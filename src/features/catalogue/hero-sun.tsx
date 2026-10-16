@@ -99,14 +99,31 @@ export function HeroScene({
   const readout = useRef<HTMLSpanElement>(null);
 
   // The intro plays on a fresh load; reached by navigation, the page is simply there.
+  // So it is when the hero is mostly out of view: a reload restored mid-page, or
+  // the reader scrolled on before it finished.
   // A tile still rising ignores the pointer, so no halo, tilt or shadow shows early.
   useLayoutEffect(() => {
-    const page = sky.current?.closest(".catalogue-intro");
-    if (!page) return;
-    if (performance.now() > INTRO_WINDOW) {
-      page.classList.remove("catalogue-intro");
+    const hero = sky.current;
+    const page = hero?.closest(".catalogue-intro");
+    if (!hero || !page) return;
+    const away = () => {
+      const { bottom, height } = hero.getBoundingClientRect();
+      return bottom < height / 2;
+    };
+    const skip = () => page.classList.remove("catalogue-intro");
+    if (performance.now() > INTRO_WINDOW || away()) {
+      skip();
       return;
     }
+    // Browsers may restore the scroll position after hydration.
+    const onScroll = () => {
+      if (performance.now() > INTRO_WINDOW) window.removeEventListener("scroll", onScroll);
+      else if (away()) {
+        skip();
+        window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     let live = true;
     for (const tile of page.querySelectorAll<HTMLElement>(".intro-tile")) {
       const rising = tile.getAnimations().filter((a) => a.playState !== "finished");
@@ -118,6 +135,7 @@ export function HeroScene({
     }
     return () => {
       live = false;
+      window.removeEventListener("scroll", onScroll);
       for (const tile of page.querySelectorAll<HTMLElement>(".intro-tile"))
         delete tile.dataset.entering;
     };
