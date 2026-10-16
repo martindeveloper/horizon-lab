@@ -224,6 +224,11 @@ export function HeroScene({
       el.style.setProperty("--moon-rise", toRise(m.altitude).toFixed(4));
       // The phase turns its bright limb to the Sun.
       const tilt = `rotate(${(m.limb - 90).toFixed(1)})`;
+      // So do the rim and the glass highlight: the night limb has no lit edge.
+      const toward = (m.limb * Math.PI) / 180;
+      el.style.setProperty("--moon-limb", `${m.limb.toFixed(1)}deg`);
+      el.style.setProperty("--moon-lx", Math.sin(toward).toFixed(3));
+      el.style.setProperty("--moon-ly", (-Math.cos(toward)).toFixed(3));
       el.style.setProperty("--moon-light", m.illumination.toFixed(3));
       // Earthshine: the night side is brightest under a thin crescent, when Earth is nearly full.
       el.style.setProperty("--moon-earthshine", ((1 - m.illumination) ** 3).toFixed(3));

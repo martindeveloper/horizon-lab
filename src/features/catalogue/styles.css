@@ -205,13 +205,14 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset calc(var(--moon-lx, 0) * -1px) calc(var(--moon-ly, -1) * -1px) 0 rgb(255 255 255 / 0.18),
     0 0 calc(var(--moon-d) * 1.2) calc(var(--moon-d) * -0.1)
       rgb(var(--moonlight) / calc(var(--moon-light, 0.5) * 0.28));
   opacity: 0;
   transition: opacity 1.4s ease;
 }
-/* Silver rim, brightest at the crown, as the Sun's is gold. */
+/* Silver rim, as the Sun's is gold, brightest at the bright limb; the night
+   limb keeps only a trace, more as the phase fills. */
 .hero-moon::before {
   content: "";
   position: absolute;
@@ -220,9 +221,9 @@
   padding: 1px;
   border-radius: inherit;
   background: linear-gradient(
-    to bottom,
+    calc(var(--moon-limb, 0deg) + 180deg),
     rgb(var(--moonlight) / 0.7),
-    rgb(var(--moonlight) / 0.05) 80%
+    rgb(var(--moonlight) / calc(0.04 + var(--moon-light, 0.5) * 0.5)) 80%
   );
   mask:
     linear-gradient(#000 0 0) content-box,
@@ -248,11 +249,15 @@
 }
 :root.light .hero-moon {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset calc(var(--moon-lx, 0) * -1px) calc(var(--moon-ly, -1) * -1px) 0 rgb(255 255 255 / 0.9),
     0 0 0 0.5px rgb(28 29 34 / 0.18);
 }
 :root.light .hero-moon::before {
-  background: linear-gradient(to bottom, rgb(28 29 34 / 0.22), rgb(28 29 34 / 0.03) 80%);
+  background: linear-gradient(
+    calc(var(--moon-limb, 0deg) + 180deg),
+    rgb(28 29 34 / 0.22),
+    rgb(28 29 34 / 0.03) 80%
+  );
 }
 :root.light .hero-moon-night {
   fill: rgb(28 29 34 / calc(0.1 + var(--moon-earthshine, 0) * 0.04));
