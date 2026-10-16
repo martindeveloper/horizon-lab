@@ -1,0 +1,246 @@
+{
+  "app": "Horizon",
+  "theme": "Appearance",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "switchLight": "Switch to light mode",
+  "switchDark": "Switch to dark mode",
+  "langEn": "English",
+  "langCs": "Czech",
+  "errorTitle": "Something went wrong",
+  "errorBody": "Try again, or go back to all simulations.",
+  "tryAgain": "Try again",
+  "notFoundTitle": "Nothing on this horizon",
+  "notFoundBody": "The page you are looking for does not exist.",
+  "returnHome": "Back to all simulations",
+  "metadataDescription": "Interactive simulations of space and gravity, starting with a black-hole observatory.",
+  "shell": {
+    "home": "Horizon home",
+    "catalogue": "Home",
+    "breadcrumb": "Current location",
+    "preferences": "Preferences",
+    "closePreferences": "Close preferences",
+    "language": "Language",
+    "skip": "Skip to content",
+    "sidereal": "Local sidereal time at Ondřejov Observatory, whose sky is behind these pages",
+    "about": "About",
+    "credits": "Credits",
+    "homeTitle": "Horizon · A little closer to the universe",
+    "playMusic": "Play music",
+    "pauseMusic": "Pause music",
+    "desktopNotice": "Best experienced on a larger screen",
+    "closeDesktopNotice": "Dismiss",
+    "starMagnitude": "{value} mag",
+    "starNames": {
+      "Arcturus": "Arcturus",
+      "Betelgeuse": "Betelgeuse",
+      "Polaris": "Polaris",
+      "Spica": "Spica",
+      "Sirius": "Sirius",
+      "Procyon": "Procyon",
+      "Castor": "Castor",
+      "Alcor": "Alcor"
+    },
+    "newTab": "opens in a new tab"
+  },
+  "catalogue": {
+    "title": "A little closer <em>to the universe.</em>",
+    "collection": "Simulations",
+    "available": "{count} available",
+    "sky": "Approximate sky over Ondřejov",
+    "sun": "Sun",
+    "moon": "Moon",
+    "features": "What you can explore",
+    "startFrom": "Start from",
+    "blackHole": {
+      "title": "Black holes",
+      "eyebrow": "Event Horizon · Relativistic observatory",
+      "category": "Space & gravity",
+      "description": "Follow light around a black hole: lensing, orbiting matter, and the slow pace of time near the horizon.",
+      "open": "Open the observatory",
+      "lensing": "Gravitational lensing",
+      "orbits": "6 scenes",
+      "guides": "Guided tours",
+      "entryPoints": {
+        "light": {
+          "title": "Lensed disk"
+        },
+        "home": {
+          "title": "Sagittarius A*"
+        },
+        "giant": {
+          "title": "Messier 87*"
+        }
+      }
+    },
+    "orrery": {
+      "title": "Solar system",
+      "eyebrow": "Orrery · Planets, belts and the Galaxy",
+      "category": "Orbits & time",
+      "description": "The planets where they are today, the clearing of the early solar system as a labelled model, and the Sun's place in the Milky Way.",
+      "open": "Open the orrery",
+      "live": "Live planet positions",
+      "timeline": "10-billion-year timeline",
+      "galaxy": "Milky Way map",
+      "entryPoints": {
+        "giants": {
+          "title": "Giants"
+        },
+        "inner": {
+          "title": "Inner worlds"
+        },
+        "galaxy": {
+          "title": "Milky Way"
+        }
+      }
+    }
+  },
+  "about": {
+    "kicker": "About",
+    "title": "Looking up, <em>one sketch at a time.</em>",
+    "lead": "Horizon is my small collection of interactive simulations of space and gravity.",
+    "quote": {
+      "text": "I know that I am mortal, a creature of a day. But when I trace the crowded, circling spirals of the stars, my feet no longer touch the earth.",
+      "source": "Attributed to Claudius Ptolemy, 2nd century"
+    },
+    "metadataDescription": "Why I made Horizon, what it is for, and how to read its simulations.",
+    "author": {
+      "label": "Author",
+      "role": "Writes code, studies the sky.",
+      "aiLabel": "AI use",
+      "ai": "AI helped me with research and coding: Anthropic Claude, OpenAI Codex, SpaceX Grok and Elicit."
+    },
+    "course": {
+      "label": "The course",
+      "body": "I started Horizon mostly as a supporting toolkit for <link>Astronomický kurz 2026/27</link> (1st year, in person), which I'm taking at Planetum.",
+      "next": "I may add more simulations as the course goes on, if time allows."
+    },
+    "disclaimer": {
+      "label": "A note on accuracy",
+      "body": "I'm not a professional physicist or astronomer. I build the simulations with care and draw on published work, but they are meant mostly for exploration and the joy of discovery: illustrative aids, not an authoritative scientific source. Please take them with a grain of salt.",
+      "simplified": "Simplified",
+      "simplifiedBody": "Models keep what matters for the idea and leave out the rest.",
+      "approximate": "Approximate",
+      "approximateBody": "Values and scales are close, but not always exact.",
+      "performance": "Tuned for speed",
+      "performanceBody": "Some physics is simplified further so the scenes run smoothly in a browser.",
+      "sources": "For teaching, study, or anything that depends on exact values, please check primary sources."
+    },
+    "source": {
+      "label": "Open source",
+      "body": "Horizon is open source under the MIT licence: the code is on <link>GitHub</link>. Spotted a mistake? Issues and fixes are welcome."
+    },
+    "thanks": {
+      "label": "Thanks",
+      "body": "I'm grateful to everyone who made the course possible.",
+      "organiser": "Organiser",
+      "teacher": "Teacher",
+      "team": "The team around them",
+      "teamRole": "Behind the scenes"
+    },
+    "signoff": "Clear skies.",
+    "newTab": "opens in a new tab"
+  },
+  "credits": {
+    "kicker": "Credits",
+    "title": "Built on <em>other people's work.</em>",
+    "lead": "The imagery, data, fonts and code behind Horizon, with the credit and licence each one asks for.",
+    "metadataDescription": "The imagery, data, fonts and software behind Horizon, with their credits and licences.",
+    "newTab": "opens in a new tab",
+    "groups": {
+      "imagery": {
+        "label": "Imagery",
+        "intro": "Planet maps, reprocessed for the orrery."
+      },
+      "data": {
+        "label": "Data",
+        "intro": "Orbits, shapes, spins, constants, stars and black holes."
+      },
+      "fonts": {
+        "label": "Fonts",
+        "intro": "Type for headlines, text and data."
+      },
+      "software": {
+        "label": "Software",
+        "intro": "Libraries that ship with the site."
+      },
+      "tools": {
+        "label": "Tools",
+        "intro": "Used to build and check it."
+      }
+    },
+    "items": {
+      "opal": "Jupiter, Saturn, Uranus and Neptune: Hubble maps from 2025, in true colour.",
+      "blueMarble": "Earth: October land and sea under a cloud layer.",
+      "viking": "Mars.",
+      "messenger": "Mercury's surface brightness.",
+      "newHorizons": "Pluto's surface brightness.",
+      "jpl": "Planet and moon orbits, Horizons positions and small-body data.",
+      "iau": "Sizes, poles and rotation of every body.",
+      "nssdc": "Radii, albedos, and the rings of Uranus and Neptune.",
+      "pds": "Ring edges, gaps and opacities from Cassini and Voyager occultations.",
+      "gaia": "Positions and motions of the nearest stars.",
+      "simbad": "Reference values for the bright and nearby stars.",
+      "mpc": "Counts of known trans-Neptunian objects.",
+      "gravity": "Sgr A*'s mass and the Sun's distance from the Galactic Centre.",
+      "eht": "The measured rings of M87* and Sgr A*.",
+      "codata": "The gravitational constant.",
+      "bodoni": "Headlines.",
+      "plex": "Text and figures.",
+      "next": "Pages, routing and prerendering.",
+      "react": "The interface.",
+      "three": "The orrery's WebGL rendering.",
+      "nextIntl": "English and Czech.",
+      "nextThemes": "Dark and light themes.",
+      "zustand": "Simulation state.",
+      "tailwind": "Styles.",
+      "motion": "Interface motion.",
+      "radix": "The time slider.",
+      "lucide": "Icons.",
+      "tailwindMerge": "Class merging.",
+      "clsx": "Class lists.",
+      "vercelAnalytics": "Anonymous page analytics.",
+      "speedInsights": "Real-user performance metrics.",
+      "typescript": "Types.",
+      "reactCompiler": "Automatic memoisation.",
+      "oxc": "Linting and formatting.",
+      "sharp": "Processing the planet maps.",
+      "glslParser": "Offline shader checks.",
+      "tsx": "Running TypeScript scripts and tests."
+    },
+    "licences": {
+      "publicDomain": "Public domain",
+      "cited": "Cited values"
+    },
+    "notes": {
+      "label": "Notes",
+      "acknowledgement": "This work used data acquired from the NASA/ESA Hubble Space Telescope, associated with the OPAL program (PI: Simon, GO13937), and archived by the Space Telescope Science Institute.",
+      "gaia": "This work has made use of data from the European Space Agency (ESA) mission Gaia, processed by the Gaia Data Processing and Analysis Consortium (DPAC). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the Gaia Multilateral Agreement.",
+      "simbad": "This research has made use of the SIMBAD database and the VizieR catalogue access tool, operated at CDS, Strasbourg, France.",
+      "changes": "Maps were reprojected, resampled and filled where data is missing; <link>what changed in each map</link>.",
+      "endorsement": "Using NASA, ESA and USGS data does not imply their endorsement.",
+      "papers": "Each simulation's Technical details list the papers behind its numbers."
+    },
+    "contents": "On this page"
+  },
+  "loading": {
+    "simulationTitle": "Opening",
+    "simulationBody": "Preparing the scene",
+    "catalogue": "Loading simulations"
+  },
+  "immersive": {
+    "title": "Immersive",
+    "enter": "Enter immersive view",
+    "exit": "Exit immersive view",
+    "close": "Exit",
+    "fullscreen": "Full screen"
+  },
+  "webgl": {
+    "unavailableTitle": "This browser can't draw the scene",
+    "unavailableBody": "It needs WebGL 2. Turn on hardware acceleration or use a current browser.",
+    "softwareTitle": "No GPU acceleration",
+    "softwareBody": "The scene will run slowly. Turn on hardware acceleration in your browser settings.",
+    "dismiss": "Dismiss"
+  }
+}

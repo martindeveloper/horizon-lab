@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "features": ["views", "time", "bodies"],
+  "sections": [
+    {
+      "id": "ephemeris",
+      "equations": [
+        {
+          "equation": "secular-element"
+        },
+        {
+          "equation": "argument-of-perihelion"
+        },
+        {
+          "equation": "mean-anomaly"
+        },
+        {
+          "equation": "kepler-equation"
+        },
+        {
+          "equation": "perifocal-x"
+        },
+        {
+          "equation": "perifocal-y"
+        },
+        {
+          "equation": "kepler-third-law"
+        }
+      ]
+    },
+    {
+      "id": "migration",
+      "equations": [
+        {
+          "equation": "gas-disk"
+        },
+        {
+          "equation": "migration-progress"
+        },
+        {
+          "equation": "migrated-element"
+        },
+        {
+          "equation": "tracer-semi-major-axis"
+        }
+      ]
+    },
+    {
+      "id": "galaxy",
+      "equations": [
+        {
+          "equation": "galactic-angle"
+        },
+        {
+          "equation": "galactic-radius"
+        },
+        {
+          "equation": "galactic-height"
+        },
+        {
+          "equation": "spiral-arm"
+        },
+        "n ∝ e^(−R / 2.6 kpc − |z| / 0.3 kpc)",
+        {
+          "equation": "galactic-warp"
+        }
+      ]
+    },
+    {
+      "id": "sky",
+      "equations": [
+        "x_ecl = x_eq, y_ecl = cos ε y_eq + sin ε z_eq, z_ecl = −sin ε y_eq + cos ε z_eq  (ε = 23.439°)",
+        "ĉ(t) = ĉ₀ cos θ + (p̂ × ĉ₀) sin θ",
+        {
+          "equation": "galactic-angle"
+        },
+        "r(t) = r₀ − v t,  v = v_r û + (μα* ê + μδ n̂) v_t / μ",
+        {
+          "equation": "tangential-velocity"
+        }
+      ]
+    },
+    {
+      "id": "swarms",
+      "equations": [
+        "E − e sin E = M, four Newton steps in the vertex shader",
+        "L_Trojan = L_Jupiter ± 60° + δ",
+        "n(r) ∝ r⁻³·⁵, r sampled by inverting ∫ r² n(r) dr"
+      ]
+    },
+    {
+      "id": "globes",
+      "equations": [
+        "I = μ₀ᵏ μᵏ⁻¹  (Minnaert; k ≈ 0.6 regolith, ≈ 0.95 cloud-topped giants)",
+        "I(μ)/I(1) = 1 − u(1 − μ) − v(1 − μ²)  (solar limb darkening per colour)",
+        "α = 1 − e^(−τ/μ);  lit face ∝ μ₀/(μ + μ₀)·(1 − e^(−τ(1/μ + 1/μ₀)))"
+      ]
+    },
+    {
+      "id": "rendering",
+      "equations": []
+    }
+  ],
+  "references": [
+    {
+      "title": "JPL Solar System Dynamics: Keplerian elements for approximate positions of the major planets",
+      "url": "https://ssd.jpl.nasa.gov/planets/approx_pos.html"
+    },
+    {
+      "title": "Tsiganis, Gomes, Morbidelli & Levison (2005), Origin of the orbital architecture of the giant planets of the Solar System, Nature 435, 459",
+      "url": "https://doi.org/10.1038/nature03539"
+    },
+    {
+      "title": "Nesvorný (2018), Dynamical evolution of the early Solar System, ARA&A 56, 137",
+      "url": "https://doi.org/10.1146/annurev-astro-081817-052028"
+    },
+    {
+      "title": "Avdellidou et al. (2024), Dating the Solar System's giant planet orbital instability using enstatite meteorites, Science 384, 348",
+      "url": "https://doi.org/10.1126/science.adg8092"
+    },
+    {
+      "title": "GRAVITY Collaboration (2021), Improved GRAVITY astrometric accuracy from modeling optical aberrations, A&A 647, A59",
+      "url": "https://doi.org/10.1051/0004-6361/202040208"
+    },
+    {
+      "title": "Bland-Hawthorn & Gerhard (2016), The Galaxy in context: structural, kinematic, and integrated properties, ARA&A 54, 529",
+      "url": "https://doi.org/10.1146/annurev-astro-081915-023441"
+    },
+    {
+      "title": "Reid et al. (2019), Trigonometric parallaxes of high-mass star-forming regions: our view of the Milky Way, ApJ 885, 131",
+      "url": "https://doi.org/10.3847/1538-4357/ab4a11"
+    },
+    {
+      "title": "Vallée (2017), A guided map to the spiral arms in the galactic disk of the Milky Way, Astronomical Review 13, 113",
+      "url": "https://doi.org/10.1080/21672857.2017.1379459"
+    },
+    {
+      "title": "Churchwell et al. (2009), The Spitzer/GLIMPSE surveys: a new view of the Milky Way, PASP 121, 213",
+      "url": "https://doi.org/10.1086/597811"
+    },
+    {
+      "title": "Wegg, Gerhard & Portail (2015), The structure of the Milky Way's bar outside the bulge, MNRAS 450, 4050",
+      "url": "https://doi.org/10.1093/mnras/stv745"
+    },
+    {
+      "title": "Chen et al. (2019), An intuitive 3D map of the Galactic warp's precession traced by classical Cepheids, Nature Astronomy 3, 320",
+      "url": "https://doi.org/10.1038/s41550-018-0686-7"
+    },
+    {
+      "title": "Eilers et al. (2019), The circular velocity curve of the Milky Way from 5 to 25 kpc, ApJ 871, 120",
+      "url": "https://doi.org/10.3847/1538-4357/aaf648"
+    },
+    {
+      "title": "Bennett & Bovy (2019), Vertical waves in the solar neighbourhood in Gaia DR2, MNRAS 482, 1417",
+      "url": "https://doi.org/10.1093/mnras/sty2813"
+    },
+    {
+      "title": "NASA Science: Kuiper Belt facts",
+      "url": "https://science.nasa.gov/solar-system/kuiper-belt/facts/"
+    },
+    {
+      "title": "NASA Science: Oort Cloud facts",
+      "url": "https://science.nasa.gov/solar-system/oort-cloud/facts/"
+    },
+    {
+      "title": "Connelly et al. (2012), The absolute chronology and thermal processing of solids in the solar protoplanetary disk, Science 338, 651",
+      "url": "https://doi.org/10.1126/science.1226919"
+    },
+    {
+      "title": "Helmi et al. (2018), The merger that led to the formation of the Milky Way's inner stellar halo and thick disk, Nature 563, 85",
+      "url": "https://doi.org/10.1038/s41586-018-0625-x"
+    },
+    {
+      "title": "Belokurov et al. (2018), Co-formation of the disc and the stellar halo, MNRAS 478, 611",
+      "url": "https://doi.org/10.1093/mnras/sty982"
+    },
+    {
+      "title": "Xiang & Rix (2022), A time-resolved picture of our Milky Way's early formation history, Nature 603, 599",
+      "url": "https://doi.org/10.1038/s41586-022-04496-5"
+    },
+    {
+      "title": "Sanders et al. (2024), The epoch of the Milky Way's bar formation: dynamical modelling of Mira variables in the nuclear stellar disc, MNRAS 530, 2972",
+      "url": "https://doi.org/10.1093/mnras/stae711"
+    },
+    {
+      "title": "Gaia Collaboration, Vallenari et al. (2023), Gaia Data Release 3: Summary of the content and survey properties, A&A 674, A1",
+      "url": "https://doi.org/10.1051/0004-6361/202243940"
+    },
+    {
+      "title": "Mamajek et al. (2015), The closest known flyby of a star to the Solar System, ApJL 800, L17",
+      "url": "https://doi.org/10.1088/2041-8205/800/1/L17"
+    },
+    {
+      "title": "Dupuy et al. (2019), WISE J072003.20−084651.2B is a massive T dwarf, AJ 158, 174",
+      "url": "https://doi.org/10.3847/1538-3881/ab3cd1"
+    },
+    {
+      "title": "Kervella et al. (2016), Close stellar conjunctions of α Centauri A and B until 2050, A&A 594, A107",
+      "url": "https://doi.org/10.1051/0004-6361/201629201"
+    },
+    {
+      "title": "Kervella, Thévenin & Lovis (2017), Proxima's orbit around α Centauri, A&A 598, L7",
+      "url": "https://doi.org/10.1051/0004-6361/201629930"
+    },
+    {
+      "title": "Akeson et al. (2021), Precision millimeter astrometry of the α Centauri AB system, AJ 162, 14",
+      "url": "https://doi.org/10.3847/1538-3881/abfaff"
+    },
+    {
+      "title": "Malhotra (1995), The origin of Pluto's orbit: implications for the Solar System beyond Neptune, AJ 110, 420",
+      "url": "https://doi.org/10.1086/117532"
+    },
+    {
+      "title": "Nesvorný, Vokrouhlický, Bottke & Levison (2018), Evidence for very early migration of the Solar System planets from the Patroclus–Menoetius binary Jupiter Trojan, Nature Astronomy 2, 878",
+      "url": "https://doi.org/10.1038/s41550-018-0564-3"
+    },
+    {
+      "title": "Nesvorný, Vokrouhlický & Morbidelli (2013), Capture of Trojans by jumping Jupiter, ApJ 768, 45",
+      "url": "https://doi.org/10.1088/0004-637X/768/1/45"
+    },
+    {
+      "title": "Duncan, Quinn & Tremaine (1987), The formation and extent of the Solar System comet cloud, AJ 94, 1330",
+      "url": "https://doi.org/10.1086/114571"
+    },
+    {
+      "title": "Kokubo & Ida (1998), Oligarchic growth of protoplanets, Icarus 131, 171",
+      "url": "https://doi.org/10.1006/icar.1997.5840"
+    },
+    {
+      "title": "Gomes, Levison, Tsiganis & Morbidelli (2005), Origin of the cataclysmic Late Heavy Bombardment period of the terrestrial planets, Nature 435, 466",
+      "url": "https://doi.org/10.1038/nature03676"
+    },
+    {
+      "title": "Archinal et al. (2018), Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements: 2015, Celest. Mech. Dyn. Astron. 130, 22",
+      "url": "https://doi.org/10.1007/s10569-017-9805-5"
+    },
+    {
+      "title": "NASA NSSDC planetary fact sheets and ring fact sheets (Saturn, Uranus, Neptune)",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/"
+    },
+    {
+      "title": "PDS Ring-Moon Systems Node: ring tables for Saturn, Uranus and Neptune",
+      "url": "https://pds-rings.seti.org/saturn/saturn_tables.html"
+    },
+    {
+      "title": "French et al. (2024), The Uranus system from occultation observations (1977–2006), Icarus",
+      "url": "https://arxiv.org/abs/2401.04634"
+    },
+    {
+      "title": "Irwin et al. (2024), Modelling the seasonal cycle of Uranus's colour and magnitude, and comparison with Neptune, MNRAS 527, 11521",
+      "url": "https://doi.org/10.1093/mnras/stad3761"
+    },
+    {
+      "title": "Lamy et al. (2025), A new rotation period and longitude system for Uranus, Nature Astronomy 9, 658",
+      "url": "https://doi.org/10.1038/s41550-025-02492-z"
+    },
+    {
+      "title": "Simon et al. (2018), Historical and contemporary trends in the size, drift and color of Jupiter's Great Red Spot, AJ 155, 151",
+      "url": "https://doi.org/10.3847/1538-3881/aaae01"
+    },
+    {
+      "title": "Hubble OPAL global maps of Jupiter, Saturn, Uranus and Neptune, 2025 (NASA, ESA, A.A. Simon, M.H. Wong; CC BY 4.0; programme GO13937), DOI 10.17909/T9G593",
+      "url": "https://dx.doi.org/10.17909/T9G593"
+    },
+    {
+      "title": "NASA Earth Observatory, Blue Marble Next Generation (October) and Blue Marble clouds",
+      "url": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/"
+    },
+    {
+      "title": "USGS Astrogeology, Mars Viking global colour mosaic 925 m",
+      "url": "https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m"
+    },
+    {
+      "title": "USGS Astrogeology, Mercury MESSENGER MDIS basemap 3-colour global mosaic 665 m",
+      "url": "https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_basemap_md3_color_global_mosaic_665m"
+    },
+    {
+      "title": "USGS, Pluto global mosaic from New Horizons, July 2017 (NASA, JHU APL, SwRI, LPI)",
+      "url": "https://www.usgs.gov/media/images/pluto-global-mosaic-new-horizons-july-2017"
+    }
+  ]
+}

@@ -1,0 +1,292 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+
+import {
+  argumentOfPerihelion,
+  keplerEquation,
+  meanAnomaly,
+  perifocalX,
+  perifocalY,
+  secularElement,
+} from "@horizon/toolkit/bodies";
+import {
+  CONSTANTS,
+  UNITS,
+  convert,
+  keplerThirdLaw,
+  lightTravelTime,
+  measure,
+  parallaxDistance,
+  pythagoras,
+  schwarzschildRadius,
+  tangentialVelocity,
+} from "@horizon/toolkit/science";
+
+import {
+  BLACK_HOLE_EQUATIONS,
+  circularOrbitEnergy,
+  circularOrbitMomentum,
+  diskRedshift,
+  diskTemperature,
+  innermostStableOrbit,
+  limbDarkening,
+  kerrHorizon,
+  photonOrbit,
+  rainClockRate,
+} from "../src/features/black-hole/lib/equations.ts";
+import {
+  ORRERY_EQUATIONS,
+  galacticAngle,
+  galacticHeight,
+  galacticRadius,
+  galacticWarp,
+  gasDisk,
+  migrationProgress,
+  spiralArm,
+  tracerSemiMajorAxis,
+} from "../src/features/orrery/lib/model/equations.ts";
+import { ORRERY_COPY, ORRERY_FIGURES } from "../src/features/orrery/lib/model/figures.ts";
+import { SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
+import {
+  advancePlay,
+  noteOf,
+  sliderToYearsAgo,
+  yearsAgoToSlider,
+} from "../src/features/orrery/lib/model/timeline.ts";
+
+const near = (actual, expected, tolerance, label) =>
+  assert.ok(
+    Math.abs(actual - expected) <= tolerance,
+    `${label ?? ""} ${actual} is not within ${tolerance} of ${expected}`,
+  );
+
+test("constants carry their defined or published values and say which", () => {
+  assert.equal(CONSTANTS.speedOfLight.value, 299_792_458);
+  assert.equal(CONSTANTS.astronomicalUnit.value, 149_597_870_700);
+  assert.equal(CONSTANTS.julianYear.value, 31_557_600);
+  near(CONSTANTS.parsec.value, 3.085677581491367e16, 1e3, "pc");
+  near(CONSTANTS.lightYear.value, 9.4607304725808e15, 1, "ly");
+  assert.equal(CONSTANTS.gravitationalConstant.value, 6.6743e-11);
+  assert.equal(CONSTANTS.solarRadius.value, 6.957e8);
+  for (const [id, constant] of Object.entries(CONSTANTS)) {
+    assert.ok(constant.symbol && constant.latex && constant.unit && constant.source, id);
+    assert.ok(Number.isFinite(constant.value) && constant.value > 0, id);
+  }
+});
+
+test("units convert within a dimension and refuse to mix dimensions", () => {
+  near(convert(1, "pc", "ly"), 3.26156, 1e-5);
+  near(convert(1, "pc", "au"), 206_264.806, 1e-3);
+  near(convert(1, "arcsec", "rad"), 4.8481368e-6, 1e-12);
+  near(convert(180, "deg", "rad"), Math.PI, 1e-15);
+  near(convert(1, "Gyr", "yr"), 1e9, 1e-3);
+  near(convert(1, "c", "km/s"), 299_792.458, 1e-9);
+  assert.throws(() => convert(1, "au", "s"), TypeError);
+  assert.throws(() => convert(Number.NaN, "au", "km"), RangeError);
+  for (const [id, unit] of Object.entries(UNITS)) assert.ok(unit.symbol && unit.latex, id);
+});
+
+test("measures convert, choose a readable unit and print for the UI and LaTeX", () => {
+  near(measure(5.2, "au").in("km"), 7.779e8, 1e5);
+  assert.equal(measure(3.1e16, "m").best(["km", "au", "ly", "pc"]).unit, "pc");
+  assert.equal(measure(1.5e8, "km").best(["km", "au", "ly"]).unit, "au");
+  assert.equal(measure(5.37, "au").toString(), "5.37 au");
+  assert.equal(measure(5.37, "au").to("ly").toString(), "8.49 × 10⁻⁵ ly");
+  assert.equal(measure(5.37, "au").to("ly").toLatex(), "8.49 \\times 10^{-5}\\,\\mathrm{ly}");
+  assert.equal(
+    measure(4.24, "ly").format({ locale: "cs", symbols: { ly: "sv. r." } }),
+    "4,24 sv. r.",
+  );
+});
+
+test("shared laws reproduce textbook values", () => {
+  assert.equal(pythagoras.compute({ a: 3, b: 4 }), 5);
+  assert.equal(keplerThirdLaw.compute({ a: 1 }), 1);
+  near(keplerThirdLaw.compute({ a: 5.2026 }), 11.87, 0.01, "Jupiter");
+  near(keplerThirdLaw.compute({ a: 30.07 }), 164.9, 0.1, "Neptune");
+  near(keplerThirdLaw.compute({ a: measure(778.5e6, "km") }), 11.87, 0.01, "measure input");
+  near(lightTravelTime.compute({ d: measure(1, "au") }), 499.004784, 1e-6, "1 au of light");
+  near(schwarzschildRadius.measure({ M: measure(1, "Msun") }).in("km"), 2.953, 0.001, "Sun Rs");
+  near(parallaxDistance.compute({ p: 0.7685 }), 1.3012, 1e-4, "Proxima");
+  near(tangentialVelocity.compute({ mu: 1, d: 1 }), 4.74047, 1e-5, "1″/yr at 1 pc");
+  assert.equal(keplerThirdLaw.example({ a: 5.2 }), "a = 5.2 au → P = 11.9 yr");
+  assert.equal(keplerThirdLaw.units(), "a [au], P [yr]");
+});
+
+test("Kerr radii meet their analytic limits", () => {
+  assert.equal(kerrHorizon.compute({ a: 0 }), 2);
+  near(photonOrbit.compute({ a: 0 }), 3, 1e-12);
+  near(innermostStableOrbit.compute({ a: 0 }), 6, 1e-12);
+  near(innermostStableOrbit.compute({ a: -1 }), 9, 1e-9, "retrograde extreme");
+  near(photonOrbit.compute({ a: -1 }), 4, 1e-9, "retrograde extreme");
+  near(innermostStableOrbit.compute({ a: 0.998 }), 1.237, 0.001, "Thorne limit");
+  near(kerrHorizon.compute({ a: 1 }), 1, 1e-12);
+  assert.equal(rainClockRate.compute({ r: 2 }), 0);
+});
+
+test("every equation a document references exists and prints for the UI and LaTeX", () => {
+  for (const [feature, equations] of [
+    ["black-hole", BLACK_HOLE_EQUATIONS],
+    ["orrery", ORRERY_EQUATIONS],
+  ]) {
+    const specification = JSON.parse(
+      readFileSync(new URL(`../src/features/${feature}/technical.json`, import.meta.url), "utf8"),
+    );
+    const refs = specification.sections.flatMap((section) =>
+      section.equations.filter((entry) => typeof entry !== "string"),
+    );
+    assert.ok(refs.length, feature);
+    for (const { equation } of refs) {
+      assert.ok(equations[equation], `${feature}: ${equation}`);
+      assert.ok(equations[equation].toString().includes("="), equation);
+      assert.ok(equations[equation].toLatex().length, equation);
+    }
+  }
+});
+
+test("figures quoted in the orrery copy come from the constants", () => {
+  near(ORRERY_FIGURES.auMillionKm, 149.6, 0.01);
+  near(ORRERY_FIGURES.auLightMinutes, 8.317, 0.001);
+  assert.equal(ORRERY_FIGURES.sunRadiusKm, 695_700);
+  near(ORRERY_FIGURES.sunRadiusAu, 0.00465, 0.00001);
+  for (const locale of ["en", "cs"]) {
+    const copy = JSON.parse(
+      readFileSync(
+        new URL(`../src/features/orrery/messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    assert.doesNotMatch(JSON.stringify(copy), /149[.,]6|8[.,]3 /, `${locale}: typed-in figure`);
+  }
+});
+
+test("circular Kerr orbits recover Schwarzschild energy and momentum", () => {
+  // a = 0, r = 6 (ISCO): E = √(8/9), L = 2√3.
+  near(circularOrbitEnergy.compute({ r: 6, a: 0 }), Math.sqrt(8 / 9), 1e-12, "E at ISCO");
+  near(circularOrbitMomentum.compute({ r: 6, a: 0 }), 2 * Math.sqrt(3), 1e-12, "L at ISCO");
+  // Far away the orbit is Newtonian: E → 1, L → √r.
+  near(circularOrbitEnergy.compute({ r: 1e6, a: 0.5 }), 1, 1e-6);
+  near(circularOrbitMomentum.compute({ r: 1e6, a: 0.5 }) / 1e3, 1, 1e-3);
+});
+
+test("orrery ephemeris formulas reproduce Meeus and the JPL table", () => {
+  // Meeus example 30.a: M = 5°, e = 0.1 → E = 5.554589°.
+  const E = keplerEquation.compute({ M: (5 * Math.PI) / 180, e: 0.1 });
+  near((E * 180) / Math.PI, 5.554589, 1e-6, "Kepler's equation");
+  assert.equal(keplerEquation.compute({ M: 1, e: 0 }), 1);
+  assert.equal(argumentOfPerihelion.compute({ varpi: 102.9, node: 0 }), 102.9);
+  near(meanAnomaly.compute({ L: 100.46, varpi: 102.94 }), -2.48, 1e-9);
+  // Earth's semi-major axis drifts by 0.00000562 au per century.
+  near(secularElement.compute({ x0: 1.00000261, rate: 0.00000562, T: 1 }), 1.00000823, 1e-12);
+  // Perifocal ellipse: perihelion at E = 0, the minor axis at E = π/2.
+  near(perifocalX.compute({ a: 1, e: 0.5, E: 0 }), 0.5, 1e-12);
+  near(perifocalY.compute({ a: 1, e: 0.5, E: Math.PI / 2 }), Math.sqrt(0.75), 1e-12);
+});
+
+test("orrery migration and galaxy formulas hold their anchors", () => {
+  assert.equal(gasDisk.compute({ t: 4.6e9 }), 1);
+  assert.equal(gasDisk.compute({ t: 4.5e9 }), 0);
+  assert.equal(migrationProgress.compute({ t: 4.6e9 }), 0);
+  near(migrationProgress.compute({ t: 4.475e9 }), 0.5, 1e-9);
+  assert.equal(migrationProgress.compute({ t: 0 }), 1);
+  near(tracerSemiMajorAxis.compute({ a0: 20, a1: 20_000, s: 0.5 }), Math.sqrt(20 * 20_000), 1e-9);
+  near(galacticAngle.compute({ t: 220e6 }), 2 * Math.PI, 1e-12, "one lap");
+  assert.equal(galacticRadius.compute({ t: 0 }), 27_000);
+  near(galacticHeight.compute({ t: 0 }), 68, 1e-9, "today's height");
+  near(spiralArm.compute({ R: 6.9, Rk: 6.9 }), 0, 1e-12, "arm crosses the Sun–centre line at R_k");
+  near(spiralArm.compute({ R: 6.9 / Math.exp(Math.tan((13 * Math.PI) / 180)), Rk: 6.9 }), 1, 1e-12);
+  assert.equal(galacticWarp.compute({ R: 9, beta: 1 }), 0);
+  assert.ok(galacticWarp.compute({ R: 15, beta: Math.PI / 2 }) > 0, "warps north");
+  // Printed text carries the same parameters the model computes with.
+  assert.match(galacticRadius.toString(), /27,000 ly \+ 1,600 ly/);
+  assert.match(gasDisk.toString(), /4\.567 Gyr .* 5 Myr/);
+});
+
+test("every number the orrery copy quotes comes from its parameters", () => {
+  const allowed = new Set([
+    ...Object.keys(ORRERY_COPY),
+    "equation",
+    "millions",
+    "minutes",
+    "km",
+    "au",
+  ]);
+  for (const locale of ["en", "cs"]) {
+    const copy = JSON.parse(
+      readFileSync(
+        new URL(`../src/features/orrery/messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    const scoped = [
+      copy.cards.galaxy,
+      copy.tour.steps,
+      copy.notes,
+      copy.technicalDetails.sections.migration,
+      copy.technicalDetails.sections.galaxy,
+    ];
+    const text = JSON.stringify(scoped);
+    for (const [, name] of text.matchAll(/\{(\w+)\}/g))
+      assert.ok(allowed.has(name), `${locale}: {${name}} has no value`);
+    assert.doesNotMatch(
+      text,
+      /4[.,]567|2[23]0 mil|27[ ,]000|8[.,]28 kpc/,
+      `${locale}: typed-in figure`,
+    );
+  }
+});
+
+test("orrery timeline gives each formation stage room, a note and a play stop", () => {
+  for (const u of [0, 0.05, 0.1, 0.12, 0.15, 0.19, 0.22, 0.25, 0.4, 0.62, 0.8, 1])
+    near(yearsAgoToSlider(sliderToYearsAgo(u)), u, 1e-9, `slider ${u}`);
+  for (let k = 1; k <= 1000; k += 1)
+    assert.ok(sliderToYearsAgo(k / 1000) <= sliderToYearsAgo((k - 1) / 1000), "monotonic");
+  // Dust and planetesimals each span several slider steps, not a fraction of one.
+  const stretch = (from, to) =>
+    yearsAgoToSlider(SUN_BIRTH - to) - yearsAgoToSlider(SUN_BIRTH - from);
+  assert.ok(stretch(1e3, 1e5) > 0.04, "dust");
+  assert.ok(stretch(1e5, 1e6) > 0.015, "planetesimals");
+  const stages = [
+    [SUN_BIRTH - 5e3, "dust"],
+    [SUN_BIRTH - 3e5, "planetesimals"],
+    [SUN_BIRTH - 2.5e6, "gasDisk"],
+    [SUN_BIRTH - 1e7, "accretion"],
+    [SUN_BIRTH - 3e7, "belt"],
+    [SUN_BIRTH - 5e7, "moon"],
+    [4.47e9, "clearing"],
+    [3.9e9, "bombardment"],
+    [1e9, "today"],
+  ];
+  for (const [yearsAgo, note] of stages) assert.equal(noteOf(yearsAgo), note, `${yearsAgo}`);
+  // A long frame in the interstellar era stops at the Sun's birth instead of skipping the disk.
+  assert.equal(advancePlay(SUN_BIRTH + 1e6, 1), SUN_BIRTH);
+  assert.ok(advancePlay(SUN_BIRTH - 1e4, 1 / 60) > SUN_BIRTH - 1.1e4, "early stages play slowly");
+  const notes = new Set(Array.from({ length: 1001 }, (_, k) => noteOf(sliderToYearsAgo(k / 1000))));
+  for (const [, note] of stages) assert.ok(notes.has(note), `${note} is reachable on the slider`);
+  for (const locale of ["en", "cs"]) {
+    const copy = JSON.parse(
+      readFileSync(
+        new URL(`../src/features/orrery/messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    for (const note of notes) assert.ok(copy.notes[note], `${locale}: notes.${note}`);
+  }
+});
+
+test("disk shading formulas match their printed parameters", () => {
+  // Flux-weighted mean of I(μ) over the visible hemisphere is 1: ∫₀¹ 2μ I(μ) dμ.
+  let integral = 0;
+  for (let k = 0; k < 10_000; k += 1) {
+    const mu = (k + 0.5) / 10_000;
+    integral += 2 * mu * limbDarkening.compute({ mu }) * 1e-4;
+  }
+  near(integral, 1, 1e-6, "limb darkening normalisation");
+  assert.match(limbDarkening.toString(), /2\.06 μ/);
+  assert.equal(diskTemperature.compute({ flux: 1, scale: 1 }), 15_800);
+  assert.match(diskTemperature.toString(), /15,800 K/);
+  assert.equal(diskRedshift.compute({ ut: 1, omega: 0, xi: 0 }), 1);
+  assert.equal(diskRedshift.compute({ ut: 100, omega: 0, xi: 0 }), 0.2, "clamped low");
+  assert.equal(diskRedshift.compute({ ut: 0.01, omega: 0, xi: 0 }), 2.5, "clamped high");
+});

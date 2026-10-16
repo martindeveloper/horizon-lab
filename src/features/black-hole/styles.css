@@ -1,0 +1,57 @@
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared
+   stylesheet, because two utility bundles with overlapping class names cannot
+   be cascade-ordered correctly for both the catalogue and the feature. */
+
+@layer base {
+  :where([data-simulation="black-hole"]) .orbit-ring,
+  :where([data-simulation="black-hole"]) .orbit-ring-inner {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: black-hole-orbit-ring 16s linear infinite;
+  }
+
+  :where([data-simulation="black-hole"]) .orbit-ring-inner {
+    animation-duration: 9s;
+    animation-direction: reverse;
+  }
+
+  :where([data-simulation="black-hole"]) .pin-card {
+    width: 22rem;
+    max-width: calc(100% - 2rem);
+    max-height: min(32rem, calc(100dvh - var(--app-header-height) - 6rem));
+  }
+
+  :where([data-simulation="black-hole"]) .observatory-sheet {
+    height: min(72dvh, 42rem);
+  }
+
+  :where([data-simulation="black-hole"]) .pin-card-mobile {
+    max-height: min(26rem, 50dvh);
+  }
+
+  :where([data-simulation="black-hole"]) .guide-card {
+    max-height: min(42dvh, 22rem);
+  }
+
+  :where([data-simulation="black-hole"]) .radial-gauge {
+    height: min(38dvh, 18rem);
+  }
+
+  @media (min-width: 48rem) and (min-height: 30rem) {
+    :where([data-simulation="black-hole"]) .radial-gauge {
+      height: min(50dvh, 26rem);
+    }
+  }
+
+  :where([data-simulation="black-hole"]) .gauge-label {
+    text-shadow:
+      0 1px 10px rgba(8, 8, 11, 0.95),
+      0 0 2px rgba(8, 8, 11, 0.85);
+  }
+}
+
+@keyframes black-hole-orbit-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}

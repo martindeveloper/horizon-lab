@@ -1,0 +1,65 @@
+/**
+ * Loads a measured map (`MAPS` in `@horizon/toolkit/bodies`) as a texture. Decoding happens off the main
+ * thread through createImageBitmap where the browser allows; the bitmap stays
+ * with the texture so a lost WebGL context can upload it again, and is closed
+ * when the texture is disposed.
+ */
+import {
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  RepeatWrapping,
+  SRGBColorSpace,
+  Texture,
+} from "three";
+
+/** Where the orrery serves the measured maps' WebP tiers (public/textures/orrery). */
+export const MAP_BASE = "/textures/orrery";
+
+function surface(texture: Texture, anisotropy: number) {
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.anisotropy = anisotropy;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+async function bitmapTexture(blob: Blob, anisotropy: number) {
+  /* An ImageBitmap ignores UNPACK_FLIP_Y, so it is flipped while decoding instead. */
+  const bitmap = await createImageBitmap(blob, {
+    imageOrientation: "flipY",
+    premultiplyAlpha: "none",
+    colorSpaceConversion: "none",
+  });
+  const texture = new Texture(bitmap);
+  texture.flipY = false;
+  texture.addEventListener("dispose", () => bitmap.close());
+  return surface(texture, anisotropy);
+}
+
+async function imageTexture(blob: Blob, anisotropy: number) {
+  const url = URL.createObjectURL(blob);
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = url;
+    await image.decode();
+    return surface(new Texture(image), anisotropy);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export async function loadMap(url: string, signal: AbortSignal, anisotropy = 2) {
+  const response = await fetch(url, { signal });
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  const blob = await response.blob();
+  signal.throwIfAborted();
+  try {
+    return await bitmapTexture(blob, anisotropy);
+  } catch {
+    return imageTexture(blob, anisotropy);
+  }
+}

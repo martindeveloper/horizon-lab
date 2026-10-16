@@ -1,0 +1,65 @@
+/** Shared URL prefix: every simulation lives under it. */
+export const SIMULATION_PREFIX = "/lab";
+
+export type SimulationPath = `${typeof SIMULATION_PREFIX}/${string}`;
+
+export function simulationPath<const Slug extends string>(slug: Slug) {
+  return `${SIMULATION_PREFIX}/${slug}` as const;
+}
+
+/** Path segments after `base`, ignoring the internal locale segment. */
+export function segmentsAfter(base: string, pathname: string): string[] {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments[0] === "en" || segments[0] === "cs") segments.shift();
+  const parts = base.split("/").filter(Boolean);
+  return parts.every((part, i) => segments[i] === part) ? segments.slice(parts.length) : segments;
+}
+
+/**
+ * URL slugs for a simulation's presets or views: the default lives at `base`,
+ * the rest at `base/<id>`. Aliases (lower-case) map old or friendly names to
+ * an id and become native redirects; an alias to an unknown id is ignored.
+ */
+export function slugRoutes<Id extends string>({
+  base,
+  ids,
+  defaultId,
+  aliases = {},
+}: {
+  base: string;
+  ids: readonly Id[];
+  defaultId: Id;
+  aliases?: Readonly<Record<string, string>>;
+}) {
+  const known = (key: string): key is Id => ids.some((id) => id === key);
+  /** The id a slug names; the default for an empty slug, null when unknown. */
+  const resolve = (slug: string | undefined): Id | null => {
+    if (!slug) return defaultId;
+    const key = slug.trim().toLowerCase();
+    const alias = Object.hasOwn(aliases, key) ? aliases[key] : undefined;
+    if (alias !== undefined && known(alias)) return alias;
+    return known(key) ? key : null;
+  };
+  /** Canonical path; unknown ids fall back to the default. */
+  const pathFor = (id: string) => (id === defaultId || !known(id) ? base : `${base}/${id}`);
+  return {
+    resolve,
+    pathFor,
+    /** The id for a pathname (the current one in the browser), else the default. */
+    fromPath: (pathname?: string): Id => {
+      const path = pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname);
+      return resolve(segmentsAfter(base, path)[0] ?? "") ?? defaultId;
+    },
+    /** Ids that need their own prerendered route. */
+    slugs: () => ids.filter((id) => id !== defaultId),
+    /** Every id and alias with its canonical path, for native redirects. */
+    redirects: () => {
+      const map = new Map<string, string>();
+      for (const slug of [...ids, ...Object.keys(aliases)]) {
+        const id = resolve(slug);
+        if (id) map.set(slug, pathFor(id));
+      }
+      return map;
+    },
+  };
+}

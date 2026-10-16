@@ -1,0 +1,51 @@
+# Dependencies and package-manager caches (keep package-lock.json)
+node_modules/
+.npm/
+.pnpm-store/
+
+# Build output and framework caches
+dist/
+.output/
+.vercel/
+.next/
+out/
+next-env.d.ts
+.cache/
+*.tsbuildinfo
+
+# Local environment and secrets (keep safe example files)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+
+# Logs and runtime files
+*.log
+*.pid
+*.pid.lock
+
+# Test results and development artifacts
+coverage/
+playwright-report/
+/bench-results/
+test-results/
+/screenshots/
+/artifacts/
+
+.claude/
+
+# Editor and operating-system files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.swp
+*.swo
+*~
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini

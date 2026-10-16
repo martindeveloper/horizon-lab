@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "endOfLine": "lf",
+  "sortImports": {
+    "internalPattern": ["@/", "@horizon/"]
+  },
+  "sortPackageJson": true,
+  "sortTailwindcss": {
+    "stylesheet": "./src/styles.css",
+    "functions": ["cn", "clsx", "twMerge"]
+  },
+  "ignorePatterns": ["screenshots/**", "artifacts/**", "bench-results/**", "package-lock.json"]
+}

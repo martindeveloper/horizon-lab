@@ -1,0 +1,87 @@
+/**
+ * Extreme Kerr  —  theory, near-maximal astrophysical spin.
+ *
+ * Kerr metric, Thorne (1974) thin-disk cap:
+ *   a/M = 0.998     (not the mathematical edge a = 1)
+ *   r₊/M = 1 + √(1 − a²) ≈ 1.063
+ *
+ * Prograde ISCO (Bardeen–Press–Teukolsky):
+ *   a = 0   →  6M
+ *   a → 1   →  1M
+ *   a = 0.998 → ≈ 1.24M
+ *
+ * Irreducible mass / spin energy:
+ *   M_irr = M √((1 + √(1−a²))/2)
+ *   a = 1  ⇒  up to 29% of Mc² sits in the spin
+ *
+ * Ergosphere (equator): r = 2M. Inside it, even light must co-rotate.
+ * Sky: host-galaxy wash (weather = host).
+ */
+import type { HoleSpec } from "./types";
+
+export const kerr: HoleSpec = {
+  id: "kerr",
+  name: "Extreme Kerr",
+  kind: "theory",
+  catalog: "a ≈ 0.998",
+  blurb:
+    "Near-maximal spin. Prograde stable orbits extend closer to the horizon. The rendered spin effect is illustrative. A metric, not a named hole.",
+  massSolar: 3e7,
+  spin: 0.998,
+  inclination: 0.18,
+  distance: 26,
+  exposure: 1.1,
+  diskBrightness: 1.25,
+  starIntensity: 0.9,
+  tempScale: 1.2,
+  sky: "host",
+  jet: 0,
+  aliases: ["kerr", "extreme-kerr"],
+  tour: [
+    // Every move turns with the hole and leans into the drag.
+    {
+      duration: 9,
+      yaw: -0.9,
+      inclination: 0.18,
+      distance: 118,
+      lift: 0.3,
+      lead: 0.3,
+      roll: -0.03,
+      eq: "a/M = 0.998    ·    r₊ / M = 1 + √(1 − (a/M)²) ≈ 1.06",
+    },
+    // Dive in close; the ISCO ring tightens from 6M once the camera lands.
+    {
+      duration: 10,
+      yaw: -0.8,
+      inclination: 0.32,
+      distance: 22,
+      swing: -0.12,
+      lead: -0.4,
+      roll: -0.04,
+      sketch: [{ kind: "rings", rings: ["isco", "horizon"], from: { isco: 6 } }],
+      eq: "r_ISCO / M → 1    as    a/M → 1  (prograde)",
+    },
+    {
+      duration: 9,
+      yaw: -0.9,
+      inclination: 1.02,
+      distance: 28,
+      lift: 0.12,
+      roll: -0.05,
+      drift: -0.012,
+      sketch: [{ kind: "drag" }],
+      eq: "M_irr = M √((1 + √(1 − (a/M)²))/2)    ·    a/M = 1 ⇒ M − M_irr ≈ 0.29 M",
+    },
+    {
+      duration: 8,
+      yaw: -0.6,
+      inclination: 0.14,
+      distance: 26,
+      swing: 0.2,
+      lead: 0.4,
+      roll: -0.02,
+      eq: "a/M ≈ 0.998   (Thorne 1974)",
+    },
+    { duration: 10, yaw: -1.4, inclination: 0.48, distance: 126, lift: 0.3, lead: -0.2 },
+  ],
+};

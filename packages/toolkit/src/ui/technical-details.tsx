@@ -1,0 +1,95 @@
+"use client";
+
+import { Info } from "lucide-react";
+import { useRef } from "react";
+
+import { Dialog, type DialogHandle } from "./dialog";
+
+export type TechnicalDocument = {
+  title: string;
+  summary: string;
+  features: string[];
+  references?: { title: string; url: string }[];
+  sections: {
+    id: string;
+    title: string;
+    body: string;
+    equations: string[];
+  }[];
+};
+
+/** Native modal supplies focus containment, Escape dismissal and focus restoration. */
+export function TechnicalDetails({
+  document,
+  labels,
+}: {
+  document: TechnicalDocument;
+  labels: { open: string; close: string; features: string; references: string };
+}) {
+  const dialog = useRef<DialogHandle>(null);
+  return (
+    <>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-label={labels.open}
+        title={labels.open}
+        onClick={() => dialog.current?.open()}
+        className="relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-xs text-muted transition-colors not-md:after:absolute not-md:after:-inset-1 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8"
+      >
+        <Info className="size-4 md:size-3.5" aria-hidden />
+        <span className="hidden xl:inline">{labels.open}</span>
+      </button>
+      <Dialog ref={dialog} title={document.title} closeLabel={labels.close}>
+        <div className="space-y-8 px-5 py-6 sm:px-7">
+          <p className="text-sm leading-relaxed text-muted">{document.summary}</p>
+          <section>
+            <h3 className="mb-3 font-display text-xl">{labels.features}</h3>
+            <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted">
+              {document.features.map((feature) => (
+                <li key={feature}>{feature}</li>
+              ))}
+            </ul>
+          </section>
+          {document.references?.length ? (
+            <section>
+              <h3 className="mb-3 font-display text-xl">{labels.references}</h3>
+              <ul className="space-y-2 text-sm text-muted">
+                {document.references.map((reference) => (
+                  <li key={reference.url}>
+                    <a
+                      className="underline decoration-border-strong underline-offset-4 hover:text-fg"
+                      href={reference.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {reference.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+          {document.sections.map((section) => (
+            <section key={section.id} className="border-t border-border pt-5">
+              <h3 className="mb-3 font-display text-xl">{section.title}</h3>
+              <p className="text-sm leading-relaxed text-muted">{section.body}</p>
+              {section.equations.length > 0 ? (
+                <div className="mt-4 space-y-2 rounded-lg border border-border bg-surface p-4">
+                  {section.equations.map((equation) => (
+                    <p
+                      key={equation}
+                      className="font-mono text-xs leading-relaxed break-words whitespace-pre-wrap"
+                    >
+                      {equation}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
+            </section>
+          ))}
+        </div>
+      </Dialog>
+    </>
+  );
+}

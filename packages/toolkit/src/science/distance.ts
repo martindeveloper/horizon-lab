@@ -1,0 +1,73 @@
+import { AU_KM, LIGHT_YEAR_KM, SPEED_OF_LIGHT } from "./constants";
+import { formatReadout, numberFormat } from "./format";
+import { convert } from "./units";
+
+/** IAU symbols: au (2012 Resolution B2), ly, pc. */
+export type DistanceUnit = "au" | "ly" | "pc";
+export const DISTANCE_UNITS: readonly DistanceUnit[] = ["au", "ly", "pc"];
+
+/** Light-time across 1 au, in seconds (both definitions exact: 499.004784 s). */
+export const AU_LIGHT_SECONDS = (AU_KM * 1000) / SPEED_OF_LIGHT;
+/** Julian light-year in au. */
+export const LIGHT_YEAR_AU = LIGHT_YEAR_KM / AU_KM;
+/** IAU 2015 Resolution B2: one parsec is exactly 648 000/π au. */
+export const PARSEC_AU = 648_000 / Math.PI;
+export const PARSEC_KM = PARSEC_AU * AU_KM;
+
+function finite(value: number) {
+  if (!Number.isFinite(value)) throw new RangeError("Distance must be finite");
+}
+
+export function convertDistance(value: number, from: DistanceUnit, to: DistanceUnit) {
+  return convert(value, from, to);
+}
+
+export type LightTimeUnit = "s" | "min" | "h" | "d";
+export type LightTime = { value: number; unit: LightTimeUnit; digits: number };
+
+/** How long light takes to cross a distance given in au: seconds, minutes (under 3 h), hours, days. */
+export function lightTime(au: number): LightTime {
+  finite(au);
+  const seconds = Math.abs(au) * AU_LIGHT_SECONDS;
+  const pick = (value: number, unit: LightTimeUnit) => ({
+    value,
+    unit,
+    digits: value < 10 ? 1 : 0,
+  });
+  if (seconds < 120) return pick(seconds, "s");
+  if (seconds < 3 * 3600) return pick(seconds / 60, "min");
+  if (seconds < 48 * 3600) return pick(seconds / 3600, "h");
+  return pick(seconds / 86400, "d");
+}
+
+export type DistanceFormat = {
+  unit: DistanceUnit;
+  locale: string;
+  /** Localized unit symbols, e.g. Czech "sv. r." for ly. */
+  symbols: Record<DistanceUnit, string>;
+  /** Phrase before the light-time ("light-time"); omit for no light-time. */
+  lightTimeLabel?: string;
+  /** Show the light-time from this distance in au (default 0.2)… */
+  lightTimeFrom?: number;
+  /** …up to this one (default 0.05 ly, about 18 light-days). */
+  lightTimeTo?: number;
+  /** Keep trailing zeros in both numbers, so a live readout holds its digit count. */
+  fixed?: boolean;
+};
+
+/**
+ * One distance readout for every simulation: the value in the chosen unit,
+ * then, inside the given range, how long light takes ("5.37 au · light-time
+ * 45 min"). Labels come from the host; numbers from Intl.
+ */
+export function formatDistance(au: number, options: DistanceFormat) {
+  const { unit, locale, symbols, lightTimeLabel } = options;
+  const text = `${formatReadout(convertDistance(au, "au", unit), locale, options.fixed)} ${symbols[unit]}`;
+  const from = options.lightTimeFrom ?? 0.2;
+  const to = options.lightTimeTo ?? 0.05 * LIGHT_YEAR_AU;
+  const abs = Math.abs(au);
+  if (!lightTimeLabel || abs < from || abs > to) return text;
+  const time = lightTime(au);
+  const number = numberFormat(locale, time.digits, options.fixed ?? false).format(time.value);
+  return `${text} · ${lightTimeLabel} ${number} ${time.unit}`;
+}

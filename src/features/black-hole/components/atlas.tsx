@@ -1,0 +1,390 @@
+import { X } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { useTranslations } from "next-intl";
+import { useId, useRef, useState } from "react";
+
+import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
+import {
+  ATLAS,
+  DISK_STARS,
+  MAP_HALF_KPC,
+  R0_KPC,
+  SPIRAL_ARMS,
+  atlasFor,
+  xyToPct,
+  type AtlasSite,
+} from "@/features/black-hole/lib/atlas";
+import { useBlackHole } from "@/features/black-hole/lib/store";
+import { Kicker, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
+
+const SCALE_KPC = 5;
+
+function Marker({
+  site,
+  active,
+  dim,
+  onPick,
+  onHover,
+}: {
+  site: AtlasSite;
+  active: boolean;
+  dim: boolean;
+  onPick: (site: AtlasSite) => void;
+  onHover: (id: string | null) => void;
+}) {
+  const t = useTranslations("blackHole");
+  const pos = site.x != null && site.y != null ? xyToPct(site.x, site.y) : null;
+  if (!pos) return null;
+  const hole = Boolean(site.preset);
+  const showLabel = site.label === "always" || dim;
+  return (
+    <button
+      type="button"
+      onClick={() => onPick(site)}
+      onPointerEnter={() => onHover(site.id)}
+      onPointerLeave={() => onHover(null)}
+      style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
+      className={cn(
+        "absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center",
+        hole ? "cursor-pointer" : "cursor-default",
+      )}
+      aria-label={hole ? `${t("open")} ${siteName(site, t)}` : siteName(site, t)}
+    >
+      <span
+        className={cn(
+          "relative flex items-center justify-center",
+          hole ? "size-11 md:size-9" : "size-9 md:size-7",
+        )}
+      >
+        {hole ? (
+          <>
+            <span
+              className={cn(
+                "absolute size-3 rounded-full border",
+                active ? "border-fg" : "border-accent/80",
+              )}
+            />
+            <span className={cn("size-1.5 rounded-full", active ? "bg-fg" : "bg-accent")} />
+          </>
+        ) : (
+          <span className={cn("size-1 rounded-full", dim || active ? "bg-fg" : "bg-muted")} />
+        )}
+      </span>
+      {showLabel ? (
+        <span
+          className={cn(
+            "mt-0.5 rounded-full px-1.5 py-0.5 font-mono text-xs tracking-widest uppercase",
+            hole ? "glass-hud" : "",
+            active || dim ? "text-fg" : "text-muted",
+          )}
+        >
+          {siteName(site, t)}
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
+function siteCopy(site: AtlasSite, t: ReturnType<typeof useTranslations>) {
+  return {
+    name: t(`atlasSites.${site.id}.name`),
+    found: t(`atlasSites.${site.id}.found`),
+    source: t(`atlasSites.${site.id}.source`),
+    distance: t(`atlasSites.${site.id}.distance`),
+    mass: t(`atlasSites.${site.id}.mass`),
+  };
+}
+
+function siteName(site: AtlasSite, t: ReturnType<typeof useTranslations>) {
+  return siteCopy(site, t).name;
+}
+
+function Fact({ site }: { site: AtlasSite }) {
+  const t = useTranslations("blackHole");
+  const copy = siteCopy(site, t);
+  const kindBit =
+    site.kind === "lab"
+      ? `${t("kindTheory")}  ·  `
+      : site.kind === "hole" || site.kind === "extragalactic"
+        ? `${t("kindCatalog")}  ·  `
+        : "";
+  return (
+    <div className="anim-fade">
+      <Kicker>
+        {kindBit}
+        {copy.found}
+      </Kicker>
+      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-fg">{copy.name}</h3>
+      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 font-mono text-xs text-muted">
+        {site.ra !== "-" ? (
+          <>
+            <dt className="text-subtle">RA</dt>
+            <dd className="text-fg">{site.ra}</dd>
+            <dt className="text-subtle">Dec</dt>
+            <dd className="text-fg">{site.dec}</dd>
+          </>
+        ) : null}
+        <dt className="text-subtle">{t("gal")}</dt>
+        <dd className="text-fg">
+          {site.lon} · {site.lat}
+        </dd>
+        <dt className="text-subtle">D</dt>
+        <dd className="text-fg">{copy.distance}</dd>
+        <dt className="text-subtle">M</dt>
+        <dd className="text-fg">{copy.mass}</dd>
+      </dl>
+      <p className="mt-3 text-xs leading-relaxed text-subtle">{copy.source}</p>
+    </div>
+  );
+}
+
+export function AtlasOverlay() {
+  const t = useTranslations("blackHole");
+  const presetId = useBlackHole((s) => s.presetId);
+  const selectHole = useSelectHole();
+  const setMapOpen = useBlackHole((s) => s.setMapOpen);
+  const reduce = useReducedMotion();
+  const [inspect, setInspect] = useState<string | null>(null);
+  const [hover, setHover] = useState<string | null>(null);
+  const selected = atlasFor(inspect ?? "") ?? ATLAS.find((s) => s.preset === presetId) ?? ATLAS[0]!;
+  const lit = hover ?? inspect;
+  const sun = xyToPct(R0_KPC, 0);
+  const disk = ATLAS.filter((s) => s.x != null && s.y != null);
+  const ids = `arm${useId().replace(/[^\w-]/g, "")}`;
+
+  const dialog = useRef<HTMLDivElement>(null);
+  useFocusHandoff(dialog, () => document.querySelector<HTMLElement>('[data-return="atlas"]'));
+
+  function pick(site: AtlasSite) {
+    setInspect(site.id);
+    if (site.preset) {
+      selectHole(site.preset);
+      setMapOpen(false);
+    }
+  }
+
+  function show(site: AtlasSite) {
+    setInspect(site.id);
+  }
+
+  return (
+    <motion.div
+      ref={dialog}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="atlas-title"
+      tabIndex={-1}
+      className="pad-safe pointer-events-auto absolute inset-0 z-[80] flex flex-col bg-bg/80 outline-hidden"
+      initial={reduce ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35 }}
+    >
+      <header className="flex items-center justify-between gap-3 pb-3 md:px-6 md:py-3">
+        <div>
+          <Kicker>{t("atlasKicker")}</Kicker>
+          <h2
+            id="atlas-title"
+            className="font-display text-lg font-medium tracking-tight text-fg md:text-xl"
+          >
+            {t("atlasTitle")}
+          </h2>
+        </div>
+        <button
+          type="button"
+          className="glass-hud relative flex h-8 shrink-0 items-center rounded-full px-3 text-xs tracking-widest text-fg uppercase not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5"
+          onClick={() => setMapOpen(false)}
+        >
+          <X className="mr-1.5 size-3.5" />
+          {t("close")}
+        </button>
+      </header>
+
+      <div className="grid min-h-0 flex-1 gap-3 overflow-y-auto overscroll-contain md:grid-cols-[minmax(0,1.4fr)_20rem] md:gap-4 md:px-6 md:pb-6">
+        <section className="glass-panel [container-type:size] relative min-h-[min(calc(100vw-2rem),52dvh)] overflow-hidden rounded-lg md:h-full md:min-h-0">
+          <Kicker className="absolute top-3 left-3 z-20">{t("milkyWayMap")}</Kicker>
+          {/* One square frame for the map, markers and scale, so they share coordinates. */}
+          <div className="absolute top-1/2 left-1/2 size-[min(100cqw,100cqh)] -translate-x-1/2 -translate-y-1/2">
+            <svg
+              viewBox={`${-MAP_HALF_KPC} ${-MAP_HALF_KPC} ${MAP_HALF_KPC * 2} ${MAP_HALF_KPC * 2}`}
+              className="absolute inset-0 size-full text-muted"
+              aria-hidden
+            >
+              <g transform="scale(1 -1)">
+                {/* Bar: ~3.5 kpc half-length, ~25° from the Sun–centre line, near end at ℓ > 0. */}
+                <ellipse
+                  cx="0"
+                  cy="0"
+                  rx="3.5"
+                  ry="1.15"
+                  transform="rotate(-25)"
+                  fill="currentColor"
+                  fillOpacity="0.14"
+                />
+                <circle
+                  r="13.2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeOpacity="0.16"
+                  strokeWidth="0.04"
+                />
+                <circle
+                  r={R0_KPC}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeOpacity="0.2"
+                  strokeWidth="0.03"
+                  strokeDasharray="0.18 0.22"
+                />
+                {DISK_STARS.map((s, i) => (
+                  <circle
+                    key={i}
+                    cx={s.x}
+                    cy={s.y}
+                    r={s.r}
+                    fill="currentColor"
+                    fillOpacity="0.28"
+                  />
+                ))}
+                {SPIRAL_ARMS.map((arm) => (
+                  <path
+                    key={arm.id}
+                    d={arm.d}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeOpacity="0.38"
+                    strokeWidth="0.42"
+                    strokeLinecap="round"
+                  />
+                ))}
+              </g>
+              {/* Names follow their arms; label paths are already in screen space (Y down). */}
+              {SPIRAL_ARMS.map((arm) => (
+                <g key={`${arm.id}-label`}>
+                  <path id={`${ids}-${arm.id}`} d={arm.label} fill="none" />
+                  <text
+                    fill="currentColor"
+                    fillOpacity="0.5"
+                    fontSize="0.48"
+                    fontFamily="ui-monospace, SFMono-Regular, monospace"
+                    dy={arm.side === "above" ? -0.36 : 0.7}
+                  >
+                    <textPath href={`#${ids}-${arm.id}`} startOffset="50%" textAnchor="middle">
+                      {t(`spiralArms.${arm.id}`)}
+                    </textPath>
+                  </text>
+                </g>
+              ))}
+            </svg>
+
+            <span
+              className="absolute z-[1] size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fg"
+              style={{ left: `${sun.left}%`, top: `${sun.top}%` }}
+            />
+            <span
+              className="absolute z-[1] -translate-x-1/2 font-mono text-xs tracking-widest text-subtle uppercase"
+              style={{ left: `${sun.left}%`, top: `calc(${sun.top}% + 8px)` }}
+            >
+              {t("sun")}
+            </span>
+
+            {disk.map((site) => (
+              <Marker
+                key={site.id}
+                site={site}
+                active={site.preset === presetId || lit === site.id}
+                dim={lit === site.id}
+                onPick={pick}
+                onHover={setHover}
+              />
+            ))}
+
+            <p className="absolute right-3 bottom-3 flex items-center gap-2 font-mono text-xs text-subtle">
+              <span
+                className="inline-block h-px bg-border-strong"
+                style={{ width: `${(SCALE_KPC / (2 * MAP_HALF_KPC)) * 100}cqmin` }}
+              />
+              {SCALE_KPC} kpc
+            </p>
+          </div>
+        </section>
+
+        <div className="flex flex-col gap-3 md:gap-4">
+          <section className="glass-panel rounded-lg p-3.5 md:p-4">
+            <div className="min-h-[13.5rem]" aria-live="polite">
+              <Fact site={selected} />
+            </div>
+            {selected.preset ? (
+              <button
+                type="button"
+                className="glass-hud mt-4 h-11 rounded-full px-3 font-mono text-xs tracking-widest text-fg uppercase md:h-8"
+                onClick={() => pick(selected)}
+              >
+                {t("open")} {siteName(selected, t)}
+              </button>
+            ) : (
+              <Kicker className="mt-3">{t("landmark")}</Kicker>
+            )}
+          </section>
+
+          <section className="glass-panel rounded-lg p-3.5 md:p-4">
+            <h3 className={kickerClass}>{t("localGroup")}</h3>
+            <p className="mt-1 text-xs leading-relaxed text-muted">{t("localGroupBody")}</p>
+            <div className="mt-3 flex flex-col gap-1.5">
+              {[
+                { id: "sgr-a", k: "8.3 kpc" },
+                { id: "lmc", k: "49.6 kpc" },
+                { id: "m31", k: "760 kpc" },
+                { id: "m87", k: "16.8 Mpc" },
+                { id: "gw231123", k: "z ≈ 0.4" },
+                { id: "ton618", k: "z = 2.22" },
+              ].map((row) => {
+                const s = atlasFor(row.id)!;
+                const fly = Boolean(s.preset);
+                return (
+                  <button
+                    key={row.id}
+                    type="button"
+                    aria-pressed={inspect === s.id}
+                    onClick={() => show(s)}
+                    className={cn(
+                      "glass-hud flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-left md:min-h-0",
+                      fly ? "cursor-pointer text-fg" : "cursor-default text-muted",
+                      inspect === s.id && "text-fg",
+                    )}
+                  >
+                    <span>{siteName(s, t)}</span>
+                    <span className="font-mono text-xs text-subtle">{row.k}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="glass-panel rounded-lg p-3.5 md:p-4">
+            <h3 className={kickerClass}>{t("theorySolutions")}</h3>
+            <p className="mt-1 mb-3 text-xs text-muted">{t("theoryBody")}</p>
+            <div className="flex flex-col gap-1.5">
+              {ATLAS.filter((s) => s.kind === "lab").map((site) => (
+                <button
+                  key={site.id}
+                  type="button"
+                  aria-pressed={inspect === site.id}
+                  onClick={() => show(site)}
+                  className={cn(
+                    "glass-hud min-h-11 rounded-md px-3 py-2 text-left text-sm md:min-h-0",
+                    inspect === site.id || presetId === site.preset
+                      ? "text-fg"
+                      : "text-muted hover:text-fg",
+                  )}
+                >
+                  {siteName(site, t)}
+                  <span className="ml-2 font-mono text-xs text-subtle">{site.lon}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

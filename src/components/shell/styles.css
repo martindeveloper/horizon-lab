@@ -1,0 +1,250 @@
+:root {
+  /* Phones get a slimmer bar; its 44px targets overhang it by 2px either side. */
+  --app-header-height: calc(2.5rem + env(safe-area-inset-top, 0px));
+  --app-footer-height: calc(1.75rem + env(safe-area-inset-bottom, 0px));
+  --app-gutter: max(1rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+}
+@media (min-width: 48rem) and (min-height: 30rem) {
+  :root {
+    --app-header-height: calc(2.75rem + env(safe-area-inset-top, 0px));
+  }
+}
+@media (min-width: 40rem) {
+  :root {
+    --app-gutter: max(1.5rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  }
+}
+@media (min-width: 64rem) {
+  :root {
+    --app-gutter: max(2rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  }
+}
+
+/* One gutter for every page. The header and footer (`app-bar`) span the window
+   on every route, so brand, nav and preferences never move between a page and a
+   simulation. Content (`app-container`) sits on the same gutter, capped at
+   1440px; simulation HUDs take it through the toolkit's `--hud-gutter`. */
+:root {
+  --hud-gutter: var(--app-gutter);
+}
+.app-bar,
+.app-container {
+  width: 100%;
+  padding-inline: var(--app-gutter);
+}
+.app-container {
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+/* Glass bar over the sky; the solar hairline below it is the horizon line.
+   Cheap glass: a thin tint, a top sheen and a lit rim. A full-width bar keeps
+   the blur radius small, which costs far less than the panels' 40px. */
+.app-header {
+  height: var(--app-header-height);
+  padding-top: env(safe-area-inset-top, 0px);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.01) 70%),
+    rgb(14 14 20 / 0.42);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 12px 32px -20px rgb(0 0 0 / 0.7);
+  backdrop-filter: blur(18px) saturate(1.9);
+}
+:root.light .app-header {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.4)), rgb(251 250 248 / 0.3);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 12px 32px -22px rgb(28 29 34 / 0.3);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+
+/* The sliding selection in the header's preference rails. */
+.header-lens {
+  background: rgb(var(--solar) / 0.14);
+  box-shadow:
+    inset 0 0 0 0.5px rgb(var(--solar) / 0.45),
+    0 0 14px rgb(var(--solar) / 0.16);
+}
+/* Light glass washes the lens out; a full rim keeps the choice visible (≥3:1). */
+:root.light .header-lens {
+  background: rgb(var(--solar) / 0.22);
+  box-shadow: inset 0 0 0 1px rgb(var(--solar) / 0.9);
+}
+
+/* Keyboard focus never hides under the sticky header. */
+html {
+  scroll-padding-top: calc(var(--app-header-height) + 0.5rem);
+}
+
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .app-header,
+  :root.light .app-header {
+    background: var(--glass-fallback);
+  }
+}
+
+/* One line at the foot of every page; stages subtract it so it never overlaps a scene. */
+.app-footer {
+  height: var(--app-footer-height);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-top: 0.5px solid var(--color-border);
+}
+
+.simulation-stage {
+  position: relative;
+  isolation: isolate;
+  height: calc(100dvh - var(--app-header-height) - var(--app-footer-height));
+  /* clip, not hidden: a focused control must never scroll the stage sideways. */
+  overflow: clip;
+  background: var(--color-space);
+}
+
+.simulation-stage .pad-hud-top {
+  padding-top: 0.75rem;
+}
+
+/* Immersive view (ImmersiveScene marks the stage): the stage covers the window and
+   the chrome steps aside. Only the stage's box changes, so WebGL stays as it is. */
+.simulation-stage[data-immersive] {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  height: auto;
+}
+.app-shell:has(.simulation-stage[data-immersive]) :is(.app-header, .app-footer) {
+  visibility: hidden;
+}
+
+/* Phone notice: above the footer on pages; over a simulation the dock owns the
+   bottom, so it sits under the HUD's top row (0.75rem + 40px) on the scene. */
+.desktop-notice {
+  bottom: calc(var(--app-footer-height) + 0.75rem);
+}
+.app-shell:has(.simulation-stage) .desktop-notice {
+  top: calc(var(--app-header-height) + 4rem);
+  bottom: auto;
+}
+.app-shell:has(.simulation-stage[data-immersive]) .desktop-notice {
+  display: none;
+}
+
+/* Music: a fine waveform arched like the rising sun. At rest it is a quiet,
+   low silhouette; playing, the gold lens lights and each bar breathes on its
+   own slow cycle. Registered properties let the bars ease between the two
+   (unregistered, browsers just snap). Pausing freezes the breath and eases
+   the bars down from wherever they are. */
+@property --music-on {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --music-breath {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+.music-wave {
+  --music-on: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+  transition: --music-on 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.music-wave[data-playing="true"] {
+  --music-on: 1;
+}
+.music-wave > span {
+  width: 1.5px;
+  height: 100%;
+  border-radius: 999px;
+  background: currentColor;
+  transform: scaleY(
+    calc(var(--rest) + (var(--peak) * var(--music-breath) - var(--rest)) * var(--music-on))
+  );
+}
+@media (prefers-reduced-motion: no-preference) {
+  .music-wave > span {
+    animation: music-breath var(--dur) ease-in-out var(--delay) infinite alternate paused;
+  }
+  .music-wave[data-playing="true"] > span {
+    animation-play-state: running;
+  }
+}
+@keyframes music-breath {
+  from {
+    --music-breath: 0.4;
+  }
+  to {
+    --music-breath: 1;
+  }
+}
+.music-lens {
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+.music-lens[data-playing="true"] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-sun,
+  .hero-moon,
+  .hero-glow,
+  .hero-arc {
+    transition: none;
+  }
+}
+
+/* A star under the pointer: a small gold ring and its name, beside it. */
+.sky-mark {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 1px solid rgb(var(--solar) / 0.65);
+  border-radius: 50%;
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity 0.25s ease,
+    scale 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.sky-label {
+  position: absolute;
+  margin: -0.5em 0 0 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--color-fg);
+  white-space: nowrap;
+  opacity: 0;
+  translate: -4px 0;
+  transition:
+    opacity 0.25s ease,
+    translate 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.sky-label[data-side="left"] {
+  margin-left: -0.875rem;
+  translate: calc(-100% + 4px) 0;
+}
+.sky-label-mag {
+  margin-left: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-subtle);
+}
+.sky-mark[data-on] {
+  opacity: 1;
+  scale: 1;
+}
+.sky-label[data-on] {
+  opacity: 1;
+  translate: 0 0;
+}
+.sky-label[data-on][data-side="left"] {
+  translate: -100% 0;
+}

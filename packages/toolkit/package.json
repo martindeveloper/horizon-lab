@@ -1,0 +1,73 @@
+{
+  "name": "@horizon/toolkit",
+  "version": "0.1.0",
+  "description": "Reusable simulation UI, camera, rendering, numerical utilities and Solar System body data.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martindeveloper/horizon-lab.git",
+    "directory": "packages/toolkit"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "tsconfig.json"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./ui": "./src/ui/index.ts",
+    "./math": "./src/math/index.ts",
+    "./science": "./src/science/index.ts",
+    "./camera": "./src/camera/index.ts",
+    "./rendering": "./src/rendering/index.ts",
+    "./audio": "./src/audio/index.ts",
+    "./bench": "./src/bench/index.ts",
+    "./environment": "./src/environment/index.ts",
+    "./storage": "./src/storage/index.ts",
+    "./bodies": "./src/bodies/index.ts",
+    "./bodies/surfaces": "./src/bodies/surfaces/index.ts",
+    "./shaders": "./src/shaders/index.ts",
+    "./shaders/defines": "./src/shaders/defines.ts",
+    "./theme.css": "./src/ui/theme.css",
+    "./styles.css": "./src/ui/styles.css",
+    "./glsl/*": "./src/shaders/*.glsl",
+    "./ui/motion": "./src/ui/text-reveal.tsx",
+    "./base.css": "./src/ui/base.css",
+    "./shaders/loader": "./src/shaders/loader.cjs"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.57.0",
+    "tailwind-merge": "^3.7.0"
+  },
+  "peerDependencies": {
+    "@radix-ui/react-slider": "^1.0.0",
+    "motion": "^14.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.186.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "three": {
+      "optional": true
+    },
+    "motion": {
+      "optional": true
+    },
+    "@radix-ui/react-slider": {
+      "optional": true
+    }
+  }
+}

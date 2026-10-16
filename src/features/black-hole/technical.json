@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "features": ["views", "controls", "learning"],
+  "sections": [
+    {
+      "id": "rays",
+      "equations": [
+        "r = |p|; L = p × v; Rs = 2 (M = 1)",
+        "dp/dλ = v",
+        "dv/dλ = −(3/2) Rs |L|² p / r⁵ + (a Rs / r³)(−v_z, 0, v_x)"
+      ]
+    },
+    {
+      "id": "radii",
+      "equations": [
+        {
+          "equation": "schwarzschild-radius"
+        },
+        {
+          "equation": "kerr-horizon"
+        },
+        {
+          "equation": "photon-orbit"
+        },
+        {
+          "equation": "isco"
+        },
+        {
+          "equation": "kerr-orbital-period"
+        }
+      ]
+    },
+    {
+      "id": "disk",
+      "equations": [
+        {
+          "equation": "kerr-angular-velocity"
+        },
+        {
+          "equation": "circular-orbit-energy"
+        },
+        {
+          "equation": "circular-orbit-momentum"
+        },
+        "F(r) ∝ −Ω′ / [r(E − ΩL)²] ∫(E − ΩL) dL",
+        {
+          "equation": "disk-redshift"
+        },
+        {
+          "equation": "disk-temperature"
+        },
+        "I ∝ F/F_peak × texture × I(μ) × g⁴",
+        {
+          "equation": "limb-darkening"
+        }
+      ]
+    },
+    {
+      "id": "clocks",
+      "equations": [
+        {
+          "equation": "rain-clock-rate"
+        },
+        {
+          "equation": "rain-fall-speed"
+        }
+      ]
+    },
+    {
+      "id": "performance",
+      "equations": []
+    },
+    {
+      "id": "limits",
+      "equations": []
+    }
+  ],
+  "references": [
+    {
+      "title": "Bardeen, Press & Teukolsky (1972) · Kerr circular orbits",
+      "url": "https://doi.org/10.1086/151796"
+    },
+    {
+      "title": "Page & Thorne (1974) · Thin-disk flux",
+      "url": "https://articles.adsabs.harvard.edu/pdf/1974ApJ...191..499P"
+    },
+    {
+      "title": "Narayan, Johnson & Gammie (2019) · Shadow and critical curve",
+      "url": "https://arxiv.org/abs/1910.02957"
+    },
+    {
+      "title": "GRAVITY Collaboration (2022) · Sgr A* mass and distance",
+      "url": "https://www.aanda.org/articles/aa/full_html/2022/01/aa42465-21/aa42465-21.html"
+    },
+    {
+      "title": "EHT Collaboration (2025) · M87* ring measurements",
+      "url": "https://arxiv.org/abs/2509.24593"
+    },
+    {
+      "title": "Miller-Jones et al. (2021) · Cygnus X-1 mass",
+      "url": "https://arxiv.org/abs/2102.09091"
+    },
+    {
+      "title": "Ramachandran et al. (2025) · Cygnus X-1 companion and mass estimates",
+      "url": "https://arxiv.org/abs/2504.05885"
+    },
+    {
+      "title": "Chandrasekhar (1960) · Radiative Transfer, limb darkening",
+      "url": "https://archive.org/details/radiativetransfe0000chan"
+    },
+    {
+      "title": "Helland (2012) · Blackbody temperature to RGB fit",
+      "url": "https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html"
+    },
+    {
+      "title": "NASA · Lensed disks and Doppler contrast",
+      "url": "https://www.nasa.gov/universe/nasa-visualization-shows-a-black-holes-warped-world/"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+<h2>Compared with <%= it.title %></h2>
+<p class="<%= it.likeForLike ? 'good' : 'bad' %>"><%= it.status %><% if (it.code) { %> <span class="dim"><%= it.code %></span><% } %></p>
+<% if (it.warnings.length) { %>
+<ul class="findings">
+  <% it.warnings.forEach((warning) => { %><li class="warning"><b>Warning</b><%= warning %></li><% }) %>
+</ul>
+<% } %>
+<% it.notes.forEach((note) => { %><p class="dim"><%= note %></p><% }) %>
+<div class="scroll">
+  <table>
+    <thead>
+      <tr><th>run</th><th>before</th><th>after</th><th>Δ</th><th>pixels changed</th><th>scene</th><th>difference</th></tr>
+    </thead>
+    <tbody>
+      <% it.rows.forEach((row) => { %>
+      <tr>
+        <td><%= row.key %></td>
+        <td><%= row.before %></td>
+        <td><%= row.after %></td>
+        <td class="<%= row.deltaClass %>"><%= row.delta %></td>
+        <td class="<%= row.diffClass %>"><%= row.diff %></td>
+        <td class="<%= row.sceneClass %>"><%= row.scene %></td>
+        <td><% if (row.heatmap) { %><a href="<%= row.heatmap %>"><img src="<%= row.heatmap %>" alt="Difference heat map" loading="lazy"></a><% } %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

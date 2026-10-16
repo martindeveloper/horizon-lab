@@ -1,0 +1,15 @@
+@import "tailwindcss" source(none);
+@import "@horizon/toolkit/theme.css";
+@import "@horizon/toolkit/base.css";
+@import "@horizon/toolkit/styles.css";
+@import "./components/shell/styles.css";
+@import "./features/catalogue/styles.css";
+
+/* The one utilities bundle for every route. Feature stylesheets hold only
+   their own scoped CSS; a second utilities bundle would reorder the cascade. */
+@source "./app";
+@source "./components";
+@source "../packages/toolkit/src/ui";
+@source not "../packages/toolkit/src/ui/examples";
+@source "./features";
+@source "./lib";

@@ -1,0 +1,68 @@
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata, Viewport } from "next";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
+
+import { AppThemeProvider } from "@/components/providers";
+import { AppShell } from "@/components/shell/app-shell";
+import { LocaleUrl } from "@/components/shell/locale-url";
+import { routing } from "@/i18n/routing";
+import { siteUrl } from "@/lib/metadata";
+
+/* Fonts ship with the site (Fontsource, from npm): no request to a font CDN, and
+   each subset file loads only when a page uses its characters. */
+import "@fontsource-variable/ibm-plex-sans/wght.css";
+import "@fontsource-variable/ibm-plex-sans/wght-italic.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource-variable/bodoni-moda/opsz.css";
+import "@fontsource-variable/bodoni-moda/opsz-italic.css";
+import "../../styles.css";
+
+export const dynamicParams = false;
+
+type Props = { children: ReactNode; params: Promise<{ locale: string }> };
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  const t = await getTranslations({ locale: "en" });
+  return {
+    metadataBase: siteUrl(),
+    title: t("app"),
+    description: t("metadataDescription"),
+    icons: { icon: "/favicon.svg", apple: "/apple-touch-icon.png" },
+  };
+}
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#08080b",
+};
+
+export default async function LocaleLayout({ children, params }: Props) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  const messages = await getMessages({ locale });
+  return (
+    <html lang={locale} className="antialiased" suppressHydrationWarning>
+      <body className="bg-bg text-fg">
+        <AppThemeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
+            <LocaleUrl />
+            <AppShell locale={locale}>{children}</AppShell>
+          </NextIntlClientProvider>
+        </AppThemeProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
+  );
+}

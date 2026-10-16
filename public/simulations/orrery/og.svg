@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#08080b"/>
+<svg x="640" y="100" width="560" height="430" viewBox="0 0 1000 800" fill="none">
+<defs>
+ <radialGradient id="sky"><stop stop-color="#1a1711"/><stop offset=".6" stop-color="#0b0c10"/><stop offset="1" stop-color="#050609"/></radialGradient>
+ <radialGradient id="sun"><stop stop-color="#fff4dc"/><stop offset=".35" stop-color="#f1cf8a"/><stop offset=".7" stop-color="#b8863b" stop-opacity=".35"/><stop offset="1" stop-color="#b8863b" stop-opacity="0"/></radialGradient>
+ <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e2c07a" stop-opacity=".9"/><stop offset="1" stop-color="#e2c07a" stop-opacity=".25"/></linearGradient>
+ <pattern id="stars" width="230" height="200" patternUnits="userSpaceOnUse"><circle cx="20" cy="30" r=".8" fill="#d7d4cb" opacity=".5"/><circle cx="110" cy="120" r=".6" fill="#ddd" opacity=".3"/><circle cx="190" cy="60" r="1.1" fill="#ddd" opacity=".35"/><circle cx="140" cy="175" r=".5" fill="#ddd" opacity=".4"/><circle cx="60" cy="160" r=".5" fill="#ddd" opacity=".3"/></pattern>
+ <filter id="glow"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>
+<path fill="url(#sky)" d="M0 0h1000v800H0z"/><path fill="url(#stars)" d="M0 0h1000v800H0z"/>
+<g transform="translate(500 420)">
+ <g fill="none" stroke="url(#ring)" stroke-width="1.2">
+  <ellipse rx="430" ry="150" opacity=".35"/>
+  <ellipse rx="330" ry="115" opacity=".5"/>
+  <ellipse rx="240" ry="84" opacity=".6"/>
+  <ellipse rx="150" ry="52" opacity=".7"/>
+  <ellipse rx="92" ry="32" opacity=".8"/>
+  <ellipse rx="52" ry="18" opacity=".9"/>
+ </g>
+ <g fill="none" stroke="#9ebccc" stroke-width=".8" opacity=".35" stroke-dasharray="3 9"><ellipse rx="470" ry="164"/></g>
+ <circle r="90" fill="url(#sun)" filter="url(#glow)" opacity=".9"/>
+ <circle r="16" fill="#fff1cf"/>
+ <circle cx="-48" cy="-7" r="3" fill="#cbb98a"/>
+ <circle cx="80" cy="-24" r="4" fill="#6aa2c8"/>
+ <circle cx="-138" cy="30" r="3.5" fill="#c4705a"/>
+ <circle cx="196" cy="-56" r="11" fill="#d7a15a"/>
+ <g transform="translate(-288 56) rotate(-18)"><ellipse rx="22" ry="7" fill="none" stroke="#e0d2a4" stroke-width="2.4" opacity=".9"/><circle r="9" fill="#e0d2a4"/></g>
+ <circle cx="360" cy="90" r="7" fill="#8ec9c4"/>
+ <circle cx="-410" cy="-98" r="7" fill="#4f78c8"/>
+</g>
+
+</svg>
+<circle cx="106" cy="108" r="24" fill="none" stroke="#9a9a96" stroke-width="1.5"/>
+<path d="M95 108a11 11 0 0 1 22 0Z" fill="#e2c07a"/><path d="M86 108h40" stroke="#e2c07a" stroke-width="1.5"/>
+<text x="148" y="119" fill="#ecece8" font-family="Georgia, serif" font-size="34">Horizon</text>
+<text x="82" y="308" fill="#ecece8" font-family="Georgia, serif" font-size="72" letter-spacing="-2">Solar system</text>
+<text x="86" y="366" fill="#b2b2ae" font-family="Arial, sans-serif" font-size="26">An honest orrery of the solar system and the Milky Way</text>
+<path d="M86 466h430" stroke="#ecece8" stroke-opacity=".15"/>
+<text x="86" y="508" fill="#9a9a96" font-family="Arial, sans-serif" font-size="14" letter-spacing="2">INTERACTIVE SPACE SIMULATIONS</text>
+</svg>

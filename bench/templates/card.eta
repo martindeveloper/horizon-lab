@@ -1,0 +1,32 @@
+<article class="card" id="<%= it.id %>">
+  <% if (it.strip.length > 1) { %>
+  <div class="strip">
+    <% it.strip.forEach((shot) => { %>
+    <a href="<%= shot.src %>"><img src="<%= shot.src %>" alt="" loading="lazy"><span><%= shot.label %></span></a>
+    <% }) %>
+  </div>
+  <% } else if (it.strip.length === 1) { %>
+  <a href="<%= it.strip[0].src %>"><img src="<%= it.strip[0].src %>" alt="<%= it.description %>" loading="lazy"></a>
+  <% } %>
+  <div class="body">
+    <h3><%= it.title %> <span class="dim"><%= it.size %></span></h3>
+    <p class="dim"><%= it.description %></p>
+    <dl class="metrics">
+      <% it.metrics.forEach((metric) => { %>
+      <div><dt><%= metric.label %></dt><dd><%= metric.value %></dd></div>
+      <% }) %>
+    </dl>
+    <% if (it.spark) { %>
+    <svg class="spark" viewBox="0 0 <%= it.spark.width %> <%= it.spark.height %>" preserveAspectRatio="none" role="img" aria-label="Frame times">
+      <line x1="0" x2="<%= it.spark.width %>" y1="<%= it.spark.median %>" y2="<%= it.spark.median %>" class="median" />
+      <polyline points="<%= it.spark.limit %>" class="limit" />
+      <polyline points="<%= it.spark.points %>" />
+    </svg>
+    <p class="dim"><%= it.spark.caption %></p>
+    <% } %>
+    <p class="dim">
+      <%= it.note %>
+      <% it.links.forEach((link) => { %> · <a href="<%= link.href %>"><%= link.label %></a><% }) %>
+    </p>
+  </div>
+</article>

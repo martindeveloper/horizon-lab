@@ -1,0 +1,80 @@
+{
+  "name": "horizon",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martindeveloper/horizon-lab.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "next dev",
+    "bench": "node --import tsx bench/run.ts",
+    "build": "next build",
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "oxlint --deny-warnings .",
+    "format": "oxfmt --write .",
+    "test": "node --import tsx --test tests/*.test.mjs",
+    "start": "next start",
+    "lint:fix": "oxlint --fix .",
+    "format:check": "oxfmt --check .",
+    "docs:generate": "node --import tsx scripts/generate-simulation-docs.mjs",
+    "docs:check": "node --import tsx scripts/generate-simulation-docs.mjs --check",
+    "shaders:generate": "node --import tsx scripts/generate-shader-headers.mjs",
+    "shaders:check": "node --import tsx scripts/generate-shader-headers.mjs --check",
+    "test:bundles": "node --test tests/build/*.test.mjs",
+    "assets:generate": "node scripts/generate-social-assets.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/bodoni-moda": "^5.3.0",
+    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@horizon/toolkit": "0.1.0",
+    "@radix-ui/react-slider": "^1.6.1",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.57.0",
+    "motion": "^14.3.0",
+    "next": "^16.4.1",
+    "next-intl": "^4.14.9",
+    "next-themes": "^0.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
+    "three": "^0.186.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@shaderfrog/glsl-parser": "7.0.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "eta": "^4.6.0",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
+    "oxlint-tsgolint": "^7.0.2004",
+    "playwright-core": "^1.64.1",
+    "rolldown": "^1.2.14",
+    "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0 || ^26.0.0"
+  },
+  "allowScripts": {
+    "@parcel/watcher": false,
+    "@swc/core": false,
+    "esbuild": false,
+    "fsevents": false
+  }
+}

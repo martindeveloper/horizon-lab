@@ -1,0 +1,210 @@
+import { ArrowUpRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
+
+import type { Locale } from "@/i18n/routing";
+import { CREDITS, LICENCE_URLS, type Credit, type CreditGroup, type Licence } from "@/lib/credits";
+import { Surface, cn, kickerClass } from "@horizon/toolkit/ui";
+
+import { HorizonMark } from "../shell/brand";
+
+/** Same margin column as the About letter: labels beside the content. */
+const grid = "lg:grid lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-x-14";
+const linkClass =
+  "rounded-sm text-fg underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
+const licenceClass = "font-mono text-[0.68rem] tracking-[0.14em] whitespace-nowrap uppercase";
+
+/** Sources people look at one by one get cards; packages are a compact two-column list. */
+const CARD_GROUPS = new Set<CreditGroup["id"]>(["imagery", "data", "fonts"]);
+
+type Translate = Awaited<ReturnType<typeof getTranslations<"credits">>>;
+
+const count = (n: number) => String(n).padStart(2, "0");
+
+function External({ href, label, children }: { href: string; label: string; children: ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
+      {children}
+      <ArrowUpRight className="ml-0.5 inline size-[0.8em] align-baseline text-accent" aria-hidden />
+      <span className="sr-only">({label})</span>
+    </a>
+  );
+}
+
+function LicenceTag({ t, licence }: { t: Translate; licence: Licence }) {
+  const url = LICENCE_URLS[licence];
+  const name =
+    licence === "Public domain"
+      ? t("licences.publicDomain")
+      : licence === "Cited"
+        ? t("licences.cited")
+        : licence;
+  return (
+    <span className={cn(licenceClass, "text-subtle")}>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-sm transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+        >
+          {name}
+          <span className="sr-only"> ({t("newTab")})</span>
+        </a>
+      ) : (
+        name
+      )}
+    </span>
+  );
+}
+
+function Card({ t, item }: { t: Translate; item: Credit }) {
+  return (
+    <li className="flex">
+      <Surface className="flex w-full flex-col rounded-lg p-5">
+        <LicenceTag t={t} licence={item.licence} />
+        <h3 className="mt-2.5 leading-snug font-medium text-balance">
+          <External href={item.url} label={t("newTab")}>
+            {item.name}
+          </External>
+        </h3>
+        <p className="mt-2 leading-relaxed text-muted">{t(`items.${item.id}`)}</p>
+        <p className="mt-auto pt-4 text-[0.8125rem] leading-relaxed text-subtle">{item.by}</p>
+      </Surface>
+    </li>
+  );
+}
+
+function Row({ t, item }: { t: Translate; item: Credit }) {
+  return (
+    <li className="border-b border-border py-3.5">
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="min-w-0 font-medium">
+          <External href={item.url} label={t("newTab")}>
+            {item.name}
+          </External>
+        </p>
+        <LicenceTag t={t} licence={item.licence} />
+      </div>
+      <p className="mt-1 text-[0.875rem] leading-relaxed text-muted">
+        {t(`items.${item.id}`)} <span className="text-subtle">· {item.by}</span>
+      </p>
+    </li>
+  );
+}
+
+/** Credits and licences for everything Horizon is built on: an index, cards, then packages. */
+export async function CreditsPage({ locale }: { locale: Locale }) {
+  const t = await getTranslations({ locale, namespace: "credits" });
+  return (
+    <main id="main-content" tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
+      <article aria-labelledby="credits-heading" className="app-container anim-rise">
+        <div className="mx-auto max-w-[36rem] pt-16 text-pretty text-fg/85 sm:max-w-[42rem] sm:pt-24 lg:max-w-[60rem] lg:pt-28">
+          <header className={cn(grid, "text-[1.0625rem] leading-[1.8] sm:text-lg")}>
+            <p className="flex items-center gap-2.5 lg:justify-end lg:self-start lg:pt-[1.15rem]">
+              <HorizonMark className="size-4 text-muted" />
+              <span className={kickerClass}>{t("kicker")}</span>
+            </p>
+            <div>
+              <h1
+                id="credits-heading"
+                className="mt-8 font-display text-[2.5rem] leading-[1.05] font-medium tracking-[-0.035em] text-balance text-fg sm:text-5xl lg:mt-0 lg:text-[3.5rem]"
+              >
+                {t.rich("title", { em: (chunks) => <span className="text-muted">{chunks}</span> })}
+              </h1>
+              <p className="mt-7 max-w-[34rem] text-xl leading-normal text-balance text-muted sm:text-[1.375rem]">
+                {t("lead")}
+              </p>
+              <nav aria-label={t("contents")} className="mt-10">
+                <ul className="grid grid-cols-3 border-t border-border sm:grid-cols-5">
+                  {CREDITS.map((group) => (
+                    <li key={group.id} className="border-b border-border">
+                      <a
+                        href={`#credits-${group.id}`}
+                        className="group flex flex-col gap-1 rounded-sm py-3 pr-3 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                      >
+                        <span className="font-mono text-2xl leading-none text-fg tabular-nums transition-colors group-hover:text-accent">
+                          {count(group.items.length)}
+                        </span>
+                        <span className={cn(kickerClass, "transition-colors group-hover:text-fg")}>
+                          {t(`groups.${group.id}.label`)}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          </header>
+
+          {CREDITS.map((group) => {
+            const cards = CARD_GROUPS.has(group.id);
+            return (
+              <section
+                key={group.id}
+                id={`credits-${group.id}`}
+                aria-labelledby={`credits-${group.id}-title`}
+                className={cn("mt-16 scroll-mt-24 text-[0.9375rem] sm:mt-20", grid)}
+              >
+                <div className="flex items-baseline justify-between gap-4 lg:block lg:pt-1 lg:text-right">
+                  <h2 id={`credits-${group.id}-title`} className={kickerClass}>
+                    {t(`groups.${group.id}.label`)}
+                  </h2>
+                  <p
+                    className="font-mono text-[0.75rem] text-subtle tabular-nums lg:mt-1.5"
+                    aria-hidden
+                  >
+                    {count(group.items.length)}
+                  </p>
+                </div>
+                <div className="mt-3 lg:mt-0">
+                  <p className="text-muted">{t(`groups.${group.id}.intro`)}</p>
+                  {cards ? (
+                    <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+                      {group.items.map((item) => (
+                        <Card key={item.id} t={t} item={item} />
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="mt-3 grid border-t border-border sm:grid-cols-2 sm:gap-x-10">
+                      {group.items.map((item) => (
+                        <Row key={item.id} t={t} item={item} />
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </section>
+            );
+          })}
+
+          <section
+            aria-labelledby="credits-notes"
+            className={cn("mt-16 text-[0.8125rem] leading-relaxed text-muted sm:mt-20", grid)}
+          >
+            <h2 id="credits-notes" className={cn(kickerClass, "lg:pt-5 lg:text-right")}>
+              {t("notes.label")}
+            </h2>
+            <Surface className="mt-3 rounded-lg p-5 sm:p-6 lg:mt-0">
+              <ul className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+                <li>{t("notes.acknowledgement")}</li>
+                <li>{t("notes.gaia")}</li>
+                <li>{t("notes.simbad")}</li>
+                <li>
+                  {t.rich("notes.changes", {
+                    link: (chunks) => (
+                      <External href="/textures/orrery/CREDITS.md" label={t("newTab")}>
+                        {chunks}
+                      </External>
+                    ),
+                  })}
+                </li>
+                <li>{t("notes.endorsement")}</li>
+                <li>{t("notes.papers")}</li>
+              </ul>
+            </Surface>
+          </section>
+        </div>
+      </article>
+    </main>
+  );
+}

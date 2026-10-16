@@ -1,0 +1,587 @@
+@layer base {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* A quiet bar for scrolled panels: thin rounded thumb, no track. */
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-fg) 24%, transparent) transparent;
+  }
+  @supports not (scrollbar-color: auto) {
+    .scroll-thin::-webkit-scrollbar {
+      width: 10px;
+    }
+    .scroll-thin::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scroll-thin::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--color-fg) 24%, transparent) padding-box;
+    }
+  }
+
+  .pad-safe {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  /* HUD edges sit on --hud-gutter (1rem unless the host sets its own gutter). */
+  .pad-sheet {
+    padding-right: max(var(--hud-gutter, 1rem), env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(var(--hud-gutter, 1rem), env(safe-area-inset-left));
+  }
+
+  .sheet-scroll {
+    max-height: 70dvh;
+  }
+
+  .hud-top {
+    background: linear-gradient(
+      to bottom,
+      rgba(8, 8, 11, 0.82) 0%,
+      rgba(8, 8, 11, 0.42) 55%,
+      rgba(8, 8, 11, 0)
+    );
+  }
+
+  .hud-bottom {
+    background: linear-gradient(to top, #08080b88, #08080b00);
+  }
+
+  .pad-hud-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-right: max(var(--hud-gutter, 1rem), env(safe-area-inset-right));
+    padding-left: max(var(--hud-gutter, 1rem), env(safe-area-inset-left));
+  }
+
+  .pad-hud-bottom {
+    padding-right: max(var(--hud-gutter, 1rem), env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(var(--hud-gutter, 1rem), env(safe-area-inset-left));
+  }
+
+  /* Phones (the complement of `md`) match the top HUD inset, leaving the scene more room. */
+  @media (width < 48rem), (height < 30rem) {
+    .pad-hud-bottom {
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+  }
+}
+
+@keyframes anim-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes anim-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes anim-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes anim-rail {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.anim-rise {
+  animation: anim-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-fade {
+  animation: anim-fade 0.35s ease-out both;
+}
+
+.anim-sheet {
+  animation: anim-sheet 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-rail {
+  animation: anim-rail 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.glass,
+.glass-pill,
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-panel {
+  background: var(--panel-bg);
+}
+
+.glass-pill {
+  background: var(--pill-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+.glass-hud {
+  background: var(--hud-bg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--hud-shadow);
+}
+
+/* Menus and popovers sit over text, not a scene: dense enough to read through nothing. */
+.glass-popover {
+  background: var(--popover-bg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--popover-shadow);
+}
+
+.hud-title {
+  color: #f4f4f0;
+  text-shadow:
+    0 1px 12px rgba(8, 8, 11, 0.95),
+    0 0 2px rgba(8, 8, 11, 0.8);
+}
+
+.hud-tip {
+  position: relative;
+  display: inline-flex;
+}
+
+.hud-tip > [data-tip] {
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 50%;
+  z-index: 80;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 0.28rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-fg);
+  background: var(--tip-bg);
+  backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow: var(--hud-shadow);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 140ms ease,
+    visibility 140ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hud-tip:hover > [data-tip] {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 280ms;
+  }
+  /* Hoverable: the shown tip keeps the hover, and a bridge spans the gap. */
+  .hud-tip:hover > [data-tip] {
+    pointer-events: auto;
+  }
+  .hud-tip > [data-tip]::before {
+    content: "";
+    position: absolute;
+    inset: -0.5rem 0 100%;
+  }
+}
+/* Hidden tips still count as overflow: keep edge tips inside the viewport. */
+.hud-tip[data-align="end"] > [data-tip] {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.hud-tip[data-dismissed] > [data-tip] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.lesson-card {
+  background: var(--lesson-bg);
+  backdrop-filter: blur(32px) saturate(1.15);
+  box-shadow: var(--lesson-shadow);
+}
+
+.lesson-card p {
+  color: var(--lesson-fg);
+}
+
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .glass,
+  .glass-pill,
+  .glass-panel,
+  .glass-hud,
+  .glass-popover,
+  .lesson-card {
+    background: var(--glass-fallback);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Keyboard focus only: a click also focuses the button, and the tip would stay. */
+.hud-tip:has(:focus-visible) > [data-tip] {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ImmersiveScene's exit control: clear of notches, tooltips kept on screen. */
+.immersive-controls {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+.immersive-controls .hud-tip:last-child > [data-tip] {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* Horizon language: a night sky over one horizon line.
+   The sky sits behind every non-simulation page: a faint warm haze at the
+   horizon, a hairline of light, and star layers the shell adds. Simulation
+   stages paint over it. Nothing here is loud; the artwork is the subject. */
+
+.horizon-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      80% 40% at 50% 104%,
+      rgb(var(--solar) / var(--sky-glow)) 0%,
+      rgb(var(--solar) / calc(var(--sky-glow) * 0.3)) 45%,
+      transparent 75%
+    ),
+    var(--color-bg);
+}
+
+/* Inside an isolated stage (status pages) the sky fills its parent. */
+.horizon-sky[data-scope="local"] {
+  position: absolute;
+}
+
+.horizon-sky::after {
+  /* The horizon itself: a hairline of light at the foot of the viewport. */
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--solar) / 0.3) 35%,
+    rgb(var(--solar) / 0.5) 50%,
+    rgb(var(--solar) / 0.3) 65%,
+    transparent
+  );
+}
+
+/* Star layers (added by the shell). Outer element: pointer parallax, transform
+   only. The real sky is drawn on a canvas once a minute; a faint seeded filler
+   stands in for the stars below the catalogue limit. */
+.sky-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.sky-filler {
+  position: absolute;
+  inset: -4%;
+  background: var(--color-fg);
+  opacity: 0.28;
+  mask-size: 1600px 1000px;
+  mask-position: center top;
+  -webkit-mask-size: 1600px 1000px;
+  -webkit-mask-position: center top;
+}
+:root.light .sky-filler {
+  opacity: 0.05;
+}
+.sky-real {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* A handful of stars that breathe. Opacity-only animations, staggered. */
+.sky-twinkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--color-fg);
+  box-shadow: 0 0 6px 1px rgb(var(--solar) / 0.35);
+  opacity: 0;
+  animation: sky-twinkle var(--period, 6s) ease-in-out var(--delay, 0s) infinite;
+}
+:root.light .sky-twinkle {
+  box-shadow: none;
+  opacity: 0;
+  animation-name: sky-twinkle-light;
+}
+
+/* A meteor: a thin streak the shell fires now and then. */
+.sky-meteor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 140px;
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgb(var(--solar) / 0.7), var(--color-fg));
+  transform-origin: right center;
+  will-change: transform, opacity;
+}
+.sky-meteor[data-live] {
+  animation: sky-meteor 1.4s cubic-bezier(0.2, 0.6, 0.3, 1) forwards;
+}
+
+@keyframes sky-twinkle {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@keyframes sky-twinkle-light {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes sky-meteor {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--mx, 60vw), var(--my, 20vh), 0) rotate(var(--angle, 200deg))
+      translateX(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--mx, 60vw), var(--my, 20vh), 0) rotate(var(--angle, 200deg))
+      translateX(-520px);
+  }
+}
+
+/* Consumers must be positioned (sticky, relative, absolute). */
+.hairline-solar::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--solar) / 0.5) 30%,
+    rgb(var(--solar) / 0.7) 50%,
+    rgb(var(--solar) / 0.5) 70%,
+    transparent
+  );
+}
+
+/* A light-catching rim for large glass: bright where light falls, warm at the
+   far corner. Consumers must be positioned and own a border radius. */
+.glass-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.3),
+    rgb(255 255 255 / 0.05) 30%,
+    transparent 60%,
+    rgb(var(--solar) / 0.22)
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+:root.light .glass-edge::before {
+  background: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.95),
+    rgb(28 29 34 / 0.06) 45%,
+    rgb(var(--solar) / 0.3)
+  );
+}
+
+/* Tilt (see tilt.tsx). Script writes transform, translate and opacity only;
+   everything painted here is static, so frames stay on the compositor. */
+.tilt {
+  position: relative;
+  isolation: isolate;
+}
+.tilt[data-tilting] {
+  will-change: transform;
+}
+/* Depth layers only move. `will-change: opacity` (or filter, mask, clip-path)
+   would make them backdrop roots, so glass inside them, like a cover panel's
+   backdrop-filter, would stop seeing the artwork behind and lose its blur
+   for as long as the card tilts. Only glare and shadow fade. */
+.tilt[data-tilting] .tilt-back,
+.tilt[data-tilting] .tilt-front {
+  will-change: translate;
+}
+.tilt[data-tilting] .tilt-glare,
+.tilt[data-tilting] .tilt-shadow {
+  will-change: translate, opacity;
+}
+/* The lift shadow: painted once, moved and faded. A box-shadow never paints
+   inside its own box, so the box is inset further than the script ever moves
+   it (16px across, 24px down) and stays hidden under the card; a positive
+   spread puts the shadow back where an edge-to-edge box would cast it. */
+.tilt-shadow {
+  position: absolute;
+  inset: 1.75rem;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 60px 4px rgb(0 0 0);
+  opacity: 0;
+}
+/* A small glare: a fixed disc centred on the card, carried to the pointer. */
+.tilt-glare-clip {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.tilt-glare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16rem;
+  height: 16rem;
+  margin: -8rem 0 0 -8rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 255 255 / 0.16),
+    rgb(255 255 255 / 0.04) 55%,
+    transparent
+  );
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt {
+    transform: none !important;
+  }
+  .tilt .tilt-back,
+  .tilt .tilt-front {
+    translate: none !important;
+  }
+  .tilt-glare-clip,
+  .tilt-shadow {
+    display: none;
+  }
+}
+
+.solar-ring {
+  box-shadow:
+    var(--glass-shadow),
+    0 0 0 1px rgb(var(--solar) / 0.28),
+    0 0 40px rgb(var(--solar) / 0.12);
+}
+
+.horizon-loading-orbit {
+  transform-origin: 24px 24px;
+  animation: horizon-orbit 4s linear infinite;
+}
+.horizon-loading-sun {
+  animation: horizon-breathe 3.2s ease-in-out infinite alternate;
+}
+.horizon-loading-track span {
+  animation: horizon-travel 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+.horizon-skeleton {
+  animation: horizon-pulse 2s ease-in-out infinite alternate;
+}
+.horizon-eclipse-corona {
+  transform-origin: center;
+  animation: horizon-breathe 4s ease-in-out infinite alternate;
+}
+@keyframes horizon-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes horizon-travel {
+  to {
+    transform: translateX(200%);
+  }
+}
+@keyframes horizon-pulse {
+  to {
+    opacity: 0.55;
+  }
+}
+@keyframes horizon-breathe {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}

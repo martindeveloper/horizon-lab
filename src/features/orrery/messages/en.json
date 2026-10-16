@@ -1,0 +1,493 @@
+{
+  "app": "Orrery",
+  "metadataDescription": "An honest orrery: the planets where they really are today, the clearing of the early solar system as a labelled model, and the Sun's place in the Milky Way.",
+  "canvasLabel": "Interactive orrery of the solar system and the Milky Way",
+  "views": {
+    "inner": "Inner worlds",
+    "giants": "Giants",
+    "kuiper": "Kuiper belt",
+    "scattered": "Scattered disk",
+    "oort": "Oort cloud",
+    "stars": "Nearest star",
+    "galaxy": "Milky Way"
+  },
+  "viewHints": {
+    "inner": "Mercury to Mars. Jupiter is near the edge.",
+    "giants": "Jupiter to Neptune, and the early disk. The best view of the clearing.",
+    "kuiper": "Neptune's orbit through the classical belt, about 30–50 au.",
+    "scattered": "Bodies Neptune tossed onto long ellipses, hundreds of au out.",
+    "oort": "Guide shells at 5,000 and 100,000 au; the dots thin out as r⁻³·⁵. No object in the cloud itself has been seen yet.",
+    "stars": "Proxima, Alpha Centauri and Barnard's Star in their real directions. The ring is the nearest star's distance; the sky behind is the real one.",
+    "galaxy": "A different map, in light-years. Zoom in on the Sun to return."
+  },
+  "units": {
+    "au": "au",
+    "ly": "ly",
+    "pc": "pc"
+  },
+  "epochs": {
+    "sketch": "10 Gyr sketch",
+    "birth": "Sun forms",
+    "disk": "Disk intact",
+    "clearing": "Clearing",
+    "today": "Today"
+  },
+  "time": {
+    "today": "Today",
+    "thousand": "{value} thousand years ago",
+    "million": "{value} million years ago",
+    "billion": "{value} billion years ago",
+    "noSun": "No Sun yet",
+    "laps": "{laps} Galaxy laps since the Sun formed, schematic",
+    "clock": "Planets drawn for {date}",
+    "offsetDays": "{value, plural, one {# day} other {# days}}",
+    "offsetYears": "{value, plural, one {# year} other {# years}}",
+    "offsetThousand": "{value} thousand years",
+    "clockDrift": "Today + {offset} · Motion {rate}"
+  },
+  "toggles": {
+    "elliptical": "Ellipses",
+    "trueSize": "True size",
+    "drift": "Motion",
+    "names": "Names",
+    "plane": "Ecliptic grid",
+    "halo": "Dark-matter halo",
+    "distances": "Distances"
+  },
+  "layers": {
+    "title": "Layers",
+    "disk": "Early disk",
+    "kuiper": "Kuiper belt",
+    "scattered": "Scattered disk",
+    "oort": "Oort cloud",
+    "ejected": "Ejected",
+    "count": "{label} · {count}"
+  },
+  "names": {
+    "sun": "Sun",
+    "snowLine": "Snow line",
+    "mercury": "Mercury",
+    "venus": "Venus",
+    "earth": "Earth",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn",
+    "uranus": "Uranus",
+    "neptune": "Neptune",
+    "pluto": "Pluto",
+    "sedna": "Sedna",
+    "halley": "Halley's comet",
+    "moon": "Moon",
+    "io": "Io",
+    "europa": "Europa",
+    "ganymede": "Ganymede",
+    "callisto": "Callisto",
+    "titan": "Titan",
+    "triton": "Triton",
+    "charon": "Charon",
+    "asteroids": "Asteroid belt",
+    "proxima": "Proxima Centauri",
+    "alphaCen": "Alpha Centauri",
+    "barnard": "Barnard's Star",
+    "scholz": "Scholz's Star",
+    "galaxySun": "Sun",
+    "milkyway": "Milky Way",
+    "bulge": "Bulge and bar",
+    "halo": "Dark-matter halo",
+    "lightYears": "ly",
+    "au": "au",
+    "lightTime": "light-time",
+    "parsecs": "pc"
+  },
+  "hud": {
+    "views": "Views",
+    "controls": "Controls",
+    "objects": "Objects",
+    "guide": "Guide",
+    "close": "Close",
+    "play": "Play time",
+    "pause": "Pause time",
+    "replay": "Replay the clearing",
+    "timeSlider": "Time. Left is older; the clearing gets extra room on the track.",
+    "scale": "{value} {unit} at the centre",
+    "driftDays": "1 s ≈ {value} days",
+    "driftYears": "1 s ≈ {value} years",
+    "driftThousand": "1 s ≈ {value} thousand years",
+    "driftPaused": "Motion paused",
+    "galaxyMotion": "Galaxy map",
+    "selectHint": "Tap a body for its card",
+    "display": "Display",
+    "camera": "Camera",
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "tiltUp": "Tilt up",
+    "tiltDown": "Tilt down",
+    "bodies": "Sun and planets",
+    "examples": "Measured examples",
+    "galaxyItems": "Milky Way map",
+    "neighbours": "Nearby stars",
+    "legend": "Switches hide a layer; they do not change the tally.",
+    "playRestart": "Play from the start",
+    "home": "Back to the solar system",
+    "closeUp": "Close-up",
+    "leaveCloseUp": "Back to the map",
+    "details": "Details",
+    "hideDetails": "Hide details",
+    "closeUpNote": "True size, turned as it is now.",
+    "epochs": "Jump to an epoch",
+    "distanceUnit": "Distance unit: astronomical units, light-years or parsecs"
+  },
+  "badges": {
+    "measured": "Measured",
+    "measuredTrack": "Measured · straight-line track",
+    "measuredRounded": "Measured, rounded",
+    "endMeasured": "End orbit measured · start is a model",
+    "presentOnly": "Present orbit only",
+    "rewound": "Measured end · rewound as a sketch",
+    "region": "Measured region",
+    "model": "Teaching model",
+    "mixed": "Measured + model",
+    "inferred": "Inferred, not seen directly",
+    "sample": "Teaching sample, not a named object",
+    "sketch": "Sketch",
+    "schematic": "Measured distance · schematic path"
+  },
+  "facts": {
+    "onSlider": "On the slider",
+    "today": "Today",
+    "period": "Period",
+    "modelStart": "Model start",
+    "notMeasured": "{value} au, not a measurement",
+    "stretch": "Stretch (e)",
+    "tilt": "Tilt",
+    "tiltValue": "{value}° to the ecliptic",
+    "retrograde": "backward (retrograde)",
+    "nearFar": "Near / far",
+    "average": "Average distance",
+    "when": "When",
+    "radius": "Radius",
+    "age": "Age",
+    "oneAu": "1 au",
+    "where": "Where",
+    "mass": "Mass",
+    "drawnAt": "Drawn at",
+    "region": "Main region",
+    "todayMass": "Today's mass",
+    "originalMass": "Possible original mass",
+    "shape": "Shape",
+    "reach": "Reach",
+    "innerEdge": "Inner edge",
+    "outerEdge": "Outer edge",
+    "shells": "Guide shells",
+    "endState": "End state",
+    "share": "In this sample",
+    "centre": "Distance to centre",
+    "lap": "Lap time",
+    "speed": "Speed",
+    "radial": "In-and-out",
+    "vertical": "Up-and-down",
+    "bar": "Bar",
+    "width": "Width",
+    "diskWidth": "Starry disk",
+    "thickness": "Thin-disk thickness",
+    "stars": "Stars",
+    "proxima": "Proxima Centauri",
+    "oortCompare": "Compared with the Oort cloud",
+    "closestFuture": "{ly} light-years, in {years} thousand years",
+    "closestPast": "{ly} light-years, {years} thousand years ago",
+    "closest": "Closest approach",
+    "motion": "Motion",
+    "direction": "Direction",
+    "days": "{value} days",
+    "years": "{value} years",
+    "yearsAbout": "about {value} years",
+    "km": "{value} km",
+    "percent": "{value} %"
+  },
+  "cards": {
+    "sun": {
+      "title": "Sun",
+      "radius": "{km} km · about {au} au",
+      "age": "About 4.57 billion years",
+      "oneAu": "{millions} million km · light-time {minutes} min",
+      "body": "Over 99.8 % of the solar system's mass, yet under 1 % of its angular momentum: nearly all of that rides in the planets' orbits. The clock of this model. Planet positions around it are computed for today's date from the JPL approximate elements, so this is tonight's configuration, seen from above the ecliptic.",
+      "caution": "Marker sizes are enlarged unless True size is on. The real Sun is 109 Earth diameters across and still a speck beside planetary distances."
+    },
+    "planets": {
+      "mercury": "Smallest planet. Its path is the most stretched of the eight.",
+      "venus": "Almost a circle. A circle and an ellipse look the same here.",
+      "earth": "1 au is Earth's mean distance from the Sun: {millions} million km, or {minutes} light-minutes.",
+      "mars": "A clearly stretched orbit. Still tiny beside Jupiter's.",
+      "jupiter": "In the model Jupiter starts slightly farther out and ends slightly closer in, as instability studies find. The start is not a measurement. It outweighs all the other planets together more than twice over.",
+      "saturn": "Starts closer to Jupiter than today, then moves outward in the model. The rings are to scale with the planet. Its mean density is lower than water's.",
+      "uranus": "An ice giant. In the model it moves outward with Neptune as the disk is stirred. Uranus and Neptune may even have swapped places.",
+      "neptune": "Ends near 30 au at the inner edge of today's Kuiper belt. Its outward move is what scatters the disk in this sketch. Dynamical friction with the disk then rounded its orbit again."
+    },
+    "planetCautionEllipse": "The curve is the real ellipse and the dot is today's position, advanced only by the Motion speed-up.",
+    "planetCautionCircle": "Ellipses are off, so the path is a circle at the mean distance. The stretch in this card is still the real one.",
+    "named": {
+      "pluto": {
+        "summary": "A dwarf planet in the Kuiper belt, locked in a 3:2 rhythm with Neptune: Neptune orbits three times while Pluto orbits twice. That is why their paths cross in distance without colliding.",
+        "caution": "Today's orbit is from the JPL table. The starting orbit in the sketch, and when it was captured into resonance, are a model of 'moved during Neptune's migration', not a recovered path."
+      },
+      "sedna": {
+        "summary": "A distant dwarf-planet candidate. Its closest point is about 76 au, far beyond Neptune, and its far point about 940 au. It is detached from the planets and reaches perihelion in 2076.",
+        "caution": "The orbit is measured; how Sedna got there is not. A passing star in the Sun's birth cluster is one idea, an unseen distant planet is another. The slider does not invent a path for Sedna."
+      },
+      "halley": {
+        "summary": "A famous comet on a long, backward-tilted ellipse: inside Venus's orbit at perihelion, out past Neptune at aphelion. It passed aphelion in December 2023 and returns to perihelion on 28 July 2061.",
+        "caution": "This is the present orbit, which itself changes a little each return. It is hidden in circle mode: a circle at 17.8 au would park it just inside Uranus's orbit, which is wrong."
+      }
+    },
+    "populations": {
+      "asteroids": {
+        "title": "Asteroid belt",
+        "where": "About 2.1–3.3 au",
+        "mass": "About 3 % of the Moon's mass",
+        "body": "Rocky leftovers between Mars and Jupiter. Jupiter stirred this zone, so collisions broke bodies apart instead of building a planet; many asteroids are fragments of larger bodies, and most of the early mass is gone (not animated here). Spacecraft cross the belt without dodging.",
+        "caution": "Dots are a seeded sample with realistic orbit shapes and the Kirkwood gaps, enlarged, not a catalogue of real asteroids. The two clumps along Jupiter's orbit are its Trojans, captured during the clearing."
+      },
+      "disk": {
+        "title": "Early planetesimal disk",
+        "drawnAt": "About 16–34 au, flat and nearly circular",
+        "when": "Only at the old end of the slider",
+        "body": "A stand-in for the icy leftovers outside the packed giants after the gas disk was gone (about 35 Earth masses in the Nice model). Neptune's outward move stirs it. It is not a photograph of a particular year.",
+        "caution": "Studies argue about the disk's mass and outer edge. Round numbers here are for teaching."
+      },
+      "kuiper": {
+        "title": "Kuiper belt",
+        "region": "About 30–50 au",
+        "todayMass": "No more than about 0.1 Earth masses",
+        "originalMass": "Several Earth masses in the classical region; the whole Nice-model disk about 35",
+        "body": "Icy worlds beyond Neptune, including Pluto. More than 4,000 trans-Neptunian objects are catalogued; the classical belt fades near 50 au, the 'Kuiper cliff'. Cold classical dots stay near 42–48 au the whole time because that population likely formed in place. The stirred dots are the ones Neptune moved, and the dense ring at 39.4 au is the plutinos it captured into the 3:2 resonance.",
+        "caution": "Do not read the two kinds as a census. Today's belt is a thin leftover of a heavier disk."
+      },
+      "scattered": {
+        "title": "Scattered disk",
+        "shape": "Long ellipses, perihelion still near Neptune",
+        "reach": "Hundreds of au, some farther",
+        "body": "Bodies Neptune scattered onto tall, stretched orbits, still loosely under the planets' influence. Some are slowly lost. Dots bound for the Oort cloud are counted here until their paths are lifted farther out.",
+        "caution": "A dot's path is a sketch that ends at a realistic orbit shape. It is not that object's history."
+      },
+      "oort": {
+        "title": "Oort cloud",
+        "innerEdge": "Thought to be about 2,000–5,000 au",
+        "outerEdge": "Uncertain, roughly 100,000–200,000 au",
+        "shells": "Drawn at 5,000 and 100,000 au",
+        "body": "A vast swarm of icy bodies proposed in 1950 to explain long-period comets, which arrive from every direction. The giants flung leftovers outward; the Galaxy's tide and passing stars lifted their perihelia out of the planets' reach, so the cloud became a thick shell. It may hold hundreds of billions to trillions of bodies; the dots thin out as r⁻³·⁵, the usual inferred profile.",
+        "caution": "No Oort-cloud object has been confirmed by telescope. These dots stand in for an unseen population; counting them teaches nothing about the true number."
+      },
+      "ejected": {
+        "title": "Ejected bodies",
+        "endState": "Leave the Sun's grip",
+        "share": "The largest share",
+        "body": "Most leftovers never find a quiet home. Jupiter throws many out of the system entirely; the ice giants are better at feeding the Oort cloud because their tosses are gentler. Here a body slides outward on a long ellipse and is then removed. A real ejection is a hyperbola, which is not drawn.",
+        "caution": "The fraction is illustrative; published simulations differ. The robust point: most of the original disk is gone."
+      }
+    },
+    "tracer": {
+      "title": "Small body · {bin}",
+      "cold": "Cold-classical stand-in, kept near 42–48 au on purpose.",
+      "ejected": "One of the bodies the model removes.",
+      "oort": "Bound for the Oort cloud in the model, then lifted off the plane.",
+      "other": "Ends in the stirred Kuiper belt or the scattered disk.",
+      "caution": "Do not count dots: 560 stand-ins are not 560 real worlds."
+    },
+    "galaxy": {
+      "sun": {
+        "title": "The Sun in the Galaxy",
+        "centre": "About {sunRadiusLy} light-years ({sunRadiusKpc} kpc)",
+        "lap": "About {galacticYearMyr} million years (estimates run 205–230)",
+        "speed": "About 230 km/s circular speed here; the Sun itself moves ~250 km/s",
+        "radial": "Out to ~{radialSwingLy} light-years farther and back, every ~{radialMyr} million years",
+        "vertical": "±{verticalLy} light-years over ~{verticalMyr} million years; now ~{heightLy} ly north, climbing",
+        "body": "We sit at the inner edge of the Local Arm (the Orion Spur), between the Sagittarius–Carina and Perseus arms, neither at the centre nor at the rim. Since it formed the Sun has lapped the Galaxy about {laps} times, clockwise seen from the north galactic pole. The slider moves a schematic clock: it does not know the Sun's true angle billions of years ago, so today is pinned to the modern position.",
+        "caution": "The wobble amplitudes are typical values from stellar-dynamics estimates; studies differ. A star's galactic path is not a closed ellipse."
+      },
+      "bulge": {
+        "title": "Bulge and bar",
+        "centre": "{sunRadiusLy} light-years from the Sun",
+        "bar": "About {barLy} light-years ({barKpc} kpc) end to end, estimates 7–10 kpc; ~{barDeg}° to the Sun–centre line",
+        "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about 4 million Suns. The point density is a sketch, not a star catalogue.",
+        "caution": "Do not measure the bar's length off this drawing."
+      },
+      "halo": {
+        "title": "Dark-matter halo",
+        "width": "On the order of a million light-years",
+        "mass": "Most of the Galaxy's mass",
+        "body": "Stars orbit too fast for the visible matter alone to hold them; the extra gravity is attributed to dark matter. The faint ball is a reminder of that halo, off by default so it is not mistaken for a cloud of stars.",
+        "caution": "Dark matter has not been seen directly. Do not treat the sphere as a photo or a sharp edge."
+      },
+      "milkyway": {
+        "title": "Milky Way",
+        "diskWidth": "On the order of 100,000 light-years",
+        "thickness": "On the order of 1,000 light-years",
+        "stars": "At least 100 billion",
+        "age": "About 13.6 billion years",
+        "body": "Our galaxy from outside, built on measurements: a thin and a thick disk, a peanut-shaped bulge inside a bar at {barDeg}°, four arms at a ~{pitchDeg}° pitch placed where maser distances put them near the Sun, the short Local Arm just outside us, dust lanes on the arms' inner edges and the warp of the outer disk. The far side is extrapolated: the centre hides it from us. Before the Sun you get one earlier sketch: thicker, smaller, less of a bar, the stirred galaxy around the Gaia-Enceladus merger roughly 8–11 billion years ago.",
+        "caution": "Spiral arms are density waves, not fixed structures; stars pass through them. The ecliptic and the Galactic plane are tilted by about 60°, so the two maps meet only at the Sun."
+      }
+    },
+    "stars": {
+      "proxima": {
+        "where": "Centaurus, near the southern Milky Way",
+        "motion": "22 km/s toward the Sun, 3.9″ a year across the sky",
+        "body": "A red dwarf, the nearest star to the Sun. It is drawn where it really is on the sky; the ring is its distance and the beam links it to the Sun. The Sun's gravity is already losing to the Galaxy near the outer Oort cloud."
+      },
+      "alphaCen": {
+        "where": "Centaurus, 2° from Proxima",
+        "motion": "22 km/s toward the Sun; Proxima orbits the pair",
+        "body": "Two Sun-like stars 4.34 light-years away, a close pair drawn as one point. Proxima is loosely bound to them, about 12,000 au out. Both pass about 3.1 light-years from the Sun in roughly 28,000 years."
+      },
+      "barnard": {
+        "where": "Ophiuchus",
+        "motion": "110 km/s toward the Sun, 10.4″ a year, the fastest proper motion known",
+        "body": "A faint red dwarf 5.96 light-years away, closing fast. It passes about 3.8 light-years from the Sun in roughly 10,000 years, then recedes."
+      },
+      "scholz": {
+        "where": "Monoceros, 22 light-years away today",
+        "motion": "82 km/s away from the Sun, almost along the line of sight",
+        "body": "A red dwarf with a brown-dwarf companion, receding. Run its track back and it passed through the outer Oort cloud about 70–80 thousand years ago, roughly a light-year out: the closest well-established stellar flyby. Humans were around and may have seen its flares."
+      },
+      "caution": "Straight-line tracks from measured positions and speeds. Good for a few hundred thousand years either way; hidden beyond that."
+    }
+  },
+  "guide": {
+    "title": "How to read this",
+    "sources": "Sources",
+    "sections": {
+      "linear": {
+        "title": "Distances in the 3D view are linear",
+        "body": "A step of 10 au is ten times a step of 1 au in every view. Mercury and the Oort cloud cannot share one useful picture: the cloud is tens of thousands of times farther out. Use the views."
+      },
+      "size": {
+        "title": "Dot size is not size",
+        "body": "Markers are enlarged so a finger can hit them. True size shrinks planets to real radii and they vanish unless you are very close. That emptiness is the lesson. Colours follow true-colour images; the bright side faces the Sun."
+      },
+      "today": {
+        "title": "Today is computed",
+        "body": "Planet positions come from the JPL approximate Keplerian elements with their secular rates, computed for the current date. The Motion switch advances the same elements faster than real time, so angles stay honest while they move."
+      },
+      "past": {
+        "title": "The past slider is a model",
+        "body": "Nobody has a video of planet positions 4 billion years ago. The old end of the slider is a sketch in the family of the giant-planet instability (the Nice model): giants start packed in a chain of resonances with a disk of leftovers outside them; the chain breaks, encounters with an ice giant kick Jupiter and Saturn past their 2:1 resonance and the system turns unstable; Neptune's outward move stirs the disk; most bodies are ejected, some stay in the Kuiper belt or the scattered disk, some are handed to the Oort cloud. The original model tied this to the Late Heavy Bombardment 3.9 billion years ago. Recent studies favour an earlier instability, within about 100 million years of the first solids, so a single spike of impacts is no longer the usual picture."
+      },
+      "ellipses": {
+        "title": "Ellipses",
+        "body": "On: each path is an ellipse with its real stretch and tilt (or the model's, for bodies being rewound). Off: a circle at the mean distance. In the Milky Way view the switch draws the Sun's in-and-out and up-and-down wobble at true amplitude."
+      },
+      "maps": {
+        "title": "Two maps, not one",
+        "body": "The solar-system plane is the ecliptic. The Milky Way view is the Galactic disk. They are tilted by about 60° and the solar system is an invisible speck on a Galaxy map, so the maps meet only at the Sun: zoom in on it to cross over."
+      }
+    }
+  },
+  "tour": {
+    "label": "Guided tour",
+    "start": "Start guide",
+    "progress": "{step} / {total} · {time}",
+    "exit": "Exit guide",
+    "previous": "Previous step",
+    "next": "Next",
+    "finish": "Finish",
+    "steps": {
+      "today": {
+        "title": "Where the planets are today",
+        "body": "Positions computed for today's date from JPL orbital elements. Motion runs the same clock faster."
+      },
+      "periods": {
+        "title": "Farther out, slower",
+        "body": "Earth laps the Sun in a year, Jupiter in 12, Neptune in 165. Kepler's third law ties the period to the distance.",
+        "eq": "{equation} · P in years, a in au"
+      },
+      "ellipses": {
+        "title": "Orbits are ellipses",
+        "body": "The Sun sits at one focus. Halley's comet dips inside Venus's orbit and swings out past Neptune's, fastest near the Sun.",
+        "eq": "Equal areas in equal times"
+      },
+      "scale": {
+        "title": "Mostly empty",
+        "body": "True size shrinks each planet to its real radius, and at this distance they vanish. The usual markers are enlarged."
+      },
+      "disk": {
+        "title": "Born in a flat disk",
+        "body": "The planets circle the Sun one way round and almost in one plane. Kant and Laplace took that as the mark of a birth in one spinning cloud of gas and dust."
+      },
+      "snowLine": {
+        "title": "The snow line",
+        "body": "Inside about {snowLineAu} au only rock and metal condense; beyond, ice adds mass, so cores grow big enough to grab gas. Where Earth's water came from is debated: from farther out, or already in its rocky building blocks."
+      },
+      "clearing": {
+        "title": "The clearing, as a model",
+        "body": "The packed giants start in a chain of resonances. When it breaks they scatter each other, Jupiter and Saturn jump past their 2:1 resonance, and Neptune moves out through the icy disk: most is ejected, some stays in the Kuiper belt or the scattered disk, and some reaches the Oort cloud."
+      },
+      "oort": {
+        "title": "The Oort cloud",
+        "body": "A shell of icy bodies out to perhaps 100,000 au, inferred from long-period comets. No object has yet been seen in the cloud itself."
+      },
+      "galaxy": {
+        "title": "One lap in {galacticYearMyr} million years",
+        "body": "A different map, in light-years. The Sun circles the Milky Way's centre about once every {galacticYearMyr} million years: roughly {laps} laps so far."
+      }
+    }
+  },
+  "technicalDetails": {
+    "open": "Technical details",
+    "close": "Close technical details",
+    "title": "Inside the orrery",
+    "summary": "Present-day positions from a standard planetary ephemeris, a labelled teaching model of the early solar system, and a schematic Milky Way. The sources below separate measured quantities from sketches.",
+    "featuresTitle": "What you can explore",
+    "references": "Scientific sources",
+    "features": {
+      "views": "Seven views from the inner planets to the Milky Way, each at a linear scale.",
+      "time": "A 10-billion-year timeline with playback, five epochs, and a tally of where the leftover bodies end up.",
+      "bodies": "Planets, Pluto, Sedna, Halley's comet, 560 planetesimal stand-ins, GPU swarms for the asteroid belt, the Trojans, the Kuiper belt and the Oort cloud, the two nearest star systems (α Centauri with Proxima, and Barnard's Star), Scholz's star, and cards that say what is measured."
+    },
+    "sections": {
+      "ephemeris": {
+        "title": "Where the planets are",
+        "body": "Each planet's a, e, I, L, ϖ and Ω come from the JPL approximate elements for 1800–2050 with linear rates per Julian century. Kepler's equation is solved by Newton's method and the perifocal position is rotated into the J2000 ecliptic frame. Pluto uses its row from the table's earlier edition, since withdrawn by JPL. Sedna and Halley use their osculating elements with the mean anomaly counted from a known perihelion passage. Periods follow Kepler's third law."
+      },
+      "migration": {
+        "title": "Formation and the clearing sketch",
+        "body": "The first solids condensed {sunBirthGyr} billion years ago (CAI ages); observed disks last about 3–10 million years, so the giants finish inside a {gasMyr}-million-year gas disk here while terrestrial planets grow until {modelStartGyr} billion years ago. Between {modelStartGyr} and {clearDoneGyr} billion years ago the giants interpolate from Nice-model starting orbits (5.45, 8.18, 11.5 and 14.2 au) to their measured ones, and a seeded sample of planetesimals moves from a 16–34 au disk to the Kuiper belt, the scattered disk, the Oort cloud, or out of the system. Orbital elements interpolate smoothly; this is not an N-body integration. Before the Sun the solar view shows a schematic molecular cloud with dated galactic milestones as its caption. Inside the gas disk the slider is logarithmic in time since the first solids, so the notes can follow dust (to {planetesimalsKyr} thousand years), planetesimals and Moon-mass embryos (by {embryosMyr} million years). The snow line is drawn at {snowLineAu} au; estimates for the young disk run from under 2 to about 4 au."
+      },
+      "galaxy": {
+        "title": "The Sun's galactic orbit",
+        "body": "The Sun circles {sunRadiusKpc} kpc from the centre (GRAVITY) with a {galacticYearMyr}-million-year period, clockwise from the north galactic pole. Today it sits near the inner end of a ~{radialSwingKpc} kpc radial swing (period ~{radialMyr} Myr) and {heightPc} pc north of the plane, climbing through ±{verticalPc} pc (period ~{verticalMyr} Myr); the phase in the deep past is unknown. The disk follows measured structure: exponential thin (2.6 kpc, 300 pc) and thick (2.0 kpc, 900 pc) disks, a boxy bulge inside a {barHalfKpc} kpc half-length bar at {barDeg}°, four logarithmic arms at a {pitchDeg}° pitch anchored to maser parallaxes near the Sun, the Local Arm, dust on the arms' inner edges and the Cepheid-traced warp beyond {warpStartKpc} kpc. The halo sphere marks R₂₀₀ ≈ 200 kpc. The far side of the disk is extrapolated."
+      },
+      "sky": {
+        "title": "The sky behind it",
+        "body": "Bright stars are the shared J2000 catalogue placed by right ascension and declination and rotated into the planets' ecliptic frame. The Milky Way is sampled from a painted map in galactic coordinates (bulge toward Sagittarius, the Great Rift, the Coalsack): tens of thousands of grains and a soft haze drawn from the same map, so it looks granular like the real band rather than a smooth glow. The whole band turns about the galactic pole once per galactic year as the Sun orbits; before about 8 billion years ago the thin disk and dust lane give way to a thicker, bluer disk; inside the natal cloud the view dims and reddens. Named stars fade beyond about 100,000 years, when proper motions have scrambled the constellations. The nearest stars follow straight-line tracks from Gaia and Hipparcos parallaxes, proper motions and radial velocities for ±300,000 years; Scholz's star's flyby through the outer Oort cloud falls out of that."
+      },
+      "swarms": {
+        "title": "Belts and clouds on the GPU",
+        "body": "The asteroid belt, Jupiter's Trojans, the Kuiper belt and the Oort cloud are point swarms whose vertex shader solves Kepler's equation each frame, so thousands of bodies orbit at the same speed-up as the planets in one draw call each. The belt has Kirkwood gaps; the Trojans librate about L4 and L5 and appear during the clearing; the Kuiper belt holds cold classicals formed in place, hot classicals, plutinos at 39.4 au and twotinos at 47.7 au swept into resonance by Neptune, and nothing beyond the cliff; the Oort cloud thins as r⁻³·⁵ from an inner, flatter cloud to an isotropic shell at 100,000 au."
+      },
+      "globes": {
+        "title": "Globes and rings",
+        "body": "Radii, flattening, poles and spin rates are IAU values, so every globe has its real shape and turns to today's angle: Uranus lies on its side, Venus spins backwards. Surfaces are measured maps: Hubble's 2025 maps of the giants, Blue Marble Earth, Viking Mars, MESSENGER Mercury and New Horizons Pluto, with mean colour and brightness set by true-colour data and albedo. The Sun, Venus, Sedna, Halley and unseen areas are painted. Rings use measured radii and optical depths, lit from the front or seen against the light, with the planet's shadow across them. Jupiter's are too faint to show."
+      },
+      "rendering": {
+        "title": "Rendering budget",
+        "body": "One instanced mesh draws all planetesimals, orbit lines are rewritten only when their elements change, and frames are rendered only while something moves or a setting changed. Coarse-pointer or low-memory devices cap the pixel ratio and frame rate. Globes switch to a finer mesh only when they are large on screen."
+      }
+    }
+  },
+  "notes": {
+    "merger": "About 10 billion years ago the Milky Way swallowed Gaia-Enceladus; the thick disk dates from that era. The Sun's atoms are interstellar gas.",
+    "thinDisk": "The thin disk is forming stars and the bar is in place by about 8 billion years ago. Earlier stars are making the Sun's heavy elements.",
+    "ingredients": "Interstellar gas, enriched by earlier generations of stars. The cloud that will form the Sun has not collapsed yet.",
+    "collapse": "A molecular-cloud core collapses in under a million years. Short-lived aluminium-26 in meteorites may point to a nearby massive star.",
+    "dust": "First solids, {sunBirthGyr} billion years ago. Dust grains stick on gentle contact and grow into millimetre-to-centimetre pebbles.",
+    "planetesimals": "Within about {planetesimalsKyr} thousand years pebbles gather into planetesimals kilometres across. Arrokoth is one survivor.",
+    "gasDisk": "Moon-mass embryos by {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to grab gas: the giants.",
+    "accretion": "The young Sun's light and wind disperse the gas. Inside, many Moon-size embryos remain; Jupiter's pull makes their orbits cross.",
+    "belt": "Slow collisions far from Jupiter merge embryos into rocky planets. Near Jupiter they are fast and shatter: the asteroid belt.",
+    "moon": "A Mars-size body strikes Earth and the Moon forms from the debris. Dates range from about 4.5 to 4.35 billion years ago.",
+    "disk": "Disk intact: giants packed in, a heavy icy disk outside them. Starting orbits are a teaching sketch.",
+    "clearing": "Clearing, as a model: the giants' resonant chain breaks, they scatter each other and Neptune scatters the disk.",
+    "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that may be debris from one basin, Imbrium. A spike or a long tail? Debated.",
+    "today": "Measured orbits. Planet positions are computed for today's date."
+  }
+}

@@ -1,0 +1,493 @@
+{
+  "app": "Orrery",
+  "metadataDescription": "Poctivé planetárium: planety tam, kde dnes skutečně jsou, vyčištění rané sluneční soustavy jako označený model a místo Slunce v Mléčné dráze.",
+  "canvasLabel": "Interaktivní planetárium sluneční soustavy a Mléčné dráhy",
+  "views": {
+    "inner": "Vnitřní světy",
+    "giants": "Obři",
+    "kuiper": "Kuiperův pás",
+    "scattered": "Rozptýlený disk",
+    "oort": "Oortův oblak",
+    "stars": "Nejbližší hvězda",
+    "galaxy": "Mléčná dráha"
+  },
+  "viewHints": {
+    "inner": "Merkur až Mars. Jupiter je u okraje.",
+    "giants": "Jupiter až Neptun a raný disk. Nejlepší pohled na vyčištění.",
+    "kuiper": "Dráha Neptunu klasickým pásem, zhruba 30–50 au.",
+    "scattered": "Tělesa, která Neptun vyhodil na dlouhé elipsy, stovky au daleko.",
+    "oort": "Vodicí slupky v 5 000 a 100 000 au; tečky řídnou jako r⁻³·⁵. V samotném oblaku zatím nikdo žádné těleso nespatřil.",
+    "stars": "Proxima, Alfa Centauri a Barnardova hvězda ve skutečných směrech. Prstenec je vzdálenost nejbližší hvězdy; obloha vzadu je ta pravá.",
+    "galaxy": "Jiná mapa, ve světelných letech. Přibližte se ke Slunci a vrátíte se."
+  },
+  "units": {
+    "au": "au",
+    "ly": "sv. r.",
+    "pc": "pc"
+  },
+  "epochs": {
+    "sketch": "Náčrt 10 Gyr",
+    "birth": "Vznik Slunce",
+    "disk": "Disk nedotčen",
+    "clearing": "Vyčištění",
+    "today": "Dnes"
+  },
+  "time": {
+    "today": "Dnes",
+    "thousand": "před {value} tisíci let",
+    "million": "před {value} miliony let",
+    "billion": "před {value} miliardami let",
+    "noSun": "Slunce ještě není",
+    "laps": "{laps} oběhů Galaxie od vzniku Slunce, schematicky",
+    "clock": "Planety vykresleny pro {date}",
+    "offsetDays": "{value, plural, one {# den} few {# dny} other {# dní}}",
+    "offsetYears": "{value, plural, one {# rok} few {# roky} other {# let}}",
+    "offsetThousand": "{value} tisíc let",
+    "clockDrift": "Dnes + {offset} · Pohyb {rate}"
+  },
+  "toggles": {
+    "elliptical": "Elipsy",
+    "trueSize": "Skutečná velikost",
+    "drift": "Pohyb",
+    "names": "Názvy",
+    "plane": "Mřížka ekliptiky",
+    "halo": "Halo temné hmoty",
+    "distances": "Vzdálenosti"
+  },
+  "layers": {
+    "title": "Vrstvy",
+    "disk": "Raný disk",
+    "kuiper": "Kuiperův pás",
+    "scattered": "Rozptýlený disk",
+    "oort": "Oortův oblak",
+    "ejected": "Vyvržená",
+    "count": "{label} · {count}"
+  },
+  "names": {
+    "sun": "Slunce",
+    "snowLine": "Sněžná čára",
+    "mercury": "Merkur",
+    "venus": "Venuše",
+    "earth": "Země",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn",
+    "uranus": "Uran",
+    "neptune": "Neptun",
+    "pluto": "Pluto",
+    "sedna": "Sedna",
+    "halley": "Halleyova kometa",
+    "moon": "Měsíc",
+    "io": "Io",
+    "europa": "Europa",
+    "ganymede": "Ganymed",
+    "callisto": "Callisto",
+    "titan": "Titan",
+    "triton": "Triton",
+    "charon": "Charon",
+    "asteroids": "Pás asteroidů",
+    "proxima": "Proxima Centauri",
+    "alphaCen": "Alfa Centauri",
+    "barnard": "Barnardova hvězda",
+    "scholz": "Scholzova hvězda",
+    "galaxySun": "Slunce",
+    "milkyway": "Mléčná dráha",
+    "bulge": "Výduť a příčka",
+    "halo": "Halo temné hmoty",
+    "lightYears": "sv. r.",
+    "au": "au",
+    "lightTime": "světlo letí",
+    "parsecs": "pc"
+  },
+  "hud": {
+    "views": "Pohledy",
+    "controls": "Ovládání",
+    "objects": "Objekty",
+    "guide": "Průvodce",
+    "close": "Zavřít",
+    "play": "Spustit čas",
+    "pause": "Zastavit čas",
+    "replay": "Přehrát vyčištění",
+    "timeSlider": "Čas. Vlevo je minulost; vyčištění má na dráze víc místa.",
+    "scale": "{value} {unit} uprostřed",
+    "driftDays": "1 s ≈ {value} dní",
+    "driftYears": "1 s ≈ {value} let",
+    "driftThousand": "1 s ≈ {value} tisíc let",
+    "driftPaused": "Pohyb zastaven",
+    "galaxyMotion": "Mapa Galaxie",
+    "selectHint": "Klepnutím na těleso otevřete kartu",
+    "display": "Zobrazení",
+    "camera": "Kamera",
+    "rotateLeft": "Otočit doleva",
+    "rotateRight": "Otočit doprava",
+    "tiltUp": "Naklonit nahoru",
+    "tiltDown": "Naklonit dolů",
+    "bodies": "Slunce a planety",
+    "examples": "Měřené příklady",
+    "galaxyItems": "Mapa Mléčné dráhy",
+    "neighbours": "Blízké hvězdy",
+    "legend": "Přepínače vrstvu skryjí; součty nemění.",
+    "playRestart": "Přehrát od začátku",
+    "home": "Zpět do sluneční soustavy",
+    "closeUp": "Zblízka",
+    "leaveCloseUp": "Zpět na mapu",
+    "details": "Podrobnosti",
+    "hideDetails": "Skrýt podrobnosti",
+    "closeUpNote": "Skutečná velikost, natočení jako právě teď.",
+    "epochs": "Skok na epochu",
+    "distanceUnit": "Jednotka vzdálenosti: astronomické jednotky, světelné roky nebo parseky"
+  },
+  "badges": {
+    "measured": "Měřeno",
+    "measuredTrack": "Měřeno · přímočará dráha",
+    "measuredRounded": "Měřeno, zaokrouhleno",
+    "endMeasured": "Koncová dráha měřena · začátek je model",
+    "presentOnly": "Jen současná dráha",
+    "rewound": "Měřený konec · zpět jen jako náčrt",
+    "region": "Měřená oblast",
+    "model": "Výukový model",
+    "mixed": "Měřeno + model",
+    "inferred": "Odvozeno, přímo nepozorováno",
+    "sample": "Výukový vzorek, ne pojmenované těleso",
+    "sketch": "Náčrt",
+    "schematic": "Měřená vzdálenost · schematická dráha"
+  },
+  "facts": {
+    "onSlider": "Na posuvníku",
+    "today": "Dnes",
+    "period": "Oběžná doba",
+    "modelStart": "Začátek modelu",
+    "notMeasured": "{value} au, není to měření",
+    "stretch": "Výstřednost (e)",
+    "tilt": "Sklon",
+    "tiltValue": "{value}° k ekliptice",
+    "retrograde": "pozpátku (retrográdně)",
+    "nearFar": "Nejblíž / nejdál",
+    "average": "Střední vzdálenost",
+    "when": "Kdy",
+    "radius": "Poloměr",
+    "age": "Stáří",
+    "oneAu": "1 au",
+    "where": "Kde",
+    "mass": "Hmotnost",
+    "drawnAt": "Kresleno v",
+    "region": "Hlavní oblast",
+    "todayMass": "Dnešní hmotnost",
+    "originalMass": "Možná původní hmotnost",
+    "shape": "Tvar",
+    "reach": "Dosah",
+    "innerEdge": "Vnitřní okraj",
+    "outerEdge": "Vnější okraj",
+    "shells": "Vodicí slupky",
+    "endState": "Konečný stav",
+    "share": "V tomto vzorku",
+    "centre": "Vzdálenost od středu",
+    "lap": "Doba oběhu",
+    "speed": "Rychlost",
+    "radial": "Dovnitř a ven",
+    "vertical": "Nahoru a dolů",
+    "bar": "Příčka",
+    "width": "Šířka",
+    "diskWidth": "Hvězdný disk",
+    "thickness": "Tloušťka tenkého disku",
+    "stars": "Hvězdy",
+    "proxima": "Proxima Centauri",
+    "oortCompare": "Ve srovnání s Oortovým oblakem",
+    "closestFuture": "{ly} sv. r. za {years} tisíc let",
+    "closestPast": "{ly} sv. r. před {years} tisíci lety",
+    "closest": "Nejtěsnější přiblížení",
+    "motion": "Pohyb",
+    "direction": "Směr",
+    "days": "{value} dní",
+    "years": "{value} let",
+    "yearsAbout": "zhruba {value} let",
+    "km": "{value} km",
+    "percent": "{value} %"
+  },
+  "cards": {
+    "sun": {
+      "title": "Slunce",
+      "radius": "{km} km · asi {au} au",
+      "age": "Asi 4,57 miliardy let",
+      "oneAu": "{millions} milionu km · světlo letí {minutes} min",
+      "body": "Přes 99,8 % hmotnosti sluneční soustavy, ale méně než 1 % jejího momentu hybnosti: ten připadá téměř celý na oběhy planet. Hodiny tohoto modelu. Polohy planet kolem něj jsou spočteny pro dnešní datum z přibližných elementů JPL, takže jde o dnešní rozestavení při pohledu shora nad ekliptikou.",
+      "caution": "Značky jsou zvětšené, dokud nezapnete Skutečnou velikost. Skutečné Slunce má 109 průměrů Země a vedle vzdáleností planet je stále jen tečka."
+    },
+    "planets": {
+      "mercury": "Nejmenší planeta. Její dráha je z osmi nejprotáhlejší.",
+      "venus": "Téměř kružnice. Kružnice a elipsa tu vypadají stejně.",
+      "earth": "1 au je střední vzdálenost Země od Slunce: {millions} milionu km, tedy {minutes} světelné minuty.",
+      "mars": "Zřetelně protáhlá dráha. Vedle Jupiterovy stále maličká.",
+      "jupiter": "V modelu Jupiter začíná o něco dál a končí o něco blíž, jak studie nestability zjišťují. Začátek není měření. Je víc než dvakrát hmotnější než všechny ostatní planety dohromady.",
+      "saturn": "Začíná blíž k Jupiteru než dnes a v modelu se posouvá ven. Prstence jsou ve stejném měřítku jako planeta. Jeho střední hustota je nižší než hustota vody.",
+      "uranus": "Ledový obr. V modelu se posouvá ven spolu s Neptunem, jak se disk promíchává. Uran a Neptun si možná dokonce vyměnily místa.",
+      "neptune": "Končí u 30 au na vnitřním okraji dnešního Kuiperova pásu. Jeho posun ven v tomto náčrtu rozptyluje disk. Výměna energie s diskem pak jeho dráhu opět přiblížila kružnici."
+    },
+    "planetCautionEllipse": "Křivka je skutečná elipsa a tečka je dnešní poloha, posunutá jen zrychleným Pohybem.",
+    "planetCautionCircle": "Elipsy jsou vypnuté, dráha je tedy kružnice ve střední vzdálenosti. Výstřednost v kartě zůstává skutečná.",
+    "named": {
+      "pluto": {
+        "summary": "Trpasličí planeta v Kuiperově pásu, svázaná s Neptunem v rytmu 3:2: Neptun oběhne třikrát, zatímco Pluto dvakrát. Proto se jejich dráhy kříží ve vzdálenosti, a přesto se nesrazí.",
+        "caution": "Dnešní dráha je z tabulky JPL. Výchozí dráha v náčrtu a okamžik zachycení do rezonance jsou model „posunu během migrace Neptunu“, ne zrekonstruovaná historie."
+      },
+      "sedna": {
+        "summary": "Vzdálený kandidát na trpasličí planetu. Nejblíž se dostane asi 76 au, daleko za Neptun, nejdál asi 940 au. Od planet je odpoutaná a perihelem projde v roce 2076.",
+        "caution": "Dráha je měřená; jak se tam Sedna dostala, ne. Jednou z možností je hvězda procházející kolem v rodné hvězdokupě Slunce, jinou neviděná vzdálená planeta. Posuvník Sedně žádnou dráhu nevymýšlí."
+      },
+      "halley": {
+        "summary": "Slavná kometa na dlouhé, pozpátku skloněné elipse: v perihelu uvnitř dráhy Venuše, v afelu za Neptunem. Afelem prošla v prosinci 2023 a do perihelu se vrátí 28. července 2061.",
+        "caution": "Jde o současnou dráhu, která se s každým návratem trochu mění. V režimu kružnic je skrytá: kružnice v 17,8 au by ji zaparkovala těsně uvnitř dráhy Uranu, což je špatně."
+      }
+    },
+    "populations": {
+      "asteroids": {
+        "title": "Pás asteroidů",
+        "where": "Zhruba 2,1–3,3 au",
+        "mass": "Asi 3 % hmotnosti Měsíce",
+        "body": "Kamenné zbytky mezi Marsem a Jupiterem. Jupiter tuto oblast rozkolísal, takže srážky tělesa rozbíjely, místo aby z nich vznikla planeta; mnoho planetek jsou úlomky větších těles a většina původní hmoty zmizela (model to neanimuje). Sondy pásem prolétají bez uhýbání.",
+        "caution": "Tečky jsou náhodný vzorek s realistickými tvary drah a Kirkwoodovými mezerami, zvětšený, ne katalog skutečných asteroidů. Dva shluky na dráze Jupiteru jsou jeho Trojané, zachycení během čištění."
+      },
+      "disk": {
+        "title": "Raný disk planetesimál",
+        "drawnAt": "Zhruba 16–34 au, plochý a téměř kruhový",
+        "when": "Jen na starém konci posuvníku",
+        "body": "Zástupce ledových zbytků vně natěsnaných obrů po zániku plynového disku (v Nice modelu asi 35 hmotností Země). Posun Neptunu ven ho promíchá. Není to snímek konkrétního roku.",
+        "caution": "Studie se přou o hmotnost disku i jeho vnější okraj. Kulatá čísla jsou tu pro výuku."
+      },
+      "kuiper": {
+        "title": "Kuiperův pás",
+        "region": "Zhruba 30–50 au",
+        "todayMass": "Nejvýš asi 0,1 hmotnosti Země",
+        "originalMass": "Několik hmotností Země v klasické oblasti; celý disk Nice modelu asi 35",
+        "body": "Ledové světy za Neptunem včetně Pluta. Katalogizováno je přes 4 000 transneptunických těles; klasický pás slábne u 50 au, na „Kuiperově útesu“. Chladné klasické tečky zůstávají celou dobu u 42–48 au, protože tato populace nejspíš vznikla na místě. Promíchané tečky jsou ty, které posunul Neptun, a hustý prstenec v 39,4 au jsou plutina, která zachytil do rezonance 3:2.",
+        "caution": "Dva druhy teček nejsou sčítání. Dnešní pás je tenký zbytek těžšího disku."
+      },
+      "scattered": {
+        "title": "Rozptýlený disk",
+        "shape": "Dlouhé elipsy, perihel stále u Neptunu",
+        "reach": "Stovky au, některá dál",
+        "body": "Tělesa, která Neptun rozptýlil na vysoké, protáhlé dráhy, stále volně pod vlivem planet. Některá se pomalu ztrácejí. Tečky mířící do Oortova oblaku se počítají sem, dokud se jejich dráhy nezvednou dál.",
+        "caution": "Dráha tečky je náčrt končící u realistického tvaru dráhy. Není to historie konkrétního tělesa."
+      },
+      "oort": {
+        "title": "Oortův oblak",
+        "innerEdge": "Odhadem asi 2 000–5 000 au",
+        "outerEdge": "Nejistý, zhruba 100 000–200 000 au",
+        "shells": "Kresleny v 5 000 a 100 000 au",
+        "body": "Obrovský roj ledových těles navržený v roce 1950, aby vysvětlil dlouhoperiodické komety, které přilétají ze všech směrů. Obři vymrštili zbytky ven; slapy Galaxie a kolemjdoucí hvězdy zvedly jejich perihelia z dosahu planet, a tak se z oblaku stala tlustá slupka. Může obsahovat stovky miliard až biliony těles; tečky řídnou jako r⁻³·⁵, obvyklý odvozený profil.",
+        "caution": "Žádné těleso Oortova oblaku nebylo dalekohledem potvrzeno. Tečky zastupují neviděnou populaci; jejich počet o skutečnosti nic neříká."
+      },
+      "ejected": {
+        "title": "Vyvržená tělesa",
+        "endState": "Opustí přitažlivost Slunce",
+        "share": "Největší podíl",
+        "body": "Většina zbytků nikdy nenajde klidný domov. Jupiter jich mnoho vyhodí ze soustavy úplně; ledoví obři Oortův oblak zásobují lépe, protože vrhají jemněji. Těleso tu sklouzne ven po dlouhé elipse a pak je odstraněno. Skutečné vyvržení je hyperbola, která se nekreslí.",
+        "caution": "Podíl je ilustrativní; publikované simulace se liší. Robustní závěr: většina původního disku je pryč."
+      }
+    },
+    "tracer": {
+      "title": "Malé těleso · {bin}",
+      "cold": "Zástupce chladné klasické populace, záměrně držený u 42–48 au.",
+      "ejected": "Jedno z těles, která model odstraní.",
+      "oort": "V modelu míří do Oortova oblaku, pak je zvednuto z roviny.",
+      "other": "Končí v promíchaném Kuiperově pásu nebo v rozptýleném disku.",
+      "caution": "Tečky nepočítejte: 560 zástupců není 560 skutečných světů."
+    },
+    "galaxy": {
+      "sun": {
+        "title": "Slunce v Galaxii",
+        "centre": "Asi {sunRadiusLy} světelných let ({sunRadiusKpc} kpc)",
+        "lap": "Asi {galacticYearMyr} milionů let (odhady 205–230)",
+        "speed": "Kruhová rychlost tu je asi 230 km/s; samo Slunce letí ~250 km/s",
+        "radial": "Až ~{radialSwingLy} světelných let dál a zpět, jednou za ~{radialMyr} milionů let",
+        "vertical": "±{verticalLy} světelných let za ~{verticalMyr} milionů let; teď ~{heightLy} sv. r. severně a stoupá",
+        "body": "Sedíme na vnitřním okraji Místního ramene (Orionova výběžku), mezi rameny Střelce–Lodního kýlu a Persea, ani ve středu, ani na okraji. Od svého vzniku Slunce oběhlo Galaxii asi {laps}krát, při pohledu od severního galaktického pólu po směru hodinových ručiček. Posuvník hýbe schematickými hodinami: skutečný úhel Slunce před miliardami let nezná, a tak je dnešek připnut k moderní poloze.",
+        "caution": "Amplitudy kývání jsou typické hodnoty z odhadů hvězdné dynamiky; studie se liší. Galaktická dráha hvězdy není uzavřená elipsa."
+      },
+      "bulge": {
+        "title": "Výduť a příčka",
+        "centre": "{sunRadiusLy} světelných let od Slunce",
+        "bar": "Asi {barLy} světelných let ({barKpc} kpc) od konce ke konci, odhady 7–10 kpc; ~{barDeg}° ke spojnici Slunce–střed",
+        "body": "Mléčná dráha je spirála s příčkou. Střed tvoří hranatá výduť starých hvězd ve tvaru buráku, z boku ve tvaru písmene X, uvnitř delší a tenčí příčky, z jejíchž konců vycházejí spirální ramena. Úplně uprostřed je Sagittarius A*, černá díra o hmotnosti asi 4 milionů Sluncí. Hustota bodů je náčrt, ne katalog hvězd.",
+        "caution": "Délku příčky z této kresby neměřte."
+      },
+      "halo": {
+        "title": "Halo temné hmoty",
+        "width": "Řádově milion světelných let",
+        "mass": "Většina hmotnosti Galaxie",
+        "body": "Hvězdy obíhají příliš rychle na to, aby je udržela jen viditelná hmota; gravitace navíc se připisuje temné hmotě. Slabá koule je připomínka tohoto hala, ve výchozím stavu vypnutá, aby se nepletla s oblakem hvězd.",
+        "caution": "Temná hmota nebyla přímo pozorována. Kouli neberte jako fotografii ani jako ostrou hranici."
+      },
+      "milkyway": {
+        "title": "Mléčná dráha",
+        "diskWidth": "Řádově 100 000 světelných let",
+        "thickness": "Řádově 1 000 světelných let",
+        "stars": "Nejméně 100 miliard",
+        "age": "Asi 13,6 miliardy let",
+        "body": "Naše galaxie zvenčí, postavená na měřeních: tenký a tlustý disk, výduť ve tvaru buráku uvnitř příčky natočené o {barDeg}°, čtyři ramena se sklonem ~{pitchDeg}° umístěná tam, kam je u Slunce kladou vzdálenosti maserů, krátké Místní rameno těsně za námi, prachové pásy na vnitřních okrajích ramen a zvlnění vnějšího disku. Odvrácená strana je dopočtená: zakrývá nám ji střed. Před Sluncem dostanete jeden starší náčrt: tlustší, menší, s menší příčkou, rozbouřenou galaxii z dob splynutí s Gaia-Enceladus zhruba před 8–11 miliardami let.",
+        "caution": "Spirální ramena jsou vlny hustoty, ne pevné útvary; hvězdy jimi procházejí. Ekliptika a rovina Galaxie svírají asi 60°, proto se obě mapy potkávají jen ve Slunci."
+      }
+    },
+    "stars": {
+      "proxima": {
+        "where": "Kentaur, u jižní Mléčné dráhy",
+        "motion": "22 km/s ke Slunci, 3,9″ za rok po obloze",
+        "body": "Červený trpaslík, nejbližší hvězda ke Slunci. Je nakreslena tam, kde na obloze opravdu je; prstenec je její vzdálenost a paprsek ji spojuje se Sluncem. Gravitace Slunce už u vnějšího Oortova oblaku prohrává s Galaxií."
+      },
+      "alphaCen": {
+        "where": "Kentaur, 2° od Proximy",
+        "motion": "22 km/s ke Slunci; Proxima dvojici obíhá",
+        "body": "Dvě hvězdy podobné Slunci ve vzdálenosti 4,34 sv. r., těsný pár nakreslený jako jeden bod. Proxima je k nim volně vázána, asi 12 000 au daleko. Obě projdou asi 3,1 sv. r. od Slunce zhruba za 28 000 let."
+      },
+      "barnard": {
+        "where": "Hadonoš",
+        "motion": "110 km/s ke Slunci, 10,4″ za rok, nejrychlejší známý vlastní pohyb",
+        "body": "Slabý červený trpaslík 5,96 sv. r. daleko, rychle se blíží. Zhruba za 10 000 let projde asi 3,8 sv. r. od Slunce a pak se vzdálí."
+      },
+      "scholz": {
+        "where": "Jednorožec, dnes 22 sv. r. daleko",
+        "motion": "82 km/s od Slunce, téměř přesně podél zorného paprsku",
+        "body": "Červený trpaslík s hnědým trpaslíkem, vzdalují se. Když dráhu vrátíme zpět, prošla vnějším Oortovým oblakem asi před 70–80 tisíci lety, zhruba světelný rok od Slunce: nejtěsnější dobře doložený průlet hvězdy. Lidé tu už byli a mohli vidět její vzplanutí."
+      },
+      "caution": "Přímočaré dráhy z měřených poloh a rychlostí. Platí pár set tisíc let na obě strany; dál se nekreslí."
+    }
+  },
+  "guide": {
+    "title": "Jak to číst",
+    "sources": "Zdroje",
+    "sections": {
+      "linear": {
+        "title": "Vzdálenosti ve 3D jsou lineární",
+        "body": "Krok 10 au je v každém pohledu desetkrát delší než krok 1 au. Merkur a Oortův oblak nemohou sdílet jeden užitečný obraz: oblak je desítky tisíckrát dál. Používejte pohledy."
+      },
+      "size": {
+        "title": "Velikost tečky není velikost",
+        "body": "Značky jsou zvětšené, aby se daly trefit prstem. Skutečná velikost zmenší planety na skutečné poloměry a ty zmizí, pokud nejste velmi blízko. Ta prázdnota je poučení. Barvy odpovídají snímkům ve skutečných barvách; osvětlená strana míří ke Slunci."
+      },
+      "today": {
+        "title": "Dnešek je spočtený",
+        "body": "Polohy planet vycházejí z přibližných Keplerových elementů JPL s jejich sekulárními změnami, spočtených pro aktuální datum. Přepínač Pohyb posouvá tytéž elementy rychleji než reálný čas, takže úhly zůstávají poctivé i v pohybu."
+      },
+      "past": {
+        "title": "Posuvník minulosti je model",
+        "body": "Nikdo nemá video poloh planet před 4 miliardami let. Starý konec posuvníku je náčrt z rodiny nestability obřích planet (Nice model): obři začínají natěsno v řetězci rezonancí a vně nich leží disk zbytků; řetězec se rozpadne, setkání s ledovým obrem přehodí Jupiter a Saturn přes jejich rezonanci 2:1 a soustava se rozkolísá; posun Neptunu ven disk promíchá; většina těles je vyvržena, část zůstane v Kuiperově pásu či rozptýleném disku, část skončí v Oortově oblaku. Původní model tak vysvětloval pozdní těžké bombardování před 3,9 miliardy let. Novější studie upřednostňují ranou nestabilitu, do asi 100 milionů let od prvních pevných látek, takže jediná špička dopadů už není obvyklý obraz."
+      },
+      "ellipses": {
+        "title": "Elipsy",
+        "body": "Zapnuto: každá dráha je elipsa se skutečnou výstředností a sklonem (nebo modelovou u těles, která vracíme zpět). Vypnuto: kružnice ve střední vzdálenosti. V pohledu na Mléčnou dráhu přepínač kreslí kývání Slunce dovnitř-ven a nahoru-dolů ve skutečné amplitudě."
+      },
+      "maps": {
+        "title": "Dvě mapy, ne jedna",
+        "body": "Rovina sluneční soustavy je ekliptika. Pohled na Mléčnou dráhu je galaktický disk. Svírají asi 60° a sluneční soustava je na mapě Galaxie neviditelná tečka, a tak se mapy potkávají jen ve Slunci: přibližte se k němu a přejdete na druhou."
+      }
+    }
+  },
+  "tour": {
+    "label": "Průvodce",
+    "start": "Spustit průvodce",
+    "progress": "{step} / {total} · {time}",
+    "exit": "Ukončit průvodce",
+    "previous": "Předchozí krok",
+    "next": "Další",
+    "finish": "Dokončit",
+    "steps": {
+      "today": {
+        "title": "Kde jsou planety dnes",
+        "body": "Polohy spočtené pro dnešní datum z orbitálních elementů JPL. Pohyb spouští stejné hodiny rychleji."
+      },
+      "periods": {
+        "title": "Čím dál, tím pomaleji",
+        "body": "Země oběhne Slunce za rok, Jupiter za 12 let, Neptun za 165. Třetí Keplerův zákon váže oběžnou dobu ke vzdálenosti.",
+        "eq": "{equation} · P v letech, a v au"
+      },
+      "ellipses": {
+        "title": "Dráhy jsou elipsy",
+        "body": "Slunce leží v jednom ohnisku. Halleyova kometa se dostane dovnitř dráhy Venuše i za dráhu Neptunu a nejrychleji letí u Slunce.",
+        "eq": "Stejné plochy za stejný čas"
+      },
+      "scale": {
+        "title": "Většinou prázdno",
+        "body": "Skutečná velikost zmenší každou planetu na její skutečný poloměr a z této vzdálenosti zmizí. Obvyklé značky jsou zvětšené."
+      },
+      "disk": {
+        "title": "Zrozeny v plochém disku",
+        "body": "Planety krouží kolem Slunce jedním směrem a skoro v téže rovině. Kant a Laplace v tom viděli stopu zrodu v jediném rotujícím oblaku plynu a prachu."
+      },
+      "snowLine": {
+        "title": "Sněžná čára",
+        "body": "Do asi {snowLineAu} au kondenzují jen horniny a kovy; dál přibude led, takže jádra dorostou natolik, aby strhla plyn. Odkud má Země vodu, je sporné: z těles zvenčí, nebo už z jejích kamenných stavebních bloků."
+      },
+      "clearing": {
+        "title": "Vyčištění jako model",
+        "body": "Natěsno sbalení obři začínají v řetězci rezonancí. Když se rozpadne, navzájem se rozhází, Jupiter a Saturn přeskočí svou rezonanci 2:1 a Neptun se posune ven skrz ledový disk: většina je vymrštěna, část zůstane v Kuiperově pásu či rozptýleném disku a část se dostane do Oortova oblaku."
+      },
+      "oort": {
+        "title": "Oortův oblak",
+        "body": "Slupka ledových těles možná až do 100 000 au, odvozená z dlouhoperiodických komet. V samotném oblaku zatím nikdo žádné těleso nespatřil."
+      },
+      "galaxy": {
+        "title": "Jeden oběh za {galacticYearMyr} milionů let",
+        "body": "Jiná mapa, ve světelných letech. Slunce oběhne střed Mléčné dráhy zhruba jednou za {galacticYearMyr} milionů let: zatím asi {laps} oběhů."
+      }
+    }
+  },
+  "technicalDetails": {
+    "open": "Technické detaily",
+    "close": "Zavřít technické detaily",
+    "title": "Uvnitř planetária",
+    "summary": "Dnešní polohy ze standardní planetární efemeridy, označený výukový model rané sluneční soustavy a schematická Mléčná dráha. Zdroje níže oddělují měřené veličiny od náčrtů.",
+    "featuresTitle": "Co můžete prozkoumat",
+    "references": "Vědecké zdroje",
+    "features": {
+      "views": "Sedm pohledů od vnitřních planet po Mléčnou dráhu, každý v lineárním měřítku.",
+      "time": "Časová osa 10 miliard let s přehráváním, pěti epochami a součtem, kde zbylá tělesa skončí.",
+      "bodies": "Planety, Pluto, Sedna, Halleyova kometa, 560 zástupců planetesimál, roje na GPU pro pás asteroidů, Trojany, Kuiperův pás a Oortův oblak, dvě nejbližší hvězdné soustavy (α Centauri s Proximou a Barnardovu hvězdu), Scholzovu hvězdu a karty, které říkají, co je měřené."
+    },
+    "sections": {
+      "ephemeris": {
+        "title": "Kde planety jsou",
+        "body": "Hodnoty a, e, I, L, ϖ a Ω každé planety pocházejí z přibližných elementů JPL pro roky 1800–2050 s lineárními změnami za juliánské století. Keplerova rovnice se řeší Newtonovou metodou a perifokální poloha se otáčí do ekliptikální soustavy J2000. Pluto používá svůj řádek ze starší verze tabulky, kterou JPL mezitím stáhla. Sedna a Halley používají své oskulační elementy se střední anomálií počítanou od známého průchodu perihelem. Oběžné doby plynou z třetího Keplerova zákona."
+      },
+      "migration": {
+        "title": "Vznik a náčrt vyčištění",
+        "body": "První pevné látky zkondenzovaly před {sunBirthGyr} miliardy let (stáří CAI); pozorované disky žijí asi 3–10 milionů let, a tak tu obři dorůstají uvnitř plynového disku s životností {gasMyr} milionů let, zatímco terestrické planety rostou až do doby před {modelStartGyr} miliardy let. Mezi {modelStartGyr} a {clearDoneGyr} miliardy let zpět obři interpolují z výchozích drah Nice modelu (5,45; 8,18; 11,5 a 14,2 au) do měřených a seedovaný vzorek planetesimál se přesouvá z disku 16–34 au do Kuiperova pásu, rozptýleného disku, Oortova oblaku nebo pryč ze soustavy. Dráhové elementy se interpolují hladce; nejde o integraci N těles. Před Sluncem ukazuje sluneční pohled schematický molekulární oblak a jako popisek datované milníky Galaxie. Uvnitř plynového disku je posuvník logaritmický v čase od prvních pevných látek, aby poznámky stihly prach (do {planetesimalsKyr} tisíc let), planetesimály a planetární embrya o hmotnosti Měsíce (do {embryosMyr} mil. let). Sněžná čára je kreslena ve {snowLineAu} au; odhady pro mladý disk sahají od méně než 2 do asi 4 au."
+      },
+      "galaxy": {
+        "title": "Galaktická dráha Slunce",
+        "body": "Slunce obíhá {sunRadiusKpc} kpc od středu (GRAVITY) s periodou {galacticYearMyr} milionů let, po směru hodinových ručiček od severního galaktického pólu. Dnes je blízko vnitřního konce radiálního kyvu ~{radialSwingKpc} kpc (perioda ~{radialMyr} Myr) a {heightPc} pc severně od roviny, stoupá v rozkmitu ±{verticalPc} pc (perioda ~{verticalMyr} Myr); fáze v hluboké minulosti není známa. Disk sleduje naměřenou stavbu: exponenciální tenký (2,6 kpc, 300 pc) a tlustý (2,0 kpc, 900 pc) disk, hranatou výduť uvnitř příčky s poloviční délkou {barHalfKpc} kpc natočené o {barDeg}°, čtyři logaritmická ramena se sklonem {pitchDeg}° ukotvená paralaxami maserů u Slunce, Místní rameno, prach na vnitřních okrajích ramen a zvlnění disku za {warpStartKpc} kpc podle cefeid. Koule hala značí R₂₀₀ ≈ 200 kpc. Odvrácená strana disku je dopočtená."
+      },
+      "sky": {
+        "title": "Obloha v pozadí",
+        "body": "Jasné hvězdy jsou sdílený katalog J2000 umístěný podle rektascenze a deklinace a otočený do ekliptikální soustavy planet. Mléčná dráha je vzorkována z malované mapy v galaktických souřadnicích (výduť směrem ke Střelci, Velká trhlina, Uhelný pytel): desetitisíce zrn a měkký opar tažené z téže mapy, takže působí zrnitě jako skutečný pás, ne jako hladká záře. Celý pás se otáčí kolem galaktického pólu jednou za galaktický rok, jak Slunce obíhá; před zhruba 8 miliardami let tenký disk a prachový pás ustupují tlustšímu, modřejšímu disku; uvnitř rodného oblaku pohled tmavne a červená. Pojmenované hvězdy mizí za hranicí asi 100 000 let, kdy vlastní pohyby zpřehází souhvězdí. Nejbližší hvězdy sledují přímočaré dráhy z paralax, vlastních pohybů a radiálních rychlostí Gaia a Hipparcos po ±300 000 let; průlet Scholzovy hvězdy vnějším Oortovým oblakem z toho vychází."
+      },
+      "swarms": {
+        "title": "Pásy a oblaky na GPU",
+        "body": "Pás asteroidů, Trojané Jupiteru, Kuiperův pás a Oortův oblak jsou roje bodů, jejichž vertex shader každý snímek řeší Keplerovu rovnici, takže tisíce těles obíhají stejným zrychlením jako planety, každý roj v jednom vykreslení. Pás má Kirkwoodovy mezery; Trojané librují kolem L4 a L5 a objevují se během čištění; Kuiperův pás obsahuje chladná klasická tělesa vzniklá na místě, horká klasická, plutina v 39,4 au a twotina v 47,7 au zametená Neptunem do rezonance a nic za útesem; Oortův oblak řídne jako r⁻³·⁵ od vnitřního, plošší oblaku po izotropní slupku ve 100 000 au."
+      },
+      "globes": {
+        "title": "Glóby a prstence",
+        "body": "Poloměry, zploštění, póly a rychlosti rotace jsou hodnoty IAU, takže každý glóbus má skutečný tvar a je natočený jako dnes: Uran leží na boku, Venuše se točí pozpátku. Povrchy jsou naměřené mapy: Hubbleovy mapy obrů z roku 2025, Země z Blue Marble, Mars z Vikingů, Merkur z MESSENGERu a Pluto z New Horizons, se střední barvou a jasem podle dat ve skutečných barvách a albeda. Slunce, Venuše, Sedna, Halley a nespatřená místa jsou malované. Prstence mají naměřené poloměry a optické hloubky, osvětlené zepředu nebo proti světlu, se stínem planety. Jupiterovy jsou příliš slabé."
+      },
+      "rendering": {
+        "title": "Rozpočet vykreslování",
+        "body": "Všechny planetesimály kreslí jedna instancovaná síť, čáry drah se přepisují jen při změně elementů a snímky se vykreslují jen tehdy, když se něco hýbe nebo se změnilo nastavení. Zařízení s hrubým ukazatelem nebo malou pamětí mají omezený poměr pixelů i snímkovou frekvenci. Glóby přecházejí na jemnější síť, jen když jsou na obrazovce velké."
+      }
+    }
+  },
+  "notes": {
+    "merger": "Před asi 10 miliardami let Mléčná dráha pohltila Gaia-Enceladus; z té doby je tlustý disk. Atomy Slunce jsou mezihvězdný plyn.",
+    "thinDisk": "Tenký disk tvoří hvězdy a příčka stojí nejpozději před 8 miliardami let. Dřívější hvězdy vyrábějí těžké prvky Slunce.",
+    "ingredients": "Mezihvězdný plyn obohacený dřívějšími generacemi hvězd. Oblak, z něhož vznikne Slunce, se ještě nezhroutil.",
+    "collapse": "Jádro molekulárního oblaku se hroutí za méně než milion let. Krátce žijící hliník-26 v meteoritech může ukazovat na blízkou hmotnou hvězdu.",
+    "dust": "První pevné látky před {sunBirthGyr} miliardy let. Prachové částice se při jemném dotyku spojují do oblázků velkých milimetry až centimetry.",
+    "planetesimals": "Za asi {planetesimalsKyr} tisíc let se oblázky shlukují v planetesimály velké kilometry. Jednou z přeživších je Arrokoth.",
+    "gasDisk": "Do {embryosMyr} mil. let vznikají planetární embrya o hmotnosti Měsíce. Za sněžnou čárou ledová jádra rychle strhnou plyn: obři.",
+    "accretion": "Světlo a vítr mladého Slunce rozptýlí plyn. Uvnitř zbývá mnoho embryí velikosti Měsíce; Jupiter jim dráhy rozkolísá, až se kříží.",
+    "belt": "Daleko od Jupiteru pomalé srážky slepí embrya v kamenné planety. U Jupiteru jsou rychlé a tříští: vzniká pás planetek.",
+    "moon": "Srážka Země s tělesem velikosti Marsu vyvrhne trosky, z nichž vznikne Měsíc. Odhady sahají od asi 4,5 do 4,35 miliardy let zpět.",
+    "disk": "Disk nedotčen: obři natěsno, vně nich těžký ledový disk. Výchozí dráhy jsou výukový náčrt.",
+    "clearing": "Vyčištění jako model: rezonanční řetězec obrů se rozpadne, obři se navzájem rozhází a Neptun rozhází disk.",
+    "bombardment": "Mnoho impaktních tavenin z misí Apollo je starých asi {lhbGyr} miliardy let: klasické pozdní těžké bombardování. Velká část ale může pocházet z jediné pánve, Imbria. Špička, nebo dlouhý dozvuk? Sporné.",
+    "today": "Měřené dráhy. Polohy planet jsou spočteny pro dnešní datum."
+  }
+}

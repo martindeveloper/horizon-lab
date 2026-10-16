@@ -1,0 +1,32 @@
+<section class="grab" id="<%= it.id %>">
+  <h3><%= it.key %></h3>
+  <p class="dim"><%= it.summary %></p>
+  <% if (it.errors) { %><p class="bad">WebGL errors: <%= it.errors %></p><% } %>
+  <% it.shaderLines.forEach((line) => { %><p class="dim"><%= line %></p><% }) %>
+  <p><a href="<%= it.json %>">grab.json</a> (every call) · <a href="<%= it.shaders %>">shaders</a> (as compiled, and as translated by the driver)</p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>#</th><th>call</th><th>mode</th><th>count</th><th>program</th><th>target</th><th>viewport</th><th>GPU ms</th><th>after</th></tr>
+      </thead>
+      <tbody>
+        <% it.draws.forEach((draw) => { %>
+        <tr>
+          <td><%= draw.index %></td>
+          <td><%= draw.fn %></td>
+          <td><%= draw.mode %></td>
+          <td><%= draw.count %></td>
+          <td><%= draw.program %></td>
+          <td><%= draw.target %></td>
+          <td><%= draw.viewport %></td>
+          <td><%= draw.gpu %></td>
+          <td><% if (draw.snapshot) { %><a href="<%= draw.snapshot %>"><img src="<%= draw.snapshot %>" alt="Render target after draw <%= draw.index %>" loading="lazy"></a><% } else if (draw.snapshotError) { %><span class="dim"><%= draw.snapshotError %></span><% } %></td>
+        </tr>
+        <tr class="detail">
+          <td colspan="9"><details><summary>uniforms</summary><pre><%= draw.uniforms %></pre></details></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= it.title %></title>
+    <style><%~ it.css %></style>
+  </head>
+  <body>
+    <main>
+      <h1>Bench report<% if (it.label) { %> <b><%= it.label %></b><% } %></h1>
+      <% it.meta.forEach((line) => { %>
+      <p class="meta"><%= line %></p>
+      <% }) %>
+
+      <% if (it.findings.length) { %>
+      <h2>Findings</h2>
+      <ul class="findings">
+        <% it.findings.forEach((finding) => { %>
+        <li class="<%= finding.level %>"><b><%= finding.label %></b><% if (finding.key) { %><code><%= finding.key %></code><% } %><%= finding.message %></li>
+        <% }) %>
+      </ul>
+      <% } %>
+
+      <% if (it.scenes.length) { %>
+      <h2>Scenes</h2>
+      <div class="cards">
+        <% it.scenes.forEach((card) => { %><%~ include("./card", card) %><% }) %>
+      </div>
+      <% } %>
+
+      <% if (it.sequences.length) { %>
+      <h2>Sequences</h2>
+      <p class="dim">Frame time per frame. Dashed: median. Red: twice the local median, the hitch threshold.</p>
+      <div class="cards">
+        <% it.sequences.forEach((card) => { %><%~ include("./card", card) %><% }) %>
+      </div>
+      <% } %>
+
+      <% if (it.scaling.length) { %>
+      <h2>Resolution scaling</h2>
+      <p class="dim">Median frame time against pixel count. A line through the origin is pure per-pixel (fragment) cost; its intercept is per-frame cost that resolution does not change.</p>
+      <% it.scaling.forEach((chart) => { %><%~ include("./scaling", chart) %><% }) %>
+      <% } %>
+
+      <% if (it.comparison) { %><%~ include("./comparison", it.comparison) %><% } %>
+
+      <% if (it.grabs.length) { %>
+      <h2>Frame grabs</h2>
+      <p class="dim">One steady-state frame recorded call by call, with each draw's GPU time, uniform values and the render target after it.</p>
+      <% it.grabs.forEach((grab) => { %><%~ include("./grab", grab) %><% }) %>
+      <% } %>
+
+      <h2>Files</h2>
+      <p><a href="report.json">report.json</a> · <a href="summary.json">summary.json</a> · <a href="report.md">report.md</a></p>
+    </main>
+  </body>
+</html>

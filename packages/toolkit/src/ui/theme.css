@@ -1,0 +1,104 @@
+@custom-variant dark (&:where(.dark, .dark *));
+/* `md` is the desktop layout: wide *and* tall enough. Landscape phones keep the
+   touch layout (44px targets, bottom sheets). Use `not-md:` for its complement. */
+@custom-variant md (@media ((width >= 48rem) and (height >= 30rem)));
+
+/* Shared tokens also support utilities compiled by individual simulations. */
+@theme static {
+  /* The variable (Fontsource) family first, then the static one if a host loads that. */
+  --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Large titles only (30px and up): the hero and catalogue tiles. */
+  --font-headline: "Bodoni Moda Variable", "Bodoni Moda", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-space: #08080b;
+  --color-space-fg: #ecece8;
+  --color-space-muted: #b2b2ae;
+  --color-solar: #e2c07a;
+  --color-bg: #08080b;
+  --color-surface: #111114;
+  --color-surface-2: #1a1a1f;
+  --color-fg: #ecece8;
+  --color-muted: #9a9a96;
+  /* Quietest text that still reads at 12px: ≥4.5:1 on every dark glass. */
+  --color-subtle: #8a8a86;
+  --color-accent: #e2c07a;
+  --color-accent-fg: #15110a;
+  --color-border: #ecece814;
+  --color-border-strong: #ecece828;
+  --color-ring: #e2c07a;
+  --color-danger: #c45b4a;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+
+  --shadow-border: 0 0 0 0.5px #ffffff18;
+  --shadow-border-hover: 0 0 0 0.5px #ffffff28;
+}
+
+:root {
+  /* Solar accent as an RGB triple for gradients, glows, and hairlines. */
+  --solar: 226 192 122;
+  --sky-glow: 0;
+  /* Frosted dark glass: a white tint lifts panels off the field instead of darkening it. */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --panel-bg: rgba(30, 30, 36, 0.5);
+  --pill-bg: rgba(255, 255, 255, 0.08);
+  --hud-bg: rgba(22, 22, 28, 0.62);
+  --popover-bg: rgba(20, 20, 26, 0.92);
+  --tip-bg: rgba(14, 14, 18, 0.9);
+  --lesson-bg: rgba(10, 10, 14, 0.92);
+  --lesson-fg: #d8d8d4;
+  --glass-fallback: rgba(16, 16, 20, 0.97);
+  --glass-blur: blur(40px) saturate(1.8);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    0 20px 50px rgba(0, 0, 0, 0.3);
+  --hud-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+  --popover-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(255, 255, 255, 0.14),
+    0 24px 60px rgba(0, 0, 0, 0.5);
+  --lesson-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    0 24px 48px rgba(0, 0, 0, 0.55);
+}
+
+/* Light changes the interface materials, never the astronomical scene. */
+:root.light {
+  /* Warm white, not grey: paper-bright field, white glass, ink text. */
+  --color-bg: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-surface-2: #ecebe6;
+  --color-fg: #1c1d22;
+  --color-muted: #50535b;
+  --color-subtle: #5f626a;
+  --color-accent: #7a5518;
+  --color-accent-fg: #fbf7ee;
+  --color-border: #1c1d2214;
+  --color-border-strong: #1c1d2226;
+  --color-ring: #9a7020;
+  --color-danger: #a23629;
+  --solar: 186 132 48;
+  --sky-glow: 0;
+  --shadow-border: 0 0 0 0.5px #1c1d2224;
+  --shadow-border-hover: 0 0 0 0.5px #1c1d2240;
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --panel-bg: rgba(255, 255, 255, 0.88);
+  --pill-bg: rgba(255, 255, 255, 0.62);
+  --hud-bg: rgba(255, 255, 255, 0.88);
+  --popover-bg: rgba(255, 255, 255, 0.95);
+  --tip-bg: rgba(255, 255, 255, 0.94);
+  --lesson-bg: rgba(255, 255, 255, 0.96);
+  --lesson-fg: #33363d;
+  --glass-fallback: #fbfaf8;
+  --glass-blur: blur(40px) saturate(1.6);
+  --glass-shadow: inset 0 1px 0 #ffffff, 0 0 0 0.5px #1c1d2220, 0 12px 32px #1c1d2212;
+  --hud-shadow: inset 0 1px 0 #ffffff, 0 0 0 0.5px #1c1d2222, 0 4px 16px #1c1d220e;
+  --popover-shadow: inset 0 1px 0 #ffffff, 0 0 0 0.5px #1c1d2226, 0 24px 60px #1c1d2229;
+  --lesson-shadow: inset 0 1px 0 #ffffff, 0 0 0 0.5px #1c1d2222, 0 24px 48px #1c1d222e;
+}

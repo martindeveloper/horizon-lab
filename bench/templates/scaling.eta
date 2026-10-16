@@ -1,0 +1,33 @@
+<h3><%= it.target %></h3>
+<svg class="chart" viewBox="0 0 <%= it.width %> <%= it.height %>" role="img" aria-label="Frame time against megapixels">
+  <% it.ticks.forEach((tick) => { %>
+  <line x1="<%= it.left %>" x2="<%= it.right %>" y1="<%= tick.y %>" y2="<%= tick.y %>" class="grid" />
+  <text x="<%= it.left - 6 %>" y="<%= tick.y + 4 %>" text-anchor="end"><%= tick.ms %></text>
+  <text x="<%= tick.x %>" y="<%= it.bottom + 18 %>" text-anchor="middle"><%= tick.mp %></text>
+  <% }) %>
+  <text x="<%= it.width / 2 %>" y="<%= it.height - 6 %>" text-anchor="middle">megapixels</text>
+  <text x="12" y="<%= it.height / 2 %>" text-anchor="middle" transform="rotate(-90 12 <%= it.height / 2 %>)">ms</text>
+  <% it.series.forEach((series) => { %>
+  <polyline style="stroke: <%= series.color %>" points="<%= series.points %>" />
+  <% series.dots.forEach((dot) => { %>
+  <circle cx="<%= dot.x %>" cy="<%= dot.y %>" r="3" style="fill: <%= series.color %>"><title><%= dot.title %></title></circle>
+  <% }) %>
+  <% }) %>
+</svg>
+<div class="legend">
+  <% it.series.forEach((series) => { %>
+  <span><i style="background: <%= series.color %>"></i><%= series.name %></span>
+  <% }) %>
+</div>
+<div class="scroll">
+  <table>
+    <thead>
+      <tr><th>scene</th><% it.sizes.forEach((size) => { %><th><%= size %></th><% }) %><th>fixed ms</th><th>ms/MP</th><th>r²</th></tr>
+    </thead>
+    <tbody>
+      <% it.rows.forEach((row) => { %>
+      <tr><td><%= row.scene %></td><% row.cells.forEach((cell) => { %><td><%= cell %></td><% }) %><td><%= row.fixed %></td><td><%= row.slope %></td><td><%= row.r2 %></td></tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
