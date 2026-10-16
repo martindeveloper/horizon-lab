@@ -224,8 +224,9 @@ redrawn once a minute so the drift is sidereal motion. The DOM root carries
 brightest visible stars breathe (`data-star` names them). A faint seeded filler
 stands in for stars below the catalogue limit, a meteor crosses now and then,
 and the field eases after the pointer (up to ±12 px for the real stars). With a
-mouse, the brightest star within 22 px of the pointer gets a gold ring and its
-name and magnitude (`shell.starNames` holds the Czech forms), unless page content
+mouse, the nearest star within 22 px of the pointer gets a gold ring and its
+name and magnitude (`shell.starNames` holds the Czech forms), with brightness breaking
+exact distance ties, unless page content
 has the pointer; and scrolling runs the sky forward four seconds per pixel, so
 the top of every page is the present and the sky wheels at its true sidereal
 rate as you read down. Transform, opacity, and one canvas repaint per minute

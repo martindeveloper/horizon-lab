@@ -9,7 +9,8 @@ import { simulationForPath } from "@/lib/simulations";
 import { FINE_POINTER_QUERY, REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 import { mulberry32 } from "@horizon/toolkit/math";
 
-import { horizontalPositions, OBSERVER, siderealTime, starColor, type Horizontal } from "./stars";
+import { nearestStar, type PlacedStar } from "./sky-picking";
+import { horizontalPositions, OBSERVER, siderealTime, starColor } from "./stars";
 
 /* Seeded so server and client render the same filler. */
 
@@ -34,8 +35,6 @@ const LAPSE_MS_PER_PX = 4000;
 /** Over these the page's own content has the pointer, so the sky stays quiet. */
 const CONTENT =
   "a, button, input, select, textarea, label, p, h1, h2, h3, h4, li, dt, dd, blockquote, figcaption, img, header, footer, nav, [role='dialog'], .glass, .glass-panel, .glass-pill, .glass-hud, .glass-popover, .simulation-tile";
-
-type Placed = Horizontal & { x: number; y: number };
 
 /**
  * The shared sky, and it is the real one: the brightest stars as they stand
@@ -73,7 +72,7 @@ export function Sky() {
     const nameOf = (name: string) => (t.has(`starNames.${name}`) ? t(`starNames.${name}`) : name);
 
     // Stars on screen, in the real layer's coordinates, for naming them under the pointer.
-    let placed: Placed[] = [];
+    let placed: PlacedStar[] = [];
     // Milliseconds the scroll has moved the sky past the present.
     let lapse = 0;
 
@@ -162,21 +161,18 @@ export function Sky() {
       hover();
     };
 
-    // The brightest star within reach of the pointer, ringed and named, unless content has the pointer.
+    // The nearest star within reach of the pointer, unless content has the pointer.
     let at: { x: number; y: number; free: boolean } | null = null;
     let named = "";
     const isFree = (target: EventTarget | null) =>
       !(target instanceof Element && target.closest(CONTENT));
     function hover() {
       if (!mark || !label) return;
-      let best: Placed | undefined;
+      let best: PlacedStar | undefined;
       if (at?.free) {
         const px = at.x - (0.5 - x) * realDepth;
         const py = at.y - (0.5 - y) * realDepth;
-        for (const p of placed) {
-          if (Math.hypot(p.x - px, p.y - py) > HOVER_RADIUS) continue;
-          if (!best || p.star[3] < best.star[3]) best = p;
-        }
+        best = nearestStar(placed, px, py, HOVER_RADIUS);
       }
       if (!best) {
         mark.removeAttribute("data-on");
