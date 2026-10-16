@@ -211,8 +211,9 @@
   opacity: 0;
   transition: opacity 1.4s ease;
 }
-/* Silver rim, as the Sun's is gold, brightest at the bright limb; the night
-   limb keeps only a trace, more as the phase fills. */
+/* Silver rim, as the Sun's is gold, on the sunward half of the limb only: the
+   cusps always sit a quarter turn from the bright limb, whatever the phase, so
+   the rim ends there. Past them the night limb keeps a trace of earthshine. */
 .hero-moon::before {
   content: "";
   position: absolute;
@@ -223,7 +224,8 @@
   background: linear-gradient(
     calc(var(--moon-limb, 0deg) + 180deg),
     rgb(var(--moonlight) / 0.7),
-    rgb(var(--moonlight) / calc(0.04 + var(--moon-light, 0.5) * 0.5)) 80%
+    rgb(var(--moonlight) / 0.45) 42%,
+    rgb(var(--moonlight) / calc(var(--moon-earthshine, 0) * 0.12)) 54%
   );
   mask:
     linear-gradient(#000 0 0) content-box,
@@ -291,66 +293,81 @@
   }
 }
 
-/* Catalogue intro, once per page load, in three acts.
-   1. The sky alone: the horizon line draws out, the Sun rises as soon as
-      HeroScene places it, its day path sweeps east to west, the Moon follows.
-   2. The chrome: the header settles in and its own hairline draws out.
-   3. The words, then the tiles, one after another.
-   About 2.7 s in all. Only opacity, translate/transform, scale, a short blur and
-   one clip-path move, so the browser composites nearly every frame; `backwards`
-   fill holds nothing after the intro (Tilt keeps its transforms). HeroScene
-   drops `.catalogue-intro` when the page is reached by navigation; reduced
-   motion never sees it. */
+/* Catalogue intro, once per page load, staged like an opening shot.
+   1. Night: the stars come up out of black as the view settles back.
+   2. Dawn: the horizon line ignites from the centre and light blooms on it;
+      the Sun rises as soon as HeroScene places it, its ring opens, its day
+      path sweeps east to west, and the Moon follows.
+   3. Titles: the header settles, a gold stroke draws, the words pull into
+      focus, then the tiles rise one after another.
+   About 4 s in all. Only opacity, transforms, a brief blur and one clip-path
+   move, so the browser composites nearly every frame; `backwards` fill holds
+   nothing after the intro (Tilt keeps its transforms). HeroScene drops
+   `.catalogue-intro` when the page is reached by navigation or opens away
+   from the hero; reduced motion never sees it. */
 @media (prefers-reduced-motion: no-preference) {
-  /* On the shell, so the header shares the curve with the page. */
+  /* On the shell, so the header and the sky share the curves with the page. */
   .app-shell:has(.catalogue-intro) {
     --intro-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    /* Slow in, long settle: for bodies and the camera. */
+    --intro-drift: cubic-bezier(0.33, 0, 0.12, 1);
   }
 
-  /* Act 1: the sky. */
-  .catalogue-intro .catalogue-sky::after {
-    animation: intro-horizon 1.2s var(--intro-ease) backwards;
+  /* Act 1: night. */
+  .app-shell:has(.catalogue-intro) > .horizon-sky {
+    animation: intro-night 3s var(--intro-drift) backwards;
   }
-  .catalogue-intro .catalogue-sky[data-ready] .hero-sun {
-    animation: intro-rise 1.7s var(--intro-ease) 0.1s backwards;
+
+  /* Act 2: dawn. */
+  .catalogue-intro .catalogue-sky::after {
+    animation: intro-horizon 1.6s var(--intro-ease) 0.35s backwards;
   }
   .catalogue-intro .catalogue-sky[data-ready] .hero-glow {
-    animation: intro-fade 2s ease-out 0.25s backwards;
+    animation: intro-bloom 2.6s ease-out 0.55s backwards;
+  }
+  .catalogue-intro .catalogue-sky[data-ready] .hero-sun {
+    animation: intro-rise 2.4s var(--intro-drift) 0.6s backwards;
+  }
+  .catalogue-intro .catalogue-sky[data-ready] .hero-sun::after {
+    animation: intro-ring 1.8s var(--intro-ease) 1.5s backwards;
   }
   .catalogue-intro .catalogue-sky[data-ready] .hero-arc {
-    animation: intro-sweep 2s var(--intro-ease) 0.4s backwards;
+    animation: intro-sweep 2.4s var(--intro-ease) 1s backwards;
   }
   .catalogue-intro .catalogue-sky[data-ready] .hero-moon {
-    animation: intro-rise 1.6s var(--intro-ease) 0.55s backwards;
+    animation: intro-rise 2.2s var(--intro-drift) 1.2s backwards;
   }
 
-  /* Act 2: the chrome. */
+  /* Act 3: titles. */
   .app-shell:has(.catalogue-intro) > .app-header {
-    animation: intro-header 0.9s var(--intro-ease) 0.8s backwards;
+    animation: intro-header 1.1s var(--intro-ease) 1.5s backwards;
   }
   .app-shell:has(.catalogue-intro) > .app-header::after {
-    animation: intro-horizon 1.1s var(--intro-ease) 0.95s backwards;
+    animation: intro-horizon 1.3s var(--intro-ease) 1.65s backwards;
   }
-
-  /* Act 3: the words, then the tiles. */
   .catalogue-intro .intro-kicker {
-    animation: intro-text 0.9s var(--intro-ease) 0.95s backwards;
+    animation: intro-fade 1s ease-out 1.85s backwards;
+  }
+  .catalogue-intro .intro-kicker > :first-child {
+    transform-origin: left;
+    animation: intro-stroke 1s var(--intro-ease) 1.75s backwards;
   }
   .catalogue-intro .intro-title {
-    animation: intro-text 1.2s var(--intro-ease) 1.05s backwards;
+    transform-origin: left bottom;
+    animation: intro-title 1.8s var(--intro-ease) 1.95s backwards;
   }
   /* The italic phrase surfaces a beat later; inline, so only light and focus move. */
   .catalogue-intro .intro-title em {
-    animation: intro-focus 1.2s var(--intro-ease) 1.3s backwards;
+    animation: intro-focus 1.6s var(--intro-ease) 2.35s backwards;
   }
   .catalogue-intro .intro-ground {
-    animation: intro-fade 0.9s ease-out 1.4s backwards;
+    animation: intro-fade 1.2s ease-out 2.4s backwards;
   }
   .catalogue-intro .hero-mark {
-    animation: intro-fade 0.9s ease-out 1.6s backwards;
+    animation: intro-fade 1.2s ease-out 2.6s backwards;
   }
   .catalogue-intro .intro-tile {
-    animation: intro-tile 1.1s var(--intro-ease) calc(1.45s + var(--i, 0) * 0.12s) backwards;
+    animation: intro-tile 1.4s var(--intro-ease) calc(2.35s + var(--i, 0) * 0.14s) backwards;
   }
   /* HeroScene marks a tile while it rises: hover, tilt and halo wait for it. */
   .catalogue-intro .intro-tile[data-entering],
@@ -359,22 +376,40 @@
   }
 }
 
+/* The view eases back as the stars come up. */
+@keyframes intro-night {
+  from {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
 @keyframes intro-horizon {
   from {
     scale: 0 1;
     opacity: 0;
   }
 }
+/* Light swells along the line, then settles to the hour's own glow. */
+@keyframes intro-bloom {
+  from {
+    opacity: 0;
+    scale: 0.35 0.6;
+  }
+  45% {
+    opacity: calc(var(--sun-glow, 0) * 0.6 + 0.4);
+  }
+}
 /* Only `from` frames: each body ends at its own computed opacity (a daytime Moon is fainter). */
 @keyframes intro-rise {
   from {
     opacity: 0;
-    transform: translateY(35%) scale(0.94);
+    transform: translateY(55%) scale(0.92);
   }
 }
-@keyframes intro-fade {
+@keyframes intro-ring {
   from {
     opacity: 0;
+    scale: 0.82;
   }
 }
 @keyframes intro-sweep {
@@ -388,26 +423,38 @@
 @keyframes intro-header {
   from {
     opacity: 0;
-    translate: 0 -0.5rem;
+    translate: 0 -0.75rem;
   }
 }
-@keyframes intro-text {
+@keyframes intro-fade {
   from {
     opacity: 0;
-    translate: 0 0.3em;
-    filter: blur(8px);
+  }
+}
+@keyframes intro-stroke {
+  from {
+    scale: 0 1;
+  }
+}
+/* A focus pull: the title arrives soft and a touch large, then sharpens. */
+@keyframes intro-title {
+  from {
+    opacity: 0;
+    scale: 1.04;
+    translate: 0 0.15em;
+    filter: blur(14px);
   }
 }
 @keyframes intro-focus {
   from {
     opacity: 0;
-    filter: blur(8px);
+    filter: blur(10px);
   }
 }
 @keyframes intro-tile {
   from {
     opacity: 0;
-    translate: 0 3rem;
-    scale: 0.985;
+    translate: 0 4rem;
+    scale: 0.97;
   }
 }
