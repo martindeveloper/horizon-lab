@@ -31,7 +31,9 @@ test("catalogue registry has real routes, assets, and translated copy", () => {
     assert.equal(simulationForPath(`${simulation.href}/m87`)?.id, simulation.id);
     assert.equal(simulationForPath(`${simulation.href}-other`), undefined);
     for (const locale of routing.locales) {
-      const messages = JSON.parse(readFileSync(new URL(`src/messages/${locale}.json`, root), "utf8"));
+      const messages = JSON.parse(
+        readFileSync(new URL(`src/messages/${locale}.json`, root), "utf8"),
+      );
       const copy = messages.catalogue[simulation.messageKey];
       for (const key of ["title", "description", "open", ...simulation.highlights])
         assert.ok(copy[key]);

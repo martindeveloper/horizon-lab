@@ -30,6 +30,21 @@ npm run bench -- --compare bench-results/<earlier-run> --strict --max-slowdown 5
 
 `npm run bench -- --help` lists every option; `--list` prints targets and scenes.
 
+## Code layout
+
+- `run.ts` orchestrates selection, rounds, diagnostics and report output.
+- `cli.ts` parses options, validates sizes and resolves baseline settings.
+- `measure.ts` runs scenes and pools frame samples across rounds.
+- `grab.ts` records a frame and writes draw and shader artifacts.
+- `browser.ts` handles Chromium, page setup and scripted input; `build.ts` bundles targets.
+- `model.ts` defines the stored report data; `fingerprint.ts` and `compare.ts` match runs.
+- `report.ts`, `html.ts` and `terminal.ts` format reports; `templates/` holds HTML and CSS.
+- `images.ts` encodes captures and compares pixels.
+
+The CLI and report formats stay stable. Sizes are normalized and deduplicated before
+measurement. If a round fails, that job is reported as an error and its partial samples
+are excluded. Tracing and profiling are stopped before proceeding to another job.
+
 ## Reports
 
 Each run writes `bench-results/<timestamp>[-label]/` (git-ignored):

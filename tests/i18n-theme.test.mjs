@@ -22,7 +22,9 @@ const catalogs = Object.fromEntries(
   routing.locales.map((locale) => [
     locale,
     {
-      ...JSON.parse(readFileSync(new URL(`../src/messages/${locale}.json`, import.meta.url), "utf8")),
+      ...JSON.parse(
+        readFileSync(new URL(`../src/messages/${locale}.json`, import.meta.url), "utf8"),
+      ),
       blackHole: JSON.parse(
         readFileSync(
           new URL(`../src/features/black-hole/messages/${locale}.json`, import.meta.url),

@@ -5,7 +5,8 @@ import { Eta } from "eta";
 
 import { rollingMedian, type GrabDraw } from "@horizon/toolkit/bench";
 
-import { comparisonWarnings, shaderLine, type Report, type Run, type Scaling } from "./report";
+import type { Report, Run, Scaling } from "./model";
+import { comparisonWarnings, shaderLine } from "./report";
 
 /**
  * The human report: Eta templates in `templates/` render a view model built
@@ -201,7 +202,11 @@ function grab(run: Run, draws: GrabDraw[]) {
 
 export function html(report: Report, grabs: Map<string, GrabDraw[]>) {
   const byTarget = new Map<string, Scaling[]>();
-  for (const s of report.scaling) byTarget.set(s.target, [...(byTarget.get(s.target) ?? []), s]);
+  for (const series of report.scaling) {
+    const group = byTarget.get(series.target);
+    if (group) group.push(series);
+    else byTarget.set(series.target, [series]);
+  }
   return eta.render("./report", {
     title: `Bench report${report.label ? ` · ${report.label}` : ""}`,
     label: report.label,

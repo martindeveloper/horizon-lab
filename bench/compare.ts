@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { diffFields, type BenchSettings, type Mismatch } from "./fingerprint";
 import { compareImages } from "./images";
-import type { Comparison, ComparisonSummary, Report, Run } from "./report";
+import type { Comparison, ComparisonSummary, Report, Run } from "./model";
 
 /**
  * Comparing two runs: per-run time and image deltas, and whether the two
@@ -40,8 +40,9 @@ export async function compare(
   budgets: { slowdown: number | null; changed: number | null },
 ): Promise<ComparisonSummary> {
   const rows: Comparison[] = [];
+  const baselineRuns = new Map(baseline.runs.map((run) => [run.key, run]));
   for (const run of report.runs) {
-    const before = baseline.runs.find((r) => r.key === run.key);
+    const before = baselineRuns.get(run.key);
     if (!before) continue;
     const timer = run.gpu && before.gpu ? "gpu" : "cpu";
     const afterMs = timer === "gpu" ? run.gpu!.median : run.wall.median;
@@ -95,7 +96,7 @@ export async function compare(
     ),
   ];
   const measured = new Set(report.runs.map((r) => r.key));
-  const known = new Set(baseline.runs.map((r) => r.key));
+  const known = baselineRuns;
   const changedScenes = rows.filter((row) => row.sceneChanged).map((row) => row.key);
   return {
     baseline: path.relative(outDir, baselineDir),
