@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { Chip, ListItem, Picker } from "@horizon/toolkit/ui";
+import { Chip, ListItem, Picker, cn } from "@horizon/toolkit/ui";
 
 import { VIEWS } from "../lib/model/views";
 import { useOrrery, type Show } from "../lib/store";
@@ -55,7 +55,16 @@ export function Switches({ keys }: { keys: (keyof Show)[] }) {
           aria-checked={show[key]}
           selected={show[key]}
           onClick={() => patchShow({ [key]: !show[key] })}
+          className="gap-1.5"
         >
+          {/* A gold pip for on, an empty ring for off: the state reads without the glass. */}
+          <span
+            aria-hidden
+            className={cn(
+              "size-1.5 shrink-0 rounded-full transition-colors duration-300",
+              show[key] ? "bg-accent" : "border border-current opacity-60",
+            )}
+          />
           {t(`toggles.${key}`)}
         </Chip>
       ))}

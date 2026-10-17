@@ -16,7 +16,7 @@
     "giants": "Jupiter až Neptun a raný disk planetesimál. V tomto pohledu nejlépe uvidíte odklízení zbylých těles.",
     "kuiper": "Od dráhy Neptunu napříč klasickým Kuiperovým pásem, zhruba 30–50 au.",
     "scattered": "Tělesa, která Neptun rozptýlil na protáhlé eliptické dráhy sahající stovky au od Slunce.",
-    "oort": "Kulové plochy vyznačují vzdálenosti 5 000 a 100 000 au; hustota bodů klesá jako r⁻³·⁵. Žádné těleso přímo v Oortově oblaku zatím nebylo pozorováním potvrzeno.",
+    "oort": "Kulové plochy vyznačují vzdálenosti 5 000 a 100 000 au; hustota bodů klesá jako r⁻³·⁵. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet.",
     "stars": "Proxima, Alfa Centauri a Barnardova hvězda ve skutečných směrech na obloze. Prstenec vyznačuje vzdálenost nejbližší hvězdy; hvězdy v pozadí jsou rozmístěné podle skutečné oblohy.",
     "galaxy": "Samostatná mapa se vzdálenostmi ve světelných letech. Přiblížením ke Slunci se vrátíte k mapě sluneční soustavy."
   },
@@ -43,7 +43,7 @@
     "offsetDays": "{value, plural, one {# den} few {# dny} other {# dní}}",
     "offsetYears": "{value, plural, one {# rok} few {# roky} other {# let}}",
     "offsetThousand": "{value} tis. let",
-    "clockDrift": "Dnes + {offset} · Pohyb {rate}"
+    "clockDrift": "Dnes + {offset} · {rate}"
   },
   "toggles": {
     "elliptical": "Elipsy",
@@ -275,7 +275,7 @@
         "outerEdge": "Nejistý, zhruba 100 000–200 000 au",
         "shells": "Ve vzdálenostech 5 000 a 100 000 au",
         "body": "Obrovský soubor ledových těles, jehož existenci astronomové navrhli v roce 1950 k vysvětlení dlouhoperiodických komet přilétajících ze všech směrů. Obří planety rozptýlily zbylá tělesa směrem ven; slapové působení Galaxie a prolétajících hvězd vzdálilo jejich perihelia z dosahu planet, čímž vznikl rozsáhlý kulový obal. Může obsahovat stovky miliard až biliony těles. Hustota bodů zde klesá jako r⁻³·⁵ podle obvykle předpokládaného profilu.",
-        "caution": "Žádné těleso přímo v Oortově oblaku zatím nebylo potvrzeno dalekohledem. Body zastupují nepozorovanou populaci; jejich počet nevypovídá o skutečném počtu těles."
+        "caution": "Vzdálený Oortův oblak zatím nebyl přímo pozorován. Pozorovaná Sedna a podobná tělesa bývají řazena k vnitřnímu Oortovu oblaku, jehož vymezení se mezi studiemi liší. Body v této scéně představují modelovou populaci a jejich počet neudává skutečný počet těles."
       },
       "ejected": {
         "title": "Vyvržená tělesa",
@@ -423,7 +423,7 @@
       },
       "oort": {
         "title": "Oortův oblak",
-        "body": "Předpokládaný kulový obal ledových těles, který může sahat až do vzdálenosti 100 000 au. Jeho existenci odvozujeme z drah dlouhoperiodických komet. Žádné těleso přímo v Oortově oblaku zatím nebylo pozorováním potvrzeno."
+        "body": "Předpokládaný kulový obal ledových těles, který může sahat až do vzdálenosti 100 000 au. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet, které sledujeme při jejich přiblížení ke Slunci."
       },
       "galaxy": {
         "title": "Jeden oběh za {galacticYearMyr, number} milionů let",

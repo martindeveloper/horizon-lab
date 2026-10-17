@@ -36,8 +36,7 @@ export function createSunLayer(
   const sun = new Mesh(globes.sphere, looks.sun);
   sun.userData.pick = { kind: "sun" } satisfies Selection;
   const glow = new Sprite(looks.sunGlow);
-  const corona = new Sprite(looks.sunCorona);
-  parent.add(sun, glow, corona);
+  parent.add(sun, glow);
 
   return {
     sun,
@@ -60,8 +59,7 @@ export function createSunLayer(
       bodyOrientation("sun", now, sun.quaternion);
       sun.geometry = globes.globeFor(sun.position, scale);
       const flare = 1 + 1.4 * gas;
-      glow.scale.set(scale * 6.2 * flare, scale * 6.2 * flare, 1);
-      corona.scale.set(scale * 3.3 * flare, scale * 3.3 * flare, 1);
+      glow.scale.set(scale * 2.8 * flare, scale * 2.8 * flare, 1);
       place("sun", 0, 0, 0, show.names && dist < 12_000 && !hidesFor("sun"), STRONG);
     },
   };

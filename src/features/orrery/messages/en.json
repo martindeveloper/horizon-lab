@@ -16,7 +16,7 @@
     "giants": "Jupiter to Neptune, and the early disk. The best view of the clearing.",
     "kuiper": "Neptune's orbit through the classical belt, about 30–50 au.",
     "scattered": "Bodies Neptune tossed onto long ellipses, hundreds of au out.",
-    "oort": "Guide shells at 5,000 and 100,000 au; the dots thin out as r⁻³·⁵. No object in the cloud itself has been seen yet.",
+    "oort": "Guide shells at 5,000 and 100,000 au; the dots thin out as r⁻³·⁵. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets.",
     "stars": "Proxima, Alpha Centauri and Barnard's Star in their real directions. The ring is the nearest star's distance; the sky behind is the real one.",
     "galaxy": "A different map, in light-years. Zoom in on the Sun to return."
   },
@@ -43,7 +43,7 @@
     "offsetDays": "{value, plural, one {# day} other {# days}}",
     "offsetYears": "{value, plural, one {# year} other {# years}}",
     "offsetThousand": "{value} thousand years",
-    "clockDrift": "Today + {offset} · Motion {rate}"
+    "clockDrift": "Today + {offset} · {rate}"
   },
   "toggles": {
     "elliptical": "Ellipses",
@@ -275,7 +275,7 @@
         "outerEdge": "Uncertain, roughly 100,000–200,000 au",
         "shells": "Drawn at 5,000 and 100,000 au",
         "body": "A vast swarm of icy bodies proposed in 1950 to explain long-period comets, which arrive from every direction. The giants flung leftovers outward; the Galaxy's tide and passing stars lifted their perihelia out of the planets' reach, so the cloud became a thick shell. It may hold hundreds of billions to trillions of bodies; the dots thin out as r⁻³·⁵, the usual inferred profile.",
-        "caution": "No Oort-cloud object has been confirmed by telescope. These dots stand in for an unseen population; counting them teaches nothing about the true number."
+        "caution": "The distant Oort cloud has not been directly observed. Observed bodies such as Sedna are often classified as inner Oort cloud objects, but the definition of that region varies between studies. The dots in this scene represent a model population; their number does not give the actual number of bodies."
       },
       "ejected": {
         "title": "Ejected bodies",
@@ -423,7 +423,7 @@
       },
       "oort": {
         "title": "The Oort cloud",
-        "body": "A shell of icy bodies out to perhaps 100,000 au, inferred from long-period comets. No object has yet been seen in the cloud itself."
+        "body": "A proposed shell of icy bodies extending perhaps to 100,000 au. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets seen as they approach the Sun."
       },
       "galaxy": {
         "title": "One lap in {galacticYearMyr} million years",

@@ -54,6 +54,9 @@ export function createMoonsLayer(
 
   return {
     hosts,
+    labelBodies: systems.flatMap((system) =>
+      system.moons.map(({ moon, mesh }) => ({ key: moon.id, mesh })),
+    ),
     /** The meshes and orbit lines of a body's moons, for its close-up pass. */
     objectsOf(id: BodyId): Object3D[] {
       return systemOf(id)?.moons.flatMap((m) => [m.mesh, m.orbit.line]) ?? [];

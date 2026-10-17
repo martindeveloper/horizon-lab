@@ -152,7 +152,7 @@ export function createOrreryEngine(
       closeUp: () => closeUp.current,
     });
     const { pose } = rig;
-    const { place, hideAll } = createLabels(kit, labelRoot, labels);
+    const { place, hideAll, setBodies, flush } = createLabels(kit, labelRoot, labels);
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit);
     const globes = createGlobes(kit);
     const hidesFor = (id: BodyId) => closeUp.hidesFor(id);
@@ -175,6 +175,12 @@ export function createOrreryEngine(
       hidesFor,
       closeId: () => closeUp.current?.id ?? null,
     });
+    setBodies([
+      { key: "sun", mesh: sun.sun },
+      ...planets.planets.map(({ id, body }) => ({ key: id, mesh: body })),
+      ...planets.named.map(({ body, mesh }) => ({ key: body.id, mesh })),
+      ...moons.labelBodies,
+    ]);
     const populations = createPopulationsLayer(kit, solar);
     const neighbours = createNeighboursLayer(kit, solar, { place, rulers, labels, distanceText });
     const focus = createFocusRing(kit, solar);
@@ -425,6 +431,7 @@ export function createOrreryEngine(
       } else hideAll(SOLAR_LABELS);
       rulers.finish();
       galaxy.update(frame, rig.realm === "galaxy");
+      flush();
 
       hud.update(dt, invalidated || engine.dirty, {
         dist,

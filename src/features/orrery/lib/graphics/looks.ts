@@ -88,7 +88,7 @@ function paint(w: number, h: number, fn: Painter) {
   return tex;
 }
 
-function radialSprite(stops: [number, string][], rays = 0) {
+function radialSprite(stops: [number, string][]) {
   const canvas = document.createElement("canvas");
   canvas.width = 128;
   canvas.height = 128;
@@ -98,21 +98,6 @@ function radialSprite(stops: [number, string][], rays = 0) {
   for (const [t, color] of stops) grd.addColorStop(t, color);
   g.fillStyle = grd;
   g.fillRect(0, 0, 128, 128);
-  if (rays > 0) {
-    g.globalCompositeOperation = "lighter";
-    for (let i = 0; i < rays; i += 1) {
-      const a = (i / rays) * Math.PI * 2 + 0.2;
-      const ray = g.createLinearGradient(64, 64, 64 + Math.cos(a) * 64, 64 + Math.sin(a) * 64);
-      ray.addColorStop(0, "rgba(255, 220, 160, 0.28)");
-      ray.addColorStop(1, "rgba(255, 180, 80, 0)");
-      g.strokeStyle = ray;
-      g.lineWidth = i % 2 === 0 ? 3 : 1.4;
-      g.beginPath();
-      g.moveTo(64, 64);
-      g.lineTo(64 + Math.cos(a) * 62, 64 + Math.sin(a) * 62);
-      g.stroke();
-    }
-  }
   const tex = new CanvasTexture(canvas);
   tex.colorSpace = SRGBColorSpace;
   return tex;
@@ -373,15 +358,15 @@ export function createLooks(light = false) {
     side: DoubleSide,
     toneMapped: false,
   });
-  const corona = radialSprite(
-    [
-      [0, "rgba(255,236,200,0.0)"],
-      [0.18, "rgba(255,210,140,0.55)"],
-      [0.42, "rgba(224,140,48,0.16)"],
-      [1, "rgba(224,120,40,0)"],
-    ],
-    10,
-  );
+  // A restrained, continuous halo keeps the resolved photosphere readable.
+  // Keep this separate from the warm glow used by galaxies and comet dust.
+  const sunHalo = radialSprite([
+    [0, "rgba(255,250,240,0.12)"],
+    [0.65, "rgba(255,250,240,0.12)"],
+    [0.76, "rgba(255,250,240,0.06)"],
+    [0.9, "rgba(255,250,240,0.015)"],
+    [1, "rgba(255,250,240,0)"],
+  ]);
   const glow = radialSprite([
     [0, "rgba(255,244,220,0.95)"],
     [0.2, "rgba(255,214,140,0.35)"],
@@ -440,8 +425,7 @@ export function createLooks(light = false) {
     }),
     shellInner: shell(0.42),
     shellOuter: shell(0.28),
-    sunGlow: sprite(glow, "#ffffff", 1, false),
-    sunCorona: sprite(corona, "#ffffff", 1, true),
+    sunGlow: sprite(sunHalo, "#ffffff", 1, true),
     halleyComa: sprite(glow, "#d5e2ea", 0.28, true),
     galaxyCore: sprite(glow, "#e7c48a", 0.62, true),
     galaxyHeart: sprite(glow, "#fff6e4", 0.75, true),
@@ -475,7 +459,7 @@ export function createLooks(light = false) {
     sunMap,
     diskMap,
     gasMap,
-    corona,
+    sunHalo,
     glow,
     softStar,
   ];
