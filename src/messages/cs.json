@@ -23,7 +23,7 @@
     "closePreferences": "Zavřít předvolby",
     "language": "Jazyk",
     "skip": "Přejít na obsah",
-    "sidereal": "Místní hvězdný čas na ondřejovské observatoři, jejíž obloha tvoří pozadí těchto stránek",
+    "sidereal": "Místní hvězdný čas v Ondřejově. Pozadí stránek znázorňuje oblohu nad tamní observatoří.",
     "about": "O projektu",
     "credits": "Zdroje",
     "homeTitle": "Horizon · O kousek blíž vesmíru",
@@ -48,20 +48,20 @@
     "title": "O kousek blíž <em>vesmíru.</em>",
     "collection": "Simulace",
     "available": "K dispozici: {count}",
-    "sky": "Přibližná obloha nad Ondřejovem",
+    "sky": "Přibližný pohled na oblohu nad Ondřejovem",
     "sun": "Slunce",
     "moon": "Měsíc",
     "features": "Co můžete prozkoumat",
-    "startFrom": "Začít od",
+    "startFrom": "Vybrat výchozí pohled",
     "blackHole": {
       "title": "Černé díry",
       "eyebrow": "Event Horizon · Relativistická observatoř",
       "category": "Vesmír a gravitace",
-      "description": "Sledujte světlo v okolí černé díry: gravitační čočkování, obíhající hmotu a zpomalení času u horizontu.",
+      "description": "Prozkoumejte okolí černé díry: ohyb světla gravitací, obíhající hmotu a zpomalení času u horizontu.",
       "open": "Otevřít observatoř",
       "lensing": "Gravitační čočkování",
       "orbits": "10 scén",
-      "guides": "Průvodci",
+      "guides": "Komentované prohlídky",
       "entryPoints": {
         "light": {
           "title": "Disk v gravitační čočce"
@@ -85,10 +85,10 @@
       "galaxy": "Mapa Mléčné dráhy",
       "entryPoints": {
         "giants": {
-          "title": "Obři"
+          "title": "Obří planety"
         },
         "inner": {
-          "title": "Vnitřní světy"
+          "title": "Vnitřní planety"
         },
         "galaxy": {
           "title": "Mléčná dráha"
@@ -118,18 +118,18 @@
     },
     "disclaimer": {
       "label": "Poznámka k přesnosti",
-      "body": "Nejsem profesionální fyzik ani astronom. Simulace tvořím pečlivě a vycházím z publikovaných prací, ale jsou určené hlavně k objevování a radosti z poznání: jako názorné pomůcky, ne jako autoritativní vědecký zdroj. Berte je proto s rezervou.",
+      "body": "Nejsem profesionální fyzik ani astronom. Simulace tvořím pečlivě a vycházím z publikovaných prací, ale slouží hlavně k objevování a radosti z poznání. Jsou to názorné pomůcky, které nenahrazují odborné vědecké zdroje. Berte je proto s rezervou.",
       "simplified": "Zjednodušené",
       "simplifiedBody": "Modely zachovávají to podstatné pro danou myšlenku a zbytek vynechávají.",
       "approximate": "Přibližné",
-      "approximateBody": "Hodnoty a měřítka odpovídají přibližně, ne vždy přesně.",
-      "performance": "Laděné na výkon",
+      "approximateBody": "Uvedené hodnoty a zobrazená měřítka jsou přibližné.",
+      "performance": "Pro plynulý chod",
       "performanceBody": "Část fyziky je zjednodušená ještě víc, aby scény plynule běžely v prohlížeči.",
       "sources": "Pro výuku, studium a vše, co závisí na přesných hodnotách, prosím vycházejte z primárních zdrojů."
     },
     "source": {
       "label": "Otevřený kód",
-      "body": "Horizon je open source pod licencí MIT: kód je na <link>GitHubu</link>. Našli jste chybu? Hlášení i opravy jsou vítané."
+      "body": "Zdrojový kód Horizonu je dostupný pod licencí MIT na <link>GitHubu</link>. Našli jste chybu? Hlášení i opravy jsou vítané."
     },
     "thanks": {
       "label": "Poděkování",
@@ -145,7 +145,7 @@
   "credits": {
     "kicker": "Zdroje",
     "title": "Postaveno na <em>práci druhých.</em>",
-    "lead": "Snímky, data, písma a kód, na kterých Horizon stojí, s uvedením autorů a licencí, jak si je každý zdroj žádá.",
+    "lead": "Snímky, data, písma a kód, na kterých Horizon stojí. U jednotlivých zdrojů najdete autory a licenční podmínky.",
     "metadataDescription": "Snímky, data, písma a software, na kterých Horizon stojí, s autory a licencemi.",
     "newTab": "otevře se v nové kartě",
     "groups": {
@@ -167,7 +167,7 @@
       },
       "tools": {
         "label": "Nástroje",
-        "intro": "Pro sestavení a kontroly."
+        "intro": "Nástroje pro vývoj a kontrolu webu."
       }
     },
     "items": {
@@ -177,14 +177,14 @@
       "messenger": "Jas povrchu Merkuru.",
       "newHorizons": "Jas povrchu Pluta.",
       "jpl": "Dráhy planet a měsíců, polohy z Horizons a data o malých tělesech.",
-      "iau": "Velikosti, póly a rotace všech těles.",
+      "iau": "Rozměry, orientace rotačních os a rotace těles.",
       "nssdc": "Poloměry, albeda a prstence Uranu a Neptunu.",
       "pds": "Okraje, mezery a neprůhlednost prstenců ze zákrytových měření sond Cassini a Voyager.",
       "gaia": "Polohy a pohyby nejbližších hvězd.",
       "simbad": "Referenční hodnoty pro jasné a blízké hvězdy.",
       "mpc": "Počty známých transneptunických těles.",
       "gravity": "Hmotnost Sgr A* a vzdálenost Slunce od středu Galaxie.",
-      "eht": "Naměřené prstence M87* a Sgr A*.",
+      "eht": "Měření prstenců kolem M87* a Sgr A*.",
       "codata": "Gravitační konstanta.",
       "bodoni": "Nadpisy.",
       "plex": "Text a čísla.",
@@ -220,7 +220,7 @@
       "simbad": "Tato práce využívá databázi SIMBAD a katalogový nástroj VizieR provozované v CDS ve Štrasburku ve Francii.",
       "changes": "Mapy jsou převedené do jiné projekce, převzorkované a doplněné tam, kde data chybí; <link>co se u které mapy změnilo</link>.",
       "endorsement": "Použití dat NASA, ESA a USGS neznamená, že tyto instituce web podporují.",
-      "papers": "Technické podrobnosti každé simulace uvádějí články, ze kterých pocházejí její čísla."
+      "papers": "V technických podrobnostech každé simulace najdete odborné práce, ze kterých vycházejí uvedené hodnoty."
     },
     "contents": "Na této stránce"
   },
@@ -230,7 +230,7 @@
     "catalogue": "Načítání simulací"
   },
   "immersive": {
-    "title": "Ponořit se",
+    "title": "Nerušené prohlížení",
     "enter": "Spustit nerušené prohlížení",
     "exit": "Ukončit nerušené prohlížení",
     "close": "Ukončit",

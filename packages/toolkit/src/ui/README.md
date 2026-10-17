@@ -16,10 +16,16 @@ catalogue and `examples/visualization-example.tsx` for composition.
   children after `ready`, unmounts them after `exitDelayMs` (default 560 ms), and
   resets when readiness becomes false. Its opacity transition lasts 500 ms.
 - `ImmersiveScene`, `ImmersiveToggle`, `useImmersive`: one page-wide immersive
-  view. The scene renders its children only outside it, sets `data-immersive` on
-  the `stage` selector's ancestor (the host CSS makes that cover the window), owns
+  view. The scene fades its children out over 440 ms before unmounting them,
+  makes hidden controls inert immediately, and eases them back in on exit.
+  HUD rows slide gently toward the edges; the exit control arrives after the HUD
+  starts clearing. Only UI opacity and translation animate, never canvas sizing.
+  Reduced motion skips the fade. It sets `data-immersive` on
+  the `stage` selector's ancestor (the host CSS owns its viewport layout), owns
   F / Escape and shows the exit control. Fullscreen on that stage is offered only
   where `document.fullscreenEnabled` is true; leaving it leaves immersive view.
+  Entry focuses a non-interactive scene container, keeping F / Escape available
+  without highlighting the exit button; Tab still reaches the controls normally.
   The canvas is never remounted. `immersive-state.ts` holds the framework-free
   state, shortcut and Fullscreen API helpers.
 - `OrbitPad`: step buttons for a camera without dragging. Labels come in props;

@@ -5,8 +5,8 @@
   "controls": "Ovládání",
   "close": "Zavřít",
   "pause": "Pozastavit",
-  "orbit": "Obíhat",
-  "reset": "Obnovit",
+  "orbit": "Otáčet pohled",
+  "reset": "Obnovit nastavení",
   "custom": "Vlastní",
   "holes": "Černé díry",
   "story": "Příběh",
@@ -20,7 +20,7 @@
   "spaceKey": "Mezerník",
   "open": "Otevřít",
   "fold": "Sbalit",
-  "read": "Číst",
+  "read": "Číst dál",
   "dropAgain": "Pustit znovu",
   "pace": "Tempo",
   "slow": "Pomalu",
@@ -32,13 +32,13 @@
   "retrogradeDisk": "retrográdní disk",
   "inclination": "Sklon",
   "azimuth": "Azimut",
-  "elevation": "Výška nad diskem",
+  "elevation": "Úhel nad rovinou disku",
   "distance": "Vzdálenost",
   "exposure": "Expozice",
-  "disk": "Disk",
-  "stars": "Hvězdy",
-  "inside": "uvnitř",
-  "infall": "pád dovnitř",
+  "disk": "Jas disku",
+  "stars": "Jas hvězd",
+  "inside": "uvnitř horizontu",
+  "infall": "blízko horizontu",
   "mass": "Hmotnost",
   "horizon": "Horizont",
   "photon": "Fotonová dráha",
@@ -58,7 +58,7 @@
   "gal": "Gal.",
   "rainObservers": "Volně padající pozorovatelé",
   "droppedClocks": "Padající hodiny",
-  "clocksLead": "Každý maják blikne jednou za tik svého vlastního času. Sledujte, jak u horizontu zpomalují, rudnou a zamrzají.",
+  "clocksLead": "Každý světelný maják představuje padající hodiny a bliká podle jejich vlastního času. V tomto souřadnicovém zobrazení se u horizontu blikání zpomaluje, světlo rudne a majáky zdánlivě zamrzají.",
   "clocksRates": "Tempo hodin vůči vzdáleným hodinám",
   "clocksMore": "Fyzika",
   "clocksP1": "Pětice hodin padá radiálně po geodetikách odpovídajících pádu z klidu v nekonečnu. Každý maják bliká v rytmu daném poměrem přírůstků vlastního času τ a Schwarzschildova souřadnicového času t, který odpovídá hodinám v klidu daleko od černé díry: dτ/dt = 1 − 2M/r. Hodiny udržované v klidu na stejném r by měly poměr √(1 − 2M/r); padající hodiny navíc zpomaluje jejich pohyb. Při přibližování k horizontu oba poměry klesají k nule. Z libovolné konečné vzdálenosti však padající hodiny dorazí k horizontu za konečný vlastní čas a překročí jej. Zamrznutí majáků vyjadřuje zvolený souřadnicový popis, nikoli zastavení vlastního času.",
@@ -89,8 +89,8 @@
   "ariaOpenAtlas": "Otevřít atlas",
   "ariaCloseClocks": "Zavřít panel hodin",
   "ariaDropClocks": "Pustit hodiny",
-  "ariaCloseObs": "Zavřít observatoř",
-  "ariaOpenObs": "Otevřít observatoř",
+  "ariaCloseObs": "Zavřít nastavení",
+  "ariaOpenObs": "Otevřít nastavení",
   "ariaShowText": "Zobrazit zbývající text",
   "ariaClose": "Zavřít",
   "presets": {
@@ -287,7 +287,7 @@
       "2": {
         "kicker": "Střední hmotnost",
         "title": "Chybějící střed",
-        "body": "Černé díry vzniklé z jednotlivých hvězd mají nejvýše desítky hmotností Slunce, ty v centrech galaxií miliony až miliardy. Černé díry o hmotnosti zhruba sto až sto tisíc Sluncí nacházíme jen vzácně, a proto je kandidát v Omega Centauri tak důležitý."
+        "body": "Běžné černé díry hvězdného původu mají hmotnosti v řádu jednotek až desítek Sluncí, zatímco supermasivní černé díry v centrech galaxií dosahují milionů až miliard slunečních hmotností. Černé díry střední hmotnosti, přibližně od sta do sta tisíc Sluncí, nacházíme jen vzácně. Proto je kandidát v Omega Centauri tak důležitý."
       },
       "3": {
         "kicker": "2026",
@@ -309,7 +309,7 @@
       "2": {
         "kicker": "Viriálová hmotnost",
         "title": "Proč je odhad hrubý",
-        "body": "Odhady hmotnosti z jediného spektra stojí na vztazích kalibrovaných na slabších, bližších aktivních galaxiích. TON 618 je mnohem jasnější, takže jeho 40 až 70 miliard hmotností Slunce je nejistých až několikanásobně."
+        "body": "Odhady hmotnosti z jediného spektra využívají vztahy kalibrované na slabších a bližších aktivních galaxiích. TON 618 je mnohem svítivější, takže odhad 40 až 70 miliard hmotností Slunce může být zatížen nejistotou až několikanásobku hodnoty."
       },
       "3": {
         "kicker": "Severní galaktický pól",
@@ -350,7 +350,7 @@
       },
       "1": {
         "kicker": "02  ·  přiblížení",
-        "title": "Ta tma není povrch",
+        "title": "Tmavá oblast není povrch",
         "body": "Tmavou oblast snadno zaměníte za horizont událostí. Ve skutečnosti je to stín černé díry, jehož podobu určuje záchyt světla, gravitační čočkování a záření okolního plynu. Jeho zdánlivá velikost není prostým průmětem horizontu. Světlý prstenec kolem něj tvoří záření okolního plynu. Část světla se k nám dostává po silně zakřivených drahách. Nevidíme tedy žádný povrch, ale vliv černé díry na světlo v okolí.",
         "phase": "Dolly"
       },
@@ -376,7 +376,7 @@
     "sgr-a": {
       "0": {
         "kicker": "01  ·  8,28 kpc",
-        "title": "V této galaxii už žijete",
+        "title": "Černá díra v naší vlastní Galaxii",
         "body": "Sagittarius A* není vzdálený kvasar. Je to černá díra v centru Mléčné dráhy, asi 27 000 světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie mezihvězdný prach. Její hmotnost, přibližně 4,3 milionu Sluncí, určujeme z drah okolních hvězd. Jako kompaktní rádiový zdroj byla objevena v roce 1974. Husté hvězdné okolí v této scéně představuje jadernou hvězdokupu. Nedíváte se na Mléčnou dráhu zvenčí. Jste uvnitř.",
         "phase": "Wide"
       },
@@ -432,7 +432,7 @@
       },
       "4": {
         "kicker": "05  ·  oddálení",
-        "title": "Pomalejší dění v bohaté kupě",
+        "title": "Pomalejší dění v kupě galaxií",
         "body": "Při stejném bezrozměrném poloměru a spinu rostou charakteristické časové škály úměrně hmotnosti. Dění, které u Sgr A* trvá minuty, tak může u M87* probíhat ve dnech až týdnech. To usnadňuje skládání rádiových pozorování do jednoho obrazu. Galaxii obklopují tisíce kulových hvězdokup a v jejím okolí najdete další velké galaxie, například M84 a M86. Vysoká galaktická šířka znamená, že v tomto směru hledíme daleko od prašné roviny Mléčné dráhy.",
         "phase": "Wide"
       }
@@ -440,7 +440,7 @@
     "schwarzschild": {
       "0": {
         "kicker": "01  ·  1916",
-        "title": "Jedna hmotnost, sféricky symetrické vakuum",
+        "title": "Nerotující černou díru určuje hmotnost",
         "body": "Karl Schwarzschild nalezl přesné řešení Einsteinových rovnic během služby na východní frontě. Zveřejnil je v roce 1916; v květnu téhož roku zemřel. Řešení popisuje sféricky symetrický vakuový prostoročas a v případě černé díry nulový spin i elektrický náboj. Její vnější geometrii určuje jediný parametr M. Poloměry horizontu, fotonové sféry i nejvnitřnější stabilní kruhové dráhy jsou pevnými násobky této hmotnosti vyjádřené v geometrických jednotkách.",
         "phase": "Wide"
       },
@@ -517,7 +517,7 @@
       "2": {
         "kicker": "03  ·  teplota disku",
         "title": "Menší černá díra, teplejší disk",
-        "body": "Pro standardní tenký disk při stejném poměru rychlosti akrece k Eddingtonově hodnotě a stejném bezrozměrném spinu přibližně platí T ∝ M^(−1/4). Menší hmotnost tedy znamená vyšší charakteristickou teplotu. Disk kolem hvězdné černé díry může dosáhnout milionů kelvinů a vyzařovat rentgenové záření, zatímco obdobný disk kolem supermasivní černé díry bývá chladnější. Toto jednoduché škálování však nelze bez dalšího použít na řídký, tok s nízkou zářivou účinností u Sgr A* nebo M87*.",
+        "body": "Pro standardní tenký disk při stejném poměru rychlosti akrece k Eddingtonově hodnotě a stejném bezrozměrném spinu přibližně platí T ∝ M^(−1/4). Menší hmotnost tedy znamená vyšší charakteristickou teplotu. Disk kolem hvězdné černé díry může dosáhnout milionů kelvinů a vyzařovat rentgenové záření, zatímco obdobný disk kolem supermasivní černé díry bývá chladnější. Toto jednoduché škálování však nelze bez dalšího použít na řídký tok s nízkou zářivou účinností u Sgr A* nebo M87*.",
         "phase": "Detail"
       },
       "3": {
@@ -536,7 +536,7 @@
     "custom": {
       "0": {
         "kicker": "01  ·  vlastní nastavení",
-        "title": "Vaše hmotnost, váš spin",
+        "title": "Zvolená hmotnost a spin",
         "body": "Tento průlet používá právě zvolenou černou díru. V geometrických jednotkách G = c = 1 určuje hmotnost převod na kilometry a sekundy, zatímco bezrozměrný spin a/M mění geometrii. Při porovnávání ponechte stejný směr pohledu. Změna hmotnosti přeskáluje rozměry; změna spinu posune horizont, rovníkové fotonové dráhy a ISCO. Dva parametry stačí k popisu izolované nenabité Kerrovy černé díry, nikoli však k úplnému popisu jejího zářícího okolí.",
         "phase": "Wide"
       },
@@ -644,7 +644,7 @@
       },
       "2": {
         "kicker": "03  ·  40–70 miliard M☉",
-        "title": "Zváženo pohybem plynu",
+        "title": "Hmotnost odhadnutá z pohybu plynu",
         "body": "Hmotnost je odhad, nikoli přímé měření. Plyn v blízkosti černé díry se pohybuje tak rychle, že způsobuje rozšíření vodíkové emisní čáry odpovídající rychlosti zhruba 10 000 kilometrů za sekundu. Spojení této rychlosti se svítivostí kvasaru dává přibližně 40 až 70 miliard Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru.",
         "phase": "Detail"
       },
@@ -825,8 +825,8 @@
   },
   "canvasLabel": "Vizualizace černé díry",
   "metadataDescription": "Prozkoumejte černé díry, gravitační čočkování a prostoročas v interaktivní observatoři.",
-  "observatory": "Observatoř",
-  "dismissObservatory": "Zavřít observatoř",
+  "observatory": "Nastavení",
+  "dismissObservatory": "Zavřít nastavení",
   "previousStory": "Předchozí příběh",
   "nextStory": "Další příběh",
   "storyNumber": "Příběh {number}",
@@ -855,36 +855,36 @@
     "close": "Zavřít technické podrobnosti",
     "title": "Jak funguje simulace černé díry",
     "featuresTitle": "Co lze prozkoumat",
-    "summary": "Analytické údaje o drahách s ilustrativním sledováním paprsků, nikoli přesný Kerrův renderer ani rekonstrukce z teleskopu. Všechny předvolby sdílejí tento model. Zdroje níže oddělují ověřenou fyziku od obrazových aproximací.",
+    "summary": "Teoretické hodnoty poloměrů a drah doplňuje názorné sledování paprsků. Obraz je přibližný: nejde o přesný výpočet v Kerrově prostoročase ani o rekonstrukci astronomického pozorování. Všechny předvolby používají stejný model. Zdroje níže rozlišují ověřené fyzikální vztahy od aproximací použitých při vykreslování.",
     "features": {
       "views": "Deset pohledů: Cygnus X-1, Gaia BH3, GW231123, ω Centauri, Sagittarius A*, M87*, TON 618, disk v gravitační čočce, Schwarzschild a téměř extremální Kerr. Úpravou parametrů lze vytvořit vlastní scénu.",
-      "controls": "Otáčení a přibližování; změna spinu, výšky nad diskem, expozice, jasu disku, intenzity hvězd a kvality vykreslení. Hmotnostní měřítko určují předvolby.",
-      "learning": "Komentované průlety kamery, radiální stupnice r/M propojující význačné poloměry s jejich prstenci, atlas oblohy, fyzikální údaje, nerušený pohled a ukázka padajících hodin."
+      "controls": "Otáčení a přibližování pohledu; změna spinu, úhlu nad rovinou disku, expozice, jasu disku a hvězd i kvality vykreslování. Hmotnost černé díry určují předvolby.",
+      "learning": "Komentované průlety, stupnice vzdálenosti r/M s vyznačenými poloměry, atlas oblohy, fyzikální údaje, nerušené prohlížení a ukázka padajících hodin."
     },
     "sections": {
       "rays": {
         "title": "Integrace paprsků v kartézských souřadnicích",
-        "body": "Three.js vykresluje jediný obdélník přes celou plochu pomocí fragmentového shaderu GLSL. Pro každý pixel se vyšle jeden deterministický paprsek z kamery v kartézských souřadnicích. Nejde o sledování světelných cest metodou Monte Carlo: nepoužívají se náhodné odrazy ani akumulace vzorků. Člen popisující ohyb používá polohu p, tečnu paprsku v a jejich vektorový součin L; a je bezrozměrný spin. Korekce rotace se zapíná až nad a = 0,002 a jde o heuristické stáčení, nikoli úplné řešení světelných geodetik v Kerrově prostoročase. Integrátor používá rychlostní variantu Verletovy metody (změna rychlosti, posun, změna rychlosti) s jedním výpočtem zrychlení na krok; při nulovém spinu přesně zachovává moment hybnosti. Za r = {farField} se při krokování pouze ohýbá směr paprsku. Velikost kroku omezuje prostorový posun přibližně na 7–10 % poloměru, bez odhadu numerické chyby. Po vyčerpání počtu kroků zůstane paprsek tmavý, místo aby byl chybně považován za paprsek uniklý k obloze. Ohyb za únikovým poloměrem i u paprsků příliš vzdálených pro krokování se dopočítá analyticky: člen slabého pole 4M/b a člen druhého řádu 15πM²/4b² se rozdělí podél zbývající dráhy. Při nulovém spinu se směr kamery převádí ze statické místní soustavy na prostorovou tečnu parametrizovanou afinním parametrem se zachovanou energií E = 1. Numerická konvergence i výpočet pro rotující černou díru zůstávají přibližné."
+        "body": "Three.js vykresluje jediný obdélník přes celou plochu pomocí fragmentového shaderu GLSL. Pro každý pixel se vyšle jeden deterministický paprsek z kamery v kartézských souřadnicích. Nejde o sledování světelných cest metodou Monte Carlo: nepoužívají se náhodné odrazy ani akumulace vzorků. Člen popisující ohyb používá polohu p, tečnu paprsku v a jejich vektorový součin L; a je bezrozměrný spin. Korekce rotace se zapíná až nad a = 0,002 a jde o heuristické stáčení, nikoli úplné řešení světelných geodetik v Kerrově prostoročase. Integrátor používá rychlostní variantu Verletovy metody (změna rychlosti, posun, změna rychlosti) s jedním výpočtem zrychlení na krok; při nulovém spinu přesně zachovává moment hybnosti. Za r = {farField, number} se při krokování pouze ohýbá směr paprsku. Velikost kroku omezuje prostorový posun přibližně na 7–10 % poloměru, bez odhadu numerické chyby. Po vyčerpání počtu kroků zůstane paprsek tmavý, místo aby byl chybně považován za paprsek uniklý k obloze. Ohyb za únikovým poloměrem i u paprsků příliš vzdálených pro krokování se dopočítá analyticky: člen slabého pole 4M/b a člen druhého řádu 15πM²/4b² se rozdělí podél zbývající dráhy. Při nulovém spinu se směr kamery převádí ze statické místní soustavy na prostorovou tečnu parametrizovanou afinním parametrem se zachovanou energií E = 1. Numerická konvergence i výpočet pro rotující černou díru zůstávají přibližné."
       },
       "radii": {
         "title": "Jednotky, poloměry a oběžné doby",
-        "body": "Vykreslování používá geometrické jednotky G = c = M = 1, tedy Rs = 2. Symbol M_phys označuje fyzikální hmotnost; symbol a označuje bezrozměrný spin. Údaje zobrazují souřadnicový poloměr vnějšího Kerrova horizontu, prográdní rovníkové fotonové dráhy a ISCO i oběžnou dobu kruhové dráhy. Zobrazený fotonový poloměr odpovídá jediné rovníkové dráze, nikoli celé Kerrově fotonové oblasti. Shader zachytává paprsky na poloměru horizontu. Vnitřní okraj disku je max({innerFactor} r₊, r_ISCO), vnější poloměr {outerRadius} M. Pomocný výpočet ISCO při nulovém spinu výslovně vrací 6 M (větev určená znaménkem je v tomto bodě kladná). Hmotnost mění fyzikální délky a oběžné doby v údajích, nikoli bezrozměrnou geometrii zobrazení ani rychlost animace."
+        "body": "Vykreslování používá geometrické jednotky G = c = M = 1, tedy Rs = 2. Symbol M_phys označuje fyzikální hmotnost; symbol a označuje bezrozměrný spin. Údaje zobrazují souřadnicový poloměr vnějšího Kerrova horizontu, rovníkové fotonové dráhy a ISCO ve směru oběhu disku i oběžnou dobu kruhové dráhy. Zobrazený fotonový poloměr odpovídá jediné rovníkové dráze, nikoli celé Kerrově fotonové oblasti. Shader zachytává paprsky na poloměru horizontu. Vnitřní okraj disku je max({innerFactor, number} r₊; r_ISCO), vnější poloměr {outerRadius, number} M. Pomocný výpočet ISCO při nulovém spinu výslovně vrací 6 M (větev určená znaménkem je v tomto bodě kladná). Hmotnost mění fyzikální délky a oběžné doby v údajích, nikoli bezrozměrnou geometrii zobrazení ani rychlost animace."
       },
       "disk": {
         "title": "Záření disku a posun frekvence",
-        "body": "E, L a Ω kruhových drah vstupují do Pageova–Thorneova profilu toku s nulovým momentem síly na vnitřním okraji. CPU jej při změně spinu integruje v {diskIntervals} radiálních intervalech. Textura s {diskSamples} vzorky je normalizována na maximum a shader ji lineárně interpoluje. Vnitřní okraj je max({innerFactor} r₊, r_ISCO), pro podporované spiny tedy ISCO. Chybí normalizace podle rychlosti akrece. Jas je úměrný tomuto toku bez konstantního minima a efektivní teplota sleduje T ∝ F^(1/4); vrchol {peakK} K je zobrazovací měřítko, nikoli naměřená teplota. Neprůhledný disk k okraji tmavne jako atmosféra s rozptylem na elektronech, I ∝ 1 + {limbDarkening} μ (Chandrasekhar 1960), přičemž μ se určuje v souřadnicové soustavě. Faktor g, omezený na {redshiftMin}–{redshiftMax}, posouvá přibližnou RGB barvu záření absolutně černého tělesa a násobí jas g⁴. Moment hybnosti paprsku se odhaduje z nenormalizované kartézské tečny; výpočet pro rotující černou díru neřeší přenos záření v Kerrově prostoročase. Šum, pohyblivá skvrna, prolínání okrajů a záře jsou výtvarné. Teploty a rychlosti animace nejsou fyzikální předpovědi. Detaily plynu napodobují turbulenci protahovanou smykovým prouděním: vlákna s úhlem vinutí asi 14° a poměrem stran 5 : 1 ve dvou prolínaných strukturách s omezenou životností a diferenciální orbitální rotací. Při pohledu pod malým úhlem se jejich kontrast snižuje; jde o ilustraci nepravidelné emise, nikoli simulaci dynamiky plazmatu."
+        "body": "E, L a Ω kruhových drah vstupují do Pageova–Thorneova profilu toku s nulovým momentem síly na vnitřním okraji. CPU jej při změně spinu integruje v {diskIntervals, number} radiálních intervalech. Textura s {diskSamples, number} vzorky je normalizována na maximum a shader ji lineárně interpoluje. Vnitřní okraj je max({innerFactor, number} r₊; r_ISCO), pro podporované spiny tedy ISCO. Chybí normalizace podle rychlosti akrece. Jas je úměrný tomuto toku bez konstantního minima a efektivní teplota se řídí vztahem T ∝ F^(1/4); maximální teplota {peakK, number} K je zvolena pro zobrazení, nikoli určena měřením. Závislost intenzity záření neprůhledného disku na úhlu odpovídá modelu atmosféry s rozptylem na elektronech, I ∝ 1 + {limbDarkening, number} μ (Chandrasekhar 1960), přičemž μ se určuje v souřadnicové soustavě. Faktor g, omezený na {redshiftMin, number}–{redshiftMax, number}, posouvá přibližnou RGB barvu záření absolutně černého tělesa a násobí jas g⁴. Moment hybnosti paprsku se odhaduje z nenormalizované kartézské tečny; výpočet pro rotující černou díru neřeší přenos záření v Kerrově prostoročase. Šum, pohyblivá skvrna, prolínání okrajů a záře slouží k výtvarnému ztvárnění. Teploty a rychlosti animace nejsou fyzikální předpovědi. Detaily plynu napodobují turbulenci protahovanou smykovým prouděním: vlákna s úhlem vinutí asi 14° a poměrem stran 5 : 1 ve dvou prolínaných strukturách s omezenou životností a diferenciální orbitální rotací. Při pohledu pod malým úhlem vůči rovině disku se jejich kontrast snižuje; jde o ilustraci nepravidelné emise, nikoli simulaci dynamiky plazmatu."
       },
       "clocks": {
         "title": "Padající hodiny jsou samostatný model",
-        "body": "Vrstva hodin používá radiální Schwarzschildův pád z klidu v nekonečnu i při nenulovém spinu scény. Poloměr je v M, souřadnicový čas T a vlastní čas τ v geometrických jednotkách hmotnosti. Používá se krokování prvního řádu s volitelnými výukovými rychlostmi; každé hodiny se zastaví na r = {rainFloor} M a neprocházejí horizontem. Zobrazuje se místní poměr dτ/dT, nikoli úplný přijímaný světelný signál se zpožděním šíření. Při nastavení omezeného pohybu se vývoj padajících hodin zastaví."
+        "body": "Ukázka hodin používá radiální pád z klidu v nekonečnu ve Schwarzschildově geometrii, a to i při nenulovém spinu černé díry ve scéně. Poloměr se udává v jednotkách M, souřadnicový čas T a vlastní čas τ v odpovídajících geometrických jednotkách času. Výpočet postupuje po krocích metodou prvního řádu; rychlost přehrávání lze upravit pro výuku. Každé hodiny se v ukázce zastaví na r = {rainFloor, number} M a nepřekročí horizont. Zobrazuje se místní poměr dτ/dT, nikoli úplný světelný signál přijatý vzdáleným pozorovatelem se započtením doby šíření. Pokud má uživatel zapnuté omezení pohybu, animace hodin se zastaví."
       },
       "performance": {
-        "title": "Rozpočet vykreslování v reálném čase",
-        "body": "Úsporná, standardní a filmová kvalita dovolují {stepsEconomy}, {stepsStandard} a {stepsCinema} kroků na pixel. Měřítka rozlišení 0,72, 0,90 a 1,00 dále omezuje rozpočet 0,6, 1,2 a 2,4 milionu pixelů. DPR je nejvýše 1, u neomezené filmové kvality 1,5. Dotyková zařízení nebo hlášený provoz na baterii mají limit 0,8 milionu pixelů. Úsporná kvalita cílí na 24 fps, standardní na 30 fps; filmová může při interakci na neomezeném zařízení dosáhnout 60 fps. Jde o limity práce, nikoli záruku výdrže baterie. Prohlížeč dostává požadavek na úsporné GPU. Skrytá stránka a atlas vykreslování pozastaví. Pozastavení animace zastaví průběžné vykreslování, ovládání však scénu stále překreslí. Omezený pohyb začíná pozastavením. Tok disku se přepočítává jen při změně spinu; start používá menší buffery a méně kroků a při odpojení se uvolní prostředky GPU."
+        "title": "Nároky na vykreslování v reálném čase",
+        "body": "Úsporná, standardní a filmová kvalita dovolují {stepsEconomy, number}, {stepsStandard, number} a {stepsCinema, number} kroků na pixel. Násobky rozlišení 0,72, 0,90 a 1,00 dále omezuje limit 0,6, 1,2 a 2,4 milionu pixelů. DPR je nejvýše 1, ve filmové kvalitě bez dalších omezení 1,5. Dotyková zařízení nebo zařízení, která hlásí provoz na baterii, mají limit 0,8 milionu pixelů. Úsporná kvalita cílí na 24 fps, standardní na 30 fps; filmová může při interakci na neomezeném zařízení dosáhnout 60 fps. Jde o limity výpočetní zátěže, nikoli záruku výdrže baterie. Prohlížeč dostává požadavek na úsporné GPU. Při skrytí stránky nebo otevření atlasu se vykreslování pozastaví. Pozastavení animace zastaví průběžné vykreslování, ovládání však scénu stále překreslí. Při zapnutém omezení pohybu se scéna načte s pozastavenou animací. Tok disku se přepočítává jen při změně spinu; při spuštění se používají menší vykreslovací buffery a méně kroků. Při odebrání scény se uvolní prostředky GPU."
       },
       "limits": {
         "title": "Co obraz nemodeluje",
-        "body": "Jde o ilustrativní hybrid, nikoli ověřenou vědeckou předpověď či rekonstrukci pozorování. Neřeší úplné Kerrovy geodetiky, dynamiku plynu, magnetická pole, rozptyl, polarizaci ani přenos záření. Obloha, výtrysky, prach a záření padajícího plynu jsou procedurální. První průsečík s diskem ukončí paprsek, takže model nepředpovídá opticky tenké proudy ani jemné fotonové podprstence. Umělá záře fotonového prstence, zvýrazněné ozvěny skvrny i hvězdy umístěné nesprávně blízko horizontu byly odstraněny. Počet kroků, analytický ohyb ve vzdáleném poli, omezení hodnot, expozice a mapování barev stále mění fyzikální věrnost ve prospěch čitelnosti. Kamera je ovládání pohledu, nikoli relativisticky padající pozorovatel; ztmavení uvnitř horizontu je ilustrativní. Hmotnosti pojmenovaných objektů jsou přibližné literární hodnoty. Jejich spiny jsou předpokládané modelové hodnoty, kromě spinu GW231123 odvozeného z gravitačních vln; pohledy a barvy jsou výukové volby. Sgr A* a M87* nejsou rekonstrukce tenkých disků."
+        "body": "Jde o názorný model kombinující několik aproximací, nikoli ověřenou vědeckou předpověď či rekonstrukci pozorování. Neřeší úplné Kerrovy geodetiky, dynamiku plynu, magnetická pole, rozptyl, polarizaci ani přenos záření. Obloha, výtrysky, prach a záření padajícího plynu jsou procedurální. První průsečík s diskem ukončí paprsek, takže model nepředpovídá opticky tenké akreční toky ani jemné fotonové podprstence. Umělá záře fotonového prstence, zvýrazněné ozvěny skvrny i hvězdy umístěné nesprávně blízko horizontu byly odstraněny. Počet kroků, analytický ohyb ve vzdáleném poli, omezení hodnot, expozice a mapování barev stále mění fyzikální věrnost obrazu, aby byly hlavní jevy dobře patrné. Kamera slouží k ovládání pohledu a nemodeluje relativisticky padajícího pozorovatele; ztmavení uvnitř horizontu je ilustrativní. Hmotnosti pojmenovaných objektů jsou přibližné hodnoty z odborné literatury. Jejich spiny jsou předpokládané modelové hodnoty, kromě spinu GW231123 odvozeného z gravitačních vln; pohledy a barvy jsou výukové volby. Sgr A* a M87* nejsou rekonstrukce tenkých disků."
       }
     },
     "references": "Vědecké zdroje"
@@ -892,7 +892,7 @@
   "pauseScene": "Pozastavit animaci · šetřit energii",
   "resumeScene": "Pokračovat v animaci",
   "modelNotice": "Ilustrativní sledování paprsků. Kerrovy poloměry jsou teoretické, obraz je přibližný. Spiny skutečných objektů jsou předpokládané modelové hodnoty, kromě GW231123; barvy jsou ilustrativní.",
-  "pauseOrbit": "Pozastavit oběh",
-  "startOrbit": "Obíhat kamerou",
-  "pauseStories": "Pozastavit příběhy"
+  "pauseOrbit": "Pozastavit otáčení pohledu",
+  "startOrbit": "Spustit otáčení pohledu",
+  "pauseStories": "Pozastavit střídání příběhů"
 }

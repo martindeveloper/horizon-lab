@@ -153,17 +153,17 @@
     "schematic": "Measured distance · schematic path"
   },
   "facts": {
-    "onSlider": "On the slider",
+    "onSlider": "At selected time",
     "today": "Today",
     "period": "Period",
-    "modelStart": "Model start",
+    "modelStart": "Initial semi-major axis",
     "notMeasured": "{value} au, not a measurement",
     "stretch": "Stretch (e)",
     "tilt": "Tilt",
     "tiltValue": "{value}° to the ecliptic",
     "retrograde": "backward (retrograde)",
     "nearFar": "Near / far",
-    "average": "Average distance",
+    "average": "Semi-major axis",
     "when": "When",
     "radius": "Radius",
     "age": "Age",
@@ -181,14 +181,14 @@
     "shells": "Guide shells",
     "endState": "End state",
     "share": "In this sample",
-    "centre": "Distance to centre",
+    "centre": "Sun–centre distance",
     "lap": "Lap time",
     "speed": "Speed",
     "radial": "In-and-out",
     "vertical": "Up-and-down",
     "bar": "Bar",
     "width": "Width",
-    "diskWidth": "Starry disk",
+    "diskWidth": "Stellar disk diameter",
     "thickness": "Thin-disk thickness",
     "stars": "Stars",
     "proxima": "Proxima Centauri",
@@ -223,8 +223,8 @@
       "uranus": "An ice giant. In the model it moves outward with Neptune as the disk is stirred. Uranus and Neptune may even have swapped places.",
       "neptune": "Ends near 30 au at the inner edge of today's Kuiper belt. Its outward move is what scatters the disk in this sketch. Dynamical friction with the disk then rounded its orbit again."
     },
-    "planetCautionEllipse": "The curve is the real ellipse and the dot is today's position, advanced only by the Motion speed-up.",
-    "planetCautionCircle": "Ellipses are off, so the path is a circle at the mean distance. The stretch in this card is still the real one.",
+    "planetCautionEllipse": "The orbit uses measured elements; during migration, the giant planets’ orbits are adjusted by a teaching model. Motion speeds up the planet’s orbit.",
+    "planetCautionCircle": "With Ellipses off, the path is a circle whose radius equals the semi-major axis. The eccentricity shown in the card is unchanged.",
     "named": {
       "pluto": {
         "summary": "A dwarf planet in the Kuiper belt, locked in a 3:2 rhythm with Neptune: Neptune orbits three times while Pluto orbits twice. That is why their paths cross in distance without colliding.",
@@ -306,7 +306,7 @@
       },
       "bulge": {
         "title": "Bulge and bar",
-        "centre": "{sunRadiusLy} light-years from the Sun",
+        "centre": "About {sunRadiusLy} light-years",
         "bar": "About {barLy} light-years ({barKpc} kpc) end to end, estimates 7–10 kpc; ~{barDeg}° to the Sun–centre line",
         "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about 4 million Suns. The point density is a sketch, not a star catalogue.",
         "caution": "Do not measure the bar's length off this drawing."

@@ -105,16 +105,64 @@ html {
   padding-top: 0.75rem;
 }
 
-/* Immersive view (ImmersiveScene marks the stage): the stage covers the window and
-   the chrome steps aside. Only the stage's box changes, so WebGL stays as it is. */
-.simulation-stage[data-immersive] {
+/* Simulation canvases always fill the viewport, behind the application chrome.
+   Immersive mode changes only UI visibility: no stage resize, margin shift,
+   camera aspect change or drawing-buffer reallocation when F is pressed. */
+.simulation-stage[data-simulation] {
   position: fixed;
   inset: 0;
-  z-index: 110;
-  height: auto;
+  z-index: 1;
+  height: 100dvh;
+}
+/* Keep normal HUDs clear of the bars without constraining the canvas. These
+   insets stay constant throughout entry/exit so controls only fade and slide. */
+.simulation-stage[data-simulation] .immersive-overlays {
+  top: var(--app-header-height);
+  bottom: var(--app-footer-height);
+}
+.app-shell:has(.simulation-stage[data-simulation]) .app-footer {
+  position: relative;
+  z-index: 100;
+  background: var(--color-bg);
+}
+/* The bars move on their own composited layers; their layout space and the
+   full-screen canvas stay fixed. Clip the footer's travel to avoid scrollbars. */
+.app-shell:has(.simulation-stage[data-simulation]) {
+  overflow: clip;
+}
+.app-shell:has(.simulation-stage[data-simulation]) :is(.app-header, .app-footer) {
+  --bar-delay: 0ms;
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition:
+    translate 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--bar-delay),
+    opacity 520ms ease var(--bar-delay),
+    visibility 0s;
+}
+.app-shell:has(.simulation-stage[data-simulation]) .app-footer {
+  --bar-delay: 60ms;
 }
 .app-shell:has(.simulation-stage[data-immersive]) :is(.app-header, .app-footer) {
+  opacity: 0;
   visibility: hidden;
+  pointer-events: none;
+  transition:
+    translate 520ms cubic-bezier(0.4, 0, 0.2, 1) var(--bar-delay),
+    opacity 360ms ease calc(80ms + var(--bar-delay)),
+    visibility 0s calc(520ms + var(--bar-delay));
+}
+.app-shell:has(.simulation-stage[data-immersive]) .app-header {
+  translate: 0 -110%;
+}
+.app-shell:has(.simulation-stage[data-immersive]) .app-footer {
+  translate: 0 110%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell:has(.simulation-stage[data-simulation]) :is(.app-header, .app-footer) {
+    transition: none;
+    translate: none;
+  }
 }
 
 /* Phone notice: above the footer on pages; over a simulation the dock owns the

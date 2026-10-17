@@ -177,7 +177,9 @@ Every simulation:
   `[locale]/lab/<slug>`. Mount the scene in that layout to preserve it between presets;
   the root locale layout owns shared navigation and never mounts simulations.
 - Render inside `.simulation-stage` and use `VisualizationShell className="h-full"`
-  to fit beneath the shared header. Do not hide page overflow globally.
+  for a full-viewport canvas behind the shared chrome. Keep HUDs within the
+  header/footer insets using the shared immersive wrapper. Do not hide page
+  overflow globally.
 - Run `npm run typecheck`, `npm run lint`, `npm test` and `npm run build`, then
   check the visuals and keyboard use in a browser.
 
@@ -256,10 +258,13 @@ gutter, 1440px max), and simulation HUDs get it as `--hud-gutter`, so a sub-app'
 top, bottom and side-rail controls line up under the header. Position side rails
 with `--hud-gutter`, not a fixed inset.
 
-Simulation stages are sized between header and footer (`--app-header-height`,
-`--app-footer-height`) and paint their own opaque scene; overlays are isolated
-inside the stage, and nothing may overlap the footer. The catalogue scrolls over
-the sky and uses the same typography, tokens, materials, and theme system.
+Simulation stages with `data-simulation` stay fixed at full viewport size behind
+the header and footer. The canvas keeps the same size and position when immersive
+mode changes; only the UI fades and slides. The shared immersive wrapper insets
+normal HUDs by `--app-header-height` and `--app-footer-height`, keeping controls
+clear of the bars. Loading placeholders without `data-simulation` still fit
+between the bars. The catalogue scrolls normally over the sky and uses the same
+typography, tokens, materials, and theme system.
 
 ### Catalogue
 

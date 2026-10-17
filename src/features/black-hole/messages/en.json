@@ -287,7 +287,7 @@
       "2": {
         "kicker": "Intermediate mass",
         "title": "The missing middle",
-        "body": "Black holes left by single stars weigh up to tens of Suns; those in galaxy centres weigh millions to billions. Black holes between about a hundred and a hundred thousand Suns are rarely found, which makes Omega Centauri’s candidate important."
+        "body": "Ordinary stellar-origin black holes have masses of a few to tens of Suns, while supermassive black holes in galactic centres reach millions to billions. Intermediate-mass black holes, roughly a hundred to a hundred thousand Suns, are rarely found. That makes the candidate in Omega Centauri especially important."
       },
       "3": {
         "kicker": "2026",
@@ -868,7 +868,7 @@
       },
       "radii": {
         "title": "Units, radii, and orbital scales",
-        "body": "The renderer uses geometric units G = c = M = 1, so Rs = 2. Here M_phys denotes the physical mass and a the dimensionless spin. The readouts calculate the Kerr outer horizon, equatorial prograde photon-orbit radius, ISCO, and circular-orbit period. The displayed photon radius is one equatorial orbit, not a complete Kerr photon region. The shader captures rays at the horizon radius; the disk inner edge is max({innerFactor} r₊, r_ISCO), with outer radius {outerRadius} M. The ISCO helper explicitly returns 6 M at zero spin (its sign branch is positive there). Mass changes physical lengths and periods in the readouts, not the dimensionless rendered geometry or its animation speed."
+        "body": "The renderer uses geometric units G = c = M = 1, so Rs = 2. Here M_phys denotes the physical mass and a the dimensionless spin. The readouts calculate the Kerr outer horizon, equatorial photon-orbit radius and ISCO in the disk’s direction, and circular-orbit period. The displayed photon radius is one equatorial orbit, not a complete Kerr photon region. The shader captures rays at the horizon radius; the disk inner edge is max({innerFactor} r₊, r_ISCO), with outer radius {outerRadius} M. The ISCO helper explicitly returns 6 M at zero spin (its sign branch is positive there). Mass changes physical lengths and periods in the readouts, not the dimensionless rendered geometry or its animation speed."
       },
       "disk": {
         "title": "Disk emission and frequency shifts",

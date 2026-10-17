@@ -585,3 +585,71 @@
     opacity: 1;
   }
 }
+
+/* Cinematic chrome choreography. Animate only composited UI layers: never the
+   canvas or its host dimensions, which would clear the WebGL drawing buffer. */
+.immersive-overlays {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 640ms cubic-bezier(0.16, 1, 0.3, 1) 100ms,
+    visibility 0s;
+}
+.immersive-overlays :is(.hud-top, .hud-bottom) {
+  translate: 0 0;
+  transition: translate 740ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.immersive-overlays[data-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 440ms cubic-bezier(0.4, 0, 1, 1),
+    visibility 0s 440ms;
+}
+.immersive-overlays[data-hidden="true"] .hud-top {
+  translate: 0 -14px;
+}
+.immersive-overlays[data-hidden="true"] .hud-bottom {
+  translate: 0 14px;
+}
+.immersive-controls {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition:
+    opacity 480ms ease 240ms,
+    translate 640ms cubic-bezier(0.16, 1, 0.3, 1) 180ms,
+    visibility 0s;
+}
+.immersive-controls[data-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 -8px;
+  transition:
+    opacity 180ms ease,
+    translate 240ms ease,
+    visibility 0s 180ms;
+}
+@starting-style {
+  .immersive-overlays {
+    opacity: 0;
+  }
+  .immersive-overlays .hud-top {
+    translate: 0 -14px;
+  }
+  .immersive-overlays .hud-bottom {
+    translate: 0 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .immersive-overlays,
+  .immersive-overlays :is(.hud-top, .hud-bottom),
+  .immersive-controls {
+    transition-delay: 0s !important;
+    translate: none !important;
+  }
+}
