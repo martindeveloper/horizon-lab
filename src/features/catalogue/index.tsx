@@ -173,7 +173,7 @@ export async function Catalogue({ locale }: { locale: Locale }) {
           </p>
           <h1
             id="catalogue-heading"
-            className="intro-title mt-5 max-w-[13ch] font-headline text-5xl leading-[0.95] font-medium tracking-[-0.025em] text-balance sm:text-6xl lg:max-w-[16ch] lg:text-[clamp(4.75rem,7.8vw,8.5rem)] lg:leading-[0.9] lg:tracking-[-0.03em]"
+            className="intro-title mt-5 max-w-[13ch] font-headline text-5xl leading-[0.95] font-medium tracking-[-0.025em] text-balance sm:text-6xl lg:max-w-[16ch] lg:text-[clamp(4.75rem,7.8vw,8.5rem)] lg:leading-[0.9] lg:tracking-[-0.03em] lg:[&_em]:block"
           >
             {t.rich("title", { em: (chunks) => <em>{chunks}</em> })}
           </h1>
