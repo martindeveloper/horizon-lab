@@ -2,16 +2,17 @@
 #ifndef HORIZON_ORRERY_PARAMETERS
 #define HORIZON_ORRERY_PARAMETERS
 
-#define SWARM_TROJAN_OFFSET 1.047197551
-#define SWARM_KEPLER_STEPS  4
-#define GAS_CAVITY_IN       0.0008333333333
-#define GAS_CAVITY_OUT      0.0035
-#define GAS_RIM_IN          0.92
-#define GAS_RIM_OUT         1.0
-#define SUN_CENTRE_RGB      vec3(1.0, 0.97, 0.9)
-#define SUN_LIMB_U          vec3(0.802, 0.914, 0.978)
-#define SUN_LIMB_V          vec3(-0.198, -0.215, -0.164)
-#define PLANET_WRAP         0.12
-#define RING_AMBIENT        0.08
+#define SWARM_TROJAN_OFFSET     1.047197551
+#define SWARM_KEPLER_STEPS      4
+#define GAS_CAVITY_IN           0.0008333333333
+#define GAS_CAVITY_OUT          0.0035
+#define GAS_RIM_IN              0.92
+#define GAS_RIM_OUT             1.0
+#define SUN_CENTRE_RGB          vec3(1.0, 0.99, 0.97)
+#define SUN_MAP_QUIET_INTENSITY 0.8
+#define SUN_LIMB_U              vec3(0.802, 0.914, 0.978)
+#define SUN_LIMB_V              vec3(-0.198, -0.215, -0.164)
+#define PLANET_WRAP             0.12
+#define RING_AMBIENT            0.08
 
 #endif // HORIZON_ORRERY_PARAMETERS

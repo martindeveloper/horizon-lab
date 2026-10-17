@@ -2,7 +2,7 @@
  * Measured surface maps: what each body's texture is built from, who made the
  * data and under which licence. The app owns where the WebP tiers are served
  * from and passes that base in. Bodies without an entry keep their painted map
- * (`@horizon/toolkit/bodies/surfaces`): the Sun, Venus (featureless cloud
+ * (`@horizon/toolkit/bodies/surfaces`): Venus (featureless cloud
  * tops), Sedna, Halley and the moons.
  *
  * All maps are equirectangular in the scene's convention: east longitude 0°
@@ -30,6 +30,14 @@ const OPAL_CREDIT = "NASA, ESA, A.A. Simon, M.H. Wong (OPAL, Hubble programme GO
 const OPAL_URL = "https://archive.stsci.edu/hlsp/opal";
 
 export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
+  sun: {
+    widths: { far: 1024, near: 8192, nearLight: 2048 },
+    source:
+      "SDO/HMI flattened continuum intensity, 1–22 May 2024; representative rotation mosaic, quiet polar fill",
+    credit: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
+    licence: "Public domain",
+    url: "https://sdo.gsfc.nasa.gov/data/",
+  },
   mercury: {
     widths: { far: 1024, near: 4096, nearLight: 2048 },
     source: "MESSENGER MDIS 3-colour global mosaic (2011–2015), brightness only",

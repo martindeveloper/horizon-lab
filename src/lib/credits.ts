@@ -49,6 +49,13 @@ export const CREDITS: readonly CreditGroup[] = [
     id: "imagery",
     items: [
       {
+        id: "sdoHmi",
+        name: "SDO/HMI continuum intensity (May 2024)",
+        by: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
+        licence: "Public domain",
+        url: "https://sdo.gsfc.nasa.gov/data/",
+      },
+      {
         id: "opal",
         name: "Hubble OPAL global maps (2025)",
         by: "NASA, ESA, A.A. Simon, M.H. Wong. Hubble programme GO13937 (PI: Simon), archived by STScI; DOI 10.17909/T9G593",

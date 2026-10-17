@@ -490,6 +490,8 @@ export function createLooks(light = false) {
     },
     /** A close-up's detailed map, to paint a few rows per frame; null when the base map suffices. */
     detailJob: (id: BodyId) => {
+      // Keep the observed far map if the Sun's close-up tier fails to load.
+      if (id === "sun") return null;
       const w = closeUpMapWidth(id, light);
       return w > size(id) ? surfaceJob(id, w, w / 2) : null;
     },

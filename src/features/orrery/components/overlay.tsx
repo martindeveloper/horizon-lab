@@ -129,13 +129,8 @@ export function OrreryOverlay() {
           {panel === "none" && selection ? (
             <SelectionCard key={closeUp ? "close-up" : "card"} />
           ) : null}
-          {panel === "none" && !selection ? (
-            <TimeDock />
-          ) : (
-            <div className="hidden md:block">
-              <TimeDock />
-            </div>
-          )}
+          {/* One mount in every state, so opening a card never rebuilds or moves the dock. */}
+          <TimeDock />
         </>
       )}
     </VisualizationOverlay>

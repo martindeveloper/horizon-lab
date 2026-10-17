@@ -1,5 +1,6 @@
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 
 import { DISTANCE_UNITS, formatReadout, type DistanceUnit } from "@horizon/toolkit/science";
 import { Dock, IconButton, SegmentedControl, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
@@ -31,8 +32,10 @@ export function TimeDock() {
   const driftRate = useOrrery((s) => s.driftRate);
   const driftYears = useOrrery((s) => s.driftYears);
   const drift = useOrrery((s) => s.show.drift);
-  // Wide screens keep the dock clear of an open rail or card (w-80 on the HUD gutter).
+  // Phones give an open sheet or card the bottom of the screen.
   const aside = useOrrery((s) => s.panel !== "none" || s.selection !== null);
+  const surface = useRef<HTMLDivElement>(null);
+  useDockClearance(surface);
   const now = useNow({ updateInterval: 60_000 });
   const atEnd = yearsAgo <= 0;
   const api = useOrrery.getState;
@@ -66,10 +69,7 @@ export function TimeDock() {
         : t("time.laps", { laps: f.number(galacticLaps(yearsAgo), { maximumFractionDigits: 1 }) });
   const playLabel = playing ? t("hud.pause") : atEnd ? t("hud.playRestart") : t("hud.play");
   return (
-    <Dock
-      footerClassName={cn(aside && "md:lg:pr-[calc(20rem+2*var(--hud-gutter))]")}
-      className="flex flex-col"
-    >
+    <Dock ref={surface} footerClassName={cn(aside && "not-md:hidden")} className="flex flex-col">
       <div className="flex items-center gap-3">
         <div className="flex shrink-0 items-center gap-2 md:gap-1">
           <Tooltip label={playLabel}>
@@ -108,6 +108,34 @@ export function TimeDock() {
       </div>
     </Dock>
   );
+}
+
+/**
+ * The dock never moves for a side panel. Where its centred width reaches the panel
+ * column (w-80 on the HUD gutter), `--orrery-clear` on the overlay tells the card and
+ * rail to end above it; on wide screens they keep their full height.
+ */
+function useDockClearance(surface: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const dock = surface.current;
+    const overlay = dock?.closest("footer")?.parentElement;
+    if (!dock || !overlay) return;
+    const write = () => {
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const box = overlay.getBoundingClientRect();
+      const rect = dock.getBoundingClientRect();
+      if (rect.height > 0 && rect.right + 22 * rem > box.right)
+        overlay.style.setProperty("--orrery-clear", `${box.bottom - rect.top + 0.75 * rem}px`);
+      else overlay.style.removeProperty("--orrery-clear");
+    };
+    const observer = new ResizeObserver(write);
+    observer.observe(dock);
+    observer.observe(overlay);
+    return () => {
+      observer.disconnect();
+      overlay.style.removeProperty("--orrery-clear");
+    };
+  }, [surface]);
 }
 
 /** The scrubber with the epochs as stations on it; wide screens label and link them. */

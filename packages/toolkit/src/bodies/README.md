@@ -63,6 +63,13 @@ tierFile("/textures/orrery", "earth", "near"); // "/textures/orrery/earth-near.w
 `tierFile` returns `null` for a body without a map and shares one file between
 tiers of equal width. Loading and texturing stay in the host.
 
+The Sun entry is a representative SDO/HMI continuum mosaic from May 2024,
+not a simultaneous global measurement or a live surface. Its normalized
+intensity is emissive, so geometric-albedo checks do not apply. The host
+removes the source display colour and limb profile during preprocessing and
+applies view-dependent limb darkening at render time. The painted Sun is a
+uniform neutral fallback while the observation map loads.
+
 ## Painted surfaces (`@horizon/toolkit/bodies/surfaces`)
 
 A separate entry point, because the painters are large and only a renderer

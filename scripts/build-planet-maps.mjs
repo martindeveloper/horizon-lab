@@ -29,6 +29,8 @@ import sharp from "sharp";
 import { FIGURES, MAPS, mapFile } from "@horizon/toolkit/bodies";
 import { surfaceMap } from "@horizon/toolkit/bodies/surfaces";
 
+import { buildSunMap } from "./build-sun-map.mjs";
+
 sharp.cache(false);
 const root = new URL("../", import.meta.url);
 const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-planet-maps"));
@@ -328,6 +330,7 @@ async function pluto(width) {
 }
 
 const BUILDERS = {
+  sun: buildSunMap,
   mercury,
   earth,
   mars,
@@ -354,7 +357,11 @@ for (const [id, map] of Object.entries(MAPS)) {
     const file = new URL(mapFile(".", id, tier), outDir);
     const info = await sharp(bytes, { raw: { width: img.w, height: img.h, channels: 3 } })
       .resize(w, w / 2, { fit: "fill", kernel: "lanczos3" })
-      .webp({ quality: tier === "far" ? 84 : 78, effort: 6, smartSubsample: true })
+      .webp({
+        quality: tier === "far" ? 84 : id === "sun" ? 85 : 78,
+        effort: 6,
+        smartSubsample: id !== "sun",
+      })
       .toFile(file.pathname);
     console.log(
       `  ${path.basename(file.pathname)} ${w} × ${w / 2}, ${(info.size / 1024).toFixed(0)} KB`,

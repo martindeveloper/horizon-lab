@@ -2,11 +2,8 @@
 import { smoothstep as smooth } from "../../math/index";
 import { RAD, fbm, mix, scale, spot, type Painter } from "./raster";
 
-/** The photosphere: supergranulation and faint faculae, grey (the shader colours it). */
-export const sun: Painter = (p) => {
-  const v = 0.86 + (fbm(p, 18, 18, 3, 18) - 0.5) * 0.22;
-  return [v * 255, v * 255, v * 255];
-};
+/** Neutral loading/offline fallback. The measured HMI mosaic supplies the Sun's detail. */
+export const sun: Painter = () => [231, 231, 231];
 
 /** Mercury: grey-brown regolith (MESSENGER MDIS colour), bright rayed craters. */
 export const mercury: Painter = (p) => {

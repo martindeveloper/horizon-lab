@@ -44,6 +44,8 @@ test("every tier exists at its declared size, inside its budget", async () => {
 
 test("measured maps keep each body's geometric albedo", async () => {
   for (const id of Object.keys(MAPS)) {
+    // The Sun emits light; its intensity map has no reflected-light geometric albedo.
+    if (id === "sun") continue;
     const { data, info } = await sharp(publicFile(tierFile(id, "far")).pathname)
       .resize(256, 128, { fit: "fill" })
       .raw()

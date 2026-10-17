@@ -171,6 +171,7 @@
       }
     },
     "items": {
+      "sdoHmi": "Sun: a representative mosaic of SDO/HMI observations from 1–22 May 2024. Reprojected and blended across one rotation; poorly observed poles fade to a quiet surface. This is not live imagery or a single-date map.",
       "opal": "Jupiter, Saturn, Uranus and Neptune: Hubble maps from 2025, in true colour.",
       "blueMarble": "Earth: October land and sea under a cloud layer.",
       "viking": "Mars.",

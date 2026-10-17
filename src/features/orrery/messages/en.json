@@ -466,7 +466,7 @@
       },
       "globes": {
         "title": "Globes and rings",
-        "body": "Radii, flattening, poles and spin rates are IAU values, so every globe has its real shape and turns to today's angle: Uranus lies on its side, Venus spins backwards. Surfaces are measured maps: Hubble's 2025 maps of the giants, Blue Marble Earth, Viking Mars, MESSENGER Mercury and New Horizons Pluto, with mean colour and brightness set by true-colour data and albedo. The Sun, Venus, Sedna, Halley and unseen areas are painted. Rings use measured radii and optical depths, lit from the front or seen against the light, with the planet's shadow across them. Jupiter's are too faint to show."
+        "body": "Radii, flattening, poles and spin rates are IAU values, so every globe has its real shape and turns to today's angle: Uranus lies on its side, Venus spins backwards. Surfaces are measured maps: Hubble's 2025 maps of the giants, Blue Marble Earth, Viking Mars, MESSENGER Mercury and New Horizons Pluto, with mean colour and brightness set by true-colour data and albedo. The Sun uses a representative SDO/HMI photosphere mosaic from 1–22 May 2024, reprojected across one rotation with quiet polar fill; its sunspots are not live or tied to the timeline date. Venus, Sedna, Halley and other unseen areas are painted. Rings use measured radii and optical depths, lit from the front or seen against the light, with the planet's shadow across them. Jupiter's are too faint to show."
       },
       "rendering": {
         "title": "Rendering budget",

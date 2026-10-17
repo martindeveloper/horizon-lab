@@ -43,7 +43,7 @@ export function Rail({
         ref={rail}
         id={id}
         tabIndex={-1}
-        className="orrery-panel glass-panel anim-rail pointer-events-auto absolute top-14 right-(--hud-gutter) bottom-4 z-40 hidden w-80 flex-col overflow-hidden rounded-lg outline-hidden md:flex"
+        className="orrery-panel glass-panel anim-rail pointer-events-auto absolute top-14 right-(--hud-gutter) bottom-[var(--orrery-clear,1rem)] z-40 hidden w-80 flex-col overflow-hidden rounded-lg outline-hidden md:flex"
         aria-label={title}
       >
         <PanelHeader

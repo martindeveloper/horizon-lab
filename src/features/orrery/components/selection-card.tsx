@@ -37,7 +37,7 @@ export function SelectionCard() {
     <article
       ref={root}
       tabIndex={-1}
-      className="orrery-sheet glass-panel anim-sheet md:anim-rail pointer-events-auto absolute inset-x-0 bottom-0 z-40 flex flex-col overflow-hidden rounded-t-xl outline-hidden md:inset-x-auto md:top-14 md:right-(--hud-gutter) md:bottom-auto md:max-h-[calc(100%-9rem)] md:w-80 md:rounded-lg"
+      className="orrery-sheet glass-panel anim-sheet md:anim-rail pointer-events-auto absolute inset-x-0 bottom-0 z-40 flex flex-col overflow-hidden rounded-t-xl outline-hidden md:inset-x-auto md:top-14 md:right-(--hud-gutter) md:bottom-auto md:max-h-[calc(100%-3.5rem-var(--orrery-clear,5.5rem))] md:w-80 md:rounded-lg"
       aria-label={card.title}
     >
       <PanelHeader

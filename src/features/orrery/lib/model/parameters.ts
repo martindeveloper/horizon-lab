@@ -84,7 +84,9 @@ export const DUST_CAVITY_OUT_AU = 0.42;
 /** The disk fades over its outer 8 % (art direction). */
 export const GAS_RIM_FRACTION = 0.92;
 /** The Sun's disc-centre colour, linear RGB: white, a touch warm. */
-export const SUN_CENTRE_RGB = [1, 0.97, 0.9] as const;
+export const SUN_CENTRE_RGB = [1, 0.99, 0.97] as const;
+/** Linear texture intensity of the quiet photosphere; reserves headroom for faculae. */
+export const SUN_MAP_QUIET_INTENSITY = 0.8;
 /**
  * Solar limb darkening I(μ)/I(1) = 1 − u(1 − μ) − v(1 − μ²) for red, green and
  * blue (0.65, 0.55, 0.45 µm), from the SolarSoft darklimb_u/v fits to Allen's
