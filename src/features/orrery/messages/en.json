@@ -216,7 +216,7 @@
     "planets": {
       "mercury": "Smallest planet. Its path is the most stretched of the eight.",
       "venus": "Almost a circle. A circle and an ellipse look the same here.",
-      "earth": "1 au is Earth's mean distance from the Sun: {millions} million km, or {minutes} light-minutes.",
+      "earth": "1 au is approximately Earth's mean distance from the Sun: {millions} million km, or {minutes} light-minutes. It is defined as exactly 149,597,870,700 metres.",
       "mars": "A clearly stretched orbit. Still tiny beside Jupiter's.",
       "jupiter": "In the model Jupiter starts slightly farther out and ends slightly closer in, as instability studies find. The start is not a measurement. It outweighs all the other planets together more than twice over.",
       "saturn": "Starts closer to Jupiter than today, then moves outward in the model. The rings are to scale with the planet. Its mean density is lower than water's.",
@@ -325,7 +325,7 @@
         "stars": "At least 100 billion",
         "age": "About 13.6 billion years",
         "body": "Our galaxy from outside, built on measurements: a thin and a thick disk, a peanut-shaped bulge inside a bar at {barDeg}°, four arms at a ~{pitchDeg}° pitch placed where maser distances put them near the Sun, the short Local Arm just outside us, dust lanes on the arms' inner edges and the warp of the outer disk. The far side is extrapolated: the centre hides it from us. Before the Sun you get one earlier sketch: thicker, smaller, less of a bar, the stirred galaxy around the Gaia-Enceladus merger roughly 8–11 billion years ago.",
-        "caution": "Spiral arms are density waves, not fixed structures; stars pass through them. The ecliptic and the Galactic plane are tilted by about 60°, so the two maps meet only at the Sun."
+        "caution": "Spiral arms are density waves, not fixed structures; stars pass through them. The ecliptic plane and the Galactic plane are tilted by about 60°, so the two maps meet only at the Sun."
       }
     },
     "stars": {
@@ -378,7 +378,7 @@
       },
       "maps": {
         "title": "Two maps, not one",
-        "body": "The solar-system plane is the ecliptic. The Milky Way view is the Galactic disk. They are tilted by about 60° and the solar system is an invisible speck on a Galaxy map, so the maps meet only at the Sun: zoom in on it to cross over."
+        "body": "The solar-system model uses the ecliptic plane, the plane of Earth's orbit, as its reference. The Milky Way view uses the Galactic disk plane. These planes are tilted by about 60°, and the solar system is an invisible speck on a Galaxy map, so the maps connect only at the Sun: zoom in on it to cross over."
       }
     }
   },

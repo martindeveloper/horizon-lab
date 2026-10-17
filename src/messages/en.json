@@ -60,7 +60,7 @@
       "description": "Follow light around a black hole: lensing, orbiting matter, and the slow pace of time near the horizon.",
       "open": "Open the observatory",
       "lensing": "Gravitational lensing",
-      "orbits": "6 scenes",
+      "orbits": "10 scenes",
       "guides": "Guided tours",
       "entryPoints": {
         "light": {

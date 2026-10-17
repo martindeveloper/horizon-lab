@@ -65,7 +65,7 @@
   "clocksP2": "This demonstration uses Schwarzschild geometry even when you select a spinning black hole. Here G = c = 1 and the horizon is at r = 2M. Spin would change both the geometry and the clocks’ motion, including frame dragging. Mass changes the conversion to seconds, not the displayed ratios at a given r/M. These ratios are not the ticking rates inferred from received light signals, which also depend on light-travel time. A clock cannot be held stationary on the horizon itself.",
   "pinHorizonK": "r₊  ·  event horizon",
   "pinPhotonK": "r_ph  ·  equatorial photon orbit",
-  "pinIscoK": "r_ISCO  ·  innermost stable orbit",
+  "pinIscoK": "r_ISCO  ·  innermost stable circular orbit",
   "pinDopplerK": "δ³  ·  spectral beaming",
   "pinHorizonT": "The boundary of no return",
   "pinPhotonT": "Where light can orbit",
