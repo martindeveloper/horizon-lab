@@ -17,6 +17,7 @@ export { Kicker, kickerClass } from "./kicker";
 export { PanelHeader, type PanelHeaderProps } from "./panel-header";
 export { Chip, type ChipProps } from "./chip";
 export { ListItem, type ListItemProps } from "./list-item";
+export { SwitchChip, SwitchMark, SwitchRow } from "./switch";
 export { Picker, type PickerProps } from "./picker";
 export { Sheet, type SheetProps } from "./sheet";
 export { Dock, type DockProps } from "./dock";

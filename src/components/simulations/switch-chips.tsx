@@ -1,54 +1,34 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { SwitchChip, SwitchRow } from "@horizon/toolkit/ui";
 
-import { Chip, cn } from "@horizon/toolkit/ui";
-
-/** One on/off chip for a scene switch: a gold pip for on, an empty ring for off. */
-export function SwitchChip({
-  on,
-  onToggle,
-  className,
-  children,
-  ...props
-}: Omit<ComponentProps<typeof Chip>, "role" | "selected" | "onClick" | "aria-checked"> & {
-  on: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <Chip
-      {...props}
-      role="switch"
-      aria-checked={on}
-      selected={on}
-      onClick={onToggle}
-      className={cn("gap-1.5", className)}
-    >
-      {/* The state reads without the glass. */}
-      <span
-        aria-hidden
-        className={cn(
-          "size-1.5 shrink-0 rounded-full transition-colors duration-300",
-          on ? "bg-accent" : "border border-current opacity-60",
-        )}
-      />
-      {children}
-    </Chip>
-  );
-}
-
-/** A row of switch chips for a scene's display switches. */
+/**
+ * A scene's display switches: a wrapping row of switch chips where space is short (a dock),
+ * or a list of switch rows in a panel.
+ */
 export function SwitchChips<Key extends string>({
   keys,
   values,
   label,
   onToggle,
+  list = false,
 }: {
   keys: readonly Key[];
   values: Readonly<Record<Key, boolean>>;
   label: (key: Key) => string;
   onToggle: (key: Key) => void;
+  list?: boolean;
 }) {
+  if (list)
+    return (
+      <div className="-mx-3 grid gap-0.5">
+        {keys.map((key) => (
+          <SwitchRow key={key} on={values[key]} onToggle={() => onToggle(key)}>
+            {label(key)}
+          </SwitchRow>
+        ))}
+      </div>
+    );
   return (
     <div className="flex flex-wrap gap-1">
       {keys.map((key) => (

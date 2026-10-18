@@ -1,4 +1,4 @@
-import { List, Orbit, SlidersHorizontal } from "lucide-react";
+import { Crosshair, Orbit, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
@@ -110,7 +110,7 @@ export function DeepFieldOverlay() {
                     active={panel === "objects"}
                     onClick={() => setPanel(panel === "objects" ? "none" : "objects")}
                   >
-                    <List className="size-4 md:size-3.5" />
+                    <Crosshair className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip label={t("hud.view")}>

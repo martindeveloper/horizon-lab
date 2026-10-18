@@ -289,7 +289,8 @@ only its layers, its views and its store of its own:
   (`useDockClearance`). Each zoomable simulation keeps two panels apart: **Objects**
   (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
   is drawn: layers, switches, the distance unit and the `CameraPad`), built from
-  `SwitchChip(s)`, `DistanceUnitControl` and `MapScale`. `useSceneEscape` lets Escape undo
+  `SwitchChips` (the toolkit's switch rows in a panel, its switch chips in a dock),
+  `DistanceUnitControl` and `MapScale`. `useSceneEscape` lets Escape undo
   one thing at a time.
 
 **Shared worlds.** What more than one simulation draws lives in `src/space/`, below the

@@ -18,6 +18,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
     <Rail id="deep-field-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
       <RailSection title={t("hud.show")}>
         <SwitchChips
+          list
           keys={SWITCHES}
           values={show}
           label={(key) => t(`toggles.${key}`)}

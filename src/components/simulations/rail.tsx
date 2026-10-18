@@ -24,7 +24,8 @@ export function RailSection({
 }
 
 /**
- * A panel beside the scene on wide screens, ending above the dock (`--hud-clear`); a bottom
+ * A panel beside the scene on wide screens, as tall as its content and never past the dock
+ * (`--hud-clear`); a bottom
  * sheet on phones that leaves the scene visible above it, so a switch shows its effect.
  */
 export function Rail({
@@ -48,7 +49,7 @@ export function Rail({
         ref={rail}
         id={id}
         tabIndex={-1}
-        className="glass-panel anim-rail pointer-events-auto absolute top-14 right-(--hud-gutter) bottom-[var(--hud-clear,1rem)] z-40 hidden max-h-[min(32rem,calc(100dvh-var(--app-header-height)-var(--app-footer-height)-6rem))] w-80 flex-col overflow-hidden rounded-lg outline-hidden md:flex"
+        className="glass-panel anim-rail pointer-events-auto absolute top-14 right-(--hud-gutter) z-40 hidden max-h-[min(32rem,calc(100dvh-var(--app-header-height)-var(--app-footer-height)-6rem),calc(100%-3.5rem-var(--hud-clear,1rem)))] w-80 flex-col overflow-hidden rounded-lg outline-hidden md:flex"
         aria-label={title}
       >
         <PanelHeader

@@ -62,7 +62,7 @@ export function HandoffRow({
         <span>{title}</span>
         <span className="text-xs text-muted">{hint}</span>
       </span>
-      <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-solar" aria-hidden />
+      <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
     </HandoffLink>
   );
 }

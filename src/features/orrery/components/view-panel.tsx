@@ -20,6 +20,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
     <Rail id="orrery-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
       <RailSection title={t("layers.title")} note={t("hud.legend")}>
         <SwitchChips
+          list
           keys={BINS}
           values={show}
           label={(bin) => t("layers.count", { label: t(`layers.${bin}`), count: tally[bin] })}
@@ -27,7 +28,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         />
       </RailSection>
       <RailSection title={t("hud.show")}>
-        <Switches keys={[...DISPLAY, ...EXTRA]} />
+        <Switches list keys={[...DISPLAY, ...EXTRA]} />
       </RailSection>
       <RailSection title={t("hud.camera")}>
         <CameraPad namespace="orrery" onRotate={(turn) => useOrrery.getState().rotate(turn)} />

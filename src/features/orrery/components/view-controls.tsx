@@ -50,11 +50,12 @@ export function ViewPicker() {
   );
 }
 
-export function Switches({ keys }: { keys: (keyof Show)[] }) {
+export function Switches({ keys, list = false }: { keys: (keyof Show)[]; list?: boolean }) {
   const t = useTranslations("orrery");
   const show = useOrrery((s) => s.show);
   return (
     <SwitchChips
+      list={list}
       keys={keys}
       values={show}
       label={(key) => t(`toggles.${key}`)}
@@ -91,7 +92,7 @@ export function EdgeChip() {
         className="glass-hud pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full px-4 text-xs tracking-wide text-fg transition-colors hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
       >
         {t("hud.keepGoing")}
-        <ArrowUpRight className="size-3.5 text-solar" aria-hidden />
+        <ArrowUpRight className="size-3.5 text-accent" aria-hidden />
       </HandoffLink>
     </div>
   );

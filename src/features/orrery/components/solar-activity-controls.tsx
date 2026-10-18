@@ -2,9 +2,8 @@ import { Pause, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId, useSyncExternalStore } from "react";
 
-import { SwitchChip } from "@/components/simulations/switch-chips";
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
-import { IconButton, Surface, useImmersive } from "@horizon/toolkit/ui";
+import { IconButton, Surface, SwitchChip, useImmersive } from "@horizon/toolkit/ui";
 
 import { useOrrery } from "../lib/store";
 

@@ -6,7 +6,7 @@ import { formatSpin, horizonOverM } from "@/features/black-hole/lib/physics";
 import { MIN_DIST, MAX_DIST, type Quality } from "@/features/black-hole/lib/presets";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { toLogFraction, fromLogFraction } from "@horizon/toolkit/math";
-import { ControlRow, SegmentedControl, Slider } from "@horizon/toolkit/ui";
+import { ControlRow, SegmentedControl, Slider, SwitchRow } from "@horizon/toolkit/ui";
 
 /** Observatory controls: spin, camera, optics, pace and quality. */
 export function SettingsBody() {
@@ -127,13 +127,14 @@ export function SettingsBody() {
         />
       </ControlRow>
 
-      <button
-        type="button"
-        onClick={() => setAnimationPaused(!animationPaused)}
-        className="min-h-11 text-left text-sm text-fg"
-      >
-        {animationPaused ? t("resumeScene") : t("pauseScene")}
-      </button>
+      <div className="-mx-3 grid gap-0.5">
+        <SwitchRow on={!animationPaused} onToggle={() => setAnimationPaused(!animationPaused)}>
+          {t("animation")}
+        </SwitchRow>
+        <SwitchRow on={autoRotate} onToggle={() => setAutoRotate(!autoRotate)}>
+          {t("orbit")}
+        </SwitchRow>
+      </div>
       <p className="text-xs text-muted">{t("modelNotice")}</p>
       <SegmentedControl<Quality>
         aria-label={t("renderQuality")}
@@ -146,24 +147,14 @@ export function SettingsBody() {
         ]}
       />
 
-      <div className="flex gap-4">
-        <button
-          type="button"
-          className="min-h-11 text-xs tracking-wide text-muted transition-colors duration-300 hover:text-fg md:min-h-6"
-          aria-label={autoRotate ? t("pauseOrbit") : t("startOrbit")}
-          onClick={() => setAutoRotate(!autoRotate)}
-        >
-          {autoRotate ? t("pause") : t("orbit")}
-        </button>
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center gap-1.5 text-xs tracking-wide text-muted transition-colors duration-300 hover:text-fg md:min-h-6"
-          onClick={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
-        >
-          <RotateCcw className="size-3" />
-          {t("reset")}
-        </button>
-      </div>
+      <button
+        type="button"
+        className="inline-flex min-h-11 items-center gap-1.5 self-start text-xs tracking-wide text-muted transition-colors duration-300 hover:text-fg md:min-h-6"
+        onClick={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
+      >
+        <RotateCcw className="size-3" />
+        {t("reset")}
+      </button>
     </div>
   );
 }
