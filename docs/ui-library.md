@@ -218,8 +218,8 @@ renders the fixed sky (`shell/sky.tsx`), a glass header and a footer.
 
 ### Sky
 
-The sky is the real one: `src/lib/stars.ts` holds the ~200 brightest naked-eye stars (J2000
-coordinates, magnitude, B−V), shared with the orrery's sky, and `shell/stars.ts`
+The sky is the real one: `src/space/star-catalogue.ts` holds the ~200 brightest naked-eye stars (J2000
+coordinates, magnitude, B−V), shared with the orrery's sky, and `space/observer-sky.ts`
 computes their altitude and azimuth over
 Ondřejov Observatory from sidereal time, with precession applied. The canvas
 draws the view toward south at equal degrees per pixel, the page's horizon
@@ -274,7 +274,7 @@ typography, tokens, materials, and theme system.
 The catalogue opens on a full-bleed panorama over Ondřejov facing south, the
 brand mark at landscape scale: today's solar path as a faint dashed arc with
 sunrise and sunset marked on the horizon hairline, and a frosted sun standing
-where the real Sun stands (`sunPosition` in `shell/stars.ts`, placed once a
+where the real Sun stands (`sunPosition` in `space/observer-sky.ts`, placed once a
 minute and on resize by `catalogue/hero-sun.tsx`). The real sky blurs through
 it; at night it sinks under the line, leaving a glow at its bearing. The Moon
 follows its own silver arc (`moonPosition`: Meeus ch. 47 with the 32 + 20

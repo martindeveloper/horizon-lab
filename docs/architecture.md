@@ -97,7 +97,7 @@ src/
                                toolkit's tour camera (as the Orrery's guide does)
       lib/store.ts             Zustand store (deepField namespace messages)
   lib/
-    stars.ts                   Shared bright-star catalogue (shell sky and orrery sky)
+    engine-lifecycle.ts        Lazy engine startup, cancellation and disposal
     sources.ts                 Shared bibliography the catalogue figures cite
     facts.ts                   Catalogue fact and card-spec types, and their printers
     scene-store.ts             What a zoomable scene's store shares (`sceneSlice`)
@@ -112,9 +112,11 @@ src/
     redirects.ts               Native Next.js compatibility redirects
     metadata.ts                Shared page metadata helper
     credits.ts                 Imagery, data, font and package credits for /credits
-  space/                       What the space simulations share, below the features:
+  space/                       Shared astronomy for the shell, catalogue and simulations:
     messages/                  The shared copy (units, distance words, HUD chrome, the solar
                                system's names), merged under each one's namespace (messages.ts)
+    star-catalogue.ts           Shared bright-star positions, magnitudes and colours
+    observer-sky.ts             Observer location and apparent Sun, Moon and star positions
     bright-stars.ts            The catalogue's bright stars on the sky sphere
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
@@ -155,7 +157,7 @@ catalogue visit does not prefetch the entire observatory.
 Feature internals may depend on the shared UI library and i18n navigation. Other
 features and shared code must use public entries (`index`, `manifest`, `routing`,
 `server`, `bench`) rather than importing a simulation's private `lib`, `hooks`, or
-`components`. Architecture tests enforce that boundary. `server.ts` is marked
+`components`. Keep these boundaries explicit in imports. `server.ts` is marked
 server-only and must never be imported from a Client Component.
 
 Each simulation's layout owns its canvas lifetime. Navigating between its presets
@@ -246,7 +248,7 @@ helpers from `@/i18n/navigation`.
    in its toolbar (see [Immersive view](#immersive-view)).
    Give it a lifecycle: its store is a module and outlives the page, so the root
    component the layout keeps mounted calls `useFreshVisit(freshVisit(store))`
-   (`src/components/simulations/fresh-visit.ts`). Leaving the simulation puts the store
+   (`src/components/simulations/use-fresh-visit.ts`). Leaving the simulation puts the store
    back as it was first made: no guide still running, no selection, panel or switch
    carried into the next visit. Keep any remembered state in the store, not in module
    variables, so the reset reaches it too.

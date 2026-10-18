@@ -116,7 +116,7 @@ painters and their mapped features; `index.ts` registers them by body ID.
 
 The orrery (`src/features/orrery`) keeps the three.js adapters
 (`lib/coordinates.ts`, `lib/moons.ts`), materials, shaders and map loading.
-The shell's header sky and the catalogue hero (`src/components/shell/stars.ts`)
+The shell's header sky and the catalogue hero (`src/space/observer-sky.ts`)
 keep the observer, the star list and the drawn bearings, built on the almanac.
 `tests/bodies.test.mjs`, `tests/astronomy.test.mjs`, `tests/sky.test.mjs` and
 `tests/maps.test.mjs` check these values against IAU, JPL Horizons and published

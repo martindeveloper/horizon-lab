@@ -3,7 +3,7 @@
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useMemo, useRef } from "react";
 
-import { useDockClearance } from "@/components/simulations/dock-clearance";
+import { useDockClearance } from "@/components/simulations/use-dock-clearance";
 import { formatAu } from "@/lib/facts";
 import { solarNameKey } from "@/space/solar-system/format";
 import { TODAY } from "@/space/solar-system/model/moment";

@@ -2,8 +2,8 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useRef } from "react";
 
-import { useDockClearance, type DockInTheWay } from "@/components/simulations/dock-clearance";
 import { DistanceUnitControl, MapScale } from "@/components/simulations/map-readouts";
+import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { proseArgs } from "@/lib/facts";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { convert } from "@horizon/toolkit/science";

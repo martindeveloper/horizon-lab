@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { nearestStar } from "../src/components/shell/sky-picking.ts";
-import { horizontalPositions, OBSERVER } from "../src/components/shell/stars.ts";
+import { horizontalPositions, OBSERVER } from "../src/space/observer-sky.ts";
 
 const placed = (name, magnitude, x, y) => ({ star: [name, 0, 0, magnitude, 0], x, y });
 

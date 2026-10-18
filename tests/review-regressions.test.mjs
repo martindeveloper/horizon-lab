@@ -5,7 +5,6 @@ import { createOrbitWriter, writeOrbit, ephemerisSelfCheck } from "@horizon/tool
 import { atViewScale, nearestView } from "@horizon/toolkit/camera";
 
 import { lineOf } from "../packages/toolkit/src/scene/lines.ts";
-import { startEngine } from "../src/components/simulations/engine-lifecycle.ts";
 import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
 import { modernGalaxy } from "../src/features/deep-field/lib/graphics/galaxy.ts";
@@ -21,6 +20,7 @@ import { modelSelfCheck } from "../src/features/orrery/lib/model/model-check.ts"
 import { createHud } from "../src/features/orrery/lib/scene/hud.ts";
 import { useOrrery } from "../src/features/orrery/lib/store.ts";
 import { resolveView } from "../src/features/orrery/routing.ts";
+import { startEngine } from "../src/lib/engine-lifecycle.ts";
 import { GALACTIC_YEAR } from "../src/space/solar-system/model/parameters.ts";
 import { SOLAR_VIEWS } from "../src/space/solar-system/model/views.ts";
 

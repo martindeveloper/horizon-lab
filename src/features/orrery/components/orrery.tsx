@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
 
-import { freshVisit, useFreshVisit } from "@/components/simulations/fresh-visit";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
+import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
 import { useViewFromPath } from "@/components/simulations/use-view-from-path";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 

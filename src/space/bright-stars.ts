@@ -4,7 +4,7 @@
  */
 import { BufferAttribute, BufferGeometry, Vector3 } from "three";
 
-import { STARS, starColor } from "@/lib/stars";
+import { STARS, starColor } from "@/space/star-catalogue";
 import { equatorialToScene } from "@horizon/toolkit/scene";
 
 /**

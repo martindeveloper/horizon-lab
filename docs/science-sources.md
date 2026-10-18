@@ -50,7 +50,7 @@ rows were re-checked on 19 October 2026 after a science review of both simulatio
 | `toolkit/moons.ts`           | `packages/toolkit/src/bodies/moons.ts`               |
 | `toolkit/rings.ts`           | `packages/toolkit/src/bodies/rings.ts`               |
 | `toolkit/cosmology.ts`       | `packages/toolkit/src/science/cosmology.ts`          |
-| `lib/stars.ts`               | `src/lib/stars.ts`                                   |
+| `space/star-catalogue.ts`    | `src/space/star-catalogue.ts`                        |
 | `lib/sources.ts`             | `src/lib/sources.ts`                                 |
 
 | Status          | Meaning                                                                             |
@@ -710,30 +710,30 @@ Saturn against the [PDS Ring-Moon Systems Node tables](https://pds-rings.seti.or
 
 ## Bright-star catalogue
 
-All 188 entries of `lib/stars.ts:11` were compared with SIMBAD (TAP `basic` × `flux`, 16 Oct 2026). 187 positions are within 1′. Six entries were corrected (φ Sgr's position; Mebsuta, Shaula, Kaus Media, Peacock and Miaplacidus photometry). The rows below list every entry that was not a clean match, plus the brightest stars. All other entries are verified to ≤ 0.05 mag and ≤ 0.6′.
+All 188 entries of `space/star-catalogue.ts:11` were compared with SIMBAD (TAP `basic` × `flux`, 16 Oct 2026). 187 positions are within 1′. Six entries were corrected (φ Sgr's position; Mebsuta, Shaula, Kaus Media, Peacock and Miaplacidus photometry). The rows below list every entry that was not a clean match, plus the brightest stars. All other entries are verified to ≤ 0.05 mag and ≤ 0.6′.
 
-| Where              | Star                                                                                                                            | Status   | Note                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| `lib/stars.ts:23`  | Sirius, Canopus, Arcturus, Vega, Capella, Rigel, Procyon, Achernar, Altair, Aldebaran, Spica, Pollux, Fomalhaut, Deneb, Regulus | verified |                                                                       |
-| `lib/stars.ts:13`  | Betelgeuse                                                                                                                      | verified | variable; SIMBAD V 0.42                                               |
-| `lib/stars.ts:139` | Antares                                                                                                                         | verified | variable; SIMBAD V 0.91                                               |
-| `lib/stars.ts:195` | Rigil Kentaurus                                                                                                                 | verified | A + B combined: −0.27                                                 |
-| `lib/stars.ts:48`  | Mebsuta                                                                                                                         | verified | corrected to 2.98, 1.41                                               |
-| `lib/stars.ts:140` | Shaula                                                                                                                          | verified | corrected B−V −0.14                                                   |
-| `lib/stars.ts:153` | Kaus Media                                                                                                                      | verified | corrected V 2.67                                                      |
-| `lib/stars.ts:157` | φ Sagittarii                                                                                                                    | verified | RA was 1.24′ off; corrected                                           |
-| `lib/stars.ts:204` | Peacock                                                                                                                         | verified | corrected B−V −0.13                                                   |
-| `lib/stars.ts:206` | Miaplacidus                                                                                                                     | verified | corrected B−V 0.00                                                    |
-| `lib/stars.ts:16`  | Mintaka                                                                                                                         | **flag** | app is combined light; SIMBAD 2.41 / −0.39 is a component (quality C) |
-| `lib/stars.ts:20`  | Meissa                                                                                                                          | **flag** | combined light; SIMBAD 3.66 (quality C)                               |
-| `lib/stars.ts:89`  | Algieba                                                                                                                         | **flag** | γ¹ + γ² combined; SIMBAD 2.23 / 1.21 (quality D)                      |
-| `lib/stars.ts:97`  | Izar                                                                                                                            | **flag** | blended A + B; SIMBAD 2.45 / 1.16 (quality D)                         |
-| `lib/stars.ts:143` | Acrab                                                                                                                           | **flag** | β Sco system 2.50; SIMBAD β¹ 2.62                                     |
-| `lib/stars.ts:117` | Rasalgethi                                                                                                                      | **flag** | variable; B−V 1.44 vs SIMBAD 1.34 (quality D)                         |
-| `lib/stars.ts:182` | Almach                                                                                                                          | **flag** | B−V 1.37 vs SIMBAD 1.20 (quality C, inconsistent with its V)          |
-| `lib/stars.ts:196` | Hadar                                                                                                                           | **flag** | SIMBAD has no B flux                                                  |
-| `lib/stars.ts:197` | Acrux                                                                                                                           | **flag** | SIMBAD α Cru has no photometry                                        |
-| `lib/stars.ts:211` | Alsephina                                                                                                                       | **flag** | SIMBAD δ Vel has no V or B                                            |
+| Where                         | Star                                                                                                                            | Status   | Note                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| `space/star-catalogue.ts:23`  | Sirius, Canopus, Arcturus, Vega, Capella, Rigel, Procyon, Achernar, Altair, Aldebaran, Spica, Pollux, Fomalhaut, Deneb, Regulus | verified |                                                                       |
+| `space/star-catalogue.ts:13`  | Betelgeuse                                                                                                                      | verified | variable; SIMBAD V 0.42                                               |
+| `space/star-catalogue.ts:139` | Antares                                                                                                                         | verified | variable; SIMBAD V 0.91                                               |
+| `space/star-catalogue.ts:195` | Rigil Kentaurus                                                                                                                 | verified | A + B combined: −0.27                                                 |
+| `space/star-catalogue.ts:48`  | Mebsuta                                                                                                                         | verified | corrected to 2.98, 1.41                                               |
+| `space/star-catalogue.ts:140` | Shaula                                                                                                                          | verified | corrected B−V −0.14                                                   |
+| `space/star-catalogue.ts:153` | Kaus Media                                                                                                                      | verified | corrected V 2.67                                                      |
+| `space/star-catalogue.ts:157` | φ Sagittarii                                                                                                                    | verified | RA was 1.24′ off; corrected                                           |
+| `space/star-catalogue.ts:204` | Peacock                                                                                                                         | verified | corrected B−V −0.13                                                   |
+| `space/star-catalogue.ts:206` | Miaplacidus                                                                                                                     | verified | corrected B−V 0.00                                                    |
+| `space/star-catalogue.ts:16`  | Mintaka                                                                                                                         | **flag** | app is combined light; SIMBAD 2.41 / −0.39 is a component (quality C) |
+| `space/star-catalogue.ts:20`  | Meissa                                                                                                                          | **flag** | combined light; SIMBAD 3.66 (quality C)                               |
+| `space/star-catalogue.ts:89`  | Algieba                                                                                                                         | **flag** | γ¹ + γ² combined; SIMBAD 2.23 / 1.21 (quality D)                      |
+| `space/star-catalogue.ts:97`  | Izar                                                                                                                            | **flag** | blended A + B; SIMBAD 2.45 / 1.16 (quality D)                         |
+| `space/star-catalogue.ts:143` | Acrab                                                                                                                           | **flag** | β Sco system 2.50; SIMBAD β¹ 2.62                                     |
+| `space/star-catalogue.ts:117` | Rasalgethi                                                                                                                      | **flag** | variable; B−V 1.44 vs SIMBAD 1.34 (quality D)                         |
+| `space/star-catalogue.ts:182` | Almach                                                                                                                          | **flag** | B−V 1.37 vs SIMBAD 1.20 (quality C, inconsistent with its V)          |
+| `space/star-catalogue.ts:196` | Hadar                                                                                                                           | **flag** | SIMBAD has no B flux                                                  |
+| `space/star-catalogue.ts:197` | Acrux                                                                                                                           | **flag** | SIMBAD α Cru has no photometry                                        |
+| `space/star-catalogue.ts:211` | Alsephina                                                                                                                       | **flag** | SIMBAD δ Vel has no V or B                                            |
 
 ## Citations in `technical.json`
 

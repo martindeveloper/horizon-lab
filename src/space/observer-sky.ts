@@ -1,10 +1,3 @@
-/**
- * The real sky over Ondřejov: the shared bright-star catalogue (`@/lib/stars`),
- * the Sun and the Moon placed on it for the hero and the header. The
- * positional astronomy itself lives in `@horizon/toolkit/science` (sky) and
- * `@horizon/toolkit/bodies` (almanac).
- */
-import { STARS, type Star } from "@/lib/stars";
 import {
   EARTH_EQUATORIAL_RADIUS_KM,
   moonAxis,
@@ -22,7 +15,15 @@ import {
   toHorizontal,
 } from "@horizon/toolkit/science";
 
-export { STARS, starColor, type Star } from "@/lib/stars";
+/**
+ * The real sky over Ondřejov: the shared bright-star catalogue (`@/space/star-catalogue`),
+ * the Sun and the Moon placed on it for the hero and the header. The
+ * positional astronomy itself lives in `@horizon/toolkit/science` (sky) and
+ * `@horizon/toolkit/bodies` (almanac).
+ */
+import { STARS, type Star } from "./star-catalogue";
+
+export { STARS, starColor, type Star } from "./star-catalogue";
 /** The sky's clock and rising arcs, for the shell's and the hero's own drawing. */
 export { risingHourAngle, siderealTime } from "@horizon/toolkit/science";
 

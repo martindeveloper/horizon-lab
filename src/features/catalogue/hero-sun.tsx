@@ -2,8 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 
-import { moonPosition, OBSERVER, risingHourAngle, sunPosition } from "@/components/shell/stars";
 import { skyNow, skyRunsFast, subscribeDebug } from "@/lib/debug";
+import { moonPosition, OBSERVER, risingHourAngle, sunPosition } from "@/space/observer-sky";
 import { RAD_PER_DEG as RAD } from "@horizon/toolkit/science";
 
 /** Highest noon Sun over Ondřejov (summer solstice), in degrees. */

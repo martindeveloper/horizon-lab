@@ -1,10 +1,10 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useRef } from "react";
 
-import type { StartEngine } from "@/components/simulations/engine-lifecycle";
 import { useSimulationEngine } from "@/components/simulations/use-simulation-engine";
 import { createBlackHoleEngine } from "@/features/black-hole/lib/engine";
 import { useBlackHole } from "@/features/black-hole/lib/store";
+import type { StartEngine } from "@/lib/engine-lifecycle";
 
 import { useSceneCamera } from "./scene-camera";
 

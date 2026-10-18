@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 
-import { freshVisit, useFreshVisit } from "@/components/simulations/fresh-visit";
 import { SimulationImmersive } from "@/components/simulations/immersive";
+import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
 import { BlackHoleCanvas } from "@/features/black-hole/components/canvas";
 import { HorizonLoader } from "@/features/black-hole/components/loader";
 import { ObservatoryOverlay } from "@/features/black-hole/components/overlay";

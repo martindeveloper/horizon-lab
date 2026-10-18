@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
 import { MapScale } from "@/components/simulations/map-readouts";
 import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
-import { useSceneEscape, type EscapeStep } from "@/components/simulations/scene-escape";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
+import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import {
   IconButton,
   Toolbar,

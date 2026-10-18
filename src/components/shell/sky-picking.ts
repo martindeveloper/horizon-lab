@@ -1,4 +1,4 @@
-import type { Star } from "@/lib/stars";
+import type { Star } from "@/space/star-catalogue";
 
 export type PlacedStar = { star: Star; x: number; y: number };
 

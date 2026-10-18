@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
-import { useDockClearance, type DockInTheWay } from "@/components/simulations/dock-clearance";
 import { GuideBody, GuideCard, GuideTitle } from "@/components/simulations/guide-card";
+import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { cn } from "@horizon/toolkit/ui";
 
 import { TOUR, TOUR_DWELL } from "../lib/model/tour";

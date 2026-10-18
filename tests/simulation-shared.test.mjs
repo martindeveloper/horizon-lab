@@ -111,7 +111,7 @@ test("selections sit where the scene draws them today", () => {
 });
 
 test("leaving a simulation starts the next visit fresh: guides, selections and panels reset", async () => {
-  const { freshVisit } = await import("../src/components/simulations/fresh-visit.ts");
+  const { freshVisit } = await import("../src/components/simulations/use-fresh-visit.ts");
   const { useDeepField } = await import("../src/features/deep-field/lib/store.ts");
   const { useOrrery } = await import("../src/features/orrery/lib/store.ts");
   const { useBlackHole } = await import("../src/features/black-hole/lib/store.ts");

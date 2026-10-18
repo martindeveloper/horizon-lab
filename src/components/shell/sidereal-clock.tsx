@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { skyNow, skyRunsFast, subscribeDebug } from "@/lib/debug";
-
-import { OBSERVER, siderealTime } from "./stars";
+import { OBSERVER, siderealTime } from "@/space/observer-sky";
 
 function format(date: Date) {
   const hours = siderealTime(date, OBSERVER.longitude) / 15;

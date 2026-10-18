@@ -3,9 +3,9 @@
 import { useLocale } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 
+import type { SimulationEngine, StartEngine } from "@/lib/engine-lifecycle";
 import type { SceneMount } from "@horizon/toolkit/scene";
 
-import type { SimulationEngine, StartEngine } from "./engine-lifecycle";
 import { useSimulationEngine } from "./use-simulation-engine";
 
 /**

@@ -4,7 +4,7 @@ import test from "node:test";
 import { moonAxis, moonEcliptic, moonPhase } from "@horizon/toolkit/bodies";
 import { risingHourAngle } from "@horizon/toolkit/science";
 
-import { moonPosition, OBSERVER, sunPosition } from "../src/components/shell/stars.ts";
+import { moonPosition, OBSERVER, sunPosition } from "../src/space/observer-sky.ts";
 
 const at = (iso) => sunPosition(new Date(iso), OBSERVER.latitude, OBSERVER.longitude);
 

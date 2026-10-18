@@ -6,11 +6,11 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "@/i18n/navigation";
 import { skyNow, skyRunsFast, subscribeDebug } from "@/lib/debug";
 import { simulationForPath } from "@/lib/simulations";
+import { horizontalPositions, OBSERVER, siderealTime, starColor } from "@/space/observer-sky";
 import { FINE_POINTER_QUERY, REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 import { mulberry32 } from "@horizon/toolkit/math";
 
 import { nearestStar, type PlacedStar } from "./sky-picking";
-import { horizontalPositions, OBSERVER, siderealTime, starColor } from "./stars";
 
 /* Seeded so server and client render the same filler. */
 
