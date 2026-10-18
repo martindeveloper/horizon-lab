@@ -16,7 +16,7 @@ const RETICLE_PX = 30;
 const LOCK_S = 0.7;
 const BREATH_S = 3.2;
 
-export function createFocusRing({ scope, looks, pxWorld }: SceneKit, parent: Object3D) {
+export function createFocusRing({ scope, looks, pxWorld, camera }: SceneKit, parent: Object3D) {
   // Faces the camera in its vertex shader; drawn wider than its geometry, so never culled.
   const ring = new Mesh(scope.own(new PlaneGeometry(2, 2)), looks.focus);
   ring.renderOrder = 10;
@@ -59,7 +59,8 @@ export function createFocusRing({ scope, looks, pxWorld }: SceneKit, parent: Obj
       }
       if (at) {
         ring.position.set(at[0], at[1], at[2]);
-        uniforms.size!.value = pxWorld(f.dist, RETICLE_PX);
+        /* Constant on screen at the body's own distance, not the aim's. */
+        uniforms.size!.value = pxWorld(camera.position.distanceTo(ring.position), RETICLE_PX);
         const t = still.matches ? 1 : Math.min(1, (now - since) / LOCK_S);
         uniforms.lock!.value = 1 - (1 - t) ** 3;
         uniforms.breath!.value = still.matches

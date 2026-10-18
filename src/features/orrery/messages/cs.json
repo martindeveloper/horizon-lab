@@ -388,7 +388,7 @@
       },
       "maps": {
         "title": "Dvě mapy, ne jedna",
-        "body": "Model sluneční soustavy používá jako referenční rovinu ekliptiku, tedy rovinu oběžné dráhy Země. Mapa Mléčné dráhy se orientuje podle roviny galaktického disku. Obě roviny svírají úhel asi 60° a celá sluneční soustava by na mapě Galaxie zabírala jediný neviditelně malý bod. Mapy proto propojuje poloha Slunce: přiblížením ke Slunci na mapě Galaxie přejdete do sluneční soustavy."
+        "body": "Model sluneční soustavy používá jako referenční rovinu ekliptiku, tedy rovinu oběžné dráhy Země. Mapa Mléčné dráhy se orientuje podle roviny galaktického disku. Obě roviny svírají úhel asi 60° a celá sluneční soustava by na mapě Galaxie zabírala jediný neviditelně malý bod. Mapy proto propojuje poloha Slunce. Při oddalování za nejbližší hvězdy se pohled stočí z jedné roviny do druhé a Mléčná dráha na obloze přejde v disk Galaxie."
       }
     }
   },

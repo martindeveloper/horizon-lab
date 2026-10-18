@@ -64,8 +64,12 @@ src/
       lib/scene/               The engine: engine.ts wires the toolkit engine host, orbit
                                input and store to one layer per part of the picture
                                (*-layer.ts) through a shared kit and per-frame state (kit.ts);
-                               camera-rig.ts, close-up-controller.ts (+ close-up-flight.ts),
-                               guide-director.ts, picking.ts, labels.ts, rulers.ts, hud.ts
+                               lod.ts is the one level of detail every layer reads (screen
+                               size, presence bands, faders, hysteresis, the solar↔Galaxy
+                               blend); measured-maps.ts budgets surface maps from it;
+                               camera-rig.ts (one log-distance zoom), close-up-controller.ts
+                               (+ close-up-flight.ts), guide-director.ts, picking.ts,
+                               labels.ts, rulers.ts, hud.ts
       lib/store.ts             Zustand store (orrery namespace messages)
   lib/
     stars.ts                   Shared bright-star catalogue (shell sky and orrery sky)

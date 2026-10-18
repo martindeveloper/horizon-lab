@@ -52,14 +52,24 @@ async function imageTexture(blob: Blob, anisotropy: number) {
   }
 }
 
-export async function loadMap(url: string, signal: AbortSignal, anisotropy = 2) {
+/** The map's compressed bytes: cheap to hold, so a likely close-up can fetch them early. */
+export async function fetchMap(url: string, signal: AbortSignal) {
   const response = await fetch(url, { signal });
   if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
   const blob = await response.blob();
   signal.throwIfAborted();
+  return blob;
+}
+
+/** Decodes fetched bytes into a texture (off the main thread where the browser can). */
+export async function decodeMap(blob: Blob, anisotropy = 2) {
   try {
     return await bitmapTexture(blob, anisotropy);
   } catch {
     return imageTexture(blob, anisotropy);
   }
+}
+
+export async function loadMap(url: string, signal: AbortSignal, anisotropy = 2) {
+  return decodeMap(await fetchMap(url, signal), anisotropy);
 }

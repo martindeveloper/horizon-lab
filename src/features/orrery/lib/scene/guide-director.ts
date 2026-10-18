@@ -5,8 +5,14 @@ import type { OrbitPose } from "@horizon/toolkit/camera";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 
 import { createTourSketch } from "../graphics/tour-sketch";
-import { TOUR, sampleTourFlight, shortestTurn, tourFlightSeconds } from "../model/tour";
-import { viewById } from "../model/views";
+import {
+  TOUR,
+  sampleTourFlight,
+  shortestTurn,
+  tourFlightSeconds,
+  type TourStep,
+} from "../model/tour";
+import { viewById, worldDistance } from "../model/views";
 import type { OrreryStore } from "../store";
 import type { CameraRig } from "./camera-rig";
 import type { Frame } from "./kit";
@@ -25,9 +31,10 @@ export function createGuideDirector(
   scope.defer(() => sketch.dispose());
   parent.add(sketch.group);
 
-  /* Flights: the step being flown to, the pose it left from and progress 0..1. */
+  /* Flights: the step being flown to (its distance in au), the pose it left from and progress 0..1. */
   let step = -1;
   let from: OrbitPose = { ...pose };
+  let to: TourStep | OrbitPose = { ...pose };
   let t = 1;
   /* Hold: a slow orbit while a landed step is read, until the viewer takes the camera. */
   let holdT = 0;
@@ -62,24 +69,24 @@ export function createGuideDirector(
         step = next;
         const tour = TOUR[next];
         if (tour) {
-          /* Crossing between the solar and Galaxy maps cuts, then settles in from farther out. */
-          if (viewById(tour.view).realm !== rig.realm) {
-            rig.snapToView(tour.view);
-            pose.distance = rig.seamDistance();
-          }
+          /* One flight between any two steps: the solar map and the Galaxy are one zoom. */
+          to = { ...tour, distance: worldDistance(tour.distance, viewById(tour.view).realm) };
           from = { ...pose };
           t = reducedMotion ? 1 : 0;
           holdT = 0;
           holdOff = false;
           holdDir = Math.sign(shortestTurn(pose.azimuth, tour.azimuth)) || 1;
-          rig.flying = false;
-          if (reducedMotion) Object.assign(pose, sampleTourFlight(1, from, tour));
+          rig.cancel();
+          if (reducedMotion) {
+            Object.assign(pose, sampleTourFlight(1, from, to));
+            rig.settle();
+          }
         } else t = 1;
       }
       const tour = TOUR[step];
       if (tour && t < 1) {
         t = Math.min(1, t + dt / tourFlightSeconds(tour));
-        Object.assign(pose, sampleTourFlight(t, from, tour));
+        Object.assign(pose, sampleTourFlight(t, from, to));
       } else if (tour && holding(s)) {
         holdT += dt;
         pose.azimuth += (tour.drift ?? 0.01 * holdDir) * (1 - Math.exp(-holdT / 3)) * dt;

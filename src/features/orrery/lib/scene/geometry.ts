@@ -8,6 +8,7 @@ import {
   LineBasicMaterial,
   LineDashedMaterial,
   SphereGeometry,
+  type Mesh,
   type Vector3,
 } from "three";
 
@@ -16,11 +17,11 @@ import { lcg } from "@horizon/toolkit/math";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 
 import { GOLD, type SceneKit } from "./kit";
+import { pickLevel } from "./lod";
 
 export const SEG = 96;
-/** Globe LOD: the fine sphere past this on-screen radius in pixels, the close-up sphere past the next. */
-const FINE_SPHERE_PX = 36;
-const CLOSE_SPHERE_PX = 360;
+/** Globe levels by on-screen radius (px): fine past the first, close-up past the second. */
+const SPHERE_PX = [36, 360] as const;
 
 export type LineSlot = ReturnType<typeof lineOf>;
 
@@ -149,7 +150,7 @@ export function molecularCloud(count: number) {
 export type Globes = ReturnType<typeof createGlobes>;
 
 /* Globes: a coarse sphere while a body is a dot, a fine one when it fills the view. */
-export function createGlobes({ scope, camera, pxWorld }: SceneKit) {
+export function createGlobes({ scope, lod }: SceneKit) {
   const sphere = scope.own(new SphereGeometry(1, 24, 16));
   const small = scope.own(new SphereGeometry(1, 16, 14));
   const fine = scope.own(new SphereGeometry(1, 72, 48));
@@ -159,10 +160,14 @@ export function createGlobes({ scope, camera, pxWorld }: SceneKit) {
     sphere,
     small,
     hit,
-    /** Coarse, fine or close-up sphere by the globe's on-screen radius. */
-    globeFor(position: Vector3, radius: number, coarse = sphere) {
-      const px = radius / pxWorld(camera.position.distanceTo(position), 1);
-      return px > CLOSE_SPHERE_PX ? close : px > FINE_SPHERE_PX ? fine : coarse;
+    /**
+     * Gives `mesh` the coarse, fine or close-up sphere for its on-screen radius, with
+     * hysteresis from the level it has, so a globe on a threshold does not flicker.
+     */
+    fit(mesh: Mesh, position: Vector3, radius: number, coarse: BufferGeometry = sphere) {
+      const levels = [coarse, fine, close];
+      const current = Math.max(0, levels.indexOf(mesh.geometry));
+      mesh.geometry = levels[pickLevel(current, lod.px(radius, position), SPHERE_PX)]!;
     },
   };
 }

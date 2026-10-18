@@ -12,12 +12,13 @@ export type LabelStyle = {
   kind?: "distance";
 };
 
+/** `on` is a switch or a presence 0..1 (labels fade with their layer; below ~2 % they hide). */
 export type PlaceLabel = (
   key: string,
   x: number,
   y: number,
   z: number,
-  on: boolean,
+  on: boolean | number,
   style?: LabelStyle,
 ) => void;
 
@@ -36,6 +37,8 @@ export function createLabels(
   // CSSOM may normalize "10.0px" to "10px"; compare our last output string.
   const masks = new WeakMap<HTMLSpanElement, string>();
   const transforms = new WeakMap<HTMLSpanElement, string>();
+  /* Opacity in 1/32 steps, written only when the step changes. */
+  const alphas = new WeakMap<HTMLSpanElement, number>();
   /* Live readouts gain and lose a digit as they play; a pill keeps its widest recent text
      and lets go only when the text gets much shorter (another body, another unit). */
   const held = new WeakMap<HTMLSpanElement, number>();
@@ -79,7 +82,13 @@ export function createLabels(
       if (kind) el.dataset.kind = kind;
       else delete el.dataset.kind;
     }
-    if (!on) return hide(el);
+    const alpha = typeof on === "number" ? on : on ? 1 : 0;
+    if (alpha < 0.02) return hide(el);
+    const step = Math.round(alpha * 32);
+    if (alphas.get(el) !== step) {
+      el.style.opacity = step >= 32 ? "" : String(step / 32);
+      alphas.set(el, step);
+    }
     point.set(x, y, z);
     projected.copy(point).applyMatrix4(camera.matrixWorldInverse);
     if (projected.z >= 0) return hide(el);

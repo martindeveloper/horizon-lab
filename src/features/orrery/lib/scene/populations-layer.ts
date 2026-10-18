@@ -11,15 +11,17 @@ import {
 } from "three";
 
 import { keplerPosition, type Elements } from "@horizon/toolkit/bodies";
+import { smoothstep } from "@horizon/toolkit/math";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { createSwarm, kuiperBelt, mainBelt, oortCloud, trojans } from "../graphics/swarms";
-import { orbitInView, planetElements } from "../model/elements";
+import { planetElements } from "../model/elements";
 import { MODEL_START, SUN_BIRTH } from "../model/parameters";
 import { TRACERS, binOf, tracerElements, tracerVisible, type Bin } from "../model/tracers";
 import type { Selection } from "../store";
 import { orbitOf } from "./geometry";
 import { GOLD, type Frame, type SceneKit } from "./kit";
+import { fade } from "./lod";
 
 /** Population tints for the planetesimal lumps: icy grey in the disk, reddened in the belt, pale far out. */
 const BIN_COLOR: Record<Bin, Color> = {
@@ -31,8 +33,15 @@ const BIN_COLOR: Record<Bin, Color> = {
 };
 const BIN_CODE: Record<Bin, number> = { disk: 1, kuiper: 2, scattered: 3, oort: 4, ejected: 5 };
 
+/** Where each population reads (camera distance, au): soft bands instead of cut-offs. */
+const BELT = fade(0, 0, 110, 230);
+const KUIPER = fade(10, 18, 1_100, 2_300);
+const OORT = fade(420, 850, 600_000, 1_300_000);
+const DISK = fade(0, 0, 280, 560);
+const SHELLS = fade(2_800, 5_600, 500_000, 1_000_000);
+
 export function createPopulationsLayer(
-  { scope, looks, tight, dpr, pxWorld }: SceneKit,
+  { scope, looks, tight, dpr, pxWorld, lod }: SceneKit,
   parent: Object3D,
 ) {
   const rock = scope.own(new SphereGeometry(1, tight ? 16 : 24, tight ? 12 : 16));
@@ -69,6 +78,15 @@ export function createPopulationsLayer(
   const shellInner = new Mesh(scope.own(new SphereGeometry(5_000, 40, 24)), looks.shellInner);
   const shellOuter = new Mesh(scope.own(new SphereGeometry(100_000, 40, 24)), looks.shellOuter);
   parent.add(diskRing, shellInner, shellOuter);
+  const shellOpacity = [
+    Number(looks.shellInner.uniforms.opacity!.value),
+    Number(looks.shellOuter.uniforms.opacity!.value),
+  ];
+  /* Display switches fade their layers in and out. */
+  const kuiperOn = lod.fader();
+  const oortOn = lod.fader();
+  const diskOn = lod.fader();
+  const age = lod.fader();
 
   const tmp: [number, number, number] = [0, 0, 0];
 
@@ -88,7 +106,9 @@ export function createPopulationsLayer(
       (show.oort ? 8 : 0) |
       (show.ejected ? 16 : 0) |
       (show.trueSize ? 32 : 0);
-    const stamp = `${yearsAgo}|${show.drift ? Math.round(driftYears * 200) : 0}|${Math.round(dist * 20)}|${mask}`;
+    /* Size is a uniform, so the zoom alone never rewrites the instances. */
+    looks.tracers.uniforms.radius!.value = show.trueSize ? 30 / AU_KM : pxWorld(dist, 3.1);
+    const stamp = `${yearsAgo}|${show.drift ? Math.round(driftYears * 200) : 0}|${mask}`;
     if (stamp === tracerStamp) return;
     tracerStamp = stamp;
     const allow: Record<Bin, boolean> = {
@@ -99,7 +119,6 @@ export function createPopulationsLayer(
       ejected: show.ejected,
     };
     let colorDirty = false;
-    const cap = pxWorld(dist, 3.1);
     for (let i = 0; i < TRACERS.length; i += 1) {
       const tr = TRACERS[i]!;
       const bin = binOf(tr, mig);
@@ -112,7 +131,7 @@ export function createPopulationsLayer(
       }
       keplerPosition(tracerElements(tr, mig, driftYears), tmp);
       dummy.position.set(tmp[0], tmp[1], tmp[2]);
-      dummy.scale.setScalar(show.trueSize ? 30 / AU_KM : cap);
+      dummy.scale.setScalar(1);
       dummy.updateMatrix();
       tracers.setMatrixAt(i, dummy.matrix);
       const code = BIN_CODE[bin];
@@ -138,27 +157,30 @@ export function createPopulationsLayer(
         const tr = TRACERS[sel.index];
         if (tr) focus = tracerElements(tr, mig, 0);
       }
-      focusOrbit.line.visible = !!focus && orbitInView(focus, true, dist, true);
-      if (focus && focusOrbit.line.visible) focusOrbit.update(focus, show.elliptical);
+      /* A selected orbit always shows. */
+      focusOrbit.line.visible = !!focus;
+      if (focus) focusOrbit.update(focus, show.elliptical);
 
       const jupiterEl = planetElements("jupiter", mig, driftYears, now);
       const jupiterLon = ((jupiterEl.node + jupiterEl.omega + jupiterEl.M) * Math.PI) / 180;
-      beltHit.visible = dist < 28 && yearsAgo <= MODEL_START;
-      belt.points.visible = dist < 160 && planetesimals;
-      if (belt.points.visible) belt.set(mig, driftYears, pxWorld(dist, 40));
-      trojanSwarm.points.visible = dist < 160 && planetesimals && mig > 0.5;
-      if (trojanSwarm.points.visible)
+      const formed = age.to(planetesimals);
+      const belts = BELT(dist) * formed;
+      beltHit.visible = belts > 0.5 && dist < 28 && yearsAgo <= MODEL_START;
+      if (belt.fade(belts)) belt.set(mig, driftYears, pxWorld(dist, 40));
+      if (trojanSwarm.fade(belts * smoothstep(0.45, 0.55, mig)))
         trojanSwarm.set(mig, driftYears, pxWorld(dist, 40), jupiterLon);
-      kuiper.points.visible = show.kuiper && dist > 14 && dist < 1_600 && planetesimals;
-      if (kuiper.points.visible) kuiper.set(mig, driftYears, pxWorld(dist, 30));
-      kuiperHit.visible = kuiper.points.visible && dist < 400;
-      oort.points.visible = show.oort && dist > 600 && dist < 900_000 && planetesimals;
-      if (oort.points.visible) oort.set(mig, driftYears, pxWorld(dist, 40));
-      diskRing.visible = show.disk && mig < 0.98 && dist < 400;
-      looks.disk.opacity = (1 - mig) * 0.85;
-      const oortOn = show.oort && dist > 4_000 && dist < 700_000;
-      shellInner.visible = oortOn;
-      shellOuter.visible = oortOn;
+      const kuiperShown = KUIPER(dist) * kuiperOn.to(show.kuiper) * formed;
+      if (kuiper.fade(kuiperShown)) kuiper.set(mig, driftYears, pxWorld(dist, 30));
+      kuiperHit.visible = kuiperShown > 0.5 && dist < 400;
+      const oortShown = oortOn.to(show.oort);
+      if (oort.fade(OORT(dist) * oortShown * formed)) oort.set(mig, driftYears, pxWorld(dist, 40));
+      const diskShown = DISK(dist) * diskOn.to(show.disk) * (1 - smoothstep(0.9, 0.98, mig));
+      diskRing.visible = diskShown > 0.004;
+      looks.disk.opacity = (1 - mig) * 0.85 * diskShown;
+      const shells = SHELLS(dist) * oortShown;
+      shellInner.visible = shellOuter.visible = shells > 0.004;
+      looks.shellInner.uniforms.opacity!.value = shellOpacity[0]! * shells;
+      looks.shellOuter.uniforms.opacity!.value = shellOpacity[1]! * shells;
     },
   };
 }

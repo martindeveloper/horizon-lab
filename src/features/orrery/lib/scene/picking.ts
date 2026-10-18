@@ -6,6 +6,7 @@ import { migrationProgress } from "../model/timeline";
 import { TRACERS, tracerElements } from "../model/tracers";
 import { hasSurface, type Selection, type useOrrery } from "../store";
 import type { SceneKit } from "./kit";
+import { GALAXY_LAYER } from "./lod";
 
 /** A second tap on the same body within this window flies in for a close-up. */
 const DOUBLE_TAP_MS = 380;
@@ -22,6 +23,8 @@ export function createPicking(
   },
 ) {
   const raycaster = new Raycaster();
+  /* The Galaxy draws in its own pass but is picked like the rest. */
+  raycaster.layers.enable(GALAXY_LAYER);
   const pointer = new Vector2();
   let downX = 0;
   let downY = 0;

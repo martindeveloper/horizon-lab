@@ -14,7 +14,7 @@ import type { BodyId } from "./figures";
 export type MapTier = "far" | "near" | "nearLight";
 
 export type MeasuredMap = {
-  /** Pixel widths per tier (height is half). `far` loads after the first frame; the `near` ones only for a close-up. */
+  /** Pixel widths per tier (height is half). `far` serves globes on the map; the `near` ones only a close-up. */
   widths: Record<MapTier, number>;
   /** What the map shows and when it was observed. */
   source: string;

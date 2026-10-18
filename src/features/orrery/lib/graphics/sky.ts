@@ -20,7 +20,7 @@ import { clamp01, lcg, valueNoise2 } from "@horizon/toolkit/math";
 
 import { galacticAngle } from "../model/equations";
 import { SUN_BIRTH } from "../model/parameters";
-import { equatorialToScene } from "./coordinates";
+import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE, equatorialToScene } from "./coordinates";
 import BAND_FRAG from "./shaders/band.frag.glsl";
 import BAND_VERT from "./shaders/band.vert.glsl";
 import STAR_FRAG from "./shaders/star.frag.glsl";
@@ -32,12 +32,6 @@ import STAR_FRAG from "./shaders/star.frag.glsl";
  * and whose shape changes from the thick-disk era to today's thin disk.
  */
 import STAR_VERT from "./shaders/star.vert.glsl";
-
-/** Sgr A* (J2000) and the north galactic pole, as scene directions. */
-export const GALACTIC_CENTRE = equatorialToScene(266.4168, -29.0078);
-export const GALACTIC_POLE = equatorialToScene(192.8595, 27.1284);
-GALACTIC_CENTRE.addScaledVector(GALACTIC_POLE, -GALACTIC_CENTRE.dot(GALACTIC_POLE)).normalize();
-const GALACTIC_EAST = new Vector3().crossVectors(GALACTIC_POLE, GALACTIC_CENTRE).normalize();
 
 /** The Sun's galactic orbital phase for a moment, radians; frozen before the Sun existed. */
 export function galacticPhase(yearsAgo: number) {

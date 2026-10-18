@@ -16,7 +16,7 @@ import type { SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { AU_KM } from "@horizon/toolkit/science";
 
-import { MAP_BASE, loadMap } from "../graphics/map-loader";
+import { MAP_BASE, decodeMap, fetchMap } from "../graphics/map-loader";
 import type { Selection } from "../store";
 import type { CameraRig } from "./camera-rig";
 import {
@@ -27,6 +27,12 @@ import {
   sampleCloseUp,
 } from "./close-up-flight";
 import { FOV, SUN_R, type SceneKit } from "./kit";
+import { rising } from "./lod";
+
+/** The layer of the close-up body's own depth pass. */
+const BODY_LAYER = 1;
+/** Prefetched close-up maps kept as compressed bytes (a few MB at most). */
+const PREFETCH_KEEP = 2;
 
 export type BodySelection = Extract<Selection, { kind: "sun" | "planet" | "named" }>;
 
@@ -81,11 +87,35 @@ export function createCloseUpController(
     /** The close-up takes the camera from flights, the guide and input. */
     onTakeCamera: () => void;
     onRelease: () => void;
+    /** Uploads a texture now, so the swap never stalls a frame mid-flight. */
+    upload: (texture: Texture) => void;
   },
 ) {
-  const { rig, reduceMotion, invalidate, locate } = deps;
+  const { rig, reduceMotion, invalidate, locate, upload } = deps;
   const { pose, aim } = rig;
   let close: CloseUp | null = null;
+  /* Near-tier bytes fetched when a body is selected, before anyone asks for its close-up. */
+  const prefetched = new Map<string, Promise<Blob>>();
+  const prefetchAbort = new AbortController();
+  scope.defer(() => prefetchAbort.abort());
+  const nearFile = (id: BodyId) => {
+    const near = tierFile(MAP_BASE, id, tight ? "nearLight" : "near");
+    return near && near !== tierFile(MAP_BASE, id, "far") ? near : null;
+  };
+  const bytesOf = (file: string) => {
+    let bytes = prefetched.get(file);
+    if (!bytes) {
+      bytes = fetchMap(file, prefetchAbort.signal);
+      /* A failed prefetch is retried by the close-up itself. */
+      bytes.catch(() => prefetched.delete(file));
+      prefetched.set(file, bytes);
+      for (const key of prefetched.keys()) {
+        if (prefetched.size <= PREFETCH_KEEP) break;
+        if (key !== file) prefetched.delete(key);
+      }
+    }
+    return bytes;
+  };
   const target = new Vector3();
   const wide = window.matchMedia("(min-width: 768px)");
   /** Room the card leaves: the globe sits left of it on wide screens, above the bar on phones. */
@@ -132,7 +162,7 @@ export function createCloseUpController(
     const material = materialOf(sel);
     const map = material.uniforms.map?.value;
     if (!(map instanceof Texture)) throw new Error("Close-up surface has no map.");
-    setLayer(objects, 1);
+    setLayer(objects, BODY_LAYER);
     close = {
       sel,
       id,
@@ -154,32 +184,38 @@ export function createCloseUpController(
       detail: null,
       blend: 0,
     };
-    const near = tierFile(MAP_BASE, id, tight ? "nearLight" : "near");
-    if (near && near !== tierFile(MAP_BASE, id, "far")) {
+    const near = nearFile(id);
+    if (near) {
       const mine = close;
       const abort = new AbortController();
       mine.loading = abort;
-      loadMap(near, abort.signal, 4).then(
-        (texture) => {
-          if (close !== mine) {
-            texture.dispose();
-            return;
-          }
-          mine.loading = null;
-          mine.detail = texture;
-          mine.material.uniforms.map!.value = texture;
-          invalidate();
-        },
-        () => {
-          /* Offline or missing: paint the detailed map instead. */
-          if (close !== mine || abort.signal.aborted) return;
-          mine.loading = null;
-          mine.job = looks.detailJob(id);
-          invalidate();
-        },
-      );
+      bytesOf(near)
+        .then((blob) => {
+          abort.signal.throwIfAborted();
+          return decodeMap(blob, 4);
+        })
+        .then(
+          (texture) => {
+            if (close !== mine) {
+              texture.dispose();
+              return;
+            }
+            mine.loading = null;
+            mine.detail = texture;
+            upload(texture);
+            mine.material.uniforms.map!.value = texture;
+            invalidate();
+          },
+          () => {
+            /* Offline or missing: paint the detailed map instead. */
+            if (close !== mine || abort.signal.aborted) return;
+            mine.loading = null;
+            mine.job = looks.detailJob(id);
+            invalidate();
+          },
+        );
     }
-    rig.flying = false;
+    rig.cancel();
     rig.edgePush = 0;
     deps.onTakeCamera();
     if (reduceMotion.matches) {
@@ -214,6 +250,7 @@ export function createCloseUpController(
     while (!done && performance.now() - begin < budget) done = close.job.step(2);
     if (!done) return;
     close.detail = looks.detailTexture(close.job);
+    upload(close.detail);
     close.material.uniforms.map!.value = close.detail;
     close.job = null;
     invalidate();
@@ -236,9 +273,17 @@ export function createCloseUpController(
     busy() {
       return close !== null && (close.phase !== "on" || close.job !== null);
     },
-    /** The focused body's own label, orbit and marker give way once it fills the view. */
-    hidesFor(id: BodyId) {
-      return close !== null && close.id === id && pose.distance < close.frame * 400;
+    /** The focused body's own label, orbit and marker fade as it comes to fill the view. */
+    shownFor(id: BodyId) {
+      return close !== null && close.id === id
+        ? rising(pose.distance, close.frame * 250, close.frame * 600)
+        : 1;
+    },
+    /** A body was selected: fetch its close-up map's bytes while the card is read. */
+    prefetch(sel: Selection | null) {
+      if (sel?.kind !== "sun" && sel?.kind !== "planet" && sel?.kind !== "named") return;
+      const near = nearFile(bodyKey(sel));
+      if (near) void bytesOf(near).catch(() => undefined);
     },
     /** A measured far map arrived; a close-up of that body returns to it and keeps its detail. */
     applyMeasured(id: BodyId, texture: Texture) {
@@ -279,10 +324,9 @@ export function createCloseUpController(
       else camera.clearViewOffset();
       paintDetail();
     },
-    /* The rest of the system with the wide frustum, then the body alone in a depth range
-       of its own, so a true-size globe a few radii away stays crisp. */
-    render(renderer: WebGLRenderer, scene: Scene) {
-      renderer.render(scene, camera);
+    /* After the main pass: the body alone in a depth range of its own, so a true-size
+       globe a few radii away stays crisp. */
+    renderBody(renderer: WebGLRenderer, scene: Scene) {
       if (!close) return;
       const keepNear = camera.near;
       const keepFar = camera.far;
@@ -292,11 +336,12 @@ export function createCloseUpController(
       camera.near = Math.max(toBody * 1e-4, (toBody - extent) * 0.8);
       camera.far = toBody + extent;
       camera.updateProjectionMatrix();
-      camera.layers.set(1);
+      camera.layers.set(BODY_LAYER);
+      const autoClear = renderer.autoClear;
       renderer.autoClear = false;
       renderer.clearDepth();
       renderer.render(scene, camera);
-      renderer.autoClear = true;
+      renderer.autoClear = autoClear;
       camera.layers.set(0);
       camera.near = keepNear;
       camera.far = keepFar;

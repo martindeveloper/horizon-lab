@@ -349,8 +349,8 @@ export function createLooks(light = false) {
   /* Moon materials are created the first time their planet shows them. */
   const moonMaps: Partial<Record<MoonId, Texture>> = {};
   const moons: Partial<Record<MoonId, ShaderMaterial>> = {};
-  const moon = (id: MoonId) =>
-    (moons[id] ??= lit(measured[id] ?? (moonMaps[id] = texture(id)), SURFACES[id]));
+  const moonMap = (id: MoonId) => (moonMaps[id] ??= texture(id));
+  const moon = (id: MoonId) => (moons[id] ??= lit(measured[id] ?? moonMap(id), SURFACES[id]));
   const sunMap = texture("sun");
   const sun = new ShaderMaterial({
     uniforms: { map: { value: sunMap } },
@@ -445,8 +445,14 @@ export function createLooks(light = false) {
     galaxyToday: points(1.7, 0.9, true),
     galaxyEarly: points(1.55, 0.75, true),
     galaxyDust: points(2.6, 0.38, false),
-    tracers: new ShaderMaterial({ vertexShader: ROCK_VERT, fragmentShader: ROCK_FRAG }),
-    ghost: new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
+    /* `radius` sizes every planetesimal (world units), so zooming never rewrites the instances. */
+    tracers: new ShaderMaterial({
+      uniforms: { radius: { value: 1 } },
+      vertexShader: ROCK_VERT,
+      fragmentShader: ROCK_FRAG,
+    }),
+    /* Touch targets: raycast, never drawn. */
+    ghost: new MeshBasicMaterial({ visible: false }),
     grid: new LineBasicMaterial({
       color: "#46536e",
       transparent: true,
@@ -494,6 +500,12 @@ export function createLooks(light = false) {
     softStar,
   ];
   const moonIds = MOONS.map((moon) => moon.id);
+  const paintedOf = (id: BodyId): Texture => {
+    if (id === "sun") return sunMap;
+    if (includesId(PLANET_IDS, id)) return maps[id];
+    if (id === "pluto" || id === "sedna" || id === "halley") return namedMaps[id];
+    return moonMap(id);
+  };
   const surfaceOf = (id: BodyId): ShaderMaterial | undefined => {
     if (id === "sun") return sun;
     if (includesId(PLANET_IDS, id)) return planets[id];
@@ -511,6 +523,15 @@ export function createLooks(light = false) {
       measured[id]?.dispose();
       measured[id] = texture;
       if (material) material.uniforms.map!.value = texture;
+    },
+    /** Frees a measured map; the body goes back to its painted stand-in. */
+    clearMeasured(id: BodyId) {
+      const texture = measured[id];
+      if (!texture) return;
+      delete measured[id];
+      const map = surfaceOf(id)?.uniforms.map;
+      if (map?.value === texture) map.value = paintedOf(id);
+      texture.dispose();
     },
     /** A close-up's detailed map, to paint a few rows per frame; null when the base map suffices. */
     detailJob: (id: BodyId) => {

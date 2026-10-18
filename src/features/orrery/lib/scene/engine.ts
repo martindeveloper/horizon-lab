@@ -5,7 +5,8 @@
  * store change made the picture stale, so an idle orrery costs no GPU time.
  *
  * Each layer builds its objects once and draws one `Frame`; this file wires them
- * to the store, the camera and input.
+ * to the store, the camera, input and the level of detail (lod.ts): one world in au,
+ * the Galaxy drawn in a pass of its own, then the solar map, then a close-up body.
  */
 import {
   Group,
@@ -32,7 +33,6 @@ import {
   REDUCED_MOTION_QUERY,
   prefersReducedMotion,
 } from "@horizon/toolkit/environment";
-import { clamp } from "@horizon/toolkit/math";
 import { createEngineHost, DisposalScope } from "@horizon/toolkit/rendering";
 
 import { createLooks } from "../graphics/looks";
@@ -40,7 +40,7 @@ import { namedElements, planetElements } from "../model/elements";
 import { NEIGHBOURS } from "../model/neighbours";
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay, isPresentEra, migrationProgress, sunExists } from "../model/timeline";
-import { DEFAULT_VIEW, driftYearsPerSecond, viewById, type ViewId } from "../model/views";
+import { driftYearsPerSecond, viewById, worldDistance, type Realm } from "../model/views";
 import { hasSurface, useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCloseUpController, type BodySelection } from "./close-up-controller";
@@ -52,13 +52,13 @@ import { createHud } from "./hud";
 import {
   FOV,
   ORBIT_INCLINATION,
-  createPxWorld,
   type Frame,
   type Labels,
   type SceneKit,
   type Viewport,
 } from "./kit";
 import { createLabels } from "./labels";
+import { GALAXY_LAYER, LY, createLod } from "./lod";
 import { createMeasuredMaps } from "./measured-maps";
 import { createMoonsLayer } from "./moons-layer";
 import { createNeighboursLayer } from "./neighbours-layer";
@@ -131,6 +131,7 @@ export function createOrreryEngine(
         onError,
       }),
     );
+    const lod = createLod(camera, viewport);
     const kit: SceneKit = {
       scope,
       looks,
@@ -138,7 +139,8 @@ export function createOrreryEngine(
       viewport,
       tight,
       dpr: Math.min(window.devicePixelRatio || 1, tight ? 1.25 : 1.5),
-      pxWorld: createPxWorld(viewport),
+      lod,
+      pxWorld: lod.pxWorld,
     };
 
     const store = useOrrery;
@@ -157,12 +159,12 @@ export function createOrreryEngine(
     const { place, hideAll, setBodies, flush } = createLabels(kit, labelRoot, labels);
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit);
     const globes = createGlobes(kit);
-    const hidesFor = (id: BodyId) => closeUp.hidesFor(id);
+    const shownFor = (id: BodyId) => closeUp.shownFor(id);
 
     const sky = createSkyLayer(kit, scene, store.getState().yearsAgo);
     const solar = new Group();
     scene.add(solar);
-    const sun = createSunLayer(kit, solar, globes, place, hidesFor);
+    const sun = createSunLayer(kit, solar, globes, place, shownFor);
     const activity = scope.own(
       createSolarActivityLifecycle(
         async () => {
@@ -184,7 +186,7 @@ export function createOrreryEngine(
       place,
       rulers,
       hosts: moons.hosts,
-      hidesFor,
+      shownFor,
       closeId: () => closeUp.current?.id ?? null,
     });
     setBodies([
@@ -233,11 +235,21 @@ export function createOrreryEngine(
         input.cancel();
       },
       onRelease: () => input.cancel(),
+      upload: (texture) => renderer.initTexture(texture),
     });
-    const maps = createMeasuredMaps(scope, (id, texture) => {
-      looks.setMeasured(id, texture);
-      closeUp.applyMeasured(id, texture);
-      engine.invalidate();
+    const maps = createMeasuredMaps(scope, {
+      budget: tight ? 24e6 : 64e6,
+      onLoad: (id, texture) => {
+        renderer.initTexture(texture);
+        looks.setMeasured(id, texture);
+        closeUp.applyMeasured(id, texture);
+        engine.invalidate();
+      },
+      onRelease: (id) => {
+        looks.clearMeasured(id);
+        engine.invalidate();
+      },
+      wake: () => engine.invalidate(),
     });
 
     const activityMoving = () => {
@@ -253,10 +265,11 @@ export function createOrreryEngine(
       return (
         s.playing ||
         (s.show.drift && rig.realm === "solar" && !closeUp.current) ||
-        rig.flying ||
+        rig.moving ||
         guide.busy(s) ||
         interacting ||
         sky.easing ||
+        lod.busy ||
         closeUp.busy() ||
         (activity.current !== null && activityMoving())
       );
@@ -270,38 +283,20 @@ export function createOrreryEngine(
     let lastView = store.getState().view;
     let lastTurn = store.getState().turn;
     let lastCloseUp = store.getState().closeUp;
-
-    const crossAtEdge = (requested: number) => {
-      const bounds = rig.limits();
-      const inward = rig.realm === "galaxy";
-      const edge = inward ? bounds.min : bounds.max;
-      const push = inward ? Math.log(edge / requested) : Math.log(requested / edge);
-      if (push <= 0) rig.edgePush = 0;
-      const atEdge = Math.abs(Math.log(pose.distance / edge)) < 0.01;
-      const s = store.getState();
-      if (push <= 0 || !atEdge || s.guideOpen || (inward && rig.homing < 0.99)) return false;
-      rig.edgePush += push;
-      if (rig.edgePush < 0.45) return false;
-      rig.edgePush = 0;
-      const view: ViewId = inward ? DEFAULT_VIEW : "galaxy";
-      /* Already flown here; the store bridge must not start the flight again. */
-      lastView = view;
-      store.setState({ view, selection: null });
-      rig.flyToView(view);
-      input.cancel();
-      return true;
-    };
+    let lastSelection = store.getState().selection;
+    /** The map that dominated the last frame; a selection from the other one is let go. */
+    let lastRealm: Realm = rig.realm;
 
     const input = scope.own(
       createOrbitInput(canvas, {
-        getPose: () => pose,
+        getPose: () => rig.inputPose(),
         onChange: (next) => {
           const close = closeUp.current;
           if (close) {
             /* Flights own the camera; once arrived, a deliberate pull past the far limit leaves. */
             if (close.phase !== "on") return;
             const far = rig.limits().max;
-            if (next.distance > far && pose.distance >= far * 0.99) {
+            if (next.distance > far && rig.target >= far * 0.99) {
               rig.edgePush += Math.log(next.distance / far);
               if (rig.edgePush > 0.45) {
                 rig.edgePush = 0;
@@ -309,12 +304,12 @@ export function createOrreryEngine(
                 return;
               }
             } else rig.edgePush = 0;
-          } else if (crossAtEdge(next.distance)) return;
-          const bounds = rig.limits();
+          }
           pose.azimuth = next.azimuth;
           pose.inclination = next.inclination;
-          pose.distance = clamp(next.distance, bounds.min, bounds.max);
-          rig.flying = false;
+          /* A drag leaves the distance alone: a flight under way glides to rest instead. */
+          if (next.distance !== rig.target) rig.zoomTo(next.distance, input.active);
+          else rig.cancel();
           guide.takeOver();
           interacting = true;
           window.clearTimeout(releaseTimer);
@@ -324,8 +319,8 @@ export function createOrreryEngine(
           }, 700);
           engine.invalidate();
         },
-        /* The engine clamps to its own limits, which reach true-size close-ups. */
-        distance: { min: 1e-12, max: 2_600_000 },
+        /* The rig clamps to its own limits, from true-size close-ups to the whole halo. */
+        distance: { min: 1e-12, max: 2_600_000 * LY },
         inclination: ORBIT_INCLINATION,
         dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
         wheelSensitivity: () => 0.0012,
@@ -365,11 +360,10 @@ export function createOrreryEngine(
         const view = viewById(s.view);
         if (closeUp.current && view.realm === "solar" && !reduceMotion.matches) {
           /* Leaving a close-up for a view: one flight, out of the body and on to the view. */
-          rig.flightTarget = view.dist;
           closeUp.leaveTo({
             azimuth: view.azimuth ?? pose.azimuth,
             inclination: view.inclination ?? 0.52,
-            distance: view.dist,
+            distance: worldDistance(view.dist, view.realm),
           });
         } else {
           closeUp.end(false);
@@ -377,6 +371,10 @@ export function createOrreryEngine(
           if (!s.guideOpen) rig.flyToView(s.view);
         }
         input.cancel();
+      }
+      if (s.selection !== lastSelection) {
+        lastSelection = s.selection;
+        if (isPresentEra(s.yearsAgo) && !s.guideOpen) closeUp.prefetch(s.selection);
       }
       if (s.closeUp !== lastCloseUp) {
         lastCloseUp = s.closeUp;
@@ -414,6 +412,54 @@ export function createOrreryEngine(
       return playHead;
     };
 
+    /**
+     * The Galaxy first, in a depth range fitted to it (its stars sit light-years behind
+     * anything on the solar map), then the solar map over it, then a close-up body.
+     */
+    const draw = () => {
+      if (galaxy.visible) {
+        const near = camera.near;
+        const far = camera.far;
+        camera.far = galaxy.reach();
+        camera.near = Math.max(pose.distance / 5000, camera.far * 1e-7);
+        camera.updateProjectionMatrix();
+        camera.layers.set(GALAXY_LAYER);
+        renderer.render(scene, camera);
+        camera.layers.set(0);
+        camera.near = near;
+        camera.far = far;
+        camera.updateProjectionMatrix();
+        renderer.autoClear = false;
+        renderer.clearDepth();
+      }
+      renderer.render(scene, camera);
+      closeUp.renderBody(renderer, scene);
+      renderer.autoClear = true;
+    };
+
+    /**
+     * Once the first frame is up: compile every material in the scene, hidden layers
+     * included (the Oort cloud, the Galaxy, rings, rocks), so no zoom ever waits on a shader.
+     * Uses parallel compilation where the browser offers it.
+     */
+    let warmed = false;
+    let alive = true;
+    scope.defer(() => {
+      alive = false;
+    });
+    const warmUp = () => {
+      if (warmed) return;
+      warmed = true;
+      const idle =
+        "requestIdleCallback" in window && typeof window.requestIdleCallback === "function"
+          ? window.requestIdleCallback.bind(window)
+          : (run: () => void) => window.setTimeout(run, 200);
+      idle(() => {
+        if (!alive) return;
+        renderer.compileAsync(scene, camera).catch(() => undefined);
+      });
+    };
+
     const tick = (dt: number, invalidated: boolean) => {
       inTick = true;
       try {
@@ -422,22 +468,31 @@ export function createOrreryEngine(
         const now = new Date();
 
         guide.stepCamera(state, dt);
-        rig.stepFlight(dt);
+        rig.step(dt);
         rig.home();
         closeUp.step(dt);
         rig.applyPose();
         const dist = pose.distance;
+        lod.begin(dt, dist, rig.target);
+        const realm = lod.realm;
+        /* Zooming across the handoff lets go of a selection from the other map. */
+        if (realm !== lastRealm) {
+          lastRealm = realm;
+          const sel = state.selection;
+          if (sel && !state.guideOpen && (sel.kind === "galaxy") !== (realm === "galaxy"))
+            store.getState().select(null);
+        }
 
         const yearsAgo = advanceClock(state, dt);
         /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. */
-        if (show.drift && rig.realm === "solar" && !closeUp.current)
+        if (show.drift && realm === "solar" && !closeUp.current)
           driftYears += dt * driftYearsPerSecond(dist, "solar");
 
         const frame: Frame = {
           dt,
           now,
           show,
-          sel: state.selection,
+          sel: store.getState().selection,
           yearsAgo,
           playing: state.playing,
           mig: migrationProgress(yearsAgo),
@@ -446,19 +501,20 @@ export function createOrreryEngine(
           present: isPresentEra(yearsAgo),
         };
         guide.stepSketch(state, frame);
-        const solarRealm = rig.realm === "solar";
-        const solarOn = solarRealm && sunExists(yearsAgo);
-        solar.visible = solarOn;
-        sky.update(frame, solarRealm);
+        /* The solar map fades out over the handoff while the Galaxy fades in. */
+        const solarShown = sunExists(yearsAgo) && lod.solar > 0.001;
+        const solarOn = realm === "solar" && sunExists(yearsAgo);
+        solar.visible = solarShown;
+        sky.update(frame, lod.solar);
 
-        if (solarOn) {
+        if (solarShown) {
           sun.update(frame);
           planets.update(frame);
           moons.update(frame);
           populations.update(frame);
           neighbours.update(frame, pose.azimuth);
           const at = focus.update(frame, closeUp.current !== null);
-          if (show.distances) rulers.drawFrom(frame.sel, at, dist);
+          if (show.distances && solarOn) rulers.drawFrom(frame.sel, at, dist);
         } else hideAll(SOLAR_LABELS);
         // Off has no effect object, update callback, scene node or GPU resources.
         activity.current?.update(
@@ -466,20 +522,25 @@ export function createOrreryEngine(
           solarActivityVisible(state, closeUp.current, solarOn),
           !state.solarActivityPaused && !reduceMotion.matches,
         );
+        galaxy.update(frame);
         rulers.finish();
-        galaxy.update(frame, rig.realm === "galaxy");
         flush();
 
         hud.update(dt, invalidated || engine.dirty, {
-          dist,
-          realm: rig.realm,
+          /* Readouts stay in the dominant map's unit. */
+          dist: realm === "galaxy" ? dist / LY : dist,
+          realm,
           drift: show.drift && !closeUp.current,
           driftYears,
           syncView: !rig.flying && !closeUp.current && !state.guideOpen,
         });
-        closeUp.render(renderer, scene);
-        if (!store.getState().ready) store.getState().setReady(true);
-        maps.request();
+        draw();
+        if (!store.getState().ready) {
+          store.getState().setReady(true);
+          maps.start();
+          warmUp();
+        }
+        maps.update(dt, lod.need, closeUp.current?.id ?? null);
       } finally {
         inTick = false;
       }
@@ -493,7 +554,7 @@ export function createOrreryEngine(
         activity.current !== null &&
         activityMoving() &&
         !interacting &&
-        !rig.flying &&
+        !rig.moving &&
         !closeUp.busy()
           ? tight
             ? 24

@@ -1,4 +1,8 @@
-/** The sky that rides with the camera, and the presolar cloud before the Sun exists. */
+/**
+ * The sky that rides with the camera, and the presolar cloud before the Sun exists. Both
+ * belong to the solar map: they fade out as the Galaxy takes over (`solar` 1 → 0), and the
+ * Galaxy's own disk replaces the Milky Way band in the same directions.
+ */
 import { Color, Group, Points, type Object3D } from "three";
 
 import { clamp } from "@horizon/toolkit/math";
@@ -51,11 +55,12 @@ export function createSkyLayer(
     get easing() {
       return easing;
     },
-    update(f: Frame, solarRealm: boolean) {
-      sky.visible = solarRealm;
+    update(f: Frame, solar: number) {
+      sky.visible = solar > 0.001;
       /* The dense natal cloud only exists in the last few million years before collapse. */
-      const natal = sunExists(f.yearsAgo) ? 0 : clamp(1 - (f.yearsAgo - SUN_BIRTH) / 4e6, 0, 1);
-      cloud.visible = solarRealm && natal > 0.01;
+      const natal =
+        (sunExists(f.yearsAgo) ? 0 : clamp(1 - (f.yearsAgo - SUN_BIRTH) / 4e6, 0, 1)) * solar;
+      cloud.visible = natal > 0.01;
       if (sky.visible) {
         sky.position.copy(camera.position);
         sky.scale.setScalar(Math.max(12, f.dist * 20));
@@ -72,14 +77,16 @@ export function createSkyLayer(
         const step = (f.playing ? 0.08 : 6) * f.dt;
         skyPhase += Math.abs(gap) <= step ? gap : Math.sign(gap) * step;
         easing = Math.abs(gap) > step;
-        milkyWay.set(skyPhase, epoch.era, epoch.dim, epoch.cloud);
-        brightMaterial.uniforms.fade!.value = epoch.real * epoch.dim;
+        const dim = epoch.dim * solar;
+        milkyWay.set(skyPhase, epoch.era, dim, epoch.cloud);
+        brightMaterial.uniforms.fade!.value = epoch.real * dim;
         const brightTint = brightMaterial.uniforms.tint?.value;
         if (brightTint instanceof Color) brightTint.copy(milkyWay.tint);
-        fieldMaterial.uniforms.fade!.value = epoch.dim;
+        fieldMaterial.uniforms.fade!.value = dim;
         const fieldTint = fieldMaterial.uniforms.tint?.value;
         if (fieldTint instanceof Color) fieldTint.copy(milkyWay.tint);
-      }
+        /* Out in the Galaxy the sky is not drawn and has nothing to ease. */
+      } else easing = false;
       if (cloud.visible) {
         if (f.show.drift) cloudSpin += f.dt * 0.02;
         cloud.rotation.y = cloudSpin;

@@ -78,12 +78,3 @@ export function namedElements(
 }
 
 export const isGiant = (id: PlanetId) => GIANTS.has(id);
-
-/** Whether an orbit is worth drawing at the current camera distance. */
-export function orbitInView(el: Elements, elliptical: boolean, camDist: number, force: boolean) {
-  if (force) return true;
-  const e = elliptical ? Math.min(0.995, el.e) : 0;
-  const peri = el.a * (1 - e);
-  const apo = el.a * (1 + e);
-  return apo >= camDist * 0.035 && peri <= camDist * 0.92 && apo <= camDist * 2.6;
-}

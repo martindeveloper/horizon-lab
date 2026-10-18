@@ -388,7 +388,7 @@
       },
       "maps": {
         "title": "Two maps, not one",
-        "body": "The solar-system model uses the ecliptic plane, the plane of Earth's orbit, as its reference. The Milky Way view uses the Galactic disk plane. These planes are tilted by about 60°, and the solar system is an invisible speck on a Galaxy map, so the maps connect only at the Sun: zoom in on it to cross over."
+        "body": "The solar-system model uses the ecliptic plane, the plane of Earth's orbit, as its reference. The Milky Way view uses the Galactic disk plane. These planes are tilted by about 60°, and the solar system is an invisible speck on a Galaxy map, so the maps meet at the Sun. Zooming out past the nearest stars turns the view from one plane to the other, and the Milky Way in the sky becomes the Galaxy's disk."
       }
     }
   },

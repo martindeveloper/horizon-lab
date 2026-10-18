@@ -7,10 +7,12 @@ import { AU_KM } from "@horizon/toolkit/science";
 
 import type { Looks } from "../graphics/looks";
 import type { Selection, Show } from "../store";
+import type { Lod } from "./lod";
 
 export const FOV = 48;
-/** Outer edge of the solar map (AU) and the closest Galaxy-map approach to the Sun (ly). */
+/** Farthest a close-up flight may carry the camera (au). */
 export const SOLAR_EDGE = 800_000;
+/** Closest approach to the galactic centre while the bulge card holds the aim there (ly). */
 export const GALAXY_NEAR = 1_500;
 export const SUN_R = SUN_RADIUS_KM / AU_KM;
 export const ORBIT_INCLINATION = { min: -1.45, max: 1.45 };
@@ -42,7 +44,9 @@ export type SceneKit = {
   /** Phones and low-memory devices: smaller samples and buffers. */
   tight: boolean;
   dpr: number;
-  /** World size of `px` screen pixels at distance `dist`. */
+  /** Screen size, presence bands, faders and the realm blend (see lod.ts). */
+  lod: Lod;
+  /** World size of `px` screen pixels at distance `dist`: `lod.pxWorld`. */
   pxWorld: (dist: number, px: number) => number;
 };
 
@@ -57,15 +61,10 @@ export type Frame = {
   /** Neptune's migration, 0..1. */
   mig: number;
   driftYears: number;
-  /** Camera distance from its target. */
+  /** Camera distance from its aim, au. */
   dist: number;
   present: boolean;
 };
 
-export function createPxWorld(viewport: Viewport) {
-  const tan = 2 * Math.tan((FOV * Math.PI) / 360);
-  return (dist: number, px: number) => ((tan * dist) / Math.max(480, viewport.height)) * px;
-}
-
-/** Hides a body's own label, orbit and marker once a close-up of it fills the view. */
-export type HidesFor = (id: BodyId) => boolean;
+/** 1 while a body's own label, orbit and marker show; eases to 0 as its close-up fills the view. */
+export type ShownFor = (id: BodyId) => number;

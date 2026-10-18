@@ -88,6 +88,8 @@ export type Swarm = {
   points: Points;
   material: ShaderMaterial;
   set: (mig: number, drift: number, near: number, anchorLon?: number) => void;
+  /** Shows the swarm at `presence` (0..1) of its opacity; returns whether it draws at all. */
+  fade: (presence: number) => boolean;
   dispose: () => void;
 };
 
@@ -110,6 +112,11 @@ export function createSwarm(
       material.uniforms.drift!.value = drift;
       material.uniforms.near!.value = near;
       material.uniforms.anchorLon!.value = anchorLon;
+    },
+    fade(presence) {
+      points.visible = presence > 0.004;
+      material.uniforms.opacity!.value = opacity * presence;
+      return points.visible;
     },
     dispose() {
       geometry.dispose();

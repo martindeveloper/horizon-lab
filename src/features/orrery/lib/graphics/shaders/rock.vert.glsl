@@ -2,8 +2,12 @@
 // instance's `seed` attribute orientates its principal axes and shapes the unit
 // sphere into a smooth triaxial, lobed rubble-pile figure with single-pass
 // analytical surface normals; the instance colour carries the population tint.
+// Instance matrices place each body (scale 0 hides it, 1 shows it); `radius` sizes
+// them all, so a zoom changes one uniform instead of every instance.
 
 attribute float seed;
+
+uniform float radius; // world radius of a shown body
 
 varying vec3 vNormal;
 varying vec3 vWorld;
@@ -90,6 +94,9 @@ void main() {
   #ifdef USE_INSTANCING
     model = modelMatrix * instanceMatrix;
   #endif
+  model[0].xyz *= radius;
+  model[1].xyz *= radius;
+  model[2].xyz *= radius;
 
   // Cull hidden/filtered planetesimal instances (scale = 0) before any shape math.
   float worldRadius = length(model[0].xyz);
