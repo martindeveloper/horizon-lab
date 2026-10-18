@@ -339,10 +339,13 @@ export function createLooks(light = false) {
     sedna: lit(namedMaps.sedna, SURFACES.sedna),
     halley: lit(namedMaps.halley, SURFACES.halley),
   };
-  /* Moons are painted the first time their planet shows them. */
+  /** Retained even when a moon material has not been created yet. */
+  const measured: Partial<Record<BodyId, Texture>> = {};
+  /* Moon materials are created the first time their planet shows them. */
   const moonMaps: Partial<Record<MoonId, Texture>> = {};
   const moons: Partial<Record<MoonId, ShaderMaterial>> = {};
-  const moon = (id: MoonId) => (moons[id] ??= lit((moonMaps[id] = texture(id)), SURFACES[id]));
+  const moon = (id: MoonId) =>
+    (moons[id] ??= lit(measured[id] ?? (moonMaps[id] = texture(id)), SURFACES[id]));
   const sunMap = texture("sun");
   const sun = new ShaderMaterial({
     uniforms: { map: { value: sunMap } },
@@ -463,8 +466,6 @@ export function createLooks(light = false) {
     glow,
     softStar,
   ];
-  /** Measured maps that replaced painted ones, freed with the engine. */
-  const measured: Partial<Record<BodyId, Texture>> = {};
   const moonIds = MOONS.map((moon) => moon.id);
   const surfaceOf = (id: BodyId): ShaderMaterial | undefined => {
     if (id === "sun") return sun;
@@ -477,16 +478,12 @@ export function createLooks(light = false) {
     ...materials,
     moon,
     surfaceOf,
-    /** Shows a measured map on the body from now on (or frees it if the body has no material). */
+    /** Retains a measured map, including for moons that are not visible yet. */
     setMeasured(id: BodyId, texture: Texture) {
       const material = surfaceOf(id);
-      if (!material) {
-        texture.dispose();
-        return;
-      }
       measured[id]?.dispose();
       measured[id] = texture;
-      material.uniforms.map!.value = texture;
+      if (material) material.uniforms.map!.value = texture;
     },
     /** A close-up's detailed map, to paint a few rows per frame; null when the base map suffices. */
     detailJob: (id: BodyId) => {

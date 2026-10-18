@@ -3,7 +3,7 @@
  * data and under which licence. The app owns where the WebP tiers are served
  * from and passes that base in. Bodies without an entry keep their painted map
  * (`@horizon/toolkit/bodies/surfaces`): Venus (featureless cloud
- * tops), Sedna, Halley and the moons.
+ * tops), Titan (haze), Sedna and Halley.
  *
  * All maps are equirectangular in the scene's convention: east longitude 0°
  * at the left edge, north at the top, and parametric latitude on the oblate
@@ -30,6 +30,55 @@ const OPAL_CREDIT = "NASA, ESA, A.A. Simon, M.H. Wong (OPAL, Hubble programme GO
 const OPAL_URL = "https://archive.stsci.edu/hlsp/opal";
 
 export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
+  moon: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill",
+    credit: "NASA’s Scientific Visualization Studio; NASA/LRO/LROC, Arizona State University",
+    licence: "Public domain",
+    url: "https://svs.gsfc.nasa.gov/4720/",
+  },
+  io: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "Galileo SSI / Voyager merged mosaic, muted enhanced colour; interpolated poles",
+    credit: "NASA/JPL; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km",
+  },
+  europa: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "Voyager / Galileo SSI mosaic, monochrome; plain south-polar fill",
+    credit: "NASA/JPL; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m",
+  },
+  ganymede: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles",
+    credit: "NASA/JPL; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km",
+  },
+  callisto: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "Voyager / Galileo SSI mosaic, monochrome",
+    credit: "NASA/JPL; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km",
+  },
+  triton: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill",
+    credit: "NASA/JPL; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m",
+  },
+  charon: {
+    widths: { far: 1024, near: 1024, nearLight: 1024 },
+    source: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
+    credit: "NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m",
+  },
   sun: {
     widths: { far: 1024, near: 8192, nearLight: 2048 },
     source:

@@ -49,6 +49,56 @@ export const CREDITS: readonly CreditGroup[] = [
     id: "imagery",
     items: [
       {
+        id: "moonMap",
+        name: "LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill",
+        by: "NASA’s Scientific Visualization Studio; NASA/LRO/LROC, Arizona State University",
+        licence: "Public domain",
+        url: "https://svs.gsfc.nasa.gov/4720/",
+      },
+      {
+        id: "ioMap",
+        name: "Galileo SSI / Voyager merged mosaic, muted enhanced colour; interpolated poles",
+        by: "NASA/JPL; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km",
+      },
+      {
+        id: "europaMap",
+        name: "Voyager / Galileo SSI mosaic, monochrome; plain south-polar fill",
+        by: "NASA/JPL; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m",
+      },
+      {
+        id: "ganymedeMap",
+        name: "Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles",
+        by: "NASA/JPL; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km",
+      },
+      {
+        id: "callistoMap",
+        name: "Voyager / Galileo SSI mosaic, monochrome",
+        by: "NASA/JPL; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km",
+      },
+      {
+        id: "tritonMap",
+        name: "Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill",
+        by: "NASA/JPL; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m",
+      },
+      {
+        id: "charonMap",
+        name: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
+        by: "NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m",
+      },
+
+      {
         id: "sdoHmi",
         name: "SDO/HMI continuum intensity (May 2024)",
         by: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
@@ -95,6 +145,13 @@ export const CREDITS: readonly CreditGroup[] = [
   {
     id: "data",
     items: [
+      {
+        id: "solarProminences",
+        name: "Solar prominences and filaments",
+        by: "NASA / Marshall Space Flight Center",
+        licence: "Cited",
+        url: "https://solarscience.msfc.nasa.gov/feature2.shtml",
+      },
       {
         id: "jpl",
         name: "JPL Solar System Dynamics",

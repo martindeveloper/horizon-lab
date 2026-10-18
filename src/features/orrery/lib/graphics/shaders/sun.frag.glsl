@@ -1,6 +1,6 @@
-// The Sun: self-lit, with measured limb darkening per colour channel, so the
-// limb is darker and redder than the white centre. The HMI mosaic has its
-// source limb shading removed so this view-dependent effect is applied once.
+// Near-white HMI intensity with limb darkening and a slight warm edge. The
+// display coefficients preserve the measured fits' luminance, reducing their
+// narrow-band chroma at build time. Source limb shading is removed from the map.
 
 uniform sampler2D map; // sRGB-encoded, quiet-normalized HMI intensity
 
@@ -15,7 +15,7 @@ void main() {
   vec3 viewDir = normalize(vView);
 
   float mu = clamp(dot(n, viewDir), 0.0, 1.0);
-  vec3 limb = 1.0 - SUN_LIMB_U * (1.0 - mu) - SUN_LIMB_V * (1.0 - mu * mu);
+  vec3 limb = 1.0 - SUN_DISPLAY_LIMB_U * (1.0 - mu) - SUN_DISPLAY_LIMB_V * (1.0 - mu * mu);
   float intensity = texture2D(map, vUv).r / SUN_MAP_QUIET_INTENSITY;
 
   vec3 col = SUN_CENTRE_RGB * limb * intensity;

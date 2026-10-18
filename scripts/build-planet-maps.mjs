@@ -17,7 +17,8 @@
  * work (Irwin et al. 2024 for Uranus and Neptune). Mercury and Pluto mosaics
  * give brightness; their colour follows true-colour images.
  */
-import { createWriteStream, existsSync, mkdirSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -27,9 +28,10 @@ import { pipeline } from "node:stream/promises";
 import sharp from "sharp";
 
 import { FIGURES, MAPS, mapFile } from "@horizon/toolkit/bodies";
-import { surfaceMap } from "@horizon/toolkit/bodies/surfaces";
+import { GEOMETRIC_ALBEDO, surfaceMap } from "@horizon/toolkit/bodies/surfaces";
 
 import { buildSunMap } from "./build-sun-map.mjs";
+import { MOON_MAP_SOURCES, moonSourceX } from "./lib/moon-maps.mjs";
 
 sharp.cache(false);
 const root = new URL("../", import.meta.url);
@@ -329,7 +331,67 @@ async function pluto(width) {
   return brightness("pluto", file, width, tint, false);
 }
 
+/** Spacecraft moon mosaics: preserve geography, never invent terrain in gaps.
+ * RGB products include non-visible filters: muted colour is illustrative, not
+ * calibrated true colour. Grayscale products stay grayscale. A bounded response
+ * matches the scene's albedo scale while retaining bright terrain detail.
+ */
+async function observedMoon(id, width) {
+  const source = MOON_MAP_SOURCES[id];
+  const file = await fetchCached(source.file);
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(file)) hash.update(chunk);
+  if (hash.digest("hex") !== source.sha256) throw new Error(`${id}: source checksum mismatch`);
+  const px = await raster(file, width, 3, false);
+  const img = image(width, width / 2);
+  const valid = new Float32Array(width * img.h);
+  for (let y = 0; y < img.h; y += 1) {
+    const lat = 90 - ((y + 0.5) / img.h) * 180;
+    for (let x = 0; x < width; x += 1) {
+      const i = y * width + x;
+      const si = (y * width + moonSourceX(x, width, source.centered)) * 3;
+      const rgb = [0, 1, 2].map((c) => LUT[Math.round(px[si + c] * 255)]);
+      const l = luminance(...rgb);
+      valid[i] = l > 0.001 && !(id === "europa" && lat < -83) ? 1 : 0;
+      for (let c = 0; c < 3; c += 1) img.rgb[i * 3 + c] = l + (rgb[c] - l) * source.saturation;
+    }
+  }
+  const mask = softMask(valid, width, img.h, 2, 3);
+  const mean = meanColour(img, mask);
+  // A bounded photographic response preserves bright terrain instead of clipping
+  // it when these contrast-stretched mosaics are put on the scene's albedo scale.
+  let low = 0;
+  let high = 1000;
+  for (let step = 0; step < 24; step += 1) {
+    const gain = (low + high) / 2;
+    let sum = 0;
+    let weight = 0;
+    for (let y = 0; y < img.h; y += 1) {
+      const w = rowWeight(y, img.h);
+      for (let x = 0; x < width; x += 1) {
+        const i = y * width + x;
+        if (mask[i] < 0.5) continue;
+        sum += luminance(...[0, 1, 2].map((c) => 1 - Math.exp(-img.rgb[i * 3 + c] * gain))) * w;
+        weight += w;
+      }
+    }
+    if (sum / weight < GEOMETRIC_ALBEDO[id]) low = gain;
+    else high = gain;
+  }
+  const gain = (low + high) / 2;
+  const reference = image(width, img.h);
+  for (let i = 0; i < img.rgb.length; i += 1) {
+    img.rgb[i] = 1 - Math.exp(-img.rgb[i] * gain);
+    reference.rgb[i] = 1 - Math.exp(-mean[i % 3] * gain);
+  }
+  fill(img, mask, reference);
+  return img;
+}
+
 const BUILDERS = {
+  ...Object.fromEntries(
+    Object.keys(MOON_MAP_SOURCES).map((id) => [id, (w) => observedMoon(id, w)]),
+  ),
   sun: buildSunMap,
   mercury,
   earth,

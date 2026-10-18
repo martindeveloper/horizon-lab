@@ -39,7 +39,7 @@ test("every tier exists at its declared size, inside its budget", async () => {
     }
     assert.ok(map.widths.nearLight <= map.widths.near && map.widths.far <= map.widths.nearLight);
   }
-  assert.ok(far <= 600e3, `all far maps together are ${far} bytes`);
+  assert.ok(far <= 1e6, `all far maps together are ${far} bytes`);
 });
 
 test("measured maps keep each body's geometric albedo", async () => {

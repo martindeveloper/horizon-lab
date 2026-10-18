@@ -10,6 +10,7 @@ import { useOrrery } from "../lib/store";
 import { viewFromPath } from "../routing";
 import { OrreryCanvas } from "./canvas";
 import { OrreryOverlay } from "./overlay";
+import { SolarActivityNotice } from "./solar-activity-controls";
 
 /** The tour drives the camera; immersive view ends it but keeps panels for the return. */
 function leaveGuide() {
@@ -38,6 +39,7 @@ export function Orrery() {
       <SimulationImmersive onEnter={leaveGuide}>
         <OrreryOverlay />
       </SimulationImmersive>
+      <SolarActivityNotice />
       <LoadingOverlay ready={ready}>
         <SimulationLoading title={t("app")} />
       </LoadingOverlay>

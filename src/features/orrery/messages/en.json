@@ -54,6 +54,15 @@
     "halo": "Dark-matter halo",
     "distances": "Distances"
   },
+  "solarActivity": {
+    "toggle": "Solar activity",
+    "model": "Illustrative model",
+    "description": "Plasma arches rise, twist and recoil as bright clumps flow along them. Motion is accelerated and illustrative, independent of the NASA surface map.",
+    "pause": "Pause illustrative solar activity",
+    "resume": "Resume illustrative solar activity",
+    "paused": "Model paused",
+    "reducedMotion": "Static view · reduced motion"
+  },
   "layers": {
     "title": "Layers",
     "disk": "Early disk",
@@ -466,7 +475,7 @@
       },
       "globes": {
         "title": "Globes and rings",
-        "body": "Radii, flattening, poles and spin rates are IAU values, so every globe has its real shape and turns to today's angle: Uranus lies on its side, Venus spins backwards. Surfaces are measured maps: Hubble's 2025 maps of the giants, Blue Marble Earth, Viking Mars, MESSENGER Mercury and New Horizons Pluto, with mean colour and brightness set by true-colour data and albedo. The Sun uses a representative SDO/HMI photosphere mosaic from 1–22 May 2024, reprojected across one rotation with quiet polar fill; its sunspots are not live or tied to the timeline date. Venus, Sedna, Halley and other unseen areas are painted. Rings use measured radii and optical depths, lit from the front or seen against the light, with the planet's shadow across them. Jupiter's are too faint to show."
+        "body": "Radii, flattening, poles and spin rates are IAU values, so every globe has its real shape and turns to today's angle: Uranus lies on its side, Venus spins backwards. Surfaces are measured maps: Hubble's 2025 maps of the giants, Blue Marble Earth, Viking Mars, MESSENGER Mercury and New Horizons Pluto, with mean colour and brightness set by true-colour data and albedo. The Sun uses a representative SDO/HMI photosphere mosaic from 1–22 May 2024, reprojected across one rotation with quiet polar fill; its sunspots are not live or tied to the timeline date. Rings use measured radii and optical depths, lit from the front or seen against the light, with the planet's shadow across them. Jupiter's are too faint to show. The Moon uses LRO/LROC imagery; Io, Europa, Ganymede, Callisto and Triton use Voyager/Galileo mosaics, and Charon uses New Horizons. Some moon maps are monochrome or use muted multispectral colour, not calibrated natural colour. Unobserved moon terrain uses plain fill; source polar interpolation is documented in the credits. Venus and Titan retain illustrative clouds and haze; Sedna and Halley retain illustrative surfaces."
       },
       "rendering": {
         "title": "Rendering budget",

@@ -151,7 +151,7 @@
     "groups": {
       "imagery": {
         "label": "Imagery",
-        "intro": "Planet maps, reprocessed for the orrery."
+        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. These four bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
       },
       "data": {
         "label": "Data",
@@ -171,7 +171,7 @@
       }
     },
     "items": {
-      "sdoHmi": "Sun: a representative mosaic of SDO/HMI observations from 1–22 May 2024. Reprojected and blended across one rotation; poorly observed poles fade to a quiet surface. This is not live imagery or a single-date map.",
+      "sdoHmi": "Sun: a representative mosaic of SDO/HMI observations from 1–22 May 2024. Reprojected and blended across one rotation; poorly observed poles fade to a quiet surface. The intensity map is displayed near white with limb darkening, not as a colour photograph. This is not live imagery or a single-date map.",
       "opal": "Jupiter, Saturn, Uranus and Neptune: Hubble maps from 2025, in true colour.",
       "blueMarble": "Earth: October land and sea under a cloud layer.",
       "viking": "Mars.",
@@ -208,7 +208,15 @@
       "oxc": "Linting and formatting.",
       "sharp": "Processing the planet maps.",
       "glslParser": "Offline shader checks.",
-      "tsx": "Running TypeScript scripts and tests."
+      "tsx": "Running TypeScript scripts and tests.",
+      "solarProminences": "Qualitative reference for the optional prominence model: plasma arches above the surface, seen as filaments against the disc. Horizon supplies the illustrative geometry, flowing plasma and simplified spring dynamics for growth, release and recoil. Pink/crimson colours approximate the visible-light appearance, with enhanced visibility. Positions and timing are authored, not observed events or a magnetic-field simulation.",
+      "moonMap": "Moon: NASA's 2025 LRO/LROC colour mosaic, with laser-altimeter albedo filling the poles. Longitude is aligned to the globe; brightness is adapted for scene lighting. This is a processed visual map, not raw photometry.",
+      "ioMap": "Io: Galileo and Voyager imagery. The source uses enhanced multispectral colour; we mute its saturation and adapt brightness without inventing surface features. The source interpolates the poles. This is not calibrated natural colour.",
+      "europaMap": "Europa: the USGS Voyager/Galileo monochrome mosaic. The unobserved region south of 83°S uses a plain fill; colour is not inferred from brightness.",
+      "ganymedeMap": "Ganymede: the USGS Voyager/Galileo multispectral mosaic, with muted colour and brightness adapted for scene lighting. Polar colour gaps use the source’s monochrome coverage; this is not calibrated natural colour.",
+      "callistoMap": "Callisto: the USGS Voyager/Galileo monochrome mosaic. Missing coverage receives a plain fill rather than invented craters.",
+      "tritonMap": "Triton: the USGS Voyager 2 synthetic-colour mosaic (orange, violet and ultraviolet filters), with muted saturation. The unobserved northern region uses a plain fill. Source grid lines were interpolated by USGS; this is not natural-colour photography.",
+      "charonMap": "Charon: the USGS New Horizons monochrome mosaic. The unobserved southern region uses a plain fill. No surface colour is inferred from the monochrome data."
     },
     "licences": {
       "publicDomain": "Public domain",

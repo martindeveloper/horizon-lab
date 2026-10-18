@@ -7,6 +7,7 @@ import { Action, PanelHeader, cn, useFocusHandoff } from "@horizon/toolkit/ui";
 import { DEFAULT_VIEW } from "../lib/model/views";
 import { canCloseUp, useOrrery } from "../lib/store";
 import { cardFor } from "./cards";
+import { SolarActivityControls } from "./solar-activity-controls";
 
 /** Facts and notes for the selected object, with the close-up entry. */
 export function SelectionCard() {
@@ -143,6 +144,7 @@ export function SelectionCard() {
             </Action>
           ) : null}
           {closeUp ? <p className="w-full text-xs text-muted">{t("hud.closeUpNote")}</p> : null}
+          {closeUp && selection.kind === "sun" ? <SolarActivityControls /> : null}
         </div>
       ) : null}
     </article>

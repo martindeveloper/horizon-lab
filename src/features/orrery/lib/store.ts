@@ -65,6 +65,9 @@ export type OrreryStore = {
   selection: Selection | null;
   /** The selected body fills the view at its true size; the engine flies in and out. */
   closeUp: boolean;
+  /** Explicitly enabled illustrative prominences; reset on leaving the close-up. */
+  solarActivity: boolean;
+  solarActivityPaused: boolean;
   panel: Panel;
   show: Show;
   /** Unit for every distance readout: labels, cards and the scale bar. */
@@ -90,6 +93,8 @@ export type OrreryStore = {
   /** Flies to the selected body when it has a surface to look at. */
   enterCloseUp: () => void;
   leaveCloseUp: () => void;
+  toggleSolarActivity: () => void;
+  toggleSolarActivityPaused: () => void;
   patchShow: (patch: Partial<Show>) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
   setPanel: (panel: Panel) => void;
@@ -118,6 +123,10 @@ function sameSelection(a: Selection | null, b: Selection | null) {
   return !!a && !!b && JSON.stringify(a) === JSON.stringify(b);
 }
 
+const SUN_ACTIVITY_OFF = { solarActivity: false, solarActivityPaused: false };
+const closeUpState = (closeUp: boolean) =>
+  closeUp ? { closeUp } : { closeUp, ...SUN_ACTIVITY_OFF };
+
 /** Display switches the visitor had before the guide, restored when it ends. */
 let showBeforeGuide: Show | null = null;
 
@@ -129,6 +138,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   turn: null,
   selection: null,
   closeUp: false,
+  ...SUN_ACTIVITY_OFF,
   panel: "none",
   show: DEFAULT_SHOW,
   distanceUnit: "au",
@@ -143,16 +153,20 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   driftYears: 0,
   /* Close-up maps show today's surfaces, so leaving the present ends a close-up. */
   setYearsAgo: (yearsAgo) =>
-    set((s) => ({ yearsAgo, playing: false, closeUp: s.closeUp && isPresentEra(yearsAgo) })),
+    set((s) => ({
+      yearsAgo,
+      playing: false,
+      ...closeUpState(s.closeUp && isPresentEra(yearsAgo)),
+    })),
   setYearsFromPlay: (yearsAgo) =>
-    set((s) => ({ yearsAgo, closeUp: s.closeUp && isPresentEra(yearsAgo) })),
+    set((s) => ({ yearsAgo, ...closeUpState(s.closeUp && isPresentEra(yearsAgo)) })),
   /** Pauses while playing; otherwise plays on, or from the start once the track has ended. */
   togglePlay: () =>
     set((s) =>
       s.playing
         ? { playing: false }
         : s.yearsAgo <= 0
-          ? { yearsAgo: OLDEST, playing: true, closeUp: false }
+          ? { yearsAgo: OLDEST, playing: true, ...closeUpState(false) }
           : { playing: true },
     ),
   replay: () =>
@@ -162,28 +176,36 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
       view: "giants",
       flight: s.flight + 1,
       panel: "none",
-      closeUp: false,
+      ...closeUpState(false),
     })),
-  setView: (view) => set((s) => ({ view, flight: s.flight + 1, closeUp: false })),
+  setView: (view) => set((s) => ({ view, flight: s.flight + 1, ...closeUpState(false) })),
   rotate: (turn) => set({ turn: { ...turn } }),
   /* Picking another body (or nothing) ends a close-up; the same body keeps it. */
   select: (selection) =>
     set((s) => ({
       selection,
-      closeUp: s.closeUp && sameSelection(s.selection, selection),
+      ...closeUpState(s.closeUp && sameSelection(s.selection, selection)),
     })),
   enterCloseUp: () => {
     const s = get();
     if (canCloseUp(s)) set({ closeUp: true, panel: "none", playing: false });
   },
-  leaveCloseUp: () => set({ closeUp: false }),
+  leaveCloseUp: () => set(closeUpState(false)),
+  toggleSolarActivity: () =>
+    set((s) =>
+      s.closeUp && s.selection?.kind === "sun" && canCloseUp(s)
+        ? { solarActivity: !s.solarActivity, solarActivityPaused: false }
+        : SUN_ACTIVITY_OFF,
+    ),
+  toggleSolarActivityPaused: () =>
+    set((s) => (s.solarActivity ? { solarActivityPaused: !s.solarActivityPaused } : {})),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
   setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
   setPanel: (panel) => set({ panel }),
   setReady: (ready) => set({ ready }),
   startGuide: () => {
     showBeforeGuide ??= get().show;
-    set({ guideOpen: true, panel: "none", closeUp: false });
+    set({ guideOpen: true, panel: "none", ...closeUpState(false) });
     get().goGuide(0);
   },
   goGuide: (index) => {

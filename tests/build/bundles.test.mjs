@@ -64,6 +64,23 @@ test("catalogues do not load the toolkit body catalogue or painted surfaces", ()
   }
 });
 
+test("solar activity stays in an optional chunk, outside the Orrery engine and initial route", () => {
+  const chunks = readdirSync(new URL("static/chunks/", build))
+    .filter((name) => name.endsWith(".js"))
+    .map((name) => ({ path: `static/chunks/${name}`, code: read(`static/chunks/${name}`) }));
+  const effects = chunks.filter(({ code }) => code.includes("Illustrative solar prominences"));
+  const engines = chunks.filter(({ code }) => code.includes("solarActivityPaused"));
+  assert.ok(effects.length > 0, "find the optional effect renderer");
+  assert.ok(engines.length > 0, "find the main Orrery engine");
+  for (const { code } of engines) {
+    assert.doesNotMatch(code, /Illustrative solar prominences|uniform sampler3D densityMap/);
+  }
+  for (const locale of ["en", "cs"]) {
+    const initial = assets(`${locale}/lab/orrery`, ".js");
+    for (const { path } of effects) assert.ok(!initial.has(path), `${locale} preloads ${path}`);
+  }
+});
+
 test("black-hole styles load on feature routes, never on catalogue routes", () => {
   for (const locale of ["en", "cs"]) {
     const shared = assets(locale, ".css");

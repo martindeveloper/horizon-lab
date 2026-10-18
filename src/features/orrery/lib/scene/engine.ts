@@ -38,6 +38,7 @@ import { createEngineHost, DisposalScope } from "@horizon/toolkit/rendering";
 import { createLooks } from "../graphics/looks";
 import { namedElements, planetElements } from "../model/elements";
 import { NEIGHBOURS } from "../model/neighbours";
+import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay, isPresentEra, migrationProgress, sunExists } from "../model/timeline";
 import { DEFAULT_VIEW, driftYearsPerSecond, viewById, type ViewId } from "../model/views";
 import { hasSurface, useOrrery, type OrreryStore } from "../store";
@@ -66,6 +67,7 @@ import { createPlanetsLayer } from "./planets-layer";
 import { createPopulationsLayer } from "./populations-layer";
 import { createDistanceText, createRulers } from "./rulers";
 import { createSkyLayer } from "./sky-layer";
+import { createSolarActivityLifecycle } from "./solar-activity-lifecycle";
 import { createSunLayer } from "./sun-layer";
 
 export type OrreryEngine = { dispose: () => void };
@@ -161,6 +163,16 @@ export function createOrreryEngine(
     const solar = new Group();
     scene.add(solar);
     const sun = createSunLayer(kit, solar, globes, place, hidesFor);
+    const activity = scope.own(
+      createSolarActivityLifecycle(
+        async () => {
+          const { createSolarActivity } = await import("./solar-activity");
+          return () => createSolarActivity(kit, sun.sun);
+        },
+        () => engine.invalidate(),
+        onError,
+      ),
+    );
     const guide = createGuideDirector(scope, solar, rig, {
       reducedMotion,
       holdBlocked: () => closeUp.current !== null || reduceMotion.matches,
@@ -228,6 +240,14 @@ export function createOrreryEngine(
       engine.invalidate();
     });
 
+    const activityMoving = () => {
+      const s = store.getState();
+      return (
+        solarActivityVisible(s, closeUp.current, rig.realm === "solar" && sunExists(s.yearsAgo)) &&
+        !s.solarActivityPaused &&
+        !reduceMotion.matches
+      );
+    };
     const continuous = () => {
       const s = store.getState();
       return (
@@ -237,7 +257,8 @@ export function createOrreryEngine(
         guide.busy(s) ||
         interacting ||
         sky.easing ||
-        closeUp.busy()
+        closeUp.busy() ||
+        (activity.current !== null && activityMoving())
       );
     };
 
@@ -325,6 +346,7 @@ export function createOrreryEngine(
     });
 
     const unsubscribe = store.subscribe((s) => {
+      activity.setEnabled(s.solarActivity);
       if (s.turn !== lastTurn) {
         lastTurn = s.turn;
         /* Button steps snap, so they read the same with reduced motion. */
@@ -361,6 +383,10 @@ export function createOrreryEngine(
       engine.invalidate();
     });
     scope.defer(unsubscribe);
+    activity.setEnabled(store.getState().solarActivity);
+    const onMotionChange = () => engine.invalidate();
+    reduceMotion.addEventListener("change", onMotionChange);
+    scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
     if (reducedMotion) store.getState().patchShow({ drift: false });
 
     /* The store is written a few times a second; between commits the playback head lives here.
@@ -429,6 +455,12 @@ export function createOrreryEngine(
         const at = focus.update(frame, closeUp.current !== null);
         if (show.distances) rulers.drawFrom(frame.sel, at, dist);
       } else hideAll(SOLAR_LABELS);
+      // Off has no effect object, update callback, scene node or GPU resources.
+      activity.current?.update(
+        dt,
+        solarActivityVisible(state, closeUp.current, solarOn),
+        !state.solarActivityPaused && !reduceMotion.matches,
+      );
       rulers.finish();
       galaxy.update(frame, rig.realm === "galaxy");
       flush();
@@ -447,7 +479,19 @@ export function createOrreryEngine(
     engine.start({
       render: tick,
       paused: () => !(engine.dirty || continuous()),
-      fps: () => (tight ? 48 : Infinity),
+      // Limit model-only playback, preserving responsive camera motion and flights.
+      fps: () =>
+        activity.current !== null &&
+        activityMoving() &&
+        !interacting &&
+        !rig.flying &&
+        !closeUp.busy()
+          ? tight
+            ? 24
+            : 30
+          : tight
+            ? 48
+            : Infinity,
     });
     engine.refresh();
     return { dispose: () => scope.dispose() };

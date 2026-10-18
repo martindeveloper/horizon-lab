@@ -83,8 +83,8 @@ export const DUST_CAVITY_IN_AU = 0.1;
 export const DUST_CAVITY_OUT_AU = 0.42;
 /** The disk fades over its outer 8 % (art direction). */
 export const GAS_RIM_FRACTION = 0.92;
-/** The Sun's disc-centre colour, linear RGB: white, a touch warm. */
-export const SUN_CENTRE_RGB = [1, 0.99, 0.97] as const;
+/** Neutral white display of the HMI intensity map; HMI is not an RGB photograph. */
+export const SUN_CENTRE_RGB = [1, 1, 1] as const;
 /** Linear texture intensity of the quiet photosphere; reserves headroom for faculae. */
 export const SUN_MAP_QUIET_INTENSITY = 0.8;
 /**
@@ -95,6 +95,8 @@ export const SUN_MAP_QUIET_INTENSITY = 0.8;
  */
 export const SUN_LIMB_U = [0.802, 0.914, 0.978] as const;
 export const SUN_LIMB_V = [-0.198, -0.215, -0.164] as const;
+/** Display choice: retain slight edge warmth, not the full narrow-band colour contrast. */
+export const SUN_LIMB_CHROMA = 0.2;
 /** Terminator wrap on the planets: a narrow penumbra-and-haze softening (art direction). */
 export const PLANET_WRAP = 0.12;
 /** Floor of a ring's brightness, as a fraction of its particles' colour, so an unlit face still reads. */

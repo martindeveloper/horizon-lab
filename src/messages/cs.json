@@ -151,7 +151,7 @@
     "groups": {
       "imagery": {
         "label": "Snímky",
-        "intro": "Mapy planet upravené pro model sluneční soustavy."
+        "intro": "Mapy planet a měsíců upravené pro model sluneční soustavy. Venuše a Titan si ponechávají ilustrační mapy oblačnosti a zákalu: radarové či infračervené mapy povrchu neodpovídají jejich vzhledu ve viditelném světle. U Sedny nemáme rozlišené snímky povrchu; částečné snímky Halleyovy komety z průletů neposkytují globální mapu pro kouli. Tyto čtyři objekty zůstávají ilustrační. Mapy jsou reprezentativní mozaiky, nikoli snímky k datu zvolenému na časové ose."
       },
       "data": {
         "label": "Data",
@@ -171,7 +171,7 @@
       }
     },
     "items": {
-      "sdoHmi": "Slunce: ilustrační mozaika pozorování SDO/HMI z 1.–22. května 2024. Snímky jsou převedeny na kulový povrch a spojeny během jedné rotace; špatně pozorované póly přecházejí do klidného povrchu. Nejde o živé snímky ani o mapu jediného okamžiku.",
+      "sdoHmi": "Slunce: ilustrační mozaika pozorování SDO/HMI z 1.–22. května 2024. Snímky jsou převedeny na kulový povrch a spojeny během jedné rotace; špatně pozorované póly přecházejí do klidného povrchu. Mapa intenzity je zobrazena téměř bíle se ztemněním u okraje, nejde o barevnou fotografii. Nejde o živé snímky ani o mapu jediného okamžiku.",
       "opal": "Jupiter, Saturn, Uran a Neptun: Hubbleovy mapy z roku 2025 ve skutečných barvách.",
       "blueMarble": "Země: pevniny a oceány v říjnu pod vrstvou oblaků.",
       "viking": "Mars.",
@@ -208,7 +208,15 @@
       "oxc": "Kontrola a formátování kódu.",
       "sharp": "Zpracování map planet.",
       "glslParser": "Kontrola shaderů bez prohlížeče.",
-      "tsx": "Spouštění skriptů a testů v TypeScriptu."
+      "tsx": "Spouštění skriptů a testů v TypeScriptu.",
+      "solarProminences": "Kvalitativní podklad pro volitelný model protuberancí: oblouky plazmatu nad povrchem, na pozadí disku viditelné jako filamenty. Horizon vytváří ilustrační geometrii, proudění plazmatu a zjednodušený pružinový model růstu, uvolnění a návratu. Růžové a karmínové tóny přibližují vzhled ve viditelném světle; jas je zvýrazněn. Polohy a časový průběh jsou autorské, nejde o pozorované události ani o simulaci magnetického pole.",
+      "moonMap": "Měsíc: barevná mozaika NASA LRO/LROC z roku 2025, doplněná na pólech albedem z laserového výškoměru. Zeměpisná délka odpovídá glóbu; jas je přizpůsoben osvětlení scény. Jde o zpracovanou vizuální mapu, nikoli o surová fotometrická data.",
+      "ioMap": "Io: snímky sond Galileo a Voyager. Zdroj používá zvýrazněné multispektrální barvy; snižujeme jejich sytost a upravujeme jas bez vytváření smyšlených útvarů. Póly jsou ve zdroji interpolované. Nejde o kalibrované přirozené barvy.",
+      "europaMap": "Europa: monochromatická mozaika USGS ze snímků Voyageru a Galilea. Nepozorovaná oblast jižně od 83° jižní šířky má jednolitou výplň; z jasu neodvozujeme barvu.",
+      "ganymedeMap": "Ganymed: multispektrální mozaika USGS ze snímků Voyageru a Galilea, s tlumenými barvami a jasem přizpůsobeným osvětlení scény. Chybějící barvy na pólech doplňují monochromatické snímky původní mapy; nejde o kalibrované přirozené barvy.",
+      "callistoMap": "Callisto: monochromatická mozaika USGS ze snímků Voyageru a Galilea. Chybějící pokrytí má jednolitou výplň místo smyšlených kráterů.",
+      "tritonMap": "Triton: mozaika USGS ze snímků Voyageru 2 v syntetických barvách (oranžový, fialový a ultrafialový filtr), se sníženou sytostí. Nepozorovaná severní oblast má jednolitou výplň. USGS interpoloval původní čáry souřadnicové sítě; nejde o fotografii v přirozených barvách.",
+      "charonMap": "Charon: monochromatická mozaika USGS ze snímků New Horizons. Nepozorovaná jižní oblast má jednolitou výplň. Z monochromatických dat neodvozujeme barvu povrchu."
     },
     "licences": {
       "publicDomain": "Volné dílo",

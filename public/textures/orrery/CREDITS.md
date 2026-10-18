@@ -93,3 +93,58 @@ Processing and limits:
   applies a near-white tint and applies limb darkening once for the current view.
 - WebP tiers: 1024 × 512 for the map, 2048 × 1024 for lighter close-ups, and
   8192 × 4096 for full close-ups. Resampling does not add observational detail.
+
+## Observed moon maps (public domain)
+
+- **Moon**: [LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill](https://svs.gsfc.nasa.gov/4720/). Credit: NASA’s Scientific Visualization Studio; NASA/LRO/LROC, Arizona State University. [Original raster](https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_4k.tif).
+- **Io**: [Galileo SSI / Voyager merged mosaic, muted enhanced colour; interpolated poles](https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Io_Galileo_SSI_Global_Mosaic_ClrMerge_1km.tif).
+- **Europa**: [Voyager / Galileo SSI mosaic, monochrome; plain south-polar fill](https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Europa_Voyager_GalileoSSI_global_mosaic_500m.tif).
+- **Ganymede**: [Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles](https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Ganymede_Voyager_GalileoSSI_Global_ClrMosaic_1435m.tif).
+- **Callisto**: [Voyager / Galileo SSI mosaic, monochrome](https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Callisto_Voyager_GalileoSSI_global_mosaic_1km.tif).
+- **Triton**: [Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill](https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Triton_Voyager2_ClrMosaic_GlobalFill_600m.tif).
+- **Charon**: [New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill](https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m). Credit: NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Charon_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif).
+
+NASA imagery and USGS-produced mosaics are public domain; see
+[NASA media guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)
+and [USGS copyright policy](https://www.usgs.gov/faqs/are-usgs-reportspublications-copyrighted).
+Source URLs and SHA-256 checksums are pinned in `scripts/lib/moon-maps.mjs`.
+
+Processing and limits:
+
+- All seven maps ship locally at 1024 × 512, shared between detail tiers because
+  moons have no independent close-up view. No external imagery requests at runtime.
+- The GeoTIFFs have north-up rows and eastward projected x, regardless of the
+  catalogue's positive-west coordinate labels. GeoKey 3088 has central meridian
+  0° for Io, Triton and Charon, and 180° for Europa, Ganymede and Callisto.
+  The former are rolled half a map; the latter already start at 0° east.
+  LROC is centred on 0° and is also rolled. No raster is mirrored. Rounded
+  source pixel bounds are resampled to the full 360° × 180° spherical extent.
+  The scene retains its approximate synchronous moon orientation, not a
+  precision libration/IAU moon-attitude ephemeris.
+- Source sRGB is decoded to linear light. A smooth bounded brightness response
+  sets the area-weighted observed mean to the scene's geometric-albedo scale
+  without clipping bright terrain. This is display normalization, not a
+  photometric calibration or a quantitative reflectance product.
+- Io, Ganymede and Triton include non-visible filters; their chroma is reduced
+  to 40% before brightness normalization. This is an illustrative colour
+  treatment, **not** a reconstruction of calibrated natural colour.
+- Europa, Callisto and Charon remain monochrome. No colour terrain is inferred.
+- Zero/nodata coverage is softly blended into a uniform mean-colour fill, not
+  procedural craters. Europa's unobserved region below 83°S is masked explicitly.
+  Triton's missing north and Charon's missing south remain plain.
+- LROC's 2025 colour map uses 643/566/415 nm observations and LDAM laser albedo
+  beyond about ±70°; the source fills small dropouts. Io's source interpolates
+  the poles within about 5°. Ganymede's source uses monochrome polar coverage.
+  Triton's source has interpolated grid lines and synthetic orange/violet/UV colour.
+  Resolution and illumination vary across these historical mosaics. They do not
+  depict the selected simulation date, and no bump/displacement is inferred.
+
+### Bodies that still need an illustrative map
+
+Venus and Titan retain generated visible cloud/haze appearances; radar or
+infrared maps would incorrectly expose surfaces hidden in visible light.
+The [JPL Venus texture](https://space.jpl.nasa.gov/tmaps/venus.html) explicitly
+clones a Mariner image and labels it fictitious; it is not a measured global map.
+Sedna has no resolved surface imagery. Halley's partial Giotto flyby views of
+an irregular nucleus are not a global spherical texture. These four bodies
+remain illustrations; generated maps also remain temporary load/error fallbacks.
