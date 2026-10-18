@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { jplElements, namedById } from "@horizon/toolkit/bodies";
+import { sampleTourFlight, tourFlightSeconds } from "@horizon/toolkit/scene";
 
 import {
   equalTimeSectors,
@@ -9,11 +10,7 @@ import {
   orbitArc,
   sweptDegrees,
 } from "../src/features/orrery/lib/graphics/tour-sketch.ts";
-import {
-  TOUR,
-  sampleTourFlight,
-  tourFlightSeconds,
-} from "../src/features/orrery/lib/model/tour.ts";
+import { TOUR } from "../src/features/orrery/lib/model/tour.ts";
 
 test("Halley's equal-time sectors sweep equal areas (Kepler's second law)", () => {
   const el = namedById("halley").elementsAt(new Date("2026-10-16T00:00:00Z"), 0);

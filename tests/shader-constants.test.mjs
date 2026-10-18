@@ -38,11 +38,12 @@ test("generated shader headers match their TypeScript parameters", () => {
 });
 
 test("shader parameters keep their physics", () => {
-  const [blackHole, orrery] = SHADER_HEADERS.map((header) => header.defines);
+  const defines = Object.fromEntries(SHADER_HEADERS.map((header) => [header.lab, header.defines]));
+  const blackHole = defines["black-hole"];
   // Limb darkening is flux-normalised: ∫₀¹ 2μ N (1 + c μ) dμ = 1.
   const c = Number(blackHole.LIMB_DARKENING);
   const n = Number(blackHole.LIMB_NORMALIZATION);
   assert.ok(Math.abs(n * (1 + (2 / 3) * c) - 1) < 1e-9);
   assert.equal(Number(blackHole.DISK_PROFILE_LAST), Number(blackHole.DISK_PROFILE_SIZE) - 1);
-  assert.ok(Math.abs(Number(orrery.SWARM_TROJAN_OFFSET) - Math.PI / 3) < 1e-9);
+  assert.ok(Math.abs(Number(defines["solar-system"].SWARM_TROJAN_OFFSET) - Math.PI / 3) < 1e-9);
 });

@@ -11,7 +11,7 @@ import {
   solarObserver,
   solarSurface,
 } from "../scripts/lib/sun-map.mjs";
-import { SUN_MAP_QUIET_INTENSITY } from "../src/features/orrery/lib/model/parameters.ts";
+import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
 
 const near = (a, b, tolerance = 1e-10) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
 

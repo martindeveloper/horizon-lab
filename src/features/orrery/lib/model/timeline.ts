@@ -1,31 +1,26 @@
 /**
- * The timeline and the teaching model that sits on top of the ephemeris.
- *
- * Today (and the recent past) is measured: elements from the JPL table. The
- * deep past is a sketch of the giant-planet instability (the Nice model family):
- * giants start packed, a planetesimal disk sits outside them, Neptune's outward
- * move clears it. Everything in that window is labelled as a model in the UI.
+ * The timeline: the slider's track, its epochs, the dated notes and playback. What the
+ * solar system looks like at a moment is the shared model's (`@/space/solar-system/model/moment`).
  */
-import { GIANTS, type PlanetId } from "@horizon/toolkit/bodies";
+import {
+  CLEAR_DONE,
+  GALACTIC_YEAR,
+  GAS_DISK_LIFETIME,
+  MODEL_START,
+  SUN_BIRTH,
+} from "@/space/solar-system/model/parameters";
 import { clamp, lerp } from "@horizon/toolkit/math";
 
-import { gasDisk, migrationProgress as migration } from "./equations";
 import {
   BELT_STIRRED_AFTER,
-  CLEAR_DONE,
   EMBRYOS_AFTER,
-  GAS_DISK_LIFETIME,
   LHB_CLASSIC,
-  MODEL_START,
   MOON_IMPACT_AFTER,
   PLANETESIMALS_AFTER,
-  SUN_BIRTH,
   OLDEST,
 } from "./parameters";
 
 export { OLDEST };
-/** Terrestrial planets finish accreting ~30–100 Myr after the first solids. */
-export const TERRESTRIAL_DONE = MODEL_START;
 
 const GAS_END = SUN_BIRTH - GAS_DISK_LIFETIME;
 /** The gas-disk segment starts this long after the first solids; earlier is one step. */
@@ -77,37 +72,9 @@ export function yearsAgoToSlider(y: number) {
   return 1;
 }
 
-/** 0 = disk intact, 1 = clearing finished. Smooth inside the window only. */
-export function migrationProgress(yearsAgo: number) {
-  return migration.compute({ t: yearsAgo });
-}
-
-export const sunExists = (yearsAgo: number) => yearsAgo <= SUN_BIRTH;
-/** 0 at the first solids, 1 once the gas disk is gone. */
-export function gasDiskFade(yearsAgo: number) {
-  return 1 - gasDisk.compute({ t: yearsAgo });
-}
-/**
- * How grown a planet is, 0–1. Giants had to finish inside the gas disk;
- * terrestrial planets kept accreting for tens of millions of years after it.
- */
-export function planetGrowth(id: PlanetId, yearsAgo: number) {
-  if (yearsAgo > SUN_BIRTH) return 0;
-  const since = SUN_BIRTH - yearsAgo;
-  if (GIANTS.has(id)) {
-    const lead = id === "jupiter" ? 0.5e6 : id === "saturn" ? 1.5e6 : 2.5e6;
-    return clamp((since - lead) / 2e6, 0, 1);
-  }
-  return clamp(since / (SUN_BIRTH - TERRESTRIAL_DONE), 0, 1);
-}
-/** Within this the ephemeris is used as is; older than this only the sketch is drawn. */
-export const isPresentEra = (yearsAgo: number) => yearsAgo < 5e6;
 /** Readouts call anything this recent "today"; older is a moment on the slider. */
 export const TODAY_SPAN = 5e4;
 export const isToday = (yearsAgo: number) => yearsAgo <= TODAY_SPAN;
-/** From this far back, beyond the Galaxy, the past reads as the scale of space. */
-export const EXPANSION_SHOWN = 1e7;
-export const showsExpansion = (yearsAgo: number) => yearsAgo >= EXPANSION_SHOWN;
 
 export type Epoch = "sketch" | "birth" | "disk" | "clearing" | "today";
 /** Finer, dated notes for the dock. Each one is a measured or well-established milestone. */
@@ -174,3 +141,6 @@ export function advancePlay(yearsAgo: number, dt: number) {
   const next = Math.max(0, yearsAgo - playRate(yearsAgo) * dt);
   return yearsAgo > SUN_BIRTH && next < SUN_BIRTH ? SUN_BIRTH : next;
 }
+
+/** Laps of the Galaxy the Sun has made by `yearsAgo`, one per galactic year (schematic). */
+export const galacticLaps = (yearsAgo: number) => Math.max(0, SUN_BIRTH - yearsAgo) / GALACTIC_YEAR;

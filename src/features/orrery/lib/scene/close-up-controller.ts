@@ -1,7 +1,3 @@
-/**
- * The close-up: a flight to a body at true size, its detailed map (measured or
- * painted a few rows per frame) and a depth pass of its own.
- */
 import {
   Vector3,
   type Object3D,
@@ -11,30 +7,35 @@ import {
   type WebGLRenderer,
 } from "three";
 
+/**
+ * The close-up: a flight to a body at true size, its detailed map (measured or
+ * painted a few rows per frame) and a depth pass of its own.
+ */
+import type { SolarSelection } from "@/space/solar-system/model/selection";
+import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
 import { FIGURES, MAPS, tierFile, type BodyId } from "@horizon/toolkit/bodies";
-import type { SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
+import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
+import { rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { MAP_BASE, decodeMap, fetchMap } from "../graphics/map-loader";
-import type { Selection } from "../store";
 import type { CameraRig } from "./camera-rig";
 import {
   CLOSE_UP_IN_S,
   CLOSE_UP_OUT_S,
   FRAME_RADII,
+  closeUpMapWidth,
   closeUpPose,
   sampleCloseUp,
 } from "./close-up-flight";
-import { FOV, SUN_R, type SceneKit } from "./kit";
-import { rising } from "./lod";
 
 /** The layer of the close-up body's own depth pass. */
 const BODY_LAYER = 1;
 /** Prefetched close-up maps kept as compressed bytes (a few MB at most). */
 const PREFETCH_KEEP = 2;
 
-export type BodySelection = Extract<Selection, { kind: "sun" | "planet" | "named" }>;
+export type BodySelection = Extract<SolarSelection, { kind: "sun" | "planet" | "named" }>;
 
 type CloseUp = {
   sel: BodySelection;
@@ -73,7 +74,7 @@ const setLayer = (objects: Object3D[], layer: number) => {
 export type CloseUpController = ReturnType<typeof createCloseUpController>;
 
 export function createCloseUpController(
-  { scope, looks, camera, viewport, tight }: SceneKit,
+  { scope, looks, camera, viewport, tight }: SolarKit,
   deps: {
     rig: CameraRig;
     reduceMotion: MediaQueryList;
@@ -144,6 +145,14 @@ export function createCloseUpController(
   };
   scope.defer(() => end(false));
 
+  /** A close-up's detailed map, to paint a few rows per frame; null when the base map suffices. */
+  const detailJob = (id: BodyId) => {
+    // Keep the observed far map if the Sun's close-up tier fails to load.
+    if (id === "sun") return null;
+    const w = closeUpMapWidth(id, tight);
+    return w > looks.mapWidth(id) ? surfaceJob(id, w, w / 2) : null;
+  };
+
   const start = (sel: BodySelection) => {
     end(false);
     const id = bodyKey(sel);
@@ -152,7 +161,7 @@ export function createCloseUpController(
     const shift = framing();
     const { width, height } = viewport;
     const halfTan =
-      Math.tan((FOV * Math.PI) / 360) *
+      Math.tan((camera.fov * Math.PI) / 360) *
       Math.min((height - 2 * shift.y) / height, (width - 2 * shift.x) / height);
     locate(sel, target);
     const to = closeUpPose([target.x, target.y, target.z], frame, halfTan, pose.azimuth);
@@ -179,7 +188,7 @@ export function createCloseUpController(
       material,
       base: map,
       /* Measured bodies fetch a detailed map; painted ones paint one during the flight. */
-      job: MAPS[id] ? null : looks.detailJob(id),
+      job: MAPS[id] ? null : detailJob(id),
       loading: null,
       detail: null,
       blend: 0,
@@ -210,7 +219,7 @@ export function createCloseUpController(
             /* Offline or missing: paint the detailed map instead. */
             if (close !== mine || abort.signal.aborted) return;
             mine.loading = null;
-            mine.job = looks.detailJob(id);
+            mine.job = detailJob(id);
             invalidate();
           },
         );
@@ -280,7 +289,7 @@ export function createCloseUpController(
         : 1;
     },
     /** A body was selected: fetch its close-up map's bytes while the card is read. */
-    prefetch(sel: Selection | null) {
+    prefetch(sel: SolarSelection | null) {
       if (sel?.kind !== "sun" && sel?.kind !== "planet" && sel?.kind !== "named") return;
       const near = nearFile(bodyKey(sel));
       if (near) void bytesOf(near).catch(() => undefined);

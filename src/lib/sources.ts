@@ -31,6 +31,10 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/1602.07702",
   },
   bovy2017: { cite: "Bovy 2017, MNRAS 468, L63 (Oort constants)" },
+  breuval2023: {
+    cite: "Breuval et al. 2023, ApJ 951, 118 (M33 at 840 ± 11 kpc from HST Cepheids)",
+    link: "https://doi.org/10.3847/1538-4357/acd3f4",
+  },
   chen2019: {
     cite: "Chen et al. 2019, Nat. Astron. 3, 320 (Cepheid warp, Table 1)",
     link: "https://arxiv.org/abs/1902.00998",
@@ -77,7 +81,10 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/astro-ph/0310571",
   },
   gravity2021: { cite: "GRAVITY Collaboration 2021, A&A 647, A59; GRAVITY Collaboration 2022" },
-  gravity2022: { cite: "GRAVITY Collaboration 2022 (Sgr A* mass)" },
+  gravity2022: {
+    cite: "GRAVITY Collaboration 2022, A&A 657, L12 (Sgr A*: 4.297 × 10⁶ M☉, R₀ = 8,277 pc)",
+    link: "https://doi.org/10.1051/0004-6361/202142465",
+  },
   horizon: { cite: "Horizon model: a labelled teaching choice" },
   hubbleFlow: {
     cite: "NED (cz 3,418 km/s) and Christlein & Zabludoff 2003 (cz 3,683 km/s), at the model's H₀",
@@ -99,11 +106,18 @@ export const SOURCES = {
     link: "https://ssd.jpl.nasa.gov/planets/phys_par.html",
   },
   kaibVolk2022: {
-    cite: "Kaib & Volk 2022 (after Heisler & Tremaine 1986)",
+    cite: "Kaib & Volk 2022, Dynamical population of comet reservoirs, in Comets III (Univ. of Arizona Press, 2024; after Heisler & Tremaine 1986)",
     link: "https://arxiv.org/abs/2206.00010",
   },
+  karachentsev2009: {
+    cite: "Karachentsev et al. 2009, MNRAS 393, 1265 (Local Group zero-velocity radius 0.96 ± 0.03 Mpc)",
+    link: "https://doi.org/10.1111/j.1365-2966.2008.14300.x",
+  },
   kervella2017: { cite: "Kervella, Thévenin & Lovis 2017, A&A 598, L7" },
-  kokubo1998: { cite: "Kokubo & Ida 1998, Icarus 131, 171 (text not opened)" },
+  kokubo1998: {
+    cite: "Kokubo & Ida 1998, Icarus 131, 171",
+    link: "https://doi.org/10.1006/icar.1997.5840",
+  },
   lecar2006: {
     cite: "Lecar et al. 2006, ApJ 640, 1115",
     link: "https://arxiv.org/abs/astro-ph/0602217",
@@ -115,12 +129,12 @@ export const SOURCES = {
   },
   liu2011: { cite: "Liu, Zhu & Zhang 2011, A&A 526, A16" },
   lucey2023: {
-    cite: "Wegg, Gerhard & Portail 2015 (5.0 ± 0.2 kpc half-length); Lucey et al. 2023, MNRAS (~3.5 kpc)",
+    cite: "Wegg, Gerhard & Portail 2015 (5.0 ± 0.2 kpc half-length); Lucey et al. 2023, MNRAS 520, 4779 (~3.5 kpc)",
     link: "https://arxiv.org/abs/2206.01798",
   },
   lyndenBell1988: { cite: "Lynden-Bell et al. 1988, ApJ 326, 19" },
   m31Merger: {
-    cite: "van der Marel et al. 2019, ApJ 872, 24; Sawala et al. 2025, Nat. Astron.; Wu et al. 2026, ApJL",
+    cite: "van der Marel et al. 2019, ApJ 872, 24; Sawala et al. 2025, Nat. Astron. 9, 1206; Wu et al. 2026, ApJL 1001, L19",
   },
   m31Width: {
     cite: "RC3, de Vaucouleurs et al. 1991 (NGC 224: log D25 = 3.28); Ibata et al. 2005, ApJ 634, 287 (outer disk to ~40 kpc, arXiv:astro-ph/0504164)",
@@ -173,7 +187,9 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/astro-ph/0509903",
   },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },
-  richter1989: { cite: "Richter 1989, catalogue of 581 galaxies in the Hydra I cluster area" },
+  richter1989: {
+    cite: "Richter 1989, A&AS 77, 237 (the Hydra I cluster: a catalogue of 581 galaxies in its area)",
+  },
   sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
   struble1999: {
     cite: "Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)",
@@ -197,6 +213,10 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/1504.01401",
   },
   wegner1993: { cite: "Wegner, Haynes & Giovanelli 1993, AJ 105, 1251 (the Perseus–Pisces ridge)" },
+  woudt2008: {
+    cite: "Woudt et al. 2008, MNRAS 383, 445 (the Norma cluster: 4,871 ± 54 km/s)",
+    link: "https://doi.org/10.1111/j.1365-2966.2007.12571.x",
+  },
   zwicky1933: {
     cite: "Zwicky 1933, Helv. Phys. Acta 6, 110 (Coma's missing mass)",
     link: "https://ned.ipac.caltech.edu/level5/March17/Zwicky/Zwicky_contents.html",

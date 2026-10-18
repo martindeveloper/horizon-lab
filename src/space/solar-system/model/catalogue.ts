@@ -1,4 +1,11 @@
-/** The Sun, planets, named bodies and small-body populations. */
+/**
+ * Every figure about the Sun, the planets, the named bodies and the small-body populations,
+ * once: value or published span, a unit of the science kit, a source and how it was checked.
+ * Values the model computes with stay in the model (`parameters.ts`, the toolkit's bodies)
+ * and are referenced here, not copied. docs/science-sources.md lists it
+ * (`npm run docs:catalogue`).
+ */
+import { factsOf, type Facts, type Span, type Value } from "@/lib/facts";
 import {
   FIGURES,
   NAMED,
@@ -17,10 +24,9 @@ import {
   resonanceSemiMajorAxis,
 } from "@horizon/toolkit/science";
 
-import { startElements } from "../elements";
-import { COLD_CLASSICAL_AU, DISK_AU, OORT_SHELLS_AU, SUN_BIRTH } from "../parameters";
-import { TRACERS } from "../tracers";
-import type { Facts, Span, Value } from "./types";
+import { startElements } from "./elements";
+import { COLD_CLASSICAL_AU, DISK_AU, OORT_SHELLS_AU, SUN_BIRTH } from "./parameters";
+import { TRACERS } from "./tracers";
 
 /** Significant figures that keep every whole kilometre: 2,439.4 → 4, 69,911 → 5. */
 const wholeDigits = (value: number) => Math.max(1, Math.floor(Math.log10(Math.abs(value))) + 1);
@@ -44,7 +50,7 @@ const coldClassicals: Span = {
   unit: "au",
   source: "kaibVolk2022",
   status: "teaching-choice",
-  note: "Kaib & Volk 2022: 42–47.5 au; drawn to 48",
+  note: "Kaib & Volk 2022: the 42–48 au region",
 };
 const auKm: Value = {
   value: AU_KM,
@@ -307,3 +313,13 @@ export const POPULATIONS = {
     count: { value: TRACERS.length, unit: "count", source: "horizon", status: "teaching-choice" },
   },
 } satisfies Record<string, Facts>;
+
+export const SOLAR_CATALOGUE = {
+  sun: SUN,
+  planets: PLANETS,
+  named: NAMED_BODIES,
+  populations: POPULATIONS,
+} as const;
+
+/** Every fact with its path ("planets.earth.radius"), for tests and the ledger. */
+export const solarCatalogueFacts = () => factsOf(SOLAR_CATALOGUE);

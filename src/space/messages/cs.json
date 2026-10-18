@@ -1,0 +1,104 @@
+{
+  "units": {
+    "au": "au",
+    "ly": "sv. r.",
+    "pc": "pc",
+    "auto": "auto"
+  },
+  "time": {
+    "million": "před {value} mil. let",
+    "billion": "před {value} mld. let"
+  },
+  "toggles": {
+    "names": "Názvy",
+    "distances": "Vzdálenosti"
+  },
+  "names": {
+    "lightYears": "sv. r.",
+    "au": "au",
+    "lightTime": "světlo letí",
+    "parsecs": "pc",
+    "million": "mil.",
+    "billion": "mld.",
+    "sun": "Slunce",
+    "snowLine": "Sněžná čára",
+    "mercury": "Merkur",
+    "venus": "Venuše",
+    "earth": "Země",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn",
+    "uranus": "Uran",
+    "neptune": "Neptun",
+    "pluto": "Pluto",
+    "sedna": "Sedna",
+    "halley": "Halleyova kometa",
+    "moon": "Měsíc",
+    "io": "Io",
+    "europa": "Europa",
+    "ganymede": "Ganymed",
+    "callisto": "Kallisto",
+    "titan": "Titan",
+    "triton": "Triton",
+    "charon": "Charon",
+    "asteroids": "Pás planetek"
+  },
+  "hud": {
+    "controls": "Ovládání",
+    "objects": "Objekty",
+    "close": "Zavřít",
+    "scale": "{value} {unit} ve středu pohledu",
+    "display": "Zobrazení",
+    "camera": "Otáčení pohledu",
+    "rotateLeft": "Otočit doleva",
+    "rotateRight": "Otočit doprava",
+    "tiltUp": "Naklonit nahoru",
+    "tiltDown": "Naklonit dolů",
+    "distanceUnit": "Jednotka vzdálenosti: automaticky, astronomické jednotky, světelné roky nebo parseky",
+    "bodies": "Slunce a planety"
+  },
+  "badges": {
+    "measured": "Z měření",
+    "mixed": "Měření a model",
+    "inferred": "Nepřímo odvozeno",
+    "sample": "Modelové těleso"
+  },
+  "facts": {
+    "today": "Dnes",
+    "age": "Stáří",
+    "where": "Kde",
+    "mass": "Hmotnost",
+    "stretch": "Výstřednost (e)",
+    "tilt": "Sklon",
+    "tiltValue": "{value}° k ekliptice",
+    "retrograde": "proti směru oběhu planet (retrográdně)",
+    "nearFar": "Nejblíž / nejdál",
+    "period": "Oběžná doba",
+    "days": "{value} d",
+    "years": "{value} r",
+    "yearsAbout": "zhruba {value} r",
+    "radius": "Poloměr",
+    "km": "{value} km",
+    "average": "Velká poloosa"
+  },
+  "technicalDetails": {
+    "open": "Technické podrobnosti",
+    "close": "Zavřít technické podrobnosti",
+    "featuresTitle": "Co můžete prozkoumat",
+    "references": "Vědecké zdroje"
+  },
+  "views": {
+    "inner": "Vnitřní planety",
+    "giants": "Obří planety",
+    "kuiper": "Kuiperův pás",
+    "scattered": "Rozptýlený disk",
+    "oort": "Oortův oblak"
+  },
+  "layers": {
+    "disk": "Raný disk",
+    "kuiper": "Kuiperův pás",
+    "scattered": "Rozptýlený disk",
+    "oort": "Oortův oblak",
+    "ejected": "Vyvržená tělesa"
+  }
+}

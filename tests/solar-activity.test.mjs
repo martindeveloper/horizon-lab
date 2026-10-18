@@ -33,7 +33,7 @@ test("solar activity requires an explicit choice in a Sun close-up and resets on
     () => api().leaveCloseUp(),
     () => api().select(null),
     () => api().select({ kind: "planet", id: "earth" }),
-    () => api().setView("galaxy"),
+    () => api().setView("oort"),
     () => api().setYearsAgo(4e9),
     () => api().setYearsFromPlay(4e9),
     () => api().togglePlay(),

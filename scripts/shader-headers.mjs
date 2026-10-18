@@ -2,6 +2,7 @@ import { glslHeader } from "@horizon/toolkit/shaders/defines";
 
 import { SHADER_DEFINES } from "../src/features/black-hole/lib/parameters.ts";
 import { ORRERY_SHADER_DEFINES } from "../src/features/orrery/lib/graphics/shader-defines.ts";
+import { SOLAR_SHADER_DEFINES } from "../src/space/solar-system/graphics/shader-defines.ts";
 
 const command = "npm run shaders:generate";
 
@@ -22,6 +23,14 @@ export const SHADER_HEADERS = [
     defines: ORRERY_SHADER_DEFINES,
     guard: "HORIZON_ORRERY_PARAMETERS",
     source: "src/features/orrery/lib/graphics/shader-defines.ts",
+  },
+  {
+    lab: "solar-system",
+    path: "src/space/solar-system/graphics/shaders/parameters.generated.glsl",
+    shaders: "src/space/solar-system/graphics/shaders/",
+    defines: SOLAR_SHADER_DEFINES,
+    guard: "HORIZON_SOLAR_SYSTEM_PARAMETERS",
+    source: "src/space/solar-system/graphics/shader-defines.ts",
   },
 ].map((header) => ({
   ...header,

@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
+import { useSceneEscape, type EscapeStep } from "@/components/simulations/scene-escape";
 import {
   IconButton,
   Toolbar,
@@ -20,7 +21,18 @@ import { ReadingPanel } from "./reading-panel";
 import { SelectionCard } from "./selection-card";
 import { OrreryTechnicalDetails } from "./technical-details";
 import { TimeDock } from "./time-dock";
-import { ViewPicker } from "./view-controls";
+import { EdgeChip, ViewPicker } from "./view-controls";
+
+/** Escape ends the guide, else closes the panel, leaves a close-up or lets go, in that order. */
+const escapeSteps = (): EscapeStep[] => {
+  const api = useOrrery.getState();
+  return [
+    [api.guideOpen, api.endGuide],
+    [api.panel !== "none", () => api.setPanel("none")],
+    [api.closeUp, api.leaveCloseUp],
+    [api.selection !== null, () => api.select(null)],
+  ];
+};
 
 export function OrreryOverlay() {
   const t = useTranslations("orrery");
@@ -40,26 +52,20 @@ export function OrreryOverlay() {
     hadGuide.current = guideOpen;
   }, [guideOpen]);
 
+  useSceneEscape(escapeSteps);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      // Escape may come from a control; Space and arrows only when no control wants them.
-      if (!isSceneShortcut(e, { controls: e.key === "Escape" })) return;
+      // Space and arrows only when no control wants them.
+      if (!isSceneShortcut(e)) return;
       const api = useOrrery.getState();
       if (api.guideOpen) {
-        if (e.key === "Escape") api.endGuide();
-        else if (e.key === " ") {
+        if (e.key === " ") {
           e.preventDefault();
           if (!e.repeat) api.goGuide(api.guideStep + 1);
         } else if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
           e.preventDefault();
           api.goGuide(api.guideStep + (e.key === "ArrowRight" ? 1 : -1));
         }
-        return;
-      }
-      if (e.key === "Escape") {
-        if (api.panel !== "none") api.setPanel("none");
-        else if (api.closeUp) api.leaveCloseUp();
-        else if (api.selection) api.select(null);
         return;
       }
       if (e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowRight") e.preventDefault();
@@ -129,6 +135,7 @@ export function OrreryOverlay() {
           {panel === "none" && selection ? (
             <SelectionCard key={closeUp ? "close-up" : "card"} />
           ) : null}
+          <EdgeChip />
           {/* One mount in every state, so opening a card never rebuilds or moves the dock. */}
           <TimeDock />
         </>

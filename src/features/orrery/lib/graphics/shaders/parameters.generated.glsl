@@ -2,18 +2,6 @@
 #ifndef HORIZON_ORRERY_PARAMETERS
 #define HORIZON_ORRERY_PARAMETERS
 
-#define SWARM_TROJAN_OFFSET         1.047197551
-#define SWARM_KEPLER_STEPS          4
-#define GAS_CAVITY_IN               0.0008333333333
-#define GAS_CAVITY_OUT              0.0035
-#define GAS_RIM_IN                  0.92
-#define GAS_RIM_OUT                 1.0
-#define SUN_CENTRE_RGB              vec3(1.0, 1.0, 1.0)
-#define SUN_MAP_QUIET_INTENSITY     0.8
-#define SUN_DISPLAY_LIMB_U          vec3(0.87624768, 0.89864768, 0.91144768)
-#define SUN_DISPLAY_LIMB_V          vec3(-0.20576288, -0.20916288, -0.19896288)
-#define PLANET_WRAP                 0.12
-#define RING_AMBIENT                0.08
 #define SUN_ACTIVITY_CYCLE_SECONDS  28.0
 #define SUN_ACTIVITY_DEPTH_RATIO    0.38
 #define SUN_ACTIVITY_REGION_COUNT   6

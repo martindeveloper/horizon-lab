@@ -7,6 +7,7 @@ import { DebugCrash } from "@/components/debug/debug-crash";
 import { OrreryApp } from "@/features/orrery";
 import { getOrreryMessages } from "@/features/orrery/server";
 
+import "@horizon/toolkit/scene.css";
 import "@/features/orrery/styles.css";
 import { routing } from "@/i18n/routing";
 

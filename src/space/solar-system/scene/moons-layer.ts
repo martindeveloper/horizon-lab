@@ -3,12 +3,12 @@ import { Mesh, Vector3, type Object3D } from "three";
 
 import { MOONS, type BodyId, type Moon, type MoonHost } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
+import { type LineSlot, ownedLine, type PlaceLabel } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { moonOffset, moonOrientation, writeMoonOrbit } from "../graphics/moons";
-import { ownedLine, type Globes, type LineSlot } from "./geometry";
-import { ORBIT_COLOR, type Frame, type SceneKit } from "./kit";
-import type { PlaceLabel } from "./labels";
+import type { Globes } from "./geometry";
+import { ORBIT_COLOR, type SolarFrame, type SolarKit } from "./kit";
 
 /** Moon dots: Ganymede's size in pixels; smaller moons scale with radius, down to the floor. */
 const MOON_PX = 4.5;
@@ -31,7 +31,7 @@ type MoonSlot = {
 };
 
 export function createMoonsLayer(
-  { scope, looks, pxWorld, lod }: SceneKit,
+  { scope, looks, pxWorld, lod }: SolarKit,
   parent: Object3D,
   globes: Globes,
   place: PlaceLabel,
@@ -74,7 +74,7 @@ export function createMoonsLayer(
        would whirl them). A selected planet's system is magnified about the
        planet until its innermost moon clears the marker, but never past the
        planet's distance from the Sun; True size keeps every distance real. */
-    update({ now, show, sel, dist, present: today }: Frame) {
+    update({ now, show, sel, dist, present: today }: SolarFrame) {
       const day = Math.floor(now.getTime() / 86_400_000);
       const era = present.to(today);
       const labelled = names.to(show.names);

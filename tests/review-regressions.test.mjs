@@ -2,24 +2,27 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createOrbitWriter, writeOrbit, ephemerisSelfCheck } from "@horizon/toolkit/bodies";
+import { atViewScale, nearestView } from "@horizon/toolkit/camera";
 
+import { lineOf } from "../packages/toolkit/src/scene/lines.ts";
 import { startEngine } from "../src/components/simulations/engine-lifecycle.ts";
 import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
-import { formatYearsAgo } from "../src/features/orrery/components/format.ts";
-import { modernGalaxy } from "../src/features/orrery/lib/graphics/galaxy.ts";
+import { modernGalaxy } from "../src/features/deep-field/lib/graphics/galaxy.ts";
 import {
-  createSunTrailWriter,
+  TRAIL_LAPS,
+  sunGalactic,
   writeSunTrail,
-} from "../src/features/orrery/lib/model/galactic-orbit.ts";
+} from "../src/features/deep-field/lib/model/galactic-orbit.ts";
+import { neighboursSelfCheck } from "../src/features/deep-field/lib/model/neighbours.ts";
+import { resolveView as resolveDeepView } from "../src/features/deep-field/routing.ts";
+import { formatYearsAgo } from "../src/features/orrery/components/format.ts";
 import { modelSelfCheck } from "../src/features/orrery/lib/model/model-check.ts";
-import { neighboursSelfCheck } from "../src/features/orrery/lib/model/neighbours.ts";
-import { SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
-import { VIEWS, atViewDistance, viewForDistance } from "../src/features/orrery/lib/model/views.ts";
-import { lineOf } from "../src/features/orrery/lib/scene/geometry.ts";
 import { createHud } from "../src/features/orrery/lib/scene/hud.ts";
 import { useOrrery } from "../src/features/orrery/lib/store.ts";
 import { resolveView } from "../src/features/orrery/routing.ts";
+import { GALACTIC_YEAR } from "../src/space/solar-system/model/parameters.ts";
+import { SOLAR_VIEWS } from "../src/space/solar-system/model/views.ts";
 
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -112,8 +115,9 @@ test("lookup tables do not mistake Object prototype names for simulation IDs", (
   for (const name of ["constructor", "toString", "__proto__"]) {
     assert.equal(holeById(name), custom);
     assert.equal(resolveView(name), null);
+    assert.equal(resolveDeepView(name), null);
   }
-  assert.equal(resolveView("milky-way"), "galaxy");
+  assert.equal(resolveView("oort-cloud"), "oort");
 });
 
 test("orrery scientific self-checks run in tests rather than on every WebGL startup", () => {
@@ -163,51 +167,38 @@ test("orbit buffers preserve periapsis/apoapsis and skip changes to mean anomaly
   assert.equal(update(changed, true), false);
 });
 
-test("galaxy trail cache preserves vertices and invalidates for time, shape and pre-birth transitions", () => {
+test("the Sun's drawn path runs back two laps and ends at today's place", () => {
   const buffer = new Float32Array(97 * 3);
-  const expected = new Float32Array(buffer.length);
-  const update = createSunTrailWriter(buffer);
-  for (const [yearsAgo, wobble] of [
-    [0, false],
-    [0, true],
-    [1e9, true],
-    [SUN_BIRTH + 1, true],
-    [0, false],
-  ]) {
-    const count = writeSunTrail(expected, yearsAgo, wobble);
-    assert.equal(update(yearsAgo, wobble), count);
-    assert.deepEqual(buffer, expected);
-    const snapshot = buffer.slice();
-    assert.equal(update(yearsAgo, wobble), null);
-    assert.deepEqual(buffer, snapshot);
-  }
+  assert.equal(writeSunTrail(buffer), 97);
+  for (const v of buffer) assert.ok(Number.isFinite(v));
+  assert.deepEqual(buffer.slice(-3), new Float32Array(sunGalactic(0)));
+  assert.deepEqual(buffer.slice(0, 3), new Float32Array(sunGalactic(TRAIL_LAPS * GALACTIC_YEAR)));
 });
 
 test("orrery HUD throttles drift readouts to 1 Hz even across forced redraws and keeps fixed decimals", () => {
   const original = useOrrery.getState();
   try {
     useOrrery.setState({ driftYears: 0, driftRate: 2.5 });
-    const hud = createHud(useOrrery, { width: 1200, height: 800, dpr: 1 });
+    const hud = createHud(useOrrery, { fov: 48 }, { width: 1200, height: 800 });
     // Forced redraws update scale/rate immediately without churning driftYears every frame.
-    hud.update(0.016, true, { dist: 170_000, realm: "solar", drift: true, driftYears: 500 });
+    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 500, syncView: true });
     assert.equal(useOrrery.getState().driftRate, 30_000);
     assert.equal(useOrrery.getState().driftYears, 0);
-    hud.update(0.5, false, { dist: 170_000, realm: "solar", drift: true, driftYears: 15_500 });
+    hud.update(0.5, false, { dist: 170_000, drift: true, driftYears: 15_500, syncView: true });
     assert.equal(useOrrery.getState().driftYears, 0);
-    hud.update(0.5, false, { dist: 170_000, realm: "solar", drift: true, driftYears: 30_000 });
+    hud.update(0.5, false, { dist: 170_000, drift: true, driftYears: 30_000, syncView: true });
     assert.equal(useOrrery.getState().driftYears, 30_000);
     // Resetting driftYears to 0 commits at once.
-    hud.update(0.016, true, { dist: 170_000, realm: "solar", drift: true, driftYears: 0 });
+    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 0, syncView: true });
     assert.equal(useOrrery.getState().driftYears, 0);
     // Manual zooming updates the active view and clears preset distance match when between presets.
-    for (const v of VIEWS) {
-      assert.equal(viewForDistance(v.dist, v.realm), v.id);
-      assert.equal(atViewDistance(v.dist, v.dist), true);
+    for (const v of SOLAR_VIEWS) {
+      assert.equal(nearestView(SOLAR_VIEWS, (view) => view.dist, v.dist).id, v.id);
+      assert.equal(atViewScale(v.dist, v.dist), true);
     }
-    assert.equal(atViewDistance(30, 72), false);
+    assert.equal(atViewScale(30, 72), false);
     hud.update(0.016, true, {
       dist: 6,
-      realm: "solar",
       drift: true,
       driftYears: 0,
       syncView: true,

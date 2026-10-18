@@ -9,6 +9,7 @@ import { pathForHole, presetFromPath, resolveHole } from "../src/features/black-
 import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
 import { localeRewrites, siteRedirects } from "../src/lib/redirects.ts";
+import { featureMessages } from "./messages-helper.mjs";
 
 const catalogs = Object.fromEntries(
   routing.locales.map((locale) => [
@@ -23,12 +24,8 @@ const catalogs = Object.fromEntries(
           "utf8",
         ),
       ),
-      orrery: JSON.parse(
-        readFileSync(
-          new URL(`../src/features/orrery/messages/${locale}.json`, import.meta.url),
-          "utf8",
-        ),
-      ),
+      orrery: featureMessages("orrery", locale),
+      deepField: featureMessages("deep-field", locale),
     },
   ]),
 );
@@ -120,7 +117,7 @@ test("clean URLs rewrite to the cookie's locale, falling back to English", () =>
   );
   for (const rule of czech) assert.equal(rule.has[0].key, LOCALE_COOKIE);
   const page = new RegExp(`^/${pageRule.source.match(/^\/:path\((.+)\)$/)[1]}$`);
-  for (const path of ["/lab/black-hole", "/lab/orrery/galaxy", "/english", "/csv"])
+  for (const path of ["/lab/black-hole", "/lab/deep-field/laniakea", "/english", "/csv"])
     assert.match(path, page);
   for (const path of ["/_next/static/x.js", "/en", "/cs", "/cs/lab/black-hole", "/en/lab/orrery"])
     assert.doesNotMatch(path, page, `${path} must not be rewritten`);

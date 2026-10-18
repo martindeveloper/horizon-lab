@@ -1,29 +1,29 @@
 /**
- * The sky that rides with the camera, and the presolar cloud before the Sun exists. Both
- * belong to the solar map: they fade out as the Galaxy takes over (`solar` 1 → 0), and the
- * Galaxy's own disk replaces the Milky Way band in the same directions.
+ * The sky that rides with the camera, and the presolar cloud before the Sun exists.
  */
 import { Color, Group, Points, type Object3D } from "three";
 
+import { brightStarGeometry } from "@/space/bright-stars";
+import { sunExists } from "@/space/solar-system/model/moment";
+import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
+import type { SolarFrame, SolarKit } from "@/space/solar-system/scene/kit";
 import { clamp } from "@horizon/toolkit/math";
 
 import {
-  catalogueStars,
+  cloudMaterial,
   createMilkyWay,
   fieldStars,
   galacticPhase,
+  molecularCloud,
   skyEpoch,
   starMaterial,
+  starSize,
 } from "../graphics/sky";
-import { SUN_BIRTH } from "../model/parameters";
-import { sunExists } from "../model/timeline";
-import { molecularCloud } from "./geometry";
-import type { Frame, SceneKit } from "./kit";
 
 const TAU = Math.PI * 2;
 
 export function createSkyLayer(
-  { scope, looks, camera, tight, dpr }: SceneKit,
+  { scope, camera, tight, dpr }: SolarKit,
   parent: Object3D,
   yearsAgo: number,
 ) {
@@ -35,13 +35,17 @@ export function createSkyLayer(
   field.renderOrder = -3;
   field.frustumCulled = false;
   const brightMaterial = scope.own(starMaterial(dpr));
-  const bright = new Points(scope.own(catalogueStars()), brightMaterial);
+  const bright = new Points(
+    scope.own(brightStarGeometry({ floor: 0.55, full: 1.4, size: starSize })),
+    brightMaterial,
+  );
   bright.renderOrder = -2;
   bright.frustumCulled = false;
   sky.add(milkyWay.group, field, bright);
   parent.add(sky);
 
-  const cloud = new Points(scope.own(molecularCloud(1800)), looks.cloud);
+  const cloudLook = scope.own(cloudMaterial());
+  const cloud = new Points(scope.own(molecularCloud(1800)), cloudLook);
   cloud.frustumCulled = false;
   parent.add(cloud);
 
@@ -55,44 +59,39 @@ export function createSkyLayer(
     get easing() {
       return easing;
     },
-    update(f: Frame, solar: number) {
-      sky.visible = solar > 0.001;
+    update(f: SolarFrame) {
       /* The dense natal cloud only exists in the last few million years before collapse. */
-      const natal =
-        (sunExists(f.yearsAgo) ? 0 : clamp(1 - (f.yearsAgo - SUN_BIRTH) / 4e6, 0, 1)) * solar;
+      const natal = sunExists(f.yearsAgo) ? 0 : clamp(1 - (f.yearsAgo - SUN_BIRTH) / 4e6, 0, 1);
       cloud.visible = natal > 0.01;
-      if (sky.visible) {
-        sky.position.copy(camera.position);
-        sky.scale.setScalar(Math.max(12, f.dist * 20));
-        const epoch = skyEpoch(f.yearsAgo);
-        /* Playback turns the Sun's galactic phase about once a second, which would spin the
-           whole sky into a strobe. Follow it slowly while playing; otherwise ease to the true
-           phase quickly. The phase is unwrapped, so the sky always turns the way time moves,
-           never more than one lap: taking the shorter way round flips direction every half
-           lap whenever the true phase outruns the follow rate. */
-        const target = galacticPhase(f.yearsAgo);
-        const ahead = target - skyPhase;
-        const gap = Math.sign(ahead) * (Math.abs(ahead) % TAU);
-        if (gap !== ahead) skyPhase = target - gap;
-        const step = (f.playing ? 0.08 : 6) * f.dt;
-        skyPhase += Math.abs(gap) <= step ? gap : Math.sign(gap) * step;
-        easing = Math.abs(gap) > step;
-        const dim = epoch.dim * solar;
-        milkyWay.set(skyPhase, epoch.era, dim, epoch.cloud);
-        brightMaterial.uniforms.fade!.value = epoch.real * dim;
-        const brightTint = brightMaterial.uniforms.tint?.value;
-        if (brightTint instanceof Color) brightTint.copy(milkyWay.tint);
-        fieldMaterial.uniforms.fade!.value = dim;
-        const fieldTint = fieldMaterial.uniforms.tint?.value;
-        if (fieldTint instanceof Color) fieldTint.copy(milkyWay.tint);
-        /* Out in the Galaxy the sky is not drawn and has nothing to ease. */
-      } else easing = false;
+      sky.position.copy(camera.position);
+      sky.scale.setScalar(Math.max(12, f.dist * 20));
+      const epoch = skyEpoch(f.yearsAgo);
+      /* Playback turns the Sun's galactic phase about once a second, which would spin the
+         whole sky into a strobe. Follow it slowly while playing; otherwise ease to the true
+         phase quickly. The phase is unwrapped, so the sky always turns the way time moves,
+         never more than one lap: taking the shorter way round flips direction every half
+         lap whenever the true phase outruns the follow rate. */
+      const target = galacticPhase(f.yearsAgo);
+      const ahead = target - skyPhase;
+      const gap = Math.sign(ahead) * (Math.abs(ahead) % TAU);
+      if (gap !== ahead) skyPhase = target - gap;
+      const step = (f.playing ? 0.08 : 6) * f.dt;
+      skyPhase += Math.abs(gap) <= step ? gap : Math.sign(gap) * step;
+      easing = Math.abs(gap) > step;
+      const { dim } = epoch;
+      milkyWay.set(skyPhase, epoch.era, dim, epoch.cloud);
+      brightMaterial.uniforms.fade!.value = epoch.real * dim;
+      const brightTint = brightMaterial.uniforms.tint?.value;
+      if (brightTint instanceof Color) brightTint.copy(milkyWay.tint);
+      fieldMaterial.uniforms.fade!.value = dim;
+      const fieldTint = fieldMaterial.uniforms.tint?.value;
+      if (fieldTint instanceof Color) fieldTint.copy(milkyWay.tint);
       if (cloud.visible) {
         if (f.show.drift) cloudSpin += f.dt * 0.02;
         cloud.rotation.y = cloudSpin;
         cloud.scale.setScalar(Math.max(8, f.dist * 2.6));
-        looks.cloud.size = f.dist * 0.3;
-        looks.cloud.opacity = 0.075 * natal;
+        cloudLook.size = f.dist * 0.3;
+        cloudLook.opacity = 0.075 * natal;
       }
     },
   };

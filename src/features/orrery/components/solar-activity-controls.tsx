@@ -2,8 +2,9 @@ import { Pause, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId, useSyncExternalStore } from "react";
 
+import { SwitchChip } from "@/components/simulations/switch-chips";
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
-import { Chip, IconButton, Surface, cn, useImmersive } from "@horizon/toolkit/ui";
+import { IconButton, Surface, useImmersive } from "@horizon/toolkit/ui";
 
 import { useOrrery } from "../lib/store";
 
@@ -41,23 +42,13 @@ export function SolarActivityControls() {
   return (
     <div className="w-full border-t border-border pt-2">
       <div className="flex items-center gap-2">
-        <Chip
-          role="switch"
-          aria-checked={enabled}
+        <SwitchChip
+          on={enabled}
+          onToggle={() => useOrrery.getState().toggleSolarActivity()}
           aria-describedby={description}
-          selected={enabled}
-          onClick={() => useOrrery.getState().toggleSolarActivity()}
-          className="gap-1.5"
         >
-          <span
-            aria-hidden
-            className={cn(
-              "size-1.5 shrink-0 rounded-full",
-              enabled ? "bg-accent" : "border border-current opacity-60",
-            )}
-          />
           {t("toggle")}
-        </Chip>
+        </SwitchChip>
         {enabled && !reduced ? (
           <IconButton
             aria-label={paused ? t("resume") : t("pause")}

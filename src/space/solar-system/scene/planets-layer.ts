@@ -9,19 +9,23 @@ import {
   keplerPosition,
   type BodyId,
 } from "@horizon/toolkit/bodies";
+import {
+  bodyOrientation,
+  framed,
+  SOLAR_GOLD,
+  type AnchoredRulers,
+  type PlaceLabel,
+} from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
-import { bodyOrientation } from "../graphics/coordinates";
 import { namedElements, planetElements, rewinds } from "../model/elements";
+import { planetGrowth } from "../model/moment";
 import { SUN_BIRTH } from "../model/parameters";
-import { planetGrowth } from "../model/timeline";
-import type { Selection, Show } from "../store";
+import type { SolarSelection } from "../model/selection";
 import { orbitOf, type Globes } from "./geometry";
-import { GOLD, ORBIT_COLOR, type Frame, type SceneKit, type ShownFor } from "./kit";
-import type { PlaceLabel } from "./labels";
-import { framed, orbitShown } from "./lod";
+import { ORBIT_COLOR, type ShownFor, type SolarFrame, type SolarKit, type SolarShow } from "./kit";
+import { orbitShown } from "./lod";
 import type { MoonHosts } from "./moons-layer";
-import type { Rulers } from "./rulers";
 
 /** Equatorial and polar radius over the mean radius: the giants' oblate figures. */
 const shapeOf = (id: BodyId) =>
@@ -33,12 +37,12 @@ const shapeOf = (id: BodyId) =>
 export type PlanetsLayer = ReturnType<typeof createPlanetsLayer>;
 
 export function createPlanetsLayer(
-  kit: SceneKit,
+  kit: SolarKit,
   parent: Object3D,
   deps: {
     globes: Globes;
     place: PlaceLabel;
-    rulers: Rulers;
+    rulers: AnchoredRulers;
     hosts: MoonHosts;
     shownFor: ShownFor;
     /** The body in close-up, which stays drawn whatever the layers say. */
@@ -48,14 +52,14 @@ export function createPlanetsLayer(
   const { scope, looks, pxWorld, lod } = kit;
   const { globes, place, rulers, hosts, shownFor, closeId } = deps;
   const names = lod.fader();
-  const dotRadius = (show: Show, dist: number, cap: number, real: number, px: number) =>
+  const dotRadius = (show: SolarShow, dist: number, cap: number, real: number, px: number) =>
     show.trueSize ? real : Math.min(cap, Math.max(real, pxWorld(dist, px)));
 
   const planets = PLANET_IDS.map((id) => {
     const group = new Group();
     const body = new Mesh(globes.sphere, looks.planets[id]);
     const hit = new Mesh(globes.hit, looks.ghost);
-    hit.userData.pick = { kind: "planet", id } satisfies Selection;
+    hit.userData.pick = { kind: "planet", id } satisfies SolarSelection;
     group.add(hit, body);
     /* Rings lie in the equatorial plane, so they follow the body's real pole. */
     const system = RINGS[id];
@@ -76,7 +80,7 @@ export function createPlanetsLayer(
 
   const named = NAMED.map((body) => {
     const mesh = new Mesh(globes.small, looks.named[body.id]);
-    mesh.userData.pick = { kind: "named", id: body.id } satisfies Selection;
+    mesh.userData.pick = { kind: "named", id: body.id } satisfies SolarSelection;
     if (body.id === "halley") {
       const coma = new Sprite(looks.halleyComa);
       coma.scale.set(4.2, 4.2, 1);
@@ -93,7 +97,7 @@ export function createPlanetsLayer(
   const orientation = new Quaternion();
   const poleWorld = new Vector3();
 
-  const updatePlanets = ({ now, show, sel, yearsAgo, mig, driftYears, dist }: Frame) => {
+  const updatePlanets = ({ now, show, sel, yearsAgo, mig, driftYears, dist }: SolarFrame) => {
     const labelled = names.to(show.names);
     for (const planet of planets) {
       const el = planetElements(planet.id, mig, driftYears, now);
@@ -146,14 +150,23 @@ export function createPlanetsLayer(
       orbit.line.visible = drawn > 0.004;
       if (orbit.line.visible) {
         orbit.update(el, show.elliptical);
-        orbit.material.color.set(selected ? GOLD : ORBIT_COLOR[planet.id]);
+        orbit.material.color.set(selected ? SOLAR_GOLD : ORBIT_COLOR[planet.id]);
         orbit.material.opacity = (selected ? 0.95 : 0.62) * drawn;
       }
       place(planet.id, tmp[0], tmp[1], tmp[2], labelled * inFrame * shown);
     }
   };
 
-  const updateNamed = ({ now, show, sel, yearsAgo, mig, driftYears, dist, present }: Frame) => {
+  const updateNamed = ({
+    now,
+    show,
+    sel,
+    yearsAgo,
+    mig,
+    driftYears,
+    dist,
+    present,
+  }: SolarFrame) => {
     const labelled = names.value;
     for (const { body, mesh, orbit, on } of named) {
       const el = namedElements(body, mig, driftYears, now);
@@ -203,7 +216,7 @@ export function createPlanetsLayer(
     planets,
     named,
     pickables: [...planets.map((p) => p.hit), ...named.map((n) => n.mesh)],
-    update(f: Frame) {
+    update(f: SolarFrame) {
       updatePlanets(f);
       updateNamed(f);
     },

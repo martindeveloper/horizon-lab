@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 
+import { freshVisit, useFreshVisit } from "@/components/simulations/fresh-visit";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { BlackHoleCanvas } from "@/features/black-hole/components/canvas";
 import { HorizonLoader } from "@/features/black-hole/components/loader";
@@ -12,8 +13,12 @@ import { VisualizationShell } from "@horizon/toolkit/ui";
 import { BLACK_HOLE_PATH } from "../manifest";
 import { SceneCameraProvider } from "./scene-camera";
 
+/** Leaving the observatory starts the next visit fresh. */
+const reset = freshVisit(useBlackHole);
+
 export function Observatory() {
   const pathname = usePathname();
+  useFreshVisit(reset);
   const closePanels = useBlackHole((s) => s.closePanels);
 
   useLayoutEffect(() => {

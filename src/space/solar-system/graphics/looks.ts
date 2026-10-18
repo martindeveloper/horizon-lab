@@ -10,12 +10,9 @@ import {
   LinearMipmapLinearFilter,
   LineBasicMaterial,
   MeshBasicMaterial,
-  NormalBlending,
   OneMinusSrcAlphaFactor,
-  PointsMaterial,
   RepeatWrapping,
   ShaderMaterial,
-  SpriteMaterial,
   SrcAlphaFactor,
   SRGBColorSpace,
   Vector2,
@@ -37,10 +34,10 @@ import {
   type PlanetId,
   type RingSystem,
 } from "@horizon/toolkit/bodies";
-import { surfaceJob, surfaceMap, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
+import { surfaceMap, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import { clamp01, valueNoise2 } from "@horizon/toolkit/math";
+import { glowSprite, radialSprite, spriteMaterial } from "@horizon/toolkit/scene";
 
-import { closeUpMapWidth } from "../scene/close-up-flight";
 import FOCUS_FRAG from "./shaders/focus.frag.glsl";
 import FOCUS_VERT from "./shaders/focus.vert.glsl";
 import GAS_FRAG from "./shaders/gas.frag.glsl";
@@ -91,36 +88,6 @@ function paint(w: number, h: number, fn: Painter) {
   tex.colorSpace = SRGBColorSpace;
   tex.anisotropy = 2;
   return tex;
-}
-
-function radialSprite(stops: [number, string][]) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 128;
-  canvas.height = 128;
-  const g = canvas.getContext("2d");
-  if (!g) throw new Error("2D canvas unavailable");
-  const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  for (const [t, color] of stops) grd.addColorStop(t, color);
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 128, 128);
-  const tex = new CanvasTexture(canvas);
-  tex.colorSpace = SRGBColorSpace;
-  return tex;
-}
-
-function softCircle() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 32;
-  canvas.height = 32;
-  const g = canvas.getContext("2d");
-  if (!g) throw new Error("2D canvas unavailable");
-  const grd = g.createRadialGradient(16, 16, 0, 16, 16, 16);
-  grd.addColorStop(0, "rgba(255,255,255,1)");
-  grd.addColorStop(0.45, "rgba(255,255,255,0.7)");
-  grd.addColorStop(1, "rgba(255,255,255,0)");
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 32, 32);
-  return new CanvasTexture(canvas);
 }
 
 /** A young, flaring gas disk: bright and warm inside, bluish and thinning outward. */
@@ -378,35 +345,8 @@ export function createLooks(light = false) {
     [0.9, "rgba(255,250,240,0.015)"],
     [1, "rgba(255,250,240,0)"],
   ]);
-  const glow = radialSprite([
-    [0, "rgba(255,244,220,0.95)"],
-    [0.2, "rgba(255,214,140,0.35)"],
-    [0.5, "rgba(224,162,58,0.08)"],
-    [1, "rgba(224,162,58,0)"],
-  ]);
-  const softStar = softCircle();
-  const sprite = (map: Texture, color: string, opacity: number, additive: boolean) =>
-    new SpriteMaterial({
-      map,
-      color,
-      transparent: true,
-      opacity,
-      depthWrite: false,
-      toneMapped: false,
-      blending: additive ? AdditiveBlending : NormalBlending,
-    });
-  const points = (size: number, opacity: number, additive: boolean) =>
-    new PointsMaterial({
-      map: softStar,
-      vertexColors: true,
-      size,
-      sizeAttenuation: false,
-      transparent: true,
-      opacity,
-      depthWrite: false,
-      toneMapped: false,
-      blending: additive ? AdditiveBlending : NormalBlending,
-    });
+  const glow = glowSprite();
+  const sprite = spriteMaterial;
   const materials = {
     planets,
     rings,
@@ -423,64 +363,10 @@ export function createLooks(light = false) {
       toneMapped: false,
       blending: AdditiveBlending,
     }),
-    cloud: new PointsMaterial({
-      map: softStar,
-      vertexColors: true,
-      size: 12,
-      sizeAttenuation: true,
-      transparent: true,
-      opacity: 0.07,
-      depthWrite: false,
-      toneMapped: false,
-      blending: AdditiveBlending,
-    }),
     shellInner: shell(0.42),
     shellOuter: shell(0.28),
     sunGlow: sprite(sunHalo, "#ffffff", 1, true),
     halleyComa: sprite(glow, "#d5e2ea", 0.28, true),
-    galaxyCore: sprite(glow, "#e7c48a", 0.62, true),
-    galaxyHeart: sprite(glow, "#fff6e4", 0.75, true),
-    galaxySun: sprite(glow, "#ffe2a8", 0.9, true),
-    galaxySunBody: new MeshBasicMaterial({ color: "#ffe2a8" }),
-    galaxyToday: points(1.7, 0.9, true),
-    galaxyEarly: points(1.55, 0.75, true),
-    galaxyDust: points(2.6, 0.38, false),
-    /* Beyond the Galaxy: one material per population, so each fades on its own scale. */
-    cosmos: {
-      dwarfs: points(1.6, 0.85, true),
-      /* Far galaxies behind the nearby ones, so the dark between them still has depth. */
-      field: points(1.3, 0.6, true),
-      sheet: points(1.5, 0.7, true),
-      near: points(1.5, 0.75, true),
-      supercluster: points(1.4, 0.6, true),
-      far: points(1.4, 0.7, true),
-      laniakea: points(1.3, 0.55, true),
-      /* The web beyond Laniakea: thousands of groups, each a faint point. */
-      web: points(1.2, 0.5, true),
-      /* The microwave background and the galaxies beyond the web, seen from outside. */
-      cmb: points(1.5, 0.55, true),
-      deep: points(1.1, 0.35, true),
-    },
-    /* Galaxies seen whole: a warm, soft glow. */
-    cosmosGalaxy: sprite(glow, "#f3e6cf", 0.95, true),
-    cosmosCluster: sprite(glow, "#ffe7c2", 0.7, true),
-    /* Laniakea's flow lines, pale like the halo. */
-    cosmosFlow: new LineBasicMaterial({
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.32,
-      depthWrite: false,
-      toneMapped: false,
-      blending: AdditiveBlending,
-    }),
-    /* Lookback rings on the observable universe: thin and quiet, like the guide shells. */
-    cosmosRing: new LineBasicMaterial({
-      color: "#8ea4ba",
-      transparent: true,
-      opacity: 0.4,
-      depthWrite: false,
-      toneMapped: false,
-    }),
     /* `radius` sizes every planetesimal (world units), so zooming never rewrites the instances. */
     tracers: new ShaderMaterial({
       uniforms: { radius: { value: 1 } },
@@ -510,19 +396,6 @@ export function createLooks(light = false) {
       transparent: true,
       toneMapped: false,
     }),
-    proxima: new MeshBasicMaterial({
-      color: "#9ebccc",
-      transparent: true,
-      opacity: 0.28,
-      depthWrite: false,
-    }),
-    halo: new MeshBasicMaterial({
-      color: "#9ebccc",
-      wireframe: true,
-      transparent: true,
-      opacity: 0.08,
-      depthWrite: false,
-    }),
   };
   const textures = [
     ...Object.values(maps),
@@ -533,7 +406,6 @@ export function createLooks(light = false) {
     gasMap,
     sunHalo,
     glow,
-    softStar,
   ];
   const moonIds = MOONS.map((moon) => moon.id);
   const paintedOf = (id: BodyId): Texture => {
@@ -569,19 +441,10 @@ export function createLooks(light = false) {
       if (map?.value === texture) map.value = paintedOf(id);
       texture.dispose();
     },
-    /** A close-up's detailed map, to paint a few rows per frame; null when the base map suffices. */
-    detailJob: (id: BodyId) => {
-      // Keep the observed far map if the Sun's close-up tier fails to load.
-      if (id === "sun") return null;
-      const w = closeUpMapWidth(id, light);
-      return w > size(id) ? surfaceJob(id, w, w / 2) : null;
-    },
-    /** Its finished texture; disposed by the caller. */
+    /** Width of a body's painted map, px. */
+    mapWidth: size,
+    /** A finished detailed map (a painted `SurfaceJob`) as a texture; disposed by the caller. */
     detailTexture,
-    /** A nearby star's body; disposed by the caller. */
-    neighbour: (color: string) => new MeshBasicMaterial({ color, toneMapped: false }),
-    /** Its halo; disposed by the caller. */
-    neighbourGlow: (color: string) => sprite(glow, color, 0.9, true),
     dispose() {
       for (const tex of textures) tex.dispose();
       for (const tex of Object.values(measured)) tex.dispose();

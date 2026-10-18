@@ -1,3 +1,10 @@
+/**
+ * The sky behind the solar system: a celestial sphere in the scene's ecliptic
+ * frame, carried with the camera. Bright stars come from the shared J2000
+ * catalogue; the Milky Way band is a painted map in galactic coordinates
+ * whose centre direction slides along the band as the Sun orbits the Galaxy,
+ * and whose shape changes from the thick-disk era to today's thin disk.
+ */
 import {
   AdditiveBlending,
   BackSide,
@@ -9,28 +16,22 @@ import {
   LinearFilter,
   Mesh,
   Points,
+  PointsMaterial,
   RepeatWrapping,
   ShaderMaterial,
   SphereGeometry,
   Vector3,
 } from "three";
 
-import { STARS, starColor } from "@/lib/stars";
+import { galacticAngle } from "@/space/solar-system/model/equations";
+import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { clamp01, lcg, valueNoise2 } from "@horizon/toolkit/math";
+import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE, softCircle } from "@horizon/toolkit/scene";
 
-import { galacticAngle } from "../model/equations";
-import { NAMED_STARS_FADE, SUN_BIRTH, THIN_DISK_ERA } from "../model/parameters";
-import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE, equatorialToScene } from "./coordinates";
+import { NAMED_STARS_FADE, THIN_DISK_ERA } from "../model/parameters";
 import BAND_FRAG from "./shaders/band.frag.glsl";
 import BAND_VERT from "./shaders/band.vert.glsl";
 import STAR_FRAG from "./shaders/star.frag.glsl";
-/**
- * The sky behind the solar system: a celestial sphere in the scene's ecliptic
- * frame, carried with the camera. Bright stars come from the shared J2000
- * catalogue; the Milky Way band is a painted map in galactic coordinates
- * whose centre direction slides along the band as the Sun orbits the Galaxy,
- * and whose shape changes from the thick-disk era to today's thin disk.
- */
 import STAR_VERT from "./shaders/star.vert.glsl";
 
 /** The Sun's galactic orbital phase for a moment, radians; frozen before the Sun existed. */
@@ -39,31 +40,8 @@ export function galacticPhase(yearsAgo: number) {
 }
 
 /** Point size in pixels for a magnitude; Sirius is about 4.6 px, 3.5 mag is 1.3 px. */
-function sizeFor(mag: number) {
+export function starSize(mag: number) {
   return Math.max(1.1, 4.6 - (mag + 1.46) * 0.66);
-}
-
-/** The catalogue stars at their real J2000 directions, with colour from B−V. */
-export function catalogueStars() {
-  const n = STARS.length;
-  const pos = new Float32Array(n * 3);
-  const col = new Float32Array(n * 3);
-  const size = new Float32Array(n);
-  const v = new Vector3();
-  for (let i = 0; i < n; i += 1) {
-    const [, ra, dec, mag, bv] = STARS[i]!;
-    equatorialToScene(ra * 15, dec, v);
-    pos[i * 3] = v.x;
-    pos[i * 3 + 1] = v.y;
-    pos[i * 3 + 2] = v.z;
-    const [r, g, b] = starColor(bv);
-    const bright = 0.55 + 0.45 * Math.min(1, 10 ** (-0.4 * (mag - 1.4)));
-    col[i * 3] = (r / 255) * bright;
-    col[i * 3 + 1] = (g / 255) * bright;
-    col[i * 3 + 2] = (b / 255) * bright;
-    size[i] = sizeFor(mag);
-  }
-  return pointsGeometry(pos, col, size);
 }
 
 /**
@@ -90,7 +68,7 @@ export function fieldStars(count: number) {
     col[i * 3] = tint.r * bright;
     col[i * 3 + 1] = tint.g * bright;
     col[i * 3 + 2] = tint.b * bright;
-    size[i] = sizeFor(mag) * 0.9;
+    size[i] = starSize(mag) * 0.9;
   }
   return pointsGeometry(pos, col, size);
 }
@@ -357,4 +335,61 @@ export function skyEpoch(yearsAgo: number) {
   const cloud = Math.max(inside, envelope);
   const dim = 1 - 0.68 * cloud;
   return { era, real, dim, cloud };
+}
+
+/**
+ * A presolar molecular cloud: a few clumpy filaments of cold gas, seeded, drawn
+ * at the camera's scale so the view is never empty before the Sun exists.
+ */
+export function molecularCloud(count: number) {
+  const rnd = lcg(71);
+  const gauss = () => {
+    const u = Math.max(1e-6, rnd());
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(Math.PI * 2 * rnd());
+  };
+  const pos = new Float32Array(count * 3);
+  const col = new Float32Array(count * 3);
+  const cold = new Color("#4f78c8");
+  const dust = new Color("#8a6a4a");
+  const warm = new Color("#c9a978");
+  const tint = new Color();
+  const filaments = 5;
+  for (let i = 0; i < count; i += 1) {
+    const f = Math.floor(rnd() * filaments);
+    const phase = (f / filaments) * Math.PI * 2 + 0.7;
+    const t = rnd() * 2 - 1;
+    const r = 0.25 + Math.abs(t) * 0.75;
+    const ang = phase + t * 1.6 + gauss() * 0.08;
+    const x = r * Math.cos(ang) + gauss() * 0.06;
+    const z = r * Math.sin(ang) + gauss() * 0.06;
+    const y = gauss() * 0.18 * (0.4 + r);
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = y;
+    pos[i * 3 + 2] = z;
+    const pick = rnd();
+    tint.copy(pick < 0.12 ? dust : pick < 0.2 ? warm : cold);
+    const fade = (0.25 + 0.75 * Math.exp(-r * 1.2)) * (0.35 + rnd() * 0.65);
+    col[i * 3] = tint.r * fade;
+    col[i * 3 + 1] = tint.g * fade;
+    col[i * 3 + 2] = tint.b * fade;
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new BufferAttribute(pos, 3));
+  geometry.setAttribute("color", new BufferAttribute(col, 3));
+  return geometry;
+}
+
+/** The cloud's soft additive points. */
+export function cloudMaterial() {
+  return new PointsMaterial({
+    map: softCircle(),
+    vertexColors: true,
+    size: 12,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.07,
+    depthWrite: false,
+    toneMapped: false,
+    blending: AdditiveBlending,
+  });
 }

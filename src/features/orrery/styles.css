@@ -1,61 +1,7 @@
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
 
 @layer base {
-  :where([data-simulation="orrery"]) .orrery-label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    white-space: nowrap;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-space-muted);
-    /* A tight halo keeps labels legible over the Sun and the galactic glow. */
-    text-shadow:
-      0 0 2px rgb(8 8 11),
-      0 0 6px rgb(8 8 11 / 0.9),
-      0 1px 8px rgb(8 8 11 / 0.9);
-    will-change: transform;
-  }
-
-  :where([data-simulation="orrery"]) .orrery-label[data-weight="strong"] {
-    color: var(--color-space-fg);
-  }
-
-  :where([data-simulation="orrery"]) .orrery-label[data-kind="distance"] {
-    padding: 2px 7px;
-    border-radius: 999px;
-    background: rgb(8 8 11 / 0.72);
-    color: var(--color-solar);
-    letter-spacing: 0.1em;
-    text-transform: none;
-    text-shadow: none;
-    /* Monospace, so the widest recent readout (see labels.ts) sets a steady width. */
-    min-width: calc(var(--chars, 0) * (1ch + 0.1em) + 14px);
-    text-align: center;
-  }
-
-  :where([data-simulation="orrery"]) .orrery-sheet {
-    max-height: min(24rem, 46dvh);
-  }
-
   :where([data-simulation="orrery"]) .orrery-tour-body {
     max-height: min(10rem, 26dvh);
-  }
-
-  :where([data-simulation="orrery"]) .orrery-panel {
-    max-height: min(
-      32rem,
-      calc(100dvh - var(--app-header-height) - var(--app-footer-height) - 6rem)
-    );
-  }
-
-  /* Phone sheets leave the scene visible above them, so a layer switch shows its effect. */
-  @media (width < 48rem), (height < 30rem) {
-    :where([data-simulation="orrery"]) .orrery-panel {
-      max-height: min(28rem, 64dvh);
-    }
   }
 }

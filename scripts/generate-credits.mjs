@@ -49,7 +49,7 @@ for (const [path, meta] of Object.entries(lock.packages).sort(([a], [b]) =>
   );
 }
 
-const { SOURCES } = await import("../src/features/orrery/lib/model/catalogue/sources.ts");
+const { SOURCES } = await import("../src/lib/sources.ts");
 const { CONSTANTS } = await import("@horizon/toolkit/science");
 const science = [
   {
@@ -65,10 +65,15 @@ const science = [
       .join("\n"),
   },
 ];
-for (const slug of ["black-hole", "orrery"]) {
+const LABS = {
+  "black-hole": "Black-hole observatory",
+  orrery: "Orrery",
+  "deep-field": "Deep Field",
+};
+for (const [slug, title] of Object.entries(LABS)) {
   const { references } = JSON.parse(read(`src/features/${slug}/technical.json`));
   science.push({
-    title: slug === "black-hole" ? "Black-hole observatory" : "Orrery",
+    title,
     text: references.map(({ title, url }) => `${title}\n${url}`).join("\n\n"),
   });
 }

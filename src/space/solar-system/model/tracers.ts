@@ -3,8 +3,8 @@ import { periodYears, type Elements } from "@horizon/toolkit/bodies";
 import { clamp, lerp, mulberry32, wrap } from "@horizon/toolkit/math";
 
 import { tracerSemiMajorAxis } from "./equations";
+import { migrationProgress } from "./moment";
 import { COLD_CLASSICAL_AU, DISK_AU } from "./parameters";
-import { migrationProgress } from "./timeline";
 
 export type Kind = "cold" | "hot" | "scattered" | "oort" | "ejected";
 export type Bin = "disk" | "kuiper" | "scattered" | "oort" | "ejected";
@@ -104,7 +104,8 @@ export function createTracers(count: number, seed = 20261014): Tracer[] {
         e0,
         e1: clamp(1 - q1 / a1, 0.15, 0.9),
         i0,
-        i1: rng() * 180,
+        /* Isotropic: cos i uniform, so polar orbits are no likelier than on a sphere. */
+        i1: Math.acos(1 - 2 * rng()) * (180 / Math.PI),
         ...angles,
         p0,
         p1,

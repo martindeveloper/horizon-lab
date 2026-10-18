@@ -9,7 +9,7 @@ import {
   labelAt,
   labelDepthMask,
   overlapsBody,
-} from "../src/features/orrery/lib/scene/label-geometry.ts";
+} from "../packages/toolkit/src/scene/label-geometry.ts";
 
 const cameraAt = () => {
   const camera = new PerspectiveCamera(48, 1, 0.01, 1000);

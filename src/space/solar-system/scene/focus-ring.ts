@@ -1,14 +1,13 @@
 /** The gold reticle around the selected body, and where that body is this frame. */
 import { Mesh, PlaneGeometry, type Object3D } from "three";
 
-import { NAMED, keplerPosition } from "@horizon/toolkit/bodies";
+import type { Vec3 } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 
-import { namedElements, planetElements } from "../model/elements";
-import { TRACERS, tracerElements, tracerVisible } from "../model/tracers";
-import type { Frame, SceneKit } from "./kit";
+import { positionOf } from "../model/position";
+import type { SolarFrame, SolarKit } from "./kit";
 
-type Point = [number, number, number];
+type Point = Vec3;
 
 /** Half-width of the reticle quad, in screen pixels; the circle sits at ~19 px. */
 const RETICLE_PX = 30;
@@ -16,7 +15,7 @@ const RETICLE_PX = 30;
 const LOCK_S = 0.7;
 const BREATH_S = 3.2;
 
-export function createFocusRing({ scope, looks, pxWorld, camera }: SceneKit, parent: Object3D) {
+export function createFocusRing({ scope, looks, pxWorld, camera }: SolarKit, parent: Object3D) {
   // Faces the camera in its vertex shader; drawn wider than its geometry, so never culled.
   const ring = new Mesh(scope.own(new PlaneGeometry(2, 2)), looks.focus);
   ring.renderOrder = 10;
@@ -24,31 +23,15 @@ export function createFocusRing({ scope, looks, pxWorld, camera }: SceneKit, par
   parent.add(ring);
   const uniforms = looks.focus.uniforms;
   const still = window.matchMedia(REDUCED_MOTION_QUERY);
-  let held: Frame["sel"] = null;
+  let held: SolarFrame["sel"] = null;
   let since = 0;
+  const at: Vec3 = [0, 0, 0];
 
-  const locate = ({ sel, mig, driftYears, now }: Frame): Point | null => {
-    if (sel?.kind === "sun") return [0, 0, 0];
-    if (sel?.kind === "planet") return keplerPosition(planetElements(sel.id, mig, driftYears, now));
-    if (sel?.kind === "named")
-      return keplerPosition(
-        namedElements(
-          NAMED.find((b) => b.id === sel.id)!,
-          mig,
-          driftYears,
-          now,
-        ),
-      );
-    if (sel?.kind === "tracer") {
-      const tr = TRACERS[sel.index];
-      if (tr && tracerVisible(tr, mig)) return keplerPosition(tracerElements(tr, mig, driftYears));
-    }
-    return null;
-  };
+  const locate = (f: SolarFrame): Point | null => (f.sel ? positionOf(f.sel, f, f.now, at) : null);
 
   return {
     /** Draws the ring unless a close-up hides it; returns the selected body's position. */
-    update(f: Frame, hidden: boolean) {
+    update(f: SolarFrame, hidden: boolean) {
       const at = locate(f);
       ring.visible = !!at && !hidden;
       const now = performance.now() / 1000;

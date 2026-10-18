@@ -1,13 +1,14 @@
-import { sampleOrbitFlight, type OrbitFlight, type OrbitPose } from "@horizon/toolkit/camera";
 /**
  * The guided tour: one concept per step, each with a camera pose, a view, a time
  * and the display switches it needs. Copy lives in `tour.steps.<id>`.
  */
+import { MODEL_START, SUN_BIRTH } from "@/space/solar-system/model/parameters";
+import type { SolarSelection } from "@/space/solar-system/model/selection";
+import { type SolarViewId } from "@/space/solar-system/model/views";
+import type { TourShot } from "@horizon/toolkit/scene";
 import { keplerThirdLaw, type Formula } from "@horizon/toolkit/science";
 
-import type { Selection, Show } from "../store";
-import { MODEL_START, SUN_BIRTH } from "./parameters";
-import { type ViewId } from "./views";
+import type { Show } from "../store";
 
 export type TourStepId =
   | "today"
@@ -17,27 +18,23 @@ export type TourStepId =
   | "disk"
   | "snowLine"
   | "clearing"
-  | "oort"
-  | "galaxy";
+  | "oort";
 
 /** A drawing laid into the scene once a step lands (see `tour-sketch.ts`). */
 export type TourSketchId = "year" | "areas" | "sense";
 
-export type TourStep = OrbitPose & {
+/** A step: its shot (pose, flight shaping and hold drift; see `createTourCamera`) and the rest. */
+export type TourStep = TourShot & {
   id: TourStepId;
-  view: ViewId;
+  view: SolarViewId;
   yearsAgo: number;
   playing?: boolean;
   show?: Partial<Show>;
-  focus?: Selection;
+  focus?: SolarSelection;
   /** Steps whose copy carries a one-line relation under the body. */
   eq?: boolean;
   /** A shared formula the relation prints as `{equation}`. */
   equation?: Formula;
-  /** Flight shaping (see `sampleOrbitFlight`) and its length in seconds. */
-  flight?: Pick<OrbitFlight, "lift" | "swing" | "lead"> & { duration?: number };
-  /** Slow orbit while the card is read, rad/s; + turns with the planets. */
-  drift?: number;
   sketch?: TourSketchId;
 };
 
@@ -136,38 +133,4 @@ export const TOUR: readonly TourStep[] = [
     flight: { duration: 9, lift: 0.2, lead: -0.5 },
     drift: 0.01,
   },
-  {
-    id: "galaxy",
-    view: "galaxy",
-    azimuth: 0.6,
-    inclination: 0.58,
-    distance: 92_000,
-    yearsAgo: 0,
-    flight: { duration: 8, lift: 0.1 },
-    drift: 0.006,
-  },
 ];
-
-/** Seconds a flight to this step takes. */
-export const tourFlightSeconds = (step: TourStep) => step.flight?.duration ?? 6;
-
-/**
- * Camera pose `t` of the way from `from` to a step: the shorter way round in
- * azimuth and log-linear in distance, so a jump from 6 AU to 170,000 AU reads as
- * one steady pull-back instead of a lurch at the end. The step may arc, swing
- * and lead the turn on the way.
- */
-export function sampleTourFlight(t: number, from: OrbitPose, to: TourStep | OrbitPose): OrbitPose {
-  return sampleOrbitFlight(t, from, {
-    yaw: shortestTurn(from.azimuth, to.azimuth),
-    inclination: to.inclination,
-    distance: to.distance,
-    ...("flight" in to ? to.flight : undefined),
-  });
-}
-
-/** Signed turn in (−π, π] from one azimuth to another. */
-export function shortestTurn(from: number, to: number) {
-  const tau = Math.PI * 2;
-  return ((((to - from + Math.PI) % tau) + tau) % tau) - Math.PI;
-}

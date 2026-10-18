@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
-import { useLayoutEffect } from "react";
 
+import { freshVisit, useFreshVisit } from "@/components/simulations/fresh-visit";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
-import { usePathname } from "@/i18n/navigation";
+import { useViewFromPath } from "@/components/simulations/use-view-from-path";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
 import { useOrrery } from "../lib/store";
@@ -11,6 +11,9 @@ import { viewFromPath } from "../routing";
 import { OrreryCanvas } from "./canvas";
 import { OrreryOverlay } from "./overlay";
 import { SolarActivityNotice } from "./solar-activity-controls";
+
+/** Leaving the simulation starts the next visit fresh. */
+const reset = freshVisit(useOrrery);
 
 /** The tour drives the camera; immersive view ends it but keeps panels for the return. */
 function leaveGuide() {
@@ -20,15 +23,11 @@ function leaveGuide() {
 
 export function Orrery() {
   const t = useTranslations("orrery");
-  const pathname = usePathname();
   const ready = useOrrery((s) => s.ready);
   const view = useOrrery((s) => s.view);
 
-  useLayoutEffect(() => {
-    const id = viewFromPath(pathname);
-    const state = useOrrery.getState();
-    if (state.view !== id) state.setView(id);
-  }, [pathname]);
+  useViewFromPath(useOrrery.getState, viewFromPath);
+  useFreshVisit(reset);
 
   return (
     <VisualizationShell id="main-content" tabIndex={-1} className="h-full">

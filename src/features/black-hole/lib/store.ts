@@ -28,6 +28,9 @@ export type BlackHoleStore = BlackHoleParams & {
   clocksOpen: boolean;
   skyReady: boolean;
   activePin: PinId | null;
+  /** Whether the camera was orbiting before a pin or the guide stopped it, to resume after. */
+  orbitBeforePin: boolean | null;
+  orbitBeforeGuide: boolean | null;
   applyPreset: (id: string) => void;
   setSpin: (v: number) => void;
   setInclination: (v: number) => void;
@@ -54,9 +57,6 @@ export type BlackHoleStore = BlackHoleParams & {
 
 const TAU = Math.PI * 2;
 
-let orbitBeforePin: boolean | null = null;
-let orbitBeforeGuide: boolean | null = null;
-
 export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   ...paramsFromPreset(
     typeof window === "undefined" ? DEFAULT_PRESET : presetFromPath(),
@@ -75,6 +75,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   clocksOpen: false,
   skyReady: false,
   activePin: null,
+  orbitBeforePin: null,
+  orbitBeforeGuide: null,
   applyPreset: (id) => {
     const preset = PRESETS.find((p) => p.id === id);
     if (!preset) return;
@@ -103,8 +105,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   startGuide: () => {
     const s = get();
     if (s.activePin) s.setActivePin(null);
-    if (orbitBeforeGuide === null) orbitBeforeGuide = get().autoRotate;
     set({
+      orbitBeforeGuide: get().orbitBeforeGuide ?? get().autoRotate,
       guideOpen: true,
       guideBeat: 0,
       guideArrived: false,
@@ -129,13 +131,14 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
     set({ guideBeat: s.guideBeat + 1, guideArrived: false });
   },
   endGuide: () => {
-    const resume = orbitBeforeGuide;
-    orbitBeforeGuide = null;
-    set(
-      resume
-        ? { guideOpen: false, guideArrived: false, guideBeat: 0, autoRotate: true }
-        : { guideOpen: false, guideArrived: false, guideBeat: 0 },
-    );
+    const resume = get().orbitBeforeGuide;
+    set({
+      guideOpen: false,
+      guideArrived: false,
+      guideBeat: 0,
+      orbitBeforeGuide: null,
+      ...(resume ? { autoRotate: true } : {}),
+    });
   },
   setGuideArrived: (guideArrived) => set({ guideArrived }),
   setSettingsOpen: (settingsOpen) =>
@@ -172,14 +175,18 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setActivePin: (activePin) => {
     if (get().guideOpen) return;
     if (activePin === null) {
-      const resume = orbitBeforePin;
-      orbitBeforePin = null;
-      set(resume ? { activePin: null, autoRotate: true } : { activePin: null });
+      const resume = get().orbitBeforePin;
+      set({ activePin: null, orbitBeforePin: null, ...(resume ? { autoRotate: true } : {}) });
       return;
     }
     if (get().activePin === null) {
-      orbitBeforePin = get().autoRotate;
-      set({ activePin, autoRotate: false, settingsOpen: false, clocksOpen: false });
+      set({
+        activePin,
+        orbitBeforePin: get().autoRotate,
+        autoRotate: false,
+        settingsOpen: false,
+        clocksOpen: false,
+      });
       return;
     }
     set({ activePin });

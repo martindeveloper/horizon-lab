@@ -2,20 +2,24 @@ import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
-import { Action, IconButton, PanelHeader, Tooltip, cn } from "@horizon/toolkit/ui";
+import { HandoffLink } from "@/components/simulations/handoff-link";
+import { proseArgs } from "@/lib/facts";
+import { Action, IconButton, PanelHeader, Tooltip, actionClass, cn } from "@horizon/toolkit/ui";
 
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { TOUR } from "../lib/model/tour";
 import { useOrrery } from "../lib/store";
-import { formatYearsAgo, proseArgs } from "./format";
+import { formatYearsAgo } from "./format";
 
 /** The tour card: one concept per step, with step navigation. The scene flies the camera. */
 export function GuideCard() {
   const t = useTranslations("orrery");
   const f = useFormatter();
-  const figures = proseArgs(useLocale());
+  const figures = proseArgs(PROSE_FIGURES, useLocale());
   const index = useOrrery((s) => s.guideStep);
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const playing = useOrrery((s) => s.playing);
+  const view = useOrrery((s) => s.view);
   const next = useRef<HTMLButtonElement>(null);
   const step = TOUR[index] ?? TOUR[0]!;
   const last = index >= TOUR.length - 1;
@@ -94,6 +98,16 @@ export function GuideCard() {
               />
             ))}
           </ol>
+          {last ? (
+            <HandoffLink
+              to="deep-field"
+              view={view}
+              onClick={() => api().endGuide()}
+              className={actionClass("ghost", "px-3")}
+            >
+              {t("tour.further")}
+            </HandoffLink>
+          ) : null}
           <Action ref={next} className="px-4" onClick={() => api().goGuide(index + 1)}>
             {last ? t("tour.finish") : t("tour.next")}
             {last ? null : <ChevronRight className="-mr-1 size-4" />}

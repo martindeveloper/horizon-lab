@@ -28,7 +28,7 @@ test("moon rasters align eastward longitudes without mirroring west-labelled cat
 
 test("moon textures survive loading before material creation and dispose exactly once", async () => {
   const bundle = await rolldown({
-    input: fileURLToPath(new URL("../src/features/orrery/lib/graphics/looks.ts", import.meta.url)),
+    input: fileURLToPath(new URL("../src/space/solar-system/graphics/looks.ts", import.meta.url)),
     platform: "node",
     plugins: [
       {

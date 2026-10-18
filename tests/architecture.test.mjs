@@ -3,6 +3,10 @@ import { existsSync } from "node:fs";
 import test from "node:test";
 
 import { presetFromPath, presetRouteParams } from "../src/features/black-hole/routing.ts";
+import {
+  viewFromPath as deepViewFromPath,
+  viewRouteParams as deepViewRouteParams,
+} from "../src/features/deep-field/routing.ts";
 import { viewFromPath, viewRouteParams } from "../src/features/orrery/routing.ts";
 import { getPathname } from "../src/i18n/navigation.ts";
 import { routing } from "../src/i18n/routing.ts";
@@ -34,7 +38,13 @@ test("legacy redirects reach the new app without loops or catalogue collisions",
   assert.equal(redirects.get("/m87"), "/lab/black-hole/m87");
   assert.equal(redirects.get("/lensed"), "/lab/black-hole");
   assert.equal(redirects.get("/lab/black-hole/lensed"), "/lab/black-hole");
-  for (const path of ["/", "/lab/black-hole", "/lab/black-hole/m87", "/lab/orrery"])
+  for (const path of [
+    "/",
+    "/lab/black-hole",
+    "/lab/black-hole/m87",
+    "/lab/orrery",
+    "/lab/deep-field",
+  ])
     assert.equal(redirects.has(path), false, `${path} is a canonical page`);
   for (const { hole } of presetRouteParams()) {
     assert.equal(presetFromPath(`/lab/black-hole/${hole}`).id, hole);
@@ -46,6 +56,11 @@ test("legacy redirects reach the new app without loops or catalogue collisions",
     assert.equal(viewFromPath(`/lab/orrery/${view}`), view);
     for (const locale of routing.locales)
       assert.equal(viewFromPath(`/${locale}/lab/orrery/${view}`), view);
+  }
+  for (const { view } of deepViewRouteParams()) {
+    assert.equal(deepViewFromPath(`/lab/deep-field/${view}`), view);
+    for (const locale of routing.locales)
+      assert.equal(deepViewFromPath(`/${locale}/lab/deep-field/${view}`), view);
   }
   for (const locale of routing.locales) {
     assert.equal(redirects.get(`/${locale}/lensed`), `/${locale}/lab/black-hole`);
@@ -77,9 +92,9 @@ test("pre-prefix simulation URLs redirect permanently to the prefixed routes", (
     ["/black-hole/powehi", "/lab/black-hole/m87"],
     ["/orrery", "/lab/orrery"],
     ["/orrery/giants", "/lab/orrery"],
-    ["/orrery/galaxy", "/lab/orrery/galaxy"],
-    ["/orrery/milky-way", "/lab/orrery/galaxy"],
-    ["/lab/orrery/milky-way", "/lab/orrery/galaxy"],
+    ["/orrery/oort", "/lab/orrery/oort"],
+    ["/orrery/oort-cloud", "/lab/orrery/oort"],
+    ["/lab/orrery/oort-cloud", "/lab/orrery/oort"],
   ];
   for (const locale of ["", ...routing.locales.map((locale) => `/${locale}`)])
     for (const [source, target] of moved)

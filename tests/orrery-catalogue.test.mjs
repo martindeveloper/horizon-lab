@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createFormatter, createTranslator } from "next-intl";
@@ -7,21 +6,15 @@ import { createFormatter, createTranslator } from "next-intl";
 import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
 import { UNITS } from "@horizon/toolkit/science";
 
-import { cardFor, NEIGHBOUR_IDS } from "../src/features/orrery/components/cards.tsx";
-import { proseArgs } from "../src/features/orrery/components/format.ts";
-import { catalogueFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { cardFor } from "../src/features/orrery/components/cards.tsx";
+import { PROSE_FIGURES, catalogueFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { proseArgs } from "../src/lib/facts.ts";
+import { solarCatalogueFacts } from "../src/space/solar-system/model/catalogue.ts";
+import { featureMessages } from "./messages-helper.mjs";
 
 const LOCALES = ["en", "cs"];
 const messages = Object.fromEntries(
-  LOCALES.map((locale) => [
-    locale,
-    JSON.parse(
-      readFileSync(
-        new URL(`../src/features/orrery/messages/${locale}.json`, import.meta.url),
-        "utf8",
-      ),
-    ),
-  ]),
+  LOCALES.map((locale) => [locale, featureMessages("orrery", locale)]),
 );
 
 const SELECTIONS = [
@@ -32,11 +25,6 @@ const SELECTIONS = [
     kind: "population",
     id,
   })),
-  ...["milkyway", "sun", "bulge", "halo"].map((id) => ({ kind: "galaxy", id })),
-  ...Object.keys(messages.en.cards.cosmos)
-    .filter((id) => typeof messages.en.cards.cosmos[id] === "object")
-    .map((id) => ({ kind: "cosmos", id })),
-  ...NEIGHBOUR_IDS.map((id) => ({ kind: "star", id })),
   { kind: "tracer", index: 3 },
 ];
 
@@ -69,7 +57,7 @@ function* cards() {
 
 test("catalogue quantities use supported units, finite ordered ranges and consistent model values", () => {
   const plain = new Set(["count", "percent", "ratio"]);
-  for (const { path, fact } of catalogueFacts()) {
+  for (const { path, fact } of [...solarCatalogueFacts(), ...catalogueFacts()]) {
     assert.ok(fact.unit in UNITS || plain.has(fact.unit), `${path}: unit ${fact.unit}`);
     assert.ok(!fact.show || fact.show in UNITS, `${path}: shown in ${fact.show}`);
     assert.ok(fact.value !== undefined || fact.range, `${path}: a value or a published span`);
@@ -82,13 +70,6 @@ test("catalogue quantities use supported units, finite ordered ranges and consis
       assert.ok(low < high, `${path}: range order`);
       if (fact.value !== undefined)
         assert.ok(low <= fact.value && fact.value <= high, `${path}: value outside its range`);
-    }
-    if (fact.at) {
-      const today = fact.at(0);
-      assert.ok(
-        Math.abs(today - fact.value) <= 0.02 * Math.abs(fact.value),
-        `${path}: the model gives ${today} today, the catalogue ${fact.value}`,
-      );
     }
   }
 });
@@ -113,11 +94,6 @@ test("lengths follow the visitor's distance unit and keep the source's precision
         values.set(unit, card.facts.find((f) => f.id === id).value);
     return values;
   };
-  const m33 = read({ kind: "cosmos", id: "triangulum" }, "width");
-  assert.match(m33.get("ly"), /60,000 ly$/);
-  assert.match(m33.get("pc"), /18,000 pc$/);
-  assert.match(m33.get("au"), /3\.8 × 10⁹ au$/);
-  assert.match(m33.get("auto"), /60,000 ly$/);
   /* Auto: au inside half a light-year, ly beyond. */
   const oort = read({ kind: "population", id: "oort" }, "innerEdge");
   assert.match(oort.get("auto"), /2,000–5,000 au$/);
@@ -143,7 +119,7 @@ test("runtime prose arguments format without missing substitutions in either loc
     });
     /* Placeholders the components fill at run time, not figures. */
     const runtime = { step: "1", total: "9", time: "today", equation: "P² = a³" };
-    const args = { ...proseArgs(locale), ...runtime };
+    const args = { ...proseArgs(PROSE_FIGURES, locale), ...runtime };
     for (const [key] of leaves(messages[locale]))
       if (/^(notes|tour|technicalDetails)\./.test(key)) {
         const printed = t(key, args);

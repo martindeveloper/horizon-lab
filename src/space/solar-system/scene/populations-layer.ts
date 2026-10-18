@@ -12,16 +12,16 @@ import {
 
 import { keplerPosition, type Elements } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
+import { fade, SOLAR_GOLD } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { createSwarm, kuiperBelt, mainBelt, oortCloud, trojans } from "../graphics/swarms";
 import { planetElements } from "../model/elements";
 import { MODEL_START, OORT_SHELLS_AU, SUN_BIRTH } from "../model/parameters";
+import type { SolarSelection } from "../model/selection";
 import { TRACERS, binOf, tracerElements, tracerVisible, type Bin } from "../model/tracers";
-import type { Selection } from "../store";
 import { orbitOf } from "./geometry";
-import { GOLD, type Frame, type SceneKit } from "./kit";
-import { fade } from "./lod";
+import { type SolarFrame, type SolarKit } from "./kit";
 
 /** Population tints for the planetesimal lumps: icy grey in the disk, reddened in the belt, pale far out. */
 const BIN_COLOR: Record<Bin, Color> = {
@@ -41,7 +41,7 @@ const DISK = fade(0, 0, 280, 560);
 const SHELLS = fade(2_800, 5_600, 500_000, 1_000_000);
 
 export function createPopulationsLayer(
-  { scope, looks, tight, dpr, pxWorld, lod }: SceneKit,
+  { scope, looks, tight, dpr, pxWorld, lod }: SolarKit,
   parent: Object3D,
 ) {
   const rock = scope.own(new SphereGeometry(1, tight ? 16 : 24, tight ? 12 : 16));
@@ -57,7 +57,7 @@ export function createPopulationsLayer(
   let tracerStamp = "";
   const dummy = new Object3D();
 
-  const focusOrbit = orbitOf(scope, GOLD, 0.95);
+  const focusOrbit = orbitOf(scope, SOLAR_GOLD, 0.95);
   parent.add(focusOrbit.line);
 
   const belt = scope.own(createSwarm(mainBelt(tight ? 1400 : 2600), 2.6, 1, false, dpr));
@@ -66,10 +66,10 @@ export function createPopulationsLayer(
   const oort = scope.own(createSwarm(oortCloud(tight ? 2000 : 3800), 1.9, 0.85, true, dpr));
   const beltHit = new Mesh(scope.own(new TorusGeometry(2.7, 0.42, 6, 28)), looks.ghost);
   beltHit.rotation.x = Math.PI / 2;
-  beltHit.userData.pick = { kind: "population", id: "asteroids" } satisfies Selection;
+  beltHit.userData.pick = { kind: "population", id: "asteroids" } satisfies SolarSelection;
   const kuiperHit = new Mesh(scope.own(new RingGeometry(38, 50, 48)), looks.ghost);
   kuiperHit.rotation.x = Math.PI / 2;
-  kuiperHit.userData.pick = { kind: "population", id: "kuiper" } satisfies Selection;
+  kuiperHit.userData.pick = { kind: "population", id: "kuiper" } satisfies SolarSelection;
   parent.add(belt.points, trojanSwarm.points, kuiper.points, oort.points, beltHit, kuiperHit);
 
   const diskRing = new Mesh(scope.own(new RingGeometry(16, 34, 64)), looks.disk);
@@ -97,7 +97,7 @@ export function createPopulationsLayer(
   const tmp: [number, number, number] = [0, 0, 0];
 
   /** Instance matrices and tints, rewritten only when the inputs that move them change. */
-  const updateTracers = ({ show, yearsAgo, mig, driftYears, dist }: Frame, on: boolean) => {
+  const updateTracers = ({ show, yearsAgo, mig, driftYears, dist }: SolarFrame, on: boolean) => {
     tracers.visible = on;
     // Hidden buffers stay untouched. Invalidate so the first visible frame
     // always uses current positions, sizes and population filters.
@@ -153,7 +153,7 @@ export function createPopulationsLayer(
 
   return {
     pickables: [tracers, beltHit, kuiperHit],
-    update(f: Frame) {
+    update(f: SolarFrame) {
       const { show, sel, yearsAgo, mig, driftYears, dist, now } = f;
       const planetesimals = SUN_BIRTH - yearsAgo > 1e6;
       updateTracers(f, planetesimals);

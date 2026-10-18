@@ -191,13 +191,13 @@ export function mainBelt(count: number): SwarmBody[] {
  * Jupiter's Trojans at L4 and L5, librating about ±60° with inclinations up to
  * ~35°. They were most likely captured during the giant-planet instability,
  * so they appear during the clearing. The leading L4 cloud holds about 1.4–1.6× as
- * many as L5 (Grav et al. 2011; Szabó et al. 2007), so five in eight dots lead.
+ * many as L5 (Grav et al. 2011; Szabó et al. 2007), so three in five dots lead (1.5×).
  */
 export function trojans(count: number): SwarmBody[] {
   const rnd = mulberry32(2013);
   const out: SwarmBody[] = [];
   for (let n = 0; n < count; n += 1) {
-    const sign = n % 8 < 5 ? 1 : -1;
+    const sign = n % 5 < 3 ? 1 : -1;
     const e = Math.min(0.2, Math.abs(gaussian(rnd)) * 0.06);
     const i = Math.min(35, Math.abs(gaussian(rnd)) * 11);
     out.push({
@@ -220,7 +220,7 @@ export function trojans(count: number): SwarmBody[] {
 }
 
 /**
- * The classical and resonant Kuiper belt. Cold classicals (42–47.5 AU, low e and
+ * The classical and resonant Kuiper belt. Cold classicals (42–48 AU, low e and
  * i) formed in place; hot classicals, plutinos (3:2, 39.4 AU) and twotinos (2:1,
  * 47.7 AU) were stirred or captured by Neptune's outward move, so they start
  * nearer in and appear as the clearing progresses. Nothing beyond ~50 AU: the

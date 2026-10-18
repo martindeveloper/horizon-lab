@@ -1,16 +1,15 @@
-/** Consistency checks across the timeline, the orbits, the planetesimal sample and the Galaxy. */
-import { planetElements } from "./elements";
-import { sunGalactic } from "./galactic-orbit";
+/** Consistency checks across the timeline, the orbits and the planetesimal sample. */
+import { planetElements } from "@/space/solar-system/model/elements";
+import { migrationProgress, planetGrowth } from "@/space/solar-system/model/moment";
 import {
   CLEAR_DONE,
   GAS_DISK_LIFETIME,
   MODEL_START,
   SUN_BIRTH,
-  SUN_GALACTIC_RADIUS_LY,
-  SUN_HEIGHT_LY,
-} from "./parameters";
-import { migrationProgress, planetGrowth, sliderToYearsAgo, yearsAgoToSlider } from "./timeline";
-import { TRACERS, tallyAt } from "./tracers";
+} from "@/space/solar-system/model/parameters";
+import { TRACERS, tallyAt } from "@/space/solar-system/model/tracers";
+
+import { sliderToYearsAgo, yearsAgoToSlider } from "./timeline";
 
 export function modelSelfCheck(): string[] {
   const errors: string[] = [];
@@ -39,8 +38,5 @@ export function modelSelfCheck(): string[] {
   const n0 = planetElements("neptune", 0, 0, date).a;
   const n1 = planetElements("neptune", 1, 0, date).a;
   if (!(n0 < 15 && n1 > 29.9)) errors.push(`neptune ${n0} -> ${n1}`);
-  const sun = sunGalactic(0, true);
-  if (!sun || Math.hypot(sun[0] - SUN_GALACTIC_RADIUS_LY, sun[1] - SUN_HEIGHT_LY, sun[2]) > 1)
-    errors.push("sun today shifted");
   return errors;
 }

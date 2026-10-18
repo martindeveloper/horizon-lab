@@ -1,19 +1,21 @@
 /** The formation timeline and the model's clocks, as the notes, tour and technical prose quote them. */
-import { NEIGHBOUR_WINDOW } from "../neighbours";
+import type { Facts } from "@/lib/facts";
 import {
   CLEAR_DONE,
-  EMBRYOS_AFTER,
   GAS_DISK_LIFETIME,
-  LHB_CLASSIC,
   MODEL_START,
+  SNOW_LINE_AU,
+  SUN_BIRTH,
+} from "@/space/solar-system/model/parameters";
+
+import {
+  EMBRYOS_AFTER,
+  LHB_CLASSIC,
   NAMED_STARS_FADE,
   OLDEST,
   PLANETESIMALS_AFTER,
-  SNOW_LINE_AU,
-  SUN_BIRTH,
   THIN_DISK_ERA,
 } from "../parameters";
-import type { Facts } from "./types";
 
 export const TIMELINE = {
   formation: {
@@ -74,7 +76,7 @@ export const TIMELINE = {
       note: "from under 2 to about 4 au in the young disk",
     },
     moonImpact: {
-      range: [4.35e9, 4.5e9],
+      range: [4.35e9, 4.51e9],
       unit: "yr",
       show: "Gyr",
       source: "barboni2017",
@@ -101,8 +103,8 @@ export const TIMELINE = {
       show: "Gyr",
       digits: 3,
       source: "avdellidou2024",
-      status: "derived",
-      note: "steepest 4.475 Gyr ago, 92 Myr after the CAIs, inside the 60–100 Myr window",
+      status: "teaching-choice",
+      note: "the drawn clearing runs 67–117 Myr after the CAIs, steepest at 92 Myr, inside the dated 60–100 Myr window",
     },
   },
   clocks: {
@@ -129,12 +131,13 @@ export const TIMELINE = {
       status: "teaching-choice",
       note: "proper motions scramble the constellations",
     },
-    neighbourWindow: {
-      value: NEIGHBOUR_WINDOW,
-      unit: "yr",
-      source: "horizon",
-      status: "teaching-choice",
-      note: "straight-line tracks good to a few per cent",
+    /** The Gaia-Enceladus merger the timeline's notes date. */
+    merger: {
+      value: 10,
+      unit: "Gyr",
+      range: [8, 11],
+      source: "gaiaEnceladus",
+      status: "verified",
     },
   },
 } satisfies Record<string, Facts>;

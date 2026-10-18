@@ -1,0 +1,104 @@
+{
+  "units": {
+    "au": "au",
+    "ly": "ly",
+    "pc": "pc",
+    "auto": "auto"
+  },
+  "time": {
+    "million": "{value} million years ago",
+    "billion": "{value} billion years ago"
+  },
+  "toggles": {
+    "names": "Names",
+    "distances": "Distances"
+  },
+  "names": {
+    "lightYears": "ly",
+    "au": "au",
+    "lightTime": "light-time",
+    "parsecs": "pc",
+    "million": "million",
+    "billion": "billion",
+    "sun": "Sun",
+    "snowLine": "Snow line",
+    "mercury": "Mercury",
+    "venus": "Venus",
+    "earth": "Earth",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn",
+    "uranus": "Uranus",
+    "neptune": "Neptune",
+    "pluto": "Pluto",
+    "sedna": "Sedna",
+    "halley": "Halley's comet",
+    "moon": "Moon",
+    "io": "Io",
+    "europa": "Europa",
+    "ganymede": "Ganymede",
+    "callisto": "Callisto",
+    "titan": "Titan",
+    "triton": "Triton",
+    "charon": "Charon",
+    "asteroids": "Asteroid belt"
+  },
+  "hud": {
+    "controls": "Controls",
+    "objects": "Objects",
+    "close": "Close",
+    "scale": "{value} {unit} at the centre",
+    "display": "Display",
+    "camera": "Camera",
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "tiltUp": "Tilt up",
+    "tiltDown": "Tilt down",
+    "distanceUnit": "Distance unit: automatic, astronomical units, light-years or parsecs",
+    "bodies": "Sun and planets"
+  },
+  "badges": {
+    "measured": "Measured",
+    "mixed": "Measured + model",
+    "inferred": "Inferred, not seen directly",
+    "sample": "Teaching sample, not a named object"
+  },
+  "facts": {
+    "today": "Today",
+    "age": "Age",
+    "where": "Where",
+    "mass": "Mass",
+    "stretch": "Stretch (e)",
+    "tilt": "Tilt",
+    "tiltValue": "{value}° to the ecliptic",
+    "retrograde": "backward (retrograde)",
+    "nearFar": "Near / far",
+    "period": "Period",
+    "days": "{value} days",
+    "years": "{value} years",
+    "yearsAbout": "about {value} years",
+    "radius": "Radius",
+    "km": "{value} km",
+    "average": "Semi-major axis"
+  },
+  "technicalDetails": {
+    "open": "Technical details",
+    "close": "Close technical details",
+    "featuresTitle": "What you can explore",
+    "references": "Scientific sources"
+  },
+  "views": {
+    "inner": "Inner worlds",
+    "giants": "Giants",
+    "kuiper": "Kuiper belt",
+    "scattered": "Scattered disk",
+    "oort": "Oort cloud"
+  },
+  "layers": {
+    "disk": "Early disk",
+    "kuiper": "Kuiper belt",
+    "scattered": "Scattered disk",
+    "oort": "Oort cloud",
+    "ejected": "Ejected"
+  }
+}

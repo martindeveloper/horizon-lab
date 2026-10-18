@@ -78,7 +78,7 @@ test("close-up maps: detailed where there is detail, lighter on small devices", 
 
 test("store: close-ups need a globe, today and the solar map; leaving is automatic", () => {
   const api = useOrrery.getState;
-  useOrrery.setState({ yearsAgo: 0, viewRealm: "solar", guideOpen: false, closeUp: false });
+  useOrrery.setState({ yearsAgo: 0, guideOpen: false, closeUp: false });
   api().select({ kind: "population", id: "asteroids" });
   api().enterCloseUp();
   assert.equal(api().closeUp, false, "a population has no globe");
@@ -97,6 +97,6 @@ test("store: close-ups need a globe, today and the solar map; leaving is automat
   assert.equal(api().closeUp, false, "not offered in the deep past");
   api().setYearsAgo(0);
   api().enterCloseUp();
-  api().setView("galaxy");
+  api().setView("oort");
   assert.equal(api().closeUp, false, "a view change ends it");
 });

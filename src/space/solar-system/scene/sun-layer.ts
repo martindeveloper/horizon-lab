@@ -1,14 +1,20 @@
 /** The Sun, the young gas disk with its snow line, and the ecliptic grid. */
 import { CircleGeometry, LineSegments, Mesh, Sprite, type Object3D } from "three";
 
-import { bodyOrientation } from "../graphics/coordinates";
+import {
+  BELOW,
+  bodyOrientation,
+  fade,
+  ownedLine,
+  type PlaceLabel,
+  STRONG,
+} from "@horizon/toolkit/scene";
+
+import { gasDiskFade } from "../model/moment";
 import { MODEL_START, GAS_DISK_RADIUS_AU, SNOW_LINE_AU } from "../model/parameters";
-import { gasDiskFade } from "../model/timeline";
-import type { Selection } from "../store";
-import { SEG, ownedLine, polarGrid, type Globes } from "./geometry";
-import { SUN_R, type Frame, type SceneKit, type ShownFor } from "./kit";
-import { BELOW, STRONG, type PlaceLabel } from "./labels";
-import { fade } from "./lod";
+import type { SolarSelection } from "../model/selection";
+import { SEG, polarGrid, type Globes } from "./geometry";
+import { SUN_R, type SolarFrame, type SolarKit, type ShownFor } from "./kit";
 
 /** Where the snow line, the grid and the Sun's name read (camera distance, au). */
 const SNOW = fade(0, 0, 280, 560);
@@ -16,7 +22,7 @@ const GRID = fade(0, 0, 8_000, 16_000);
 const NAME = fade(0, 0, 8_000, 16_000);
 
 export function createSunLayer(
-  { scope, looks, pxWorld, lod }: SceneKit,
+  { scope, looks, pxWorld, lod }: SolarKit,
   parent: Object3D,
   globes: Globes,
   place: PlaceLabel,
@@ -44,13 +50,13 @@ export function createSunLayer(
   const names = lod.fader();
 
   const sun = new Mesh(globes.sphere, looks.sun);
-  sun.userData.pick = { kind: "sun" } satisfies Selection;
+  sun.userData.pick = { kind: "sun" } satisfies SolarSelection;
   const glow = new Sprite(looks.sunGlow);
   parent.add(sun, glow);
 
   return {
     sun,
-    update({ yearsAgo, dist, show, now }: Frame) {
+    update({ yearsAgo, dist, show, now }: SolarFrame) {
       const forming = yearsAgo > MODEL_START;
       const gas = 1 - gasDiskFade(yearsAgo);
       gasDisk.visible = forming && gas > 0.01;

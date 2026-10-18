@@ -15,6 +15,7 @@ import {
   MeshBasicMaterial,
 } from "three";
 
+import { namedElements, planetElements } from "@/space/solar-system/model/elements";
 import {
   keplerPosition,
   namedById,
@@ -23,14 +24,13 @@ import {
   type PlanetId,
 } from "@horizon/toolkit/bodies";
 import { smootherstep } from "@horizon/toolkit/math";
+import { SOLAR_GOLD } from "@horizon/toolkit/scene";
 
-import { namedElements, planetElements } from "../model/elements";
 import type { TourSketchId } from "../model/tour";
 
 type Vec3 = [number, number, number];
 type Shape = { points: Vec3[]; fill?: boolean; opacity: number; delay: number; duration: number };
 
-const GOLD = 0xe2c07a;
 const YEAR_PLANETS: readonly PlanetId[] = [
   "earth",
   "mars",
@@ -182,7 +182,11 @@ export function createTourSketch() {
       const positions = new Float32Array(LINE_CAP * 3);
       const geometry = new BufferGeometry();
       geometry.setAttribute("position", new BufferAttribute(positions, 3));
-      const material = new LineBasicMaterial({ color: GOLD, transparent: true, depthTest: false });
+      const material = new LineBasicMaterial({
+        color: SOLAR_GOLD,
+        transparent: true,
+        depthTest: false,
+      });
       const line = new Line(geometry, material);
       line.frustumCulled = false;
       line.renderOrder = 7;
@@ -197,7 +201,7 @@ export function createTourSketch() {
       const geometry = new BufferGeometry();
       geometry.setAttribute("position", new BufferAttribute(positions, 3));
       const material = new MeshBasicMaterial({
-        color: GOLD,
+        color: SOLAR_GOLD,
         transparent: true,
         depthTest: false,
         depthWrite: false,

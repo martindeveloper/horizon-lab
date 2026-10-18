@@ -1,12 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import { proseArgs, type Fact } from "@/lib/facts";
 import type { Formula } from "@horizon/toolkit/science";
 import { TechnicalDetails, type TechnicalDocument } from "@horizon/toolkit/ui";
 
 /** A formula as text, or the ID of an `Equation` the feature registers (printed from the library). */
-export type EquationEntry = string | { equation: string };
+type EquationEntry = string | { equation: string };
 
 type Specification = {
   features: string[];
@@ -15,7 +16,7 @@ type Specification = {
 };
 
 /** Resolves equation IDs to their text; an unknown ID is a bug, not a blank line. */
-export function equationText(entry: EquationEntry, equations: Record<string, Formula> = {}) {
+function equationText(entry: EquationEntry, equations: Record<string, Formula> = {}) {
   if (typeof entry === "string") return entry;
   const equation = equations[entry.equation];
   if (!equation) throw new Error(`Unknown equation "${entry.equation}"`);
@@ -28,6 +29,7 @@ export function SimulationTechnicalDetails({
   specification,
   equations,
   values,
+  figures,
 }: {
   namespace: string;
   specification: Specification;
@@ -35,8 +37,12 @@ export function SimulationTechnicalDetails({
   equations?: Record<string, Formula>;
   /** ICU arguments for prose that quotes the feature's own parameters. */
   values?: Record<string, number | string>;
+  /** Catalogue figures the prose quotes, by placeholder, printed in the page's language. */
+  figures?: Readonly<Record<string, Fact>>;
 }) {
   const t = useTranslations(`${namespace}.technicalDetails`);
+  const locale = useLocale();
+  const args = figures ? { ...values, ...proseArgs(figures, locale) } : values;
   return (
     <TechnicalDetails
       labels={{
@@ -49,12 +55,12 @@ export function SimulationTechnicalDetails({
         title: t("title"),
         summary: t("summary"),
         ...(specification.references !== undefined ? { references: specification.references } : {}),
-        features: specification.features.map((id) => t(`features.${id}`, values)),
+        features: specification.features.map((id) => t(`features.${id}`, args)),
         sections: specification.sections.map((section) => ({
           ...section,
           equations: section.equations.map((entry) => equationText(entry, equations)),
           title: t(`sections.${section.id}.title`),
-          body: t(`sections.${section.id}.body`, values),
+          body: t(`sections.${section.id}.body`, args),
         })),
       }}
     />

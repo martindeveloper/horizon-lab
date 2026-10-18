@@ -48,7 +48,7 @@ const COMMANDS = {
 // The simulation canvas already owns a context, so getContext returns it rather than creating one.
 function simulationContext() {
   const canvas = document.querySelector<HTMLCanvasElement>(
-    "[data-black-hole-canvas], [data-orrery-canvas]",
+    "[data-black-hole-canvas], [data-scene-canvas]",
   );
   return canvas?.getContext("webgl2") ?? null;
 }

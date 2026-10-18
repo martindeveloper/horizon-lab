@@ -8,6 +8,7 @@ import {
   type Object3D,
 } from "three";
 
+import type { SolarKit } from "@/space/solar-system/scene/kit";
 import { DisposalScope } from "@horizon/toolkit/rendering";
 
 import FRAG from "../graphics/shaders/solar-activity.frag.glsl";
@@ -15,13 +16,12 @@ import VERT from "../graphics/shaders/solar-activity.vert.glsl";
 import { SUN_ACTIVITY_MAX_STEPS } from "../model/solar-activity";
 import { createSolarActivityDensity } from "../model/solar-activity-density";
 import { createSolarActivityDynamics } from "../model/solar-activity-dynamics";
-import type { SceneKit } from "./kit";
 import { createSolarActivityGeometry } from "./solar-activity-geometry";
 import type { SolarActivity } from "./solar-activity-lifecycle";
 
 /** Loaded only on enable. Its private scope releases every resource on Off, not just on navigation. */
 export function createSolarActivity(
-  { camera, tight }: Pick<SceneKit, "camera" | "tight">,
+  { camera, tight }: Pick<SolarKit, "camera" | "tight">,
   sun: Object3D,
 ): SolarActivity {
   const scope = new DisposalScope();

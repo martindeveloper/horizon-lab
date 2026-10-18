@@ -1,29 +1,26 @@
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
-import {
-  DISTANCE_UNITS,
-  convert,
-  formatReadout,
-  type DistanceChoice,
-} from "@horizon/toolkit/science";
-import { Dock, IconButton, SegmentedControl, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
+import { useDockClearance, type DockInTheWay } from "@/components/simulations/dock-clearance";
+import { DistanceUnitControl, MapScale } from "@/components/simulations/map-readouts";
+import { proseArgs } from "@/lib/facts";
+import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
+import { convert } from "@horizon/toolkit/science";
+import { Dock, IconButton, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
 
-import { scaleAt } from "../lib/model/cosmos";
-import { galacticLaps } from "../lib/model/galactic-orbit";
-import { SUN_BIRTH } from "../lib/model/parameters";
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import {
   EPOCHS,
   epochOf,
+  galacticLaps,
   isToday,
   noteOf,
-  showsExpansion,
   sliderToYearsAgo,
   yearsAgoToSlider,
 } from "../lib/model/timeline";
 import { useOrrery } from "../lib/store";
-import { formatYearsAgo, proseArgs } from "./format";
+import { formatYearsAgo } from "./format";
 import { DISPLAY, Switches } from "./view-controls";
 
 /* Epochs sit at their true places on the track, alternating above and below it so
@@ -35,6 +32,13 @@ const STATIONS = EPOCHS.map((epoch, i) => ({
 }));
 const trackX = (at: number) => `calc(7px + ${at} * (100% - 14px))`;
 
+/**
+ * The dock never moves for a side panel. Only where its centred width reaches the panel
+ * column (w-80 on the HUD gutter) do the card and rail end above it; on wide screens they
+ * keep their full height.
+ */
+const reachesPanels: DockInTheWay = (dock, stage, rem) => dock.right + 22 * rem > stage.right;
+
 /** The timeline dock: date and playback, era note, epoch track, then map settings. */
 export function TimeDock() {
   const t = useTranslations("orrery");
@@ -42,31 +46,30 @@ export function TimeDock() {
   const locale = useLocale();
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const playing = useOrrery((s) => s.playing);
-  const viewRealm = useOrrery((s) => s.viewRealm);
   const driftRate = useOrrery((s) => s.driftRate);
   const driftYears = useOrrery((s) => s.driftYears);
   const drift = useOrrery((s) => s.show.drift);
+  const scalePx = useOrrery((s) => s.scalePx);
+  const scaleValue = useOrrery((s) => s.scaleValue);
+  const scaleUnit = useOrrery((s) => s.scaleUnit);
+  const unit = useOrrery((s) => s.distanceUnit);
   // Phones give an open sheet or card the bottom of the screen.
   const aside = useOrrery((s) => s.panel !== "none" || s.selection !== null);
   const surface = useRef<HTMLDivElement>(null);
-  useDockClearance(surface);
+  useDockClearance(surface, reachesPanels);
   const now = useNow({ updateInterval: 60_000 });
   const atEnd = yearsAgo <= 0;
   const api = useOrrery.getState;
   const driftLabel =
     !drift || driftRate === 0
       ? t("hud.driftPaused")
-      : viewRealm === "galaxy"
-        ? t("hud.galaxyMotion")
-        : viewRealm === "cosmos"
-          ? t("hud.cosmosMotion")
-          : driftRate < 1.2
-            ? t("hud.driftDays", { value: Math.round(driftRate * 365) })
-            : driftRate < 800
-              ? t("hud.driftYears", { value: Math.round(driftRate) })
-              : t("hud.driftThousand", {
-                  value: f.number(driftRate / 1000, { maximumFractionDigits: 1 }),
-                });
+      : driftRate < 1.2
+        ? t("hud.driftDays", { value: Math.round(driftRate * 365) })
+        : driftRate < 800
+          ? t("hud.driftYears", { value: Math.round(driftRate) })
+          : t("hud.driftThousand", {
+              value: f.number(driftRate / 1000, { maximumFractionDigits: 1 }),
+            });
   const offset =
     driftYears < 1
       ? t("time.offsetDays", { value: Math.max(1, Math.round(convert(driftYears, "yr", "d"))) })
@@ -77,22 +80,19 @@ export function TimeDock() {
               maximumFractionDigits: 0,
             }),
           });
-  /* Beyond the Galaxy the deep past reads as the scale of space. */
   const subline =
-    viewRealm === "cosmos" && showsExpansion(yearsAgo)
-      ? t("time.expansion", { value: f.number(scaleAt(yearsAgo), { style: "percent" }) })
-      : yearsAgo > SUN_BIRTH
-        ? t("time.noSun")
-        : isToday(yearsAgo)
-          ? drift && driftYears > 0.002 && viewRealm === "solar"
-            ? t("time.clockDrift", { offset, rate: driftLabel })
-            : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
-          : t("time.laps", {
-              laps: f.number(galacticLaps(yearsAgo), {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              }),
-            });
+    yearsAgo > SUN_BIRTH
+      ? t("time.noSun")
+      : isToday(yearsAgo)
+        ? drift && driftYears > 0.002
+          ? t("time.clockDrift", { offset, rate: driftLabel })
+          : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
+        : t("time.laps", {
+            laps: f.number(galacticLaps(yearsAgo), {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }),
+          });
   const playLabel = playing ? t("hud.pause") : atEnd ? t("hud.playRestart") : t("hud.play");
   return (
     <Dock ref={surface} footerClassName={cn(aside && "not-md:hidden")} className="flex flex-col">
@@ -120,13 +120,18 @@ export function TimeDock() {
         </div>
       </div>
       <p className="mt-2 text-xs text-pretty text-muted not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5">
-        {t(`notes.${noteOf(yearsAgo)}`, proseArgs(locale))}
+        {t(`notes.${noteOf(yearsAgo)}`, proseArgs(PROSE_FIGURES, locale))}
       </p>
       <Timeline yearsAgo={yearsAgo} />
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-2.5 md:mt-1 md:pt-3">
         <div className="flex min-w-0 items-center gap-4 not-md:flex-1">
-          <ScaleBar />
-          <DistanceUnits className="not-md:ml-auto" />
+          <MapScale namespace="orrery" value={scaleValue} unit={scaleUnit} px={scalePx} />
+          <DistanceUnitControl
+            namespace="orrery"
+            value={unit}
+            onChange={(next) => useOrrery.getState().setDistanceUnit(next)}
+            className="shrink-0 not-md:ml-auto"
+          />
         </div>
         <div className="hidden md:block">
           <Switches keys={DISPLAY} />
@@ -134,34 +139,6 @@ export function TimeDock() {
       </div>
     </Dock>
   );
-}
-
-/**
- * The dock never moves for a side panel. Where its centred width reaches the panel
- * column (w-80 on the HUD gutter), `--orrery-clear` on the overlay tells the card and
- * rail to end above it; on wide screens they keep their full height.
- */
-function useDockClearance(surface: React.RefObject<HTMLDivElement | null>) {
-  useEffect(() => {
-    const dock = surface.current;
-    const overlay = dock?.closest("footer")?.parentElement;
-    if (!dock || !overlay) return;
-    const write = () => {
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-      const box = overlay.getBoundingClientRect();
-      const rect = dock.getBoundingClientRect();
-      if (rect.height > 0 && rect.right + 22 * rem > box.right)
-        overlay.style.setProperty("--orrery-clear", `${box.bottom - rect.top + 0.75 * rem}px`);
-      else overlay.style.removeProperty("--orrery-clear");
-    };
-    const observer = new ResizeObserver(write);
-    observer.observe(dock);
-    observer.observe(overlay);
-    return () => {
-      observer.disconnect();
-      overlay.style.removeProperty("--orrery-clear");
-    };
-  }, [surface]);
 }
 
 /** The scrubber with the epochs as stations on it; wide screens label and link them. */
@@ -218,50 +195,5 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
         })}
       </div>
     </div>
-  );
-}
-
-/** A cartographic scale: the round distance the bar spans at the centre of the view. */
-function ScaleBar() {
-  const t = useTranslations("orrery");
-  const locale = useLocale();
-  const scalePx = useOrrery((s) => s.scalePx);
-  const scaleValue = useOrrery((s) => s.scaleValue);
-  const unit = useOrrery((s) => s.scaleUnit);
-  /* Millions read as words, not powers of ten: "200 million ly". */
-  const millions = scaleValue >= 1e6;
-  const number = formatReadout(millions ? scaleValue / 1e6 : scaleValue, locale);
-  const value = millions ? `${number} ${t("names.million")}` : number;
-  const label = t("hud.scale", { value, unit: t(`units.${unit}`) });
-  return (
-    <Tooltip label={label} className="min-w-0 shrink-0">
-      <span className="flex flex-col items-start gap-1 font-mono text-[11px] leading-none tracking-wide text-subtle tabular-nums">
-        <span aria-hidden className="whitespace-nowrap">
-          {value} {t(`units.${unit}`)}
-        </span>
-        <span
-          aria-hidden
-          className="h-1.5 border-x border-b border-fg/50 transition-[width] duration-300"
-          style={{ width: scalePx }}
-        />
-        <span className="sr-only">{label}</span>
-      </span>
-    </Tooltip>
-  );
-}
-
-const CHOICES: readonly DistanceChoice[] = ["auto", ...DISTANCE_UNITS];
-
-function DistanceUnits({ className }: { className?: string }) {
-  const t = useTranslations("orrery");
-  const unit = useOrrery((s) => s.distanceUnit);
-  return (
-    <SegmentedControl<DistanceChoice>
-      aria-label={t("hud.distanceUnit")}
-      className={cn("shrink-0 gap-2", className)}
-      value={unit}
-      onValueChange={(next) => useOrrery.getState().setDistanceUnit(next)}
-      options={CHOICES.map((value) => ({ value, label: t(`units.${value}`) }))}
-    />
   );
 }

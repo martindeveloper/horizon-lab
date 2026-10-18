@@ -29,24 +29,26 @@ import {
   limbDarkening,
   rainClockRate,
 } from "../src/features/black-hole/lib/equations.ts";
-import { CATALOGUE } from "../src/features/orrery/lib/model/catalogue/index.ts";
 import {
-  galacticAngle,
   galacticHeight,
   galacticRadius,
   galacticWarp,
-  gasDisk,
-  migrationProgress,
   spiralArm,
-  tracerSemiMajorAxis,
-} from "../src/features/orrery/lib/model/equations.ts";
-import { SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
+} from "../src/features/deep-field/lib/model/equations.ts";
 import {
   advancePlay,
   noteOf,
   sliderToYearsAgo,
   yearsAgoToSlider,
 } from "../src/features/orrery/lib/model/timeline.ts";
+import { SOLAR_CATALOGUE } from "../src/space/solar-system/model/catalogue.ts";
+import {
+  galacticAngle,
+  gasDisk,
+  migrationProgress,
+  tracerSemiMajorAxis,
+} from "../src/space/solar-system/model/equations.ts";
+import { GALACTIC_YEAR, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
 
 const near = (actual, expected, tolerance, label) =>
   assert.ok(
@@ -106,7 +108,7 @@ test("shared laws reproduce textbook values", () => {
 });
 
 test("solar catalogue values agree with physical constants", () => {
-  const sun = CATALOGUE.sun.sun;
+  const sun = SOLAR_CATALOGUE.sun.sun;
   near(sun.au.value / 1e6, 149.6, 0.01);
   near(sun.auLightTime.value / 60, 8.317, 0.001);
   assert.equal(sun.radius.value, 695_700);
@@ -143,7 +145,7 @@ test("orrery migration and galaxy formulas hold their anchors", () => {
   near(migrationProgress.compute({ t: 4.475e9 }), 0.5, 1e-9);
   assert.equal(migrationProgress.compute({ t: 0 }), 1);
   near(tracerSemiMajorAxis.compute({ a0: 20, a1: 20_000, s: 0.5 }), Math.sqrt(20 * 20_000), 1e-9);
-  near(galacticAngle.compute({ t: 220e6 }), 2 * Math.PI, 1e-12, "one lap");
+  near(galacticAngle.compute({ t: GALACTIC_YEAR }), 2 * Math.PI, 1e-12, "one lap");
   assert.equal(galacticRadius.compute({ t: 0 }), 27_000);
   near(galacticHeight.compute({ t: 0 }), 68, 1e-9, "today's height");
   near(spiralArm.compute({ R: 6.9, Rk: 6.9 }), 0, 1e-12, "arm crosses the Sun–centre line at R_k");
@@ -168,7 +170,7 @@ test("orrery timeline gives each formation stage room, a note and a play stop", 
     [SUN_BIRTH - 2.5e6, "gasDisk"],
     [SUN_BIRTH - 1e7, "accretion"],
     [SUN_BIRTH - 3e7, "belt"],
-    [SUN_BIRTH - 5e7, "moon"],
+    [SUN_BIRTH - 6e7, "moon"],
     [4.47e9, "clearing"],
     [3.9e9, "bombardment"],
     [1e9, "today"],

@@ -1,39 +1,25 @@
 import { slugRoutes } from "../../lib/simulation-paths";
-import { DEFAULT_VIEW, VIEWS, type ViewId } from "./lib/model/views";
+import { SOLAR_VIEWS, type SolarViewId } from "../../space/solar-system/model/views";
+import { DEFAULT_VIEW } from "./lib/model/views";
 import { ORRERY_PATH } from "./manifest";
 
-const ALIASES: Record<string, ViewId> = {
+const ALIASES: Record<string, SolarViewId> = {
   "inner-worlds": "inner",
   planets: "giants",
   "kuiper-belt": "kuiper",
   "scattered-disk": "scattered",
   "oort-cloud": "oort",
-  proxima: "stars",
-  "nearest-star": "stars",
-  "milky-way": "galaxy",
-  milkyway: "galaxy",
-  localgroup: "local-group",
-  localsheet: "local-sheet",
-  "local-volume": "local-sheet",
-  virgo: "virgo-cluster",
-  "local-supercluster": "virgo-supercluster",
-  "great-attractor": "laniakea",
-  cosmicweb: "cosmic-web",
-  "sloan-great-wall": "cosmic-web",
-  "shapley-supercluster": "cosmic-web",
-  universe: "observable-universe",
-  cmb: "observable-universe",
 };
 
 const routes = slugRoutes({
   base: ORRERY_PATH,
-  ids: VIEWS.map((v) => v.id),
+  ids: SOLAR_VIEWS.map((v) => v.id),
   defaultId: DEFAULT_VIEW,
   aliases: ALIASES,
 });
 
 export const resolveView = routes.resolve;
-export const pathForView: (id: ViewId) => string = routes.pathFor;
+export const pathForView: (id: SolarViewId) => string = routes.pathFor;
 export const viewFromPath = routes.fromPath;
 
 export function viewRouteParams() {

@@ -12,7 +12,7 @@ import sharp from "sharp";
 
 import { MAPS, mapFile } from "@horizon/toolkit/bodies";
 
-import { SUN_MAP_QUIET_INTENSITY } from "../src/features/orrery/lib/model/parameters.ts";
+import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
 import {
   HMI_SOURCES,
   projectSolarPoint,
