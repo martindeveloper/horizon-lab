@@ -10,9 +10,7 @@ resampling, and WebP compression. Map-specific changes are listed under each map
 Outer Planet Atmospheres Legacy (OPAL) global maps, DOI
 [10.17909/T9G593](https://dx.doi.org/10.17909/T9G593), © NASA, ESA, A.A. Simon and
 M.H. Wong, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-This work used data acquired from the NASA/ESA Hubble Space Telescope, associated
-with the OPAL program (PI: Simon, GO13937), and archived by the Space Telescope
-Science Institute. References: Simon et al. 2015, ApJ 812, 55; Wong et al. 2020,
+This work used data acquired from the NASA/ESA HST Space Telescope, associated with OPAL program (PI: Simon, GO13937), and archived by the Space Telescope Science Institute, which is operated by the Association of Universities for Research in Astronomy, Inc., under NASA contract NAS 5-26555. All maps are available at http://dx.doi.org/10.17909/T9G593. References: Simon et al. 2015, ApJ 812, 55; Wong et al. 2020,
 ApJS 247, 58.
 
 - Jupiter: Cycle 32, 11 December 2025 (F631N, F502N, F467M).

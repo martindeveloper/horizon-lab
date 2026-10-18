@@ -216,7 +216,8 @@
       "ganymedeMap": "Ganymede: the USGS Voyager/Galileo multispectral mosaic, with muted colour and brightness adapted for scene lighting. Polar colour gaps use the source’s monochrome coverage; this is not calibrated natural colour.",
       "callistoMap": "Callisto: the USGS Voyager/Galileo monochrome mosaic. Missing coverage receives a plain fill rather than invented craters.",
       "tritonMap": "Triton: the USGS Voyager 2 synthetic-colour mosaic (orange, violet and ultraviolet filters), with muted saturation. The unobserved northern region uses a plain fill. Source grid lines were interpolated by USGS; this is not natural-colour photography.",
-      "charonMap": "Charon: the USGS New Horizons monochrome mosaic. The unobserved southern region uses a plain fill. No surface colour is inferred from the monochrome data."
+      "charonMap": "Charon: the USGS New Horizons monochrome mosaic. The unobserved southern region uses a plain fill. No surface colour is inferred from the monochrome data.",
+      "feather": "Original Feather icons used by Lucide, including navigation and interface controls."
     },
     "licences": {
       "publicDomain": "Public domain",
@@ -224,12 +225,13 @@
     },
     "notes": {
       "label": "Notes",
-      "acknowledgement": "This work used data acquired from the NASA/ESA Hubble Space Telescope, associated with the OPAL program (PI: Simon, GO13937), and archived by the Space Telescope Science Institute.",
+      "acknowledgement": "This work used data acquired from the NASA/ESA HST Space Telescope, associated with OPAL program (PI: Simon, GO13937), and archived by the Space Telescope Science Institute, which is operated by the Association of Universities for Research in Astronomy, Inc., under NASA contract NAS 5-26555. All maps are available at http://dx.doi.org/10.17909/T9G593.",
       "gaia": "This work has made use of data from the European Space Agency (ESA) mission Gaia, processed by the Gaia Data Processing and Analysis Consortium (DPAC). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the Gaia Multilateral Agreement.",
       "simbad": "This research has made use of the SIMBAD database and the VizieR catalogue access tool, operated at CDS, Strasbourg, France.",
       "changes": "Maps were reprojected, resampled and filled where data is missing; <link>what changed in each map</link>.",
       "endorsement": "Using NASA, ESA and USGS data does not imply their endorsement.",
-      "papers": "Each simulation's Technical details list the papers behind its numbers."
+      "papers": "Each simulation's Technical details list the papers behind its numbers.",
+      "softwareNotices": "Full copyright and licence texts for fonts and software, including bundled dependencies: <link>third-party notices</link>."
     },
     "contents": "On this page"
   },

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 /**
  * The credits page: copy in both languages, every measured planet map
@@ -20,6 +21,26 @@ const catalogs = Object.fromEntries(
 const items = CREDITS.flatMap((group) => group.items);
 /** The page names licences as people read them; package.json uses SPDX ids. */
 const spdx = (licence) => ({ "SIL OFL 1.1": "OFL-1.1" })[licence] ?? licence;
+
+test("distributed notices match dependencies and retain font and Feather terms verbatim", () => {
+  execFileSync(process.execPath, ["scripts/generate-license-notices.mjs", "--check"], {
+    cwd: root,
+  });
+  const notices = read("public/THIRD-PARTY-NOTICES.txt");
+  for (const name of [
+    "lucide-react",
+    "@fontsource-variable/bodoni-moda",
+    "@fontsource-variable/ibm-plex-sans",
+    "@fontsource/ibm-plex-mono",
+  ]) {
+    assert.ok(notices.includes(read(`node_modules/${name}/LICENSE`)), name);
+  }
+  assert.ok(items.some((item) => item.id === "feather" && item.licence === "MIT"));
+  for (const messages of Object.values(catalogs)) {
+    assert.ok(messages.credits.notes.softwareNotices.includes("<link>"));
+    assert.ok(messages.credits.notes.acknowledgement.includes("NAS 5-26555"));
+  }
+});
 
 test("credits copy is complete and translated", () => {
   for (const [locale, messages] of Object.entries(catalogs)) {

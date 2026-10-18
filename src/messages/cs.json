@@ -216,7 +216,8 @@
       "ganymedeMap": "Ganymed: multispektrální mozaika USGS ze snímků Voyageru a Galilea, s tlumenými barvami a jasem přizpůsobeným osvětlení scény. Chybějící barvy na pólech doplňují monochromatické snímky původní mapy; nejde o kalibrované přirozené barvy.",
       "callistoMap": "Callisto: monochromatická mozaika USGS ze snímků Voyageru a Galilea. Chybějící pokrytí má jednolitou výplň místo smyšlených kráterů.",
       "tritonMap": "Triton: mozaika USGS ze snímků Voyageru 2 v syntetických barvách (oranžový, fialový a ultrafialový filtr), se sníženou sytostí. Nepozorovaná severní oblast má jednolitou výplň. USGS interpoloval původní čáry souřadnicové sítě; nejde o fotografii v přirozených barvách.",
-      "charonMap": "Charon: monochromatická mozaika USGS ze snímků New Horizons. Nepozorovaná jižní oblast má jednolitou výplň. Z monochromatických dat neodvozujeme barvu povrchu."
+      "charonMap": "Charon: monochromatická mozaika USGS ze snímků New Horizons. Nepozorovaná jižní oblast má jednolitou výplň. Z monochromatických dat neodvozujeme barvu povrchu.",
+      "feather": "Původní ikony Feather používané v Lucide, včetně navigace a ovládacích prvků rozhraní."
     },
     "licences": {
       "publicDomain": "Volné dílo",
@@ -224,12 +225,13 @@
     },
     "notes": {
       "label": "Poznámky",
-      "acknowledgement": "Tato práce využívá data z Hubbleova vesmírného dalekohledu NASA/ESA z programu OPAL (PI: Simon, GO13937), archivovaná v institutu Space Telescope Science Institute.",
+      "acknowledgement": "Tato práce využívá data získaná kosmickým dalekohledem NASA/ESA HST v rámci programu OPAL (PI: Simon, GO13937), archivovaná ve Space Telescope Science Institute, který provozuje Association of Universities for Research in Astronomy, Inc., na základě smlouvy NASA NAS 5-26555. Všechny mapy jsou dostupné na http://dx.doi.org/10.17909/T9G593.",
       "gaia": "Tato práce využívá data mise Gaia Evropské kosmické agentury (ESA), zpracovaná konsorciem Gaia Data Processing and Analysis Consortium (DPAC). DPAC financují národní instituce, zejména ty, které se účastní mnohostranné dohody o misi Gaia.",
       "simbad": "Tato práce využívá databázi SIMBAD a katalogový nástroj VizieR provozované v CDS ve Štrasburku ve Francii.",
       "changes": "Mapy jsou převedené do jiné projekce, převzorkované a doplněné tam, kde data chybí; <link>co se u které mapy změnilo</link>.",
       "endorsement": "Použití dat NASA, ESA a USGS neznamená, že tyto instituce web podporují.",
-      "papers": "V technických podrobnostech každé simulace najdete odborné práce, ze kterých vycházejí uvedené hodnoty."
+      "papers": "V technických podrobnostech každé simulace najdete odborné práce, ze kterých vycházejí uvedené hodnoty.",
+      "softwareNotices": "Úplná znění autorských oznámení a licencí písem a softwaru včetně přibalených závislostí: <link>oznámení třetích stran</link>."
     },
     "contents": "Na této stránce"
   },

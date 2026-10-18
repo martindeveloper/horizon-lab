@@ -331,6 +331,13 @@ export const CREDITS: readonly CreditGroup[] = [
         package: "lucide-react",
       },
       {
+        id: "feather",
+        name: "Feather icons (used by Lucide)",
+        by: "Copyright (c) 2013-present Cole Bemis",
+        licence: "MIT",
+        url: "https://github.com/feathericons/feather",
+      },
+      {
         id: "tailwindMerge",
         name: "tailwind-merge",
         by: "Dany Castillo",

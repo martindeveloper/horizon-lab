@@ -198,6 +198,15 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                     ),
                   })}
                 </li>
+                <li>
+                  {t.rich("notes.softwareNotices", {
+                    link: (chunks) => (
+                      <External href="/THIRD-PARTY-NOTICES.txt" label={t("newTab")}>
+                        {chunks}
+                      </External>
+                    ),
+                  })}
+                </li>
                 <li>{t("notes.endorsement")}</li>
                 <li>{t("notes.papers")}</li>
               </ul>
