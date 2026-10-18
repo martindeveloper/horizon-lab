@@ -251,6 +251,24 @@
       "si": "SI definitions underpinning units and the exact speed of light.",
       "helland": "Adapted to GLSL and normalized RGB for the black-hole disk. This is an approximate display colour, not a calibrated spectrum."
     },
+    "worlds": {
+      "sun": "Sun",
+      "mercury": "Mercury",
+      "earth": "Earth",
+      "moon": "Moon",
+      "mars": "Mars",
+      "jupiter": "Jupiter",
+      "saturn": "Saturn",
+      "uranus": "Uranus",
+      "neptune": "Neptune",
+      "pluto": "Pluto",
+      "charon": "Charon",
+      "io": "Io",
+      "europa": "Europa",
+      "ganymede": "Ganymede",
+      "callisto": "Callisto",
+      "triton": "Triton"
+    },
     "licences": {
       "publicDomain": "Public domain",
       "cited": "Cited values"

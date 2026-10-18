@@ -27,6 +27,7 @@ export function ViewPicker() {
       aria-label={t("hud.views")}
       open={open}
       onOpenChange={setOpen}
+      className="min-w-36"
       triggerClassName="relative max-w-[min(16rem,100%)] not-md:h-10 not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-0.5"
     >
       <div className="flex flex-col gap-1">

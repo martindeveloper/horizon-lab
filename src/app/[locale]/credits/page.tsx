@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { CreditsPage } from "@/components/pages/credits-page";
+
+import "@/components/pages/credits.css";
 import { routing } from "@/i18n/routing";
 import { pageMetadata } from "@/lib/metadata";
 

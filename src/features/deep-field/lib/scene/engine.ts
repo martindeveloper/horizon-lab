@@ -22,7 +22,7 @@ import {
   rulerOrigin,
   solarLabelPick,
 } from "@/space/solar-system/scene/solar-system";
-import { REDUCED_MOTION_QUERY, WIDE_LAYOUT_QUERY } from "@horizon/toolkit/environment";
+import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 import { DisposalScope } from "@horizon/toolkit/rendering";
 import {
   SOLAR_GOLD,
@@ -35,7 +35,7 @@ import {
 } from "@horizon/toolkit/scene";
 
 import { createLooks } from "../graphics/looks";
-import { LADDER_LY } from "../model/depth";
+import { LADDER_LY, LADDER_SIDE_QUERY } from "../model/depth";
 import { NEIGHBOURS } from "../model/neighbours";
 import { PROBES } from "../model/probes";
 import { viewById, worldDistance, type Realm } from "../model/views";
@@ -76,7 +76,8 @@ export function createDeepFieldEngine({
 
     const store = useDeepField;
     const reduceMotion = window.matchMedia(REDUCED_MOTION_QUERY);
-    const wide = window.matchMedia(WIDE_LAYOUT_QUERY);
+    /* Labels keep clear of the ladder wherever it stands (model/depth.ts). */
+    const wide = window.matchMedia(LADDER_SIDE_QUERY);
     /* The eyepiece publishes its height on the stage; labels and their taps keep above it. */
     const stage = host.closest<HTMLElement>("[data-simulation]");
     const clearOf = (property: string) =>

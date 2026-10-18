@@ -8,23 +8,22 @@ import { useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { HandoffLink } from "@/components/simulations/handoff-link";
 import { formatAu } from "@/lib/facts";
 import { isSolarView } from "@/space/solar-system/model/views";
-import { WIDE_LAYOUT_QUERY } from "@horizon/toolkit/environment";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { Tooltip, cn } from "@horizon/toolkit/ui";
 
-import { RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
+import { LADDER_SIDE_QUERY, RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
 import { METHOD_OF } from "../lib/model/views";
 import { useDeepField } from "../lib/store";
 
 const subscribe = (change: () => void) => {
-  const query = window.matchMedia(WIDE_LAYOUT_QUERY);
+  const query = window.matchMedia(LADDER_SIDE_QUERY);
   query.addEventListener("change", change);
   return () => query.removeEventListener("change", change);
 };
 const useWide = () =>
   useSyncExternalStore(
     subscribe,
-    () => window.matchMedia(WIDE_LAYOUT_QUERY).matches,
+    () => window.matchMedia(LADDER_SIDE_QUERY).matches,
     () => true,
   );
 
@@ -37,8 +36,8 @@ const NEXT = new Set(["ArrowDown", "ArrowRight", "PageDown"]);
  * The depth ladder: the camera's distance on one log scale, from inside Mercury's orbit to
  * past the microwave background. Its thumb follows the zoom; dragging it zooms, a rung flies
  * to its view, arrow keys step from rung to rung. Above its near end, the same solar system
- * back in time, in the Orrery. Vertical down the left on wide screens, along the bottom on
- * phones.
+ * back in time, in the Orrery. Vertical down the left wherever there is width for a column
+ * (a phone held sideways too), along the bottom on narrow phones.
  */
 export function DepthLadder() {
   const t = useTranslations("deepField");

@@ -106,17 +106,14 @@ function SimulationTile({
             <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-pretty text-muted">
               {t(`${key}.description`)}
             </p>
+            {/* Each highlight carries its own marker, so a wrapped line starts like the first. */}
             <ul
-              className="mt-3 flex flex-wrap font-mono text-[11px] tracking-wide text-subtle"
+              className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 font-mono text-[11px] tracking-wide text-subtle"
               aria-label={t("features")}
             >
-              {simulation.highlights.map((highlight, i) => (
-                <li key={highlight} className="whitespace-nowrap">
-                  {i > 0 ? (
-                    <span className="mx-2 text-accent" aria-hidden>
-                      ·
-                    </span>
-                  ) : null}
+              {simulation.highlights.map((highlight) => (
+                <li key={highlight} className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="size-1 shrink-0 rounded-full bg-accent" aria-hidden />
                   {t(`${key}.${highlight}`)}
                 </li>
               ))}

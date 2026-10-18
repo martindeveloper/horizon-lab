@@ -17,6 +17,13 @@ import { CMB_AGE_YEARS, CMB_MLY, LAST_SCATTERING_Z, UNIVERSE_AGE_GYR } from "./c
 import type { ViewId } from "./view-ids";
 import { VIEWS } from "./views";
 
+/**
+ * Where the ladder stands: down the left wherever the screen is wide enough for a column
+ * beside the scene, a phone held sideways included (its sky is too short for a rail across
+ * it); along the bottom on narrow screens. Labels keep clear of it by the same rule.
+ */
+export const LADDER_SIDE_QUERY = "(min-width: 48rem)";
+
 /** The ladder's ends, camera distance in ly: inside Mercury's orbit to past the CMB. */
 export const LADDER_LY = { near: 0.35 / LIGHT_YEAR_AU, far: 3e11 } as const;
 

@@ -39,6 +39,13 @@
     }
   }
 
+  /* A phone held sideways: the gauge fits between the toolbar and the story dock. */
+  @media (height < 30rem) {
+    :where([data-simulation="black-hole"]) .radial-gauge {
+      height: min(26dvh, 6rem);
+    }
+  }
+
   :where([data-simulation="black-hole"]) .gauge-label {
     text-shadow:
       0 1px 10px rgba(8, 8, 11, 0.95),

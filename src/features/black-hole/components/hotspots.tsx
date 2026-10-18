@@ -216,7 +216,7 @@ export function Hotspots() {
           role="group"
           aria-label={t("gaugeLabel")}
           className={cn(
-            "absolute top-[calc(50%-5rem)] left-[max(1rem,env(safe-area-inset-left))] w-40 -translate-y-1/2 md:top-1/2 md:w-44",
+            "absolute top-[calc(50%-5rem)] left-[max(1rem,env(safe-area-inset-left))] w-40 -translate-y-1/2 md:top-1/2 md:w-44 short:top-3 short:translate-y-0",
             active && "not-md:invisible",
           )}
         >

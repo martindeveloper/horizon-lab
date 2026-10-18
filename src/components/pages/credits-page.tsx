@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import creditDocuments from "@/data/credits.generated.json";
 import type { Locale } from "@/i18n/routing";
 import { CREDITS, LICENCE_URLS, type Credit, type CreditGroup, type Licence } from "@/lib/credits";
+import { keysOf } from "@/lib/records";
+import { MAPS, mapFile, type BodyId } from "@horizon/toolkit/bodies";
 import { Surface, cn, kickerClass } from "@horizon/toolkit/ui";
 
 import { HorizonMark } from "../shell/brand";
@@ -15,8 +17,12 @@ const linkClass =
   "rounded-sm text-fg underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
 const licenceClass = "font-mono text-[0.68rem] tracking-[0.14em] whitespace-nowrap uppercase";
 
-/** Sources people look at one by one get cards; packages are a compact two-column list. */
-const CARD_GROUPS = new Set<CreditGroup["id"]>(["imagery", "data", "fonts"]);
+/** Where the orrery serves its measured maps (public/textures/orrery); the globes reuse them. */
+const MAP_BASE = "/textures/orrery";
+
+/** The worlds a map credit covers, in the order the toolkit lists them: one for most, four for OPAL. */
+const worldsOf = (item: Credit): BodyId[] =>
+  keysOf(MAPS).filter((id) => MAPS[id]?.url === item.url);
 
 type Translate = Awaited<ReturnType<typeof getTranslations<"credits">>>;
 
@@ -59,12 +65,28 @@ function LicenceTag({ t, licence }: { t: Translate; licence: Licence }) {
   );
 }
 
-function Card({ t, item }: { t: Translate; item: Credit }) {
+/** A map credit: the worlds it paints, turning on their own maps, then the source. */
+function WorldCard({ t, item }: { t: Translate; item: Credit }) {
+  const worlds = worldsOf(item);
   return (
     <li className="flex">
       <Surface className="flex w-full flex-col rounded-lg p-5">
-        <LicenceTag t={t} licence={item.licence} />
-        <h3 className="mt-2.5 leading-snug font-medium text-balance">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex -space-x-3" aria-hidden>
+            {worlds.map((id) => (
+              <span
+                key={id}
+                className="credit-globe"
+                style={{ backgroundImage: `url(${mapFile(MAP_BASE, id, "far")})` }}
+              />
+            ))}
+          </div>
+          <LicenceTag t={t} licence={item.licence} />
+        </div>
+        <p className={cn(kickerClass, "mt-4 text-accent")}>
+          {worlds.map((id) => t(`worlds.${id}`)).join(" · ")}
+        </p>
+        <h3 className="mt-1.5 leading-snug font-medium text-balance">
           <External href={item.url} label={t("newTab")}>
             {item.name}
           </External>
@@ -76,6 +98,40 @@ function Card({ t, item }: { t: Translate; item: Credit }) {
   );
 }
 
+/** The typefaces set in themselves. */
+const SPECIMENS: Record<string, ReactNode> = {
+  bodoni: <span className="font-headline text-6xl leading-none">Aa</span>,
+  plex: (
+    <span className="flex items-baseline gap-3 leading-none">
+      <span className="font-sans text-5xl">Aa</span>
+      <span className="font-mono text-4xl text-muted">01</span>
+    </span>
+  ),
+};
+
+function FontCard({ t, item }: { t: Translate; item: Credit }) {
+  return (
+    <li className="flex">
+      <Surface className="flex w-full flex-col rounded-lg p-5">
+        <div className="flex items-start justify-between gap-4">
+          <span className="text-fg" aria-hidden>
+            {SPECIMENS[item.id]}
+          </span>
+          <LicenceTag t={t} licence={item.licence} />
+        </div>
+        <h3 className="mt-5 leading-snug font-medium text-balance">
+          <External href={item.url} label={t("newTab")}>
+            {item.name}
+          </External>
+        </h3>
+        <p className="mt-2 leading-relaxed text-muted">{t(`items.${item.id}`)}</p>
+        <p className="mt-auto pt-4 text-[0.8125rem] leading-relaxed text-subtle">{item.by}</p>
+      </Surface>
+    </li>
+  );
+}
+
+/** A source in the ledger: its name and licence, then what it gave and who made it. */
 function Row({ t, item }: { t: Translate; item: Credit }) {
   return (
     <li className="border-b border-border py-3.5">
@@ -94,7 +150,68 @@ function Row({ t, item }: { t: Translate; item: Credit }) {
   );
 }
 
-/** Credits and licences for everything Horizon is built on: an index, cards, then packages. */
+/** A package: its name and licence on one line, a line on what it does under it. */
+function Tile({ t, item }: { t: Translate; item: Credit }) {
+  return (
+    <li className="min-w-0 border-b border-border py-3">
+      <p className="flex items-baseline justify-between gap-3">
+        <span className="min-w-0 font-medium">
+          <External href={item.url} label={t("newTab")}>
+            {item.name}
+          </External>
+        </span>
+        <LicenceTag t={t} licence={item.licence} />
+      </p>
+      <p className="mt-0.5 text-[0.8125rem] leading-snug text-subtle">
+        {t(`items.${item.id}`)} · {item.by}
+      </p>
+    </li>
+  );
+}
+
+/** How each group lays out: worlds and fonts as cards, data as a ledger, code as tiles. */
+function Items({ t, group }: { t: Translate; group: CreditGroup }) {
+  switch (group.id) {
+    case "imagery":
+      return (
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+          {group.items.map((item) => (
+            <WorldCard key={item.id} t={t} item={item} />
+          ))}
+        </ul>
+      );
+    case "fonts":
+      return (
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+          {group.items.map((item) => (
+            <FontCard key={item.id} t={t} item={item} />
+          ))}
+        </ul>
+      );
+    case "data":
+      return (
+        <ul className="mt-3 grid border-t border-border sm:grid-cols-2 sm:gap-x-10">
+          {group.items.map((item) => (
+            <Row key={item.id} t={t} item={item} />
+          ))}
+        </ul>
+      );
+    default:
+      return (
+        <ul className="mt-3 grid border-t border-border sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-3">
+          {group.items.map((item) => (
+            <Tile key={item.id} t={t} item={item} />
+          ))}
+        </ul>
+      );
+  }
+}
+
+/**
+ * Credits and licences for everything Horizon is built on: an index, then each group laid out
+ * as what it is (the worlds turning on their maps, the typefaces set in themselves, the data
+ * as a ledger, the code as tiles), the notes, and the full records.
+ */
 export async function CreditsPage({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "credits" });
   return (
@@ -138,45 +255,30 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
             </div>
           </header>
 
-          {CREDITS.map((group) => {
-            const cards = CARD_GROUPS.has(group.id);
-            return (
-              <section
-                key={group.id}
-                id={`credits-${group.id}`}
-                aria-labelledby={`credits-${group.id}-title`}
-                className={cn("mt-16 scroll-mt-24 text-[0.9375rem] sm:mt-20", grid)}
-              >
-                <div className="flex items-baseline justify-between gap-4 lg:block lg:pt-1 lg:text-right">
-                  <h2 id={`credits-${group.id}-title`} className={kickerClass}>
-                    {t(`groups.${group.id}.label`)}
-                  </h2>
-                  <p
-                    className="font-mono text-[0.75rem] text-subtle tabular-nums lg:mt-1.5"
-                    aria-hidden
-                  >
-                    {count(group.items.length)}
-                  </p>
-                </div>
-                <div className="mt-3 lg:mt-0">
-                  <p className="text-muted">{t(`groups.${group.id}.intro`)}</p>
-                  {cards ? (
-                    <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                      {group.items.map((item) => (
-                        <Card key={item.id} t={t} item={item} />
-                      ))}
-                    </ul>
-                  ) : (
-                    <ul className="mt-3 grid border-t border-border sm:grid-cols-2 sm:gap-x-10">
-                      {group.items.map((item) => (
-                        <Row key={item.id} t={t} item={item} />
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </section>
-            );
-          })}
+          {CREDITS.map((group) => (
+            <section
+              key={group.id}
+              id={`credits-${group.id}`}
+              aria-labelledby={`credits-${group.id}-title`}
+              className={cn("mt-16 scroll-mt-24 text-[0.9375rem] sm:mt-20", grid)}
+            >
+              <div className="flex items-baseline justify-between gap-4 lg:block lg:pt-1 lg:text-right">
+                <h2 id={`credits-${group.id}-title`} className={kickerClass}>
+                  {t(`groups.${group.id}.label`)}
+                </h2>
+                <p
+                  className="font-mono text-[0.75rem] text-subtle tabular-nums lg:mt-1.5"
+                  aria-hidden
+                >
+                  {count(group.items.length)}
+                </p>
+              </div>
+              <div className="mt-3 lg:mt-0">
+                <p className="text-muted">{t(`groups.${group.id}.intro`)}</p>
+                <Items t={t} group={group} />
+              </div>
+            </section>
+          ))}
 
           <section
             aria-labelledby="credits-notes"

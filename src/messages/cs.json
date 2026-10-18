@@ -251,6 +251,24 @@
       "si": "Definice SI tvořící základ jednotek a přesné rychlosti světla.",
       "helland": "Přizpůsobeno pro GLSL a normalizované RGB disku černé díry. Jde o přibližnou barvu pro zobrazení, nikoli kalibrované spektrum."
     },
+    "worlds": {
+      "sun": "Slunce",
+      "mercury": "Merkur",
+      "earth": "Země",
+      "moon": "Měsíc",
+      "mars": "Mars",
+      "jupiter": "Jupiter",
+      "saturn": "Saturn",
+      "uranus": "Uran",
+      "neptune": "Neptun",
+      "pluto": "Pluto",
+      "charon": "Charon",
+      "io": "Io",
+      "europa": "Europa",
+      "ganymede": "Ganymed",
+      "callisto": "Callisto",
+      "triton": "Triton"
+    },
     "licences": {
       "publicDomain": "Volné dílo",
       "cited": "Citované hodnoty"

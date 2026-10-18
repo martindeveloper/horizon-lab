@@ -84,7 +84,8 @@ export function OrreryOverlay() {
       {guideOpen ? null : (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">
-            <div className="flex items-center gap-3">
+            {/* The narrowest phones keep the view's name readable and take the tools a row lower. */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <ViewPicker />
               <Toolbar aria-label={t("hud.controls")} className="ml-auto shrink-0">
                 <OrreryTechnicalDetails />

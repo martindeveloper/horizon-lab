@@ -72,7 +72,12 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
     <article ref={root} className="pointer-events-auto min-w-0">
       <div className="flex items-center gap-2">
         <Kicker className="not-md:text-[11px]">
-          {kind ? `${kind === "catalog" ? t("kindCatalog") : t("kindTheory")}  ·  ` : null}
+          {/* Phones name the kind in the dock's own kicker above. */}
+          {kind ? (
+            <span className="not-md:hidden">
+              {`${kind === "catalog" ? t("kindCatalog") : t("kindTheory")}  ·  `}
+            </span>
+          ) : null}
           {story.kicker}
         </Kicker>
         {stories.length > 1 ? (
@@ -130,7 +135,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
           <p
             id={bodyId}
             className={cn(
-              "mt-1 text-sm leading-relaxed text-muted not-md:text-[13px] not-md:leading-normal",
+              "mt-1 text-sm leading-relaxed text-muted not-md:text-[13px] not-md:leading-normal short:hidden",
               !full && "line-clamp-2",
               open && !alwaysOpen && "max-h-[28dvh] overflow-y-auto overscroll-contain",
             )}
@@ -142,7 +147,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
       {alwaysOpen ? null : (
         <button
           type="button"
-          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-xs tracking-widest text-subtle uppercase transition-colors after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-xs tracking-widest text-subtle uppercase transition-colors after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden short:hidden"
           onClick={() => {
             setHeld(true);
             setOpen((v) => !v);

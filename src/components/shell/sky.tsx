@@ -32,9 +32,9 @@ const DEGREES_SHOWN = 90;
 const HOVER_RADIUS = 22;
 /** Scrolling one pixel moves the sky four seconds on: a 1,000 px page spans about an hour. */
 const LAPSE_MS_PER_PX = 4000;
-/** Over these the page's own content has the pointer, so the sky stays quiet. */
+/** Keep hover quiet over page content, except the hero copy floating over the sky. */
 const CONTENT =
-  "a, button, input, select, textarea, label, p, h1, h2, h3, h4, li, dt, dd, blockquote, figcaption, img, header, footer, nav, [role='dialog'], .glass, .glass-panel, .glass-pill, .glass-hud, .glass-popover, .simulation-tile";
+  "a, button, input, select, textarea, label, p:not(.intro-kicker), h1:not(.intro-title), h2, h3, h4, li, dt, dd, blockquote, figcaption, img, header, footer, nav, [role='dialog'], .glass, .glass-panel, .glass-pill, .glass-hud, .glass-popover, .simulation-tile";
 
 /**
  * The shared sky, and it is the real one: the brightest stars as they stand
