@@ -16,7 +16,7 @@ import { namedElements, planetElements, rewinds } from "@/space/solar-system/mod
 import { migrationProgress } from "@/space/solar-system/model/moment";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import { TRACERS, binOf, tracerElements } from "@/space/solar-system/model/tracers";
-import { NAMED, namedById, type PlanetId } from "@horizon/toolkit/bodies";
+import { namedById, type PlanetId } from "@horizon/toolkit/bodies";
 
 import { NAMED_NOTES, PLANET_NOTES, POPULATION_CARDS, SUN_CARD, TRACER_NOTES } from "./card-specs";
 import { formatYearsAgo } from "./format";
@@ -136,5 +136,3 @@ export function cardFor(
       return tracerCard(sel, m);
   }
 }
-
-export const NAMED_IDS = NAMED.map((body) => body.id);

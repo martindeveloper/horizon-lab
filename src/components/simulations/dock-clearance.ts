@@ -10,9 +10,14 @@ export type DockInTheWay = (dock: DOMRect, stage: DOMRect, rem: number) => boole
  * `--hud-clear` on the stage (`[data-simulation]`): rails, cards, labels and controls end
  * above it. Where `inTheWay` says the dock clears them, nothing is published and they keep
  * their full height. Rewritten whenever the dock or the stage resizes; pass a stable
- * `inTheWay`.
+ * `inTheWay`. Something else over the stage's foot, such as a caption, publishes under its
+ * own `property`.
  */
-export function useDockClearance(dock: RefObject<HTMLElement | null>, inTheWay?: DockInTheWay) {
+export function useDockClearance(
+  dock: RefObject<HTMLElement | null>,
+  inTheWay?: DockInTheWay,
+  property = "--hud-clear",
+) {
   useEffect(() => {
     const el = dock.current;
     const stage = el?.closest<HTMLElement>("[data-simulation]");
@@ -22,18 +27,15 @@ export function useDockClearance(dock: RefObject<HTMLElement | null>, inTheWay?:
       const box = stage.getBoundingClientRect();
       const rect = el.getBoundingClientRect();
       if (rect.height > 0 && (inTheWay?.(rect, box, rem) ?? true))
-        stage.style.setProperty(
-          "--hud-clear",
-          `${Math.ceil(box.bottom - rect.top + 0.75 * rem)}px`,
-        );
-      else stage.style.removeProperty("--hud-clear");
+        stage.style.setProperty(property, `${Math.ceil(box.bottom - rect.top + 0.75 * rem)}px`);
+      else stage.style.removeProperty(property);
     };
     const observer = new ResizeObserver(write);
     observer.observe(el);
     observer.observe(stage);
     return () => {
       observer.disconnect();
-      stage.style.removeProperty("--hud-clear");
+      stage.style.removeProperty(property);
     };
-  }, [dock, inTheWay]);
+  }, [dock, inTheWay, property]);
 }

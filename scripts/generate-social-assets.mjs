@@ -9,14 +9,16 @@ const artwork = async (slug) =>
 const blackHole = await artwork("black-hole");
 const orrery = await artwork("orrery");
 const deepField = await artwork("deep-field");
+/** The card's ink, which every artwork's sky must end in. */
+const INK = "#08080b";
 const escape = (text) =>
   text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
 const copy = {
   intro: "Explore the universe.",
   category: "INTERACTIVE SPACE SIMULATIONS",
   observatory: "Relativistic observatory",
-  orrery: "An honest orrery of the solar system, out to the Oort cloud",
-  deepField: "From the planets to the edge of the universe",
+  orrery: "In motion, from its birth to tonight",
+  deepField: "As far out as we can see",
 };
 const messages = JSON.parse(
   await readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
@@ -46,11 +48,13 @@ const cards = [
 for (const card of cards) {
   const feature = card.art !== null;
   const { title, subtitle, path } = card;
+  /* The artwork paints its own sky, darker at the rim than the card: here it ends in the
+     card's ink, and an elliptical mask dissolves its edges, so no square shows. */
   const art = feature
-    ? `<svg x="640" y="100" width="560" height="430" viewBox="0 0 1000 800" fill="none">${card.art.replace(/<svg[^>]*>|<\/svg>/g, "")}</svg>`
+    ? `<defs><radialGradient id="art-fade"><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient><mask id="art-edge" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="630"><rect x="600" y="40" width="640" height="550" fill="url(#art-fade)"/></mask></defs><g mask="url(#art-edge)"><svg x="640" y="100" width="560" height="430" viewBox="0 0 1000 800" fill="none">${card.art.replace(/<svg[^>]*>|<\/svg>/g, "").replaceAll("#050609", INK)}</svg></g>`
     : `<g fill="none" stroke="#e2c07a"><circle cx="940" cy="315" r="240" opacity=".08"/><circle cx="940" cy="315" r="180" opacity=".12"/><circle cx="940" cy="315" r="120" opacity=".22"/></g><path d="M875 315a65 65 0 0 1 130 0Z" fill="#e2c07a" opacity=".8"/><path d="M680 315h520" stroke="#e2c07a" opacity=".5"/>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-<rect width="1200" height="630" fill="#08080b"/>
+<rect width="1200" height="630" fill="${INK}"/>
 ${art}
 <circle cx="106" cy="108" r="24" fill="none" stroke="#9a9a96" stroke-width="1.5"/>
 <path d="M95 108a11 11 0 0 1 22 0Z" fill="#e2c07a"/><path d="M86 108h40" stroke="#e2c07a" stroke-width="1.5"/>

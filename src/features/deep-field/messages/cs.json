@@ -104,6 +104,17 @@
     "noSun": "Slunce ani Země ještě nevznikly",
     "cmb": "Nejstarší světlo, jaké vidíme, {age} let po velkém třesku"
   },
+  "methods": {
+    "radar": "Změřeno radarem a sledováním sond",
+    "orbits": "Z drah spočtených z naměřených poloh",
+    "comets": "Odvozeno z dlouhoperiodických komet",
+    "parallax": "Změřeno paralaxou: posunem, jak Země obíhá Slunce",
+    "galacticCentre": "Z paralaxy a hvězd obíhajících centrální černou díru",
+    "candles": "Z cefeid a rudých obrů známé svítivosti",
+    "flows": "Ze vzdáleností a pohybů galaxií (Cosmicflows)",
+    "redshift": "Z rudého posuvu: dnešní vzdálenost, delší než cesta světla",
+    "cosmology": "Z rudého posuvu a modelu rozpínání vesmíru: dnešní vzdálenost, delší než cesta světla"
+  },
   "badges": {
     "sketch": "Náčrt",
     "schematic": "Měřená vzdálenost · schematická dráha"

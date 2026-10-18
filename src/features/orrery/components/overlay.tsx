@@ -1,4 +1,4 @@
-import { BookOpen, List, Orbit } from "lucide-react";
+import { BookOpen, List, Orbit, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
@@ -22,6 +22,7 @@ import { SelectionCard } from "./selection-card";
 import { OrreryTechnicalDetails } from "./technical-details";
 import { TimeDock } from "./time-dock";
 import { EdgeChip, ViewPicker } from "./view-controls";
+import { ViewPanel } from "./view-panel";
 
 /** Escape ends the guide, else closes the panel, leaves a close-up or lets go, in that order. */
 const escapeSteps = (): EscapeStep[] => {
@@ -113,6 +114,17 @@ export function OrreryOverlay() {
                     <List className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
+                <Tooltip label={t("hud.view")}>
+                  <IconButton
+                    aria-label={t("hud.view")}
+                    aria-expanded={panel === "view"}
+                    aria-controls={panel === "view" ? "orrery-view" : undefined}
+                    active={panel === "view"}
+                    onClick={() => setPanel(panel === "view" ? "none" : "view")}
+                  >
+                    <SlidersHorizontal className="size-4 md:size-3.5" />
+                  </IconButton>
+                </Tooltip>
                 <Tooltip label={t("guide.title")}>
                   <IconButton
                     aria-label={t("guide.title")}
@@ -130,6 +142,7 @@ export function OrreryOverlay() {
           </header>
 
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}
+          {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}
           {panel === "reading" ? <ReadingPanel onClose={() => setPanel("none")} /> : null}
           {/* Remounts on entering or leaving a close-up, so the card starts folded or whole. */}
           {panel === "none" && selection ? (

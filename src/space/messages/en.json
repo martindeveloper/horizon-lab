@@ -48,14 +48,18 @@
     "objects": "Objects",
     "close": "Close",
     "scale": "{value} {unit} at the centre",
-    "display": "Display",
     "camera": "Camera",
     "rotateLeft": "Rotate left",
     "rotateRight": "Rotate right",
     "tiltUp": "Tilt up",
     "tiltDown": "Tilt down",
     "distanceUnit": "Distance unit: automatic, astronomical units, light-years or parsecs",
-    "bodies": "Sun and planets"
+    "bodies": "Sun and planets",
+    "view": "View",
+    "show": "Show",
+    "units": "Distances in",
+    "smallWorlds": "Dwarf planets and comets",
+    "belts": "Belts and clouds"
   },
   "badges": {
     "measured": "Measured",
@@ -99,6 +103,6 @@
     "kuiper": "Kuiper belt",
     "scattered": "Scattered disk",
     "oort": "Oort cloud",
-    "ejected": "Ejected"
+    "ejected": "Ejected bodies"
   }
 }

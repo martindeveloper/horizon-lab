@@ -13,6 +13,7 @@ import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
+import { METHOD_OF } from "../lib/model/views";
 import { useDeepField } from "../lib/store";
 
 const subscribe = (change: () => void) => {
@@ -73,10 +74,10 @@ export function DepthLadder() {
     go(step > 0 ? (ahead < 0 ? RUNGS.length - 1 : ahead) : Math.max(0, behind));
   };
   const at = (d: number) => `calc(7px + ${d} * (100% - 14px))`;
-  const valueText = t("hud.atDepth", {
+  const valueText = `${t("hud.atDepth", {
     view: t(`views.${view}`),
     distance: formatAu(t, { unit, locale }, lyAtDepth(depth) * LIGHT_YEAR_AU),
-  });
+  })}. ${t(`methods.${METHOD_OF[view]}`)}`;
 
   return (
     /* On wide screens it starts below the caption at its tallest (title + two clamped hint lines). */
@@ -154,7 +155,7 @@ export function DepthLadder() {
             />
             <span
               className={cn(
-                "deep-field-rung font-mono text-[10px] tracking-[0.14em] whitespace-nowrap uppercase transition-opacity",
+                "deep-field-rung relative font-mono text-[10px] tracking-[0.14em] whitespace-nowrap uppercase transition-opacity",
                 i === current
                   ? "text-space-fg opacity-100"
                   : "text-space-muted opacity-0 group-hover:opacity-100",
@@ -162,6 +163,12 @@ export function DepthLadder() {
               )}
             >
               {t(`views.${rung.id}`)}
+              {/* How that distance is known; phones read it in the sightline. */}
+              {wide && i === current ? (
+                <span className="absolute top-full left-0 mt-1 w-28 font-sans text-[11px] leading-snug tracking-normal whitespace-normal text-space-muted normal-case">
+                  {t(`methods.${METHOD_OF[rung.id]}`)}
+                </span>
+              ) : null}
             </span>
           </button>
         ))}

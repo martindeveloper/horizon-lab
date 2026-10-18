@@ -54,3 +54,36 @@ export function viewById(id: ViewId): View {
 
 /** A view's camera distance in the scene's unit, au. */
 export const worldDistance = (ly: number) => ly * LIGHT_YEAR_AU;
+
+/**
+ * How we know how far each view reaches: the method its distances rest on, near to far, from
+ * radar inside the solar system to redshift and the expanding-universe model at the edge
+ * (copy in `methods.<id>`).
+ */
+export type DistanceMethod =
+  | "radar"
+  | "orbits"
+  | "comets"
+  | "parallax"
+  | "galacticCentre"
+  | "candles"
+  | "flows"
+  | "redshift"
+  | "cosmology";
+
+export const METHOD_OF: Readonly<Record<ViewId, DistanceMethod>> = {
+  inner: "radar",
+  giants: "radar",
+  kuiper: "orbits",
+  scattered: "orbits",
+  oort: "comets",
+  stars: "parallax",
+  galaxy: "galacticCentre",
+  "local-group": "candles",
+  "local-sheet": "candles",
+  "virgo-cluster": "candles",
+  "virgo-supercluster": "flows",
+  laniakea: "flows",
+  "cosmic-web": "redshift",
+  "observable-universe": "cosmology",
+};

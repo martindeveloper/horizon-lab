@@ -81,7 +81,12 @@ export function createOrreryEngine({
       closeUp: () => closeUp.current,
     });
     const { pose } = rig;
-    const { place, hideAll, setBodies, flush, hits } = createLabels(kit, labelRoot, labels);
+    /* Names keep above the time dock where it publishes its height (phones), else 150 px. */
+    const stage = host.closest<HTMLElement>("[data-simulation]");
+    const dockClear = () => parseFloat(stage?.style.getPropertyValue("--hud-clear") ?? "") || 150;
+    const { place, hideAll, setBodies, flush, hits } = createLabels(kit, labelRoot, labels, {
+      insets: () => ({ top: 56, bottom: dockClear(), left: 4, right: 4 }),
+    });
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     const shownFor = (id: BodyId) => closeUp.shownFor(id);
 

@@ -78,9 +78,9 @@
     },
     "orrery": {
       "title": "Sluneční soustava",
-      "eyebrow": "Orrery · Planety, pásy a Oortův oblak",
+      "eyebrow": "Orrery · Sluneční soustava v pohybu",
       "category": "Dráhy a čas",
-      "description": "Dnešní polohy planet a názorný model odklízení zbylých těles z rané sluneční soustavy, až po Oortův oblak.",
+      "description": "Jak se sluneční soustava pohybuje a jak vznikla: planety tam, kde jsou dnes, a jak mladé obří planety změnily dráhy malých těles, až po Oortův oblak.",
       "open": "Otevřít model soustavy",
       "live": "Aktuální polohy planet",
       "timeline": "Časová osa 10 miliard let",
@@ -99,9 +99,9 @@
     },
     "deepField": {
       "title": "Hluboké pole",
-      "eyebrow": "Deep Field · Od Slunce až k okraji",
+      "eyebrow": "Deep Field · Tak daleko, jak dohlédneme",
       "category": "Vzdálenost a světlo",
-      "description": "Oddalte se od planet přes nejbližší hvězdy a Mléčnou dráhu až k reliktnímu záření. Čím dál se díváte, tím starší světlo vidíte.",
+      "description": "Jeden zoom od Slunce přes nejbližší hvězdy a galaxie až k nejstaršímu světlu, jaké můžeme vidět. Čím dál se díváte, tím starší světlo vidíte.",
       "open": "Otevřít Deep Field",
       "depth": "Od planet po 46 miliard světelných let, v jednom zoomu",
       "lookback": "Vzdálenost jako pohled do minulosti",

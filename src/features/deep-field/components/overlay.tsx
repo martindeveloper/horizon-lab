@@ -1,4 +1,4 @@
-import { List, Orbit } from "lucide-react";
+import { List, Orbit, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
@@ -21,6 +21,7 @@ import { ObjectsPanel } from "./objects-panel";
 import { SelectionCard } from "./selection-card";
 import { Sightline } from "./sightline";
 import { DeepFieldTechnicalDetails } from "./technical-details";
+import { ViewPanel } from "./view-panel";
 
 /** Escape ends the journey, else closes the panel, else lets go of the selection. */
 const escapeSteps = (): EscapeStep[] => {
@@ -112,6 +113,17 @@ export function DeepFieldOverlay() {
                     <List className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
+                <Tooltip label={t("hud.view")}>
+                  <IconButton
+                    aria-label={t("hud.view")}
+                    aria-expanded={panel === "view"}
+                    aria-controls={panel === "view" ? "deep-field-view" : undefined}
+                    active={panel === "view"}
+                    onClick={() => setPanel(panel === "view" ? "none" : "view")}
+                  >
+                    <SlidersHorizontal className="size-4 md:size-3.5" />
+                  </IconButton>
+                </Tooltip>
                 <SimulationImmersiveToggle />
               </Toolbar>
             </div>
@@ -128,6 +140,7 @@ export function DeepFieldOverlay() {
             />
           </div>
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}
+          {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}
           {panel === "none" && selection ? <SelectionCard /> : null}
         </>
       )}

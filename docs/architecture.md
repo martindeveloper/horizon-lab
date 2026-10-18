@@ -71,10 +71,11 @@ src/
     deep-field/
       index.ts                 Public client entry: DeepFieldApp
       manifest.ts, routing.ts, server.ts, technical.json
-      components/              Overlay, depth ladder, sightline, journey captions, objects
-                               rail, cards, canvas host
+      components/              Overlay, depth ladder, sightline, guide captions, the Objects
+                               and View panels, cards, canvas host
       lib/model/               Today's sky at every scale, without three.js scenes:
-        view-ids.ts, views.ts  The fourteen views, inner planets to the observable universe
+        view-ids.ts, views.ts  The fourteen views, inner planets to the observable universe,
+                               and how each one's distances are known (METHOD_OF)
         depth.ts               The ladder's log scale and the sightline (distance,
                                light-travel time, redshift, Earth when the light set out)
         tour.ts                The guided journey, planets to the first light: its shots
@@ -280,9 +281,11 @@ only its layers, its views and its store of its own:
   ignores the view the HUD writes during a frame, and reports the first frame.
 - **Panels:** `Rail` and `RailSection` for side panels, `SelectionSheet` for cards, both
   ending above the dock, which publishes its height as `--hud-clear` on the stage
-  (`useDockClearance`); `SwitchChip(s)`, `CameraPad`, `DistanceUnitControl`, `MapScale`
-  and `SolarBodyPicks` for their contents; `useSceneEscape` lets Escape undo one thing
-  at a time.
+  (`useDockClearance`). Each zoomable simulation keeps two panels apart: **Objects**
+  (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
+  is drawn: layers, switches, the distance unit and the `CameraPad`), built from
+  `SwitchChip(s)`, `DistanceUnitControl` and `MapScale`. `useSceneEscape` lets Escape undo
+  one thing at a time.
 
 **Shared worlds.** What more than one simulation draws lives in `src/space/`, below the
 features and above the toolkit: it may use app code (`@/lib/facts`, the sources) but never

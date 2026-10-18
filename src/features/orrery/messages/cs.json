@@ -57,7 +57,6 @@
     "driftYears": "1 s ≈ {value, plural, one {# rok} few {# roky} other {# let}}",
     "driftThousand": "1 s ≈ {value} tis. let",
     "driftPaused": "Pohyb zastaven",
-    "examples": "Malá tělesa a jejich skupiny",
     "legend": "Skrytí vrstvy nemění počet těles v přehledu.",
     "playRestart": "Přehrát od začátku",
     "closeUp": "Zblízka",

@@ -2,6 +2,8 @@
 /* `md` is the desktop layout: wide *and* tall enough. Landscape phones keep the
    touch layout (44px targets, bottom sheets). Use `not-md:` for its complement. */
 @custom-variant md (@media ((width >= 48rem) and (height >= 30rem)));
+/* Too short for the full HUD (a phone held sideways): docks and captions keep their essentials. */
+@custom-variant short (@media (height < 30rem));
 
 /* Shared tokens also support utilities compiled by individual simulations. */
 @theme static {

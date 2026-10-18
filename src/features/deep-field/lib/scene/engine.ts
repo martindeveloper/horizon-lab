@@ -77,12 +77,14 @@ export function createDeepFieldEngine({
     const wide = window.matchMedia(WIDE_LAYOUT_QUERY);
     /* The eyepiece publishes its height on the stage; labels and their taps keep above it. */
     const stage = host.closest<HTMLElement>("[data-simulation]");
-    const dockClear = () => parseFloat(stage?.style.getPropertyValue("--hud-clear") ?? "") || 96;
+    const clearOf = (property: string) =>
+      parseFloat(stage?.style.getPropertyValue(property) ?? "") || 0;
+    const dockClear = () => clearOf("--hud-clear") || 96;
 
     const rig = createCameraRig(camera, { state: () => store.getState(), reduceMotion });
     const { pose } = rig;
     const { place, flush, hits, hideAll, setBodies } = createLabels(kit, labelRoot, labels, {
-      insets: () => labelInsets(wide.matches, dockClear()),
+      insets: () => labelInsets(wide.matches, dockClear(), clearOf("--caption-clear")),
     });
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     /* Rulers from the selection (or the Sun) to the bodies, or the nearest stars, in view. */

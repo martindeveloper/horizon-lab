@@ -31,6 +31,8 @@ export type PlaceLabel = (
 
 /** Labels fainter than this do not take taps. */
 const READABLE = 0.3;
+/** Gap kept between two labels, CSS px; closer, the less important one steps aside. */
+const LABEL_GAP = 2;
 
 /** A drawn label as a tap target: `clear` when no globe covers any of its text. */
 export type LabelHit = LabelTarget & { clear: boolean };
@@ -74,6 +76,8 @@ export function createLabels(
   const targets = new Map<string, Target>();
   /* Each body's place in `bodies` and `bounds`. */
   const indexOf = new Map<string, number>();
+  /* Labels drawn last frame, which keep their place when another one comes to overlap them. */
+  let kept = new Set<string>();
   const hide = (key: string, el: HTMLSpanElement) => {
     const target = targets.get(key);
     if (target) target.shown = false;
@@ -197,6 +201,45 @@ export function createLabels(
     pending.set(args[0], args);
   };
 
+  /**
+   * Strong names first, then names, then distances; a label already shown before a new one,
+   * and a faint one (fading in or out) after every readable one.
+   */
+  const rank = (key: string, el: HTMLSpanElement, rect: Target) =>
+    (el.dataset.weight ? 0 : el.dataset.kind ? 4 : 2) +
+    (kept.has(key) ? 0 : 1) +
+    (rect.alpha < READABLE ? 6 : 0);
+  /**
+   * Overlapping labels cannot both be read, least of all on a phone: each label is drawn only
+   * where no more important one already sits, so names win over rulers and nothing flickers
+   * as two labels cross.
+   */
+  const declutter = () => {
+    const shown: { key: string; el: HTMLSpanElement; rect: Target; rank: number }[] = [];
+    for (const [key, rect] of targets) {
+      const el = spans.get(key);
+      if (rect.shown && el) shown.push({ key, el, rect, rank: rank(key, el, rect) });
+    }
+    shown.sort((a, b) => a.rank - b.rank);
+    const placed: Target[] = [];
+    const next = new Set<string>();
+    for (const { key, el, rect } of shown) {
+      const blocked = placed.some(
+        (o) =>
+          rect.left < o.right + LABEL_GAP &&
+          rect.right > o.left - LABEL_GAP &&
+          rect.top < o.bottom + LABEL_GAP &&
+          rect.bottom > o.top - LABEL_GAP,
+      );
+      if (blocked) hide(key, el);
+      else {
+        placed.push(rect);
+        next.add(key);
+      }
+    }
+    kept = next;
+  };
+
   return {
     place,
     setBodies: (next: readonly LabelBody[]) => {
@@ -213,6 +256,7 @@ export function createLabels(
       );
       for (const args of pending.values()) draw(...args);
       pending.clear();
+      declutter();
     },
     /** Labels readable enough to tap, in viewport px, of the keys `accept` takes. */
     hits: (accept: (key: string) => boolean): LabelHit[] => {

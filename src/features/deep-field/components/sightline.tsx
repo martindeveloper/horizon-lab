@@ -16,6 +16,7 @@ import { anchorById, type AnchorId } from "../lib/model/cosmos";
 import { CMB_LY, sightline, thenOf } from "../lib/model/depth";
 import { NEIGHBOURS, neighbourDistanceLy } from "../lib/model/neighbours";
 import { SUN_GALACTIC_RADIUS_LY } from "../lib/model/parameters";
+import { METHOD_OF } from "../lib/model/views";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
 import { formatAgo, formatThen } from "./format";
 
@@ -100,7 +101,7 @@ export function Sightline() {
   return (
     <footer
       className={cn(
-        "hud-bottom pad-hud-bottom pointer-events-none absolute inset-x-0 bottom-0 z-30 pt-12",
+        "hud-bottom pad-hud-bottom pointer-events-none absolute inset-x-0 bottom-0 z-30 pt-12 short:pt-6",
         aside && "not-md:hidden",
       )}
     >
@@ -113,17 +114,21 @@ export function Sightline() {
           {where}
         </p>
         {/* Here on the left, there on the right, and light on its way between. */}
-        <div aria-hidden className="relative mt-2.5 h-2 w-full max-w-sm">
+        <div aria-hidden className="relative mt-2.5 h-2 w-full max-w-sm short:hidden">
           <span className="absolute inset-x-1 top-1/2 h-px bg-linear-to-r from-space-fg/40 via-space-fg/15 to-solar/70" />
           <span className="absolute top-1/2 left-0 size-1.5 -translate-y-1/2 rounded-full bg-space-fg/80" />
           <span className="absolute top-1/2 right-0 size-2 -translate-y-1/2 rounded-full border border-solar bg-space shadow-[0_0_10px_rgb(var(--solar)/0.6)]" />
           <span className="deep-field-photon absolute top-1/2 size-1 -translate-y-1/2 rounded-full bg-solar" />
         </div>
-        <p className="mt-2 font-display text-base font-medium tracking-tight text-space-fg tabular-nums md:text-lg">
+        <p className="mt-2 font-display text-base font-medium tracking-tight text-space-fg tabular-nums md:text-lg short:mt-0.5 short:text-sm">
           {t("hud.lightLeftAgo", { ago: formatAgo(t, f, line.years) })}
         </p>
-        <p className="mt-0.5 max-w-full truncate text-xs text-space-muted">
+        <p className="mt-0.5 max-w-full truncate text-xs text-space-muted short:hidden">
           {formatThen(t, f, thenOf(line, now))}
+        </p>
+        {/* How that distance is known; wide screens read it beside the ladder's rung. */}
+        <p className="mt-0.5 max-w-full truncate text-[11px] text-space-muted/80 md:hidden short:hidden">
+          {t(`methods.${METHOD_OF[view]}`)}
         </p>
       </section>
     </footer>

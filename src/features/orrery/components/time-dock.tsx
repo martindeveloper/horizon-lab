@@ -114,16 +114,17 @@ export function TimeDock() {
             {formatYearsAgo(t, f, yearsAgo)}
           </p>
           {/* Phones wrap into reserved lines, so scrubbing never makes the dock jump. */}
-          <p className="text-xs text-muted tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate">
+          <p className="text-xs text-muted tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate short:min-h-0 short:truncate">
             {subline}
           </p>
         </div>
       </div>
-      <p className="mt-2 text-xs text-pretty text-muted not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5">
+      {/* A phone held sideways keeps the clock and the track; the scene needs the height. */}
+      <p className="mt-2 text-xs text-pretty text-muted not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5 short:hidden">
         {t(`notes.${noteOf(yearsAgo)}`, proseArgs(PROSE_FIGURES, locale))}
       </p>
       <Timeline yearsAgo={yearsAgo} />
-      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-2.5 md:mt-1 md:pt-3">
+      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-2.5 md:mt-1 md:pt-3 short:hidden">
         <div className="flex min-w-0 items-center gap-4 not-md:flex-1">
           <MapScale namespace="orrery" value={scaleValue} unit={scaleUnit} px={scalePx} />
           <DistanceUnitControl

@@ -25,13 +25,13 @@ export const GALAXY_NEAR = 1_500;
 
 /**
  * Where labels may sit around the HUD, CSS px: below the header, above the dock (`clear`, its
- * height as the eyepiece publishes it) and clear of the depth ladder, down the left on wide
- * screens and along the bottom on phones (as depth-ladder.tsx lays it out).
+ * height as the sightline publishes it) and clear of the depth ladder, down the left on wide
+ * screens and along the bottom on phones (as depth-ladder.tsx lays it out). While the guide
+ * speaks, above its caption too (`caption`, 0 without one).
  */
-export function labelInsets(wide: boolean, clear: number): LabelInsets {
-  return wide
-    ? { top: 56, bottom: clear, left: 168, right: 4 }
-    : { top: 56, bottom: clear + 72, left: 4, right: 4 };
+export function labelInsets(wide: boolean, clear: number, caption = 0): LabelInsets {
+  const bottom = Math.max(wide ? clear : clear + 72, caption);
+  return wide ? { top: 56, bottom, left: 168, right: 4 } : { top: 56, bottom, left: 4, right: 4 };
 }
 
 /** What every layer is built with: the host's basics, the looks and the level of detail. */

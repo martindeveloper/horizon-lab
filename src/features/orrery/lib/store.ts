@@ -15,7 +15,7 @@ import { DEFAULT_VIEW } from "./model/views";
 /** The solar system scene's switches, and rulers from the selection to the other bodies. */
 export type Show = SolarShow & { distances: boolean };
 
-export type Panel = "none" | "objects" | "reading";
+export type Panel = "none" | "objects" | "view" | "reading";
 
 export const DEFAULT_SHOW: Show = {
   disk: true,

@@ -32,7 +32,7 @@ export function GuideCard() {
   return (
     <div className="pad-hud-bottom pointer-events-none absolute inset-x-0 bottom-0 z-[60]">
       <section
-        className="glass-panel anim-rise pointer-events-auto mx-auto flex max-w-md flex-col gap-2.5 rounded-lg p-3.5 md:gap-3 md:p-4"
+        className="glass-panel anim-rise pointer-events-auto mx-auto flex max-w-md flex-col gap-2.5 rounded-lg p-3.5 md:gap-3 md:p-4 short:mx-0 short:max-w-xs short:gap-2 short:p-3"
         aria-label={t("tour.label")}
       >
         <PanelHeader

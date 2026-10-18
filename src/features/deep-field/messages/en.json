@@ -104,6 +104,17 @@
     "noSun": "Before the Sun and Earth formed",
     "cmb": "The oldest light we can see, {age} years after the Big Bang"
   },
+  "methods": {
+    "radar": "Measured by radar and spacecraft tracking",
+    "orbits": "From orbits fitted to tracked positions",
+    "comets": "Inferred from long-period comets",
+    "parallax": "Measured by parallax: the shift as Earth circles the Sun",
+    "galacticCentre": "From parallax and stars orbiting the central black hole",
+    "candles": "From Cepheids and red giants of known brightness",
+    "flows": "From galaxy distances and motions (Cosmicflows)",
+    "redshift": "From redshift: today's distance, longer than the light's path",
+    "cosmology": "From redshift and the expanding-universe model: today's distance, longer than the light's path"
+  },
   "badges": {
     "sketch": "Sketch",
     "schematic": "Measured distance · schematic path"

@@ -58,7 +58,7 @@ const realmOfSelection = (sel: Selection): Realm =>
 export const dropsSelection = (sel: Selection, realm: Realm, flyingTo: Realm | null) =>
   realmOfSelection(sel) !== realm && realmOfSelection(sel) !== flyingTo;
 
-export type Panel = "none" | "objects";
+export type Panel = "none" | "objects" | "view";
 
 export const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false };
 

@@ -11,6 +11,7 @@ import {
 import { anchorById, anchorToday } from "../src/features/deep-field/lib/model/cosmos.ts";
 import { VIEWS, viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { createCameraRig } from "../src/features/deep-field/lib/scene/camera-rig.ts";
+import { labelInsets } from "../src/features/deep-field/lib/scene/kit.ts";
 import {
   COSMIC_HANDOFF,
   GALAXY_FRAME,
@@ -180,4 +181,11 @@ test("the cosmic web view keeps its landmarks apart and in frame, phone and desk
         assert.ok(gap > 60, `${ids[i]} and ${ids[j]} ${gap.toFixed(0)} px apart at ${width}`);
       }
   }
+});
+
+test("names keep above the sightline, the phone's ladder and the guide's caption", () => {
+  assert.equal(labelInsets(true, 120).bottom, 120, "wide: the ladder is down the side");
+  assert.equal(labelInsets(false, 120).bottom, 192, "phones: the ladder sits on the sightline");
+  assert.equal(labelInsets(false, 120, 340).bottom, 340, "a caption above both wins");
+  assert.equal(labelInsets(true, 120, 60).bottom, 120, "a caption below the dock changes nothing");
 });

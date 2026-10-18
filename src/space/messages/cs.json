@@ -48,14 +48,18 @@
     "objects": "Objekty",
     "close": "Zavřít",
     "scale": "{value} {unit} ve středu pohledu",
-    "display": "Zobrazení",
     "camera": "Otáčení pohledu",
     "rotateLeft": "Otočit doleva",
     "rotateRight": "Otočit doprava",
     "tiltUp": "Naklonit nahoru",
     "tiltDown": "Naklonit dolů",
     "distanceUnit": "Jednotka vzdálenosti: automaticky, astronomické jednotky, světelné roky nebo parseky",
-    "bodies": "Slunce a planety"
+    "bodies": "Slunce a planety",
+    "view": "Zobrazení",
+    "show": "Zobrazit",
+    "units": "Vzdálenosti v",
+    "smallWorlds": "Trpasličí planety a komety",
+    "belts": "Pásy a oblaky"
   },
   "badges": {
     "measured": "Z měření",

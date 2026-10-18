@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
 <rect width="1200" height="630" fill="#08080b"/>
-<svg x="640" y="100" width="560" height="430" viewBox="0 0 1000 800" fill="none">
+<defs><radialGradient id="art-fade"><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient><mask id="art-edge" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="630"><rect x="600" y="40" width="640" height="550" fill="url(#art-fade)"/></mask></defs><g mask="url(#art-edge)"><svg x="640" y="100" width="560" height="430" viewBox="0 0 1000 800" fill="none">
 <defs>
- <radialGradient id="sky" cx=".5" cy=".7" r=".8"><stop stop-color="#15130f"/><stop offset=".6" stop-color="#0b0c10"/><stop offset="1" stop-color="#050609"/></radialGradient>
+ <radialGradient id="sky" cx=".5" cy=".7" r=".8"><stop stop-color="#15130f"/><stop offset=".6" stop-color="#0b0c10"/><stop offset="1" stop-color="#08080b"/></radialGradient>
  <radialGradient id="sun"><stop stop-color="#fff4dc"/><stop offset=".35" stop-color="#f1cf8a"/><stop offset=".7" stop-color="#b8863b" stop-opacity=".35"/><stop offset="1" stop-color="#b8863b" stop-opacity="0"/></radialGradient>
  <radialGradient id="band" cx=".5" cy="1" r=".6"><stop stop-color="#e7c48a" stop-opacity=".18"/><stop offset="1" stop-color="#e7c48a" stop-opacity="0"/></radialGradient>
  <clipPath id="above"><path d="M0 0h1000v560H0z"/></clipPath>
@@ -23,12 +23,12 @@
 </g>
 <path d="M60 560h880" stroke="#e2c07a" stroke-width="1.4" opacity=".7"/>
 
-</svg>
+</svg></g>
 <circle cx="106" cy="108" r="24" fill="none" stroke="#9a9a96" stroke-width="1.5"/>
 <path d="M95 108a11 11 0 0 1 22 0Z" fill="#e2c07a"/><path d="M86 108h40" stroke="#e2c07a" stroke-width="1.5"/>
 <text x="148" y="119" fill="#ecece8" font-family="Georgia, serif" font-size="34">Horizon</text>
-<text x="82" y="308" fill="#ecece8" font-family="Georgia, serif" font-size="72" letter-spacing="-2">Deep field</text>
-<text x="86" y="366" fill="#b2b2ae" font-family="Arial, sans-serif" font-size="26">From the planets to the edge of the universe</text>
+<text x="82" y="308" fill="#ecece8" font-family="Georgia, serif" font-size="72" letter-spacing="-2">Deep Field</text>
+<text x="86" y="366" fill="#b2b2ae" font-family="Arial, sans-serif" font-size="26">As far out as we can see</text>
 <path d="M86 466h430" stroke="#ecece8" stroke-opacity=".15"/>
 <text x="86" y="508" fill="#9a9a96" font-family="Arial, sans-serif" font-size="14" letter-spacing="2">INTERACTIVE SPACE SIMULATIONS</text>
 </svg>
