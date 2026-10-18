@@ -53,11 +53,13 @@ export function TimeDock() {
               });
   const offset =
     driftYears < 1
-      ? t("time.offsetDays", { value: Math.round(driftYears * 365.25) })
-      : driftYears < 1000
+      ? t("time.offsetDays", { value: Math.max(1, Math.round(driftYears * 365.25)) })
+      : Math.round(driftYears) < 1000
         ? t("time.offsetYears", { value: Math.round(driftYears) })
         : t("time.offsetThousand", {
-            value: f.number(driftYears / 1000, { maximumFractionDigits: 1 }),
+            value: f.number(Math.max(1, Math.round(driftYears / 1000)), {
+              maximumFractionDigits: 0,
+            }),
           });
   const subline =
     yearsAgo > SUN_BIRTH
@@ -66,7 +68,12 @@ export function TimeDock() {
         ? drift && driftYears > 0.002 && viewRealm === "solar"
           ? t("time.clockDrift", { offset, rate: driftLabel })
           : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
-        : t("time.laps", { laps: f.number(galacticLaps(yearsAgo), { maximumFractionDigits: 1 }) });
+        : t("time.laps", {
+            laps: f.number(galacticLaps(yearsAgo), {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }),
+          });
   const playLabel = playing ? t("hud.pause") : atEnd ? t("hud.playRestart") : t("hud.play");
   return (
     <Dock ref={surface} footerClassName={cn(aside && "not-md:hidden")} className="flex flex-col">
@@ -84,11 +91,11 @@ export function TimeDock() {
           </Tooltip>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-sm font-medium tracking-tight text-fg md:text-base">
+          <p className="truncate font-display text-sm font-medium tracking-tight text-fg tabular-nums md:text-base">
             {formatYearsAgo(t, f, yearsAgo)}
           </p>
           {/* Phones wrap into reserved lines, so scrubbing never makes the dock jump. */}
-          <p className="text-xs text-muted not-md:line-clamp-2 not-md:min-h-8 md:truncate">
+          <p className="text-xs text-muted tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate">
             {subline}
           </p>
         </div>

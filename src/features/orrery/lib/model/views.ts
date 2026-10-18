@@ -24,6 +24,28 @@ export function viewById(id: ViewId) {
   return VIEWS.find((v) => v.id === id) ?? VIEWS[1]!;
 }
 
+/** Nearest framed view for a camera distance, measured in log space across scales. */
+export function viewForDistance(camDist: number, realm: Realm): ViewId {
+  if (realm === "galaxy") return "galaxy";
+  const d = Math.max(1e-6, camDist);
+  let best: ViewId = DEFAULT_VIEW;
+  let bestGap = Infinity;
+  for (const v of VIEWS) {
+    if (v.realm !== "solar") continue;
+    const gap = Math.abs(Math.log(d / v.dist));
+    if (gap < bestGap) {
+      bestGap = gap;
+      best = v.id;
+    }
+  }
+  return best;
+}
+
+/** True while the camera is still framed at the preset's scale rather than zoomed elsewhere. */
+export function atViewDistance(camDist: number, presetDist: number) {
+  return Math.abs(Math.log(Math.max(1e-6, camDist) / presetDist)) < 0.25;
+}
+
 /** Along-orbit speed-up, in model years per real second, by camera distance. */
 export function driftYearsPerSecond(camDist: number, realm: Realm) {
   if (realm === "galaxy") return 0;

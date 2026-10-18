@@ -18,6 +18,7 @@ export function createSunLayer(
 ) {
   const gasDisk = new Mesh(scope.own(new CircleGeometry(GAS_DISK_RADIUS_AU, 72)), looks.gasDisk);
   gasDisk.rotation.x = -Math.PI / 2;
+  gasDisk.renderOrder = -1;
   parent.add(gasDisk);
 
   /* The snow line: beyond it water ice condenses beside rock and metal. */

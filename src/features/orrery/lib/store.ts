@@ -10,7 +10,7 @@ import type { NeighbourId } from "./model/neighbours";
 import { OLDEST, isPresentEra } from "./model/timeline";
 import { TOUR } from "./model/tour";
 import { type Bin } from "./model/tracers";
-import { DEFAULT_VIEW, type Realm, type ViewId } from "./model/views";
+import { DEFAULT_VIEW, viewById, type Realm, type ViewId } from "./model/views";
 
 export type Show = {
   disk: boolean;
@@ -119,6 +119,15 @@ export function canCloseUp(
   );
 }
 
+/** A close-up that only deep time rules out: the card shows it disabled, with why. */
+export function closeUpAwaitsPresent(
+  s: Pick<OrreryStore, "selection" | "viewRealm" | "guideOpen" | "yearsAgo">,
+) {
+  return (
+    hasSurface(s.selection) && s.viewRealm === "solar" && !s.guideOpen && !isPresentEra(s.yearsAgo)
+  );
+}
+
 function sameSelection(a: Selection | null, b: Selection | null) {
   return !!a && !!b && JSON.stringify(a) === JSON.stringify(b);
 }
@@ -174,11 +183,22 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
       yearsAgo: 4.5e9,
       playing: true,
       view: "giants",
+      viewDist: viewById("giants").dist,
+      viewRealm: "solar",
       flight: s.flight + 1,
       panel: "none",
       ...closeUpState(false),
     })),
-  setView: (view) => set((s) => ({ view, flight: s.flight + 1, ...closeUpState(false) })),
+  setView: (view) => {
+    const v = viewById(view);
+    set((s) => ({
+      view,
+      viewDist: v.dist,
+      viewRealm: v.realm,
+      flight: s.flight + 1,
+      ...closeUpState(false),
+    }));
+  },
   rotate: (turn) => set({ turn: { ...turn } }),
   /* Picking another body (or nothing) ends a close-up; the same body keeps it. */
   select: (selection) =>
@@ -217,9 +237,12 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     }
     /* Each step starts from the default layers; Motion keeps the visitor's choice. */
     const drift = (showBeforeGuide ?? get().show).drift;
+    const v = viewById(step.view);
     set({
       guideStep: index,
       view: step.view,
+      viewDist: v.dist,
+      viewRealm: v.realm,
       yearsAgo: step.yearsAgo,
       playing: Boolean(step.playing) && !prefersReducedMotion(),
       show: { ...DEFAULT_SHOW, drift, ...step.show },

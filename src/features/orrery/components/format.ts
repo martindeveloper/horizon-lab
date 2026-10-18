@@ -22,7 +22,8 @@ export function formatAu(t: Translate, d: DistanceSettings, au: number, withLigh
 }
 
 export function formatYearsAgo(t: Translate, f: Format, years: number) {
-  const n = (v: number, digits: number) => f.number(v, { maximumFractionDigits: digits });
+  const n = (v: number, digits: number) =>
+    f.number(v, { minimumFractionDigits: digits, maximumFractionDigits: digits });
   if (years <= 5e4) return t("time.today");
   if (years < 1e6) return t("time.thousand", { value: n(years / 1e3, 0) });
   if (years < 1e9) return t("time.million", { value: n(years / 1e6, years / 1e6 < 10 ? 1 : 0) });

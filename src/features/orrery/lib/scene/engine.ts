@@ -345,6 +345,7 @@ export function createOrreryEngine(
       distance: () => pose.distance,
     });
 
+    let inTick = false;
     const unsubscribe = store.subscribe((s) => {
       activity.setEnabled(s.solarActivity);
       if (s.turn !== lastTurn) {
@@ -356,7 +357,9 @@ export function createOrreryEngine(
         }
       }
       if (s.guideOpen && closeUp.current) closeUp.end(false);
-      if (s.flight !== lastFlight || s.view !== lastView) {
+      if (inTick) {
+        lastView = s.view;
+      } else if (s.flight !== lastFlight || s.view !== lastView) {
         lastFlight = s.flight;
         lastView = s.view;
         const view = viewById(s.view);
@@ -380,7 +383,7 @@ export function createOrreryEngine(
         if (s.closeUp && hasSurface(s.selection)) closeUp.start(s.selection);
         else if (!s.closeUp) closeUp.leave();
       }
-      engine.invalidate();
+      if (!inTick) engine.invalidate();
     });
     scope.defer(unsubscribe);
     activity.setEnabled(store.getState().solarActivity);
@@ -412,68 +415,74 @@ export function createOrreryEngine(
     };
 
     const tick = (dt: number, invalidated: boolean) => {
-      const state = store.getState();
-      const show = state.show;
-      const now = new Date();
+      inTick = true;
+      try {
+        const state = store.getState();
+        const show = state.show;
+        const now = new Date();
 
-      guide.stepCamera(state, dt);
-      rig.stepFlight(dt);
-      rig.home();
-      closeUp.step(dt);
-      rig.applyPose();
-      const dist = pose.distance;
+        guide.stepCamera(state, dt);
+        rig.stepFlight(dt);
+        rig.home();
+        closeUp.step(dt);
+        rig.applyPose();
+        const dist = pose.distance;
 
-      const yearsAgo = advanceClock(state, dt);
-      /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. */
-      if (show.drift && rig.realm === "solar" && !closeUp.current)
-        driftYears += dt * driftYearsPerSecond(dist, "solar");
+        const yearsAgo = advanceClock(state, dt);
+        /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. */
+        if (show.drift && rig.realm === "solar" && !closeUp.current)
+          driftYears += dt * driftYearsPerSecond(dist, "solar");
 
-      const frame: Frame = {
-        dt,
-        now,
-        show,
-        sel: state.selection,
-        yearsAgo,
-        playing: state.playing,
-        mig: migrationProgress(yearsAgo),
-        driftYears,
-        dist,
-        present: isPresentEra(yearsAgo),
-      };
-      guide.stepSketch(state, frame);
-      const solarRealm = rig.realm === "solar";
-      const solarOn = solarRealm && sunExists(yearsAgo);
-      solar.visible = solarOn;
-      sky.update(frame, solarRealm);
+        const frame: Frame = {
+          dt,
+          now,
+          show,
+          sel: state.selection,
+          yearsAgo,
+          playing: state.playing,
+          mig: migrationProgress(yearsAgo),
+          driftYears,
+          dist,
+          present: isPresentEra(yearsAgo),
+        };
+        guide.stepSketch(state, frame);
+        const solarRealm = rig.realm === "solar";
+        const solarOn = solarRealm && sunExists(yearsAgo);
+        solar.visible = solarOn;
+        sky.update(frame, solarRealm);
 
-      if (solarOn) {
-        sun.update(frame);
-        planets.update(frame);
-        moons.update(frame);
-        populations.update(frame);
-        neighbours.update(frame, pose.azimuth);
-        const at = focus.update(frame, closeUp.current !== null);
-        if (show.distances) rulers.drawFrom(frame.sel, at, dist);
-      } else hideAll(SOLAR_LABELS);
-      // Off has no effect object, update callback, scene node or GPU resources.
-      activity.current?.update(
-        dt,
-        solarActivityVisible(state, closeUp.current, solarOn),
-        !state.solarActivityPaused && !reduceMotion.matches,
-      );
-      rulers.finish();
-      galaxy.update(frame, rig.realm === "galaxy");
-      flush();
+        if (solarOn) {
+          sun.update(frame);
+          planets.update(frame);
+          moons.update(frame);
+          populations.update(frame);
+          neighbours.update(frame, pose.azimuth);
+          const at = focus.update(frame, closeUp.current !== null);
+          if (show.distances) rulers.drawFrom(frame.sel, at, dist);
+        } else hideAll(SOLAR_LABELS);
+        // Off has no effect object, update callback, scene node or GPU resources.
+        activity.current?.update(
+          dt,
+          solarActivityVisible(state, closeUp.current, solarOn),
+          !state.solarActivityPaused && !reduceMotion.matches,
+        );
+        rulers.finish();
+        galaxy.update(frame, rig.realm === "galaxy");
+        flush();
 
-      hud.update(dt, invalidated || engine.dirty, {
-        dist,
-        realm: rig.realm,
-        drift: show.drift && !closeUp.current,
-        driftYears,
-      });
-      closeUp.render(renderer, scene);
-      if (!store.getState().ready) store.getState().setReady(true);
-      maps.request();
+        hud.update(dt, invalidated || engine.dirty, {
+          dist,
+          realm: rig.realm,
+          drift: show.drift && !closeUp.current,
+          driftYears,
+          syncView: !rig.flying && !closeUp.current && !state.guideOpen,
+        });
+        closeUp.render(renderer, scene);
+        if (!store.getState().ready) store.getState().setReady(true);
+        maps.request();
+      } finally {
+        inTick = false;
+      }
     };
 
     engine.start({

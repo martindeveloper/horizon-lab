@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { Chip, ListItem, Picker, cn } from "@horizon/toolkit/ui";
 
-import { VIEWS } from "../lib/model/views";
+import { VIEWS, atViewDistance } from "../lib/model/views";
 import { useOrrery, type Show } from "../lib/store";
 
 export const DISPLAY: (keyof Show)[] = ["elliptical", "trueSize", "drift", "names", "distances"];
@@ -12,6 +12,8 @@ export const EXTRA: (keyof Show)[] = ["plane", "halo"];
 export function ViewPicker() {
   const t = useTranslations("orrery");
   const view = useOrrery((s) => s.view);
+  const viewDist = useOrrery((s) => s.viewDist);
+  const closeUp = useOrrery((s) => s.closeUp);
   const setView = useOrrery((s) => s.setView);
   const [open, setOpen] = useState(false);
   return (
@@ -26,7 +28,7 @@ export function ViewPicker() {
         {VIEWS.map((v) => (
           <ListItem
             key={v.id}
-            selected={view === v.id}
+            selected={!closeUp && view === v.id && atViewDistance(viewDist, v.dist)}
             onClick={() => {
               setView(v.id);
               setOpen(false);

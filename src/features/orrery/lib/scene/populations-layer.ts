@@ -35,7 +35,7 @@ export function createPopulationsLayer(
   { scope, looks, tight, dpr, pxWorld }: SceneKit,
   parent: Object3D,
 ) {
-  const rock = scope.own(new SphereGeometry(1, 12, 9));
+  const rock = scope.own(new SphereGeometry(1, tight ? 16 : 24, tight ? 12 : 16));
   const seeds = new Float32Array(TRACERS.length);
   for (let i = 0; i < seeds.length; i += 1) seeds[i] = (i * 0.618034) % 1;
   rock.setAttribute("seed", new InstancedBufferAttribute(seeds, 1));
@@ -65,6 +65,7 @@ export function createPopulationsLayer(
 
   const diskRing = new Mesh(scope.own(new RingGeometry(16, 34, 64)), looks.disk);
   diskRing.rotation.x = Math.PI / 2;
+  diskRing.renderOrder = -1;
   const shellInner = new Mesh(scope.own(new SphereGeometry(5_000, 40, 24)), looks.shellInner);
   const shellOuter = new Mesh(scope.own(new SphereGeometry(100_000, 40, 24)), looks.shellOuter);
   parent.add(diskRing, shellInner, shellOuter);

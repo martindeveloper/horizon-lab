@@ -3,6 +3,7 @@ import {
   BackSide,
   CanvasTexture,
   Color,
+  CustomBlending,
   DataTexture,
   DoubleSide,
   LinearFilter,
@@ -10,10 +11,12 @@ import {
   LineBasicMaterial,
   MeshBasicMaterial,
   NormalBlending,
+  OneMinusSrcAlphaFactor,
   PointsMaterial,
   RepeatWrapping,
   ShaderMaterial,
   SpriteMaterial,
+  SrcAlphaFactor,
   SRGBColorSpace,
   Vector2,
   Vector3,
@@ -38,6 +41,8 @@ import { surfaceJob, surfaceMap, type SurfaceJob } from "@horizon/toolkit/bodies
 import { clamp01, valueNoise2 } from "@horizon/toolkit/math";
 
 import { closeUpMapWidth } from "../scene/close-up-flight";
+import FOCUS_FRAG from "./shaders/focus.frag.glsl";
+import FOCUS_VERT from "./shaders/focus.vert.glsl";
 import GAS_FRAG from "./shaders/gas.frag.glsl";
 import PLANET_FRAG from "./shaders/planet.frag.glsl";
 import RING_FRAG from "./shaders/ring.frag.glsl";
@@ -356,7 +361,10 @@ export function createLooks(light = false) {
   const gasMap = paint(256, 256, gasPainter);
   const disk = new MeshBasicMaterial({
     map: diskMap,
-    transparent: true,
+    transparent: false,
+    blending: CustomBlending,
+    blendSrc: SrcAlphaFactor,
+    blendDst: OneMinusSrcAlphaFactor,
     depthWrite: false,
     side: DoubleSide,
     toneMapped: false,
@@ -409,7 +417,7 @@ export function createLooks(light = false) {
       uniforms: { map: { value: gasMap }, opacity: { value: 0 } },
       vertexShader: VERT,
       fragmentShader: GAS_FRAG,
-      transparent: true,
+      transparent: false,
       depthWrite: false,
       side: DoubleSide,
       toneMapped: false,
@@ -439,20 +447,39 @@ export function createLooks(light = false) {
     galaxyDust: points(2.6, 0.38, false),
     tracers: new ShaderMaterial({ vertexShader: ROCK_VERT, fragmentShader: ROCK_FRAG }),
     ghost: new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
-    grid: new LineBasicMaterial({ color: "#46536e", transparent: true, opacity: 0.5 }),
-    focus: new MeshBasicMaterial({
-      color: "#e2c07a",
-      side: DoubleSide,
-      depthTest: false,
+    grid: new LineBasicMaterial({
+      color: "#46536e",
       transparent: true,
-      opacity: 0.95,
+      opacity: 0.5,
+      depthWrite: false,
     }),
-    proxima: new MeshBasicMaterial({ color: "#9ebccc", transparent: true, opacity: 0.28 }),
+    focus: new ShaderMaterial({
+      uniforms: {
+        color: { value: new Color("#e2c07a") },
+        opacity: { value: 0.95 },
+        size: { value: 1 },
+        lock: { value: 1 },
+        breath: { value: 0 },
+      },
+      vertexShader: FOCUS_VERT,
+      fragmentShader: FOCUS_FRAG,
+      depthTest: false,
+      depthWrite: false,
+      transparent: true,
+      toneMapped: false,
+    }),
+    proxima: new MeshBasicMaterial({
+      color: "#9ebccc",
+      transparent: true,
+      opacity: 0.28,
+      depthWrite: false,
+    }),
     halo: new MeshBasicMaterial({
       color: "#9ebccc",
       wireframe: true,
       transparent: true,
       opacity: 0.08,
+      depthWrite: false,
     }),
   };
   const textures = [

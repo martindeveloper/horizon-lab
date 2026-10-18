@@ -1,11 +1,11 @@
 import { ArrowLeft, ChevronDown, ChevronUp, Info, ZoomIn } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { Action, PanelHeader, cn, useFocusHandoff } from "@horizon/toolkit/ui";
 
 import { DEFAULT_VIEW } from "../lib/model/views";
-import { canCloseUp, useOrrery } from "../lib/store";
+import { canCloseUp, closeUpAwaitsPresent, useOrrery } from "../lib/store";
 import { cardFor } from "./cards";
 import { SolarActivityControls } from "./solar-activity-controls";
 
@@ -21,6 +21,8 @@ export function SelectionCard() {
   const select = useOrrery((s) => s.select);
   const closeUp = useOrrery((s) => s.closeUp);
   const offerCloseUp = useOrrery(canCloseUp);
+  const deepTime = useOrrery(closeUpAwaitsPresent);
+  const deepTimeNote = useId();
   /* On phones a close-up folds the card to a bar so the globe has the screen. */
   const [expanded, setExpanded] = useState(false);
   const now = useNow({ updateInterval: 60_000 });
@@ -103,7 +105,7 @@ export function SelectionCard() {
           </p>
         ) : null}
       </div>
-      {closeUp || offerCloseUp || home ? (
+      {closeUp || offerCloseUp || deepTime || home ? (
         <div className="flex flex-wrap items-center gap-2 border-t border-border px-3.5 py-3 md:px-4">
           {closeUp ? (
             <Action className="flex-1" onClick={() => useOrrery.getState().leaveCloseUp()}>
@@ -112,6 +114,11 @@ export function SelectionCard() {
             </Action>
           ) : offerCloseUp ? (
             <Action className="flex-1" onClick={() => useOrrery.getState().enterCloseUp()}>
+              <ZoomIn className="size-4" aria-hidden />
+              {t("hud.closeUp")}
+            </Action>
+          ) : deepTime ? (
+            <Action className="flex-1" disabled aria-describedby={deepTimeNote}>
               <ZoomIn className="size-4" aria-hidden />
               {t("hud.closeUp")}
             </Action>
@@ -144,6 +151,11 @@ export function SelectionCard() {
             </Action>
           ) : null}
           {closeUp ? <p className="w-full text-xs text-muted">{t("hud.closeUpNote")}</p> : null}
+          {deepTime ? (
+            <p id={deepTimeNote} className="w-full text-xs text-muted">
+              {t("hud.closeUpPresentOnly")}
+            </p>
+          ) : null}
           {closeUp && selection.kind === "sun" ? <SolarActivityControls /> : null}
         </div>
       ) : null}

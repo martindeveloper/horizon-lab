@@ -51,13 +51,17 @@ void main() {
 
   vec3 col = texture2D(map, vUv).rgb * (ambient + (1.0 - ambient) * diffuse);
 
-  // Specular glint, only on the day side.
-  vec3 halfV = normalize(sunDir + viewDir);
-  col += pow(max(dot(n, halfV), 0.0), specPower) * specStrength * clamp(ndl, 0.0, 1.0);
+  // Specular glint, only on the day side of bodies with specular reflection.
+  if (specStrength > 0.0 && ndl > 0.0) {
+    vec3 halfV = normalize(sunDir + viewDir);
+    col += pow(max(dot(n, halfV), 0.0), specPower) * specStrength * ndl;
+  }
 
   // Haze: Fresnel rim, brighter where the Sun lights the limb.
-  float fresnel = fresnelRim(n, viewDir, 2.35);
-  col += atmos * fresnel * atmosStrength * (0.15 + 0.85 * mu0);
+  if (atmosStrength > 0.0) {
+    float fresnel = fresnelRim(n, viewDir, 2.35);
+    col += atmos * fresnel * atmosStrength * (0.15 + 0.85 * mu0);
+  }
 
   gl_FragColor = linearToOutputTexel(vec4(col, 1.0));
 }

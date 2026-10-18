@@ -28,11 +28,11 @@ export function createSkyLayer(
   const milkyWay = scope.own(createMilkyWay(dpr, tight ? 12000 : 30000));
   const fieldMaterial = scope.own(starMaterial(dpr));
   const field = new Points(scope.own(fieldStars(tight ? 900 : 1600)), fieldMaterial);
-  field.renderOrder = -2;
+  field.renderOrder = -3;
   field.frustumCulled = false;
   const brightMaterial = scope.own(starMaterial(dpr));
   const bright = new Points(scope.own(catalogueStars()), brightMaterial);
-  bright.renderOrder = -1;
+  bright.renderOrder = -2;
   bright.frustumCulled = false;
   sky.add(milkyWay.group, field, bright);
   parent.add(sky);

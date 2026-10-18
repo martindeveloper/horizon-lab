@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createOrbitWriter, writeOrbit, ephemerisSelfCheck } from "@horizon/toolkit/bodies";
@@ -6,6 +7,7 @@ import { createOrbitWriter, writeOrbit, ephemerisSelfCheck } from "@horizon/tool
 import { startEngine } from "../src/components/simulations/engine-lifecycle.ts";
 import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
+import { formatYearsAgo } from "../src/features/orrery/components/format.ts";
 import { modernGalaxy } from "../src/features/orrery/lib/graphics/galaxy.ts";
 import {
   createSunTrailWriter,
@@ -14,6 +16,10 @@ import {
 import { modelSelfCheck } from "../src/features/orrery/lib/model/model-check.ts";
 import { neighboursSelfCheck } from "../src/features/orrery/lib/model/neighbours.ts";
 import { SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
+import { VIEWS, atViewDistance, viewForDistance } from "../src/features/orrery/lib/model/views.ts";
+import { lineOf } from "../src/features/orrery/lib/scene/geometry.ts";
+import { createHud } from "../src/features/orrery/lib/scene/hud.ts";
+import { useOrrery } from "../src/features/orrery/lib/store.ts";
 import { resolveView } from "../src/features/orrery/routing.ts";
 
 const flush = () => new Promise((resolve) => setImmediate(resolve));
@@ -176,4 +182,88 @@ test("galaxy trail cache preserves vertices and invalidates for time, shape and 
     assert.equal(update(yearsAgo, wobble), null);
     assert.deepEqual(buffer, snapshot);
   }
+});
+
+test("orrery HUD throttles drift readouts to 1 Hz even across forced redraws and keeps fixed decimals", () => {
+  const original = useOrrery.getState();
+  try {
+    useOrrery.setState({ driftYears: 0, driftRate: 2.5 });
+    const hud = createHud(useOrrery, { width: 1200, height: 800, dpr: 1 });
+    // Forced redraws update scale/rate immediately without churning driftYears every frame.
+    hud.update(0.016, true, { dist: 170_000, realm: "solar", drift: true, driftYears: 500 });
+    assert.equal(useOrrery.getState().driftRate, 30_000);
+    assert.equal(useOrrery.getState().driftYears, 0);
+    hud.update(0.5, false, { dist: 170_000, realm: "solar", drift: true, driftYears: 15_500 });
+    assert.equal(useOrrery.getState().driftYears, 0);
+    hud.update(0.5, false, { dist: 170_000, realm: "solar", drift: true, driftYears: 30_000 });
+    assert.equal(useOrrery.getState().driftYears, 30_000);
+    // Resetting driftYears to 0 commits at once.
+    hud.update(0.016, true, { dist: 170_000, realm: "solar", drift: true, driftYears: 0 });
+    assert.equal(useOrrery.getState().driftYears, 0);
+    // Manual zooming updates the active view and clears preset distance match when between presets.
+    for (const v of VIEWS) {
+      assert.equal(viewForDistance(v.dist, v.realm), v.id);
+      assert.equal(atViewDistance(v.dist, v.dist), true);
+    }
+    assert.equal(atViewDistance(30, 72), false);
+    hud.update(0.016, true, {
+      dist: 6,
+      realm: "solar",
+      drift: true,
+      driftYears: 0,
+      syncView: true,
+    });
+    assert.equal(useOrrery.getState().view, "inner");
+    assert.equal(useOrrery.getState().viewDist, 6);
+  } finally {
+    useOrrery.setState(original, true);
+  }
+
+  const t = (key, values) => `${key}:${values?.value ?? ""}`;
+  const f = {
+    number: (value, opts) =>
+      new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: opts.minimumFractionDigits,
+        maximumFractionDigits: opts.maximumFractionDigits,
+      }).format(value),
+  };
+  assert.equal(formatYearsAgo(t, f, 4e9), "time.billion:4.00");
+  assert.equal(formatYearsAgo(t, f, 4.5e9), "time.billion:4.50");
+  assert.equal(formatYearsAgo(t, f, 5e6), "time.million:5.0");
+});
+
+test("sky and schematic disks draw in the pre-body pass and planetesimals use smooth cratered sRGB shaders", () => {
+  const orbit = lineOf(0xffffff, 0.6);
+  assert.equal(orbit.material.depthWrite, false);
+  orbit.geometry.dispose();
+  orbit.material.dispose();
+
+  const skySource = readFileSync(
+    new URL("../src/features/orrery/lib/graphics/sky.ts", import.meta.url),
+    "utf8",
+  );
+  // Pre-body additive sky materials must keep transparent: false so Three.js
+  // sorts their negative renderOrder ahead of opaque 3D bodies instead of
+  // drawing stars on top of planets and planetesimals in the transparent pass.
+  assert.doesNotMatch(skySource, /transparent:\s*true/);
+  assert.match(skySource, /band\.renderOrder\s*=\s*-4/);
+
+  const rockVert = readFileSync(
+    new URL("../src/features/orrery/lib/graphics/shaders/rock.vert.glsl", import.meta.url),
+    "utf8",
+  );
+  const rockFrag = readFileSync(
+    new URL("../src/features/orrery/lib/graphics/shaders/rock.frag.glsl", import.meta.url),
+    "utf8",
+  );
+  assert.match(rockVert, /smoothValue3/);
+  assert.match(rockVert, /rockShape/);
+  assert.match(rockVert, /worldRadius\s*<=\s*0\.0/);
+  assert.match(rockVert, /vDetail/);
+  assert.doesNotMatch(rockVert, /floor\(position/);
+  assert.match(rockFrag, /craterLayer/);
+  assert.match(rockFrag, /valueGrad3/);
+  assert.match(rockFrag, /vDetail\s*>\s*0\.02/);
+  assert.match(rockFrag, /linearToOutputTexel/);
+  assert.doesNotMatch(rockFrag, /floor\(n\s*\*/);
 });

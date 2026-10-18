@@ -120,7 +120,7 @@ export function starMaterial(dpr: number) {
     vertexShader: STAR_VERT,
     fragmentShader: STAR_FRAG,
     vertexColors: true,
-    transparent: true,
+    transparent: false,
     depthWrite: false,
     depthTest: false,
     blending: AdditiveBlending,
@@ -285,13 +285,13 @@ export function createMilkyWay(dpr: number, grains: number) {
     side: BackSide,
     depthWrite: false,
     depthTest: false,
-    transparent: true,
+    transparent: false,
     blending: AdditiveBlending,
     toneMapped: false,
   });
   const geometry = new SphereGeometry(1, 36, 24);
   const band = new Mesh(geometry, material);
-  band.renderOrder = -3;
+  band.renderOrder = -4;
   band.frustumCulled = false;
   /* Resolved grains plus a clumpy unresolved haze of large soft points, both from the map. */
   const todayGeometry = today.sample(grains, 17);
@@ -305,7 +305,7 @@ export function createMilkyWay(dpr: number, grains: number) {
   const todayHaze = new Points(todayHazeGeometry, todayMaterial);
   const earlyHaze = new Points(earlyHazeGeometry, earlyMaterial);
   for (const p of [todayGrains, earlyGrains, todayHaze, earlyHaze]) {
-    p.renderOrder = -2;
+    p.renderOrder = -3;
     p.frustumCulled = false;
   }
   const group = new Group();

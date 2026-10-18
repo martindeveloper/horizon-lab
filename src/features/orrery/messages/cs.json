@@ -143,6 +143,7 @@
     "details": "Podrobnosti",
     "hideDetails": "Skrýt podrobnosti",
     "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",
+    "closeUpPresentOnly": "Pohled zblízka ukazuje dnešní povrchy. Pro přiblížení se vraťte do současnosti.",
     "epochs": "Přejít na období",
     "distanceUnit": "Jednotka vzdálenosti: astronomické jednotky, světelné roky nebo parseky"
   },

@@ -143,6 +143,7 @@
     "details": "Details",
     "hideDetails": "Hide details",
     "closeUpNote": "True size, turned as it is now.",
+    "closeUpPresentOnly": "Close-ups show today's surfaces. Return to the present to zoom in.",
     "epochs": "Jump to an epoch",
     "distanceUnit": "Distance unit: astronomical units, light-years or parsecs"
   },

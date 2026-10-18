@@ -28,7 +28,7 @@ export function lineOf(color: number, opacity: number, segments = SEG) {
   const positions = new Float32Array((segments + 1) * 3);
   const geometry = new BufferGeometry();
   geometry.setAttribute("position", new BufferAttribute(positions, 3));
-  const material = new LineBasicMaterial({ color, transparent: true, opacity });
+  const material = new LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
   const line = new Line(geometry, material);
   line.frustumCulled = false;
   return { line, positions, geometry, material };
