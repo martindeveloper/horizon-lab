@@ -78,13 +78,13 @@
     },
     "orrery": {
       "title": "Solar system",
-      "eyebrow": "Orrery · Planets, belts and the Galaxy",
+      "eyebrow": "Orrery · Planets, belts and the Oort cloud",
       "category": "Orbits & time",
-      "description": "The planets where they are today, the clearing of the early solar system as a labelled model, and the Sun's place in the Milky Way.",
+      "description": "The planets where they are today and the clearing of the early solar system as a labelled model, out to the Oort cloud.",
       "open": "Open the orrery",
       "live": "Live planet positions",
       "timeline": "10-billion-year timeline",
-      "galaxy": "Milky Way map",
+      "oort": "Out to the Oort cloud",
       "entryPoints": {
         "giants": {
           "title": "Giants"
@@ -92,8 +92,29 @@
         "inner": {
           "title": "Inner worlds"
         },
+        "oort": {
+          "title": "Oort cloud"
+        }
+      }
+    },
+    "deepField": {
+      "title": "Deep field",
+      "eyebrow": "Deep Field · From the Sun to the edge",
+      "category": "Distance & light",
+      "description": "Zoom from the planets through the nearest stars and the Milky Way to the microwave background. The farther you look, the older the light.",
+      "open": "Open Deep Field",
+      "depth": "From the planets to 46 billion light-years, in one zoom",
+      "lookback": "Distance as lookback time",
+      "edge": "The edge of the observable universe",
+      "entryPoints": {
         "galaxy": {
           "title": "Milky Way"
+        },
+        "laniakea": {
+          "title": "Laniakea"
+        },
+        "universe": {
+          "title": "Observable universe"
         }
       }
     }

@@ -1,19 +1,12 @@
 /**
  * Beyond the Milky Way: the Local Group, the Virgo Cluster, the Virgo (Local) Supercluster,
- * Laniakea and the cosmic web around it out to the Sloan Great Wall, and how they change over
- * the timeline. Lengths are in millions of
- * light-years (Mly), in the Galaxy model's axes (+X from the galactic centre to the Sun,
- * +Y the north galactic pole, +Z toward galactic longitude 90°), with the galactic centre at
- * the origin.
+ * Laniakea and the cosmic web around it out to the Sloan Great Wall, and the observable
+ * universe, as they are today. Lengths are in millions of light-years (Mly), in the Galaxy
+ * model's axes (+X from the galactic centre to the Sun, +Y the north galactic pole, +Z toward
+ * galactic longitude 90°), with the galactic centre at the origin.
  *
- * Named galaxies and clusters sit at their measured directions and distances; the rest is
- * a sketch shaped like each structure. Time is a teaching model on top:
- *
- * - expansion: everything not bound to the Local Group or to its own cluster keeps its
- *   comoving place, so its distance scales with the cosmic scale factor a(t) of flat ΛCDM;
- * - the Local Group: the Milky Way and Andromeda follow the radial timing-argument orbit
- *   that today's separation, closing speed and the age of the Universe imply;
- * - clusters keep their size but gather their members as the timeline nears today.
+ * Named galaxies and clusters sit at their measured directions and distances (comoving ones
+ * from their redshifts, in flat ΛCDM); the rest is a sketch shaped like each structure.
  */
 import { clamp01 } from "@horizon/toolkit/math";
 import {
@@ -22,14 +15,12 @@ import {
   comovingDistanceMpc,
   convert,
   cosmicAgeAtRedshiftGyr,
-  cosmicAgeGyr,
   defineEquation,
   equatorialToGalactic,
   formatNumber,
   hubbleLaw,
   particleHorizonMpc,
   redshiftAtLookback,
-  scaleFactorAtAge,
 } from "@horizon/toolkit/science";
 
 import { SUN_GALACTIC_RADIUS_LY, SUN_HEIGHT_LY } from "./parameters";
@@ -40,39 +31,8 @@ const n = (value: number) => formatNumber(value, "en", 4);
 /** The model's cosmology: flat ΛCDM with Planck 2018's H₀ (km/s/Mpc) and Ωm. */
 export const HUBBLE = PLANCK_2018.H0;
 export const OMEGA_M = PLANCK_2018.omegaM;
-/** Age of the Universe today, Gyr (13.79 for these parameters). */
-export const UNIVERSE_AGE_GYR = cosmicAgeGyr(1, PLANCK_2018);
-
-/** The cosmic scale factor `t` years ago: 1 today, ~0.37 ten billion years ago. */
-export const scaleFactor = defineEquation({
-  id: "scale-factor",
-  text: `a = (sinh(3 √Ω_Λ H₀ (t₀ − t) / 2) / √(Ω_Λ / Ω_m))^(2/3),  H₀ = ${n(HUBBLE)} km/s/Mpc, Ω_m = ${n(OMEGA_M)}`,
-  latex: `a = \\left(\\frac{\\sinh\\left(\\tfrac{3}{2}\\sqrt{\\Omega_\\Lambda}\\,H_0\\,(t_0 - t)\\right)}{\\sqrt{\\Omega_\\Lambda/\\Omega_m}}\\right)^{2/3}, \\quad H_0 = ${n(HUBBLE)}\\,\\mathrm{km\\,s^{-1}\\,Mpc^{-1}}, \\ \\Omega_m = ${n(OMEGA_M)}`,
-  output: "a",
-  variables: {
-    t: { symbol: "t", latex: "t", unit: "Gyr" },
-    a: { symbol: "a", latex: "a" },
-  },
-  compute: ({ t }) => scaleFactorAtAge(Math.max(1e-3, UNIVERSE_AGE_GYR - t), PLANCK_2018),
-});
-
-/** One-entry memo: a frame asks for the same moment many times. */
-function lastOf(fn: (x: number) => number) {
-  let key = Number.NaN;
-  let value = 0;
-  return (x: number) => {
-    if (x !== key) {
-      key = x;
-      value = fn(x);
-    }
-    return value;
-  };
-}
-
-/** Scale factor `yearsAgo` years ago. */
-export const scaleAt = lastOf((yearsAgo: number) =>
-  scaleFactor.compute({ t: Math.max(0, yearsAgo) / 1e9 }),
-);
+/** Age of the Universe today, Gyr (13.787 for these parameters, radiation included). */
+export const UNIVERSE_AGE_GYR = cosmicAgeAtRedshiftGyr(0, PLANCK_2018);
 
 /** Hubble-flow distance (Mly) for a recession velocity cz (km/s) at H₀. */
 export const hubbleMly = (cz: number) =>
@@ -85,8 +45,7 @@ export const hubbleMly = (cz: number) =>
 export const redshiftMly = (cz: number) => comovingMly(cz / convert(1, "c", "km/s"));
 
 /** Comoving distance (Mly) to redshift z in the model's cosmology. */
-export const comovingMly = (z: number) =>
-  convert(comovingDistanceMpc(z, PLANCK_2018), "Mpc", "Mly");
+const comovingMly = (z: number) => convert(comovingDistanceMpc(z, PLANCK_2018), "Mpc", "Mly");
 
 /* ---------------------------------------------------------------------------------------
  * The observable universe: as far as light has had time to come since the Big Bang. Its wall
@@ -99,6 +58,14 @@ export const LAST_SCATTERING_Z = 1089.8;
 export const HORIZON_MLY = convert(particleHorizonMpc(PLANCK_2018), "Mpc", "Mly");
 /** Today's distance to where the microwave background we see set out, Mly. */
 export const CMB_MLY = comovingMly(LAST_SCATTERING_Z);
+/** The farthest galaxies yet confirmed, redshift (JADES-GS-z14-0 at z = 14.32). */
+export const FIRST_GALAXIES_Z = 14;
+/**
+ * Today's distance to them, Mly: about three quarters of the way to the microwave background.
+ * Between them and it lie cosmic dawn, when the first stars and galaxies lit up beyond what
+ * we have seen yet, and before it the dark ages.
+ */
+export const FIRST_GALAXIES_MLY = comovingMly(FIRST_GALAXIES_Z);
 /** The universe's age when that light set out, years: about 372,000. */
 export const CMB_AGE_YEARS = cosmicAgeAtRedshiftGyr(LAST_SCATTERING_Z, PLANCK_2018) * 1e9;
 /** The CMB's temperature today, K (Fixsen 2009). */
@@ -109,23 +76,10 @@ export const LOOKBACK_RINGS_GYR = [1, 5, 10] as const;
 /** Where light that set out `gyr` billion years ago started, today's distance in Mly. */
 export const lookbackMly = (gyr: number) => comovingMly(redshiftAtLookback(gyr, PLANCK_2018));
 
-/**
- * A comoving shell `yearsAgo` years ago, in proper Mly: as seen from here then, the light had
- * come from nearer (the part of the path still ahead of it is cut off) and space was smaller.
- */
-const shellAt = (todayMly: number, yearsAgo: number) => {
-  const a = scaleAt(yearsAgo);
-  return a * Math.max(0, todayMly - comovingMly(1 / a - 1));
-};
-/** The observable universe's edge `yearsAgo` years ago, proper Mly. */
-export const horizonAt = lastOf((yearsAgo: number) => shellAt(HORIZON_MLY, yearsAgo));
-/** The microwave background's shell `yearsAgo` years ago, proper Mly. */
-export const cmbAt = lastOf((yearsAgo: number) => shellAt(CMB_MLY, yearsAgo));
-
 /* ---------------------------------------------------------------------------------------
  * The Milky Way and Andromeda: a radial Kepler orbit from the Big Bang (Kahn & Woltjer
  * 1959; van der Marel et al. 2012). r = A(1 − cos η), t = B(η − sin η); today's r, ṙ and
- * t₀ fix A, B and η.
+ * t₀ fix A, B and η, and with them when the pair turned around.
  * ------------------------------------------------------------------------------------- */
 
 /** M31's distance from the Milky Way today, Mly (765 kpc; Li et al. 2021, McConnachie 2012). */
@@ -138,7 +92,7 @@ export const ANDROMEDA_APPROACH_KMS = 110;
 /** Light-years travelled in a gigayear at 1 km/s (1.0227 pc/Myr): 10⁹ ly times v/c. */
 const LY_PER_KMS_GYR = 1e9 * convert(1, "km/s", "c");
 /** Fraction of the way from the Milky Way to Andromeda where the Local Group's mass centre sits. */
-export const ANDROMEDA_MASS_SHARE = 0.55;
+const ANDROMEDA_MASS_SHARE = 0.55;
 
 /** sin η (η − sin η) / (1 − cos η)²: the dimensionless v t / r of the orbit. */
 const orbitShape = (eta: number) =>
@@ -186,23 +140,11 @@ export const localGroupOrbit = defineEquation({
 });
 const clampAge = (age: number) => Math.min(UNIVERSE_AGE_GYR, Math.max(1e-3, age));
 
-/** Andromeda's distance (Mly) `yearsAgo` years ago; the last moment asked for is kept. */
-export const andromedaApart = lastOf((yearsAgo: number) =>
-  localGroupOrbit.compute({ t: Math.max(0, yearsAgo) / 1e9 }),
-);
 /** Largest separation on the orbit (turnaround), Mly, and when (years ago). */
 export const LOCAL_TURNAROUND = {
   mly: 2 * LOCAL_ORBIT.A,
   yearsAgo: (UNIVERSE_AGE_GYR - Math.PI * LOCAL_ORBIT.B) * 1e9,
 };
-
-/**
- * How much of a cluster has gathered `yearsAgo` years ago: a teaching curve, a^1.5, close to
- * how a cluster's mass grows by infall in ΛCDM since z ≈ 2 (about a fifth 10 billion years ago).
- */
-export const CLUSTER_GROWTH_POWER = 1.5;
-export const clusterGathered = (yearsAgo: number) =>
-  clamp01(scaleAt(yearsAgo) ** CLUSTER_GROWTH_POWER);
 
 /* ---------------------------------------------------------------------------------------
  * Directions. Galactic (l, b) → Galaxy-model axes; the supergalactic frame of de
@@ -212,9 +154,23 @@ export const clusterGathered = (yearsAgo: number) =>
 export type Vec = [number, number, number];
 
 /** Unit vector toward galactic (l, b), in degrees, in Galaxy-model axes. */
-export function galacticDirection(l: number, b: number): Vec {
+function galacticDirection(l: number, b: number): Vec {
   const cb = Math.cos(b * RAD);
   return [-cb * Math.cos(l * RAD), Math.sin(b * RAD), cb * Math.sin(l * RAD)];
+}
+
+/**
+ * The Sun's motion against the microwave background: 369.82 km/s toward l = 264.021°,
+ * b = 48.253° (Planck 2018 I). Added along a line of sight it turns a heliocentric cz into
+ * the CMB frame, where the Hubble flow is at rest.
+ */
+const CMB_DIPOLE = { kms: 369.82, toward: galacticDirection(264.021, 48.253) };
+
+/** A heliocentric cz (km/s) toward galactic (l, b) as the CMB-frame cz distances use. */
+export function cmbCz(l: number, b: number, cz: number) {
+  const [x, y, z] = galacticDirection(l, b);
+  const [tx, ty, tz] = CMB_DIPOLE.toward;
+  return cz + CMB_DIPOLE.kms * (x * tx + y * ty + z * tz);
 }
 
 const cross = (a: Vec, b: Vec): Vec => [
@@ -263,11 +219,11 @@ export function place(l: number, b: number, mly: number): Vec {
  * Named anchors. Distances are rounded literature values; see docs/science-sources.md.
  * ------------------------------------------------------------------------------------- */
 
-/** A J2000 sky position and redshift as an anchor's galactic direction and distance. */
-const fromSky = (ra: number, dec: number, cz: number) => ({
-  ...equatorialToGalactic(ra, dec),
-  mly: redshiftMly(cz),
-});
+/** A J2000 sky position and heliocentric cz as an anchor's direction and comoving distance. */
+const fromSky = (ra: number, dec: number, cz: number) => {
+  const { l, b } = equatorialToGalactic(ra, dec);
+  return { l, b, mly: redshiftMly(cmbCz(l, b, cz)) };
+};
 
 /**
  * The Sloan Great Wall in the SDSS equatorial slice (Gott et al. 2005): RA 8.7h–13.7h,
@@ -292,10 +248,10 @@ export const WEB_SKY = {
   },
 } as const;
 
-/** A J2000 sky position and redshift (cz, km/s) as a place, Mly from the galactic centre. */
+/** A J2000 sky position and heliocentric cz (km/s) as a place, Mly from the galactic centre. */
 export function skyPlace(ra: number, dec: number, cz: number): Vec {
-  const { l, b } = equatorialToGalactic(ra, dec);
-  return place(l, b, redshiftMly(cz));
+  const { l, b, mly } = fromSky(ra, dec, cz);
+  return place(l, b, mly);
 }
 
 /**
@@ -334,9 +290,6 @@ const SKY = {
   ),
 };
 
-/** How an anchor moves over time: bound to us, riding on Andromeda, or with the expansion. */
-export type Tie = "local" | "andromeda" | "flow";
-
 export type AnchorId =
   | "andromeda"
   | "triangulum"
@@ -362,32 +315,33 @@ export type Anchor = {
   b: number;
   /** Heliocentric distance today, Mly. */
   mly: number;
-  tie: Tie;
 };
 
 export const ANCHORS: readonly Anchor[] = [
-  { id: "andromeda", l: 121.17, b: -21.57, mly: ANDROMEDA_MLY, tie: "andromeda" },
-  { id: "triangulum", l: 133.61, b: -31.33, mly: 2.73, tie: "andromeda" },
-  { id: "lmc", l: 280.47, b: -32.89, mly: 0.163, tie: "local" },
-  { id: "smc", l: 302.81, b: -44.33, mly: 0.203, tie: "local" },
-  { id: "m81", l: 142.09, b: 40.9, mly: 11.7, tie: "flow" },
-  { id: "centaurusA", l: 309.52, b: 19.42, mly: 12.4, tie: "flow" },
-  { id: "sculptor", l: 97.37, b: -87.96, mly: 11.4, tie: "flow" },
+  { id: "andromeda", l: 121.17, b: -21.57, mly: ANDROMEDA_MLY },
+  /* M33, 840 ± 11 kpc from HST Cepheids (Breuval et al. 2023). */
+  { id: "triangulum", l: 133.61, b: -31.33, mly: convert(0.84, "Mpc", "Mly") },
+  { id: "lmc", l: 280.47, b: -32.89, mly: 0.163 },
+  { id: "smc", l: 302.81, b: -44.33, mly: 0.203 },
+  { id: "m81", l: 142.09, b: 40.9, mly: 11.7 },
+  { id: "centaurusA", l: 309.52, b: 19.42, mly: 12.4 },
+  { id: "sculptor", l: 97.37, b: -87.96, mly: 11.4 },
   /* The Virgo Cluster's centre, M87: 16.5 Mpc (Mei et al. 2007). */
-  { id: "virgoCluster", l: 283.78, b: 74.49, mly: convert(16.5, "Mpc", "Mly"), tie: "flow" },
+  { id: "virgoCluster", l: 283.78, b: 74.49, mly: convert(16.5, "Mpc", "Mly") },
   /* NGC 1399, 20.0 Mpc (Blakeslee et al. 2009). */
-  { id: "fornaxCluster", l: 236.72, b: -53.64, mly: convert(20, "Mpc", "Mly"), tie: "flow" },
+  { id: "fornaxCluster", l: 236.72, b: -53.64, mly: convert(20, "Mpc", "Mly") },
   /* Abell 3526 and Abell 1060 (cz 3,683, Christlein & Zabludoff 2003): Hubble-flow distances
-     at the model's own H₀. */
-  { id: "centaurusCluster", l: 302.4, b: 21.56, mly: hubbleMly(3_418), tie: "flow" },
-  { id: "hydraCluster", l: 269.63, b: 26.51, mly: hubbleMly(3_683), tie: "flow" },
-  /* The Great Attractor toward the Norma Cluster (Abell 3627): ~77 Mpc at h = 0.68. */
-  { id: "greatAttractor", l: 325.33, b: -7.26, mly: 250, tie: "flow" },
+     at the model's own H₀, from their CMB-frame cz. */
+  { id: "centaurusCluster", l: 302.4, b: 21.56, mly: hubbleMly(cmbCz(302.4, 21.56, 3_418)) },
+  { id: "hydraCluster", l: 269.63, b: 26.51, mly: hubbleMly(cmbCz(269.63, 26.51, 3_683)) },
+  /* The Great Attractor toward the Norma Cluster (Abell 3627, cz 4,871 km/s, Woudt et al.
+     2008): its Hubble-flow distance, ~73 Mpc. */
+  { id: "greatAttractor", l: 325.33, b: -7.26, mly: hubbleMly(cmbCz(325.33, -7.26, 4_871)) },
   /* Beyond Laniakea, at comoving distances from their redshifts. */
-  { id: "perseusCluster", ...SKY.perseus, tie: "flow" },
-  { id: "comaCluster", ...SKY.coma, tie: "flow" },
-  { id: "shapleyCore", ...SKY.shapley, tie: "flow" },
-  { id: "sloanGreatWall", ...SKY.sloanGreatWall, tie: "flow" },
+  { id: "perseusCluster", ...SKY.perseus },
+  { id: "comaCluster", ...SKY.coma },
+  { id: "shapleyCore", ...SKY.shapley },
+  { id: "sloanGreatWall", ...SKY.sloanGreatWall },
 ];
 
 const BY_ID = new Map(ANCHORS.map((a) => [a.id, a]));
@@ -422,19 +376,25 @@ export const anchorToday = (a: Anchor): Readonly<Vec> => TODAY.get(a)!;
 
 /** Today's diameter of each structure (Mly), from the published size in its own unit. */
 export const STRUCTURES = {
-  /** Diameter ~3 Mpc; McConnachie 2012. */
-  localGroup: { width: convert(3, "Mpc", "Mly") },
+  /** Twice the zero-velocity radius, 0.96 ± 0.03 Mpc (Karachentsev et al. 2009). */
+  localGroup: { width: convert(2 * 0.96, "Mpc", "Mly") },
   /**
    * Tully et al. 2008: a 7 Mpc radius about us, ±1.5 Mpc about the supergalactic equator;
    * random motions ~40 km/s; the sheet moves 259 km/s away from the Local Void.
    */
   localSheet: { width: convert(2 * 7, "Mpc", "Mly"), thickness: convert(2 * 1.5, "Mpc", "Mly") },
-  /** r₂₀₀ = 1.55 Mpc at 15 Mpc (McLaughlin 1999, ApJ 512, L9): twice that across. */
-  virgo: { width: convert(2 * 1.55, "Mpc", "Mly") },
+  /**
+   * r₂₀₀ = 1.55 Mpc at 15 Mpc (McLaughlin 1999, ApJ 512, L9), scaled to the model's 16.5 Mpc:
+   * twice that across.
+   */
+  virgo: { width: convert((2 * 1.55 * 16.5) / 15, "Mpc", "Mly") },
   /** De Vaucouleurs' Local Supercluster, ~33 Mpc across. */
   supercluster: { width: convert(33, "Mpc", "Mly") },
-  /** Tully et al. 2014: 160 Mpc across, 10¹⁷ solar masses, ~100,000 galaxies. */
-  laniakea: { width: convert(160, "Mpc", "Mly") },
+  /**
+   * Tully et al. 2014: 160 Mpc across (12,000 km/s) on Cosmicflows-2's scale, H₀ = 75.2,
+   * rescaled to the model's; 10¹⁷ solar masses, ~100,000 galaxies.
+   */
+  laniakea: { width: convert((160 * 75.2) / HUBBLE, "Mpc", "Mly") },
   /**
    * Gott et al. 2005: 450 Mpc long (comoving) at their H₀ = 71, rescaled to the model's; their
    * "1.37 billion light-years" is that over (1 + z), the length when the light we see left it.
@@ -444,59 +404,22 @@ export const STRUCTURES = {
   perseusPisces: { length: convert(50 / (HUBBLE / 100), "Mpc", "Mly") },
 } as const;
 
-/** Where the Local Group's mass centre is `yearsAgo` years ago, Mly from the galactic centre. */
-export function localGroupCentre(yearsAgo: number, out: Vec = [0, 0, 0]): Vec {
+/** The Local Group's mass centre, Mly from the galactic centre: along the line to Andromeda. */
+export const LOCAL_GROUP_CENTRE: Readonly<Vec> = (() => {
   const d = ANDROMEDA_DIRECTION;
-  const r = andromedaApart(yearsAgo) * ANDROMEDA_MASS_SHARE;
-  out[0] = d[0] * r;
-  out[1] = d[1] * r;
-  out[2] = d[2] * r;
-  return out;
-}
-
-/** An anchor's position `yearsAgo` years ago, Mly from the galactic centre. */
-export function anchorAt(a: Anchor, yearsAgo: number, out: Vec = [0, 0, 0]): Vec {
-  const today = anchorToday(a);
-  if (a.tie === "local") {
-    out[0] = today[0];
-    out[1] = today[1];
-    out[2] = today[2];
-    return out;
-  }
-  if (a.tie === "andromeda") {
-    /* Satellites ride with Andromeda: shift by its change along the line of sight. */
-    const d = ANDROMEDA_DIRECTION;
-    const shift = andromedaApart(yearsAgo) - ANDROMEDA_MLY;
-    out[0] = today[0] + d[0] * shift;
-    out[1] = today[1] + d[1] * shift;
-    out[2] = today[2] + d[2] * shift;
-    return out;
-  }
-  const s = scaleAt(yearsAgo);
-  out[0] = today[0] * s;
-  out[1] = today[1] * s;
-  out[2] = today[2] * s;
-  return out;
-}
+  const r = ANDROMEDA_MLY * ANDROMEDA_MASS_SHARE;
+  return [d[0] * r, d[1] * r, d[2] * r];
+})();
 
 /* ---------------------------------------------------------------------------------------
  * Camera aims: as the camera pulls out, the point it turns about moves from the galactic
  * centre to each structure's heart, in log distance between the framed views.
  * ------------------------------------------------------------------------------------- */
 
-type AimStop = { ly: number; at: (yearsAgo: number, out: Vec) => Vec };
+type AimStop = { ly: number; at: Readonly<Vec> };
 
-const zero = (_: number, out: Vec) => {
-  out[0] = out[1] = out[2] = 0;
-  return out;
-};
-const towardVirgo = (share: number) => (yearsAgo: number, out: Vec) => {
-  anchorAt(anchorById("virgoCluster"), yearsAgo, out);
-  out[0] *= share;
-  out[1] *= share;
-  out[2] *= share;
-  return out;
-};
+const scaled = (v: Readonly<Vec>, k: number): Vec => [v[0] * k, v[1] * k, v[2] * k];
+const ZERO: Readonly<Vec> = [0, 0, 0];
 
 /** Camera distances (ly) of the framed views beyond the Galaxy. */
 export const COSMIC_VIEW_LY = {
@@ -509,59 +432,56 @@ export const COSMIC_VIEW_LY = {
   universe: 1.5e11,
 } as const;
 
-const AIM_STOPS: readonly AimStop[] = [
-  { ly: 300_000, at: zero },
-  { ly: COSMIC_VIEW_LY.localGroup, at: localGroupCentre },
-  /* Pull straight back over our own sheet before the frame turns toward Virgo. */
-  { ly: COSMIC_VIEW_LY.sheet, at: localGroupCentre },
-  { ly: COSMIC_VIEW_LY.virgo, at: towardVirgo(0.55) },
-  { ly: COSMIC_VIEW_LY.supercluster, at: towardVirgo(0.8) },
-  {
-    ly: COSMIC_VIEW_LY.laniakea,
-    at: (yearsAgo, out) => anchorAt(anchorById("greatAttractor"), yearsAgo, out),
-  },
-  /* The web turns about the middle of its named landmarks, from Perseus to the Great Wall. */
-  { ly: COSMIC_VIEW_LY.web, at: webCentre },
-  /* The observable universe is centred on us, as every observer's is. */
-  { ly: COSMIC_VIEW_LY.universe, at: zero },
-];
-
 const WEB_LANDMARKS: readonly AnchorId[] = [
   "perseusCluster",
   "comaCluster",
   "shapleyCore",
   "sloanGreatWall",
 ];
-const landmark: Vec = [0, 0, 0];
-/** The middle of the web's landmarks `yearsAgo` years ago, Mly from the galactic centre. */
-function webCentre(yearsAgo: number, out: Vec) {
-  out[0] = out[1] = out[2] = 0;
-  for (const id of WEB_LANDMARKS) {
-    anchorAt(anchorById(id), yearsAgo, landmark);
-    out[0] += landmark[0] / WEB_LANDMARKS.length;
-    out[1] += landmark[1] / WEB_LANDMARKS.length;
-    out[2] += landmark[2] / WEB_LANDMARKS.length;
-  }
-  return out;
-}
+/** The middle of the web's landmarks, Mly from the galactic centre. */
+const WEB_CENTRE = WEB_LANDMARKS.reduce<Vec>(
+  (sum, id) => {
+    const p = anchorToday(anchorById(id));
+    return [
+      sum[0] + p[0] / WEB_LANDMARKS.length,
+      sum[1] + p[1] / WEB_LANDMARKS.length,
+      sum[2] + p[2] / WEB_LANDMARKS.length,
+    ];
+  },
+  [0, 0, 0],
+);
 
-const stopA: Vec = [0, 0, 0];
-const stopB: Vec = [0, 0, 0];
+const AIM_STOPS: readonly AimStop[] = [
+  { ly: 300_000, at: ZERO },
+  { ly: COSMIC_VIEW_LY.localGroup, at: LOCAL_GROUP_CENTRE },
+  /* Pull straight back over our own sheet before the frame turns toward Virgo. */
+  { ly: COSMIC_VIEW_LY.sheet, at: LOCAL_GROUP_CENTRE },
+  { ly: COSMIC_VIEW_LY.virgo, at: scaled(anchorToday(anchorById("virgoCluster")), 0.55) },
+  { ly: COSMIC_VIEW_LY.supercluster, at: scaled(anchorToday(anchorById("virgoCluster")), 0.8) },
+  { ly: COSMIC_VIEW_LY.laniakea, at: anchorToday(anchorById("greatAttractor")) },
+  /* The web turns about the middle of its named landmarks, from Perseus to the Great Wall. */
+  { ly: COSMIC_VIEW_LY.web, at: WEB_CENTRE },
+  /* The observable universe is centred on us, as every observer's is. */
+  { ly: COSMIC_VIEW_LY.universe, at: ZERO },
+];
+
 const ease = (t: number) => t * t * t * (t * (6 * t - 15) + 10);
 
 /** The camera's turning point (Mly from the galactic centre) at a camera distance in ly. */
-export function cosmicAim(ly: number, yearsAgo: number, out: Vec = [0, 0, 0]): Vec {
-  if (ly <= AIM_STOPS[0]!.ly) return zero(yearsAgo, out);
+export function cosmicAim(ly: number, out: Vec = [0, 0, 0]): Vec {
+  const first = AIM_STOPS[0]!;
+  if (ly <= first.ly) {
+    out[0] = out[1] = out[2] = 0;
+    return out;
+  }
   for (let i = 1; i < AIM_STOPS.length; i += 1) {
     const to = AIM_STOPS[i]!;
     if (ly > to.ly && i < AIM_STOPS.length - 1) continue;
     const from = AIM_STOPS[i - 1]!;
     const k = ease(clamp01(Math.log(ly / from.ly) / Math.log(to.ly / from.ly)));
-    from.at(yearsAgo, stopA);
-    to.at(yearsAgo, stopB);
-    out[0] = stopA[0] + (stopB[0] - stopA[0]) * k;
-    out[1] = stopA[1] + (stopB[1] - stopA[1]) * k;
-    out[2] = stopA[2] + (stopB[2] - stopA[2]) * k;
+    out[0] = from.at[0] + (to.at[0] - from.at[0]) * k;
+    out[1] = from.at[1] + (to.at[1] - from.at[1]) * k;
+    out[2] = from.at[2] + (to.at[2] - from.at[2]) * k;
     return out;
   }
   return out;

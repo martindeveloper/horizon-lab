@@ -35,7 +35,7 @@
 <path d="M95 108a11 11 0 0 1 22 0Z" fill="#e2c07a"/><path d="M86 108h40" stroke="#e2c07a" stroke-width="1.5"/>
 <text x="148" y="119" fill="#ecece8" font-family="Georgia, serif" font-size="34">Horizon</text>
 <text x="82" y="308" fill="#ecece8" font-family="Georgia, serif" font-size="72" letter-spacing="-2">Solar system</text>
-<text x="86" y="366" fill="#b2b2ae" font-family="Arial, sans-serif" font-size="26">An honest orrery of the solar system and the Milky Way</text>
+<text x="86" y="366" fill="#b2b2ae" font-family="Arial, sans-serif" font-size="26">An honest orrery of the solar system, out to the Oort cloud</text>
 <path d="M86 466h430" stroke="#ecece8" stroke-opacity=".15"/>
 <text x="86" y="508" fill="#9a9a96" font-family="Arial, sans-serif" font-size="14" letter-spacing="2">INTERACTIVE SPACE SIMULATIONS</text>
 </svg>

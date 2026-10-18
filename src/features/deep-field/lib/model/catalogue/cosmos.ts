@@ -1,10 +1,11 @@
+import type { Facts, Status, Value } from "@/lib/facts";
+import type { SourceId } from "@/lib/sources";
 /** Beyond the Milky Way: figures from the cosmos model and the literature. */
 import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
 
 import {
   ANDROMEDA_APPROACH_KMS,
   ANDROMEDA_MLY,
-  CLUSTER_GROWTH_POWER,
   CMB_AGE_YEARS,
   CMB_KELVIN,
   CMB_MLY,
@@ -17,55 +18,41 @@ import {
   UNIVERSE_AGE_GYR,
   STRUCTURES,
   WEB_SKY,
-  anchorAt,
   anchorById,
-  andromedaApart,
-  cmbAt,
-  horizonAt,
-  scaleAt,
   type AnchorId,
 } from "../cosmos";
-import type { SourceId } from "./sources";
-import type { Facts, Live, Status, Value } from "./types";
 
 type Extra = { status?: Status; note?: string; digits?: number };
 
-const length = (v: readonly number[]) => Math.hypot(v[0]!, v[1]!, v[2]!);
 /** The Sloan Great Wall's redshift (Gott et al. 2005). */
 const SLOAN_Z = WEB_SKY.sloanGreatWall.cz / convert(1, "c", "km/s");
 
-/** An anchor's heliocentric distance today and its place on the slider (comoving or bound). */
-const anchorDistance = (id: AnchorId, source: SourceId, extra: Extra = {}): Live => ({
+/** An anchor's heliocentric distance today. */
+const anchorDistance = (id: AnchorId, source: SourceId, extra: Extra = {}): Value => ({
   value: anchorById(id).mly,
   unit: "Mly",
   digits: 3,
   source,
   status: "verified",
-  at: (yearsAgo) =>
-    anchorById(id).tie === "flow"
-      ? anchorById(id).mly * scaleAt(yearsAgo)
-      : length(anchorAt(anchorById(id), yearsAgo)),
   ...extra,
 });
 
-/** A structure's diameter today, stretched with the scale of space on the slider. */
-const comoving = (width: number, source: SourceId, extra: Extra): Live => ({
+/** A structure's comoving size today. */
+const comoving = (width: number, source: SourceId, extra: Extra): Value => ({
   value: width,
   unit: "Mly",
   source,
   status: "derived",
-  at: (yearsAgo) => width * scaleAt(yearsAgo),
   ...extra,
 });
 
-const andromedaDistance: Live = {
+const andromedaDistance: Value = {
   value: ANDROMEDA_MLY,
   unit: "Mly",
   show: "Mly",
   source: "li2021",
   status: "verified",
-  note: "765 kpc; 752–785 kpc in McConnachie 2012 and Li et al. 2021",
-  at: andromedaApart,
+  note: "765 kpc; 761 ± 11 kpc (Li et al. 2021) and 783 ± 25 kpc (McConnachie 2012)",
 };
 /** M31's bright disk: RC3's isophotal diameter (log D25 = 3.28, in 0.1′) at the model's distance. */
 const M31_DISK_LY = convert(ANDROMEDA_MLY, "Mly", "ly") * convert(10 ** 3.28 / 10, "arcmin", "rad");
@@ -78,23 +65,15 @@ const ring = (gyr: number): Value => ({
   status: "teaching-choice",
   note: "drawn where that light set out, at today's distance",
 });
-const greatAttractorDistance = anchorDistance("greatAttractor", "tully2014", {
+const greatAttractorDistance = anchorDistance("greatAttractor", "woudt2008", {
   digits: 2,
   status: "derived",
-  note: "~77 Mpc at h = 0.68; Dupuy & Courtois 2023 put the basin centre farther, ~105 Mpc",
+  note: "the Norma Cluster's Hubble-flow distance, cz 4,871 km/s in the CMB frame; Dupuy & Courtois 2023 put the basin centre farther, ~105 Mpc",
 });
 
 export const COSMOS = {
-  /** The scale of space then, for every card beyond the Local Group. */
+  /** The model's cosmology. */
   universe: {
-    scale: {
-      value: 1,
-      unit: "ratio",
-      source: "planck2018",
-      status: "derived",
-      note: "flat ΛCDM, H₀ 67.66 km/s/Mpc, Ωm 0.3111; a = 0.37 ten billion years ago",
-      at: scaleAt,
-    },
     hubble: {
       value: HUBBLE,
       unit: "km/s/Mpc",
@@ -112,22 +91,15 @@ export const COSMOS = {
       status: "derived",
       note: "flat ΛCDM with these H₀ and Ωm",
     },
-    clusterGrowth: {
-      value: CLUSTER_GROWTH_POWER,
-      unit: "ratio",
-      source: "horizon",
-      status: "teaching-choice",
-      note: "a cluster's gathered share goes as a^1.5, close to ΛCDM infall since z ≈ 2",
-    },
   },
   localGroup: {
     width: {
       value: STRUCTURES.localGroup.width,
       unit: "Mly",
       digits: 1,
-      source: "mcconnachie2012",
-      status: "verified",
-      note: "~3 Mpc",
+      source: "karachentsev2009",
+      status: "derived",
+      note: "twice the zero-velocity radius, 0.96 ± 0.03 Mpc",
     },
     members: {
       value: 100,
@@ -211,7 +183,7 @@ export const COSMOS = {
     },
   },
   triangulum: {
-    distance: anchorDistance("triangulum", "mcconnachie2012"),
+    distance: anchorDistance("triangulum", "breuval2023", { note: "840 ± 11 kpc" }),
     width: { value: 60_000, unit: "ly", source: "nasaM33", status: "verified" },
   },
   virgo: {
@@ -229,7 +201,7 @@ export const COSMOS = {
       digits: 1,
       source: "mclaughlin1999",
       status: "derived",
-      note: "2 r₂₀₀",
+      note: "2 r₂₀₀; McLaughlin's 1.55 Mpc at 15 Mpc, scaled to 16.5 Mpc",
     },
     blackHole: { value: 6.5e9, unit: "Msun", source: "eht2019", status: "verified" },
   },
@@ -265,10 +237,16 @@ export const COSMOS = {
     },
   },
   centaurus: {
-    distance: anchorDistance("centaurusCluster", "hubbleFlow", { status: "derived" }),
+    distance: anchorDistance("centaurusCluster", "hubbleFlow", {
+      status: "derived",
+      note: "cz 3,418 km/s in the CMB frame at the model's H₀",
+    }),
   },
   hydra: {
-    distance: anchorDistance("hydraCluster", "hubbleFlow", { status: "derived" }),
+    distance: anchorDistance("hydraCluster", "hubbleFlow", {
+      status: "derived",
+      note: "cz 3,683 km/s in the CMB frame at the model's H₀",
+    }),
     members: {
       value: 580,
       unit: "count",
@@ -291,7 +269,7 @@ export const COSMOS = {
   laniakea: {
     width: comoving(STRUCTURES.laniakea.width, "tully2014", {
       digits: 2,
-      note: "160 Mpc across",
+      note: "160 Mpc across at Cosmicflows-2's H₀ = 75.2, rescaled to the model's",
     }),
     members: { value: 100_000, unit: "count", source: "tully2014", status: "verified" },
     mass: { value: 1e17, unit: "Msun", source: "tully2014", status: "verified" },
@@ -302,7 +280,7 @@ export const COSMOS = {
     distance: anchorDistance("perseusCluster", "struble1999", {
       digits: 2,
       status: "flag",
-      note: "comoving from the cluster's cz 5,366 km/s, seen only as quoted (NGC 1275 itself: 5,297); papers adopt 72–74 Mpc",
+      note: "comoving from the cluster's heliocentric cz 5,366 km/s in the CMB frame, seen only as quoted (NGC 1275 itself: 5,297); papers adopt 72–74 Mpc",
     }),
     length: {
       value: STRUCTURES.perseusPisces.length,
@@ -317,7 +295,7 @@ export const COSMOS = {
     distance: anchorDistance("comaCluster", "geller1999", {
       digits: 2,
       status: "derived",
-      note: "comoving from the median cz 7,090 km/s; SNe Ia give 98.5 ± 2.2 Mpc (Scolnic et al. 2024)",
+      note: "comoving from the median heliocentric cz 7,090 km/s in the CMB frame; SNe Ia give 98.5 ± 2.2 Mpc (Scolnic et al. 2024)",
     }),
     members: {
       value: 1_651,
@@ -339,7 +317,7 @@ export const COSMOS = {
     distance: anchorDistance("shapleyCore", "proust2006", {
       digits: 2,
       status: "derived",
-      note: "comoving from Abell 3558's cz 14,307 km/s; the paper uses 145 h⁻¹ Mpc",
+      note: "comoving from Abell 3558's heliocentric cz 14,307 km/s in the CMB frame; the paper uses 145 h⁻¹ Mpc",
     }),
     clusters: {
       value: 44,
@@ -401,7 +379,6 @@ export const COSMOS = {
       source: "planck2018",
       status: "derived",
       note: "particle horizon: the comoving distance light has covered since the Big Bang, with radiation",
-      at: horizonAt,
     },
     cmbDistance: {
       value: CMB_MLY,
@@ -410,7 +387,6 @@ export const COSMOS = {
       source: "planck2018",
       status: "derived",
       note: `comoving distance to z∗ = ${LAST_SCATTERING_Z}; Planck's r∗ / θ∗ give 13,885 Mpc`,
-      at: cmbAt,
     },
     cmbAge: {
       value: CMB_AGE_YEARS,
@@ -427,8 +403,7 @@ export const COSMOS = {
       digits: 5,
       source: "fixsen2009",
       status: "verified",
-      note: "2.7255 ± 0.0006 K today; T₀ / a back along the slider",
-      at: (yearsAgo) => CMB_KELVIN / scaleAt(yearsAgo),
+      note: "2.7255 ± 0.0006 K today",
     },
     lightTravel: {
       value: UNIVERSE_AGE_GYR,
@@ -436,8 +411,7 @@ export const COSMOS = {
       digits: 3,
       source: "planck2018",
       status: "derived",
-      note: "the universe's age at the slider's moment",
-      at: (yearsAgo) => UNIVERSE_AGE_GYR - yearsAgo / 1e9,
+      note: "the age of the universe: how long the oldest light has travelled",
     },
     ringNear: ring(LOOKBACK_RINGS_GYR[0]),
     ringMid: ring(LOOKBACK_RINGS_GYR[1]),

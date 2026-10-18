@@ -28,10 +28,20 @@ Real data, honest models, every number sourced.
     <td width="50%" valign="top">
       <img src="public/simulations/orrery/og.png" alt="Solar-system orrery" />
       <h3>Solar system</h3>
-      <p>The planets where they are today, the clearing of the early solar system, and the Sun's place in the Milky Way.</p>
-      <p>Live JPL positions · 10-billion-year timeline · true-size close-ups · nearest stars</p>
+      <p>The planets where they are today and the clearing of the early solar system, out to the Oort cloud.</p>
+      <p>Live JPL positions · 10-billion-year timeline · true-size close-ups</p>
       <p><a href="docs/science-sources.md">Sources →</a></p>
     </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="public/simulations/deep-field/og.png" alt="Deep field" />
+      <h3>Deep field</h3>
+      <p>Zoom from the planets through the nearest stars and the Milky Way to the microwave background. The farther you look, the older the light.</p>
+      <p>Fourteen views · depth ladder · light-travel time and redshift</p>
+      <p><a href="docs/science-sources.md">Sources →</a></p>
+    </td>
+    <td width="50%" valign="top"></td>
   </tr>
 </table>
 
@@ -52,8 +62,8 @@ npm ci
 npm run dev
 ```
 
-Open <http://localhost:3000>. Simulations live under `/lab`, for example `/lab/black-hole` and
-`/lab/orrery`. URLs carry no language; a cookie picks it, English by default.
+Open <http://localhost:3000>. Simulations live under `/lab`, for example `/lab/black-hole`,
+`/lab/orrery` and `/lab/deep-field`. URLs carry no language; a cookie picks it, English by default.
 
 ## Scripts
 

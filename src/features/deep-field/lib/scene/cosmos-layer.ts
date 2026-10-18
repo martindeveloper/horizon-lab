@@ -3,8 +3,8 @@
  * Supercluster, Laniakea, the cosmic web around it and the observable universe. The model is in millions of light-years around the galactic
  * centre (see `model/cosmos.ts`); its group is turned by `GALAXY_FRAME` and placed where the
  * Galaxy is, so the Milky Way drawn here takes over from the Galaxy map as it fades. It
- * draws in the Galaxy's pass. With the timeline, unbound structures ride the expansion,
- * Andromeda follows its orbit and clusters gather their members.
+ * draws in the Galaxy's pass. Everything stands where it is today; only the lookback rings
+ * and the edge's name follow the camera.
  *
  * Every label is a mark: it names something with a card, and a finger-sized target sits
  * under it while it reads. Where two labels share a place (Virgo and its supercluster, the
@@ -26,6 +26,17 @@ import {
 } from "three";
 
 import {
+  BELOW,
+  rising,
+  STRONG,
+  type AnchoredRulers,
+  type DistanceText,
+  type LabelStyle,
+  type LabelText,
+  type PlaceLabel,
+} from "@horizon/toolkit/scene";
+
+import {
   clusterCloud,
   cosmicWeb,
   deepField,
@@ -36,34 +47,20 @@ import {
   observableUniverse,
 } from "../graphics/cosmos";
 import {
+  CMB_MLY,
   COSMIC_VIEW_LY,
   COSMOS_LABELS,
+  FIRST_GALAXIES_MLY,
+  LOCAL_GROUP_CENTRE,
   LOOKBACK_RINGS_GYR,
-  anchorAt,
   anchorById,
-  clusterGathered,
-  cmbAt,
-  horizonAt,
-  localGroupCentre,
+  anchorToday,
   lookbackMly,
-  scaleAt,
   type AnchorId,
-  type Vec,
 } from "../model/cosmos";
 import type { Selection } from "../store";
-import type { Frame, Labels, SceneKit } from "./kit";
-import { BELOW, STRONG, type LabelStyle, type PlaceLabel } from "./labels";
-import {
-  GALAXY_FRAME,
-  GALAXY_LAYER,
-  LY,
-  MLY,
-  cosmicToWorld,
-  galacticAnchor,
-  galaxyToWorld,
-  rising,
-} from "./lod";
-import type { DistanceText, Rulers } from "./rulers";
+import type { Frame, SceneKit } from "./kit";
+import { GALAXY_FRAME, GALAXY_LAYER, LY, MLY, cosmicToWorld, galaxyToWorld } from "./lod";
 
 /** Farthest anything drawn reaches from the galactic centre, Mly: the microwave background. */
 const EXTENT_MLY = 48_000;
@@ -114,17 +111,21 @@ type Mark = {
 export function createCosmosLayer(
   { scope, looks, camera, pxWorld, lod, tight }: SceneKit,
   parent: Object3D,
-  deps: { place: PlaceLabel; rulers: Rulers; labels: Labels; distanceText: DistanceText },
+  deps: {
+    place: PlaceLabel;
+    rulers: AnchoredRulers;
+    labels: LabelText;
+    distanceText: DistanceText;
+  },
 ) {
   const { place, rulers, labels, distanceText } = deps;
   const m = looks.cosmos;
   const root = new Group();
   root.quaternion.copy(GALAXY_FRAME);
   root.scale.setScalar(MLY);
+  /* The galactic centre, with the Sun at the scene's origin. */
+  galaxyToWorld(0, 0, 0, root.position);
   parent.add(root);
-  /* Unbound structures keep comoving places: this group scales with the expansion. */
-  const flow = new Group();
-  root.add(flow);
 
   const points = (geometry: BufferGeometry, material: Material, into: Object3D) => {
     const cloud = new Points(scope.own(geometry), material);
@@ -132,22 +133,28 @@ export function createCosmosLayer(
     into.add(cloud);
     return cloud;
   };
+  const position = (object: Object3D, p: Readonly<[number, number, number]>) =>
+    object.position.set(p[0], p[1], p[2]);
   const lg = localGroupClouds(tight);
   points(lg.local, m.dwarfs, root);
   const m31Group = new Group();
   root.add(m31Group);
   points(lg.andromeda, m.dwarfs, m31Group);
-  points(localSheet(tight), m.sheet, flow);
-  points(localSupercluster(tight), m.supercluster, flow);
+  points(localSheet(tight), m.sheet, root);
+  points(localSupercluster(tight), m.supercluster, root);
   const web = laniakeaWeb(tight);
-  const laniakeaCloud = points(web.points, m.laniakea, flow);
-  const webCloud = points(cosmicWeb(tight), m.web, flow);
+  const laniakeaCloud = points(web.points, m.laniakea, root);
+  const webCloud = points(cosmicWeb(tight), m.web, root);
 
   /* The observable universe: the microwave background, galaxies beyond the web and rings
      where light set out 1, 5 and 10 billion years ago. Each is scaled every frame. */
   const universe = observableUniverse(tight);
   const cmbShell = points(universe.cmb, m.cmb, root);
   const deepFill = points(universe.fill, m.deep, root);
+  cmbShell.scale.setScalar(CMB_MLY);
+  /* The galaxies beyond the web fill space out to the first galaxies; the dark ages lie between
+     them and the microwave background. */
+  deepFill.scale.setScalar(FIRST_GALAXIES_MLY);
   const circle = scope.own(universe.circle);
   const rings = LOOKBACK_RINGS_GYR.map((gyr) => {
     const line = new LineLoop(circle, looks.cosmosRing);
@@ -158,7 +165,7 @@ export function createCosmosLayer(
   const RING_KEYS = rings.map((ring) => ring.key);
   const flows = new LineSegments(scope.own(web.flows), looks.cosmosFlow);
   flows.frustumCulled = false;
-  flow.add(flows);
+  root.add(flows);
 
   /* Far galaxies all round the camera: depth behind the Local Group and Virgo. */
   const field = new Group();
@@ -176,7 +183,8 @@ export function createCosmosLayer(
     );
     const glow = new Sprite(looks.cosmosCluster);
     group.add(glow);
-    return { spec, group, cloud, count, glow };
+    position(group, anchorToday(anchorById(spec.id)));
+    return { spec, group, cloud, glow };
   });
   const cluster = (id: AnchorId) => clusters.find((c) => c.spec.id === id)!;
   const virgo = cluster("virgoCluster");
@@ -187,8 +195,11 @@ export function createCosmosLayer(
   const andromeda = new Sprite(looks.cosmosGalaxy);
   const triangulum = new Sprite(looks.cosmosGalaxy);
   root.add(milkyWay, andromeda, triangulum);
-  const lgCentre = new Vector3();
-  const wallCentre = new Vector3();
+  position(andromeda, anchorToday(anchorById("andromeda")));
+  m31Group.position.copy(andromeda.position);
+  position(triangulum, anchorToday(anchorById("triangulum")));
+  const lgCentre = new Vector3(...LOCAL_GROUP_CENTRE);
+  const wallCentre = new Vector3(...anchorToday(anchorById("sloanGreatWall")));
   /* Laniakea's inner landmarks give way once the web is in frame. */
   const insideWeb = (ly: number) => 1 - rising(ly, 1.3e9, 2.2e9);
   /* The web's names give way to the observable universe. */
@@ -381,11 +392,9 @@ export function createCosmosLayer(
     flow: looks.cosmosFlow.opacity,
   };
   const names = lod.fader();
-  const anchor: [number, number, number] = [0, 0, 0];
-  const centre = new Vector3();
+  const centre = root.position;
   const at = new Vector3();
-  const from = new Vector3();
-  const v: Vec = [0, 0, 0];
+  const from = cosmicToWorld([0, 0, 0], new Vector3());
   const best = new Map<string, { mark: Mark; alpha: number; fit: number }>();
   const eye = new Vector3();
   const toward = new Vector3();
@@ -399,7 +408,6 @@ export function createCosmosLayer(
     root.localToWorld(at.copy(local));
     object.scale.setScalar(pxWorld(camera.position.distanceTo(at), px) / MLY);
   };
-  const position = (object: Object3D, p: Vec) => object.position.set(p[0], p[1], p[2]);
 
   const labelPicks = new Map<string, Selection>(marks.map((mark) => [mark.key, mark.pick]));
 
@@ -414,7 +422,7 @@ export function createCosmosLayer(
     reach() {
       return camera.position.distanceTo(centre) + EXTENT_MLY * MLY;
     },
-    update({ show, yearsAgo, sel }: Frame) {
+    update({ show, sel }: Frame) {
       const shown = lod.cosmos;
       root.visible = field.visible = shown > 0.001;
       const labelled = names.to(show.names) * shown;
@@ -424,10 +432,6 @@ export function createCosmosLayer(
         return;
       }
       const ly = lod.dist / LY;
-      galacticAnchor(yearsAgo, show.elliptical, anchor);
-      galaxyToWorld(0, 0, 0, anchor, centre);
-      root.position.copy(centre);
-      flow.scale.setScalar(scaleAt(yearsAgo));
       /* This frame's placement, before anything below asks for world positions. */
       root.updateMatrixWorld();
       field.position.copy(camera.position);
@@ -449,11 +453,10 @@ export function createCosmosLayer(
       m.laniakea.opacity *= speck;
       m.far.opacity *= speck;
       m.cmb.opacity = base.cmb * shown * rising(ly, 2e10, 6e10);
-      m.deep.opacity = base.deep * shown * rising(ly, 8e9, 3e10);
+      m.deep.opacity = base.deep * shown * rising(ly, 4e9, 2e10);
       cmbShell.visible = m.cmb.opacity > 0.002;
       deepFill.visible = m.deep.opacity > 0.002;
-      /* The rings mark today's sky; back along the timeline they fade. */
-      const ringsOn = shown * rising(ly, 5e9, 2e10) * (1 - rising(yearsAgo, 1e8, 1e9));
+      const ringsOn = shown * rising(ly, 5e9, 2e10);
       looks.cosmosRing.opacity = base.ring * ringsOn;
       /* The two big clouds skip their draw while they are faded out. */
       webCloud.visible = m.web.opacity > 0.002;
@@ -463,21 +466,9 @@ export function createCosmosLayer(
       looks.cosmosGalaxy.opacity = base.galaxy * shown * (1 - rising(ly, 40e6, 120e6));
       looks.cosmosCluster.opacity = base.cluster * shown;
 
-      /* The Local Group: Andromeda and its own on their orbit toward us. */
-      position(andromeda, anchorAt(anchorById("andromeda"), yearsAgo, v));
-      m31Group.position.copy(andromeda.position);
-      position(triangulum, anchorAt(anchorById("triangulum"), yearsAgo, v));
-      position(milkyWay, [0, 0, 0]);
-      const c = localGroupCentre(yearsAgo, v);
-      lgCentre.set(c[0], c[1], c[2]);
-      const wall = anchorAt(anchorById("sloanGreatWall"), yearsAgo, v);
-      wallCentre.set(wall[0], wall[1], wall[2]);
-
-      /* The observable universe then, and each shell's outline as the camera sees it: a sphere
-         of radius R seen from d shows a circle of R √(1 − R²/d²), R²/d nearer than its centre. */
-      const cmb = cmbAt(yearsAgo);
-      cmbShell.scale.setScalar(Math.max(1e-3, cmb));
-      deepFill.scale.setScalar(Math.max(1e-3, horizonAt(yearsAgo) * 0.7));
+      /* Each shell's outline as the camera sees it: a sphere of radius R seen from d shows a
+         circle of R √(1 − R²/d²), R²/d nearer than its centre. */
+      const cmb = CMB_MLY;
       root.worldToLocal(eye.copy(camera.position));
       const d = eye.length() || 1;
       toward.copy(eye).divideScalar(d);
@@ -518,11 +509,7 @@ export function createCosmosLayer(
         sprite.scale.setScalar(Math.max(sprite.scale.x, mly * 2.2));
       }
 
-      /* Clusters: carried by the expansion, their own size kept; members gather toward today. */
-      const gathered = clusterGathered(yearsAgo);
       for (const k of clusters) {
-        position(k.group, anchorAt(anchorById(k.spec.id), yearsAgo, v));
-        k.cloud.geometry.setDrawRange(0, Math.max(1, Math.round(k.count * gathered)));
         k.group.visible = (k.spec.far ? far : near) > 0.002;
         toPx(k.glow, k.group.position, 16);
       }
@@ -563,7 +550,6 @@ export function createCosmosLayer(
                   : ly > 220e6
                     ? heart.group.position
                     : virgo.group.position;
-        cosmicToWorld([0, 0, 0], anchor, from);
         root.localToWorld(at.copy(to));
         rulers.draw(
           from.x,

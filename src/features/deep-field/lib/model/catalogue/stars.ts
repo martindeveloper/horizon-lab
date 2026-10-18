@@ -1,3 +1,5 @@
+import type { Facts, Value } from "@/lib/facts";
+import type { SourceId } from "@/lib/sources";
 /** The nearest stars, from their astrometry (neighbours.ts) through the science kit's laws. */
 import { angularSeparation, convert, parallaxDistance } from "@horizon/toolkit/science";
 
@@ -7,8 +9,6 @@ import {
   neighbourSeparationAu,
   type NeighbourId,
 } from "../neighbours";
-import type { SourceId } from "./sources";
-import type { Facts, Value } from "./types";
 
 const neighbour = (id: NeighbourId) => NEIGHBOURS.find((star) => star.id === id)!;
 

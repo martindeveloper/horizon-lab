@@ -1,15 +1,15 @@
+import type { Facts, Value } from "@/lib/facts";
 /** The Milky Way and the Sun's orbit in it, from the model's parameters. */
+import { GALACTIC_YEAR, SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { convert } from "@horizon/toolkit/science";
 
 import {
   ARM_PITCH_DEG,
   ARM_START_KPC,
   BAR_ANGLE_DEG,
-  GALACTIC_YEAR,
   HALO_R200_KPC,
   RADIAL_AMPLITUDE_LY,
   RADIAL_PERIOD,
-  SUN_BIRTH,
   SUN_GALACTIC_RADIUS_LY,
   SUN_HEIGHT_LY,
   THICK_DISK_KPC,
@@ -18,7 +18,6 @@ import {
   VERTICAL_PERIOD,
   WARP_START_KPC,
 } from "../parameters";
-import type { Facts, Value } from "./types";
 
 /** The Sun's distance from the Galactic centre: the model's R₀. */
 const sunToCentre: Value = {
@@ -45,16 +44,16 @@ export const GALAXY = {
       value: GALACTIC_YEAR,
       unit: "yr",
       show: "Myr",
-      range: [205e6, 230e6],
-      source: "eilers2019",
+      range: [203e6, 211e6],
+      source: "reid2019",
       status: "derived",
-      note: "2πR₀/Θ₀: 222 Myr at 229 km/s (Eilers 2019), 206 Myr at 247 km/s (Reid 2019)",
+      note: "2πR₀/(Θ₀ + V☉): 206 Myr at 247 km/s and 8.28 kpc (Reid 2019), 211 Myr at 229 + 12 km/s (Eilers 2019; Schönrich 2010), 203 Myr at R₀ = 8.18 kpc",
     },
     laps: {
       value: SUN_BIRTH / GALACTIC_YEAR,
       unit: "count",
       digits: 2,
-      source: "eilers2019",
+      source: "reid2019",
       status: "derived",
       note: "the Sun's age over the galactic year",
     },
@@ -136,7 +135,7 @@ export const GALAXY = {
       status: "verified",
       note: "Wegg 2015: 5.0 ± 0.2; Lucey 2023: ~3.5",
     },
-    blackHole: { value: 4e6, unit: "Msun", source: "gravity2022", status: "verified" },
+    blackHole: { value: 4.3e6, unit: "Msun", source: "gravity2022", status: "verified" },
   },
   halo: {
     r200: {

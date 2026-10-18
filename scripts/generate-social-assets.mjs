@@ -8,13 +8,15 @@ const artwork = async (slug) =>
   readFile(new URL(`../public/simulations/${slug}.svg`, import.meta.url), "utf8");
 const blackHole = await artwork("black-hole");
 const orrery = await artwork("orrery");
+const deepField = await artwork("deep-field");
 const escape = (text) =>
   text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
 const copy = {
   intro: "Explore the universe.",
   category: "INTERACTIVE SPACE SIMULATIONS",
   observatory: "Relativistic observatory",
-  orrery: "An honest orrery of the solar system and the Milky Way",
+  orrery: "An honest orrery of the solar system, out to the Oort cloud",
+  deepField: "From the planets to the edge of the universe",
 };
 const messages = JSON.parse(
   await readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
@@ -33,6 +35,12 @@ const cards = [
     title: messages.catalogue.orrery.title,
     subtitle: copy.orrery,
     art: orrery,
+  },
+  {
+    path: "simulations/deep-field/og",
+    title: messages.catalogue.deepField.title,
+    subtitle: copy.deepField,
+    art: deepField,
   },
 ];
 for (const card of cards) {

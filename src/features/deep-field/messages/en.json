@@ -1,0 +1,442 @@
+{
+  "app": "Deep Field",
+  "metadataDescription": "From the planets to the edge of the observable universe in one zoom, where distance is also how long the light has been on its way.",
+  "canvasLabel": "Interactive map from the planets to the observable universe",
+  "views": {
+    "stars": "Nearest star",
+    "galaxy": "Milky Way",
+    "local-group": "Local Group",
+    "local-sheet": "Local Sheet",
+    "virgo-cluster": "Virgo Cluster",
+    "virgo-supercluster": "Virgo Supercluster",
+    "laniakea": "Laniakea",
+    "cosmic-web": "Cosmic web",
+    "observable-universe": "Observable universe"
+  },
+  "viewHints": {
+    "inner": "Mercury to Mars, where they are today.",
+    "giants": "Jupiter to Neptune, today.",
+    "kuiper": "Neptune and the icy belt beyond it, about 30–50 au.",
+    "scattered": "Bodies on long ellipses, hundreds of au out.",
+    "oort": "The comet cloud, inferred from long-period comets, out to one to three light-years.",
+    "stars": "Proxima, Alpha Centauri and Barnard's Star in their real directions. The ring is Proxima's distance; the sky behind is the real one.",
+    "galaxy": "Our galaxy, about 100,000 light-years across. The gold line is the Sun's path.",
+    "local-group": "The Milky Way, Andromeda and their dwarfs, about 6 million light-years across.",
+    "local-sheet": "The flat wall of nearby groups we live in, about 46 million light-years across.",
+    "virgo-cluster": "About 1,500 galaxies some 54 million light-years away. We sit outside it.",
+    "virgo-supercluster": "Groups and clouds fanned out around Virgo, about 110 million light-years across.",
+    "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor.",
+    "cosmic-web": "Laniakea among its neighbours: filaments of galaxies around nearly empty voids, out to the Sloan Great Wall.",
+    "observable-universe": "Everything light has had time to reach us from, walled by the cosmic microwave background."
+  },
+  "toggles": {
+    "halo": "Dark-matter halo"
+  },
+  "names": {
+    "proxima": "Proxima Centauri",
+    "alphaCen": "Alpha Centauri",
+    "barnard": "Barnard's Star",
+    "scholz": "Scholz's Star",
+    "galaxySun": "Sun",
+    "milkyway": "Milky Way",
+    "bulge": "Bulge and bar",
+    "halo": "Dark-matter halo",
+    "andromeda": "Andromeda",
+    "triangulum": "Triangulum",
+    "localGroup": "Local Group",
+    "localSheet": "Local Sheet",
+    "virgoCluster": "Virgo Cluster",
+    "fornaxCluster": "Fornax Cluster",
+    "virgoSupercluster": "Virgo Supercluster",
+    "centaurusCluster": "Centaurus Cluster",
+    "hydraCluster": "Hydra Cluster",
+    "greatAttractor": "Great Attractor",
+    "laniakea": "Laniakea",
+    "perseusPisces": "Perseus–Pisces",
+    "comaCluster": "Coma Cluster",
+    "shapleySupercluster": "Shapley Supercluster",
+    "sloanGreatWall": "Sloan Great Wall",
+    "observableUniverse": "Observable universe",
+    "lookbackRing": "{value} billion years ago"
+  },
+  "hud": {
+    "galaxyItems": "Milky Way map",
+    "cosmosItems": "Beyond the Milky Way",
+    "neighbours": "Nearby stars",
+    "home": "Back to the solar system",
+    "depth": "Depth",
+    "eyepiece": "Sightline",
+    "outTo": "Out to",
+    "distance": "Distance",
+    "lightLeft": "Light left",
+    "redshift": "Redshift",
+    "redshiftValue": "z = {value}",
+    "atDepth": "{view}, {distance} out",
+    "backInTime": "Back in time · Orrery",
+    "backInTimeHint": "This place through the solar system's history",
+    "lightLeftAgo": "Light left {ago}",
+    "outToValue": "out to {distance}",
+    "guide": "Guide"
+  },
+  "time": {
+    "years": "{value} years ago",
+    "minutes": "{value} minutes ago",
+    "hours": "{value} hours ago",
+    "days": "{value} days ago"
+  },
+  "then": {
+    "clock": "It set out at {time}",
+    "date": "It set out on {date}",
+    "year": "It set out in {year}",
+    "yearBce": "It set out in {year} BC",
+    "iceAge": "On Earth: the last ice age",
+    "firstHumans": "On Earth: the first modern humans",
+    "stoneTools": "On Earth: early humans and stone tools",
+    "upright": "On Earth: our ancestors begin to walk upright",
+    "mammals": "On Earth: mammals spread after the dinosaurs",
+    "dinosaurs": "On Earth: the age of dinosaurs",
+    "land": "On Earth: life spreads onto land",
+    "seas": "On Earth: animals multiply in the seas",
+    "simple": "On Earth: microbes and the first simple multicellular life, in the seas",
+    "microbes": "On Earth: microbes, and no oxygen in the air",
+    "young": "On Earth: a young world, before any sure sign of life",
+    "noEarth": "Before Earth formed",
+    "noSun": "Before the Sun and Earth formed",
+    "cmb": "The oldest light we can see, {age} years after the Big Bang"
+  },
+  "badges": {
+    "sketch": "Sketch",
+    "schematic": "Measured distance · schematic path"
+  },
+  "facts": {
+    "centre": "Sun–centre distance",
+    "lap": "Lap time",
+    "speed": "Speed",
+    "radial": "In-and-out",
+    "vertical": "Up-and-down",
+    "bar": "Bar",
+    "width": "Width",
+    "diskWidth": "Stellar disk diameter",
+    "thickness": "Thin-disk thickness",
+    "stars": "Stars",
+    "closestFuture": "{distance}, in {years} years",
+    "closestPast": "{distance}, {years} years ago",
+    "closest": "Closest approach",
+    "motion": "Motion",
+    "direction": "Direction",
+    "distance": "Distance",
+    "members": "Members",
+    "apart": "Milky Way–Andromeda",
+    "approach": "Approach",
+    "future": "Future",
+    "heart": "Heart",
+    "depth": "Thickness",
+    "length": "Length",
+    "lookback": "Light left",
+    "edge": "Edge",
+    "cmb": "Microwave glow",
+    "temperature": "Temperature",
+    "fromEarth": "From Earth",
+    "fromSun": "From the Sun",
+    "sunlight": "Sunlight takes",
+    "catalogued": "Catalogued",
+    "innerEdge": "Inner edge",
+    "outerEdge": "Outer edge"
+  },
+  "cards": {
+    "galaxy": {
+      "sun": {
+        "title": "The Sun in the Galaxy",
+        "centre": "About {value}",
+        "lap": "About {value} million years (estimates run {range})",
+        "speed": "About {value} km/s circular speed here; the Sun itself moves ~{sun} km/s",
+        "radial": "Out to ~{value} farther and back, every ~{period} million years",
+        "vertical": "±{value} over ~{period} million years; now ~{height} north, climbing",
+        "body": "We sit at the inner edge of the Local Arm (the Orion Spur), between the Sagittarius–Carina and Perseus arms, neither at the centre nor at the rim. Since it formed the Sun has lapped the Galaxy about {laps} times, clockwise seen from the north galactic pole. The gold line is its path over the last two laps, a schematic: its true angle that long ago is not known.",
+        "caution": "The wobble amplitudes are typical values from stellar-dynamics estimates; studies differ. A star's galactic path is not a closed ellipse."
+      },
+      "bulge": {
+        "title": "Bulge and bar",
+        "centre": "About {value}",
+        "bar": "About {value} end to end, estimates {range}; ~{angle}° to the Sun–centre line",
+        "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about {mass} Suns. The point density is a sketch, not a star catalogue.",
+        "caution": "Do not measure the bar's length off this drawing."
+      },
+      "halo": {
+        "title": "Dark-matter halo",
+        "width": "On the order of {value}",
+        "mass": "Most of the Galaxy's mass",
+        "body": "Stars orbit too fast for the visible matter alone to hold them; the extra gravity is attributed to dark matter. The faint ball is a reminder of that halo, off by default so it is not mistaken for a cloud of stars.",
+        "caution": "Dark matter has not been seen directly. Do not treat the sphere as a photo or a sharp edge."
+      },
+      "milkyway": {
+        "title": "Milky Way",
+        "diskWidth": "On the order of {value}",
+        "thickness": "On the order of {value}",
+        "stars": "At least {value}",
+        "age": "About {value} billion years",
+        "body": "Our galaxy from outside, built on measurements: a thin and a thick disk, a peanut-shaped bulge inside a bar at {bar}°, four arms at a ~{pitch}° pitch placed where maser distances put them near the Sun, the short Local Arm just outside us, dust lanes on the arms' inner edges and the warp of the outer disk. The far side is extrapolated: the centre hides it from us. About {merger} billion years ago the Gaia-Enceladus merger stirred it and thickened its disk.",
+        "caution": "Spiral arms are not fixed structures: stars pass through them, whether the arms are long-lived density waves or come and go, which is still debated. The planets' plane is tilted by about {tilt}° to the Galaxy's, so the view turns as you pull out past the nearest stars."
+      }
+    },
+    "stars": {
+      "proxima": {
+        "where": "Centaurus, near the southern Milky Way",
+        "motion": "{velocity} km/s toward the Sun, {proper}″ a year across the sky",
+        "body": "A red dwarf, the nearest star to the Sun. It is drawn where it really is on the sky; the ring is its distance and the beam links it to the Sun. The Sun's gravity is already losing to the Galaxy near the outer Oort cloud."
+      },
+      "alphaCen": {
+        "where": "Centaurus, {separation}° from Proxima",
+        "motion": "{velocity} km/s toward the Sun; Proxima orbits the pair",
+        "body": "Two Sun-like stars {distance} away, a close pair drawn as one point. Proxima is loosely bound to them, about {proxima} out. Both pass about {approach} from the Sun in roughly {years} years."
+      },
+      "barnard": {
+        "where": "Ophiuchus",
+        "motion": "{velocity} km/s toward the Sun, {proper}″ a year, the fastest proper motion known",
+        "body": "A faint red dwarf {distance} away, closing fast. It passes about {approach} from the Sun in roughly {years} years, then recedes."
+      },
+      "scholz": {
+        "where": "Monoceros, {distance} away today",
+        "motion": "{velocity} km/s away from the Sun, almost along the line of sight",
+        "body": "A red dwarf with a brown-dwarf companion, receding. Run its track back and it passed through the outer Oort cloud about {flyby} thousand years ago, roughly a light-year out: the closest well-established stellar flyby. Humans were around and may have seen its flares."
+      },
+      "caution": "Distances and directions are measured. Closest approaches follow straight-line tracks from measured speeds, good for a few hundred thousand years either way."
+    },
+    "cosmos": {
+      "localGroup": {
+        "title": "Local Group",
+        "width": "About {value}",
+        "members": "About {value} galaxies, most of them dwarfs",
+        "mass": "A few trillion Suns, mostly dark matter",
+        "body": "Our galaxy's group: two giants, the Milky Way and Andromeda, with Triangulum and dozens of dwarfs, held together by their own gravity, so it does not expand with the Universe. By the timing argument the giants flew apart after the Big Bang, turned around about {turnaroundAgo} billion years ago at {turnaround}, and have been falling together since.",
+        "caution": "Only the named galaxies are at measured places; the dwarfs are a sketch around their hosts."
+      },
+      "andromeda": {
+        "title": "Andromeda Galaxy",
+        "approach": "About {value} km/s toward the Milky Way ({sun} km/s toward the Sun)",
+        "width": "About {range}, from the bright disk to its faint outer edge",
+        "future": "A first close pass in ~{range} billion years is likely; a merger is possible, not certain",
+        "body": "The nearest big galaxy and the largest in the Local Group, a spiral like ours seen at a slant. Its spectrum shows it nearing the Sun at about {sun} km/s; take away the Sun's own orbit around the Galaxy and it closes on the Milky Way at about {approach} km/s. Gravity alone, that speed, today's {distance} and the age of the Universe fix one radial orbit: the timing argument.",
+        "caution": "Its sideways motion is uncertain, so studies put the chance of a merger within {within} billion years anywhere from about one half to nine in ten."
+      },
+      "virgo": {
+        "title": "Virgo Cluster",
+        "members": "About {value} galaxies (estimates {range})",
+        "width": "About {value}",
+        "heart": "M87, with a black hole of about {value} Suns",
+        "body": "The nearest large cluster and the heart of our supercluster. We are not inside it: the Local Group lies far out on the supercluster's outskirts, pulled toward the cluster while the expansion still carries us apart.",
+        "caution": "The members are a drawn sample shaped like a cluster, not a catalogue."
+      },
+      "supercluster": {
+        "title": "Virgo Supercluster",
+        "width": "About {value}",
+        "members": "{value} clouds of galaxy groups",
+        "heart": "The Virgo Cluster",
+        "body": "Also called the Local Supercluster: a flattened spread of groups and clouds around Virgo, with the Local Group on one of its spurs. It is not bound, so it grows with the expansion; since 2014 it counts as one lobe of Laniakea.",
+        "caution": "Its clouds and spurs are a sketch; only the named groups and clusters are at measured places."
+      },
+      "laniakea": {
+        "title": "Laniakea",
+        "width": "About {value}",
+        "members": "About {value} large galaxies",
+        "mass": "About {value} Suns",
+        "heart": "The Great Attractor, ~{value} away toward Norma and Centaurus",
+        "body": "Our home supercluster, named in 2014 from the Hawaiian for \"immeasurable heaven\". Its edge is a watershed, not a wall: inside it, once the expansion is taken out, galaxies flow toward the Great Attractor. The lines trace those flows.",
+        "caution": "The filaments and flow lines are a sketch in the spirit of the Cosmicflows maps, not their data; studies still move the boundary."
+      },
+      "triangulum": {
+        "title": "Triangulum Galaxy",
+        "width": "About {value}",
+        "future": "May join the Milky Way–Andromeda merger",
+        "body": "The Local Group's third spiral, smaller and looser than ours, probably on a long orbit around Andromeda. Under a dark sky it is just visible to the eye, among the farthest things you can see without a telescope.",
+        "caution": "Whether it has already passed close to Andromeda is debated."
+      },
+      "fornax": {
+        "title": "Fornax Cluster",
+        "members": "About {value} catalogued galaxies",
+        "width": "About {value}",
+        "heart": "NGC 1399",
+        "body": "After Virgo, the most massive cluster within about 65 million light-years, smaller and more compact, in the southern sky.",
+        "caution": "The members are a drawn sample shaped like a cluster, not a catalogue."
+      },
+      "centaurus": {
+        "title": "Centaurus Cluster",
+        "members": "Hundreds of galaxies",
+        "heart": "NGC 4696",
+        "body": "A rich cluster on the run of galaxies from Virgo toward the Great Attractor, part of the Centaurus–Hydra concentration.",
+        "caution": "Its distance here comes from its redshift, not a direct measurement; the members are a drawn sample."
+      },
+      "hydra": {
+        "title": "Hydra Cluster",
+        "members": "About {value} catalogued in its field",
+        "heart": "NGC 3311 and NGC 3309",
+        "body": "A rich cluster at about the same distance as the Centaurus Cluster, part of the same concentration that feeds the Great Attractor.",
+        "caution": "Its distance here comes from its redshift, not a direct measurement; the members are a drawn sample."
+      },
+      "greatAttractor": {
+        "title": "Great Attractor",
+        "mass": "About {value} Suns",
+        "heart": "The Norma Cluster (Abell 3627)",
+        "where": "Behind the Milky Way's disk, toward Norma and Centaurus",
+        "body": "Where Laniakea's flows converge: a concentration of clusters about {distance} away, mostly hidden by our own galaxy's dust and stars. Its pull showed up in galaxy motions in the 1980s before anyone could see what was there.",
+        "caution": "It is a region, not one object; its centre and mass differ between studies."
+      },
+      "localSheet": {
+        "title": "Local Sheet",
+        "width": "About {value}",
+        "thickness": "About {value}",
+        "members": "The Local Group and a dozen nearby groups: M81, Centaurus A, Sculptor and more",
+        "motion": "Moving ~{value} km/s away from the Local Void; inside it, galaxies stray only ~{stray} km/s",
+        "body": "The thin wall of galaxies we live in: the Local Group and its neighbours lie in one flat slab about {radius} in radius. Its galaxies drift apart with the expansion almost in step, and the whole sheet is being pushed away from the emptiness of the Local Void beside it. It sits on the outskirts of the Virgo Supercluster.",
+        "caution": "Only the named groups are at measured places; the smaller groups in the sheet are a sketch."
+      },
+      "perseusPisces": {
+        "title": "Perseus–Pisces Supercluster",
+        "length": "At least {value} along its main ridge",
+        "where": "Toward Perseus and Pisces, next door to Laniakea",
+        "body": "A long chain of galaxies and clusters, one of the clearest filaments in the nearby sky. It is a basin of its own beside Laniakea: galaxies on its side of the watershed flow toward it, not toward the Great Attractor.",
+        "caution": "The chain is drawn through a few measured clusters; the Milky Way hides where it crosses our galaxy’s plane. Its distance comes from its redshift."
+      },
+      "coma": {
+        "title": "Coma Cluster",
+        "members": "About {value} confirmed by their spectra",
+        "mass": "About {value} Suns",
+        "heart": "NGC 4874 and NGC 4889",
+        "body": "One of the richest clusters near us. In 1933 Fritz Zwicky found its galaxies moving far too fast to be held by the matter that shines: an early strong hint of dark matter.",
+        "caution": "Its distance here comes from its redshift, which the cluster’s own motion can shift by a few per cent; the members are a drawn sample."
+      },
+      "shapley": {
+        "title": "Shapley Supercluster",
+        "members": "{clusters} clusters in its velocity range; about {galaxies} galaxies measured in its field",
+        "mass": "About {value} Suns",
+        "where": "Far beyond the Centaurus Cluster, in the same part of the sky",
+        "body": "One of the largest concentrations of matter in the nearby universe. With the Great Attractor it pulls on the Local Group, though how much of our motion it explains is still debated.",
+        "caution": "Its mass is an estimate for the surveyed region and differs between studies; the clusters around its core are placed approximately."
+      },
+      "sloanGreatWall": {
+        "title": "Sloan Great Wall",
+        "length": "About {value}; {past} when the light we see left it",
+        "lookback": "About {value} billion years ago",
+        "where": "Along the celestial equator, from Hydra through Sextans and Leo to Virgo",
+        "body": "A wall of galaxy clusters about {distance} away, found in 2003 in the Sloan Digital Sky Survey’s map. We see it as it was when its light left; the map places it where it is now, stretched with the expansion since.",
+        "caution": "Whether it is one structure or several superclusters in a row is debated; the drawing follows its outline in the survey, not its galaxies."
+      },
+      "observableUniverse": {
+        "title": "Observable universe",
+        "cmb": "From {distance}, set out {age} thousand years after the Big Bang",
+        "temperature": "{value} K above absolute zero",
+        "age": "{value} billion years of light on its way",
+        "body": "Everything we could ever have seen. Light has had {age} billion years to reach us, but space kept stretching while it travelled, so its sources now lie much farther away. The wall is the cosmic microwave background, light from when the universe first turned transparent. We sit at the centre only because every observer sits at the centre of their own.",
+        "caution": "The rings mark where light set out {near}, {mid} and {far} billion years ago, at today’s distances. The glow’s spots stand in for the Planck map, and the galaxies beyond the web are a uniform sample, not a catalogue. They stop at the farthest galaxies known; the dark band before the glow is what we have not seen yet: cosmic dawn, when the first stars lit up, and before it the dark ages."
+      }
+    },
+    "solar": {
+      "age": "About {value} billion years",
+      "asteroidsMass": "About {value} % of the Moon's",
+      "kuiperMass": "At most about {value} Earth masses",
+      "kuiperCatalogued": "More than {value}",
+      "scatteredWhere": "Near Neptune at closest, hundreds of au out at farthest",
+      "sun": "Our star. Seen from Alpha Centauri it would be one more bright point in Cassiopeia.",
+      "mercury": "The smallest planet and the closest to the Sun. From Earth it never strays far from the Sun, so it shows only near dawn or dusk.",
+      "venus": "Clouds of sulphuric acid over a crushing carbon-dioxide air; the brightest planet in our sky.",
+      "earth": "Home, and where Deep Field looks out from: every 'light left' counts back from now.",
+      "mars": "A cold, dusty desert with the tallest volcano known, Olympus Mons.",
+      "jupiter": "The largest planet, more than twice as massive as all the others together.",
+      "saturn": "A gas giant less dense than water, circled by rings of bright ice.",
+      "uranus": "An ice giant tipped on its side, so each pole gets decades of daylight, then decades of night.",
+      "neptune": "The outermost planet, found in 1846 where mathematics said it had to be.",
+      "pluto": "A dwarf planet in the Kuiper belt. New Horizons flew past in 2015 and found a vast plain of nitrogen ice.",
+      "sedna": "A distant, reddish world found in 2003, on an orbit that never comes near the planets.",
+      "halley": "The best-known comet: last near the Sun in 1986, back in 2061.",
+      "asteroids": "Millions of rocky bodies between Mars and Jupiter, yet all together a small fraction of the Moon's mass: the belt is mostly empty space.",
+      "kuiper": "A broad ring of icy bodies beyond Neptune, Pluto among them; many short-period comets start out here.",
+      "scattered": "Icy bodies on long, tilted orbits that Neptune's gravity flung outward.",
+      "oort": "A vast shell of icy bodies, inferred from long-period comets and never seen directly. Its outer edge reaches perhaps halfway to the nearest stars.",
+      "tracer": "One sample of the population, on a realistic orbit. It is not a real catalogued object."
+    }
+  },
+  "technicalDetails": {
+    "title": "Inside Deep Field",
+    "summary": "Today's sky at every scale: the nearest stars from Gaia astrometry, a Milky Way built on measurements where they exist, named galaxies and clusters at their measured places, and flat ΛCDM for distances and light-travel times. The sources below separate measured quantities from sketches.",
+    "features": {
+      "views": "Fourteen views from the inner planets to the observable universe, on one zoom.",
+      "depth": "A depth ladder and an eyepiece: how far a place is, when its light left and its redshift.",
+      "objects": "The Sun and planets, the nearest stars and Scholz's star, the Milky Way's structure, the Local Group, the Virgo Cluster, Laniakea, the cosmic web and the microwave background, each with a card that says what is measured."
+    },
+    "sections": {
+      "solar": {
+        "title": "The solar system today",
+        "body": "The planets, Pluto, Sedna and Halley's comet sit where JPL's orbital elements put them on today's date, with the Moon and the large moons of the giants. The asteroid belt, the Kuiper belt and the Oort cloud are samples drawn to their measured or inferred extents, not catalogues. It is the Orrery's solar system held at today; the Orrery shows how it got there."
+      },
+      "stars": {
+        "title": "The Sun's neighbourhood",
+        "body": "The nearest stars sit at their Gaia DR3 positions and parallaxes (α Centauri's from ALMA, Scholz's star's from Dupuy et al. 2019). Their closest approaches come from straight-line tracks through measured proper motions and radial velocities, good for a few hundred thousand years; Scholz's star's flyby through the outer Oort cloud falls out of that. Behind them the bright stars of the shared J2000 catalogue sit in their real directions, and the Milky Way band is the Galaxy map itself, seen from the Sun."
+      },
+      "galaxy": {
+        "title": "The Sun's galactic orbit",
+        "body": "The Sun circles {sunRadiusKpc} kpc from the centre (GRAVITY) with a {galacticYearMyr}-million-year period, clockwise from the north galactic pole. Today it sits near the inner end of a ~{radialSwingKpc} kpc radial swing (period ~{radialMyr} Myr) and {heightPc} pc north of the plane, climbing through ±{verticalPc} pc (period ~{verticalMyr} Myr). The gold line runs those oscillations back over two laps; the true phase that long ago is unknown. The disk follows measured structure: exponential thin ({thinLengthKpc} kpc, {thinHeightPc} pc) and thick ({thickLengthKpc} kpc, {thickHeightPc} pc) disks, a boxy bulge inside a {barHalfKpc} kpc half-length bar at {barDeg}°, four logarithmic arms at a {pitchDeg}° pitch anchored to maser parallaxes near the Sun, the Local Arm, dust on the arms' inner edges and the Cepheid-traced warp beyond {warpStartKpc} kpc. The halo sphere marks R₂₀₀ ≈ {haloKpc} kpc. The far side of the disk is extrapolated."
+      },
+      "cosmos": {
+        "title": "Beyond the Milky Way",
+        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda ({andromedaMly} million light-years, closing at {andromedaKms} km/s), Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Beyond Laniakea the Perseus–Pisces ridge, the Coma Cluster, the Shapley concentration and the Sloan Great Wall sit at comoving distances from their redshifts, tied into a seeded web of filaments around voids. Farther out the observable universe is drawn to scale: its edge (the particle horizon) and the microwave background at last scattering come from integrating flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, with radiation; age {universeGyr} billion years). Far out the camera orbits in the supergalactic plane."
+      },
+      "depth": {
+        "title": "Distance and light",
+        "body": "The ladder is the camera's distance on a log scale, from the Sun's neighbourhood to past the microwave background. The eyepiece reads how far the view reaches (its centre's distance from the Sun plus half the field), or the distance of the selected object. Up to a million light-years the light's travel time in years is its distance in light-years. Farther, the redshift is the one whose comoving distance matches, found by inverting the ΛCDM distance integral (the cosmological redshift alone: a galaxy's own motion shifts its measured one a little), and the light left at that redshift's lookback time. Nothing beyond the microwave background can be seen, so the readout stops there."
+      }
+    }
+  },
+  "tour": {
+    "label": "Guided tour",
+    "start": "Start guide",
+    "progress": "{step} / {total}",
+    "previous": "Previous step",
+    "next": "Next",
+    "play": "Play guide",
+    "pause": "Pause guide",
+    "finish": "Finish",
+    "exit": "Exit guide",
+    "steps": {
+      "sunlight": {
+        "title": "Light takes time",
+        "body": "Even sunlight is old: it left the Sun minutes before it reaches us. The rulers give each planet's distance from Earth and how long its light takes."
+      },
+      "giants": {
+        "title": "Hours away",
+        "body": "Past the giant planets, light needs hours. The line below says how long ago the light at the edge of the view set out."
+      },
+      "oort": {
+        "title": "The Sun's last outpost",
+        "body": "The Oort cloud of icy comets reaches perhaps halfway to the nearest stars. Nobody has seen it directly."
+      },
+      "stars": {
+        "title": "Years of light",
+        "body": "Proxima's light set out years ago. Every star in the night sky shows us its past, not its present."
+      },
+      "galaxy": {
+        "title": "One star among billions",
+        "body": "The Sun is one of hundreds of billions of stars in the Milky Way's disk. Light from the Galaxy's far side left during the last ice age."
+      },
+      "andromeda": {
+        "title": "Our big neighbour",
+        "body": "Andromeda's light left when early humans were shaping the first stone tools. The gap is closing: billions of years from now the two galaxies will probably pass close, and may merge."
+      },
+      "virgo": {
+        "title": "A city of galaxies",
+        "body": "More than a thousand galaxies, whose pull reaches all the way to us. This light set out not long after the dinosaurs died out."
+      },
+      "laniakea": {
+        "title": "Our home basin",
+        "body": "Galaxies stream toward the Great Attractor like rivers toward the sea. This basin of flows is our supercluster, Laniakea."
+      },
+      "web": {
+        "title": "The cosmic web",
+        "body": "On the largest scales, galaxies line walls and filaments around vast, nearly empty voids."
+      },
+      "firstLight": {
+        "title": "The oldest light",
+        "body": "Farther means earlier. Beyond the farthest galaxies seen lie cosmic dawn and the dark ages, and at the edge glows the oldest light we can see, set free soon after the Big Bang."
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
+
+@layer base {
+  /* Rung names and the sightline read over the scene like the labels do. */
+  :where([data-simulation="deep-field"]) :is(.deep-field-rung, .deep-field-sightline) {
+    text-shadow: 0 0 6px rgb(8 8 11 / 0.9);
+  }
+}
+
+/* The sightline's photon: a faint glint of light leaving the far end and arriving here, then a
+   long rest, so it reads as a hint rather than a movement to follow. */
+@keyframes deep-field-photon {
+  from {
+    left: calc(100% - 0.25rem);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.45;
+  }
+  42% {
+    opacity: 0.45;
+  }
+  50% {
+    left: 0;
+    opacity: 0;
+  }
+  to {
+    left: 0;
+    opacity: 0;
+  }
+}
+:where([data-simulation="deep-field"]) .deep-field-photon {
+  animation: deep-field-photon 12s linear infinite;
+  box-shadow: 0 0 4px rgb(var(--solar) / 0.5);
+}
+
+/* The journey's hold on a shot: a hairline that fills, freezes while paused, then moves on. */
+@keyframes deep-field-dwell {
+  to {
+    transform: scaleX(1);
+  }
+}
+:where([data-simulation="deep-field"]) .deep-field-dwell {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+:where([data-simulation="deep-field"])
+  .deep-field-dwell:is([data-state="running"], [data-state="paused"]) {
+  animation-name: deep-field-dwell;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+:where([data-simulation="deep-field"]) .deep-field-dwell[data-state="paused"] {
+  animation-play-state: paused;
+}

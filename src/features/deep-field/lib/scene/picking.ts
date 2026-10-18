@@ -1,0 +1,49 @@
+/** Taps on the canvas or a name select what is under them; a tap on nothing lets go. */
+import type { Object3D } from "three";
+
+import { selectTapped } from "@/space/solar-system/model/framing";
+import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
+
+import type { Selection, useDeepField } from "../store";
+import type { SceneKit } from "./kit";
+import { GALAXY_LAYER } from "./lod";
+
+export function createPicking(
+  kit: SceneKit,
+  canvas: HTMLCanvasElement,
+  store: typeof useDeepField,
+  options: {
+    pickables: Object3D[];
+    /** Camera distance from its aim, au. */
+    distance: () => number;
+    /** Names readable enough to tap, and what each opens. */
+    labels: () => LabelHit[];
+    labelPick: (key: string) => Selection | undefined;
+  },
+) {
+  /* The Galaxy and the cosmic map draw in their own pass but are picked like the rest. */
+  createTapPicking(kit, canvas, {
+    pickables: options.pickables,
+    layers: [GALAXY_LAYER],
+    blocked: () => false,
+    labels: options.labels,
+    labelPick: options.labelPick,
+    onTap: (target) => {
+      const api = store.getState();
+      if (!target) return api.select(null);
+      if (selectTapped(api, target, 1, options.distance())) return;
+      if (isSelection(target.pick)) api.select(target.pick);
+    },
+  });
+}
+
+function isSelection(value: unknown): value is Selection {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "kind" in value &&
+    (value.kind === "galaxy" || value.kind === "cosmos" || value.kind === "star") &&
+    "id" in value &&
+    typeof value.id === "string"
+  );
+}

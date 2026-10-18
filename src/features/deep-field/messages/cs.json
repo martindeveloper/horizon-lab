@@ -1,0 +1,442 @@
+{
+  "app": "Deep Field",
+  "metadataDescription": "Od planet po okraj pozorovatelného vesmíru v jednom zoomu, ve kterém vzdálenost udává i to, jak dlouho k nám světlo letělo.",
+  "canvasLabel": "Interaktivní mapa od planet po pozorovatelný vesmír",
+  "views": {
+    "stars": "Nejbližší hvězda",
+    "galaxy": "Mléčná dráha",
+    "local-group": "Místní skupina",
+    "local-sheet": "Místní list",
+    "virgo-cluster": "Kupa v Panně",
+    "virgo-supercluster": "Nadkupa v Panně",
+    "laniakea": "Laniakea",
+    "cosmic-web": "Kosmická pavučina",
+    "observable-universe": "Pozorovatelný vesmír"
+  },
+  "viewHints": {
+    "inner": "Merkur až Mars, tam, kde jsou dnes.",
+    "giants": "Jupiter až Neptun, dnes.",
+    "kuiper": "Neptun a ledový pás za ním, asi 30–50 au.",
+    "scattered": "Tělesa na protáhlých elipsách, stovky au daleko.",
+    "oort": "Oblak komet odvozený z dlouhoperiodických komet, až do vzdálenosti jednoho až tří světelných let.",
+    "stars": "Proxima, Alfa Centauri a Barnardova hvězda ve skutečných směrech na obloze. Prstenec vyznačuje vzdálenost Proximy; hvězdy v pozadí jsou rozmístěné podle skutečné oblohy.",
+    "galaxy": "Naše Galaxie, napříč asi 100 000 světelných let. Zlatá čára je dráha Slunce.",
+    "local-group": "Mléčná dráha, Andromeda a jejich trpaslíci, asi 6 milionů světelných let napříč.",
+    "local-sheet": "Plochá stěna blízkých skupin, ve které žijeme, asi 46 milionů světelných let napříč.",
+    "virgo-cluster": "Asi 1 500 galaxií zhruba 54 milionů světelných let od nás. My stojíme mimo ni.",
+    "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi 110 milionů světelných let napříč.",
+    "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru.",
+    "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan.",
+    "observable-universe": "Vše, odkud k nám světlo stihlo doletět, ohraničené reliktním zářením."
+  },
+  "toggles": {
+    "halo": "Halo temné hmoty"
+  },
+  "names": {
+    "proxima": "Proxima Centauri",
+    "alphaCen": "Alfa Centauri",
+    "barnard": "Barnardova hvězda",
+    "scholz": "Scholzova hvězda",
+    "galaxySun": "Slunce",
+    "milkyway": "Mléčná dráha",
+    "bulge": "Výduť a příčka",
+    "halo": "Halo temné hmoty",
+    "andromeda": "Andromeda",
+    "triangulum": "Trojúhelník",
+    "localGroup": "Místní skupina",
+    "localSheet": "Místní list",
+    "virgoCluster": "Kupa v Panně",
+    "fornaxCluster": "Kupa v Peci",
+    "virgoSupercluster": "Nadkupa v Panně",
+    "centaurusCluster": "Kupa v Kentauru",
+    "hydraCluster": "Kupa v Hydře",
+    "greatAttractor": "Velký atraktor",
+    "laniakea": "Laniakea",
+    "perseusPisces": "Perseus–Ryby",
+    "comaCluster": "Kupa ve Vlasu Bereniky",
+    "shapleySupercluster": "Shapleyho nadkupa",
+    "sloanGreatWall": "Velká zeď Sloan",
+    "observableUniverse": "Pozorovatelný vesmír",
+    "lookbackRing": "před {value} mld. let"
+  },
+  "hud": {
+    "galaxyItems": "Mapa Mléčné dráhy",
+    "cosmosItems": "Za Mléčnou dráhou",
+    "neighbours": "Blízké hvězdy",
+    "home": "Zpět do sluneční soustavy",
+    "depth": "Hloubka",
+    "eyepiece": "Zorná přímka",
+    "outTo": "Až do",
+    "distance": "Vzdálenost",
+    "lightLeft": "Světlo vyšlo",
+    "redshift": "Rudý posuv",
+    "redshiftValue": "z = {value}",
+    "atDepth": "{view}, {distance} daleko",
+    "backInTime": "Zpět v čase · Orrery",
+    "backInTimeHint": "Toto místo napříč dějinami sluneční soustavy",
+    "lightLeftAgo": "Světlo vyšlo {ago}",
+    "outToValue": "až do {distance}",
+    "guide": "Průvodce"
+  },
+  "time": {
+    "years": "před {value} lety",
+    "minutes": "před {value} minutami",
+    "hours": "před {value} hodinami",
+    "days": "před {value} dny"
+  },
+  "then": {
+    "clock": "Vyšlo v {time}",
+    "date": "Vyšlo {date}",
+    "year": "Vyšlo v roce {year}",
+    "yearBce": "Vyšlo v roce {year} př. n. l.",
+    "iceAge": "Na Zemi: poslední doba ledová",
+    "firstHumans": "Na Zemi: první moderní lidé",
+    "stoneTools": "Na Zemi: raní lidé a kamenné nástroje",
+    "upright": "Na Zemi: naši předci se začínají napřimovat",
+    "mammals": "Na Zemi: savci se šíří po vymření dinosaurů",
+    "dinosaurs": "Na Zemi: věk dinosaurů",
+    "land": "Na Zemi: život se šíří na souš",
+    "seas": "Na Zemi: v mořích se množí živočichové",
+    "simple": "Na Zemi: mikroby a první jednoduchý mnohobuněčný život v mořích",
+    "microbes": "Na Zemi: mikrobi a vzduch bez kyslíku",
+    "young": "Na Zemi: mladý svět, ještě bez jistých stop života",
+    "noEarth": "Země ještě nevznikla",
+    "noSun": "Slunce ani Země ještě nevznikly",
+    "cmb": "Nejstarší světlo, jaké vidíme, {age} let po velkém třesku"
+  },
+  "badges": {
+    "sketch": "Náčrt",
+    "schematic": "Měřená vzdálenost · schematická dráha"
+  },
+  "facts": {
+    "centre": "Vzdálenost Slunce od středu",
+    "lap": "Doba oběhu",
+    "speed": "Rychlost",
+    "radial": "Radiální kmitání",
+    "vertical": "Kmitání kolmo k disku",
+    "bar": "Příčka",
+    "width": "Průměr",
+    "diskWidth": "Průměr hvězdného disku",
+    "thickness": "Tloušťka tenkého disku",
+    "stars": "Hvězdy",
+    "closestFuture": "{distance} za {years} let",
+    "closestPast": "{distance} před {years} lety",
+    "closest": "Nejtěsnější přiblížení",
+    "motion": "Pohyb",
+    "direction": "Směr",
+    "distance": "Vzdálenost",
+    "members": "Členové",
+    "apart": "Mléčná dráha–Andromeda",
+    "approach": "Přibližování",
+    "future": "Budoucnost",
+    "heart": "Srdce",
+    "depth": "Tloušťka",
+    "length": "Délka",
+    "lookback": "Světlo vyšlo",
+    "edge": "Okraj",
+    "cmb": "Reliktní záření",
+    "temperature": "Teplota",
+    "fromEarth": "Od Země",
+    "fromSun": "Od Slunce",
+    "sunlight": "Sluneční světlo letí",
+    "catalogued": "V katalogu",
+    "innerEdge": "Vnitřní okraj",
+    "outerEdge": "Vnější okraj"
+  },
+  "cards": {
+    "galaxy": {
+      "sun": {
+        "title": "Slunce v Galaxii",
+        "centre": "Asi {value}",
+        "lap": "Asi {value} milionů let (odhady {range})",
+        "speed": "Kruhová rychlost v této vzdálenosti je asi {value} km/s; rychlost Slunce vůči středu Galaxie je přibližně {sun} km/s",
+        "radial": "Rozdíl mezi nejmenší a největší vzdáleností od středu ~{value}, perioda ~{period} milionů let",
+        "vertical": "Kmitání ±{value} s periodou ~{period} milionů let; nyní ~{height} severně od roviny Galaxie a vzdaluje se od ní",
+        "body": "Slunce leží na vnitřním okraji Místního ramene (Orionova výběžku), mezi rameny Střelce–Lodního kýlu a Persea. Od svého vzniku oběhlo střed Galaxie asi {laps}krát, při pohledu od severního galaktického pólu po směru hodinových ručiček. Zlatá čára ukazuje jeho dráhu za poslední dva oběhy, schematicky: skutečnou polohu Slunce na dráze v tak dávné minulosti neznáme.",
+        "caution": "Amplitudy kmitání vycházejí z odhadů hvězdné dynamiky, které se mezi studiemi liší. Dráha hvězdy kolem středu Galaxie není uzavřená elipsa."
+      },
+      "bulge": {
+        "title": "Výduť a příčka",
+        "centre": "Asi {value}",
+        "bar": "Délka asi {value} (odhady {range}), úhel asi {angle}° vůči spojnici Slunce se středem Galaxie",
+        "body": "Mléčná dráha je spirální galaxie s příčkou. V jejím středu leží výduť tvořená starými hvězdami. Má hranatý tvar připomínající arašíd a při pohledu z boku vykazuje strukturu ve tvaru písmene X. Výduť je součástí delší, tenčí příčky, z jejíchž konců vycházejí spirální ramena. V samotném středu leží Sagittarius A*, černá díra o hmotnosti asi {mass} Sluncí. Rozmístění bodů je schematické a nevychází z katalogu jednotlivých hvězd.",
+        "caution": "Příčka je zobrazena schematicky; její délku z tohoto pohledu nelze přesně měřit."
+      },
+      "halo": {
+        "title": "Halo temné hmoty",
+        "width": "Řádově {value}",
+        "mass": "Většina hmotnosti Galaxie",
+        "body": "Pozorované rychlosti oběhu hvězd nelze vysvětlit gravitací samotné viditelné hmoty. Dodatečné gravitační působení připisujeme temné hmotě rozložené v rozsáhlém halu. Průsvitná koule toto halo pouze znázorňuje. Ve výchozím nastavení je skrytá, aby nepůsobila jako oblak hvězd.",
+        "caution": "Temnou hmotu známe z jejích gravitačních účinků; přímo pozorována nebyla. Zobrazená koule není fotografií ani nevyznačuje ostrou hranici hala."
+      },
+      "milkyway": {
+        "title": "Mléčná dráha",
+        "diskWidth": "Řádově {value}",
+        "thickness": "Řádově {value}",
+        "stars": "Nejméně {value}",
+        "age": "Asi {value} miliardy let",
+        "body": "Pohled na naši Galaxii zvenčí vychází z měření její stavby: zahrnuje tenký a tlustý disk, výduť uvnitř příčky natočené o {bar}°, čtyři spirální ramena s úhlem vinutí přibližně {pitch}° a krátké Místní rameno, které leží o něco dále od středu než Slunce. Polohy ramen v našem okolí vycházejí z měření vzdáleností maserů. Podél vnitřních okrajů ramen jsou prachové pásy a vnější disk je zvlněný. Podobu odvrácené části Galaxie odhadujeme, protože ji zakrývá oblast středu. Asi před {merger} miliardami let ji rozvířilo splynutí s galaxií Gaia-Enceladus a zesílilo její disk.",
+        "caution": "Spirální ramena nejsou pevné útvary: hvězdy jimi procházejí, ať jsou ramena dlouhověké hustotní vlny, nebo vznikají a zanikají, což je stále předmětem diskuse. Rovina oběhu planet svírá s rovinou Galaxie úhel asi {tilt}°, proto se pohled při oddalování od nejbližších hvězd natáčí."
+      }
+    },
+    "stars": {
+      "proxima": {
+        "where": "Kentaur, u jižní Mléčné dráhy",
+        "motion": "{velocity} km/s ke Slunci, {proper}″ za rok po obloze",
+        "body": "Červený trpaslík a nejbližší hvězda ke Slunci. Je zakreslena ve skutečném směru na obloze. Prstenec vyznačuje její vzdálenost a úsečka ji spojuje se Sluncem. Na vzdálených okrajích Oortova oblaku už gravitační vazbu těles ke Slunci výrazně narušuje slapové působení Galaxie."
+      },
+      "alphaCen": {
+        "where": "Kentaur, {separation}° od Proximy",
+        "motion": "{velocity} km/s ke Slunci; Proxima dvojici obíhá",
+        "body": "Dvojice hvězd podobných Slunci ve vzdálenosti {distance}, zobrazená jako jediný bod. Proxima, vzdálená od této dvojice asi {proxima}, je k ní slabě gravitačně vázána. Dvojice se ke Slunci přiblíží na {approach} přibližně za {years} let."
+      },
+      "barnard": {
+        "where": "Hadonoš",
+        "motion": "{velocity} km/s ke Slunci, {proper}″ za rok, největší známý vlastní pohyb hvězdy",
+        "body": "Slabý červený trpaslík ve vzdálenosti {distance}, který se k nám rychle přibližuje. Asi za {years} let se dostane na vzdálenost {approach} od Slunce a poté se začne vzdalovat."
+      },
+      "scholz": {
+        "where": "Jednorožec, dnes {distance} daleko",
+        "motion": "{velocity} km/s od Slunce, téměř přesně podél zorného paprsku",
+        "body": "Vzdalující se dvojice červeného a hnědého trpaslíka. Zpětný výpočet dráhy ukazuje, že asi před {flyby} tisíci lety prošla vnějším Oortovým oblakem, zhruba světelný rok od Slunce. Jde o nejtěsnější dobře doložený průlet hvězdné soustavy kolem Slunce. Tehdejší lidé možná mohli spatřit její vzplanutí."
+      },
+      "caution": "Vzdálenosti a směry jsou měřené. Největší přiblížení vycházejí z přímočarých drah podle měřených rychlostí; aproximace platí několik set tisíc let do minulosti i budoucnosti."
+    },
+    "cosmos": {
+      "localGroup": {
+        "title": "Místní skupina",
+        "width": "Asi {value}",
+        "members": "Asi {value} galaxií, většinou trpasličích",
+        "mass": "Několik bilionů Sluncí, hlavně temná hmota",
+        "body": "Skupina naší Galaxie: dva obři, Mléčná dráha a Andromeda, s Trojúhelníkem a desítkami trpaslíků, držená vlastní gravitací, takže se s vesmírem nerozpíná. Podle argumentu časování se obři po Velkém třesku vzdalovali, asi před {turnaroundAgo} miliardami let se ve vzdálenosti {turnaround} obrátili a od té doby k sobě padají.",
+        "caution": "Na změřených místech jsou jen pojmenované galaxie; trpaslíci kolem obrů jsou náčrt."
+      },
+      "andromeda": {
+        "title": "Galaxie v Andromedě",
+        "approach": "Asi {value} km/s k Mléčné dráze ({sun} km/s ke Slunci)",
+        "width": "Asi {range}, od jasného disku po jeho slabý vnější okraj",
+        "future": "První těsné míjení za ~{range} miliard let je pravděpodobné; splynutí je možné, ne jisté",
+        "body": "Nejbližší velká galaxie a největší v Místní skupině, spirála jako naše, viděná šikmo. Její spektrum ukazuje, že se ke Slunci blíží asi {sun} km/s; po odečtení oběhu Slunce kolem Galaxie se k Mléčné dráze blíží asi {approach} km/s. Samotná gravitace, tato rychlost, dnešní vzdálenost {distance} a stáří vesmíru určují jednu radiální dráhu: argument časování.",
+        "caution": "Její pohyb napříč je nejistý, takže studie dávají šanci na splynutí do {within} miliard let od zhruba poloviny po devět z deseti."
+      },
+      "virgo": {
+        "title": "Kupa galaxií v Panně",
+        "members": "Asi {value} galaxií (odhady {range})",
+        "width": "Asi {value}",
+        "heart": "M87 s černou dírou asi {value} Sluncí",
+        "body": "Nejbližší velká kupa a srdce naší nadkupy. Nejsme v ní: Místní skupina leží daleko na okraji nadkupy, přitahovaná ke kupě, zatímco nás rozpínání stále vzdaluje.",
+        "caution": "Členové jsou nakreslený vzorek ve tvaru kupy, ne katalog."
+      },
+      "supercluster": {
+        "title": "Nadkupa v Panně",
+        "width": "Asi {value}",
+        "members": "{value} oblaků skupin galaxií",
+        "heart": "Kupa v Panně",
+        "body": "Říká se jí i Místní nadkupa: zploštělé rozložení skupin a oblak kolem Panny, s Místní skupinou na jednom z výběžků. Není vázaná, takže roste s rozpínáním; od roku 2014 se počítá jako jeden lalok Laniakey.",
+        "caution": "Její oblaka a výběžky jsou náčrt; na změřených místech jsou jen pojmenované skupiny a kupy."
+      },
+      "laniakea": {
+        "title": "Laniakea",
+        "width": "Asi {value}",
+        "members": "Asi {value} velkých galaxií",
+        "mass": "Asi {value} Sluncí",
+        "heart": "Velký atraktor, ~{value} směrem k Pravítku a Kentauru",
+        "body": "Naše domovská nadkupa, pojmenovaná v roce 2014 z havajského „nezměrné nebe“. Její okraj je rozvodí, ne zeď: uvnitř, když odečteme rozpínání, galaxie proudí k Velkému atraktoru. Čáry ty proudy sledují.",
+        "caution": "Vlákna a proudnice jsou náčrt v duchu map Cosmicflows, ne jejich data; studie hranici stále posouvají."
+      },
+      "triangulum": {
+        "title": "Galaxie v Trojúhelníku",
+        "width": "Asi {value}",
+        "future": "Možná se přidá ke splynutí Mléčné dráhy s Andromedou",
+        "body": "Třetí spirála Místní skupiny, menší a řidší než naše, nejspíš na dlouhé dráze kolem Andromedy. Pod tmavou oblohou je právě viditelná okem, jedna z nejvzdálenějších věcí, které uvidíte bez dalekohledu.",
+        "caution": "Zda už prošla blízko Andromedy, je sporné."
+      },
+      "fornax": {
+        "title": "Kupa galaxií v Peci",
+        "members": "Asi {value} katalogizovaných galaxií",
+        "width": "Asi {value}",
+        "heart": "NGC 1399",
+        "body": "Po kupě v Panně nejhmotnější kupa do vzdálenosti asi 65 milionů světelných let, menší a hustší, na jižní obloze.",
+        "caution": "Členové jsou nakreslený vzorek ve tvaru kupy, ne katalog."
+      },
+      "centaurus": {
+        "title": "Kupa galaxií v Kentauru",
+        "members": "Stovky galaxií",
+        "heart": "NGC 4696",
+        "body": "Bohatá kupa na pásu galaxií od Panny k Velkému atraktoru, součást koncentrace Kentaur–Hydra.",
+        "caution": "Její vzdálenost tu vychází z rudého posuvu, ne z přímého měření; členové jsou nakreslený vzorek."
+      },
+      "hydra": {
+        "title": "Kupa galaxií v Hydře",
+        "members": "Asi {value} katalogizovaných v jejím poli",
+        "heart": "NGC 3311 a NGC 3309",
+        "body": "Bohatá kupa zhruba ve stejné vzdálenosti jako kupa v Kentauru, součást stejné koncentrace, která živí Velký atraktor.",
+        "caution": "Její vzdálenost tu vychází z rudého posuvu, ne z přímého měření; členové jsou nakreslený vzorek."
+      },
+      "greatAttractor": {
+        "title": "Velký atraktor",
+        "mass": "Asi {value} Sluncí",
+        "heart": "Kupa v Pravítku (Abell 3627)",
+        "where": "Za diskem Mléčné dráhy, směrem k Pravítku a Kentauru",
+        "body": "Místo, kde se sbíhají proudy Laniakey: koncentrace kup asi {distance} daleko, z velké části skrytá za prachem a hvězdami naší Galaxie. Jeho tah se v pohybech galaxií ukázal v 80. letech, dřív než kdokoli viděl, co tam je.",
+        "caution": "Je to oblast, ne jeden objekt; její střed a hmotnost se mezi studiemi liší."
+      },
+      "localSheet": {
+        "title": "Místní list",
+        "width": "Asi {value}",
+        "thickness": "Asi {value}",
+        "members": "Místní skupina a tucet blízkých skupin: M81, Centaurus A, Sochař a další",
+        "motion": "Vzdaluje se od Místní prázdnoty ~{value} km/s; uvnitř se galaxie odchylují jen o ~{stray} km/s",
+        "body": "Tenká stěna galaxií, ve které žijeme: Místní skupina a její sousedé leží v jedné ploché vrstvě o poloměru asi {radius}; její galaxie se s rozpínáním vzdalují téměř v jednom kroku a celý list je odtlačován od prázdnoty Místní prázdnoty vedle něj. Leží na okraji Nadkupy v Panně.",
+        "caution": "Na změřených místech jsou jen pojmenované skupiny; menší skupiny v listu jsou náčrt."
+      },
+      "perseusPisces": {
+        "title": "Nadkupa Perseus–Ryby",
+        "length": "Hlavní hřbet nejméně {value}",
+        "where": "Směrem k Perseovi a Rybám, hned vedle Laniakey",
+        "body": "Dlouhý řetěz galaxií a kup, jedno z nejzřetelnějších vláken na blízké obloze. Je to samostatná pánev vedle Laniakey: galaxie na její straně rozvodí proudí k ní, ne k Velkému atraktoru.",
+        "caution": "Řetěz je nakreslený přes několik změřených kup; kde protíná rovinu naší Galaxie, zakrývá ho Mléčná dráha. Vzdálenost vychází z rudého posuvu."
+      },
+      "coma": {
+        "title": "Kupa galaxií ve Vlasu Bereniky",
+        "members": "Asi {value} potvrzených spektry",
+        "mass": "Asi {value} Sluncí",
+        "heart": "NGC 4874 a NGC 4889",
+        "body": "Jedna z nejbohatších kup v našem okolí. Fritz Zwicky v roce 1933 zjistil, že se její galaxie pohybují příliš rychle, než aby je udržela svítící hmota: jedna z prvních silných stop temné hmoty.",
+        "caution": "Vzdálenost tu vychází z rudého posuvu, který vlastní pohyb kupy může posunout o několik procent; členové jsou nakreslený vzorek."
+      },
+      "shapley": {
+        "title": "Shapleyho nadkupa",
+        "members": "{clusters} kup v jejím rozsahu rychlostí; asi {galaxies} změřených galaxií v jejím poli",
+        "mass": "Asi {value} Sluncí",
+        "where": "Daleko za kupou v Kentauru, ve stejné části oblohy",
+        "body": "Jedno z největších soustředění hmoty v blízkém vesmíru. Spolu s Velkým atraktorem táhne Místní skupinu, i když kolik z našeho pohybu vysvětluje, se stále vede spor.",
+        "caution": "Její hmotnost je odhad pro prozkoumanou oblast a mezi studiemi se liší; kupy kolem jádra jsou umístěné přibližně."
+      },
+      "sloanGreatWall": {
+        "title": "Velká zeď Sloan",
+        "length": "Asi {value}; {past}, když vyšlo světlo, které vidíme",
+        "lookback": "Asi před {value} mld. let",
+        "where": "Podél nebeského rovníku, od Hydry přes Sextant a Lva k Panně",
+        "body": "Stěna kup galaxií vzdálená asi {distance}, objevená v roce 2003 v mapě přehlídky Sloan Digital Sky Survey. Vidíme ji, jaká byla, když z ní vyšlo světlo; mapa ji kreslí tam, kde je teď, roztaženou rozpínáním od té doby.",
+        "caution": "Zda jde o jednu stavbu, nebo několik nadkup za sebou, je sporné; kresba sleduje její obrys v přehlídce, ne její galaxie."
+      },
+      "observableUniverse": {
+        "title": "Pozorovatelný vesmír",
+        "cmb": "Z {distance}, vyšlo {age} tisíc let po velkém třesku",
+        "temperature": "{value} K nad absolutní nulou",
+        "age": "{value} mld. let světla na cestě",
+        "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Stěnou je reliktní záření, světlo z doby, kdy vesmír poprvé zprůhledněl. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",
+        "caution": "Kruhy značí, odkud vyšlo světlo před {near}, {mid} a {far} mld. let, v dnešních vzdálenostech. Skvrny v záření zastupují mapu z Plancku a galaxie za pavučinou jsou rovnoměrný vzorek, ne katalog. Končí u nejvzdálenějších známých galaxií; tmavý pás před zářením je to, co jsme ještě neviděli: kosmický úsvit, kdy se rozsvítily první hvězdy, a před ním temný věk."
+      }
+    },
+    "solar": {
+      "age": "Zhruba {value} mld. let",
+      "asteroidsMass": "Zhruba {value} % hmotnosti Měsíce",
+      "kuiperMass": "Nanejvýš zhruba {value} hmotnosti Země",
+      "kuiperCatalogued": "Víc než {value}",
+      "scatteredWhere": "Nejblíž u Neptunu, nejdál stovky au",
+      "sun": "Naše hvězda. Z Alfy Centauri by byla jen další jasnou tečkou v Kasiopeji.",
+      "mercury": "Nejmenší planeta a nejbližší ke Slunci. Ze Země se nikdy nevzdálí daleko od Slunce, proto ji uvidíte jen za svítání nebo soumraku.",
+      "venus": "Mraky kyseliny sírové nad drtivou atmosférou z oxidu uhličitého; nejjasnější planeta naší oblohy.",
+      "earth": "Domov, odkud se Deep Field dívá ven: každé „světlo vyšlo“ se počítá zpět od teď.",
+      "mars": "Studená prašná poušť s nejvyšší známou sopkou, Olympus Mons.",
+      "jupiter": "Největší planeta, víc než dvakrát hmotnější než všechny ostatní dohromady.",
+      "saturn": "Plynný obr s menší hustotou než voda, obklopený prstenci z jasného ledu.",
+      "uranus": "Ledový obr převrácený na bok, takže každý pól má desítky let den a pak desítky let noc.",
+      "neptune": "Nejvzdálenější planeta, nalezená roku 1846 tam, kde ji předpověděla matematika.",
+      "pluto": "Trpasličí planeta v Kuiperově pásu. New Horizons kolem ní proletěla v roce 2015 a objevila rozlehlou pláň dusíkového ledu.",
+      "sedna": "Vzdálený načervenalý svět objevený roku 2003 na dráze, která se nikdy nepřiblíží k planetám.",
+      "halley": "Nejznámější kometa: naposledy u Slunce v roce 1986, znovu v roce 2061.",
+      "asteroids": "Miliony skalnatých těles mezi Marsem a Jupiterem, a přesto mají dohromady jen malý zlomek hmotnosti Měsíce: pás je hlavně prázdný prostor.",
+      "kuiper": "Široký prstenec ledových těles za Neptunem, mezi nimi Pluto; odtud pochází mnoho krátkoperiodických komet.",
+      "scattered": "Ledová tělesa na dlouhých skloněných drahách, která Neptunova gravitace vymrštila ven.",
+      "oort": "Obrovská slupka ledových těles, odvozená z dlouhoperiodických komet a nikdy přímo nepozorovaná. Její vnější okraj sahá možná do poloviny cesty k nejbližším hvězdám.",
+      "tracer": "Jeden vzorek populace na realistické dráze. Není to skutečný katalogizovaný objekt."
+    }
+  },
+  "technicalDetails": {
+    "title": "Jak funguje Deep Field",
+    "summary": "Dnešní obloha v každém měřítku: nejbližší hvězdy z astrometrie Gaia, Mléčná dráha postavená na měřeních tam, kde existují, pojmenované galaxie a kupy na změřených místech a plochý ΛCDM pro vzdálenosti a doby letu světla. Zdroje níže oddělují měřené veličiny od náčrtů.",
+    "features": {
+      "views": "Čtrnáct pohledů od vnitřních planet po pozorovatelný vesmír v jednom zoomu.",
+      "depth": "Žebřík hloubky a okulár: jak daleko místo je, kdy z něj vyšlo světlo a jaký má rudý posuv.",
+      "objects": "Slunce a planety, nejbližší hvězdy a Scholzova hvězda, stavba Mléčné dráhy, Místní skupina, kupa v Panně, Laniakea, kosmická síť a reliktní záření, každé s kartou, která říká, co je změřené."
+    },
+    "sections": {
+      "solar": {
+        "title": "Sluneční soustava dnes",
+        "body": "Planety, Pluto, Sedna a Halleyova kometa stojí tam, kam je pro dnešní datum kladou dráhové elementy JPL, spolu s Měsícem a velkými měsíci obřích planet. Pás asteroidů, Kuiperův pás a Oortův oblak jsou vzorky vykreslené do změřeného nebo odvozeného rozsahu, ne katalogy. Je to sluneční soustava z Orrery zastavená v dnešku; Orrery ukazuje, jak vznikla."
+      },
+      "stars": {
+        "title": "Okolí Slunce",
+        "body": "Nejbližší hvězdy stojí na polohách a paralaxách z Gaia DR3 (α Centauri podle ALMA, Scholzova hvězda podle Dupuy et al. 2019). Jejich největší přiblížení vycházejí z přímočarých drah podle měřených vlastních pohybů a radiálních rychlostí, platných několik set tisíc let; z toho plyne i průlet Scholzovy hvězdy vnějším Oortovým oblakem. Za nimi stojí jasné hvězdy sdíleného katalogu J2000 ve skutečných směrech a pás Mléčné dráhy je sama mapa Galaxie viděná od Slunce."
+      },
+      "galaxy": {
+        "title": "Galaktická dráha Slunce",
+        "body": "Slunce obíhá ve vzdálenosti přibližně {sunRadiusKpc} kpc od středu Galaxie (podle měření GRAVITY). V modelu má oběžnou dobu {galacticYearMyr} milionů let a při pohledu od severního galaktického pólu se pohybuje po směru hodinových ručiček. Nyní je poblíž bodu svého radiálního kmitu nejbližšího ke středu. Rozdíl mezi nejmenší a největší vzdáleností od středu je asi {radialSwingKpc} kpc a perioda kmitání asi {radialMyr} milionů let. Slunce zároveň kmitá kolmo k rovině disku s amplitudou {verticalPc} pc a periodou asi {verticalMyr} milionů let. Nyní leží {heightPc} pc severně od roviny Galaxie a dále se od ní vzdaluje. Zlatá čára vede tyto kmity zpět přes dva oběhy; skutečnou fázi v tak dávné minulosti neznáme. Model stavby Galaxie vychází z měření: zahrnuje exponenciální tenký disk s délkovou škálou {thinLengthKpc} kpc a výškovou škálou {thinHeightPc} pc a tlustý disk s odpovídajícími škálami {thickLengthKpc} kpc a {thickHeightPc} pc. Hranatá výduť leží uvnitř příčky, která sahá {barHalfKpc} kpc od středu a svírá se spojnicí Slunce se středem Galaxie úhel {barDeg}°. Čtyři logaritmická ramena s úhlem vinutí {pitchDeg}° jsou v okolí Slunce umístěna podle paralax maserů. Model obsahuje také Místní rameno, prach na vnitřních okrajích ramen a zvlnění disku za vzdáleností {warpStartKpc} kpc podle pozorování cefeid. Koule hala vyznačuje poloměr R₂₀₀ ≈ {haloKpc} kpc. Podoba odvrácené strany disku je odhadnuta extrapolací."
+      },
+      "cosmos": {
+        "title": "Za Mléčnou dráhou",
+        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda ({andromedaMly} milionu světelných let, blíží se rychlostí {andromedaKms} km/s), Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Za Laniakeou leží hřbet Perseus–Ryby, kupa ve Vlasu Bereniky, Shapleyho koncentrace a Velká zeď Sloan v souběžných vzdálenostech z rudého posuvu, propojené nakreslenou sítí vláken kolem prázdnot. Dál je pozorovatelný vesmír kreslený v měřítku: jeho okraj (částicový horizont) a reliktní záření z poslední srážky plynou z integrace plochého ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, včetně záření; stáří {universeGyr} miliardy let). Daleko venku kamera obíhá v supergalaktické rovině."
+      },
+      "depth": {
+        "title": "Vzdálenost a světlo",
+        "body": "Žebřík ukazuje vzdálenost kamery v logaritmickém měřítku, od okolí Slunce až za reliktní záření. Okulár čte, kam až pohled sahá (vzdálenost jeho středu od Slunce plus polovina zorného pole), nebo vzdálenost vybraného objektu. Do milionu světelných let je doba letu světla v letech rovna vzdálenosti ve světelných letech. Dál je rudý posuv ten, jehož souběžná vzdálenost odpovídá, nalezený obrácením vzdálenostního integrálu ΛCDM (jen kosmologický rudý posuv: vlastní pohyb galaxie ten změřený trochu posouvá), a světlo vyšlo v době pohledu zpět pro tento posuv. Za reliktním zářením nelze vidět nic, proto tam odečet končí."
+      }
+    }
+  },
+  "tour": {
+    "label": "Průvodce",
+    "start": "Spustit průvodce",
+    "progress": "{step} / {total}",
+    "previous": "Předchozí krok",
+    "next": "Další",
+    "play": "Spustit průvodce",
+    "pause": "Pozastavit průvodce",
+    "finish": "Dokončit",
+    "exit": "Ukončit průvodce",
+    "steps": {
+      "sunlight": {
+        "title": "Světlo potřebuje čas",
+        "body": "I sluneční světlo je staré: Slunce opustilo minuty předtím, než k nám dorazí. Pravítka ukazují vzdálenost každé planety od Země a jak dlouho letí její světlo."
+      },
+      "giants": {
+        "title": "Hodiny daleko",
+        "body": "Za obřími planetami už světlo letí hodiny. Čára dole ukazuje, jak dávno vyšlo světlo z okraje záběru."
+      },
+      "oort": {
+        "title": "Poslední výspa Slunce",
+        "body": "Oortův oblak ledových komet sahá možná do poloviny cesty k nejbližším hvězdám. Přímo ho ještě nikdo neviděl."
+      },
+      "stars": {
+        "title": "Roky světla",
+        "body": "Světlo Proximy vyšlo před lety. Každá hvězda na noční obloze nám ukazuje svou minulost, ne přítomnost."
+      },
+      "galaxy": {
+        "title": "Jedna hvězda z miliard",
+        "body": "Slunce je jednou ze stovek miliard hvězd v disku Mléčné dráhy. Světlo z druhé strany Galaxie vyšlo v poslední době ledové."
+      },
+      "andromeda": {
+        "title": "Náš velký soused",
+        "body": "Světlo Andromedy vyšlo, když raní lidé tvarovali první kamenné nástroje. Vzdálenost se zmenšuje: za miliardy let se obě galaxie nejspíš těsně minou a možná splynou."
+      },
+      "virgo": {
+        "title": "Město galaxií",
+        "body": "Víc než tisíc galaxií, jejichž gravitace sahá až k nám. Toto světlo vyšlo nedlouho po vymření dinosaurů."
+      },
+      "laniakea": {
+        "title": "Naše domovská pánev",
+        "body": "Galaxie proudí k Velkému atraktoru jako řeky k moři. Tato pánev proudů je naše nadkupa Laniakea."
+      },
+      "web": {
+        "title": "Kosmická pavučina",
+        "body": "V největších měřítkách lemují galaxie stěny a vlákna kolem obrovských, téměř prázdných dutin."
+      },
+      "firstLight": {
+        "title": "Nejstarší světlo",
+        "body": "Dál znamená dřív. Za nejvzdálenějšími pozorovanými galaxiemi leží kosmický úsvit a temný věk a na okraji září nejstarší světlo, jaké vidíme, uvolněné brzy po velkém třesku."
+      }
+    }
+  }
+}

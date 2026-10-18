@@ -7,6 +7,8 @@ import robots from "../src/app/robots.ts";
 import sitemap from "../src/app/sitemap.ts";
 import { BLACK_HOLE_PATH } from "../src/features/black-hole/manifest.ts";
 import { presetRouteParams } from "../src/features/black-hole/routing.ts";
+import { DEEP_FIELD_PATH } from "../src/features/deep-field/manifest.ts";
+import { viewRouteParams as deepViewRouteParams } from "../src/features/deep-field/routing.ts";
 import { ORRERY_PATH } from "../src/features/orrery/manifest.ts";
 import { viewRouteParams } from "../src/features/orrery/routing.ts";
 import { routing } from "../src/i18n/routing.ts";
@@ -27,6 +29,7 @@ test("sitemap lists the catalogue, the about and credits pages, every simulation
     ...simulations.map(({ href }) => href),
     ...presetRouteParams().map(({ hole }) => `${BLACK_HOLE_PATH}/${hole}`),
     ...viewRouteParams().map(({ view }) => `${ORRERY_PATH}/${view}`),
+    ...deepViewRouteParams().map(({ view }) => `${DEEP_FIELD_PATH}/${view}`),
   ];
   assert.deepEqual([...paths].sort(), [...new Set(expected)].sort());
   for (const { entryPoints } of simulations)

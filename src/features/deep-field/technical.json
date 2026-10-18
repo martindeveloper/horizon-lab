@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "features": ["views", "depth", "objects"],
+  "sections": [
+    {
+      "id": "solar",
+      "equations": [
+        {
+          "equation": "kepler-third-law"
+        },
+        {
+          "equation": "light-travel-time"
+        }
+      ]
+    },
+    {
+      "id": "stars",
+      "equations": [
+        "r = (1000 / ϖ) pc · (cos δ cos α, cos δ sin α, sin δ), rotated into the ecliptic frame",
+        {
+          "equation": "tangential-velocity"
+        },
+        "r(t) = r₀ − v t,  closest at t = (r₀ · v) / |v|²"
+      ]
+    },
+    {
+      "id": "galaxy",
+      "equations": [
+        {
+          "equation": "galactic-angle"
+        },
+        {
+          "equation": "galactic-radius"
+        },
+        {
+          "equation": "galactic-height"
+        },
+        {
+          "equation": "spiral-arm"
+        },
+        "n ∝ e^(−R / 2.6 kpc − |z| / 0.3 kpc)",
+        {
+          "equation": "galactic-warp"
+        }
+      ]
+    },
+    {
+      "id": "cosmos",
+      "equations": [
+        {
+          "equation": "local-group-orbit"
+        },
+        "D_C(z) = (c / H₀) ∫ da / (a² E(a)),  E(a) = √(Ω_r a⁻⁴ + Ω_m a⁻³ + Ω_Λ)",
+        "D_horizon = D_C(∞),  D_CMB = D_C(1089.8)"
+      ]
+    },
+    {
+      "id": "depth",
+      "equations": [
+        {
+          "equation": "light-travel-time"
+        },
+        "z: D_C(z) = d, by bisection in ln(1 + z)",
+        "t_lookback = t₀ − t(a = 1 / (1 + z))"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "GRAVITY Collaboration (2021), Improved GRAVITY astrometric accuracy from modeling optical aberrations, A&A 647, A59",
+      "url": "https://doi.org/10.1051/0004-6361/202040208"
+    },
+    {
+      "title": "Bland-Hawthorn & Gerhard (2016), The Galaxy in context: structural, kinematic, and integrated properties, ARA&A 54, 529",
+      "url": "https://doi.org/10.1146/annurev-astro-081915-023441"
+    },
+    {
+      "title": "Reid et al. (2019), Trigonometric parallaxes of high-mass star-forming regions: our view of the Milky Way, ApJ 885, 131",
+      "url": "https://doi.org/10.3847/1538-4357/ab4a11"
+    },
+    {
+      "title": "Vallée (2017), A guided map to the spiral arms in the galactic disk of the Milky Way, Astronomical Review 13, 113",
+      "url": "https://doi.org/10.1080/21672857.2017.1379459"
+    },
+    {
+      "title": "Churchwell et al. (2009), The Spitzer/GLIMPSE surveys: a new view of the Milky Way, PASP 121, 213",
+      "url": "https://doi.org/10.1086/597811"
+    },
+    {
+      "title": "Wegg, Gerhard & Portail (2015), The structure of the Milky Way's bar outside the bulge, MNRAS 450, 4050",
+      "url": "https://doi.org/10.1093/mnras/stv745"
+    },
+    {
+      "title": "Chen et al. (2019), An intuitive 3D map of the Galactic warp's precession traced by classical Cepheids, Nature Astronomy 3, 320",
+      "url": "https://doi.org/10.1038/s41550-018-0686-7"
+    },
+    {
+      "title": "Eilers et al. (2019), The circular velocity curve of the Milky Way from 5 to 25 kpc, ApJ 871, 120",
+      "url": "https://doi.org/10.3847/1538-4357/aaf648"
+    },
+    {
+      "title": "Bennett & Bovy (2019), Vertical waves in the solar neighbourhood in Gaia DR2, MNRAS 482, 1417",
+      "url": "https://doi.org/10.1093/mnras/sty2813"
+    },
+    {
+      "title": "Connelly et al. (2012), The absolute chronology and thermal processing of solids in the solar protoplanetary disk, Science 338, 651",
+      "url": "https://doi.org/10.1126/science.1226919"
+    },
+    {
+      "title": "Helmi et al. (2018), The merger that led to the formation of the Milky Way's inner stellar halo and thick disk, Nature 563, 85",
+      "url": "https://doi.org/10.1038/s41586-018-0625-x"
+    },
+    {
+      "title": "Belokurov et al. (2018), Co-formation of the disc and the stellar halo, MNRAS 478, 611",
+      "url": "https://doi.org/10.1093/mnras/sty982"
+    },
+    {
+      "title": "Gaia Collaboration, Vallenari et al. (2023), Gaia Data Release 3: Summary of the content and survey properties, A&A 674, A1",
+      "url": "https://doi.org/10.1051/0004-6361/202243940"
+    },
+    {
+      "title": "Mamajek et al. (2015), The closest known flyby of a star to the Solar System, ApJL 800, L17",
+      "url": "https://doi.org/10.1088/2041-8205/800/1/L17"
+    },
+    {
+      "title": "Dupuy et al. (2019), WISE J072003.20−084651.2B is a massive T dwarf, AJ 158, 174",
+      "url": "https://doi.org/10.3847/1538-3881/ab3cd1"
+    },
+    {
+      "title": "Kervella et al. (2016), Close stellar conjunctions of α Centauri A and B until 2050, A&A 594, A107",
+      "url": "https://doi.org/10.1051/0004-6361/201629201"
+    },
+    {
+      "title": "Kervella, Thévenin & Lovis (2017), Proxima's orbit around α Centauri, A&A 598, L7",
+      "url": "https://doi.org/10.1051/0004-6361/201629930"
+    },
+    {
+      "title": "Akeson et al. (2021), Precision millimeter astrometry of the α Centauri AB system, AJ 162, 14",
+      "url": "https://doi.org/10.3847/1538-3881/abfaff"
+    },
+    {
+      "title": "Planck Collaboration (2020), Planck 2018 results VI: Cosmological parameters, A&A 641, A6",
+      "url": "https://doi.org/10.1051/0004-6361/201833910"
+    },
+    {
+      "title": "Tully, Courtois, Hoffman & Pomarède (2014), The Laniakea supercluster of galaxies, Nature 513, 71",
+      "url": "https://doi.org/10.1038/nature13674"
+    },
+    {
+      "title": "van der Marel et al. (2012), The M31 velocity vector II: radial orbit toward the Milky Way and implied Local Group mass, ApJ 753, 8",
+      "url": "https://doi.org/10.1088/0004-637X/753/1/8"
+    },
+    {
+      "title": "McConnachie (2012), The observed properties of dwarf galaxies in and around the Local Group, AJ 144, 4",
+      "url": "https://doi.org/10.1088/0004-6256/144/1/4"
+    },
+    {
+      "title": "Mei et al. (2007), The ACS Virgo Cluster Survey XIII: SBF distance catalog and the three-dimensional structure of the Virgo Cluster, ApJ 655, 144",
+      "url": "https://doi.org/10.1086/509598"
+    },
+    {
+      "title": "Sawala et al. (2025), No certainty of a Milky Way–Andromeda collision, Nature Astronomy",
+      "url": "https://doi.org/10.1038/s41550-025-02563-1"
+    },
+    {
+      "title": "Tully et al. (2008), Our peculiar motion away from the Local Void, ApJ 676, 184",
+      "url": "https://doi.org/10.1086/527428"
+    },
+    {
+      "title": "Zwicky (1933), Die Rotverschiebung von extragalaktischen Nebeln, Helvetica Physica Acta 6, 110",
+      "url": "https://ned.ipac.caltech.edu/level5/March17/Zwicky/Zwicky_contents.html"
+    },
+    {
+      "title": "Wegner, Haynes & Giovanelli (1993), A survey of the Pisces-Perseus Supercluster. V. The declination strip +33.5° to +39.5° and the main supercluster ridge, AJ 105, 1251",
+      "url": "https://ui.adsabs.harvard.edu/abs/1993AJ....105.1251W"
+    },
+    {
+      "title": "Geller, Diaferio & Kurtz (1999), The mass profile of the Coma galaxy cluster, ApJ 517, L23",
+      "url": "https://arxiv.org/abs/astro-ph/9903305"
+    },
+    {
+      "title": "Gott et al. (2005), A map of the universe, ApJ 624, 463",
+      "url": "https://arxiv.org/abs/astro-ph/0310571"
+    },
+    {
+      "title": "Proust et al. (2006), Structure and dynamics of the Shapley Supercluster, A&A 447, 133",
+      "url": "https://arxiv.org/abs/astro-ph/0509903"
+    },
+    {
+      "title": "Pedratti et al. (2026), Novel insights into the Coma cluster kinematics with DESI. I. Linking mass profile, orbital anisotropy, and galaxy populations, A&A 710, A218",
+      "url": "https://arxiv.org/abs/2603.16706"
+    },
+    {
+      "title": "Fixsen (2009), The temperature of the cosmic microwave background, ApJ 707, 916",
+      "url": "https://arxiv.org/abs/0911.1955"
+    }
+  ]
+}

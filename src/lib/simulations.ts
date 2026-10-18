@@ -1,4 +1,5 @@
 import { blackHoleManifest } from "@/features/black-hole/manifest";
+import { deepFieldManifest } from "@/features/deep-field/manifest";
 import { orreryManifest } from "@/features/orrery/manifest";
 
 import type { SimulationManifest } from "./simulation-types";
@@ -7,6 +8,7 @@ import type { SimulationManifest } from "./simulation-types";
 export const simulations = [
   blackHoleManifest,
   orreryManifest,
+  deepFieldManifest,
 ] as const satisfies readonly SimulationManifest[];
 export function simulationForPath(pathname: string) {
   return simulations.find(({ href }) => pathname === href || pathname.startsWith(`${href}/`));

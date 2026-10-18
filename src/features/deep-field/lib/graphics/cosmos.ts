@@ -16,7 +16,7 @@
  */
 import { BufferAttribute, BufferGeometry, Color } from "three";
 
-import { lcg } from "@horizon/toolkit/math";
+import { lcg, smoothstep } from "@horizon/toolkit/math";
 import { convert } from "@horizon/toolkit/science";
 
 import {
@@ -517,7 +517,8 @@ const CMB_WARM = new Color("#f0a35e");
  * The observable universe, in units of its own radius (the layer scales each part every frame):
  * the microwave background as points on a unit sphere, mottled warm and cool by a seeded
  * pattern (a stand-in for the Planck map, not its data); galaxies beyond the web as a uniform
- * sample inside it; and a unit circle the layer turns into each lookback ring.
+ * sample out to the first galaxies (the unit there is their distance), thinning toward it; and
+ * a unit circle the layer turns into each lookback ring.
  */
 export function observableUniverse(tight: boolean) {
   const size = scaled(tight);
@@ -538,11 +539,13 @@ export function observableUniverse(tight: boolean) {
     mix.copy(CMB_COOL).lerp(CMB_WARM, Math.min(1, Math.max(0, 0.5 + t * 0.35)));
     put(cmb, x, y, z, mix, 0.55 + rnd() * 0.25);
   }
-  const fill = writer(size(7_000));
-  for (let i = 0; i < size(7_000); i += 1) {
-    const [x, y, z] = onSphere(rnd, Math.cbrt(rnd()));
+  const fill = writer(size(18_000));
+  for (let i = 0; i < size(18_000); i += 1) {
+    const r = Math.cbrt(rnd());
+    const [x, y, z] = onSphere(rnd, r);
     const { color, brightness } = tint(rnd, 0.2);
-    put(fill, x, y, z, color, brightness * 0.6);
+    /* Fewer and fainter toward the first galaxies, as the first ones were. */
+    put(fill, x, y, z, color, brightness * (1 - 0.85 * smoothstep(0.7, 1, r)));
   }
   const ring = new Float32Array(128 * 3);
   for (let i = 0; i < 128; i += 1) {

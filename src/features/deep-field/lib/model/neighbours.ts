@@ -1,7 +1,7 @@
 /**
- * The nearest stars, in their real directions, moved in straight lines from
- * their measured positions and velocities. Good to a few per cent for about
- * ±300,000 years; beyond that the straight line and the sketch are hidden.
+ * The nearest stars, in their real directions and distances today. Their closest approach
+ * to the Sun comes from straight-line tracks through their measured positions and
+ * velocities, good to a few per cent for about ±300,000 years.
  */
 import { equatorialFrameToScene, equatorialToScene, type Vec3 } from "@horizon/toolkit/bodies";
 import {
@@ -90,9 +90,6 @@ const PC_AU = PARSEC_AU;
 /** 1 km/s is this many au per year. */
 const KMS_AU_YEAR = convert(1, "km/s", "au/yr");
 
-/** Within this the straight-line sketch is drawn. */
-export const NEIGHBOUR_WINDOW = 3e5;
-
 /** Position today (au) and velocity (au/yr), in the scene frame. */
 type Track = { p0: Vec3; v: Vec3 };
 const tracks = new Map<NeighbourId, Track>();
@@ -143,20 +140,6 @@ export function neighbourSeparationAu(a: Neighbour, b: Neighbour, yearsAgo: numb
   const p = neighbourPosition(a, yearsAgo);
   const q = neighbourPosition(b, yearsAgo);
   return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
-}
-
-/** The nearest of the four at a moment. */
-export function nearestNeighbour(yearsAgo: number) {
-  let best = NEIGHBOURS[0]!;
-  let bestD = Infinity;
-  for (const star of NEIGHBOURS) {
-    const d = neighbourDistanceLy(star, yearsAgo);
-    if (d < bestD) {
-      bestD = d;
-      best = star;
-    }
-  }
-  return { star: best, ly: bestD };
 }
 
 /** Closest approach of the straight-line track: distance in light-years and when (years ago; negative is future). */

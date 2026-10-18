@@ -39,7 +39,7 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
     const gzipBytes = [...initial].reduce((total, path) => total + gzipSync(read(path)).length, 0);
     console.log(`${locale}: initial JS ${(gzipBytes / 1024).toFixed(1)} KiB gzip`);
     // The WebGL gate runs first on simulation routes; the renderer stays lazy behind it.
-    for (const suffix of ["lab/black-hole", "lab/orrery"]) {
+    for (const suffix of ["lab/black-hole", "lab/orrery", "lab/deep-field"]) {
       const route = assets(`${locale}/${suffix}`, ".js");
       for (const path of heavy) assert.ok(!route.has(path), `${locale}/${suffix} loads ${path}`);
     }
@@ -84,19 +84,30 @@ test("solar activity stays in an optional chunk, outside the Orrery engine and i
 test("black-hole styles load on feature routes, never on catalogue routes", () => {
   for (const locale of ["en", "cs"]) {
     const shared = assets(locale, ".css");
-    assert.doesNotMatch(contents(shared), /black-hole-orbit-ring|orrery-label/);
-    const marker = { "black-hole": /black-hole-orbit-ring/, orrery: /orrery-label/ };
+    assert.doesNotMatch(
+      contents(shared),
+      /black-hole-orbit-ring|scene-label|orrery-tour-body|deep-field-rung/,
+    );
+    const marker = {
+      "black-hole": /black-hole-orbit-ring/,
+      orrery: /orrery-tour-body/,
+      "deep-field": /deep-field-rung/,
+    };
     for (const suffix of [
       "lab/black-hole",
       "lab/black-hole/m87",
       "lab/orrery",
-      "lab/orrery/galaxy",
+      "lab/orrery/oort",
+      "lab/deep-field",
+      "lab/deep-field/laniakea",
     ]) {
       const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
         (path) => !shared.has(path),
       );
       assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
       assert.match(contents(feature), marker[suffix.split("/")[1]]);
+      if (!suffix.startsWith("lab/black-hole"))
+        assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
       assert.doesNotMatch(
         contents(feature),
         /@layer utilities/,

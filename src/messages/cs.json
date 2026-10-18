@@ -78,13 +78,13 @@
     },
     "orrery": {
       "title": "Sluneční soustava",
-      "eyebrow": "Orrery · Planety, pásy a Galaxie",
+      "eyebrow": "Orrery · Planety, pásy a Oortův oblak",
       "category": "Dráhy a čas",
-      "description": "Dnešní polohy planet, názorný model odklízení zbylých těles z rané sluneční soustavy a místo Slunce v Mléčné dráze.",
+      "description": "Dnešní polohy planet a názorný model odklízení zbylých těles z rané sluneční soustavy, až po Oortův oblak.",
       "open": "Otevřít model soustavy",
       "live": "Aktuální polohy planet",
       "timeline": "Časová osa 10 miliard let",
-      "galaxy": "Mapa Mléčné dráhy",
+      "oort": "Až k Oortovu oblaku",
       "entryPoints": {
         "giants": {
           "title": "Obří planety"
@@ -92,8 +92,29 @@
         "inner": {
           "title": "Vnitřní planety"
         },
+        "oort": {
+          "title": "Oortův oblak"
+        }
+      }
+    },
+    "deepField": {
+      "title": "Hluboké pole",
+      "eyebrow": "Deep Field · Od Slunce až k okraji",
+      "category": "Vzdálenost a světlo",
+      "description": "Oddalte se od planet přes nejbližší hvězdy a Mléčnou dráhu až k reliktnímu záření. Čím dál se díváte, tím starší světlo vidíte.",
+      "open": "Otevřít Deep Field",
+      "depth": "Od planet po 46 miliard světelných let, v jednom zoomu",
+      "lookback": "Vzdálenost jako pohled do minulosti",
+      "edge": "Okraj pozorovatelného vesmíru",
+      "entryPoints": {
         "galaxy": {
           "title": "Mléčná dráha"
+        },
+        "laniakea": {
+          "title": "Laniakea"
+        },
+        "universe": {
+          "title": "Pozorovatelný vesmír"
         }
       }
     }

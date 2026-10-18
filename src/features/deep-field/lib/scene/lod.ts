@@ -1,0 +1,135 @@
+/**
+ * Level of detail for every Deep Field layer, in one place: the toolkit's screen size,
+ * presence bands and faders, and the blend between the three scales. The world is one, in au:
+ * the nearest stars round the Sun, the Galaxy around them, the cosmic map beyond.
+ *
+ * The Galaxy model stays in light-years; its group is turned by `GALAXY_FRAME` (the galactic
+ * frame of the sky's J2000 pole and centre) and scaled by one light-year, with the Sun at the
+ * origin. The cosmic map is in millions of light-years in the same axes, around the galactic
+ * centre.
+ */
+import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from "three";
+
+import { smootherstep } from "@horizon/toolkit/math";
+import {
+  GALACTIC_CENTRE,
+  GALACTIC_EAST,
+  GALACTIC_POLE,
+  createFaders,
+  createScreenScale,
+  logFraction,
+  type Viewport,
+} from "@horizon/toolkit/scene";
+import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
+
+import { SUPERGALACTIC } from "../model/cosmos";
+import { sunGalactic } from "../model/galactic-orbit";
+import type { Realm } from "../model/views";
+
+export const LY = LIGHT_YEAR_AU;
+/** One million light-years in au: the cosmic map's unit. */
+export const MLY = 1e6 * LY;
+
+/** From the nearest stars to the Galaxy, au: past the neighbours, into the local disk. */
+export const HANDOFF = { from: 7 * LY, to: 950 * LY } as const;
+/** From the Galaxy to the cosmic map, au: past the halo, the Galaxy becomes one of many. */
+export const COSMIC_HANDOFF = { from: 350_000 * LY, to: 3_000_000 * LY } as const;
+
+/** The Galaxy's and the cosmic map's own render pass (drawn first, with a depth range of its own). */
+export const GALAXY_LAYER = 2;
+
+/**
+ * Galaxy-model axes → scene: +X points from the centre to the Sun, +Y is the north galactic
+ * pole, +Z the direction of rotation (galactic longitude 90°).
+ */
+export const GALAXY_FRAME = new Quaternion().setFromRotationMatrix(
+  new Matrix4().makeBasis(GALACTIC_CENTRE.clone().negate(), GALACTIC_POLE, GALACTIC_EAST),
+);
+
+/**
+ * Supergalactic axes → scene, as `GALAXY_FRAME` does for galactic ones: +Y the supergalactic
+ * pole, +X toward SGL = 0. The nearby galaxies lie flat in this plane, so far out the camera
+ * orbits in it.
+ */
+export const SUPERGALACTIC_FRAME = (() => {
+  const { x, y, z } = SUPERGALACTIC;
+  const basis = new Quaternion().setFromRotationMatrix(
+    new Matrix4().makeBasis(new Vector3(...x), new Vector3(...z), new Vector3(-y[0], -y[1], -y[2])),
+  );
+  return GALAXY_FRAME.clone().multiply(basis);
+})();
+
+/** Where the Sun sits in the Galaxy model today (ly): the scene's origin. */
+export const SUN_ANCHOR: Readonly<[number, number, number]> = sunGalactic(0);
+
+/** A Galaxy-model point (ly) in the scene (au), with the Sun at the origin. */
+export function galaxyToWorld(x: number, y: number, z: number, out: Vector3) {
+  return out
+    .set(x - SUN_ANCHOR[0], y - SUN_ANCHOR[1], z - SUN_ANCHOR[2])
+    .applyQuaternion(GALAXY_FRAME)
+    .multiplyScalar(LY);
+}
+
+/** A cosmic-map point (Mly from the galactic centre) in the scene (au). */
+export function cosmicToWorld(v: readonly [number, number, number], out: Vector3) {
+  return galaxyToWorld(v[0] * 1e6, v[1] * 1e6, v[2] * 1e6, out);
+}
+
+/** 0 among the nearest stars, 1 in the Galaxy (and beyond), for a camera distance in au. */
+export function galaxyMix(dist: number) {
+  return smootherstep(logFraction(dist, HANDOFF.from, HANDOFF.to));
+}
+
+/** 0 up to the Galaxy, 1 on the cosmic map, for a camera distance in au. */
+export function cosmosMix(dist: number) {
+  return smootherstep(logFraction(dist, COSMIC_HANDOFF.from, COSMIC_HANDOFF.to));
+}
+
+/** From this camera distance (au), just beyond Proxima, the nearest stars hold the view. */
+const STARS_FROM = 300_000;
+
+/** The scale that dominates at a camera distance (au): what readouts and cards follow. */
+export const realmOf = (dist: number): Realm =>
+  cosmosMix(dist) >= 0.5
+    ? "cosmos"
+    : galaxyMix(dist) >= 0.5
+      ? "galaxy"
+      : dist < STARS_FROM
+        ? "solar"
+        : "stars";
+
+export type Lod = ReturnType<typeof createLod>;
+
+/** One per engine: call `begin` each frame once the camera is placed. */
+export function createLod(camera: PerspectiveCamera, viewport: Pick<Viewport, "height">) {
+  const faders = createFaders();
+  const { pxWorld, px } = createScreenScale(camera, viewport);
+  const lod = {
+    /** Camera distance from its aim, au. */
+    dist: 1,
+    /** 0 among the nearest stars … 1 in the Galaxy and beyond. */
+    galaxy: 0,
+    /** 0 up to the Galaxy … 1 on the cosmic map. */
+    cosmos: 0,
+    realm: "stars" as Realm,
+    /** World size of `px` CSS pixels at `distance` from the camera. */
+    pxWorld,
+    /** On-screen radius in CSS pixels of a sphere of world radius `r` centred at `at`. */
+    px,
+    /** A fader moved this frame and has further to go: keep frames coming. */
+    get busy() {
+      return faders.busy;
+    },
+    /** A fader's first call shows the switch as it is; only later changes ease. */
+    fader: faders.fader,
+    /** A new frame at a camera distance in au. */
+    begin(frameDt: number, dist: number) {
+      faders.begin(frameDt);
+      lod.dist = dist;
+      lod.galaxy = galaxyMix(dist);
+      lod.cosmos = cosmosMix(dist);
+      lod.realm = realmOf(dist);
+    },
+  };
+  return lod;
+}
