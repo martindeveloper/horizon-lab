@@ -104,6 +104,7 @@ function isSelection(value: unknown): value is Selection {
       value.kind === "named" ||
       value.kind === "population" ||
       value.kind === "galaxy" ||
+      value.kind === "cosmos" ||
       value.kind === "star") &&
     "id" in value &&
     typeof value.id === "string"

@@ -1,20 +1,33 @@
 /**
  * The orbit camera: its pose about an aim point, zoom limits, and one zoom across every
- * scale, from a close-up to the whole Galaxy. Distance moves in log space: a critically
- * damped spring follows wheel and pinch, and view flights run a quintic path that leaves at
- * the zoom's current speed and lands at rest. As the camera pulls out past the nearest
- * stars, the orbit frame turns from the ecliptic to the galactic plane and the aim slides
- * from the Sun to the galactic centre, so the solar map hands over to the Galaxy unbroken.
+ * scale, from a close-up to Laniakea. Distance moves in log space: a critically damped
+ * spring follows wheel and pinch, and view flights run a quintic path that leaves at the
+ * zoom's current speed and lands at rest. As the camera pulls out past the nearest stars,
+ * the orbit frame turns from the ecliptic to the galactic plane and the aim slides from the
+ * Sun to the galactic centre, so the solar map hands over to the Galaxy unbroken. Past the
+ * halo the frame turns again, to the supergalactic plane, and the aim travels on to the
+ * heart of each larger structure.
  */
 import { Quaternion, Vector3, type PerspectiveCamera } from "three";
 
 import { clamp, smootherstep, toLogFraction, wrapSigned } from "@horizon/toolkit/math";
 
+import { cosmicAim, type Vec } from "../model/cosmos";
 import { viewById, worldDistance, type Realm, type ViewId } from "../model/views";
 import type { OrreryStore } from "../store";
 import { closeUpLimits } from "./close-up-flight";
 import { GALAXY_NEAR, SOLAR_EDGE } from "./kit";
-import { GALAXY_FRAME, LY, galacticAnchor, galaxyMix, galaxyToWorld, realmOf } from "./lod";
+import {
+  GALAXY_FRAME,
+  LY,
+  MLY,
+  SUPERGALACTIC_FRAME,
+  cosmosMix,
+  galacticAnchor,
+  galaxyMix,
+  galaxyToWorld,
+  realmOf,
+} from "./lod";
 
 /** What the rig needs to know about a close-up in progress. */
 export type CloseUpFrame = { phase: "in" | "on" | "out"; radius: number; frame: number };
@@ -27,7 +40,11 @@ const PINCH_RATE = 30;
 /** Speed (e-folds/s) taken over from another camera owner; a larger jump is a cut. */
 const MAX_CARRY = 40;
 /** A view flight's length grows with the scales it crosses. */
-const flightSeconds = (efolds: number) => clamp(0.9 + 0.2 * Math.abs(efolds), 0.9, 4.5);
+const flightSeconds = (efolds: number) => clamp(0.9 + 0.2 * Math.abs(efolds), 0.9, 6);
+/** Farthest zoom, au: Laniakea whole, with room around it. */
+const COSMIC_MAX = 1.4e9 * LY;
+/** Default tilt of each map's views. */
+const inclinationOf = (realm: Realm) => (realm === "solar" ? 0.52 : 0.58);
 /** Seconds for the bulge card to take the aim to the centre or give it back. */
 const HOLD_S = 0.8;
 
@@ -55,6 +72,8 @@ export function createCameraRig(
   const offset = new Vector3();
   const orbitFrame = new Quaternion();
   const centre = new Vector3();
+  const beyond = new Vector3();
+  const heart: Vec = [0, 0, 0];
   /** Log-distance zoom: destination, speed (e-folds/s), spring rate, and the distance last written. */
   const zoom = { target: Math.log(72), speed: 0, rate: WHEEL_RATE, written: 72 };
   let flight: Flight | null = null;
@@ -71,13 +90,15 @@ export function createCameraRig(
     aim: new Vector3(),
     /** 0 on the solar map … 1 in the Galaxy, from the camera distance. */
     galaxy: 0,
+    /** 0 up to the Galaxy … 1 on the cosmic map. */
+    cosmos: 0,
     /** Galaxy camera target: the centre from afar, the Sun up close (0..1 of the way). */
     homing: 0,
     /** Accumulated zoom past a close-up's far limit, in e-folds; a deliberate push leaves. */
     edgePush: 0,
     /** The map that dominates the view. */
     get realm(): Realm {
-      return realmOf(rig.galaxy);
+      return realmOf(rig.galaxy, rig.cosmos);
     },
     /** A view flight is under way. */
     get flying() {
@@ -92,7 +113,7 @@ export function createCameraRig(
       return Math.exp(zoom.target);
     },
 
-    /** Zoom bounds, au. The solar map and the Galaxy are one range. */
+    /** Zoom bounds, au. The solar map, the Galaxy and the cosmic map are one range. */
     limits() {
       const close = closeUp();
       if (close) {
@@ -104,7 +125,7 @@ export function createCameraRig(
       return {
         /* While the bulge card holds the aim on the centre, stop at the Galaxy map's floor. */
         min: bulgeHeld() ? GALAXY_NEAR * LY : 0.35,
-        max: (state().show.halo ? 2_400_000 : 230_000) * LY,
+        max: COSMIC_MAX,
       };
     },
 
@@ -147,9 +168,10 @@ export function createCameraRig(
     snapToView(id: ViewId) {
       const view = viewById(id);
       rig.pose.azimuth = view.azimuth ?? 0.6;
-      rig.pose.inclination = view.inclination ?? (view.realm === "galaxy" ? 0.58 : 0.52);
+      rig.pose.inclination = view.inclination ?? inclinationOf(view.realm);
       rig.pose.distance = worldDistance(view.dist, view.realm);
       rig.galaxy = galaxyMix(rig.pose.distance);
+      rig.cosmos = cosmosMix(rig.pose.distance);
       rig.settle();
     },
     /** Flies to a view's scale; between maps the angles fly to the view's framing too. */
@@ -166,7 +188,7 @@ export function createCameraRig(
       if (!crossing && Math.abs(to - from) < 0.012) return;
       const seconds = flightSeconds(to - from);
       const azimuth = view.azimuth ?? 0.6;
-      const inclination = view.inclination ?? (view.realm === "galaxy" ? 0.58 : 0.52);
+      const inclination = view.inclination ?? inclinationOf(view.realm);
       flight = {
         from,
         to,
@@ -227,7 +249,7 @@ export function createCameraRig(
           flight = null;
         }
       } else {
-        /* Limits can move under the zoom (the halo switched off, the bulge card held): glide back. */
+        /* Limits can move under the zoom (the bulge card held): glide back. */
         const bounds = close ? null : rig.limits();
         if (bounds) zoom.target = clamp(zoom.target, Math.log(bounds.min), Math.log(bounds.max));
       }
@@ -248,7 +270,10 @@ export function createCameraRig(
       zoom.written = pose.distance;
     },
 
-    /** Close in, the camera turns about the Sun; far out, about the galactic centre. */
+    /**
+     * Close in, the camera turns about the Sun; farther, about the galactic centre; past the
+     * halo, about the heart of the structure in view (moving with the timeline).
+     */
     home() {
       const s = state();
       galacticAnchor(s.yearsAgo, s.show.elliptical, anchor);
@@ -257,14 +282,27 @@ export function createCameraRig(
         smootherstep(1 - toLogFraction(rig.pose.distance / LY, 9_000, 40_000)) *
         (1 - smootherstep(hold));
       rig.aim.copy(centre).multiplyScalar(1 - rig.homing);
+      cosmicAim(rig.pose.distance / LY, s.yearsAgo, heart);
+      if (heart[0] !== 0 || heart[1] !== 0 || heart[2] !== 0)
+        rig.aim.add(
+          beyond
+            .set(heart[0], heart[1], heart[2])
+            .applyQuaternion(GALAXY_FRAME)
+            .multiplyScalar(MLY),
+        );
     },
 
     applyPose() {
       const { pose, aim } = rig;
       const { azimuth, inclination, distance } = pose;
       rig.galaxy = galaxyMix(distance);
-      /* The orbit frame turns from the ecliptic to the galactic plane over the handoff. */
-      orbitFrame.identity().slerp(GALAXY_FRAME, rig.galaxy);
+      rig.cosmos = cosmosMix(distance);
+      /* The orbit frame turns from the ecliptic to the galactic plane over the handoff, then
+         to the supergalactic plane as the nearby galaxies come into view. */
+      orbitFrame
+        .identity()
+        .slerp(GALAXY_FRAME, rig.galaxy)
+        .slerp(SUPERGALACTIC_FRAME, smootherstep(toLogFraction(distance / LY, 2e6, 4e7)));
       offset
         .set(
           distance * Math.cos(inclination) * Math.sin(azimuth),

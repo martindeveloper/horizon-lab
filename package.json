@@ -23,6 +23,8 @@
     "lint:fix": "oxlint --fix .",
     "format:check": "oxfmt --check .",
     "docs:generate": "node --import tsx scripts/generate-simulation-docs.mjs",
+    "docs:catalogue": "node --import tsx scripts/generate-catalogue-docs.mjs",
+    "docs:catalogue:check": "node --import tsx scripts/generate-catalogue-docs.mjs --check",
     "docs:check": "node --import tsx scripts/generate-simulation-docs.mjs --check",
     "shaders:generate": "node --import tsx scripts/generate-shader-headers.mjs",
     "shaders:check": "node --import tsx scripts/generate-shader-headers.mjs --check",

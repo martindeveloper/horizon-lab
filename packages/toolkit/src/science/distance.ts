@@ -1,5 +1,5 @@
 import { AU_KM, LIGHT_YEAR_KM, SPEED_OF_LIGHT } from "./constants";
-import { formatReadout, numberFormat } from "./format";
+import { formatReadout, formatSignificant, numberFormat } from "./format";
 import { convert } from "./units";
 
 /** IAU symbols: au (2012 Resolution B2), ly, pc. */
@@ -53,7 +53,33 @@ export type DistanceFormat = {
   lightTimeTo?: number;
   /** Keep trailing zeros in both numbers, so a live readout holds its digit count. */
   fixed?: boolean;
+  /** Localized word for a million ("million"): ly and pc from a million read "53.8 million ly". */
+  millionWord?: string;
+  /** Round to this many significant figures (a literature value), instead of the readout's ~3. */
+  significant?: number;
 };
+
+function formatValue(value: number, options: DistanceFormat) {
+  return options.significant
+    ? formatSignificant(value, options.locale, options.significant)
+    : formatReadout(value, options.locale, options.fixed);
+}
+
+/** The value in the chosen unit, divided down to millions where the host has a word for it. */
+function scaled(au: number, magnitudeAu: number, options: DistanceFormat) {
+  const value = convertDistance(au, "au", options.unit);
+  const million =
+    !!options.millionWord &&
+    options.unit !== "au" &&
+    /* A converted million (1 Mly) can land a rounding error below 10⁶. */
+    Math.abs(convertDistance(magnitudeAu, "au", options.unit)) >= 1e6 * (1 - 1e-12);
+  return { value: million ? value / 1e6 : value, million };
+}
+
+function unitText(million: boolean, options: DistanceFormat) {
+  const symbol = options.symbols[options.unit];
+  return million ? `${options.millionWord} ${symbol}` : symbol;
+}
 
 /**
  * One distance readout for every simulation: the value in the chosen unit,
@@ -61,8 +87,10 @@ export type DistanceFormat = {
  * 45 min"). Labels come from the host; numbers from Intl.
  */
 export function formatDistance(au: number, options: DistanceFormat) {
-  const { unit, locale, symbols, lightTimeLabel } = options;
-  const text = `${formatReadout(convertDistance(au, "au", unit), locale, options.fixed)} ${symbols[unit]}`;
+  const { locale, lightTimeLabel } = options;
+  const { value, million } = scaled(au, au, options);
+  const text = `${formatValue(value, options)} ${unitText(million, options)}`;
+  if (million) return text;
   const from = options.lightTimeFrom ?? 0.2;
   const to = options.lightTimeTo ?? 0.05 * LIGHT_YEAR_AU;
   const abs = Math.abs(au);
@@ -70,4 +98,17 @@ export function formatDistance(au: number, options: DistanceFormat) {
   const time = lightTime(au);
   const number = numberFormat(locale, time.digits, options.fixed ?? false).format(time.value);
   return `${text} · ${lightTimeLabel} ${number} ${time.unit}`;
+}
+
+/**
+ * A span in the same readout, the unit once: "2.1–3.3 au", "1.6–3.2 ly". The larger end
+ * picks the million scaling for both; ranges carry no light-time.
+ */
+export function formatDistanceRange(lowAu: number, highAu: number, options: DistanceFormat) {
+  finite(lowAu);
+  finite(highAu);
+  const magnitude = Math.max(Math.abs(lowAu), Math.abs(highAu));
+  const low = scaled(lowAu, magnitude, options);
+  const high = scaled(highAu, magnitude, options);
+  return `${formatValue(low.value, options)}–${formatValue(high.value, options)} ${unitText(high.million, options)}`;
 }

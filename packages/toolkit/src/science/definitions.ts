@@ -9,6 +9,8 @@ export const SPEED_OF_LIGHT_SI = 299_792_458;
 export const GRAVITATIONAL_CONSTANT_SI = 6.6743e-11;
 /** Solar gravitational parameter GM☉, m³ s⁻² (IAU 2015 Resolution B3, nominal; measured to ~10⁻¹⁰). */
 export const SOLAR_GM_SI = 1.3271244e20;
+/** Terrestrial gravitational parameter GM⊕, m³ s⁻² (IAU 2015 Resolution B3, nominal). */
+export const EARTH_GM_SI = 3.986004e14;
 /** Nominal solar radius, m (IAU 2015 Resolution B3). */
 export const SOLAR_RADIUS_SI = 6.957e8;
 /** Astronomical unit, m (exact, IAU 2012 Resolution B2). */

@@ -101,7 +101,8 @@ export function createGalaxyLayer(
       return camera.position.distanceTo(centre) + EXTENT_LY * LY;
     },
     update({ show, yearsAgo, dist }: Frame) {
-      const shown = lod.galaxy;
+      /* In from the solar map, out as the cosmic map's Milky Way takes over. */
+      const shown = lod.galaxy * (1 - lod.cosmos);
       const labelled = names.to(show.names);
       galaxy.visible = shown > 0.001;
       if (!galaxy.visible) {

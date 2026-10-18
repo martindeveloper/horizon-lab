@@ -19,8 +19,8 @@ code uses the named values whose names state their units (`AU_KM`,
 
 ## Units and measures (`units.ts`, `measure.ts`)
 
-`UNITS` defines lengths (m, km, R☉, au, ly, pc, kpc, Mpc), times (s … Gyr,
-Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉), speeds (m/s, km/s,
+`UNITS` defines lengths (m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (s … Gyr,
+Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), speeds (m/s, km/s,
 c) and K, each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 
@@ -33,7 +33,8 @@ measure(4.24, "ly").format({ locale: "cs", symbols: { ly: "sv. r." } }); // "4,2
 
 `readout` chooses about three significant figures (scientific below 0.001 or
 from 10⁷); `formatReadout` and `formatNumber` print with cached Intl formatters,
-because canvas labels redraw every frame.
+because canvas labels redraw every frame. `formatSignificant` prints a literature
+value to a chosen number of significant figures ("18,000", "5 × 10¹⁶", "10¹⁷").
 
 ## Equations (`equation.ts`, `laws.ts`)
 
@@ -59,7 +60,10 @@ way. `Formula` is the print-only view documents use.
 
 `DistanceUnit` is `au` | `ly` | `pc`. `convertDistance`, `lightTime` (s / min /
 h / d) and `formatDistance` render the shared readout "5.37 au · light-time
-45 min"; the host passes translated unit symbols and the light-time phrase.
+45 min"; the host passes translated unit symbols and the light-time phrase, and
+optionally `millionWord` so ly and pc from a million read "53.8 million ly", and
+`significant` to keep a rounded literature value rounded after conversion ("60,000 ly"
+reads "18,000 pc"). `formatDistanceRange` prints a span with the unit once ("2.1–3.3 au").
 `AU_LIGHT_SECONDS`, `LIGHT_YEAR_AU`, `PARSEC_AU` and `PARSEC_KM` derive from the
 exact definitions.
 

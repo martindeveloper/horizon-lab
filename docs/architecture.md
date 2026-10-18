@@ -53,12 +53,15 @@ src/
         elements.ts            Planet and named-body orbits along Neptune's migration
         tracers.ts             The planetesimal sample and its populations
         galactic-orbit.ts      The Sun's Galactic orbit, trail and laps
+        cosmos.ts              Beyond the Galaxy: ΛCDM scale factor, the Milky Way–Andromeda
+                               orbit, named galaxies and clusters, camera aims
         views.ts               Camera views and along-orbit drift by scale
         neighbours.ts          Nearest stars on straight-line tracks (Gaia astrometry)
         tour.ts                Guide steps and their flights
+        catalogue.ts           Every figure a card prints: value, unit, range, source
         parameters.ts, equations.ts, figures.ts, model-check.ts
       lib/graphics/            three.js building blocks: looks.ts (textures, materials),
-                               sky.ts, galaxy.ts, swarms.ts, moons.ts, coordinates.ts,
+                               sky.ts, galaxy.ts, cosmos.ts, swarms.ts, moons.ts, coordinates.ts,
                                map-loader.ts (WebP maps from MAP_BASE; scripts/build-planet-maps.mjs),
                                tour-sketch.ts, shader-defines.ts, shaders/
       lib/scene/               The engine: engine.ts wires the toolkit engine host, orbit
@@ -66,7 +69,8 @@ src/
                                (*-layer.ts) through a shared kit and per-frame state (kit.ts);
                                lod.ts is the one level of detail every layer reads (screen
                                size, presence bands, faders, hysteresis, the solar↔Galaxy
-                               blend); measured-maps.ts budgets surface maps from it;
+                               and Galaxy↔cosmos blends); measured-maps.ts budgets surface
+                               maps from it;
                                camera-rig.ts (one log-distance zoom), close-up-controller.ts
                                (+ close-up-flight.ts), guide-director.ts, picking.ts,
                                labels.ts, rulers.ts, hud.ts
@@ -119,19 +123,19 @@ page scrolling.
 
 ## Routes and compatibility
 
-| Route                   | Purpose                                                     |
-| ----------------------- | ----------------------------------------------------------- |
-| `/`                     | Catalogue                                                   |
-| `/lab/black-hole`       | Default black-hole scene                                    |
-| `/lab/black-hole/m87`   | Preset                                                      |
-| `/m87`                  | Permanent redirect to the preset route                      |
-| `/lensed`               | Permanent redirect to the default scene                     |
-| `/lab/orrery`           | Orrery, default view (the giant planets)                    |
-| `/lab/orrery/galaxy`    | Orrery view (inner, kuiper, scattered, oort, stars, galaxy) |
-| `/lab/orrery/milky-way` | Permanent redirect to the canonical view                    |
-| `/black-hole/...`       | Permanent redirect to the same `/lab` page (pre-prefix URL) |
-| `/orrery/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL) |
-| `/en/...`, `/cs/...`    | Served in that language, then shown as the clean path       |
+| Route                   | Purpose                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                     | Catalogue                                                                                                                          |
+| `/lab/black-hole`       | Default black-hole scene                                                                                                           |
+| `/lab/black-hole/m87`   | Preset                                                                                                                             |
+| `/m87`                  | Permanent redirect to the preset route                                                                                             |
+| `/lensed`               | Permanent redirect to the default scene                                                                                            |
+| `/lab/orrery`           | Orrery, default view (the giant planets)                                                                                           |
+| `/lab/orrery/galaxy`    | Orrery view (inner, kuiper, scattered, oort, stars, galaxy, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea) |
+| `/lab/orrery/milky-way` | Permanent redirect to the canonical view                                                                                           |
+| `/black-hole/...`       | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                        |
+| `/orrery/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                        |
+| `/en/...`, `/cs/...`    | Served in that language, then shown as the clean path                                                                              |
 
 Every simulation lives under `SIMULATION_PREFIX` (`src/lib/simulation-paths.ts`).
 Build manifest paths with `simulationPath(slug)`; the manifest type rejects any
@@ -350,7 +354,17 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   constant or a parameter: "1 au = {millions} million km · light-time {minutes} min",
   "One lap in {galacticYearMyr} million years". The orrery's `lib/model/figures.ts`
   supplies them (rounded for print); pass them to `t()` and, for technical prose,
-  as `values` to `SimulationTechnicalDetails`. Literature values stay as text.
+  as `values` to `SimulationTechnicalDetails`.
+- **Card figures come from a catalogue.** The orrery's `lib/model/catalogue.ts` holds
+  every number a selection card prints, literature values included: value, a unit of
+  the science kit, optional range, significant figures and a source id. It references
+  model constants and toolkit bodies instead of copying them, and derives what follows
+  from physics (Kepler's third law, the parallax law, light-time) with the kit's
+  equations. Messages keep only the words ("About {value} galaxies"); `quantity()` in
+  `components/format.ts` prints lengths in the visitor's distance unit through
+  `formatDistance`. `npm run docs:catalogue` writes the catalogue and its sources into
+  `docs/science-sources.md`; `tests/orrery-catalogue.test.mjs` checks sources, units,
+  rendering in both languages and that card copy types no digits.
 - Shader-only steps, vector rotations and sampling recipes stay as plain text in
   `technical.json`.
 - **Shaders type no numbers either.** A lab's shader parameters live in its

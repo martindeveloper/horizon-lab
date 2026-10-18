@@ -9,7 +9,12 @@
     "scattered": "Scattered disk",
     "oort": "Oort cloud",
     "stars": "Nearest star",
-    "galaxy": "Milky Way"
+    "galaxy": "Milky Way",
+    "local-group": "Local Group",
+    "local-sheet": "Local Sheet",
+    "virgo-cluster": "Virgo Cluster",
+    "virgo-supercluster": "Virgo Supercluster",
+    "laniakea": "Laniakea"
   },
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",
@@ -18,7 +23,12 @@
     "scattered": "Bodies Neptune tossed onto long ellipses, hundreds of au out.",
     "oort": "Guide shells at 5,000 and 100,000 au; the dots thin out as r⁻³·⁵. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets.",
     "stars": "Proxima, Alpha Centauri and Barnard's Star in their real directions. The ring is the nearest star's distance; the sky behind is the real one.",
-    "galaxy": "A different map, in light-years. Zoom in on the Sun to return."
+    "galaxy": "A different map, in light-years. Zoom in on the Sun to return.",
+    "local-group": "The Milky Way, Andromeda and their dwarfs, about 10 million light-years across.",
+    "local-sheet": "The flat wall of nearby groups we live in, about 46 million light-years across.",
+    "virgo-cluster": "About 1,500 galaxies some 54 million light-years away. We sit outside it.",
+    "virgo-supercluster": "Groups and clouds fanned out around Virgo, about 110 million light-years across.",
+    "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor."
   },
   "units": {
     "au": "au",
@@ -43,7 +53,8 @@
     "offsetDays": "{value, plural, one {# day} other {# days}}",
     "offsetYears": "{value, plural, one {# year} other {# years}}",
     "offsetThousand": "{value} thousand years",
-    "clockDrift": "Today + {offset} · {rate}"
+    "clockDrift": "Today + {offset} · {rate}",
+    "expansion": "Space at {value} of today's scale, modelled"
   },
   "toggles": {
     "elliptical": "Ellipses",
@@ -106,7 +117,19 @@
     "lightYears": "ly",
     "au": "au",
     "lightTime": "light-time",
-    "parsecs": "pc"
+    "parsecs": "pc",
+    "andromeda": "Andromeda",
+    "triangulum": "Triangulum",
+    "localGroup": "Local Group",
+    "virgoCluster": "Virgo Cluster",
+    "fornaxCluster": "Fornax Cluster",
+    "virgoSupercluster": "Virgo Supercluster",
+    "centaurusCluster": "Centaurus Cluster",
+    "hydraCluster": "Hydra Cluster",
+    "greatAttractor": "Great Attractor",
+    "laniakea": "Laniakea",
+    "million": "million",
+    "localSheet": "Local Sheet"
   },
   "hud": {
     "views": "Views",
@@ -145,7 +168,9 @@
     "closeUpNote": "True size, turned as it is now.",
     "closeUpPresentOnly": "Close-ups show today's surfaces. Return to the present to zoom in.",
     "epochs": "Jump to an epoch",
-    "distanceUnit": "Distance unit: astronomical units, light-years or parsecs"
+    "distanceUnit": "Distance unit: astronomical units, light-years or parsecs",
+    "cosmosMotion": "Cosmic map",
+    "cosmosItems": "Beyond the Milky Way"
   },
   "badges": {
     "measured": "Measured",
@@ -167,7 +192,7 @@
     "today": "Today",
     "period": "Period",
     "modelStart": "Initial semi-major axis",
-    "notMeasured": "{value} au, not a measurement",
+    "notMeasured": "{value}, not a measurement",
     "stretch": "Stretch (e)",
     "tilt": "Tilt",
     "tiltValue": "{value}° to the ecliptic",
@@ -203,8 +228,8 @@
     "stars": "Stars",
     "proxima": "Proxima Centauri",
     "oortCompare": "Compared with the Oort cloud",
-    "closestFuture": "{ly} light-years, in {years} thousand years",
-    "closestPast": "{ly} light-years, {years} thousand years ago",
+    "closestFuture": "{distance}, in {years} thousand years",
+    "closestPast": "{distance}, {years} thousand years ago",
     "closest": "Closest approach",
     "motion": "Motion",
     "direction": "Direction",
@@ -212,26 +237,34 @@
     "years": "{value} years",
     "yearsAbout": "about {value} years",
     "km": "{value} km",
-    "percent": "{value} %"
+    "percent": "{value} %",
+    "distance": "Distance",
+    "members": "Members",
+    "apart": "Milky Way–Andromeda",
+    "approach": "Approach",
+    "future": "Future",
+    "heart": "Heart",
+    "scaleThen": "Space then",
+    "depth": "Thickness"
   },
   "cards": {
     "sun": {
       "title": "Sun",
       "radius": "{km} km · about {au} au",
-      "age": "About 4.57 billion years",
+      "age": "About {value} billion years",
       "oneAu": "{millions} million km · light-time {minutes} min",
-      "body": "Over 99.8 % of the solar system's mass, yet under 1 % of its angular momentum: nearly all of that rides in the planets' orbits. The clock of this model. Planet positions around it are computed for today's date from the JPL approximate elements, so this is tonight's configuration, seen from above the ecliptic.",
-      "caution": "Marker sizes are enlarged unless True size is on. The real Sun is 109 Earth diameters across and still a speck beside planetary distances."
+      "body": "Over {mass} % of the solar system's mass, yet under {spin} % of its angular momentum: nearly all of that rides in the planets' orbits. The clock of this model. Planet positions around it are computed for today's date from the JPL approximate elements, so this is tonight's configuration, seen from above the ecliptic.",
+      "caution": "Marker sizes are enlarged unless True size is on. The real Sun is {diameters} Earth diameters across and still a speck beside planetary distances."
     },
     "planets": {
       "mercury": "Smallest planet. Its path is the most stretched of the eight.",
       "venus": "Almost a circle. A circle and an ellipse look the same here.",
-      "earth": "1 au is approximately Earth's mean distance from the Sun: {millions} million km, or {minutes} light-minutes. It is defined as exactly 149,597,870,700 metres.",
+      "earth": "1 au is approximately Earth's mean distance from the Sun: {millions} million km, or {minutes} light-minutes. It is defined as exactly {metres} metres.",
       "mars": "A clearly stretched orbit. Still tiny beside Jupiter's.",
       "jupiter": "In the model Jupiter starts slightly farther out and ends slightly closer in, as instability studies find. The start is not a measurement. It outweighs all the other planets together more than twice over.",
       "saturn": "Starts closer to Jupiter than today, then moves outward in the model. The rings are to scale with the planet. Its mean density is lower than water's.",
       "uranus": "An ice giant. In the model it moves outward with Neptune as the disk is stirred. Uranus and Neptune may even have swapped places.",
-      "neptune": "Ends near 30 au at the inner edge of today's Kuiper belt. Its outward move is what scatters the disk in this sketch. Dynamical friction with the disk then rounded its orbit again."
+      "neptune": "Ends near {end} at the inner edge of today's Kuiper belt. Its outward move is what scatters the disk in this sketch. Dynamical friction with the disk then rounded its orbit again."
     },
     "planetCautionEllipse": "The orbit uses measured elements; during migration, the giant planets’ orbits are adjusted by a teaching model. Motion speeds up the planet’s orbit.",
     "planetCautionCircle": "With Ellipses off, the path is a circle whose radius equals the semi-major axis. The eccentricity shown in the card is unchanged.",
@@ -241,35 +274,35 @@
         "caution": "Today's orbit is from the JPL table. The starting orbit in the sketch, and when it was captured into resonance, are a model of 'moved during Neptune's migration', not a recovered path."
       },
       "sedna": {
-        "summary": "A distant dwarf-planet candidate. Its closest point is about 76 au, far beyond Neptune, and its far point about 940 au. It is detached from the planets and reaches perihelion in 2076.",
+        "summary": "A distant dwarf-planet candidate. Its closest point is about {near}, far beyond Neptune, and its far point about {far}. It is detached from the planets and reaches perihelion in 2076.",
         "caution": "The orbit is measured; how Sedna got there is not. A passing star in the Sun's birth cluster is one idea, an unseen distant planet is another. The slider does not invent a path for Sedna."
       },
       "halley": {
         "summary": "A famous comet on a long, backward-tilted ellipse: inside Venus's orbit at perihelion, out past Neptune at aphelion. It passed aphelion in December 2023 and returns to perihelion on 28 July 2061.",
-        "caution": "This is the present orbit, which itself changes a little each return. It is hidden in circle mode: a circle at 17.8 au would park it just inside Uranus's orbit, which is wrong."
+        "caution": "This is the present orbit, which itself changes a little each return. It is hidden in circle mode: a circle at {a} would park it just inside Uranus's orbit, which is wrong."
       }
     },
     "populations": {
       "asteroids": {
         "title": "Asteroid belt",
-        "where": "About 2.1–3.3 au",
-        "mass": "About 3 % of the Moon's mass",
+        "where": "About {range}",
+        "mass": "About {value} % of the Moon's mass",
         "body": "Rocky leftovers between Mars and Jupiter. Jupiter stirred this zone, so collisions broke bodies apart instead of building a planet; many asteroids are fragments of larger bodies, and most of the early mass is gone (not animated here). Spacecraft cross the belt without dodging.",
         "caution": "Dots are a seeded sample with realistic orbit shapes and the Kirkwood gaps, enlarged, not a catalogue of real asteroids. The two clumps along Jupiter's orbit are its Trojans, captured during the clearing."
       },
       "disk": {
         "title": "Early planetesimal disk",
-        "drawnAt": "About 16–34 au, flat and nearly circular",
+        "drawnAt": "About {range}, flat and nearly circular",
         "when": "Only at the old end of the slider",
-        "body": "A stand-in for the icy leftovers outside the packed giants after the gas disk was gone (about 35 Earth masses in the Nice model). Neptune's outward move stirs it. It is not a photograph of a particular year.",
+        "body": "A stand-in for the icy leftovers outside the packed giants after the gas disk was gone (about {mass} Earth masses in the Nice model). Neptune's outward move stirs it. It is not a photograph of a particular year.",
         "caution": "Studies argue about the disk's mass and outer edge. Round numbers here are for teaching."
       },
       "kuiper": {
         "title": "Kuiper belt",
-        "region": "About 30–50 au",
-        "todayMass": "No more than about 0.1 Earth masses",
-        "originalMass": "Several Earth masses in the classical region; the whole Nice-model disk about 35",
-        "body": "Icy worlds beyond Neptune, including Pluto. More than 4,000 trans-Neptunian objects are catalogued; the classical belt fades near 50 au, the 'Kuiper cliff'. Cold classical dots stay near 42–48 au the whole time because that population likely formed in place. The stirred dots are the ones Neptune moved, and the dense ring at 39.4 au is the plutinos it captured into the 3:2 resonance.",
+        "region": "About {range}",
+        "todayMass": "No more than about {value} Earth masses",
+        "originalMass": "Several Earth masses in the classical region; the whole Nice-model disk about {value}",
+        "body": "Icy worlds beyond Neptune, including Pluto. More than {catalogued} trans-Neptunian objects are catalogued; the classical belt fades near {cliff}, the 'Kuiper cliff'. Cold classical dots stay near {cold} the whole time because that population likely formed in place. The stirred dots are the ones Neptune moved, and the dense ring at {plutinos} is the plutinos it captured into the 3:2 resonance.",
         "caution": "Do not read the two kinds as a census. Today's belt is a thin leftover of a heavier disk."
       },
       "scattered": {
@@ -281,9 +314,9 @@
       },
       "oort": {
         "title": "Oort cloud",
-        "innerEdge": "Thought to be about 2,000–5,000 au",
-        "outerEdge": "Uncertain, roughly 100,000–200,000 au",
-        "shells": "Drawn at 5,000 and 100,000 au",
+        "innerEdge": "Thought to be about {range}",
+        "outerEdge": "Uncertain, roughly {range}",
+        "shells": "Drawn at {inner} and {outer}",
         "body": "A vast swarm of icy bodies proposed in 1950 to explain long-period comets, which arrive from every direction. The giants flung leftovers outward; the Galaxy's tide and passing stars lifted their perihelia out of the planets' reach, so the cloud became a thick shell. It may hold hundreds of billions to trillions of bodies; the dots thin out as r⁻³·⁵, the usual inferred profile.",
         "caution": "The distant Oort cloud has not been directly observed. Observed bodies such as Sedna are often classified as inner Oort cloud objects, but the definition of that region varies between studies. The dots in this scene represent a model population; their number does not give the actual number of bodies."
       },
@@ -297,69 +330,159 @@
     },
     "tracer": {
       "title": "Small body · {bin}",
-      "cold": "Cold-classical stand-in, kept near 42–48 au on purpose.",
+      "cold": "Cold-classical stand-in, kept near {range} on purpose.",
       "ejected": "One of the bodies the model removes.",
       "oort": "Bound for the Oort cloud in the model, then lifted off the plane.",
       "other": "Ends in the stirred Kuiper belt or the scattered disk.",
-      "caution": "Do not count dots: 560 stand-ins are not 560 real worlds."
+      "caution": "Do not count dots: {count} stand-ins are not {count} real worlds."
     },
     "galaxy": {
       "sun": {
         "title": "The Sun in the Galaxy",
-        "centre": "About {sunRadiusLy} light-years ({sunRadiusKpc} kpc)",
-        "lap": "About {galacticYearMyr} million years (estimates run 205–230)",
-        "speed": "About 230 km/s circular speed here; the Sun itself moves ~250 km/s",
-        "radial": "Out to ~{radialSwingLy} light-years farther and back, every ~{radialMyr} million years",
-        "vertical": "±{verticalLy} light-years over ~{verticalMyr} million years; now ~{heightLy} ly north, climbing",
+        "centre": "About {value}",
+        "lap": "About {value} million years (estimates run {range})",
+        "speed": "About {value} km/s circular speed here; the Sun itself moves ~{sun} km/s",
+        "radial": "Out to ~{value} farther and back, every ~{period} million years",
+        "vertical": "±{value} over ~{period} million years; now ~{height} north, climbing",
         "body": "We sit at the inner edge of the Local Arm (the Orion Spur), between the Sagittarius–Carina and Perseus arms, neither at the centre nor at the rim. Since it formed the Sun has lapped the Galaxy about {laps} times, clockwise seen from the north galactic pole. The slider moves a schematic clock: it does not know the Sun's true angle billions of years ago, so today is pinned to the modern position.",
         "caution": "The wobble amplitudes are typical values from stellar-dynamics estimates; studies differ. A star's galactic path is not a closed ellipse."
       },
       "bulge": {
         "title": "Bulge and bar",
-        "centre": "About {sunRadiusLy} light-years",
-        "bar": "About {barLy} light-years ({barKpc} kpc) end to end, estimates 7–10 kpc; ~{barDeg}° to the Sun–centre line",
-        "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about 4 million Suns. The point density is a sketch, not a star catalogue.",
+        "centre": "About {value}",
+        "bar": "About {value} end to end, estimates {range}; ~{angle}° to the Sun–centre line",
+        "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about {mass} million Suns. The point density is a sketch, not a star catalogue.",
         "caution": "Do not measure the bar's length off this drawing."
       },
       "halo": {
         "title": "Dark-matter halo",
-        "width": "On the order of a million light-years",
+        "width": "On the order of {value}",
         "mass": "Most of the Galaxy's mass",
         "body": "Stars orbit too fast for the visible matter alone to hold them; the extra gravity is attributed to dark matter. The faint ball is a reminder of that halo, off by default so it is not mistaken for a cloud of stars.",
         "caution": "Dark matter has not been seen directly. Do not treat the sphere as a photo or a sharp edge."
       },
       "milkyway": {
         "title": "Milky Way",
-        "diskWidth": "On the order of 100,000 light-years",
-        "thickness": "On the order of 1,000 light-years",
-        "stars": "At least 100 billion",
-        "age": "About 13.6 billion years",
-        "body": "Our galaxy from outside, built on measurements: a thin and a thick disk, a peanut-shaped bulge inside a bar at {barDeg}°, four arms at a ~{pitchDeg}° pitch placed where maser distances put them near the Sun, the short Local Arm just outside us, dust lanes on the arms' inner edges and the warp of the outer disk. The far side is extrapolated: the centre hides it from us. Before the Sun you get one earlier sketch: thicker, smaller, less of a bar, the stirred galaxy around the Gaia-Enceladus merger roughly 8–11 billion years ago.",
-        "caution": "Spiral arms are density waves, not fixed structures; stars pass through them. The ecliptic plane and the Galactic plane are tilted by about 60°, so the two maps meet only at the Sun."
+        "diskWidth": "On the order of {value}",
+        "thickness": "On the order of {value}",
+        "stars": "At least {value} billion",
+        "age": "About {value} billion years",
+        "body": "Our galaxy from outside, built on measurements: a thin and a thick disk, a peanut-shaped bulge inside a bar at {bar}°, four arms at a ~{pitch}° pitch placed where maser distances put them near the Sun, the short Local Arm just outside us, dust lanes on the arms' inner edges and the warp of the outer disk. The far side is extrapolated: the centre hides it from us. Before the Sun you get one earlier sketch: thicker, smaller, less of a bar, the stirred galaxy around the Gaia-Enceladus merger roughly {merger} billion years ago.",
+        "caution": "Spiral arms are density waves, not fixed structures; stars pass through them. The ecliptic plane and the Galactic plane are tilted by about {tilt}°, so the two maps meet only at the Sun."
       }
     },
     "stars": {
       "proxima": {
         "where": "Centaurus, near the southern Milky Way",
-        "motion": "22 km/s toward the Sun, 3.9″ a year across the sky",
+        "motion": "{velocity} km/s toward the Sun, {proper}″ a year across the sky",
         "body": "A red dwarf, the nearest star to the Sun. It is drawn where it really is on the sky; the ring is its distance and the beam links it to the Sun. The Sun's gravity is already losing to the Galaxy near the outer Oort cloud."
       },
       "alphaCen": {
-        "where": "Centaurus, 2° from Proxima",
-        "motion": "22 km/s toward the Sun; Proxima orbits the pair",
-        "body": "Two Sun-like stars 4.34 light-years away, a close pair drawn as one point. Proxima is loosely bound to them, about 12,000 au out. Both pass about 3.1 light-years from the Sun in roughly 28,000 years."
+        "where": "Centaurus, {separation}° from Proxima",
+        "motion": "{velocity} km/s toward the Sun; Proxima orbits the pair",
+        "body": "Two Sun-like stars {distance} away, a close pair drawn as one point. Proxima is loosely bound to them, about {proxima} out. Both pass about {approach} from the Sun in roughly {years} years."
       },
       "barnard": {
         "where": "Ophiuchus",
-        "motion": "110 km/s toward the Sun, 10.4″ a year, the fastest proper motion known",
-        "body": "A faint red dwarf 5.96 light-years away, closing fast. It passes about 3.8 light-years from the Sun in roughly 10,000 years, then recedes."
+        "motion": "{velocity} km/s toward the Sun, {proper}″ a year, the fastest proper motion known",
+        "body": "A faint red dwarf {distance} away, closing fast. It passes about {approach} from the Sun in roughly {years} years, then recedes."
       },
       "scholz": {
-        "where": "Monoceros, 22 light-years away today",
-        "motion": "82 km/s away from the Sun, almost along the line of sight",
-        "body": "A red dwarf with a brown-dwarf companion, receding. Run its track back and it passed through the outer Oort cloud about 70–80 thousand years ago, roughly a light-year out: the closest well-established stellar flyby. Humans were around and may have seen its flares."
+        "where": "Monoceros, {distance} away today",
+        "motion": "{velocity} km/s away from the Sun, almost along the line of sight",
+        "body": "A red dwarf with a brown-dwarf companion, receding. Run its track back and it passed through the outer Oort cloud about {flyby} thousand years ago, roughly a light-year out: the closest well-established stellar flyby. Humans were around and may have seen its flares."
       },
       "caution": "Straight-line tracks from measured positions and speeds. Good for a few hundred thousand years either way; hidden beyond that."
+    },
+    "cosmos": {
+      "scaleThen": "{value} of today's scale",
+      "localGroup": {
+        "title": "Local Group",
+        "width": "About {value}",
+        "members": "More than {value} galaxies, most of them dwarfs",
+        "mass": "A few trillion Suns, mostly dark matter",
+        "body": "Our galaxy's group: two giants, the Milky Way and Andromeda, with Triangulum and dozens of dwarfs, held together by their own gravity, so it does not expand with the Universe. On the timeline the giants follow the timing-argument orbit: they flew apart after the Big Bang, turned around about {turnaroundAgo} billion years ago at {turnaround}, and have been falling together since.",
+        "caution": "Only the named galaxies are at measured places; the dwarfs are a sketch around their hosts."
+      },
+      "andromeda": {
+        "title": "Andromeda Galaxy",
+        "approach": "About {value} km/s toward the Milky Way ({sun} km/s toward the Sun)",
+        "width": "About {range}, from the bright disk to its faint outer edge",
+        "future": "A first close pass in ~{range} billion years; a merger is likely, not certain",
+        "body": "The nearest big galaxy and the largest in the Local Group, a spiral like ours seen at a slant. Its spectrum shows it nearing the Sun at about {sun} km/s; take away the Sun's own orbit around the Galaxy and it closes on the Milky Way at about {approach} km/s. Gravity alone, that speed, today's {distance} and the age of the Universe fix one radial orbit, and the slider follows it.",
+        "caution": "Its sideways motion is uncertain, so studies put the chance of a merger within {within} billion years anywhere from about one half to nine in ten."
+      },
+      "virgo": {
+        "title": "Virgo Cluster",
+        "members": "About {value} galaxies (estimates {range})",
+        "width": "About {value}",
+        "heart": "M87, with a black hole of about {value} billion Suns",
+        "body": "The nearest large cluster and the heart of our supercluster. We are not inside it: the Local Group sits on its outskirts, pulled toward it while the expansion still carries us apart. On the timeline it rides the expansion and gathers its members, as clusters do.",
+        "caution": "The members are a drawn sample shaped like a cluster, not a catalogue; the gathering is a rough curve, not a simulation."
+      },
+      "supercluster": {
+        "title": "Virgo Supercluster",
+        "width": "About {value}",
+        "members": "{value} clouds of galaxy groups",
+        "heart": "The Virgo Cluster",
+        "body": "Also called the Local Supercluster: a flattened spread of groups and clouds around Virgo, with the Local Group on one of its spurs. It is not bound, so it grows with the expansion; since 2014 it counts as one lobe of Laniakea.",
+        "caution": "Its clouds and spurs are a sketch; only the named groups and clusters are at measured places."
+      },
+      "laniakea": {
+        "title": "Laniakea",
+        "width": "About {value}",
+        "members": "About {value} large galaxies",
+        "mass": "About {value} Suns",
+        "heart": "The Great Attractor, ~{value} away toward Norma and Centaurus",
+        "body": "Our home supercluster, named in 2014 from the Hawaiian for \"immeasurable heaven\". Its edge is a watershed, not a wall: inside it, once the expansion is taken out, galaxies flow toward the Great Attractor. The lines trace those flows. Back along the timeline it shrinks with the scale of space.",
+        "caution": "The filaments and flow lines are a sketch in the spirit of the Cosmicflows maps, not their data; studies still move the boundary."
+      },
+      "triangulum": {
+        "title": "Triangulum Galaxy",
+        "width": "About {value}",
+        "future": "May join the Milky Way–Andromeda merger",
+        "body": "The Local Group's third spiral, smaller and looser than ours, probably on a long orbit around Andromeda. Under a dark sky it is just visible to the eye, among the farthest things you can see without a telescope.",
+        "caution": "Whether it has already passed close to Andromeda is debated; on the timeline it simply rides with Andromeda."
+      },
+      "fornax": {
+        "title": "Fornax Cluster",
+        "members": "About {value} catalogued galaxies",
+        "width": "About {value}",
+        "heart": "NGC 1399",
+        "body": "After Virgo, the most massive cluster near us, smaller and more compact, in the southern sky.",
+        "caution": "The members are a drawn sample shaped like a cluster, not a catalogue."
+      },
+      "centaurus": {
+        "title": "Centaurus Cluster",
+        "members": "Hundreds of galaxies",
+        "heart": "NGC 4696",
+        "body": "A rich cluster on the run of galaxies from Virgo toward the Great Attractor, part of the Centaurus–Hydra concentration.",
+        "caution": "Its distance here comes from its redshift, not a direct measurement; the members are a drawn sample."
+      },
+      "hydra": {
+        "title": "Hydra Cluster",
+        "members": "About {value} catalogued in its field",
+        "heart": "NGC 3311 and NGC 3309",
+        "body": "A rich cluster close to the Centaurus Cluster on the sky and in depth, part of the same concentration that feeds the Great Attractor.",
+        "caution": "Its distance here comes from its redshift, not a direct measurement; the members are a drawn sample."
+      },
+      "greatAttractor": {
+        "title": "Great Attractor",
+        "mass": "About {value} Suns",
+        "heart": "The Norma Cluster (Abell 3627)",
+        "where": "Behind the Milky Way's disk, toward Norma and Centaurus",
+        "body": "Where Laniakea's flows converge: a concentration of clusters about {distance} away, mostly hidden by our own galaxy's dust and stars. Its pull showed up in galaxy motions in the 1980s before anyone could see what was there.",
+        "caution": "It is a region, not one object; its centre and mass differ between studies."
+      },
+      "localSheet": {
+        "title": "Local Sheet",
+        "width": "About {value}",
+        "thickness": "About {value}",
+        "members": "The Local Group and a dozen nearby groups: M81, Centaurus A, Sculptor and more",
+        "motion": "Moving ~{value} km/s away from the Local Void; inside it, galaxies stray only ~{stray} km/s",
+        "body": "The thin wall of galaxies we live in: the Local Group and its neighbours lie in one flat slab about {radius} in radius. Its galaxies drift apart with the expansion almost in step, and the whole sheet is being pushed away from the emptiness of the Local Void beside it. It sits on the outskirts of the Virgo Supercluster.",
+        "caution": "Only the named groups are at measured places; the smaller groups in the sheet are a sketch."
+      }
     }
   },
   "guide": {
@@ -449,7 +572,7 @@
     "featuresTitle": "What you can explore",
     "references": "Scientific sources",
     "features": {
-      "views": "Seven views from the inner planets to the Milky Way, each at a linear scale.",
+      "views": "Twelve views from the inner planets to Laniakea, each at a linear scale.",
       "time": "A 10-billion-year timeline with playback, five epochs, and a tally of where the leftover bodies end up.",
       "bodies": "Planets, Pluto, Sedna, Halley's comet, 560 planetesimal stand-ins, GPU swarms for the asteroid belt, the Trojans, the Kuiper belt and the Oort cloud, the two nearest star systems (α Centauri with Proxima, and Barnard's Star), Scholz's star, and cards that say what is measured."
     },
@@ -481,6 +604,10 @@
       "rendering": {
         "title": "Rendering budget",
         "body": "One instanced mesh draws all planetesimals, orbit lines are rewritten only when their elements change, and frames are rendered only while something moves or a setting changed. Coarse-pointer or low-memory devices cap the pixel ratio and frame rate. Globes switch to a finer mesh only when they are large on screen."
+      },
+      "cosmos": {
+        "title": "Beyond the Milky Way",
+        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^1.5."
       }
     }
   },

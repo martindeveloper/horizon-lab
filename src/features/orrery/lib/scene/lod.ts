@@ -8,19 +8,22 @@
  * - levels: discrete choices (globe meshes) with hysteresis (`pickLevel`);
  * - need: each frame, layers report how large each body is now and where the zoom is
  *   heading (`see`), and the map budget loads and releases surfaces from that;
- * - realms: the solar map and the Galaxy are one world in au and blend over one band.
+ * - realms: the solar map, the Galaxy and the cosmic map beyond it are one world in au and
+ *   blend over two bands.
  *
  * The Galaxy model stays in light-years; its group is turned by `GALAXY_FRAME` (the galactic
  * frame of the sky's J2000 pole and centre) and scaled by one light-year, with the Sun at the
  * origin. The sky's Milky Way band and the Galaxy's disk then line up as the camera pulls out.
+ * The cosmic map is in millions of light-years in the same axes, around the galactic centre.
  */
-import { Matrix4, Quaternion, type PerspectiveCamera, type Vector3 } from "three";
+import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from "three";
 
 import type { BodyId, Elements } from "@horizon/toolkit/bodies";
 import { clamp01, smootherstep } from "@horizon/toolkit/math";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
 import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE } from "../graphics/coordinates";
+import { SUPERGALACTIC } from "../model/cosmos";
 import { sunGalactic } from "../model/galactic-orbit";
 import { SUN_BIRTH } from "../model/parameters";
 import type { Realm } from "../model/views";
@@ -29,6 +32,10 @@ export const LY = LIGHT_YEAR_AU;
 
 /** The handoff from the solar map to the Galaxy, au: past the nearest stars, into the local disk. */
 export const HANDOFF = { from: 7 * LY, to: 950 * LY } as const;
+/** The handoff from the Galaxy to the cosmic map, au: past the halo, the Galaxy becomes one of many. */
+export const COSMIC_HANDOFF = { from: 350_000 * LY, to: 3_000_000 * LY } as const;
+/** One million light-years in au: the cosmic map's unit. */
+export const MLY = 1e6 * LY;
 
 /** The Galaxy's own render pass (drawn first, with a depth range of its own). */
 export const GALAXY_LAYER = 2;
@@ -41,6 +48,19 @@ export const GALAXY_LAYER = 2;
 export const GALAXY_FRAME = new Quaternion().setFromRotationMatrix(
   new Matrix4().makeBasis(GALACTIC_CENTRE.clone().negate(), GALACTIC_POLE, GALACTIC_EAST),
 );
+
+/**
+ * Supergalactic axes → scene, as `GALAXY_FRAME` does for galactic ones: +Y the supergalactic
+ * pole, +X toward SGL = 0. The nearby galaxies lie flat in this plane, so far out the camera
+ * orbits in it.
+ */
+export const SUPERGALACTIC_FRAME = (() => {
+  const { x, y, z } = SUPERGALACTIC;
+  const basis = new Quaternion().setFromRotationMatrix(
+    new Matrix4().makeBasis(new Vector3(...x), new Vector3(...z), new Vector3(-y[0], -y[1], -y[2])),
+  );
+  return GALAXY_FRAME.clone().multiply(basis);
+})();
 
 /** Where the solar map sits in the Galaxy model (ly): the Sun, or its birthplace before it. */
 export function galacticAnchor(
@@ -68,13 +88,28 @@ export function galaxyToWorld(
 const logFraction = (x: number, from: number, to: number) =>
   clamp01(Math.log(x / from) / Math.log(to / from));
 
-/** 0 on the solar map, 1 in the Galaxy, for a camera distance in au. */
+/** A cosmic-map point (Mly from the galactic centre) in the scene (au), with `anchor` at the origin. */
+export function cosmicToWorld(
+  v: readonly [number, number, number],
+  anchor: readonly [number, number, number],
+  out: Vector3,
+) {
+  return galaxyToWorld(v[0] * 1e6, v[1] * 1e6, v[2] * 1e6, anchor, out);
+}
+
+/** 0 on the solar map, 1 in the Galaxy (and beyond), for a camera distance in au. */
 export function galaxyMix(dist: number) {
   return smootherstep(logFraction(dist, HANDOFF.from, HANDOFF.to));
 }
 
+/** 0 up to the Galaxy, 1 on the cosmic map, for a camera distance in au. */
+export function cosmosMix(dist: number) {
+  return smootherstep(logFraction(dist, COSMIC_HANDOFF.from, COSMIC_HANDOFF.to));
+}
+
 /** The map that dominates at a blend: what readouts, drift and cards follow. */
-export const realmOf = (galaxy: number): Realm => (galaxy >= 0.5 ? "galaxy" : "solar");
+export const realmOf = (galaxy: number, cosmos = 0): Realm =>
+  cosmos >= 0.5 ? "cosmos" : galaxy >= 0.5 ? "galaxy" : "solar";
 
 const ease = (t: number) => t * t * (3 - 2 * t);
 /** 0 below `from`, 1 above `to`, eased in log space. */
@@ -136,9 +171,11 @@ export function createLod(camera: PerspectiveCamera, viewport: { height: number 
     dist: 1,
     /** How much larger things near the aim will be once the zoom arrives (≥ 1). */
     lead: 1,
-    /** 0 on the solar map … 1 in the Galaxy. */
+    /** 0 on the solar map … 1 in the Galaxy and beyond. */
     galaxy: 0,
     solar: 1,
+    /** 0 up to the Galaxy … 1 on the cosmic map. */
+    cosmos: 0,
     realm: "solar" as Realm,
     /** World size of `px` CSS pixels at `distance` from the camera. */
     pxWorld,
@@ -192,7 +229,8 @@ export function createLod(camera: PerspectiveCamera, viewport: { height: number 
       lod.lead = Math.min(64, Math.max(1, dist / Math.max(1e-12, target)));
       lod.galaxy = galaxyMix(dist);
       lod.solar = 1 - lod.galaxy;
-      lod.realm = realmOf(lod.galaxy);
+      lod.cosmos = cosmosMix(dist);
+      lod.realm = realmOf(lod.galaxy, lod.cosmos);
     },
   };
   return lod;

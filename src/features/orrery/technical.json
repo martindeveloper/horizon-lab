@@ -67,6 +67,18 @@
       ]
     },
     {
+      "id": "cosmos",
+      "equations": [
+        {
+          "equation": "scale-factor"
+        },
+        {
+          "equation": "local-group-orbit"
+        },
+        "n_cluster(t) = n₀ a(t)^1.5"
+      ]
+    },
+    {
       "id": "sky",
       "equations": [
         "x_ecl = x_eq, y_ecl = cos ε y_eq + sin ε z_eq, z_ecl = −sin ε y_eq + cos ε z_eq  (ε = 23.439°)",
@@ -277,6 +289,34 @@
     {
       "title": "USGS, Pluto global mosaic from New Horizons, July 2017 (NASA, JHU APL, SwRI, LPI)",
       "url": "https://www.usgs.gov/media/images/pluto-global-mosaic-new-horizons-july-2017"
+    },
+    {
+      "title": "Planck Collaboration (2020), Planck 2018 results VI: Cosmological parameters, A&A 641, A6",
+      "url": "https://doi.org/10.1051/0004-6361/201833910"
+    },
+    {
+      "title": "Tully, Courtois, Hoffman & Pomarède (2014), The Laniakea supercluster of galaxies, Nature 513, 71",
+      "url": "https://doi.org/10.1038/nature13674"
+    },
+    {
+      "title": "van der Marel et al. (2012), The M31 velocity vector II: radial orbit toward the Milky Way and implied Local Group mass, ApJ 753, 8",
+      "url": "https://doi.org/10.1088/0004-637X/753/1/8"
+    },
+    {
+      "title": "McConnachie (2012), The observed properties of dwarf galaxies in and around the Local Group, AJ 144, 4",
+      "url": "https://doi.org/10.1088/0004-6256/144/1/4"
+    },
+    {
+      "title": "Mei et al. (2007), The ACS Virgo Cluster Survey XIII: SBF distance catalog and the three-dimensional structure of the Virgo Cluster, ApJ 655, 144",
+      "url": "https://doi.org/10.1086/509598"
+    },
+    {
+      "title": "Sawala et al. (2025), No certainty of a Milky Way–Andromeda collision, Nature Astronomy",
+      "url": "https://doi.org/10.1038/s41550-025-02563-1"
+    },
+    {
+      "title": "Tully et al. (2008), Our peculiar motion away from the Local Void, ApJ 676, 184",
+      "url": "https://doi.org/10.1086/527428"
     }
   ]
 }

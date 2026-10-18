@@ -16,7 +16,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 
 import { createSwarm, kuiperBelt, mainBelt, oortCloud, trojans } from "../graphics/swarms";
 import { planetElements } from "../model/elements";
-import { MODEL_START, SUN_BIRTH } from "../model/parameters";
+import { MODEL_START, OORT_SHELLS_AU, SUN_BIRTH } from "../model/parameters";
 import { TRACERS, binOf, tracerElements, tracerVisible, type Bin } from "../model/tracers";
 import type { Selection } from "../store";
 import { orbitOf } from "./geometry";
@@ -75,8 +75,14 @@ export function createPopulationsLayer(
   const diskRing = new Mesh(scope.own(new RingGeometry(16, 34, 64)), looks.disk);
   diskRing.rotation.x = Math.PI / 2;
   diskRing.renderOrder = -1;
-  const shellInner = new Mesh(scope.own(new SphereGeometry(5_000, 40, 24)), looks.shellInner);
-  const shellOuter = new Mesh(scope.own(new SphereGeometry(100_000, 40, 24)), looks.shellOuter);
+  const shellInner = new Mesh(
+    scope.own(new SphereGeometry(OORT_SHELLS_AU[0], 40, 24)),
+    looks.shellInner,
+  );
+  const shellOuter = new Mesh(
+    scope.own(new SphereGeometry(OORT_SHELLS_AU[1], 40, 24)),
+    looks.shellOuter,
+  );
   parent.add(diskRing, shellInner, shellOuter);
   const shellOpacity = [
     Number(looks.shellInner.uniforms.opacity!.value),

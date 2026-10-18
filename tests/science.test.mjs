@@ -35,6 +35,7 @@ import {
   photonOrbit,
   rainClockRate,
 } from "../src/features/black-hole/lib/equations.ts";
+import { CATALOGUE } from "../src/features/orrery/lib/model/catalogue.ts";
 import {
   ORRERY_EQUATIONS,
   galacticAngle,
@@ -46,7 +47,7 @@ import {
   spiralArm,
   tracerSemiMajorAxis,
 } from "../src/features/orrery/lib/model/equations.ts";
-import { ORRERY_COPY, ORRERY_FIGURES } from "../src/features/orrery/lib/model/figures.ts";
+import { ORRERY_COPY } from "../src/features/orrery/lib/model/figures.ts";
 import { SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
 import {
   advancePlay,
@@ -146,10 +147,11 @@ test("every equation a document references exists and prints for the UI and LaTe
 });
 
 test("figures quoted in the orrery copy come from the constants", () => {
-  near(ORRERY_FIGURES.auMillionKm, 149.6, 0.01);
-  near(ORRERY_FIGURES.auLightMinutes, 8.317, 0.001);
-  assert.equal(ORRERY_FIGURES.sunRadiusKm, 695_700);
-  near(ORRERY_FIGURES.sunRadiusAu, 0.00465, 0.00001);
+  const sun = CATALOGUE.sun.sun.facts;
+  near(sun.au.value / 1e6, 149.6, 0.01);
+  near(sun.auLightTime.value / 60, 8.317, 0.001);
+  assert.equal(sun.radius.value, 695_700);
+  near(sun.earthDiameters.value, 109.1, 0.05);
   for (const locale of ["en", "cs"]) {
     const copy = JSON.parse(
       readFileSync(
@@ -219,8 +221,8 @@ test("every number the orrery copy quotes comes from its parameters", () => {
         "utf8",
       ),
     );
+    /* Card figures come from the catalogue: tests/orrery-catalogue.test.mjs. */
     const scoped = [
-      copy.cards.galaxy,
       copy.tour.steps,
       copy.notes,
       copy.technicalDetails.sections.migration,

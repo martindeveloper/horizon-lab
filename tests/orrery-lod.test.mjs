@@ -17,9 +17,12 @@ import {
 } from "../src/features/orrery/lib/model/views.ts";
 import { createCameraRig } from "../src/features/orrery/lib/scene/camera-rig.ts";
 import {
+  COSMIC_HANDOFF,
   GALAXY_FRAME,
   HANDOFF,
   LY,
+  SUPERGALACTIC_FRAME,
+  cosmosMix,
   fade,
   framed,
   galacticAnchor,
@@ -43,11 +46,31 @@ test("the realm blend is continuous and every view sits in its own map", () => {
     assert.ok(mix - last < 0.01, "no step");
     last = mix;
   }
-  for (const view of VIEWS) {
-    const mix = galaxyMix(worldDistance(view.dist, view.realm));
-    assert.equal(realmOf(mix), view.realm, view.id);
-    assert.ok(view.realm === "solar" ? mix < 0.01 : mix > 0.99, view.id);
+  assert.equal(cosmosMix(COSMIC_HANDOFF.from), 0);
+  assert.equal(cosmosMix(COSMIC_HANDOFF.to), 1);
+  last = 0;
+  for (let k = 0; k <= 400; k += 1) {
+    const d = COSMIC_HANDOFF.from * (COSMIC_HANDOFF.to / COSMIC_HANDOFF.from) ** (k / 400);
+    const mix = cosmosMix(d);
+    assert.ok(mix >= last && mix - last < 0.01, "the second handoff is smooth too");
+    last = mix;
   }
+  assert.ok(HANDOFF.to < COSMIC_HANDOFF.from, "the two handoffs never overlap");
+  for (const view of VIEWS) {
+    const d = worldDistance(view.dist, view.realm);
+    const mix = galaxyMix(d);
+    const beyond = cosmosMix(d);
+    assert.equal(realmOf(mix, beyond), view.realm, view.id);
+    assert.ok(view.realm === "solar" ? mix < 0.01 : mix > 0.99, view.id);
+    assert.ok(view.realm === "cosmos" ? beyond > 0.99 : beyond < 0.01, view.id);
+  }
+});
+
+test("far out the camera orbits in the supergalactic plane, where Virgo lies", () => {
+  const up = new Vector3(0, 1, 0).applyQuaternion(SUPERGALACTIC_FRAME);
+  const galacticUp = new Vector3(0, 1, 0).applyQuaternion(GALAXY_FRAME);
+  /* The two planes stand about 84° apart. */
+  near((up.angleTo(galacticUp) * 180) / Math.PI, 83.7, 0.5, "plane tilt");
 });
 
 test("the Galaxy model lines up with the sky's galactic frame", () => {
@@ -194,6 +217,35 @@ test("wheel steps glide into each other and interrupt a flight without a jolt", 
   const after = (Math.log(rig.pose.distance) - at) / dt;
   assert.ok(speed > 1, `flying out at ${speed}`);
   assert.ok(Math.abs(after - speed) < speed * 0.25, `${after} vs ${speed}`);
+});
+
+test("a flight from Laniakea to the Galaxy is one smooth zoom, its aim gliding home", () => {
+  const { rig, camera, frame } = rigWith();
+  assert.ok(rig.limits().max >= 1.2e9 * LY, "the zoom reaches past Laniakea");
+  rig.snapToView("laniakea");
+  frame(0);
+  assert.equal(rig.realm, "cosmos");
+  assert.ok(rig.aim.length() > 200e6 * LY, "aimed at the Great Attractor");
+  rig.flyToView("galaxy");
+  const dt = 1 / 60;
+  let last = Math.log(rig.pose.distance);
+  let lastSpeed = 0;
+  let lastPosition = camera.position.clone();
+  let frames = 0;
+  while (rig.flying && frames < 1000) {
+    const position = frame(dt);
+    const x = Math.log(rig.pose.distance);
+    const speed = (x - last) / dt;
+    assert.ok(speed <= 1e-9, "never backs out");
+    assert.ok(Math.abs(speed - lastSpeed) < 0.5, `speed jump at frame ${frames}`);
+    assert.ok(position.distanceTo(lastPosition) < rig.pose.distance * 0.25, `cut at ${frames}`);
+    last = x;
+    lastSpeed = speed;
+    lastPosition = position;
+    frames += 1;
+  }
+  assert.ok(frames > 60 && frames < 400, `${frames} frames`);
+  assert.equal(rig.realm, "galaxy");
 });
 
 test("reduced motion lands every zoom at once", () => {

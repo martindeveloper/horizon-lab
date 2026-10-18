@@ -41,9 +41,10 @@ import { NEIGHBOURS } from "../model/neighbours";
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay, isPresentEra, migrationProgress, sunExists } from "../model/timeline";
 import { driftYearsPerSecond, viewById, worldDistance, type Realm } from "../model/views";
-import { hasSurface, useOrrery, type OrreryStore } from "../store";
+import { dropsSelection, hasSurface, useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCloseUpController, type BodySelection } from "./close-up-controller";
+import { createCosmosLayer } from "./cosmos-layer";
 import { createFocusRing } from "./focus-ring";
 import { createGalaxyLayer } from "./galaxy-layer";
 import { createGlobes } from "./geometry";
@@ -199,6 +200,7 @@ export function createOrreryEngine(
     const neighbours = createNeighboursLayer(kit, solar, { place, rulers, labels, distanceText });
     const focus = createFocusRing(kit, solar);
     const galaxy = createGalaxyLayer(kit, scene, { place, rulers, distanceText });
+    const cosmos = createCosmosLayer(kit, scene, { place, rulers, distanceText });
     const hud = createHud(store, viewport);
 
     /** Where the body is now: today's clock plus the Motion offset, as the scene draws it. */
@@ -319,8 +321,8 @@ export function createOrreryEngine(
           }, 700);
           engine.invalidate();
         },
-        /* The rig clamps to its own limits, from true-size close-ups to the whole halo. */
-        distance: { min: 1e-12, max: 2_600_000 * LY },
+        /* The rig clamps to its own limits, from true-size close-ups to Laniakea. */
+        distance: { min: 1e-12, max: 1.5e9 * LY },
         inclination: ORBIT_INCLINATION,
         dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
         wheelSensitivity: () => 0.0012,
@@ -335,6 +337,7 @@ export function createOrreryEngine(
         ...populations.pickables,
         ...neighbours.pickables,
         ...galaxy.pickables,
+        ...cosmos.pickables,
       ],
       blocked: () => store.getState().guideOpen || closeUp.current !== null,
       distance: () => pose.distance,
@@ -413,14 +416,18 @@ export function createOrreryEngine(
     };
 
     /**
-     * The Galaxy first, in a depth range fitted to it (its stars sit light-years behind
-     * anything on the solar map), then the solar map over it, then a close-up body.
+     * The Galaxy and the cosmic map first, in a depth range fitted to them (their stars and
+     * galaxies sit light-years behind anything on the solar map), then the solar map over
+     * them, then a close-up body.
      */
     const draw = () => {
-      if (galaxy.visible) {
+      if (galaxy.visible || cosmos.visible) {
         const near = camera.near;
         const far = camera.far;
-        camera.far = galaxy.reach();
+        camera.far = Math.max(
+          galaxy.visible ? galaxy.reach() : 0,
+          cosmos.visible ? cosmos.reach() : 0,
+        );
         camera.near = Math.max(pose.distance / 5000, camera.far * 1e-7);
         camera.updateProjectionMatrix();
         camera.layers.set(GALAXY_LAYER);
@@ -475,11 +482,13 @@ export function createOrreryEngine(
         const dist = pose.distance;
         lod.begin(dt, dist, rig.target);
         const realm = lod.realm;
-        /* Zooming across the handoff lets go of a selection from the other map. */
+        /* Zooming across the handoff lets go of a selection from the other map, unless a
+           view flight is carrying the camera to that map (it may cross a map on the way). */
         if (realm !== lastRealm) {
           lastRealm = realm;
           const sel = state.selection;
-          if (sel && !state.guideOpen && (sel.kind === "galaxy") !== (realm === "galaxy"))
+          const flyingTo = rig.flying ? viewById(state.view).realm : null;
+          if (sel && !state.guideOpen && dropsSelection(sel, realm, flyingTo))
             store.getState().select(null);
         }
 
@@ -523,12 +532,13 @@ export function createOrreryEngine(
           !state.solarActivityPaused && !reduceMotion.matches,
         );
         galaxy.update(frame);
+        cosmos.update(frame);
         rulers.finish();
         flush();
 
         hud.update(dt, invalidated || engine.dirty, {
           /* Readouts stay in the dominant map's unit. */
-          dist: realm === "galaxy" ? dist / LY : dist,
+          dist: realm === "solar" ? dist : dist / LY,
           realm,
           drift: show.drift && !closeUp.current,
           driftYears,

@@ -72,6 +72,12 @@ export const WARP_AMPLITUDE_KPC = 0.15;
 export const WARP_POWER = 1;
 export const WARP_NODES_DEG = 17.4;
 
+/** The primordial planetesimal disk outside the packed giants (Morbidelli 2005, Nice model). */
+export const DISK_AU = [16, 34] as const;
+/** Cold classicals form near here and stay (Kaib & Volk 2022: 42–47.5 au). */
+export const COLD_CLASSICAL_AU = [42, 48] as const;
+/** Radii of the Oort cloud's two guide shells (art direction inside the inferred edges). */
+export const OORT_SHELLS_AU = [5_000, 100_000] as const;
 /** Jupiter's Trojans gather about L4 and L5, 60° ahead of and behind the planet. */
 export const TROJAN_OFFSET_DEG = 60;
 /** Newton steps for Kepler's equation in the swarm vertex shader (e ≤ 0.3 converges). */

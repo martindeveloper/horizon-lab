@@ -1,12 +1,27 @@
-/** Camera views: the framed scales of the solar map and the Galaxy, and the drift by scale. */
+/** Camera views: the framed scales of the solar map, the Galaxy and beyond, and the drift by scale. */
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
-export type ViewId = "inner" | "giants" | "kuiper" | "scattered" | "oort" | "stars" | "galaxy";
-export type Realm = "solar" | "galaxy";
+import { COSMIC_VIEW_LY } from "./cosmos";
+
+export type ViewId =
+  | "inner"
+  | "giants"
+  | "kuiper"
+  | "scattered"
+  | "oort"
+  | "stars"
+  | "galaxy"
+  | "local-group"
+  | "local-sheet"
+  | "virgo-cluster"
+  | "virgo-supercluster"
+  | "laniakea";
+/** The solar map in au; the Galaxy and the cosmic map beyond it in light-years. */
+export type Realm = "solar" | "galaxy" | "cosmos";
 export type View = {
   id: ViewId;
   realm: Realm;
-  /** Camera distance in the realm's unit: au on the solar map, light-years in the Galaxy. */
+  /** Camera distance in the realm's unit: au on the solar map, light-years beyond it. */
   dist: number;
   /** Camera pose that frames the view best; the default is 0.6 / 0.52. */
   azimuth?: number;
@@ -21,6 +36,16 @@ export const VIEWS: readonly View[] = [
   { id: "oort", realm: "solar", dist: 170_000 },
   { id: "stars", realm: "solar", dist: 560_000, azimuth: 2.14, inclination: 0.47 },
   { id: "galaxy", realm: "galaxy", dist: 92_000 },
+  { id: "local-group", realm: "cosmos", dist: COSMIC_VIEW_LY.localGroup, inclination: 0.36 },
+  { id: "local-sheet", realm: "cosmos", dist: COSMIC_VIEW_LY.sheet, inclination: 0.28 },
+  { id: "virgo-cluster", realm: "cosmos", dist: COSMIC_VIEW_LY.virgo, inclination: 0.42 },
+  {
+    id: "virgo-supercluster",
+    realm: "cosmos",
+    dist: COSMIC_VIEW_LY.supercluster,
+    inclination: 0.5,
+  },
+  { id: "laniakea", realm: "cosmos", dist: COSMIC_VIEW_LY.laniakea, inclination: 0.62 },
 ];
 export const DEFAULT_VIEW: ViewId = "giants";
 export function viewById(id: ViewId) {
@@ -29,17 +54,16 @@ export function viewById(id: ViewId) {
 
 /** A realm distance in the scene's one unit, au. */
 export function worldDistance(dist: number, realm: Realm) {
-  return realm === "galaxy" ? dist * LIGHT_YEAR_AU : dist;
+  return realm === "solar" ? dist : dist * LIGHT_YEAR_AU;
 }
 
-/** Nearest framed view for a camera distance, measured in log space across scales. */
+/** Nearest framed view of the realm for a camera distance (in its unit), in log space. */
 export function viewForDistance(camDist: number, realm: Realm): ViewId {
-  if (realm === "galaxy") return "galaxy";
   const d = Math.max(1e-6, camDist);
-  let best: ViewId = DEFAULT_VIEW;
+  let best: ViewId = realm === "solar" ? DEFAULT_VIEW : realm === "galaxy" ? "galaxy" : "laniakea";
   let bestGap = Infinity;
   for (const v of VIEWS) {
-    if (v.realm !== "solar") continue;
+    if (v.realm !== realm) continue;
     const gap = Math.abs(Math.log(d / v.dist));
     if (gap < bestGap) {
       bestGap = gap;
@@ -72,7 +96,7 @@ const DRIFT_BLEND = 0.3;
  * around the edge, so zooming never jolts the motion.
  */
 export function driftYearsPerSecond(camDist: number, realm: Realm) {
-  if (realm === "galaxy") return 0;
+  if (realm !== "solar") return 0;
   const x = Math.log(Math.max(1e-9, camDist));
   for (let i = 0; i < DRIFT_STEPS.length - 1; i += 1) {
     const [edge, rate] = DRIFT_STEPS[i]!;

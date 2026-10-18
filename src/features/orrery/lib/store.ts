@@ -34,8 +34,34 @@ export type Selection =
   | { kind: "named"; id: NamedId }
   | { kind: "population"; id: "asteroids" | Bin }
   | { kind: "galaxy"; id: "milkyway" | "sun" | "bulge" | "halo" }
+  | { kind: "cosmos"; id: CosmosId }
   | { kind: "star"; id: NeighbourId }
   | { kind: "tracer"; index: number };
+
+/** Structures beyond the Galaxy with a card. */
+export type CosmosId =
+  | "localGroup"
+  | "localSheet"
+  | "andromeda"
+  | "triangulum"
+  | "virgo"
+  | "fornax"
+  | "supercluster"
+  | "centaurus"
+  | "hydra"
+  | "greatAttractor"
+  | "laniakea";
+
+/** The map a selection belongs to; zooming into another lets it go. */
+export const realmOfSelection = (sel: Selection): Realm =>
+  sel.kind === "galaxy" ? "galaxy" : sel.kind === "cosmos" ? "cosmos" : "solar";
+
+/**
+ * Whether entering `realm` lets go of `sel`: it belongs to another map, and no view flight is
+ * carrying the camera to its map (a flight may cross a map on the way, e.g. planets → Laniakea).
+ */
+export const dropsSelection = (sel: Selection, realm: Realm, flyingTo: Realm | null) =>
+  realmOfSelection(sel) !== realm && realmOfSelection(sel) !== flyingTo;
 
 export type Panel = "none" | "objects" | "reading";
 

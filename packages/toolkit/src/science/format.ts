@@ -64,3 +64,29 @@ export function formatReadout(value: number, locale: string, fixed = false) {
 export function formatNumber(value: number, locale: string, digits: number, fixed = false) {
   return numberFormat(locale, digits, fixed).format(value);
 }
+
+const significantFormatters = new Map<string, Intl.NumberFormat>();
+
+/**
+ * A literature value printed to `significant` figures, so a converted "60,000 ly" reads
+ * "18,000 pc" rather than "18,396 pc". Scientific from 10 million as in `readout`, with a
+ * bare power of ten for a one-figure 1 ("10¹⁷"), unless every whole digit is significant.
+ */
+export function formatSignificant(value: number, locale: string, significant: number) {
+  finite(value);
+  const rounded = Number(value.toPrecision(significant));
+  const abs = Math.abs(rounded);
+  const exponent = abs === 0 ? 0 : Math.floor(Math.log10(abs));
+  /* Large values stay plain when every whole digit is significant (an exact definition). */
+  if (abs !== 0 && (abs < 1e-3 || (abs >= 1e7 && significant <= exponent))) {
+    const mantissa = numberFormat(locale, significant - 1, true).format(rounded / 10 ** exponent);
+    return mantissa === "1" ? powerOfTen(exponent) : `${mantissa} × ${powerOfTen(exponent)}`;
+  }
+  const key = `${locale}|${significant}`;
+  let format = significantFormatters.get(key);
+  if (!format) {
+    format = new Intl.NumberFormat(locale, { maximumSignificantDigits: significant });
+    significantFormatters.set(key, format);
+  }
+  return format.format(rounded);
+}

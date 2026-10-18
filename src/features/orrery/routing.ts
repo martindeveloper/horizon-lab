@@ -12,6 +12,12 @@ const ALIASES: Record<string, ViewId> = {
   "nearest-star": "stars",
   "milky-way": "galaxy",
   milkyway: "galaxy",
+  localgroup: "local-group",
+  localsheet: "local-sheet",
+  "local-volume": "local-sheet",
+  virgo: "virgo-cluster",
+  "local-supercluster": "virgo-supercluster",
+  "great-attractor": "laniakea",
 };
 
 const routes = slugRoutes({

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { StartEngine } from "@/components/simulations/engine-lifecycle";
 import { useSimulationEngine } from "@/components/simulations/use-simulation-engine";
 
+import { COSMOS_LABELS } from "../lib/model/cosmos";
 import { createOrreryEngine } from "../lib/scene/engine";
 import { useOrrery } from "../lib/store";
 
@@ -34,10 +35,12 @@ const LABEL_KEYS = [
   "barnard",
   "scholz",
   "galaxySun",
+  ...COSMOS_LABELS,
   "au",
   "lightTime",
   "lightYears",
   "parsecs",
+  "million",
 ] as const;
 
 const resetReady = () => useOrrery.getState().setReady(false);

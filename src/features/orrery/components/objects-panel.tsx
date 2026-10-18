@@ -135,6 +135,34 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
           />
         </div>
       </Section>
+      <Section title={t("hud.cosmosItems")}>
+        <div className="grid gap-1">
+          <Pick
+            label={t("names.localGroup")}
+            onPick={() => pick({ kind: "cosmos", id: "localGroup" }, "local-group")}
+          />
+          <Pick
+            label={t("names.localSheet")}
+            onPick={() => pick({ kind: "cosmos", id: "localSheet" }, "local-sheet")}
+          />
+          <Pick
+            label={t("cards.cosmos.andromeda.title")}
+            onPick={() => pick({ kind: "cosmos", id: "andromeda" }, "local-group")}
+          />
+          <Pick
+            label={t("names.virgoCluster")}
+            onPick={() => pick({ kind: "cosmos", id: "virgo" }, "virgo-cluster")}
+          />
+          <Pick
+            label={t("names.virgoSupercluster")}
+            onPick={() => pick({ kind: "cosmos", id: "supercluster" }, "virgo-supercluster")}
+          />
+          <Pick
+            label={t("names.laniakea")}
+            onPick={() => pick({ kind: "cosmos", id: "laniakea" }, "laniakea")}
+          />
+        </div>
+      </Section>
       <Section title={t("hud.neighbours")}>
         <div className="grid gap-1">
           {NEIGHBOUR_IDS.map((id) => (

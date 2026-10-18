@@ -7,8 +7,11 @@ import {
   AU_LIGHT_SECONDS,
   LIGHT_YEAR_AU,
   PARSEC_AU,
+  convert,
   convertDistance,
   formatDistance,
+  formatDistanceRange,
+  formatSignificant,
   lightTime,
   readout,
   scaleMagnitude,
@@ -70,6 +73,38 @@ test("distance units convert through exact IAU definitions and read out consiste
     });
   assert.equal(steady(1), "1.00 au · light-time 8.3 min");
   assert.equal(steady(1.0822), "1.08 au · light-time 9.0 min");
+});
+
+test("literature values keep their significant figures through a unit change", () => {
+  assert.equal(formatSignificant(18_396, "en", 2), "18,000");
+  assert.equal(formatSignificant(4.344, "cs", 3), "4,34");
+  assert.equal(formatSignificant(0.0316, "en", 2), "0.032");
+  assert.equal(formatSignificant(5.4e16, "en", 1), "5 × 10¹⁶");
+  assert.equal(formatSignificant(1e17, "en", 1), "10¹⁷");
+  assert.equal(formatSignificant(149_597_870_700, "en", 12), "149,597,870,700");
+  assert.equal(formatSignificant(3.79e9, "en", 2), "3.8 × 10⁹");
+  const symbols = { au: "au", ly: "ly", pc: "pc" };
+  const options = (unit) => ({ unit, locale: "en", symbols, millionWord: "million" });
+  const ly = 60_000 * LIGHT_YEAR_AU;
+  assert.equal(formatDistance(ly, { ...options("pc"), significant: 2 }), "18,000 pc");
+  assert.equal(formatDistance(ly, { ...options("ly"), significant: 2 }), "60,000 ly");
+  assert.equal(
+    formatDistance(10e6 * LIGHT_YEAR_AU, { ...options("ly"), significant: 2 }),
+    "10 million ly",
+  );
+  assert.equal(formatDistance(convert(1, "Mly", "au"), options("ly")), "1 million ly");
+  assert.equal(formatDistanceRange(2.1, 3.3, { ...options("au"), significant: 2 }), "2.1–3.3 au");
+  assert.equal(
+    formatDistanceRange(0.5e6 * LIGHT_YEAR_AU, 2e6 * LIGHT_YEAR_AU, {
+      ...options("ly"),
+      significant: 2,
+    }),
+    "0.5–2 million ly",
+  );
+  assert.equal(
+    formatDistanceRange(2_000, 5_000, { ...options("ly"), significant: 1 }),
+    "0.03–0.08 ly",
+  );
 });
 
 test("Julian dates match the J2000 epoch", () => {

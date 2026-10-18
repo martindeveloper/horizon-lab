@@ -3,6 +3,7 @@ import { periodYears, type Elements } from "@horizon/toolkit/bodies";
 import { clamp, lerp, mulberry32, wrap } from "@horizon/toolkit/math";
 
 import { tracerSemiMajorAxis } from "./equations";
+import { COLD_CLASSICAL_AU, DISK_AU } from "./parameters";
 import { migrationProgress } from "./timeline";
 
 export type Kind = "cold" | "hot" | "scattered" | "oort" | "ejected";
@@ -56,13 +57,13 @@ export function createTracers(count: number, seed = 20261014): Tracer[] {
     const p0 = rng() * 0.22;
     const p1 = 0.55 + rng() * 0.42;
     if (kind === "cold") {
-      const a = 42 + rng() * 6;
+      const a = COLD_CLASSICAL_AU[0] + rng() * (COLD_CLASSICAL_AU[1] - COLD_CLASSICAL_AU[0]);
       const e = 0.02 + rng() * 0.05;
       const i = rng() * 4;
       out.push({ kind, a0: a, a1: a, e0: e, e1: e, i0: i, i1: i, ...angles, p0: 0, p1: 1 });
       continue;
     }
-    const a0 = 16 + rng() * 18;
+    const a0 = DISK_AU[0] + rng() * (DISK_AU[1] - DISK_AU[0]);
     const e0 = 0.01 + rng() * 0.03;
     const i0 = rng() * 2;
     if (kind === "hot") {

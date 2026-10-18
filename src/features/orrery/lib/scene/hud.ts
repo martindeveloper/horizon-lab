@@ -39,8 +39,8 @@ export function createHud(store: typeof useOrrery, viewport: Viewport) {
       const { width, height } = viewport;
       const s = store.getState();
       const worldPerPx = (2 * Math.tan((FOV * Math.PI) / 360) * dist) / Math.max(1, height);
-      /* World units are au (solar) or ly (galaxy); the bar is a round number in the visitor's unit. */
-      const perWorld = convertDistance(1, realm === "galaxy" ? "ly" : "au", s.distanceUnit);
+      /* World units are au (solar) or ly (beyond); the bar is a round number in the visitor's unit. */
+      const perWorld = convertDistance(1, realm === "solar" ? "au" : "ly", s.distanceUnit);
       const nice = niceNumber(worldPerPx * perWorld * Math.min(150, width * 0.36));
       const px = Math.round(Math.max(44, Math.min(140, width * 0.4, nice / perWorld / worldPerPx)));
       const rate = view.drift ? driftYearsPerSecond(dist, realm) : 0;

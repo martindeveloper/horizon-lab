@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { DISTANCE_UNITS, formatReadout, type DistanceUnit } from "@horizon/toolkit/science";
 import { Dock, IconButton, SegmentedControl, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
 
+import { scaleAt } from "../lib/model/cosmos";
 import { ORRERY_COPY } from "../lib/model/figures";
 import { galacticLaps } from "../lib/model/galactic-orbit";
 import { SUN_BIRTH } from "../lib/model/parameters";
@@ -44,13 +45,15 @@ export function TimeDock() {
       ? t("hud.driftPaused")
       : viewRealm === "galaxy"
         ? t("hud.galaxyMotion")
-        : driftRate < 1.2
-          ? t("hud.driftDays", { value: Math.round(driftRate * 365) })
-          : driftRate < 800
-            ? t("hud.driftYears", { value: Math.round(driftRate) })
-            : t("hud.driftThousand", {
-                value: f.number(driftRate / 1000, { maximumFractionDigits: 1 }),
-              });
+        : viewRealm === "cosmos"
+          ? t("hud.cosmosMotion")
+          : driftRate < 1.2
+            ? t("hud.driftDays", { value: Math.round(driftRate * 365) })
+            : driftRate < 800
+              ? t("hud.driftYears", { value: Math.round(driftRate) })
+              : t("hud.driftThousand", {
+                  value: f.number(driftRate / 1000, { maximumFractionDigits: 1 }),
+                });
   const offset =
     driftYears < 1
       ? t("time.offsetDays", { value: Math.max(1, Math.round(driftYears * 365.25)) })
@@ -61,19 +64,22 @@ export function TimeDock() {
               maximumFractionDigits: 0,
             }),
           });
+  /* Beyond the Galaxy the deep past reads as the scale of space. */
   const subline =
-    yearsAgo > SUN_BIRTH
-      ? t("time.noSun")
-      : yearsAgo < 5e4
-        ? drift && driftYears > 0.002 && viewRealm === "solar"
-          ? t("time.clockDrift", { offset, rate: driftLabel })
-          : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
-        : t("time.laps", {
-            laps: f.number(galacticLaps(yearsAgo), {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            }),
-          });
+    viewRealm === "cosmos" && yearsAgo >= 1e7
+      ? t("time.expansion", { value: f.number(scaleAt(yearsAgo), { style: "percent" }) })
+      : yearsAgo > SUN_BIRTH
+        ? t("time.noSun")
+        : yearsAgo < 5e4
+          ? drift && driftYears > 0.002 && viewRealm === "solar"
+            ? t("time.clockDrift", { offset, rate: driftLabel })
+            : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
+          : t("time.laps", {
+              laps: f.number(galacticLaps(yearsAgo), {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              }),
+            });
   const playLabel = playing ? t("hud.pause") : atEnd ? t("hud.playRestart") : t("hud.play");
   return (
     <Dock ref={surface} footerClassName={cn(aside && "not-md:hidden")} className="flex flex-col">
@@ -209,7 +215,10 @@ function ScaleBar() {
   const scalePx = useOrrery((s) => s.scalePx);
   const scaleValue = useOrrery((s) => s.scaleValue);
   const unit = useOrrery((s) => s.distanceUnit);
-  const value = formatReadout(scaleValue, locale);
+  /* Millions read as words, not powers of ten: "200 million ly". */
+  const millions = scaleValue >= 1e6;
+  const number = formatReadout(millions ? scaleValue / 1e6 : scaleValue, locale);
+  const value = millions ? `${number} ${t("names.million")}` : number;
   const label = t("hud.scale", { value, unit: t(`units.${unit}`) });
   return (
     <Tooltip label={label} className="min-w-0 shrink-0">

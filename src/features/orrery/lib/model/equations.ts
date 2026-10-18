@@ -8,6 +8,7 @@ import {
   type Formula,
 } from "@horizon/toolkit/science";
 
+import { localGroupOrbit, scaleFactor } from "./cosmos";
 import {
   ARM_PITCH_DEG,
   ARM_CROSSINGS_KPC,
@@ -198,6 +199,8 @@ export const ORRERY_EQUATIONS = Object.fromEntries<Formula>(
     galacticRadius,
     galacticHeight,
     spiralArm,
+    scaleFactor,
+    localGroupOrbit,
     galacticWarp,
   ].map((equation) => [equation.id, equation]),
 );

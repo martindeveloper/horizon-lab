@@ -6,6 +6,7 @@
 
 import {
   AU_SI,
+  EARTH_GM_SI,
   GRAVITATIONAL_CONSTANT_SI,
   JULIAN_YEAR_SI,
   SOLAR_GM_SI,
@@ -54,6 +55,8 @@ export const UNITS = {
   au: unit("length", "au", AU),
   /** Julian light-year: light's path in 365.25 days. */
   ly: unit("length", "ly", C * YEAR),
+  /** A million light-years, the usual unit for galaxies beyond the Local Group. */
+  Mly: unit("length", "Mly", 1e6 * C * YEAR),
   pc: unit("length", "pc", PC),
   kpc: unit("length", "kpc", 1e3 * PC),
   Mpc: unit("length", "Mpc", 1e6 * PC),
@@ -81,6 +84,8 @@ export const UNITS = {
   kg: unit("mass", "kg", 1),
   /** Solar mass: the measured GM☉ divided by G (CODATA 2022), 1.98841 × 10³⁰ kg. */
   Msun: unit("mass", "M☉", SOLAR_GM_SI / GRAVITATIONAL_CONSTANT_SI, "M_\\odot"),
+  /** Earth mass: the nominal GM⊕ divided by G, 5.9722 × 10²⁴ kg. */
+  Mearth: unit("mass", "M⊕", EARTH_GM_SI / GRAVITATIONAL_CONSTANT_SI, "M_\\oplus"),
   // Speed
   "m/s": unit("speed", "m/s", 1, "\\mathrm{m\\,s^{-1}}"),
   "km/s": unit("speed", "km/s", 1e3, "\\mathrm{km\\,s^{-1}}"),
