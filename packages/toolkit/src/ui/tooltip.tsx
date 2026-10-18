@@ -7,8 +7,9 @@ import { cn } from "./utils";
 /**
  * Supplemental visual label. The trigger still needs text or aria-label.
  * Shown on hover and keyboard focus, hoverable, and dismissed with Escape
- * until the pointer or focus leaves (WCAG 1.4.13). `align="end"` anchors the
- * tip to the trigger's right edge, for controls at the right of the viewport.
+ * until the pointer or focus leaves (WCAG 1.4.13). `align="start"` and `"end"`
+ * anchor the tip to the trigger's left or right edge, for controls at that side
+ * of the viewport.
  */
 export function Tooltip({
   label,
@@ -16,7 +17,7 @@ export function Tooltip({
   className,
   align = "center",
   ...props
-}: ComponentProps<"span"> & { label: ReactNode; align?: "center" | "end" }) {
+}: ComponentProps<"span"> & { label: ReactNode; align?: "start" | "center" | "end" }) {
   const root = useRef<HTMLSpanElement>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -42,7 +43,7 @@ export function Tooltip({
       ref={root}
       className={cn("hud-tip", className)}
       data-dismissed={dismissed || undefined}
-      data-align={align === "end" ? align : undefined}
+      data-align={align === "center" ? undefined : align}
       {...props}
     >
       {children}

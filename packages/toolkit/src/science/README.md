@@ -74,17 +74,20 @@ exact definitions.
 
 ## Cosmology (`cosmology.ts`)
 
-`FlatLcdm` is H₀ (km/s/Mpc) and Ωm of a flat ΛCDM universe; `PLANCK_2018` holds the
-Planck 2018 VI values (H₀ 67.66, Ωm 0.3111). `hubbleTimeGyr(H0)`, `cosmicAgeGyr(a)` (13.79
-Gyr today) and its inverse `scaleFactorAtAge(ageGyr)` take the model as an optional
-argument, so a lab can print its own formula and compute with these.
+`FlatLcdm` is H₀ (km/s/Mpc), Ωm and optionally Ωr of a flat ΛCDM universe; `PLANCK_2018`
+holds the Planck 2018 VI values (H₀ 67.66, Ωm 0.3111, radiation included). Every function
+takes the model as an optional argument, so a lab can print its own formula and compute
+with these. `hubbleTimeGyr(H0)`; `cosmicAgeGyr(a)` and its inverse `scaleFactorAtAge(ageGyr)`
+are the closed forms for matter and Λ alone (13.79 Gyr today, about 5.6 million years older
+than with radiation).
 `comovingDistanceMpc(z)` integrates (c / H₀) ∫ da / (a² E(a)) over √a, so it holds back to
 the Big Bang (3.40 Gpc at z = 1, Planck's 13.88 Gpc at last scattering);
-`particleHorizonMpc()` is the edge of the observable universe (~14.2 Gpc).
-`lookbackTimeGyr(z)` and its inverse `redshiftAtLookback(gyr)` say how long ago light from
-redshift z set out, and `cosmicAgeAtRedshiftGyr(z)` gives the age then (~372,000 years at
-the microwave background). The optional `omegaR` (radiation, set for `PLANCK_2018`) enters
-these distances and that age; `cosmicAgeGyr` leaves it out.
+`particleHorizonMpc()` is the edge of the observable universe (~14.2 Gpc), and
+`redshiftAtComovingDistance(mpc)` inverts the distance (Infinity at the horizon).
+`cosmicAgeAtRedshiftGyr(z)` gives the age then (13.787 Gyr today, Planck's value; ~372,000
+years at the microwave background), and `lookbackTimeGyr(z)` and its inverse
+`redshiftAtLookback(gyr)` say how long ago light from redshift z set out. These integrate
+with radiation when the model has it.
 
 ## Time (`time.ts`)
 
@@ -105,6 +108,21 @@ latitude)`, `hourAngle(lst, ra)` (−180…180, negative while rising) and
 rises, 180 never sets). `equatorialToGalactic(ra, dec)` turns J2000 coordinates into
 galactic longitude and latitude (IAU pole). No nutation, aberration or refraction. The Sun's and the
 Moon's own positions are in `@horizon/toolkit/bodies` (almanac).
+
+## Catalogued facts (`facts.ts`)
+
+A fact is one figure a card prints, once: a `value` (with an optional published
+`range`) or only a published `range`, a `Unit` of the kit (or `count`,
+`percent`, `ratio`), a `source` id of the caller's bibliography and a `Status`
+(`verified`, `derived`, `teaching-choice`, `flag`). `digits` fixes its
+significant figures; `show` names the unit its message words (years as "Gyr").
+
+`printFact(fact, value, format)` prints a figure through `formatDistance` for
+lengths, in the visitor's unit, at least two significant figures. Other units
+print as plain numbers in the `show` unit, with "million" and "billion" as words
+from `format` and scientific notation from 10¹². `live` values print at the
+readout's precision. `printFactSpan` prints a range with the unit once.
+`quoteFact(locale, fact)` gives the bare number prose quotes.
 
 ## Display scales (`quantities.ts`)
 

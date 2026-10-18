@@ -46,3 +46,10 @@ mid-flight inclination arc, `swing` a fractional mid-flight distance change, and
 `lead` (−1…1) runs the turn ahead of or behind the dolly so the path curves.
 Time is normalized [0,1] and t ≥ 1 returns the exact target. There is no
 collision, orbital dynamics or automatic shortest-angle selection.
+
+## Views
+
+`nearestView(views, distanceOf, distance)` picks the framed view nearest a camera
+distance in log space; `atViewScale(distance, viewDistance)` says whether the
+camera is still at a view's scale (within a quarter e-fold). Neither needs three.js,
+so menus can mark the current view without loading a renderer.

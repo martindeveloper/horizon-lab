@@ -20,6 +20,7 @@ import {
   cosmicAgeAtRedshiftGyr,
   cosmicAgeGyr,
   particleHorizonMpc,
+  redshiftAtComovingDistance,
   redshiftAtLookback,
   hubbleLaw,
   hubbleTimeGyr,
@@ -240,7 +241,7 @@ test("flat ΛCDM: Planck 2018 gives a 13.8-billion-year Universe and a(t) invert
   assert.equal(comovingDistanceMpc(0), 0);
   // Lookback time: none today, the whole age at the Big Bang's edge.
   assert.equal(lookbackTimeGyr(0), 0);
-  near(lookbackTimeGyr(1e6), age, 0.01);
+  near(lookbackTimeGyr(1e6), cosmicAgeAtRedshiftGyr(0), 1e-3);
   near(lookbackTimeGyr(0.08), 1.09, 0.01);
   // Back to the Big Bang: last scattering (z∗ = 1089.80) at Planck's 13,885 Mpc, the edge at
   // ~14.2 Gpc, ~372,000 years after the Big Bang; today's age agrees with Planck's 13.787 Gyr.
@@ -249,8 +250,16 @@ test("flat ΛCDM: Planck 2018 gives a 13.8-billion-year Universe and a(t) invert
   near(cosmicAgeAtRedshiftGyr(1089.8) * 1e9, 372_000, 5_000);
   near(cosmicAgeAtRedshiftGyr(0), 13.787, 0.005);
   near(cosmicAgeAtRedshiftGyr(1), cosmicAgeGyr(0.5), 0.01);
-  // Lookback inverts.
+  // The closed form leaves radiation out: about 5.6 million years older.
+  near(cosmicAgeGyr(1) - cosmicAgeAtRedshiftGyr(0), 0.0056, 0.0005);
+  // Without radiation the integral still starts cleanly at the Big Bang.
+  near(cosmicAgeAtRedshiftGyr(0, { H0: 67.66, omegaM: 0.3111 }), cosmicAgeGyr(1), 1e-6);
+  // Lookback inverts, and so does the comoving distance (Infinity at the horizon).
   for (const t of [1, 5, 10]) near(lookbackTimeGyr(redshiftAtLookback(t)), t, 1e-9);
+  for (const z of [0.004, 0.073, 1, 1089.8])
+    near(redshiftAtComovingDistance(comovingDistanceMpc(z)) / z, 1, 1e-6);
+  assert.equal(redshiftAtComovingDistance(0), 0);
+  assert.equal(redshiftAtComovingDistance(particleHorizonMpc()), Number.POSITIVE_INFINITY);
 });
 
 test("auto distances read in au inside half a light-year and in ly beyond", () => {

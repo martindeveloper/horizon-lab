@@ -26,14 +26,15 @@ import {
   toHorizontal,
 } from "@horizon/toolkit/science";
 
-import { equatorialToScene } from "../src/features/orrery/lib/graphics/coordinates.ts";
-import { galacticLaps, sunGalactic } from "../src/features/orrery/lib/model/galactic-orbit.ts";
+import { equatorialToScene } from "../packages/toolkit/src/scene/frames.ts";
+import { sunGalactic } from "../src/features/deep-field/lib/model/galactic-orbit.ts";
 import {
   NEIGHBOURS,
   closestApproach,
   neighbourDistanceLy,
-} from "../src/features/orrery/lib/model/neighbours.ts";
-import { GALACTIC_YEAR, SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
+} from "../src/features/deep-field/lib/model/neighbours.ts";
+import { galacticLaps } from "../src/features/orrery/lib/model/timeline.ts";
+import { GALACTIC_YEAR, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
   assert.ok(
@@ -89,10 +90,10 @@ test("the scene frame puts the ecliptic and the Galaxy where the IAU defines the
   // Scene +X is the vernal equinox, +Y the north ecliptic pole (RA 18h, δ = 90° − ε).
   const equinox = equatorialToScene(0, 0);
   near(equinox.x, 1, 1e-12);
-  const pole = equatorialToScene(270, 90 - 23.4392911);
+  const pole = equatorialToScene(270, 90 - 23.4392794);
   near(pole.y, 1, 1e-9, "ecliptic pole");
   // The June solstice point lies at ecliptic longitude 90°: scene −Z.
-  near(equatorialToScene(90, 23.4392911).z, -1, 1e-9, "solstice");
+  near(equatorialToScene(90, 23.4392794).z, -1, 1e-9, "solstice");
   // IAU galactic pole (RA 192.8595°, δ +27.1284°) is 60.19° from the ecliptic pole,
   // and the galactic centre (Sgr A*) lies in the galactic plane.
   const galacticPole = equatorialToScene(192.8595, 27.1284);
@@ -246,12 +247,12 @@ test("nearby stars sit at their measured distances and meet their published enco
 });
 
 test("the Sun's galactic orbit closes once per galactic year", () => {
-  const today = sunGalactic(0, true);
+  const today = sunGalactic(0);
   near(today[0], 27_000, 1e-9);
   near(today[1], 68, 1e-9);
-  const lap = sunGalactic(GALACTIC_YEAR, false);
-  near(lap[0], 27_000, 1e-6, "back after one lap");
-  near(lap[2], 0, 1e-6);
+  near(today[2], 0, 1e-9);
+  /* One galactic year back the Sun is at the same angle; its epicycles keep their own clocks. */
+  const lap = sunGalactic(GALACTIC_YEAR);
+  near(Math.atan2(-lap[2], lap[0]), 0, 1e-9, "back after one lap");
   near(galacticLaps(0), SUN_BIRTH / GALACTIC_YEAR, 1e-12);
-  assert.equal(sunGalactic(SUN_BIRTH + 1, true), null, "no Sun before its birth");
 });

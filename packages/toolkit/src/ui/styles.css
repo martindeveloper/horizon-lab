@@ -221,6 +221,10 @@
   }
 }
 /* Hidden tips still count as overflow: keep edge tips inside the viewport. */
+.hud-tip[data-align="start"] > [data-tip] {
+  left: 0;
+  transform: none;
+}
 .hud-tip[data-align="end"] > [data-tip] {
   left: auto;
   right: 0;

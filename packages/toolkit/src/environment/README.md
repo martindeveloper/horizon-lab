@@ -4,7 +4,8 @@
 every surface honours the same user preference. No dependencies; importing it
 touches no browser globals.
 
-- `REDUCED_MOTION_QUERY`, `FINE_POINTER_QUERY`, `COARSE_POINTER_QUERY`: query
+- `REDUCED_MOTION_QUERY`, `FINE_POINTER_QUERY`, `COARSE_POINTER_QUERY`,
+  `WIDE_LAYOUT_QUERY` (the theme's `md`: side rails instead of sheets): query
   strings for `window.matchMedia`. Keep the returned list and read `.matches`
   when deciding, so a preference changed while the page is open applies at once.
 - `prefersReducedMotion()`: a one-off snapshot, false on the server or where

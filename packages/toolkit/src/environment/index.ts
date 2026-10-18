@@ -5,6 +5,8 @@ export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 export const FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 /** A finger: larger targets, and a hint that the GPU may be mobile. */
 export const COARSE_POINTER_QUERY = "(pointer: coarse)";
+/** The desktop layout: wide and tall enough for side rails (the theme's `md`). */
+export const WIDE_LAYOUT_QUERY = "(min-width: 48rem) and (min-height: 30rem)";
 
 function matches(query: string) {
   return typeof window !== "undefined" && typeof window.matchMedia === "function"

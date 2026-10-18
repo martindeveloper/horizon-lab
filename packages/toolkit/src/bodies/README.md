@@ -30,11 +30,14 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
 - `ORBIT_EQUATIONS`: the secular-element, ω, M, Kepler's equation and perifocal
   formulas, built with `defineEquation` from `@horizon/toolkit/science`, so a
   lab computes with them and prints the same objects.
-- `jplElements(id, T)`: JPL approximate elements (Standish & Williams,
-  1800–2050) for the planets, plus Pluto's row from the table's withdrawn
-  earlier edition, `T` in Julian centuries from J2000
-  (`centuriesSinceJ2000(date)`).
-- `NAMED`: Pluto, Sedna and Halley with `elementsAt(date, extraYears)`.
+- `jplElements(id, T, driftYears?)`: JPL approximate elements (Standish &
+  Williams, 1800–2050) for the planets, plus Pluto's row from the table's
+  withdrawn earlier edition, `T` in Julian centuries from J2000
+  (`centuriesSinceJ2000(date)`). `driftYears` moves the body on along that
+  orbit (its mean longitude only), so a sped-up clock never runs the secular
+  rates outside their fit.
+- `NAMED`: Pluto, Sedna and Halley with `elementsAt(date, extraYears)`, which
+  likewise only advance each body along its orbit.
 - `keplerPosition(elements)` gives a heliocentric position in au;
   `writeOrbit` / `createOrbitWriter` fill a flat XYZ buffer with the ellipse
   (the writer skips work when only M changed). `eccentricAnomaly`, `periodYears`.

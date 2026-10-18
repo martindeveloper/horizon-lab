@@ -37,8 +37,8 @@ import {
   equatorialFrameToScene,
   equatorialToScene,
   poleVector,
-} from "../src/features/orrery/lib/graphics/coordinates.ts";
-import { moonOffset, moonOrientation } from "../src/features/orrery/lib/graphics/moons.ts";
+} from "../packages/toolkit/src/scene/frames.ts";
+import { moonOffset, moonOrientation } from "../src/space/solar-system/graphics/moons.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
   assert.ok(
@@ -375,4 +375,14 @@ test("illustrative maps follow measured physical constraints for Venus, Titan, S
   }
   assert.ok(darkArea / totalArea > 0.85, "Halley's dark crust covers >85 % of the surface");
   assert.ok(ventArea / totalArea > 0.02 && ventArea / totalArea < 0.15, "Discrete active vents");
+});
+
+test("Motion's sped-up clock moves the planets along today's orbits without ageing them", () => {
+  const now = jplElements("saturn", T2026);
+  /* A million years of drift is far outside the 1800–2050 fit: only the planet moves on. */
+  const later = jplElements("saturn", T2026, 1e6);
+  for (const key of ["a", "e", "i", "omega", "node"]) assert.equal(later[key], now[key], key);
+  /* A year of drift carries Saturn about a 29.4th of the way round. */
+  const year = jplElements("saturn", T2026, 1);
+  assert.ok(Math.abs(year.M - now.M - 360 / 29.45) < 0.05, `${year.M - now.M}`);
 });

@@ -1,7 +1,7 @@
 /** DOM labels pinned to scene points, written only when their text or position changes. */
 import { Vector3 } from "three";
 
-import type { Labels, SceneKit } from "./kit";
+import type { LabelText, SceneBasics } from "./kit";
 import {
   bodyLabelBounds,
   bodyVisible,
@@ -39,11 +39,24 @@ type Target = LabelBounds & { alpha: number; clear: boolean; shown: boolean };
 export const STRONG: LabelStyle = { strong: true };
 export const BELOW: LabelStyle = { below: true };
 
+/** Where labels may sit: CSS px kept clear at each edge (a header, a dock, a side control). */
+export type LabelInsets = { top: number; bottom: number; left: number; right: number };
+
+const DEFAULT_INSETS: LabelInsets = { top: 56, bottom: 150, left: 4, right: 4 };
+
 export function createLabels(
-  { scope, camera, viewport }: SceneKit,
+  { scope, camera, viewport }: SceneBasics,
   root: HTMLElement,
-  labels: Labels,
+  labels: LabelText,
+  options: {
+    /** Each label's class; `scene-label` is styled by `@horizon/toolkit/scene.css`. */
+    className?: string;
+    /** Fixed, or read once a frame when the controls over the stage move. */
+    insets?: LabelInsets | (() => LabelInsets);
+  } = {},
 ) {
+  const { className = "scene-label", insets = DEFAULT_INSETS } = options;
+  let inset = DEFAULT_INSETS;
   let bodies: readonly LabelBody[] = [];
   const pending = new Map<string, Parameters<PlaceLabel>>();
   const point = new Vector3();
@@ -77,7 +90,7 @@ export function createLabels(
     let el = spans.get(key);
     if (!el) {
       el = document.createElement("span");
-      el.className = "orrery-label";
+      el.className = className;
       root.appendChild(el);
       spans.set(key, el);
     }
@@ -118,7 +131,8 @@ export function createLabels(
     const { width, height } = viewport;
     const sx = (projected.x * 0.5 + 0.5) * width;
     let sy = (-projected.y * 0.5 + 0.5) * height;
-    if (sx < 4 || sy < 56 || sx > width - 4 || sy > height - 150) return hide(key, el);
+    if (sx < inset.left || sy < inset.top || sx > width - inset.right || sy > height - inset.bottom)
+      return hide(key, el);
     if (el.style.display !== "block") el.style.display = "block";
     const ownIndex = indexOf.get(key);
     const own = ownIndex === undefined ? undefined : bounds[ownIndex];
@@ -155,7 +169,12 @@ export function createLabels(
     rect.right = sx + w / 2;
     rect.top = top;
     rect.bottom = top + h;
-    if (rect.left < 4 || rect.right > width - 4 || rect.top < 56 || rect.bottom > height - 150)
+    if (
+      rect.left < inset.left ||
+      rect.right > width - inset.right ||
+      rect.top < inset.top ||
+      rect.bottom > height - inset.bottom
+    )
       return hide(key, el);
     // DOM labels cannot share WebGL's depth buffer. Mask only the covered pixels,
     // at the anchor's depth, rather than hiding the label when its anchor is covered.
@@ -187,6 +206,7 @@ export function createLabels(
     },
     /** Resolve after all bodies have their current frame positions and scales. */
     flush: () => {
+      inset = typeof insets === "function" ? insets() : insets;
       for (const body of bodies) body.mesh.updateWorldMatrix(true, false);
       bounds = bodies.map(({ mesh }) =>
         bodyVisible(mesh) ? bodyLabelBounds(mesh, camera, viewport.width, viewport.height) : null,

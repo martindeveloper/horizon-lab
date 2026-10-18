@@ -59,6 +59,7 @@ const JPL: Record<PlanetId | "pluto", JplRow> = {
     0.72333566, 0.00677672, 3.39467605, 181.9790995, 131.60246718, 76.67984255, 0.0000039,
     -0.00004107, -0.0007889, 58517.81538729, 0.00268329, -0.27769418,
   ],
+  /* JPL's Earth–Moon barycentre row: the Earth itself sits at most 4,700 km (3 × 10⁻⁵ au) off it. */
   earth: [
     1.00000261, 0.01671123, -0.00001531, 100.46457166, 102.93768193, 0.0, 0.00000562, -0.00004392,
     -0.01294668, 35999.37244981, 0.32327364, 0.0,
@@ -114,9 +115,9 @@ export const PLANET_IDS: readonly PlanetId[] = [
 
 export const GIANTS: ReadonlySet<PlanetId> = new Set(["jupiter", "saturn", "uranus", "neptune"]);
 
-/** Julian centuries since J2000 for a date, plus an optional offset in years. */
-export function centuriesSinceJ2000(date: Date, extraYears = 0) {
-  return (julianDay(date) - J2000_JD) / 36525 + extraYears / 100;
+/** Julian centuries since J2000 for a date. */
+export function centuriesSinceJ2000(date: Date) {
+  return (julianDay(date) - J2000_JD) / 36525;
 }
 
 /** Osculating elements at the given epoch from the JPL table. */
@@ -135,10 +136,16 @@ function six(values: readonly number[]): [number, number, number, number, number
   return [a, e, i, L, varpi, node];
 }
 
-export function jplElements(id: PlanetId | "pluto", T: number): Elements {
+/**
+ * Elements from the JPL table `T` Julian centuries after J2000; the fit holds for 1800–2050.
+ * `driftYears` carries the body on along that orbit at its mean rate (the mean longitude
+ * alone), never ageing the orbit itself: the secular rates do not extrapolate.
+ */
+export function jplElements(id: PlanetId | "pluto", T: number, driftYears = 0): Elements {
   const r = JPL[id];
   const at = (k: number) => secularElement.compute({ x0: r[k]!, rate: r[k + 6]!, T });
-  const [a, e, i, L, varpi, node] = six(Array.from({ length: 6 }, (_, k) => at(k)));
+  const [a, e, i, L0, varpi, node] = six(Array.from({ length: 6 }, (_, k) => at(k)));
+  const L = L0 + r[9] * (driftYears / 100);
   return {
     a,
     e,
@@ -174,7 +181,7 @@ export const NAMED: readonly NamedBody[] = [
     id: "pluto",
     /* New Horizons, 1188.3 ± 1.6 km (Nimmo et al. 2017, Icarus 287, 12). */
     radiusKm: 1188.3,
-    elementsAt: (date, extraYears) => jplElements("pluto", centuriesSinceJ2000(date, extraYears)),
+    elementsAt: (date, extraYears) => jplElements("pluto", centuriesSinceJ2000(date), extraYears),
   },
   {
     id: "sedna",

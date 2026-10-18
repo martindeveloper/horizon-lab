@@ -10,8 +10,8 @@ export type Vec3 = [x: number, y: number, z: number];
 /** A rotation as quaternion components, three.js order. */
 export type Quat = [x: number, y: number, z: number, w: number];
 
-/** Mean obliquity of the ecliptic at J2000, degrees. */
-export const J2000_OBLIQUITY_DEG = 23.4392911;
+/** Mean obliquity of the ecliptic at J2000, degrees: 84381.406″ (IAU 2006, P03). */
+export const J2000_OBLIQUITY_DEG = 23.4392794;
 const COS_OBLIQUITY = Math.cos(J2000_OBLIQUITY_DEG * RAD);
 const SIN_OBLIQUITY = Math.sin(J2000_OBLIQUITY_DEG * RAD);
 

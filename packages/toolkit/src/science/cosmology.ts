@@ -2,8 +2,9 @@ import { convert } from "./units";
 
 /**
  * A flat ΛCDM universe: the Hubble constant (km/s/Mpc), the matter density Ωm and, optionally,
- * radiation Ωr; Ω_Λ = 1 − Ωm − Ωr. Radiation enters distances only: it changes the age by
- * well under a million years, so the age formulas leave it out.
+ * radiation Ωr; Ω_Λ = 1 − Ωm − Ωr. Distances, ages and lookback times integrate with
+ * radiation; only the closed forms `cosmicAgeGyr` and `scaleFactorAtAge` leave it out, which
+ * makes every age about 5.6 million years older with Planck's values.
  */
 export type FlatLcdm = { H0: number; omegaM: number; omegaR?: number };
 
@@ -30,7 +31,10 @@ function shape({ H0, omegaM }: FlatLcdm) {
   };
 }
 
-/** Age (Gyr) of a flat ΛCDM universe when its scale factor was `a` (1 today). */
+/**
+ * Age (Gyr) of a flat matter + Λ universe when its scale factor was `a` (1 today): a closed
+ * form without radiation (see `cosmicAgeAtRedshiftGyr` for the age with it).
+ */
 export function cosmicAgeGyr(a: number, model: FlatLcdm = PLANCK_2018) {
   const { factor, ratio } = shape(model);
   return factor * Math.asinh(ratio * a ** 1.5);
@@ -70,20 +74,49 @@ export function comovingDistanceMpc(z: number, model: FlatLcdm = PLANCK_2018) {
 export const particleHorizonMpc = (model: FlatLcdm = PLANCK_2018) =>
   comovingDistanceMpc(Number.POSITIVE_INFINITY, model);
 
-/** Redshift of light that set out `gyr` billion years ago (the inverse of `lookbackTimeGyr`). */
-export function redshiftAtLookback(gyr: number, model: FlatLcdm = PLANCK_2018) {
-  return 1 / scaleFactorAtAge(cosmicAgeGyr(1, model) - gyr, model) - 1;
+/**
+ * Redshift of a source at today's (comoving) distance `mpc`: the inverse of
+ * `comovingDistanceMpc`, by bisection in ln(1 + z). Infinity at or past the particle horizon.
+ */
+export function redshiftAtComovingDistance(mpc: number, model: FlatLcdm = PLANCK_2018) {
+  if (!(mpc > 0)) return 0;
+  if (mpc >= particleHorizonMpc(model)) return Number.POSITIVE_INFINITY;
+  let lo = 0;
+  let hi = Math.log(1e6);
+  for (let i = 0; i < 64; i += 1) {
+    const mid = (lo + hi) / 2;
+    if (comovingDistanceMpc(Math.expm1(mid), model) < mpc) lo = mid;
+    else hi = mid;
+  }
+  return Math.expm1((lo + hi) / 2);
 }
 
-/** How long ago (Gyr) light now arriving from redshift z set out. */
+/**
+ * Redshift of light that set out `gyr` billion years ago: the inverse of `lookbackTimeGyr`, by
+ * bisection in ln(1 + z). Infinity at or past the age of the universe.
+ */
+export function redshiftAtLookback(gyr: number, model: FlatLcdm = PLANCK_2018) {
+  if (!(gyr > 0)) return 0;
+  if (gyr >= cosmicAgeAtRedshiftGyr(0, model)) return Number.POSITIVE_INFINITY;
+  let lo = 0;
+  let hi = Math.log(1e6);
+  for (let i = 0; i < 64; i += 1) {
+    const mid = (lo + hi) / 2;
+    if (lookbackTimeGyr(Math.expm1(mid), model) < gyr) lo = mid;
+    else hi = mid;
+  }
+  return Math.expm1((lo + hi) / 2);
+}
+
+/** How long ago (Gyr) light now arriving from redshift z set out, with radiation. */
 export function lookbackTimeGyr(z: number, model: FlatLcdm = PLANCK_2018) {
-  return cosmicAgeGyr(1, model) - cosmicAgeGyr(1 / (1 + z), model);
+  return z > 0 ? cosmicAgeAtRedshiftGyr(0, model) - cosmicAgeAtRedshiftGyr(z, model) : 0;
 }
 
 /**
  * Age (Gyr) of the universe at redshift z, with radiation: (1 / H₀) ∫₀ᵃ a′ da′ / √(Ωr + Ωm a′
- * + Ω_Λ a′⁴). Agrees with `cosmicAgeGyr` once radiation no longer matters; at the cosmic
- * microwave background (z ≈ 1090) it gives the familiar ~0.37 million years.
+ * + Ω_Λ a′⁴); 13.787 Gyr today with Planck's values. At the cosmic microwave background
+ * (z ≈ 1090) it gives the familiar ~0.37 million years.
  */
 export function cosmicAgeAtRedshiftGyr(z: number, model: FlatLcdm = PLANCK_2018) {
   const { H0, omegaM, omegaR = 0 } = model;
@@ -91,7 +124,7 @@ export function cosmicAgeAtRedshiftGyr(z: number, model: FlatLcdm = PLANCK_2018)
   const a = 1 / (1 + z);
   const integrand = (x: number) => x / Math.sqrt(omegaR + omegaM * x + omegaL * x ** 4);
   /* Over u = √x the integrand stays smooth where radiation hands over to matter. */
-  const inU = (u: number) => 2 * u * integrand(u * u);
+  const inU = (u: number) => (u === 0 ? 0 : 2 * u * integrand(u * u));
   const top = Math.sqrt(a);
   const h = top / COMOVING_STEPS;
   let sum = inU(0) + inU(top);
