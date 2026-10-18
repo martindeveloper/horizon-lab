@@ -12,20 +12,20 @@ import {
   centuriesSinceJ2000,
   jplElements,
   keplerPosition,
+  moonEcliptic,
   namedById,
   periodYears,
   keplerEquation,
+  solarEcliptic,
 } from "@horizon/toolkit/bodies";
-
 import {
   eclipticToEquatorial,
   julianEphemerisDay,
-  moonEcliptic,
   precess,
   siderealTime,
-  solarEcliptic,
   toHorizontal,
-} from "../src/components/shell/stars.ts";
+} from "@horizon/toolkit/science";
+
 import { equatorialToScene } from "../src/features/orrery/lib/graphics/coordinates.ts";
 import { galacticLaps, sunGalactic } from "../src/features/orrery/lib/model/galactic-orbit.ts";
 import {

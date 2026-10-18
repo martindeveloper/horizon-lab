@@ -11,12 +11,11 @@ import {
 import { Dock, IconButton, SegmentedControl, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { scaleAt } from "../lib/model/cosmos";
-import { ORRERY_COPY } from "../lib/model/figures";
 import { galacticLaps } from "../lib/model/galactic-orbit";
 import { SUN_BIRTH } from "../lib/model/parameters";
 import { EPOCHS, epochOf, noteOf, sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
 import { useOrrery } from "../lib/store";
-import { formatYearsAgo } from "./format";
+import { formatYearsAgo, proseArgs } from "./format";
 import { DISPLAY, Switches } from "./view-controls";
 
 /* Epochs sit at their true places on the track, alternating above and below it so
@@ -32,6 +31,7 @@ const trackX = (at: number) => `calc(7px + ${at} * (100% - 14px))`;
 export function TimeDock() {
   const t = useTranslations("orrery");
   const f = useFormatter();
+  const locale = useLocale();
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const playing = useOrrery((s) => s.playing);
   const viewRealm = useOrrery((s) => s.viewRealm);
@@ -112,7 +112,7 @@ export function TimeDock() {
         </div>
       </div>
       <p className="mt-2 text-xs text-pretty text-muted not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5">
-        {t(`notes.${noteOf(yearsAgo)}`, ORRERY_COPY)}
+        {t(`notes.${noteOf(yearsAgo)}`, proseArgs(locale))}
       </p>
       <Timeline yearsAgo={yearsAgo} />
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-2.5 md:mt-1 md:pt-3">

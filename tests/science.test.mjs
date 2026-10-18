@@ -35,7 +35,7 @@ import {
   photonOrbit,
   rainClockRate,
 } from "../src/features/black-hole/lib/equations.ts";
-import { CATALOGUE } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { CATALOGUE, PROSE_FIGURES } from "../src/features/orrery/lib/model/catalogue/index.ts";
 import {
   ORRERY_EQUATIONS,
   galacticAngle,
@@ -47,7 +47,6 @@ import {
   spiralArm,
   tracerSemiMajorAxis,
 } from "../src/features/orrery/lib/model/equations.ts";
-import { ORRERY_COPY } from "../src/features/orrery/lib/model/figures.ts";
 import { SUN_BIRTH } from "../src/features/orrery/lib/model/parameters.ts";
 import {
   advancePlay,
@@ -207,7 +206,7 @@ test("orrery migration and galaxy formulas hold their anchors", () => {
 
 test("every number the orrery copy quotes comes from its parameters", () => {
   const allowed = new Set([
-    ...Object.keys(ORRERY_COPY),
+    ...Object.keys(PROSE_FIGURES),
     "equation",
     "millions",
     "minutes",

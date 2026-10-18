@@ -15,10 +15,11 @@ import {
   type Object3D,
 } from "three";
 
-import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
+import { LIGHT_YEAR_AU, convert } from "@horizon/toolkit/science";
 
 import { earlyGalaxy, modernGalaxy } from "../graphics/galaxy";
 import { createSunTrailWriter, sunGalactic } from "../model/galactic-orbit";
+import { HALO_R200_KPC } from "../model/parameters";
 import { sunExists } from "../model/timeline";
 import type { Selection } from "../store";
 import { ownedLine } from "./geometry";
@@ -65,8 +66,11 @@ export function createGalaxyLayer(
   sunHit.userData.pick = { kind: "galaxy", id: "sun" } satisfies Selection;
   const bulgeHit = new Mesh(scope.own(new SphereGeometry(3_200, 16, 12)), looks.ghost);
   bulgeHit.userData.pick = { kind: "galaxy", id: "bulge" } satisfies Selection;
-  /** Dark-matter halo out to roughly R₂₀₀ ≈ 200 kpc (virial radius ~280 kpc, Bland-Hawthorn & Gerhard 2016). */
-  const halo = new Mesh(scope.own(new SphereGeometry(650_000, 24, 14)), looks.halo);
+  /** Dark-matter halo out to R₂₀₀ (virial radius ~280 kpc, Bland-Hawthorn & Gerhard 2016). */
+  const halo = new Mesh(
+    scope.own(new SphereGeometry(convert(HALO_R200_KPC, "kpc", "ly"), 24, 14)),
+    looks.halo,
+  );
   const diskHit = new Mesh(scope.own(new RingGeometry(48_000, 52_000, 64)), looks.ghost);
   diskHit.rotation.x = Math.PI / 2;
   diskHit.userData.pick = { kind: "galaxy", id: "milkyway" } satisfies Selection;

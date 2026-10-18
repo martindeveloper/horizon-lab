@@ -1,8 +1,10 @@
+import { useLocale } from "next-intl";
+
 import { SimulationTechnicalDetails } from "@/components/simulations/technical-details";
 
 import { ORRERY_EQUATIONS } from "../lib/model/equations";
-import { ORRERY_COPY } from "../lib/model/figures";
 import specification from "../technical.json";
+import { proseArgs } from "./format";
 
 export function OrreryTechnicalDetails() {
   return (
@@ -10,7 +12,7 @@ export function OrreryTechnicalDetails() {
       namespace="orrery"
       specification={specification}
       equations={ORRERY_EQUATIONS}
-      values={ORRERY_COPY}
+      values={proseArgs(useLocale())}
     />
   );
 }

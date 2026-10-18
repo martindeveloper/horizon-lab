@@ -19,7 +19,7 @@ import { STARS, starColor } from "@/lib/stars";
 import { clamp01, lcg, valueNoise2 } from "@horizon/toolkit/math";
 
 import { galacticAngle } from "../model/equations";
-import { SUN_BIRTH } from "../model/parameters";
+import { NAMED_STARS_FADE, SUN_BIRTH, THIN_DISK_ERA } from "../model/parameters";
 import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE, equatorialToScene } from "./coordinates";
 import BAND_FRAG from "./shaders/band.frag.glsl";
 import BAND_VERT from "./shaders/band.vert.glsl";
@@ -348,8 +348,10 @@ export function createMilkyWay(dpr: number, grains: number) {
  * `dim`/`tint` are extinction inside the natal cloud and the Sun's envelope.
  */
 export function skyEpoch(yearsAgo: number) {
-  const era = clamp01((9e9 - yearsAgo) / 2e9);
-  const real = 1 - clamp01((Math.log10(Math.max(1, yearsAgo)) - 4.5) / 0.8);
+  /* The thin disk fades in over ±1 Gyr about its era; named stars over ±0.4 dex about theirs. */
+  const era = clamp01((THIN_DISK_ERA + 1e9 - yearsAgo) / 2e9);
+  const real =
+    1 - clamp01((Math.log10(Math.max(1, yearsAgo)) - Math.log10(NAMED_STARS_FADE) + 0.5) / 0.8);
   const inside = yearsAgo > SUN_BIRTH ? clamp01(1 - (yearsAgo - SUN_BIRTH) / 1.2e6) : 0;
   const envelope = yearsAgo <= SUN_BIRTH ? clamp01(1 - (SUN_BIRTH - yearsAgo) / 2e6) : 0;
   const cloud = Math.max(inside, envelope);

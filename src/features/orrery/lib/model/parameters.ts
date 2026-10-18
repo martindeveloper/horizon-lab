@@ -66,6 +66,17 @@ export const REID_R0_KPC = 8.15;
  * model keeps each arm's distance from the Sun, so it moves with this model's R₀.
  */
 export const ARM_CROSSINGS_KPC = [5.4, 6.9, 10.1, 12.4] as const;
+/** Exponential thin and thick disks: scale length and height (Bland-Hawthorn & Gerhard 2016). */
+export const THIN_DISK_KPC = { length: 2.6, height: 0.3 } as const;
+export const THICK_DISK_KPC = { length: 2, height: 0.9 } as const;
+/** The dark-matter halo sphere's radius, R₂₀₀ ≈ 200 kpc (Bland-Hawthorn & Gerhard 2016). */
+export const HALO_R200_KPC = 200;
+/** The thin disk and bar are in place by ~8 Gyr ago (Sanders et al. 2024; Xiang & Rix 2022). */
+export const THIN_DISK_ERA = 8e9;
+/** Bright stars' proper motions scramble the constellations within ~10⁵ years. */
+export const NAMED_STARS_FADE = 1e5;
+/** The timeline's oldest moment. */
+export const OLDEST = 10e9;
 /** Warp onset, amplitude, power and line of nodes: Chen et al. 2019's linear fit to all Cepheids. */
 export const WARP_START_KPC = 9.3;
 export const WARP_AMPLITUDE_KPC = 0.15;

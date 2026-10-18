@@ -49,7 +49,7 @@ export function SimulationTechnicalDetails({
         title: t("title"),
         summary: t("summary"),
         ...(specification.references !== undefined ? { references: specification.references } : {}),
-        features: specification.features.map((id) => t(`features.${id}`)),
+        features: specification.features.map((id) => t(`features.${id}`, values)),
         sections: specification.sections.map((section) => ({
           ...section,
           equations: section.equations.map((entry) => equationText(entry, equations)),

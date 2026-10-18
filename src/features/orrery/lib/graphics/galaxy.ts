@@ -4,8 +4,7 @@
  * (clockwise from the north), so galactocentric azimuth β grows toward +Z.
  *
  * Today's Galaxy follows the measured structure where it is known and labels the
- * rest a sketch: an exponential thin disk (scale length 2.6 kpc, height 300 pc)
- * and thick disk (2.0 kpc, 900 pc), a boxy/peanut bulge inside a long bar at 28°,
+ * rest a sketch: an exponential thin and thick disk (`THIN_DISK_KPC`, `THICK_DISK_KPC`), a boxy/peanut bulge inside a long bar at 28°,
  * four logarithmic arms at the ~13° mean pitch of multi-tracer studies, anchored to
  * the maser distances of the arms crossing the Sun–centre line, the Local Arm just
  * outside the Sun, dust on the arms' inner edges, the outer warp and a sparse
@@ -24,6 +23,8 @@ import {
   KPC_LY,
   REID_R0_KPC,
   SUN_GALACTIC_RADIUS_LY,
+  THICK_DISK_KPC,
+  THIN_DISK_KPC,
   WARP_START_KPC,
 } from "../model/parameters";
 
@@ -154,7 +155,7 @@ export function modernGalaxy(count: number) {
     );
   /* Smooth thin disk, thinned inside the bar where the bar has swept it. */
   for (let i = budget(0.3); i > 0; i -= 1) {
-    const R = diskR(2.6 * KPC, 1.2 * KPC, 18 * KPC);
+    const R = diskR(THIN_DISK_KPC.length * KPC, 1.2 * KPC, 18 * KPC);
     if (R < 3 * KPC && rnd() < 0.6) {
       i += 1;
       continue;
@@ -164,15 +165,16 @@ export function modernGalaxy(count: number) {
       stars,
       R,
       rnd() * Math.PI * 2,
-      laplace(rnd, 0.3 * KPC * flare(R)),
+      laplace(rnd, THIN_DISK_KPC.height * KPC * flare(R)),
       tint,
       0.3 + rnd() * 0.45,
     );
   }
   /* Thick disk: older, shorter and puffier. */
   for (let i = budget(0.06); i > 0; i -= 1) {
-    const R = diskR(2 * KPC, 0.8 * KPC, 15 * KPC);
-    disk(stars, R, rnd() * Math.PI * 2, laplace(rnd, 0.9 * KPC), old, 0.22 + rnd() * 0.3);
+    const R = diskR(THICK_DISK_KPC.length * KPC, 0.8 * KPC, 15 * KPC);
+    const z = laplace(rnd, THICK_DISK_KPC.height * KPC);
+    disk(stars, R, rnd() * Math.PI * 2, z, old, 0.22 + rnd() * 0.3);
   }
   /* Arms: old stars mostly in the two bar-end arms, young stars and H II regions in all four. */
   const armPoint = (spread: number, h: number, inner = 0) => {

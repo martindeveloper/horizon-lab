@@ -10,6 +10,13 @@ export const SOURCES = {
     link: "https://doi.org/10.3847/1538-3881/abfaff",
   },
   allen2001: { cite: "Allen, Bernstein & Malhotra 2001, ApJ 549, L241 (the Kuiper cliff)" },
+  avdellidou2024: {
+    cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878",
+    link: "https://doi.org/10.1126/science.adg8092",
+  },
+  barboni2017: {
+    cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70",
+  },
   bennettBovy2019: {
     cite: "Bennett & Bovy 2019, MNRAS 482, 1417",
     link: "https://arxiv.org/abs/1809.03507",
@@ -24,11 +31,19 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/1602.07702",
   },
   bovy2017: { cite: "Bovy 2017, MNRAS 468, L63 (Oort constants)" },
+  chen2019: {
+    cite: "Chen et al. 2019, Nat. Astron. 3, 320 (Cepheid warp, Table 1)",
+    link: "https://arxiv.org/abs/1902.00998",
+  },
   connelly2012: {
     cite: "Connelly et al. 2012, Science 338, 651",
     link: "https://doi.org/10.1126/science.1226919",
   },
   devaucouleurs1958: { cite: "de Vaucouleurs 1958 (the Local Supercluster)" },
+  diskLifetimes: {
+    cite: "Haisch, Lada & Lada 2001, ApJ 553, L153; Mamajek 2009",
+    link: "https://arxiv.org/abs/0906.5011",
+  },
   drinkwater2001: { cite: "Drinkwater et al. 2001, ApJ 548, L139" },
   duncan1987: { cite: "Duncan, Quinn & Tremaine 1987, AJ 94, 1330; NASA Oort cloud facts" },
   dupuy2019: {
@@ -76,6 +91,12 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/2206.00010",
   },
   kervella2017: { cite: "Kervella, Thévenin & Lovis 2017, A&A 598, L7" },
+  kokubo1998: { cite: "Kokubo & Ida 1998, Icarus 131, 171 (text not opened)" },
+  lecar2006: {
+    cite: "Lecar et al. 2006, ApJ 640, 1115",
+    link: "https://arxiv.org/abs/astro-ph/0602217",
+  },
+  lhb: { cite: "Zellner 2017, OLEB 47, 261; Boehnke & Harrison 2016, PNAS 113, 10802" },
   li2021: {
     cite: "Li et al. 2021, ApJ 920, 84",
     link: "https://doi.org/10.3847/1538-4357/ac1597",
@@ -86,12 +107,12 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/2206.01798",
   },
   lyndenBell1988: { cite: "Lynden-Bell et al. 1988, ApJ 326, 19" },
+  m31Merger: {
+    cite: "van der Marel et al. 2019, ApJ 872, 24; Sawala et al. 2025, Nat. Astron.; Wu et al. 2026, ApJL",
+  },
   m31Width: {
     cite: "RC3, de Vaucouleurs et al. 1991 (NGC 224: log D25 = 3.28); Ibata et al. 2005, ApJ 634, 287 (outer disk to ~40 kpc, arXiv:astro-ph/0504164)",
     link: "https://vizier.cds.unistra.fr/viz-bin/VizieR?-source=VII/155",
-  },
-  m31Merger: {
-    cite: "van der Marel et al. 2019, ApJ 872, 24; Sawala et al. 2025, Nat. Astron.; Wu et al. 2026, ApJL",
   },
   mamajek2015: { cite: "Mamajek et al. 2015, ApJL 800, L17" },
   mcconnachie2012: {
@@ -130,13 +151,14 @@ export const SOURCES = {
   planck2018: { cite: "Planck Collaboration 2020, A&A 641, A6 (TT,TE,EE+lowE+lensing+BAO)" },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },
   richter1989: { cite: "Richter 1989, catalogue of 581 galaxies in the Hydra I cluster area" },
-  tully2008: {
-    cite: "Tully et al. 2008, ApJ 676, 184",
-    link: "https://arxiv.org/abs/0705.4139",
-  },
+  sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
   tully1982: {
     cite: "Tully 1982, ApJ 257, 389 (Table 1: the Virgo Cluster and ten clouds)",
     link: "https://adsabs.harvard.edu/pdf/1982ApJ...257..389T",
+  },
+  tully2008: {
+    cite: "Tully et al. 2008, ApJ 676, 184",
+    link: "https://arxiv.org/abs/0705.4139",
   },
   tully2014: { cite: "Tully et al. 2014, Nature 513, 71" },
   vallee2017: {

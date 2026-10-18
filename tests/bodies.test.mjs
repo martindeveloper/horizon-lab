@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 /**
  * The orrery's bodies against published values: spin axes and rates (IAU
  * WGCCRE 2015, Archinal et al. 2018; NASA planetary fact sheets), figures,
@@ -10,7 +11,9 @@ import test from "node:test";
 import { Vector3 } from "three";
 
 import {
+  EARTH_EQUATORIAL_RADIUS_KM,
   FIGURES,
+  LUNAR_EQUATOR_INCLINATION_DEG,
   MOONS,
   PLANET_IDS,
   PLANET_RADIUS_KM,
@@ -281,6 +284,19 @@ test("moons rotate synchronously, the Moon in its Cassini state", () => {
   const a = moonOffset("moon", date);
   const b = moonOffset("moon", new Date(date.getTime() + 86_400_000));
   near(spin.angleTo(a.cross(b)) / RAD, 6.7, 0.1, "Moon's axis from its orbit normal");
+});
+
+test("the sky almanac and the orrery share Earth's radius and the Moon's tilt, without planet tables", () => {
+  assert.equal(FIGURES.earth.equatorialKm, EARTH_EQUATORIAL_RADIUS_KM);
+  near(EARTH_EQUATORIAL_RADIUS_KM, 6378.14, 0.01, "Meeus' 6378.14 km");
+  assert.equal(MOONS.find((moon) => moon.id === "moon").cassini, LUNAR_EQUATOR_INCLINATION_DEG);
+  near(LUNAR_EQUATOR_INCLINATION_DEG, 1 + 32 / 60 + 32.7 / 3600, 1e-5, "I = 1°32′32.7″");
+  // The header sky imports the almanac on every page; it must not drag in the JPL tables.
+  const almanac = readFileSync(
+    new URL("../packages/toolkit/src/bodies/almanac.ts", import.meta.url),
+    "utf8",
+  );
+  for (const [, from] of almanac.matchAll(/from "([^"]+)"/g)) assert.equal(from, "../science");
 });
 
 test("moon maps: brightness follows albedo, Europa brightest of the Galileans, Callisto darkest", () => {

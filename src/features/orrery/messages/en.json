@@ -532,7 +532,7 @@
       },
       "periods": {
         "title": "Farther out, slower",
-        "body": "Earth laps the Sun in a year, Jupiter in 12, Neptune in 165. Kepler's third law ties the period to the distance.",
+        "body": "Earth laps the Sun in a year, Jupiter in {jupiterYears}, Neptune in {neptuneYears}. Kepler's third law ties the period to the distance.",
         "eq": "{equation} · P in years, a in au"
       },
       "ellipses": {
@@ -558,7 +558,7 @@
       },
       "oort": {
         "title": "The Oort cloud",
-        "body": "A proposed shell of icy bodies extending perhaps to 100,000 au. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets seen as they approach the Sun."
+        "body": "A proposed shell of icy bodies extending perhaps to {oortShellAu} au. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets seen as they approach the Sun."
       },
       "galaxy": {
         "title": "One lap in {galacticYearMyr} million years",
@@ -575,8 +575,8 @@
     "references": "Scientific sources",
     "features": {
       "views": "Twelve views from the inner planets to Laniakea, each at a linear scale.",
-      "time": "A 10-billion-year timeline with playback, five epochs, and a tally of where the leftover bodies end up.",
-      "bodies": "Planets, Pluto, Sedna, Halley's comet, 560 planetesimal stand-ins, GPU swarms for the asteroid belt, the Trojans, the Kuiper belt and the Oort cloud, the two nearest star systems (α Centauri with Proxima, and Barnard's Star), Scholz's star, and cards that say what is measured."
+      "time": "A {timelineGyr}-billion-year timeline with playback, five epochs, and a tally of where the leftover bodies end up.",
+      "bodies": "Planets, Pluto, Sedna, Halley's comet, {tracers} planetesimal stand-ins, GPU swarms for the asteroid belt, the Trojans, the Kuiper belt and the Oort cloud, the two nearest star systems (α Centauri with Proxima, and Barnard's Star), Scholz's star, and cards that say what is measured."
     },
     "sections": {
       "ephemeris": {
@@ -585,19 +585,19 @@
       },
       "migration": {
         "title": "Formation and the clearing sketch",
-        "body": "The first solids condensed {sunBirthGyr} billion years ago (CAI ages); observed disks last about 3–10 million years, so the giants finish inside a {gasMyr}-million-year gas disk here while terrestrial planets grow until {modelStartGyr} billion years ago. Between {modelStartGyr} and {clearDoneGyr} billion years ago the giants interpolate from Nice-model starting orbits (5.45, 8.18, 11.5 and 14.2 au) to their measured ones, and a seeded sample of planetesimals moves from a 16–34 au disk to the Kuiper belt, the scattered disk, the Oort cloud, or out of the system. Orbital elements interpolate smoothly; this is not an N-body integration. Before the Sun the solar view shows a schematic molecular cloud with dated galactic milestones as its caption. Inside the gas disk the slider is logarithmic in time since the first solids, so the notes can follow dust (to {planetesimalsKyr} thousand years), planetesimals and Moon-mass embryos (by {embryosMyr} million years). The snow line is drawn at {snowLineAu} au; estimates for the young disk run from under 2 to about 4 au."
+        "body": "The first solids condensed {sunBirthGyr} billion years ago (CAI ages); observed disks last about {diskLifetimesMyr} million years, so the giants finish inside a {gasMyr}-million-year gas disk here while terrestrial planets grow until {modelStartGyr} billion years ago. Between {modelStartGyr} and {clearDoneGyr} billion years ago the giants interpolate from Nice-model starting orbits ({jupiterStartAu}, {saturnStartAu}, {uranusStartAu} and {neptuneStartAu} au) to their measured ones, and a seeded sample of planetesimals moves from a {diskAu} au disk to the Kuiper belt, the scattered disk, the Oort cloud, or out of the system. Orbital elements interpolate smoothly; this is not an N-body integration. Before the Sun the solar view shows a schematic molecular cloud with dated galactic milestones as its caption. Inside the gas disk the slider is logarithmic in time since the first solids, so the notes can follow dust (to {planetesimalsKyr} thousand years), planetesimals and Moon-mass embryos (by {embryosMyr} million years). The snow line is drawn at {snowLineAu} au; estimates for the young disk span about {snowLineEstimatesAu} au."
       },
       "galaxy": {
         "title": "The Sun's galactic orbit",
-        "body": "The Sun circles {sunRadiusKpc} kpc from the centre (GRAVITY) with a {galacticYearMyr}-million-year period, clockwise from the north galactic pole. Today it sits near the inner end of a ~{radialSwingKpc} kpc radial swing (period ~{radialMyr} Myr) and {heightPc} pc north of the plane, climbing through ±{verticalPc} pc (period ~{verticalMyr} Myr); the phase in the deep past is unknown. The disk follows measured structure: exponential thin (2.6 kpc, 300 pc) and thick (2.0 kpc, 900 pc) disks, a boxy bulge inside a {barHalfKpc} kpc half-length bar at {barDeg}°, four logarithmic arms at a {pitchDeg}° pitch anchored to maser parallaxes near the Sun, the Local Arm, dust on the arms' inner edges and the Cepheid-traced warp beyond {warpStartKpc} kpc. The halo sphere marks R₂₀₀ ≈ 200 kpc. The far side of the disk is extrapolated."
+        "body": "The Sun circles {sunRadiusKpc} kpc from the centre (GRAVITY) with a {galacticYearMyr}-million-year period, clockwise from the north galactic pole. Today it sits near the inner end of a ~{radialSwingKpc} kpc radial swing (period ~{radialMyr} Myr) and {heightPc} pc north of the plane, climbing through ±{verticalPc} pc (period ~{verticalMyr} Myr); the phase in the deep past is unknown. The disk follows measured structure: exponential thin ({thinLengthKpc} kpc, {thinHeightPc} pc) and thick ({thickLengthKpc} kpc, {thickHeightPc} pc) disks, a boxy bulge inside a {barHalfKpc} kpc half-length bar at {barDeg}°, four logarithmic arms at a {pitchDeg}° pitch anchored to maser parallaxes near the Sun, the Local Arm, dust on the arms' inner edges and the Cepheid-traced warp beyond {warpStartKpc} kpc. The halo sphere marks R₂₀₀ ≈ {haloKpc} kpc. The far side of the disk is extrapolated."
       },
       "sky": {
         "title": "The sky behind it",
-        "body": "Bright stars are the shared J2000 catalogue placed by right ascension and declination and rotated into the planets' ecliptic frame. The Milky Way is sampled from a painted map in galactic coordinates (bulge toward Sagittarius, the Great Rift, the Coalsack): tens of thousands of grains and a soft haze drawn from the same map, so it looks granular like the real band rather than a smooth glow. The whole band turns about the galactic pole once per galactic year as the Sun orbits; before about 8 billion years ago the thin disk and dust lane give way to a thicker, bluer disk; inside the natal cloud the view dims and reddens. Named stars fade beyond about 100,000 years, when proper motions have scrambled the constellations. The nearest stars follow straight-line tracks from Gaia and Hipparcos parallaxes, proper motions and radial velocities for ±300,000 years; Scholz's star's flyby through the outer Oort cloud falls out of that."
+        "body": "Bright stars are the shared J2000 catalogue placed by right ascension and declination and rotated into the planets' ecliptic frame. The Milky Way is sampled from a painted map in galactic coordinates (bulge toward Sagittarius, the Great Rift, the Coalsack): tens of thousands of grains and a soft haze drawn from the same map, so it looks granular like the real band rather than a smooth glow. The whole band turns about the galactic pole once per galactic year as the Sun orbits; before about {thinDiskGyr} billion years ago the thin disk and dust lane give way to a thicker, bluer disk; inside the natal cloud the view dims and reddens. Named stars fade beyond about {namedStarsYears} years, when proper motions have scrambled the constellations. The nearest stars follow straight-line tracks from Gaia and Hipparcos parallaxes, proper motions and radial velocities for ±{neighbourYears} years; Scholz's star's flyby through the outer Oort cloud falls out of that."
       },
       "swarms": {
         "title": "Belts and clouds on the GPU",
-        "body": "The asteroid belt, Jupiter's Trojans, the Kuiper belt and the Oort cloud are point swarms whose vertex shader solves Kepler's equation each frame, so thousands of bodies orbit at the same speed-up as the planets in one draw call each. The belt has Kirkwood gaps; the Trojans librate about L4 and L5 and appear during the clearing; the Kuiper belt holds cold classicals formed in place, hot classicals, plutinos at 39.4 au and twotinos at 47.7 au swept into resonance by Neptune, and nothing beyond the cliff; the Oort cloud thins as r⁻³·⁵ from an inner, flatter cloud to an isotropic shell at 100,000 au."
+        "body": "The asteroid belt, Jupiter's Trojans, the Kuiper belt and the Oort cloud are point swarms whose vertex shader solves Kepler's equation each frame, so thousands of bodies orbit at the same speed-up as the planets in one draw call each. The belt has Kirkwood gaps; the Trojans librate about L4 and L5 and appear during the clearing; the Kuiper belt holds cold classicals formed in place, hot classicals, plutinos at {plutinosAu} au and twotinos at {twotinosAu} au swept into resonance by Neptune, and nothing beyond the cliff; the Oort cloud thins as r⁻³·⁵ from an inner, flatter cloud to an isotropic shell at {oortShellAu} au."
       },
       "globes": {
         "title": "Globes and rings",
@@ -609,13 +609,13 @@
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^1.5."
+        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^{growthPower}."
       }
     }
   },
   "notes": {
-    "merger": "About 10 billion years ago the Milky Way swallowed Gaia-Enceladus; the thick disk dates from that era. The Sun's atoms are interstellar gas.",
-    "thinDisk": "The thin disk is forming stars and the bar is in place by about 8 billion years ago. Earlier stars are making the Sun's heavy elements.",
+    "merger": "About {mergerGyr} billion years ago the Milky Way swallowed Gaia-Enceladus; the thick disk dates from that era. The Sun's atoms are interstellar gas.",
+    "thinDisk": "The thin disk is forming stars and the bar is in place by about {thinDiskGyr} billion years ago. Earlier stars are making the Sun's heavy elements.",
     "ingredients": "Interstellar gas, enriched by earlier generations of stars. The cloud that will form the Sun has not collapsed yet.",
     "collapse": "A molecular-cloud core collapses in under a million years. Short-lived aluminium-26 in meteorites may point to a nearby massive star.",
     "dust": "First solids, {sunBirthGyr} billion years ago. Dust grains stick on gentle contact and grow into millimetre-to-centimetre pebbles.",
@@ -623,7 +623,7 @@
     "gasDisk": "Moon-mass embryos by {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to grab gas: the giants.",
     "accretion": "The young Sun's light and wind disperse the gas. Inside, many Moon-size embryos remain; Jupiter's pull makes their orbits cross.",
     "belt": "Slow collisions far from Jupiter merge embryos into rocky planets. Near Jupiter they are fast and shatter: the asteroid belt.",
-    "moon": "A Mars-size body strikes Earth and the Moon forms from the debris. Dates range from about 4.5 to 4.35 billion years ago.",
+    "moon": "A Mars-size body strikes Earth and the Moon forms from the debris. Estimates span about {moonImpactGyr} billion years ago.",
     "disk": "Disk intact: giants packed in, a heavy icy disk outside them. Starting orbits are a teaching sketch.",
     "clearing": "Clearing, as a model: the giants' resonant chain breaks, they scatter each other and Neptune scatters the disk.",
     "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that may be debris from one basin, Imbrium. A spike or a long tail? Debated.",

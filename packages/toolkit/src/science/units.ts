@@ -21,6 +21,7 @@ export type Dimension =
   | "angularRate"
   | "mass"
   | "speed"
+  | "rate"
   | "temperature";
 
 export type UnitDefinition = {
@@ -91,6 +92,10 @@ export const UNITS = {
   "km/s": unit("speed", "km/s", 1e3, "\\mathrm{km\\,s^{-1}}"),
   "au/yr": unit("speed", "au/yr", AU / YEAR, "\\mathrm{au\\,yr^{-1}}"),
   c: unit("speed", "c", C, "c"),
+  // Rate (per second)
+  Hz: unit("rate", "s⁻¹", 1, "\\mathrm{s^{-1}}"),
+  /** The Hubble constant's unit: km/s of recession per Mpc of distance. */
+  "km/s/Mpc": unit("rate", "km/s/Mpc", 1e3 / (1e6 * PC), "\\mathrm{km\\,s^{-1}\\,Mpc^{-1}}"),
   // Temperature
   K: unit("temperature", "K", 1),
 } as const satisfies Record<string, UnitDefinition>;

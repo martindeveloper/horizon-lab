@@ -6,13 +6,17 @@ import {
   ARM_START_KPC,
   BAR_ANGLE_DEG,
   GALACTIC_YEAR,
+  HALO_R200_KPC,
   RADIAL_AMPLITUDE_LY,
   RADIAL_PERIOD,
   SUN_BIRTH,
   SUN_GALACTIC_RADIUS_LY,
   SUN_HEIGHT_LY,
+  THICK_DISK_KPC,
+  THIN_DISK_KPC,
   VERTICAL_AMPLITUDE_LY,
   VERTICAL_PERIOD,
+  WARP_START_KPC,
 } from "../parameters";
 import type { Facts, Value } from "./types";
 
@@ -20,6 +24,7 @@ import type { Facts, Value } from "./types";
 const sunToCentre: Value = {
   value: SUN_GALACTIC_RADIUS_LY,
   unit: "ly",
+  show: "kpc",
   digits: 3,
   source: "gravity2021",
   status: "verified",
@@ -70,6 +75,7 @@ export const GALAXY = {
     radialSwing: {
       value: 2 * RADIAL_AMPLITUDE_LY,
       unit: "ly",
+      show: "kpc",
       digits: 2,
       source: "bovy2017",
       status: "derived",
@@ -86,6 +92,7 @@ export const GALAXY = {
     verticalAmplitude: {
       value: VERTICAL_AMPLITUDE_LY,
       unit: "ly",
+      show: "pc",
       digits: 2,
       source: "blandHawthorn2016",
       status: "derived",
@@ -102,6 +109,7 @@ export const GALAXY = {
     height: {
       value: SUN_HEIGHT_LY,
       unit: "ly",
+      show: "pc",
       source: "bennettBovy2019",
       status: "verified",
       note: "20.8 ± 0.3 pc",
@@ -119,9 +127,26 @@ export const GALAXY = {
       note: "twice the 4.3 kpc half-length; estimates 7–10 kpc end to end",
     },
     barAngle,
+    barHalfLength: {
+      value: ARM_START_KPC,
+      unit: "kpc",
+      show: "kpc",
+      range: [3.5, 5],
+      source: "lucey2023",
+      status: "verified",
+      note: "Wegg 2015: 5.0 ± 0.2; Lucey 2023: ~3.5",
+    },
     blackHole: { value: 4e6, unit: "Msun", source: "gravity2022", status: "verified" },
   },
   halo: {
+    r200: {
+      value: HALO_R200_KPC,
+      unit: "kpc",
+      show: "kpc",
+      source: "blandHawthorn2016",
+      status: "derived",
+      note: "M₂₀₀ 1.1 × 10¹² M☉ → 213 kpc",
+    },
     width: {
       value: 1,
       unit: "Mly",
@@ -174,6 +199,42 @@ export const GALAXY = {
       unit: "Gyr",
       range: [8, 11],
       source: "gaiaEnceladus",
+      status: "verified",
+    },
+    thinDiskLength: {
+      value: THIN_DISK_KPC.length,
+      unit: "kpc",
+      show: "kpc",
+      source: "blandHawthorn2016",
+      status: "verified",
+    },
+    thinDiskHeight: {
+      value: THIN_DISK_KPC.height,
+      unit: "kpc",
+      show: "pc",
+      source: "blandHawthorn2016",
+      status: "verified",
+    },
+    thickDiskLength: {
+      value: THICK_DISK_KPC.length,
+      unit: "kpc",
+      show: "kpc",
+      digits: 2,
+      source: "blandHawthorn2016",
+      status: "verified",
+    },
+    thickDiskHeight: {
+      value: THICK_DISK_KPC.height,
+      unit: "kpc",
+      show: "pc",
+      source: "blandHawthorn2016",
+      status: "verified",
+    },
+    warpStart: {
+      value: WARP_START_KPC,
+      unit: "kpc",
+      show: "kpc",
+      source: "chen2019",
       status: "verified",
     },
     planeTilt: {

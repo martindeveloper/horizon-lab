@@ -7,8 +7,8 @@ export type FlatLcdm = { H0: number; omegaM: number };
 export const PLANCK_2018 = { H0: 67.66, omegaM: 0.3111 } as const satisfies FlatLcdm;
 export const PLANCK_2018_SOURCE = "Planck Collaboration 2020, A&A 641, A6";
 
-/** The Hubble time 1/H₀ in Gyr: a megaparsec in km over H₀, in Gyr (977.79 / H₀). */
-export const hubbleTimeGyr = (H0: number) => convert(convert(1, "Mpc", "km") / H0, "s", "Gyr");
+/** The Hubble time 1/H₀ in Gyr (977.79 / H₀ for H₀ in km/s/Mpc). */
+export const hubbleTimeGyr = (H0: number) => convert(1 / convert(H0, "km/s/Mpc", "Hz"), "s", "Gyr");
 
 function shape({ H0, omegaM }: FlatLcdm) {
   const omegaL = 1 - omegaM;

@@ -532,7 +532,7 @@
       },
       "periods": {
         "title": "Čím dál, tím pomaleji",
-        "body": "Země oběhne Slunce za rok, Jupiter za 12 let, Neptun za 165. Třetí Keplerův zákon spojuje oběžnou dobu s velkou poloosou dráhy.",
+        "body": "Země oběhne Slunce za rok, Jupiter za {jupiterYears} let, Neptun za {neptuneYears}. Třetí Keplerův zákon spojuje oběžnou dobu s velkou poloosou dráhy.",
         "eq": "{equation} · P v letech, a v au"
       },
       "ellipses": {
@@ -550,7 +550,7 @@
       },
       "snowLine": {
         "title": "Sněžná čára",
-        "body": "V raném disku mohou blíže než přibližně {snowLineAu, number} au od Slunce kondenzovat horniny a kovy, zatímco dále se může udržet i vodní led. Materiálu pro růst planetárních jader je tam více, takže mohou dorůst natolik, aby gravitačně zachytila plyn. Původ zemské vody zůstává předmětem diskuse: část mohla přiletět s tělesy z vnějších oblastí, část mohla být už v materiálu, ze kterého Země vznikla."
+        "body": "V raném disku mohou blíže než přibližně {snowLineAu} au od Slunce kondenzovat horniny a kovy, zatímco dále se může udržet i vodní led. Materiálu pro růst planetárních jader je tam více, takže mohou dorůst natolik, aby gravitačně zachytila plyn. Původ zemské vody zůstává předmětem diskuse: část mohla přiletět s tělesy z vnějších oblastí, část mohla být už v materiálu, ze kterého Země vznikla."
       },
       "clearing": {
         "title": "Odklízení těles jako model",
@@ -558,11 +558,11 @@
       },
       "oort": {
         "title": "Oortův oblak",
-        "body": "Předpokládaný kulový obal ledových těles, který může sahat až do vzdálenosti 100 000 au. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet, které sledujeme při jejich přiblížení ke Slunci."
+        "body": "Předpokládaný kulový obal ledových těles, který může sahat až do vzdálenosti {oortShellAu} au. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet, které sledujeme při jejich přiblížení ke Slunci."
       },
       "galaxy": {
-        "title": "Jeden oběh za {galacticYearMyr, number} milionů let",
-        "body": "Nyní se díváte na samostatnou mapu se vzdálenostmi ve světelných letech. Slunce oběhne střed Mléčné dráhy zhruba jednou za {galacticYearMyr, number} milionů let. Od svého vzniku tak dokončilo asi {laps, number} oběhů."
+        "title": "Jeden oběh za {galacticYearMyr} milionů let",
+        "body": "Nyní se díváte na samostatnou mapu se vzdálenostmi ve světelných letech. Slunce oběhne střed Mléčné dráhy zhruba jednou za {galacticYearMyr} milionů let. Od svého vzniku tak dokončilo asi {laps} oběhů."
       }
     }
   },
@@ -575,8 +575,8 @@
     "references": "Vědecké zdroje",
     "features": {
       "views": "Dvanáct pohledů od vnitřních planet po Laniakeu, každý v lineárním měřítku.",
-      "time": "Časová osa pokrývající 10 miliard let, s přehráváním, pěti předvolenými obdobími a přehledem konečných osudů zbylých těles.",
-      "bodies": "Planety, Pluto, Sedna, Halleyova kometa, 560 modelových planetesimál, soubory bodů vykreslované na GPU pro pás planetek, trojány, Kuiperův pás a Oortův oblak, dvě nejbližší hvězdné soustavy (α Centauri s Proximou a Barnardova hvězda), Scholzova hvězda a karty rozlišující měřené údaje od modelových."
+      "time": "Časová osa pokrývající {timelineGyr} miliard let, s přehráváním, pěti předvolenými obdobími a přehledem konečných osudů zbylých těles.",
+      "bodies": "Planety, Pluto, Sedna, Halleyova kometa, {tracers} modelových planetesimál, soubory bodů vykreslované na GPU pro pás planetek, trojány, Kuiperův pás a Oortův oblak, dvě nejbližší hvězdné soustavy (α Centauri s Proximou a Barnardova hvězda), Scholzova hvězda a karty rozlišující měřené údaje od modelových."
     },
     "sections": {
       "ephemeris": {
@@ -585,19 +585,19 @@
       },
       "migration": {
         "title": "Vznik soustavy a model odklízení těles",
-        "body": "První pevné látky zkondenzovaly před {sunBirthGyr, number} miliardy let (podle stáří vápenato-hlinitých inkluzí, CAI). Pozorované disky přetrvávají asi 3–10 milionů let, a tak zde obří planety dokončují růst během existence plynového disku s životností {gasMyr, number} milionů let, zatímco terestrické planety rostou až do doby před {modelStartGyr, number} miliardy let. V období před {modelStartGyr, number} až {clearDoneGyr, number} miliardy let se dráhy obrů interpolují z výchozích drah modelu z Nice (5,45; 8,18; 11,5 a 14,2 au) na současné dráhy odvozené z měření. Pseudonáhodný vzorek planetesimál s pevným počátečním nastavením se přesouvá z disku 16–34 au do Kuiperova pásu, rozptýleného disku, Oortova oblaku nebo ven ze soustavy. Dráhové elementy se interpolují plynule; nejde o numerickou integraci pohybu N těles. Před vznikem Slunce zobrazuje pohled na sluneční soustavu schematický molekulární oblak s datovanými milníky vývoje Galaxie. Během existence plynového disku má posuvník logaritmické měřítko času od vzniku prvních pevných látek, aby bylo možné rozlišit vývoj prachu (do {planetesimalsKyr, number} tisíc let), planetesimál a planetárních embryí o hmotnosti Měsíce (do {embryosMyr, number} mil. let). Sněžná čára je zakreslena ve vzdálenosti {snowLineAu, number} au; odhady pro mladý disk sahají od méně než 2 do asi 4 au."
+        "body": "První pevné látky zkondenzovaly před {sunBirthGyr} miliardy let (podle stáří vápenato-hlinitých inkluzí, CAI). Pozorované disky přetrvávají asi {diskLifetimesMyr} milionů let, a tak zde obří planety dokončují růst během existence plynového disku s životností {gasMyr} milionů let, zatímco terestrické planety rostou až do doby před {modelStartGyr} miliardy let. V období před {modelStartGyr} až {clearDoneGyr} miliardy let se dráhy obrů interpolují z výchozích drah modelu z Nice ({jupiterStartAu}; {saturnStartAu}; {uranusStartAu} a {neptuneStartAu} au) na současné dráhy odvozené z měření. Pseudonáhodný vzorek planetesimál s pevným počátečním nastavením se přesouvá z disku {diskAu} au do Kuiperova pásu, rozptýleného disku, Oortova oblaku nebo ven ze soustavy. Dráhové elementy se interpolují plynule; nejde o numerickou integraci pohybu N těles. Před vznikem Slunce zobrazuje pohled na sluneční soustavu schematický molekulární oblak s datovanými milníky vývoje Galaxie. Během existence plynového disku má posuvník logaritmické měřítko času od vzniku prvních pevných látek, aby bylo možné rozlišit vývoj prachu (do {planetesimalsKyr} tisíc let), planetesimál a planetárních embryí o hmotnosti Měsíce (do {embryosMyr} mil. let). Sněžná čára je zakreslena ve vzdálenosti {snowLineAu} au; odhady pro mladý disk se pohybují kolem {snowLineEstimatesAu} au."
       },
       "galaxy": {
         "title": "Galaktická dráha Slunce",
-        "body": "Slunce obíhá ve vzdálenosti přibližně {sunRadiusKpc, number} kpc od středu Galaxie (podle měření GRAVITY). V modelu má oběžnou dobu {galacticYearMyr, number} milionů let a při pohledu od severního galaktického pólu se pohybuje po směru hodinových ručiček. Nyní je poblíž bodu svého radiálního kmitu nejbližšího ke středu. Rozdíl mezi nejmenší a největší vzdáleností od středu je asi {radialSwingKpc, number} kpc a perioda kmitání asi {radialMyr, number} milionů let. Slunce zároveň kmitá kolmo k rovině disku s amplitudou {verticalPc, number} pc a periodou asi {verticalMyr, number} milionů let. Nyní leží {heightPc, number} pc severně od roviny Galaxie a dále se od ní vzdaluje. Fáze těchto kmitů v dávné minulosti neznáme. Model stavby Galaxie vychází z měření: zahrnuje exponenciální tenký disk s délkovou škálou 2,6 kpc a výškovou škálou 300 pc a tlustý disk s odpovídajícími škálami 2,0 kpc a 900 pc. Hranatá výduť leží uvnitř příčky, která sahá {barHalfKpc, number} kpc od středu a svírá se spojnicí Slunce se středem Galaxie úhel {barDeg, number}°. Čtyři logaritmická ramena s úhlem vinutí {pitchDeg, number}° jsou v okolí Slunce umístěna podle paralax maserů. Model obsahuje také Místní rameno, prach na vnitřních okrajích ramen a zvlnění disku za vzdáleností {warpStartKpc, number} kpc podle pozorování cefeid. Koule hala vyznačuje poloměr R₂₀₀ ≈ 200 kpc. Podoba odvrácené strany disku je odhadnuta extrapolací."
+        "body": "Slunce obíhá ve vzdálenosti přibližně {sunRadiusKpc} kpc od středu Galaxie (podle měření GRAVITY). V modelu má oběžnou dobu {galacticYearMyr} milionů let a při pohledu od severního galaktického pólu se pohybuje po směru hodinových ručiček. Nyní je poblíž bodu svého radiálního kmitu nejbližšího ke středu. Rozdíl mezi nejmenší a největší vzdáleností od středu je asi {radialSwingKpc} kpc a perioda kmitání asi {radialMyr} milionů let. Slunce zároveň kmitá kolmo k rovině disku s amplitudou {verticalPc} pc a periodou asi {verticalMyr} milionů let. Nyní leží {heightPc} pc severně od roviny Galaxie a dále se od ní vzdaluje. Fáze těchto kmitů v dávné minulosti neznáme. Model stavby Galaxie vychází z měření: zahrnuje exponenciální tenký disk s délkovou škálou {thinLengthKpc} kpc a výškovou škálou {thinHeightPc} pc a tlustý disk s odpovídajícími škálami {thickLengthKpc} kpc a {thickHeightPc} pc. Hranatá výduť leží uvnitř příčky, která sahá {barHalfKpc} kpc od středu a svírá se spojnicí Slunce se středem Galaxie úhel {barDeg}°. Čtyři logaritmická ramena s úhlem vinutí {pitchDeg}° jsou v okolí Slunce umístěna podle paralax maserů. Model obsahuje také Místní rameno, prach na vnitřních okrajích ramen a zvlnění disku za vzdáleností {warpStartKpc} kpc podle pozorování cefeid. Koule hala vyznačuje poloměr R₂₀₀ ≈ {haloKpc} kpc. Podoba odvrácené strany disku je odhadnuta extrapolací."
       },
       "sky": {
         "title": "Obloha v pozadí",
-        "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než 8 miliardami let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně 100 000 let od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí. Nejbližší hvězdy se pohybují po přímočarých drahách vypočtených z paralax, vlastních pohybů a radiálních rychlostí z misí Gaia a Hipparcos, v intervalu ±300 000 let. Tento výpočet zachycuje i průlet Scholzovy hvězdy vnějším Oortovým oblakem."
+        "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než {thinDiskGyr} miliardami let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně {namedStarsYears} let od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí. Nejbližší hvězdy se pohybují po přímočarých drahách vypočtených z paralax, vlastních pohybů a radiálních rychlostí z misí Gaia a Hipparcos, v intervalu ±{neighbourYears} let. Tento výpočet zachycuje i průlet Scholzovy hvězdy vnějším Oortovým oblakem."
       },
       "swarms": {
         "title": "Pásy a oblaky na GPU",
-        "body": "Pás planetek, Jupiterovi trojáni, Kuiperův pás a Oortův oblak jsou soubory bodů, pro něž vrcholový shader v každém snímku řeší Keplerovu rovnici. Tisíce těles tak obíhají při stejném zrychlení času jako planety a každý soubor vyžaduje jediný vykreslovací příkaz. Pás planetek obsahuje Kirkwoodovy mezery; trojáni librují kolem bodů L4 a L5 a objevují se během odklízení těles. Kuiperův pás zahrnuje dynamicky chladnou klasickou populaci vzniklou na místě, dynamicky horkou klasickou populaci, plutina u 39,4 au a twotina u 47,7 au zachycená Neptunem do rezonancí. Za Kuiperovým útesem tento soubor bodů končí. Hustota Oortova oblaku klesá jako r⁻³·⁵ od vnitřní, plošší části po izotropní kulový obal ve vzdálenosti 100 000 au."
+        "body": "Pás planetek, Jupiterovi trojáni, Kuiperův pás a Oortův oblak jsou soubory bodů, pro něž vrcholový shader v každém snímku řeší Keplerovu rovnici. Tisíce těles tak obíhají při stejném zrychlení času jako planety a každý soubor vyžaduje jediný vykreslovací příkaz. Pás planetek obsahuje Kirkwoodovy mezery; trojáni librují kolem bodů L4 a L5 a objevují se během odklízení těles. Kuiperův pás zahrnuje dynamicky chladnou klasickou populaci vzniklou na místě, dynamicky horkou klasickou populaci, plutina u {plutinosAu} au a twotina u {twotinosAu} au zachycená Neptunem do rezonancí. Za Kuiperovým útesem tento soubor bodů končí. Hustota Oortova oblaku klesá jako r⁻³·⁵ od vnitřní, plošší části po izotropní kulový obal ve vzdálenosti {oortShellAu} au."
       },
       "globes": {
         "title": "Modely těles a prstence",
@@ -609,24 +609,24 @@
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda, Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Daleko venku kamera obíhá v supergalaktické rovině. V čase plochý ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, stáří {universeGyr} miliardy let) násobí každou nevázanou vzdálenost faktorem a(t); Andromeda sleduje radiální dráhu argumentu časování přes dnešních {andromedaMly} milionu světelných let a {andromedaKms} km/s; kupy si drží velikost a shromažďují členy jako a^1,5."
+        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda, Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Daleko venku kamera obíhá v supergalaktické rovině. V čase plochý ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, stáří {universeGyr} miliardy let) násobí každou nevázanou vzdálenost faktorem a(t); Andromeda sleduje radiální dráhu argumentu časování přes dnešních {andromedaMly} milionu světelných let a {andromedaKms} km/s; kupy si drží velikost a shromažďují členy jako a^{growthPower}."
       }
     }
   },
   "notes": {
-    "merger": "Asi před 10 miliardami let Mléčná dráha pohltila galaxii Gaia-Enceladus; z této epochy pochází tlustý disk. Atomy budoucího Slunce jsou zatím součástí mezihvězdného plynu.",
-    "thinDisk": "V tenkém disku vznikají hvězdy a nejpozději před přibližně 8 miliardami let je již přítomna příčka. Dřívější generace hvězd vytvářejí těžké prvky, které se později stanou součástí Slunce.",
+    "merger": "Asi před {mergerGyr} miliardami let Mléčná dráha pohltila galaxii Gaia-Enceladus; z této epochy pochází tlustý disk. Atomy budoucího Slunce jsou zatím součástí mezihvězdného plynu.",
+    "thinDisk": "V tenkém disku vznikají hvězdy a nejpozději před přibližně {thinDiskGyr} miliardami let je již přítomna příčka. Dřívější generace hvězd vytvářejí těžké prvky, které se později stanou součástí Slunce.",
     "ingredients": "Mezihvězdný plyn obohacený dřívějšími generacemi hvězd. Oblak, z něhož vznikne Slunce, se ještě nezhroutil.",
     "collapse": "Jádro molekulárního oblaku se hroutí za méně než milion let. Krátce žijící hliník-26 v meteoritech může ukazovat na blízkou hmotnou hvězdu.",
-    "dust": "První pevné látky před {sunBirthGyr, number} miliardy let. Prachová zrna se při pomalých srážkách spojují do částic o velikosti milimetrů až centimetrů.",
-    "planetesimals": "Během prvních {planetesimalsKyr, number} tisíc let se oblázky shlukují do kilometrových planetesimál. Jedním z dochovaných těles tohoto typu je Arrokoth.",
-    "gasDisk": "Do {embryosMyr, number} mil. let vznikají planetární embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led dost rychle, aby gravitačně zachytila okolní plyn: vznikají obří planety.",
+    "dust": "První pevné látky před {sunBirthGyr} miliardy let. Prachová zrna se při pomalých srážkách spojují do částic o velikosti milimetrů až centimetrů.",
+    "planetesimals": "Během prvních {planetesimalsKyr} tisíc let se oblázky shlukují do kilometrových planetesimál. Jedním z dochovaných těles tohoto typu je Arrokoth.",
+    "gasDisk": "Do {embryosMyr} mil. let vznikají planetární embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led dost rychle, aby gravitačně zachytila okolní plyn: vznikají obří planety.",
     "accretion": "Záření a hvězdný vítr mladého Slunce rozptylují plyn. Ve vnitřní části soustavy zbývá mnoho planetárních embryí velikosti Měsíce. Jupiter mění jejich dráhy, které se začínají křížit.",
     "belt": "Daleko od Jupiteru se planetární embrya při pomalých srážkách spojují v kamenné planety. Blízko Jupiteru jsou srážky rychlé a tělesa tříští: zůstává pás planetek.",
-    "moon": "Srážka Země s tělesem velikosti Marsu vyvrhne materiál, z něhož vznikne Měsíc. Odhady doby této události se pohybují přibližně mezi 4,5 a 4,35 miliardy let před současností.",
+    "moon": "Srážka Země s tělesem velikosti Marsu vyvrhne materiál, z něhož vznikne Měsíc. Odhady doby této události se pohybují přibližně v rozmezí {moonImpactGyr} miliardy let před současností.",
     "disk": "Výchozí stav modelu: obří planety na těsně sousedících drahách, za nimi hmotný disk ledových těles. Počáteční dráhy jsou zvoleny pro výukový model.",
     "clearing": "Model odklízení těles: rezonanční řetězec obrů se rozpadne, jejich vzájemné gravitační působení změní dráhy a Neptun rozptýlí tělesa disku.",
-    "bombardment": "Mnoho impaktních tavenin přivezených misemi Apollo má stáří asi {lhbGyr, number} miliardy let. To vedlo k představě pozdního těžkého bombardování. Vzorky ale mohou z velké části pocházet z jediné pánve, Imbria. Zda nastalo krátké období zvýšeného počtu dopadů, nebo jejich četnost dlouhodobě klesala, zůstává sporné.",
+    "bombardment": "Mnoho impaktních tavenin přivezených misemi Apollo má stáří asi {lhbGyr} miliardy let. To vedlo k představě pozdního těžkého bombardování. Vzorky ale mohou z velké části pocházet z jediné pánve, Imbria. Zda nastalo krátké období zvýšeného počtu dopadů, nebo jejich četnost dlouhodobě klesala, zůstává sporné.",
     "today": "Měřené dráhy. Polohy planet jsou spočteny pro dnešní datum."
   }
 }

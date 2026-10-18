@@ -4,6 +4,7 @@ import {
   NAMED,
   PLANET_RADIUS_KM,
   jplElements,
+  periodYears,
   type NamedId,
   type PlanetId,
 } from "@horizon/toolkit/bodies";
@@ -63,10 +64,18 @@ const auLightTime: Value = {
   note: "1 au over c, both exact",
 };
 
-/** A planet's radius (toolkit bodies), and its Nice-model start where the sketch moves it. */
+/** A planet's radius (toolkit bodies) and its period by Kepler's third law. */
 function planetFacts(id: PlanetId) {
-  const start = startElements(id);
-  const facts: { radius: Value; start?: Value } = {
+  const period = periodYears(jplElements(id, 0).a);
+  return {
+    period: {
+      value: period,
+      unit: "yr",
+      digits: wholeDigits(period),
+      source: "jplElements",
+      status: "derived",
+      note: "Kepler's third law from the J2000 semi-major axis",
+    },
     radius: {
       value: PLANET_RADIUS_KM[id],
       unit: "km",
@@ -74,17 +83,21 @@ function planetFacts(id: PlanetId) {
       source: "jplRadii",
       status: "verified",
     },
+  } satisfies Facts;
+}
+
+/** Where the Nice-model sketch starts a giant planet. */
+function startFact(id: PlanetId): Value {
+  const start = startElements(id);
+  if (!start) throw new Error(`${id} has no model start`);
+  return {
+    value: start.a,
+    unit: "au",
+    digits: 3,
+    source: "morbidelli2005",
+    status: "teaching-choice",
+    note: "Nice-model start, not a measurement",
   };
-  if (start)
-    facts.start = {
-      value: start.a,
-      unit: "au",
-      digits: start.a < 10 ? 2 : 3,
-      source: "morbidelli2005",
-      status: "teaching-choice",
-      note: "Nice-model start, not a measurement",
-    };
-  return facts;
 }
 
 export const SUN = {
@@ -156,11 +169,12 @@ export const PLANETS = {
     },
   },
   mars: planetFacts("mars"),
-  jupiter: planetFacts("jupiter"),
-  saturn: planetFacts("saturn"),
-  uranus: planetFacts("uranus"),
+  jupiter: { ...planetFacts("jupiter"), start: startFact("jupiter") },
+  saturn: { ...planetFacts("saturn"), start: startFact("saturn") },
+  uranus: { ...planetFacts("uranus"), start: startFact("uranus") },
   neptune: {
     ...planetFacts("neptune"),
+    start: startFact("neptune"),
     end: {
       value: jplElements("neptune", 0).a,
       unit: "au",
@@ -256,6 +270,14 @@ export const POPULATIONS = {
       source: "jplElements",
       status: "derived",
       note: "Neptune's 3:2 resonance by Kepler's third law",
+    },
+    twotinos: {
+      value: resonance("neptune", 2),
+      unit: "au",
+      digits: 3,
+      source: "jplElements",
+      status: "derived",
+      note: "Neptune's 2:1 resonance by Kepler's third law",
     },
   },
   oort: {

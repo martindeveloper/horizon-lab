@@ -150,7 +150,9 @@ export const LOCAL_TURNAROUND = {
  * How much of a cluster has gathered `yearsAgo` years ago: a teaching curve, a^1.5, close to
  * how a cluster's mass grows by infall in ΛCDM since z ≈ 2 (about a fifth 10 billion years ago).
  */
-export const clusterGathered = (yearsAgo: number) => clamp01(scaleAt(yearsAgo) ** 1.5);
+export const CLUSTER_GROWTH_POWER = 1.5;
+export const clusterGathered = (yearsAgo: number) =>
+  clamp01(scaleAt(yearsAgo) ** CLUSTER_GROWTH_POWER);
 
 /* ---------------------------------------------------------------------------------------
  * Directions. Galactic (l, b) → Galaxy-model axes; the supergalactic frame of de

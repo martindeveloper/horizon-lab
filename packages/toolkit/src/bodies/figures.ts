@@ -12,6 +12,7 @@
  */
 import { recordBy } from "../records";
 import { J2000_JD, julianDay, RAD_PER_DEG as RAD } from "../science";
+import { EARTH_EQUATORIAL_RADIUS_KM } from "./almanac";
 import {
   PLANET_RADIUS_KM,
   SUN_RADIUS_KM,
@@ -59,7 +60,11 @@ export const FIGURES: Record<BodyId, Figure> = {
   sun: sphere(SUN_RADIUS_KM),
   mercury: { meanKm: PLANET_RADIUS_KM.mercury, equatorialKm: 2440.53, polarKm: 2438.26 },
   venus: sphere(PLANET_RADIUS_KM.venus),
-  earth: { meanKm: PLANET_RADIUS_KM.earth, equatorialKm: 6378.1366, polarKm: 6356.7519 },
+  earth: {
+    meanKm: PLANET_RADIUS_KM.earth,
+    equatorialKm: EARTH_EQUATORIAL_RADIUS_KM,
+    polarKm: 6356.7519,
+  },
   mars: { meanKm: PLANET_RADIUS_KM.mars, equatorialKm: 3396.19, polarKm: 3376.2 },
   jupiter: { meanKm: PLANET_RADIUS_KM.jupiter, equatorialKm: 71_492, polarKm: 66_854 },
   saturn: { meanKm: PLANET_RADIUS_KM.saturn, equatorialKm: 60_268, polarKm: 54_364 },

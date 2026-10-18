@@ -11,6 +11,7 @@ import {
 } from "@horizon/toolkit/science";
 
 import {
+  PROSE_FIGURES,
   isLength,
   type Fact,
   type Live,
@@ -68,11 +69,17 @@ function shown(fact: Fact, v: number) {
  * Plain numbers in words a reader takes in: "6.5 billion", "4 million"; scientific from
  * 10¹² ("5 × 10¹⁶"). An exact value whose every digit counts stays whole.
  */
-function plain(t: Translate, d: DistanceSettings, values: number[], digits: number) {
+function plain(
+  t: Translate,
+  d: DistanceSettings,
+  values: number[],
+  digits: number,
+  fixed: boolean,
+) {
   const top = Math.max(...values.map(Math.abs));
   const whole = top > 0 && digits > Math.floor(Math.log10(top));
   const scale = whole || top < 1e6 || top >= 1e12 ? 1 : top >= 1e9 ? 1e9 : 1e6;
-  const text = values.map((v) => formatSignificant(v / scale, d.locale, digits)).join("–");
+  const text = values.map((v) => formatSignificant(v / scale, d.locale, digits, fixed)).join("–");
   return scale === 1 ? text : `${text} ${t(scale === 1e9 ? "names.billion" : "names.million")}`;
 }
 
@@ -108,8 +115,7 @@ function printed(
       significant: digits ?? Math.max(2, significantOf(value)),
     });
   }
-  const v = shown(fact, value);
-  return plain(t, d, [v], digits ?? significantOf(v));
+  return plain(t, d, [shown(fact, value)], digits ?? significantOf(value), digits !== undefined);
 }
 
 /** A published span, the unit once: "2.1–3.3 au", "1,300–2,000", "4–5" (billion years). */
@@ -122,7 +128,32 @@ export function span(t: Translate, d: DistanceSettings, fact: Ranged) {
       significant: fact.digits ?? Math.max(2, significantOf(low, high)),
     });
   const ends = [shown(fact, low), shown(fact, high)];
-  return plain(t, d, ends, fact.digits ?? significantOf(...ends));
+  return plain(t, d, ends, fact.digits ?? significantOf(low, high), fact.digits !== undefined);
+}
+
+/**
+ * A figure as prose quotes it: a number, or a span, in the unit the sentence names (`show`,
+ * lengths included), with the significant figures it is written with.
+ */
+export function quote(locale: string, fact: Fact) {
+  const ends = fact.value !== undefined ? [fact.value] : [...fact.range];
+  const digits = fact.digits ?? significantOf(...ends);
+  const fixed = fact.digits !== undefined;
+  return ends.map((v) => formatSignificant(shown(fact, v), locale, digits, fixed)).join("–");
+}
+
+const proseCache = new Map<string, Record<string, string>>();
+
+/** Every figure the notes, guide and technical notes quote, for `t()`, once per language. */
+export function proseArgs(locale: string) {
+  let args = proseCache.get(locale);
+  if (!args) {
+    args = Object.fromEntries(
+      Object.entries(PROSE_FIGURES).map(([name, fact]) => [name, quote(locale, fact)]),
+    );
+    proseCache.set(locale, args);
+  }
+  return args;
 }
 
 export function formatYearsAgo(t: Translate, f: Format, years: number) {
@@ -162,7 +193,7 @@ export function orbitFacts(
     {
       id: ids[0],
       label: t("facts.nearFar"),
-      value: `${formatAu(t, d, el.a * (1 - e), false)} – ${formatAu(t, d, el.a * (1 + e), false)}`,
+      value: formatDistanceRange(el.a * (1 - e), el.a * (1 + e), distanceFormat(t, d)),
     },
     { id: ids[1], label: t("facts.period"), value: formatPeriod(t, f, periodYears(el.a)) },
   ];

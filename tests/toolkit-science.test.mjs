@@ -28,7 +28,19 @@ import {
   LIGHT_YEAR_KM,
   J2000_JD,
   julianDay,
+  DELTA_T_SECONDS,
+  JULIAN_CENTURY_DAYS,
+  eclipticToEquatorial,
+  hourAngle,
+  julianEphemerisDay,
+  precess,
+  risingHourAngle,
+  siderealTime,
+  toHorizontal,
 } from "@horizon/toolkit/science";
+
+const near = (actual, expected, tolerance) =>
+  assert.ok(Math.abs(actual - expected) < tolerance, `${actual} vs ${expected}`);
 
 test("scientific scaling handles boundaries, negative durations and nonfinite inputs", () => {
   assert.deepEqual(durationQuantity(1), { value: 1, unit: "s", digits: 2 });
@@ -91,6 +103,8 @@ test("literature values keep their significant figures through a unit change", (
   assert.equal(formatSignificant(5.4e16, "en", 1), "5 × 10¹⁶");
   assert.equal(formatSignificant(1e17, "en", 1), "10¹⁷");
   assert.equal(formatSignificant(149_597_870_700, "en", 12), "149,597,870,700");
+  assert.equal(formatSignificant(2, "en", 2), "2");
+  assert.equal(formatSignificant(2, "cs", 2, true), "2,0");
   assert.equal(formatSignificant(3.79e9, "en", 2), "3.8 × 10⁹");
   const symbols = { au: "au", ly: "ly", pc: "pc" };
   const options = (unit) => ({ unit, locale: "en", symbols, millionWord: "million" });
@@ -119,6 +133,44 @@ test("literature values keep their significant figures through a unit change", (
 test("Julian dates match the J2000 epoch", () => {
   assert.equal(julianDay(new Date("2000-01-01T12:00:00Z")), J2000_JD);
   assert.equal(julianDay(new Date("1970-01-01T00:00:00Z")), 2_440_587.5);
+  const date = new Date("2026-10-18T18:00:00Z");
+  near(julianEphemerisDay(date) - julianDay(date), DELTA_T_SECONDS / 86_400, 1e-9);
+  assert.equal(JULIAN_CENTURY_DAYS, 36_525);
+});
+
+test("sky coordinates: angles wrap, poles and the equator behave, conversions invert", () => {
+  assert.equal(RAD_PER_DEG, Math.PI / 180);
+  // Sidereal time stays in 0…360 at any instant and longitude.
+  for (const iso of ["1900-01-01T00:00:00Z", "2000-01-01T12:00:00Z", "2100-12-31T23:59:59Z"])
+    for (const longitude of [-180, -14.78, 0, 14.78, 180]) {
+      const lst = siderealTime(new Date(iso), longitude);
+      assert.ok(lst >= 0 && lst < 360, `${iso} ${longitude}: ${lst}`);
+    }
+  // Hour angle: −180…180, negative before the meridian.
+  assert.equal(hourAngle(10, 30), -20);
+  assert.equal(hourAngle(350, 10), -20);
+  assert.equal(hourAngle(10, 350), 20);
+  // The celestial pole stands at the latitude, due north; the equator crosses the meridian at 90° − φ.
+  const pole = toHorizontal(0, 90, 123, 49.9);
+  near(pole.altitude, 49.9, 1e-9);
+  assert.ok(Math.abs(((pole.azimuth + 180) % 360) - 180) < 1e-6);
+  const meridian = toHorizontal(40, 0, 40, 49.9);
+  near(meridian.altitude, 40.1, 1e-9);
+  near(meridian.azimuth, 180, 1e-9);
+  // The ecliptic north pole sits at RA 270°, Dec 90° − ε; the equinox stays put.
+  const eclipticPole = eclipticToEquatorial(0, 90, 23.44);
+  near(eclipticPole.ra, -90, 1e-9);
+  near(eclipticPole.dec, 90 - 23.44, 1e-9);
+  near(eclipticToEquatorial(0, 0, 23.44).ra, 0, 1e-12);
+  // At J2000 precession is the identity.
+  const still = precess(101.287, -16.716, new Date("2000-01-01T12:00:00Z"));
+  near(still.ra, 101.287, 1e-6);
+  near(still.dec, -16.716, 1e-6);
+  // Rising: a quarter turn on the equator; the horizon offset narrows the arc.
+  near(risingHourAngle(0, 0), 90, 1e-9);
+  assert.ok(risingHourAngle(0, 49.9, 10) < 90);
+  assert.equal(risingHourAngle(89, 49.9), 180);
+  assert.equal(risingHourAngle(-89, 49.9), 0);
 });
 
 test("sky angles, resonances and Hubble's law compute from the shared laws", () => {

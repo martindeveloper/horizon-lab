@@ -21,7 +21,7 @@ the one degree-to-radian factor; do not retype it.
 ## Units and measures (`units.ts`, `measure.ts`)
 
 `UNITS` defines lengths (m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (s … Gyr,
-Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), speeds (m/s, km/s,
+Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
 c) and K, each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 
@@ -81,9 +81,21 @@ argument, so a lab can print its own formula and compute with these.
 ## Time (`time.ts`)
 
 `julianDay(date)` gives the Julian Date of an instant and `J2000_JD` the
-J2000.0 epoch (2 451 545.0), so `julianDay(date) − J2000_JD` is days from J2000.
-Dates are taken as UTC; the ~69 s TT − UTC offset is below what the
-simulations resolve.
+J2000.0 epoch (2 451 545.0), so `julianDay(date) − J2000_JD` is days from J2000
+(`JULIAN_CENTURY_DAYS` = 36 525 per century). Dates are taken as UTC; the ~69 s
+TT − UTC offset is below what most simulations resolve. Series in TT (the Sun
+and the Moon) take `julianEphemerisDay(date)`, which adds `DELTA_T_SECONDS` (69).
+
+## Sky coordinates (`sky.ts`)
+
+Positional astronomy for an observer on Earth, after Meeus (Astronomical
+Algorithms, 2nd ed.), in degrees with azimuth from north through east:
+`siderealTime(date, longitude)` (local mean, eq. 12.4), `precess(ra, dec, date)`
+from J2000 (ch. 21), `eclipticToEquatorial(λ, β, ε)`, `toHorizontal(ra, dec, lst,
+latitude)`, `hourAngle(lst, ra)` (−180…180, negative while rising) and
+`risingHourAngle(dec, latitude, horizon)` (half the arc above an altitude; 0 never
+rises, 180 never sets). No nutation, aberration or refraction. The Sun's and the
+Moon's own positions are in `@horizon/toolkit/bodies` (almanac).
 
 ## Display scales (`quantities.ts`)
 

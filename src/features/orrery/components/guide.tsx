@@ -1,18 +1,18 @@
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { Action, IconButton, PanelHeader, Tooltip, cn } from "@horizon/toolkit/ui";
 
-import { ORRERY_COPY } from "../lib/model/figures";
 import { TOUR } from "../lib/model/tour";
 import { useOrrery } from "../lib/store";
-import { formatYearsAgo } from "./format";
+import { formatYearsAgo, proseArgs } from "./format";
 
 /** The tour card: one concept per step, with step navigation. The scene flies the camera. */
 export function GuideCard() {
   const t = useTranslations("orrery");
   const f = useFormatter();
+  const figures = proseArgs(useLocale());
   const index = useOrrery((s) => s.guideStep);
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const playing = useOrrery((s) => s.playing);
@@ -37,7 +37,7 @@ export function GuideCard() {
             total: TOUR.length,
             time: formatYearsAgo(t, f, yearsAgo),
           })}
-          title={t(`tour.steps.${step.id}.title`, ORRERY_COPY)}
+          title={t(`tour.steps.${step.id}.title`, figures)}
           onClose={() => api().endGuide()}
           closeLabel={t("tour.exit")}
         />
@@ -48,9 +48,9 @@ export function GuideCard() {
           aria-atomic="true"
         >
           <div key={step.id} className="anim-fade">
-            <p className="sr-only">{t(`tour.steps.${step.id}.title`, ORRERY_COPY)}</p>
+            <p className="sr-only">{t(`tour.steps.${step.id}.title`, figures)}</p>
             <p className="text-sm leading-relaxed text-muted">
-              {t(`tour.steps.${step.id}.body`, ORRERY_COPY)}
+              {t(`tour.steps.${step.id}.body`, figures)}
             </p>
             {step.eq ? (
               <p className="mt-2 font-mono text-xs tracking-wide text-fg tabular-nums">

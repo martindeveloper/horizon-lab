@@ -8,8 +8,18 @@ import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
 import { UNITS } from "@horizon/toolkit/science";
 
 import { ledger } from "../scripts/lib/catalogue-ledger.mjs";
+import {
+  PLANET_NOTES,
+  TRACER_NOTES,
+  cardSpecs,
+} from "../src/features/orrery/components/card-specs.ts";
 import { cardFor, NEIGHBOUR_IDS } from "../src/features/orrery/components/cards.tsx";
-import { SOURCES, catalogueFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { proseArgs } from "../src/features/orrery/components/format.ts";
+import {
+  PROSE_FIGURES,
+  SOURCES,
+  catalogueFacts,
+} from "../src/features/orrery/lib/model/catalogue/index.ts";
 
 const LOCALES = ["en", "cs"];
 const messages = Object.fromEntries(
@@ -152,16 +162,20 @@ test("large plain figures read in words, huge ones in powers of ten", () => {
       assert.equal(card.facts.find((f) => f.id === "mass").value, "About 10¹⁷ Suns");
 });
 
-/** Card copy migrated to the catalogue: its numbers are arguments, never typed digits. */
-const MIGRATED = ["cards", "facts"];
+/** Copy whose numbers are catalogue arguments, never typed digits. */
+const MIGRATED = ["cards", "facts", "notes", "tour", "technicalDetails"];
 /** Digits that are not measurements: years, catalogue designations, a resonance ratio, the unit's name. */
 const NOT_FIGURES = [
   /\b1 au\b/g,
+  /\b\d{1,2}\.?–\d{1,2}\.? \p{L}+ (?:19|20)\d\d\b/gu,
   /\b\d{1,2}\.? \p{L}+ (?:1[5-9]|20)\d\d\b/gu,
   /\b(?:1[5-9]|20)\d\d(?:s)?\b/g,
   /\b\d{2}\. letech/g,
   /\b(?:NGC|Abell|M) ?\d+/g,
-  /\b3:2\b/g,
+  /\b\d:\d\b/g,
+  /\bJ2000\b/g,
+  /\bL[45]\b/g,
+  /\p{L}+-\d+\b/gu,
 ];
 
 function leaves(value, prefix = "") {
@@ -178,6 +192,75 @@ test("card copy takes its figures from the catalogue, not typed digits", () => {
         const rest = NOT_FIGURES.reduce((s, pattern) => s.replace(pattern, ""), text);
         assert.doesNotMatch(rest, /\d/, `${locale}:${key}: ${text}`);
       }
+});
+
+const placeholders = (text) =>
+  [...new Set([...text.matchAll(/\{(\w+)[,}]/g)].map(([, name]) => name))].sort();
+const message = (locale, key) =>
+  key.split(".").reduce((node, part) => node?.[part], messages[locale]);
+const names = (args = {}) => Object.keys(args).sort();
+
+test("card definitions give every message exactly the figures it asks for", () => {
+  for (const locale of LOCALES) {
+    for (const { body, caution, spec } of cardSpecs()) {
+      for (const row of spec.rows)
+        if (row.text)
+          assert.deepEqual(
+            placeholders(message(locale, row.text)),
+            names(row.args),
+            `${locale}:${row.text}`,
+          );
+      for (const [key, args] of [
+        [body, spec.body],
+        [caution, spec.caution],
+      ]) {
+        const text = message(locale, key);
+        if (typeof text === "string")
+          assert.deepEqual(placeholders(text), names(args), `${locale}:${key}`);
+      }
+    }
+    for (const [id, text] of Object.entries(messages[locale].cards.planets))
+      if (typeof text === "string" && !id.startsWith("planetCaution"))
+        assert.deepEqual(
+          placeholders(text),
+          names(PLANET_NOTES[id]),
+          `${locale}:cards.planets.${id}`,
+        );
+    assert.deepEqual(placeholders(messages[locale].cards.tracer.cold), names(TRACER_NOTES.cold));
+    assert.deepEqual(
+      placeholders(messages[locale].cards.tracer.caution),
+      names(TRACER_NOTES.caution),
+    );
+  }
+});
+
+test("notes, guide and technical notes quote catalogue figures in both languages", () => {
+  for (const locale of LOCALES) {
+    const t = createTranslator({
+      locale,
+      messages: { orrery: messages[locale] },
+      namespace: "orrery",
+      onError(error) {
+        throw error;
+      },
+    });
+    /* Placeholders the components fill at run time, not figures. */
+    const runtime = { step: "1", total: "9", time: "today", equation: "P² = a³" };
+    const args = { ...proseArgs(locale), ...runtime };
+    for (const [key, text] of leaves(messages[locale]))
+      if (/^(notes|tour|technicalDetails)\./.test(key)) {
+        for (const name of placeholders(text))
+          assert.ok(
+            name in PROSE_FIGURES || name in runtime,
+            `${locale}:${key}: {${name}} is not a catalogue figure`,
+          );
+        const printed = t(key, args);
+        assert.doesNotMatch(printed, /[{}]|NaN|undefined/, `${locale}:${key}`);
+      }
+  }
+  assert.equal(proseArgs("en").sunRadiusKpc, "8.28");
+  assert.equal(proseArgs("cs").sunBirthGyr, "4,567");
+  assert.equal(proseArgs("en").namedStarsYears, "100,000");
 });
 
 test("docs/science-sources.md lists the catalogue and its sources", async () => {

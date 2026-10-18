@@ -72,7 +72,13 @@ const significantFormatters = new Map<string, Intl.NumberFormat>();
  * "18,000 pc" rather than "18,396 pc". Scientific from 10 million as in `readout`, with a
  * bare power of ten for a one-figure 1 ("10¹⁷"), unless every whole digit is significant.
  */
-export function formatSignificant(value: number, locale: string, significant: number) {
+export function formatSignificant(
+  value: number,
+  locale: string,
+  significant: number,
+  /** Keep trailing zeros that count ("2.0"): the figure was quoted to this precision. */
+  fixed = false,
+) {
   finite(value);
   const rounded = Number(value.toPrecision(significant));
   const abs = Math.abs(rounded);
@@ -82,10 +88,13 @@ export function formatSignificant(value: number, locale: string, significant: nu
     const mantissa = numberFormat(locale, significant - 1, true).format(rounded / 10 ** exponent);
     return mantissa === "1" ? powerOfTen(exponent) : `${mantissa} × ${powerOfTen(exponent)}`;
   }
-  const key = `${locale}|${significant}`;
+  const key = `${locale}|${significant}|${fixed}`;
   let format = significantFormatters.get(key);
   if (!format) {
-    format = new Intl.NumberFormat(locale, { maximumSignificantDigits: significant });
+    format = new Intl.NumberFormat(locale, {
+      maximumSignificantDigits: significant,
+      ...(fixed ? { minimumSignificantDigits: significant } : {}),
+    });
     significantFormatters.set(key, format);
   }
   return format.format(rounded);

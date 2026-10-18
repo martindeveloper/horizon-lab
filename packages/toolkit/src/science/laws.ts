@@ -160,7 +160,7 @@ export const hubbleLaw = defineEquation({
   output: "d",
   variables: {
     v: { symbol: "v", latex: "v", unit: "km/s" },
-    H0: { symbol: "H₀", latex: "H_0" },
+    H0: { symbol: "H₀", latex: "H_0", unit: "km/s/Mpc" },
     d: { symbol: "d", latex: "d", unit: "Mpc" },
   },
   compute: ({ v, H0 }) => v / H0,

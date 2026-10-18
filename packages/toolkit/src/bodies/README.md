@@ -42,6 +42,27 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
   precession periods; `meanRates(moon)` and `meanLongitude(id, date)`.
   Positions from them are left to the lab for now.
 
+## Sun and Moon in the sky (`almanac.ts`)
+
+The low-precision series a sky view needs, about 0.01°, from the Julian
+Ephemeris Day (`julianEphemerisDay` in the science module):
+
+- `solarEcliptic(jde)`: the Sun's apparent longitude, distance (au) and the mean
+  obliquity of the date (Astronomical Almanac, good 1950–2050).
+- `moonEcliptic(jde)`: the Moon's longitude, latitude and distance (km) from
+  Meeus' tables 47.A/B, truncated to their largest terms.
+- `moonPhase(jde)`: illuminated fraction and waxing (Meeus ch. 48);
+  `moonAxis(jde)`: position angle of its axis east of celestial north (ch. 53,
+  within 0.2°).
+- `EARTH_EQUATORIAL_RADIUS_KM` (6378.1366, IAU 2015; Meeus' 6378.14 differs by
+  under 1e-6° in lunar parallax) is the `FIGURES.earth` value, and
+  `LUNAR_EQUATOR_INCLINATION_DEG` (1.54242°) is the Moon's `cassini` tilt.
+
+The module imports only the science entry, never the planet tables, so a page
+that draws the sky (Horizon's header) does not load the orrery's catalogue. The
+Meeus-specific coefficients (the series, the Almanac obliquity, the Moon's
+mean distance 385 000.56 km) stay in their functions.
+
 ## Figures, spin and rings (`figures.ts`, `rings.ts`)
 
 - `FIGURES`: mean, equatorial and polar radii (IAU WGCCRE 2015); `flattening(id)`.
@@ -92,5 +113,8 @@ painters and their mapped features; `index.ts` registers them by body ID.
 
 The orrery (`src/features/orrery`) keeps the three.js adapters
 (`lib/coordinates.ts`, `lib/moons.ts`), materials, shaders and map loading.
-`tests/bodies.test.mjs`, `tests/astronomy.test.mjs` and `tests/maps.test.mjs`
-check these values against IAU, JPL Horizons and published examples.
+The shell's header sky and the catalogue hero (`src/components/shell/stars.ts`)
+keep the observer, the star list and the drawn bearings, built on the almanac.
+`tests/bodies.test.mjs`, `tests/astronomy.test.mjs`, `tests/sky.test.mjs` and
+`tests/maps.test.mjs` check these values against IAU, JPL Horizons and published
+examples.

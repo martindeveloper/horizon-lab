@@ -16,6 +16,7 @@
  */
 import { wrap } from "../math/index";
 import { J2000_JD, julianDay } from "../science";
+import { LUNAR_EQUATOR_INCLINATION_DEG } from "./almanac";
 import { DAYS_PER_JULIAN_YEAR, type PlanetId } from "./ephemeris";
 
 export type MoonId =
@@ -72,7 +73,7 @@ export const MOONS: readonly Moon[] = [
     nodeYears: -18.6,
     plane: "ecliptic",
     /** Cassini's third law: the spin axis leans 1.54° from the ecliptic pole, opposite the orbit's. */
-    cassini: 1.5424,
+    cassini: LUNAR_EQUATOR_INCLINATION_DEG,
   },
   {
     id: "io",

@@ -20,9 +20,10 @@ import {
   MOON_IMPACT_AFTER,
   PLANETESIMALS_AFTER,
   SUN_BIRTH,
+  OLDEST,
 } from "./parameters";
 
-export const OLDEST = 10e9;
+export { OLDEST };
 /** Terrestrial planets finish accreting ~30–100 Myr after the first solids. */
 export const TERRESTRIAL_DONE = MODEL_START;
 
