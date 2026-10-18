@@ -2,7 +2,14 @@
 import { Vector3 } from "three";
 
 import type { Labels, SceneKit } from "./kit";
-import { bodyLabelBounds, bodyVisible, labelDepthMask, type LabelBody } from "./label-geometry";
+import {
+  bodyLabelBounds,
+  bodyVisible,
+  labelDepthMask,
+  type LabelBody,
+  type LabelBounds,
+  type LabelTarget,
+} from "./label-geometry";
 
 export type LabelStyle = {
   strong?: boolean;
@@ -21,6 +28,12 @@ export type PlaceLabel = (
   on: boolean | number,
   style?: LabelStyle,
 ) => void;
+
+/** Labels fainter than this do not take taps. */
+const READABLE = 0.3;
+
+/** A drawn label as a tap target: `clear` when no globe covers any of its text. */
+export type LabelHit = LabelTarget & { clear: boolean };
 
 export const STRONG: LabelStyle = { strong: true };
 export const BELOW: LabelStyle = { below: true };
@@ -43,12 +56,16 @@ export function createLabels(
      and lets go only when the text gets much shorter (another body, another unit). */
   const held = new WeakMap<HTMLSpanElement, number>();
   const projected = new Vector3();
-  const hide = (el: HTMLSpanElement) => {
+  /* Where each shown label sits on screen, for taps. */
+  const targets = new Map<string, { rect: LabelBounds; alpha: number; clear: boolean }>();
+  const hide = (key: string, el: HTMLSpanElement) => {
+    targets.delete(key);
     if (el.style.display !== "none") el.style.display = "none";
   };
   scope.defer(() => {
     for (const el of spans.values()) el.remove();
     spans.clear();
+    targets.clear();
   });
 
   let bounds: ReturnType<typeof bodyLabelBounds>[] = [];
@@ -83,7 +100,7 @@ export function createLabels(
       else delete el.dataset.kind;
     }
     const alpha = typeof on === "number" ? on : on ? 1 : 0;
-    if (alpha < 0.02) return hide(el);
+    if (alpha < 0.02) return hide(key, el);
     const step = Math.round(alpha * 32);
     if (alphas.get(el) !== step) {
       el.style.opacity = step >= 32 ? "" : String(step / 32);
@@ -91,13 +108,13 @@ export function createLabels(
     }
     point.set(x, y, z);
     projected.copy(point).applyMatrix4(camera.matrixWorldInverse);
-    if (projected.z >= 0) return hide(el);
+    if (projected.z >= 0) return hide(key, el);
     projected.copy(point).project(camera);
-    if (projected.z > 1) return hide(el);
+    if (projected.z > 1) return hide(key, el);
     const { width, height } = viewport;
     const sx = (projected.x * 0.5 + 0.5) * width;
     let sy = (-projected.y * 0.5 + 0.5) * height;
-    if (sx < 4 || sy < 56 || sx > width - 4 || sy > height - 150) return hide(el);
+    if (sx < 4 || sy < 56 || sx > width - 4 || sy > height - 150) return hide(key, el);
     if (el.style.display !== "block") el.style.display = "block";
     const ownIndex = bodies.findIndex((body) => body.key === key);
     const own = bounds[ownIndex];
@@ -127,10 +144,11 @@ export function createLabels(
               : 0);
     const rect = { left: sx - w / 2, right: sx + w / 2, top, bottom: top + h };
     if (rect.left < 4 || rect.right > width - 4 || rect.top < 56 || rect.bottom > height - 150)
-      return hide(el);
+      return hide(key, el);
     // DOM labels cannot share WebGL's depth buffer. Mask only the covered pixels,
     // at the anchor's depth, rather than hiding the label when its anchor is covered.
     const mask = labelDepthMask(rect, point, key, bodies, bounds, camera, width, height);
+    targets.set(key, { rect, alpha, clear: mask === "none" });
     if (masks.get(el) !== mask) {
       el.style.maskImage = mask;
       masks.set(el, mask);
@@ -159,6 +177,13 @@ export function createLabels(
       );
       for (const args of pending.values()) draw(...args);
       pending.clear();
+    },
+    /** Labels readable enough to tap, in viewport px, of the keys `accept` takes. */
+    hits: (accept: (key: string) => boolean): LabelHit[] => {
+      const out: LabelHit[] = [];
+      for (const [key, { rect, alpha, clear }] of targets)
+        if (alpha >= READABLE && accept(key)) out.push({ key, rect, clear });
+      return out;
     },
     /** Hides every label in `keys`. */
     hideAll: (keys: readonly string[]) => {

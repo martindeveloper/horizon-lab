@@ -6,6 +6,7 @@ import { Group, Mesh, PerspectiveCamera, Vector3 } from "three";
 import {
   bodyLabelBounds,
   bodyVisible,
+  labelAt,
   labelDepthMask,
   overlapsBody,
 } from "../src/features/orrery/lib/scene/label-geometry.ts";
@@ -69,4 +70,34 @@ test("projected bounds provide clearance for the whole label and grow with rende
   mesh.position.z = 20;
   mesh.updateMatrixWorld();
   assert.equal(bodyLabelBounds(mesh, camera, 800, 800), null);
+});
+
+test("label taps land on the name, reach a fingertip around small ones and prefer the nearest", () => {
+  const rect = (left, top, width = 40, height = 12) => ({
+    left,
+    right: left + width,
+    top,
+    bottom: top + height,
+  });
+  const mars = { key: "mars", rect: rect(100, 100) };
+  const ceres = { key: "ceres", rect: rect(130, 108) };
+  // Squarely on the text, or a hair off it with the padding; a miss is a miss.
+  assert.equal(labelAt([mars], 120, 106), "mars");
+  assert.equal(labelAt([mars], 120, 98), null);
+  assert.equal(labelAt([mars], 120, 98, 0, 2), "mars");
+  assert.equal(labelAt([mars], 120, 80), null);
+  // A 12 px tall name still takes a 44 px fingertip, centred on it, and no more.
+  assert.equal(labelAt([mars], 120, 106 - 21, 44), "mars", "top of a 44 px target");
+  assert.equal(labelAt([mars], 120, 106 + 21, 44), "mars", "bottom of a 44 px target");
+  assert.equal(labelAt([mars], 120, 106 - 23, 44), null);
+  // Wide names keep their width; the reach only grows the short side.
+  assert.equal(labelAt([mars], 95, 106, 44), null);
+  assert.equal(labelAt([mars], 95, 106, 44, 6), "mars");
+  // Overlapping names: the one under the pointer, then the one nearest it.
+  assert.equal(labelAt([mars, ceres], 140, 111), "ceres", "inside both, nearer centre");
+  assert.equal(labelAt([mars, ceres], 110, 104), "mars");
+  assert.equal(labelAt([ceres, mars], 160, 115), "ceres", "inside only ceres");
+  assert.equal(labelAt([mars, ceres], 138, 124, 44), "ceres", "below both, nearer ceres");
+  assert.equal(labelAt([mars, ceres], 132, 96, 44), "mars", "above both, nearer mars");
+  assert.equal(labelAt([], 0, 0, 44), null);
 });

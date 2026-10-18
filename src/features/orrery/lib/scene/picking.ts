@@ -1,4 +1,4 @@
-/** Taps on the canvas select what is under them; a second tap on a body flies in. */
+/** Taps on the canvas or a name select what is under them; a second tap on a body flies in. */
 import { Raycaster, Vector2, type Object3D } from "three";
 
 import { planetElements } from "../model/elements";
@@ -6,10 +6,14 @@ import { migrationProgress } from "../model/timeline";
 import { TRACERS, tracerElements } from "../model/tracers";
 import { hasSurface, type Selection, type useOrrery } from "../store";
 import type { SceneKit } from "./kit";
+import { labelAt } from "./label-geometry";
+import type { LabelHit } from "./labels";
 import { GALAXY_LAYER } from "./lod";
 
 /** A second tap on the same body within this window flies in for a close-up. */
 const DOUBLE_TAP_MS = 380;
+/** A fingertip: near misses on touch still reach a name this close. */
+const FINGER_PX = 44;
 
 export function createPicking(
   { scope, camera }: SceneKit,
@@ -20,6 +24,9 @@ export function createPicking(
     /** Taps are ignored while the guide or a close-up holds the camera. */
     blocked: () => boolean;
     distance: () => number;
+    /** Names readable enough to tap, and what each opens. */
+    labels: () => LabelHit[];
+    labelPick: (key: string) => Selection | undefined;
   },
 ) {
   const raycaster = new Raycaster();
@@ -33,6 +40,30 @@ export function createPicking(
   const shown = (object: Object3D | null): boolean =>
     !object || (object.visible && shown(object.parent));
 
+  /* Names sit over the scene: one tapped squarely wins; a near miss only where nothing is hit. */
+  const under = (event: PointerEvent): { pick: unknown; instance?: number | undefined } | null => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const labels = options.labels();
+    const squarely = labelAt(
+      labels.filter((label) => label.clear),
+      x,
+      y,
+      0,
+      2,
+    );
+    if (squarely) return { pick: options.labelPick(squarely) };
+    pointer.set((x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1);
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster
+      .intersectObjects(options.pickables, false)
+      .find((candidate) => shown(candidate.object));
+    if (hit) return { pick: hit.object.userData.pick, instance: hit.instanceId };
+    const near = labelAt(labels, x, y, event.pointerType === "mouse" ? 0 : FINGER_PX, 4);
+    return near ? { pick: options.labelPick(near) } : null;
+  };
+
   const onDown = (event: PointerEvent) => {
     downX = event.clientX;
     downY = event.clientY;
@@ -42,26 +73,17 @@ export function createPicking(
     if (options.blocked()) return;
     if (Math.hypot(event.clientX - downX, event.clientY - downY) > 6) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    const rect = canvas.getBoundingClientRect();
-    pointer.set(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1,
-    );
-    raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster
-      .intersectObjects(options.pickables, false)
-      .filter((hit) => shown(hit.object));
-    const hit = hits[0];
     const api = store.getState();
-    if (!hit) {
+    const target = under(event);
+    if (!target) {
       api.select(null);
       return;
     }
-    const pick = hit.object.userData.pick;
+    const { pick, instance } = target;
     if (!isSelection(pick)) return;
     const distance = options.distance();
     if (pick.kind === "tracer") {
-      const index = hit.instanceId ?? -1;
+      const index = instance ?? -1;
       const tr = TRACERS[index];
       if (!tr) return;
       const el = tracerElements(tr, migrationProgress(api.yearsAgo), 0);

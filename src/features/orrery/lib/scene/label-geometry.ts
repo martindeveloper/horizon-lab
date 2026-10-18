@@ -119,3 +119,32 @@ export function labelDepthMask(
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><path fill="white" d="${path}"/></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
+
+export type LabelTarget = { key: string; rect: LabelBounds };
+
+/** The label at (x, y): each rect grows by `pad` and to at least `reach` px a side (a finger),
+ * and of the labels it falls in, the one whose text is nearest wins.
+ */
+export function labelAt(targets: readonly LabelTarget[], x: number, y: number, reach = 0, pad = 0) {
+  let best: string | null = null;
+  let bestGap = Infinity;
+  let bestOff = Infinity;
+  for (const { key, rect } of targets) {
+    const cx = (rect.left + rect.right) / 2;
+    const cy = (rect.top + rect.bottom) / 2;
+    const halfW = Math.max((rect.right - rect.left) / 2 + pad, reach / 2);
+    const halfH = Math.max((rect.bottom - rect.top) / 2 + pad, reach / 2);
+    if (Math.abs(x - cx) > halfW || Math.abs(y - cy) > halfH) continue;
+    const gap = Math.hypot(
+      Math.max(rect.left - x, 0, x - rect.right),
+      Math.max(rect.top - y, 0, y - rect.bottom),
+    );
+    const off = Math.hypot(x - cx, y - cy);
+    if (gap < bestGap || (gap === bestGap && off < bestOff)) {
+      best = key;
+      bestGap = gap;
+      bestOff = off;
+    }
+  }
+  return best;
+}

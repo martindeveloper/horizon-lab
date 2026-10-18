@@ -312,8 +312,12 @@ export function createCosmosLayer(
   };
   const position = (object: Object3D, p: Vec) => object.position.set(p[0], p[1], p[2]);
 
+  const labelPicks = new Map<string, Selection>(marks.map((mark) => [mark.key, mark.pick]));
+
   return {
     pickables: [...spots.values()],
+    /** What a tap on a label opens. */
+    labelPick: (key: string) => labelPicks.get(key),
     get visible() {
       return root.visible;
     },

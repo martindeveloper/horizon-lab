@@ -9,6 +9,7 @@ import {
   NEIGHBOUR_WINDOW,
   nearestNeighbour,
   neighbourPosition,
+  type NeighbourId,
 } from "../model/neighbours";
 import type { Selection } from "../store";
 import { ownedLine } from "./geometry";
@@ -51,9 +52,16 @@ export function createNeighboursLayer(
   const vec = new Vector3();
   const era = lod.fader();
   const names = lod.fader();
+  /* The ring's label names the nearest star of the moment. */
+  let ringStar: NeighbourId = "proxima";
 
   return {
     pickables: [ring, ...stars.map((n) => n.mesh)],
+    /** What a tap on a label opens. */
+    labelPick: (key: string): Selection | undefined => {
+      const id = key === "proximaRing" ? ringStar : NEIGHBOURS.find((n) => n.id === key)?.id;
+      return id && { kind: "star", id };
+    },
     /** `azimuth` turns the ring's label toward the camera. */
     update({ show, yearsAgo, dist }: Frame, azimuth: number) {
       const nearby = era.to(yearsAgo < NEIGHBOUR_WINDOW);
@@ -68,6 +76,7 @@ export function createNeighboursLayer(
         ? `${labels()[nearest.star.id] ?? nearest.star.id} · ${distanceText(nearest.ly * LIGHT_YEAR_AU, true)}`
         : undefined;
       const ringR = nearest ? nearest.ly * LIGHT_YEAR_AU : PROXIMA_AU;
+      if (nearest) ringStar = nearest.star.id;
       place(
         "proximaRing",
         -Math.sin(azimuth) * ringR,

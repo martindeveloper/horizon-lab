@@ -41,7 +41,7 @@ import { NEIGHBOURS } from "../model/neighbours";
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay, isPresentEra, migrationProgress, sunExists } from "../model/timeline";
 import { driftYearsPerSecond, viewById, worldDistance, type Realm } from "../model/views";
-import { dropsSelection, hasSurface, useOrrery, type OrreryStore } from "../store";
+import { dropsSelection, hasSurface, useOrrery, type OrreryStore, type Selection } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCloseUpController, type BodySelection } from "./close-up-controller";
 import { createCosmosLayer } from "./cosmos-layer";
@@ -157,7 +157,7 @@ export function createOrreryEngine(
       closeUp: () => closeUp.current,
     });
     const { pose } = rig;
-    const { place, hideAll, setBodies, flush } = createLabels(kit, labelRoot, labels);
+    const { place, hideAll, setBodies, flush, hits } = createLabels(kit, labelRoot, labels);
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit);
     const globes = createGlobes(kit);
     const shownFor = (id: BodyId) => closeUp.shownFor(id);
@@ -330,6 +330,15 @@ export function createOrreryEngine(
     );
     scope.defer(() => window.clearTimeout(releaseTimer));
 
+    /* Names open what they name; moons, the snow line and rulers have nothing to open. */
+    const labelPicks = new Map<string, Selection>([
+      ["sun", { kind: "sun" }],
+      ["galaxySun", { kind: "galaxy", id: "sun" }],
+      ...PLANET_IDS.map((id): [string, Selection] => [id, { kind: "planet", id }]),
+      ...NAMED.map(({ id }): [string, Selection] => [id, { kind: "named", id }]),
+    ]);
+    const labelPick = (key: string) =>
+      labelPicks.get(key) ?? neighbours.labelPick(key) ?? cosmos.labelPick(key);
     createPicking(kit, canvas, store, {
       pickables: [
         sun.sun,
@@ -341,6 +350,8 @@ export function createOrreryEngine(
       ],
       blocked: () => store.getState().guideOpen || closeUp.current !== null,
       distance: () => pose.distance,
+      labels: () => hits((key) => labelPick(key) !== undefined),
+      labelPick,
     });
 
     let inTick = false;
