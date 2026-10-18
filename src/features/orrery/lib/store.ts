@@ -50,7 +50,11 @@ export type CosmosId =
   | "centaurus"
   | "hydra"
   | "greatAttractor"
-  | "laniakea";
+  | "laniakea"
+  | "perseusPisces"
+  | "coma"
+  | "shapley"
+  | "sloanGreatWall";
 
 /** The map a selection belongs to; zooming into another lets it go. */
 export const realmOfSelection = (sel: Selection): Realm =>

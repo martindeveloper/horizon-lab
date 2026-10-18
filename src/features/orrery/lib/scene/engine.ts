@@ -321,8 +321,8 @@ export function createOrreryEngine(
           }, 700);
           engine.invalidate();
         },
-        /* The rig clamps to its own limits, from true-size close-ups to Laniakea. */
-        distance: { min: 1e-12, max: 1.5e9 * LY },
+        /* The rig clamps to its own limits, from true-size close-ups to the cosmic web. */
+        distance: { min: 1e-12, max: 5.5e9 * LY },
         inclination: ORBIT_INCLINATION,
         dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
         wheelSensitivity: () => 0.0012,

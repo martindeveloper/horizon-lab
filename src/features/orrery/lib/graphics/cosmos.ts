@@ -10,17 +10,24 @@
  * - the Virgo Supercluster: clouds and spurs that fan out from Virgo in the plane, one of
  *   them through the Local Group;
  * - Laniakea: filaments that run in from its edge and converge on the Great Attractor,
- *   with flow lines along them, as in the Cosmicflows map of peculiar velocities.
+ *   with flow lines along them, as in the Cosmicflows map of peculiar velocities;
+ * - the cosmic web: the Perseus–Pisces chain, the Shapley concentration and the Sloan Great
+ *   Wall at their measured places, tied into a seeded web of filaments around empty voids.
  */
 import { BufferAttribute, BufferGeometry, Color } from "three";
 
 import { lcg } from "@horizon/toolkit/math";
+import { convert } from "@horizon/toolkit/science";
 
 import {
+  PERSEUS_PISCES_CHAIN,
+  SHAPLEY_CLUSTERS,
+  SLOAN_WALL,
   SUPERGALACTIC,
   anchorById,
   anchorToday,
   fromSupergalactic,
+  skyPlace,
   type AnchorId,
   type Vec,
 } from "../model/cosmos";
@@ -36,6 +43,7 @@ const ELLIPTICAL = new Color("#ffdcae");
 const DWARF = new Color("#b9c2d6");
 const mix = new Color();
 
+/** A point buffer sized for `count`; it grows if a sketch writes more, so nothing is dropped. */
 type Writer = { pos: Float32Array; col: Float32Array; n: number };
 const writer = (count: number): Writer => ({
   pos: new Float32Array(count * 3),
@@ -43,7 +51,14 @@ const writer = (count: number): Writer => ({
   n: 0,
 });
 function put(w: Writer, x: number, y: number, z: number, c: Color, brightness: number) {
-  if (w.n * 3 >= w.pos.length) return;
+  if (w.n * 3 >= w.pos.length) {
+    const pos = new Float32Array(Math.max(3, w.pos.length * 2));
+    const col = new Float32Array(pos.length);
+    pos.set(w.pos);
+    col.set(w.col);
+    w.pos = pos;
+    w.col = col;
+  }
   const i = w.n * 3;
   w.pos[i] = x;
   w.pos[i + 1] = y;
@@ -273,7 +288,7 @@ export function deepField(tight: boolean) {
 }
 
 /** A point on a quadratic Bézier from a to c through control b. */
-function bezier(a: Vec, b: Vec, c: Vec, t: number): Vec {
+function bezier(a: Readonly<Vec>, b: Readonly<Vec>, c: Readonly<Vec>, t: number): Vec {
   const u = 1 - t;
   return [
     u * u * a[0] + 2 * u * t * b[0] + t * t * c[0],
@@ -305,7 +320,7 @@ export function laniakeaWeb(tight: boolean) {
     /* Flatter than round, like the basin. */
     starts.push([heart[0] + x * r, heart[1] + y * r, heart[2] + z * r * 0.55]);
   }
-  const points = writer(size(11_000));
+  const points = writer(size(14_000));
   const lines = {
     pos: new Float32Array(starts.length * FLOW_STEPS * 6),
     col: new Float32Array(starts.length * FLOW_STEPS * 6),
@@ -358,4 +373,139 @@ export function laniakeaWeb(tight: boolean) {
   flows.setAttribute("position", new BufferAttribute(lines.pos.subarray(0, lines.n * 6), 3));
   flows.setAttribute("color", new BufferAttribute(lines.col.subarray(0, lines.n * 6), 3));
   return { points: geometryOf(points), flows };
+}
+
+/** Galaxies strung from a to b along a gentle bow: groups every `step` Mly, where `keep` allows. */
+function filament(
+  w: Writer,
+  rnd: Rnd,
+  a: Readonly<Vec>,
+  b: Readonly<Vec>,
+  step: number,
+  sigma: number,
+  scale = 1,
+  keep: (at: Readonly<Vec>) => boolean = () => true,
+) {
+  const gauss = gaussOf(rnd);
+  const length = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+  const bow = length * 0.12;
+  const control: Vec = [
+    (a[0] + b[0]) / 2 + gauss() * bow,
+    (a[1] + b[1]) / 2 + gauss() * bow,
+    (a[2] + b[2]) / 2 + gauss() * bow,
+  ];
+  const groups = Math.max(2, Math.round(length / step));
+  for (let g = 0; g < groups; g += 1) {
+    const at = bezier(a, control, b, (g + rnd()) / groups);
+    const count = Math.round((3 + rnd() * 9) * scale);
+    if (!keep(at)) continue;
+    for (let i = 0; i < count; i += 1) {
+      const { color, brightness } = tint(rnd, 0.2);
+      put(
+        w,
+        at[0] + gauss() * sigma,
+        at[1] + gauss() * sigma,
+        at[2] + gauss() * sigma,
+        color,
+        brightness * 0.7,
+      );
+    }
+  }
+}
+
+/** A knot where filaments meet: a loose ball of galaxies. */
+function knot(w: Writer, rnd: Rnd, at: Readonly<Vec>, count: number, core: number, reach: number) {
+  for (let i = 0; i < count; i += 1) {
+    const [x, y, z] = onSphere(rnd, ballRadius(rnd, core, reach));
+    const { color, brightness } = tint(rnd, 0.5);
+    put(w, at[0] + x, at[1] + y, at[2] + z, color, brightness * 0.8);
+  }
+}
+
+/** Radius of the seeded web around the Milky Way, Mly: past the Sloan Great Wall. */
+const WEB_RADIUS_MLY = 1_700;
+/** Laniakea's basin, drawn on its own (`laniakeaWeb`): the seeded web leaves it out. */
+const BASIN_MLY = 280;
+
+/**
+ * The cosmic web beyond Laniakea, in Mly (model axes): the Perseus–Pisces chain across the
+ * Local Void, the clusters of the Shapley concentration and the Sloan Great Wall where they
+ * are measured, and a seeded web of knots joined to their nearest neighbours, so voids open
+ * between filaments. Laniakea's own basin is left to `laniakeaWeb`.
+ */
+export function cosmicWeb(tight: boolean) {
+  const size = scaled(tight);
+  const rnd = lcg(131);
+  const w = writer(size(21_000));
+  const heart = anchorToday(anchorById("greatAttractor"));
+  const dist = (a: Readonly<Vec>, b: Readonly<Vec>) =>
+    Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+  /* Perseus–Pisces: groups strung along the measured chain. */
+  const chain = PERSEUS_PISCES_CHAIN.map((p) => skyPlace(p.ra, p.dec, p.cz));
+  for (let i = 1; i < chain.length; i += 1)
+    filament(w, rnd, chain[i - 1]!, chain[i]!, 4, 2.2, tight ? 1.2 : 2);
+  /* Shapley: its rich clusters, each a dense knot. */
+  const shapley = SHAPLEY_CLUSTERS.map((p) => skyPlace(p.ra, p.dec, p.cz));
+  for (const at of shapley) knot(w, rnd, at, size(120), 2, 12);
+  /* The Sloan Great Wall: groups along the measured arc, a few knots in it. */
+  /* Bent in depth about its redshift; the middle waypoint is the labelled one, so it stays put. */
+  const wall: Vec[] = [];
+  const { ra, dec, z, swing } = SLOAN_WALL;
+  const cz = z * convert(1, "c", "km/s");
+  for (let k = 0; k <= 12; k += 1) {
+    const t = k / 12;
+    const jitter = k === 6 ? 0 : 1;
+    wall.push(
+      skyPlace(
+        ra[0] + (ra[1] - ra[0]) * t,
+        dec + (rnd() - 0.5) * 3 * jitter,
+        cz + swing * Math.sin(t * Math.PI * 2) + (rnd() - 0.5) * 900 * jitter,
+      ),
+    );
+  }
+  for (let i = 1; i < wall.length; i += 1)
+    filament(w, rnd, wall[i - 1]!, wall[i]!, 6, 6, tight ? 1.2 : 2);
+  for (let i = 1; i < wall.length; i += 3) knot(w, rnd, wall[i]!, size(90), 3, 14);
+
+  /* The seeded web: the landmarks and random knots, each joined to its nearest three. */
+  const nodes: Readonly<Vec>[] = [chain[0]!, chain[chain.length - 1]!, ...shapley.slice(0, 2)];
+  nodes.push(wall[0]!, wall[wall.length - 1]!);
+  const coma = anchorToday(anchorById("comaCluster"));
+  nodes.push(coma);
+  for (let k = 0; k < (tight ? 70 : 110); k += 1) {
+    const p = onSphere(rnd, Math.cbrt(rnd()) * WEB_RADIUS_MLY);
+    if (dist(p, heart) < BASIN_MLY) continue;
+    nodes.push(p);
+    knot(w, rnd, p, size(8 + Math.floor(rnd() * 24)), 3, 16);
+  }
+  /* Nothing of the seeded web inside Laniakea's basin: no chord through it, no group in it. */
+  const outside = (p: Readonly<Vec>) => dist(p, heart) >= BASIN_MLY;
+  const missesBasin = (a: Readonly<Vec>, b: Readonly<Vec>) => {
+    const ab: Vec = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const t = Math.min(
+      1,
+      Math.max(
+        0,
+        ((heart[0] - a[0]) * ab[0] + (heart[1] - a[1]) * ab[1] + (heart[2] - a[2]) * ab[2]) /
+          (ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2 || 1),
+      ),
+    );
+    return outside([a[0] + ab[0] * t, a[1] + ab[1] * t, a[2] + ab[2] * t]);
+  };
+  const joined = new Set<string>();
+  for (const [i, a] of nodes.entries()) {
+    const nearest = nodes
+      .map((b, j) => ({ j, d: dist(a, b) }))
+      .filter(({ j }) => j !== i)
+      .sort((x, y) => x.d - y.d)
+      .slice(0, 3);
+    for (const { j, d } of nearest) {
+      const pair = i < j ? `${i}:${j}` : `${j}:${i}`;
+      if (joined.has(pair) || d > 650 || !missesBasin(a, nodes[j]!)) continue;
+      joined.add(pair);
+      filament(w, rnd, a, nodes[j]!, 30, 5, tight ? 0.38 : 0.6, outside);
+    }
+  }
+  return geometryOf(w);
 }

@@ -65,7 +65,8 @@ way. `Formula` is the print-only view documents use.
 in au below half a light-year and in ly beyond (`autoDistanceUnit`, `resolveDistanceUnit`). `convertDistance`, `lightTime` (s / min /
 h / d) and `formatDistance` render the shared readout "5.37 au · light-time
 45 min"; the host passes translated unit symbols and the light-time phrase, and
-optionally `millionWord` so ly and pc from a million read "53.8 million ly", and
+optionally `millionWord` (and `billionWord`) so ly and pc from a million read "53.8
+million ly" and from a billion "1.09 billion ly", and
 `significant` to keep a rounded literature value rounded after conversion ("60,000 ly"
 reads "18,000 pc"). `formatDistanceRange` prints a span with the unit once ("2.1–3.3 au").
 `AU_LIGHT_SECONDS`, `LIGHT_YEAR_AU`, `PARSEC_AU` and `PARSEC_KM` derive from the
@@ -77,6 +78,8 @@ exact definitions.
 Planck 2018 VI values (H₀ 67.66, Ωm 0.3111). `hubbleTimeGyr(H0)`, `cosmicAgeGyr(a)` (13.79
 Gyr today) and its inverse `scaleFactorAtAge(ageGyr)` take the model as an optional
 argument, so a lab can print its own formula and compute with these.
+`comovingDistanceMpc(z)` integrates (c / H₀) ∫ dz / E(z) (3.40 Gpc at z = 1) and
+`lookbackTimeGyr(z)` gives how long ago light from redshift z set out.
 
 ## Time (`time.ts`)
 
@@ -94,7 +97,8 @@ Algorithms, 2nd ed.), in degrees with azimuth from north through east:
 from J2000 (ch. 21), `eclipticToEquatorial(λ, β, ε)`, `toHorizontal(ra, dec, lst,
 latitude)`, `hourAngle(lst, ra)` (−180…180, negative while rising) and
 `risingHourAngle(dec, latitude, horizon)` (half the arc above an altitude; 0 never
-rises, 180 never sets). No nutation, aberration or refraction. The Sun's and the
+rises, 180 never sets). `equatorialToGalactic(ra, dec)` turns J2000 coordinates into
+galactic longitude and latitude (IAU pole). No nutation, aberration or refraction. The Sun's and the
 Moon's own positions are in `@horizon/toolkit/bodies` (almanac).
 
 ## Display scales (`quantities.ts`)

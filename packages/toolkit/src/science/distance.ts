@@ -70,6 +70,8 @@ export type DistanceFormat = {
   fixed?: boolean;
   /** Localized word for a million ("million"): ly and pc from a million read "53.8 million ly". */
   millionWord?: string;
+  /** …and for a billion, with `millionWord`: from a billion, "1.09 billion ly". */
+  billionWord?: string;
   /** Round to this many significant figures (a literature value), instead of the readout's ~3. */
   significant?: number;
 };
@@ -80,21 +82,33 @@ function formatValue(value: number, options: DistanceFormat) {
     : formatReadout(value, options.locale, options.fixed);
 }
 
-/** The value in the chosen unit, divided down to millions where the host has a word for it. */
+/** The value in the chosen unit, divided down to millions or billions where the host has words. */
 function scaled(au: number, magnitudeAu: number, options: DistanceFormat) {
   const unit = resolveDistanceUnit(options.unit, magnitudeAu);
   const value = convertDistance(au, "au", unit);
-  const million =
-    !!options.millionWord &&
-    unit !== "au" &&
-    /* A converted million (1 Mly) can land a rounding error below 10⁶. */
-    Math.abs(convertDistance(magnitudeAu, "au", unit)) >= 1e6 * (1 - 1e-12);
-  return { value: million ? value / 1e6 : value, million, unit };
+  /* Scale by the value as printed: 999.6 million rounds to "1,000" and reads "1 billion";
+     a converted million (1 Mly) can land a rounding error below 10⁶. */
+  const raw = Math.abs(convertDistance(magnitudeAu, "au", unit));
+  const magnitude =
+    Number(raw.toPrecision(Math.min(21, Math.max(1, options.significant ?? 3)))) * (1 + 1e-12);
+  const scale =
+    !options.millionWord || unit === "au"
+      ? 1
+      : options.billionWord && magnitude >= 1e9
+        ? 1e9
+        : magnitude >= 1e6
+          ? 1e6
+          : 1;
+  /* A value that reaches the scale only by rounding prints as 1, not "1.000" in a fixed readout. */
+  const shown = value / scale;
+  const roundedUp = scale > 1 && Math.abs(shown) < 1 && Math.abs(value) === raw;
+  return { value: roundedUp ? Math.sign(shown) : shown, scale, unit };
 }
 
-function unitText(unit: DistanceUnit, million: boolean, options: DistanceFormat) {
+function unitText(unit: DistanceUnit, scale: number, options: DistanceFormat) {
   const symbol = options.symbols[unit];
-  return million ? `${options.millionWord} ${symbol}` : symbol;
+  if (scale === 1e9) return `${options.billionWord} ${symbol}`;
+  return scale === 1e6 ? `${options.millionWord} ${symbol}` : symbol;
 }
 
 /**
@@ -104,9 +118,9 @@ function unitText(unit: DistanceUnit, million: boolean, options: DistanceFormat)
  */
 export function formatDistance(au: number, options: DistanceFormat) {
   const { locale, lightTimeLabel } = options;
-  const { value, million, unit } = scaled(au, au, options);
-  const text = `${formatValue(value, options)} ${unitText(unit, million, options)}`;
-  if (million) return text;
+  const { value, scale, unit } = scaled(au, au, options);
+  const text = `${formatValue(value, options)} ${unitText(unit, scale, options)}`;
+  if (scale > 1) return text;
   const from = options.lightTimeFrom ?? 0.2;
   const to = options.lightTimeTo ?? 0.05 * LIGHT_YEAR_AU;
   const abs = Math.abs(au);
@@ -118,7 +132,7 @@ export function formatDistance(au: number, options: DistanceFormat) {
 
 /**
  * A span in the same readout, the unit once: "2.1–3.3 au", "1.6–3.2 ly". The larger end
- * picks the million scaling for both; ranges carry no light-time.
+ * picks the million or billion scaling for both; ranges carry no light-time.
  */
 export function formatDistanceRange(lowAu: number, highAu: number, options: DistanceFormat) {
   finite(lowAu);
@@ -126,5 +140,5 @@ export function formatDistanceRange(lowAu: number, highAu: number, options: Dist
   const magnitude = Math.max(Math.abs(lowAu), Math.abs(highAu));
   const low = scaled(lowAu, magnitude, options);
   const high = scaled(highAu, magnitude, options);
-  return `${formatValue(low.value, options)}–${formatValue(high.value, options)} ${unitText(high.unit, high.million, options)}`;
+  return `${formatValue(low.value, options)}–${formatValue(high.value, options)} ${unitText(high.unit, high.scale, options)}`;
 }

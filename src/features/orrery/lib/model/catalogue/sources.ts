@@ -64,6 +64,14 @@ export const SOURCES = {
   gaiaEnceladus: {
     cite: "Helmi et al. 2018, Nature 563, 85; Belokurov et al. 2018, MNRAS 478, 611",
   },
+  geller1999: {
+    cite: "Geller, Diaferio & Kurtz 1999, ApJ 517, L23 (Coma: centre and median cz 7,090 km/s)",
+    link: "https://arxiv.org/abs/astro-ph/9903305",
+  },
+  gott2005: {
+    cite: "Gott et al. 2005, ApJ 624, 463 (the Sloan Great Wall)",
+    link: "https://arxiv.org/abs/astro-ph/0310571",
+  },
   gravity2021: { cite: "GRAVITY Collaboration 2021, A&A 647, A59; GRAVITY Collaboration 2022" },
   gravity2022: { cite: "GRAVITY Collaboration 2022 (Sgr A* mass)" },
   horizon: { cite: "Horizon model: a labelled teaching choice" },
@@ -144,14 +152,25 @@ export const SOURCES = {
     cite: "Pasquini et al. 2004, A&A 426, 651",
     link: "https://arxiv.org/abs/astro-ph/0407524",
   },
+  pedratti2026: {
+    cite: "Pedratti et al. 2026, A&A 710, A218 (Coma members and M₂₀₀ from DESI)",
+    link: "https://arxiv.org/abs/2603.16706",
+  },
   pitjeva2018: {
     cite: "Pitjeva & Pitjev 2018, Astron. Lett. 44, 554",
     link: "https://arxiv.org/abs/1811.05191",
   },
   planck2018: { cite: "Planck Collaboration 2020, A&A 641, A6 (TT,TE,EE+lowE+lensing+BAO)" },
+  proust2006: {
+    cite: "Proust et al. 2006, A&A 447, 133 (the Shapley Supercluster)",
+    link: "https://arxiv.org/abs/astro-ph/0509903",
+  },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },
   richter1989: { cite: "Richter 1989, catalogue of 581 galaxies in the Hydra I cluster area" },
   sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
+  struble1999: {
+    cite: "Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)",
+  },
   tully1982: {
     cite: "Tully 1982, ApJ 257, 389 (Table 1: the Virgo Cluster and ten clouds)",
     link: "https://adsabs.harvard.edu/pdf/1982ApJ...257..389T",
@@ -169,6 +188,11 @@ export const SOURCES = {
   wegg2015: {
     cite: "Wegg, Gerhard & Portail 2015, MNRAS 450, 4050",
     link: "https://arxiv.org/abs/1504.01401",
+  },
+  wegner1993: { cite: "Wegner, Haynes & Giovanelli 1993, AJ 105, 1251 (the Perseus–Pisces ridge)" },
+  zwicky1933: {
+    cite: "Zwicky 1933, Helv. Phys. Acta 6, 110 (Coma's missing mass)",
+    link: "https://ned.ipac.caltech.edu/level5/March17/Zwicky/Zwicky_contents.html",
   },
 } as const satisfies Record<string, Source>;
 

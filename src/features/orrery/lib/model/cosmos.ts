@@ -1,6 +1,7 @@
 /**
- * Beyond the Milky Way: the Local Group, the Virgo Cluster, the Virgo (Local) Supercluster
- * and Laniakea, and how they change over the timeline. Lengths are in millions of
+ * Beyond the Milky Way: the Local Group, the Virgo Cluster, the Virgo (Local) Supercluster,
+ * Laniakea and the cosmic web around it out to the Sloan Great Wall, and how they change over
+ * the timeline. Lengths are in millions of
  * light-years (Mly), in the Galaxy model's axes (+X from the galactic centre to the Sun,
  * +Y the north galactic pole, +Z toward galactic longitude 90°), with the galactic centre at
  * the origin.
@@ -18,9 +19,11 @@ import { clamp01 } from "@horizon/toolkit/math";
 import {
   PLANCK_2018,
   RAD_PER_DEG as RAD,
+  comovingDistanceMpc,
   convert,
   cosmicAgeGyr,
   defineEquation,
+  equatorialToGalactic,
   formatNumber,
   hubbleLaw,
   scaleFactorAtAge,
@@ -71,6 +74,13 @@ export const scaleAt = lastOf((yearsAgo: number) =>
 /** Hubble-flow distance (Mly) for a recession velocity cz (km/s) at H₀. */
 export const hubbleMly = (cz: number) =>
   convert(hubbleLaw.compute({ v: cz, H0: HUBBLE }), "Mpc", "Mly");
+
+/**
+ * Comoving distance (Mly) for a redshift given as cz (km/s), in the model's cosmology: where
+ * Hubble's law runs long (by ~2 % at the Sloan Great Wall's z = 0.073).
+ */
+export const redshiftMly = (cz: number) =>
+  convert(comovingDistanceMpc(cz / convert(1, "c", "km/s"), PLANCK_2018), "Mpc", "Mly");
 
 /* ---------------------------------------------------------------------------------------
  * The Milky Way and Andromeda: a radial Kepler orbit from the Big Bang (Kahn & Woltjer
@@ -213,6 +223,77 @@ export function place(l: number, b: number, mly: number): Vec {
  * Named anchors. Distances are rounded literature values; see docs/science-sources.md.
  * ------------------------------------------------------------------------------------- */
 
+/** A J2000 sky position and redshift as an anchor's galactic direction and distance. */
+const fromSky = (ra: number, dec: number, cz: number) => ({
+  ...equatorialToGalactic(ra, dec),
+  mly: redshiftMly(cz),
+});
+
+/**
+ * The Sloan Great Wall in the SDSS equatorial slice (Gott et al. 2005): RA 8.7h–13.7h,
+ * −2° < δ < 2°, at z = 0.073. The drawing bends it ±`swing` km/s in depth about that, with
+ * its middle (its label) at z = 0.073.
+ */
+export const SLOAN_WALL = { ra: [130.5, 205.5], dec: 0, z: 0.073, swing: 1_500 } as const;
+
+/** The cosmic web's named landmarks: J2000 position (degrees) and heliocentric cz (km/s). */
+export const WEB_SKY = {
+  /** NGC 1275 at the heart of the Perseus Cluster (Abell 426), at the cluster's cz (Struble & Rood 1999). */
+  perseus: { ra: 49.9507, dec: 41.5117, cz: 5_366 },
+  /** The Coma Cluster's centre and median velocity (Geller, Diaferio & Kurtz 1999). */
+  coma: { ra: 194.854, dec: 27.946, cz: 7_090 },
+  /** Abell 3558, the Shapley Supercluster's central cluster (Proust et al. 2006, Table 4). */
+  shapley: { ra: 201.987, dec: -31.495, cz: 14_307 },
+  /** The middle of the Sloan Great Wall's span, at its z = 0.073 (Gott et al. 2005). */
+  sloanGreatWall: {
+    ra: (SLOAN_WALL.ra[0] + SLOAN_WALL.ra[1]) / 2,
+    dec: SLOAN_WALL.dec,
+    cz: SLOAN_WALL.z * convert(1, "c", "km/s"),
+  },
+} as const;
+
+/** A J2000 sky position and redshift (cz, km/s) as a place, Mly from the galactic centre. */
+export function skyPlace(ra: number, dec: number, cz: number): Vec {
+  const { l, b } = equatorialToGalactic(ra, dec);
+  return place(l, b, redshiftMly(cz));
+}
+
+/**
+ * The Perseus–Pisces ridge, as the drawing strings it: NGC 383 in the Pisces groups, Abell 262,
+ * the Perseus Cluster and on across the Milky Way's plane to Abell 569 (NED positions and
+ * velocities). The main ridge runs at least 50 h⁻¹ Mpc to the plane (Wegner, Haynes &
+ * Giovanelli 1993); the link on to Abell 569 (Kraan-Korteweg et al. 2018) has been disputed.
+ */
+export const PERSEUS_PISCES_CHAIN = [
+  { ra: 16.854, dec: 32.413, cz: 5_098 },
+  { ra: 28.194, dec: 36.152, cz: 4_860 },
+  { ra: 49.951, dec: 41.512, cz: 5_366 },
+  { ra: 107.29, dec: 48.62, cz: 5_949 },
+] as const;
+
+/**
+ * The Shapley concentration's richest clusters for the drawing: Abell 3558, 3562 and 3556 at
+ * its core, Abell 3528 and 3571 on its edges (velocities from Proust et al. 2006, Table 4).
+ */
+export const SHAPLEY_CLUSTERS = [
+  { ra: 201.987, dec: -31.495, cz: 14_307 },
+  { ra: 203.4, dec: -31.67, cz: 14_455 },
+  { ra: 201.03, dec: -31.67, cz: 14_439 },
+  { ra: 193.6, dec: -29.0, cz: 16_294 },
+  { ra: 206.87, dec: -32.85, cz: 11_676 },
+] as const;
+
+const SKY = {
+  perseus: fromSky(WEB_SKY.perseus.ra, WEB_SKY.perseus.dec, WEB_SKY.perseus.cz),
+  coma: fromSky(WEB_SKY.coma.ra, WEB_SKY.coma.dec, WEB_SKY.coma.cz),
+  shapley: fromSky(WEB_SKY.shapley.ra, WEB_SKY.shapley.dec, WEB_SKY.shapley.cz),
+  sloanGreatWall: fromSky(
+    WEB_SKY.sloanGreatWall.ra,
+    WEB_SKY.sloanGreatWall.dec,
+    WEB_SKY.sloanGreatWall.cz,
+  ),
+};
+
 /** How an anchor moves over time: bound to us, riding on Andromeda, or with the expansion. */
 export type Tie = "local" | "andromeda" | "flow";
 
@@ -228,7 +309,11 @@ export type AnchorId =
   | "fornaxCluster"
   | "centaurusCluster"
   | "hydraCluster"
-  | "greatAttractor";
+  | "greatAttractor"
+  | "perseusCluster"
+  | "comaCluster"
+  | "shapleyCore"
+  | "sloanGreatWall";
 
 export type Anchor = {
   id: AnchorId;
@@ -258,6 +343,11 @@ export const ANCHORS: readonly Anchor[] = [
   { id: "hydraCluster", l: 269.63, b: 26.51, mly: hubbleMly(3_683), tie: "flow" },
   /* The Great Attractor toward the Norma Cluster (Abell 3627): ~77 Mpc at h = 0.68. */
   { id: "greatAttractor", l: 325.33, b: -7.26, mly: 250, tie: "flow" },
+  /* Beyond Laniakea, at comoving distances from their redshifts. */
+  { id: "perseusCluster", ...SKY.perseus, tie: "flow" },
+  { id: "comaCluster", ...SKY.coma, tie: "flow" },
+  { id: "shapleyCore", ...SKY.shapley, tie: "flow" },
+  { id: "sloanGreatWall", ...SKY.sloanGreatWall, tie: "flow" },
 ];
 
 const BY_ID = new Map(ANCHORS.map((a) => [a.id, a]));
@@ -277,6 +367,10 @@ export const COSMOS_LABELS = [
   "hydraCluster",
   "greatAttractor",
   "laniakea",
+  "perseusPisces",
+  "comaCluster",
+  "shapleySupercluster",
+  "sloanGreatWall",
 ] as const;
 
 /* Fixed for the session: each anchor's place today. */
@@ -300,6 +394,13 @@ export const STRUCTURES = {
   supercluster: { width: convert(33, "Mpc", "Mly") },
   /** Tully et al. 2014: 160 Mpc across, 10¹⁷ solar masses, ~100,000 galaxies. */
   laniakea: { width: convert(160, "Mpc", "Mly") },
+  /**
+   * Gott et al. 2005: 450 Mpc long (comoving) at their H₀ = 71, rescaled to the model's; their
+   * "1.37 billion light-years" is that over (1 + z), the length when the light we see left it.
+   */
+  sloanGreatWall: { length: convert((450 * 71) / HUBBLE, "Mpc", "Mly") },
+  /** Wegner, Haynes & Giovanelli 1993: at least 50 h⁻¹ Mpc, here at the model's H₀. */
+  perseusPisces: { length: convert(50 / (HUBBLE / 100), "Mpc", "Mly") },
 } as const;
 
 /** Where the Local Group's mass centre is `yearsAgo` years ago, Mly from the galactic centre. */
@@ -363,6 +464,7 @@ export const COSMIC_VIEW_LY = {
   virgo: 68e6,
   supercluster: 175e6,
   laniakea: 760e6,
+  web: 2.8e9,
 } as const;
 
 const AIM_STOPS: readonly AimStop[] = [
@@ -376,7 +478,28 @@ const AIM_STOPS: readonly AimStop[] = [
     ly: COSMIC_VIEW_LY.laniakea,
     at: (yearsAgo, out) => anchorAt(anchorById("greatAttractor"), yearsAgo, out),
   },
+  /* The web turns about the middle of its named landmarks, from Perseus to the Great Wall. */
+  { ly: COSMIC_VIEW_LY.web, at: webCentre },
 ];
+
+const WEB_LANDMARKS: readonly AnchorId[] = [
+  "perseusCluster",
+  "comaCluster",
+  "shapleyCore",
+  "sloanGreatWall",
+];
+const landmark: Vec = [0, 0, 0];
+/** The middle of the web's landmarks `yearsAgo` years ago, Mly from the galactic centre. */
+function webCentre(yearsAgo: number, out: Vec) {
+  out[0] = out[1] = out[2] = 0;
+  for (const id of WEB_LANDMARKS) {
+    anchorAt(anchorById(id), yearsAgo, landmark);
+    out[0] += landmark[0] / WEB_LANDMARKS.length;
+    out[1] += landmark[1] / WEB_LANDMARKS.length;
+    out[2] += landmark[2] / WEB_LANDMARKS.length;
+  }
+  return out;
+}
 
 const stopA: Vec = [0, 0, 0];
 const stopB: Vec = [0, 0, 0];

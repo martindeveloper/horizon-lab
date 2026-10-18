@@ -16,6 +16,7 @@ import {
   PLANCK_2018,
   RAD_PER_DEG,
   angularSeparation,
+  comovingDistanceMpc,
   cosmicAgeGyr,
   hubbleLaw,
   hubbleTimeGyr,
@@ -31,8 +32,10 @@ import {
   DELTA_T_SECONDS,
   JULIAN_CENTURY_DAYS,
   eclipticToEquatorial,
+  equatorialToGalactic,
   hourAngle,
   julianEphemerisDay,
+  lookbackTimeGyr,
   precess,
   risingHourAngle,
   siderealTime,
@@ -108,6 +111,27 @@ test("literature values keep their significant figures through a unit change", (
   assert.equal(formatSignificant(3.79e9, "en", 2), "3.8 × 10⁹");
   const symbols = { au: "au", ly: "ly", pc: "pc" };
   const options = (unit) => ({ unit, locale: "en", symbols, millionWord: "million" });
+  const words = { ...options("ly"), billionWord: "billion" };
+  assert.equal(formatDistance(1.09e9 * LIGHT_YEAR_AU, words), "1.09 billion ly");
+  assert.equal(formatDistance(1.09e9 * LIGHT_YEAR_AU, options("ly")), "1,090 million ly");
+  assert.equal(
+    formatDistanceRange(0.5e9 * LIGHT_YEAR_AU, 1.5e9 * LIGHT_YEAR_AU, words),
+    "0.5–1.5 billion ly",
+  );
+  assert.equal(
+    formatDistance(0.998e9 * LIGHT_YEAR_AU, { ...words, significant: 2 }),
+    "1 billion ly",
+  );
+  /* A fixed readout keeps its digit count across the step: no "1.000 million ly". */
+  const fixed = { ...options("ly"), fixed: true };
+  assert.equal(
+    formatDistance(999_700 * LIGHT_YEAR_AU, fixed),
+    formatDistance(1_000_000 * LIGHT_YEAR_AU, fixed),
+  );
+  assert.equal(
+    formatDistance(0.9997e9 * LIGHT_YEAR_AU, { ...words, fixed: true }),
+    formatDistance(1e9 * LIGHT_YEAR_AU, { ...words, fixed: true }),
+  );
   const ly = 60_000 * LIGHT_YEAR_AU;
   assert.equal(formatDistance(ly, { ...options("pc"), significant: 2 }), "18,000 pc");
   assert.equal(formatDistance(ly, { ...options("ly"), significant: 2 }), "60,000 ly");
@@ -171,6 +195,14 @@ test("sky coordinates: angles wrap, poles and the equator behave, conversions in
   assert.ok(risingHourAngle(0, 49.9, 10) < 90);
   assert.equal(risingHourAngle(89, 49.9), 180);
   assert.equal(risingHourAngle(-89, 49.9), 0);
+  // Galactic coordinates: the pole and M87 (l 283.78°, b 74.49°); the equinox at l 96.34°, b −60.19°.
+  near(equatorialToGalactic(192.85948, 27.12825).b, 90, 1e-9);
+  const m87 = equatorialToGalactic(187.7059, 12.3911);
+  near(m87.l, 283.78, 0.01);
+  near(m87.b, 74.49, 0.01);
+  const equinox = equatorialToGalactic(0, 0);
+  near(equinox.l, 96.34, 0.01);
+  near(equinox.b, -60.19, 0.01);
 });
 
 test("sky angles, resonances and Hubble's law compute from the shared laws", () => {
@@ -199,6 +231,14 @@ test("flat ΛCDM: Planck 2018 gives a 13.8-billion-year Universe and a(t) invert
   near(scaleFactorAtAge(age), 1, 1e-12);
   near(scaleFactorAtAge(age - 10), 0.37, 0.02);
   for (const a of [0.1, 0.5, 0.9]) near(scaleFactorAtAge(cosmicAgeGyr(a)), a, 1e-12);
+  // Comoving distance: Hubble's law while z is small, 3.40 Gpc at z = 1 for these parameters.
+  near(comovingDistanceMpc(0.001), hubbleLaw.compute({ v: 299.792458, H0: 67.66 }), 0.01);
+  near(comovingDistanceMpc(1), 3_396, 2);
+  assert.equal(comovingDistanceMpc(0), 0);
+  // Lookback time: none today, the whole age at the Big Bang's edge.
+  assert.equal(lookbackTimeGyr(0), 0);
+  near(lookbackTimeGyr(1e6), age, 0.01);
+  near(lookbackTimeGyr(0.08), 1.09, 0.01);
 });
 
 test("auto distances read in au inside half a light-year and in ly beyond", () => {

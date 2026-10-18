@@ -1,5 +1,5 @@
 /** Beyond the Milky Way: figures from the cosmos model and the literature. */
-import { convert } from "@horizon/toolkit/science";
+import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
 
 import {
   ANDROMEDA_APPROACH_KMS,
@@ -10,6 +10,7 @@ import {
   OMEGA_M,
   UNIVERSE_AGE_GYR,
   STRUCTURES,
+  WEB_SKY,
   anchorAt,
   anchorById,
   andromedaApart,
@@ -22,6 +23,8 @@ import type { Facts, Live, Status } from "./types";
 type Extra = { status?: Status; note?: string; digits?: number };
 
 const length = (v: readonly number[]) => Math.hypot(v[0]!, v[1]!, v[2]!);
+/** The Sloan Great Wall's redshift (Gott et al. 2005). */
+const SLOAN_Z = WEB_SKY.sloanGreatWall.cz / convert(1, "c", "km/s");
 
 /** An anchor's heliocentric distance today and its place on the slider (comoving or bound). */
 const anchorDistance = (id: AnchorId, source: SourceId, extra: Extra = {}): Live => ({
@@ -276,5 +279,101 @@ export const COSMOS = {
     members: { value: 100_000, unit: "count", source: "tully2014", status: "verified" },
     mass: { value: 1e17, unit: "Msun", source: "tully2014", status: "verified" },
     heart: greatAttractorDistance,
+  },
+  /* Beyond Laniakea: comoving distances from redshifts, in the model's cosmology. */
+  perseusPisces: {
+    distance: anchorDistance("perseusCluster", "struble1999", {
+      digits: 2,
+      status: "flag",
+      note: "comoving from the cluster's cz 5,366 km/s, seen only as quoted (NGC 1275 itself: 5,297); papers adopt 72–74 Mpc",
+    }),
+    length: {
+      value: STRUCTURES.perseusPisces.length,
+      unit: "Mly",
+      digits: 2,
+      source: "wegner1993",
+      status: "derived",
+      note: "lower bound: the main ridge runs at least 50 h⁻¹ Mpc, here at h = 0.6766",
+    },
+  },
+  coma: {
+    distance: anchorDistance("comaCluster", "geller1999", {
+      digits: 2,
+      status: "derived",
+      note: "comoving from the median cz 7,090 km/s; SNe Ia give 98.5 ± 2.2 Mpc (Scolnic et al. 2024)",
+    }),
+    members: {
+      value: 1_651,
+      unit: "count",
+      digits: 3,
+      source: "pedratti2026",
+      status: "verified",
+      note: "spectroscopic members after interlopers are removed",
+    },
+    mass: {
+      value: 1e15,
+      unit: "Msun",
+      source: "pedratti2026",
+      status: "verified",
+      note: "M₂₀₀ = 1.04 × 10¹⁵ M☉ at H₀ = 70",
+    },
+  },
+  shapley: {
+    distance: anchorDistance("shapleyCore", "proust2006", {
+      digits: 2,
+      status: "derived",
+      note: "comoving from Abell 3558's cz 14,307 km/s; the paper uses 145 h⁻¹ Mpc",
+    }),
+    clusters: {
+      value: 44,
+      unit: "count",
+      source: "proust2006",
+      status: "verified",
+      note: "clusters in its velocity range",
+    },
+    galaxies: {
+      value: 8_632,
+      unit: "count",
+      digits: 2,
+      source: "proust2006",
+      status: "verified",
+      note: "galaxies with measured velocities in the surveyed field, fore- and background included",
+    },
+    mass: {
+      value: 5e16 / (HUBBLE / 100),
+      unit: "Msun",
+      digits: 1,
+      source: "proust2006",
+      status: "derived",
+      note: "5 × 10¹⁶ h⁻¹ M☉ in the surveyed volume, at h = 0.6766; Ragone et al. 2006: at least 1.1 × 10¹⁶ h⁻¹",
+    },
+  },
+  sloanGreatWall: {
+    distance: anchorDistance("sloanGreatWall", "gott2005", {
+      digits: 2,
+      status: "derived",
+      note: "comoving at z = 0.073; the paper's median 310 Mpc at H₀ = 71, Ωm = 0.27",
+    }),
+    length: comoving(STRUCTURES.sloanGreatWall.length, "gott2005", {
+      digits: 2,
+      note: "450 Mpc comoving at H₀ = 71, rescaled to the model's H₀",
+    }),
+    lengthThen: {
+      value: STRUCTURES.sloanGreatWall.length / (1 + SLOAN_Z),
+      unit: "Mly",
+      digits: 2,
+      source: "gott2005",
+      status: "derived",
+      note: "comoving length / (1 + z); the paper's 419 Mpc (1.37 billion ly) is at H₀ = 71",
+    },
+    lookback: {
+      value: lookbackTimeGyr(SLOAN_Z) * 1e9,
+      unit: "yr",
+      show: "Gyr",
+      digits: 2,
+      source: "gott2005",
+      status: "derived",
+      note: "lookback time to z = 0.073 in the model's cosmology",
+    },
   },
 } satisfies Record<string, Facts>;

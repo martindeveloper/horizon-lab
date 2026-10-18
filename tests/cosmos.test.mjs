@@ -77,6 +77,29 @@ test("the camera's aim leaves the galactic centre for each structure's heart", (
   }
   for (const view of VIEWS.filter((v) => v.realm === "cosmos"))
     assert.equal(viewForDistance(view.dist, "cosmos"), view.id, view.id);
+  /* On out to the web, the aim glides from the Great Attractor to the web's landmarks. */
+  for (let ly = 7.6e8; ly <= 2.8e9; ly *= 1.05) {
+    const d = length(cosmicAim(ly, 0));
+    assert.ok(Math.abs(d - last) < (ly / 1e6) * 0.5, `no jump at ${ly}`);
+    last = d;
+  }
+});
+
+test("the cosmic web's landmarks sit at their measured directions and redshift distances", async () => {
+  const { redshiftMly, hubbleMly } = await import("../src/features/orrery/lib/model/cosmos.ts");
+  const at = (id) => anchorById(id);
+  near(at("perseusCluster").l, 150.58, 0.02, "Perseus (NGC 1275)");
+  near(at("perseusCluster").b, -13.26, 0.02, "Perseus (NGC 1275)");
+  near(at("comaCluster").b, 88, 0.1, "Coma near the galactic pole");
+  near(at("shapleyCore").l, 312.0, 0.05, "Abell 3558");
+  near(at("shapleyCore").b, 30.7, 0.05, "Abell 3558");
+  /* About a billion light-years at z = 0.073, where Hubble's law runs ~2 % long. */
+  near(at("sloanGreatWall").mly, 1_060, 40, "Sloan Great Wall");
+  near(redshiftMly(21_900) / hubbleMly(21_900), 0.983, 0.003, "comoving vs Hubble's law");
+  near(redshiftMly(3_000), hubbleMly(3_000), 1, "the two agree close by");
+  /* All ride the expansion. */
+  for (const id of ["perseusCluster", "comaCluster", "shapleyCore", "sloanGreatWall"])
+    near(length(anchorAt(at(id), 5e9)), length(anchorToday(at(id))) * scaleAt(5e9), 1e-6, id);
 });
 
 test("a flight across maps keeps a selection made for its destination", async () => {
@@ -141,5 +164,6 @@ test("zooming out holds on the Local Group over its own sheet before turning to 
     "virgo-cluster",
     "virgo-supercluster",
     "laniakea",
+    "cosmic-web",
   ]);
 });

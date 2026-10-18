@@ -33,6 +33,7 @@ function distanceFormat(t: Translate, d: DistanceSettings): DistanceFormat {
     locale: d.locale,
     symbols: { au: t("units.au"), ly: t("units.ly"), pc: t("units.pc") },
     millionWord: t("names.million"),
+    billionWord: t("names.billion"),
   };
 }
 

@@ -41,6 +41,7 @@ const LABEL_KEYS = [
   "lightYears",
   "parsecs",
   "million",
+  "billion",
 ] as const;
 
 const resetReady = () => useOrrery.getState().setReady(false);

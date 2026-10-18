@@ -404,6 +404,54 @@ export const COSMOS_CARDS: Record<CosmosId, StaticCard> = {
       row("heart", "cards.cosmos.laniakea.heart", { value: v(C.laniakea.heart) }),
     ],
   },
+  perseusPisces: {
+    badge: "mixed",
+    expands: true,
+    rows: [
+      figureRow("distance", live(C.perseusPisces.distance)),
+      row("length", "cards.cosmos.perseusPisces.length", { value: v(C.perseusPisces.length) }),
+      row("where", "cards.cosmos.perseusPisces.where"),
+    ],
+  },
+  coma: {
+    badge: "mixed",
+    expands: true,
+    rows: [
+      figureRow("distance", live(C.coma.distance)),
+      row("members", "cards.cosmos.coma.members", { value: v(C.coma.members) }),
+      row("mass", "cards.cosmos.coma.mass", { value: v(C.coma.mass) }),
+      row("heart", "cards.cosmos.coma.heart"),
+    ],
+  },
+  shapley: {
+    badge: "mixed",
+    expands: true,
+    rows: [
+      figureRow("distance", live(C.shapley.distance)),
+      row("members", "cards.cosmos.shapley.members", {
+        clusters: v(C.shapley.clusters),
+        galaxies: v(C.shapley.galaxies),
+      }),
+      row("mass", "cards.cosmos.shapley.mass", { value: v(C.shapley.mass) }),
+      row("where", "cards.cosmos.shapley.where"),
+    ],
+  },
+  sloanGreatWall: {
+    badge: "mixed",
+    expands: true,
+    rows: [
+      figureRow("distance", live(C.sloanGreatWall.distance)),
+      row("length", "cards.cosmos.sloanGreatWall.length", {
+        value: live(C.sloanGreatWall.length),
+        past: v(C.sloanGreatWall.lengthThen),
+      }),
+      row("lookback", "cards.cosmos.sloanGreatWall.lookback", {
+        value: v(C.sloanGreatWall.lookback),
+      }),
+      row("where", "cards.cosmos.sloanGreatWall.where"),
+    ],
+    body: { distance: v(C.sloanGreatWall.distance) },
+  },
 };
 
 /** Every definition with its body and caution message keys, for the placeholder test. */

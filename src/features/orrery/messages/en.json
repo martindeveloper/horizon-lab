@@ -14,7 +14,8 @@
     "local-sheet": "Local Sheet",
     "virgo-cluster": "Virgo Cluster",
     "virgo-supercluster": "Virgo Supercluster",
-    "laniakea": "Laniakea"
+    "laniakea": "Laniakea",
+    "cosmic-web": "Cosmic web"
   },
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",
@@ -28,7 +29,8 @@
     "local-sheet": "The flat wall of nearby groups we live in, about 46 million light-years across.",
     "virgo-cluster": "About 1,500 galaxies some 54 million light-years away. We sit outside it.",
     "virgo-supercluster": "Groups and clouds fanned out around Virgo, about 110 million light-years across.",
-    "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor."
+    "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor.",
+    "cosmic-web": "Laniakea among its neighbours: filaments of galaxies around nearly empty voids, out to the Sloan Great Wall."
   },
   "units": {
     "au": "au",
@@ -129,6 +131,10 @@
     "hydraCluster": "Hydra Cluster",
     "greatAttractor": "Great Attractor",
     "laniakea": "Laniakea",
+    "perseusPisces": "Perseus–Pisces",
+    "comaCluster": "Coma Cluster",
+    "shapleySupercluster": "Shapley Supercluster",
+    "sloanGreatWall": "Sloan Great Wall",
     "million": "million",
     "localSheet": "Local Sheet",
     "billion": "billion"
@@ -247,7 +253,9 @@
     "future": "Future",
     "heart": "Heart",
     "scaleThen": "Space then",
-    "depth": "Thickness"
+    "depth": "Thickness",
+    "length": "Length",
+    "lookback": "Light left"
   },
   "cards": {
     "sun": {
@@ -484,6 +492,37 @@
         "motion": "Moving ~{value} km/s away from the Local Void; inside it, galaxies stray only ~{stray} km/s",
         "body": "The thin wall of galaxies we live in: the Local Group and its neighbours lie in one flat slab about {radius} in radius. Its galaxies drift apart with the expansion almost in step, and the whole sheet is being pushed away from the emptiness of the Local Void beside it. It sits on the outskirts of the Virgo Supercluster.",
         "caution": "Only the named groups are at measured places; the smaller groups in the sheet are a sketch."
+      },
+      "perseusPisces": {
+        "title": "Perseus–Pisces Supercluster",
+        "length": "At least {value} along its main ridge",
+        "where": "Toward Perseus and Pisces, next door to Laniakea",
+        "body": "A long chain of galaxies and clusters, one of the clearest filaments in the nearby sky. It is a basin of its own beside Laniakea: galaxies on its side of the watershed flow toward it, not toward the Great Attractor.",
+        "caution": "The chain is drawn through a few measured clusters; the Milky Way hides where it crosses our galaxy’s plane. Its distance comes from its redshift."
+      },
+      "coma": {
+        "title": "Coma Cluster",
+        "members": "About {value} confirmed by their spectra",
+        "mass": "About {value} Suns",
+        "heart": "NGC 4874 and NGC 4889",
+        "body": "One of the richest clusters near us. In 1933 Fritz Zwicky found its galaxies moving far too fast to be held by the matter that shines: an early strong hint of dark matter.",
+        "caution": "Its distance here comes from its redshift, which the cluster’s own motion can shift by a few per cent; the members are a drawn sample."
+      },
+      "shapley": {
+        "title": "Shapley Supercluster",
+        "members": "{clusters} clusters in its velocity range; about {galaxies} galaxies measured in its field",
+        "mass": "About {value} Suns",
+        "where": "Far beyond the Centaurus Cluster, in the same part of the sky",
+        "body": "One of the largest concentrations of matter in the nearby universe. With the Great Attractor it pulls on the Local Group, though how much of our motion it explains is still debated.",
+        "caution": "Its mass is an estimate for the surveyed region and differs between studies; the clusters around its core are placed approximately."
+      },
+      "sloanGreatWall": {
+        "title": "Sloan Great Wall",
+        "length": "About {value}; {past} when the light we see left it",
+        "lookback": "About {value} billion years ago",
+        "where": "Along the celestial equator, from Hydra through Sextans and Leo to Virgo",
+        "body": "A wall of galaxy clusters about {distance} away, found in 2003 in the Sloan Digital Sky Survey’s map. We see it as it was when its light left; the map places it where it is now, stretched with the expansion since.",
+        "caution": "Whether it is one structure or several superclusters in a row is debated; the drawing follows its outline in the survey, not its galaxies."
       }
     }
   },
@@ -609,7 +648,7 @@
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^{growthPower}."
+        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Beyond Laniakea the Perseus–Pisces ridge, the Coma Cluster, the Shapley concentration and the Sloan Great Wall sit at comoving distances from their redshifts, tied into a seeded web of filaments around voids. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^{growthPower}."
       }
     }
   },

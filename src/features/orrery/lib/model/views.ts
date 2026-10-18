@@ -15,7 +15,8 @@ export type ViewId =
   | "local-sheet"
   | "virgo-cluster"
   | "virgo-supercluster"
-  | "laniakea";
+  | "laniakea"
+  | "cosmic-web";
 /** The solar map in au; the Galaxy and the cosmic map beyond it in light-years. */
 export type Realm = "solar" | "galaxy" | "cosmos";
 export type View = {
@@ -46,6 +47,14 @@ export const VIEWS: readonly View[] = [
     inclination: 0.5,
   },
   { id: "laniakea", realm: "cosmos", dist: COSMIC_VIEW_LY.laniakea, inclination: 0.62 },
+  /* Turned so Coma and the Sloan Great Wall, nearly in line from us, read apart. */
+  {
+    id: "cosmic-web",
+    realm: "cosmos",
+    dist: COSMIC_VIEW_LY.web,
+    azimuth: 1.2,
+    inclination: 0.7,
+  },
 ];
 export const DEFAULT_VIEW: ViewId = "giants";
 export function viewById(id: ViewId) {
@@ -60,7 +69,8 @@ export function worldDistance(dist: number, realm: Realm) {
 /** Nearest framed view of the realm for a camera distance (in its unit), in log space. */
 export function viewForDistance(camDist: number, realm: Realm): ViewId {
   const d = Math.max(1e-6, camDist);
-  let best: ViewId = realm === "solar" ? DEFAULT_VIEW : realm === "galaxy" ? "galaxy" : "laniakea";
+  let best: ViewId =
+    realm === "solar" ? DEFAULT_VIEW : realm === "galaxy" ? "galaxy" : "cosmic-web";
   let bestGap = Infinity;
   for (const v of VIEWS) {
     if (v.realm !== realm) continue;

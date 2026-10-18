@@ -72,3 +72,18 @@ export function risingHourAngle(declination: number, latitude: number, horizon =
     (Math.sin(horizon * RAD) - Math.sin(lat) * Math.sin(dec)) / (Math.cos(lat) * Math.cos(dec));
   return Math.acos(Math.max(-1, Math.min(1, cos))) / RAD;
 }
+
+/** The north galactic pole and the galactic longitude of the north celestial pole, J2000. */
+const GALACTIC_POLE = { ra: 192.85948, dec: 27.12825, lNcp: 122.93192 };
+
+/** J2000 right ascension and declination to galactic longitude (0…360) and latitude. */
+export function equatorialToGalactic(ra: number, dec: number) {
+  const d = dec * RAD;
+  const dp = GALACTIC_POLE.dec * RAD;
+  const da = (ra - GALACTIC_POLE.ra) * RAD;
+  const b = Math.asin(Math.sin(d) * Math.sin(dp) + Math.cos(d) * Math.cos(dp) * Math.cos(da));
+  const y = Math.cos(d) * Math.sin(da);
+  const x = Math.sin(d) * Math.cos(dp) - Math.cos(d) * Math.sin(dp) * Math.cos(da);
+  const l = GALACTIC_POLE.lNcp - Math.atan2(y, x) / RAD;
+  return { l: ((l % 360) + 360) % 360, b: b / RAD };
+}

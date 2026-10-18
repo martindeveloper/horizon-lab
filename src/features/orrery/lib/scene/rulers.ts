@@ -17,7 +17,7 @@ export type DistanceText = (au: number, fixed?: boolean) => string;
 
 /**
  * Shared readout in the visitor's unit: "5.37 au · light-time 45 min" (cards match). Beyond
- * the Galaxy, millions read as a word: "53.8 million ly".
+ * the Galaxy, millions and billions read as a word: "53.8 million ly".
  */
 export function createDistanceText(labels: Labels, unit: () => DistanceChoice): DistanceText {
   return (au, fixed = false) => {
@@ -28,6 +28,7 @@ export function createDistanceText(labels: Labels, unit: () => DistanceChoice): 
       symbols: { au: L.au ?? "au", ly: L.lightYears ?? "ly", pc: L.parsecs ?? "pc" },
       lightTimeLabel: L.lightTime ?? "light-time",
       millionWord: L.million ?? "million",
+      billionWord: L.billion ?? "billion",
       fixed,
     });
   };

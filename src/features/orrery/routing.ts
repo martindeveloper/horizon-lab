@@ -18,6 +18,9 @@ const ALIASES: Record<string, ViewId> = {
   virgo: "virgo-cluster",
   "local-supercluster": "virgo-supercluster",
   "great-attractor": "laniakea",
+  cosmicweb: "cosmic-web",
+  "sloan-great-wall": "cosmic-web",
+  "shapley-supercluster": "cosmic-web",
 };
 
 const routes = slugRoutes({

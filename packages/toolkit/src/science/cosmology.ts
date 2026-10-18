@@ -30,3 +30,21 @@ export function scaleFactorAtAge(ageGyr: number, model: FlatLcdm = PLANCK_2018) 
   const { factor, ratio } = shape(model);
   return (Math.sinh(ageGyr / factor) / ratio) ** (2 / 3);
 }
+
+/** Steps of the Simpson rule in `comovingDistanceMpc`: far below a part in 10⁶ out to z ≈ 10. */
+const COMOVING_STEPS = 256;
+
+/** Comoving distance (Mpc) to redshift z in a flat ΛCDM universe: (c / H₀) ∫₀ᶻ dz′ / E(z′). */
+export function comovingDistanceMpc(z: number, model: FlatLcdm = PLANCK_2018) {
+  const { H0, omegaM } = model;
+  const inverseE = (x: number) => 1 / Math.sqrt(omegaM * (1 + x) ** 3 + (1 - omegaM));
+  const h = z / COMOVING_STEPS;
+  let sum = inverseE(0) + inverseE(z);
+  for (let i = 1; i < COMOVING_STEPS; i += 1) sum += (i % 2 ? 4 : 2) * inverseE(i * h);
+  return ((convert(1, "c", "km/s") / H0) * (sum * h)) / 3;
+}
+
+/** How long ago (Gyr) light now arriving from redshift z set out. */
+export function lookbackTimeGyr(z: number, model: FlatLcdm = PLANCK_2018) {
+  return cosmicAgeGyr(1, model) - cosmicAgeGyr(1 / (1 + z), model);
+}

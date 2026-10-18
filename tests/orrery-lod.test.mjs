@@ -259,3 +259,32 @@ test("reduced motion lands every zoom at once", () => {
   frame(1 / 60);
   assert.equal(rig.realm, "galaxy");
 });
+
+test("the cosmic web view keeps its landmarks apart and in frame, phone and desktop", async () => {
+  const { anchorById, anchorToday } = await import("../src/features/orrery/lib/model/cosmos.ts");
+  const { cosmicToWorld, galacticAnchor } = await import("../src/features/orrery/lib/scene/lod.ts");
+  const ids = ["greatAttractor", "perseusCluster", "comaCluster", "shapleyCore", "sloanGreatWall"];
+  const anchor = galacticAnchor(0, false);
+  for (const [width, height] of [
+    [390, 844],
+    [1440, 900],
+  ]) {
+    const { rig, camera, frame } = rigWith();
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    rig.snapToView("cosmic-web");
+    frame(0);
+    camera.updateMatrixWorld();
+    const px = ids.map((id) => {
+      const p = cosmicToWorld(anchorToday(anchorById(id)), anchor, new Vector3()).project(camera);
+      return [(p.x * 0.5 + 0.5) * width, (-p.y * 0.5 + 0.5) * height];
+    });
+    for (const [i, [x, y]] of px.entries())
+      assert.ok(x > 30 && x < width - 30 && y > 70 && y < height - 170, `${ids[i]} in frame`);
+    for (let i = 0; i < px.length; i += 1)
+      for (let j = i + 1; j < px.length; j += 1) {
+        const gap = Math.hypot(px[i][0] - px[j][0], px[i][1] - px[j][1]);
+        assert.ok(gap > 60, `${ids[i]} and ${ids[j]} ${gap.toFixed(0)} px apart at ${width}`);
+      }
+  }
+});

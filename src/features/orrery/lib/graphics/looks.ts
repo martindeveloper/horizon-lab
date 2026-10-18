@@ -455,6 +455,8 @@ export function createLooks(light = false) {
       supercluster: points(1.4, 0.6, true),
       far: points(1.4, 0.7, true),
       laniakea: points(1.3, 0.55, true),
+      /* The web beyond Laniakea: thousands of groups, each a faint point. */
+      web: points(1.2, 0.5, true),
     },
     /* Galaxies seen whole: a warm, soft glow. */
     cosmosGalaxy: sprite(glow, "#f3e6cf", 0.95, true),

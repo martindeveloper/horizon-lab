@@ -1,6 +1,6 @@
 /**
  * The cosmic map beyond the Galaxy: the Local Group, the Virgo Cluster, the Virgo
- * Supercluster and Laniakea. The model is in millions of light-years around the galactic
+ * Supercluster, Laniakea and the cosmic web around it. The model is in millions of light-years around the galactic
  * centre (see `model/cosmos.ts`); its group is turned by `GALAXY_FRAME` and placed where the
  * Galaxy is, so the Milky Way drawn here takes over from the Galaxy map as it fades. It
  * draws in the Galaxy's pass. With the timeline, unbound structures ride the expansion,
@@ -25,6 +25,7 @@ import {
 
 import {
   clusterCloud,
+  cosmicWeb,
   deepField,
   laniakeaWeb,
   localGroupClouds,
@@ -57,8 +58,8 @@ import {
 } from "./lod";
 import type { DistanceText, Rulers } from "./rulers";
 
-/** Farthest anything drawn reaches from the galactic centre, Mly: Laniakea's far side. */
-const EXTENT_MLY = 560;
+/** Farthest anything drawn reaches from the galactic centre, Mly: the web's far side. */
+const EXTENT_MLY = 2_000;
 /** The deep field's distance from the camera, Mly: inside the pass's far plane at any zoom. */
 const FIELD_MLY = 450;
 
@@ -79,6 +80,10 @@ const CLUSTERS: readonly ClusterSpec[] = [
   { id: "centaurusCluster", count: 700, core: 1, reach: 6, far: true },
   { id: "hydraCluster", count: 560, core: 0.9, reach: 5, far: true },
   { id: "greatAttractor", count: 900, core: 1.2, reach: 7, far: true },
+  /* Beyond Laniakea. Coma reaches ~2.9 h₇₀⁻¹ Mpc at Δc = 102 (Łokas & Mamon 2003); r₂₀₀c is 2.07 Mpc. */
+  { id: "perseusCluster", count: 500, core: 0.9, reach: 6, far: true },
+  { id: "comaCluster", count: 1000, core: 1.3, reach: 9.5, far: true },
+  { id: "shapleyCore", count: 700, core: 1.1, reach: 7, far: true },
 ];
 
 /** Visible diameters (Mly) of the galaxies drawn whole: the glow never shrinks below a few px. */
@@ -128,7 +133,8 @@ export function createCosmosLayer(
   points(localSheet(tight), m.sheet, flow);
   points(localSupercluster(tight), m.supercluster, flow);
   const web = laniakeaWeb(tight);
-  points(web.points, m.laniakea, flow);
+  const laniakeaCloud = points(web.points, m.laniakea, flow);
+  const webCloud = points(cosmicWeb(tight), m.web, flow);
   const flows = new LineSegments(scope.own(web.flows), looks.cosmosFlow);
   flows.frustumCulled = false;
   flow.add(flows);
@@ -161,6 +167,9 @@ export function createCosmosLayer(
   const triangulum = new Sprite(looks.cosmosGalaxy);
   root.add(milkyWay, andromeda, triangulum);
   const lgCentre = new Vector3();
+  const wallCentre = new Vector3();
+  /* Laniakea's inner landmarks give way once the web is in frame. */
+  const insideWeb = (ly: number) => 1 - rising(ly, 1.3e9, 2.2e9);
 
   const marks: Mark[] = [
     {
@@ -242,7 +251,7 @@ export function createCosmosLayer(
       at: cluster("centaurusCluster").group.position,
       spot: "centaurus",
       frame: COSMIC_VIEW_LY.laniakea,
-      range: (ly) => rising(ly, 200e6, 400e6),
+      range: (ly) => rising(ly, 200e6, 400e6) * insideWeb(ly),
     },
     {
       key: "hydraCluster",
@@ -251,7 +260,7 @@ export function createCosmosLayer(
       at: cluster("hydraCluster").group.position,
       spot: "hydra",
       frame: COSMIC_VIEW_LY.laniakea,
-      range: (ly) => rising(ly, 200e6, 400e6),
+      range: (ly) => rising(ly, 200e6, 400e6) * insideWeb(ly),
     },
     {
       key: "greatAttractor",
@@ -260,7 +269,7 @@ export function createCosmosLayer(
       at: heart.group.position,
       spot: "heart",
       frame: 300e6,
-      range: (ly) => rising(ly, 150e6, 300e6),
+      range: (ly) => rising(ly, 150e6, 300e6) * insideWeb(ly),
     },
     {
       key: "laniakea",
@@ -270,6 +279,42 @@ export function createCosmosLayer(
       spot: "heart",
       frame: COSMIC_VIEW_LY.laniakea,
       range: (ly) => rising(ly, 400e6, 650e6),
+    },
+    {
+      key: "perseusPisces",
+      pick: { kind: "cosmos", id: "perseusPisces" },
+      style: BELOW,
+      at: cluster("perseusCluster").group.position,
+      spot: "perseus",
+      frame: COSMIC_VIEW_LY.web,
+      range: (ly) => rising(ly, 350e6, 700e6),
+    },
+    {
+      key: "comaCluster",
+      pick: { kind: "cosmos", id: "coma" },
+      style: STRONG,
+      at: cluster("comaCluster").group.position,
+      spot: "coma",
+      frame: COSMIC_VIEW_LY.web,
+      range: (ly) => rising(ly, 250e6, 500e6),
+    },
+    {
+      key: "shapleySupercluster",
+      pick: { kind: "cosmos", id: "shapley" },
+      style: BELOW,
+      at: cluster("shapleyCore").group.position,
+      spot: "shapley",
+      frame: COSMIC_VIEW_LY.web,
+      range: (ly) => rising(ly, 700e6, 1.2e9),
+    },
+    {
+      key: "sloanGreatWall",
+      pick: { kind: "cosmos", id: "sloanGreatWall" },
+      style: BELOW,
+      at: wallCentre,
+      spot: "sloanGreatWall",
+      frame: COSMIC_VIEW_LY.web,
+      range: (ly) => rising(ly, 900e6, 1.6e9),
     },
   ];
 
@@ -293,6 +338,7 @@ export function createCosmosLayer(
     supercluster: m.supercluster.opacity,
     far: m.far.opacity,
     laniakea: m.laniakea.opacity,
+    web: m.web.opacity,
     galaxy: looks.cosmosGalaxy.opacity,
     cluster: looks.cosmosCluster.opacity,
     flow: looks.cosmosFlow.opacity,
@@ -353,7 +399,12 @@ export function createCosmosLayer(
       m.supercluster.opacity = base.supercluster * shown * rising(ly, 25e6, 80e6);
       m.far.opacity = base.far * shown * far;
       m.laniakea.opacity = base.laniakea * shown * rising(ly, 120e6, 380e6);
+      m.web.opacity = base.web * shown * rising(ly, 500e6, 1.4e9);
+      /* The two big clouds skip their draw while they are faded out. */
+      webCloud.visible = m.web.opacity > 0.002;
+      laniakeaCloud.visible = m.laniakea.opacity > 0.002;
       looks.cosmosFlow.opacity = base.flow * shown * rising(ly, 220e6, 600e6);
+      flows.visible = looks.cosmosFlow.opacity > 0.002;
       looks.cosmosGalaxy.opacity = base.galaxy * shown * (1 - rising(ly, 40e6, 120e6));
       looks.cosmosCluster.opacity = base.cluster * shown;
 
@@ -364,6 +415,8 @@ export function createCosmosLayer(
       position(milkyWay, [0, 0, 0]);
       const c = localGroupCentre(yearsAgo, v);
       lgCentre.set(c[0], c[1], c[2]);
+      const wall = anchorAt(anchorById("sloanGreatWall"), yearsAgo, v);
+      wallCentre.set(wall[0], wall[1], wall[2]);
       /* At their real size once that is larger than a dozen pixels. */
       for (const [sprite, mly] of [
         [milkyWay, DISC_MLY.milkyWay],
@@ -412,9 +465,11 @@ export function createCosmosLayer(
             ? chosen.at
             : ly < 25e6
               ? andromeda.position
-              : ly > 220e6
-                ? heart.group.position
-                : virgo.group.position;
+              : ly > 1.5e9
+                ? wallCentre
+                : ly > 220e6
+                  ? heart.group.position
+                  : virgo.group.position;
         cosmicToWorld([0, 0, 0], anchor, from);
         root.localToWorld(at.copy(to));
         rulers.draw(

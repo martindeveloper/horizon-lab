@@ -14,7 +14,8 @@
     "local-sheet": "Místní list",
     "virgo-cluster": "Kupa v Panně",
     "virgo-supercluster": "Nadkupa v Panně",
-    "laniakea": "Laniakea"
+    "laniakea": "Laniakea",
+    "cosmic-web": "Kosmická pavučina"
   },
   "viewHints": {
     "inner": "Merkur, Venuše, Země a Mars. Jupiter leží u okraje záběru.",
@@ -28,7 +29,8 @@
     "local-sheet": "Plochá stěna blízkých skupin, ve které žijeme, asi 46 milionů světelných let napříč.",
     "virgo-cluster": "Asi 1 500 galaxií zhruba 54 milionů světelných let od nás. My stojíme mimo ni.",
     "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi 110 milionů světelných let napříč.",
-    "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru."
+    "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru.",
+    "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan."
   },
   "units": {
     "au": "au",
@@ -129,6 +131,10 @@
     "hydraCluster": "Kupa v Hydře",
     "greatAttractor": "Velký atraktor",
     "laniakea": "Laniakea",
+    "perseusPisces": "Perseus–Ryby",
+    "comaCluster": "Kupa ve Vlasu Bereniky",
+    "shapleySupercluster": "Shapleyho nadkupa",
+    "sloanGreatWall": "Velká zeď Sloan",
     "million": "mil.",
     "localSheet": "Místní list",
     "billion": "mld."
@@ -247,7 +253,9 @@
     "future": "Budoucnost",
     "heart": "Srdce",
     "scaleThen": "Prostor tehdy",
-    "depth": "Tloušťka"
+    "depth": "Tloušťka",
+    "length": "Délka",
+    "lookback": "Světlo vyšlo"
   },
   "cards": {
     "sun": {
@@ -484,6 +492,37 @@
         "motion": "Vzdaluje se od Místní prázdnoty ~{value} km/s; uvnitř se galaxie odchylují jen o ~{stray} km/s",
         "body": "Tenká stěna galaxií, ve které žijeme: Místní skupina a její sousedé leží v jedné ploché vrstvě o poloměru asi {radius}; její galaxie se s rozpínáním vzdalují téměř v jednom kroku a celý list je odtlačován od prázdnoty Místní prázdnoty vedle něj. Leží na okraji Nadkupy v Panně.",
         "caution": "Na změřených místech jsou jen pojmenované skupiny; menší skupiny v listu jsou náčrt."
+      },
+      "perseusPisces": {
+        "title": "Nadkupa Perseus–Ryby",
+        "length": "Hlavní hřbet nejméně {value}",
+        "where": "Směrem k Perseovi a Rybám, hned vedle Laniakey",
+        "body": "Dlouhý řetěz galaxií a kup, jedno z nejzřetelnějších vláken na blízké obloze. Je to samostatná pánev vedle Laniakey: galaxie na její straně rozvodí proudí k ní, ne k Velkému atraktoru.",
+        "caution": "Řetěz je nakreslený přes několik změřených kup; kde protíná rovinu naší Galaxie, zakrývá ho Mléčná dráha. Vzdálenost vychází z rudého posuvu."
+      },
+      "coma": {
+        "title": "Kupa galaxií ve Vlasu Bereniky",
+        "members": "Asi {value} potvrzených spektry",
+        "mass": "Asi {value} Sluncí",
+        "heart": "NGC 4874 a NGC 4889",
+        "body": "Jedna z nejbohatších kup v našem okolí. Fritz Zwicky v roce 1933 zjistil, že se její galaxie pohybují příliš rychle, než aby je udržela svítící hmota: jedna z prvních silných stop temné hmoty.",
+        "caution": "Vzdálenost tu vychází z rudého posuvu, který vlastní pohyb kupy může posunout o několik procent; členové jsou nakreslený vzorek."
+      },
+      "shapley": {
+        "title": "Shapleyho nadkupa",
+        "members": "{clusters} kup v jejím rozsahu rychlostí; asi {galaxies} změřených galaxií v jejím poli",
+        "mass": "Asi {value} Sluncí",
+        "where": "Daleko za kupou v Kentauru, ve stejné části oblohy",
+        "body": "Jedno z největších soustředění hmoty v blízkém vesmíru. Spolu s Velkým atraktorem táhne Místní skupinu, i když kolik z našeho pohybu vysvětluje, se stále vede spor.",
+        "caution": "Její hmotnost je odhad pro prozkoumanou oblast a mezi studiemi se liší; kupy kolem jádra jsou umístěné přibližně."
+      },
+      "sloanGreatWall": {
+        "title": "Velká zeď Sloan",
+        "length": "Asi {value}; {past}, když vyšlo světlo, které vidíme",
+        "lookback": "Asi před {value} mld. let",
+        "where": "Podél nebeského rovníku, od Hydry přes Sextant a Lva k Panně",
+        "body": "Stěna kup galaxií vzdálená asi {distance}, objevená v roce 2003 v mapě přehlídky Sloan Digital Sky Survey. Vidíme ji, jaká byla, když z ní vyšlo světlo; mapa ji kreslí tam, kde je teď, roztaženou rozpínáním od té doby.",
+        "caution": "Zda jde o jednu stavbu, nebo několik nadkup za sebou, je sporné; kresba sleduje její obrys v přehlídce, ne její galaxie."
       }
     }
   },
@@ -609,7 +648,7 @@
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda, Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Daleko venku kamera obíhá v supergalaktické rovině. V čase plochý ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, stáří {universeGyr} miliardy let) násobí každou nevázanou vzdálenost faktorem a(t); Andromeda sleduje radiální dráhu argumentu časování přes dnešních {andromedaMly} milionu světelných let a {andromedaKms} km/s; kupy si drží velikost a shromažďují členy jako a^{growthPower}."
+        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda, Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Za Laniakeou leží hřbet Perseus–Ryby, kupa ve Vlasu Bereniky, Shapleyho koncentrace a Velká zeď Sloan v souběžných vzdálenostech z rudého posuvu, propojené nakreslenou sítí vláken kolem prázdnot. Daleko venku kamera obíhá v supergalaktické rovině. V čase plochý ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, stáří {universeGyr} miliardy let) násobí každou nevázanou vzdálenost faktorem a(t); Andromeda sleduje radiální dráhu argumentu časování přes dnešních {andromedaMly} milionu světelných let a {andromedaKms} km/s; kupy si drží velikost a shromažďují členy jako a^{growthPower}."
       }
     }
   },

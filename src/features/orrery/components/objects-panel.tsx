@@ -161,6 +161,22 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
             label={t("names.laniakea")}
             onPick={() => pick({ kind: "cosmos", id: "laniakea" }, "laniakea")}
           />
+          <Pick
+            label={t("names.perseusPisces")}
+            onPick={() => pick({ kind: "cosmos", id: "perseusPisces" }, "cosmic-web")}
+          />
+          <Pick
+            label={t("names.comaCluster")}
+            onPick={() => pick({ kind: "cosmos", id: "coma" }, "cosmic-web")}
+          />
+          <Pick
+            label={t("names.shapleySupercluster")}
+            onPick={() => pick({ kind: "cosmos", id: "shapley" }, "cosmic-web")}
+          />
+          <Pick
+            label={t("names.sloanGreatWall")}
+            onPick={() => pick({ kind: "cosmos", id: "sloanGreatWall" }, "cosmic-web")}
+          />
         </div>
       </Section>
       <Section title={t("hud.neighbours")}>
