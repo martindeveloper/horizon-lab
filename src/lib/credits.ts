@@ -8,19 +8,21 @@
 
 export type Licence =
   | "Public domain"
-  /** Measured values taken from a publication; facts, so no licence applies. */
+  /** Citation of published values or methods; does not relicense the source. */
   | "Cited"
   | "CC BY 4.0"
-  | "CC BY-SA 3.0 IGO"
+  | "CC BY-NC 3.0 IGO"
   | "SIL OFL 1.1"
+  | "BSD-2-Clause"
   | "MIT"
   | "ISC"
   | "Apache-2.0";
 
 export const LICENCE_URLS: Partial<Record<Licence, string>> = {
   "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
-  "CC BY-SA 3.0 IGO": "https://creativecommons.org/licenses/by-sa/3.0/igo/",
+  "CC BY-NC 3.0 IGO": "https://creativecommons.org/licenses/by-nc/3.0/igo/",
   "SIL OFL 1.1": "https://openfontlicense.org/",
+  "BSD-2-Clause": "https://opensource.org/license/bsd-2-clause",
   MIT: "https://opensource.org/license/mit",
   ISC: "https://opensource.org/license/isc-license-txt",
   "Apache-2.0": "https://www.apache.org/licenses/LICENSE-2.0",
@@ -146,6 +148,63 @@ export const CREDITS: readonly CreditGroup[] = [
     id: "data",
     items: [
       {
+        id: "ned",
+        name: "NASA/IPAC Extragalactic Database (NED)",
+        by: "IPAC, California Institute of Technology; NASA",
+        licence: "Cited",
+        url: "https://ned.ipac.caltech.edu/",
+      },
+      {
+        id: "planck",
+        name: "Planck 2018 cosmological parameters",
+        by: "ESA; Planck Collaboration (2020), A&A 641, A6",
+        licence: "Cited",
+        url: "https://doi.org/10.1051/0004-6361/201833910",
+      },
+      {
+        id: "nearbyGalaxies",
+        name: "Nearby galaxies catalogue (October 2019 table)",
+        by: "Alan W. McConnachie (2012), AJ 144, 4; Canadian Astronomy Data Centre",
+        licence: "Cited",
+        url: "https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/nearby/",
+      },
+      {
+        id: "gwosc",
+        name: "Gravitational Wave Open Science Center and LVK results",
+        by: "LIGO Scientific Collaboration, Virgo Collaboration and KAGRA",
+        licence: "CC BY 4.0",
+        url: "https://gwosc.org/acknowledgement/",
+      },
+      {
+        id: "naif",
+        name: "NAIF planetary constants kernel pck00011",
+        by: "NASA/JPL Navigation and Ancillary Information Facility; IAU WGCCRE",
+        licence: "Cited",
+        url: "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc",
+      },
+      {
+        id: "solarLimb",
+        name: "Solar limb-darkening coefficients",
+        by: "C. W. Allen, Astrophysical Quantities; D. Alexander and S. L. Freeland, SolarSoft",
+        licence: "Cited",
+        url: "https://hesperia.gsfc.nasa.gov/ssw/gen/idl/solar/darklimb_u.pro",
+      },
+      {
+        id: "iauUnits",
+        name: "IAU astronomical units and nominal solar values",
+        by: "International Astronomical Union, resolutions 2012 B2 and 2015 B2/B3",
+        licence: "Cited",
+        url: "https://www.iau.org/static/resolutions/IAU2015_English.pdf",
+      },
+      {
+        id: "si",
+        name: "International System of Units (SI)",
+        by: "Bureau International des Poids et Mesures (BIPM)",
+        licence: "Cited",
+        url: "https://www.bipm.org/en/publications/si-brochure",
+      },
+
+      {
         id: "solarProminences",
         name: "Solar prominences and filaments",
         by: "NASA / Marshall Space Flight Center",
@@ -184,7 +243,7 @@ export const CREDITS: readonly CreditGroup[] = [
         id: "gaia",
         name: "Gaia Data Release 3",
         by: "ESA/Gaia/DPAC",
-        licence: "CC BY-SA 3.0 IGO",
+        licence: "CC BY-NC 3.0 IGO",
         url: "https://www.cosmos.esa.int/web/gaia/dr3",
       },
       {
@@ -249,6 +308,13 @@ export const CREDITS: readonly CreditGroup[] = [
   {
     id: "software",
     items: [
+      {
+        id: "helland",
+        name: "Blackbody temperature-to-RGB approximation",
+        by: "Tanner Helland; fit based on Mitchell Charity’s blackbody colour data",
+        licence: "BSD-2-Clause",
+        url: "https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html",
+      },
       {
         id: "next",
         name: "Next.js",

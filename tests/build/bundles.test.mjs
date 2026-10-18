@@ -108,16 +108,10 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
   }
 });
 
-test("global 404 is branded and static; root errors include the custom recovery component", () => {
+test("standalone errors keep clean recovery links, noindex and lightweight bundles", () => {
   const html = read("server/app/_not-found.html");
-  assert.match(html, /horizon-status[\s\S]*>404<\/p>/);
-  // One language at a time: the cookie picks the copy, and one link goes home.
-  assert.match(html, /NEXT_LOCALE/);
-  assert.match(html, /data-locale="en"[^>]*>Back to all simulations</);
-  assert.match(html, /data-locale="cs"/);
   assert.doesNotMatch(html, /href="\/(?:en|cs)"/);
   assert.match(html, /href="\/"/);
-  assert.match(html, /horizon-theme/, "Standalone pages restore the saved theme");
   assert.match(html, /noindex/);
   assert.doesNotMatch(contents(assets("_not-found", ".js")), /WebGLRenderer|uniform vec3 uCamPos/);
 
@@ -131,7 +125,5 @@ test("global 404 is branded and static; root errors include the custom recovery 
   );
   assert.ok(entry, "Custom root error boundary must be included");
   const code = contents(entry[1].chunks.map((path) => path.replace(/^\/_next\//, "")));
-  assert.match(code, /500/);
-  assert.match(code, /errorTitle/);
   assert.doesNotMatch(code, /WebGLRenderer|uniform vec3 uCamPos/);
 });

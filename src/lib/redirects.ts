@@ -13,6 +13,9 @@ export function siteRedirects(): Map<string, string> {
   const add = (source: string, target: string) => {
     if (source !== target) redirects.set(source, target);
   };
+  add("/textures/orrery/CREDITS.md", "/credits#credits-map-details");
+  add("/SCIENTIFIC-SOURCES.txt", "/credits#credits-source-details");
+  add("/THIRD-PARTY-NOTICES.txt", "/credits#credits-licence-texts");
   const features = [
     [BLACK_HOLE_PATH, legacyPresetRedirects()],
     [ORRERY_PATH, legacyViewRedirects()],

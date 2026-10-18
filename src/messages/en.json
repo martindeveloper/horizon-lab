@@ -183,7 +183,7 @@
       "iau": "Sizes, poles and rotation of every body.",
       "nssdc": "Radii, albedos, and the rings of Uranus and Neptune.",
       "pds": "Ring edges, gaps and opacities from Cassini and Voyager occultations.",
-      "gaia": "Positions and motions of the nearest stars.",
+      "gaia": "Positions and motions of nearby stars, selected from Gaia DR3 and propagated with Horizon’s approximate motion model. ESA distributes Gaia data under CC BY-NC 3.0 IGO; commercial use requires ESA authorization.",
       "simbad": "Reference values for the bright and nearby stars.",
       "mpc": "Counts of known trans-Neptunian objects.",
       "gravity": "Sgr A*'s mass and the Sun's distance from the Galactic Centre.",
@@ -219,7 +219,16 @@
       "callistoMap": "Callisto: the USGS Voyager/Galileo monochrome mosaic. Missing coverage receives a plain fill rather than invented craters.",
       "tritonMap": "Triton: the USGS Voyager 2 synthetic-colour mosaic (orange, violet and ultraviolet filters), with muted saturation. The unobserved northern region uses a plain fill. Source grid lines were interpolated by USGS; this is not natural-colour photography.",
       "charonMap": "Charon: the USGS New Horizons monochrome mosaic. The unobserved southern region uses a plain fill. No surface colour is inferred from the monochrome data.",
-      "feather": "Original Feather icons used by Lucide, including navigation and interface controls."
+      "feather": "Original Feather icons used by Lucide, including navigation and interface controls.",
+      "ned": "Galaxy and cluster positions and redshifts. This work uses NED, operated by Caltech under contract with NASA.",
+      "planck": "Published cosmological parameters used for expansion, ages and distances. The drawn cosmic microwave background is illustrative; no Planck sky map is reproduced.",
+      "nearbyGalaxies": "Local Group membership and nearby-galaxy properties, citing McConnachie (2012) and the October 2019 catalogue table.",
+      "gwosc": "Published gravitational-wave event parameters, including GW150914 and GW231123. Values are selected and rounded for educational comparisons; Horizon does not replay detector strain data. Detailed citations and acknowledgements are in the scientific source record linked below.",
+      "naif": "Reference radii, rotation poles and prime meridians. Moon orbits use JPL satellite elements and approximate fits to Horizons vectors, not a live SPICE calculation.",
+      "solarLimb": "Red, green and blue coefficients evaluated from the SolarSoft darklimb_u and darklimb_v fits to Allen’s tables. Horizon applies an illustrative colour adjustment.",
+      "iauUnits": "Astronomical unit, parsec, Julian year and nominal solar mass parameter and radius used across both simulations.",
+      "si": "SI definitions underpinning units and the exact speed of light.",
+      "helland": "Adapted to GLSL and normalized RGB for the black-hole disk. This is an approximate display colour, not a calibrated spectrum."
     },
     "licences": {
       "publicDomain": "Public domain",
@@ -232,10 +241,18 @@
       "simbad": "This research has made use of the SIMBAD database and the VizieR catalogue access tool, operated at CDS, Strasbourg, France.",
       "changes": "Maps were reprojected, resampled and filled where data is missing; <link>what changed in each map</link>.",
       "endorsement": "Using NASA, ESA and USGS data does not imply their endorsement.",
-      "papers": "Each simulation's Technical details list the papers behind its numbers.",
+      "papers": "The <link>detailed scientific source record</link> lists catalogue sources, papers, model assumptions and unresolved measurement flags across both simulations. References remain in their published language.",
       "softwareNotices": "Full copyright and licence texts for fonts and software, including bundled dependencies: <link>third-party notices</link>."
     },
-    "contents": "On this page"
+    "contents": "On this page",
+    "documents": {
+      "imagery": "Map details",
+      "science": "Scientific sources",
+      "notices": "Licence texts",
+      "imageryIntro": "Original source and processing records for the imagery. Expand a record to read it in its original language.",
+      "scienceIntro": "References, acknowledgements and measurement records, including model assumptions and unresolved checks. Records retain their original language and notation.",
+      "noticesIntro": "Full copyright and licence notices, reproduced in their original language. Includes bundled dependencies; some are used only on the server or during the build."
+    }
   },
   "loading": {
     "simulationTitle": "Opening",

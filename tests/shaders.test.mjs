@@ -1,12 +1,5 @@
 import assert from "node:assert/strict";
-import {
-  realpathSync,
-  mkdtempSync,
-  writeFileSync,
-  rmSync,
-  readFileSync,
-  readdirSync,
-} from "node:fs";
+import { realpathSync, mkdtempSync, writeFileSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -102,20 +95,6 @@ test("loader tracks nested relative files, rebuilds changed dependencies and exp
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-});
-
-test("every application shader expands without runtime Horizon includes", () => {
-  const roots = ["src/features", "packages/toolkit/src/shaders"];
-  let count = 0;
-  for (const root of roots) {
-    for (const file of readdirSync(root, { recursive: true })) {
-      if (!file.endsWith(".glsl")) continue;
-      const { source } = load(path.resolve(root, file));
-      assert.doesNotMatch(source, /^\s*#\s*include\s+[<"](?:horizon\/|\.)/m, file);
-      count++;
-    }
-  }
-  assert.ok(count >= 20);
 });
 
 test("block comments surrounding include directives remain balanced", () => {

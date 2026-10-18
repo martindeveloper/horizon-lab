@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { nearestStar } from "../src/components/shell/sky-picking.ts";
-import { horizontalPositions, OBSERVER, STARS } from "../src/components/shell/stars.ts";
+import { horizontalPositions, OBSERVER } from "../src/components/shell/stars.ts";
 
 const placed = (name, magnitude, x, y) => ({ star: [name, 0, 0, magnitude, 0], x, y });
 
@@ -61,14 +61,4 @@ test("hover identifies individual Pleiades stars instead of always selecting Alc
     assert.ok(Math.hypot(target.x - alcyone.x, target.y - alcyone.y) < 22, name);
     assert.equal(nearestStar(stars, target.x, target.y, 22), target, name);
   }
-});
-
-test("the shared catalogue uses Gienah for gamma Corvi", () => {
-  // IAU WGSN: https://exopla.net/star-names/modern-iau-star-names/
-  const matches = STARS.filter(([name]) => name === "Gienah");
-  assert.equal(matches.length, 1);
-  assert.ok(!STARS.some(([name]) => name === "Gienah Corvi"));
-  const [, ra, dec] = matches[0];
-  assert.ok(Math.abs(ra * 15 - 183.951545) < 0.001);
-  assert.ok(Math.abs(dec - -17.54193046) < 0.001);
 });

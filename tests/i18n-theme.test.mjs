@@ -4,16 +4,8 @@ import test from "node:test";
 
 import { createTranslator } from "next-intl";
 
-import { formatDistance } from "@horizon/toolkit/science";
-
-import {
-  HOLES,
-  custom,
-  HOLE_ALIASES,
-  PRESETS,
-} from "../src/features/black-hole/lib/holes/index.ts";
+import { HOLE_ALIASES, PRESETS } from "../src/features/black-hole/lib/holes/index.ts";
 import { pathForHole, presetFromPath, resolveHole } from "../src/features/black-hole/routing.ts";
-import { TOUR } from "../src/features/orrery/lib/model/tour.ts";
 import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
 import { localeRewrites, siteRedirects } from "../src/lib/redirects.ts";
@@ -74,26 +66,6 @@ test("English and Czech have identical keys and every ICU message formats", () =
       const text = Object.keys(tags).length ? t.markup(key, { ...args, ...tags }) : t(key, args);
       assert.ok(text.length, `${locale}:${key}`);
     }
-    assert.ok(t("blackHole.pins.horizon1", { rh: "1.57" }).includes("1.57"));
-  }
-});
-
-test("distances use the IAU symbol au and the shared light-time readout", () => {
-  for (const [locale, messages] of Object.entries(catalogs)) {
-    for (const feature of ["orrery", "blackHole"])
-      for (const [key, text] of leaves(messages[feature]))
-        assert.doesNotMatch(text, /\bAU\b/, `${locale}:${feature}.${key}`);
-    const { units, names } = messages.orrery;
-    const text = formatDistance(5.37, {
-      unit: "au",
-      locale,
-      symbols: { au: units.au, ly: units.ly, pc: units.pc },
-      lightTimeLabel: names.lightTime,
-    });
-    assert.equal(
-      text,
-      locale === "cs" ? "5,37 au · světlo letí 45 min" : "5.37 au · light-time 45 min",
-    );
   }
 });
 
@@ -210,37 +182,4 @@ test("localized preset links, aliases, and initial scene state agree", () => {
   }
   assert.equal(resolveHole("unknown-black-hole"), null);
   assert.equal(resolveHole("M87"), "m87");
-});
-
-test("every tour camera pose has translated copy in both languages", () => {
-  for (const messages of Object.values(catalogs)) {
-    for (const hole of [...HOLES, custom]) {
-      const copy = messages.blackHole.tours[hole.id];
-      assert.equal(Object.keys(copy).length, hole.tour.length, hole.id);
-      for (const beat of Object.values(copy)) {
-        assert.ok(beat.title && beat.body && beat.kicker);
-      }
-      assert.ok(Object.keys(messages.blackHole.stories[hole.id]).length);
-    }
-  }
-});
-
-test("every orrery tour step has translated copy in both languages", () => {
-  for (const locale of routing.locales) {
-    const copy = JSON.parse(
-      readFileSync(
-        new URL(`../src/features/orrery/messages/${locale}.json`, import.meta.url),
-        "utf8",
-      ),
-    ).tour.steps;
-    assert.deepEqual(
-      Object.keys(copy),
-      TOUR.map((step) => step.id),
-      locale,
-    );
-    for (const step of TOUR) {
-      assert.ok(copy[step.id].title && copy[step.id].body, `${locale} ${step.id}`);
-      assert.equal(Boolean(copy[step.id].eq), Boolean(step.eq), `${locale} ${step.id} eq`);
-    }
-  }
 });

@@ -22,6 +22,7 @@ import {
   iscoOverM,
   iscoPeriodSeconds,
   massSeconds,
+  orbitalPeriodSeconds,
   photonOverM,
   rainDrDt,
   rainRedshift,
@@ -60,6 +61,8 @@ test("the Schwarzschild ISCO period equals Kepler's law at r = 6GM/c²", () => {
     const kepler = 2 * Math.PI * Math.sqrt(r ** 3 / gm);
     near(iscoPeriodSeconds(mass, 0) / kepler, 1, 1e-4, `${mass} M☉`);
   }
+  near(orbitalPeriodSeconds(10, 6, 0), 0.004549, 0.000002);
+  near(orbitalPeriodSeconds(20, 6, 0), 2 * orbitalPeriodSeconds(10, 6, 0), 1e-12);
   // Sgr A*'s ISCO period is about half an hour.
   near(iscoPeriodSeconds(4.3e6, 0) / 60, 32.6, 0.2, "Sgr A* minutes");
 });
@@ -98,6 +101,9 @@ test("Kerr radii reach their extremal and Schwarzschild limits", () => {
   near(photonOrbit.compute({ a: -1 }), 4, 1e-9);
   near(innermostStableOrbit.compute({ a: -1 }), 9, 1e-9);
   // The app clamps spin below 1; the clamped helpers agree with the formulas.
+  near(horizonOverM(-0.9), horizonOverM(0.9), 1e-12);
+  near(iscoOverM(-0.998), 8.994374455, 1e-8);
+  near(innermostStableOrbit.compute({ a: 0.998 }), 1.236970655, 1e-8);
   near(horizonOverM(0.5), kerrHorizon.compute({ a: 0.5 }), 1e-15);
   near(photonOverM(0.5), photonOrbit.compute({ a: 0.5 }), 1e-15);
   near(iscoOverM(0.5), innermostStableOrbit.compute({ a: 0.5 }), 1e-15);

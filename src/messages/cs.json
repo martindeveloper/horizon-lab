@@ -183,7 +183,7 @@
       "iau": "Rozměry, orientace rotačních os a rotace těles.",
       "nssdc": "Poloměry, albeda a prstence Uranu a Neptunu.",
       "pds": "Okraje, mezery a neprůhlednost prstenců ze zákrytových měření sond Cassini a Voyager.",
-      "gaia": "Polohy a pohyby nejbližších hvězd.",
+      "gaia": "Polohy a pohyby blízkých hvězd vybrané z Gaia DR3 a přepočtené přibližným modelem pohybu v Horizonu. ESA poskytuje data Gaia pod CC BY-NC 3.0 IGO; komerční použití vyžaduje souhlas ESA.",
       "simbad": "Referenční hodnoty pro jasné a blízké hvězdy.",
       "mpc": "Počty známých transneptunických těles.",
       "gravity": "Hmotnost Sgr A* a vzdálenost Slunce od středu Galaxie.",
@@ -219,7 +219,16 @@
       "callistoMap": "Callisto: monochromatická mozaika USGS ze snímků Voyageru a Galilea. Chybějící pokrytí má jednolitou výplň místo smyšlených kráterů.",
       "tritonMap": "Triton: mozaika USGS ze snímků Voyageru 2 v syntetických barvách (oranžový, fialový a ultrafialový filtr), se sníženou sytostí. Nepozorovaná severní oblast má jednolitou výplň. USGS interpoloval původní čáry souřadnicové sítě; nejde o fotografii v přirozených barvách.",
       "charonMap": "Charon: monochromatická mozaika USGS ze snímků New Horizons. Nepozorovaná jižní oblast má jednolitou výplň. Z monochromatických dat neodvozujeme barvu povrchu.",
-      "feather": "Původní ikony Feather používané v Lucide, včetně navigace a ovládacích prvků rozhraní."
+      "feather": "Původní ikony Feather používané v Lucide, včetně navigace a ovládacích prvků rozhraní.",
+      "ned": "Polohy a rudé posuvy galaxií a kup galaxií. Tato práce využívá NED, který provozuje Caltech na základě smlouvy s NASA.",
+      "planck": "Publikované kosmologické parametry pro rozpínání, stáří a vzdálenosti. Zobrazené reliktní záření je ilustrativní; nepřebíráme mapu oblohy Planck.",
+      "nearbyGalaxies": "Členství v Místní skupině a vlastnosti blízkých galaxií podle McConnachieho (2012) a tabulky katalogu z října 2019.",
+      "gwosc": "Publikované parametry událostí gravitačních vln včetně GW150914 a GW231123. Hodnoty vybíráme a zaokrouhlujeme pro výuková srovnání; Horizon nepřehrává data deformací z detektorů. Podrobné citace a poděkování jsou v přehledu vědeckých zdrojů níže.",
+      "naif": "Referenční poloměry, rotační póly a nulté poledníky. Dráhy měsíců využívají elementy JPL a přibližné proložení vektorů Horizons, nikoli živý výpočet SPICE.",
+      "solarLimb": "Koeficienty pro červenou, zelenou a modrou složku vyhodnocené z proložení Allenových tabulek ve funkcích SolarSoft darklimb_u a darklimb_v. Horizon přidává ilustrativní úpravu barev.",
+      "iauUnits": "Astronomická jednotka, parsek, juliánský rok a nominální gravitační parametr a poloměr Slunce používané v obou simulacích.",
+      "si": "Definice SI tvořící základ jednotek a přesné rychlosti světla.",
+      "helland": "Přizpůsobeno pro GLSL a normalizované RGB disku černé díry. Jde o přibližnou barvu pro zobrazení, nikoli kalibrované spektrum."
     },
     "licences": {
       "publicDomain": "Volné dílo",
@@ -232,10 +241,18 @@
       "simbad": "Tato práce využívá databázi SIMBAD a katalogový nástroj VizieR provozované v CDS ve Štrasburku ve Francii.",
       "changes": "Mapy jsou převedené do jiné projekce, převzorkované a doplněné tam, kde data chybí; <link>co se u které mapy změnilo</link>.",
       "endorsement": "Použití dat NASA, ESA a USGS neznamená, že tyto instituce web podporují.",
-      "papers": "V technických podrobnostech každé simulace najdete odborné práce, ze kterých vycházejí uvedené hodnoty.",
+      "papers": "<link>Podrobný přehled vědeckých zdrojů</link> uvádí zdroje katalogů, články, modelové předpoklady a nevyřešené nejistoty měření v obou simulacích. Citace zůstávají v původním jazyce.",
       "softwareNotices": "Úplná znění autorských oznámení a licencí písem a softwaru včetně přibalených závislostí: <link>oznámení třetích stran</link>."
     },
-    "contents": "Na této stránce"
+    "contents": "Na této stránce",
+    "documents": {
+      "imagery": "Podrobnosti map",
+      "science": "Vědecké zdroje",
+      "notices": "Znění licencí",
+      "imageryIntro": "Původní záznamy o zdrojích a zpracování snímků. Rozbalením zobrazíte záznam v původním jazyce.",
+      "scienceIntro": "Reference, poděkování a záznamy o měřeních včetně modelových předpokladů a nevyřešených kontrol. Záznamy zachovávají původní jazyk a zápis.",
+      "noticesIntro": "Úplná autorská oznámení a znění licencí v původním jazyce. Zahrnuje přibalené závislosti; některé se používají pouze na serveru nebo při sestavení."
+    }
   },
   "loading": {
     "simulationTitle": "Otevíráme",

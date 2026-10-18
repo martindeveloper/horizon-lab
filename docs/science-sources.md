@@ -690,6 +690,45 @@ Every reference in `orrery/technical.json:104` and `bh/technical.json:78` was re
 | Black-hole references: BPT 1972, Page & Thorne 1974, Narayan et al. 2019, GRAVITY 2022, EHT 2025, Miller-Jones 2021, Ramachandran 2025, Chandrasekhar 1960, Helland 2012, NASA visualization                                                                                                                                        | verified |                                                                                                  |
 | USGS Pluto global mosaic                                                                                                                                                                                                                                                                                                            | **flag** | usgs.gov returned 403/504; image credit, not a number                                            |
 
+## Additional rendering and surface references
+
+These references support illustrative rendering choices and physical constraints;
+they do not supply observed textures unless explicitly identified in the imagery
+credits. The public source record also includes both technical bibliographies and
+the live catalogue source registry.
+
+- `toolkit/surfaces/giants.ts`: Simon et al. 2024, PSJ 5, 223 (Great Red Spot);
+  Chavez et al. 2023, Icarus 404 (Neptune cloud variability); Irwin et al. 2024,
+  MNRAS 527, 11521 (Uranus and Neptune colours).
+- `toolkit/surfaces/planets.ts`: Titov et al. 2018, Space Sci. Rev. 214, 126
+  (Venus clouds); Barucci et al. 2005, Emery et al. 2007, Pál et al. 2012 and
+  Gaudi et al. 2005 (Sedna constraints); Keller et al. 1986/1987 and
+  Stooke & Abergel 1991 (Halley). The generated maps are Horizon illustrations.
+- `toolkit/surfaces/moons.ts`: Smith et al. 1981; Porco et al. 2005;
+  Lorenz et al. 2004; Roman et al. 2009 (Titan atmosphere and haze).
+- `toolkit/surfaces/index.ts`: Buratti et al. 2017 (New Horizons albedos),
+  Pál et al. 2012 (Sedna), and the NASA planetary fact sheets.
+- `orrery/ring.frag.glsl`: Chandrasekhar 1960, Radiative Transfer;
+  Cuzzi et al. 1984 (single-scattering slab approximation).
+- `toolkit/temperature.glsl`: Tanner Helland 2012, temperature-to-RGB fit,
+  based on Mitchell Charity's blackbody colour table. The GLSL adaptation's
+  BSD-2-Clause notice is included in the public third-party notices.
+- `orrery/solar-activity.ts`: NASA/MSFC solar features,
+  <https://solarscience.msfc.nasa.gov/feature2.shtml>;
+  <https://www.nasa.gov/image-article/what-solar-prominence/>;
+  <https://www.nasa.gov/image-article/suns-corona-seen-during-2017-solar-eclipse/>.
+  Geometry, positions, timing and dynamics are illustrative, not observations.
+- `toolkit/science/laws.ts`: Kepler, Astronomia Nova (1609) and Harmonices
+  Mundi (1619); Schwarzschild (1916); Sinnott 1984, Sky & Telescope 68, 159;
+  Hubble 1929, PNAS 15, 168; Lemaître (1927).
+- `bh/atlas.ts`: Maíz Apellániz et al. 2022, A&A 657, A131 (Orion distance
+  context), in addition to the atlas-site references above.
+
+Public attribution maintenance: run `npm run credits:generate` after changing this
+ledger, either `technical.json`, the catalogue `SOURCES` registry or shared
+constant citations. `npm test` checks that the public record remains current.
+This attribution audit does not remove the measurement flags below.
+
 ## Open flags
 
 - Planetesimals by ~0.1 Myr and Moon-mass embryos by ~1 Myr (`orrery/parameters.ts:16`, `orrery/parameters.ts:18`): consistent with reviews; no primary text was readable.

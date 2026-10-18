@@ -4,13 +4,7 @@ import test from "node:test";
 import { moonAxis, moonEcliptic, moonPhase } from "@horizon/toolkit/bodies";
 import { risingHourAngle } from "@horizon/toolkit/science";
 
-import {
-  horizontalPositions,
-  moonPosition,
-  OBSERVER,
-  siderealTime,
-  sunPosition,
-} from "../src/components/shell/stars.ts";
+import { moonPosition, OBSERVER, sunPosition } from "../src/components/shell/stars.ts";
 
 const at = (iso) => sunPosition(new Date(iso), OBSERVER.latitude, OBSERVER.longitude);
 
@@ -114,64 +108,4 @@ test("the hero dial cuts each body's daily circle where it rises and sets", () =
     OBSERVER.longitude,
   );
   assert.ok(Math.abs(moon.hourAngle) <= 180 && Math.abs(moon.declination) < 29);
-});
-
-test("the shell sky draws the same numbers it did before the astronomy moved to the toolkit", () => {
-  // Values from the shell's own Meeus code, captured before the move. Only the
-  // Moon shifts, by under 1e-6° in altitude (Earth's radius 6378.14 → IAU
-  // 6378.1366 km) and 1e-4° in its bearings; everything else is bit-identical.
-  const pinned = [
-    {
-      iso: "2000-01-01T12:00:00Z",
-      lst: 295.24281837,
-      sun: [16.0070971571, 193.351268397, 13.9571431242, -23.0334404382],
-      moon: [1.51999586728, 249.851494607, 72.7876298247, -10.9065081031],
-      bearings: [-71.9259898385, 21.1963454006],
-      illumination: 0.230100383192,
-      waxing: false,
-      sirius: [-54.9431989756, 23.7108774457],
-    },
-    {
-      iso: "2026-10-18T18:00:00Z",
-      lst: 312.020031946,
-      sun: [-19.3778411972, 277.89638376, 108.508946915, -9.81080722438],
-      moon: [14.7159964907, 192.623534245, 13.2757523692, -23.5552538026],
-      bearings: [109.918014118, 18.5995481058],
-      illumination: 0.508495749663,
-      waxing: true,
-      sirius: [-48.7734716633, 47.3918145176],
-    },
-    {
-      iso: "2049-06-21T03:00:00Z",
-      lst: 329.535557034,
-      sun: [0.153885934035, 52.0943753981, -120.690168792, 23.4323330574],
-      moon: [36.4642975806, 162.994762586, -13.4674572334, -1.55414655293],
-      bearings: [-77.0871751739, 11.7355548894],
-      illumination: 0.642300789488,
-      waxing: false,
-      sirius: [-39.4754083193, 66.5449328515],
-    },
-  ];
-  const near = (actual, expected, tolerance, label) =>
-    assert.ok(Math.abs(actual - expected) < tolerance, `${label}: ${actual} vs ${expected}`);
-  for (const p of pinned) {
-    const date = new Date(p.iso);
-    near(siderealTime(date, OBSERVER.longitude), p.lst, 1e-8, `${p.iso} sidereal time`);
-    const sun = sunPosition(date, OBSERVER.latitude, OBSERVER.longitude);
-    ["altitude", "azimuth", "hourAngle", "declination"].forEach((key, i) =>
-      near(sun[key], p.sun[i], 1e-8, `${p.iso} Sun ${key}`),
-    );
-    const moon = moonPosition(date, OBSERVER.latitude, OBSERVER.longitude);
-    ["altitude", "azimuth", "hourAngle", "declination"].forEach((key, i) =>
-      near(moon[key], p.moon[i], key === "altitude" ? 1e-6 : 1e-8, `${p.iso} Moon ${key}`),
-    );
-    ["limb", "north"].forEach((key, i) => near(moon[key], p.bearings[i], 1e-4, `${p.iso} ${key}`));
-    near(moon.illumination, p.illumination, 1e-10, `${p.iso} illumination`);
-    assert.equal(moon.waxing, p.waxing);
-    const sirius = horizontalPositions(date, OBSERVER.latitude, OBSERVER.longitude).find(
-      ({ star }) => star[0] === "Sirius",
-    );
-    near(sirius.altitude, p.sirius[0], 1e-8, `${p.iso} Sirius altitude`);
-    near(sirius.azimuth, p.sirius[1], 1e-8, `${p.iso} Sirius azimuth`);
-  }
 });

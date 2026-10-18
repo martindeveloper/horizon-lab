@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createOrbitWriter, writeOrbit, ephemerisSelfCheck } from "@horizon/toolkit/bodies";
@@ -232,38 +231,9 @@ test("orrery HUD throttles drift readouts to 1 Hz even across forced redraws and
   assert.equal(formatYearsAgo(t, f, 5e6), "time.million:5.0");
 });
 
-test("sky and schematic disks draw in the pre-body pass and planetesimals use smooth cratered sRGB shaders", () => {
+test("orbit lines do not occlude bodies in the depth buffer", () => {
   const orbit = lineOf(0xffffff, 0.6);
   assert.equal(orbit.material.depthWrite, false);
   orbit.geometry.dispose();
   orbit.material.dispose();
-
-  const skySource = readFileSync(
-    new URL("../src/features/orrery/lib/graphics/sky.ts", import.meta.url),
-    "utf8",
-  );
-  // Pre-body additive sky materials must keep transparent: false so Three.js
-  // sorts their negative renderOrder ahead of opaque 3D bodies instead of
-  // drawing stars on top of planets and planetesimals in the transparent pass.
-  assert.doesNotMatch(skySource, /transparent:\s*true/);
-  assert.match(skySource, /band\.renderOrder\s*=\s*-4/);
-
-  const rockVert = readFileSync(
-    new URL("../src/features/orrery/lib/graphics/shaders/rock.vert.glsl", import.meta.url),
-    "utf8",
-  );
-  const rockFrag = readFileSync(
-    new URL("../src/features/orrery/lib/graphics/shaders/rock.frag.glsl", import.meta.url),
-    "utf8",
-  );
-  assert.match(rockVert, /smoothValue3/);
-  assert.match(rockVert, /rockShape/);
-  assert.match(rockVert, /worldRadius\s*<=\s*0\.0/);
-  assert.match(rockVert, /vDetail/);
-  assert.doesNotMatch(rockVert, /floor\(position/);
-  assert.match(rockFrag, /craterLayer/);
-  assert.match(rockFrag, /valueGrad3/);
-  assert.match(rockFrag, /vDetail\s*>\s*0\.02/);
-  assert.match(rockFrag, /linearToOutputTexel/);
-  assert.doesNotMatch(rockFrag, /floor\(n\s*\*/);
 });

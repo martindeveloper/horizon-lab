@@ -1,15 +1,19 @@
-# Third-party notices
+# Credits maintenance
 
-Run `npm run licenses:generate` after installing dependency updates and commit
-`public/THIRD-PARTY-NOTICES.txt`. `npm test` and `npm run licenses:check` reject
-stale notices. The credits page links to this file in both languages.
+`/credits` is the single public attribution page. Run `npm run credits:generate`
+after updating dependencies or scientific source records. Commit the generated
+`src/data/credits.generated.json`; do not edit it manually. `npm test` and
+`npm run credits:check` detect stale output.
 
-The generator copies licence, copyright, OFL and NOTICE files verbatim from
-platform-independent production dependencies in `package-lock.json`, including
-nested bundled components (for example, Next.js's compiled dependencies).
-It deliberately includes server-only dependencies too; it is not a bundle-size
-inventory. Native/optional build and server binaries and the SWC download counter
-are excluded. Reassess those licences separately if distributing server binaries.
+The generator collects upstream software notices, `docs/imagery-credits.md`,
+`docs/science-sources.md`, the catalogue source registry, shared constants,
+both technical bibliographies, and the acknowledgements here. These are internal
+source records; the page renders them in expandable sections without client JS.
+Original licence texts and citations stay in their published language.
+
+The software inventory includes platform-independent production dependencies
+and their bundled notices. Native/optional server binaries and the SWC download
+counter are excluded; review those separately if distributing server binaries.
 
 Some npm tarballs omit their licence file:
 
@@ -21,6 +25,10 @@ Some npm tarballs omit their licence file:
   on 2026-10-18 for installed version 1.21.5. Review this upstream licence when
   updating that dependency.
 
-Music provenance remains unconfirmed by the owner; these notices do not establish
-rights to the ambient track. Imagery attribution lives separately in
-`public/textures/orrery/CREDITS.md` and on `/credits`.
+The blackbody shader also adapts Tanner Helland's temperature-to-RGB algorithm.
+`tanner-helland-LICENSE.txt` was copied verbatim on 2026-10-18 from
+<https://raw.githubusercontent.com/tannerhelland/vb6-code/master/LICENSE.md>,
+the licence linked by <https://tannerhelland.com/code.html>. It is included even
+though this code is not an npm dependency.
+
+`scientific-acknowledgements.txt` preserves the GWOSC acknowledgement and data terms.

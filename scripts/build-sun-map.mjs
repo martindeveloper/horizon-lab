@@ -1,6 +1,6 @@
 /** Build the Sun only: node --import tsx scripts/build-sun-map.mjs [source-cache].
  * Offline, reproducible preprocessing of NASA's HMIIF browse images; no live feed.
- * See public/textures/orrery/CREDITS.md for limitations and source attribution.
+ * See docs/imagery-credits.md for limitations and source attribution.
  */
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";

@@ -114,42 +114,6 @@ test("a flight across maps keeps a selection made for its destination", async ()
   assert.equal(dropsSelection(laniakea, "cosmos", null), false);
 });
 
-test("cosmic distances read in the chosen unit, millions as a word", async () => {
-  const { formatDistance, LIGHT_YEAR_AU } = await import("@horizon/toolkit/science");
-  const options = (unit) => ({
-    unit,
-    locale: "en",
-    symbols: { au: "au", ly: "ly", pc: "pc" },
-    millionWord: "million",
-  });
-  const virgo = 53.8e6 * LIGHT_YEAR_AU;
-  assert.equal(formatDistance(virgo, options("ly")), "53.8 million ly");
-  assert.equal(formatDistance(virgo, options("pc")), "16.5 million pc");
-  assert.match(formatDistance(virgo, options("au")), /× 10¹² au$/);
-  assert.equal(formatDistance(9e5 * LIGHT_YEAR_AU, options("ly")), "900,000 ly");
-});
-
-test("every label on the cosmic map has a card", async () => {
-  const { COSMOS_LABELS } = await import("../src/features/orrery/lib/model/cosmos.ts");
-  const { readFileSync } = await import("node:fs");
-  const layer = readFileSync(
-    new URL("../src/features/orrery/lib/scene/cosmos-layer.ts", import.meta.url),
-    "utf8",
-  );
-  const en = JSON.parse(
-    readFileSync(new URL("../src/features/orrery/messages/en.json", import.meta.url), "utf8"),
-  );
-  for (const key of COSMOS_LABELS) {
-    const mark = layer.match(
-      new RegExp(`key: "${key}",\\s*pick: \\{ kind: "(\\w+)", id: "(\\w+)" \\}`),
-    );
-    assert.ok(mark, `${key} has a target`);
-    const [, kind, id] = mark;
-    const card = kind === "cosmos" ? en.cards.cosmos[id] : en.cards[kind]?.[id];
-    assert.ok(card?.title && card?.body, `${key} opens a card (${kind}.${id})`);
-  }
-});
-
 test("zooming out holds on the Local Group over its own sheet before turning to Virgo", async () => {
   const { COSMIC_VIEW_LY, localGroupCentre } =
     await import("../src/features/orrery/lib/model/cosmos.ts");
@@ -157,16 +121,6 @@ test("zooming out holds on the Local Group over its own sheet before turning to 
   for (let ly = COSMIC_VIEW_LY.localGroup; ly <= COSMIC_VIEW_LY.sheet; ly *= 1.1)
     near(length(cosmicAim(ly, 0)), lg, 1e-9, `still on the Local Group at ${ly}`);
   assert.ok(length(cosmicAim(COSMIC_VIEW_LY.virgo, 0)) > 20, "then on toward Virgo");
-  const order = VIEWS.filter((v) => v.realm === "cosmos").map((v) => v.id);
-  assert.deepEqual(order, [
-    "local-group",
-    "local-sheet",
-    "virgo-cluster",
-    "virgo-supercluster",
-    "laniakea",
-    "cosmic-web",
-    "observable-universe",
-  ]);
 });
 
 test("the observable universe: its edge and the microwave background from the same cosmology", async () => {

@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import creditDocuments from "@/data/credits.generated.json";
 import type { Locale } from "@/i18n/routing";
 import { CREDITS, LICENCE_URLS, type Credit, type CreditGroup, type Licence } from "@/lib/credits";
 import { Surface, cn, kickerClass } from "@horizon/toolkit/ui";
@@ -192,26 +193,70 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 <li>
                   {t.rich("notes.changes", {
                     link: (chunks) => (
-                      <External href="/textures/orrery/CREDITS.md" label={t("newTab")}>
+                      <a href="#credits-map-details" className={linkClass}>
                         {chunks}
-                      </External>
+                      </a>
                     ),
                   })}
                 </li>
                 <li>
                   {t.rich("notes.softwareNotices", {
                     link: (chunks) => (
-                      <External href="/THIRD-PARTY-NOTICES.txt" label={t("newTab")}>
+                      <a href="#credits-licence-texts" className={linkClass}>
                         {chunks}
-                      </External>
+                      </a>
                     ),
                   })}
                 </li>
                 <li>{t("notes.endorsement")}</li>
-                <li>{t("notes.papers")}</li>
+                <li>
+                  {t.rich("notes.papers", {
+                    link: (chunks) => (
+                      <a href="#credits-source-details" className={linkClass}>
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </li>
               </ul>
             </Surface>
           </section>
+
+          {(
+            [
+              ["map-details", "imagery"],
+              ["source-details", "science"],
+              ["licence-texts", "notices"],
+            ] as const
+          ).map(([id, key]) => (
+            <section
+              key={id}
+              id={`credits-${id}`}
+              aria-labelledby={`credits-${id}-heading`}
+              className={cn("mt-16 scroll-mt-24 sm:mt-20", grid)}
+            >
+              <h2 id={`credits-${id}-heading`} className={cn(kickerClass, "lg:pt-5 lg:text-right")}>
+                {t(`documents.${key}`)}
+              </h2>
+              <div className="mt-3 min-w-0 lg:mt-0">
+                <p className="mb-5 text-sm leading-relaxed text-muted">
+                  {t(`documents.${key}Intro`)}
+                </p>
+                <Surface className="divide-y divide-border rounded-lg">
+                  {creditDocuments[key].map(({ title, text }, index) => (
+                    <details key={`${title}-${index}`} className="group p-5">
+                      <summary className="cursor-pointer rounded-sm text-sm font-medium text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden">
+                        {title}
+                      </summary>
+                      <pre className="mt-4 font-sans text-xs leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap text-muted">
+                        {text}
+                      </pre>
+                    </details>
+                  ))}
+                </Surface>
+              </div>
+            </section>
+          ))}
         </div>
       </article>
     </main>

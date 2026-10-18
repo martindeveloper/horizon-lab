@@ -30,8 +30,8 @@
     "shaders:check": "node --import tsx scripts/generate-shader-headers.mjs --check",
     "test:bundles": "node --test tests/build/*.test.mjs",
     "assets:generate": "node scripts/generate-social-assets.mjs",
-    "licenses:generate": "node scripts/generate-license-notices.mjs",
-    "licenses:check": "node scripts/generate-license-notices.mjs --check"
+    "credits:generate": "node --import tsx scripts/generate-credits.mjs",
+    "credits:check": "node --import tsx scripts/generate-credits.mjs --check"
   },
   "dependencies": {
     "@fontsource-variable/bodoni-moda": "^5.3.0",
