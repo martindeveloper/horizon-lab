@@ -21,11 +21,14 @@ import {
   RAD_PER_DEG as RAD,
   comovingDistanceMpc,
   convert,
+  cosmicAgeAtRedshiftGyr,
   cosmicAgeGyr,
   defineEquation,
   equatorialToGalactic,
   formatNumber,
   hubbleLaw,
+  particleHorizonMpc,
+  redshiftAtLookback,
   scaleFactorAtAge,
 } from "@horizon/toolkit/science";
 
@@ -79,8 +82,45 @@ export const hubbleMly = (cz: number) =>
  * Comoving distance (Mly) for a redshift given as cz (km/s), in the model's cosmology: where
  * Hubble's law runs long (by ~2 % at the Sloan Great Wall's z = 0.073).
  */
-export const redshiftMly = (cz: number) =>
-  convert(comovingDistanceMpc(cz / convert(1, "c", "km/s"), PLANCK_2018), "Mpc", "Mly");
+export const redshiftMly = (cz: number) => comovingMly(cz / convert(1, "c", "km/s"));
+
+/** Comoving distance (Mly) to redshift z in the model's cosmology. */
+export const comovingMly = (z: number) =>
+  convert(comovingDistanceMpc(z, PLANCK_2018), "Mpc", "Mly");
+
+/* ---------------------------------------------------------------------------------------
+ * The observable universe: as far as light has had time to come since the Big Bang. Its wall
+ * is the cosmic microwave background, released at last scattering.
+ * ------------------------------------------------------------------------------------- */
+
+/** Redshift of last scattering (Planck 2018 VI, Table 2: z∗ = 1089.80 ± 0.21). */
+export const LAST_SCATTERING_Z = 1089.8;
+/** Today's distance to the edge, Mly: 46.2 billion light-years. */
+export const HORIZON_MLY = convert(particleHorizonMpc(PLANCK_2018), "Mpc", "Mly");
+/** Today's distance to where the microwave background we see set out, Mly. */
+export const CMB_MLY = comovingMly(LAST_SCATTERING_Z);
+/** The universe's age when that light set out, years: about 372,000. */
+export const CMB_AGE_YEARS = cosmicAgeAtRedshiftGyr(LAST_SCATTERING_Z, PLANCK_2018) * 1e9;
+/** The CMB's temperature today, K (Fixsen 2009). */
+export const CMB_KELVIN = 2.7255;
+
+/** Rings at the distances light set out from this many billion years ago (a teaching choice). */
+export const LOOKBACK_RINGS_GYR = [1, 5, 10] as const;
+/** Where light that set out `gyr` billion years ago started, today's distance in Mly. */
+export const lookbackMly = (gyr: number) => comovingMly(redshiftAtLookback(gyr, PLANCK_2018));
+
+/**
+ * A comoving shell `yearsAgo` years ago, in proper Mly: as seen from here then, the light had
+ * come from nearer (the part of the path still ahead of it is cut off) and space was smaller.
+ */
+const shellAt = (todayMly: number, yearsAgo: number) => {
+  const a = scaleAt(yearsAgo);
+  return a * Math.max(0, todayMly - comovingMly(1 / a - 1));
+};
+/** The observable universe's edge `yearsAgo` years ago, proper Mly. */
+export const horizonAt = lastOf((yearsAgo: number) => shellAt(HORIZON_MLY, yearsAgo));
+/** The microwave background's shell `yearsAgo` years ago, proper Mly. */
+export const cmbAt = lastOf((yearsAgo: number) => shellAt(CMB_MLY, yearsAgo));
 
 /* ---------------------------------------------------------------------------------------
  * The Milky Way and Andromeda: a radial Kepler orbit from the Big Bang (Kahn & Woltjer
@@ -371,6 +411,7 @@ export const COSMOS_LABELS = [
   "comaCluster",
   "shapleySupercluster",
   "sloanGreatWall",
+  "observableUniverse",
 ] as const;
 
 /* Fixed for the session: each anchor's place today. */
@@ -465,6 +506,7 @@ export const COSMIC_VIEW_LY = {
   supercluster: 175e6,
   laniakea: 760e6,
   web: 2.8e9,
+  universe: 1.5e11,
 } as const;
 
 const AIM_STOPS: readonly AimStop[] = [
@@ -480,6 +522,8 @@ const AIM_STOPS: readonly AimStop[] = [
   },
   /* The web turns about the middle of its named landmarks, from Perseus to the Great Wall. */
   { ly: COSMIC_VIEW_LY.web, at: webCentre },
+  /* The observable universe is centred on us, as every observer's is. */
+  { ly: COSMIC_VIEW_LY.universe, at: zero },
 ];
 
 const WEB_LANDMARKS: readonly AnchorId[] = [

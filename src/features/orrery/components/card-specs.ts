@@ -452,6 +452,29 @@ export const COSMOS_CARDS: Record<CosmosId, StaticCard> = {
     ],
     body: { distance: v(C.sloanGreatWall.distance) },
   },
+  observableUniverse: {
+    badge: "mixed",
+    expands: true,
+    rows: [
+      figureRow("edge", live(C.observableUniverse.edge)),
+      row("cmb", "cards.cosmos.observableUniverse.cmb", {
+        distance: live(C.observableUniverse.cmbDistance),
+        age: v(C.observableUniverse.cmbAge),
+      }),
+      row("temperature", "cards.cosmos.observableUniverse.temperature", {
+        value: live(C.observableUniverse.cmbTemperature),
+      }),
+      row("age", "cards.cosmos.observableUniverse.age", {
+        value: live(C.observableUniverse.lightTravel),
+      }),
+    ],
+    body: { age: v(C.universe.age) },
+    caution: {
+      near: v(C.observableUniverse.ringNear),
+      mid: v(C.observableUniverse.ringMid),
+      far: v(C.observableUniverse.ringFar),
+    },
+  },
 };
 
 /** Every definition with its body and caution message keys, for the placeholder test. */

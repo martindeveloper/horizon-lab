@@ -21,6 +21,8 @@ const ALIASES: Record<string, ViewId> = {
   cosmicweb: "cosmic-web",
   "sloan-great-wall": "cosmic-web",
   "shapley-supercluster": "cosmic-web",
+  universe: "observable-universe",
+  cmb: "observable-universe",
 };
 
 const routes = slugRoutes({

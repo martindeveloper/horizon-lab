@@ -1,6 +1,6 @@
 /**
  * The cosmic map beyond the Galaxy: the Local Group, the Virgo Cluster, the Virgo
- * Supercluster, Laniakea and the cosmic web around it. The model is in millions of light-years around the galactic
+ * Supercluster, Laniakea, the cosmic web around it and the observable universe. The model is in millions of light-years around the galactic
  * centre (see `model/cosmos.ts`); its group is turned by `GALAXY_FRAME` and placed where the
  * Galaxy is, so the Milky Way drawn here takes over from the Galaxy map as it fades. It
  * draws in the Galaxy's pass. With the timeline, unbound structures ride the expansion,
@@ -12,9 +12,11 @@
  */
 import {
   Group,
+  LineLoop,
   LineSegments,
   Mesh,
   Points,
+  Quaternion,
   SphereGeometry,
   Sprite,
   Vector3,
@@ -31,20 +33,25 @@ import {
   localGroupClouds,
   localSheet,
   localSupercluster,
+  observableUniverse,
 } from "../graphics/cosmos";
 import {
   COSMIC_VIEW_LY,
   COSMOS_LABELS,
+  LOOKBACK_RINGS_GYR,
   anchorAt,
   anchorById,
   clusterGathered,
+  cmbAt,
+  horizonAt,
   localGroupCentre,
+  lookbackMly,
   scaleAt,
   type AnchorId,
   type Vec,
 } from "../model/cosmos";
 import type { Selection } from "../store";
-import type { Frame, SceneKit } from "./kit";
+import type { Frame, Labels, SceneKit } from "./kit";
 import { BELOW, STRONG, type LabelStyle, type PlaceLabel } from "./labels";
 import {
   GALAXY_FRAME,
@@ -58,8 +65,8 @@ import {
 } from "./lod";
 import type { DistanceText, Rulers } from "./rulers";
 
-/** Farthest anything drawn reaches from the galactic centre, Mly: the web's far side. */
-const EXTENT_MLY = 2_000;
+/** Farthest anything drawn reaches from the galactic centre, Mly: the microwave background. */
+const EXTENT_MLY = 48_000;
 /** The deep field's distance from the camera, Mly: inside the pass's far plane at any zoom. */
 const FIELD_MLY = 450;
 
@@ -107,9 +114,9 @@ type Mark = {
 export function createCosmosLayer(
   { scope, looks, camera, pxWorld, lod, tight }: SceneKit,
   parent: Object3D,
-  deps: { place: PlaceLabel; rulers: Rulers; distanceText: DistanceText },
+  deps: { place: PlaceLabel; rulers: Rulers; labels: Labels; distanceText: DistanceText },
 ) {
-  const { place, rulers, distanceText } = deps;
+  const { place, rulers, labels, distanceText } = deps;
   const m = looks.cosmos;
   const root = new Group();
   root.quaternion.copy(GALAXY_FRAME);
@@ -135,6 +142,20 @@ export function createCosmosLayer(
   const web = laniakeaWeb(tight);
   const laniakeaCloud = points(web.points, m.laniakea, flow);
   const webCloud = points(cosmicWeb(tight), m.web, flow);
+
+  /* The observable universe: the microwave background, galaxies beyond the web and rings
+     where light set out 1, 5 and 10 billion years ago. Each is scaled every frame. */
+  const universe = observableUniverse(tight);
+  const cmbShell = points(universe.cmb, m.cmb, root);
+  const deepFill = points(universe.fill, m.deep, root);
+  const circle = scope.own(universe.circle);
+  const rings = LOOKBACK_RINGS_GYR.map((gyr) => {
+    const line = new LineLoop(circle, looks.cosmosRing);
+    line.frustumCulled = false;
+    root.add(line);
+    return { gyr, mly: lookbackMly(gyr), line, key: `lookback${gyr}` };
+  });
+  const RING_KEYS = rings.map((ring) => ring.key);
   const flows = new LineSegments(scope.own(web.flows), looks.cosmosFlow);
   flows.frustumCulled = false;
   flow.add(flows);
@@ -170,6 +191,10 @@ export function createCosmosLayer(
   const wallCentre = new Vector3();
   /* Laniakea's inner landmarks give way once the web is in frame. */
   const insideWeb = (ly: number) => 1 - rising(ly, 1.3e9, 2.2e9);
+  /* The web's names give way to the observable universe. */
+  const insideUniverse = (ly: number) => 1 - rising(ly, 8e9, 2e10);
+  /* Under the microwave background's outline: where the edge is named. */
+  const edgeMark = new Vector3();
 
   const marks: Mark[] = [
     {
@@ -278,7 +303,7 @@ export function createCosmosLayer(
       at: heart.group.position,
       spot: "heart",
       frame: COSMIC_VIEW_LY.laniakea,
-      range: (ly) => rising(ly, 400e6, 650e6),
+      range: (ly) => rising(ly, 400e6, 650e6) * insideUniverse(ly),
     },
     {
       key: "perseusPisces",
@@ -287,7 +312,7 @@ export function createCosmosLayer(
       at: cluster("perseusCluster").group.position,
       spot: "perseus",
       frame: COSMIC_VIEW_LY.web,
-      range: (ly) => rising(ly, 350e6, 700e6),
+      range: (ly) => rising(ly, 350e6, 700e6) * insideUniverse(ly),
     },
     {
       key: "comaCluster",
@@ -296,7 +321,7 @@ export function createCosmosLayer(
       at: cluster("comaCluster").group.position,
       spot: "coma",
       frame: COSMIC_VIEW_LY.web,
-      range: (ly) => rising(ly, 250e6, 500e6),
+      range: (ly) => rising(ly, 250e6, 500e6) * insideUniverse(ly),
     },
     {
       key: "shapleySupercluster",
@@ -305,7 +330,7 @@ export function createCosmosLayer(
       at: cluster("shapleyCore").group.position,
       spot: "shapley",
       frame: COSMIC_VIEW_LY.web,
-      range: (ly) => rising(ly, 700e6, 1.2e9),
+      range: (ly) => rising(ly, 700e6, 1.2e9) * insideUniverse(ly),
     },
     {
       key: "sloanGreatWall",
@@ -314,7 +339,16 @@ export function createCosmosLayer(
       at: wallCentre,
       spot: "sloanGreatWall",
       frame: COSMIC_VIEW_LY.web,
-      range: (ly) => rising(ly, 900e6, 1.6e9),
+      range: (ly) => rising(ly, 900e6, 1.6e9) * insideUniverse(ly),
+    },
+    {
+      key: "observableUniverse",
+      pick: { kind: "cosmos", id: "observableUniverse" },
+      style: BELOW,
+      at: edgeMark,
+      spot: "observableUniverse",
+      frame: COSMIC_VIEW_LY.universe,
+      range: (ly) => rising(ly, 2e10, 6e10),
     },
   ];
 
@@ -339,6 +373,9 @@ export function createCosmosLayer(
     far: m.far.opacity,
     laniakea: m.laniakea.opacity,
     web: m.web.opacity,
+    cmb: m.cmb.opacity,
+    deep: m.deep.opacity,
+    ring: looks.cosmosRing.opacity,
     galaxy: looks.cosmosGalaxy.opacity,
     cluster: looks.cosmosCluster.opacity,
     flow: looks.cosmosFlow.opacity,
@@ -350,6 +387,12 @@ export function createCosmosLayer(
   const from = new Vector3();
   const v: Vec = [0, 0, 0];
   const best = new Map<string, { mark: Mark; alpha: number; fit: number }>();
+  const eye = new Vector3();
+  const toward = new Vector3();
+  const up = new Vector3();
+  const turn = new Quaternion();
+  const facing = new Quaternion();
+  const Z = new Vector3(0, 0, 1);
 
   /** Size a sprite or target (in the root's Mly) to `px` pixels where it stands. */
   const toPx = (object: Object3D, local: Vector3, px: number) => {
@@ -377,6 +420,7 @@ export function createCosmosLayer(
       const labelled = names.to(show.names) * shown;
       if (!root.visible) {
         for (const key of COSMOS_LABELS) place(key, 0, 0, 0, false);
+        for (const key of RING_KEYS) place(key, 0, 0, 0, false);
         return;
       }
       const ly = lod.dist / LY;
@@ -399,7 +443,18 @@ export function createCosmosLayer(
       m.supercluster.opacity = base.supercluster * shown * rising(ly, 25e6, 80e6);
       m.far.opacity = base.far * shown * far;
       m.laniakea.opacity = base.laniakea * shown * rising(ly, 120e6, 380e6);
-      m.web.opacity = base.web * shown * rising(ly, 500e6, 1.4e9);
+      /* From the observable universe, everything nearer shrinks to a dim knot round us. */
+      const speck = 1 - 0.75 * rising(ly, 1.5e10, 5e10);
+      m.web.opacity = base.web * shown * rising(ly, 500e6, 1.4e9) * speck;
+      m.laniakea.opacity *= speck;
+      m.far.opacity *= speck;
+      m.cmb.opacity = base.cmb * shown * rising(ly, 2e10, 6e10);
+      m.deep.opacity = base.deep * shown * rising(ly, 8e9, 3e10);
+      cmbShell.visible = m.cmb.opacity > 0.002;
+      deepFill.visible = m.deep.opacity > 0.002;
+      /* The rings mark today's sky; back along the timeline they fade. */
+      const ringsOn = shown * rising(ly, 5e9, 2e10) * (1 - rising(yearsAgo, 1e8, 1e9));
+      looks.cosmosRing.opacity = base.ring * ringsOn;
       /* The two big clouds skip their draw while they are faded out. */
       webCloud.visible = m.web.opacity > 0.002;
       laniakeaCloud.visible = m.laniakea.opacity > 0.002;
@@ -417,6 +472,42 @@ export function createCosmosLayer(
       lgCentre.set(c[0], c[1], c[2]);
       const wall = anchorAt(anchorById("sloanGreatWall"), yearsAgo, v);
       wallCentre.set(wall[0], wall[1], wall[2]);
+
+      /* The observable universe then, and each shell's outline as the camera sees it: a sphere
+         of radius R seen from d shows a circle of R √(1 − R²/d²), R²/d nearer than its centre. */
+      const cmb = cmbAt(yearsAgo);
+      cmbShell.scale.setScalar(Math.max(1e-3, cmb));
+      deepFill.scale.setScalar(Math.max(1e-3, horizonAt(yearsAgo) * 0.7));
+      root.worldToLocal(eye.copy(camera.position));
+      const d = eye.length() || 1;
+      toward.copy(eye).divideScalar(d);
+      root.getWorldQuaternion(turn).invert();
+      up.setFromMatrixColumn(camera.matrixWorld, 1).applyQuaternion(turn);
+      up.addScaledVector(toward, -up.dot(toward)).normalize();
+      facing.setFromUnitVectors(Z, toward);
+      const L = labels();
+      for (const ring of rings) {
+        const R = ring.mly;
+        const outside = d > R * 1.001;
+        ring.line.visible = outside && looks.cosmosRing.opacity > 0.002;
+        if (!outside) {
+          place(ring.key, 0, 0, 0, false);
+          continue;
+        }
+        const radius = R * Math.sqrt(1 - (R / d) ** 2);
+        ring.line.position.copy(toward).multiplyScalar((R * R) / d);
+        ring.line.quaternion.copy(facing);
+        ring.line.scale.setScalar(radius);
+        root.localToWorld(at.copy(ring.line.position).addScaledVector(up, radius));
+        place(ring.key, at.x, at.y, at.z, labelled * ringsOn, {
+          text: (L.lookbackRing ?? "{value}").replace("{value}", String(ring.gyr)),
+        });
+      }
+      const outline = d > cmb ? cmb * Math.sqrt(1 - (cmb / d) ** 2) : cmb;
+      edgeMark
+        .copy(toward)
+        .multiplyScalar(d > cmb ? (cmb * cmb) / d : 0)
+        .addScaledVector(up, -outline);
       /* At their real size once that is larger than a dozen pixels. */
       for (const [sprite, mly] of [
         [milkyWay, DISC_MLY.milkyWay],
@@ -465,11 +556,13 @@ export function createCosmosLayer(
             ? chosen.at
             : ly < 25e6
               ? andromeda.position
-              : ly > 1.5e9
-                ? wallCentre
-                : ly > 220e6
-                  ? heart.group.position
-                  : virgo.group.position;
+              : ly > 2e10
+                ? edgeMark
+                : ly > 1.5e9
+                  ? wallCentre
+                  : ly > 220e6
+                    ? heart.group.position
+                    : virgo.group.position;
         cosmicToWorld([0, 0, 0], anchor, from);
         root.localToWorld(at.copy(to));
         rulers.draw(

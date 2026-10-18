@@ -17,7 +17,10 @@ import {
   RAD_PER_DEG,
   angularSeparation,
   comovingDistanceMpc,
+  cosmicAgeAtRedshiftGyr,
   cosmicAgeGyr,
+  particleHorizonMpc,
+  redshiftAtLookback,
   hubbleLaw,
   hubbleTimeGyr,
   resonanceSemiMajorAxis,
@@ -239,6 +242,15 @@ test("flat ΛCDM: Planck 2018 gives a 13.8-billion-year Universe and a(t) invert
   assert.equal(lookbackTimeGyr(0), 0);
   near(lookbackTimeGyr(1e6), age, 0.01);
   near(lookbackTimeGyr(0.08), 1.09, 0.01);
+  // Back to the Big Bang: last scattering (z∗ = 1089.80) at Planck's 13,885 Mpc, the edge at
+  // ~14.2 Gpc, ~372,000 years after the Big Bang; today's age agrees with Planck's 13.787 Gyr.
+  near(comovingDistanceMpc(1089.8), 13_885, 15);
+  near(particleHorizonMpc(), 14_160, 30);
+  near(cosmicAgeAtRedshiftGyr(1089.8) * 1e9, 372_000, 5_000);
+  near(cosmicAgeAtRedshiftGyr(0), 13.787, 0.005);
+  near(cosmicAgeAtRedshiftGyr(1), cosmicAgeGyr(0.5), 0.01);
+  // Lookback inverts.
+  for (const t of [1, 5, 10]) near(lookbackTimeGyr(redshiftAtLookback(t)), t, 1e-9);
 });
 
 test("auto distances read in au inside half a light-year and in ly beyond", () => {

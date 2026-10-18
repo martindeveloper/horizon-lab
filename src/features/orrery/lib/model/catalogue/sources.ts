@@ -57,6 +57,10 @@ export const SOURCES = {
   },
   eilers2019: { cite: "Eilers et al. 2019, ApJ 871, 120" },
   ferguson1989: { cite: "Ferguson 1989, AJ 98, 367 (Fornax Cluster Catalog)" },
+  fixsen2009: {
+    cite: "Fixsen 2009, ApJ 707, 916 (T₀ = 2.7255 K; adopted by Planck 2018)",
+    link: "https://arxiv.org/abs/0911.1955",
+  },
   gaiaDr3: {
     cite: "Gaia Collaboration 2023, A&A 674, A1 (Gaia DR3)",
     link: "https://vizier.cds.unistra.fr/viz-bin/VizieR?-source=I/355/gaiadr3",
@@ -160,7 +164,10 @@ export const SOURCES = {
     cite: "Pitjeva & Pitjev 2018, Astron. Lett. 44, 554",
     link: "https://arxiv.org/abs/1811.05191",
   },
-  planck2018: { cite: "Planck Collaboration 2020, A&A 641, A6 (TT,TE,EE+lowE+lensing+BAO)" },
+  planck2018: {
+    cite: "Planck Collaboration 2020, A&A 641, A6 (TT,TE,EE+lowE+lensing+BAO; Table 2: z∗ = 1089.80)",
+    link: "https://arxiv.org/abs/1807.06209",
+  },
   proust2006: {
     cite: "Proust et al. 2006, A&A 447, 133 (the Shapley Supercluster)",
     link: "https://arxiv.org/abs/astro-ph/0509903",

@@ -15,7 +15,8 @@
     "virgo-cluster": "Kupa v Panně",
     "virgo-supercluster": "Nadkupa v Panně",
     "laniakea": "Laniakea",
-    "cosmic-web": "Kosmická pavučina"
+    "cosmic-web": "Kosmická pavučina",
+    "observable-universe": "Pozorovatelný vesmír"
   },
   "viewHints": {
     "inner": "Merkur, Venuše, Země a Mars. Jupiter leží u okraje záběru.",
@@ -30,7 +31,8 @@
     "virgo-cluster": "Asi 1 500 galaxií zhruba 54 milionů světelných let od nás. My stojíme mimo ni.",
     "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi 110 milionů světelných let napříč.",
     "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru.",
-    "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan."
+    "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan.",
+    "observable-universe": "Vše, odkud k nám světlo stihlo doletět, ohraničené reliktním zářením."
   },
   "units": {
     "au": "au",
@@ -135,6 +137,8 @@
     "comaCluster": "Kupa ve Vlasu Bereniky",
     "shapleySupercluster": "Shapleyho nadkupa",
     "sloanGreatWall": "Velká zeď Sloan",
+    "observableUniverse": "Pozorovatelný vesmír",
+    "lookbackRing": "před {value} mld. let",
     "million": "mil.",
     "localSheet": "Místní list",
     "billion": "mld."
@@ -255,7 +259,10 @@
     "scaleThen": "Prostor tehdy",
     "depth": "Tloušťka",
     "length": "Délka",
-    "lookback": "Světlo vyšlo"
+    "lookback": "Světlo vyšlo",
+    "edge": "Okraj",
+    "cmb": "Reliktní záření",
+    "temperature": "Teplota"
   },
   "cards": {
     "sun": {
@@ -523,6 +530,14 @@
         "where": "Podél nebeského rovníku, od Hydry přes Sextant a Lva k Panně",
         "body": "Stěna kup galaxií vzdálená asi {distance}, objevená v roce 2003 v mapě přehlídky Sloan Digital Sky Survey. Vidíme ji, jaká byla, když z ní vyšlo světlo; mapa ji kreslí tam, kde je teď, roztaženou rozpínáním od té doby.",
         "caution": "Zda jde o jednu stavbu, nebo několik nadkup za sebou, je sporné; kresba sleduje její obrys v přehlídce, ne její galaxie."
+      },
+      "observableUniverse": {
+        "title": "Pozorovatelný vesmír",
+        "cmb": "Z {distance}, vyšlo {age} tisíc let po velkém třesku",
+        "temperature": "{value} K nad absolutní nulou",
+        "age": "{value} mld. let světla na cestě",
+        "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Stěnou je reliktní záření, světlo z doby, kdy vesmír poprvé zprůhledněl. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",
+        "caution": "Kruhy značí, odkud vyšlo světlo před {near}, {mid} a {far} mld. let, v dnešních vzdálenostech. Skvrny v záření zastupují mapu z Plancku a galaxie za pavučinou jsou rovnoměrný vzorek, ne katalog."
       }
     }
   },
@@ -648,7 +663,7 @@
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda, Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Za Laniakeou leží hřbet Perseus–Ryby, kupa ve Vlasu Bereniky, Shapleyho koncentrace a Velká zeď Sloan v souběžných vzdálenostech z rudého posuvu, propojené nakreslenou sítí vláken kolem prázdnot. Daleko venku kamera obíhá v supergalaktické rovině. V čase plochý ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, stáří {universeGyr} miliardy let) násobí každou nevázanou vzdálenost faktorem a(t); Andromeda sleduje radiální dráhu argumentu časování přes dnešních {andromedaMly} milionu světelných let a {andromedaKms} km/s; kupy si drží velikost a shromažďují členy jako a^{growthPower}."
+        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda, Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Za Laniakeou leží hřbet Perseus–Ryby, kupa ve Vlasu Bereniky, Shapleyho koncentrace a Velká zeď Sloan v souběžných vzdálenostech z rudého posuvu, propojené nakreslenou sítí vláken kolem prázdnot. Dál je pozorovatelný vesmír kreslený v měřítku: jeho okraj (částicový horizont) a reliktní záření z poslední srážky plynou z integrace téže kosmologie včetně záření a zpět po časové ose se zmenšují, jak byly tehdy. Daleko venku kamera obíhá v supergalaktické rovině. V čase plochý ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, stáří {universeGyr} miliardy let) násobí každou nevázanou vzdálenost faktorem a(t); Andromeda sleduje radiální dráhu argumentu časování přes dnešních {andromedaMly} milionu světelných let a {andromedaKms} km/s; kupy si drží velikost a shromažďují členy jako a^{growthPower}."
       }
     }
   },

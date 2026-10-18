@@ -15,7 +15,8 @@
     "virgo-cluster": "Virgo Cluster",
     "virgo-supercluster": "Virgo Supercluster",
     "laniakea": "Laniakea",
-    "cosmic-web": "Cosmic web"
+    "cosmic-web": "Cosmic web",
+    "observable-universe": "Observable universe"
   },
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",
@@ -30,7 +31,8 @@
     "virgo-cluster": "About 1,500 galaxies some 54 million light-years away. We sit outside it.",
     "virgo-supercluster": "Groups and clouds fanned out around Virgo, about 110 million light-years across.",
     "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor.",
-    "cosmic-web": "Laniakea among its neighbours: filaments of galaxies around nearly empty voids, out to the Sloan Great Wall."
+    "cosmic-web": "Laniakea among its neighbours: filaments of galaxies around nearly empty voids, out to the Sloan Great Wall.",
+    "observable-universe": "Everything light has had time to reach us from, walled by the cosmic microwave background."
   },
   "units": {
     "au": "au",
@@ -135,6 +137,8 @@
     "comaCluster": "Coma Cluster",
     "shapleySupercluster": "Shapley Supercluster",
     "sloanGreatWall": "Sloan Great Wall",
+    "observableUniverse": "Observable universe",
+    "lookbackRing": "{value} billion years ago",
     "million": "million",
     "localSheet": "Local Sheet",
     "billion": "billion"
@@ -255,7 +259,10 @@
     "scaleThen": "Space then",
     "depth": "Thickness",
     "length": "Length",
-    "lookback": "Light left"
+    "lookback": "Light left",
+    "edge": "Edge",
+    "cmb": "Microwave glow",
+    "temperature": "Temperature"
   },
   "cards": {
     "sun": {
@@ -523,6 +530,14 @@
         "where": "Along the celestial equator, from Hydra through Sextans and Leo to Virgo",
         "body": "A wall of galaxy clusters about {distance} away, found in 2003 in the Sloan Digital Sky Survey’s map. We see it as it was when its light left; the map places it where it is now, stretched with the expansion since.",
         "caution": "Whether it is one structure or several superclusters in a row is debated; the drawing follows its outline in the survey, not its galaxies."
+      },
+      "observableUniverse": {
+        "title": "Observable universe",
+        "cmb": "From {distance}, set out {age} thousand years after the Big Bang",
+        "temperature": "{value} K above absolute zero",
+        "age": "{value} billion years of light on its way",
+        "body": "Everything we could ever have seen. Light has had {age} billion years to reach us, but space kept stretching while it travelled, so its sources now lie much farther away. The wall is the cosmic microwave background, light from when the universe first turned transparent. We sit at the centre only because every observer sits at the centre of their own.",
+        "caution": "The rings mark where light set out {near}, {mid} and {far} billion years ago, at today’s distances. The glow’s spots stand in for the Planck map, and the galaxies beyond the web are a uniform sample, not a catalogue."
       }
     }
   },
@@ -648,7 +663,7 @@
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Beyond Laniakea the Perseus–Pisces ridge, the Coma Cluster, the Shapley concentration and the Sloan Great Wall sit at comoving distances from their redshifts, tied into a seeded web of filaments around voids. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^{growthPower}."
+        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda, Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Beyond Laniakea the Perseus–Pisces ridge, the Coma Cluster, the Shapley concentration and the Sloan Great Wall sit at comoving distances from their redshifts, tied into a seeded web of filaments around voids. Farther out the observable universe is drawn to scale: its edge (the particle horizon) and the microwave background at last scattering come from integrating the same cosmology, with radiation, and back along the timeline they shrink as they were then. Far out the camera orbits in the supergalactic plane. In time, flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, age {universeGyr} billion years) scales every unbound distance by a(t); Andromeda follows the radial timing-argument orbit through today's {andromedaMly} million light-years and {andromedaKms} km/s; clusters keep their size and gather their members as a^{growthPower}."
       }
     }
   },

@@ -457,6 +457,9 @@ export function createLooks(light = false) {
       laniakea: points(1.3, 0.55, true),
       /* The web beyond Laniakea: thousands of groups, each a faint point. */
       web: points(1.2, 0.5, true),
+      /* The microwave background and the galaxies beyond the web, seen from outside. */
+      cmb: points(1.5, 0.55, true),
+      deep: points(1.1, 0.35, true),
     },
     /* Galaxies seen whole: a warm, soft glow. */
     cosmosGalaxy: sprite(glow, "#f3e6cf", 0.95, true),
@@ -469,6 +472,14 @@ export function createLooks(light = false) {
       depthWrite: false,
       toneMapped: false,
       blending: AdditiveBlending,
+    }),
+    /* Lookback rings on the observable universe: thin and quiet, like the guide shells. */
+    cosmosRing: new LineBasicMaterial({
+      color: "#8ea4ba",
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false,
+      toneMapped: false,
     }),
     /* `radius` sizes every planetesimal (world units), so zooming never rewrites the instances. */
     tracers: new ShaderMaterial({

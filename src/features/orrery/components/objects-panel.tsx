@@ -177,6 +177,10 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
             label={t("names.sloanGreatWall")}
             onPick={() => pick({ kind: "cosmos", id: "sloanGreatWall" }, "cosmic-web")}
           />
+          <Pick
+            label={t("names.observableUniverse")}
+            onPick={() => pick({ kind: "cosmos", id: "observableUniverse" }, "observable-universe")}
+          />
         </div>
       </Section>
       <Section title={t("hud.neighbours")}>

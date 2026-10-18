@@ -78,8 +78,13 @@ exact definitions.
 Planck 2018 VI values (H₀ 67.66, Ωm 0.3111). `hubbleTimeGyr(H0)`, `cosmicAgeGyr(a)` (13.79
 Gyr today) and its inverse `scaleFactorAtAge(ageGyr)` take the model as an optional
 argument, so a lab can print its own formula and compute with these.
-`comovingDistanceMpc(z)` integrates (c / H₀) ∫ dz / E(z) (3.40 Gpc at z = 1) and
-`lookbackTimeGyr(z)` gives how long ago light from redshift z set out.
+`comovingDistanceMpc(z)` integrates (c / H₀) ∫ da / (a² E(a)) over √a, so it holds back to
+the Big Bang (3.40 Gpc at z = 1, Planck's 13.88 Gpc at last scattering);
+`particleHorizonMpc()` is the edge of the observable universe (~14.2 Gpc).
+`lookbackTimeGyr(z)` and its inverse `redshiftAtLookback(gyr)` say how long ago light from
+redshift z set out, and `cosmicAgeAtRedshiftGyr(z)` gives the age then (~372,000 years at
+the microwave background). The optional `omegaR` (radiation, set for `PLANCK_2018`) enters
+these distances and that age; `cosmicAgeGyr` leaves it out.
 
 ## Time (`time.ts`)
 

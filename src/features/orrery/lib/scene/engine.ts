@@ -200,7 +200,7 @@ export function createOrreryEngine(
     const neighbours = createNeighboursLayer(kit, solar, { place, rulers, labels, distanceText });
     const focus = createFocusRing(kit, solar);
     const galaxy = createGalaxyLayer(kit, scene, { place, rulers, distanceText });
-    const cosmos = createCosmosLayer(kit, scene, { place, rulers, distanceText });
+    const cosmos = createCosmosLayer(kit, scene, { place, rulers, labels, distanceText });
     const hud = createHud(store, viewport);
 
     /** Where the body is now: today's clock plus the Motion offset, as the scene draws it. */
@@ -321,8 +321,8 @@ export function createOrreryEngine(
           }, 700);
           engine.invalidate();
         },
-        /* The rig clamps to its own limits, from true-size close-ups to the cosmic web. */
-        distance: { min: 1e-12, max: 5.5e9 * LY },
+        /* The rig clamps to its own limits, from true-size close-ups to the observable universe. */
+        distance: { min: 1e-12, max: 3.3e11 * LY },
         inclination: ORBIT_INCLINATION,
         dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
         wheelSensitivity: () => 0.0012,

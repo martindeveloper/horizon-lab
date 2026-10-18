@@ -16,7 +16,8 @@ export type ViewId =
   | "virgo-cluster"
   | "virgo-supercluster"
   | "laniakea"
-  | "cosmic-web";
+  | "cosmic-web"
+  | "observable-universe";
 /** The solar map in au; the Galaxy and the cosmic map beyond it in light-years. */
 export type Realm = "solar" | "galaxy" | "cosmos";
 export type View = {
@@ -55,6 +56,12 @@ export const VIEWS: readonly View[] = [
     azimuth: 1.2,
     inclination: 0.7,
   },
+  {
+    id: "observable-universe",
+    realm: "cosmos",
+    dist: COSMIC_VIEW_LY.universe,
+    inclination: 0.5,
+  },
 ];
 export const DEFAULT_VIEW: ViewId = "giants";
 export function viewById(id: ViewId) {
@@ -70,7 +77,7 @@ export function worldDistance(dist: number, realm: Realm) {
 export function viewForDistance(camDist: number, realm: Realm): ViewId {
   const d = Math.max(1e-6, camDist);
   let best: ViewId =
-    realm === "solar" ? DEFAULT_VIEW : realm === "galaxy" ? "galaxy" : "cosmic-web";
+    realm === "solar" ? DEFAULT_VIEW : realm === "galaxy" ? "galaxy" : "observable-universe";
   let bestGap = Infinity;
   for (const v of VIEWS) {
     if (v.realm !== realm) continue;

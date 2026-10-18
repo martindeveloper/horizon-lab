@@ -53,7 +53,11 @@ export function OrreryCanvas() {
   const labelRef = useRef<HTMLDivElement>(null);
   const names = useRef<Record<string, string>>({});
   const translated = useMemo(
-    () => Object.fromEntries(LABEL_KEYS.map((key) => [key, t(`names.${key}`)])),
+    () => ({
+      ...Object.fromEntries(LABEL_KEYS.map((key) => [key, t(`names.${key}`)])),
+      /* A template the scene fills with each ring's age. */
+      lookbackRing: String(t.raw("names.lookbackRing")),
+    }),
     [t],
   );
   useEffect(() => {

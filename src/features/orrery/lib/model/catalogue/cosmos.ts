@@ -5,6 +5,12 @@ import {
   ANDROMEDA_APPROACH_KMS,
   ANDROMEDA_MLY,
   CLUSTER_GROWTH_POWER,
+  CMB_AGE_YEARS,
+  CMB_KELVIN,
+  CMB_MLY,
+  HORIZON_MLY,
+  LAST_SCATTERING_Z,
+  LOOKBACK_RINGS_GYR,
   HUBBLE,
   LOCAL_TURNAROUND,
   OMEGA_M,
@@ -14,11 +20,13 @@ import {
   anchorAt,
   anchorById,
   andromedaApart,
+  cmbAt,
+  horizonAt,
   scaleAt,
   type AnchorId,
 } from "../cosmos";
 import type { SourceId } from "./sources";
-import type { Facts, Live, Status } from "./types";
+import type { Facts, Live, Status, Value } from "./types";
 
 type Extra = { status?: Status; note?: string; digits?: number };
 
@@ -61,6 +69,15 @@ const andromedaDistance: Live = {
 };
 /** M31's bright disk: RC3's isophotal diameter (log D25 = 3.28, in 0.1′) at the model's distance. */
 const M31_DISK_LY = convert(ANDROMEDA_MLY, "Mly", "ly") * convert(10 ** 3.28 / 10, "arcmin", "rad");
+/** A lookback ring's age: a teaching choice of round numbers. */
+const ring = (gyr: number): Value => ({
+  value: gyr * 1e9,
+  unit: "yr",
+  show: "Gyr",
+  source: "horizon",
+  status: "teaching-choice",
+  note: "drawn where that light set out, at today's distance",
+});
 const greatAttractorDistance = anchorDistance("greatAttractor", "tully2014", {
   digits: 2,
   status: "derived",
@@ -375,5 +392,55 @@ export const COSMOS = {
       status: "derived",
       note: "lookback time to z = 0.073 in the model's cosmology",
     },
+  },
+  observableUniverse: {
+    edge: {
+      value: HORIZON_MLY,
+      unit: "Mly",
+      digits: 3,
+      source: "planck2018",
+      status: "derived",
+      note: "particle horizon: the comoving distance light has covered since the Big Bang, with radiation",
+      at: horizonAt,
+    },
+    cmbDistance: {
+      value: CMB_MLY,
+      unit: "Mly",
+      digits: 3,
+      source: "planck2018",
+      status: "derived",
+      note: `comoving distance to z∗ = ${LAST_SCATTERING_Z}; Planck's r∗ / θ∗ give 13,885 Mpc`,
+      at: cmbAt,
+    },
+    cmbAge: {
+      value: CMB_AGE_YEARS,
+      unit: "yr",
+      show: "kyr",
+      digits: 2,
+      source: "planck2018",
+      status: "derived",
+      note: "the universe's age at z∗, with radiation: ~372,000 years",
+    },
+    cmbTemperature: {
+      value: CMB_KELVIN,
+      unit: "K",
+      digits: 5,
+      source: "fixsen2009",
+      status: "verified",
+      note: "2.7255 ± 0.0006 K today; T₀ / a back along the slider",
+      at: (yearsAgo) => CMB_KELVIN / scaleAt(yearsAgo),
+    },
+    lightTravel: {
+      value: UNIVERSE_AGE_GYR,
+      unit: "Gyr",
+      digits: 3,
+      source: "planck2018",
+      status: "derived",
+      note: "the universe's age at the slider's moment",
+      at: (yearsAgo) => UNIVERSE_AGE_GYR - yearsAgo / 1e9,
+    },
+    ringNear: ring(LOOKBACK_RINGS_GYR[0]),
+    ringMid: ring(LOOKBACK_RINGS_GYR[1]),
+    ringFar: ring(LOOKBACK_RINGS_GYR[2]),
   },
 } satisfies Record<string, Facts>;

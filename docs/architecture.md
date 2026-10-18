@@ -124,19 +124,19 @@ page scrolling.
 
 ## Routes and compatibility
 
-| Route                   | Purpose                                                                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                     | Catalogue                                                                                                                                      |
-| `/lab/black-hole`       | Default black-hole scene                                                                                                                       |
-| `/lab/black-hole/m87`   | Preset                                                                                                                                         |
-| `/m87`                  | Permanent redirect to the preset route                                                                                                         |
-| `/lensed`               | Permanent redirect to the default scene                                                                                                        |
-| `/lab/orrery`           | Orrery, default view (the giant planets)                                                                                                       |
-| `/lab/orrery/galaxy`    | Orrery view (inner, kuiper, scattered, oort, stars, galaxy, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web) |
-| `/lab/orrery/milky-way` | Permanent redirect to the canonical view                                                                                                       |
-| `/black-hole/...`       | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                    |
-| `/orrery/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                    |
-| `/en/...`, `/cs/...`    | Served in that language, then shown as the clean path                                                                                          |
+| Route                   | Purpose                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                     | Catalogue                                                                                                                                                           |
+| `/lab/black-hole`       | Default black-hole scene                                                                                                                                            |
+| `/lab/black-hole/m87`   | Preset                                                                                                                                                              |
+| `/m87`                  | Permanent redirect to the preset route                                                                                                                              |
+| `/lensed`               | Permanent redirect to the default scene                                                                                                                             |
+| `/lab/orrery`           | Orrery, default view (the giant planets)                                                                                                                            |
+| `/lab/orrery/galaxy`    | Orrery view (inner, kuiper, scattered, oort, stars, galaxy, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
+| `/lab/orrery/milky-way` | Permanent redirect to the canonical view                                                                                                                            |
+| `/black-hole/...`       | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                                         |
+| `/orrery/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                                         |
+| `/en/...`, `/cs/...`    | Served in that language, then shown as the clean path                                                                                                               |
 
 Every simulation lives under `SIMULATION_PREFIX` (`src/lib/simulation-paths.ts`).
 Build manifest paths with `simulationPath(slug)`; the manifest type rejects any

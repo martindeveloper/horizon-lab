@@ -165,5 +165,22 @@ test("zooming out holds on the Local Group over its own sheet before turning to 
     "virgo-supercluster",
     "laniakea",
     "cosmic-web",
+    "observable-universe",
   ]);
+});
+
+test("the observable universe: its edge and the microwave background from the same cosmology", async () => {
+  const { HORIZON_MLY, CMB_MLY, CMB_AGE_YEARS, horizonAt, cmbAt, lookbackMly, LOOKBACK_RINGS_GYR } =
+    await import("../src/features/orrery/lib/model/cosmos.ts");
+  /* ~46 billion light-years; Planck's r∗ / θ∗ put last scattering at 13,885 Mpc (45.29 Gly). */
+  near(HORIZON_MLY / 1e3, 46.2, 0.2, "edge, Gly");
+  near(CMB_MLY / 1e3, 45.29, 0.05, "microwave background, Gly");
+  near(CMB_AGE_YEARS, 372_000, 5_000, "released ~372,000 years after the Big Bang");
+  near(horizonAt(0), HORIZON_MLY, 1e-9, "today");
+  assert.ok(horizonAt(5e9) < HORIZON_MLY * 0.6, "smaller in the past");
+  assert.ok(cmbAt(5e9) < horizonAt(5e9));
+  /* Rings grow with lookback and stay inside the background. */
+  const radii = LOOKBACK_RINGS_GYR.map(lookbackMly);
+  near(radii[0] / 1e3, 1.04, 0.02, "1 billion years");
+  assert.ok(radii[1] > radii[0] && radii[2] > radii[1] && radii[2] < CMB_MLY);
 });

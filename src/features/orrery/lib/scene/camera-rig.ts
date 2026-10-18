@@ -1,6 +1,6 @@
 /**
  * The orbit camera: its pose about an aim point, zoom limits, and one zoom across every
- * scale, from a close-up to the cosmic web. Distance moves in log space: a critically damped
+ * scale, from a close-up to the edge of the observable universe. Distance moves in log space: a critically damped
  * spring follows wheel and pinch, and view flights run a quintic path that leaves at the
  * zoom's current speed and lands at rest. As the camera pulls out past the nearest stars,
  * the orbit frame turns from the ecliptic to the galactic plane and the aim slides from the
@@ -41,8 +41,8 @@ const PINCH_RATE = 30;
 const MAX_CARRY = 40;
 /** A view flight's length grows with the scales it crosses. */
 const flightSeconds = (efolds: number) => clamp(0.9 + 0.2 * Math.abs(efolds), 0.9, 6);
-/** Farthest zoom, au: the cosmic web out to the Sloan Great Wall, with room around it. */
-const COSMIC_MAX = 5e9 * LY;
+/** Farthest zoom, au: the whole observable universe, with room around it. */
+const COSMIC_MAX = 3e11 * LY;
 /** Default tilt of each map's views. */
 const inclinationOf = (realm: Realm) => (realm === "solar" ? 0.52 : 0.58);
 /** Seconds for the bulge card to take the aim to the centre or give it back. */
