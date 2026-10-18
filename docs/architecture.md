@@ -23,9 +23,13 @@ src/
         layout.tsx             Feature messages, CSS, persistent scene
         page.tsx               Default view + metadata
         [view]/page.tsx        View route + metadata
+      deep-field/              The same three routes for Deep Field's views
   components/
     shell/                     AppShell, header, preferences, theme switch, stage sizing
-    simulations/               Shared simulation stage: WebGL gate, immersive view, loading
+    simulations/               Shared simulation stage: WebGL gate, immersive view, loading,
+                               technical details; for zoomable scenes the canvas host
+                               (scene-canvas.tsx), view-from-URL hook, side rail, selection
+                               sheet and the Orrery–Deep Field link (handoff-link.tsx)
     pages/                     About and credits page bodies
     status/                    Brand-specific error-page composition and its locale
   features/
@@ -48,41 +52,72 @@ src/
       manifest.ts, routing.ts, server.ts, technical.json
       components/              HUD overlay, selection cards, canvas host
       components/overlay.tsx   Overlay composition; panels, cards and the time dock beside it
-      lib/model/               What the orrery shows, without three.js scenes:
+      lib/model/               The solar system through time, on the shared model (src/space):
         timeline.ts            Slider segments, epochs, dated notes, playback
-        elements.ts            Planet and named-body orbits along Neptune's migration
-        tracers.ts             The planetesimal sample and its populations
-        galactic-orbit.ts      The Sun's Galactic orbit, trail and laps
-        cosmos.ts              Beyond the Galaxy: ΛCDM scale factor, the Milky Way–Andromeda
-                               orbit, named galaxies and clusters, camera aims
-        views.ts               Camera views and along-orbit drift by scale
-        neighbours.ts          Nearest stars on straight-line tracks (Gaia astrometry)
+        views.ts               The default view and the Motion speed-up by scale
         tour.ts                Guide steps and their flights
-        catalogue/             Every figure a card prints: value or span, unit, source, status
+        catalogue/             The timeline's figures: value or span, unit, source, status
+        solar-activity*.ts     The Sun's illustrative activity
         parameters.ts, equations.ts, model-check.ts
-      lib/graphics/            three.js building blocks: looks.ts (textures, materials),
-                               sky.ts, galaxy.ts, cosmos.ts, swarms.ts, moons.ts, coordinates.ts,
+      lib/graphics/            The time-dependent sky (sky.ts), tour-sketch.ts,
                                map-loader.ts (WebP maps from MAP_BASE; scripts/build-planet-maps.mjs),
-                               tour-sketch.ts, shader-defines.ts, shaders/
-      lib/scene/               The engine: engine.ts wires the toolkit engine host, orbit
-                               input and store to one layer per part of the picture
-                               (*-layer.ts) through a shared kit and per-frame state (kit.ts);
-                               lod.ts is the one level of detail every layer reads (screen
-                               size, presence bands, faders, hysteresis, the solar↔Galaxy
-                               and Galaxy↔cosmos blends); measured-maps.ts budgets surface
-                               maps from it;
-                               camera-rig.ts (one log-distance zoom), close-up-controller.ts
-                               (+ close-up-flight.ts), guide-director.ts, picking.ts,
-                               labels.ts, rulers.ts, hud.ts
+                               shader-defines.ts, shaders/
+      lib/scene/               The engine: engine.ts hosts the shared solar system on the
+                               toolkit's scene host, orbit rig and controls, moves it along
+                               the timeline and adds what is the Orrery's own: the sky,
+                               close-ups (close-up-controller.ts, close-up-flight.ts),
+                               measured maps, the guide, solar activity, picking and the HUD
       lib/store.ts             Zustand store (orrery namespace messages)
+    deep-field/
+      index.ts                 Public client entry: DeepFieldApp
+      manifest.ts, routing.ts, server.ts, technical.json
+      components/              Overlay, depth ladder, sightline, journey captions, objects
+                               rail, cards, canvas host
+      lib/model/               Today's sky at every scale, without three.js scenes:
+        view-ids.ts, views.ts  The fourteen views, inner planets to the observable universe
+        depth.ts               The ladder's log scale and the sightline (distance,
+                               light-travel time, redshift, Earth when the light set out)
+        tour.ts                The guided journey, planets to the first light: its shots
+        cosmos.ts              Named galaxies and clusters at today's places, the observable
+                               universe, camera aims
+        neighbours.ts          Nearest stars and their closest approaches (Gaia astrometry)
+        galactic-orbit.ts      The Sun's place in the Galaxy and its recent path
+        catalogue/             Every figure a card prints: value or span, unit, source, status
+      lib/graphics/            Point clouds (galaxy.ts, cosmos.ts), the bright-star sky, looks.ts
+      lib/scene/               The engine: the shared solar system held at today, then the
+                               stars, Galaxy and cosmos layers, on the toolkit's scene pieces;
+                               camera-rig.ts turns the orbit rig's frame and aim between the
+                               scales, lod.ts blends them, guide.ts flies the journey on the
+                               toolkit's tour camera (as the Orrery's guide does)
+      lib/store.ts             Zustand store (deepField namespace messages)
   lib/
     stars.ts                   Shared bright-star catalogue (shell sky and orrery sky)
+    sources.ts                 Shared bibliography the catalogue figures cite
+    facts.ts                   Catalogue fact and card-spec types, and their printers
+    scene-store.ts             What a zoomable scene's store shares (`sceneSlice`)
+    scene-bridge.ts            An engine's side of that store: turns, flights, ready, and
+                               the HUD readouts it publishes (`createSceneHud`)
+    handoff.ts                 One-shot note that a visitor crossed between the Orrery and
+                               Deep Field at a solar system view, with the camera's pose, so
+                               the other side opens where this one left off
     simulation-types.ts        Registry contract
     simulation-paths.ts        Shared `/lab` prefix, path helpers and preset slug routes
     simulations.ts             Registry and active-app matching
     redirects.ts               Native Next.js compatibility redirects
     metadata.ts                Shared page metadata helper
     credits.ts                 Imagery, data, font and package credits for /credits
+  space/                       What the space simulations share, below the features:
+    messages/                  The shared copy (units, distance words, HUD chrome, the solar
+                               system's names), merged under each one's namespace (messages.ts)
+    bright-stars.ts            The catalogue's bright stars on the sky sphere
+    solar-system/              The solar system at any moment, for any host engine:
+      model/                   parameters, equations, moment (migration, growth, the gas
+                               disk), elements, tracers, catalogue, views, framing, position
+      graphics/                looks.ts, swarms.ts, moons.ts, shader-defines.ts, shaders/
+      scene/                   solar-system.ts composes the Sun, planets, moons, populations
+                               and the reticle (*-layer.ts, focus-ring.ts) on a kit (kit.ts)
+                               with its own level of detail (lod.ts)
+      format.ts                Names and orbit rows both simulations print
   i18n/                        Shared request/routing/navigation configuration
   messages/                    Shared catalogue, shell, and error copy
 bench/                         Headless rendering benchmark: CLI, bundling, reports
@@ -91,11 +126,14 @@ packages/toolkit/
   package.json                 Explicit subpath exports, no root barrel
   src/ui/                      Domain-free controls, dialog, loading and tokens
   src/math/                    Scalar interpolation, log-scale controls, seeded random, value noise
-  src/science/                 Constants, units, shared laws, ΛCDM cosmology, sky coordinates
-  src/camera/                  Per-instance projection, orbit input and flights
+  src/science/                 Constants, units, shared laws, ΛCDM cosmology, sky coordinates,
+                               catalogued facts and their printers
+  src/camera/                  Per-instance projection, orbit input, flights and framed views
   src/rendering/               Shader pass, engine host, frame loop, sizing and disposal
+  src/scene/                   Scene host, orbit rig and controls on a log zoom, labels (and
+                               scene.css), taps, rulers, HUD readouts, presence, sky frames
   src/shaders/                 Reusable GLSL snippets and assembly
-  src/environment/             Shared media queries: reduced motion, pointer type
+  src/environment/             Shared media queries: reduced motion, pointer type, wide layout
   src/storage/                 Session and local cells: lifetime, decay, codecs
   src/bench/                   Benchmark contract, in-page runner, timing and image statistics
   src/bodies/                  Sun, planets, moons: JPL elements, IAU figures and spin, rings,
@@ -124,19 +162,21 @@ page scrolling.
 
 ## Routes and compatibility
 
-| Route                   | Purpose                                                                                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                     | Catalogue                                                                                                                                                           |
-| `/lab/black-hole`       | Default black-hole scene                                                                                                                                            |
-| `/lab/black-hole/m87`   | Preset                                                                                                                                                              |
-| `/m87`                  | Permanent redirect to the preset route                                                                                                                              |
-| `/lensed`               | Permanent redirect to the default scene                                                                                                                             |
-| `/lab/orrery`           | Orrery, default view (the giant planets)                                                                                                                            |
-| `/lab/orrery/galaxy`    | Orrery view (inner, kuiper, scattered, oort, stars, galaxy, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
-| `/lab/orrery/milky-way` | Permanent redirect to the canonical view                                                                                                                            |
-| `/black-hole/...`       | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                                         |
-| `/orrery/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                                         |
-| `/en/...`, `/cs/...`    | Served in that language, then shown as the clean path                                                                                                               |
+| Route                      | Purpose                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                        | Catalogue                                                                                                                       |
+| `/lab/black-hole`          | Default black-hole scene                                                                                                        |
+| `/lab/black-hole/m87`      | Preset                                                                                                                          |
+| `/m87`                     | Permanent redirect to the preset route                                                                                          |
+| `/lensed`                  | Permanent redirect to the default scene                                                                                         |
+| `/lab/orrery`              | Orrery, default view (the giant planets)                                                                                        |
+| `/lab/orrery/oort`         | Orrery view (inner, kuiper, scattered, oort)                                                                                    |
+| `/lab/orrery/oort-cloud`   | Permanent redirect to the canonical view                                                                                        |
+| `/lab/deep-field`          | Deep Field, default view (the Milky Way)                                                                                        |
+| `/lab/deep-field/laniakea` | Deep Field view (stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
+| `/black-hole/...`          | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                     |
+| `/orrery/...`              | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                     |
+| `/en/...`, `/cs/...`       | Served in that language, then shown as the clean path                                                                           |
 
 Every simulation lives under `SIMULATION_PREFIX` (`src/lib/simulation-paths.ts`).
 Build manifest paths with `simulationPath(slug)`; the manifest type rejects any
@@ -160,7 +200,9 @@ request-time locale proxy or dynamic fallback route.
 
 Root catalogs contain only shell, catalogue, preferences, and error text. Each
 feature layout loads its own language file and passes its namespace (`blackHole`,
-`orrery`) alongside shared messages to its nested `NextIntlClientProvider`. Feature components use
+`orrery`, `deepField`) alongside shared messages to its nested `NextIntlClientProvider`; the
+space simulations' copy includes the shared `src/space/messages/` (see
+[Zoomable scenes](#zoomable-scenes)). Feature components use
 `useTranslations("blackHole")`; route metadata loads that same feature catalog.
 Only the selected language is sent to the client. The catalogue receives no
 scientific lessons, tour copy, or other feature messages.
@@ -196,6 +238,12 @@ helpers from `@/i18n/navigation`.
    and keep browser-dependent scenes behind a client-only boundary.
    Wrap the overlay in `SimulationImmersive` and put `SimulationImmersiveToggle`
    in its toolbar (see [Immersive view](#immersive-view)).
+   Give it a lifecycle: its store is a module and outlives the page, so the root
+   component the layout keeps mounted calls `useFreshVisit(freshVisit(store))`
+   (`src/components/simulations/fresh-visit.ts`). Leaving the simulation puts the store
+   back as it was first made: no guide still running, no selection, panel or switch
+   carried into the next visit. Keep any remembered state in the store, not in module
+   variables, so the reset reaches it too.
 5. Add route metadata and static params for any presets. Build the feature's
    `routing.ts` on `slugRoutes({ base, ids, defaultId, aliases })` so slugs,
    aliases, static params and redirects behave like the other simulations.
@@ -208,6 +256,47 @@ helpers from `@/i18n/navigation`.
 
 Automated checks cover catalogue entries, translation parity, routing, namespace
 separation, and import boundaries; they do not replace visual and interaction testing.
+
+## Zoomable scenes
+
+The Orrery and Deep Field share one engine, split between the toolkit (no app code) and
+thin app adapters. A new simulation that zooms across scales reuses all of it and keeps
+only its layers, its views and its store of its own:
+
+- **Stage:** `SceneCanvas` (`src/components/simulations/scene-canvas.tsx`) owns the canvas
+  and the label layer, and hands the engine a `SceneMount` with live label text and
+  language. `useViewFromPath` keeps the store's view on the URL. Route layouts import
+  `@horizon/toolkit/scene.css` for the labels.
+- **Engine:** `createSceneHost` (renderer, camera, frame loop, `tight` devices, shader
+  warm-up), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
+  adds limits, the aim's `home` and the frame's `orient`), `createViewMoves` (its views,
+  as the pose framing each) and `createOrbitControls` (drag, wheel, pinch).
+  `createLabels`, `createTapPicking`, `createAnchoredRulers`, `createDistanceText` and the
+  presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
+  view a few times a second, plus the feature's own readouts.
+- **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
+  `flight`, `turn`, `ready`, `distanceUnit` and the scale bar; the feature adds its view,
+  selection and switches. `bridgeStore` acts once on each button turn and view flight,
+  ignores the view the HUD writes during a frame, and reports the first frame.
+- **Panels:** `Rail` and `RailSection` for side panels, `SelectionSheet` for cards, both
+  ending above the dock, which publishes its height as `--hud-clear` on the stage
+  (`useDockClearance`); `SwitchChip(s)`, `CameraPad`, `DistanceUnitControl`, `MapScale`
+  and `SolarBodyPicks` for their contents; `useSceneEscape` lets Escape undo one thing
+  at a time.
+
+**Shared worlds.** What more than one simulation draws lives in `src/space/`, below the
+features and above the toolkit: it may use app code (`@/lib/facts`, the sources) but never
+a feature. It holds the bright-star sky (`brightStarGeometry`) and the solar system as
+one unit: `createSolarKit(basics)` and
+`createSolarSystem(kit, parent, { place, hideAll, setBodies, rulers })`, drawn each frame at
+a `SolarMoment`. The Orrery moves that moment along its timeline and adds close-ups, its sky
+and the guide; Deep Field holds it at `TODAY` and carries on past it. Its copy (names,
+views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged under each
+simulation's namespace by its `server.ts` (`withSpaceCopy`); a key in both is an error.
+
+The Orrery and Deep Field name the solar system's views alike. `HandoffLink` opens the same
+view in the other, and `src/lib/handoff.ts` carries the camera's pose so it opens where this
+one left off; neither feature imports the other.
 
 ## Technical documentation
 
@@ -348,35 +437,39 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   `{ "equation": "<id>" }` instead of retyping the text. The technical-details
   adapter prints `toString()`; the generated README prints `toLatex()` in math
   blocks. Pass the feature's registry to `SimulationTechnicalDetails`.
-- **Model numbers live once.** A feature's parameters (the orrery's
-  `lib/model/parameters.ts`: Sun's age, galactic year, arm pitch…) feed both its code
-  and the text of its formulas, which are built from them.
+- **Model numbers live once.** A model's parameters (the solar system's
+  `src/space/solar-system/model/parameters.ts`: Sun's age, galactic year, the young disk…;
+  Deep Field's arm pitch and halo) feed both its code and the text of its formulas, which
+  are built from them.
 - **Figures in copy are arguments, not typed digits**: "One lap in {galacticYearMyr} million
-  years". In the orrery every one comes from the catalogue below: cards through
-  `components/card-specs.ts`, and the timeline notes, guide and technical notes through
-  `PROSE_FIGURES` and `proseArgs(locale)`, which print each figure in the unit its sentence
-  names. Pass them to `t()` and, for technical prose, as `values` to
-  `SimulationTechnicalDetails`.
-- **Card figures come from a catalogue.** The orrery's `lib/model/catalogue/` holds every
+  years". In the Orrery and Deep Field every one comes from the feature's catalogue: cards
+  through `components/card-specs.ts`, and notes, guide and technical prose through its
+  `PROSE_FIGURES` and `proseArgs(figures, locale)` (`src/lib/facts.ts`), which print each
+  figure in the unit its sentence names. Pass them to `t()`; for technical prose, pass
+  `figures` (or plain `values`) to `SimulationTechnicalDetails`.
+- **Card figures come from a catalogue.** A model's catalogue (the solar system's
+  `src/space/solar-system/model/catalogue.ts`, each feature's `lib/model/catalogue/`) holds every
   number a selection card prints, literature values included: a value or a published span
   (never an invented midpoint), a unit of the science kit, the unit the copy words it in
-  (`show`), significant figures, a source id and a required status. It references model
-  constants and toolkit bodies instead of copying them, and derives what follows from
-  physics (Kepler's third law, the parallax law, angular separation, light-time) with the
-  kit's laws. Messages keep only the words ("About {value} galaxies"); `figure`, `span` and
-  `figureAt` (figures that follow the slider) in `components/format.ts` print them as
-  `card-specs.ts` declares (one entry per object: badge, rows, body and caution arguments,
-  and whether it stretches with space), lengths
+  (`show`), significant figures, a source id from the shared bibliography
+  (`src/lib/sources.ts`) and a required status. It references model constants and toolkit
+  bodies instead of copying them, and derives what follows from physics (Kepler's third
+  law, the parallax law, angular separation, light-time) with the kit's laws. Messages keep
+  only the words ("About {value} galaxies"). `src/lib/facts.ts` holds the fact and
+  card-spec types and prints them as `card-specs.ts` declares (one entry per object: badge,
+  rows, body and caution arguments): `figure`, `span`, `buildCard`, `staticCard`, lengths
   through `formatDistance` in the visitor's unit, large numbers in words ("6.5 billion").
-  The default unit is `auto`: au below half a light-year, ly beyond.
-  `npm run docs:catalogue` writes the catalogue and its sources into
-  `docs/science-sources.md`; `tests/orrery-catalogue.test.mjs` checks sources, units,
-  statuses, rendering in both languages and that card copy types no digits.
+  The default unit is `auto`: au below half a light-year, ly beyond. `SelectionSheet`
+  (`src/components/simulations/`) shows the resulting card.
+  `npm run docs:catalogue` writes the catalogues and their sources into
+  `docs/science-sources.md`. `tests/orrery-catalogue.test.mjs` and
+  `tests/deep-field.test.mjs` check sources, units, statuses and rendering in both
+  languages; `tests/simulation-shared.test.mjs` checks every card message's placeholders.
 - Shader-only steps, vector rotations and sampling recipes stay as plain text in
   `technical.json`.
 - **Shaders type no numbers either.** A lab's shader parameters live in its
-  TypeScript (`lib/parameters.ts`; the orrery collects them in
-  `lib/graphics/shader-defines.ts`) and are written by `npm run shaders:generate` into a
+  TypeScript (`lib/parameters.ts`; the solar system and the Orrery collect theirs in
+  `graphics/shader-defines.ts`) and are written by `npm run shaders:generate` into a
   committed header, `parameters.generated.glsl`, that the shaders `#include`
   (the list is `scripts/shader-headers.mjs`). Shader sources stay complete for
   editors and offline compilers; nothing is injected at runtime.
