@@ -5,6 +5,7 @@ import { SolarObjectPicks } from "@/components/simulations/solar-picks";
 import { viewOf } from "@/space/solar-system/model/framing";
 import { ListItem } from "@horizon/toolkit/ui";
 
+import { PROBES } from "../lib/model/probes";
 import type { ViewId } from "../lib/model/view-ids";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
 import { NEIGHBOUR_IDS } from "./cards";
@@ -61,6 +62,20 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
         belts={["asteroids", "kuiper", "scattered", "oort"]}
         onPick={(sel) => pick(sel, viewOf(sel))}
       />
+      <RailSection title={t("hud.reach")}>
+        {list([
+          ...PROBES.map(({ id }) => ({
+            key: id,
+            label: `names.${id}`,
+            onClick: () => pick({ kind: "reach", id }, "heliosphere"),
+          })),
+          {
+            key: "heliopause",
+            label: "names.heliopause",
+            onClick: () => pick({ kind: "reach", id: "heliopause" }, "heliosphere"),
+          },
+        ])}
+      </RailSection>
       <RailSection title={t("hud.neighbours")}>
         {list(
           NEIGHBOUR_IDS.map((id) => ({

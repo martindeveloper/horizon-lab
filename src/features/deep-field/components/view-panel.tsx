@@ -7,7 +7,7 @@ import { SwitchChips } from "@/components/simulations/switch-chips";
 
 import { useDeepField, type Show } from "../lib/store";
 
-const SWITCHES: (keyof Show)[] = ["names", "distances", "halo"];
+const SWITCHES: (keyof Show)[] = ["names", "distances", "lightTime", "halo"];
 
 /** How the map is drawn: what it shows, the distance unit, and buttons to turn the camera. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {

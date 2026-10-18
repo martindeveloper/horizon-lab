@@ -42,7 +42,10 @@ function isSelection(value: unknown): value is Selection {
     typeof value === "object" &&
     value !== null &&
     "kind" in value &&
-    (value.kind === "galaxy" || value.kind === "cosmos" || value.kind === "star") &&
+    (value.kind === "galaxy" ||
+      value.kind === "cosmos" ||
+      value.kind === "star" ||
+      value.kind === "reach") &&
     "id" in value &&
     typeof value.id === "string"
   );

@@ -20,14 +20,21 @@ export type View = {
   inclination?: number;
 };
 
+/** 520 au out, raised so the probes' paths read apart above and below the planets' plane. */
+const HELIOSPHERE_VIEW: View = {
+  id: "heliosphere",
+  realm: "solar",
+  ly: 520 / LIGHT_YEAR_AU,
+  azimuth: 0.9,
+  inclination: 0.42,
+};
+
 export const VIEWS: readonly View[] = [
-  /* The solar system's own framings, today. */
-  ...SOLAR_VIEWS.map(({ id, dist, ...framing }): View => ({
-    id,
-    realm: "solar",
-    ly: dist / LIGHT_YEAR_AU,
-    ...framing,
-  })),
+  /* The solar system's own framings, today, and past the Kuiper belt the probes leaving it. */
+  ...SOLAR_VIEWS.flatMap(({ id, dist, ...framing }): View[] => {
+    const view: View = { id, realm: "solar", ly: dist / LIGHT_YEAR_AU, ...framing };
+    return id === "kuiper" ? [view, HELIOSPHERE_VIEW] : [view];
+  }),
   /* 560,000 au from the Sun, turned so the four neighbours read apart. */
   { id: "stars", realm: "stars", ly: 560_000 / LIGHT_YEAR_AU, azimuth: 2.14, inclination: 0.47 },
   { id: "galaxy", realm: "galaxy", ly: 92_000 },
@@ -62,6 +69,7 @@ export const worldDistance = (ly: number) => ly * LIGHT_YEAR_AU;
  */
 export type DistanceMethod =
   | "radar"
+  | "tracking"
   | "orbits"
   | "comets"
   | "parallax"
@@ -75,6 +83,7 @@ export const METHOD_OF: Readonly<Record<ViewId, DistanceMethod>> = {
   inner: "radar",
   giants: "radar",
   kuiper: "orbits",
+  heliosphere: "tracking",
   scattered: "orbits",
   oort: "comets",
   stars: "parallax",

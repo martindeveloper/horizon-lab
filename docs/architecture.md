@@ -29,7 +29,8 @@ src/
     simulations/               Shared simulation stage: WebGL gate, immersive view, loading,
                                technical details; for zoomable scenes the canvas host
                                (scene-canvas.tsx), view-from-URL hook, side rail, selection
-                               sheet and the Orrery–Deep Field link (handoff-link.tsx)
+                               sheet, the Orrery–Deep Field link (handoff-link.tsx) and the
+                               guide card every simulation's tour shows (guide-card.tsx)
     pages/                     About and credits page bodies
     status/                    Brand-specific error-page composition and its locale
   features/
@@ -71,10 +72,10 @@ src/
     deep-field/
       index.ts                 Public client entry: DeepFieldApp
       manifest.ts, routing.ts, server.ts, technical.json
-      components/              Overlay, depth ladder, sightline, guide captions, the Objects
+      components/              Overlay, depth ladder, sightline, guide caption, the Objects
                                and View panels, cards, canvas host
       lib/model/               Today's sky at every scale, without three.js scenes:
-        view-ids.ts, views.ts  The fourteen views, inner planets to the observable universe,
+        view-ids.ts, views.ts  The fifteen views, inner planets to the observable universe,
                                and how each one's distances are known (METHOD_OF)
         depth.ts               The ladder's log scale and the sightline (distance,
                                light-travel time, redshift, Earth when the light set out)
@@ -83,10 +84,14 @@ src/
                                universe, camera aims
         neighbours.ts          Nearest stars and their closest approaches (Gaia astrometry)
         galactic-orbit.ts      The Sun's place in the Galaxy and its recent path
+        probes.ts              Our reach: five probes on their JPL Horizons tracks
+                               (probe-tracks.json, scripts/fetch-probe-tracks.mjs), the
+                               heliopause they crossed, sunlight's light-time rings
         catalogue/             Every figure a card prints: value or span, unit, source, status
       lib/graphics/            Point clouds (galaxy.ts, cosmos.ts), the bright-star sky, looks.ts
       lib/scene/               The engine: the shared solar system held at today, then the
-                               stars, Galaxy and cosmos layers, on the toolkit's scene pieces;
+                               reach (probes, heliopause, light-time rings), stars, Galaxy and
+                               cosmos layers, on the toolkit's scene pieces;
                                camera-rig.ts turns the orbit rig's frame and aim between the
                                scales, lod.ts blends them, guide.ts flies the journey on the
                                toolkit's tour camera (as the Orrery's guide does)
@@ -163,21 +168,21 @@ page scrolling.
 
 ## Routes and compatibility
 
-| Route                      | Purpose                                                                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                        | Catalogue                                                                                                                       |
-| `/lab/black-hole`          | Default black-hole scene                                                                                                        |
-| `/lab/black-hole/m87`      | Preset                                                                                                                          |
-| `/m87`                     | Permanent redirect to the preset route                                                                                          |
-| `/lensed`                  | Permanent redirect to the default scene                                                                                         |
-| `/lab/orrery`              | Orrery, default view (the giant planets)                                                                                        |
-| `/lab/orrery/oort`         | Orrery view (inner, kuiper, scattered, oort)                                                                                    |
-| `/lab/orrery/oort-cloud`   | Permanent redirect to the canonical view                                                                                        |
-| `/lab/deep-field`          | Deep Field, default view (the Milky Way)                                                                                        |
-| `/lab/deep-field/laniakea` | Deep Field view (stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
-| `/black-hole/...`          | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                     |
-| `/orrery/...`              | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                     |
-| `/en/...`, `/cs/...`       | Served in that language, then shown as the clean path                                                                           |
+| Route                      | Purpose                                                                                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                        | Catalogue                                                                                                                                    |
+| `/lab/black-hole`          | Default black-hole scene                                                                                                                     |
+| `/lab/black-hole/m87`      | Preset                                                                                                                                       |
+| `/m87`                     | Permanent redirect to the preset route                                                                                                       |
+| `/lensed`                  | Permanent redirect to the default scene                                                                                                      |
+| `/lab/orrery`              | Orrery, default view (the giant planets)                                                                                                     |
+| `/lab/orrery/oort`         | Orrery view (inner, kuiper, scattered, oort)                                                                                                 |
+| `/lab/orrery/oort-cloud`   | Permanent redirect to the canonical view                                                                                                     |
+| `/lab/deep-field`          | Deep Field, default view (the Milky Way)                                                                                                     |
+| `/lab/deep-field/laniakea` | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
+| `/black-hole/...`          | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
+| `/orrery/...`              | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
+| `/en/...`, `/cs/...`       | Served in that language, then shown as the clean path                                                                                        |
 
 Every simulation lives under `SIMULATION_PREFIX` (`src/lib/simulation-paths.ts`).
 Build manifest paths with `simulationPath(slug)`; the manifest type rejects any
@@ -293,7 +298,8 @@ a feature. It holds the bright-star sky (`brightStarGeometry`) and the solar sys
 one unit: `createSolarKit(basics)` and
 `createSolarSystem(kit, parent, { place, hideAll, setBodies, rulers })`, drawn each frame at
 a `SolarMoment`. The Orrery moves that moment along its timeline and adds close-ups, its sky
-and the guide; Deep Field holds it at `TODAY` and carries on past it. Its copy (names,
+and the guide; Deep Field holds it at `TODAY`, adds what we have sent out (the probes, the
+heliopause, light-time rings) and carries on past it. Its copy (names,
 views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged under each
 simulation's namespace by its `server.ts` (`withSpaceCopy`); a key in both is an error.
 

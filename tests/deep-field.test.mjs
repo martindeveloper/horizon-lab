@@ -41,6 +41,17 @@ import {
   sightline,
   thenOf,
 } from "../src/features/deep-field/lib/model/depth.ts";
+import {
+  HELIOPAUSE_AU,
+  LIGHT_DAY_AU,
+  LIGHT_RINGS,
+  PROBES,
+  crossingAu,
+  firstLightDay,
+  probeFromEarth,
+  probePath,
+  probeSpeed,
+} from "../src/features/deep-field/lib/model/probes.ts";
 import { TOUR } from "../src/features/deep-field/lib/model/tour.ts";
 import { VIEWS } from "../src/features/deep-field/lib/model/views.ts";
 import { dropsSelection, useDeepField } from "../src/features/deep-field/lib/store.ts";
@@ -82,6 +93,7 @@ const SELECTIONS = [
   ...["milkyway", "sun", "bulge", "halo"].map((id) => ({ kind: "galaxy", id })),
   ...Object.keys(messages.en.cards.cosmos).map((id) => ({ kind: "cosmos", id })),
   ...NEIGHBOUR_IDS.map((id) => ({ kind: "star", id })),
+  ...[...PROBES.map((p) => p.id), "heliopause"].map((id) => ({ kind: "reach", id })),
 ];
 
 test("views run from the inner planets to the observable universe, and the ladder holds them in order", () => {
@@ -94,6 +106,41 @@ test("views run from the inner planets to the observable universe, and the ladde
   }
   for (const d of [0, 0.25, 0.5, 1]) near(depthOf(lyAtDepth(d)), d, 1e-12, `depth ${d}`);
   near(lyAtDepth(0), LADDER_LY.near, 1e-12, "near end");
+});
+
+test("the probes fly their tracked paths: the Voyagers met the heliosphere's edges where they did", () => {
+  /* Stone et al. 2005, 2008, 2013, 2019. */
+  near(crossingAu("voyager1", "shock"), 94, 0.5, "Voyager 1 at the termination shock");
+  near(crossingAu("voyager2", "shock"), 84, 0.5, "Voyager 2 at the termination shock");
+  near(crossingAu("voyager1", "heliopause"), 121.6, 0.3, "Voyager 1 at the heliopause");
+  near(crossingAu("voyager2", "heliopause"), 119, 0.3, "Voyager 2 at the heliopause");
+  assert.ok(HELIOPAUSE_AU > 119 && HELIOPAUSE_AU < 121.6, "the bubble sits between the crossings");
+  const now = new Date("2026-10-19T00:00:00Z");
+  /* NASA quotes about 17 and 15 km/s, coasting away from the Sun. */
+  near(convert(probeSpeed("voyager1", now), "au/yr", "km/s"), 16.9, 0.2, "Voyager 1 speed");
+  near(convert(probeSpeed("voyager2", now), "au/yr", "km/s"), 15.3, 0.2, "Voyager 2 speed");
+  for (const probe of PROBES) {
+    /* Each path starts at Earth, just after launch. */
+    const start = probePath(probe.id, 2100).slice(0, 3);
+    near(length(start), 1, 0.05, `${probe.id} leaves from Earth's distance`);
+  }
+});
+
+test("Voyager 1 is a full light-day from Earth from mid-November 2026", () => {
+  near(LIGHT_DAY_AU, 173.14, 0.01, "a light-day");
+  const day = firstLightDay("voyager1");
+  /* JPL Horizons puts its one-way light-time past 24 h on 18–19 November 2026. */
+  assert.ok(day >= new Date("2026-11-15") && day <= new Date("2026-11-23"), day.toISOString());
+  assert.ok(probeFromEarth("voyager1", new Date("2026-10-19")) < LIGHT_DAY_AU);
+  assert.equal(firstLightDay("newHorizons"), null, "not before its track ends");
+  /* The rings are sunlight's reach: Earth lies inside ten light-minutes, Saturn past an hour. */
+  const ring = (id) => LIGHT_RINGS.find((r) => r.id === id).au;
+  near(ring("lightMinutes"), 1.2, 0.01, "ten light-minutes");
+  near(ring("lightYear"), 63_241, 1, "a light-year");
+  assert.deepEqual(
+    LIGHT_RINGS.map((r) => r.au),
+    LIGHT_RINGS.map((r) => r.au).toSorted((a, b) => a - b),
+  );
 });
 
 test("the eyepiece: nearby, light's age is the distance; farther, ΛCDM redshift and lookback", () => {
@@ -324,5 +371,5 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   api().goGuide(TOUR.length);
   assert.equal(api().guideOpen, false, "past the last step the journey ends");
   assert.equal(api().selection, null);
-  assert.deepEqual(api().show, { halo: true, names: true, distances: false });
+  assert.deepEqual(api().show, { halo: true, names: true, distances: false, lightTime: true });
 });

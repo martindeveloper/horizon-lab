@@ -14,6 +14,7 @@ import { CATALOGUE } from "../lib/model/catalogue";
 import { NEIGHBOURS, closestApproach, neighbourDistanceLy } from "../lib/model/neighbours";
 import type { Selection } from "../lib/store";
 import { COSMOS_CARDS, GALAXY_CARDS, STAR_CARDS } from "./card-specs";
+import { reachCard } from "./reach-cards";
 import { solarCard } from "./solar-cards";
 
 type Of<K extends Selection["kind"]> = Extract<Selection, { kind: K }>;
@@ -64,6 +65,8 @@ export function cardFor(
       return staticCard(t, d, `cards.galaxy.${sel.id}`, GALAXY_CARDS[sel.id]);
     case "cosmos":
       return staticCard(t, d, `cards.cosmos.${sel.id}`, COSMOS_CARDS[sel.id]);
+    case "reach":
+      return reachCard(t, f, d, sel.id, now);
     default:
       return solarCard(t, f, d, sel, now);
   }

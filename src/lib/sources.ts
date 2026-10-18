@@ -86,6 +86,10 @@ export const SOURCES = {
     link: "https://doi.org/10.1051/0004-6361/202142465",
   },
   horizon: { cite: "Horizon model: a labelled teaching choice" },
+  horizonsProbes: {
+    cite: "JPL Horizons trajectories of Pioneer 10–11, Voyager 1–2 and New Horizons (heliocentric, ecliptic J2000)",
+    link: "https://ssd.jpl.nasa.gov/horizons/",
+  },
   hubbleFlow: {
     cite: "NED (cz 3,418 km/s) and Christlein & Zabludoff 2003 (cz 3,683 km/s), at the model's H₀",
   },
@@ -191,6 +195,22 @@ export const SOURCES = {
     cite: "Richter 1989, A&AS 77, 237 (the Hydra I cluster: a catalogue of 581 galaxies in its area)",
   },
   sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
+  stone2005: {
+    cite: "Stone et al. 2005, Science 309, 2017 (Voyager 1 crosses the termination shock)",
+    link: "https://doi.org/10.1126/science.1117684",
+  },
+  stone2008: {
+    cite: "Stone et al. 2008, Nature 454, 71 (Voyager 2 at the termination shock)",
+    link: "https://doi.org/10.1038/nature07022",
+  },
+  stone2013: {
+    cite: "Stone et al. 2013, Science 341, 150 (Voyager 1 enters interstellar space)",
+    link: "https://doi.org/10.1126/science.1236408",
+  },
+  stone2019: {
+    cite: "Stone et al. 2019, Nat. Astron. 3, 1013 (Voyager 2 crosses the heliopause)",
+    link: "https://doi.org/10.1038/s41550-019-0928-3",
+  },
   struble1999: {
     cite: "Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)",
   },

@@ -1,7 +1,2 @@
-/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
-
-@layer base {
-  :where([data-simulation="orrery"]) .orrery-tour-body {
-    max-height: min(10rem, 26dvh);
-  }
-}
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. The
+   Orrery has none of its own today; its scene labels come from the toolkit's scene.css. */

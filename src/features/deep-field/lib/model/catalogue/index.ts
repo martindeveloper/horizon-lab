@@ -12,12 +12,14 @@ import { factsOf, type Fact } from "@/lib/facts";
 
 import { COSMOS } from "./cosmos";
 import { GALAXY } from "./galaxy";
+import { PROBES } from "./probes";
 import { STARS } from "./stars";
 
 export const CATALOGUE = {
   stars: STARS,
   galaxy: GALAXY,
   cosmos: COSMOS,
+  probes: PROBES,
 } as const;
 
 /**

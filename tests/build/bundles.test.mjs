@@ -84,13 +84,11 @@ test("solar activity stays in an optional chunk, outside the Orrery engine and i
 test("black-hole styles load on feature routes, never on catalogue routes", () => {
   for (const locale of ["en", "cs"]) {
     const shared = assets(locale, ".css");
-    assert.doesNotMatch(
-      contents(shared),
-      /black-hole-orbit-ring|scene-label|orrery-tour-body|deep-field-rung/,
-    );
+    assert.doesNotMatch(contents(shared), /black-hole-orbit-ring|scene-label|deep-field-rung/);
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
-      orrery: /orrery-tour-body/,
+      /* The Orrery has no rules of its own: its scene labels are its marker. */
+      orrery: /scene-label/,
       "deep-field": /deep-field-rung/,
     };
     for (const suffix of [

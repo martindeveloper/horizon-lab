@@ -44,6 +44,8 @@ export type BlackHoleStore = BlackHoleParams & {
   setGuideOpen: (v: boolean) => void;
   startGuide: () => void;
   advanceGuide: () => void;
+  /** Back one beat; the camera flies back to it. */
+  previousGuide: () => void;
   endGuide: () => void;
   setGuideArrived: (v: boolean) => void;
   setSettingsOpen: (v: boolean) => void;
@@ -129,6 +131,11 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
       return;
     }
     set({ guideBeat: s.guideBeat + 1, guideArrived: false });
+  },
+  previousGuide: () => {
+    const s = get();
+    if (!s.guideOpen || s.guideBeat === 0) return;
+    set({ guideBeat: s.guideBeat - 1, guideArrived: false });
   },
   endGuide: () => {
     const resume = get().orbitBeforeGuide;

@@ -29,10 +29,6 @@
     max-height: min(26rem, 50dvh);
   }
 
-  :where([data-simulation="black-hole"]) .guide-card {
-    max-height: min(42dvh, 22rem);
-  }
-
   :where([data-simulation="black-hole"]) .radial-gauge {
     height: min(38dvh, 18rem);
   }

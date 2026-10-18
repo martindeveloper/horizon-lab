@@ -3,6 +3,7 @@
   "metadataDescription": "From the planets to the edge of the observable universe in one zoom, where distance is also how long the light has been on its way.",
   "canvasLabel": "Interactive map from the planets to the observable universe",
   "views": {
+    "heliosphere": "Heliosphere",
     "stars": "Nearest star",
     "galaxy": "Milky Way",
     "local-group": "Local Group",
@@ -17,6 +18,7 @@
     "inner": "Mercury to Mars, where they are today.",
     "giants": "Jupiter to Neptune, today.",
     "kuiper": "Neptune and the icy belt beyond it, about 30–50 au.",
+    "heliosphere": "Five probes on their way out, and the edge of the Sun's wind they crossed.",
     "scattered": "Bodies on long ellipses, hundreds of au out.",
     "oort": "The comet cloud, inferred from long-period comets, out to one to three light-years.",
     "stars": "Proxima, Alpha Centauri and Barnard's Star in their real directions. The ring is Proxima's distance; the sky behind is the real one.",
@@ -30,7 +32,8 @@
     "observable-universe": "Everything light has had time to reach us from, walled by the cosmic microwave background."
   },
   "toggles": {
-    "halo": "Dark-matter halo"
+    "halo": "Dark-matter halo",
+    "lightTime": "Light-time rings"
   },
   "names": {
     "proxima": "Proxima Centauri",
@@ -57,12 +60,25 @@
     "shapleySupercluster": "Shapley Supercluster",
     "sloanGreatWall": "Sloan Great Wall",
     "observableUniverse": "Observable universe",
-    "lookbackRing": "{value} billion years ago"
+    "lookbackRing": "{value} billion years ago",
+    "voyager1": "Voyager 1",
+    "voyager2": "Voyager 2",
+    "pioneer10": "Pioneer 10",
+    "pioneer11": "Pioneer 11",
+    "newHorizons": "New Horizons",
+    "heliopause": "Heliopause",
+    "lightMinutes": "10 light-minutes",
+    "lightHour": "1 light-hour",
+    "lightDay": "1 light-day",
+    "lightWeek": "1 light-week",
+    "lightMonth": "1 light-month",
+    "lightYear": "1 light-year"
   },
   "hud": {
     "galaxyItems": "Milky Way map",
     "cosmosItems": "Beyond the Milky Way",
     "neighbours": "Nearby stars",
+    "reach": "Spacecraft",
     "home": "Back to the solar system",
     "depth": "Depth",
     "eyepiece": "Sightline",
@@ -106,6 +122,7 @@
   },
   "methods": {
     "radar": "Measured by radar and spacecraft tracking",
+    "tracking": "Measured by radio tracking of the probes",
     "orbits": "From orbits fitted to tracked positions",
     "comets": "Inferred from long-period comets",
     "parallax": "Measured by parallax: the shift as Earth circles the Sun",
@@ -152,7 +169,12 @@
     "sunlight": "Sunlight takes",
     "catalogued": "Catalogued",
     "innerEdge": "Inner edge",
-    "outerEdge": "Outer edge"
+    "outerEdge": "Outer edge",
+    "launched": "Launched",
+    "leftHeliosphere": "Left the heliosphere",
+    "lightDay": "A light-day from Earth",
+    "lastSignal": "Last signal",
+    "shock": "Termination shock"
   },
   "cards": {
     "galaxy": {
@@ -364,6 +386,21 @@
       "scattered": "Icy bodies on long, tilted orbits that Neptune's gravity flung outward.",
       "oort": "A vast shell of icy bodies, inferred from long-period comets and never seen directly. Its outer edge reaches perhaps halfway to the nearest stars.",
       "tracer": "One sample of the population, on a realistic orbit. It is not a real catalogued object."
+    },
+    "reach": {
+      "speed": "{value} km/s",
+      "crossed": "{date}, {distance} out",
+      "since": "Since {date}",
+      "from": "From {date}",
+      "predicted": "Earth no longer hears it: its place is predicted from its last tracking.",
+      "shock": "Voyager 1 at {v1}, Voyager 2 at {v2}",
+      "shape": "Two crossings are all we have measured, so its shape is unknown; it is drawn here as a sphere.",
+      "heliopause": "Where the Sun's wind stops against the thin gas between the stars. Past it lies interstellar space.",
+      "voyager1": "Flew past Jupiter and Saturn, then kept going. In 2012 it became the first craft in interstellar space, and it is the farthest we have reached.",
+      "voyager2": "The only craft to visit Uranus and Neptune. It crossed into interstellar space in 2018, far to the south of where Voyager 1 crossed.",
+      "pioneer10": "The first craft through the asteroid belt and the first to Jupiter, in 1973. Its last faint signal reached Earth in 2003.",
+      "pioneer11": "The first to Saturn, in 1979, after Jupiter. It went silent in 1995.",
+      "newHorizons": "Flew past Pluto in 2015 and Arrokoth in 2019, the farthest world any craft has visited."
     }
   },
   "technicalDetails": {
@@ -415,6 +452,10 @@
       "giants": {
         "title": "Hours away",
         "body": "Past the giant planets, light needs hours. The line below says how long ago the light at the edge of the view set out."
+      },
+      "voyager": {
+        "title": "Our farthest reach",
+        "body": "Five probes are leaving the Sun. The farthest, Voyager 1, entered interstellar space in 2012; its signal now takes about a day to reach us."
       },
       "oort": {
         "title": "The Sun's last outpost",

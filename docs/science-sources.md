@@ -477,6 +477,10 @@ and language; the rows further down audit how the model values were chosen.
 | `deep-field/cosmos.observableUniverse.ringNear`       | 10⁹ yr                                | `horizon`           | teaching-choice | shown in Gyr; drawn where that light set out, at today's distance                                                                                            |
 | `deep-field/cosmos.observableUniverse.ringMid`        | 5 × 10⁹ yr                            | `horizon`           | teaching-choice | shown in Gyr; drawn where that light set out, at today's distance                                                                                            |
 | `deep-field/cosmos.observableUniverse.ringFar`        | 10¹⁰ yr                               | `horizon`           | teaching-choice | shown in Gyr; drawn where that light set out, at today's distance                                                                                            |
+| `deep-field/probes.voyager1.shock`                    | 94.02 au                              | `stone2005`         | derived         | JPL Horizons track on 2004-12-16; published 94 au                                                                                                            |
+| `deep-field/probes.voyager1.heliopause`               | 121.6 au                              | `stone2013`         | derived         | JPL Horizons track on 2012-08-25; published 121.6 au                                                                                                         |
+| `deep-field/probes.voyager2.shock`                    | 83.66 au                              | `stone2008`         | derived         | JPL Horizons track on 2007-08-30; published 84 au                                                                                                            |
+| `deep-field/probes.voyager2.heliopause`               | 119 au                                | `stone2019`         | derived         | JPL Horizons track on 2018-11-05; published 119 au                                                                                                           |
 
 | Source              | Citation                                                                                                                                                                                                   |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -546,6 +550,10 @@ and language; the rows further down audit how the model values were chosen.
 | `reid2019`          | Reid et al. 2019, ApJ 885, 131                                                                                                                                                                             |
 | `richter1989`       | Richter 1989, A&AS 77, 237 (the Hydra I cluster: a catalogue of 581 galaxies in its area)                                                                                                                  |
 | `sanders2024`       | Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599                                                                                                                                    |
+| `stone2005`         | [Stone et al. 2005, Science 309, 2017 (Voyager 1 crosses the termination shock)](https://doi.org/10.1126/science.1117684)                                                                                  |
+| `stone2008`         | [Stone et al. 2008, Nature 454, 71 (Voyager 2 at the termination shock)](https://doi.org/10.1038/nature07022)                                                                                              |
+| `stone2013`         | [Stone et al. 2013, Science 341, 150 (Voyager 1 enters interstellar space)](https://doi.org/10.1126/science.1236408)                                                                                       |
+| `stone2019`         | [Stone et al. 2019, Nat. Astron. 3, 1013 (Voyager 2 crosses the heliopause)](https://doi.org/10.1038/s41550-019-0928-3)                                                                                    |
 | `struble1999`       | Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)                                                                                                                  |
 | `tully1982`         | [Tully 1982, ApJ 257, 389 (Table 1: the Virgo Cluster and ten clouds)](https://adsabs.harvard.edu/pdf/1982ApJ...257..389T)                                                                                 |
 | `tully2008`         | [Tully et al. 2008, ApJ 676, 184](https://arxiv.org/abs/0705.4139)                                                                                                                                         |
@@ -632,6 +640,24 @@ boundary below. The figures are standard; the sources were not reopened for this
 | `noEarth`               | Earth forms                        | 4.54 Gyr                          | Dalrymple 2001, Geol. Soc. Spec. Publ. 190, 205              | **flag** |                               |
 | `noSun`                 | Sun forms                          | `SUN_BIRTH`                       | see [Orrery: formation timeline](#orrery-formation-timeline) | verified |                               |
 | `cmb` (`CMB_AGE_YEARS`) | Last scattering                    | ~370,000 years after the Big Bang | `PLANCK_2018` at z = 1089.8                                  | derived  |                               |
+
+## Deep Field: our reach
+
+`deep-field/probes.ts`: the five probes fly their JPL Horizons trajectories
+(`probe-tracks.json`, fetched by `scripts/fetch-probe-tracks.mjs`: heliocentric, ecliptic
+J2000, monthly through the flybys and twice a year after, to 2040), read at the visitor's date.
+The Voyagers' boundary distances in the card catalogue are those tracks read on the published
+crossing dates, and land on the published distances. The dates below were not reopened.
+
+| Where                 | Figure                           | Value                                                                       | Source                                  | Status          | Note                                                                 |
+| --------------------- | -------------------------------- | --------------------------------------------------------------------------- | --------------------------------------- | --------------- | -------------------------------------------------------------------- |
+| `PROBES` `launched`   | Launches                         | P10 1972-03-03, P11 1973-04-06, V2 1977-08-20, V1 1977-09-05, NH 2006-01-19 | NASA mission pages                      | **flag**        | UTC days                                                             |
+| `PROBES` `lastSignal` | Last signals                     | P10 2003-01-23, P11 1995-09-30                                              | NASA Pioneer project                    | **flag**        | their places since are Horizons predictions                          |
+| `PROBES` `crossed`    | Termination shock                | V1 2004-12-16, V2 2007-08-30                                                | Stone et al. 2005; Stone et al. 2008    | **flag**        | V2 crossed several times over a few days                             |
+| `PROBES` `crossed`    | Heliopause                       | V1 2012-08-25, V2 2018-11-05                                                | Stone et al. 2013; Stone et al. 2019    | **flag**        |                                                                      |
+| `HELIOPAUSE_AU`       | The bubble's radius              | mean of the two crossings, about 120 au                                     | the two crossings above                 | teaching-choice | drawn as a sphere: its real shape is unknown                         |
+| `firstLightDay`       | Voyager 1 a light-day from Earth | 2026-11-19                                                                  | Horizons track and the shared ephemeris | derived         | Horizons' own Earth-centred light-time passes 24 h on 18–19 Nov 2026 |
+| `LIGHT_RINGS`         | Light-time rings                 | 10 min, 1 h, 1 d, 1 wk, 1 month (a twelfth of a Julian year), 1 yr          | the speed of light and the IAU au       | derived         |                                                                      |
 
 ## Toolkit: moons
 
@@ -774,4 +800,5 @@ This attribution audit does not remove the measurement flags below.
 - Perseus Cluster cz 5,366 km/s (`deep-field/cosmos.ts`, `WEB_SKY.perseus`): Struble & Rood 1999 seen only as quoted; NED gives NGC 1275 itself 5,297 km/s, which moves the distance by about 1 %.
 - The first galaxies at z ≈ 14 (`deep-field/cosmos.ts`: `FIRST_GALAXIES_Z`): source not reopened.
 - Deep Field's "On Earth" boundaries (`deep-field/depth.ts`: `EARTH_THEN`): standard figures, sources not reopened.
+- The probes' launch, last-signal and boundary-crossing dates (`deep-field/probes.ts`: `PROBES`): standard mission dates, sources not reopened; the crossing distances read from the Horizons tracks on those dates match the published 94, 84, 121.6 and 119 au.
 - Narrative history without numbers (Kant and Laplace, aluminium-26 and a nearby massive star, Arrokoth) was not treated as a measurement.

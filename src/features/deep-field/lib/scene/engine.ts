@@ -37,6 +37,7 @@ import {
 import { createLooks } from "../graphics/looks";
 import { LADDER_LY } from "../model/depth";
 import { NEIGHBOURS } from "../model/neighbours";
+import { PROBES } from "../model/probes";
 import { viewById, worldDistance, type Realm } from "../model/views";
 import { dropsSelection, useDeepField, type Selection } from "../store";
 import { createCameraRig } from "./camera-rig";
@@ -48,6 +49,7 @@ import { SOLAR_SHOW, labelInsets, type Frame, type SceneKit } from "./kit";
 import { GALAXY_LAYER, LY, createLod, galaxyMix } from "./lod";
 import { createNeighboursLayer } from "./neighbours-layer";
 import { createPicking } from "./picking";
+import { createReachLayer } from "./reach-layer";
 import { createSkyLayer } from "./sky-layer";
 
 export type DeepFieldEngine = { dispose: () => void };
@@ -87,9 +89,9 @@ export function createDeepFieldEngine({
       insets: () => labelInsets(wide.matches, dockClear(), clearOf("--caption-clear")),
     });
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
-    /* Rulers from the selection (or the Sun) to the bodies, or the nearest stars, in view. */
+    /* Rulers from the selection (or the Sun) to the bodies and probes, or the nearest stars, in view. */
     const rulers = createAnchoredRulers(scope, scene, place, {
-      keys: [...SOLAR_RULER_KEYS, ...NEIGHBOURS.map((n) => n.id)],
+      keys: [...SOLAR_RULER_KEYS, ...PROBES.map((p) => p.id), ...NEIGHBOURS.map((n) => n.id)],
       color: SOLAR_GOLD,
       pxWorld: kit.pxWorld,
       distanceText,
@@ -98,6 +100,7 @@ export function createDeepFieldEngine({
     /* The solar system today, on its own looks and level of detail. */
     const solarKit = createSolarKit(basics);
     const solar = createSolarSystem(solarKit, scene, { place, hideAll, setBodies, rulers });
+    const reach = createReachLayer(kit, scene, { place, rulers });
     const neighbours = createNeighboursLayer(kit, scene, { place, rulers, labels, distanceText });
     const galaxy = createGalaxyLayer(kit, scene, { place, rulers, distanceText });
     const cosmos = createCosmosLayer(kit, scene, { place, rulers, labels, distanceText });
@@ -132,12 +135,14 @@ export function createDeepFieldEngine({
     const labelPicks = new Map<string, Selection>([["galaxySun", { kind: "galaxy", id: "sun" }]]);
     const labelPick = (key: string): Selection | undefined =>
       solarLabelPick(key) ??
+      reach.labelPick(key) ??
       labelPicks.get(key) ??
       neighbours.labelPick(key) ??
       cosmos.labelPick(key);
     createPicking(kit, canvas, store, {
       pickables: [
         ...solar.pickables,
+        ...reach.pickables,
         ...neighbours.pickables,
         ...galaxy.pickables,
         ...cosmos.pickables,
@@ -233,10 +238,16 @@ export function createDeepFieldEngine({
         };
         sky.update(frame);
         const at = solar.update(solarFrame);
+        reach.update(frame);
         /* The neighbours fade themselves out past the nearest stars. */
         neighbours.update(frame, pose.azimuth);
         if (state.show.distances && realm === "solar")
-          rulers.drawFrom(rulerOrigin(solarFrame.sel, at), dist);
+          rulers.drawFrom(
+            frame.sel?.kind === "reach" && frame.sel.id !== "heliopause"
+              ? frame.sel.id
+              : rulerOrigin(solarFrame.sel, at),
+            dist,
+          );
         else if (state.show.distances && realm === "stars")
           rulers.drawFrom(frame.sel?.kind === "star" ? frame.sel.id : null, dist);
         galaxy.update(frame);

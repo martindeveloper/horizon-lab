@@ -1,5 +1,5 @@
 /**
- * The guided journey: from the planets out to the microwave background in ten shots. Each
+ * The guided journey: from the planets out to the microwave background in eleven shots. Each
  * frames a view as the ladder does, lights what it is about (a selection, the rulers) and
  * holds while its caption is read, then the journey moves on; on the way the sightline reads
  * how far the camera looks and how old that light is. Copy lives in `tour.steps.<id>`.
@@ -13,6 +13,7 @@ import type { ViewId } from "./view-ids";
 export type TourStepId =
   | "sunlight"
   | "giants"
+  | "voyager"
   | "oort"
   | "stars"
   | "galaxy"
@@ -55,6 +56,16 @@ export const TOUR: readonly TourStep[] = [
     // Pull back first, turn late: the inner orbits shrink away before the giants swing in.
     flight: { duration: 7, lift: 0.1, lead: -0.4 },
     drift: 0.008,
+  },
+  {
+    id: "voyager",
+    view: "heliosphere",
+    focus: { kind: "reach", id: "voyager1" },
+    show: { lightTime: true },
+    /* Out past the planets' plane and up, so the probes' paths open out from the Sun. */
+    flight: { duration: 7, lift: 0.2, lead: 0.2 },
+    drift: 0.01,
+    dwell: 10,
   },
   {
     id: "oort",

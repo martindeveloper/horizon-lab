@@ -59,6 +59,15 @@ export function createLooks() {
       depthWrite: false,
       toneMapped: false,
     }),
+    /* Our reach: the probes leaving the solar system, and the Sun's wind bubble they crossed. */
+    probe: spriteMaterial(glow, "#dbe8f2", 0.95, true),
+    heliopause: new MeshBasicMaterial({
+      color: "#e2c99a",
+      transparent: true,
+      opacity: 0.035,
+      depthWrite: false,
+      toneMapped: false,
+    }),
     /* Touch targets: raycast, never drawn. */
     ghost: new MeshBasicMaterial({ visible: false }),
     proxima: new MeshBasicMaterial({

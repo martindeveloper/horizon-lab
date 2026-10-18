@@ -3,6 +3,7 @@
   "metadataDescription": "Od planet po okraj pozorovatelného vesmíru v jednom zoomu, ve kterém vzdálenost udává i to, jak dlouho k nám světlo letělo.",
   "canvasLabel": "Interaktivní mapa od planet po pozorovatelný vesmír",
   "views": {
+    "heliosphere": "Heliosféra",
     "stars": "Nejbližší hvězda",
     "galaxy": "Mléčná dráha",
     "local-group": "Místní skupina",
@@ -17,6 +18,7 @@
     "inner": "Merkur až Mars, tam, kde jsou dnes.",
     "giants": "Jupiter až Neptun, dnes.",
     "kuiper": "Neptun a ledový pás za ním, asi 30–50 au.",
+    "heliosphere": "Pět sond na cestě ven a okraj slunečního větru, který překročily.",
     "scattered": "Tělesa na protáhlých elipsách, stovky au daleko.",
     "oort": "Oblak komet odvozený z dlouhoperiodických komet, až do vzdálenosti jednoho až tří světelných let.",
     "stars": "Proxima, Alfa Centauri a Barnardova hvězda ve skutečných směrech na obloze. Prstenec vyznačuje vzdálenost Proximy; hvězdy v pozadí jsou rozmístěné podle skutečné oblohy.",
@@ -30,7 +32,8 @@
     "observable-universe": "Vše, odkud k nám světlo stihlo doletět, ohraničené reliktním zářením."
   },
   "toggles": {
-    "halo": "Halo temné hmoty"
+    "halo": "Halo temné hmoty",
+    "lightTime": "Kruhy světelného času"
   },
   "names": {
     "proxima": "Proxima Centauri",
@@ -57,12 +60,25 @@
     "shapleySupercluster": "Shapleyho nadkupa",
     "sloanGreatWall": "Velká zeď Sloan",
     "observableUniverse": "Pozorovatelný vesmír",
-    "lookbackRing": "před {value} mld. let"
+    "lookbackRing": "před {value} mld. let",
+    "voyager1": "Voyager 1",
+    "voyager2": "Voyager 2",
+    "pioneer10": "Pioneer 10",
+    "pioneer11": "Pioneer 11",
+    "newHorizons": "New Horizons",
+    "heliopause": "Heliopauza",
+    "lightMinutes": "10 světelných minut",
+    "lightHour": "1 světelná hodina",
+    "lightDay": "1 světelný den",
+    "lightWeek": "1 světelný týden",
+    "lightMonth": "1 světelný měsíc",
+    "lightYear": "1 světelný rok"
   },
   "hud": {
     "galaxyItems": "Mapa Mléčné dráhy",
     "cosmosItems": "Za Mléčnou dráhou",
     "neighbours": "Blízké hvězdy",
+    "reach": "Sondy",
     "home": "Zpět do sluneční soustavy",
     "depth": "Hloubka",
     "eyepiece": "Zorná přímka",
@@ -106,6 +122,7 @@
   },
   "methods": {
     "radar": "Změřeno radarem a sledováním sond",
+    "tracking": "Změřeno rádiovým sledováním sond",
     "orbits": "Z drah spočtených z naměřených poloh",
     "comets": "Odvozeno z dlouhoperiodických komet",
     "parallax": "Změřeno paralaxou: posunem, jak Země obíhá Slunce",
@@ -152,7 +169,12 @@
     "sunlight": "Sluneční světlo letí",
     "catalogued": "V katalogu",
     "innerEdge": "Vnitřní okraj",
-    "outerEdge": "Vnější okraj"
+    "outerEdge": "Vnější okraj",
+    "launched": "Start",
+    "leftHeliosphere": "Opustil heliosféru",
+    "lightDay": "Světelný den od Země",
+    "lastSignal": "Poslední signál",
+    "shock": "Terminační rázová vlna"
   },
   "cards": {
     "galaxy": {
@@ -364,6 +386,21 @@
       "scattered": "Ledová tělesa na dlouhých skloněných drahách, která Neptunova gravitace vymrštila ven.",
       "oort": "Obrovská slupka ledových těles, odvozená z dlouhoperiodických komet a nikdy přímo nepozorovaná. Její vnější okraj sahá možná do poloviny cesty k nejbližším hvězdám.",
       "tracer": "Jeden vzorek populace na realistické dráze. Není to skutečný katalogizovaný objekt."
+    },
+    "reach": {
+      "speed": "{value} km/s",
+      "crossed": "{date}, ve vzdálenosti {distance}",
+      "since": "Od {date}",
+      "from": "Od {date}",
+      "predicted": "Země ho už neslyší: jeho poloha je předpověď z posledního sledování.",
+      "shock": "Voyager 1: {v1}, Voyager 2: {v2}",
+      "shape": "Překročily ji jen dvě sondy, takže její tvar neznáme; tady je nakreslená jako koule.",
+      "heliopause": "Místo, kde se sluneční vítr zastaví o řídký plyn mezi hvězdami. Za ní začíná mezihvězdný prostor.",
+      "voyager1": "Proletěl kolem Jupiteru a Saturnu a pokračoval dál. V roce 2012 se jako první sonda dostal do mezihvězdného prostoru a je nejdál, kam jsme se dostali.",
+      "voyager2": "Jediná sonda u Uranu a Neptunu. Do mezihvězdného prostoru vstoupil v roce 2018, daleko na jih od místa, kudy prošel Voyager 1.",
+      "pioneer10": "První sonda, která proletěla pásem planetek, a první u Jupiteru, v roce 1973. Jeho poslední slabý signál zachytila Země v roce 2003.",
+      "pioneer11": "První u Saturnu, v roce 1979, po průletu kolem Jupiteru. Odmlčel se v roce 1995.",
+      "newHorizons": "Proletěla kolem Pluta v roce 2015 a kolem Arrokothu v roce 2019, nejvzdálenějšího tělesa, které kdy sonda navštívila."
     }
   },
   "technicalDetails": {
@@ -415,6 +452,10 @@
       "giants": {
         "title": "Hodiny daleko",
         "body": "Za obřími planetami už světlo letí hodiny. Čára dole ukazuje, jak dávno vyšlo světlo z okraje záběru."
+      },
+      "voyager": {
+        "title": "Nejdál, kam jsme došli",
+        "body": "Pět sond opouští Slunce. Nejvzdálenější Voyager 1 vstoupil do mezihvězdného prostoru v roce 2012 a jeho signál k nám teď letí zhruba den."
       },
       "oort": {
         "title": "Poslední výspa Slunce",

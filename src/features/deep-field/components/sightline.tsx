@@ -16,6 +16,7 @@ import { anchorById, type AnchorId } from "../lib/model/cosmos";
 import { CMB_LY, sightline, thenOf } from "../lib/model/depth";
 import { NEIGHBOURS, neighbourDistanceLy } from "../lib/model/neighbours";
 import { SUN_GALACTIC_RADIUS_LY } from "../lib/model/parameters";
+import { probeFromEarth } from "../lib/model/probes";
 import { METHOD_OF } from "../lib/model/views";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
 import { formatAgo, formatThen } from "./format";
@@ -50,6 +51,9 @@ function distanceOf(sel: Selection, now: Date): number | null {
       0,
     );
   if (sel.kind === "galaxy") return sel.id === "bulge" ? SUN_GALACTIC_RADIUS_LY : null;
+  /* A probe's signal crosses the gap to Earth; the heliopause is all round us. */
+  if (sel.kind === "reach")
+    return sel.id === "heliopause" ? null : probeFromEarth(sel.id, now) / LIGHT_YEAR_AU;
   if (sel.id === "observableUniverse") return CMB_LY;
   const anchor = ANCHOR_OF[sel.id];
   return anchor ? anchorById(anchor).mly * 1e6 : null;
@@ -58,7 +62,9 @@ function distanceOf(sel: Selection, now: Date): number | null {
 /** The selection's name as its card titles it. */
 function nameOf(sel: Selection) {
   if (isSolarSelection(sel)) return solarNameKey(sel);
-  return sel.kind === "star" ? `names.${sel.id}` : `cards.${sel.kind}.${sel.id}.title`;
+  return sel.kind === "star" || sel.kind === "reach"
+    ? `names.${sel.id}`
+    : `cards.${sel.kind}.${sel.id}.title`;
 }
 
 /**

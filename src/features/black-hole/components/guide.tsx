@@ -1,10 +1,16 @@
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import { useTranslations, useLocale } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  GuideBody,
+  GuideCard,
+  GuideEquation,
+  GuideTitle,
+} from "@/components/simulations/guide-card";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { flightPhase, tourFor, type TourBeat } from "@/features/black-hole/lib/tours";
-import { isSceneShortcut, kickerClass } from "@horizon/toolkit/ui";
+import { isSceneShortcut } from "@horizon/toolkit/ui";
 import { TextReveal, textStagger } from "@horizon/toolkit/ui/motion";
 
 import { GuideSketch } from "./guide-sketch";
@@ -151,18 +157,21 @@ function GuideStep() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[70]">
-      <header className="pad-hud-top absolute inset-x-0 top-0 z-20 flex items-center justify-between">
-        <p className="glass-hud rounded-full px-3 py-1.5 font-mono text-xs tracking-widest text-fg uppercase">
-          {phase} · {beatIndex + 1} / {beats.length}
-        </p>
-        <button
-          type="button"
-          className="glass-hud pointer-events-auto relative h-8 rounded-full px-3 text-xs tracking-widest text-fg uppercase transition-opacity duration-300 not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:opacity-80"
-          onClick={endGuide}
-        >
-          {t("exit")}
-        </button>
-      </header>
+      {/* While the camera flies there is no card yet: the move and a way out, up top. */}
+      {arrived ? null : (
+        <header className="pad-hud-top absolute inset-x-0 top-0 z-20 flex items-center justify-between">
+          <p className="glass-hud rounded-full px-3 py-1.5 font-mono text-xs tracking-widest text-fg uppercase">
+            {phase} · {beatIndex + 1} / {beats.length}
+          </p>
+          <button
+            type="button"
+            className="glass-hud pointer-events-auto relative h-8 rounded-full px-3 text-xs tracking-widest text-fg uppercase transition-opacity duration-300 not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:opacity-80"
+            onClick={endGuide}
+          >
+            {t("exit")}
+          </button>
+        </header>
+      )}
 
       <button
         type="button"
@@ -172,48 +181,38 @@ function GuideStep() {
       />
 
       {arrived ? (
-        <div className="pad-hud-bottom pointer-events-none absolute inset-x-0 bottom-0 z-10">
-          <motion.div
-            key={`${presetId}-${beatIndex}`}
-            initial={reduce ? false : { opacity: 0, y: 18, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{
-              duration: instant ? 0.2 : 0.72,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="guide-card glass-panel pointer-events-auto mx-auto max-w-xl overflow-y-auto overscroll-contain rounded-lg p-3.5 md:p-4"
-          >
-            <TextReveal text={beat.kicker} className={kickerClass} ms={28} instant={instant} />
-            <h2
-              ref={heading}
-              tabIndex={-1}
-              className="mt-1 font-display text-lg font-medium tracking-tight text-fg outline-hidden md:text-2xl"
-            >
-              <TextReveal text={beat.title} delay={titleDelay} ms={22} instant={instant} />
-            </h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted md:mt-2">
-              <TextReveal text={beat.body} delay={bodyDelay} ms={14} instant={instant} />
-            </p>
-            {beat.eq ? (
-              <p className="mt-3 overflow-x-auto text-center font-mono text-xs leading-relaxed whitespace-pre-wrap text-fg md:text-sm">
-                <TextReveal text={beat.eq} delay={eqDelay} ms={18} instant={instant} />
-              </p>
-            ) : null}
-            <motion.button
-              type="button"
-              onClick={onContinue}
-              className="glass-hud relative mt-3 flex h-10 w-full cursor-pointer items-center justify-center gap-2.5 rounded-full font-mono text-xs tracking-widest text-fg uppercase transition-opacity duration-300 after:absolute after:inset-x-0 after:-inset-y-0.5 hover:opacity-80 md:mt-4"
-              initial={reduce ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: instant ? 0 : eqDelay + 0.4, duration: 0.5 }}
-            >
-              {canAdvance ? prompt : t("skip")}
-              <kbd className="hidden rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-muted md:inline">
-                {t("spaceKey")}
-              </kbd>
-            </motion.button>
-          </motion.div>
-        </div>
+        <GuideCard
+          label={t("guide")}
+          kicker={t("guideProgress", {
+            step: beatIndex + 1,
+            total: beats.length,
+            kicker: beat.kicker,
+          })}
+          stepKey={`${presetId}-${beatIndex}`}
+          live={false}
+          className="z-10"
+          controls={{
+            previous: {
+              label: t("previousBeat"),
+              disabled: beatIndex === 0,
+              onClick: () => useBlackHole.getState().previousGuide(),
+            },
+            next: { label: canAdvance ? prompt : t("skip"), last, onClick: onContinue },
+            exit: { label: t("exit"), onClick: endGuide },
+          }}
+        >
+          <GuideTitle ref={heading}>
+            <TextReveal text={beat.title} delay={titleDelay} ms={22} instant={instant} />
+          </GuideTitle>
+          <GuideBody>
+            <TextReveal text={beat.body} delay={bodyDelay} ms={14} instant={instant} />
+          </GuideBody>
+          {beat.eq ? (
+            <GuideEquation>
+              <TextReveal text={beat.eq} delay={eqDelay} ms={18} instant={instant} />
+            </GuideEquation>
+          ) : null}
+        </GuideCard>
       ) : null}
     </div>
   );

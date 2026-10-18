@@ -6,6 +6,7 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
 import type { NeighbourId } from "./model/neighbours";
+import type { ProbeId } from "./model/probes";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import { viewById, type Realm } from "./model/views";
@@ -16,6 +17,8 @@ export type Show = {
   names: boolean;
   /** Dashed rulers with distances from the selection (or home) to what is in view. */
   distances: boolean;
+  /** Rings round the Sun at the distance sunlight covers in a minute, an hour, a day… */
+  lightTime: boolean;
 };
 
 /** Structures beyond the Galaxy with a card. */
@@ -41,7 +44,9 @@ export type Selection =
   | SolarSelection
   | { kind: "star"; id: NeighbourId }
   | { kind: "galaxy"; id: "milkyway" | "sun" | "bulge" | "halo" }
-  | { kind: "cosmos"; id: CosmosId };
+  | { kind: "cosmos"; id: CosmosId }
+  /** The probes leaving the solar system, and the heliopause the Voyagers crossed. */
+  | { kind: "reach"; id: ProbeId | "heliopause" };
 
 /** The scale a selection belongs to; zooming into another lets it go. */
 const realmOfSelection = (sel: Selection): Realm =>
@@ -60,7 +65,7 @@ export const dropsSelection = (sel: Selection, realm: Realm, flyingTo: Realm | n
 
 export type Panel = "none" | "objects" | "view";
 
-export const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false };
+export const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
 
 export type DeepFieldStore = SceneSlice & {
   view: ViewId;
