@@ -277,20 +277,29 @@ catch-all dynamic route or backend is introduced.
 ## Ambient music
 
 The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-music.ts`),
-one `MusicPlayer` from `@horizon/toolkit/audio` configured with
-`public/audio/interstellar-drift.{webm,m4a}`. The player owns playback: two
-streaming decks crossfade for 8 s where the track repeats, and Web Audio gains
-fade play (3 s) and pause (1.5 s). Hidden tabs fade out and resume on return.
-The choice lasts for the browser session; after a reload the music resumes on
-the first interaction. To replace the track, cut its intro and outro fades so it loops at full level,
-strip metadata and encode at −22 LUFS:
+one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from `public/audio/`:
+`interstellar-drift` and `aeolian-static`, each as `.webm` (Opus) and `.m4a` (AAC).
+The player owns playback: two streaming decks crossfade for 8 s where a track ends,
+the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). Nothing
+loads before the first play; the next track buffers 30 s before its crossfade, or on
+a skip, which blends over 2.5 s. Hidden tabs fade out and resume on return. While
+music plays, the toggle opens a sun dial: each track is an hour on a day arc, and
+skipping carries the sun to the next. The choice lasts for the browser session;
+after a reload the music resumes on the first interaction.
+
+To add a track, cut its intro and outro fades so it blends at full level, strip
+metadata and encode at −22 LUFS (measure with `-af ebur128` and set the gain),
+then add it to the playlist:
 
 ```sh
 ffmpeg -ss <start> -to <end> -i source.wav -map_metadata -1 -fflags +bitexact \
-  -af volume=<gain>dB -c:a libopus -b:a 80k interstellar-drift.webm
+  -flags:a +bitexact -af volume=<gain>dB -c:a libopus -b:a 80k track.webm
 ffmpeg -ss <start> -to <end> -i source.wav -map_metadata -1 -fflags +bitexact \
-  -af volume=<gain>dB -c:a aac_at -b:a 112k -movflags +faststart interstellar-drift.m4a
+  -af volume=<gain>dB -c:a aac_at -b:a 112k -movflags +faststart track.m4a
 ```
+
+libopus still writes an `ENCODER` stream tag; remux the WebM once to drop it:
+`ffmpeg -i track.webm -map_metadata -1 -map_metadata:s:a -1 -fflags +bitexact -c copy clean.webm`.
 
 ## Immersive view
 

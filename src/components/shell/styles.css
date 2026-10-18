@@ -237,6 +237,70 @@ html {
   opacity: 1;
 }
 
+/* The sun dial: opens beside the waveform while music plays. Each track is an
+   hour on a day arc; a skip carries the sun on over the crossfade, and past
+   the last hour it sets under the horizon and rises in the east. */
+.music-next {
+  display: grid;
+  grid-template-columns: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-columns 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 500ms ease;
+}
+.music-next[data-open="true"] {
+  grid-template-columns: 1fr;
+  opacity: 1;
+}
+.music-dial svg * {
+  transform-box: view-box;
+  transform-origin: 14px 15px;
+}
+.music-dial-arc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.75;
+  stroke-dasharray: 0.6 2.2;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.music-dial-horizon {
+  stroke: rgb(var(--solar) / 0.55);
+  stroke-width: 0.75;
+}
+.music-dial-hour {
+  fill: currentColor;
+  opacity: 0.6;
+}
+.music-dial-orbit {
+  transition: rotate 2.4s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.music-dial-nudge {
+  transition: rotate 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.music-dial-sun {
+  fill: rgb(var(--solar));
+}
+.music-dial-halo {
+  fill: rgb(var(--solar) / 0.22);
+  transition: fill 450ms ease;
+}
+/* Hover leans the sun toward the next hour. */
+@media (hover: hover) {
+  .music-dial:hover .music-dial-nudge {
+    rotate: 7deg;
+  }
+  .music-dial:hover .music-dial-halo {
+    fill: rgb(var(--solar) / 0.34);
+  }
+}
+.music-dial:focus-visible .music-dial-nudge {
+  rotate: 7deg;
+}
+:root.light .music-dial-halo {
+  fill: rgb(var(--solar) / 0.3);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-sun,
   .hero-moon,

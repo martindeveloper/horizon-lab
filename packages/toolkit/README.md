@@ -15,7 +15,7 @@ outside this package.
 | `@horizon/toolkit/science`         | Constants, units, measures, equations, distance readouts, Julian dates | None                                                      |
 | `@horizon/toolkit/camera`          | Camera snapshots, screen projection, orbit input, flight interpolation | DOM only when creating input controls                     |
 | `@horizon/toolkit/rendering`       | Shader pass, engine host, frame loop, sizing, power hints, WebGL probe | Three.js; DOM only when creating a renderer/observer/loop |
-| `@horizon/toolkit/audio`           | Looping background music with fades and gapless crossfade              | Web Audio and `<audio>`, only once playing                |
+| `@horizon/toolkit/audio`           | Background music and playlists with fades and gapless crossfade        | Web Audio and `<audio>`, only once playing                |
 | `@horizon/toolkit/bench`           | Benchmark contract, in-page WebGL 2 runner, frame grab, statistics     | None; DOM and WebGL only when a scene runs                |
 | `@horizon/toolkit/environment`     | Shared media queries: reduced motion, fine and coarse pointers         | None; reads `matchMedia` only when called                 |
 | `@horizon/toolkit/storage`         | One session or local value: lifetime, decay, and a decode-once codec   | None; reads web storage only when a cell is called        |

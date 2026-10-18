@@ -29,6 +29,7 @@
     "homeTitle": "Horizon · O kousek blíž vesmíru",
     "playMusic": "Přehrát hudbu",
     "pauseMusic": "Pozastavit hudbu",
+    "nextTrack": "Další: {title}",
     "desktopNotice": "Nejlépe vynikne na větší obrazovce",
     "closeDesktopNotice": "Zavřít",
     "starMagnitude": "{value} mag",

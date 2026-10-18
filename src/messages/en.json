@@ -29,6 +29,7 @@
     "homeTitle": "Horizon · A little closer to the universe",
     "playMusic": "Play music",
     "pauseMusic": "Pause music",
+    "nextTrack": "Next: {title}",
     "desktopNotice": "Best experienced on a larger screen",
     "closeDesktopNotice": "Dismiss",
     "starMagnitude": "{value} mag",

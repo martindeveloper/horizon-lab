@@ -33,11 +33,41 @@ test("players construct without browser globals and remember only when asked", (
   assert.equal(saved.get("horizon:music"), "on");
   const quiet = new MusicPlayer(track, { storageKey: "horizon:music:off" });
   assert.equal(quiet.remembered, false);
-  assert.ok(ambientMusic.track.sources.every((source) => source.src.startsWith("/audio/")));
+  assert.ok(
+    ambientMusic.tracks.every((item) =>
+      item.sources.every((source) => source.src.startsWith("/audio/")),
+    ),
+  );
+});
+
+test("a playlist skips while paused and wraps; a single track has nowhere to go", () => {
+  const tracks = ["A", "B", "C"].map((title) => ({
+    title,
+    sources: [{ src: `/${title}.webm`, type: "audio/webm" }],
+  }));
+  const playlist = new MusicPlayer(tracks);
+  let heard = 0;
+  const stop = playlist.subscribe(() => heard++);
+  assert.equal(playlist.getTrack(), 0);
+  playlist.next();
+  playlist.next();
+  assert.equal(playlist.track.title, "C");
+  playlist.next();
+  assert.equal(playlist.getTrack(), 0, "Past the last track it wraps");
+  assert.equal(heard, 3);
+  stop();
+  const single = new MusicPlayer(tracks[0]);
+  single.next();
+  assert.equal(single.getTrack(), 0);
+  assert.equal(single.tracks.length, 1);
+  assert.throws(() => new MusicPlayer([]));
+  assert.ok(ambientMusic.tracks.length >= 2, "The ambient playlist can skip");
 });
 
 test("published ambient audio is small and free of generator metadata", () => {
-  for (const name of ["interstellar-drift.webm", "interstellar-drift.m4a"]) {
+  const files = ambientMusic.tracks.flatMap((item) => item.sources.map((source) => source.src));
+  assert.ok(files.length >= 4);
+  for (const name of files.map((src) => src.replace("/audio/", ""))) {
     const url = new URL(`../public/audio/${name}`, import.meta.url);
     assert.ok(statSync(url).size < 4.5 * 1024 * 1024, `${name} is too large for the web`);
     assert.doesNotMatch(readFileSync(url, "latin1"), /suno|created=|Lavf\d/i, name);
