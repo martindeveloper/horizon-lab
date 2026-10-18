@@ -284,7 +284,8 @@ the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). Nothi
 loads before the first play; the next track buffers 30 s before its crossfade, or on
 a skip, which blends over 2.5 s. Hidden tabs fade out and resume on return. While
 music plays, the toggle opens a sun dial: each track is an hour on a day arc, and
-skipping carries the sun to the next. The choice lasts for the browser session;
+skipping carries the sun to the next. Until sound arrives (the first play, a
+skip, a stall), the lens stays half lit and light runs across the waveform. The choice lasts for the browser session;
 after a reload the music resumes on the first interaction.
 
 To add a track, cut its intro and outro fades so it blends at full level, strip

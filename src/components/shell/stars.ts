@@ -92,14 +92,37 @@ export function eclipticToEquatorial(longitude: number, latitude: number, obliqu
   return { ra, dec };
 }
 
+/** Hour angle in degrees, −180…180: negative east of the meridian, rising; positive west, setting. */
+export function hourAngle(lst: number, ra: number) {
+  return ((((lst - ra + 180) % 360) + 360) % 360) - 180;
+}
+
 /**
- * The Sun's altitude and azimuth in degrees. No refraction: the disc sits on
- * the line a few minutes before published sunrise.
+ * The hour angle, in degrees, at which a body of this declination crosses the
+ * altitude `horizon`: half its time above it, as an angle of the sky's turn.
+ * 0 for a body that never rises, 180 for one that never sets.
+ */
+export function risingHourAngle(declination: number, latitude: number, horizon = 0) {
+  const lat = latitude * RAD;
+  const dec = declination * RAD;
+  const cos =
+    (Math.sin(horizon * RAD) - Math.sin(lat) * Math.sin(dec)) / (Math.cos(lat) * Math.cos(dec));
+  return Math.acos(Math.max(-1, Math.min(1, cos))) / RAD;
+}
+
+/**
+ * The Sun's altitude and azimuth, hour angle and declination, in degrees. No
+ * refraction: the disc sits on the line a few minutes before published sunrise.
  */
 export function sunPosition(date: Date, latitude: number, longitude: number) {
   const sun = solarEcliptic(julianEphemerisDay(date));
   const { ra, dec } = eclipticToEquatorial(sun.longitude, 0, sun.obliquity);
-  return toHorizontal(ra, dec, siderealTime(date, longitude), latitude);
+  const lst = siderealTime(date, longitude);
+  return {
+    ...toHorizontal(ra, dec, lst, latitude),
+    hourAngle: hourAngle(lst, ra),
+    declination: dec,
+  };
 }
 
 /* Meeus, Astronomical Algorithms (2nd ed.), table 47.A: the 32 largest
@@ -265,7 +288,8 @@ export function moonAxis(jde: number) {
 
 /**
  * Where the Moon stands for an observer and how it is lit: topocentric
- * altitude (parallax up to ~1° applied, no refraction), azimuth, illuminated
+ * altitude (parallax up to ~1° applied, no refraction), azimuth, geocentric
+ * hour angle and declination, illuminated
  * fraction, the bearing of its bright limb (the direction of the Sun), and the
  * bearing of its north pole. Bearings are measured on the sky from the zenith
  * towards increasing azimuth, i.e. clockwise in a view facing south.
@@ -285,5 +309,13 @@ export function moonPosition(date: Date, latitude: number, longitude: number) {
   const limb = skyBearing(geo.azimuth, altitude, s.azimuth, s.altitude);
   // Celestial north is the bearing of the pole; the axis sits P east (anticlockwise) of it.
   const north = skyBearing(geo.azimuth, altitude, 0, latitude) - moonAxis(jde);
-  return { altitude, azimuth: geo.azimuth, limb, north, ...moonPhase(jde) };
+  return {
+    altitude,
+    azimuth: geo.azimuth,
+    hourAngle: hourAngle(lst, eq.ra),
+    declination: eq.dec,
+    limb,
+    north,
+    ...moonPhase(jde),
+  };
 }

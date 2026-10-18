@@ -13,7 +13,9 @@ come from a user gesture.
     remember "on" in sessionStorage).
   - `play()` resolves to `false` when autoplay policy blocks it. `pause()`,
     `toggle()` and `next()` are bound, as are `getState()`, `getTrack()` (the
-    playlist index) and `subscribe()`, which suit React's `useSyncExternalStore`.
+    playlist index), `getBuffering()` (playing is wanted but the audible track
+    is still loading: the first play, a skip or a stall) and `subscribe()`,
+    which suit React's `useSyncExternalStore`.
     `track` is the current track.
   - `resumeOnInteraction(ignore)`: if the music was on before a reload, starts it on
     the first interaction outside `ignore()` (the controls). Returns a cleanup.

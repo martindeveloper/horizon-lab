@@ -17,13 +17,23 @@ varying vec2 vBounds;
 varying vec4 vWave;
 
 void main() {
+  // Cull volumes on the far side of the Sun that are completely occluded by the photosphere.
+  if (dot(aAnchor, localCamera) < -0.65 * length(localCamera)) {
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+    return;
+  }
   vec4 motion = activityMotion[int(aShape.w)];
   float height = aShape.x * motion.x;
   vMotion = motion.yzw;
-  // Two volume-preserving shears twist x/z. Include their maximum reach and both wave modes.
+  vPhase = aShape.z;
+  // Evaluate slow MHD kink/Alfvén wave harmonics per vertex.
+  float phase = TWO_PI * (activityTime / SUN_ACTIVITY_CYCLE_SECONDS + aShape.z);
+  vWave = SUN_ACTIVITY_WAVE_AMPLITUDE * vec4(sin(phase * 2.0), cos(phase * 2.0),
+    sin(phase * 3.0 + 1.0), cos(phase * 3.0 + 1.0));
+  // Two volume-preserving shears twist x/z. Bound to the current frame's reach and wave displacement.
   float twist = abs(motion.w);
   vBounds = vec2(1.0 - twist * twist + twist, 1.0 + twist)
-    + abs(motion.yz) + 2.0 * SUN_ACTIVITY_WAVE_AMPLITUDE;
+    + abs(motion.yz) + abs(vWave.xy) + abs(vWave.zw);
   float halfSpan = aShape.y * vBounds.x;
   float halfDepth = aShape.y * SUN_ACTIVITY_DEPTH_RATIO * vBounds.y;
   vec3 across = cross(aAlong, aAnchor);
@@ -35,10 +45,5 @@ void main() {
   vCameraBox = vec3(dot(offset, aAlong) / halfSpan, dot(offset, aAnchor) / height, dot(offset, across) / halfDepth);
   vBox = position;
   vLocal = point;
-  vPhase = aShape.z;
-  // Evaluate temporal wave modes per vertex, never noise or trig inside the ray-march for bending.
-  float phase = TWO_PI * (activityTime / SUN_ACTIVITY_CYCLE_SECONDS + aShape.z);
-  vWave = SUN_ACTIVITY_WAVE_AMPLITUDE * vec4(sin(phase * 8.0), cos(phase * 8.0),
-    sin(phase * 11.0 + 1.0), cos(phase * 11.0 + 1.0));
   gl_Position = projectionMatrix * modelViewMatrix * vec4(point, 1.0);
 }

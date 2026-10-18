@@ -12,24 +12,30 @@ export const SUN_ACTIVITY_WAVE_AMPLITUDE = 0.06;
 export const SUN_ACTIVITY_DEPTH_RATIO = 0.38;
 export const SUN_ACTIVITY_MAX_HEIGHT = 0.11;
 export const SUN_ACTIVITY_MAX_STEPS = 32;
-export const SUN_ACTIVITY_EXTINCTION = 175;
+export const SUN_ACTIVITY_EXTINCTION = 215;
 /**
- * Linear RGB display colours inspired by pink/crimson visible-light prominences:
+ * Linear RGB display colours for visible-light prominences (Balmer Hα 656.3 nm +
+ * Hβ 486.1 nm rose-crimson outer threads, warm He I D₃ 587.6 nm + continuum
+ * dense core/footpoints, and dark on-disc Hα filament absorption):
  * https://www.nasa.gov/image-article/suns-corona-seen-during-2017-solar-eclipse/
  * Authored, enhanced visibility; not a spectral fit, temperature scale or EUV colour table.
  */
-export const SUN_ACTIVITY_CRIMSON_RGB = [0.8, 0.022, 0.065] as const;
-export const SUN_ACTIVITY_PINK_RGB = [1.8, 0.24, 0.38] as const;
-export const SUN_ACTIVITY_FILAMENT_RGB = [0.09, 0.018, 0.03] as const;
+export const SUN_ACTIVITY_CRIMSON_RGB = [0.96, 0.14, 0.13] as const;
+export const SUN_ACTIVITY_PINK_RGB = [2.25, 0.68, 0.42] as const;
+export const SUN_ACTIVITY_FILAMENT_RGB = [0.14, 0.065, 0.05] as const;
 
-/** Latitude, longitude, tilt, height, footpoint separation, cycle offset. Angles in radians. */
+/**
+ * Latitude, longitude, Joy's-law tilt, height, footpoint separation, cycle offset (radians).
+ * Anchored along the magnetic polarity inversion channels of the May 2024 SDO/HMI active
+ * regions (including AR 13664 at −19° S) and high-latitude quiescent filament channels.
+ */
 export const PROMINENCE_REGIONS = [
-  [0.31, 0.2, 1.15, 0.1, 0.25, 0.12],
-  [-0.44, 1.22, 0.8, SUN_ACTIVITY_MAX_HEIGHT, 0.3, 0.29],
-  [0.38, 2.5, 0.3, 0.065, 0.19, 0.48],
-  [-0.26, 3.4, -1.2, 0.09, 0.26, 0.66],
-  [0.48, 4.45, 0.6, 0.055, 0.17, 0.83],
-  [-0.35, 5.65, -0.2, 0.075, 0.22, 0.96],
+  [-0.33, 3.35, 0.46, SUN_ACTIVITY_MAX_HEIGHT, 0.3, 0.08],
+  [0.44, 4.08, -0.52, 0.105, 0.29, 0.24],
+  [-0.25, 0.52, 0.42, 0.1, 0.28, 0.41],
+  [0.34, 5.02, -0.38, 0.098, 0.27, 0.58],
+  [-0.18, 5.88, 0.34, 0.102, 0.28, 0.74],
+  [0.5, 1.72, -0.32, 0.108, 0.29, 0.91],
 ] as const;
 export const SUN_ACTIVITY_REGION_COUNT = PROMINENCE_REGIONS.length;
 

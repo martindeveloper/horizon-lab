@@ -9,6 +9,7 @@ import { ambientMusic } from "./ambient-music";
 
 const serverState = () => "paused" as const;
 const serverTrack = () => 0;
+const serverBuffering = () => false;
 
 // An arch, like the sun over the horizon: resting and peak heights, breath period (s).
 const BARS = [
@@ -38,6 +39,11 @@ export function MusicToggle({ className }: { className?: string }) {
   const playing =
     useSyncExternalStore(ambientMusic.subscribe, ambientMusic.getState, serverState) === "playing";
   const track = useSyncExternalStore(ambientMusic.subscribe, ambientMusic.getTrack, serverTrack);
+  const loading = useSyncExternalStore(
+    ambientMusic.subscribe,
+    ambientMusic.getBuffering,
+    serverBuffering,
+  );
   useEffect(() => ambientMusic.resumeOnInteraction(() => ref.current), []);
 
   // Turns of the dial: wrapping to the first track goes on round, under the horizon.
@@ -56,16 +62,18 @@ export function MusicToggle({ className }: { className?: string }) {
       className={cn("flex h-11 shrink-0 items-center justify-center md:h-8", className)}
     >
       <div className="glass-pill relative flex items-center rounded-full p-0.5">
-        <Tooltip label={label}>
+        <Tooltip label={loading ? t("loadingMusic") : label}>
           <button
             type="button"
             aria-label={label}
+            aria-busy={loading}
             onClick={ambientMusic.toggle}
             className="group relative flex rounded-full after:absolute after:-inset-y-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <span
               aria-hidden
               data-playing={playing}
+              data-loading={loading}
               className="music-lens header-lens absolute inset-0 rounded-full"
             />
             <span
@@ -74,7 +82,12 @@ export function MusicToggle({ className }: { className?: string }) {
                 playing ? "text-accent" : "text-subtle group-hover:text-fg",
               )}
             >
-              <span className="music-wave" data-playing={playing} aria-hidden>
+              <span
+                className="music-wave"
+                data-playing={playing}
+                data-loading={loading}
+                aria-hidden
+              >
                 {BARS.map(([rest, peak, period], i) => (
                   <span
                     key={i}
@@ -83,6 +96,7 @@ export function MusicToggle({ className }: { className?: string }) {
                       "--peak": peak,
                       "--dur": `${period}s`,
                       "--delay": `${-period * ((i * 0.37) % 1)}s`,
+                      "--i": i,
                     }}
                   />
                 ))}
@@ -98,6 +112,8 @@ export function MusicToggle({ className }: { className?: string }) {
                 <button
                   type="button"
                   aria-label={nextLabel}
+                  aria-busy={loading}
+                  data-loading={loading}
                   onClick={ambientMusic.next}
                   className="music-dial group relative ml-0.5 flex h-7 w-10 items-center justify-center rounded-full text-subtle transition-colors duration-500 after:absolute after:-inset-y-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                 >

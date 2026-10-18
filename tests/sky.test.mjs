@@ -7,6 +7,7 @@ import {
   moonPhase,
   moonPosition,
   OBSERVER,
+  risingHourAngle,
   sunPosition,
 } from "../src/components/shell/stars.ts";
 
@@ -87,4 +88,29 @@ test("the hero moon's phase, bright limb and north follow the sky over Ondřejov
 
   // Meeus example 53.a: position angle of the axis 15.08° on 1992 April 12, 0h TD.
   assert.ok(Math.abs(moonAxis(2448724.5) - 15.08) < 0.2);
+});
+
+test("the hero dial cuts each body's daily circle where it rises and sets", () => {
+  // Equator-crossing bodies are up for half the turn; summer days are longer.
+  assert.ok(Math.abs(risingHourAngle(0, OBSERVER.latitude) - 90) < 1e-9);
+  assert.ok(risingHourAngle(23.44, OBSERVER.latitude) > 115);
+  assert.ok(risingHourAngle(-23.44, OBSERVER.latitude) < 65);
+  assert.equal(risingHourAngle(80, OBSERVER.latitude), 180, "Circumpolar: never sets");
+  assert.equal(risingHourAngle(-80, OBSERVER.latitude), 0, "Never rises");
+
+  // Solar noon is the top of the dial; sunrise and sunset sit on the line.
+  const noon = at("2026-06-21T11:02:00Z");
+  assert.ok(Math.abs(noon.hourAngle) < 1);
+  for (const iso of ["2026-06-21T02:00:00Z", "2026-10-18T05:30:00Z", "2026-10-18T15:30:00Z"]) {
+    const sun = at(iso);
+    const rising = risingHourAngle(sun.declination, OBSERVER.latitude);
+    const above = Math.cos((sun.hourAngle * Math.PI) / 180) > Math.cos((rising * Math.PI) / 180);
+    assert.equal(above, sun.altitude > 0, iso);
+  }
+  const moon = moonPosition(
+    new Date("2026-10-18T12:00:00Z"),
+    OBSERVER.latitude,
+    OBSERVER.longitude,
+  );
+  assert.ok(Math.abs(moon.hourAngle) <= 180 && Math.abs(moon.declination) < 29);
 });

@@ -33,11 +33,11 @@ export function SiderealClock({ label }: { label: string }) {
   }, []);
   if (!value) return null;
   return (
-    <span className="tabular-nums">
+    <span className="inline-flex items-center gap-2 tabular-nums">
       <abbr title={label} className="no-underline">
         LST
-      </abbr>{" "}
-      {value}
+      </abbr>
+      <span className="text-muted">{value}</span>
     </span>
   );
 }

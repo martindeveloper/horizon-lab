@@ -86,10 +86,69 @@ html {
 }
 
 /* One line at the foot of every page; stages subtract it so it never overlaps a scene. */
+/* The footer: one quiet line under a fading hairline, the horizon seen again
+   at the foot of the page, warm only at its centre. */
 .app-footer {
+  position: relative;
   height: var(--app-footer-height);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  border-top: 0.5px solid var(--color-border);
+}
+.app-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border) 18%,
+    rgb(var(--solar) / 0.28) 50%,
+    var(--color-border) 82%,
+    transparent
+  );
+}
+.footer-dot {
+  width: 2px;
+  height: 2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+/* Links stay quiet; hover or focus draws a gold line out from the centre. */
+.footer-link {
+  position: relative;
+  display: inline-flex;
+  height: 100%;
+  align-items: center;
+  border-radius: 2px;
+  color: var(--color-muted);
+  transition: color 300ms ease;
+}
+.footer-link::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 calc(50% - 0.6rem);
+  height: 1px;
+  background: rgb(var(--solar) / 0.8);
+  scale: 0 1;
+  opacity: 0;
+  transition:
+    scale 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 300ms ease;
+}
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--color-fg);
+}
+.footer-link:hover::after,
+.footer-link:focus-visible::after {
+  scale: 1 1;
+  opacity: 1;
+}
+.footer-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-ring);
 }
 
 .simulation-stage {
@@ -229,12 +288,40 @@ html {
     --music-breath: 1;
   }
 }
+/* Loading: first light runs across the arch, east to west, until sound arrives. */
+@media (prefers-reduced-motion: no-preference) {
+  .music-wave[data-loading="true"] > span {
+    animation: music-scan 1.4s ease-in-out calc(var(--i) * 0.11s) infinite;
+  }
+  .music-dial[data-loading="true"] .music-dial-halo {
+    animation: music-halo 1.4s ease-in-out infinite alternate;
+  }
+}
+@keyframes music-scan {
+  0%,
+  70%,
+  100% {
+    --music-breath: 0.35;
+  }
+  35% {
+    --music-breath: 1;
+  }
+}
+@keyframes music-halo {
+  from {
+    opacity: 0.2;
+  }
+}
 .music-lens {
   opacity: 0;
   transition: opacity 700ms ease;
 }
 .music-lens[data-playing="true"] {
   opacity: 1;
+}
+/* Dawn, not day: the lens stays half lit until the music is heard. */
+.music-lens[data-playing="true"][data-loading="true"] {
+  opacity: 0.45;
 }
 
 /* The sun dial: opens beside the waveform while music plays. Each track is an

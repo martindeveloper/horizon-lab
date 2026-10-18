@@ -4,6 +4,7 @@ import test from "node:test";
 import { createSolarActivityDensity } from "../src/features/orrery/lib/model/solar-activity-density.ts";
 import { createSolarActivityDynamics } from "../src/features/orrery/lib/model/solar-activity-dynamics.ts";
 import {
+  PROMINENCE_REGIONS,
   SUN_ACTIVITY_CYCLE_SECONDS,
   SUN_ACTIVITY_DEPTH_RATIO,
   SUN_ACTIVITY_LEAN_LIMIT,
@@ -227,5 +228,35 @@ test("the baked density is small, sparse, reproducible and transparent at every 
     );
     assert.ok(maximum > 128, "retain bright density knots");
     assert.deepEqual(data, createSolarActivityDensity(tight).data);
+  }
+});
+
+test("flux-rope density roots both legs, clears the sub-arch cavity and follows Joy's law", () => {
+  const { data, width, height, depth } = createSolarActivityDensity(false);
+  const stride = width * height;
+  let leftFoot = 0,
+    rightFoot = 0,
+    cavity = 0,
+    crown = 0;
+  for (let z = 1; z < depth - 1; z++) {
+    for (let y = 1; y <= Math.floor(height * 0.14); y++) {
+      for (let x = 1; x < width - 1; x++) {
+        const d = data[x + y * width + z * stride];
+        if (x < width * 0.34) leftFoot += d;
+        else if (x > width * 0.66) rightFoot += d;
+        else if (x > width * 0.44 && x < width * 0.56) cavity += d;
+      }
+    }
+    for (let y = Math.floor(height * 0.45); y <= Math.floor(height * 0.85); y++) {
+      for (let x = Math.floor(width * 0.3); x <= Math.floor(width * 0.7); x++) {
+        crown += data[x + y * width + z * stride];
+      }
+    }
+  }
+  assert.ok(leftFoot > 20_000 && rightFoot > 20_000, "both chromospheric legs stay firmly rooted");
+  assert.ok(cavity < Math.min(leftFoot, rightFoot) * 0.25, "open magnetic cavity beneath the arch");
+  assert.ok(crown > leftFoot + rightFoot, "dense dipped spine across the upper arch");
+  for (const [lat, , tilt] of PROMINENCE_REGIONS) {
+    assert.ok(lat * tilt < 0, "Joy's law: opposite polarity-inversion tilt in N and S hemispheres");
   }
 });

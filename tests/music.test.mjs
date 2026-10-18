@@ -49,12 +49,14 @@ test("a playlist skips while paused and wraps; a single track has nowhere to go"
   let heard = 0;
   const stop = playlist.subscribe(() => heard++);
   assert.equal(playlist.getTrack(), 0);
+  assert.equal(playlist.getBuffering(), false, "Nothing loads before the first play");
   playlist.next();
   playlist.next();
   assert.equal(playlist.track.title, "C");
   playlist.next();
   assert.equal(playlist.getTrack(), 0, "Past the last track it wraps");
   assert.equal(heard, 3);
+  assert.equal(playlist.getBuffering(), false, "A paused skip loads nothing");
   stop();
   const single = new MusicPlayer(tracks[0]);
   single.next();

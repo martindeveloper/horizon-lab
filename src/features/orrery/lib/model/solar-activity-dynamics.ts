@@ -37,15 +37,15 @@ export function createSolarActivityDynamics() {
     const phase = tick / CYCLE_TICKS;
     for (let region = 0; region < SUN_ACTIVITY_REGION_COUNT; region++) {
       const p = (phase + PROMINENCE_REGIONS[region]![5]) % 1;
-      const rise = ramp(0.06, 0.43, p) * (1 - ramp(0.54, 0.79, p));
-      const launch = pulse(0.39, 0.48, 0.6, p);
-      const recoil = pulse(0.52, 0.59, 0.68, p);
+      const rise = ramp(0.04, 0.34, p) * (1 - ramp(0.64, 0.88, p));
+      const launch = pulse(0.42, 0.51, 0.63, p);
+      const recoil = pulse(0.55, 0.62, 0.71, p);
       const sign = region % 2 === 0 ? 1 : -1;
       for (let axis = 0; axis < 4; axis++) {
         const i = region * 4 + axis;
         let target: number, frequency: number, damping: number, force: number, limit: number;
         if (axis === 0) {
-          target = 0.38 + 0.84 * rise + 0.65 * launch;
+          target = 0.36 + 0.94 * rise + 0.62 * launch;
           frequency = 2.8;
           damping = 0.58;
           force = 0;

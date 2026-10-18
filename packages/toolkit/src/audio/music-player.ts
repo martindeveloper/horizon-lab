@@ -68,6 +68,8 @@ export class MusicPlayer {
   private state: MusicState = "paused";
   /** True from the start of a blend until the decks settle. */
   private blending = false;
+  /** Playing was asked for, but the audible deck is still waiting for data. */
+  private buffering = false;
   private loopTimer: Timer;
   private prefetchTimer: Timer;
   private settleTimer: Timer;
@@ -99,6 +101,9 @@ export class MusicPlayer {
 
   /** Playlist index of `track`. */
   getTrack = (): number => this.index;
+
+  /** Whether music is wanted but still loading: the first play, a skip, or a stall. */
+  getBuffering = (): boolean => this.buffering;
 
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -180,6 +185,7 @@ export class MusicPlayer {
     this.master = null;
     this.decks = [];
     this.blending = false;
+    this.buffering = false;
     this.emit("paused");
   }
 
@@ -193,9 +199,21 @@ export class MusicPlayer {
 
   private emit(next: MusicState) {
     this.state = next;
+    if (next === "paused") this.buffering = false;
     if (typeof navigator !== "undefined" && "mediaSession" in navigator)
       navigator.mediaSession.playbackState = next;
     this.notify();
+  }
+
+  private setBuffering(on: boolean) {
+    if (this.buffering === on) return;
+    this.buffering = on;
+    this.notify();
+  }
+
+  /** Mark buffering while the deck has no data to play through yet. */
+  private awaitData(deck: Deck) {
+    this.setBuffering(deck.el.readyState < HTMLMediaElement.HAVE_FUTURE_DATA);
   }
 
   private remember(on: boolean) {
@@ -239,6 +257,14 @@ export class MusicPlayer {
       el.addEventListener("ended", () => {
         if (this.decks[this.current]?.el === el && this.state === "playing") this.blend();
       });
+      // Only the audible deck speaks for loading: a stall shows, a resumed stream clears it.
+      const audible = () => this.decks[this.current]?.el === el;
+      el.addEventListener("waiting", () => {
+        if (audible() && this.state === "playing") this.setBuffering(true);
+      });
+      el.addEventListener("playing", () => {
+        if (audible()) this.setBuffering(false);
+      });
       return { el, gain, track: -1 };
     });
     this.current = 0;
@@ -279,6 +305,7 @@ export class MusicPlayer {
     const ctx = this.setup();
     clearTimeout(this.stopTimer);
     const deck = this.decks[this.current]!;
+    this.awaitData(deck);
     try {
       // Both calls start inside the gesture; awaiting the first would lose it on iOS.
       const resumed = ctx.resume();
@@ -293,6 +320,7 @@ export class MusicPlayer {
     gain.cancelScheduledValues(ctx.currentTime);
     gain.setValueAtTime(gain.value, ctx.currentTime);
     gain.setTargetAtTime(1, ctx.currentTime, this.fadeIn / 4);
+    this.setBuffering(false);
     this.scheduleLoop();
     return true;
   }
@@ -357,10 +385,12 @@ export class MusicPlayer {
     this.current = 1 - this.current;
     this.index = into.track;
     this.updateMetadata();
+    this.awaitData(into);
     this.notify();
 
     const begin = () => {
       if (!this.blending || this.decks[this.current] !== into || this.state !== "playing") return;
+      this.setBuffering(false);
       for (const [deck, rising] of [
         [out, false],
         [into, true],

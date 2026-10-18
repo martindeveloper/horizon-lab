@@ -30,6 +30,7 @@
     "playMusic": "Play music",
     "pauseMusic": "Pause music",
     "nextTrack": "Next: {title}",
+    "loadingMusic": "Loading music",
     "desktopNotice": "Best experienced on a larger screen",
     "closeDesktopNotice": "Dismiss",
     "starMagnitude": "{value} mag",
