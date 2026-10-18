@@ -20,11 +20,11 @@ export async function AppFooter({ locale }: { locale: Locale }) {
             <span className="max-[23rem]:sr-only">Horizon</span>
           </span>
           <span className="footer-dot max-[23rem]:hidden" aria-hidden />
-          <Link href="/about" prefetch={false} className="footer-link">
+          <Link href="/about" prefetch={false} className="footer-link inline-flex">
             {t("about")}
           </Link>
           <span className="footer-dot" aria-hidden />
-          <Link href="/credits" prefetch={false} className="footer-link">
+          <Link href="/credits" prefetch={false} className="footer-link inline-flex">
             {t("credits")}
           </Link>
           {/* Phones reach the repository from About; the footer line stays one line. */}

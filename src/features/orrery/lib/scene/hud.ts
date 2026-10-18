@@ -33,11 +33,13 @@ export function createHud(
         drift: boolean;
         driftYears: number;
         syncView: boolean;
+        /** The camera's orbit angles, radians. */
+        angles: { azimuth: number; inclination: number };
       },
     ) {
       driftClock += dt;
       const { dist, syncView } = view;
-      hud.update(dt, force, { distance: dist, syncView }, (s) => {
+      hud.update(dt, force, { distance: dist, syncView, angles: view.angles }, (s) => {
         const viewDist = syncView ? dist : solarViewById(s.view).dist;
         const driftRate = view.drift ? driftYearsPerSecond(dist) : 0;
         let driftYears = s.driftYears;

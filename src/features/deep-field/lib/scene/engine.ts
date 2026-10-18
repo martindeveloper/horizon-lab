@@ -259,6 +259,7 @@ export function createDeepFieldEngine({
           ly: dist / LY,
           aimLy: rig.aim.length() / LY,
           syncView: !rig.flying && !state.guideOpen,
+          angles: pose,
         });
         draw();
         if (bridge.ready()) warmUp(scene);

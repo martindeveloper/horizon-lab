@@ -10,3 +10,10 @@ export const featureMessages = (feature, locale) =>
     read(`space/messages/${locale}.json`),
     read(`features/${feature}/messages/${locale}.json`),
   );
+
+export function leaves(value, prefix = "") {
+  return Object.entries(value).flatMap(([key, child]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    return typeof child === "string" ? [[path, child]] : leaves(child, path);
+  });
+}

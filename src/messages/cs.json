@@ -103,7 +103,7 @@
       "category": "Vzdálenost a světlo",
       "description": "Jeden zoom od Slunce přes nejbližší hvězdy a galaxie až k nejstaršímu světlu, jaké můžeme vidět. Čím dál se díváte, tím starší světlo vidíte.",
       "open": "Otevřít Deep Field",
-      "depth": "Od planet po 46 miliard světelných let, v jednom zoomu",
+      "depth": "Až do 46 miliard světelných let",
       "lookback": "Vzdálenost jako pohled do minulosti",
       "edge": "Okraj pozorovatelného vesmíru",
       "entryPoints": {

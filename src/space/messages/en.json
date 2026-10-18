@@ -53,6 +53,8 @@
     "rotateRight": "Rotate right",
     "tiltUp": "Tilt up",
     "tiltDown": "Tilt down",
+    "heading": "Heading",
+    "elevation": "Elevation",
     "distanceUnit": "Distance unit: automatic, astronomical units, light-years or parsecs",
     "bodies": "Sun and planets",
     "view": "View",

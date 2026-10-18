@@ -18,8 +18,13 @@ export type SceneStoreState = {
   setReady: (ready: boolean) => void;
 };
 
+/** The camera's angles round its aim, whole degrees: heading 0–359, tilt the elevation above the map's plane. */
+export type CameraAngles = { heading: number; tilt: number };
+
 export type SceneSlice = Omit<SceneStoreState, "view"> &
   ScaleReadout & {
+    /** Written by the HUD with the scale bar, for the camera pad's readout. */
+    cameraAngles: CameraAngles;
     /** The visitor's readout unit; `auto` picks au or ly by each distance's size. */
     distanceUnit: DistanceChoice;
     rotate: (turn: OrbitTurn) => void;
@@ -36,6 +41,7 @@ export function sceneSlice(
     turn: null,
     ready: false,
     distanceUnit: "auto",
+    cameraAngles: { heading: 0, tilt: 0 },
     ...scale,
     rotate: (turn) => set({ turn: { ...turn } }),
     setDistanceUnit: (distanceUnit) => set({ distanceUnit }),

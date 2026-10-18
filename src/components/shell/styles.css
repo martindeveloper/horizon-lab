@@ -116,9 +116,9 @@ html {
   background: var(--color-border-strong);
 }
 /* Links stay quiet; hover or focus draws a gold line out from the centre. */
+/* No `display` here: an unlayered rule would beat the `hidden` utility a link may carry. */
 .footer-link {
   position: relative;
-  display: inline-flex;
   height: 100%;
   align-items: center;
   border-radius: 2px;

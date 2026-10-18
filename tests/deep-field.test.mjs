@@ -5,14 +5,11 @@ import { createFormatter, createTranslator } from "next-intl";
 
 import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
 import { nearestView } from "@horizon/toolkit/camera";
-import { UNITS, convert } from "@horizon/toolkit/science";
+import { convert } from "@horizon/toolkit/science";
 
 import { cardFor, NEIGHBOUR_IDS } from "../src/features/deep-field/components/cards.tsx";
 import { formatAgo, formatThen } from "../src/features/deep-field/components/format.ts";
-import {
-  PROSE_FIGURES,
-  catalogueFacts,
-} from "../src/features/deep-field/lib/model/catalogue/index.ts";
+import { PROSE_FIGURES } from "../src/features/deep-field/lib/model/catalogue/index.ts";
 import {
   ANCHORS,
   CMB_AGE_YEARS,
@@ -57,7 +54,7 @@ import { VIEWS } from "../src/features/deep-field/lib/model/views.ts";
 import { dropsSelection, useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { pathForView, resolveView, viewFromPath } from "../src/features/deep-field/routing.ts";
 import { proseArgs } from "../src/lib/facts.ts";
-import { featureMessages } from "./messages-helper.mjs";
+import { featureMessages, leaves } from "./messages-helper.mjs";
 
 const near = (actual, expected, tolerance, message) =>
   assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: ${actual} vs ${expected}`);
@@ -76,13 +73,6 @@ const translator = (locale) =>
       throw error;
     },
   });
-
-function leaves(value, prefix = "") {
-  return Object.entries(value).flatMap(([key, child]) => {
-    const path = prefix ? `${prefix}.${key}` : key;
-    return typeof child === "string" ? [[path, child]] : leaves(child, path);
-  });
-}
 
 const SELECTIONS = [
   { kind: "sun" },
@@ -230,24 +220,6 @@ test("routes: every view has one canonical path, and no legacy names", () => {
   }
   assert.equal(pathForView("galaxy"), "/lab/deep-field", "the default view lives at the base");
   for (const name of ["cmb", "milky-way", "proxima"]) assert.equal(resolveView(name), null);
-});
-
-test("catalogue quantities use supported units, finite ordered ranges and no time dependence", () => {
-  const plain = new Set(["count", "percent", "ratio"]);
-  for (const { path, fact } of catalogueFacts()) {
-    assert.ok(fact.unit in UNITS || plain.has(fact.unit), `${path}: unit ${fact.unit}`);
-    assert.ok(!fact.show || fact.show in UNITS, `${path}: shown in ${fact.show}`);
-    assert.ok(fact.value !== undefined || fact.range, `${path}: a value or a published span`);
-    assert.equal("at" in fact, false, `${path}: Deep Field has no slider`);
-    for (const v of [fact.value, ...(fact.range ?? [])])
-      if (v !== undefined) assert.ok(Number.isFinite(v), `${path}: ${v}`);
-    if (fact.range) {
-      const [low, high] = fact.range;
-      assert.ok(low < high, `${path}: range order`);
-      if (fact.value !== undefined)
-        assert.ok(low <= fact.value && fact.value <= high, `${path}: value outside its range`);
-    }
-  }
 });
 
 test("cards render every figure in both languages and all distance units", () => {

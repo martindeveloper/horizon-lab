@@ -35,8 +35,9 @@ frame, compiles every material in idle time, hidden objects included.
 `createOrbitRig(camera, options)` holds a pose (azimuth, inclination, distance)
 about an aim and moves the distance on the log zoom. `zoomTo` is for input,
 `flyTo(distance, angles?)` flies and turns the angles the short way round,
-`snap` sets the pose outright, `turnBy` takes a button step (during a turning flight
-it carries on to the landing), `cancel` lets a flight glide to rest. Each frame call
+`snap` sets the pose outright, `turnBy` takes a button step (it eases in over about a
+third of a second and steps add up; it snaps with reduced motion, and during a turning
+flight it carries on to the landing), `cancel` lets a flight glide to rest. Each frame call
 `step(dt)`, `home()` and `applyPose()`. Options: the starting `pose`, `limits`,
 `reduceMotion` (zooms and flights land at once), `nearFloor`, `far`; hooks `follow`
 (another owner holds the distance), `onStep`, `busy`, `home` (where the aim sits) and

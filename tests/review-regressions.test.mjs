@@ -180,16 +180,37 @@ test("orrery HUD throttles drift readouts to 1 Hz even across forced redraws and
   try {
     useOrrery.setState({ driftYears: 0, driftRate: 2.5 });
     const hud = createHud(useOrrery, { fov: 48 }, { width: 1200, height: 800 });
+    /* Turned a step right of the start and raised 30°: the camera pad reads whole degrees. */
+    const angles = { azimuth: -Math.PI / 12, inclination: Math.PI / 6 };
     // Forced redraws update scale/rate immediately without churning driftYears every frame.
-    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 500, syncView: true });
+    hud.update(0.016, true, {
+      dist: 170_000,
+      drift: true,
+      driftYears: 500,
+      syncView: true,
+      angles,
+    });
     assert.equal(useOrrery.getState().driftRate, 30_000);
+    assert.deepEqual(useOrrery.getState().cameraAngles, { heading: 345, tilt: 30 });
     assert.equal(useOrrery.getState().driftYears, 0);
-    hud.update(0.5, false, { dist: 170_000, drift: true, driftYears: 15_500, syncView: true });
+    hud.update(0.5, false, {
+      dist: 170_000,
+      drift: true,
+      driftYears: 15_500,
+      syncView: true,
+      angles,
+    });
     assert.equal(useOrrery.getState().driftYears, 0);
-    hud.update(0.5, false, { dist: 170_000, drift: true, driftYears: 30_000, syncView: true });
+    hud.update(0.5, false, {
+      dist: 170_000,
+      drift: true,
+      driftYears: 30_000,
+      syncView: true,
+      angles,
+    });
     assert.equal(useOrrery.getState().driftYears, 30_000);
     // Resetting driftYears to 0 commits at once.
-    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 0, syncView: true });
+    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 0, syncView: true, angles });
     assert.equal(useOrrery.getState().driftYears, 0);
     // Manual zooming updates the active view and clears preset distance match when between presets.
     for (const v of SOLAR_VIEWS) {
@@ -202,6 +223,7 @@ test("orrery HUD throttles drift readouts to 1 Hz even across forced redraws and
       drift: true,
       driftYears: 0,
       syncView: true,
+      angles,
     });
     assert.equal(useOrrery.getState().view, "inner");
     assert.equal(useOrrery.getState().viewDist, 6);

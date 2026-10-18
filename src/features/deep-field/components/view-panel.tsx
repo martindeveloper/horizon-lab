@@ -14,6 +14,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("deepField");
   const show = useDeepField((s) => s.show);
   const unit = useDeepField((s) => s.distanceUnit);
+  const angles = useDeepField((s) => s.cameraAngles);
   return (
     <Rail id="deep-field-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
       <RailSection title={t("hud.show")}>
@@ -35,6 +36,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
       <RailSection title={t("hud.camera")}>
         <CameraPad
           namespace="deepField"
+          angles={angles}
           onRotate={(turn) => useDeepField.getState().rotate(turn)}
         />
       </RailSection>

@@ -9,7 +9,7 @@ import { pathForHole, presetFromPath, resolveHole } from "../src/features/black-
 import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
 import { localeRewrites, siteRedirects } from "../src/lib/redirects.ts";
-import { featureMessages } from "./messages-helper.mjs";
+import { featureMessages, leaves } from "./messages-helper.mjs";
 
 const catalogs = Object.fromEntries(
   routing.locales.map((locale) => [
@@ -29,13 +29,6 @@ const catalogs = Object.fromEntries(
     },
   ]),
 );
-function leaves(value, prefix = "") {
-  return Object.entries(value).flatMap(([key, child]) => {
-    const path = prefix ? `${prefix}.${key}` : key;
-    return typeof child === "string" ? [[path, child]] : leaves(child, path);
-  });
-}
-
 test("English and Czech have identical keys and every ICU message formats", () => {
   assert.deepEqual(
     leaves(catalogs.cs)

@@ -164,7 +164,15 @@ test("orbit rigs take hooks for the aim, the frame and other owners, and honour 
   assert.ok(Math.abs(camera.up.x + 1) < 1e-9, "the frame turns the camera's up");
   assert.equal(camera.near, 0.5);
   rig.turnBy({ azimuth: 1, inclination: 0 });
-  assert.ok(Math.abs(rig.pose.azimuth - Math.PI / 12) < 1e-9, "a button step is 15°");
+  rig.turnBy({ azimuth: 1, inclination: 0 });
+  frame(1 / 60);
+  assert.ok(rig.pose.azimuth > 0 && rig.pose.azimuth < Math.PI / 6, "a button step eases in");
+  assert.ok(rig.moving, "and keeps frames coming while it does");
+  for (let i = 0; i < 120 && rig.moving; i++) frame(1 / 60);
+  assert.ok(Math.abs(rig.pose.azimuth - Math.PI / 6) < 1e-9, "two steps of 15° add up");
+  const still = orbitRig({ reduced: true }).rig;
+  still.turnBy({ azimuth: 1, inclination: 0 });
+  assert.ok(Math.abs(still.pose.azimuth - Math.PI / 12) < 1e-9, "with reduced motion it snaps");
 });
 
 test("a button step during a turning flight carries on to where the flight lands", () => {

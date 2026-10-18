@@ -30,10 +30,12 @@ export function createHud(
         /** Its aim's distance from the Sun, ly. */
         aimLy: number;
         syncView: boolean;
+        /** The camera's orbit angles, radians. */
+        angles: { azimuth: number; inclination: number };
       },
     ) {
       const { ly } = view;
-      hud.update(dt, force, { distance: ly, syncView: view.syncView }, (s) => {
+      hud.update(dt, force, { distance: ly, syncView: view.syncView, angles: view.angles }, (s) => {
         const reachLy = view.aimLy + ly * spread();
         return {
           moved: movedBy(ly, s.viewLy, 0.01) || movedBy(reachLy, s.reachLy, 0.01),

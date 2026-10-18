@@ -34,7 +34,7 @@ viewport height per page) before applying sensitivity. Call `cancel()` when a sc
 `dispose()` on unmount. A pinch does not jump into drag when one finger lifts.
 
 `stepOrbit(pose, turn, options)` applies one discrete button or key step: signed
-`turn.azimuth` / `turn.inclination` times `step` (default 15°), with inclination
+`turn.azimuth` / `turn.inclination` times `step` (default `ORBIT_STEP`, 15°), with inclination
 clamped. Directions match a drag (a positive azimuth turns the scene left). It
 snaps, so it needs no reduced-motion branch.
 

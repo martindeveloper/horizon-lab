@@ -1,10 +1,12 @@
-import { Crosshair, Orbit, SlidersHorizontal } from "lucide-react";
+import { Orbit } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
 import { MapScale } from "@/components/simulations/map-readouts";
+import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/scene-escape";
+import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import {
   IconButton,
   Toolbar,
@@ -45,14 +47,7 @@ export function DeepFieldOverlay() {
   const scaleValue = useDeepField((s) => s.scaleValue);
   const scaleUnit = useDeepField((s) => s.scaleUnit);
   const aside = panel !== "none" || selection !== null;
-  const guideButton = useRef<HTMLButtonElement>(null);
-  const hadGuide = useRef(false);
-
-  /* The entry button unmounts with the header; hand focus back to it after the journey. */
-  useEffect(() => {
-    if (hadGuide.current && !guideOpen) guideButton.current?.focus({ preventScroll: true });
-    hadGuide.current = guideOpen;
-  }, [guideOpen]);
+  const guideButton = useGuideFocusReturn(guideOpen);
 
   useSceneEscape(escapeSteps);
   /* During the journey, Space pauses and the arrows step, when no control wants them. */
@@ -102,28 +97,13 @@ export function DeepFieldOverlay() {
                     <Orbit className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip label={t("hud.objects")}>
-                  <IconButton
-                    aria-label={t("hud.objects")}
-                    aria-expanded={panel === "objects"}
-                    aria-controls={panel === "objects" ? "deep-field-objects" : undefined}
-                    active={panel === "objects"}
-                    onClick={() => setPanel(panel === "objects" ? "none" : "objects")}
-                  >
-                    <Crosshair className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip label={t("hud.view")}>
-                  <IconButton
-                    aria-label={t("hud.view")}
-                    aria-expanded={panel === "view"}
-                    aria-controls={panel === "view" ? "deep-field-view" : undefined}
-                    active={panel === "view"}
-                    onClick={() => setPanel(panel === "view" ? "none" : "view")}
-                  >
-                    <SlidersHorizontal className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
+                <ScenePanelButtons
+                  simulationId="deep-field"
+                  panel={panel}
+                  objectsLabel={t("hud.objects")}
+                  viewLabel={t("hud.view")}
+                  onPanelChange={setPanel}
+                />
                 <SimulationImmersiveToggle />
               </Toolbar>
             </div>

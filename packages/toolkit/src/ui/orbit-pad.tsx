@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { keysOf } from "../records";
 import { IconButton } from "./icon-button";
@@ -15,6 +16,8 @@ export type OrbitPadProps = {
   labels: Record<OrbitPadDirection, string>;
   /** Signed steps matching a drag: left is `azimuth: 1`, up is `inclination: -1`. */
   onRotate: (turn: { azimuth: number; inclination: number }) => void;
+  /** Shown in the middle of the pad, such as the size of one step ("15°"). Decorative. */
+  centre?: ReactNode;
   className?: string;
 };
 
@@ -25,24 +28,45 @@ const TURNS = {
   down: { azimuth: 0, inclination: 1, Icon: ChevronDown, cell: "col-start-2 row-start-3" },
 } as const;
 
-/** Four step buttons that rotate a camera without dragging (WCAG 2.5.7). */
-export function OrbitPad({ labels, onRotate, className, ...props }: OrbitPadProps) {
+/**
+ * Four step buttons that rotate a camera without dragging (WCAG 2.5.7), round a glass dial:
+ * a faint ring for the orbit, the steps at its four points, and `centre` in the middle.
+ */
+export function OrbitPad({ labels, onRotate, centre, className, ...props }: OrbitPadProps) {
   return (
     <div
       role="group"
-      className={cn("grid w-fit grid-cols-3 grid-rows-3 not-md:gap-2", className)}
+      className={cn(
+        "relative grid w-fit shrink-0 grid-cols-3 grid-rows-3 place-items-center rounded-full bg-fg/[0.04] p-1 ring-1 ring-border ring-inset not-md:gap-2",
+        className,
+      )}
       {...props}
     >
+      {/* The orbit the steps move along. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-[22%] rounded-full border border-dashed border-fg/15"
+      />
       {keysOf(TURNS).map((direction) => {
         const { Icon, cell, ...turn } = TURNS[direction];
         return (
           <Tooltip key={direction} label={labels[direction]} className={cell}>
-            <IconButton aria-label={labels[direction]} onClick={() => onRotate(turn)}>
+            <IconButton
+              aria-label={labels[direction]}
+              onClick={() => onRotate(turn)}
+              className="transition-[color,background-color,scale] hover:bg-fg/[0.06] hover:text-accent active:scale-90"
+            >
               <Icon className="size-4" />
             </IconButton>
           </Tooltip>
         );
       })}
+      <span
+        aria-hidden
+        className="col-start-2 row-start-2 font-mono text-[10px] tracking-wide text-subtle tabular-nums"
+      >
+        {centre}
+      </span>
     </div>
   );
 }

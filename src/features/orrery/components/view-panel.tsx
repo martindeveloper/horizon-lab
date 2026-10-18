@@ -15,6 +15,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const show = useOrrery((s) => s.show);
   const patchShow = useOrrery((s) => s.patchShow);
+  const angles = useOrrery((s) => s.cameraAngles);
   const tally = useMemo(() => tallyAt(yearsAgo), [yearsAgo]);
   return (
     <Rail id="orrery-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
@@ -31,7 +32,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         <Switches list keys={[...DISPLAY, ...EXTRA]} />
       </RailSection>
       <RailSection title={t("hud.camera")}>
-        <CameraPad namespace="orrery" onRotate={(turn) => useOrrery.getState().rotate(turn)} />
+        <CameraPad
+          namespace="orrery"
+          angles={angles}
+          onRotate={(turn) => useOrrery.getState().rotate(turn)}
+        />
       </RailSection>
     </Rail>
   );

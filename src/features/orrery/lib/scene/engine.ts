@@ -360,6 +360,7 @@ export function createOrreryEngine({
           drift: show.drift && !closeUp.current,
           driftYears,
           syncView: !rig.flying && !closeUp.current && !state.guideOpen,
+          angles: pose,
         });
         draw();
         if (bridge.ready()) {

@@ -53,6 +53,8 @@
     "rotateRight": "Otočit doprava",
     "tiltUp": "Naklonit nahoru",
     "tiltDown": "Naklonit dolů",
+    "heading": "Směr",
+    "elevation": "Elevace",
     "distanceUnit": "Jednotka vzdálenosti: automaticky, astronomické jednotky, světelné roky nebo parseky",
     "bodies": "Slunce a planety",
     "view": "Zobrazení",

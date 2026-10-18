@@ -12,6 +12,8 @@ import { createLogZoom, type ZoomLimits } from "./log-zoom";
 
 /** How far the orbit tilts above and below its plane, radians. */
 export const ORBIT_INCLINATION = { min: -1.45, max: 1.45 };
+/** A button step eases out over about a third of a second: the time constant, seconds. */
+const STEP_EASE = 0.08;
 
 export type OrbitAngles = { azimuth: number; inclination: number };
 
@@ -49,6 +51,8 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
   const offset = new Vector3();
   /** A flight's turn: where the angles started and how far they go. */
   let turn: { from: OrbitAngles; by: OrbitAngles } | null = null;
+  /** What is left of button steps still easing in. */
+  let stepping: OrbitAngles | null = null;
 
   const rig = {
     pose: { ...options.pose },
@@ -61,7 +65,7 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
     },
     /** A flight, a zoom still gliding, or something else moving the camera. */
     get moving() {
-      return zoom.moving || (options.busy?.() ?? false);
+      return zoom.moving || stepping !== null || (options.busy?.() ?? false);
     },
     /** Where the zoom is heading, world units. */
     get target() {
@@ -85,11 +89,13 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
     /** The pose was set outright (a snap, a landing): nothing left to glide. */
     settle() {
       turn = null;
+      stepping = null;
       zoom.settle(rig.pose.distance);
     },
     /** Ends a flight; the zoom glides to rest from its current speed, without turning back. */
     cancel() {
       turn = null;
+      stepping = null;
       zoom.cancel(rig.pose.distance);
     },
     /** Sets the pose outright. */
@@ -117,21 +123,43 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
         : null;
     },
     /**
-     * A button step; it snaps, so it reads the same with reduced motion. During a turning
-     * flight the step carries on to where the flight lands.
+     * A button step. It eases in over a moment, and steps pressed in a row add up; with
+     * reduced motion it snaps. During a turning flight the step carries on to where the
+     * flight lands.
      */
     turnBy(step: OrbitTurn) {
       const { azimuth, inclination } = rig.pose;
-      Object.assign(rig.pose, stepOrbit(rig.pose, step, { inclination: ORBIT_INCLINATION }));
-      if (turn) {
-        turn.from.azimuth += rig.pose.azimuth - azimuth;
-        turn.from.inclination += rig.pose.inclination - inclination;
+      if (turn || reduceMotion.matches) {
+        Object.assign(rig.pose, stepOrbit(rig.pose, step, { inclination: ORBIT_INCLINATION }));
+        if (turn) {
+          turn.from.azimuth += rig.pose.azimuth - azimuth;
+          turn.from.inclination += rig.pose.inclination - inclination;
+        }
+        return;
       }
+      /* From where the steps already pressed will land. */
+      const from = {
+        azimuth: azimuth + (stepping?.azimuth ?? 0),
+        inclination: inclination + (stepping?.inclination ?? 0),
+      };
+      const to = stepOrbit({ ...rig.pose, ...from }, step, { inclination: ORBIT_INCLINATION });
+      stepping = { azimuth: to.azimuth - azimuth, inclination: to.inclination - inclination };
     },
 
     /** Advances the flight or the zoom spring. */
     step(dt: number) {
       options.onStep?.(dt);
+      if (stepping) {
+        const k = 1 - Math.exp(-dt / STEP_EASE);
+        const done = Math.abs(stepping.azimuth) < 1e-4 && Math.abs(stepping.inclination) < 1e-4;
+        const da = done ? stepping.azimuth : stepping.azimuth * k;
+        const di = done ? stepping.inclination : stepping.inclination * k;
+        rig.pose.azimuth += da;
+        rig.pose.inclination += di;
+        stepping = done
+          ? null
+          : { azimuth: stepping.azimuth - da, inclination: stepping.inclination - di };
+      }
       const { held, clamp } = options.follow?.() ?? { held: false, clamp: true };
       const { distance, progress } = zoom.step(dt, rig.pose.distance, held, clamp);
       if (progress !== null && turn) {

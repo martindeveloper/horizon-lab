@@ -78,6 +78,15 @@ export type OwnReadouts<S> = { moved: boolean; values: Partial<S> };
  * `syncView` holds (no flight or close-up owns the camera), the view the zoom is nearest.
  * `own` adds the simulation's own readouts. Only news reaches the store.
  */
+/** Orbit angles (radians) as the readout shows them: whole degrees, the heading in 0–359. */
+function anglesOf({ azimuth, inclination }: { azimuth: number; inclination: number }) {
+  const heading = Math.round((azimuth * 180) / Math.PI) % 360;
+  return {
+    heading: heading < 0 ? heading + 360 : heading,
+    tilt: Math.round((inclination * 180) / Math.PI),
+  };
+}
+
 export function createSceneHud<V extends { id: unknown }, S extends SceneSlice & { view: V["id"] }>(
   store: Pick<StoreApi<S>, "getState" | "setState">,
   camera: { fov: number },
@@ -95,7 +104,12 @@ export function createSceneHud<V extends { id: unknown }, S extends SceneSlice &
     update(
       dt: number,
       force: boolean,
-      at: { distance: number; syncView: boolean },
+      at: {
+        distance: number;
+        syncView: boolean;
+        /** The camera's orbit angles, radians. */
+        angles: { azimuth: number; inclination: number };
+      },
       own: (state: S) => OwnReadouts<S>,
     ) {
       if (!due(dt, force)) return;
@@ -105,8 +119,12 @@ export function createSceneHud<V extends { id: unknown }, S extends SceneSlice &
         ? nearestView(options.views, options.distanceOf, at.distance).id
         : s.view;
       const { moved, values } = own(s);
-      if (moved || view !== s.view || scaleChanged(scale, s))
-        store.setState({ ...values, ...scale, view });
+      const cameraAngles = anglesOf(at.angles);
+      const turned =
+        cameraAngles.heading !== s.cameraAngles.heading ||
+        cameraAngles.tilt !== s.cameraAngles.tilt;
+      if (moved || turned || view !== s.view || scaleChanged(scale, s))
+        store.setState({ ...values, ...scale, view, ...(turned ? { cameraAngles } : {}) });
     },
   };
 }

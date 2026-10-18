@@ -28,8 +28,9 @@ catalogue and `examples/visualization-example.tsx` for composition.
   without highlighting the exit button; Tab still reaches the controls normally.
   The canvas is never remounted. `immersive-state.ts` holds the framework-free
   state, shortcut and Fullscreen API helpers.
-- `OrbitPad`: step buttons for a camera without dragging. Labels come in props;
-  pair it with `stepOrbit` from `@horizon/toolkit/camera`.
+- `OrbitPad`: step buttons for a camera without dragging, round a glass dial with
+  optional `centre` content. Labels come in props; pair it with `stepOrbit` (or an orbit
+  rig's eased `turnBy`) and `ORBIT_STEP` from `@horizon/toolkit/camera`.
 - `TextReveal` lives at `@horizon/toolkit/ui/motion` to keep Motion optional.
   Reduced motion and `instant` render full text immediately.
 

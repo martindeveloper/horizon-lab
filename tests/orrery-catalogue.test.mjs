@@ -4,13 +4,11 @@ import test from "node:test";
 import { createFormatter, createTranslator } from "next-intl";
 
 import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
-import { UNITS } from "@horizon/toolkit/science";
 
 import { cardFor } from "../src/features/orrery/components/cards.tsx";
-import { PROSE_FIGURES, catalogueFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { PROSE_FIGURES } from "../src/features/orrery/lib/model/catalogue/index.ts";
 import { proseArgs } from "../src/lib/facts.ts";
-import { solarCatalogueFacts } from "../src/space/solar-system/model/catalogue.ts";
-import { featureMessages } from "./messages-helper.mjs";
+import { featureMessages, leaves } from "./messages-helper.mjs";
 
 const LOCALES = ["en", "cs"];
 const messages = Object.fromEntries(
@@ -55,25 +53,6 @@ function* cards() {
   }
 }
 
-test("catalogue quantities use supported units, finite ordered ranges and consistent model values", () => {
-  const plain = new Set(["count", "percent", "ratio"]);
-  for (const { path, fact } of [...solarCatalogueFacts(), ...catalogueFacts()]) {
-    assert.ok(fact.unit in UNITS || plain.has(fact.unit), `${path}: unit ${fact.unit}`);
-    assert.ok(!fact.show || fact.show in UNITS, `${path}: shown in ${fact.show}`);
-    assert.ok(fact.value !== undefined || fact.range, `${path}: a value or a published span`);
-    for (const v of [fact.value, ...(fact.range ?? [])])
-      if (v !== undefined) {
-        assert.ok(Number.isFinite(v), `${path}: ${v}`);
-      }
-    if (fact.range) {
-      const [low, high] = fact.range;
-      assert.ok(low < high, `${path}: range order`);
-      if (fact.value !== undefined)
-        assert.ok(low <= fact.value && fact.value <= high, `${path}: value outside its range`);
-    }
-  }
-});
-
 test("cards render every figure in both languages and all distance units", () => {
   for (const { where, card } of cards())
     for (const text of [card.title, card.body, card.caution, ...card.facts.map((f) => f.value)]) {
@@ -99,13 +78,6 @@ test("lengths follow the visitor's distance unit and keep the source's precision
   assert.match(oort.get("auto"), /2,000–5,000 au$/);
   assert.match(read({ kind: "population", id: "oort" }, "outerEdge").get("auto"), /1\.6–3\.2 ly$/);
 });
-
-function leaves(value, prefix = "") {
-  return Object.entries(value).flatMap(([key, child]) => {
-    const path = prefix ? `${prefix}.${key}` : key;
-    return typeof child === "string" ? [[path, child]] : leaves(child, path);
-  });
-}
 
 test("runtime prose arguments format without missing substitutions in either locale", () => {
   for (const locale of LOCALES) {

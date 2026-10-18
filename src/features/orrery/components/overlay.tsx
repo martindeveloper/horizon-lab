@@ -1,9 +1,11 @@
-import { BookOpen, Crosshair, Orbit, SlidersHorizontal } from "lucide-react";
+import { BookOpen, Orbit } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
+import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/scene-escape";
+import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import {
   IconButton,
   Toolbar,
@@ -43,15 +45,7 @@ export function OrreryOverlay() {
   const selection = useOrrery((s) => s.selection);
   const closeUp = useOrrery((s) => s.closeUp);
   const guideOpen = useOrrery((s) => s.guideOpen);
-  const guideButton = useRef<HTMLButtonElement>(null);
-
-  const hadGuide = useRef(false);
-
-  /* The entry button unmounts with the toolbar; hand focus back to it after the tour. */
-  useEffect(() => {
-    if (hadGuide.current && !guideOpen) guideButton.current?.focus({ preventScroll: true });
-    hadGuide.current = guideOpen;
-  }, [guideOpen]);
+  const guideButton = useGuideFocusReturn(guideOpen);
 
   useSceneEscape(escapeSteps);
   useEffect(() => {
@@ -103,28 +97,13 @@ export function OrreryOverlay() {
                     <Orbit className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip label={t("hud.objects")}>
-                  <IconButton
-                    aria-label={t("hud.objects")}
-                    aria-expanded={panel === "objects"}
-                    aria-controls={panel === "objects" ? "orrery-objects" : undefined}
-                    active={panel === "objects"}
-                    onClick={() => setPanel(panel === "objects" ? "none" : "objects")}
-                  >
-                    <Crosshair className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip label={t("hud.view")}>
-                  <IconButton
-                    aria-label={t("hud.view")}
-                    aria-expanded={panel === "view"}
-                    aria-controls={panel === "view" ? "orrery-view" : undefined}
-                    active={panel === "view"}
-                    onClick={() => setPanel(panel === "view" ? "none" : "view")}
-                  >
-                    <SlidersHorizontal className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
+                <ScenePanelButtons
+                  simulationId="orrery"
+                  panel={panel}
+                  objectsLabel={t("hud.objects")}
+                  viewLabel={t("hud.view")}
+                  onPanelChange={setPanel}
+                />
                 <Tooltip label={t("guide.title")}>
                   <IconButton
                     aria-label={t("guide.title")}
