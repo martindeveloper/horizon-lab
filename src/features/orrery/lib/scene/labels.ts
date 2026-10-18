@@ -34,6 +34,7 @@ const READABLE = 0.3;
 
 /** A drawn label as a tap target: `clear` when no globe covers any of its text. */
 export type LabelHit = LabelTarget & { clear: boolean };
+type Target = LabelBounds & { alpha: number; clear: boolean; shown: boolean };
 
 export const STRONG: LabelStyle = { strong: true };
 export const BELOW: LabelStyle = { below: true };
@@ -56,10 +57,13 @@ export function createLabels(
      and lets go only when the text gets much shorter (another body, another unit). */
   const held = new WeakMap<HTMLSpanElement, number>();
   const projected = new Vector3();
-  /* Where each shown label sits on screen, for taps. */
-  const targets = new Map<string, { rect: LabelBounds; alpha: number; clear: boolean }>();
+  /* Where each label sits on screen, for taps: one record per label, rewritten each frame. */
+  const targets = new Map<string, Target>();
+  /* Each body's place in `bodies` and `bounds`. */
+  const indexOf = new Map<string, number>();
   const hide = (key: string, el: HTMLSpanElement) => {
-    targets.delete(key);
+    const target = targets.get(key);
+    if (target) target.shown = false;
     if (el.style.display !== "none") el.style.display = "none";
   };
   scope.defer(() => {
@@ -116,8 +120,8 @@ export function createLabels(
     let sy = (-projected.y * 0.5 + 0.5) * height;
     if (sx < 4 || sy < 56 || sx > width - 4 || sy > height - 150) return hide(key, el);
     if (el.style.display !== "block") el.style.display = "block";
-    const ownIndex = bodies.findIndex((body) => body.key === key);
-    const own = bounds[ownIndex];
+    const ownIndex = indexOf.get(key);
+    const own = ownIndex === undefined ? undefined : bounds[ownIndex];
     const w = el.offsetWidth;
     const h = el.offsetHeight;
     if (own && !kind) sy = style?.below ? own.bottom + 6 : own.top - 6;
@@ -142,13 +146,23 @@ export function createLabels(
             : dy === "-140%"
               ? -h * 1.4
               : 0);
-    const rect = { left: sx - w / 2, right: sx + w / 2, top, bottom: top + h };
+    let rect = targets.get(key);
+    if (!rect) {
+      rect = { left: 0, right: 0, top: 0, bottom: 0, alpha: 0, clear: false, shown: false };
+      targets.set(key, rect);
+    }
+    rect.left = sx - w / 2;
+    rect.right = sx + w / 2;
+    rect.top = top;
+    rect.bottom = top + h;
     if (rect.left < 4 || rect.right > width - 4 || rect.top < 56 || rect.bottom > height - 150)
       return hide(key, el);
     // DOM labels cannot share WebGL's depth buffer. Mask only the covered pixels,
     // at the anchor's depth, rather than hiding the label when its anchor is covered.
     const mask = labelDepthMask(rect, point, key, bodies, bounds, camera, width, height);
-    targets.set(key, { rect, alpha, clear: mask === "none" });
+    rect.alpha = alpha;
+    rect.clear = mask === "none";
+    rect.shown = true;
     if (masks.get(el) !== mask) {
       el.style.maskImage = mask;
       masks.set(el, mask);
@@ -168,6 +182,8 @@ export function createLabels(
     place,
     setBodies: (next: readonly LabelBody[]) => {
       bodies = next;
+      indexOf.clear();
+      next.forEach((body, i) => indexOf.set(body.key, i));
     },
     /** Resolve after all bodies have their current frame positions and scales. */
     flush: () => {
@@ -181,8 +197,9 @@ export function createLabels(
     /** Labels readable enough to tap, in viewport px, of the keys `accept` takes. */
     hits: (accept: (key: string) => boolean): LabelHit[] => {
       const out: LabelHit[] = [];
-      for (const [key, { rect, alpha, clear }] of targets)
-        if (alpha >= READABLE && accept(key)) out.push({ key, rect, clear });
+      for (const [key, target] of targets)
+        if (target.shown && target.alpha >= READABLE && accept(key))
+          out.push({ key, rect: target, clear: target.clear });
       return out;
     },
     /** Hides every label in `keys`. */

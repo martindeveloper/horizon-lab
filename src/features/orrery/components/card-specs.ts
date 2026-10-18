@@ -2,8 +2,10 @@
  * What each card shows, as data: rows (a fact label, the message that words it and the
  * catalogue figures that fill its placeholders) and the figures its body and caution quote.
  * A new object needs its facts in the catalogue, its words in the messages and an entry here;
- * cards.tsx builds every card from these. tests/orrery-catalogue.test.mjs checks that each
- * message's placeholders match the arguments given here, in both languages.
+ * cards.tsx builds every card from these (the Sun, populations, the Galaxy and the cosmos
+ * wholly; planets, named bodies, tracers and stars add rows from their orbits and tracks).
+ * tests/orrery-catalogue.test.mjs checks that each message's placeholders match the
+ * arguments given here, in both languages.
  */
 import type { PlanetId } from "@horizon/toolkit/bodies";
 
@@ -32,12 +34,34 @@ export type Row =
   | { id: string; text: string; args?: Args; figure?: never }
   | { id: string; figure: Ref; text?: never; args?: never };
 
+/** What a card's kicker says about how far its figures can be trusted (`badges.<id>`). */
+export type Badge =
+  | "measured"
+  | "measuredTrack"
+  | "measuredRounded"
+  | "endMeasured"
+  | "presentOnly"
+  | "rewound"
+  | "region"
+  | "model"
+  | "mixed"
+  | "inferred"
+  | "sample"
+  | "sketch"
+  | "schematic";
+
 export type CardSpec = {
   rows: readonly Row[];
   /** Arguments of the card's body and caution messages. */
   body?: Args;
   caution?: Args;
 };
+
+/**
+ * A card wholly described here: its kicker and, for structures the expansion of space
+ * stretches, a row with the scale of space once it differs from today's.
+ */
+export type StaticCard = CardSpec & { badge: Badge; expands?: true };
 
 const row = (id: string, text: string, args?: Args): Row =>
   args ? { id, text, args } : { id, text };
@@ -51,7 +75,8 @@ const S = CATALOGUE.stars;
 /** 1 au in km and light-minutes, from the science kit's exact definitions. */
 const auArgs = { au: v(CATALOGUE.sun.sun.au), minutes: v(CATALOGUE.sun.sun.auLightTime) };
 
-export const SUN_CARD: CardSpec = {
+export const SUN_CARD: StaticCard = {
+  badge: "measured",
   rows: [
     row("radius", "cards.sun.radius", {
       km: v(CATALOGUE.sun.sun.radius),
@@ -81,14 +106,16 @@ export const NAMED_NOTES: Partial<Record<"pluto" | "sedna" | "halley", CardSpec>
   halley: { rows: [], caution: { a: v(CATALOGUE.named.halley.semiMajorAxis) } },
 };
 
-export const POPULATION_CARDS: Record<"asteroids" | Bin, CardSpec> = {
+export const POPULATION_CARDS: Record<"asteroids" | Bin, StaticCard> = {
   asteroids: {
+    badge: "region",
     rows: [
       row("where", "cards.populations.asteroids.where", { range: r(P.asteroids.where) }),
       row("mass", "cards.populations.asteroids.mass", { value: v(P.asteroids.mass) }),
     ],
   },
   disk: {
+    badge: "model",
     rows: [
       row("drawnAt", "cards.populations.disk.drawnAt", { range: r(P.disk.drawnAt) }),
       row("when", "cards.populations.disk.when"),
@@ -96,6 +123,7 @@ export const POPULATION_CARDS: Record<"asteroids" | Bin, CardSpec> = {
     body: { mass: v(P.disk.mass) },
   },
   kuiper: {
+    badge: "mixed",
     rows: [
       row("region", "cards.populations.kuiper.region", { range: r(P.kuiper.region) }),
       row("todayMass", "cards.populations.kuiper.todayMass", { value: v(P.kuiper.todayMass) }),
@@ -111,12 +139,14 @@ export const POPULATION_CARDS: Record<"asteroids" | Bin, CardSpec> = {
     },
   },
   scattered: {
+    badge: "region",
     rows: [
       row("shape", "cards.populations.scattered.shape"),
       row("reach", "cards.populations.scattered.reach"),
     ],
   },
   oort: {
+    badge: "inferred",
     rows: [
       row("innerEdge", "cards.populations.oort.innerEdge", { range: r(P.oort.innerEdge) }),
       row("outerEdge", "cards.populations.oort.outerEdge", { range: r(P.oort.outerEdge) }),
@@ -127,6 +157,7 @@ export const POPULATION_CARDS: Record<"asteroids" | Bin, CardSpec> = {
     ],
   },
   ejected: {
+    badge: "model",
     rows: [
       row("endState", "cards.populations.ejected.endState"),
       row("share", "cards.populations.ejected.share"),
@@ -140,8 +171,9 @@ export const TRACER_NOTES = {
   caution: { count: v(P.tracers.count) },
 } satisfies Record<string, Args>;
 
-export const GALAXY_CARDS: Record<"milkyway" | "sun" | "bulge" | "halo", CardSpec> = {
+export const GALAXY_CARDS: Record<"milkyway" | "sun" | "bulge" | "halo", StaticCard> = {
   sun: {
+    badge: "schematic",
     rows: [
       row("centre", "cards.galaxy.sun.centre", { value: v(G.sun.centre) }),
       row("lap", "cards.galaxy.sun.lap", { value: v(G.sun.lap), range: r(G.sun.lap) }),
@@ -162,6 +194,7 @@ export const GALAXY_CARDS: Record<"milkyway" | "sun" | "bulge" | "halo", CardSpe
     body: { laps: v(G.sun.laps) },
   },
   bulge: {
+    badge: "sketch",
     rows: [
       row("centre", "cards.galaxy.bulge.centre", { value: v(G.bulge.centre) }),
       row("bar", "cards.galaxy.bulge.bar", {
@@ -173,12 +206,14 @@ export const GALAXY_CARDS: Record<"milkyway" | "sun" | "bulge" | "halo", CardSpe
     body: { mass: v(G.bulge.blackHole) },
   },
   halo: {
+    badge: "inferred",
     rows: [
       row("width", "cards.galaxy.halo.width", { value: v(G.halo.width) }),
       row("mass", "cards.galaxy.halo.mass"),
     ],
   },
   milkyway: {
+    badge: "sketch",
     rows: [
       row("diskWidth", "cards.galaxy.milkyway.diskWidth", { value: v(G.milkyway.diskWidth) }),
       row("thickness", "cards.galaxy.milkyway.thickness", { value: v(G.milkyway.thickness) }),
@@ -242,10 +277,11 @@ export const STAR_CARDS: Record<NeighbourId, CardSpec> = {
 
 /**
  * Structures beyond the Galaxy. Distances and sizes that change with time follow the slider;
- * cards.tsx adds the scale of space once it differs from today's.
+ * those not bound to the Local Group `expand` with space.
  */
-export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
+export const COSMOS_CARDS: Record<CosmosId, StaticCard> = {
   localGroup: {
+    badge: "mixed",
     rows: [
       row("width", "cards.cosmos.localGroup.width", { value: v(C.localGroup.width) }),
       row("members", "cards.cosmos.localGroup.members", { value: v(C.localGroup.members) }),
@@ -258,6 +294,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     },
   },
   localSheet: {
+    badge: "mixed",
+    expands: true,
     rows: [
       row("width", "cards.cosmos.localSheet.width", { value: live(C.localSheet.width) }),
       row("depth", "cards.cosmos.localSheet.thickness", { value: v(C.localSheet.thickness) }),
@@ -270,6 +308,7 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     body: { radius: v(C.localSheet.radius) },
   },
   andromeda: {
+    badge: "mixed",
     rows: [
       figureRow("distance", live(C.andromeda.distance)),
       row("approach", "cards.cosmos.andromeda.approach", {
@@ -287,6 +326,7 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     caution: { within: v(C.andromeda.mergerWithin) },
   },
   triangulum: {
+    badge: "mixed",
     rows: [
       figureRow("distance", live(C.triangulum.distance)),
       row("width", "cards.cosmos.triangulum.width", { value: v(C.triangulum.width) }),
@@ -294,6 +334,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     ],
   },
   virgo: {
+    badge: "mixed",
+    expands: true,
     rows: [
       figureRow("distance", live(C.virgo.distance)),
       row("members", "cards.cosmos.virgo.members", {
@@ -305,6 +347,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     ],
   },
   fornax: {
+    badge: "mixed",
+    expands: true,
     rows: [
       figureRow("distance", live(C.fornax.distance)),
       row("members", "cards.cosmos.fornax.members", { value: v(C.fornax.members) }),
@@ -313,6 +357,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     ],
   },
   supercluster: {
+    badge: "sketch",
+    expands: true,
     rows: [
       row("width", "cards.cosmos.supercluster.width", { value: live(C.supercluster.width) }),
       row("members", "cards.cosmos.supercluster.members", { value: v(C.supercluster.members) }),
@@ -320,6 +366,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     ],
   },
   centaurus: {
+    badge: "mixed",
+    expands: true,
     rows: [
       figureRow("distance", live(C.centaurus.distance)),
       row("members", "cards.cosmos.centaurus.members"),
@@ -327,6 +375,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     ],
   },
   hydra: {
+    badge: "mixed",
+    expands: true,
     rows: [
       figureRow("distance", live(C.hydra.distance)),
       row("members", "cards.cosmos.hydra.members", { value: v(C.hydra.members) }),
@@ -334,6 +384,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     ],
   },
   greatAttractor: {
+    badge: "mixed",
+    expands: true,
     rows: [
       figureRow("distance", live(C.greatAttractor.distance)),
       row("where", "cards.cosmos.greatAttractor.where"),
@@ -343,6 +395,8 @@ export const COSMOS_CARDS: Record<CosmosId, CardSpec> = {
     body: { distance: v(C.greatAttractor.distance) },
   },
   laniakea: {
+    badge: "sketch",
+    expands: true,
     rows: [
       row("width", "cards.cosmos.laniakea.width", { value: live(C.laniakea.width) }),
       row("members", "cards.cosmos.laniakea.members", { value: v(C.laniakea.members) }),

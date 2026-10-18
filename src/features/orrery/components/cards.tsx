@@ -5,11 +5,12 @@ import { CATALOGUE, type Value } from "../lib/model/catalogue";
 import { namedElements, planetElements, rewinds } from "../lib/model/elements";
 import {
   NEIGHBOURS,
+  NEIGHBOUR_WINDOW,
   closestApproach,
   neighbourDistanceLy,
   type NeighbourId,
 } from "../lib/model/neighbours";
-import { migrationProgress } from "../lib/model/timeline";
+import { isToday, migrationProgress, showsExpansion } from "../lib/model/timeline";
 import { TRACERS, binOf, tracerElements } from "../lib/model/tracers";
 import type { Selection } from "../lib/store";
 import {
@@ -24,6 +25,7 @@ import {
   type Args,
   type CardSpec,
   type Ref,
+  type StaticCard,
 } from "./card-specs";
 import {
   figure,
@@ -87,15 +89,28 @@ function build(m: Moment, spec: CardSpec) {
 
 export const NEIGHBOUR_IDS: readonly NeighbourId[] = NEIGHBOURS.map((n) => n.id);
 
-function sunCard(m: Moment): Card {
-  const { t } = m;
-  const built = build(m, SUN_CARD);
+/** A card its definition describes whole, its words under `key`. */
+function staticCard(m: Moment, key: string, spec: StaticCard): Card {
+  const { t, f, yearsAgo } = m;
+  const built = build(m, spec);
+  const then: Fact[] =
+    spec.expands && showsExpansion(yearsAgo)
+      ? [
+          {
+            id: "scaleThen",
+            label: t("facts.scaleThen"),
+            value: t("cards.cosmos.scaleThen", {
+              value: f.number(CATALOGUE.cosmos.universe.scale.at(yearsAgo), { style: "percent" }),
+            }),
+          },
+        ]
+      : [];
   return {
-    badge: t("badges.measured"),
-    title: t("cards.sun.title"),
-    facts: built.facts,
-    body: t("cards.sun.body", built.body),
-    caution: t("cards.sun.caution", built.caution),
+    badge: t(`badges.${spec.badge}`),
+    title: t(`${key}.title`),
+    facts: [...built.facts, ...then],
+    body: t(`${key}.body`, built.body),
+    caution: t(`${key}.caution`, built.caution),
   };
 }
 
@@ -149,26 +164,6 @@ function namedCard(sel: Of<"named">, m: Moment): Card {
   };
 }
 
-function populationCard(sel: Of<"population">, m: Moment): Card {
-  const { t } = m;
-  const built = build(m, POPULATION_CARDS[sel.id]);
-  const badge =
-    sel.id === "asteroids" || sel.id === "scattered"
-      ? t("badges.region")
-      : sel.id === "kuiper"
-        ? t("badges.mixed")
-        : sel.id === "oort"
-          ? t("badges.inferred")
-          : t("badges.model");
-  return {
-    badge,
-    title: t(`cards.populations.${sel.id}.title`),
-    facts: built.facts,
-    body: t(`cards.populations.${sel.id}.body`, built.body),
-    caution: t(`cards.populations.${sel.id}.caution`, built.caution),
-  };
-}
-
 function tracerCard(sel: Of<"tracer">, m: Moment): Card {
   const { t, f, d, yearsAgo, mig } = m;
   const tr = TRACERS[sel.index];
@@ -207,7 +202,7 @@ function tracerCard(sel: Of<"tracer">, m: Moment): Card {
 function starCard(sel: Of<"star">, m: Moment): Card {
   const { t, d, yearsAgo } = m;
   const star = NEIGHBOURS.find((s) => s.id === sel.id)!;
-  const inWindow = yearsAgo < 3e5;
+  const inWindow = yearsAgo < NEIGHBOUR_WINDOW;
   const ly = neighbourDistanceLy(star, inWindow ? yearsAgo : 0);
   const c = CATALOGUE.stars[sel.id];
   const built = build(m, STAR_CARDS[sel.id]);
@@ -217,7 +212,7 @@ function starCard(sel: Of<"star">, m: Moment): Card {
     facts: [
       {
         id: "distance",
-        label: inWindow && yearsAgo > 5e4 ? t("facts.onSlider") : t("facts.today"),
+        label: inWindow && !isToday(yearsAgo) ? t("facts.onSlider") : t("facts.today"),
         value: formatAu(t, d, ly * LIGHT_YEAR_AU, false),
       },
       ...built.facts,
@@ -235,51 +230,6 @@ function starCard(sel: Of<"star">, m: Moment): Card {
   };
 }
 
-function galaxyCard(sel: Of<"galaxy">, m: Moment): Card {
-  const { t } = m;
-  const built = build(m, GALAXY_CARDS[sel.id]);
-  const badge =
-    sel.id === "sun"
-      ? t("badges.schematic")
-      : sel.id === "halo"
-        ? t("badges.inferred")
-        : t("badges.sketch");
-  return {
-    badge,
-    title: t(`cards.galaxy.${sel.id}.title`),
-    facts: built.facts,
-    body: t(`cards.galaxy.${sel.id}.body`, built.body),
-    caution: t(`cards.galaxy.${sel.id}.caution`, built.caution),
-  };
-}
-
-/** Beyond the Galaxy, with the scale of space once it differs from today's. */
-function cosmosCard(sel: Of<"cosmos">, m: Moment): Card {
-  const { t, f, yearsAgo } = m;
-  const key = `cards.cosmos.${sel.id}` as const;
-  const built = build(m, COSMOS_CARDS[sel.id]);
-  const unbound = sel.id !== "localGroup" && sel.id !== "andromeda" && sel.id !== "triangulum";
-  const scale = CATALOGUE.cosmos.universe.scale.at(yearsAgo);
-  const then: Fact[] =
-    unbound && yearsAgo >= 1e7
-      ? [
-          {
-            id: "scaleThen",
-            label: t("facts.scaleThen"),
-            value: t("cards.cosmos.scaleThen", { value: f.number(scale, { style: "percent" }) }),
-          },
-        ]
-      : [];
-  return {
-    badge:
-      sel.id === "supercluster" || sel.id === "laniakea" ? t("badges.sketch") : t("badges.mixed"),
-    title: t(`${key}.title`),
-    facts: [...built.facts, ...then],
-    body: t(`${key}.body`, built.body),
-    caution: t(`${key}.caution`, built.caution),
-  };
-}
-
 /** The card for a selection at a moment on the timeline. Pure of React state. */
 export function cardFor(
   t: Translate,
@@ -293,21 +243,21 @@ export function cardFor(
   const m: Moment = { t, f, d, yearsAgo, mig: migrationProgress(yearsAgo), elliptical, date };
   switch (sel.kind) {
     case "sun":
-      return sunCard(m);
+      return staticCard(m, "cards.sun", SUN_CARD);
     case "planet":
       return planetCard(sel, m);
     case "named":
       return namedCard(sel, m);
     case "population":
-      return populationCard(sel, m);
+      return staticCard(m, `cards.populations.${sel.id}`, POPULATION_CARDS[sel.id]);
     case "tracer":
       return tracerCard(sel, m);
     case "star":
       return starCard(sel, m);
     case "galaxy":
-      return galaxyCard(sel, m);
+      return staticCard(m, `cards.galaxy.${sel.id}`, GALAXY_CARDS[sel.id]);
     case "cosmos":
-      return cosmosCard(sel, m);
+      return staticCard(m, `cards.cosmos.${sel.id}`, COSMOS_CARDS[sel.id]);
   }
 }
 

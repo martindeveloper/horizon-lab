@@ -102,6 +102,12 @@ export function planetGrowth(id: PlanetId, yearsAgo: number) {
 }
 /** Within this the ephemeris is used as is; older than this only the sketch is drawn. */
 export const isPresentEra = (yearsAgo: number) => yearsAgo < 5e6;
+/** Readouts call anything this recent "today"; older is a moment on the slider. */
+export const TODAY_SPAN = 5e4;
+export const isToday = (yearsAgo: number) => yearsAgo <= TODAY_SPAN;
+/** From this far back, beyond the Galaxy, the past reads as the scale of space. */
+export const EXPANSION_SHOWN = 1e7;
+export const showsExpansion = (yearsAgo: number) => yearsAgo >= EXPANSION_SHOWN;
 
 export type Epoch = "sketch" | "birth" | "disk" | "clearing" | "today";
 /** Finer, dated notes for the dock. Each one is a measured or well-established milestone. */

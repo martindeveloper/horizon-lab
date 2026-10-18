@@ -365,7 +365,8 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   physics (Kepler's third law, the parallax law, angular separation, light-time) with the
   kit's laws. Messages keep only the words ("About {value} galaxies"); `figure`, `span` and
   `figureAt` (figures that follow the slider) in `components/format.ts` print them as
-  `card-specs.ts` declares (one entry per object: rows, body and caution arguments), lengths
+  `card-specs.ts` declares (one entry per object: badge, rows, body and caution arguments,
+  and whether it stretches with space), lengths
   through `formatDistance` in the visitor's unit, large numbers in words ("6.5 billion").
   The default unit is `auto`: au below half a light-year, ly beyond.
   `npm run docs:catalogue` writes the catalogue and its sources into

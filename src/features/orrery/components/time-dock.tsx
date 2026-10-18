@@ -13,7 +13,15 @@ import { Dock, IconButton, SegmentedControl, Slider, Tooltip, cn } from "@horizo
 import { scaleAt } from "../lib/model/cosmos";
 import { galacticLaps } from "../lib/model/galactic-orbit";
 import { SUN_BIRTH } from "../lib/model/parameters";
-import { EPOCHS, epochOf, noteOf, sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
+import {
+  EPOCHS,
+  epochOf,
+  isToday,
+  noteOf,
+  showsExpansion,
+  sliderToYearsAgo,
+  yearsAgoToSlider,
+} from "../lib/model/timeline";
 import { useOrrery } from "../lib/store";
 import { formatYearsAgo, proseArgs } from "./format";
 import { DISPLAY, Switches } from "./view-controls";
@@ -71,11 +79,11 @@ export function TimeDock() {
           });
   /* Beyond the Galaxy the deep past reads as the scale of space. */
   const subline =
-    viewRealm === "cosmos" && yearsAgo >= 1e7
+    viewRealm === "cosmos" && showsExpansion(yearsAgo)
       ? t("time.expansion", { value: f.number(scaleAt(yearsAgo), { style: "percent" }) })
       : yearsAgo > SUN_BIRTH
         ? t("time.noSun")
-        : yearsAgo < 5e4
+        : isToday(yearsAgo)
           ? drift && driftYears > 0.002 && viewRealm === "solar"
             ? t("time.clockDrift", { offset, rate: driftLabel })
             : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
