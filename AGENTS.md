@@ -9,6 +9,7 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
 - The WebGL observatory loads through a client-only dynamic boundary; browser-derived stores must not render on the server.
 - No authentication or database is required.
 - Run `npm run typecheck` and `npm run build` after code changes.
+- Tests must protect real logic or behavior, not page copy, source-code patterns, or implementation details. Avoid duplicate tests.
 - Start servers or run browser checks only when the user requests them.
 
 - Reuse `@horizon/toolkit/ui` and its theme tokens for new visualization interfaces.

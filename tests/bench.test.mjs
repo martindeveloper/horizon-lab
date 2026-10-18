@@ -22,8 +22,6 @@ import {
   benchMotion,
   benchPose,
 } from "../src/features/black-hole/lib/bench-scenes.ts";
-import { HOLES } from "../src/features/black-hole/lib/holes/index.ts";
-import { QUALITY_STEPS } from "../src/features/black-hole/lib/presets.ts";
 
 const close = (actual, expected, tolerance = 1e-9) =>
   assert.ok(Math.abs(actual - expected) < tolerance, `${actual} != ${expected}`);
@@ -114,31 +112,6 @@ test("scripted input becomes press, moves and release at the right frames", () =
     { type: "key", key: "Space" },
     { type: "wheel", x: 0.5, y: 0.5, deltaX: 0, deltaY: -100 },
   ]);
-});
-
-test("black-hole bench covers presets, qualities, sequences and input", () => {
-  const ids = BENCH_SCENES.map((scene) => scene.id);
-  assert.equal(new Set(ids).size, ids.length);
-  for (const hole of HOLES) assert.ok(ids.includes(hole.id), hole.id);
-  const sweep = BENCH_SCENES.filter((scene) => scene.tags?.includes("quality"));
-  assert.deepEqual(
-    sweep.map((scene) => scene.quality),
-    Object.keys(QUALITY_STEPS),
-  );
-  for (const scene of BENCH_SCENES) {
-    assert.equal(
-      Boolean(scene.motion),
-      Boolean(scene.script),
-      `${scene.id}: motion needs a script`,
-    );
-    for (const input of scene.script?.input ?? [])
-      for (const point of input.kind === "drag" ? [input.from, input.to] : [])
-        assert.ok(
-          point.every((v) => v >= 0 && v <= 1),
-          `${scene.id}: input inside the canvas`,
-        );
-  }
-  assert.ok(BENCH_SCENES.some((scene) => scene.script?.input?.length));
 });
 
 test("black-hole camera paths are continuous and end where they say", () => {

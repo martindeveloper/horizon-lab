@@ -4,47 +4,12 @@ import test from "node:test";
 import { createStore } from "zustand/vanilla";
 
 import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
-import { cardSpecs as deepFieldSpecs } from "../src/features/deep-field/components/card-specs.ts";
-import { cardSpecs as orrerySpecs } from "../src/features/orrery/components/card-specs.ts";
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
 import { bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
 import { framingView, viewOf } from "../src/space/solar-system/model/framing.ts";
 import { TODAY } from "../src/space/solar-system/model/moment.ts";
 import { positionOf } from "../src/space/solar-system/model/position.ts";
-import { featureMessages } from "./messages-helper.mjs";
-
-test("each card message names exactly the placeholders its definition fills, in every simulation", () => {
-  const placeholders = (text) => new Set([...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]));
-  const at = (tree, key) => key.split(".").reduce((node, part) => node?.[part], tree);
-  for (const [feature, specs] of [
-    ["orrery", orrerySpecs()],
-    ["deep-field", deepFieldSpecs()],
-  ])
-    for (const locale of ["en", "cs"]) {
-      const words = featureMessages(feature, locale);
-      for (const { body, caution, spec } of specs) {
-        for (const [key, args] of [
-          [body, spec.body],
-          [caution, spec.caution],
-        ]) {
-          const text = at(words, key);
-          if (typeof text !== "string") continue;
-          assert.deepEqual(
-            placeholders(text),
-            new Set(Object.keys(args ?? {})),
-            `${locale}:${key}`,
-          );
-        }
-        for (const row of spec.rows)
-          if (row.text) {
-            const text = at(words, row.text);
-            assert.equal(typeof text, "string", `${feature}/${locale}:${row.text}`);
-            assert.deepEqual(placeholders(text), new Set(Object.keys(row.args ?? {})), row.text);
-          }
-      }
-    }
-});
 
 test("a crossing between the simulations is read once, by its addressee, with the pose left", () => {
   const pose = { azimuth: 1.2, inclination: 0.4, distance: 72 };
