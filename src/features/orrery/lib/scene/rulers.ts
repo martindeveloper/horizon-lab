@@ -2,7 +2,7 @@
 import type { Object3D } from "three";
 
 import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
-import { formatDistance, type DistanceUnit } from "@horizon/toolkit/science";
+import { formatDistance, type DistanceChoice } from "@horizon/toolkit/science";
 
 import { NEIGHBOURS } from "../model/neighbours";
 import type { Selection } from "../store";
@@ -19,7 +19,7 @@ export type DistanceText = (au: number, fixed?: boolean) => string;
  * Shared readout in the visitor's unit: "5.37 au · light-time 45 min" (cards match). Beyond
  * the Galaxy, millions read as a word: "53.8 million ly".
  */
-export function createDistanceText(labels: Labels, unit: () => DistanceUnit): DistanceText {
+export function createDistanceText(labels: Labels, unit: () => DistanceChoice): DistanceText {
   return (au, fixed = false) => {
     const L = labels();
     return formatDistance(au, {

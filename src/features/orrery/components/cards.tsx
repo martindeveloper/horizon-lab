@@ -1,7 +1,7 @@
 import { NAMED, namedById, type PlanetId } from "@horizon/toolkit/bodies";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
-import { CATALOGUE, type Fact } from "../lib/model/catalogue";
+import { CATALOGUE, type Live, type Range, type Span, type Value } from "../lib/model/catalogue";
 import { namedElements, planetElements, rewinds } from "../lib/model/elements";
 import {
   NEIGHBOURS,
@@ -13,12 +13,13 @@ import { migrationProgress } from "../lib/model/timeline";
 import { TRACERS, binOf, tracerElements } from "../lib/model/tracers";
 import type { Selection } from "../lib/store";
 import {
+  figure,
+  figureAt,
   formatAu,
   formatYearsAgo,
   orbitFacts,
-  quantity,
+  span,
   type DistanceSettings,
-  type QuantityOptions,
   type Format,
   type Translate,
 } from "./format";
@@ -31,12 +32,19 @@ export type Card = {
   caution: string;
 };
 
+/** How a card prints catalogue figures: today's value, a published span, or a live value. */
+type Print = {
+  v: (fact: Value | Live) => string;
+  r: (fact: (Value | Span) & { range: Range }) => string;
+  live: (fact: Live) => string;
+};
+
 /** Everything a card reads besides its selection. */
 type Moment = {
   t: Translate;
   f: Format;
   d: DistanceSettings;
-  n: (v: number, digits: number) => string;
+  p: Print;
   yearsAgo: number;
   mig: number;
   elliptical: boolean;
@@ -45,8 +53,7 @@ type Moment = {
 
 type Of<K extends Selection["kind"]> = Extract<Selection, { kind: K }>;
 
-function populationFacts(id: Of<"population">["id"], { t, d }: Moment) {
-  const q = (fact: Fact) => quantity(t, d, fact);
+function populationFacts(id: Of<"population">["id"], { t, p: { v, r } }: Moment) {
   type FactId =
     | "where"
     | "mass"
@@ -65,26 +72,29 @@ function populationFacts(id: Of<"population">["id"], { t, d }: Moment) {
   const row = (id: FactId, value: string) => ({ id, label: t(`facts.${id}`), value });
   switch (id) {
     case "asteroids": {
-      const c = CATALOGUE.populations.asteroids.facts;
+      const c = CATALOGUE.populations.asteroids;
       return [
-        row("where", t("cards.populations.asteroids.where", q(c.where))),
-        row("mass", t("cards.populations.asteroids.mass", q(c.mass))),
+        row("where", t("cards.populations.asteroids.where", { range: r(c.where) })),
+        row("mass", t("cards.populations.asteroids.mass", { value: v(c.mass) })),
       ];
     }
     case "disk":
       return [
         row(
           "drawnAt",
-          t("cards.populations.disk.drawnAt", q(CATALOGUE.populations.disk.facts.drawnAt)),
+          t("cards.populations.disk.drawnAt", { range: r(CATALOGUE.populations.disk.drawnAt) }),
         ),
         row("when", t("cards.populations.disk.when")),
       ];
     case "kuiper": {
-      const c = CATALOGUE.populations.kuiper.facts;
+      const c = CATALOGUE.populations.kuiper;
       return [
-        row("region", t("cards.populations.kuiper.region", q(c.region))),
-        row("todayMass", t("cards.populations.kuiper.todayMass", q(c.todayMass))),
-        row("originalMass", t("cards.populations.kuiper.originalMass", q(c.originalMass))),
+        row("region", t("cards.populations.kuiper.region", { range: r(c.region) })),
+        row("todayMass", t("cards.populations.kuiper.todayMass", { value: v(c.todayMass) })),
+        row(
+          "originalMass",
+          t("cards.populations.kuiper.originalMass", { value: v(c.originalMass) }),
+        ),
       ];
     }
     case "scattered":
@@ -93,16 +103,13 @@ function populationFacts(id: Of<"population">["id"], { t, d }: Moment) {
         row("reach", t("cards.populations.scattered.reach")),
       ];
     case "oort": {
-      const c = CATALOGUE.populations.oort.facts;
+      const c = CATALOGUE.populations.oort;
       return [
-        row("innerEdge", t("cards.populations.oort.innerEdge", q(c.innerEdge))),
-        row("outerEdge", t("cards.populations.oort.outerEdge", q(c.outerEdge))),
+        row("innerEdge", t("cards.populations.oort.innerEdge", { range: r(c.innerEdge) })),
+        row("outerEdge", t("cards.populations.oort.outerEdge", { range: r(c.outerEdge) })),
         row(
           "shells",
-          t("cards.populations.oort.shells", {
-            inner: q(c.innerShell).value,
-            outer: q(c.outerShell).value,
-          }),
+          t("cards.populations.oort.shells", { inner: v(c.innerShell), outer: v(c.outerShell) }),
         ),
       ];
     }
@@ -115,18 +122,17 @@ function populationFacts(id: Of<"population">["id"], { t, d }: Moment) {
 }
 
 /** Figures in a population card's body. */
-function populationBody(id: Of<"population">["id"], { t, d }: Moment) {
-  const q = (fact: Fact) => quantity(t, d, fact);
+function populationBody(id: Of<"population">["id"], { p: { v, r } }: Moment) {
   switch (id) {
     case "disk":
-      return { mass: q(CATALOGUE.populations.disk.facts.mass).value };
+      return { mass: v(CATALOGUE.populations.disk.mass) };
     case "kuiper": {
-      const c = CATALOGUE.populations.kuiper.facts;
+      const c = CATALOGUE.populations.kuiper;
       return {
-        catalogued: q(c.catalogued).value,
-        cliff: q(c.cliff).value,
-        cold: q(c.coldClassicals).range,
-        plutinos: q(c.plutinos).value,
+        catalogued: v(c.catalogued),
+        cliff: v(c.cliff),
+        cold: r(c.coldClassicals),
+        plutinos: v(c.plutinos),
       };
     }
     default:
@@ -134,8 +140,7 @@ function populationBody(id: Of<"population">["id"], { t, d }: Moment) {
   }
 }
 
-function galaxyFacts(id: Of<"galaxy">["id"], { t, d }: Moment) {
-  const q = (fact: Fact, options?: QuantityOptions) => quantity(t, d, fact, options);
+function galaxyFacts(id: Of<"galaxy">["id"], { t, p: { v, r } }: Moment) {
   type FactId =
     | "centre"
     | "lap"
@@ -152,80 +157,69 @@ function galaxyFacts(id: Of<"galaxy">["id"], { t, d }: Moment) {
   const row = (id: FactId, value: string) => ({ id, label: t(`facts.${id}`), value });
   switch (id) {
     case "sun": {
-      const c = CATALOGUE.galaxy.sun.facts;
+      const c = CATALOGUE.galaxy.sun;
       return [
-        row("centre", t("cards.galaxy.sun.centre", q(c.centre))),
-        row("lap", t("cards.galaxy.sun.lap", q(c.lap, { in: "Myr" }))),
+        row("centre", t("cards.galaxy.sun.centre", { value: v(c.centre) })),
+        row("lap", t("cards.galaxy.sun.lap", { value: v(c.lap), range: r(c.lap) })),
         row(
           "speed",
-          t("cards.galaxy.sun.speed", {
-            value: q(c.circularSpeed).value,
-            sun: q(c.sunSpeed).value,
-          }),
+          t("cards.galaxy.sun.speed", { value: v(c.circularSpeed), sun: v(c.sunSpeed) }),
         ),
         row(
           "radial",
-          t("cards.galaxy.sun.radial", {
-            value: q(c.radialSwing).value,
-            period: q(c.radialPeriod, { in: "Myr" }).value,
-          }),
+          t("cards.galaxy.sun.radial", { value: v(c.radialSwing), period: v(c.radialPeriod) }),
         ),
         row(
           "vertical",
           t("cards.galaxy.sun.vertical", {
-            value: q(c.verticalAmplitude).value,
-            period: q(c.verticalPeriod, { in: "Myr" }).value,
-            height: q(c.height).value,
+            value: v(c.verticalAmplitude),
+            period: v(c.verticalPeriod),
+            height: v(c.height),
           }),
         ),
       ];
     }
     case "bulge": {
-      const c = CATALOGUE.galaxy.bulge.facts;
+      const c = CATALOGUE.galaxy.bulge;
       return [
-        row("centre", t("cards.galaxy.bulge.centre", q(c.centre))),
-        row("bar", t("cards.galaxy.bulge.bar", { ...q(c.bar), angle: q(c.barAngle).value })),
+        row("centre", t("cards.galaxy.bulge.centre", { value: v(c.centre) })),
+        row(
+          "bar",
+          t("cards.galaxy.bulge.bar", { value: v(c.bar), range: r(c.bar), angle: v(c.barAngle) }),
+        ),
       ];
     }
     case "halo":
       return [
-        row("width", t("cards.galaxy.halo.width", q(CATALOGUE.galaxy.halo.facts.width))),
+        row("width", t("cards.galaxy.halo.width", { value: v(CATALOGUE.galaxy.halo.width) })),
         row("mass", t("cards.galaxy.halo.mass")),
       ];
     case "milkyway": {
-      const c = CATALOGUE.galaxy.milkyway.facts;
+      const c = CATALOGUE.galaxy.milkyway;
       return [
-        row("diskWidth", t("cards.galaxy.milkyway.diskWidth", q(c.diskWidth))),
-        row("thickness", t("cards.galaxy.milkyway.thickness", q(c.thickness))),
-        row("stars", t("cards.galaxy.milkyway.stars", q(c.stars, { scale: 1e9 }))),
-        row("age", t("cards.galaxy.milkyway.age", q(c.age))),
+        row("diskWidth", t("cards.galaxy.milkyway.diskWidth", { value: v(c.diskWidth) })),
+        row("thickness", t("cards.galaxy.milkyway.thickness", { value: v(c.thickness) })),
+        row("stars", t("cards.galaxy.milkyway.stars", { value: v(c.stars) })),
+        row("age", t("cards.galaxy.milkyway.age", { value: v(c.age) })),
       ];
     }
   }
 }
 
 /** Figures in a galaxy card's body and caution. */
-function galaxyNotes(id: Of<"galaxy">["id"], { t, d }: Moment) {
-  const q = (fact: Fact, options?: QuantityOptions) => quantity(t, d, fact, options).value;
+function galaxyNotes(id: Of<"galaxy">["id"], { p: { v, r } }: Moment) {
   switch (id) {
     case "sun":
-      return { body: { laps: q(CATALOGUE.galaxy.sun.facts.laps) }, caution: {} };
+      return { body: { laps: v(CATALOGUE.galaxy.sun.laps) }, caution: {} };
     case "bulge":
-      return {
-        body: { mass: q(CATALOGUE.galaxy.bulge.facts.blackHole, { scale: 1e6 }) },
-        caution: {},
-      };
+      return { body: { mass: v(CATALOGUE.galaxy.bulge.blackHole) }, caution: {} };
     case "halo":
       return { body: {}, caution: {} };
     case "milkyway": {
-      const c = CATALOGUE.galaxy.milkyway.facts;
+      const c = CATALOGUE.galaxy.milkyway;
       return {
-        body: {
-          bar: q(c.barAngle),
-          pitch: q(c.armPitch),
-          merger: quantity(t, d, c.gaiaEnceladus).range,
-        },
-        caution: { tilt: q(c.planeTilt) },
+        body: { bar: v(c.barAngle), pitch: v(c.armPitch), merger: r(c.gaiaEnceladus) },
+        caution: { tilt: v(c.planeTilt) },
       };
     }
   }
@@ -233,9 +227,18 @@ function galaxyNotes(id: Of<"galaxy">["id"], { t, d }: Moment) {
 
 export const NEIGHBOUR_IDS: readonly NeighbourId[] = NEIGHBOURS.map((n) => n.id);
 
-function sunCard({ t, d }: Moment): Card {
-  const q = (fact: Fact, options?: QuantityOptions) => quantity(t, d, fact, options).value;
-  const c = CATALOGUE.sun.sun.facts;
+/** 1 au in km and light-minutes, from the science kit's exact definitions. */
+function auFigures({ p: { v } }: Moment) {
+  const c = CATALOGUE.sun.sun;
+  return { au: v(c.au), minutes: v(c.auLightTime) };
+}
+
+function sunCard(m: Moment): Card {
+  const {
+    t,
+    p: { v },
+  } = m;
+  const c = CATALOGUE.sun.sun;
   return {
     badge: t("badges.measured"),
     title: t("cards.sun.title"),
@@ -243,45 +246,29 @@ function sunCard({ t, d }: Moment): Card {
       {
         id: "radius",
         label: t("facts.radius"),
-        value: t("cards.sun.radius", { km: q(c.radius), au: q(c.radius, { in: "au", digits: 2 }) }),
+        value: t("cards.sun.radius", { km: v(c.radius), au: v(c.radiusAu) }),
       },
-      {
-        id: "age",
-        label: t("facts.age"),
-        value: t("cards.sun.age", { value: q(c.age, { in: "Gyr" }) }),
-      },
-      { id: "au", label: t("facts.oneAu"), value: t("cards.sun.oneAu", auFigures(t, d)) },
+      { id: "age", label: t("facts.age"), value: t("cards.sun.age", { value: v(c.age) }) },
+      { id: "au", label: t("facts.oneAu"), value: t("cards.sun.oneAu", auFigures(m)) },
     ],
-    body: t("cards.sun.body", { mass: q(c.massShare), spin: q(c.spinShare) }),
-    caution: t("cards.sun.caution", { diameters: q(c.earthDiameters) }),
-  };
-}
-
-/** 1 au in million km and light-minutes, from the science kit's exact definitions. */
-function auFigures(t: Translate, d: DistanceSettings) {
-  const c = CATALOGUE.sun.sun.facts;
-  return {
-    millions: quantity(t, d, c.au, { scale: 1e6, digits: 4 }).value,
-    minutes: quantity(t, d, c.auLightTime, { in: "min", digits: 2 }).value,
+    body: t("cards.sun.body", { mass: v(c.massShare), spin: v(c.spinShare) }),
+    caution: t("cards.sun.caution", { diameters: v(c.earthDiameters) }),
   };
 }
 
 /** Figures in a planet's note. */
-function planetBody(id: PlanetId, t: Translate, d: DistanceSettings) {
-  if (id === "earth")
-    return {
-      ...auFigures(t, d),
-      metres: quantity(t, d, CATALOGUE.planets.earth.facts.auMetres).value,
-    };
-  if (id === "neptune") return { end: quantity(t, d, CATALOGUE.planets.neptune.facts.end).value };
+function planetBody(id: PlanetId, m: Moment) {
+  if (id === "earth") return { ...auFigures(m), metres: m.p.v(CATALOGUE.planets.earth.auMetres) };
+  if (id === "neptune") return { end: m.p.v(CATALOGUE.planets.neptune.end) };
   return {};
 }
 
-function planetCard(sel: Of<"planet">, { t, f, d, mig, elliptical, date }: Moment): Card {
+function planetCard(sel: Of<"planet">, m: Moment): Card {
+  const { t, f, d, p, mig, elliptical, date } = m;
   const id: PlanetId = sel.id;
   const el = planetElements(id, mig, 0, date);
   const now = planetElements(id, 1, 0, date);
-  const c: { radius: Fact; start?: Fact } = CATALOGUE.planets[id].facts;
+  const c: { radius: Value; start?: Value } = CATALOGUE.planets[id];
   const moved = !!c.start && mig < 0.999;
   return {
     badge: moved ? t("badges.endMeasured") : t("badges.measuredRounded"),
@@ -294,36 +281,32 @@ function planetCard(sel: Of<"planet">, { t, f, d, mig, elliptical, date }: Momen
             {
               id: "start",
               label: t("facts.modelStart"),
-              value: t("facts.notMeasured", { value: quantity(t, d, c.start).value }),
+              value: t("facts.notMeasured", { value: p.v(c.start) }),
             },
           ]
         : []),
-      {
-        id: "radius",
-        label: t("facts.radius"),
-        value: t("facts.km", { value: quantity(t, d, c.radius).value }),
-      },
+      { id: "radius", label: t("facts.radius"), value: t("facts.km", { value: p.v(c.radius) }) },
       ...orbitFacts(t, f, d, el, ["nearFar", "period"]),
     ],
-    body: t(`cards.planets.${id}`, planetBody(id, t, d)),
+    body: t(`cards.planets.${id}`, planetBody(id, m)),
     caution: elliptical ? t("cards.planetCautionEllipse") : t("cards.planetCautionCircle"),
   };
 }
 
-function namedNotes(id: Of<"named">["id"], t: Translate, d: DistanceSettings) {
-  const q = (fact: Fact) => quantity(t, d, fact).value;
+function namedNotes(id: Of<"named">["id"], { p: { v } }: Moment) {
   if (id === "sedna") {
-    const c = CATALOGUE.named.sedna.facts;
-    return { summary: { near: q(c.perihelion), far: q(c.aphelion) }, caution: {} };
+    const c = CATALOGUE.named.sedna;
+    return { summary: { near: v(c.perihelion), far: v(c.aphelion) }, caution: {} };
   }
   if (id === "halley")
-    return { summary: {}, caution: { a: q(CATALOGUE.named.halley.facts.semiMajorAxis) } };
+    return { summary: {}, caution: { a: v(CATALOGUE.named.halley.semiMajorAxis) } };
   return { summary: {}, caution: {} };
 }
 
-function namedCard(sel: Of<"named">, { t, f, d, mig, date }: Moment): Card {
-  const body = namedById(sel.id);
-  const el = namedElements(body, mig, 0, date);
+function namedCard(sel: Of<"named">, m: Moment): Card {
+  const { t, f, d, mig, date } = m;
+  const el = namedElements(namedById(sel.id), mig, 0, date);
+  const notes = namedNotes(sel.id, m);
   return {
     badge: rewinds(sel.id) ? t("badges.rewound") : t("badges.presentOnly"),
     title: t(`names.${sel.id}`),
@@ -331,8 +314,8 @@ function namedCard(sel: Of<"named">, { t, f, d, mig, date }: Moment): Card {
       { id: "average", label: t("facts.average"), value: formatAu(t, d, el.a) },
       ...orbitFacts(t, f, d, el, ["nearFar", "period"]),
     ],
-    body: t(`cards.named.${sel.id}.summary`, namedNotes(sel.id, t, d).summary),
-    caution: t(`cards.named.${sel.id}.caution`, namedNotes(sel.id, t, d).caution),
+    body: t(`cards.named.${sel.id}.summary`, notes.summary),
+    caution: t(`cards.named.${sel.id}.caution`, notes.caution),
   };
 }
 
@@ -355,7 +338,7 @@ function populationCard(sel: Of<"population">, m: Moment): Card {
   };
 }
 
-function tracerCard(sel: Of<"tracer">, { t, f, d, yearsAgo, mig }: Moment): Card {
+function tracerCard(sel: Of<"tracer">, { t, f, d, p, yearsAgo, mig }: Moment): Card {
   const tr = TRACERS[sel.index];
   if (!tr)
     return {
@@ -367,10 +350,10 @@ function tracerCard(sel: Of<"tracer">, { t, f, d, yearsAgo, mig }: Moment): Card
     };
   const el = tracerElements(tr, mig, 0);
   const bin = binOf(tr, mig);
-  const sample = CATALOGUE.tracers.sample.facts;
+  const sample = CATALOGUE.populations.tracers;
   const note =
     tr.kind === "cold"
-      ? t("cards.tracer.cold", { range: quantity(t, d, sample.coldClassicals).range })
+      ? t("cards.tracer.cold", { range: p.r(sample.coldClassicals) })
       : tr.kind === "ejected"
         ? t("cards.tracer.ejected")
         : tr.kind === "oort"
@@ -385,71 +368,51 @@ function tracerCard(sel: Of<"tracer">, { t, f, d, yearsAgo, mig }: Moment): Card
       ...orbitFacts(t, f, d, el, ["nearFar", "period"]),
     ],
     body: note,
-    caution: t("cards.tracer.caution", { count: quantity(t, d, sample.count).value }),
+    caution: t("cards.tracer.caution", { count: p.v(sample.count) }),
   };
 }
 
-/** Rows and notes of a neighbour's card, from the catalogue. */
-function starCopy(id: NeighbourId, { t, d }: Moment) {
-  const q = (fact: Fact, options?: QuantityOptions) => quantity(t, d, fact, options).value;
-  const c = CATALOGUE.stars[id].facts;
-  const velocity = q(c.radialVelocity);
+/** Rows and notes of a neighbour's card. */
+function starCopy(id: NeighbourId, { t, p: { v, r } }: Moment) {
+  const c = CATALOGUE.stars[id];
+  const velocity = v(c.radialVelocity);
+  const approach = { distance: v(c.distance), approach: v(c.approach), years: v(c.approachWhen) };
   switch (id) {
     case "proxima":
       return {
         where: t("cards.stars.proxima.where"),
-        motion: t("cards.stars.proxima.motion", {
-          velocity,
-          proper: q(c.properMotion, { in: "arcsec/yr", digits: 2 }),
-        }),
+        motion: t("cards.stars.proxima.motion", { velocity, proper: v(c.properMotion) }),
         body: {},
       };
     case "alphaCen": {
-      const a = CATALOGUE.stars.alphaCen.facts;
+      const a = CATALOGUE.stars.alphaCen;
       return {
-        where: t("cards.stars.alphaCen.where", { separation: q(a.fromProxima) }),
+        where: t("cards.stars.alphaCen.where", { separation: v(a.fromProxima) }),
         motion: t("cards.stars.alphaCen.motion", { velocity }),
-        body: {
-          distance: q(c.distance),
-          proxima: q(a.proximaOut),
-          approach: q(c.approach, { digits: 2 }),
-          years: q(c.approachWhen, { digits: 2 }),
-        },
+        body: { ...approach, proxima: v(a.proximaOut) },
       };
     }
     case "barnard":
       return {
         where: t("cards.stars.barnard.where"),
-        motion: t("cards.stars.barnard.motion", {
-          velocity,
-          proper: q(c.properMotion, { in: "arcsec/yr", digits: 3 }),
-        }),
-        body: {
-          distance: q(c.distance),
-          approach: q(c.approach, { digits: 2 }),
-          years: q(c.approachWhen, { digits: 1 }),
-        },
+        motion: t("cards.stars.barnard.motion", { velocity, proper: v(c.properMotion) }),
+        body: approach,
       };
     case "scholz":
       return {
-        where: t("cards.stars.scholz.where", { distance: q(c.distance, { digits: 2 }) }),
+        where: t("cards.stars.scholz.where", { distance: v(c.distance) }),
         motion: t("cards.stars.scholz.motion", { velocity }),
-        body: {
-          flyby: quantity(t, d, CATALOGUE.stars.scholz.facts.flyby, { in: "kyr" }).range,
-        },
+        body: { flyby: r(CATALOGUE.stars.scholz.flyby) },
       };
   }
 }
 
 function starCard(sel: Of<"star">, m: Moment): Card {
-  const { t, d, yearsAgo } = m;
+  const { t, d, p, yearsAgo } = m;
   const star = NEIGHBOURS.find((s) => s.id === sel.id)!;
   const inWindow = yearsAgo < 3e5;
   const ly = neighbourDistanceLy(star, inWindow ? yearsAgo : 0);
-  const c = CATALOGUE.stars[sel.id].facts;
-  const pastApproach = closestApproach(star).yearsAgo > 0;
-  /* Whole thousands of years, however many digits that takes. */
-  const kyr = c.approachWhen.value / 1e3;
+  const c = CATALOGUE.stars[sel.id];
   const copy = starCopy(sel.id, m);
   return {
     badge: inWindow ? t("badges.measuredTrack") : t("badges.measured"),
@@ -465,12 +428,9 @@ function starCard(sel: Of<"star">, m: Moment): Card {
       {
         id: "closest",
         label: t("facts.closest"),
-        value: t(pastApproach ? "facts.closestPast" : "facts.closestFuture", {
-          distance: quantity(t, d, c.approach).value,
-          years: quantity(t, d, c.approachWhen, {
-            in: "kyr",
-            digits: Math.max(1, Math.floor(Math.log10(Math.max(kyr, 1))) + 1),
-          }).value,
+        value: t(closestApproach(star).yearsAgo > 0 ? "facts.closestPast" : "facts.closestFuture", {
+          distance: p.v(c.approach),
+          years: p.v(c.approachWhen),
         }),
       },
     ],
@@ -501,10 +461,8 @@ function galaxyCard(sel: Of<"galaxy">, m: Moment): Card {
  * A structure beyond the Galaxy at the slider's moment: distances and sizes that change with
  * time are computed from the model, and the scale of space is shown once it differs.
  */
-function cosmosCard(sel: Of<"cosmos">, { t, f, d, yearsAgo }: Moment): Card {
-  const q = (fact: Fact, options?: QuantityOptions) => quantity(t, d, fact, options);
-  /* Figures that follow the slider. */
-  const now = (fact: Fact) => q(fact, { yearsAgo }).value;
+function cosmosCard(sel: Of<"cosmos">, { t, f, p, yearsAgo }: Moment): Card {
+  const { v, r, live } = p;
   type FactId =
     | "width"
     | "members"
@@ -520,7 +478,7 @@ function cosmosCard(sel: Of<"cosmos">, { t, f, d, yearsAgo }: Moment): Card {
     | "scaleThen";
   const fact = (id: FactId, value: string) => ({ id, label: t(`facts.${id}`), value });
   const key = `cards.cosmos.${sel.id}` as const;
-  const scale = CATALOGUE.cosmos.universe.facts.scale.at(yearsAgo);
+  const scale = CATALOGUE.cosmos.universe.scale.at(yearsAgo);
   const then =
     yearsAgo >= 1e7
       ? [
@@ -541,114 +499,107 @@ function cosmosCard(sel: Of<"cosmos">, { t, f, d, yearsAgo }: Moment): Card {
   } => {
     switch (sel.id) {
       case "localGroup": {
-        const c = CATALOGUE.cosmos.localGroup.facts;
+        const c = CATALOGUE.cosmos.localGroup;
         return {
           facts: [
-            fact("width", t("cards.cosmos.localGroup.width", q(c.width))),
-            fact("members", t("cards.cosmos.localGroup.members", q(c.members))),
+            fact("width", t("cards.cosmos.localGroup.width", { value: v(c.width) })),
+            fact("members", t("cards.cosmos.localGroup.members", { value: v(c.members) })),
             fact("mass", t("cards.cosmos.localGroup.mass")),
-            fact("apart", now(c.apart)),
+            fact("apart", live(c.apart)),
           ],
-          body: {
-            turnaround: q(c.turnaround).value,
-            turnaroundAgo: q(c.turnaroundAgo, { in: "Gyr" }).value,
-          },
+          body: { turnaround: v(c.turnaround), turnaroundAgo: v(c.turnaroundAgo) },
         };
       }
       case "localSheet": {
-        const c = CATALOGUE.cosmos.localSheet.facts;
+        const c = CATALOGUE.cosmos.localSheet;
         return {
           facts: [
-            fact("width", t("cards.cosmos.localSheet.width", { value: now(c.width) })),
-            fact("depth", t("cards.cosmos.localSheet.thickness", q(c.thickness))),
+            fact("width", t("cards.cosmos.localSheet.width", { value: live(c.width) })),
+            fact("depth", t("cards.cosmos.localSheet.thickness", { value: v(c.thickness) })),
             fact("members", t("cards.cosmos.localSheet.members")),
             fact(
               "motion",
-              t("cards.cosmos.localSheet.motion", {
-                value: q(c.fromVoid).value,
-                stray: q(c.stray).value,
-              }),
+              t("cards.cosmos.localSheet.motion", { value: v(c.fromVoid), stray: v(c.stray) }),
             ),
             ...then,
           ],
-          body: { radius: q(c.radius).value },
+          body: { radius: v(c.radius) },
         };
       }
       case "andromeda": {
-        const c = CATALOGUE.cosmos.andromeda.facts;
+        const c = CATALOGUE.cosmos.andromeda;
         return {
           facts: [
-            fact("distance", now(c.distance)),
+            fact("distance", live(c.distance)),
             fact(
               "approach",
               t("cards.cosmos.andromeda.approach", {
-                value: q(c.approach).value,
-                sun: q(c.approachSun).value,
+                value: v(c.approach),
+                sun: v(c.approachSun),
               }),
             ),
-            fact("width", t("cards.cosmos.andromeda.width", q(c.width))),
-            fact("future", t("cards.cosmos.andromeda.future", q(c.firstPass))),
+            fact("width", t("cards.cosmos.andromeda.width", { range: r(c.width) })),
+            fact("future", t("cards.cosmos.andromeda.future", { range: r(c.firstPass) })),
           ],
-          body: {
-            sun: q(c.approachSun).value,
-            approach: q(c.approach).value,
-            distance: q(c.distance).value,
-          },
-          caution: { within: q(c.mergerWithin).value },
+          body: { sun: v(c.approachSun), approach: v(c.approach), distance: v(c.distance) },
+          caution: { within: v(c.mergerWithin) },
         };
       }
       case "virgo": {
-        const c = CATALOGUE.cosmos.virgo.facts;
+        const c = CATALOGUE.cosmos.virgo;
         return {
           facts: [
-            fact("distance", now(c.distance)),
-            fact("members", t("cards.cosmos.virgo.members", q(c.members))),
-            fact("width", t("cards.cosmos.virgo.width", q(c.width))),
-            fact("heart", t("cards.cosmos.virgo.heart", q(c.blackHole, { scale: 1e9 }))),
+            fact("distance", live(c.distance)),
+            fact(
+              "members",
+              t("cards.cosmos.virgo.members", { value: v(c.members), range: r(c.members) }),
+            ),
+            fact("width", t("cards.cosmos.virgo.width", { value: v(c.width) })),
+            fact("heart", t("cards.cosmos.virgo.heart", { value: v(c.blackHole) })),
             ...then,
           ],
         };
       }
       case "supercluster": {
-        const c = CATALOGUE.cosmos.supercluster.facts;
+        const c = CATALOGUE.cosmos.supercluster;
         return {
           facts: [
-            fact("width", t("cards.cosmos.supercluster.width", { value: now(c.width) })),
-            fact("members", t("cards.cosmos.supercluster.members", q(c.members))),
+            fact("width", t("cards.cosmos.supercluster.width", { value: live(c.width) })),
+            fact("members", t("cards.cosmos.supercluster.members", { value: v(c.members) })),
             fact("heart", t("cards.cosmos.supercluster.heart")),
             ...then,
           ],
         };
       }
       case "laniakea": {
-        const c = CATALOGUE.cosmos.laniakea.facts;
+        const c = CATALOGUE.cosmos.laniakea;
         return {
           facts: [
-            fact("width", t("cards.cosmos.laniakea.width", { value: now(c.width) })),
-            fact("members", t("cards.cosmos.laniakea.members", q(c.members))),
-            fact("mass", t("cards.cosmos.laniakea.mass", q(c.mass))),
-            fact("heart", t("cards.cosmos.laniakea.heart", q(c.heart))),
+            fact("width", t("cards.cosmos.laniakea.width", { value: live(c.width) })),
+            fact("members", t("cards.cosmos.laniakea.members", { value: v(c.members) })),
+            fact("mass", t("cards.cosmos.laniakea.mass", { value: v(c.mass) })),
+            fact("heart", t("cards.cosmos.laniakea.heart", { value: v(c.heart) })),
             ...then,
           ],
         };
       }
       case "triangulum": {
-        const c = CATALOGUE.cosmos.triangulum.facts;
+        const c = CATALOGUE.cosmos.triangulum;
         return {
           facts: [
-            fact("distance", now(c.distance)),
-            fact("width", t("cards.cosmos.triangulum.width", q(c.width))),
+            fact("distance", live(c.distance)),
+            fact("width", t("cards.cosmos.triangulum.width", { value: v(c.width) })),
             fact("future", t("cards.cosmos.triangulum.future")),
           ],
         };
       }
       case "fornax": {
-        const c = CATALOGUE.cosmos.fornax.facts;
+        const c = CATALOGUE.cosmos.fornax;
         return {
           facts: [
-            fact("distance", now(c.distance)),
-            fact("members", t("cards.cosmos.fornax.members", q(c.members))),
-            fact("width", t("cards.cosmos.fornax.width", q(c.width))),
+            fact("distance", live(c.distance)),
+            fact("members", t("cards.cosmos.fornax.members", { value: v(c.members) })),
+            fact("width", t("cards.cosmos.fornax.width", { value: v(c.width) })),
             fact("heart", t("cards.cosmos.fornax.heart")),
             ...then,
           ],
@@ -657,34 +608,34 @@ function cosmosCard(sel: Of<"cosmos">, { t, f, d, yearsAgo }: Moment): Card {
       case "centaurus":
         return {
           facts: [
-            fact("distance", now(CATALOGUE.cosmos.centaurus.facts.distance)),
+            fact("distance", live(CATALOGUE.cosmos.centaurus.distance)),
             fact("members", t("cards.cosmos.centaurus.members")),
             fact("heart", t("cards.cosmos.centaurus.heart")),
             ...then,
           ],
         };
       case "hydra": {
-        const c = CATALOGUE.cosmos.hydra.facts;
+        const c = CATALOGUE.cosmos.hydra;
         return {
           facts: [
-            fact("distance", now(c.distance)),
-            fact("members", t("cards.cosmos.hydra.members", q(c.members))),
+            fact("distance", live(c.distance)),
+            fact("members", t("cards.cosmos.hydra.members", { value: v(c.members) })),
             fact("heart", t("cards.cosmos.hydra.heart")),
             ...then,
           ],
         };
       }
       case "greatAttractor": {
-        const c = CATALOGUE.cosmos.greatAttractor.facts;
+        const c = CATALOGUE.cosmos.greatAttractor;
         return {
           facts: [
-            fact("distance", now(c.distance)),
+            fact("distance", live(c.distance)),
             fact("where", t("cards.cosmos.greatAttractor.where")),
-            fact("mass", t("cards.cosmos.greatAttractor.mass", q(c.mass))),
+            fact("mass", t("cards.cosmos.greatAttractor.mass", { value: v(c.mass) })),
             fact("heart", t("cards.cosmos.greatAttractor.heart")),
             ...then,
           ],
-          body: { distance: q(c.distance).value },
+          body: { distance: v(c.distance) },
         };
       }
     }
@@ -713,7 +664,11 @@ export function cardFor(
     t,
     f,
     d,
-    n: (v, digits) => f.number(v, { maximumFractionDigits: digits }),
+    p: {
+      v: (fact) => figure(t, d, fact),
+      r: (fact) => span(t, d, fact),
+      live: (fact) => figureAt(t, d, fact, yearsAgo),
+    },
     yearsAgo,
     mig: migrationProgress(yearsAgo),
     elliptical,

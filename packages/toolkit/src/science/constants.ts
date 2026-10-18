@@ -114,3 +114,5 @@ export const SOLAR_RADIUS_KM = CONSTANTS.solarRadius.value / 1e3;
 export const AU_KM = CONSTANTS.astronomicalUnit.value / 1e3;
 export const LIGHT_YEAR_KM = CONSTANTS.lightYear.value / 1e3;
 export const JULIAN_YEAR_SECONDS = CONSTANTS.julianYear.value;
+/** Radians in one degree (π/180): multiply degrees by it, divide radians by it. */
+export const RAD_PER_DEG = UNITS.deg.factor;

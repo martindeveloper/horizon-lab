@@ -7,7 +7,9 @@ import {
   ShaderMaterial,
 } from "three";
 
+import { jplElements } from "@horizon/toolkit/bodies";
 import { mulberry32 } from "@horizon/toolkit/math";
+import { RAD_PER_DEG as RAD, resonanceSemiMajorAxis } from "@horizon/toolkit/science";
 
 import FRAG from "./shaders/swarm.frag.glsl";
 /**
@@ -19,7 +21,9 @@ import FRAG from "./shaders/swarm.frag.glsl";
  */
 import VERT from "./shaders/swarm.vert.glsl";
 
-const RAD = Math.PI / 180;
+/** Where an orbit of `k` times the planet's period sits, by Kepler's third law. */
+const resonance = (planet: "jupiter" | "neptune", k: number) =>
+  resonanceSemiMajorAxis.compute({ ap: jplElements(planet, 0).a, k });
 
 export type SwarmBody = {
   a0: number;
@@ -139,12 +143,16 @@ const COMET: Rgb = [0.9, 0.94, 0.98];
 
 /** Kirkwood gaps: the 4:1, 3:1, 5:2, 7:3 and 2:1 resonances with Jupiter are nearly empty. */
 const KIRKWOOD: readonly [a: number, halfWidth: number][] = [
-  [2.06, 0.02],
-  [2.5, 0.03],
-  [2.82, 0.025],
-  [2.96, 0.015],
-  [3.28, 0.04],
+  [resonance("jupiter", 1 / 4), 0.02],
+  [resonance("jupiter", 1 / 3), 0.03],
+  [resonance("jupiter", 2 / 5), 0.025],
+  [resonance("jupiter", 3 / 7), 0.015],
+  [resonance("jupiter", 1 / 2), 0.04],
 ];
+
+/** Neptune's 3:2 and 2:1 resonances: the plutinos (39.4 au) and twotinos (47.7 au). */
+const PLUTINOS_AU = resonance("neptune", 3 / 2);
+const TWOTINOS_AU = resonance("neptune", 2);
 
 /**
  * The main belt: a seeded sample of 2.1–3.3 AU orbits with e < 0.3 and
@@ -155,7 +163,7 @@ export function mainBelt(count: number): SwarmBody[] {
   const out: SwarmBody[] = [];
   while (out.length < count) {
     const a = 2.1 + rnd() * 1.2 + gaussian(rnd) * 0.1;
-    if (a < 2.06 || a > 3.35) continue;
+    if (a < KIRKWOOD[0]![0] || a > 3.35) continue;
     if (KIRKWOOD.some(([c, w]) => Math.abs(a - c) < w)) continue;
     const e = Math.min(0.3, Math.abs(gaussian(rnd)) * 0.1 + rnd() * 0.08);
     const i = Math.min(25, Math.abs(gaussian(rnd)) * 7);
@@ -258,7 +266,7 @@ export function kuiperBelt(count: number): SwarmBody[] {
         color: shade(ICE, k),
       });
     } else if (roll < 0.9) {
-      const a1 = 39.4 + gaussian(rnd) * 0.25;
+      const a1 = PLUTINOS_AU + gaussian(rnd) * 0.25;
       out.push({
         a0: 24 + rnd() * 8,
         a1,
@@ -273,7 +281,7 @@ export function kuiperBelt(count: number): SwarmBody[] {
         color: shade(ICE, k * 1.05),
       });
     } else {
-      const a1 = 47.7 + gaussian(rnd) * 0.25;
+      const a1 = TWOTINOS_AU + gaussian(rnd) * 0.25;
       out.push({
         a0: 26 + rnd() * 8,
         a1,

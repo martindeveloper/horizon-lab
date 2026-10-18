@@ -15,26 +15,27 @@
  * - clusters keep their size but gather their members as the timeline nears today.
  */
 import { clamp01 } from "@horizon/toolkit/math";
-import { convert, defineEquation } from "@horizon/toolkit/science";
+import {
+  PLANCK_2018,
+  RAD_PER_DEG as RAD,
+  convert,
+  cosmicAgeGyr,
+  defineEquation,
+  formatNumber,
+  hubbleLaw,
+  scaleFactorAtAge,
+} from "@horizon/toolkit/science";
 
 import { SUN_GALACTIC_RADIUS_LY, SUN_HEIGHT_LY } from "./parameters";
 
-const RAD = Math.PI / 180;
 /** Numbers inside printed formulas. */
-const n = (value: number) => value.toLocaleString("en", { maximumFractionDigits: 4 });
+const n = (value: number) => formatNumber(value, "en", 4);
 
-/** Planck 2018 (TT,TE,EE+lowE+lensing+BAO): H₀ = 67.66 km/s/Mpc, Ωm = 0.3111, flat. */
-export const HUBBLE = 67.66;
-export const OMEGA_M = 0.3111;
-const OMEGA_L = 1 - OMEGA_M;
-/** 1/H₀ in Gyr: one Mpc in km over H₀, in Gyr (977.79 / H₀). */
-const HUBBLE_TIME_GYR = convert(convert(1, "Mpc", "km") / HUBBLE, "s", "Gyr");
-const AGE_FACTOR = (2 / (3 * Math.sqrt(OMEGA_L))) * HUBBLE_TIME_GYR;
-const MATTER_LAMBDA = Math.sqrt(OMEGA_L / OMEGA_M);
-/** Age of a flat ΛCDM universe at scale factor a, Gyr. */
-const ageAt = (a: number) => AGE_FACTOR * Math.asinh(MATTER_LAMBDA * a ** 1.5);
+/** The model's cosmology: flat ΛCDM with Planck 2018's H₀ (km/s/Mpc) and Ωm. */
+export const HUBBLE = PLANCK_2018.H0;
+export const OMEGA_M = PLANCK_2018.omegaM;
 /** Age of the Universe today, Gyr (13.79 for these parameters). */
-export const UNIVERSE_AGE_GYR = ageAt(1);
+export const UNIVERSE_AGE_GYR = cosmicAgeGyr(1, PLANCK_2018);
 
 /** The cosmic scale factor `t` years ago: 1 today, ~0.37 ten billion years ago. */
 export const scaleFactor = defineEquation({
@@ -46,10 +47,7 @@ export const scaleFactor = defineEquation({
     t: { symbol: "t", latex: "t", unit: "Gyr" },
     a: { symbol: "a", latex: "a" },
   },
-  compute: ({ t }) => {
-    const age = Math.max(1e-3, UNIVERSE_AGE_GYR - t);
-    return (Math.sinh(age / AGE_FACTOR) / MATTER_LAMBDA) ** (2 / 3);
-  },
+  compute: ({ t }) => scaleFactorAtAge(Math.max(1e-3, UNIVERSE_AGE_GYR - t), PLANCK_2018),
 });
 
 /** One-entry memo: a frame asks for the same moment many times. */
@@ -71,7 +69,8 @@ export const scaleAt = lastOf((yearsAgo: number) =>
 );
 
 /** Hubble-flow distance (Mly) for a recession velocity cz (km/s) at H₀. */
-export const hubbleMly = (cz: number) => convert(cz / HUBBLE, "Mpc", "Mly");
+export const hubbleMly = (cz: number) =>
+  convert(hubbleLaw.compute({ v: cz, H0: HUBBLE }), "Mpc", "Mly");
 
 /* ---------------------------------------------------------------------------------------
  * The Milky Way and Andromeda: a radial Kepler orbit from the Big Bang (Kahn & Woltjer

@@ -16,7 +16,7 @@
  */
 import { wrap } from "../math/index";
 import { J2000_JD, julianDay } from "../science";
-import type { PlanetId } from "./ephemeris";
+import { DAYS_PER_JULIAN_YEAR, type PlanetId } from "./ephemeris";
 
 export type MoonId =
   | "moon"
@@ -192,7 +192,7 @@ export function moonById(id: MoonId) {
   return found;
 }
 
-const perDay = (years: number) => (years ? 360 / (years * 365.25) : 0);
+const perDay = (years: number) => (years ? 360 / (years * DAYS_PER_JULIAN_YEAR) : 0);
 
 /**
  * Rates in degrees per day. The mean longitude advances once per sidereal

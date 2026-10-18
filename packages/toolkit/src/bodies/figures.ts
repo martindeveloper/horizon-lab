@@ -11,7 +11,7 @@
  * Radii are the same report's (1-bar level for the giants).
  */
 import { recordBy } from "../records";
-import { J2000_JD, julianDay } from "../science";
+import { J2000_JD, julianDay, RAD_PER_DEG as RAD } from "../science";
 import {
   PLANET_RADIUS_KM,
   SUN_RADIUS_KM,
@@ -50,7 +50,6 @@ const turning =
     w0 + rate * d;
 /** Rotation rate in degrees per day for a sidereal period in hours (negative: retrograde). */
 const perHours = (hours: number) => (360 * 24) / hours;
-const RAD = Math.PI / 180;
 /** Neptune's pole precesses on a 3.4 kyr cone; N is that angle (IAU 2015). */
 const neptuneN = (T: number) => (357.85 + 52.316 * T) * RAD;
 

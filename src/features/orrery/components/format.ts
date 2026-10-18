@@ -7,17 +7,23 @@ import {
   formatDistanceRange,
   formatSignificant,
   type DistanceFormat,
-  type DistanceUnit,
-  type UnitId,
+  type DistanceChoice,
 } from "@horizon/toolkit/science";
 
-import { isLength, type Fact } from "../lib/model/catalogue";
+import {
+  isLength,
+  type Fact,
+  type Live,
+  type Range,
+  type Span,
+  type Value,
+} from "../lib/model/catalogue";
 
 export type Translate = ReturnType<typeof useTranslations<"orrery">>;
 export type Format = ReturnType<typeof useFormatter>;
 
 /** The visitor's distance unit and language, for the shared readout. */
-export type DistanceSettings = { unit: DistanceUnit; locale: string };
+export type DistanceSettings = { unit: DistanceChoice; locale: string };
 
 function distanceFormat(t: Translate, d: DistanceSettings): DistanceFormat {
   return {
@@ -47,60 +53,76 @@ function significantOf(...values: number[]) {
   );
 }
 
-export type QuantityOptions = {
-  /** The slider's moment: a figure with `at` follows it; without, its value today is printed. */
-  yearsAgo?: number;
-  /** Convert to this unit of the science kit first: years to "Gyr" for "billion years". */
-  in?: UnitId;
-  /** Then print in thousands, millions…: the message says "billion Suns" for 10⁹. */
-  scale?: number;
-  /** Significant figures for this sentence, when prose rounds harder than the fact row. */
-  digits?: number;
-};
+type Figure = Value | Live;
+type Ranged = (Value | Span) & { range: Range };
+
+/** A plain figure in the unit the message words (`show`), as a number. */
+function shown(fact: Fact, v: number) {
+  const { unit, show } = fact;
+  return show && unit !== "count" && unit !== "percent" && unit !== "ratio"
+    ? convert(v, unit, show)
+    : v;
+}
 
 /**
- * A catalogue figure in the visitor's language, as message arguments: `value` and, with a
- * range, `range` ("1,300–2,000"). Lengths come in the visitor's distance unit with its
- * symbol; other units leave their words to the message. Literature values keep their
- * significant figures (lengths at least two, so a conversion keeps its shape); figures
- * that follow the slider use the canvas readout unless the fact fixes `digits`.
+ * Plain numbers in words a reader takes in: "6.5 billion", "4 million"; scientific from
+ * 10¹² ("5 × 10¹⁶"). An exact value whose every digit counts stays whole.
  */
-export function quantity(
+function plain(t: Translate, d: DistanceSettings, values: number[], digits: number) {
+  const top = Math.max(...values.map(Math.abs));
+  const whole = top > 0 && digits > Math.floor(Math.log10(top));
+  const scale = whole || top < 1e6 || top >= 1e12 ? 1 : top >= 1e9 ? 1e9 : 1e6;
+  const text = values.map((v) => formatSignificant(v / scale, d.locale, digits)).join("–");
+  return scale === 1 ? text : `${text} ${t(scale === 1e9 ? "names.billion" : "names.million")}`;
+}
+
+/**
+ * A catalogue figure today, in the visitor's language: lengths in their distance unit with
+ * its symbol, other units in the unit the message words. Literature values keep their
+ * significant figures; lengths at least two, so a conversion keeps its shape.
+ */
+export function figure(t: Translate, d: DistanceSettings, fact: Figure) {
+  return printed(t, d, fact, fact.value, fact.digits);
+}
+
+/** A figure that follows the slider, `yearsAgo` years ago, in the canvas readout's precision. */
+export function figureAt(t: Translate, d: DistanceSettings, fact: Live, yearsAgo: number) {
+  return printed(t, d, fact, fact.at(yearsAgo), fact.digits, true);
+}
+
+function printed(
   t: Translate,
   d: DistanceSettings,
   fact: Fact,
-  { yearsAgo, in: to, scale = 1, digits: rounded }: QuantityOptions = {},
+  value: number,
+  digits: number | undefined,
+  live = false,
 ) {
-  if (rounded !== undefined) fact = { ...fact, digits: rounded };
-  const live = fact.at !== undefined && yearsAgo !== undefined;
-  const value = live ? fact.at!(yearsAgo) : fact.value;
-  const [low, high] = fact.range ?? [];
-  const ranged = low !== undefined && high !== undefined;
   const { unit } = fact;
   if (isLength(unit)) {
-    const au = (v: number) => convert(v, unit, "au");
     const format = distanceFormat(t, d);
-    const significant = fact.digits ?? Math.max(2, significantOf(value));
-    return {
-      value: formatDistance(au(value), live && !fact.digits ? format : { ...format, significant }),
-      range: ranged
-        ? formatDistanceRange(au(low), au(high), {
-            ...format,
-            significant: fact.digits ?? Math.max(2, significantOf(low, high)),
-          })
-        : "",
-    };
+    const au = convert(value, unit, "au");
+    if (live && digits === undefined) return formatDistance(au, format);
+    return formatDistance(au, {
+      ...format,
+      significant: digits ?? Math.max(2, significantOf(value)),
+    });
   }
-  const plain = (v: number) =>
-    (to && unit !== "count" && unit !== "percent" && unit !== "ratio" ? convert(v, unit, to) : v) /
-    scale;
-  const print = (v: number, digits: number) => formatSignificant(v, d.locale, digits);
-  const digits = fact.digits ?? significantOf(plain(value));
-  const rangeDigits = ranged ? (fact.digits ?? significantOf(plain(low), plain(high))) : 0;
-  return {
-    value: print(plain(value), digits),
-    range: ranged ? `${print(plain(low), rangeDigits)}–${print(plain(high), rangeDigits)}` : "",
-  };
+  const v = shown(fact, value);
+  return plain(t, d, [v], digits ?? significantOf(v));
+}
+
+/** A published span, the unit once: "2.1–3.3 au", "1,300–2,000", "4–5" (billion years). */
+export function span(t: Translate, d: DistanceSettings, fact: Ranged) {
+  const [low, high] = fact.range;
+  const { unit } = fact;
+  if (isLength(unit))
+    return formatDistanceRange(convert(low, unit, "au"), convert(high, unit, "au"), {
+      ...distanceFormat(t, d),
+      significant: fact.digits ?? Math.max(2, significantOf(low, high)),
+    });
+  const ends = [shown(fact, low), shown(fact, high)];
+  return plain(t, d, ends, fact.digits ?? significantOf(...ends));
 }
 
 export function formatYearsAgo(t: Translate, f: Format, years: number) {
@@ -114,7 +136,7 @@ export function formatYearsAgo(t: Translate, f: Format, years: number) {
 
 function formatPeriod(t: Translate, f: Format, years: number) {
   const n = (v: number, digits: number) => f.number(v, { maximumFractionDigits: digits });
-  if (years < 2) return t("facts.days", { value: n(years * 365.25, 0) });
+  if (years < 2) return t("facts.days", { value: n(convert(years, "yr", "d"), 0) });
   if (years < 1000) return t("facts.years", { value: n(years, years < 20 ? 1 : 0) });
   return t("facts.yearsAbout", { value: n(years, 0) });
 }

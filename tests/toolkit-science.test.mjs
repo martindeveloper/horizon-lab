@@ -12,6 +12,15 @@ import {
   formatDistance,
   formatDistanceRange,
   formatSignificant,
+  resolveDistanceUnit,
+  PLANCK_2018,
+  RAD_PER_DEG,
+  angularSeparation,
+  cosmicAgeGyr,
+  hubbleLaw,
+  hubbleTimeGyr,
+  resonanceSemiMajorAxis,
+  scaleFactorAtAge,
   lightTime,
   readout,
   scaleMagnitude,
@@ -110,4 +119,44 @@ test("literature values keep their significant figures through a unit change", (
 test("Julian dates match the J2000 epoch", () => {
   assert.equal(julianDay(new Date("2000-01-01T12:00:00Z")), J2000_JD);
   assert.equal(julianDay(new Date("1970-01-01T00:00:00Z")), 2_440_587.5);
+});
+
+test("sky angles, resonances and Hubble's law compute from the shared laws", () => {
+  assert.equal(RAD_PER_DEG, Math.PI / 180);
+  const near = (actual, expected, tolerance) =>
+    assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} vs ${expected}`);
+  near(angularSeparation.compute({ ra1: 10, dec1: 90, ra2: 200, dec2: 0 }), 90, 1e-9);
+  near(angularSeparation.compute({ ra1: 0, dec1: 0, ra2: 1e-6, dec2: 0 }), 1e-6, 1e-15);
+  /* Proxima and α Cen AB (Gaia DR3, Akeson 2021): 2.19°. */
+  near(
+    angularSeparation.compute({ ra1: 217.4289, dec1: -62.6795, ra2: 219.8994, dec2: -60.8354 }),
+    2.19,
+    0.01,
+  );
+  near(resonanceSemiMajorAxis.compute({ ap: 5.2026, k: 1 / 4 }), 2.065, 0.001);
+  near(resonanceSemiMajorAxis.compute({ ap: 30.07, k: 3 / 2 }), 39.4, 0.01);
+  near(hubbleLaw.compute({ v: 6_766, H0: 67.66 }), 100, 1e-9);
+});
+
+test("flat ΛCDM: Planck 2018 gives a 13.8-billion-year Universe and a(t) inverts t(a)", () => {
+  const near = (actual, expected, tolerance) =>
+    assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} vs ${expected}`);
+  near(hubbleTimeGyr(PLANCK_2018.H0), 977.79 / 67.66, 0.01);
+  const age = cosmicAgeGyr(1);
+  near(age, 13.79, 0.02);
+  near(scaleFactorAtAge(age), 1, 1e-12);
+  near(scaleFactorAtAge(age - 10), 0.37, 0.02);
+  for (const a of [0.1, 0.5, 0.9]) near(scaleFactorAtAge(cosmicAgeGyr(a)), a, 1e-12);
+});
+
+test("auto distances read in au inside half a light-year and in ly beyond", () => {
+  const symbols = { au: "au", ly: "ly", pc: "pc" };
+  const auto = { unit: "auto", locale: "en", symbols, millionWord: "million" };
+  assert.equal(resolveDistanceUnit("auto", 30), "au");
+  assert.equal(resolveDistanceUnit("auto", LIGHT_YEAR_AU), "ly");
+  assert.equal(resolveDistanceUnit("pc", 30), "pc");
+  assert.equal(formatDistance(5_000, auto), "5,000 au");
+  assert.equal(formatDistance(4.24 * LIGHT_YEAR_AU, auto), "4.24 ly");
+  assert.equal(formatDistance(53.8e6 * LIGHT_YEAR_AU, auto), "53.8 million ly");
+  assert.equal(formatDistanceRange(100_000, 200_000, { ...auto, significant: 2 }), "1.6–3.2 ly");
 });

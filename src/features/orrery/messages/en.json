@@ -33,7 +33,8 @@
   "units": {
     "au": "au",
     "ly": "ly",
-    "pc": "pc"
+    "pc": "pc",
+    "auto": "auto"
   },
   "epochs": {
     "sketch": "10 Gyr sketch",
@@ -129,7 +130,8 @@
     "greatAttractor": "Great Attractor",
     "laniakea": "Laniakea",
     "million": "million",
-    "localSheet": "Local Sheet"
+    "localSheet": "Local Sheet",
+    "billion": "billion"
   },
   "hud": {
     "views": "Views",
@@ -168,7 +170,7 @@
     "closeUpNote": "True size, turned as it is now.",
     "closeUpPresentOnly": "Close-ups show today's surfaces. Return to the present to zoom in.",
     "epochs": "Jump to an epoch",
-    "distanceUnit": "Distance unit: astronomical units, light-years or parsecs",
+    "distanceUnit": "Distance unit: automatic, astronomical units, light-years or parsecs",
     "cosmosMotion": "Cosmic map",
     "cosmosItems": "Beyond the Milky Way"
   },
@@ -228,8 +230,8 @@
     "stars": "Stars",
     "proxima": "Proxima Centauri",
     "oortCompare": "Compared with the Oort cloud",
-    "closestFuture": "{distance}, in {years} thousand years",
-    "closestPast": "{distance}, {years} thousand years ago",
+    "closestFuture": "{distance}, in {years} years",
+    "closestPast": "{distance}, {years} years ago",
     "closest": "Closest approach",
     "motion": "Motion",
     "direction": "Direction",
@@ -250,16 +252,16 @@
   "cards": {
     "sun": {
       "title": "Sun",
-      "radius": "{km} km · about {au} au",
+      "radius": "{km} km · about {au}",
       "age": "About {value} billion years",
-      "oneAu": "{millions} million km · light-time {minutes} min",
+      "oneAu": "{au} km · light-time {minutes} min",
       "body": "Over {mass} % of the solar system's mass, yet under {spin} % of its angular momentum: nearly all of that rides in the planets' orbits. The clock of this model. Planet positions around it are computed for today's date from the JPL approximate elements, so this is tonight's configuration, seen from above the ecliptic.",
       "caution": "Marker sizes are enlarged unless True size is on. The real Sun is {diameters} Earth diameters across and still a speck beside planetary distances."
     },
     "planets": {
       "mercury": "Smallest planet. Its path is the most stretched of the eight.",
       "venus": "Almost a circle. A circle and an ellipse look the same here.",
-      "earth": "1 au is approximately Earth's mean distance from the Sun: {millions} million km, or {minutes} light-minutes. It is defined as exactly {metres} metres.",
+      "earth": "1 au is approximately Earth's mean distance from the Sun: {au} km, or {minutes} light-minutes. It is defined as exactly {metres} metres.",
       "mars": "A clearly stretched orbit. Still tiny beside Jupiter's.",
       "jupiter": "In the model Jupiter starts slightly farther out and ends slightly closer in, as instability studies find. The start is not a measurement. It outweighs all the other planets together more than twice over.",
       "saturn": "Starts closer to Jupiter than today, then moves outward in the model. The rings are to scale with the planet. Its mean density is lower than water's.",
@@ -351,7 +353,7 @@
         "title": "Bulge and bar",
         "centre": "About {value}",
         "bar": "About {value} end to end, estimates {range}; ~{angle}° to the Sun–centre line",
-        "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about {mass} million Suns. The point density is a sketch, not a star catalogue.",
+        "body": "The Milky Way is a barred spiral. The centre is a boxy, peanut-shaped bulge of old stars, X-shaped seen edge-on, inside a longer, thinner bar whose ends feed the spiral arms. At the very middle sits Sagittarius A*, a black hole of about {mass} Suns. The point density is a sketch, not a star catalogue.",
         "caution": "Do not measure the bar's length off this drawing."
       },
       "halo": {
@@ -365,7 +367,7 @@
         "title": "Milky Way",
         "diskWidth": "On the order of {value}",
         "thickness": "On the order of {value}",
-        "stars": "At least {value} billion",
+        "stars": "At least {value}",
         "age": "About {value} billion years",
         "body": "Our galaxy from outside, built on measurements: a thin and a thick disk, a peanut-shaped bulge inside a bar at {bar}°, four arms at a ~{pitch}° pitch placed where maser distances put them near the Sun, the short Local Arm just outside us, dust lanes on the arms' inner edges and the warp of the outer disk. The far side is extrapolated: the centre hides it from us. Before the Sun you get one earlier sketch: thicker, smaller, less of a bar, the stirred galaxy around the Gaia-Enceladus merger roughly {merger} billion years ago.",
         "caution": "Spiral arms are density waves, not fixed structures; stars pass through them. The ecliptic plane and the Galactic plane are tilted by about {tilt}°, so the two maps meet only at the Sun."
@@ -416,7 +418,7 @@
         "title": "Virgo Cluster",
         "members": "About {value} galaxies (estimates {range})",
         "width": "About {value}",
-        "heart": "M87, with a black hole of about {value} billion Suns",
+        "heart": "M87, with a black hole of about {value} Suns",
         "body": "The nearest large cluster and the heart of our supercluster. We are not inside it: the Local Group sits on its outskirts, pulled toward it while the expansion still carries us apart. On the timeline it rides the expansion and gathers its members, as clusters do.",
         "caution": "The members are a drawn sample shaped like a cluster, not a catalogue; the gathering is a rough curve, not a simulation."
       },

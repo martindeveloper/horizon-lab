@@ -1,6 +1,7 @@
 /** Nearest stars in their real directions, on straight-line tracks, and the nearest-star ring. */
 import { Mesh, SphereGeometry, Sprite, TorusGeometry, Vector3, type Object3D } from "three";
 
+import type { Vec3 } from "@horizon/toolkit/bodies";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
 import {
@@ -17,6 +18,7 @@ import { fade, rising } from "./lod";
 import type { DistanceText, Rulers } from "./rulers";
 
 const PROXIMA_AU = 4.2465 * LIGHT_YEAR_AU;
+const track: Vec3 = [0, 0, 0];
 /** Where the nearest stars read (camera distance, au): from the Oort cloud into the handoff. */
 const STARS = fade(14_000, 28_000, 1_200_000, 4_000_000);
 const RING = fade(45_000, 80_000, 600_000, 1_100_000);
@@ -75,7 +77,7 @@ export function createNeighboursLayer(
         ringLabel !== undefined ? { text: ringLabel } : {},
       );
       for (const n of stars) {
-        const p = neighbourPosition(n.star, yearsAgo, vec);
+        const p = vec.fromArray(neighbourPosition(n.star, yearsAgo, track));
         const far = p.length();
         /* Stars far past the frame would sit behind the camera's shoulder. */
         const presence = shown * (1 - rising(far / dist, 2.2, 3));

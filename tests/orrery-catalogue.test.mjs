@@ -9,7 +9,7 @@ import { UNITS } from "@horizon/toolkit/science";
 
 import { ledger } from "../scripts/lib/catalogue-ledger.mjs";
 import { cardFor, NEIGHBOUR_IDS } from "../src/features/orrery/components/cards.tsx";
-import { SOURCES, catalogueFacts } from "../src/features/orrery/lib/model/catalogue.ts";
+import { SOURCES, catalogueFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
 
 const LOCALES = ["en", "cs"];
 const messages = Object.fromEntries(
@@ -53,7 +53,7 @@ function* cards() {
       },
     });
     const f = createFormatter({ locale });
-    for (const unit of ["au", "ly", "pc"])
+    for (const unit of ["auto", "au", "ly", "pc"])
       for (const yearsAgo of [0, 1.5e5, 2e8, 4.5e9, 9e9])
         for (const sel of SELECTIONS)
           yield {
@@ -67,19 +67,27 @@ function* cards() {
   }
 }
 
-test("every catalogue figure has a unit of the science kit, a known source and a sane range", () => {
+test("every catalogue figure has a kit unit, a known source, a stated status and a sane range", () => {
   const plain = new Set(["count", "percent", "ratio"]);
+  const statuses = new Set(["verified", "derived", "teaching-choice", "flag"]);
   for (const { path, fact } of catalogueFacts()) {
     assert.ok(fact.unit in UNITS || plain.has(fact.unit), `${path}: unit ${fact.unit}`);
+    assert.ok(!fact.show || fact.show in UNITS, `${path}: shown in ${fact.show}`);
     assert.ok(fact.source in SOURCES, `${path}: source ${fact.source}`);
-    assert.ok(Number.isFinite(fact.value), `${path}: value`);
-    /* A computed value must say how much of it to print. */
-    const written = Math.abs(fact.value).toExponential().split("e")[0].replace(".", "");
-    assert.ok(fact.digits || written.replace(/0+$/, "").length <= 6, `${path}: set digits`);
+    assert.ok(statuses.has(fact.status), `${path}: status ${fact.status}`);
+    assert.ok(fact.value !== undefined || fact.range, `${path}: a value or a published span`);
+    for (const v of [fact.value, ...(fact.range ?? [])])
+      if (v !== undefined) {
+        assert.ok(Number.isFinite(v), `${path}: ${v}`);
+        /* A computed value must say how much of it to print. */
+        const written = Math.abs(v).toExponential().split("e")[0].replace(".", "");
+        assert.ok(fact.digits || written.replace(/0+$/, "").length <= 6, `${path}: set digits`);
+      }
     if (fact.range) {
       const [low, high] = fact.range;
       assert.ok(low < high, `${path}: range order`);
-      assert.ok(low <= fact.value && fact.value <= high, `${path}: value outside its range`);
+      if (fact.value !== undefined)
+        assert.ok(low <= fact.value && fact.value <= high, `${path}: value outside its range`);
     }
     if (fact.at) {
       const today = fact.at(0);
@@ -100,13 +108,48 @@ test("cards render every figure in both languages and all distance units", () =>
 });
 
 test("lengths follow the visitor's distance unit and keep the source's precision", () => {
+  const read = (selection, id) => {
+    const values = new Map();
+    for (const { locale, unit, yearsAgo, sel, card } of cards())
+      if (
+        locale === "en" &&
+        yearsAgo === 0 &&
+        sel.kind === selection.kind &&
+        sel.id === selection.id
+      )
+        values.set(unit, card.facts.find((f) => f.id === id).value);
+    return values;
+  };
+  const m33 = read({ kind: "cosmos", id: "triangulum" }, "width");
+  assert.equal(m33.get("ly"), "About 60,000 ly");
+  assert.equal(m33.get("pc"), "About 18,000 pc");
+  assert.equal(m33.get("au"), "About 3.8 × 10⁹ au");
+  assert.equal(m33.get("auto"), "About 60,000 ly");
+  /* Auto: au inside half a light-year, ly beyond. */
+  const oort = read({ kind: "population", id: "oort" }, "innerEdge");
+  assert.equal(oort.get("auto"), "Thought to be about 2,000–5,000 au");
+  assert.equal(
+    read({ kind: "population", id: "oort" }, "outerEdge").get("auto"),
+    "Uncertain, roughly 1.6–3.2 ly",
+  );
+});
+
+test("large plain figures read in words, huge ones in powers of ten", () => {
   const values = new Map();
   for (const { locale, unit, yearsAgo, sel, card } of cards())
-    if (locale === "en" && yearsAgo === 0 && sel.kind === "cosmos" && sel.id === "triangulum")
-      values.set(unit, card.facts.find((f) => f.id === "width").value);
-  assert.equal(values.get("ly"), "About 60,000 ly");
-  assert.equal(values.get("pc"), "About 18,000 pc");
-  assert.equal(values.get("au"), "About 3.8 × 10⁹ au");
+    if (unit === "auto" && yearsAgo === 0 && sel.kind === "cosmos" && sel.id === "virgo")
+      values.set(locale, card.facts.find((f) => f.id === "heart").value);
+  assert.equal(values.get("en"), "M87, with a black hole of about 6.5 billion Suns");
+  assert.equal(values.get("cs"), "M87 s černou dírou asi 6,5 mld. Sluncí");
+  for (const { unit, yearsAgo, sel, card, locale } of cards())
+    if (
+      locale === "en" &&
+      unit === "auto" &&
+      yearsAgo === 0 &&
+      sel.kind === "cosmos" &&
+      sel.id === "laniakea"
+    )
+      assert.equal(card.facts.find((f) => f.id === "mass").value, "About 10¹⁷ Suns");
 });
 
 /** Card copy migrated to the catalogue: its numbers are arguments, never typed digits. */

@@ -12,11 +12,9 @@ import {
   type MoonId,
 } from "@horizon/toolkit/bodies";
 import { wrap } from "@horizon/toolkit/math";
-import { AU_KM, J2000_JD, julianDay } from "@horizon/toolkit/science";
+import { AU_KM, J2000_JD, julianDay, RAD_PER_DEG as RAD } from "@horizon/toolkit/science";
 
 import { equatorialToScene } from "./coordinates";
-
-const RAD = Math.PI / 180;
 
 /** The reference plane's axes in the scene frame: node, 90° on, pole. */
 type Frame = { x: Vector3; y: Vector3; z: Vector3 };

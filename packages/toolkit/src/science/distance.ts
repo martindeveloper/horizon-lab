@@ -5,6 +5,20 @@ import { convert } from "./units";
 /** IAU symbols: au (2012 Resolution B2), ly, pc. */
 export type DistanceUnit = "au" | "ly" | "pc";
 export const DISTANCE_UNITS: readonly DistanceUnit[] = ["au", "ly", "pc"];
+/** A readout unit, or `auto`: each distance picks au or ly by its own size. */
+export type DistanceChoice = DistanceUnit | "auto";
+
+/** Where `auto` switches from au to ly: half a light-year (≈ 31,600 au), past the planets and the inner Oort cloud. */
+export const AUTO_LIGHT_YEAR_FROM_AU = 0.5 * (LIGHT_YEAR_KM / AU_KM);
+
+/** The unit a distance in au reads best in: au inside the Oort cloud's inner reach, ly beyond. */
+export function autoDistanceUnit(au: number): DistanceUnit {
+  return Math.abs(au) < AUTO_LIGHT_YEAR_FROM_AU ? "au" : "ly";
+}
+
+/** A choice resolved for a distance (au) of this size. */
+export const resolveDistanceUnit = (choice: DistanceChoice, au: number): DistanceUnit =>
+  choice === "auto" ? autoDistanceUnit(au) : choice;
 
 /** Light-time across 1 au, in seconds (both definitions exact: 499.004784 s). */
 export const AU_LIGHT_SECONDS = (AU_KM * 1000) / SPEED_OF_LIGHT;
@@ -41,7 +55,8 @@ export function lightTime(au: number): LightTime {
 }
 
 export type DistanceFormat = {
-  unit: DistanceUnit;
+  /** `auto` picks au or ly for each distance (the larger end of a range). */
+  unit: DistanceChoice;
   locale: string;
   /** Localized unit symbols, e.g. Czech "sv. r." for ly. */
   symbols: Record<DistanceUnit, string>;
@@ -67,17 +82,18 @@ function formatValue(value: number, options: DistanceFormat) {
 
 /** The value in the chosen unit, divided down to millions where the host has a word for it. */
 function scaled(au: number, magnitudeAu: number, options: DistanceFormat) {
-  const value = convertDistance(au, "au", options.unit);
+  const unit = resolveDistanceUnit(options.unit, magnitudeAu);
+  const value = convertDistance(au, "au", unit);
   const million =
     !!options.millionWord &&
-    options.unit !== "au" &&
+    unit !== "au" &&
     /* A converted million (1 Mly) can land a rounding error below 10⁶. */
-    Math.abs(convertDistance(magnitudeAu, "au", options.unit)) >= 1e6 * (1 - 1e-12);
-  return { value: million ? value / 1e6 : value, million };
+    Math.abs(convertDistance(magnitudeAu, "au", unit)) >= 1e6 * (1 - 1e-12);
+  return { value: million ? value / 1e6 : value, million, unit };
 }
 
-function unitText(million: boolean, options: DistanceFormat) {
-  const symbol = options.symbols[options.unit];
+function unitText(unit: DistanceUnit, million: boolean, options: DistanceFormat) {
+  const symbol = options.symbols[unit];
   return million ? `${options.millionWord} ${symbol}` : symbol;
 }
 
@@ -88,8 +104,8 @@ function unitText(million: boolean, options: DistanceFormat) {
  */
 export function formatDistance(au: number, options: DistanceFormat) {
   const { locale, lightTimeLabel } = options;
-  const { value, million } = scaled(au, au, options);
-  const text = `${formatValue(value, options)} ${unitText(million, options)}`;
+  const { value, million, unit } = scaled(au, au, options);
+  const text = `${formatValue(value, options)} ${unitText(unit, million, options)}`;
   if (million) return text;
   const from = options.lightTimeFrom ?? 0.2;
   const to = options.lightTimeTo ?? 0.05 * LIGHT_YEAR_AU;
@@ -110,5 +126,5 @@ export function formatDistanceRange(lowAu: number, highAu: number, options: Dist
   const magnitude = Math.max(Math.abs(lowAu), Math.abs(highAu));
   const low = scaled(lowAu, magnitude, options);
   const high = scaled(highAu, magnitude, options);
-  return `${formatValue(low.value, options)}–${formatValue(high.value, options)} ${unitText(high.million, options)}`;
+  return `${formatValue(low.value, options)}–${formatValue(high.value, options)} ${unitText(high.unit, high.million, options)}`;
 }

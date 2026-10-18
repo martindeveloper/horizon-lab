@@ -15,7 +15,8 @@ whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConst
 `solarMass`, `solarRadius` (IAU 2015 B3 nominal). A page can print the table;
 code uses the named values whose names state their units (`AU_KM`,
 `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `JULIAN_YEAR_SECONDS`,
-`SPEED_OF_LIGHT` in m s⁻¹, `GRAVITATIONAL_CONSTANT` in SI).
+`SPEED_OF_LIGHT` in m s⁻¹, `GRAVITATIONAL_CONSTANT` in SI). `RAD_PER_DEG` (π/180) is
+the one degree-to-radian factor; do not retype it.
 
 ## Units and measures (`units.ts`, `measure.ts`)
 
@@ -52,13 +53,16 @@ schwarzschildRadius.measure({ M: measure(1, "Msun") }).in("km"); // 2.95
 ```
 
 Shared laws: `pythagoras`, `keplerThirdLaw`, `lightTravelTime`,
-`schwarzschildRadius`, `parallaxDistance`, `geometricMassTime`. A simulation's
+`schwarzschildRadius`, `parallaxDistance`, `geometricMassTime`, `tangentialVelocity`,
+`angularSeparation` (haversine, degrees), `resonanceSemiMajorAxis` (Kepler III for an orbit
+of k times a planet's period) and `hubbleLaw` (d = v / H₀, in Mpc). A simulation's
 own formulas live in its feature (`lib/equations.ts`) and are built the same
 way. `Formula` is the print-only view documents use.
 
 ## Distances (`distance.ts`)
 
-`DistanceUnit` is `au` | `ly` | `pc`. `convertDistance`, `lightTime` (s / min /
+`DistanceUnit` is `au` | `ly` | `pc`; `DistanceChoice` adds `auto`, which reads each distance
+in au below half a light-year and in ly beyond (`autoDistanceUnit`, `resolveDistanceUnit`). `convertDistance`, `lightTime` (s / min /
 h / d) and `formatDistance` render the shared readout "5.37 au · light-time
 45 min"; the host passes translated unit symbols and the light-time phrase, and
 optionally `millionWord` so ly and pc from a million read "53.8 million ly", and
@@ -66,6 +70,13 @@ optionally `millionWord` so ly and pc from a million read "53.8 million ly", and
 reads "18,000 pc"). `formatDistanceRange` prints a span with the unit once ("2.1–3.3 au").
 `AU_LIGHT_SECONDS`, `LIGHT_YEAR_AU`, `PARSEC_AU` and `PARSEC_KM` derive from the
 exact definitions.
+
+## Cosmology (`cosmology.ts`)
+
+`FlatLcdm` is H₀ (km/s/Mpc) and Ωm of a flat ΛCDM universe; `PLANCK_2018` holds the
+Planck 2018 VI values (H₀ 67.66, Ωm 0.3111). `hubbleTimeGyr(H0)`, `cosmicAgeGyr(a)` (13.79
+Gyr today) and its inverse `scaleFactorAtAge(ageGyr)` take the model as an optional
+argument, so a lab can print its own formula and compute with these.
 
 ## Time (`time.ts`)
 

@@ -3,11 +3,13 @@
  * colour helpers, row-by-row rasterising and polygon coverage.
  */
 import { fbm3, smoothstep as smooth, wrapSigned } from "../../math/index";
+import { RAD_PER_DEG } from "../../science/constants";
 
 export type Rgb = readonly [number, number, number];
 export type Painter = (p: Point) => Rgb;
 
-export const RAD = Math.PI / 180;
+/** Radians per degree, for painters; the science kit's constant. */
+export const RAD = RAD_PER_DEG;
 
 /**
  * The surface point being painted; one object reused for every texel.

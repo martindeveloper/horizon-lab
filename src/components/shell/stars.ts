@@ -3,14 +3,12 @@
  * positions of the shared bright-star catalogue (`@/lib/stars`).
  */
 import { STARS, type Star } from "@/lib/stars";
-import { AU_KM } from "@horizon/toolkit/science";
+import { AU_KM, RAD_PER_DEG as RAD } from "@horizon/toolkit/science";
 
 export { STARS, starColor, type Star } from "@/lib/stars";
 
 /** Ondřejov Observatory, Czech Academy of Sciences. */
 export const OBSERVER = { name: "Ondřejov Observatory", latitude: 49.9138, longitude: 14.7822 };
-
-const RAD = Math.PI / 180;
 
 /** Greenwich mean sidereal time in degrees (Meeus, eq. 12.4). */
 export function siderealTime(date: Date, longitude: number) {

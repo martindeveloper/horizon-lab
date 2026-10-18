@@ -35,7 +35,7 @@ import {
   photonOrbit,
   rainClockRate,
 } from "../src/features/black-hole/lib/equations.ts";
-import { CATALOGUE } from "../src/features/orrery/lib/model/catalogue.ts";
+import { CATALOGUE } from "../src/features/orrery/lib/model/catalogue/index.ts";
 import {
   ORRERY_EQUATIONS,
   galacticAngle,
@@ -147,7 +147,7 @@ test("every equation a document references exists and prints for the UI and LaTe
 });
 
 test("figures quoted in the orrery copy come from the constants", () => {
-  const sun = CATALOGUE.sun.sun.facts;
+  const sun = CATALOGUE.sun.sun;
   near(sun.au.value / 1e6, 149.6, 0.01);
   near(sun.auLightTime.value / 60, 8.317, 0.001);
   assert.equal(sun.radius.value, 695_700);

@@ -3,11 +3,10 @@
  * the scene frame (frames.ts). Each formula is written once with
  * `defineEquation`, so a lab computes with it and prints the same object.
  */
-import { defineEquation, keplerThirdLaw } from "../science";
+import { defineEquation, keplerThirdLaw, RAD_PER_DEG as RAD } from "../science";
 import type { Vec3 } from "./frames";
 
 const TAU = Math.PI * 2;
-const RAD = Math.PI / 180;
 
 /** JPL approximate elements: each one drifts linearly with time. */
 export const secularElement = defineEquation({

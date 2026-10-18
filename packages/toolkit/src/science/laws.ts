@@ -1,4 +1,4 @@
-import { CONSTANTS } from "./constants";
+import { CONSTANTS, RAD_PER_DEG } from "./constants";
 import { defineEquation } from "./equation";
 import { UNITS } from "./units";
 
@@ -105,6 +105,68 @@ export const tangentialVelocity = defineEquation({
   compute: ({ mu, d }) => (mu * UNITS["arcsec/yr"].factor * d * UNITS.pc.factor) / 1e3,
 });
 
+/**
+ * Angle between two directions on the sky (right ascension and declination, or any
+ * longitude and latitude), by the haversine form, which stays accurate for small angles.
+ */
+export const angularSeparation = defineEquation({
+  id: "angular-separation",
+  text: "θ = 2 asin √(sin²(Δδ/2) + cos δ₁ cos δ₂ sin²(Δα/2))",
+  latex:
+    "\\theta = 2 \\arcsin \\sqrt{\\sin^2\\tfrac{\\Delta\\delta}{2} + \\cos\\delta_1 \\cos\\delta_2 \\sin^2\\tfrac{\\Delta\\alpha}{2}}",
+  output: "theta",
+  variables: {
+    ra1: { symbol: "α₁", latex: "\\alpha_1", unit: "deg" },
+    dec1: { symbol: "δ₁", latex: "\\delta_1", unit: "deg" },
+    ra2: { symbol: "α₂", latex: "\\alpha_2", unit: "deg" },
+    dec2: { symbol: "δ₂", latex: "\\delta_2", unit: "deg" },
+    theta: { symbol: "θ", latex: "\\theta", unit: "deg" },
+  },
+  compute: ({ ra1, dec1, ra2, dec2 }) => {
+    const h =
+      Math.sin(((dec2 - dec1) * RAD_PER_DEG) / 2) ** 2 +
+      Math.cos(dec1 * RAD_PER_DEG) *
+        Math.cos(dec2 * RAD_PER_DEG) *
+        Math.sin(((ra2 - ra1) * RAD_PER_DEG) / 2) ** 2;
+    return (2 * Math.asin(Math.sqrt(Math.min(1, h)))) / RAD_PER_DEG;
+  },
+  source: "Sinnott 1984, Sky & Telescope 68, 159",
+});
+
+/**
+ * Where a mean-motion resonance with a planet sits: Kepler's third law for an orbit
+ * whose period is `k` times the planet's (¼ for Jupiter's 4:1 Kirkwood gap, 3/2 for
+ * Neptune's plutinos).
+ */
+export const resonanceSemiMajorAxis = defineEquation({
+  id: "resonance-semi-major-axis",
+  text: "a = a_p k^(2/3),  k = P / P_p",
+  latex: "a = a_p\\,k^{2/3}, \\quad k = P / P_p",
+  output: "a",
+  variables: {
+    ap: { symbol: "a_p", latex: "a_p", unit: "au" },
+    k: { symbol: "k", latex: "k" },
+    a: { symbol: "a", latex: "a", unit: "au" },
+  },
+  compute: ({ ap, k }) => ap * k ** (2 / 3),
+  source: "Kepler, Harmonices Mundi (1619)",
+});
+
+/** Hubble's law: the distance of a galaxy receding at v in the smooth expansion. */
+export const hubbleLaw = defineEquation({
+  id: "hubble-law",
+  text: "d = v / H₀",
+  latex: "d = \\frac{v}{H_0}",
+  output: "d",
+  variables: {
+    v: { symbol: "v", latex: "v", unit: "km/s" },
+    H0: { symbol: "H₀", latex: "H_0" },
+    d: { symbol: "d", latex: "d", unit: "Mpc" },
+  },
+  compute: ({ v, H0 }) => v / H0,
+  source: "Hubble 1929, PNAS 15, 168; Lemaître 1927",
+});
+
 export const LAWS = {
   pythagoras,
   keplerThirdLaw,
@@ -113,4 +175,7 @@ export const LAWS = {
   parallaxDistance,
   geometricMassTime,
   tangentialVelocity,
+  angularSeparation,
+  resonanceSemiMajorAxis,
+  hubbleLaw,
 };

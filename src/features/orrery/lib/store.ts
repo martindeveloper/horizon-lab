@@ -3,7 +3,7 @@ import { create } from "zustand";
 import type { NamedId, PlanetId } from "@horizon/toolkit/bodies";
 import type { OrbitTurn } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import type { DistanceUnit } from "@horizon/toolkit/science";
+import type { DistanceChoice, DistanceUnit } from "@horizon/toolkit/science";
 
 import { viewFromPath } from "../routing";
 import type { NeighbourId } from "./model/neighbours";
@@ -97,7 +97,8 @@ export type OrreryStore = {
   panel: Panel;
   show: Show;
   /** Unit for every distance readout: labels, cards and the scale bar. */
-  distanceUnit: DistanceUnit;
+  /** The visitor's readout unit; `auto` picks au or ly by each distance's size. */
+  distanceUnit: DistanceChoice;
   guideOpen: boolean;
   guideStep: number;
   ready: boolean;
@@ -106,6 +107,8 @@ export type OrreryStore = {
   viewRealm: Realm;
   scalePx: number;
   scaleValue: number;
+  /** The unit the scale bar reads in (the choice, resolved for the bar's length). */
+  scaleUnit: DistanceUnit;
   driftRate: number;
   /** Years the Motion switch has advanced the real clock, published by the engine. */
   driftYears: number;
@@ -122,7 +125,7 @@ export type OrreryStore = {
   toggleSolarActivity: () => void;
   toggleSolarActivityPaused: () => void;
   patchShow: (patch: Partial<Show>) => void;
-  setDistanceUnit: (unit: DistanceUnit) => void;
+  setDistanceUnit: (unit: DistanceChoice) => void;
   setPanel: (panel: Panel) => void;
   setReady: (ready: boolean) => void;
   startGuide: () => void;
@@ -176,7 +179,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   ...SUN_ACTIVITY_OFF,
   panel: "none",
   show: DEFAULT_SHOW,
-  distanceUnit: "au",
+  distanceUnit: "auto",
   guideOpen: false,
   guideStep: 0,
   ready: false,
@@ -184,6 +187,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   viewRealm: "solar",
   scalePx: 120,
   scaleValue: 10,
+  scaleUnit: "au",
   driftRate: 2.5,
   driftYears: 0,
   /* Close-up maps show today's surfaces, so leaving the present ends a close-up. */

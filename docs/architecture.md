@@ -58,7 +58,7 @@ src/
         views.ts               Camera views and along-orbit drift by scale
         neighbours.ts          Nearest stars on straight-line tracks (Gaia astrometry)
         tour.ts                Guide steps and their flights
-        catalogue.ts           Every figure a card prints: value, unit, range, source
+        catalogue/             Every figure a card prints: value or span, unit, source, status
         parameters.ts, equations.ts, figures.ts, model-check.ts
       lib/graphics/            three.js building blocks: looks.ts (textures, materials),
                                sky.ts, galaxy.ts, cosmos.ts, swarms.ts, moons.ts, coordinates.ts,
@@ -91,7 +91,7 @@ packages/toolkit/
   package.json                 Explicit subpath exports, no root barrel
   src/ui/                      Domain-free controls, dialog, loading and tokens
   src/math/                    Scalar interpolation, log-scale controls, seeded random, value noise
-  src/science/                 Physical constants and display-scale selection
+  src/science/                 Constants, units, shared laws, flat-ΛCDM cosmology, readouts
   src/camera/                  Per-instance projection, orbit input and flights
   src/rendering/               Shader pass, engine host, frame loop, sizing and disposal
   src/shaders/                 Reusable GLSL snippets and assembly
@@ -355,16 +355,19 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   "One lap in {galacticYearMyr} million years". The orrery's `lib/model/figures.ts`
   supplies them (rounded for print); pass them to `t()` and, for technical prose,
   as `values` to `SimulationTechnicalDetails`.
-- **Card figures come from a catalogue.** The orrery's `lib/model/catalogue.ts` holds
-  every number a selection card prints, literature values included: value, a unit of
-  the science kit, optional range, significant figures and a source id. It references
-  model constants and toolkit bodies instead of copying them, and derives what follows
-  from physics (Kepler's third law, the parallax law, light-time) with the kit's
-  equations. Messages keep only the words ("About {value} galaxies"); `quantity()` in
-  `components/format.ts` prints lengths in the visitor's distance unit through
-  `formatDistance`. `npm run docs:catalogue` writes the catalogue and its sources into
+- **Card figures come from a catalogue.** The orrery's `lib/model/catalogue/` holds every
+  number a selection card prints, literature values included: a value or a published span
+  (never an invented midpoint), a unit of the science kit, the unit the copy words it in
+  (`show`), significant figures, a source id and a required status. It references model
+  constants and toolkit bodies instead of copying them, and derives what follows from
+  physics (Kepler's third law, the parallax law, angular separation, light-time) with the
+  kit's laws. Messages keep only the words ("About {value} galaxies"); `figure`, `span` and
+  `figureAt` (figures that follow the slider) in `components/format.ts` print them, lengths
+  through `formatDistance` in the visitor's unit, large numbers in words ("6.5 billion").
+  The default unit is `auto`: au below half a light-year, ly beyond.
+  `npm run docs:catalogue` writes the catalogue and its sources into
   `docs/science-sources.md`; `tests/orrery-catalogue.test.mjs` checks sources, units,
-  rendering in both languages and that card copy types no digits.
+  statuses, rendering in both languages and that card copy types no digits.
 - Shader-only steps, vector rotations and sampling recipes stay as plain text in
   `technical.json`.
 - **Shaders type no numbers either.** A lab's shader parameters live in its

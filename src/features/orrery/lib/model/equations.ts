@@ -6,6 +6,8 @@ import {
   lightTravelTime,
   tangentialVelocity,
   type Formula,
+  RAD_PER_DEG as RAD,
+  formatNumber,
 } from "@horizon/toolkit/science";
 
 import { localGroupOrbit, scaleFactor } from "./cosmos";
@@ -38,9 +40,8 @@ import {
  */
 
 const TAU = Math.PI * 2;
-const RAD = Math.PI / 180;
 /** Numbers inside printed formulas: "27,000", "4.567". */
-const n = (value: number) => value.toLocaleString("en", { maximumFractionDigits: 3 });
+const n = (value: number) => formatNumber(value, "en", 3);
 const gyr = (years: number) => n(years / 1e9);
 const myr = (years: number) => n(years / 1e6);
 

@@ -1,5 +1,6 @@
 /** Sky catalog for the atlas. Epoch J2000. Positions as of 2026. */
 import { keysOf } from "@/lib/records";
+import { RAD_PER_DEG as DEG } from "@horizon/toolkit/science";
 
 export type AtlasKind = "hole" | "body" | "extragalactic" | "lab";
 
@@ -309,7 +310,6 @@ export type ArmFit = {
 
 /** The fit assumes R0 = 8.15 kpc; radii are rescaled to this map's R0. */
 const FIT_R0_KPC = 8.15;
-const DEG = Math.PI / 180;
 
 export function armPoint(fit: ArmFit, betaDeg: number): { x: number; y: number } {
   const psi = betaDeg < fit.betaKink ? fit.psiBefore : fit.psiAfter;

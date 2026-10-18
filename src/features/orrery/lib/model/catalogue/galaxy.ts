@@ -1,0 +1,187 @@
+/** The Milky Way and the Sun's orbit in it, from the model's parameters. */
+import { convert } from "@horizon/toolkit/science";
+
+import {
+  ARM_PITCH_DEG,
+  ARM_START_KPC,
+  BAR_ANGLE_DEG,
+  GALACTIC_YEAR,
+  RADIAL_AMPLITUDE_LY,
+  RADIAL_PERIOD,
+  SUN_BIRTH,
+  SUN_GALACTIC_RADIUS_LY,
+  SUN_HEIGHT_LY,
+  VERTICAL_AMPLITUDE_LY,
+  VERTICAL_PERIOD,
+} from "../parameters";
+import type { Facts, Value } from "./types";
+
+/** The Sun's distance from the Galactic centre: the model's R₀. */
+const sunToCentre: Value = {
+  value: SUN_GALACTIC_RADIUS_LY,
+  unit: "ly",
+  digits: 3,
+  source: "gravity2021",
+  status: "verified",
+  note: "8.28 kpc; GRAVITY 8.275–8.277 kpc",
+};
+const barAngle: Value = {
+  value: BAR_ANGLE_DEG,
+  unit: "deg",
+  source: "wegg2015",
+  status: "verified",
+  note: "28–33°",
+};
+
+export const GALAXY = {
+  sun: {
+    centre: sunToCentre,
+    lap: {
+      value: GALACTIC_YEAR,
+      unit: "yr",
+      show: "Myr",
+      range: [205e6, 230e6],
+      source: "eilers2019",
+      status: "derived",
+      note: "2πR₀/Θ₀: 222 Myr at 229 km/s (Eilers 2019), 206 Myr at 247 km/s (Reid 2019)",
+    },
+    laps: {
+      value: SUN_BIRTH / GALACTIC_YEAR,
+      unit: "count",
+      digits: 2,
+      source: "eilers2019",
+      status: "derived",
+      note: "the Sun's age over the galactic year",
+    },
+    circularSpeed: {
+      value: 230,
+      unit: "km/s",
+      source: "eilers2019",
+      status: "verified",
+      note: "229.0 km/s",
+    },
+    sunSpeed: {
+      value: 250,
+      unit: "km/s",
+      source: "reid2019",
+      status: "verified",
+      note: "247 ± 4 km/s",
+    },
+    radialSwing: {
+      value: 2 * RADIAL_AMPLITUDE_LY,
+      unit: "ly",
+      digits: 2,
+      source: "bovy2017",
+      status: "derived",
+      note: "twice the ~0.5 kpc epicycle amplitude",
+    },
+    radialPeriod: {
+      value: RADIAL_PERIOD,
+      unit: "yr",
+      show: "Myr",
+      source: "bovy2017",
+      status: "derived",
+      note: "κ = 36.0 km/s/kpc → 171 Myr",
+    },
+    verticalAmplitude: {
+      value: VERTICAL_AMPLITUDE_LY,
+      unit: "ly",
+      digits: 2,
+      source: "blandHawthorn2016",
+      status: "derived",
+      note: "ρ₀ = 0.097 M☉/pc³; √(20.8² + (W/ν)²) = 102 pc",
+    },
+    verticalPeriod: {
+      value: VERTICAL_PERIOD,
+      unit: "yr",
+      show: "Myr",
+      source: "blandHawthorn2016",
+      status: "derived",
+      note: "84.8 Myr",
+    },
+    height: {
+      value: SUN_HEIGHT_LY,
+      unit: "ly",
+      source: "bennettBovy2019",
+      status: "verified",
+      note: "20.8 ± 0.3 pc",
+    },
+  },
+  bulge: {
+    centre: sunToCentre,
+    bar: {
+      value: convert(2 * ARM_START_KPC, "kpc", "ly"),
+      unit: "ly",
+      range: [convert(7, "kpc", "ly"), convert(10, "kpc", "ly")],
+      digits: 2,
+      source: "lucey2023",
+      status: "verified",
+      note: "twice the 4.3 kpc half-length; estimates 7–10 kpc end to end",
+    },
+    barAngle,
+    blackHole: { value: 4e6, unit: "Msun", source: "gravity2022", status: "verified" },
+  },
+  halo: {
+    width: {
+      value: 1,
+      unit: "Mly",
+      digits: 1,
+      source: "blandHawthorn2016",
+      status: "derived",
+      note: "R₂₀₀ ≈ 200 kpc: 1.3–1.8 Mly across",
+    },
+  },
+  milkyway: {
+    diskWidth: {
+      value: 100_000,
+      unit: "ly",
+      digits: 1,
+      source: "nasaMilkyWay",
+      status: "verified",
+    },
+    thickness: {
+      value: 1_000,
+      unit: "ly",
+      digits: 1,
+      source: "blandHawthorn2016",
+      status: "verified",
+      note: "thin-disk scale height 300 pc",
+    },
+    stars: {
+      value: 100e9,
+      unit: "count",
+      source: "nasaMilkyWay",
+      status: "verified",
+      note: "lower bound",
+    },
+    age: {
+      value: 13.6,
+      unit: "Gyr",
+      source: "pasquini2004",
+      status: "derived",
+      note: "13.4 Gyr halo age plus 0.2–0.3 Gyr",
+    },
+    barAngle,
+    armPitch: {
+      value: ARM_PITCH_DEG,
+      unit: "deg",
+      source: "vallee2017",
+      status: "verified",
+      note: "13.1°",
+    },
+    gaiaEnceladus: {
+      value: 10,
+      unit: "Gyr",
+      range: [8, 11],
+      source: "gaiaEnceladus",
+      status: "verified",
+    },
+    planeTilt: {
+      value: 60,
+      unit: "deg",
+      source: "liu2011",
+      status: "derived",
+      note: "60.19° between the ecliptic and Galactic planes",
+    },
+  },
+} satisfies Record<string, Facts>;

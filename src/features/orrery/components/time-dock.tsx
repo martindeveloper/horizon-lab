@@ -2,7 +2,12 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
-import { DISTANCE_UNITS, formatReadout, type DistanceUnit } from "@horizon/toolkit/science";
+import {
+  DISTANCE_UNITS,
+  convert,
+  formatReadout,
+  type DistanceChoice,
+} from "@horizon/toolkit/science";
 import { Dock, IconButton, SegmentedControl, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { scaleAt } from "../lib/model/cosmos";
@@ -56,7 +61,7 @@ export function TimeDock() {
                 });
   const offset =
     driftYears < 1
-      ? t("time.offsetDays", { value: Math.max(1, Math.round(driftYears * 365.25)) })
+      ? t("time.offsetDays", { value: Math.max(1, Math.round(convert(driftYears, "yr", "d"))) })
       : Math.round(driftYears) < 1000
         ? t("time.offsetYears", { value: Math.round(driftYears) })
         : t("time.offsetThousand", {
@@ -214,7 +219,7 @@ function ScaleBar() {
   const locale = useLocale();
   const scalePx = useOrrery((s) => s.scalePx);
   const scaleValue = useOrrery((s) => s.scaleValue);
-  const unit = useOrrery((s) => s.distanceUnit);
+  const unit = useOrrery((s) => s.scaleUnit);
   /* Millions read as words, not powers of ten: "200 million ly". */
   const millions = scaleValue >= 1e6;
   const number = formatReadout(millions ? scaleValue / 1e6 : scaleValue, locale);
@@ -237,16 +242,18 @@ function ScaleBar() {
   );
 }
 
+const CHOICES: readonly DistanceChoice[] = ["auto", ...DISTANCE_UNITS];
+
 function DistanceUnits({ className }: { className?: string }) {
   const t = useTranslations("orrery");
   const unit = useOrrery((s) => s.distanceUnit);
   return (
-    <SegmentedControl<DistanceUnit>
+    <SegmentedControl<DistanceChoice>
       aria-label={t("hud.distanceUnit")}
       className={cn("shrink-0 gap-2", className)}
       value={unit}
       onValueChange={(next) => useOrrery.getState().setDistanceUnit(next)}
-      options={DISTANCE_UNITS.map((value) => ({ value, label: t(`units.${value}`) }))}
+      options={CHOICES.map((value) => ({ value, label: t(`units.${value}`) }))}
     />
   );
 }

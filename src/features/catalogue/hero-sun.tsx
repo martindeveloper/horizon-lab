@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 
 import { moonPosition, OBSERVER, risingHourAngle, sunPosition } from "@/components/shell/stars";
 import { skyNow, skyRunsFast, subscribeDebug } from "@/lib/debug";
+import { RAD_PER_DEG as RAD } from "@horizon/toolkit/science";
 
 /** Highest noon Sun over Ondřejov (summer solstice), in degrees. */
 const PEAK = 64;
@@ -24,7 +25,6 @@ const MOONRISE = 0.125;
 const DIAL_ASPECT = 1.25;
 /** The Moon's circle inside the Sun's, as in the brand mark. */
 const MOON_RING = 0.62;
-const RAD = Math.PI / 180;
 /** A hero mounted later than this after page load arrived by navigation: no intro. */
 const INTRO_WINDOW = 4000;
 

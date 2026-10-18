@@ -33,7 +33,8 @@
   "units": {
     "au": "au",
     "ly": "sv. r.",
-    "pc": "pc"
+    "pc": "pc",
+    "auto": "auto"
   },
   "epochs": {
     "sketch": "Před 10 miliardami let",
@@ -129,7 +130,8 @@
     "greatAttractor": "Velký atraktor",
     "laniakea": "Laniakea",
     "million": "mil.",
-    "localSheet": "Místní list"
+    "localSheet": "Místní list",
+    "billion": "mld."
   },
   "hud": {
     "views": "Pohledy",
@@ -168,7 +170,7 @@
     "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",
     "closeUpPresentOnly": "Pohled zblízka ukazuje dnešní povrchy. Pro přiblížení se vraťte do současnosti.",
     "epochs": "Přejít na období",
-    "distanceUnit": "Jednotka vzdálenosti: astronomické jednotky, světelné roky nebo parseky",
+    "distanceUnit": "Jednotka vzdálenosti: automaticky, astronomické jednotky, světelné roky nebo parseky",
     "cosmosMotion": "Kosmická mapa",
     "cosmosItems": "Za Mléčnou dráhou"
   },
@@ -228,8 +230,8 @@
     "stars": "Hvězdy",
     "proxima": "Proxima Centauri",
     "oortCompare": "Ve srovnání s Oortovým oblakem",
-    "closestFuture": "{distance} za {years} tisíc let",
-    "closestPast": "{distance} před {years} tisíci lety",
+    "closestFuture": "{distance} za {years} let",
+    "closestPast": "{distance} před {years} lety",
     "closest": "Nejtěsnější přiblížení",
     "motion": "Pohyb",
     "direction": "Směr",
@@ -250,16 +252,16 @@
   "cards": {
     "sun": {
       "title": "Slunce",
-      "radius": "{km} km · asi {au} au",
+      "radius": "{km} km · asi {au}",
       "age": "Asi {value} miliardy let",
-      "oneAu": "{millions} milionu km · světlo letí {minutes} min",
+      "oneAu": "{au} km · světlo letí {minutes} min",
       "body": "Slunce obsahuje přes {mass} % hmotnosti sluneční soustavy, ale připadá na něj méně než {spin} % jejího momentu hybnosti. Ten je z větší části spojen s oběžným pohybem planet. Od vzniku Slunce se odvíjí časová osa tohoto modelu. Současné polohy planet počítáme z přibližných dráhových elementů JPL pro aktuální datum.",
       "caution": "Značky těles jsou zvětšené, dokud nezapnete Skutečnou velikost. Průměr Slunce je přibližně {diameters}krát větší než průměr Země, ale v měřítku celé sluneční soustavy i Slunce vypadá jako nepatrný bod."
     },
     "planets": {
       "mercury": "Nejmenší planeta sluneční soustavy. Ze všech osmi planet má dráhu s největší výstředností.",
       "venus": "Venuše má téměř kruhovou dráhu. Rozdíl mezi elipsou a kružnicí tu na pohled téměř nepoznáte.",
-      "earth": "1 au přibližně odpovídá střední vzdálenosti Země od Slunce: {millions} milionu km, tedy {minutes} světelné minuty. Je definována jako přesně {metres} metrů.",
+      "earth": "1 au přibližně odpovídá střední vzdálenosti Země od Slunce: {au} km, tedy {minutes} světelné minuty. Je definována jako přesně {metres} metrů.",
       "mars": "Dráha Marsu je zřetelně protáhlá, ale ve srovnání s Jupiterovou dráhou stále malá.",
       "jupiter": "Jupiter v modelu začíná o něco dále od Slunce a postupně se k němu přibližuje, v souladu se studiemi nestability obřích planet. Počáteční dráha je modelová, nikoli změřená. Jupiter má více než dvojnásobnou hmotnost všech ostatních planet dohromady.",
       "saturn": "Saturn v modelu začíná blíže k Jupiteru než dnes a postupně se vzdaluje od Slunce. Jeho prstence jsou zobrazeny ve stejném měřítku jako planeta. Střední hustota Saturnu je nižší než hustota vody.",
@@ -351,7 +353,7 @@
         "title": "Výduť a příčka",
         "centre": "Asi {value}",
         "bar": "Délka asi {value} (odhady {range}), úhel asi {angle}° vůči spojnici Slunce se středem Galaxie",
-        "body": "Mléčná dráha je spirální galaxie s příčkou. V jejím středu leží výduť tvořená starými hvězdami. Má hranatý tvar připomínající arašíd a při pohledu z boku vykazuje strukturu ve tvaru písmene X. Výduť je součástí delší, tenčí příčky, z jejíchž konců vycházejí spirální ramena. V samotném středu leží Sagittarius A*, černá díra o hmotnosti asi {mass} milionů Sluncí. Rozmístění bodů je schematické a nevychází z katalogu jednotlivých hvězd.",
+        "body": "Mléčná dráha je spirální galaxie s příčkou. V jejím středu leží výduť tvořená starými hvězdami. Má hranatý tvar připomínající arašíd a při pohledu z boku vykazuje strukturu ve tvaru písmene X. Výduť je součástí delší, tenčí příčky, z jejíchž konců vycházejí spirální ramena. V samotném středu leží Sagittarius A*, černá díra o hmotnosti asi {mass} Sluncí. Rozmístění bodů je schematické a nevychází z katalogu jednotlivých hvězd.",
         "caution": "Příčka je zobrazena schematicky; její délku z tohoto pohledu nelze přesně měřit."
       },
       "halo": {
@@ -365,7 +367,7 @@
         "title": "Mléčná dráha",
         "diskWidth": "Řádově {value}",
         "thickness": "Řádově {value}",
-        "stars": "Nejméně {value} miliard",
+        "stars": "Nejméně {value}",
         "age": "Asi {value} miliardy let",
         "body": "Pohled na naši Galaxii zvenčí vychází z měření její stavby: zahrnuje tenký a tlustý disk, výduť uvnitř příčky natočené o {bar}°, čtyři spirální ramena s úhlem vinutí přibližně {pitch}° a krátké Místní rameno, které leží o něco dále od středu než Slunce. Polohy ramen v našem okolí vycházejí z měření vzdáleností maserů. Podél vnitřních okrajů ramen jsou prachové pásy a vnější disk je zvlněný. Podobu odvrácené části Galaxie odhadujeme, protože ji zakrývá oblast středu. Před vznikem Slunce model ukazuje schematickou podobu z doby splynutí s galaxií Gaia-Enceladus, přibližně před {merger} miliardami let: menší galaxii s tlustším, narušeným diskem a méně výraznou příčkou.",
         "caution": "Spirální ramena zde představují hustotní vlny, kterými hvězdy procházejí. Rovina ekliptiky svírá s rovinou Galaxie úhel asi {tilt}°. Mapy sluneční soustavy a Galaxie proto používají odlišné referenční roviny a propojuje je poloha Slunce."
@@ -416,7 +418,7 @@
         "title": "Kupa galaxií v Panně",
         "members": "Asi {value} galaxií (odhady {range})",
         "width": "Asi {value}",
-        "heart": "M87 s černou dírou asi {value} miliardy Sluncí",
+        "heart": "M87 s černou dírou asi {value} Sluncí",
         "body": "Nejbližší velká kupa a srdce naší nadkupy. Nejsme v ní: Místní skupina leží na jejím okraji, přitahovaná k ní, zatímco nás rozpínání stále vzdaluje. Na časové ose se nese s rozpínáním a shromažďuje své členy, jak to kupy dělají.",
         "caution": "Členové jsou nakreslený vzorek ve tvaru kupy, ne katalog; shromažďování je hrubá křivka, ne simulace."
       },

@@ -3,13 +3,13 @@
  * vernal equinox, Y = ecliptic north (up), Z = −y of the right-handed J2000
  * ecliptic frame, so planets run counter-clockwise seen from ecliptic north.
  */
+import { RAD_PER_DEG as RAD } from "../science/constants";
 
 /** A scene-frame vector or point: x, y (ecliptic north), z. */
 export type Vec3 = [x: number, y: number, z: number];
 /** A rotation as quaternion components, three.js order. */
 export type Quat = [x: number, y: number, z: number, w: number];
 
-const RAD = Math.PI / 180;
 /** Mean obliquity of the ecliptic at J2000, degrees. */
 export const J2000_OBLIQUITY_DEG = 23.4392911;
 const COS_OBLIQUITY = Math.cos(J2000_OBLIQUITY_DEG * RAD);

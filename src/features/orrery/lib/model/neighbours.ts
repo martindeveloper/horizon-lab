@@ -3,11 +3,14 @@
  * their measured positions and velocities. Good to a few per cent for about
  * ±300,000 years; beyond that the straight line and the sketch are hidden.
  */
-import { Vector3 } from "three";
-
-import { LIGHT_YEAR_AU, PARSEC_AU, convert, tangentialVelocity } from "@horizon/toolkit/science";
-
-import { equatorialToScene, equatorialFrameToScene } from "../graphics/coordinates";
+import { equatorialFrameToScene, equatorialToScene, type Vec3 } from "@horizon/toolkit/bodies";
+import {
+  LIGHT_YEAR_AU,
+  PARSEC_AU,
+  convert,
+  tangentialVelocity,
+  RAD_PER_DEG as RAD,
+} from "@horizon/toolkit/science";
 
 export type NeighbourId = "proxima" | "alphaCen" | "barnard" | "scholz";
 
@@ -83,7 +86,6 @@ export const NEIGHBOURS: readonly Neighbour[] = [
   },
 ];
 
-const RAD = Math.PI / 180;
 const PC_AU = PARSEC_AU;
 /** 1 km/s is this many au per year. */
 const KMS_AU_YEAR = convert(1, "km/s", "au/yr");
@@ -91,8 +93,11 @@ const KMS_AU_YEAR = convert(1, "km/s", "au/yr");
 /** Within this the straight-line sketch is drawn. */
 export const NEIGHBOUR_WINDOW = 3e5;
 
-type Track = { p0: Vector3; v: Vector3 };
+/** Position today (au) and velocity (au/yr), in the scene frame. */
+type Track = { p0: Vec3; v: Vec3 };
 const tracks = new Map<NeighbourId, Track>();
+
+const dot = (a: Readonly<Vec3>, b: Readonly<Vec3>) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 
 function trackOf(star: Neighbour): Track {
   let track = tracks.get(star.id);
@@ -110,27 +115,34 @@ function trackOf(star: Neighbour): Track {
   );
   /* Proper motions are in mas/yr: km/s per mas/yr at this distance. */
   const vt = tangentialVelocity.compute({ mu: 0.001, d: dPc });
-  const v = new Vector3()
-    .addScaledVector(u, star.rv)
-    .addScaledVector(east, vt * star.pmRa)
-    .addScaledVector(north, vt * star.pmDec)
-    .multiplyScalar(KMS_AU_YEAR);
-  track = { p0: u.multiplyScalar(dPc * PC_AU), v };
+  const axis = (k: 0 | 1 | 2) =>
+    (u[k] * star.rv + east[k] * vt * star.pmRa + north[k] * vt * star.pmDec) * KMS_AU_YEAR;
+  const v: Vec3 = [axis(0), axis(1), axis(2)];
+  track = { p0: [u[0] * dPc * PC_AU, u[1] * dPc * PC_AU, u[2] * dPc * PC_AU], v };
   tracks.set(star.id, track);
   return track;
 }
 
-/** Scene position in AU at `yearsAgo`, straight-line motion. */
-export function neighbourPosition(star: Neighbour, yearsAgo: number, out = new Vector3()) {
+/** Scene position in au at `yearsAgo`, straight-line motion. */
+export function neighbourPosition(star: Neighbour, yearsAgo: number, out: Vec3 = [0, 0, 0]): Vec3 {
   const { p0, v } = trackOf(star);
-  return out.copy(p0).addScaledVector(v, -yearsAgo);
+  out[0] = p0[0] - v[0] * yearsAgo;
+  out[1] = p0[1] - v[1] * yearsAgo;
+  out[2] = p0[2] - v[2] * yearsAgo;
+  return out;
 }
 
 export function neighbourDistanceLy(star: Neighbour, yearsAgo: number) {
-  const { p0, v } = trackOf(star);
-  return (
-    Math.hypot(p0.x - v.x * yearsAgo, p0.y - v.y * yearsAgo, p0.z - v.z * yearsAgo) / LIGHT_YEAR_AU
-  );
+  const p = neighbourPosition(star, yearsAgo, scratch);
+  return Math.hypot(p[0], p[1], p[2]) / LIGHT_YEAR_AU;
+}
+const scratch: Vec3 = [0, 0, 0];
+
+/** Separation of two neighbours at a moment, au. */
+export function neighbourSeparationAu(a: Neighbour, b: Neighbour, yearsAgo: number) {
+  const p = neighbourPosition(a, yearsAgo);
+  const q = neighbourPosition(b, yearsAgo);
+  return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
 }
 
 /** The nearest of the four at a moment. */
@@ -150,9 +162,9 @@ export function nearestNeighbour(yearsAgo: number) {
 /** Closest approach of the straight-line track: distance in light-years and when (years ago; negative is future). */
 export function closestApproach(star: Neighbour) {
   const { p0, v } = trackOf(star);
-  const t = p0.dot(v) / v.lengthSq();
-  const p = new Vector3().copy(p0).addScaledVector(v, -t);
-  return { ly: p.length() / LIGHT_YEAR_AU, yearsAgo: t };
+  const t = dot(p0, v) / dot(v, v);
+  const p = neighbourPosition(star, t);
+  return { ly: Math.hypot(p[0], p[1], p[2]) / LIGHT_YEAR_AU, yearsAgo: t };
 }
 
 export function neighboursSelfCheck(): string[] {

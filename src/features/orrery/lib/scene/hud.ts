@@ -1,5 +1,5 @@
 /** The HUD readouts the engine publishes a few times a second: scale bar, realm, drift rate. */
-import { convertDistance } from "@horizon/toolkit/science";
+import { convertDistance, resolveDistanceUnit } from "@horizon/toolkit/science";
 
 import { driftYearsPerSecond, viewById, viewForDistance, type Realm } from "../model/views";
 import type { useOrrery } from "../store";
@@ -40,8 +40,11 @@ export function createHud(store: typeof useOrrery, viewport: Viewport) {
       const s = store.getState();
       const worldPerPx = (2 * Math.tan((FOV * Math.PI) / 360) * dist) / Math.max(1, height);
       /* World units are au (solar) or ly (beyond); the bar is a round number in the visitor's unit. */
-      const perWorld = convertDistance(1, realm === "solar" ? "au" : "ly", s.distanceUnit);
-      const nice = niceNumber(worldPerPx * perWorld * Math.min(150, width * 0.36));
+      const world = realm === "solar" ? "au" : "ly";
+      const span = worldPerPx * Math.min(150, width * 0.36);
+      const unit = resolveDistanceUnit(s.distanceUnit, convertDistance(span, world, "au"));
+      const perWorld = convertDistance(1, world, unit);
+      const nice = niceNumber(span * perWorld);
       const px = Math.round(Math.max(44, Math.min(140, width * 0.4, nice / perWorld / worldPerPx)));
       const rate = view.drift ? driftYearsPerSecond(dist, realm) : 0;
       const nextView = view.syncView ? viewForDistance(dist, realm) : s.view;
@@ -60,6 +63,7 @@ export function createHud(store: typeof useOrrery, viewport: Viewport) {
         s.view !== nextView ||
         s.viewRealm !== realm ||
         s.scaleValue !== nice ||
+        s.scaleUnit !== unit ||
         s.scalePx !== px ||
         s.driftRate !== rate ||
         s.driftYears !== drifted
@@ -70,6 +74,7 @@ export function createHud(store: typeof useOrrery, viewport: Viewport) {
           viewRealm: realm,
           scalePx: px,
           scaleValue: nice,
+          scaleUnit: unit,
           driftRate: rate,
           driftYears: drifted,
         });
