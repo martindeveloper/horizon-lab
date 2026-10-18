@@ -214,7 +214,7 @@ function lit(map: Texture, look: Surface, defines?: Record<string, string>) {
  */
 const SURFACES: Record<PlanetId | NamedId | MoonId, Surface> = {
   mercury: { minnaert: 0.58 },
-  venus: { atmos: ["#f4ecd2", 0.35], minnaert: 0.75 },
+  venus: { atmos: ["#f4ecd2", 0.35], minnaert: 0.9 },
   earth: { atmos: ["#7fb2ff", 0.7], minnaert: 0.9, glint: [0.3, 28] },
   mars: { atmos: ["#e8c4a4", 0.1], minnaert: 0.8 },
   jupiter: { atmos: ["#efe2c8", 0.08], minnaert: 0.95 },
@@ -239,7 +239,7 @@ const SURFACES: Record<PlanetId | NamedId | MoonId, Surface> = {
 const MAP_SIZE: Record<BodyId, number> = {
   sun: 128,
   mercury: 256,
-  venus: 128,
+  venus: 256,
   earth: 384,
   mars: 256,
   jupiter: 384,
@@ -247,14 +247,14 @@ const MAP_SIZE: Record<BodyId, number> = {
   uranus: 128,
   neptune: 128,
   pluto: 256,
-  sedna: 64,
-  halley: 64,
+  sedna: 128,
+  halley: 128,
   moon: 256,
   io: 128,
   europa: 128,
   ganymede: 128,
   callisto: 128,
-  titan: 128,
+  titan: 256,
   triton: 128,
   charon: 128,
 };

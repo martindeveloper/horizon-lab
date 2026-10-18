@@ -147,4 +147,24 @@ The [JPL Venus texture](https://space.jpl.nasa.gov/tmaps/venus.html) explicitly
 clones a Mariner image and labels it fictitious; it is not a measured global map.
 Sedna has no resolved surface imagery. Halley's partial Giotto flyby views of
 an irregular nucleus are not a global spherical texture. These four bodies
-remain illustrations; generated maps also remain temporary load/error fallbacks.
+remain illustrations built from published physical constraints; generated maps
+also remain temporary load/error fallbacks:
+
+- **Venus**: H₂SO₄ cloud deck (`p_V = 0.689`) with the planetary-scale horizontal
+  Y (ψ) wave, chevron-sheared mid-latitude streaks from 4-day westward
+  super-rotation and Hadley flow, dark subpolar collars (~50–62°) and bright
+  polar hoods (>64°), with contrast concentrated in the blue/violet absorber
+  wing (Titov et al. 2018, _Space Sci. Rev._ 214, 126).
+- **Titan**: Photochemical tholin haze (`p_V = 0.22`) with super-rotational
+  zonal smoothness, the seasonal north–south hemispheric albedo dichotomy,
+  faint equatorial boundary band, and dark north-polar hood and vortex collar
+  (Porco et al. 2005; Lorenz et al. 2004; Roman et al. 2009).
+- **Sedna**: Ultra-red organic tholin mantle (`p_V = 0.32`, Pál et al. 2012)
+  with brighter CH₄/N₂ volatile frost in high-latitude cold traps and ancient
+  basins (Barucci et al. 2005; Emery et al. 2007), balanced across all four
+  longitude quadrants to respect the small rotational light-curve amplitude
+  (`Δm ≈ 0.02 mag`, Gaudi et al. 2005).
+- **Halley**: Soot-dark refractory CHON/silicate lag crust (`p_V = 0.04`),
+  central saddle waist, mapped Giotto HMC topography (Crater, Mountain, Chain,
+  Ducktail) and localized active outgassing vents covering ~10–15 % of the
+  surface (Keller et al. 1986, 1987; Stooke & Abergel 1991).

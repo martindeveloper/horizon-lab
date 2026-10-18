@@ -75,8 +75,7 @@ export function sampleCloseUp(t: number, from: OrbitPose, to: OrbitPose, enterin
 
 /** Width of the detailed map painted for a close-up; nearly featureless bodies need less. */
 export function closeUpMapWidth(id: BodyId, light: boolean) {
-  const plain = id === "venus" || id === "uranus" || id === "neptune" || id === "sedna";
-  if (id === "halley") return 256;
-  if (plain || id === "sun") return light ? 512 : 1024;
+  const plain = id === "uranus" || id === "neptune" || id === "sun";
+  if (plain) return light ? 512 : 1024;
   return light ? 1024 : 2048;
 }

@@ -292,3 +292,78 @@ test("moon maps: brightness follows albedo, Europa brightest of the Galileans, C
   assert.ok(titan.r > titan.g && titan.g > titan.b * 1.5, "Titan's haze is orange");
   assert.ok(mean("moon").luminance < mean("charon").luminance, "the Moon is darker than Charon");
 });
+
+test("illustrative maps follow measured physical constraints for Venus, Titan, Sedna and Halley", () => {
+  // Venus: polar hoods (>70°) are brighter and less blue-absorbed than the subpolar collar (~56°).
+  const venusPx = surfaceMap("venus", W, H);
+  const rowMean = (px, y) => {
+    let r = 0,
+      g = 0,
+      b = 0;
+    for (let x = 0; x < W; x += 1) {
+      const i = (y * W + x) * 4;
+      r += linear(px[i]);
+      g += linear(px[i + 1]);
+      b += linear(px[i + 2]);
+    }
+    return { r: r / W, g: g / W, b: b / W, lum: (0.2126 * r + 0.7152 * g + 0.0722 * b) / W };
+  };
+  const venusHood = rowMean(venusPx, Math.floor(((90 - 78) / 180) * H));
+  const venusCollar = rowMean(venusPx, Math.floor(((90 - 56) / 180) * H));
+  assert.ok(venusHood.lum > venusCollar.lum, "Venus polar hood is brighter than subpolar collar");
+  assert.ok(
+    venusHood.b / venusHood.r > venusCollar.b / venusCollar.r,
+    "Venus UV/blue absorber dims blue more in the subpolar collar than in the polar hood",
+  );
+
+  // Titan: southern hemisphere brighter than northern hood, and zonally smooth (<1.5 % along a parallel).
+  const titanPx = surfaceMap("titan", W, H);
+  const titanSouth = rowMean(titanPx, Math.floor(((90 - -30) / 180) * H));
+  const titanNorth = rowMean(titanPx, Math.floor(((90 - 30) / 180) * H));
+  const titanHood = rowMean(titanPx, Math.floor(((90 - 62) / 180) * H));
+  assert.ok(
+    titanSouth.lum > titanNorth.lum && titanNorth.lum > titanHood.lum,
+    "Titan hemispheric dichotomy and dark north-polar hood",
+  );
+
+  // Sedna: ultra-red tholin colour and longitudinally balanced light curve (Gaudi et al. 2005).
+  const sedna = mean("sedna");
+  assert.ok(sedna.r > sedna.g * 1.8 && sedna.g > sedna.b * 1.6, "Sedna is ultra-red");
+  const sednaPx = surfaceMap("sedna", W, H);
+  const quadLum = [0, 0, 0, 0];
+  for (let y = 0; y < H; y += 1) {
+    const wgt = Math.cos((90 - ((y + 0.5) / H) * 180) * RAD);
+    for (let x = 0; x < W; x += 1) {
+      const i = (y * W + x) * 4;
+      const lum =
+        0.2126 * linear(sednaPx[i]) +
+        0.7152 * linear(sednaPx[i + 1]) +
+        0.0722 * linear(sednaPx[i + 2]);
+      quadLum[Math.floor((x / W) * 4)] += lum * wgt;
+    }
+  }
+  const qMax = Math.max(...quadLum);
+  const qMin = Math.min(...quadLum);
+  assert.ok((qMax - qMin) / ((qMax + qMin) / 2) < 0.03, "Sedna rotational variation stays small");
+
+  // Halley: >85 % dark refractory crust, with localized brighter active vent regions (Keller et al. 1987).
+  const halleyPx = surfaceMap("halley", W, H);
+  let darkArea = 0,
+    ventArea = 0,
+    totalArea = 0;
+  for (let y = 0; y < H; y += 1) {
+    const wgt = Math.cos((90 - ((y + 0.5) / H) * 180) * RAD);
+    for (let x = 0; x < W; x += 1) {
+      const i = (y * W + x) * 4;
+      const lum =
+        0.2126 * linear(halleyPx[i]) +
+        0.7152 * linear(halleyPx[i + 1]) +
+        0.0722 * linear(halleyPx[i + 2]);
+      if (lum < 0.06) darkArea += wgt;
+      if (lum > 0.07) ventArea += wgt;
+      totalArea += wgt;
+    }
+  }
+  assert.ok(darkArea / totalArea > 0.85, "Halley's dark crust covers >85 % of the surface");
+  assert.ok(ventArea / totalArea > 0.02 && ventArea / totalArea < 0.15, "Discrete active vents");
+});

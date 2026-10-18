@@ -1,6 +1,6 @@
 /** The Sun, the terrestrial planets and the named small bodies. */
 import { smoothstep as smooth } from "../../math/index";
-import { RAD, fbm, mix, scale, spot, type Painter } from "./raster";
+import { RAD, dLon, fbm, fbmAt, mix, ridge, scale, spot, type Painter } from "./raster";
 
 /** Neutral loading/offline fallback. The measured HMI mosaic supplies the Sun's detail. */
 export const sun: Painter = () => [231, 231, 231];
@@ -18,12 +18,39 @@ export const mercury: Painter = (p) => {
   return scale([144, 136, 126], v);
 };
 
-/** Venus: the cloud deck in visible light, pale yellowish white with faint banding. */
+/**
+ * Venus: the cloud deck in visible light (Mariner 10, Pioneer Venus, MESSENGER,
+ * Akatsuki; Titov et al. 2018, SSRv 214, 126). Westward 4-day super-rotation
+ * and poleward Hadley flow shear the near-UV/blue absorber into a horizontal
+ * Y (ψ) wave, swept-back chevrons, dark subpolar collars (~56°) and bright,
+ * absorber-depleted polar hoods (>64°). In human-eye wavelengths the absorber's
+ * long-wave wing dims blue more than red, giving subtle cream-to-ochre contrast.
+ */
 export const venus: Painter = (p) => {
-  const { lat } = p;
-  const n = fbm(p, 3, 10, 4, 5);
-  const band = Math.sin(lat * RAD * 9 + n * 4) * 0.025;
-  return scale([248, 238, 212], 0.97 + band + (n - 0.5) * 0.05);
+  const { lon, lat } = p;
+  const a = Math.abs(lat);
+  const shear = (lat / 36) ** 2;
+  const c = Math.cos(shear * 0.85);
+  const s = Math.sin(shear * 0.85);
+  const sx = p.x * c - p.z * s;
+  const sz = p.x * s + p.z * c;
+  const streaks = fbmAt(sx, p.y, sz, 2.5, 14, 4 + p.detail, 5);
+  const ripples = fbmAt(sx, p.y, sz, 9, 24, 3 + p.detail, 18);
+  const cells = fbm(p, 14, 16, 3, 19) * smooth(32, 8, a);
+  /* Planetary-scale Y (ψ) wave: Kelvin stem on the equator, Rossby arms to ±50°. */
+  const phase = (lon - 40) * RAD + shear * 1.9 + (streaks - 0.5) * 0.8;
+  const arms = (0.5 + 0.5 * Math.cos(phase)) * smooth(4, 18, a) * smooth(56, 38, a);
+  const stem = (0.5 + 0.5 * Math.cos((lon - 155) * RAD)) * smooth(22, 4, a);
+  const yWave = Math.max(arms, stem * 0.85);
+  /* Dark subpolar collar (~50–62°) and bright sulfuric-acid polar hoods (>64°). */
+  const collar = Math.exp(-(((a - 56) / 7.5) ** 2));
+  const hood = smooth(61, 74, a + (streaks - 0.5) * 4);
+  const absorber =
+    (yWave * 0.48 + collar * 0.42 + (streaks - 0.35) * 0.25 + (ripples - 0.5) * 0.14) *
+    (1 - hood * 0.85);
+  const rgb = mix([250, 243, 222], [236, 219, 178], Math.min(1, Math.max(0, absorber)));
+  const v = 0.99 + hood * 0.025 + (streaks - 0.5) * 0.03 + (cells - 0.5) * 0.02;
+  return scale(rgb, v);
 };
 
 /** Classical Mars albedo features: [east lon, lat, half-width, half-height, strength]. */
@@ -89,9 +116,79 @@ export const pluto: Painter = (p) => {
   return mix(rgb, [246, 240, 230], heart);
 };
 
-/** Sedna: one of the reddest bodies known, moderately bright (Pál et al. 2012). */
-export const sedna: Painter = (p) =>
-  scale([228, 140, 100], 0.96 + (fbm(p, 5, 5, 3, 8) - 0.5) * 0.2);
+/**
+ * Sedna's longitudinally balanced ancient basins: [east lon, lat, half-width, half-height, frost].
+ * Distributed across all four quadrants so the disc-integrated rotational light curve stays
+ * within Δm ≈ 0.02 mag (Gaudi et al. 2005, ApJ 629, L49).
+ */
+const SEDNA_BASINS = [
+  [44, 18, 22, 18, 0.95],
+  [136, -20, 22, 18, 0.95],
+  [224, 16, 22, 18, 0.95],
+  [316, -18, 22, 18, 0.95],
+] as const;
+/**
+ * Sedna: ultra-red organic tholin mantle with CH₄/N₂ volatile frost in low basins
+ * and high-latitude cold traps (Barucci et al. 2005; Emery et al. 2007; Pál et al. 2012).
+ */
+export const sedna: Painter = (p) => {
+  const { lat } = p;
+  const n = fbm(p, 8, 8, 4, 8);
+  const mottle = fbm(p, 14, 14, 4, 41);
+  const rims = ridge(fbm(p, 10, 10, 3, 42), 0.035);
+  let basin = 0;
+  let rim = 0;
+  for (let i = 0; i < SEDNA_BASINS.length; i += 1) {
+    const b = SEDNA_BASINS[i]!;
+    const d = spot(p, b[0], b[1], b[2], b[3]) + (n - 0.5) * 0.35;
+    if (d < 1.8) {
+      basin = Math.max(basin, smooth(0.85, 0.25, d) * b[4]);
+      rim = Math.max(rim, smooth(0.28, 0, Math.abs(d - 0.95)) * b[4]);
+    }
+  }
+  const tholin = smooth(0.45, 0.72, n * 0.65 + mottle * 0.35) * (1 - basin * 0.7);
+  const polarFrost = smooth(54, 76, Math.abs(lat) + (n - 0.5) * 10) * 0.55;
+  const frost = Math.min(1, basin * 0.65 + polarFrost + rims * 0.22);
+  let rgb = mix([226, 136, 96], [182, 92, 58], tholin * 0.75);
+  rgb = mix(rgb, [196, 106, 70], rim * 0.45);
+  rgb = mix(rgb, [246, 188, 148], frost * 0.75);
+  return scale(rgb, 0.96 + (mottle - 0.5) * 0.14);
+};
 
-/** Halley's nucleus: albedo 0.04, as dark as soot (Giotto). */
-export const halley: Painter = (p) => scale([66, 61, 56], 0.92 + (fbm(p, 6, 6, 3, 9) - 0.5) * 0.4);
+/**
+ * Halley's nucleus: coal-black refractory CHON/silicate crust (albedo 0.04),
+ * bilobate saddle waist, mapped Giotto HMC topography (Crater, Mountain, Chain,
+ * Ducktail) and localized active outgassing vents covering ~10–15 % of the
+ * surface (Keller et al. 1986, 1987, A&A 187, 807; Stooke & Abergel 1991).
+ */
+export const halley: Painter = (p) => {
+  const n = fbm(p, 5, 5, 4, 9);
+  const rough = fbm(p, 13, 13, 4, 50);
+  const scarps = ridge(fbm(p, 7, 7, 3, 51), 0.032);
+  /* Central saddle/waist depression between the two lobes. */
+  const waist =
+    Math.exp(-(((dLon(p.lon, 255) * p.cosLat) / 28) ** 2)) * 0.45 +
+    Math.exp(-(((dLon(p.lon, 75) * p.cosLat) / 32) ** 2)) * 0.35;
+  /* Giotto HMC features: sunward Crater (348° E, 6° N), Mountain (18° E, −6° S),
+     northern Chain (2° E, 24° N) and southern Ducktail terrace (185° E, −22° S). */
+  const craterD = spot(p, 348, 6, 16, 14) + (n - 0.5) * 0.25;
+  const craterFloor = smooth(0.85, 0.25, craterD);
+  const craterRim = smooth(0.28, 0, Math.abs(craterD - 0.95));
+  const hills = Math.max(
+    smooth(1, 0.25, spot(p, 18, -6, 10, 8)),
+    smooth(1.1, 0.35, spot(p, 2, 24, 24, 7)) * 0.75,
+    smooth(1.1, 0.4, spot(p, 185, -22, 18, 13)) * 0.65,
+  );
+  /* Discrete active jet vents (~10 % of surface) exposing dusty sublimating ice. */
+  const vents = Math.max(
+    smooth(1.05, 0.25, spot(p, 335, 26, 18, 14) + (rough - 0.5) * 0.3),
+    smooth(1.05, 0.25, spot(p, 356, 2, 16, 13) + (rough - 0.5) * 0.3) * 0.95,
+    smooth(1.05, 0.25, spot(p, 28, -12, 17, 14) + (rough - 0.5) * 0.3) * 0.9,
+  );
+  let rgb = scale(
+    [63, 58, 53],
+    0.9 + (n - 0.5) * 0.24 + (rough - 0.5) * 0.18 - waist * 0.14 - craterFloor * 0.12,
+  );
+  rgb = mix(rgb, [82, 76, 70], Math.min(1, craterRim * 0.55 + hills * 0.5 + scarps * 0.35));
+  return mix(rgb, [128, 134, 142], vents * 0.85);
+};

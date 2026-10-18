@@ -1,6 +1,6 @@
 /** The major moons, from spacecraft maps. */
 import { smoothstep as smooth } from "../../math/index";
-import { fbm, mix, ridge, scale, spot, type Painter } from "./raster";
+import { RAD, fbm, mix, ridge, scale, spot, type Painter } from "./raster";
 
 /* Moon maps put longitude 0 at the sub-planet point; west longitudes from the
    literature are written as east, 360 − W. */
@@ -115,11 +115,28 @@ export const callisto: Painter = (p) => {
   return mix(rgb, [208, 202, 194], smooth(1, 0.3, spot(p, 220, 32, 3, 3)));
 };
 
-/** Titan: the visible-light haze, pale orange-tan with a darker north-polar hood. */
+/**
+ * Titan: visible-light photochemical tholin haze (Voyager 1/2, Cassini ISS;
+ * Smith et al. 1981; Porco et al. 2005; Lorenz et al. 2004; Roman et al. 2009).
+ * Super-rotating stratospheric winds smooth out longitudinal detail while Hadley
+ * circulation creates the north–south hemispheric albedo dichotomy, a faint
+ * equatorial transition band and the dark north-polar hood and vortex collar.
+ */
 export const titan: Painter = (p) => {
-  const n = fbm(p, 2, 10, 3, 32);
-  const rgb = scale([176, 128, 72], 0.97 + (n - 0.5) * 0.05);
-  return mix(rgb, [136, 95, 54], smooth(48, 70, p.lat) * 0.5);
+  const { lat } = p;
+  const zonal = fbm(p, 1.2, 18, 3, 32);
+  const bands = Math.sin(lat * RAD * 11 + zonal * 1.6) * 0.014;
+  /* Seasonal north–south hemispheric dichotomy across the equator. */
+  const north = smooth(-18, 18, lat + (zonal - 0.5) * 3);
+  let rgb = mix([186, 136, 76], [162, 114, 63], north);
+  /* Subtle bright equatorial boundary band and dark north-polar hood/collar (>50° N). */
+  const eqBand = Math.exp(-((lat / 6.5) ** 2)) * 0.04;
+  const hood = smooth(46, 66, lat + (zonal - 0.5) * 2.5);
+  rgb = mix(rgb, [132, 92, 51], hood * 0.65);
+  /* High-altitude polar vortex condensate haze (>70° N and faint south vortex). */
+  const vortex = smooth(68, 84, lat) * 0.35 + smooth(-66, -82, lat) * 0.22;
+  rgb = mix(rgb, [146, 108, 68], vortex);
+  return scale(rgb, 0.99 + eqBand + bands + (zonal - 0.5) * 0.025);
 };
 
 /**
