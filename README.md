@@ -41,7 +41,13 @@ Real data, honest models, every number sourced.
       <p>Fourteen views · depth ladder · light-travel time and redshift</p>
       <p><a href="docs/science-sources.md">Sources →</a></p>
     </td>
-    <td width="50%" valign="top"></td>
+    <td width="50%" valign="top">
+      <img src="public/simulations/spectroscopy/og.png" alt="Stellar spectra" />
+      <h3>Stellar spectra</h3>
+      <p>Split starlight into its colours and read the dark lines: which atoms, how hot, how fast.</p>
+      <p>NIST atomic lines · Kirchhoff's bench · spectral sequence · mystery spectra</p>
+      <p><a href="src/features/spectroscopy/lib/model">Model →</a></p>
+    </td>
   </tr>
 </table>
 
@@ -63,7 +69,7 @@ npm run dev
 ```
 
 Open <http://localhost:3000>. Simulations live under `/lab`, for example `/lab/black-hole`,
-`/lab/orrery` and `/lab/deep-field`. URLs carry no language; a cookie picks it, English by default.
+`/lab/orrery`, `/lab/deep-field` and `/lab/spectroscopy`. URLs carry no language; a cookie picks it, English by default.
 
 ## Scripts
 
