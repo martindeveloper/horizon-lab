@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useMemo, type ReactNode } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 
 import { dopplerFactor } from "@horizon/toolkit/science";
 import { Chip, Slider, cn } from "@horizon/toolkit/ui";
@@ -36,6 +36,8 @@ export function VelocityLens({ step }: { step: ReactNode }) {
   const measure = useSpectroscopy((s) => s.measure);
   const velocity = useSpectroscopy((s) => s.velocity);
   const api = useSpectroscopy.getState;
+  /* A plain id: useId's punctuation does not survive url(#…). */
+  const clip = `lens-${useId().replace(/[^a-zA-Z0-9-]/g, "")}`;
   const element = measuredElement(compare, measure);
   const line = element ? measureLine(element, formed) : undefined;
   const lab = line?.wavelength ?? 500;
@@ -135,6 +137,11 @@ export function VelocityLens({ step }: { step: ReactNode }) {
                   vectorEffect="non-scaling-stroke"
                 />
               ))}
+              <defs>
+                <clipPath id={clip}>
+                  <rect x={0} y={-10} width={100} height={120} />
+                </clipPath>
+              </defs>
               <path
                 d={line ? path : ""}
                 fill="none"
@@ -142,6 +149,22 @@ export function VelocityLens({ step }: { step: ReactNode }) {
                 strokeWidth={1.25}
                 vectorEffect="non-scaling-stroke"
               />
+              {/* The profile reflected about the marker (λ → 2λ_m − λ, a mirror in x here). A
+                  line is symmetric about its centre, so the two curves coincide exactly when
+                  the marker sits on it: the mirror (bisector) method of finding a line's
+                  centre, precise even across a broad, flat-bottomed core. */}
+              {line ? (
+                <g clipPath={`url(#${clip})`}>
+                  <path
+                    d={path}
+                    transform={`translate(${2 * xOf(observed)} 0) scale(-1 1)`}
+                    fill="none"
+                    className="stroke-accent/60"
+                    strokeWidth={1}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </g>
+              ) : null}
               <line
                 x1={xOf(observed)}
                 x2={xOf(observed)}
@@ -185,6 +208,9 @@ export function VelocityLens({ step }: { step: ReactNode }) {
               })
             : "—"}
         </p>
+        {line ? (
+          <p className="text-[11px] text-pretty text-subtle short:hidden">{t("dock.mirror")}</p>
+        ) : null}
       </div>
     </div>
   );

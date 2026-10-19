@@ -181,7 +181,8 @@
     "conditions": "Světlo a plyn",
     "elementsTab": "Prvky",
     "speedTab": "Rychlost",
-    "compareHint": "Najeďte na prvek a uvidíte jeho laboratorní čáry ve spektru; kliknutím je ponecháte."
+    "compareHint": "Najeďte na prvek a uvidíte jeho laboratorní čáry ve spektru; kliknutím je ponecháte.",
+    "mirror": "Zlatá křivka: čára zrcadlená kolem vaší značky. Čára je souměrná podle svého středu, takže jste na něm, když se obě křivky kryjí."
   },
   "kirchhoff": {
     "continuum": {
