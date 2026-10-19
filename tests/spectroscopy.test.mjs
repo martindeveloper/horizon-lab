@@ -12,6 +12,11 @@ import {
   lineNear,
   partitionFunction,
 } from "../src/features/spectroscopy/lib/model/atoms.ts";
+import {
+  continuumOf,
+  continuumWavelength,
+  totalOpacity,
+} from "../src/features/spectroscopy/lib/model/continuum.ts";
 import { rydbergFormula } from "../src/features/spectroscopy/lib/model/equations.ts";
 import {
   ease,
@@ -172,6 +177,28 @@ test("the curve of growth rises as N, flattens, then grows as √N", () => {
     assert.ok(Math.abs(iron[i] - iron[i - 1]) < 0.15, "a smooth curve");
 });
 
+test("the continuum is H⁻ in the Sun and hydrogen in a B star, on the models' own depth scale", () => {
+  const visible = continuumWavelength(500);
+  const layerNear = (photosphere, logTau) =>
+    photosphere.layers.findIndex((l) => l.logTau >= logTau);
+  const parts = (layer) => continuumOf(layer)(visible);
+  const share = (p, ...keys) => keys.reduce((sum, k) => sum + p[k], 0) / totalOpacity(p);
+  // Through the Sun's line-forming layers κ(500 nm) stays close to ATLAS9's Rosseland mean,
+  // Δτ_Ross / Δm, which the model worked out independently.
+  const sun = starPhotosphere("sun");
+  for (let i = layerNear(sun, -3); i <= layerNear(sun, 0.5); i++) {
+    const [a, b] = [sun.layers[i - 1], sun.layers[i]];
+    const rosseland = (10 ** b.logTau - 10 ** a.logTau) / (b.column - a.column);
+    near(totalOpacity(parts(b)) / rosseland, 1, 0.25, `log τ = ${b.logTau}`);
+  }
+  const photosphere = sun.layers[layerNear(sun, 0)];
+  assert.ok(share(parts(photosphere), "hMinusBoundFree", "hMinusFreeFree") > 0.9, "H⁻ in the Sun");
+  const hot = mainSequencePhotosphere(20_000);
+  const deep = parts(hot.layers[layerNear(hot, 0)]);
+  assert.ok(share(deep, "hMinusBoundFree", "hMinusFreeFree") < 0.01, "no H⁻ in a B star");
+  assert.ok(share(deep, "hydrogenBoundFree", "hydrogenFreeFree") > 0.8, "hydrogen in a B star");
+});
+
 test("the model Sun's lines come within a factor of two of the measured ones", () => {
   const sun = star(starPhotosphere("sun"), { microturbulence: 1 });
   // Solar equivalent widths in pm (Moore, Minnaert & Houtgast 1966).
@@ -182,6 +209,8 @@ test("the model Sun's lines come within a factor of two of the measured ones", (
     ["Ca II", 393.366, 2025],
     ["Ca I", 422.673, 147.6],
     ["Na I", 568.82, 12.1],
+    ["Fe I", 438.354, 100.8],
+    ["Fe I", 526.954, 47.8],
   ]) {
     const ratio = (width(species, nm, sun) * 1e3) / measured;
     assert.ok(ratio > 0.5 && ratio < 2, `${species} ${nm}: ${ratio.toFixed(2)}× measured`);

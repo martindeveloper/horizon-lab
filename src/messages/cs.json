@@ -234,6 +234,7 @@
       "codata": "Gravitační konstanta, hmotnosti elektronu a protonu, atomová hmotnostní konstanta, klasický poloměr elektronu a Rydbergova konstanta.",
       "nistAsd": "Energetické hladiny, ionizační energie a pravděpodobnosti přechodů pro každou atomovou čáru ve Spektrech hvězd.",
       "atlas9": "Modelové fotosféry hvězd ve Spektrech hvězd: teplota a tlak vrstvu po vrstvě.",
+      "barklem": "Šířky čar kovů rozšířených srážkami s atomy vodíku ve Spektrech hvězd.",
       "cie": "Normalizovaný pozorovatel, který mění spektra v barvy hvězd, plamenů a pásu spektra.",
       "bodoni": "Nadpisy.",
       "plex": "Text a čísla.",

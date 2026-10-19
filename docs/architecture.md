@@ -108,7 +108,9 @@ src/
         atmospheres.ts         ATLAS9 photospheres (atmospheres.json from
                                scripts/fetch-model-atmospheres.mjs)
         populations.ts         Saha and Boltzmann
-        profile.ts, voigt.ts   Line shapes: Doppler, Voigt, van der Waals, Stark
+        profile.ts, voigt.ts   Line shapes: Doppler, Voigt, hydrogen collisions (broadening.json
+                               from scripts/fetch-line-broadening.mjs), Stark
+        continuum.ts           The stars' continuous opacity: H⁻, hydrogen, scattering
         spectrum.ts            The bench's uniform slab, the stars' layered LTE transfer, the
                                instrument and pixels; line reports and curves of growth
         telluric.ts            Earth's O₂ A and B bands

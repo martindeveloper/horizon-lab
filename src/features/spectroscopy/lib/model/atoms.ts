@@ -1,4 +1,5 @@
 import data from "./atomic-data.json";
+import broadening from "./broadening.json";
 
 /**
  * The atoms the lab knows: their masses, the Sun's mix of them, their ionization stages and
@@ -89,6 +90,12 @@ export type Line = {
   upperLevel: Level;
   /** NIST's accuracy grade of the transition probability (AAA ≤ 0.3 % … E > 50 %). */
   accuracy: string;
+  /**
+   * Broadening by neutral hydrogen from Barklem, Piskunov & O'Mara (2000), where they list the
+   * line: log₁₀ of the full width per atom at 10,000 K (rad s⁻¹ cm³) and its temperature
+   * exponent (scripts/fetch-line-broadening.mjs).
+   */
+  hydrogenCollisions?: { logGamma: number; exponent: number };
 };
 
 type RawLine = [string, number, number, number, number, string, string, string];
@@ -126,10 +133,25 @@ function rawLine(row: readonly (string | number)[]): RawLine {
 
 const ROMAN = ["I", "II", "III"];
 
+const COLLISIONS = new Map(
+  broadening.lines.map((row) => {
+    const [species, wavelength, logGamma, exponent] = row;
+    if (
+      typeof species !== "string" ||
+      typeof wavelength !== "number" ||
+      typeof logGamma !== "number" ||
+      typeof exponent !== "number"
+    )
+      throw new Error(`Malformed broadening ${JSON.stringify(row)}`);
+    return [`${species} ${wavelength}`, { logGamma, exponent }];
+  }),
+);
+
 export const LINES: readonly Line[] = data.lines
   .map(rawLine)
-  .map(([species, wavelength, logGf, lower, upper, lo, up, accuracy]) => {
+  .map(([species, wavelength, logGf, lower, upper, lo, up, accuracy]): Line => {
     const element = elementOf(species);
+    const collisions = COLLISIONS.get(`${species} ${wavelength}`);
     const stage = ROMAN.indexOf(species.split(" ")[1] ?? "");
     return {
       id: `${element.toLowerCase()}${stage + 1}-${wavelength.toFixed(3)}`,
@@ -143,6 +165,7 @@ export const LINES: readonly Line[] = data.lines
       lowerLevel: level(lo),
       upperLevel: level(up),
       accuracy,
+      ...(collisions ? { hydrogenCollisions: collisions } : {}),
     };
   });
 

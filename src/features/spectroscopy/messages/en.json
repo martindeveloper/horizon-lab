@@ -311,11 +311,11 @@
       },
       "stars": {
         "title": "Stars",
-        "body": "Each star is the ATLAS9 model (Castelli & Kurucz 2003) nearest its measured temperature and gravity; its lines use the Sun's abundances (Asplund et al. 2009). Light is integrated up through 23 layers from τ_Ross = 10⁻⁴ to 10^1.5, each in LTE at its own temperature and pressures. The continuum opacity is the model's Rosseland mean at every wavelength, and the flux is taken in the Eddington–Barbier approximation, F ≈ πI(μ = 2/3). Against the observed Sun, line strengths agree within about a factor of two."
+        "body": "Each star is the ATLAS9 model (Castelli & Kurucz 2003) nearest its measured temperature and gravity, with the Sun's composition (Asplund et al. 2009). Light is integrated up through 23 layers from τ_Ross = 10⁻⁴ to 10^1.5, each in LTE at its own temperature and pressures. At every wavelength, each layer's continuum opacity comes from H⁻ (John 1988), neutral hydrogen, electron scattering and Rayleigh scattering; the flux is taken in the Eddington–Barbier approximation, F ≈ πI(μ = 2/3). Against the observed Sun, line strengths agree within a factor of 1.7."
       },
       "shapes": {
         "title": "Line shapes",
-        "body": "Voigt profiles (Humlíček 1982) from thermal and turbulent Doppler broadening, radiation damping, van der Waals collisions (Unsöld's approximation, doubled) and, for hydrogen, the linear Stark effect scaled from Hβ measurements, with Holtsmark's Δλ^(−5/2) wings. A line's shape is taken at one depth (τ_Ross = 0.1, hydrogen 0.3); its strength follows every layer."
+        "body": "Voigt profiles (Humlíček 1982) from thermal and turbulent Doppler broadening, radiation damping, collisions with hydrogen atoms (Barklem, Piskunov & O'Mara 2000 where they list the line, otherwise Unsöld's approximation × 1.15, their median ratio) and, for hydrogen, the linear Stark effect scaled from Hβ measurements, with Holtsmark's Δλ^(−5/2) wings. Each layer broadens a line by its own temperature and pressures; hydrogen's shape is taken at τ_Ross = 0.3."
       },
       "motion": {
         "title": "Motion and the instrument",
@@ -327,7 +327,7 @@
       },
       "limits": {
         "title": "What is left out",
-        "body": "No molecules besides O₂ (no TiO, so no M stars), no chromospheres or departures from LTE, no wavelength-dependent continuum opacity, no hydrogen self-broadening, rotation or macroturbulence. In the Sun, iron lines come out up to twice too strong; cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
+        "body": "No molecules besides O₂ (no TiO, so no M stars), no chromospheres or departures from LTE, no metal bound-free continua (they matter below about 400 nm in cool stars), no hydrogen self-broadening, collisions with helium, rotation or macroturbulence; scattering counts as absorption. In the Sun, strong lines come out up to 1.7 times too strong (Fe I 438 nm); cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
       }
     }
   }

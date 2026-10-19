@@ -1,7 +1,14 @@
-import { ATOMIC_MASS_KG, dopplerFactor, planckRadiance } from "@horizon/toolkit/science";
+import { dopplerFactor, planckRadiance } from "@horizon/toolkit/science";
 
 import { layerAt, type Photosphere } from "./atmospheres";
-import { ELEMENTS, LINES, type ElementId, type Line } from "./atoms";
+import { LINES, type ElementId, type Line } from "./atoms";
+import {
+  continuumOf,
+  continuumWavelength,
+  totalOpacity,
+  type ContinuumWavelength,
+} from "./continuum";
+import { atomsPerKilogram } from "./populations";
 import {
   lineCrossSection,
   lineProfile,
@@ -25,9 +32,9 @@ import { voigt } from "./voigt";
  * Kirchhoff's three laws from one equation.
  *
  * A star (`star`): light integrated up through the layers of a model photosphere, each in
- * local thermodynamic equilibrium at its own temperature and pressure, with the continuum's
- * opacity the model's Rosseland mean. The emergent flux is taken in the Eddington–Barbier
- * approximation, F ≈ π I(μ = 2/3).
+ * local thermodynamic equilibrium at its own temperature and pressure, its continuum opacity
+ * worked out at each wavelength from H⁻, hydrogen and free electrons (`continuum`). The
+ * emergent flux is taken in the Eddington–Barbier approximation, F ≈ π I(μ = 2/3).
  *
  * Both then cross Earth's air (`airmass`) and the spectrograph (`resolution`).
  */
@@ -77,9 +84,7 @@ const MAX_FINE = { slab: 160_000, star: 60_000 };
 const FWHM_PER_SIGMA = 2 * Math.sqrt(2 * Math.LN2);
 /** The Eddington–Barbier direction: F = π I(μ = 2/3), exact for a source function linear in τ. */
 const MU = 2 / 3;
-/** The Sun's hydrogen mass fraction (Asplund et al. 2009). */
-const HYDROGEN_MASS_FRACTION = 0.7381;
-/** Where a metal line's shape is taken, and hydrogen's (whose wings form deep). */
+/** Where a line's reference shape is taken; hydrogen's (whose wings form deep) serves every cell. */
 const SHAPE_DEPTH = { metal: -1, hydrogen: -0.5 };
 
 type Grid = { lnStart: number; step: number; count: number };
@@ -92,8 +97,11 @@ function gridFor(from: number, to: number, resolution: number, max: number): Gri
   return { lnStart, step: (lnEnd - lnStart) / count, count };
 }
 
-/** Calls `visit(i, h)` with H(a, v) at every grid sample the profile reaches. */
-function sweep(p: Profile, grid: Grid, visit: (i: number, h: number) => void, cap = 40) {
+/**
+ * Calls `visit(i, offset)` at every grid sample the profile reaches, offset from centre in nm,
+ * out to at most `cap` widths.
+ */
+function sweep(p: Profile, grid: Grid, visit: (i: number, offset: number) => void, cap = 40) {
   const width = reach(p, TAU_FLOOR, cap);
   const first = Math.max(0, Math.ceil((Math.log(p.centre - width) - grid.lnStart) / grid.step));
   const last = Math.min(
@@ -103,7 +111,7 @@ function sweep(p: Profile, grid: Grid, visit: (i: number, h: number) => void, ca
   const ratio = Math.exp(grid.step);
   let nm = Math.exp(grid.lnStart + first * grid.step);
   for (let i = first; i <= last; i++) {
-    visit(i, shapeAt(p, (nm - p.centre) / p.doppler));
+    visit(i, nm - p.centre);
     nm *= ratio;
   }
 }
@@ -112,8 +120,8 @@ function airTransmission(grid: Grid, airmass: number) {
   const tau = new Float64Array(grid.count);
   if (airmass > 0)
     for (const p of TELLURIC)
-      sweep({ ...p, peak: p.peak * airmass }, grid, (i, h) => {
-        tau[i]! += p.peak * airmass * h;
+      sweep({ ...p, peak: p.peak * airmass }, grid, (i, offset) => {
+        tau[i]! += p.peak * airmass * shapeAt(p, offset / p.doppler);
       });
   return tau.map((t) => Math.exp(-t));
 }
@@ -213,8 +221,8 @@ function synthesizeSlab(obs: SlabObservation, from: number, to: number, samples:
     sweep(
       profile,
       grid,
-      (i, h) => {
-        tau[i]! += profile.peak * h;
+      (i, offset) => {
+        tau[i]! += profile.peak * shapeAt(profile, offset / profile.doppler);
       },
       Infinity,
     );
@@ -239,126 +247,190 @@ function synthesizeSlab(obs: SlabObservation, from: number, to: number, samples:
 type Cell = Conditions & {
   /** Mass of gas in the cell, kg m⁻². */
   mass: number;
-  /** Continuum optical depth across the cell. */
-  tau: number;
-  /** log τ_Ross at the cell's middle. */
-  logTau: number;
+  /** The cell's continuum opacity at a wavelength, m² kg⁻¹. */
+  opacity: (w: ContinuumWavelength) => number;
 };
+
+function cell(conditions: Conditions, mass: number): Cell {
+  const parts = continuumOf(conditions);
+  return { ...conditions, mass, opacity: (w) => totalOpacity(parts(w)) };
+}
 
 /** The model cut into cells between its depths, plus everything above the first one. */
 function cellsOf(atmosphere: Photosphere, microturbulence: number): Cell[] {
   const { layers } = atmosphere;
   const top = layers[0]!;
   const cells: Cell[] = [
-    {
-      temperature: top.temperature,
-      electronPressure: top.electronPressure,
-      gasPressure: top.gasPressure,
-      microturbulence,
-      mass: top.column,
-      tau: 10 ** top.logTau,
-      logTau: top.logTau - 0.5,
-    },
+    cell(
+      {
+        temperature: top.temperature,
+        electronPressure: top.electronPressure,
+        gasPressure: top.gasPressure,
+        microturbulence,
+      },
+      top.column,
+    ),
   ];
   for (let i = 1; i < layers.length; i++) {
     const a = layers[i - 1]!;
     const b = layers[i]!;
-    cells.push({
+    const conditions = {
       temperature: (a.temperature + b.temperature) / 2,
       electronPressure: Math.sqrt(a.electronPressure * b.electronPressure),
       gasPressure: Math.sqrt(a.gasPressure * b.gasPressure),
       microturbulence,
-      mass: b.column - a.column,
-      tau: 10 ** b.logTau - 10 ** a.logTau,
-      logTau: (a.logTau + b.logTau) / 2,
-    });
+    };
+    cells.push(cell(conditions, b.column - a.column));
   }
   return cells;
 }
 
-/** Atoms of an element in a kilogram of the star's gas. */
-function atomsPerKilogram(element: ElementId, abundances?: Partial<Record<ElementId, number>>) {
-  const hydrogen = HYDROGEN_MASS_FRACTION / (ELEMENTS.H.mass * ATOMIC_MASS_KG);
-  return hydrogen * 10 ** (ELEMENTS[element].abundance + (abundances?.[element] ?? 0) - 12);
-}
+/**
+ * Within this many Doppler widths (or Lorentz half-widths, if wider) of its centre, a line's
+ * opacity in each cell is its own Voigt function; beyond, its Lorentz wings,
+ * H ≈ (a / √π v²)(1 + (3/2 − a²) / v²), good there to better than 1 %.
+ */
+const CORE_REACH = 5;
 
 type StarLine = {
   line: Line;
+  /** The line's shape at one depth: its centre, and what the line card shows. */
   shape: Shape;
-  /** τ per unit H(a, v) in each cell. */
-  cells: Float64Array;
+  /** Each cell's τ per unit H(a, v), its Doppler width (nm) and damping a. */
+  strength: Float64Array;
+  doppler: Float64Array;
+  damping: Float64Array;
+  /** Each cell's Lorentz wings, τ ≈ wing / Δλ² + wing2 / Δλ⁴ (Δλ in nm). */
+  wing: Float64Array;
+  wing2: Float64Array;
+  /** How far from centre, nm, the cells take their full Voigt functions. */
+  core: number;
+  /** Hydrogen keeps one shape, its Stark wings, through every cell. */
+  frozen: boolean;
   /** Line-centre optical depth down to the continuum's τ = 1. */
   tau: number;
+  /** One profile that reaches as far as the cells' together, for finding the line's span. */
+  extent: Profile;
 };
 
-/** Every line the star forms, with its optical depth layer by layer. */
+/** Adds the line's opacity in each cell, `offset` nm from its centre, to `out` from `at`. */
+function addLine(sl: StarLine, offset: number, out: Float32Array, at: number) {
+  const K = sl.strength.length;
+  if (sl.frozen) {
+    const h = shapeAt(sl.shape, offset / sl.shape.doppler);
+    for (let k = 0; k < K; k++) out[at + k]! += sl.strength[k]! * h;
+  } else if (Math.abs(offset) > sl.core) {
+    const inv = 1 / (offset * offset);
+    for (let k = 0; k < K; k++) out[at + k]! += inv * (sl.wing[k]! + sl.wing2[k]! * inv);
+  } else
+    for (let k = 0; k < K; k++)
+      out[at + k]! += sl.strength[k]! * voigt(sl.damping[k]!, offset / sl.doppler[k]!);
+}
+
+/**
+ * Every line the star forms, with its optical depth layer by layer. Each cell broadens a metal
+ * line by its own temperature and pressures; hydrogen's shape is taken at one depth.
+ */
 export function starLines(obs: StarObservation, only?: Line) {
   const cells = cellsOf(obs.photosphere, obs.microturbulence);
+  const K = cells.length;
   const shift = dopplerFactor(obs.velocity);
-  const shapeAt = {
-    metal: { ...layerAt(obs.photosphere, SHAPE_DEPTH.metal), microturbulence: obs.microturbulence },
-    hydrogen: {
-      ...layerAt(obs.photosphere, SHAPE_DEPTH.hydrogen),
-      microturbulence: obs.microturbulence,
-    },
-  };
+  const at = (depth: number) => ({
+    ...layerAt(obs.photosphere, depth),
+    microturbulence: obs.microturbulence,
+  });
+  const reference = { metal: at(SHAPE_DEPTH.metal), hydrogen: at(SHAPE_DEPTH.hydrogen) };
   const out: StarLine[] = [];
   for (const line of only ? [only] : LINES) {
-    const shape = lineShape(line, line.element === "H" ? shapeAt.hydrogen : shapeAt.metal, shift);
-    const perAtom = atomsPerKilogram(line.element, obs.abundances);
-    const norm = Math.sqrt(Math.PI) * (shape.doppler / shift) * 1e-9;
-    const centre = voigt(shape.damping, 0);
-    const opacity = new Float64Array(cells.length);
+    const frozen = line.element === "H";
+    const shape = lineShape(line, frozen ? reference.hydrogen : reference.metal, shift);
+    const perAtom = atomsPerKilogram(line.element, obs.abundances?.[line.element]);
+    const w = continuumWavelength(line.wavelength);
+    const strength = new Float64Array(K);
+    const doppler = new Float64Array(K);
+    const damping = new Float64Array(K);
+    const wing = new Float64Array(K);
+    const wing2 = new Float64Array(K);
+    let core = 0;
     let tau = 0;
+    let wings = 0;
+    let continuum = 0;
     cells.forEach((cell, k) => {
-      const value = (perAtom * cell.mass * lineCrossSection(line, cell)) / norm;
-      opacity[k] = value;
-      if (cell.logTau < 0) tau += value * centre;
+      const own = frozen ? shape : lineShape(line, cell, shift);
+      const d = own.doppler;
+      const a = own.damping;
+      const s =
+        (perAtom * cell.mass * lineCrossSection(line, cell)) /
+        (Math.sqrt(Math.PI) * (d / shift) * 1e-9);
+      const lorentz = (s * a * d * d) / Math.sqrt(Math.PI);
+      strength[k] = s;
+      doppler[k] = d;
+      damping[k] = a;
+      wing[k] = lorentz;
+      wing2[k] = lorentz * (1.5 - a * a) * d * d;
+      core = Math.max(core, CORE_REACH * d * Math.max(1, a));
+      const step = cell.opacity(w) * cell.mass;
+      if (continuum + step / 2 < 1) {
+        tau += s * voigt(a, 0);
+        wings += lorentz;
+      }
+      continuum += step;
     });
-    if (only || tau > TAU_FLOOR) out.push({ line, shape, cells: opacity, tau });
+    /* The single profile with the same centre depth and the same wings. */
+    const extent = {
+      ...shape,
+      peak: tau,
+      damping: tau > 0 ? (Math.sqrt(Math.PI) * wings) / (tau * shape.doppler ** 2) : shape.damping,
+    };
+    if (only || tau > TAU_FLOOR)
+      out.push({ line, shape, strength, doppler, damping, wing, wing2, core, frozen, tau, extent });
   }
   return { cells, lines: out };
 }
 
 /**
- * Integrates the light up through the cells at one wavelength (along μ = 2/3), given the
- * Planck function of each cell, the line opacity in each (or null), and the source below.
+ * The cells at one wavelength, as one row: the Planck function of each, then the source below
+ * them all, then each cell's continuum optical depth.
  */
-function emerge(
-  source: Float64Array,
-  cells: Cell[],
-  lines: Float32Array | null,
-  row: number,
-  deep: number,
-) {
+function columnAt(cells: Cell[], nm: number, deepTemperature: number, out?: Float64Array) {
+  const K = cells.length;
+  const row = out ?? new Float64Array(2 * K + 1);
+  const w = continuumWavelength(nm);
+  cells.forEach((cell, k) => {
+    row[k] = planckRadiance(nm, cell.temperature);
+    row[K + 1 + k] = cell.opacity(w) * cell.mass;
+  });
+  row[K] = planckRadiance(nm, deepTemperature);
+  return row;
+}
+
+/**
+ * Integrates the light up through the cells at one wavelength (along μ = 2/3), given
+ * their row from `columnAt` and the line opacity in each (or null).
+ */
+function emerge(column: Float64Array, K: number, lines: Float32Array | null, offset: number) {
   let tau = 0;
   let above = 1;
   let intensity = 0;
-  for (let k = 0; k < cells.length; k++) {
-    tau += cells[k]!.tau + (lines ? lines[row + k]! : 0);
+  for (let k = 0; k < K; k++) {
+    tau += column[K + 1 + k]! + (lines ? lines[offset + k]! : 0);
     const below = Math.exp(-tau / MU);
-    intensity += source[k]! * (above - below);
+    intensity += column[k]! * (above - below);
     above = below;
   }
-  return intensity + deep * above;
+  return intensity + column[K]! * above;
 }
 
-/** Planck functions of every cell on a coarse wavelength grid, interpolated when used. */
-function sourceTable(cells: Cell[], from: number, to: number, deepTemperature: number) {
+/** The cells' rows on a coarse wavelength grid, interpolated when used: both vary slowly. */
+function columnTable(cells: Cell[], from: number, to: number, deepTemperature: number) {
   const step = 0.5;
   const start = from - 1;
   const count = Math.ceil((to + 1 - start) / step) + 1;
-  const table = new Float64Array(count * (cells.length + 1));
-  for (let g = 0; g < count; g++) {
-    const nm = start + g * step;
-    cells.forEach((cell, k) => {
-      table[g * (cells.length + 1) + k] = planckRadiance(nm, cell.temperature);
-    });
-    table[g * (cells.length + 1) + cells.length] = planckRadiance(nm, deepTemperature);
-  }
-  const width = cells.length + 1;
+  const width = 2 * cells.length + 1;
+  const table = new Float64Array(count * width);
+  for (let g = 0; g < count; g++)
+    columnAt(cells, start + g * step, deepTemperature, table.subarray(g * width, (g + 1) * width));
   const row = new Float64Array(width);
-  /** The cells' Planck functions at a wavelength; the last entry is the deep source's. */
   return (nm: number) => {
     const x = Math.min(count - 1.001, Math.max(0, (nm - start) / step));
     const g = Math.floor(x);
@@ -375,31 +447,27 @@ function synthesizeStar(obs: StarObservation, from: number, to: number, samples:
   const K = cells.length;
   const opacity = new Float32Array(grid.count * K);
   const touched = new Uint8Array(grid.count);
-  for (const { shape, cells: perCell, tau } of lines)
-    sweep({ ...shape, peak: tau }, grid, (i, h) => {
+  for (const sl of lines)
+    sweep(sl.extent, grid, (i, offset) => {
       touched[i] = 1;
-      for (let k = 0; k < K; k++) opacity[i * K + k]! += perCell[k]! * h;
+      addLine(sl, offset, opacity, i * K);
     });
   const deepTemperature = obs.photosphere.layers.at(-1)!.temperature;
-  const sources = sourceTable(
+  const columns = columnTable(
     cells,
     Math.exp(grid.lnStart),
     Math.exp(grid.lnStart + grid.count * grid.step),
     deepTemperature,
   );
-  const continuumAt = (nm: number) => {
-    const s = sources(nm);
-    return emerge(s, cells, null, 0, s[K]!);
-  };
+  const continuumAt = (nm: number) => emerge(columns(nm), K, null, 0);
   const air = airTransmission(grid, obs.airmass);
   const fine = new Float64Array(grid.count);
   let nm = Math.exp(grid.lnStart);
   const ratio = Math.exp(grid.step);
   for (let i = 0; i < grid.count; i++) {
-    const s = sources(nm);
+    const column = columns(nm);
     fine[i] =
-      (touched[i] ? emerge(s, cells, opacity, i * K, s[K]!) : emerge(s, cells, null, 0, s[K]!)) *
-      air[i]!;
+      (touched[i] ? emerge(column, K, opacity, i * K) : emerge(column, K, null, 0)) * air[i]!;
     nm *= ratio;
   }
   return observe(fine, grid, obs.resolution, from, to, samples, continuumAt);
@@ -472,27 +540,23 @@ function starWidth(obs: StarObservation, line: Line) {
   const { cells, lines } = starLines(obs, line);
   const one = lines[0]!;
   const K = cells.length;
-  const width = integrationReach({ ...one.shape, peak: one.tau }, 30);
-  const sources = sourceTable(
-    cells,
-    one.shape.centre - width,
-    one.shape.centre + width,
-    obs.photosphere.layers.at(-1)!.temperature,
-  );
-  const s = sources(one.shape.centre);
-  const continuum = emerge(s, cells, null, 0, s[K]!);
+  const width = integrationReach(one.extent, 30);
+  /* The continuum and source functions are taken at line centre across the whole line. */
+  const column = columnAt(cells, one.shape.centre, obs.photosphere.layers.at(-1)!.temperature);
+  const continuum = emerge(column, K, null, 0);
   const row = new Float32Array(K);
   const sum = integrateLine(one.shape.doppler, width, 801, (v) => {
-    const h = shapeAt(one.shape, v);
-    for (let k = 0; k < K; k++) row[k] = one.cells[k]! * h;
-    return 1 - emerge(s, cells, row, 0, s[K]!) / continuum;
+    row.fill(0);
+    addLine(one, v * one.shape.doppler, row, 0);
+    return 1 - emerge(column, K, row, 0) / continuum;
   });
   /* Where the core reaches τ = μ: the layer the core's light comes from. */
   let tau = 0;
   let coreTemperature = cells.at(-1)!.temperature;
-  const centre = voigt(one.shape.damping, 0);
+  row.fill(0);
+  addLine(one, 0, row, 0);
   for (let k = 0; k < K; k++) {
-    tau += cells[k]!.tau + one.cells[k]! * centre;
+    tau += column[K + 1 + k]! + row[k]!;
     if (tau >= MU) {
       coreTemperature = cells[k]!.temperature;
       break;
@@ -510,7 +574,7 @@ export function reportLine(line: Line, obs: Observation): LineReport | null {
       shape: one.shape,
       tau: one.tau,
       equivalentWidth: width,
-      regime: regimeOf(one.tau, one.shape.damping),
+      regime: regimeOf(one.tau, one.extent.damping),
       coreTemperature,
     };
   }

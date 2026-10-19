@@ -234,6 +234,7 @@
       "codata": "The gravitational constant, the electron's and proton's masses, the atomic mass constant, the classical electron radius and the Rydberg constant.",
       "nistAsd": "Energy levels, ionization energies and transition probabilities for every atomic line in Stellar Spectra.",
       "atlas9": "Model photospheres of the stars in Stellar Spectra: temperature and pressure layer by layer.",
+      "barklem": "Widths of metal lines broadened by collisions with hydrogen atoms in Stellar Spectra.",
       "cie": "The standard observer that turns spectra into the colours of stars, flames and the spectrum ribbon.",
       "bodoni": "Headlines.",
       "plex": "Text and figures.",

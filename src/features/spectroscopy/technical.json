@@ -45,7 +45,8 @@
     {
       "id": "stars",
       "equations": [
-        "Δτ_k = κ_Ross Δm_k + Σ_lines n_k σ_k(λ) Δm_k",
+        "Δτ_k(λ) = κ_k(λ) Δm_k + Σ_lines n_k σ_k(λ) Δm_k",
+        "κ(λ) = κ_H⁻ + κ_H,bf + κ_H,ff + σ_T nₑ / ρ + σ_R(λ) n_H / ρ",
         {
           "equation": "eddington-flux"
         },
@@ -61,7 +62,8 @@
           "equation": "doppler-width"
         },
         "H(a, v) = (a / π) ∫ e^(−y²) / ((v − y)² + a²) dy",
-        "log γ₆ = 19.6 + ⅖ log C₆ + log P_g − 0.7 log T",
+        "γ₆ = γ₁₀₀₀₀ (T / 10⁴ K)^((1 − α)/2) n_H",
+        "log γ₆ = 19.6 + ⅖ log C₆ + log P_g − 0.7 log T  (× 1.15)",
         "Δλ_Stark(Hβ) = 4.8 nm (nₑ / 10²³ m⁻³)^0.681"
       ]
     },
@@ -104,6 +106,14 @@
     {
       "title": "Carroll & Ostlie (2017), An Introduction to Modern Astrophysics, 2nd ed., ch. 8–9",
       "url": "https://doi.org/10.1017/9781108380980"
+    },
+    {
+      "title": "John (1988), Continuous absorption by the negative hydrogen ion reconsidered, A&A 193, 189",
+      "url": "https://ui.adsabs.harvard.edu/abs/1988A%26A...193..189J"
+    },
+    {
+      "title": "Barklem, Piskunov & O'Mara (2000), A list of data for the broadening of metallic lines by neutral hydrogen collisions, A&AS 142, 467",
+      "url": "https://ui.adsabs.harvard.edu/abs/2000A%26AS..142..467B"
     },
     {
       "title": "Humlíček (1982), Optimized computation of the Voigt and complex probability functions, JQSRT 27, 437",

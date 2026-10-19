@@ -9,7 +9,7 @@ import data from "./atmospheres.json";
 
 /** One depth in a model. */
 export type Layer = {
-  /** log₁₀ τ_Ross: the continuum's optical depth (Rosseland mean). */
+  /** log₁₀ τ_Ross: the model's depth scale, its optical depth in the Rosseland mean. */
   logTau: number;
   /** K. */
   temperature: number;

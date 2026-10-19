@@ -289,6 +289,13 @@ export const CREDITS: readonly CreditGroup[] = [
         url: "https://wwwuser.oats.inaf.it/fiorella.castelli/grids.html",
       },
       {
+        id: "barklem",
+        name: "Hydrogen-collision broadening (Barklem, Piskunov & O'Mara 2000)",
+        by: "Paul Barklem, Nikolai Piskunov and Brian O'Mara, via CDS VizieR",
+        licence: "Cited",
+        url: "https://cdsarc.cds.unistra.fr/viz-bin/cat/J/A+AS/142/467",
+      },
+      {
         id: "cie",
         name: "CIE 1931 colour-matching functions",
         by: "International Commission on Illumination (CIE)",

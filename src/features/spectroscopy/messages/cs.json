@@ -311,11 +311,11 @@
       },
       "stars": {
         "title": "Hvězdy",
-        "body": "Každá hvězda je model ATLAS9 (Castelli a Kurucz 2003) nejbližší její změřené teplotě a gravitaci; její čáry používají zastoupení prvků ve Slunci (Asplund a kol. 2009). Světlo se integruje vzhůru skrz 23 vrstev od τ_Ross = 10⁻⁴ do 10^1,5, každou v LTE při její teplotě a tlacích. Opacita kontinua je na všech vlnových délkách Rosselandova střední opacita modelu a tok se bere v Eddingtonově–Barbierově aproximaci, F ≈ πI(μ = 2/3). Ve srovnání s pozorovaným Sluncem souhlasí síly čar zhruba do dvojnásobku."
+        "body": "Každá hvězda je model ATLAS9 (Castelli a Kurucz 2003) nejbližší její změřené teplotě a gravitaci, se složením Slunce (Asplund a kol. 2009). Světlo se integruje vzhůru skrz 23 vrstev od τ_Ross = 10⁻⁴ do 10^1,5, každou v LTE při její teplotě a tlacích. Opacita kontinua se v každé vrstvě počítá na každé vlnové délce z H⁻ (John 1988), neutrálního vodíku, rozptylu na elektronech a Rayleighova rozptylu; tok se bere v Eddingtonově–Barbierově aproximaci, F ≈ πI(μ = 2/3). Ve srovnání s pozorovaným Sluncem souhlasí síly čar do faktoru 1,7."
       },
       "shapes": {
         "title": "Tvary čar",
-        "body": "Voigtovy profily (Humlíček 1982) z tepelného a turbulentního Dopplerova rozšíření, radiačního tlumení, van der Waalsových srážek (Unsöldova aproximace, zdvojená) a u vodíku z lineárního Starkova jevu škálovaného podle měření Hβ, s Holtsmarkovými křídly Δλ^(−5/2). Tvar čáry se bere v jedné hloubce (τ_Ross = 0,1, vodík 0,3); její síla sleduje každou vrstvu."
+        "body": "Voigtovy profily (Humlíček 1982) z tepelného a turbulentního Dopplerova rozšíření, radiačního tlumení, srážek s atomy vodíku (Barklem, Piskunov a O'Mara 2000, kde čáru uvádějí, jinak Unsöldova aproximace × 1,15, jejich mediánový poměr) a u vodíku z lineárního Starkova jevu škálovaného podle měření Hβ, s Holtsmarkovými křídly Δλ^(−5/2). Každá vrstva rozšiřuje čáru podle své teploty a tlaků; tvar vodíkových čar se bere v τ_Ross = 0,3."
       },
       "motion": {
         "title": "Pohyb a přístroj",
@@ -327,7 +327,7 @@
       },
       "limits": {
         "title": "Co tu chybí",
-        "body": "Žádné molekuly kromě O₂ (žádné TiO, a tedy žádné hvězdy M), žádné chromosféry ani odchylky od LTE, žádná opacita kontinua závislá na vlnové délce, žádné vlastní rozšíření vodíku, rotace ani makroturbulence. Ve Slunci vycházejí čáry železa až dvakrát silnější; Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
+        "body": "Žádné molekuly kromě O₂ (žádné TiO, a tedy žádné hvězdy M), žádné chromosféry ani odchylky od LTE, žádná vázaně-volná kontinua kovů (důležitá pod 400 nm u chladných hvězd), žádné vlastní rozšíření vodíku, srážky s heliem, rotace ani makroturbulence; rozptyl se počítá jako absorpce. Ve Slunci vycházejí silné čáry až 1,7krát silnější (Fe I 438 nm); Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
       }
     }
   }

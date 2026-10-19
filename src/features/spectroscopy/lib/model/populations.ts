@@ -1,11 +1,19 @@
 import {
+  ATOMIC_MASS_KG,
   BOLTZMANN_CONSTANT,
   ELECTRON_MASS_KG,
   ELECTRON_VOLT_J,
   PLANCK_CONSTANT,
 } from "@horizon/toolkit/science";
 
-import { ELEMENTS, ionizationEnergy, partitionFunction, type ElementId, type Line } from "./atoms";
+import {
+  ELEMENT_IDS,
+  ELEMENTS,
+  ionizationEnergy,
+  partitionFunction,
+  type ElementId,
+  type Line,
+} from "./atoms";
 
 /**
  * How a gas in local thermodynamic equilibrium shares its atoms out: among ionization stages
@@ -82,3 +90,15 @@ export function levelShare(
   const fraction = ionizationFractions(element, kelvin, electronPressure)[stage] ?? 0;
   return fraction * levelFraction(species, g, energy, kelvin);
 }
+
+/** The Sun's hydrogen mass fraction (Asplund et al. 2009). */
+const HYDROGEN_MASS_FRACTION = 0.7381;
+
+/** Atoms of an element in a kilogram of the star's gas, its abundance changed by `shift` dex. */
+export function atomsPerKilogram(element: ElementId, shift = 0) {
+  const hydrogen = HYDROGEN_MASS_FRACTION / (ELEMENTS.H.mass * ATOMIC_MASS_KG);
+  return hydrogen * 10 ** (ELEMENTS[element].abundance + shift - 12);
+}
+
+/** Nuclei of every element in a kilogram of gas with the Sun's composition. */
+export const NUCLEI_PER_KILOGRAM = ELEMENT_IDS.reduce((sum, id) => sum + atomsPerKilogram(id), 0);

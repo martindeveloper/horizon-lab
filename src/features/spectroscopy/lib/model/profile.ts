@@ -8,7 +8,12 @@ import {
 } from "@horizon/toolkit/science";
 
 import { ELEMENTS, ionizationEnergy, type ElementId, type Line } from "./atoms";
-import { absorberShare } from "./populations";
+import {
+  absorberShare,
+  atomsPerKilogram,
+  ionizationFractions,
+  NUCLEI_PER_KILOGRAM,
+} from "./populations";
 import { voigt } from "./voigt";
 
 /** The state of a gas in local thermodynamic equilibrium. */
@@ -56,14 +61,30 @@ export type Profile = Shape & { peak: number };
 export const RADIATIVE_FWHM = ((4 * Math.PI) / 3) * CLASSICAL_ELECTRON_RADIUS_M * 1e9;
 
 /**
- * Collisions with neutral hydrogen (van der Waals), by Unsöld's (1955) approximation in Gray's
- * form (The Observation and Analysis of Stellar Photospheres, eq. 11.29–11.30, cgs):
- * log γ₆ = 19.6 + ⅖ log C₆ + log P_g − 0.7 log T, C₆ = 0.3 × 10⁻³⁰ [(I − χ − χ_λ)⁻² − (I − χ)⁻²].
- * Unsöld's widths are known to fall short, so they are doubled, as abundance work usually does.
+ * Collisions with neutral hydrogen (van der Waals), as a full width in rad s⁻¹. Where Barklem,
+ * Piskunov & O'Mara (2000) list the line, their quantum-mechanical (ABO) cross-section:
+ * γ = γ₁₀₀₀₀ (T / 10⁴ K)^((1 − α)/2) n_H, with n_H the neutral hydrogen atoms per cm³.
  */
-const VAN_DER_WAALS_ENHANCEMENT = 2;
+function hydrogenCollisionRate(line: Line, c: Conditions) {
+  const abo = line.hydrogenCollisions;
+  if (abo) return 10 ** abo.logGamma * (c.temperature / 1e4) ** abo.exponent * neutralHydrogen(c);
+  return UNSOLD_ENHANCEMENT * unsoldRate(line, c);
+}
 
-function vanDerWaalsFwhm(line: Line, c: Conditions) {
+/** Neutral hydrogen atoms per cm³: the Sun's share of the heavy particles, by Saha. */
+function neutralHydrogen(c: Conditions) {
+  const heavy = (c.gasPressure - c.electronPressure) / (BOLTZMANN_CONSTANT * c.temperature);
+  const neutral = ionizationFractions("H", c.temperature, c.electronPressure)[0]!;
+  return Math.max(0, heavy) * HYDROGEN_SHARE * neutral * 1e-6;
+}
+const HYDROGEN_SHARE = atomsPerKilogram("H") / NUCLEI_PER_KILOGRAM;
+
+/**
+ * Otherwise Unsöld's (1955) approximation in Gray's form (The Observation and Analysis of
+ * Stellar Photospheres, eq. 11.29–11.30, cgs):
+ * log γ₆ = 19.6 + ⅖ log C₆ + log P_g − 0.7 log T, C₆ = 0.3 × 10⁻³⁰ [(I − χ − χ_λ)⁻² − (I − χ)⁻²].
+ */
+export function unsoldRate(line: Line, c: Conditions) {
   const limit = ionizationEnergy(line.species);
   const photon = HC_EV_NM / line.wavelength;
   const upper = limit - line.lower - photon;
@@ -71,11 +92,21 @@ function vanDerWaalsFwhm(line: Line, c: Conditions) {
   const c6 = 0.3e-30 * (1 / upper ** 2 - 1 / (limit - line.lower) ** 2);
   if (!(c6 > 0)) return 0;
   const gasPressureCgs = c.gasPressure * 10;
-  const gamma =
+  return (
     10 **
-    (19.6 + 0.4 * Math.log10(c6) + Math.log10(gasPressureCgs) - 0.7 * Math.log10(c.temperature));
+    (19.6 + 0.4 * Math.log10(c6) + Math.log10(gasPressureCgs) - 0.7 * Math.log10(c.temperature))
+  );
+}
+
+/**
+ * Unsöld's widths fall short of ABO's: for the lab's lines that Barklem et al. list, by a
+ * median factor of this much in the Sun's photosphere, which the rest are given.
+ */
+export const UNSOLD_ENHANCEMENT = 1.15;
+
+function vanDerWaalsFwhm(line: Line, c: Conditions) {
   const metres = line.wavelength * 1e-9;
-  return ((VAN_DER_WAALS_ENHANCEMENT * gamma * metres ** 2) / (2 * Math.PI * SPEED_OF_LIGHT)) * 1e9;
+  return ((hydrogenCollisionRate(line, c) * metres ** 2) / (2 * Math.PI * SPEED_OF_LIGHT)) * 1e9;
 }
 
 /**
