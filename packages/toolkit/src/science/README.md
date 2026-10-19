@@ -12,17 +12,21 @@ symbols follow the SI and the IAU.
 whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConstant`
 (CODATA 2022), `astronomicalUnit` (exact, IAU 2012 B2), `parsec` (exactly
 648 000/π au, IAU 2015 B2), `lightYear` (c × Julian year), `julianYear`,
-`solarMass`, `solarRadius` (IAU 2015 B3 nominal). A page can print the table;
-code uses the named values whose names state their units (`AU_KM`,
-`LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `JULIAN_YEAR_SECONDS`,
-`SPEED_OF_LIGHT` in m s⁻¹, `GRAVITATIONAL_CONSTANT` in SI). `RAD_PER_DEG` (π/180) is
+`solarMass`, `solarRadius` (IAU 2015 B3 nominal), and for atoms and light
+`planckConstant`, `boltzmannConstant`, `elementaryCharge` (exact, SI 2019),
+`electronMass`, `atomicMassConstant` and `classicalElectronRadius` (CODATA 2022).
+A page can print the table; code uses the named values whose names state their
+units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`,
+`JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `GRAVITATIONAL_CONSTANT` in SI,
+`PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`,
+`ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`). `RAD_PER_DEG` (π/180) is
 the one degree-to-radian factor; do not retype it.
 
 ## Units and measures (`units.ts`, `measure.ts`)
 
-`UNITS` defines lengths (m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (s … Gyr,
+`UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (s … Gyr,
 Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
-c) and K, each as a factor to its SI base. `convert(value, from, to)` refuses to
+c), K and energies (J, eV), each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 
 ```ts
@@ -55,9 +59,23 @@ schwarzschildRadius.measure({ M: measure(1, "Msun") }).in("km"); // 2.95
 Shared laws: `pythagoras`, `keplerThirdLaw`, `lightTravelTime`,
 `schwarzschildRadius`, `parallaxDistance`, `geometricMassTime`, `tangentialVelocity`,
 `angularSeparation` (haversine, degrees), `resonanceSemiMajorAxis` (Kepler III for an orbit
-of k times a planet's period) and `hubbleLaw` (d = v / H₀, in Mpc). A simulation's
+of k times a planet's period), `hubbleLaw` (d = v / H₀, in Mpc), and for light `planckLaw`,
+`wienDisplacement`, `photonEnergy` (E = hc/λ, nm to eV) and `dopplerShift` (relativistic). A simulation's
 own formulas live in its feature (`lib/equations.ts`) and are built the same
 way. `Formula` is the print-only view documents use.
+
+## Spectra and colour (`spectra.ts`, `color.ts`)
+
+`planckRadiance(nm, K)` is Planck's law per unit wavelength (W m⁻² sr⁻¹ m⁻¹), with
+`SECOND_RADIATION_CONSTANT` (hc/k), `WIEN_CONSTANT` (b, from h, c and k) and `HC_EV_NM`
+(1239.84 eV nm). `dopplerFactor(km/s)` is λ/λ₀ for a receding source; `vacuumToAir(nm)` and
+`airIndex` follow the IAU convention (Morton 2000) for the air wavelengths spectroscopists
+quote.
+
+`cieObserver(nm)` is the CIE 1931 2° observer (the CIE's 5 nm table, interpolated);
+`spectrumXyz` integrates a spectrum against it, `chromaticity` gives (x, y), and
+`displayColor` turns XYZ into sRGB at full brightness, clipping primaries a screen cannot
+make. `blackbodyColor(K)` and `wavelengthColor(nm)` are the usual two; `cssRgb` prints one.
 
 ## Distances (`distance.ts`)
 

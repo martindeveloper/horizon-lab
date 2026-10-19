@@ -273,3 +273,82 @@ test("auto distances read in au inside half a light-year and in ly beyond", () =
   assert.equal(formatDistance(53.8e6 * LIGHT_YEAR_AU, auto), "53.8 million ly");
   assert.equal(formatDistanceRange(100_000, 200_000, { ...auto, significant: 2 }), "1.6–3.2 ly");
 });
+
+test("radiation laws: Planck integrates to Stefan–Boltzmann, Wien, photon energies, Doppler, air", async () => {
+  const {
+    BOLTZMANN_CONSTANT,
+    CONSTANTS,
+    PLANCK_CONSTANT,
+    SPEED_OF_LIGHT,
+    WIEN_CONSTANT,
+    convert,
+    dopplerFactor,
+    dopplerShift,
+    photonEnergy,
+    planckRadiance,
+    vacuumToAir,
+    wienDisplacement,
+  } = await import("@horizon/toolkit/science");
+  // π ∫ B_λ dλ = σT⁴, σ derived from h, c and k.
+  const sigma =
+    (2 * Math.PI ** 5 * BOLTZMANN_CONSTANT ** 4) /
+    (15 * PLANCK_CONSTANT ** 3 * SPEED_OF_LIGHT ** 2);
+  for (const T of [3000, 5772, 20_000]) {
+    let sum = 0;
+    for (let nm = 10; nm < 200_000; nm *= 1.001)
+      sum += planckRadiance(nm, T) * nm * 1e-9 * Math.log(1.001);
+    near((Math.PI * sum) / (sigma * T ** 4), 1, 2e-3);
+  }
+  assert.equal(planckRadiance(500, 0), 0);
+  // CODATA's b = 2.897 771 955 × 10⁻³ m K; the Sun peaks near 502 nm.
+  near(WIEN_CONSTANT, 2.897771955e-3, 1e-12);
+  near(wienDisplacement.compute({ T: 5772 }), 502.04, 0.01);
+  near(photonEnergy.compute({ lambda: 656.28 }), 1.8892, 1e-4);
+  assert.equal(convert(1, "eV", "J"), CONSTANTS.elementaryCharge.value);
+  // Receding then approaching at the same speed undoes the shift exactly.
+  near(dopplerFactor(300) * dopplerFactor(-300), 1, 1e-15);
+  // β = 0.001: λ/λ₀ = √(1.001 / 0.999), a shade more than 1 + β.
+  near(dopplerShift.compute({ lambda0: 500, v: 299.792458 }) - 500, 0.50025, 1e-6);
+  // NIST's vacuum and air wavelengths of sodium D₂ and Hα.
+  near(vacuumToAir(589.1583), 588.995, 2e-4);
+  near(vacuumToAir(656.461), 656.2797, 2e-4);
+  // The classical electron radius agrees with e, mₑ and c through α (CODATA 2022).
+  const e = CONSTANTS.elementaryCharge.value;
+  const epsilon0 = (e * e) / (2 * 7.2973525643e-3 * PLANCK_CONSTANT * SPEED_OF_LIGHT);
+  near(
+    (e * e) /
+      (4 * Math.PI * epsilon0 * CONSTANTS.electronMass.value * SPEED_OF_LIGHT ** 2) /
+      CONSTANTS.classicalElectronRadius.value,
+    1,
+    1e-9,
+  );
+});
+
+test("colours: the CIE observer, a 6500 K black body near white, spectral hues in order", async () => {
+  const {
+    blackbodyColor,
+    chromaticity,
+    cieObserver,
+    planckRadiance,
+    spectrumXyz,
+    wavelengthColor,
+  } = await import("@horizon/toolkit/science");
+  assert.deepEqual(cieObserver(555), [0.5121, 1, 0.00575]);
+  assert.deepEqual(cieObserver(300), [0, 0, 0]);
+  // The Planckian locus at 6504 K: x = 0.3135, y = 0.3237.
+  const white = chromaticity(spectrumXyz((nm) => planckRadiance(nm, 6504)));
+  near(white.x, 0.3135, 0.002);
+  near(white.y, 0.3237, 0.002);
+  // Cool stars are red, hot ones blue.
+  const [r3, , b3] = blackbodyColor(3500);
+  const [r20, , b20] = blackbodyColor(20_000);
+  assert.ok(r3 > b3 && b20 > r20);
+  // Violet is blue-dominated, 520 nm green, the red end red: no hue reversals at the ends.
+  near(wavelengthColor(520)[1], 1, 1e-9);
+  for (const nm of [650, 700, 760]) {
+    const [r, g, b] = wavelengthColor(nm);
+    assert.ok(r > 0.999 && g === 0 && b === 0, `${nm} nm is red`);
+  }
+  const [rV, gV, bV] = wavelengthColor(420);
+  assert.ok(bV > 0.999 && gV === 0 && rV < 0.5);
+});

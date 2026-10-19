@@ -44,6 +44,7 @@ test("legacy redirects reach the new app without loops or catalogue collisions",
     "/lab/black-hole/m87",
     "/lab/orrery",
     "/lab/deep-field",
+    "/lab/spectroscopy",
   ])
     assert.equal(redirects.has(path), false, `${path} is a canonical page`);
   for (const { hole } of presetRouteParams()) {

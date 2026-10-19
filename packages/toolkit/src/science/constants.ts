@@ -1,4 +1,14 @@
-import { GRAVITATIONAL_CONSTANT_SI, SOLAR_GM_SI, SPEED_OF_LIGHT_SI } from "./definitions";
+import {
+  ATOMIC_MASS_CONSTANT_SI,
+  BOLTZMANN_CONSTANT_SI,
+  CLASSICAL_ELECTRON_RADIUS_SI,
+  ELECTRON_MASS_SI,
+  ELEMENTARY_CHARGE_SI,
+  GRAVITATIONAL_CONSTANT_SI,
+  PLANCK_CONSTANT_SI,
+  SOLAR_GM_SI,
+  SPEED_OF_LIGHT_SI,
+} from "./definitions";
 import { UNITS } from "./units";
 
 /**
@@ -102,6 +112,60 @@ export const CONSTANTS = {
     exact: true,
     source: "IAU 2015 Resolution B3 nominal value",
   },
+  planckConstant: {
+    symbol: "h",
+    latex: "h",
+    value: PLANCK_CONSTANT_SI,
+    unit: "J s",
+    unitLatex: "\\mathrm{J\\,s}",
+    exact: true,
+    source: "SI definition of the kilogram (2019)",
+  },
+  boltzmannConstant: {
+    symbol: "k",
+    latex: "k",
+    value: BOLTZMANN_CONSTANT_SI,
+    unit: "J K⁻¹",
+    unitLatex: "\\mathrm{J\\,K^{-1}}",
+    exact: true,
+    source: "SI definition of the kelvin (2019)",
+  },
+  elementaryCharge: {
+    symbol: "e",
+    latex: "e",
+    value: ELEMENTARY_CHARGE_SI,
+    unit: "C",
+    unitLatex: "\\mathrm{C}",
+    exact: true,
+    source: "SI definition of the ampere (2019)",
+  },
+  electronMass: {
+    symbol: "mₑ",
+    latex: "m_e",
+    value: ELECTRON_MASS_SI,
+    unit: "kg",
+    unitLatex: "\\mathrm{kg}",
+    exact: false,
+    source: "CODATA 2022",
+  },
+  atomicMassConstant: {
+    symbol: "mᵤ",
+    latex: "m_u",
+    value: ATOMIC_MASS_CONSTANT_SI,
+    unit: "kg",
+    unitLatex: "\\mathrm{kg}",
+    exact: false,
+    source: "CODATA 2022",
+  },
+  classicalElectronRadius: {
+    symbol: "rₑ",
+    latex: "r_e",
+    value: CLASSICAL_ELECTRON_RADIUS_SI,
+    unit: "m",
+    unitLatex: "\\mathrm{m}",
+    exact: false,
+    source: "CODATA 2022",
+  },
 } as const satisfies Record<string, Constant>;
 
 export type ConstantId = keyof typeof CONSTANTS;
@@ -114,5 +178,12 @@ export const SOLAR_RADIUS_KM = CONSTANTS.solarRadius.value / 1e3;
 export const AU_KM = CONSTANTS.astronomicalUnit.value / 1e3;
 export const LIGHT_YEAR_KM = CONSTANTS.lightYear.value / 1e3;
 export const JULIAN_YEAR_SECONDS = CONSTANTS.julianYear.value;
+export const PLANCK_CONSTANT = CONSTANTS.planckConstant.value; // J s
+export const BOLTZMANN_CONSTANT = CONSTANTS.boltzmannConstant.value; // J K⁻¹
+/** Joules in one electronvolt (the elementary charge's value). */
+export const ELECTRON_VOLT_J = CONSTANTS.elementaryCharge.value;
+export const ELECTRON_MASS_KG = CONSTANTS.electronMass.value;
+export const ATOMIC_MASS_KG = CONSTANTS.atomicMassConstant.value;
+export const CLASSICAL_ELECTRON_RADIUS_M = CONSTANTS.classicalElectronRadius.value;
 /** Radians in one degree (π/180): multiply degrees by it, divide radians by it. */
 export const RAD_PER_DEG = UNITS.deg.factor;

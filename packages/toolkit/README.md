@@ -7,22 +7,22 @@ outside this package.
 
 ## Finding the right module
 
-| Import                             | Owns                                                                                 | Runtime dependencies                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------- |
-| `@horizon/toolkit/ui`              | Controls, surfaces, equations, loading, dialogs, technical documents                 | React; Radix Slider; Lucide; class utilities              |
-| `@horizon/toolkit/ui/motion`       | `TextReveal`, `textStagger`                                                          | React, Motion                                             |
-| `@horizon/toolkit/math`            | Clamp, wrap, easing, log sliders, seeded random, CPU value noise                     | None                                                      |
-| `@horizon/toolkit/science`         | Constants, units, equations, readouts, Julian dates, sky coordinates                 | None                                                      |
-| `@horizon/toolkit/camera`          | Camera snapshots, screen projection, orbit input, flight interpolation, framed views | DOM only when creating input controls                     |
-| `@horizon/toolkit/rendering`       | Shader pass, engine host, frame loop, sizing, power hints, WebGL probe               | Three.js; DOM only when creating a renderer/observer/loop |
-| `@horizon/toolkit/scene`           | Scene host, orbit rig and input, labels, taps, rulers, HUD readouts                  | Three.js; DOM and WebGL only when a host or labels start  |
-| `@horizon/toolkit/audio`           | Background music and playlists with fades and gapless crossfade                      | Web Audio and `<audio>`, only once playing                |
-| `@horizon/toolkit/bench`           | Benchmark contract, in-page WebGL 2 runner, frame grab, statistics                   | None; DOM and WebGL only when a scene runs                |
-| `@horizon/toolkit/environment`     | Shared media queries: reduced motion, pointers, the wide layout                      | None; reads `matchMedia` only when called                 |
-| `@horizon/toolkit/storage`         | One session or local value: lifetime, decay, and a decode-once codec                 | None; reads web storage only when a cell is called        |
-| `@horizon/toolkit/bodies`          | Sun, planets, moons: orbits, figures, spin, rings, Sun/Moon almanac                  | None                                                      |
-| `@horizon/toolkit/bodies/surfaces` | Painted equirectangular body maps, albedos                                           | None                                                      |
-| `@horizon/toolkit/shaders`         | GLSL snippets and build-time includes                                                | Bundler text imports                                      |
+| Import                             | Owns                                                                                  | Runtime dependencies                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `@horizon/toolkit/ui`              | Controls, surfaces, equations, loading, dialogs, technical documents                  | React; Radix Slider; Lucide; class utilities              |
+| `@horizon/toolkit/ui/motion`       | `TextReveal`, `textStagger`                                                           | React, Motion                                             |
+| `@horizon/toolkit/math`            | Clamp, wrap, easing, log sliders, seeded random, CPU value noise                      | None                                                      |
+| `@horizon/toolkit/science`         | Constants, units, equations, readouts, Julian dates, sky coordinates, spectra, colour | None                                                      |
+| `@horizon/toolkit/camera`          | Camera snapshots, screen projection, orbit input, flight interpolation, framed views  | DOM only when creating input controls                     |
+| `@horizon/toolkit/rendering`       | Shader pass, engine host, frame loop, sizing, power hints, WebGL probe                | Three.js; DOM only when creating a renderer/observer/loop |
+| `@horizon/toolkit/scene`           | Scene host, orbit rig and input, labels, taps, rulers, HUD readouts                   | Three.js; DOM and WebGL only when a host or labels start  |
+| `@horizon/toolkit/audio`           | Background music and playlists with fades and gapless crossfade                       | Web Audio and `<audio>`, only once playing                |
+| `@horizon/toolkit/bench`           | Benchmark contract, in-page WebGL 2 runner, frame grab, statistics                    | None; DOM and WebGL only when a scene runs                |
+| `@horizon/toolkit/environment`     | Shared media queries: reduced motion, pointers, the wide layout                       | None; reads `matchMedia` only when called                 |
+| `@horizon/toolkit/storage`         | One session or local value: lifetime, decay, and a decode-once codec                  | None; reads web storage only when a cell is called        |
+| `@horizon/toolkit/bodies`          | Sun, planets, moons: orbits, figures, spin, rings, Sun/Moon almanac                   | None                                                      |
+| `@horizon/toolkit/bodies/surfaces` | Painted equirectangular body maps, albedos                                            | None                                                      |
+| `@horizon/toolkit/shaders`         | GLSL snippets and build-time includes                                                 | Bundler text imports                                      |
 
 There is intentionally no root barrel exporting everything. UI does not import
 Three.js or shader code. Camera and numerical functions can be tested without a

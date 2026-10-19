@@ -26,6 +26,12 @@ const catalogs = Object.fromEntries(
       ),
       orrery: featureMessages("orrery", locale),
       deepField: featureMessages("deep-field", locale),
+      spectroscopy: JSON.parse(
+        readFileSync(
+          new URL(`../src/features/spectroscopy/messages/${locale}.json`, import.meta.url),
+          "utf8",
+        ),
+      ),
     },
   ]),
 );

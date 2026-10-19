@@ -1,0 +1,334 @@
+{
+  "app": "Stellar Spectra",
+  "metadataDescription": "Split starlight and read its dark lines: Kirchhoff's bench, Fraunhofer's Sun, the spectral sequence and mystery spectra, computed from NIST atomic data and real model atmospheres.",
+  "views": {
+    "kirchhoff": {
+      "title": "Kirchhoff's bench",
+      "kicker": "Lab",
+      "hint": "Shine a lamp through a gas: dark lines, bright lines, and why."
+    },
+    "sun": {
+      "title": "The Sun",
+      "kicker": "G2 V",
+      "hint": "Fraunhofer's dark lines, and the atoms that make them."
+    },
+    "stars": {
+      "title": "Spectral sequence",
+      "kicker": "O–K",
+      "hint": "The same atoms at different temperatures give different spectra."
+    },
+    "mystery": {
+      "title": "Mystery spectra",
+      "kicker": "Solve",
+      "hint": "Which elements, and how fast is the source moving?"
+    }
+  },
+  "hud": {
+    "views": "Views",
+    "controls": "Spectrum controls",
+    "guide": "Guided tour",
+    "elements": "Elements",
+    "view": "Display",
+    "close": "Close"
+  },
+  "spectrum": {
+    "label": "Spectrum",
+    "surface": "Spectrum from {from} to {to} nm",
+    "keys": "Left and right arrows step between lines, Shift with an arrow pans, plus and minus zoom, 0 shows the whole range.",
+    "window": "{from}–{to} nm",
+    "normalized": "flux ÷ continuum",
+    "glow": "light from the gas alone",
+    "flux": "relative flux",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "reset": "Whole range"
+  },
+  "scene": {
+    "unknown": "Unknown source",
+    "lamp": "Lamp",
+    "sun": "Sun",
+    "dwarf": "Main-sequence star",
+    "gas": "Gas",
+    "atmosphere": "Atmosphere",
+    "air": "Earth's air",
+    "spectrograph": "Spectrograph"
+  },
+  "stars": {
+    "alnitak": "Alnitak",
+    "rigel": "Rigel",
+    "vega": "Vega",
+    "procyon": "Procyon",
+    "sun": "Sun",
+    "arcturus": "Arcturus",
+    "aldebaran": "Aldebaran"
+  },
+  "elements": {
+    "H": "Hydrogen",
+    "He": "Helium",
+    "Li": "Lithium",
+    "Na": "Sodium",
+    "K": "Potassium",
+    "Mg": "Magnesium",
+    "Ca": "Calcium",
+    "Fe": "Iron"
+  },
+  "stages": {
+    "0": "neutral",
+    "1": "ionized",
+    "2": "doubly ionized"
+  },
+  "card": {
+    "energy": "Photon energy",
+    "transition": "Transition",
+    "gf": "log gf",
+    "gfValue": "{value} · NIST {grade}",
+    "tau": "Optical depth τ₀",
+    "width": "Equivalent width",
+    "glows": "glows, nothing behind",
+    "bright": "bright, gas hotter than the light behind",
+    "core": "Core forms at",
+    "letter": "Fraunhofer {letter}",
+    "observed": "Observed wavelength",
+    "wavelength": "Wavelength in air",
+    "rest": "rest {rest} nm · shift {shift} nm",
+    "ground": "ground",
+    "limit": "ionization",
+    "diagramAbsorb": "Absorption from {lower} to {upper}",
+    "diagramEmit": "Emission from {upper} to {lower}",
+    "growthTitle": "Curve of growth",
+    "growthX": "more atoms →",
+    "growthY": "log W",
+    "sequenceTitle": "Across the main sequence",
+    "sequenceY": "line strength",
+    "zoom": "Zoom to line",
+    "compare": "Mark {element}"
+  },
+  "regime": {
+    "weak": "weak",
+    "saturated": "saturated",
+    "damped": "damped wings"
+  },
+  "regimeNote": {
+    "weak": "Few atoms absorb, so the line grows in proportion to their number. Weak lines measure abundances best.",
+    "saturated": "The core is already as dark as it gets; more atoms barely deepen it. Thermal and turbulent motion set its width.",
+    "damped": "Only the wings still grow, as the square root of the number of atoms. Pressure broadening sets their width."
+  },
+  "notes": {
+    "caK": "Ionized calcium's resonance line, the strongest in the Sun's visible spectrum. Calcium is rare, but nearly every calcium atom in the Sun is ionized and in its ground state, ready to absorb.",
+    "caH": "K's partner: the same lower level, the other fine-structure upper level, half the oscillator strength.",
+    "hDelta": "Balmer line from n = 2 to n = 6. Higher in the series, the lines crowd toward the Balmer limit at 364.6 nm.",
+    "ca4227": "Neutral calcium's resonance line. Strong in cool stars, gone in hot ones, where calcium is ionized.",
+    "gBand": "Fraunhofer's G: iron and calcium lines blended with molecular CH bands, which the lab does not model.",
+    "hGamma": "Balmer line from n = 2 to n = 5.",
+    "fe4383": "One of iron's strongest visible lines. Iron's thousands of lines fill the Sun's blue spectrum.",
+    "he4471": "Neutral helium from a level 21 eV up: only stars hotter than about 10,000 K excite it. A key line for classifying B stars.",
+    "mg4481": "Ionized magnesium from a level 8.9 eV up: strongest in A stars, and a temperature gauge beside He I 447.1.",
+    "he4686": "Ionized helium, from a level 48 eV above its ground state. It marks the O stars.",
+    "hBeta": "Balmer line from n = 2 to n = 4. Its wings, widened by the electric fields of nearby ions, measure a star's surface pressure.",
+    "mgB": "Magnesium's b triplet, from a metastable level 2.7 eV up. Its wings grow with surface gravity, telling dwarfs from giants.",
+    "feE": "Fraunhofer's E: neutral iron.",
+    "heD3": "Seen in the Sun's chromosphere in 1868 at a wavelength no known element matched: the discovery of helium. The photosphere is too cool to absorb it.",
+    "naD": "Sodium's resonance doublet, the yellow of street lamps and of Bunsen's flame. Strong in cool stars and in cold interstellar gas.",
+    "hAlpha": "Balmer line from n = 2 to n = 3: the red of glowing hydrogen. Its strength places a star on the spectral sequence.",
+    "li6708": "Lithium's resonance line, the crimson of a lithium flame. Stars destroy lithium deep inside, so it reveals mixing and age.",
+    "kI": "Potassium's resonance line, from the lilac potassium flame Bunsen and Kirchhoff studied in 1860."
+  },
+  "dock": {
+    "kms": "{value} km/s",
+    "star": "Star",
+    "anyStar": "Any main-sequence star",
+    "temperature": "Surface temperature",
+    "velocity": "Radial velocity",
+    "moveSun": "What if the Sun moved?",
+    "air": "Earth's air",
+    "letters": "Fraunhofer's letters",
+    "compare": "Compare",
+    "gasElements": "In the gas",
+    "lamp": "Light behind",
+    "off": "Off",
+    "gasTemperature": "Gas temperature",
+    "column": "Gas amount",
+    "columnValue": "log N = {value}",
+    "check": "Check",
+    "shift": "How fast is it moving?",
+    "answer": "Which elements?",
+    "cases": "Cases",
+    "caseNumber": "Case {number}",
+    "newCases": "New cases",
+    "nextCase": "Next case",
+    "solved": "{solved}/{total} solved",
+    "showAnswer": "Show me",
+    "outcome": {
+      "solved": "Solved",
+      "close": "Nearly",
+      "missed": "Not this time"
+    },
+    "verdict": {
+      "found": "found",
+      "missed": "missed",
+      "wrong": "not there"
+    },
+    "elementsScore": "{found}/{total} elements{wrong, plural, =0 {} other {, # not there}}",
+    "velocityScore": "{truth} km/s · yours {yours}",
+    "markFirst": "Mark an element to measure one of its lines.",
+    "answerHint": "Gold ticks under the spectrum mark each element's lab lines. Keep the ones that land on its lines.",
+    "measuring": "Line to measure",
+    "lab": "lab",
+    "reading": "Δλ {shift} nm · seen at {observed} nm",
+    "yourAnswer": "Your answer"
+  },
+  "kirchhoff": {
+    "continuum": {
+      "title": "Continuous spectrum",
+      "body": "a hot, dense body glows at every wavelength."
+    },
+    "absorption": {
+      "title": "Dark lines",
+      "body": "the light behind is hotter than the gas, which takes out its own wavelengths."
+    },
+    "emission": {
+      "title": "Bright lines",
+      "body": "with nothing behind it, the gas glows only at its own wavelengths."
+    },
+    "reversed": {
+      "title": "Bright lines on a continuum",
+      "body": "the gas is hotter than the light behind it."
+    },
+    "vanish": {
+      "title": "No lines",
+      "body": "gas and light share one temperature: what the gas takes, it gives back."
+    }
+  },
+  "mysteries": {
+    "flame": "A flame at {temperature} K",
+    "cell": "Gas at {temperature} K in front of a {lamp} K lamp",
+    "dwarf": "A {type}-type main-sequence star at {temperature} K",
+    "giant": "A K giant like {star}, at {temperature} K",
+    "receding": "receding at {value} km/s",
+    "approaching": "approaching at {value} km/s"
+  },
+  "panel": {
+    "elementsNote": "Mark an element to see its laboratory wavelengths under the spectrum. Pick a line to read it.",
+    "mark": "Mark lab lines",
+    "none": "No lines in this spectrum.",
+    "spectrograph": "Spectrograph",
+    "resolutionNote": "Resolving power R = λ / Δλ: at low R, neighbouring lines blend.",
+    "resolution": "Resolving power",
+    "resolutionValue": "R {power} · {width} nm at 600 nm",
+    "show": "Show",
+    "normalized": "Divide by the continuum",
+    "photons": "Photons in the scene",
+    "windows": "Windows",
+    "benchNote": "The bench gas has a stellar photosphere's electron pressure, so it ionizes as a star's gas would at the same temperature."
+  },
+  "windows": {
+    "full": "Whole visible range",
+    "hk": "Calcium H and K",
+    "balmer": "Balmer series",
+    "mgb": "Magnesium b",
+    "nad": "Sodium D",
+    "halpha": "Hα",
+    "oxygen": "Earth's oxygen bands"
+  },
+  "tour": {
+    "label": "Guided tour",
+    "start": "Start guided tour",
+    "progress": "{step} / {total}",
+    "previous": "Previous step",
+    "next": "Next",
+    "play": "Play guide",
+    "pause": "Pause guide",
+    "finish": "Finish",
+    "exit": "Exit tour",
+    "steps": {
+      "continuum": {
+        "title": "Light from heat",
+        "body": "A hot, dense body glows at every wavelength, brightest where Wien's law puts the peak. This lamp is at the Sun's temperature."
+      },
+      "absorption": {
+        "title": "A gas takes its own colours",
+        "body": "Sodium vapour in front of the lamp absorbs at 589.0 and 589.6 nm: photons whose energy exactly lifts its outer electron from 3s to 3p."
+      },
+      "emission": {
+        "title": "The same lines, glowing",
+        "body": "Turn the lamp off and the hot gas shines at exactly those wavelengths. Kirchhoff, 1859: a gas absorbs the light it can emit."
+      },
+      "hydrogen": {
+        "title": "Hydrogen's ladder",
+        "body": "Hot hydrogen absorbs the Balmer series, jumps up from n = 2, at wavelengths Rydberg's formula predicts. A cool flame shows none: no atoms sit in n = 2."
+      },
+      "fraunhofer": {
+        "title": "Fraunhofer's dark lines",
+        "body": "In 1814 Fraunhofer mapped hundreds of dark lines in sunlight and lettered the strongest. The Sun is a hot photosphere seen through its cooler atmosphere: Kirchhoff's bench, in the sky."
+      },
+      "fingerprint": {
+        "title": "Fingerprints",
+        "body": "Each element absorbs its own pattern. When many marked lab lines fall on dark lines at once, the element is there: one match could be chance, a pattern is not."
+      },
+      "air": {
+        "title": "Lines from our own air",
+        "body": "Move the Sun at 300 km/s: its lines shift by λv/c, but the A and B bands stay put. They come from oxygen in Earth's air, which isn't moving."
+      },
+      "sequence": {
+        "title": "Temperature, not composition",
+        "body": "Modelled with the Sun's composition, Vega still has far stronger hydrogen lines. Near 10,000 K the most hydrogen atoms sit in n = 2; hotter, hydrogen ionizes. Payne showed this with Saha's equation in 1925."
+      },
+      "cool": {
+        "title": "Cool stars, metal lines",
+        "body": "At 4,300 K more metal atoms stay neutral and many sit in low levels: lines of neutral metals crowd the spectrum while hydrogen's fade."
+      },
+      "mystery": {
+        "title": "Your turn",
+        "body": "A spectrum with its source hidden. Mark the elements whose lab lines match, slide the gold marker onto the middle of one of their lines to read the velocity, then check."
+      }
+    }
+  },
+  "technicalDetails": {
+    "open": "Technical details",
+    "close": "Close",
+    "title": "Inside Stellar Spectra",
+    "summary": "Every spectrum here is computed, not drawn: NIST atomic data, Saha–Boltzmann populations and radiative transfer, through a uniform slab on the bench and through ATLAS9 model photospheres for the stars.",
+    "featuresTitle": "What it shows",
+    "references": "Sources",
+    "features": {
+      "bench": "Kirchhoff's bench: a lamp, a gas and a spectrograph, with dark, bright and vanishing lines from one equation.",
+      "stars": "The Sun and six bright stars from O9.5 to K5, and any main-sequence star from 3,500 to 30,000 K.",
+      "lines": "{lines} lines of eight elements from NIST, each with its levels, strength, curve of growth and trend down the spectral sequence.",
+      "mystery": "Mystery cases dealt at random: flames, gas in front of a lamp, stars from B to K, each with its own temperature and velocity."
+    },
+    "sections": {
+      "light": {
+        "title": "Light and photons",
+        "body": "Sources are black bodies (Planck's law). The colours of stars, lamps and flames come from integrating their spectra against the CIE 1931 observer and converting to sRGB. A photon of wavelength λ carries hc/λ: the energy step it can bridge."
+      },
+      "atoms": {
+        "title": "Atoms in a hot gas",
+        "body": "In local thermodynamic equilibrium, Saha's equation shares an element among its ionization stages and Boltzmann's among the levels of each, with partition functions summed over NIST's levels. The lines are those NIST lists between 380 and 770 nm (air) that are strong enough to show at their species' typical temperature; oscillator strengths come from NIST's transition probabilities, with fine-structure components closer than 0.05 nm merged."
+      },
+      "bench": {
+        "title": "The bench",
+        "body": "A uniform slab: I = I₀e^(−τ) + B(T)(1 − e^(−τ)). Its gas has an electron pressure of 10 Pa and a gas pressure of 10 kPa, teaching choices; the column, the gas temperature and the lamp are yours."
+      },
+      "stars": {
+        "title": "Stars",
+        "body": "Each star is the ATLAS9 model (Castelli & Kurucz 2003) nearest its measured temperature and gravity; its lines use the Sun's abundances (Asplund et al. 2009). Light is integrated up through 23 layers from τ_Ross = 10⁻⁴ to 10^1.5, each in LTE at its own temperature and pressures. The continuum opacity is the model's Rosseland mean at every wavelength, and the flux is taken in the Eddington–Barbier approximation, F ≈ πI(μ = 2/3). Against the observed Sun, line strengths agree within about a factor of two."
+      },
+      "shapes": {
+        "title": "Line shapes",
+        "body": "Voigt profiles (Humlíček 1982) from thermal and turbulent Doppler broadening, radiation damping, van der Waals collisions (Unsöld's approximation, doubled) and, for hydrogen, the linear Stark effect scaled from Hβ measurements, with Holtsmark's Δλ^(−5/2) wings. A line's shape is taken at one depth (τ_Ross = 0.1, hydrogen 0.3); its strength follows every layer."
+      },
+      "motion": {
+        "title": "Motion and the instrument",
+        "body": "Radial velocities shift lines by the relativistic Doppler factor. The spectrograph blurs with a Gaussian of full width λ/R, and each pixel averages over its width. Wavelengths are in standard air (Morton 2000)."
+      },
+      "earth": {
+        "title": "Earth's air",
+        "body": "The O₂ A and B bands: a rigid-rotor model of their P and R branches from the odd rotational levels of ¹⁶O₂ at 255 K, with measured band origins, rotational constants and strengths, for one airmass."
+      },
+      "limits": {
+        "title": "What is left out",
+        "body": "No molecules besides O₂ (no TiO, so no M stars), no chromospheres or departures from LTE, no wavelength-dependent continuum opacity, no hydrogen self-broadening, rotation or macroturbulence. In the Sun, iron lines come out up to twice too strong; cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
+      }
+    }
+  }
+}

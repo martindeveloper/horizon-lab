@@ -9,6 +9,7 @@ const artwork = async (slug) =>
 const blackHole = await artwork("black-hole");
 const orrery = await artwork("orrery");
 const deepField = await artwork("deep-field");
+const spectroscopy = await artwork("spectroscopy");
 /** The card's ink, which every artwork's sky must end in. */
 const INK = "#08080b";
 const escape = (text) =>
@@ -19,6 +20,7 @@ const copy = {
   observatory: "Relativistic observatory",
   orrery: "In motion, from its birth to tonight",
   deepField: "As far out as we can see",
+  spectroscopy: "Fingerprints in starlight",
 };
 const messages = JSON.parse(
   await readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
@@ -43,6 +45,12 @@ const cards = [
     title: messages.catalogue.deepField.title,
     subtitle: copy.deepField,
     art: deepField,
+  },
+  {
+    path: "simulations/spectroscopy/og",
+    title: messages.catalogue.spectroscopy.title,
+    subtitle: copy.spectroscopy,
+    art: spectroscopy,
   },
 ];
 for (const card of cards) {

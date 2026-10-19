@@ -275,6 +275,27 @@ export const CREDITS: readonly CreditGroup[] = [
         url: "https://eventhorizontelescope.org/",
       },
       {
+        id: "nistAsd",
+        name: "NIST Atomic Spectra Database",
+        by: "Kramida, Ralchenko, Reader and the NIST ASD Team, National Institute of Standards and Technology",
+        licence: "Cited",
+        url: "https://www.nist.gov/pml/atomic-spectra-database",
+      },
+      {
+        id: "atlas9",
+        name: "ATLAS9 model atmospheres (Castelli & Kurucz 2003)",
+        by: "Fiorella Castelli and Robert L. Kurucz",
+        licence: "Cited",
+        url: "https://wwwuser.oats.inaf.it/fiorella.castelli/grids.html",
+      },
+      {
+        id: "cie",
+        name: "CIE 1931 colour-matching functions",
+        by: "International Commission on Illumination (CIE)",
+        licence: "Cited",
+        url: "https://cie.co.at/datatable/cie-1931-colour-matching-functions-2-degree-observer",
+      },
+      {
         id: "codata",
         name: "CODATA 2022 fundamental constants",
         by: "CODATA Task Group on Fundamental Constants; NIST",

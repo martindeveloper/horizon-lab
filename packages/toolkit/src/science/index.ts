@@ -5,6 +5,8 @@ export * from "./format";
 export * from "./measure";
 export * from "./equation";
 export * from "./laws";
+export * from "./spectra";
+export * from "./color";
 export * from "./quantities";
 export * from "./distance";
 export * from "./time";

@@ -11,6 +11,8 @@ import { DEEP_FIELD_PATH } from "../src/features/deep-field/manifest.ts";
 import { viewRouteParams as deepViewRouteParams } from "../src/features/deep-field/routing.ts";
 import { ORRERY_PATH } from "../src/features/orrery/manifest.ts";
 import { viewRouteParams } from "../src/features/orrery/routing.ts";
+import { SPECTROSCOPY_PATH } from "../src/features/spectroscopy/manifest.ts";
+import { viewRouteParams as spectroscopyViewParams } from "../src/features/spectroscopy/routing.ts";
 import { routing } from "../src/i18n/routing.ts";
 import { siteUrl } from "../src/lib/metadata.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
@@ -30,6 +32,7 @@ test("sitemap lists the catalogue, the about and credits pages, every simulation
     ...presetRouteParams().map(({ hole }) => `${BLACK_HOLE_PATH}/${hole}`),
     ...viewRouteParams().map(({ view }) => `${ORRERY_PATH}/${view}`),
     ...deepViewRouteParams().map(({ view }) => `${DEEP_FIELD_PATH}/${view}`),
+    ...spectroscopyViewParams().map(({ view }) => `${SPECTROSCOPY_PATH}/${view}`),
   ];
   assert.deepEqual([...paths].sort(), [...new Set(expected)].sort());
   for (const { entryPoints } of simulations)

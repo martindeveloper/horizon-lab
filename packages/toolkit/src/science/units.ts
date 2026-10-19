@@ -1,5 +1,5 @@
 /**
- * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, K).
+ * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, K, J).
  * Symbols follow the SI and the IAU (au, ly, pc, M☉); hosts may translate them
  * for display. Astronomical definitions are exact where the IAU fixed them.
  */
@@ -7,6 +7,7 @@
 import {
   AU_SI,
   EARTH_GM_SI,
+  ELEMENTARY_CHARGE_SI,
   GRAVITATIONAL_CONSTANT_SI,
   JULIAN_YEAR_SI,
   SOLAR_GM_SI,
@@ -22,7 +23,8 @@ export type Dimension =
   | "mass"
   | "speed"
   | "rate"
-  | "temperature";
+  | "temperature"
+  | "energy";
 
 export type UnitDefinition = {
   dimension: Dimension;
@@ -49,6 +51,9 @@ const PC = (648_000 / Math.PI) * AU;
 
 export const UNITS = {
   // Length
+  /** Ångström, the spectroscopist's traditional unit of wavelength. */
+  angstrom: unit("length", "Å", 1e-10, "\\mathring{A}"),
+  nm: unit("length", "nm", 1e-9),
   m: unit("length", "m", 1),
   km: unit("length", "km", 1e3),
   /** Nominal solar radius (IAU 2015 Resolution B3). */
@@ -98,6 +103,10 @@ export const UNITS = {
   "km/s/Mpc": unit("rate", "km/s/Mpc", 1e3 / (1e6 * PC), "\\mathrm{km\\,s^{-1}\\,Mpc^{-1}}"),
   // Temperature
   K: unit("temperature", "K", 1),
+  // Energy
+  J: unit("energy", "J", 1),
+  /** Electronvolt: the energy one elementary charge gains across one volt (exact). */
+  eV: unit("energy", "eV", ELEMENTARY_CHARGE_SI),
 } as const satisfies Record<string, UnitDefinition>;
 
 export type UnitId = keyof typeof UNITS;

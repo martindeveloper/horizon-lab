@@ -1,0 +1,334 @@
+{
+  "app": "Spektra hvězd",
+  "metadataDescription": "Rozložte světlo hvězd a čtěte jeho tmavé čáry: Kirchhoffův stůl, Fraunhoferovo Slunce, spektrální posloupnost a záhadná spektra, spočítané z atomových dat NIST a skutečných modelů atmosfér.",
+  "views": {
+    "kirchhoff": {
+      "title": "Kirchhoffův stůl",
+      "kicker": "Laboratoř",
+      "hint": "Posviťte lampou skrz plyn: tmavé čáry, jasné čáry a proč."
+    },
+    "sun": {
+      "title": "Slunce",
+      "kicker": "G2 V",
+      "hint": "Fraunhoferovy tmavé čáry a atomy, které je tvoří."
+    },
+    "stars": {
+      "title": "Spektrální posloupnost",
+      "kicker": "O–K",
+      "hint": "Stejné atomy při různých teplotách dávají různá spektra."
+    },
+    "mystery": {
+      "title": "Záhadná spektra",
+      "kicker": "Řešte",
+      "hint": "Které prvky a jak rychle se zdroj pohybuje?"
+    }
+  },
+  "hud": {
+    "views": "Pohledy",
+    "controls": "Ovládání spektra",
+    "guide": "Průvodce",
+    "elements": "Prvky",
+    "view": "Zobrazení",
+    "close": "Zavřít"
+  },
+  "spectrum": {
+    "label": "Spektrum",
+    "surface": "Spektrum od {from} do {to} nm",
+    "keys": "Šipky vlevo a vpravo přecházejí mezi čarami, se Shiftem posouvají, plus a minus přibližují, 0 ukáže celý rozsah.",
+    "window": "{from}–{to} nm",
+    "normalized": "tok ÷ kontinuum",
+    "glow": "světlo samotného plynu",
+    "flux": "relativní tok",
+    "zoomIn": "Přiblížit",
+    "zoomOut": "Oddálit",
+    "reset": "Celý rozsah"
+  },
+  "scene": {
+    "unknown": "Neznámý zdroj",
+    "lamp": "Lampa",
+    "sun": "Slunce",
+    "dwarf": "Hvězda hlavní posloupnosti",
+    "gas": "Plyn",
+    "atmosphere": "Atmosféra",
+    "air": "Zemský vzduch",
+    "spectrograph": "Spektrograf"
+  },
+  "stars": {
+    "alnitak": "Alnitak",
+    "rigel": "Rigel",
+    "vega": "Vega",
+    "procyon": "Procyon",
+    "sun": "Slunce",
+    "arcturus": "Arcturus",
+    "aldebaran": "Aldebaran"
+  },
+  "elements": {
+    "H": "Vodík",
+    "He": "Helium",
+    "Li": "Lithium",
+    "Na": "Sodík",
+    "K": "Draslík",
+    "Mg": "Hořčík",
+    "Ca": "Vápník",
+    "Fe": "Železo"
+  },
+  "stages": {
+    "0": "neutrální",
+    "1": "ionizovaný",
+    "2": "dvakrát ionizovaný"
+  },
+  "card": {
+    "energy": "Energie fotonu",
+    "transition": "Přechod",
+    "gf": "log gf",
+    "gfValue": "{value} · NIST {grade}",
+    "tau": "Optická hloubka τ₀",
+    "width": "Ekvivalentní šířka",
+    "glows": "svítí, za plynem nic není",
+    "bright": "jasná, plyn je teplejší než světlo za ním",
+    "core": "Jádro vzniká při",
+    "letter": "Fraunhofer {letter}",
+    "observed": "Pozorovaná vlnová délka",
+    "wavelength": "Vlnová délka ve vzduchu",
+    "rest": "klidová {rest} nm · posun {shift} nm",
+    "ground": "základní",
+    "limit": "ionizace",
+    "diagramAbsorb": "Absorpce z {lower} do {upper}",
+    "diagramEmit": "Emise z {upper} do {lower}",
+    "growthTitle": "Křivka růstu",
+    "growthX": "více atomů →",
+    "growthY": "log W",
+    "sequenceTitle": "Napříč hlavní posloupností",
+    "sequenceY": "síla čáry",
+    "zoom": "Přiblížit čáru",
+    "compare": "Označit: {element}"
+  },
+  "regime": {
+    "weak": "slabá",
+    "saturated": "nasycená",
+    "damped": "tlumená křídla"
+  },
+  "regimeNote": {
+    "weak": "Absorbuje málo atomů, takže čára roste úměrně jejich počtu. Slabé čáry nejlépe měří zastoupení prvků.",
+    "saturated": "Jádro je už tak tmavé, jak jen může být; další atomy ho téměř neprohloubí. Jeho šířku určuje tepelný a turbulentní pohyb.",
+    "damped": "Rostou už jen křídla, s druhou odmocninou počtu atomů. Jejich šířku určuje tlakové rozšíření."
+  },
+  "notes": {
+    "caK": "Rezonanční čára ionizovaného vápníku, nejsilnější ve viditelném spektru Slunce. Vápník je vzácný, ale skoro každý jeho atom na Slunci je ionizovaný a v základním stavu, připravený absorbovat.",
+    "caH": "Partnerka čáry K: stejná dolní hladina, druhá horní hladina jemné struktury, poloviční síla oscilátoru.",
+    "hDelta": "Balmerova čára z n = 2 do n = 6. Výš v sérii se čáry zhušťují k Balmerově mezi na 364,6 nm.",
+    "ca4227": "Rezonanční čára neutrálního vápníku. Silná v chladných hvězdách, v horkých mizí, protože tam je vápník ionizovaný.",
+    "gBand": "Fraunhoferovo G: čáry železa a vápníku splývající s molekulovými pásy CH, které laboratoř nemodeluje.",
+    "hGamma": "Balmerova čára z n = 2 do n = 5.",
+    "fe4383": "Jedna z nejsilnějších viditelných čar železa. Tisíce čar železa vyplňují modrou část slunečního spektra.",
+    "he4471": "Neutrální helium z hladiny 21 eV nad základní: vybudí ho jen hvězdy teplejší než asi 10 000 K. Klíčová čára pro klasifikaci hvězd typu B.",
+    "mg4481": "Ionizovaný hořčík z hladiny 8,9 eV: nejsilnější u hvězd typu A a vedle He I 447,1 ukazatel teploty.",
+    "he4686": "Ionizované helium z hladiny 48 eV nad jeho základním stavem. Označuje hvězdy typu O.",
+    "hBeta": "Balmerova čára z n = 2 do n = 4. Její křídla, rozšířená elektrickými poli okolních iontů, měří tlak na povrchu hvězdy.",
+    "mgB": "Triplet b hořčíku z metastabilní hladiny 2,7 eV. Jeho křídla rostou s povrchovou gravitací a odliší trpaslíky od obrů.",
+    "feE": "Fraunhoferovo E: neutrální železo.",
+    "heD3": "Spatřena v chromosféře Slunce roku 1868 na vlnové délce, které neodpovídal žádný známý prvek: objev helia. Fotosféra je na její absorpci příliš chladná.",
+    "naD": "Rezonanční dublet sodíku, žluť pouličních lamp i Bunsenova plamene. Silný v chladných hvězdách a v chladném mezihvězdném plynu.",
+    "hAlpha": "Balmerova čára z n = 2 do n = 3: červeň zářícího vodíku. Její síla řadí hvězdu do spektrální posloupnosti.",
+    "li6708": "Rezonanční čára lithia, karmínová barva lithiového plamene. Hvězdy lithium hluboko uvnitř ničí, takže prozrazuje promíchávání a stáří.",
+    "kI": "Rezonanční čára draslíku, z fialového draslíkového plamene, který Bunsen a Kirchhoff zkoumali roku 1860."
+  },
+  "dock": {
+    "kms": "{value} km/s",
+    "star": "Hvězda",
+    "anyStar": "Libovolná hvězda hlavní posloupnosti",
+    "temperature": "Povrchová teplota",
+    "velocity": "Radiální rychlost",
+    "moveSun": "Co kdyby se Slunce pohybovalo?",
+    "air": "Zemský vzduch",
+    "letters": "Fraunhoferova písmena",
+    "compare": "Porovnat",
+    "gasElements": "V plynu",
+    "lamp": "Světlo za plynem",
+    "off": "Vypnuto",
+    "gasTemperature": "Teplota plynu",
+    "column": "Množství plynu",
+    "columnValue": "log N = {value}",
+    "check": "Zkontrolovat",
+    "shift": "Jak rychle se pohybuje?",
+    "answer": "Které prvky?",
+    "cases": "Případy",
+    "caseNumber": "Případ {number}",
+    "newCases": "Nové případy",
+    "nextCase": "Další případ",
+    "solved": "{solved}/{total} vyřešeno",
+    "showAnswer": "Ukázat",
+    "outcome": {
+      "solved": "Vyřešeno",
+      "close": "Skoro",
+      "missed": "Tentokrát ne"
+    },
+    "verdict": {
+      "found": "nalezen",
+      "missed": "chybí",
+      "wrong": "není ve spektru"
+    },
+    "elementsScore": "{found}/{total} prvků{wrong, plural, =0 {} one {, # navíc} few {, # navíc} other {, # navíc}}",
+    "velocityScore": "{truth} km/s · vaše {yours}",
+    "markFirst": "Označte prvek a změřte jednu z jeho čar.",
+    "answerHint": "Zlaté značky pod spektrem ukazují laboratorní čáry prvků. Nechte ty, které sedí na jeho čáry.",
+    "measuring": "Měřená čára",
+    "lab": "lab",
+    "reading": "Δλ {shift} nm · změřeno na {observed} nm",
+    "yourAnswer": "Vaše odpověď"
+  },
+  "kirchhoff": {
+    "continuum": {
+      "title": "Spojité spektrum",
+      "body": "horké husté těleso září na všech vlnových délkách."
+    },
+    "absorption": {
+      "title": "Tmavé čáry",
+      "body": "světlo za plynem je teplejší než plyn, který si z něj bere své vlnové délky."
+    },
+    "emission": {
+      "title": "Jasné čáry",
+      "body": "bez světla za sebou plyn září jen na svých vlnových délkách."
+    },
+    "reversed": {
+      "title": "Jasné čáry na spojitém spektru",
+      "body": "plyn je teplejší než světlo za ním."
+    },
+    "vanish": {
+      "title": "Žádné čáry",
+      "body": "plyn i světlo za ním mají stejnou teplotu: co plyn pohltí, to vrátí."
+    }
+  },
+  "mysteries": {
+    "flame": "Plamen o teplotě {temperature} K",
+    "cell": "Plyn o teplotě {temperature} K před lampou o {lamp} K",
+    "dwarf": "Hvězda hlavní posloupnosti typu {type}, {temperature} K",
+    "giant": "Obr typu K jako {star}, {temperature} K",
+    "receding": "vzdaluje se {value} km/s",
+    "approaching": "přibližuje se {value} km/s"
+  },
+  "panel": {
+    "elementsNote": "Označte prvek a pod spektrem uvidíte jeho laboratorní vlnové délky. Vyberte čáru a přečtěte si ji.",
+    "mark": "Označit laboratorní čáry",
+    "none": "V tomto spektru žádné čáry nejsou.",
+    "spectrograph": "Spektrograf",
+    "resolutionNote": "Rozlišovací schopnost R = λ / Δλ: při nízkém R sousední čáry splývají.",
+    "resolution": "Rozlišovací schopnost",
+    "resolutionValue": "R {power} · {width} nm na 600 nm",
+    "show": "Zobrazit",
+    "normalized": "Dělit kontinuem",
+    "photons": "Fotony ve scéně",
+    "windows": "Výřezy",
+    "benchNote": "Plyn na stole má elektronový tlak jako fotosféra hvězdy, takže se ionizuje jako plyn hvězdy při stejné teplotě."
+  },
+  "windows": {
+    "full": "Celý viditelný rozsah",
+    "hk": "Vápník H a K",
+    "balmer": "Balmerova série",
+    "mgb": "Hořčík b",
+    "nad": "Sodík D",
+    "halpha": "Hα",
+    "oxygen": "Kyslíkové pásy zemského vzduchu"
+  },
+  "tour": {
+    "label": "Průvodce",
+    "start": "Spustit průvodce",
+    "progress": "{step} / {total}",
+    "previous": "Předchozí krok",
+    "next": "Další",
+    "play": "Přehrát průvodce",
+    "pause": "Pozastavit průvodce",
+    "finish": "Dokončit",
+    "exit": "Ukončit průvodce",
+    "steps": {
+      "continuum": {
+        "title": "Světlo z tepla",
+        "body": "Horké husté těleso září na všech vlnových délkách, nejjasněji tam, kam maximum klade Wienův zákon. Tato lampa má teplotu Slunce."
+      },
+      "absorption": {
+        "title": "Plyn si bere své barvy",
+        "body": "Sodíkové páry před lampou pohlcují na 589,0 a 589,6 nm: fotony, jejichž energie přesně zvedne vnější elektron z 3s do 3p."
+      },
+      "emission": {
+        "title": "Tytéž čáry září",
+        "body": "Vypněte lampu a horký plyn svítí přesně na těchto vlnových délkách. Kirchhoff, 1859: plyn pohlcuje světlo, které umí vyzařovat."
+      },
+      "hydrogen": {
+        "title": "Vodíkový žebřík",
+        "body": "Horký vodík pohlcuje Balmerovu sérii, skoky nahoru z n = 2, na vlnových délkách podle Rydbergova vzorce. Chladný plamen žádné nemá: v n = 2 nesedí žádné atomy."
+      },
+      "fraunhofer": {
+        "title": "Fraunhoferovy tmavé čáry",
+        "body": "Roku 1814 Fraunhofer zmapoval stovky tmavých čar ve slunečním světle a ty nejsilnější označil písmeny. Slunce je horká fotosféra viděná skrz chladnější atmosféru: Kirchhoffův stůl na obloze."
+      },
+      "fingerprint": {
+        "title": "Otisky prstů",
+        "body": "Každý prvek pohlcuje svůj vlastní vzor. Když mnoho označených laboratorních čar padne na tmavé čáry najednou, prvek tam je: jedna shoda může být náhoda, vzor ne."
+      },
+      "air": {
+        "title": "Čáry našeho vzduchu",
+        "body": "Rozhýbejte Slunce na 300 km/s: jeho čáry se posunou o λv/c, ale pásy A a B zůstanou na místě. Pocházejí z kyslíku v zemském vzduchu, který se nepohybuje."
+      },
+      "sequence": {
+        "title": "Teplota, ne složení",
+        "body": "I se složením Slunce má Vega mnohem silnější vodíkové čáry. Kolem 10 000 K sedí v n = 2 nejvíce atomů vodíku; při vyšší teplotě se vodík ionizuje. Payneová to roku 1925 ukázala Sahovou rovnicí."
+      },
+      "cool": {
+        "title": "Chladné hvězdy, čáry kovů",
+        "body": "Při 4 300 K zůstává víc atomů kovů neutrálních a mnoho jich sedí v nízkých hladinách: spektrum zaplní čáry neutrálních kovů a vodíkové slábnou."
+      },
+      "mystery": {
+        "title": "Teď vy",
+        "body": "Spektrum se skrytým zdrojem. Označte prvky, jejichž laboratorní čáry sedí, posuňte zlatou značku doprostřed jedné z jejich čar a odečtěte rychlost, pak zkontrolujte."
+      }
+    }
+  },
+  "technicalDetails": {
+    "open": "Technické podrobnosti",
+    "close": "Zavřít",
+    "title": "Uvnitř Spekter hvězd",
+    "summary": "Každé spektrum se tu počítá, nekreslí: atomová data NIST, populace podle Sahy a Boltzmanna a přenos záření, na stole skrz homogenní vrstvu plynu, u hvězd skrz modelové fotosféry ATLAS9.",
+    "featuresTitle": "Co ukazuje",
+    "references": "Zdroje",
+    "features": {
+      "bench": "Kirchhoffův stůl: lampa, plyn a spektrograf, s tmavými, jasnými i mizejícími čarami z jedné rovnice.",
+      "stars": "Slunce a šest jasných hvězd od O9,5 po K5 a libovolná hvězda hlavní posloupnosti od 3 500 do 30 000 K.",
+      "lines": "{lines} čar osmi prvků z NIST, každá se svými hladinami, silou, křivkou růstu a průběhem napříč spektrální posloupností.",
+      "mystery": "Náhodně rozdávané záhadné případy: plameny, plyn před lampou, hvězdy od B po K, každá s vlastní teplotou a rychlostí."
+    },
+    "sections": {
+      "light": {
+        "title": "Světlo a fotony",
+        "body": "Zdroje jsou černá tělesa (Planckův zákon). Barvy hvězd, lamp a plamenů vycházejí z integrace jejich spekter s normalizovaným pozorovatelem CIE 1931 a převodu do sRGB. Foton vlnové délky λ nese energii hc/λ: krok, který umí překlenout."
+      },
+      "atoms": {
+        "title": "Atomy v horkém plynu",
+        "body": "V lokální termodynamické rovnováze rozděluje Sahova rovnice prvek mezi stupně ionizace a Boltzmannova mezi hladiny každého z nich; partiční funkce jsou součty přes hladiny NIST. Čáry jsou ty, které NIST uvádí mezi 380 a 770 nm (ve vzduchu) a které jsou při typické teplotě svého iontu dost silné; síly oscilátorů pocházejí z pravděpodobností přechodů NIST a složky jemné struktury bližší než 0,05 nm jsou sloučeny."
+      },
+      "bench": {
+        "title": "Stůl",
+        "body": "Homogenní vrstva: I = I₀e^(−τ) + B(T)(1 − e^(−τ)). Její plyn má elektronový tlak 10 Pa a tlak plynu 10 kPa, výukové volby; sloupec, teplotu plynu i lampu nastavujete vy."
+      },
+      "stars": {
+        "title": "Hvězdy",
+        "body": "Každá hvězda je model ATLAS9 (Castelli a Kurucz 2003) nejbližší její změřené teplotě a gravitaci; její čáry používají zastoupení prvků ve Slunci (Asplund a kol. 2009). Světlo se integruje vzhůru skrz 23 vrstev od τ_Ross = 10⁻⁴ do 10^1,5, každou v LTE při její teplotě a tlacích. Opacita kontinua je na všech vlnových délkách Rosselandova střední opacita modelu a tok se bere v Eddingtonově–Barbierově aproximaci, F ≈ πI(μ = 2/3). Ve srovnání s pozorovaným Sluncem souhlasí síly čar zhruba do dvojnásobku."
+      },
+      "shapes": {
+        "title": "Tvary čar",
+        "body": "Voigtovy profily (Humlíček 1982) z tepelného a turbulentního Dopplerova rozšíření, radiačního tlumení, van der Waalsových srážek (Unsöldova aproximace, zdvojená) a u vodíku z lineárního Starkova jevu škálovaného podle měření Hβ, s Holtsmarkovými křídly Δλ^(−5/2). Tvar čáry se bere v jedné hloubce (τ_Ross = 0,1, vodík 0,3); její síla sleduje každou vrstvu."
+      },
+      "motion": {
+        "title": "Pohyb a přístroj",
+        "body": "Radiální rychlosti posouvají čáry relativistickým Dopplerovým faktorem. Spektrograf rozmazává Gaussovou funkcí s pološířkou (FWHM) λ/R a každý pixel průměruje přes svou šířku. Vlnové délky jsou ve standardním vzduchu (Morton 2000)."
+      },
+      "earth": {
+        "title": "Zemský vzduch",
+        "body": "Pásy A a B molekuly O₂: model tuhého rotátoru pro jejich větve P a R z lichých rotačních hladin ¹⁶O₂ při 255 K, se změřenými počátky pásů, rotačními konstantami a silami, pro jednu vzdušnou hmotu."
+      },
+      "limits": {
+        "title": "Co tu chybí",
+        "body": "Žádné molekuly kromě O₂ (žádné TiO, a tedy žádné hvězdy M), žádné chromosféry ani odchylky od LTE, žádná opacita kontinua závislá na vlnové délce, žádné vlastní rozšíření vodíku, rotace ani makroturbulence. Ve Slunci vycházejí čáry železa až dvakrát silnější; Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
+      }
+    }
+  }
+}

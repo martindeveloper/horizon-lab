@@ -17,3 +17,15 @@ export const SOLAR_RADIUS_SI = 6.957e8;
 export const AU_SI = 149_597_870_700;
 /** Julian year, s (exact, IAU). */
 export const JULIAN_YEAR_SI = 365.25 * 86_400;
+/** Planck constant, J s (exact, SI 2019). */
+export const PLANCK_CONSTANT_SI = 6.62607015e-34;
+/** Boltzmann constant, J K⁻¹ (exact, SI 2019). */
+export const BOLTZMANN_CONSTANT_SI = 1.380649e-23;
+/** Elementary charge, C (exact, SI 2019); also the joules in one electronvolt. */
+export const ELEMENTARY_CHARGE_SI = 1.602176634e-19;
+/** Electron mass, kg (CODATA 2022). */
+export const ELECTRON_MASS_SI = 9.1093837139e-31;
+/** Atomic mass constant, one twelfth of a ¹²C atom, kg (CODATA 2022). */
+export const ATOMIC_MASS_CONSTANT_SI = 1.66053906892e-27;
+/** Classical electron radius e² / (4πε₀ mₑ c²), m (CODATA 2022). */
+export const CLASSICAL_ELECTRON_RADIUS_SI = 2.8179403205e-15;

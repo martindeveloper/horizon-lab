@@ -1,0 +1,97 @@
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
+
+@layer base {
+  /* Names and readouts over the dark spectrum read like the scene's labels. */
+  :where([data-simulation="spectroscopy"]) .spectroscopy-spectrum {
+    text-shadow: 0 0 6px rgb(8 8 11 / 0.9);
+  }
+}
+
+/* The ribbon sits on the scene like a slit image: a hairline frame, never a card. */
+:where([data-simulation="spectroscopy"]) .spectroscopy-ribbon {
+  box-shadow:
+    0 0 0 0.5px rgb(236 236 232 / 0.12),
+    0 0 24px rgb(var(--solar) / 0.06);
+}
+
+/* The guide's hold on a step: a hairline that fills, freezes while paused, then moves on. */
+@keyframes spectroscopy-dwell {
+  to {
+    transform: scaleX(1);
+  }
+}
+:where([data-simulation="spectroscopy"]) .spectroscopy-dwell {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+:where([data-simulation="spectroscopy"])
+  .spectroscopy-dwell:is([data-state="running"], [data-state="paused"]) {
+  animation-name: spectroscopy-dwell;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+:where([data-simulation="spectroscopy"]) .spectroscopy-dwell[data-state="paused"] {
+  animation-play-state: paused;
+}
+
+/* Names rise into place over their lines, one after another. */
+@keyframes spectroscopy-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+:where([data-simulation="spectroscopy"]) .spectroscopy-label {
+  animation: spectroscopy-label-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* A picked line rings twice in gold, then holds as a hairline that glides to the next pick. */
+@keyframes spectroscopy-pulse {
+  from {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgb(var(--solar) / 0.75);
+  }
+  to {
+    opacity: 0;
+    box-shadow: 0 0 0 12px rgb(var(--solar) / 0);
+  }
+}
+:where([data-simulation="spectroscopy"]) .spectroscopy-pulse {
+  animation: spectroscopy-pulse 1s ease-out 2 both;
+}
+
+/* A checked mystery's verdict lands like a stamp; its chips turn over one after another. */
+@keyframes spectroscopy-stamp {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+:where([data-simulation="spectroscopy"]) .spectroscopy-stamp {
+  animation: spectroscopy-stamp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+@keyframes spectroscopy-verdict {
+  from {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+}
+:where([data-simulation="spectroscopy"]) .spectroscopy-verdict {
+  animation: spectroscopy-verdict 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where([data-simulation="spectroscopy"])
+    :is(.spectroscopy-label, .spectroscopy-pulse, .spectroscopy-stamp, .spectroscopy-verdict) {
+    animation: none;
+  }
+  :where([data-simulation="spectroscopy"]) .spectroscopy-pulse {
+    opacity: 0;
+  }
+}

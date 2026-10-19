@@ -1,5 +1,6 @@
 import { CONSTANTS, RAD_PER_DEG } from "./constants";
 import { defineEquation } from "./equation";
+import { dopplerShift, photonEnergy, planckLaw, wienDisplacement } from "./spectra";
 import { UNITS } from "./units";
 
 /**
@@ -178,4 +179,8 @@ export const LAWS = {
   angularSeparation,
   resonanceSemiMajorAxis,
   hubbleLaw,
+  planckLaw,
+  wienDisplacement,
+  photonEnergy,
+  dopplerShift,
 };

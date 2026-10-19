@@ -118,6 +118,27 @@
           "title": "Observable universe"
         }
       }
+    },
+    "spectroscopy": {
+      "title": "Stellar Spectra",
+      "eyebrow": "Stellar Spectra · Fingerprints in starlight",
+      "category": "Light & atoms",
+      "description": "Split starlight into its colours and read the dark lines: which atoms, how hot, how fast.",
+      "open": "Open Stellar Spectra",
+      "fingerprints": "Elements by their lines",
+      "kirchhoff": "Kirchhoff's bench",
+      "sequence": "The spectral sequence",
+      "entryPoints": {
+        "sun": {
+          "title": "The Sun"
+        },
+        "kirchhoff": {
+          "title": "Kirchhoff's bench"
+        },
+        "mystery": {
+          "title": "Mystery spectra"
+        }
+      }
     }
   },
   "about": {
@@ -179,7 +200,7 @@
       },
       "data": {
         "label": "Data",
-        "intro": "Orbits, shapes, spins, constants, stars and black holes."
+        "intro": "Orbits, shapes, spins, constants, stars, spectra and black holes."
       },
       "fonts": {
         "label": "Fonts",
@@ -210,7 +231,10 @@
       "mpc": "Counts of known trans-Neptunian objects.",
       "gravity": "Sgr A*'s mass and the Sun's distance from the Galactic Centre.",
       "eht": "The measured rings of M87* and Sgr A*.",
-      "codata": "The gravitational constant.",
+      "codata": "The gravitational constant, the electron's and proton's masses, the atomic mass constant, the classical electron radius and the Rydberg constant.",
+      "nistAsd": "Energy levels, ionization energies and transition probabilities for every atomic line in Stellar Spectra.",
+      "atlas9": "Model photospheres of the stars in Stellar Spectra: temperature and pressure layer by layer.",
+      "cie": "The standard observer that turns spectra into the colours of stars, flames and the spectrum ribbon.",
       "bodoni": "Headlines.",
       "plex": "Text and figures.",
       "next": "Pages, routing and prerendering.",
@@ -249,7 +273,7 @@
       "naif": "Reference radii, rotation poles and prime meridians. Moon orbits use JPL satellite elements and approximate fits to Horizons vectors, not a live SPICE calculation.",
       "solarLimb": "Red, green and blue coefficients evaluated from the SolarSoft darklimb_u and darklimb_v fits to Allen’s tables. Horizon applies an illustrative colour adjustment.",
       "iauUnits": "Astronomical unit, parsec, Julian year and nominal solar mass parameter and radius used across both simulations.",
-      "si": "SI definitions underpinning units and the exact speed of light.",
+      "si": "SI definitions underpinning units: the exact speed of light and the Planck, Boltzmann and elementary-charge constants.",
       "helland": "Adapted to GLSL and normalized RGB for the black-hole disk. This is an approximate display colour, not a calibrated spectrum."
     },
     "worlds": {

@@ -24,6 +24,7 @@ src/
         page.tsx               Default view + metadata
         [view]/page.tsx        View route + metadata
       deep-field/              The same three routes for Deep Field's views
+      spectroscopy/            The same three routes for Stellar Spectra's views
   components/
     shell/                     AppShell, header, phone menu, preferences, theme switch, stage sizing
     simulations/               Shared simulation stage: WebGL gate, immersive view, loading,
@@ -96,6 +97,24 @@ src/
                                scales, lod.ts blends them, guide.ts flies the journey on the
                                toolkit's tour camera (as the Orrery's guide does)
       lib/store.ts             Zustand store (deepField namespace messages)
+    spectroscopy/
+      index.ts                 Public client entry: SpectroscopyApp
+      manifest.ts, routing.ts, server.ts, technical.json
+      components/              The stage (scene canvas and spectrum), dock, line card with its
+                               level diagram and curves, Elements and Display panels, guide
+      lib/model/               The physics, without React or the DOM:
+        atoms.ts               Elements, NIST lines and partition functions (atomic-data.json
+                               from scripts/fetch-atomic-data.mjs)
+        atmospheres.ts         ATLAS9 photospheres (atmospheres.json from
+                               scripts/fetch-model-atmospheres.mjs)
+        populations.ts         Saha and Boltzmann
+        profile.ts, voigt.ts   Line shapes: Doppler, Voigt, van der Waals, Stark
+        spectrum.ts            The bench's uniform slab, the stars' layered LTE transfer, the
+                               instrument and pixels; line reports and curves of growth
+        telluric.ts            Earth's O₂ A and B bands
+        scenes.ts, stars.ts    What each view observes: bench, named stars, mysteries
+        equations.ts, tour.ts  The formulas the documents print; the guided journey
+      lib/store.ts             Zustand store (spectroscopy namespace messages)
   lib/
     engine-lifecycle.ts        Lazy engine startup, cancellation and disposal
     sources.ts                 Shared bibliography the catalogue figures cite
@@ -182,6 +201,8 @@ page scrolling.
 | `/lab/orrery/oort-cloud`   | Permanent redirect to the canonical view                                                                                                     |
 | `/lab/deep-field`          | Deep Field, default view (the Milky Way)                                                                                                     |
 | `/lab/deep-field/laniakea` | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
+| `/lab/spectroscopy`        | Stellar Spectra, default view (the Sun)                                                                                                      |
+| `/lab/spectroscopy/stars`  | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
 | `/black-hole/...`          | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/orrery/...`              | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/en/...`, `/cs/...`       | Served in that language, then shown as the clean path                                                                                        |
@@ -365,7 +386,7 @@ The black-hole canvas raises initialization failures into the route boundary so
 an error cannot remain hidden beneath an endless loader.
 
 Wrap each WebGL feature entry in `WebGLGate` (`src/components/simulations/webgl-gate.tsx`)
-with that loader as `fallback`. It probes WebGL 2 once per page session before the
+with that loader as `fallback`. Stellar Spectra draws with Canvas 2D and SVG and needs no gate. It probes WebGL 2 once per page session before the
 renderer chunk downloads: without it the stage shows a WebGL status page, and a
 CPU-only renderer gets a dismissible slow-performance notice over the scene.
 

@@ -4,6 +4,10 @@ import {
   viewRouteParams as deepViewRouteParams,
 } from "@/features/deep-field/routing";
 import { pathForView, viewRouteParams } from "@/features/orrery/routing";
+import {
+  pathForView as pathForSpectroscopyView,
+  viewRouteParams as spectroscopyRouteParams,
+} from "@/features/spectroscopy/routing";
 
 import { simulations } from "./simulations";
 
@@ -14,6 +18,7 @@ const subpages: Record<SimulationId, () => string[]> = {
   "black-hole": () => presetRouteParams().map(({ hole }) => pathForHole(hole)),
   orrery: () => viewRouteParams().map(({ view }) => pathForView(view)),
   "deep-field": () => deepViewRouteParams().map(({ view }) => pathForDeepView(view)),
+  spectroscopy: () => spectroscopyRouteParams().map(({ view }) => pathForSpectroscopyView(view)),
 };
 
 /** Canonical clean paths: no language prefix and no redirect sources. */

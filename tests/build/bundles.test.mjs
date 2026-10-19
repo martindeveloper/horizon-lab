@@ -39,7 +39,7 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
     const gzipBytes = [...initial].reduce((total, path) => total + gzipSync(read(path)).length, 0);
     console.log(`${locale}: initial JS ${(gzipBytes / 1024).toFixed(1)} KiB gzip`);
     // The WebGL gate runs first on simulation routes; the renderer stays lazy behind it.
-    for (const suffix of ["lab/black-hole", "lab/orrery", "lab/deep-field"]) {
+    for (const suffix of ["lab/black-hole", "lab/orrery", "lab/deep-field", "lab/spectroscopy"]) {
       const route = assets(`${locale}/${suffix}`, ".js");
       for (const path of heavy) assert.ok(!route.has(path), `${locale}/${suffix} loads ${path}`);
     }
@@ -84,12 +84,16 @@ test("solar activity stays in an optional chunk, outside the Orrery engine and i
 test("black-hole styles load on feature routes, never on catalogue routes", () => {
   for (const locale of ["en", "cs"]) {
     const shared = assets(locale, ".css");
-    assert.doesNotMatch(contents(shared), /black-hole-orbit-ring|scene-label|deep-field-rung/);
+    assert.doesNotMatch(
+      contents(shared),
+      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon/,
+    );
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
       /* The Orrery has no rules of its own: its scene labels are its marker. */
       orrery: /scene-label/,
       "deep-field": /deep-field-rung/,
+      spectroscopy: /spectroscopy-ribbon/,
     };
     for (const suffix of [
       "lab/black-hole",
@@ -98,13 +102,16 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       "lab/orrery/oort",
       "lab/deep-field",
       "lab/deep-field/laniakea",
+      "lab/spectroscopy",
+      "lab/spectroscopy/kirchhoff",
     ]) {
       const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
         (path) => !shared.has(path),
       );
       assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
       assert.match(contents(feature), marker[suffix.split("/")[1]]);
-      if (!suffix.startsWith("lab/black-hole"))
+      /* The zoomable scenes label their objects; the black hole and the spectra draw no labels. */
+      if (/^lab\/(?:orrery|deep-field)/.test(suffix))
         assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
       assert.doesNotMatch(
         contents(feature),

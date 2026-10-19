@@ -115,12 +115,15 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   const { useDeepField } = await import("../src/features/deep-field/lib/store.ts");
   const { useOrrery } = await import("../src/features/orrery/lib/store.ts");
   const { useBlackHole } = await import("../src/features/black-hole/lib/store.ts");
+  const { useSpectroscopy } = await import("../src/features/spectroscopy/lib/store.ts");
 
   useDeepField.getState().patchShow({ halo: true });
   useDeepField.getState().startGuide();
   useOrrery.getState().startGuide();
   useBlackHole.getState().startGuide();
-  for (const store of [useDeepField, useOrrery, useBlackHole]) {
+  useSpectroscopy.getState().toggleCompare("Fe");
+  useSpectroscopy.getState().startGuide();
+  for (const store of [useDeepField, useOrrery, useBlackHole, useSpectroscopy]) {
     assert.equal(store.getState().guideOpen, true);
     freshVisit(store)();
     const s = store.getState();
@@ -135,4 +138,5 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   assert.equal(useDeepField.getState().show.halo, false, "switches go back too");
   assert.equal(useDeepField.getState().showBeforeGuide, null);
   assert.equal(useBlackHole.getState().orbitBeforeGuide, null);
+  assert.deepEqual(useSpectroscopy.getState().compare, [], "marked elements go back too");
 });

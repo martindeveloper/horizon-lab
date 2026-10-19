@@ -118,6 +118,27 @@
           "title": "Pozorovatelný vesmír"
         }
       }
+    },
+    "spectroscopy": {
+      "title": "Spektra hvězd",
+      "eyebrow": "Stellar Spectra · Otisky ve světle hvězd",
+      "category": "Světlo a atomy",
+      "description": "Rozložte světlo hvězd do barev a čtěte tmavé čáry: které atomy, jak horké, jak rychlé.",
+      "open": "Otevřít Spektra hvězd",
+      "fingerprints": "Prvky podle čar",
+      "kirchhoff": "Kirchhoffův stůl",
+      "sequence": "Spektrální posloupnost",
+      "entryPoints": {
+        "sun": {
+          "title": "Slunce"
+        },
+        "kirchhoff": {
+          "title": "Kirchhoffův stůl"
+        },
+        "mystery": {
+          "title": "Záhadná spektra"
+        }
+      }
     }
   },
   "about": {
@@ -179,7 +200,7 @@
       },
       "data": {
         "label": "Data",
-        "intro": "Dráhy, tvary, rotace, konstanty, hvězdy a černé díry."
+        "intro": "Dráhy, tvary, rotace, konstanty, hvězdy, spektra a černé díry."
       },
       "fonts": {
         "label": "Písma",
@@ -210,7 +231,10 @@
       "mpc": "Počty známých transneptunických těles.",
       "gravity": "Hmotnost Sgr A* a vzdálenost Slunce od středu Galaxie.",
       "eht": "Měření prstenců kolem M87* a Sgr A*.",
-      "codata": "Gravitační konstanta.",
+      "codata": "Gravitační konstanta, hmotnosti elektronu a protonu, atomová hmotnostní konstanta, klasický poloměr elektronu a Rydbergova konstanta.",
+      "nistAsd": "Energetické hladiny, ionizační energie a pravděpodobnosti přechodů pro každou atomovou čáru ve Spektrech hvězd.",
+      "atlas9": "Modelové fotosféry hvězd ve Spektrech hvězd: teplota a tlak vrstvu po vrstvě.",
+      "cie": "Normalizovaný pozorovatel, který mění spektra v barvy hvězd, plamenů a pásu spektra.",
       "bodoni": "Nadpisy.",
       "plex": "Text a čísla.",
       "next": "Stránky, směrování a předgenerování.",
@@ -249,7 +273,7 @@
       "naif": "Referenční poloměry, rotační póly a nulté poledníky. Dráhy měsíců využívají elementy JPL a přibližné proložení vektorů Horizons, nikoli živý výpočet SPICE.",
       "solarLimb": "Koeficienty pro červenou, zelenou a modrou složku vyhodnocené z proložení Allenových tabulek ve funkcích SolarSoft darklimb_u a darklimb_v. Horizon přidává ilustrativní úpravu barev.",
       "iauUnits": "Astronomická jednotka, parsek, juliánský rok a nominální gravitační parametr a poloměr Slunce používané v obou simulacích.",
-      "si": "Definice SI tvořící základ jednotek a přesné rychlosti světla.",
+      "si": "Definice SI tvořící základ jednotek: přesná rychlost světla a Planckova a Boltzmannova konstanta a elementární náboj.",
       "helland": "Přizpůsobeno pro GLSL a normalizované RGB disku černé díry. Jde o přibližnou barvu pro zobrazení, nikoli kalibrované spektrum."
     },
     "worlds": {
