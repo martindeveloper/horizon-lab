@@ -196,6 +196,7 @@ float gK;      // Q + (L − aE)²
 float gC;      // a(aE − L)
 float gSphere; // Q + L²
 float gA2E2;   // a²E²
+float gA2;     // a²
 
 // Frequency ratio g = ν_camera / ν_emitted for gas on a prograde circular
 // orbit at r: g = 1 / (uᵗ(E_photon − Ω L_photon)). The photon's constants are
@@ -375,28 +376,33 @@ vec3 plungeColor(vec3 hit, float rho, float g) {
 // the unit sphere with potential −½a²E²cos²θ; frame dragging rotates both
 // about the spin axis at dφ/dλ = a u (2E − aLu) / (1 − 2u + a²u²).
 
-float potU(float u) {
-  float w = gE + gC * u * u;
-  return w * w - gK * u * u * (1.0 - 2.0 * u + gA * gA * u * u);
+// U(u) and d²u/dλ² = U′/2 together: they share u² and E + cu².
+vec2 radialU(float u) {
+  float uu = u * u;
+  float w = gE + gC * uu;
+  return vec2(
+    w * w - gK * uu * (1.0 - 2.0 * u + gA2 * uu),
+    2.0 * gC * u * w - gK * u * (1.0 - 3.0 * u + 2.0 * gA2 * uu)
+  );
 }
 
-float accU(float u) {
-  return 2.0 * gC * u * (gE + gC * u * u) - gK * u * (1.0 - 3.0 * u + 2.0 * gA * gA * u * u);
+// |ds/dλ|² fixed by Carter's constant: Q + L² + a²E² cos²θ.
+float sphereSpeed2(float mu) {
+  return gSphere + gA2E2 * mu * mu;
 }
 
 vec3 accS(vec3 s) {
   float mu = s.y;
-  return -(gSphere + gA2E2 * mu * mu) * s + gA2E2 * mu * (vec3(0.0, 1.0, 0.0) - mu * s);
+  return -sphereSpeed2(mu) * s + gA2E2 * mu * (vec3(0.0, 1.0, 0.0) - mu * s);
 }
 
 float dragRate(float u) {
-  return gA * u * (2.0 * gE - gA * gL * u) / max(1.0 - 2.0 * u + gA * gA * u * u, 1e-6);
+  return gA * u * (2.0 * gE - gA * gL * u) / max(1.0 - 2.0 * u + gA2 * u * u, 1e-6);
 }
 
 // Scene point of Boyer–Lindquist (r, s), on oblate spheroids.
-vec3 rayPoint(float u, vec3 s) {
-  float r = 1.0 / u;
-  float w = sqrt(r * r + gA * gA);
+vec3 rayPoint(float r, vec3 s) {
+  float w = sqrt(r * r + gA2);
   return vec3(w * s.x, r * s.y, w * s.z);
 }
 
@@ -476,6 +482,7 @@ void main() {
   gC = a * (a * gE - gL);
   gSphere = gQ + gL * gL;
   gA2E2 = a2 * gE * gE;
+  gA2 = a2;
 
   float u = 1.0 / rc;
   float ud = -sqrt(sigC * delC) * nR / (rc * rc);
@@ -507,9 +514,11 @@ void main() {
     float exitR = uJet > 0.02
       ? FAR_FIELD_R
       : min(uOuter * GLOW_OUTER * sqrt(1.0 + coneSlope * coneSlope), ESCAPE_R);
-    float kU = accU(u);
+    float kU = radialU(u).y;
     vec3 kS = accS(s);
     float drag = dragRate(u);
+    float r = rc;
+    float speed2 = sphereSpeed2(s.y); // |ds/dλ|², kept exact below
     for (int i = 0; i < MAX_STEPS; i++) {
       if (float(i) >= uSteps) break;
 
@@ -526,23 +535,23 @@ void main() {
 
       // Velocity Verlet in Mino time; each step moves the ray about STEP_NEAR
       // of its radius inside 8 M and STEP_FAR (growing to STEP_FAR_GROWTH×) beyond.
-      float r = 1.0 / u;
       float frac = r < 8.0 ? STEP_NEAR : STEP_FAR * min(sqrt(r / 8.0), STEP_FAR_GROWTH);
-      float dl = frac / max(length(vec2(ud * r, length(sd))), 1e-6);
+      float dl = frac * inversesqrt(max(ud * ud * r * r + speed2, 1e-12));
       float udHalf = ud + 0.5 * dl * kU;
       vec3 sdHalf = sd + 0.5 * dl * kS;
       float u1 = u + dl * udHalf;
       vec3 s1 = normalize(s + dl * sdHalf);
-      kU = accU(u1);
+      vec2 radial = radialU(u1);
+      kU = radial.y;
       float ud1 = udHalf + 0.5 * dl * kU;
       // Unless the ray turned during the step, reset du/dλ to ±√U.
-      float pot = potU(u1);
-      if (pot > 0.0 && ud1 * ud > 0.0) ud1 = sign(ud1) * sqrt(pot);
+      if (radial.x > 0.0 && ud1 * ud > 0.0) ud1 = sign(ud1) * sqrt(radial.x);
       kS = accS(s1);
       vec3 sd1 = sdHalf + 0.5 * dl * kS;
       // Back onto the sphere's tangent plane, at the speed Carter's constant fixes.
       sd1 -= dot(s1, sd1) * s1;
-      sd1 *= sqrt(max(gSphere + gA2E2 * s1.y * s1.y, 0.0)) / max(length(sd1), 1e-9);
+      speed2 = sphereSpeed2(s1.y);
+      sd1 *= sqrt(speed2 / max(dot(sd1, sd1), 1e-18));
       // Frame dragging: a rotation about the spin axis, trapezoidal in u.
       float drag1 = dragRate(u1);
       float turn = 0.5 * dl * (drag + drag1);
@@ -553,6 +562,7 @@ void main() {
       sd1.xz = rot * sd1.xz;
       kS.xz = rot * kS.xz;
 
+      bool farField = r > FAR_FIELD_R;
       float u0 = u;
       float ud0 = ud;
       u = u1;
@@ -560,15 +570,14 @@ void main() {
       s = s1;
       sd = sd1;
       drag = drag1;
+      r = 1.0 / u;
 
-      bool farField = r > FAR_FIELD_R;
       vec3 prev = pos;
-      pos = rayPoint(u, s);
+      pos = rayPoint(r, s);
 
       // Nothing to sample out here: glow, jet and disk all lie closer in.
       if (farField) continue;
 
-      float stepLen = length(pos - prev);
       float cyl = length(pos.xz);
       float ay = abs(pos.y);
 
@@ -583,6 +592,7 @@ void main() {
           * (1.0 - smoothstep(uOuter * 0.82, uOuter * GLOW_OUTER, cyl));
         float dens = wall * radial * exp(-ay * 0.1);
         dens *= (uWeather == 1.0) ? 0.2 : 0.8;
+        float stepLen = length(pos - prev);
         vec3 glow = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
         fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright;
       }
@@ -591,6 +601,7 @@ void main() {
       if (uJet > 0.02 && ay > 2.4 && cyl < 0.22 * ay + 0.45) {
         float core = 1.0 - smoothstep(0.04 * ay, 0.2 * ay + 0.5, cyl);
         float fade = 1.0 / (1.0 + ay * 0.07);
+        float stepLen = length(pos - prev);
         // The traced ray runs backward: light reaching the camera moves along prev − pos.
         float lobe = 0.4 + 0.6 * clamp((prev.y - pos.y) * sign(pos.y) / max(stepLen, 1e-6), 0.0, 1.0);
         fore += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35;

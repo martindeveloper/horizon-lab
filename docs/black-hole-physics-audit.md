@@ -184,9 +184,18 @@ actual shader compilation, controls, and narrow/wide layouts. These are not
 measured watts, battery-duration tests or a GPU performance benchmark. Actual
 power depends on device, browser, screen size and selected quality.
 
-The Kerr step of 19 October does more arithmetic than the former one (one radial and one
-sphere acceleration, a drag rotation and a few square roots) and has not been re-benchmarked;
-the figures below describe the earlier march. On 16 October 2026 the bench (`npm run bench`) attributed GPU time at 1920×1080 on
+The Kerr step of 19 October does more arithmetic than the former one: a radial and a sphere
+acceleration, a drag rotation (one sine and cosine) and about four square roots and three
+divisions. It needs fewer steps: counted on the CPU mirror over every preset's home view, a
+marched pixel averages 20–26 steps instead of 26–33, 25% fewer overall. The step reuses
+what it already knows: |ds/dλ| comes from Carter's constant rather than a vector length,
+r = 1/u is computed once, U and dU/du share terms, and the step length for the glow and
+jet is measured only inside them. On 19 October 2026 the bench (1280×720, two interleaved
+rounds, Apple M5 Max) put the Kerr march 5–20% above the former heuristic in the preset and
+edge-on views, 58% above it in the near-extremal close-up from 6 M, where rays now wind near
+the photon orbit as they should. Reusing those values made every scene about 3% faster than
+the first Kerr shader, with pixels unchanged; repeat runs of the same code agreed within 0.7%.
+The component figures below describe the earlier march. On 16 October 2026 the bench (`npm run bench`) attributed GPU time at 1920×1080 on
 an Apple M5 Max by switching components off between bracketing baseline runs.
 In near views, the march was about 60% of the frame, the glow and jet
 volumes 23%, the sky 11–19% (72% from 480 M) and disk texture 2–8%. The glow is

@@ -172,7 +172,9 @@ export function kerrStep(ray: RayState, a: number, refine = 1): RayState {
   };
   const drag = (x: number) => (a * x * (2 * E - a * L * x)) / (1 - 2 * x + a * a * x * x);
 
-  const dl = stepFraction(1 / u) / Math.max(Math.hypot(ud / u, Math.hypot(...sd)), 1e-9) / refine;
+  // |ds/dλ| is fixed by Carter's constant, so the step needs no length of ṡ.
+  const speed2 = sphere + a2E2 * s[1] * s[1];
+  const dl = stepFraction(1 / u) / Math.sqrt(Math.max((ud / u) ** 2 + speed2, 1e-18)) / refine;
 
   const a0 = accS(s);
   const udHalf = ud + 0.5 * dl * accU(u);
