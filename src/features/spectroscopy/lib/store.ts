@@ -95,6 +95,9 @@ export type SpectroscopyStore = Settings & {
   /** The marked element whose strongest line a mystery's velocity is measured on. */
   measure: ElementId | null;
   setMeasure: (element: ElementId) => void;
+  /** An element whose lab lines are shown while the pointer or focus rests on its tile. */
+  preview: ElementId | null;
+  setPreview: (element: ElementId | null) => void;
   setRange: (range: readonly [number, number]) => void;
   /** Zooms by `factor` (below 1 zooms in) about a wavelength. */
   zoom: (factor: number, about?: number) => void;
@@ -277,6 +280,8 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
     ),
   measure: null,
   setMeasure: (measure) => set({ measure }),
+  preview: null,
+  setPreview: (preview) => set({ preview }),
   setRange: (range) => set({ range: clampRange(range) }),
   zoom: (factor, about) => {
     const [from, to] = get().range;

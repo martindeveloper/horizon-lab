@@ -77,6 +77,15 @@ quote.
 `displayColor` turns XYZ into sRGB at full brightness, clipping primaries a screen cannot
 make. `blackbodyColor(K)` and `wavelengthColor(nm)` are the usual two; `cssRgb` prints one.
 
+## Elements (`elements.ts`)
+
+`PERIODIC_TABLE` holds hydrogen to zinc (Z = 1–30, every element abundant in stars), keyed by
+symbol: atomic number, symbol, English name, standard atomic weight (IUPAC CIAAW 2021,
+abridged; the conventional value where it varies in nature), period, group and block.
+`ELEMENT_SYMBOLS` lists them in order of Z, `ElementSymbol` is their type and
+`isElementSymbol` checks a string. Names are English for code; hosts translate what they show.
+A simulation adds its own facts about an element (abundances, spectra) in its feature.
+
 ## Distances (`distance.ts`)
 
 `DistanceUnit` is `au` | `ly` | `pc`; `DistanceChoice` adds `auto`, which reads each distance

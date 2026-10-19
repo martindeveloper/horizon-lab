@@ -131,7 +131,8 @@ export function dopplerWidth(
   kelvin: number,
   microturbulence: number,
 ) {
-  const thermal = (2 * BOLTZMANN_CONSTANT * kelvin) / (ELEMENTS[element].mass * ATOMIC_MASS_KG);
+  const thermal =
+    (2 * BOLTZMANN_CONSTANT * kelvin) / (ELEMENTS[element].atomicWeight * ATOMIC_MASS_KG);
   return (nm * Math.sqrt(thermal + (microturbulence * 1e3) ** 2)) / SPEED_OF_LIGHT;
 }
 

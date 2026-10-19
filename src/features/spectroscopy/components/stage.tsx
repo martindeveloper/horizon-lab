@@ -61,10 +61,13 @@ export function Stage() {
         "spectroscopy-stage pad-hud-top anim-fade absolute inset-x-0 flex flex-col",
         /* --hud-clear already counts the footer: the dock's or guide's top from the window's foot. */
         "top-[calc(var(--app-header-height)+2.75rem)] bottom-[max(var(--hud-clear,calc(var(--app-footer-height)+1rem)),var(--sheet-clear,0px))]",
+        /* The dock leaving (the immersive view) or growing moves the foot: glide, as the HUD does. */
+        "transition-[top,bottom] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
       )}
     >
-      {/* A phone held sideways keeps the spectrum and lets the scene go. */}
-      <div className="relative min-h-0 flex-1 short:hidden">
+      {/* The scene sets the stage but the spectrum is the instrument: the scene stops at a third
+          of the window and the plot takes the rest. A phone held sideways lets the scene go. */}
+      <div className="relative max-h-[32dvh] min-h-0 flex-[1_1_0%] short:hidden">
         <SceneCanvas
           obs={obs}
           lines={lines}
@@ -74,7 +77,7 @@ export function Stage() {
           teff={teff}
         />
       </div>
-      <SpectrumView className="max-h-full" />
+      <SpectrumView className="max-h-full flex-[1_1_auto]" />
     </div>
   );
 }

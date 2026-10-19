@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  ELEMENT_SYMBOLS,
+  PERIODIC_TABLE,
+  isElementSymbol,
   durationQuantity,
   lengthQuantity,
   AU_LIGHT_SECONDS,
@@ -351,4 +354,33 @@ test("colours: the CIE observer, a 6500 K black body near white, spectral hues i
   }
   const [rV, gV, bV] = wavelengthColor(420);
   assert.ok(bV > 0.999 && gV === 0 && rV < 0.5);
+});
+
+test("the periodic table runs in atomic number, and only Ar–K and Co–Ni break the order of weight", () => {
+  const elements = ELEMENT_SYMBOLS.map((symbol) => PERIODIC_TABLE[symbol]);
+  elements.forEach((element, i) => {
+    assert.equal(element.number, i + 1, element.symbol);
+    assert.equal(element.symbol, ELEMENT_SYMBOLS[i]);
+  });
+  // Mendeleev's famous inversions: ordering by weight would swap these pairs.
+  const inversions = [];
+  for (let i = 1; i < elements.length; i++)
+    if (elements[i].atomicWeight < elements[i - 1].atomicWeight)
+      inversions.push(`${elements[i - 1].symbol}–${elements[i].symbol}`);
+  assert.deepEqual(inversions, ["Ar–K", "Co–Ni"]);
+  // Rows close on the noble gases; columns follow the blocks.
+  assert.deepEqual(
+    elements.filter((e) => e.group === 18).map((e) => [e.symbol, e.period]),
+    [
+      ["He", 1],
+      ["Ne", 2],
+      ["Ar", 3],
+    ],
+  );
+  assert.equal(PERIODIC_TABLE.Fe.period, 4);
+  assert.deepEqual(
+    ["He", "Na", "Si", "Fe"].map((s) => PERIODIC_TABLE[s].block),
+    ["s", "s", "p", "d"],
+  );
+  assert.ok(isElementSymbol("Ca") && !isElementSymbol("Xx"));
 });

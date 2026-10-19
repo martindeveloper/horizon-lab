@@ -96,7 +96,7 @@ const HYDROGEN_MASS_FRACTION = 0.7381;
 
 /** Atoms of an element in a kilogram of the star's gas, its abundance changed by `shift` dex. */
 export function atomsPerKilogram(element: ElementId, shift = 0) {
-  const hydrogen = HYDROGEN_MASS_FRACTION / (ELEMENTS.H.mass * ATOMIC_MASS_KG);
+  const hydrogen = HYDROGEN_MASS_FRACTION / (ELEMENTS.H.atomicWeight * ATOMIC_MASS_KG);
   return hydrogen * 10 ** (ELEMENTS[element].abundance + shift - 12);
 }
 

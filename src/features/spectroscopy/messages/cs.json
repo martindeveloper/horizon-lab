@@ -170,12 +170,17 @@
     },
     "elementsScore": "{found}/{total} prvků{wrong, plural, =0 {} one {, # navíc} few {, # navíc} other {, # navíc}}",
     "velocityScore": "{truth} km/s · vaše {yours}",
-    "markFirst": "Označte prvek a změřte jednu z jeho čar.",
-    "answerHint": "Zlaté značky pod spektrem ukazují laboratorní čáry prvků. Nechte ty, které sedí na jeho čáry.",
+    "markFirst": "Označte prvek a změřte jednu z jeho čar",
+    "answerHint": "Zlaté čáry ve spektru jsou laboratorní čáry prvků. Ponechte prvky, jejichž čáry sedí na čáry spektra.",
     "measuring": "Měřená čára",
     "lab": "lab",
     "reading": "Δλ {shift} nm · změřeno na {observed} nm",
-    "yourAnswer": "Vaše odpověď"
+    "yourAnswer": "Vaše odpověď",
+    "motion": "Pohyb",
+    "conditions": "Světlo a plyn",
+    "elementsTab": "Prvky",
+    "speedTab": "Rychlost",
+    "compareHint": "Najeďte na prvek a uvidíte jeho laboratorní čáry ve spektru; kliknutím je ponecháte."
   },
   "kirchhoff": {
     "continuum": {

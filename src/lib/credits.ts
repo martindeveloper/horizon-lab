@@ -309,6 +309,13 @@ export const CREDITS: readonly CreditGroup[] = [
         licence: "Cited",
         url: "https://physics.nist.gov/cuu/Constants/",
       },
+      {
+        id: "ciaaw",
+        name: "Standard atomic weights (IUPAC CIAAW 2021)",
+        by: "IUPAC Commission on Isotopic Abundances and Atomic Weights",
+        licence: "Cited",
+        url: "https://www.ciaaw.org/atomic-weights.htm",
+      },
     ],
   },
   {

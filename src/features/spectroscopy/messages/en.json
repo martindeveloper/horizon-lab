@@ -170,12 +170,17 @@
     },
     "elementsScore": "{found}/{total} elements{wrong, plural, =0 {} other {, # not there}}",
     "velocityScore": "{truth} km/s · yours {yours}",
-    "markFirst": "Mark an element to measure one of its lines.",
-    "answerHint": "Gold ticks under the spectrum mark each element's lab lines. Keep the ones that land on its lines.",
+    "markFirst": "Mark an element to measure one of its lines",
+    "answerHint": "Gold lines on the spectrum are each element's lab lines. Keep the elements whose lines land on the spectrum's lines.",
     "measuring": "Line to measure",
     "lab": "lab",
     "reading": "Δλ {shift} nm · seen at {observed} nm",
-    "yourAnswer": "Your answer"
+    "yourAnswer": "Your answer",
+    "motion": "Motion",
+    "conditions": "Light and gas",
+    "elementsTab": "Elements",
+    "speedTab": "Speed",
+    "compareHint": "Point at an element to preview its lab lines on the spectrum; click to keep them."
   },
   "kirchhoff": {
     "continuum": {

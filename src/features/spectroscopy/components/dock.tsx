@@ -18,26 +18,24 @@ import {
   kickerClass,
 } from "@horizon/toolkit/ui";
 
-import { ELEMENT_IDS, type ElementId } from "../lib/model/atoms";
+import { ELEMENT_IDS, ELEMENTS, type ElementId } from "../lib/model/atoms";
 import { BENCH_RANGE, SEQUENCE_RANGE, verdict, type Verdict } from "../lib/model/scenes";
 import { STAR_IDS, STARS } from "../lib/model/stars";
 import { useSpectroscopy } from "../lib/store";
 import { kelvin, signed } from "./format";
 import { MysteryResultCard, OutcomeMark } from "./mystery-result";
+import { PanelTitle, Tray } from "./tray";
 import { VelocityLens } from "./velocity-lens";
 
-/** A labelled row of chips that scrolls sideways on phones. */
+/** A labelled row of chips that scrolls sideways. */
 function ChipRow({
   label,
   shown = label,
-  fit = false,
   children,
 }: {
   label: string;
   /** The visible label, when it differs from the spoken one; null shows none. */
   shown?: ReactNode;
-  /** On phones, share the width evenly rather than scroll (every chip in sight). */
-  fit?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -47,72 +45,123 @@ function ChipRow({
           {shown}
         </span>
       )}
-      <div
-        className={
-          fit
-            ? /* Phone-first: a grid of equal cells, the scrolling row from the desktop up. */
-              "no-scrollbar grid min-w-0 flex-1 grid-cols-8 gap-0.5 md:-mx-1 md:flex md:items-center md:gap-1 md:overflow-x-auto md:px-1"
-            : "no-scrollbar -mx-1 flex min-w-0 items-center gap-1 overflow-x-auto px-1"
-        }
-      >
+      {/* A scrolling row clips both ways: the room above and below keeps a chip's corner badge
+          and focus ring whole. */}
+      <div className="no-scrollbar -mx-1 -my-1.5 flex min-w-0 items-center gap-1 overflow-x-auto px-1 py-1.5">
         {children}
       </div>
     </div>
   );
 }
 
-/** Element chips: which laboratory patterns to mark, or (on the bench) which gases to fill. */
-function ElementChips({
+/**
+ * Element tiles: which laboratory patterns to lay over the spectrum, or (on the bench) which
+ * gases to fill. A phone shows the symbols in one row; a desktop adds each name. Where
+ * `preview` is on, resting the pointer or focus on a tile shows its lab lines before it is
+ * marked.
+ */
+function ElementTiles({
   label,
-  shown,
-  fit = false,
   chosen,
   onToggle,
+  preview = false,
   result,
 }: {
   label: string;
-  shown?: ReactNode;
-  fit?: boolean;
   chosen: readonly ElementId[];
   onToggle: (element: ElementId) => void;
-  /** After a mystery is checked: what each chip turned out to be. */
+  preview?: boolean;
+  /** After a mystery is checked: what each tile turned out to be. */
   result?: (element: ElementId) => Verdict;
 }) {
   const t = useTranslations("spectroscopy");
+  const f = useFormatter();
+  const api = useSpectroscopy.getState;
+  const show = (element: ElementId | null) => {
+    if (preview) api().setPreview(element);
+  };
   return (
-    <ChipRow label={label} shown={shown} fit={fit}>
+    <div
+      role="group"
+      aria-label={label}
+      className="grid grid-cols-8 gap-1 md:gap-1.5"
+      onPointerLeave={() => show(null)}
+    >
       {ELEMENT_IDS.map((element, i) => {
         const on = chosen.includes(element);
         const outcome = result?.(element) ?? null;
-        const name = `${element} · ${t(`elements.${element}`)}`;
+        const name = t(`elements.${element}`);
         return (
-          /* The symbol shows; the name is read with it (the row scrolls, so no tooltips). */
-          <Chip
+          <button
             key={element}
-            selected={on}
+            type="button"
             aria-pressed={on}
-            aria-label={outcome ? `${name} · ${t(`dock.verdict.${outcome}`)}` : name}
+            aria-label={
+              outcome
+                ? `${element} · ${name} · ${t(`dock.verdict.${outcome}`)}`
+                : `${element} · ${name}`
+            }
             onClick={() => onToggle(element)}
-            /* A checked answer marks its chips one after another. */
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse") show(element);
+            }}
+            onFocus={() => show(element)}
+            onBlur={() => show(null)}
+            /* A checked answer turns its tiles over one after another. */
             style={{ "--i": i }}
+            /* A cell of the periodic table: atomic number in the corner, the symbol large, the
+               name and atomic weight beneath. */
             className={cn(
-              "font-mono md:min-w-9",
-              fit ? "min-w-0 px-0 md:px-3" : "min-w-11",
+              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-md transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+              "md:aspect-square md:h-auto md:max-h-24 md:justify-between md:px-1.5 md:py-1.5",
+              /* An unmarked element reads as a button: a hairline ring that brightens on hover.
+                 A marked one takes the gold of its lines on the spectrum. */
+              !outcome &&
+                (on
+                  ? "bg-accent/10 text-fg ring-1 ring-accent/60 ring-inset"
+                  : "text-muted ring-1 ring-border-strong ring-inset hover:bg-fg/5 hover:text-fg hover:ring-fg/40"),
               outcome && "spectroscopy-verdict",
               outcome === "found" && "bg-accent/15 text-fg ring-1 ring-accent/70 ring-inset",
               outcome === "missed" &&
                 "text-accent outline-1 -outline-offset-1 outline-accent/80 outline-dashed",
-              outcome === "wrong" &&
-                "text-danger line-through decoration-danger ring-1 ring-danger/60 ring-inset",
+              outcome === "wrong" && "text-danger ring-1 ring-danger/60 ring-inset",
+              outcome === null && result && !on && "text-subtle",
             )}
           >
-            {outcome === "found" ? <Check aria-hidden className="size-3 text-accent" /> : null}
-            {outcome === "wrong" ? <X aria-hidden className="size-3" /> : null}
-            {element}
-          </Chip>
+            <span
+              aria-hidden
+              className={cn(
+                "absolute top-1 left-1.5 font-mono text-[10px] leading-none tabular-nums md:static md:self-start",
+                on || outcome === "found" ? "text-accent" : "text-subtle",
+              )}
+            >
+              {ELEMENTS[element].number}
+            </span>
+            <span
+              className={cn(
+                "text-base leading-none font-medium tracking-tight md:text-xl",
+                outcome === "wrong" && "line-through decoration-danger",
+              )}
+            >
+              {element}
+            </span>
+            {/* Name and weight only where the tile has room for them whole. */}
+            <span aria-hidden className="hidden w-full text-center leading-tight @min-[5rem]:block">
+              <span className="block truncate text-[10px] text-muted">{name}</span>
+              <span className="block font-mono text-[10px] text-subtle tabular-nums">
+                {f.number(ELEMENTS[element].atomicWeight, { maximumFractionDigits: 3 })}
+              </span>
+            </span>
+            {outcome === "found" ? (
+              <Check aria-hidden className="absolute top-1 right-1 size-3 text-accent" />
+            ) : null}
+            {outcome === "wrong" ? (
+              <X aria-hidden className="absolute top-1 right-1 size-3" />
+            ) : null}
+          </button>
         );
       })}
-    </ChipRow>
+    </div>
   );
 }
 
@@ -151,76 +200,95 @@ function SkyControls() {
   const toSlider = (T: number) => Math.round((Math.log(T / lo) / Math.log(hi / lo)) * 1000);
   const fromSlider = (v: number) => Math.round((lo * (hi / lo) ** (v / 1000)) / 50) * 50;
   return (
-    <>
-      {view === "stars" ? (
-        <ChipRow label={t("dock.star")}>
-          {STAR_IDS.map((id) => (
-            <Chip
-              key={id}
-              selected={star === id}
-              aria-pressed={star === id}
-              onClick={() => api().setStar(id)}
-              className="shrink-0"
-            >
-              {t(`stars.${id}`)}
-              <span className="font-mono text-[10px] text-subtle">
-                {STARS[id].type.split(" ")[0]}
-              </span>
-            </Chip>
-          ))}
-          <Chip
-            selected={star === "sequence"}
-            aria-pressed={star === "sequence"}
-            onClick={() => api().setStar("sequence")}
-            className="shrink-0"
-          >
-            {t("dock.anyStar")}
-          </Chip>
-        </ChipRow>
-      ) : null}
-      <div className="grid gap-x-6 gap-y-1 md:grid-cols-[1fr_auto] md:items-end">
-        <div
-          className={cn(
-            "grid gap-x-6 gap-y-1",
-            view === "stars" && star === "sequence" && "md:grid-cols-2",
-          )}
-        >
-          {view === "stars" && star === "sequence" ? (
-            <ControlRow label={t("dock.temperature")} value={`${kelvin(f, sequenceTemperature)} K`}>
-              <Slider
-                aria-label={t("dock.temperature")}
-                min={0}
-                max={1000}
-                step={1}
-                value={[toSlider(sequenceTemperature)]}
-                valueText={(v) => `${kelvin(f, fromSlider(v))} K`}
-                onValueChange={([v]) => api().setSequenceTemperature(fromSlider(v ?? 0))}
+    <Tray
+      panels={[
+        {
+          id: "source",
+          label: view === "stars" ? t("dock.star") : t("dock.motion"),
+          className: "md:col-span-6 lg:col-span-5",
+          children: (
+            <>
+              <PanelTitle>{view === "stars" ? t("dock.star") : t("dock.motion")}</PanelTitle>
+              {view === "stars" ? (
+                <ChipRow label={t("dock.star")} shown={null}>
+                  {STAR_IDS.map((id) => (
+                    <Chip
+                      key={id}
+                      selected={star === id}
+                      aria-pressed={star === id}
+                      onClick={() => api().setStar(id)}
+                      className="shrink-0"
+                    >
+                      {t(`stars.${id}`)}
+                      <span className="font-mono text-[10px] text-subtle">
+                        {STARS[id].type.split(" ")[0]}
+                      </span>
+                    </Chip>
+                  ))}
+                  <Chip
+                    selected={star === "sequence"}
+                    aria-pressed={star === "sequence"}
+                    onClick={() => api().setStar("sequence")}
+                    className="shrink-0"
+                  >
+                    {t("dock.anyStar")}
+                  </Chip>
+                </ChipRow>
+              ) : null}
+              {view === "stars" && star === "sequence" ? (
+                <ControlRow
+                  label={t("dock.temperature")}
+                  value={`${kelvin(f, sequenceTemperature)} K`}
+                >
+                  <Slider
+                    aria-label={t("dock.temperature")}
+                    min={0}
+                    max={1000}
+                    step={1}
+                    value={[toSlider(sequenceTemperature)]}
+                    valueText={(v) => `${kelvin(f, fromSlider(v))} K`}
+                    onValueChange={([v]) => api().setSequenceTemperature(fromSlider(v ?? 0))}
+                  />
+                </ControlRow>
+              ) : null}
+              <VelocitySlider
+                label={view === "sun" ? t("dock.moveSun") : t("dock.velocity")}
+                range={view === "sun" ? 600 : 300}
               />
-            </ControlRow>
-          ) : null}
-          <VelocitySlider
-            label={view === "sun" ? t("dock.moveSun") : t("dock.velocity")}
-            range={view === "sun" ? 600 : 300}
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-1 pb-0.5">
-          <SwitchChip on={air} onToggle={() => api().setAir(!air)}>
-            {t("dock.air")}
-          </SwitchChip>
-          {view === "sun" ? (
-            <SwitchChip on={letters} onToggle={() => api().setLetters(!letters)}>
-              {t("dock.letters")}
-            </SwitchChip>
-          ) : null}
-        </div>
-      </div>
-      <ElementChips
-        fit
-        label={t("dock.compare")}
-        chosen={compare}
-        onToggle={(e) => api().toggleCompare(e)}
-      />
-    </>
+              <div className="flex flex-wrap items-center gap-1">
+                <SwitchChip on={air} onToggle={() => api().setAir(!air)}>
+                  {t("dock.air")}
+                </SwitchChip>
+                {view === "sun" ? (
+                  <SwitchChip on={letters} onToggle={() => api().setLetters(!letters)}>
+                    {t("dock.letters")}
+                  </SwitchChip>
+                ) : null}
+              </div>
+            </>
+          ),
+        },
+        {
+          id: "compare",
+          label: t("dock.compare"),
+          className: "md:col-span-6 lg:col-span-7",
+          children: (
+            <>
+              <PanelTitle>{t("dock.compare")}</PanelTitle>
+              <ElementTiles
+                preview
+                label={t("dock.compare")}
+                chosen={compare}
+                onToggle={(e) => api().toggleCompare(e)}
+              />
+              <p className="hidden text-xs text-pretty text-subtle md:block">
+                {t("dock.compareHint")}
+              </p>
+            </>
+          ),
+        },
+      ]}
+    />
   );
 }
 
@@ -254,47 +322,70 @@ function BenchControls() {
             : "vanish";
   return (
     <>
-      <ElementChips
-        fit
-        label={t("dock.gasElements")}
-        chosen={bench.elements}
-        onToggle={(e) => api().toggleGas(e)}
+      <Tray
+        panels={[
+          {
+            id: "gas",
+            label: t("dock.gasElements"),
+            className: "md:col-span-5",
+            children: (
+              <>
+                <PanelTitle>{t("dock.gasElements")}</PanelTitle>
+                <ElementTiles
+                  label={t("dock.gasElements")}
+                  chosen={bench.elements}
+                  onToggle={(e) => api().toggleGas(e)}
+                />
+              </>
+            ),
+          },
+          {
+            id: "conditions",
+            label: t("dock.conditions"),
+            className: "md:col-span-7",
+            children: (
+              <>
+                <PanelTitle>{t("dock.conditions")}</PanelTitle>
+                <div className="grid gap-x-5 gap-y-1 lg:grid-cols-3">
+                  <ControlRow label={t("dock.lamp")} value={lampText(bench.lamp)}>
+                    <Slider
+                      aria-label={t("dock.lamp")}
+                      min={0}
+                      max={1000}
+                      step={1}
+                      value={[lampToSlider(bench.lamp)]}
+                      valueText={(v) => lampText(sliderToLamp(v))}
+                      onValueChange={([v]) => api().patchBench({ lamp: sliderToLamp(v ?? 0) })}
+                    />
+                  </ControlRow>
+                  <ControlRow label={t("dock.gasTemperature")} value={`${kelvin(f, bench.gas)} K`}>
+                    <Slider
+                      aria-label={t("dock.gasTemperature")}
+                      min={0}
+                      max={1000}
+                      step={1}
+                      value={[gasToSlider(bench.gas)]}
+                      valueText={(v) => `${kelvin(f, sliderToGas(v))} K`}
+                      onValueChange={([v]) => api().patchBench({ gas: sliderToGas(v ?? 0) })}
+                    />
+                  </ControlRow>
+                  <ControlRow label={t("dock.column")} value={columnText(bench.column)}>
+                    <Slider
+                      aria-label={t("dock.column")}
+                      min={BENCH_RANGE.column[0]}
+                      max={BENCH_RANGE.column[1]}
+                      step={0.1}
+                      value={[bench.column]}
+                      valueText={columnText}
+                      onValueChange={([v]) => api().patchBench({ column: v ?? bench.column })}
+                    />
+                  </ControlRow>
+                </div>
+              </>
+            ),
+          },
+        ]}
       />
-      <div className="grid gap-x-6 gap-y-1 md:grid-cols-3">
-        <ControlRow label={t("dock.lamp")} value={lampText(bench.lamp)}>
-          <Slider
-            aria-label={t("dock.lamp")}
-            min={0}
-            max={1000}
-            step={1}
-            value={[lampToSlider(bench.lamp)]}
-            valueText={(v) => lampText(sliderToLamp(v))}
-            onValueChange={([v]) => api().patchBench({ lamp: sliderToLamp(v ?? 0) })}
-          />
-        </ControlRow>
-        <ControlRow label={t("dock.gasTemperature")} value={`${kelvin(f, bench.gas)} K`}>
-          <Slider
-            aria-label={t("dock.gasTemperature")}
-            min={0}
-            max={1000}
-            step={1}
-            value={[gasToSlider(bench.gas)]}
-            valueText={(v) => `${kelvin(f, sliderToGas(v))} K`}
-            onValueChange={([v]) => api().patchBench({ gas: sliderToGas(v ?? 0) })}
-          />
-        </ControlRow>
-        <ControlRow label={t("dock.column")} value={columnText(bench.column)}>
-          <Slider
-            aria-label={t("dock.column")}
-            min={BENCH_RANGE.column[0]}
-            max={BENCH_RANGE.column[1]}
-            step={0.1}
-            value={[bench.column]}
-            valueText={columnText}
-            onValueChange={([v]) => api().patchBench({ column: v ?? bench.column })}
-          />
-        </ControlRow>
-      </div>
       <p aria-live="polite" className="text-xs text-pretty text-muted short:hidden">
         <span className="text-fg">{t(`kirchhoff.${law}.title`)}</span> ·{" "}
         {t(`kirchhoff.${law}.body`)}
@@ -319,7 +410,7 @@ function StepLabel({ step, children }: { step: number; children: ReactNode }) {
 }
 
 /** The deck: one chip per case, each marked once checked, and a fresh deal. */
-function CaseStrip({ action }: { action?: ReactNode }) {
+function CaseStrip() {
   const t = useTranslations("spectroscopy");
   const deck = useSpectroscopy((s) => s.deck);
   const index = useSpectroscopy((s) => s.caseIndex);
@@ -364,7 +455,6 @@ function CaseStrip({ action }: { action?: ReactNode }) {
             <Shuffle className="size-4 md:size-3.5" />
           </IconButton>
         </Tooltip>
-        {action}
       </div>
     </div>
   );
@@ -397,32 +487,45 @@ function MysteryControls() {
   );
   return (
     <>
-      {/* A phone held sideways has room for one row of chrome: Check joins the cases. */}
-      <CaseStrip action={result ? null : check("hidden short:inline-flex")} />
+      <CaseStrip />
       {result ? <MysteryResultCard result={result} /> : null}
-      <div className="grid items-start gap-x-8 gap-y-2.5 md:grid-cols-2 md:gap-y-4 short:grid-cols-2 short:gap-x-5">
-        <div className="flex min-w-0 flex-col gap-1.5 md:gap-2">
-          <p className="flex h-5 items-center text-xs text-muted">
-            <StepLabel step={1}>{t("dock.answer")}</StepLabel>
-          </p>
-          <ElementChips
-            label={t("dock.answer")}
-            shown={null}
-            fit
-            chosen={compare}
-            onToggle={(e) => api().toggleCompare(e)}
-            {...(verdicts ? { result: verdicts } : {})}
-          />
-          <p className="text-xs text-pretty text-subtle not-md:hidden">{t("dock.answerHint")}</p>
-        </div>
-        {/* On a phone the verdict takes the lens's room: its card already gives the velocity. */}
-        <div className={cn(result && "not-md:hidden")}>
-          <VelocityLens step={<StepLabel step={2}>{t("dock.shift")}</StepLabel>} />
-        </div>
-      </div>
+      <Tray
+        /* On a phone, Check rides in the tab row, beside the panels it scores. */
+        action={result ? null : check("")}
+        panels={[
+          {
+            id: "elements",
+            label: t("dock.elementsTab"),
+            className: "md:col-span-6",
+            children: (
+              <>
+                <PanelTitle>
+                  <StepLabel step={1}>{t("dock.answer")}</StepLabel>
+                </PanelTitle>
+                <ElementTiles
+                  preview
+                  label={t("dock.answer")}
+                  chosen={compare}
+                  onToggle={(e) => api().toggleCompare(e)}
+                  {...(verdicts ? { result: verdicts } : {})}
+                />
+                <p className="hidden text-xs text-pretty text-subtle md:block">
+                  {t("dock.answerHint")}
+                </p>
+              </>
+            ),
+          },
+          {
+            id: "speed",
+            label: t("dock.speedTab"),
+            className: "md:col-span-6",
+            children: <VelocityLens step={<StepLabel step={2}>{t("dock.shift")}</StepLabel>} />,
+          },
+        ]}
+      />
       {result ? null : (
-        /* The answer as it stands, and the one action that scores it. */
-        <div className="flex items-center justify-between gap-3 border-t border-border pt-2.5 md:pt-3 short:hidden">
+        /* The answer as it stands, and the one action that scores it (a phone has Check above). */
+        <div className="hidden items-center justify-between gap-3 md:flex">
           <p className="flex min-w-0 items-center gap-2 text-xs text-muted">
             <StepLabel step={3}>{t("dock.yourAnswer")}</StepLabel>
             <span className="truncate font-mono text-fg tabular-nums">
@@ -448,8 +551,9 @@ export function SpectroscopyDock() {
     <Dock
       ref={surface}
       footerClassName={cn(aside && "not-md:hidden")}
-      /* On phones the dock stops short of the spectrum and scrolls instead. */
-      className="anim-rise scroll-thin flex max-h-[50dvh] flex-col gap-2.5 overflow-y-auto overscroll-contain md:max-h-none md:gap-3 md:overflow-visible short:max-h-[42dvh]"
+      /* On a desktop the tray spans the stage, as the spectrum does; on phones the dock stops
+         short of the spectrum and scrolls instead. */
+      className="anim-rise scroll-thin flex max-h-[50dvh] flex-col gap-2.5 overflow-y-auto overscroll-contain md:max-h-none md:max-w-none md:gap-3 md:overflow-visible short:max-h-[42dvh]"
     >
       {view === "kirchhoff" ? (
         <BenchControls />

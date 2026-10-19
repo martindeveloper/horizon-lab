@@ -7,6 +7,7 @@ export * from "./equation";
 export * from "./laws";
 export * from "./spectra";
 export * from "./color";
+export * from "./elements";
 export * from "./quantities";
 export * from "./distance";
 export * from "./time";

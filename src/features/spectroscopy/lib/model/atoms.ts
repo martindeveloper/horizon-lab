@@ -1,8 +1,10 @@
+import { PERIODIC_TABLE, type ChemicalElement } from "@horizon/toolkit/science";
+
 import data from "./atomic-data.json";
 import broadening from "./broadening.json";
 
 /**
- * The atoms the lab knows: their masses, the Sun's mix of them, their ionization stages and
+ * The atoms the lab knows (from the shared periodic table): the Sun's mix of them, their ionization stages and
  * the lines they absorb between 380 and 770 nm. Energies, partition functions and line data
  * come from the NIST Atomic Spectra Database (scripts/fetch-atomic-data.mjs); wavelengths are
  * in air, as astronomers quote them.
@@ -11,25 +13,31 @@ import broadening from "./broadening.json";
 export const ELEMENT_IDS = ["H", "He", "Li", "Na", "K", "Mg", "Ca", "Fe"] as const;
 export type ElementId = (typeof ELEMENT_IDS)[number];
 
-export type Element = {
+/** A periodic-table element (`@horizon/toolkit/science`) with what the lab adds about it. */
+export type Element = ChemicalElement & {
   id: ElementId;
-  /** Standard atomic weight, u (IUPAC CIAAW 2021, conventional values). */
-  mass: number;
   /** The Sun's photospheric abundance log ε = log(N / N_H) + 12 (Asplund et al. 2009). */
   abundance: number;
   /** Its spectra from the neutral atom up, as NIST names them ("Ca I", "Ca II", …). */
   stages: readonly string[];
 };
 
+const element = (id: ElementId, abundance: number, stages: readonly string[]): Element => ({
+  ...PERIODIC_TABLE[id],
+  id,
+  abundance,
+  stages,
+});
+
 export const ELEMENTS: Record<ElementId, Element> = {
-  H: { id: "H", mass: 1.008, abundance: 12, stages: ["H I", "H II"] },
-  He: { id: "He", mass: 4.0026, abundance: 10.93, stages: ["He I", "He II", "He III"] },
-  Li: { id: "Li", mass: 6.94, abundance: 1.05, stages: ["Li I", "Li II"] },
-  Na: { id: "Na", mass: 22.99, abundance: 6.24, stages: ["Na I", "Na II"] },
-  K: { id: "K", mass: 39.098, abundance: 5.03, stages: ["K I", "K II"] },
-  Mg: { id: "Mg", mass: 24.305, abundance: 7.6, stages: ["Mg I", "Mg II", "Mg III"] },
-  Ca: { id: "Ca", mass: 40.078, abundance: 6.34, stages: ["Ca I", "Ca II", "Ca III"] },
-  Fe: { id: "Fe", mass: 55.845, abundance: 7.5, stages: ["Fe I", "Fe II", "Fe III"] },
+  H: element("H", 12, ["H I", "H II"]),
+  He: element("He", 10.93, ["He I", "He II", "He III"]),
+  Li: element("Li", 1.05, ["Li I", "Li II"]),
+  Na: element("Na", 6.24, ["Na I", "Na II"]),
+  K: element("K", 5.03, ["K I", "K II"]),
+  Mg: element("Mg", 7.6, ["Mg I", "Mg II", "Mg III"]),
+  Ca: element("Ca", 6.34, ["Ca I", "Ca II", "Ca III"]),
+  Fe: element("Fe", 7.5, ["Fe I", "Fe II", "Fe III"]),
 };
 
 type SpeciesData = { ionization: number; partition: number[] };

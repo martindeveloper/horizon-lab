@@ -22,6 +22,7 @@ import { FULL_RANGE } from "../lib/model/tour";
 import { useSpectroscopy } from "../lib/store";
 import { digitsFor, lineName, wavelength } from "./format";
 import { useFormedLines, useObservation, useSettings, useSpectrum } from "./use-spectrum";
+import { measuredElement } from "./velocity-lens";
 
 /** Hues of each nanometre, computed once: the ribbon's colours. */
 const HUES = Array.from({ length: FULL_RANGE[1] - FULL_RANGE[0] + 2 }, (_, i) =>
@@ -81,6 +82,8 @@ export function SpectrumView({ className }: { className?: string }) {
   const normalizedSetting = useSpectroscopy((s) => s.normalized);
   const letters = useSpectroscopy((s) => s.letters);
   const compare = useSpectroscopy((s) => s.compare);
+  const measure = useSpectroscopy((s) => s.measure);
+  const preview = useSpectroscopy((s) => s.preview);
   const selection = useSpectroscopy((s) => s.selection);
   const checked = useSpectroscopy((s) => s.result !== null);
   const api = useSpectroscopy.getState;
@@ -202,13 +205,36 @@ export function SpectrumView({ className }: { className?: string }) {
     return placed;
   })();
 
+  /* Lab lines straight through the ribbon and the plot: the element in focus (previewed, or
+     the one measured on, else the last marked) in full gold, the others faint, so a line that
+     sits in a dip reads at a glance. */
   const markerShift = dopplerFactor(markerVelocity({ view: settings.view, velocity: rawVelocity }));
-  const markerRows = compare.map((element) => ({
-    element,
-    ticks: LINES.filter((l) => l.element === element)
-      .map((l) => ({ line: l, x: xOf(l.wavelength * markerShift) }))
+  const previewing = preview !== null && !compare.includes(preview) ? preview : null;
+  const focus = preview ?? measuredElement(compare, measure);
+  const marked = previewing ? [...compare, previewing] : compare;
+  const markers = marked.flatMap((element) =>
+    LINES.filter((l) => l.element === element)
+      .map((l) => ({
+        line: l,
+        x: xOf(l.wavelength * markerShift),
+        weight: (markWeights.get(element)?.get(l.id) ?? 0.5) * (element === focus ? 1 : 0.3),
+      }))
       .filter(({ x }) => x >= 0 && x <= 1),
-  }));
+  );
+  /* The focused element's strongest lines in view, named under the ribbon. */
+  const markerLabels = (() => {
+    if (!focus) return [];
+    const out: { key: string; x: number; text: string }[] = [];
+    const room = width > 0 ? 76 / width : 0;
+    for (const m of markers
+      .filter((m) => m.line.element === focus)
+      .sort((a, b) => b.weight - a.weight)) {
+      if (out.length >= 6) break;
+      if (out.every((o) => Math.abs(o.x - m.x) > room))
+        out.push({ key: m.line.id, x: m.x, text: lineName(m.line, f) });
+    }
+    return out;
+  })();
 
   const selected = selection ? lineById(selection) : undefined;
   const selectedCentre = selected
@@ -341,8 +367,8 @@ export function SpectrumView({ className }: { className?: string }) {
         className,
       )}
     >
-      {/* Short of room (a phone under a tall dock), the plot gives up height before anything else. */}
-      <div ref={box} className="relative flex min-h-0 flex-col [&>*]:shrink-0">
+      {/* The plot takes whatever height the stage has to spare, and gives it up first when short. */}
+      <div ref={box} className="relative flex min-h-0 flex-1 flex-col [&>*]:shrink-0">
         {/* Names over the lines */}
         <div aria-hidden className="relative h-5 text-[11px] leading-5 short:hidden">
           {labels.map((l, i) => (
@@ -364,30 +390,25 @@ export function SpectrumView({ className }: { className?: string }) {
           className="spectroscopy-ribbon block h-[clamp(1.5rem,5dvh,3rem)] w-full rounded-[3px]"
           style={{ imageRendering: "pixelated" }}
         />
-        {markerRows.length ? (
-          <div aria-hidden className="mt-1 space-y-px">
-            {markerRows.map((row) => (
-              <div key={row.element} className="anim-fade relative h-3.5">
-                <span className="absolute top-0 left-0 z-10 bg-space/80 pr-1 font-mono text-[10px] leading-3.5 text-space-muted">
-                  {row.element}
-                </span>
-                {row.ticks.map(({ line, x }) => (
-                  <span
-                    key={line.id}
-                    style={{
-                      left: `${x * 100}%`,
-                      opacity: markWeights.get(row.element)?.get(line.id) ?? 0.5,
-                    }}
-                    className="absolute top-0 h-full w-px bg-solar"
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {/* The focused element's lines, named; the lines themselves run through everything. */}
+        <div aria-hidden className="relative mt-0.5 h-3.5 font-mono text-[10px] leading-3.5">
+          {markerLabels.map((l) => (
+            <span
+              key={l.key}
+              /* Centred on its line, or held inside the edges. */
+              style={{
+                left: `${l.x * 100}%`,
+                translate: l.x < 0.05 ? "0" : l.x > 0.95 ? "-100%" : "-50%",
+              }}
+              className="anim-fade absolute rounded-sm bg-space/80 px-1 whitespace-nowrap text-solar"
+            >
+              {l.text}
+            </span>
+          ))}
+        </div>
         <svg
           aria-hidden
-          className="mt-1.5 block min-h-12 w-full shrink! basis-[clamp(3rem,17dvh,9rem)] overflow-visible"
+          className="mt-1.5 block min-h-12 w-full shrink! grow! basis-[clamp(3rem,17dvh,9rem)] overflow-visible"
           viewBox={`0 0 ${Math.max(1, plot?.n ?? 1) - 1} 100`}
           preserveAspectRatio="none"
         >
@@ -438,6 +459,23 @@ export function SpectrumView({ className }: { className?: string }) {
           ))}
         </div>
 
+        {/* Lab lines of the marked elements, through ribbon and plot */}
+        {markers.length ? (
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-5 bottom-5">
+            {markers.map(({ line, x, weight }) => (
+              <span
+                key={line.id}
+                style={{ left: `${x * 100}%`, opacity: weight }}
+                className={cn(
+                  "absolute inset-y-0 w-px transition-opacity duration-300",
+                  line.element === previewing
+                    ? "bg-[repeating-linear-gradient(to_bottom,rgb(var(--solar))_0_3px,transparent_3px_6px)]"
+                    : "bg-solar",
+                )}
+              />
+            ))}
+          </div>
+        ) : null}
         {/* The selected line, through ribbon and plot */}
         {selectedCentre !== null && xOf(selectedCentre) >= 0 && xOf(selectedCentre) <= 1 ? (
           <span
