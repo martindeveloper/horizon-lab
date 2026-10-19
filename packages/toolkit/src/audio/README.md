@@ -7,7 +7,9 @@ come from a user gesture.
 - `MusicPlayer(tracks, options)`: background music. One track loops; a playlist
   runs on and wraps.
   - `tracks`: a `{ title, artist?, sources }` or an array of them. Sources are in
-    order of preference, e.g. Opus/WebM, then AAC/M4A for Safari.
+    order of preference, e.g. Opus/WebM, then AAC/M4A. Safari and iOS skip WebM
+    when another source exists: WebKit plays it outside Web Audio, so gains
+    cannot fade it.
   - `options`: `fadeIn` (3 s), `fadeOut` (1.5 s), `crossfade` (8 s), `skipFade`
     (2.5 s), `prefetch` (30 s) and `storageKey` (default `null`; set it to
     remember "on" in sessionStorage).
@@ -21,7 +23,8 @@ come from a user gesture.
     the first interaction outside `ignore()` (the controls). Returns a cleanup.
   - `dispose()` stops at once and releases the graph, the media-session handlers
     and every listener.
-- `equalPowerCurve` and `crossfadeDelay` are the pure helpers behind the loop.
+- `equalPowerCurve`, `crossfadeDelay` and `chooseSource` are the pure helpers
+  behind the loop and the source choice.
 
 Two streaming `<audio>` decks crossfade where a track ends, so there is no codec
 gap or decoded-buffer memory cost. Nothing downloads before the first play; only

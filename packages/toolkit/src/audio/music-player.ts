@@ -38,6 +38,24 @@ export function equalPowerCurve(rising: boolean, steps = 64) {
   return curve;
 }
 
+/**
+ * The first source the browser plays, preferring a "probably". WebKit plays WebM
+ * outside the Web Audio graph, where gains cannot fade it, so it gets the others.
+ */
+export function chooseSource(
+  sources: MusicTrack["sources"],
+  canPlay: (type: string) => string,
+  webkit = false,
+) {
+  const usable = webkit ? sources.filter((source) => !/^audio\/webm\b/i.test(source.type)) : [];
+  const pool = usable.length ? usable : sources;
+  return (
+    pool.find((source) => canPlay(source.type) === "probably") ??
+    pool.find((source) => canPlay(source.type) !== "") ??
+    pool.at(-1)!
+  ).src;
+}
+
 /** Seconds until the next deck must start so its fade ends exactly at the track end. */
 export function crossfadeDelay(duration: number, position: number, crossfade: number) {
   return Math.max(0, duration - position - crossfade);
@@ -224,12 +242,9 @@ export class MusicPlayer {
 
   private pickSource(track: MusicTrack) {
     const probe = this.decks[0]?.el ?? document.createElement("audio");
-    const sources = track.sources;
-    return (
-      sources.find((source) => probe.canPlayType(source.type) === "probably") ??
-      sources.find((source) => probe.canPlayType(source.type) !== "") ??
-      sources.at(-1)!
-    ).src;
+    // Safari and every iOS browser report Apple: they share the WebKit media stack.
+    const webkit = navigator.vendor === "Apple Computer, Inc.";
+    return chooseSource(track.sources, (type) => probe.canPlayType(type), webkit);
   }
 
   /** Point a deck at a track and let it buffer; a deck already holding it keeps its data. */

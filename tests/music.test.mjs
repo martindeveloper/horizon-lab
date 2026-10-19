@@ -8,7 +8,8 @@ globalThis.sessionStorage = {
   setItem: (key, value) => saved.set(key, String(value)),
   removeItem: (key) => saved.delete(key),
 };
-const { MusicPlayer, equalPowerCurve, crossfadeDelay } = await import("@horizon/toolkit/audio");
+const { MusicPlayer, equalPowerCurve, crossfadeDelay, chooseSource } =
+  await import("@horizon/toolkit/audio");
 const { ambientMusic } = await import("../src/components/shell/ambient-music.ts");
 
 test("loop crossfade keeps constant power and ends with the track", () => {
@@ -21,6 +22,19 @@ test("loop crossfade keeps constant power and ends with the track", () => {
     assert.ok(Math.abs(out[i] ** 2 + into[i] ** 2 - 1) < 1e-6, `power dips at step ${i}`);
   assert.equal(crossfadeDelay(261.5, 0, 8), 253.5);
   assert.equal(crossfadeDelay(261.5, 258, 8), 0, "Late timers start the next deck at once");
+});
+
+test("WebKit avoids WebM, which bypasses the fading gains, unless nothing else exists", () => {
+  const sources = [
+    { src: "/a.webm", type: 'audio/webm; codecs="opus"' },
+    { src: "/a.m4a", type: 'audio/mp4; codecs="mp4a.40.2"' },
+  ];
+  const playsBoth = () => "probably";
+  assert.equal(chooseSource(sources, playsBoth), "/a.webm");
+  assert.equal(chooseSource(sources, playsBoth, true), "/a.m4a");
+  assert.equal(chooseSource(sources.slice(0, 1), playsBoth, true), "/a.webm");
+  const maybeAac = (type) => (type.startsWith("audio/webm") ? "" : "maybe");
+  assert.equal(chooseSource(sources, maybeAac), "/a.m4a");
 });
 
 test("players construct without browser globals and remember only when asked", () => {
