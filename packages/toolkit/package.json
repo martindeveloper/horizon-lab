@@ -10,6 +10,7 @@
   },
   "files": [
     "src",
+    "NOTICE.md",
     "README.md",
     "tsconfig.json"
   ],

@@ -137,5 +137,5 @@ More: [all docs](docs/README.md) · [UI library](docs/ui-library.md) · [brandin
 
 ## License
 
-[MIT](LICENSE) for the code. Imagery, data and fonts keep their own licences, listed on the
-in-app credits page.
+[MIT](LICENSE) for Horizon's own code, docs and artwork. Planet imagery, music, scientific data
+and dependencies keep their own licences; see [NOTICE](NOTICE.md).

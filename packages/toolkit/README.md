@@ -127,3 +127,7 @@ checks, not GPU render or browser interaction tests.
 When adding exports, keep functions small and name their units and assumptions.
 Add a consumer before generalizing feature-specific behavior. Update the relevant
 module README and tests with the public contract.
+
+## License
+
+[MIT](LICENSE), except the third-party code listed in [NOTICE](NOTICE.md).
