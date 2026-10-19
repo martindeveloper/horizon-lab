@@ -36,7 +36,7 @@ export function GuideSketch() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const text = useRef<Pick<
     SketchContext,
-    "number" | "km" | "notToScale" | "spinZero" | "assumedSpin"
+    "number" | "km" | "notToScale" | "spinZero" | "assumedSpin" | "criticalCurve"
   > | null>(null);
   useEffect(() => {
     text.current = {
@@ -46,6 +46,7 @@ export function GuideSketch() {
       notToScale: t("sketchNotToScale"),
       spinZero: t("sketchSpinZero"),
       assumedSpin: t("sketchAssumedSpin"),
+      criticalCurve: t("sketchCriticalCurve"),
     };
   });
 

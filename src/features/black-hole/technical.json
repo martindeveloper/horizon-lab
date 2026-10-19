@@ -5,9 +5,11 @@
     {
       "id": "rays",
       "equations": [
-        "r = |p|; L = p × v; Rs = 2 (M = 1)",
-        "dp/dλ = v",
-        "dv/dλ = −(3/2) Rs |L|² p / r⁵ + (a Rs / r³)(−v_z, 0, v_x)"
+        "u = 1/r; c = a(aE − L); K = Q + (L − aE)²; dλ = dλ_affine / Σ",
+        "(du/dλ)² = (E + cu²)² − K(u² − 2u³ + a²u⁴); d²u/dλ² = 2cu(E + cu²) − Ku(1 − 3u + 2a²u²)",
+        "d²s/dλ² = −(Q + L² + a²E² cos²θ) s + a²E² cosθ (ŷ − cosθ s); s = (sinθ cosφ, cosθ, sinθ sinφ)",
+        "(dφ/dλ)_drag = a u (2E − aLu) / (1 − 2u + a²u²)",
+        "camera (ZAMO): L = ϖ n_φ, E = α + ωL, p_θ = √Σ n_θ; g_sky = 1/E"
       ]
     },
     {
@@ -52,6 +54,9 @@
         "I ∝ F/F_peak × texture × I(μ) × g⁴",
         {
           "equation": "limb-darkening"
+        },
+        {
+          "equation": "emission-angle"
         }
       ]
     },
@@ -87,6 +92,14 @@
     {
       "title": "Narayan, Johnson & Gammie (2019) · Shadow and critical curve",
       "url": "https://arxiv.org/abs/1910.02957"
+    },
+    {
+      "title": "Mino (2003) · Separated Kerr geodesics in Mino time",
+      "url": "https://arxiv.org/abs/gr-qc/0302075"
+    },
+    {
+      "title": "Cunningham (1975) · Disk light in Kerr, plunging-region shifts",
+      "url": "https://doi.org/10.1086/154033"
     },
     {
       "title": "GRAVITY Collaboration (2022) · Sgr A* mass and distance",

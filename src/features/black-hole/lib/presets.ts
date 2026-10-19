@@ -4,7 +4,8 @@ export type { Quality, HoleKind, BlackHoleParams, Preset } from "./holes/types";
 export { paramsFromPreset } from "./holes/types";
 export { PRESETS, DEFAULT_PRESET, holeById, HOLES } from "./holes";
 
-export const MIN_DIST = 0.32;
+/** Below every spin's `cameraFloor` (physics.ts), which the camera also respects. */
+export const MIN_DIST = 1.6;
 export const MAX_DIST = 480;
 
 export const QUALITY_STEPS: Record<Quality, number> = {

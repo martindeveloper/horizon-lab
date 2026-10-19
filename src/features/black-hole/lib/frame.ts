@@ -3,8 +3,8 @@ import { DataTexture, FloatType, RGBAFormat, Vector2, Vector3 } from "three";
 import { DISK_OUTER_RADIUS, DISK_PROFILE_SIZE, diskProfilePixels } from "./disk-profile";
 import { holeById, SKY_CODE } from "./holes";
 import { DISK_INNER_HORIZON_FACTOR } from "./parameters";
-import { horizonOverM, iscoOverM } from "./physics";
-import { MAX_DIST, MIN_DIST } from "./presets";
+import { cameraFloor, horizonOverM, iscoOverM } from "./physics";
+import { MAX_DIST } from "./presets";
 import { framedRayFov } from "./render-policy";
 
 /**
@@ -114,13 +114,18 @@ export function sceneWriter(uniforms: Uniforms) {
   };
 }
 
+/** Camera distance within its bounds: outside the horizon of a hole with this spin. */
+export function clampDistance(distance: number, spin: number) {
+  return Math.max(cameraFloor(spin), Math.min(MAX_DIST, distance));
+}
+
 /** Orbit camera: position, a roll-free basis tilted by `roll`, and the framed field of view. */
-export function writeCamera(uniforms: Uniforms, pose: CameraPose) {
+export function writeCamera(uniforms: Uniforms, pose: CameraPose, spin: number) {
   const camPos = uniforms.uCamPos.value;
   const camFwd = uniforms.uCamFwd.value;
   const camRight = uniforms.uCamRight.value;
   const camUp = uniforms.uCamUp.value;
-  const dist = Math.max(MIN_DIST, Math.min(MAX_DIST, pose.distance));
+  const dist = clampDistance(pose.distance, spin);
   const incl = Math.max(-1.35, Math.min(1.35, pose.inclination));
   const c = Math.cos(incl);
   camPos.set(

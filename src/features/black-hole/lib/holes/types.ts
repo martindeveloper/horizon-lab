@@ -39,6 +39,13 @@ export type Preset = {
   massSolar: number;
   /** The mass is only a lower limit (shown with ≥). */
   massLowerLimit?: boolean;
+  /** How the readout qualifies the mass: one study's bound, or a value adopted among estimates. */
+  massNote?: "bound" | "adopted";
+  /**
+   * The real flow is hot and optically thin (synchrotron at horizon scales);
+   * the shared thin-disk renderer only stands in for it.
+   */
+  illustrativeFlow?: boolean;
   spin: number;
   inclination: number;
   distance: number;

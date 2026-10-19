@@ -1,12 +1,6 @@
 import { type Formula, defineEquation, schwarzschildRadius } from "@horizon/toolkit/science";
 
-import {
-  DISK_PEAK_K,
-  LIMB_DARKENING,
-  LIMB_NORMALIZATION,
-  REDSHIFT_MAX,
-  REDSHIFT_MIN,
-} from "./parameters";
+import { DISK_PEAK_K, LIMB_DARKENING, LIMB_NORMALIZATION } from "./parameters";
 
 /** Numbers inside printed formulas: "15,800", "0.4213". */
 const n = (value: number, digits = 4) =>
@@ -113,20 +107,40 @@ export const circularOrbitMomentum = defineEquation({
   source: "Bardeen, Press & Teukolsky (1972), eq. 2.13",
 });
 
-/** Frequency factor of a circular equatorial emitter; the shader clamps it before g⁴ brightening. */
+/**
+ * Frequency factor of a circular equatorial emitter seen by the camera. The
+ * photon's E and L are normalised so the camera measures unit energy, which
+ * folds the camera's own gravitational and frame-dragging shift into g.
+ */
 export const diskRedshift = defineEquation({
   id: "disk-redshift",
-  text: `g = 1 / [uᵗ(1 − Ωξ)],  clamped to ${n(REDSHIFT_MIN)}–${n(REDSHIFT_MAX)};  I ∝ g⁴`,
-  latex: `g = \\frac{1}{u^t(1 - \\Omega\\xi)} \\in [${n(REDSHIFT_MIN)}, ${n(REDSHIFT_MAX)}], \\quad I \\propto g^4`,
+  text: "g = 1 / [uᵗ(E − ΩL)],  −p·u_camera = 1;  I ∝ g⁴",
+  latex: "g = \\frac{1}{u^t(E - \\Omega L)}, \\quad -p \\cdot u_{cam} = 1, \\quad I \\propto g^4",
   output: "g",
   variables: {
     ut: { symbol: "uᵗ", latex: "u^t" },
     omega: { symbol: "Ω", latex: "\\Omega" },
-    xi: { symbol: "ξ", latex: "\\xi" },
+    E: { symbol: "E", latex: "E" },
+    L: { symbol: "L", latex: "L" },
     g: { symbol: "g", latex: "g" },
   },
-  compute: ({ ut, omega, xi }) =>
-    Math.min(REDSHIFT_MAX, Math.max(REDSHIFT_MIN, 1 / Math.max(ut * (1 - omega * xi), 0.08))),
+  compute: ({ ut, omega, E, L }) => 1 / (ut * (E - omega * L)),
+  source: "Cunningham & Bardeen (1973); Cunningham (1975)",
+});
+
+/** Emission angle from the disk normal in the gas's rest frame, on the equator. */
+export const emissionAngle = defineEquation({
+  id: "emission-angle",
+  text: "μ_em = g √Q / r",
+  latex: "\\mu_{em} = \\frac{g\\sqrt{Q}}{r}",
+  output: "mu",
+  variables: {
+    g: { symbol: "g", latex: "g" },
+    Q: { symbol: "Q", latex: "Q" },
+    r: radius,
+    mu: { symbol: "μ_em", latex: "\\mu_{em}" },
+  },
+  compute: ({ g, Q, r }) => Math.min(1, (g * Math.sqrt(Math.max(Q, 0))) / r),
 });
 
 /** Electron-scattering limb darkening, normalised to an isotropic emitter's flux. */
@@ -185,6 +199,7 @@ export const BLACK_HOLE_EQUATIONS = Object.fromEntries<Formula>(
     circularOrbitEnergy,
     circularOrbitMomentum,
     diskRedshift,
+    emissionAngle,
     limbDarkening,
     diskTemperature,
     rainClockRate,

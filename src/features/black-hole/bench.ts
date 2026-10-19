@@ -66,7 +66,7 @@ export const benchTarget: BenchTarget = {
           pose = motion.pose;
           spin = motion.spin;
         }
-        writeCamera(uniforms, pose);
+        writeCamera(uniforms, pose, spin);
         writeScene({ ...settings, spin }, frame.time, steps);
         pass.render();
       },

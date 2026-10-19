@@ -55,6 +55,16 @@ export function criticalImpactParameters(a: number): { prograde: number; retrogr
   return { prograde: Math.abs(lambda(prograde)), retrograde: Math.abs(lambda(retrograde)) };
 }
 
+/**
+ * Closest camera distance for spin a. The camera is a zero-angular-momentum
+ * observer, which exists only outside the horizon; it stays 0.3 M clear of
+ * r₊ on the equator, where Boyer–Lindquist r = √(d² − a²) is smallest.
+ */
+export function cameraFloor(a: number): number {
+  const r = horizonOverM(a) + 0.3;
+  return Math.sqrt(r * r + a * a);
+}
+
 /** Prograde ISCO radius / M. a = 0 → 6; a → 1 → 1. */
 export function iscoOverM(a: number): number {
   return innermostStableOrbit.compute({ a: clamp(a, -0.999, 0.999) });

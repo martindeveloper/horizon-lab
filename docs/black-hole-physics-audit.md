@@ -8,9 +8,11 @@ tags: [black-hole, physics, general-relativity, rendering, audit]
 # Black-hole physics and rendering audit
 
 Reviewed 15 October 2026; disk shading revised the same day. Preset viewing angles and
-catalogue numbers rechecked 16 October 2026. This is an educational illustration with analytic
-physical readouts, not a validated general-relativistic radiative-transfer code.
-The distinction matters most at high spin and close to the horizon.
+catalogue numbers rechecked 16 October 2026. On 19 October 2026 the heuristic spin
+twist was replaced by Kerr null geodesics seen from a hovering camera (below). Light
+paths, the capture boundary and frequency shifts are now computed from the metric; the
+glowing gas is still an educational illustration, not a general-relativistic
+radiative-transfer model.
 
 ## What is quantitative
 
@@ -21,10 +23,27 @@ orbit is not the apparent ring radius and not the entire Kerr photon region.
 Tests cover Schwarzschild limits, near-extremal ISCO values, negative-spin
 horizon symmetry, physical unit conversion and mass scaling.
 
+Rays follow Kerr null geodesics in Mino time with exact conserved E, L and Carter's Q
+([Mino 2003](https://arxiv.org/abs/gr-qc/0302075)). The radial motion is integrated in
+u = 1/r, where (du/dλ)² is a quartic polynomial; the polar direction moves on the unit
+sphere, so the poles are regular; frame dragging rotates both about the spin axis. The
+camera is a zero-angular-momentum observer (ZAMO), the local frame that exists at every
+radius outside the horizon ([Bardeen, Press & Teukolsky 1972](https://doi.org/10.1086/151796)).
+`lib/kerr-rays.ts` mirrors the shader's integrator step for step. Tests compare it with the
+analytic critical curve for the same finite-distance ZAMO, built from the spherical photon
+orbits (Bardeen 1973; Teo 2003): converged capture edges agree within
+0.4% for spins −0.9 to 0.998 and inclinations from edge-on to 73°, at 8–480 M. At the
+Standard budget of 192 steps they stay within 3.5%; the near-extremal prograde edge, where
+rays wind longest, is the worst case. Rays that exhaust the budget are reported apart from
+captured rays. Carter's constant is kept to rounding, and disk crossings change by under
+0.5% with eight-times-finer steps. Escaped sky directions agree with converged rays to about
+0.15° (median) and 0.5° (worst sampled).
+
 The falling clocks use radial Schwarzschild free fall with specific energy
 E=1: dτ/dt=1−2/r and dr/dt=−(1−2/r)√(2/r). These are coordinate-time ratios,
-not observed pulse-arrival rates. The model stops at 2.06 M, is independent of
-selected spin, and does not depict horizon crossing. Compare
+not observed pulse-arrival rates. The model stops at 2.06 M, keeping its last rate
+(dτ/dt ≈ 0.029, not zero), is independent of selected spin, and does not depict horizon
+crossing; the panel says so. Compare
 [NASA's black-hole FAQ](https://science.nasa.gov/apod/frequently-asked-questions-faqs-on-black-holes/).
 
 The disk's relative radial flux follows the zero-torque thin-disk expression of
@@ -43,7 +62,7 @@ relative profile, not the final displayed RGB intensity or a real accretion flow
   [Narayan, Johnson & Gammie (2019)](https://arxiv.org/abs/1910.02957).
 - Spectral intensity transforms as Iν,obs(ν)=g³ Iν,em(ν/g); bolometric
   intensity as Iobs=g⁴ Iem. Removed the incorrect mixed δ³/gravitational
-  square-root equation. The shader's frequency factor remains approximate.
+  square-root equation. Since 19 October the shader's g is exact for its camera (below).
   [Kulkarni et al. (2011)](https://academic.oup.com/mnras/article/414/2/1183/977096).
 - A non-spinning hole can have a Doppler-bright disk crescent: its disk still
   rotates. A lensed disk is not necessarily an Einstein ring.
@@ -67,44 +86,74 @@ relative profile, not the final displayed RGB intensity or a real accretion flow
   the former peak values kept as display scales (1.68 and 15,800 K).
 - A grazing "path length" boost (up to 1.75×) treated the opaque disk as
   optically thin. It is replaced by Chandrasekhar's electron-scattering limb
-  darkening, I ∝ 1 + 2.06 μ, normalized to an isotropic emitter's flux. μ is
-  taken from the coordinate-frame ray tangent without orbital aberration.
+  darkening, I ∝ 1 + 2.06 μ, normalized to an isotropic emitter's flux, with μ
+  measured in the gas's rest frame since 19 October.
 - Removed artificial photon-ring glow, amplified hotspot echoes and a
   post-tonemap highlight boost. Replaced reversed-edge GLSL `smoothstep`
   calls, whose results are [undefined by the specification](https://registry.khronos.org/OpenGL-Refpages/gl4/html/smoothstep.xhtml).
-- Catalogue presets open at their measured viewing angles: Sgr A* at i ≈ 30°
-  (EHT 2024, i = 150°), M87* at the jet's 17° and Cygnus X-1 at its 27.5° orbital
-  inclination ([Miller-Jones et al. 2021](https://arxiv.org/abs/2102.09091)).
+- Catalogue presets open at adopted viewing angles: Sgr A* at i ≈ 30°, model-dependent
+  (the EHT 2024 conditional model fit with i = 150°), M87* at the jet's 17° and Cygnus X-1
+  at its 27.5° orbital inclination ([Miller-Jones et al. 2021](https://arxiv.org/abs/2102.09091)).
   Cygnus X-1's spin of 0.95 is a teaching value: continuum fits give > 0.9985,
   warm-corona fits far less.
 
+## Review of 19 October 2026
+
+An external review was checked against the code; each point held.
+
+- The spin twist was not Kerr. Re-running the former march on the CPU at a = 0.998,
+  edge-on from 480 M, put the capture edges at 4.05 M and 6.10 M; Kerr gives 2.11 M and
+  6.98 M. More steps did not help. The renderer now integrates Kerr geodesics (above).
+- Falling clocks displayed 0.00× after stopping at 2.06 M, where dτ/dt ≈ 0.029. They now
+  keep that rate, and the panel is labelled as a Schwarzschild coordinate-time model.
+- Disk g assumed an observer at infinity while the camera sat at finite radius. The photon's
+  E and L are now normalised in the camera's frame, so g includes the camera's own shift:
+  at a = 0 and 26 M a factor 1/√(1 − 2/26) ≈ 1.041 in frequency, 17% in bolometric
+  intensity. Starlight gains the camera's blueshift 1/E as g⁴. The g clamp (0.2–2.5) was
+  removed; only the colour-temperature lookup is bounded.
+- The red tint, darkening and tunnel near the horizon, and the ember inside it, implied
+  that a falling observer's universe goes dark. They are gone. The camera hovers as a ZAMO,
+  which cannot exist inside the horizon, so it stays at least 0.3 M outside it. The control
+  label reads "near horizon" in both languages.
+- Limb darkening now uses μ = g√Q/r, the emission angle in the gas's rest frame, rather
+  than the coordinate-frame tangent. The glare highlight, which added flux, was removed.
+  Gas inside the ISCO keeps the ISCO's E and L ([Cunningham 1975](https://doi.org/10.1086/154033)),
+  which sets its g; its emissivity stays illustrative. That glow was first drawn only on rays
+  that went on to escape, and at up to a third of the disk's peak: beside the shadow on the
+  approaching side it cut a bright, hard-edged band next to the disk's lensed secondary image.
+  It now shows on every ray that crosses it, at under a tenth of the disk's peak. The dark gap
+  between the disk's inner edge and that secondary image is real for a disk ending at the ISCO. Temperatures remain display scales
+  without an observing band; animation is not mass-scaled and has no light-travel delays.
+- Sgr A* and M87* show a visible "illustrative thin disk, not an EHT image" note: their
+  horizon-scale light is synchrotron emission from hot, optically thin flows
+  ([EHT 2025](https://arxiv.org/abs/2509.24593)). The "dusty wind" is now an illustrative
+  glow; dust would need a sublimation model ([Baskin & Laor 2018](https://arxiv.org/abs/1711.00025)).
+- The lesson no longer equates the dark patch with the shadow: emission, opacity and the disk's
+  inner edge shape it ([Gralla, Holz & Wald 2019](https://arxiv.org/abs/1906.00873)). The guide's
+  overlay is now the exact critical curve for the renderer's camera, labelled as theory.
+- Readouts qualify ω Centauri's ≥ 8,200 M☉ as one study's bound for a debated candidate and
+  Cygnus X-1's 15 M☉ as an adopted value.
+
 ## What remains approximate
 
-At zero spin, the spatial ray acceleration is the Schwarzschild affine-ray
-form; the initial tangent now matches a static local observer with E=1.
 Finite-step velocity Verlet integration is not an error-controlled precision
-solver. It replaced a two-evaluation Heun step on 16 October 2026: one
-acceleration per step at equal accuracy, and exact conservation of L at a = 0.
-The saved work raised the budgets to 144, 192 and 256 steps. Rays that ran out
-of steps near the critical curve were drawn dark, inflating the zero-spin shadow
-(true edge b = 3√3 M ≈ 5.196 M) to 6.8–9.0 M at 72 steps and 5.3–5.7 M at 112.
-At 144 steps the edge lies within 1.8% at every camera distance; at 192, within 0.1%.
-At nonzero spin the added twist is a heuristic, not Kerr frame dragging from
-the metric. The rotating shadow and critical curve are **not quantitatively
-validated**. Readout accuracy must not be used as evidence of image accuracy.
+solver. Budgets are 144, 192 and 256 steps. Rays that run out of steps near the
+critical curve are drawn dark, so the dark region can be slightly larger than the
+capture boundary; at 192 steps the excess is under 3.5% even at a = 0.998. The CPU
+mirror, not the GPU, is what the tests check: browser shader compilation is checked
+offline by the GLSL parser, and float precision on the GPU is not separately validated.
 
 Emission stops at the first disk intersection. There is no optically thin
 volume transfer, plasma dynamics, magnetic-field evolution, polarization or
-physical accretion-rate normalization. Colours, hotspot motion, dust, jets and
+physical accretion-rate normalization. Colours, hotspot motion, the glow, jets and
 filaments are illustrative. Animation seconds are not physical seconds.
 Sgr A* and M87* have hot, radiatively inefficient flows; these thin-disk views
-are not EHT reconstructions. The camera is not a relativistic observer, and
-its inside-horizon fade is not an infall prediction.
+are not EHT reconstructions, and the scene says so. The camera hovers; it is not a
+falling observer.
 
-A future precision mode needs a validated Kerr geodesic solver, local observer
-frames, invariant radiative transfer and image convergence benchmarks before
-claiming scientific fidelity. Faster hardware or more steps alone will not fix
-the present rotating model.
+A future precision mode needs invariant radiative transfer through optically thin
+plasma, a physical temperature normalisation with an observing band, and mass-scaled
+time with light-travel delays before claiming quantitative brightness or colour.
 
 ## Rendering cost and verification
 
@@ -127,16 +176,20 @@ inside divergent ray-hit branches: they produced broken streaks in visual QA.
 The detail adds no ray steps or render passes; pixel and frame-rate budgets
 remain unchanged.
 
-`tests/black-hole-physics.test.mjs` covers formulas, flux convergence and budgets.
+`tests/black-hole-physics.test.mjs` covers formulas, flux convergence, budgets and the
+rendered ray model: capture boundaries across spin, inclination and distance, conserved
+quantities, step convergence of disk images, and finite-observer frequency shifts.
 Toolkit tests cover frame-loop suspension and disposal. Browser checks cover
 actual shader compilation, controls, and narrow/wide layouts. These are not
 measured watts, battery-duration tests or a GPU performance benchmark. Actual
 power depends on device, browser, screen size and selected quality.
 
-On 16 October 2026 the bench (`npm run bench`) attributed GPU time at 1920×1080 on
+The Kerr step of 19 October does more arithmetic than the former one (one radial and one
+sphere acceleration, a drag rotation and a few square roots) and has not been re-benchmarked;
+the figures below describe the earlier march. On 16 October 2026 the bench (`npm run bench`) attributed GPU time at 1920×1080 on
 an Apple M5 Max by switching components off between bracketing baseline runs.
-In near views, the march was about 60% of the frame, the dusty wind and jet
-volumes 23%, the sky 11–19% (72% from 480 M) and disk texture 2–8%. The dust is
+In near views, the march was about 60% of the frame, the glow and jet
+volumes 23%, the sky 11–19% (72% from 480 M) and disk texture 2–8%. The glow is
 a Gaussian cone around slope 0.38. Samples more than 0.26 from that slope, where
 the cone's weight is under 1% of its peak, are now rejected with one comparison,
 and outbound rays end at the cone's far corner (above). Together that made near
@@ -146,19 +199,20 @@ sub-pixel star shifts from the earlier hand-off to the analytic tail.
 ## Finite rendering boundaries
 
 Outbound rays stop once nothing is left to draw, rather than returning to the
-camera radius. Without a jet that is the dust cone's far corner, about 1.78 disk
+camera radius. Without a jet that is the glow cone's far corner, about 1.78 disk
 radii (27.8 M). With a jet it is the 36 M far-field radius, and never beyond
 48 M. Handing over at any radius from 18 to 48 M gave the same sky accuracy in
-tests, and the earlier exit saves about 12% of steps. Far-field steps retain the
-10% radial displacement bound, with a 48 M ceiling, to avoid exhausting the fixed
-budget at the maximum 480 M camera distance. Bending beyond this boundary, and
+tests, and the earlier exit saves about 12% of steps. Beyond 8 M a step moves a ray
+10% of its radius, growing as √(r/8 M) to 30% far out, so the march from the maximum
+480 M camera distance does not exhaust the fixed budget. Bending beyond this boundary, and
 for rays too far out to march, is added analytically along the
 remaining straight path: in these coordinates the bending term falls as 1/r⁴,
 giving (1/b)[2 − s(2s² + 3b²)/(b² + s²)^(3/2)] (4M/b for a full pass), with the
 second-order 15πM²/4b² shared in the same proportion. This replaced a blend that
 faded rays passing 8–24 M back towards their undeflected direction: a star seen
-at b = 20 M was bent 3° instead of 12°. At zero spin, escaped sky directions now
-agree with a converged integration within 0.2°.
+at b = 20 M was bent 3° instead of 12°. Escaped sky directions agree with a converged
+integration to about 0.15° (median); spin enters the tail at order a/b², which is small
+beyond the hand-off radius.
 The disk's finite outer display window fades both emission and coverage,
 compositing the background through the taper. This is an artistic truncation
 treatment, not a prediction of optical depth or the physical outer disk radius.

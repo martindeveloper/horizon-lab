@@ -183,7 +183,7 @@ test("orrery timeline gives each formation stage room, a note and a play stop", 
   for (const [, note] of stages) assert.ok(notes.has(note), `${note} is reachable on the slider`);
 });
 
-test("disk shading conserves flux and clamps redshift", () => {
+test("disk shading conserves flux", () => {
   assert.equal(rainClockRate.compute({ r: 2 }), 0);
   // Flux-weighted mean of I(μ) over the visible hemisphere is 1: ∫₀¹ 2μ I(μ) dμ.
   let integral = 0;
@@ -193,7 +193,10 @@ test("disk shading conserves flux and clamps redshift", () => {
   }
   near(integral, 1, 1e-6, "limb darkening normalisation");
   assert.equal(diskTemperature.compute({ flux: 1, scale: 1 }), 15_800);
-  assert.equal(diskRedshift.compute({ ut: 1, omega: 0, xi: 0 }), 1);
-  assert.equal(diskRedshift.compute({ ut: 100, omega: 0, xi: 0 }), 0.2, "clamped low");
-  assert.equal(diskRedshift.compute({ ut: 0.01, omega: 0, xi: 0 }), 2.5, "clamped high");
+  // Face-on Schwarzschild ISCO seen from far away: g = 1/uᵗ = √(1 − 3/r).
+  near(
+    diskRedshift.compute({ ut: 1 / Math.sqrt(0.5), omega: 0, E: 1, L: 0 }),
+    Math.sqrt(0.5),
+    1e-12,
+  );
 });

@@ -15,7 +15,13 @@ import {
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 
 import fragmentShader from "./black-hole.frag.glsl";
-import { createUniforms, orbitWheelSensitivity, sceneWriter, writeCamera } from "./frame";
+import {
+  clampDistance,
+  createUniforms,
+  orbitWheelSensitivity,
+  sceneWriter,
+  writeCamera,
+} from "./frame";
 import { MAX_DIST, MIN_DIST, QUALITY_STEPS } from "./presets";
 import { renderBudget, renderScale } from "./render-policy";
 import { useBlackHole } from "./store";
@@ -75,7 +81,7 @@ export function createBlackHoleEngine(
         onChange: (pose) => {
           azimuth = pose.azimuth;
           incl = pose.inclination;
-          dist = pose.distance;
+          dist = clampDistance(pose.distance, useBlackHole.getState().spin);
           useBlackHole.getState().setAzimuth(azimuth);
           useBlackHole.getState().setInclination(incl);
           useBlackHole.getState().setDistance(dist);
@@ -127,8 +133,8 @@ export function createBlackHoleEngine(
         incl = state.inclination;
         dist = state.distance;
       }
-      dist = Math.max(MIN_DIST, Math.min(MAX_DIST, dist));
-      writeCamera(uniforms, { azimuth, inclination: incl, distance: dist, roll });
+      dist = clampDistance(dist, state.spin);
+      writeCamera(uniforms, { azimuth, inclination: incl, distance: dist, roll }, state.spin);
       writeCameraSnapshot(
         snapshot,
         uniforms.uCamPos.value,
@@ -168,7 +174,7 @@ export function createBlackHoleEngine(
           const pose = sampleOrbitFlight(tourT, from, beat);
           azimuth = pose.azimuth;
           incl = pose.inclination;
-          dist = Math.max(MIN_DIST, Math.min(MAX_DIST, pose.distance));
+          dist = clampDistance(pose.distance, state.spin);
           roll = lerp(tourFromRoll, beat.roll ?? 0, smootherstep(tourT));
           if (tourT >= 1 && !state.guideArrived) useBlackHole.getState().setGuideArrived(true);
         } else if (beat && state.guideArrived) {
@@ -189,10 +195,7 @@ export function createBlackHoleEngine(
           const settle = 1 - (1 + holdT / 18) * Math.exp(-holdT / 18);
           azimuth = holdAz + drift * (holdT - ramp * (1 - Math.exp(-holdT / ramp)));
           incl = holdIncl;
-          dist = Math.max(
-            MIN_DIST,
-            Math.min(MAX_DIST, holdDist * (1 - (beat.creep ?? 0.05) * settle)),
-          );
+          dist = clampDistance(holdDist * (1 - (beat.creep ?? 0.05) * settle), state.spin);
         }
       } else {
         if (lastGuideOpen) {

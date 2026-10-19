@@ -25,6 +25,7 @@ export const omegaCen: HoleSpec = {
     "A candidate intermediate-mass black hole in a swallowed dwarf galaxy's core, 17,700 ly away.",
   massSolar: 8200,
   massLowerLimit: true,
+  massNote: "bound",
   spin: 0,
   inclination: 0.7,
   distance: 30,

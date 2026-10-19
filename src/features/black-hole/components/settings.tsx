@@ -2,8 +2,8 @@ import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
-import { formatSpin, horizonOverM } from "@/features/black-hole/lib/physics";
-import { MIN_DIST, MAX_DIST, type Quality } from "@/features/black-hole/lib/presets";
+import { cameraFloor, formatSpin } from "@/features/black-hole/lib/physics";
+import { MAX_DIST, type Quality } from "@/features/black-hole/lib/presets";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { toLogFraction, fromLogFraction } from "@horizon/toolkit/math";
 import { ControlRow, SegmentedControl, Slider, SwitchRow } from "@horizon/toolkit/ui";
@@ -40,12 +40,11 @@ export function SettingsBody() {
     a < 0 ? `${formatSpin(a)} · ${t("retrogradeDisk")}` : formatSpin(a);
   const degrees = (inclination * 180) / Math.PI;
   const elevationText = `${degrees.toFixed(0)}° · i ≈ ${(90 - Math.abs(degrees)).toFixed(0)}°`;
+  const floor = cameraFloor(spin);
   const distanceText =
-    distance < horizonOverM(spin)
-      ? `${distance.toFixed(2)} M · ${t("inside")}`
-      : distance < 8
-        ? `${distance.toFixed(1)} M · ${t("infall")}`
-        : `${distance < 80 ? distance.toFixed(1) : distance.toFixed(0)} M`;
+    distance < 8
+      ? `${distance.toFixed(1)} M · ${t("nearHorizon")}`
+      : `${distance < 80 ? distance.toFixed(1) : distance.toFixed(0)} M`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -89,8 +88,8 @@ export function SettingsBody() {
           min={0}
           max={1}
           step={0.002}
-          value={[toLogFraction(distance, MIN_DIST, MAX_DIST)]}
-          onValueChange={([v]) => setDistance(fromLogFraction(v ?? 0, MIN_DIST, MAX_DIST))}
+          value={[toLogFraction(distance, floor, MAX_DIST)]}
+          onValueChange={([v]) => setDistance(fromLogFraction(v ?? 0, floor, MAX_DIST))}
         />
       </ControlRow>
       <ControlRow label={t("exposure")} value={exposure.toFixed(2)}>

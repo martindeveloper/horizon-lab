@@ -28,6 +28,7 @@ export const stellar: HoleSpec = {
   blurb:
     "A ~15 M☉ hole, likely from the Cygnus OB3 association, 7,240 ly. The band is the Orion Spur; Sadr and Deneb lie 7–13° away.",
   massSolar: 15,
+  massNote: "adopted",
   spin: 0.95,
   inclination: 1.09,
   distance: 26,

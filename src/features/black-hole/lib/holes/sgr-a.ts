@@ -7,7 +7,7 @@
  *   a/M ≈ 0.94      not measured: the only EHT model passing every test (EHT 2022 Paper V;
  *                   2024 Paper VIII, a = 0.94, i = 150°). Later work is split (arXiv:2509.22639
  *                   disfavours high spin; arXiv:2601.16267 finds it unconstrained).
- *   i ≈ 30°         near face-on: EHT 2024 (150° ≡ 30° from the axis), GRAVITY flares,
+ *   i ≈ 30°         adopted, model-dependent: EHT 2024 conditional fit (150° ≡ 30° from the axis), GRAVITY flares,
  *                   arXiv:2601.16267
  *
  * Shared radii (see physics.ts):
@@ -31,6 +31,7 @@ export const sgrA: HoleSpec = {
   blurb:
     "Galactic Centre, 27,000 ly. You sit inside the nuclear star cluster; the plane of the Milky Way runs through the view.",
   massSolar: 4.297e6,
+  illustrativeFlow: true,
   spin: 0.94,
   inclination: 1.05,
   distance: 28,

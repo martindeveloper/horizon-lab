@@ -143,8 +143,9 @@ function ClockRun({
         const refs = rowRefs.current[i];
         const was = shown[i];
         if (!refs || !was) return;
-        const rate = d.gone ? 0 : rainRedshift(d.r);
-        const label = `r ${d.r.toFixed(1)}`;
+        // A stopped clock keeps the rate it had at the floor: dτ/dt never reaches zero outside r = 2M.
+        const rate = rainRedshift(d.r);
+        const label = `r ${d.r.toFixed(d.gone ? 2 : 1)}`;
         const rateText = `${rate.toFixed(2)}×`;
         if (label !== was.label && refs.label) refs.label.textContent = label;
         if (rateText !== was.rate) {
@@ -183,7 +184,7 @@ function ClockRun({
         if (d.gone && d.fade >= FADE_LIFE) return;
         const s = place(d.r, d.spread);
         if (!s.visible) return;
-        const rate = d.gone ? 0 : rainRedshift(d.r);
+        const rate = rainRedshift(d.r);
         const latest = d.flashes.at(-1);
         const boost = latest && latest.age < 0.3 ? 1 - latest.age / 0.3 : 0;
         const alpha = d.gone ? 0.5 * (1 - d.fade / FADE_LIFE) : 0.4 + 0.6 * rate;
@@ -242,7 +243,9 @@ function ClockRun({
             onClose={() => setOpen(false)}
             closeLabel={t("ariaCloseClocks")}
           />
-          <p className="mt-2 text-sm leading-relaxed text-fg/80">{t("clocksLead")}</p>
+          <p className="mt-2 text-sm leading-relaxed text-fg/80">
+            {t("clocksLead", { floor: RAIN_FLOOR })}
+          </p>
 
           <ul
             aria-label={t("clocksRates")}

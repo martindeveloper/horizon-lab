@@ -28,6 +28,7 @@ export const m87: HoleSpec = {
   blurb:
     "16.8 Mpc, 55 million ly. High above the Milky Way plane - a yellow elliptical halo, globulars, and Virgo neighbours. The jet is real.",
   massSolar: 6.5e9,
+  illustrativeFlow: true,
   spin: 0.9,
   inclination: HOME_INCLINATION,
   distance: 32,

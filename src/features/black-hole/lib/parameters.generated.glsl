@@ -4,13 +4,15 @@
 
 #define DISK_PEAK_K        15800.0
 #define DISK_PEAK_FLUX     1.68
+#define PLUNGE_GLOW        0.06
 #define DISK_PROFILE_SIZE  512.0
 #define DISK_PROFILE_LAST  511.0
-#define REDSHIFT_MIN       0.2
-#define REDSHIFT_MAX       2.5
 #define LIMB_DARKENING     2.06
 #define LIMB_NORMALIZATION 0.4213483146
 #define MAX_STEPS          256
+#define STEP_NEAR          0.07
+#define STEP_FAR           0.1
+#define STEP_FAR_GROWTH    3.0
 #define ESCAPE_R           48.0
 #define FAR_FIELD_R        36.0
 #define MARCH_B            34.0
@@ -18,9 +20,9 @@
 #define GAS_TURN_CELLS     12.0
 #define GAS_SPIRAL_CELLS   16.0
 #define GAS_PITCH          4.0
-#define DUST_SLOPE         0.38
-#define DUST_WIDTH         0.12
-#define DUST_CONE          0.26
-#define DUST_OUTER         1.5
+#define GLOW_SLOPE         0.38
+#define GLOW_WIDTH         0.12
+#define GLOW_CONE          0.26
+#define GLOW_OUTER         1.5
 
 #endif // HORIZON_BLACK_HOLE_PARAMETERS

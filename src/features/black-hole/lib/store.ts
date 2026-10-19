@@ -4,6 +4,7 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { wrap } from "@horizon/toolkit/math";
 
 import { presetFromPath } from "../routing";
+import { cameraFloor } from "./physics";
 import type { PinId } from "./pins";
 import {
   DEFAULT_PRESET,
@@ -91,9 +92,11 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
       clocksOpen: false,
     });
   },
-  setSpin: (spin) => set({ spin, presetId: "custom" }),
+  // The camera stays outside the horizon, which grows as spin falls.
+  setSpin: (spin) =>
+    set((s) => ({ spin, presetId: "custom", distance: Math.max(s.distance, cameraFloor(spin)) })),
   setInclination: (inclination) => set({ inclination }),
-  setDistance: (distance) => set({ distance }),
+  setDistance: (distance) => set((s) => ({ distance: Math.max(distance, cameraFloor(s.spin)) })),
   setExposure: (exposure) => set({ exposure }),
   setDiskBrightness: (diskBrightness) => set({ diskBrightness }),
   setStarIntensity: (starIntensity) => set({ starIntensity }),

@@ -2,7 +2,7 @@
 
 # Black-hole observatory
 
-Analytic orbital readouts with illustrative ray tracing, not a precision Kerr renderer or telescope reconstruction. All presets share this model. Sources below distinguish established physics from the visual approximations.
+Analytic orbital readouts and Kerr ray tracing from a hovering camera. Disk light, colours and motion are illustrative, not a telescope reconstruction or radiative-transfer model. All presets share this model. Sources below distinguish established physics from the visual approximations.
 
 The in-app Technical details button uses the same structured specification and localized copy.
 All preset subpages below share this implementation; they are configurations, not separate solvers.
@@ -35,6 +35,8 @@ Routes carry no language prefix. Mass and spin below are initial preset values, 
 - [Bardeen, Press & Teukolsky (1972) · Kerr circular orbits](https://doi.org/10.1086/151796)
 - [Page & Thorne (1974) · Thin-disk flux](https://articles.adsabs.harvard.edu/pdf/1974ApJ...191..499P)
 - [Narayan, Johnson & Gammie (2019) · Shadow and critical curve](https://arxiv.org/abs/1910.02957)
+- [Mino (2003) · Separated Kerr geodesics in Mino time](https://arxiv.org/abs/gr-qc/0302075)
+- [Cunningham (1975) · Disk light in Kerr, plunging-region shifts](https://doi.org/10.1086/154033)
 - [GRAVITY Collaboration (2022) · Sgr A* mass and distance](https://www.aanda.org/articles/aa/full_html/2022/01/aa42465-21/aa42465-21.html)
 - [EHT Collaboration (2025) · M87* ring measurements](https://arxiv.org/abs/2509.24593)
 - [Miller-Jones et al. (2021) · Cygnus X-1 mass](https://arxiv.org/abs/2102.09091)
@@ -45,19 +47,21 @@ Routes carry no language prefix. Mass and spin below are initial preset values, 
 
 See [physics audit](../../../docs/black-hole-physics-audit.md) for verification scope and remaining limits.
 
-## Cartesian ray integration
+## Kerr ray tracing
 
-Three.js draws one full-screen quad with a GLSL fragment shader. Each pixel launches one deterministic camera ray in Cartesian coordinates. This is not Monte Carlo path tracing: there are no stochastic light bounces or accumulated samples. The bending term uses p (position), v (ray tangent), and L (their cross product); a is dimensionless spin. The spin correction is enabled only above a = 0.002 and is a heuristic twist, not a full Kerr null-geodesic solver. The integrator is velocity Verlet (kick, drift, kick), with one acceleration per step; at zero spin it conserves angular momentum exactly. Beyond r = 36 the march only bends the ray. Step sizes limit spatial displacement to roughly 7–10% of radius, without numerical error estimation. Exhausting the step budget leaves a ray dark rather than treating it as escaped sky. Bending beyond the escape radius, and for rays too far out to march, is added analytically: the weak-field 4M/b plus the second-order 15πM²/4b², shared along the remaining path. For zero spin, the camera direction is converted from a static local frame to a spatial affine tangent with conserved energy E = 1. Numerical convergence and the rotating branch remain approximate.
+Three.js draws one full-screen quad with a GLSL fragment shader. Each pixel launches one deterministic ray, traced backward along a Kerr null geodesic. This is not Monte Carlo path tracing: there are no stochastic light bounces or accumulated samples. The camera is a zero-angular-momentum observer; its local frame turns each pixel’s direction into the photon’s conserved energy E, angular momentum L and Carter constant Q, normalised so the camera measures unit energy. It stays at least 0.3 M outside the horizon, where such an observer exists. Rays advance in Mino time λ. The radial motion in u = 1/r is a smooth oscillator, the direction s moves on the unit sphere without a pole singularity, and frame dragging rotates both about the spin axis. Velocity Verlet steps move a ray about 7% of its radius inside 8 M and 10–30% beyond. Each step restores |ds/dλ| from Q, and du/dλ from the radial potential away from turning points. Beyond r = 36 the march only bends the ray. An ingoing ray inside the midpoint between r₊ and the prograde photon orbit can no longer turn and is captured. Exhausting the step budget leaves a ray dark, reported apart from capture. Bending beyond the escape radius, and for rays too far out to march, is added analytically: the weak-field 4M/b plus the second-order 15πM²/4b², shared along the remaining path. Tests trace the same equations on the CPU: converged capture edges match this camera’s analytic critical curve within 0.4%, Standard quality keeps them within 3.5%, and escaped sky directions agree with eight-times-finer steps to about 0.2°.
 
 ```text
-r = |p|; L = p × v; Rs = 2 (M = 1)
-dp/dλ = v
-dv/dλ = −(3/2) Rs |L|² p / r⁵ + (a Rs / r³)(−v_z, 0, v_x)
+u = 1/r; c = a(aE − L); K = Q + (L − aE)²; dλ = dλ_affine / Σ
+(du/dλ)² = (E + cu²)² − K(u² − 2u³ + a²u⁴); d²u/dλ² = 2cu(E + cu²) − Ku(1 − 3u + 2a²u²)
+d²s/dλ² = −(Q + L² + a²E² cos²θ) s + a²E² cosθ (ŷ − cosθ s); s = (sinθ cosφ, cosθ, sinθ sinφ)
+(dφ/dλ)_drag = a u (2E − aLu) / (1 − 2u + a²u²)
+camera (ZAMO): L = ϖ n_φ, E = α + ωL, p_θ = √Σ n_θ; g_sky = 1/E
 ```
 
 ## Units, radii, and orbital scales
 
-The renderer uses geometric units G = c = M = 1, so Rs = 2. Here M_phys denotes the physical mass and a the dimensionless spin. The readouts calculate the Kerr outer horizon, equatorial prograde photon-orbit radius, ISCO, and circular-orbit period. The displayed photon radius is one equatorial orbit, not a complete Kerr photon region. The shader captures rays at the horizon radius; the disk inner edge is max(1.08 r₊, r_ISCO), with outer radius 15.6 M. The ISCO helper explicitly returns 6 M at zero spin (its sign branch is positive there). Mass changes physical lengths and periods in the readouts, not the dimensionless rendered geometry or its animation speed.
+The renderer uses geometric units G = c = M = 1, so Rs = 2. Here M_phys denotes the physical mass and a the dimensionless spin. The readouts calculate the Kerr outer horizon, equatorial photon-orbit radius and ISCO in the disk’s direction, and circular-orbit period. The displayed photon radius is one equatorial orbit, not a complete Kerr photon region. The disk inner edge is max(1.08 r₊, r_ISCO), with outer radius 15.6 M. The ISCO helper explicitly returns 6 M at zero spin (its sign branch is positive there). Mass changes physical lengths and periods in the readouts, not the dimensionless rendered geometry or its animation speed.
 
 ```math
 R_s = \frac{2 G M}{c^2}
@@ -85,7 +89,7 @@ T = 2\pi\left[\left(\frac{r}{M}\right)^{3/2} + a\right]\frac{G M_{phys}}{c^3}
 
 ## Disk emission and frequency shifts
 
-Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over 511 radial intervals when spin changes. The 512-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max(1.08 r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the 15,800 K peak is a display scale, not a measured temperature. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + 2.06 μ (Chandrasekhar 1960), with μ taken in the coordinate frame. The frequency factor g (clamped to 0.2–2.5) shifts an approximate blackbody RGB colour and weights brightness by g⁴. Its ray angular momentum is estimated from the unnormalized Cartesian tangent; the rotating branch is not Kerr radiative transfer. Noise, a moving hotspot, edge fades and glare remain artistic. Temperatures and animation speeds are not physical predictions. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics.
+Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over 511 radial intervals when spin changes. The 512-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max(1.08 r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the 15,800 K peak is a display scale, not a measured temperature, and colours are not tied to an observing band. The frequency factor g = 1/[uᵗ(E − ΩL)] uses the photon’s conserved E and L in the camera’s normalisation, so it includes the camera’s own gravitational and frame-dragging shift. It shifts an approximate blackbody RGB colour and weights bolometric brightness by g⁴; starlight gains the camera’s blueshift 1/E the same way. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + 2.06 μ (Chandrasekhar 1960), with μ = g√Q/r measured in the gas’s rest frame. Gas inside the ISCO plunges with the ISCO’s E and L (Cunningham 1975), which sets its g; its faint, optically thin glow is illustrative and shows in front of whatever a ray meets next. Noise, a moving hotspot and edge fades remain artistic. Animation is not scaled by mass and has no light-travel delays. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics.
 
 ```text
 F(r) ∝ −Ω′ / [r(E − ΩL)²] ∫(E − ΩL) dL
@@ -105,7 +109,7 @@ L = \frac{r^2 - 2a\,r^{1/2} + a^2}{r^{3/4}\sqrt{r^{3/2} - 3r^{1/2} + 2a}}
 ```
 
 ```math
-g = \frac{1}{u^t(1 - \Omega\xi)} \in [0.2, 2.5], \quad I \propto g^4
+g = \frac{1}{u^t(E - \Omega L)}, \quad -p \cdot u_{cam} = 1, \quad I \propto g^4
 ```
 
 ```math
@@ -114,6 +118,10 @@ T_{em} = 15\,800\,\mathrm{K}\left(\frac{F}{F_{peak}}\,\mathrm{texture}\right)^{1
 
 ```math
 I(\mu) = 0.4213\,(1 + 2.06\,\mu)
+```
+
+```math
+\mu_{em} = \frac{g\sqrt{Q}}{r}
 ```
 
 ## Falling clocks are a separate model
@@ -130,11 +138,11 @@ The clock overlay uses radial Schwarzschild infall from rest at infinity, even w
 
 ## Real-time rendering budget
 
-Economy, Standard and Cinema allow 144, 192 and 256 integration steps per pixel. Resolution scales 0.72, 0.90 and 1.00 are further limited to 0.6, 1.2 and 2.4 million pixels. DPR is capped at 1, or 1.5 for unconstrained Cinema; touch or reported battery operation caps the buffer at 0.8 million pixels. Economy targets 24 fps; Standard targets 30 fps; Cinema can reach 60 fps during interaction on unconstrained devices. These are work caps, not battery-life guarantees. A low-power GPU is requested as a browser hint. Hidden pages and the atlas suspend rendering. Pause animation stops continuous scene rendering while controls still redraw it; reduced-motion preference starts paused. Disk flux is cached on spin changes. Warm-up uses reduced buffers and steps; GPU resources are disposed on unmount.
+Economy, Standard and Cinema allow 144, 192 and 256 integration steps per pixel. Resolution scales 0.72, 0.90 and 1.00 are further limited to 0.6, 1.2 and 2.4 million pixels. DPR is capped at 1, or 1.5 for unconstrained Cinema; touch or reported battery operation caps the buffer at 0.8 million pixels. Economy targets 24 fps; Standard targets 30 fps; Cinema can reach 60 fps during interaction on unconstrained devices. These are work caps, not battery-life guarantees. A low-power GPU is requested as a browser hint. Hidden pages and the atlas suspend rendering. Turning Animation off stops continuous scene rendering while controls still redraw it; reduced-motion preference starts paused. Disk flux is cached on spin changes. Warm-up uses reduced buffers and steps; GPU resources are disposed on unmount.
 
 ## What the image does not model
 
-This is an illustrative hybrid, not a validated scientific prediction or observational reconstruction. It does not solve full Kerr geodesics, gas dynamics, magnetic fields, scattering, polarization or radiative transfer. The sky, jets, dust and plunge emission are procedural. The first disk intersection ends a ray, so optically thin flows and resolved photon subrings are not predicted. Artificial photon-ring glow and exaggerated hotspot echoes have been removed, as have companion stars drawn at physically incorrect near-horizon distances. Finite step budgets, the analytic far-field bending, clamps, exposure and colour mapping still trade fidelity for real-time readability. The camera is an orbit control, not a relativistic falling observer; its inside-horizon fade is illustrative. Named-object masses are approximate literature values. Their spins are assumed model values, except GW231123’s, inferred from its gravitational waves; camera poses and colours are teaching choices. Sgr A* and M87* are not thin-disk reconstructions.
+Light paths follow Kerr geodesics, but the emission is an illustrative hybrid, not a validated scientific prediction or observational reconstruction. It does not model gas dynamics, magnetic fields, scattering, polarization or radiative transfer. The sky, jets, plunge emissivity and the glow above the disk are procedural; the glow is art direction, not a dust or plasma model. The first disk intersection ends a ray, so optically thin flows and resolved photon subrings are not predicted. Artificial photon-ring glow, glare and exaggerated hotspot echoes have been removed, as have companion stars drawn at physically incorrect near-horizon distances. Finite step budgets, the analytic far-field bending, colour-temperature clamps, exposure and colour mapping still trade fidelity for real-time readability. The camera hovers as a zero-angular-momentum observer and stays outside the horizon; it is not a falling observer. Named-object masses are approximate literature values. Their spins are assumed model values, except GW231123’s, inferred from its gravitational waves; camera poses and colours are teaching choices. Sgr A* and M87* have hot, optically thin flows whose horizon-scale light is synchrotron emission; their thin disks are illustrative.
 
 ## Maintenance
 

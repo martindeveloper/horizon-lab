@@ -1,11 +1,12 @@
 /**
  * Line drawings laid over the hole during guide beats, in scene units of M.
- * Geometry is real where it can be: coordinate radii, the Bardeen shadow
- * curve, a Schwarzschild null geodesic, zero-angular-momentum Kerr infall and
+ * Geometry is real where it can be: coordinate radii, the critical curve this
+ * camera sees, a Schwarzschild null geodesic, zero-angular-momentum Kerr infall and
  * a Keplerian ellipse. Builders are pure; the canvas layer only projects.
  */
 import { smootherstep } from "@horizon/toolkit/math";
 
+import { criticalCurve } from "./kerr-rays";
 import { horizonOverM, iscoOverM, photonOverM } from "./physics";
 import { pinRadius } from "./pins";
 
@@ -14,7 +15,7 @@ export type RingId = "horizon" | "photon" | "isco" | "ergo";
 export type Sketch =
   /** Equatorial coordinate radii; `from` animates a ring in from another radius. */
   | { kind: "rings"; rings: RingId[]; from?: Partial<Record<RingId, number>> }
-  /** Critical curve for the current spin and viewing angle; `assumed` marks an unmeasured spin. */
+  /** Critical curve for the current spin and camera; `assumed` marks an unmeasured spin. */
   | { kind: "shadow"; assumed?: boolean }
   /** Orbital flow arrows on the approaching and receding sides. */
   | { kind: "flow" }
@@ -66,6 +67,8 @@ export type SketchContext = {
   spinZero: string;
   /** Marks a real object's spin as a model value. */
   assumedSpin: string;
+  /** Names the shadow drawing as theory, not this image's dark edge. */
+  criticalCurve: string;
 };
 
 const TAU = Math.PI * 2;
@@ -108,53 +111,6 @@ export function shadowScale(distance: number) {
   const d = Math.max(distance, 3.2);
   const s = Math.min(0.98, (B_CRIT / d) * Math.sqrt(1 - 2 / d));
   return (d * Math.tan(Math.asin(s))) / B_CRIT;
-}
-
-/**
- * Bardeen (1973) critical curve in sky coordinates (α, β) / M for spin a and
- * observer inclination θo from the spin axis. α < 0 is the prograde side.
- */
-export function shadowCurve(a: number, theta: number, n = 160): [number, number][] {
-  const th = Math.min(Math.PI - 0.05, Math.max(0.05, theta));
-  if (Math.abs(a) < 1e-3) {
-    const pts: [number, number][] = [];
-    for (let i = 0; i <= n; i++)
-      pts.push([B_CRIT * Math.cos((TAU * i) / n), B_CRIT * Math.sin((TAU * i) / n)]);
-    return pts;
-  }
-  const sin = Math.sin(th);
-  const cos = Math.cos(th);
-  const xi = (r: number) => -(r ** 3 - 3 * r * r + a * a * r + a * a) / (a * (r - 1));
-  const beta2 = (r: number) =>
-    -(r ** 3 * (r ** 3 - 6 * r * r + 9 * r - 4 * a * a)) / (a * a * (r - 1) ** 2) +
-    a * a * cos * cos -
-    ((xi(r) * cos) / sin) ** 2;
-  // Visible orbits are those with β² ≥ 0; find its ends so the widest points (β = 0) are on the curve.
-  const r1 = photonOverM(a);
-  const r2 = photonOverM(-a);
-  let peak = r1;
-  for (let i = 0; i <= 64; i++) {
-    const r = r1 + ((r2 - r1) * i) / 64;
-    if (beta2(r) > beta2(peak)) peak = r;
-  }
-  const edge = (lo: number, hi: number, rising: boolean) => {
-    if (beta2(rising ? lo : hi) >= 0) return rising ? lo : hi;
-    for (let i = 0; i < 60; i++) {
-      const mid = (lo + hi) / 2;
-      if (beta2(mid) >= 0 === rising) hi = mid;
-      else lo = mid;
-    }
-    return rising ? hi : lo;
-  };
-  const lo = edge(r1, peak, true);
-  const hi = edge(peak, r2, false);
-  const upper: [number, number][] = [];
-  for (let i = 0; i <= n; i++) {
-    const r = lo + ((hi - lo) * (1 - Math.cos((Math.PI * i) / n))) / 2;
-    upper.push([-xi(r) / sin, Math.sqrt(Math.max(0, beta2(r)))]);
-  }
-  const lower = upper.map(([x, y]): [number, number] => [x, -y]).reverse();
-  return [...upper, ...lower, upper[0]!];
 }
 
 /** Schwarzschild null geodesic in its orbital plane, entering from r = 40 M. */
@@ -297,14 +253,12 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
   }
 
   if (s.kind === "shadow") {
-    // Observer inclination from the spin axis: 90° minus the camera's elevation.
-    const curve = shadowCurve(
-      c.spin,
-      Math.PI / 2 - Math.asin(Math.max(-1, Math.min(1, -live.fwd[1]))),
+    // Photons from the spherical photon orbits, as this camera receives them.
+    const d = c.distance;
+    const curve = criticalCurve(c.spin, scale(live.fwd, -d), live).map(
+      ([x, y]): [number, number] => [x * d, y * d],
     );
-    const k = shadowScale(c.distance);
-    // −α runs toward the approaching side, which is the camera's right.
-    const points = curve.map(([x, y]) => inPlane(live.right, live.up, -x * k, y * k));
+    const points = curve.map(([x, y]) => inPlane(live.right, live.up, x, y));
     strokes.push({ points, tone: "accent", delay: 0.2, duration: 2.6 });
     let minX = Infinity;
     let maxX = -Infinity;
@@ -316,15 +270,15 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
     }
     // A diameter, beside rings labelled by radius, and for this scene's spin.
     labels.push({
-      at: inPlane(live.right, live.up, 0, top * k + 0.6),
-      text: `⌀ ≈ ${c.number(maxX - minX, 1)}M · a = ${c.number(c.spin, spinDigits(c.spin))}`,
+      at: inPlane(live.right, live.up, 0, top + 0.6),
+      text: `${c.criticalCurve} · ⌀ ≈ ${c.number(maxX - minX, 1)}M · a = ${c.number(c.spin, spinDigits(c.spin))}`,
       tone: "accent",
       delay: 2.2,
       place: "above",
     });
     if (s.assumed)
       labels.push({
-        at: inPlane(live.right, live.up, 0, top * k + 0.6),
+        at: inPlane(live.right, live.up, 0, top + 0.6),
         text: c.assumedSpin,
         tone: "quiet",
         delay: 2.6,

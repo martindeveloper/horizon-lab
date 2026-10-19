@@ -39,8 +39,10 @@
   "exposure": "Exposure",
   "disk": "Disk",
   "stars": "Stars",
-  "inside": "inside",
-  "infall": "infall",
+  "nearHorizon": "near horizon",
+  "massBound": "Mass · one study’s bound",
+  "massAdopted": "Mass · adopted value",
+  "flowNotice": "Illustrative thin disk, not an EHT image: the real flow is hot, transparent plasma.",
   "mass": "Mass",
   "horizon": "Horizon",
   "photon": "Photon orbit",
@@ -55,12 +57,12 @@
   "localGroup": "Beyond the Milky Way",
   "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about 760 kpc from us; M87* is about 16.8 Mpc away. That is roughly 22 times farther than Andromeda and 2,000 times farther than Sagittarius A*. TON 618’s light travelled about 10.8 billion years; the waves from GW231123 travelled roughly 2 to 6 billion.",
   "theorySolutions": "Theory  ·  GR solutions",
-  "theoryBody": "These are not specific objects in the sky. Lensed disk illustrates gravitational lensing. The Schwarzschild and Kerr metrics are exact vacuum solutions of Einstein’s equations; this visualisation is approximate.",
+  "theoryBody": "These are not specific objects in the sky. Lensed disk illustrates gravitational lensing. The Schwarzschild and Kerr metrics are exact vacuum solutions of Einstein’s equations; light here follows Kerr paths, while the glowing gas is illustrative.",
   "landmark": "Landmark  ·  not an explorable black hole",
   "gal": "Gal.",
-  "rainObservers": "Free-falling observers",
+  "rainObservers": "Schwarzschild · coordinate time",
   "droppedClocks": "Falling clocks",
-  "clocksLead": "Each beacon flashes once per tick of its own time. Watch them slow, redden and freeze at the horizon.",
+  "clocksLead": "A non-spinning model, whatever the scene’s spin. Each beacon flashes once per tick of its own time, timed by a far-away clock. The demonstration stops each one at r = {floor}M, short of the horizon, and keeps its last rate.",
   "clocksRates": "Clock rates relative to a far-away clock",
   "clocksMore": "The physics",
   "clocksP1": "Five clocks follow radial free-fall paths corresponding to release from rest at infinity, often called rain geodesics. Each beacon flashes at the rate of its proper time τ relative to Schwarzschild coordinate time t, which matches a stationary clock far away: dτ/dt = 1 − 2M/r. A clock held stationary at the same radius would have the larger rate √(1 − 2M/r); the falling clock also experiences time dilation due to its motion. Both ratios approach zero near the horizon. From any finite starting radius, however, the falling clock reaches and crosses the horizon in finite proper time. Its own time never stops: the frozen display reflects the choice of coordinates.",
@@ -83,6 +85,7 @@
   "sketchNotToScale": "not to scale",
   "sketchSpinZero": "example for a = 0",
   "sketchAssumedSpin": "assumed spin, not yet measured",
+  "sketchCriticalCurve": "theoretical critical curve",
   "phaseDolly": "Approach",
   "phaseDetail": "Detail",
   "phaseHold": "Hold",
@@ -109,7 +112,7 @@
     "custom": "Custom"
   },
   "pins": {
-    "horizon1": "The dark patch is not a solid surface you could stand on. It is the black hole’s shadow, shaped by light capture and gravitational lensing. Its apparent size is not simply the horizon’s radius projected onto the sky. For this spin, the horizon has coordinate radius r₊ = {rh} M. The event horizon is a boundary in spacetime: no light signal from inside it can reach a distant observer.",
+    "horizon1": "The dark patch is not a solid surface you could stand on. Light capture and gravitational lensing shape it, but so do where the gas glows and where the disk ends, so its edge need not follow the theoretical shadow exactly. Its apparent size is not simply the horizon’s radius projected onto the sky. For this spin, the horizon has coordinate radius r₊ = {rh} M. The event horizon is a boundary in spacetime: no light signal from inside it can reach a distant observer.",
     "horizon2": "For mass {mass} and dimensionless spin a* = {spin}, the outer Kerr horizon has a Boyer–Lindquist coordinate radius of {km}. At fixed mass, this radius decreases from 2M towards M as spin increases. For a rotating black hole, it is not an ordinary distance from the centre or the radius of a circle in the image.",
     "photon1": "Around a non-spinning black hole, unstable circular light paths form the photon sphere at r = 3M. A photon could circle indefinitely in the ideal case, but a small perturbation can send it inward or let it escape. A spinning black hole has a more complex set of bound photon paths. The broad bright ring in an EHT image is emission from surrounding gas, shaped by gravity; it is not a directly resolved photon sphere or a single photon orbit.",
     "photon2": "For this spin, the equatorial circular photon orbit in the direction of rotation lies at {rp} M. As spin increases, this prograde orbit moves inward from 3M towards M, while the retrograde orbit moves outward. No single photon-orbit radius determines the entire shadow: its apparent size and shape also depend on viewing direction.",
@@ -249,8 +252,8 @@
       },
       "1": {
         "kicker": "This renderer",
-        "title": "An illustration of light paths",
-        "body": "This visualisation uses approximate ray tracing with simplified gravity and rotational effects. It is not an exact integration of light paths in Kerr spacetime or a complete radiative-transfer calculation. Use it to understand the shadow, lensed disk and brightness contrast, not as a quantitative prediction of their precise positions or fine structure."
+        "title": "How the light paths are drawn",
+        "body": "Each pixel’s light is traced back along its path through Kerr spacetime, from a camera hovering outside the hole. The paths, the light-capture boundary and the frequency shifts follow the theory. The glowing gas does not: its brightness, colours and motion are illustrative, with no full radiative-transfer calculation."
       }
     },
     "gaia-bh3": {
@@ -556,8 +559,8 @@
       },
       "3": {
         "kicker": "model limits",
-        "title": "An illustration, not an exact Kerr calculation",
-        "body": "The ray tracing in this application is simplified. The renderer approximates gravity and frame dragging instead of integrating exact light paths in Kerr spacetime. Thin photon subrings, the light-capture boundary and the brightness distribution may therefore be inaccurate. Displaying theoretical radius markers does not guarantee that the rendered image is exact. Use the visualisation to explore the main effects; quantitative predictions require a fully relativistic treatment of light propagation, emission and absorption.",
+        "title": "Exact light paths, illustrative gas",
+        "body": "Light here follows Kerr geodesics traced from a camera that hovers outside the hole, so the light-capture boundary and lensed images come from the theory. Finite step budgets can still leave the thinnest photon subrings dark. The disk is opaque and thin, its temperatures are display scales and its texture is art. Quantitative brightness predictions need the emission, absorption and motion of real plasma, which this scene does not model.",
         "phase": "Hold"
       },
       "4": {
@@ -615,7 +618,7 @@
       "2": {
         "kicker": "at least 8,200 M☉",
         "title": "A lower limit, not a weight",
-        "body": "Keeping those stars bound requires a central mass of at least about 8,200 Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century.",
+        "body": "In that study, keeping those stars bound requires a central mass of at least about 8,200 Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century. Other analyses still question whether this mass is a single black hole.",
         "phase": "Detail"
       },
       "3": {
@@ -857,7 +860,7 @@
     "close": "Close technical details",
     "title": "Inside the black-hole simulation",
     "featuresTitle": "What you can explore",
-    "summary": "Analytic orbital readouts with illustrative ray tracing, not a precision Kerr renderer or telescope reconstruction. All presets share this model. Sources below distinguish established physics from the visual approximations.",
+    "summary": "Analytic orbital readouts and Kerr ray tracing from a hovering camera. Disk light, colours and motion are illustrative, not a telescope reconstruction or radiative-transfer model. All presets share this model. Sources below distinguish established physics from the visual approximations.",
     "features": {
       "views": "Ten views: Cygnus X-1, Gaia BH3, GW231123, ω Centauri, Sagittarius A*, M87*, TON 618, a lensed disk, Schwarzschild, and near-extremal Kerr. Adjusting parameters also allows a custom scene.",
       "controls": "Orbit and zoom; change spin, elevation above the disk, exposure, disk brightness, star intensity and render quality. Presets set the mass scale.",
@@ -865,16 +868,16 @@
     },
     "sections": {
       "rays": {
-        "title": "Cartesian ray integration",
-        "body": "Three.js draws one full-screen quad with a GLSL fragment shader. Each pixel launches one deterministic camera ray in Cartesian coordinates. This is not Monte Carlo path tracing: there are no stochastic light bounces or accumulated samples. The bending term uses p (position), v (ray tangent), and L (their cross product); a is dimensionless spin. The spin correction is enabled only above a = 0.002 and is a heuristic twist, not a full Kerr null-geodesic solver. The integrator is velocity Verlet (kick, drift, kick), with one acceleration per step; at zero spin it conserves angular momentum exactly. Beyond r = {farField} the march only bends the ray. Step sizes limit spatial displacement to roughly 7–10% of radius, without numerical error estimation. Exhausting the step budget leaves a ray dark rather than treating it as escaped sky. Bending beyond the escape radius, and for rays too far out to march, is added analytically: the weak-field 4M/b plus the second-order 15πM²/4b², shared along the remaining path. For zero spin, the camera direction is converted from a static local frame to a spatial affine tangent with conserved energy E = 1. Numerical convergence and the rotating branch remain approximate."
+        "title": "Kerr ray tracing",
+        "body": "Three.js draws one full-screen quad with a GLSL fragment shader. Each pixel launches one deterministic ray, traced backward along a Kerr null geodesic. This is not Monte Carlo path tracing: there are no stochastic light bounces or accumulated samples. The camera is a zero-angular-momentum observer; its local frame turns each pixel’s direction into the photon’s conserved energy E, angular momentum L and Carter constant Q, normalised so the camera measures unit energy. It stays at least 0.3 M outside the horizon, where such an observer exists. Rays advance in Mino time λ. The radial motion in u = 1/r is a smooth oscillator, the direction s moves on the unit sphere without a pole singularity, and frame dragging rotates both about the spin axis. Velocity Verlet steps move a ray about {stepNear}% of its radius inside 8 M and {stepFar}–{stepFarMax}% beyond. Each step restores |ds/dλ| from Q, and du/dλ from the radial potential away from turning points. Beyond r = {farField} the march only bends the ray. An ingoing ray inside the midpoint between r₊ and the prograde photon orbit can no longer turn and is captured. Exhausting the step budget leaves a ray dark, reported apart from capture. Bending beyond the escape radius, and for rays too far out to march, is added analytically: the weak-field 4M/b plus the second-order 15πM²/4b², shared along the remaining path. Tests trace the same equations on the CPU: converged capture edges match this camera’s analytic critical curve within 0.4%, Standard quality keeps them within 3.5%, and escaped sky directions agree with eight-times-finer steps to about 0.2°."
       },
       "radii": {
         "title": "Units, radii, and orbital scales",
-        "body": "The renderer uses geometric units G = c = M = 1, so Rs = 2. Here M_phys denotes the physical mass and a the dimensionless spin. The readouts calculate the Kerr outer horizon, equatorial photon-orbit radius and ISCO in the disk’s direction, and circular-orbit period. The displayed photon radius is one equatorial orbit, not a complete Kerr photon region. The shader captures rays at the horizon radius; the disk inner edge is max({innerFactor} r₊, r_ISCO), with outer radius {outerRadius} M. The ISCO helper explicitly returns 6 M at zero spin (its sign branch is positive there). Mass changes physical lengths and periods in the readouts, not the dimensionless rendered geometry or its animation speed."
+        "body": "The renderer uses geometric units G = c = M = 1, so Rs = 2. Here M_phys denotes the physical mass and a the dimensionless spin. The readouts calculate the Kerr outer horizon, equatorial photon-orbit radius and ISCO in the disk’s direction, and circular-orbit period. The displayed photon radius is one equatorial orbit, not a complete Kerr photon region. The disk inner edge is max({innerFactor} r₊, r_ISCO), with outer radius {outerRadius} M. The ISCO helper explicitly returns 6 M at zero spin (its sign branch is positive there). Mass changes physical lengths and periods in the readouts, not the dimensionless rendered geometry or its animation speed."
       },
       "disk": {
         "title": "Disk emission and frequency shifts",
-        "body": "Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over {diskIntervals} radial intervals when spin changes. The {diskSamples}-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max({innerFactor} r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the {peakK} K peak is a display scale, not a measured temperature. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + {limbDarkening} μ (Chandrasekhar 1960), with μ taken in the coordinate frame. The frequency factor g (clamped to {redshiftMin}–{redshiftMax}) shifts an approximate blackbody RGB colour and weights brightness by g⁴. Its ray angular momentum is estimated from the unnormalized Cartesian tangent; the rotating branch is not Kerr radiative transfer. Noise, a moving hotspot, edge fades and glare remain artistic. Temperatures and animation speeds are not physical predictions. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics."
+        "body": "Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over {diskIntervals} radial intervals when spin changes. The {diskSamples}-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max({innerFactor} r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the {peakK} K peak is a display scale, not a measured temperature, and colours are not tied to an observing band. The frequency factor g = 1/[uᵗ(E − ΩL)] uses the photon’s conserved E and L in the camera’s normalisation, so it includes the camera’s own gravitational and frame-dragging shift. It shifts an approximate blackbody RGB colour and weights bolometric brightness by g⁴; starlight gains the camera’s blueshift 1/E the same way. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + {limbDarkening} μ (Chandrasekhar 1960), with μ = g√Q/r measured in the gas’s rest frame. Gas inside the ISCO plunges with the ISCO’s E and L (Cunningham 1975), which sets its g; its faint, optically thin glow is illustrative and shows in front of whatever a ray meets next. Noise, a moving hotspot and edge fades remain artistic. Animation is not scaled by mass and has no light-travel delays. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics."
       },
       "clocks": {
         "title": "Falling clocks are a separate model",
@@ -886,11 +889,11 @@
       },
       "limits": {
         "title": "What the image does not model",
-        "body": "This is an illustrative hybrid, not a validated scientific prediction or observational reconstruction. It does not solve full Kerr geodesics, gas dynamics, magnetic fields, scattering, polarization or radiative transfer. The sky, jets, dust and plunge emission are procedural. The first disk intersection ends a ray, so optically thin flows and resolved photon subrings are not predicted. Artificial photon-ring glow and exaggerated hotspot echoes have been removed, as have companion stars drawn at physically incorrect near-horizon distances. Finite step budgets, the analytic far-field bending, clamps, exposure and colour mapping still trade fidelity for real-time readability. The camera is an orbit control, not a relativistic falling observer; its inside-horizon fade is illustrative. Named-object masses are approximate literature values. Their spins are assumed model values, except GW231123’s, inferred from its gravitational waves; camera poses and colours are teaching choices. Sgr A* and M87* are not thin-disk reconstructions."
+        "body": "Light paths follow Kerr geodesics, but the emission is an illustrative hybrid, not a validated scientific prediction or observational reconstruction. It does not model gas dynamics, magnetic fields, scattering, polarization or radiative transfer. The sky, jets, plunge emissivity and the glow above the disk are procedural; the glow is art direction, not a dust or plasma model. The first disk intersection ends a ray, so optically thin flows and resolved photon subrings are not predicted. Artificial photon-ring glow, glare and exaggerated hotspot echoes have been removed, as have companion stars drawn at physically incorrect near-horizon distances. Finite step budgets, the analytic far-field bending, colour-temperature clamps, exposure and colour mapping still trade fidelity for real-time readability. The camera hovers as a zero-angular-momentum observer and stays outside the horizon; it is not a falling observer. Named-object masses are approximate literature values. Their spins are assumed model values, except GW231123’s, inferred from its gravitational waves; camera poses and colours are teaching choices. Sgr A* and M87* have hot, optically thin flows whose horizon-scale light is synchrotron emission; their thin disks are illustrative."
       }
     },
     "references": "Scientific sources"
   },
-  "modelNotice": "Illustrative ray tracing. Kerr radii are theoretical; the image is approximate. Real-object spins are assumed model values, except GW231123’s; colours are illustrative.",
+  "modelNotice": "Light follows Kerr geodesics; disk light and colours are illustrative. Real-object spins are assumed model values, except GW231123’s.",
   "pauseStories": "Pause stories"
 }

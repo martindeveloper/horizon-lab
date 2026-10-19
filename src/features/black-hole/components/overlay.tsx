@@ -43,7 +43,14 @@ function Readout() {
   const massSolar = useBlackHole((s) => s.massSolar);
   const spin = useBlackHole((s) => s.spin);
   const presetId = useBlackHole((s) => s.presetId);
-  const lowerLimit = PRESETS.find((p) => p.id === presetId)?.massLowerLimit;
+  const preset = PRESETS.find((p) => p.id === presetId);
+  const lowerLimit = preset?.massLowerLimit;
+  const massLabel =
+    preset?.massNote === "bound"
+      ? t("massBound")
+      : preset?.massNote === "adopted"
+        ? t("massAdopted")
+        : t("mass");
   const rs = schwarzschildKm(massSolar);
   const rh = horizonOverM(spin);
   const rp = photonOverM(spin);
@@ -51,7 +58,7 @@ function Readout() {
   const period = iscoPeriodSeconds(massSolar, spin);
 
   const cells = [
-    { k: t("mass"), v: `${lowerLimit ? "≥ " : ""}${formatMassShort(massSolar)}` },
+    { k: massLabel, v: `${lowerLimit ? "≥ " : ""}${formatMassShort(massSolar)}` },
     { k: "Rs", v: formatLengthKm(rs) },
     { k: t("horizon"), v: `${rh.toFixed(2)} M` },
     { k: t("photon"), v: `${rp.toFixed(2)} M` },
@@ -68,6 +75,13 @@ function Readout() {
       }))}
     />
   );
+}
+
+/** Real objects whose flow the thin-disk renderer cannot model say so at a glance. */
+function FlowNotice({ className }: { className?: string }) {
+  const t = useTranslations("blackHole");
+  const flow = useBlackHole((s) => PRESETS.find((p) => p.id === s.presetId)?.illustrativeFlow);
+  return flow ? <p className={cn("text-xs text-subtle", className)}>{t("flowNotice")}</p> : null;
 }
 
 export function ObservatoryOverlay() {
@@ -206,6 +220,7 @@ export function ObservatoryOverlay() {
             >
               <div className="min-w-0 flex-1">
                 <StoryLine />
+                <FlowNotice className="mt-1.5" />
               </div>
               <div className="hidden w-[22rem] shrink-0 border-l border-border pl-6 lg:block">
                 <Readout />
@@ -229,6 +244,7 @@ export function ObservatoryOverlay() {
                   {formatMassShort(massSolar)}
                 </span>
               </Kicker>
+              <FlowNotice className="mb-1" />
               <StoryLine />
             </Dock>
           ) : null}
