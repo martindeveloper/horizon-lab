@@ -43,6 +43,10 @@ function edgeFade(nm: number) {
   return 0.35 + 0.65 * smooth((nm - 380) / 50) * smooth((770 - nm) / 80);
 }
 
+/** Flux gridlines, and the values labelled on them. */
+const FLUX_GRID = [0, 0.25, 0.5, 0.75, 1];
+const FLUX_LABELS = [0, 0.5, 1];
+
 /** Tick spacing for a window: about eight labelled ticks. */
 function tickStep(span: number) {
   for (const step of [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50]) if (span / step <= 9) return step;
@@ -178,6 +182,12 @@ export function SpectrumView({ className }: { className?: string }) {
   const step = tickStep(span);
   const ticks: number[] = [];
   for (let v = Math.ceil(from / step) * step; v <= to + 1e-9; v += step) ticks.push(v);
+  /* Minor ticks: fifths of a step, or quarters of a step of 2. */
+  const minor = step / (String(step).replace(/[0.]/g, "").startsWith("2") ? 4 : 5);
+  const minorTicks: number[] = [];
+  for (let k = Math.ceil(from / minor); k * minor <= to + 1e-9; k++)
+    if (Math.abs((k * minor) / step - Math.round((k * minor) / step)) > 1e-6)
+      minorTicks.push(k * minor);
 
   /* Names over the lines: Fraunhofer's letters on the Sun, species when zoomed in. */
   const labels = (() => {
@@ -406,57 +416,123 @@ export function SpectrumView({ className }: { className?: string }) {
             </span>
           ))}
         </div>
-        <svg
+        {/* The plot: flux on a labelled scale over faint gridlines. */}
+        <div
           aria-hidden
-          className="mt-1.5 block min-h-12 w-full shrink! grow! basis-[clamp(3rem,17dvh,9rem)] overflow-visible"
-          viewBox={`0 0 ${Math.max(1, plot?.n ?? 1) - 1} 100`}
-          preserveAspectRatio="none"
+          className="relative mt-1.5 min-h-12 shrink! grow! basis-[clamp(3rem,17dvh,9rem)]"
         >
-          {plot && normalized ? (
-            <line
-              x1={0}
-              x2={plot.n - 1}
-              y1={plot.unit}
-              y2={plot.unit}
-              className="stroke-space-fg/25"
-              strokeDasharray="3 4"
-              vectorEffect="non-scaling-stroke"
-            />
-          ) : null}
-          {plot?.cont ? (
-            <path
-              d={plot.cont}
-              fill="none"
-              className="stroke-space-fg/30"
-              strokeDasharray="3 4"
-              vectorEffect="non-scaling-stroke"
-            />
-          ) : null}
-          {plot ? (
-            <path
-              d={plot.line}
-              fill="none"
-              className="stroke-space-fg"
-              strokeWidth={1.25}
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          ) : null}
-        </svg>
-        {/* The wavelength axis */}
+          <svg
+            className="absolute inset-0 block size-full overflow-visible"
+            viewBox={`0 0 ${Math.max(1, plot?.n ?? 1) - 1} 100`}
+            preserveAspectRatio="none"
+          >
+            {plot
+              ? FLUX_GRID.filter((v) => v <= plot.ceiling).map((v) => (
+                  <line
+                    key={`y${v}`}
+                    x1={0}
+                    x2={plot.n - 1}
+                    y1={100 - (v / plot.ceiling) * 100}
+                    y2={100 - (v / plot.ceiling) * 100}
+                    className="stroke-space-fg/[0.07]"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))
+              : null}
+            {plot
+              ? ticks.map((v) => (
+                  <line
+                    key={`x${v}`}
+                    x1={xOf(v) * (plot.n - 1)}
+                    x2={xOf(v) * (plot.n - 1)}
+                    y1={0}
+                    y2={100}
+                    className="stroke-space-fg/[0.07]"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))
+              : null}
+            {plot && normalized ? (
+              <line
+                x1={0}
+                x2={plot.n - 1}
+                y1={plot.unit}
+                y2={plot.unit}
+                className="stroke-space-fg/25"
+                strokeDasharray="3 4"
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : null}
+            {plot?.cont ? (
+              <path
+                d={plot.cont}
+                fill="none"
+                className="stroke-space-fg/30"
+                strokeDasharray="3 4"
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : null}
+            {plot ? (
+              <path
+                d={plot.line}
+                fill="none"
+                className="stroke-space-fg"
+                strokeWidth={1.25}
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : null}
+          </svg>
+          {/* The flux scale, inside the plot's left edge, and what it measures. */}
+          {plot
+            ? FLUX_LABELS.filter((v) => v <= plot.ceiling).map((v) => (
+                <span
+                  key={v}
+                  style={{ top: `${100 - (v / plot.ceiling) * 100}%` }}
+                  className="absolute left-0 -translate-y-1/2 rounded-sm bg-space/70 px-0.5 font-mono text-[10px] leading-none text-space-muted tabular-nums"
+                >
+                  {f.number(v, { minimumFractionDigits: v % 1 ? 1 : 0 })}
+                </span>
+              ))
+            : null}
+          <span className="absolute -top-1 left-7 font-mono text-[10px] leading-none text-space-muted not-md:hidden">
+            {normalized
+              ? t("spectrum.normalized")
+              : glowing
+                ? t("spectrum.glow")
+                : t("spectrum.flux")}
+          </span>
+        </div>
+        {/* The wavelength axis: minor ticks, labelled major ones, and its unit at the end. */}
         <div
           aria-hidden
           className="relative mt-1 h-4 font-mono text-[10px] text-space-muted tabular-nums"
         >
-          {ticks.map((v) => (
+          {minorTicks.map((v) => (
             <span
-              key={v}
+              key={`m${v}`}
               style={{ left: `${xOf(v) * 100}%` }}
-              className="absolute -translate-x-1/2 whitespace-nowrap"
-            >
-              {f.number(v, { maximumFractionDigits: step < 1 ? 2 : 0 })}
+              className="absolute top-0 h-1 w-px bg-space-fg/20"
+            />
+          ))}
+          {ticks.map((v) => (
+            <span key={v}>
+              <span
+                style={{ left: `${xOf(v) * 100}%` }}
+                className="absolute top-0 h-1.5 w-px bg-space-fg/40"
+              />
+              {/* A label that would run into the unit gives way to it. */}
+              {xOf(v) * width + 16 < width - 22 ? (
+                <span
+                  style={{ left: `${xOf(v) * 100}%` }}
+                  className="absolute top-1.5 -translate-x-1/2 leading-none whitespace-nowrap"
+                >
+                  {f.number(v, { maximumFractionDigits: step < 1 ? 2 : 0 })}
+                </span>
+              ) : null}
             </span>
           ))}
+          <span className="absolute top-1.5 right-0 leading-none">nm</span>
         </div>
 
         {/* Lab lines of the marked elements, through ribbon and plot */}
@@ -558,22 +634,15 @@ export function SpectrumView({ className }: { className?: string }) {
             from: wavelength(f, from, digits),
             to: wavelength(f, to, digits),
           })}
-          <span className="not-md:hidden">
-            {" · "}
-            {normalized
-              ? t("spectrum.normalized")
-              : glowing
-                ? t("spectrum.glow")
-                : t("spectrum.flux")}
-          </span>
         </p>
         <div className="flex items-center gap-1">
-          <Tooltip label={t("spectrum.zoomOut")}>
+          {/* The dock sits just below: these tips open upward. */}
+          <Tooltip label={t("spectrum.zoomOut")} side="top">
             <IconButton aria-label={t("spectrum.zoomOut")} onClick={() => api().zoom(1 / 0.6)}>
               <Minus className="size-3.5" />
             </IconButton>
           </Tooltip>
-          <Tooltip label={t("spectrum.zoomIn")}>
+          <Tooltip label={t("spectrum.zoomIn")} side="top">
             <IconButton
               aria-label={t("spectrum.zoomIn")}
               onClick={() => api().zoom(0.6, selectedCentre ?? undefined)}
@@ -581,7 +650,7 @@ export function SpectrumView({ className }: { className?: string }) {
               <Plus className="size-3.5" />
             </IconButton>
           </Tooltip>
-          <Tooltip label={t("spectrum.reset")} align="end">
+          <Tooltip label={t("spectrum.reset")} align="end" side="top">
             <IconButton
               aria-label={t("spectrum.reset")}
               aria-disabled={from === FULL_RANGE[0] && to === FULL_RANGE[1]}

@@ -79,12 +79,29 @@ make. `blackbodyColor(K)` and `wavelengthColor(nm)` are the usual two; `cssRgb` 
 
 ## Elements (`elements.ts`)
 
-`PERIODIC_TABLE` holds hydrogen to zinc (Z = 1–30, every element abundant in stars), keyed by
-symbol: atomic number, symbol, English name, standard atomic weight (IUPAC CIAAW 2021,
-abridged; the conventional value where it varies in nature), period, group and block.
-`ELEMENT_SYMBOLS` lists them in order of Z, `ElementSymbol` is their type and
+`PERIODIC_TABLE` holds all 118 elements, hydrogen to oganesson, keyed by symbol: atomic number,
+symbol, English name (IUPAC spelling), period, group, block, and either a weight or a mass
+number. `ELEMENT_SYMBOLS` lists them in order of Z, `ElementSymbol` is their type and
 `isElementSymbol` checks a string. Names are English for code; hosts translate what they show.
 A simulation adds its own facts about an element (abundances, spectra) in its feature.
+
+- **Weights.** `atomicWeight` is IUPAC's abridged standard atomic weight (CIAAW: Atomic Weights
+  2021 with the 2024 revisions of Zr, Gd and Lu), five significant figures where nature allows;
+  where the weight varies with the source (H, Li, B, C, N, O, Mg, Si, S, Cl, Ar, Br, Tl, Pb) it
+  is CIAAW's single abridged value.
+- **No standard weight.** Elements with no stable isotopes and no characteristic composition on
+  Earth (Tc, Pm, Po–Ac, Np–Og; `UnweighedSymbol`) have `atomicWeight: null` and `massNumber`,
+  the mass number of their longest-lived known isotope (CIAAW's list, from NUBASE2020; where it
+  names several, the longest recommended half-life, so Tc is 97, not the often printed 98).
+  Th, Pa and U do have standard weights. Everyone else has `massNumber: null`.
+- **Types.** `ChemicalElement` (with a weight) and `UnweighedElement` (with a mass number) make
+  up `PeriodicElement`; `atomicWeight !== null` narrows. `PERIODIC_TABLE.Fe` is typed as a
+  `ChemicalElement`, `PERIODIC_TABLE.Tc` as an `UnweighedElement`.
+- **Groups.** IUPAC numbering, 1–18, with group 3 as Sc, Y, Lu, Lr. The f block is La–Yb and
+  Ac–No (fourteen columns each, `block: "f"`) and has no group number (`group: null`).
+
+`node scripts/fetch-elements.mjs` regenerates the data from CIAAW and cross-checks it against
+NIST (`--check` reports a stale file); run `npm run format` after it.
 
 ## Distances (`distance.ts`)
 

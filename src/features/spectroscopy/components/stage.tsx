@@ -67,7 +67,13 @@ export function Stage() {
     >
       {/* The scene sets the stage but the spectrum is the instrument: the scene stops at a third
           of the window and the plot takes the rest. A phone held sideways lets the scene go. */}
-      <div className="relative max-h-[32dvh] min-h-0 flex-[1_1_0%] short:hidden">
+      <div
+        className={cn(
+          "relative min-h-0 flex-[1_1_0%] short:hidden",
+          /* The bench is the lesson in Kirchhoff's view; elsewhere the scene is a strip. */
+          view === "kirchhoff" ? "max-h-[32dvh]" : "max-h-[20dvh]",
+        )}
+      >
         <SceneCanvas
           obs={obs}
           lines={lines}

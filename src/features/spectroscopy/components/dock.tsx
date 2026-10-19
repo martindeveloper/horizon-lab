@@ -113,7 +113,7 @@ function ElementTiles({
                name and atomic weight beneath. */
             className={cn(
               "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-md transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
-              "md:aspect-square md:h-auto md:max-h-24 md:justify-between md:px-1.5 md:py-1.5",
+              "md:aspect-square md:h-auto md:max-h-24 md:gap-1 md:px-1.5 md:pt-3.5 md:pb-1.5",
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */
               !outcome &&
@@ -131,7 +131,7 @@ function ElementTiles({
             <span
               aria-hidden
               className={cn(
-                "absolute top-1 left-1.5 font-mono text-[10px] leading-none tabular-nums md:static md:self-start",
+                "absolute top-1 left-1.5 font-mono text-[10px] leading-none tabular-nums md:top-1.5 md:left-2",
                 on || outcome === "found" ? "text-accent" : "text-subtle",
               )}
             >
@@ -146,7 +146,7 @@ function ElementTiles({
               {element}
             </span>
             {/* Name and weight only where the tile has room for them whole. */}
-            <span aria-hidden className="hidden w-full text-center leading-tight @min-[5rem]:block">
+            <span aria-hidden className="hidden w-full text-center leading-tight @min-[4rem]:block">
               <span className="block truncate text-[10px] text-muted">{name}</span>
               <span className="block font-mono text-[10px] text-subtle tabular-nums">
                 {f.number(ELEMENTS[element].atomicWeight, { maximumFractionDigits: 3 })}

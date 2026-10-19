@@ -356,31 +356,96 @@ test("colours: the CIE observer, a 6500 K black body near white, spectral hues i
   assert.ok(bV > 0.999 && gV === 0 && rV < 0.5);
 });
 
-test("the periodic table runs in atomic number, and only Ar–K and Co–Ni break the order of weight", () => {
+test("the periodic table runs in atomic number, and only four pairs break the order of weight", () => {
   const elements = ELEMENT_SYMBOLS.map((symbol) => PERIODIC_TABLE[symbol]);
+  assert.equal(elements.length, 118);
   elements.forEach((element, i) => {
     assert.equal(element.number, i + 1, element.symbol);
     assert.equal(element.symbol, ELEMENT_SYMBOLS[i]);
   });
-  // Mendeleev's famous inversions: ordering by weight would swap these pairs.
-  const inversions = [];
-  for (let i = 1; i < elements.length; i++)
-    if (elements[i].atomicWeight < elements[i - 1].atomicWeight)
-      inversions.push(`${elements[i - 1].symbol}–${elements[i].symbol}`);
-  assert.deepEqual(inversions, ["Ar–K", "Co–Ni"]);
-  // Rows close on the noble gases; columns follow the blocks.
+  // Exactly one of a standard weight and a mass number; Tc, Pm, Po–Ac and Np onwards have none.
+  const unweighed = elements.filter((e) => e.atomicWeight === null).map((e) => e.symbol);
+  assert.deepEqual(unweighed, [
+    "Tc",
+    "Pm",
+    ...ELEMENT_SYMBOLS.slice(83, 89),
+    ...ELEMENT_SYMBOLS.slice(92),
+  ]);
+  for (const e of elements) {
+    assert.ok((e.atomicWeight === null) !== (e.massNumber === null), e.symbol);
+    if (e.massNumber !== null) assert.ok(Number.isInteger(e.massNumber), e.symbol);
+    // Every nucleus holds Z protons and at most about 1.6 neutrons per proton.
+    const mass = e.atomicWeight ?? e.massNumber;
+    assert.ok(mass >= e.number && mass < 2.6 * e.number, `${e.symbol}: ${mass}`);
+  }
+  // Mendeleev's inversions: ordering by weight would swap these pairs.
+  const inversions = (massOf) => {
+    const pairs = [];
+    for (let i = 1; i < elements.length; i++) {
+      const [lighter, heavier] = [massOf(elements[i - 1]), massOf(elements[i])];
+      if (lighter !== null && heavier !== null && heavier < lighter)
+        pairs.push(`${elements[i - 1].symbol}–${elements[i].symbol}`);
+    }
+    return pairs;
+  };
+  assert.deepEqual(
+    inversions((e) => e.atomicWeight),
+    ["Ar–K", "Co–Ni", "Te–I", "Th–Pa"],
+  );
+  // Longest-lived isotopes add three more.
+  assert.deepEqual(
+    inversions((e) => e.atomicWeight ?? e.massNumber),
+    ["Ar–K", "Co–Ni", "Te–I", "Th–Pa", "U–Np", "Pu–Am", "Bh–Hs"],
+  );
+  assert.ok(isElementSymbol("Og") && !isElementSymbol("Xx"));
+});
+
+test("the periodic table's rows close on the noble gases and its blocks fill their columns", () => {
+  const elements = ELEMENT_SYMBOLS.map((symbol) => PERIODIC_TABLE[symbol]);
   assert.deepEqual(
     elements.filter((e) => e.group === 18).map((e) => [e.symbol, e.period]),
     [
       ["He", 1],
       ["Ne", 2],
       ["Ar", 3],
+      ["Kr", 4],
+      ["Xe", 5],
+      ["Rn", 6],
+      ["Og", 7],
     ],
   );
-  assert.equal(PERIODIC_TABLE.Fe.period, 4);
-  assert.deepEqual(
-    ["He", "Na", "Si", "Fe"].map((s) => PERIODIC_TABLE[s].block),
-    ["s", "s", "p", "d"],
+  const rowLengths = [1, 2, 3, 4, 5, 6, 7].map(
+    (p) => elements.filter((e) => e.period === p).length,
   );
-  assert.ok(isElementSymbol("Ca") && !isElementSymbol("Xx"));
+  assert.deepEqual(rowLengths, [2, 8, 8, 18, 18, 32, 32]);
+  // No two elements share a cell; s holds 2 columns, p 6, d 10 and f 14 per row.
+  const cells = elements.filter((e) => e.group !== null).map((e) => `${e.period}:${e.group}`);
+  assert.equal(new Set(cells).size, cells.length);
+  const count = (block) => elements.filter((e) => e.block === block).length;
+  assert.deepEqual(["s", "p", "d", "f"].map(count), [2 + 2 * 6, 6 * 6, 10 * 4, 14 * 2]);
+  // The f block is La–Yb and Ac–No, with no group number; Lu and Lr complete group 3.
+  const fBlock = elements.filter((e) => e.block === "f");
+  assert.deepEqual(
+    [fBlock[0].symbol, fBlock[13].symbol, fBlock[14].symbol, fBlock[27].symbol],
+    ["La", "Yb", "Ac", "No"],
+  );
+  assert.ok(fBlock.every((e) => e.group === null));
+  assert.deepEqual(
+    elements.filter((e) => e.group === 3).map((e) => e.symbol),
+    ["Sc", "Y", "Lu", "Lr"],
+  );
+  assert.deepEqual(
+    ["H", "He", "Fe", "Hg", "Tl", "Og"].map((s) => [
+      PERIODIC_TABLE[s].group,
+      PERIODIC_TABLE[s].block,
+    ]),
+    [
+      [1, "s"],
+      [18, "s"],
+      [8, "d"],
+      [12, "d"],
+      [13, "p"],
+      [18, "p"],
+    ],
+  );
 });

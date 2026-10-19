@@ -230,6 +230,14 @@
   right: 0;
   transform: none;
 }
+/* Above the trigger, when something sits just below it. */
+.hud-tip[data-side="top"] > [data-tip] {
+  top: auto;
+  bottom: calc(100% + 0.45rem);
+}
+.hud-tip[data-side="top"] > [data-tip]::before {
+  inset: 100% 0 -0.5rem;
+}
 .hud-tip[data-dismissed] > [data-tip] {
   opacity: 0 !important;
   visibility: hidden !important;
