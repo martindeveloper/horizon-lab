@@ -30,7 +30,7 @@ const GF_PER_GA_LAMBDA2 =
  * The species the lab models. `lines` keeps a line whose strength index log gf − θ E_low, at
  * the species' typical temperature (θ = 5040 / T), is within `depth` dex of its strongest
  * line's; `totals` takes NIST's summed multiplets (hydrogenic spectra also list their
- * fine-structure components).
+ * fine-structure components). Other species keep every component.
  */
 const SPECIES = {
   "H I": { lines: { T: 10000, depth: 2.6 }, totals: true },
@@ -163,11 +163,17 @@ async function lines(species, { T, depth }, totals) {
     .filter((l) => l.air >= RANGE[0] && l.air <= RANGE[1] && l.gf > 0 && Number.isFinite(l.El))
     .sort((a, b) => a.air - b.air);
 
-  /* Fine-structure components closer than 0.05 nm from one lower level read as one line. */
+  /*
+   * Fine-structure components stay separate lines: at R = 100,000 some are resolved (Li I's
+   * 0.015 nm doublet), and each saturates on its own. Only components NIST lists at the same
+   * wavelength (within 0.002 nm, a third of the finest resolution element) from one lower
+   * level are summed, as are hydrogen's (`totals`): its Stark and thermal widths exceed their
+   * spacing, and its Stark model is for whole lines.
+   */
   const merged = [];
   for (const line of rows) {
     const last = merged.at(-1);
-    if (last && line.air - last.air < 0.05 && Math.abs(line.El - last.El) < 0.05) {
+    if (last && line.air - last.air < 0.002 && Math.abs(line.El - last.El) < 0.05) {
       const gf = last.gf + line.gf;
       const strongest = line.gf > last.strongest ? line : last;
       merged[merged.length - 1] = {

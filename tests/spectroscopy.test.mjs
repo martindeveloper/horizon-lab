@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { CLASSICAL_ELECTRON_RADIUS_M, dopplerFactor } from "@horizon/toolkit/science";
+import {
+  airToVacuum,
+  CLASSICAL_ELECTRON_RADIUS_M,
+  dopplerFactor,
+  HC_EV_NM,
+  planckRadiance,
+} from "@horizon/toolkit/science";
 
 import {
   mainSequencePhotosphere,
@@ -10,6 +16,7 @@ import {
 import {
   LINES,
   lineNear,
+  measureLine,
   partitionFunction,
 } from "../src/features/spectroscopy/lib/model/atoms.ts";
 import {
@@ -27,7 +34,7 @@ import {
   ionizationFractions,
   levelShare,
 } from "../src/features/spectroscopy/lib/model/populations.ts";
-import { lineProfile } from "../src/features/spectroscopy/lib/model/profile.ts";
+import { lineProfile, lineShape, shapeAt } from "../src/features/spectroscopy/lib/model/profile.ts";
 import {
   drawDeck,
   grade,
@@ -40,6 +47,7 @@ import {
   absorbedWidth,
   curveOfGrowth,
   depthAt,
+  formedLines,
   reportLine,
   synthesize,
 } from "../src/features/spectroscopy/lib/model/spectrum.ts";
@@ -310,14 +318,14 @@ test("a mystery's answer is what its spectrum shows, and grading weighs both hal
   assert.equal(verdict(answer, "H", false), "missed");
   assert.equal(verdict(answer, "K", false), null);
   assert.equal(verdict(answer, "K", true), "found");
-  assert.equal(verdict(answer, "He", true), "wrong");
+  assert.equal(verdict(answer, "He", true), "unseen");
   assert.equal(grade(dwarf, answer, ["H", "Mg"], 45).outcome, "solved");
   assert.equal(grade(dwarf, answer, ["H", "Mg", "K"], 33).outcome, "solved", "within 10 km/s");
   assert.equal(grade(dwarf, answer, ["H", "Mg", "He"], 42).outcome, "close", "one too many");
   assert.equal(grade(dwarf, answer, ["H", "Mg"], -42).outcome, "close", "wrong way");
   assert.equal(grade(dwarf, answer, ["He"], 0).outcome, "missed");
   const scored = grade(dwarf, answer, ["H", "He"], 0);
-  assert.deepEqual([scored.found, scored.total, scored.wrong], [1, 2, 1]);
+  assert.deepEqual([scored.found, scored.total, scored.unseen], [1, 2, 1]);
 });
 
 test("mystery cases keep each answer while another is open, and a new deal starts clean", async () => {
@@ -345,6 +353,64 @@ test("mystery cases keep each answer while another is open, and a new deal start
   api().shuffleCases();
   assert.deepEqual([api().results.length, api().caseIndex, api().compare], [0, 0, []]);
   api().setView("sun");
+});
+
+test("a dense bench gas keeps its line: wings wider than the wavelength stay on the grid", () => {
+  // At log N = 26 sodium's damping wings reach past λ = 0; D₂ must stay saturated, not vanish.
+  const depths = [20, 23, 24, 26].map((column) =>
+    depthAt(synthesize(bench({ column }), 585, 593, 400), 588.995),
+  );
+  for (const depth of depths) near(depth, depths[0], 0.01, "saturated at every column");
+  assert.ok(depths[0] > 0.9);
+});
+
+test("hydrogen's Holtsmark wings keep the line's area, so its oscillator strength holds", () => {
+  const conditions = {
+    temperature: 9500,
+    electronPressure: 100,
+    gasPressure: 1e4,
+    microturbulence: 2,
+  };
+  const shape = lineShape(lineNear("H I", 486.135), conditions);
+  assert.ok(shape.holtsmark !== undefined);
+  // ∫ shape dv over a sinh-spaced grid out to 10⁵ Doppler widths, against √π for any Voigt.
+  const top = Math.asinh(1e5);
+  const n = 40_000;
+  let sum = 0;
+  for (let i = 0; i <= n; i++) {
+    const u = -top + (2 * top * i) / n;
+    const weight = i === 0 || i === n ? 0.5 : 1;
+    sum += weight * shapeAt(shape, Math.sinh(u)) * Math.cosh(u);
+  }
+  near((sum * (2 * top)) / n / Math.sqrt(Math.PI), 1, 0.01, "area / √π");
+});
+
+test("fine structure stays resolved, energies come from vacuum wavelengths", () => {
+  // Lithium's resonance doublet is 0.015 nm apart: two lines, which R = 100,000 separates.
+  const lithium = LINES.filter(
+    (l) => l.species === "Li I" && Math.abs(l.wavelength - 670.78) < 0.05,
+  );
+  assert.equal(lithium.length, 2);
+  // Na D₂ at 588.995 nm in air is 589.158 nm in vacuum: 2.1044 eV, the levels' separation.
+  const d2 = lineNear("Na I", 588.995);
+  near(d2.vacuum, 589.158, 0.002);
+  near(HC_EV_NM / d2.vacuum, d2.upper - d2.lower, 2e-4);
+});
+
+test("a star returns surface flux: an isothermal atmosphere gives πB(T)", () => {
+  const sun = starPhotosphere("sun");
+  const isothermal = { ...sun, layers: sun.layers.map((l) => ({ ...l, temperature: 6000 })) };
+  const spectrum = synthesize(star(isothermal, { resolution: 20_000 }), 500, 501, 5);
+  const middle = spectrum.wavelengths[2];
+  near(spectrum.continuum[2] / (Math.PI * planckRadiance(airToVacuum(middle), 6000)), 1, 1e-3);
+});
+
+test("a velocity is measured on the line the spectrum shows: Ca I in the Sun, Ca II in a B star", () => {
+  const sun = formedLines(star(starPhotosphere("sun"), { airmass: 0 }));
+  const hot = formedLines(star(mainSequencePhotosphere(17_000)));
+  assert.equal(measureLine("Ca", sun).species, "Ca I");
+  assert.equal(measureLine("Ca", hot).species, "Ca II");
+  assert.equal(measureLine("Mg", hot).species, "Mg II");
 });
 
 test("every line is unique and inside the visible range", () => {

@@ -289,6 +289,7 @@ test("radiation laws: Planck integrates to Stefan–Boltzmann, Wien, photon ener
     dopplerShift,
     photonEnergy,
     planckRadiance,
+    airToVacuum,
     vacuumToAir,
     wienDisplacement,
   } = await import("@horizon/toolkit/science");
@@ -315,6 +316,8 @@ test("radiation laws: Planck integrates to Stefan–Boltzmann, Wien, photon ener
   // NIST's vacuum and air wavelengths of sodium D₂ and Hα.
   near(vacuumToAir(589.1583), 588.995, 2e-4);
   near(vacuumToAir(656.461), 656.2797, 2e-4);
+  // And back: air to vacuum inverts it across the visible.
+  for (const nm of [380, 589.1583, 770]) near(airToVacuum(vacuumToAir(nm)), nm, 1e-9);
   // The classical electron radius agrees with e, mₑ and c through α (CODATA 2022).
   const e = CONSTANTS.elementaryCharge.value;
   const epsilon0 = (e * e) / (2 * 7.2973525643e-3 * PLANCK_CONSTANT * SPEED_OF_LIGHT);

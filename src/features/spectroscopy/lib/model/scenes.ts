@@ -1,7 +1,7 @@
 import { mainSequencePhotosphere, SEQUENCE_RANGE, starPhotosphere } from "./atmospheres";
 import { ELEMENT_IDS, type ElementId } from "./atoms";
 import { synthesize, type Observation, type StarObservation } from "./spectrum";
-import { STARS, type StarId } from "./stars";
+import { spectralClass, STARS, type StarId } from "./stars";
 import type { ViewId } from "./view-ids";
 
 /**
@@ -49,18 +49,7 @@ export type Mystery =
   | { kind: "dwarf"; teff: number; velocity: number }
   | { kind: "giant"; star: "arcturus" | "aldebaran"; velocity: number };
 
-/** Main-sequence classes by effective temperature, K (Pecaut & Mamajek 2013, rounded). */
-const CLASSES = [
-  ["O", 31_000],
-  ["B", 10_000],
-  ["A", 7300],
-  ["F", 6000],
-  ["G", 5300],
-  ["K", 3900],
-] as const;
-
-/** A main-sequence star's spectral class. */
-export const spectralClass = (teff: number) => CLASSES.find(([, from]) => teff >= from)?.[0] ?? "M";
+export { spectralClass };
 
 /** What a case can be, and the span each is drawn from. */
 const DRAWS = {
@@ -323,13 +312,18 @@ export function mysteryAnswer(m: Mystery, resolution: number, airmass: number): 
   return answer;
 }
 
-export type Verdict = "found" | "missed" | "wrong" | null;
+/**
+ * How one element chip fares. A star has every element in its gas (the Sun's mix); what
+ * counts is whether its lines show in this spectrum, so an element marked without visible
+ * lines is "unseen" (not detected here), not absent.
+ */
+export type Verdict = "found" | "missed" | "unseen" | null;
 
 /** How one element chip fares against the answer. */
 export function verdict(answer: MysteryAnswer, element: ElementId, marked: boolean): Verdict {
   if (answer.clear.has(element)) return marked ? "found" : "missed";
   if (answer.faint.has(element)) return marked ? "found" : null;
-  return marked ? "wrong" : null;
+  return marked ? "unseen" : null;
 }
 
 /** How close a matched velocity must be, km/s. */
@@ -345,15 +339,15 @@ export type MysteryResult = {
   /** Clearly shown elements found, of `total`. */
   found: number;
   total: number;
-  /** Elements marked that the spectrum does not show. */
-  wrong: number;
+  /** Elements marked whose lines this spectrum does not show. */
+  unseen: number;
   velocityMatched: boolean;
   outcome: Outcome;
 };
 
 /**
- * Scores an answer: solved with every clear element found, none wrong and the velocity
- * matched; close with either half right (or most elements and none wrong); else missed.
+ * Scores an answer: solved with every clear element found, none unseen and the velocity
+ * matched; close with either half right (or most elements and none unseen); else missed.
  */
 export function grade(
   m: Mystery,
@@ -363,15 +357,15 @@ export function grade(
 ): MysteryResult {
   const found = [...answer.clear].filter((e) => marked.includes(e)).length;
   const total = answer.clear.size;
-  const wrong = marked.filter((e) => verdict(answer, e, true) === "wrong").length;
+  const unseen = marked.filter((e) => verdict(answer, e, true) === "unseen").length;
   const velocityMatched = Math.abs(velocity - mysteryVelocity(m)) <= VELOCITY_MATCH;
-  const elements = found === total && wrong === 0;
-  const most = wrong === 0 && found * 2 >= total && found > 0;
+  const elements = found === total && unseen === 0;
+  const most = unseen === 0 && found * 2 >= total && found > 0;
   const outcome: Outcome =
     elements && velocityMatched
       ? "solved"
       : elements || velocityMatched || most
         ? "close"
         : "missed";
-  return { answer, marked, velocity, found, total, wrong, velocityMatched, outcome };
+  return { answer, marked, velocity, found, total, unseen, velocityMatched, outcome };
 }

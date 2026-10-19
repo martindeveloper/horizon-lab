@@ -124,7 +124,7 @@ function ElementTiles({
               outcome === "found" && "bg-accent/15 text-fg ring-1 ring-accent/70 ring-inset",
               outcome === "missed" &&
                 "text-accent outline-1 -outline-offset-1 outline-accent/80 outline-dashed",
-              outcome === "wrong" && "text-danger ring-1 ring-danger/60 ring-inset",
+              outcome === "unseen" && "text-danger ring-1 ring-danger/60 ring-inset",
               outcome === null && result && !on && "text-subtle",
             )}
           >
@@ -140,7 +140,7 @@ function ElementTiles({
             <span
               className={cn(
                 "text-base leading-none font-medium tracking-tight md:text-xl",
-                outcome === "wrong" && "line-through decoration-danger",
+                outcome === "unseen" && "line-through decoration-danger",
               )}
             >
               {element}
@@ -155,7 +155,7 @@ function ElementTiles({
             {outcome === "found" ? (
               <Check aria-hidden className="absolute top-1 right-1 size-3 text-accent" />
             ) : null}
-            {outcome === "wrong" ? (
+            {outcome === "unseen" ? (
               <X aria-hidden className="absolute top-1 right-1 size-3" />
             ) : null}
           </button>

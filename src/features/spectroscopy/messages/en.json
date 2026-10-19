@@ -111,7 +111,8 @@
   "regimeNote": {
     "weak": "Few atoms absorb, so the line grows in proportion to their number. Weak lines measure abundances best.",
     "saturated": "The core is already as dark as it gets; more atoms barely deepen it. Thermal and turbulent motion set its width.",
-    "damped": "Only the wings still grow, as the square root of the number of atoms. Pressure broadening sets their width."
+    "damped": "Only the wings still grow, as the square root of the number of atoms. Pressure broadening sets their width.",
+    "stark": "Only the wings still grow, as about the 2/5 power of the number of atoms: hydrogen's Stark wings fall off faster than a collision-broadened line's. The electric fields of nearby ions set their width."
   },
   "notes": {
     "caK": "Ionized calcium's resonance line, the strongest in the Sun's visible spectrum. Calcium is rare, but nearly every calcium atom in the Sun is ionized and in its ground state, ready to absorb.",
@@ -151,7 +152,7 @@
     "columnValue": "log N = {value}",
     "check": "Check",
     "shift": "How fast is it moving?",
-    "answer": "Which elements?",
+    "answer": "Which elements show?",
     "cases": "Cases",
     "caseNumber": "Case {number}",
     "newCases": "New cases",
@@ -166,12 +167,12 @@
     "verdict": {
       "found": "found",
       "missed": "missed",
-      "wrong": "not there"
+      "unseen": "not seen here"
     },
-    "elementsScore": "{found}/{total} elements{wrong, plural, =0 {} other {, # not there}}",
+    "elementsScore": "{found}/{total} elements{unseen, plural, =0 {} other {, # not seen}}",
     "velocityScore": "{truth} km/s · yours {yours}",
     "markFirst": "Mark an element to measure one of its lines",
-    "answerHint": "Gold lines on the spectrum are each element's lab lines. Keep the elements whose lines land on the spectrum's lines.",
+    "answerHint": "Gold lines on the spectrum are each element's lab lines. Keep the elements whose lines land on the spectrum's lines. A star holds every element; you are finding the ones this spectrum shows.",
     "measuring": "Line to measure",
     "lab": "lab",
     "reading": "Δλ {shift} nm · seen at {observed} nm",
@@ -297,7 +298,7 @@
     "references": "Sources",
     "features": {
       "bench": "Kirchhoff's bench: a lamp, a gas and a spectrograph, with dark, bright and vanishing lines from one equation.",
-      "stars": "The Sun and six bright stars from O9.5 to K5, and any main-sequence star from 3,500 to 30,000 K.",
+      "stars": "The Sun and six bright stars from O9.5 to K5, and any main-sequence star from 3,900 to 30,000 K (no M dwarfs).",
       "lines": "{lines} lines of eight elements from NIST, each with its levels, strength, curve of growth and trend down the spectral sequence.",
       "mystery": "Mystery cases dealt at random: flames, gas in front of a lamp, stars from B to K, each with its own temperature and velocity."
     },
@@ -308,15 +309,15 @@
       },
       "atoms": {
         "title": "Atoms in a hot gas",
-        "body": "In local thermodynamic equilibrium, Saha's equation shares an element among its ionization stages and Boltzmann's among the levels of each, with partition functions summed over NIST's levels. The lines are those NIST lists between 380 and 770 nm (air) that are strong enough to show at their species' typical temperature; oscillator strengths come from NIST's transition probabilities, with fine-structure components closer than 0.05 nm merged."
+        "body": "In local thermodynamic equilibrium, Saha's equation shares an element among its ionization stages and Boltzmann's among the levels of each, with partition functions summed over NIST's levels. The lines are those NIST lists between 380 and 770 nm (air) that are strong enough to show at their species' typical temperature; oscillator strengths come from NIST's transition probabilities, with fine-structure components kept apart (only those NIST lists within 0.002 nm are summed, and hydrogen's lines are its multiplet totals). Wavelengths are quoted in air; photon energies and the physics use vacuum wavelengths."
       },
       "bench": {
         "title": "The bench",
-        "body": "A uniform slab: I = I₀e^(−τ) + B(T)(1 − e^(−τ)). Its gas has an electron pressure of 10 Pa and a gas pressure of 10 kPa, teaching choices; the column, the gas temperature and the lamp are yours."
+        "body": "A uniform slab: I = I₀e^(−τ) + B(T)(1 − e^(−τ)). Its gas has an electron pressure of 10 Pa and a gas pressure of 10 kPa, teaching choices set by hand rather than solved from charge balance, so the bench is an idealised slab; the column, the gas temperature and the lamp are yours."
       },
       "stars": {
         "title": "Stars",
-        "body": "Each star is the ATLAS9 model (Castelli & Kurucz 2003) nearest its measured temperature and gravity, with the Sun's composition (Asplund et al. 2009). Light is integrated up through 23 layers from τ_Ross = 10⁻⁴ to 10^1.5, each in LTE at its own temperature and pressures. At every wavelength, each layer's continuum opacity comes from H⁻ (John 1988), neutral hydrogen, electron scattering and Rayleigh scattering; the flux is taken in the Eddington–Barbier approximation, F ≈ πI(μ = 2/3). Against the observed Sun, line strengths agree within a factor of 1.7."
+        "body": "Each star is the ATLAS9 model (Castelli & Kurucz 2003) nearest its measured temperature and gravity, with the Sun's composition (Asplund et al. 2009) for its lines; the models themselves were computed with Grevesse & Sauval's (1998), so the pairing is a close hybrid rather than one self-consistent atmosphere. Light is integrated up through 23 layers from τ_Ross = 10⁻⁴ to 10^1.5, each in LTE at its own temperature and pressures. At every wavelength, each layer's continuum opacity comes from H⁻ (John 1988), neutral hydrogen, electron scattering and Rayleigh scattering; the flux is taken in the Eddington–Barbier approximation, F ≈ πI(μ = 2/3). Against the observed Sun, line strengths agree within a factor of 1.7."
       },
       "shapes": {
         "title": "Line shapes",
@@ -332,7 +333,7 @@
       },
       "limits": {
         "title": "What is left out",
-        "body": "No molecules besides O₂ (no TiO, so no M stars), no chromospheres or departures from LTE, no metal bound-free continua (they matter below about 400 nm in cool stars), no hydrogen self-broadening, collisions with helium, rotation or macroturbulence; scattering counts as absorption. In the Sun, strong lines come out up to 1.7 times too strong (Fe I 438 nm); cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
+        "body": "No molecules besides O₂ (no TiO, so the lab stops at 3,900 K, short of the M dwarfs), no chromospheres or departures from LTE, no metal bound-free continua (they matter below about 400 nm in cool stars), no hydrogen self-broadening, collisions with helium, rotation or macroturbulence; scattering counts as absorption. In the Sun, strong lines come out up to 1.7 times too strong (Fe I 438 nm); cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
       }
     }
   }

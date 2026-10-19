@@ -116,11 +116,11 @@ export function MysteryResultCard({ result }: { result: MysteryResult }) {
         <p className="text-sm font-medium text-fg">{t(`dock.outcome.${outcome}`)}</p>
         <p className="text-xs text-pretty text-muted">{reveal}</p>
         <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs">
-          <Score ok={result.found === result.total && result.wrong === 0}>
+          <Score ok={result.found === result.total && result.unseen === 0}>
             {t("dock.elementsScore", {
               found: result.found,
               total: result.total,
-              wrong: result.wrong,
+              unseen: result.unseen,
             })}
           </Score>
           <Score ok={result.velocityMatched}>

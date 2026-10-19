@@ -68,9 +68,9 @@ way. `Formula` is the print-only view documents use.
 
 `planckRadiance(nm, K)` is Planck's law per unit wavelength (W m⁻² sr⁻¹ m⁻¹), with
 `SECOND_RADIATION_CONSTANT` (hc/k), `WIEN_CONSTANT` (b, from h, c and k) and `HC_EV_NM`
-(1239.84 eV nm). `dopplerFactor(km/s)` is λ/λ₀ for a receding source; `vacuumToAir(nm)` and
-`airIndex` follow the IAU convention (Morton 2000) for the air wavelengths spectroscopists
-quote.
+(1239.84 eV nm). `dopplerFactor(km/s)` is λ/λ₀ for a receding source; `vacuumToAir(nm)`, its inverse
+`airToVacuum(nm)` and `airIndex` follow the IAU convention (Morton 2000) for the air
+wavelengths spectroscopists quote. Photon energies and line physics use vacuum wavelengths.
 
 `cieObserver(nm)` is the CIE 1931 2° observer (the CIE's 5 nm table, interpolated);
 `spectrumXyz` integrates a spectrum against it, `chromaticity` gives (x, y), and

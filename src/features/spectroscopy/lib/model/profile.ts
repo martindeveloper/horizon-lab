@@ -44,14 +44,34 @@ export type Shape = {
    * (Holtsmark's quasi-static limit) instead of a Lorentzian's v⁻².
    */
   holtsmark?: number;
+  /**
+   * With Holtsmark wings: the factor that gives the steeper profile back the area √π of
+   * H(a, v), so the line keeps its oscillator strength.
+   */
+  scale?: number;
 };
 
 /** The shape's value v Doppler widths from centre: H(a, v), with hydrogen's Stark wings. */
 export function shapeAt(shape: Shape, v: number) {
   const h = voigt(shape.damping, v);
   const edge = shape.holtsmark;
+  if (edge === undefined) return h;
   const x = Math.abs(v);
-  return edge !== undefined && x > edge ? h * Math.sqrt(edge / x) : h;
+  return (shape.scale ?? 1) * (x > edge ? h * Math.sqrt(edge / x) : h);
+}
+
+/**
+ * The area Holtsmark's wings take from H(a, v): 2∫ H (1 − √(edge / v)) dv beyond the edge,
+ * integrated in u = √(edge / v) from 0 to 1 by Simpson's rule (the integrand vanishes at both
+ * ends).
+ */
+function holtsmarkLoss(damping: number, edge: number) {
+  const n = 128;
+  const f = (u: number) =>
+    u <= 0 ? 0 : voigt(damping, edge / (u * u)) * (1 - u) * ((2 * edge) / u ** 3);
+  let sum = f(0) + f(1);
+  for (let i = 1; i < n; i++) sum += (i % 2 ? 4 : 2) * f(i / n);
+  return 2 * (sum / (3 * n));
 }
 
 /** A line's optical depth: τ(λ) = peak · H(a, v), so τ at centre is peak · H(a, 0). */
@@ -86,7 +106,7 @@ const HYDROGEN_SHARE = atomsPerKilogram("H") / NUCLEI_PER_KILOGRAM;
  */
 export function unsoldRate(line: Line, c: Conditions) {
   const limit = ionizationEnergy(line.species);
-  const photon = HC_EV_NM / line.wavelength;
+  const photon = HC_EV_NM / line.vacuum;
   const upper = limit - line.lower - photon;
   if (upper <= 0.1) return 0;
   const c6 = 0.3e-30 * (1 / upper ** 2 - 1 / (limit - line.lower) ** 2);
@@ -144,21 +164,21 @@ export const lorentzFwhm = (line: Line, c: Conditions) =>
 export function lineShape(line: Line, c: Conditions, shift = 1): Shape {
   const doppler = dopplerWidth(line.wavelength, line.element, c.temperature, c.microturbulence);
   const stark = starkFwhm(line, c);
-  return {
-    centre: line.wavelength * shift,
-    doppler: doppler * shift,
-    damping: lorentzFwhm(line, c) / (2 * doppler),
-    ...(stark > 0 ? { holtsmark: Math.max(3, stark / doppler) } : {}),
-  };
+  const damping = lorentzFwhm(line, c) / (2 * doppler);
+  const shape = { centre: line.wavelength * shift, doppler: doppler * shift, damping };
+  if (!(stark > 0)) return shape;
+  const holtsmark = Math.max(3, stark / doppler);
+  const root = Math.sqrt(Math.PI);
+  return { ...shape, holtsmark, scale: root / (root - holtsmarkLoss(damping, holtsmark)) };
 }
 
 /**
  * What one atom of the element contributes to the line, integrated over wavelength, m³:
- * (Σ n_lower f / N) · π rₑ λ² · (1 − e^(−hc/λkT)), the last factor for stimulated emission.
+ * (Σ n_lower f / N) · π rₑ λ² · (1 − e^(−hc/λkT)), λ in vacuum, the last factor for stimulated emission.
  * Divided by √π Δλ_D it is the cross-section where H(a, v) = 1.
  */
 export function lineCrossSection(line: Line, c: Conditions) {
-  const metres = line.wavelength * 1e-9;
+  const metres = line.vacuum * 1e-9;
   const stimulated = -Math.expm1(-SECOND_RADIATION_CONSTANT / (metres * c.temperature));
   const share = absorberShare(line, c.temperature, c.electronPressure);
   return share * Math.PI * CLASSICAL_ELECTRON_RADIUS_M * metres ** 2 * stimulated;

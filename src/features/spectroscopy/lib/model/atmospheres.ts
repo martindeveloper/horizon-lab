@@ -74,14 +74,20 @@ export function starPhotosphere(id: string): Photosphere {
 
 const SEQUENCE = data.sequence as Model[];
 /** The main-sequence models' temperature span, K. */
-export const SEQUENCE_RANGE = [SEQUENCE[0]!.teff, SEQUENCE[SEQUENCE.length - 1]!.teff] as const;
+const GRID_RANGE = [SEQUENCE[0]!.teff, SEQUENCE[SEQUENCE.length - 1]!.teff] as const;
+
+/**
+ * The main-sequence stars the lab offers, K: down to the K/M boundary (3,890 K). Cooler, in
+ * the M dwarfs, molecules (TiO above all) shape the spectrum, and the lab has none of them.
+ */
+export const SEQUENCE_RANGE = [3900, GRID_RANGE[1]] as const;
 
 /**
  * A main-sequence (log g = 4) photosphere at any effective temperature in the grid's span,
  * between its two neighbouring models (linear in log T_eff, depth by depth).
  */
 export function mainSequencePhotosphere(teff: number): Photosphere {
-  const clamped = Math.min(SEQUENCE_RANGE[1], Math.max(SEQUENCE_RANGE[0], teff));
+  const clamped = Math.min(GRID_RANGE[1], Math.max(GRID_RANGE[0], teff));
   const i = Math.max(
     1,
     SEQUENCE.findIndex((m) => m.teff >= clamped),

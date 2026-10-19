@@ -111,7 +111,8 @@
   "regimeNote": {
     "weak": "Absorbuje málo atomů, takže čára roste úměrně jejich počtu. Slabé čáry nejlépe měří zastoupení prvků.",
     "saturated": "Jádro je už tak tmavé, jak jen může být; další atomy ho téměř neprohloubí. Jeho šířku určuje tepelný a turbulentní pohyb.",
-    "damped": "Rostou už jen křídla, s druhou odmocninou počtu atomů. Jejich šířku určuje tlakové rozšíření."
+    "damped": "Rostou už jen křídla, s druhou odmocninou počtu atomů. Jejich šířku určuje tlakové rozšíření.",
+    "stark": "Rostou už jen křídla, zhruba s mocninou 2/5 počtu atomů: Starkova křídla vodíku klesají rychleji než u čáry rozšířené srážkami. Jejich šířku určují elektrická pole okolních iontů."
   },
   "notes": {
     "caK": "Rezonanční čára ionizovaného vápníku, nejsilnější ve viditelném spektru Slunce. Vápník je vzácný, ale skoro každý jeho atom na Slunci je ionizovaný a v základním stavu, připravený absorbovat.",
@@ -151,7 +152,7 @@
     "columnValue": "log N = {value}",
     "check": "Zkontrolovat",
     "shift": "Jak rychle se pohybuje?",
-    "answer": "Které prvky?",
+    "answer": "Které prvky jsou vidět?",
     "cases": "Případy",
     "caseNumber": "Případ {number}",
     "newCases": "Nové případy",
@@ -166,12 +167,12 @@
     "verdict": {
       "found": "nalezen",
       "missed": "chybí",
-      "wrong": "není ve spektru"
+      "unseen": "zde není vidět"
     },
-    "elementsScore": "{found}/{total} prvků{wrong, plural, =0 {} one {, # navíc} few {, # navíc} other {, # navíc}}",
+    "elementsScore": "{found}/{total} prvků{unseen, plural, =0 {} other {, # bez čar}}",
     "velocityScore": "{truth} km/s · vaše {yours}",
     "markFirst": "Označte prvek a změřte jednu z jeho čar",
-    "answerHint": "Zlaté čáry ve spektru jsou laboratorní čáry prvků. Ponechte prvky, jejichž čáry sedí na čáry spektra.",
+    "answerHint": "Zlaté čáry ve spektru jsou laboratorní čáry prvků. Ponechte prvky, jejichž čáry sedí na čáry spektra. Hvězda obsahuje všechny prvky; hledáte ty, které toto spektrum ukazuje.",
     "measuring": "Měřená čára",
     "lab": "lab",
     "reading": "Δλ {shift} nm · změřeno na {observed} nm",
@@ -297,7 +298,7 @@
     "references": "Zdroje",
     "features": {
       "bench": "Kirchhoffův stůl: lampa, plyn a spektrograf, s tmavými, jasnými i mizejícími čarami z jedné rovnice.",
-      "stars": "Slunce a šest jasných hvězd od O9,5 po K5 a libovolná hvězda hlavní posloupnosti od 3 500 do 30 000 K.",
+      "stars": "Slunce a šest jasných hvězd od O9,5 po K5 a libovolná hvězda hlavní posloupnosti od 3 900 do 30 000 K (bez M trpaslíků).",
       "lines": "{lines} čar osmi prvků z NIST, každá se svými hladinami, silou, křivkou růstu a průběhem napříč spektrální posloupností.",
       "mystery": "Náhodně rozdávané záhadné případy: plameny, plyn před lampou, hvězdy od B po K, každá s vlastní teplotou a rychlostí."
     },
@@ -308,15 +309,15 @@
       },
       "atoms": {
         "title": "Atomy v horkém plynu",
-        "body": "V lokální termodynamické rovnováze rozděluje Sahova rovnice prvek mezi stupně ionizace a Boltzmannova mezi hladiny každého z nich; partiční funkce jsou součty přes hladiny NIST. Čáry jsou ty, které NIST uvádí mezi 380 a 770 nm (ve vzduchu) a které jsou při typické teplotě svého iontu dost silné; síly oscilátorů pocházejí z pravděpodobností přechodů NIST a složky jemné struktury bližší než 0,05 nm jsou sloučeny."
+        "body": "V lokální termodynamické rovnováze rozděluje Sahova rovnice prvek mezi stupně ionizace a Boltzmannova mezi hladiny každého z nich; partiční funkce jsou součty přes hladiny NIST. Čáry jsou ty, které NIST uvádí mezi 380 a 770 nm (ve vzduchu) a které jsou při typické teplotě svého iontu dost silné; síly oscilátorů pocházejí z pravděpodobností přechodů NIST a složky jemné struktury zůstávají oddělené (sčítají se jen ty, které NIST uvádí do 0,002 nm, a čáry vodíku jsou součty multipletů). Vlnové délky se uvádějí ve vzduchu; energie fotonů a fyzika používají vlnové délky ve vakuu."
       },
       "bench": {
         "title": "Stůl",
-        "body": "Homogenní vrstva: I = I₀e^(−τ) + B(T)(1 − e^(−τ)). Její plyn má elektronový tlak 10 Pa a tlak plynu 10 kPa, výukové volby; sloupec, teplotu plynu i lampu nastavujete vy."
+        "body": "Homogenní vrstva: I = I₀e^(−τ) + B(T)(1 − e^(−τ)). Její plyn má elektronový tlak 10 Pa a tlak plynu 10 kPa, výukové volby zadané ručně, nikoli dopočtené z nábojové rovnováhy, takže jde o idealizovanou vrstvu; sloupec, teplotu plynu i lampu nastavujete vy."
       },
       "stars": {
         "title": "Hvězdy",
-        "body": "Každá hvězda je model ATLAS9 (Castelli a Kurucz 2003) nejbližší její změřené teplotě a gravitaci, se složením Slunce (Asplund a kol. 2009). Světlo se integruje vzhůru skrz 23 vrstev od τ_Ross = 10⁻⁴ do 10^1,5, každou v LTE při její teplotě a tlacích. Opacita kontinua se v každé vrstvě počítá na každé vlnové délce z H⁻ (John 1988), neutrálního vodíku, rozptylu na elektronech a Rayleighova rozptylu; tok se bere v Eddingtonově–Barbierově aproximaci, F ≈ πI(μ = 2/3). Ve srovnání s pozorovaným Sluncem souhlasí síly čar do faktoru 1,7."
+        "body": "Každá hvězda je model ATLAS9 (Castelli a Kurucz 2003) nejbližší její změřené teplotě a gravitaci, se složením Slunce (Asplund a kol. 2009) pro její čáry; samotné modely byly spočteny se složením Grevesse a Sauvala (1998), takže jde o blízký hybrid, nikoli jednu konzistentní atmosféru. Světlo se integruje vzhůru skrz 23 vrstev od τ_Ross = 10⁻⁴ do 10^1,5, každou v LTE při její teplotě a tlacích. Opacita kontinua se v každé vrstvě počítá na každé vlnové délce z H⁻ (John 1988), neutrálního vodíku, rozptylu na elektronech a Rayleighova rozptylu; tok se bere v Eddingtonově–Barbierově aproximaci, F ≈ πI(μ = 2/3). Ve srovnání s pozorovaným Sluncem souhlasí síly čar do faktoru 1,7."
       },
       "shapes": {
         "title": "Tvary čar",
@@ -332,7 +333,7 @@
       },
       "limits": {
         "title": "Co tu chybí",
-        "body": "Žádné molekuly kromě O₂ (žádné TiO, a tedy žádné hvězdy M), žádné chromosféry ani odchylky od LTE, žádná vázaně-volná kontinua kovů (důležitá pod 400 nm u chladných hvězd), žádné vlastní rozšíření vodíku, srážky s heliem, rotace ani makroturbulence; rozptyl se počítá jako absorpce. Ve Slunci vycházejí silné čáry až 1,7krát silnější (Fe I 438 nm); Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
+        "body": "Žádné molekuly kromě O₂ (žádné TiO, proto laboratoř končí u 3 900 K, před M trpaslíky), žádné chromosféry ani odchylky od LTE, žádná vázaně-volná kontinua kovů (důležitá pod 400 nm u chladných hvězd), žádné vlastní rozšíření vodíku, srážky s heliem, rotace ani makroturbulence; rozptyl se počítá jako absorpce. Ve Slunci vycházejí silné čáry až 1,7krát silnější (Fe I 438 nm); Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
       }
     }
   }

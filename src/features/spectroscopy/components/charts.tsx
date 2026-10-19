@@ -5,6 +5,7 @@ import { useFormatter } from "next-intl";
 import { cssRgb, wavelengthColor } from "@horizon/toolkit/science";
 
 import { ionizationEnergy, type Line } from "../lib/model/atoms";
+import { SPECTRAL_CLASSES } from "../lib/model/stars";
 import { levelName } from "./format";
 
 const W = 280;
@@ -175,17 +176,6 @@ export function GrowthChart({
   );
 }
 
-/** Spectral classes by effective temperature, hot to cool: their lower bounds, K. */
-const CLASSES = [
-  ["O", 30_000],
-  ["B", 10_000],
-  ["A", 7_500],
-  ["F", 6_000],
-  ["G", 5_200],
-  ["K", 3_700],
-  ["M", 0],
-] as const;
-
 /**
  * How strong this line is in main-sequence stars from hot (left, as spectral types run) to
  * cool, the star in view marked: Payne's insight that temperature, not composition, sets the
@@ -221,17 +211,17 @@ export function SequenceChart({
       <path d={fill} className="fill-fg/8" />
       <path d={path} fill="none" className="stroke-fg" strokeWidth={1.3} />
       <line x1={8} x2={W - 8} y1={H - 22} y2={H - 22} className="stroke-border-strong" />
-      {CLASSES.map(([name, bound], i) => {
-        const upper = i === 0 ? Math.exp(hi) : CLASSES[i - 1]![1];
+      {SPECTRAL_CLASSES.map(([name, bound], i) => {
+        const upper = i === 0 ? Math.exp(hi) : SPECTRAL_CLASSES[i - 1]![1];
         const lower = Math.max(bound, Math.exp(lo));
         if (upper <= Math.exp(lo) || lower >= Math.exp(hi)) return null;
         const mid = Math.sqrt(Math.min(upper, Math.exp(hi)) * lower);
         return (
           <g key={name}>
-            {i > 0 && bound > Math.exp(lo) && CLASSES[i - 1]![1] < Math.exp(hi) ? (
+            {i > 0 && bound > Math.exp(lo) && SPECTRAL_CLASSES[i - 1]![1] < Math.exp(hi) ? (
               <line
-                x1={px(CLASSES[i - 1]![1])}
-                x2={px(CLASSES[i - 1]![1])}
+                x1={px(SPECTRAL_CLASSES[i - 1]![1])}
+                x2={px(SPECTRAL_CLASSES[i - 1]![1])}
                 y1={H - 22}
                 y2={H - 17}
                 className="stroke-border-strong"

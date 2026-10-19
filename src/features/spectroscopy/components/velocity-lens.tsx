@@ -6,10 +6,10 @@ import { useMemo, type ReactNode } from "react";
 import { dopplerFactor } from "@horizon/toolkit/science";
 import { Chip, Slider, cn } from "@horizon/toolkit/ui";
 
-import { MEASURE_LINES, type ElementId } from "../lib/model/atoms";
+import { measureLine, type ElementId } from "../lib/model/atoms";
 import { useSpectroscopy } from "../lib/store";
 import { lineName, signed, wavelength } from "./format";
-import { useObservation, useSpectrum } from "./use-spectrum";
+import { useFormedLines, useObservation, useSpectrum } from "./use-spectrum";
 
 /** The lens's reach either side of the laboratory wavelength, km/s. */
 const REACH = 250;
@@ -31,12 +31,13 @@ export function VelocityLens({ step }: { step: ReactNode }) {
   const t = useTranslations("spectroscopy");
   const f = useFormatter();
   const obs = useObservation();
+  const formed = useFormedLines(obs);
   const compare = useSpectroscopy((s) => s.compare);
   const measure = useSpectroscopy((s) => s.measure);
   const velocity = useSpectroscopy((s) => s.velocity);
   const api = useSpectroscopy.getState;
   const element = measuredElement(compare, measure);
-  const line = element ? MEASURE_LINES[element] : undefined;
+  const line = element ? measureLine(element, formed) : undefined;
   const lab = line?.wavelength ?? 500;
   const range: readonly [number, number] = useMemo(
     () => [lab * dopplerFactor(-REACH), lab * dopplerFactor(REACH)],
@@ -105,7 +106,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
                     key={e}
                     selected={e === element}
                     aria-pressed={e === element}
-                    aria-label={`${t("dock.measuring")}: ${lineName(MEASURE_LINES[e], f)}`}
+                    aria-label={`${t("dock.measuring")}: ${lineName(measureLine(e, formed), f)}`}
                     onClick={() => api().setMeasure(e)}
                     className="h-9 min-w-9 shrink-0 px-2 font-mono text-[11px] md:h-6 md:min-w-7"
                   >

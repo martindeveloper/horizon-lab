@@ -1,4 +1,9 @@
-import { mainSequencePhotosphere, starPhotosphere, type Photosphere } from "./atmospheres";
+import {
+  mainSequencePhotosphere,
+  SEQUENCE_RANGE,
+  starPhotosphere,
+  type Photosphere,
+} from "./atmospheres";
 
 /**
  * Bright stars down the spectral sequence. Each is drawn with the ATLAS9 model nearest its
@@ -94,7 +99,26 @@ export const photosphereOf = (id: StarId): Photosphere => starPhotosphere(id);
 
 /** Main-sequence effective temperatures the line-strength curves are drawn at, K. */
 export const SEQUENCE_TEMPERATURES = Array.from({ length: 30 }, (_, i) =>
-  Math.round(3600 * (29_000 / 3600) ** (i / 29)),
+  Math.round(SEQUENCE_RANGE[0] * (29_000 / SEQUENCE_RANGE[0]) ** (i / 29)),
 );
+
+/**
+ * Main-sequence classes by effective temperature, hot to cool: where each begins, K, halfway
+ * between the last subtype of the class above and its own first (Pecaut & Mamajek 2013, as
+ * updated: O9.5 V 31,900 / B0 V 31,400 … K9 V 3,930 / M0 V 3,850).
+ */
+export const SPECTRAL_CLASSES = [
+  ["O", 31_650],
+  ["B", 10_050],
+  ["A", 7310],
+  ["F", 5960],
+  ["G", 5325],
+  ["K", 3890],
+  ["M", 0],
+] as const;
+
+/** A main-sequence star's spectral class. */
+export const spectralClass = (teff: number) =>
+  SPECTRAL_CLASSES.find(([, from]) => teff >= from)?.[0] ?? "M";
 
 export { mainSequencePhotosphere };

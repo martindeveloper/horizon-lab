@@ -1,4 +1,4 @@
-import { CLASSICAL_ELECTRON_RADIUS_M, HC_EV_NM } from "@horizon/toolkit/science";
+import { airToVacuum, CLASSICAL_ELECTRON_RADIUS_M, HC_EV_NM } from "@horizon/toolkit/science";
 
 import { ionizationEnergy, partitionFunction } from "./atoms";
 import {
@@ -104,7 +104,9 @@ export type ContinuumWavelength = {
   rayleigh: number;
 };
 
-export function continuumWavelength(nm: number): ContinuumWavelength {
+/** The continuum's wavelength-dependent factors at an air wavelength (the fits use vacuum). */
+export function continuumWavelength(air: number): ContinuumWavelength {
+  const nm = airToVacuum(air);
   const um = nm / 1e3;
   const angstrom = nm * 10;
   const photon = HC_EV_NM / nm;

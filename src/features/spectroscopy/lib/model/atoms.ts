@@ -1,4 +1,4 @@
-import { PERIODIC_TABLE, type ChemicalElement } from "@horizon/toolkit/science";
+import { airToVacuum, PERIODIC_TABLE, type ChemicalElement } from "@horizon/toolkit/science";
 
 import data from "./atomic-data.json";
 import broadening from "./broadening.json";
@@ -87,8 +87,10 @@ export type Line = {
   species: string;
   /** 0 for the neutral atom, 1 once ionized, … */
   stage: number;
-  /** Air wavelength, nm. */
+  /** Air wavelength, nm: where the line sits in a spectrum. */
   wavelength: number;
+  /** Vacuum wavelength, nm: for the photon's energy and the line's physics. */
+  vacuum: number;
   /** log₁₀ of the oscillator strength times the lower level's weight. */
   logGf: number;
   /** Energy of the lower and upper level above the ground state, eV. */
@@ -167,6 +169,7 @@ export const LINES: readonly Line[] = data.lines
       species,
       stage,
       wavelength,
+      vacuum: airToVacuum(wavelength),
       logGf,
       lower,
       upper,
@@ -217,7 +220,7 @@ export const NAMED: readonly { line: Line; letter?: string; note: string }[] = [
   { line: lineNear("H I", 434.05), note: "hGamma" },
   { line: lineNear("Fe I", 438.354), letter: "e", note: "fe4383" },
   { line: lineNear("He I", 447.15), note: "he4471" },
-  { line: lineNear("Mg II", 448.12), note: "mg4481" },
+  { line: lineNear("Mg II", 448.113), note: "mg4481" },
   { line: lineNear("He II", 468.57), note: "he4686" },
   { line: lineNear("H I", 486.135), letter: "F", note: "hBeta" },
   { line: lineNear("Mg I", 517.268), letter: "b₂", note: "mgB" },
@@ -234,16 +237,32 @@ export const NAMED: readonly { line: Line; letter?: string; note: string }[] = [
 export const namedLine = (id: string) => NAMED.find((n) => n.line.id === id);
 
 /**
- * The line each element's velocity is measured on: a strong, well-known line clear of its
- * neighbours (and of Balmer lines), as an observer would pick it.
+ * The lines each element's velocity can be measured on: strong, well-known lines clear of
+ * Balmer lines, the neutral atom's and, where the ion's take over in hotter stars, the ion's.
+ * An observer picks whichever the spectrum shows best (`measureLine`).
  */
-export const MEASURE_LINES: Record<ElementId, Line> = {
-  H: lineNear("H I", 656.279),
-  He: lineNear("He I", 587.566),
-  Li: lineNear("Li I", 670.781),
-  Na: lineNear("Na I", 588.995),
-  K: lineNear("K I", 766.49),
-  Mg: lineNear("Mg I", 518.36),
-  Ca: lineNear("Ca I", 422.673),
-  Fe: lineNear("Fe I", 438.354),
+export const MEASURE_LINES: Record<ElementId, readonly Line[]> = {
+  H: [lineNear("H I", 656.279)],
+  He: [lineNear("He I", 587.562), lineNear("He II", 468.57)],
+  Li: [lineNear("Li I", 670.776)],
+  Na: [lineNear("Na I", 588.995)],
+  K: [lineNear("K I", 766.49)],
+  Mg: [lineNear("Mg I", 518.36), lineNear("Mg II", 448.113)],
+  Ca: [lineNear("Ca I", 422.673), lineNear("Ca II", 393.366)],
+  Fe: [lineNear("Fe I", 438.354), lineNear("Fe II", 516.903)],
 };
+
+/**
+ * The element's measuring line for this spectrum: the first of its lines that shows clearly
+ * (line-centre optical depth from `formed` at least ½), else the strongest. So the neutral
+ * atom's line in cool stars, the ion's once the atoms are ionized, never a saturated trough
+ * picked only for being deepest; nothing the visitor cannot already see.
+ */
+export function measureLine(element: ElementId, formed: readonly { line: Line; tau: number }[]) {
+  const candidates = MEASURE_LINES[element];
+  const depth = (line: Line) => formed.find((f) => f.line === line)?.tau ?? 0;
+  return (
+    candidates.find((line) => depth(line) >= 0.5) ??
+    candidates.reduce((best, line) => (depth(line) > depth(best) ? line : best))
+  );
+}

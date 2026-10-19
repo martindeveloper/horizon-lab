@@ -1,4 +1,4 @@
-import { dopplerFactor, planckRadiance } from "@horizon/toolkit/science";
+import { airToVacuum, dopplerFactor, planckRadiance } from "@horizon/toolkit/science";
 
 import { layerAt, type Photosphere } from "./atmospheres";
 import { LINES, type ElementId, type Line } from "./atoms";
@@ -68,7 +68,10 @@ export type Observation = SlabObservation | StarObservation;
 export type Spectrum = {
   /** Pixel centres, nm, evenly spaced. */
   wavelengths: Float64Array;
-  /** What reaches the detector, W m⁻² sr⁻¹ m⁻¹ (stars: π I(2/3) per steradian). */
+  /**
+   * What reaches the detector: the bench's intensity, W m⁻² sr⁻¹ m⁻¹, or a star's surface
+   * flux, W m⁻² m⁻¹ (πI at μ = 2/3).
+   */
   flux: Float64Array;
   /** The source's continuum without lines; zeros when nothing shines behind the gas. */
   continuum: Float64Array;
@@ -87,6 +90,9 @@ const MU = 2 / 3;
 /** Where a line's reference shape is taken; hydrogen's (whose wings form deep) serves every cell. */
 const SHAPE_DEPTH = { metal: -1, hydrogen: -0.5 };
 
+/** Planck's law at a spectrum's air wavelength, evaluated (as it is defined) in vacuum. */
+const planck = (air: number, kelvin: number) => planckRadiance(airToVacuum(air), kelvin);
+
 type Grid = { lnStart: number; step: number; count: number };
 
 function gridFor(from: number, to: number, resolution: number, max: number): Grid {
@@ -103,7 +109,9 @@ function gridFor(from: number, to: number, resolution: number, max: number): Gri
  */
 function sweep(p: Profile, grid: Grid, visit: (i: number, offset: number) => void, cap = 40) {
   const width = reach(p, TAU_FLOOR, cap);
-  const first = Math.max(0, Math.ceil((Math.log(p.centre - width) - grid.lnStart) / grid.step));
+  /* Wings wider than the line's own wavelength start at the grid's first sample, not at λ ≤ 0. */
+  const blue = p.centre - width;
+  const first = blue > 0 ? Math.max(0, Math.ceil((Math.log(blue) - grid.lnStart) / grid.step)) : 0;
   const last = Math.min(
     grid.count - 1,
     Math.floor((Math.log(p.centre + width) - grid.lnStart) / grid.step),
@@ -207,8 +215,7 @@ export function slabProfiles(obs: SlabObservation) {
   const out: { line: Line; profile: Profile }[] = [];
   for (const line of LINES) {
     const profile = lineProfile(line, obs.gas, shift);
-    if (profile && profile.peak * voigt(profile.damping, 0) > TAU_FLOOR)
-      out.push({ line, profile });
+    if (profile && profile.peak * shapeAt(profile, 0) > TAU_FLOOR) out.push({ line, profile });
   }
   return out;
 }
@@ -231,14 +238,14 @@ function synthesizeSlab(obs: SlabObservation, from: number, to: number, samples:
   let nm = Math.exp(grid.lnStart);
   const ratio = Math.exp(grid.step);
   for (let i = 0; i < grid.count; i++) {
-    const behind = obs.background === null ? 0 : planckRadiance(nm, obs.background);
-    const source = planckRadiance(nm, obs.gas.temperature);
+    const behind = obs.background === null ? 0 : planck(nm, obs.background);
+    const source = planck(nm, obs.gas.temperature);
     const transmitted = Math.exp(-tau[i]!);
     fine[i] = (behind * transmitted + source * (1 - transmitted)) * air[i]!;
     nm *= ratio;
   }
   return observe(fine, grid, obs.resolution, from, to, samples, (x) =>
-    obs.background === null ? 0 : planckRadiance(x, obs.background),
+    obs.background === null ? 0 : planck(x, obs.background),
   );
 }
 
@@ -371,7 +378,7 @@ export function starLines(obs: StarObservation, only?: Line) {
       core = Math.max(core, CORE_REACH * d * Math.max(1, a));
       const step = cell.opacity(w) * cell.mass;
       if (continuum + step / 2 < 1) {
-        tau += s * voigt(a, 0);
+        tau += s * (frozen ? shapeAt(shape, 0) : voigt(a, 0));
         wings += lorentz;
       }
       continuum += step;
@@ -397,16 +404,16 @@ function columnAt(cells: Cell[], nm: number, deepTemperature: number, out?: Floa
   const row = out ?? new Float64Array(2 * K + 1);
   const w = continuumWavelength(nm);
   cells.forEach((cell, k) => {
-    row[k] = planckRadiance(nm, cell.temperature);
+    row[k] = planck(nm, cell.temperature);
     row[K + 1 + k] = cell.opacity(w) * cell.mass;
   });
-  row[K] = planckRadiance(nm, deepTemperature);
+  row[K] = planck(nm, deepTemperature);
   return row;
 }
 
 /**
  * Integrates the light up through the cells at one wavelength (along μ = 2/3), given
- * their row from `columnAt` and the line opacity in each (or null).
+ * their row from `columnAt` and the line opacity in each (or null): the surface flux.
  */
 function emerge(column: Float64Array, K: number, lines: Float32Array | null, offset: number) {
   let tau = 0;
@@ -418,7 +425,8 @@ function emerge(column: Float64Array, K: number, lines: Float32Array | null, off
     intensity += column[k]! * (above - below);
     above = below;
   }
-  return intensity + column[K]! * above;
+  /* Eddington–Barbier: the surface flux is π times the intensity along μ = 2/3. */
+  return Math.PI * (intensity + column[K]! * above);
 }
 
 /** The cells' rows on a coarse wavelength grid, interpolated when used: both vary slowly. */
@@ -512,7 +520,7 @@ function integrationReach(p: Profile, cap: number) {
 export function absorbedWidth(p: Profile) {
   return integrateLine(
     p.doppler,
-    integrationReach(p, 1000),
+    integrationReach(p, Math.min(1000, p.centre)),
     2001,
     (v) => -Math.expm1(-p.peak * shapeAt(p, v)),
   );
@@ -580,11 +588,11 @@ export function reportLine(line: Line, obs: Observation): LineReport | null {
   }
   const profile = lineProfile(line, obs.gas, dopplerFactor(obs.velocity));
   if (!profile) return null;
-  const tau = profile.peak * voigt(profile.damping, 0);
+  const tau = profile.peak * shapeAt(profile, 0);
   let equivalentWidth: number | null = null;
   if (obs.background !== null) {
-    const behind = planckRadiance(line.wavelength, obs.background);
-    const source = planckRadiance(line.wavelength, obs.gas.temperature);
+    const behind = planck(line.wavelength, obs.background);
+    const source = planck(line.wavelength, obs.gas.temperature);
     equivalentWidth = (1 - source / behind) * absorbedWidth(profile);
   }
   return {
@@ -646,7 +654,7 @@ export function formedLines(obs: Observation) {
       ? slabProfiles(obs).map(({ line, profile }) => ({
           line,
           centre: profile.centre,
-          tau: profile.peak * voigt(profile.damping, 0),
+          tau: profile.peak * shapeAt(profile, 0),
         }))
       : starLines(obs).lines.map(({ line, shape, tau }) => ({ line, centre: shape.centre, tau }));
   return list.sort((a, b) => b.tau - a.tau);

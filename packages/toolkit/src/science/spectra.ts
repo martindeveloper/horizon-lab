@@ -119,3 +119,14 @@ export function airIndex(vacuumNm: number) {
 
 /** The air wavelength astronomers quote for light of a vacuum wavelength (both nm). */
 export const vacuumToAir = (vacuumNm: number) => vacuumNm / airIndex(vacuumNm);
+
+/**
+ * The vacuum wavelength of light quoted at an air wavelength (both nm): λ_vac = λ_air n(λ_vac),
+ * solved by iteration (three steps agree to 10⁻⁹ nm across the visible). Photon energies and
+ * other physics use it; positions in a spectrum stay in air.
+ */
+export function airToVacuum(airNm: number) {
+  let vacuum = airNm * airIndex(airNm);
+  for (let i = 0; i < 2; i++) vacuum = airNm * airIndex(vacuum);
+  return vacuum;
+}

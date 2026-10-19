@@ -114,7 +114,7 @@ export function LineCard() {
     {
       id: "energy",
       label: t("card.energy"),
-      value: `${f.number(HC_EV_NM / line.wavelength, { maximumFractionDigits: 3 })} eV`,
+      value: `${f.number(HC_EV_NM / line.vacuum, { maximumFractionDigits: 3 })} eV`,
     },
     {
       id: "transition",
@@ -233,7 +233,14 @@ export function LineCard() {
               damped: t("regime.damped"),
             }}
           />
-          <p className="text-xs leading-relaxed text-muted">{t(`regimeNote.${report.regime}`)}</p>
+          <p className="text-xs leading-relaxed text-muted">
+            {/* Hydrogen's Holtsmark wings fall as Δλ^(−5/2), so its damped lines grow as N^(2/5). */}
+            {t(
+              report.regime === "damped" && line.species === "H I"
+                ? "regimeNote.stark"
+                : `regimeNote.${report.regime}`,
+            )}
+          </p>
         </section>
 
         {sequence.length ? (
