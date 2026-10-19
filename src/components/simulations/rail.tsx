@@ -27,18 +27,21 @@ export function RailSection({
  * A panel beside the scene on wide screens, as tall as its content and never past the dock
  * (`--hud-clear`); a bottom
  * sheet on phones that leaves the scene visible above it, so a switch shows its effect.
+ * `sheetLead` opens the phone sheet only, for tools the wide header carries elsewhere.
  */
 export function Rail({
   id,
   title,
   closeLabel,
   onClose,
+  sheetLead,
   children,
 }: {
   id: string;
   title: string;
   closeLabel: string;
   onClose: () => void;
+  sheetLead?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const rail = useRef<HTMLElement>(null);
@@ -76,6 +79,7 @@ export function Rail({
           className="items-center py-1.5"
         />
         <div className="no-scrollbar flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain pt-2 pb-2">
+          {sheetLead}
           {children}
         </div>
       </Sheet>

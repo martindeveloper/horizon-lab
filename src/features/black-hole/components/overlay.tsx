@@ -1,8 +1,11 @@
-import { Globe2, Orbit, SlidersHorizontal, Timer, X } from "lucide-react";
+import { Globe2, Orbit, SlidersHorizontal, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
+import { Rail, RailSection } from "@/components/simulations/rail";
+import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
+import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { AtlasOverlay } from "@/features/black-hole/components/atlas";
 import { ClockDrops } from "@/features/black-hole/components/clocks";
 import { GuideOverlay } from "@/features/black-hole/components/guide";
@@ -23,18 +26,16 @@ import {
   Dock,
   IconButton,
   Kicker,
-  Sheet,
   Toolbar,
   Tooltip,
   VisualizationOverlay,
   cn,
-  isSceneShortcut,
   useFocusHandoff,
 } from "@horizon/toolkit/ui";
 
 import { PinLesson } from "./pin-lessons";
 import { HolePicker, PresetNav } from "./preset-nav";
-import { SettingsBody } from "./settings";
+import { SETTINGS_PANEL_ID, SettingsBody } from "./settings";
 import { BlackHoleTechnicalDetails } from "./technical-details";
 
 function Readout() {
@@ -84,6 +85,36 @@ function FlowNotice({ className }: { className?: string }) {
   return flow ? <p className={cn("text-xs text-subtle", className)}>{t("flowNotice")}</p> : null;
 }
 
+/** The story dock on wide screens; the settings rail ends above it where they would meet. */
+const reachesRail: DockInTheWay = (dock, stage, rem) => dock.right + 22 * rem > stage.right;
+
+function StoryDock() {
+  const dock = useRef<HTMLDivElement>(null);
+  useDockClearance(dock, reachesRail);
+  return (
+    <Dock ref={dock} footerClassName="hidden md:block" className="flex items-center gap-8">
+      <div className="min-w-0 flex-1">
+        <StoryLine />
+        <FlowNotice className="mt-1.5" />
+      </div>
+      <div className="hidden w-[22rem] shrink-0 border-l border-border pl-6 lg:block">
+        <Readout />
+      </div>
+    </Dock>
+  );
+}
+
+/** Escape ends the guide, else closes the atlas, the clocks or the settings, in that order. */
+const escapeSteps = (): EscapeStep[] => {
+  const s = useBlackHole.getState();
+  return [
+    [s.guideOpen, s.endGuide],
+    [s.mapOpen, () => s.setMapOpen(false)],
+    [s.clocksOpen, () => s.setClocksOpen(false)],
+    [s.settingsOpen, () => s.setSettingsOpen(false)],
+  ];
+};
+
 export function ObservatoryOverlay() {
   const { formatMassShort } = usePhysicsFormat();
   const t = useTranslations("blackHole");
@@ -104,27 +135,7 @@ export function ObservatoryOverlay() {
   const setActivePin = useBlackHole((s) => s.setActivePin);
   const holeName = t.has(`presets.${presetId}`) ? t(`presets.${presetId}`) : t("custom");
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || !isSceneShortcut(e, { controls: true })) return;
-      const s = useBlackHole.getState();
-      if (s.guideOpen) {
-        s.endGuide();
-        return;
-      }
-      if (s.mapOpen) {
-        s.setMapOpen(false);
-        return;
-      }
-      if (s.clocksOpen) {
-        s.setClocksOpen(false);
-        return;
-      }
-      if (s.settingsOpen) s.setSettingsOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  useSceneEscape(escapeSteps);
 
   function toggleMenu() {
     const next = !useBlackHole.getState().settingsOpen;
@@ -182,21 +193,16 @@ export function ObservatoryOverlay() {
                     <Timer className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip label={settingsOpen ? t("close") : t("observatory")} align="end">
+                <Tooltip label={t("observatory")} align="end">
                   <IconButton
                     type="button"
                     onClick={toggleMenu}
                     active={settingsOpen}
-                    aria-label={settingsOpen ? t("ariaCloseObs") : t("ariaOpenObs")}
+                    aria-label={t("observatory")}
                     aria-expanded={settingsOpen}
-                    aria-controls="observatory-panel observatory-sheet"
+                    aria-controls={settingsOpen ? SETTINGS_PANEL_ID : undefined}
                   >
-                    {/* Sliders on phones too: the header's menu is the only one. */}
-                    {settingsOpen ? (
-                      <X className="size-4 md:size-3.5" />
-                    ) : (
-                      <SlidersHorizontal className="size-4 md:size-3.5" />
-                    )}
+                    <SlidersHorizontal className="size-4 md:size-3.5" />
                   </IconButton>
                 </Tooltip>
               </Toolbar>
@@ -204,29 +210,42 @@ export function ObservatoryOverlay() {
           </header>
 
           {settingsOpen ? (
-            <aside
-              id="observatory-panel"
-              className="glass-panel anim-rail pointer-events-auto absolute top-0 right-0 bottom-0 z-40 hidden w-56 p-4 pt-16 md:block"
-              aria-label={t("controls")}
+            <Rail
+              id={SETTINGS_PANEL_ID}
+              title={t("observatory")}
+              closeLabel={t("ariaCloseObs")}
+              onClose={() => setSettingsOpen(false)}
+              sheetLead={
+                <>
+                  {/* Phones pick the hole and read its story here; wide screens have the header and dock. */}
+                  <RailSection title={t("holes")}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        startGuide();
+                      }}
+                      className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-xs tracking-widest text-fg uppercase"
+                    >
+                      <Orbit className="size-3.5" />
+                      {t("startGuide")}
+                    </button>
+                    <PresetNav stacked />
+                  </RailSection>
+                  <RailSection title={t("story")}>
+                    <StoryLine alwaysOpen />
+                  </RailSection>
+                  <RailSection title={t("measurements")}>
+                    <Readout />
+                  </RailSection>
+                </>
+              }
             >
               <SettingsBody />
-            </aside>
+            </Rail>
           ) : null}
 
-          {!activePin && !clocksOpen ? (
-            <Dock
-              footerClassName={cn("hidden md:block", settingsOpen && "pr-60")}
-              className="flex items-center gap-8"
-            >
-              <div className="min-w-0 flex-1">
-                <StoryLine />
-                <FlowNotice className="mt-1.5" />
-              </div>
-              <div className="hidden w-[22rem] shrink-0 border-l border-border pl-6 lg:block">
-                <Readout />
-              </div>
-            </Dock>
-          ) : null}
+          {!activePin && !clocksOpen ? <StoryDock /> : null}
 
           {!activePin && !settingsOpen && !clocksOpen ? (
             <Dock footerClassName="md:hidden" className="overflow-hidden">
@@ -255,39 +274,6 @@ export function ObservatoryOverlay() {
                 <PinLesson id={activePin} spin={spin} onClose={() => setActivePin(null)} />
               </MobilePinCard>
             </div>
-          ) : null}
-
-          {settingsOpen ? (
-            <Sheet
-              id="observatory-sheet"
-              className="md:hidden"
-              panelClassName="observatory-sheet"
-              aria-label={t("observatory")}
-              dismissLabel={t("dismissObservatory")}
-              onDismiss={() => setSettingsOpen(false)}
-            >
-              <Kicker className="py-2.5">{t("holes")}</Kicker>
-              <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSettingsOpen(false);
-                    startGuide();
-                  }}
-                  className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-xs tracking-widest text-fg uppercase"
-                >
-                  <Orbit className="size-3.5" />
-                  {t("startGuide")}
-                </button>
-                <PresetNav stacked />
-                <Kicker className="mt-5 mb-2">{t("story")}</Kicker>
-                <StoryLine alwaysOpen />
-                <Kicker className="mt-5 mb-2">{t("measurements")}</Kicker>
-                <Readout />
-                <Kicker className="mt-5 mb-2">{t("optics")}</Kicker>
-                <SettingsBody />
-              </div>
-            </Sheet>
           ) : null}
         </>
       ) : null}

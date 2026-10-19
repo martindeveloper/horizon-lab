@@ -21,10 +21,6 @@
     max-height: min(32rem, calc(100dvh - var(--app-header-height) - 6rem));
   }
 
-  :where([data-simulation="black-hole"]) .observatory-sheet {
-    height: min(72dvh, 42rem);
-  }
-
   :where([data-simulation="black-hole"]) .pin-card-mobile {
     max-height: min(26rem, 50dvh);
   }

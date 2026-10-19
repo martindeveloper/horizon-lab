@@ -309,7 +309,8 @@ only its layers, its views and its store of its own:
   `flight`, `turn`, `ready`, `distanceUnit` and the scale bar; the feature adds its view,
   selection and switches. `bridgeStore` acts once on each button turn and view flight,
   ignores the view the HUD writes during a frame, and reports the first frame.
-- **Panels:** `Rail` and `RailSection` for side panels, `SelectionSheet` for cards, both
+- **Panels:** `Rail` and `RailSection` for side panels (`sheetLead` adds phone-only
+  sections), `SelectionSheet` for cards, both
   ending above the dock, which publishes its height as `--hud-clear` on the stage
   (`useDockClearance`). Each zoomable simulation keeps two panels apart: **Objects**
   (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map

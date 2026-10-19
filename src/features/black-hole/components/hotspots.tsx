@@ -18,6 +18,7 @@ import { drawOverHole, fitOverlay, frameLoop } from "./overlay-canvas";
 import { PinLesson } from "./pin-lessons";
 import { drawRing, ringTarget } from "./pin-rings";
 import { useSceneCamera } from "./scene-camera";
+import { SETTINGS_PANEL_ID } from "./settings";
 
 /** Minimum label spacing on the gauge: one 44px touch target. */
 const LABEL_GAP = 44;
@@ -110,7 +111,11 @@ export function Hotspots() {
         const gaugeRight = railRef.current?.getBoundingClientRect().right ?? labelBox.right;
         const cw = card.offsetWidth || 352;
         const ch = card.offsetHeight || 260;
-        const rightLimit = layerBox.width - (state.settingsOpen ? 240 : 16);
+        // Keep clear of the open settings rail.
+        const rail = state.settingsOpen ? document.getElementById(SETTINGS_PANEL_ID) : null;
+        const rightLimit = rail
+          ? rail.getBoundingClientRect().left - layerBox.left - 8
+          : layerBox.width - 16;
         const x = Math.max(16, Math.min(gaugeRight - layerBox.left + 8, rightLimit - cw));
         const labelMid = labelBox.top + labelBox.height / 2 - layerBox.top;
         const y = Math.max(52, Math.min(labelMid - 28, layerBox.height - ch - 16));
