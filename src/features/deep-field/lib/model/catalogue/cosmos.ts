@@ -173,7 +173,13 @@ export const COSMOS = {
       status: "derived",
       note: "D25 = 190.5′ at the model's 2.5 Mly, to twice the ~40 kpc outer-disk radius",
     },
-    firstPass: { range: [4, 5], unit: "Gyr", source: "m31Merger", status: "verified" },
+    firstPass: {
+      range: [4, 6],
+      unit: "Gyr",
+      source: "m31Merger",
+      status: "verified",
+      note: "~4.5 Gyr (van der Marel et al. 2019); 5.3, 4.7–6.2 Gyr (Wu et al. 2026)",
+    },
     mergerWithin: {
       value: 10,
       unit: "Gyr",
@@ -269,7 +275,7 @@ export const COSMOS = {
   laniakea: {
     width: comoving(STRUCTURES.laniakea.width, "tully2014", {
       digits: 2,
-      note: "160 Mpc across at Cosmicflows-2's H₀ = 75.2, rescaled to the model's",
+      note: "160 Mpc across at Cosmicflows-2's H₀ = 75.2, rescaled to the model's; Cosmicflows-4 slightly favours a larger Shapley basin (Valade et al. 2024, Nat. Astron. 8, 1610)",
     }),
     members: { value: 100_000, unit: "count", source: "tully2014", status: "verified" },
     mass: { value: 1e17, unit: "Msun", source: "tully2014", status: "verified" },

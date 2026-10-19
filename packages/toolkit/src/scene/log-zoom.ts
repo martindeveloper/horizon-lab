@@ -49,9 +49,9 @@ export function createLogZoom(
     get flying() {
       return flight !== null;
     },
-    /** A flight, or the spring still gliding. */
+    /** A flight, or the spring still gliding or yet to leave for a new target. */
     get moving() {
-      return flight !== null || speed !== 0;
+      return flight !== null || speed !== 0 || Math.abs(Math.log(written) - target) >= 1e-4;
     },
     /** Input asks for a distance; `direct` (a pinch) follows closely. Returns it clamped. */
     zoomTo(next: number, direct: boolean) {

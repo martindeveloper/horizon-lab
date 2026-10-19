@@ -1,9 +1,10 @@
-import { Orbit } from "lucide-react";
+import { Info, Maximize2, Orbit } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
 import { MapScale } from "@/components/simulations/map-readouts";
+import { SceneMoreMenu } from "@/components/simulations/more-menu";
 import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
@@ -14,6 +15,8 @@ import {
   VisualizationOverlay,
   cn,
   isSceneShortcut,
+  setImmersive,
+  type DialogHandle,
 } from "@horizon/toolkit/ui";
 
 import { useDeepField } from "../lib/store";
@@ -37,6 +40,8 @@ const escapeSteps = (): EscapeStep[] => {
 
 export function DeepFieldOverlay() {
   const t = useTranslations("deepField");
+  const tImmersive = useTranslations("immersive");
+  const details = useRef<DialogHandle>(null);
   const ready = useDeepField((s) => s.ready);
   const view = useDeepField((s) => s.view);
   const panel = useDeepField((s) => s.panel);
@@ -87,7 +92,8 @@ export function DeepFieldOverlay() {
                 </p>
               </div>
               <Toolbar aria-label={t("hud.controls")} className="ml-auto shrink-0">
-                <DeepFieldTechnicalDetails />
+                {/* Phones keep the guide and the two panels in reach; the rest is under More. */}
+                <DeepFieldTechnicalDetails ref={details} triggerClassName="not-md:hidden" />
                 <Tooltip label={t("hud.guide")}>
                   <IconButton
                     ref={guideButton}
@@ -104,7 +110,26 @@ export function DeepFieldOverlay() {
                   viewLabel={t("hud.view")}
                   onPanelChange={setPanel}
                 />
-                <SimulationImmersiveToggle />
+                <div className="not-md:hidden md:contents">
+                  <SimulationImmersiveToggle />
+                </div>
+                <SceneMoreMenu
+                  className="md:hidden"
+                  items={[
+                    {
+                      id: "details",
+                      label: t("technicalDetails.open"),
+                      icon: Info,
+                      onSelect: () => details.current?.open(),
+                    },
+                    {
+                      id: "immersive",
+                      label: tImmersive("title"),
+                      icon: Maximize2,
+                      onSelect: () => setImmersive(true),
+                    },
+                  ]}
+                />
               </Toolbar>
             </div>
           </header>

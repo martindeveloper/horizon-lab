@@ -85,13 +85,18 @@ export const spiralArm = defineEquation({
   compute: ({ R, Rk }) => -Math.log(R / Rk) / Math.tan(ARM_PITCH_DEG * RAD),
 });
 
-/** The outer disk bends north beyond WARP_START_KPC; a linear warp prints no exponent. */
+/**
+ * The outer disk bends north beyond WARP_START_KPC. A linear warp prints no exponent, and its
+ * amplitude is a pure slope; otherwise the amplitude carries kpc^(1 − power).
+ */
 const warpPower = WARP_POWER === 1 ? "" : `^${n(WARP_POWER)}`;
 const warpPowerLatex = WARP_POWER === 1 ? "" : `^{${n(WARP_POWER)}}`;
+const warpUnit = WARP_POWER === 1 ? "" : ` kpc^${n(1 - WARP_POWER)}`;
+const warpUnitLatex = WARP_POWER === 1 ? "" : `\\,\\mathrm{kpc}^{${n(1 - WARP_POWER)}}`;
 export const galacticWarp = defineEquation({
   id: "galactic-warp",
-  text: `z_warp = ${n(WARP_AMPLITUDE_KPC)} kpc (R − ${n(WARP_START_KPC)} kpc)${warpPower} sin(β − ${n(WARP_NODES_DEG)}°)`,
-  latex: `z_{warp} = ${n(WARP_AMPLITUDE_KPC)}\\,\\mathrm{kpc}\\,(R - ${n(WARP_START_KPC)}\\,\\mathrm{kpc})${warpPowerLatex}\\sin(\\beta - ${n(WARP_NODES_DEG)}^\\circ)`,
+  text: `z_warp = ${n(WARP_AMPLITUDE_KPC)}${warpUnit} (R − ${n(WARP_START_KPC)} kpc)${warpPower} sin(β − ${n(WARP_NODES_DEG)}°)`,
+  latex: `z_{warp} = ${n(WARP_AMPLITUDE_KPC)}${warpUnitLatex}\\,(R - ${n(WARP_START_KPC)}\\,\\mathrm{kpc})${warpPowerLatex}\\sin(\\beta - ${n(WARP_NODES_DEG)}^\\circ)`,
   output: "z",
   variables: {
     R: { symbol: "R", latex: "R", unit: "kpc" },

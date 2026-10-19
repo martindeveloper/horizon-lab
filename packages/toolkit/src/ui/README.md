@@ -11,6 +11,8 @@ catalogue and `examples/visualization-example.tsx` for composition.
 - `TechnicalDetails`: composes Dialog with a plain `TechnicalDocument`. The app
   owns JSON loading, schema validation and translations. Optional `references`
   (`{title, url}[]`) render cited reading links, headed by `labels.references`.
+  Optional `ref` (the Dialog handle) opens it from elsewhere, such as a menu row,
+  while `triggerClassName` hides its own button; the dialog stays mounted.
 - `Equation`, `Sub`: semantic text styling, not a LaTeX parser or equation solver.
 - `LoadingScreen`: stateless loading content. `LoadingOverlay` fades supplied
   children after `ready`, unmounts them after `exitDelayMs` (default 560 ms), and

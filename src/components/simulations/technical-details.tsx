@@ -1,10 +1,11 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import type { Ref } from "react";
 
 import { proseArgs, type Fact } from "@/lib/facts";
 import type { Formula } from "@horizon/toolkit/science";
-import { TechnicalDetails, type TechnicalDocument } from "@horizon/toolkit/ui";
+import { TechnicalDetails, type DialogHandle, type TechnicalDocument } from "@horizon/toolkit/ui";
 
 /** A formula as text, or the ID of an `Equation` the feature registers (printed from the library). */
 type EquationEntry = string | { equation: string };
@@ -23,14 +24,23 @@ function equationText(entry: EquationEntry, equations: Record<string, Formula> =
   return equation.toString();
 }
 
+/** How a feature's details are reached besides their own button: a handle, and that button hidden. */
+export type TechnicalDetailsAccess = {
+  /** Opens the dialog from elsewhere, such as a phone's More menu. */
+  ref?: Ref<DialogHandle>;
+  triggerClassName?: string;
+};
+
 /** Feature modules own their JSON; this adapter only supplies the common translation mapping. */
 export function SimulationTechnicalDetails({
+  ref,
+  triggerClassName,
   namespace,
   specification,
   equations,
   values,
   figures,
-}: {
+}: TechnicalDetailsAccess & {
   namespace: string;
   specification: Specification;
   /** The feature's formulas by ID, from `@horizon/toolkit/science` or its own `defineEquation`s. */
@@ -45,6 +55,8 @@ export function SimulationTechnicalDetails({
   const args = figures ? { ...values, ...proseArgs(figures, locale) } : values;
   return (
     <TechnicalDetails
+      {...(ref !== undefined ? { ref } : {})}
+      {...(triggerClassName !== undefined ? { triggerClassName } : {})}
       labels={{
         open: t("open"),
         close: t("close"),

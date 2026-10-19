@@ -92,8 +92,8 @@ export function Sightline() {
   /* The bisection behind a redshift runs only when the distance moves. */
   const line = useMemo(() => sightline(ly), [ly]);
   const distance = formatAu(t, { unit, locale }, line.ly * LIGHT_YEAR_AU);
-  const where = [
-    selection ? t(nameOf(selection)) : t(`views.${view}`),
+  const name = selection ? t(nameOf(selection)) : t(`views.${view}`);
+  const reach = [
     selected === null ? t("hud.outToValue", { distance }) : distance,
     ...(line.z >= 1e-3
       ? [
@@ -117,7 +117,9 @@ export function Sightline() {
         className="deep-field-sightline mx-auto flex max-w-xl flex-col items-center text-center"
       >
         <p className="max-w-full truncate font-mono text-[10px] tracking-[0.14em] text-space-muted uppercase tabular-nums">
-          {where}
+          {/* Phones name the view in the caption up top, so the numbers keep the line. */}
+          <span className={selection ? undefined : "not-md:hidden"}>{name} · </span>
+          {reach}
         </p>
         {/* Here on the left, there on the right, and light on its way between. */}
         <div aria-hidden className="relative mt-2.5 h-2 w-full max-w-sm short:hidden">
@@ -129,11 +131,13 @@ export function Sightline() {
         <p className="mt-2 font-display text-base font-medium tracking-tight text-space-fg tabular-nums md:text-lg short:mt-0.5 short:text-sm">
           {t("hud.lightLeftAgo", { ago: formatAgo(t, f, line.years) })}
         </p>
-        <p className="mt-0.5 max-w-full truncate text-xs text-space-muted short:hidden">
+        {/* Phones wrap these rather than cut them; the era keeps two lines so the ladder above
+            never jumps while it is dragged through the ages. */}
+        <p className="mt-0.5 max-w-full text-xs text-balance text-space-muted not-md:line-clamp-2 not-md:min-h-[2lh] md:truncate short:hidden">
           {formatThen(t, f, thenOf(line, now))}
         </p>
         {/* How that distance is known; wide screens read it beside the ladder's rung. */}
-        <p className="mt-0.5 max-w-full truncate text-[11px] text-space-muted/80 md:hidden short:hidden">
+        <p className="mt-0.5 line-clamp-2 max-w-full text-[11px] text-balance text-space-muted/80 md:hidden short:hidden">
           {t(`methods.${METHOD_OF[view]}`)}
         </p>
       </section>

@@ -1,4 +1,4 @@
-import { Globe2, Menu, Orbit, SlidersHorizontal, Timer, X } from "lucide-react";
+import { Globe2, Orbit, SlidersHorizontal, Timer, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
@@ -177,12 +177,12 @@ export function ObservatoryOverlay() {
                     aria-expanded={settingsOpen}
                     aria-controls="observatory-panel observatory-sheet"
                   >
+                    {/* Sliders on phones too: the header's menu is the only one. */}
                     {settingsOpen ? (
                       <X className="size-4 md:size-3.5" />
                     ) : (
-                      <SlidersHorizontal className="hidden size-4 md:block md:size-3.5" />
+                      <SlidersHorizontal className="size-4 md:size-3.5" />
                     )}
-                    {settingsOpen ? null : <Menu className="size-4 md:hidden" />}
                   </IconButton>
                 </Tooltip>
               </Toolbar>

@@ -86,8 +86,13 @@ function planetFacts(id: PlanetId) {
       value: PLANET_RADIUS_KM[id],
       unit: "km",
       digits: wholeDigits(PLANET_RADIUS_KM[id]),
-      source: "jplRadii",
-      status: "verified",
+      ...(id === "jupiter"
+        ? {
+            source: "galanti2026",
+            status: "derived",
+            note: "volumetric mean of the Juno 1-bar axes, 71,488 and 66,842 km",
+          }
+        : { source: "jplRadii", status: "verified" }),
     },
   } satisfies Facts;
 }

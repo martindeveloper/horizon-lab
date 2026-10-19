@@ -29,7 +29,7 @@
     "virgo-supercluster": "Groups and clouds fanned out around Virgo, about 110 million light-years across.",
     "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor.",
     "cosmic-web": "Laniakea among its neighbours: filaments of galaxies around nearly empty voids, out to the Sloan Great Wall.",
-    "observable-universe": "Everything light has had time to reach us from, walled by the cosmic microwave background."
+    "observable-universe": "Everything light has had time to reach us from. The microwave background is the farthest light we can see."
   },
   "toggles": {
     "halo": "Dark-matter halo",
@@ -114,7 +114,7 @@
     "land": "On Earth: life spreads onto land",
     "seas": "On Earth: animals multiply in the seas",
     "simple": "On Earth: microbes and the first simple multicellular life, in the seas",
-    "microbes": "On Earth: microbes, and no oxygen in the air",
+    "microbes": "On Earth: microbes, and almost no oxygen in the air",
     "young": "On Earth: a young world, before any sure sign of life",
     "noEarth": "Before Earth formed",
     "noSun": "Before the Sun and Earth formed",
@@ -145,7 +145,7 @@
     "bar": "Bar",
     "width": "Width",
     "diskWidth": "Stellar disk diameter",
-    "thickness": "Thin-disk thickness",
+    "thickness": "Thin-disk scale height",
     "stars": "Stars",
     "closestFuture": "{distance}, in {years} years",
     "closestPast": "{distance}, {years} years ago",
@@ -275,7 +275,7 @@
         "mass": "About {value} Suns",
         "heart": "The Great Attractor, ~{value} away toward Norma and Centaurus",
         "body": "Our home supercluster, named in 2014 from the Hawaiian for \"immeasurable heaven\". Its edge is a watershed, not a wall: inside it, once the expansion is taken out, galaxies flow toward the Great Attractor. The lines trace those flows.",
-        "caution": "The filaments and flow lines are a sketch in the spirit of the Cosmicflows maps, not their data; studies still move the boundary."
+        "caution": "The filaments and flow lines are a sketch in the spirit of the Cosmicflows maps, not their data. The basin follows the 2014 reconstruction; newer Cosmicflows-4 flows slightly favour Laniakea being part of a larger basin around Shapley."
       },
       "triangulum": {
         "title": "Triangulum Galaxy",
@@ -359,7 +359,7 @@
         "cmb": "From {distance}, set out {age} thousand years after the Big Bang",
         "temperature": "{value} K above absolute zero",
         "age": "{value} billion years of light on its way",
-        "body": "Everything we could ever have seen. Light has had {age} billion years to reach us, but space kept stretching while it travelled, so its sources now lie much farther away. The wall is the cosmic microwave background, light from when the universe first turned transparent. We sit at the centre only because every observer sits at the centre of their own.",
+        "body": "Everything we could ever have seen. Light has had {age} billion years to reach us, but space kept stretching while it travelled, so its sources now lie much farther away. Its farthest visible light is the cosmic microwave background, from when the universe first turned transparent: a limit on what light can show, not an edge. We sit at the centre only because every observer sits at the centre of their own.",
         "caution": "The rings mark where light set out {near}, {mid} and {far} billion years ago, at today’s distances. The glow’s spots stand in for the Planck map, and the galaxies beyond the web are a uniform sample, not a catalogue. They stop at the farthest galaxies known; the dark band before the glow is what we have not seen yet: cosmic dawn, when the first stars lit up, and before it the dark ages."
       }
     },
@@ -390,8 +390,8 @@
     "reach": {
       "speed": "{value} km/s",
       "crossed": "{date}, {distance} out",
-      "since": "Since {date}",
-      "from": "From {date}",
+      "since": "Since about {date}",
+      "from": "From about {date}",
       "predicted": "Earth no longer hears it: its place is predicted from its last tracking.",
       "shock": "Voyager 1 at {v1}, Voyager 2 at {v2}",
       "shape": "Two crossings are all we have measured, so its shape is unknown; it is drawn here as a sphere.",
@@ -471,7 +471,7 @@
       },
       "andromeda": {
         "title": "Our big neighbour",
-        "body": "Andromeda's light left when early humans were shaping the first stone tools. The gap is closing: billions of years from now the two galaxies will probably pass close, and may merge."
+        "body": "Andromeda's light left when early humans were already shaping stone tools. The gap is closing: billions of years from now the two galaxies will probably pass close, and may merge."
       },
       "virgo": {
         "title": "A city of galaxies",

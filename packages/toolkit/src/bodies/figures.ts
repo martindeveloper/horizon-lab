@@ -54,7 +54,7 @@ const perHours = (hours: number) => (360 * 24) / hours;
 /** Neptune's pole precesses on a 3.4 kyr cone; N is that angle (IAU 2015). */
 const neptuneN = (T: number) => (357.85 + 52.316 * T) * RAD;
 
-/** Mean radii come from ephemeris.ts and moons.ts; shapes are the IAU's. */
+/** Mean radii come from ephemeris.ts and moons.ts; shapes are the IAU's except Jupiter's. */
 export const FIGURES: Record<BodyId, Figure> = {
   /** Nominal solar radius, IAU 2015 Resolution B3. */
   sun: sphere(SUN_RADIUS_KM),
@@ -66,7 +66,8 @@ export const FIGURES: Record<BodyId, Figure> = {
     polarKm: 6356.7519,
   },
   mars: { meanKm: PLANET_RADIUS_KM.mars, equatorialKm: 3396.19, polarKm: 3376.2 },
-  jupiter: { meanKm: PLANET_RADIUS_KM.jupiter, equatorialKm: 71_492, polarKm: 66_854 },
+  /** Juno radio occultations at 1 bar (Galanti et al. 2026, Nat. Astron.). */
+  jupiter: { meanKm: PLANET_RADIUS_KM.jupiter, equatorialKm: 71_488, polarKm: 66_842 },
   saturn: { meanKm: PLANET_RADIUS_KM.saturn, equatorialKm: 60_268, polarKm: 54_364 },
   uranus: { meanKm: PLANET_RADIUS_KM.uranus, equatorialKm: 25_559, polarKm: 24_973 },
   neptune: { meanKm: PLANET_RADIUS_KM.neptune, equatorialKm: 24_764, polarKm: 24_341 },

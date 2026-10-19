@@ -119,8 +119,8 @@ test("the probes fly their tracked paths: the Voyagers met the heliosphere's edg
 test("Voyager 1 is a full light-day from Earth from mid-November 2026", () => {
   near(LIGHT_DAY_AU, 173.14, 0.01, "a light-day");
   const day = firstLightDay("voyager1");
-  /* JPL Horizons puts its one-way light-time past 24 h on 18–19 November 2026. */
-  assert.ok(day >= new Date("2026-11-15") && day <= new Date("2026-11-23"), day.toISOString());
+  /* NASA predicts 18 November 2026, 10:16 UTC; the card shows the day it falls on. */
+  assert.equal(day.toISOString().slice(0, 10), "2026-11-18", day.toISOString());
   assert.ok(probeFromEarth("voyager1", new Date("2026-10-19")) < LIGHT_DAY_AU);
   assert.equal(firstLightDay("newHorizons"), null, "not before its track ends");
   /* The rings are sunlight's reach: Earth lies inside ten light-minutes, Saturn past an hour. */

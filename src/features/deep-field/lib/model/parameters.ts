@@ -41,7 +41,10 @@ export const THIN_DISK_KPC = { length: 2.6, height: 0.3 } as const;
 export const THICK_DISK_KPC = { length: 2, height: 0.9 } as const;
 /** The dark-matter halo sphere's radius, R₂₀₀ ≈ 200 kpc (Bland-Hawthorn & Gerhard 2016). */
 export const HALO_R200_KPC = 200;
-/** Warp onset, amplitude, power and line of nodes: Chen et al. 2019's linear fit to all Cepheids. */
+/**
+ * Warp onset, amplitude, power and line of nodes: Chen et al. 2019's linear fit to all
+ * Cepheids. The amplitude carries kpc^(1 − power): for the linear fit it is a pure slope.
+ */
 export const WARP_START_KPC = 9.3;
 export const WARP_AMPLITUDE_KPC = 0.15;
 export const WARP_POWER = 1;

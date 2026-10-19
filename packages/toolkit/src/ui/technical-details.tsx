@@ -1,9 +1,10 @@
 "use client";
 
 import { Info } from "lucide-react";
-import { useRef } from "react";
+import { useImperativeHandle, useRef, type Ref } from "react";
 
 import { Dialog, type DialogHandle } from "./dialog";
+import { cn } from "./utils";
 
 export type TechnicalDocument = {
   title: string;
@@ -18,15 +19,27 @@ export type TechnicalDocument = {
   }[];
 };
 
-/** Native modal supplies focus containment, Escape dismissal and focus restoration. */
+/**
+ * Native modal supplies focus containment, Escape dismissal and focus restoration. `ref`
+ * opens it from elsewhere (a menu row) when `triggerClassName` hides its own button.
+ */
 export function TechnicalDetails({
+  ref,
   document,
   labels,
+  triggerClassName,
 }: {
+  ref?: Ref<DialogHandle>;
   document: TechnicalDocument;
   labels: { open: string; close: string; features: string; references: string };
+  triggerClassName?: string;
 }) {
   const dialog = useRef<DialogHandle>(null);
+  useImperativeHandle(
+    ref,
+    () => ({ open: () => dialog.current?.open(), close: () => dialog.current?.close() }),
+    [],
+  );
   return (
     <>
       <button
@@ -35,7 +48,10 @@ export function TechnicalDetails({
         aria-label={labels.open}
         title={labels.open}
         onClick={() => dialog.current?.open()}
-        className="relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-xs text-muted transition-colors not-md:after:absolute not-md:after:-inset-1 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8"
+        className={cn(
+          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-xs text-muted transition-colors not-md:after:absolute not-md:after:-inset-1 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
+          triggerClassName,
+        )}
       >
         <Info className="size-4 md:size-3.5" aria-hidden />
         <span className="hidden xl:inline">{labels.open}</span>

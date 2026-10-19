@@ -37,7 +37,7 @@ export const PROBES: readonly Probe[] = [
     launched: "1977-08-20",
     crossed: { shock: "2007-08-30", heliopause: "2018-11-05" },
   },
-  { id: "pioneer11", launched: "1973-04-06", lastSignal: "1995-09-30" },
+  { id: "pioneer11", launched: "1973-04-06", lastSignal: "1995-11-24" },
   { id: "newHorizons", launched: "2006-01-19" },
 ];
 
@@ -122,19 +122,29 @@ export const LIGHT_DAY_AU = 86_400 / AU_LIGHT_SECONDS;
 const lightDays = new Map<ProbeId, Date | null>();
 
 /**
- * The first day a probe is a full light-day from Earth, on its track (to 2040), or null. Earth
+ * When a probe first is a full light-day from Earth, on its track (to 2040), or null. Earth
  * swings a little under an au toward and away from it each year, so the scan is daily once
- * the probe is within an au of the mark from the Sun.
+ * the probe is within an au of the mark from the Sun, then halves the day it falls in. The
+ * interpolated track is good to the day, not the hour.
  */
 export function firstLightDay(id: ProbeId): Date | null {
   if (lightDays.has(id)) return lightDays.get(id)!;
   const { years } = trackOf(id);
   const end = J2000_MS + (years.at(-1)! - 2000) * JULIAN_YEAR_SECONDS * 1000;
+  const past = (ms: number) => probeFromEarth(id, new Date(ms)) >= LIGHT_DAY_AU;
   let ms = new Date(probeById(id).launched).getTime();
   while (ms < end && probeFromSun(id, new Date(ms)) < LIGHT_DAY_AU - 1.1) ms += 30 * DAY_MS;
+  for (ms -= 30 * DAY_MS; ms < end && !past(ms); ms += DAY_MS);
   let found: Date | null = null;
-  for (ms -= 30 * DAY_MS; ms < end && !found; ms += DAY_MS)
-    if (probeFromEarth(id, new Date(ms)) >= LIGHT_DAY_AU) found = new Date(ms);
+  if (ms < end) {
+    let before = ms - DAY_MS;
+    while (ms - before > 60_000) {
+      const mid = (before + ms) / 2;
+      if (past(mid)) ms = mid;
+      else before = mid;
+    }
+    found = new Date(ms);
+  }
   lightDays.set(id, found);
   return found;
 }

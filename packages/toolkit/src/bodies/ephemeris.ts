@@ -90,13 +90,17 @@ const JPL: Record<PlanetId | "pluto", JplRow> = {
   ],
 };
 
-/** IAU mean radii in km (WGCCRE 2015, Archinal et al. 2018); shapes are in figures.ts. */
+/**
+ * IAU mean radii in km (WGCCRE 2015, Archinal et al. 2018); shapes are in figures.ts.
+ * Jupiter's is the volumetric mean of the Juno 1-bar figure (Galanti et al. 2026), not the
+ * IAU nominal unit; the paper's own 69,886 km mean follows its non-ellipsoidal shape.
+ */
 export const PLANET_RADIUS_KM: Record<PlanetId, number> = {
   mercury: 2439.4,
   venus: 6051.8,
   earth: 6371.0,
   mars: 3389.5,
-  jupiter: 69911,
+  jupiter: 69905,
   saturn: 58232,
   uranus: 25362,
   neptune: 24622,

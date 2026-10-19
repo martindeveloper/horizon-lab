@@ -93,6 +93,10 @@ test("log zoom flights land on target; springs stay inside limits; a cut carries
   assert.ok(Math.abs(at / 1e5 - 1) < 1e-12);
   assert.equal(zoom.moving, false);
   assert.equal(zoom.zoomTo(1e9, false), 1e6);
+  /* A new target keeps the zoom moving before it leaves, through a frame with no time in it. */
+  assert.equal(zoom.moving, true);
+  at = zoom.step(0, at).distance;
+  assert.equal(zoom.moving, true);
   for (let i = 0; i < 600; i += 1) at = zoom.step(1 / 60, at).distance;
   assert.ok(Math.abs(at - 1e6) / 1e6 < 1e-3);
   /* Someone else jumped the distance by far more than half an e-fold: no speed carried. */

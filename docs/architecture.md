@@ -25,7 +25,7 @@ src/
         [view]/page.tsx        View route + metadata
       deep-field/              The same three routes for Deep Field's views
   components/
-    shell/                     AppShell, header, preferences, theme switch, stage sizing
+    shell/                     AppShell, header, phone menu, preferences, theme switch, stage sizing
     simulations/               Shared simulation stage: WebGL gate, immersive view, loading,
                                technical details; for zoomable scenes the canvas host
                                (scene-canvas.tsx), view-from-URL hook, side rail, selection

@@ -43,7 +43,8 @@ export function horizontalPositions(date: Date, latitude: number, longitude: num
 
 /**
  * The Sun's altitude and azimuth, hour angle and declination, in degrees. No
- * refraction: the disc sits on the line a few minutes before published sunrise.
+ * refraction: the disc's centre reaches the line a few minutes after published sunrise
+ * (and before published sunset).
  */
 export function sunPosition(date: Date, latitude: number, longitude: number) {
   const sun = solarEcliptic(julianEphemerisDay(date));

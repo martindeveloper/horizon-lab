@@ -276,7 +276,7 @@
       },
       "migration": {
         "title": "Formation and the clearing sketch",
-        "body": "The first solids condensed {sunBirthGyr} billion years ago (CAI ages); observed disks last about {diskLifetimesMyr} million years, so the giants finish inside a {gasMyr}-million-year gas disk here while the terrestrial planets do most of their growing by {modelStartGyr} billion years ago; the Moon-forming impact, among the last giant collisions, is dated about {moonImpactGyr} billion years ago. Between {modelStartGyr} and {clearDoneGyr} billion years ago the giants interpolate from Nice-model starting orbits ({jupiterStartAu}, {saturnStartAu}, {uranusStartAu} and {neptuneStartAu} au) to their measured ones, and a seeded sample of planetesimals moves from a {diskAu} au disk to the Kuiper belt, the scattered disk, the Oort cloud, or out of the system. Orbital elements interpolate smoothly; this is not an N-body integration. Before the Sun the solar view shows a schematic molecular cloud with dated galactic milestones as its caption. Inside the gas disk the slider is logarithmic in time since the first solids, so the notes can follow dust (to {planetesimalsKyr} thousand years), planetesimals and Moon-mass embryos (by {embryosMyr} million years). The snow line is drawn at {snowLineAu} au; estimates for the young disk span about {snowLineEstimatesAu} au."
+        "body": "The first solids condensed {sunBirthGyr} billion years ago (CAI ages); observed disks last about {diskLifetimesMyr} million years, so the giants finish inside a {gasMyr}-million-year gas disk here while the terrestrial planets do most of their growing by {modelStartGyr} billion years ago; the Moon-forming impact, among the last giant collisions, is dated about {moonImpactGyr} billion years ago. Between {modelStartGyr} and {clearDoneGyr} billion years ago the giants interpolate from Nice-model starting orbits ({jupiterStartAu}, {saturnStartAu}, {uranusStartAu} and {neptuneStartAu} au) to their measured ones, and a seeded sample of planetesimals moves from a {diskAu} au disk to the Kuiper belt, the scattered disk, the Oort cloud, or out of the system. The timing is debated: other meteorite studies put the instability soon after the gas cleared. Orbital elements interpolate smoothly; this is not an N-body integration. Before the Sun the solar view shows a schematic molecular cloud with dated galactic milestones as its caption. Inside the gas disk the slider is logarithmic in time since the first solids, so the notes can follow dust (to {planetesimalsKyr} thousand years), planetesimals and Moon-mass embryos (by {embryosMyr} million years). The snow line is drawn at {snowLineAu} au; estimates for the young disk span about {snowLineEstimatesAu} au."
       },
       "sky": {
         "title": "The sky behind it",
@@ -297,16 +297,16 @@
     }
   },
   "notes": {
-    "merger": "About {mergerGyr} billion years ago the Milky Way swallowed Gaia-Enceladus; the thick disk dates from that era. The Sun's atoms are interstellar gas.",
+    "merger": "About {mergerGyr} billion years ago the Milky Way swallowed Gaia-Enceladus, stirring and thickening a thick disk that had already begun to form. The Sun's atoms are interstellar gas.",
     "thinDisk": "The thin disk is forming stars and the bar is in place by about {thinDiskGyr} billion years ago. Earlier stars are making the Sun's heavy elements.",
     "ingredients": "Interstellar gas, enriched by earlier generations of stars. The cloud that will form the Sun has not collapsed yet.",
     "collapse": "A molecular-cloud core collapses in under a million years. Short-lived aluminium-26 in meteorites may point to a nearby massive star.",
-    "dust": "First solids, {sunBirthGyr} billion years ago. Dust grains stick on gentle contact and grow into millimetre-to-centimetre pebbles.",
-    "planetesimals": "Within about {planetesimalsKyr} thousand years the first pebbles gather into planetesimals kilometres across; farther out this goes on for millions of years. Arrokoth is one survivor.",
-    "gasDisk": "Moon-mass embryos by {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to grab gas: the giants.",
+    "dust": "First solids, {sunBirthGyr} billion years ago: the timeline's zero. Dust grains stick on gentle contact and grow into millimetre-to-centimetre pebbles.",
+    "planetesimals": "In models, within about {planetesimalsKyr} thousand years the first pebbles gather into planetesimals kilometres across; farther out this goes on for millions of years. Arrokoth is one survivor.",
+    "gasDisk": "In models, Moon-mass embryos by about {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to grab gas: the giants.",
     "accretion": "The young Sun's light and wind disperse the gas. Inside, many Moon-size embryos remain; Jupiter's pull makes their orbits cross.",
     "belt": "Slow collisions far from Jupiter merge embryos into rocky planets. Near Jupiter they are fast and shatter: the asteroid belt.",
-    "moon": "In the leading model a Mars-size body strikes Earth and the Moon forms from the debris. Estimates span about {moonImpactGyr} billion years ago.",
+    "moon": "In the leading model a Mars-size body strikes Earth and the Moon forms from the debris. Estimates span about {moonImpactGyr} billion years ago; the younger ages may record later remelting.",
     "disk": "Disk intact: giants packed in, a heavy icy disk outside them. Starting orbits are a teaching sketch.",
     "clearing": "Clearing, as a model: the giants' resonant chain breaks, they scatter each other and Neptune scatters the disk.",
     "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that may be debris from one basin, Imbrium. A spike or a long tail? Debated.",

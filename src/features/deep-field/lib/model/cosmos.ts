@@ -48,8 +48,9 @@ export const redshiftMly = (cz: number) => comovingMly(cz / convert(1, "c", "km/
 const comovingMly = (z: number) => convert(comovingDistanceMpc(z, PLANCK_2018), "Mpc", "Mly");
 
 /* ---------------------------------------------------------------------------------------
- * The observable universe: as far as light has had time to come since the Big Bang. Its wall
- * is the cosmic microwave background, released at last scattering.
+ * The observable universe: as far as light has had time to come since the Big Bang. The
+ * cosmic microwave background, released at last scattering, is as far as light lets us see;
+ * the particle horizon lies a little beyond it.
  * ------------------------------------------------------------------------------------- */
 
 /** Redshift of last scattering (Planck 2018 VI, Table 2: z∗ = 1089.80 ± 0.21). */
@@ -58,8 +59,11 @@ export const LAST_SCATTERING_Z = 1089.8;
 export const HORIZON_MLY = convert(particleHorizonMpc(PLANCK_2018), "Mpc", "Mly");
 /** Today's distance to where the microwave background we see set out, Mly. */
 export const CMB_MLY = comovingMly(LAST_SCATTERING_Z);
-/** The farthest galaxies yet confirmed, redshift (JADES-GS-z14-0 at z = 14.32). */
-export const FIRST_GALAXIES_Z = 14;
+/**
+ * The farthest galaxy yet confirmed by its spectrum, redshift: MoM-z14 (Naidu et al. 2025,
+ * z = 14.44 ± 0.02), checked 19 October 2026. Photometric candidates beyond it do not count.
+ */
+export const FIRST_GALAXIES_Z = 14.44;
 /**
  * Today's distance to them, Mly: about three quarters of the way to the microwave background.
  * Between them and it lie cosmic dawn, when the first stars and galaxies lit up beyond what

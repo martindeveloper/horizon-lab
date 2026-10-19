@@ -131,7 +131,8 @@ export function DepthLadder() {
             className="block size-3.5 rounded-full bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
           />
         </SliderPrimitive.Root>
-        {/* Rungs beside the track: a tick each, named when current or pointed at. */}
+        {/* Rungs beside the track: a tick each, named when current or pointed at. Phones name the
+            view in the sightline just below, so their ticks sit close over the track unnamed. */}
         {RUNGS.map((rung, i) => (
           <button
             key={rung.id}
@@ -142,7 +143,9 @@ export function DepthLadder() {
             style={wide ? { top: at(rung.depth) } : { left: at(rung.depth) }}
             className={cn(
               "group absolute flex items-center gap-2",
-              wide ? "left-6 -translate-y-1/2" : "bottom-full -translate-x-1/2 flex-col-reverse",
+              wide
+                ? "left-6 -translate-y-1/2"
+                : "bottom-[calc(50%+0.5rem)] -translate-x-1/2 after:absolute after:-inset-x-1 after:-inset-y-2",
             )}
           >
             <span
@@ -158,7 +161,7 @@ export function DepthLadder() {
                 i === current
                   ? "text-space-fg opacity-100"
                   : "text-space-muted opacity-0 group-hover:opacity-100",
-                !wide && i !== current && "hidden",
+                !wide && "hidden",
               )}
             >
               {t(`views.${rung.id}`)}

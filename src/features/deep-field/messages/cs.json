@@ -29,7 +29,7 @@
     "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi 110 milionů světelných let napříč.",
     "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru.",
     "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan.",
-    "observable-universe": "Vše, odkud k nám světlo stihlo doletět, ohraničené reliktním zářením."
+    "observable-universe": "Vše, odkud k nám světlo stihlo doletět. Reliktní záření je nejvzdálenější světlo, které můžeme spatřit."
   },
   "toggles": {
     "halo": "Halo temné hmoty",
@@ -114,7 +114,7 @@
     "land": "Na Zemi: život se šíří na souš",
     "seas": "Na Zemi: v mořích se množí živočichové",
     "simple": "Na Zemi: mikroby a první jednoduchý mnohobuněčný život v mořích",
-    "microbes": "Na Zemi: mikrobi a vzduch bez kyslíku",
+    "microbes": "Na Zemi: mikrobi a vzduch téměř bez kyslíku",
     "young": "Na Zemi: mladý svět, ještě bez jistých stop života",
     "noEarth": "Země ještě nevznikla",
     "noSun": "Slunce ani Země ještě nevznikly",
@@ -145,7 +145,7 @@
     "bar": "Příčka",
     "width": "Průměr",
     "diskWidth": "Průměr hvězdného disku",
-    "thickness": "Tloušťka tenkého disku",
+    "thickness": "Škálová výška tenkého disku",
     "stars": "Hvězdy",
     "closestFuture": "{distance} za {years} let",
     "closestPast": "{distance} před {years} lety",
@@ -275,7 +275,7 @@
         "mass": "Asi {value} Sluncí",
         "heart": "Velký atraktor, ~{value} směrem k Pravítku a Kentauru",
         "body": "Naše domovská nadkupa, pojmenovaná v roce 2014 z havajského „nezměrné nebe“. Její okraj je rozvodí, ne zeď: uvnitř, když odečteme rozpínání, galaxie proudí k Velkému atraktoru. Čáry ty proudy sledují.",
-        "caution": "Vlákna a proudnice jsou náčrt v duchu map Cosmicflows, ne jejich data; studie hranici stále posouvají."
+        "caution": "Vlákna a proudnice jsou náčrt v duchu map Cosmicflows, ne jejich data. Povodí sleduje rekonstrukci z roku 2014; novější data Cosmicflows-4 mírně nahrávají tomu, že Laniakea je součástí většího povodí kolem Shapleyho nadkupy."
       },
       "triangulum": {
         "title": "Galaxie v Trojúhelníku",
@@ -359,7 +359,7 @@
         "cmb": "Z {distance}, vyšlo {age} tisíc let po velkém třesku",
         "temperature": "{value} K nad absolutní nulou",
         "age": "{value} mld. let světla na cestě",
-        "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Stěnou je reliktní záření, světlo z doby, kdy vesmír poprvé zprůhledněl. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",
+        "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Nejvzdálenějším viditelným světlem je reliktní záření z doby, kdy vesmír poprvé zprůhledněl: mez toho, co světlo ukáže, ne okraj. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",
         "caution": "Kruhy značí, odkud vyšlo světlo před {near}, {mid} a {far} mld. let, v dnešních vzdálenostech. Skvrny v záření zastupují mapu z Plancku a galaxie za pavučinou jsou rovnoměrný vzorek, ne katalog. Končí u nejvzdálenějších známých galaxií; tmavý pás před zářením je to, co jsme ještě neviděli: kosmický úsvit, kdy se rozsvítily první hvězdy, a před ním temný věk."
       }
     },
@@ -390,8 +390,8 @@
     "reach": {
       "speed": "{value} km/s",
       "crossed": "{date}, ve vzdálenosti {distance}",
-      "since": "Od {date}",
-      "from": "Od {date}",
+      "since": "Zhruba od {date}",
+      "from": "Zhruba od {date}",
       "predicted": "Země ho už neslyší: jeho poloha je předpověď z posledního sledování.",
       "shock": "Voyager 1: {v1}, Voyager 2: {v2}",
       "shape": "Překročily ji jen dvě sondy, takže její tvar neznáme; tady je nakreslená jako koule.",
@@ -471,7 +471,7 @@
       },
       "andromeda": {
         "title": "Náš velký soused",
-        "body": "Světlo Andromedy vyšlo, když raní lidé tvarovali první kamenné nástroje. Vzdálenost se zmenšuje: za miliardy let se obě galaxie nejspíš těsně minou a možná splynou."
+        "body": "Světlo Andromedy vyšlo, když raní lidé už tvarovali kamenné nástroje. Vzdálenost se zmenšuje: za miliardy let se obě galaxie nejspíš těsně minou a možná splynou."
       },
       "virgo": {
         "title": "Město galaxií",

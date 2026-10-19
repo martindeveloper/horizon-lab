@@ -242,12 +242,17 @@ present, pointer effects need a fine pointer, and nothing runs over a simulation
 
 The glass header (40px on phones, 44px on desktop) sits on a solar hairline and
 carries the brand mark and wordmark (`brand.tsx`), the current app name when a
-simulation is open, a glass "Catalogue" pill back to the index, and the
-preferences popover (language and appearance). Scene-specific tools remain inside
-the feature. Header sizing is defined by `--app-header-height` and includes the
-top safe-area inset. A 28px `AppFooter` closes every page: the mark, the
-name, About and Credits links, a GitHub link from 640px up (phones reach it from About),
-and the local sidereal time at Ondřejov (`SiderealClock`, client-only).
+simulation is open, the music toggle, and on `md` a glass "Catalogue" pill back to
+the index and the language and theme rails. Below `md` one menu button
+(`phone-menu.tsx`) drops a solid panel from the bar over a dimmed page instead: the
+simulations (the current one marked), language and appearance, then About, Credits,
+GitHub and the sidereal clock, in two columns from 640px. Scene-specific tools remain
+inside the feature, so no simulation uses the menu icon for its own panels. Header
+sizing is defined by `--app-header-height` and includes the top safe-area inset. A
+28px `AppFooter` closes every page: the mark, the name, About and Credits links, a
+GitHub link from 640px up, and the local sidereal time at Ondřejov (`SiderealClock`,
+client-only). Below `md` the menu carries those, so over a simulation the footer is
+gone and `--app-footer-height` is 0: the scene takes its line.
 
 On phones (coarse pointer on the touch layout) `DesktopNotice` shows one glass pill,
 once per session, suggesting a larger screen: above the footer on pages, under the
@@ -328,3 +333,13 @@ uses it to render a translated document. `LoadingScreen` supplies the loading
 visual, and `LoadingOverlay` owns its ready-to-hidden lifecycle. `TextReveal`
 is exported separately from `@horizon/toolkit/ui/motion` and respects reduced motion.
 Their API contracts are in [UI README](../packages/toolkit/src/ui/README.md).
+
+Below `md` a scene toolbar keeps its guide and main panels and folds the rest into
+`SceneMoreMenu` (`src/components/simulations/more-menu.tsx`): an ellipsis button at
+the toolbar's end that drops a short list of named tools (`MoreItem`: label, icon,
+`onSelect`, optional `active`). Escape, an outside tap and tabbing away close it, and
+a choice leaves focus on the button, so a dialog it opens returns there. The folded
+buttons stay in the toolbar for `md` (`not-md:hidden md:contents`); technical details
+hide only their trigger and open through their handle. The Orrery and Deep Field fold
+technical details and the immersive view (the Orrery its reading guide too); the
+black-hole toolbar has room for all six tools on phones.

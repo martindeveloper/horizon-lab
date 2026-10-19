@@ -102,7 +102,7 @@ test("figures: IAU radii, flattening of the oblate planets", () => {
   }
   near(flattening("earth"), 1 / 298.257, 2e-5, "Earth");
   near(flattening("mars"), 0.00589, 2e-5, "Mars");
-  near(flattening("jupiter"), 0.06487, 2e-5, "Jupiter");
+  near(flattening("jupiter"), 0.06499, 2e-5, "Jupiter (Juno 1-bar figure)");
   near(flattening("saturn"), 0.09796, 2e-5, "Saturn");
   near(flattening("uranus"), 0.02293, 2e-5, "Uranus");
   near(flattening("neptune"), 0.01708, 2e-5, "Neptune");

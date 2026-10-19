@@ -224,6 +224,38 @@ html {
   }
 }
 
+/* Phones reach About, Credits and GitHub from the header menu, so over a simulation the
+   footer's line goes to the scene (loading stages too, so nothing jumps when it mounts).
+   The complement of the `md` variant, where the menu shows. */
+@media not ((min-width: 48rem) and (min-height: 30rem)) {
+  .app-shell:has(.simulation-stage) {
+    --app-footer-height: 0px;
+  }
+  .app-shell:has(.simulation-stage) .app-footer {
+    display: none;
+  }
+}
+
+/* The phone menu drops from the bar over a dimmed page. */
+.phone-menu-scrim {
+  background: rgb(4 4 8 / 0.5);
+}
+:root.light .phone-menu-scrim {
+  background: rgb(28 29 34 / 0.22);
+}
+/* Solid: a blur nested in the bar's own would not reach the page beneath. */
+.phone-menu {
+  background: var(--color-bg);
+  box-shadow: var(--popover-shadow);
+  animation: phone-menu-drop 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes phone-menu-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
 /* Phone notice: above the footer on pages; over a simulation the dock owns the
    bottom, so it sits under the HUD's top row (0.75rem + 40px) on the scene. */
 .desktop-notice {

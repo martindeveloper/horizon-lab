@@ -16,7 +16,7 @@ export type NeighbourId = "proxima" | "alphaCen" | "barnard" | "scholz";
 
 export type Neighbour = {
   id: NeighbourId;
-  /** J2000 right ascension and declination, degrees. */
+  /** Right ascension and declination at epoch J2000.0 (ICRS), degrees. */
   ra: number;
   dec: number;
   /** Parallax in milliarcseconds. */
@@ -37,7 +37,8 @@ export type Neighbour = {
  * for Gaia: its barycentre, orbital parallax, proper motion and radial velocity
  * are the ALMA values of Akeson et al. (2021). Scholz's star uses the parallax,
  * proper motion and systemic radial velocity of Dupuy et al. (2019).
- * Gaia DR4 (December 2026) will supersede the DR3 values.
+ * Positions are SIMBAD's, propagated to epoch J2000.0. Gaia DR4 (December 2026) will
+ * supersede the DR3 values.
  */
 export const NEIGHBOURS: readonly Neighbour[] = [
   {
@@ -87,6 +88,9 @@ export const NEIGHBOURS: readonly Neighbour[] = [
 ];
 
 const PC_AU = PARSEC_AU;
+/** The positions' epoch, and the year "today" stands for: the tracks carry them across. */
+const POSITION_EPOCH = 2000;
+const TODAY_YEAR = 2026;
 /** 1 km/s is this many au per year. */
 const KMS_AU_YEAR = convert(1, "km/s", "au/yr");
 
@@ -115,7 +119,9 @@ function trackOf(star: Neighbour): Track {
   const axis = (k: 0 | 1 | 2) =>
     (u[k] * star.rv + east[k] * vt * star.pmRa + north[k] * vt * star.pmDec) * KMS_AU_YEAR;
   const v: Vec3 = [axis(0), axis(1), axis(2)];
-  track = { p0: [u[0] * dPc * PC_AU, u[1] * dPc * PC_AU, u[2] * dPc * PC_AU], v };
+  const dt = TODAY_YEAR - POSITION_EPOCH;
+  const at = (k: 0 | 1 | 2) => u[k] * dPc * PC_AU + v[k] * dt;
+  track = { p0: [at(0), at(1), at(2)], v };
   tracks.set(star.id, track);
   return track;
 }

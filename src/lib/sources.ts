@@ -11,11 +11,11 @@ export const SOURCES = {
   },
   allen2001: { cite: "Allen, Bernstein & Malhotra 2001, ApJ 549, L241 (the Kuiper cliff)" },
   avdellidou2024: {
-    cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878",
+    cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878; Edwards et al. 2024, Nat. Astron. 8, 1264 (an earlier instability)",
     link: "https://doi.org/10.1126/science.adg8092",
   },
   barboni2017: {
-    cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70",
+    cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70; Nimmo, Kleine & Morbidelli 2024, Nature 636, 598 (younger ages as remelting)",
   },
   bennettBovy2019: {
     cite: "Bennett & Bovy 2019, MNRAS 482, 1417",
@@ -71,6 +71,10 @@ export const SOURCES = {
   },
   gaiaEnceladus: {
     cite: "Helmi et al. 2018, Nature 563, 85; Belokurov et al. 2018, MNRAS 478, 611",
+  },
+  galanti2026: {
+    cite: "Galanti et al. 2026, Nat. Astron. 10, 493 (Jupiter's 1-bar radii from Juno radio occultations)",
+    link: "https://doi.org/10.1038/s41550-026-02777-x",
   },
   geller1999: {
     cite: "Geller, Diaferio & Kurtz 1999, ApJ 517, L23 (Coma: centre and median cz 7,090 km/s)",

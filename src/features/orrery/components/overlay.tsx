@@ -1,8 +1,9 @@
-import { BookOpen, Orbit } from "lucide-react";
+import { BookOpen, Info, Maximize2, Orbit } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
+import { SceneMoreMenu } from "@/components/simulations/more-menu";
 import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
@@ -13,6 +14,8 @@ import {
   VisualizationOverlay,
   cn,
   isSceneShortcut,
+  setImmersive,
+  type DialogHandle,
 } from "@horizon/toolkit/ui";
 
 import { sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
@@ -39,6 +42,8 @@ const escapeSteps = (): EscapeStep[] => {
 
 export function OrreryOverlay() {
   const t = useTranslations("orrery");
+  const tImmersive = useTranslations("immersive");
+  const details = useRef<DialogHandle>(null);
   const ready = useOrrery((s) => s.ready);
   const panel = useOrrery((s) => s.panel);
   const setPanel = useOrrery((s) => s.setPanel);
@@ -84,11 +89,13 @@ export function OrreryOverlay() {
       {guideOpen ? null : (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">
-            {/* The narrowest phones keep the view's name readable and take the tools a row lower. */}
+            {/* The view's name gives way to the tools down to its minimum; phones under 360px
+                take the tools a row lower. */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <ViewPicker />
               <Toolbar aria-label={t("hud.controls")} className="ml-auto shrink-0">
-                <OrreryTechnicalDetails />
+                {/* Phones keep the guide and the two panels in reach; the rest is under More. */}
+                <OrreryTechnicalDetails ref={details} triggerClassName="not-md:hidden" />
                 <Tooltip label={t("hud.guide")}>
                   <IconButton
                     ref={guideButton}
@@ -105,18 +112,44 @@ export function OrreryOverlay() {
                   viewLabel={t("hud.view")}
                   onPanelChange={setPanel}
                 />
-                <Tooltip label={t("guide.title")}>
-                  <IconButton
-                    aria-label={t("guide.title")}
-                    aria-expanded={panel === "reading"}
-                    aria-controls={panel === "reading" ? "orrery-reading" : undefined}
-                    active={panel === "reading"}
-                    onClick={() => setPanel(panel === "reading" ? "none" : "reading")}
-                  >
-                    <BookOpen className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <SimulationImmersiveToggle />
+                <div className="not-md:hidden md:contents">
+                  <Tooltip label={t("guide.title")}>
+                    <IconButton
+                      aria-label={t("guide.title")}
+                      aria-expanded={panel === "reading"}
+                      aria-controls={panel === "reading" ? "orrery-reading" : undefined}
+                      active={panel === "reading"}
+                      onClick={() => setPanel(panel === "reading" ? "none" : "reading")}
+                    >
+                      <BookOpen className="size-4 md:size-3.5" />
+                    </IconButton>
+                  </Tooltip>
+                  <SimulationImmersiveToggle />
+                </div>
+                <SceneMoreMenu
+                  className="md:hidden"
+                  items={[
+                    {
+                      id: "reading",
+                      label: t("guide.title"),
+                      icon: BookOpen,
+                      active: panel === "reading",
+                      onSelect: () => setPanel(panel === "reading" ? "none" : "reading"),
+                    },
+                    {
+                      id: "details",
+                      label: t("technicalDetails.open"),
+                      icon: Info,
+                      onSelect: () => details.current?.open(),
+                    },
+                    {
+                      id: "immersive",
+                      label: tImmersive("title"),
+                      icon: Maximize2,
+                      onSelect: () => setImmersive(true),
+                    },
+                  ]}
+                />
               </Toolbar>
             </div>
           </header>
