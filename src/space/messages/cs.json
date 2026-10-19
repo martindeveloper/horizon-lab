@@ -61,7 +61,8 @@
     "show": "Zobrazit",
     "units": "Vzdálenosti v",
     "smallWorlds": "Trpasličí planety a komety",
-    "belts": "Pásy a oblaky"
+    "belts": "Pásy a oblaky",
+    "antialiasing": "Vyhlazování hran"
   },
   "badges": {
     "measured": "Z měření",
@@ -106,5 +107,10 @@
     "scattered": "Rozptýlený disk",
     "oort": "Oortův oblak",
     "ejected": "Vyvržená tělesa"
+  },
+  "antialias": {
+    "off": "Vyp.",
+    "msaa": "MSAA",
+    "fxaa": "FXAA"
   }
 }

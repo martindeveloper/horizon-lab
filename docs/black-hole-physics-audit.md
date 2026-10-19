@@ -134,6 +134,20 @@ An external review was checked against the code; each point held.
 - Readouts qualify ω Centauri's ≥ 8,200 M☉ as one study's bound for a debated candidate and
   Cygnus X-1's 15 M☉ as an adopted value.
 
+## Gravity off: the flat-space comparison
+
+A Gravity switch (Spacetime, on by default; presets and the guide turn it back on) draws the
+same scene in Minkowski space so students can see what lensing does. Rays run straight from a
+static camera, with no analytic far-field bend; only a dark ball of radius r₊ captures, and
+starlight is unshifted. The disk, glow, jet and sky are sampled by the same code at the same
+step lengths, on the chord through the exit sphere. Disk gas keeps the Kerr Ω, so the image
+keeps the special-relativistic Doppler factor g = √(1 − v²)/(1 − v·n) and its brighter
+approaching side; gravitational and frame-dragging shifts are gone. The plunge glow is drawn
+unshifted, since its motion exists only because of gravity. `traceFlatRay` and
+`flatDiskShift` in `lib/kerr-rays.ts` mirror the shader; tests check that rays missing the
+ball escape along their initial direction, that a ray aimed at a disk point crosses there,
+and that the Doppler factor is 1/γ transverse with approaching × receding = 1.
+
 ## What remains approximate
 
 Finite-step velocity Verlet integration is not an error-controlled precision
@@ -175,6 +189,15 @@ Contrast is reduced at grazing angles. Screen derivatives must not be used
 inside divergent ray-hit branches: they produced broken streaks in visual QA.
 The detail adds no ray steps or render passes; pixel and frame-rate budgets
 remain unchanged.
+
+Experimental anti-aliasing (off by default) offers FXAA or edge rays. FXAA filters the
+finished, tone-mapped frame in one pass: it softens stair steps but cannot restore a ring
+thinner than a pixel that single rays missed. Edge rays (`<horizon/supersample>`) keeps the
+one-ray frame and, in a second pass over it, traces four extra rays on a rotated grid only
+where a pixel's 3 × 3 neighbourhood spans a luma difference of 0.04 or more. Thin photon
+rings and the lensed crescent's rim then join up because more rays hit them. Those extra
+rays cannot use screen derivatives, so their star footprint is one pixel. Both modes leave
+the pixel and frame-rate budgets unchanged; edge rays cost about four rays per edge pixel.
 
 `tests/black-hole-physics.test.mjs` covers formulas, flux convergence, budgets and the
 rendered ray model: capture boundaries across spin, inclination and distance, conserved

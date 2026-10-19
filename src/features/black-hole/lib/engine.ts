@@ -51,6 +51,7 @@ export function createBlackHoleEngine(
         uniforms,
         clearColor: 0x08080b,
         powerPreference: "low-power",
+        supersample: true,
       }),
     );
     const reduce = prefersReducedMotion();
@@ -227,7 +228,7 @@ export function createBlackHoleEngine(
 
       applyCamera();
 
-      pass.render();
+      pass.render({ antialias: state.antialiasing });
 
       if (stage === 0) {
         announceFirstFrame();

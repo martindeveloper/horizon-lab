@@ -248,6 +248,73 @@ export function traceRay(
   return { outcome: "exhausted", steps: budget, ray, crossing };
 }
 
+export type FlatTraceResult = {
+  outcome: "captured" | "escaped" | "exhausted";
+  steps: number;
+  /** Where the march stopped; an escaped ray continues along `dir` from there. */
+  position: Vec3;
+  /** First equatorial crossing: Boyer–Lindquist radius of that scene point, or NaN. */
+  crossing: number;
+};
+
+/**
+ * The same scene with gravity off, the shader's flat-space branch: a straight
+ * ray from a static camera, marched only along its chord through the sphere
+ * of radius `escapeR` with the Kerr march's step lengths, until it meets the
+ * dark ball of radius r₊ or leaves that sphere.
+ */
+export function traceFlatRay(
+  cam: Vec3,
+  dir: Vec3,
+  a: number,
+  { budget = 256, escapeR = 48 }: { budget?: number; escapeR?: number } = {},
+): FlatTraceResult {
+  const at = (t: number): Vec3 => [cam[0] + t * dir[0], cam[1] + t * dir[1], cam[2] + t * dir[2]];
+  const rh = horizonOverM(a);
+  const b = dot(cam, dir);
+  const c = dot(cam, cam);
+  const ballDisc = b * b - c + rh * rh;
+  const tBall = ballDisc > 0 && b < 0 ? -b - Math.sqrt(ballDisc) : Infinity;
+  const exitDisc = Math.max(b * b - c + escapeR * escapeR, 0);
+  const tExit = -b + Math.sqrt(exitDisc);
+  let t = Math.max(-b - Math.sqrt(exitDisc), 0);
+  let crossing = NaN;
+  let outcome: FlatTraceResult["outcome"] = tExit <= t ? "escaped" : "exhausted";
+  let steps = 0;
+  while (outcome === "exhausted" && steps < budget) {
+    const prev = at(t);
+    const r = Math.hypot(...prev);
+    t = Math.min(t + stepFraction(r) * r, tBall, tExit);
+    const pos = at(t);
+    steps++;
+    if (
+      Number.isNaN(crossing) &&
+      prev[1] * pos[1] <= 0 &&
+      Math.abs(prev[1]) + Math.abs(pos[1]) > 0
+    ) {
+      const f = prev[1] / (prev[1] - pos[1]);
+      const hit = prev.map((p, i) => p + (pos[i]! - p) * f);
+      // The Boyer–Lindquist radius of that equatorial point.
+      crossing = Math.sqrt(Math.max(hit[0]! ** 2 + hit[2]! ** 2 - a * a, 0));
+    }
+    if (t >= tBall) outcome = "captured";
+    else if (t >= tExit) outcome = "escaped";
+  }
+  return { outcome, steps, position: at(t), crossing };
+}
+
+/**
+ * Doppler factor g and rest-frame emission cosine for disk gas at
+ * Boyer–Lindquist radius `rho` with gravity off, the shader's `flatShift`:
+ * the gas circles at the Kerr Ω in flat space, and `dir` is the traced ray.
+ */
+export function flatDiskShift(hit: Vec3, dir: Vec3, rho: number, a: number) {
+  const omega = 1 / (rho * Math.sqrt(rho) + a);
+  const v: Vec3 = [-omega * hit[2], 0, omega * hit[0]];
+  const g = Math.sqrt(1 - Math.min(dot(v, v), 0.98)) / Math.max(1 + dot(v, dir), 1e-4);
+  return { g, mu: Math.min(g * Math.abs(dir[1]), 1) };
+}
+
 /**
  * Unit Cartesian direction the ray is moving in, the shader's hand-off to the
  * analytic far-field bend: dx/dλ ≈ ṙ s + r ṡ + r (dφ/dλ)_drag (s × ŷ) far out.

@@ -7,6 +7,7 @@ import { cameraFloor, formatSpin } from "@/features/black-hole/lib/physics";
 import { MAX_DIST, type Quality } from "@/features/black-hole/lib/presets";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { toLogFraction, fromLogFraction } from "@horizon/toolkit/math";
+import type { PassAntialias } from "@horizon/toolkit/rendering";
 import { ControlRow, SegmentedControl, Slider, SwitchRow } from "@horizon/toolkit/ui";
 
 /** The observatory rail's id, for its toggle and for pin cards that keep clear of it. */
@@ -16,6 +17,8 @@ export const SETTINGS_PANEL_ID = "observatory-panel";
 export function SettingsBody() {
   const t = useTranslations("blackHole");
   const spin = useBlackHole((s) => s.spin);
+  const gravity = useBlackHole((s) => s.gravity);
+  const setGravity = useBlackHole((s) => s.setGravity);
   // Whole degrees, so the auto-orbit re-renders this a few times a second, not every frame.
   const heading = useBlackHole((s) => Math.round((s.azimuth * 180) / Math.PI) % 360);
   const inclination = useBlackHole((s) => s.inclination);
@@ -34,6 +37,8 @@ export function SettingsBody() {
   const setStarIntensity = useBlackHole((s) => s.setStarIntensity);
   const setAutoRotate = useBlackHole((s) => s.setAutoRotate);
   const setQuality = useBlackHole((s) => s.setQuality);
+  const antialiasing = useBlackHole((s) => s.antialiasing);
+  const setAntialiasing = useBlackHole((s) => s.setAntialiasing);
   const applyPreset = useBlackHole((s) => s.applyPreset);
   const presetId = useBlackHole((s) => s.presetId);
   const selectHole = useSelectHole();
@@ -53,17 +58,25 @@ export function SettingsBody() {
   return (
     <>
       <RailSection title={t("spacetime")}>
-        <ControlRow label={t("spin")} value={spinText(spin)}>
-          <Slider
-            aria-label={t("spin")}
-            valueText={spinText}
-            min={-0.998}
-            max={0.998}
-            step={0.002}
-            value={[spin]}
-            onValueChange={([v]) => setSpin(v ?? 0)}
-          />
-        </ControlRow>
+        <div className="flex flex-col gap-4">
+          <ControlRow label={t("spin")} value={spinText(spin)}>
+            <Slider
+              aria-label={t("spin")}
+              valueText={spinText}
+              min={-0.998}
+              max={0.998}
+              step={0.002}
+              value={[spin]}
+              onValueChange={([v]) => setSpin(v ?? 0)}
+            />
+          </ControlRow>
+          <div className="-mx-3 grid gap-0.5">
+            <SwitchRow on={gravity} onToggle={() => setGravity(!gravity)}>
+              {t("gravity")}
+            </SwitchRow>
+          </div>
+          {gravity ? null : <p className="text-xs text-muted">{t("gravityOff")}</p>}
+        </div>
       </RailSection>
       <RailSection title={t("camera")}>
         <div className="flex flex-col gap-4">
@@ -159,6 +172,16 @@ export function SettingsBody() {
               { value: "economy", label: t("qualityEconomy") },
               { value: "standard", label: t("qualityStandard") },
               { value: "cinema", label: t("qualityCinema") },
+            ]}
+          />
+          <SegmentedControl<PassAntialias>
+            aria-label={t("antialiasing")}
+            value={antialiasing}
+            onValueChange={setAntialiasing}
+            options={[
+              { value: "off", label: t("antialiasOff") },
+              { value: "fxaa", label: t("antialiasFxaa") },
+              { value: "supersample", label: t("antialiasEdges") },
             ]}
           />
           <p className="text-xs text-muted">{t("modelNotice")}</p>

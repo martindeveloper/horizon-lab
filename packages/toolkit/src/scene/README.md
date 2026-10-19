@@ -30,6 +30,16 @@ resize, context loss). `tight` marks phones and low-memory devices; `basics` is
 `SceneBasics` plus `tight` and `dpr`. `warmUp(scene)`, called once after the first
 frame, compiles every material in idle time, hidden objects included.
 
+Draw every frame through `render(paint)`: `paint` makes the frame's renders (several
+may share a depth buffer, with `autoClear` off and `clearDepth()` between them) and the
+host anti-aliases them as `setAntialias(mode)` last chose. The renderer is made without
+hardware antialiasing, so a mode switches at once, without a new context: `off` renders
+straight to the canvas, `msaa` into a 4× multisampled offscreen frame (`createMsaaPass`)
+and `fxaa` through `createFxaaPass`. Only the current mode holds buffers.
+`defaultSceneAntialias(tight)` is the mode a host starts with: MSAA, off on tight
+devices. `antialias` reads the current mode; the first switch between the canvas and an
+offscreen frame after warm-up compiles the scene again, for linear output.
+
 ## Orbit rig and controls
 
 `createOrbitRig(camera, options)` holds a pose (azimuth, inclination, distance)

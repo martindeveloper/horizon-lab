@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import { AntialiasSection } from "@/components/simulations/antialias-section";
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { SwitchChips } from "@/components/simulations/switch-chips";
@@ -16,6 +17,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const show = useOrrery((s) => s.show);
   const patchShow = useOrrery((s) => s.patchShow);
   const angles = useOrrery((s) => s.cameraAngles);
+  const antialias = useOrrery((s) => s.antialias);
   const tally = useMemo(() => tallyAt(yearsAgo), [yearsAgo]);
   return (
     <Rail id="orrery-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
@@ -38,6 +40,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onRotate={(turn) => useOrrery.getState().rotate(turn)}
         />
       </RailSection>
+      <AntialiasSection
+        namespace="orrery"
+        value={antialias}
+        onChange={(mode) => useOrrery.getState().setAntialias(mode)}
+      />
     </Rail>
   );
 }

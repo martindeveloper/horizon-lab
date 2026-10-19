@@ -30,6 +30,7 @@ export type Uniforms = {
   uSteps: { value: number };
   uJet: { value: number };
   uWeather: { value: number };
+  uGravity: { value: number };
 };
 
 /** The scene settings the shader reads; the store and benchmark scenes both supply them. */
@@ -40,6 +41,8 @@ export type SceneSettings = {
   diskBrightness: number;
   starIntensity: number;
   tempScale: number;
+  /** Off draws the same scene in flat space, for comparison. */
+  gravity: boolean;
 };
 
 export type CameraPose = {
@@ -83,6 +86,7 @@ export function createUniforms(): Uniforms {
     uSteps: { value: 140 },
     uJet: { value: 0 },
     uWeather: { value: 0 },
+    uGravity: { value: 1 },
   };
 }
 
@@ -111,6 +115,7 @@ export function sceneWriter(uniforms: Uniforms) {
     uniforms.uSteps.value = steps;
     uniforms.uJet.value = hole.jet;
     uniforms.uWeather.value = SKY_CODE[hole.sky];
+    uniforms.uGravity.value = scene.gravity ? 1 : 0;
   };
 }
 

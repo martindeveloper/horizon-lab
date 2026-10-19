@@ -4,8 +4,9 @@ import test from "node:test";
 import { createStore } from "zustand/vanilla";
 
 import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
+import { defaultSceneAntialias } from "../packages/toolkit/src/scene/host.ts";
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
-import { bridgeStore } from "../src/lib/scene-bridge.ts";
+import { bridgeAntialias, bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
 import { framingView, viewOf } from "../src/space/solar-system/model/framing.ts";
 import { TODAY } from "../src/space/solar-system/model/moment.ts";
@@ -64,6 +65,27 @@ test("the store bridge acts once on each turn and flight, never on the engine's 
   scope.dispose();
   store.setState({ view: "d", flight: 3 });
   assert.deepEqual(seen.flights, ["b", "c"], "disposed, it listens no more");
+});
+
+test("a scene draws with MSAA, or none on tight devices, until the visitor picks another", () => {
+  assert.equal(defaultSceneAntialias(false), "msaa");
+  assert.equal(defaultSceneAntialias(true), "off");
+  const store = createStore((set) => ({
+    antialias: null,
+    setAntialias: (antialias) => set({ antialias }),
+  }));
+  const host = {
+    antialias: defaultSceneAntialias(true),
+    setAntialias: (m) => (host.antialias = m),
+  };
+  const scope = new DisposalScope();
+  bridgeAntialias(store, scope, host);
+  assert.equal(store.getState().antialias, "off", "the device's default is published");
+  store.getState().setAntialias("fxaa");
+  assert.equal(host.antialias, "fxaa");
+  scope.dispose();
+  store.getState().setAntialias("msaa");
+  assert.equal(host.antialias, "fxaa", "disposed, it listens no more");
 });
 
 test("the shared space copy merges under a simulation's own, and is never written twice", () => {

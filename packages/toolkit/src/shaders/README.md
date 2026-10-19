@@ -58,6 +58,20 @@ engines import already expanded shader strings and do not invoke it at runtime.
 - `#include <horizon/sprite>` provides `pointGlow(vec2 pointCoord, float falloff)`:
   a round Gaussian point-sprite profile that is zero outside the sprite. Pass
   `gl_PointCoord`; star and swarm points share it with their own falloff.
+- `fxaa.frag.glsl` and `resolve.frag.glsl` are the fragment shaders of the
+  rendering module's FXAA and MSAA passes (`createFxaaPass`, `createMsaaPass`).
+  Both read the offscreen frame as `uImage` with one pixel `uTexel`, and encode
+  with three.js's `linearToOutputTexel`; FXAA judges edges on approximately
+  perceptual luma when `FXAA_LINEAR_INPUT` is defined (sRGB output). They draw
+  with `fullscreen.vert.glsl`.
+- `#include <horizon/supersample>` supplies `main()` for a full-screen ray shader
+  that defines `vec3 shade(vec2 fragCoord, bool derivatives)`. Pass 0 traces one
+  ray per pixel; pass 1 (`HORIZON_PASS 1`, compiled by `createFullscreenPass` with
+  `supersample: true`) reads that frame through its own `uFirstPass` and
+  `uFirstTexel` uniforms and adds four rotated-grid rays where a 3 × 3
+  neighbourhood's luma spans at least `SUPERSAMPLE_EDGE` (default 0.04). Those
+  rays get `derivatives = false` and must not use screen derivatives. Include it
+  last, after `shade`.
 - `#include <horizon/fresnel>` provides
   `fresnelRim(vec3 normal, vec3 viewDir, float power)`: the shared one-sided rim
   power curve. Both vectors must be normalized. This artistic factor is not

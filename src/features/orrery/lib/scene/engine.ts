@@ -11,7 +11,7 @@
 import { Scene, type Object3D, type Vector3 } from "three";
 
 import { carryPose, takeHandoff } from "@/lib/handoff";
-import { bridgeStore } from "@/lib/scene-bridge";
+import { bridgeAntialias, bridgeStore } from "@/lib/scene-bridge";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { positionOf } from "@/space/solar-system/model/position";
 import { hasSurface } from "@/space/solar-system/model/selection";
@@ -62,11 +62,8 @@ export function createOrreryEngine({
 }: SceneMount): OrreryEngine {
   const scope = new DisposalScope();
   try {
-    const { renderer, camera, viewport, engine, tight, basics, warmUp } = createSceneHost(scope, {
-      canvas,
-      host,
-      onError,
-    });
+    const sceneHost = createSceneHost(scope, { canvas, host, onError });
+    const { renderer, camera, viewport, engine, tight, basics, warmUp } = sceneHost;
     const kit = createSolarKit(basics);
     const { looks, lod } = kit;
     const scene = new Scene();
@@ -281,6 +278,7 @@ export function createOrreryEngine({
       },
     });
     activity.setEnabled(store.getState().solarActivity);
+    bridgeAntialias(store, scope, sceneHost);
     const onMotionChange = () => engine.invalidate();
     reduceMotion.addEventListener("change", onMotionChange);
     scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
@@ -362,7 +360,7 @@ export function createOrreryEngine({
           syncView: !rig.flying && !closeUp.current && !state.guideOpen,
           angles: pose,
         });
-        draw();
+        sceneHost.render(draw);
         if (bridge.ready()) {
           maps.start();
           warmUp(scene);

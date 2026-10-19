@@ -6,6 +6,10 @@
   "close": "Zavřít",
   "orbit": "Otáčet pohled",
   "animation": "Animace",
+  "antialiasing": "Vyhlazování hran",
+  "antialiasOff": "Vyp.",
+  "antialiasFxaa": "FXAA",
+  "antialiasEdges": "Paprsky hran",
   "reset": "Obnovit nastavení",
   "custom": "Vlastní",
   "holes": "Černé díry",
@@ -33,6 +37,8 @@
   "kindCatalog": "Na obloze",
   "kindTheory": "Teorie",
   "spin": "Spin a/M",
+  "gravity": "Gravitace",
+  "gravityOff": "Plochý prostoročas: světlo letí rovně, bez ohybu a gravitačního rudého posuvu. Disku zůstává Dopplerův posuv.",
   "retrogradeDisk": "retrográdní disk",
   "inclination": "Sklon",
   "azimuth": "Azimut",
@@ -863,13 +869,13 @@
     "summary": "Teoretické hodnoty poloměrů a drah doplňuje sledování paprsků v Kerrově prostoročase od vznášející se kamery. Záření disku, barvy a pohyb jsou ilustrativní, nejde o rekonstrukci astronomického pozorování ani o model přenosu záření. Všechny předvolby používají stejný model. Zdroje níže rozlišují ověřené fyzikální vztahy od aproximací použitých při vykreslování.",
     "features": {
       "views": "Deset pohledů: Cygnus X-1, Gaia BH3, GW231123, ω Centauri, Sagittarius A*, M87*, TON 618, disk v gravitační čočce, Schwarzschild a téměř extremální Kerr. Úpravou parametrů lze vytvořit vlastní scénu.",
-      "controls": "Otáčení a přibližování pohledu; změna spinu, úhlu nad rovinou disku, expozice, jasu disku a hvězd i kvality vykreslování. Hmotnost černé díry určují předvolby.",
+      "controls": "Otáčení a přibližování pohledu; změna spinu, vypnutí gravitace, změna úhlu nad rovinou disku, expozice, jasu disku a hvězd i kvality vykreslování. Hmotnost černé díry určují předvolby.",
       "learning": "Komentované průlety, stupnice vzdálenosti r/M s vyznačenými poloměry, atlas oblohy, fyzikální údaje, nerušené prohlížení a ukázka padajících hodin."
     },
     "sections": {
       "rays": {
         "title": "Sledování paprsků v Kerrově prostoročase",
-        "body": "Three.js vykresluje jediný obdélník přes celou plochu pomocí fragmentového shaderu GLSL. Pro každý pixel se vyšle jeden deterministický paprsek, sledovaný zpětně po světelné geodetice Kerrova prostoročasu. Nejde o sledování světelných cest metodou Monte Carlo: nepoužívají se náhodné odrazy ani akumulace vzorků. Kamera je pozorovatel s nulovým momentem hybnosti; jeho místní soustava převádí směr každého pixelu na zachovávanou energii E, moment hybnosti L a Carterovu konstantu Q fotonu, normalizované tak, aby kamera naměřila jednotkovou energii. Kamera zůstává nejméně 0,3 M vně horizontu, kde takový pozorovatel existuje. Paprsky postupují v Minově čase λ. Radiální pohyb v proměnné u = 1/r je hladký kmit, směr s se pohybuje po jednotkové sféře bez singularity na pólech a strhávání inerciálních soustav oba otáčí kolem osy rotace. Kroky rychlostní Verletovy metody posunou paprsek asi o {stepNear, number} % jeho poloměru uvnitř 8 M a o {stepFar, number}–{stepFarMax, number} % dále. Každý krok obnoví |ds/dλ| z Q a mimo body obratu i du/dλ z radiálního potenciálu. Za r = {farField, number} se při krokování pouze ohýbá směr paprsku. Paprsek mířící dovnitř pod polovinou vzdálenosti mezi r₊ a prográdní fotonovou dráhou se už nemůže vrátit a je zachycen. Po vyčerpání počtu kroků zůstane paprsek tmavý a hlásí se odděleně od záchytu. Ohyb za únikovým poloměrem i u paprsků příliš vzdálených pro krokování se dopočítá analyticky: člen slabého pole 4M/b a člen druhého řádu 15πM²/4b² se rozdělí podél zbývající dráhy. Testy počítají tytéž rovnice na CPU: konvergované hranice záchytu odpovídají analytické kritické křivce této kamery do 0,4 %, standardní kvalita je drží do 3,5 % a směry k obloze se shodují s osmkrát jemnějším krokem asi na 0,2°."
+        "body": "Three.js vykresluje jediný obdélník přes celou plochu pomocí fragmentového shaderu GLSL. Pro každý pixel se vyšle jeden deterministický paprsek, sledovaný zpětně po světelné geodetice Kerrova prostoročasu. Nejde o sledování světelných cest metodou Monte Carlo: nepoužívají se náhodné odrazy ani akumulace vzorků. Kamera je pozorovatel s nulovým momentem hybnosti; jeho místní soustava převádí směr každého pixelu na zachovávanou energii E, moment hybnosti L a Carterovu konstantu Q fotonu, normalizované tak, aby kamera naměřila jednotkovou energii. Kamera zůstává nejméně 0,3 M vně horizontu, kde takový pozorovatel existuje. Paprsky postupují v Minově čase λ. Radiální pohyb v proměnné u = 1/r je hladký kmit, směr s se pohybuje po jednotkové sféře bez singularity na pólech a strhávání inerciálních soustav oba otáčí kolem osy rotace. Kroky rychlostní Verletovy metody posunou paprsek asi o {stepNear, number} % jeho poloměru uvnitř 8 M a o {stepFar, number}–{stepFarMax, number} % dále. Každý krok obnoví |ds/dλ| z Q a mimo body obratu i du/dλ z radiálního potenciálu. Za r = {farField, number} se při krokování pouze ohýbá směr paprsku. Paprsek mířící dovnitř pod polovinou vzdálenosti mezi r₊ a prográdní fotonovou dráhou se už nemůže vrátit a je zachycen. Po vyčerpání počtu kroků zůstane paprsek tmavý a hlásí se odděleně od záchytu. Ohyb za únikovým poloměrem i u paprsků příliš vzdálených pro krokování se dopočítá analyticky: člen slabého pole 4M/b a člen druhého řádu 15πM²/4b² se rozdělí podél zbývající dráhy. Testy počítají tytéž rovnice na CPU: konvergované hranice záchytu odpovídají analytické kritické křivce této kamery do 0,4 %, standardní kvalita je drží do 3,5 % a směry k obloze se shodují s osmkrát jemnějším krokem asi na 0,2°. S vypnutou gravitací se stejná scéna kreslí v plochém prostoročase: přímé paprsky ze statické kamery se stejnými délkami kroků, místo záchytu tmavá koule o poloměru r₊, světlo hvězd bez posuvu a jen speciálně relativistický Dopplerův faktor g = √(1 − v²)/(1 − v·n) plynu disku obíhajícího se stejnou Ω."
       },
       "radii": {
         "title": "Jednotky, poloměry a oběžné doby",
@@ -885,7 +891,7 @@
       },
       "performance": {
         "title": "Nároky na vykreslování v reálném čase",
-        "body": "Úsporná, standardní a filmová kvalita dovolují {stepsEconomy, number}, {stepsStandard, number} a {stepsCinema, number} kroků na pixel. Násobky rozlišení 0,72, 0,90 a 1,00 dále omezuje limit 0,6, 1,2 a 2,4 milionu pixelů. DPR je nejvýše 1, ve filmové kvalitě bez dalších omezení 1,5. Dotyková zařízení nebo zařízení, která hlásí provoz na baterii, mají limit 0,8 milionu pixelů. Úsporná kvalita cílí na 24 fps, standardní na 30 fps; filmová může při interakci na neomezeném zařízení dosáhnout 60 fps. Jde o limity výpočetní zátěže, nikoli záruku výdrže baterie. Prohlížeč dostává požadavek na úsporné GPU. Při skrytí stránky nebo otevření atlasu se vykreslování pozastaví. Vypnutí animace zastaví průběžné vykreslování, ovládání však scénu stále překreslí. Při zapnutém omezení pohybu se scéna načte s pozastavenou animací. Tok disku se přepočítává jen při změně spinu; při spuštění se používají menší vykreslovací buffery a méně kroků. Při odebrání scény se uvolní prostředky GPU."
+        "body": "Úsporná, standardní a filmová kvalita dovolují {stepsEconomy, number}, {stepsStandard, number} a {stepsCinema, number} kroků na pixel. Násobky rozlišení 0,72, 0,90 a 1,00 dále omezuje limit 0,6, 1,2 a 2,4 milionu pixelů. DPR je nejvýše 1, ve filmové kvalitě bez dalších omezení 1,5. Dotyková zařízení nebo zařízení, která hlásí provoz na baterii, mají limit 0,8 milionu pixelů. Úsporná kvalita cílí na 24 fps, standardní na 30 fps; filmová může při interakci na neomezeném zařízení dosáhnout 60 fps. Jde o limity výpočetní zátěže, nikoli záruku výdrže baterie. Prohlížeč dostává požadavek na úsporné GPU. Při skrytí stránky nebo otevření atlasu se vykreslování pozastaví. Vypnutí animace zastaví průběžné vykreslování, ovládání však scénu stále překreslí. Při zapnutém omezení pohybu se scéna načte s pozastavenou animací. Tok disku se přepočítává jen při změně spinu; při spuštění se používají menší vykreslovací buffery a méně kroků. Při odebrání scény se uvolní prostředky GPU. Experimentální vyhlazování, ve výchozím stavu vypnuté: FXAA vyhladí schodovité hrany jedním průchodem přes hotový snímek; Paprsky hran vyšlou čtyři další paprsky jen tam, kde se pixel liší od sousedů, takže spojí i prstence tenčí než pixel."
       },
       "limits": {
         "title": "Co obraz nemodeluje",

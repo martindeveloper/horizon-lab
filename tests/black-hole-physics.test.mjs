@@ -11,10 +11,12 @@ import {
   carterOf,
   criticalCurve,
   diskShift,
+  flatDiskShift,
   inversePotential,
   kerrMetric,
   kerrStep,
   plungeShift,
+  traceFlatRay,
   traceRay,
   blRadius,
 } from "../src/features/black-hole/lib/kerr-rays.ts";
@@ -316,4 +318,52 @@ test("negative spin describes a retrograde disk", () => {
   assert.deepEqual(criticalImpactParameters(-0.7), criticalImpactParameters(0.7));
   const flux = diskFluxProfile(-0.9, iscoOverM(-0.9));
   assert.ok(flux.every(Number.isFinite) && Math.max(...flux) > 0);
+});
+
+test("with gravity off, rays run straight to the disk point they aim at or out to the sky", () => {
+  const sub = (p, q) => p.map((v, i) => v - q[i]);
+  for (const spin of [0, 0.94, -0.9]) {
+    const rh = horizonOverM(spin);
+    for (const cam of [camera(28, 0.3), camera(8, 1.0), camera(480, 0.05)]) {
+      const d = Math.hypot(...cam.pos);
+      for (let i = 0; i < 60; i++) {
+        const k = ((i % 10) + 1) / 10;
+        const dir = pixel(cam, (k * Math.cos(i * 2.4) * 8) / d, (k * Math.sin(i * 2.4) * 8) / d);
+        const b = dir.reduce((sum, v, j) => sum + v * cam.pos[j], 0);
+        const meetsBall = b < 0 && d * d - b * b < rh * rh;
+        const ray = traceFlatRay(cam.pos, dir, spin, { budget: QUALITY_STEPS.economy });
+        assert.equal(
+          ray.outcome,
+          meetsBall ? "captured" : "escaped",
+          `a=${spin} d=${d} pixel ${i}`,
+        );
+        if (meetsBall) continue;
+        // Escaped from the initial line, moving outward along the initial direction.
+        const along = sub(ray.position, cam.pos);
+        const t = Math.hypot(...along);
+        if (t > 0) along.forEach((v, j) => close(v / t, dir[j], 1e-9));
+        assert.ok(Math.hypot(...ray.position) >= 48 - 1e-6 || t === 0);
+      }
+      // A ray aimed at an equatorial point crosses the disk plane exactly there.
+      for (const rho of [iscoOverM(spin) * 1.1, 6, 11, 15]) {
+        for (const phi of [0.3, 2.1, 4.4]) {
+          const w = Math.hypot(rho, spin);
+          const target = [w * Math.cos(phi), 0, w * Math.sin(phi)];
+          const toward = sub(target, cam.pos);
+          const dir = toward.map((v) => v / Math.hypot(...toward));
+          const ray = traceFlatRay(cam.pos, dir, spin);
+          if (ray.outcome === "captured" && Number.isNaN(ray.crossing)) continue; // behind the ball
+          close(ray.crossing, rho, 1e-9);
+        }
+      }
+    }
+  }
+  // Disk light keeps only the special-relativistic Doppler shift.
+  const hit = [6, 0, 0];
+  const v = 6 / (6 * Math.sqrt(6)); // Ω r, moving along +z
+  close(flatDiskShift(hit, [0, -1, 0], 6, 0).g, Math.sqrt(1 - v * v));
+  const toward = flatDiskShift(hit, [0, 0, -1], 6, 0).g;
+  const away = flatDiskShift(hit, [0, 0, 1], 6, 0).g;
+  close(toward * away, 1);
+  assert.ok(toward > 1);
 });

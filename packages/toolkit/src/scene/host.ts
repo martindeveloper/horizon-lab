@@ -1,7 +1,8 @@
 /**
  * What every zoomable scene starts from: a WebGL renderer sized to its stage, a perspective
  * camera, the stage's CSS size and the frame loop that renders only while something moves
- * (`createEngineHost`). Phones and low-memory devices get a lighter setup (`tight`).
+ * (`createEngineHost`). Phones and low-memory devices get a lighter setup (`tight`). Frames
+ * are drawn through `render`, anti-aliased as `setAntialias` last chose.
  */
 import {
   NoToneMapping,
@@ -15,12 +16,22 @@ import {
 import { COARSE_POINTER_QUERY } from "../environment";
 import type { DisposalScope } from "../rendering/disposal";
 import { createEngineHost } from "../rendering/engine-host";
+import { createFxaaPass, type FxaaPass } from "../rendering/fxaa-pass";
+import { createMsaaPass, type MsaaPass } from "../rendering/msaa-pass";
 import type { SceneBasics, Viewport } from "./kit";
 
 /** Vertical field of view of the scenes, degrees. */
 const SCENE_FOV = 48;
 
 export type SceneHost = ReturnType<typeof createSceneHost>;
+
+/** How a scene smooths its edges: not at all, 4× hardware multisampling, or FXAA. */
+export type SceneAntialias = "off" | "msaa" | "fxaa";
+
+/** What a scene draws with until the visitor chooses: MSAA, except on tight devices. */
+export function defaultSceneAntialias(tight: boolean): SceneAntialias {
+  return tight ? "off" : "msaa";
+}
 
 /** `SceneBasics` plus the device class and pixel ratio every layer may size itself by. */
 export type SceneHostBasics = SceneBasics & {
@@ -48,7 +59,8 @@ export function createSceneHost(
   const dprCap = tight ? 1.25 : 1.5;
   const renderer = new WebGLRenderer({
     canvas,
-    antialias: !tight,
+    /* Anti-aliasing happens offscreen (`setAntialias`), so it can change without a new context. */
+    antialias: false,
     powerPreference: "low-power",
     alpha: false,
     stencil: false,
@@ -77,11 +89,53 @@ export function createSceneHost(
     }),
   );
 
-  let warmed = false;
+  let antialias = defaultSceneAntialias(tight);
+  let pass: MsaaPass | FxaaPass | null = null;
+  const passFor = (mode: SceneAntialias) =>
+    mode === "msaa" ? createMsaaPass(renderer) : mode === "fxaa" ? createFxaaPass(renderer) : null;
+  scope.defer(() => pass?.dispose());
+
+  /* Programs differ between the canvas (sRGB) and an offscreen frame (linear): warm both as used. */
+  let warmScene: Scene | null = null;
+  const warmed = new Set<boolean>();
   let alive = true;
   scope.defer(() => {
     alive = false;
   });
+  const idle =
+    "requestIdleCallback" in window && typeof window.requestIdleCallback === "function"
+      ? window.requestIdleCallback.bind(window)
+      : (run: () => void) => window.setTimeout(run, 200);
+  const warm = () => {
+    const offscreen = antialias !== "off";
+    if (!warmScene || warmed.has(offscreen)) return;
+    warmed.add(offscreen);
+    const scene = warmScene;
+    idle(() => {
+      if (!alive) return;
+      /* Switched back before idle time: the next switch warms it. */
+      if (offscreen !== (antialias !== "off")) {
+        warmed.delete(offscreen);
+        return;
+      }
+      /* Compiling walks visible objects only; show the hidden ones for that walk alone. */
+      const hidden: Object3D[] = [];
+      scene.traverse((object) => {
+        if (!object.visible) {
+          hidden.push(object);
+          object.visible = true;
+        }
+      });
+      const previous = renderer.getRenderTarget();
+      try {
+        if (offscreen) renderer.setRenderTarget((pass ??= passFor(antialias))?.target ?? null);
+        renderer.compileAsync(scene, camera).catch(() => undefined);
+      } finally {
+        renderer.setRenderTarget(previous);
+        for (const object of hidden) object.visible = false;
+      }
+    });
+  };
   const basics: SceneHostBasics = {
     scope,
     camera,
@@ -97,34 +151,37 @@ export function createSceneHost(
     engine,
     tight,
     basics,
+    /** The anti-aliasing frames are drawn with. */
+    get antialias() {
+      return antialias;
+    },
+    /** Switches anti-aliasing for the next frame on; the previous mode's buffers are freed. */
+    setAntialias(mode: SceneAntialias) {
+      if (mode === antialias) return;
+      pass?.dispose();
+      pass = null;
+      antialias = mode;
+      warm();
+      engine.invalidate();
+    },
+    /**
+     * Draws one frame: `paint` makes the renders (several may share one depth buffer), into
+     * the canvas or an offscreen frame that is anti-aliased onto it.
+     */
+    render(paint: () => void) {
+      pass ??= passFor(antialias);
+      if (pass) pass.paint(paint);
+      else paint();
+    },
     /**
      * Once, in idle time after the first frame: compiles every material in `scene`, hidden
-     * objects included, so no zoom or switch ever waits on a shader. Uses parallel
-     * compilation where the browser offers it.
+     * objects included, so no zoom or switch ever waits on a shader; again for an
+     * anti-aliasing that draws offscreen. Uses parallel compilation where the browser offers it.
      */
     warmUp: (scene: Scene) => {
-      if (warmed) return;
-      warmed = true;
-      const idle =
-        "requestIdleCallback" in window && typeof window.requestIdleCallback === "function"
-          ? window.requestIdleCallback.bind(window)
-          : (run: () => void) => window.setTimeout(run, 200);
-      idle(() => {
-        if (!alive) return;
-        /* Compiling walks visible objects only; show the hidden ones for that walk alone. */
-        const hidden: Object3D[] = [];
-        scene.traverse((object) => {
-          if (!object.visible) {
-            hidden.push(object);
-            object.visible = true;
-          }
-        });
-        try {
-          renderer.compileAsync(scene, camera).catch(() => undefined);
-        } finally {
-          for (const object of hidden) object.visible = false;
-        }
-      });
+      if (warmScene) return;
+      warmScene = scene;
+      warm();
     },
   };
 }

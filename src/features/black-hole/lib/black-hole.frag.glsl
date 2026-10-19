@@ -4,13 +4,15 @@
 // along a Kerr null geodesic, in geometric units G = c = M = 1. A ray can end
 // in four ways: it is captured by the hole, it crosses the equatorial
 // accretion disk, it escapes to the sky, or it runs out of steps and stays dark.
+// With gravity off, rays run straight from a static camera and only a dark
+// ball of radius r₊ captures; the disk keeps its orbital Doppler shift.
 //
 // Sections, in order:
 //   1. Uniforms and shared snippets
 //   2. Sky presets (one per "weather" setting)
 //   3. Accretion disk and plunging-region emission
 //   4. Ray geometry: Kerr geodesics in Mino time
-//   5. main(): march, composite, tone map
+//   5. shade(): march, composite, tone map; main() comes from <horizon/supersample>
 
 precision highp float;
 
@@ -34,6 +36,7 @@ uniform float uFov;            // vertical field of view, radians
 uniform float uSteps;          // step budget per ray (≤ 180)
 uniform float uJet;            // jet brightness, 0 = off
 uniform float uWeather;        // sky preset: 1 Sgr A*, 2 M87, 3 Cyg X-1, 4 lab, 5 host, else generic
+uniform float uGravity;        // 1 Kerr; 0 the same scene in flat space, for comparison
 
 #include <horizon/math>
 #include "./parameters.generated.glsl"
@@ -197,6 +200,7 @@ float gC;      // a(aE − L)
 float gSphere; // Q + L²
 float gA2E2;   // a²E²
 float gA2;     // a²
+vec3 gRay;     // the straight ray's direction, with gravity off
 
 // Frequency ratio g = ν_camera / ν_emitted for gas on a prograde circular
 // orbit at r: g = 1 / (uᵗ(E_photon − Ω L_photon)). The photon's constants are
@@ -207,6 +211,17 @@ float diskG(float r) {
   float om = 1.0 / (r * s + gA);
   float ut = (r * s + gA) / (pow(r, 0.75) * sqrt(max(r * s - 3.0 * s + 2.0 * gA, 1e-6)));
   return 1.0 / max(ut * (-gE + om * gL), 1e-4);
+}
+
+// Gravity off: gas circling at the same Ω in flat space, seen along the
+// straight ray, has only the special-relativistic Doppler factor
+// g = 1 / (γ(1 + v·d)) and rest-frame emission cosine μ = g |d_y|.
+vec2 flatShift(vec3 hit, float rho) {
+  float om = 1.0 / (rho * sqrt(rho) + gA);
+  vec3 v = om * vec3(-hit.z, 0.0, hit.x);
+  float v2 = min(dot(v, v), 0.98);
+  float g = sqrt(1.0 - v2) / max(1.0 + dot(v, gRay), 1e-4);
+  return vec2(g, clamp(g * abs(gRay.y), 0.0, 1.0));
 }
 
 // Gas inside the ISCO plunges on a geodesic that keeps the ISCO's energy and
@@ -305,8 +320,9 @@ vec3 diskColor(vec3 hit, float rho) {
 
   // Physical shape: Page–Thorne flux, the frequency factor g, and the emission
   // angle in the gas's rest frame, μ = g √Q / r on the equator.
-  float g = diskG(rho);
-  float mu = clamp(g * sqrt(max(gQ, 0.0)) / rho, 0.0, 1.0);
+  vec2 shift = uGravity > 0.5 ? vec2(diskG(rho), 0.0) : flatShift(hit, rho);
+  float g = shift.x;
+  float mu = uGravity > 0.5 ? clamp(g * sqrt(max(gQ, 0.0)) / rho, 0.0, 1.0) : shift.y;
   float rin = max(uInner, 1.2);
   float fpt = diskFlux(rho); // peak-normalised, zero at the inner edge
   float innerEdge = smoothstep(rin * 0.94, rin * 1.06, rho);
@@ -430,22 +446,88 @@ vec3 lensTail(vec3 p, vec3 d) {
 
 #include <horizon/tonemap>
 
-/* ------------------------------------------------------------------ 5. main */
+/* ----------------------------------------------------------------- 5. shade */
 
 // MAX_STEPS, STEP_*, ESCAPE_R, FAR_FIELD_R, MARCH_B and MARCH_CAM_R: parameters.generated.glsl.
 
-void main() {
+// Glow, jet and disk light on one step of the march, from prev to pos. With
+// gravity, du/dλ and u at both ends locate the equatorial crossing; without,
+// its radius comes from the crossing point. Returns true once the disk is opaque.
+bool collect(
+  vec3 prev, vec3 pos, vec2 uStep, vec2 udStep, float horizon,
+  inout vec3 fore, inout vec3 disk, inout float transmission
+) {
+  float cyl = length(pos.xz);
+  float ay = abs(pos.y);
+
+  // Illustrative glow above and below the disk, in a cone around
+  // GLOW_SLOPE. Most steps lie outside the cone, where the wall term is
+  // under 1 % of its peak: one multiply-add rejects them before any exp.
+  if (cyl > uInner * 1.08 && ay > 0.18 && cyl < uOuter * GLOW_OUTER
+      && abs(ay - GLOW_SLOPE * cyl) < GLOW_CONE * cyl) {
+    float w = (ay / cyl - GLOW_SLOPE) / GLOW_WIDTH;
+    float wall = exp(-w * w);
+    float radial = smoothstep(uInner * 1.08, uInner * 1.9, cyl)
+      * (1.0 - smoothstep(uOuter * 0.82, uOuter * GLOW_OUTER, cyl));
+    float dens = wall * radial * exp(-ay * 0.1);
+    dens *= (uWeather == 1.0) ? 0.2 : 0.8;
+    float stepLen = length(pos - prev);
+    vec3 glow = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
+    fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright;
+  }
+
+  // Jet along the spin axis.
+  if (uJet > 0.02 && ay > 2.4 && cyl < 0.22 * ay + 0.45) {
+    float core = 1.0 - smoothstep(0.04 * ay, 0.2 * ay + 0.5, cyl);
+    float fade = 1.0 / (1.0 + ay * 0.07);
+    float stepLen = length(pos - prev);
+    // The traced ray runs backward: light reaching the camera moves along prev − pos.
+    float lobe = 0.4 + 0.6 * clamp((prev.y - pos.y) * sign(pos.y) / max(stepLen, 1e-6), 0.0, 1.0);
+    fore += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35;
+  }
+
+  // Crossing the equatorial plane: the disk, or the plunging region inside it.
+  if (prev.y * pos.y <= 0.0 && abs(prev.y) + abs(pos.y) > 1e-6) {
+    float t = clamp(prev.y / (prev.y - pos.y), 0.0, 1.0);
+    vec3 hitp = mix(prev, pos, t);
+    // Without gravity, the Boyer–Lindquist radius of the same equatorial point.
+    float rho = uGravity > 0.5
+      ? 1.0 / mix(uStep.x, uStep.y, t)
+      : sqrt(max(dot(hitp.xz, hitp.xz) - gA2, 0.0));
+
+    // A dormant hole (no disk brightness) has no gas to block the sky behind it.
+    if (uDiskBright > 0.0 && rho > uInner && rho < uOuter) {
+      disk += transmission * diskColor(hitp, rho);
+      transmission *= 1.0 - diskCoverage(rho);
+      if (transmission < 0.001) return true;
+      // Otherwise keep marching through the display taper so the
+      // background matches neighbouring rays outside the disk window.
+    }
+    // The plunging gas is thin and lies in front of whatever the ray meets
+    // next, so it shows whether the ray then escapes, is captured or hits the disk.
+    // Without gravity it is drawn unshifted.
+    if (rho > horizon * 1.08 && rho < uInner) {
+      float g = uGravity > 0.5 ? plungeG(rho, mix(udStep.x, udStep.y, t)) : 1.0;
+      fore += transmission * plungeColor(hitp, rho, g);
+    }
+  }
+  return false;
+}
+
+// One ray through fragCoord (pixels), tone-mapped and ready to display. The
+// supersample include below supplies main(); extra rays it traces near edges
+// pass derivatives = false, since screen derivatives are undefined there.
+vec3 shade(vec2 fragCoord, bool derivatives) {
   /* Camera ray */
-  vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / uResolution.y;
+  vec2 uv = (fragCoord - 0.5 * uResolution) / uResolution.y;
   float tanFov = tan(uFov * 0.5);
   vec3 rd = normalize(uCamFwd + uv.x * uCamRight * tanFov + uv.y * uCamUp * tanFov);
 
   float a = clamp(uSpin, -0.999, 0.999);
   float a2 = a * a;
   float horizon = 1.0 + sqrt(max(1.0 - a2, 0.0));
-  // Inside this radius an ingoing ray cannot turn back: halfway from the
-  // horizon to the prograde equatorial photon orbit.
-  float rCapture = 0.5 * (horizon + 2.0 * (1.0 + cos(acos(-abs(a)) * 2.0 / 3.0)));
+  gA = a;
+  gA2 = a2;
 
   /* The camera is a zero-angular-momentum observer at Boyer–Lindquist (r, θ, φ). */
   vec3 cam = uCamPos;
@@ -453,45 +535,8 @@ void main() {
   float rc = sqrt(0.5 * (camR2 + sqrt(camR2 * camR2 + 4.0 * a2 * cam.y * cam.y)));
   float delC = rc * rc - 2.0 * rc + a2;
   if (delC <= 0.0) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); // no static frame exists there
-    return;
+    return vec3(0.0); // no static frame exists there
   }
-  float muC = clamp(cam.y / rc, -1.0, 1.0);
-  float sinC = sqrt(max(1.0 - muC * muC, 1e-8));
-  vec2 az = cam.xz / max(length(cam.xz), 1e-6);
-  vec3 s = vec3(sinC * az.x, muC, sinC * az.y);
-  vec3 eTheta = vec3(muC * az.x, -sinC, muC * az.y);
-  vec3 ePhi = vec3(-az.y, 0.0, az.x);
-
-  float sigC = rc * rc + a2 * muC * muC;
-  float bigA = (rc * rc + a2) * (rc * rc + a2) - a2 * delC * sinC * sinC;
-  float lapse = sqrt(sigC * delC / bigA);
-  float frame = 2.0 * a * rc / bigA;
-  float lift = sqrt(bigA / sigC); // √g_φφ / sinθ
-
-  // Photon arriving along −rd with unit energy in the camera's frame.
-  float nR = dot(rd, s);
-  float nTheta = dot(rd, eTheta);
-  float nPhi = dot(rd, ePhi);
-  gA = a;
-  gL = lift * sinC * nPhi;
-  gE = frame * gL - lapse;
-  float pTheta = sqrt(sigC) * nTheta;
-  gQ = pTheta * pTheta + muC * muC * (lift * lift * nPhi * nPhi - a2 * gE * gE);
-  gK = gQ + (gL - a * gE) * (gL - a * gE);
-  gC = a * (a * gE - gL);
-  gSphere = gQ + gL * gL;
-  gA2E2 = a2 * gE * gE;
-  gA2 = a2;
-
-  float u = 1.0 / rc;
-  float ud = -sqrt(sigC * delC) * nR / (rc * rc);
-  vec3 sd = pTheta * eTheta + lift * nPhi * ePhi;
-  vec3 pos = cam;
-  vec3 dir = rayDir(u, ud, s, sd);
-
-  // Light from far away arrives blueshifted by 1 / E_photon at the camera.
-  float gSky = 1.0 / max(-gE, 1e-3);
 
   /* March state */
   vec3 fore = vec3(0.0);        // glow, jet and plunging gas picked up along the way
@@ -500,145 +545,174 @@ void main() {
   bool hitDisk = false;
   bool captured = false;
   bool escaped = false;
+  bool march = true;
+  vec3 skyDir = rd;
+  float gSky = 1.0;             // frequency shift of starlight at the camera
 
-  // Rays that pass far from the hole bend weakly: lensTail() bends them unmarched.
-  float bImp = sqrt(max(gSphere, 0.0)) / max(-gE, 1e-3);
-  bool march = bImp < MARCH_B || rc < MARCH_CAM_R;
+  // Past the glow cone's far corner, or the jet when one is drawn, an
+  // outbound ray collects nothing more.
+  float coneSlope = GLOW_SLOPE + GLOW_CONE;
+  float exitR = uJet > 0.02
+    ? FAR_FIELD_R
+    : min(uOuter * GLOW_OUTER * sqrt(1.0 + coneSlope * coneSlope), ESCAPE_R);
 
-  if (march) {
-    float uCapture = 1.0 / rCapture;
-    float uHorizon = 1.0 / (horizon * 1.001);
-    // Past the glow cone's far corner, or the jet when one is drawn, an
-    // outbound ray collects nothing more; lensTail() finishes its bending.
-    float coneSlope = GLOW_SLOPE + GLOW_CONE;
-    float exitR = uJet > 0.02
-      ? FAR_FIELD_R
-      : min(uOuter * GLOW_OUTER * sqrt(1.0 + coneSlope * coneSlope), ESCAPE_R);
-    float kU = radialU(u).y;
-    vec3 kS = accS(s);
-    float drag = dragRate(u);
-    float r = rc;
-    float speed2 = sphereSpeed2(s.y); // |ds/dλ|², kept exact below
+  if (uGravity < 0.5) {
+    /* Flat space: a straight ray from a static camera, marched with the same
+       step lengths so the glow and jet collect alike, until it meets the
+       ball of radius r₊ or leaves the exit sphere moving outward. */
+    gRay = rd;
+    float b = dot(cam, rd);
+    float c = dot(cam, cam);
+    float ballDisc = b * b - c + horizon * horizon;
+    float tBall = ballDisc > 0.0 && b < 0.0 ? -b - sqrt(ballDisc) : 1e9;
+    // Nothing lies outside the exit sphere: march only the chord inside it.
+    float exitDisc = max(b * b - c + exitR * exitR, 0.0);
+    float tExit = -b + sqrt(exitDisc);
+    float t = max(-b - sqrt(exitDisc), 0.0);
+    escaped = tExit <= t;
+    vec3 pos = cam + t * rd;
     for (int i = 0; i < MAX_STEPS; i++) {
-      if (float(i) >= uSteps) break;
-
-      if (u > uHorizon || (u > uCapture && ud > 0.0)) {
-        captured = true;
-        break;
-      }
-      // The background is at infinity: an outbound ray only needs to leave
-      // the region with anything left to draw, not return to the camera's radius.
-      if (u * exitR < 1.0 && ud < 0.0) {
-        escaped = true;
-        break;
-      }
-
-      // Velocity Verlet in Mino time; each step moves the ray about STEP_NEAR
-      // of its radius inside 8 M and STEP_FAR (growing to STEP_FAR_GROWTH×) beyond.
+      if (escaped || float(i) >= uSteps) break;
+      float r = length(pos);
       float frac = r < 8.0 ? STEP_NEAR : STEP_FAR * min(sqrt(r / 8.0), STEP_FAR_GROWTH);
-      float dl = frac * inversesqrt(max(ud * ud * r * r + speed2, 1e-12));
-      float udHalf = ud + 0.5 * dl * kU;
-      vec3 sdHalf = sd + 0.5 * dl * kS;
-      float u1 = u + dl * udHalf;
-      vec3 s1 = normalize(s + dl * sdHalf);
-      vec2 radial = radialU(u1);
-      kU = radial.y;
-      float ud1 = udHalf + 0.5 * dl * kU;
-      // Unless the ray turned during the step, reset du/dλ to ±√U.
-      if (radial.x > 0.0 && ud1 * ud > 0.0) ud1 = sign(ud1) * sqrt(radial.x);
-      kS = accS(s1);
-      vec3 sd1 = sdHalf + 0.5 * dl * kS;
-      // Back onto the sphere's tangent plane, at the speed Carter's constant fixes.
-      sd1 -= dot(s1, sd1) * s1;
-      speed2 = sphereSpeed2(s1.y);
-      sd1 *= sqrt(speed2 / max(dot(sd1, sd1), 1e-18));
-      // Frame dragging: a rotation about the spin axis, trapezoidal in u.
-      float drag1 = dragRate(u1);
-      float turn = 0.5 * dl * (drag + drag1);
-      float ct = cos(turn);
-      float st = sin(turn);
-      mat2 rot = mat2(ct, st, -st, ct);
-      s1.xz = rot * s1.xz;
-      sd1.xz = rot * sd1.xz;
-      kS.xz = rot * kS.xz;
-
-      bool farField = r > FAR_FIELD_R;
-      float u0 = u;
-      float ud0 = ud;
-      u = u1;
-      ud = ud1;
-      s = s1;
-      sd = sd1;
-      drag = drag1;
-      r = 1.0 / u;
-
+      t = min(t + frac * r, min(tBall, tExit));
       vec3 prev = pos;
-      pos = rayPoint(r, s);
-
-      // Nothing to sample out here: glow, jet and disk all lie closer in.
-      if (farField) continue;
-
-      float cyl = length(pos.xz);
-      float ay = abs(pos.y);
-
-      // Illustrative glow above and below the disk, in a cone around
-      // GLOW_SLOPE. Most steps lie outside the cone, where the wall term is
-      // under 1 % of its peak: one multiply-add rejects them before any exp.
-      if (cyl > uInner * 1.08 && ay > 0.18 && cyl < uOuter * GLOW_OUTER
-          && abs(ay - GLOW_SLOPE * cyl) < GLOW_CONE * cyl) {
-        float w = (ay / cyl - GLOW_SLOPE) / GLOW_WIDTH;
-        float wall = exp(-w * w);
-        float radial = smoothstep(uInner * 1.08, uInner * 1.9, cyl)
-          * (1.0 - smoothstep(uOuter * 0.82, uOuter * GLOW_OUTER, cyl));
-        float dens = wall * radial * exp(-ay * 0.1);
-        dens *= (uWeather == 1.0) ? 0.2 : 0.8;
-        float stepLen = length(pos - prev);
-        vec3 glow = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
-        fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright;
+      pos = cam + t * rd;
+      if (collect(prev, pos, vec2(0.0), vec2(0.0), horizon, fore, disk, transmission)) {
+        hitDisk = true;
+        break;
       }
-
-      // Jet along the spin axis.
-      if (uJet > 0.02 && ay > 2.4 && cyl < 0.22 * ay + 0.45) {
-        float core = 1.0 - smoothstep(0.04 * ay, 0.2 * ay + 0.5, cyl);
-        float fade = 1.0 / (1.0 + ay * 0.07);
-        float stepLen = length(pos - prev);
-        // The traced ray runs backward: light reaching the camera moves along prev − pos.
-        float lobe = 0.4 + 0.6 * clamp((prev.y - pos.y) * sign(pos.y) / max(stepLen, 1e-6), 0.0, 1.0);
-        fore += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35;
-      }
-
-      // Crossing the equatorial plane: the disk, or the plunging region inside it.
-      if (prev.y * pos.y <= 0.0 && abs(prev.y) + abs(pos.y) > 1e-6) {
-        float t = clamp(prev.y / (prev.y - pos.y), 0.0, 1.0);
-        vec3 hitp = mix(prev, pos, t);
-        float rho = 1.0 / mix(u0, u, t);
-
-        // A dormant hole (no disk brightness) has no gas to block the sky behind it.
-        if (uDiskBright > 0.0 && rho > uInner && rho < uOuter) {
-          disk += transmission * diskColor(hitp, rho);
-          transmission *= 1.0 - diskCoverage(rho);
-          if (transmission < 0.001) {
-            hitDisk = true;
-            break;
-          }
-          // Otherwise keep marching through the display taper so the
-          // background matches neighbouring rays outside the disk window.
-        }
-        // The plunging gas is thin and lies in front of whatever the ray meets
-        // next, so it shows whether the ray then escapes, is captured or hits the disk.
-        if (rho > horizon * 1.08 && rho < uInner) {
-          fore += transmission * plungeColor(hitp, rho, plungeG(rho, mix(ud0, ud, t)));
-        }
-      }
+      captured = t >= tBall;
+      escaped = t >= tExit;
+      if (captured) break;
     }
-    dir = rayDir(u, ud, s, sd);
+  } else {
+    // Inside this radius an ingoing ray cannot turn back: halfway from the
+    // horizon to the prograde equatorial photon orbit.
+    float rCapture = 0.5 * (horizon + 2.0 * (1.0 + cos(acos(-abs(a)) * 2.0 / 3.0)));
+
+    float muC = clamp(cam.y / rc, -1.0, 1.0);
+    float sinC = sqrt(max(1.0 - muC * muC, 1e-8));
+    vec2 az = cam.xz / max(length(cam.xz), 1e-6);
+    vec3 s = vec3(sinC * az.x, muC, sinC * az.y);
+    vec3 eTheta = vec3(muC * az.x, -sinC, muC * az.y);
+    vec3 ePhi = vec3(-az.y, 0.0, az.x);
+
+    float sigC = rc * rc + a2 * muC * muC;
+    float bigA = (rc * rc + a2) * (rc * rc + a2) - a2 * delC * sinC * sinC;
+    float lapse = sqrt(sigC * delC / bigA);
+    float frame = 2.0 * a * rc / bigA;
+    float lift = sqrt(bigA / sigC); // √g_φφ / sinθ
+
+    // Photon arriving along −rd with unit energy in the camera's frame.
+    float nR = dot(rd, s);
+    float nTheta = dot(rd, eTheta);
+    float nPhi = dot(rd, ePhi);
+    gL = lift * sinC * nPhi;
+    gE = frame * gL - lapse;
+    float pTheta = sqrt(sigC) * nTheta;
+    gQ = pTheta * pTheta + muC * muC * (lift * lift * nPhi * nPhi - a2 * gE * gE);
+    gK = gQ + (gL - a * gE) * (gL - a * gE);
+    gC = a * (a * gE - gL);
+    gSphere = gQ + gL * gL;
+    gA2E2 = a2 * gE * gE;
+
+    float u = 1.0 / rc;
+    float ud = -sqrt(sigC * delC) * nR / (rc * rc);
+    vec3 sd = pTheta * eTheta + lift * nPhi * ePhi;
+    vec3 pos = cam;
+    vec3 dir = rayDir(u, ud, s, sd);
+
+    // Light from far away arrives blueshifted by 1 / E_photon at the camera.
+    gSky = 1.0 / max(-gE, 1e-3);
+
+    // Rays that pass far from the hole bend weakly: lensTail() bends them unmarched.
+    float bImp = sqrt(max(gSphere, 0.0)) / max(-gE, 1e-3);
+    march = bImp < MARCH_B || rc < MARCH_CAM_R;
+
+    if (march) {
+      float uCapture = 1.0 / rCapture;
+      float uHorizon = 1.0 / (horizon * 1.001);
+      float kU = radialU(u).y;
+      vec3 kS = accS(s);
+      float drag = dragRate(u);
+      float r = rc;
+      float speed2 = sphereSpeed2(s.y); // |ds/dλ|², kept exact below
+      for (int i = 0; i < MAX_STEPS; i++) {
+        if (float(i) >= uSteps) break;
+
+        if (u > uHorizon || (u > uCapture && ud > 0.0)) {
+          captured = true;
+          break;
+        }
+        // The background is at infinity: an outbound ray only needs to leave
+        // the region with anything left to draw, not return to the camera's radius.
+        if (u * exitR < 1.0 && ud < 0.0) {
+          escaped = true;
+          break;
+        }
+
+        // Velocity Verlet in Mino time; each step moves the ray about STEP_NEAR
+        // of its radius inside 8 M and STEP_FAR (growing to STEP_FAR_GROWTH×) beyond.
+        float frac = r < 8.0 ? STEP_NEAR : STEP_FAR * min(sqrt(r / 8.0), STEP_FAR_GROWTH);
+        float dl = frac * inversesqrt(max(ud * ud * r * r + speed2, 1e-12));
+        float udHalf = ud + 0.5 * dl * kU;
+        vec3 sdHalf = sd + 0.5 * dl * kS;
+        float u1 = u + dl * udHalf;
+        vec3 s1 = normalize(s + dl * sdHalf);
+        vec2 radial = radialU(u1);
+        kU = radial.y;
+        float ud1 = udHalf + 0.5 * dl * kU;
+        // Unless the ray turned during the step, reset du/dλ to ±√U.
+        if (radial.x > 0.0 && ud1 * ud > 0.0) ud1 = sign(ud1) * sqrt(radial.x);
+        kS = accS(s1);
+        vec3 sd1 = sdHalf + 0.5 * dl * kS;
+        // Back onto the sphere's tangent plane, at the speed Carter's constant fixes.
+        sd1 -= dot(s1, sd1) * s1;
+        speed2 = sphereSpeed2(s1.y);
+        sd1 *= sqrt(speed2 / max(dot(sd1, sd1), 1e-18));
+        // Frame dragging: a rotation about the spin axis, trapezoidal in u.
+        float drag1 = dragRate(u1);
+        float turn = 0.5 * dl * (drag + drag1);
+        float ct = cos(turn);
+        float st = sin(turn);
+        mat2 rot = mat2(ct, st, -st, ct);
+        s1.xz = rot * s1.xz;
+        sd1.xz = rot * sd1.xz;
+        kS.xz = rot * kS.xz;
+
+        bool farField = r > FAR_FIELD_R;
+        vec2 uStep = vec2(u, u1);
+        vec2 udStep = vec2(ud, ud1);
+        u = u1;
+        ud = ud1;
+        s = s1;
+        sd = sd1;
+        drag = drag1;
+        r = 1.0 / u;
+
+        vec3 prev = pos;
+        pos = rayPoint(r, s);
+
+        // Nothing to sample out here: glow, jet and disk all lie closer in.
+        if (farField) continue;
+
+        if (collect(prev, pos, uStep, udStep, horizon, fore, disk, transmission)) {
+          hitDisk = true;
+          break;
+        }
+      }
+      dir = rayDir(u, ud, s, sd);
+    }
+
+    // Finish the bending analytically: from the escape radius for marched
+    // rays, from the camera for rays too far out to march.
+    skyDir = lensTail(pos, dir);
   }
 
-  // Finish the bending analytically: from the escape radius for marched rays,
-  // from the camera for rays too far out to march. Every pixel computes it, so
-  // its screen derivatives, and with them skyFootprint(), are defined.
-  vec3 skyDir = lensTail(pos, dir);
-  vec2 pixel = skyFootprint(skyDir);
+  // In the main pass every pixel computes skyDir, so its screen derivatives,
+  // and with them skyFootprint(), are defined; extra edge rays use one pixel.
+  vec2 pixel = derivatives ? skyFootprint(skyDir) : vec2(skyPixel());
 
   /* Composite */
   vec3 col = fore + disk;
@@ -656,5 +730,7 @@ void main() {
   float dither = hash21(gl_FragCoord.xy) - 0.5;
   col += dither * 0.004; // about one 8-bit step: hides banding without visible grain
 
-  gl_FragColor = vec4(col, 1.0);
+  return col;
 }
+
+#include <horizon/supersample>

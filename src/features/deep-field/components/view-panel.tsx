@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 
+import { AntialiasSection } from "@/components/simulations/antialias-section";
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { DistanceUnitControl } from "@/components/simulations/map-readouts";
 import { Rail, RailSection } from "@/components/simulations/rail";
@@ -15,6 +16,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const show = useDeepField((s) => s.show);
   const unit = useDeepField((s) => s.distanceUnit);
   const angles = useDeepField((s) => s.cameraAngles);
+  const antialias = useDeepField((s) => s.antialias);
   return (
     <Rail id="deep-field-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
       <RailSection title={t("hud.show")}>
@@ -40,6 +42,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onRotate={(turn) => useDeepField.getState().rotate(turn)}
         />
       </RailSection>
+      <AntialiasSection
+        namespace="deepField"
+        value={antialias}
+        onChange={(mode) => useDeepField.getState().setAntialias(mode)}
+      />
     </Rail>
   );
 }

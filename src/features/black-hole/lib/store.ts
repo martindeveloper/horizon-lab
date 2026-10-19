@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { wrap } from "@horizon/toolkit/math";
+import type { PassAntialias } from "@horizon/toolkit/rendering";
 
 import { presetFromPath } from "../routing";
 import { cameraFloor } from "./physics";
@@ -21,6 +22,9 @@ export type BlackHoleStore = BlackHoleParams & {
   setAzimuth: (v: number) => void;
   animationPaused: boolean;
   setAnimationPaused: (v: boolean) => void;
+  /** Off shows the same scene in flat space; presets and the guide turn it back on. */
+  gravity: boolean;
+  setGravity: (v: boolean) => void;
   guideOpen: boolean;
   guideBeat: number;
   guideArrived: boolean;
@@ -42,6 +46,9 @@ export type BlackHoleStore = BlackHoleParams & {
   setTempScale: (v: number) => void;
   setAutoRotate: (v: boolean) => void;
   setQuality: (v: Quality) => void;
+  /** Anti-aliasing (experimental, off by default). */
+  antialiasing: PassAntialias;
+  setAntialiasing: (v: PassAntialias) => void;
   setGuideOpen: (v: boolean) => void;
   startGuide: () => void;
   advanceGuide: () => void;
@@ -70,6 +77,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setAzimuth: (azimuth) => set({ azimuth: wrap(azimuth, TAU) }),
   animationPaused: false,
   setAnimationPaused: (animationPaused) => set({ animationPaused }),
+  gravity: true,
+  setGravity: (gravity) => set({ gravity }),
   guideOpen: false,
   guideBeat: 0,
   guideArrived: false,
@@ -88,6 +97,7 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
     const s = get();
     set({
       ...paramsFromPreset(preset, s.quality, s.autoRotate),
+      gravity: true,
       mapOpen: false,
       clocksOpen: false,
     });
@@ -103,6 +113,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setTempScale: (tempScale) => set({ tempScale, presetId: "custom" }),
   setAutoRotate: (autoRotate) => set({ autoRotate }),
   setQuality: (quality) => set({ quality }),
+  antialiasing: "off",
+  setAntialiasing: (antialiasing) => set({ antialiasing }),
   setGuideOpen: (guideOpen) => {
     if (guideOpen) get().startGuide();
     else get().endGuide();
@@ -116,6 +128,7 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
       guideBeat: 0,
       guideArrived: false,
       autoRotate: false,
+      gravity: true,
       settingsOpen: false,
       mapOpen: false,
       clocksOpen: false,

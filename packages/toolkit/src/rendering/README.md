@@ -2,7 +2,9 @@
 
 Import from `@horizon/toolkit/rendering`. Construct these resources inside a
 client lifecycle, never while rendering a React component or evaluating a server
-module. Importing the package alone does not touch browser globals.
+module. Importing the package alone does not touch browser globals. The post
+passes import their shaders from `../shaders/*.glsl`, so consumers need the
+toolkit's `.glsl` loader (see the package README).
 
 - `createFullscreenPass`: one Three.js full-screen quad and custom ShaderMaterial.
   Supply vertex/fragment source and uniforms. Call `compile()`, `resize(w,h)`,
@@ -10,6 +12,24 @@ module. Importing the package alone does not touch browser globals.
   Output is LinearSRGB with Three.js tone mapping disabled: the shader owns its
   color pipeline. Shader diagnostics are enabled by default. The optional `powerPreference` is a
   browser GPU-selection hint; its default is `default`, not forced discrete GPU.
+  `render({ antialias })` takes `off` (default), `fxaa` or `supersample`.
+  `supersample` needs `supersample: true` at creation and a fragment shader that
+  defines `vec3 shade(vec2 fragCoord, bool derivatives)` and includes
+  `<horizon/supersample>` for its `main()`: the shader is compiled a second time,
+  and that pass re-traces four extra rays only where the first frame has an
+  edge. Post resources are created on first use.
+- `createFxaaPass(renderer)`: FXAA for any three.js renderer. `render(scene,
+  camera)` draws into an offscreen frame of the drawing buffer's size, then onto
+  the canvas through the FXAA shader; with sRGB output the frame is stored as
+  linear half floats and encoded on the way out. The canvas's hardware MSAA does
+  not apply offscreen, so use it instead of MSAA, not with it. `paint(draw)` takes
+  any number of renders (passes over one depth buffer) and filters their result.
+- `createMsaaPass(renderer, samples = 4)`: hardware multisampling that switches on
+  and off with the renderer kept (create it with `antialias: false`). `paint(draw)`
+  renders into a multisampled offscreen frame of the drawing buffer's size, linear
+  half floats with sRGB output, then copies it onto the canvas, encoded. Both passes
+  expose their offscreen `target`, to compile materials for it, and allocate nothing
+  until first drawn.
 - `observeViewport`: ResizeObserver plus explicit `refresh()` when quality changes.
   `bufferSize` multiplies CSS dimensions by resolution scale, capped DPR and an
   optional warm-up factor. It does not set CSS dimensions.

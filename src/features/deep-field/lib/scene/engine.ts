@@ -12,7 +12,7 @@
 import { Scene } from "three";
 
 import { carryPose, takeHandoff } from "@/lib/handoff";
-import { bridgeStore } from "@/lib/scene-bridge";
+import { bridgeAntialias, bridgeStore } from "@/lib/scene-bridge";
 import { TODAY } from "@/space/solar-system/model/moment";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
@@ -64,11 +64,8 @@ export function createDeepFieldEngine({
 }: SceneMount): DeepFieldEngine {
   const scope = new DisposalScope();
   try {
-    const { renderer, camera, engine, tight, basics, viewport, warmUp } = createSceneHost(scope, {
-      canvas,
-      host,
-      onError,
-    });
+    const sceneHost = createSceneHost(scope, { canvas, host, onError });
+    const { renderer, camera, engine, tight, basics, viewport, warmUp } = sceneHost;
     const looks = scope.own(createLooks());
     const scene = new Scene();
     const lod = createLod(camera, viewport);
@@ -171,6 +168,7 @@ export function createDeepFieldEngine({
         controls.cancel();
       },
     });
+    bridgeAntialias(store, scope, sceneHost);
     const onMotionChange = () => engine.invalidate();
     reduceMotion.addEventListener("change", onMotionChange);
     scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
@@ -262,7 +260,7 @@ export function createDeepFieldEngine({
           syncView: !rig.flying && !state.guideOpen,
           angles: pose,
         });
-        draw();
+        sceneHost.render(draw);
         if (bridge.ready()) warmUp(scene);
       });
 

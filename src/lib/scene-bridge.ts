@@ -6,6 +6,7 @@ import {
   createReadoutClock,
   scaleChanged,
   scaleReadout,
+  type SceneHost,
   type Viewport,
 } from "@horizon/toolkit/scene";
 import type { DistanceUnit } from "@horizon/toolkit/science";
@@ -68,6 +69,23 @@ export function bridgeStore<S extends SceneStoreState>(
       return true;
     },
   };
+}
+
+/**
+ * The store's anti-aliasing drives the host's: an unset choice takes the host's default for
+ * this device (published, so the settings show it), and every later choice switches it.
+ */
+export function bridgeAntialias<S extends Pick<SceneSlice, "antialias" | "setAntialias">>(
+  store: Pick<StoreApi<S>, "getState" | "subscribe">,
+  scope: DisposalScope,
+  host: Pick<SceneHost, "antialias" | "setAntialias">,
+) {
+  const apply = (s: S) => {
+    if (s.antialias === null) s.setAntialias(host.antialias);
+    else host.setAntialias(s.antialias);
+  };
+  apply(store.getState());
+  scope.defer(store.subscribe(apply));
 }
 
 /** A simulation's own readouts: whether any moved enough to publish, and their values. */

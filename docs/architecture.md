@@ -299,24 +299,25 @@ only its layers, its views and its store of its own:
   language. `useViewFromPath` keeps the store's view on the URL. Route layouts import
   `@horizon/toolkit/scene.css` for the labels.
 - **Engine:** `createSceneHost` (renderer, camera, frame loop, `tight` devices, shader
-  warm-up), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
+  warm-up, anti-aliasing: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
   adds limits, the aim's `home` and the frame's `orient`), `createViewMoves` (its views,
   as the pose framing each) and `createOrbitControls` (drag, wheel, pinch).
   `createLabels`, `createTapPicking`, `createAnchoredRulers`, `createDistanceText` and the
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
 - **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
-  `flight`, `turn`, `ready`, `distanceUnit` and the scale bar; the feature adds its view,
-  selection and switches. `bridgeStore` acts once on each button turn and view flight,
-  ignores the view the HUD writes during a frame, and reports the first frame.
+  `flight`, `turn`, `ready`, `distanceUnit`, `antialias` and the scale bar; the feature adds
+  its view, selection and switches. `bridgeStore` acts once on each button turn and view flight,
+  ignores the view the HUD writes during a frame, and reports the first frame;
+  `bridgeAntialias` publishes the host's default and switches it on each choice.
 - **Panels:** `Rail` and `RailSection` for side panels (`sheetLead` adds phone-only
   sections), `SelectionSheet` for cards, both
   ending above the dock, which publishes its height as `--hud-clear` on the stage
   (`useDockClearance`). Each zoomable simulation keeps two panels apart: **Objects**
   (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
-  is drawn: layers, switches, the distance unit and the `CameraPad`), built from
+  is drawn: layers, switches, the distance unit, the `CameraPad` and anti-aliasing), built from
   `SwitchChips` (the toolkit's switch rows in a panel, its switch chips in a dock),
-  `DistanceUnitControl` and `MapScale`. `useSceneEscape` lets Escape undo
+  `DistanceUnitControl`, `AntialiasSection` and `MapScale`. `useSceneEscape` lets Escape undo
   one thing at a time.
 
 **Shared worlds.** What more than one simulation draws lives in `src/space/`, below the

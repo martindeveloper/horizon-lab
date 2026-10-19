@@ -18,7 +18,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "oxlint --deny-warnings .",
     "format": "oxfmt --write .",
-    "test": "node --import tsx --test tests/*.test.mjs",
+    "test": "node --import tsx --import ./tests/glsl-register.mjs --test tests/*.test.mjs",
     "start": "next start",
     "lint:fix": "oxlint --fix .",
     "format:check": "oxfmt --check .",
