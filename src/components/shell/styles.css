@@ -279,37 +279,67 @@ html {
   inherits: true;
   initial-value: 0;
 }
+@property --music-load {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
 @property --music-breath {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --music-scan {
   syntax: "<number>";
   inherits: false;
   initial-value: 1;
 }
 .music-wave {
   --music-on: 0;
+  --music-load: 0;
   display: flex;
   align-items: center;
   gap: 2px;
   height: 14px;
-  transition: --music-on 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    --music-on 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    --music-load 600ms ease;
 }
 .music-wave[data-playing="true"] {
   --music-on: 1;
 }
+/* Waits a moment before it shows, so a track that is ready at once never flickers. */
+.music-wave[data-loading="true"] {
+  --music-load: 1;
+  transition:
+    --music-on 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    --music-load 600ms ease 300ms;
+}
 .music-wave > span {
+  --music-level: calc(
+    var(--music-breath) + (var(--music-scan) - var(--music-breath)) * var(--music-load)
+  );
   width: 1.5px;
   height: 100%;
   border-radius: 999px;
   background: currentColor;
   transform: scaleY(
-    calc(var(--rest) + (var(--peak) * var(--music-breath) - var(--rest)) * var(--music-on))
+    calc(var(--rest) + (var(--peak) * var(--music-level) - var(--rest)) * var(--music-on))
   );
 }
+/* Breath and scan run side by side; --music-load blends them, so a track change
+   eases into the scan and back instead of jumping between animations. */
 @media (prefers-reduced-motion: no-preference) {
   .music-wave > span {
-    animation: music-breath var(--dur) ease-in-out var(--delay) infinite alternate paused;
+    animation:
+      music-breath var(--dur) ease-in-out var(--delay) infinite alternate paused,
+      music-scan 1.4s ease-in-out calc(var(--i) * 0.11s - 1.4s) infinite paused;
   }
   .music-wave[data-playing="true"] > span {
-    animation-play-state: running;
+    animation-play-state: running, paused;
+  }
+  .music-wave[data-loading="true"] > span {
+    animation-play-state: running, running;
   }
 }
 @keyframes music-breath {
@@ -322,9 +352,6 @@ html {
 }
 /* Loading: first light runs across the arch, east to west, until sound arrives. */
 @media (prefers-reduced-motion: no-preference) {
-  .music-wave[data-loading="true"] > span {
-    animation: music-scan 1.4s ease-in-out calc(var(--i) * 0.11s) infinite;
-  }
   .music-dial[data-loading="true"] .music-dial-halo {
     animation: music-halo 1.4s ease-in-out infinite alternate;
   }
@@ -333,10 +360,10 @@ html {
   0%,
   70%,
   100% {
-    --music-breath: 0.35;
+    --music-scan: 0.35;
   }
   35% {
-    --music-breath: 1;
+    --music-scan: 1;
   }
 }
 @keyframes music-halo {
