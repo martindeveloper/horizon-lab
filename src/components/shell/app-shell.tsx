@@ -21,7 +21,7 @@ export function AppShell({ children, locale }: { children: ReactNode; locale: Lo
       <Suspense fallback={<div className="horizon-sky" aria-hidden="true" />}>
         <Sky />
       </Suspense>
-      <header className="app-header hairline-solar sticky top-0 z-[100] shrink-0">
+      <header className="app-header sticky top-0 z-[100] shrink-0">
         <Suspense
           fallback={
             <div className="app-bar flex h-full items-center">
