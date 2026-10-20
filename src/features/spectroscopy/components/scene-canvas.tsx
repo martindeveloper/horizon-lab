@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { frameMeter } from "@horizon/toolkit/rendering";
+import { createFrameLoop } from "@horizon/toolkit/rendering";
 import { blackbodyColor } from "@horizon/toolkit/science";
 
 import { glowOf } from "../lib/model/glow";
 import type { Observation } from "../lib/model/spectrum";
-import { canvasScale, context2d } from "../lib/quality";
+import { canvasScale, context2d, SCENE_FPS } from "../lib/quality";
 import { createFlock } from "../lib/scene/flock";
 import { layout } from "../lib/scene/layout";
 import { drawScene, sameScene, type SceneInputs, type SceneLabels } from "../lib/scene/paint";
@@ -16,9 +16,6 @@ import { useSpectroscopy } from "../lib/store";
 import { useDrawingGamut } from "./use-gamut";
 
 export type { SceneLabels };
-
-/** The scene at most this often while photons fly: smooth enough, and half a 60 Hz budget. */
-const FRAME_MS = 1000 / 30;
 
 /**
  * The bench or the sky above the spectrum: where the light starts (a star's limb in its true
@@ -28,8 +25,8 @@ const FRAME_MS = 1000 / 30;
  * motion or when switched off.
  *
  * Kind to batteries: the still scene is drawn into its own layer only when it changes; while
- * photons fly, a frame (at most 30 a second) stamps that layer and draws them, and nothing
- * runs while the canvas is out of sight or the page hidden.
+ * photons fly, a frame (as often as the quality allows) stamps that layer and draws them, and
+ * nothing runs while the canvas is out of sight or the page hidden.
  */
 export function SceneCanvas({
   obs,
@@ -122,8 +119,6 @@ export function SceneCanvas({
 
     const animate = photons && !prefersReducedMotion();
     let visible = true;
-    let frame = 0;
-    let last = 0;
 
     const observer = new ResizeObserver(resize);
     observer.observe(el);
@@ -144,55 +139,41 @@ export function SceneCanvas({
     }
 
     const flock = createFlock(gamut);
-    const tick = (now: number) => {
-      frame = requestAnimationFrame(tick);
-      if (now - last < FRAME_MS) return;
-      const dt = Math.min(0.1, (now - last) / 1000);
-      last = now;
-      const inputs = latest.current;
-      paint();
-      stamp();
-      flock.step(
-        dt,
-        {
-          range: inputs.range,
-          strong: inputs.strong,
-          glowing: inputs.glowing,
-          air: inputs.labels.air !== null,
-        },
-        geometry,
-        width,
-        height,
-      );
-      flock.draw(ctx);
-      frameMeter.tick(now);
-    };
-    const start = () => {
-      if (frame || !visible || document.hidden) return;
-      last = performance.now() - FRAME_MS;
-      frame = requestAnimationFrame(tick);
-    };
-    const stop = () => {
-      cancelAnimationFrame(frame);
-      frame = 0;
-    };
-    /* Out of sight (scrolled away, a sheet over it, immersive off) or a hidden page: no frames. */
+    /* The shared loop paces frames on the display's own, so a 60 Hz screen holds the cap. */
+    const loop = createFrameLoop({
+      render: (dt) => {
+        const inputs = latest.current;
+        paint();
+        stamp();
+        flock.step(
+          dt,
+          {
+            range: inputs.range,
+            strong: inputs.strong,
+            glowing: inputs.glowing,
+            air: inputs.labels.air !== null,
+          },
+          geometry,
+          width,
+          height,
+        );
+        flock.draw(ctx);
+      },
+      /* Out of sight (scrolled away, a sheet over it, immersive off): no frames. */
+      paused: () => !visible,
+      fps: () => SCENE_FPS[useSpectroscopy.getState().quality],
+    });
     const sight = new IntersectionObserver(([entry]) => {
       visible = entry?.isIntersecting ?? true;
-      if (visible) start();
-      else stop();
+      loop.sync();
     });
     sight.observe(el);
-    const onVisibility = () => (document.hidden ? stop() : start());
-    document.addEventListener("visibilitychange", onVisibility);
     refresh.current = null;
-    start();
     return () => {
-      stop();
+      loop.dispose();
       sight.disconnect();
       observer.disconnect();
       unsubscribe();
-      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [photons, gamut]);
 

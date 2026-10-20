@@ -18,6 +18,17 @@ const PIXEL_CAP: Readonly<Record<RenderQuality, number>> = {
   max: 4,
 };
 
+/**
+ * Frames a second the flying photons draw at, at most. The scene only stamps its still layer
+ * and a few dozen streaks, so every level but Economy keeps up with a 60 Hz screen.
+ */
+export const SCENE_FPS: Readonly<Record<RenderQuality, number>> = {
+  economy: 30,
+  standard: 60,
+  cinema: 60,
+  max: 60,
+};
+
 /** Supersampling never takes a canvas past this many pixels per CSS pixel. */
 const MOST_PIXELS = 4;
 

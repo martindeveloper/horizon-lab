@@ -9,6 +9,7 @@ import { simulations } from "@/lib/simulations";
 import { cn, kickerClass, Tilt } from "@horizon/toolkit/ui";
 
 import { HeroScene } from "./hero-sun";
+import { TileLink } from "./tile-link";
 import { TILE_FRAME, tileSpan } from "./tiles";
 
 type Translate = Awaited<ReturnType<typeof getTranslations<"catalogue">>>;
@@ -47,13 +48,7 @@ function SimulationTile({
         </div>
 
         {/* The whole tile opens the simulation; the visible link below is the one that takes focus. */}
-        <Link
-          href={simulation.href}
-          prefetch={false}
-          aria-hidden
-          tabIndex={-1}
-          className="absolute inset-0 z-10 rounded-3xl"
-        />
+        <TileLink href={simulation.href} className="absolute inset-0 z-10 rounded-3xl" />
 
         <div className="tilt-front pointer-events-none relative z-20 flex items-start justify-between gap-6 p-5 sm:p-6">
           <span className="mt-2 inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.24em] text-space-muted uppercase">
@@ -70,13 +65,7 @@ function SimulationTile({
 
         <div className="tilt-front pointer-events-none relative z-20 p-3 sm:p-4">
           <div className="cover-panel pointer-events-auto relative rounded-2xl p-5 sm:p-6">
-            <Link
-              href={simulation.href}
-              prefetch={false}
-              aria-hidden
-              tabIndex={-1}
-              className="absolute inset-0 rounded-2xl"
-            />
+            <TileLink href={simulation.href} className="absolute inset-0 rounded-2xl" />
             <p className="font-mono text-[10px] tracking-[0.22em] text-accent uppercase">
               {t(`${key}.eyebrow`)}
             </p>
