@@ -32,9 +32,11 @@ toolkit's `.glsl` loader (see the package README).
   onto the canvas. Both passes expose their offscreen `target` and allocate nothing
   until first drawn. Materials compile alike for the canvas and these frames.
 - `RenderQuality`: the four quality levels every simulation offers (`economy`,
-  `standard`, `cinema`, `max`, which lifts the device caps). A type only: each consumer
-  maps a level to concrete settings in one place (in Horizon, each simulation's
-  `lib/quality.ts`), and `standard` is its default.
+  `standard`, `cinema`, `max`, which lifts the device caps), in that order in
+  `RENDER_QUALITIES`. Each consumer maps a level to concrete settings in one place (in
+  Horizon, each simulation's `lib/quality.ts`), and `standard` is its default. UI that
+  only lists the levels imports them from `@horizon/toolkit/rendering/quality`, which
+  pulls in no Three.js.
 - `createFrameMeter({ span, keep, gap })` and the page's `frameMeter`: loops call `tick(now)`
   after each frame they draw (`createFrameLoop` does so itself); `rate()` is frames per
   second over the last `span` seconds, 0 once a scene stops drawing; `intervals()` the times between the last `keep` frames (a
@@ -78,6 +80,14 @@ toolkit's `.glsl` loader (see the package README).
   `sync()` re-evaluates pause and FPS; `refresh()` re-measures the buffer;
   restore runs `onRestored` (mark DataTextures for upload), then re-measures
   and redraws. It owns no renderer, scene or camera.
+- `startEngine(create, onError)`: owns a lazy engine across navigation. `create(signal,
+  onError)` returns a `SimulationEngine` (anything with `dispose()`), or a promise of one,
+  on the next microtask; `dispose()` aborts the signal, disposes the engine once, disposes
+  one that resolves later at once, and drops errors reported after it. No DOM; a React
+  effect or any host lifecycle can return its `dispose`.
+- `withScope(build)`: a `SimulationEngine` over one `DisposalScope`. `build(scope)` owns its
+  resources there; the engine's `dispose()` lets them go, and a `build` that throws lets go
+  of whatever it had already made before rethrowing.
 - `DisposalScope`: owns resources and callbacks. Cleanup runs once, in reverse
   acquisition order; every callback runs even if one throws. Errors are collected
   into an AggregateError. Registration after disposal cleans up immediately.

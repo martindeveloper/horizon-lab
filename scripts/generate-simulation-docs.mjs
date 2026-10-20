@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 
 import { format } from "oxfmt";
 
@@ -6,6 +6,7 @@ import { BLACK_HOLE_EQUATIONS } from "../src/features/black-hole/lib/equations.t
 import { PRESETS } from "../src/features/black-hole/lib/holes/index.ts";
 import { BLACK_HOLE_COPY } from "../src/features/black-hole/lib/parameters.ts";
 import { pathForHole } from "../src/features/black-hole/routing.ts";
+import { syncGenerated } from "./lib/generated.mjs";
 
 /** The app passes the same values as ICU arguments; English formatting here. */
 const withValues = (text) =>
@@ -75,15 +76,10 @@ lines.push(
   "`technical.json` owns section IDs, equations, and scientific references. The `technicalDetails` namespace in `messages/en.json` and `messages/cs.json` owns translated prose. Review the implementation when changing these notes; some older lesson captions describe idealized theory rather than the renderer. Regenerate this README with `npm run docs:generate` and check it with `npm run docs:check`.",
   "",
 );
-const output = new URL(`${feature}README.md`, root);
 const formatted = await format("README.md", lines.join("\n"), { printWidth: 100 });
 if (formatted.errors.length) throw new Error("Could not format simulation README.");
-const content = formatted.code;
-if (process.argv.includes("--check")) {
-  if (readFileSync(output, "utf8") !== content)
-    throw new Error("Simulation README is stale. Run npm run docs:generate.");
-  console.log("Simulation documentation is current.");
-} else {
-  writeFileSync(output, content);
-  console.log("Generated black-hole README from the in-app technical documentation.");
-}
+syncGenerated({
+  file: new URL(`${feature}README.md`, root),
+  content: formatted.code,
+  command: "npm run docs:generate",
+});

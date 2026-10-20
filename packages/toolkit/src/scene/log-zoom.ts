@@ -4,7 +4,7 @@
  * speed and lands at rest. Someone else may write the distance between steps (a guided tour,
  * a close-up); the zoom then carries that speed on, unless the change was a cut.
  */
-import { clamp } from "../math";
+import { clamp, smootherstep } from "../math";
 
 /** Zoom bounds, world units. */
 export type ZoomLimits = { min: number; max: number };
@@ -107,7 +107,7 @@ export function createLogZoom(
         progress = s;
         /* Quintic Hermite: leaves at the zoom's speed, lands at rest, no jerk at either end. */
         const s2 = s * s;
-        const land = s2 * s * (10 - 15 * s + 6 * s2);
+        const land = smootherstep(s);
         const carry = s - 6 * s2 * s + 8 * s2 * s2 - 3 * s2 * s2 * s;
         const landRate = 30 * s2 * (1 - s) * (1 - s);
         const carryRate = 1 - 18 * s2 + 32 * s2 * s - 15 * s2 * s2;

@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { DistanceUnitControl, MapScale } from "@/components/simulations/map-readouts";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { proseArgs } from "@/lib/facts";
+import { asideOpen } from "@/lib/scene-store";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { convert } from "@horizon/toolkit/science";
 import { Dock, IconButton, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
@@ -54,7 +55,7 @@ export function TimeDock() {
   const scaleUnit = useOrrery((s) => s.scaleUnit);
   const unit = useOrrery((s) => s.distanceUnit);
   // Phones give an open sheet or card the bottom of the screen.
-  const aside = useOrrery((s) => s.panel !== "none" || s.selection !== null);
+  const aside = useOrrery(asideOpen);
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface, reachesPanels);
   const now = useNow({ updateInterval: 60_000 });

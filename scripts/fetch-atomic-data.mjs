@@ -13,6 +13,8 @@
  */
 import { writeFile } from "node:fs/promises";
 
+import { fetchText } from "./lib/net.mjs";
+
 const OUT = new URL("../src/features/spectroscopy/lib/model/atomic-data.json", import.meta.url);
 const ASD = "https://physics.nist.gov/cgi-bin/ASD";
 const RANGE = [380, 770];
@@ -50,13 +52,10 @@ const SPECIES = {
   "Fe III": {},
 };
 
-const text = async (url) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
-  const body = await res.text();
-  if (body.startsWith("<!DOCTYPE")) throw new Error(`${url}: NIST returned an error page`);
-  return body;
-};
+const text = (url) =>
+  fetchText(url, {
+    reject: (body) => body.startsWith("<!DOCTYPE") && "NIST returned an error page",
+  });
 
 /** A tab-separated NIST table as rows of named, unquoted cells. */
 function table(tsv) {

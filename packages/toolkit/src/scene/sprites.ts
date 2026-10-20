@@ -9,13 +9,37 @@ import {
   type Texture,
 } from "three";
 
-function canvas2d(size: number) {
+function canvas2d(width: number, height = width) {
   const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = width;
+  canvas.height = height;
   const g = canvas.getContext("2d");
   if (!g) throw new Error("2D canvas unavailable");
   return { canvas, g };
+}
+
+/** RGBA, 0–255, of the texel at `u`, `v` (0..1 from the top left). */
+export type TexelPainter = (u: number, v: number) => readonly [number, number, number, number];
+
+/** A `width` × `height` sRGB texture painted texel by texel. */
+export function paintedTexture(width: number, height: number, texel: TexelPainter) {
+  const { canvas, g } = canvas2d(width, height);
+  const img = g.createImageData(width, height);
+  const data = img.data;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const px = texel(x / width, y / height);
+      const i = (y * width + x) * 4;
+      data[i] = px[0];
+      data[i + 1] = px[1];
+      data[i + 2] = px[2];
+      data[i + 3] = px[3];
+    }
+  }
+  g.putImageData(img, 0, 0);
+  const tex = new CanvasTexture(canvas);
+  tex.colorSpace = SRGBColorSpace;
+  return tex;
 }
 
 /** A 128 px radial gradient: `[t, css colour]` stops from the centre out. */
@@ -39,6 +63,7 @@ export function softCircle() {
   grd.addColorStop(1, "rgba(255,255,255,0)");
   g.fillStyle = grd;
   g.fillRect(0, 0, 32, 32);
+  /* Every texel is white and only the alpha varies, so there is no colour to decode. */
   return new CanvasTexture(canvas);
 }
 

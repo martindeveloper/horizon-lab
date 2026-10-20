@@ -34,6 +34,11 @@ import {
   scaleMagnitude,
   AU_KM,
   LIGHT_YEAR_KM,
+  PARSEC_KM,
+  GRAVITATIONAL_CONSTANT,
+  RYDBERG_INFINITY,
+  SOLAR_MASS_KG,
+  cssRgb,
   J2000_JD,
   julianDay,
   DELTA_T_SECONDS,
@@ -69,6 +74,7 @@ test("distance units convert through exact IAU definitions and read out consiste
   assert.ok(Math.abs(AU_LIGHT_SECONDS - 499.004784) < 1e-6);
   assert.ok(Math.abs(LIGHT_YEAR_AU - 63241.077) < 0.001);
   assert.ok(Math.abs(PARSEC_AU - 206264.806) < 0.001);
+  assert.ok(Math.abs(PARSEC_KM / 3.0857e13 - 1) < 1e-4, "a parsec is 3.0857 × 10¹³ km");
   assert.ok(Math.abs(convertDistance(1, "pc", "ly") - 3.26156) < 1e-5);
   assert.equal(convertDistance(convertDistance(42, "ly", "au"), "au", "ly"), 42);
   assert.throws(() => convertDistance(Number.NaN, "au", "ly"), RangeError);
@@ -159,6 +165,18 @@ test("literature values keep their significant figures through a unit change", (
     formatDistanceRange(2_000, 5_000, { ...options("ly"), significant: 1 }),
     "0.03–0.08 ly",
   );
+});
+
+test("named constants carry the units their names state", () => {
+  assert.ok(Math.abs(GRAVITATIONAL_CONSTANT / 6.6743e-11 - 1) < 1e-4, "G in m³ kg⁻¹ s⁻²");
+  assert.ok(Math.abs(SOLAR_MASS_KG / 1.98841e30 - 1) < 1e-4, "the Sun's mass in kg");
+  const gm = GRAVITATIONAL_CONSTANT * SOLAR_MASS_KG;
+  assert.ok(Math.abs(gm / 1.3271244e20 - 1) < 1e-5, "GM☉ (IAU 2015 B3) in m³ s⁻²");
+  near(RYDBERG_INFINITY, 1.0973731568157e7, 1e-3, "R∞ in m⁻¹");
+  near(1e9 / RYDBERG_INFINITY, 91.1267, 1e-4, "the Lyman limit for a fixed nucleus, nm");
+  assert.equal(cssRgb([1, 0.5, 0]), "rgb(255 128 0)");
+  assert.equal(cssRgb([0.2, 0.4, 1], 2), "rgb(102 204 255)", "brightness scales and clips");
+  assert.equal(cssRgb([-1, 0, 0]), "rgb(0 0 0)");
 });
 
 test("Julian dates match the J2000 epoch", () => {

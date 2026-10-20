@@ -1,11 +1,11 @@
 import path from "node:path";
 
+import { fixed } from "./format";
 import type { Report } from "./model";
 
 export const write = (text = "") => process.stdout.write(`${text}\n`);
-export const fixed = (value: number, digits = 2) => value.toFixed(digits);
 
-function table(header: string[], rows: string[][]) {
+function terminalTable(header: string[], rows: string[][]) {
   const widths = header.map((h, i) => Math.max(h.length, ...rows.map((row) => row[i]!.length)));
   const pad = (cells: string[]) =>
     cells.map((c, i) => (i === 0 ? c.padEnd(widths[i]!) : c.padStart(widths[i]!))).join("  ");
@@ -18,7 +18,7 @@ export function printReport(report: Report, outDir: string) {
   write();
   write(`GPU: ${report.gpu?.renderer ?? "unknown"}`);
   write();
-  table(
+  terminalTable(
     ["run", "median ms", "p90 ms", "submit ms", "ns/px", "timer", "worst ms"],
     report.runs.map((r) => [
       r.key,
@@ -37,7 +37,7 @@ export function printReport(report: Report, outDir: string) {
     write(
       `Against ${c.label ?? c.createdAt}: ${c.likeForLike ? "like for like" : "NOT like for like (see warnings)"}${code}`,
     );
-    table(
+    terminalTable(
       ["run", "before", "after", "Δ", "pixels changed", "scene"],
       report.comparison.rows.map((row) => [
         row.key,

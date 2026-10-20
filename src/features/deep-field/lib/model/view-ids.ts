@@ -1,5 +1,5 @@
 /** Deep Field's view ids, near to far, and its default. Light: routes read them. */
-import { SOLAR_VIEWS, type SolarViewId } from "../../../../space/solar-system/model/views";
+import { SOLAR_VIEWS, type SolarViewId } from "@/space/solar-system/model/views";
 
 /** Deep Field's own views past the solar system's framings, and the one it adds among them. */
 const HELIOSPHERE = "heliosphere";

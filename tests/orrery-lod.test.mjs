@@ -3,10 +3,16 @@ import test from "node:test";
 
 import { PerspectiveCamera } from "three";
 
+import { atViewScale, nearestView } from "@horizon/toolkit/camera";
+
+import { modelSelfCheck } from "../src/features/orrery/lib/model/model-check.ts";
 import { driftYearsPerSecond } from "../src/features/orrery/lib/model/views.ts";
 import { createCameraRig } from "../src/features/orrery/lib/scene/camera-rig.ts";
+import { createHud } from "../src/features/orrery/lib/scene/hud.ts";
 import { ORRERY_EDGE } from "../src/features/orrery/lib/scene/kit.ts";
+import { useOrrery } from "../src/features/orrery/lib/store.ts";
 import { SOLAR_VIEWS } from "../src/space/solar-system/model/views.ts";
+import { assertSmoothFlight } from "./toolkit-helpers.mjs";
 
 const near = (actual, expected, tolerance, message) =>
   assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: ${actual} vs ${expected}`);
@@ -53,26 +59,8 @@ test("a flight from the Oort cloud down to the planets is one smooth zoom", () =
   rig.snapToView("oort");
   frame(0);
   rig.flyToView("inner");
-  const dt = 1 / 60;
-  let last = Math.log(rig.pose.distance);
-  let lastSpeed = 0;
-  let lastPosition = camera.position.clone();
-  let frames = 0;
-  while (rig.flying && frames < 1000) {
-    const position = frame(dt);
-    const x = Math.log(rig.pose.distance);
-    const speed = (x - last) / dt;
-    /* Inward all the way, never faster than ~10 e-folds/s, and no lurch between frames. */
-    assert.ok(speed <= 1e-9, "never backs out");
-    assert.ok(Math.abs(speed) < 10, `speed ${speed}`);
-    assert.ok(Math.abs(speed - lastSpeed) < 0.5, `speed jump at frame ${frames}`);
-    assert.ok(position.distanceTo(lastPosition) < rig.pose.distance * 0.25, `cut at ${frames}`);
-    last = x;
-    lastSpeed = speed;
-    lastPosition = position;
-    frames += 1;
-  }
-  assert.ok(frames > 60 && frames < 400, `${frames} frames`);
+  /* Inward all the way, never faster than ~10 e-folds/s, and no lurch between frames. */
+  assertSmoothFlight(rig, camera, frame, { maxSpeed: 10 });
   assert.equal(rig.pose.distance, 6);
   assert.ok(rig.aim.length() < 1e-9, "aimed at the Sun");
   assert.equal(rig.moving, false);
@@ -120,4 +108,65 @@ test("reduced motion lands every zoom at once", () => {
   rig.flyToView("oort");
   assert.equal(rig.flying, false);
   assert.equal(rig.pose.distance, 170_000);
+});
+
+test("the orrery model passes its own consistency checks, here rather than on every WebGL startup", () => {
+  assert.deepEqual(modelSelfCheck(), []);
+});
+
+test("the orrery HUD throttles drift readouts to 1 Hz even across forced redraws", () => {
+  const original = useOrrery.getState();
+  try {
+    useOrrery.setState({ driftYears: 0, driftRate: 2.5 });
+    const hud = createHud(useOrrery, { fov: 48 }, { width: 1200, height: 800 });
+    /* Turned a step right of the start and raised 30°: the camera pad reads whole degrees. */
+    const angles = { azimuth: -Math.PI / 12, inclination: Math.PI / 6 };
+    // Forced redraws update scale/rate immediately without churning driftYears every frame.
+    hud.update(0.016, true, {
+      dist: 170_000,
+      drift: true,
+      driftYears: 500,
+      syncView: true,
+      angles,
+    });
+    assert.equal(useOrrery.getState().driftRate, 30_000);
+    assert.deepEqual(useOrrery.getState().cameraAngles, { heading: 345, tilt: 30 });
+    assert.equal(useOrrery.getState().driftYears, 0);
+    hud.update(0.5, false, {
+      dist: 170_000,
+      drift: true,
+      driftYears: 15_500,
+      syncView: true,
+      angles,
+    });
+    assert.equal(useOrrery.getState().driftYears, 0);
+    hud.update(0.5, false, {
+      dist: 170_000,
+      drift: true,
+      driftYears: 30_000,
+      syncView: true,
+      angles,
+    });
+    assert.equal(useOrrery.getState().driftYears, 30_000);
+    // Resetting driftYears to 0 commits at once.
+    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 0, syncView: true, angles });
+    assert.equal(useOrrery.getState().driftYears, 0);
+    // Manual zooming updates the active view and clears preset distance match when between presets.
+    for (const v of SOLAR_VIEWS) {
+      assert.equal(nearestView(SOLAR_VIEWS, (view) => view.dist, v.dist).id, v.id);
+      assert.equal(atViewScale(v.dist, v.dist), true);
+    }
+    assert.equal(atViewScale(30, 72), false);
+    hud.update(0.016, true, {
+      dist: 6,
+      drift: true,
+      driftYears: 0,
+      syncView: true,
+      angles,
+    });
+    assert.equal(useOrrery.getState().view, "inner");
+    assert.equal(useOrrery.getState().viewDist, 6);
+  } finally {
+    useOrrery.setState(original, true);
+  }
 });

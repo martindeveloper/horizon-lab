@@ -42,7 +42,8 @@ translation does not require new social assets or metadata copy. Every language
 shares one canonical URL without a language prefix, so pages have no language links.
 
 For a new simulation, add artwork and English card copy to the generator, then
-call `pageMetadata` from its page with its route, English copy and image path.
+export `simulationMetadata` from its pages with its route, message loader and image path;
+the catalogue, about and credits pages call `pageMetadata` directly.
 Keep feature assets under `public/simulations/<slug>/`.
 
 Set `SITE_URL` to the public HTTPS origin in Vercel for a custom domain. Otherwise

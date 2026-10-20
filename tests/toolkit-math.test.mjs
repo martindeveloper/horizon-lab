@@ -8,6 +8,9 @@ import {
   toLogFraction,
   fromLogFraction,
   mulberry32,
+  minstd,
+  gaussian,
+  onSphere,
   lcg,
   wrap,
   wrapSigned,
@@ -68,4 +71,33 @@ test("scalar wrap, clamp and smoothstep follow their GLSL counterparts", () => {
   close(wrap(-0.5, 2 * Math.PI), 2 * Math.PI - 0.5);
   close(wrapSigned(350 - 10, 360), -20);
   close(wrapSigned(-200, 360), 160);
+});
+
+test("gaussian deviates are standard normal and onSphere directions are uniform unit vectors", () => {
+  const rnd = mulberry32(3);
+  const n = 20000;
+  let sum = 0;
+  let squares = 0;
+  for (let i = 0; i < n; i += 1) {
+    const g = gaussian(rnd);
+    sum += g;
+    squares += g * g;
+  }
+  const mean = sum / n;
+  const variance = squares / n - mean * mean;
+  assert.ok(Math.abs(mean) < 0.03, `mean ${mean}`);
+  assert.ok(Math.abs(variance - 1) < 0.05, `variance ${variance}`);
+  let up = 0;
+  for (let i = 0; i < n; i += 1) {
+    const [x, y, z] = onSphere(rnd);
+    close(Math.hypot(x, y, z), 1);
+    if (z > 0.5) up += 1;
+  }
+  assert.ok(Math.abs(up / n - 0.25) < 0.02, "a quarter of directions lie within 60° of the pole");
+  const [x, y, z] = onSphere(mulberry32(9), 3);
+  close(Math.hypot(x, y, z), 3);
+  const a = minstd(7);
+  const b = minstd(7);
+  assert.deepEqual(Array.from({ length: 16 }, a), Array.from({ length: 16 }, b));
+  assert.ok(Array.from({ length: 256 }, a).every((v) => v > 0 && v < 1));
 });

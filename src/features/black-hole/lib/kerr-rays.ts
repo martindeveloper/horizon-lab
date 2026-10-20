@@ -21,8 +21,8 @@
  */
 
 import { circularOrbit } from "./disk-profile";
-import { diskRedshift, emissionAngle } from "./equations";
-import { STEP_FAR, STEP_FAR_GROWTH, STEP_NEAR } from "./parameters";
+import { diskRedshift } from "./equations";
+import { ESCAPE_RADIUS, STEP_FAR, STEP_FAR_GROWTH, STEP_NEAR, TRACE_STEPS } from "./parameters";
 import { horizonOverM, photonOverM } from "./physics";
 
 export type Vec3 = [number, number, number];
@@ -67,7 +67,7 @@ function localAxes(s: Vec3) {
   return { er, et, ep, sinT };
 }
 
-export type RayState = {
+type RayState = {
   /** Constants of the traced (time-reversed) ray; the arriving photon has −E, −L. */
   E: number;
   L: number;
@@ -113,13 +113,6 @@ export function cameraRay(cam: Vec3, dir: Vec3, a: number): RayState {
   return { E, L, Q, u: 1 / r, ud: (-Math.sqrt(m.sigma * m.delta) * nr) / (r * r), s, sd };
 }
 
-/** Radial potential R(r); (dr/dλ)² equals it along the ray. */
-export function radialPotential(ray: Pick<RayState, "E" | "L" | "Q">, r: number, a: number) {
-  const P = ray.E * (r * r + a * a) - a * ray.L;
-  const K = ray.Q + (ray.L - a * ray.E) ** 2;
-  return P * P - (r * r - 2 * r + a * a) * K;
-}
-
 /** U(u) = R(1/u) u⁴; (du/dλ)² equals it along the ray. */
 export function inversePotential(ray: Pick<RayState, "E" | "L" | "Q">, u: number, a: number) {
   const c = a * (a * ray.E - ray.L);
@@ -137,19 +130,13 @@ export function carterOf(ray: RayState, a: number) {
 }
 
 /** Radius inside which an ingoing ray can no longer turn: halfway from r₊ to the prograde photon orbit. */
-export function captureRadius(a: number) {
+function captureRadius(a: number) {
   const rh = horizonOverM(a);
   return 0.5 * (rh + photonOverM(Math.abs(a)));
 }
 
-/** Oblate-spheroidal Cartesian point of (r, s). */
-export function rayPoint(r: number, s: Vec3, a: number): Vec3 {
-  const w = Math.sqrt(r * r + a * a);
-  return [w * s[0], r * s[1], w * s[2]];
-}
-
 /** Fraction of the radius one step may move: finer near the hole, coarser far out where rays are nearly straight. */
-export function stepFraction(r: number) {
+function stepFraction(r: number) {
   return r < 8 ? STEP_NEAR : STEP_FAR * Math.min(Math.sqrt(r / 8), STEP_FAR_GROWTH);
 }
 
@@ -211,7 +198,7 @@ export function kerrStep(ray: RayState, a: number, refine = 1): RayState {
   return { ...ray, u: u1, ud: ud1, s: s1, sd: sd1 };
 }
 
-export type TraceResult = {
+type TraceResult = {
   outcome: "captured" | "escaped" | "exhausted";
   steps: number;
   ray: RayState;
@@ -225,8 +212,8 @@ export function traceRay(
   dir: Vec3,
   a: number,
   {
-    budget = 256,
-    escapeR = 48,
+    budget = TRACE_STEPS,
+    escapeR = ESCAPE_RADIUS,
     refine = 1,
   }: { budget?: number; escapeR?: number; refine?: number } = {},
 ): TraceResult {
@@ -248,7 +235,7 @@ export function traceRay(
   return { outcome: "exhausted", steps: budget, ray, crossing };
 }
 
-export type FlatTraceResult = {
+type FlatTraceResult = {
   outcome: "captured" | "escaped" | "exhausted";
   steps: number;
   /** Where the march stopped; an escaped ray continues along `dir` from there. */
@@ -267,7 +254,7 @@ export function traceFlatRay(
   cam: Vec3,
   dir: Vec3,
   a: number,
-  { budget = 256, escapeR = 48 }: { budget?: number; escapeR?: number } = {},
+  { budget = TRACE_STEPS, escapeR = ESCAPE_RADIUS }: { budget?: number; escapeR?: number } = {},
 ): FlatTraceResult {
   const at = (t: number): Vec3 => [cam[0] + t * dir[0], cam[1] + t * dir[1], cam[2] + t * dir[2]];
   const rh = horizonOverM(a);
@@ -316,22 +303,6 @@ export function flatDiskShift(hit: Vec3, dir: Vec3, rho: number, a: number) {
 }
 
 /**
- * Unit Cartesian direction the ray is moving in, the shader's hand-off to the
- * analytic far-field bend: dx/dλ ≈ ṙ s + r ṡ + r (dφ/dλ)_drag (s × ŷ) far out.
- */
-export function rayDirection(ray: RayState, a: number): Vec3 {
-  const { s, sd } = ray;
-  const r = 1 / ray.u;
-  const rd = -ray.ud * r * r;
-  const drag = (a * (2 * ray.E * r - a * ray.L)) / (r * r - 2 * r + a * a);
-  return norm([
-    rd * s[0] + r * sd[0] - r * drag * s[2],
-    rd * s[1] + r * sd[1],
-    rd * s[2] + r * sd[2] + r * drag * s[0],
-  ]);
-}
-
-/**
  * Frequency ratio g = ν_camera / ν_emitted for disk gas on a prograde circular
  * orbit at r, the shader's `diskG`. The traced ray's constants are normalised
  * to the camera's frame, so g includes the camera's own shift.
@@ -342,11 +313,6 @@ export function diskShift(ray: Pick<RayState, "E" | "L">, r: number, a: number) 
   const ut = (r * s + a) / (r ** 0.75 * Math.sqrt(Math.max(r * s - 3 * s + 2 * a, 1e-9)));
   // The arriving photon is the traced ray reversed: E = −E_traced, L = −L_traced.
   return diskRedshift.compute({ ut, omega, E: -ray.E, L: -ray.L });
-}
-
-/** Cosine of the emission angle from the disk normal in the gas's rest frame. */
-export function emissionCosine(ray: Pick<RayState, "E" | "L" | "Q">, r: number, a: number) {
-  return emissionAngle.compute({ g: diskShift(ray, r, a), Q: ray.Q, r });
 }
 
 /**

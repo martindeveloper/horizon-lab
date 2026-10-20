@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { routing, type Locale } from "@/i18n/routing";
 import { Tooltip, cn } from "@horizon/toolkit/ui";
 
-import { themeModes, useThemeMode, type ThemeMode } from "./theme-switch";
+import { themeModes, useThemeLabels, useThemeMode, type ThemeMode } from "./theme-switch";
 
 const loadFeatures = () => import("./motion-features").then((module) => module.default);
 const spring = { type: "spring", stiffness: 520, damping: 38, mass: 0.7 } as const;
@@ -101,11 +101,7 @@ export function HeaderPreferences({
 }) {
   const t = useTranslations();
   const theme = useThemeMode();
-  const themeLabels: Record<ThemeMode, string> = {
-    dark: t("themeDark"),
-    light: t("themeLight"),
-    system: t("themeSystem"),
-  };
+  const themeLabels = useThemeLabels();
   return (
     <LazyMotion features={loadFeatures} strict>
       <MotionConfig reducedMotion="user">

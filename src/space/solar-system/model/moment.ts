@@ -13,7 +13,7 @@ import { gasDisk, migrationProgress as migration } from "./equations";
 import { MODEL_START, SUN_BIRTH } from "./parameters";
 
 /** Terrestrial planets finish accreting ~30–100 Myr after the first solids. */
-export const TERRESTRIAL_DONE = MODEL_START;
+const TERRESTRIAL_DONE = MODEL_START;
 
 /** 0 = disk intact, 1 = clearing finished. Smooth inside the window only. */
 export function migrationProgress(yearsAgo: number) {

@@ -29,3 +29,5 @@ export const ELECTRON_MASS_SI = 9.1093837139e-31;
 export const ATOMIC_MASS_CONSTANT_SI = 1.66053906892e-27;
 /** Classical electron radius e² / (4πε₀ mₑ c²), m (CODATA 2022). */
 export const CLASSICAL_ELECTRON_RADIUS_SI = 2.8179403205e-15;
+/** Rydberg constant R∞, m⁻¹ (CODATA 2022): hydrogen's spectrum for an infinitely heavy nucleus. */
+export const RYDBERG_CONSTANT_SI = 10_973_731.568_157;

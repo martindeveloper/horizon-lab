@@ -112,6 +112,13 @@ export function storageCell<T>(options: StorageCellOptions<T>): StorageCell<T> {
   const codec = options.codec;
   const state: State<T> = { loaded: false, value: null, at: 0 };
 
+  /** The cell holds no value; `loaded` says whether the store was asked. */
+  function reset(loaded: boolean) {
+    state.loaded = loaded;
+    state.value = null;
+    state.at = 0;
+  }
+
   function write(raw: string | null) {
     try {
       const store = open(area);
@@ -142,37 +149,26 @@ export function storageCell<T>(options: StorageCellOptions<T>): StorageCell<T> {
     try {
       const store = open(area);
       if (!store) {
-        state.loaded = true;
-        state.value = null;
-        state.at = 0;
+        reset(true);
         return;
       }
       raw = store.getItem(key);
     } catch {
       return;
     }
-    if (raw === null) {
-      state.loaded = true;
-      state.value = null;
-      state.at = 0;
-      return;
-    }
-    const parsed = unpack(raw);
-    state.loaded = true;
+    const parsed = raw === null ? null : unpack(raw);
     if (!parsed) {
-      state.value = null;
-      state.at = 0;
-      write(null);
+      reset(true);
+      if (raw !== null) write(null);
       return;
     }
+    state.loaded = true;
     state.value = parsed.value;
     state.at = parsed.at;
   }
 
   function drop() {
-    state.loaded = true;
-    state.value = null;
-    state.at = 0;
+    reset(true);
     write(null);
   }
 
@@ -188,13 +184,8 @@ export function storageCell<T>(options: StorageCellOptions<T>): StorageCell<T> {
     return state.value;
   }
 
-  if (area === "local") {
-    watchLocal(key, () => {
-      state.loaded = false;
-      state.value = null;
-      state.at = 0;
-    });
-  }
+  /* Cells live as long as the page (see the README), so the watcher is never removed. */
+  if (area === "local") watchLocal(key, () => reset(false));
 
   return {
     get: (now) => current(now),

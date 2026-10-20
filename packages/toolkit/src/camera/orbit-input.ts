@@ -12,6 +12,11 @@ export type OrbitInputOptions = {
 };
 
 /** Canvas-local input. No store, camera singleton, animation loop or renderer dependency. */
+/** Two fingers closer than this (CSS px) are not yet a pinch; the zoom baseline waits. */
+const PINCH_MIN_PX = 24;
+/** Pixels one page of wheel scroll stands for when the canvas has no height yet. */
+const PAGE_FALLBACK_PX = 800;
+
 export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputOptions) {
   if (
     !Number.isFinite(options.distance.min) ||
@@ -56,7 +61,7 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     } else {
       dragging = false;
       pinchLock = true;
-      pinch0 = gap() > 24 ? gap() : 0;
+      pinch0 = gap() > PINCH_MIN_PX ? gap() : 0;
       dist0 = options.getPose().distance;
     }
   }
@@ -70,8 +75,8 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     const pose = options.getPose();
     if (pointers.size >= 2) {
       const currentGap = gap();
-      if (currentGap > 24) {
-        if (pinch0 <= 24) {
+      if (currentGap > PINCH_MIN_PX) {
+        if (pinch0 <= PINCH_MIN_PX) {
           // Fingers can start very close together. Begin the pinch once separable,
           // keeping the current zoom as its baseline rather than locking forever.
           pinch0 = currentGap;
@@ -95,7 +100,7 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     if (!pointers.delete(event.pointerId)) return;
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
     if (pointers.size >= 2) {
-      pinch0 = gap() > 24 ? gap() : 0;
+      pinch0 = gap() > PINCH_MIN_PX ? gap() : 0;
       dist0 = options.getPose().distance;
     } else if (pointers.size === 1) {
       dragging = false;
@@ -109,7 +114,11 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     const pose = options.getPose();
     const sensitivity = options.wheelSensitivity?.(pose.distance, event.ctrlKey) ?? 0.001;
     const unit =
-      event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? canvas.clientHeight || 800 : 1;
+      event.deltaMode === 1
+        ? 16
+        : event.deltaMode === 2
+          ? canvas.clientHeight || PAGE_FALLBACK_PX
+          : 1;
     options.onChange({
       ...pose,
       distance: distance(pose.distance * Math.exp(event.deltaY * unit * sensitivity)),

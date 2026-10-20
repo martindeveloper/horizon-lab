@@ -2,16 +2,15 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
-import { schwarzschildKm } from "@/features/black-hole/lib/physics";
+import { orbitBasis, type Basis } from "@/features/black-hole/lib/frame";
+import type { Vec3 } from "@/features/black-hole/lib/kerr-rays";
+import { B_CRIT, schwarzschildKm } from "@/features/black-hole/lib/physics";
 import {
   buildSketch,
-  orbitBasis,
   shadowScale,
-  type Basis,
   type Sketch,
   type SketchContext,
   type Tone,
-  type Vec3,
 } from "@/features/black-hole/lib/sketches";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { tourFor } from "@/features/black-hole/lib/tours";
@@ -22,7 +21,6 @@ import { drawOverHole, fitOverlay, frameLoop } from "./overlay-canvas";
 import { useSceneCamera } from "./scene-camera";
 
 const FADE_OUT = 0.7;
-const B_CRIT = 3 * Math.sqrt(3);
 
 type Shown = { key: string; sketches: Sketch[]; start: number; anchor: Basis; fade: number };
 

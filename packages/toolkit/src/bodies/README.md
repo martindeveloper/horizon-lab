@@ -110,12 +110,14 @@ run them without a canvas.
 
 `surfaces/raster.ts` holds the surface point, noise, polygon coverage and row
 rasteriser; `earth.ts`, `planets.ts`, `giants.ts` and `moons.ts` hold the
-painters and their mapped features; `index.ts` registers them by body ID.
+painters and their mapped features; `index.ts` registers them by body ID. The
+colour helpers the painters share are public too: `mix(a, b, t)` blends two
+`Rgb` triples and `scale(c, k)` multiplies one.
 
 ## Consumers and tests
 
-The orrery (`src/features/orrery`) keeps the three.js adapters
-(`lib/coordinates.ts`, `lib/moons.ts`), materials, shaders and map loading.
+The shared solar system (`src/space/solar-system/graphics/moons.ts`) keeps the three.js
+moon adapters; the orrery (`src/features/orrery`) keeps its materials, shaders and map loading.
 The shell's header sky and the catalogue hero (`src/space/observer-sky.ts`)
 keep the observer, the star list and the drawn bearings, built on the almanac.
 `tests/bodies.test.mjs`, `tests/astronomy.test.mjs`, `tests/sky.test.mjs` and

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import { cn } from "@horizon/toolkit/ui";
 
-import { STARS } from "../lib/model/stars";
+import { temperatureInView } from "../lib/model/scenes";
 import { useSpectroscopy } from "../lib/store";
 import { SceneCanvas } from "./scene-canvas";
 import { SpectrumView } from "./spectrum-view";
@@ -22,18 +22,8 @@ export function Stage() {
   const lines = useFormedLines(obs);
   const range = useSpectroscopy((s) => s.range);
   const photons = useSpectroscopy((s) => s.photons);
-  const { view, star, sequenceTemperature, air } = settings;
-
-  const teff =
-    obs.kind === "star"
-      ? view === "stars" && star !== "sequence"
-        ? STARS[star].teff
-        : view === "sun"
-          ? STARS.sun.teff
-          : view === "stars"
-            ? sequenceTemperature
-            : obs.photosphere.teff
-      : null;
+  const { view, star, air } = settings;
+  const teff = temperatureInView(settings, obs);
   const labels = useMemo(
     () => ({
       source:

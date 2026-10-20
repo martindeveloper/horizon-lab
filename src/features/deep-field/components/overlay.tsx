@@ -1,16 +1,17 @@
 import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 
 import { MapScale } from "@/components/simulations/map-readouts";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
+import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import { VisualizationOverlay, cn, isSceneShortcut } from "@horizon/toolkit/ui";
+import { asideOpen } from "@/lib/scene-store";
+import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
-import { useDeepField } from "../lib/store";
+import { useDeepField, type DeepFieldStore } from "../lib/store";
 import { DepthLadder } from "./depth-ladder";
-import { GuideCaption } from "./guide";
+import { DeepFieldGuide } from "./guide";
 import { ObjectsPanel } from "./objects-panel";
 import { SelectionCard } from "./selection-card";
 import { Sightline } from "./sightline";
@@ -27,6 +28,9 @@ const escapeSteps = (): EscapeStep[] => {
   ];
 };
 
+/* During the journey, Space pauses and the arrows step, when no control wants them. */
+const guideKeys = { onSpace: (api: DeepFieldStore) => api.toggleGuidePlaying() };
+
 export function DeepFieldOverlay() {
   const t = useTranslations("deepField");
   const ready = useDeepField((s) => s.ready);
@@ -38,26 +42,11 @@ export function DeepFieldOverlay() {
   const scalePx = useDeepField((s) => s.scalePx);
   const scaleValue = useDeepField((s) => s.scaleValue);
   const scaleUnit = useDeepField((s) => s.scaleUnit);
-  const aside = panel !== "none" || selection !== null;
+  const aside = asideOpen({ panel, selection });
   const guideButton = useGuideFocusReturn(guideOpen);
 
   useSceneEscape(escapeSteps);
-  /* During the journey, Space pauses and the arrows step, when no control wants them. */
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const api = useDeepField.getState();
-      if (!api.guideOpen || !isSceneShortcut(e)) return;
-      if (e.key === " ") {
-        e.preventDefault();
-        if (!e.repeat) api.toggleGuidePlaying();
-      } else if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-        e.preventDefault();
-        api.goGuide(api.guideStep + (e.key === "ArrowRight" ? 1 : -1));
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  useGuideKeys(useDeepField.getState, guideKeys);
 
   return (
     <VisualizationOverlay
@@ -65,7 +54,7 @@ export function DeepFieldOverlay() {
       inert={!ready}
     >
       {guideOpen ? (
-        <GuideCaption />
+        <DeepFieldGuide />
       ) : (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">

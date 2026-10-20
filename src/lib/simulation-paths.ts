@@ -1,3 +1,5 @@
+import { LOCALES } from "../i18n/locales";
+
 /** Shared URL prefix: every simulation lives under it. */
 export const SIMULATION_PREFIX = "/lab";
 
@@ -8,9 +10,9 @@ export function simulationPath<const Slug extends string>(slug: Slug) {
 }
 
 /** Path segments after `base`, ignoring the internal locale segment. */
-export function segmentsAfter(base: string, pathname: string): string[] {
+function segmentsAfter(base: string, pathname: string): string[] {
   const segments = pathname.split("/").filter(Boolean);
-  if (segments[0] === "en" || segments[0] === "cs") segments.shift();
+  if (LOCALES.some((locale) => locale === segments[0])) segments.shift();
   const parts = base.split("/").filter(Boolean);
   return parts.every((part, i) => segments[i] === part) ? segments.slice(parts.length) : segments;
 }

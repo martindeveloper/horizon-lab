@@ -9,7 +9,7 @@ import { PLANETS, POPULATIONS } from "@/space/solar-system/model/catalogue";
 
 import { TIMELINE } from "./timeline";
 
-export const CATALOGUE = { timeline: TIMELINE } as const;
+const CATALOGUE = { timeline: TIMELINE } as const;
 
 /**
  * Every figure the timeline notes, the guide and the technical notes quote, by the

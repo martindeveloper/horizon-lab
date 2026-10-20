@@ -6,6 +6,8 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { IconButton, ListItem, Tooltip, cn } from "@horizon/toolkit/ui";
 
+import { useDismissOnEscape } from "../shell/use-dismiss-on-escape";
+
 export type MoreItem = {
   id: string;
   label: string;
@@ -32,6 +34,8 @@ export function SceneMoreMenu({
   const root = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   const id = useId();
+  const close = () => setOpen(false);
+  useDismissOnEscape(open, button, close);
 
   useEffect(() => {
     const el = root.current;
@@ -39,22 +43,13 @@ export function SceneMoreMenu({
     const onPointer = (e: PointerEvent) => {
       if (!(e.target instanceof Node) || !el.contains(e.target)) setOpen(false);
     };
-    /* Ahead of the scene's own Escape, which would otherwise close its panels too. */
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      setOpen(false);
-      button.current?.focus({ preventScroll: true });
-    };
     const onFocusOut = (e: FocusEvent) => {
       if (e.relatedTarget instanceof Node && !el.contains(e.relatedTarget)) setOpen(false);
     };
     window.addEventListener("pointerdown", onPointer);
-    window.addEventListener("keydown", onKey, true);
     el.addEventListener("focusout", onFocusOut);
     return () => {
       window.removeEventListener("pointerdown", onPointer);
-      window.removeEventListener("keydown", onKey, true);
       el.removeEventListener("focusout", onFocusOut);
     };
   }, [open]);

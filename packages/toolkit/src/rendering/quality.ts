@@ -4,4 +4,5 @@
  * sharper picture, `max` lifts the simulation's device caps and spends all it can. What each
  * step changes is the simulation's own.
  */
-export type RenderQuality = "economy" | "standard" | "cinema" | "max";
+export const RENDER_QUALITIES = ["economy", "standard", "cinema", "max"] as const;
+export type RenderQuality = (typeof RENDER_QUALITIES)[number];

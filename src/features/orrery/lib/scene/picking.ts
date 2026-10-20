@@ -3,7 +3,11 @@ import type { Object3D } from "three";
 
 import { selectTapped } from "@/space/solar-system/model/framing";
 import { migrationProgress } from "@/space/solar-system/model/moment";
-import { hasSurface, type SolarSelection } from "@/space/solar-system/model/selection";
+import {
+  hasSurface,
+  selectionKey,
+  type SolarSelection,
+} from "@/space/solar-system/model/selection";
 import type { SolarKit } from "@/space/solar-system/scene/kit";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
@@ -43,7 +47,7 @@ export function createPicking(
       }
       const pick = selectTapped(api, target, migrationProgress(api.yearsAgo), options.distance());
       if (!pick || pick.kind === "tracer") return;
-      const key = JSON.stringify(pick);
+      const key = selectionKey(pick);
       const at = performance.now();
       const twice = key === lastTapKey && at - lastTapAt < DOUBLE_TAP_MS;
       lastTapKey = twice ? "" : key;

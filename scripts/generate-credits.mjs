@@ -1,6 +1,8 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { syncGenerated } from "./lib/generated.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -100,12 +102,8 @@ const notices = noticesSections.map((section) => {
   const [title, ...lines] = section.split("\n");
   return { title, text: lines.join("\n") };
 });
-const output = `${JSON.stringify({ imagery, science, notices }, null, 2)}\n`;
-const target = "src/data/credits.generated.json";
-if (process.argv.includes("--check")) {
-  if (!existsSync(join(root, target)) || read(target) !== output)
-    throw new Error("Credits are stale. Run npm run credits:generate.");
-} else {
-  mkdirSync(join(root, "src/data"), { recursive: true });
-  writeFileSync(join(root, target), output);
-}
+syncGenerated({
+  file: join(root, "src/data/credits.generated.json"),
+  content: `${JSON.stringify({ imagery, science, notices }, null, 2)}\n`,
+  command: "npm run credits:generate",
+});

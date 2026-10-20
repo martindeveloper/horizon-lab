@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
 
 import { SceneCanvas } from "@/components/simulations/scene-canvas";
+import { useSceneLabels } from "@/components/simulations/use-scene-labels";
 import { SOLAR_LABEL_KEYS } from "@/space/solar-system/scene/solar-system";
 import { DISTANCE_WORDS } from "@horizon/toolkit/scene";
 
@@ -15,10 +15,7 @@ const resetReady = () => useOrrery.getState().setReady(false);
 
 export function OrreryCanvas() {
   const t = useTranslations("orrery");
-  const translated = useMemo(
-    () => Object.fromEntries(LABEL_KEYS.map((key) => [key, t(`names.${key}`)])),
-    [t],
-  );
+  const translated = useSceneLabels(t, LABEL_KEYS);
   return (
     <SceneCanvas
       id="orrery"

@@ -45,8 +45,6 @@ export function rulerOrigin(sel: SolarSelection | null, at: Point | null): strin
   return sel?.kind === "tracer" ? at : null;
 }
 
-export type SolarSystem = ReturnType<typeof createSolarSystem>;
-
 export function createSolarSystem(
   kit: SolarKit,
   parent: Object3D,

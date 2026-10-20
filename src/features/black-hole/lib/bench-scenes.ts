@@ -1,23 +1,23 @@
 import type { BenchScene } from "@horizon/toolkit/bench";
-import { sampleOrbitFlight, type OrbitPose } from "@horizon/toolkit/camera";
-import { lerp, smootherstep } from "@horizon/toolkit/math";
+import { lerp } from "@horizon/toolkit/math";
 
 import type { CameraPose } from "./frame";
-import { HOLES, holeById } from "./holes";
-import type { Quality } from "./presets";
+import { holeById, PRESETS, type Quality } from "./holes";
+import { MAX_SPIN } from "./physics";
+import { tourAt } from "./tour-flight";
 
 /** The store's opening azimuth, so preset scenes match what a visitor first sees. */
 const HOME_AZIMUTH = 0.55;
 
 /** How a sequence moves: scripted camera paths, a spin change, a guided tour, or live input. */
-export type BlackHoleMotion =
+type BlackHoleMotion =
   | { kind: "orbit"; turns: number }
   | { kind: "dolly"; from: number; to: number }
   | { kind: "spin"; from: number; to: number }
   | { kind: "tour" }
   | { kind: "input" };
 
-export type BlackHoleBenchScene = BenchScene & {
+type BlackHoleBenchScene = BenchScene & {
   presetId: string;
   quality: Quality;
   /** Overrides of the preset's home pose. */
@@ -41,7 +41,7 @@ const tourSeconds = (presetId: string) =>
  * drive the real orbit input with a drag and wheel zooms.
  */
 export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
-  ...HOLES.map((hole): BlackHoleBenchScene => ({
+  ...PRESETS.map((hole): BlackHoleBenchScene => ({
     id: hole.id,
     description: `${hole.name}, home view, standard quality`,
     tags: ["preset"],
@@ -92,11 +92,11 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
   },
   {
     id: "spin-sweep",
-    description: "Spin 0 → 0.998: the disk profile is re-integrated on the CPU every frame",
+    description: `Spin 0 → ${MAX_SPIN}: the disk profile is re-integrated on the CPU every frame`,
     tags: ["sequence", "cpu"],
     presetId: "kerr",
     quality: "standard",
-    motion: { kind: "spin", from: 0, to: 0.998 },
+    motion: { kind: "spin", from: 0, to: MAX_SPIN },
     script: { frames: 90, duration: 3 },
   },
   {
@@ -169,24 +169,5 @@ export function benchMotion(
   if (motion.kind === "spin") return { pose: home, spin: lerp(motion.from, motion.to, progress) };
 
   // Guided tour: each beat flies from where the previous one ended, as in the engine.
-  let from: OrbitPose = home;
-  let roll = 0;
-  let start = 0;
-  for (const beat of holeById(scene.presetId).tour) {
-    const end = start + beat.duration;
-    if (elapsed <= end) {
-      const t = Math.min(1, Math.max(0, (elapsed - start) / beat.duration));
-      return {
-        pose: {
-          ...sampleOrbitFlight(t, from, beat),
-          roll: lerp(roll, beat.roll ?? 0, smootherstep(t)),
-        },
-        spin,
-      };
-    }
-    from = sampleOrbitFlight(1, from, beat);
-    roll = beat.roll ?? 0;
-    start = end;
-  }
-  return { pose: { ...from, roll }, spin };
+  return { pose: tourAt(holeById(scene.presetId).tour, home, elapsed), spin };
 }

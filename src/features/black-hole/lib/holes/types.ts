@@ -5,6 +5,9 @@ import type { Sketch } from "../sketches";
 
 export type HoleKind = "catalog" | "theory";
 
+/** The shot the header names while the camera flies to a beat. */
+export type TourPhase = "wide" | "dolly" | "detail" | "hold";
+
 export type SkyId = "lensed" | "sgr" | "m87" | "cyg" | "lab" | "host";
 
 export const SKY_CODE: Record<SkyId, number> = {
@@ -23,6 +26,7 @@ export const SKY_CODE: Record<SkyId, number> = {
  * slowly while the card is read. sketch draws over the hole once it lands.
  */
 export type TourPose = OrbitFlight & {
+  phase: TourPhase;
   duration: number;
   roll?: number;
   drift?: number;
@@ -35,8 +39,6 @@ export type Preset = {
   id: string;
   name: string;
   kind: HoleKind;
-  catalog: string;
-  blurb: string;
   massSolar: number;
   /** The mass is only a lower limit (shown with ≥). */
   massLowerLimit?: boolean;
@@ -63,7 +65,7 @@ export type HoleSpec = Preset & {
   tour: TourPose[];
 };
 
-/** The shared render quality steps; what each costs here is in `presets.ts`. */
+/** The shared render quality steps; what each costs here is in `lib/quality.ts`. */
 export type Quality = RenderQuality;
 
 export type BlackHoleParams = {

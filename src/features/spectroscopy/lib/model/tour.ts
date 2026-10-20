@@ -30,8 +30,6 @@ export type TourStep = {
 /** A step's hold when it sets none: time to read a caption and look. */
 export const GUIDE_DWELL = 14;
 
-export const FULL_RANGE = [380, 770] as const;
-
 export const TOUR: readonly TourStep[] = [
   {
     id: "continuum",

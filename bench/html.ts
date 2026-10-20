@@ -5,6 +5,7 @@ import { Eta } from "eta";
 
 import { rollingMedian, type GrabDraw } from "@horizon/toolkit/bench";
 
+import { fixed as f, LEVEL } from "./format";
 import type { Report, Run, Scaling } from "./model";
 import { comparisonWarnings, shaderLine } from "./report";
 
@@ -16,9 +17,7 @@ import { comparisonWarnings, shaderLine } from "./report";
 const TEMPLATES = fileURLToPath(new URL("templates/", import.meta.url));
 const eta = new Eta({ views: TEMPLATES, cache: true });
 
-const f = (value: number, digits = 2) => value.toFixed(digits);
 const ms = (value: number) => `${f(value)} ms`;
-const LEVEL = { error: "Error", regression: "Regression", warning: "Warning", info: "Note" };
 const COLORS = [
   "#e8b860",
   "#7fb4ff",

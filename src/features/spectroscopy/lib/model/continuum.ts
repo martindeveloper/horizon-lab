@@ -1,4 +1,9 @@
-import { airToVacuum, CLASSICAL_ELECTRON_RADIUS_M, HC_EV_NM } from "@horizon/toolkit/science";
+import {
+  airToVacuum,
+  CLASSICAL_ELECTRON_RADIUS_M,
+  HC_EV_NM,
+  SECOND_RADIATION_CONSTANT,
+} from "@horizon/toolkit/science";
 
 import { ionizationEnergy, partitionFunction } from "./atoms";
 import {
@@ -6,6 +11,7 @@ import {
   BOLTZMANN_EV,
   ionizationFractions,
   NUCLEI_PER_KILOGRAM,
+  RYDBERG_HYDROGEN,
 } from "./populations";
 
 /**
@@ -21,7 +27,7 @@ import {
  * absorption, with the Planck function as source).
  */
 
-export type ContinuumGas = {
+type ContinuumGas = {
   /** K. */
   temperature: number;
   /** Pa. */
@@ -30,7 +36,7 @@ export type ContinuumGas = {
   gasPressure: number;
 };
 
-export const CONTINUUM_SOURCES = [
+const CONTINUUM_SOURCES = [
   "hMinusBoundFree",
   "hMinusFreeFree",
   "hydrogenBoundFree",
@@ -38,10 +44,10 @@ export const CONTINUUM_SOURCES = [
   "electrons",
   "rayleigh",
 ] as const;
-export type ContinuumSource = (typeof CONTINUUM_SOURCES)[number];
+type ContinuumSource = (typeof CONTINUUM_SOURCES)[number];
 
 /** hc/k, μm K. */
-const SECOND_RADIATION_UM = 1.4388e4;
+const SECOND_RADIATION_UM = SECOND_RADIATION_CONSTANT * 1e6;
 /** H⁻'s photodetachment threshold, μm (0.754 eV). */
 const H_MINUS_THRESHOLD = 1.6419;
 /** John (1988), eq. 4–5: H⁻ bound-free cross-section, the f(λ) series. */
@@ -60,7 +66,7 @@ const H_MINUS_FF = [
 ] as const;
 const H_MINUS_FF_SHORTEST = 0.3645;
 /** Hydrogen's Rydberg constant, Å⁻¹. */
-const RYDBERG_PER_ANGSTROM = 1.09678e-3;
+const RYDBERG_PER_ANGSTROM = RYDBERG_HYDROGEN * 1e-10;
 /** Kramers' bound-free cross-section at n = 1 per Å³ of wavelength, cm² (Gray eq. 8.4). */
 const KRAMERS = 1.0449e-26;
 /** Hydrogen's ionization energy, eV (NIST). */

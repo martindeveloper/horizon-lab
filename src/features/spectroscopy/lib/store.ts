@@ -1,6 +1,8 @@
 import { create } from "zustand";
 
+import { guideSlice, type GuideSlice } from "@/lib/scene-store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import { clamp } from "@horizon/toolkit/math";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import { viewFromPath } from "../routing";
@@ -9,6 +11,9 @@ import { poseOf, type GuidePose } from "./model/guide-motion";
 import {
   BENCH_DEFAULT,
   BENCH_RANGE,
+  DEFAULT_RESOLUTION,
+  FULL_RANGE,
+  RESOLUTION_RANGE,
   SEQUENCE_DEFAULT,
   defaultVelocity,
   drawDeck,
@@ -21,122 +26,107 @@ import {
   type Settings,
   type StarChoice,
 } from "./model/scenes";
-import { FULL_RANGE, TOUR } from "./model/tour";
+import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import type { CanvasAntialias } from "./quality";
 
-export type Panel = "none" | "elements" | "view";
+type Panel = "none" | "elements" | "view";
 
 /** What the guide puts back when it ends: the visitor's own settings. */
-type Saved = Pick<
-  SpectroscopyStore,
-  | "view"
-  | "star"
-  | "velocity"
-  | "air"
-  | "bench"
-  | "mystery"
-  | "result"
-  | "compare"
-  | "letters"
-  | "range"
->;
+type Saved = Pick<Settings, "view" | "star" | "velocity" | "air" | "bench" | "mystery"> & {
+  result: MysteryResult | null;
+  compare: readonly ElementId[];
+  letters: boolean;
+  range: readonly [number, number];
+};
 
 /** A case's answer so far: the elements marked and the shift given the markers. */
 type Draft = { marked: readonly ElementId[]; velocity: number };
 
 /** The narrowest window the spectrum zooms to, nm. */
 export const MIN_SPAN = 0.4;
-/** Resolving powers the spectrograph offers. */
-export const RESOLUTION_RANGE = [300, 100_000] as const;
 
-export type SpectroscopyStore = Settings & {
-  /** The first spectrum is drawn. */
-  ready: boolean;
-  panel: Panel;
-  /** The selected line's id. */
-  selection: string | null;
-  /** The wavelength window, nm. */
-  range: readonly [number, number];
-  /** Flux divided by the continuum, as astronomers plot it. */
-  normalized: boolean;
-  /** Fraunhofer's letters over the lines he named. */
-  letters: boolean;
-  /** Elements whose laboratory wavelengths are marked under the spectrum. */
-  compare: readonly ElementId[];
-  /** The mystery cases, in the order they are offered. */
-  deck: readonly Mystery[];
-  /** Which case is open. */
-  caseIndex: number;
-  /** Each case's answer so far, kept while the visitor tries another. */
-  drafts: readonly (Draft | undefined)[];
-  /** Each checked case's result. */
-  results: readonly (MysteryResult | undefined)[];
-  /** The open mystery's result, once checked: its answer is shown. */
-  result: MysteryResult | null;
-  /** The scene's schematic photons fly (never under reduced motion). */
-  photons: boolean;
-  /** How sharply the canvases are drawn (`canvasScale`), for this visit. */
-  quality: RenderQuality;
-  antialias: CanvasAntialias;
-  /** Spectral colours in Display P3, where the screen shows it (`drawingGamut`). */
-  wideColour: boolean;
-  setReady: () => void;
-  setView: (view: ViewId) => void;
-  setStar: (star: StarChoice) => void;
-  setSequenceTemperature: (kelvin: number) => void;
-  setVelocity: (kmPerS: number) => void;
-  setAir: (air: boolean) => void;
-  setResolution: (resolution: number) => void;
-  patchBench: (patch: Partial<Bench>) => void;
-  toggleGas: (element: ElementId) => void;
-  /** Opens a case of the deck. */
-  setCase: (index: number) => void;
-  /** Scores the open mystery as the visitor sees it (their resolving power and air). */
-  check: () => void;
-  /** Moves the markers onto the answer: the right elements at the right velocity. */
-  showAnswer: () => void;
-  /** Deals a new deck. */
-  shuffleCases: () => void;
-  toggleCompare: (element: ElementId) => void;
-  /** The marked element whose strongest line a mystery's velocity is measured on. */
-  measure: ElementId | null;
-  setMeasure: (element: ElementId) => void;
-  /** An element whose lab lines are shown while the pointer or focus rests on its tile. */
-  preview: ElementId | null;
-  setPreview: (element: ElementId | null) => void;
-  setRange: (range: readonly [number, number]) => void;
-  /** Zooms by `factor` (below 1 zooms in) about a wavelength. */
-  zoom: (factor: number, about?: number) => void;
-  /** Slides the window by a fraction of its width. */
-  pan: (fraction: number) => void;
-  select: (id: string | null) => void;
-  setPanel: (panel: Panel) => void;
-  setNormalized: (normalized: boolean) => void;
-  setLetters: (letters: boolean) => void;
-  setPhotons: (photons: boolean) => void;
-  setQuality: (quality: RenderQuality) => void;
-  setAntialias: (antialias: CanvasAntialias) => void;
-  setWideColour: (wideColour: boolean) => void;
-  /** The View panel's settings as a visit starts: spectrograph, switches, window, render quality. */
-  resetView: () => void;
-  guideOpen: boolean;
-  guideStep: number;
-  /** The guide moves on by itself once a step has been read; off under reduced motion. */
-  guidePlaying: boolean;
-  /** The step's motion has arrived (the window, temperatures and velocity are in place). */
-  guideLanded: boolean;
-  /** Where the step's motion is heading. */
-  guideTarget: GuidePose | null;
-  savedBeforeGuide: Saved | null;
-  startGuide: () => void;
-  /** Starts a step: its discrete settings switch now, its motion heads for `guideTarget`. */
-  goGuide: (step: number) => void;
-  /** Ends the step's motion: the target pose in place, the step's line open. */
-  landGuide: () => void;
-  toggleGuidePlaying: () => void;
-  endGuide: () => void;
-};
+type SpectroscopyStore = Settings &
+  GuideSlice<Saved> & {
+    /** The first spectrum is drawn. */
+    ready: boolean;
+    panel: Panel;
+    /** The selected line's id. */
+    selection: string | null;
+    /** The wavelength window, nm. */
+    range: readonly [number, number];
+    /** Flux divided by the continuum, as astronomers plot it. */
+    normalized: boolean;
+    /** Fraunhofer's letters over the lines he named. */
+    letters: boolean;
+    /** Elements whose laboratory wavelengths are marked under the spectrum. */
+    compare: readonly ElementId[];
+    /** The mystery cases, in the order they are offered. */
+    deck: readonly Mystery[];
+    /** Which case is open. */
+    caseIndex: number;
+    /** Each case's answer so far, kept while the visitor tries another. */
+    drafts: readonly (Draft | undefined)[];
+    /** Each checked case's result. */
+    results: readonly (MysteryResult | undefined)[];
+    /** The open mystery's result, once checked: its answer is shown. */
+    result: MysteryResult | null;
+    /** The scene's schematic photons fly (never under reduced motion). */
+    photons: boolean;
+    /** How sharply the canvases are drawn (`canvasScale`), for this visit. */
+    quality: RenderQuality;
+    antialias: CanvasAntialias;
+    /** Spectral colours in Display P3, where the screen shows it (`drawingGamut`). */
+    wideColour: boolean;
+    setReady: () => void;
+    setView: (view: ViewId) => void;
+    setStar: (star: StarChoice) => void;
+    setSequenceTemperature: (kelvin: number) => void;
+    setVelocity: (kmPerS: number) => void;
+    setAir: (air: boolean) => void;
+    setResolution: (resolution: number) => void;
+    patchBench: (patch: Partial<Bench>) => void;
+    toggleGas: (element: ElementId) => void;
+    /** Opens a case of the deck. */
+    setCase: (index: number) => void;
+    /** Scores the open mystery as the visitor sees it (their resolving power and air). */
+    check: () => void;
+    /** Moves the markers onto the answer: the right elements at the right velocity. */
+    showAnswer: () => void;
+    /** Deals a new deck. */
+    shuffleCases: () => void;
+    toggleCompare: (element: ElementId) => void;
+    /** The marked element whose strongest line a mystery's velocity is measured on. */
+    measure: ElementId | null;
+    setMeasure: (element: ElementId) => void;
+    /** An element whose lab lines are shown while the pointer or focus rests on its tile. */
+    preview: ElementId | null;
+    setPreview: (element: ElementId | null) => void;
+    setRange: (range: readonly [number, number]) => void;
+    /** Zooms by `factor` (below 1 zooms in) about a wavelength. */
+    zoom: (factor: number, about?: number) => void;
+    /** Slides the window by a fraction of its width. */
+    pan: (fraction: number) => void;
+    select: (id: string | null) => void;
+    setPanel: (panel: Panel) => void;
+    setNormalized: (normalized: boolean) => void;
+    setLetters: (letters: boolean) => void;
+    setPhotons: (photons: boolean) => void;
+    setQuality: (quality: RenderQuality) => void;
+    setAntialias: (antialias: CanvasAntialias) => void;
+    setWideColour: (wideColour: boolean) => void;
+    /** The View panel's settings as a visit starts: spectrograph, switches, window, render quality. */
+    resetView: () => void;
+    /** The guide moves on by itself once a step has been read; off under reduced motion. */
+    guidePlaying: boolean;
+    /** The step's motion has arrived (the window, temperatures and velocity are in place). */
+    guideLanded: boolean;
+    /** Where the step's motion is heading. */
+    guideTarget: GuidePose | null;
+    /** Ends the step's motion: the target pose in place, the step's line open. */
+    landGuide: () => void;
+    toggleGuidePlaying: () => void;
+  };
 
 /** A pose written into the store's own fields. */
 const placePose = (s: SpectroscopyStore, pose: GuidePose) => ({
@@ -147,17 +137,29 @@ const placePose = (s: SpectroscopyStore, pose: GuidePose) => ({
 });
 
 /** A window inside the visible range, at least `MIN_SPAN` wide. */
-export function clampRange([from, to]: readonly [number, number]): readonly [number, number] {
+function clampRange([from, to]: readonly [number, number]): readonly [number, number] {
   const [lo, hi] = FULL_RANGE;
   const span = Math.min(hi - lo, Math.max(MIN_SPAN, to - from));
   const start = Math.min(hi - span, Math.max(lo, from));
   return [start, start + span];
 }
 
-const clamp = (v: number, [lo, hi]: readonly [number, number]) => Math.min(hi, Math.max(lo, v));
-
 const initialView: ViewId = typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath();
+/* Dealt as the store is made: the mystery view may be the first page (`viewFromPath`), and
+   `mystery` is part of every `Settings`, so there is no later moment and no placeholder case
+   that would not show. The draw costs microseconds; nothing else reads `Math.random` at load. */
 const initialDeck = drawDeck();
+
+/** The View panel's settings as a visit starts; `resetView` puts them back. */
+const VIEW_DEFAULTS = {
+  resolution: DEFAULT_RESOLUTION,
+  normalized: false,
+  photons: true,
+  range: FULL_RANGE,
+  quality: "standard",
+  antialias: "off",
+  wideColour: false,
+} as const satisfies Partial<SpectroscopyStore>;
 
 const replaced = <T>(items: readonly T[], index: number, item: T) => {
   const out = [...items];
@@ -191,7 +193,6 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   sequenceTemperature: SEQUENCE_DEFAULT,
   velocity: defaultVelocity(initialView, "vega"),
   air: true,
-  resolution: 20_000,
   bench: BENCH_DEFAULT,
   mystery: initialDeck[0]!,
   deck: initialDeck,
@@ -202,14 +203,9 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   ready: false,
   panel: "none",
   selection: null,
-  range: FULL_RANGE,
-  normalized: false,
+  ...VIEW_DEFAULTS,
   letters: true,
   compare: [],
-  photons: true,
-  quality: "standard",
-  antialias: "off",
-  wideColour: false,
   setReady: () => set({ ready: true }),
   setView: (view) =>
     set((s) => {
@@ -222,16 +218,16 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   setSequenceTemperature: (kelvin) => set({ sequenceTemperature: kelvin }),
   setVelocity: (velocity) => set({ velocity }),
   setAir: (air) => set({ air }),
-  setResolution: (resolution) => set({ resolution: clamp(resolution, RESOLUTION_RANGE) }),
+  setResolution: (resolution) => set({ resolution: clamp(resolution, ...RESOLUTION_RANGE) }),
   patchBench: (patch) =>
     set((s) => {
       const bench = { ...s.bench, ...patch };
       return {
         bench: {
           ...bench,
-          lamp: bench.lamp > 0 ? clamp(bench.lamp, BENCH_RANGE.lamp) : 0,
-          gas: clamp(bench.gas, BENCH_RANGE.gas),
-          column: clamp(bench.column, BENCH_RANGE.column),
+          lamp: bench.lamp > 0 ? clamp(bench.lamp, ...BENCH_RANGE.lamp) : 0,
+          gas: clamp(bench.gas, ...BENCH_RANGE.gas),
+          column: clamp(bench.column, ...BENCH_RANGE.column),
         },
       };
     }),
@@ -316,71 +312,52 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   setQuality: (quality) => set({ quality }),
   setAntialias: (antialias) => set({ antialias }),
   setWideColour: (wideColour) => set({ wideColour }),
-  resetView: () =>
-    set({
-      resolution: 20_000,
-      normalized: false,
-      photons: true,
-      range: FULL_RANGE,
-      quality: "standard",
-      antialias: "off",
-      wideColour: false,
+  resetView: () => set(VIEW_DEFAULTS),
+  ...guideSlice(set, get, {
+    tour: TOUR,
+    save: (s) => ({
+      view: s.view,
+      star: s.star,
+      velocity: s.velocity,
+      air: s.air,
+      bench: s.bench,
+      mystery: s.mystery,
+      result: s.result,
+      compare: s.compare,
+      letters: s.letters,
+      range: s.range,
     }),
-  guideOpen: false,
-  guideStep: 0,
+    restore: (saved) => saved,
+    open: () => ({ guidePlaying: !prefersReducedMotion() }),
+    /* A step's discrete settings switch now; its motion heads for `guideTarget`. */
+    apply: (step, s) => {
+      const star = step.star ?? s.star;
+      const bench = step.bench ?? s.bench;
+      return {
+        guideLanded: false,
+        guideTarget: poseOf({
+          range: step.range ?? FULL_RANGE,
+          velocity: step.velocity ?? defaultVelocity(step.view, star),
+          bench,
+          sequenceTemperature: s.sequenceTemperature,
+        }),
+        view: step.view,
+        star,
+        /* The elements switch now; their amount, the lamp and the gas glide (guide-motion.ts). */
+        bench: { ...s.bench, elements: bench.elements },
+        mystery: step.mystery ?? s.mystery,
+        air: step.air ?? s.air,
+        letters: step.letters ?? s.letters,
+        compare: step.compare ?? [],
+        selection: null,
+        result: null,
+      };
+    },
+    close: () => ({ guideLanded: false, guideTarget: null }),
+  }),
   guidePlaying: false,
   guideLanded: false,
   guideTarget: null,
-  savedBeforeGuide: null,
-  startGuide: () => {
-    const s = get();
-    set({
-      guideOpen: true,
-      guidePlaying: !prefersReducedMotion(),
-      panel: "none",
-      savedBeforeGuide: s.savedBeforeGuide ?? {
-        view: s.view,
-        star: s.star,
-        velocity: s.velocity,
-        air: s.air,
-        bench: s.bench,
-        mystery: s.mystery,
-        result: s.result,
-        compare: s.compare,
-        letters: s.letters,
-        range: s.range,
-      },
-    });
-    get().goGuide(0);
-  },
-  goGuide: (index) => {
-    const step = TOUR[index];
-    if (!get().guideOpen || index < 0) return;
-    if (!step) return get().endGuide();
-    const s = get();
-    const star = step.star ?? s.star;
-    const bench = step.bench ?? s.bench;
-    set({
-      guideStep: index,
-      guideLanded: false,
-      guideTarget: poseOf({
-        range: step.range ?? FULL_RANGE,
-        velocity: step.velocity ?? defaultVelocity(step.view, star),
-        bench,
-        sequenceTemperature: s.sequenceTemperature,
-      }),
-      view: step.view,
-      star,
-      /* The elements switch now; their amount, the lamp and the gas glide (guide-motion.ts). */
-      bench: { ...s.bench, elements: bench.elements },
-      mystery: step.mystery ?? s.mystery,
-      air: step.air ?? s.air,
-      letters: step.letters ?? s.letters,
-      compare: step.compare ?? [],
-      selection: null,
-      result: null,
-    });
-  },
   landGuide: () => {
     const s = get();
     if (!s.guideOpen || !s.guideTarget) return;
@@ -391,14 +368,4 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
     });
   },
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
-  endGuide: () =>
-    set((s) => ({
-      guideOpen: false,
-      guideStep: 0,
-      guideLanded: false,
-      guideTarget: null,
-      selection: null,
-      ...s.savedBeforeGuide,
-      savedBeforeGuide: null,
-    })),
 }));

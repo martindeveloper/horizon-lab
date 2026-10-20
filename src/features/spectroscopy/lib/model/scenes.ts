@@ -1,12 +1,20 @@
 import { mainSequencePhotosphere, SEQUENCE_RANGE, starPhotosphere } from "./atmospheres";
-import { ELEMENT_IDS, type ElementId } from "./atoms";
-import { synthesize, type Observation, type StarObservation } from "./spectrum";
-import { spectralClass, STARS, type StarId } from "./stars";
+import { ELEMENT_IDS, type ElementId, type Line } from "./atoms";
+import { reportLine, synthesize, type Observation, type StarObservation } from "./spectrum";
+import { SEQUENCE_TEMPERATURES, spectralClass, STARS, type StarId } from "./stars";
 import type { ViewId } from "./view-ids";
 
 /**
  * What each view looks at, as plain settings the store keeps and the spectrum is computed from.
  */
+
+/** The visible range the spectrograph covers, nm: every window lies inside it. */
+export const FULL_RANGE = [380, 770] as const;
+/** Resolving powers λ / Δλ the spectrograph offers, and the one a visit starts at. */
+export const RESOLUTION_RANGE = [300, 100_000] as const;
+export const DEFAULT_RESOLUTION = 20_000;
+/** Microturbulence of the main-sequence models, km/s: the ATLAS9 grid's own. */
+const SEQUENCE_MICROTURBULENCE = 2;
 
 /** The lab bench: a lamp, a gas and a spectrograph. */
 export type Bench = {
@@ -73,7 +81,7 @@ const DRAW_KINDS: readonly DrawKind[] = ["flame", "cell", "B", "A", "F", "G", "K
 const BENCH_KINDS: readonly DrawKind[] = ["flame", "cell"];
 
 /** Cases in one deck. */
-export const DECK_SIZE = 5;
+const DECK_SIZE = 5;
 
 type Random = () => number;
 const between = (random: Random, [lo, hi]: readonly [number, number], step: number) =>
@@ -126,9 +134,34 @@ export function drawDeck(random: Random = Math.random, size = DECK_SIZE): Myster
   return shuffled(random, kinds).map((kind) => drawCase(kind, random));
 }
 
-/** A gas's columns: each element at a column that shows plainly at the bench's pressures. */
+/** A gas's columns: each element at 10^`log` atoms per m² of column. */
 const columnsOf = (elements: readonly ElementId[], log: number) =>
   Object.fromEntries(elements.map((id) => [id, 10 ** log]));
+
+const star = (observation: Omit<StarObservation, "kind">): StarObservation => ({
+  kind: "star",
+  ...observation,
+});
+
+/** A named star in its own model, with its own microturbulence. */
+const namedStar = (id: StarId, velocity: number, airmass: number, resolution: number) =>
+  star({
+    photosphere: starPhotosphere(id),
+    microturbulence: STARS[id].microturbulence,
+    velocity,
+    airmass,
+    resolution,
+  });
+
+/** A main-sequence star at an effective temperature, from the model grid. */
+const sequenceStar = (teff: number, velocity: number, airmass: number, resolution: number) =>
+  star({
+    photosphere: mainSequencePhotosphere(teff),
+    microturbulence: SEQUENCE_MICROTURBULENCE,
+    velocity,
+    airmass,
+    resolution,
+  });
 
 function mysteryObservation(m: Mystery, resolution: number, airmass: number): Observation {
   switch (m.kind) {
@@ -153,15 +186,9 @@ function mysteryObservation(m: Mystery, resolution: number, airmass: number): Ob
         resolution,
       };
     case "dwarf":
-      return star(mainSequencePhotosphere(m.teff), 2, m.velocity, airmass, resolution);
+      return sequenceStar(m.teff, m.velocity, airmass, resolution);
     case "giant":
-      return star(
-        starPhotosphere(m.star),
-        STARS[m.star].microturbulence,
-        m.velocity,
-        airmass,
-        resolution,
-      );
+      return namedStar(m.star, m.velocity, airmass, resolution);
   }
 }
 
@@ -172,16 +199,6 @@ export const mysteryVelocity = (m: Mystery) =>
 /** The case's temperature, K: the gas's, or the star's effective temperature. */
 export const mysteryTemperature = (m: Mystery) =>
   m.kind === "dwarf" ? m.teff : m.kind === "giant" ? STARS[m.star].teff : m.temperature;
-
-function star(
-  photosphere: StarObservation["photosphere"],
-  microturbulence: number,
-  velocity: number,
-  airmass: number,
-  resolution: number,
-): StarObservation {
-  return { kind: "star", photosphere, microturbulence, velocity, airmass, resolution };
-}
 
 export type Settings = {
   view: ViewId;
@@ -218,7 +235,7 @@ export function observationFor(s: Settings): Observation {
         gas: {
           ...BENCH_GAS,
           temperature: s.bench.gas,
-          columns: Object.fromEntries(s.bench.elements.map((id) => [id, 10 ** s.bench.column])),
+          columns: columnsOf(s.bench.elements, s.bench.column),
         },
         background: s.bench.lamp > 0 ? s.bench.lamp : null,
         velocity: 0,
@@ -226,26 +243,39 @@ export function observationFor(s: Settings): Observation {
         resolution: s.resolution,
       };
     case "sun":
-      return star(
-        starPhotosphere("sun"),
-        STARS.sun.microturbulence,
-        s.velocity,
-        airmass,
-        s.resolution,
-      );
+      return namedStar("sun", s.velocity, airmass, s.resolution);
     case "stars":
       return s.star === "sequence"
-        ? star(mainSequencePhotosphere(s.sequenceTemperature), 2, s.velocity, airmass, s.resolution)
-        : star(
-            starPhotosphere(s.star),
-            STARS[s.star].microturbulence,
-            s.velocity,
-            airmass,
-            s.resolution,
-          );
+        ? sequenceStar(s.sequenceTemperature, s.velocity, airmass, s.resolution)
+        : namedStar(s.star, s.velocity, airmass, s.resolution);
     case "mystery":
       return mysteryObservation(s.mystery, s.resolution, airmass);
   }
+}
+
+/** The star in view's effective temperature, K; null on the bench. */
+export function temperatureInView(
+  s: Pick<Settings, "view" | "star" | "sequenceTemperature">,
+  obs: Observation,
+) {
+  if (obs.kind !== "star") return null;
+  if (s.view === "sun") return STARS.sun.teff;
+  if (s.view === "stars") return s.star === "sequence" ? s.sequenceTemperature : STARS[s.star].teff;
+  return obs.photosphere.teff;
+}
+
+/**
+ * The sequence chart is drawn at the finest resolving power, so a line's run down the main
+ * sequence does not change with the visitor's spectrograph.
+ */
+const SEQUENCE_RESOLUTION = RESOLUTION_RANGE[1];
+
+/** This line's equivalent width down the main sequence, nm, at `SEQUENCE_TEMPERATURES`. */
+export function sequenceWidths(line: Line): [number, number][] {
+  return SEQUENCE_TEMPERATURES.map((teff) => [
+    teff,
+    reportLine(line, sequenceStar(teff, 0, 0, SEQUENCE_RESOLUTION))?.equivalentWidth ?? 0,
+  ]);
 }
 
 /** How far the laboratory markers are shifted: only in a mystery, where finding it is the task. */
@@ -255,12 +285,12 @@ export const markerVelocity = (s: Pick<Settings, "view" | "velocity">) =>
 /**
  * How much each element shapes a mystery's spectrum, as the visitor sees it (their resolving
  * power, with or without Earth's air): the largest change, against the continuum (or the
- * brightest line, for a glowing gas), that removing the element makes between 380 and 770 nm.
+ * brightest line, for a glowing gas), that removing the element makes across `FULL_RANGE`.
  */
-export function mysteryChanges(m: Mystery, resolution: number, airmass: number) {
+function mysteryChanges(m: Mystery, resolution: number, airmass: number) {
   const obs = mysteryObservation(m, resolution, airmass);
   const samples = 3000;
-  const base = synthesize(obs, 380, 770, samples);
+  const base = synthesize(obs, ...FULL_RANGE, samples);
   const changes = new Map<ElementId, number>();
   for (const element of ELEMENT_IDS) {
     if (obs.kind === "slab" && !obs.gas.columns[element]) continue;
@@ -276,7 +306,7 @@ export function mysteryChanges(m: Mystery, resolution: number, airmass: number) 
             },
           }
         : { ...obs, abundances: { ...obs.abundances, [element]: -20 } };
-    const other = synthesize(without, 380, 770, samples);
+    const other = synthesize(without, ...FULL_RANGE, samples);
     let change = 0;
     for (let i = 0; i < samples; i++) {
       const scale = base.continuum[i]! > 0 ? base.continuum[i]! : base.peak;
@@ -291,16 +321,19 @@ export function mysteryChanges(m: Mystery, resolution: number, airmass: number) 
  * An element is clearly shown when it changes the spectrum by a tenth of the continuum, and
  * faintly from 3 %: a faint one counts when found but is not required.
  */
-export const SHOWN = { clear: 0.1, faint: 0.03 } as const;
+const SHOWN = { clear: 0.1, faint: 0.03 } as const;
 
 export type MysteryAnswer = { clear: ReadonlySet<ElementId>; faint: ReadonlySet<ElementId> };
 
-const answers = new Map<string, MysteryAnswer>();
+/** Answers by case and by the settings they were seen under; they go with their deck. */
+const answers = new WeakMap<Mystery, Map<string, MysteryAnswer>>();
 
-/** The elements a mystery shows as the visitor sees it; computed once per mystery and settings. */
+/** The elements a mystery shows as the visitor sees it; computed once per case and settings. */
 export function mysteryAnswer(m: Mystery, resolution: number, airmass: number): MysteryAnswer {
-  const key = `${JSON.stringify(m)}|${resolution}|${airmass}`;
-  const known = answers.get(key);
+  let seen = answers.get(m);
+  if (!seen) answers.set(m, (seen = new Map()));
+  const key = `${resolution}|${airmass}`;
+  const known = seen.get(key);
   if (known) return known;
   const clear = new Set<ElementId>();
   const faint = new Set<ElementId>();
@@ -308,7 +341,7 @@ export function mysteryAnswer(m: Mystery, resolution: number, airmass: number): 
     if (change > SHOWN.clear) clear.add(element);
     else if (change > SHOWN.faint) faint.add(element);
   const answer = { clear, faint };
-  answers.set(key, answer);
+  seen.set(key, answer);
   return answer;
 }
 
@@ -327,7 +360,7 @@ export function verdict(answer: MysteryAnswer, element: ElementId, marked: boole
 }
 
 /** How close a matched velocity must be, km/s. */
-export const VELOCITY_MATCH = 10;
+const VELOCITY_MATCH = 10;
 
 export type Outcome = "solved" | "close" | "missed";
 

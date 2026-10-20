@@ -7,14 +7,14 @@
 import type { Quality } from "./holes/types";
 
 /** A frame's work: buffer pixels and pixels per CSS pixel at most, frames per second. */
-export type WorkBudget = {
+type WorkBudget = {
   pixels: number;
   dprCap: number;
   /** Target frame rate at rest and while the view moves. */
   fps: { idle: number; active: number };
 };
 
-export type BlackHoleQuality = {
+type BlackHoleQuality = {
   /** Integration steps per pixel. */
   steps: number;
   /** Share of the stage's resolution traced, before the pixel budget. */

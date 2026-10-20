@@ -20,9 +20,6 @@ export const schwarzschild: HoleSpec = {
   id: "schwarzschild",
   name: "Schwarzschild",
   kind: "theory",
-  catalog: "a = 0",
-  blurb:
-    "No spin, no charge. Spherical vacuum geometry, ISCO at 6M – the geometry Schwarzschild wrote down. A solution, not a catalog source.",
   massSolar: 1e8,
   spin: 0,
   inclination: 0.38,
@@ -37,6 +34,7 @@ export const schwarzschild: HoleSpec = {
   tour: [
     // Symmetric geometry, symmetric camera: straight dollies, level horizon.
     {
+      phase: "wide",
       duration: 9,
       yaw: 0.6,
       inclination: 0.22,
@@ -45,6 +43,7 @@ export const schwarzschild: HoleSpec = {
       eq: "ds² = −(1 − 2M/r) dt² + (1 − 2M/r)⁻¹ dr² + r² dΩ²",
     },
     {
+      phase: "dolly",
       duration: 9,
       yaw: 0.5,
       inclination: 0.88,
@@ -55,6 +54,7 @@ export const schwarzschild: HoleSpec = {
       eq: "r₊ = 2M    ·    r_ph = 3M    ·    r_ISCO = 6M",
     },
     {
+      phase: "detail",
       duration: 8,
       yaw: 0.3,
       inclination: 1.18,
@@ -64,6 +64,7 @@ export const schwarzschild: HoleSpec = {
     },
     // A slow 135° sweep low around the disk: every side looks alike but one.
     {
+      phase: "hold",
       duration: 10,
       yaw: -2.36,
       inclination: 0.32,
@@ -72,6 +73,6 @@ export const schwarzschild: HoleSpec = {
       drift: -0.006,
       sketch: [{ kind: "flow" }],
     },
-    { duration: 9, yaw: 1, inclination: 0.72, distance: 128 },
+    { phase: "wide", duration: 9, yaw: 1, inclination: 0.72, distance: 128 },
   ],
 };

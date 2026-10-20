@@ -1,7 +1,6 @@
 import {
   AdditiveBlending,
   BackSide,
-  CanvasTexture,
   Color,
   CustomBlending,
   DataTexture,
@@ -20,11 +19,10 @@ import {
   type Texture,
 } from "three";
 
-import { includesId, keysOf, partialFrom, recordFrom } from "@/lib/records";
 import {
   FIGURES,
   MAPS,
-  MOONS,
+  MOON_IDS,
   PLANET_IDS,
   RINGS,
   ringStrip,
@@ -34,9 +32,17 @@ import {
   type PlanetId,
   type RingSystem,
 } from "@horizon/toolkit/bodies";
-import { surfaceMap, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
+import { mix, surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import { clamp01, valueNoise2 } from "@horizon/toolkit/math";
-import { glowSprite, radialSprite, spriteMaterial } from "@horizon/toolkit/scene";
+import { includesId, keysOf, partialFrom, recordFrom } from "@horizon/toolkit/records";
+import {
+  SOLAR_GOLD,
+  glowSprite,
+  paintedTexture,
+  radialSprite,
+  spriteMaterial,
+  type TexelPainter,
+} from "@horizon/toolkit/scene";
 
 import FOCUS_FRAG from "./shaders/focus.frag.glsl";
 import FOCUS_VERT from "./shaders/focus.vert.glsl";
@@ -56,88 +62,51 @@ import SUN_FRAG from "./shaders/sun.frag.glsl";
  */
 import VERT from "./shaders/surface.vert.glsl";
 
-type Rgb = [number, number, number];
-const mix3 = (a: Rgb, b: Rgb, t: number): Rgb => [
-  a[0] + (b[0] - a[0]) * t,
-  a[1] + (b[1] - a[1]) * t,
-  a[2] + (b[2] - a[2]) * t,
-];
-
-type Painter = (lon: number, lat: number) => [number, number, number, number];
-
-function paint(w: number, h: number, fn: Painter) {
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const g = canvas.getContext("2d");
-  if (!g) throw new Error("2D canvas unavailable");
-  const img = g.createImageData(w, h);
-  const data = img.data;
-  for (let y = 0; y < h; y += 1) {
-    for (let x = 0; x < w; x += 1) {
-      const px = fn(x / w, y / h);
-      const i = (y * w + x) * 4;
-      data[i] = px[0];
-      data[i + 1] = px[1];
-      data[i + 2] = px[2];
-      data[i + 3] = px[3];
-    }
-  }
-  g.putImageData(img, 0, 0);
-  const tex = new CanvasTexture(canvas);
-  tex.colorSpace = SRGBColorSpace;
+function paint(w: number, h: number, fn: TexelPainter) {
+  const tex = paintedTexture(w, h, fn);
   tex.anisotropy = 2;
   return tex;
 }
 
 /** A young, flaring gas disk: bright and warm inside, bluish and thinning outward. */
-const gasPainter: Painter = (u, v) => {
+const gasPainter: TexelPainter = (u, v) => {
   const r = Math.hypot(u - 0.5, v - 0.5) * 2;
   if (r > 1) return [0, 0, 0, 0];
   const n = valueNoise2(u * 24, v * 24) * 0.35 + 0.65;
   const inner = Math.exp(-r * 7);
   const body = Math.exp(-r * 2.2) * (1 - inner);
-  const rgb = mix3(mix3([120, 150, 190], [236, 214, 170], inner), [255, 240, 210], inner * 0.6);
+  const rgb = mix(mix([120, 150, 190], [236, 214, 170], inner), [255, 240, 210], inner * 0.6);
   const alpha = clamp01((inner * 0.9 + body * 0.3) * n);
   return [rgb[0], rgb[1], rgb[2], Math.round(alpha * 255)];
 };
-const diskPainter: Painter = (u, v) => {
+const diskPainter: TexelPainter = (u, v) => {
   const r = Math.hypot(u - 0.5, v - 0.5) * 2;
   const band = Math.exp(-((r - 0.72) * (r - 0.72)) / 0.02);
   return [158, 188, 204, Math.round(band * 150)];
 };
 
-/** A surface map as a texture; its pixel array stays with it, so a lost context re-uploads it. */
-function mapTexture(id: BodyId, w: number, h: number): Texture {
-  const north = surfaceMap(id, w, h);
-  /* Rows are painted from the north pole down; GL's first row is v = 0, the south. */
-  const data = new Uint8Array(north.length);
-  const row = w * 4;
-  for (let y = 0; y < h; y += 1)
-    data.set(north.subarray(y * row, (y + 1) * row), (h - 1 - y) * row);
-  const tex = new DataTexture(data, w, h);
-  tex.colorSpace = SRGBColorSpace;
-  tex.wrapS = RepeatWrapping;
-  tex.magFilter = LinearFilter;
-  tex.minFilter = LinearMipmapLinearFilter;
-  tex.generateMipmaps = true;
-  tex.anisotropy = 2;
-  tex.needsUpdate = true;
-  return tex;
-}
-
-/** A finished pixel array (rows in GL order) as a sharp, mipmapped surface texture. */
-function detailTexture(job: SurfaceJob): Texture {
+/** A finished map (rows in GL order) as a mipmapped surface texture; the job's pixels stay with it, so a lost context re-uploads them. */
+function dataTexture(job: SurfaceJob, anisotropy: number): Texture {
   const tex = new DataTexture(job.data, job.width, job.height);
   tex.colorSpace = SRGBColorSpace;
   tex.wrapS = RepeatWrapping;
   tex.magFilter = LinearFilter;
   tex.minFilter = LinearMipmapLinearFilter;
   tex.generateMipmaps = true;
-  tex.anisotropy = 4;
+  tex.anisotropy = anisotropy;
   tex.needsUpdate = true;
   return tex;
 }
+
+/** A body's painted surface map as a texture. */
+function mapTexture(id: BodyId, w: number, h: number): Texture {
+  const job = surfaceJob(id, w, h);
+  job.step(h);
+  return dataTexture(job, 2);
+}
+
+/** A finished detailed map as a sharp surface texture. */
+const detailTexture = (job: SurfaceJob): Texture => dataTexture(job, 4);
 
 /** A ring system's radial strip: colour and normal opacity per 1/RING_TEXELS of its width. */
 const RING_TEXELS = 1024;
@@ -383,7 +352,7 @@ export function createLooks(light = false) {
     }),
     focus: new ShaderMaterial({
       uniforms: {
-        color: { value: new Color("#e2c07a") },
+        color: { value: new Color(SOLAR_GOLD) },
         opacity: { value: 0.95 },
         size: { value: 1 },
         lock: { value: 1 },
@@ -407,7 +376,6 @@ export function createLooks(light = false) {
     sunHalo,
     glow,
   ];
-  const moonIds = MOONS.map((moon) => moon.id);
   const paintedOf = (id: BodyId): Texture => {
     if (id === "sun") return sunMap;
     if (includesId(PLANET_IDS, id)) return maps[id];
@@ -418,7 +386,7 @@ export function createLooks(light = false) {
     if (id === "sun") return sun;
     if (includesId(PLANET_IDS, id)) return planets[id];
     if (id === "pluto" || id === "sedna" || id === "halley") return named[id];
-    if (includesId(moonIds, id)) return moons[id];
+    if (includesId(MOON_IDS, id)) return moons[id];
     return undefined;
   };
   return {

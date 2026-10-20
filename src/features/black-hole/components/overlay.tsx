@@ -1,6 +1,6 @@
 import { Globe2, GraduationCap, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
@@ -12,6 +12,7 @@ import { GuideOverlay } from "@/features/black-hole/components/guide";
 import { Hotspots } from "@/features/black-hole/components/hotspots";
 import { StoryLine } from "@/features/black-hole/components/learn";
 import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
+import { PRESETS } from "@/features/black-hole/lib/holes";
 import {
   horizonOverM,
   iscoOverM,
@@ -19,7 +20,6 @@ import {
   photonOverM,
   schwarzschildKm,
 } from "@/features/black-hole/lib/physics";
-import { PRESETS } from "@/features/black-hole/lib/presets";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import {
   DataReadout,
@@ -230,7 +230,7 @@ export function ObservatoryOverlay() {
           {!activePin && !settingsOpen && !clocksOpen ? (
             <Dock footerClassName="md:hidden" className="overflow-hidden">
               <Kicker className="mb-1.5 text-[11px]">
-                {active ? (t(`presets.${active.id}`) ?? active.name) : t("custom")}
+                {active ? t(`presets.${active.id}`) : t("custom")}
                 <span className="text-subtle">
                   {" "}
                   ·{" "}
@@ -266,7 +266,7 @@ export function ObservatoryOverlay() {
 }
 
 /** The phone pin card takes focus when it opens and hands it back when it closes. */
-function MobilePinCard({ children }: { children: React.ReactNode }) {
+function MobilePinCard({ children }: { children: ReactNode }) {
   const card = useRef<HTMLDivElement>(null);
   useFocusHandoff(card);
   return (

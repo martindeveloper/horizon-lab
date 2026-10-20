@@ -11,8 +11,13 @@
  */
 import { Scene } from "three";
 
-import { carryPose, takeHandoff } from "@/lib/handoff";
-import { bridgeRender, bridgeStore } from "@/lib/scene-bridge";
+import {
+  bridgeHandoff,
+  bridgeRender,
+  bridgeStore,
+  invalidateOnMotionChange,
+  stageClearance,
+} from "@/lib/scene-bridge";
 import { TODAY } from "@/space/solar-system/model/moment";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
@@ -22,8 +27,8 @@ import {
   rulerOrigin,
   solarLabelPick,
 } from "@/space/solar-system/scene/solar-system";
-import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
-import { DisposalScope } from "@horizon/toolkit/rendering";
+import { REDUCED_MOTION_QUERY, WIDE_QUERY } from "@horizon/toolkit/environment";
+import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
 import {
   SOLAR_GOLD,
   createAnchoredRulers,
@@ -31,29 +36,29 @@ import {
   createLabels,
   createOrbitControls,
   createSceneHost,
+  sceneKit,
   type SceneMount,
 } from "@horizon/toolkit/scene";
 
 import { createLooks } from "../graphics/looks";
-import { LADDER_LY, LADDER_SIDE_QUERY } from "../model/depth";
+import { LADDER_LY } from "../model/depth";
 import { NEIGHBOURS } from "../model/neighbours";
 import { PROBES } from "../model/probes";
 import { viewById, worldDistance, type Realm } from "../model/views";
 import { deepFieldQuality } from "../quality";
-import { dropsSelection, useDeepField, type Selection } from "../store";
+import { dropsSelection, useDeepField } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCosmosLayer } from "./cosmos-layer";
 import { createGalaxyLayer } from "./galaxy-layer";
-import { createGuide } from "./guide";
+import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
 import { SOLAR_SHOW, labelInsets, type Frame, type SceneKit } from "./kit";
+import { createLabelPicks } from "./label-picks";
 import { GALAXY_LAYER, LY, createLod, galaxyMix } from "./lod";
 import { createNeighboursLayer } from "./neighbours-layer";
 import { createPicking } from "./picking";
 import { createReachLayer } from "./reach-layer";
 import { createSkyLayer } from "./sky-layer";
-
-export type DeepFieldEngine = { dispose: () => void };
 
 export function createDeepFieldEngine({
   canvas,
@@ -62,9 +67,8 @@ export function createDeepFieldEngine({
   labels,
   locale,
   onError,
-}: SceneMount): DeepFieldEngine {
-  const scope = new DisposalScope();
-  try {
+}: SceneMount): SimulationEngine {
+  return withScope((scope) => {
     const sceneHost = createSceneHost(scope, { canvas, host, onError });
     const { renderer, camera, engine, tight, basics, viewport, warmUp } = sceneHost;
     /** The visitor's render quality as Deep Field's settings; `bridgeRender` keeps it current. */
@@ -73,22 +77,21 @@ export function createDeepFieldEngine({
     const looks = scope.own(createLooks());
     const scene = new Scene();
     const lod = createLod(camera, viewport);
-    const kit: SceneKit = { ...basics, looks, lod, pxWorld: lod.pxWorld };
+    const kit: SceneKit = sceneKit(basics, looks, lod);
 
     const store = useDeepField;
     const reduceMotion = window.matchMedia(REDUCED_MOTION_QUERY);
     /* Labels keep clear of the ladder wherever it stands (model/depth.ts). */
-    const wide = window.matchMedia(LADDER_SIDE_QUERY);
-    /* The eyepiece publishes its height on the stage; labels and their taps keep above it. */
-    const stage = host.closest<HTMLElement>("[data-simulation]");
-    const clearOf = (property: string) =>
-      parseFloat(stage?.style.getPropertyValue(property) ?? "") || 0;
-    const dockClear = () => clearOf("--hud-clear") || 96;
+    const wide = window.matchMedia(WIDE_QUERY);
+    /* The eyepiece publishes its height on the stage, the caption its own; labels and their
+       taps keep above them. */
+    const dockClear = stageClearance(host, "--hud-clear", 96);
+    const captionClear = stageClearance(host, "--caption-clear");
 
     const rig = createCameraRig(camera, { state: () => store.getState(), reduceMotion });
     const { pose } = rig;
     const { place, flush, hits, hideAll, setBodies } = createLabels(kit, labelRoot, labels, {
-      insets: () => labelInsets(wide.matches, dockClear(), clearOf("--caption-clear")),
+      insets: () => labelInsets(wide.matches, dockClear(), captionClear()),
     });
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     /* Rulers from the selection (or the Sun) to the bodies and probes, or the nearest stars, in view. */
@@ -99,6 +102,9 @@ export function createDeepFieldEngine({
       distanceText,
     });
     const sky = createSkyLayer(kit, scene);
+    /* What a tap on a name opens: the solar system's first, then each layer's own. */
+    const picks = createLabelPicks();
+    picks.register(solarLabelPick);
     /* The solar system today, on its own looks and level of detail. */
     const solarKit = createSolarKit(basics);
     const solar = createSolarSystem(solarKit, scene, {
@@ -108,35 +114,37 @@ export function createDeepFieldEngine({
       rulers,
       swarms: quality.swarms,
     });
-    const reach = createReachLayer(kit, scene, { place, rulers });
-    const neighbours = createNeighboursLayer(kit, scene, { place, rulers, labels, distanceText });
-    const galaxy = createGalaxyLayer(kit, scene, { place, rulers, distanceText });
+    const reach = createReachLayer(kit, scene, { place, rulers, picks });
+    const neighbours = createNeighboursLayer(kit, scene, {
+      place,
+      rulers,
+      labels,
+      distanceText,
+      picks,
+    });
+    const galaxy = createGalaxyLayer(kit, scene, { place, rulers, distanceText, picks });
     const cosmos = createCosmosLayer(kit, scene, {
       place,
       rulers,
       labels,
       distanceText,
+      picks,
       detail: quality.cosmos,
     });
     const hud = createHud(store, camera, viewport);
 
     const { view } = store.getState();
     rig.snapToView(view);
-    /* Arrived from the Orrery: open where it left off, then settle on this view. */
-    const crossing = takeHandoff("deep-field", rig.limits());
-    if (crossing?.pose) {
-      rig.snap(crossing.pose);
-      rig.flyToView(view);
-    }
+    /* Arrived from the Orrery: open where it left off, then settle on this view. Leaving for
+       the Orrery while the orbit is still in the ecliptic: it opens at this pose. */
+    bridgeHandoff(scope, "deep-field", rig, view, {
+      leaveAt: () => (galaxyMix(pose.distance) === 0 ? pose : null),
+    });
     rig.home();
     rig.applyPose();
-    /* Leaving for the Orrery while the orbit is still in the ecliptic: it opens at this pose. */
-    scope.defer(() => {
-      if (galaxyMix(pose.distance) === 0) carryPose("deep-field", pose);
-    });
 
     /* The guided journey flies its own shots; a drag or a zoom takes the camera back. */
-    const guide = createGuide(rig, store, reduceMotion);
+    const guide = createGuideDirector(rig, store, reduceMotion);
     const controls = createOrbitControls(scope, canvas, rig, {
       invalidate: () => engine.invalidate(),
       /* The rig clamps to its own limits, the ladder's ends. */
@@ -146,13 +154,6 @@ export function createDeepFieldEngine({
     const continuous = () =>
       rig.moving || guide.busy || controls.interacting || lod.busy || solarKit.lod.busy;
 
-    const labelPicks = new Map<string, Selection>([["galaxySun", { kind: "galaxy", id: "sun" }]]);
-    const labelPick = (key: string): Selection | undefined =>
-      solarLabelPick(key) ??
-      reach.labelPick(key) ??
-      labelPicks.get(key) ??
-      neighbours.labelPick(key) ??
-      cosmos.labelPick(key);
     createPicking(kit, canvas, store, {
       pickables: [
         ...solar.pickables,
@@ -162,8 +163,8 @@ export function createDeepFieldEngine({
         ...cosmos.pickables,
       ],
       distance: () => pose.distance,
-      labels: () => hits((key) => labelPick(key) !== undefined),
-      labelPick,
+      labels: () => hits((key) => picks.pick(key) !== undefined),
+      labelPick: (key) => picks.pick(key),
     });
 
     /** What the bridge last acted on besides the view, flight and turn. */
@@ -192,9 +193,7 @@ export function createDeepFieldEngine({
       quality = next;
       engine.invalidate();
     });
-    const onMotionChange = () => engine.invalidate();
-    reduceMotion.addEventListener("change", onMotionChange);
-    scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
+    invalidateOnMotionChange(scope, engine, reduceMotion);
 
     /**
      * The Galaxy and the cosmic map first, in a depth range fitted to them (their stars and
@@ -293,9 +292,5 @@ export function createDeepFieldEngine({
       fps: () => quality.resolution.fps,
     });
     engine.refresh();
-    return { dispose: () => scope.dispose() };
-  } catch (error) {
-    scope.dispose();
-    throw error;
-  }
+  });
 }

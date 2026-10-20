@@ -2,6 +2,8 @@
 
 import { SwitchChip, SwitchRow } from "@horizon/toolkit/ui";
 
+import { SwitchGroup } from "./rail";
+
 /**
  * A scene's display switches: a wrapping row of switch chips where space is short (a dock),
  * or a list of switch rows in a panel.
@@ -21,13 +23,13 @@ export function SwitchChips<Key extends string>({
 }) {
   if (list)
     return (
-      <div className="-mx-3 grid gap-0.5">
+      <SwitchGroup>
         {keys.map((key) => (
           <SwitchRow key={key} on={values[key]} onToggle={() => onToggle(key)}>
             {label(key)}
           </SwitchRow>
         ))}
-      </div>
+      </SwitchGroup>
     );
   return (
     <div className="flex flex-wrap gap-1">

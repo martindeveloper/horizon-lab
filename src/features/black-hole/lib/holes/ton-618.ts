@@ -19,9 +19,6 @@ export const ton618: HoleSpec = {
   id: "ton-618",
   name: "TON 618",
   kind: "catalog",
-  catalog: "z = 2.219",
-  blurb:
-    "A hyperluminous quasar whose light left 10.8 billion years ago; one of the heaviest black holes known.",
   massSolar: 4.07e10,
   spin: 0.6,
   inclination: 1.0,
@@ -36,6 +33,7 @@ export const ton618: HoleSpec = {
   tour: [
     // A long fall in from far away, as its light did.
     {
+      phase: "wide",
       duration: 10.5,
       yaw: 1.1,
       inclination: 0.5,
@@ -45,6 +43,7 @@ export const ton618: HoleSpec = {
       eq: "z = 2.219    ·    t_light ≈ 10.8 Gyr",
     },
     {
+      phase: "dolly",
       duration: 9.5,
       yaw: -0.9,
       inclination: 0.35,
@@ -54,6 +53,7 @@ export const ton618: HoleSpec = {
       roll: -0.03,
     },
     {
+      phase: "detail",
       duration: 9,
       yaw: 0.6,
       inclination: 1.0,
@@ -67,6 +67,7 @@ export const ton618: HoleSpec = {
       eq: "M = f R v² / G ≈ 4–7 × 10¹⁰ M☉",
     },
     {
+      phase: "hold",
       duration: 8.5,
       yaw: -0.6,
       inclination: 0.7,
@@ -74,6 +75,14 @@ export const ton618: HoleSpec = {
       swing: 0.2,
       eq: "R_s = 2GM/c² ≈ 800–1,300 au",
     },
-    { duration: 10.5, yaw: 1.5, inclination: 0.6, distance: 160, lift: 0.25, lead: 0.3 },
+    {
+      phase: "wide",
+      duration: 10.5,
+      yaw: 1.5,
+      inclination: 0.6,
+      distance: 160,
+      lift: 0.25,
+      lead: 0.3,
+    },
   ],
 };

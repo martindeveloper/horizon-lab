@@ -5,6 +5,7 @@ import {
   type DistanceChoice,
   type DistanceUnit,
 } from "../science";
+import { worldPerPixel } from "./kit";
 
 /** The nearest of 1, 2, 5 × 10ⁿ. */
 export function niceNumber(x: number) {
@@ -28,7 +29,7 @@ export function scaleBar(options: {
   choice: DistanceChoice;
 }) {
   const { fov, dist, width, height, world, choice } = options;
-  const worldPerPx = (2 * Math.tan((fov * Math.PI) / 360) * dist) / Math.max(1, height);
+  const worldPerPx = worldPerPixel(fov, dist, Math.max(1, height));
   const span = worldPerPx * Math.min(150, width * 0.36);
   const unit = resolveDistanceUnit(choice, convertDistance(span, world, "au"));
   const perWorld = convertDistance(1, world, unit);

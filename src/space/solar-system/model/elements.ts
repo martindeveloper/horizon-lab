@@ -1,6 +1,5 @@
 /** Orbital elements on the timeline: measured today, rewound by Neptune's migration in the sketch. */
 import {
-  GIANTS,
   centuriesSinceJ2000,
   jplElements,
   type Elements,
@@ -76,5 +75,3 @@ export function namedElements(
     i: migrated(start.i, now.i, mig),
   };
 }
-
-export const isGiant = (id: PlanetId) => GIANTS.has(id);

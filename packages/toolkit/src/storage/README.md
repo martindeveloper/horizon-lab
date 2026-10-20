@@ -29,3 +29,8 @@ forgotten on reload.
 
 A local cell listens for `storage` events, so another tab's write is visible on
 the next read. Session storage belongs to this tab. Use one cell per key.
+
+Cells are long-lived: create each one once, at module level, and keep it for the
+life of the page. A cell has no `dispose`, and a local cell's `storage` listener
+stays registered as long as the page does, so a cell made per component mount
+or per call would accumulate listeners.

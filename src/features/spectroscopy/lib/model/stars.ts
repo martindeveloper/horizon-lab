@@ -1,9 +1,4 @@
-import {
-  mainSequencePhotosphere,
-  SEQUENCE_RANGE,
-  starPhotosphere,
-  type Photosphere,
-} from "./atmospheres";
+import { mainSequencePhotosphere, SEQUENCE_RANGE } from "./atmospheres";
 
 /**
  * Bright stars down the spectral sequence. Each is drawn with the ATLAS9 model nearest its
@@ -22,7 +17,7 @@ export const STAR_IDS = [
 ] as const;
 export type StarId = (typeof STAR_IDS)[number];
 
-export type Star = {
+type Star = {
   id: StarId;
   /** MK spectral type. */
   type: string;
@@ -94,8 +89,6 @@ export const STARS: Record<StarId, Star> = {
     source: "Heiter et al. 2015, A&A 582, A49",
   },
 };
-
-export const photosphereOf = (id: StarId): Photosphere => starPhotosphere(id);
 
 /** Main-sequence effective temperatures the line-strength curves are drawn at, K. */
 export const SEQUENCE_TEMPERATURES = Array.from({ length: 30 }, (_, i) =>

@@ -10,9 +10,10 @@
  * outside the Sun, dust on the arms' inner edges, the outer warp and a sparse
  * stellar halo. The far side of the disk is extrapolated, as in every map of it.
  */
-import { BufferAttribute, BufferGeometry, Color } from "three";
+import { Color } from "three";
 
-import { lcg } from "@horizon/toolkit/math";
+import { gaussian, lcg, onSphere } from "@horizon/toolkit/math";
+import { createPointWriter, type PointWriter } from "@horizon/toolkit/scene";
 
 import { galacticWarp, spiralArm } from "../model/equations";
 import { BAR_ANGLE } from "../model/galactic-orbit";
@@ -57,10 +58,6 @@ const LOCAL = { r: SUN_GALACTIC_RADIUS_LY + 0.3 * KPC, pitch: Math.tan((11.4 * M
 const WARP_START = WARP_START_KPC * KPC;
 
 type Rnd = () => number;
-const gaussOf = (rnd: Rnd) => () => {
-  const u = Math.max(1e-6, rnd());
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(Math.PI * 2 * rnd());
-};
 /** Two-sided exponential: the vertical profile of a disk with scale height h. */
 const laplace = (rnd: Rnd, h: number) => {
   const u = Math.max(1e-6, rnd());
@@ -71,39 +68,13 @@ const warp = (R: number, beta: number) =>
   R > WARP_START ? galacticWarp.compute({ R: R / KPC, beta }) * KPC : 0;
 const flare = (R: number) => 1 + Math.max(0, R - 9 * KPC) / (6 * KPC);
 
-type Writer = { pos: Float32Array; col: Float32Array; n: number };
-function put(w: Writer, x: number, y: number, z: number, c: Color, brightness: number) {
-  const i = w.n * 3;
-  w.pos[i] = x;
-  w.pos[i + 1] = y;
-  w.pos[i + 2] = z;
-  w.col[i] = c.r * brightness;
-  w.col[i + 1] = c.g * brightness;
-  w.col[i + 2] = c.b * brightness;
-  w.n += 1;
-}
-function geometryOf(w: Writer) {
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new BufferAttribute(w.pos.subarray(0, w.n * 3), 3));
-  geometry.setAttribute("color", new BufferAttribute(w.col.subarray(0, w.n * 3), 3));
-  return geometry;
-}
-
 /** The modern Milky Way: stars (additive) and dust (drawn over them) as two clouds. */
 export function modernGalaxy(count: number) {
   const rnd = lcg(11);
-  const gauss = gaussOf(rnd);
-  const stars: Writer = {
-    pos: new Float32Array(count * 3),
-    col: new Float32Array(count * 3),
-    n: 0,
-  };
+  const gauss = () => gaussian(rnd);
+  const stars = createPointWriter(count);
   const dustCount = Math.round(count * 0.32);
-  const dust: Writer = {
-    pos: new Float32Array(dustCount * 3),
-    col: new Float32Array(dustCount * 3),
-    n: 0,
-  };
+  const dust = createPointWriter(dustCount);
   const old = new Color("#ffd49c");
   const bone = new Color("#f3eee4");
   const young = new Color("#a9c3ff");
@@ -114,10 +85,10 @@ export function modernGalaxy(count: number) {
 
   /* Bar frame (along, across, up) → scene. */
   const bar = (a: number, b: number, y: number, c: Color, brightness: number) =>
-    put(stars, a * cosBar - b * sinBar, y, a * sinBar + b * cosBar, c, brightness);
+    stars.put(a * cosBar - b * sinBar, y, a * sinBar + b * cosBar, c, brightness);
   /* Disk point at radius R and azimuth β, lifted by the warp. */
-  const disk = (w: Writer, R: number, beta: number, y: number, c: Color, brightness: number) =>
-    put(w, R * Math.cos(beta), y + warp(R, beta), R * Math.sin(beta), c, brightness);
+  const disk = (w: PointWriter, R: number, beta: number, y: number, c: Color, brightness: number) =>
+    w.put(R * Math.cos(beta), y + warp(R, beta), R * Math.sin(beta), c, brightness);
   /* Along an arm: distance from its inner end falls off exponentially. */
   const exponentialR = (scale: number, min: number, max: number) => {
     for (;;) {
@@ -228,16 +199,15 @@ export function modernGalaxy(count: number) {
   /* Stellar halo: sparse, slightly flattened, n(r) ∝ r^-3.5 between 1 and 40 kpc. */
   for (let i = budget(0.022); i > 0; i -= 1) {
     const r = KPC / (1 - rnd() * (1 - 1 / Math.sqrt(40))) ** 2;
-    const cosT = rnd() * 2 - 1;
-    const sinT = Math.sqrt(1 - cosT * cosT);
-    const phi = rnd() * Math.PI * 2;
-    put(stars, r * sinT * Math.cos(phi), r * cosT * 0.7, r * sinT * Math.sin(phi), old, 0.25);
+    const p = onSphere(rnd, r);
+    /* The pole of the direction is the galactic pole, y. */
+    stars.put(p[0], p[2] * 0.7, p[1], old, 0.25);
   }
   /* Dust lanes sit on the inner, concave edge of each arm, and in a thin layer. */
-  while (dust.n < dustCount) {
+  while (dust.count < dustCount) {
     const p = armPoint(0.7, 0.05 * KPC, 0.9);
     disk(dust, p.R, p.beta, p.y, soot, 1);
   }
 
-  return { stars: geometryOf(stars), dust: geometryOf(dust) };
+  return { stars: stars.geometry(), dust: dust.geometry() };
 }

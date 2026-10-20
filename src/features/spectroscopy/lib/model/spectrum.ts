@@ -93,6 +93,16 @@ const SHAPE_DEPTH = { metal: -1, hydrogen: -0.5 };
 /** Planck's law at a spectrum's air wavelength, evaluated (as it is defined) in vacuum. */
 const planck = (air: number, kelvin: number) => planckRadiance(airToVacuum(air), kelvin);
 
+/**
+ * Light through a uniform slab: what shines `behind` it dimmed by e^(−τ), plus the slab's own
+ * `source` function for the rest, I = I₀ e^(−τ) + B (1 − e^(−τ)). Kirchhoff's laws in one line;
+ * the printed equation (`equations.ts`) computes from this too.
+ */
+export function slabIntensity(behind: number, source: number, tau: number) {
+  const transmitted = Math.exp(-tau);
+  return behind * transmitted + source * (1 - transmitted);
+}
+
 type Grid = { lnStart: number; step: number; count: number };
 
 function gridFor(from: number, to: number, resolution: number, max: number): Grid {
@@ -101,6 +111,21 @@ function gridFor(from: number, to: number, resolution: number, max: number): Gri
   const lnEnd = Math.log(to) + 5 * sigma;
   const count = Math.min(max, Math.ceil((lnEnd - lnStart) / FINE_STEP));
   return { lnStart, step: (lnEnd - lnStart) / count, count };
+}
+
+/** Calls `visit(i, nm)` at the grid's samples `first` through `last`, walking the log grid. */
+function forEachSample(
+  grid: Grid,
+  visit: (i: number, nm: number) => void,
+  first = 0,
+  last = grid.count - 1,
+) {
+  const ratio = Math.exp(grid.step);
+  let nm = Math.exp(grid.lnStart + first * grid.step);
+  for (let i = first; i <= last; i++) {
+    visit(i, nm);
+    nm *= ratio;
+  }
 }
 
 /**
@@ -116,12 +141,7 @@ function sweep(p: Profile, grid: Grid, visit: (i: number, offset: number) => voi
     grid.count - 1,
     Math.floor((Math.log(p.centre + width) - grid.lnStart) / grid.step),
   );
-  const ratio = Math.exp(grid.step);
-  let nm = Math.exp(grid.lnStart + first * grid.step);
-  for (let i = first; i <= last; i++) {
-    visit(i, nm - p.centre);
-    nm *= ratio;
-  }
+  forEachSample(grid, (i, nm) => visit(i, nm - p.centre), first, last);
 }
 
 function airTransmission(grid: Grid, airmass: number) {
@@ -207,6 +227,27 @@ function observe(
   return { wavelengths, flux, continuum, peak };
 }
 
+/**
+ * What both sources share once their light is known: `intensityAt(i, nm)` on the fine grid,
+ * through Earth's air, then the instrument (`observe`), with `continuumAt` for the plot.
+ */
+function render(
+  grid: Grid,
+  obs: Instrument,
+  from: number,
+  to: number,
+  samples: number,
+  intensityAt: (i: number, nm: number) => number,
+  continuumAt: (nm: number) => number,
+): Spectrum {
+  const air = airTransmission(grid, obs.airmass);
+  const fine = new Float64Array(grid.count);
+  forEachSample(grid, (i, nm) => {
+    fine[i] = intensityAt(i, nm) * air[i]!;
+  });
+  return observe(fine, grid, obs.resolution, from, to, samples, continuumAt);
+}
+
 /* ─── The lab: a uniform slab ─── */
 
 /** Every line the slab's gas absorbs, with its profile at the source's velocity. */
@@ -233,19 +274,15 @@ function synthesizeSlab(obs: SlabObservation, from: number, to: number, samples:
       },
       Infinity,
     );
-  const air = airTransmission(grid, obs.airmass);
-  const fine = new Float64Array(grid.count);
-  let nm = Math.exp(grid.lnStart);
-  const ratio = Math.exp(grid.step);
-  for (let i = 0; i < grid.count; i++) {
-    const behind = obs.background === null ? 0 : planck(nm, obs.background);
-    const source = planck(nm, obs.gas.temperature);
-    const transmitted = Math.exp(-tau[i]!);
-    fine[i] = (behind * transmitted + source * (1 - transmitted)) * air[i]!;
-    nm *= ratio;
-  }
-  return observe(fine, grid, obs.resolution, from, to, samples, (x) =>
-    obs.background === null ? 0 : planck(x, obs.background),
+  const continuumAt = (nm: number) => (obs.background === null ? 0 : planck(nm, obs.background));
+  return render(
+    grid,
+    obs,
+    from,
+    to,
+    samples,
+    (i, nm) => slabIntensity(continuumAt(nm), planck(nm, obs.gas.temperature), tau[i]!),
+    continuumAt,
   );
 }
 
@@ -338,7 +375,7 @@ function addLine(sl: StarLine, offset: number, out: Float32Array, at: number) {
  * Every line the star forms, with its optical depth layer by layer. Each cell broadens a metal
  * line by its own temperature and pressures; hydrogen's shape is taken at one depth.
  */
-export function starLines(obs: StarObservation, only?: Line) {
+function starLines(obs: StarObservation, only?: Line) {
   const cells = cellsOf(obs.photosphere, obs.microturbulence);
   const K = cells.length;
   const shift = dopplerFactor(obs.velocity);
@@ -468,17 +505,18 @@ function synthesizeStar(obs: StarObservation, from: number, to: number, samples:
     deepTemperature,
   );
   const continuumAt = (nm: number) => emerge(columns(nm), K, null, 0);
-  const air = airTransmission(grid, obs.airmass);
-  const fine = new Float64Array(grid.count);
-  let nm = Math.exp(grid.lnStart);
-  const ratio = Math.exp(grid.step);
-  for (let i = 0; i < grid.count; i++) {
-    const column = columns(nm);
-    fine[i] =
-      (touched[i] ? emerge(column, K, opacity, i * K) : emerge(column, K, null, 0)) * air[i]!;
-    nm *= ratio;
-  }
-  return observe(fine, grid, obs.resolution, from, to, samples, continuumAt);
+  return render(
+    grid,
+    obs,
+    from,
+    to,
+    samples,
+    (i, nm) => {
+      const column = columns(nm);
+      return touched[i] ? emerge(column, K, opacity, i * K) : emerge(column, K, null, 0);
+    },
+    continuumAt,
+  );
 }
 
 /** The spectrum between `from` and `to` nm in `samples` pixels. */
@@ -490,7 +528,7 @@ export function synthesize(obs: Observation, from: number, to: number, samples: 
 
 /* ─── One line at a time ─── */
 
-export type LineReport = {
+type LineReport = {
   line: Line;
   shape: Shape;
   /** Optical depth at line centre (a star: down to the continuum's τ = 1). */
@@ -645,6 +683,15 @@ export function depthAt(spectrum: Spectrum, nm: number) {
   const f = flux[i]! * (1 - t) + flux[i + 1]! * t;
   const c = continuum[i]! * (1 - t) + continuum[i + 1]! * t;
   return c > 0 ? 1 - f / c : 0;
+}
+
+/** A glowing gas's brightness at a wavelength, against its brightest light in view. */
+export function emissionAt(spectrum: Spectrum, nm: number) {
+  const { wavelengths, flux, peak } = spectrum;
+  const n = wavelengths.length;
+  const x = ((nm - wavelengths[0]!) / (wavelengths[n - 1]! - wavelengths[0]!)) * (n - 1);
+  const i = Math.round(x);
+  return i >= 0 && i < n && peak > 0 ? flux[i]! / peak : 0;
 }
 
 /** The lines an observation forms, strongest first, with their observed centres. */

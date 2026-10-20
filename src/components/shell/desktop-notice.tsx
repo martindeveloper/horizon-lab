@@ -5,9 +5,10 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { onDesktopNotice } from "@/lib/debug";
+import { PHONE_QUERY } from "@horizon/toolkit/environment";
 import { IconButton, Surface, cn } from "@horizon/toolkit/ui";
 
-import { PHONE_QUERY, dismissNotice, shouldShowNotice } from "./desktop-notice-state";
+import { dismissNotice, shouldShowNotice } from "./desktop-notice-state";
 
 const SHOW_AFTER = 1500;
 const HIDE_AFTER = 7000;

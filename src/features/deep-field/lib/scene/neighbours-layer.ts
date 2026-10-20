@@ -17,6 +17,7 @@ import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { NEIGHBOURS, neighbourDistanceLy, neighbourPosition } from "../model/neighbours";
 import type { Selection } from "../store";
 import type { Frame, SceneKit } from "./kit";
+import type { LabelPicks } from "./label-picks";
 
 const PROXIMA = NEIGHBOURS[0]!;
 const PROXIMA_AU = neighbourDistanceLy(PROXIMA, 0) * LIGHT_YEAR_AU;
@@ -33,6 +34,7 @@ export function createNeighboursLayer(
     rulers: AnchoredRulers;
     labels: LabelText;
     distanceText: DistanceText;
+    picks: LabelPicks;
   },
 ) {
   const { place, rulers, labels, distanceText } = deps;
@@ -60,13 +62,14 @@ export function createNeighboursLayer(
   const names = lod.fader();
   const vec = new Vector3();
 
+  /* What a tap on a name opens: the star, or Proxima for its ring. */
+  deps.picks.register((key): Selection | undefined => {
+    const id = key === "proximaRing" ? PROXIMA.id : NEIGHBOURS.find((n) => n.id === key)?.id;
+    return id && { kind: "star", id };
+  });
+
   return {
     pickables: [ring, ...stars.map((n) => n.mesh)],
-    /** What a tap on a label opens. */
-    labelPick: (key: string): Selection | undefined => {
-      const id = key === "proximaRing" ? PROXIMA.id : NEIGHBOURS.find((n) => n.id === key)?.id;
-      return id && { kind: "star", id };
-    },
     /** `azimuth` turns the ring's label toward the camera. */
     update({ show, dist }: Frame, azimuth: number) {
       const labelled = names.to(show.names);

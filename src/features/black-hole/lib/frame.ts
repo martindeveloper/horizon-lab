@@ -2,16 +2,16 @@ import { DataTexture, FloatType, RGBAFormat, Vector2, Vector3 } from "three";
 
 import { DISK_OUTER_RADIUS, DISK_PROFILE_SIZE, diskProfilePixels } from "./disk-profile";
 import { holeById, SKY_CODE } from "./holes";
+import type { Vec3 } from "./kerr-rays";
 import { DISK_INNER_HORIZON_FACTOR } from "./parameters";
-import { cameraFloor, horizonOverM, iscoOverM } from "./physics";
-import { MAX_DIST } from "./presets";
+import { cameraFloor, horizonOverM, INCLINATION_LIMIT, iscoOverM, MAX_DIST } from "./physics";
 import { framedRayFov } from "./render-policy";
 
 /**
  * Shader inputs for one frame, shared by the live engine and the headless
  * benchmark so both draw exactly the same scene from the same state.
  */
-export type Uniforms = {
+type Uniforms = {
   uDiskProfile: { value: DataTexture };
   uResolution: { value: InstanceType<typeof Vector2> };
   uCamPos: { value: InstanceType<typeof Vector3> };
@@ -34,7 +34,7 @@ export type Uniforms = {
 };
 
 /** The scene settings the shader reads; the store and benchmark scenes both supply them. */
-export type SceneSettings = {
+type SceneSettings = {
   presetId: string;
   spin: number;
   exposure: number;
@@ -52,10 +52,33 @@ export type CameraPose = {
   roll: number;
 };
 
+/** Unrolled camera frame: right points at the approaching side, fwd into the scene. */
+export type Basis = { right: Vec3; up: Vec3; fwd: Vec3 };
+
+/** The frame looking along `fwd` from `azimuth`; right follows the azimuth alone, so the image never rolls near the pole. */
+function rollFreeBasis(azimuth: number, fwd: Vec3): Basis {
+  const right: Vec3 = [Math.cos(azimuth), 0, -Math.sin(azimuth)];
+  const up: Vec3 = [
+    right[1] * fwd[2] - right[2] * fwd[1],
+    right[2] * fwd[0] - right[0] * fwd[2],
+    right[0] * fwd[1] - right[1] * fwd[0],
+  ];
+  return { right, up, fwd };
+}
+
+/** Basis of the camera at (px, py, pz) without roll, as the guide's drawings and the critical curve need it. */
+export function orbitBasis(px: number, py: number, pz: number): Basis {
+  const d = Math.hypot(px, py, pz) || 1;
+  return rollFreeBasis(Math.atan2(px, pz), [-px / d, -py / d, -pz / d]);
+}
+
 /** Zoom per wheel unit: gentler far out, and for trackpad pinches. */
 export function orbitWheelSensitivity(distance: number, pinch: boolean) {
   return pinch ? 0.0024 : distance < 18 ? 0.0026 : 0.00115;
 }
+
+/** How the fullscreen pass clears and which GPU it asks for, for the engine and the bench alike. */
+export const PASS_OPTIONS = { clearColor: 0x08080b, powerPreference: "low-power" } as const;
 
 /** Fresh uniforms; the caller owns (and disposes) the disk-profile texture. */
 export function createUniforms(): Uniforms {
@@ -131,7 +154,7 @@ export function writeCamera(uniforms: Uniforms, pose: CameraPose, spin: number) 
   const camRight = uniforms.uCamRight.value;
   const camUp = uniforms.uCamUp.value;
   const dist = clampDistance(pose.distance, spin);
-  const incl = Math.max(-1.35, Math.min(1.35, pose.inclination));
+  const incl = Math.max(-INCLINATION_LIMIT, Math.min(INCLINATION_LIMIT, pose.inclination));
   const c = Math.cos(incl);
   camPos.set(
     dist * c * Math.sin(pose.azimuth),
@@ -139,9 +162,9 @@ export function writeCamera(uniforms: Uniforms, pose: CameraPose, spin: number) 
     dist * c * Math.cos(pose.azimuth),
   );
   camFwd.copy(camPos).multiplyScalar(-1).normalize();
-  /* Right follows the azimuth alone, so the image never rolls near the pole. */
-  camRight.set(Math.cos(pose.azimuth), 0, -Math.sin(pose.azimuth));
-  camUp.crossVectors(camRight, camFwd).normalize();
+  const basis = rollFreeBasis(pose.azimuth, [camFwd.x, camFwd.y, camFwd.z]);
+  camRight.set(...basis.right);
+  camUp.set(...basis.up).normalize();
   if (pose.roll !== 0) {
     const cr = Math.cos(pose.roll);
     const sr = Math.sin(pose.roll);

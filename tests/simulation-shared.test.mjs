@@ -3,8 +3,9 @@ import test from "node:test";
 
 import { createStore } from "zustand/vanilla";
 
-import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
-import { defaultSceneAntialias } from "../packages/toolkit/src/scene/host.ts";
+import { DisposalScope, startEngine } from "@horizon/toolkit/rendering";
+import { defaultSceneAntialias } from "@horizon/toolkit/scene";
+
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
 import { bridgeRender, bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
@@ -203,7 +204,95 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
     );
   }
   assert.equal(useDeepField.getState().show.halo, false, "switches go back too");
-  assert.equal(useDeepField.getState().showBeforeGuide, null);
+  assert.equal(useDeepField.getState().savedBeforeGuide, null);
   assert.equal(useBlackHole.getState().orbitBeforeGuide, null);
   assert.deepEqual(useSpectroscopy.getState().compare, [], "marked elements go back too");
+});
+
+const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+test("lazy engines clean up late arrivals once and suppress failures after navigation", async () => {
+  let resolve;
+  let report;
+  let signal;
+  let disposed = 0;
+  const errors = [];
+  const lifetime = startEngine(
+    (abort, onError) => {
+      signal = abort;
+      report = onError;
+      return new Promise((done) => {
+        resolve = done;
+      });
+    },
+    (error) => errors.push(error),
+  );
+  await flush();
+  lifetime.dispose();
+  assert.equal(signal.aborted, true);
+  resolve({
+    dispose() {
+      disposed++;
+    },
+  });
+  await flush();
+  report(new Error("late failure"));
+  lifetime.dispose();
+  assert.equal(disposed, 1);
+  assert.deepEqual(errors, []);
+});
+
+test("lazy engine failures are reported and synchronous cancellation never starts work", async () => {
+  const error = new Error("GPU unavailable");
+  const errors = [];
+  const failed = startEngine(
+    async () => {
+      throw error;
+    },
+    (value) => errors.push(value),
+  );
+  await flush();
+  assert.deepEqual(errors, [error]);
+  failed.dispose();
+  let started = false;
+  const cancelled = startEngine(
+    async () => {
+      started = true;
+    },
+    () => {},
+  );
+  cancelled.dispose();
+  await flush();
+  assert.equal(started, false);
+  let disposed = 0;
+  const ready = startEngine(
+    async () => ({
+      dispose() {
+        disposed++;
+      },
+    }),
+    () => {},
+  );
+  await flush();
+  ready.dispose();
+  ready.dispose();
+  assert.equal(disposed, 1);
+});
+
+test("opening a tour from a hotspot restores the original orbit setting", async () => {
+  const { useBlackHole } = await import("../src/features/black-hole/lib/store.ts");
+  const original = useBlackHole.getState();
+  try {
+    for (const autoRotate of [true, false]) {
+      useBlackHole.setState({ autoRotate });
+      useBlackHole.getState().setActivePin("horizon");
+      assert.equal(useBlackHole.getState().autoRotate, false);
+      useBlackHole.getState().startGuide();
+      assert.equal(useBlackHole.getState().activePin, null);
+      useBlackHole.getState().endGuide();
+      assert.equal(useBlackHole.getState().autoRotate, autoRotate);
+    }
+  } finally {
+    useBlackHole.setState(original, true);
+  }
 });

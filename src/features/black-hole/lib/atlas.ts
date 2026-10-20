@@ -1,5 +1,5 @@
 /** Sky catalog for the atlas. Epoch J2000. Positions as of 2026. */
-import { keysOf } from "@/lib/records";
+import { keysOf } from "@horizon/toolkit/records";
 import { RAD_PER_DEG as DEG } from "@horizon/toolkit/science";
 
 export type AtlasKind = "hole" | "body" | "extragalactic" | "lab";
@@ -28,11 +28,7 @@ export const MAP_HALF_KPC = 14;
  * Face-on map seen from the north Galactic pole, Y up: the Sun sits at +R0 on X,
  * ℓ = 90° points to −Y, and the Galaxy turns clockwise.
  */
-export function xyFromGalactic(
-  lonDeg: number,
-  latDeg: number,
-  dKpc: number,
-): { x: number; y: number } {
+function xyFromGalactic(lonDeg: number, latDeg: number, dKpc: number): { x: number; y: number } {
   const l = (lonDeg * Math.PI) / 180;
   const b = (latDeg * Math.PI) / 180;
   const cb = Math.cos(b);
@@ -299,7 +295,7 @@ export function atlasFor(id: string): AtlasSite | undefined {
  * direction of rotation. ln(R / Rkink) = −(β − βkink) tan ψ, with ψ< before
  * the kink and ψ> after it.
  */
-export type ArmFit = {
+type ArmFit = {
   betaMin: number;
   betaMax: number;
   betaKink: number;
@@ -311,7 +307,7 @@ export type ArmFit = {
 /** The fit assumes R0 = 8.15 kpc; radii are rescaled to this map's R0. */
 const FIT_R0_KPC = 8.15;
 
-export function armPoint(fit: ArmFit, betaDeg: number): { x: number; y: number } {
+function armPoint(fit: ArmFit, betaDeg: number): { x: number; y: number } {
   const psi = betaDeg < fit.betaKink ? fit.psiBefore : fit.psiAfter;
   const r =
     fit.rKink *
@@ -331,7 +327,7 @@ function sample(fit: ArmFit, from: number, to: number) {
   return Array.from({ length: n + 1 }, (_, i) => armPoint(fit, from + (i / n) * (to - from)));
 }
 
-export function armPath(fit: ArmFit): string {
+function armPath(fit: ArmFit): string {
   return polyline(sample(fit, fit.betaMin, fit.betaMax));
 }
 
@@ -374,7 +370,7 @@ const ARM_FITS = {
   outer: { betaMin: -16, betaMax: 71, betaKink: 18, rKink: 12.24, psiBefore: 3.0, psiAfter: 9.4 },
 } satisfies Record<string, ArmFit>;
 
-export type ArmId = keyof typeof ARM_FITS;
+type ArmId = keyof typeof ARM_FITS;
 
 /** Where each name runs along its arm: β range in degrees, and which side of the arm. */
 const LABELS: Record<ArmId, { beta: [number, number]; side: "above" | "below" }> = {
@@ -406,7 +402,7 @@ export const SPIRAL_ARMS: {
   ];
 });
 
-export function diskStars(count = 110): { x: number; y: number; r: number }[] {
+function diskStars(count = 110): { x: number; y: number; r: number }[] {
   const out: { x: number; y: number; r: number }[] = [];
   for (let i = 0; i < count; i++) {
     const u = Math.sin(i * 12.9898) * 43758.5453;

@@ -78,7 +78,7 @@ function holtsmarkLoss(damping: number, edge: number) {
 export type Profile = Shape & { peak: number };
 
 /** Radiation damping's Lorentz width, the classical (4π/3) rₑ, nm: 1.18 × 10⁻⁵ nm. */
-export const RADIATIVE_FWHM = ((4 * Math.PI) / 3) * CLASSICAL_ELECTRON_RADIUS_M * 1e9;
+const RADIATIVE_FWHM = ((4 * Math.PI) / 3) * CLASSICAL_ELECTRON_RADIUS_M * 1e9;
 
 /**
  * Collisions with neutral hydrogen (van der Waals), as a full width in rad s⁻¹. Where Barklem,
@@ -104,7 +104,7 @@ const HYDROGEN_SHARE = atomsPerKilogram("H") / NUCLEI_PER_KILOGRAM;
  * Stellar Photospheres, eq. 11.29–11.30, cgs):
  * log γ₆ = 19.6 + ⅖ log C₆ + log P_g − 0.7 log T, C₆ = 0.3 × 10⁻³⁰ [(I − χ − χ_λ)⁻² − (I − χ)⁻²].
  */
-export function unsoldRate(line: Line, c: Conditions) {
+function unsoldRate(line: Line, c: Conditions) {
   const limit = ionizationEnergy(line.species);
   const photon = HC_EV_NM / line.vacuum;
   const upper = limit - line.lower - photon;
@@ -122,7 +122,7 @@ export function unsoldRate(line: Line, c: Conditions) {
  * Unsöld's widths fall short of ABO's: for the lab's lines that Barklem et al. list, by a
  * median factor of this much in the Sun's photosphere, which the rest are given.
  */
-export const UNSOLD_ENHANCEMENT = 1.15;
+const UNSOLD_ENHANCEMENT = 1.15;
 
 function vanDerWaalsFwhm(line: Line, c: Conditions) {
   const metres = line.wavelength * 1e-9;
@@ -144,25 +144,32 @@ function starkFwhm(line: Line, c: Conditions) {
   return 4.8 * (density / 1e23) ** 0.681 * ((upper ** 2 - lower ** 2) / 12);
 }
 
-/** Doppler width Δλ_D = (λ / c) √(2kT / m + ξ²), nm. */
+/**
+ * Doppler width Δλ_D = (λ / c) √(2kT / m + ξ²), nm, for atoms of `atomicWeight` mᵤ and a
+ * microturbulence ξ in km/s. The printed equation (`equations.ts`) computes from this too.
+ */
 export function dopplerWidth(
   nm: number,
-  element: ElementId,
+  atomicWeight: number,
   kelvin: number,
   microturbulence: number,
 ) {
-  const thermal =
-    (2 * BOLTZMANN_CONSTANT * kelvin) / (ELEMENTS[element].atomicWeight * ATOMIC_MASS_KG);
+  const thermal = (2 * BOLTZMANN_CONSTANT * kelvin) / (atomicWeight * ATOMIC_MASS_KG);
   return (nm * Math.sqrt(thermal + (microturbulence * 1e3) ** 2)) / SPEED_OF_LIGHT;
 }
 
 /** The line's total Lorentz width (full width at half maximum): radiation, collisions, Stark, nm. */
-export const lorentzFwhm = (line: Line, c: Conditions) =>
+const lorentzFwhm = (line: Line, c: Conditions) =>
   RADIATIVE_FWHM + vanDerWaalsFwhm(line, c) + starkFwhm(line, c);
 
 /** The line's shape under some conditions, its centre moved by `shift` (λ_observed / λ_rest). */
 export function lineShape(line: Line, c: Conditions, shift = 1): Shape {
-  const doppler = dopplerWidth(line.wavelength, line.element, c.temperature, c.microturbulence);
+  const doppler = dopplerWidth(
+    line.wavelength,
+    ELEMENTS[line.element].atomicWeight,
+    c.temperature,
+    c.microturbulence,
+  );
   const stark = starkFwhm(line, c);
   const damping = lorentzFwhm(line, c) / (2 * doppler);
   const shape = { centre: line.wavelength * shift, doppler: doppler * shift, damping };

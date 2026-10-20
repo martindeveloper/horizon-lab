@@ -20,8 +20,6 @@ export const gaiaBh3: HoleSpec = {
   id: "gaia-bh3",
   name: "Gaia BH3",
   kind: "catalog",
-  catalog: "ℓ ≈ 52°, b ≈ −3.5°",
-  blurb: "A dormant 33 M☉ hole 1,926 ly away, found by the wobble of an old giant star.",
   massSolar: 32.7,
   spin: 0,
   inclination: 0.5,
@@ -36,6 +34,7 @@ export const gaiaBh3: HoleSpec = {
   tour: [
     // A slow, level drift in from the star field: nothing glows, only the stars bend.
     {
+      phase: "wide",
       duration: 9.5,
       yaw: 0.8,
       inclination: 0.2,
@@ -46,6 +45,7 @@ export const gaiaBh3: HoleSpec = {
     },
     // Trace the giant's long, stretched orbit.
     {
+      phase: "dolly",
       duration: 10.5,
       yaw: 1.7,
       inclination: 0.7,
@@ -57,6 +57,7 @@ export const gaiaBh3: HoleSpec = {
       eq: "P = 11.6 yr    ·    e = 0.73",
     },
     {
+      phase: "detail",
       duration: 8.5,
       yaw: 0.5,
       inclination: 0.35,
@@ -68,7 +69,23 @@ export const gaiaBh3: HoleSpec = {
       ],
       eq: "L_X(2–10 keV) < 2.1 × 10²⁹ erg s⁻¹",
     },
-    { duration: 8.5, yaw: -0.7, inclination: 0.9, distance: 34, swing: 0.2, roll: -0.03 },
-    { duration: 10, yaw: 1.3, inclination: 0.4, distance: 140, lift: 0.25, lead: -0.2 },
+    {
+      phase: "hold",
+      duration: 8.5,
+      yaw: -0.7,
+      inclination: 0.9,
+      distance: 34,
+      swing: 0.2,
+      roll: -0.03,
+    },
+    {
+      phase: "wide",
+      duration: 10,
+      yaw: 1.3,
+      inclination: 0.4,
+      distance: 140,
+      lift: 0.25,
+      lead: -0.2,
+    },
   ],
 };

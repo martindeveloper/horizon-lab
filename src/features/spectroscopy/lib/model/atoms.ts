@@ -14,7 +14,7 @@ export const ELEMENT_IDS = ["H", "He", "Li", "Na", "K", "Mg", "Ca", "Fe"] as con
 export type ElementId = (typeof ELEMENT_IDS)[number];
 
 /** A periodic-table element (`@horizon/toolkit/science`) with what the lab adds about it. */
-export type Element = ChemicalElement & {
+type Element = ChemicalElement & {
   id: ElementId;
   /** The Sun's photospheric abundance log ε = log(N / N_H) + 12 (Asplund et al. 2009). */
   abundance: number;
@@ -188,10 +188,29 @@ export const lineById = (id: string) => BY_ID.get(id);
  * (5,000, 10,000 and 30,000 K; hydrogen at 10,000 K): a ranking within an element that knows
  * nothing of the source in view.
  */
-export function labStrength(line: Line) {
+function labStrength(line: Line) {
   const kelvin = line.element === "H" ? 10_000 : ([5000, 10_000, 30_000][line.stage] ?? 30_000);
   return line.logGf - (5040 / kelvin) * line.lower;
 }
+
+/** How strong each laboratory line looks within its element, 0.25–1 (from `labStrength`). */
+const markWeights = new Map<string, number>();
+function markWeightsOf(element: ElementId) {
+  const own = LINES.filter((line) => line.element === element);
+  const top = Math.max(...own.map(labStrength));
+  for (const line of own)
+    markWeights.set(line.id, Math.max(0.25, 1 - (top - labStrength(line)) / 3));
+}
+
+/** A laboratory line's weight under the spectrum: 1 for its element's strongest, 0.25 at least. */
+export function markWeight(line: Line) {
+  if (!markWeights.has(line.id)) markWeightsOf(line.element);
+  return markWeights.get(line.id) ?? 0.5;
+}
+
+/** The element measured on: the one picked, if still marked, else the one marked last. */
+export const measuredElement = (compare: readonly ElementId[], measure: ElementId | null) =>
+  measure && compare.includes(measure) ? measure : (compare.at(-1) ?? null);
 
 /** The line of an element nearest a wavelength, for naming famous lines in code. */
 export function lineNear(species: string, nm: number) {
@@ -241,7 +260,7 @@ export const namedLine = (id: string) => NAMED.find((n) => n.line.id === id);
  * Balmer lines, the neutral atom's and, where the ion's take over in hotter stars, the ion's.
  * An observer picks whichever the spectrum shows best (`measureLine`).
  */
-export const MEASURE_LINES: Record<ElementId, readonly Line[]> = {
+const MEASURE_LINES: Record<ElementId, readonly Line[]> = {
   H: [lineNear("H I", 656.279)],
   He: [lineNear("He I", 587.562), lineNear("He II", 468.57)],
   Li: [lineNear("Li I", 670.776)],

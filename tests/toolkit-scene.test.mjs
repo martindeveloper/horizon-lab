@@ -1,28 +1,34 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { Group, PerspectiveCamera } from "three";
+import { Color, Group, PerspectiveCamera } from "three";
 
-import { atViewScale, nearestView } from "../packages/toolkit/src/camera/views.ts";
-import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
+import { atViewScale, nearestView } from "@horizon/toolkit/camera";
+import { DisposalScope } from "@horizon/toolkit/rendering";
 import {
   createAnchoredRulers,
   createFaders,
   createLogZoom,
   createOrbitRig,
+  createPointWriter,
   createReadoutClock,
   createTapPicking,
   createViewMoves,
   fade,
   framed,
+  lineOf,
   movedBy,
   niceNumber,
   pickLevel,
+  pointsGeometry,
   rising,
   scaleBar,
   scaleChanged,
   scaleReadout,
-} from "../packages/toolkit/src/scene/index.ts";
+  worldPerPixel,
+} from "@horizon/toolkit/scene";
+
+import { close } from "./toolkit-helpers.mjs";
 
 test("scale bars are round numbers in the visitor's unit, 44–140 px long", () => {
   assert.deepEqual([0.7, 1.2, 2.9, 4, 8, 120].map(niceNumber), [0.5, 1, 2, 5, 10, 100]);
@@ -321,4 +327,33 @@ test("anchored rulers run from home or a chosen anchor to every anchor on screen
     [["far0", "63241"]],
   );
   scope.dispose();
+});
+
+test("point writers grow past their first size and view exactly what was written", () => {
+  const w = createPointWriter(2);
+  const c = new Color(0.5, 1, 0.25);
+  for (let i = 0; i < 5; i += 1) w.put(i, i * 2, i * 3, c, 2);
+  assert.equal(w.count, 5);
+  const g = w.geometry();
+  assert.equal(g.getAttribute("position").count, 5);
+  assert.deepEqual(Array.from(g.getAttribute("position").array.slice(12, 15)), [4, 8, 12]);
+  assert.deepEqual(Array.from(g.getAttribute("color").array.slice(0, 3)), [1, 2, 0.5]);
+  assert.equal(g.getAttribute("size"), undefined);
+  const sized = pointsGeometry(new Float32Array(6), new Float32Array(6), new Float32Array([3, 4]));
+  assert.equal(sized.getAttribute("position").count, 2);
+  assert.equal(sized.getAttribute("size").itemSize, 1);
+  assert.deepEqual(Array.from(sized.getAttribute("size").array), [3, 4]);
+});
+
+test("worldPerPixel spans the frustum height over the stage", () => {
+  close(worldPerPixel(90, 10, 1000), (2 * 10) / 1000);
+  close(worldPerPixel(48, 72, 800) * 800, 2 * Math.tan((48 * Math.PI) / 360) * 72);
+  close(worldPerPixel(48, 72, 800) * 2, worldPerPixel(48, 144, 800));
+});
+
+test("orbit lines do not occlude bodies in the depth buffer", () => {
+  const orbit = lineOf(0xffffff, 0.6);
+  assert.equal(orbit.material.depthWrite, false);
+  orbit.geometry.dispose();
+  orbit.material.dispose();
 });

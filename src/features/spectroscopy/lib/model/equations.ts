@@ -1,9 +1,4 @@
 import {
-  ATOMIC_MASS_KG,
-  BOLTZMANN_CONSTANT,
-  ELECTRON_MASS_KG,
-  PLANCK_CONSTANT,
-  SPEED_OF_LIGHT,
   defineEquation,
   dopplerShift,
   photonEnergy,
@@ -13,11 +8,14 @@ import {
   type Formula,
 } from "@horizon/toolkit/science";
 
-import { BOLTZMANN_EV } from "./populations";
+import { boltzmannFactor, RYDBERG_HYDROGEN, sahaFactor } from "./populations";
+import { dopplerWidth as thermalWidth } from "./profile";
+import { slabIntensity } from "./spectrum";
 
 /**
  * Stellar Spectra's formulas, written once: the guide and the technical details print them,
- * and tests check them against textbook values.
+ * and tests check them against textbook values. Each `compute` calls the function the spectra
+ * are made with (`populations.ts`, `profile.ts`, `spectrum.ts`), so the two cannot drift.
  */
 
 /** Boltzmann's law: how a gas at T shares its atoms between two levels. */
@@ -32,13 +30,9 @@ export const boltzmannLaw = defineEquation({
     T: { symbol: "T", latex: "T", unit: "K" },
     ratio: { symbol: "n_b / n_a", latex: "n_b/n_a" },
   },
-  compute: ({ g, dE, T }) => g * Math.exp(-dE / (BOLTZMANN_EV * T)),
+  compute: ({ g, dE, T }) => boltzmannFactor(g, dE, T),
   source: "Boltzmann (1877)",
 });
-
-/** The proton–electron mass ratio's effect on hydrogen: R_H = R_∞ / (1 + mₑ / m_p). */
-const RYDBERG_HYDROGEN =
-  10_973_731.568_157 / (1 + ELECTRON_MASS_KG / (1.007_276_466_578_9 * ATOMIC_MASS_KG));
 
 /** Saha's equation: how a gas at T and electron pressure Pₑ shares its atoms between two stages. */
 export const sahaEquation = defineEquation({
@@ -54,11 +48,7 @@ export const sahaEquation = defineEquation({
     Pe: { symbol: "Pₑ", latex: "P_e" },
     ratio: { symbol: "N_{i+1} / N_i", latex: "N_{i+1}/N_i" },
   },
-  compute: ({ U, chi, T, Pe }) => {
-    const kT = BOLTZMANN_CONSTANT * T;
-    const quantum = ((2 * Math.PI * ELECTRON_MASS_KG * kT) / PLANCK_CONSTANT ** 2) ** 1.5;
-    return 2 * U * quantum * (kT / Pe) * Math.exp(-chi / (BOLTZMANN_EV * T));
-  },
+  compute: ({ U, chi, T, Pe }) => sahaFactor(U, 1, chi, T, Pe),
   source: "Saha (1920), Philosophical Magazine 40, 472",
 });
 
@@ -90,8 +80,7 @@ export const slabTransfer = defineEquation({
     T: { symbol: "T", latex: "T", unit: "K" },
     I: { symbol: "I", latex: "I" },
   },
-  compute: ({ I0, tau, lambda, T }) =>
-    I0 * Math.exp(-tau) + planckRadiance(lambda, T) * -Math.expm1(-tau),
+  compute: ({ I0, tau, lambda, T }) => slabIntensity(I0, planckRadiance(lambda, T), tau),
   source: "Kirchhoff (1860); the formal solution of radiative transfer",
 });
 
@@ -108,9 +97,7 @@ export const dopplerWidth = defineEquation({
     xi: { symbol: "ξ", latex: "\\xi", unit: "km/s" },
     width: { symbol: "Δλ_D", latex: "\\Delta\\lambda_D", unit: "nm" },
   },
-  compute: ({ lambda, T, A, xi }) =>
-    (lambda * Math.sqrt((2 * BOLTZMANN_CONSTANT * T) / (A * ATOMIC_MASS_KG) + (xi * 1e3) ** 2)) /
-    SPEED_OF_LIGHT,
+  compute: ({ lambda, T, A, xi }) => thermalWidth(lambda, A, T, xi),
 });
 
 /** A formula the documents print but nothing computes from directly. */
@@ -122,7 +109,7 @@ const formula = (id: string, text: string, latex: string, source?: string): Form
 });
 
 /** A line's optical depth: atoms, oscillator strength and the Voigt profile. */
-export const lineOpacity = formula(
+const lineOpacity = formula(
   "line-opacity",
   "τ(λ) = π rₑ λ² f N_lower (1 − e^(−hc/λkT)) H(a, v) / (√π Δλ_D)",
   "\\tau(\\lambda) = \\pi r_e \\lambda^2 f N_\\ell \\left(1 - e^{-hc/\\lambda k T}\\right) \\frac{H(a, v)}{\\sqrt{\\pi}\\,\\Delta\\lambda_D}",
@@ -132,7 +119,7 @@ export const lineOpacity = formula(
  * The flux leaving a star: the intensity integrated up through its layers along μ = 2/3, which
  * the Eddington–Barbier relation makes stand for the whole disc.
  */
-export const eddingtonFlux = formula(
+const eddingtonFlux = formula(
   "eddington-flux",
   "F_λ ≈ π Σ B_λ(T_k) [e^(−3τ_k/2) − e^(−3τ_{k+1}/2)]",
   "F_\\lambda \\approx \\pi \\sum_k B_\\lambda(T_k)\\left[e^{-3\\tau_k/2} - e^{-3\\tau_{k+1}/2}\\right]",
@@ -140,7 +127,7 @@ export const eddingtonFlux = formula(
 );
 
 /** The width a line absorbs: what a curve of growth plots. */
-export const equivalentWidth = formula(
+const equivalentWidth = formula(
   "equivalent-width",
   "W = ∫ (1 − F_λ / F_c) dλ",
   "W = \\int \\left(1 - \\frac{F_\\lambda}{F_c}\\right) d\\lambda",

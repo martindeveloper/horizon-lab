@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 
 import { PanelHeader, Sheet, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
 
@@ -12,7 +12,7 @@ export function RailSection({
 }: {
   title: string;
   note?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section>
@@ -21,6 +21,11 @@ export function RailSection({
       <div className="mt-2">{children}</div>
     </section>
   );
+}
+
+/** Switch rows in a rail section; they bleed to the rail's edges so their hit areas line up. */
+export function SwitchGroup({ children }: { children: ReactNode }) {
+  return <div className="-mx-3 grid gap-0.5">{children}</div>;
 }
 
 /**
@@ -41,8 +46,8 @@ export function Rail({
   title: string;
   closeLabel: string;
   onClose: () => void;
-  sheetLead?: React.ReactNode;
-  children: React.ReactNode;
+  sheetLead?: ReactNode;
+  children: ReactNode;
 }) {
   const rail = useRef<HTMLElement>(null);
   useFocusHandoff(rail);

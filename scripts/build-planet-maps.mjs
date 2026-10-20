@@ -18,12 +18,10 @@
  * give brightness; their colour follows true-colour images.
  */
 import { createHash } from "node:crypto";
-import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync } from "node:fs";
+import { createReadStream, mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
 
 import sharp from "sharp";
 
@@ -31,12 +29,14 @@ import { FIGURES, MAPS, mapFile } from "@horizon/toolkit/bodies";
 import { GEOMETRIC_ALBEDO, surfaceMap } from "@horizon/toolkit/bodies/surfaces";
 
 import { buildSunMap } from "./build-sun-map.mjs";
+import { SRGB_TO_LINEAR as LUT, encodeSrgb as encode } from "./lib/colour.mjs";
 import { MOON_MAP_SOURCES, moonSourceX } from "./lib/moon-maps.mjs";
+import { fetchCached as download } from "./lib/net.mjs";
 
 sharp.cache(false);
 const root = new URL("../", import.meta.url);
 const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-planet-maps"));
-mkdirSync(cache, { recursive: true });
+const fetchCached = (url) => download(url, cache);
 const outDir = new URL("public/textures/orrery/", root);
 mkdirSync(outDir, { recursive: true });
 
@@ -81,24 +81,6 @@ const SOURCES = {
   pluto: `${USGS}/Pluto_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif`,
 };
 
-async function fetchCached(url) {
-  const file = path.join(cache, path.basename(new URL(url).pathname));
-  if (existsSync(file) && statSync(file).size > 0) return file;
-  console.log(`Downloading ${url}`);
-  const res = await fetch(url);
-  if (!res.ok || !res.body) throw new Error(`${url}: HTTP ${res.status}`);
-  await pipeline(Readable.fromWeb(res.body), createWriteStream(file));
-  return file;
-}
-
-const LUT = Float32Array.from({ length: 256 }, (_, i) => {
-  const c = i / 255;
-  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-});
-const encode = (v) => {
-  const c = v <= 0 ? 0 : v >= 1 ? 1 : v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
-  return Math.round(c * 255);
-};
 const luminance = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
 /** A map in progress: linear RGB, w × h, north row first. */

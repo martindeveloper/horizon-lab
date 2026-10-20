@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 
@@ -19,6 +20,12 @@ export function useThemeMode() {
   const { theme, setTheme } = useTheme();
   const value: ThemeMode = mounted && (theme === "light" || theme === "system") ? theme : "dark";
   return { mounted, value, setTheme: (mode: ThemeMode) => setTheme(mode) };
+}
+
+/** The three modes as the visitor reads them, from the root message namespace. */
+export function useThemeLabels(): Record<ThemeMode, string> {
+  const t = useTranslations();
+  return { dark: t("themeDark"), light: t("themeLight"), system: t("themeSystem") };
 }
 
 export function ThemeSwitch({

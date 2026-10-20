@@ -24,9 +24,6 @@ export const m87: HoleSpec = {
   id: "m87",
   name: "Messier 87*",
   kind: "catalog",
-  catalog: "Virgo · b ≈ +74°",
-  blurb:
-    "16.8 Mpc, 55 million ly. High above the Milky Way plane - a yellow elliptical halo, globulars, and Virgo neighbours. The jet is real.",
   massSolar: 6.5e9,
   illustrativeFlow: true,
   spin: 0.9,
@@ -41,6 +38,7 @@ export const m87: HoleSpec = {
   aliases: ["m87", "m87-star", "messier-87", "powehi", "pōwehi"],
   tour: [
     {
+      phase: "wide",
       duration: 9,
       yaw: 0.8,
       inclination: 0.4,
@@ -51,6 +49,7 @@ export const m87: HoleSpec = {
     },
     // A slow helix up along the jet.
     {
+      phase: "dolly",
       duration: 11,
       yaw: 2,
       inclination: 0.92,
@@ -63,6 +62,7 @@ export const m87: HoleSpec = {
       eq: "i_jet ≈ 17°    ·    P_BZ ∝ Ω_H² Φ²",
     },
     {
+      phase: "detail",
       duration: 8.5,
       yaw: 0.6,
       inclination: 1.22,
@@ -72,6 +72,7 @@ export const m87: HoleSpec = {
       eq: "d_crit ≈ 10.4 GM / (c² D) ≈ 40 μas (a = 0)    ·    observed ring 42–44 μas",
     },
     {
+      phase: "hold",
       duration: 7.5,
       yaw: -0.5,
       inclination: 1.3,
@@ -80,6 +81,14 @@ export const m87: HoleSpec = {
       roll: -0.03,
       eq: "θ_res ~ λ / D_Earth    at    λ = 1.3 mm",
     },
-    { duration: 10, yaw: 1.5, inclination: 0.48, distance: 150, lift: 0.2, lead: 0.3 },
+    {
+      phase: "wide",
+      duration: 10,
+      yaw: 1.5,
+      inclination: 0.48,
+      distance: 150,
+      lift: 0.2,
+      lead: 0.3,
+    },
   ],
 };

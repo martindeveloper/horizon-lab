@@ -1,17 +1,17 @@
 "use client";
 
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
-import { REPOSITORY_URL } from "@/lib/links";
 import { simulationForPath, simulations } from "@/lib/simulations";
 import { SegmentedControl, cn } from "@horizon/toolkit/ui";
 
-import { SiderealClock } from "./sidereal-clock";
-import { ThemeSwitch } from "./theme-switch";
+import { FooterLinks } from "./footer-links";
+import { ThemeSwitch, useThemeLabels } from "./theme-switch";
+import { useDismissOnEscape } from "./use-dismiss-on-escape";
 
 const kicker = "font-mono text-[10px] tracking-[0.22em] text-subtle uppercase";
 
@@ -32,6 +32,8 @@ export function PhoneMenu({
   onLocale: (locale: Locale) => void;
 }) {
   const t = useTranslations();
+  const shell = useTranslations("shell");
+  const themeLabels = useThemeLabels();
   const pathname = usePathname();
   const current = simulationForPath(pathname);
   /* Open on the page it was opened on, so any navigation closes it. */
@@ -40,23 +42,15 @@ export function PhoneMenu({
   const button = useRef<HTMLButtonElement>(null);
   const id = useId();
   const close = () => setOpenOn(null);
+  useDismissOnEscape(open, button, close);
 
   useEffect(() => {
     if (!open) return;
-    /* Ahead of a scene's own Escape, which would otherwise close its panels too. */
-    function escape(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      event.stopPropagation();
-      setOpenOn(null);
-      button.current?.focus();
-    }
-    window.addEventListener("keydown", escape, true);
     /* The page under the dimmed scrim holds still. */
     const root = document.documentElement;
     const overflow = root.style.overflow;
     root.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("keydown", escape, true);
       root.style.overflow = overflow;
     };
   }, [open]);
@@ -146,50 +140,13 @@ export function PhoneMenu({
                   <p aria-hidden className={cn(kicker, "mb-2")}>
                     {t("theme")}
                   </p>
-                  <ThemeSwitch
-                    label={t("theme")}
-                    labels={{
-                      dark: t("themeDark"),
-                      light: t("themeLight"),
-                      system: t("themeSystem"),
-                    }}
-                  />
+                  <ThemeSwitch label={t("theme")} labels={themeLabels} />
                 </div>
               </div>
             </div>
 
             <div className="mt-4 flex h-10 items-center justify-between gap-4 border-t border-border pt-1 font-mono text-[10px] tracking-[0.18em] text-subtle uppercase">
-              <span className="inline-flex h-full items-center gap-2.5">
-                <Link
-                  href="/about"
-                  prefetch={false}
-                  onClick={close}
-                  className="footer-link inline-flex"
-                >
-                  {t("shell.about")}
-                </Link>
-                <span className="footer-dot" aria-hidden />
-                <Link
-                  href="/credits"
-                  prefetch={false}
-                  onClick={close}
-                  className="footer-link inline-flex"
-                >
-                  {t("shell.credits")}
-                </Link>
-                <span className="footer-dot" aria-hidden />
-                <a
-                  href={REPOSITORY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-link inline-flex gap-1"
-                >
-                  GitHub
-                  <ArrowUpRight className="size-3" aria-hidden />
-                  <span className="sr-only"> ({t("shell.newTab")})</span>
-                </a>
-              </span>
-              <SiderealClock label={t("shell.sidereal")} />
+              <FooterLinks t={shell} menu onNavigate={close} />
             </div>
           </nav>
         </>

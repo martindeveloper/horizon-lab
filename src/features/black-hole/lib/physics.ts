@@ -11,6 +11,9 @@ import {
   rainClockRate,
   rainFallSpeed,
 } from "./equations";
+import { SPIN_LIMIT } from "./parameters";
+
+export { SPIN_LIMIT };
 
 /** Schwarzschild radius in kilometers. */
 export function schwarzschildKm(massSolar: number): number {
@@ -27,13 +30,16 @@ export function massSeconds(massSolar: number): number {
  * In units of Rs = 2M this is (1 + sqrt(1 − a²)) / 2.
  */
 export function horizonOverM(a: number): number {
-  return kerrHorizon.compute({ a: clamp(a, -0.999, 0.999) });
+  return kerrHorizon.compute({ a: clamp(a, -SPIN_LIMIT, SPIN_LIMIT) });
 }
 
 /** Equatorial photon-orbit radius / M. a = 0 → 3. */
 export function photonOverM(a: number): number {
-  return photonOrbit.compute({ a: clamp(a, -0.999, 0.999) });
+  return photonOrbit.compute({ a: clamp(a, -SPIN_LIMIT, SPIN_LIMIT) });
 }
+
+/** Critical impact parameter 3√3 M of a Schwarzschild hole: the shadow's radius on the sky. */
+export const B_CRIT = 3 * Math.sqrt(3);
 
 /**
  * Critical impact parameters |λ| of the equatorial prograde and retrograde
@@ -44,11 +50,8 @@ export function photonOverM(a: number): number {
  */
 export function criticalImpactParameters(a: number): { prograde: number; retrograde: number } {
   // Prograde and retrograde refer to the hole's own rotation, so only |a| matters.
-  const aa = clamp(Math.abs(a), 0, 0.999);
-  if (Math.abs(aa) < 1e-3) {
-    const b = 3 * Math.sqrt(3);
-    return { prograde: b, retrograde: b };
-  }
+  const aa = clamp(Math.abs(a), 0, SPIN_LIMIT);
+  if (Math.abs(aa) < 1e-3) return { prograde: B_CRIT, retrograde: B_CRIT };
   const lambda = (r: number) => -(r * r * r - 3 * r * r + aa * aa * r + aa * aa) / (aa * (r - 1));
   const prograde = photonOrbit.compute({ a: aa });
   const retrograde = photonOrbit.compute({ a: -aa });
@@ -60,6 +63,17 @@ export function criticalImpactParameters(a: number): { prograde: number; retrogr
  * observer, which exists only outside the horizon; it stays 0.3 M clear of
  * r₊ on the equator, where Boyer–Lindquist r = √(d² − a²) is smallest.
  */
+/** Camera distance bounds in M; MIN_DIST sits below every spin's `cameraFloor`. */
+export const MIN_DIST = 1.6;
+export const MAX_DIST = 480;
+/** The camera stays this far (radians) from either pole, where the azimuth would degenerate. */
+export const INCLINATION_LIMIT = 1.35;
+/**
+ * The largest spin a preset or the spin slider sets: Thorne's limit (1974), the spin an
+ * accreting hole can reach. Formulas still accept up to `SPIN_LIMIT`.
+ */
+export const MAX_SPIN = 0.998;
+
 export function cameraFloor(a: number): number {
   const r = horizonOverM(a) + 0.3;
   return Math.sqrt(r * r + a * a);
@@ -67,7 +81,7 @@ export function cameraFloor(a: number): number {
 
 /** Prograde ISCO radius / M. a = 0 → 6; a → 1 → 1. */
 export function iscoOverM(a: number): number {
-  return innermostStableOrbit.compute({ a: clamp(a, -0.999, 0.999) });
+  return innermostStableOrbit.compute({ a: clamp(a, -SPIN_LIMIT, SPIN_LIMIT) });
 }
 
 /** Keplerian orbital period at radius r/M, Kerr equatorial (prograde). */

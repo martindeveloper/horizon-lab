@@ -11,8 +11,6 @@ export const custom: HoleSpec = {
   id: "custom",
   name: "Custom",
   kind: "theory",
-  catalog: "sandbox",
-  blurb: "Preset mass scale and adjustable spin.",
   massSolar: 1e7,
   spin: 0.82,
   inclination: 0.18,
@@ -25,8 +23,17 @@ export const custom: HoleSpec = {
   jet: 0,
   aliases: ["custom"],
   tour: [
-    { duration: 8.5, yaw: 0.85, inclination: 0.55, distance: 118, lift: 0.25, lead: 0.3 },
     {
+      phase: "wide",
+      duration: 8.5,
+      yaw: 0.85,
+      inclination: 0.55,
+      distance: 118,
+      lift: 0.25,
+      lead: 0.3,
+    },
+    {
+      phase: "dolly",
       duration: 8.5,
       yaw: 0.7,
       inclination: 0.18,
@@ -36,6 +43,7 @@ export const custom: HoleSpec = {
       eq: "GM☉/c² ≈ 1.48 km    ·    GM☉/c³ ≈ 4.93 μs",
     },
     {
+      phase: "detail",
       duration: 8,
       yaw: 0.55,
       inclination: 1.05,
@@ -44,6 +52,7 @@ export const custom: HoleSpec = {
       sketch: [{ kind: "rings", rings: ["horizon", "photon", "isco"] }],
     },
     {
+      phase: "hold",
       duration: 7.5,
       yaw: -0.6,
       inclination: 0.22,
@@ -51,6 +60,6 @@ export const custom: HoleSpec = {
       swing: 0.2,
       sketch: [{ kind: "shadow" }],
     },
-    { duration: 9.5, yaw: 1.2, inclination: 0.5, distance: 128, lift: 0.25 },
+    { phase: "wide", duration: 9.5, yaw: 1.2, inclination: 0.5, distance: 128, lift: 0.25 },
   ],
 };

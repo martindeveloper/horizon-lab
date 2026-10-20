@@ -24,9 +24,6 @@ export const stellar: HoleSpec = {
   id: "stellar",
   name: "Cygnus X-1",
   kind: "catalog",
-  catalog: "ℓ ≈ 71°, b ≈ +3°",
-  blurb:
-    "A ~15 M☉ hole, likely from the Cygnus OB3 association, 7,240 ly. The band is the Orion Spur; Sadr and Deneb lie 7–13° away.",
   massSolar: 15,
   massNote: "adopted",
   spin: 0.95,
@@ -41,6 +38,7 @@ export const stellar: HoleSpec = {
   aliases: ["stellar", "cygnus-x-1", "cyg-x-1", "cygnus"],
   tour: [
     {
+      phase: "wide",
       duration: 9,
       yaw: 0.9,
       inclination: 0.32,
@@ -51,6 +49,7 @@ export const stellar: HoleSpec = {
     },
     // Out and back in around the hole, the way the companion circles it.
     {
+      phase: "dolly",
       duration: 10.5,
       yaw: 1.8,
       inclination: 0.6,
@@ -60,6 +59,7 @@ export const stellar: HoleSpec = {
       roll: 0.03,
     },
     {
+      phase: "detail",
       duration: 8.5,
       yaw: 0.6,
       inclination: 0.16,
@@ -70,6 +70,7 @@ export const stellar: HoleSpec = {
       eq: "T_max ∝ (Ṁ / M²)^(1/4) ∝ M^(−1/4)   at fixed ṁ",
     },
     {
+      phase: "hold",
       duration: 8,
       yaw: -0.5,
       inclination: 1.08,
@@ -81,6 +82,7 @@ export const stellar: HoleSpec = {
       eq: "GM☉/c² ≈ 1.48 km    ·    GM☉/c³ ≈ 4.93 μs",
     },
     {
+      phase: "wide",
       duration: 10,
       yaw: 1.4,
       inclination: 0.42,

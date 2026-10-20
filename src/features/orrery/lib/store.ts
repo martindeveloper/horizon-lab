@@ -1,8 +1,19 @@
 import { create } from "zustand";
 
-import { sceneSlice, type SceneSlice } from "@/lib/scene-store";
+import {
+  RESET_SCENE_SETTINGS,
+  guideSlice,
+  sceneSlice,
+  type GuideSlice,
+  type SceneSlice,
+} from "@/lib/scene-store";
 import { isPresentEra } from "@/space/solar-system/model/moment";
-import { hasSurface, type SolarSelection } from "@/space/solar-system/model/selection";
+import { MODEL_START } from "@/space/solar-system/model/parameters";
+import {
+  hasSurface,
+  selectionKey,
+  type SolarSelection,
+} from "@/space/solar-system/model/selection";
 import { solarViewById, type SolarViewId } from "@/space/solar-system/model/views";
 import type { SolarShow } from "@/space/solar-system/scene/kit";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
@@ -17,7 +28,7 @@ export type Show = SolarShow & { distances: boolean };
 
 export type Panel = "none" | "objects" | "view" | "reading";
 
-export const DEFAULT_SHOW: Show = {
+const DEFAULT_SHOW: Show = {
   disk: true,
   kuiper: true,
   scattered: true,
@@ -31,47 +42,40 @@ export const DEFAULT_SHOW: Show = {
   drift: true,
 };
 
-export type OrreryStore = SceneSlice & {
-  yearsAgo: number;
-  playing: boolean;
-  view: SolarViewId;
-  selection: SolarSelection | null;
-  /** The selected body fills the view at its true size; the engine flies in and out. */
-  closeUp: boolean;
-  /** Explicitly enabled illustrative prominences; reset on leaving the close-up. */
-  solarActivity: boolean;
-  solarActivityPaused: boolean;
-  panel: Panel;
-  show: Show;
-  guideOpen: boolean;
-  guideStep: number;
-  /** The visitor's switches from before the guide, given back when it ends. */
-  showBeforeGuide: Show | null;
-  /* HUD readouts written by the engine a few times per second, besides the scale bar. */
-  viewDist: number;
-  driftRate: number;
-  /** Years the Motion switch has advanced the real clock, published by the engine. */
-  driftYears: number;
-  setYearsAgo: (yearsAgo: number) => void;
-  setYearsFromPlay: (yearsAgo: number) => void;
-  togglePlay: () => void;
-  replay: () => void;
-  setView: (view: SolarViewId) => void;
-  select: (selection: SolarSelection | null) => void;
-  /** Flies to the selected body when it has a surface to look at. */
-  enterCloseUp: () => void;
-  leaveCloseUp: () => void;
-  toggleSolarActivity: () => void;
-  toggleSolarActivityPaused: () => void;
-  patchShow: (patch: Partial<Show>) => void;
-  /** The View panel's settings as a visit starts: layers, switches, render quality. */
-  resetView: () => void;
-  setPanel: (panel: Panel) => void;
-  startGuide: () => void;
-  /** Applies a tour step; past the last step the guide ends. */
-  goGuide: (step: number) => void;
-  endGuide: () => void;
-};
+export type OrreryStore = SceneSlice &
+  GuideSlice<Show> & {
+    yearsAgo: number;
+    playing: boolean;
+    view: SolarViewId;
+    selection: SolarSelection | null;
+    /** The selected body fills the view at its true size; the engine flies in and out. */
+    closeUp: boolean;
+    /** Explicitly enabled illustrative prominences; reset on leaving the close-up. */
+    solarActivity: boolean;
+    solarActivityPaused: boolean;
+    panel: Panel;
+    show: Show;
+    /* HUD readouts written by the engine a few times per second, besides the scale bar. */
+    viewDist: number;
+    driftRate: number;
+    /** Years the Motion switch has advanced the real clock, published by the engine. */
+    driftYears: number;
+    setYearsAgo: (yearsAgo: number) => void;
+    setYearsFromPlay: (yearsAgo: number) => void;
+    togglePlay: () => void;
+    replay: () => void;
+    setView: (view: SolarViewId) => void;
+    select: (selection: SolarSelection | null) => void;
+    /** Flies to the selected body when it has a surface to look at. */
+    enterCloseUp: () => void;
+    leaveCloseUp: () => void;
+    toggleSolarActivity: () => void;
+    toggleSolarActivityPaused: () => void;
+    patchShow: (patch: Partial<Show>) => void;
+    /** The View panel's settings as a visit starts: layers, switches, distance unit, render quality. */
+    resetView: () => void;
+    setPanel: (panel: Panel) => void;
+  };
 
 /** Close-ups show today's surfaces, outside the guide. */
 export function canCloseUp(s: Pick<OrreryStore, "selection" | "guideOpen" | "yearsAgo">) {
@@ -84,7 +88,7 @@ export function closeUpAwaitsPresent(s: Pick<OrreryStore, "selection" | "guideOp
 }
 
 function sameSelection(a: SolarSelection | null, b: SolarSelection | null) {
-  return !!a && !!b && JSON.stringify(a) === JSON.stringify(b);
+  return !!a && !!b && selectionKey(a) === selectionKey(b);
 }
 
 const SUN_ACTIVITY_OFF = { solarActivity: false, solarActivityPaused: false };
@@ -93,6 +97,23 @@ const closeUpState = (closeUp: boolean) =>
 
 export const useOrrery = create<OrreryStore>((set, get) => ({
   ...sceneSlice(set, { scalePx: 120, scaleValue: 10, scaleUnit: "au" }),
+  ...guideSlice(set, get, {
+    tour: TOUR,
+    /* The visitor's switches, given back when the tour ends. */
+    save: (s) => s.show,
+    restore: (show) => ({ show }),
+    open: () => closeUpState(false),
+    apply: (step, s) => ({
+      view: step.view,
+      viewDist: solarViewById(step.view).dist,
+      yearsAgo: step.yearsAgo,
+      playing: Boolean(step.playing) && !prefersReducedMotion(),
+      /* Each step starts from the default layers; Motion keeps the visitor's choice. */
+      show: { ...DEFAULT_SHOW, drift: (s.savedBeforeGuide ?? s.show).drift, ...step.show },
+      selection: step.focus ?? null,
+    }),
+    close: () => ({ playing: false }),
+  }),
   yearsAgo: 0,
   playing: false,
   view: typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath(),
@@ -101,9 +122,6 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   ...SUN_ACTIVITY_OFF,
   panel: "none",
   show: DEFAULT_SHOW,
-  guideOpen: false,
-  guideStep: 0,
-  showBeforeGuide: null,
   viewDist: 72,
   driftRate: 2.5,
   driftYears: 0,
@@ -127,7 +145,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     ),
   replay: () =>
     set((s) => ({
-      yearsAgo: 4.5e9,
+      yearsAgo: MODEL_START,
       playing: true,
       view: "giants",
       viewDist: solarViewById("giants").dist,
@@ -166,48 +184,6 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
   /* Motion starts off under reduced motion (the engine), so a reset keeps it off there. */
   resetView: () =>
-    set({
-      show: { ...DEFAULT_SHOW, drift: !prefersReducedMotion() },
-      antialias: null,
-      quality: "standard",
-    }),
+    set({ show: { ...DEFAULT_SHOW, drift: !prefersReducedMotion() }, ...RESET_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
-  startGuide: () => {
-    set((s) => ({
-      guideOpen: true,
-      showBeforeGuide: s.showBeforeGuide ?? s.show,
-      panel: "none",
-      ...closeUpState(false),
-    }));
-    get().goGuide(0);
-  },
-  goGuide: (index) => {
-    const step = TOUR[index];
-    if (!get().guideOpen || index < 0) return;
-    if (!step) {
-      get().endGuide();
-      return;
-    }
-    /* Each step starts from the default layers; Motion keeps the visitor's choice. */
-    const drift = (get().showBeforeGuide ?? get().show).drift;
-    const v = solarViewById(step.view);
-    set({
-      guideStep: index,
-      view: step.view,
-      viewDist: v.dist,
-      yearsAgo: step.yearsAgo,
-      playing: Boolean(step.playing) && !prefersReducedMotion(),
-      show: { ...DEFAULT_SHOW, drift, ...step.show },
-      selection: step.focus ?? null,
-    });
-  },
-  endGuide: () =>
-    set((s) => ({
-      guideOpen: false,
-      guideStep: 0,
-      playing: false,
-      selection: null,
-      show: s.showBeforeGuide ?? s.show,
-      showBeforeGuide: null,
-    })),
 }));

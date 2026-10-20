@@ -14,7 +14,7 @@ import TRACKS from "./probe-tracks.json";
 
 export type ProbeId = "voyager1" | "voyager2" | "pioneer10" | "pioneer11" | "newHorizons";
 
-export type Probe = {
+type Probe = {
   id: ProbeId;
   /** Launch, UTC date. */
   launched: string;
@@ -163,7 +163,7 @@ export function crossingAu(id: ProbeId, boundary: "shock" | "heliopause") {
 export const HELIOPAUSE_AU =
   (crossingAu("voyager1", "heliopause") + crossingAu("voyager2", "heliopause")) / 2;
 
-export type LightRingId =
+type LightRingId =
   | "lightMinutes"
   | "lightHour"
   | "lightDay"

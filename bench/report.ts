@@ -1,7 +1,7 @@
 import type { Mismatch } from "./fingerprint";
+import { fixed as f, LEVEL } from "./format";
 import type { ComparisonSummary, Finding, GrabSummary, Report } from "./model";
 
-const f = (value: number, digits = 2) => value.toFixed(digits);
 const sig = (value: number) => Number(value.toPrecision(3));
 const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
 
@@ -220,14 +220,12 @@ export function llmSummary(report: Report) {
   };
 }
 
-function table(header: string[], rows: string[][]) {
+function markdownTable(header: string[], rows: string[][]) {
   const line = (cells: string[]) => `| ${cells.join(" | ")} |`;
   return [line(header), line(header.map((_, i) => (i ? "---:" : "---"))), ...rows.map(line)].join(
     "\n",
   );
 }
-
-const LEVEL = { error: "Error", regression: "Regression", warning: "Warning", info: "Note" };
 
 /** "program#1 fragment: 712 lines, 30.5 KiB → 70.6 KiB translated, compiles in 41.2 ms" */
 export function shaderLine(shader: GrabSummary["shaders"][number]) {
@@ -267,7 +265,7 @@ export function markdown(report: Report) {
   if (statics.length) {
     lines.push("## Scenes", "");
     lines.push(
-      table(
+      markdownTable(
         ["scene", "median ms", "p90 ms", "submit ms", "ns/px", "timer", "first ms"],
         statics.map((r) => [
           `\`${r.key}\``,
@@ -286,7 +284,7 @@ export function markdown(report: Report) {
   if (sequences.length) {
     lines.push("## Sequences", "");
     lines.push(
-      table(
+      markdownTable(
         ["sequence", "frames", "median ms", "p90 ms", "worst ms", "at", "spikes", "submit ms"],
         sequences.map((r) => [
           `\`${r.key}\``,
@@ -310,7 +308,7 @@ export function markdown(report: Report) {
       "",
     );
     lines.push(
-      table(
+      markdownTable(
         ["scene", ...report.options.sizes, "fixed ms", "ms/MP", "r²"],
         report.scaling.map((s) => [
           `\`${s.target}/${s.scene}\``,
@@ -340,7 +338,7 @@ export function markdown(report: Report) {
       ...(comparisonWarnings(c).length ? [""] : []),
     );
     lines.push(
-      table(
+      markdownTable(
         ["scene", "before ms", "after ms", "Δ", "pixels changed", "mean |Δ|", "scene"],
         c.rows.map((row) => [
           `\`${row.key}\``,

@@ -15,7 +15,10 @@
  * Compositions: the same symbol for each Z, and each abridged weight within the combined
  * uncertainties of NIST's standard atomic weight.
  */
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+
+import { syncGenerated } from "./lib/generated.mjs";
+import { fetchText } from "./lib/net.mjs";
 
 const OUT = new URL("../packages/toolkit/src/science/elements.ts", import.meta.url);
 const ABRIDGED = "https://www.ciaaw.org/abridged-atomic-weights.htm";
@@ -27,12 +30,6 @@ const END = "/* </generated> */";
 
 const SECONDS = { ms: 1e-3, s: 1, min: 60, h: 3600, d: 86400, a: 31556926, ka: 31556926e3 };
 SECONDS.Ma = SECONDS.ka * 1e3;
-
-const text = async (url) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
-  return res.text();
-};
 
 const decode = (html) =>
   html
@@ -170,9 +167,9 @@ function generate(elements) {
 }
 
 const [abridged, radioactive, nistBody, source] = await Promise.all([
-  text(ABRIDGED),
-  text(RADIOACTIVE),
-  text(NIST),
+  fetchText(ABRIDGED),
+  fetchText(RADIOACTIVE),
+  fetchText(NIST),
   readFile(OUT, "utf8"),
 ]);
 const masses = parseRadioactive(radioactive);
@@ -191,12 +188,4 @@ const end = source.indexOf(END);
 if (start < 0 || end < start) throw new Error(`${OUT.pathname}: generated markers not found`);
 const next = source.slice(0, start) + generate(elements) + source.slice(end + END.length);
 
-if (process.argv.includes("--check")) {
-  if (next !== source) {
-    console.error("elements.ts is out of date: run node scripts/fetch-elements.mjs");
-    process.exit(1);
-  }
-} else {
-  await writeFile(OUT, next);
-  console.warn(`Wrote ${elements.length} elements to ${OUT.pathname}`);
-}
+syncGenerated({ file: OUT, content: next, command: "node scripts/fetch-elements.mjs" });

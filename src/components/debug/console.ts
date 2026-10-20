@@ -8,10 +8,15 @@ import {
   triggerCrash,
   webglOverride,
 } from "@/lib/debug";
-import { COARSE_POINTER_QUERY, REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
+import {
+  COARSE_POINTER_QUERY,
+  PHONE_QUERY,
+  REDUCED_MOTION_QUERY,
+  WIDE_LAYOUT_QUERY,
+} from "@horizon/toolkit/environment";
 import { probeWebGL, type WebGLSupport } from "@horizon/toolkit/rendering";
 
-import { PHONE_QUERY, noticeDismissed } from "../shell/desktop-notice-state";
+import { noticeDismissed } from "../shell/desktop-notice-state";
 
 type LoseContext = { loseContext(): void; restoreContext(): void };
 
@@ -78,7 +83,7 @@ export function createDebug() {
         webgl: probeWebGL(),
         webglOverride: webglOverride(),
         ...gpuDetails(),
-        layout: media("((width >= 48rem) and (height >= 30rem))") ? "desktop" : "touch",
+        layout: media(WIDE_LAYOUT_QUERY) ? "desktop" : "touch",
         viewport: `${innerWidth}×${innerHeight}`,
         devicePixelRatio,
         coarsePointer: media(COARSE_POINTER_QUERY),

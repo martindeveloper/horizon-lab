@@ -14,7 +14,7 @@ import {
 
 export type NeighbourId = "proxima" | "alphaCen" | "barnard" | "scholz";
 
-export type Neighbour = {
+type Neighbour = {
   id: NeighbourId;
   /** Right ascension and declination at epoch J2000.0 (ICRS), degrees. */
   ra: number;

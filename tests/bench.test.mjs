@@ -22,9 +22,7 @@ import {
   benchMotion,
   benchPose,
 } from "../src/features/black-hole/lib/bench-scenes.ts";
-
-const close = (actual, expected, tolerance = 1e-9) =>
-  assert.ok(Math.abs(actual - expected) < tolerance, `${actual} != ${expected}`);
+import { close } from "./toolkit-helpers.mjs";
 
 test("timing summaries use nearest-rank percentiles and reject empty runs", () => {
   const summary = summarizeTimings([5, 1, 4, 2, 3, 10, 6, 7, 9, 8]);

@@ -4,20 +4,21 @@
  */
 import type { PerspectiveCamera } from "three";
 
-import { solarViewById, type SolarViewId } from "@/space/solar-system/model/views";
+import {
+  SOLAR_FRAMING,
+  solarViewById,
+  solarViewPose,
+  type SolarViewId,
+} from "@/space/solar-system/model/views";
 import { createOrbitRig, createViewMoves } from "@horizon/toolkit/scene";
 
 import { closeUpLimits } from "./close-up-flight";
 import { ORRERY_EDGE, SOLAR_EDGE } from "./kit";
 
 /** What the rig needs to know about a close-up in progress. */
-export type CloseUpFrame = { phase: "in" | "on" | "out"; radius: number; frame: number };
+type CloseUpFrame = { phase: "in" | "on" | "out"; radius: number; frame: number };
 
 export type CameraRig = ReturnType<typeof createCameraRig>;
-
-/** Default framing of the views. */
-const AZIMUTH = 0.6;
-const INCLINATION = 0.52;
 
 export function createCameraRig(
   camera: PerspectiveCamera,
@@ -25,7 +26,7 @@ export function createCameraRig(
 ) {
   const { reduceMotion, closeUp } = options;
   const rig = createOrbitRig(camera, {
-    pose: { azimuth: AZIMUTH, inclination: INCLINATION, distance: 72 },
+    pose: { ...SOLAR_FRAMING, distance: 72 },
     reduceMotion,
     /* From a true-size close-up to just past the Oort cloud. */
     limits: () => {
@@ -42,21 +43,14 @@ export function createCameraRig(
       const close = closeUp();
       return { held: close !== null && close.phase !== "on", clamp: !close };
     },
-    nearFloor: 0.008,
+    nearFloor: SOLAR_FRAMING.nearFloor,
     /* In a close-up this frustum draws the rest of the system; the body gets its own pass. */
     far: (distance, aim) =>
       closeUp() ? Math.max(distance * 40, aim.length() * 2 + 60) : distance * 40,
   });
 
   /* Flights between views keep the angles; reduced motion lands framed as the view is. */
-  const moves = createViewMoves(rig, (id: SolarViewId) => {
-    const view = solarViewById(id);
-    return {
-      azimuth: view.azimuth ?? AZIMUTH,
-      inclination: view.inclination ?? INCLINATION,
-      distance: view.dist,
-    };
-  });
+  const moves = createViewMoves(rig, (id: SolarViewId) => solarViewPose(solarViewById(id)));
 
   return Object.assign(rig, moves, {
     /** Accumulated zoom past a close-up's far limit, in e-folds; a deliberate push leaves. */

@@ -6,10 +6,16 @@
   use for reproducible procedural visuals, never security-sensitive values.
 - `lcg(seed)`: weaker linear congruential generator with a 10⁻⁶ step, kept
   because seeded orrery artwork depends on its exact sequence. Prefer `mulberry32`.
+- `minstd(seed)`: the Park–Miller minimal standard generator (seed in 1..2³¹−2),
+  kept because seeded painted artwork depends on its exact sequence. Prefer `mulberry32`.
+- `gaussian(rnd)`: one standard normal deviate (Box–Muller) from two draws of a
+  generator in [0, 1). `onSphere(rnd, radius = 1)`: a uniformly random direction
+  as `[x, y, z]` scaled to `radius`, from two draws; z is the pole.
 - `valueNoise2(x, y)` / `valueNoise3(x, y, z)`: smooth value noise in [0, 1];
   the 3D lattice repeats every 256 units. Sample 3D noise on a unit sphere for
   seamless planet maps. `fbm3(x, y, z, octaves)` sums octaves (lacunarity 2.03,
   gain 0.5), normalized to [0, 1]. CPU only; the GLSL `noiseGLSL` hashes differ.
+- `TAU`: a full turn, 2π.
 - `clamp(value, min, max)`: inclusive bounds; caller supplies ordered bounds.
   `clamp01(value)` is the [0, 1] case for hot loops.
 - `smoothstep(edge0, edge1, x)`: GLSL semantics; reversed edges run downhill.

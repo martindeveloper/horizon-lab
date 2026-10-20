@@ -6,7 +6,7 @@ import { useId, useMemo, type ReactNode } from "react";
 import { dopplerFactor } from "@horizon/toolkit/science";
 import { Chip, Slider, cn } from "@horizon/toolkit/ui";
 
-import { measureLine, type ElementId } from "../lib/model/atoms";
+import { measuredElement, measureLine } from "../lib/model/atoms";
 import { useSpectroscopy } from "../lib/store";
 import { lineName, signed, wavelength } from "./format";
 import { useFormedLines, useObservation, useSpectrum } from "./use-spectrum";
@@ -15,10 +15,6 @@ import { useFormedLines, useObservation, useSpectrum } from "./use-spectrum";
 const REACH = 250;
 const TICKS = [-200, -100, 0, 100, 200];
 const SAMPLES = 240;
-
-/** The element measured on: the one picked, if still marked, else the one marked last. */
-export const measuredElement = (compare: readonly ElementId[], measure: ElementId | null) =>
-  measure && compare.includes(measure) ? measure : (compare.at(-1) ?? null);
 
 /**
  * Measuring a velocity the way astronomers do: one line, close up, on an axis of velocity.

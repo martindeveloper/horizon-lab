@@ -16,7 +16,9 @@
  */
 import { BufferAttribute, BufferGeometry, Color } from "three";
 
-import { lcg, smoothstep } from "@horizon/toolkit/math";
+import type { Vec3 } from "@horizon/toolkit/bodies";
+import { gaussian, lcg, onSphere, smoothstep } from "@horizon/toolkit/math";
+import { createPointWriter, pointsGeometry, type PointWriter } from "@horizon/toolkit/scene";
 import { convert } from "@horizon/toolkit/science";
 
 import {
@@ -29,58 +31,21 @@ import {
   fromSupergalactic,
   skyPlace,
   type AnchorId,
-  type Vec,
 } from "../model/cosmos";
 
 type Rnd = () => number;
-const gaussOf = (rnd: Rnd) => () => {
-  const u = Math.max(1e-6, rnd());
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(Math.PI * 2 * rnd());
-};
 
 const SPIRAL = new Color("#c9d6ff");
 const ELLIPTICAL = new Color("#ffdcae");
 const DWARF = new Color("#b9c2d6");
 const mix = new Color();
 
-/** A point buffer sized for `count`; it grows if a sketch writes more, so nothing is dropped. */
-type Writer = { pos: Float32Array; col: Float32Array; n: number };
-const writer = (count: number): Writer => ({
-  pos: new Float32Array(count * 3),
-  col: new Float32Array(count * 3),
-  n: 0,
-});
-function put(w: Writer, x: number, y: number, z: number, c: Color, brightness: number) {
-  if (w.n * 3 >= w.pos.length) {
-    const pos = new Float32Array(Math.max(3, w.pos.length * 2));
-    const col = new Float32Array(pos.length);
-    pos.set(w.pos);
-    col.set(w.col);
-    w.pos = pos;
-    w.col = col;
-  }
-  const i = w.n * 3;
-  w.pos[i] = x;
-  w.pos[i + 1] = y;
-  w.pos[i + 2] = z;
-  w.col[i] = c.r * brightness;
-  w.col[i + 1] = c.g * brightness;
-  w.col[i + 2] = c.b * brightness;
-  w.n += 1;
-}
-function geometryOf(w: Writer) {
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new BufferAttribute(w.pos.subarray(0, w.n * 3), 3));
-  geometry.setAttribute("color", new BufferAttribute(w.col.subarray(0, w.n * 3), 3));
-  return geometry;
-}
-
 /** A point in supergalactic coordinates (Mly) added to `w`, converted to model axes. */
-function putSg(w: Writer, x: number, y: number, z: number, c: Color, brightness: number) {
+function putSg(w: PointWriter, x: number, y: number, z: number, c: Color, brightness: number) {
   const v = fromSupergalactic(x, y, z);
-  put(w, v[0], v[1], v[2], c, brightness);
+  w.put(v[0], v[1], v[2], c, brightness);
 }
-const toSg = (v: Readonly<Vec>): Vec => {
+const toSg = (v: Readonly<Vec3>): Vec3 => {
   const { x, y, z } = SUPERGALACTIC;
   return [
     v[0] * x[0] + v[1] * x[1] + v[2] * x[2],
@@ -89,14 +54,6 @@ const toSg = (v: Readonly<Vec>): Vec => {
   ];
 };
 const sgOf = (id: AnchorId) => toSg(anchorToday(anchorById(id)));
-
-/** A random direction scaled to radius r. */
-function onSphere(rnd: Rnd, r: number): Vec {
-  const u = rnd() * 2 - 1;
-  const t = rnd() * Math.PI * 2;
-  const s = Math.sqrt(1 - u * u);
-  return [s * Math.cos(t) * r, s * Math.sin(t) * r, u * r];
-}
 
 /** Radius inside a concentrated ball (projected NFW-like): dense core, long tail to `max`. */
 const ballRadius = (rnd: Rnd, core: number, max: number) => {
@@ -113,8 +70,8 @@ function tint(rnd: Rnd, coreShare: number) {
 }
 
 /** One group of galaxies, Gaussian around a supergalactic point. */
-function group(w: Writer, rnd: Rnd, centre: Vec, count: number, sigma: number, flat = 1) {
-  const gauss = gaussOf(rnd);
+function group(w: PointWriter, rnd: Rnd, centre: Vec3, count: number, sigma: number, flat = 1) {
+  const gauss = () => gaussian(rnd);
   for (let i = 0; i < count; i += 1) {
     const { color, brightness } = tint(rnd, 0.25);
     putSg(
@@ -150,14 +107,14 @@ const scaled = (detail: CosmosDetail) => (count: number) => Math.round(count * d
 export function localGroupClouds(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(41);
-  const local = writer(size(70));
-  const andromeda = writer(size(50));
+  const local = createPointWriter(size(70));
+  const andromeda = createPointWriter(size(50));
   const m31 = anchorToday(anchorById("andromeda"));
-  const satellites = (w: Writer, count: number, reach: number, origin: Vec) => {
+  const satellites = (w: PointWriter, count: number, reach: number, origin: Vec3) => {
     for (let i = 0; i < count; i += 1) {
       const r = 0.04 + ballRadius(rnd, 0.12, reach);
       const [x, y, z] = onSphere(rnd, r);
-      put(w, origin[0] + x, origin[1] + y, origin[2] + z, DWARF, 0.55 + rnd() * 0.45);
+      w.put(origin[0] + x, origin[1] + y, origin[2] + z, DWARF, 0.55 + rnd() * 0.45);
     }
   };
   satellites(local, size(40), 0.9, [0, 0, 0]);
@@ -165,15 +122,15 @@ export function localGroupClouds(detail: CosmosDetail) {
   /* The Magellanic Clouds, brighter than the rest. */
   for (const id of ["lmc", "smc"] as const) {
     const p = anchorToday(anchorById(id));
-    put(local, p[0], p[1], p[2], SPIRAL, id === "lmc" ? 1.3 : 1);
+    local.put(p[0], p[1], p[2], SPIRAL, id === "lmc" ? 1.3 : 1);
   }
   /* Loose members out to the zero-velocity surface, ~1 Mpc from the mass centre. */
-  const centre: Vec = [m31[0] * 0.55, m31[1] * 0.55, m31[2] * 0.55];
+  const centre: Vec3 = [m31[0] * 0.55, m31[1] * 0.55, m31[2] * 0.55];
   for (let i = 0; i < size(24); i += 1) {
     const [x, y, z] = onSphere(rnd, 1.2 + rnd() * 2.8);
-    put(local, centre[0] + x, centre[1] + y * 0.6, centre[2] + z, DWARF, 0.45 + rnd() * 0.35);
+    local.put(centre[0] + x, centre[1] + y * 0.6, centre[2] + z, DWARF, 0.45 + rnd() * 0.35);
   }
-  return { local: geometryOf(local), andromeda: geometryOf(andromeda) };
+  return { local: local.geometry(), andromeda: andromeda.geometry() };
 }
 
 /**
@@ -183,23 +140,23 @@ export function localGroupClouds(detail: CosmosDetail) {
 export function localSheet(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(53);
-  const w = writer(size(520));
+  const w = createPointWriter(size(520));
   for (const id of ["m81", "centaurusA", "sculptor"] as const)
     group(w, rnd, sgOf(id), size(36), 0.9, 0.7);
   for (let k = 0; k < 22; k += 1) {
     const r = 5 + Math.sqrt(rnd()) * 17;
     const t = rnd() * Math.PI * 2;
-    const centre: Vec = [Math.cos(t) * r, Math.sin(t) * r, gaussOf(rnd)() * 2];
+    const centre: Vec3 = [Math.cos(t) * r, Math.sin(t) * r, gaussian(rnd) * 2];
     group(w, rnd, centre, size(4 + Math.floor(rnd() * 12)), 0.6 + rnd() * 0.7, 0.6);
   }
-  const gauss = gaussOf(rnd);
+  const gauss = () => gaussian(rnd);
   for (let i = 0; i < size(90); i += 1) {
     const r = 3 + Math.sqrt(rnd()) * 20;
     const t = rnd() * Math.PI * 2;
     const { color, brightness } = tint(rnd, 0.1);
     putSg(w, Math.cos(t) * r, Math.sin(t) * r, gauss() * 2.2, color, brightness * 0.8);
   }
-  return geometryOf(w);
+  return w.geometry();
 }
 
 /**
@@ -209,25 +166,25 @@ export function localSheet(detail: CosmosDetail) {
  */
 export function clusterCloud(count: number, core: number, reach: number, seed: number) {
   const rnd = lcg(seed);
-  const w = writer(count);
+  const w = createPointWriter(count);
   for (let i = 0; i < count; i += 1) {
     const r = ballRadius(rnd, core, reach);
     const [x, y, z] = onSphere(rnd, r);
     const { color, brightness } = tint(rnd, Math.max(0.15, 0.85 - r / reach));
-    put(w, x, y, z, color, brightness);
+    w.put(x, y, z, color, brightness);
   }
-  return geometryOf(w);
+  return w.geometry();
 }
 
 /** The Virgo Supercluster: spurs and clouds fanning out from Virgo in the supergalactic plane. */
 export function localSupercluster(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(67);
-  const w = writer(size(3200));
+  const w = createPointWriter(size(3200));
   const virgo = sgOf("virgoCluster");
-  const gauss = gaussOf(rnd);
+  const gauss = () => gaussian(rnd);
   /* One spur runs from Virgo through the Local Group and on past it. */
-  const spurs: { to: Vec; groups: number }[] = [
+  const spurs: { to: Vec3; groups: number }[] = [
     { to: [-virgo[0] * 0.25, -virgo[1] * 0.25, -virgo[2] * 0.25], groups: 14 },
   ];
   for (let k = 0; k < 7; k += 1) {
@@ -245,7 +202,7 @@ export function localSupercluster(detail: CosmosDetail) {
   for (const spur of spurs) {
     for (let g = 0; g < spur.groups; g += 1) {
       const t = (g + 0.5 + (rnd() - 0.5) * 0.6) / spur.groups;
-      const centre: Vec = [
+      const centre: Vec3 = [
         virgo[0] + (spur.to[0] - virgo[0]) * t + gauss() * 2.5,
         virgo[1] + (spur.to[1] - virgo[1]) * t + gauss() * 2.5,
         virgo[2] + (spur.to[2] - virgo[2]) * t + gauss() * 1.5,
@@ -267,7 +224,7 @@ export function localSupercluster(detail: CosmosDetail) {
       brightness * 0.75,
     );
   }
-  return geometryOf(w);
+  return w.geometry();
 }
 
 /**
@@ -278,9 +235,9 @@ export function localSupercluster(detail: CosmosDetail) {
 export function deepField(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(97);
-  const gauss = gaussOf(rnd);
+  const gauss = () => gaussian(rnd);
   const count = size(2400);
-  const w = writer(count);
+  const w = createPointWriter(count);
   const clumps = Array.from({ length: 48 }, () => onSphere(rnd, 1));
   for (let i = 0; i < count; i += 1) {
     let [x, y, z] = onSphere(rnd, 1);
@@ -295,13 +252,13 @@ export function deepField(detail: CosmosDetail) {
       z /= len;
     }
     const { color, brightness } = tint(rnd, 0.2);
-    put(w, x, y, z, color, brightness * 0.8);
+    w.put(x, y, z, color, brightness * 0.8);
   }
-  return geometryOf(w);
+  return w.geometry();
 }
 
 /** A point on a quadratic Bézier from a to c through control b. */
-function bezier(a: Readonly<Vec>, b: Readonly<Vec>, c: Readonly<Vec>, t: number): Vec {
+function bezier(a: Readonly<Vec3>, b: Readonly<Vec3>, c: Readonly<Vec3>, t: number): Vec3 {
   const u = 1 - t;
   return [
     u * u * a[0] + 2 * u * t * b[0] + t * t * c[0],
@@ -321,25 +278,25 @@ const FLOW_BRIGHT = new Color("#cfe2ec");
 export function laniakeaWeb(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(79);
-  const gauss = gaussOf(rnd);
+  const gauss = () => gaussian(rnd);
   const heart = sgOf("greatAttractor");
   const virgo = sgOf("virgoCluster");
   const centaurus = sgOf("centaurusCluster");
   const hydra = sgOf("hydraCluster");
-  const starts: Vec[] = [virgo, hydra];
+  const starts: Vec3[] = [virgo, hydra];
   for (let k = 0; k < detail.filaments; k += 1) {
     const [x, y, z] = onSphere(rnd, 1);
     const r = 150 + rnd() * 120;
     /* Flatter than round, like the basin. */
     starts.push([heart[0] + x * r, heart[1] + y * r, heart[2] + z * r * 0.55]);
   }
-  const points = writer(size(14_000));
+  const points = createPointWriter(size(14_000));
   const lines = {
     pos: new Float32Array(starts.length * FLOW_STEPS * 6),
     col: new Float32Array(starts.length * FLOW_STEPS * 6),
     n: 0,
   };
-  const segment = (a: Vec, b: Vec, ta: number, tb: number) => {
+  const segment = (a: Vec3, b: Vec3, ta: number, tb: number) => {
     const i = lines.n * 6;
     lines.pos.set([a[0], a[1], a[2], b[0], b[1], b[2]], i);
     mix.copy(FLOW_FAINT).lerp(FLOW_BRIGHT, ta);
@@ -350,7 +307,7 @@ export function laniakeaWeb(detail: CosmosDetail) {
   };
   for (const [k, start] of starts.entries()) {
     /* Virgo's spur bends through Centaurus; the rest bow by a random control point. */
-    const control: Vec =
+    const control: Vec3 =
       k === 0
         ? centaurus
         : [
@@ -382,27 +339,28 @@ export function laniakeaWeb(detail: CosmosDetail) {
     const { color, brightness } = tint(rnd, 0.1);
     putSg(points, heart[0] + x, heart[1] + y, heart[2] + z * 0.55, color, brightness * 0.6);
   }
-  const flows = new BufferGeometry();
-  flows.setAttribute("position", new BufferAttribute(lines.pos.subarray(0, lines.n * 6), 3));
-  flows.setAttribute("color", new BufferAttribute(lines.col.subarray(0, lines.n * 6), 3));
-  return { points: geometryOf(points), flows };
+  const flows = pointsGeometry(
+    lines.pos.subarray(0, lines.n * 6),
+    lines.col.subarray(0, lines.n * 6),
+  );
+  return { points: points.geometry(), flows };
 }
 
 /** Galaxies strung from a to b along a gentle bow: groups every `step` Mly, where `keep` allows. */
 function filament(
-  w: Writer,
+  w: PointWriter,
   rnd: Rnd,
-  a: Readonly<Vec>,
-  b: Readonly<Vec>,
+  a: Readonly<Vec3>,
+  b: Readonly<Vec3>,
   step: number,
   sigma: number,
   scale = 1,
-  keep: (at: Readonly<Vec>) => boolean = () => true,
+  keep: (at: Readonly<Vec3>) => boolean = () => true,
 ) {
-  const gauss = gaussOf(rnd);
+  const gauss = () => gaussian(rnd);
   const length = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
   const bow = length * 0.12;
-  const control: Vec = [
+  const control: Vec3 = [
     (a[0] + b[0]) / 2 + gauss() * bow,
     (a[1] + b[1]) / 2 + gauss() * bow,
     (a[2] + b[2]) / 2 + gauss() * bow,
@@ -414,8 +372,7 @@ function filament(
     if (!keep(at)) continue;
     for (let i = 0; i < count; i += 1) {
       const { color, brightness } = tint(rnd, 0.2);
-      put(
-        w,
+      w.put(
         at[0] + gauss() * sigma,
         at[1] + gauss() * sigma,
         at[2] + gauss() * sigma,
@@ -427,11 +384,18 @@ function filament(
 }
 
 /** A knot where filaments meet: a loose ball of galaxies. */
-function knot(w: Writer, rnd: Rnd, at: Readonly<Vec>, count: number, core: number, reach: number) {
+function knot(
+  w: PointWriter,
+  rnd: Rnd,
+  at: Readonly<Vec3>,
+  count: number,
+  core: number,
+  reach: number,
+) {
   for (let i = 0; i < count; i += 1) {
     const [x, y, z] = onSphere(rnd, ballRadius(rnd, core, reach));
     const { color, brightness } = tint(rnd, 0.5);
-    put(w, at[0] + x, at[1] + y, at[2] + z, color, brightness * 0.8);
+    w.put(at[0] + x, at[1] + y, at[2] + z, color, brightness * 0.8);
   }
 }
 
@@ -449,9 +413,9 @@ const BASIN_MLY = 280;
 export function cosmicWeb(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(131);
-  const w = writer(size(21_000));
+  const w = createPointWriter(size(21_000));
   const heart = anchorToday(anchorById("greatAttractor"));
-  const dist = (a: Readonly<Vec>, b: Readonly<Vec>) =>
+  const dist = (a: Readonly<Vec3>, b: Readonly<Vec3>) =>
     Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
   /* Perseus–Pisces: groups strung along the measured chain. */
@@ -463,7 +427,7 @@ export function cosmicWeb(detail: CosmosDetail) {
   for (const at of shapley) knot(w, rnd, at, size(120), 2, 12);
   /* The Sloan Great Wall: groups along the measured arc, a few knots in it. */
   /* Bent in depth about its redshift; the middle waypoint is the labelled one, so it stays put. */
-  const wall: Vec[] = [];
+  const wall: Vec3[] = [];
   const { ra, dec, z, swing } = SLOAN_WALL;
   const cz = z * convert(1, "c", "km/s");
   for (let k = 0; k <= 12; k += 1) {
@@ -482,7 +446,7 @@ export function cosmicWeb(detail: CosmosDetail) {
   for (let i = 1; i < wall.length; i += 3) knot(w, rnd, wall[i]!, size(90), 3, 14);
 
   /* The seeded web: the landmarks and random knots, each joined to its nearest three. */
-  const nodes: Readonly<Vec>[] = [chain[0]!, chain[chain.length - 1]!, ...shapley.slice(0, 2)];
+  const nodes: Readonly<Vec3>[] = [chain[0]!, chain[chain.length - 1]!, ...shapley.slice(0, 2)];
   nodes.push(wall[0]!, wall[wall.length - 1]!);
   const coma = anchorToday(anchorById("comaCluster"));
   nodes.push(coma);
@@ -493,9 +457,9 @@ export function cosmicWeb(detail: CosmosDetail) {
     knot(w, rnd, p, size(8 + Math.floor(rnd() * 24)), 3, 16);
   }
   /* Nothing of the seeded web inside Laniakea's basin: no chord through it, no group in it. */
-  const outside = (p: Readonly<Vec>) => dist(p, heart) >= BASIN_MLY;
-  const missesBasin = (a: Readonly<Vec>, b: Readonly<Vec>) => {
-    const ab: Vec = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+  const outside = (p: Readonly<Vec3>) => dist(p, heart) >= BASIN_MLY;
+  const missesBasin = (a: Readonly<Vec3>, b: Readonly<Vec3>) => {
+    const ab: Vec3 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
     const t = Math.min(
       1,
       Math.max(
@@ -520,7 +484,7 @@ export function cosmicWeb(detail: CosmosDetail) {
       filament(w, rnd, a, nodes[j]!, 30, 5, detail.bridgeStrand, outside);
     }
   }
-  return geometryOf(w);
+  return w.geometry();
 }
 
 const CMB_COOL = new Color("#5f8fd0");
@@ -541,7 +505,7 @@ export function observableUniverse(detail: CosmosDetail) {
     sign: rnd() < 0.5 ? -1 : 1,
     width: 0.15 + rnd() * 0.35,
   }));
-  const cmb = writer(size(9_000));
+  const cmb = createPointWriter(size(9_000));
   for (let i = 0; i < size(9_000); i += 1) {
     const [x, y, z] = onSphere(rnd, 1);
     let t = 0;
@@ -550,15 +514,15 @@ export function observableUniverse(detail: CosmosDetail) {
       t += spot.sign * Math.exp(-near / spot.width);
     }
     mix.copy(CMB_COOL).lerp(CMB_WARM, Math.min(1, Math.max(0, 0.5 + t * 0.35)));
-    put(cmb, x, y, z, mix, 0.55 + rnd() * 0.25);
+    cmb.put(x, y, z, mix, 0.55 + rnd() * 0.25);
   }
-  const fill = writer(size(18_000));
+  const fill = createPointWriter(size(18_000));
   for (let i = 0; i < size(18_000); i += 1) {
     const r = Math.cbrt(rnd());
     const [x, y, z] = onSphere(rnd, r);
     const { color, brightness } = tint(rnd, 0.2);
     /* Fewer and fainter toward the first galaxies, as the first ones were. */
-    put(fill, x, y, z, color, brightness * (1 - 0.85 * smoothstep(0.7, 1, r)));
+    fill.put(x, y, z, color, brightness * (1 - 0.85 * smoothstep(0.7, 1, r)));
   }
   const ring = new Float32Array(128 * 3);
   for (let i = 0; i < 128; i += 1) {
@@ -568,5 +532,5 @@ export function observableUniverse(detail: CosmosDetail) {
   }
   const circle = new BufferGeometry();
   circle.setAttribute("position", new BufferAttribute(ring, 3));
-  return { cmb: geometryOf(cmb), fill: geometryOf(fill), circle };
+  return { cmb: cmb.geometry(), fill: fill.geometry(), circle };
 }

@@ -12,5 +12,6 @@ export * from "./rulers";
 export * from "./scale-bar";
 export * from "./readouts";
 export * from "./sprites";
+export * from "./points";
 export * from "./log-zoom";
 export * from "./tour-camera";

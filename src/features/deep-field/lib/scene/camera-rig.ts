@@ -1,3 +1,6 @@
+import { Vector3, type PerspectiveCamera } from "three";
+
+import { SOLAR_FRAMING } from "@/space/solar-system/model/views";
 /**
  * Deep Field's orbit camera (the toolkit's orbit rig): one zoom from the Sun's neighbourhood to
  * the edge of the observable universe. As the camera pulls out past the nearest stars, the
@@ -5,12 +8,11 @@
  * the galactic centre; past the halo the frame turns again, to the supergalactic plane, and
  * the aim travels on to the heart of each larger structure.
  */
-import { Vector3, type PerspectiveCamera } from "three";
-
+import type { Vec3 } from "@horizon/toolkit/bodies";
 import { smootherstep, toLogFraction } from "@horizon/toolkit/math";
 import { createOrbitRig, createViewMoves } from "@horizon/toolkit/scene";
 
-import { cosmicAim, type Vec } from "../model/cosmos";
+import { cosmicAim } from "../model/cosmos";
 import { LADDER_LY } from "../model/depth";
 import type { ViewId } from "../model/view-ids";
 import { viewById, worldDistance, type Realm } from "../model/views";
@@ -28,9 +30,10 @@ import {
 
 export type CameraRig = ReturnType<typeof createCameraRig>;
 
-/** Default azimuth, and tilt of each scale's views. */
-const AZIMUTH = 0.6;
-const inclinationOf = (realm: Realm) => (realm === "solar" || realm === "stars" ? 0.52 : 0.58);
+/** Default azimuth, and tilt of each scale's views: the solar framing out to the stars, steeper beyond. */
+const AZIMUTH = SOLAR_FRAMING.azimuth;
+const inclinationOf = (realm: Realm) =>
+  realm === "solar" || realm === "stars" ? SOLAR_FRAMING.inclination : 0.58;
 /** Seconds for the bulge card to take the aim to the centre or give it back. */
 const HOLD_S = 0.8;
 
@@ -44,7 +47,7 @@ export function createCameraRig(
   const { state, reduceMotion } = options;
   const centre = galaxyToWorld(0, 0, 0, new Vector3());
   const beyond = new Vector3();
-  const heart: Vec = [0, 0, 0];
+  const heart: Vec3 = [0, 0, 0];
   /** 0..1 of the way the bulge card has taken the aim to the centre. */
   let hold = 0;
   const bulgeHeld = () => {
@@ -64,7 +67,7 @@ export function createCameraRig(
       min: (bulgeHeld() ? GALAXY_NEAR : LADDER_LY.near) * LY,
       max: LADDER_LY.far * LY,
     }),
-    nearFloor: 0.008,
+    nearFloor: SOLAR_FRAMING.nearFloor,
     onStep: (dt) => {
       hold = bulgeHeld() ? Math.min(1, hold + dt / HOLD_S) : Math.max(0, hold - dt / HOLD_S);
     },

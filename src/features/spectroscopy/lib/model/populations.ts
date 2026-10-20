@@ -4,6 +4,7 @@ import {
   ELECTRON_MASS_KG,
   ELECTRON_VOLT_J,
   PLANCK_CONSTANT,
+  RYDBERG_INFINITY,
 } from "@horizon/toolkit/science";
 
 import {
@@ -24,23 +25,48 @@ import {
 /** k in eV per kelvin. */
 export const BOLTZMANN_EV = BOLTZMANN_CONSTANT / ELECTRON_VOLT_J;
 
+/** The proton's mass in mᵤ (CODATA 2022). */
+const PROTON_MASS_U = 1.007_276_466_578_9;
+/** Hydrogen's Rydberg constant, m⁻¹: R∞ for the proton's finite mass, R_H = R∞ / (1 + mₑ / m_p). */
+export const RYDBERG_HYDROGEN =
+  RYDBERG_INFINITY / (1 + ELECTRON_MASS_KG / (PROTON_MASS_U * ATOMIC_MASS_KG));
+
 /** (2π mₑ k / h²)^(3/2), m⁻³ K^(−3/2): the electron's quantum concentration per T^(3/2). */
 const QUANTUM_CONCENTRATION =
   ((2 * Math.PI * ELECTRON_MASS_KG * BOLTZMANN_CONSTANT) / PLANCK_CONSTANT ** 2) ** 1.5;
 
 /**
- * Saha: atoms in the next stage up per atom in this one,
+ * Saha: atoms in the next stage up per atom in this one, given the two stages' partition
+ * functions and the ionization energy χ in eV,
  * N_{i+1}/N_i = (2 U_{i+1} / U_i) (2π mₑ k T / h²)^(3/2) (k T / Pₑ) e^(−χ/kT).
+ * The printed equation (`equations.ts`) computes from this too.
  */
-export function sahaRatio(species: string, next: string, kelvin: number, electronPressure: number) {
+export function sahaFactor(
+  upperPartition: number,
+  lowerPartition: number,
+  chi: number,
+  kelvin: number,
+  electronPressure: number,
+) {
   const kT = BOLTZMANN_CONSTANT * kelvin;
-  const exponent = -ionizationEnergy(species) / (BOLTZMANN_EV * kelvin);
+  const exponent = -chi / (BOLTZMANN_EV * kelvin);
   return (
-    ((2 * partitionFunction(next, kelvin)) / partitionFunction(species, kelvin)) *
+    ((2 * upperPartition) / lowerPartition) *
     QUANTUM_CONCENTRATION *
     kelvin ** 1.5 *
     (kT / electronPressure) *
     Math.exp(exponent)
+  );
+}
+
+/** Saha's ratio for a species and the stage above it, from NIST's partition functions. */
+function sahaRatio(species: string, next: string, kelvin: number, electronPressure: number) {
+  return sahaFactor(
+    partitionFunction(next, kelvin),
+    partitionFunction(species, kelvin),
+    ionizationEnergy(species),
+    kelvin,
+    electronPressure,
   );
 }
 
@@ -60,11 +86,16 @@ export function ionizationFractions(element: ElementId, kelvin: number, electron
 }
 
 /**
- * Boltzmann: the fraction of a stage's atoms in a level of statistical weight g at E eV,
- * n / N = g e^(−E/kT) / U(T).
+ * Boltzmann's factor g e^(−E/kT) for a level of statistical weight g at E eV: atoms in it per
+ * atom in a level of weight 1 at the ground state. The printed equation computes from this too.
  */
-export function levelFraction(species: string, g: number, energy: number, kelvin: number) {
-  return (g * Math.exp(-energy / (BOLTZMANN_EV * kelvin))) / partitionFunction(species, kelvin);
+export function boltzmannFactor(g: number, energy: number, kelvin: number) {
+  return g * Math.exp(-energy / (BOLTZMANN_EV * kelvin));
+}
+
+/** Boltzmann: the fraction of a stage's atoms in a level, n / N = g e^(−E/kT) / U(T). */
+function levelFraction(species: string, g: number, energy: number, kelvin: number) {
+  return boltzmannFactor(g, energy, kelvin) / partitionFunction(species, kelvin);
 }
 
 /**

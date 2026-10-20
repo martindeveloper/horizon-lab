@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
-import type { CSSProperties, ReactNode, Ref } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode, type Ref } from "react";
 
 import { Action, IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
 
@@ -36,7 +36,8 @@ const VEIL = {
  * `GuideBody`, `GuideEquation` as children), an optional `hold` under them (the time left on
  * a shot) and the controls. The card keeps the words readable over a bright scene; held
  * sideways on a phone it moves to the corner. `className` places it (by default at the foot
- * of the stage) and `cardRef` reaches the panel, to measure it.
+ * of the stage) and `cardRef` reaches the panel, to measure it. `focusNext` gives the Next
+ * button focus as the card opens.
  */
 export function GuideCard({
   label,
@@ -47,7 +48,7 @@ export function GuideCard({
   controls,
   className,
   cardRef,
-  nextRef,
+  focusNext = false,
   children,
 }: {
   label: string;
@@ -58,13 +59,17 @@ export function GuideCard({
   live?: boolean;
   hold?: ReactNode;
   controls: GuideControls;
-  className?: string;
-  cardRef?: Ref<HTMLElement>;
-  /** The Next button, to give it focus as the guide opens. */
-  nextRef?: Ref<HTMLButtonElement>;
+  className?: string | undefined;
+  cardRef?: Ref<HTMLElement> | undefined;
+  /** Give the Next button focus as the card opens. */
+  focusNext?: boolean;
   children: ReactNode;
 }) {
   const { previous, play, next, exit, extra } = controls;
+  const nextRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (focusNext) nextRef.current?.focus({ preventScroll: true });
+  }, [focusNext]);
   return (
     <div
       className={cn(

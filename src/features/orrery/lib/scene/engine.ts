@@ -10,12 +10,17 @@
  */
 import { Scene, type Object3D, type Vector3 } from "three";
 
-import { carryPose, takeHandoff } from "@/lib/handoff";
-import { bridgeRender, bridgeStore } from "@/lib/scene-bridge";
+import {
+  bridgeHandoff,
+  bridgeRender,
+  bridgeStore,
+  invalidateOnMotionChange,
+  stageClearance,
+} from "@/lib/scene-bridge";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { positionOf } from "@/space/solar-system/model/position";
 import { hasSurface } from "@/space/solar-system/model/selection";
-import { solarViewById } from "@/space/solar-system/model/views";
+import { solarViewById, solarViewPose } from "@/space/solar-system/model/views";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
 import {
   SOLAR_RULER_KEYS,
@@ -25,7 +30,7 @@ import {
 } from "@/space/solar-system/scene/solar-system";
 import type { BodyId, Vec3 } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
-import { DisposalScope } from "@horizon/toolkit/rendering";
+import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
 import {
   SOLAR_GOLD,
   createAnchoredRulers,
@@ -34,6 +39,7 @@ import {
   createOrbitControls,
   createSceneHost,
   type SceneMount,
+  DEFAULT_INSETS,
 } from "@horizon/toolkit/scene";
 
 import { solarActivityVisible } from "../model/solar-activity";
@@ -51,8 +57,6 @@ import { createPicking } from "./picking";
 import { createSkyLayer } from "./sky-layer";
 import { createSolarActivityLifecycle } from "./solar-activity-lifecycle";
 
-export type OrreryEngine = { dispose: () => void };
-
 export function createOrreryEngine({
   canvas,
   host,
@@ -60,9 +64,8 @@ export function createOrreryEngine({
   labels,
   locale,
   onError,
-}: SceneMount): OrreryEngine {
-  const scope = new DisposalScope();
-  try {
+}: SceneMount): SimulationEngine {
+  return withScope((scope) => {
     const sceneHost = createSceneHost(scope, { canvas, host, onError });
     const { renderer, camera, viewport, engine, tight, basics, warmUp } = sceneHost;
     /** The visitor's render quality as the Orrery's settings; `bridgeRender` keeps it current. */
@@ -83,10 +86,9 @@ export function createOrreryEngine({
     });
     const { pose } = rig;
     /* Names keep above the time dock where it publishes its height (phones), else 150 px. */
-    const stage = host.closest<HTMLElement>("[data-simulation]");
-    const dockClear = () => parseFloat(stage?.style.getPropertyValue("--hud-clear") ?? "") || 150;
+    const dockClear = stageClearance(host, "--hud-clear", 150);
     const { place, hideAll, setBodies, flush, hits } = createLabels(kit, labelRoot, labels, {
-      insets: () => ({ top: 56, bottom: dockClear(), left: 4, right: 4 }),
+      insets: () => ({ ...DEFAULT_INSETS, bottom: dockClear() }),
     });
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     const shownFor = (id: BodyId) => closeUp.shownFor(id);
@@ -197,16 +199,13 @@ export function createOrreryEngine({
     const { view } = store.getState();
     rig.snapToView(view);
     /* Arrived from Deep Field: open where it left off, or, from past the Oort cloud, come in
-       from the Orrery's edge; then settle on this view. */
-    const crossing = takeHandoff("orrery", rig.limits());
-    if (crossing) {
-      rig.snap(crossing.pose ?? { distance: ORRERY_EDGE });
-      rig.flyToView(view);
-    }
+       from the Orrery's edge; then settle on this view. Leaving for Deep Field: it opens at
+       this pose, or from a close-up, at the pose the close-up flew in from. */
+    bridgeHandoff(scope, "orrery", rig, view, {
+      arriveAt: (crossing) => crossing.pose ?? { distance: ORRERY_EDGE },
+      leaveAt: () => closeUp.current?.home ?? pose,
+    });
     rig.applyPose();
-    /* Leaving for Deep Field: it opens at this pose, or from a close-up, at the pose the
-       close-up flew in from. */
-    scope.defer(() => carryPose("orrery", closeUp.current?.home ?? pose));
 
     const controls = createOrbitControls(scope, canvas, rig, {
       invalidate: () => engine.invalidate(),
@@ -259,11 +258,7 @@ export function createOrreryEngine({
         const view = solarViewById(s.view);
         if (closeUp.current && !reduceMotion.matches) {
           /* Leaving a close-up for a view: one flight, out of the body and on to the view. */
-          closeUp.leaveTo({
-            azimuth: view.azimuth ?? pose.azimuth,
-            inclination: view.inclination ?? 0.52,
-            distance: view.dist,
-          });
+          closeUp.leaveTo({ ...solarViewPose(view), azimuth: view.azimuth ?? pose.azimuth });
         } else {
           closeUp.end(false);
           /* The guide flies its own poses. */
@@ -294,9 +289,7 @@ export function createOrreryEngine({
       closeUp.refilter();
       engine.invalidate();
     });
-    const onMotionChange = () => engine.invalidate();
-    reduceMotion.addEventListener("change", onMotionChange);
-    scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
+    invalidateOnMotionChange(scope, engine, reduceMotion);
     if (reducedMotion) store.getState().patchShow({ drift: false });
 
     /* The store is written a few times a second; between commits the playback head lives here.
@@ -402,9 +395,5 @@ export function createOrreryEngine({
         ),
     });
     engine.refresh();
-    return { dispose: () => scope.dispose() };
-  } catch (error) {
-    scope.dispose();
-    throw error;
-  }
+  });
 }

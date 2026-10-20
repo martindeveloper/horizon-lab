@@ -39,6 +39,12 @@ import {
   thenOf,
 } from "../src/features/deep-field/lib/model/depth.ts";
 import {
+  TRAIL_LAPS,
+  sunGalactic,
+  writeSunTrail,
+} from "../src/features/deep-field/lib/model/galactic-orbit.ts";
+import { neighboursSelfCheck } from "../src/features/deep-field/lib/model/neighbours.ts";
+import {
   HELIOPAUSE_AU,
   LIGHT_DAY_AU,
   LIGHT_RINGS,
@@ -54,6 +60,7 @@ import { VIEWS } from "../src/features/deep-field/lib/model/views.ts";
 import { dropsSelection, useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { pathForView, resolveView, viewFromPath } from "../src/features/deep-field/routing.ts";
 import { proseArgs } from "../src/lib/facts.ts";
+import { GALACTIC_YEAR } from "../src/space/solar-system/model/parameters.ts";
 import { featureMessages, leaves } from "./messages-helper.mjs";
 
 const near = (actual, expected, tolerance, message) =>
@@ -222,7 +229,7 @@ test("routes: every view has one canonical path, and no legacy names", () => {
   for (const name of ["cmb", "milky-way", "proxima"]) assert.equal(resolveView(name), null);
 });
 
-test("cards render every figure in both languages and all distance units", () => {
+test("Deep Field's cards render every figure in both languages and all distance units", () => {
   const date = new Date("2026-10-18T00:00:00Z");
   for (const locale of LOCALES) {
     const t = translator(locale);
@@ -276,7 +283,7 @@ test("the sightline places when the light set out: a clock time, a date, a year,
   }
 });
 
-test("lengths follow the visitor's distance unit and keep the source's precision", () => {
+test("Deep Field's lengths follow the visitor's distance unit and keep the source's precision", () => {
   const t = translator("en");
   const width = (unit) =>
     cardFor(
@@ -344,4 +351,16 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   assert.equal(api().guideOpen, false, "past the last step the journey ends");
   assert.equal(api().selection, null);
   assert.deepEqual(api().show, { halo: true, names: true, distances: false, lightTime: true });
+});
+
+test("the neighbours pass their own consistency checks, here rather than on every WebGL startup", () => {
+  assert.deepEqual(neighboursSelfCheck(), []);
+});
+
+test("the Sun's drawn path runs back two laps and ends at today's place", () => {
+  const buffer = new Float32Array(97 * 3);
+  assert.equal(writeSunTrail(buffer), 97);
+  for (const v of buffer) assert.ok(Number.isFinite(v));
+  assert.deepEqual(buffer.slice(-3), new Float32Array(sunGalactic(0)));
+  assert.deepEqual(buffer.slice(0, 3), new Float32Array(sunGalactic(TRAIL_LAPS * GALACTIC_YEAR)));
 });

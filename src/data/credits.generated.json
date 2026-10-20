@@ -28,7 +28,7 @@
     },
     {
       "title": "Shared constants",
-      "text": "speedOfLight: SI definition of the metre (1983, kept in 2019)\ngravitationalConstant: CODATA 2022\nastronomicalUnit: IAU 2012 Resolution B2\nparsec: IAU 2015 Resolution B2: 648 000/π au\nlightYear: IAU: c × one Julian year\njulianYear: IAU: 365.25 days of 86 400 s\nsolarGravitationalParameter: IAU 2015 Resolution B3 nominal value\nsolarMass: GM☉ (IAU 2015 B3) / G (CODATA 2022)\nsolarRadius: IAU 2015 Resolution B3 nominal value\nplanckConstant: SI definition of the kilogram (2019)\nboltzmannConstant: SI definition of the kelvin (2019)\nelementaryCharge: SI definition of the ampere (2019)\nelectronMass: CODATA 2022\natomicMassConstant: CODATA 2022\nclassicalElectronRadius: CODATA 2022"
+      "text": "speedOfLight: SI definition of the metre (1983, kept in 2019)\ngravitationalConstant: CODATA 2022\nastronomicalUnit: IAU 2012 Resolution B2\nparsec: IAU 2015 Resolution B2: 648 000/π au\nlightYear: IAU: c × one Julian year\njulianYear: IAU: 365.25 days of 86 400 s\nsolarGravitationalParameter: IAU 2015 Resolution B3 nominal value\nsolarMass: GM☉ (IAU 2015 B3) / G (CODATA 2022)\nsolarRadius: IAU 2015 Resolution B3 nominal value\nplanckConstant: SI definition of the kilogram (2019)\nboltzmannConstant: SI definition of the kelvin (2019)\nelementaryCharge: SI definition of the ampere (2019)\nelectronMass: CODATA 2022\natomicMassConstant: CODATA 2022\nclassicalElectronRadius: CODATA 2022\nrydbergConstant: CODATA 2022"
     },
     {
       "title": "Black-hole observatory",

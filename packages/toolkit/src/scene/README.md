@@ -3,10 +3,10 @@
 Three.js building blocks for a map that zooms across many scales: a host for the
 renderer and frame loop, an orbit camera on a log-distance zoom and its input, DOM
 labels pinned to scene points, taps that pick objects or names, rulers, HUD readouts,
-presence fades, painted sprites and the sky's frames. Nothing here knows about a
+presence fades, painted sprites, point clouds and the sky's frames. Nothing here knows about a
 particular simulation, its store or its copy. Every piece that holds listeners, DOM
 nodes or GPU resources of its own takes a `DisposalScope` and is released with it. The
-plain makers (`radialSprite`, `softCircle`, `glowSprite`, `spriteMaterial`,
+plain makers (`radialSprite`, `softCircle`, `glowSprite`, `paintedTexture`, `spriteMaterial`,
 `pointsMaterial`, `lineOf`) hand back what they build for the caller to own.
 
 A new zoomable simulation starts from `createSceneHost`, `createOrbitRig` with
@@ -17,10 +17,15 @@ own.
 ## Kit
 
 `SceneBasics` is `{ scope, camera, viewport }`. `viewport` holds the stage's CSS
-size; the engine writes it on resize. `LabelText` returns translated label text
+size; the engine writes it on resize. `SceneKit<Looks, Lod>` is what a scene's layers
+are built with: the host's basics, the materials they share and a level of detail with
+`pxWorld(dist, px)`, the world size of screen pixels at a distance; `sceneKit(basics, looks,
+lod)` makes one. `LabelText` returns translated label text
 by key. `SceneMount` is what a page hands an engine: canvas, host element, label
 root, label text, the page's `locale` and `onError`. `SOLAR_GOLD` is the theme's
-gold for scene materials.
+gold for scene materials. `worldPerPixel(fov, distance, height)` is the world length
+one CSS pixel covers at `distance` from a perspective camera on a stage `height` px
+tall; the scale bar and `createScreenScale` are built on it.
 
 ## Host
 
@@ -89,8 +94,8 @@ while drawing a frame, then `flush()` once every body has its pose. `on` is a
 switch or a presence 0..1; below 2 % a label hides. Text comes from
 `labels()[key]` unless `style.text` gives it. Labels never sit inside `insets`
 (CSS px kept clear at the top, bottom, left and right: a header, a dock, a side
-control; defaults 56, 150, 4 and 4). Pass a function to read them once a frame
-when the controls over the stage move. Bodies passed to `setBodies` mask the
+control; `DEFAULT_INSETS` is 56, 150, 4 and 4, so spread it and override a side).
+Pass a function to read them once a frame when the controls over the stage move. Bodies passed to `setBodies` mask the
 pixels of a label they cover, at the label's depth; their meshes are unit globes
 (geometry within radius 1) scaled by their transforms. `hits(accept)` lists the
 labels readable enough to tap.
@@ -142,11 +147,18 @@ frames coming. `createScreenScale(camera, viewport)` gives `pxWorld` and `px` fo
 detail and marker sizes; it counts a stage under 480 px tall as 480, so a small stage
 keeps a phone's detail, while `scaleBar` measures the true stage.
 
-## Sprites and lines
+## Sprites, points and lines
 
-`radialSprite`, `softCircle` and `glowSprite` paint small canvas textures;
-`spriteMaterial` and `pointsMaterial` build additive or covering materials on
-them. `lineOf`, `ownedLine` and `rulerOf` are reusable line buffers.
+`radialSprite`, `softCircle` and `glowSprite` paint small canvas textures, and
+`paintedTexture(width, height, texel)` any sRGB texture texel by texel from a
+`TexelPainter` (RGBA 0–255 at `u`, `v` from the top left); `spriteMaterial` and
+`pointsMaterial` build additive or covering materials on them. `pointsGeometry(pos, col, size?)` is the vertex-coloured point cloud those
+materials draw: `position` and `color` over xyz and rgb triples, and a `size` per
+point when given. `createPointWriter(count)` fills one a point at a time:
+`put(x, y, z, color, brightness)` writes `color × brightness`, `count` is how
+many so far, and `geometry()` views what was written; the buffers grow if a
+sketch writes past `count`, so nothing is dropped. `lineOf`, `ownedLine` and
+`rulerOf` are reusable line buffers.
 
 ## Sky frames
 

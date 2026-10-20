@@ -1,10 +1,11 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { ViewList } from "@/components/simulations/view-picker";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
-import { PRESETS } from "@/features/black-hole/lib/presets";
+import { PRESETS } from "@/features/black-hole/lib/holes";
 import { useBlackHole } from "@/features/black-hole/lib/store";
-import { Kicker, ListItem, Picker, cn, kickerClass } from "@horizon/toolkit/ui";
+import { Kicker, Picker, cn } from "@horizon/toolkit/ui";
 
 /** Preset links: a row in the header strip, or grouped lists when stacked. */
 export function PresetNav({ stacked = false, onPick }: { stacked?: boolean; onPick?: () => void }) {
@@ -14,7 +15,7 @@ export function PresetNav({ stacked = false, onPick }: { stacked?: boolean; onPi
   const catalog = PRESETS.filter((p) => p.kind === "catalog");
   const theory = PRESETS.filter((p) => p.kind === "theory");
   const kind = (k: "catalog" | "theory") => (k === "catalog" ? t("kindCatalog") : t("kindTheory"));
-  const nameOf = (id: string) => t(`presets.${id}`) ?? id;
+  const nameOf = (id: string) => t(`presets.${id}`);
 
   function choose(id: string) {
     selectHole(id);
@@ -22,46 +23,49 @@ export function PresetNav({ stacked = false, onPick }: { stacked?: boolean; onPi
   }
 
   function row(list: typeof PRESETS) {
-    return list.map((p) =>
-      stacked ? (
-        <ListItem key={p.id} selected={presetId === p.id} onClick={() => choose(p.id)}>
-          <span>{nameOf(p.id)}</span>
-          <span className={kickerClass}>{kind(p.kind)}</span>
-        </ListItem>
-      ) : (
-        <button
-          key={p.id}
-          type="button"
-          aria-current={presetId === p.id ? "true" : undefined}
-          onClick={() => choose(p.id)}
-          className={cn(
-            "h-11 shrink-0 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-colors duration-300 md:h-8 md:px-2.5",
-            presetId === p.id ? "text-fg" : "text-muted hover:text-fg",
-          )}
-        >
-          <span>{nameOf(p.id)}</span>
-          {p.kind === "catalog" ? (
-            <span
-              className="ml-1.5 inline-block size-1 translate-y-[-1px] rounded-full bg-accent"
-              aria-hidden
-            />
-          ) : null}
-        </button>
-      ),
+    return list.map((p) => (
+      <button
+        key={p.id}
+        type="button"
+        aria-current={presetId === p.id ? "true" : undefined}
+        onClick={() => choose(p.id)}
+        className={cn(
+          "h-11 shrink-0 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-colors duration-300 md:h-8 md:px-2.5",
+          presetId === p.id ? "text-fg" : "text-muted hover:text-fg",
+        )}
+      >
+        <span>{nameOf(p.id)}</span>
+        {p.kind === "catalog" ? (
+          <span
+            className="ml-1.5 inline-block size-1 translate-y-[-1px] rounded-full bg-accent"
+            aria-hidden
+          />
+        ) : null}
+      </button>
+    ));
+  }
+
+  /** One kind's presets as a list, each with its kind beside it. */
+  function group(k: "catalog" | "theory") {
+    return (
+      <div>
+        <Kicker className="mb-1.5">{kind(k)}</Kicker>
+        <ViewList
+          ids={(k === "catalog" ? catalog : theory).map((p) => p.id)}
+          selected={(id) => presetId === id}
+          labelOf={nameOf}
+          kickerOf={() => kind(k)}
+          onPick={choose}
+        />
+      </div>
     );
   }
 
   if (stacked) {
     return (
       <nav aria-label={t("holes")} className="flex flex-col gap-4">
-        <div>
-          <Kicker className="mb-1.5">{t("kindCatalog")}</Kicker>
-          <div className="flex flex-col gap-1">{row(catalog)}</div>
-        </div>
-        <div>
-          <Kicker className="mb-1.5">{t("kindTheory")}</Kicker>
-          <div className="flex flex-col gap-1">{row(theory)}</div>
-        </div>
+        {group("catalog")}
+        {group("theory")}
       </nav>
     );
   }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { onCrash, type CrashScope } from "@/lib/debug";
 
-export class DebugCrashError extends Error {
+class DebugCrashError extends Error {
   constructor(scope: CrashScope) {
     super(`Horizon.Debug crash (${scope})`);
     this.name = "DebugCrashError";

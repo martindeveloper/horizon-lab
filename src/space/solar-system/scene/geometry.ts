@@ -17,8 +17,6 @@ export const SEG = 96;
 /** Globe levels by on-screen radius (px): fine past the first, close-up past the second. */
 const SPHERE_PX = [36, 360] as const;
 
-export type OrbitSlot = ReturnType<typeof orbitOf>;
-
 /** Reuse orbit buffers until the orbital shape or plane changes. */
 export function orbitOf(scope: DisposalScope, color: number, opacity: number) {
   const slot = ownedLine(scope, color, opacity);

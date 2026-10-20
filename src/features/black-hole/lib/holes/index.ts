@@ -9,25 +9,13 @@ import { schwarzschild } from "./schwarzschild";
 import { sgrA } from "./sgr-a";
 import { stellar } from "./stellar";
 import { ton618 } from "./ton-618";
-import type { HoleSpec, Preset } from "./types";
+import type { HoleSpec } from "./types";
 
 export * from "./types";
-export {
-  sgrA,
-  m87,
-  stellar,
-  gaiaBh3,
-  omegaCen,
-  ton618,
-  gw231123,
-  lensed,
-  schwarzschild,
-  kerr,
-  custom,
-};
+export { custom };
 
-/** Observatory holes, picker order: real objects by mass, then theory. */
-export const HOLES: HoleSpec[] = [
+/** Observatory presets, picker order: real objects by mass, then theory. */
+export const PRESETS: HoleSpec[] = [
   stellar,
   gaiaBh3,
   gw231123,
@@ -40,12 +28,10 @@ export const HOLES: HoleSpec[] = [
   kerr,
 ];
 
-export const PRESETS: Preset[] = HOLES;
-
-export const DEFAULT_PRESET: Preset = lensed;
+export const DEFAULT_PRESET: HoleSpec = lensed;
 
 const BY_ID: Record<string, HoleSpec> = Object.fromEntries(
-  [...HOLES, custom].map((h) => [h.id, h]),
+  [...PRESETS, custom].map((h) => [h.id, h]),
 );
 
 export function holeById(id: string): HoleSpec {
@@ -53,5 +39,5 @@ export function holeById(id: string): HoleSpec {
 }
 
 export const HOLE_ALIASES: Record<string, string> = Object.fromEntries(
-  [...HOLES, custom].flatMap((h) => h.aliases.map((a) => [a, h.id])),
+  [...PRESETS, custom].flatMap((h) => h.aliases.map((a) => [a, h.id])),
 );

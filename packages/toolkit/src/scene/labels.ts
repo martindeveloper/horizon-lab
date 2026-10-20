@@ -44,7 +44,8 @@ export const BELOW: LabelStyle = { below: true };
 /** Where labels may sit: CSS px kept clear at each edge (a header, a dock, a side control). */
 export type LabelInsets = { top: number; bottom: number; left: number; right: number };
 
-const DEFAULT_INSETS: LabelInsets = { top: 56, bottom: 150, left: 4, right: 4 };
+/** Where labels keep clear by default: a 56 px header, a 150 px dock and a 4 px edge each side. */
+export const DEFAULT_INSETS: LabelInsets = { top: 56, bottom: 150, left: 4, right: 4 };
 
 export function createLabels(
   { scope, camera, viewport }: SceneBasics,

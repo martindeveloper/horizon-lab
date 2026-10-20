@@ -123,14 +123,12 @@ const round = (value: number) => (Number.isInteger(value) ? value : Number(value
 
 type Timer = { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number };
 
-export async function grabFrame(
-  gl: WebGL2RenderingContext,
-  render: () => void,
-  options: GrabOptions,
-): Promise<FrameGrab> {
+/** Short stable names for GL objects, by kind and first appearance: `program#1`, `texture#3`. */
+type Label = (object: object) => string;
+function createLabeller(): Label {
   const ids = new WeakMap<object, string>();
   const serial = new Map<string, number>();
-  const label = (object: object) => {
+  return (object) => {
     let id = ids.get(object);
     if (!id) {
       const kind = object.constructor.name.replace(/^WebGL/, "").toLowerCase();
@@ -141,19 +139,220 @@ export async function grabFrame(
     }
     return id;
   };
+}
+
+/** Drains `gl.getError()` into `into`, at most 16 entries. */
+function drainErrors(gl: WebGL2RenderingContext, into: string[]) {
+  for (let e = gl.getError(); e !== gl.NO_ERROR && into.length < 16; e = gl.getError())
+    into.push(enumName(e) ?? String(e));
+}
+
+/** One call argument for the log: enum names, short strings, typed-array sizes, object labels. */
+function formatArg(arg: unknown, label: Label): string {
+  if (typeof arg === "number") return enumName(arg) ?? String(round(arg));
+  if (arg === null || arg === undefined || typeof arg === "boolean") return String(arg);
+  if (typeof arg === "string")
+    return JSON.stringify(arg.length > 60 ? `${arg.slice(0, 57)}…` : arg);
+  if (ArrayBuffer.isView(arg)) {
+    const length = "length" in arg && typeof arg.length === "number" ? arg.length : arg.byteLength;
+    return `${arg.constructor.name}(${length})`;
+  }
+  if (arg instanceof ArrayBuffer) return `ArrayBuffer(${arg.byteLength})`;
+  if (Array.isArray(arg))
+    return `[${arg
+      .slice(0, 8)
+      .map((item) => formatArg(item, label))
+      .join(", ")}${arg.length > 8 ? ", …" : ""}]`;
+  if (typeof arg === "object") {
+    const name = arg.constructor.name;
+    return name.startsWith("WebGL") && name !== "WebGLUniformLocation" ? label(arg) : name;
+  }
+  return typeof arg;
+}
+
+/** The `clear` call's arguments as its bit names; any other call's as formatted arguments. */
+function formatArgs(name: string, args: unknown[], label: Label) {
+  return name === "clear"
+    ? CLEAR_BITS.filter(([bit]) => Number(args[0]) & bit)
+        .map(([, bit]) => bit)
+        .join(" | ")
+    : args.map((arg) => formatArg(arg, label)).join(", ");
+}
+
+/** Bytes a texture upload moves: the data given, an image's pixels, or an allocation's size. */
+function textureUploadBytes(args: unknown[]) {
+  for (const arg of args) {
+    if (ArrayBuffer.isView(arg) || arg instanceof ArrayBuffer) return arg.byteLength;
+    if (arg && typeof arg === "object" && "width" in arg && "height" in arg)
+      return Number(arg.width) * Number(arg.height) * 4;
+  }
+  // Allocation without data: texImage2D(target, level, format, width, height, …).
+  const [width, height] = [args[3], args[4]];
+  return typeof width === "number" && typeof height === "number" ? width * height * 4 : 0;
+}
+
+/** Bytes a buffer upload moves: `bufferData(target, size | data, …)`. */
+function bufferUploadBytes(data: unknown) {
+  return typeof data === "number"
+    ? data
+    : ArrayBuffer.isView(data) || data instanceof ArrayBuffer
+      ? data.byteLength
+      : 0;
+}
+
+/** A program's interface and shaders; compiles a fresh copy of each shader to time and translate it. */
+function describeProgram(
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+  id: string,
+): GrabProgram {
+  const typeName = (type: number) => enumName(type) ?? String(type);
+  const uniforms = [];
+  for (let i = 0; i < Number(gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)); i++) {
+    const info = gl.getActiveUniform(program, i);
+    if (info) uniforms.push({ name: info.name, type: typeName(info.type), size: info.size });
+  }
+  const attributes = [];
+  for (let i = 0; i < Number(gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)); i++) {
+    const info = gl.getActiveAttrib(program, i);
+    if (info) attributes.push({ name: info.name, type: typeName(info.type), size: info.size });
+  }
+  const debug = gl.getExtension("WEBGL_debug_shaders");
+  const shaders = (gl.getAttachedShaders(program) ?? []).map((shader): GrabShader => {
+    const type = Number(gl.getShaderParameter(shader, gl.SHADER_TYPE));
+    const source = gl.getShaderSource(shader) ?? "";
+    // Renderers delete shaders once linked, so translate and time a fresh copy.
+    const copy = gl.createShader(type);
+    let translated: string | undefined;
+    let compileMs: number | undefined;
+    if (copy) {
+      gl.shaderSource(copy, source);
+      const start = performance.now();
+      gl.compileShader(copy);
+      gl.getShaderParameter(copy, gl.COMPILE_STATUS);
+      compileMs = performance.now() - start;
+      translated = debug?.getTranslatedShaderSource(copy) || undefined;
+      gl.deleteShader(copy);
+    }
+    return {
+      type: type === gl.VERTEX_SHADER ? "vertex" : "fragment",
+      source,
+      ...(translated !== undefined ? { translated } : {}),
+      ...(compileMs !== undefined ? { compileMs } : {}),
+    };
+  });
+  return { id, uniforms, attributes, shaders };
+}
+
+/** The current value of every active uniform, numbers rounded for the report. */
+function uniformValues(gl: WebGL2RenderingContext, program: WebGLProgram) {
+  const values: Record<string, unknown> = {};
+  for (let i = 0; i < Number(gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)); i++) {
+    const info = gl.getActiveUniform(program, i);
+    if (!info) continue;
+    const location = gl.getUniformLocation(program, info.name);
+    if (!location) continue;
+    const value: unknown = gl.getUniform(program, location);
+    values[info.name] = isList(value)
+      ? Array.from(value, (item) => (typeof item === "number" ? round(item) : item))
+      : typeof value === "number"
+        ? round(value)
+        : value;
+  }
+  return values;
+}
+
+/** The bound render target's `width` × `height` as a PNG thumbnail `thumbWidth` wide, or why not. */
+function snapshot(
+  gl: WebGL2RenderingContext,
+  width: number,
+  height: number,
+  thumbWidth: number,
+): { image?: string; error?: string } {
+  if (width <= 0 || height <= 0) return { error: "empty viewport" };
+  const pixels = new Uint8Array(width * height * 4);
+  gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  const error = gl.getError();
+  // Float targets, for example, cannot be read as RGBA8.
+  if (error !== gl.NO_ERROR) return { error: enumName(error) ?? String(error) };
+  const full = document.createElement("canvas");
+  full.width = width;
+  full.height = height;
+  const image = new ImageData(width, height);
+  const row = width * 4;
+  for (let y = 0; y < height; y++)
+    image.data.set(pixels.subarray((height - 1 - y) * row, (height - y) * row), y * row);
+  full.getContext("2d")!.putImageData(image, 0, 0);
+  const scale = Math.min(1, thumbWidth / width);
+  const thumb = document.createElement("canvas");
+  thumb.width = Math.max(1, Math.round(width * scale));
+  thumb.height = Math.max(1, Math.round(height * scale));
+  thumb.getContext("2d")!.drawImage(full, 0, 0, thumb.width, thumb.height);
+  return { image: thumb.toDataURL("image/png") };
+}
+
+/** The vertex count of a draw call from its arguments. */
+function drawCount(name: string, args: unknown[]) {
+  // drawArrays*(mode, first, count…), drawElements*(mode, count…), drawRangeElements(mode, start, end, count…)
+  return Number(
+    args[name.startsWith("drawArrays") ? 2 : name === "drawRangeElements" ? 3 : 1] ?? 0,
+  );
+}
+
+/** Consecutive draws into one render target. */
+function passesOf(draws: readonly GrabDraw[]) {
+  const passes: GrabPass[] = [];
+  for (const draw of draws) {
+    const last = passes.at(-1);
+    if (last && last.framebuffer === draw.framebuffer) last.draws++;
+    else
+      passes.push({
+        framebuffer: draw.framebuffer,
+        draws: 1,
+        width: draw.viewport[2],
+        height: draw.viewport[3],
+      });
+  }
+  return passes;
+}
+
+/** Waits up to four seconds for every timer query, then reads the GPU time of each draw. */
+async function readTimers(
+  gl: WebGL2RenderingContext,
+  timer: Timer,
+  queries: readonly (WebGLQuery | null)[],
+  draws: GrabDraw[],
+) {
+  const deadline = performance.now() + 4000;
+  const pending = queries.filter((q): q is WebGLQuery => q !== null);
+  while (!pending.every((q) => gl.getQueryParameter(q, gl.QUERY_RESULT_AVAILABLE))) {
+    if (performance.now() > deadline) break;
+    await new Promise((resolve) => setTimeout(resolve, 8));
+  }
+  const disjoint = Boolean(gl.getParameter(timer.GPU_DISJOINT_EXT));
+  queries.forEach((query, i) => {
+    if (!query) return;
+    if (!disjoint && gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE))
+      draws[i]!.gpuMs = Number(gl.getQueryParameter(query, gl.QUERY_RESULT)) / 1e6;
+    gl.deleteQuery(query);
+  });
+}
+
+export async function grabFrame(
+  gl: WebGL2RenderingContext,
+  render: () => void,
+  options: GrabOptions,
+): Promise<FrameGrab> {
+  const label = createLabeller();
   let internal = false;
-  const frameErrors: string[] = [];
-  /** Errors the frame raised so far: collected before our own calls so none are misattributed. */
-  const drainErrors = () => {
-    for (let e = gl.getError(); e !== gl.NO_ERROR && frameErrors.length < 16; e = gl.getError())
-      frameErrors.push(enumName(e) ?? String(e));
-  };
+  const errors: string[] = [];
   /** Runs the grab's own GL calls unrecorded; errors they raise are discarded. */
   const call = <T>(fn: () => T): T => {
     const was = internal;
     internal = true;
     try {
-      if (!was) drainErrors();
+      /* Errors the frame raised so far are collected first, so none are misattributed. */
+      if (!was) drainErrors(gl, errors);
       return fn();
     } finally {
       if (!was) for (let i = 0; i < 16 && gl.getError() !== gl.NO_ERROR; i++);
@@ -161,121 +360,12 @@ export async function grabFrame(
     }
   };
 
-  const formatArg = (arg: unknown): string => {
-    if (typeof arg === "number") return enumName(arg) ?? String(round(arg));
-    if (arg === null || arg === undefined || typeof arg === "boolean") return String(arg);
-    if (typeof arg === "string")
-      return JSON.stringify(arg.length > 60 ? `${arg.slice(0, 57)}…` : arg);
-    if (ArrayBuffer.isView(arg)) {
-      const length =
-        "length" in arg && typeof arg.length === "number" ? arg.length : arg.byteLength;
-      return `${arg.constructor.name}(${length})`;
-    }
-    if (arg instanceof ArrayBuffer) return `ArrayBuffer(${arg.byteLength})`;
-    if (Array.isArray(arg))
-      return `[${arg.slice(0, 8).map(formatArg).join(", ")}${arg.length > 8 ? ", …" : ""}]`;
-    if (typeof arg === "object") {
-      const name = arg.constructor.name;
-      return name.startsWith("WebGL") && name !== "WebGLUniformLocation" ? label(arg) : name;
-    }
-    return typeof arg;
-  };
-
-  const uploadBytes = (args: unknown[]) => {
-    for (const arg of args) {
-      if (ArrayBuffer.isView(arg) || arg instanceof ArrayBuffer) return arg.byteLength;
-      if (arg && typeof arg === "object" && "width" in arg && "height" in arg)
-        return Number(arg.width) * Number(arg.height) * 4;
-    }
-    // Allocation without data: texImage2D(target, level, format, width, height, …).
-    const [width, height] = [args[3], args[4]];
-    return typeof width === "number" && typeof height === "number" ? width * height * 4 : 0;
-  };
-
   const programs = new Map<string, GrabProgram>();
-  const describeProgram = (program: WebGLProgram) =>
+  const programId = (program: WebGLProgram) =>
     call(() => {
       const id = label(program);
-      if (programs.has(id)) return id;
-      const typeName = (type: number) => enumName(type) ?? String(type);
-      const uniforms = [];
-      for (let i = 0; i < Number(gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)); i++) {
-        const info = gl.getActiveUniform(program, i);
-        if (info) uniforms.push({ name: info.name, type: typeName(info.type), size: info.size });
-      }
-      const attributes = [];
-      for (let i = 0; i < Number(gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)); i++) {
-        const info = gl.getActiveAttrib(program, i);
-        if (info) attributes.push({ name: info.name, type: typeName(info.type), size: info.size });
-      }
-      const debug = gl.getExtension("WEBGL_debug_shaders");
-      const shaders = (gl.getAttachedShaders(program) ?? []).map((shader): GrabShader => {
-        const type = Number(gl.getShaderParameter(shader, gl.SHADER_TYPE));
-        const source = gl.getShaderSource(shader) ?? "";
-        // Renderers delete shaders once linked, so translate and time a fresh copy.
-        const copy = gl.createShader(type);
-        let translated: string | undefined;
-        let compileMs: number | undefined;
-        if (copy) {
-          gl.shaderSource(copy, source);
-          const start = performance.now();
-          gl.compileShader(copy);
-          gl.getShaderParameter(copy, gl.COMPILE_STATUS);
-          compileMs = performance.now() - start;
-          translated = debug?.getTranslatedShaderSource(copy) || undefined;
-          gl.deleteShader(copy);
-        }
-        return {
-          type: type === gl.VERTEX_SHADER ? "vertex" : "fragment",
-          source,
-          ...(translated !== undefined ? { translated } : {}),
-          ...(compileMs !== undefined ? { compileMs } : {}),
-        };
-      });
-      programs.set(id, { id, uniforms, attributes, shaders });
+      if (!programs.has(id)) programs.set(id, describeProgram(gl, program, id));
       return id;
-    });
-
-  const uniformValues = (program: WebGLProgram) =>
-    call(() => {
-      const values: Record<string, unknown> = {};
-      for (let i = 0; i < Number(gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)); i++) {
-        const info = gl.getActiveUniform(program, i);
-        if (!info) continue;
-        const location = gl.getUniformLocation(program, info.name);
-        if (!location) continue;
-        const value: unknown = gl.getUniform(program, location);
-        values[info.name] = isList(value)
-          ? Array.from(value, (item) => (typeof item === "number" ? round(item) : item))
-          : typeof value === "number"
-            ? round(value)
-            : value;
-      }
-      return values;
-    });
-
-  const snapshot = (width: number, height: number): { image?: string; error?: string } =>
-    call(() => {
-      if (width <= 0 || height <= 0) return { error: "empty viewport" };
-      const pixels = new Uint8Array(width * height * 4);
-      gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      const error = gl.getError();
-      // Float targets, for example, cannot be read as RGBA8.
-      if (error !== gl.NO_ERROR) return { error: enumName(error) ?? String(error) };
-      const full = document.createElement("canvas");
-      full.width = width;
-      full.height = height;
-      const image = new ImageData(width, height);
-      const row = width * 4;
-      for (let y = 0; y < height; y++)
-        image.data.set(pixels.subarray((height - 1 - y) * row, (height - y) * row), y * row);
-      full.getContext("2d")!.putImageData(image, 0, 0);
-      const scale = Math.min(1, options.thumbWidth / width);
-      const thumb = document.createElement("canvas");
-      thumb.width = Math.max(1, Math.round(width * scale));
-      thumb.height = Math.max(1, Math.round(height * scale));
-      thumb.getContext("2d")!.drawImage(full, 0, 0, thumb.width, thumb.height);
-      return { image: thumb.toDataURL("image/png") };
     });
 
   const timerValue: unknown = call(() => gl.getExtension("EXT_disjoint_timer_query_webgl2"));
@@ -298,30 +388,15 @@ export async function grabFrame(
       if (internal) return Reflect.apply(original, gl, args);
       n++;
       counts[name] = (counts[name] ?? 0) + 1;
-      const entry: GrabCall = {
-        n,
-        fn: name,
-        args:
-          name === "clear"
-            ? CLEAR_BITS.filter(([bit]) => Number(args[0]) & bit)
-                .map(([, label]) => label)
-                .join(" | ")
-            : args.map(formatArg).join(", "),
-      };
+      const entry: GrabCall = { n, fn: name, args: formatArgs(name, args, label) };
       if (calls.length < options.maxCalls) calls.push(entry);
       else truncated = true;
       if (TEXTURE_UPLOADS.has(name)) {
         uploads.textureCalls++;
-        uploads.textureBytes += uploadBytes(args);
+        uploads.textureBytes += textureUploadBytes(args);
       } else if (BUFFER_UPLOADS.has(name)) {
         uploads.bufferCalls++;
-        const data = args[1];
-        uploads.bufferBytes +=
-          typeof data === "number"
-            ? data
-            : ArrayBuffer.isView(data) || data instanceof ArrayBuffer
-              ? data.byteLength
-              : 0;
+        uploads.bufferBytes += bufferUploadBytes(args[1]);
       }
       if (!DRAWS.has(name)) return Reflect.apply(original, gl, args);
 
@@ -338,17 +413,14 @@ export async function grabFrame(
         index: draws.length,
         call: n,
         fn: name,
-        mode: DRAW_MODES[Number(args[0])] ?? formatArg(args[0]),
-        // drawArrays*(mode, first, count…), drawElements*(mode, count…), drawRangeElements(mode, start, end, count…)
-        count: Number(
-          args[name.startsWith("drawArrays") ? 2 : name === "drawRangeElements" ? 3 : 1] ?? 0,
-        ),
+        mode: DRAW_MODES[Number(args[0])] ?? formatArg(args[0], label),
+        count: drawCount(name, args),
         instances: name.endsWith("Instanced") ? Number(args.at(-1) ?? 1) : 1,
-        program: program ? describeProgram(program) : null,
+        program: program ? programId(program) : null,
         framebuffer: framebuffer ? label(framebuffer) : null,
         viewport,
         gpuMs: null,
-        uniforms: program ? uniformValues(program) : {},
+        uniforms: program ? call(() => uniformValues(gl, program)) : {},
       };
       entry.draw = draw.index;
       const query = timer ? call(() => gl.createQuery()) : null;
@@ -357,7 +429,7 @@ export async function grabFrame(
       if (timer && query) call(() => gl.endQuery(timer.TIME_ELAPSED_EXT));
       queries.push(query);
       if (options.snapshots && draws.length < options.maxSnapshots) {
-        const shot = snapshot(viewport[2], viewport[3]);
+        const shot = call(() => snapshot(gl, viewport[2], viewport[3], options.thumbWidth));
         if (shot.image !== undefined) draw.snapshot = shot.image;
         if (shot.error !== undefined) draw.snapshotError = shot.error;
       }
@@ -375,37 +447,9 @@ export async function grabFrame(
   }
   const instrumentedMs = performance.now() - start;
 
-  if (timer) {
-    const deadline = performance.now() + 4000;
-    const pending = queries.filter((q): q is WebGLQuery => q !== null);
-    while (!pending.every((q) => gl.getQueryParameter(q, gl.QUERY_RESULT_AVAILABLE))) {
-      if (performance.now() > deadline) break;
-      await new Promise((resolve) => setTimeout(resolve, 8));
-    }
-    const disjoint = Boolean(gl.getParameter(timer.GPU_DISJOINT_EXT));
-    queries.forEach((query, i) => {
-      if (!query) return;
-      if (!disjoint && gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE))
-        draws[i]!.gpuMs = Number(gl.getQueryParameter(query, gl.QUERY_RESULT)) / 1e6;
-      gl.deleteQuery(query);
-    });
-  }
+  if (timer) await readTimers(gl, timer, queries, draws);
 
-  drainErrors();
-  const errors = frameErrors;
-
-  const passes: GrabPass[] = [];
-  for (const draw of draws) {
-    const last = passes.at(-1);
-    if (last && last.framebuffer === draw.framebuffer) last.draws++;
-    else
-      passes.push({
-        framebuffer: draw.framebuffer,
-        draws: 1,
-        width: draw.viewport[2],
-        height: draw.viewport[3],
-      });
-  }
+  drainErrors(gl, errors);
 
   return {
     instrumentedMs,
@@ -413,7 +457,7 @@ export async function grabFrame(
     truncated,
     counts,
     draws,
-    passes,
+    passes: passesOf(draws),
     programs: [...programs.values()],
     uploads,
     errors,

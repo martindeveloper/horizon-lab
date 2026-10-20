@@ -1,14 +1,30 @@
 /** The solar system's framed scales, inner planets to the Oort cloud. Light: routes read it. */
+import type { OrbitPose } from "@horizon/toolkit/camera";
 
 export type SolarViewId = "inner" | "giants" | "kuiper" | "scattered" | "oort";
-export type SolarView = {
+type SolarView = {
   id: SolarViewId;
   /** Camera distance from the Sun, au. */
   dist: number;
-  /** Camera pose that frames the view best; the default is 0.6 / 0.52. */
+  /** Camera pose that frames the view best; the default is `SOLAR_FRAMING`. */
   azimuth?: number;
   inclination?: number;
 };
+
+/**
+ * How the solar system is framed where a view says nothing else: the orbit camera's angles
+ * (radians) and the nearest its frustum comes (au), for every engine that hosts it.
+ */
+export const SOLAR_FRAMING = { azimuth: 0.6, inclination: 0.52, nearFloor: 0.008 } as const;
+
+/** The pose that frames a view: its own angles where it has them, else the solar framing. */
+export function solarViewPose(view: SolarView): OrbitPose {
+  return {
+    azimuth: view.azimuth ?? SOLAR_FRAMING.azimuth,
+    inclination: view.inclination ?? SOLAR_FRAMING.inclination,
+    distance: view.dist,
+  };
+}
 
 export const SOLAR_VIEWS: readonly SolarView[] = [
   { id: "inner", dist: 6 },

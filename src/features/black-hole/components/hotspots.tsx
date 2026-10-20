@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import {
   GAUGE_TICKS,
@@ -344,7 +344,7 @@ export function Hotspots() {
 }
 
 /** The desktop lesson takes focus from its pin and gives it back when it closes. */
-function PinFocus({ children }: { children: React.ReactNode }) {
+function PinFocus({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
   useFocusHandoff(root);
   return (

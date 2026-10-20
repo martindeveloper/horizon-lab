@@ -3,9 +3,10 @@ import { useTranslations } from "next-intl";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
-import { useViewFromPath } from "@/components/simulations/use-view-from-path";
+import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
+import type { ViewId } from "../lib/model/view-ids";
 import { useDeepField } from "../lib/store";
 import { viewFromPath } from "../routing";
 import { DeepFieldCanvas } from "./canvas";
@@ -13,6 +14,8 @@ import { DeepFieldOverlay } from "./overlay";
 
 /** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useDeepField);
+/** The store as the address sees it. */
+const views: ViewStore<ViewId> = useDeepField;
 
 /** The guide drives the camera; immersive view ends it. */
 function leaveGuide() {
@@ -25,7 +28,7 @@ export function DeepField() {
   const ready = useDeepField((s) => s.ready);
   const view = useDeepField((s) => s.view);
 
-  useViewFromPath(useDeepField.getState, viewFromPath);
+  useViewFromPath(views, viewFromPath);
   useFreshVisit(reset);
 
   return (

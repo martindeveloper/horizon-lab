@@ -20,9 +20,6 @@ export const omegaCen: HoleSpec = {
   id: "omega-cen",
   name: "ω Centauri",
   kind: "catalog",
-  catalog: "ℓ ≈ 309°, b ≈ +15°",
-  blurb:
-    "A candidate intermediate-mass black hole in a swallowed dwarf galaxy's core, 17,700 ly away.",
   massSolar: 8200,
   massLowerLimit: true,
   massNote: "bound",
@@ -39,6 +36,7 @@ export const omegaCen: HoleSpec = {
   tour: [
     // Sink slowly through the crowded core.
     {
+      phase: "wide",
       duration: 10,
       yaw: -0.9,
       inclination: 0.3,
@@ -50,6 +48,7 @@ export const omegaCen: HoleSpec = {
     },
     // A long survey sweep, like twenty years of Hubble images.
     {
+      phase: "dolly",
       duration: 10.5,
       yaw: 1.5,
       inclination: 0.75,
@@ -60,6 +59,7 @@ export const omegaCen: HoleSpec = {
       eq: "v_esc ≈ 62 km/s    ·    v_max ≈ 113 km/s",
     },
     {
+      phase: "detail",
       duration: 8.5,
       yaw: 0.45,
       inclination: 1.0,
@@ -72,6 +72,7 @@ export const omegaCen: HoleSpec = {
       eq: "M_• ≥ 8,200 M☉    ·    models ≈ 39,000–47,000 M☉",
     },
     {
+      phase: "hold",
       duration: 8.5,
       yaw: -0.6,
       inclination: 0.25,
@@ -80,6 +81,14 @@ export const omegaCen: HoleSpec = {
       roll: -0.03,
       eq: "M_• < 6,000 M☉ (3σ, stars + pulsars)",
     },
-    { duration: 10, yaw: 1.2, inclination: 0.55, distance: 145, lift: 0.2, lead: 0.3 },
+    {
+      phase: "wide",
+      duration: 10,
+      yaw: 1.2,
+      inclination: 0.55,
+      distance: 145,
+      lift: 0.2,
+      lead: 0.3,
+    },
   ],
 };

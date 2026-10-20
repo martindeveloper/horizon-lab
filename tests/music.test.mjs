@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const saved = new Map();
-globalThis.sessionStorage = {
-  getItem: (key) => saved.get(key) ?? null,
-  setItem: (key, value) => saved.set(key, String(value)),
-  removeItem: (key) => saved.delete(key),
-};
+import { stubStorage } from "./toolkit-helpers.mjs";
+
+const { saved } = stubStorage();
 const { MusicPlayer, equalPowerCurve, crossfadeDelay, chooseSource } =
   await import("@horizon/toolkit/audio");
 const { ambientMusic } = await import("../src/components/shell/ambient-music.ts");

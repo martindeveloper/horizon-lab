@@ -1,6 +1,12 @@
 import { create } from "zustand";
 
-import { sceneSlice, type SceneSlice } from "@/lib/scene-store";
+import {
+  RESET_SCENE_SETTINGS,
+  guideSlice,
+  sceneSlice,
+  type GuideSlice,
+  type SceneSlice,
+} from "@/lib/scene-store";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
@@ -63,45 +69,38 @@ const realmOfSelection = (sel: Selection): Realm =>
 export const dropsSelection = (sel: Selection, realm: Realm, flyingTo: Realm | null) =>
   realmOfSelection(sel) !== realm && realmOfSelection(sel) !== flyingTo;
 
-export type Panel = "none" | "objects" | "view";
+type Panel = "none" | "objects" | "view";
 
-export const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
+const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
 
-export type DeepFieldStore = SceneSlice & {
-  view: ViewId;
-  /** A depth the visitor dragged the ladder to (camera distance, ly), or null. */
-  seek: { ly: number } | null;
-  selection: Selection | null;
-  panel: Panel;
-  show: Show;
-  /* HUD readouts written by the engine a few times per second, besides the scale bar. */
-  /** Camera distance from its aim, ly. */
-  viewLy: number;
-  /** How far from us the view reaches: its centre's distance plus the field's half-height, ly. */
-  reachLy: number;
-  setView: (view: ViewId) => void;
-  /** Glides the zoom to a camera distance (ly), as the ladder's thumb asks. */
-  seekTo: (ly: number) => void;
-  select: (selection: Selection | null) => void;
-  patchShow: (patch: Partial<Show>) => void;
-  /** The View panel's settings as a visit starts: switches, distance unit, render quality. */
-  resetView: () => void;
-  setPanel: (panel: Panel) => void;
-  /* The guided journey (model/tour.ts). */
-  guideOpen: boolean;
-  guideStep: number;
-  /** The journey moves on by itself once a shot has been read; off under reduced motion. */
-  guidePlaying: boolean;
-  /** The camera has landed on the step's shot (written by the scene). */
-  guideLanded: boolean;
-  /** The visitor's switches from before the journey, given back when it ends. */
-  showBeforeGuide: Show | null;
-  startGuide: () => void;
-  /** Applies a step; past the last one the journey ends. */
-  goGuide: (step: number) => void;
-  toggleGuidePlaying: () => void;
-  endGuide: () => void;
-};
+export type DeepFieldStore = SceneSlice &
+  GuideSlice<Show> & {
+    view: ViewId;
+    /** A depth the visitor dragged the ladder to (camera distance, ly), or null. */
+    seek: { ly: number } | null;
+    selection: Selection | null;
+    panel: Panel;
+    show: Show;
+    /* HUD readouts written by the engine a few times per second, besides the scale bar. */
+    /** Camera distance from its aim, ly. */
+    viewLy: number;
+    /** How far from us the view reaches: its centre's distance plus the field's half-height, ly. */
+    reachLy: number;
+    setView: (view: ViewId) => void;
+    /** Glides the zoom to a camera distance (ly), as the ladder's thumb asks. */
+    seekTo: (ly: number) => void;
+    select: (selection: Selection | null) => void;
+    patchShow: (patch: Partial<Show>) => void;
+    /** The View panel's settings as a visit starts: switches, distance unit, render quality. */
+    resetView: () => void;
+    setPanel: (panel: Panel) => void;
+    /* The guided journey (model/tour.ts). */
+    /** The journey moves on by itself once a shot has been read; off under reduced motion. */
+    guidePlaying: boolean;
+    /** The camera has landed on the step's shot (written by the scene). */
+    guideLanded: boolean;
+    toggleGuidePlaying: () => void;
+  };
 
 export const useDeepField = create<DeepFieldStore>((set, get) => ({
   ...sceneSlice(set, { scalePx: 120, scaleValue: 10_000, scaleUnit: "ly" }),
@@ -119,44 +118,23 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   seekTo: (ly) => set({ seek: { ly } }),
   select: (selection) => set({ selection }),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
-  resetView: () =>
-    set({ show: DEFAULT_SHOW, distanceUnit: "auto", antialias: null, quality: "standard" }),
+  resetView: () => set({ show: DEFAULT_SHOW, ...RESET_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
-  guideOpen: false,
-  guideStep: 0,
-  guidePlaying: false,
-  guideLanded: false,
-  showBeforeGuide: null,
-  startGuide: () => {
-    set((s) => ({
-      guideOpen: true,
-      guidePlaying: !prefersReducedMotion(),
-      showBeforeGuide: s.showBeforeGuide ?? s.show,
-      panel: "none",
-      seek: null,
-    }));
-    get().goGuide(0);
-  },
-  goGuide: (index) => {
-    const step = TOUR[index];
-    if (!get().guideOpen || index < 0) return;
-    if (!step) return get().endGuide();
-    set({
-      guideStep: index,
+  ...guideSlice(set, get, {
+    tour: TOUR,
+    /* The visitor's switches, given back when the journey ends. */
+    save: (s) => s.show,
+    restore: (show) => ({ show }),
+    open: () => ({ guidePlaying: !prefersReducedMotion(), seek: null }),
+    apply: (step, s) => ({
       guideLanded: false,
       view: step.view,
       selection: step.focus ?? null,
-      show: { ...(get().showBeforeGuide ?? DEFAULT_SHOW), ...step.show },
-    });
-  },
+      show: { ...(s.savedBeforeGuide ?? DEFAULT_SHOW), ...step.show },
+    }),
+    close: () => ({ guideLanded: false }),
+  }),
+  guidePlaying: false,
+  guideLanded: false,
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
-  endGuide: () =>
-    set((s) => ({
-      guideOpen: false,
-      guideStep: 0,
-      guideLanded: false,
-      selection: null,
-      show: s.showBeforeGuide ?? s.show,
-      showBeforeGuide: null,
-    })),
 }));

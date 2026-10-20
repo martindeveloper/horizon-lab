@@ -23,9 +23,6 @@ export const kerr: HoleSpec = {
   id: "kerr",
   name: "Extreme Kerr",
   kind: "theory",
-  catalog: "a ≈ 0.998",
-  blurb:
-    "Near-maximal spin. Prograde stable orbits extend closer to the horizon. The rendered spin effect is illustrative. A metric, not a named hole.",
   massSolar: 3e7,
   spin: 0.998,
   inclination: 0.18,
@@ -40,6 +37,7 @@ export const kerr: HoleSpec = {
   tour: [
     // Every move turns with the hole and leans into the drag.
     {
+      phase: "wide",
       duration: 9,
       yaw: -0.9,
       inclination: 0.18,
@@ -51,6 +49,7 @@ export const kerr: HoleSpec = {
     },
     // Dive in close; the ISCO ring tightens from 6M once the camera lands.
     {
+      phase: "dolly",
       duration: 10,
       yaw: -0.8,
       inclination: 0.32,
@@ -62,6 +61,7 @@ export const kerr: HoleSpec = {
       eq: "r_ISCO / M → 1    as    a/M → 1  (prograde)",
     },
     {
+      phase: "detail",
       duration: 9,
       yaw: -0.9,
       inclination: 1.02,
@@ -73,6 +73,7 @@ export const kerr: HoleSpec = {
       eq: "M_irr = M √((1 + √(1 − (a/M)²))/2)    ·    a/M = 1 ⇒ M − M_irr ≈ 0.29 M",
     },
     {
+      phase: "hold",
       duration: 8,
       yaw: -0.6,
       inclination: 0.14,
@@ -82,6 +83,14 @@ export const kerr: HoleSpec = {
       roll: -0.02,
       eq: "a/M ≈ 0.998   (Thorne 1974)",
     },
-    { duration: 10, yaw: -1.4, inclination: 0.48, distance: 126, lift: 0.3, lead: -0.2 },
+    {
+      phase: "wide",
+      duration: 10,
+      yaw: -1.4,
+      inclination: 0.48,
+      distance: 126,
+      lift: 0.3,
+      lead: -0.2,
+    },
   ],
 };

@@ -7,6 +7,7 @@ import {
   type Card,
   type DistanceSettings,
   type Format,
+  type Of,
   type Translate,
   type Value,
 } from "@/lib/facts";
@@ -32,9 +33,7 @@ type Moment = {
   date: Date;
 };
 
-type Of<K extends SolarSelection["kind"]> = Extract<SolarSelection, { kind: K }>;
-
-function planetCard(sel: Of<"planet">, m: Moment): Card {
+function planetCard(sel: Of<SolarSelection, "planet">, m: Moment): Card {
   const { t, f, d, mig, elliptical, date } = m;
   const id: PlanetId = sel.id;
   const el = planetElements(id, mig, 0, date);
@@ -66,7 +65,7 @@ function planetCard(sel: Of<"planet">, m: Moment): Card {
   };
 }
 
-function namedCard(sel: Of<"named">, m: Moment): Card {
+function namedCard(sel: Of<SolarSelection, "named">, m: Moment): Card {
   const { t, f, d, mig, date } = m;
   const el = namedElements(namedById(sel.id), mig, 0, date);
   const notes = buildCard(t, d, NAMED_NOTES[sel.id] ?? { rows: [] });
@@ -79,7 +78,7 @@ function namedCard(sel: Of<"named">, m: Moment): Card {
   };
 }
 
-function tracerCard(sel: Of<"tracer">, m: Moment): Card {
+function tracerCard(sel: Of<SolarSelection, "tracer">, m: Moment): Card {
   const { t, f, d, yearsAgo, mig } = m;
   const tr = TRACERS[sel.index];
   if (!tr)

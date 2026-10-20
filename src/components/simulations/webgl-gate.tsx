@@ -1,13 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import dynamic from "next/dynamic";
+import { useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 
 import { StatusPage, statusPrimaryActionClass } from "@/components/status/status-page";
 import { Link } from "@/i18n/navigation";
 import { subscribeDebug, webglOverride } from "@/lib/debug";
 import { probeWebGL, type WebGLSupport } from "@horizon/toolkit/rendering";
 import { PanelHeader, Surface, useImmersive } from "@horizon/toolkit/ui";
+
+import { SimulationLoadingPage } from "./loading";
 
 // One probe per page session: browsers cap live WebGL contexts.
 let support: WebGLSupport | undefined;
@@ -16,6 +19,33 @@ let noticeDismissed = false;
 // `Horizon.Debug.webgl()` can force a result; it skips the real probe entirely.
 const clientSupport = () => webglOverride() ?? (support ??= probeWebGL());
 const serverSupport = () => null;
+
+/**
+ * A simulation's client boundary: its root loads on the client only (the stores read the
+ * browser, the scene draws in it), behind `SimulationLoadingPage` titled by the namespace's
+ * `app` while its chunk downloads and, where it draws WebGL (`gate`), behind the WebGL check.
+ * The route layout keeps what it returns mounted across the simulation's views.
+ */
+export function simulationClient(
+  namespace: string,
+  load: () => Promise<ComponentType>,
+  { gate = true }: { gate?: boolean } = {},
+) {
+  function Loading() {
+    const t = useTranslations(namespace);
+    return <SimulationLoadingPage title={t("app")} />;
+  }
+  const Simulation = dynamic(load, { ssr: false, loading: Loading });
+  return function SimulationClient() {
+    return gate ? (
+      <WebGLGate fallback={<Loading />}>
+        <Simulation />
+      </WebGLGate>
+    ) : (
+      <Simulation />
+    );
+  };
+}
 
 /**
  * Checks WebGL 2 before a simulation's renderer chunk loads. The server pass and

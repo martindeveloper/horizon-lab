@@ -3,6 +3,8 @@
 /**
  * Calls `frame` every animation frame with the elapsed seconds (capped at 0.05)
  * and the frame time. Keeps scheduling while the page is hidden; returns the cancel.
+ * Deliberately not the toolkit's `createFrameLoop`: that loop feeds the frame-rate meter,
+ * and these 2D overlays must not count as rendered frames of the hole.
  */
 export function frameLoop(frame: (dt: number, now: number) => void): () => void {
   let raf = 0;
@@ -19,7 +21,7 @@ export function frameLoop(frame: (dt: number, now: number) => void): () => void 
 }
 
 /** Overlay layer and hole canvas boxes, with the backing-store pixel ratio. */
-export type OverlayFit = { layerBox: DOMRect; holeBox: DOMRect; dpr: number; resized: boolean };
+type OverlayFit = { layerBox: DOMRect; holeBox: DOMRect; dpr: number; resized: boolean };
 
 /** Sizes `canvas` to its layer; null while the hole canvas is too small to draw over. */
 export function fitOverlay(layer: HTMLElement, canvas: HTMLCanvasElement): OverlayFit | null {

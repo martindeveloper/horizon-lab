@@ -39,7 +39,7 @@ export const PROMINENCE_REGIONS = [
 ] as const;
 export const SUN_ACTIVITY_REGION_COUNT = PROMINENCE_REGIONS.length;
 
-export type SolarActivityState = {
+type SolarActivityState = {
   solarActivity: boolean;
   solarActivityPaused: boolean;
   closeUp: boolean;

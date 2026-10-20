@@ -1,5 +1,7 @@
 import type { useFormatter } from "next-intl";
 
+import { powerOfTen } from "@horizon/toolkit/science";
+
 import type { Level, Line } from "../lib/model/atoms";
 
 type Format = ReturnType<typeof useFormatter>;
@@ -33,7 +35,7 @@ const sup = (s: string) => s.replace(/[0-9]/g, (c) => SUPERSCRIPT[c] ?? c);
 const sub = (s: string) => s.replace(/[0-9/]/g, (c) => SUBSCRIPT[c] ?? c);
 
 /** NIST's "3d6.4s2" as "3d⁶4s²"; parent terms ("4F") as "⁴F". */
-export function configuration(raw: string) {
+function configuration(raw: string) {
   return raw
     .split(".")
     .map((part) => {
@@ -47,7 +49,7 @@ export function configuration(raw: string) {
 }
 
 /** A term and its J as spectroscopists write it: "²P°₃/₂", "a ⁵D₄". */
-export function term(level: Level) {
+function term(level: Level) {
   const m = /^([a-z]\s)?(\d+)([A-Z])(\*)?$/.exec(level.term.trim());
   if (!m) return level.term;
   return `${m[1] ?? ""}${sup(m[2]!)}${m[3]}${m[4] ? "°" : ""}${sub(level.j)}`;
@@ -90,10 +92,7 @@ export function scientific(f: Format, v: number) {
     return f.number(v, { maximumSignificantDigits: 2 });
   const exponent = Math.floor(Math.log10(Math.abs(v)));
   const mantissa = v / 10 ** exponent;
-  const power = String(exponent)
-    .replace("-", "⁻")
-    .replace(/[0-9]/g, (c) => SUPERSCRIPT[c] ?? c);
-  return `${f.number(mantissa, { maximumFractionDigits: 1 })} × 10${power}`;
+  return `${f.number(mantissa, { maximumFractionDigits: 1 })} × ${powerOfTen(exponent)}`;
 }
 
 export const signed = (f: Format, v: number, digits = 0) =>

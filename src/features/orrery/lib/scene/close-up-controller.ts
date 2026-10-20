@@ -16,6 +16,7 @@ import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
 import { FIGURES, MAPS, tierFile, type BodyId } from "@horizon/toolkit/bodies";
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
+import { WIDE_QUERY } from "@horizon/toolkit/environment";
 import { rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
@@ -72,8 +73,6 @@ const setLayer = (objects: Object3D[], layer: number) => {
   for (const object of objects) object.traverse((child) => child.layers.set(layer));
 };
 
-export type CloseUpController = ReturnType<typeof createCloseUpController>;
-
 export function createCloseUpController(
   { scope, looks, camera, viewport, tight }: SolarKit,
   deps: {
@@ -121,7 +120,7 @@ export function createCloseUpController(
     return bytes;
   };
   const target = new Vector3();
-  const wide = window.matchMedia("(min-width: 768px)");
+  const wide = window.matchMedia(WIDE_QUERY);
   /** Room the card leaves: the globe sits left of it on wide screens, above the bar on phones. */
   const framing = () =>
     wide.matches

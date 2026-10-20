@@ -10,8 +10,6 @@ import { TOUR } from "../model/tour";
 import type { OrreryStore } from "../store";
 import type { CameraRig } from "./camera-rig";
 
-export type GuideDirector = ReturnType<typeof createGuideDirector>;
-
 export function createGuideDirector(
   scope: DisposalScope,
   parent: Object3D,

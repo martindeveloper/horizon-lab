@@ -1,24 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { stubStorage } from "./toolkit-helpers.mjs";
+
 const { flag, json, numbers, oneOf, storageCell, text } = await import("@horizon/toolkit/storage");
 
+/** A fresh storage area that counts its reads. */
 function install(area = "session") {
-  const saved = new Map();
   let reads = 0;
-  const store = {
-    get reads() {
-      return reads;
-    },
-    getItem: (key) => {
-      reads += 1;
-      return saved.get(key) ?? null;
-    },
-    setItem: (key, value) => saved.set(key, String(value)),
-    removeItem: (key) => saved.delete(key),
-  };
-  if (area === "local") globalThis.localStorage = store;
-  else globalThis.sessionStorage = store;
+  const { saved, store } = stubStorage([], { area, onRead: () => (reads += 1) });
+  Object.defineProperty(store, "reads", { get: () => reads });
   return { saved, store };
 }
 

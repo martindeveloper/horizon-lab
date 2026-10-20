@@ -1,12 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import { HandoffLink, HandoffRow } from "@/components/simulations/handoff-link";
 import { SwitchChips } from "@/components/simulations/switch-chips";
-import { SOLAR_VIEWS } from "@/space/solar-system/model/views";
+import { ViewPicker as SharedViewPicker } from "@/components/simulations/view-picker";
+import { SOLAR_VIEWS, solarViewById } from "@/space/solar-system/model/views";
 import { atViewScale } from "@horizon/toolkit/camera";
-import { ListItem, Picker } from "@horizon/toolkit/ui";
 
 import { ORRERY_EDGE } from "../lib/scene/kit";
 import { useOrrery, type Show } from "../lib/store";
@@ -14,40 +13,29 @@ import { useOrrery, type Show } from "../lib/store";
 export const DISPLAY: (keyof Show)[] = ["elliptical", "trueSize", "drift", "names", "distances"];
 export const EXTRA: (keyof Show)[] = ["plane"];
 
+const VIEW_IDS = SOLAR_VIEWS.map((v) => v.id);
+
+/** The views as a pill that opens a list, with the way on into Deep Field under them. */
 export function ViewPicker() {
   const t = useTranslations("orrery");
   const view = useOrrery((s) => s.view);
   const viewDist = useOrrery((s) => s.viewDist);
   const closeUp = useOrrery((s) => s.closeUp);
   const setView = useOrrery((s) => s.setView);
-  const [open, setOpen] = useState(false);
   return (
-    <Picker
+    <SharedViewPicker
+      ariaLabel={t("hud.views")}
       label={t(`views.${view}`)}
-      aria-label={t("hud.views")}
-      open={open}
-      onOpenChange={setOpen}
       className="min-w-36 flex-1"
       triggerClassName="relative max-w-[min(16rem,100%)] not-md:h-10 not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-0.5"
+      ids={VIEW_IDS}
+      selected={(id) => !closeUp && view === id && atViewScale(viewDist, solarViewById(id).dist)}
+      labelOf={(id) => t(`views.${id}`)}
+      hintOf={(id) => t(`viewHints.${id}`)}
+      onPick={setView}
     >
-      <div className="flex flex-col gap-1">
-        {SOLAR_VIEWS.map((v) => (
-          <ListItem
-            key={v.id}
-            selected={!closeUp && view === v.id && atViewScale(viewDist, v.dist)}
-            onClick={() => {
-              setView(v.id);
-              setOpen(false);
-            }}
-            className="flex-col items-start justify-start gap-0"
-          >
-            <span>{t(`views.${v.id}`)}</span>
-            <span className="text-xs text-muted">{t(`viewHints.${v.id}`)}</span>
-          </ListItem>
-        ))}
-        <DeepFieldLink className="mt-1 border-t border-border pt-3" />
-      </div>
-    </Picker>
+      <DeepFieldLink className="mt-1 border-t border-border pt-3" />
+    </SharedViewPicker>
   );
 }
 

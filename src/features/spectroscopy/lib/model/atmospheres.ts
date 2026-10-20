@@ -1,3 +1,5 @@
+import { lerp } from "@horizon/toolkit/math";
+
 import data from "./atmospheres.json";
 
 /**
@@ -36,10 +38,10 @@ type Row = readonly [T: number, logPe: number, logPg: number, logColumn: number]
 const DEPTHS: readonly number[] = data.depths;
 
 const mix = (a: Row, b: Row, t: number): Row => [
-  a[0] + t * (b[0] - a[0]),
-  a[1] + t * (b[1] - a[1]),
-  a[2] + t * (b[2] - a[2]),
-  a[3] + t * (b[3] - a[3]),
+  lerp(a[0], b[0], t),
+  lerp(a[1], b[1], t),
+  lerp(a[2], b[2], t),
+  lerp(a[3], b[3], t),
 ];
 
 function photosphere(teff: number, logg: number, rows: readonly Row[]): Photosphere {

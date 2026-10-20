@@ -8,20 +8,26 @@ import {
   GuideEquation,
   GuideTitle,
 } from "@/components/simulations/guide-card";
+import type { TourPhase } from "@/features/black-hole/lib/holes/types";
 import { useBlackHole } from "@/features/black-hole/lib/store";
-import { flightPhase, tourFor, type TourBeat } from "@/features/black-hole/lib/tours";
+import { tourFor, type TourBeat } from "@/features/black-hole/lib/tours";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 import { TextReveal, textStagger } from "@horizon/toolkit/ui/motion";
 
 import { GuideSketch } from "./guide-sketch";
 
+/** When each line of a beat starts to reveal, seconds: the title, the body after it, the formula last. */
+function revealDelays(beat: TourBeat) {
+  const title = 0.12;
+  const body = title + beat.title.length * 0.022 + 0.18;
+  const eq = body + beat.body.length * Math.min(0.014, 2.4 / Math.max(beat.body.length, 1)) + 0.2;
+  return { title, body, eq };
+}
+
 function revealMs(beat: TourBeat) {
-  const titleDelay = 0.12;
-  const bodyDelay = titleDelay + beat.title.length * 0.022 + 0.18;
-  const eqDelay =
-    bodyDelay + beat.body.length * Math.min(0.014, 2.4 / Math.max(beat.body.length, 1)) + 0.2;
+  const delays = revealDelays(beat);
   const last = beat.eq ?? beat.body;
-  const lastDelay = beat.eq ? eqDelay : bodyDelay;
+  const lastDelay = beat.eq ? delays.eq : delays.body;
   const lastStagger = textStagger(last, beat.eq ? 18 : 14);
   return lastDelay + Math.max(last.length - 1, 0) * lastStagger + 0.4;
 }
@@ -53,6 +59,13 @@ export function GuideOverlay() {
   );
 }
 
+const PHASE_LABEL = {
+  wide: "phaseWide",
+  dolly: "phaseDolly",
+  detail: "phaseDetail",
+  hold: "phaseHold",
+} as const satisfies Record<TourPhase, string>;
+
 function GuideStep() {
   const t = useTranslations("blackHole");
   const presetId = useBlackHole((s) => s.presetId);
@@ -67,26 +80,12 @@ function GuideStep() {
       kicker: t(`tours.${key}.${index}.kicker`),
       title: t(`tours.${key}.${index}.title`),
       body: t(`tours.${key}.${index}.body`),
-      phase: t.has(`tours.${key}.${index}.phase`) ? t(`tours.${key}.${index}.phase`) : "Transit",
     }));
   }, [presetId, t]);
   const beat = beats[beatIndex] ?? beats[0]!;
   const last = beatIndex >= beats.length - 1;
-  const rawPhase = flightPhase(beat);
-  const phase =
-    rawPhase === "Wide"
-      ? t("phaseWide")
-      : rawPhase === "Dolly"
-        ? t("phaseDolly")
-        : rawPhase === "Detail"
-          ? t("phaseDetail")
-          : rawPhase === "Hold"
-            ? t("phaseHold")
-            : t("phaseTransit");
-  const titleDelay = 0.12;
-  const bodyDelay = titleDelay + beat.title.length * 0.022 + 0.18;
-  const eqDelay =
-    bodyDelay + beat.body.length * Math.min(0.014, 2.4 / Math.max(beat.body.length, 1)) + 0.2;
+  const phase = t(PHASE_LABEL[beat.phase]);
+  const delays = revealDelays(beat);
   const [skip, setSkip] = useState(false);
   const [ready, setReady] = useState(Boolean(arrived && reduce));
   const readyRef = useRef(Boolean(arrived && reduce));
@@ -202,14 +201,14 @@ function GuideStep() {
           }}
         >
           <GuideTitle ref={heading}>
-            <TextReveal text={beat.title} delay={titleDelay} ms={22} instant={instant} />
+            <TextReveal text={beat.title} delay={delays.title} ms={22} instant={instant} />
           </GuideTitle>
           <GuideBody>
-            <TextReveal text={beat.body} delay={bodyDelay} ms={14} instant={instant} />
+            <TextReveal text={beat.body} delay={delays.body} ms={14} instant={instant} />
           </GuideBody>
           {beat.eq ? (
             <GuideEquation>
-              <TextReveal text={beat.eq} delay={eqDelay} ms={18} instant={instant} />
+              <TextReveal text={beat.eq} delay={delays.eq} ms={18} instant={instant} />
             </GuideEquation>
           ) : null}
         </GuideCard>

@@ -2,14 +2,14 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
-import { Rail, RailSection } from "@/components/simulations/rail";
+import { Rail, RailSection, SwitchGroup } from "@/components/simulations/rail";
 import { RenderSection, type AntialiasMode } from "@/components/simulations/render-settings";
 import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
-import { FULL_RANGE } from "../lib/model/tour";
+import { FULL_RANGE, RESOLUTION_RANGE } from "../lib/model/scenes";
 import type { CanvasAntialias } from "../lib/quality";
-import { RESOLUTION_RANGE, useSpectroscopy } from "../lib/store";
+import { useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
 import { useWideGamut } from "./use-gamut";
 import { useFormedLines, useObservation } from "./use-spectrum";
@@ -52,7 +52,7 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
           : [];
         return (
           <RailSection key={element} title={t(`elements.${element}`)}>
-            <div className="-mx-3 grid gap-0.5">
+            <SwitchGroup>
               <SwitchRow
                 on={compare.includes(element)}
                 onToggle={() => api().toggleCompare(element)}
@@ -79,7 +79,7 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
               {identify && lines.length === 0 ? (
                 <p className="px-3 py-1 text-xs text-subtle">{t("panel.none")}</p>
               ) : null}
-            </div>
+            </SwitchGroup>
           </RailSection>
         );
       })}
@@ -146,17 +146,17 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         </ControlRow>
       </RailSection>
       <RailSection title={t("panel.show")}>
-        <div className="-mx-3 grid gap-0.5">
+        <SwitchGroup>
           <SwitchRow on={normalized} onToggle={() => api().setNormalized(!normalized)}>
             {t("panel.normalized")}
           </SwitchRow>
           <SwitchRow on={photons} onToggle={() => api().setPhotons(!photons)}>
             {t("panel.photons")}
           </SwitchRow>
-        </div>
+        </SwitchGroup>
       </RailSection>
       <RailSection title={t("panel.windows")}>
-        <div className="-mx-3 grid gap-0.5">
+        <SwitchGroup>
           {WINDOWS.map((w) => (
             <ListItem
               key={w.id}
@@ -169,7 +169,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
               </span>
             </ListItem>
           ))}
-        </div>
+        </SwitchGroup>
       </RailSection>
       {view !== "kirchhoff" ? null : (
         <p className="text-xs leading-relaxed text-muted">{t("panel.benchNote")}</p>

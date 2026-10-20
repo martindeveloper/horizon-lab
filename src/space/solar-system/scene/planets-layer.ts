@@ -34,8 +34,6 @@ const shapeOf = (id: BodyId) =>
     FIGURES[id].polarKm / FIGURES[id].meanKm,
   ] as const;
 
-export type PlanetsLayer = ReturnType<typeof createPlanetsLayer>;
-
 export function createPlanetsLayer(
   kit: SolarKit,
   parent: Object3D,

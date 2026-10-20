@@ -10,7 +10,7 @@ import type { ViewId } from "./view-ids";
  * and the cosmic map beyond it. Cards, rulers and readouts follow it.
  */
 export type Realm = "solar" | "stars" | "galaxy" | "cosmos";
-export type View = {
+type View = {
   id: ViewId;
   realm: Realm;
   /** Camera distance from its aim, ly. */
@@ -67,7 +67,7 @@ export const worldDistance = (ly: number) => ly * LIGHT_YEAR_AU;
  * radar inside the solar system to redshift and the expanding-universe model at the edge
  * (copy in `methods.<id>`).
  */
-export type DistanceMethod =
+type DistanceMethod =
   | "radar"
   | "tracking"
   | "orbits"

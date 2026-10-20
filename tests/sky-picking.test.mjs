@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { placeStars } from "../src/components/shell/sky-field.ts";
 import { nearestStar } from "../src/components/shell/sky-picking.ts";
-import { horizontalPositions, OBSERVER } from "../src/space/observer-sky.ts";
 
 const placed = (name, magnitude, x, y) => ({ star: [name, 0, 0, magnitude, 0], x, y });
 
@@ -40,18 +40,8 @@ test("hover includes the radius boundary and ignores stars outside it", () => {
 });
 
 test("hover identifies individual Pleiades stars instead of always selecting Alcyone", () => {
-  // The catalogue's south-facing 1920×1080 projection, 90° vertically.
-  const stars = horizontalPositions(
-    new Date("2026-10-16T23:00:00Z"),
-    OBSERVER.latitude,
-    OBSERVER.longitude,
-  )
-    .filter(({ altitude }) => altitude > 0)
-    .map((position) => ({
-      ...position,
-      x: 960 + (position.azimuth - 180) * 12,
-      y: 1080 - position.altitude * 12,
-    }));
+  // The sky as the shell draws it on a 1920×1080 window.
+  const stars = placeStars(new Date("2026-10-16T23:00:00Z"), 1920, 1080);
   const alcyone = stars.find(({ star }) => star[0] === "Alcyone");
   assert.ok(alcyone);
   for (const name of ["Atlas", "Electra", "Maia", "Merope", "Taygeta"]) {

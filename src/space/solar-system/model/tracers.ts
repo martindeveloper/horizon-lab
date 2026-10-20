@@ -6,11 +6,11 @@ import { tracerSemiMajorAxis } from "./equations";
 import { migrationProgress } from "./moment";
 import { COLD_CLASSICAL_AU, DISK_AU } from "./parameters";
 
-export type Kind = "cold" | "hot" | "scattered" | "oort" | "ejected";
+type Kind = "cold" | "hot" | "scattered" | "oort" | "ejected";
 export type Bin = "disk" | "kuiper" | "scattered" | "oort" | "ejected";
 export const BINS: readonly Bin[] = ["disk", "kuiper", "scattered", "oort", "ejected"];
 
-export type Tracer = {
+type Tracer = {
   kind: Kind;
   a0: number;
   a1: number;
@@ -38,7 +38,7 @@ function scatterS(tr: Tracer, mig: number) {
  * illustrative: most leftovers are ejected, a minority ends in the belt, the
  * scattered disk and the Oort cloud.
  */
-export function createTracers(count: number, seed = 20261014): Tracer[] {
+function createTracers(count: number, seed = 20261014): Tracer[] {
   const rng = mulberry32(seed);
   const out: Tracer[] = [];
   for (let n = 0; n < count; n += 1) {
@@ -143,7 +143,7 @@ export function tracerVisible(tr: Tracer, mig: number) {
   return tr.kind !== "ejected" || scatterS(tr, mig) < 0.93;
 }
 
-export type Tally = Record<Bin, number>;
+type Tally = Record<Bin, number>;
 export function tallyAt(yearsAgo: number): Tally {
   const mig = migrationProgress(yearsAgo);
   const tally: Tally = { disk: 0, kuiper: 0, scattered: 0, oort: 0, ejected: 0 };

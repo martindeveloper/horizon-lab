@@ -2,19 +2,19 @@
 
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
+import { ViewPicker } from "@/components/simulations/view-picker";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { ListItem, Picker, VisualizationOverlay, cn, kickerClass } from "@horizon/toolkit/ui";
+import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
 import { VIEW_IDS, type ViewId } from "../lib/model/view-ids";
 import { useSpectroscopy } from "../lib/store";
 import { pathForView } from "../routing";
 import { SpectroscopyDock } from "./dock";
-import { GuideCaption } from "./guide";
+import { SpectroscopyGuide } from "./guide";
 import { LineCard } from "./line-card";
 import { ElementsPanel, ViewPanel } from "./panels";
 import { SpectroscopyTechnicalDetails } from "./technical-details";
@@ -29,38 +29,28 @@ const escapeSteps = (): EscapeStep[] => {
   ];
 };
 
-/** The four views, as a pill that opens a list. */
-function ViewPicker() {
+/** The four views, as a pill that opens a list; a pick navigates, and the view follows the address. */
+function SpectroscopyViews() {
   const t = useTranslations("spectroscopy");
   const view = useSpectroscopy((s) => s.view);
-  const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const go = (id: ViewId) => {
-    setOpen(false);
     const path = pathForView(id);
     if (pathname !== path) router.push(path, { scroll: false });
   };
   return (
-    <Picker
-      aria-label={t("hud.views")}
+    <ViewPicker
+      ariaLabel={t("hud.views")}
       label={t(`views.${view}.title`)}
       detail={t(`views.${view}.kicker`)}
-      open={open}
-      onOpenChange={setOpen}
-    >
-      <div className="flex flex-col gap-1">
-        {VIEW_IDS.map((id) => (
-          <ListItem key={id} selected={id === view} onClick={() => go(id)}>
-            <span className="min-w-0">
-              <span className="block truncate">{t(`views.${id}.title`)}</span>
-              <span className="block truncate text-xs text-muted">{t(`views.${id}.hint`)}</span>
-            </span>
-            <span className={cn(kickerClass, "shrink-0")}>{t(`views.${id}.kicker`)}</span>
-          </ListItem>
-        ))}
-      </div>
-    </Picker>
+      ids={VIEW_IDS}
+      selected={(id) => id === view}
+      labelOf={(id) => t(`views.${id}.title`)}
+      hintOf={(id) => t(`views.${id}.hint`)}
+      kickerOf={(id) => t(`views.${id}.kicker`)}
+      onPick={go}
+    />
   );
 }
 
@@ -84,7 +74,7 @@ export function SpectroscopyOverlay() {
         <header className="hud-top pad-hud-top anim-fade absolute inset-x-0 top-0 z-[60]">
           <div className="flex items-start gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <ViewPicker />
+              <SpectroscopyViews />
               <p className="line-clamp-2 max-w-md text-xs text-muted not-lg:hidden">
                 {t(`views.${view}.hint`)}
               </p>
@@ -126,7 +116,7 @@ export function SpectroscopyOverlay() {
           <LineCard />
         </div>
       ) : null}
-      {guideOpen ? <GuideCaption /> : <SpectroscopyDock />}
+      {guideOpen ? <SpectroscopyGuide /> : <SpectroscopyDock />}
     </VisualizationOverlay>
   );
 }

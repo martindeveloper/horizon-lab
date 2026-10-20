@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const saved = new Map();
-const storage = {
-  getItem: (key) => saved.get(key) ?? null,
-  setItem: (key, value) => saved.set(key, String(value)),
-};
-globalThis.sessionStorage = storage;
+import { stubStorage } from "./toolkit-helpers.mjs";
+
+const { saved } = stubStorage();
 const { dismissNotice, noticeDismissed, shouldShowNotice } =
   await import("../src/components/shell/desktop-notice-state.ts");
 

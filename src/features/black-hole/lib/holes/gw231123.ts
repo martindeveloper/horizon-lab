@@ -20,9 +20,6 @@ export const gw231123: HoleSpec = {
   id: "gw231123",
   name: "GW231123",
   kind: "catalog",
-  catalog: "z ≈ 0.4",
-  blurb:
-    "The remnant of the most massive black-hole merger detected so far, found only through gravitational waves.",
   massSolar: 222,
   spin: 0.84,
   inclination: 0.6,
@@ -36,6 +33,7 @@ export const gw231123: HoleSpec = {
   aliases: ["gw231123", "gw-231123"],
   tour: [
     {
+      phase: "wide",
       duration: 9.5,
       yaw: -1,
       inclination: 0.25,
@@ -46,6 +44,7 @@ export const gw231123: HoleSpec = {
     },
     // A quick tightening spiral, like the final orbits before the merger.
     {
+      phase: "dolly",
       duration: 9,
       yaw: -2.2,
       inclination: 0.5,
@@ -56,6 +55,7 @@ export const gw231123: HoleSpec = {
       eq: "f ≈ 30–80 Hz    ·    D_L ≈ 2.2 Gpc",
     },
     {
+      phase: "detail",
       duration: 8.5,
       yaw: -0.5,
       inclination: 0.9,
@@ -66,6 +66,7 @@ export const gw231123: HoleSpec = {
       eq: "χ_f = 0.84 (+0.08 / −0.16)",
     },
     {
+      phase: "hold",
       duration: 8.5,
       yaw: 0.6,
       inclination: 0.3,
@@ -73,6 +74,14 @@ export const gw231123: HoleSpec = {
       swing: 0.2,
       eq: "pair-instability gap ≈ 60–130 M☉",
     },
-    { duration: 10, yaw: -1.3, inclination: 0.5, distance: 150, lift: 0.25, lead: -0.2 },
+    {
+      phase: "wide",
+      duration: 10,
+      yaw: -1.3,
+      inclination: 0.5,
+      distance: 150,
+      lift: 0.25,
+      lead: -0.2,
+    },
   ],
 };

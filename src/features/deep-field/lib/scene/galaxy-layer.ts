@@ -31,6 +31,7 @@ import { writeSunTrail } from "../model/galactic-orbit";
 import { HALO_R200_KPC } from "../model/parameters";
 import type { Selection } from "../store";
 import { type Frame, type SceneKit } from "./kit";
+import type { LabelPicks } from "./label-picks";
 import { GALAXY_FRAME, GALAXY_LAYER, LY, SUN_ANCHOR, galaxyToWorld } from "./lod";
 
 /** Farthest the drawn Galaxy reaches from its centre (ly), halo included. */
@@ -39,9 +40,16 @@ const EXTENT_LY = 660_000;
 export function createGalaxyLayer(
   { scope, looks, camera, pxWorld, lod }: SceneKit,
   parent: Object3D,
-  deps: { place: PlaceLabel; rulers: AnchoredRulers; distanceText: DistanceText },
+  deps: {
+    place: PlaceLabel;
+    rulers: AnchoredRulers;
+    distanceText: DistanceText;
+    picks: LabelPicks;
+  },
 ) {
   const { place, rulers, distanceText } = deps;
+  /* The Sun's name in the Galaxy opens its card there. */
+  deps.picks.register(new Map<string, Selection>([["galaxySun", { kind: "galaxy", id: "sun" }]]));
   const galaxy = new Group();
   galaxy.quaternion.copy(GALAXY_FRAME);
   galaxy.scale.setScalar(LY);

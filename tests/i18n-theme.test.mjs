@@ -9,30 +9,14 @@ import { pathForHole, presetFromPath, resolveHole } from "../src/features/black-
 import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
 import { localeRewrites, siteRedirects } from "../src/lib/redirects.ts";
-import { featureMessages, leaves } from "./messages-helper.mjs";
+import { simulations } from "../src/lib/simulations.ts";
+import { layoutMessages, leaves } from "./messages-helper.mjs";
 
+/** Every layout's catalog at once: the shared copy and each simulation under its namespace. */
 const catalogs = Object.fromEntries(
   routing.locales.map((locale) => [
     locale,
-    {
-      ...JSON.parse(
-        readFileSync(new URL(`../src/messages/${locale}.json`, import.meta.url), "utf8"),
-      ),
-      blackHole: JSON.parse(
-        readFileSync(
-          new URL(`../src/features/black-hole/messages/${locale}.json`, import.meta.url),
-          "utf8",
-        ),
-      ),
-      orrery: featureMessages("orrery", locale),
-      deepField: featureMessages("deep-field", locale),
-      spectroscopy: JSON.parse(
-        readFileSync(
-          new URL(`../src/features/spectroscopy/messages/${locale}.json`, import.meta.url),
-          "utf8",
-        ),
-      ),
-    },
+    Object.assign({}, ...simulations.map(({ id }) => layoutMessages(id, locale))),
   ]),
 );
 test("English and Czech have identical keys and every ICU message formats", () => {

@@ -8,7 +8,7 @@ import {
 } from "three";
 
 import { jplElements } from "@horizon/toolkit/bodies";
-import { mulberry32 } from "@horizon/toolkit/math";
+import { gaussian, mulberry32 } from "@horizon/toolkit/math";
 import { RAD_PER_DEG as RAD, resonanceSemiMajorAxis } from "@horizon/toolkit/science";
 
 import FRAG from "./shaders/swarm.frag.glsl";
@@ -25,7 +25,7 @@ import VERT from "./shaders/swarm.vert.glsl";
 const resonance = (planet: "jupiter" | "neptune", k: number) =>
   resonanceSemiMajorAxis.compute({ ap: jplElements(planet, 0).a, k });
 
-export type SwarmBody = {
+type SwarmBody = {
   a0: number;
   a1: number;
   e0: number;
@@ -44,7 +44,7 @@ export type SwarmBody = {
   color: [number, number, number];
 };
 
-export function swarmGeometry(bodies: SwarmBody[]) {
+function swarmGeometry(bodies: SwarmBody[]) {
   const n = bodies.length;
   const position = new Float32Array(n * 3);
   const orbitA = new Float32Array(n * 4);
@@ -68,12 +68,7 @@ export function swarmGeometry(bodies: SwarmBody[]) {
 }
 
 /** `dpr` is the host's live pixel ratio, shared as the uniform so sizes follow the quality. */
-export function swarmMaterial(
-  size: number,
-  opacity: number,
-  additive: boolean,
-  dpr: { value: number },
-) {
+function swarmMaterial(size: number, opacity: number, additive: boolean, dpr: { value: number }) {
   return new ShaderMaterial({
     uniforms: {
       mig: { value: 1 },
@@ -94,7 +89,7 @@ export function swarmMaterial(
   });
 }
 
-export type Swarm = {
+type Swarm = {
   points: Points;
   material: ShaderMaterial;
   /** Draws these bodies instead, as a new quality asks for more or fewer. */
@@ -143,10 +138,6 @@ export function createSwarm(
   };
 }
 
-const gaussian = (rnd: () => number) => {
-  const u = Math.max(1e-9, rnd());
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(Math.PI * 2 * rnd());
-};
 type Rgb = [number, number, number];
 const shade = (base: Rgb, k: number): Rgb => [base[0] * k, base[1] * k, base[2] * k];
 const ROCK: Rgb = [0.7, 0.65, 0.57];

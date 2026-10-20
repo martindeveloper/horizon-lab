@@ -23,7 +23,7 @@ import {
  */
 import { STARS, type Star } from "./star-catalogue";
 
-export { STARS, starColor, type Star } from "./star-catalogue";
+export { starColor } from "./star-catalogue";
 /** The sky's clock and rising arcs, for the shell's and the hero's own drawing. */
 export { risingHourAngle, siderealTime } from "@horizon/toolkit/science";
 

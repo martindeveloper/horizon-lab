@@ -2,7 +2,7 @@
 
 export const DROP_START = [22, 17.5, 13.2, 9.2, 5.8];
 /** Azimuth offsets from the camera, so the chain sits on the near face. */
-export const DROP_SPREAD = [-0.42, -0.21, 0, 0.21, 0.42];
+const DROP_SPREAD = [-0.42, -0.21, 0, 0.21, 0.42];
 
 export const RAIN_FLOOR = 2.06;
 

@@ -20,9 +20,6 @@ export const lensed: HoleSpec = {
   id: "lensed",
   name: "Lensed disk",
   kind: "theory",
-  catalog: "Classic view",
-  blurb:
-    "A thin disk seen from just above the equator - the warped far side lifts over the hole. An optical effect, not a named object.",
   massSolar: 1e7,
   spin: 0.82,
   inclination: 0.18,
@@ -37,6 +34,7 @@ export const lensed: HoleSpec = {
   tour: [
     // Crane up and out, the turn leading the pull-back.
     {
+      phase: "wide",
       duration: 8.4,
       yaw: 0.9,
       inclination: 0.58,
@@ -48,6 +46,7 @@ export const lensed: HoleSpec = {
     },
     // A long, even push-in that sinks toward the disk plane before it turns.
     {
+      phase: "dolly",
       duration: 8.6,
       yaw: 0.6,
       inclination: 0.16,
@@ -60,6 +59,7 @@ export const lensed: HoleSpec = {
     },
     // Hop over and skim back along the plane, tilted.
     {
+      phase: "detail",
       duration: 8,
       yaw: -0.9,
       inclination: 0.1,
@@ -71,6 +71,7 @@ export const lensed: HoleSpec = {
     },
     // Breathe out mid-flight, then settle high over the crescent.
     {
+      phase: "hold",
       duration: 8.2,
       yaw: 0.5,
       inclination: 0.82,
@@ -80,6 +81,14 @@ export const lensed: HoleSpec = {
       sketch: [{ kind: "flow" }],
       eq: "g = ν_obs / ν_em    ·    I_bol,obs = g⁴ I_bol,em",
     },
-    { duration: 9.5, yaw: 1.4, inclination: 0.5, distance: 128, lift: 0.3, lead: -0.3 },
+    {
+      phase: "wide",
+      duration: 9.5,
+      yaw: 1.4,
+      inclination: 0.5,
+      distance: 128,
+      lift: 0.3,
+      lead: -0.3,
+    },
   ],
 };

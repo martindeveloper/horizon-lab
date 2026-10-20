@@ -25,6 +25,7 @@ import {
 } from "../model/probes";
 import type { Selection } from "../store";
 import type { Frame, SceneKit } from "./kit";
+import type { LabelPicks } from "./label-picks";
 
 const RING_SEGMENTS = 192;
 const RING_COLOR = 0x8ea4ba;
@@ -48,7 +49,7 @@ const bubbleShown = (dist: number) =>
 export function createReachLayer(
   { scope, looks, camera, pxWorld, lod }: SceneKit,
   parent: Object3D,
-  deps: { place: PlaceLabel; rulers: AnchoredRulers },
+  deps: { place: PlaceLabel; rulers: AnchoredRulers; picks: LabelPicks },
 ) {
   const { place, rulers } = deps;
 
@@ -97,14 +98,15 @@ export function createReachLayer(
   const zAxis = new Vector3(0, 0, 1);
   const up = new Vector3();
 
+  /* What a tap on a name opens: the heliopause, or the probe. */
+  deps.picks.register((key): Selection | undefined => {
+    if (key === "heliopause") return { kind: "reach", id: "heliopause" };
+    const probe = probes.find((p) => p.id === key);
+    return probe && { kind: "reach", id: probe.id };
+  });
+
   return {
     pickables: probes.map((p) => p.hit),
-    /** What a tap on a label opens. */
-    labelPick: (key: string): Selection | undefined => {
-      if (key === "heliopause") return { kind: "reach", id: "heliopause" };
-      const probe = probes.find((p) => p.id === key);
-      return probe && { kind: "reach", id: probe.id };
-    },
     update({ show, sel, dist }: Frame) {
       const labelled = names.to(show.names);
       const lightTime = lit.to(show.lightTime);

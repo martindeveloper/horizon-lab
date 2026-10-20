@@ -4,10 +4,11 @@
  * camera sees, a Schwarzschild null geodesic, zero-angular-momentum Kerr infall and
  * a Keplerian ellipse. Builders are pure; the canvas layer only projects.
  */
-import { smootherstep } from "@horizon/toolkit/math";
+import { smootherstep, TAU } from "@horizon/toolkit/math";
 
-import { criticalCurve } from "./kerr-rays";
-import { horizonOverM, iscoOverM, photonOverM } from "./physics";
+import type { Basis } from "./frame";
+import { criticalCurve, type Vec3 } from "./kerr-rays";
+import { B_CRIT, horizonOverM, iscoOverM, photonOverM } from "./physics";
 import { pinRadius } from "./pins";
 
 export type RingId = "horizon" | "photon" | "isco" | "ergo";
@@ -30,12 +31,8 @@ export type Sketch =
   /** A ruler of `length` M in kilometres for this mass. */
   | { kind: "ruler"; length: number };
 
-export type Vec3 = [number, number, number];
-/** Unrolled camera frame: right points at the approaching side, fwd into the scene. */
-export type Basis = { right: Vec3; up: Vec3; fwd: Vec3 };
-
 export type Tone = "accent" | "quiet";
-export type Stroke = {
+type Stroke = {
   points: Vec3[];
   tone: Tone;
   delay: number;
@@ -47,7 +44,7 @@ export type Stroke = {
   /** A dot at this world point, drawn once the stroke is complete. */
   marker?: Vec3;
 };
-export type Label = { at: Vec3; text: string; tone: Tone; delay: number; place: "right" | "above" };
+type Label = { at: Vec3; text: string; tone: Tone; delay: number; place: "right" | "above" };
 
 export type SketchContext = {
   spin: number;
@@ -71,9 +68,6 @@ export type SketchContext = {
   criticalCurve: string;
 };
 
-const TAU = Math.PI * 2;
-const B_CRIT = 3 * Math.sqrt(3);
-
 const add = (a: Vec3, b: Vec3, s = 1): Vec3 => [a[0] + b[0] * s, a[1] + b[1] * s, a[2] + b[2] * s];
 const scale = (a: Vec3, s: number): Vec3 => [a[0] * s, a[1] * s, a[2] * s];
 const inPlane = (u: Vec3, v: Vec3, x: number, y: number): Vec3 => add(scale(u, x), v, y);
@@ -87,20 +81,6 @@ function arc(r: number, t0: number, t1: number, n = 96): Vec3[] {
   const pts: Vec3[] = [];
   for (let i = 0; i <= n; i++) pts.push(ringAt(r, t0 + ((t1 - t0) * i) / n));
   return pts;
-}
-
-/** Basis of the camera without roll; right is the approaching side of the disk. */
-export function orbitBasis(px: number, py: number, pz: number): Basis {
-  const d = Math.hypot(px, py, pz) || 1;
-  const fwd: Vec3 = [-px / d, -py / d, -pz / d];
-  const az = Math.atan2(px, pz);
-  const right: Vec3 = [Math.cos(az), 0, -Math.sin(az)];
-  const up: Vec3 = [
-    right[1] * fwd[2] - right[2] * fwd[1],
-    right[2] * fwd[0] - right[0] * fwd[2],
-    right[0] * fwd[1] - right[1] * fwd[0],
-  ];
-  return { right, up, fwd };
 }
 
 /**
@@ -168,7 +148,7 @@ export function dragStreamline(a: number, r0 = 9, n = 140): [number, number][] {
  * zero-angular-momentum observer (Bardeen, Press & Teukolsky 1972). Light
  * bending and gravitational redshift are left out: δ is the beaming factor only.
  */
-export function limbDoppler(r: number, a: number, inclination: number): [number, number] {
+function limbDoppler(r: number, a: number, inclination: number): [number, number] {
   const delta = r * r - 2 * r + a * a;
   const v = (r * r - 2 * a * Math.sqrt(r) + a * a) / (Math.sqrt(delta) * (r ** 1.5 + a));
   const gamma = 1 / Math.sqrt(1 - v * v);
@@ -207,12 +187,17 @@ function trimmed(c: SketchContext, n: number) {
   return c.number(n, digits);
 }
 
-export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; labels: Label[] } {
-  const strokes: Stroke[] = [];
-  const labels: Label[] = [];
-  const { live, anchor } = c;
+type Drawing = { strokes: Stroke[]; labels: Label[] };
+type Builder<Kind extends Sketch["kind"]> = (
+  s: Extract<Sketch, { kind: Kind }>,
+  c: SketchContext,
+  out: Drawing,
+) => void;
 
-  if (s.kind === "rings") {
+/** One builder per drawing; each adds its strokes and labels to the beat's drawing. */
+const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
+  rings: (s, c, { strokes, labels }) => {
+    const { live } = c;
     s.rings.forEach((id, i) => {
       const to = ringRadius(id, c.spin);
       const from = s.from?.[id];
@@ -250,9 +235,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
         place: "right",
       });
     });
-  }
-
-  if (s.kind === "shadow") {
+  },
+  shadow: (s, c, { strokes, labels }) => {
+    const { live } = c;
     // Photons from the spherical photon orbits, as this camera receives them.
     const d = c.distance;
     const curve = criticalCurve(c.spin, scale(live.fwd, -d), live).map(
@@ -284,9 +269,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
         delay: 2.6,
         place: "above",
       });
-  }
-
-  if (s.kind === "flow") {
+  },
+  flow: (s, c, { strokes, labels }) => {
+    const { live } = c;
     const R = pinRadius("doppler", c.spin);
     const near = heading(live.right);
     const far = near + Math.PI;
@@ -319,9 +304,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
       delay: 2.1,
       place: "above",
     });
-  }
-
-  if (s.kind === "jet") {
+  },
+  jet: (s, c, { strokes, labels }) => {
+    const { anchor } = c;
     const H = 30;
     const side = scale(anchor.right, -1);
     strokes.push({
@@ -368,9 +353,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
       delay: 3.4,
       place: "right",
     });
-  }
-
-  if (s.kind === "orbit") {
+  },
+  orbit: (s, c, { strokes, labels }) => {
+    const { anchor } = c;
     const e = s.eccentricity;
     const a = s.periapsis / (1 - e);
     const p = a * (1 - e * e);
@@ -416,9 +401,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
       delay: 2.8,
       place: "right",
     });
-  }
-
-  if (s.kind === "photon") {
+  },
+  photon: (s, c, { strokes, labels }) => {
+    const { anchor } = c;
     const u = anchor.right;
     const v = anchor.up;
     const start = Math.PI + 0.3;
@@ -444,9 +429,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
       delay: 1.4,
       place: "right",
     });
-  }
-
-  if (s.kind === "drag") {
+  },
+  drag: (s, c, { strokes, labels }) => {
+    const { live } = c;
     const r0 = 9;
     const line = dragStreamline(c.spin, r0);
     const base = heading(live.right);
@@ -476,9 +461,9 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
       delay: 1.2,
       place: "right",
     });
-  }
-
-  if (s.kind === "ruler") {
+  },
+  ruler: (s, c, { strokes, labels }) => {
+    const { live } = c;
     const L = s.length;
     const y = -(B_CRIT * shadowScale(c.distance) + 2.2);
     strokes.push({
@@ -504,7 +489,37 @@ export function buildSketch(s: Sketch, c: SketchContext): { strokes: Stroke[]; l
       delay: 1.6,
       place: "above",
     });
-  }
+  },
+};
 
-  return { strokes, labels };
+export function buildSketch(s: Sketch, c: SketchContext): Drawing {
+  const out: Drawing = { strokes: [], labels: [] };
+  // Each case narrows s to its builder's kind; a lookup by s.kind would not.
+  switch (s.kind) {
+    case "rings":
+      BUILDERS.rings(s, c, out);
+      break;
+    case "shadow":
+      BUILDERS.shadow(s, c, out);
+      break;
+    case "flow":
+      BUILDERS.flow(s, c, out);
+      break;
+    case "jet":
+      BUILDERS.jet(s, c, out);
+      break;
+    case "orbit":
+      BUILDERS.orbit(s, c, out);
+      break;
+    case "photon":
+      BUILDERS.photon(s, c, out);
+      break;
+    case "drag":
+      BUILDERS.drag(s, c, out);
+      break;
+    case "ruler":
+      BUILDERS.ruler(s, c, out);
+      break;
+  }
+  return out;
 }

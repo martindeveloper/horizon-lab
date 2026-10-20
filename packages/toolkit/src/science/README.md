@@ -14,12 +14,13 @@ whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConst
 648 000/π au, IAU 2015 B2), `lightYear` (c × Julian year), `julianYear`,
 `solarMass`, `solarRadius` (IAU 2015 B3 nominal), and for atoms and light
 `planckConstant`, `boltzmannConstant`, `elementaryCharge` (exact, SI 2019),
-`electronMass`, `atomicMassConstant` and `classicalElectronRadius` (CODATA 2022).
+`electronMass`, `atomicMassConstant`, `classicalElectronRadius` and `rydbergConstant`
+(CODATA 2022).
 A page can print the table; code uses the named values whose names state their
 units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`,
 `JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `GRAVITATIONAL_CONSTANT` in SI,
 `PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`,
-`ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`). `RAD_PER_DEG` (π/180) is
+`ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`, `RYDBERG_INFINITY` in m⁻¹). `RAD_PER_DEG` (π/180) is
 the one degree-to-radian factor; do not retype it.
 
 ## Units and measures (`units.ts`, `measure.ts`)

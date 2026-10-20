@@ -1,4 +1,7 @@
 /** Small scalar operations. No React, DOM or rendering dependencies. */
+/** A full turn in radians. */
+export const TAU = Math.PI * 2;
+
 export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -40,5 +43,5 @@ export function fromLogFraction(t: number, min: number, max: number) {
   return min * (max / min) ** clamp(t, 0, 1);
 }
 
-export { lcg, mulberry32 } from "./random";
+export { gaussian, lcg, minstd, mulberry32, onSphere } from "./random";
 export { fbm3, valueNoise2, valueNoise3 } from "./noise";

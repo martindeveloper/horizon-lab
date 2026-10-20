@@ -10,7 +10,7 @@ import { keplerThirdLaw, type Formula } from "@horizon/toolkit/science";
 
 import type { Show } from "../store";
 
-export type TourStepId =
+type TourStepId =
   | "today"
   | "periods"
   | "ellipses"
@@ -24,7 +24,7 @@ export type TourStepId =
 export type TourSketchId = "year" | "areas" | "sense";
 
 /** A step: its shot (pose, flight shaping and hold drift; see `createTourCamera`) and the rest. */
-export type TourStep = TourShot & {
+type TourStep = TourShot & {
   id: TourStepId;
   view: SolarViewId;
   yearsAgo: number;

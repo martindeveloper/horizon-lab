@@ -12,11 +12,11 @@ export const CLOSE_UP_OUT_S = 2.4;
 /** The framed body's apparent radius, as a fraction of half the shorter side of the view. */
 export const CLOSE_UP_FILL = 0.55;
 /** Nearest approach in body radii from the centre, and farthest in framing radii. */
-export const CLOSE_UP_NEAREST = 1.3;
-export const CLOSE_UP_FARTHEST = 40;
+const CLOSE_UP_NEAREST = 1.3;
+const CLOSE_UP_FARTHEST = 40;
 /** Arrival angles: this far round from the Sun (three-quarter light) and above the ecliptic. */
 export const CLOSE_UP_SWING = 0.9;
-export const CLOSE_UP_INCLINATION = 0.3;
+const CLOSE_UP_INCLINATION = 0.3;
 
 /** Radius to frame, in equatorial radii: Saturn's bright rings, Halley's glow. */
 export const FRAME_RADII: Partial<Record<BodyId, number>> = { saturn: 2.3, halley: 2.2 };

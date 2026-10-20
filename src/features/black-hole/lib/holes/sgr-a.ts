@@ -27,9 +27,6 @@ export const sgrA: HoleSpec = {
   id: "sgr-a",
   name: "Sagittarius A*",
   kind: "catalog",
-  catalog: "ℓ ≈ 0°, b ≈ 0°",
-  blurb:
-    "Galactic Centre, 27,000 ly. You sit inside the nuclear star cluster; the plane of the Milky Way runs through the view.",
   massSolar: 4.297e6,
   illustrativeFlow: true,
   spin: 0.94,
@@ -45,6 +42,7 @@ export const sgrA: HoleSpec = {
   tour: [
     // Back away low through the cluster, turning against the usual direction.
     {
+      phase: "wide",
       duration: 9.5,
       yaw: -1.1,
       inclination: 0.22,
@@ -56,6 +54,7 @@ export const sgrA: HoleSpec = {
     },
     // A long sweeping orbit that dips inward mid-way, like a star at pericentre.
     {
+      phase: "dolly",
       duration: 10,
       yaw: 1.6,
       inclination: 0.62,
@@ -67,6 +66,7 @@ export const sgrA: HoleSpec = {
       eq: "P² = 4π² a_S2³ / GM    ·    P = 16.05 yr",
     },
     {
+      phase: "detail",
       duration: 8,
       yaw: 0.4,
       inclination: 1.08,
@@ -77,6 +77,7 @@ export const sgrA: HoleSpec = {
       eq: "θ_crit = 6√3 GM / (c² D) ≈ 53 μas (a = 0)    ·    ring 51.8 μas",
     },
     {
+      phase: "hold",
       duration: 8,
       yaw: -0.7,
       inclination: 0.3,
@@ -85,6 +86,14 @@ export const sgrA: HoleSpec = {
       lead: -0.3,
       eq: "L_Edd ≈ 1.3 × 10³⁸ (M/M☉) erg s⁻¹",
     },
-    { duration: 10, yaw: 1.3, inclination: 0.7, distance: 150, lift: 0.25, lead: 0.4 },
+    {
+      phase: "wide",
+      duration: 10,
+      yaw: 1.3,
+      inclination: 0.7,
+      distance: 150,
+      lift: 0.25,
+      lead: 0.4,
+    },
   ],
 };

@@ -1,4 +1,4 @@
-import { startEngine, type SimulationEngine } from "@/lib/engine-lifecycle";
+import { startEngine, type SimulationEngine } from "@horizon/toolkit/rendering";
 
 export type SolarActivity = {
   update: (dt: number, visible: boolean, animate: boolean) => void;

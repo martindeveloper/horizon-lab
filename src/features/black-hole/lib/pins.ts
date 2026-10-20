@@ -1,3 +1,5 @@
+import { toLogFraction } from "@horizon/toolkit/math";
+
 import { horizonOverM, iscoOverM, photonOverM } from "./physics";
 
 export type PinId = "horizon" | "photon" | "isco" | "doppler";
@@ -29,14 +31,11 @@ export function ringPoints(radius: number, n = 128): { x: number; y: number; z: 
 }
 
 /** Radial gauge range in units of M, drawn on a log scale. */
-export const GAUGE_MIN_R = 1;
-export const GAUGE_MAX_R = 100;
+const GAUGE_MIN_R = 1;
+const GAUGE_MAX_R = 100;
 
 /** Gauge position for radius r: 0 at the bottom (r = M), 1 at the top. */
-export function gaugeFraction(r: number): number {
-  const t = Math.log(r / GAUGE_MIN_R) / Math.log(GAUGE_MAX_R / GAUGE_MIN_R);
-  return Math.min(1, Math.max(0, t));
-}
+export const gaugeFraction = (r: number) => toLogFraction(r, GAUGE_MIN_R, GAUGE_MAX_R);
 
 /** Log-scale minor ticks: 1…9, 10…90, 100. */
 export const GAUGE_TICKS = (() => {

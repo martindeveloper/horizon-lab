@@ -6,6 +6,7 @@ import {
   ELEMENTARY_CHARGE_SI,
   GRAVITATIONAL_CONSTANT_SI,
   PLANCK_CONSTANT_SI,
+  RYDBERG_CONSTANT_SI,
   SOLAR_GM_SI,
   SPEED_OF_LIGHT_SI,
 } from "./definitions";
@@ -166,6 +167,15 @@ export const CONSTANTS = {
     exact: false,
     source: "CODATA 2022",
   },
+  rydbergConstant: {
+    symbol: "R∞",
+    latex: "R_\\infty",
+    value: RYDBERG_CONSTANT_SI,
+    unit: "m⁻¹",
+    unitLatex: "\\mathrm{m^{-1}}",
+    exact: false,
+    source: "CODATA 2022",
+  },
 } as const satisfies Record<string, Constant>;
 
 export type ConstantId = keyof typeof CONSTANTS;
@@ -185,5 +195,6 @@ export const ELECTRON_VOLT_J = CONSTANTS.elementaryCharge.value;
 export const ELECTRON_MASS_KG = CONSTANTS.electronMass.value;
 export const ATOMIC_MASS_KG = CONSTANTS.atomicMassConstant.value;
 export const CLASSICAL_ELECTRON_RADIUS_M = CONSTANTS.classicalElectronRadius.value;
+export const RYDBERG_INFINITY = CONSTANTS.rydbergConstant.value; // m⁻¹
 /** Radians in one degree (π/180): multiply degrees by it, divide radians by it. */
 export const RAD_PER_DEG = UNITS.deg.factor;

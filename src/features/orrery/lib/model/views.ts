@@ -1,4 +1,5 @@
 /** The Orrery's views are the solar system's framings; here the default, and drift by scale. */
+/* Relative, not `@/`: routing.ts reaches this file from next.config.ts, which resolves no path aliases. */
 import type { SolarViewId } from "../../../../space/solar-system/model/views";
 
 export const DEFAULT_VIEW: SolarViewId = "giants";

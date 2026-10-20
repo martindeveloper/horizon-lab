@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
 
@@ -13,11 +12,10 @@ import RouteError from "../src/app/[locale]/error.tsx";
 import { WebGLGate } from "../src/components/simulations/webgl-gate.tsx";
 import { StatusLocaleHead, cookieLocale } from "../src/components/status/status-locale.tsx";
 import { CatalogueLoading } from "../src/features/catalogue/loading.tsx";
+import { layoutMessages } from "./messages-helper.mjs";
 
 for (const locale of ["en", "cs"]) {
-  const messages = JSON.parse(
-    readFileSync(new URL(`../src/messages/${locale}.json`, import.meta.url), "utf8"),
-  );
+  const messages = layoutMessages(null, locale);
   const render = (child) =>
     renderToStaticMarkup(
       createElement(NextIntlClientProvider, { locale, messages, timeZone: "UTC" }, child),

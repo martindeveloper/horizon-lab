@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import test from "node:test";
 
+import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { presetFromPath, presetRouteParams } from "../src/features/black-hole/routing.ts";
 import {
+  resolveView as resolveDeepView,
   viewFromPath as deepViewFromPath,
   viewRouteParams as deepViewRouteParams,
 } from "../src/features/deep-field/routing.ts";
-import { viewFromPath, viewRouteParams } from "../src/features/orrery/routing.ts";
+import { resolveView, viewFromPath, viewRouteParams } from "../src/features/orrery/routing.ts";
 import { getPathname } from "../src/i18n/navigation.ts";
 import { routing } from "../src/i18n/routing.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
@@ -132,4 +134,13 @@ test("slug routes resolve aliases, fall back to the default and list redirects",
       ["distant", "/lab/demo/far"],
     ],
   );
+});
+
+test("lookup tables do not mistake Object prototype names for simulation IDs", () => {
+  for (const name of ["constructor", "toString", "__proto__"]) {
+    assert.equal(holeById(name), custom);
+    assert.equal(resolveView(name), null);
+    assert.equal(resolveDeepView(name), null);
+  }
+  assert.equal(resolveView("oort-cloud"), "oort");
 });

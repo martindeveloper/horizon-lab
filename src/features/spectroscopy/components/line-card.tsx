@@ -8,42 +8,13 @@ import { useDockClearance, type DockInTheWay } from "@/components/simulations/us
 import { HC_EV_NM } from "@horizon/toolkit/science";
 import { Action, Chip, PanelHeader, cn } from "@horizon/toolkit/ui";
 
-import { lineById, namedLine, type Line } from "../lib/model/atoms";
-import type { StarChoice } from "../lib/model/scenes";
-import { curveOfGrowth, reportLine, type Observation } from "../lib/model/spectrum";
-import { SEQUENCE_TEMPERATURES, STARS, mainSequencePhotosphere } from "../lib/model/stars";
+import { lineById, namedLine } from "../lib/model/atoms";
+import { sequenceWidths, temperatureInView } from "../lib/model/scenes";
+import { curveOfGrowth, reportLine } from "../lib/model/spectrum";
 import { useSpectroscopy } from "../lib/store";
 import { GrowthChart, LevelDiagram, SequenceChart } from "./charts";
 import { kelvin, levelName, lineName, scientific, wavelength } from "./format";
 import { useObservation } from "./use-spectrum";
-
-/** This line's equivalent width down the main sequence, nm. */
-function sequenceOf(line: Line): [number, number][] {
-  return SEQUENCE_TEMPERATURES.map((T) => {
-    const report = reportLine(line, {
-      kind: "star",
-      photosphere: mainSequencePhotosphere(T),
-      microturbulence: 2,
-      velocity: 0,
-      airmass: 0,
-      resolution: 100_000,
-    });
-    return [T, report?.equivalentWidth ?? 0];
-  });
-}
-
-/** The star in view's temperature, for marking it on the sequence. */
-function starTemperature(
-  obs: Observation,
-  view: string,
-  star: StarChoice,
-  sequenceTemperature: number,
-) {
-  if (obs.kind !== "star") return null;
-  if (view === "sun") return STARS.sun.teff;
-  if (view === "stars") return star === "sequence" ? sequenceTemperature : STARS[star].teff;
-  return null;
-}
 
 /** The card covers the stage's whole width at its foot only as a phone's bottom sheet. */
 const isSheet: DockInTheWay = (card, stage) =>
@@ -92,7 +63,7 @@ export function LineCard() {
   const report = useMemo(() => (line ? reportLine(line, obs) : null), [line, obs]);
   const growth = useMemo(() => (line ? curveOfGrowth(line, obs) : []), [line, obs]);
   const sequence = useMemo(
-    () => (line && obs.kind === "star" && view !== "mystery" ? sequenceOf(line) : []),
+    () => (line && obs.kind === "star" && view !== "mystery" ? sequenceWidths(line) : []),
     [line, obs.kind, view],
   );
   if (!line || !report) return null;
@@ -107,7 +78,8 @@ export function LineCard() {
   const shifted = Math.abs(observed - line.wavelength) > 1e-4;
   const element = t(`elements.${line.element}`);
   const stage = t(`stages.${line.stage}`);
-  const marker = starTemperature(obs, view, star, sequenceTemperature);
+  /* The star in view, marked on the sequence chart (never shown for a mystery). */
+  const marker = temperatureInView({ view, star, sequenceTemperature }, obs);
   const ew = report.equivalentWidth;
 
   const facts: { id: string; label: string; value: string }[] = [

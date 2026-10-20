@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
+import { asideOpen } from "@/lib/scene-store";
 import {
   Action,
   Chip,
@@ -544,7 +545,7 @@ function MysteryControls() {
 /** The one bottom bar: whatever the current view lets the visitor change. */
 export function SpectroscopyDock() {
   const view = useSpectroscopy((s) => s.view);
-  const aside = useSpectroscopy((s) => s.panel !== "none" || s.selection !== null);
+  const aside = useSpectroscopy(asideOpen);
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface);
   return (

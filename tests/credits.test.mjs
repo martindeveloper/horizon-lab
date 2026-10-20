@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 /**
  * Attribution integrity: measured map sources, dependency coverage, and
  * distributed licence texts stay in sync with their sources.
@@ -51,7 +51,12 @@ test("every measured planet map is credited with its licence", () => {
 
 test("packages are named with the licence they declare, and every runtime dependency is credited", () => {
   const pkg = JSON.parse(read("package.json"));
-  const declared = { ...pkg.dependencies, ...pkg.devDependencies };
+  // Workspace packages (the toolkit) declare runtime dependencies of their own.
+  const workspaces = readdirSync(new URL("packages/", root)).map((name) =>
+    JSON.parse(read(`packages/${name}/package.json`)),
+  );
+  const runtime = Object.assign({}, pkg.dependencies, ...workspaces.map((w) => w.dependencies));
+  const declared = { ...runtime, ...pkg.devDependencies };
   const credited = new Set();
   for (const item of items.filter((item) => item.package)) {
     assert.ok(declared[item.package], `${item.package} is a dependency`);
@@ -64,7 +69,7 @@ test("packages are named with the licence they declare, and every runtime depend
       credited.add(sibling);
     }
   }
-  for (const name of Object.keys(pkg.dependencies)) {
+  for (const name of Object.keys(runtime)) {
     if (name.startsWith("@horizon/")) continue;
     assert.ok(credited.has(name), `${name} is not on the credits page`);
   }

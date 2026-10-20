@@ -16,7 +16,16 @@ import { raster, rasterJob, type Painter } from "./raster";
 
 export { GREAT_RED_SPOT, SATURN_HEXAGON } from "./giants";
 export { earthLandFraction } from "./earth";
-export { coverage, detailFor, raster, rasterJob, type Rgb, type SurfaceJob } from "./raster";
+export {
+  coverage,
+  detailFor,
+  mix,
+  raster,
+  rasterJob,
+  scale,
+  type Rgb,
+  type SurfaceJob,
+} from "./raster";
 
 /**
  * Geometric albedo (V), NASA planetary and satellite fact sheets; Pluto and

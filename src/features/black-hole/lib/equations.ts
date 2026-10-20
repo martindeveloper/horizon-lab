@@ -129,7 +129,7 @@ export const diskRedshift = defineEquation({
 });
 
 /** Emission angle from the disk normal in the gas's rest frame, on the equator. */
-export const emissionAngle = defineEquation({
+const emissionAngle = defineEquation({
   id: "emission-angle",
   text: "μ_em = g √Q / r",
   latex: "\\mu_{em} = \\frac{g\\sqrt{Q}}{r}",

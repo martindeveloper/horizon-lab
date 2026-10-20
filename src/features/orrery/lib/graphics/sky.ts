@@ -8,8 +8,7 @@
 import {
   AdditiveBlending,
   BackSide,
-  BufferAttribute,
-  BufferGeometry,
+  type BufferGeometry,
   CanvasTexture,
   Color,
   Group,
@@ -25,8 +24,14 @@ import {
 
 import { galacticAngle } from "@/space/solar-system/model/equations";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
-import { clamp01, lcg, valueNoise2 } from "@horizon/toolkit/math";
-import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE, softCircle } from "@horizon/toolkit/scene";
+import { clamp01, gaussian, lcg, onSphere, valueNoise2 } from "@horizon/toolkit/math";
+import {
+  GALACTIC_CENTRE,
+  GALACTIC_EAST,
+  GALACTIC_POLE,
+  pointsGeometry,
+  softCircle,
+} from "@horizon/toolkit/scene";
 
 import { NAMED_STARS_FADE, THIN_DISK_ERA } from "../model/parameters";
 import BAND_FRAG from "./shaders/band.frag.glsl";
@@ -55,12 +60,11 @@ export function fieldStars(count: number) {
   const size = new Float32Array(count);
   const tint = new Color();
   for (let i = 0; i < count; i += 1) {
-    const z = rnd() * 2 - 1;
-    const theta = rnd() * Math.PI * 2;
-    const r = Math.sqrt(Math.max(0, 1 - z * z));
-    pos[i * 3] = r * Math.cos(theta);
-    pos[i * 3 + 1] = z;
-    pos[i * 3 + 2] = r * Math.sin(theta);
+    const p = onSphere(rnd);
+    /* The pole of the direction is up, y. */
+    pos[i * 3] = p[0];
+    pos[i * 3 + 1] = p[2];
+    pos[i * 3 + 2] = p[1];
     const pick = rnd();
     tint.set(pick > 0.9 ? "#ffd6a0" : pick > 0.68 ? "#b9cce6" : "#f4f1ea");
     const mag = 3.4 + rnd() * rnd() * 3.2;
@@ -71,14 +75,6 @@ export function fieldStars(count: number) {
     size[i] = starSize(mag) * 0.9;
   }
   return pointsGeometry(pos, col, size);
-}
-
-function pointsGeometry(pos: Float32Array, col: Float32Array, size: Float32Array) {
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new BufferAttribute(pos, 3));
-  geometry.setAttribute("color", new BufferAttribute(col, 3));
-  geometry.setAttribute("size", new BufferAttribute(size, 1));
-  return geometry;
 }
 
 /** `fade` is presence (real stars fade in the deep past), `tint` the extinction colour. */
@@ -231,8 +227,6 @@ function bandMap(mode: "today" | "early"): BandMap {
   return { texture: tex, sample };
 }
 
-export type MilkyWay = ReturnType<typeof createMilkyWay>;
-
 /**
  * The Milky Way: a faint unresolved glow plus thousands of grains sampled from
  * the same map, for today's thin disk and for the early thick disk. Everything
@@ -352,10 +346,7 @@ export function skyEpoch(yearsAgo: number) {
  */
 export function molecularCloud(count: number) {
   const rnd = lcg(71);
-  const gauss = () => {
-    const u = Math.max(1e-6, rnd());
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(Math.PI * 2 * rnd());
-  };
+  const gauss = () => gaussian(rnd);
   const pos = new Float32Array(count * 3);
   const col = new Float32Array(count * 3);
   const cold = new Color("#4f78c8");
@@ -382,10 +373,7 @@ export function molecularCloud(count: number) {
     col[i * 3 + 1] = tint.g * fade;
     col[i * 3 + 2] = tint.b * fade;
   }
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new BufferAttribute(pos, 3));
-  geometry.setAttribute("color", new BufferAttribute(col, 3));
-  return geometry;
+  return pointsGeometry(pos, col);
 }
 
 /** The cloud's soft additive points. */

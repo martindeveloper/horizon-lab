@@ -10,7 +10,7 @@ import type { TourShot } from "@horizon/toolkit/scene";
 import type { Selection, Show } from "../store";
 import type { ViewId } from "./view-ids";
 
-export type TourStepId =
+type TourStepId =
   | "sunlight"
   | "giants"
   | "voyager"
@@ -23,7 +23,7 @@ export type TourStepId =
   | "web"
   | "firstLight";
 
-export type TourStep = Pick<TourShot, "flight" | "drift"> & {
+type TourStep = Pick<TourShot, "flight" | "drift"> & {
   id: TourStepId;
   /** The view the shot frames, as the ladder frames it. */
   view: ViewId;

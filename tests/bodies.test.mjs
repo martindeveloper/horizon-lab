@@ -19,11 +19,14 @@ import {
   RINGS,
   SPINS,
   centuriesSinceJ2000,
+  createOrbitWriter,
+  ephemerisSelfCheck,
   flattening,
   jplElements,
   meanLongitude,
   meanRates,
   ringStrip,
+  writeOrbit,
 } from "@horizon/toolkit/bodies";
 import {
   GEOMETRIC_ALBEDO,
@@ -31,13 +34,13 @@ import {
   earthLandFraction,
   surfaceMap,
 } from "@horizon/toolkit/bodies/surfaces";
-
 import {
   bodyOrientation,
   equatorialFrameToScene,
   equatorialToScene,
   poleVector,
-} from "../packages/toolkit/src/scene/frames.ts";
+} from "@horizon/toolkit/scene";
+
 import { moonOffset, moonOrientation } from "../src/space/solar-system/graphics/moons.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
@@ -385,4 +388,29 @@ test("Motion's sped-up clock moves the planets along today's orbits without agei
   /* A year of drift carries Saturn about a 29.4th of the way round. */
   const year = jplElements("saturn", T2026, 1);
   assert.ok(Math.abs(year.M - now.M - 360 / 29.45) < 0.05, `${year.M - now.M}`);
+});
+
+test("the ephemeris passes its own consistency checks, here rather than on every WebGL startup", () => {
+  assert.deepEqual(ephemerisSelfCheck(), []);
+});
+
+test("orbit buffers preserve periapsis/apoapsis and skip changes to mean anomaly alone", () => {
+  const el = { a: 20, e: 0.8, i: 63, omega: 120, node: 45, M: 0 };
+  const buffer = new Float32Array(97 * 3);
+  const update = createOrbitWriter(buffer);
+  assert.equal(update(el, true), true);
+  assert.ok(Math.abs(Math.hypot(...buffer.slice(0, 3)) - 4) < 1e-5);
+  assert.ok(Math.abs(Math.hypot(...buffer.slice(48 * 3, 49 * 3)) - 36) < 1e-5);
+  const initial = buffer.slice();
+  assert.equal(update({ ...el, M: 180 }, true), false);
+  assert.deepEqual(buffer, initial);
+  assert.equal(update(el, false), true);
+  for (let i = 0; i < buffer.length; i += 3)
+    assert.ok(Math.abs(Math.hypot(...buffer.slice(i, i + 3)) - 20) < 1e-5);
+  const changed = { ...el, node: 90 };
+  assert.equal(update(changed, true), true);
+  const expected = new Float32Array(buffer.length);
+  writeOrbit(expected, changed, true);
+  assert.deepEqual(buffer, expected);
+  assert.equal(update(changed, true), false);
 });

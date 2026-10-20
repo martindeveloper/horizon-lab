@@ -6,6 +6,7 @@ import {
   circularOrbit,
   diskFluxProfile,
 } from "../src/features/black-hole/lib/disk-profile.ts";
+import { orbitBasis } from "../src/features/black-hole/lib/frame.ts";
 import {
   cameraRay,
   carterOf,
@@ -36,14 +37,9 @@ import {
   renderScale,
 } from "../src/features/black-hole/lib/quality.ts";
 import { framedRayFov } from "../src/features/black-hole/lib/render-policy.ts";
-import {
-  dragStreamline,
-  orbitBasis,
-  shadowScale,
-} from "../src/features/black-hole/lib/sketches.ts";
+import { dragStreamline, shadowScale } from "../src/features/black-hole/lib/sketches.ts";
+import { close } from "./toolkit-helpers.mjs";
 
-const close = (actual, expected, tolerance = 1e-8) =>
-  assert.ok(Math.abs(actual - expected) < tolerance, `${actual} != ${expected}`);
 test("rain-clock rates are coordinate-time ratios, and conserve unit specific energy", () => {
   for (const r of [2.06, 3, 6, 20, 100]) {
     const f = 1 - 2 / r;

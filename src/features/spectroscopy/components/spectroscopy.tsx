@@ -1,12 +1,12 @@
 import { useTranslations } from "next-intl";
-import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
+import type { ViewId } from "../lib/model/view-ids";
 import { useSpectroscopy } from "../lib/store";
 import { pathForView, viewFromPath } from "../routing";
 import { SpectroscopyOverlay } from "./overlay";
@@ -19,6 +19,8 @@ const reset = () => {
   restore();
   useSpectroscopy.getState().shuffleCases();
 };
+/** The store as the address sees it. */
+const views: ViewStore<ViewId> = useSpectroscopy;
 
 /** The immersive view hides the guide's caption, so it ends the guide; nothing else. */
 function leaveGuide() {
@@ -26,54 +28,13 @@ function leaveGuide() {
   if (state.guideOpen) state.endGuide();
 }
 
-/**
- * The view and the address stay one. A visitor's navigation (the view picker, a link, back)
- * changes the address and the view follows; the guide changes the view and the address follows
- * with a replace. While such a replace is on its way the address speaks for the store, not for
- * the visitor: when it lands and the guide has moved on meanwhile, the address is put right
- * again instead of dragging the view back.
- */
-function useViewAddress() {
-  const view = useSpectroscopy((s) => s.view);
-  const pathname = usePathname();
-  const router = useRouter();
-  /** The address this hook asked for and has not seen land yet. */
-  const requested = useRef<string | null>(null);
-  const last = useRef(view);
-
-  useLayoutEffect(() => {
-    const state = useSpectroscopy.getState();
-    const wanted = pathForView(state.view);
-    if (requested.current !== null) {
-      if (pathname !== requested.current) return;
-      requested.current = null;
-      if (pathname !== wanted) {
-        requested.current = wanted;
-        router.replace(wanted, { scroll: false });
-      }
-      return;
-    }
-    const id = viewFromPath(pathname);
-    if (state.view !== id) state.setView(id);
-  }, [pathname, router]);
-
-  useEffect(() => {
-    if (last.current === view) return;
-    last.current = view;
-    const path = pathForView(view);
-    if (requested.current === null && viewFromPath(pathname) === view) return;
-    if (requested.current === path) return;
-    requested.current = path;
-    router.replace(path, { scroll: false });
-  }, [view, pathname, router]);
-}
-
 export function Spectroscopy() {
   const t = useTranslations("spectroscopy");
   const ready = useSpectroscopy((s) => s.ready);
   const view = useSpectroscopy((s) => s.view);
 
-  useViewAddress();
+  /* The guide changes the view itself; the address follows it. */
+  useViewFromPath(views, viewFromPath, pathForView);
   useGuideMotion();
   useFreshVisit(reset);
 

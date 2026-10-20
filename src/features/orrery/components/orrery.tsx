@@ -3,7 +3,8 @@ import { useTranslations } from "next-intl";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
-import { useViewFromPath } from "@/components/simulations/use-view-from-path";
+import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
+import type { SolarViewId } from "@/space/solar-system/model/views";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
 import { useOrrery } from "../lib/store";
@@ -14,6 +15,8 @@ import { SolarActivityNotice } from "./solar-activity-controls";
 
 /** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useOrrery);
+/** The store as the address sees it. */
+const views: ViewStore<SolarViewId> = useOrrery;
 
 /** The tour drives the camera; immersive view ends it but keeps panels for the return. */
 function leaveGuide() {
@@ -26,7 +29,7 @@ export function Orrery() {
   const ready = useOrrery((s) => s.ready);
   const view = useOrrery((s) => s.view);
 
-  useViewFromPath(useOrrery.getState, viewFromPath);
+  useViewFromPath(views, viewFromPath);
   useFreshVisit(reset);
 
   return (

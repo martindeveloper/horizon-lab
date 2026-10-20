@@ -1,13 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-// Stub the tab's sessionStorage before the module reads it.
-const saved = new Map([["horizon:debug:webgl", "unavailable"]]);
-globalThis.sessionStorage = {
-  getItem: (key) => saved.get(key) ?? null,
-  setItem: (key, value) => saved.set(key, String(value)),
-  removeItem: (key) => saved.delete(key),
-};
+import { stubStorage } from "./toolkit-helpers.mjs";
+
+const { saved } = stubStorage([["horizon:debug:webgl", "unavailable"]]);
 const {
   webglOverride,
   setWebGLOverride,

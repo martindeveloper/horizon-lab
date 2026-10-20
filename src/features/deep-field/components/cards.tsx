@@ -6,6 +6,7 @@ import {
   type Card,
   type DistanceSettings,
   type Format,
+  type Of,
   type Translate,
 } from "@/lib/facts";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
@@ -17,12 +18,10 @@ import { COSMOS_CARDS, GALAXY_CARDS, STAR_CARDS } from "./card-specs";
 import { reachCard } from "./reach-cards";
 import { solarCard } from "./solar-cards";
 
-type Of<K extends Selection["kind"]> = Extract<Selection, { kind: K }>;
-
 export const NEIGHBOUR_IDS = NEIGHBOURS.map((n) => n.id);
 
 /** A neighbour: its distance today and closest approach from its track, the rest from its definition. */
-function starCard(t: Translate, d: DistanceSettings, sel: Of<"star">): Card {
+function starCard(t: Translate, d: DistanceSettings, sel: Of<Selection, "star">): Card {
   const star = NEIGHBOURS.find((s) => s.id === sel.id)!;
   const c = CATALOGUE.stars[sel.id];
   const built = buildCard(t, d, STAR_CARDS[sel.id]);

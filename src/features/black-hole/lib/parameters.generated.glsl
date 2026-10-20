@@ -2,6 +2,8 @@
 #ifndef HORIZON_BLACK_HOLE_PARAMETERS
 #define HORIZON_BLACK_HOLE_PARAMETERS
 
+#define SPIN_LIMIT         0.999
+#define DISK_INNER_FACTOR  1.08
 #define DISK_PEAK_K        15800.0
 #define DISK_PEAK_FLUX     1.68
 #define PLUNGE_GLOW        0.06
@@ -24,5 +26,11 @@
 #define GLOW_WIDTH         0.12
 #define GLOW_CONE          0.26
 #define GLOW_OUTER         1.5
+#define SKY_LENSED         0.0
+#define SKY_SGR            1.0
+#define SKY_M87            2.0
+#define SKY_CYG            3.0
+#define SKY_LAB            4.0
+#define SKY_HOST           5.0
 
 #endif // HORIZON_BLACK_HOLE_PARAMETERS

@@ -8,10 +8,8 @@
  */
 import type { PerspectiveCamera, Vector3 } from "three";
 
-import { clamp01 } from "../math";
-import type { Viewport } from "./kit";
-
-const ease = (t: number) => t * t * (3 - 2 * t);
+import { clamp01, smoothstep } from "../math";
+import { worldPerPixel, type Viewport } from "./kit";
 
 /** Where `x` sits between `from` and `to` in log space, 0..1. */
 export const logFraction = (x: number, from: number, to: number) =>
@@ -19,7 +17,7 @@ export const logFraction = (x: number, from: number, to: number) =>
 
 /** 0 below `from`, 1 above `to`, eased in log space. */
 export const rising = (x: number, from: number, to: number) =>
-  x <= from ? 0 : x >= to ? 1 : ease(logFraction(x, from, to));
+  x <= from ? 0 : x >= to ? 1 : smoothstep(0, 1, logFraction(x, from, to));
 
 /**
  * A presence band over distance: eases in from `inFrom` to `inTo`, out from `outFrom` to
@@ -83,7 +81,7 @@ export function createFaders() {
           }
           if (t !== goal) {
             t = goal > t ? Math.min(1, t + dt / seconds) : Math.max(0, t - dt / seconds);
-            value = ease(t);
+            value = smoothstep(0, 1, t);
             if (t !== goal) unsettled += 1;
           }
           return value;
@@ -99,9 +97,9 @@ export function createFaders() {
  * bar (`scaleBar`) measures the true stage.
  */
 export function createScreenScale(camera: PerspectiveCamera, viewport: Pick<Viewport, "height">) {
-  const tan = 2 * Math.tan((camera.fov * Math.PI) / 360);
+  const { fov } = camera;
   const pxWorld = (distance: number, px: number) =>
-    ((tan * distance) / Math.max(480, viewport.height)) * px;
+    worldPerPixel(fov, distance, Math.max(480, viewport.height)) * px;
   return {
     /** World size of `px` CSS pixels at `distance` from the camera. */
     pxWorld,

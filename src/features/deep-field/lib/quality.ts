@@ -8,7 +8,7 @@ import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import type { CosmosDetail } from "./graphics/cosmos";
 
-export type DeepFieldQuality = SpaceQuality & { cosmos: CosmosDetail };
+type DeepFieldQuality = SpaceQuality & { cosmos: CosmosDetail };
 
 /** Max keeps the web's structure and samples it half as densely again. */
 const COSMOS: ByTier<CosmosDetail> = {

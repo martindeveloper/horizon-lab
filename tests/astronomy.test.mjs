@@ -18,6 +18,7 @@ import {
   keplerEquation,
   solarEcliptic,
 } from "@horizon/toolkit/bodies";
+import { equatorialToScene } from "@horizon/toolkit/scene";
 import {
   eclipticToEquatorial,
   julianEphemerisDay,
@@ -26,7 +27,6 @@ import {
   toHorizontal,
 } from "@horizon/toolkit/science";
 
-import { equatorialToScene } from "../packages/toolkit/src/scene/frames.ts";
 import { sunGalactic } from "../src/features/deep-field/lib/model/galactic-orbit.ts";
 import {
   NEIGHBOURS,

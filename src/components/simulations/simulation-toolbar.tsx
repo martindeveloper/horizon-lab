@@ -11,7 +11,7 @@ import { SceneMoreMenu, type MoreItem } from "./more-menu";
 import type { TechnicalDetailsAccess } from "./technical-details";
 
 /** A toolbar button that opens something: a panel (`controls` names it), an overlay, a dialog. */
-export type SimulationTool = {
+type SimulationTool = {
   /** Also `data-return`, so what it opens can hand focus back. */
   id: string;
   label: string;

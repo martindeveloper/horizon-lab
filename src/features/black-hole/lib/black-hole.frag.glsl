@@ -25,8 +25,8 @@ uniform vec3 uCamFwd;          // camera basis (unit vectors)
 uniform vec3 uCamRight;
 uniform vec3 uCamUp;
 uniform float uTime;           // seconds, drives the disk animation
-uniform float uSpin;           // dimensionless spin a/M, −0.998–0.998; negative: the disk orbits retrograde
-uniform float uInner;          // disk inner radius / M (max of 1.08 r₊ and r_ISCO)
+uniform float uSpin;           // dimensionless spin a/M, within ±MAX_SPIN; negative: the disk orbits retrograde
+uniform float uInner;          // disk inner radius / M (max of DISK_INNER_FACTOR r₊ and r_ISCO)
 uniform float uOuter;          // disk outer radius / M
 uniform float uExposure;       // tone-map exposure
 uniform float uDiskBright;     // disk brightness multiplier
@@ -178,11 +178,11 @@ vec3 starfield(vec3 dir, vec2 pixel) {
   vec3 d = normalize(dir);
   float far = smoothstep(28.0, 110.0, length(uCamPos));
 
-  if (uWeather == 1.0) return skySgr(d, far, pixel);
-  if (uWeather == 2.0) return skyM87(d, far, pixel);
-  if (uWeather == 3.0) return skyCyg(d, far, pixel);
-  if (uWeather == 4.0) return skyLab(d, far, pixel);
-  if (uWeather == 5.0) return skyHost(d, far, normalize(vec3(0.42, 0.88, 0.22)), 0.7, pixel);
+  if (uWeather == SKY_SGR) return skySgr(d, far, pixel);
+  if (uWeather == SKY_M87) return skyM87(d, far, pixel);
+  if (uWeather == SKY_CYG) return skyCyg(d, far, pixel);
+  if (uWeather == SKY_LAB) return skyLab(d, far, pixel);
+  if (uWeather == SKY_HOST) return skyHost(d, far, normalize(vec3(0.42, 0.88, 0.22)), 0.7, pixel);
   return skyHost(d, far, vec3(0.0, 1.0, 0.0), 0.85, pixel);
 }
 
@@ -308,7 +308,7 @@ float gasPatch(float phi, float rho, float omega, float age, float seed) {
 // The disk's outer edge is a display window, not a physical wall: fade
 // coverage with emissivity so the truncation cannot paint a black silhouette.
 float diskCoverage(float rho) {
-  float outerCut = uWeather == 2.0 ? 0.58 : 0.78;
+  float outerCut = uWeather == SKY_M87 ? 0.58 : 0.78;
   return 1.0 - smoothstep(uOuter * outerCut, uOuter, rho);
 }
 
@@ -344,12 +344,12 @@ vec3 diskColor(vec3 hit, float rho) {
   // Brightness is proportional to the flux; the effective temperature follows
   // Stefan–Boltzmann, T ∝ F^(1/4), including the local gas fluctuation.
   // DISK_PEAK_K and DISK_PEAK_FLUX are display scales, not accretion rates.
-  float tScale = uWeather == 3.0 ? 1.28 : 1.0;
+  float tScale = uWeather == SKY_CYG ? 1.28 : 1.0;
   float tEm = DISK_PEAK_K * pow(fpt * gas, 0.25) * uTemp * tScale;
   vec3 color = blackbody(clamp(tEm * g, 1200.0, 19000.0));
   float flux = DISK_PEAK_FLUX * fpt;
-  if (uWeather == 2.0) flux *= 0.72 + 0.85 * exp(-pow((rho - rin) / 1.15, 2.0));
-  if (uWeather == 1.0) {
+  if (uWeather == SKY_M87) flux *= 0.72 + 0.85 * exp(-pow((rho - rin) / 1.15, 2.0));
+  if (uWeather == SKY_SGR) {
     flux *= 0.48 * (0.72 + 0.28 * wrapFbm(phi, rlog, uTime * 0.22, 0.85, 0.4));
   }
 
@@ -365,7 +365,7 @@ vec3 diskColor(vec3 hit, float rho) {
   // (Chandrasekhar 1960): I(μ) ∝ 1 + LIMB_DARKENING μ, scaled to an isotropic
   // emitter's flux, and bolometric beaming g⁴.
   float limb = LIMB_NORMALIZATION * (1.0 + LIMB_DARKENING * mu);
-  if (uWeather == 2.0) limb *= 1.18;
+  if (uWeather == SKY_M87) limb *= 1.18;
   float beam = g * g * g * g;
 
   return color * flux * gas * beam * innerEdge * outerEdge * limb * uDiskBright * 0.78;
@@ -470,7 +470,7 @@ bool collect(
     float radial = smoothstep(uInner * 1.08, uInner * 1.9, cyl)
       * (1.0 - smoothstep(uOuter * 0.82, uOuter * GLOW_OUTER, cyl));
     float dens = wall * radial * exp(-ay * 0.1);
-    dens *= (uWeather == 1.0) ? 0.2 : 0.8;
+    dens *= (uWeather == SKY_SGR) ? 0.2 : 0.8;
     float stepLen = length(pos - prev);
     vec3 glow = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
     fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright;
@@ -506,7 +506,7 @@ bool collect(
     // The plunging gas is thin and lies in front of whatever the ray meets
     // next, so it shows whether the ray then escapes, is captured or hits the disk.
     // Without gravity it is drawn unshifted.
-    if (rho > horizon * 1.08 && rho < uInner) {
+    if (rho > horizon * DISK_INNER_FACTOR && rho < uInner) {
       float g = uGravity > 0.5 ? plungeG(rho, mix(udStep.x, udStep.y, t)) : 1.0;
       fore += transmission * plungeColor(hitp, rho, g);
     }
@@ -523,7 +523,7 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
   float tanFov = tan(uFov * 0.5);
   vec3 rd = normalize(uCamFwd + uv.x * uCamRight * tanFov + uv.y * uCamUp * tanFov);
 
-  float a = clamp(uSpin, -0.999, 0.999);
+  float a = clamp(uSpin, -SPIN_LIMIT, SPIN_LIMIT);
   float a2 = a * a;
   float horizon = 1.0 + sqrt(max(1.0 - a2, 0.0));
   gA = a;

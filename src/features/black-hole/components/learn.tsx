@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, Pause } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { PRESETS } from "@/features/black-hole/lib/presets";
+import { PRESETS } from "@/features/black-hole/lib/holes";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { Kicker, cn } from "@horizon/toolkit/ui";

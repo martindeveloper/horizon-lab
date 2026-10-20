@@ -6,23 +6,13 @@
  * tests/simulation-shared.test.mjs checks that each message's placeholders match the arguments
  * given here, in both languages.
  */
-import {
-  figureRow,
-  r,
-  row,
-  specEntries,
-  v,
-  type CardSpec,
-  type SpecEntry,
-  type StaticCard,
-} from "@/lib/facts";
+import { figureRow, r, row, v, type CardSpec, type StaticCard, type Badge } from "@/lib/facts";
 
 import { CATALOGUE } from "../lib/model/catalogue";
 import type { NeighbourId } from "../lib/model/neighbours";
 import type { CosmosId } from "../lib/store";
 
 /** What a card's kicker says about how far its figures can be trusted (`badges.<id>`). */
-export type Badge = "measured" | "mixed" | "inferred" | "sketch" | "schematic";
 
 const G = CATALOGUE.galaxy;
 const C = CATALOGUE.cosmos;
@@ -317,12 +307,3 @@ export const COSMOS_CARDS: Record<CosmosId, StaticCard<Badge>> = {
     },
   },
 };
-
-/** Every definition with its body and caution message keys, for the placeholder test. */
-export function cardSpecs(): SpecEntry[] {
-  return [
-    ...specEntries(GALAXY_CARDS, "cards.galaxy"),
-    ...specEntries(STAR_CARDS, "cards.stars"),
-    ...specEntries(COSMOS_CARDS, "cards.cosmos"),
-  ];
-}

@@ -32,6 +32,18 @@ export function solarPick(pick: unknown, instance?: number): SolarSelection | nu
   return isSolarSelection(pick) ? pick : null;
 }
 
+/** A selection as one string ("sun", "planet:earth", "tracer:12"): equal for the same object. */
+export function selectionKey(sel: SolarSelection) {
+  switch (sel.kind) {
+    case "sun":
+      return "sun";
+    case "tracer":
+      return `tracer:${sel.index}`;
+    default:
+      return `${sel.kind}:${sel.id}`;
+  }
+}
+
 /** Bodies with a globe: the Sun, the planets and the named bodies. */
 export function hasSurface(sel: SolarSelection | null) {
   return sel?.kind === "sun" || sel?.kind === "planet" || sel?.kind === "named";

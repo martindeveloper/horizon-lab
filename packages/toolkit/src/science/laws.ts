@@ -1,6 +1,5 @@
 import { CONSTANTS, RAD_PER_DEG } from "./constants";
 import { defineEquation } from "./equation";
-import { dopplerShift, photonEnergy, planckLaw, wienDisplacement } from "./spectra";
 import { UNITS } from "./units";
 
 /**
@@ -167,20 +166,3 @@ export const hubbleLaw = defineEquation({
   compute: ({ v, H0 }) => v / H0,
   source: "Hubble 1929, PNAS 15, 168; Lemaître 1927",
 });
-
-export const LAWS = {
-  pythagoras,
-  keplerThirdLaw,
-  lightTravelTime,
-  schwarzschildRadius,
-  parallaxDistance,
-  geometricMassTime,
-  tangentialVelocity,
-  angularSeparation,
-  resonanceSemiMajorAxis,
-  hubbleLaw,
-  planckLaw,
-  wienDisplacement,
-  photonEnergy,
-  dopplerShift,
-};

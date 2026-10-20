@@ -8,11 +8,13 @@ import fragmentShader from "./lib/black-hole.frag.glsl";
 import {
   createUniforms,
   orbitWheelSensitivity,
+  PASS_OPTIONS,
   sceneWriter,
   writeCamera,
   type CameraPose,
 } from "./lib/frame";
-import { holeById, MAX_DIST, MIN_DIST, paramsFromPreset } from "./lib/presets";
+import { holeById, paramsFromPreset } from "./lib/holes";
+import { MAX_DIST, MIN_DIST } from "./lib/physics";
 import { BLACK_HOLE_QUALITY } from "./lib/quality";
 
 /**
@@ -33,8 +35,7 @@ export const benchTarget: BenchTarget = {
       vertexShader: fullscreenVertex,
       fragmentShader,
       uniforms,
-      clearColor: 0x08080b,
-      powerPreference: "low-power",
+      ...PASS_OPTIONS,
     });
     pass.resize(width, height);
     uniforms.uResolution.value.set(width, height);

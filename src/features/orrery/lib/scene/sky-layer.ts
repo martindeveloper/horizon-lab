@@ -3,7 +3,7 @@
  */
 import { Color, Group, Points, type Object3D } from "three";
 
-import { brightStarGeometry } from "@/space/bright-stars";
+import { carrySky, createBrightSky } from "@/space/bright-stars";
 import { sunExists } from "@/space/solar-system/model/moment";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import type { SolarFrame, SolarKit } from "@/space/solar-system/scene/kit";
@@ -39,12 +39,7 @@ export function createSkyLayer(
   field.renderOrder = -3;
   field.frustumCulled = false;
   const brightMaterial = scope.own(starMaterial(dpr));
-  const bright = new Points(
-    scope.own(brightStarGeometry({ floor: 0.55, full: 1.4, size: starSize })),
-    brightMaterial,
-  );
-  bright.renderOrder = -2;
-  bright.frustumCulled = false;
+  const bright = createBrightSky(scope, brightMaterial, { floor: 0.55, full: 1.4, size: starSize });
   sky.add(milkyWay.group, field, bright);
   parent.add(sky);
 
@@ -76,8 +71,7 @@ export function createSkyLayer(
       /* The dense natal cloud only exists in the last few million years before collapse. */
       const natal = sunExists(f.yearsAgo) ? 0 : clamp(1 - (f.yearsAgo - SUN_BIRTH) / 4e6, 0, 1);
       cloud.visible = natal > 0.01;
-      sky.position.copy(camera.position);
-      sky.scale.setScalar(Math.max(12, f.dist * 20));
+      carrySky(sky, camera, f.dist);
       const epoch = skyEpoch(f.yearsAgo);
       /* Playback turns the Sun's galactic phase about once a second, which would spin the
          whole sky into a strobe. Follow it slowly while playing; otherwise ease to the true

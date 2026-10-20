@@ -1,7 +1,7 @@
 "use client";
 
 import { Info } from "lucide-react";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 
 import type { Card } from "@/lib/facts";
 import { PanelHeader, cn, useFocusHandoff } from "@horizon/toolkit/ui";
@@ -22,7 +22,7 @@ export function SelectionSheet({
   closeLabel: string;
   onClose: () => void;
   folded?: boolean;
-  footer?: React.ReactNode;
+  footer?: ReactNode;
 }) {
   const root = useRef<HTMLElement>(null);
   useFocusHandoff(root);

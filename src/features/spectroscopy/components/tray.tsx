@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { cn } from "@horizon/toolkit/ui";
 
-export type TrayPanel = {
+type TrayPanel = {
   id: string;
   /** The panel's name on its phone tab. */
   label: string;

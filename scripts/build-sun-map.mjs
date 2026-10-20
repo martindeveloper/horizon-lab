@@ -3,7 +3,7 @@
  * See docs/imagery-credits.md for limitations and source attribution.
  */
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -13,6 +13,8 @@ import sharp from "sharp";
 import { MAPS, mapFile } from "@horizon/toolkit/bodies";
 
 import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
+import { encodeSrgb as encode } from "./lib/colour.mjs";
+import { fetchCached } from "./lib/net.mjs";
 import {
   HMI_SOURCES,
   projectSolarPoint,
@@ -23,23 +25,19 @@ import {
 } from "./lib/sun-map.mjs";
 
 const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-sun-maps"));
-const encode = (v) =>
-  Math.round(255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.min(1, v) ** (1 / 2.4) - 0.055));
+const sha256 = async (file) =>
+  createHash("sha256")
+    .update(await readFile(file))
+    .digest("hex");
 
 async function sourceImage(source) {
-  await mkdir(cache, { recursive: true });
-  const file = path.join(cache, path.basename(source.url));
-  let bytes;
-  try {
-    bytes = await readFile(file);
-  } catch {
-    const res = await fetch(source.url);
-    if (!res.ok) throw new Error(`${source.url}: HTTP ${res.status}`);
-    bytes = Buffer.from(await res.arrayBuffer());
-    if (createHash("sha256").update(bytes).digest("hex") !== source.sha256)
-      throw new Error(`Changed HMI source: ${source.url}`);
-    await writeFile(file, bytes);
-  }
+  const file = await fetchCached(source.url, cache, {
+    async verify(download) {
+      if ((await sha256(download)) !== source.sha256)
+        throw new Error(`Changed HMI source: ${source.url}`);
+    },
+  });
+  const bytes = await readFile(file);
   if (createHash("sha256").update(bytes).digest("hex") !== source.sha256)
     throw new Error(`Corrupt HMI source cache: ${file}`);
   const { data, info } = await sharp(bytes)

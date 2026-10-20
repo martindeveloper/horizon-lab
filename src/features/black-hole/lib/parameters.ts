@@ -1,6 +1,7 @@
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
 import { RAIN_FLOOR } from "./clocks";
+import { SKY_CODE } from "./holes/types";
 import { BLACK_HOLE_QUALITY } from "./quality";
 
 /**
@@ -10,6 +11,11 @@ import { BLACK_HOLE_QUALITY } from "./quality";
  * Radii are in units of M.
  */
 
+/**
+ * Spins are clamped this close to |a| = 1 wherever the Kerr formulas are evaluated: at
+ * a = 1 the horizon and the ISCO meet and the metric's Δ has a double root.
+ */
+export const SPIN_LIMIT = 0.999;
 /** Radial samples of the Page–Thorne flux texture. */
 export const DISK_PROFILE_SIZE = 512;
 /** The disk's outer radius. */
@@ -36,11 +42,11 @@ export const STEP_FAR_GROWTH = 3;
 /** Outbound rays beyond this radius have escaped to the sky. */
 export const ESCAPE_RADIUS = 48;
 /** Beyond this radius the march only bends rays: glow, jet and disk lie closer in. */
-export const FAR_FIELD_RADIUS = 36;
+const FAR_FIELD_RADIUS = 36;
 /** Rays with a larger impact parameter bend analytically instead of marching… */
-export const STRAIGHT_IMPACT = 34;
+const STRAIGHT_IMPACT = 34;
 /** …unless the camera is closer than this. */
-export const NEAR_CAMERA_RADIUS = 22;
+const NEAR_CAMERA_RADIUS = 22;
 /**
  * Illustrative glow above the disk (art direction, not a dust or plasma
  * model): a cone around height/radius slope 0.38 with a Gaussian half-width of
@@ -49,19 +55,23 @@ export const NEAR_CAMERA_RADIUS = 22;
  * are skipped, and outbound rays past the cone's far corner
  * (1.5 · √(1 + 0.64²) ≈ 1.78 disk radii) have no glow left to collect.
  */
-export const GLOW_SLOPE = 0.38;
-export const GLOW_WIDTH = 0.12;
-export const GLOW_CONE = 0.26;
-export const GLOW_OUTER = 1.5;
+const GLOW_SLOPE = 0.38;
+const GLOW_WIDTH = 0.12;
+const GLOW_CONE = 0.26;
+const GLOW_OUTER = 1.5;
 /** Turbulent gas: cells around and along the shear spiral, and its pitch (art direction). */
-export const GAS_TURN_CELLS = 12;
-export const GAS_SPIRAL_CELLS = 16;
-export const GAS_PITCH = 4;
+const GAS_TURN_CELLS = 12;
+const GAS_SPIRAL_CELLS = 16;
+const GAS_PITCH = 4;
 /** The highest quality's step budget bounds the shader loop. */
-export const MAX_STEPS = Math.max(...Object.values(BLACK_HOLE_QUALITY).map((level) => level.steps));
+const MAX_STEPS = Math.max(...Object.values(BLACK_HOLE_QUALITY).map((level) => level.steps));
+/** Rays traced on the CPU (the guide's drawings, the tests) get the cinematic budget. */
+export const TRACE_STEPS = BLACK_HOLE_QUALITY.cinema.steps;
 
 /** Compile-time constants for `black-hole.frag.glsl`. */
 export const SHADER_DEFINES = glslDefines({
+  SPIN_LIMIT,
+  DISK_INNER_FACTOR: DISK_INNER_HORIZON_FACTOR,
   DISK_PEAK_K,
   DISK_PEAK_FLUX,
   PLUNGE_GLOW,
@@ -84,6 +94,10 @@ export const SHADER_DEFINES = glslDefines({
   GLOW_WIDTH,
   GLOW_CONE,
   GLOW_OUTER,
+  // The sky each preset looks out on, as `uWeather` names it.
+  ...Object.fromEntries(
+    Object.entries(SKY_CODE).map(([sky, code]) => [`SKY_${sky.toUpperCase()}`, code]),
+  ),
 });
 
 /** ICU arguments for the technical notes. */

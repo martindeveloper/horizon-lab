@@ -1,22 +1,22 @@
 import { create } from "zustand";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { wrap } from "@horizon/toolkit/math";
+import { TAU, wrap } from "@horizon/toolkit/math";
 import type { PassAntialias } from "@horizon/toolkit/rendering";
 
 import { presetFromPath } from "../routing";
-import { cameraFloor } from "./physics";
-import type { PinId } from "./pins";
 import {
   DEFAULT_PRESET,
   PRESETS,
   paramsFromPreset,
   type BlackHoleParams,
   type Quality,
-} from "./presets";
+} from "./holes";
+import { cameraFloor } from "./physics";
+import type { PinId } from "./pins";
 import { tourFor } from "./tours";
 
-export type BlackHoleStore = BlackHoleParams & {
+type BlackHoleStore = BlackHoleParams & {
   /** Camera heading in radians, wrapped to [0, 2π); kept across presets. */
   azimuth: number;
   setAzimuth: (v: number) => void;
@@ -43,13 +43,11 @@ export type BlackHoleStore = BlackHoleParams & {
   setExposure: (v: number) => void;
   setDiskBrightness: (v: number) => void;
   setStarIntensity: (v: number) => void;
-  setTempScale: (v: number) => void;
   setAutoRotate: (v: boolean) => void;
   setQuality: (v: Quality) => void;
   /** Anti-aliasing (experimental, off by default). */
   antialiasing: PassAntialias;
   setAntialiasing: (v: PassAntialias) => void;
-  setGuideOpen: (v: boolean) => void;
   startGuide: () => void;
   advanceGuide: () => void;
   /** Back one beat; the camera flies back to it. */
@@ -64,8 +62,6 @@ export type BlackHoleStore = BlackHoleParams & {
   setActivePin: (v: PinId | null) => void;
   calibrateDevice: () => void;
 };
-
-const TAU = Math.PI * 2;
 
 export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   ...paramsFromPreset(
@@ -110,15 +106,10 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setExposure: (exposure) => set({ exposure }),
   setDiskBrightness: (diskBrightness) => set({ diskBrightness }),
   setStarIntensity: (starIntensity) => set({ starIntensity }),
-  setTempScale: (tempScale) => set({ tempScale, presetId: "custom" }),
   setAutoRotate: (autoRotate) => set({ autoRotate }),
   setQuality: (quality) => set({ quality }),
   antialiasing: "off",
   setAntialiasing: (antialiasing) => set({ antialiasing }),
-  setGuideOpen: (guideOpen) => {
-    if (guideOpen) get().startGuide();
-    else get().endGuide();
-  },
   startGuide: () => {
     const s = get();
     if (s.activePin) s.setActivePin(null);
@@ -134,9 +125,6 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
       clocksOpen: false,
       activePin: null,
     });
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("eh-guide-start"));
-    }
   },
   advanceGuide: () => {
     const s = get();

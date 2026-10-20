@@ -29,7 +29,7 @@ export function sceneTier(quality: RenderQuality, tight: boolean): SceneTier {
  * everywhere and draws at the device's own ratio, up to 2 on tight devices, where a bigger buffer
  * could cost the WebGL context its memory.
  */
-export function sceneResolution(quality: RenderQuality, tight: boolean): SceneResolution {
+function sceneResolution(quality: RenderQuality, tight: boolean): SceneResolution {
   if (quality === "economy") return { dprCap: 1, fps: 30 };
   if (quality === "standard") return defaultSceneResolution(tight);
   if (quality === "cinema") return tight ? { dprCap: 1.5, fps: 48 } : { dprCap: 2, fps: Infinity };

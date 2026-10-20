@@ -9,20 +9,9 @@ import { simulations } from "@/lib/simulations";
 import { cn, kickerClass, Tilt } from "@horizon/toolkit/ui";
 
 import { HeroScene } from "./hero-sun";
+import { TILE_FRAME, tileSpan } from "./tiles";
 
 type Translate = Awaited<ReturnType<typeof getTranslations<"catalogue">>>;
-
-/**
- * Bento rows: pairs of tiles alternate 7/5 and 5/7 on wide screens (6/6 on
- * laptops); a lone last tile spans the row. Phones stack full-bleed tiles.
- */
-function tileSpan(index: number, count: number) {
-  if (count % 2 === 1 && index === count - 1) return "lg:col-span-12";
-  const wideFirst = Math.floor(index / 2) % 2 === 0;
-  return (index % 2 === 0) === wideFirst
-    ? "lg:col-span-6 xl:col-span-7"
-    : "lg:col-span-6 xl:col-span-5";
-}
 
 /**
  * A tile is one world: the artwork fills it, the category and plate number
@@ -44,13 +33,7 @@ function SimulationTile({
 }) {
   const key = simulation.messageKey;
   return (
-    <Tilt
-      style={{ "--i": index }}
-      className={cn(
-        "intro-tile min-h-[38rem] rounded-3xl sm:min-h-[42rem] lg:h-[clamp(38rem,48vw,46rem)] lg:min-h-0",
-        tileSpan(index, count),
-      )}
-    >
+    <Tilt style={{ "--i": index }} className={cn("intro-tile", TILE_FRAME, tileSpan(index, count))}>
       <article className="simulation-tile glass-edge group focus-within:solar-ring hover:solar-ring relative isolate flex h-full min-h-[inherit] flex-col justify-between overflow-hidden rounded-3xl bg-space">
         <div className="catalogue-art tilt-back absolute -inset-3">
           <Image

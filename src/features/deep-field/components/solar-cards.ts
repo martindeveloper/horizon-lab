@@ -6,13 +6,15 @@
 import {
   figure,
   formatAu,
-  span,
+  formatLightTime,
+  print,
   type Card,
   type CardFact,
   type DistanceSettings,
   type Format,
   type Translate,
 } from "@/lib/facts";
+import { POPULATION_FIGURES } from "@/space/solar-system/cards";
 import { orbitFacts, radiusRow, solarNameKey } from "@/space/solar-system/format";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
@@ -23,13 +25,14 @@ import { TRACERS, tracerElements } from "@/space/solar-system/model/tracers";
 import { namedById, type Elements } from "@horizon/toolkit/bodies";
 import { lightTime } from "@horizon/toolkit/science";
 
-const P = SOLAR_CATALOGUE.populations;
+const F = POPULATION_FIGURES;
 
 /** "17–27 min": how long sunlight takes to cross out to each end of a region. */
 function lightSpan(f: Format, [near, far]: readonly [number, number]) {
   const [a, b] = [lightTime(near), lightTime(far)];
+  if (a.unit !== b.unit) return `${formatLightTime(f, near)} – ${formatLightTime(f, far)}`;
   const n = (time: typeof a) => f.number(time.value, { maximumFractionDigits: time.digits });
-  return a.unit === b.unit ? `${n(a)}–${n(b)} ${b.unit}` : `${n(a)} ${a.unit} – ${n(b)} ${b.unit}`;
+  return `${n(a)}–${n(b)} ${b.unit}`;
 }
 
 /** Tonight's distances: from Earth (the light we see) and from the Sun, each with its light-time. */
@@ -52,6 +55,7 @@ function whereRows(t: Translate, d: DistanceSettings, sel: SolarSelection, now: 
 const orbitRows = (t: Translate, f: Format, d: DistanceSettings, el: Elements) =>
   orbitFacts(t, f, d, el).filter((row) => row.id === "nearFar" || row.id === "period");
 
+/** The shared figures as bare values, each region followed by how long sunlight takes to cross it. */
 function populationRows(
   t: Translate,
   f: Format,
@@ -61,39 +65,43 @@ function populationRows(
   switch (id) {
     case "asteroids":
       return [
-        { id: "where", label: t("facts.where"), value: span(t, d, P.asteroids.where) },
+        { id: "where", label: t("facts.where"), value: print(t, d, F.asteroids.where) },
         {
           id: "sunlight",
           label: t("facts.sunlight"),
-          value: lightSpan(f, P.asteroids.where.range),
+          value: lightSpan(f, F.asteroids.where.fact.range),
         },
         {
           id: "mass",
           label: t("facts.mass"),
-          value: t("cards.solar.asteroidsMass", { value: figure(t, d, P.asteroids.mass) }),
+          value: t("cards.solar.asteroidsMass", { value: print(t, d, F.asteroids.mass) }),
         },
       ];
     case "kuiper":
       return [
-        { id: "where", label: t("facts.where"), value: span(t, d, P.kuiper.region) },
-        { id: "sunlight", label: t("facts.sunlight"), value: lightSpan(f, P.kuiper.region.range) },
+        { id: "where", label: t("facts.where"), value: print(t, d, F.kuiper.region) },
+        {
+          id: "sunlight",
+          label: t("facts.sunlight"),
+          value: lightSpan(f, F.kuiper.region.fact.range),
+        },
         {
           id: "mass",
           label: t("facts.mass"),
-          value: t("cards.solar.kuiperMass", { value: figure(t, d, P.kuiper.todayMass) }),
+          value: t("cards.solar.kuiperMass", { value: print(t, d, F.kuiper.todayMass) }),
         },
         {
           id: "catalogued",
           label: t("facts.catalogued"),
-          value: t("cards.solar.kuiperCatalogued", { value: figure(t, d, P.kuiper.catalogued) }),
+          value: t("cards.solar.kuiperCatalogued", { value: print(t, d, F.kuiper.catalogued) }),
         },
       ];
     case "scattered":
       return [{ id: "where", label: t("facts.where"), value: t("cards.solar.scatteredWhere") }];
     case "oort":
       return [
-        { id: "innerEdge", label: t("facts.innerEdge"), value: span(t, d, P.oort.innerEdge) },
-        { id: "outerEdge", label: t("facts.outerEdge"), value: span(t, d, P.oort.outerEdge) },
+        { id: "innerEdge", label: t("facts.innerEdge"), value: print(t, d, F.oort.innerEdge) },
+        { id: "outerEdge", label: t("facts.outerEdge"), value: print(t, d, F.oort.outerEdge) },
       ];
     default:
       return [];

@@ -3,11 +3,9 @@ import test from "node:test";
 
 import { PerspectiveCamera, Vector3 } from "three";
 
-import {
-  GALACTIC_CENTRE,
-  GALACTIC_EAST,
-  GALACTIC_POLE,
-} from "../packages/toolkit/src/scene/frames.ts";
+import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE } from "@horizon/toolkit/scene";
+
+import { modernGalaxy } from "../src/features/deep-field/lib/graphics/galaxy.ts";
 import { anchorById, anchorToday } from "../src/features/deep-field/lib/model/cosmos.ts";
 import { VIEWS, viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { createCameraRig } from "../src/features/deep-field/lib/scene/camera-rig.ts";
@@ -25,6 +23,7 @@ import {
   galaxyToWorld,
   realmOf,
 } from "../src/features/deep-field/lib/scene/lod.ts";
+import { assertSmoothFlight } from "./toolkit-helpers.mjs";
 
 const near = (actual, expected, tolerance, message) =>
   assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: ${actual} vs ${expected}`);
@@ -105,24 +104,7 @@ test("a flight from Laniakea to the Galaxy is one smooth zoom, its aim gliding h
   assert.equal(realmOf(rig.pose.distance), "cosmos");
   assert.ok(rig.aim.length() > 200e6 * LY, "aimed at the Great Attractor");
   rig.flyToView("galaxy");
-  const dt = 1 / 60;
-  let last = Math.log(rig.pose.distance);
-  let lastSpeed = 0;
-  let lastPosition = camera.position.clone();
-  let frames = 0;
-  while (rig.flying && frames < 1000) {
-    const position = frame(dt);
-    const x = Math.log(rig.pose.distance);
-    const speed = (x - last) / dt;
-    assert.ok(speed <= 1e-9, "never backs out");
-    assert.ok(Math.abs(speed - lastSpeed) < 0.5, `speed jump at frame ${frames}`);
-    assert.ok(position.distanceTo(lastPosition) < rig.pose.distance * 0.25, `cut at ${frames}`);
-    last = x;
-    lastSpeed = speed;
-    lastPosition = position;
-    frames += 1;
-  }
-  assert.ok(frames > 60 && frames < 400, `${frames} frames`);
+  assertSmoothFlight(rig, camera, frame, { maxSpeed: 10 });
   assert.equal(realmOf(rig.pose.distance), "galaxy");
 });
 
@@ -188,4 +170,24 @@ test("names keep above the sightline, the phone's ladder and the guide's caption
   assert.equal(labelInsets(false, 120).bottom, 192, "phones: the ladder sits on the sightline");
   assert.equal(labelInsets(false, 120, 340).bottom, 340, "a caption above both wins");
   assert.equal(labelInsets(true, 120, 60).bottom, 120, "a caption below the dock changes nothing");
+});
+
+test("the modern Milky Way is a thin, finite disk with dust and a populated centre", () => {
+  const { stars, dust } = modernGalaxy(6000);
+  const pos = stars.getAttribute("position").array;
+  assert.ok(stars.getAttribute("position").count > 5500);
+  assert.ok(dust.getAttribute("position").count > 1500);
+  const radii = [];
+  const heights = [];
+  for (let i = 0; i < pos.length; i += 3) {
+    assert.ok(Number.isFinite(pos[i] + pos[i + 1] + pos[i + 2]));
+    radii.push(Math.hypot(pos[i], pos[i + 2]));
+    heights.push(Math.abs(pos[i + 1]));
+  }
+  radii.sort((a, b) => a - b);
+  heights.sort((a, b) => a - b);
+  const median = (values) => values[Math.floor(values.length / 2)];
+  // Half the light inside the solar circle; the disk roughly 1:50 thin.
+  assert.ok(median(radii) > 6_000 && median(radii) < 27_000, `median R ${median(radii)}`);
+  assert.ok(median(heights) < 1_200, `median |z| ${median(heights)}`);
 });

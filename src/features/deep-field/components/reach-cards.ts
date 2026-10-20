@@ -6,13 +6,14 @@
 import {
   figure,
   formatAu,
+  formatLightTime,
   type Card,
   type CardFact,
   type DistanceSettings,
   type Format,
   type Translate,
 } from "@/lib/facts";
-import { convert, lightTime } from "@horizon/toolkit/science";
+import { convert } from "@horizon/toolkit/science";
 
 import { CATALOGUE } from "../lib/model/catalogue";
 import {
@@ -86,7 +87,6 @@ function heliopauseCard(t: Translate, f: Format, d: DistanceSettings): Card {
       distance: figure(t, d, C[id].heliopause),
     }),
   });
-  const sunlight = lightTime(HELIOPAUSE_AU);
   return {
     badge: t("badges.mixed"),
     title: t("names.heliopause"),
@@ -104,7 +104,7 @@ function heliopauseCard(t: Translate, f: Format, d: DistanceSettings): Card {
       {
         id: "sunlight",
         label: t("facts.sunlight"),
-        value: `${f.number(sunlight.value, { maximumFractionDigits: sunlight.digits })} ${sunlight.unit}`,
+        value: formatLightTime(f, HELIOPAUSE_AU),
       },
     ],
     body: t("cards.reach.heliopause"),

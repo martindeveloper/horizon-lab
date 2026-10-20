@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { startEngine, type StartEngine } from "@/lib/engine-lifecycle";
+import { startEngine, type StartEngine } from "@horizon/toolkit/rendering";
 
 /** Feature adapters supply stable callbacks and retain ownership of their stores. */
 export function useSimulationEngine(create: StartEngine, resetReady: () => void) {

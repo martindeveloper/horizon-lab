@@ -17,7 +17,7 @@ export type MapQuality = { budget: number; anisotropy: number };
 /** Close-up maps: the lighter near tier and painted detail, and their filtering. */
 export type CloseUpQuality = { light: boolean; anisotropy: number };
 
-export type OrreryQuality = SpaceQuality & {
+type OrreryQuality = SpaceQuality & {
   sky: SkyCounts;
   maps: MapQuality;
   closeUp: CloseUpQuality;

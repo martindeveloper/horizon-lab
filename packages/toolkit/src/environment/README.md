@@ -5,9 +5,13 @@ every surface honours the same user preference. No dependencies; importing it
 touches no browser globals.
 
 - `REDUCED_MOTION_QUERY`, `FINE_POINTER_QUERY`, `COARSE_POINTER_QUERY`,
-  `WIDE_LAYOUT_QUERY` (the theme's `md`: side rails instead of sheets): query
+  `WIDE_QUERY` (the theme's `md` width alone: a column beside the scene, on a phone
+  held sideways too), `WIDE_LAYOUT_QUERY` (`md` width and height: side rails instead
+  of sheets) and `PHONE_QUERY` (a coarse pointer on the layout below that): query
   strings for `window.matchMedia`. Keep the returned list and read `.matches`
   when deciding, so a preference changed while the page is open applies at once.
+  Spell the breakpoint through these, never as a literal, so layout code and the
+  stylesheet's `md` agree.
 - `prefersReducedMotion()`: a one-off snapshot, false on the server or where
   `matchMedia` is missing. Use it for decisions made once, such as a store's
   initial state.

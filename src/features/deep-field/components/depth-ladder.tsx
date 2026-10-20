@@ -8,22 +8,24 @@ import { useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { HandoffLink } from "@/components/simulations/handoff-link";
 import { formatAu } from "@/lib/facts";
 import { isSolarView } from "@/space/solar-system/model/views";
+import { WIDE_QUERY } from "@horizon/toolkit/environment";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { Tooltip, cn } from "@horizon/toolkit/ui";
 
-import { LADDER_SIDE_QUERY, RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
+import { RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
 import { METHOD_OF } from "../lib/model/views";
 import { useDeepField } from "../lib/store";
 
 const subscribe = (change: () => void) => {
-  const query = window.matchMedia(LADDER_SIDE_QUERY);
+  /* Down the left wherever a column fits beside the scene, a phone held sideways included. */
+  const query = window.matchMedia(WIDE_QUERY);
   query.addEventListener("change", change);
   return () => query.removeEventListener("change", change);
 };
 const useWide = () =>
   useSyncExternalStore(
     subscribe,
-    () => window.matchMedia(LADDER_SIDE_QUERY).matches,
+    () => window.matchMedia(WIDE_QUERY).matches,
     () => true,
   );
 

@@ -14,7 +14,9 @@ import {
   starPhotosphere,
 } from "../src/features/spectroscopy/lib/model/atmospheres.ts";
 import {
+  ELEMENTS,
   LINES,
+  ionizationEnergy,
   lineNear,
   measureLine,
   partitionFunction,
@@ -24,7 +26,13 @@ import {
   continuumWavelength,
   totalOpacity,
 } from "../src/features/spectroscopy/lib/model/continuum.ts";
-import { rydbergFormula } from "../src/features/spectroscopy/lib/model/equations.ts";
+import {
+  boltzmannLaw,
+  dopplerWidth,
+  rydbergFormula,
+  sahaEquation,
+  slabTransfer,
+} from "../src/features/spectroscopy/lib/model/equations.ts";
 import {
   ease,
   moveDuration,
@@ -49,6 +57,7 @@ import {
   depthAt,
   formedLines,
   reportLine,
+  slabIntensity,
   synthesize,
 } from "../src/features/spectroscopy/lib/model/spectrum.ts";
 import { BAND_HEADS } from "../src/features/spectroscopy/lib/model/telluric.ts";
@@ -250,6 +259,37 @@ test("a star's lines shift with its velocity; Earth's oxygen bands stay put", ()
   assert.ok(depthAt(s, BAND_HEADS.A + 0.4) > 0.3, "the A band is where it always is");
   const space = synthesize({ ...moving, airmass: 0 }, 650, 770, 6000);
   assert.ok(depthAt(space, BAND_HEADS.A + 0.4) < 0.05, "and gone above the air");
+});
+
+test("the printed equations compute from the same physics as the spectra", () => {
+  const T = 6000;
+  const Pe = 10;
+  const na = lineNear("Na I", 588.995);
+  const conditions = {
+    temperature: T,
+    electronPressure: Pe,
+    gasPressure: 1e4,
+    microturbulence: 1.5,
+  };
+  const A = ELEMENTS.Na.atomicWeight;
+  assert.equal(
+    dopplerWidth.compute({ lambda: na.wavelength, T, A, xi: 1.5 }),
+    lineShape(na, conditions).doppler,
+    "Doppler width",
+  );
+  const [neutral, ionized] = ionizationFractions("Na", T, Pe);
+  const U = partitionFunction("Na II", T) / partitionFunction("Na I", T);
+  const chi = ionizationEnergy("Na I");
+  near(sahaEquation.compute({ U, chi, T, Pe }) / (ionized / neutral), 1, 1e-9, "Saha");
+  const level = levelShare("Na", 0, 2, 2.1, T, Pe) / neutral;
+  near(boltzmannLaw.compute({ g: 2, dE: 2.1, T }) / partitionFunction("Na I", T) / level, 1, 1e-12);
+  const B = planckRadiance(589, 2000);
+  assert.equal(
+    slabTransfer.compute({ I0: 3e12, tau: 0.7, lambda: 589, T: 2000 }),
+    slabIntensity(3e12, B, 0.7),
+  );
+  near(slabTransfer.compute({ I0: 0, tau: 50, lambda: 589, T: 2000 }) / B, 1, 1e-12, "thick: B");
+  near(slabTransfer.compute({ I0: 5, tau: 0, lambda: 589, T: 2000 }), 5, 1e-12, "thin: I₀");
 });
 
 test("hydrogen's lines follow Rydberg's formula to within fine structure", () => {

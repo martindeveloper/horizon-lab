@@ -111,7 +111,7 @@ function startFact(id: PlanetId): Value {
   };
 }
 
-export const SUN = {
+const SUN = {
   sun: {
     radius: {
       value: SOLAR_RADIUS_KM,
@@ -196,7 +196,7 @@ export const PLANETS = {
   },
 } satisfies Record<PlanetId, Facts>;
 
-export const NAMED_BODIES = {
+const NAMED_BODIES = {
   sedna: {
     perihelion: {
       value: named("sedna").a * (1 - named("sedna").e),

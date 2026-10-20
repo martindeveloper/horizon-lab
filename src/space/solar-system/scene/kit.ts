@@ -1,6 +1,6 @@
 /** Shared pieces of the solar system scene: constants, the kit its layers are built with, a frame. */
 import { SUN_RADIUS_KM, type BodyId, type PlanetId } from "@horizon/toolkit/bodies";
-import type { SceneHostBasics } from "@horizon/toolkit/scene";
+import { sceneKit, type SceneHostBasics, type SceneKit } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { createLooks, type Looks } from "../graphics/looks";
@@ -34,20 +34,16 @@ export type SolarShow = {
   drift: boolean;
 };
 
-/** What every layer is built with: the host's basics, the looks and the level of detail. */
-export type SolarKit = SceneHostBasics & {
-  looks: Looks;
-  /** Screen size, presence bands, faders and the map budget (see lod.ts). */
-  lod: Lod;
-  /** World size of `px` screen pixels at distance `dist`: `lod.pxWorld`. */
-  pxWorld: (dist: number, px: number) => number;
-};
+/**
+ * What every layer is built with: the host's basics, the looks and the level of detail (screen
+ * size, presence bands, faders and the map budget; see lod.ts).
+ */
+export type SolarKit = SceneKit<Looks, Lod>;
 
 /** The kit for a host's scene: painted looks (lighter on tight devices) and a level of detail. */
 export function createSolarKit(basics: SceneHostBasics): SolarKit {
   const looks = basics.scope.own(createLooks(basics.tight));
-  const lod = createLod(basics.camera, basics.viewport);
-  return { ...basics, looks, lod, pxWorld: lod.pxWorld };
+  return sceneKit(basics, looks, createLod(basics.camera, basics.viewport));
 }
 
 /** The state one frame draws: a moment, the clock, the switches and the camera distance. */

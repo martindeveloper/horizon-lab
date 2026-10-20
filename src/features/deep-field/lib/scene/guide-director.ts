@@ -9,9 +9,7 @@ import { TOUR } from "../model/tour";
 import type { useDeepField } from "../store";
 import type { CameraRig } from "./camera-rig";
 
-export type Guide = ReturnType<typeof createGuide>;
-
-export function createGuide(
+export function createGuideDirector(
   rig: CameraRig,
   store: typeof useDeepField,
   reduceMotion: { matches: boolean },

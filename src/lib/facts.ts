@@ -9,6 +9,7 @@ import type { useFormatter } from "next-intl";
 import type { SourceId } from "@/lib/sources";
 import {
   formatDistance,
+  lightTime,
   printFact,
   printFactSpan,
   quoteFact,
@@ -19,13 +20,7 @@ import {
   type Range,
 } from "@horizon/toolkit/science";
 
-export {
-  isLength,
-  type LengthUnit,
-  type Range,
-  type Status,
-  type Unit,
-} from "@horizon/toolkit/science";
+export { type Status } from "@horizon/toolkit/science";
 
 /** A measured or modelled value, with an optional published spread. */
 export type Value = FactValue<SourceId>;
@@ -37,7 +32,7 @@ export type Fact = Value | Span;
 export type Facts = Readonly<Record<string, Fact>>;
 
 /** A catalogue: groups of objects, each object's facts by id. */
-export type Catalogue = Readonly<Record<string, Readonly<Record<string, Facts>>>>;
+type Catalogue = Readonly<Record<string, Readonly<Record<string, Facts>>>>;
 
 /** Every fact with its path ("planets.earth.radius"), for tests and the ledger. */
 export function factsOf(catalogue: Catalogue): { path: string; fact: Fact }[] {
@@ -53,8 +48,11 @@ export type Ref =
   | { kind: "value"; fact: Value }
   | { kind: "span"; fact: (Value | Span) & { range: Range } };
 
-export const v = (fact: Value): Ref => ({ kind: "value", fact });
-export const r = (fact: (Value | Span) & { range: Range }): Ref => ({ kind: "span", fact });
+export const v = (fact: Value): Extract<Ref, { kind: "value" }> => ({ kind: "value", fact });
+export const r = (fact: (Value | Span) & { range: Range }): Extract<Ref, { kind: "span" }> => ({
+  kind: "span",
+  fact,
+});
 
 export type Args = Readonly<Record<string, Ref>>;
 
@@ -80,19 +78,11 @@ export type CardSpec = {
 /** A card wholly described by its spec, with its kicker (`badges.<badge>`). */
 export type StaticCard<Badge extends string = string> = CardSpec & { badge: Badge };
 
-/** A spec with its body and caution message keys, for the placeholder test. */
-export type SpecEntry = { body: string; caution: string; spec: CardSpec };
+/** The member of a selection union with this `kind`. */
+export type Of<S extends { kind: string }, K extends S["kind"]> = Extract<S, { kind: K }>;
 
-/** Specs by object id, with message keys `<prefix>.<id>.<body>` and `<prefix>.<id>.caution`. */
-export function specEntries(
-  specs: Readonly<Record<string, CardSpec | undefined>>,
-  prefix: string,
-  body = "body",
-): SpecEntry[] {
-  return Object.entries(specs).flatMap(([id, spec]) =>
-    spec ? [{ body: `${prefix}.${id}.${body}`, caution: `${prefix}.${id}.caution`, spec }] : [],
-  );
-}
+/** What a card's kicker says about how far its figures can be trusted (`badges.<id>`); a simulation adds its own. */
+export type Badge = "measured" | "mixed" | "inferred" | "sketch" | "schematic";
 
 /** A card as the selection sheet shows it. */
 export type Card = {
@@ -130,6 +120,12 @@ export function formatAu(t: Translate, d: DistanceSettings, au: number, withLigh
     ...distanceFormat(t, d),
     ...(withLightTime ? { lightTimeLabel: t("names.lightTime") } : {}),
   });
+}
+
+/** How long light takes to cross `au`, in the unit that fits: "8.3 min", "4.1 h", "1.3 d". */
+export function formatLightTime(f: Format, au: number) {
+  const time = lightTime(au);
+  return `${f.number(time.value, { maximumFractionDigits: time.digits })} ${time.unit}`;
 }
 
 /**

@@ -20,7 +20,6 @@
   "guideProgress": "{step} / {total} · {kicker}",
   "finish": "Finish",
   "skip": "Skip",
-  "spaceKey": "Space",
   "open": "Open",
   "fold": "Collapse",
   "read": "Read",
@@ -89,7 +88,6 @@
   "phaseDolly": "Approach",
   "phaseDetail": "Detail",
   "phaseHold": "Hold",
-  "phaseTransit": "Transit",
   "ariaStartGuide": "Start guide",
   "ariaOpenAtlas": "Open atlas",
   "ariaCloseClocks": "Close clocks panel",
@@ -349,352 +347,297 @@
       "0": {
         "kicker": "establishing",
         "title": "The view every textbook wants",
-        "body": "A thin, bright disk of gas circles a spinning black hole, seen from about a hundred gravitational radii away. Inner orbits are faster than outer ones. The dimensionless spin here is a/M ≈ 0.82. Distances are expressed in gravitational radii, GM/c², denoted by M in geometric units. At the same spin and viewing angle, stellar-mass and supermassive black holes share the same dimensionless geometry. Mass changes the conversion to kilometres and seconds; the gas determines how that geometry lights up.",
-        "phase": "Wide"
+        "body": "A thin, bright disk of gas circles a spinning black hole, seen from about a hundred gravitational radii away. Inner orbits are faster than outer ones. The dimensionless spin here is a/M ≈ 0.82. Distances are expressed in gravitational radii, GM/c², denoted by M in geometric units. At the same spin and viewing angle, stellar-mass and supermassive black holes share the same dimensionless geometry. Mass changes the conversion to kilometres and seconds; the gas determines how that geometry lights up."
       },
       "1": {
         "kicker": "approach",
         "title": "That darkness is not a surface",
-        "body": "It is easy to call the dark patch the event horizon. More precisely, it is the black hole’s shadow: a feature shaped by light capture, gravitational lensing and the surrounding emission. Its apparent size is not a simple projection of the horizon. The bright ring comes from gas outside the black hole, with some light reaching us along strongly curved paths. You are seeing gravity’s effect on the light, not a solid surface at the edge of the hole.",
-        "phase": "Dolly"
+        "body": "It is easy to call the dark patch the event horizon. More precisely, it is the black hole’s shadow: a feature shaped by light capture, gravitational lensing and the surrounding emission. Its apparent size is not a simple projection of the horizon. The bright ring comes from gas outside the black hole, with some light reaching us along strongly curved paths. You are seeing gravity’s effect on the light, not a solid surface at the edge of the hole."
       },
       "2": {
         "kicker": "photon orbits",
         "title": "Light can go into orbit here",
-        "body": "For a non-spinning black hole, unstable circular light paths lie at r = 3M and together form the photon sphere. A rotating black hole has a more complex set of bound photon paths, depending on their direction. Light from the disk can pass partway around the hole and form additional images. The band above the shadow is not a second disk, but the far side of this one, lifted into view by lensing. The broad EHT emission ring is not a direct image of a single photon orbit.",
-        "phase": "Detail"
+        "body": "For a non-spinning black hole, unstable circular light paths lie at r = 3M and together form the photon sphere. A rotating black hole has a more complex set of bound photon paths, depending on their direction. Light from the disk can pass partway around the hole and form additional images. The band above the shadow is not a second disk, but the far side of this one, lifted into view by lensing. The broad EHT emission ring is not a direct image of a single photon orbit."
       },
       "3": {
         "kicker": "beaming",
         "title": "One side shines brighter",
-        "body": "Gas on opposite sides of the same ring can have the same temperature but very different motion relative to us. Relativistic beaming brightens the approaching side, while the receding side generally looks dimmer and redder. Spectral intensity transforms with the cube of the Doppler factor, δ³, at correspondingly shifted frequencies; intensity integrated over the spectrum transforms with δ⁴. With gravitational redshift included, the total shift g takes the place of δ; the image also depends on viewing angle and the distribution of emitting gas. A bright crescent does not require one side to be intrinsically hotter.",
-        "phase": "Hold"
+        "body": "Gas on opposite sides of the same ring can have the same temperature but very different motion relative to us. Relativistic beaming brightens the approaching side, while the receding side generally looks dimmer and redder. Spectral intensity transforms with the cube of the Doppler factor, δ³, at correspondingly shifted frequencies; intensity integrated over the spectrum transforms with δ⁴. With gravitational redshift included, the total shift g takes the place of δ; the image also depends on viewing angle and the distribution of emitting gas. A bright crescent does not require one side to be intrinsically hotter."
       },
       "4": {
         "kicker": "pull back",
         "title": "Now you can explore it yourself",
-        "body": "You have seen the main ingredients of a black hole image: a shadow, strongly bent light, several images of the same disk and relativistic beaming. Drag to orbit, pinch to change distance, and tap Horizon / Photon orbit / ISCO / Doppler for an explanation. The radius markers refer to the selected model; the rendered image remains approximate. Switch to Sagittarius A* or M87* to place these ideas in the surroundings of a real object.",
-        "phase": "Wide"
+        "body": "You have seen the main ingredients of a black hole image: a shadow, strongly bent light, several images of the same disk and relativistic beaming. Drag to orbit, pinch to change distance, and tap Horizon / Photon orbit / ISCO / Doppler for an explanation. The radius markers refer to the selected model; the rendered image remains approximate. Switch to Sagittarius A* or M87* to place these ideas in the surroundings of a real object."
       }
     },
     "sgr-a": {
       "0": {
         "kicker": "8.28 kpc",
         "title": "You are already inside this galaxy",
-        "body": "Sagittarius A* is not a distant quasar. It is the black hole at the centre of the Milky Way, about 27,000 light-years away in the direction of Sagittarius. Interstellar dust hides the Galactic Centre at visible wavelengths. Stellar orbits give a black hole mass of about 4.3 million Suns. It was discovered as a compact radio source in 1974. The crowded stellar surroundings in this scene represent the nuclear star cluster. You are not looking at the Milky Way from outside. You live in it.",
-        "phase": "Wide"
+        "body": "Sagittarius A* is not a distant quasar. It is the black hole at the centre of the Milky Way, about 27,000 light-years away in the direction of Sagittarius. Interstellar dust hides the Galactic Centre at visible wavelengths. Stellar orbits give a black hole mass of about 4.3 million Suns. It was discovered as a compact radio source in 1974. The crowded stellar surroundings in this scene represent the nuclear star cluster. You are not looking at the Milky Way from outside. You live in it."
       },
       "1": {
         "kicker": "S2",
         "title": "A stellar orbit becomes a set of scales",
-        "body": "S2 is a B-type star on an orbit of about 16 years. At its closest approach, or pericentre, it passes roughly 120 au from Sgr A*, about 1,400 Schwarzschild radii, and moves at over 2.5% of the speed of light. Its orbit constrains the central mass and reveals relativistic redshift and orbital precession. A 2026 GRAVITY+ study reported S301, whose fitted orbit brings it within about 12 au at over 8% of the speed of light. Future observations of that orbit could measure Sgr A*’s spin.",
-        "phase": "Dolly"
+        "body": "S2 is a B-type star on an orbit of about 16 years. At its closest approach, or pericentre, it passes roughly 120 au from Sgr A*, about 1,400 Schwarzschild radii, and moves at over 2.5% of the speed of light. Its orbit constrains the central mass and reveals relativistic redshift and orbital precession. A 2026 GRAVITY+ study reported S301, whose fitted orbit brings it within about 12 au at over 8% of the speed of light. Future observations of that orbit could measure Sgr A*’s spin."
       },
       "2": {
         "kicker": "52 μas",
         "title": "Light around a shadow",
-        "body": "On 12 May 2022, the Event Horizon Telescope released an image of Sgr A* with a bright ring about 52 microarcseconds across. That is roughly the angle subtended by a ten-centimetre object on the Moon as seen from Earth. The ring is emission from hot gas shaped by strong gravity, not the event horizon or an isolated photon orbit. Sgr A*’s surroundings change on timescales of minutes. That rapid variability made reconstructing the image especially difficult.",
-        "phase": "Detail"
+        "body": "On 12 May 2022, the Event Horizon Telescope released an image of Sgr A* with a bright ring about 52 microarcseconds across. That is roughly the angle subtended by a ten-centimetre object on the Moon as seen from Earth. The ring is emission from hot gas shaped by strong gravity, not the event horizon or an isolated photon orbit. Sgr A*’s surroundings change on timescales of minutes. That rapid variability made reconstructing the image especially difficult."
       },
       "3": {
         "kicker": "RIAF",
         "title": "A massive object, a faint source",
-        "body": "Sgr A* receives little gas, and its hot accretion flow radiates inefficiently. Its quiescent total luminosity is roughly a billionth of its Eddington luminosity. That luminosity ratio is not the same as an accretion-rate ratio. This radiatively inefficient accretion flow, or RIAF, is unlike the standard thin disk of a luminous quasar. Variable radio, infrared and X-ray emission still lets us study activity close to the horizon. The bright thin disk used for illustration should not be mistaken for a literal reconstruction of Sgr A*’s flow.",
-        "phase": "Hold"
+        "body": "Sgr A* receives little gas, and its hot accretion flow radiates inefficiently. Its quiescent total luminosity is roughly a billionth of its Eddington luminosity. That luminosity ratio is not the same as an accretion-rate ratio. This radiatively inefficient accretion flow, or RIAF, is unlike the standard thin disk of a luminous quasar. Variable radio, infrared and X-ray emission still lets us study activity close to the horizon. The bright thin disk used for illustration should not be mistaken for a literal reconstruction of Sgr A*’s flow."
       },
       "4": {
         "kicker": "pull back",
         "title": "The Nobel came before the image",
-        "body": "The teams led by Andrea Ghez and Reinhard Genzel spent decades tracking stars in the Galactic Centre. Their orbits revealed an unseen object with millions of solar masses confined to an extraordinarily small region. The two researchers shared half of the 2020 Nobel Prize in Physics for discovering this supermassive compact object. The EHT image followed less than two years later, providing independent evidence on horizon scales. Pull back and you are still looking into the heart of our own Galaxy.",
-        "phase": "Wide"
+        "body": "The teams led by Andrea Ghez and Reinhard Genzel spent decades tracking stars in the Galactic Centre. Their orbits revealed an unseen object with millions of solar masses confined to an extraordinarily small region. The two researchers shared half of the 2020 Nobel Prize in Physics for discovering this supermassive compact object. The EHT image followed less than two years later, providing independent evidence on horizon scales. Pull back and you are still looking into the heart of our own Galaxy."
       }
     },
     "m87": {
       "0": {
         "kicker": "Virgo",
         "title": "A black hole 55 million light-years away",
-        "body": "M87* sits in the nucleus of Messier 87, a giant elliptical galaxy in the Virgo cluster. Its position is near right ascension 12h30m and declination +12°, about 74° above the Galactic plane in our sky. Its distance is about 16.8 Mpc and its estimated mass is 6.5 billion Suns. Our line of sight lies only about 17° from the jet axis, so we see the surrounding flow nearly face-on. The yellow glow in this scene represents the galaxy’s predominantly old stars.",
-        "phase": "Wide"
+        "body": "M87* sits in the nucleus of Messier 87, a giant elliptical galaxy in the Virgo cluster. Its position is near right ascension 12h30m and declination +12°, about 74° above the Galactic plane in our sky. Its distance is about 16.8 Mpc and its estimated mass is 6.5 billion Suns. Our line of sight lies only about 17° from the jet axis, so we see the surrounding flow nearly face-on. The yellow glow in this scene represents the galaxy’s predominantly old stars."
       },
       "1": {
         "kicker": "17°",
         "title": "The jet reveals the axis",
-        "body": "Heber Curtis described M87’s jet in 1918. Very-long-baseline radio observations place its axis roughly 17° from our line of sight. A leading explanation for its power is the Blandford–Znajek mechanism: magnetic field lines threading the spinning horizon extract rotational energy from the black hole and help power a relativistic jet. The plasma is not being expelled from inside the horizon. The blue feature in this scene represents the jet region.",
-        "phase": "Dolly"
+        "body": "Heber Curtis described M87’s jet in 1918. Very-long-baseline radio observations place its axis roughly 17° from our line of sight. A leading explanation for its power is the Blandford–Znajek mechanism: magnetic field lines threading the spinning horizon extract rotational energy from the black hole and help power a relativistic jet. The plasma is not being expelled from inside the horizon. The blue feature in this scene represents the jet region."
       },
       "2": {
         "kicker": "about 44 μas",
         "title": "Two black holes, similar sizes in the sky",
-        "body": "The M87* image released in 2019 showed a ring 42 ± 3 microarcseconds across. A 2025 analysis combining observations from 2017, 2018 and 2021 found an average diameter of 43.9 ± 0.6 μas. A shadow’s angular size scales mainly with mass divided by distance. M87* is roughly 2,000 times farther away than Sgr A* but 1,500 times more massive. Their shadows therefore have comparable angular sizes, within reach of the same global radio interferometer.",
-        "phase": "Detail"
+        "body": "The M87* image released in 2019 showed a ring 42 ± 3 microarcseconds across. A 2025 analysis combining observations from 2017, 2018 and 2021 found an average diameter of 43.9 ± 0.6 μas. A shadow’s angular size scales mainly with mass divided by distance. M87* is roughly 2,000 times farther away than Sgr A* but 1,500 times more massive. Their shadows therefore have comparable angular sizes, within reach of the same global radio interferometer."
       },
       "3": {
         "kicker": "10 April 2019",
         "title": "The first image on horizon scales",
-        "body": "The EHT linked radio telescopes across continents, including observatories on Maunakea, to achieve Earth-sized resolving power at a wavelength of 1.3 mm. Data collected in 2017 became the image released two years later. Orange represents radio brightness, not the gas’s visible colour. For a non-spinning black hole of this mass, the horizon diameter would be about 38 billion kilometres, or 260 au. For a rotating black hole, its size depends on which geometric measure you use.",
-        "phase": "Hold"
+        "body": "The EHT linked radio telescopes across continents, including observatories on Maunakea, to achieve Earth-sized resolving power at a wavelength of 1.3 mm. Data collected in 2017 became the image released two years later. Orange represents radio brightness, not the gas’s visible colour. For a non-spinning black hole of this mass, the horizon diameter would be about 38 billion kilometres, or 260 au. For a rotating black hole, its size depends on which geometric measure you use."
       },
       "4": {
         "kicker": "pull back",
         "title": "A slower clock in a rich cluster",
-        "body": "At a fixed dimensionless radius and spin, characteristic timescales grow in proportion to mass. Processes lasting minutes around Sgr A* can take days to weeks around M87*, helping radio observations capture a more slowly changing scene. Thousands of globular clusters surround Messier 87, with other large galaxies such as M84 and M86 nearby. Its high Galactic latitude means we are looking well away from the Milky Way’s dusty plane. This is a different galactic neighbourhood, not an empty sky.",
-        "phase": "Wide"
+        "body": "At a fixed dimensionless radius and spin, characteristic timescales grow in proportion to mass. Processes lasting minutes around Sgr A* can take days to weeks around M87*, helping radio observations capture a more slowly changing scene. Thousands of globular clusters surround Messier 87, with other large galaxies such as M84 and M86 nearby. Its high Galactic latitude means we are looking well away from the Milky Way’s dusty plane. This is a different galactic neighbourhood, not an empty sky."
       }
     },
     "schwarzschild": {
       "0": {
         "kicker": "1916",
         "title": "One mass, a spherical vacuum geometry",
-        "body": "Karl Schwarzschild found an exact solution of Einstein’s equations while serving on the Eastern Front. It was published in 1916; he died that May. The solution describes a spherically symmetric vacuum spacetime and, for a black hole, zero spin and zero electric charge. A single parameter, M, determines the exterior geometry. The horizon, photon sphere and innermost stable circular orbit all lie at fixed multiples of that mass expressed in geometric units.",
-        "phase": "Wide"
+        "body": "Karl Schwarzschild found an exact solution of Einstein’s equations while serving on the Eastern Front. It was published in 1916; he died that May. The solution describes a spherically symmetric vacuum spacetime and, for a black hole, zero spin and zero electric charge. A single parameter, M, determines the exterior geometry. The horizon, photon sphere and innermost stable circular orbit all lie at fixed multiples of that mass expressed in geometric units."
       },
       "1": {
         "kicker": "three radii",
         "title": "2M, 3M, 6M: three key landmarks",
-        "body": "At r = 2M lies the event horizon, the boundary beyond which no signal can escape to distant observers. At r = 3M, the photon sphere supports unstable circular light paths. At r = 6M lies the ISCO, the innermost stable circular orbit for massive particles. Circular particle orbits exist between 3M and 6M, but they are unstable. With increasing black hole spin, the horizon and prograde equatorial orbits move to smaller coordinate radii; retrograde orbits move outward.",
-        "phase": "Dolly"
+        "body": "At r = 2M lies the event horizon, the boundary beyond which no signal can escape to distant observers. At r = 3M, the photon sphere supports unstable circular light paths. At r = 6M lies the ISCO, the innermost stable circular orbit for massive particles. Circular particle orbits exist between 3M and 6M, but they are unstable. With increasing black hole spin, the horizon and prograde equatorial orbits move to smaller coordinate radii; retrograde orbits move outward."
       },
       "2": {
         "kicker": "horizon",
         "title": "A boundary, not a visible surface",
-        "body": "The event horizon is a boundary in spacetime, not a textured material surface. No light signal from inside it reaches a distant observer. Light emitted just outside may escape, but can undergo a strong gravitational redshift on the way out. The dark region in an image is not a simple projection of r = 2M: lensing and the surrounding emission shape what you see. Light still moves locally at c. Its coordinate speed dr/dt falls to zero at r = 2M only because Schwarzschild coordinates break down there.",
-        "phase": "Detail"
+        "body": "The event horizon is a boundary in spacetime, not a textured material surface. No light signal from inside it reaches a distant observer. Light emitted just outside may escape, but can undergo a strong gravitational redshift on the way out. The dark region in an image is not a simple projection of r = 2M: lensing and the surrounding emission shape what you see. Light still moves locally at c. Its coordinate speed dr/dt falls to zero at r = 2M only because Schwarzschild coordinates break down there."
       },
       "3": {
         "kicker": "symmetry and motion",
         "title": "Zero spin does not mean equal brightness",
-        "body": "Schwarzschild geometry is spherically symmetric and has no preferred sense of rotation. The disk, however, can still orbit, and its approaching side can be Doppler-brightened. A crescent is therefore not, by itself, evidence that the black hole spins. This left-right contrast is weaker when looking along the disk’s axis and stronger from the side. Gas structure and the rendering model also affect symmetry. Black hole spin is only part of the story.",
-        "phase": "Hold"
+        "body": "Schwarzschild geometry is spherically symmetric and has no preferred sense of rotation. The disk, however, can still orbit, and its approaching side can be Doppler-brightened. A crescent is therefore not, by itself, evidence that the black hole spins. This left-right contrast is weaker when looking along the disk’s axis and stronger from the side. Gas structure and the rendering model also affect symmetry. Black hole spin is only part of the story."
       },
       "4": {
         "kicker": "pull back",
         "title": "Mass, angular momentum and charge",
-        "body": "Under the usual assumptions of black hole uniqueness theorems, an isolated, stationary black hole in general relativity with no external matter is described by the Kerr–Newman family: mass, angular momentum and electric charge. Schwarzschild is the zero-spin, zero-charge case. This is the idea behind saying black holes have no hair. It does not mean real black holes have empty surroundings or identical disks. Switch to a Kerr black hole and you add rotation to the geometry.",
-        "phase": "Wide"
+        "body": "Under the usual assumptions of black hole uniqueness theorems, an isolated, stationary black hole in general relativity with no external matter is described by the Kerr–Newman family: mass, angular momentum and electric charge. Schwarzschild is the zero-spin, zero-charge case. This is the idea behind saying black holes have no hair. It does not mean real black holes have empty surroundings or identical disks. Switch to a Kerr black hole and you add rotation to the geometry."
       }
     },
     "kerr": {
       "0": {
         "kicker": "1963",
         "title": "Close to the extremal limit",
-        "body": "Roy Kerr found the rotating vacuum solution of Einstein’s equations in 1963. Here you are exploring a rapidly rotating, uncharged black hole with a/M ≈ 0.998. This is the Thorne equilibrium value for accretion from a standard thin disk, not the exactly extremal value a/M = 1. Stable prograde orbits can reach much smaller coordinate radii than in the non-spinning case. Real black holes span a range of spins; this high-spin example is not a universal portrait.",
-        "phase": "Wide"
+        "body": "Roy Kerr found the rotating vacuum solution of Einstein’s equations in 1963. Here you are exploring a rapidly rotating, uncharged black hole with a/M ≈ 0.998. This is the Thorne equilibrium value for accretion from a standard thin disk, not the exactly extremal value a/M = 1. Stable prograde orbits can reach much smaller coordinate radii than in the non-spinning case. Real black holes span a range of spins; this high-spin example is not a universal portrait."
       },
       "1": {
         "kicker": "ISCO",
         "title": "From 6M to about 1.24M",
-        "body": "For a non-spinning black hole, the innermost stable circular orbit is at 6M. Circular orbits can exist farther in, but they are unstable. Bardeen, Press and Teukolsky described how the prograde equatorial ISCO moves inward as spin increases. At a/M ≈ 0.998, its coordinate radius is about 1.24M; in the extremal limit it approaches M. The disk can therefore extend deeper into the gravitational field. Its temperature and brightness still depend on accretion and radiative transfer.",
-        "phase": "Dolly"
+        "body": "For a non-spinning black hole, the innermost stable circular orbit is at 6M. Circular orbits can exist farther in, but they are unstable. Bardeen, Press and Teukolsky described how the prograde equatorial ISCO moves inward as spin increases. At a/M ≈ 0.998, its coordinate radius is about 1.24M; in the extremal limit it approaches M. The disk can therefore extend deeper into the gravitational field. Its temperature and brightness still depend on accretion and radiative transfer."
       },
       "2": {
         "kicker": "ergosphere",
         "title": "Rotation drags inertial frames",
-        "body": "The Lense–Thirring effect describes frame dragging by rotating matter. Around a Kerr black hole, its strong-field counterpart is especially striking in the ergosphere, between the horizon and the stationary limit at r = 2M on the equator. Here neither matter nor light can remain stationary relative to distant stars. The Penrose process can extract rotational energy through a particle’s breakup; the Blandford–Znajek mechanism uses magnetic fields. For an ideal extremal Kerr black hole, the theoretical extractable fraction is up to about 29% of its total mass-energy.",
-        "phase": "Detail"
+        "body": "The Lense–Thirring effect describes frame dragging by rotating matter. Around a Kerr black hole, its strong-field counterpart is especially striking in the ergosphere, between the horizon and the stationary limit at r = 2M on the equator. Here neither matter nor light can remain stationary relative to distant stars. The Penrose process can extract rotational energy through a particle’s breakup; the Blandford–Znajek mechanism uses magnetic fields. For an ideal extremal Kerr black hole, the theoretical extractable fraction is up to about 29% of its total mass-energy."
       },
       "3": {
         "kicker": "Thorne limit",
         "title": "Why the number 0.998 appears",
-        "body": "In 1974, Kip Thorne showed that captured radiation from a standard thin disk opposes further spin-up. In that model, the combined effects of accreting matter and radiation lead to an equilibrium near a/M ≈ 0.998. The result depends on the accretion model; it is not a universal ban on higher spins. Exactly extremal Kerr has a/M = 1, with coincident inner and outer horizons. The disk’s bright crescent still comes largely from moving, emitting gas, rather than high spin alone.",
-        "phase": "Hold"
+        "body": "In 1974, Kip Thorne showed that captured radiation from a standard thin disk opposes further spin-up. In that model, the combined effects of accreting matter and radiation lead to an equilibrium near a/M ≈ 0.998. The result depends on the accretion model; it is not a universal ban on higher spins. Exactly extremal Kerr has a/M = 1, with coincident inner and outer horizons. The disk’s bright crescent still comes largely from moving, emitting gas, rather than high spin alone."
       },
       "4": {
         "kicker": "pull back",
         "title": "Compare the spinning and non-spinning cases",
-        "body": "Switch back to Schwarzschild while keeping the same viewing angle. The ISCO returns to 6M, and the photon orbits merge back into a single sphere at 3M. These are orbital radii in the geometry, not the radii of rings on the screen. Doppler asymmetry need not disappear, because the disk can still orbit. Mass and spin determine the uncharged vacuum geometry; the gas, its motion and your viewing direction determine how that geometry appears in light.",
-        "phase": "Wide"
+        "body": "Switch back to Schwarzschild while keeping the same viewing angle. The ISCO returns to 6M, and the photon orbits merge back into a single sphere at 3M. These are orbital radii in the geometry, not the radii of rings on the screen. Doppler asymmetry need not disappear, because the disk can still orbit. Mass and spin determine the uncharged vacuum geometry; the gas, its motion and your viewing direction determine how that geometry appears in light."
       }
     },
     "stellar": {
       "0": {
         "kicker": "Cyg X-1",
         "title": "A black hole in Cygnus",
-        "body": "Cygnus X-1 was one of the first convincing black hole candidates. VLBA parallax places the binary about 2.22 kpc away, or 7,240 light-years, near the Galactic plane in Cygnus. Miller-Jones and colleagues derived a black hole mass of 21.2 ± 2.2 M☉ in 2021. A 2025 analysis by Ramachandran and colleagues inferred roughly 13–18 M☉ using different estimates for the companion. That companion is HDE 226868, an O9.7 Iab supergiant. The X-ray source itself was discovered in 1964.",
-        "phase": "Wide"
+        "body": "Cygnus X-1 was one of the first convincing black hole candidates. VLBA parallax places the binary about 2.22 kpc away, or 7,240 light-years, near the Galactic plane in Cygnus. Miller-Jones and colleagues derived a black hole mass of 21.2 ± 2.2 M☉ in 2021. A 2025 analysis by Ramachandran and colleagues inferred roughly 13–18 M☉ using different estimates for the companion. That companion is HDE 226868, an O9.7 Iab supergiant. The X-ray source itself was discovered in 1964."
       },
       "1": {
         "kicker": "stellar wind",
         "title": "The surroundings reveal the black hole",
-        "body": "The black hole in Cygnus X-1 is not alone. It captures part of its companion’s stellar wind, and the accreting gas powers X-ray emission. The visible star’s orbital motion, combined with its own mass and the orbit’s tilt, reveals the mass of its unseen partner. Stephen Hawking bet Kip Thorne in the 1970s that it was not a black hole, then conceded in 1990. Stellar-mass black holes are known only through such indirect clues; their shadows are far too small to image.",
-        "phase": "Dolly"
+        "body": "The black hole in Cygnus X-1 is not alone. It captures part of its companion’s stellar wind, and the accreting gas powers X-ray emission. The visible star’s orbital motion, combined with its own mass and the orbit’s tilt, reveals the mass of its unseen partner. Stephen Hawking bet Kip Thorne in the 1970s that it was not a black hole, then conceded in 1990. Stellar-mass black holes are known only through such indirect clues; their shadows are far too small to image."
       },
       "2": {
         "kicker": "disk temperature",
         "title": "Smaller black hole, hotter disk",
-        "body": "For a standard thin disk at the same Eddington-scaled accretion rate and dimensionless spin, the characteristic temperature scales approximately as T ∝ M^(−1/4). Lower mass therefore means a hotter disk. A stellar-mass black hole’s disk can reach millions of kelvin and emit X-rays, while an otherwise comparable disk around a supermassive black hole is cooler. This simple scaling cannot be applied directly to the hot, tenuous, radiatively inefficient flows around Sgr A* or M87*.",
-        "phase": "Detail"
+        "body": "For a standard thin disk at the same Eddington-scaled accretion rate and dimensionless spin, the characteristic temperature scales approximately as T ∝ M^(−1/4). Lower mass therefore means a hotter disk. A stellar-mass black hole’s disk can reach millions of kelvin and emit X-rays, while an otherwise comparable disk around a supermassive black hole is cooler. This simple scaling cannot be applied directly to the hot, tenuous, radiatively inefficient flows around Sgr A* or M87*."
       },
       "3": {
         "kicker": "same geometry",
         "title": "The same shape at a different scale",
-        "body": "At the same dimensionless spin and viewing angle, stellar-mass and supermassive black holes can have the same shadow shape in units of M. For a 15 M☉ example, corresponding lengths and times are roughly 300,000 times smaller than for Sgr A*. Think tens of kilometres rather than millions, with inner orbital periods measured in milliseconds. The geometry rescales simply. The spectrum and brightness do not: they also depend on the amount, temperature and motion of the surrounding gas.",
-        "phase": "Hold"
+        "body": "At the same dimensionless spin and viewing angle, stellar-mass and supermassive black holes can have the same shadow shape in units of M. For a 15 M☉ example, corresponding lengths and times are roughly 300,000 times smaller than for Sgr A*. Think tens of kilometres rather than millions, with inner orbital periods measured in milliseconds. The geometry rescales simply. The spectrum and brightness do not: they also depend on the amount, temperature and motion of the surrounding gas."
       },
       "4": {
         "kicker": "pull back",
         "title": "Another way to detect a black hole",
-        "body": "On 14 September 2015, LIGO detected GW150914: the merger of black holes of about 35 and 30 solar masses, roughly 1.3 billion light-years away. Gravitational waves carried away energy equivalent to about three solar masses. This was a ripple in spacetime, not sound travelling through space. Cygnus X-1 shows a different side of the stellar-mass population: a binary supplied with gas by a companion. Isolated black holes without bright accretion are much harder to find.",
-        "phase": "Wide"
+        "body": "On 14 September 2015, LIGO detected GW150914: the merger of black holes of about 35 and 30 solar masses, roughly 1.3 billion light-years away. Gravitational waves carried away energy equivalent to about three solar masses. This was a ripple in spacetime, not sound travelling through space. Cygnus X-1 shows a different side of the stellar-mass population: a binary supplied with gas by a companion. Isolated black holes without bright accretion are much harder to find."
       }
     },
     "custom": {
       "0": {
         "kicker": "sandbox",
         "title": "Your mass, your spin",
-        "body": "This flight uses the black hole you have selected. In geometric units, G = c = 1, mass sets the conversion to kilometres and seconds, while the dimensionless spin a* = a/M changes the geometry. Keep the viewing angle fixed when comparing models. Changing mass rescales the dimensions; changing spin shifts the horizon, equatorial photon orbits and ISCO. Two parameters describe an isolated, uncharged Kerr black hole, but not every detail of its luminous surroundings.",
-        "phase": "Wide"
+        "body": "This flight uses the black hole you have selected. In geometric units, G = c = 1, mass sets the conversion to kilometres and seconds, while the dimensionless spin a* = a/M changes the geometry. Keep the viewing angle fixed when comparing models. Changing mass rescales the dimensions; changing spin shifts the horizon, equatorial photon orbits and ISCO. Two parameters describe an isolated, uncharged Kerr black hole, but not every detail of its luminous surroundings."
       },
       "1": {
         "kicker": "units",
         "title": "Mass becomes a length and a time",
-        "body": "With G = c = 1, the Schwarzschild radius is written as 2M. For one solar mass, the gravitational length scale GM☉/c² is about 1.48 km, and the time scale GM☉/c³ is about 4.93 microseconds. Both scale directly with mass. The on-screen measurements translate these scales back into familiar units. At the same dimensionless spin, viewing angle and observer distance in units of M, changing mass leaves the dimensionless shadow unchanged.",
-        "phase": "Dolly"
+        "body": "With G = c = 1, the Schwarzschild radius is written as 2M. For one solar mass, the gravitational length scale GM☉/c² is about 1.48 km, and the time scale GM☉/c³ is about 4.93 microseconds. Both scale directly with mass. The on-screen measurements translate these scales back into familiar units. At the same dimensionless spin, viewing angle and observer distance in units of M, changing mass leaves the dimensionless shadow unchanged."
       },
       "2": {
         "kicker": "two parameters",
         "title": "Mass sets the scale. Spin changes the geometry.",
-        "body": "Double the mass while keeping the camera distance fixed in units of M: the geometric image stays the same, while lengths in kilometres and characteristic times double. Change a/M and the horizon’s coordinate radius, equatorial photon orbits and ISCO shift. Prograde and retrograde orbits respond differently. You are moving through the Kerr family one parameter at a time. Brightness asymmetry comes mainly from the orbiting gas and the viewing direction, not from spin alone.",
-        "phase": "Detail"
+        "body": "Double the mass while keeping the camera distance fixed in units of M: the geometric image stays the same, while lengths in kilometres and characteristic times double. Change a/M and the horizon’s coordinate radius, equatorial photon orbits and ISCO shift. Prograde and retrograde orbits respond differently. You are moving through the Kerr family one parameter at a time. Brightness asymmetry comes mainly from the orbiting gas and the viewing direction, not from spin alone."
       },
       "3": {
         "kicker": "model limits",
         "title": "Exact light paths, illustrative gas",
-        "body": "Light here follows Kerr geodesics traced from a camera that hovers outside the hole, so the light-capture boundary and lensed images come from the theory. Finite step budgets can still leave the thinnest photon subrings dark. The disk is opaque and thin, its temperatures are display scales and its texture is art. Quantitative brightness predictions need the emission, absorption and motion of real plasma, which this scene does not model.",
-        "phase": "Hold"
+        "body": "Light here follows Kerr geodesics traced from a camera that hovers outside the hole, so the light-capture boundary and lensed images come from the theory. Finite step budgets can still leave the thinnest photon subrings dark. The disk is opaque and thin, its temperatures are display scales and its texture is art. Quantitative brightness predictions need the emission, absorption and motion of real plasma, which this scene does not model."
       },
       "4": {
         "kicker": "pull back",
         "title": "Two parameters. A universe to explore.",
-        "body": "Mass and spin set the geometry of an idealised, uncharged black hole. Gas, stars and viewing direction give the scene its individual appearance. Exit the guide, choose a real object, or vary the spin and watch the ISCO shift. The markers refer to the model’s radii; the image is an illustration. One idea runs through every case: gravity bends light into an image of something you cannot see directly.",
-        "phase": "Wide"
+        "body": "Mass and spin set the geometry of an idealised, uncharged black hole. Gas, stars and viewing direction give the scene its individual appearance. Exit the guide, choose a real object, or vary the spin and watch the ISCO shift. The markers refer to the model’s radii; the image is an illustration. One idea runs through every case: gravity bends light into an image of something you cannot see directly."
       }
     },
     "gaia-bh3": {
       "0": {
         "kicker": "Aquila",
         "title": "A sleeping giant nearby",
-        "body": "Gaia BH3 is a black hole of about 33 solar masses, roughly 1,900 light-years away in the constellation Aquila. It is the second-closest black hole known, after Gaia BH1, and the most massive known black hole of stellar origin in the Milky Way. It does not glow: no X-rays, radio waves or accretion disk have been detected. In this scene you see only background starlight bent by its gravity.",
-        "phase": "Wide"
+        "body": "Gaia BH3 is a black hole of about 33 solar masses, roughly 1,900 light-years away in the constellation Aquila. It is the second-closest black hole known, after Gaia BH1, and the most massive known black hole of stellar origin in the Milky Way. It does not glow: no X-rays, radio waves or accretion disk have been detected. In this scene you see only background starlight bent by its gravity."
       },
       "1": {
         "kicker": "astrometry",
         "title": "Found by a wobble",
-        "body": "Nobody saw the black hole itself. ESA’s Gaia spacecraft measures stellar positions with extreme precision, and one old giant star was tracing a small ellipse on the sky. While checking preliminary data for Gaia’s fourth data release, the team found that this star orbits an unseen companion, and announced it in 2024. Gaia’s own spectrometer and ground-based telescopes, including ESO’s Very Large Telescope, measured its line-of-sight velocity. Together, the two motions give the dark partner’s mass.",
-        "phase": "Dolly"
+        "body": "Nobody saw the black hole itself. ESA’s Gaia spacecraft measures stellar positions with extreme precision, and one old giant star was tracing a small ellipse on the sky. While checking preliminary data for Gaia’s fourth data release, the team found that this star orbits an unseen companion, and announced it in 2024. Gaia’s own spectrometer and ground-based telescopes, including ESO’s Very Large Telescope, measured its line-of-sight velocity. Together, the two motions give the dark partner’s mass."
       },
       "2": {
         "kicker": "dormant",
         "title": "Why it stays dark",
-        "body": "The giant star stays between about 4.4 and 28 astronomical units from the black hole, never close enough to spill gas onto it. Its weak stellar wind delivers very little, so no bright accretion disk forms, and X-ray telescopes have detected nothing. Most black holes in the Milky Way are probably dormant like this one. That is why only a few dozen of them have been found.",
-        "phase": "Detail"
+        "body": "The giant star stays between about 4.4 and 28 astronomical units from the black hole, never close enough to spill gas onto it. Its weak stellar wind delivers very little, so no bright accretion disk forms, and X-ray telescopes have detected nothing. Most black holes in the Milky Way are probably dormant like this one. That is why only a few dozen of them have been found."
       },
       "3": {
         "kicker": "ED-2",
         "title": "An ancient pair",
-        "body": "The companion is an old red giant with a few hundred times less iron than the Sun, among the most metal-poor stars known to orbit a black hole. Massive metal-poor stars lose less mass in winds before they collapse, which helps explain how such a heavy black hole formed. The pair travels with the ED-2 stream, the remains of an ancient star cluster torn apart by the Milky Way’s tides.",
-        "phase": "Hold"
+        "body": "The companion is an old red giant with a few hundred times less iron than the Sun, among the most metal-poor stars known to orbit a black hole. Massive metal-poor stars lose less mass in winds before they collapse, which helps explain how such a heavy black hole formed. The pair travels with the ED-2 stream, the remains of an ancient star cluster torn apart by the Milky Way’s tides."
       },
       "4": {
         "kicker": "pull back",
         "title": "Heavy black holes, close to home",
-        "body": "Gravitational-wave detectors had already found black holes this heavy in distant galaxies. Gaia BH3 was the first of that mass found in our own Galaxy. Gaia’s fourth data release, scheduled for December 2026, may reveal more dormant black holes hiding in binary systems.",
-        "phase": "Wide"
+        "body": "Gravitational-wave detectors had already found black holes this heavy in distant galaxies. Gaia BH3 was the first of that mass found in our own Galaxy. Gaia’s fourth data release, scheduled for December 2026, may reveal more dormant black holes hiding in binary systems."
       }
     },
     "omega-cen": {
       "0": {
         "kicker": "17,700 ly",
         "title": "A galaxy’s leftover heart",
-        "body": "Omega Centauri is the Milky Way’s most massive globular cluster, about 17,700 light-years away, with roughly 10 million stars. It is probably the stripped core of a small galaxy that the Milky Way absorbed long ago. A black hole at its centre would have stopped growing once the gas and outer stars of that galaxy were stripped away.",
-        "phase": "Wide"
+        "body": "Omega Centauri is the Milky Way’s most massive globular cluster, about 17,700 light-years away, with roughly 10 million stars. It is probably the stripped core of a small galaxy that the Milky Way absorbed long ago. A black hole at its centre would have stopped growing once the gas and outer stars of that galaxy were stripped away."
       },
       "1": {
         "kicker": "Hubble, 2002–2023",
         "title": "Twenty years of Hubble images",
-        "body": "In 2024, a team led by Maximilian Häberle compared more than 500 Hubble Space Telescope images taken over two decades and measured the motions of 1.4 million stars. Near the centre they found seven stars moving faster than the cluster’s escape speed, the fastest at 113 kilometres per second across the sky. Without an extra unseen mass at the centre, those stars would have escaped long ago.",
-        "phase": "Dolly"
+        "body": "In 2024, a team led by Maximilian Häberle compared more than 500 Hubble Space Telescope images taken over two decades and measured the motions of 1.4 million stars. Near the centre they found seven stars moving faster than the cluster’s escape speed, the fastest at 113 kilometres per second across the sky. Without an extra unseen mass at the centre, those stars would have escaped long ago."
       },
       "2": {
         "kicker": "at least 8,200 M☉",
         "title": "A lower limit, not a weight",
-        "body": "In that study, keeping those stars bound requires a central mass of at least about 8,200 Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century. Other analyses still question whether this mass is a single black hole.",
-        "phase": "Detail"
+        "body": "In that study, keeping those stars bound requires a central mass of at least about 8,200 Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century. Other analyses still question whether this mass is a single black hole."
       },
       "3": {
         "kicker": "debate",
         "title": "Not yet settled",
-        "body": "Not everyone agrees. A 2025 analysis of pulsar accelerations and stellar motions prefers a central swarm of dark stellar remnants, such as stellar-mass black holes, and limits any single black hole to about 6,000 Suns. The most sensitive radio image of the cluster and infrared observations with the James Webb Space Telescope, published in 2026, found no glow from the centre. That fits a black hole that barely feeds, but it neither confirms nor rules one out.",
-        "phase": "Hold"
+        "body": "Not everyone agrees. A 2025 analysis of pulsar accelerations and stellar motions prefers a central swarm of dark stellar remnants, such as stellar-mass black holes, and limits any single black hole to about 6,000 Suns. The most sensitive radio image of the cluster and infrared observations with the James Webb Space Telescope, published in 2026, found no glow from the centre. That fits a black hole that barely feeds, but it neither confirms nor rules one out."
       },
       "4": {
         "kicker": "pull back",
         "title": "Closer than Sgr A*",
-        "body": "If confirmed, this would be the nearest known massive black hole, closer than Sgr A* at the centre of the Galaxy. Instruments such as GRAVITY+ at ESO’s Very Large Telescope Interferometer and MICADO on the Extremely Large Telescope should measure these fast stars more precisely and test the case.",
-        "phase": "Wide"
+        "body": "If confirmed, this would be the nearest known massive black hole, closer than Sgr A* at the centre of the Galaxy. Instruments such as GRAVITY+ at ESO’s Very Large Telescope Interferometer and MICADO on the Extremely Large Telescope should measure these fast stars more precisely and test the case."
       }
     },
     "ton-618": {
       "0": {
         "kicker": "z = 2.219",
         "title": "Light from a young universe",
-        "body": "TON 618 is a quasar: gas falling onto a giant black hole shines so brightly that it outshines its entire host galaxy. Its light left about 10.8 billion years ago, when the universe was roughly 3 billion years old. Cosmic expansion has since carried it to about 18 billion light-years from us. Through a telescope it still looks like a faint star of the 16th magnitude.",
-        "phase": "Wide"
+        "body": "TON 618 is a quasar: gas falling onto a giant black hole shines so brightly that it outshines its entire host galaxy. Its light left about 10.8 billion years ago, when the universe was roughly 3 billion years old. Cosmic expansion has since carried it to about 18 billion light-years from us. Through a telescope it still looks like a faint star of the 16th magnitude."
       },
       "1": {
         "kicker": "Tonantzintla, 1957",
         "title": "A blue star that wasn’t",
-        "body": "In 1957, astronomers at the Tonantzintla Observatory in Mexico listed it as faint blue star number 618. A radio survey detected it in 1970, and in 1976 a spectrum taken by Marie-Hélène Ulrich revealed its large redshift. It was not a nearby star but an extremely luminous quasar billions of light-years away.",
-        "phase": "Dolly"
+        "body": "In 1957, astronomers at the Tonantzintla Observatory in Mexico listed it as faint blue star number 618. A radio survey detected it in 1970, and in 1976 a spectrum taken by Marie-Hélène Ulrich revealed its large redshift. It was not a nearby star but an extremely luminous quasar billions of light-years away."
       },
       "2": {
         "kicker": "40–70 billion M☉",
         "title": "Weighed by moving gas",
-        "body": "Its mass is estimated, not measured directly. Gas near the black hole moves so fast that its hydrogen emission line is broadened to about 10,000 kilometres per second. Combining that speed with the quasar’s brightness gives roughly 40 to 70 billion Suns. Such estimates are uncertain by a factor of a few, especially for a quasar this bright.",
-        "phase": "Detail"
+        "body": "Its mass is estimated, not measured directly. Gas near the black hole moves so fast that its hydrogen emission line is broadened to about 10,000 kilometres per second. Combining that speed with the quasar’s brightness gives roughly 40 to 70 billion Suns. Such estimates are uncertain by a factor of a few, especially for a quasar this bright."
       },
       "3": {
         "kicker": "800–1,300 au",
         "title": "Near a theoretical limit",
-        "body": "For a non-spinning black hole of this mass, the Schwarzschild radius would be roughly 800 to 1,300 astronomical units, dozens of times the radius of Neptune’s orbit. Theory suggests that a black hole fed by a luminous thin disk cannot grow much beyond about 50 billion Suns for typical parameters, so TON 618 sits close to that limit. Its spin has not been measured.",
-        "phase": "Hold"
+        "body": "For a non-spinning black hole of this mass, the Schwarzschild radius would be roughly 800 to 1,300 astronomical units, dozens of times the radius of Neptune’s orbit. Theory suggests that a black hole fed by a luminous thin disk cannot grow much beyond about 50 billion Suns for typical parameters, so TON 618 sits close to that limit. Its spin has not been measured."
       },
       "4": {
         "kicker": "pull back",
         "title": "Among the heaviest known",
-        "body": "TON 618 is one of the most massive black holes known, but not certainly the most massive. Black holes weighed more directly, such as Holm 15A from the motions of its galaxy’s stars, also reach tens of billions of Suns, though the estimates depend on the method. TON 618 also sits inside an enormous glowing hydrogen nebula and a reservoir of cold gas about 100 kiloparsecs across.",
-        "phase": "Wide"
+        "body": "TON 618 is one of the most massive black holes known, but not certainly the most massive. Black holes weighed more directly, such as Holm 15A from the motions of its galaxy’s stars, also reach tens of billions of Suns, though the estimates depend on the method. TON 618 also sits inside an enormous glowing hydrogen nebula and a reservoir of cold gas about 100 kiloparsecs across."
       }
     },
     "gw231123": {
       "0": {
         "kicker": "23 November 2023",
         "title": "The heaviest merger so far",
-        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about 137 and 101 solar masses merging into one of about 220. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected.",
-        "phase": "Wide"
+        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about 137 and 101 solar masses merging into one of about 220. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
       },
       "1": {
         "kicker": "0.1 s",
         "title": "A tenth of a second",
-        "body": "The signal lasted only about a tenth of a second, because black holes this heavy merge at low frequencies, near the bottom of LIGO’s sensitive band. Only the two LIGO detectors were observing, so the source is located only roughly, within about 1,700 square degrees of sky. Its waves travelled for roughly 2 to 6 billion years before reaching Earth.",
-        "phase": "Dolly"
+        "body": "The signal lasted only about a tenth of a second, because black holes this heavy merge at low frequencies, near the bottom of LIGO’s sensitive band. Only the two LIGO detectors were observing, so the source is located only roughly, within about 1,700 square degrees of sky. Its waves travelled for roughly 2 to 6 billion years before reaching Earth."
       },
       "2": {
         "kicker": "χ ≈ 0.84",
         "title": "Spins near the limit",
-        "body": "Both black holes spun fast: about 0.9 and 0.8 of the maximum allowed by general relativity. The remnant’s spin, about 0.84, is inferred from the shape of the waves, not from light, unlike the spin estimates for Sgr A* or Cygnus X-1. Some values depend on which waveform model is used, so they carry wide uncertainties.",
-        "phase": "Detail"
+        "body": "Both black holes spun fast: about 0.9 and 0.8 of the maximum allowed by general relativity. The remnant’s spin, about 0.84, is inferred from the shape of the waves, not from light, unlike the spin estimates for Sgr A* or Cygnus X-1. Some values depend on which waveform model is used, so they carry wide uncertainties."
       },
       "3": {
         "kicker": "mass gap",
         "title": "Too heavy for one star",
-        "body": "Single stars are not expected to leave black holes between about 60 and 130 solar masses, because pair instability makes very massive stars shed much of their mass in pulses or blows them apart entirely. The lighter black hole here probably lies in that gap. A leading explanation is that one or both were themselves products of earlier mergers in a dense environment such as a star cluster.",
-        "phase": "Hold"
+        "body": "Single stars are not expected to leave black holes between about 60 and 130 solar masses, because pair instability makes very massive stars shed much of their mass in pulses or blows them apart entirely. The lighter black hole here probably lies in that gap. A leading explanation is that one or both were themselves products of earlier mergers in a dense environment such as a star cluster."
       },
       "4": {
         "kicker": "pull back",
         "title": "Black holes without light",
-        "body": "Gravitational waves reveal black holes that emit no light at all. This remnant of about 220 solar masses counts as an intermediate-mass black hole, like the candidate in Omega Centauri, but it formed in a distant galaxy, and its waves reached us after billions of years.",
-        "phase": "Wide"
+        "body": "Gravitational waves reveal black holes that emit no light at all. This remnant of about 220 solar masses counts as an intermediate-mass black hole, like the candidate in Omega Centauri, but it formed in a distant galaxy, and its waves reached us after billions of years."
       }
     }
   },

@@ -1,6 +1,6 @@
 /** Shared pieces of the Deep Field renderer: constants, the per-engine kit and the per-frame state. */
 import type { SolarShow } from "@/space/solar-system/scene/kit";
-import type { LabelInsets, SceneHostBasics } from "@horizon/toolkit/scene";
+import { DEFAULT_INSETS, type LabelInsets, type SceneKit as Kit } from "@horizon/toolkit/scene";
 
 import type { Looks } from "../graphics/looks";
 import type { Selection, Show } from "../store";
@@ -31,17 +31,14 @@ export const GALAXY_NEAR = 1_500;
  */
 export function labelInsets(wide: boolean, clear: number, caption = 0): LabelInsets {
   const bottom = Math.max(wide ? clear : clear + 72, caption);
-  return wide ? { top: 56, bottom, left: 168, right: 4 } : { top: 56, bottom, left: 4, right: 4 };
+  return wide ? { ...DEFAULT_INSETS, bottom, left: 168 } : { ...DEFAULT_INSETS, bottom };
 }
 
-/** What every layer is built with: the host's basics, the looks and the level of detail. */
-export type SceneKit = SceneHostBasics & {
-  looks: Looks;
-  /** Screen size, presence bands, faders and the scale blend (see lod.ts). */
-  lod: Lod;
-  /** World size of `px` screen pixels at distance `dist`: `lod.pxWorld`. */
-  pxWorld: (dist: number, px: number) => number;
-};
+/**
+ * What every layer is built with: the host's basics, the looks and the level of detail (screen
+ * size, presence bands, faders and the scale blend; see lod.ts).
+ */
+export type SceneKit = Kit<Looks, Lod>;
 
 /** The model state one frame draws. */
 export type Frame = {

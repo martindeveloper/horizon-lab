@@ -5,6 +5,7 @@ import { useMemo, useRef } from "react";
 
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
 import { formatAu } from "@/lib/facts";
+import { asideOpen } from "@/lib/scene-store";
 import { solarNameKey } from "@/space/solar-system/format";
 import { TODAY } from "@/space/solar-system/model/moment";
 import { distanceFromEarth } from "@/space/solar-system/model/position";
@@ -83,7 +84,7 @@ export function Sightline() {
   const unit = useDeepField((s) => s.distanceUnit);
   const now = useNow({ updateInterval: 60_000 });
   // Phones give an open sheet or card the bottom of the screen; the journey keeps it.
-  const aside = useDeepField((s) => !s.guideOpen && (s.panel !== "none" || s.selection !== null));
+  const aside = useDeepField((s) => !s.guideOpen && asideOpen(s));
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface);
 

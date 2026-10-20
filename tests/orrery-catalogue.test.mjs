@@ -6,6 +6,7 @@ import { createFormatter, createTranslator } from "next-intl";
 import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
 
 import { cardFor } from "../src/features/orrery/components/cards.tsx";
+import { formatYearsAgo } from "../src/features/orrery/components/format.ts";
 import { PROSE_FIGURES } from "../src/features/orrery/lib/model/catalogue/index.ts";
 import { proseArgs } from "../src/lib/facts.ts";
 import { featureMessages, leaves } from "./messages-helper.mjs";
@@ -53,14 +54,14 @@ function* cards() {
   }
 }
 
-test("cards render every figure in both languages and all distance units", () => {
+test("the orrery's cards render every figure in both languages and all distance units", () => {
   for (const { where, card } of cards())
     for (const text of [card.title, card.body, card.caution, ...card.facts.map((f) => f.value)]) {
       assert.doesNotMatch(text, /[{}]|NaN|undefined|Infinity/, where);
     }
 });
 
-test("lengths follow the visitor's distance unit and keep the source's precision", () => {
+test("the orrery's lengths follow the visitor's distance unit and keep the source's precision", () => {
   const read = (selection, id) => {
     const values = new Map();
     for (const { locale, unit, yearsAgo, sel, card } of cards())
@@ -98,4 +99,18 @@ test("runtime prose arguments format without missing substitutions in either loc
         assert.doesNotMatch(printed, /[{}]|NaN|undefined/, `${locale}:${key}`);
       }
   }
+});
+
+test("years ago keep fixed decimals: two for billions, one for millions", () => {
+  const t = (key, values) => `${key}:${values?.value ?? ""}`;
+  const f = {
+    number: (value, opts) =>
+      new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: opts.minimumFractionDigits,
+        maximumFractionDigits: opts.maximumFractionDigits,
+      }).format(value),
+  };
+  assert.equal(formatYearsAgo(t, f, 4e9), "time.billion:4.00");
+  assert.equal(formatYearsAgo(t, f, 4.5e9), "time.billion:4.50");
+  assert.equal(formatYearsAgo(t, f, 5e6), "time.million:5.0");
 });

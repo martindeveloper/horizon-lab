@@ -1,6 +1,6 @@
 import type { StoreApi } from "zustand";
 
-import { nearestView, type OrbitTurn } from "@horizon/toolkit/camera";
+import { nearestView, type OrbitPose, type OrbitTurn } from "@horizon/toolkit/camera";
 import type { DisposalScope, RenderQuality } from "@horizon/toolkit/rendering";
 import {
   createReadoutClock,
@@ -12,7 +12,63 @@ import {
 } from "@horizon/toolkit/scene";
 import type { DistanceUnit } from "@horizon/toolkit/science";
 
+import { carryPose, takeHandoff, type Crossing, type HandoffSide } from "./handoff";
 import type { SceneSlice, SceneStoreState } from "./scene-store";
+
+/**
+ * Reads what the HUD publishes on the stage (`[data-simulation]`) under a custom property, CSS
+ * px: the dock's height as `--hud-clear` (`useDockClearance`), a caption's as its own. Nothing
+ * published, or no stage, reads as `fallback`.
+ */
+export function stageClearance(host: HTMLElement, property: string, fallback = 0) {
+  const stage = host.closest<HTMLElement>("[data-simulation]");
+  return () => parseFloat(stage?.style.getPropertyValue(property) ?? "") || fallback;
+}
+
+/** A change of the visitor's motion preference redraws the scene, for as long as the scope lives. */
+export function invalidateOnMotionChange(
+  scope: DisposalScope,
+  engine: { invalidate: () => void },
+  media: MediaQueryList,
+) {
+  const onChange = () => engine.invalidate();
+  media.addEventListener("change", onChange);
+  scope.defer(() => media.removeEventListener("change", onChange));
+}
+
+/**
+ * The camera's side of a crossing between the Orrery and Deep Field (`handoff.ts`). Arriving,
+ * the rig snaps to where `arriveAt` says the other side left off (by default its pose, if it
+ * carried one) and flies on to this view; leaving, as the scope is disposed, it carries the
+ * pose `leaveAt` gives (null carries none).
+ */
+export function bridgeHandoff<View>(
+  scope: DisposalScope,
+  side: HandoffSide,
+  rig: {
+    limits: () => { min: number; max: number };
+    snap: (pose: Partial<OrbitPose>) => void;
+    flyToView: (view: View) => void;
+  },
+  view: View,
+  options: {
+    arriveAt?: (crossing: Crossing) => Partial<OrbitPose> | null;
+    leaveAt: () => OrbitPose | null;
+  },
+) {
+  const crossing = takeHandoff(side, rig.limits());
+  if (crossing) {
+    const at = options.arriveAt ? options.arriveAt(crossing) : (crossing.pose ?? null);
+    if (at) {
+      rig.snap(at);
+      rig.flyToView(view);
+    }
+  }
+  scope.defer(() => {
+    const pose = options.leaveAt();
+    if (pose) carryPose(side, pose);
+  });
+}
 
 /**
  * An engine's side of its store. Each new button turn and each view flight is acted on once;
@@ -114,7 +170,7 @@ export function bridgeRender<S extends Pick<SceneSlice, "antialias" | "setAntial
 }
 
 /** A simulation's own readouts: whether any moved enough to publish, and their values. */
-export type OwnReadouts<S> = { moved: boolean; values: Partial<S> };
+type OwnReadouts<S> = { moved: boolean; values: Partial<S> };
 
 /**
  * The HUD readouts an engine publishes a few times a second: the scale bar and, while

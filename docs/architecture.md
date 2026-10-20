@@ -16,22 +16,28 @@ src/
     page.tsx                   Catalogue entry point
     lab/                       Shared simulation prefix (SIMULATION_PREFIX)
       black-hole/
-        layout.tsx             Feature messages, CSS, persistent scene
-        page.tsx               Default scene + metadata
-        [hole]/page.tsx        Preset route + metadata
+        layout.tsx             Feature CSS + simulationLayout (messages, persistent scene)
+        page.tsx               Default scene: simulationMetadata
+        [hole]/page.tsx        Preset route: static params + simulationMetadata
       orrery/
-        layout.tsx             Feature messages, CSS, persistent scene
-        page.tsx               Default view + metadata
-        [view]/page.tsx        View route + metadata
+        layout.tsx             Feature CSS + simulationLayout (messages, persistent scene)
+        page.tsx               Default view: simulationMetadata
+        [view]/page.tsx        View route: static params + simulationMetadata
       deep-field/              The same three routes for Deep Field's views
       spectroscopy/            The same three routes for Stellar Spectra's views
   components/
     shell/                     AppShell, header, phone menu, preferences, theme switch, stage sizing
-    simulations/               Shared simulation stage: WebGL gate, immersive view, loading,
-                               technical details; for zoomable scenes the canvas host
-                               (scene-canvas.tsx), view-from-URL hook, side rail, selection
-                               sheet, the Orrery–Deep Field link (handoff-link.tsx) and the
-                               guide card every simulation's tour shows (guide-card.tsx)
+    simulations/               Shared simulation stage: the lab route layout
+                               (simulation-layout.tsx), the client boundary and WebGL gate
+                               (webgl-gate.tsx: simulationClient), immersive view, loading,
+                               technical details; the view picker (view-picker.tsx) and the
+                               view-from-URL hook (use-view-from-path.ts); for zoomable scenes
+                               the canvas host (scene-canvas.tsx) and its label words
+                               (use-scene-labels.ts), side rail, selection sheet, the
+                               Orrery–Deep Field link (handoff-link.tsx); the guide card every
+                               simulation's tour shows (guide-card.tsx), the journey caption
+                               with its dwell and tour controls (guide-caption.tsx) and the
+                               guide's keys (use-guide-keys.ts)
     pages/                     About and credits page bodies
     status/                    Brand-specific error-page composition and its locale
   features/
@@ -92,16 +98,21 @@ src/
       lib/graphics/            Point clouds (galaxy.ts, cosmos.ts), the bright-star sky, looks.ts
       lib/scene/               The engine: the shared solar system held at today, then the
                                reach (probes, heliopause, light-time rings), stars, Galaxy and
-                               cosmos layers, on the toolkit's scene pieces;
+                               cosmos layers (cosmos-layer.ts fades what cosmos-clouds.ts draws,
+                               cosmos-rings.ts and cosmos-marks.ts), on the toolkit's scene
+                               pieces; each layer registers what its names open (label-picks.ts);
                                camera-rig.ts turns the orbit rig's frame and aim between the
-                               scales, lod.ts blends them, guide.ts flies the journey on the
+                               scales, lod.ts blends them, guide-director.ts flies the journey on the
                                toolkit's tour camera (as the Orrery's guide does)
       lib/store.ts             Zustand store (deepField namespace messages)
     spectroscopy/
       index.ts                 Public client entry: SpectroscopyApp
       manifest.ts, routing.ts, server.ts, technical.json
       components/              The stage (scene canvas and spectrum), dock, line card with its
-                               level diagram and curves, Elements and Display panels, guide
+                               level diagram and curves, Elements and Display panels, guide;
+                               spectrum-view/ keeps the ribbon, plot, labels and gestures as
+                               hooks and pure helpers beside the component
+      lib/scene/               The scene canvas's layout, still-scene painters and photon flock
       lib/model/               The physics, without React or the DOM:
         atoms.ts               Elements, NIST lines and partition functions (atomic-data.json
                                from scripts/fetch-atomic-data.mjs)
@@ -114,16 +125,21 @@ src/
         spectrum.ts            The bench's uniform slab, the stars' layered LTE transfer, the
                                instrument and pixels; line reports and curves of growth
         telluric.ts            Earth's O₂ A and B bands
-        scenes.ts, stars.ts    What each view observes: bench, named stars, mysteries
+        scenes.ts, stars.ts    What each view observes: bench, named stars, mysteries; the
+                               settings' ranges and defaults
+        glow.ts                A glowing gas's colour and brightness, for the scene
         equations.ts, tour.ts  The formulas the documents print; the guided journey
       lib/store.ts             Zustand store (spectroscopy namespace messages)
   lib/
-    engine-lifecycle.ts        Lazy engine startup, cancellation and disposal
     sources.ts                 Shared bibliography the catalogue figures cite
     facts.ts                   Catalogue fact and card-spec types, and their printers
-    scene-store.ts             What a zoomable scene's store shares (`sceneSlice`)
-    scene-bridge.ts            An engine's side of that store: turns, flights, ready, and
-                               the HUD readouts it publishes (`createSceneHud`)
+    scene-store.ts             What a zoomable scene's store shares (`sceneSlice`), the guide
+                               machine of every stepped guide (`guideSlice`) and `asideOpen`
+    scene-bridge.ts            An engine's side of that store: turns, flights, ready, the HUD
+                               readouts it publishes (`createSceneHud`), what the HUD publishes
+                               on the stage (`stageClearance`), redraws on a motion-preference
+                               change and the camera's side of the Orrery–Deep Field crossing
+                               (`bridgeHandoff`)
     handoff.ts                 One-shot note that a visitor crossed between the Orrery and
                                Deep Field at a solar system view, with the camera's pose, so
                                the other side opens where this one left off
@@ -131,22 +147,25 @@ src/
     simulation-paths.ts        Shared `/lab` prefix, path helpers and preset slug routes
     simulations.ts             Registry and active-app matching
     redirects.ts               Native Next.js compatibility redirects
-    metadata.ts                Shared page metadata helper
+    metadata.ts                Page metadata: pageMetadata, simulationMetadata, localeParam
     credits.ts                 Imagery, data, font and package credits for /credits
   space/                       Shared astronomy for the shell, catalogue and simulations:
     messages/                  The shared copy (units, distance words, HUD chrome, the solar
                                system's names), merged under each one's namespace (messages.ts)
     star-catalogue.ts           Shared bright-star positions, magnitudes and colours
     observer-sky.ts             Observer location and apparent Sun, Moon and star positions
-    bright-stars.ts            The catalogue's bright stars on the sky sphere
+    bright-stars.ts            The catalogue's bright stars on the sky sphere, as points
+                               carried with the camera (`createBrightSky`, `carrySky`)
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
-                               disk), elements, tracers, catalogue, views, framing, position
+                               disk), elements, tracers, catalogue, views (and the solar
+                               framing every host engine shares), framing, position
       graphics/                looks.ts, swarms.ts, moons.ts, shader-defines.ts, shaders/
       scene/                   solar-system.ts composes the Sun, planets, moons, populations
                                and the reticle (*-layer.ts, focus-ring.ts) on a kit (kit.ts)
                                with its own level of detail (lod.ts)
       format.ts                Names and orbit rows both simulations print
+      cards.ts                 The figures the population cards quote (`POPULATION_FIGURES`)
   i18n/                        Shared request/routing/navigation configuration
   messages/                    Shared catalogue, shell, and error copy
 bench/                         Headless rendering benchmark: CLI, bundling, reports
@@ -158,9 +177,11 @@ packages/toolkit/
   src/science/                 Constants, units, shared laws, ΛCDM cosmology, sky coordinates,
                                catalogued facts and their printers
   src/camera/                  Per-instance projection, orbit input, flights and framed views
-  src/rendering/               Shader pass, engine host, frame loop, sizing and disposal
-  src/scene/                   Scene host, orbit rig and controls on a log zoom, labels (and
-                               scene.css), taps, rulers, HUD readouts, presence, sky frames
+  src/rendering/               Shader pass, engine host, frame loop, sizing, disposal and the
+                               engine lifecycle (startEngine, withScope)
+  src/scene/                   Scene host, the kit its layers are built with (`SceneKit`), orbit
+                               rig and controls on a log zoom, labels (and scene.css), taps,
+                               rulers, HUD readouts, presence, sky frames
   src/shaders/                 Reusable GLSL snippets and assembly
   src/environment/             Shared media queries: reduced motion, pointer type, wide layout
   src/storage/                 Session and local cells: lifetime, decay, codecs
@@ -243,7 +264,8 @@ string and hash preserved). A full load is required: the locale layout is a root
 `<html>`, so a client-side route change would remount the theme provider and
 re-render its inline theme script, which React refuses on the client.
 
-Server Components receive the validated locale from route params. Pass it explicitly
+Server Components receive the validated locale from route params: `localeParam(params)`
+(`src/lib/metadata.ts`) narrows it to a known locale or renders the 404. Pass it explicitly
 to `getTranslations` and server-rendered localized links; there is no request-time
 locale middleware to infer it. Client Components use the shared locale provider.
 
@@ -264,9 +286,12 @@ helpers from `@/i18n/navigation`.
    `category`, a one-sentence `description`, `open`, one short label per
    highlight key, and `entryPoints.<id>.title` for each entry point. The
    catalogue tile and header then pick it up automatically; keep the copy short.
-4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx`. Load only that feature's
-   translations and styles in its layout. Use the shared stage/shell components
-   and keep browser-dependent scenes behind a client-only boundary.
+4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx`. The layout imports the
+   feature's stylesheets and exports `simulationLayout({ slug, namespace, App, messages })`
+   (`src/components/simulations/simulation-layout.tsx`), which loads only that feature's
+   translations beside the shared ones and keeps the scene mounted across its routes.
+   Use the shared stage/shell components and keep browser-dependent scenes behind a
+   client-only boundary.
    Wrap the overlay in `SimulationImmersive` and give its header `SimulationToolbar`
    (`src/components/simulations/simulation-toolbar.tsx`), which keeps every
    simulation's tools in one order and holds the immersive toggle (see
@@ -277,9 +302,12 @@ helpers from `@/i18n/navigation`.
    back as it was first made: no guide still running, no selection, panel or switch
    carried into the next visit. Keep any remembered state in the store, not in module
    variables, so the reset reaches it too.
-5. Add route metadata and static params for any presets. Build the feature's
-   `routing.ts` on `slugRoutes({ base, ids, defaultId, aliases })` so slugs,
-   aliases, static params and redirects behave like the other simulations.
+5. Export `simulationMetadata({ path, messages, image })` (`src/lib/metadata.ts`) from
+   the page; a `[slug]/page.tsx` passes `view` (its param, `resolve`, `pathFor` and the
+   view's title) instead of `path`, sets `dynamicParams = false` and exports the
+   feature's static params. Build the feature's `routing.ts` on
+   `slugRoutes({ base, ids, defaultId, aliases })` so slugs, aliases, static params and
+   redirects behave like the other simulations.
    Add compatibility redirects only when replacing existing URLs.
 6. Extend tests for the new feature's entry points and copy coverage. Run
    `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`.
@@ -298,8 +326,9 @@ only its layers, its views and its store of its own:
 
 - **Stage:** `SceneCanvas` (`src/components/simulations/scene-canvas.tsx`) owns the canvas
   and the label layer, and hands the engine a `SceneMount` with live label text and
-  language. `useViewFromPath` keeps the store's view on the URL. Route layouts import
-  `@horizon/toolkit/scene.css` for the labels.
+  language (`useSceneLabels` words them). `useViewFromPath` keeps the store's view on the URL,
+  and with a `pathFor` the URL on the view too, as Stellar Spectra's guide needs. Route
+  layouts import `@horizon/toolkit/scene.css` for the labels.
 - **Engine:** `createSceneHost` (renderer, camera, frame loop, `tight` devices, shader
   warm-up, anti-aliasing: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
   adds limits, the aim's `home` and the frame's `orient`), `createViewMoves` (its views,
@@ -309,7 +338,11 @@ only its layers, its views and its store of its own:
   view a few times a second, plus the feature's own readouts.
 - **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
   `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias` and the scale bar; the
-  feature adds its view, selection and switches. `bridgeStore` acts once on each button turn
+  feature adds its view, selection and switches. `guideSlice` is the guide's machine (open
+  keeping the visitor's settings, step within the tour, end giving them back); the feature adds
+  what its own guide sets per step. Its caption is `GuideCaption`, its keys `useGuideKeys`, and
+  the engines build on `withScope`, `stageClearance`, `bridgeHandoff` and
+  `invalidateOnMotionChange`. `bridgeStore` acts once on each button turn
   and view flight, ignores the view the HUD writes during a frame, and reports the first frame;
   `bridgeRender` hands the engine each new quality level and the host the anti-aliasing,
   publishing the device's default anti-aliasing while none is chosen.

@@ -2,7 +2,7 @@
  * Works the card figures are checked against (docs/science-sources.md lists them with the
  * figures that cite them). Links only where the ledger opened one.
  */
-export type Source = { cite: string; link?: string };
+type Source = { cite: string; link?: string };
 
 export const SOURCES = {
   akeson2021: {

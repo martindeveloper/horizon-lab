@@ -8,6 +8,7 @@
  * Named galaxies and clusters sit at their measured directions and distances (comoving ones
  * from their redshifts, in flat ΛCDM); the rest is a sketch shaped like each structure.
  */
+import type { Vec3 } from "@horizon/toolkit/bodies";
 import { clamp01 } from "@horizon/toolkit/math";
 import {
   PLANCK_2018,
@@ -35,14 +36,13 @@ export const OMEGA_M = PLANCK_2018.omegaM;
 export const UNIVERSE_AGE_GYR = cosmicAgeAtRedshiftGyr(0, PLANCK_2018);
 
 /** Hubble-flow distance (Mly) for a recession velocity cz (km/s) at H₀. */
-export const hubbleMly = (cz: number) =>
-  convert(hubbleLaw.compute({ v: cz, H0: HUBBLE }), "Mpc", "Mly");
+const hubbleMly = (cz: number) => convert(hubbleLaw.compute({ v: cz, H0: HUBBLE }), "Mpc", "Mly");
 
 /**
  * Comoving distance (Mly) for a redshift given as cz (km/s), in the model's cosmology: where
  * Hubble's law runs long (by ~2 % at the Sloan Great Wall's z = 0.073).
  */
-export const redshiftMly = (cz: number) => comovingMly(cz / convert(1, "c", "km/s"));
+const redshiftMly = (cz: number) => comovingMly(cz / convert(1, "c", "km/s"));
 
 /** Comoving distance (Mly) to redshift z in the model's cosmology. */
 const comovingMly = (z: number) => convert(comovingDistanceMpc(z, PLANCK_2018), "Mpc", "Mly");
@@ -63,7 +63,7 @@ export const CMB_MLY = comovingMly(LAST_SCATTERING_Z);
  * The farthest galaxy yet confirmed by its spectrum, redshift: MoM-z14 (Naidu et al. 2025,
  * z = 14.44 ± 0.02), checked 19 October 2026. Photometric candidates beyond it do not count.
  */
-export const FIRST_GALAXIES_Z = 14.44;
+const FIRST_GALAXIES_Z = 14.44;
 /**
  * Today's distance to them, Mly: about three quarters of the way to the microwave background.
  * Between them and it lie cosmic dawn, when the first stars and galaxies lit up beyond what
@@ -155,10 +155,8 @@ export const LOCAL_TURNAROUND = {
  * Vaucouleurs (pole at l = 47.37°, b = +6.32°; SGL = 0 at l = 137.37°, b = 0°).
  * ------------------------------------------------------------------------------------- */
 
-export type Vec = [number, number, number];
-
 /** Unit vector toward galactic (l, b), in degrees, in Galaxy-model axes. */
-function galacticDirection(l: number, b: number): Vec {
+function galacticDirection(l: number, b: number): Vec3 {
   const cb = Math.cos(b * RAD);
   return [-cb * Math.cos(l * RAD), Math.sin(b * RAD), cb * Math.sin(l * RAD)];
 }
@@ -177,7 +175,7 @@ export function cmbCz(l: number, b: number, cz: number) {
   return cz + CMB_DIPOLE.kms * (x * tx + y * ty + z * tz);
 }
 
-const cross = (a: Vec, b: Vec): Vec => [
+const cross = (a: Vec3, b: Vec3): Vec3 => [
   a[1] * b[2] - a[2] * b[1],
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
@@ -191,7 +189,7 @@ export const SUPERGALACTIC = (() => {
 })();
 
 /** A supergalactic Cartesian vector in Galaxy-model axes. */
-export function fromSupergalactic(x: number, y: number, z: number): Vec {
+export function fromSupergalactic(x: number, y: number, z: number): Vec3 {
   const { x: X, y: Y, z: Z } = SUPERGALACTIC;
   return [
     X[0] * x + Y[0] * y + Z[0] * z,
@@ -201,7 +199,7 @@ export function fromSupergalactic(x: number, y: number, z: number): Vec {
 }
 
 /** Supergalactic latitude (degrees) of a Galaxy-model direction. */
-export function supergalacticLatitude(v: Vec) {
+export function supergalacticLatitude(v: Vec3) {
   const { z } = SUPERGALACTIC;
   const len = Math.hypot(v[0], v[1], v[2]) || 1;
   return Math.asin((v[0] * z[0] + v[1] * z[1] + v[2] * z[2]) / len) / RAD;
@@ -211,10 +209,10 @@ export function supergalacticLatitude(v: Vec) {
 const ANDROMEDA_DIRECTION = galacticDirection(121.17, -21.57);
 
 /** The Sun in Galaxy-model axes, Mly from the galactic centre. */
-const SUN_MLY: Vec = [SUN_GALACTIC_RADIUS_LY / 1e6, SUN_HEIGHT_LY / 1e6, 0];
+const SUN_MLY: Vec3 = [SUN_GALACTIC_RADIUS_LY / 1e6, SUN_HEIGHT_LY / 1e6, 0];
 
 /** A heliocentric distance (Mly) toward (l, b), from the galactic centre. */
-export function place(l: number, b: number, mly: number): Vec {
+function place(l: number, b: number, mly: number): Vec3 {
   const d = galacticDirection(l, b);
   return [SUN_MLY[0] + d[0] * mly, SUN_MLY[1] + d[1] * mly, SUN_MLY[2] + d[2] * mly];
 }
@@ -253,7 +251,7 @@ export const WEB_SKY = {
 } as const;
 
 /** A J2000 sky position and heliocentric cz (km/s) as a place, Mly from the galactic centre. */
-export function skyPlace(ra: number, dec: number, cz: number): Vec {
+export function skyPlace(ra: number, dec: number, cz: number): Vec3 {
   const { l, b, mly } = fromSky(ra, dec, cz);
   return place(l, b, mly);
 }
@@ -312,7 +310,7 @@ export type AnchorId =
   | "shapleyCore"
   | "sloanGreatWall";
 
-export type Anchor = {
+type Anchor = {
   id: AnchorId;
   /** Galactic longitude and latitude, degrees. */
   l: number;
@@ -373,10 +371,10 @@ export const COSMOS_LABELS = [
 ] as const;
 
 /* Fixed for the session: each anchor's place today. */
-const TODAY = new Map<Anchor, Vec>(ANCHORS.map((a) => [a, place(a.l, a.b, a.mly)]));
+const TODAY = new Map<Anchor, Vec3>(ANCHORS.map((a) => [a, place(a.l, a.b, a.mly)]));
 
 /** Today's position of an anchor, Mly from the galactic centre. Shared: do not modify. */
-export const anchorToday = (a: Anchor): Readonly<Vec> => TODAY.get(a)!;
+export const anchorToday = (a: Anchor): Readonly<Vec3> => TODAY.get(a)!;
 
 /** Today's diameter of each structure (Mly), from the published size in its own unit. */
 export const STRUCTURES = {
@@ -409,7 +407,7 @@ export const STRUCTURES = {
 } as const;
 
 /** The Local Group's mass centre, Mly from the galactic centre: along the line to Andromeda. */
-export const LOCAL_GROUP_CENTRE: Readonly<Vec> = (() => {
+export const LOCAL_GROUP_CENTRE: Readonly<Vec3> = (() => {
   const d = ANDROMEDA_DIRECTION;
   const r = ANDROMEDA_MLY * ANDROMEDA_MASS_SHARE;
   return [d[0] * r, d[1] * r, d[2] * r];
@@ -420,10 +418,10 @@ export const LOCAL_GROUP_CENTRE: Readonly<Vec> = (() => {
  * centre to each structure's heart, in log distance between the framed views.
  * ------------------------------------------------------------------------------------- */
 
-type AimStop = { ly: number; at: Readonly<Vec> };
+type AimStop = { ly: number; at: Readonly<Vec3> };
 
-const scaled = (v: Readonly<Vec>, k: number): Vec => [v[0] * k, v[1] * k, v[2] * k];
-const ZERO: Readonly<Vec> = [0, 0, 0];
+const scaled = (v: Readonly<Vec3>, k: number): Vec3 => [v[0] * k, v[1] * k, v[2] * k];
+const ZERO: Readonly<Vec3> = [0, 0, 0];
 
 /** Camera distances (ly) of the framed views beyond the Galaxy. */
 export const COSMIC_VIEW_LY = {
@@ -443,7 +441,7 @@ const WEB_LANDMARKS: readonly AnchorId[] = [
   "sloanGreatWall",
 ];
 /** The middle of the web's landmarks, Mly from the galactic centre. */
-const WEB_CENTRE = WEB_LANDMARKS.reduce<Vec>(
+const WEB_CENTRE = WEB_LANDMARKS.reduce<Vec3>(
   (sum, id) => {
     const p = anchorToday(anchorById(id));
     return [
@@ -472,7 +470,7 @@ const AIM_STOPS: readonly AimStop[] = [
 const ease = (t: number) => t * t * t * (t * (6 * t - 15) + 10);
 
 /** The camera's turning point (Mly from the galactic centre) at a camera distance in ly. */
-export function cosmicAim(ly: number, out: Vec = [0, 0, 0]): Vec {
+export function cosmicAim(ly: number, out: Vec3 = [0, 0, 0]): Vec3 {
   const first = AIM_STOPS[0]!;
   if (ly <= first.ly) {
     out[0] = out[1] = out[2] = 0;

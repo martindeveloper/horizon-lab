@@ -73,12 +73,12 @@ export function yearsAgoToSlider(y: number) {
 }
 
 /** Readouts call anything this recent "today"; older is a moment on the slider. */
-export const TODAY_SPAN = 5e4;
+const TODAY_SPAN = 5e4;
 export const isToday = (yearsAgo: number) => yearsAgo <= TODAY_SPAN;
 
-export type Epoch = "sketch" | "birth" | "disk" | "clearing" | "today";
+type Epoch = "sketch" | "birth" | "disk" | "clearing" | "today";
 /** Finer, dated notes for the dock. Each one is a measured or well-established milestone. */
-export type Note =
+type Note =
   | "merger"
   | "thinDisk"
   | "ingredients"
@@ -127,7 +127,7 @@ export function epochOf(yearsAgo: number): Epoch {
 }
 
 /** Years of model time per real second while playing, by era. */
-export function playRate(yearsAgo: number) {
+function playRate(yearsAgo: number) {
   if (yearsAgo > SUN_BIRTH) return 1.6e8;
   /* The gas disk plays at a constant pace on its logarithmic slider segment. */
   if (yearsAgo > GAS_END) return 1.5 * Math.max(SUN_BIRTH - yearsAgo, FIRST_SOLIDS_FLOOR);

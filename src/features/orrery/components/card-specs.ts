@@ -1,11 +1,10 @@
 import {
   r,
   row,
-  specEntries,
   v,
   type Args,
+  type Badge as SharedBadge,
   type CardSpec,
-  type SpecEntry,
   type StaticCard,
 } from "@/lib/facts";
 /**
@@ -17,26 +16,24 @@ import {
  * tests/simulation-shared.test.mjs checks that each message's placeholders match the
  * arguments given here, in both languages.
  */
+import { POPULATION_FIGURES } from "@/space/solar-system/cards";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import type { Bin } from "@/space/solar-system/model/tracers";
 import type { PlanetId } from "@horizon/toolkit/bodies";
 
-/** What a card's kicker says about how far its figures can be trusted (`badges.<id>`). */
+/** The shared badges, and the Orrery's own for figures the timeline moves or models (`badges.<id>`). */
 export type Badge =
-  | "measured"
+  | SharedBadge
   | "measuredRounded"
   | "endMeasured"
   | "presentOnly"
   | "rewound"
   | "region"
   | "model"
-  | "mixed"
-  | "inferred"
-  | "sample"
-  | "sketch"
-  | "schematic";
+  | "sample";
 
 const P = SOLAR_CATALOGUE.populations;
+const F = POPULATION_FIGURES;
 
 /** 1 au in km and light-minutes, from the science kit's exact definitions. */
 const auArgs = {
@@ -79,32 +76,32 @@ export const POPULATION_CARDS: Record<"asteroids" | Bin, StaticCard<Badge>> = {
   asteroids: {
     badge: "region",
     rows: [
-      row("where", "cards.populations.asteroids.where", { range: r(P.asteroids.where) }),
-      row("mass", "cards.populations.asteroids.mass", { value: v(P.asteroids.mass) }),
+      row("where", "cards.populations.asteroids.where", { range: F.asteroids.where }),
+      row("mass", "cards.populations.asteroids.mass", { value: F.asteroids.mass }),
     ],
   },
   disk: {
     badge: "model",
     rows: [
-      row("drawnAt", "cards.populations.disk.drawnAt", { range: r(P.disk.drawnAt) }),
+      row("drawnAt", "cards.populations.disk.drawnAt", { range: F.disk.drawnAt }),
       row("when", "cards.populations.disk.when"),
     ],
-    body: { mass: v(P.disk.mass) },
+    body: { mass: F.disk.mass },
   },
   kuiper: {
     badge: "mixed",
     rows: [
-      row("region", "cards.populations.kuiper.region", { range: r(P.kuiper.region) }),
-      row("todayMass", "cards.populations.kuiper.todayMass", { value: v(P.kuiper.todayMass) }),
+      row("region", "cards.populations.kuiper.region", { range: F.kuiper.region }),
+      row("todayMass", "cards.populations.kuiper.todayMass", { value: F.kuiper.todayMass }),
       row("originalMass", "cards.populations.kuiper.originalMass", {
-        value: v(P.kuiper.originalMass),
+        value: F.kuiper.originalMass,
       }),
     ],
     body: {
-      catalogued: v(P.kuiper.catalogued),
-      cliff: v(P.kuiper.cliff),
-      cold: r(P.kuiper.coldClassicals),
-      plutinos: v(P.kuiper.plutinos),
+      catalogued: F.kuiper.catalogued,
+      cliff: F.kuiper.cliff,
+      cold: F.kuiper.cold,
+      plutinos: F.kuiper.plutinos,
     },
   },
   scattered: {
@@ -117,11 +114,11 @@ export const POPULATION_CARDS: Record<"asteroids" | Bin, StaticCard<Badge>> = {
   oort: {
     badge: "inferred",
     rows: [
-      row("innerEdge", "cards.populations.oort.innerEdge", { range: r(P.oort.innerEdge) }),
-      row("outerEdge", "cards.populations.oort.outerEdge", { range: r(P.oort.outerEdge) }),
+      row("innerEdge", "cards.populations.oort.innerEdge", { range: F.oort.innerEdge }),
+      row("outerEdge", "cards.populations.oort.outerEdge", { range: F.oort.outerEdge }),
       row("shells", "cards.populations.oort.shells", {
-        inner: v(P.oort.innerShell),
-        outer: v(P.oort.outerShell),
+        inner: F.oort.innerShell,
+        outer: F.oort.outerShell,
       }),
     ],
   },
@@ -139,12 +136,3 @@ export const TRACER_NOTES = {
   cold: { range: r(P.tracers.coldClassicals) },
   caution: { count: v(P.tracers.count) },
 } satisfies Record<string, Args>;
-
-/** Every definition with its body and caution message keys, for the placeholder test. */
-export function cardSpecs(): SpecEntry[] {
-  return [
-    ...specEntries({ sun: SUN_CARD }, "cards"),
-    ...specEntries(NAMED_NOTES, "cards.named", "summary"),
-    ...specEntries(POPULATION_CARDS, "cards.populations"),
-  ];
-}

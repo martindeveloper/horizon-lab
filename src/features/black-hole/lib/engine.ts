@@ -1,11 +1,9 @@
 import {
   createOrbitInput,
-  sampleOrbitFlight,
   writeCameraSnapshot,
   type CameraSnapshot,
 } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { lerp, smootherstep } from "@horizon/toolkit/math";
 import {
   createEngineHost,
   createFullscreenPass,
@@ -19,15 +17,102 @@ import {
   clampDistance,
   createUniforms,
   orbitWheelSensitivity,
+  PASS_OPTIONS,
   sceneWriter,
   writeCamera,
+  type CameraPose,
 } from "./frame";
-import { MAX_DIST, MIN_DIST, type Quality } from "./presets";
+import type { Quality } from "./holes";
+import { MAX_DIST, MIN_DIST } from "./physics";
 import { BLACK_HOLE_QUALITY, renderBudget, renderScale } from "./quality";
 import { useBlackHole } from "./store";
+import { holdPose, tourEnd, tourPose } from "./tour-flight";
 import { tourFor } from "./tours";
 
-export type BlackHoleEngine = { dispose: () => void };
+type BlackHoleEngine = { dispose: () => void };
+type State = ReturnType<typeof useBlackHole.getState>;
+
+/** Auto-orbit rate, radians per second. */
+const ORBIT_RATE = 0.045;
+/** A Dutch tilt left by the guide eases out with this time constant once it closes, in seconds. */
+const ROLL_DECAY = 0.7;
+
+/**
+ * The first frames trace few steps at low resolution so something shows at once;
+ * the next frame steps up, and from the third on the scene draws in full.
+ */
+function createWarmup() {
+  let stage = 0;
+  return {
+    done: () => stage >= 2,
+    /** Share of the resolution and the device pixel ratio to draw at this stage. */
+    scale: () => (stage === 0 ? 0.38 : stage === 1 ? 0.68 : 1),
+    dpr: (device: number) => (stage < 2 ? 1 : device),
+    /** Ray steps for this stage, out of the quality's full budget. */
+    steps: (full: number) => {
+      if (stage === 0) return Math.min(48, full);
+      if (stage === 1) return Math.min(full, Math.max(80, Math.round(full * 0.72)));
+      return full;
+    },
+    /** After a frame: whether the stage moved on, so the resolution must be refreshed. */
+    advance: () => {
+      if (stage >= 2) return false;
+      stage += 1;
+      return true;
+    },
+  };
+}
+
+/**
+ * Flies the camera into each guide beat from wherever it is, then holds it there with
+ * a slow drift. The card's timer may land first; the flight still finishes unless motion
+ * is reduced.
+ */
+function createTourDirector(reduce: boolean) {
+  let open = false;
+  let beatIndex = -1;
+  let t = 0;
+  let from: CameraPose = { azimuth: 0, inclination: 0, distance: 0, roll: 0 };
+  let landed: CameraPose | null = null;
+  let held = 0;
+  return {
+    /** The current beat's flight is still under way. */
+    flying: () => t < 1,
+    /** The camera for this frame while the guide is open. */
+    step(state: State, camera: CameraPose, dt: number): CameraPose {
+      if (!open || state.guideBeat !== beatIndex) {
+        open = true;
+        beatIndex = state.guideBeat;
+        from = { ...camera };
+        t = 0;
+        landed = null;
+      }
+      const beat = tourFor(state.presetId)[state.guideBeat];
+      if (!beat) return camera;
+      if (t < 1 && !(state.guideArrived && reduce)) {
+        t = Math.min(1, t + dt / Math.max(beat.duration, 0.4));
+        if (t >= 1 && !state.guideArrived) state.setGuideArrived(true);
+        return tourPose(beat, from, t);
+      }
+      if (!state.guideArrived) return camera;
+      if (!landed) {
+        landed = tourEnd(beat, from);
+        t = 1;
+        held = 0;
+      }
+      if (!state.animationPaused && !reduce) held += dt;
+      return holdPose(beat, landed, held);
+    },
+    /** The guide closed; true once, when a tour was running. */
+    close() {
+      const was = open;
+      open = false;
+      beatIndex = -1;
+      landed = null;
+      return was;
+    },
+  };
+}
 
 /** Feature orchestration only: physics, uniforms, tours and application state. */
 export function createBlackHoleEngine(
@@ -42,50 +127,49 @@ export function createBlackHoleEngine(
     const uniforms = createUniforms();
     const profile = resources.own(uniforms.uDiskProfile.value);
     const writeScene = sceneWriter(uniforms);
-
     const pass = resources.own(
       createFullscreenPass({
         canvas,
         vertexShader: fullscreenVertex,
         fragmentShader,
         uniforms,
-        clearColor: 0x08080b,
-        powerPreference: "low-power",
+        ...PASS_OPTIONS,
         supersample: true,
       }),
     );
     const reduce = prefersReducedMotion();
-
-    let azimuth = useBlackHole.getState().azimuth;
-    let incl = useBlackHole.getState().inclination;
-    let dist = useBlackHole.getState().distance;
-    let time = 0;
-    let stage = 0;
+    const warmup = createWarmup();
+    const tour = createTourDirector(reduce);
     let announced = false;
-    let lastGuideOpen = false;
-    let lastGuideBeat = -1;
-    let tourT = 0;
-    let tourFromAz = azimuth;
-    let tourFromIncl = incl;
-    let tourFromDist = dist;
-    let tourFromRoll = 0;
-    let roll = 0;
-    let holding = false;
-    let holdT = 0;
-    let holdAz = 0;
-    let holdIncl = 0;
-    let holdDist = 0;
+    let time = 0;
+
+    const opening = useBlackHole.getState();
+    /** The camera the frame draws; the store holds the visitor's own pose. */
+    const camera: CameraPose = {
+      azimuth: opening.azimuth,
+      inclination: opening.inclination,
+      distance: opening.distance,
+      roll: 0,
+    };
+    function moveCamera(pose: CameraPose, spin: number) {
+      camera.azimuth = pose.azimuth;
+      camera.inclination = pose.inclination;
+      camera.distance = clampDistance(pose.distance, spin);
+      camera.roll = pose.roll;
+    }
+    function storeCamera() {
+      const state = useBlackHole.getState();
+      state.setAzimuth(camera.azimuth);
+      state.setInclination(camera.inclination);
+      state.setDistance(camera.distance);
+    }
 
     const input = resources.own(
       createOrbitInput(canvas, {
-        getPose: () => ({ azimuth, inclination: incl, distance: dist }),
+        getPose: () => camera,
         onChange: (pose) => {
-          azimuth = pose.azimuth;
-          incl = pose.inclination;
-          dist = clampDistance(pose.distance, useBlackHole.getState().spin);
-          useBlackHole.getState().setAzimuth(azimuth);
-          useBlackHole.getState().setInclination(incl);
-          useBlackHole.getState().setDistance(dist);
+          moveCamera({ ...pose, roll: camera.roll }, useBlackHole.getState().spin);
+          storeCamera();
         },
         enabled: () => !useBlackHole.getState().guideOpen,
         distance: { min: MIN_DIST, max: MAX_DIST },
@@ -93,24 +177,20 @@ export function createBlackHoleEngine(
       }),
     );
     const power = resources.own(observePowerPreference());
-    let constrained = power.state.coarsePointer || power.state.onBattery;
+    const constrainedNow = () => power.state.coarsePointer || power.state.onBattery;
+    let constrained = constrainedNow();
     const engine = resources.own(
       createEngineHost({
         canvas,
         host,
         resolution: () => {
           const quality = useBlackHole.getState().quality;
+          const device = window.devicePixelRatio || 1;
           return {
-            scale: renderScale(
-              quality,
-              host.clientWidth,
-              host.clientHeight,
-              window.devicePixelRatio || 1,
-              constrained,
-            ),
+            scale: renderScale(quality, host.clientWidth, host.clientHeight, device, constrained),
             dprCap: renderBudget(quality, constrained, false).dprCap,
-            dpr: stage < 2 ? 1 : window.devicePixelRatio || 1,
-            warmupScale: stage === 0 ? 0.38 : stage === 1 ? 0.68 : 1,
+            dpr: warmup.dpr(device),
+            warmupScale: warmup.scale(),
           };
         },
         onResize: (width, height) => {
@@ -127,117 +207,54 @@ export function createBlackHoleEngine(
       announced = true;
       onFirstFrame?.();
     }
+    /** The store's pose wins unless the guide or the visitor's hand is moving the camera. */
     function applyCamera() {
       const state = useBlackHole.getState();
       if (!state.guideOpen && !input.active) {
-        azimuth = state.azimuth;
-        incl = state.inclination;
-        dist = state.distance;
+        camera.azimuth = state.azimuth;
+        camera.inclination = state.inclination;
+        camera.distance = state.distance;
       }
-      dist = clampDistance(dist, state.spin);
-      writeCamera(uniforms, { azimuth, inclination: incl, distance: dist, roll }, state.spin);
+      camera.distance = clampDistance(camera.distance, state.spin);
+      writeCamera(uniforms, camera, state.spin);
       writeCameraSnapshot(
         snapshot,
         uniforms.uCamPos.value,
         uniforms.uCamFwd.value,
         uniforms.uCamRight.value,
         uniforms.uCamUp.value,
-        dist,
+        camera.distance,
         uniforms.uFov.value,
       );
     }
-
-    function stepCount(quality: Quality): number {
-      const full = BLACK_HOLE_QUALITY[quality].steps;
-      if (stage === 0) return Math.min(48, full);
-      if (stage === 1) return Math.min(full, Math.max(80, Math.round(full * 0.72)));
-      return full;
-    }
+    const stepCount = (quality: Quality) => warmup.steps(BLACK_HOLE_QUALITY[quality].steps);
+    const busy = (state: State) => state.guideOpen && (!state.guideArrived || tour.flying());
 
     function tick(stepDt: number) {
       const state = useBlackHole.getState();
-      if (state.guideOpen) {
-        if (!lastGuideOpen || state.guideBeat !== lastGuideBeat) {
-          lastGuideOpen = true;
-          lastGuideBeat = state.guideBeat;
-          tourFromAz = azimuth;
-          tourFromIncl = incl;
-          tourFromDist = dist;
-          tourFromRoll = roll;
-          tourT = 0;
-          holding = false;
-        }
-        const beat = tourFor(state.presetId)[state.guideBeat];
-        const from = { azimuth: tourFromAz, inclination: tourFromIncl, distance: tourFromDist };
-        // The card's timer may land first; the flight still finishes unless motion is reduced.
-        if (beat && tourT < 1 && !(state.guideArrived && reduce)) {
-          tourT = Math.min(1, tourT + stepDt / Math.max(beat.duration, 0.4));
-          const pose = sampleOrbitFlight(tourT, from, beat);
-          azimuth = pose.azimuth;
-          incl = pose.inclination;
-          dist = clampDistance(pose.distance, state.spin);
-          roll = lerp(tourFromRoll, beat.roll ?? 0, smootherstep(tourT));
-          if (tourT >= 1 && !state.guideArrived) useBlackHole.getState().setGuideArrived(true);
-        } else if (beat && state.guideArrived) {
-          if (!holding) {
-            const end = sampleOrbitFlight(1, from, beat);
-            holding = true;
-            tourT = 1;
-            holdT = 0;
-            holdAz = end.azimuth;
-            holdIncl = end.inclination;
-            holdDist = end.distance;
-            roll = beat.roll ?? 0;
-          }
-          // Hold: a slow orbit that eases in, and a push that settles.
-          if (!state.animationPaused && !reduce) holdT += stepDt;
-          const drift = beat.drift ?? 0.008 * Math.sign(beat.yaw);
-          const ramp = 3;
-          const settle = 1 - (1 + holdT / 18) * Math.exp(-holdT / 18);
-          azimuth = holdAz + drift * (holdT - ramp * (1 - Math.exp(-holdT / ramp)));
-          incl = holdIncl;
-          dist = clampDistance(holdDist * (1 - (beat.creep ?? 0.05) * settle), state.spin);
-        }
-      } else {
-        if (lastGuideOpen) {
-          lastGuideOpen = false;
-          lastGuideBeat = -1;
-          holding = false;
-          useBlackHole.getState().setAzimuth(azimuth);
-          useBlackHole.getState().setInclination(incl);
-          useBlackHole.getState().setDistance(dist);
-        }
-        if (roll !== 0) {
-          roll *= Math.exp(-stepDt / 0.7);
-          if (Math.abs(roll) < 1e-4) roll = 0;
+      if (state.guideOpen) moveCamera(tour.step(state, camera, stepDt), state.spin);
+      else {
+        if (tour.close()) storeCamera();
+        if (camera.roll !== 0) {
+          camera.roll *= Math.exp(-stepDt / ROLL_DECAY);
+          if (Math.abs(camera.roll) < 1e-4) camera.roll = 0;
           engine.markDirty();
         }
       }
-
       if (!state.animationPaused && state.autoRotate && !input.active && !state.guideOpen) {
-        azimuth += 0.045 * stepDt;
-        useBlackHole.getState().setAzimuth(azimuth);
+        camera.azimuth += ORBIT_RATE * stepDt;
+        useBlackHole.getState().setAzimuth(camera.azimuth);
       }
-      const nextConstrained = power.state.coarsePointer || power.state.onBattery;
-      if (nextConstrained !== constrained) {
-        constrained = nextConstrained;
+      if (constrainedNow() !== constrained) {
+        constrained = constrainedNow();
         engine.refresh();
       }
       if (!state.animationPaused) time += stepDt;
       writeScene(state, time, stepCount(state.quality));
-
       applyCamera();
-
       pass.render({ antialias: state.antialiasing });
-
-      if (stage === 0) {
-        announceFirstFrame();
-        stage = 1;
-        engine.refresh();
-      } else if (stage === 1) {
-        stage = 2;
-        engine.refresh();
-      } else announceFirstFrame();
+      if (warmup.advance()) engine.refresh();
+      announceFirstFrame();
     }
     applyCamera();
     pass.compile();
@@ -249,17 +266,12 @@ export function createBlackHoleEngine(
       paused: () => {
         const state = useBlackHole.getState();
         return (
-          state.mapOpen ||
-          (state.animationPaused &&
-            !engine.dirty &&
-            stage >= 2 &&
-            !(state.guideOpen && (!state.guideArrived || tourT < 1)))
+          state.mapOpen || (state.animationPaused && !engine.dirty && warmup.done() && !busy(state))
         );
       },
       fps: () => {
         const state = useBlackHole.getState();
-        const busy = input.active || (state.guideOpen && (!state.guideArrived || tourT < 1));
-        return renderBudget(state.quality, constrained, busy).fps;
+        return renderBudget(state.quality, constrained, input.active || busy(state)).fps;
       },
     });
     resources.defer(

@@ -38,7 +38,7 @@ npm run bench -- --compare bench-results/<earlier-run> --strict --max-slowdown 5
 - `grab.ts` records a frame and writes draw and shader artifacts.
 - `browser.ts` handles Chromium, page setup and scripted input; `build.ts` bundles targets.
 - `model.ts` defines the stored report data; `fingerprint.ts` and `compare.ts` match runs.
-- `report.ts`, `html.ts` and `terminal.ts` format reports; `templates/` holds HTML and CSS.
+- `report.ts`, `html.ts` and `terminal.ts` format reports over `format.ts`; `templates/` holds HTML and CSS.
 - `images.ts` encodes captures and compares pixels.
 
 The CLI and report formats stay stable. Sizes are normalized and deduplicated before

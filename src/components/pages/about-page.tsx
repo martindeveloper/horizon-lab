@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
@@ -6,9 +5,9 @@ import type { Locale } from "@/i18n/routing";
 import { REPOSITORY_URL } from "@/lib/links";
 import { cn, kickerClass } from "@horizon/toolkit/ui";
 
-import { HorizonMark } from "../shell/brand";
+import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
 
-export const COURSE_URL =
+const COURSE_URL =
   "https://www.planetum.cz/eshop/produkt/1115-astronomicky-kurz-2026-27-i-rocnik-prezencni";
 
 const thanks = [
@@ -19,8 +18,8 @@ const thanks = [
 
 const caveats = ["simplified", "approximate", "performance"] as const;
 
-/** Margin column for labels beside a ~65-character text column, as in a printed essay. */
-const grid = "lg:grid lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-x-14";
+const linkClass =
+  "font-medium text-fg underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden";
 
 /** One part of the letter: its label hangs in the margin on wide screens. */
 function Part({
@@ -35,7 +34,10 @@ function Part({
   children: ReactNode;
 }) {
   return (
-    <section aria-labelledby={`about-${id}`} className={cn("mt-16 sm:mt-20", grid, className)}>
+    <section
+      aria-labelledby={`about-${id}`}
+      className={cn("mt-16 sm:mt-20", letterGrid, className)}
+    >
       <h2
         id={`about-${id}`}
         className={cn(kickerClass, "text-balance lg:pt-[0.7em] lg:text-right lg:leading-relaxed")}
@@ -44,30 +46,6 @@ function Part({
       </h2>
       <div className="mt-5 space-y-6 lg:mt-0">{children}</div>
     </section>
-  );
-}
-
-/** An inline link that leaves the site, marked with an arrow and announced as opening a new tab. */
-function ExternalLink({
-  href,
-  newTab,
-  children,
-}: {
-  href: string;
-  newTab: string;
-  children: ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="font-medium text-fg underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
-    >
-      {children}
-      <ArrowUpRight className="ml-0.5 inline size-[0.8em] align-baseline text-accent" aria-hidden />
-      <span className="sr-only">({newTab})</span>
-    </a>
   );
 }
 
@@ -81,38 +59,28 @@ export async function AboutPage({ locale }: { locale: Locale }) {
     <main id="main-content" tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
       <article aria-labelledby="about-heading" className="app-container anim-rise">
         <div className="mx-auto max-w-[36rem] pt-16 text-[1.0625rem] leading-[1.8] text-pretty text-fg/85 sm:pt-24 sm:text-lg lg:max-w-[51rem] lg:pt-28 lg:text-[1.1875rem] lg:leading-[1.75]">
-          <header className={grid}>
-            <p className="flex items-center gap-2.5 lg:justify-end lg:self-start lg:pt-[1.15rem]">
-              <HorizonMark className="size-4 text-muted" />
-              <span className={kickerClass}>{t("kicker")}</span>
-            </p>
-            <div>
-              <h1
-                id="about-heading"
-                className="mt-8 font-display text-[2.5rem] leading-[1.05] font-medium tracking-[-0.035em] text-balance text-fg sm:text-5xl lg:mt-0 lg:text-[3.5rem]"
-              >
-                {t.rich("title", { em: (chunks) => <span className="text-muted">{chunks}</span> })}
-              </h1>
-              <p className="mt-7 text-xl leading-normal text-balance text-muted sm:text-[1.375rem]">
-                {t("lead")}
-              </p>
-              <span className="mt-10 block h-px w-12 bg-accent/60" aria-hidden />
-              <figure className="mt-10 max-w-[25rem] sm:ml-auto">
-                <blockquote className="text-[0.95em] leading-relaxed text-muted italic">
-                  {locale === "cs" ? `„${t("quote.text")}“` : `“${t("quote.text")}”`}
-                </blockquote>
-                <figcaption className="mt-3 text-[0.8em] text-subtle">
-                  — {t("quote.source")}
-                </figcaption>
-              </figure>
-            </div>
-          </header>
+          <LetterHeader
+            id="about-heading"
+            kicker={t("kicker")}
+            title={t.rich("title", { em: letterEmphasis })}
+            lead={t("lead")}
+          >
+            <span className="mt-10 block h-px w-12 bg-accent/60" aria-hidden />
+            <figure className="mt-10 max-w-[25rem] sm:ml-auto">
+              <blockquote className="text-[0.95em] leading-relaxed text-muted italic">
+                {locale === "cs" ? `„${t("quote.text")}“` : `“${t("quote.text")}”`}
+              </blockquote>
+              <figcaption className="mt-3 text-[0.8em] text-subtle">
+                — {t("quote.source")}
+              </figcaption>
+            </figure>
+          </LetterHeader>
 
           <Part id="course" label={t("course.label")}>
             <p>
               {t.rich("course.body", {
                 link: (chunks) => (
-                  <ExternalLink href={COURSE_URL} newTab={t("newTab")}>
+                  <ExternalLink href={COURSE_URL} newTab={t("newTab")} className={linkClass}>
                     {chunks}
                   </ExternalLink>
                 ),
@@ -140,7 +108,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             <p>
               {t.rich("source.body", {
                 link: (chunks) => (
-                  <ExternalLink href={REPOSITORY_URL} newTab={t("newTab")}>
+                  <ExternalLink href={REPOSITORY_URL} newTab={t("newTab")} className={linkClass}>
                     {chunks}
                   </ExternalLink>
                 ),
@@ -163,7 +131,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             </ul>
           </Part>
 
-          <section aria-labelledby="about-author" className={cn("mt-20 sm:mt-24", grid)}>
+          <section aria-labelledby="about-author" className={cn("mt-20 sm:mt-24", letterGrid)}>
             <h2 id="about-author" className="sr-only">
               {t("author.label")}
             </h2>
