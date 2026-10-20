@@ -56,10 +56,11 @@ export function Stage() {
       )}
     >
       {/* The scene sets the stage but the spectrum is the instrument: the scene stops at a third
-          of the window and the plot takes the rest. A phone held sideways lets the scene go. */}
+          of the window and the plot takes the rest. A phone held sideways lets the scene go, and
+          so does a stage too short to show it whole (`spectroscopy-scene`, by the stage's height). */}
       <div
         className={cn(
-          "relative min-h-0 flex-[1_1_0%] short:hidden",
+          "spectroscopy-scene relative min-h-0 flex-[1_1_0%] short:hidden",
           /* The bench is the lesson in Kirchhoff's view; elsewhere the scene is a strip. */
           view === "kirchhoff" ? "max-h-[32dvh]" : "max-h-[20dvh]",
         )}

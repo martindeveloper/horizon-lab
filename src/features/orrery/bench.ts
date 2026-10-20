@@ -1,7 +1,12 @@
+import { provideAudioMap } from "@/lib/audio-maps";
+import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 import type { PlanetId } from "@horizon/toolkit/bodies";
 
+import interstellarDriftMap from "../../../bench/fixtures/audio-maps/interstellar-drift.json";
+import { DRIFT } from "./lib/drift";
 import { SUN_ACTIVITY_CYCLE_SECONDS } from "./lib/model/solar-activity";
 import { DEFAULT_VIEW } from "./lib/model/views";
 import { createOrreryEngine } from "./lib/scene/engine";
@@ -14,7 +19,13 @@ type OrreryBenchScene = BenchScene & {
   closeUp?: PlanetId | "sun";
   /** The Sun's close-up with its optional activity switched on and loaded. */
   solarActivity?: boolean;
+  drift?: boolean;
 };
+
+/** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
+const DRIFT_MAP = parseAudioMap(interstellarDriftMap);
+/** One loop of the drift timed to its map, two plays of the track; the engine steps at most a tenth of a second a frame. */
+const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
 
 /** Frames the mount runs before a close-up scene's first one: the flight in, then its map painted. */
 const CLOSE_UP_PREROLL = 600;
@@ -89,6 +100,19 @@ const SCENES: readonly OrreryBenchScene[] = [
     },
   },
   {
+    id: "drift",
+    description: "One loop of the drift, timed to its track's map (two plays), from the home view",
+    tags: ["sequence", "camera", "drift"],
+    bloom: false,
+    lens: false,
+    drift: true,
+    script: {
+      frames: Math.ceil(DRIFT_LOOP / 0.1),
+      duration: DRIFT_LOOP,
+      keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
+    },
+  },
+  {
     id: "sun-activity-zoom",
     description: "Close-up of the Sun with solar activity on, zoomed in on the limb",
     tags: ["sequence", "effects"],
@@ -127,6 +151,13 @@ export const benchTarget: BenchTarget = {
       lens: scene.lens,
       playing: false,
     });
+    /* A drift scene plays the drift as the page would once its map has loaded and its loader lifted. */
+    if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
+    store.getState().stopDrift();
+    if (scene.drift) {
+      store.getState().startDrift();
+      store.getState().readyDrift();
+    }
     const instance = mountSceneEngine(surface, createOrreryEngine, () => store.setState({}));
     const preroll = (count: number) => {
       for (let index = 0; index < count; index += 1)

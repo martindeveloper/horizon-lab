@@ -14,9 +14,10 @@ import { nearestVisible, type Visible } from "./labels";
 const api = useSpectroscopy.getState;
 
 /**
- * Hover reads a wavelength, a tap picks a line, a drag pans, two fingers or the wheel zoom,
- * and the arrow keys step through lines (or pan with Shift). The hover is kept as a fraction
- * of the width, so a zoom under a still cursor reads the new wavelength.
+ * Hover reads a wavelength, a tap picks a line, a mouse drag pans, the wheel zooms, and the
+ * arrow keys step through lines (or pan with Shift). A finger has no hover, so on touch one
+ * finger scrubs the reading line and two fingers pan and pinch the window. The hover is
+ * kept as a fraction of the width, so a zoom under a still cursor reads the new wavelength.
  */
 export function useWindowGestures(input: {
   surface: RefObject<HTMLDivElement | null>;
@@ -36,7 +37,11 @@ export function useWindowGestures(input: {
   /** A gesture that has had a second finger is never a tap, until every finger lifts. */
   const gesture = useRef(false);
   const drag = useRef<{ x: number; range: readonly [number, number]; moved: boolean } | null>(null);
-  const pinch = useRef<{ distance: number; range: readonly [number, number] } | null>(null);
+  const pinch = useRef<{
+    distance: number;
+    middle: number;
+    range: readonly [number, number];
+  } | null>(null);
 
   const fractionAt = (clientX: number) => {
     const rect = surface.current?.getBoundingClientRect();
@@ -67,13 +72,21 @@ export function useWindowGestures(input: {
     if (pointers.current.size === 2) {
       gesture.current = true;
       const [a, b] = [...pointers.current.values()];
-      pinch.current = { distance: Math.abs(a! - b!), range };
+      pinch.current = { distance: Math.abs(a! - b!), middle: (a! + b!) / 2, range };
       drag.current = null;
-    } else drag.current = { x: e.clientX, range, moved: false };
+      setHoverAt(null);
+    } else {
+      drag.current = { x: e.clientX, range, moved: false };
+      // The line appears under the finger at once, not only once it moves.
+      if (e.pointerType === "touch") setHoverAt(fractionAt(e.clientX));
+    }
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === "mouse") setHoverAt(fractionAt(e.clientX));
-    if (!pointers.current.has(e.pointerId)) return;
+    const touching = pointers.current.has(e.pointerId);
+    if (!pinch.current && (e.pointerType !== "touch" || touching)) {
+      setHoverAt(fractionAt(e.clientX));
+    }
+    if (!touching) return;
     pointers.current.set(e.pointerId, e.clientX);
     const rect = surface.current?.getBoundingClientRect();
     if (!rect) return;
@@ -81,13 +94,19 @@ export function useWindowGestures(input: {
       const [a, b] = [...pointers.current.values()];
       const distance = Math.max(8, Math.abs(a! - b!));
       const [lo, hi] = pinch.current.range;
-      const centre = lo + (((a! + b!) / 2 - rect.left) / rect.width) * (hi - lo);
+      // Zoom about the fingers' midpoint, then carry the window with it.
+      const centre = lo + ((pinch.current.middle - rect.left) / rect.width) * (hi - lo);
       const factor = pinch.current.distance / distance;
-      api().setRange([centre - (centre - lo) * factor, centre + (hi - centre) * factor]);
+      const shift = (-((a! + b!) / 2 - pinch.current.middle) / rect.width) * (hi - lo) * factor;
+      api().setRange([
+        centre - (centre - lo) * factor + shift,
+        centre + (hi - centre) * factor + shift,
+      ]);
     } else if (drag.current) {
       const dx = e.clientX - drag.current.x;
       if (Math.abs(dx) > 4) drag.current.moved = true;
-      if (drag.current.moved) {
+      // One finger scrubs the reading; only a mouse or pen drags the window.
+      if (drag.current.moved && e.pointerType !== "touch") {
         const [lo, hi] = drag.current.range;
         const shift = (-dx / rect.width) * (hi - lo);
         api().setRange([lo + shift, hi + shift]);
@@ -102,6 +121,7 @@ export function useWindowGestures(input: {
       if (!wasDrag && identify) api().select(nearest(nmAt(e.clientX))?.line.id ?? null);
       drag.current = null;
       gesture.current = false;
+      if (e.pointerType === "touch") setHoverAt(null);
     }
   };
   const onPointerLeave = () => setHoverAt(null);

@@ -1,11 +1,11 @@
-import type { DriftProgramme } from "@/lib/drift";
+import { timedDrift, type DriftProgramme } from "@/lib/drift";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene } from "@horizon/toolkit/bench";
 import { lerp } from "@horizon/toolkit/math";
 
 import aeolianMap from "../../../../bench/fixtures/audio-maps/aeolian-static.json";
 import lowDroneMap from "../../../../bench/fixtures/audio-maps/low-drone-rises.json";
-import { driftFor, timedDrift, DRIFT, type HoleShot } from "./drift";
+import { driftFor, DRIFT, type HoleShot } from "./drift";
 import type { CameraPose } from "./frame";
 import { holeById, PRESETS, type Quality } from "./holes";
 import { MAX_SPIN } from "./physics";

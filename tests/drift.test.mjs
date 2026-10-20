@@ -11,8 +11,6 @@ import { MUSIC_LEVEL, ambientMusic } from "../src/components/shell/ambient-music
 import {
   DRIFT as BLACK_HOLE,
   DORMANT_DRIFT as BLACK_HOLE_DORMANT,
-  openingFor,
-  timedDrift,
 } from "../src/features/black-hole/lib/drift.ts";
 import { MAX_DIST, MIN_DIST } from "../src/features/black-hole/lib/physics.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
@@ -23,7 +21,14 @@ import { viewById, worldDistance } from "../src/features/deep-field/lib/model/vi
 import { useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { DRIFT as ORRERY } from "../src/features/orrery/lib/drift.ts";
 import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
-import { DRIFT_LOADING, driftReady, driftSlice, timeShots } from "../src/lib/drift.ts";
+import {
+  DRIFT_LOADING,
+  driftReady,
+  driftSlice,
+  openingFor,
+  timedDrift,
+  timeShots,
+} from "../src/lib/drift.ts";
 import { isSolarView } from "../src/space/solar-system/model/views.ts";
 
 const PROGRAMMES = {
@@ -102,8 +107,9 @@ test("every drift programme is one the camera and the music can play", () => {
      map (the fixture mirrors the published one), every cue a shot names exists and the cued
      shots meet them, the loop still the period; and the camera opens on the shot whose cue the
      music is nearest. */
-  for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT]) {
+  for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT, DEEP_FIELD, ORRERY]) {
     const slug = programme.music.track.toLowerCase().replaceAll(" ", "-");
+    const loops = programme.music.loops ?? 1;
     const map = parseAudioMap(
       JSON.parse(
         readFileSync(new URL(`../bench/fixtures/audio-maps/${slug}.json`, import.meta.url), "utf8"),
@@ -115,13 +121,21 @@ test("every drift programme is one the camera and the music can play", () => {
       "the written period is the map's",
     );
     const written = timedDrift(programme, null);
-    assert.ok(Math.abs(written.loop - programme.music.period) <= 2, `written loop ${written.loop}`);
+    assert.ok(
+      Math.abs(written.loop - programme.music.period * loops) <= 2,
+      `written loop ${written.loop}`,
+    );
     const timed = timedDrift(programme, map);
     assert.ok(
-      Math.abs(timed.loop - map.period) <= 0.5,
-      `timed loop ${timed.loop} vs ${map.period}`,
+      Math.abs(timed.loop - map.period * loops) <= 0.5,
+      `timed loop ${timed.loop} vs ${map.period * loops}`,
     );
-    const cue = (id) => map.cues.find((c) => c.id === id)?.at;
+    /* A cue in a later play of the track: `peak@2`. */
+    const cue = (id) => {
+      const [name, play = "1"] = id.split("@");
+      const at = map.cues.find((c) => c.id === name)?.at;
+      return at === undefined ? undefined : at + (Number(play) - 1) * map.period;
+    };
     timed.shots.forEach((shot, i) => {
       assert.ok(shot.hold >= 1, `${slug} shot ${i} holds ${shot.hold}`);
       if (shot.at !== undefined) {
@@ -138,7 +152,8 @@ test("every drift programme is one the camera and the music can play", () => {
       }
     });
     /* Lengths never vary between loops, whatever the spread of angles: at the widest spread the
-       first flight still lands exactly when written. */
+       first flight still lands exactly when written (shots framed by a rig are posed elsewhere). */
+    if (!("distance" in timed.shots[0])) continue;
     const camera = createDriftCamera(timed.shots, {
       ...programme.camera,
       random: () => 1,

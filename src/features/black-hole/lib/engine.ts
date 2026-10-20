@@ -1,7 +1,7 @@
 import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
 import { freeCameraOn, onFreeCamera, onRide, rideOverride } from "@/lib/debug";
-import { driftRunState } from "@/lib/drift";
+import { driftRunState, openingFor, timedDrift, type TimedDrift } from "@/lib/drift";
 import type { AudioMap } from "@horizon/toolkit/audio";
 import {
   createDriftRun,
@@ -27,7 +27,7 @@ import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
 import fragmentShader from "./black-hole.frag.glsl";
-import { DRIFT, driftFor, openingFor, timedDrift, type TimedDrift } from "./drift";
+import { DRIFT, driftFor, type HoleShot } from "./drift";
 import {
   cameraDistance,
   cameraOf,
@@ -175,7 +175,7 @@ export function createBlackHoleEngine(
        lit hole's and the dormant hole's, chosen each frame by how the disk is lit. Each is timed
        by its track's published map, which the drift's loader has fetched by the time it plays
        (`audioMapNow`), or by the timing it was written with until then. */
-    const driftRun = (timed: TimedDrift) =>
+    const driftRun = (timed: TimedDrift<HoleShot>) =>
       createDriftRun(timed.shots, {
         ...timed.programme.camera,
         reduceMotion: window.matchMedia(REDUCED_MOTION_QUERY),

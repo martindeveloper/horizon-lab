@@ -33,3 +33,11 @@ export function audioMapNow(title: string | undefined): AudioMap | null {
   const url = title === undefined ? undefined : mapUrl(title);
   return url === undefined ? null : (settled.get(url) ?? null);
 }
+
+/** Seeds the map of the track titled `title` as if it had loaded: a bench replays a fixture through it. */
+export function provideAudioMap(title: string, map: AudioMap | null) {
+  const url = mapUrl(title);
+  if (!url) return;
+  if (map) settled.set(url, map);
+  else settled.delete(url);
+}

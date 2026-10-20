@@ -280,9 +280,30 @@ export class MusicPlayer {
     this.emit("paused");
   }
 
+  /** The next blend starts the current track again (`restart`). */
+  private restarting = false;
+
   private get upcoming() {
+    if (this.restarting) {
+      this.restarting = false;
+      return this.index;
+    }
     return this.held ?? (this.index + 1) % this.tracks.length;
   }
+
+  /**
+   * Starts the current track again from the top, blending into it over `skipFade` (a staged
+   * piece begins at its first bar). True when it will; false while paused (the next play
+   * starts from the top anyway), before the graph exists, or during a loop crossfade.
+   */
+  restart = () => {
+    if (this.state !== "playing" || !this.ctx) return false;
+    if (this.blending && this.settleTimer === undefined) return false;
+    this.restarting = true;
+    this.settle();
+    this.blend(this.skipFade);
+    return true;
+  };
 
   private notify() {
     for (const listener of this.listeners) listener();

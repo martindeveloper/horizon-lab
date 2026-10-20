@@ -204,8 +204,11 @@ export function VelocityLens({ step }: { step: ReactNode }) {
               })
             : "—"}
         </p>
+        {/* The method, in a line: a desktop has the room; a phone's dock keeps the slider in view. */}
         {line ? (
-          <p className="text-[11px] text-pretty text-subtle short:hidden">{t("dock.mirror")}</p>
+          <p className="text-[11px] text-pretty text-subtle not-md:hidden short:hidden">
+            {t("dock.mirror")}
+          </p>
         ) : null}
       </div>
     </div>

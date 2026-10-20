@@ -542,7 +542,10 @@ loudness and brightness per second, the period it plays before looping and named
 the page reads: a drift waits for it (and for the track to buffer) behind its loader, and
 falls back to the timing it was written with if the map never comes. `bench/fixtures/
 audio-maps/` mirrors the maps for the bench and the tests. After a track is re-cut, run
-the script and upload the map with it.
+the script and upload the map with it. A drift is a staged piece and begins at its
+track's first bar: when the playlist is already on that track, the player restarts it
+behind the drift's loader (`restart()`), blending into its intro; a paused drift lets the
+music run on, and on resume the camera rejoins at the shot nearest the music.
 Tracks live on the CDN as `audio/<slug>.webm` and `.m4a` (see CDN assets). Without
 the bucket's CORS headers Web Audio plays silence.
 

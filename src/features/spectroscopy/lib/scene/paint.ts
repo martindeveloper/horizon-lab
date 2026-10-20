@@ -229,10 +229,14 @@ function drawCell(
   ctx.stroke();
 }
 
+/** The grating's lean from vertical, in radians: its face turns toward the slit. */
+const GRATING_TILT = 0.5;
+
 /**
  * The fan of colours from the grating to the ribbon, the window's wavelengths left to right.
  * Drawn first, then dimmed with distance from the grating (nothing else is on the layer yet),
- * so it reads as light spreading out rather than a wedge of paint.
+ * so it reads as light spreading out rather than a wedge of paint. The grating reflects, so
+ * the fan is kept to the side of its plane that faces the slit: nothing passes behind it.
  */
 function drawFan(
   ctx: CanvasRenderingContext2D,
@@ -245,6 +249,16 @@ function drawFan(
   const [from, to] = range;
   const slices = 72;
   ctx.save();
+  const reach = width + height;
+  const along = { x: Math.sin(GRATING_TILT) * reach, y: Math.cos(GRATING_TILT) * reach };
+  const front = { x: -Math.cos(GRATING_TILT) * reach, y: Math.sin(GRATING_TILT) * reach };
+  ctx.beginPath();
+  ctx.moveTo(grating.x - along.x, grating.y - along.y);
+  ctx.lineTo(grating.x + along.x, grating.y + along.y);
+  ctx.lineTo(grating.x + along.x + front.x, grating.y + along.y + front.y);
+  ctx.lineTo(grating.x - along.x + front.x, grating.y - along.y + front.y);
+  ctx.closePath();
+  ctx.clip();
   ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < slices; i++) {
     /* As bright as the eye finds each colour (CIE ȳ), so the far red and violet stay dim. */
@@ -386,7 +400,7 @@ function drawSpectrograph(
   ctx.stroke();
   ctx.save();
   ctx.translate(grating.x, grating.y);
-  ctx.rotate(-0.5);
+  ctx.rotate(-GRATING_TILT);
   const metal = ctx.createLinearGradient(-2, 0, 2, 0);
   metal.addColorStop(0, "rgb(160 128 70)");
   metal.addColorStop(0.5, SCENE_GOLD);

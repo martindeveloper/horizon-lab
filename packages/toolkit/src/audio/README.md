@@ -28,6 +28,9 @@ come from a user gesture.
   - `hold(index | null)`: holds the playlist on one track, which plays next (blending
     over `skipFade` if something else is playing) and loops until released; released,
     the playlist runs on from it. `getHeld()` reads it.
+  - `restart()`: starts the current track again from the top, blending into it over
+    `skipFade`, so a staged piece begins at its first bar; returns false when it cannot
+    (paused, no graph yet, or a loop crossfade under way).
   - `preload()`: buffers the track that plays next before the first play, e.g. on
     hover or focus of the control. Needs no gesture; skipped under Save-Data.
   - `resumeOnInteraction(ignore)`: if the music was on before a reload, preloads it

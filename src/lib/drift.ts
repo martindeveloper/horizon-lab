@@ -40,17 +40,30 @@ export type DriftMusic = {
   level?: number;
   /**
    * Seconds the track plays before it loops (its length less the player's crossfade), when the
-   * camera's loop is timed to it: the programme's flights and holds then add up to this.
+   * camera's loop is timed to it: the programme's flights and holds then add up to this, times
+   * `loops`.
    */
   period?: number;
+  /** Plays of the track one loop of the camera spans; 1 by default. A cue in a later play is `peak@2`. */
+  loops?: number;
 };
 
 /**
  * A shot timed to the music: its flight begins (`at`) or lands (`land`) on the named cue of the
- * track's audio map (`AudioMap.cues`, e.g. `rise`, `breath-2`, `peak`). The flight and hold it
- * is written with stand when there is no map or no such cue.
+ * track's audio map (`AudioMap.cues`, e.g. `rise`, `breath-2`, `peak`; `peak@2` in the track's
+ * second play, for a camera loop spanning several). The flight and hold it is written with
+ * stand when there is no map or no such cue.
  */
 export type CuedShot = { at?: string; land?: string };
+
+/** Seconds into the camera loop of the cue `id`, read from `map` with its play (`peak@2`). */
+function cueAt(map: AudioMap, id: string) {
+  const [name, play] = id.split("@");
+  const at = cueTime(map, name ?? id);
+  if (at === undefined) return undefined;
+  const plays = play === undefined ? 1 : Number(play);
+  return Number.isInteger(plays) && plays >= 1 ? at + (plays - 1) * map.period : undefined;
+}
 
 /** A hold shorter than this, seconds, means the cues are too close: the shots keep their own timing. */
 const MIN_HOLD = 2;
@@ -71,12 +84,18 @@ export function timeShots<
   /* A handoff shot is the host's to fly: it adds no length of its own. */
   const length = (shot: Shot) => ("handoff" in shot ? 0 : flight(shot) + hold(shot));
   const written = shots.reduce((sum, shot) => sum + length(shot), 0);
-  if (!map) return { shots, period: programme.music?.period ?? written };
+  const loops = programme.music?.loops ?? 1;
+  if (!map)
+    return {
+      shots,
+      period: programme.music?.period === undefined ? written : programme.music.period * loops,
+    };
+  const period = map.period * loops;
   /* When a cued shot's flight begins: on its cue, or a flight's length before the cue it lands on. */
   const cueStart = (shot: Shot) => {
-    const at = shot.at !== undefined ? cueTime(map, shot.at) : undefined;
+    const at = shot.at !== undefined ? cueAt(map, shot.at) : undefined;
     if (at !== undefined) return at;
-    const land = shot.land !== undefined ? cueTime(map, shot.land) : undefined;
+    const land = shot.land !== undefined ? cueAt(map, shot.land) : undefined;
     return land !== undefined ? land - flight(shot) : undefined;
   };
   const round = (seconds: number) => Math.round(seconds * 10) / 10;
@@ -101,10 +120,10 @@ export function timeShots<
     const { i, start } = last as { i: number; start: number };
     let after = 0;
     for (let j = i + 1; j < shots.length; j++) after += length(shots[j]!);
-    const closing = map.period - start - flight(shots[i]!) - after;
+    const closing = period - start - flight(shots[i]!) - after;
     if (closing >= MIN_HOLD) shots[i]!.hold = round(closing);
   }
-  return { shots, period: map.period };
+  return { shots, period };
 }
 
 /** A simulation's drift: its music, the camera's pace and spread, and the shots it flies. */
@@ -113,6 +132,59 @@ export type DriftProgramme<Shot> = {
   camera: Partial<Omit<DriftSettings, "random" | "reduceMotion">>;
   shots: readonly Shot[];
 };
+
+/** A programme timed to its track's map (or as written, without one): its shots, loop and cues. */
+export type TimedDrift<Shot extends CuedShot & { flight?: { duration?: number }; hold?: number }> =
+  ReturnType<typeof timedDrift<Shot>>;
+
+export function timedDrift<
+  Shot extends CuedShot & { flight?: { duration?: number }; hold?: number },
+>(programme: DriftProgramme<Shot>, map: AudioMap | null) {
+  const { shots, period } = timeShots(programme, map);
+  /* When each shot's flight begins, seconds into the loop. */
+  const starts: number[] = [];
+  let at = 0;
+  for (const shot of shots) {
+    starts.push(at);
+    if ("handoff" in shot) continue;
+    at +=
+      (shot.flight?.duration ?? programme.camera.flight ?? 20) +
+      (shot.hold ?? programme.camera.hold ?? 12);
+  }
+  /* Seconds of one play of the track: the loop holds `music.loops` of them. */
+  const play = period / (programme.music?.loops ?? 1);
+  return { programme, shots, period, play, starts, loop: at };
+}
+
+/**
+ * The shot to open a drift on so the camera meets its music: the one whose cue is nearest
+ * `position` seconds into the track (null, no music: the first). A loop spanning several plays
+ * of the track picks across them; the earliest wins a tie.
+ */
+export function openingFor(
+  timed: { starts: readonly number[]; period: number; play: number },
+  position: number | null,
+) {
+  if (position === null) return 0;
+  const { starts, period, play } = timed;
+  if (period <= 0 || play <= 0) return 0;
+  const at = ((position % play) + play) % play;
+  /* How far a start lies from the music's moment within its play, either way round. */
+  const apart = (start: number) => {
+    const d = Math.abs((start % play) - at);
+    return Math.min(d, play - d);
+  };
+  let best = 0;
+  let gap = apart(0);
+  starts.forEach((start, i) => {
+    const d = apart(start);
+    if (d < gap) {
+      gap = d;
+      best = i;
+    }
+  });
+  return best;
+}
 
 export type DriftSlice = {
   drift: DriftState;

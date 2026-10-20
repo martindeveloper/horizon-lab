@@ -6,10 +6,13 @@
  * selection go so the close-up flies out, and resumes the drift from there. Flying on after a
  * pause leaves any close-up first.
  */
-import { driftRunState } from "@/lib/drift";
+import { ambientMusic } from "@/components/shell/ambient-music";
+import { audioMapNow } from "@/lib/audio-maps";
+import { driftRunState, openingFor, timedDrift } from "@/lib/drift";
+import type { AudioMap } from "@horizon/toolkit/audio";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { clamp, lerp, smootherstep } from "@horizon/toolkit/math";
-import { createRigDrift } from "@horizon/toolkit/scene";
+import { createRigDrift, type RigDrift } from "@horizon/toolkit/scene";
 
 import { DRIFT } from "../drift";
 import { canCloseUp, type useOrrery } from "../store";
@@ -47,10 +50,13 @@ export function createDriftDirector(
 ) {
   const { reduceMotion, closeUp, moonPose } = options;
   let visit: Visit | null = null;
+  /** The programme timed to its track's map: a hold at a body may linger to meet a cue. */
+  let timed = timedDrift(DRIFT, null);
+  let timedWith: AudioMap | null = null;
 
   /** Begins the close-up the handoff names, or skips it when the clock forbids one. */
   function enter(index: number, resume: () => void) {
-    const shot = DRIFT.shots[index];
+    const shot = timed.shots[index];
     const s = store.getState();
     if (!shot || !("closeUp" in shot) || !canCloseUp({ ...s, selection: shot.closeUp }))
       return resume();
@@ -100,7 +106,7 @@ export function createDriftDirector(
     if (visit.phase === "in") {
       if (!close) return resume();
       if (close.phase === "on") {
-        const shot = DRIFT.shots[index];
+        const shot = timed.shots[index];
         const hold = (shot && "closeUp" in shot ? shot.hold : undefined) ?? DRIFT.closeUp.hold;
         visit = {
           phase: "on",
@@ -123,16 +129,27 @@ export function createDriftDirector(
     }
   }
 
-  const drift = createRigDrift(
-    rig,
-    DRIFT.shots.map((shot) => {
-      if ("closeUp" in shot) return { handoff: true as const };
-      const { view, pose, ...rest } = shot;
-      return { ...rig.framing(view), ...pose, ...rest };
-    }),
-    { ...DRIFT.camera, reduceMotion },
-    { handoff: stepVisit },
-  );
+  let drift: RigDrift;
+  /** The drift timed by `map`: a run on the rig, its framed shots posed by the views, its close-ups handed off. */
+  function build(map: AudioMap | null) {
+    timed = timedDrift(DRIFT, map);
+    timedWith = map;
+    drift = createRigDrift(
+      rig,
+      timed.shots.map((shot) => {
+        if ("closeUp" in shot) return { handoff: true as const };
+        const { view, pose, ...rest } = shot;
+        return { ...rig.framing(view), ...pose, ...rest };
+      }),
+      {
+        ...DRIFT.camera,
+        reduceMotion,
+        opening: () => openingFor(timed, ambientMusic.position),
+      },
+      { handoff: stepVisit },
+    );
+  }
+  build(audioMapNow(DRIFT.music?.track));
 
   return {
     /** Frames are needed while the drift plays. */
@@ -150,6 +167,9 @@ export function createDriftDirector(
       const leaving = state.drift === "playing" && !drift.flying && closeUp() !== null;
       if (leaving && state.closeUp) state.leaveCloseUp(true);
       if (state.drift !== "playing") visit = null;
+      /* A map that arrived since retimes the drift, unless it is flying: that run keeps its timing. */
+      const map = audioMapNow(DRIFT.music?.track);
+      if (map !== timedWith && !drift.flying) build(map);
       drift.step(driftRunState(state.drift), dt, leaving);
     },
   };

@@ -53,7 +53,8 @@ async function loudness(file) {
 
 /** Spectral centroid per STEP seconds, from ffmpeg's aspectralstats on one-second mono frames. */
 async function brightness(file) {
-  const { stderr } = await run(
+  /* ametadata's `file=-` prints the frames to stdout, apart from ffmpeg's own log on stderr. */
+  const { stdout } = await run(
     "ffmpeg",
     [
       "-nostats",
@@ -69,7 +70,7 @@ async function brightness(file) {
   );
   const samples = [];
   let at = null;
-  for (const line of stderr.split("\n")) {
+  for (const line of stdout.split("\n")) {
     const frame = /pts_time:([\d.]+)/.exec(line);
     if (frame) at = Number(frame[1]);
     const value = /centroid=([\d.]+)/.exec(line);

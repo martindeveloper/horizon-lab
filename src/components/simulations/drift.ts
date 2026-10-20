@@ -100,6 +100,13 @@ export function useDriftReady(drift: SimulationDrift | undefined) {
       title === undefined ? -1 : ambientMusic.tracks.findIndex((t) => t.title === title);
     let map: "loading" | "settled" = "loading";
     let done = false;
+    /* A staged piece begins at its first bar: a track already playing starts again behind the
+       veil, and counts as audible once the blend into its intro has run. */
+    const restarted =
+      index >= 0 &&
+      ambientMusic.getState() === "playing" &&
+      ambientMusic.getTrack() === index &&
+      ambientMusic.restart();
     /* The player blends to the held track within its skip fade; when it cannot (a loop
        crossfade is under way, and the hold waits for it), the music playing now is what plays. */
     const switchGrace = ambientMusic.skipFade + 1;
@@ -107,6 +114,7 @@ export function useDriftReady(drift: SimulationDrift | undefined) {
       if (ambientMusic.getState() !== "playing") return "off";
       const held = index < 0 || ambientMusic.getTrack() === index;
       if (!held) return elapsed >= switchGrace ? "audible" : "buffering";
+      if (restarted && elapsed < ambientMusic.skipFade + 0.5) return "buffering";
       return ambientMusic.getBuffering() ? "buffering" : "audible";
     };
     const check = () => {

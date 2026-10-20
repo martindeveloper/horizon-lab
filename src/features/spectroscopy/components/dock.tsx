@@ -24,7 +24,7 @@ import { BENCH_RANGE, SEQUENCE_RANGE, verdict, type Verdict } from "../lib/model
 import { STAR_IDS, STARS } from "../lib/model/stars";
 import { useSpectroscopy } from "../lib/store";
 import { kelvin, signed } from "./format";
-import { MysteryResultCard, OutcomeMark } from "./mystery-result";
+import { MysteryActions, MysteryResultCard, OutcomeMark } from "./mystery-result";
 import { PanelTitle, Tray } from "./tray";
 import { VelocityLens } from "./velocity-lens";
 
@@ -491,8 +491,9 @@ function MysteryControls() {
       <CaseStrip />
       {result ? <MysteryResultCard result={result} /> : null}
       <Tray
-        /* On a phone, Check rides in the tab row, beside the panels it scores. */
-        action={result ? null : check("")}
+        /* On a phone, Check rides in the tab row, beside the panels it scores; once checked,
+           the way on takes its place. */
+        action={result ? <MysteryActions result={result} compact /> : check("")}
         panels={[
           {
             id: "elements",

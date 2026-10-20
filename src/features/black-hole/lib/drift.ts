@@ -1,5 +1,4 @@
 import type { CuedShot, DriftProgramme } from "@/lib/drift";
-import { timeShots } from "@/lib/drift";
 /**
  * The observatory's drift: a directed passage, flown in order, that arrives, stays close and
  * leaves once. Shots are camera poses in M about the hole with a `look` off it, so the hole
@@ -19,7 +18,6 @@ import { timeShots } from "@/lib/drift";
  * (`clampDistance`), which the engine applies as it moves the camera; a riding shot's hold
  * turns at the gas's rate for the hole's spin (the engine's `holdDrift`).
  */
-import type { AudioMap } from "@horizon/toolkit/audio";
 import type { DriftShot } from "@horizon/toolkit/camera";
 
 /** A black-hole drift shot: a toolkit shot that may begin or land on a cue of the track's map. */
@@ -255,42 +253,3 @@ export const DORMANT_DRIFT: DriftProgramme<HoleShot> = {
 
 /** The drift for a hole as it is lit: a dark disk (dormant, or turned down) flies the dormant one. */
 export const driftFor = (diskBrightness: number) => (diskBrightness > 0 ? DRIFT : DORMANT_DRIFT);
-
-/** A programme timed to its track's map (or as written, without one): its shots, loop and cues. */
-export type TimedDrift = ReturnType<typeof timedDrift>;
-
-export function timedDrift(programme: DriftProgramme<HoleShot>, map: AudioMap | null) {
-  const { shots, period } = timeShots(programme, map);
-  /* When each shot's flight begins, seconds into the loop. */
-  const starts: number[] = [];
-  let at = 0;
-  for (const shot of shots) {
-    starts.push(at);
-    if ("handoff" in shot) continue;
-    at +=
-      (shot.flight?.duration ?? programme.camera.flight ?? 20) +
-      (shot.hold ?? programme.camera.hold ?? 12);
-  }
-  return { programme, shots, period, starts, loop: at };
-}
-
-/**
- * The shot to open a drift on so the camera meets its music: the one whose cue is nearest
- * `position` seconds into the track (null, no music: the first).
- */
-export function openingFor(timed: TimedDrift, position: number | null) {
-  if (position === null) return 0;
-  const { starts, period } = timed;
-  if (period <= 0) return 0;
-  const at = ((position % period) + period) % period;
-  let best = 0;
-  let gap = Math.min(at, period - at);
-  starts.forEach((start, i) => {
-    const d = Math.abs(start - at);
-    if (d < gap) {
-      gap = d;
-      best = i;
-    }
-  });
-  return best;
-}

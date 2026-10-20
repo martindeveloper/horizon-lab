@@ -7,6 +7,17 @@
   }
 }
 
+/* The stage measures itself, so the scene can go when a tall dock (a phone with a verdict up)
+   leaves it a sliver: the spectrum then takes the whole stage. */
+:where([data-simulation="spectroscopy"]) .spectroscopy-stage {
+  container-type: size;
+}
+@container (height < 22rem) {
+  :where([data-simulation="spectroscopy"]) .spectroscopy-scene {
+    display: none;
+  }
+}
+
 /* The ribbon sits on the scene like a slit image: a hairline frame, never a card. */
 :where([data-simulation="spectroscopy"]) .spectroscopy-ribbon {
   box-shadow:

@@ -1,3 +1,4 @@
+import { timedDrift } from "@/lib/drift";
 import type { BenchTarget } from "@horizon/toolkit/bench";
 import { createDriftCamera, createOrbitInput } from "@horizon/toolkit/camera";
 import { createFullscreenPass } from "@horizon/toolkit/rendering";
@@ -5,7 +6,7 @@ import { fullscreenVertex } from "@horizon/toolkit/shaders";
 
 import { BENCH_SCENES, benchMotion, benchPose, bundledAudioMap } from "./lib/bench-scenes";
 import fragmentShader from "./lib/black-hole.frag.glsl";
-import { driftFor, timedDrift } from "./lib/drift";
+import { driftFor } from "./lib/drift";
 import {
   cameraDistance,
   cameraOf,
