@@ -3,8 +3,10 @@ import test from "node:test";
 
 import { createStore } from "zustand/vanilla";
 
+import { MOONS } from "@horizon/toolkit/bodies";
 import { DisposalScope, startEngine } from "@horizon/toolkit/rendering";
 import { defaultSceneAntialias } from "@horizon/toolkit/scene";
+import { AU_KM } from "@horizon/toolkit/science";
 
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
 import { bridgeRender, bridgeStore } from "../src/lib/scene-bridge.ts";
@@ -12,6 +14,8 @@ import { withSpaceMessages } from "../src/space/messages.ts";
 import { framingView, viewOf } from "../src/space/solar-system/model/framing.ts";
 import { TODAY } from "../src/space/solar-system/model/moment.ts";
 import { positionOf } from "../src/space/solar-system/model/position.ts";
+import { hasSurface, hostOf, solarPick } from "../src/space/solar-system/model/selection.ts";
+import { solarLabelPick } from "../src/space/solar-system/scene/solar-system.ts";
 
 test("a crossing between the simulations is read once, by its addressee, with the pose left", () => {
   const pose = { azimuth: 1.2, inclination: 0.4, distance: 72 };
@@ -250,6 +254,28 @@ test("selections sit where the scene draws them today", () => {
   const sedna = positionOf({ kind: "named", id: "sedna" }, TODAY, now);
   assert.ok(Math.hypot(...sedna) > 70, "Sedna far out");
   assert.equal(positionOf({ kind: "population", id: "kuiper" }, TODAY, now), null);
+});
+
+test("every moon opens from its name or its globe, flies in close, and sits on its orbit", () => {
+  const now = new Date("2026-10-18T00:00:00Z");
+  for (const moon of MOONS) {
+    const sel = { kind: "moon", id: moon.id };
+    const host = hostOf(moon.id);
+    assert.deepEqual(solarLabelPick(moon.id), sel, `${moon.id} name`);
+    assert.deepEqual(solarPick(sel), sel, `${moon.id} globe`);
+    assert.ok(hasSurface(sel), `${moon.id} close-up`);
+    assert.equal(
+      framingView(sel, 1, 1),
+      framingView(host, 1, 1),
+      `${moon.id} framed as its planet`,
+    );
+    const at = positionOf(sel, TODAY, now);
+    const centre = positionOf(host, TODAY, now);
+    const km = Math.hypot(at[0] - centre[0], at[1] - centre[1], at[2] - centre[2]) * AU_KM;
+    const [near, far] = [moon.aKm * (1 - moon.e), moon.aKm * (1 + moon.e)];
+    assert.ok(km > near * 0.999 && km < far * 1.001, `${moon.id} ${km} km from its planet`);
+  }
+  assert.equal(solarPick({ kind: "moon", id: "nix" }), null, "only catalogued moons");
 });
 
 test("leaving a simulation starts the next visit fresh: guides, selections and panels reset", async () => {

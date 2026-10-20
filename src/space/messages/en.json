@@ -96,6 +96,7 @@
     "days": "{value} days",
     "years": "{value} years",
     "yearsAbout": "about {value} years",
+    "host": "Orbits",
     "radius": "Radius",
     "km": "{value} km",
     "average": "Semi-major axis"

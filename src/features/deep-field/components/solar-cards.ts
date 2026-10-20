@@ -15,7 +15,7 @@ import {
   type Translate,
 } from "@/lib/facts";
 import { POPULATION_FIGURES } from "@/space/solar-system/cards";
-import { orbitFacts, radiusRow, solarNameKey } from "@/space/solar-system/format";
+import { moonRows, orbitFacts, radiusRow, solarNameKey } from "@/space/solar-system/format";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
 import { TODAY } from "@/space/solar-system/model/moment";
@@ -137,6 +137,11 @@ function rowsOf(
         ...whereRows(t, d, sel, now),
         ...orbitRows(t, f, d, namedElements(namedById(sel.id), 1, 0, now)),
       ];
+    case "moon":
+      return [
+        ...whereRows(t, d, sel, now),
+        ...moonRows(t, f, d, sel.id).filter((row) => row.id !== "average"),
+      ];
     case "tracer": {
       const tr = TRACERS[sel.index];
       return tr
@@ -158,6 +163,8 @@ function bodyKey(sel: SolarSelection) {
       return sel.id;
     case "tracer":
       return "tracer";
+    case "moon":
+      return null;
     case "population":
       return sel.id === "disk" || sel.id === "ejected" ? null : sel.id;
   }

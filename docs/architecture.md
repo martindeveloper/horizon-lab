@@ -168,7 +168,8 @@ src/
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
                                disk), elements, tracers, catalogue, views (and the solar
-                               framing every host engine shares), framing, position
+                               framing every host engine shares), framing, position,
+                               moon-orbits (the moons' orbits, without three.js)
       graphics/                looks.ts, swarms.ts, moons.ts, shader-defines.ts, shaders/
       scene/                   solar-system.ts composes the Sun, planets, moons, populations
                                and the reticle (*-layer.ts, focus-ring.ts) on a kit (kit.ts)

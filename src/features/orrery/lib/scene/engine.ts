@@ -19,7 +19,7 @@ import {
 } from "@/lib/scene-bridge";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { positionOf } from "@/space/solar-system/model/position";
-import { hasSurface } from "@/space/solar-system/model/selection";
+import { hasSurface, hostOf } from "@/space/solar-system/model/selection";
 import { solarViewById, solarViewPose } from "@/space/solar-system/model/views";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
 import {
@@ -151,16 +151,24 @@ export function createOrreryEngine({
     /** Where the body is now: today's clock plus the Motion offset, as the scene draws it. */
     const located: Vec3 = [0, 0, 0];
     const locate = (sel: BodySelection, out: Vector3) => {
+      /* A moon where its system draws it (magnified about its planet until the camera is near). */
+      const drawn = sel.kind === "moon" ? moons.drawnAt(sel.id) : null;
       const moment = momentAt(store.getState().yearsAgo, driftYears);
-      const at = positionOf(sel, moment, new Date(), located) ?? located;
+      const at = drawn ?? positionOf(sel, moment, new Date(), located) ?? located;
       return out.set(at[0], at[1], at[2]);
     };
-    const bodyObjects = (sel: BodySelection): Object3D[] =>
-      sel.kind === "sun"
-        ? [solar.sun]
-        : sel.kind === "planet"
-          ? [planets.planets.find((p) => p.id === sel.id)!.body]
-          : [planets.named.find((n) => n.body.id === sel.id)!.mesh];
+    const bodyObjects = (sel: BodySelection): Object3D[] => {
+      switch (sel.kind) {
+        case "sun":
+          return [solar.sun];
+        case "planet":
+          return [planets.planets.find((p) => p.id === sel.id)!.body];
+        case "named":
+          return [planets.named.find((n) => n.body.id === sel.id)!.mesh];
+        case "moon":
+          return [moons.meshOf(sel.id)];
+      }
+    };
     const closeUp = createCloseUpController(kit, {
       rig,
       reduceMotion,
@@ -170,6 +178,7 @@ export function createOrreryEngine({
         ...bodyObjects(sel),
         ...moons.objectsOf(sel.kind === "sun" ? "sun" : sel.id),
       ],
+      hostOf: (sel) => (sel.kind === "moon" ? bodyObjects(hostOf(sel.id)) : []),
       reachOf: (id) => moons.reachOf(id),
       onTakeCamera: () => {
         guide.cancelFlight();

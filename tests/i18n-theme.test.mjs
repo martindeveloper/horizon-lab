@@ -4,12 +4,17 @@ import test from "node:test";
 
 import { createTranslator } from "next-intl";
 
+import { MAPS } from "@horizon/toolkit/bodies";
+import { keysOf } from "@horizon/toolkit/records";
+
 import { HOLE_ALIASES, PRESETS } from "../src/features/black-hole/lib/holes/index.ts";
 import { pathForHole, presetFromPath, resolveHole } from "../src/features/black-hole/routing.ts";
 import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
+import { CREDITS } from "../src/lib/credits.ts";
 import { localeRewrites, siteRedirects } from "../src/lib/redirects.ts";
 import { simulations } from "../src/lib/simulations.ts";
+import { SOLAR_LABEL_KEYS } from "../src/space/solar-system/scene/solar-system.ts";
 import { layoutMessages, leaves } from "./messages-helper.mjs";
 
 /** Every layout's catalog at once: the shared copy and each simulation under its namespace. */
@@ -46,6 +51,31 @@ test("English and Czech have identical keys and every ICU message formats", () =
       const text = Object.keys(tags).length ? t.markup(key, { ...args, ...tags }) : t(key, args);
       assert.ok(text.length, `${locale}:${key}`);
     }
+  }
+});
+
+test("every body the scenes label and every credited map has its name in both languages", () => {
+  const strict = (locale, messages, namespace) =>
+    createTranslator({
+      locale,
+      messages,
+      namespace,
+      onError(error) {
+        throw error;
+      },
+    });
+  for (const locale of routing.locales) {
+    // The scenes that place the solar system's labels read `names.<key>` in their namespace.
+    for (const id of ["orrery", "deep-field"]) {
+      const { messageKey } = simulations.find((simulation) => simulation.id === id);
+      const t = strict(locale, layoutMessages(id, locale), messageKey);
+      for (const key of SOLAR_LABEL_KEYS) assert.ok(t(`names.${key}`), `${locale} ${id}: ${key}`);
+    }
+    // The credits page names each measured map's world and describes every source.
+    const t = strict(locale, layoutMessages(null, locale), "credits");
+    for (const id of keysOf(MAPS)) assert.ok(t(`worlds.${id}`), `${locale} credits world: ${id}`);
+    for (const item of CREDITS.flatMap((group) => group.items))
+      assert.ok(t(`items.${item.id}`), `${locale} credits item: ${item.id}`);
   }
 });
 

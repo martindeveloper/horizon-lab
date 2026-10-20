@@ -113,6 +113,14 @@ export const SOURCES = {
     cite: "JPL planetary physical parameters (IAU 2015 mean radii)",
     link: "https://ssd.jpl.nasa.gov/planets/phys_par.html",
   },
+  jplSatElements: {
+    cite: "JPL planetary satellite mean elements; several fitted to JPL Horizons, 2000–2032",
+    link: "https://ssd.jpl.nasa.gov/sats/elem/",
+  },
+  jplSatRadii: {
+    cite: "JPL planetary satellite physical parameters (IAU 2015 mean radii)",
+    link: "https://ssd.jpl.nasa.gov/sats/phys_par/",
+  },
   kaibVolk2022: {
     cite: "Kaib & Volk 2022, Dynamical population of comet reservoirs, in Comets III (Univ. of Arizona Press, 2024; after Heisler & Tremaine 1986)",
     link: "https://arxiv.org/abs/2206.00010",

@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { createFormatter, createTranslator } from "next-intl";
 
-import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
+import { MOON_IDS, NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
 
 import { cardFor } from "../src/features/orrery/components/cards.tsx";
 import { formatYearsAgo } from "../src/features/orrery/components/format.ts";
@@ -20,6 +20,7 @@ const SELECTIONS = [
   { kind: "sun" },
   ...PLANET_IDS.map((id) => ({ kind: "planet", id })),
   ...NAMED.map((body) => ({ kind: "named", id: body.id })),
+  ...MOON_IDS.map((id) => ({ kind: "moon", id })),
   ...["asteroids", "disk", "kuiper", "scattered", "oort", "ejected"].map((id) => ({
     kind: "population",
     id,

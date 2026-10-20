@@ -1,6 +1,6 @@
 /** Which solar system view shows a selection, and when a tap should fly there. */
 import { planetElements } from "./elements";
-import { solarPick, type SolarSelection } from "./selection";
+import { hostOf, solarPick, type SolarSelection } from "./selection";
 import { TRACERS, tracerElements } from "./tracers";
 import type { SolarViewId } from "./views";
 
@@ -16,6 +16,8 @@ export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
     }
     case "named":
       return sel.id === "sedna" ? "scattered" : sel.id === "pluto" ? "kuiper" : "giants";
+    case "moon":
+      return viewOf(hostOf(sel.id), mig);
     case "population":
       return sel.id === "asteroids"
         ? "inner"
@@ -38,6 +40,8 @@ export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
  * null keeps the camera where it is.
  */
 export function framingView(sel: SolarSelection, mig: number, dist: number): SolarViewId | null {
+  /* A moon's tap comes from near its planet: frame it as the planet would be. */
+  if (sel.kind === "moon") return framingView(hostOf(sel.id), mig, dist);
   if (sel.kind === "planet") {
     const a = planetElements(sel.id, 1, 0, new Date()).a;
     return dist <= a * 8 && dist >= a * 0.4 ? null : viewOf(sel);

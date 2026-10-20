@@ -3,12 +3,17 @@ import { keplerPosition, namedById, type Vec3 } from "@horizon/toolkit/bodies";
 
 import { namedElements, planetElements } from "./elements";
 import type { SolarMoment } from "./moment";
-import type { SolarSelection } from "./selection";
+import { moonOffset } from "./moon-orbits";
+import { hostOf, type SolarSelection } from "./selection";
 import { TRACERS, tracerElements, tracerVisible } from "./tracers";
 
+const offset: Vec3 = [0, 0, 0];
+
 /**
- * The Sun at the origin, a body on its orbit at `now` plus the Motion offset, a sample while
- * it exists; null for a population, which is everywhere along its belt or cloud.
+ * The Sun at the origin, a body on its orbit at `now` plus the Motion offset, a moon at its
+ * true offset from that body, a sample while it exists; null for a population, which is
+ * everywhere along its belt or cloud. (A selected planet's system is drawn magnified; the
+ * scene reports where it draws a moon.)
  */
 export function positionOf(
   sel: SolarSelection,
@@ -24,6 +29,15 @@ export function positionOf(
       return keplerPosition(planetElements(sel.id, mig, driftYears, now), out);
     case "named":
       return keplerPosition(namedElements(namedById(sel.id), mig, driftYears, now), out);
+    case "moon": {
+      const at = positionOf(hostOf(sel.id), { mig, driftYears }, now, out);
+      if (!at) return null;
+      moonOffset(sel.id, now, offset);
+      at[0] += offset[0];
+      at[1] += offset[1];
+      at[2] += offset[2];
+      return at;
+    }
     case "tracer": {
       const tr = TRACERS[sel.index];
       return tr && tracerVisible(tr, mig)

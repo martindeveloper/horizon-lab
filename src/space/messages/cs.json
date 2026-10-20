@@ -96,6 +96,7 @@
     "days": "{value} d",
     "years": "{value} r",
     "yearsAbout": "zhruba {value} r",
+    "host": "Mateřské těleso",
     "radius": "Poloměr",
     "km": "{value} km",
     "average": "Velká poloosa"

@@ -76,11 +76,12 @@ toolkit's `.glsl` loader (see the package README).
   lines through each compact bright light, not the light smeared along the arms.
   `render(levelOf, w, h, settings)` finds the lights in level `level` of a frame's bloom chain
   (`levelOf` reads the chain's last render or mask; each texel a cell about a thirty-second of
-  the frame): a cell brighter than its eight neighbours, with the ring of cells two out dark
-  beside it and its glow no wider than about half a cell around its centre, is a point; a
-  wider light (a disc filling the view, a galaxy's core, the black hole's disk) fades out of
-  spiking. Each point is placed at its light-weighted centre in a level two finer and gets a
-  four- or six-point star (`arms`: two vanes across, as Hubble's spider, or three, as JWST's
+  the frame): a cell brighter than its eight neighbours is a candidate, then measured in a
+  level two finer through a Gaussian window a cell wide centred on the light itself (its own
+  light-weighted centre, refined twice), so its energy, place and size change smoothly as it
+  or a neighbour moves rather than stepping at a cell's edge; a light no wider than about
+  half a cell is a point, and a wider one (a disc filling the view, a galaxy's core, the
+  black hole's disk) fades out of spiking. Each point gets a four- or six-point star (`arms`: two vanes across, as Hubble's spider, or three, as JWST's
   struts): lines a pixel or two wide whose brightness falls as 1/r² from a small core, red
   reaching furthest (a vane's diffraction grows as the wavelength squared), drawn until they
   fade below `threshold` (in the frame's units) and at most `reach` of the frame's height, so

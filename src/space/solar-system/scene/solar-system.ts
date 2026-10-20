@@ -35,14 +35,15 @@ const LABEL_PICKS = new Map<string, SolarSelection>([
   ["sun", { kind: "sun" }],
   ...PLANET_IDS.map((id): [string, SolarSelection] => [id, { kind: "planet", id }]),
   ...NAMED.map(({ id }): [string, SolarSelection] => [id, { kind: "named", id }]),
+  ...MOON_IDS.map((id): [string, SolarSelection] => [id, { kind: "moon", id }]),
 ]);
-/** What a tapped name opens; moons and the snow line open nothing. */
+/** What a tapped name opens; the snow line opens nothing. */
 export const solarLabelPick = (key: string) => LABEL_PICKS.get(key);
 
-/** Where rulers start for a selection: its body, a sample's position (`at`), or the Sun. */
+/** Where rulers start for a selection: its body, a sample's or moon's position (`at`), or the Sun. */
 export function rulerOrigin(sel: SolarSelection | null, at: Point | null): string | Point | null {
   if (sel?.kind === "planet" || sel?.kind === "named") return sel.id;
-  return sel?.kind === "tracer" ? at : null;
+  return sel?.kind === "tracer" || sel?.kind === "moon" ? at : null;
 }
 
 export function createSolarSystem(
@@ -67,14 +68,15 @@ export function createSolarSystem(
   parent.add(root);
   const globes = createGlobes(kit);
   const sun = createSunLayer(kit, root, globes, place, shownFor);
-  const moons = createMoonsLayer(kit, root, globes, place);
+  const closeId = deps.closeId ?? (() => null);
+  const moons = createMoonsLayer(kit, root, globes, place, { closeId, shownFor });
   const planets = createPlanetsLayer(kit, root, {
     globes,
     place,
     rulers,
     hosts: moons.hosts,
     shownFor,
-    closeId: deps.closeId ?? (() => null),
+    closeId,
   });
   deps.setBodies([
     { key: "sun", mesh: sun.sun },
@@ -83,7 +85,10 @@ export function createSolarSystem(
     ...moons.labelBodies,
   ]);
   const populations = createPopulationsLayer(kit, root, deps.swarms);
-  const focus = createFocusRing(kit, root);
+  /* The reticle sits on a moon where its (maybe magnified) system draws it. */
+  const focus = createFocusRing(kit, root, (sel: SolarSelection) =>
+    sel.kind === "moon" ? moons.drawnAt(sel.id) : undefined,
+  );
 
   return {
     /** Everything the scene draws; hosts may add to it (a tour's sketch, the Sun's activity). */
@@ -91,7 +96,7 @@ export function createSolarSystem(
     sun: sun.sun,
     planets,
     moons,
-    pickables: [sun.sun, ...planets.pickables, ...populations.pickables],
+    pickables: [sun.sun, ...planets.pickables, ...moons.pickables, ...populations.pickables],
     /** Redraws the swarms at a new quality's counts. */
     setSwarms: (counts: SwarmCounts) => populations.setCounts(counts),
     /**

@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { createFormatter, createTranslator } from "next-intl";
 
-import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
+import { MOON_IDS, NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
 import { nearestView } from "@horizon/toolkit/camera";
 import { convert } from "@horizon/toolkit/science";
 
@@ -85,6 +85,7 @@ const SELECTIONS = [
   { kind: "sun" },
   ...PLANET_IDS.map((id) => ({ kind: "planet", id })),
   ...NAMED.map(({ id }) => ({ kind: "named", id })),
+  ...MOON_IDS.map((id) => ({ kind: "moon", id })),
   ...["asteroids", "kuiper", "scattered", "oort"].map((id) => ({ kind: "population", id })),
   { kind: "tracer", index: 3 },
   ...["milkyway", "sun", "bulge", "halo"].map((id) => ({ kind: "galaxy", id })),

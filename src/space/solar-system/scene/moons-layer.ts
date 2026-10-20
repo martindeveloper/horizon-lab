@@ -1,14 +1,22 @@
 /** Major moons, grouped by planet. Each planet's marker is recorded as the planets are placed. */
 import { Mesh, Vector3, type Object3D } from "three";
 
-import { MOONS, type BodyId, type Moon, type MoonHost } from "@horizon/toolkit/bodies";
+import {
+  MOONS,
+  type BodyId,
+  type Moon,
+  type MoonHost,
+  type MoonId,
+  type Vec3,
+} from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
 import { type LineSlot, ownedLine, type PlaceLabel } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { moonOffset, moonOrientation, writeMoonOrbit } from "../graphics/moons";
+import { hostOf, type SolarSelection } from "../model/selection";
 import type { Globes } from "./geometry";
-import { ORBIT_COLOR, type SolarFrame, type SolarKit } from "./kit";
+import { ORBIT_COLOR, type ShownFor, type SolarFrame, type SolarKit } from "./kit";
 
 /** Moon dots: Ganymede's size in pixels; smaller moons scale with radius, down to the floor. */
 const MOON_PX = 4.5;
@@ -18,6 +26,8 @@ const MOON_CLEAR_PX = 12;
 /** A moon shows once it clears its planet's marker by this many pixels (eased over the span). */
 const SEPARATE_PX = [6, 10] as const;
 const SELECTED_PX = [3, 6] as const;
+/** A moon's touch target, screen pixels: smaller than a planet's, so a planet stays tappable. */
+const TOUCH_PX = 10;
 /**
  * A magnified system reaches at most this many times its innermost orbit: Jupiter's and
  * Uranus's moons fit (4.5) and spread evenly; Saturn's, Mimas to Iapetus (19), are drawn
@@ -30,6 +40,8 @@ export type MoonHosts = ReadonlyMap<string, Host>;
 type MoonSlot = {
   moon: Moon;
   mesh: Mesh;
+  /** Touch target: raycast, never drawn. */
+  hit: Mesh;
   offset: Vector3;
   orbit: LineSlot;
   orbitDay: number;
@@ -43,16 +55,26 @@ export function createMoonsLayer(
   parent: Object3D,
   globes: Globes,
   place: PlaceLabel,
+  deps: {
+    /** The body in close-up: a moon there stays drawn whatever its system's state. */
+    closeId: () => BodyId | null;
+    /** A moon's own label fades as its close-up fills the view. */
+    shownFor: ShownFor;
+  },
 ) {
+  const { closeId, shownFor } = deps;
   const systems = [...new Set(MOONS.map((m) => m.host))].map((id: MoonHost) => {
     const moons = MOONS.filter((m) => m.host === id).map((moon): MoonSlot => {
       const mesh = new Mesh(globes.small, looks.ghost);
       mesh.visible = false;
+      const hit = new Mesh(globes.hit, looks.ghost);
+      hit.userData.pick = { kind: "moon", id: moon.id } satisfies SolarSelection;
+      hit.visible = false;
       const orbit = ownedLine(scope, id === "pluto" ? 0x9ebccc : ORBIT_COLOR[id], 0.45);
       orbit.line.visible = false;
-      parent.add(mesh, orbit.line);
+      parent.add(mesh, hit, orbit.line);
       const dotPx = Math.max(MOON_PX_MIN, MOON_PX * Math.sqrt(moon.radiusKm / 2631.2));
-      return { moon, mesh, offset: new Vector3(), orbit, orbitDay: NaN, dotPx, lift: 1 };
+      return { moon, mesh, hit, offset: new Vector3(), orbit, orbitDay: NaN, dotPx, lift: 1 };
     });
     const apsides = moons.map((m) => m.moon.aKm / AU_KM);
     const host: Host = { position: new Vector3(), extent: 0, on: false };
@@ -69,12 +91,29 @@ export function createMoonsLayer(
   const names = lod.fader();
   const hosts: MoonHosts = new Map(systems.map((system) => [system.id, system.host]));
   const systemOf = (id: BodyId) => systems.find((s) => s.id === id);
+  const slots = new Map(systems.flatMap((s) => s.moons.map((slot) => [slot.moon.id, slot])));
+  const drawn: Vec3 = [0, 0, 0];
 
   return {
     hosts,
     labelBodies: systems.flatMap((system) =>
       system.moons.map(({ moon, mesh }) => ({ key: moon.id, mesh })),
     ),
+    /** Every moon's touch target, shown while its moon is. */
+    pickables: [...slots.values()].map((slot) => slot.hit),
+    /** A moon's globe, for its own close-up pass. */
+    meshOf(id: MoonId): Mesh {
+      return slots.get(id)!.mesh;
+    },
+    /** Where a moon is drawn this frame (its system may be magnified), or null while hidden. */
+    drawnAt(id: MoonId): Vec3 | null {
+      const mesh = slots.get(id)?.mesh;
+      if (!mesh?.visible) return null;
+      drawn[0] = mesh.position.x;
+      drawn[1] = mesh.position.y;
+      drawn[2] = mesh.position.z;
+      return drawn;
+    },
     /** The meshes and orbit lines of a body's moons, for its close-up pass. */
     objectsOf(id: BodyId): Object3D[] {
       return systemOf(id)?.moons.flatMap((m) => [m.mesh, m.orbit.line]) ?? [];
@@ -98,7 +137,10 @@ export function createMoonsLayer(
         const range = Math.max(1e-12, camera.position.distanceTo(host.position));
         /** Screen pixels per world unit at the planet. */
         const perPx = 1 / pxWorld(range, 1);
-        const selected = (sel?.kind === "planet" || sel?.kind === "named") && sel.id === system.id;
+        /* Selecting a moon selects its system too, so the moon stays clear of its planet. */
+        const selected =
+          ((sel?.kind === "planet" || sel?.kind === "named") && sel.id === system.id) ||
+          (sel?.kind === "moon" && hostOf(sel.id).id === system.id);
         const focus = system.focus.to(selected);
         const shown =
           era *
@@ -118,21 +160,26 @@ export function createMoonsLayer(
         const [from, to] = selected ? SELECTED_PX : SEPARATE_PX;
         system.reach = 0;
         for (const slot of system.moons) {
-          const { moon, mesh, offset, orbit } = slot;
+          const { moon, mesh, hit, offset, orbit } = slot;
           const magnify = 1 + (Math.max(1, spread * slot.lift) - 1) * focus;
-          if (shown > 0) moonOffset(moon.id, now, offset);
+          /* A close-up keeps its moon on whatever its system's state. */
+          const close = closeId() === moon.id;
+          if (shown > 0 || close) moonOffset(moon.id, now, offset);
           const reach = offset.length() * magnify;
           const clears = reach > hidden ? smoothstep(from, to, (reach - host.extent) * perPx) : 0;
-          const presence = shown * clears;
+          const presence = close ? 1 : shown * clears;
           const on = presence > 0.004;
           mesh.visible = on;
+          hit.visible = on && !close;
           orbit.line.visible = on;
           if (on) {
             mesh.position.copy(host.position).addScaledVector(offset, magnify);
+            /* The dot's floor at the moon's own distance: in its close-up the planet is far. */
+            const near = Math.max(1e-12, camera.position.distanceTo(mesh.position));
             const real = moon.radiusKm / AU_KM;
             const radius = show.trueSize
               ? real
-              : Math.max(real * magnify, pxWorld(range, slot.dotPx));
+              : Math.max(real * magnify, pxWorld(near, slot.dotPx));
             /* Markers grow in; true size never changes size. */
             mesh.scale.setScalar(show.trueSize ? radius : radius * presence);
             system.reach = Math.max(
@@ -143,6 +190,8 @@ export function createMoonsLayer(
             if (mesh.material === looks.ghost) mesh.material = looks.moon(moon.id);
             globes.fit(mesh, mesh.position, radius, globes.small);
             lod.see(moon.id, lod.px(radius, mesh.position));
+            hit.position.copy(mesh.position);
+            hit.scale.setScalar(Math.max(radius, pxWorld(near, TOUCH_PX)));
             orbit.line.position.copy(host.position);
             orbit.line.scale.setScalar(magnify);
             orbit.material.opacity = 0.45 * presence;
@@ -157,7 +206,7 @@ export function createMoonsLayer(
             mesh.position.x,
             mesh.position.y,
             mesh.position.z,
-            labelled * (on ? presence : 0),
+            labelled * (on ? presence : 0) * shownFor(moon.id),
           );
         }
       }

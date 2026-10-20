@@ -9,10 +9,14 @@
 // window a cell wide, centred on the light itself (the window's own light-weighted centre,
 // refined twice from the coarse neighbourhood's), so its energy, its place and its size change
 // smoothly as it moves across the frame or another light passes by, instead of stepping as
-// one of them crosses a cell's edge. The energy is the window's light, in frame pixels of
-// light (uFineArea); a point keeps all of it, and a light wider than the window loses most. A
-// light whose root-mean-square radius passes half a cell (a disc filling the view, the black
-// hole's disk, a galaxy's core) is no point: its spikes fade out as it grows.
+// one of them crosses a cell's edge. Only texels near the window's own peak count (a soft
+// gate from LENS_GATE_FROM to LENS_GATE_TO of it): the specks of a belt or the field stars
+// around a far Sun are many times dimmer once the chain has blurred them, so they neither
+// pull the star about as they drift through nor widen the light. The energy is the window's
+// light, in frame pixels of light (uFineArea); a point keeps all of it, and a light wider
+// than the window loses most. A light whose root-mean-square radius passes half a cell (a
+// disc filling the view, the black hole's disk, a galaxy's core) is no point: its spikes
+// fade out as it grows.
 //
 // A clipped frame cannot tell how far past white a light is, so a light whose energy is below
 // uFull spikes as the cube of its share of it: the Sun's star stands out from a white speck's.
@@ -45,7 +49,9 @@ varying float vLength;
 // The window: two cells out from its centre, in fine texels, at most this many across.
 #define LENS_WINDOW_REACH 8
 #define LENS_WINDOW_SPAN 17
-#define LENS_WINDOW_PASSES 2
+#define LENS_WINDOW_PASSES 3
+#define LENS_GATE_FROM 0.12
+#define LENS_GATE_TO 0.35
 #define LENS_SHORTEST 6.0
 // Red spreads furthest: a vane's diffraction scales as the wavelength squared (630, 530, 465 nm).
 #define LENS_RED_CORE 1.41
@@ -103,11 +109,14 @@ void main() {
   vec3 colour = vec3(0.0);
   float weight = 0.0;
   float second = 0.0;
+  // The first pass only finds the window's peak and a first centre; the gate needs the peak.
+  float brightest = 0.0;
   for (int pass = 0; pass < LENS_WINDOW_PASSES; pass++) {
     colour = vec3(0.0);
     weight = 0.0;
     second = 0.0;
     vec2 first = vec2(0.0);
+    float top = 0.0;
     ivec2 from = ivec2(floor(centre)) - reach;
     for (int j = 0; j < LENS_WINDOW_SPAN; j++) {
       if (j > 2 * reach) break;
@@ -116,10 +125,13 @@ void main() {
         ivec2 f = from + ivec2(i, j);
         if (any(lessThan(f, ivec2(0))) || any(greaterThanEqual(f, fine))) continue;
         vec3 v = texelFetch(uFine, f, 0).rgb;
+        float l = luma(v);
+        top = max(top, l);
         vec2 c = vec2(f) + 0.5;
         vec2 d = c - centre;
         float g = exp(-0.5 * dot(d, d) / (sigma * sigma));
-        float w = luma(v) * g;
+        if (pass > 0) g *= smoothstep(LENS_GATE_FROM * brightest, LENS_GATE_TO * brightest, l);
+        float w = l * g;
         colour += v * g;
         weight += w;
         first += c * w;
@@ -128,6 +140,7 @@ void main() {
     }
     if (weight <= 0.0) return;
     centre = first / weight;
+    brightest = top;
   }
 
   vec3 light = colour * uFineArea;

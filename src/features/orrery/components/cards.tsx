@@ -11,7 +11,13 @@ import {
   type Translate,
   type Value,
 } from "@/lib/facts";
-import { orbitFacts, orbitRows, radiusRow, solarNameKey } from "@/space/solar-system/format";
+import {
+  moonRows,
+  orbitFacts,
+  orbitRows,
+  radiusRow,
+  solarNameKey,
+} from "@/space/solar-system/format";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import { namedElements, planetElements, rewinds } from "@/space/solar-system/model/elements";
 import { migrationProgress } from "@/space/solar-system/model/moment";
@@ -78,6 +84,16 @@ function namedCard(sel: Of<SolarSelection, "named">, m: Moment): Card {
   };
 }
 
+function moonCard(sel: Of<SolarSelection, "moon">, { t, f, d }: Moment): Card {
+  return {
+    badge: t("badges.measured"),
+    title: t(solarNameKey(sel)),
+    facts: moonRows(t, f, d, sel.id),
+    body: "",
+    caution: "",
+  };
+}
+
 function tracerCard(sel: Of<SolarSelection, "tracer">, m: Moment): Card {
   const { t, f, d, yearsAgo, mig } = m;
   const tr = TRACERS[sel.index];
@@ -129,6 +145,8 @@ export function cardFor(
       return planetCard(sel, m);
     case "named":
       return namedCard(sel, m);
+    case "moon":
+      return moonCard(sel, m);
     case "population":
       return staticCard(t, d, `cards.populations.${sel.id}`, POPULATION_CARDS[sel.id]);
     case "tracer":

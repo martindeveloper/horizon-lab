@@ -17,7 +17,11 @@ import { moonOffset } from "@/space/solar-system/graphics/moons";
  * painted a few rows per frame), the atmosphere shell over a body with air (its own and its
  * moons', drawn in place of the surface shader's haze rim) and a depth pass of its own.
  */
-import type { SolarSelection } from "@/space/solar-system/model/selection";
+import {
+  hasSurface,
+  type SolarSelection,
+  type SurfaceSelection,
+} from "@/space/solar-system/model/selection";
 import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
 import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horizon/toolkit/bodies";
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
@@ -39,6 +43,8 @@ import {
   sampleCloseUp,
 } from "./close-up-flight";
 
+/** The layer of a moon's planet in a moon's close-up: its own depth pass, behind the moon's. */
+const HOST_LAYER = 2;
 /** The layer of the close-up body's own depth pass. */
 const BODY_LAYER = 1;
 /** Prefetched close-up maps kept as compressed bytes (a few MB at most). */
@@ -48,7 +54,7 @@ const LARGEST_MOON = new Map<BodyId, MoonId>();
 for (const moon of [...MOONS].sort((a, b) => a.radiusKm - b.radiusKm))
   LARGEST_MOON.set(moon.host, moon.id);
 
-export type BodySelection = Extract<SolarSelection, { kind: "sun" | "planet" | "named" }>;
+export type BodySelection = SurfaceSelection;
 
 type CloseUp = {
   sel: BodySelection;
@@ -67,6 +73,8 @@ type CloseUp = {
   frame: number;
   /** The body's meshes, drawn in their own depth pass on layer 1. */
   objects: Object3D[];
+  /** A moon's planet (globe and rings), drawn in a depth pass of its own before the moon's. */
+  host: Object3D[];
   /** The detailed map, painted a few rows per frame, then swapped in. */
   job: SurfaceJob | null;
   /** The measured close-up map on its way, if the body has one. */
@@ -106,6 +114,8 @@ export function createCloseUpController(
     locate: (sel: BodySelection, out: Vector3) => Vector3;
     /** The body's own meshes and its moons'. */
     objectsOf: (sel: BodySelection) => Object3D[];
+    /** For a moon, its planet's globe (rings included); none for the rest. */
+    hostOf: (sel: BodySelection) => Object3D[];
     /** How far the body's drawn moons reach. */
     reachOf: (id: BodyId) => number;
     /** The close-up takes the camera from flights, the guide and input. */
@@ -146,6 +156,7 @@ export function createCloseUpController(
   };
   const target = new Vector3();
   const moonAt = new Vector3();
+  const hostAt = new Vector3();
   /** The shells' sphere; each shell is scaled to its body's air. */
   const shellGeometry = scope.own(new SphereGeometry(1, 96, 64));
   const shellInverse = new Matrix4();
@@ -223,6 +234,7 @@ export function createCloseUpController(
     if (!close) return;
     unshell(close);
     setLayer(close.objects, 0);
+    setLayer(close.host, 0);
     close.loading?.abort();
     looks.release(close.id);
     close.detail?.dispose();
@@ -252,6 +264,10 @@ export function createCloseUpController(
        wide pass's near plane once the camera is at the Earth. */
     const objects = deps.objectsOf(sel);
     setLayer(objects, BODY_LAYER);
+    /* A moon's planet can be a million km off while the near plane is a few km out: the wide
+       pass cannot resolve its rings against its globe, so it gets a depth range of its own. */
+    const host = deps.hostOf(sel);
+    setLayer(host, HOST_LAYER);
     close = {
       sel,
       id,
@@ -265,6 +281,7 @@ export function createCloseUpController(
       radius,
       frame,
       objects,
+      host,
       /* Measured bodies fetch a detailed map; painted ones paint one during the flight. */
       job: MAPS[id] ? null : detailJob(id),
       loading: null,
@@ -387,7 +404,7 @@ export function createCloseUpController(
     },
     /** A body was selected: fetch its close-up map's bytes while the card is read. */
     prefetch(sel: SolarSelection | null) {
-      if (sel?.kind !== "sun" && sel?.kind !== "planet" && sel?.kind !== "named") return;
+      if (!hasSurface(sel)) return;
       const near = nearFile(bodyKey(sel));
       if (near) void bytesOf(near).catch(() => undefined);
     },
@@ -428,24 +445,29 @@ export function createCloseUpController(
       shellGlobes(close);
       paintDetail();
     },
-    /* After the main pass: the body alone in a depth range of its own, so a true-size
-       globe a few radii away stays crisp. */
+    /* After the main pass: a moon's planet, then the body alone, each in a depth range of
+       its own, so a true-size globe a few radii away stays crisp. */
     renderBody(renderer: WebGLRenderer, scene: Scene) {
       if (!close) return;
       const keepNear = camera.near;
       const keepFar = camera.far;
-      const toBody = camera.position.distanceTo(target);
-      const moons = deps.reachOf(close.id);
-      const extent = Math.max(close.objects[0]!.scale.x * 3, moons * 1.02);
-      camera.near = Math.max(toBody * 1e-4, (toBody - extent) * 0.8);
-      camera.far = toBody + extent;
-      camera.updateProjectionMatrix();
-      camera.layers.set(BODY_LAYER);
-      aimShells(close);
       const autoClear = renderer.autoClear;
       renderer.autoClear = false;
-      renderer.clearDepth();
-      renderer.render(scene, camera);
+      /** Draws `layer` with the depth range around a globe `extent` from `centre`. */
+      const pass = (layer: number, centre: Vector3, extent: number) => {
+        const to = camera.position.distanceTo(centre);
+        camera.near = Math.max(to * 1e-4, (to - extent) * 0.8);
+        camera.far = to + extent;
+        camera.updateProjectionMatrix();
+        camera.layers.set(layer);
+        renderer.clearDepth();
+        renderer.render(scene, camera);
+      };
+      const planet = close.host[0];
+      if (planet) pass(HOST_LAYER, planet.getWorldPosition(hostAt), planet.scale.x * 3);
+      aimShells(close);
+      const moons = deps.reachOf(close.id);
+      pass(BODY_LAYER, target, Math.max(close.objects[0]!.scale.x * 3, moons * 1.02));
       renderer.autoClear = autoClear;
       camera.layers.set(0);
       camera.near = keepNear;

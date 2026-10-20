@@ -9,10 +9,11 @@ import {
   type Translate,
   type Value,
 } from "@/lib/facts";
-import { periodYears, type Elements } from "@horizon/toolkit/bodies";
+import { periodYears, type Elements, type MoonId } from "@horizon/toolkit/bodies";
 import { convert, formatDistanceRange } from "@horizon/toolkit/science";
 
-import type { SolarSelection } from "./model/selection";
+import { SOLAR_CATALOGUE } from "./model/catalogue";
+import { hostOf, type SolarSelection } from "./model/selection";
 import { TRACERS, binOf } from "./model/tracers";
 
 function formatPeriod(t: Translate, f: Format, years: number) {
@@ -60,6 +61,28 @@ export function radiusRow(t: Translate, d: DistanceSettings, radius: Value): Car
   };
 }
 
+/** A moon's planet, its radius, its mean distance from that planet and its sidereal period. */
+export function moonRows(t: Translate, f: Format, d: DistanceSettings, id: MoonId): CardFact[] {
+  const facts = SOLAR_CATALOGUE.moons[id];
+  const days = facts.period.value;
+  return [
+    { id: "host", label: t("facts.host"), value: t(solarNameKey(hostOf(id))) },
+    radiusRow(t, d, facts.radius),
+    {
+      id: "average",
+      label: t("facts.average"),
+      value: t("facts.km", { value: figure(t, d, facts.semiMajorAxis) }),
+    },
+    {
+      id: "period",
+      label: t("facts.period"),
+      value: t("facts.days", {
+        value: f.number(days, { maximumFractionDigits: days < 10 ? 2 : 1 }),
+      }),
+    },
+  ];
+}
+
 /**
  * The message key naming a selection: a body, a belt or cloud, or the population a sample is
  * in today.
@@ -70,6 +93,7 @@ export function solarNameKey(sel: SolarSelection) {
       return "names.sun";
     case "planet":
     case "named":
+    case "moon":
       return `names.${sel.id}`;
     case "population":
       return sel.id === "asteroids" ? "names.asteroids" : `layers.${sel.id}`;

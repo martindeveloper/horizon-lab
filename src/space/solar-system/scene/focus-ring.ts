@@ -5,6 +5,7 @@ import type { Vec3 } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 
 import { positionOf } from "../model/position";
+import type { SolarSelection } from "../model/selection";
 import type { SolarFrame, SolarKit } from "./kit";
 
 type Point = Vec3;
@@ -15,7 +16,15 @@ const RETICLE_PX = 30;
 const LOCK_S = 0.7;
 const BREATH_S = 3.2;
 
-export function createFocusRing({ scope, looks, pxWorld, camera }: SolarKit, parent: Object3D) {
+/**
+ * `drawnAt`: where the scene draws a selection when that differs from its true position (a
+ * moon in a magnified system; null while it is hidden), or undefined to use the true one.
+ */
+export function createFocusRing(
+  { scope, looks, pxWorld, camera }: SolarKit,
+  parent: Object3D,
+  drawnAt: (sel: SolarSelection) => Vec3 | null | undefined = () => undefined,
+) {
   // Faces the camera in its vertex shader; drawn wider than its geometry, so never culled.
   const ring = new Mesh(scope.own(new PlaneGeometry(2, 2)), looks.focus);
   ring.renderOrder = 10;
@@ -27,7 +36,11 @@ export function createFocusRing({ scope, looks, pxWorld, camera }: SolarKit, par
   let since = 0;
   const at: Vec3 = [0, 0, 0];
 
-  const locate = (f: SolarFrame): Point | null => (f.sel ? positionOf(f.sel, f, f.now, at) : null);
+  const locate = (f: SolarFrame): Point | null => {
+    if (!f.sel) return null;
+    const drawn = drawnAt(f.sel);
+    return drawn === undefined ? positionOf(f.sel, f, f.now, at) : drawn;
+  };
 
   return {
     /** Draws the ring unless a close-up hides it; returns the selected body's position. */

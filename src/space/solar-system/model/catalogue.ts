@@ -8,13 +8,17 @@
 import { factsOf, type Facts, type Span, type Value } from "@/lib/facts";
 import {
   FIGURES,
+  MOON_IDS,
   NAMED,
   PLANET_RADIUS_KM,
   jplElements,
+  moonById,
   periodYears,
+  type MoonId,
   type NamedId,
   type PlanetId,
 } from "@horizon/toolkit/bodies";
+import { recordFrom } from "@horizon/toolkit/records";
 import {
   AU_KM,
   AU_LIGHT_SECONDS,
@@ -93,6 +97,35 @@ function planetFacts(id: PlanetId) {
             note: "volumetric mean of the Juno 1-bar axes, 71,488 and 66,842 km",
           }
         : { source: "jplRadii", status: "verified" }),
+    },
+  } satisfies Facts;
+}
+
+/** A moon's radius, mean distance from its planet and sidereal period (toolkit bodies). */
+function moonFacts(id: MoonId) {
+  const moon = moonById(id);
+  return {
+    radius: {
+      value: moon.radiusKm,
+      unit: "km",
+      digits: wholeDigits(moon.radiusKm),
+      source: "jplSatRadii",
+      status: "verified",
+    },
+    semiMajorAxis: {
+      value: moon.aKm,
+      unit: "km",
+      digits: wholeDigits(moon.aKm),
+      source: "jplSatElements",
+      status: "verified",
+    },
+    period: {
+      value: moon.periodDays,
+      unit: "d",
+      digits: 4,
+      source: "jplSatElements",
+      status: "derived",
+      note: "sidereal, from the mean motion",
     },
   } satisfies Facts;
 }
@@ -323,6 +356,7 @@ export const SOLAR_CATALOGUE = {
   sun: SUN,
   planets: PLANETS,
   named: NAMED_BODIES,
+  moons: recordFrom(MOON_IDS, moonFacts),
   populations: POPULATIONS,
 } as const;
 
