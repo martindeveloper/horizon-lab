@@ -3,6 +3,9 @@ const base = (
   process.env.NEXT_PUBLIC_ASSETS_URL || "https://horizon-cdn.martinpernica.xyz"
 ).replace(/\/+$/, "");
 
+/** Origin to preconnect to, anonymously: assets load with CORS. */
+export const assetOrigin = new URL(base).origin;
+
 /**
  * URL for a CDN asset by its bucket key, e.g. `/audio/x.webm`. The bucket sends
  * CORS headers: audio runs through Web Audio.

@@ -24,6 +24,7 @@ export type MusicPlayerOptions = {
 
 /** `track` is the playlist index the deck holds, or -1 while it holds nothing. */
 type Deck = { el: HTMLAudioElement; gain: GainNode; track: number };
+type Source = Pick<Deck, "el" | "track">;
 type Timer = ReturnType<typeof setTimeout> | undefined;
 
 const RESUME_EVENTS = ["pointerdown", "pointerup", "keydown", "touchend"] as const;
@@ -68,7 +69,7 @@ export function crossfadeDelay(duration: number, position: number, crossfade: nu
  * playing track loads; the next one buffers shortly before its blend or on a
  * skip. A hidden tab fades out and resumes on return. Constructing touches
  * nothing; the audio graph is built on the first play, which must come from a
- * user gesture.
+ * user gesture. `preload()` buffers the first track before that.
  */
 export class MusicPlayer {
   readonly tracks: readonly MusicTrack[];
@@ -81,6 +82,8 @@ export class MusicPlayer {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private decks: Deck[] = [];
+  /** The first deck's element, buffering before the graph exists; the first play adopts it. */
+  private primed: Source | null = null;
   private current = 0;
   private index = 0;
   private state: MusicState = "paused";
@@ -161,10 +164,21 @@ export class MusicPlayer {
       return;
     }
     this.index = this.upcoming;
-    const deck = this.decks[this.current];
+    const deck = this.decks[this.current] ?? this.primed;
     if (deck) this.load(deck, this.index);
     this.updateMetadata();
     this.notify();
+  };
+
+  /**
+   * Buffer the track that plays next before the first play: on intent (hover,
+   * focus) or for a remembered session. Needs no gesture; does nothing once the
+   * graph exists or when the browser asks to save data.
+   */
+  preload = () => {
+    if (this.ctx || this.primed || saveData()) return;
+    this.primed = { el: audioElement(), track: -1 };
+    this.load(this.primed, this.index);
   };
 
   /** Whether the music was on before this page loaded (same tab session). */
@@ -174,11 +188,12 @@ export class MusicPlayer {
 
   /**
    * Browsers only start audio after a gesture. If the music was remembered,
-   * resume on the first interaction, except one inside `ignore()` (the
-   * controls act themselves). Returns a cleanup.
+   * buffer it now and resume on the first interaction, except one inside
+   * `ignore()` (the controls act themselves). Returns a cleanup.
    */
   resumeOnInteraction(ignore: () => Element | null = () => null) {
     this.ignore = ignore;
+    if (this.remembered) this.preload();
     this.armResume();
     return () => this.disarm();
   }
@@ -193,7 +208,7 @@ export class MusicPlayer {
       for (const action of ["play", "pause", "nexttrack"] as const)
         navigator.mediaSession.setActionHandler(action, null);
     }
-    for (const deck of this.decks) {
+    for (const deck of this.primed ? [...this.decks, this.primed] : this.decks) {
       deck.el.pause();
       deck.el.removeAttribute("src");
       deck.el.load();
@@ -202,6 +217,7 @@ export class MusicPlayer {
     this.ctx = null;
     this.master = null;
     this.decks = [];
+    this.primed = null;
     this.blending = false;
     this.buffering = false;
     this.emit("paused");
@@ -248,7 +264,7 @@ export class MusicPlayer {
   }
 
   /** Point a deck at a track and let it buffer; a deck already holding it keeps its data. */
-  private load(deck: Deck, track: number) {
+  private load(deck: Source, track: number) {
     if (deck.track === track) return;
     deck.track = track;
     deck.el.preload = "auto";
@@ -261,12 +277,12 @@ export class MusicPlayer {
     const master = ctx.createGain();
     master.gain.value = 0;
     master.connect(ctx.destination);
-    // Decks start empty: nothing downloads until a track is assigned.
+    // Decks start empty unless preloaded: nothing downloads until a track is assigned.
+    const primed = this.primed;
+    this.primed = null;
     this.decks = [0, 1].map((index) => {
-      const el = new Audio();
-      // A cross-origin source needs CORS, or Web Audio hears silence.
-      el.crossOrigin = "anonymous";
-      el.preload = "none";
+      const source = index === 0 ? primed : null;
+      const el = source?.el ?? audioElement();
       const gain = ctx.createGain();
       gain.gain.value = index === 0 ? 1 : 0;
       ctx.createMediaElementSource(el).connect(gain).connect(master);
@@ -282,7 +298,7 @@ export class MusicPlayer {
       el.addEventListener("playing", () => {
         if (audible()) this.setBuffering(false);
       });
-      return { el, gain, track: -1 };
+      return { el, gain, track: source?.track ?? -1 };
     });
     this.current = 0;
     this.load(this.decks[0]!, this.index);
@@ -454,6 +470,22 @@ export class MusicPlayer {
       this.disarm = () => {};
     };
   }
+}
+
+function audioElement() {
+  const el = new Audio();
+  // A cross-origin source needs CORS, or Web Audio hears silence.
+  el.crossOrigin = "anonymous";
+  el.preload = "none";
+  return el;
+}
+
+/** The browser's Save-Data hint, where it exposes one. */
+function saveData() {
+  const connection: unknown = "connection" in navigator ? navigator.connection : undefined;
+  return typeof connection === "object" && connection !== null && "saveData" in connection
+    ? connection.saveData === true
+    : false;
 }
 
 /** A gesture counts once the browser marks this tab as user-activated. Missing API means it does. */

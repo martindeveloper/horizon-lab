@@ -2,7 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { preconnect } from "react-dom";
 
+import { assetOrigin } from "@/lib/assets";
 import { Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { ambientMusic } from "./ambient-music";
@@ -32,10 +34,13 @@ const hour = (index: number) => (TRACKS < 2 ? 0 : -SPAN / 2 + (SPAN * index) / (
  * waveform plays and pauses. Playing, a sun dial opens beside it: each track
  * is an hour on a day arc, and skipping carries the sun on to the next, over
  * the length of the crossfade. Past the last track it sets and rises again.
+ * The CDN connection opens with the page; the first track buffers on hover or
+ * focus, so a click starts almost at once.
  */
 export function MusicToggle({ className }: { className?: string }) {
   const t = useTranslations("shell");
   const ref = useRef<HTMLDivElement>(null);
+  preconnect(assetOrigin, { crossOrigin: "anonymous" });
   const playing =
     useSyncExternalStore(ambientMusic.subscribe, ambientMusic.getState, serverState) === "playing";
   const track = useSyncExternalStore(ambientMusic.subscribe, ambientMusic.getTrack, serverTrack);
@@ -68,6 +73,8 @@ export function MusicToggle({ className }: { className?: string }) {
             aria-label={label}
             aria-busy={loading}
             onClick={ambientMusic.toggle}
+            onPointerEnter={ambientMusic.preload}
+            onFocus={ambientMusic.preload}
             className="group relative flex rounded-full after:absolute after:-inset-y-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <span

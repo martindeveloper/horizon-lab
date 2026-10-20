@@ -21,15 +21,19 @@ come from a user gesture.
     is still loading: the first play, a skip or a stall) and `subscribe()`,
     which suit React's `useSyncExternalStore`.
     `track` is the current track.
-  - `resumeOnInteraction(ignore)`: if the music was on before a reload, starts it on
-    the first interaction outside `ignore()` (the controls). Returns a cleanup.
+  - `preload()`: buffers the track that plays next before the first play, e.g. on
+    hover or focus of the control. Needs no gesture; skipped under Save-Data.
+  - `resumeOnInteraction(ignore)`: if the music was on before a reload, preloads it
+    and starts it on the first interaction outside `ignore()` (the controls).
+    Returns a cleanup.
   - `dispose()` stops at once and releases the graph, the media-session handlers
     and every listener.
 - `equalPowerCurve`, `crossfadeDelay` and `chooseSource` are the pure helpers
   behind the loop and the source choice.
 
 Two streaming `<audio>` decks crossfade where a track ends, so there is no codec
-gap or decoded-buffer memory cost. Nothing downloads before the first play; only
+gap or decoded-buffer memory cost. Nothing downloads before the first play or a
+`preload()`; only
 the playing track loads, and the next one buffers `prefetch` seconds before its
 blend, or at once on a skip, whose fade waits until it plays. Gains, not element volume, do every
 fade, so they work on iOS. A hidden tab fades out and resumes on return. Prepare

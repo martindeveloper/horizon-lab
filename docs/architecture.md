@@ -419,8 +419,10 @@ The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-
 one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
 `interstellar-drift` and `aeolian-static`, each as `.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
-the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). Nothing
-loads before the first play; the next track buffers 30 s before its crossfade, or on
+the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The page
+preconnects to the CDN; the first track buffers when the toggle is hovered or
+focused, or at once when the session had music on. Otherwise nothing loads before
+the first play; the next track buffers 30 s before its crossfade, or on
 a skip, which blends over 2.5 s. Hidden tabs fade out and resume on return. While
 music plays, the toggle opens a sun dial: each track is an hour on a day arc, and
 skipping carries the sun to the next. Until sound arrives (the first play, a
