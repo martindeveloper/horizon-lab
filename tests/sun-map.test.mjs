@@ -5,6 +5,8 @@ import test from "node:test";
 import sharp from "sharp";
 import { Vector3 } from "three";
 
+import { mapFile } from "@horizon/toolkit/bodies";
+
 import {
   HMI_SOURCES,
   projectSolarPoint,
@@ -52,7 +54,7 @@ test("the dated observations cover all nonpolar longitudes without duplicating a
   near(sampleBilinear(new Float32Array([0, 2, 4, 6]), 2, 0.5, 0.5), 3);
 });
 
-const shippedSun = new URL(`../cdn${MAPS_KEY}/sun-nearLight.webp`, import.meta.url);
+const shippedSun = new URL(`../cdn${mapFile(MAPS_KEY, "sun", "nearLight")}`, import.meta.url);
 const skip = !existsSync(shippedSun) && "no CDN mirror: run npm run cdn:pull";
 
 test(

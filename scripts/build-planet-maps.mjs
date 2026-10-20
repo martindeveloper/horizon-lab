@@ -2,7 +2,7 @@
  * Builds the orrery's measured surface maps (`MAPS` in packages/toolkit/src/bodies/maps.ts)
  * from the original NASA, USGS and Hubble OPAL data, and writes WebP tiers to the
  * local CDN mirror, cdn/ + `MAPS_KEY`. Not part of `next build`: run it when a
- * source or a tier changes, bump `MAPS_KEY` to the next version, and upload the
+ * source or a tier changes, bump that body's `version` in `MAPS`, and upload its new
  * folder (scripts/README.md).
  *
  *   node --import tsx scripts/build-planet-maps.mjs [cache-dir]
@@ -41,7 +41,6 @@ const root = new URL("../", import.meta.url);
 const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-planet-maps"));
 const fetchCached = (url) => download(url, cache);
 const outDir = new URL(`cdn${MAPS_KEY}/`, root);
-mkdirSync(outDir, { recursive: true });
 
 const OPAL = "https://archive.stsci.edu/missions/hlsp/opal";
 const opalFile = (cycle, planet, rotation, filter) =>
@@ -442,6 +441,7 @@ for (const [id, map] of Object.entries(MAPS)) {
   const bytes = Buffer.alloc(img.w * img.h * 3);
   for (let i = 0; i < bytes.length; i += 1) bytes[i] = encode(img.rgb[i]);
   const written = new Set();
+  mkdirSync(new URL(`${path.dirname(mapFile(".", id, "far"))}/`, outDir), { recursive: true });
   for (const tier of ["far", "nearLight", "near"]) {
     const w = map.widths[tier];
     if (written.has(w)) continue;

@@ -2,9 +2,10 @@ import { CDN_URL } from "@/config";
 
 /**
  * Bucket folder of the measured maps' WebP tiers, mirrored locally in `cdn/` for the
- * map builds and tests. Never overwrite a published set: a rebuild takes the next version.
+ * map builds and tests. Each body has its own versioned folder (`MAPS` `version`):
+ * never overwrite a published file, a rebuild bumps that body's version.
  */
-export const MAPS_KEY = "/textures/orrery/v1";
+export const MAPS_KEY = "/textures/bodies";
 
 /** Origin to preconnect to, anonymously: assets load with CORS. */
 export const assetOrigin = new URL(CDN_URL).origin;

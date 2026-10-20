@@ -541,14 +541,17 @@ repo. `src/lib/assets.ts` builds their URLs from `CDN_URL` in `src/config.ts`
 folder mirrors the bucket's keys:
 
 - `audio/<slug>.webm`, `.m4a`: the ambient playlist.
-- `textures/orrery/v1/<body>-<tier>.webp`: the measured maps (`MAPS_KEY`), written by
-  `scripts/build-planet-maps.mjs`, which also prints each far tier's mean colour for its
-  `MAPS` entry (the placeholder while it streams). `npm run cdn:pull` fetches the
-  published set, which the map tests check; without it they skip.
+- `textures/bodies/<body>/v<version>/<body>-<tier>.webp`: the measured maps (`MAPS_KEY`,
+  each body versioned by its `MAPS` entry), written by `scripts/build-planet-maps.mjs`,
+  which also prints each far tier's mean colour for that entry (the placeholder while it
+  streams). `npm run cdn:pull` fetches the published set, which the map tests check;
+  without it they skip.
+- `textures/orrery/v1/`: retired, kept for older deployments. Never upload into it.
 
-A published key is never overwritten, so older deployments keep their assets: rebuilt
-maps take the next `MAPS_KEY` version and a new mix takes a new name. Uploading is in
-`scripts/README.md`. Further kinds follow the layout (`models/<feature>/`).
+A published key is never overwritten, so older deployments keep their assets: a rebuilt
+map bumps its body's `version` and a new mix takes a new name. Uploading is in
+`scripts/README.md`. Keys follow the subject, not the simulation that first used it
+(`models/bodies/`), so any feature can share them.
 
 ## Immersive view
 

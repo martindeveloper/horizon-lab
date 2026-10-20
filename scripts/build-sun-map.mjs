@@ -141,10 +141,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const img = await buildSunMap(map.widths.near);
   const bytes = Buffer.alloc(img.rgb.length);
   for (let i = 0; i < bytes.length; i += 1) bytes[i] = encode(img.rgb[i]);
-  mkdirSync(new URL(`../cdn${MAPS_KEY}/`, import.meta.url), { recursive: true });
   for (const tier of ["far", "nearLight", "near"]) {
     const w = map.widths[tier];
     const file = new URL(`../cdn${mapFile(MAPS_KEY, "sun", tier)}`, import.meta.url);
+    mkdirSync(path.dirname(file.pathname), { recursive: true });
     const info = await sharp(bytes, { raw: { width: img.w, height: img.h, channels: 3 } })
       .resize(w, w / 2)
       .webp({ quality: tier === "far" ? 84 : 85, effort: 6 })

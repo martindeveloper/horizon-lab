@@ -78,12 +78,14 @@ mean distance 385 000.56 km) stay in their functions.
 
 ## Measured maps (`maps.ts`)
 
-`MAPS` lists the bodies with a measured map: tier widths, the far tier's mean
+`MAPS` lists the bodies with a measured map: folder version, tier widths, the far tier's mean
 colour (a placeholder while the map streams in), source, credit, licence and link. The host decides where the files live and passes that base:
 
 ```ts
-tierFile("/textures/orrery", "earth", "near"); // "/textures/orrery/earth-near.webp"
+tierFile("/textures/bodies", "earth", "near"); // "/textures/bodies/earth/v1/earth-near.webp"
 ```
+
+Each body is versioned on its own. A rebuilt map bumps its `version`, so a published file is never overwritten.
 
 `tierFile` returns `null` for a body without a map and shares one file between
 tiers of equal width. Loading and texturing stay in the host.

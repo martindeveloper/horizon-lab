@@ -4,17 +4,20 @@
  *
  *   npm run cdn:pull
  */
+import path from "node:path";
+
 import { MAPS, tierFile } from "@horizon/toolkit/bodies";
 import { keysOf } from "@horizon/toolkit/records";
 
 import { MAPS_KEY, assetUrl } from "../src/lib/assets.ts";
 import { fetchCached } from "./lib/net.mjs";
 
-const dir = new URL(`../cdn${MAPS_KEY}/`, import.meta.url).pathname;
+const root = new URL("../cdn/", import.meta.url);
 const keys = new Set(
   keysOf(MAPS).flatMap((id) =>
     ["far", "nearLight", "near"].map((tier) => tierFile(MAPS_KEY, id, tier)),
   ),
 );
-for (const key of keys) if (key) await fetchCached(assetUrl(key), dir);
-console.log(`${keys.size} maps in ${dir}`);
+for (const key of keys)
+  if (key) await fetchCached(assetUrl(key), path.dirname(new URL(`.${key}`, root).pathname));
+console.log(`${keys.size} maps in ${new URL(`.${MAPS_KEY}/`, root).pathname}`);

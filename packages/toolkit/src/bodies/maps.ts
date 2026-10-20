@@ -14,6 +14,8 @@ import type { BodyId } from "./figures";
 export type MapTier = "far" | "near" | "nearLight";
 
 export type MeasuredMap = {
+  /** The map's own folder version: published files are never overwritten, so a rebuild bumps it. */
+  version: number;
   /** Pixel widths per tier (height is half). `far` serves globes on the map; the `near` ones only a close-up. */
   widths: Record<MapTier, number>;
   /**
@@ -28,14 +30,22 @@ export type MeasuredMap = {
   url: string;
 };
 
-/** A tier's file under `base`, the app's URL or directory for the maps (no trailing slash). */
-export const mapFile = (base: string, id: BodyId, tier: MapTier) => `${base}/${id}-${tier}.webp`;
+/**
+ * A tier's file under `base`, the app's URL or directory for the maps (no trailing slash):
+ * `<base>/<body>/v<version>/<body>-<tier>.webp`. Throws for a body without a map.
+ */
+export function mapFile(base: string, id: BodyId, tier: MapTier) {
+  const map = MAPS[id];
+  if (!map) throw new Error(`${id} has no measured map`);
+  return `${base}/${id}/v${map.version}/${id}-${tier}.webp`;
+}
 
 const OPAL_CREDIT = "NASA, ESA, A.A. Simon, M.H. Wong (OPAL, Hubble programme GO13937)";
 const OPAL_URL = "https://archive.stsci.edu/hlsp/opal";
 
 export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
   moon: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#63615f",
     source: "LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill",
@@ -44,6 +54,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://svs.gsfc.nasa.gov/4720/",
   },
   io: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#d7cfc2",
     source: "Galileo SSI / Voyager merged mosaic, muted enhanced colour; interpolated poles",
@@ -52,6 +63,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km",
   },
   europa: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#d6d6d6",
     source: "Voyager / Galileo SSI mosaic, monochrome; plain south-polar fill",
@@ -60,6 +72,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m",
   },
   ganymede: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#b1afaa",
     source: "Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles",
@@ -68,6 +81,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km",
   },
   callisto: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#818181",
     source: "Voyager / Galileo SSI mosaic, monochrome",
@@ -76,6 +90,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km",
   },
   triton: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#e4e5df",
     source: "Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill",
@@ -85,6 +100,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
   },
   /* Never more than a few pixels across: one small tier. */
   phobos: {
+    version: 1,
     widths: { far: 512, near: 512, nearLight: 512 },
     mean: "#4b4b4b",
     source: "Viking Orbiter mosaic with Mars Express, MGS and MRO images (DLR control), monochrome",
@@ -93,6 +109,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m",
   },
   deimos: {
+    version: 1,
     widths: { far: 512, near: 512, nearLight: 512 },
     mean: "#4a4a4a",
     source: "Viking Orbiter mosaic with MRO HiRISE detail, monochrome",
@@ -102,6 +119,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://sbn.psi.edu/pds/resource/stookemaps.html",
   },
   mimas: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#cacaca",
     source: "Cassini ISS final atlas mosaic (DLR, 2017), monochrome",
@@ -110,6 +128,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://www.usgs.gov/publications/final-mimas-and-enceladus-atlases-derived-cassini-iss-images",
   },
   enceladus: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#ededed",
     source: "Cassini ISS global mosaic, monochrome",
@@ -118,6 +137,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/enceladus_cassini_global_mosaic_110m",
   },
   tethys: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#e6e6e6",
     source: "Cassini ISS global mosaic, monochrome",
@@ -126,6 +146,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/tethys_cassini_global_mosaic_293m",
   },
   dione: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#d8d8d8",
     source: "Cassini ISS and Voyager global mosaic, monochrome",
@@ -134,6 +155,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/dione_cassini_voyager_global_mosaic_154m",
   },
   rhea: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#dadada",
     source: "Cassini ISS and Voyager global mosaic, monochrome",
@@ -142,6 +164,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/rhea_cassini_voyager_global_mosaic_417m",
   },
   iapetus: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#999999",
     source:
@@ -151,6 +174,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/iapetus_cassini_voyager_global_mosaic_803m",
   },
   charon: {
+    version: 1,
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     mean: "#adadad",
     source: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
@@ -159,6 +183,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m",
   },
   sun: {
+    version: 1,
     widths: { far: 1024, near: 8192, nearLight: 2048 },
     mean: "#e8e8e8",
     source:
@@ -168,6 +193,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://sdo.gsfc.nasa.gov/data/",
   },
   mercury: {
+    version: 1,
     widths: { far: 1024, near: 4096, nearLight: 2048 },
     mean: "#756f67",
     source: "MESSENGER MDIS 3-colour global mosaic (2011–2015), brightness only",
@@ -176,6 +202,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_basemap_md3_color_global_mosaic_665m",
   },
   earth: {
+    version: 1,
     widths: { far: 1024, near: 4096, nearLight: 2048 },
     mean: "#9297a4",
     source: "Blue Marble Next Generation, October, with the Blue Marble cloud layer",
@@ -184,6 +211,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
   },
   mars: {
+    version: 1,
     widths: { far: 1024, near: 4096, nearLight: 2048 },
     mean: "#a27653",
     source: "Viking Orbiter global colour mosaic, 925 m per pixel",
@@ -192,6 +220,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: "https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m",
   },
   jupiter: {
+    version: 1,
     widths: { far: 1024, near: 3600, nearLight: 2048 },
     mean: "#ccbaa7",
     source: "Hubble OPAL global map, 11 December 2025",
@@ -200,6 +229,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: OPAL_URL,
   },
   saturn: {
+    version: 1,
     widths: { far: 1024, near: 1800, nearLight: 1800 },
     mean: "#d3c099",
     source: "Hubble OPAL global map, 29 August 2025",
@@ -208,6 +238,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: OPAL_URL,
   },
   uranus: {
+    version: 1,
     widths: { far: 720, near: 720, nearLight: 720 },
     mean: "#b0d0d2",
     source: "Hubble OPAL global map, 23 October 2025 (southern hemisphere in darkness, painted)",
@@ -216,6 +247,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: OPAL_URL,
   },
   neptune: {
+    version: 1,
     widths: { far: 720, near: 720, nearLight: 720 },
     mean: "#a1c4d7",
     source: "Hubble OPAL global map, 24 August 2025 (far north in darkness, painted)",
@@ -224,6 +256,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: OPAL_URL,
   },
   pluto: {
+    version: 1,
     widths: { far: 1024, near: 4096, nearLight: 2048 },
     mean: "#ceb394",
     source:
