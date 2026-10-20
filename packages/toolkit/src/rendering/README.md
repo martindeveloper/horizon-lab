@@ -83,7 +83,7 @@ toolkit's `.glsl` loader (see the package README).
   half a cell is a point, and a wider one (a disc filling the view, a galaxy's core, the
   black hole's disk) fades out of spiking. Each point gets a four- or six-point star (`arms`: two vanes across, as Hubble's spider, or three, as JWST's
   struts): lines a pixel or two wide whose brightness falls as 1/r² from a small core, red
-  reaching furthest (a vane's diffraction grows as the wavelength squared), drawn until they
+  reaching furthest (a vane's diffraction grows with the wavelength), drawn until they
   fade below `threshold` (in the frame's units) and at most `reach` of the frame's height, so
   a brighter light's spikes are longer. An 8-bit frame clips every bright light to white, so
   `full` (frame pixels of light above the mask's threshold) is the energy from which a light

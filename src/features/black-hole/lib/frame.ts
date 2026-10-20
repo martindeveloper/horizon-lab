@@ -1,5 +1,11 @@
-import { DataTexture, FloatType, RGBAFormat, Vector2, Vector3 } from "three";
+import { DataTexture, FloatType, Matrix4, RGBAFormat, Vector2, Vector3 } from "three";
 
+import {
+  freeFromOrbit,
+  writeCameraMatrix,
+  type FreeLook,
+  type FreePose,
+} from "@horizon/toolkit/camera";
 import { clamp, smoothstep } from "@horizon/toolkit/math";
 
 import resolveShader from "./black-hole-resolve.frag.glsl";
@@ -7,7 +13,14 @@ import { DISK_OUTER_RADIUS, DISK_PROFILE_SIZE, diskProfilePixels } from "./disk-
 import { holeById, SKY_CODE } from "./holes";
 import type { Vec3 } from "./kerr-rays";
 import { DISK_INNER_HORIZON_FACTOR, SPIN_LIMIT } from "./parameters";
-import { cameraFloor, horizonOverM, INCLINATION_LIMIT, iscoOverM, MAX_DIST } from "./physics";
+import {
+  cameraFloor,
+  diskFlowVelocity,
+  horizonOverM,
+  INCLINATION_LIMIT,
+  iscoOverM,
+  MAX_DIST,
+} from "./physics";
 import { framedRayFov } from "./render-policy";
 
 /**
@@ -17,10 +30,10 @@ import { framedRayFov } from "./render-policy";
 type Uniforms = {
   uDiskProfile: { value: DataTexture };
   uResolution: { value: InstanceType<typeof Vector2> };
-  uCamPos: { value: InstanceType<typeof Vector3> };
-  uCamFwd: { value: InstanceType<typeof Vector3> };
-  uCamRight: { value: InstanceType<typeof Vector3> };
-  uCamUp: { value: InstanceType<typeof Vector3> };
+  /** Camera to world, column-major: right, up, back (−forward) and the position in M. */
+  uCamera: { value: InstanceType<typeof Matrix4> };
+  /** The camera's velocity through the hovering observer's frame, units of c; zero hovers. */
+  uCamVelocity: { value: InstanceType<typeof Vector3> };
   uTime: { value: number };
   uSpin: { value: number };
   uInner: { value: number };
@@ -50,11 +63,17 @@ type SceneSettings = {
   gravity: boolean;
 };
 
+/**
+ * The orbit camera about the hole; `look` turns it off the hole (a free shot), at it by default,
+ * and `ride` (0–1) moves it with the disk gas at its radius instead of hovering.
+ */
 export type CameraPose = {
   azimuth: number;
   inclination: number;
   distance: number;
   roll: number;
+  look?: FreeLook;
+  ride?: number;
 };
 
 /** Unrolled camera frame: right points at the approaching side, fwd into the scene. */
@@ -115,10 +134,8 @@ export function createUniforms(): Uniforms {
       ),
     },
     uResolution: { value: new Vector2(1, 1) },
-    uCamPos: { value: new Vector3(0, 0, 24) },
-    uCamFwd: { value: new Vector3(0, 0, -1) },
-    uCamRight: { value: new Vector3(1, 0, 0) },
-    uCamUp: { value: new Vector3(0, 1, 0) },
+    uCamera: { value: new Matrix4().makeTranslation(0, 0, 24) },
+    uCamVelocity: { value: new Vector3() },
     uTime: { value: 0 },
     uSpin: { value: 0.82 },
     uInner: { value: 3.2 },
@@ -170,37 +187,51 @@ export function clampDistance(distance: number, spin: number) {
   return Math.max(cameraFloor(spin), Math.min(MAX_DIST, distance));
 }
 
-/** Orbit camera: position, a roll-free basis tilted by `roll`, and the framed field of view. */
-export function writeCamera(uniforms: Uniforms, pose: CameraPose, spin: number) {
-  const camPos = uniforms.uCamPos.value;
-  const camFwd = uniforms.uCamFwd.value;
-  const camRight = uniforms.uCamRight.value;
-  const camUp = uniforms.uCamUp.value;
-  const dist = clampDistance(pose.distance, spin);
-  const incl = Math.max(-INCLINATION_LIMIT, Math.min(INCLINATION_LIMIT, pose.inclination));
-  const c = Math.cos(incl);
-  camPos.set(
-    dist * c * Math.sin(pose.azimuth),
-    dist * Math.sin(incl),
-    dist * c * Math.cos(pose.azimuth),
-  );
-  camFwd.copy(camPos).multiplyScalar(-1).normalize();
-  const basis = rollFreeBasis(pose.azimuth, [camFwd.x, camFwd.y, camFwd.z]);
-  camRight.set(...basis.right);
-  camUp.set(...basis.up).normalize();
-  if (pose.roll !== 0) {
-    const cr = Math.cos(pose.roll);
-    const sr = Math.sin(pose.roll);
-    const { x, y, z } = camRight;
-    camRight.multiplyScalar(cr).addScaledVector(camUp, sr);
-    camUp.multiplyScalar(cr);
-    camUp.set(camUp.x - x * sr, camUp.y - y * sr, camUp.z - z * sr);
+/** The free pose an orbit pose draws: off the pole, outside the horizon, turned by its look. */
+export function cameraOf(pose: CameraPose, spin: number): FreePose {
+  return freeFromOrbit({
+    ...pose,
+    distance: clampDistance(pose.distance, spin),
+    inclination: clamp(pose.inclination, -INCLINATION_LIMIT, INCLINATION_LIMIT),
+  });
+}
+
+/** A free camera's position kept within the distance bounds, in place. */
+export function clampPosition(position: FreePose["position"], spin: number) {
+  const r = Math.hypot(...position);
+  if (r === 0) {
+    position[2] = clampDistance(0, spin);
+    return;
   }
+  const scale = clampDistance(r, spin) / r;
+  position[0] *= scale;
+  position[1] *= scale;
+  position[2] *= scale;
+}
+
+/** The camera's distance from the hole, M. */
+export function cameraDistance(uniforms: Uniforms) {
+  const m = uniforms.uCamera.value.elements;
+  return Math.hypot(m[12], m[13], m[14]);
+}
+
+/**
+ * Free camera: the matrix, its motion (`ride` of the way to moving with the disk gas), the lens
+ * vignette for its distance and the framed field of view.
+ */
+export function writeCamera(uniforms: Uniforms, pose: FreePose, spin: number, ride = 0) {
+  const m = uniforms.uCamera.value.elements;
+  writeCameraMatrix(m, pose);
+  const flow = ride > 0 ? diskFlowVelocity(pose.position, spin) : null;
+  if (flow) uniforms.uCamVelocity.value.set(...flow).multiplyScalar(Math.min(ride, 1));
+  else uniforms.uCamVelocity.value.set(0, 0, 0);
+  const [x, y, z] = pose.position;
+  const dist = Math.hypot(x, y, z);
   /* The vignette eases off with the camera's Boyer–Lindquist radius: a tenth of the way to the
      corners' black up close, under half that from 160 M out. */
   const a = clamp(spin, -SPIN_LIMIT, SPIN_LIMIT);
-  const camR2 = camPos.lengthSq() - a * a;
-  const rc = Math.sqrt(0.5 * (camR2 + Math.sqrt(camR2 * camR2 + 4 * a * a * camPos.y * camPos.y)));
+  const camR2 = dist * dist - a * a;
+  const rc = Math.sqrt(0.5 * (camR2 + Math.sqrt(camR2 * camR2 + 4 * a * a * y * y)));
   uniforms.uVignette.value = 0.1 * (1 - 0.55 * smoothstep(40, 160, rc));
   const far = Math.min(1, Math.max(0, (dist - 48) / 240));
   const near = Math.min(1, Math.max(0, (14 - dist) / 12));

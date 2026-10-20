@@ -40,7 +40,8 @@ export const sgrA: HoleSpec = {
   jet: 0,
   aliases: ["sgr-a", "sgra", "sagittarius-a", "sagittarius-a-star"],
   tour: [
-    // Back away low through the cluster, turning against the usual direction.
+    // Back away low through the cluster, turning against the usual direction and looking up
+    // into the crowded sky: the hole sits off to one side of the nuclear star cluster.
     {
       phase: "wide",
       duration: 9.5,
@@ -49,6 +50,7 @@ export const sgrA: HoleSpec = {
       distance: 140,
       lift: 0.2,
       lead: -0.5,
+      look: { yaw: 0.4, pitch: 0.12 },
       drift: -0.01,
       eq: "D = 8.277 kpc    ·    M = 4.297 × 10⁶ M☉",
     },

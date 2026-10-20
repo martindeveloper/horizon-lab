@@ -6,6 +6,8 @@ import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { BENCH_SCENES, benchMotion, benchPose } from "./lib/bench-scenes";
 import fragmentShader from "./lib/black-hole.frag.glsl";
 import {
+  cameraDistance,
+  cameraOf,
   createUniforms,
   orbitWheelSensitivity,
   passOptions,
@@ -71,14 +73,14 @@ export const benchTarget: BenchTarget = {
           pose = motion.pose;
           spin = motion.spin;
         }
-        writeCamera(uniforms, pose, spin);
+        writeCamera(uniforms, cameraOf(pose, spin), spin, pose.ride ?? 0);
         writeScene({ ...settings, spin, gravity: true }, frame.time, steps);
         pass.render({ bloom, lens, gamut });
       },
       describe: () => ({
         azimuth: pose.azimuth,
         inclination: pose.inclination,
-        distance: uniforms.uCamPos.value.length(),
+        distance: cameraDistance(uniforms),
         spin,
         steps,
         fovDeg: (uniforms.uFov.value * 180) / Math.PI,

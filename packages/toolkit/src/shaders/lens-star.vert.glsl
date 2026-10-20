@@ -53,8 +53,8 @@ varying float vLength;
 #define LENS_GATE_FROM 0.12
 #define LENS_GATE_TO 0.35
 #define LENS_SHORTEST 6.0
-// Red spreads furthest: a vane's diffraction scales as the wavelength squared (630, 530, 465 nm).
-#define LENS_RED_CORE 1.41
+// Red spreads furthest: a vane's diffraction scales with the wavelength (630, 530, 465 nm).
+#define LENS_RED_CORE 1.19
 
 float luma(vec3 c) {
   return dot(c, vec3(0.2126, 0.7152, 0.0722));

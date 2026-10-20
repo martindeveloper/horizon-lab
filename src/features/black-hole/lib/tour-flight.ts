@@ -9,12 +9,24 @@ import type { TourPose } from "./holes/types";
  * frame and the bench samples them at any elapsed time, so both fly the same path.
  */
 
-/** The camera `t` (0–1) of the way from `from` into a beat: the orbit flight, roll eased alongside. */
+/**
+ * The camera `t` (0–1) of the way from `from` into a beat: the orbit flight, the roll, the look
+ * and the ride eased alongside. A beat without a look turns back to the hole; one without a ride
+ * slows back to hovering.
+ */
 export function tourPose(beat: TourPose, from: CameraPose, t: number): CameraPose {
-  return {
+  const e = smootherstep(t);
+  const pose: CameraPose = {
     ...sampleOrbitFlight(t, from, beat),
-    roll: lerp(from.roll, beat.roll ?? 0, smootherstep(t)),
+    roll: lerp(from.roll, beat.roll ?? 0, e),
   };
+  if (from.look || beat.look)
+    pose.look = {
+      yaw: lerp(from.look?.yaw ?? 0, beat.look?.yaw ?? 0, e),
+      pitch: lerp(from.look?.pitch ?? 0, beat.look?.pitch ?? 0, e),
+    };
+  if (from.ride || beat.ride) pose.ride = lerp(from.ride ?? 0, beat.ride ?? 0, e);
+  return pose;
 }
 
 /** Where a beat lands, and so where the next one flies from. */
@@ -24,7 +36,10 @@ export const tourEnd = (beat: TourPose, from: CameraPose) => tourPose(beat, from
 const DRIFT_RAMP = 3;
 const CREEP_SETTLE = 18;
 
-/** The camera `held` seconds after landing on a beat: a slow orbit that eases in, and a push that settles. */
+/**
+ * The camera `held` seconds after landing on a beat: a slow orbit that eases in, and a push that
+ * settles. A beat that looks off the hole keeps its look, so the orbit glides along it.
+ */
 export function holdPose(beat: TourPose, landed: CameraPose, held: number): CameraPose {
   const drift = beat.drift ?? 0.008 * Math.sign(beat.yaw);
   const settle = 1 - (1 + held / CREEP_SETTLE) * Math.exp(-held / CREEP_SETTLE);
@@ -33,6 +48,8 @@ export function holdPose(beat: TourPose, landed: CameraPose, held: number): Came
     inclination: landed.inclination,
     distance: landed.distance * (1 - (beat.creep ?? 0.05) * settle),
     roll: landed.roll,
+    ...(landed.look ? { look: landed.look } : {}),
+    ...(landed.ride ? { ride: landed.ride } : {}),
   };
 }
 

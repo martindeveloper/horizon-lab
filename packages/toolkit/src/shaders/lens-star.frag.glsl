@@ -1,6 +1,6 @@
 // One line of a diffraction star (lens-star.vert.glsl): a thin vane spreads a point of light
 // into a line across it whose brightness falls as 1/r² from a small core, and longer
-// wavelengths spread further (as the square of the wavelength), so a spike is white near its
+// wavelengths spread further (in proportion to the wavelength), so a spike is white near its
 // light and reddens towards its tip. Across, the line is a Gaussian of uWidth frame pixels,
 // box-filtered over the target's texel (uTexelFrame frame pixels wide), so it stays as bright
 // and as steady at any resolution. Along, each channel is a Lorentzian of its own core, which
@@ -17,7 +17,7 @@ varying float vLength;
 
 #include <horizon/math>
 
-#define LENS_CHROMA vec3(1.41, 1.0, 0.77)
+#define LENS_CHROMA vec3(1.19, 1.0, 0.88)
 
 float erfApprox(float x) {
   float x2 = x * x;

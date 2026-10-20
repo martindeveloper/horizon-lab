@@ -1,8 +1,15 @@
+import { freeCameraOn, onFreeCamera, onRide, rideOverride } from "@/lib/debug";
 import {
   createDriftRun,
+  createFlightInput,
   createOrbitInput,
-  writeCameraSnapshot,
+  orbitFromFree,
+  stepFreeFly,
+  turnFree,
+  writeCameraSnapshotFromMatrix,
   type CameraSnapshot,
+  type FreePose,
+  type Vec3,
 } from "@horizon/toolkit/camera";
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
 import {
@@ -12,11 +19,15 @@ import {
   DisposalScope,
 } from "@horizon/toolkit/rendering";
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
+import { isSceneShortcut } from "@horizon/toolkit/ui";
 
 import fragmentShader from "./black-hole.frag.glsl";
 import { DRIFT } from "./drift";
 import {
+  cameraDistance,
+  cameraOf,
   clampDistance,
+  clampPosition,
   createUniforms,
   orbitWheelSensitivity,
   passOptions,
@@ -25,6 +36,7 @@ import {
   type CameraPose,
 } from "./frame";
 import type { Quality } from "./holes";
+import { gasTurnRate } from "./parameters";
 import { MAX_DIST, MIN_DIST } from "./physics";
 import {
   BLACK_HOLE_QUALITY,
@@ -44,6 +56,12 @@ type State = ReturnType<typeof useBlackHole.getState>;
 const ORBIT_RATE = 0.045;
 /** A Dutch tilt left by the guide eases out with this time constant once it closes, in seconds. */
 const ROLL_DECAY = 0.7;
+/** A look off the hole or a ride, left by the guide, the drift or the free camera, eases out this slowly, in seconds. */
+const LOOK_DECAY = 1.6;
+/** Free camera: radians per CSS pixel of drag, roll rate (rad/s) and speed per M from the hole (1/s). */
+const FREE_LOOK = 0.0035;
+const FREE_ROLL = 0.9;
+const FREE_SPEED = 0.25;
 
 /**
  * The first frames trace few steps at low resolution so something shows at once;
@@ -152,6 +170,11 @@ export function createBlackHoleEngine(
     const drift = createDriftRun(DRIFT.shots, {
       ...DRIFT.camera,
       reduceMotion: window.matchMedia(REDUCED_MOTION_QUERY),
+      /* A riding shot orbits with the gas where it landed, for this hole's spin. */
+      holdDrift: (landed, shot) =>
+        shot.ride
+          ? -gasTurnRate(landed.distance, useBlackHole.getState().spin) * shot.ride
+          : undefined,
     });
     let announced = false;
     let time = 0;
@@ -169,6 +192,10 @@ export function createBlackHoleEngine(
       camera.inclination = pose.inclination;
       camera.distance = clampDistance(pose.distance, spin);
       camera.roll = pose.roll;
+      if (pose.look) camera.look = { yaw: pose.look.yaw, pitch: pose.look.pitch };
+      else delete camera.look;
+      if (pose.ride) camera.ride = pose.ride;
+      else delete camera.ride;
     }
     function storeCamera() {
       const state = useBlackHole.getState();
@@ -184,14 +211,77 @@ export function createBlackHoleEngine(
           const state = useBlackHole.getState();
           /* A hand on the camera pauses the drift; it flies on from here when resumed. */
           if (state.drift === "playing") state.pauseDrift();
-          moveCamera({ ...pose, roll: camera.roll }, state.spin);
+          moveCamera({ ...camera, ...pose }, state.spin);
           storeCamera();
         },
-        enabled: () => !useBlackHole.getState().guideOpen,
+        enabled: () => !useBlackHole.getState().guideOpen && !free,
         distance: { min: MIN_DIST, max: MAX_DIST },
         wheelSensitivity: orbitWheelSensitivity,
       }),
     );
+    /**
+     * The debug free camera (`Horizon.Debug.freeCamera()`): drag looks, the keys fly. It takes
+     * over from the guide and the drift, and gives the orbit back where it left the camera.
+     */
+    let free: { pose: FreePose; velocity: Vec3; speed: number } | null = null;
+    const flight = resources.own(
+      createFlightInput(canvas, {
+        onLook: (dx, dy) => {
+          if (!free) return;
+          free.pose.orientation = turnFree(free.pose.orientation, -dx * FREE_LOOK, -dy * FREE_LOOK);
+          engine.markDirty();
+        },
+        onAxes: () => engine.markDirty(),
+        onWheel: (delta) => {
+          if (free)
+            free.speed = Math.min(8, Math.max(0.125, free.speed * Math.exp(-delta * 0.002)));
+        },
+        enabled: () => free !== null,
+        isShortcut: (event) => isSceneShortcut(event),
+      }),
+    );
+    const focusCanvas = () => canvas.focus({ preventScroll: true });
+    function setFree(on: boolean) {
+      if (on === (free !== null)) return;
+      const state = useBlackHole.getState();
+      if (on) {
+        if (state.guideOpen) state.endGuide();
+        state.stopDrift();
+        input.cancel();
+        free = { pose: cameraOf(camera, state.spin), velocity: [0, 0, 0], speed: 1 };
+        canvas.tabIndex = -1;
+        canvas.addEventListener("pointerdown", focusCanvas);
+      } else if (free) {
+        /* The orbit takes the camera where it stopped; its look and tilt turn back to the hole. */
+        moveCamera(orbitFromFree(free.pose), state.spin);
+        storeCamera();
+        flight.cancel();
+        free = null;
+        canvas.removeAttribute("tabindex");
+        canvas.removeEventListener("pointerdown", focusCanvas);
+      }
+      engine.markDirty();
+    }
+    resources.defer(() => canvas.removeEventListener("pointerdown", focusCanvas));
+    /** One frame of free flight; true while the camera still moves. */
+    function flyFree(dt: number, spin: number) {
+      if (!free) return false;
+      const { axes } = flight;
+      if (axes.roll !== 0)
+        free.pose.orientation = turnFree(free.pose.orientation, 0, 0, -axes.roll * FREE_ROLL * dt);
+      const stop = axes.park || axes.brake > 0.5;
+      const move = stop
+        ? { right: 0, up: 0, forward: 0 }
+        : { right: axes.strafe, up: axes.lift, forward: axes.thrust };
+      const speed = free.speed;
+      free.pose.position = stepFreeFly(free.pose, free.velocity, move, axes.boost, dt, {
+        speed: (p) => FREE_SPEED * speed * Math.hypot(...p),
+        smoothing: stop ? 0.08 : 0.3,
+        reduceMotion: { matches: reduce },
+        constrain: (p) => clampPosition(p, spin),
+      });
+      return flight.active || Math.hypot(...free.velocity) > 1e-4;
+    }
     const power = resources.own(observePowerPreference());
     const constrainedNow = () => power.state.coarsePointer || power.state.onBattery;
     let constrained = constrainedNow();
@@ -226,29 +316,38 @@ export function createBlackHoleEngine(
     /** The store's pose wins unless the guide, the drift or the visitor's hand is moving the camera. */
     function applyCamera() {
       const state = useBlackHole.getState();
-      if (!state.guideOpen && state.drift === "off" && !input.active) {
-        camera.azimuth = state.azimuth;
-        camera.inclination = state.inclination;
-        camera.distance = state.distance;
+      const ride = rideOverride();
+      if (free) {
+        clampPosition(free.pose.position, state.spin);
+        writeCamera(uniforms, free.pose, state.spin, ride ?? 0);
+      } else {
+        if (!state.guideOpen && state.drift === "off" && !input.active) {
+          camera.azimuth = state.azimuth;
+          camera.inclination = state.inclination;
+          camera.distance = state.distance;
+        }
+        camera.distance = clampDistance(camera.distance, state.spin);
+        writeCamera(uniforms, cameraOf(camera, state.spin), state.spin, ride ?? camera.ride ?? 0);
       }
-      camera.distance = clampDistance(camera.distance, state.spin);
-      writeCamera(uniforms, camera, state.spin);
-      writeCameraSnapshot(
+      writeCameraSnapshotFromMatrix(
         snapshot,
-        uniforms.uCamPos.value,
-        uniforms.uCamFwd.value,
-        uniforms.uCamRight.value,
-        uniforms.uCamUp.value,
-        camera.distance,
+        uniforms.uCamera.value.elements,
+        cameraDistance(uniforms),
         uniforms.uFov.value,
       );
     }
     const stepCount = (quality: Quality) => warmup.steps(BLACK_HOLE_QUALITY[quality].steps);
+    let flyingFree = false;
     const busy = (state: State) =>
-      (state.guideOpen && (!state.guideArrived || tour.flying())) || state.drift === "playing";
+      (state.guideOpen && (!state.guideArrived || tour.flying())) ||
+      state.drift === "playing" ||
+      flyingFree;
 
     function tick(stepDt: number) {
       const state = useBlackHole.getState();
+      /* The guide or the drift starting takes the camera back from the free camera. */
+      if (free && (state.guideOpen || state.drift !== "off")) setFree(false);
+      flyingFree = flyFree(stepDt, state.spin);
       /* The drift's camera comes back to the visitor where it stopped, roll easing out. */
       const drifted = drift.step(state.drift, camera, stepDt);
       if (drifted.ended) storeCamera();
@@ -264,10 +363,27 @@ export function createBlackHoleEngine(
           engine.markDirty();
         }
       }
+      /* Nothing scripted is flying (the drift may be paused under the visitor's hand): the view
+         turns back to the hole and the camera slows back to hovering. */
+      if (!free && !state.guideOpen && state.drift !== "playing") {
+        const fade = Math.exp(-stepDt / LOOK_DECAY);
+        if (camera.look) {
+          camera.look.yaw *= fade;
+          camera.look.pitch *= fade;
+          if (Math.hypot(camera.look.yaw, camera.look.pitch) < 1e-4) delete camera.look;
+          engine.markDirty();
+        }
+        if (camera.ride) {
+          camera.ride *= fade;
+          if (camera.ride < 1e-4) delete camera.ride;
+          engine.markDirty();
+        }
+      }
       if (
         !state.animationPaused &&
         state.autoRotate &&
         !input.active &&
+        !free &&
         !state.guideOpen &&
         state.drift === "off"
       ) {
@@ -318,6 +434,9 @@ export function createBlackHoleEngine(
         if (state.drift === "playing" && previous.drift !== "playing") input.cancel();
       }),
     );
+    resources.defer(onFreeCamera(setFree));
+    resources.defer(onRide(() => engine.markDirty()));
+    setFree(freeCameraOn());
     return { dispose: () => resources.dispose() };
   } catch (error) {
     resources.dispose();

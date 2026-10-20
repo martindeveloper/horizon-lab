@@ -1,4 +1,4 @@
-import type { OrbitFlight } from "@horizon/toolkit/camera";
+import type { FreeLook, OrbitFlight } from "@horizon/toolkit/camera";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import type { Sketch } from "../sketches";
@@ -29,6 +29,10 @@ export type TourPose = OrbitFlight & {
   phase: TourPhase;
   duration: number;
   roll?: number;
+  /** Looks off the hole: a free shot, held and glided along with the orbit (`FreeLook`). */
+  look?: FreeLook;
+  /** 0–1: how far the camera moves with the disk gas instead of hovering (`CameraPose.ride`). */
+  ride?: number;
   drift?: number;
   creep?: number;
   sketch?: Sketch[];

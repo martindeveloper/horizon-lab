@@ -47,11 +47,32 @@ mid-flight inclination arc, `swing` a fractional mid-flight distance change, and
 Time is normalized [0,1] and t ≥ 1 returns the exact target. There is no
 collision, orbital dynamics or automatic shortest-angle selection.
 
+## Flight input
+
+`createFlightInput(canvas, options)` is the pilot's hands for a free-flying camera, modelled on
+the orbit input: it owns pointer capture, the wheel, the keyboard and a gamepad, and reports
+through callbacks without a camera of its own. A one-pointer drag calls `onLook(dx, dy)` in CSS
+pixels; the wheel calls `onWheel(deltaPixels, trackpadPinch)` with the same line/page
+normalization as the orbit input and ctrl+wheel as the pinch. Keys write one reusable
+`FlightAxes` object (`axes`, never reallocated) and call `onAxes(axes)` on every change: W/S
+`thrust`, A/D `strafe`, R/F `lift`, Q/E `roll` (each −1…1, opposed keys cancel), Shift `boost`
+(0…1), Space `park`. Keys are read by `event.code` on the window, only while focus is on the
+canvas or inside `stage` (default: the canvas's parent) so a single key never fires from a
+form elsewhere on the page (WCAG 2.1.4), never with ctrl, alt or meta held, and only when the
+host's `isShortcut(event)` agrees; a window blur lets everything go. When a gamepad connects
+the input polls it every 250 ms (`GAMEPAD_POLL_MS`): left stick thrust and strafe, right stick
+look (pixels per poll, `stickLook`), right trigger boost, left trigger `brake`; stick values
+pass a `deadzone` (`STICK_DEADZONE`, 0.15) and are stretched back to ±1. Polling stops when the
+last pad goes. `active` is true while a drag, a held key or a live pad reading is on;
+`cancel()` releases everything (a scripted flight takes over) and `dispose()` removes the
+listeners. The pure parts are exported for tests and other hosts: `flightAxesFromKeys`,
+`readGamepad`, `stickValue`, `wheelPixels`, `axesIdle`, `createFlightAxes` and `FLIGHT_KEYS`.
+
 ## Drift
 
 `createDriftCamera(shots, settings)` is a camera that flies itself: from shot to shot
 for as long as it runs, with no rig and no renderer. Each `DriftShot` is a pose
-(`azimuth`, `inclination`, `distance`, optional `roll`) with an optional `flight`
+(`azimuth`, `inclination`, `distance`, optional `roll` and `look`) with an optional `flight`
 (`lift`, `swing`, `lead` and a `duration`), a `hold` in seconds, a hold `drift`
 (rad/s) and a `creep` (the fraction of the distance pushed in over the hold).
 The camera never stands still: an orbit at the `drift` rate runs under flights and
@@ -65,7 +86,13 @@ never repeats a shot) and the `random` source; `reduceMotion` cuts flights and
 stills the orbit, sway and holds while it matches. `start(pose)` begins from the camera's pose (a
 sequence goes on from the shot nearest it); `step(dt)` returns the pose for the
 frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
-`sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot of
+`sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot's `look` eases in over its flight and holds through the hold, so the orbit glides along
+wherever it looks; its `ride` (0–1, how far the camera moves with the scene's own flow, which the
+host defines, such as orbiting gas) eases the same way. The drawn pose always carries `look` (zero
+at the aim) and `ride` (zero, still); `freeFromOrbit` turns it into a free pose, and a rig that
+ignores them keeps looking at its aim from rest. A `holdDrift(landed, shot)` setting may
+set a shot's hold rate from the pose it landed on (for example, a riding camera orbiting at the
+gas's rate for the landed distance); returning undefined keeps the shot's `drift`. A shot of
 `{ handoff: true }` is the host's to fly (a close-up on its own rig): the camera
 reports `handoff`, leaves the pose alone, and goes on to the next shot from
 wherever `resume(pose)` says the host left the camera.
@@ -77,6 +104,40 @@ or `paused` state: `step(state, current, dt, hold?)` starts the camera from
 back where it stopped) and `handoff`; `hold` keeps it from starting or flying
 while something else owns the camera. The scene module's `createRigDrift` puts it
 on an orbit rig.
+
+## Free camera
+
+`free-pose.ts` is pure maths on tuples, for a raymarched scene, a three.js camera
+and a floating-origin host alike. A `FreePose` is `{ position: Vec3, orientation:
+Quat }`. The quaternion is camera-to-world in three's camera convention (local −Z
+looks into the scene, +Y up, +X right), so `camera.quaternion.fromArray(pose.orientation)`
+applies it. The host owns the pose and may overwrite it every frame. `createFlightInput`
+(above) is the input that drives it: map its axes to `stepFreeFly` and `onLook` to `turnFree`.
+
+- `freeBasis(q)` gives the world axes (`right`, `up`, `fwd`); `lookRotation(fwd, up?,
+  roll?)` builds a level attitude.
+- `freeFromOrbit(pose, aim?)` turns an orbit pose (the rigs' convention: `azimuth`
+  about +Y from +Z, `inclination` above XZ) into a free pose. Optional `roll` tilts
+  about the line of sight (positive turns right toward up). Optional `look: { yaw,
+  pitch }` turns the view off the aim (yaw left, pitch up), so a scripted shot can look
+  anywhere while it keeps its orbit flights and holds. `orbitFromFree` is its inverse.
+- `turnFree(q, yaw, pitch, roll?)` turns like a head: yaw about world up, pitch stopped
+  just short of the poles. `revolveFree(pose, angle, axis?, about?)` carries position
+  and view round a centre (a glide).
+- `sampleFreeFlight(t, from, to, { about? })` eases the position and slerps the
+  attitude. With `about`, the flight turns on a great circle round that point and
+  eases the distance geometrically, so it never cuts inside the nearer end.
+- `stepFreeFly(pose, velocity, move, boost, dt, options)` is one frame of kinematic
+  flight. `velocity` is the host's and is updated in place. `move` is
+  `{ right, up, forward }` in −1…1, `options.speed(position)` is units per second, and
+  `smoothing`, `reduceMotion` and `constrain(position)` are optional. It returns the
+  new position; the attitude stays the host's. `easeToward` is the same reduced-motion-aware ease
+  for one number.
+- `writeCameraMatrix(out, pose)` writes the column-major camera-to-world matrix:
+  columns right, up, back and the position, as three's `matrixWorld.elements`. A shader
+  reads its ray as `mat3(m) * vec3(uv * tan(fov / 2), -1.0)` from `m[3].xyz`.
+  `writeCameraSnapshotFromMatrix(snapshot, m, dist, fov)` fills a projection snapshot
+  from either.
 
 ## Views
 

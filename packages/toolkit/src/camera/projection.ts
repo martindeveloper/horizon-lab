@@ -45,6 +45,32 @@ export function writeCameraSnapshot(
   cam.fov = fov;
 }
 
+/**
+ * The snapshot from a column-major camera-to-world matrix (`writeCameraMatrix`, or three's
+ * `camera.matrixWorld.elements`): columns right, up, back and the position.
+ */
+export function writeCameraSnapshotFromMatrix(
+  cam: CameraSnapshot,
+  m: { readonly [index: number]: number },
+  dist: number,
+  fov: number,
+) {
+  cam.rightX = m[0]!;
+  cam.rightY = m[1]!;
+  cam.rightZ = m[2]!;
+  cam.upX = m[4]!;
+  cam.upY = m[5]!;
+  cam.upZ = m[6]!;
+  cam.fwdX = -m[8]!;
+  cam.fwdY = -m[9]!;
+  cam.fwdZ = -m[10]!;
+  cam.posX = m[12]!;
+  cam.posY = m[13]!;
+  cam.posZ = m[14]!;
+  cam.dist = dist;
+  cam.fov = fov;
+}
+
 export type ScreenPt = { x: number; y: number; visible: boolean };
 
 /** Matches height-normalized shader UVs: (fragCoord - resolution / 2) / height.

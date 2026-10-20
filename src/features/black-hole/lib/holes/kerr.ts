@@ -17,14 +17,18 @@
  * Ergosphere (equator): r = 2M. Inside it, even light must co-rotate.
  * Sky: host-galaxy wash (weather = host).
  */
+import { gasTurnRate } from "../parameters";
 import type { HoleSpec } from "./types";
+
+/** Thorne's equilibrium spin; the riding beat's orbit rate follows it. */
+const SPIN = 0.998;
 
 export const kerr: HoleSpec = {
   id: "kerr",
   name: "Extreme Kerr",
   kind: "theory",
   massSolar: 3e7,
-  spin: 0.998,
+  spin: SPIN,
   inclination: 0.18,
   distance: 26,
   exposure: 1.1,
@@ -72,15 +76,22 @@ export const kerr: HoleSpec = {
       sketch: [{ kind: "drag" }],
       eq: "M_irr = M √((1 + √(1 − (a/M)²))/2)    ·    a/M = 1 ⇒ M − M_irr ≈ 0.29 M",
     },
+    // Down onto the disk, then ride with the gas, looking along its flow: the camera moves at
+    // the gas's speed (the sky aberrates and shifts) and orbits at its animated rate, so the
+    // texture holds still beneath it.
     {
       phase: "hold",
-      duration: 8,
+      duration: 9,
       yaw: -0.6,
-      inclination: 0.14,
-      distance: 26,
+      inclination: 0.1,
+      distance: 9,
       swing: 0.2,
       lead: 0.4,
       roll: -0.02,
+      look: { yaw: 0.22, pitch: -0.03 },
+      ride: 1,
+      drift: -gasTurnRate(9, SPIN),
+      creep: 0,
       eq: "a/M ≈ 0.998   (Thorne 1974)",
     },
     {

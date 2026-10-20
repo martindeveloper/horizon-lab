@@ -1,5 +1,7 @@
 import { DEPLOYMENT_ID, ENVIRONMENT } from "@/config";
 import {
+  setFreeCamera,
+  setRide,
   setSkyTime,
   setSkyTimeScale,
   setWebGLOverride,
@@ -50,6 +52,12 @@ const COMMANDS = {
     "Set the hero and star sky to this moment (local time); keeps the time scale",
   "time()": "Back to the real time",
   "timeScale(600)": "Run the sky 600× faster (10 minutes a second); 0 freezes, 1 is real speed",
+  "freeCamera()":
+    "Fly the simulation's camera freely: drag to look, W/S/A/D move, R/F up and down, Q/E roll, Shift faster, wheel sets the speed, Space stops",
+  "freeCamera(false)": "Back to the simulation's own camera",
+  "ride(1)":
+    "Move the camera with the scene's flow (the black hole's disk gas): the sky aberrates and shifts with its motion; 0 hovers",
+  "ride()": "Back to the simulation's own ride",
   "reset()": "Clear every override",
 } as const;
 
@@ -148,7 +156,21 @@ export function createDebug() {
       setSkyTimeScale(scale);
       return scale;
     },
+    freeCamera(on = true) {
+      if (!setFreeCamera(on)) console.warn("Horizon.Debug: this page has no free camera");
+      else if (on)
+        console.info("Horizon.Debug: click the scene, then W/S/A/D, R/F, Q/E, Shift, wheel, Space");
+      return on;
+    },
+    ride(fraction?: number) {
+      if (fraction !== undefined && !Number.isFinite(fraction))
+        throw new TypeError("Use a fraction from 0 (hover) to 1 (ride with the flow)");
+      if (!setRide(fraction ?? null)) console.warn("Horizon.Debug: this page has no ride");
+      return fraction ?? "auto";
+    },
     reset() {
+      setFreeCamera(false);
+      setRide(null);
       setWebGLOverride(null);
       setSkyTimeScale(1);
       setSkyTime(null);

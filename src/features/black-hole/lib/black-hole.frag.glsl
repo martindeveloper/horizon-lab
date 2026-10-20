@@ -1,7 +1,9 @@
 // Black-hole fragment shader.
 //
 // One ray per pixel is traced backward from a zero-angular-momentum camera
-// along a Kerr null geodesic, in geometric units G = c = M = 1. A ray can end
+// along a Kerr null geodesic, in geometric units G = c = M = 1. A camera that
+// moves through that hovering frame (riding with the disk gas) sees each ray
+// aberrated into it first, and every frequency shifted by its own Doppler factor. A ray can end
 // in four ways: it is captured by the hole, it crosses the equatorial
 // accretion disk, it escapes to the sky, or it runs out of steps and stays dark.
 // With gravity off, rays run straight from a static camera and only a dark
@@ -21,10 +23,8 @@ precision highp float;
 
 uniform vec2 uResolution;      // framebuffer size in pixels
 uniform sampler2D uDiskProfile; // 512×1 Page–Thorne flux, preintegrated on the CPU
-uniform vec3 uCamPos;          // camera position in units of M
-uniform vec3 uCamFwd;          // camera basis (unit vectors)
-uniform vec3 uCamRight;
-uniform vec3 uCamUp;
+uniform mat4 uCamera;          // camera to world: columns right, up, back (−forward), position in M
+uniform vec3 uCamVelocity;     // camera velocity through the hovering observer's frame, units of c (0: hovering)
 uniform float uTime;           // seconds, drives the disk animation
 uniform float uSpin;           // dimensionless spin a/M, within ±MAX_SPIN; negative: the disk orbits retrograde
 uniform float uInner;          // disk inner radius / M (max of DISK_INNER_FACTOR r₊ and r_ISCO)
@@ -47,6 +47,8 @@ uniform float uVignette;       // the lens vignette's depth at this camera dista
 #include <horizon/temperature>
 
 #include <horizon/stars>
+
+#include <horizon/relativity>
 
 // Angular size of one pixel at the view centre, matching the ray set-up in main():
 // one pixel moves uv by 1 / height, scaled by tan(fov / 2).
@@ -178,7 +180,7 @@ vec3 skyLab(vec3 d, float far, vec2 pixel) {
 
 vec3 starfield(vec3 dir, vec2 pixel) {
   vec3 d = normalize(dir);
-  float far = smoothstep(28.0, 110.0, length(uCamPos));
+  float far = smoothstep(28.0, 110.0, length(uCamera[3].xyz));
 
   if (uWeather == SKY_SGR) return skySgr(d, far, pixel);
   if (uWeather == SKY_M87) return skyM87(d, far, pixel);
@@ -203,6 +205,8 @@ float gSphere; // Q + L²
 float gA2E2;   // a²E²
 float gA2;     // a²
 vec3 gRay;     // the straight ray's direction, with gravity off
+float gCam;    // ν_camera / ν_hovering along this pixel: 1 for a hovering camera
+float gCam4;   // gCam⁴, which brightens light at rest in the hovering frame
 
 // Frequency ratio g = ν_camera / ν_emitted for gas on a prograde circular
 // orbit at r: g = 1 / (uᵗ(E_photon − Ω L_photon)). The photon's constants are
@@ -325,13 +329,15 @@ vec3 diskColor(vec3 hit, float rho) {
   vec2 shift = uGravity > 0.5 ? vec2(diskG(rho), 0.0) : flatShift(hit, rho);
   float g = shift.x;
   float mu = uGravity > 0.5 ? clamp(g * sqrt(max(gQ, 0.0)) / rho, 0.0, 1.0) : shift.y;
+  // The emission angle is the gas's own; its colour and brightness reach a moving camera shifted again.
+  g *= gCam;
   float rin = max(uInner, 1.2);
   float fpt = diskFlux(rho); // peak-normalised, zero at the inner edge
   float innerEdge = smoothstep(rin * 0.94, rin * 1.06, rho);
   float outerEdge = diskCoverage(rho);
 
   // Gas texture: two cross-faded patches sheared by a teaching-speed rotation.
-  float omega = 2.8 / (pow(max(rho, 1.0), 1.5) + uSpin);
+  float omega = GAS_RATE / (pow(max(rho, 1.0), 1.5) + uSpin);
   float life = 8.0;
   float ageA = mod(uTime, life);
   float ageB = mod(uTime + life * 0.5, life);
@@ -473,7 +479,7 @@ bool collect(
     dens *= (uWeather == SKY_SGR) ? 0.2 : 0.8;
     float stepLen = length(pos - prev);
     vec3 glow = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
-    fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright;
+    fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright * gCam4;
   }
 
   // Jet along the spin axis.
@@ -483,7 +489,7 @@ bool collect(
     float stepLen = length(pos - prev);
     // The traced ray runs backward: light reaching the camera moves along prev − pos.
     float lobe = 0.4 + 0.6 * clamp((prev.y - pos.y) * sign(pos.y) / max(stepLen, 1e-6), 0.0, 1.0);
-    fore += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35;
+    fore += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35 * gCam4;
   }
 
   // Crossing the equatorial plane: the disk, or the plunging region inside it.
@@ -508,7 +514,7 @@ bool collect(
     // Without gravity it is drawn unshifted.
     if (rho > horizon * DISK_INNER_FACTOR && rho < uInner) {
       float g = uGravity > 0.5 ? plungeG(rho, mix(udStep.x, udStep.y, t)) : 1.0;
-      fore += transmission * plungeColor(hitp, rho, g);
+      fore += transmission * plungeColor(hitp, rho, g * gCam);
     }
   }
   return false;
@@ -521,7 +527,19 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
   /* Camera ray */
   vec2 uv = (fragCoord - 0.5 * uResolution) / uResolution.y;
   float tanFov = tan(uFov * 0.5);
-  vec3 rd = normalize(uCamFwd + uv.x * uCamRight * tanFov + uv.y * uCamUp * tanFov);
+  vec3 rd = normalize(mat3(uCamera) * vec3(uv * tanFov, -1.0));
+  /* A moving camera: the direction the hovering observer sees this light come from (the boost
+     undone, so the sky crowds toward the motion), and the camera's own shift of its frequency. */
+  gCam = 1.0;
+  float camSpeed2 = dot(uCamVelocity, uCamVelocity);
+  if (camSpeed2 > 0.0) {
+    float beta = sqrt(camSpeed2);
+    vec3 heading = uCamVelocity / beta;
+    float gamma = inversesqrt(1.0 - camSpeed2);
+    gCam = dopplerFactorObserved(beta, gamma, dot(rd, heading));
+    rd = normalize(aberrate(rd, heading, -beta, gamma));
+  }
+  gCam4 = gCam * gCam * gCam * gCam;
 
   float a = clamp(uSpin, -SPIN_LIMIT, SPIN_LIMIT);
   float a2 = a * a;
@@ -530,7 +548,7 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
   gA2 = a2;
 
   /* The camera is a zero-angular-momentum observer at Boyer–Lindquist (r, θ, φ). */
-  vec3 cam = uCamPos;
+  vec3 cam = uCamera[3].xyz;
   float camR2 = dot(cam, cam) - a2;
   float rc = sqrt(0.5 * (camR2 + sqrt(camR2 * camR2 + 4.0 * a2 * cam.y * cam.y)));
   float delC = rc * rc - 2.0 * rc + a2;
@@ -717,7 +735,7 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
   /* Composite */
   vec3 col = fore + disk;
   if (!hitDisk && !captured && (!march || escaped)) {
-    col += transmission * starfield(skyDir, pixel) * pow(gSky, 4.0);
+    col += transmission * starfield(skyDir, pixel) * pow(gSky * gCam, 4.0);
   }
 
   return col;

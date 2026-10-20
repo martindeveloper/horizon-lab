@@ -73,6 +73,46 @@ export function onUpdateNotice(listener: () => void) {
   return () => void updateListeners.delete(listener);
 }
 
+const freeCameraListeners = new Set<(on: boolean) => void>();
+let freeCamera = false;
+
+/** The mounted simulation flies a free camera (look and move) in place of its orbit. */
+export function freeCameraOn() {
+  return DEBUG && freeCamera;
+}
+
+/** Turns the free camera on or off; false when no mounted simulation supports it. */
+export function setFreeCamera(on: boolean) {
+  freeCamera = on;
+  for (const listener of freeCameraListeners) listener(freeCameraOn());
+  return freeCameraListeners.size > 0;
+}
+
+export function onFreeCamera(listener: (on: boolean) => void) {
+  freeCameraListeners.add(listener);
+  return () => void freeCameraListeners.delete(listener);
+}
+
+const rideListeners = new Set<() => void>();
+let ride: number | null = null;
+
+/** How far the mounted simulation's camera moves with its scene's flow (0 hovers), or null for its own choice. */
+export function rideOverride() {
+  return DEBUG ? ride : null;
+}
+
+/** Sets the ride (null: the simulation's own); false when no mounted simulation supports it. */
+export function setRide(value: number | null) {
+  ride = value === null ? null : Math.min(1, Math.max(0, value));
+  for (const listener of rideListeners) listener();
+  return rideListeners.size > 0;
+}
+
+export function onRide(listener: () => void) {
+  rideListeners.add(listener);
+  return () => void rideListeners.delete(listener);
+}
+
 /** Sky time = `sky` + (wall time − `wall`) × `scale`, in milliseconds. */
 const skyCell = storageCell({
   key: ["debug", "sky"],

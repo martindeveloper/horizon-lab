@@ -63,6 +63,13 @@ const GLOW_OUTER = 1.5;
 const GAS_TURN_CELLS = 12;
 const GAS_SPIRAL_CELLS = 16;
 const GAS_PITCH = 4;
+/** The animated gas turns at GAS_RATE / (r^{3/2} + a) rad/s: Kepler's shape at a teaching pace. */
+const GAS_RATE = 2.8;
+
+/** How fast the animated gas turns at radius r, rad/s; a camera riding with it orbits at this rate. */
+export function gasTurnRate(r: number, spin: number) {
+  return GAS_RATE / (Math.max(r, 1) ** 1.5 + spin);
+}
 /** The highest quality's step budget bounds the shader loop. */
 const MAX_STEPS = Math.max(...Object.values(BLACK_HOLE_QUALITY).map((level) => level.steps));
 /** Rays traced on the CPU (the guide's drawings, the tests) get the cinematic budget. */
@@ -90,6 +97,7 @@ export const SHADER_DEFINES = glslDefines({
   GAS_TURN_CELLS,
   GAS_SPIRAL_CELLS,
   GAS_PITCH,
+  GAS_RATE,
   GLOW_SLOPE,
   GLOW_WIDTH,
   GLOW_CONE,

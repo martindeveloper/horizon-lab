@@ -13,7 +13,7 @@ outside this package.
 | `@horizon/toolkit/ui/motion`         | `TextReveal`, `textStagger`                                                                                        | React, Motion                                             |
 | `@horizon/toolkit/math`              | Clamp, wrap, easing, log sliders, seeded random, CPU value noise                                                   | None                                                      |
 | `@horizon/toolkit/science`           | Constants, units, equations, readouts, Julian dates, sky coordinates, spectra, colour, periodic table              | None                                                      |
-| `@horizon/toolkit/camera`            | Camera snapshots, screen projection, orbit input, flight interpolation, framed views                               | DOM only when creating input controls                     |
+| `@horizon/toolkit/camera`            | Camera snapshots, screen projection, orbit and flight input, free poses and matrices, flight interpolation, views  | DOM only when creating input controls                     |
 | `@horizon/toolkit/rendering`         | Shader pass, composite (MSAA, FXAA, bloom, lens) passes, engine host, frame loop, sizing, power hints, WebGL probe | Three.js; DOM only when creating a renderer/observer/loop |
 | `@horizon/toolkit/rendering/quality` | `RENDER_QUALITIES` and `RenderQuality`, the four levels, without the Three.js barrel                               | None                                                      |
 | `@horizon/toolkit/scene`             | Scene host with switchable anti-aliasing, bloom and lens, orbit rig and input, labels, taps, rulers, HUD readouts  | Three.js; DOM and WebGL only when a host or labels start  |

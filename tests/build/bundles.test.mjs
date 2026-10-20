@@ -30,12 +30,12 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
   const chunks = readdirSync(new URL("static/chunks/", build))
     .filter((name) => name.endsWith(".js"))
     .map((name) => `static/chunks/${name}`);
-  const heavy = chunks.filter((path) => /WebGLRenderer|uniform vec3 uCamPos/.test(read(path)));
+  const heavy = chunks.filter((path) => /WebGLRenderer|uniform mat4 uCamera/.test(read(path)));
   assert.ok(heavy.length > 0, "Must find the production renderer/shader chunks");
   for (const locale of ["en", "cs"]) {
     const initial = assets(locale, ".js");
     for (const path of heavy) assert.ok(!initial.has(path), `${locale} loads ${path}`);
-    assert.doesNotMatch(contents(initial), /WebGLRenderer|uniform vec3 uCamPos/);
+    assert.doesNotMatch(contents(initial), /WebGLRenderer|uniform mat4 uCamera/);
     const gzipBytes = [...initial].reduce((total, path) => total + gzipSync(read(path)).length, 0);
     console.log(`${locale}: initial JS ${(gzipBytes / 1024).toFixed(1)} KiB gzip`);
     // The WebGL gate runs first on simulation routes; the renderer stays lazy behind it.
@@ -129,7 +129,7 @@ test("standalone errors keep clean recovery links, noindex and lightweight bundl
   assert.doesNotMatch(html, /href="\/(?:en|cs)"/);
   assert.match(html, /href="\/"/);
   assert.match(html, /noindex/);
-  assert.doesNotMatch(contents(assets("_not-found", ".js")), /WebGLRenderer|uniform vec3 uCamPos/);
+  assert.doesNotMatch(contents(assets("_not-found", ".js")), /WebGLRenderer|uniform mat4 uCamera/);
 
   // Next's emergency HTML is framework-owned. The custom global-error boundary
   // is registered in the client manifest and takes over when React handles errors.
@@ -141,5 +141,5 @@ test("standalone errors keep clean recovery links, noindex and lightweight bundl
   );
   assert.ok(entry, "Custom root error boundary must be included");
   const code = contents(entry[1].chunks.map((path) => path.replace(/^\/_next\//, "")));
-  assert.doesNotMatch(code, /WebGLRenderer|uniform vec3 uCamPos/);
+  assert.doesNotMatch(code, /WebGLRenderer|uniform mat4 uCamera/);
 });

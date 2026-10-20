@@ -22,6 +22,7 @@
 #define GAS_TURN_CELLS     12.0
 #define GAS_SPIRAL_CELLS   16.0
 #define GAS_PITCH          4.0
+#define GAS_RATE           2.8
 #define GLOW_SLOPE         0.38
 #define GLOW_WIDTH         0.12
 #define GLOW_CONE          0.26

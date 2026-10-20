@@ -79,6 +79,40 @@ export function cameraFloor(a: number): number {
   return Math.sqrt(r * r + a * a);
 }
 
+/** A riding camera stays below this speed, a fraction of c: inside the photon orbit no circular orbit is timelike. */
+export const RIDE_SPEED_LIMIT = 0.95;
+
+/**
+ * The disk's circular flow at a scene point, seen by the hovering (zero-angular-momentum)
+ * observer there: v = (Ω − ω) ϖ / α with the gas's Ω = 1 / (r^{3/2} + a), frame dragging
+ * ω = 2ar / A, lapse α = √(ΣΔ / A) and ϖ = √(A / Σ) sin θ (Bardeen, Press & Teukolsky 1972).
+ * In units of c along the scene axes, in the shader's local frame; at most `RIDE_SPEED_LIMIT`.
+ * Zero on the spin axis and where no hovering observer exists.
+ */
+export function diskFlowVelocity(
+  position: readonly [number, number, number],
+  spin: number,
+): [number, number, number] {
+  const a = clamp(spin, -SPIN_LIMIT, SPIN_LIMIT);
+  const [x, y, z] = position;
+  const cyl = Math.hypot(x, z);
+  const r2 = x * x + y * y + z * z - a * a;
+  const r = Math.sqrt(0.5 * (r2 + Math.sqrt(r2 * r2 + 4 * a * a * y * y)));
+  const delta = r * r - 2 * r + a * a;
+  if (cyl < 1e-9 || delta <= 0) return [0, 0, 0];
+  const cos = clamp(y / r, -1, 1);
+  const sin2 = 1 - cos * cos;
+  const sigma = r * r + a * a * cos * cos;
+  const bigA = (r * r + a * a) ** 2 - a * a * delta * sin2;
+  const lapse = Math.sqrt((sigma * delta) / bigA);
+  const drag = (2 * a * r) / bigA;
+  const arm = Math.sqrt((bigA / sigma) * sin2);
+  const omega = 1 / (r ** 1.5 + a);
+  const v = clamp(((omega - drag) * arm) / lapse, -RIDE_SPEED_LIMIT, RIDE_SPEED_LIMIT);
+  /* The gas moves toward +φ, which the scene's azimuth (atan2(x, z)) counts backward. */
+  return [(-z / cyl) * v, 0, (x / cyl) * v];
+}
+
 /** Prograde ISCO radius / M. a = 0 → 6; a → 1 → 1. */
 export function iscoOverM(a: number): number {
   return innermostStableOrbit.compute({ a: clamp(a, -SPIN_LIMIT, SPIN_LIMIT) });
