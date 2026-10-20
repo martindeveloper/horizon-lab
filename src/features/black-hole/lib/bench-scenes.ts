@@ -22,6 +22,8 @@ type BlackHoleBenchScene = BenchScene & {
   quality: Quality;
   /** Overrides of the preset's home pose. */
   pose?: Partial<CameraPose>;
+  /** Bloom on: the frame is traced as radiance, bloomed and resolved. */
+  bloom?: boolean;
   motion?: BlackHoleMotion;
 };
 
@@ -30,7 +32,8 @@ const tourSeconds = (presetId: string) =>
 
 /**
  * Every preset at its home view, a quality sweep, stress views that bound
- * the per-pixel cost, and sequences.
+ * the per-pixel cost, the lensed disk with bloom (against its plain home view,
+ * the effect's cost), and sequences.
  *
  * The sweep is edge-on at zero spin: there the ISCO gap lets rays near the
  * critical curve wind around the hole, so the step budget decides the image.
@@ -71,6 +74,14 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     presetId: "lensed",
     quality: "standard",
     pose: { distance: 480 },
+  },
+  {
+    id: "lensed-bloom",
+    description: "Lensed disk, home view, standard quality, bloom on",
+    tags: ["effects"],
+    presetId: "lensed",
+    quality: "standard",
+    bloom: true,
   },
   {
     id: "orbit",

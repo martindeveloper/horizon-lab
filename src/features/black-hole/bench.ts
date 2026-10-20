@@ -8,14 +8,14 @@ import fragmentShader from "./lib/black-hole.frag.glsl";
 import {
   createUniforms,
   orbitWheelSensitivity,
-  PASS_OPTIONS,
+  passOptions,
   sceneWriter,
   writeCamera,
   type CameraPose,
 } from "./lib/frame";
 import { holeById, paramsFromPreset } from "./lib/holes";
 import { MAX_DIST, MIN_DIST } from "./lib/physics";
-import { BLACK_HOLE_QUALITY } from "./lib/quality";
+import { BLACK_HOLE_QUALITY, bloomSettings } from "./lib/quality";
 
 /**
  * Headless benchmark target: the observatory's shader, uniforms, camera and
@@ -35,7 +35,7 @@ export const benchTarget: BenchTarget = {
       vertexShader: fullscreenVertex,
       fragmentShader,
       uniforms,
-      ...PASS_OPTIONS,
+      ...passOptions(uniforms),
     });
     pass.resize(width, height);
     uniforms.uResolution.value.set(width, height);
@@ -57,6 +57,7 @@ export const benchTarget: BenchTarget = {
           })
         : null;
     let spin = settings.spin;
+    const bloom = scene.bloom ? bloomSettings(scene.quality, false, settings.exposure) : null;
 
     const gl = canvas.getContext("webgl2");
     if (!gl) throw new Error("WebGL 2 is unavailable");
@@ -70,7 +71,7 @@ export const benchTarget: BenchTarget = {
         }
         writeCamera(uniforms, pose, spin);
         writeScene({ ...settings, spin, gravity: true }, frame.time, steps);
-        pass.render();
+        pass.render({ bloom });
       },
       describe: () => ({
         azimuth: pose.azimuth,
@@ -79,6 +80,7 @@ export const benchTarget: BenchTarget = {
         spin,
         steps,
         fovDeg: (uniforms.uFov.value * 180) / Math.PI,
+        bloom: bloom !== null,
       }),
       dispose() {
         input?.dispose();

@@ -36,6 +36,19 @@ function sceneResolution(quality: RenderQuality, tight: boolean): SceneResolutio
   return { dprCap: tight ? 2 : 3, fps: Infinity };
 }
 
+/** The bloom chain's size: its levels, and the first level's share of the frame. */
+export type BloomChain = { mips: number; scale: number };
+
+/**
+ * Light devices blur a quarter-resolution frame through four levels; the full tier a half-
+ * resolution one through five; Max adds a sixth, wider level.
+ */
+const BLOOM: ByTier<BloomChain> = {
+  light: { mips: 4, scale: 0.25 },
+  full: { mips: 5, scale: 0.5 },
+  max: { mips: 6, scale: 0.5 },
+};
+
 /** Small bodies in each GPU swarm. */
 export type SwarmCounts = { belt: number; trojans: number; kuiper: number; oort: number };
 
@@ -50,9 +63,15 @@ export type SpaceQuality = {
   tier: SceneTier;
   resolution: SceneResolution;
   swarms: SwarmCounts;
+  bloom: BloomChain;
 };
 
 export function spaceQuality(quality: RenderQuality, tight: boolean): SpaceQuality {
   const tier = sceneTier(quality, tight);
-  return { tier, resolution: sceneResolution(quality, tight), swarms: SWARMS[tier] };
+  return {
+    tier,
+    resolution: sceneResolution(quality, tight),
+    swarms: SWARMS[tier],
+    bloom: BLOOM[tier],
+  };
 }

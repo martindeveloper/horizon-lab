@@ -16,7 +16,7 @@ import { DeepFieldOverlay } from "./overlay";
 
 /** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useDeepField);
-/** The store as the address sees it, and as the drift does. */
+/** The store as the address sees it, and as the drift's controls do. */
 const views: ViewStore<ViewId> = useDeepField;
 const driftStore: DriftStore<DeepFieldStore> = useDeepField;
 
@@ -30,7 +30,11 @@ export function DeepField() {
   const t = useTranslations("deepField");
   const ready = useDeepField((s) => s.ready);
   const view = useDeepField((s) => s.view);
-  const drift = useSimulationDrift(driftStore, DRIFT);
+  const drift = useSimulationDrift(
+    useDeepField((s) => s.drift),
+    driftStore,
+    DRIFT,
+  );
 
   useViewFromPath(views, viewFromPath);
   useFreshVisit(reset);

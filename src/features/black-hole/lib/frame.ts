@@ -1,9 +1,12 @@
 import { DataTexture, FloatType, RGBAFormat, Vector2, Vector3 } from "three";
 
+import { clamp, smoothstep } from "@horizon/toolkit/math";
+
+import resolveShader from "./black-hole-resolve.frag.glsl";
 import { DISK_OUTER_RADIUS, DISK_PROFILE_SIZE, diskProfilePixels } from "./disk-profile";
 import { holeById, SKY_CODE } from "./holes";
 import type { Vec3 } from "./kerr-rays";
-import { DISK_INNER_HORIZON_FACTOR } from "./parameters";
+import { DISK_INNER_HORIZON_FACTOR, SPIN_LIMIT } from "./parameters";
 import { cameraFloor, horizonOverM, INCLINATION_LIMIT, iscoOverM, MAX_DIST } from "./physics";
 import { framedRayFov } from "./render-policy";
 
@@ -31,6 +34,8 @@ type Uniforms = {
   uJet: { value: number };
   uWeather: { value: number };
   uGravity: { value: number };
+  /** The lens vignette's depth: how much the frame's corners darken, less from far away. */
+  uVignette: { value: number };
 };
 
 /** The scene settings the shader reads; the store and benchmark scenes both supply them. */
@@ -77,8 +82,25 @@ export function orbitWheelSensitivity(distance: number, pinch: boolean) {
   return pinch ? 0.0024 : distance < 18 ? 0.0026 : 0.00115;
 }
 
-/** How the fullscreen pass clears and which GPU it asks for, for the engine and the bench alike. */
-export const PASS_OPTIONS = { clearColor: 0x08080b, powerPreference: "low-power" } as const;
+/**
+ * How the fullscreen pass clears, which GPU it asks for, and how it finishes a bloomed frame
+ * (the resolve shader, sharing the uniforms its display pipeline reads), for the engine and
+ * the bench alike.
+ */
+export function passOptions(uniforms: Uniforms) {
+  return {
+    clearColor: 0x08080b,
+    powerPreference: "low-power",
+    hdr: {
+      fragmentShader: resolveShader,
+      uniforms: {
+        uResolution: uniforms.uResolution,
+        uExposure: uniforms.uExposure,
+        uVignette: uniforms.uVignette,
+      },
+    },
+  } as const;
+}
 
 /** Fresh uniforms; the caller owns (and disposes) the disk-profile texture. */
 export function createUniforms(): Uniforms {
@@ -110,6 +132,7 @@ export function createUniforms(): Uniforms {
     uJet: { value: 0 },
     uWeather: { value: 0 },
     uGravity: { value: 1 },
+    uVignette: { value: 0.1 },
   };
 }
 
@@ -173,6 +196,12 @@ export function writeCamera(uniforms: Uniforms, pose: CameraPose, spin: number) 
     camUp.multiplyScalar(cr);
     camUp.set(camUp.x - x * sr, camUp.y - y * sr, camUp.z - z * sr);
   }
+  /* The vignette eases off with the camera's Boyer–Lindquist radius: a tenth of the way to the
+     corners' black up close, under half that from 160 M out. */
+  const a = clamp(spin, -SPIN_LIMIT, SPIN_LIMIT);
+  const camR2 = camPos.lengthSq() - a * a;
+  const rc = Math.sqrt(0.5 * (camR2 + Math.sqrt(camR2 * camR2 + 4 * a * a * camPos.y * camPos.y)));
+  uniforms.uVignette.value = 0.1 * (1 - 0.55 * smoothstep(40, 160, rc));
   const far = Math.min(1, Math.max(0, (dist - 48) / 240));
   const near = Math.min(1, Math.max(0, (14 - dist) / 12));
   uniforms.uFov.value = framedRayFov(

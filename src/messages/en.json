@@ -351,6 +351,7 @@
     "fxaa": "FXAA",
     "edges": "Edge rays",
     "supersample": "SSAA",
+    "bloom": "Bloom",
     "wideColour": "Wide colour (P3)",
     "frameRate": "Frame rate",
     "parts": {

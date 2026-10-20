@@ -58,20 +58,30 @@ engines import already expanded shader strings and do not invoke it at runtime.
 - `#include <horizon/sprite>` provides `pointGlow(vec2 pointCoord, float falloff)`:
   a round Gaussian point-sprite profile that is zero outside the sprite. Pass
   `gl_PointCoord`; star and swarm points share it with their own falloff.
-- `fxaa.frag.glsl` and `resolve.frag.glsl` are the fragment shaders of the
-  rendering module's FXAA and MSAA passes (`createFxaaPass`, `createMsaaPass`).
-  Both read the offscreen frame as `uImage` with one pixel `uTexel`; it holds
-  display-ready bytes, encoded as the canvas would be, so they write their result
-  as it is and FXAA judges edges where they are seen. They draw with
-  `fullscreen.vert.glsl`.
+- `#include <horizon/fxaa>` provides `vec3 fxaa(vec2 uv)`, fast approximate anti-aliasing
+  over a finished frame the including shader declares as `uniform sampler2D uImage` with one
+  pixel `uniform vec2 uTexel`. The frame holds display-ready bytes, encoded as the canvas
+  would be, so edges are judged where they are seen and the result is written as it is.
+- `composite.frag.glsl`, `bloom-down.frag.glsl` and `bloom-up.frag.glsl` are the fragment
+  shaders of the rendering module's composite and bloom passes (`createCompositePass`,
+  `createBloomPass`), drawn with `fullscreen.vert.glsl`. The composite copies or FXAA-filters
+  the offscreen frame (`uImage`, `uTexel`; `HORIZON_FXAA`) and, with `HORIZON_BLOOM`, adds
+  `uBloom` `uBloomStrength` times and dithers by one 8-bit step. The bloom shaders are one
+  dual-Kawase step each: down averages five taps of `uImage` half a destination pixel apart
+  (`uHalfPixel`), with `HORIZON_BLOOM_PREFILTER` first keeping only light above `uThreshold`
+  (soft knee `uKnee`, cap `uClamp`); up tents eight taps and adds the chain's own level
+  (`uLevel`) at that size.
 - `#include <horizon/supersample>` supplies `main()` for a full-screen ray shader
-  that defines `vec3 shade(vec2 fragCoord, bool derivatives)`. Pass 0 traces one
-  ray per pixel; pass 1 (`HORIZON_PASS 1`, compiled by `createFullscreenPass` with
+  that defines `vec3 shade(vec2 fragCoord, bool derivatives)`, one ray's radiance, and
+  `vec3 display(vec3 radiance, vec2 fragCoord)`, that pixel's display colour. Pass 0 traces
+  one ray per pixel; pass 1 (`HORIZON_PASS 1`, compiled by `createFullscreenPass` with
   `supersample: true`) reads that frame through its own `uFirstPass` and
   `uFirstTexel` uniforms and adds four rotated-grid rays where a 3 × 3
-  neighbourhood's luma spans at least `SUPERSAMPLE_EDGE` (default 0.04). Those
-  rays get `derivatives = false` and must not use screen derivatives. Include it
-  last, after `shade`.
+  neighbourhood's display luma spans at least `SUPERSAMPLE_EDGE` (default 0.04). Those
+  rays get `derivatives = false` and must not use screen derivatives. The pass's
+  `uHdrOutput` uniform (0 by default) chooses what a frame holds: display colours, or 1 for
+  radiance, which a bloom chain and a resolve shader finish. Include it last, after `shade`
+  and `display`.
 - `#include <horizon/fresnel>` provides
   `fresnelRim(vec3 normal, vec3 viewDir, float power)`: the shared one-sided rim
   power curve. Both vectors must be normalized. This artistic factor is not
@@ -79,7 +89,7 @@ engines import already expanded shader strings and do not invoke it at runtime.
 
 Black-hole acceleration, spin correction, disk emission, capture conditions,
 sky presets and step sizes remain in the feature shader. The final highlight
-boost, vignette and dithering also stay with its artistic pipeline. Importing a
+boost, vignette and dithering also stay with its artistic pipeline (its `display.glsl`). Importing a
 snippet does not imply scientifically calibrated rendering.
 
 ## Parameters from TypeScript

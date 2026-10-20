@@ -8,6 +8,7 @@ import {
   UnsignedByteType,
   Vector2,
   WebGLRenderTarget,
+  type IUniform,
   type WebGLRenderer,
 } from "three";
 
@@ -18,13 +19,21 @@ import fullscreenVertex from "../shaders/fullscreen.vert.glsl";
  * would: materials encode for the renderer's output colour space into it and blend there, as on
  * the canvas, so a scene looks the same through it. 8-bit RGBA, like the canvas: no float
  * buffers needed. A full-screen `fragmentShader` then reads it as `uImage` (one pixel is
- * `uTexel`) and writes its display-ready result straight to the canvas. `samples` above 0
- * multisamples the frame; three.js resolves it after each render into it, as the canvas's own
- * MSAA would. Allocates no GPU memory until the first `render`.
+ * `uTexel`), with any `uniforms` of its own, and writes its display-ready result straight to
+ * the canvas. `samples` above 0 multisamples the frame; three.js resolves it after each render
+ * into it, as the canvas's own MSAA would. `before(target, size)` runs once the frame is drawn
+ * and resolved, before the full-screen shader reads it: a place to derive other textures from
+ * it. Allocates no GPU memory until the first `render`.
  */
 export function createOffscreenFrame(
   renderer: WebGLRenderer,
-  options: { fragmentShader: string; defines?: Record<string, string>; samples?: number },
+  options: {
+    fragmentShader: string;
+    defines?: Record<string, string>;
+    samples?: number;
+    uniforms?: Record<string, IUniform>;
+    before?: (target: WebGLRenderTarget, size: Vector2) => void;
+  },
 ) {
   const size = new Vector2(1, 1);
   const texel = new Vector2(1, 1);
@@ -48,7 +57,11 @@ export function createOffscreenFrame(
   const material = new ShaderMaterial({
     vertexShader: fullscreenVertex,
     fragmentShader: options.fragmentShader,
-    uniforms: { uImage: { value: target.texture }, uTexel: { value: texel } },
+    uniforms: {
+      ...options.uniforms,
+      uImage: { value: target.texture },
+      uTexel: { value: texel },
+    },
     defines: options.defines ?? {},
     depthTest: false,
     depthWrite: false,
@@ -81,6 +94,7 @@ export function createOffscreenFrame(
       } finally {
         renderer.setRenderTarget(previous);
       }
+      options.before?.(target, size);
       renderer.render(post, postCamera);
     },
     dispose: () => {

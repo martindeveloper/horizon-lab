@@ -74,6 +74,7 @@ export function createOrreryEngine({
     /** The visitor's render quality as the Orrery's settings; `bridgeRender` keeps it current. */
     let quality = orreryQuality(useOrrery.getState().quality, tight);
     sceneHost.setResolution(quality.resolution);
+    sceneHost.setBloom({ enabled: useOrrery.getState().bloom, ...quality.bloom });
     const kit = createSolarKit(basics);
     const { looks, lod } = kit;
     const scene = new Scene();
@@ -302,6 +303,7 @@ export function createOrreryEngine({
     bridgeRender(store, scope, sceneHost, (level) => {
       quality = orreryQuality(level, tight);
       sceneHost.setResolution(quality.resolution);
+      sceneHost.setBloom({ enabled: store.getState().bloom, ...quality.bloom });
       sky.setCounts(quality.sky);
       solar.setSwarms(quality.swarms);
       activity.current?.setSteps(quality.activitySteps);

@@ -1,4 +1,11 @@
-export { createFullscreenPass, type PassAntialias } from "./fullscreen-pass";
+export { createFullscreenPass, type PassAntialias, type PassFrame } from "./fullscreen-pass";
+export {
+  createBloomPass,
+  halfFloatRenderable,
+  type BloomPass,
+  type BloomSettings,
+} from "./bloom-pass";
+export { createCompositePass, type CompositeAntialias, type CompositePass } from "./composite-pass";
 export { createFxaaPass, type FxaaPass } from "./fxaa-pass";
 export { createMsaaPass, type MsaaPass } from "./msaa-pass";
 export { RENDER_QUALITIES, type RenderQuality } from "./quality";

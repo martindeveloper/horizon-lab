@@ -1,7 +1,11 @@
 import { useTranslations } from "next-intl";
 
 import { RailSection, SwitchGroup } from "@/components/simulations/rail";
-import { RenderSection, type AntialiasMode } from "@/components/simulations/render-settings";
+import {
+  BloomSwitch,
+  RenderSection,
+  type AntialiasMode,
+} from "@/components/simulations/render-settings";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
 import {
   cameraFloor,
@@ -86,6 +90,8 @@ export function SettingsBody() {
   const setQuality = useBlackHole((s) => s.setQuality);
   const antialiasing = useBlackHole((s) => s.antialiasing);
   const setAntialiasing = useBlackHole((s) => s.setAntialiasing);
+  const bloom = useBlackHole((s) => s.bloom);
+  const setBloom = useBlackHole((s) => s.setBloom);
   const applyPreset = useBlackHole((s) => s.applyPreset);
   const presetId = useBlackHole((s) => s.presetId);
   const selectHole = useSelectHole();
@@ -209,8 +215,14 @@ export function SettingsBody() {
         modes={ANTIALIAS_MODES}
         onAntialias={setAntialiasing}
         note={<p className="text-xs text-muted">{t("modelNotice")}</p>}
-        onReset={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
-      />
+        onReset={() => {
+          setBloom(false);
+          if (presetId === "custom") selectHole("lensed");
+          else applyPreset(presetId);
+        }}
+      >
+        <BloomSwitch on={bloom} onToggle={() => setBloom(!bloom)} />
+      </RenderSection>
     </>
   );
 }

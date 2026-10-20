@@ -45,14 +45,23 @@ its own budgets in its `lib/quality.ts`.
 
 Draw every frame through `render(paint)`: `paint` makes the frame's renders (several
 may share a depth buffer, with `autoClear` off and `clearDepth()` between them) and the
-host anti-aliases them as `setAntialias(mode)` last chose. The renderer is made without
-hardware antialiasing, so a mode switches at once, without a new context: `off` renders
-straight to the canvas, `msaa` into a 4× multisampled offscreen frame (`createMsaaPass`)
-and `fxaa` through `createFxaaPass`. Only the current mode holds buffers.
-`defaultSceneAntialias(tight)` is the mode a host starts with: MSAA, off on tight
+host resolves them as `setAntialias(mode)` and `setBloom(bloom)` last chose, in one
+composite pass (`createCompositePass`). The renderer is made without hardware
+antialiasing, so a mode switches at once, without a new context: `off` renders straight
+to the canvas, `msaa` into a 4× multisampled offscreen frame and `fxaa` through the FXAA
+filter. `defaultSceneAntialias(tight)` is the mode a host starts with: MSAA, off on tight
 devices. `antialias` reads the current mode. An offscreen frame holds the canvas's own
 bytes, so a mode never changes how a scene looks beyond its edges, and needs no second
 shader compile.
+
+`setBloom({ enabled, ...settings })` (a `SceneBloom`) switches bloom for the next frame:
+on, the frame's bright light is blurred and added back by the composite (`createBloomPass`),
+with `DEFAULT_SCENE_BLOOM` for what the call leaves out, in display units (light above 0.6
+of white, eased in from 0.3, added back at six tenths through a five-level chain from half
+resolution). A simulation's `lib/quality.ts` maps its level and the device class to the
+chain's `mips` and `scale` and passes them here; the switch itself is the visitor's, off by
+default (`bloom` reads it). Only the current mode's and switch's buffers are held. Only what
+`paint` draws blooms: DOM labels and HUD readouts sit above the canvas, so text never does.
 
 ## Orbit rig and controls
 

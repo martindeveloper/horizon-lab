@@ -3,7 +3,11 @@ import { useTranslations } from "next-intl";
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { DistanceUnitControl } from "@/components/simulations/map-readouts";
 import { Rail, RailSection } from "@/components/simulations/rail";
-import { RenderSection, SCENE_ANTIALIAS } from "@/components/simulations/render-settings";
+import {
+  BloomSwitch,
+  RenderSection,
+  SCENE_ANTIALIAS,
+} from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
 
 import { useDeepField, type Show } from "../lib/store";
@@ -18,6 +22,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const angles = useDeepField((s) => s.cameraAngles);
   const antialias = useDeepField((s) => s.antialias);
   const quality = useDeepField((s) => s.quality);
+  const bloom = useDeepField((s) => s.bloom);
   return (
     <Rail id="deep-field-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
       <RailSection title={t("hud.show")}>
@@ -50,7 +55,9 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         modes={SCENE_ANTIALIAS}
         onAntialias={(mode) => useDeepField.getState().setAntialias(mode)}
         onReset={() => useDeepField.getState().resetView()}
-      />
+      >
+        <BloomSwitch on={bloom} onToggle={() => useDeepField.getState().setBloom(!bloom)} />
+      </RenderSection>
     </Rail>
   );
 }

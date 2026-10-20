@@ -17,14 +17,18 @@ import { SceneCameraProvider } from "./scene-camera";
 
 /** Leaving the observatory starts the next visit fresh. */
 const reset = freshVisit(useBlackHole);
-/** The store as the drift reads it. */
+/** The store as the drift's controls reach it. */
 const driftStore: DriftStore<ReturnType<typeof useBlackHole.getState>> = useBlackHole;
 
 export function Observatory() {
   const pathname = usePathname();
   useFreshVisit(reset);
   const closePanels = useBlackHole((s) => s.closePanels);
-  const drift = useSimulationDrift(driftStore, DRIFT);
+  const drift = useSimulationDrift(
+    useBlackHole((s) => s.drift),
+    driftStore,
+    DRIFT,
+  );
 
   useLayoutEffect(() => {
     const id = presetFromPath(pathname).id;

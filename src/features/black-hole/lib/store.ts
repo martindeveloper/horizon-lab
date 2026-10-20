@@ -50,6 +50,9 @@ type BlackHoleStore = BlackHoleParams &
     /** Anti-aliasing (experimental, off by default). */
     antialiasing: PassAntialias;
     setAntialiasing: (v: PassAntialias) => void;
+    /** Bloom on the disk, jet and sky (off by default); Reset turns it off. */
+    bloom: boolean;
+    setBloom: (v: boolean) => void;
     startGuide: () => void;
     advanceGuide: () => void;
     /** Back one beat; the camera flies back to it. */
@@ -112,6 +115,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setQuality: (quality) => set({ quality }),
   antialiasing: "off",
   setAntialiasing: (antialiasing) => set({ antialiasing }),
+  bloom: false,
+  setBloom: (bloom) => set({ bloom }),
   startGuide: () => {
     const s = get();
     if (s.activePin) s.setActivePin(null);

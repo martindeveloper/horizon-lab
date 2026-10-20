@@ -76,6 +76,7 @@ export function createDeepFieldEngine({
     /** The visitor's render quality as Deep Field's settings; `bridgeRender` keeps it current. */
     let quality = deepFieldQuality(useDeepField.getState().quality, tight);
     sceneHost.setResolution(quality.resolution);
+    sceneHost.setBloom({ enabled: useDeepField.getState().bloom, ...quality.bloom });
     const looks = scope.own(createLooks());
     const scene = new Scene();
     const lod = createLod(camera, viewport);
@@ -202,6 +203,7 @@ export function createDeepFieldEngine({
     bridgeRender(store, scope, sceneHost, (level) => {
       const next = deepFieldQuality(level, tight);
       sceneHost.setResolution(next.resolution);
+      sceneHost.setBloom({ enabled: store.getState().bloom, ...next.bloom });
       solar.setSwarms(next.swarms);
       if (next.cosmos !== quality.cosmos) cosmos.setDetail(next.cosmos);
       quality = next;

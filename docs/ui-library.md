@@ -343,8 +343,9 @@ and look alike everywhere: technical details, the guide (graduation cap), the fi
 (the Orrery's reading guide, the black hole's clocks), its settings panel (sliders),
 then the immersive view. Each button carries `data-return` with its id, so what it
 opens can hand focus back. Every settings panel ends with `RenderSection`
-(`src/components/simulations/render-settings.tsx`): quality levels, anti-aliasing, then
-Reset, worded by the shared `render` copy.
+(`src/components/simulations/render-settings.tsx`): quality levels, anti-aliasing, the
+render switches (bloom, the frame-rate readout), then Reset, worded by the shared `render`
+copy.
 
 Below `md` the toolbar keeps the guide, the finder and the settings and folds the rest,
 in the same order, into

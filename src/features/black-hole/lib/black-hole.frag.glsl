@@ -12,7 +12,8 @@
 //   2. Sky presets (one per "weather" setting)
 //   3. Accretion disk and plunging-region emission
 //   4. Ray geometry: Kerr geodesics in Mino time
-//   5. shade(): march, composite, tone map; main() comes from <horizon/supersample>
+//   5. shade(): march, composite → radiance; display() (display.glsl) tone maps it;
+//      main() comes from <horizon/supersample>
 
 precision highp float;
 
@@ -37,6 +38,7 @@ uniform float uSteps;          // step budget per ray (≤ 180)
 uniform float uJet;            // jet brightness, 0 = off
 uniform float uWeather;        // sky preset: 1 Sgr A*, 2 M87, 3 Cyg X-1, 4 lab, 5 host, else generic
 uniform float uGravity;        // 1 Kerr; 0 the same scene in flat space, for comparison
+uniform float uVignette;       // the lens vignette's depth at this camera distance (frame.ts)
 
 #include <horizon/math>
 #include "./parameters.generated.glsl"
@@ -444,8 +446,6 @@ vec3 lensTail(vec3 p, vec3 d) {
   return normalize(d * cos(bend) + toward * (sin(bend) / b));
 }
 
-#include <horizon/tonemap>
-
 /* ----------------------------------------------------------------- 5. shade */
 
 // MAX_STEPS, STEP_*, ESCAPE_R, FAR_FIELD_R, MARCH_B and MARCH_CAM_R: parameters.generated.glsl.
@@ -720,17 +720,10 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
     col += transmission * starfield(skyDir, pixel) * pow(gSky, 4.0);
   }
 
-  /* Lens vignette, tone map, dither */
-  float farV = smoothstep(40.0, 160.0, rc);
-  float vig = 1.0 - 0.1 * (1.0 - 0.55 * farV) * dot(uv, uv);
-  col *= vig;
-
-  col = tonemap(max(col, vec3(0.0)), uExposure);
-  col = pow(col, vec3(0.97)); // keep highlight detail instead of a second clipping boost
-  float dither = hash21(gl_FragCoord.xy) - 0.5;
-  col += dither * 0.004; // about one 8-bit step: hides banding without visible grain
-
   return col;
 }
 
+// display() turns that radiance into the pixel's colour; supersample supplies main(), which
+// draws either, as createFullscreenPass asks (a bloomed frame keeps the radiance).
+#include "./display.glsl"
 #include <horizon/supersample>

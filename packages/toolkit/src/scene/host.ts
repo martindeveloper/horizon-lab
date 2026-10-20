@@ -2,7 +2,8 @@
  * What every zoomable scene starts from: a WebGL renderer sized to its stage, a perspective
  * camera, the stage's CSS size and the frame loop that renders only while something moves
  * (`createEngineHost`). Phones and low-memory devices get a lighter setup (`tight`). Frames
- * are drawn through `render`, anti-aliased as `setAntialias` last chose.
+ * are drawn through `render`, anti-aliased as `setAntialias` last chose and bloomed as
+ * `setBloom` did.
  */
 import {
   NoToneMapping,
@@ -14,10 +15,10 @@ import {
 } from "three";
 
 import { COARSE_POINTER_QUERY } from "../environment";
+import type { BloomSettings } from "../rendering/bloom-pass";
+import { createCompositePass, type CompositePass } from "../rendering/composite-pass";
 import type { DisposalScope } from "../rendering/disposal";
 import { createEngineHost } from "../rendering/engine-host";
-import { createFxaaPass, type FxaaPass } from "../rendering/fxaa-pass";
-import { createMsaaPass, type MsaaPass } from "../rendering/msaa-pass";
 import type { SceneBasics, Viewport } from "./kit";
 
 /** Vertical field of view of the scenes, degrees. */
@@ -32,6 +33,26 @@ export type SceneAntialias = "off" | "msaa" | "fxaa";
 export function defaultSceneAntialias(tight: boolean): SceneAntialias {
   return tight ? "off" : "msaa";
 }
+
+/**
+ * A scene's bloom: whether its bright light glows, and any of the chain's settings to change
+ * (`BloomSettings`, in display units: the frame holds the canvas's bytes). What a switch
+ * leaves out keeps its value.
+ */
+export type SceneBloom = Partial<BloomSettings> & { enabled: boolean };
+
+/**
+ * What a scene blooms with until told otherwise: light brighter than 0.6 of white, eased in
+ * from 0.3, added back at six tenths through a five-level chain from half resolution.
+ */
+export const DEFAULT_SCENE_BLOOM: Readonly<BloomSettings> = {
+  strength: 0.6,
+  threshold: 0.6,
+  knee: 0.3,
+  clamp: 1,
+  mips: 5,
+  scale: 0.5,
+};
 
 /** How finely a scene is drawn: buffer pixels per CSS pixel at most, and frames per second. */
 export type SceneResolution = { dprCap: number; fps: number };
@@ -108,9 +129,20 @@ export function createSceneHost(
   );
 
   let antialias = defaultSceneAntialias(tight);
-  let pass: MsaaPass | FxaaPass | null = null;
-  const passFor = (mode: SceneAntialias) =>
-    mode === "msaa" ? createMsaaPass(renderer) : mode === "fxaa" ? createFxaaPass(renderer) : null;
+  let bloomOn = false;
+  const bloom: BloomSettings = { ...DEFAULT_SCENE_BLOOM };
+  /* The composite is built for the current anti-aliasing and bloom switch; off and off draws
+     straight to the canvas. */
+  let pass: CompositePass | null = null;
+  const passFor = () =>
+    antialias === "off" && !bloomOn
+      ? null
+      : createCompositePass(renderer, { antialias, bloom: bloomOn ? bloom : null });
+  const rebuild = () => {
+    pass?.dispose();
+    pass = null;
+    engine.invalidate();
+  };
   scope.defer(() => pass?.dispose());
 
   let warmed = false;
@@ -150,17 +182,37 @@ export function createSceneHost(
     /** Switches anti-aliasing for the next frame on; the previous mode's buffers are freed. */
     setAntialias(mode: SceneAntialias) {
       if (mode === antialias) return;
-      pass?.dispose();
-      pass = null;
       antialias = mode;
-      engine.invalidate();
+      rebuild();
+    },
+    /** Whether frames bloom. */
+    get bloom() {
+      return bloomOn;
+    },
+    /**
+     * Switches bloom for the next frame on or off and takes the chain's settings given (a
+     * quality level's resolution and mip count, a look's strength); off frees its buffers.
+     */
+    setBloom({ enabled, strength, threshold, knee, clamp, mips, scale }: SceneBloom) {
+      bloom.strength = strength ?? bloom.strength;
+      bloom.threshold = threshold ?? bloom.threshold;
+      bloom.knee = knee ?? bloom.knee;
+      bloom.clamp = clamp ?? bloom.clamp;
+      bloom.mips = mips ?? bloom.mips;
+      bloom.scale = scale ?? bloom.scale;
+      if (enabled !== bloomOn) {
+        bloomOn = enabled;
+        rebuild();
+      } else if (bloomOn) engine.invalidate();
     },
     /**
      * Draws one frame: `paint` makes the renders (several may share one depth buffer), into
-     * the canvas or an offscreen frame that is anti-aliased onto it.
+     * the canvas or an offscreen frame that is anti-aliased and bloomed onto it. Only what
+     * `paint` draws takes part: DOM labels and readouts sit above the canvas, so text never
+     * blooms.
      */
     render(paint: () => void) {
-      pass ??= passFor(antialias);
+      pass ??= passFor();
       if (pass) pass.paint(paint);
       else paint();
     },

@@ -351,6 +351,7 @@
     "fxaa": "FXAA",
     "edges": "Paprsky hran",
     "supersample": "SSAA",
+    "bloom": "Záře",
     "wideColour": "Široký gamut (P3)",
     "frameRate": "Snímková frekvence",
     "parts": {

@@ -32,17 +32,24 @@ export type SceneSlice = Omit<SceneStoreState, "view"> &
     antialias: SceneAntialias | null;
     /** The visitor's render quality (`sceneQuality`), for this visit. */
     quality: RenderQuality;
+    /** Whether bright light blooms, for this visit; off until the visitor turns it on. */
+    bloom: boolean;
     rotate: (turn: OrbitTurn) => void;
     setDistanceUnit: (unit: DistanceChoice) => void;
     setAntialias: (mode: SceneAntialias) => void;
     setQuality: (quality: RenderQuality) => void;
+    setBloom: (bloom: boolean) => void;
   };
 
-/** The shared settings as a visit starts, for every `resetView`: the unit, anti-aliasing and quality. */
-export const RESET_SCENE_SETTINGS: Pick<SceneSlice, "distanceUnit" | "antialias" | "quality"> = {
+/** The shared settings as a visit starts, for every `resetView`: the unit, anti-aliasing, quality and bloom. */
+export const RESET_SCENE_SETTINGS: Pick<
+  SceneSlice,
+  "distanceUnit" | "antialias" | "quality" | "bloom"
+> = {
   distanceUnit: "auto",
   antialias: null,
   quality: "standard",
+  bloom: false,
 };
 
 /** The shared fields at rest, with the scale bar's first reading, and their actions. */
@@ -57,12 +64,14 @@ export function sceneSlice(
     distanceUnit: "auto",
     antialias: null,
     quality: "standard",
+    bloom: false,
     cameraAngles: { heading: 0, tilt: 0 },
     ...scale,
     rotate: (turn) => set({ turn: { ...turn } }),
     setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
     setAntialias: (antialias) => set({ antialias }),
     setQuality: (quality) => set({ quality }),
+    setBloom: (bloom) => set({ bloom }),
     setReady: (ready) => set({ ready }),
   };
 }

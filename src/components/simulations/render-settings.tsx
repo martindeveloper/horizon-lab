@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { RenderQuality } from "@horizon/toolkit/rendering";
-import { ControlRow, SegmentedControl } from "@horizon/toolkit/ui";
+import { ControlRow, SegmentedControl, SwitchRow } from "@horizon/toolkit/ui";
 
 import { FrameRateSwitches } from "./frame-rate";
 import { RailSection } from "./rail";
@@ -22,6 +22,16 @@ export const SCENE_ANTIALIAS = [
   { value: "msaa", name: "msaa" },
   { value: "fxaa", name: "fxaa" },
 ] as const satisfies readonly AntialiasMode<string>[];
+
+/** The Rendering section's Bloom switch: bright light glows, off until the visitor turns it on. */
+export function BloomSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  const t = useTranslations("render");
+  return (
+    <SwitchRow on={on} onToggle={onToggle}>
+      {t("bloom")}
+    </SwitchRow>
+  );
+}
 
 /** Puts a settings panel back as a visit starts; the last thing in it. */
 function ResetButton({ label, onReset }: { label: string; onReset: () => void }) {

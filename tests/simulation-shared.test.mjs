@@ -74,26 +74,42 @@ test("the store's render settings reach the engine: the level now, later ones af
   const store = createStore((set) => ({
     antialias: null,
     quality: "standard",
+    bloom: false,
     setAntialias: (antialias) => set({ antialias }),
   }));
-  const host = { tight: true, antialias: "off", setAntialias: (m) => (host.antialias = m) };
+  const host = {
+    tight: true,
+    antialias: "off",
+    bloom: [],
+    setAntialias: (m) => (host.antialias = m),
+    setBloom: (b) => host.bloom.push(b),
+  };
   const levels = [];
   const scope = new DisposalScope();
   const settle = () => new Promise((done) => setTimeout(done, 5));
   bridgeRender(store, scope, host, (level) => levels.push(level));
   assert.deepEqual(levels, ["standard"], "the engine starts at the store's level");
   assert.equal(store.getState().antialias, "off", "the device's default is published");
+  assert.deepEqual(host.bloom, [{ enabled: false }], "the bloom switch reaches the host at once");
   store.getState().setAntialias("fxaa");
   assert.equal(host.antialias, "fxaa");
+  store.setState({ bloom: true });
+  store.setState({ bloom: true });
+  assert.deepEqual(
+    host.bloom,
+    [{ enabled: false }, { enabled: true }],
+    "only a change is passed on",
+  );
   store.setState({ quality: "max" });
   store.setState({ quality: "economy" });
   assert.deepEqual(levels, ["standard"], "a new level waits for the control to answer");
   await settle();
   assert.deepEqual(levels, ["standard", "economy"], "quick changes arrive as the last");
   /* A reset clears the choice; the device's default comes back, not the last mode. */
-  store.setState({ antialias: null, quality: "standard" });
+  store.setState({ antialias: null, quality: "standard", bloom: false });
   assert.equal(store.getState().antialias, "off");
   assert.equal(host.antialias, "off");
+  assert.deepEqual(host.bloom.at(-1), { enabled: false });
   await settle();
   assert.deepEqual(levels, ["standard", "economy", "standard"]);
   store.setState({ quality: "max" });

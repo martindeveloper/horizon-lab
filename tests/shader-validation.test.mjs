@@ -91,7 +91,13 @@ test("shader variants parse with the defines their passes compile them with", ()
   const variants = shaders
     .filter((file) => readFileSync(file, "utf8").includes("#include <horizon/supersample>"))
     .map((file) => [file, "#define HORIZON_PASS 1"]);
-  assert.ok(variants.length > 0);
+  const post = (name) => shaders.find((file) => file.endsWith(`/${name}`));
+  variants.push(
+    [post("composite.frag.glsl"), "#define HORIZON_FXAA 1\n#define HORIZON_BLOOM 1"],
+    [post("composite.frag.glsl"), "#define HORIZON_BLOOM 1"],
+    [post("bloom-down.frag.glsl"), "#define HORIZON_BLOOM_PREFILTER 1"],
+  );
+  assert.ok(variants.length > 3);
   for (const [file, define] of variants)
     assert.doesNotThrow(
       () =>

@@ -58,6 +58,7 @@ src/
     orrery/
       index.ts                 Public client entry: OrreryApp
       manifest.ts, routing.ts, server.ts, technical.json
+      bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
       components/              HUD overlay, selection cards, canvas host
       components/overlay.tsx   Overlay composition; panels, cards and the time dock beside it
       lib/model/               The solar system through time, on the shared model (src/space):
@@ -79,6 +80,7 @@ src/
     deep-field/
       index.ts                 Public client entry: DeepFieldApp
       manifest.ts, routing.ts, server.ts, technical.json
+      bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
       components/              Overlay, depth ladder, sightline, guide caption, the Objects
                                and View panels, cards, canvas host
       lib/model/               Today's sky at every scale, without three.js scenes:
@@ -156,6 +158,9 @@ src/
     observer-sky.ts             Observer location and apparent Sun, Moon and star positions
     bright-stars.ts            The catalogue's bright stars on the sky sphere, as points
                                carried with the camera (`createBrightSky`, `carrySky`)
+    bench.ts                   A scene engine on the bench: its frame loop driven frame by frame
+    quality.ts                 What a render quality means for every space scene: tier,
+                               resolution, swarms, the bloom chain
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
                                disk), elements, tracers, catalogue, views (and the solar
@@ -330,22 +335,23 @@ only its layers, its views and its store of its own:
   and with a `pathFor` the URL on the view too, as Stellar Spectra's guide needs. Route
   layouts import `@horizon/toolkit/scene.css` for the labels.
 - **Engine:** `createSceneHost` (renderer, camera, frame loop, `tight` devices, shader
-  warm-up, anti-aliasing: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
+  warm-up, anti-aliasing and bloom: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
   adds limits, the aim's `home` and the frame's `orient`), `createViewMoves` (its views,
   as the pose framing each) and `createOrbitControls` (drag, wheel, pinch).
   `createLabels`, `createTapPicking`, `createAnchoredRulers`, `createDistanceText` and the
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
 - **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
-  `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias` and the scale bar; the
+  `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias`, `bloom` and the scale bar; the
   feature adds its view, selection and switches. `guideSlice` is the guide's machine (open
   keeping the visitor's settings, step within the tour, end giving them back); the feature adds
   what its own guide sets per step. Its caption is `GuideCaption`, its keys `useGuideKeys`, and
   the engines build on `withScope`, `stageClearance`, `bridgeHandoff` and
   `invalidateOnMotionChange`. `bridgeStore` acts once on each button turn
   and view flight, ignores the view the HUD writes during a frame, and reports the first frame;
-  `bridgeRender` hands the engine each new quality level and the host the anti-aliasing,
-  publishing the device's default anti-aliasing while none is chosen.
+  `bridgeRender` hands the engine each new quality level and the host the anti-aliasing and
+  the bloom switch, publishing the device's default anti-aliasing while none is chosen; the
+  engine sets the bloom chain's size for the level (`spaceQuality`'s `bloom`).
 - **Quality:** every simulation maps the shared `RenderQuality` to its own settings in one
   file, `lib/quality.ts`, and passes the result down: engines and layers take numbers (a
   resolution, point counts, map budgets, ray steps), never the level or the device class.
@@ -373,8 +379,11 @@ only its layers, its views and its store of its own:
   `frameMeter`, in the stage's top-left corner. `RenderSection`
   (`src/components/simulations/render-settings.tsx`) ends every simulation's settings panel:
   render quality (Economy, Standard, Cinematic, Max: `RenderQuality`), anti-aliasing (the modes
-  the simulation can draw), an optional note and Reset, which puts the panel back as a visit
-  starts (`resetView`; the black hole re-applies its preset). Its copy is the shared `render`
+  the simulation can draw), the simulation's render switches (`BloomSwitch`: bloom on the
+  Sun, the gas disk, the Milky Way and bright stars, or on the black hole's disk, jet and
+  sky; off by default, stored like anti-aliasing), an optional note and Reset, which puts the
+  panel back as a visit starts (`resetView`; the black hole re-applies its preset and turns
+  bloom off). Its copy is the shared `render`
   namespace. Standard is always the default and what the simulation drew before the choice
   existed; what each level and mode does is the simulation's own. `useSceneEscape` lets Escape undo
   one thing at a time.
@@ -569,7 +578,7 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   toolkit's `createLineVeil` around each render and back when the drift ends; the
   cosmic web's filaments are content (`userData.content`) and stay, as do names.
 - `SimulationToolbar`'s `drift` prop (the store's `startDrift`) puts the drift in
-  the experiences button; `useSimulationDrift(store, programme, caption?)` gives
+  the experiences button; `useSimulationDrift(state, store, programme, caption?)` gives
   `SimulationImmersive`'s `drift` prop, which carries the state into the immersive
   controls (pause, Space, a music mute, the exit control as stop) and runs
   `useDriftMusic`. Leaving immersive view stops the drift. `tests/drift.test.mjs`

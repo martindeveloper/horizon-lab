@@ -18,7 +18,7 @@ import { motionRateLabel } from "./time-dock";
 
 /** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useOrrery);
-/** The store as the address sees it, and as the drift does. */
+/** The store as the address sees it, and as the drift's controls do. */
 const views: ViewStore<SolarViewId> = useOrrery;
 const driftStore: DriftStore<OrreryStore> = useOrrery;
 
@@ -43,7 +43,12 @@ export function Orrery() {
   const t = useTranslations("orrery");
   const ready = useOrrery((s) => s.ready);
   const view = useOrrery((s) => s.view);
-  const drift = useSimulationDrift(driftStore, DRIFT, <DriftClock />);
+  const drift = useSimulationDrift(
+    useOrrery((s) => s.drift),
+    driftStore,
+    DRIFT,
+    <DriftClock />,
+  );
 
   useViewFromPath(views, viewFromPath);
   useFreshVisit(reset);

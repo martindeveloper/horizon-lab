@@ -4,12 +4,10 @@
 // softens single-pixel sparkle. One texture, no history, so it works on moving and
 // still frames alike.
 //
-// uImage is the frame, uTexel one pixel in texture coordinates. It holds display-ready
-// values, encoded as the canvas would be, so edges are judged where they are seen and the
-// result is written as it is.
-
-uniform sampler2D uImage;
-uniform vec2 uTexel;
+// The including shader declares the frame as `uniform sampler2D uImage` and one of its
+// pixels as `uniform vec2 uTexel` before this include, then calls `fxaa(uv)` for the
+// filtered colour at `uv`. The frame holds display-ready values, encoded as the canvas
+// would be, so edges are judged where they are seen and the result is written as it is.
 
 // Below this local contrast (absolute, or relative to the brightest neighbour) a pixel is left alone.
 #define FXAA_EDGE_MIN 0.0312
@@ -26,8 +24,7 @@ float fxaaLuma(vec2 uv) {
   return fxaaLumaOf(texture2D(uImage, uv).rgb);
 }
 
-void main() {
-  vec2 uv = gl_FragCoord.xy * uTexel;
+vec3 fxaa(vec2 uv) {
   vec4 centre = texture2D(uImage, uv);
   float lM = fxaaLumaOf(centre.rgb);
   float lN = fxaaLuma(uv + vec2(0.0, uTexel.y));
@@ -38,10 +35,7 @@ void main() {
   float lo = min(lM, min(min(lN, lS), min(lE, lW)));
   float hi = max(lM, max(max(lN, lS), max(lE, lW)));
   float range = hi - lo;
-  if (range < max(FXAA_EDGE_MIN, hi * FXAA_EDGE_REL)) {
-    gl_FragColor = vec4(centre.rgb, 1.0);
-    return;
-  }
+  if (range < max(FXAA_EDGE_MIN, hi * FXAA_EDGE_REL)) return centre.rgb;
 
   float lNE = fxaaLuma(uv + uTexel);
   float lSW = fxaaLuma(uv - uTexel);
@@ -108,5 +102,5 @@ void main() {
   offset = max(offset, soft * soft * FXAA_SUBPIXEL);
 
   vec2 sampleAt = uv + (horizontal ? vec2(0.0, offset * across) : vec2(offset * across, 0.0));
-  gl_FragColor = vec4(texture2D(uImage, sampleAt).rgb, 1.0);
+  return texture2D(uImage, sampleAt).rgb;
 }

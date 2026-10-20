@@ -19,14 +19,14 @@ import {
   clampDistance,
   createUniforms,
   orbitWheelSensitivity,
-  PASS_OPTIONS,
+  passOptions,
   sceneWriter,
   writeCamera,
   type CameraPose,
 } from "./frame";
 import type { Quality } from "./holes";
 import { MAX_DIST, MIN_DIST } from "./physics";
-import { BLACK_HOLE_QUALITY, renderBudget, renderScale } from "./quality";
+import { BLACK_HOLE_QUALITY, bloomSettings, renderBudget, renderScale } from "./quality";
 import { useBlackHole } from "./store";
 import { holdPose, tourEnd, tourPose } from "./tour-flight";
 import { tourFor } from "./tours";
@@ -135,7 +135,7 @@ export function createBlackHoleEngine(
         vertexShader: fullscreenVertex,
         fragmentShader,
         uniforms,
-        ...PASS_OPTIONS,
+        ...passOptions(uniforms),
         supersample: true,
       }),
     );
@@ -275,7 +275,10 @@ export function createBlackHoleEngine(
       if (!state.animationPaused) time += stepDt;
       writeScene(state, time, stepCount(state.quality));
       applyCamera();
-      pass.render({ antialias: state.antialiasing });
+      pass.render({
+        antialias: state.antialiasing,
+        bloom: state.bloom ? bloomSettings(state.quality, constrained, state.exposure) : null,
+      });
       if (warmup.advance()) engine.refresh();
       announceFirstFrame();
     }

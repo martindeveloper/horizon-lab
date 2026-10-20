@@ -12,25 +12,45 @@ toolkit's `.glsl` loader (see the package README).
   Output is LinearSRGB with Three.js tone mapping disabled: the shader owns its
   color pipeline. Shader diagnostics are enabled by default. The optional `powerPreference` is a
   browser GPU-selection hint; its default is `default`, not forced discrete GPU.
-  `render({ antialias })` takes `off` (default), `fxaa` or `supersample`.
+  `render({ antialias, bloom })` takes `antialias` `off` (default), `fxaa` or `supersample`,
+  and `bloom` as `BloomSettings` or null (default).
   `supersample` needs `supersample: true` at creation and a fragment shader that
-  defines `vec3 shade(vec2 fragCoord, bool derivatives)` and includes
+  defines `vec3 shade(vec2 fragCoord, bool derivatives)` (one ray's radiance) and
+  `vec3 display(vec3 radiance, vec2 fragCoord)` (its display colour) and includes
   `<horizon/supersample>` for its `main()`: the shader is compiled a second time,
   and that pass re-traces four extra rays only where the first frame has an
-  edge. Post resources are created on first use.
-- `createFxaaPass(renderer)`: FXAA for any three.js renderer. `render(scene,
-  camera)` draws into an offscreen frame of the drawing buffer's size, then onto
-  the canvas through the FXAA shader. The frame holds exactly the bytes the canvas
-  would (8-bit, encoded and blended for the renderer's output colour space), so a
-  scene looks the same through it on any WebGL 2 device. The canvas's hardware MSAA does
-  not apply offscreen, so use it instead of MSAA, not with it. `paint(draw)` takes
-  any number of renders (passes over one depth buffer) and filters their result.
-- `createMsaaPass(renderer, samples = 4)`: hardware multisampling that switches on
-  and off with the renderer kept (create it with `antialias: false`). `paint(draw)`
-  renders into a multisampled offscreen frame of the drawing buffer's size, holding
-  the canvas's own bytes and resolved as the canvas's MSAA would be, then copies it
-  onto the canvas. Both passes expose their offscreen `target` and allocate nothing
-  until first drawn. Materials compile alike for the canvas and these frames.
+  edge, judged on display luma. Bloom draws the shader into an offscreen frame, blooms it
+  (`createBloomPass`) and resolves both onto the canvas. With the `hdr` option (a resolve
+  fragment shader and its uniforms) and a GPU that renders into half-float textures
+  (`halfFloatRenderable`), that frame is RGBA16F radiance: the shader's `uHdrOutput`
+  uniform is 1, `display` is skipped, the chain thresholds radiance and the resolve shader
+  (reading `uImage`, `uTexel`, `uBloom`, `uBloomStrength` and its own uniforms) applies
+  `display` to the sum; `hdr` reports which path a pass has. Otherwise bloom works on the
+  display frame through the composite below. Post resources are created on first use.
+- `createCompositePass(renderer, { antialias, bloom })`: the resolve stage of a scene.
+  `paint(draw)` runs any number of renders (passes over one depth buffer) into an offscreen
+  frame of the drawing buffer's size, then writes it onto the canvas in one full-screen pass
+  (`composite.frag.glsl`): copied, or anti-aliased as `antialias` says (`msaa` draws the frame
+  4× multisampled and resolved as the canvas's MSAA would be; `fxaa` filters it), and with
+  `bloom` (`BloomSettings`) with the frame's bright light blurred and added back and a dither
+  of one 8-bit step. The frame holds exactly the bytes the canvas would (8-bit, encoded and
+  blended for the renderer's output colour space), so a scene looks the same through it on
+  any WebGL 2 device and materials compile alike for the canvas and the frame. The canvas's
+  hardware MSAA does not apply offscreen, so create the renderer with `antialias: false`.
+  `bloom` is read every frame, so its numbers may change in place; switching bloom or the
+  anti-aliasing takes a new pass. `target` is the offscreen frame; nothing is allocated until
+  the first `paint`. `createFxaaPass(renderer)` and `createMsaaPass(renderer)` are this pass
+  at `fxaa` and `msaa` without bloom (`render(scene, camera)` on the former draws one scene).
+- `createBloomPass(renderer)`: bloom for any texture, dual Kawase. `render(source, w, h,
+  settings)` takes the source's light above `threshold` (eased in over `knee` below it, each
+  pixel capped at `clamp`, all in the source's units) down a chain of `mips` levels, the
+  first `scale` of the source's size (0.5, or 0.25 on tight devices), blurring as each halves
+  the one before, then back up with each level's blur summed into the next finer one, and
+  returns the first level: the glow, to be added `strength` times. Half-float levels where
+  the GPU renders into them, bytes otherwise; levels are allocated on first use and
+  reallocated when the size, `mips` or `scale` change. The quality level decides `mips` and
+  `scale`, never whether bloom is on: a switch is the consumer's, off by default. Only what
+  is drawn into the frame blooms; DOM labels and readouts sit above the canvas.
 - `RenderQuality`: the four quality levels every simulation offers (`economy`,
   `standard`, `cinema`, `max`, which lifts the device caps), in that order in
   `RENDER_QUALITIES`. Each consumer maps a level to concrete settings in one place (in

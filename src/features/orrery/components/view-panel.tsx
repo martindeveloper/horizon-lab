@@ -3,7 +3,11 @@ import { useMemo } from "react";
 
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { Rail, RailSection } from "@/components/simulations/rail";
-import { RenderSection, SCENE_ANTIALIAS } from "@/components/simulations/render-settings";
+import {
+  BloomSwitch,
+  RenderSection,
+  SCENE_ANTIALIAS,
+} from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
 import { BINS, tallyAt } from "@/space/solar-system/model/tracers";
 
@@ -19,6 +23,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const angles = useOrrery((s) => s.cameraAngles);
   const antialias = useOrrery((s) => s.antialias);
   const quality = useOrrery((s) => s.quality);
+  const bloom = useOrrery((s) => s.bloom);
   const tally = useMemo(() => tallyAt(yearsAgo), [yearsAgo]);
   return (
     <Rail id="orrery-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
@@ -48,7 +53,9 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         modes={SCENE_ANTIALIAS}
         onAntialias={(mode) => useOrrery.getState().setAntialias(mode)}
         onReset={() => useOrrery.getState().resetView()}
-      />
+      >
+        <BloomSwitch on={bloom} onToggle={() => useOrrery.getState().setBloom(!bloom)} />
+      </RenderSection>
     </Rail>
   );
 }

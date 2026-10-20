@@ -20,23 +20,22 @@ export type SimulationDrift = {
   onStop: () => void;
 };
 
-/** A simulation's store as the drift reads it: a hook with a selector, and its state. */
-export type DriftStore<S extends DriftSlice> = {
-  <T>(selector: (state: S) => T): T;
-  getState: () => S;
-};
+/** A simulation's store as the drift's controls reach it: its state, read outside rendering. */
+export type DriftStore<S extends DriftSlice> = { getState: () => S };
 
 /**
  * The drift of a simulation, from its store and programme, for `SimulationImmersive`: its
- * state, its music, and the controls the immersive view calls. `caption` is the one readout
- * shown under them (the Orrery's clock), if the simulation has one.
+ * state, its music, and the controls the immersive view calls. The caller selects `state` from
+ * its own store hook (a hook passed in would be called dynamically, which the rules of hooks
+ * forbid); `store` only serves the controls. `caption` is the one readout shown under them
+ * (the Orrery's clock), if the simulation has one.
  */
 export function useSimulationDrift<S extends DriftSlice>(
+  state: DriftState,
   store: DriftStore<S>,
   programme: Pick<DriftProgramme<unknown>, "music">,
   caption?: ReactNode,
 ): SimulationDrift {
-  const state = store((s) => s.drift);
   const controls = useMemo(
     () => ({
       onToggle: () => store.getState().toggleDrift(),
