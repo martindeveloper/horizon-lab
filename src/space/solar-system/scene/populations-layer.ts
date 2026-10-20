@@ -12,7 +12,7 @@ import {
 
 import { keplerPosition, type Elements } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
-import { fade, type PlaceLabel, SOLAR_GOLD } from "@horizon/toolkit/scene";
+import { BELOW, fade, SOLAR_GOLD, type PlaceLabel } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import type { SwarmCounts } from "../../quality";
@@ -40,6 +40,9 @@ const KUIPER = fade(10, 18, 1_100, 2_300);
 const OORT = fade(420, 850, 600_000, 1_300_000);
 const DISK = fade(0, 0, 280, 560);
 const SHELLS = fade(2_800, 5_600, 500_000, 1_000_000);
+/* The planetesimal sample is drawn at a fixed few pixels, which no single body earns from light-years
+   away: it shrinks to nothing over the Oort shells' own band, well inside the scene's reach. */
+const ROCKS = fade(0, 0, 500_000, 1_000_000);
 
 export function createPopulationsLayer(
   { scope, looks, tight, dpr, pxWorld, lod }: SolarKit,
@@ -108,10 +111,11 @@ export function createPopulationsLayer(
 
   /** Instance matrices and tints, rewritten only when the inputs that move them change. */
   const updateTracers = ({ show, yearsAgo, mig, driftYears, dist }: SolarFrame, on: boolean) => {
-    tracers.visible = on;
+    const presence = ROCKS(dist);
+    tracers.visible = on && presence > 0.004;
     // Hidden buffers stay untouched. Invalidate so the first visible frame
     // always uses current positions, sizes and population filters.
-    if (!on) {
+    if (!tracers.visible) {
       tracerStamp = "";
       return;
     }
@@ -123,7 +127,9 @@ export function createPopulationsLayer(
       (show.ejected ? 16 : 0) |
       (show.trueSize ? 32 : 0);
     /* Size is a uniform, so the zoom alone never rewrites the instances. */
-    looks.tracers.uniforms.radius!.value = show.trueSize ? 30 / AU_KM : pxWorld(dist, 3.1);
+    looks.tracers.uniforms.radius!.value = show.trueSize
+      ? 30 / AU_KM
+      : pxWorld(dist, 3.1) * presence;
     const stamp = `${yearsAgo}|${Math.round(driftYears * 200)}|${mask}`;
     if (stamp === tracerStamp) return;
     tracerStamp = stamp;
@@ -205,10 +211,11 @@ export function createPopulationsLayer(
       shellInner.visible = shellOuter.visible = shells > 0.004;
       looks.shellInner.uniforms.opacity!.value = shellOpacity[0]! * shells;
       looks.shellOuter.uniforms.opacity!.value = shellOpacity[1]! * shells;
-      /* Each shell is named at its pole, where the label sits clear of the swarm inside it. */
+      /* Each shell is named at the near edge of its equator, below the point, as the snow line is:
+         its pole would project above the frame at the views' tilts. */
       const labelled = names.to(show.names) * shells;
-      place("oortInner", 0, OORT_SHELLS_AU[0], 0, labelled);
-      place("oortOuter", 0, OORT_SHELLS_AU[1], 0, labelled);
+      place("oortInner", 0, 0, OORT_SHELLS_AU[0], labelled, BELOW);
+      place("oortOuter", 0, 0, OORT_SHELLS_AU[1], labelled, BELOW);
     },
   };
 }
