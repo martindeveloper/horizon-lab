@@ -53,6 +53,9 @@ type BlackHoleStore = BlackHoleParams &
     /** Bloom on the disk, jet and sky (off by default); Reset turns it off. */
     bloom: boolean;
     setBloom: (v: boolean) => void;
+    /** Diffraction spikes on the disk's hot side and a colour fringe at the corners (off by default); Reset turns it off. */
+    lens: boolean;
+    setLens: (v: boolean) => void;
     startGuide: () => void;
     advanceGuide: () => void;
     /** Back one beat; the camera flies back to it. */
@@ -117,6 +120,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setAntialiasing: (antialiasing) => set({ antialiasing }),
   bloom: false,
   setBloom: (bloom) => set({ bloom }),
+  lens: false,
+  setLens: (lens) => set({ lens }),
   startGuide: () => {
     const s = get();
     if (s.activePin) s.setActivePin(null);

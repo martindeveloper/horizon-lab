@@ -23,6 +23,7 @@ import {
   type BloomSettings,
 } from "./bloom-pass";
 import { createCompositePass, type CompositePass } from "./composite-pass";
+import { createLensPass, type LensPass, type LensSettings } from "./lens-pass";
 
 /**
  * Anti-aliasing for one frame: `fxaa` filters the finished image; `supersample`
@@ -30,8 +31,12 @@ import { createCompositePass, type CompositePass } from "./composite-pass";
  */
 export type PassAntialias = "off" | "fxaa" | "supersample";
 
-/** What one frame asks for: its anti-aliasing (default off) and its bloom (default none). */
-export type PassFrame = { antialias?: PassAntialias; bloom?: BloomSettings | null };
+/** What one frame asks for: its anti-aliasing (default off), its bloom and its lens (default none). */
+export type PassFrame = {
+  antialias?: PassAntialias;
+  bloom?: BloomSettings | null;
+  lens?: LensSettings | null;
+};
 
 /** A single shader pass. Call only on the client; importing this module creates no GPU resources. */
 export function createFullscreenPass(options: {
@@ -52,12 +57,14 @@ export function createFullscreenPass(options: {
    */
   supersample?: boolean;
   /**
-   * How a frame with bloom is finished when the GPU renders into half-float textures: the
-   * shader's radiance (`uHdrOutput` 1, before `display`) is drawn into an RGBA16F frame,
-   * bloomed in those units, and this full-screen shader writes the display result. It reads
-   * the frame as `uImage` (one pixel `uTexel`), the glow as `uBloom` with `uBloomStrength`,
-   * and `uniforms` of its own (share the ray shader's where `display` needs them). Without
-   * it, or without half-float rendering, bloom works on the display frame instead.
+   * How a frame with bloom or a lens is finished when the GPU renders into half-float
+   * textures: the shader's radiance (`uHdrOutput` 1, before `display`) is drawn into an
+   * RGBA16F frame, bloomed and spiked in those units, and this full-screen shader writes the
+   * display result. It reads the frame as `uImage` (one pixel `uTexel`), the glow as `uBloom`
+   * with `uBloomStrength`, includes `<horizon/lens>` and applies it under `HORIZON_LENS`
+   * (defined while the lens is on), and has `uniforms` of its own (share the ray shader's
+   * where `display` needs them). Without it, or without half-float rendering, bloom and the
+   * lens work on the display frame instead.
    */
   hdr?: { fragmentShader: string; uniforms: Record<string, IUniform> };
 }) {
@@ -148,7 +155,8 @@ export function createFullscreenPass(options: {
   }
 
   let fxaa: CompositePass | null = null;
-  /* Bloom on the display frame: the composite is built for the frame's anti-aliasing. */
+  /* Bloom and the lens on the display frame: the composite is built for the frame's
+     anti-aliasing and switches; the settings change in place. */
   const ldrBloom: BloomSettings = {
     strength: 0,
     threshold: 1,
@@ -157,14 +165,40 @@ export function createFullscreenPass(options: {
     mips: 1,
     scale: 0.5,
   };
-  let ldr: { pass: CompositePass; fxaa: boolean } | null = null;
-  /* Bloom on radiance: the half-float frame, its glow and the resolve that finishes both. */
+  const ldrLens: LensSettings = {
+    mask: ldrBloom,
+    level: 1,
+    threshold: 1,
+    arms: 4,
+    reach: 0,
+    taps: 1,
+    strength: 0,
+    fringe: 0,
+  };
+  let ldr: { pass: CompositePass; key: string } | null = null;
+  /* Bloom and the lens on radiance: the half-float frame, its glow and spikes, and the
+     resolve that finishes them. */
   let chain: BloomPass | null = null;
-  let radiance: { target: WebGLRenderTarget; scene: Scene; material: ShaderMaterial } | null = null;
-  const resolveUniforms = { uBloom: { value: null as unknown }, uBloomStrength: { value: 0 } };
-  function radianceFrame() {
-    if (radiance || !hdr) return radiance;
-    const target = frameTarget(true);
+  let spikes: LensPass | null = null;
+  let radiance: {
+    target: WebGLRenderTarget;
+    scene: Scene;
+    material: ShaderMaterial;
+    lens: boolean;
+  } | null = null;
+  const resolveUniforms = {
+    uBloom: { value: null as unknown },
+    uBloomStrength: { value: 0 },
+    uSpikes: { value: null as unknown },
+    uSpikeStrength: { value: 0 },
+    uFringe: { value: 0 },
+  };
+  /** The radiance frame and its resolve, compiled with or without the lens. */
+  function radianceFrame(lens: boolean) {
+    if (!hdr) return null;
+    if (radiance?.lens === lens) return radiance;
+    const target = radiance?.target ?? frameTarget(true);
+    radiance?.material.dispose();
     const resolve = new ShaderMaterial({
       vertexShader: options.vertexShader,
       fragmentShader: hdr.fragmentShader,
@@ -174,6 +208,7 @@ export function createFullscreenPass(options: {
         uImage: { value: target.texture },
         uTexel: { value: texel },
       },
+      defines: lens ? { HORIZON_LENS: "1" } : {},
       depthTest: false,
       depthWrite: false,
     });
@@ -181,13 +216,13 @@ export function createFullscreenPass(options: {
     quad.frustumCulled = false;
     const resolveScene = new Scene();
     resolveScene.add(quad);
-    radiance = { target, scene: resolveScene, material: resolve };
+    radiance = { target, scene: resolveScene, material: resolve, lens };
     return radiance;
   }
 
   let disposed = false;
   return {
-    /** Whether bloom here works on radiance (an RGBA16F frame) rather than on the display frame. */
+    /** Whether bloom and the lens here work on radiance (an RGBA16F frame) rather than on the display frame. */
     hdr: hdr !== null,
     resize(width: number, height: number) {
       renderer.setPixelRatio(1);
@@ -200,14 +235,15 @@ export function createFullscreenPass(options: {
     compile() {
       renderer.compile(scene, camera);
     },
-    /** Draws the shader to the canvas, anti-aliased and bloomed as `frame` asks (both default off). */
+    /** Draws the shader to the canvas, anti-aliased, bloomed and lensed as `frame` asks (all default off). */
     render(frame?: PassFrame) {
       if (disposed) return;
       const mode = frame?.antialias ?? "off";
       const bloom = frame?.bloom ?? null;
-      const floating = bloom !== null && hdr !== null;
+      const lens = frame?.lens ?? null;
+      const floating = (bloom !== null || lens !== null) && hdr !== null;
       hdrOutput.value = floating ? 1 : 0;
-      if (bloom === null) {
+      if (bloom === null && lens === null) {
         if (mode === "fxaa") {
           fxaa ??= createCompositePass(renderer, { antialias: "fxaa" });
           fxaa.paint(() => drawRays(mode, false));
@@ -215,28 +251,44 @@ export function createFullscreenPass(options: {
         return;
       }
       if (!floating) {
-        Object.assign(ldrBloom, bloom);
-        if (ldr && ldr.fxaa !== (mode === "fxaa")) {
+        if (bloom) Object.assign(ldrBloom, bloom);
+        if (lens) Object.assign(ldrLens, lens, { mask: ldrBloom });
+        if (lens && !bloom) Object.assign(ldrBloom, lens.mask);
+        const key = `${mode === "fxaa"}/${bloom !== null}/${lens !== null}`;
+        if (ldr && ldr.key !== key) {
           ldr.pass.dispose();
           ldr = null;
         }
         ldr ??= {
-          fxaa: mode === "fxaa",
+          key,
           pass: createCompositePass(renderer, {
             antialias: mode === "fxaa" ? "fxaa" : "off",
-            bloom: ldrBloom,
+            bloom: bloom ? ldrBloom : null,
+            lens: lens ? ldrLens : null,
           }),
         };
         ldr.pass.paint(() => drawRays(mode, false));
         return;
       }
-      const hdrFrame = radianceFrame()!;
+      const hdrFrame = radianceFrame(lens !== null)!;
       renderer.setRenderTarget(hdrFrame.target);
       drawRays(mode, true);
       renderer.setRenderTarget(null);
       chain ??= createBloomPass(renderer);
-      resolveUniforms.uBloom.value = chain.render(hdrFrame.target.texture, size.x, size.y, bloom);
-      resolveUniforms.uBloomStrength.value = bloom.strength;
+      const source = hdrFrame.target.texture;
+      if (bloom) {
+        resolveUniforms.uBloom.value = chain.render(source, size.x, size.y, bloom);
+        resolveUniforms.uBloomStrength.value = bloom.strength;
+      } else resolveUniforms.uBloomStrength.value = 0;
+      if (lens) {
+        const mask = bloom
+          ? chain.level(lens.level)!
+          : chain.mask(source, size.x, size.y, lens.mask, lens.level);
+        spikes ??= createLensPass(renderer);
+        resolveUniforms.uSpikes.value = spikes.render(mask.texture, mask.width, mask.height, lens);
+        resolveUniforms.uSpikeStrength.value = lens.strength;
+        resolveUniforms.uFringe.value = lens.fringe;
+      }
       if (mode === "fxaa") {
         fxaa ??= createCompositePass(renderer, { antialias: "fxaa" });
         fxaa.paint(() => renderer.render(hdrFrame.scene, camera));
@@ -248,6 +300,7 @@ export function createFullscreenPass(options: {
       fxaa?.dispose();
       ldr?.pass.dispose();
       chain?.dispose();
+      spikes?.dispose();
       radiance?.target.dispose();
       radiance?.material.dispose();
       for (const pass of edges.values()) {

@@ -62,11 +62,21 @@ engines import already expanded shader strings and do not invoke it at runtime.
   over a finished frame the including shader declares as `uniform sampler2D uImage` with one
   pixel `uniform vec2 uTexel`. The frame holds display-ready bytes, encoded as the canvas
   would be, so edges are judged where they are seen and the result is written as it is.
+- `#include <horizon/lens>` provides the lens finishing of a resolve shader that declares
+  `uniform sampler2D uImage` and `uniform vec2 uTexel`: `lensFringe(colour, uv)` reads the
+  red a little further out and the blue a little further in, by `uFringe` pixels at the
+  corners and nothing at the centre (blended in by the same measure, so the centre keeps the
+  colour it was given), and `lensSpikes(colour, uv)` adds the lens pass's star (`uSpikes`)
+  `uSpikeStrength` times. `lens-spike.frag.glsl` draws that star in one pass: the mask
+  summed `HORIZON_LENS_TAPS` taps out each way along each of `HORIZON_LENS_ARMS` directions
+  (`uSteps`), tapering, each tap gated by its brightness over the threshold
+  (`uInvThreshold`); both counts are compile-time, so the loops unroll.
 - `composite.frag.glsl`, `bloom-down.frag.glsl` and `bloom-up.frag.glsl` are the fragment
   shaders of the rendering module's composite and bloom passes (`createCompositePass`,
   `createBloomPass`), drawn with `fullscreen.vert.glsl`. The composite copies or FXAA-filters
-  the offscreen frame (`uImage`, `uTexel`; `HORIZON_FXAA`) and, with `HORIZON_BLOOM`, adds
-  `uBloom` `uBloomStrength` times and dithers by one 8-bit step. The bloom shaders are one
+  the offscreen frame (`uImage`, `uTexel`; `HORIZON_FXAA`), with `HORIZON_LENS` fringes it
+  and adds the spikes, with `HORIZON_BLOOM` adds `uBloom` `uBloomStrength` times, and with
+  either dithers by one 8-bit step. The bloom shaders are one
   dual-Kawase step each: down averages five taps of `uImage` half a destination pixel apart
   (`uHalfPixel`), with `HORIZON_BLOOM_PREFILTER` first keeping only light above `uThreshold`
   (soft knee `uKnee`, cap `uClamp`); up tents eight taps and adds the chain's own level

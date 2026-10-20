@@ -352,6 +352,8 @@
     "edges": "Paprsky hran",
     "supersample": "SSAA",
     "bloom": "Záře",
+    "lens": "Objektiv",
+    "glow": "Svit",
     "wideColour": "Široký gamut (P3)",
     "frameRate": "Snímková frekvence",
     "parts": {

@@ -95,7 +95,14 @@ test("shader variants parse with the defines their passes compile them with", ()
   variants.push(
     [post("composite.frag.glsl"), "#define HORIZON_FXAA 1\n#define HORIZON_BLOOM 1"],
     [post("composite.frag.glsl"), "#define HORIZON_BLOOM 1"],
+    [post("composite.frag.glsl"), "#define HORIZON_LENS 1"],
+    [
+      post("composite.frag.glsl"),
+      "#define HORIZON_FXAA 1\n#define HORIZON_BLOOM 1\n#define HORIZON_LENS 1",
+    ],
     [post("bloom-down.frag.glsl"), "#define HORIZON_BLOOM_PREFILTER 1"],
+    [post("lens-spike.frag.glsl"), "#define HORIZON_LENS_ARMS 3\n#define HORIZON_LENS_TAPS 6"],
+    [post("black-hole-resolve.frag.glsl"), "#define HORIZON_LENS 1"],
   );
   assert.ok(variants.length > 3);
   for (const [file, define] of variants)

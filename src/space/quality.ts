@@ -36,6 +36,19 @@ function sceneResolution(quality: RenderQuality, tight: boolean): SceneResolutio
   return { dprCap: tight ? 2 : 3, fps: Infinity };
 }
 
+/** The lens's spikes: taps out each way along an arm, and an arm's reach as a share of the frame's height. */
+export type LensChain = { taps: number; reach: number };
+
+/**
+ * Light devices draw short spikes from few taps; the full tier longer ones from ten; Max
+ * longer still from fourteen.
+ */
+const LENS: ByTier<LensChain> = {
+  light: { taps: 6, reach: 0.05 },
+  full: { taps: 10, reach: 0.07 },
+  max: { taps: 14, reach: 0.09 },
+};
+
 /** The bloom chain's size: its levels, and the first level's share of the frame. */
 export type BloomChain = { mips: number; scale: number };
 
@@ -64,6 +77,7 @@ export type SpaceQuality = {
   resolution: SceneResolution;
   swarms: SwarmCounts;
   bloom: BloomChain;
+  lens: LensChain;
 };
 
 export function spaceQuality(quality: RenderQuality, tight: boolean): SpaceQuality {
@@ -73,5 +87,6 @@ export function spaceQuality(quality: RenderQuality, tight: boolean): SpaceQuali
     resolution: sceneResolution(quality, tight),
     swarms: SWARMS[tier],
     bloom: BLOOM[tier],
+    lens: LENS[tier],
   };
 }

@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { RailSection, SwitchGroup } from "@/components/simulations/rail";
 import {
   BloomSwitch,
+  LensSwitch,
   RenderSection,
   type AntialiasMode,
 } from "@/components/simulations/render-settings";
@@ -92,6 +93,8 @@ export function SettingsBody() {
   const setAntialiasing = useBlackHole((s) => s.setAntialiasing);
   const bloom = useBlackHole((s) => s.bloom);
   const setBloom = useBlackHole((s) => s.setBloom);
+  const lens = useBlackHole((s) => s.lens);
+  const setLens = useBlackHole((s) => s.setLens);
   const applyPreset = useBlackHole((s) => s.applyPreset);
   const presetId = useBlackHole((s) => s.presetId);
   const selectHole = useSelectHole();
@@ -217,11 +220,13 @@ export function SettingsBody() {
         note={<p className="text-xs text-muted">{t("modelNotice")}</p>}
         onReset={() => {
           setBloom(false);
+          setLens(false);
           if (presetId === "custom") selectHole("lensed");
           else applyPreset(presetId);
         }}
       >
         <BloomSwitch on={bloom} onToggle={() => setBloom(!bloom)} />
+        <LensSwitch on={lens} onToggle={() => setLens(!lens)} />
       </RenderSection>
     </>
   );

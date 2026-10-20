@@ -3,7 +3,11 @@
 import { useFormatter, useTranslations } from "next-intl";
 
 import { Rail, RailSection, SwitchGroup } from "@/components/simulations/rail";
-import { RenderSection, type AntialiasMode } from "@/components/simulations/render-settings";
+import {
+  GlowSwitch,
+  RenderSection,
+  type AntialiasMode,
+} from "@/components/simulations/render-settings";
 import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
@@ -110,6 +114,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const quality = useSpectroscopy((s) => s.quality);
   const antialias = useSpectroscopy((s) => s.antialias);
   const wideColour = useSpectroscopy((s) => s.wideColour);
+  const glow = useSpectroscopy((s) => s.glow);
   const wideGamut = useWideGamut();
   const tRender = useTranslations("render");
   const api = useSpectroscopy.getState;
@@ -182,6 +187,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         onAntialias={(mode) => api().setAntialias(mode)}
         onReset={() => api().resetView()}
       >
+        <GlowSwitch on={glow} onToggle={() => api().setGlow(!glow)} />
         {wideGamut ? (
           <SwitchRow on={wideColour} onToggle={() => api().setWideColour(!wideColour)}>
             {tRender("wideColour")}

@@ -32,6 +32,8 @@ export type SceneInputs = {
   labels: SceneLabels;
   /** The canvas's colour space, which the colours above are computed in. */
   gamut: Gamut;
+  /** The Glow switch: a soft blurred layer under the lights. */
+  halo: boolean;
 };
 
 /** Whether two inputs draw the same still scene (the photons' lines aside). */
@@ -44,7 +46,8 @@ export const sameScene = (a: SceneInputs, b: SceneInputs) =>
   a.lampColor === b.lampColor &&
   a.range === b.range &&
   a.labels === b.labels &&
-  a.gamut === b.gamut;
+  a.gamut === b.gamut &&
+  a.halo === b.halo;
 
 /** The scene stays dark in both themes, so it keeps the dark theme's gold and muted text. */
 const SCENE_GOLD = "rgb(226 192 122 / 0.9)";
@@ -296,6 +299,48 @@ function drawAir(
   ctx.restore();
 }
 
+/**
+ * The Glow switch's layer, under the lights: each light's shape in its own colour with a
+ * shadow of that colour blurred `radius` CSS pixels, so the gas, the star or lamp and the beam
+ * sit in a soft haze of their light. A canvas blurs its shadows in its own pixels, whatever
+ * the transform, so the radius is scaled by the canvas's pixels per CSS pixel. Drawn before
+ * the lights and the labels, which stay crisp.
+ */
+function drawHalo(
+  ctx: CanvasRenderingContext2D,
+  g: Geometry,
+  inputs: SceneInputs,
+  tint: Rgb,
+  beamStart: number,
+  height: number,
+) {
+  const { kind, glow, starColor, lampColor, gamut } = inputs;
+  const { midY, star, source, gas, slit } = g;
+  const scale = ctx.getTransform().a || 1;
+  const soft = (rgb: Rgb, alpha: number, radius: number, shape: () => void) => {
+    ctx.save();
+    ctx.shadowColor = css(rgb, alpha, gamut);
+    ctx.shadowBlur = radius * scale;
+    ctx.fillStyle = css(rgb, alpha * 0.5, gamut);
+    ctx.beginPath();
+    shape();
+    ctx.fill();
+    ctx.restore();
+  };
+  soft(tint, 0.35, 10, () => ctx.rect(beamStart, midY - 2, slit.x - beamStart, 4));
+  if (kind === "star" && starColor)
+    soft(starColor, 0.6, 24, () => ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2));
+  else if (kind === "slab") {
+    if (lampColor) soft(lampColor, 0.7, 16, () => ctx.arc(source.x, source.y, 10, 0, Math.PI * 2));
+    if (glow) {
+      const h = height * 0.6;
+      soft(glow.rgb, 0.6 * glow.level, 18, () =>
+        ctx.roundRect(gas.x - gas.w / 2, midY - h / 2, gas.w, h, 4),
+      );
+    }
+  }
+}
+
 /** The beam: a soft band of the source's light with a crisp core, fading toward the slit. */
 function drawBeam(
   ctx: CanvasRenderingContext2D,
@@ -408,7 +453,7 @@ export function drawScene(
   font: string,
   inputs: SceneInputs,
 ) {
-  const { kind, glowing, glow, starColor, teff, lampColor, range, labels, gamut } = inputs;
+  const { kind, glowing, glow, starColor, teff, lampColor, range, labels, gamut, halo } = inputs;
   const g = layout(kind, width, height);
   const { midY, star, source, gas, airBand, slit, grating } = g;
   ctx.clearRect(0, 0, width, height);
@@ -421,6 +466,7 @@ export function drawScene(
     : kind === "slab" && glowing
       ? glow?.rgb
       : lampColor) ?? [1, 1, 1];
+  if (halo) drawHalo(ctx, g, inputs, tint, beamStart, height);
   drawBeam(ctx, beamStart, slit, midY, tint, gamut);
   if (kind === "star" && starColor && teff) drawStar(ctx, star, starColor, teff, gamut);
   else if (kind === "slab") {

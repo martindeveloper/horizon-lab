@@ -562,3 +562,47 @@ test("the spectrum's canvases: standard keeps today's scale, economy and 2× mov
   assert.equal(drawingGamut(true, false), "srgb");
   assert.equal(drawingGamut(false, true), "srgb");
 });
+
+test("the Glow switch: the ribbon's halo spreads strong emission alone, and repaints the scene", async () => {
+  const { ribbonHalo } =
+    await import("../src/features/spectroscopy/components/spectrum-view/ribbon.ts");
+  const { sameScene } = await import("../src/features/spectroscopy/lib/scene/paint.ts");
+  const n = 200;
+  const wavelengths = Float64Array.from({ length: n }, (_, i) => 500 + i * 0.5);
+  const continuum = new Float64Array(n).fill(1);
+  const flux = new Float64Array(continuum);
+  flux[50] = 3; /* a strong emission line */
+  flux[120] = 1.15; /* a weak one */
+  flux[150] = 0.2; /* an absorption line */
+  const spectrum = { wavelengths, flux, continuum, peak: 3 };
+  const halo = ribbonHalo(spectrum, 6, "srgb");
+  assert.ok(halo, "there is light to spread");
+  const at = (i) => halo[i * 3] + halo[i * 3 + 1] + halo[i * 3 + 2];
+  assert.ok(at(50) > 0 && at(53) > 0 && at(47) > 0, "the strong line glows and spreads");
+  assert.ok(at(53) < at(50), "softly");
+  assert.equal(at(120), 0, "a weak line gets no halo");
+  assert.equal(at(150), 0, "an absorption line stays crisp");
+  assert.equal(at(100), 0, "the continuum between them is untouched");
+  assert.equal(ribbonHalo(spectrum, 0, "srgb"), null, "no radius, no halo");
+  assert.equal(
+    ribbonHalo({ ...spectrum, flux: continuum }, 6, "srgb"),
+    null,
+    "no emission, no halo",
+  );
+  /* The still scene repaints when the switch changes, and only then. */
+  const inputs = {
+    kind: "slab",
+    glowing: true,
+    glow: null,
+    starColor: null,
+    teff: null,
+    lampColor: null,
+    strong: [],
+    range: [380, 780],
+    labels: { source: "", gas: "", air: null, spectrograph: "" },
+    gamut: "srgb",
+    halo: false,
+  };
+  assert.ok(sameScene(inputs, { ...inputs, strong: [{ centre: 500, tau: 1 }] }));
+  assert.ok(!sameScene(inputs, { ...inputs, halo: true }));
+});

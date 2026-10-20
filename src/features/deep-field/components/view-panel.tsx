@@ -5,6 +5,7 @@ import { DistanceUnitControl } from "@/components/simulations/map-readouts";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import {
   BloomSwitch,
+  LensSwitch,
   RenderSection,
   SCENE_ANTIALIAS,
 } from "@/components/simulations/render-settings";
@@ -23,6 +24,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const antialias = useDeepField((s) => s.antialias);
   const quality = useDeepField((s) => s.quality);
   const bloom = useDeepField((s) => s.bloom);
+  const lens = useDeepField((s) => s.lens);
   return (
     <Rail id="deep-field-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
       <RailSection title={t("hud.show")}>
@@ -57,6 +59,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         onReset={() => useDeepField.getState().resetView()}
       >
         <BloomSwitch on={bloom} onToggle={() => useDeepField.getState().setBloom(!bloom)} />
+        <LensSwitch on={lens} onToggle={() => useDeepField.getState().setLens(!lens)} />
       </RenderSection>
     </Rail>
   );

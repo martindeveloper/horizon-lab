@@ -23,15 +23,34 @@ export const SCENE_ANTIALIAS = [
   { value: "fxaa", name: "fxaa" },
 ] as const satisfies readonly AntialiasMode<string>[];
 
-/** The Rendering section's Bloom switch: bright light glows, off until the visitor turns it on. */
-export function BloomSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+/** A render switch, off until the visitor turns it on, named by its `render.*` copy key. */
+function EffectSwitch({
+  name,
+  on,
+  onToggle,
+}: {
+  name: "bloom" | "lens" | "glow";
+  on: boolean;
+  onToggle: () => void;
+}) {
   const t = useTranslations("render");
   return (
     <SwitchRow on={on} onToggle={onToggle}>
-      {t("bloom")}
+      {t(name)}
     </SwitchRow>
   );
 }
+
+type Switch = { on: boolean; onToggle: () => void };
+
+/** The Rendering section's Bloom switch: bright light glows. */
+export const BloomSwitch = (props: Switch) => <EffectSwitch name="bloom" {...props} />;
+
+/** The Rendering section's Lens switch: the brightest light gets diffraction spikes, the corners a colour fringe. */
+export const LensSwitch = (props: Switch) => <EffectSwitch name="lens" {...props} />;
+
+/** The Rendering section's Glow switch, for a 2D stage: its lights get a soft blurred layer. */
+export const GlowSwitch = (props: Switch) => <EffectSwitch name="glow" {...props} />;
 
 /** Puts a settings panel back as a visit starts; the last thing in it. */
 function ResetButton({ label, onReset }: { label: string; onReset: () => void }) {

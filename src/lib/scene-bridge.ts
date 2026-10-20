@@ -143,15 +143,15 @@ function afterPaint(run: () => void) {
  * in the next idle moment (the engine maps it to its settings in `lib/quality.ts`, and may
  * resample whole point clouds, so the control answers first; quick changes arrive as the last).
  * The anti-aliasing reaches the host at once, an unset choice (at first, or after a reset) taking
- * this device's default, published so the settings show it. The bloom switch reaches the host at
- * once too; the chain's size for a level is the engine's to set in `quality`.
+ * this device's default, published so the settings show it. The bloom and lens switches reach the
+ * host at once too; their sizes for a level are the engine's to set in `quality`.
  */
 export function bridgeRender<
-  S extends Pick<SceneSlice, "antialias" | "setAntialias" | "quality" | "bloom">,
+  S extends Pick<SceneSlice, "antialias" | "setAntialias" | "quality" | "bloom" | "lens">,
 >(
   store: Pick<StoreApi<S>, "getState" | "subscribe">,
   scope: DisposalScope,
-  host: Pick<SceneHost, "tight" | "setAntialias" | "setBloom">,
+  host: Pick<SceneHost, "tight" | "setAntialias" | "setBloom" | "setLens">,
   quality: (level: RenderQuality) => void,
 ) {
   let level = store.getState().quality;
@@ -159,8 +159,10 @@ export function bridgeRender<
   let cancel: (() => void) | null = null;
   scope.defer(() => cancel?.());
   let bloom: boolean | null = null;
+  let lens: boolean | null = null;
   const apply = (s: S) => {
     if (s.bloom !== bloom) host.setBloom({ enabled: (bloom = s.bloom) });
+    if (s.lens !== lens) host.setLens({ enabled: (lens = s.lens) });
     if (s.quality !== level && cancel === null)
       cancel = afterPaint(() => {
         cancel = null;

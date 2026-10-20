@@ -5,21 +5,30 @@ import { DEFAULT_VIEW } from "./lib/model/view-ids";
 import { createDeepFieldEngine } from "./lib/scene/engine";
 import { useDeepField } from "./lib/store";
 
-type DeepFieldBenchScene = BenchScene & { bloom: boolean };
+type DeepFieldBenchScene = BenchScene & { bloom: boolean; lens: boolean };
 
-/** The Galaxy (home view) at standard quality, as a visitor first sees it, and the same with bloom on. */
+/** The Galaxy (home view) at standard quality, as a visitor first sees it, and the same with bloom on and with the lens on. */
 const SCENES: readonly DeepFieldBenchScene[] = [
   {
     id: "home",
     description: "The Galaxy (home view), standard quality",
     tags: ["preset"],
     bloom: false,
+    lens: false,
   },
   {
     id: "home-bloom",
     description: "The Galaxy (home view), standard quality, bloom on",
     tags: ["effects"],
     bloom: true,
+    lens: false,
+  },
+  {
+    id: "home-lens",
+    description: "The Galaxy (home view), standard quality, lens on",
+    tags: ["effects"],
+    bloom: false,
+    lens: true,
   },
 ];
 
@@ -35,13 +44,18 @@ export const benchTarget: BenchTarget = {
     if (!scene) throw new Error(`Unknown deep-field scene: ${sceneId}`);
     const store = useDeepField;
     store.getState().resetView();
-    store.setState({ view: DEFAULT_VIEW, quality: "standard", bloom: scene.bloom });
+    store.setState({
+      view: DEFAULT_VIEW,
+      quality: "standard",
+      bloom: scene.bloom,
+      lens: scene.lens,
+    });
     const instance = mountSceneEngine(surface, createDeepFieldEngine, () => store.setState({}));
     return {
       ...instance,
       describe: () => {
-        const { view, quality, antialias, bloom } = store.getState();
-        return { view, quality, antialias: antialias ?? "default", bloom };
+        const { view, quality, antialias, bloom, lens } = store.getState();
+        return { view, quality, antialias: antialias ?? "default", bloom, lens };
       },
     };
   },

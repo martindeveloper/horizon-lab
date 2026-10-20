@@ -2,10 +2,12 @@ export { createFullscreenPass, type PassAntialias, type PassFrame } from "./full
 export {
   createBloomPass,
   halfFloatRenderable,
+  type BloomLevel,
   type BloomPass,
   type BloomSettings,
 } from "./bloom-pass";
 export { createCompositePass, type CompositeAntialias, type CompositePass } from "./composite-pass";
+export { createLensPass, type LensPass, type LensSettings } from "./lens-pass";
 export { createFxaaPass, type FxaaPass } from "./fxaa-pass";
 export { createMsaaPass, type MsaaPass } from "./msaa-pass";
 export { RENDER_QUALITIES, type RenderQuality } from "./quality";

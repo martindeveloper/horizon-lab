@@ -352,6 +352,8 @@
     "edges": "Edge rays",
     "supersample": "SSAA",
     "bloom": "Bloom",
+    "lens": "Lens",
+    "glow": "Glow",
     "wideColour": "Wide colour (P3)",
     "frameRate": "Frame rate",
     "parts": {

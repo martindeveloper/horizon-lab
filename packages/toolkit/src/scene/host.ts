@@ -2,8 +2,8 @@
  * What every zoomable scene starts from: a WebGL renderer sized to its stage, a perspective
  * camera, the stage's CSS size and the frame loop that renders only while something moves
  * (`createEngineHost`). Phones and low-memory devices get a lighter setup (`tight`). Frames
- * are drawn through `render`, anti-aliased as `setAntialias` last chose and bloomed as
- * `setBloom` did.
+ * are drawn through `render`, anti-aliased as `setAntialias` last chose, bloomed as
+ * `setBloom` did and finished as a lens would as `setLens` did.
  */
 import {
   NoToneMapping,
@@ -19,6 +19,7 @@ import type { BloomSettings } from "../rendering/bloom-pass";
 import { createCompositePass, type CompositePass } from "../rendering/composite-pass";
 import type { DisposalScope } from "../rendering/disposal";
 import { createEngineHost } from "../rendering/engine-host";
+import type { LensSettings } from "../rendering/lens-pass";
 import type { SceneBasics, Viewport } from "./kit";
 
 /** Vertical field of view of the scenes, degrees. */
@@ -52,6 +53,28 @@ export const DEFAULT_SCENE_BLOOM: Readonly<BloomSettings> = {
   clamp: 1,
   mips: 5,
   scale: 0.5,
+};
+
+/**
+ * A scene's lens: whether its brightest light gets diffraction spikes and its corners a
+ * colour fringe, and any of the lens's settings to change (`LensSettings` but its mask,
+ * which is the scene's bloom). What a switch leaves out keeps its value.
+ */
+export type SceneLens = Partial<Omit<LensSettings, "mask">> & { enabled: boolean };
+
+/**
+ * What a scene's lens does until told otherwise: a four-point star on light whose bloom mask
+ * (its first level) is brighter than 0.2, reaching 7 % of the frame's height over ten taps
+ * each way, added at eight tenths, and a fringe of 1.5 pixels at the corners.
+ */
+export const DEFAULT_SCENE_LENS: Readonly<Omit<LensSettings, "mask">> = {
+  level: 0,
+  threshold: 0.2,
+  arms: 4,
+  reach: 0.07,
+  taps: 10,
+  strength: 0.8,
+  fringe: 1.5,
 };
 
 /** How finely a scene is drawn: buffer pixels per CSS pixel at most, and frames per second. */
@@ -131,13 +154,20 @@ export function createSceneHost(
   let antialias = defaultSceneAntialias(tight);
   let bloomOn = false;
   const bloom: BloomSettings = { ...DEFAULT_SCENE_BLOOM };
-  /* The composite is built for the current anti-aliasing and bloom switch; off and off draws
+  let lensOn = false;
+  /* The lens's spikes come from the bloom's mask, on or off. */
+  const lens: LensSettings = { ...DEFAULT_SCENE_LENS, mask: bloom };
+  /* The composite is built for the current anti-aliasing and switches; all off draws
      straight to the canvas. */
   let pass: CompositePass | null = null;
   const passFor = () =>
-    antialias === "off" && !bloomOn
+    antialias === "off" && !bloomOn && !lensOn
       ? null
-      : createCompositePass(renderer, { antialias, bloom: bloomOn ? bloom : null });
+      : createCompositePass(renderer, {
+          antialias,
+          bloom: bloomOn ? bloom : null,
+          lens: lensOn ? lens : null,
+        });
   const rebuild = () => {
     pass?.dispose();
     pass = null;
@@ -203,13 +233,34 @@ export function createSceneHost(
       if (enabled !== bloomOn) {
         bloomOn = enabled;
         rebuild();
-      } else if (bloomOn) engine.invalidate();
+      } else if (bloomOn || lensOn) engine.invalidate();
+    },
+    /** Whether frames are finished as a lens would. */
+    get lens() {
+      return lensOn;
+    },
+    /**
+     * Switches the lens for the next frame on or off and takes the settings given (a quality
+     * level's reach and taps, a look's strength); off frees its buffers.
+     */
+    setLens({ enabled, level, threshold, arms, reach, taps, strength, fringe }: SceneLens) {
+      lens.level = level ?? lens.level;
+      lens.threshold = threshold ?? lens.threshold;
+      lens.arms = arms ?? lens.arms;
+      lens.reach = reach ?? lens.reach;
+      lens.taps = taps ?? lens.taps;
+      lens.strength = strength ?? lens.strength;
+      lens.fringe = fringe ?? lens.fringe;
+      if (enabled !== lensOn) {
+        lensOn = enabled;
+        rebuild();
+      } else if (lensOn) engine.invalidate();
     },
     /**
      * Draws one frame: `paint` makes the renders (several may share one depth buffer), into
-     * the canvas or an offscreen frame that is anti-aliased and bloomed onto it. Only what
-     * `paint` draws takes part: DOM labels and readouts sit above the canvas, so text never
-     * blooms.
+     * the canvas or an offscreen frame that is anti-aliased, bloomed and lensed onto it. Only
+     * what `paint` draws takes part: DOM labels and readouts sit above the canvas, so text
+     * never blooms, spikes or fringes.
      */
     render(paint: () => void) {
       pass ??= passFor();

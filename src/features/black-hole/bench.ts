@@ -15,7 +15,7 @@ import {
 } from "./lib/frame";
 import { holeById, paramsFromPreset } from "./lib/holes";
 import { MAX_DIST, MIN_DIST } from "./lib/physics";
-import { BLACK_HOLE_QUALITY, bloomSettings } from "./lib/quality";
+import { BLACK_HOLE_QUALITY, bloomSettings, lensSettings } from "./lib/quality";
 
 /**
  * Headless benchmark target: the observatory's shader, uniforms, camera and
@@ -58,6 +58,7 @@ export const benchTarget: BenchTarget = {
         : null;
     let spin = settings.spin;
     const bloom = scene.bloom ? bloomSettings(scene.quality, false, settings.exposure) : null;
+    const lens = scene.lens ? lensSettings(scene.quality, false, settings.exposure) : null;
 
     const gl = canvas.getContext("webgl2");
     if (!gl) throw new Error("WebGL 2 is unavailable");
@@ -71,7 +72,7 @@ export const benchTarget: BenchTarget = {
         }
         writeCamera(uniforms, pose, spin);
         writeScene({ ...settings, spin, gravity: true }, frame.time, steps);
-        pass.render({ bloom });
+        pass.render({ bloom, lens });
       },
       describe: () => ({
         azimuth: pose.azimuth,
@@ -81,6 +82,7 @@ export const benchTarget: BenchTarget = {
         steps,
         fovDeg: (uniforms.uFov.value * 180) / Math.PI,
         bloom: bloom !== null,
+        lens: lens !== null,
       }),
       dispose() {
         input?.dispose();

@@ -77,6 +77,7 @@ export function createDeepFieldEngine({
     let quality = deepFieldQuality(useDeepField.getState().quality, tight);
     sceneHost.setResolution(quality.resolution);
     sceneHost.setBloom({ enabled: useDeepField.getState().bloom, ...quality.bloom });
+    sceneHost.setLens({ enabled: useDeepField.getState().lens, ...quality.lens });
     const looks = scope.own(createLooks());
     const scene = new Scene();
     const lod = createLod(camera, viewport);
@@ -204,6 +205,7 @@ export function createDeepFieldEngine({
       const next = deepFieldQuality(level, tight);
       sceneHost.setResolution(next.resolution);
       sceneHost.setBloom({ enabled: store.getState().bloom, ...next.bloom });
+      sceneHost.setLens({ enabled: store.getState().lens, ...next.lens });
       solar.setSwarms(next.swarms);
       if (next.cosmos !== quality.cosmos) cosmos.setDetail(next.cosmos);
       quality = next;

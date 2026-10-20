@@ -45,7 +45,7 @@ its own budgets in its `lib/quality.ts`.
 
 Draw every frame through `render(paint)`: `paint` makes the frame's renders (several
 may share a depth buffer, with `autoClear` off and `clearDepth()` between them) and the
-host resolves them as `setAntialias(mode)` and `setBloom(bloom)` last chose, in one
+host resolves them as `setAntialias(mode)`, `setBloom(bloom)` and `setLens(lens)` last chose, in one
 composite pass (`createCompositePass`). The renderer is made without hardware
 antialiasing, so a mode switches at once, without a new context: `off` renders straight
 to the canvas, `msaa` into a 4× multisampled offscreen frame and `fxaa` through the FXAA
@@ -60,8 +60,13 @@ with `DEFAULT_SCENE_BLOOM` for what the call leaves out, in display units (light
 of white, eased in from 0.3, added back at six tenths through a five-level chain from half
 resolution). A simulation's `lib/quality.ts` maps its level and the device class to the
 chain's `mips` and `scale` and passes them here; the switch itself is the visitor's, off by
-default (`bloom` reads it). Only the current mode's and switch's buffers are held. Only what
-`paint` draws blooms: DOM labels and HUD readouts sit above the canvas, so text never does.
+default (`bloom` reads it). `setLens({ enabled, ...settings })` (a `SceneLens`) switches the
+lens the same way: on, the brightest light gets a four-point diffraction star drawn from the
+bloom's mask (light brighter than 0.2 there), reaching 7 % of the frame's height, and the corners a colour fringe of 1.5 pixels, with `DEFAULT_SCENE_LENS` for what the
+call leaves out; the quality table passes the star's `taps` and `reach`. With bloom off, only
+the mask levels the spikes need are built. Only the current mode's and switches' buffers are
+held. Only what `paint` draws blooms, spikes or fringes: DOM labels and HUD readouts sit above
+the canvas, so text never does.
 
 ## Orbit rig and controls
 

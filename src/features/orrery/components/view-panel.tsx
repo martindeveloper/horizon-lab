@@ -5,6 +5,7 @@ import { CameraPad } from "@/components/simulations/camera-pad";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import {
   BloomSwitch,
+  LensSwitch,
   RenderSection,
   SCENE_ANTIALIAS,
 } from "@/components/simulations/render-settings";
@@ -24,6 +25,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const antialias = useOrrery((s) => s.antialias);
   const quality = useOrrery((s) => s.quality);
   const bloom = useOrrery((s) => s.bloom);
+  const lens = useOrrery((s) => s.lens);
   const tally = useMemo(() => tallyAt(yearsAgo), [yearsAgo]);
   return (
     <Rail id="orrery-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
@@ -55,6 +57,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         onReset={() => useOrrery.getState().resetView()}
       >
         <BloomSwitch on={bloom} onToggle={() => useOrrery.getState().setBloom(!bloom)} />
+        <LensSwitch on={lens} onToggle={() => useOrrery.getState().setLens(!lens)} />
       </RenderSection>
     </Rail>
   );

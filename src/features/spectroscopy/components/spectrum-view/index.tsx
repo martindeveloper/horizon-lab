@@ -20,6 +20,9 @@ import { useRibbon } from "./ribbon";
 import { useBoxSize } from "./use-box-size";
 import { useWindowGestures } from "./use-window-gestures";
 
+/** The ribbon halo's width in CSS pixels, with the Glow switch on. */
+const RIBBON_HALO_PX = 6;
+
 /**
  * The spectrum: the light as the eye would see it spread out (the ribbon), the laboratory
  * wavelengths of the elements being compared, and the measured flux. Hover reads a
@@ -73,7 +76,9 @@ export function SpectrumView({ className }: { className?: string }) {
     () => (spectrum ? visibleLines(formed, spectrum, from, to, glowing) : []),
     [formed, spectrum, from, to, glowing],
   );
-  useRibbon(ribbon, spectrum, gamut);
+  /* The Glow switch's halo, 6 CSS pixels wide, in the ribbon's own pixels. */
+  const glow = useSpectroscopy((s) => s.glow);
+  useRibbon(ribbon, spectrum, gamut, glow ? (RIBBON_HALO_PX * samples) / Math.max(1, width) : 0);
   const plot = usePlotPath(spectrum, normalized, glowing);
   const { step, ticks, minorTicks } = axisTicks(from, to);
   const labels = lineLabels({

@@ -78,6 +78,8 @@ type SpectroscopyStore = Settings &
     antialias: CanvasAntialias;
     /** Spectral colours in Display P3, where the screen shows it (`drawingGamut`). */
     wideColour: boolean;
+    /** A soft blurred layer under the scene's lights and a halo on the ribbon's strong emission lines; off by default. */
+    glow: boolean;
     setReady: () => void;
     setView: (view: ViewId) => void;
     setStar: (star: StarChoice) => void;
@@ -115,6 +117,7 @@ type SpectroscopyStore = Settings &
     setQuality: (quality: RenderQuality) => void;
     setAntialias: (antialias: CanvasAntialias) => void;
     setWideColour: (wideColour: boolean) => void;
+    setGlow: (glow: boolean) => void;
     /** The View panel's settings as a visit starts: spectrograph, switches, window, render quality. */
     resetView: () => void;
     /** The guide moves on by itself once a step has been read; off under reduced motion. */
@@ -159,6 +162,7 @@ const VIEW_DEFAULTS = {
   quality: "standard",
   antialias: "off",
   wideColour: false,
+  glow: false,
 } as const satisfies Partial<SpectroscopyStore>;
 
 const replaced = <T>(items: readonly T[], index: number, item: T) => {
@@ -312,6 +316,7 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   setQuality: (quality) => set({ quality }),
   setAntialias: (antialias) => set({ antialias }),
   setWideColour: (wideColour) => set({ wideColour }),
+  setGlow: (glow) => set({ glow }),
   resetView: () => set(VIEW_DEFAULTS),
   ...guideSlice(set, get, {
     tour: TOUR,

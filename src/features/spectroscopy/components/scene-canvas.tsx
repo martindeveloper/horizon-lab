@@ -50,6 +50,7 @@ export function SceneCanvas({
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const gamut = useDrawingGamut();
+  const halo = useSpectroscopy((s) => s.glow);
   const glow = useMemo(() => glowOf(obs, gamut), [obs, gamut]);
   const lamp = obs.kind === "slab" ? obs.background : null;
   const starColor = useMemo(() => (teff ? blackbodyColor(teff, gamut) : null), [teff, gamut]);
@@ -70,6 +71,7 @@ export function SceneCanvas({
     range,
     labels,
     gamut,
+    halo,
   };
   const latest = useRef(inputs);
   /** Brings the still layer up to date after a render; set by the drawing effect. */

@@ -45,14 +45,19 @@ export function halfFloatRenderable(renderer: WebGLRenderer) {
   );
 }
 
+/** One level of the chain: the frame's light above the threshold, blurred that many steps. */
+export type BloomLevel = { texture: Texture; width: number; height: number };
+
 /**
  * Bloom for any texture (dual Kawase: Bjørge, "Bandwidth-efficient rendering", 2015). `render`
  * takes the frame's bright light down a chain of `mips` levels, the first `scale` of the
  * frame's size, blurring as each halves the one before, then back up, each level's blur added
  * to the next finer one, and returns the first level: the frame's glow, to be added to it
- * `strength` times. Half-float levels where the GPU renders into them, bytes otherwise.
- * Levels are allocated on the first render and reallocated when the frame's size, `mips` or
- * `scale` change. Call only on the client.
+ * `strength` times. `mask` runs only the way down, as far as one level, for an effect that
+ * draws from the bright light alone (the lens pass's spikes), and `level` reads a level of
+ * the last render or mask. Half-float levels where the GPU renders into them, bytes
+ * otherwise. Levels are allocated on the first render and reallocated when the frame's
+ * size, `mips` or `scale` change. Call only on the client.
  */
 export function createBloomPass(renderer: WebGLRenderer) {
   const floating = halfFloatRenderable(renderer);
@@ -84,8 +89,13 @@ export function createBloomPass(renderer: WebGLRenderer) {
   scene.add(quad);
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  /** The chain's levels going down, and the sums coming back up at the same sizes. */
-  let levels: { down: WebGLRenderTarget[]; up: WebGLRenderTarget[]; key: string } | null = null;
+  /** The chain's levels going down (and each as a `BloomLevel`), and the sums coming back up at the same sizes. */
+  let levels: {
+    down: WebGLRenderTarget[];
+    up: WebGLRenderTarget[];
+    read: BloomLevel[];
+    key: string;
+  } | null = null;
   const targetOf = (width: number, height: number) => {
     const target = new WebGLRenderTarget(width, height, {
       type: floating ? HalfFloatType : UnsignedByteType,
@@ -102,9 +112,14 @@ export function createBloomPass(renderer: WebGLRenderer) {
     for (const target of [...levels.down, ...levels.up]) target.dispose();
     levels = null;
   };
-  const chain = (width: number, height: number, settings: BloomSettings) => {
-    const mips = Math.max(1, Math.round(settings.mips));
-    const key = `${width}x${height}/${mips}@${settings.scale}`;
+  const chain = (
+    width: number,
+    height: number,
+    settings: BloomSettings,
+    mips: number,
+    climb: boolean,
+  ) => {
+    const key = `${width}x${height}/${mips}@${settings.scale}${climb ? "" : "/down"}`;
     if (levels?.key === key) return levels;
     free();
     const sizes = Array.from({ length: mips }, (_, i) => {
@@ -114,11 +129,17 @@ export function createBloomPass(renderer: WebGLRenderer) {
         h: Math.max(1, Math.round(height * share)),
       };
     });
+    const down = sizes.map(({ w, h }) => targetOf(w, h));
     levels = {
       key,
-      down: sizes.map(({ w, h }) => targetOf(w, h)),
-      /* The coarsest level needs no sum: the chain turns there. */
-      up: sizes.slice(0, -1).map(({ w, h }) => targetOf(w, h)),
+      down,
+      /* The coarsest level needs no sum: the chain turns there. A mask never comes back up. */
+      up: climb ? sizes.slice(0, -1).map(({ w, h }) => targetOf(w, h)) : [],
+      read: down.map((target) => ({
+        texture: target.texture,
+        width: target.width,
+        height: target.height,
+      })),
     };
     return levels;
   };
@@ -129,24 +150,38 @@ export function createBloomPass(renderer: WebGLRenderer) {
     renderer.render(scene, camera);
   };
 
+  /** The way down: the prefilter from `source`, then each level from the one before. */
+  const descend = (source: Texture, settings: BloomSettings, downs: WebGLRenderTarget[]) => {
+    uniforms.uThreshold.value = settings.threshold;
+    uniforms.uKnee.value = Math.max(0, settings.knee);
+    uniforms.uClamp.value = settings.clamp;
+    uniforms.uImage.value = source;
+    draw(prefilter, downs[0]!);
+    for (let i = 1; i < downs.length; i++) {
+      uniforms.uImage.value = downs[i - 1]!.texture;
+      draw(down, downs[i]!);
+    }
+  };
+  /** Runs `pass` with the renderer's target and auto-clear kept. */
+  const guarded = <T>(pass: () => T) => {
+    const previous = renderer.getRenderTarget();
+    const autoClear = renderer.autoClear;
+    renderer.autoClear = false;
+    try {
+      return pass();
+    } finally {
+      renderer.autoClear = autoClear;
+      renderer.setRenderTarget(previous);
+    }
+  };
   let disposed = false;
   return {
     /** Blooms `source`, a `width` × `height` texture, and returns its glow at the chain's first level. */
     render(source: Texture, width: number, height: number, settings: BloomSettings): Texture {
-      const { down: downs, up: ups } = chain(width, height, settings);
-      const previous = renderer.getRenderTarget();
-      const autoClear = renderer.autoClear;
-      renderer.autoClear = false;
-      try {
-        uniforms.uThreshold.value = settings.threshold;
-        uniforms.uKnee.value = Math.max(0, settings.knee);
-        uniforms.uClamp.value = settings.clamp;
-        uniforms.uImage.value = source;
-        draw(prefilter, downs[0]!);
-        for (let i = 1; i < downs.length; i++) {
-          uniforms.uImage.value = downs[i - 1]!.texture;
-          draw(down, downs[i]!);
-        }
+      const mips = Math.max(1, Math.round(settings.mips));
+      const { down: downs, up: ups } = chain(width, height, settings, mips, true);
+      return guarded(() => {
+        descend(source, settings, downs);
         let finer = downs[downs.length - 1]!;
         for (let i = ups.length - 1; i >= 0; i--) {
           uniforms.uImage.value = finer.texture;
@@ -155,10 +190,33 @@ export function createBloomPass(renderer: WebGLRenderer) {
           finer = ups[i]!;
         }
         return finer.texture;
-      } finally {
-        renderer.autoClear = autoClear;
-        renderer.setRenderTarget(previous);
-      }
+      });
+    },
+    /**
+     * The way down only, as far as level `index` (0 is the prefiltered frame at `scale`; each
+     * further level halves and blurs the one before), and that level: the frame's bright
+     * light, for an effect drawn from it alone. `settings.mips` is not read.
+     */
+    mask(
+      source: Texture,
+      width: number,
+      height: number,
+      settings: BloomSettings,
+      index: number,
+    ): BloomLevel {
+      const mips = Math.max(1, Math.round(index) + 1);
+      const { down: downs, read } = chain(width, height, settings, mips, false);
+      guarded(() => descend(source, settings, downs));
+      return read[mips - 1]!;
+    },
+    /**
+     * Level `index` of the last `render` or `mask` (the coarsest one past the chain's end), or
+     * null before either.
+     */
+    level(index: number): BloomLevel | null {
+      if (!levels) return null;
+      const { read } = levels;
+      return read[Math.min(read.length - 1, Math.max(0, Math.round(index)))]!;
     },
     dispose() {
       if (disposed) return;

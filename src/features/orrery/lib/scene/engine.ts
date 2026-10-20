@@ -75,6 +75,7 @@ export function createOrreryEngine({
     let quality = orreryQuality(useOrrery.getState().quality, tight);
     sceneHost.setResolution(quality.resolution);
     sceneHost.setBloom({ enabled: useOrrery.getState().bloom, ...quality.bloom });
+    sceneHost.setLens({ enabled: useOrrery.getState().lens, ...quality.lens });
     const kit = createSolarKit(basics);
     const { looks, lod } = kit;
     const scene = new Scene();
@@ -304,6 +305,7 @@ export function createOrreryEngine({
       quality = orreryQuality(level, tight);
       sceneHost.setResolution(quality.resolution);
       sceneHost.setBloom({ enabled: store.getState().bloom, ...quality.bloom });
+      sceneHost.setLens({ enabled: store.getState().lens, ...quality.lens });
       sky.setCounts(quality.sky);
       solar.setSwarms(quality.swarms);
       activity.current?.setSteps(quality.activitySteps);

@@ -12,8 +12,9 @@ toolkit's `.glsl` loader (see the package README).
   Output is LinearSRGB with Three.js tone mapping disabled: the shader owns its
   color pipeline. Shader diagnostics are enabled by default. The optional `powerPreference` is a
   browser GPU-selection hint; its default is `default`, not forced discrete GPU.
-  `render({ antialias, bloom })` takes `antialias` `off` (default), `fxaa` or `supersample`,
-  and `bloom` as `BloomSettings` or null (default).
+  `render({ antialias, bloom, lens })` takes `antialias` `off` (default), `fxaa` or
+  `supersample`, `bloom` as `BloomSettings` or null (default) and `lens` as `LensSettings` or
+  null (default).
   `supersample` needs `supersample: true` at creation and a fragment shader that
   defines `vec3 shade(vec2 fragCoord, bool derivatives)` (one ray's radiance) and
   `vec3 display(vec3 radiance, vec2 fragCoord)` (its display colour) and includes
@@ -25,20 +26,25 @@ toolkit's `.glsl` loader (see the package README).
   (`halfFloatRenderable`), that frame is RGBA16F radiance: the shader's `uHdrOutput`
   uniform is 1, `display` is skipped, the chain thresholds radiance and the resolve shader
   (reading `uImage`, `uTexel`, `uBloom`, `uBloomStrength` and its own uniforms) applies
-  `display` to the sum; `hdr` reports which path a pass has. Otherwise bloom works on the
-  display frame through the composite below. Post resources are created on first use.
-- `createCompositePass(renderer, { antialias, bloom })`: the resolve stage of a scene.
+  `display` to the sum; `hdr` reports which path a pass has. The lens takes the same path:
+  the resolve shader includes `<horizon/lens>` and applies it under `HORIZON_LENS`, which the
+  pass defines while the lens is on (its spikes and fringe then act on radiance). Otherwise
+  bloom and the lens work on the display frame through the composite below. Post resources
+  are created on first use.
+- `createCompositePass(renderer, { antialias, bloom, lens })`: the resolve stage of a scene.
   `paint(draw)` runs any number of renders (passes over one depth buffer) into an offscreen
   frame of the drawing buffer's size, then writes it onto the canvas in one full-screen pass
   (`composite.frag.glsl`): copied, or anti-aliased as `antialias` says (`msaa` draws the frame
-  4× multisampled and resolved as the canvas's MSAA would be; `fxaa` filters it), and with
-  `bloom` (`BloomSettings`) with the frame's bright light blurred and added back and a dither
-  of one 8-bit step. The frame holds exactly the bytes the canvas would (8-bit, encoded and
+  4× multisampled and resolved as the canvas's MSAA would be; `fxaa` filters it), with `lens`
+  (`LensSettings`) with its brightest light spiked and its colours fringed towards the
+  corners, with `bloom` (`BloomSettings`) with the frame's bright light blurred and added
+  back, and with either a dither of one 8-bit step. The frame holds exactly the bytes the canvas would (8-bit, encoded and
   blended for the renderer's output colour space), so a scene looks the same through it on
   any WebGL 2 device and materials compile alike for the canvas and the frame. The canvas's
   hardware MSAA does not apply offscreen, so create the renderer with `antialias: false`.
-  `bloom` is read every frame, so its numbers may change in place; switching bloom or the
-  anti-aliasing takes a new pass. `target` is the offscreen frame; nothing is allocated until
+  `bloom` and `lens` are read every frame, so their numbers may change in place; switching
+  either or the anti-aliasing takes a new pass. With bloom off, the lens builds only the mask
+  levels its spikes need (`mask` below). `target` is the offscreen frame; nothing is allocated until
   the first `paint`. `createFxaaPass(renderer)` and `createMsaaPass(renderer)` are this pass
   at `fxaa` and `msaa` without bloom (`render(scene, camera)` on the former draws one scene).
 - `createBloomPass(renderer)`: bloom for any texture, dual Kawase. `render(source, w, h,
@@ -48,9 +54,23 @@ toolkit's `.glsl` loader (see the package README).
   the one before, then back up with each level's blur summed into the next finer one, and
   returns the first level: the glow, to be added `strength` times. Half-float levels where
   the GPU renders into them, bytes otherwise; levels are allocated on first use and
-  reallocated when the size, `mips` or `scale` change. The quality level decides `mips` and
+  reallocated when the size, `mips` or `scale` change. `mask(source, w, h, settings, level)`
+  runs the way down alone, as far as `level`, and returns that level (texture and size);
+  `level(i)` reads a level of the last render or mask. The quality level decides `mips` and
   `scale`, never whether bloom is on: a switch is the consumer's, off by default. Only what
   is drawn into the frame blooms; DOM labels and readouts sit above the canvas.
+- `createLensPass(renderer)`: diffraction spikes for any bright mask (a bloom chain level).
+  `render(mask, w, h, settings)` sums the mask along each arm of a four- or six-point star
+  (`arms`: two or three directional blurs in one draw, `lens-spike.frag.glsl`), `taps`
+  bilinear taps out each way over `reach` of the frame's height, tapering, each tap counting in proportion to
+  the square of its brightness over `threshold` (in the mask's units), so only the brightest
+  light spikes; returns the star at the mask's size, to be added `strength` times. The
+  fringe (`fringe` pixels at the corners, none at the centre) is the resolve shader's, from
+  `<horizon/lens>`. `LensSettings.mask` is the bloom's settings, which the spikes draw from
+  when bloom is off, and `level` the chain level they read (0: the prefiltered frame at the
+  chain's `scale`; each further level coarser and softer). The quality level decides `taps` and `reach`; the switch
+  is the consumer's, off by default. One half-float target at the mask's size; one program
+  per star shape and tap count (compile-time loop bounds), compiled on first use.
 - `RenderQuality`: the four quality levels every simulation offers (`economy`,
   `standard`, `cinema`, `max`, which lifts the device caps), in that order in
   `RENDER_QUALITIES`. Each consumer maps a level to concrete settings in one place (in

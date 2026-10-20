@@ -75,7 +75,12 @@ export async function buildBenchBundle(targets = discoverTargets()) {
     cwd: ROOT,
     platform: "browser",
     tsconfig: path.join(ROOT, "tsconfig.json"),
-    transform: { target: "es2022", define: { "process.env.NODE_ENV": '"production"' } },
+    transform: {
+      target: "es2022",
+      /* The page has no `process`: the build is production, and `src/config.ts` reads its
+         other variables as unset, taking its defaults. */
+      define: { "process.env.NODE_ENV": '"production"', "process.env": "{}" },
+    },
     logLevel: "silent",
     plugins: [entry(targets), glsl],
   });

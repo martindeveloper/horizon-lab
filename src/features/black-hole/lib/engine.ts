@@ -26,7 +26,13 @@ import {
 } from "./frame";
 import type { Quality } from "./holes";
 import { MAX_DIST, MIN_DIST } from "./physics";
-import { BLACK_HOLE_QUALITY, bloomSettings, renderBudget, renderScale } from "./quality";
+import {
+  BLACK_HOLE_QUALITY,
+  bloomSettings,
+  lensSettings,
+  renderBudget,
+  renderScale,
+} from "./quality";
 import { useBlackHole } from "./store";
 import { holdPose, tourEnd, tourPose } from "./tour-flight";
 import { tourFor } from "./tours";
@@ -278,6 +284,7 @@ export function createBlackHoleEngine(
       pass.render({
         antialias: state.antialiasing,
         bloom: state.bloom ? bloomSettings(state.quality, constrained, state.exposure) : null,
+        lens: state.lens ? lensSettings(state.quality, constrained, state.exposure) : null,
       });
       if (warmup.advance()) engine.refresh();
       announceFirstFrame();

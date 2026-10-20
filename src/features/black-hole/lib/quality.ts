@@ -4,26 +4,36 @@
  * for touch or battery operation (`constrained`). The engine, the bench and the technical copy
  * read this table; nothing else picks numbers by level.
  */
-import type { BloomSettings } from "@horizon/toolkit/rendering";
+import type { BloomSettings, LensSettings } from "@horizon/toolkit/rendering";
 
 import type { Quality } from "./holes/types";
 
 /** The bloom chain's size: its levels, and the first level's share of the traced frame. */
 type BloomChain = Pick<BloomSettings, "mips" | "scale">;
 
-/** A frame's work: buffer pixels and pixels per CSS pixel at most, frames per second, the bloom chain. */
+/** The lens's spikes: taps out each way along an arm, and an arm's reach as a share of the frame's height. */
+type LensChain = Pick<LensSettings, "taps" | "reach">;
+
+/** A frame's work: buffer pixels and pixels per CSS pixel at most, frames per second, the bloom chain, the lens. */
 type WorkBudget = {
   pixels: number;
   dprCap: number;
   /** Target frame rate at rest and while the view moves. */
   fps: { idle: number; active: number };
   bloom: BloomChain;
+  lens: LensChain;
 };
 
 /** Quarter-resolution bloom through four levels, for Economy and for touch or battery operation. */
 const SMALL_BLOOM: BloomChain = { mips: 4, scale: 0.25 };
 /** Half-resolution bloom through five levels. */
 const BLOOM: BloomChain = { mips: 5, scale: 0.5 };
+/** Short spikes from six taps, for Economy and for touch or battery operation. */
+const SMALL_LENS: LensChain = { taps: 6, reach: 0.05 };
+/** Spikes over 7 % of the frame from ten taps. */
+const LENS: LensChain = { taps: 10, reach: 0.07 };
+/** Max's spikes: longer, from fourteen taps. */
+const LONG_LENS: LensChain = { taps: 14, reach: 0.09 };
 
 type BlackHoleQuality = {
   /** Integration steps per pixel. */
@@ -39,20 +49,56 @@ export const BLACK_HOLE_QUALITY: Readonly<Record<Quality, BlackHoleQuality>> = {
   economy: {
     steps: 144,
     scale: 0.72,
-    budget: { pixels: 600_000, dprCap: 1, fps: { idle: 24, active: 24 }, bloom: SMALL_BLOOM },
-    constrained: { pixels: 600_000, dprCap: 1, fps: { idle: 24, active: 24 }, bloom: SMALL_BLOOM },
+    budget: {
+      pixels: 600_000,
+      dprCap: 1,
+      fps: { idle: 24, active: 24 },
+      bloom: SMALL_BLOOM,
+      lens: SMALL_LENS,
+    },
+    constrained: {
+      pixels: 600_000,
+      dprCap: 1,
+      fps: { idle: 24, active: 24 },
+      bloom: SMALL_BLOOM,
+      lens: SMALL_LENS,
+    },
   },
   standard: {
     steps: 192,
     scale: 0.9,
-    budget: { pixels: 1_200_000, dprCap: 1, fps: { idle: 30, active: 30 }, bloom: BLOOM },
-    constrained: { pixels: 800_000, dprCap: 1, fps: { idle: 30, active: 30 }, bloom: SMALL_BLOOM },
+    budget: {
+      pixels: 1_200_000,
+      dprCap: 1,
+      fps: { idle: 30, active: 30 },
+      bloom: BLOOM,
+      lens: LENS,
+    },
+    constrained: {
+      pixels: 800_000,
+      dprCap: 1,
+      fps: { idle: 30, active: 30 },
+      bloom: SMALL_BLOOM,
+      lens: SMALL_LENS,
+    },
   },
   cinema: {
     steps: 256,
     scale: 1,
-    budget: { pixels: 2_400_000, dprCap: 1.5, fps: { idle: 30, active: 60 }, bloom: BLOOM },
-    constrained: { pixels: 800_000, dprCap: 1, fps: { idle: 30, active: 30 }, bloom: SMALL_BLOOM },
+    budget: {
+      pixels: 2_400_000,
+      dprCap: 1.5,
+      fps: { idle: 30, active: 60 },
+      bloom: BLOOM,
+      lens: LENS,
+    },
+    constrained: {
+      pixels: 800_000,
+      dprCap: 1,
+      fps: { idle: 30, active: 30 },
+      bloom: SMALL_BLOOM,
+      lens: SMALL_LENS,
+    },
   },
   max: {
     steps: 384,
@@ -62,8 +108,15 @@ export const BLACK_HOLE_QUALITY: Readonly<Record<Quality, BlackHoleQuality>> = {
       dprCap: 2,
       fps: { idle: 60, active: 60 },
       bloom: { mips: 6, scale: 0.5 },
+      lens: LONG_LENS,
     },
-    constrained: { pixels: 2_400_000, dprCap: 1.5, fps: { idle: 60, active: 60 }, bloom: BLOOM },
+    constrained: {
+      pixels: 2_400_000,
+      dprCap: 1.5,
+      fps: { idle: 60, active: 60 },
+      bloom: BLOOM,
+      lens: LENS,
+    },
   },
 };
 
@@ -76,6 +129,7 @@ export function renderBudget(quality: Quality, constrained: boolean, active: boo
     dprCap: budget.dprCap,
     fps: active ? budget.fps.active : budget.fps.idle,
     bloom: budget.bloom,
+    lens: budget.lens,
   };
 }
 
@@ -99,6 +153,31 @@ export function bloomSettings(
     knee: BLACK_HOLE_BLOOM.knee * scale,
     clamp: BLACK_HOLE_BLOOM.clamp * scale,
     ...renderBudget(quality, constrained, false).bloom,
+  };
+}
+
+/**
+ * The observatory's lens, in radiance before the exposure is applied: a four-point star on
+ * light the bloom's mask holds brighter than 1.5, about the disk's hot side and nothing
+ * fainter, added at six tenths, and a fringe of 1.5 pixels at the corners.
+ */
+export const BLACK_HOLE_LENS = { strength: 0.6, threshold: 1.5, arms: 4, fringe: 1.5 } as const;
+
+/** This frame's lens: the look above in the scene's units, with the level's reach and taps. */
+export function lensSettings(
+  quality: Quality,
+  constrained: boolean,
+  exposure: number,
+): LensSettings {
+  const scale = 1 / Math.max(exposure, 0.05);
+  return {
+    mask: bloomSettings(quality, constrained, exposure),
+    level: 0,
+    threshold: BLACK_HOLE_LENS.threshold * scale,
+    arms: BLACK_HOLE_LENS.arms,
+    strength: BLACK_HOLE_LENS.strength,
+    fringe: BLACK_HOLE_LENS.fringe,
+    ...renderBudget(quality, constrained, false).lens,
   };
 }
 

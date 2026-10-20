@@ -75,14 +75,17 @@ test("the store's render settings reach the engine: the level now, later ones af
     antialias: null,
     quality: "standard",
     bloom: false,
+    lens: false,
     setAntialias: (antialias) => set({ antialias }),
   }));
   const host = {
     tight: true,
     antialias: "off",
     bloom: [],
+    lens: [],
     setAntialias: (m) => (host.antialias = m),
     setBloom: (b) => host.bloom.push(b),
+    setLens: (l) => host.lens.push(l),
   };
   const levels = [];
   const scope = new DisposalScope();
@@ -91,6 +94,7 @@ test("the store's render settings reach the engine: the level now, later ones af
   assert.deepEqual(levels, ["standard"], "the engine starts at the store's level");
   assert.equal(store.getState().antialias, "off", "the device's default is published");
   assert.deepEqual(host.bloom, [{ enabled: false }], "the bloom switch reaches the host at once");
+  assert.deepEqual(host.lens, [{ enabled: false }], "so does the lens switch");
   store.getState().setAntialias("fxaa");
   assert.equal(host.antialias, "fxaa");
   store.setState({ bloom: true });
@@ -100,16 +104,21 @@ test("the store's render settings reach the engine: the level now, later ones af
     [{ enabled: false }, { enabled: true }],
     "only a change is passed on",
   );
+  store.setState({ lens: true });
+  store.setState({ bloom: false });
+  assert.deepEqual(host.lens, [{ enabled: false }, { enabled: true }], "each switch on its own");
+  assert.deepEqual(host.bloom.at(-1), { enabled: false });
   store.setState({ quality: "max" });
   store.setState({ quality: "economy" });
   assert.deepEqual(levels, ["standard"], "a new level waits for the control to answer");
   await settle();
   assert.deepEqual(levels, ["standard", "economy"], "quick changes arrive as the last");
   /* A reset clears the choice; the device's default comes back, not the last mode. */
-  store.setState({ antialias: null, quality: "standard", bloom: false });
+  store.setState({ antialias: null, quality: "standard", bloom: false, lens: false });
   assert.equal(store.getState().antialias, "off");
   assert.equal(host.antialias, "off");
   assert.deepEqual(host.bloom.at(-1), { enabled: false });
+  assert.deepEqual(host.lens.at(-1), { enabled: false });
   await settle();
   assert.deepEqual(levels, ["standard", "economy", "standard"]);
   store.setState({ quality: "max" });
@@ -148,6 +157,49 @@ test("space scenes: Standard keeps each device's old budgets, the other levels m
   const counts = (q) => Object.values(orreryQuality(q, false).swarms).reduce((a, b) => a + b);
   assert.ok(counts("economy") < counts("standard") && counts("standard") < counts("max"));
   assert.equal(spaceQuality("economy", false).resolution.fps, 30);
+  /* The level sizes the effects, never switches them: a longer, finer star up the levels. */
+  const lens = (q) => spaceQuality(q, false).lens;
+  assert.ok(
+    lens("economy").taps < lens("standard").taps && lens("standard").taps < lens("max").taps,
+  );
+  assert.ok(
+    lens("economy").reach < lens("standard").reach && lens("standard").reach < lens("max").reach,
+  );
+  assert.deepEqual(
+    spaceQuality("standard", true).lens,
+    lens("economy"),
+    "tight devices keep the light tier",
+  );
+});
+
+test("the black hole's bloom and lens follow the exposure, so a darker scene glows and spikes alike", async () => {
+  const { bloomSettings, lensSettings, BLACK_HOLE_LENS } =
+    await import("../src/features/black-hole/lib/quality.ts");
+  const bright = lensSettings("standard", false, 1);
+  const dim = lensSettings("standard", false, 0.5);
+  assert.equal(bright.threshold, BLACK_HOLE_LENS.threshold);
+  assert.equal(dim.threshold, 2 * bright.threshold, "the threshold is in radiance before exposure");
+  assert.deepEqual(
+    dim.mask,
+    bloomSettings("standard", false, 0.5),
+    "the spikes read the bloom's mask",
+  );
+  assert.ok(
+    bright.threshold > bright.mask.threshold,
+    "only light the bloom holds brightest spikes",
+  );
+  /* The level sizes the star; touch or battery operation takes the small one. */
+  assert.ok(lensSettings("economy", false, 1).taps < lensSettings("max", false, 1).taps);
+  assert.deepEqual(
+    {
+      taps: lensSettings("standard", true, 1).taps,
+      reach: lensSettings("standard", true, 1).reach,
+    },
+    {
+      taps: lensSettings("economy", false, 1).taps,
+      reach: lensSettings("economy", false, 1).reach,
+    },
+  );
 });
 
 test("the shared space copy merges under a simulation's own, and is never written twice", () => {

@@ -160,7 +160,7 @@ src/
                                carried with the camera (`createBrightSky`, `carrySky`)
     bench.ts                   A scene engine on the bench: its frame loop driven frame by frame
     quality.ts                 What a render quality means for every space scene: tier,
-                               resolution, swarms, the bloom chain
+                               resolution, swarms, the bloom chain, the lens's star
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
                                disk), elements, tracers, catalogue, views (and the solar
@@ -335,14 +335,14 @@ only its layers, its views and its store of its own:
   and with a `pathFor` the URL on the view too, as Stellar Spectra's guide needs. Route
   layouts import `@horizon/toolkit/scene.css` for the labels.
 - **Engine:** `createSceneHost` (renderer, camera, frame loop, `tight` devices, shader
-  warm-up, anti-aliasing and bloom: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
+  warm-up, anti-aliasing, bloom and lens: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
   adds limits, the aim's `home` and the frame's `orient`), `createViewMoves` (its views,
   as the pose framing each) and `createOrbitControls` (drag, wheel, pinch).
   `createLabels`, `createTapPicking`, `createAnchoredRulers`, `createDistanceText` and the
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
 - **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
-  `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias`, `bloom` and the scale bar; the
+  `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias`, `bloom`, `lens` and the scale bar; the
   feature adds its view, selection and switches. `guideSlice` is the guide's machine (open
   keeping the visitor's settings, step within the tour, end giving them back); the feature adds
   what its own guide sets per step. Its caption is `GuideCaption`, its keys `useGuideKeys`, and
@@ -350,8 +350,9 @@ only its layers, its views and its store of its own:
   `invalidateOnMotionChange`. `bridgeStore` acts once on each button turn
   and view flight, ignores the view the HUD writes during a frame, and reports the first frame;
   `bridgeRender` hands the engine each new quality level and the host the anti-aliasing and
-  the bloom switch, publishing the device's default anti-aliasing while none is chosen; the
-  engine sets the bloom chain's size for the level (`spaceQuality`'s `bloom`).
+  the bloom and lens switches, publishing the device's default anti-aliasing while none is
+  chosen; the engine sets the bloom chain's and the lens star's size for the level
+  (`spaceQuality`'s `bloom` and `lens`).
 - **Quality:** every simulation maps the shared `RenderQuality` to its own settings in one
   file, `lib/quality.ts`, and passes the result down: engines and layers take numbers (a
   resolution, point counts, map budgets, ray steps), never the level or the device class.
@@ -381,9 +382,11 @@ only its layers, its views and its store of its own:
   render quality (Economy, Standard, Cinematic, Max: `RenderQuality`), anti-aliasing (the modes
   the simulation can draw), the simulation's render switches (`BloomSwitch`: bloom on the
   Sun, the gas disk, the Milky Way and bright stars, or on the black hole's disk, jet and
-  sky; off by default, stored like anti-aliasing), an optional note and Reset, which puts the
-  panel back as a visit starts (`resetView`; the black hole re-applies its preset and turns
-  bloom off). Its copy is the shared `render`
+  sky; `LensSwitch`: diffraction spikes on the brightest of that light and a colour fringe
+  towards the corners; `GlowSwitch`: a soft layer under Stellar Spectra's lights and a halo
+  on its ribbon's strong emission lines; each off by default, stored like anti-aliasing), an
+  optional note and Reset, which puts the panel back as a visit starts (`resetView`; the
+  black hole re-applies its preset and turns bloom and the lens off). Its copy is the shared `render`
   namespace. Standard is always the default and what the simulation drew before the choice
   existed; what each level and mode does is the simulation's own. `useSceneEscape` lets Escape undo
   one thing at a time.
