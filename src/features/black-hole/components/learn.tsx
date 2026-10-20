@@ -137,7 +137,9 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
             className={cn(
               "mt-1 text-sm leading-relaxed text-muted not-md:text-[13px] not-md:leading-normal short:hidden",
               !full && "line-clamp-2",
-              open && !alwaysOpen && "max-h-[28dvh] overflow-y-auto overscroll-contain",
+              open &&
+                !alwaysOpen &&
+                "max-h-[28dvh] overflow-x-hidden overflow-y-auto overscroll-contain",
             )}
           >
             {story.body}

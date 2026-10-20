@@ -31,6 +31,16 @@ catalogue and `examples/visualization-example.tsx` for composition.
   The canvas is never remounted. `ImmersiveToggle`'s `align` anchors its tooltip
   like `Tooltip`'s (`end` when it ends a toolbar at the viewport's right edge).
   `immersive-state.ts` holds the framework-free state, shortcut and Fullscreen API helpers.
+  With `drift` (a scene flying itself, as `active`, `playing`, `onToggle` and labels), the
+  exit control becomes its stop, a pause control joins it (Space does the same, away from
+  controls that use Space), and the controls fade after three still seconds while it plays;
+  an optional `caption` (a clock rate) sits under them, and `music` (on, a toggle and its
+  labels) adds a control that silences the music or brings it back without leaving.
+- `ExperienceMenu`: one toolbar button for a scene's experiences. With `onDrift` it unfolds
+  a column of two round buttons below itself, immersive view and the drift (the drift enters
+  immersive view too); without it the button enters immersive view directly, so it keeps
+  its place and icon on every scene. Escape, an outside press and tabbing away close the
+  column; the button takes focus back when immersive view ends.
 - `FrameStats`: a frame-rate readout for any `FrameSource` (in Horizon, the rendering
   module's `frameMeter`, passed in so this module never imports rendering). Without options
   it shows the rate; `graph`, `vsync` and `memory` add a frame-time graph drawn every display

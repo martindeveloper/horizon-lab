@@ -86,6 +86,15 @@ in seconds, 6 by default) and a `drift` for the slow orbit while the shot is rea
 the short way round, log-linear in distance), a landed shot drifts until `takeOver()`.
 `landed` and `busy` tell the host when to count and when to keep rendering.
 
+## Rig drift
+
+`createRigDrift(rig, shots, settings, { handoff? })` runs a drift (`createDriftRun`
+in the camera module) on an orbit rig: `step(state, dt, hold?)` writes each
+playing frame's pose to the rig and settles it, cancels the rig's own motion as a
+flight begins, and gives a handoff shot to `handoff(index, dt, resume)` each
+frame until the host resumes the drift from wherever it left the camera.
+`flying` says the drift has the camera now.
+
 ## Labels
 
 `createLabels(basics, root, labels, { className, insets })` returns `place`,
@@ -158,7 +167,13 @@ point when given. `createPointWriter(count)` fills one a point at a time:
 `put(x, y, z, color, brightness)` writes `color × brightness`, `count` is how
 many so far, and `geometry()` views what was written; the buffers grow if a
 sketch writes past `count`, so nothing is dropped. `lineOf`, `ownedLine` and
-`rulerOf` are reusable line buffers.
+`rulerOf` are reusable line buffers. `createLineVeil(seconds = 0.8)` fades a
+scene's line art (every `Line`, bar those marked `userData.content = true`) out
+and back together: `step(dt, shown)` eases its `presence`, `cover(root)` just
+before a render scales each line material's opacity (or hides the line once the
+veil is down) and `uncover()` right after gives everything back, so the layers'
+own visibility and opacity are never disturbed; `busy` asks for frames while it
+moves.
 
 ## Sky frames
 

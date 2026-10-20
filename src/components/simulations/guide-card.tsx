@@ -87,7 +87,7 @@ export function GuideCard({
           {kicker}
         </p>
         <div
-          className="mt-1.5 max-h-[min(13rem,32dvh)] w-full overflow-y-auto overscroll-contain short:mt-1 short:max-h-[38dvh]"
+          className="mt-1.5 max-h-[min(13rem,32dvh)] w-full overflow-x-hidden overflow-y-auto overscroll-contain short:mt-1 short:max-h-[38dvh]"
           aria-live={live ? "polite" : undefined}
           aria-atomic={live ? true : undefined}
         >

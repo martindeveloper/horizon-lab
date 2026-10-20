@@ -34,6 +34,7 @@ import {
   createAnchoredRulers,
   createDistanceText,
   createLabels,
+  createLineVeil,
   createOrbitControls,
   createSceneHost,
   sceneKit,
@@ -49,6 +50,7 @@ import { deepFieldQuality } from "../quality";
 import { dropsSelection, useDeepField } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCosmosLayer } from "./cosmos-layer";
+import { createDriftDirector } from "./drift-director";
 import { createGalaxyLayer } from "./galaxy-layer";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
@@ -143,16 +145,28 @@ export function createDeepFieldEngine({
     rig.home();
     rig.applyPose();
 
-    /* The guided journey flies its own shots; a drag or a zoom takes the camera back. */
+    /* The guided journey and the drift fly their own shots; a drag or a zoom takes the camera back. */
     const guide = createGuideDirector(rig, store, reduceMotion);
+    const drift = createDriftDirector(rig, store, reduceMotion);
+    /* The drift veils the line art: orbits, rings, trails and rulers fade, the sky stays. */
+    const veil = createLineVeil();
     const controls = createOrbitControls(scope, canvas, rig, {
       invalidate: () => engine.invalidate(),
       /* The rig clamps to its own limits, the ladder's ends. */
       distance: { min: LADDER_LY.near * LY * 0.5, max: LADDER_LY.far * LY * 1.1 },
-      onInput: () => guide.takeOver(),
+      onInput: () => {
+        guide.takeOver();
+        drift.takeOver();
+      },
     });
     const continuous = () =>
-      rig.moving || guide.busy || controls.interacting || lod.busy || solarKit.lod.busy;
+      rig.moving ||
+      guide.busy ||
+      drift.busy ||
+      veil.busy ||
+      controls.interacting ||
+      lod.busy ||
+      solarKit.lod.busy;
 
     createPicking(kit, canvas, store, {
       pickables: [
@@ -179,8 +193,8 @@ export function createDeepFieldEngine({
       },
       turn: (turn) => rig.turnBy(turn),
       fly: (s) => {
-        /* The journey flies its own shots. */
-        if (s.guideOpen) return;
+        /* The journey and the drift fly their own shots. */
+        if (s.guideOpen || s.drift !== "off") return;
         rig.flyToView(s.view);
         controls.cancel();
       },
@@ -200,6 +214,7 @@ export function createDeepFieldEngine({
      * galaxies sit light-years behind the Sun's neighbours), then the neighbourhood over them.
      */
     const draw = () => {
+      veil.cover(scene);
       if (galaxy.visible || cosmos.visible) {
         const near = camera.near;
         const far = camera.far;
@@ -220,6 +235,7 @@ export function createDeepFieldEngine({
       }
       renderer.render(scene, camera);
       renderer.autoClear = true;
+      veil.uncover();
     };
 
     /**
@@ -231,6 +247,8 @@ export function createDeepFieldEngine({
       bridge.frame(() => {
         const state = store.getState();
         guide.step(dt);
+        drift.step(dt);
+        veil.step(dt, state.drift === "off");
         rig.step(dt);
         rig.home();
         rig.applyPose();
@@ -247,7 +265,12 @@ export function createDeepFieldEngine({
           if (sel && dropsSelection(sel, realm, flyingTo)) store.getState().select(null);
         }
 
-        const frame: Frame = { show: state.show, sel: store.getState().selection, dist };
+        const frame: Frame = {
+          show: state.show,
+          sel: store.getState().selection,
+          dist,
+          lines: veil.presence,
+        };
         const solarFrame: SolarFrame = {
           ...TODAY,
           dt,
@@ -262,14 +285,16 @@ export function createDeepFieldEngine({
         reach.update(frame);
         /* The neighbours fade themselves out past the nearest stars. */
         neighbours.update(frame, pose.azimuth);
-        if (state.show.distances && realm === "solar")
+        /* Rulers carry their readouts: the drift leaves them out with the rest of the line art. */
+        const rulersOn = state.show.distances && state.drift === "off";
+        if (rulersOn && realm === "solar")
           rulers.drawFrom(
             frame.sel?.kind === "reach" && frame.sel.id !== "heliopause"
               ? frame.sel.id
               : rulerOrigin(solarFrame.sel, at),
             dist,
           );
-        else if (state.show.distances && realm === "stars")
+        else if (rulersOn && realm === "stars")
           rulers.drawFrom(frame.sel?.kind === "star" ? frame.sel.id : null, dist);
         galaxy.update(frame);
         cosmos.update(frame);

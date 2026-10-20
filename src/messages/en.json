@@ -326,7 +326,17 @@
     "enter": "Enter immersive view",
     "exit": "Exit immersive view",
     "close": "Exit",
-    "fullscreen": "Full screen"
+    "fullscreen": "Full screen",
+    "experiences": "Viewing modes"
+  },
+  "drift": {
+    "title": "Drift",
+    "start": "Start Drift",
+    "pause": "Pause Drift",
+    "resume": "Resume Drift",
+    "stop": "Stop Drift",
+    "muteMusic": "Mute music",
+    "playMusic": "Play music"
   },
   "render": {
     "title": "Rendering",

@@ -475,7 +475,10 @@ one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
 `interstellar-drift`, `aeolian-static`, `drifting-probe` and `low-drone-rises`, each as
 `.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
-the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The page
+the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The bed
+plays at `MUSIC_LEVEL.ambient` (0.75); a drift lifts it to `MUSIC_LEVEL.drift` (1)
+and may hold the playlist on its simulation's track (`useDriftMusic`), never
+starting music the visitor has off. The page
 preconnects to the CDN; the first track buffers when the toggle is hovered or
 focused, or at once when the session had music on. Otherwise nothing loads before
 the first play; the next track buffers 30 s before its crossfade, or on
@@ -509,14 +512,17 @@ Other large assets follow the same layout (`textures/<feature>/`, `models/<featu
 
 Every simulation uses the same immersive view; never build a feature-specific
 one. The app adapter `src/components/simulations/immersive.tsx` wraps the
-toolkit's `ImmersiveScene` and `ImmersiveToggle` with shared copy (`immersive.*`
-in the root catalogs) and the `[data-simulation]` stage:
+toolkit's `ImmersiveScene` and `ExperienceMenu` with shared copy (`immersive.*`
+and `drift.*` in the root catalogs) and the `[data-simulation]` stage:
 
 ```tsx
 <VisualizationShell id="main-content" tabIndex={-1} className="h-full">
   <MyCanvas />
-  <SimulationImmersive onEnter={closeMyTour}>
-    <MyOverlay /> {/* its SimulationToolbar holds the immersive toggle */}
+  <SimulationImmersive
+    onEnter={closeMyTour}
+    drift={{ state, music: DRIFT.music, onToggle, onStop }} // with a drift (below)
+  >
+    <MyOverlay /> {/* its SimulationToolbar ends with the experiences button */}
   </SimulationImmersive>
 </VisualizationShell>
 ```
@@ -529,6 +535,45 @@ leaves. Where `document.fullscreenEnabled` is true the exit control also offers
 real fullscreen on the stage; leaving fullscreen leaves immersive view. Other
 shared overlays read `useImmersive()` to step aside. `tests/immersive.test.mjs`
 fails for any feature that skips the shared pieces or keeps its own.
+
+### Drift
+
+Drift is the lean-back mode: the scene enters immersive view, the music lifts,
+and the camera flies itself from shot to shot until the visitor pauses it, takes
+the camera (a drag or a zoom pauses it) or leaves (Esc, the exit control, the end
+of fullscreen). The Black Hole, the Orrery and Deep Field have one; Stellar
+Spectra has no camera, so its experiences button enters immersive view directly.
+
+- `src/lib/drift.ts` holds the shared state (`DriftState`, `driftSlice` for the
+  stores: start, pause, resume, toggle, stop, with `open` and `close` hooks for
+  what each simulation clears) and the shape of a programme.
+- `src/features/<slug>/lib/drift.ts` is the simulation's programme: its music
+  (`track` from the playlist, `level`), the camera settings (pace, variance, hold
+  orbit and push, order) and the shots. Deep Field's and the Orrery's shots name a
+  view plus nudges; the observatory's are poses in M with roll. The Orrery's
+  programme also visits bodies: a `closeUp` shot is a handoff to the close-up
+  (the drift selects the body, the close-up flies in at `closeUp.pace` times its
+  usual flight time, the director circles it and drifts nearer for the hold, then
+  lets the selection go so the close-up flies out and no marker stays), and `clock` holds the
+  Motion speed-up to a few hundredths of a year per second while the drift is on,
+  so the inner planets and the belt glide rather than whirl; the rate shows under
+  the drift's controls (`SimulationImmersive`'s `drift.caption`).
+- The toolkit runs the camera: `createDriftRun` from the store's `drift` state,
+  and `createRigDrift` on an orbit rig. A director beside each rig engine
+  (`lib/scene/drift-director.ts`) resolves the shots to the rig's framings and
+  adds what is the simulation's own (the Orrery's close-up visits); the
+  observatory's engine runs the drift directly on its raymarched camera. The
+  engine's `fly`, HUD view sync and auto-orbit stand aside meanwhile, and the
+  camera comes back to the visitor where it stopped. The line art (orbits, the
+  grid, light-time and lookback rings, trails, rulers) fades out over the
+  toolkit's `createLineVeil` around each render and back when the drift ends; the
+  cosmic web's filaments are content (`userData.content`) and stay, as do names.
+- `SimulationToolbar`'s `drift` prop (the store's `startDrift`) puts the drift in
+  the experiences button; `useSimulationDrift(store, programme, caption?)` gives
+  `SimulationImmersive`'s `drift` prop, which carries the state into the immersive
+  controls (pause, Space, a music mute, the exit control as stop) and runs
+  `useDriftMusic`. Leaving immersive view stops the drift. `tests/drift.test.mjs`
+  checks every programme and the stores' transitions.
 
 ## Units, constants and equations
 

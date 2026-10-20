@@ -49,6 +49,7 @@ export function OrreryOverlay() {
   const setPanel = useOrrery((s) => s.setPanel);
   const selection = useOrrery((s) => s.selection);
   const closeUp = useOrrery((s) => s.closeUp);
+  const drift = useOrrery((s) => s.drift);
   const guideOpen = useOrrery((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
 
@@ -103,6 +104,7 @@ export function OrreryOverlay() {
                   controls: "orrery-view",
                   onSelect: () => setPanel(panel === "view" ? "none" : "view"),
                 }}
+                drift={() => useOrrery.getState().startDrift()}
               />
             </div>
           </header>
@@ -111,7 +113,7 @@ export function OrreryOverlay() {
           {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}
           {panel === "reading" ? <ReadingPanel onClose={() => setPanel("none")} /> : null}
           {/* Remounts on entering or leaving a close-up, so the card starts folded or whole. */}
-          {panel === "none" && selection ? (
+          {panel === "none" && selection && drift === "off" ? (
             <SelectionCard key={closeUp ? "close-up" : "card"} />
           ) : null}
           <EdgeChip />

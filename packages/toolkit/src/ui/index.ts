@@ -29,11 +29,14 @@ export {
   ImmersiveScene,
   ImmersiveToggle,
   useImmersive,
+  type ImmersiveDrift,
   type ImmersiveSceneProps,
   type ImmersiveToggleProps,
 } from "./immersive";
+export { ExperienceMenu, type ExperienceMenuProps } from "./experience-menu";
 export {
   IMMERSIVE_SHORTCUT,
+  driftKeyAction,
   enterFullscreen,
   exitFullscreen,
   fullscreenAvailable,

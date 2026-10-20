@@ -46,4 +46,6 @@ export type Frame = {
   sel: Selection | null;
   /** Camera distance from its aim, au. */
   dist: number;
+  /** The line art's presence 0..1 (a drift veils it); labels that name a line follow it. */
+  lines: number;
 };

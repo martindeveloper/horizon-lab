@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { driftSlice, type DriftSlice } from "@/lib/drift";
 import {
   RESET_SCENE_SETTINGS,
   guideSlice,
@@ -74,7 +75,8 @@ type Panel = "none" | "objects" | "view";
 const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
 
 export type DeepFieldStore = SceneSlice &
-  GuideSlice<Show> & {
+  GuideSlice<Show> &
+  DriftSlice & {
     view: ViewId;
     /** A depth the visitor dragged the ladder to (camera distance, ly), or null. */
     seek: { ly: number } | null;
@@ -137,4 +139,11 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   guidePlaying: false,
   guideLanded: false,
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
+  /* The drift closes the panel and the card and ends the journey; the view follows the camera. */
+  ...driftSlice(set, get, {
+    open: (s) => {
+      if (s.guideOpen) s.endGuide();
+      return { panel: "none" as const, selection: null, seek: null };
+    },
+  }),
 }));

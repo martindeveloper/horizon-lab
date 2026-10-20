@@ -66,7 +66,7 @@ export function Rail({
           closeLabel={closeLabel}
           className="items-center border-b border-border px-4 py-3"
         />
-        <div className="flex flex-col gap-5 overflow-y-auto overscroll-contain px-4 py-4">
+        <div className="flex flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4">
           {children}
         </div>
       </aside>
@@ -83,7 +83,7 @@ export function Rail({
           closeLabel={closeLabel}
           className="items-center py-1.5"
         />
-        <div className="no-scrollbar flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain pt-2 pb-2">
+        <div className="no-scrollbar -mx-3 flex min-h-0 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3 pt-2 pb-2">
           {sheetLead}
           {children}
         </div>

@@ -124,7 +124,7 @@ test("the orrery HUD throttles drift readouts to 1 Hz even across forced redraws
     // Forced redraws update scale/rate immediately without churning driftYears every frame.
     hud.update(0.016, true, {
       dist: 170_000,
-      drift: true,
+      driftRate: driftYearsPerSecond(170_000),
       driftYears: 500,
       syncView: true,
       angles,
@@ -134,7 +134,7 @@ test("the orrery HUD throttles drift readouts to 1 Hz even across forced redraws
     assert.equal(useOrrery.getState().driftYears, 0);
     hud.update(0.5, false, {
       dist: 170_000,
-      drift: true,
+      driftRate: driftYearsPerSecond(170_000),
       driftYears: 15_500,
       syncView: true,
       angles,
@@ -142,14 +142,20 @@ test("the orrery HUD throttles drift readouts to 1 Hz even across forced redraws
     assert.equal(useOrrery.getState().driftYears, 0);
     hud.update(0.5, false, {
       dist: 170_000,
-      drift: true,
+      driftRate: driftYearsPerSecond(170_000),
       driftYears: 30_000,
       syncView: true,
       angles,
     });
     assert.equal(useOrrery.getState().driftYears, 30_000);
     // Resetting driftYears to 0 commits at once.
-    hud.update(0.016, true, { dist: 170_000, drift: true, driftYears: 0, syncView: true, angles });
+    hud.update(0.016, true, {
+      dist: 170_000,
+      driftRate: driftYearsPerSecond(170_000),
+      driftYears: 0,
+      syncView: true,
+      angles,
+    });
     assert.equal(useOrrery.getState().driftYears, 0);
     // Manual zooming updates the active view and clears preset distance match when between presets.
     for (const v of SOLAR_VIEWS) {
@@ -159,7 +165,7 @@ test("the orrery HUD throttles drift readouts to 1 Hz even across forced redraws
     assert.equal(atViewScale(30, 72), false);
     hud.update(0.016, true, {
       dist: 6,
-      drift: true,
+      driftRate: driftYearsPerSecond(170_000),
       driftYears: 0,
       syncView: true,
       angles,

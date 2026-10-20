@@ -58,6 +58,17 @@ export function immersiveKeyAction(event: KeyLike, immersive: boolean): "toggle"
   return event.key.toUpperCase() === IMMERSIVE_SHORTCUT ? "toggle" : null;
 }
 
+/**
+ * Space pauses or resumes a drift that is on; typing, chords and auto-repeat are ignored. The
+ * host keeps it from controls that use Space themselves.
+ */
+export function driftKeyAction(event: KeyLike, drifting: boolean): "toggle" | null {
+  if (!drifting || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey)
+    return null;
+  if (event.repeat || typing(event.target)) return null;
+  return event.key === " " || event.key === "Spacebar" ? "toggle" : null;
+}
+
 /** Fullscreen API on one element. iPhone Safari reports `fullscreenEnabled` false or leaves it out. */
 export function fullscreenAvailable(doc: Pick<Document, "fullscreenEnabled"> | undefined) {
   return doc?.fullscreenEnabled === true;

@@ -1,12 +1,11 @@
 "use client";
 
-import { GraduationCap, Info, Maximize2, SlidersHorizontal, type LucideIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { GraduationCap, Info, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { useRef, type ReactNode, type Ref } from "react";
 
-import { IconButton, Toolbar, Tooltip, setImmersive, type DialogHandle } from "@horizon/toolkit/ui";
+import { IconButton, Toolbar, Tooltip, type DialogHandle } from "@horizon/toolkit/ui";
 
-import { SimulationImmersiveToggle } from "./immersive";
+import { SimulationExperience } from "./immersive";
 import { SceneMoreMenu, type MoreItem } from "./more-menu";
 import type { TechnicalDetailsAccess } from "./technical-details";
 
@@ -57,8 +56,8 @@ function ToolButton({
 /**
  * Every simulation's header tools, in one order so hands learn it once: technical details,
  * the guide, the finder (what to look at), the simulation's other tools, its settings panel,
- * then the immersive view. Phones keep the guide, the finder and the settings, and fold the
- * rest into More, in the same order.
+ * then the experiences (immersive view and, with `drift`, the drift). Phones keep the guide,
+ * the finder, the settings and the experiences, and fold the rest into More, in the same order.
  */
 export function SimulationToolbar({
   label,
@@ -69,6 +68,7 @@ export function SimulationToolbar({
   finder,
   tools = [],
   settings,
+  drift,
 }: {
   label: string;
   /** The feature's technical details, given the handle and trigger class the toolbar needs. */
@@ -81,8 +81,9 @@ export function SimulationToolbar({
   finder?: SimulationTool;
   tools?: readonly SimulationTool[];
   settings: Omit<SimulationTool, "id" | "icon">;
+  /** Starts the simulation's drift (`src/lib/drift.ts`); without it the experiences button enters immersive view. */
+  drift?: () => void;
 }) {
-  const tImmersive = useTranslations("immersive");
   const dialog = useRef<DialogHandle>(null);
   const more: MoreItem[] = [
     {
@@ -98,12 +99,6 @@ export function SimulationToolbar({
       onSelect,
       ...(active !== undefined ? { active } : {}),
     })),
-    {
-      id: "immersive",
-      label: tImmersive("title"),
-      icon: Maximize2,
-      onSelect: () => setImmersive(true),
-    },
   ];
   return (
     <Toolbar aria-label={label} className="ml-auto shrink-0">
@@ -116,9 +111,7 @@ export function SimulationToolbar({
         ))}
       </div>
       <ToolButton tool={{ ...settings, id: "settings", icon: SlidersHorizontal }} />
-      <div className="not-md:hidden md:contents">
-        <SimulationImmersiveToggle />
-      </div>
+      <SimulationExperience onDrift={drift} />
       <SceneMoreMenu className="md:hidden" items={more} />
     </Toolbar>
   );

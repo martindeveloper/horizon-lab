@@ -112,7 +112,7 @@ export function createCosmosLayer(
     reach() {
       return camera.position.distanceTo(centre) + EXTENT_MLY * MLY;
     },
-    update({ show, sel }: Frame) {
+    update({ show, sel, lines }: Frame) {
       const shown = lod.cosmos;
       root.visible = field.visible = shown > 0.001;
       const labelled = names.to(show.names) * shown;
@@ -164,7 +164,7 @@ export function createCosmosLayer(
       view.up.setFromMatrixColumn(camera.matrixWorld, 1).applyQuaternion(turn);
       view.up.addScaledVector(view.toward, -view.up.dot(view.toward)).normalize();
       view.facing.setFromUnitVectors(Z, view.toward);
-      rings.update(view, labelled * ringsOn, labels().lookbackRing, place);
+      rings.update(view, labelled * ringsOn * lines, labels().lookbackRing, place);
       const edge = shellOutline(CMB_MLY, view.d);
       edgeMark.copy(view.toward).multiplyScalar(edge.offset).addScaledVector(view.up, -edge.radius);
       /* At their real size once that is larger than a dozen pixels. */

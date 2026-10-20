@@ -74,3 +74,43 @@ test("a playlist skips while paused and wraps; a single track has nowhere to go"
   assert.equal(single.tracks.length, 1);
   assert.throws(() => new MusicPlayer([]));
 });
+
+test("a held track plays next and loops; the level is kept for the next play and clamped", () => {
+  const tracks = ["A", "B", "C"].map((title) => ({
+    title,
+    sources: [{ src: `/${title}.webm`, type: "audio/webm" }],
+  }));
+  const playlist = new MusicPlayer(tracks, { level: 0.75 });
+  assert.equal(playlist.getLevel(), 0.75);
+  assert.equal(playlist.getHeld(), null);
+  let heard = 0;
+  const stop = playlist.subscribe(() => heard++);
+  /* Paused, holding a track queues it for the next play. */
+  playlist.hold(2);
+  assert.equal(playlist.getHeld(), 2);
+  assert.equal(playlist.track.title, "C");
+  assert.equal(heard, 1);
+  playlist.next();
+  assert.equal(playlist.track.title, "C", "a skip stays on the held track");
+  playlist.hold(null);
+  assert.equal(playlist.getHeld(), null);
+  playlist.next();
+  assert.equal(playlist.track.title, "A", "released, the playlist runs on and wraps");
+  playlist.hold(7);
+  assert.equal(playlist.getHeld(), null, "an index outside the playlist is ignored");
+  playlist.hold(0);
+  assert.equal(heard, 3, "holding the current track changes nothing");
+  stop();
+  /* The level moves without an audio graph and never leaves 0..1. */
+  playlist.setLevel(1.4);
+  assert.equal(playlist.getLevel(), 1);
+  playlist.setLevel(-2);
+  assert.equal(playlist.getLevel(), 0);
+  playlist.setLevel(Number.NaN);
+  assert.equal(playlist.getLevel(), 1);
+  assert.equal(
+    ambientMusic.getLevel(),
+    0.75,
+    "the site's music plays below full, leaving room for a drift",
+  );
+});

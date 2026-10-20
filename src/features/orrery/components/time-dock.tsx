@@ -40,6 +40,18 @@ const trackX = (at: number) => `calc(7px + ${at} * (100% - 14px))`;
  */
 const reachesPanels: DockInTheWay = (dock, stage, rem) => dock.right + 22 * rem > stage.right;
 
+/** "1 s ≈ 15 days": the Motion speed-up's rate in words, or that it is paused at 0. */
+export function motionRateLabel(
+  t: ReturnType<typeof useTranslations<"orrery">>,
+  f: ReturnType<typeof useFormatter>,
+  rate: number,
+) {
+  if (rate === 0) return t("hud.driftPaused");
+  if (rate < 1.2) return t("hud.driftDays", { value: Math.round(rate * 365) });
+  if (rate < 800) return t("hud.driftYears", { value: Math.round(rate) });
+  return t("hud.driftThousand", { value: f.number(rate / 1000, { maximumFractionDigits: 1 }) });
+}
+
 /** The timeline dock: date and playback, era note, epoch track, then map settings. */
 export function TimeDock() {
   const t = useTranslations("orrery");
@@ -61,16 +73,7 @@ export function TimeDock() {
   const now = useNow({ updateInterval: 60_000 });
   const atEnd = yearsAgo <= 0;
   const api = useOrrery.getState;
-  const driftLabel =
-    !drift || driftRate === 0
-      ? t("hud.driftPaused")
-      : driftRate < 1.2
-        ? t("hud.driftDays", { value: Math.round(driftRate * 365) })
-        : driftRate < 800
-          ? t("hud.driftYears", { value: Math.round(driftRate) })
-          : t("hud.driftThousand", {
-              value: f.number(driftRate / 1000, { maximumFractionDigits: 1 }),
-            });
+  const driftLabel = motionRateLabel(t, f, drift ? driftRate : 0);
   const offset =
     driftYears < 1
       ? t("time.offsetDays", { value: Math.max(1, Math.round(convert(driftYears, "yr", "d"))) })

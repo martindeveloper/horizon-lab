@@ -133,6 +133,8 @@ export function createCosmosClouds(
   const circle = scope.own(first.circle);
   const flows = new LineSegments(first.flows, looks.cosmosFlow);
   flows.frustumCulled = false;
+  /* The web's filaments are the picture, not a line drawn over it: a drift's veil leaves them. */
+  flows.userData.content = true;
   root.add(flows);
   drawn.push({ object: flows, of: (s) => s.flows });
 

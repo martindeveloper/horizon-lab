@@ -185,6 +185,7 @@ export function ObservatoryOverlay() {
                   controls: SETTINGS_PANEL_ID,
                   onSelect: toggleMenu,
                 }}
+                drift={() => useBlackHole.getState().startDrift()}
               />
             </div>
           </header>
@@ -273,7 +274,7 @@ function MobilePinCard({ children }: { children: ReactNode }) {
     <div
       ref={card}
       tabIndex={-1}
-      className="pin-card-mobile lesson-card no-scrollbar anim-sheet overflow-y-auto rounded-t-xl p-3.5 outline-hidden"
+      className="pin-card-mobile lesson-card no-scrollbar anim-sheet overflow-x-hidden overflow-y-auto rounded-t-xl p-3.5 outline-hidden"
     >
       {children}
     </div>

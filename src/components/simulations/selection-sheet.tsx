@@ -51,7 +51,7 @@ export function SelectionSheet({
       />
       <div
         className={cn(
-          "scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4",
+          "scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4",
           folded && "not-md:hidden",
         )}
       >

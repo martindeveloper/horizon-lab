@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { driftSlice, type DriftSlice } from "@/lib/drift";
 import {
   RESET_SCENE_SETTINGS,
   guideSlice,
@@ -43,7 +44,8 @@ const DEFAULT_SHOW: Show = {
 };
 
 export type OrreryStore = SceneSlice &
-  GuideSlice<Show> & {
+  GuideSlice<Show> &
+  DriftSlice & {
     yearsAgo: number;
     playing: boolean;
     view: SolarViewId;
@@ -186,4 +188,11 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   resetView: () =>
     set({ show: { ...DEFAULT_SHOW, drift: !prefersReducedMotion() }, ...RESET_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
+  /* The drift (lib/drift.ts) leaves a close-up and the panel and ends the tour; the clock runs on. */
+  ...driftSlice(set, get, {
+    open: (s) => {
+      if (s.guideOpen) s.endGuide();
+      return { panel: "none" as const, selection: null, ...closeUpState(false) };
+    },
+  }),
 }));

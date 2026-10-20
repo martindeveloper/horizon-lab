@@ -15,3 +15,4 @@ export * from "./sprites";
 export * from "./points";
 export * from "./log-zoom";
 export * from "./tour-camera";
+export * from "./drift-rig";

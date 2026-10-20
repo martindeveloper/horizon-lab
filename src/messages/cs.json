@@ -326,7 +326,17 @@
     "enter": "Spustit nerušené prohlížení",
     "exit": "Ukončit nerušené prohlížení",
     "close": "Ukončit",
-    "fullscreen": "Celá obrazovka"
+    "fullscreen": "Celá obrazovka",
+    "experiences": "Režimy prohlížení"
+  },
+  "drift": {
+    "title": "Drift",
+    "start": "Spustit Drift",
+    "pause": "Pozastavit Drift",
+    "resume": "Pokračovat v Driftu",
+    "stop": "Ukončit Drift",
+    "muteMusic": "Ztlumit hudbu",
+    "playMusic": "Pustit hudbu"
   },
   "render": {
     "title": "Vykreslování",

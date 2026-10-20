@@ -65,6 +65,8 @@ type CloseUp = {
   detail: Texture | null;
   /** 0..1 of the framing offset applied, eased with the flight. */
   blend: number;
+  /** How many times the usual flight time this flight takes (a drift flies in and out slowly). */
+  pace: number;
 };
 
 const bodyKey = (sel: BodySelection): BodyId => (sel.kind === "sun" ? "sun" : sel.id);
@@ -92,6 +94,8 @@ export function createCloseUpController(
     upload: (texture: Texture) => void;
     /** The current quality's close-up maps, read as each close-up starts. */
     quality: () => CloseUpQuality;
+    /** A multiplier on the flight times, read as each flight starts; 1 by default. */
+    pace?: () => number;
   },
 ) {
   const { rig, reduceMotion, invalidate, locate, upload } = deps;
@@ -194,6 +198,7 @@ export function createCloseUpController(
       loading: null,
       detail: null,
       blend: 0,
+      pace: deps.pace?.() ?? 1,
     };
     const near = nearFile(id);
     if (near) {
@@ -246,6 +251,7 @@ export function createCloseUpController(
     }
     close.phase = "out";
     close.t = 0;
+    close.pace = deps.pace?.() ?? 1;
     close.from = { ...pose };
     close.fromAim = aim.clone();
     deps.onRelease();
@@ -317,7 +323,10 @@ export function createCloseUpController(
       if (close.phase === "on") aim.copy(target);
       else {
         const entering = close.phase === "in";
-        close.t = Math.min(1, close.t + dt / (entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S));
+        close.t = Math.min(
+          1,
+          close.t + dt / ((entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * close.pace),
+        );
         const step = sampleCloseUp(close.t, close.from, entering ? close.to : close.home, entering);
         Object.assign(pose, step.pose);
         if (entering) aim.lerpVectors(close.fromAim, target, step.aim);

@@ -144,7 +144,7 @@ export function LineCard() {
         closeLabel={t("hud.close")}
         className="px-3.5 pt-3.5 md:px-4 md:pt-4"
       />
-      <div className="scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4">
+      <div className="scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4">
         <div>
           <p className="text-xs text-muted">
             {shifted ? t("card.observed") : t("card.wavelength")}

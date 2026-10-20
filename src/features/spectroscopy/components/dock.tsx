@@ -554,7 +554,7 @@ export function SpectroscopyDock() {
       footerClassName={cn(aside && "not-md:hidden")}
       /* On a desktop the tray spans the stage, as the spectrum does; on phones the dock stops
          short of the spectrum and scrolls instead. */
-      className="anim-rise scroll-thin flex max-h-[50dvh] flex-col gap-2.5 overflow-y-auto overscroll-contain md:max-h-none md:max-w-none md:gap-3 md:overflow-visible short:max-h-[42dvh]"
+      className="anim-rise scroll-thin flex max-h-[50dvh] flex-col gap-2.5 overflow-x-hidden overflow-y-auto overscroll-contain md:max-h-none md:max-w-none md:gap-3 md:overflow-visible short:max-h-[42dvh]"
     >
       {view === "kirchhoff" ? (
         <BenchControls />

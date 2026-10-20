@@ -8,6 +8,7 @@ import { DisposalScope } from "@horizon/toolkit/rendering";
 import {
   createAnchoredRulers,
   createFaders,
+  createLineVeil,
   createLogZoom,
   createOrbitRig,
   createPointWriter,
@@ -356,4 +357,67 @@ test("orbit lines do not occlude bodies in the depth buffer", () => {
   assert.equal(orbit.material.depthWrite, false);
   orbit.geometry.dispose();
   orbit.material.dispose();
+});
+
+test("a line veil fades every line out together and gives the layers' own state back", async () => {
+  const { Line, LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial, Scene } =
+    await import("three");
+  const scene = new Scene();
+  const orbit = lineOf(0xffffff, 0.6).line;
+  const shared = new LineBasicMaterial({ color: 0xffffff, opacity: 1, transparent: false });
+  const gridA = new LineSegments(orbit.geometry, shared);
+  const gridB = new LineSegments(orbit.geometry, shared);
+  const web = new Line(orbit.geometry, new LineBasicMaterial({ opacity: 0.3, transparent: true }));
+  web.userData.content = true;
+  const off = new Line(orbit.geometry, new LineBasicMaterial({ opacity: 0.5 }));
+  off.visible = false;
+  const body = new Mesh(undefined, new MeshBasicMaterial({ opacity: 0.8, transparent: true }));
+  scene.add(orbit, gridA, gridB, web, off, body);
+
+  const veil = createLineVeil(1);
+  assert.equal(veil.presence, 1);
+  assert.equal(veil.busy, false);
+  veil.cover(scene);
+  assert.equal(orbit.material.opacity, 0.6, "fully shown, the veil touches nothing");
+  veil.uncover();
+
+  /* Half-way down: lines dim by the eased presence, shared materials once, content and meshes never. */
+  veil.step(0.5, false);
+  assert.equal(veil.busy, true);
+  assert.ok(veil.presence > 0.49 && veil.presence < 0.51);
+  veil.cover(scene);
+  assert.ok(
+    orbit.material.opacity < 0.31 && orbit.material.opacity > 0.29,
+    `orbit ${orbit.material.opacity}`,
+  );
+  assert.ok(shared.opacity < 0.51 && shared.opacity > 0.49, "a material two lines share dims once");
+  assert.equal(shared.transparent, true, "an opaque line material blends while dimmed");
+  assert.equal(web.material.opacity, 0.3, "content lines keep their look");
+  assert.equal(body.material.opacity, 0.8, "meshes are not lines");
+  assert.equal(off.visible, false);
+  veil.uncover();
+  assert.equal(orbit.material.opacity, 0.6);
+  assert.equal(shared.opacity, 1);
+  assert.equal(shared.transparent, false);
+
+  /* Down: lines hide for the render and come back after, except what was hidden already. */
+  veil.step(1, false);
+  assert.equal(veil.presence, 0);
+  assert.equal(veil.busy, false);
+  veil.cover(scene);
+  assert.equal(orbit.visible, false);
+  assert.equal(gridA.visible, false);
+  assert.equal(web.visible, true);
+  assert.equal(body.visible, true);
+  veil.uncover();
+  assert.equal(orbit.visible, true);
+  assert.equal(gridA.visible, true);
+  assert.equal(off.visible, false, "a line the layer hid stays hidden");
+
+  /* Lifting takes the same time and ends exactly shown. */
+  veil.step(0.6, true);
+  assert.ok(veil.busy);
+  veil.step(0.6, true);
+  assert.equal(veil.presence, 1);
+  assert.equal(veil.busy, false);
 });

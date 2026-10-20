@@ -20,6 +20,8 @@ export type MusicPlayerOptions = {
   prefetch?: number;
   /** sessionStorage key that remembers "on" across reloads; null disables it. */
   storageKey?: string | null;
+  /** Playback level 0..1 the music fades up to; 1 by default. `setLevel` moves it. */
+  level?: number;
 };
 
 /** `track` is the playlist index the deck holds, or -1 while it holds nothing. */
@@ -78,6 +80,9 @@ export class MusicPlayer {
   readonly crossfade: number;
   readonly skipFade: number;
   readonly prefetch: number;
+  private level: number;
+  /** A track the playlist holds on (by index): it loops until released. */
+  private held: number | null = null;
   private readonly memory: StorageCell<boolean> | null;
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
@@ -107,6 +112,7 @@ export class MusicPlayer {
     this.crossfade = options.crossfade ?? 8;
     this.skipFade = options.skipFade ?? 2.5;
     this.prefetch = options.prefetch ?? 30;
+    this.level = clampLevel(options.level ?? 1);
     const storageKey = options.storageKey ?? null;
     this.memory = storageKey ? storageCell({ key: storageKey, codec: flag("on") }) : null;
   }
@@ -125,6 +131,12 @@ export class MusicPlayer {
 
   /** Whether music is wanted but still loading: the first play, a skip, or a stall. */
   getBuffering = (): boolean => this.buffering;
+
+  /** The level the music plays at, 0..1. */
+  getLevel = (): number => this.level;
+
+  /** The track the playlist holds on, or null while it runs on. */
+  getHeld = (): number | null => this.held;
 
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -164,6 +176,43 @@ export class MusicPlayer {
       return;
     }
     this.index = this.upcoming;
+    const deck = this.decks[this.current] ?? this.primed;
+    if (deck) this.load(deck, this.index);
+    this.updateMetadata();
+    this.notify();
+  };
+
+  /**
+   * Fade to a level 0..1 over `seconds`: a quieter bed under speech, a lift for a
+   * cinematic mode. Playing, the master gain glides there; paused, the next play
+   * fades up to it.
+   */
+  setLevel = (level: number, seconds = 2) => {
+    this.level = clampLevel(level);
+    const { ctx, master } = this;
+    if (!ctx || !master || this.state !== "playing") return;
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+    master.gain.setTargetAtTime(this.level, ctx.currentTime, Math.max(0.05, seconds) / 4);
+  };
+
+  /**
+   * Hold the playlist on one track: it plays next and loops until `hold(null)`,
+   * after which the playlist runs on from it. Playing another track, the music
+   * blends over in `skipFade` seconds; paused, the next play starts there.
+   */
+  hold = (track: number | null) => {
+    const next = track === null ? null : Math.trunc(track);
+    if (next !== null && (next < 0 || next >= this.tracks.length)) return;
+    this.held = next;
+    if (next === null || next === this.index) return;
+    if (this.state === "playing" && this.ctx) {
+      if (this.blending && this.settleTimer === undefined) return;
+      this.settle();
+      this.blend(this.skipFade);
+      return;
+    }
+    this.index = next;
     const deck = this.decks[this.current] ?? this.primed;
     if (deck) this.load(deck, this.index);
     this.updateMetadata();
@@ -224,7 +273,7 @@ export class MusicPlayer {
   }
 
   private get upcoming() {
-    return (this.index + 1) % this.tracks.length;
+    return this.held ?? (this.index + 1) % this.tracks.length;
   }
 
   private notify() {
@@ -352,7 +401,7 @@ export class MusicPlayer {
     const gain = this.master!.gain;
     gain.cancelScheduledValues(ctx.currentTime);
     gain.setValueAtTime(gain.value, ctx.currentTime);
-    gain.setTargetAtTime(1, ctx.currentTime, this.fadeIn / 4);
+    gain.setTargetAtTime(this.level, ctx.currentTime, this.fadeIn / 4);
     this.setBuffering(false);
     this.scheduleLoop();
     return true;
@@ -471,6 +520,8 @@ export class MusicPlayer {
     };
   }
 }
+
+const clampLevel = (level: number) => Math.min(1, Math.max(0, Number.isFinite(level) ? level : 1));
 
 function audioElement() {
   const el = new Audio();

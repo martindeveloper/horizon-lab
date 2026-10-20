@@ -107,9 +107,9 @@ export function createReachLayer(
 
   return {
     pickables: probes.map((p) => p.hit),
-    update({ show, sel, dist }: Frame) {
+    update({ show, sel, dist, lines }: Frame) {
       const labelled = names.to(show.names);
-      const lightTime = lit.to(show.lightTime);
+      const lightTime = lit.to(show.lightTime) * lines;
       for (const ring of rings) {
         const shown = lightTime * ringShown(ring.au, dist);
         ring.line.visible = shown > 0.004;

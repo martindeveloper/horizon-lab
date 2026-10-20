@@ -1,9 +1,10 @@
 import {
+  createDriftRun,
   createOrbitInput,
   writeCameraSnapshot,
   type CameraSnapshot,
 } from "@horizon/toolkit/camera";
-import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
 import {
   createEngineHost,
   createFullscreenPass,
@@ -13,6 +14,7 @@ import {
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 
 import fragmentShader from "./black-hole.frag.glsl";
+import { DRIFT } from "./drift";
 import {
   clampDistance,
   createUniforms,
@@ -140,6 +142,11 @@ export function createBlackHoleEngine(
     const reduce = prefersReducedMotion();
     const warmup = createWarmup();
     const tour = createTourDirector(reduce);
+    /* The drift (lib/drift.ts) flies the camera itself while the store says it plays. */
+    const drift = createDriftRun(DRIFT.shots, {
+      ...DRIFT.camera,
+      reduceMotion: window.matchMedia(REDUCED_MOTION_QUERY),
+    });
     let announced = false;
     let time = 0;
 
@@ -168,7 +175,10 @@ export function createBlackHoleEngine(
       createOrbitInput(canvas, {
         getPose: () => camera,
         onChange: (pose) => {
-          moveCamera({ ...pose, roll: camera.roll }, useBlackHole.getState().spin);
+          const state = useBlackHole.getState();
+          /* A hand on the camera pauses the drift; it flies on from here when resumed. */
+          if (state.drift === "playing") state.pauseDrift();
+          moveCamera({ ...pose, roll: camera.roll }, state.spin);
           storeCamera();
         },
         enabled: () => !useBlackHole.getState().guideOpen,
@@ -207,10 +217,10 @@ export function createBlackHoleEngine(
       announced = true;
       onFirstFrame?.();
     }
-    /** The store's pose wins unless the guide or the visitor's hand is moving the camera. */
+    /** The store's pose wins unless the guide, the drift or the visitor's hand is moving the camera. */
     function applyCamera() {
       const state = useBlackHole.getState();
-      if (!state.guideOpen && !input.active) {
+      if (!state.guideOpen && state.drift === "off" && !input.active) {
         camera.azimuth = state.azimuth;
         camera.inclination = state.inclination;
         camera.distance = state.distance;
@@ -228,12 +238,19 @@ export function createBlackHoleEngine(
       );
     }
     const stepCount = (quality: Quality) => warmup.steps(BLACK_HOLE_QUALITY[quality].steps);
-    const busy = (state: State) => state.guideOpen && (!state.guideArrived || tour.flying());
+    const busy = (state: State) =>
+      (state.guideOpen && (!state.guideArrived || tour.flying())) || state.drift === "playing";
 
     function tick(stepDt: number) {
       const state = useBlackHole.getState();
+      /* The drift's camera comes back to the visitor where it stopped, roll easing out. */
+      const drifted = drift.step(state.drift, camera, stepDt);
+      if (drifted.ended) storeCamera();
       if (state.guideOpen) moveCamera(tour.step(state, camera, stepDt), state.spin);
-      else {
+      else if (drifted.pose) {
+        moveCamera(drifted.pose, state.spin);
+        engine.markDirty();
+      } else if (state.drift === "off") {
         if (tour.close()) storeCamera();
         if (camera.roll !== 0) {
           camera.roll *= Math.exp(-stepDt / ROLL_DECAY);
@@ -241,7 +258,13 @@ export function createBlackHoleEngine(
           engine.markDirty();
         }
       }
-      if (!state.animationPaused && state.autoRotate && !input.active && !state.guideOpen) {
+      if (
+        !state.animationPaused &&
+        state.autoRotate &&
+        !input.active &&
+        !state.guideOpen &&
+        state.drift === "off"
+      ) {
         camera.azimuth += ORBIT_RATE * stepDt;
         useBlackHole.getState().setAzimuth(camera.azimuth);
       }
@@ -281,6 +304,7 @@ export function createBlackHoleEngine(
         else engine.markDirty();
         if (state.quality !== previous.quality) engine.refresh();
         if (state.guideOpen && !previous.guideOpen) input.cancel();
+        if (state.drift === "playing" && previous.drift !== "playing") input.cancel();
       }),
     );
     return { dispose: () => resources.dispose() };

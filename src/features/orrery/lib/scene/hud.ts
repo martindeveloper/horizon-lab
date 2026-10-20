@@ -5,7 +5,6 @@ import { createSceneHud } from "@/lib/scene-bridge";
 import { SOLAR_VIEWS, solarViewById } from "@/space/solar-system/model/views";
 import { movedBy, type Viewport } from "@horizon/toolkit/scene";
 
-import { driftYearsPerSecond } from "../model/views";
 import type { useOrrery } from "../store";
 
 const DRIFT_INTERVAL_S = 1;
@@ -30,7 +29,8 @@ export function createHud(
       view: {
         /** Camera distance from its aim, au. */
         dist: number;
-        drift: boolean;
+        /** Model years per real second the Motion speed-up runs at now; 0 while it is off or held. */
+        driftRate: number;
         driftYears: number;
         syncView: boolean;
         /** The camera's orbit angles, radians. */
@@ -38,10 +38,9 @@ export function createHud(
       },
     ) {
       driftClock += dt;
-      const { dist, syncView } = view;
+      const { dist, syncView, driftRate } = view;
       hud.update(dt, force, { distance: dist, syncView, angles: view.angles }, (s) => {
         const viewDist = syncView ? dist : solarViewById(s.view).dist;
-        const driftRate = view.drift ? driftYearsPerSecond(dist) : 0;
         let driftYears = s.driftYears;
         if (view.driftYears === 0) {
           driftYears = 0;

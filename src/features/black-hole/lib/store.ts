@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { driftSlice, type DriftSlice } from "@/lib/drift";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { TAU, wrap } from "@horizon/toolkit/math";
 import type { PassAntialias } from "@horizon/toolkit/rendering";
@@ -16,52 +17,53 @@ import { cameraFloor } from "./physics";
 import type { PinId } from "./pins";
 import { tourFor } from "./tours";
 
-type BlackHoleStore = BlackHoleParams & {
-  /** Camera heading in radians, wrapped to [0, 2π); kept across presets. */
-  azimuth: number;
-  setAzimuth: (v: number) => void;
-  animationPaused: boolean;
-  setAnimationPaused: (v: boolean) => void;
-  /** Off shows the same scene in flat space; presets and the guide turn it back on. */
-  gravity: boolean;
-  setGravity: (v: boolean) => void;
-  guideOpen: boolean;
-  guideBeat: number;
-  guideArrived: boolean;
-  settingsOpen: boolean;
-  mapOpen: boolean;
-  clocksOpen: boolean;
-  skyReady: boolean;
-  activePin: PinId | null;
-  /** Whether the camera was orbiting before a pin or the guide stopped it, to resume after. */
-  orbitBeforePin: boolean | null;
-  orbitBeforeGuide: boolean | null;
-  applyPreset: (id: string) => void;
-  setSpin: (v: number) => void;
-  setInclination: (v: number) => void;
-  setDistance: (v: number) => void;
-  setExposure: (v: number) => void;
-  setDiskBrightness: (v: number) => void;
-  setStarIntensity: (v: number) => void;
-  setAutoRotate: (v: boolean) => void;
-  setQuality: (v: Quality) => void;
-  /** Anti-aliasing (experimental, off by default). */
-  antialiasing: PassAntialias;
-  setAntialiasing: (v: PassAntialias) => void;
-  startGuide: () => void;
-  advanceGuide: () => void;
-  /** Back one beat; the camera flies back to it. */
-  previousGuide: () => void;
-  endGuide: () => void;
-  setGuideArrived: (v: boolean) => void;
-  setSettingsOpen: (v: boolean) => void;
-  setMapOpen: (v: boolean) => void;
-  closePanels: () => void;
-  setClocksOpen: (v: boolean) => void;
-  setSkyReady: (v: boolean) => void;
-  setActivePin: (v: PinId | null) => void;
-  calibrateDevice: () => void;
-};
+type BlackHoleStore = BlackHoleParams &
+  DriftSlice & {
+    /** Camera heading in radians, wrapped to [0, 2π); kept across presets. */
+    azimuth: number;
+    setAzimuth: (v: number) => void;
+    animationPaused: boolean;
+    setAnimationPaused: (v: boolean) => void;
+    /** Off shows the same scene in flat space; presets and the guide turn it back on. */
+    gravity: boolean;
+    setGravity: (v: boolean) => void;
+    guideOpen: boolean;
+    guideBeat: number;
+    guideArrived: boolean;
+    settingsOpen: boolean;
+    mapOpen: boolean;
+    clocksOpen: boolean;
+    skyReady: boolean;
+    activePin: PinId | null;
+    /** Whether the camera was orbiting before a pin or the guide stopped it, to resume after. */
+    orbitBeforePin: boolean | null;
+    orbitBeforeGuide: boolean | null;
+    applyPreset: (id: string) => void;
+    setSpin: (v: number) => void;
+    setInclination: (v: number) => void;
+    setDistance: (v: number) => void;
+    setExposure: (v: number) => void;
+    setDiskBrightness: (v: number) => void;
+    setStarIntensity: (v: number) => void;
+    setAutoRotate: (v: boolean) => void;
+    setQuality: (v: Quality) => void;
+    /** Anti-aliasing (experimental, off by default). */
+    antialiasing: PassAntialias;
+    setAntialiasing: (v: PassAntialias) => void;
+    startGuide: () => void;
+    advanceGuide: () => void;
+    /** Back one beat; the camera flies back to it. */
+    previousGuide: () => void;
+    endGuide: () => void;
+    setGuideArrived: (v: boolean) => void;
+    setSettingsOpen: (v: boolean) => void;
+    setMapOpen: (v: boolean) => void;
+    closePanels: () => void;
+    setClocksOpen: (v: boolean) => void;
+    setSkyReady: (v: boolean) => void;
+    setActivePin: (v: PinId | null) => void;
+    calibrateDevice: () => void;
+  };
 
 export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   ...paramsFromPreset(
@@ -168,6 +170,13 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
     if (get().activePin) get().setActivePin(null);
     set({ settingsOpen: false, mapOpen: false, clocksOpen: false });
   },
+  /* The drift (lib/drift.ts) takes the camera with the panels, the pins and the guide out of the way. */
+  ...driftSlice(set, get, {
+    open: (s) => {
+      s.closePanels();
+      return { gravity: true };
+    },
+  }),
   setClocksOpen: (clocksOpen) => {
     if (clocksOpen) {
       if (get().guideOpen) get().endGuide();

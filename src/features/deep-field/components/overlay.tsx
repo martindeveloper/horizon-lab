@@ -91,6 +91,7 @@ export function DeepFieldOverlay() {
                   controls: "deep-field-view",
                   onSelect: () => setPanel(panel === "view" ? "none" : "view"),
                 }}
+                drift={() => useDeepField.getState().startDrift()}
               />
             </div>
           </header>

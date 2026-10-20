@@ -13,14 +13,19 @@ come from a user gesture.
     Sources may live on another origin (a CDN) if it sends CORS headers;
     without them Web Audio plays silence.
   - `options`: `fadeIn` (3 s), `fadeOut` (1.5 s), `crossfade` (8 s), `skipFade`
-    (2.5 s), `prefetch` (30 s) and `storageKey` (default `null`; set it to
-    remember "on" in sessionStorage).
+    (2.5 s), `prefetch` (30 s), `level` (0..1, default 1: what play fades up to)
+    and `storageKey` (default `null`; set it to remember "on" in sessionStorage).
   - `play()` resolves to `false` when autoplay policy blocks it. `pause()`,
     `toggle()` and `next()` are bound, as are `getState()`, `getTrack()` (the
     playlist index), `getBuffering()` (playing is wanted but the audible track
     is still loading: the first play, a skip or a stall) and `subscribe()`,
     which suit React's `useSyncExternalStore`.
     `track` is the current track.
+  - `setLevel(level, seconds = 2)`: fades to a level 0..1 (a quieter bed, a lift
+    for a cinematic mode); paused, the next play fades up to it. `getLevel()` reads it.
+  - `hold(index | null)`: holds the playlist on one track, which plays next (blending
+    over `skipFade` if something else is playing) and loops until released; released,
+    the playlist runs on from it. `getHeld()` reads it.
   - `preload()`: buffers the track that plays next before the first play, e.g. on
     hover or focus of the control. Needs no gesture; skipped under Save-Data.
   - `resumeOnInteraction(ignore)`: if the music was on before a reload, preloads it

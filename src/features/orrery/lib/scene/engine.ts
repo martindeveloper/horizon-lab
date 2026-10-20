@@ -36,12 +36,14 @@ import {
   createAnchoredRulers,
   createDistanceText,
   createLabels,
+  createLineVeil,
   createOrbitControls,
   createSceneHost,
   type SceneMount,
   DEFAULT_INSETS,
 } from "@horizon/toolkit/scene";
 
+import { DRIFT } from "../drift";
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay } from "../model/timeline";
 import { driftYearsPerSecond } from "../model/views";
@@ -49,6 +51,7 @@ import { orreryQuality } from "../quality";
 import { useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCloseUpController, type BodySelection } from "./close-up-controller";
+import { createDriftDirector } from "./drift-director";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
 import { ORRERY_EDGE, SOLAR_EDGE } from "./kit";
@@ -125,6 +128,13 @@ export function createOrreryEngine({
       reduceMotion,
       holdBlocked: () => closeUp.current !== null,
     });
+    /* The drift flies the framed shots itself and visits bodies through the close-up. */
+    const drift = createDriftDirector(rig, store, {
+      reduceMotion,
+      closeUp: () => closeUp.current,
+    });
+    /* The drift veils the line art: orbits, the grid and rulers fade, the bodies and sky stay. */
+    const veil = createLineVeil();
     const hud = createHud(store, camera, viewport);
 
     /** Where the body is now: today's clock plus the Motion offset, as the scene draws it. */
@@ -157,6 +167,8 @@ export function createOrreryEngine({
       onRelease: () => controls.cancel(),
       upload: (texture) => renderer.initTexture(texture),
       quality: () => quality.closeUp,
+      /* The drift's visits fly in and out at a lean-back pace. */
+      pace: () => (store.getState().drift === "off" ? 1 : DRIFT.closeUp.pace),
     });
     const maps = createMeasuredMaps(scope, {
       quality: () => quality.maps,
@@ -188,6 +200,8 @@ export function createOrreryEngine({
         (s.show.drift && !closeUp.current) ||
         rig.moving ||
         guide.busy() ||
+        drift.busy ||
+        veil.busy ||
         controls.interacting ||
         sky.easing ||
         lod.busy ||
@@ -227,13 +241,19 @@ export function createOrreryEngine({
         } else rig.edgePush = 0;
         return false;
       },
-      onInput: () => guide.takeOver(),
+      onInput: () => {
+        guide.takeOver();
+        drift.takeOver();
+      },
     });
 
     /* Names open what they name; moons, the snow line and rulers have nothing to open. */
     createPicking(kit, canvas, store, {
       pickables: solar.pickables,
-      blocked: () => store.getState().guideOpen || closeUp.current !== null,
+      blocked: () => {
+        const s = store.getState();
+        return s.guideOpen || s.drift !== "off" || closeUp.current !== null;
+      },
       distance: () => pose.distance,
       labels: () => hits((key) => solarLabelPick(key) !== undefined),
       labelPick: solarLabelPick,
@@ -261,8 +281,8 @@ export function createOrreryEngine({
           closeUp.leaveTo({ ...solarViewPose(view), azimuth: view.azimuth ?? pose.azimuth });
         } else {
           closeUp.end(false);
-          /* The guide flies its own poses. */
-          if (!s.guideOpen) rig.flyToView(s.view);
+          /* The guide and the drift fly their own poses. */
+          if (!s.guideOpen && s.drift === "off") rig.flyToView(s.view);
         }
         controls.cancel();
       },
@@ -316,8 +336,10 @@ export function createOrreryEngine({
 
     /** The solar map, then a close-up body over it. */
     const draw = () => {
+      veil.cover(scene);
       renderer.render(scene, camera);
       closeUp.renderBody(renderer, scene);
+      veil.uncover();
     };
 
     const tick = (dt: number, invalidated: boolean) =>
@@ -327,6 +349,8 @@ export function createOrreryEngine({
         const now = new Date();
 
         guide.stepCamera(state, dt);
+        drift.step(dt);
+        veil.step(dt, state.drift === "off");
         rig.step(dt);
         rig.home();
         closeUp.step(dt);
@@ -335,8 +359,13 @@ export function createOrreryEngine({
         lod.begin(dt, dist, rig.target);
 
         const yearsAgo = advanceClock(state, dt);
-        /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. */
-        if (show.drift && !closeUp.current) driftYears += dt * driftYearsPerSecond(dist);
+        /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. The
+           drift holds the rate down, so the inner planets glide through its wide framings. */
+        const motion = show.drift && !closeUp.current;
+        const driftRate = motion
+          ? Math.min(driftYearsPerSecond(dist), state.drift === "off" ? Infinity : DRIFT.clock)
+          : 0;
+        driftYears += dt * driftRate;
 
         const frame: SolarFrame = {
           ...momentAt(yearsAgo, driftYears),
@@ -351,7 +380,9 @@ export function createOrreryEngine({
         sky.update(frame);
         const at = solar.update(frame, closeUp.current !== null);
         const solarOn = sunExists(yearsAgo);
-        if (show.distances && solarOn) rulers.drawFrom(rulerOrigin(frame.sel, at), dist);
+        /* Rulers carry their readouts: the drift leaves them out with the rest of the line art. */
+        if (show.distances && solarOn && state.drift === "off")
+          rulers.drawFrom(rulerOrigin(frame.sel, at), dist);
         // Off has no effect object, update callback, scene node or GPU resources.
         activity.current?.update(
           dt,
@@ -363,7 +394,7 @@ export function createOrreryEngine({
 
         hud.update(dt, invalidated || engine.dirty, {
           dist,
-          drift: show.drift && !closeUp.current,
+          driftRate,
           driftYears,
           syncView: !rig.flying && !closeUp.current && !state.guideOpen,
           angles: pose,

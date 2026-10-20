@@ -1,6 +1,9 @@
 import { assetUrl } from "@/lib/assets";
 import { MusicPlayer } from "@horizon/toolkit/audio";
 
+/** Playback levels: the everyday bed, and the lift a drift gives it (`useDriftMusic`). */
+export const MUSIC_LEVEL = { ambient: 0.75, drift: 1 } as const;
+
 /**
  * The site's ambient playlist. Session-scoped memory: a reload or language switch
  * keeps the music, a new visit starts silent. See docs/architecture.md to add a track.
@@ -40,5 +43,5 @@ export const ambientMusic = new MusicPlayer(
       ],
     },
   ],
-  { storageKey: "horizon:music" },
+  { storageKey: "horizon:music", level: MUSIC_LEVEL.ambient },
 );

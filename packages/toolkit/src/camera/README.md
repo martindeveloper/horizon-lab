@@ -47,6 +47,34 @@ mid-flight inclination arc, `swing` a fractional mid-flight distance change, and
 Time is normalized [0,1] and t ≥ 1 returns the exact target. There is no
 collision, orbital dynamics or automatic shortest-angle selection.
 
+## Drift
+
+`createDriftCamera(shots, settings)` is a camera that flies itself: from shot to shot
+for as long as it runs, with no rig and no renderer. Each `DriftShot` is a pose
+(`azimuth`, `inclination`, `distance`, optional `roll`) with an optional `flight`
+(`lift`, `swing`, `lead` and a `duration`), a `hold` in seconds, a hold `drift`
+(rad/s) and a `creep` (the fraction of the distance pushed in over the hold).
+Settings give the defaults (`flight` 20 s, `hold` 12 s, `drift` 0.01, `creep` 0.05),
+a `speed` that scales every duration, a `variance` 0..1 that spreads each shot's
+angles (±0.5 rad azimuth, ±0.2 rad inclination, within `inclination` bounds),
+distance (±0.3 e-folds) and timing (±35 %), the `order` (`sequence` wraps, `shuffle`
+never repeats a shot) and the `random` source; `reduceMotion` cuts flights and
+stills holds while it matches. `start(pose)` begins from the camera's pose (a
+sequence goes on from the shot nearest it); `step(dt)` returns the pose for the
+frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
+`sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot of
+`{ handoff: true }` is the host's to fly (a close-up on its own rig): the camera
+reports `handoff`, leaves the pose alone, and goes on to the next shot from
+wherever `resume(pose)` says the host left the camera.
+
+`createDriftRun(shots, settings)` runs that camera from a host's `off`, `playing`
+or `paused` state: `step(state, current, dt, hold?)` starts the camera from
+`current` on the first playing frame (and again after a pause), returns the
+`pose` to draw or null, `started`, `ended` (once, so the host can give the camera
+back where it stopped) and `handoff`; `hold` keeps it from starting or flying
+while something else owns the camera. The scene module's `createRigDrift` puts it
+on an orbit rig.
+
 ## Views
 
 `nearestView(views, distanceOf, distance)` picks the framed view nearest a camera
