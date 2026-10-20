@@ -3,6 +3,8 @@ import test from "node:test";
 
 import { stubStorage } from "./toolkit-helpers.mjs";
 
+// The overrides only apply with the developer tools on; a test run counts as production.
+process.env.NEXT_PUBLIC_DEBUG = "on";
 const { saved } = stubStorage([["horizon:debug:webgl", "unavailable"]]);
 const {
   webglOverride,

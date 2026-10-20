@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import creditDocuments from "@/data/credits.generated.json";
 import type { Locale } from "@/i18n/routing";
+import { MAPS_KEY, assetUrl } from "@/lib/assets";
 import { CREDITS, LICENCE_URLS, type Credit, type CreditGroup, type Licence } from "@/lib/credits";
 import { MAPS, mapFile, type BodyId } from "@horizon/toolkit/bodies";
 import { keysOf } from "@horizon/toolkit/records";
@@ -14,8 +15,8 @@ const linkClass =
   "rounded-sm text-fg underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
 const licenceClass = "font-mono text-[0.68rem] tracking-[0.14em] whitespace-nowrap uppercase";
 
-/** Where the orrery serves its measured maps (public/textures/orrery); the globes reuse them. */
-const MAP_BASE = "/textures/orrery";
+/** Where the orrery's measured maps live (the CDN); the globes reuse them. */
+const MAP_BASE = assetUrl(MAPS_KEY);
 
 /** The worlds a map credit covers, in the order the toolkit lists them: one for most, four for OPAL. */
 const worldsOf = (item: Credit): BodyId[] =>

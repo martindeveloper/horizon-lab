@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { REPOSITORY_URL } from "@/config";
 import type { Locale } from "@/i18n/routing";
-import { REPOSITORY_URL } from "@/lib/links";
 import { cn, kickerClass } from "@horizon/toolkit/ui";
 
 import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";

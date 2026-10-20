@@ -1,8 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { REPOSITORY_URL } from "@/config";
 import { Link } from "@/i18n/navigation";
-import { REPOSITORY_URL } from "@/lib/links";
 
 import { SiderealClock } from "./sidereal-clock";
 

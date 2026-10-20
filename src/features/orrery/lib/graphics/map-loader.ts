@@ -12,8 +12,10 @@ import {
   Texture,
 } from "three";
 
-/** Where the orrery serves the measured maps' WebP tiers (public/textures/orrery). */
-export const MAP_BASE = "/textures/orrery";
+import { MAPS_KEY, assetUrl } from "@/lib/assets";
+
+/** Where the orrery fetches the measured maps' WebP tiers: the CDN. */
+export const MAP_BASE = assetUrl(MAPS_KEY);
 
 function surface(texture: Texture, anisotropy: number) {
   texture.colorSpace = SRGBColorSpace;

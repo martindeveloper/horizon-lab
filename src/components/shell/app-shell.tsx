@@ -1,6 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 
 import { DebugTools } from "@/components/debug/debug-tools";
+import { DEBUG } from "@/config";
 import type { Locale } from "@/i18n/routing";
 
 import { AppFooter } from "./app-footer";
@@ -33,7 +34,7 @@ export function AppShell({ children, locale }: { children: ReactNode; locale: Lo
       {children}
       <AppFooter locale={locale} />
       <DesktopNotice />
-      <DebugTools />
+      {DEBUG ? <DebugTools /> : null}
     </div>
   );
 }

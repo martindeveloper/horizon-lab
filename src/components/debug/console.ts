@@ -1,3 +1,4 @@
+import { ENVIRONMENT } from "@/config";
 import {
   setSkyTime,
   setSkyTimeScale,
@@ -80,6 +81,7 @@ export function createDebug() {
     },
     info() {
       const snapshot = {
+        environment: ENVIRONMENT,
         webgl: probeWebGL(),
         webglOverride: webglOverride(),
         ...gpuDetails(),

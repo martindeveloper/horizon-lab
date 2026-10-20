@@ -465,6 +465,8 @@ CPU-only renderer gets a dismissible slow-performance notice over the scene.
 Each page or simulation layout also renders `<DebugCrash scope="route" />` so
 `Horizon.Debug.crash()` can reach its route error boundary. The console helpers
 (`src/components/debug/`) load lazily after hydration and change nothing until called.
+They mount only with `DEBUG` from `src/config.ts` (development and previews), and
+without it the stored overrides in `src/lib/debug.ts` are ignored.
 
 The locale `error.tsx` provides translated retry/catalogue actions and retains
 shared navigation. `global-error.tsx` supplies a standalone recovery document for
@@ -511,11 +513,25 @@ ffmpeg -ss <start> -to <end> -i source.wav -map_metadata -1 -fflags +bitexact \
 libopus still writes an `ENCODER` stream tag; remux the WebM once to drop it:
 `ffmpeg -i track.webm -map_metadata -1 -map_metadata:s:a -1 -fflags +bitexact -c copy clean.webm`.
 
-Tracks live in the `horizon-cdn` R2 bucket (`horizon-cdn.martinpernica.xyz`) as
-`audio/<slug>.webm` and `.m4a`, not in the repo; `assetUrl()` builds their URLs and
-`NEXT_PUBLIC_ASSETS_URL` points it elsewhere. The bucket sends CORS headers, or Web
-Audio plays silence. Never overwrite a published key: a new mix takes a new name.
-Other large assets follow the same layout (`textures/<feature>/`, `models/<feature>/`).
+Tracks live on the CDN as `audio/<slug>.webm` and `.m4a` (see CDN assets). Without
+the bucket's CORS headers Web Audio plays silence.
+
+## CDN assets
+
+Large binaries live in the `horizon-cdn` R2 bucket, served from
+`cdn.horizonlab.observer` with CORS and one-year immutable caching, not in the
+repo. `src/lib/assets.ts` builds their URLs from `CDN_URL` in `src/config.ts`
+(`NEXT_PUBLIC_CDN_URL` overrides it), and the locale layout preconnects to the origin. The ignored `cdn/`
+folder mirrors the bucket's keys:
+
+- `audio/<slug>.webm`, `.m4a`: the ambient playlist.
+- `textures/orrery/v1/<body>-<tier>.webp`: the measured maps (`MAPS_KEY`), written by
+  `scripts/build-planet-maps.mjs`. `npm run cdn:pull` fetches the published set, which
+  the map tests check; without it they skip.
+
+A published key is never overwritten, so older deployments keep their assets: rebuilt
+maps take the next `MAPS_KEY` version and a new mix takes a new name. Uploading is in
+`scripts/README.md`. Further kinds follow the layout (`models/<feature>/`).
 
 ## Immersive view
 

@@ -4,12 +4,6 @@ import { notFound } from "next/navigation";
 
 import { routing, type Locale } from "@/i18n/routing";
 
-const host = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
-/** Public origin for metadata, robots and sitemap. `SITE_URL` overrides Vercel's host. */
-export function siteUrl(): URL {
-  return new URL(process.env.SITE_URL || (host ? `https://${host}` : "http://localhost:3000"));
-}
-
 /** Supply complete social objects: Next replaces nested metadata rather than merging it. */
 export function pageMetadata({
   path,

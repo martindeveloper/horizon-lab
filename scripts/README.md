@@ -8,7 +8,7 @@ One-off data builds, run by hand when a source changes, and the docs that descri
 
 | Script                        | Writes                                                        | Described in              |
 | ----------------------------- | ------------------------------------------------------------- | ------------------------- |
-| `build-planet-maps.mjs`       | `public/textures/orrery/` (measured planet and moon maps)     | `docs/imagery-credits.md` |
+| `build-planet-maps.mjs`       | `cdn/textures/orrery/<version>/` (planet and moon maps)       | `docs/imagery-credits.md` |
 | `build-sun-map.mjs`           | the Sun's map alone                                           | `docs/imagery-credits.md` |
 | `fetch-elements.mjs`          | `packages/toolkit/src/science/elements.ts` (CIAAW weights)    | `docs/science-sources.md` |
 | `fetch-atomic-data.mjs`       | `src/features/spectroscopy/lib/model/atomic-data.json` (NIST) | `docs/architecture.md`    |
@@ -16,6 +16,16 @@ One-off data builds, run by hand when a source changes, and the docs that descri
 | `fetch-model-atmospheres.mjs` | `src/features/spectroscopy/lib/model/atmospheres.json`        | `docs/architecture.md`    |
 | `fetch-probe-tracks.mjs`      | `src/features/deep-field/lib/model/probe-tracks.json`         | `docs/architecture.md`    |
 | `generate-social-assets.mjs`  | share images under `public/`                                  | `docs/branding.md`        |
+
+`pull-cdn.mjs` (`npm run cdn:pull`) mirrors the published maps into `cdn/` for the tests.
+After a map build, bump `MAPS_KEY` in `src/lib/assets.ts` and upload the new folder with an
+R2 token scoped to `horizon-cdn` (an AWS CLI profile with the R2 endpoint):
+
+```sh
+aws s3 cp cdn/textures/orrery/v2/ s3://horizon-cdn/textures/orrery/v2/ --recursive \
+  --content-type image/webp --cache-control "public, max-age=31536000, immutable" \
+  --profile horizon-cdn
+```
 
 Each script's header comment gives its sources and the exact command. `lib/net.mjs` fetches
 text and caches downloads; `lib/colour.mjs` converts between sRGB and linear light.

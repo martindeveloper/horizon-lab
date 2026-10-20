@@ -4,12 +4,15 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { preconnect } from "react-dom";
 
 import { AppThemeProvider } from "@/components/providers";
 import { AppShell } from "@/components/shell/app-shell";
 import { LocaleUrl } from "@/components/shell/locale-url";
+import { ANALYTICS, siteUrl } from "@/config";
 import { routing } from "@/i18n/routing";
-import { localeParam, siteUrl } from "@/lib/metadata";
+import { assetOrigin } from "@/lib/assets";
+import { localeParam } from "@/lib/metadata";
 
 /* Fonts ship with the site (Fontsource, from npm): no request to a font CDN, and
    each subset file loads only when a page uses its characters. */
@@ -48,6 +51,8 @@ export const viewport: Viewport = {
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await localeParam(params);
   const messages = await getMessages({ locale });
+  // Music and the orrery's maps come from the CDN, both fetched with CORS.
+  preconnect(assetOrigin, { crossOrigin: "anonymous" });
   return (
     <html lang={locale} className="antialiased" suppressHydrationWarning>
       <body className="bg-bg text-fg">
@@ -57,8 +62,12 @@ export default async function LocaleLayout({ children, params }: Props) {
             <AppShell locale={locale}>{children}</AppShell>
           </NextIntlClientProvider>
         </AppThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        {ANALYTICS ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );

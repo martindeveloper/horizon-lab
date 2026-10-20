@@ -3,6 +3,7 @@
  * See docs/imagery-credits.md for limitations and source attribution.
  */
 import { createHash } from "node:crypto";
+import { mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -12,6 +13,7 @@ import sharp from "sharp";
 
 import { MAPS, mapFile } from "@horizon/toolkit/bodies";
 
+import { MAPS_KEY } from "../src/lib/assets.ts";
 import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
 import { encodeSrgb as encode } from "./lib/colour.mjs";
 import { fetchCached } from "./lib/net.mjs";
@@ -139,9 +141,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const img = await buildSunMap(map.widths.near);
   const bytes = Buffer.alloc(img.rgb.length);
   for (let i = 0; i < bytes.length; i += 1) bytes[i] = encode(img.rgb[i]);
+  mkdirSync(new URL(`../cdn${MAPS_KEY}/`, import.meta.url), { recursive: true });
   for (const tier of ["far", "nearLight", "near"]) {
     const w = map.widths[tier];
-    const file = new URL(`../public${mapFile("/textures/orrery", "sun", tier)}`, import.meta.url);
+    const file = new URL(`../cdn${mapFile(MAPS_KEY, "sun", tier)}`, import.meta.url);
     const info = await sharp(bytes, { raw: { width: img.w, height: img.h, channels: 3 } })
       .resize(w, w / 2)
       .webp({ quality: tier === "far" ? 84 : 85, effort: 6 })

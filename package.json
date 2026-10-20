@@ -31,7 +31,8 @@
     "test:bundles": "node --test tests/build/*.test.mjs",
     "assets:generate": "node scripts/generate-social-assets.mjs",
     "credits:generate": "node --import tsx scripts/generate-credits.mjs",
-    "credits:check": "node --import tsx scripts/generate-credits.mjs --check"
+    "credits:check": "node --import tsx scripts/generate-credits.mjs --check",
+    "cdn:pull": "node --import tsx scripts/pull-cdn.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bodoni-moda": "^5.3.0",

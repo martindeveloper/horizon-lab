@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { existsSync, statSync } from "node:fs";
 /**
- * The measured surface maps shipped in public/textures/orrery: every tier
- * exists at its size, stays inside its download budget and keeps the body's
- * albedo.
+ * The measured surface maps the orrery serves, from the local CDN mirror
+ * (`npm run cdn:pull`): every tier exists at its size, stays inside its download
+ * budget and keeps the body's albedo.
  */
 import test from "node:test";
 
@@ -12,16 +12,17 @@ import sharp from "sharp";
 import { MAPS, tierFile as tierAt } from "@horizon/toolkit/bodies";
 import { GEOMETRIC_ALBEDO } from "@horizon/toolkit/bodies/surfaces";
 
-import { MAP_BASE } from "../src/features/orrery/lib/graphics/map-loader.ts";
+import { MAPS_KEY } from "../src/lib/assets.ts";
 
-const tierFile = (id, tier) => tierAt(MAP_BASE, id, tier);
-const publicFile = (url) => new URL(`../public${url}`, import.meta.url);
+const tierFile = (id, tier) => tierAt(MAPS_KEY, id, tier);
+const publicFile = (key) => new URL(`../cdn${key}`, import.meta.url);
+const skip = !existsSync(publicFile(MAPS_KEY)) && "no CDN mirror: run npm run cdn:pull";
 const linear = (c) => {
   const v = c / 255;
   return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
 };
 
-test("every tier exists at its declared size, inside its budget", async () => {
+test("every tier exists at its declared size, inside its budget", { skip }, async () => {
   let far = 0;
   for (const [id, map] of Object.entries(MAPS)) {
     for (const tier of ["far", "near", "nearLight"]) {
@@ -42,7 +43,7 @@ test("every tier exists at its declared size, inside its budget", async () => {
   assert.ok(far <= 1e6, `all far maps together are ${far} bytes`);
 });
 
-test("measured maps keep each body's geometric albedo", async () => {
+test("measured maps keep each body's geometric albedo", { skip }, async () => {
   for (const id of Object.keys(MAPS)) {
     // The Sun emits light; its intensity map has no reflected-light geometric albedo.
     if (id === "sun") continue;

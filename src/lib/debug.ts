@@ -1,9 +1,11 @@
+import { DEBUG } from "@/config";
 import type { WebGLSupport } from "@horizon/toolkit/rendering";
 import { numbers, oneOf, storageCell } from "@horizon/toolkit/storage";
 
 /**
  * Developer overrides driven from the browser console (`Horizon.Debug`).
  * Nothing here runs unless someone calls it; without overrides the app is unchanged.
+ * Without `DEBUG` stored overrides are ignored, so none outlives the tools.
  */
 export type CrashScope = "route" | "root";
 
@@ -17,7 +19,7 @@ const webglCell = storageCell({
 
 /** The forced WebGL result for this tab, kept across reloads. */
 export function webglOverride(): WebGLSupport | null {
-  return webglCell.get();
+  return DEBUG ? webglCell.get() : null;
 }
 
 export function setWebGLOverride(value: WebGLSupport | null) {
@@ -70,15 +72,17 @@ function saveSky(next: { sky: number; wall: number; scale: number } | null) {
   for (const listener of listeners) listener();
 }
 
+const skyClock = () => (DEBUG ? skyCell.get() : null);
+
 /** The time the hero, the star field and the sidereal clock show, in ms: wall time unless overridden. */
 export function skyNow(wall = Date.now()) {
-  const clock = skyCell.get();
+  const clock = skyClock();
   return clock ? clock.sky + (wall - clock.wall) * clock.scale : wall;
 }
 
 /** Sky seconds per wall second; 1 without an override. */
 export function skyTimeScale() {
-  return skyCell.get()?.scale ?? 1;
+  return skyClock()?.scale ?? 1;
 }
 
 /** True when the sky moves faster or slower than a minute-by-minute redraw can show. */

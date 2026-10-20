@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import test from "node:test";
 
 import sharp from "sharp";
@@ -11,6 +12,7 @@ import {
   solarObserver,
   solarSurface,
 } from "../scripts/lib/sun-map.mjs";
+import { MAPS_KEY } from "../src/lib/assets.ts";
 import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
 
 const near = (a, b, tolerance = 1e-10) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
@@ -50,35 +52,40 @@ test("the dated observations cover all nonpolar longitudes without duplicating a
   near(sampleBilinear(new Float32Array([0, 2, 4, 6]), 2, 0.5, 0.5), 3);
 });
 
-test("shipped Sun retains dark sunspots, a quiet polar fill and a continuous longitude seam", async () => {
-  const { data, info } = await sharp(
-    new URL("../public/textures/orrery/sun-nearLight.webp", import.meta.url).pathname,
-  )
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const { width: w, height: h, channels: c } = info;
-  const linear = (v) => {
-    const s = v / 255;
-    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  };
-  let dark = 0,
-    bright = 0,
-    mean = 0,
-    seam = 0;
-  for (let y = 0; y < h; y += 1) {
-    seam += Math.abs(data[y * w * c] - data[(y * w + w - 1) * c]);
-    for (let x = 0; x < w; x += 1) {
-      const v = linear(data[(y * w + x) * c]);
-      if (v < SUN_MAP_QUIET_INTENSITY * 0.4) dark += 1;
-      if (v > SUN_MAP_QUIET_INTENSITY * 0.9) bright += 1;
-      mean += v;
+const shippedSun = new URL(`../cdn${MAPS_KEY}/sun-nearLight.webp`, import.meta.url);
+const skip = !existsSync(shippedSun) && "no CDN mirror: run npm run cdn:pull";
+
+test(
+  "shipped Sun retains dark sunspots, a quiet polar fill and a continuous longitude seam",
+  { skip },
+  async () => {
+    const { data, info } = await sharp(shippedSun.pathname)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width: w, height: h, channels: c } = info;
+    const linear = (v) => {
+      const s = v / 255;
+      return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    };
+    let dark = 0,
+      bright = 0,
+      mean = 0,
+      seam = 0;
+    for (let y = 0; y < h; y += 1) {
+      seam += Math.abs(data[y * w * c] - data[(y * w + w - 1) * c]);
+      for (let x = 0; x < w; x += 1) {
+        const v = linear(data[(y * w + x) * c]);
+        if (v < SUN_MAP_QUIET_INTENSITY * 0.4) dark += 1;
+        if (v > SUN_MAP_QUIET_INTENSITY * 0.9) bright += 1;
+        mean += v;
+      }
     }
-  }
-  assert.ok(dark > 50, "observed umbrae remain dark");
-  assert.ok(bright > w * h * 0.9, "quiet photosphere dominates");
-  near(mean / (w * h), SUN_MAP_QUIET_INTENSITY, 0.03);
-  assert.ok(seam / h < 3, "no hard longitude seam");
-  const polarRow = Array.from({ length: w }, (_, x) => data[x * c]);
-  assert.ok(Math.max(...polarRow) - Math.min(...polarRow) < 3, "no invented polar features");
-});
+    assert.ok(dark > 50, "observed umbrae remain dark");
+    assert.ok(bright > w * h * 0.9, "quiet photosphere dominates");
+    near(mean / (w * h), SUN_MAP_QUIET_INTENSITY, 0.03);
+    assert.ok(seam / h < 3, "no hard longitude seam");
+    const polarRow = Array.from({ length: w }, (_, x) => data[x * c]);
+    assert.ok(Math.max(...polarRow) - Math.min(...polarRow) < 3, "no invented polar features");
+  },
+);

@@ -1,8 +1,9 @@
 /**
  * Builds the orrery's measured surface maps (`MAPS` in packages/toolkit/src/bodies/maps.ts)
- * from the original NASA, USGS and Hubble OPAL data, and writes WebP tiers to
- * public/textures/orrery/. Not part of `next build`: run it when a source or a
- * tier changes, and commit the output.
+ * from the original NASA, USGS and Hubble OPAL data, and writes WebP tiers to the
+ * local CDN mirror, cdn/ + `MAPS_KEY`. Not part of `next build`: run it when a
+ * source or a tier changes, bump `MAPS_KEY` to the next version, and upload the
+ * folder (scripts/README.md).
  *
  *   node --import tsx scripts/build-planet-maps.mjs [cache-dir]
  *
@@ -28,6 +29,7 @@ import sharp from "sharp";
 import { FIGURES, MAPS, mapFile } from "@horizon/toolkit/bodies";
 import { GEOMETRIC_ALBEDO, surfaceMap } from "@horizon/toolkit/bodies/surfaces";
 
+import { MAPS_KEY } from "../src/lib/assets.ts";
 import { buildSunMap } from "./build-sun-map.mjs";
 import { SRGB_TO_LINEAR as LUT, encodeSrgb as encode } from "./lib/colour.mjs";
 import { MOON_MAP_SOURCES, moonSourceX } from "./lib/moon-maps.mjs";
@@ -37,7 +39,7 @@ sharp.cache(false);
 const root = new URL("../", import.meta.url);
 const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-planet-maps"));
 const fetchCached = (url) => download(url, cache);
-const outDir = new URL("public/textures/orrery/", root);
+const outDir = new URL(`cdn${MAPS_KEY}/`, root);
 mkdirSync(outDir, { recursive: true });
 
 const OPAL = "https://archive.stsci.edu/missions/hlsp/opal";

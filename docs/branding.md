@@ -46,9 +46,9 @@ export `simulationMetadata` from its pages with its route, message loader and im
 the catalogue, about and credits pages call `pageMetadata` directly.
 Keep feature assets under `public/simulations/<slug>/`.
 
-Set `SITE_URL` to the public HTTPS origin in Vercel for a custom domain. Otherwise
-metadata uses `VERCEL_PROJECT_PRODUCTION_URL`, then `VERCEL_URL`. Local builds
-fall back to `http://localhost:3000`. The locale layout owns this metadata base.
+`siteUrl()` in `src/config.ts` gives the metadata origin: `SITE_URL`, then
+`VERCEL_PROJECT_PRODUCTION_URL`, then `https://horizon.martinpernica.xyz`, so local
+builds render production URLs too. The locale layout owns this metadata base.
 After `npm run build`, run `npm run test:bundles` to check rendered social tags
 without starting a server or browser.
 

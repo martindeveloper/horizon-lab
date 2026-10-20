@@ -25,6 +25,9 @@ next-env.d.ts
 *.pid
 *.pid.lock
 
+# Local mirror of the horizon-cdn bucket (npm run cdn:pull)
+/cdn/
+
 # Test results and development artifacts
 coverage/
 playwright-report/

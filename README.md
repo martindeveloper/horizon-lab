@@ -111,8 +111,9 @@ lives in [`@horizon/toolkit`](packages/toolkit/README.md), which never imports t
 
 ## Debugging
 
-Every page exposes `Horizon.Debug` in the browser console, production included. Run
-`Horizon.Debug.help()` for the full list.
+`Horizon.Debug` is in the browser console during `npm run dev` and on Vercel previews; production
+leaves it out unless built with `NEXT_PUBLIC_DEBUG=on`. Run `Horizon.Debug.help()` for the full
+list.
 
 | Command                                         | Effect                                          |
 | ----------------------------------------------- | ----------------------------------------------- |
@@ -126,8 +127,8 @@ Every page exposes `Horizon.Debug` in the browser console, production included. 
 ## Deployment
 
 Import the repository into [Vercel](https://vercel.com) with the Next.js preset; no settings are
-needed. Set `SITE_URL` to the production origin for share metadata. Locally, run `npm run build`
-and `npm start`.
+needed: `src/config.ts` falls back to production values, and `.env.example` lists the optional
+overrides. Locally, run `npm run build` and `npm start`.
 
 ## Contributing
 

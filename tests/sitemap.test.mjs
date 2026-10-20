@@ -5,6 +5,7 @@ import test from "node:test";
 import manifest from "../src/app/manifest.ts";
 import robots from "../src/app/robots.ts";
 import sitemap from "../src/app/sitemap.ts";
+import { siteUrl } from "../src/config.ts";
 import { BLACK_HOLE_PATH } from "../src/features/black-hole/manifest.ts";
 import { presetRouteParams } from "../src/features/black-hole/routing.ts";
 import { DEEP_FIELD_PATH } from "../src/features/deep-field/manifest.ts";
@@ -14,7 +15,6 @@ import { viewRouteParams } from "../src/features/orrery/routing.ts";
 import { SPECTROSCOPY_PATH } from "../src/features/spectroscopy/manifest.ts";
 import { viewRouteParams as spectroscopyViewParams } from "../src/features/spectroscopy/routing.ts";
 import { routing } from "../src/i18n/routing.ts";
-import { siteUrl } from "../src/lib/metadata.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
 import { simulations } from "../src/lib/simulations.ts";
 
