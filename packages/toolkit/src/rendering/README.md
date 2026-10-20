@@ -35,6 +35,11 @@ toolkit's `.glsl` loader (see the package README).
   `standard`, `cinema`, `max`, which lifts the device caps). A type only: each consumer
   maps a level to concrete settings in one place (in Horizon, each simulation's
   `lib/quality.ts`), and `standard` is its default.
+- `createFrameMeter({ span, keep, gap })` and the page's `frameMeter`: loops call `tick(now)`
+  after each frame they draw (`createFrameLoop` does so itself); `rate()` is frames per
+  second over the last `span` seconds, 0 once a scene stops drawing; `intervals()` the times between the last `keep` frames (a
+  pause over `gap` ms starts afresh). Feed it from a
+  simulation's main loop only, so frames are not counted twice.
 - `observeViewport`: ResizeObserver plus explicit `refresh()` when quality changes.
   `bufferSize` multiplies CSS dimensions by resolution scale, capped DPR and an
   optional warm-up factor. It does not set CSS dimensions.
@@ -43,7 +48,8 @@ toolkit's `.glsl` loader (see the package README).
   application pause state changes, and `dispose()` on unmount. The first frame
   and first frame after resuming receive dt=0; a `sync()` while the loop is
   already running (a drag, a store write) does not reset its clock. Per-frame deltas cap at 0.1 seconds;
-  throttled frames accumulate time. This is not a fixed-step physics integrator.
+  throttled frames accumulate time. A capped loop draws on the display frame nearest
+  the target interval, so 30 fps holds at 30 on a 60 Hz screen rather than dropping to 20. This is not a fixed-step physics integrator.
   `onError` receives render exceptions; the loop stops after an exception.
 - `observePowerPreference`: optional coarse-pointer and battery hints. A denied
   battery API is ignored. It never decides rendering quality for the application.

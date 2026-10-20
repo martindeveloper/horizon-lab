@@ -31,6 +31,12 @@ catalogue and `examples/visualization-example.tsx` for composition.
   The canvas is never remounted. `ImmersiveToggle`'s `align` anchors its tooltip
   like `Tooltip`'s (`end` when it ends a toolbar at the viewport's right edge).
   `immersive-state.ts` holds the framework-free state, shortcut and Fullscreen API helpers.
+- `FrameStats`: a frame-rate readout for any `FrameSource` (in Horizon, the rendering
+  module's `frameMeter`, passed in so this module never imports rendering). Without options
+  it shows the rate; `graph`, `vsync` and `memory` add a frame-time graph drawn every display
+  frame, the display's refresh rate with its vsync windows, and the JavaScript heap where the
+  browser reports it. `frame-stats-model.ts` holds its arithmetic (`median`, `refreshRate`,
+  `vsyncWindows`).
 - `OrbitPad`: step buttons for a camera without dragging, round a glass dial with
   optional `centre` content. Labels come in props; pair it with `stepOrbit` (or an orbit
   rig's eased `turnBy`) and `ORBIT_STEP` from `@horizon/toolkit/camera`.

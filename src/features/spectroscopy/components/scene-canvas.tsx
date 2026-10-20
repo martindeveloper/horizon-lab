@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import { frameMeter } from "@horizon/toolkit/rendering";
 import {
   blackbodyColor,
   cieObserver,
@@ -686,6 +687,7 @@ export function SceneCanvas({
         ctx.fill();
       }
       ctx.globalCompositeOperation = "source-over";
+      frameMeter.tick(now);
     };
     const start = () => {
       if (frame || !visible || document.hidden) return;

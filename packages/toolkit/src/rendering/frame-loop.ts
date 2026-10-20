@@ -1,3 +1,5 @@
+import { frameMeter } from "./frame-meter";
+
 /** Frame pacing is separate from numerical integration. dt is elapsed seconds, capped per frame. */
 export class FrameClock {
   private last: number | null = null;
@@ -15,7 +17,11 @@ export class FrameClock {
     const dt = Math.max(0, Math.min((now - this.last) / 1000, this.maxDelta));
     this.last = now;
     this.held += dt;
-    if (fps <= 0 || this.held < 1 / fps) return null;
+    if (fps <= 0) return null;
+    /* Draw on the display frame nearest the target interval. Waiting for the whole interval
+       would often cost a whole extra display frame: display frames run a hair short, so 30 fps
+       would draw at 20 on a 60 Hz screen, and 60 at about 40. */
+    if (this.held < 1 / fps - dt / 2) return null;
     const elapsed = this.held;
     this.held = 0;
     return elapsed;
@@ -43,7 +49,10 @@ export function createFrameLoop(options: {
     const dt = clock.advance(now, options.fps?.() ?? Infinity);
     rendering = true;
     try {
-      if (dt !== null) options.render(dt);
+      if (dt !== null) {
+        options.render(dt);
+        frameMeter.tick(now);
+      }
     } catch (error) {
       failed = true;
       if (options.onError) options.onError(error);

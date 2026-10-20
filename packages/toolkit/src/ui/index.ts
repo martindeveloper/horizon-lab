@@ -12,6 +12,7 @@ export {
   type SegmentedOption,
 } from "./segmented-control";
 export { DataReadout, type DataReadoutProps, type ReadoutItem } from "./data-readout";
+export { FrameStats, type FrameSource, type FrameStatsProps } from "./frame-stats";
 export { ScaleBar, type ScaleBarProps } from "./scale-bar";
 export { Kicker, kickerClass } from "./kicker";
 export { PanelHeader, type PanelHeaderProps } from "./panel-header";

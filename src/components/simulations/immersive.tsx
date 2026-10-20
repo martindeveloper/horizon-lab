@@ -5,13 +5,16 @@ import type { ReactNode } from "react";
 
 import { ImmersiveScene, ImmersiveToggle } from "@horizon/toolkit/ui";
 
+import { FrameRateReadout } from "./frame-rate";
+
 /** Every simulation stage carries `data-simulation`; it is what covers the window and goes fullscreen. */
 const STAGE = "[data-simulation]";
 
 /**
  * The one immersive view for every simulation. Mount it inside the scene after
  * the canvas and pass the feature overlay as children: they step aside while
- * the shared header, footer and canvas-only exit control are handled here.
+ * the shared header, footer and canvas-only exit control are handled here. The
+ * frame-rate readout stays in both views.
  */
 export function SimulationImmersive({
   onEnter,
@@ -22,18 +25,21 @@ export function SimulationImmersive({
 }) {
   const t = useTranslations("immersive");
   return (
-    <ImmersiveScene
-      stage={STAGE}
-      {...(onEnter !== undefined ? { onEnter } : {})}
-      labels={{
-        group: t("title"),
-        exit: t("exit"),
-        exitTooltip: t("close"),
-        fullscreen: t("fullscreen"),
-      }}
-    >
-      {children}
-    </ImmersiveScene>
+    <>
+      <FrameRateReadout />
+      <ImmersiveScene
+        stage={STAGE}
+        {...(onEnter !== undefined ? { onEnter } : {})}
+        labels={{
+          group: t("title"),
+          exit: t("exit"),
+          exitTooltip: t("close"),
+          fullscreen: t("fullscreen"),
+        }}
+      >
+        {children}
+      </ImmersiveScene>
+    </>
   );
 }
 

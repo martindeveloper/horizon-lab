@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 import { ControlRow, SegmentedControl } from "@horizon/toolkit/ui";
 
+import { FrameRateSwitches } from "./frame-rate";
 import { RailSection } from "./rail";
 
 /* Listed here, not imported: the rendering module's values would pull the renderer into the page. */
@@ -39,7 +40,8 @@ function ResetButton({ label, onReset }: { label: string; onReset: () => void })
 /**
  * The last section of every simulation's settings, the same in each: render quality, then
  * anti-aliasing (hidden while `antialias` is still unknown), the simulation's own render
- * switches (`children`), an optional note, then Reset.
+ * switches (`children`), the frame-rate readout's switch (one for every simulation), an
+ * optional note, then Reset.
  * Copy is the shared `render` namespace; each simulation decides what its levels and modes do.
  */
 export function RenderSection<A extends string>({
@@ -83,7 +85,10 @@ export function RenderSection<A extends string>({
             />
           </ControlRow>
         ) : null}
-        {children}
+        <div className="-mx-3 grid gap-0.5">
+          {children}
+          <FrameRateSwitches />
+        </div>
         {note}
         <ResetButton label={t("reset")} onReset={onReset} />
       </div>

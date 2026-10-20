@@ -333,7 +333,11 @@ only its layers, its views and its store of its own:
   (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
   is drawn: layers, switches, the distance unit, the `CameraPad`, then render quality), built from
   `SwitchChips` (the toolkit's switch rows in a panel, its switch chips in a dock),
-  `DistanceUnitControl`, `RenderSection` and `MapScale`. `RenderSection`
+  `DistanceUnitControl`, `RenderSection` and `MapScale`. Its frame-rate switch is one for every
+  simulation (`src/lib/frame-rate.ts`, in memory); on, it drops smaller switches for the
+  readout's parts (graph, vsync, memory where the browser reports it). The readout
+  (`FrameRateReadout`, mounted by `SimulationImmersive`) is the toolkit's `FrameStats` on its
+  `frameMeter`, in the stage's top-left corner. `RenderSection`
   (`src/components/simulations/render-settings.tsx`) ends every simulation's settings panel:
   render quality (Economy, Standard, Cinematic, Max: `RenderQuality`), anti-aliasing (the modes
   the simulation can draw), an optional note and Reset, which puts the panel back as a visit
@@ -435,7 +439,8 @@ catch-all dynamic route or backend is introduced.
 
 The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-music.ts`),
 one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
-`interstellar-drift` and `aeolian-static`, each as `.webm` (Opus) and `.m4a` (AAC).
+`interstellar-drift`, `aeolian-static`, `drifting-probe` and `low-drone-rises`, each as
+`.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
 the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The page
 preconnects to the CDN; the first track buffers when the toggle is hovered or

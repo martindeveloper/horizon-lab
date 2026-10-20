@@ -346,6 +346,14 @@
     "edges": "Edge rays",
     "supersample": "SSAA",
     "wideColour": "Wide colour (P3)",
+    "frameRate": "Frame rate",
+    "parts": {
+      "graph": "Graph",
+      "vsync": "Vsync",
+      "memory": "Memory"
+    },
+    "idle": "Idle",
+    "heap": "JS",
     "reset": "Reset"
   },
   "webgl": {

@@ -4,6 +4,7 @@ export { createMsaaPass, type MsaaPass } from "./msaa-pass";
 export type { RenderQuality } from "./quality";
 export { bufferSize, observeViewport, type ResolutionOptions } from "./viewport";
 export { FrameClock, createFrameLoop } from "./frame-loop";
+export { createFrameMeter, frameMeter, type FrameMeter } from "./frame-meter";
 export { observePowerPreference } from "./power";
 export { DisposalScope } from "./disposal";
 export { probeWebGL, type WebGLSupport } from "./capability";

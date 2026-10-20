@@ -183,11 +183,9 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         onReset={() => api().resetView()}
       >
         {wideGamut ? (
-          <div className="-mx-3 grid gap-0.5">
-            <SwitchRow on={wideColour} onToggle={() => api().setWideColour(!wideColour)}>
-              {tRender("wideColour")}
-            </SwitchRow>
-          </div>
+          <SwitchRow on={wideColour} onToggle={() => api().setWideColour(!wideColour)}>
+            {tRender("wideColour")}
+          </SwitchRow>
         ) : null}
       </RenderSection>
     </Rail>

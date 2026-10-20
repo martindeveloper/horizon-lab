@@ -346,6 +346,14 @@
     "edges": "Paprsky hran",
     "supersample": "SSAA",
     "wideColour": "Široký gamut (P3)",
+    "frameRate": "Snímková frekvence",
+    "parts": {
+      "graph": "Graf",
+      "vsync": "Vsync",
+      "memory": "Paměť"
+    },
+    "idle": "Klid",
+    "heap": "JS",
     "reset": "Obnovit nastavení"
   },
   "webgl": {

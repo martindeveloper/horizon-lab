@@ -26,12 +26,27 @@ test("buffer sizing preserves CSS aspect and caps DPR while warming up", () => {
   assert.deepEqual(bufferSize(0, 0, { scale: 1, dpr: 1, dprCap: 2 }), { width: 1, height: 1 });
 });
 
-test("frame pacing accumulates elapsed time, caps stalls and resets on resume", () => {
+test("frame pacing holds the target rate on real displays, caps stalls and resets on resume", () => {
+  /* Frames drawn in a second of display frames a hair shorter than nominal, as browsers give. */
+  const drawn = (hz, fps) => {
+    const clock = new FrameClock();
+    let frames = 0;
+    for (let t = 0; t < 1000; t += 1000 / hz - 0.05) if (clock.advance(t, fps) !== null) frames++;
+    return frames;
+  };
+  for (const [hz, fps] of [
+    [60, 30],
+    [60, 60],
+    [120, 30],
+    [120, 60],
+    [144, 48],
+  ])
+    assert.ok(Math.abs(drawn(hz, fps) - fps) <= fps * 0.06, `${fps} fps on ${hz} Hz`);
+  assert.ok(drawn(60, 24) <= 24, "never faster than the cap");
   const clock = new FrameClock();
   assert.equal(clock.advance(0, 30), 0);
   assert.equal(clock.advance(16, 30), null);
-  assert.equal(clock.advance(32, 30), null);
-  close(clock.advance(48, 30), 0.048);
+  close(clock.advance(32, 30), 0.032);
   close(clock.advance(5000), 0.1);
   clock.reset();
   assert.equal(clock.advance(9000), 0);
@@ -284,4 +299,38 @@ test("engine host sizes the buffer, redraws on demand and pauses through context
     engine.dispose();
     Object.assign(globalThis, previous);
   }
+});
+
+test("the frame meter reports drawn frames per second and their times, nothing once a scene stops", async () => {
+  const { createFrameMeter } = await import("@horizon/toolkit/rendering");
+  const meter = createFrameMeter({ span: 0.5, keep: 120 });
+  assert.equal(meter.rate(0), 0, "no frames yet");
+  for (let t = 0; t <= 1000; t += 1000 / 60) meter.tick(t);
+  assert.ok(Math.abs(meter.rate(1000) - 60) < 0.5);
+  /* A throttled loop: one frame in two. */
+  for (let t = 1000; t <= 2000; t += 1000 / 30) meter.tick(t);
+  assert.ok(Math.abs(meter.rate(2000) - 30) < 0.5);
+  assert.equal(meter.rate(2600), 0, "an idle scene draws nothing");
+  assert.equal(meter.intervals().length, 91, "a time between each pair of frames");
+  assert.ok(Math.abs(meter.intervals().at(-1) - 1000 / 30) < 0.01);
+  const short = createFrameMeter({ keep: 10 });
+  for (let t = 0; t < 400; t += 16) short.tick(t);
+  assert.equal(short.intervals().length, 10, "only the last `keep` frame times");
+  /* Waking from idle starts afresh rather than counting the pause as one long frame. */
+  meter.tick(5000);
+  assert.ok(meter.intervals().every((ms) => ms < 250));
+});
+
+test("frame stats read the display's refresh rate and the vsync windows each frame took", async () => {
+  const { median, refreshRate, vsyncWindows } =
+    await import("../packages/toolkit/src/ui/frame-stats-model.ts");
+  assert.equal(median([16.5, 16.7, 40, 16.6, 16.8]), 16.7, "a stray slow frame does not move it");
+  assert.equal(median([]), 0);
+  assert.equal(refreshRate(16.72), 60, "59.8 Hz reads as the 60 Hz panel it is");
+  assert.equal(refreshRate(6.95), 144);
+  assert.equal(refreshRate(0), 0);
+  assert.equal(vsyncWindows(16.6, 16.7), 1);
+  assert.equal(vsyncWindows(33.2, 16.7), 2, "a 30 fps cap on 60 Hz takes two windows");
+  assert.equal(vsyncWindows(52, 16.7), 3, "a missed window");
+  assert.equal(vsyncWindows(16, 0), 0, "unknown until the display is measured");
 });
