@@ -274,12 +274,13 @@ export function createOrreryEngine({
       },
     });
 
-    /* Names open what they name; moons, the snow line and rulers have nothing to open. */
+    /* Names open what they name; the snow line and rulers have nothing to open. */
     createPicking(kit, canvas, store, {
       pickables: solar.pickables,
       blocked: () => {
         const s = store.getState();
-        return s.guideOpen || s.drift !== "off" || closeUp.current !== null;
+        const flying = closeUp.current !== null && closeUp.current.phase !== "on";
+        return s.guideOpen || s.drift !== "off" || flying;
       },
       distance: () => pose.distance,
       labels: () => hits((key) => solarLabelPick(key) !== undefined),
@@ -314,11 +315,13 @@ export function createOrreryEngine({
         controls.cancel();
       },
       after: (s) => {
-        if (s.selection !== lastSelection) {
+        const moved = s.selection !== lastSelection;
+        if (moved) {
           lastSelection = s.selection;
           if (isPresentEra(s.yearsAgo) && !s.guideOpen) closeUp.prefetch(s.selection);
         }
-        if (s.closeUp !== lastCloseUp) {
+        /* A close-up that moves on to another body (a moon from its planet) flies straight there. */
+        if (s.closeUp !== lastCloseUp || (s.closeUp && moved)) {
           lastCloseUp = s.closeUp;
           if (s.closeUp && hasSurface(s.selection)) closeUp.start(s.selection);
           else if (!s.closeUp) closeUp.leave();

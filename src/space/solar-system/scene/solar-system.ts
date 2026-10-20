@@ -4,7 +4,7 @@
  * builds it on its kit, labels and rulers, and draws it at a moment each frame; the Orrery
  * moves that moment along its timeline, Deep Field holds it at today.
  */
-import { Group, type Object3D } from "three";
+import { Group, Object3D, Vector3, type Intersection, type Ray } from "three";
 
 import { MOON_IDS, NAMED, PLANET_IDS, type BodyId } from "@horizon/toolkit/bodies";
 import type { AnchoredRulers, LabelBody, PlaceLabel } from "@horizon/toolkit/scene";
@@ -39,6 +39,42 @@ const LABEL_PICKS = new Map<string, SolarSelection>([
 ]);
 /** What a tapped name opens; the snow line opens nothing. */
 export const solarLabelPick = (key: string) => LABEL_PICKS.get(key);
+
+const centre = new Vector3();
+const size = new Vector3();
+const candidates: { hit: Intersection; off: number; near: number }[] = [];
+
+/**
+ * Which body a tap meant: of the bodies under it (each pickable's `userData.globe`), the one whose
+ * centre is nearest the tap as seen, unless a drawn globe the tap is on hides it. A moon behind
+ * its planet's generous touch target, or seen through the asteroid belt's, is still the moon; a
+ * belt or swarm counts only when no body is under the tap.
+ */
+export function chooseSolarHit(hits: Intersection[], ray: Ray): Intersection | undefined {
+  candidates.length = 0;
+  /** The nearest globe surface the tap is on: what lies behind it is hidden. */
+  let wall = Infinity;
+  for (const hit of hits) {
+    const globe: unknown = hit.object.userData.globe;
+    if (!(globe instanceof Object3D)) continue;
+    globe.getWorldPosition(centre);
+    const miss = ray.distanceToPoint(centre);
+    const depth = centre.sub(ray.origin).dot(ray.direction);
+    if (depth <= 0) continue;
+    size.setFromMatrixScale(globe.matrixWorld);
+    const radius = Math.max(size.x, size.y, size.z);
+    if (miss <= radius) wall = Math.min(wall, depth - radius);
+    candidates.push({ hit, off: miss / depth, near: depth - radius });
+  }
+  let best: Intersection | undefined;
+  let bestOff = Infinity;
+  for (const { hit, off, near } of candidates)
+    if (near <= wall && off < bestOff) {
+      best = hit;
+      bestOff = off;
+    }
+  return best ?? hits[0];
+}
 
 /** Where rulers start for a selection: its body, a sample's or moon's position (`at`), or the Sun. */
 export function rulerOrigin(sel: SolarSelection | null, at: Point | null): string | Point | null {

@@ -5,16 +5,23 @@ import { selectTapped } from "@/space/solar-system/model/framing";
 import { migrationProgress } from "@/space/solar-system/model/moment";
 import {
   hasSurface,
+  hostOf,
   selectionKey,
+  solarPick,
   type SolarSelection,
 } from "@/space/solar-system/model/selection";
 import type { SolarKit } from "@/space/solar-system/scene/kit";
+import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
 import type { useOrrery } from "../store";
+import { CLOSE_UP_LAYERS } from "./close-up-controller";
 
 /** A second tap on the same body within this window flies in for a close-up. */
 const DOUBLE_TAP_MS = 380;
+
+/** The planet (or Pluto) a body belongs with: itself, or a moon's. */
+const systemOf = (sel: SolarSelection) => selectionKey(sel.kind === "moon" ? hostOf(sel.id) : sel);
 
 export function createPicking(
   kit: SolarKit,
@@ -33,14 +40,24 @@ export function createPicking(
   let lastTapKey = "";
   let lastTapAt = 0;
 
-  /* In a close-up, taps never pull the camera away; Back, Escape or zooming out do. */
+  /* In a close-up, taps never pull the camera away; Back, Escape or zooming out do. A tap on
+     another body of its planet's system (the Moon from the Earth) flies straight there. */
   createTapPicking(kit, canvas, {
     pickables: options.pickables,
+    choose: chooseSolarHit,
+    layers: CLOSE_UP_LAYERS,
     blocked: options.blocked,
     labels: options.labels,
     labelPick: options.labelPick,
     onTap: (target) => {
       const api = store.getState();
+      if (api.closeUp) {
+        const pick = target && solarPick(target.pick, target.instance);
+        const from = api.selection;
+        if (pick && from && hasSurface(pick) && systemOf(pick) === systemOf(from))
+          if (selectionKey(pick) !== selectionKey(from)) api.switchCloseUp(pick);
+        return;
+      }
       if (!target) {
         api.select(null);
         return;

@@ -51,6 +51,7 @@ export function createSunLayer(
 
   const sun = new Mesh(globes.sphere, looks.sun);
   sun.userData.pick = { kind: "sun" } satisfies SolarSelection;
+  sun.userData.globe = sun;
   const glow = new Sprite(looks.sunGlow);
   parent.add(sun, glow);
 

@@ -58,6 +58,7 @@ export function createPlanetsLayer(
     const body = new Mesh(globes.sphere, looks.planets[id]);
     const hit = new Mesh(globes.hit, looks.ghost);
     hit.userData.pick = { kind: "planet", id } satisfies SolarSelection;
+    hit.userData.globe = body;
     group.add(hit, body);
     /* Rings lie in the equatorial plane, so they follow the body's real pole. */
     const system = RINGS[id];
@@ -79,6 +80,7 @@ export function createPlanetsLayer(
   const named = NAMED.map((body) => {
     const mesh = new Mesh(globes.small, looks.named[body.id]);
     mesh.userData.pick = { kind: "named", id: body.id } satisfies SolarSelection;
+    mesh.userData.globe = mesh;
     if (body.id === "halley") {
       const coma = new Sprite(looks.halleyComa);
       coma.scale.set(4.2, 4.2, 1);

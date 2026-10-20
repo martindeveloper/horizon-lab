@@ -2,6 +2,7 @@
 import type { Object3D } from "three";
 
 import { selectTapped } from "@/space/solar-system/model/framing";
+import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
 import type { Selection, useDeepField } from "../store";
@@ -24,6 +25,7 @@ export function createPicking(
   /* The Galaxy and the cosmic map draw in their own pass but are picked like the rest. */
   createTapPicking(kit, canvas, {
     pickables: options.pickables,
+    choose: chooseSolarHit,
     layers: [GALAXY_LAYER],
     blocked: () => false,
     labels: options.labels,

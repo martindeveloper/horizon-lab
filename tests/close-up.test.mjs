@@ -155,6 +155,11 @@ test("store: close-ups need a globe, today and the solar map; leaving is automat
   assert.equal(api().closeUp, true);
   api().select({ kind: "planet", id: "mars" });
   assert.equal(api().closeUp, true, "same body keeps it");
+  api().switchCloseUp({ kind: "population", id: "asteroids" });
+  assert.deepEqual(api().selection, { kind: "planet", id: "mars" }, "only to a globe");
+  api().switchCloseUp({ kind: "moon", id: "phobos" });
+  assert.equal(api().closeUp, true, "on to its moon, still close");
+  assert.deepEqual(api().selection, { kind: "moon", id: "phobos" });
   api().select({ kind: "planet", id: "jupiter" });
   assert.equal(api().closeUp, false, "another body ends it");
   api().enterCloseUp();

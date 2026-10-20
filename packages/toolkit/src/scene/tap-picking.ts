@@ -1,5 +1,5 @@
 /** Taps on a canvas: a name tapped squarely wins, then the objects under the pointer, then a near miss. */
-import { Raycaster, Vector2, type Object3D } from "three";
+import { Raycaster, Vector2, type Intersection, type Object3D, type Ray } from "three";
 
 import type { SceneBasics } from "./kit";
 import { labelAt } from "./label-geometry";
@@ -18,6 +18,8 @@ export function createTapPicking(
   canvas: HTMLCanvasElement,
   options: {
     pickables: Object3D[];
+    /** Which of the shown objects under the pointer (nearest first) a tap meant; the nearest by default. */
+    choose?: (hits: Intersection[], ray: Ray) => Intersection | undefined;
     /** Render layers to raycast besides the default one. */
     layers?: readonly number[];
     /** Taps are ignored while something else holds the camera. */
@@ -54,9 +56,10 @@ export function createTapPicking(
     if (squarely) return { pick: options.labelPick(squarely) };
     pointer.set((x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster
+    const hits = raycaster
       .intersectObjects(options.pickables, false)
-      .find((candidate) => shown(candidate.object));
+      .filter((candidate) => shown(candidate.object));
+    const hit = options.choose ? options.choose(hits, raycaster.ray) : hits[0];
     if (hit) return { pick: hit.object.userData.pick, instance: hit.instanceId };
     const near = labelAt(labels, x, y, event.pointerType === "mouse" ? 0 : FINGER_PX, 4);
     return near ? { pick: options.labelPick(near) } : null;

@@ -71,6 +71,8 @@ export type OrreryStore = SceneSlice &
     /** Flies to the selected body when it has a surface to look at. */
     enterCloseUp: () => void;
     leaveCloseUp: () => void;
+    /** In a close-up, flies straight on to another body's (a moon of the same planet). */
+    switchCloseUp: (selection: SolarSelection) => void;
     toggleSolarActivity: () => void;
     toggleSolarActivityPaused: () => void;
     patchShow: (patch: Partial<Show>) => void;
@@ -175,6 +177,8 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     if (canCloseUp(s)) set({ closeUp: true, panel: "none", playing: false });
   },
   leaveCloseUp: () => set(closeUpState(false)),
+  switchCloseUp: (selection) =>
+    set((s) => (s.closeUp && canCloseUp({ ...s, selection }) ? { selection } : {})),
   toggleSolarActivity: () =>
     set((s) =>
       s.closeUp && s.selection?.kind === "sun" && canCloseUp(s)

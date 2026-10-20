@@ -26,8 +26,13 @@ const MOON_CLEAR_PX = 12;
 /** A moon shows once it clears its planet's marker by this many pixels (eased over the span). */
 const SEPARATE_PX = [6, 10] as const;
 const SELECTED_PX = [3, 6] as const;
-/** A moon's touch target, screen pixels: smaller than a planet's, so a planet stays tappable. */
-const TOUCH_PX = 10;
+/**
+ * A system spreads as if selected while the camera is this near its planet, as fractions of
+ * the planet's distance from the Sun: Earth's within 0.3 au, Jupiter's within 1.6 au.
+ */
+const NEAR = [0.3, 0.5] as const;
+/** A moon's touch target, screen pixels; where targets overlap, the nearer centre wins (chooseSolarHit). */
+const TOUCH_PX = 16;
 /**
  * A magnified system reaches at most this many times its innermost orbit: Jupiter's and
  * Uranus's moons fit (4.5) and spread evenly; Saturn's, Mimas to Iapetus (19), are drawn
@@ -69,6 +74,7 @@ export function createMoonsLayer(
       mesh.visible = false;
       const hit = new Mesh(globes.hit, looks.ghost);
       hit.userData.pick = { kind: "moon", id: moon.id } satisfies SolarSelection;
+      hit.userData.globe = mesh;
       hit.visible = false;
       const orbit = ownedLine(scope, id === "pluto" ? 0x9ebccc : ORBIT_COLOR[id], 0.45);
       orbit.line.visible = false;
@@ -122,7 +128,7 @@ export function createMoonsLayer(
       return systemOf(id)?.reach ?? 0;
     },
     /* Moons sit at today's positions (the clock, not the Motion speed-up, which
-       would whirl them). A selected planet's system is magnified about the
+       would whirl them). A selected or nearby planet's system is magnified about the
        planet until its innermost moon clears the marker, but never past the
        planet's distance from the Sun; a wide system's outer moons less (SPREAD).
        True size keeps every distance real. */
@@ -141,7 +147,8 @@ export function createMoonsLayer(
         const selected =
           ((sel?.kind === "planet" || sel?.kind === "named") && sel.id === system.id) ||
           (sel?.kind === "moon" && hostOf(sel.id).id === system.id);
-        const focus = system.focus.to(selected);
+        const near = 1 - smoothstep(NEAR[0], NEAR[1], range / host.position.length());
+        const focus = Math.max(system.focus.to(selected), near);
         const shown =
           era *
           (host.on ? 1 : 0) *
@@ -149,7 +156,7 @@ export function createMoonsLayer(
             focus,
             smoothstep(SEPARATE_PX[0], SEPARATE_PX[1], (system.outer - host.extent) * perPx),
           );
-        /* The selected system magnifies smoothly as the selection eases in. */
+        /* The system magnifies smoothly as the selection eases in or the camera nears. */
         let spread = 0;
         if (shown > 0 && focus > 0 && !show.trueSize) {
           const clear = Math.max(host.extent + pxWorld(range, MOON_CLEAR_PX), pxWorld(range, 26));
@@ -157,7 +164,7 @@ export function createMoonsLayer(
           spread = Math.min(clear / system.inner, room);
         }
         const hidden = host.extent + (show.trueSize ? 0 : pxWorld(range, 3));
-        const [from, to] = selected ? SELECTED_PX : SEPARATE_PX;
+        const [from, to] = focus > 0.5 ? SELECTED_PX : SEPARATE_PX;
         system.reach = 0;
         for (const slot of system.moons) {
           const { moon, mesh, hit, offset, orbit } = slot;

@@ -136,9 +136,10 @@ mask and `labelAt`, the label nearest a point with a finger's reach.
 
 `createTapPicking(basics, canvas, options)` reports each tap once, after a press
 that moved no more than 6 px; neither finger of a pinch taps. A name tapped squarely wins. Otherwise the
-pickables under the pointer give their `userData.pick` (and instance id), and
-then a near miss on a name counts: 44 px on touch. `layers` adds render layers
-to the raycast. What a tap means is the caller's.
+pickables under the pointer give their `userData.pick` (and instance id): the
+nearest, or the one `choose(hits, ray)` takes. Then a near miss on a name counts:
+44 px on touch. `layers` adds render layers to the raycast. What a tap means is
+the caller's.
 
 ## Rulers and distances
 

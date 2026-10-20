@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { Group, PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
 import { createStore } from "zustand/vanilla";
 
 import { MOONS } from "@horizon/toolkit/bodies";
@@ -15,7 +16,12 @@ import { framingView, viewOf } from "../src/space/solar-system/model/framing.ts"
 import { TODAY } from "../src/space/solar-system/model/moment.ts";
 import { positionOf } from "../src/space/solar-system/model/position.ts";
 import { hasSurface, hostOf, solarPick } from "../src/space/solar-system/model/selection.ts";
-import { solarLabelPick } from "../src/space/solar-system/scene/solar-system.ts";
+import { createSolarKit } from "../src/space/solar-system/scene/kit.ts";
+import {
+  chooseSolarHit,
+  createSolarSystem,
+  solarLabelPick,
+} from "../src/space/solar-system/scene/solar-system.ts";
 
 test("a crossing between the simulations is read once, by its addressee, with the pose left", () => {
   const pose = { azimuth: 1.2, inclination: 0.4, distance: 72 };
@@ -395,4 +401,116 @@ test("opening a tour from a hotspot restores the original orbit setting", async 
   } finally {
     useBlackHole.setState(original, true);
   }
+});
+
+/** The real solar system with a stub for painted sprites' 2D canvas (no browser, no WebGL). */
+function withSolarScene(run) {
+  const original = globalThis.document;
+  globalThis.document = {
+    createElement: () => ({
+      getContext: () => ({
+        createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+        putImageData() {},
+        createRadialGradient: () => ({ addColorStop() {} }),
+        fillRect() {},
+      }),
+    }),
+  };
+  globalThis.window ??= globalThis;
+  globalThis.window.matchMedia ??= () => ({ matches: true, addEventListener() {} });
+  const scope = new DisposalScope();
+  try {
+    const camera = new PerspectiveCamera(48, 1.6, 1e-9, 1e7);
+    const kit = createSolarKit({
+      scope,
+      camera,
+      viewport: { width: 1600, height: 1000 },
+      tight: true,
+      dpr: { value: 1 },
+    });
+    const scene = new Group();
+    const solar = createSolarSystem(kit, scene, {
+      place() {},
+      hideAll() {},
+      setBodies() {},
+      rulers: { anchor: () => ({ x: 0, y: 0, z: 0, on: false }) },
+      swarms: { belt: 10, trojans: 10, kuiper: 10, oort: 10 },
+    });
+    const now = new Date("2026-10-18T00:00:00Z");
+    const show = { names: true, trueSize: false, elliptical: true, drift: false, kuiper: true };
+    /** Puts the camera at `position` looking at `aim` and settles the scene there. */
+    const view = (position, aim, sel) => {
+      camera.position.copy(position);
+      camera.lookAt(aim);
+      camera.updateMatrixWorld();
+      const dist = position.distanceTo(aim);
+      for (let frame = 0; frame < 12; frame += 1) {
+        kit.lod.begin(0.1, dist, dist);
+        solar.update({ ...TODAY, dt: 0.1, now, show, sel, playing: false, dist });
+      }
+      scene.updateMatrixWorld(true); // as a render would
+    };
+    run({ camera, solar, now, view });
+  } finally {
+    scope.dispose();
+    globalThis.document = original;
+  }
+}
+
+test("a tap on a selected planet's moon picks the moon, from any side", () => {
+  withSolarScene(({ camera, solar, view }) => {
+    const sel = { kind: "planet", id: "earth" };
+    const globes = [solar.sun, ...solar.planets.planets.map((planet) => planet.body)];
+    const raycaster = new Raycaster();
+    const shown = (object) => !object || (object.visible && shown(object.parent));
+    let tapped = 0;
+    // The Orrery's camera circles the Sun: behind the Earth, edge-on through the belt, above.
+    for (const distance of [0.6, 1.5, 3, 5])
+      for (const lift of [0.05, 0.4, 1.2])
+        for (let step = 0; step < 16; step += 1) {
+          const turn = (step / 16) * Math.PI * 2;
+          const position = new Vector3(Math.sin(turn), 0, Math.cos(turn))
+            .multiplyScalar(Math.cos(lift))
+            .setY(Math.sin(lift))
+            .multiplyScalar(distance);
+          view(position, new Vector3(), sel);
+          const moon = solar.moons.drawnAt("moon");
+          assert.ok(moon, "a selected planet's moon is drawn");
+          const ndc = new Vector3().fromArray(moon).project(camera);
+          if (Math.abs(ndc.x) > 1 || Math.abs(ndc.y) > 1 || ndc.z > 1) continue;
+          raycaster.setFromCamera(new Vector2(ndc.x, ndc.y), camera);
+          // Behind a drawn globe (Earth's, or Venus passing in front) the Moon is not seen.
+          const far = camera.position.distanceTo(ndc.set(...moon));
+          const hidden = globes.some((globe) => {
+            const centre = globe.getWorldPosition(new Vector3());
+            const ahead = camera.position.distanceTo(centre) < far;
+            return globe.visible && ahead && raycaster.ray.distanceToPoint(centre) < globe.scale.x;
+          });
+          if (hidden) continue;
+          const hits = raycaster
+            .intersectObjects(solar.pickables, false)
+            .filter((c) => shown(c.object));
+          const pick = chooseSolarHit(hits, raycaster.ray)?.object.userData.pick;
+          const where = `${distance} au, ${lift} rad up, ${turn.toFixed(2)} rad round`;
+          assert.deepEqual(pick, { kind: "moon", id: "moon" }, where);
+          tapped += 1;
+        }
+    assert.ok(tapped > 100);
+  });
+});
+
+test("a planet's moons spread out as the camera nears it, selected or not", () => {
+  withSolarScene(({ solar, now, view }) => {
+    const jupiter = new Vector3().fromArray(
+      positionOf({ kind: "planet", id: "jupiter" }, TODAY, now),
+    );
+    const callisto = MOONS.find((m) => m.id === "callisto");
+    const spread = (distance) => {
+      view(jupiter.clone().multiplyScalar(1 + distance / jupiter.length()), jupiter, null);
+      const at = solar.moons.drawnAt("callisto");
+      return at ? new Vector3().fromArray(at).distanceTo(jupiter) / (callisto.aKm / AU_KM) : 0;
+    };
+    assert.ok(spread(1) > 1.5, "magnified 1 au from Jupiter");
+    assert.ok(spread(4) <= 1 + 1e-6, "true distances 4 au away");
+  });
 });

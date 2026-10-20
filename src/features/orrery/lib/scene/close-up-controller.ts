@@ -47,6 +47,8 @@ import {
 const HOST_LAYER = 2;
 /** The layer of the close-up body's own depth pass. */
 const BODY_LAYER = 1;
+/** The close-up's own passes, for taps on the bodies they draw (Pluto from Charon's). */
+export const CLOSE_UP_LAYERS = [BODY_LAYER, HOST_LAYER] as const;
 /** Prefetched close-up maps kept as compressed bytes (a few MB at most). */
 const PREFETCH_KEEP = 2;
 /** Each body's largest moon: the one a drift's visit swings out to. */
@@ -254,6 +256,10 @@ export function createCloseUpController(
   };
 
   const start = (sel: BodySelection) => {
+    /* Moving on from another close-up (its planet to a moon) still leaves for the map it came from. */
+    const home = close
+      ? { pose: close.home, aim: close.homeAim }
+      : { pose: { ...pose }, aim: aim.clone() };
     end(false);
     const id = bodyKey(sel);
     const radius = id === "sun" ? SUN_R : FIGURES[id].equatorialKm / AU_KM;
@@ -276,8 +282,8 @@ export function createCloseUpController(
       from: { ...pose },
       fromAim: aim.clone(),
       to,
-      home: { ...pose },
-      homeAim: aim.clone(),
+      home: home.pose,
+      homeAim: home.aim,
       radius,
       frame,
       objects,
