@@ -192,7 +192,7 @@
     "groups": {
       "imagery": {
         "label": "Imagery",
-        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. Phobos and Deimos are painted from spacecraft views. These six bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
+        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. These four bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
       },
       "data": {
         "label": "Data",
@@ -262,6 +262,8 @@
       "ganymedeMap": "Ganymede: the USGS Voyager/Galileo multispectral mosaic, with muted colour and brightness adapted for scene lighting. Polar colour gaps use the source’s monochrome coverage; this is not calibrated natural colour.",
       "callistoMap": "Callisto: the USGS Voyager/Galileo monochrome mosaic. Missing coverage receives a plain fill rather than invented craters.",
       "tritonMap": "Triton: the USGS Voyager 2 synthetic-colour mosaic (orange, violet and ultraviolet filters), with muted saturation. The unobserved northern region uses a plain fill. Source grid lines were interpolated by USGS; this is not natural-colour photography.",
+      "phobosMap": "Phobos: Philip Stooke's monochrome mosaic of Viking images with later Mars Express, Mars Global Surveyor and MRO views, on the DLR control network. Phobos is irregular; its map is drawn on a sphere.",
+      "deimosMap": "Deimos: Philip Stooke's monochrome Viking mosaic with MRO HiRISE detail, from the NASA Planetary Data System. Deimos is irregular; its map is drawn on a sphere.",
       "charonMap": "Charon: the USGS New Horizons monochrome mosaic. The unobserved southern region uses a plain fill. No surface colour is inferred from the monochrome data.",
       "feather": "Original Feather icons used by Lucide, including navigation and interface controls.",
       "ned": "Galaxy and cluster positions and redshifts. This work uses NED, operated by Caltech under contract with NASA.",
@@ -280,6 +282,8 @@
       "earth": "Earth",
       "moon": "Moon",
       "mars": "Mars",
+      "phobos": "Phobos",
+      "deimos": "Deimos",
       "jupiter": "Jupiter",
       "saturn": "Saturn",
       "uranus": "Uranus",

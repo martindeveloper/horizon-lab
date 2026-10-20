@@ -1,7 +1,10 @@
 /** Source rasters are north-up, eastward GeoTIFFs. The catalogue's west-positive
  * labels are NOT the raster x direction. Central meridians from GeoKey 3088:
  * Io/Triton/Charon 0°, Europa/Ganymede/Callisto 180°. LROC is centred on 0°.
- * These spherical maps need no oblate-latitude conversion.
+ * These spherical maps need no oblate-latitude conversion. Phobos and Deimos are
+ * Stooke's simple-cylindrical mosaics on each shape model's planetocentric grid,
+ * 0° at the centre and east to the right: USGS labels its copy of the Phobos map
+ * PositiveEast, which puts Stickney at its IAU 49° W.
  */
 export const MOON_MAP_SOURCES = {
   moon: {
@@ -43,6 +46,19 @@ export const MOON_MAP_SOURCES = {
   charon: {
     file: "https://planetarymaps.usgs.gov/mosaic/Charon_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif",
     sha256: "4a874809e0a33a851cd026b8e4647f5875ed15807e677d413812367509564b00",
+    centered: true,
+    saturation: 1,
+  },
+  phobos: {
+    file: "https://planetarymaps.usgs.gov/mosaic/Phobos_Viking_Mosaic_40ppd_DLRcontrol.tif",
+    sha256: "d7934d5b209e5f31ed26297e1e85a4713d8d0aa2906111ffe4b3d60d02ae0ccb",
+    centered: true,
+    saturation: 1,
+  },
+  /* No USGS mosaic product: Stooke's map as archived at the PDS Small Bodies Node. */
+  deimos: {
+    file: "https://sbnarchive.psi.edu/pds3/multi_mission/MULTI_SA_MULTI_6_STOOKEMAPS_V2_0/document/m2deimos/deimos_cyl_viking_mro.jpg",
+    sha256: "90ff4ac7f23ece9255774cf72f9ed9ca5be861d9f2aa136977fc2d460141ad6d",
     centered: true,
     saturation: 1,
   },

@@ -93,6 +93,20 @@ export const CREDITS: readonly CreditGroup[] = [
         url: "https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m",
       },
       {
+        id: "phobosMap",
+        name: "Phobos Viking global mosaic (DLR control), monochrome",
+        by: "NASA/JPL; Philip Stooke, University of Western Ontario; USGS Astrogeology",
+        licence: "Public domain",
+        url: "https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m",
+      },
+      {
+        id: "deimosMap",
+        name: "Stooke small bodies maps: Deimos, Viking with MRO HiRISE, monochrome",
+        by: "NASA/JPL; Philip Stooke, University of Western Ontario (with C. Jongkind, M. Arntz); P. Thomas, Cornell; PDS Small Bodies Node",
+        licence: "Public domain",
+        url: "https://sbn.psi.edu/pds/resource/stookemaps.html",
+      },
+      {
         id: "charonMap",
         name: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
         by: "NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology",

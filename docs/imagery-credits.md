@@ -100,6 +100,8 @@ Processing and limits:
 - **Ganymede**: [Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles](https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Ganymede_Voyager_GalileoSSI_Global_ClrMosaic_1435m.tif).
 - **Callisto**: [Voyager / Galileo SSI mosaic, monochrome](https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Callisto_Voyager_GalileoSSI_global_mosaic_1km.tif).
 - **Triton**: [Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill](https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Triton_Voyager2_ClrMosaic_GlobalFill_600m.tif).
+- **Phobos**: [Viking Orbiter mosaic with Mars Express, MGS and MRO images (DLR control), monochrome](https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m). Credit: NASA/JPL; Philip Stooke, University of Western Ontario; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Phobos_Viking_Mosaic_40ppd_DLRcontrol.tif).
+- **Deimos**: [Viking Orbiter mosaic with MRO HiRISE detail, monochrome](https://sbn.psi.edu/pds/resource/stookemaps.html) (Stooke small bodies maps V2.0, PDS Small Bodies Node). Credit: NASA/JPL; Philip Stooke, University of Western Ontario, with C. Jongkind and M. Arntz; control by P. Thomas, Cornell. [Original image](https://sbnarchive.psi.edu/pds3/multi_mission/MULTI_SA_MULTI_6_STOOKEMAPS_V2_0/document/m2deimos/deimos_cyl_viking_mro.jpg).
 - **Charon**: [New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill](https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m). Credit: NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Charon_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif).
 
 NASA imagery and USGS-produced mosaics are public domain; see
@@ -109,13 +111,16 @@ Source URLs and SHA-256 checksums are pinned in `scripts/lib/moon-maps.mjs`.
 
 Processing and limits:
 
-- All seven maps ship locally at 1024 × 512, shared between detail tiers because
-  moons have no independent close-up view. No external imagery requests at runtime.
+- The maps ship at 1024 × 512, Phobos and Deimos at 512 × 256 (they are never
+  more than a few pixels across), shared between detail tiers because moons have
+  no independent close-up view. No external imagery requests at runtime.
 - The GeoTIFFs have north-up rows and eastward projected x, regardless of the
   catalogue's positive-west coordinate labels. GeoKey 3088 has central meridian
   0° for Io, Triton and Charon, and 180° for Europa, Ganymede and Callisto.
   The former are rolled half a map; the latter already start at 0° east.
-  LROC is centred on 0° and is also rolled. No raster is mirrored. Rounded
+  LROC is centred on 0° and is also rolled. Stooke's Phobos and Deimos maps are
+  centred on 0° with east to the right (USGS labels its Phobos copy PositiveEast,
+  which puts Stickney at its IAU 49° W) and are rolled too. No raster is mirrored. Rounded
   source pixel bounds are resampled to the full 360° × 180° spherical extent.
   The scene retains its approximate synchronous moon orientation, not a
   precision libration/IAU moon-attitude ephemeris.
@@ -126,7 +131,9 @@ Processing and limits:
 - Io, Ganymede and Triton include non-visible filters; their chroma is reduced
   to 40% before brightness normalization. This is an illustrative colour
   treatment, **not** a reconstruction of calibrated natural colour.
-- Europa, Callisto and Charon remain monochrome. No colour terrain is inferred.
+- Europa, Callisto, Charon, Phobos and Deimos remain monochrome. No colour terrain
+  is inferred. Phobos and Deimos are irregular; their planetocentric maps are drawn
+  on spheres, and Phobos's seams between reverse-lit images carry Stooke's blending.
 - Zero/nodata coverage is softly blended into a uniform mean-colour fill, not
   procedural craters. Europa's unobserved region below 83°S is masked explicitly.
   Triton's missing north and Charon's missing south remain plain.
@@ -144,8 +151,7 @@ infrared maps would incorrectly expose surfaces hidden in visible light.
 The [JPL Venus texture](https://space.jpl.nasa.gov/tmaps/venus.html) explicitly
 clones a Mariner image and labels it fictitious; it is not a measured global map.
 Sedna has no resolved surface imagery. Halley's partial Giotto flyby views of
-an irregular nucleus are not a global spherical texture. Phobos and Deimos are
-painted from Viking, Mars Express and HiRISE views. These six bodies
+an irregular nucleus are not a global spherical texture. These four bodies
 remain illustrations built from published physical constraints; generated maps
 also remain temporary load/error fallbacks:
 
@@ -167,6 +173,3 @@ also remain temporary load/error fallbacks:
   central saddle waist, mapped Giotto HMC topography (Crater, Mountain, Chain,
   Ducktail) and localized active outgassing vents covering ~10–15 % of the
   surface (Keller et al. 1986, 1987; Stooke & Abergel 1991).
-- **Phobos and Deimos**: Dark reddish regolith (`p_V = 0.071`, `0.068`) drawn on
-  spheres. Phobos has Stickney's bluer ejecta and grooves that spare the trailing
-  side; Deimos has smooth fill with brighter Voltaire and Swift rims and streaks.

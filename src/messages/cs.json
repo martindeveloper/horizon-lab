@@ -192,7 +192,7 @@
     "groups": {
       "imagery": {
         "label": "Snímky",
-        "intro": "Mapy planet a měsíců upravené pro model sluneční soustavy. Venuše a Titan si ponechávají ilustrační mapy oblačnosti a zákalu: radarové či infračervené mapy povrchu neodpovídají jejich vzhledu ve viditelném světle. U Sedny nemáme rozlišené snímky povrchu; částečné snímky Halleyovy komety z průletů neposkytují globální mapu pro kouli. Phobos a Deimos jsou malované podle snímků sond. Těchto šest objektů zůstává ilustračních. Mapy jsou reprezentativní mozaiky, nikoli snímky k datu zvolenému na časové ose."
+        "intro": "Mapy planet a měsíců upravené pro model sluneční soustavy. Venuše a Titan si ponechávají ilustrační mapy oblačnosti a zákalu: radarové či infračervené mapy povrchu neodpovídají jejich vzhledu ve viditelném světle. U Sedny nemáme rozlišené snímky povrchu; částečné snímky Halleyovy komety z průletů neposkytují globální mapu pro kouli. Tyto čtyři objekty zůstávají ilustrační. Mapy jsou reprezentativní mozaiky, nikoli snímky k datu zvolenému na časové ose."
       },
       "data": {
         "label": "Data",
@@ -262,6 +262,8 @@
       "ganymedeMap": "Ganymed: multispektrální mozaika USGS ze snímků Voyageru a Galilea, s tlumenými barvami a jasem přizpůsobeným osvětlení scény. Chybějící barvy na pólech doplňují monochromatické snímky původní mapy; nejde o kalibrované přirozené barvy.",
       "callistoMap": "Callisto: monochromatická mozaika USGS ze snímků Voyageru a Galilea. Chybějící pokrytí má jednolitou výplň místo smyšlených kráterů.",
       "tritonMap": "Triton: mozaika USGS ze snímků Voyageru 2 v syntetických barvách (oranžový, fialový a ultrafialový filtr), se sníženou sytostí. Nepozorovaná severní oblast má jednolitou výplň. USGS interpoloval původní čáry souřadnicové sítě; nejde o fotografii v přirozených barvách.",
+      "phobosMap": "Phobos: monochromatická mozaika Philipa Stooka ze snímků Vikingů doplněná pozdějšími snímky Mars Express, Mars Global Surveyor a MRO, podle kontrolní sítě DLR. Phobos je nepravidelný; jeho mapa je vykreslena na kouli.",
+      "deimosMap": "Deimos: monochromatická mozaika Philipa Stooka ze snímků Vikingů s detaily z HiRISE na MRO, z archivu NASA Planetary Data System. Deimos je nepravidelný; jeho mapa je vykreslena na kouli.",
       "charonMap": "Charon: monochromatická mozaika USGS ze snímků New Horizons. Nepozorovaná jižní oblast má jednolitou výplň. Z monochromatických dat neodvozujeme barvu povrchu.",
       "feather": "Původní ikony Feather používané v Lucide, včetně navigace a ovládacích prvků rozhraní.",
       "ned": "Polohy a rudé posuvy galaxií a kup galaxií. Tato práce využívá NED, který provozuje Caltech na základě smlouvy s NASA.",
@@ -280,6 +282,8 @@
       "earth": "Země",
       "moon": "Měsíc",
       "mars": "Mars",
+      "phobos": "Phobos",
+      "deimos": "Deimos",
       "jupiter": "Jupiter",
       "saturn": "Saturn",
       "uranus": "Uran",

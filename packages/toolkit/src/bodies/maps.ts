@@ -72,6 +72,22 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     licence: "Public domain",
     url: "https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m",
   },
+  /* Never more than a few pixels across: one small tier. */
+  phobos: {
+    widths: { far: 512, near: 512, nearLight: 512 },
+    source: "Viking Orbiter mosaic with Mars Express, MGS and MRO images (DLR control), monochrome",
+    credit: "NASA/JPL; Philip Stooke, University of Western Ontario; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m",
+  },
+  deimos: {
+    widths: { far: 512, near: 512, nearLight: 512 },
+    source: "Viking Orbiter mosaic with MRO HiRISE detail, monochrome",
+    credit:
+      "NASA/JPL; Philip Stooke, University of Western Ontario (with C. Jongkind, M. Arntz); P. Thomas, Cornell; PDS Small Bodies Node",
+    licence: "Public domain",
+    url: "https://sbn.psi.edu/pds/resource/stookemaps.html",
+  },
   charon: {
     widths: { far: 1024, near: 1024, nearLight: 1024 },
     source: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
