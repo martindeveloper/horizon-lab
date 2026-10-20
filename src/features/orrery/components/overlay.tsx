@@ -24,7 +24,7 @@ const escapeSteps = (): EscapeStep[] => {
   return [
     [api.guideOpen, api.endGuide],
     [api.panel !== "none", () => api.setPanel("none")],
-    [api.closeUp, api.leaveCloseUp],
+    [api.closeUp !== null, () => api.leaveCloseUp()],
     [api.selection !== null, () => api.select(null)],
   ];
 };

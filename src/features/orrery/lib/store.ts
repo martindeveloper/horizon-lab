@@ -12,8 +12,11 @@ import { isPresentEra } from "@/space/solar-system/model/moment";
 import { MODEL_START } from "@/space/solar-system/model/parameters";
 import {
   hasSurface,
+  hostOf,
+  sameSystem,
   selectionKey,
   type SolarSelection,
+  type SurfaceSelection,
 } from "@/space/solar-system/model/selection";
 import { solarViewById, type SolarViewId } from "@/space/solar-system/model/views";
 import type { SolarShow } from "@/space/solar-system/scene/kit";
@@ -50,8 +53,11 @@ export type OrreryStore = SceneSlice &
     playing: boolean;
     view: SolarViewId;
     selection: SolarSelection | null;
-    /** The selected body fills the view at its true size; the engine flies in and out. */
-    closeUp: boolean;
+    /**
+     * The body filling the view at its true size, or null on the map; the engine flies in and
+     * out. The card may show another body of its system (the Moon from the Earth's).
+     */
+    closeUp: SurfaceSelection | null;
     /** Explicitly enabled illustrative prominences; reset on leaving the close-up. */
     solarActivity: boolean;
     solarActivityPaused: boolean;
@@ -70,9 +76,8 @@ export type OrreryStore = SceneSlice &
     select: (selection: SolarSelection | null) => void;
     /** Flies to the selected body when it has a surface to look at. */
     enterCloseUp: () => void;
-    leaveCloseUp: () => void;
-    /** In a close-up, flies straight on to another body's (a moon of the same planet). */
-    switchCloseUp: (selection: SolarSelection) => void;
+    /** Back up a level: from a moon to its planet's close-up, from a planet to the map; `toMap` all the way. */
+    leaveCloseUp: (toMap?: boolean) => void;
     toggleSolarActivity: () => void;
     toggleSolarActivityPaused: () => void;
     patchShow: (patch: Partial<Show>) => void;
@@ -96,7 +101,7 @@ function sameSelection(a: SolarSelection | null, b: SolarSelection | null) {
 }
 
 const SUN_ACTIVITY_OFF = { solarActivity: false, solarActivityPaused: false };
-const closeUpState = (closeUp: boolean) =>
+const closeUpState = (closeUp: SurfaceSelection | null) =>
   closeUp ? { closeUp } : { closeUp, ...SUN_ACTIVITY_OFF };
 
 export const useOrrery = create<OrreryStore>((set, get) => ({
@@ -106,7 +111,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     /* The visitor's switches, given back when the tour ends. */
     save: (s) => s.show,
     restore: (show) => ({ show }),
-    open: () => closeUpState(false),
+    open: () => closeUpState(null),
     apply: (step, s) => ({
       view: step.view,
       viewDist: solarViewById(step.view).dist,
@@ -122,7 +127,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   playing: false,
   view: typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath(),
   selection: null,
-  closeUp: false,
+  closeUp: null,
   ...SUN_ACTIVITY_OFF,
   panel: "none",
   show: DEFAULT_SHOW,
@@ -134,17 +139,17 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     set((s) => ({
       yearsAgo,
       playing: false,
-      ...closeUpState(s.closeUp && isPresentEra(yearsAgo)),
+      ...closeUpState(isPresentEra(yearsAgo) ? s.closeUp : null),
     })),
   setYearsFromPlay: (yearsAgo) =>
-    set((s) => ({ yearsAgo, ...closeUpState(s.closeUp && isPresentEra(yearsAgo)) })),
+    set((s) => ({ yearsAgo, ...closeUpState(isPresentEra(yearsAgo) ? s.closeUp : null) })),
   /** Pauses while playing; otherwise plays on, or from the start once the track has ended. */
   togglePlay: () =>
     set((s) =>
       s.playing
         ? { playing: false }
         : s.yearsAgo <= 0
-          ? { yearsAgo: OLDEST, playing: true, ...closeUpState(false) }
+          ? { yearsAgo: OLDEST, playing: true, ...closeUpState(null) }
           : { playing: true },
     ),
   replay: () =>
@@ -155,7 +160,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
       viewDist: solarViewById("giants").dist,
       flight: s.flight + 1,
       panel: "none",
-      ...closeUpState(false),
+      ...closeUpState(null),
     })),
   setView: (view) => {
     const v = solarViewById(view);
@@ -163,25 +168,32 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
       view,
       viewDist: v.dist,
       flight: s.flight + 1,
-      ...closeUpState(false),
+      ...closeUpState(null),
     }));
   },
-  /* Picking another body (or nothing) ends a close-up; the same body keeps it. */
+  /* A close-up stays while the card shows its own system (the Moon from the Earth's); picking
+     anything else, or nothing, ends it. */
   select: (selection) =>
     set((s) => ({
       selection,
-      ...closeUpState(s.closeUp && sameSelection(s.selection, selection)),
+      ...closeUpState(
+        s.closeUp && selection && sameSystem(s.closeUp, selection) ? s.closeUp : null,
+      ),
     })),
   enterCloseUp: () => {
     const s = get();
-    if (canCloseUp(s)) set({ closeUp: true, panel: "none", playing: false });
+    const body = s.selection;
+    if (hasSurface(body) && canCloseUp(s) && !sameSelection(s.closeUp, body))
+      set({ closeUp: body, panel: "none", playing: false });
   },
-  leaveCloseUp: () => set(closeUpState(false)),
-  switchCloseUp: (selection) =>
-    set((s) => (s.closeUp && canCloseUp({ ...s, selection }) ? { selection } : {})),
+  leaveCloseUp: (toMap = false) =>
+    set((s) => {
+      const up = !toMap && s.closeUp?.kind === "moon" ? hostOf(s.closeUp.id) : null;
+      return up ? { selection: up, closeUp: up } : closeUpState(null);
+    }),
   toggleSolarActivity: () =>
     set((s) =>
-      s.closeUp && s.selection?.kind === "sun" && canCloseUp(s)
+      s.closeUp?.kind === "sun" && canCloseUp(s)
         ? { solarActivity: !s.solarActivity, solarActivityPaused: false }
         : SUN_ACTIVITY_OFF,
     ),
@@ -196,7 +208,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   ...driftSlice(set, get, {
     open: (s) => {
       if (s.guideOpen) s.endGuide();
-      return { panel: "none" as const, selection: null, ...closeUpState(false) };
+      return { panel: "none" as const, selection: null, ...closeUpState(null) };
     },
   }),
 }));

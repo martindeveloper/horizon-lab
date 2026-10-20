@@ -72,3 +72,10 @@ export function hostOf(id: MoonId): Extract<SolarSelection, { kind: "planet" | "
   const { host } = moonById(id);
   return host === "pluto" ? { kind: "named", id: "pluto" } : { kind: "planet", id: host };
 }
+
+/** Whether two selections are one planet's system: the planet and its moons (the Earth and the Moon). */
+export function sameSystem(a: SolarSelection, b: SolarSelection) {
+  const systemOf = (sel: SolarSelection) =>
+    selectionKey(sel.kind === "moon" ? hostOf(sel.id) : sel);
+  return systemOf(a) === systemOf(b);
+}

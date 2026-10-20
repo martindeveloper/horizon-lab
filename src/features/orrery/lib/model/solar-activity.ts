@@ -42,8 +42,7 @@ export const SUN_ACTIVITY_REGION_COUNT = PROMINENCE_REGIONS.length;
 type SolarActivityState = {
   solarActivity: boolean;
   solarActivityPaused: boolean;
-  closeUp: boolean;
-  selection: { kind: string } | null;
+  closeUp: { kind: string } | null;
 };
 
 /** The model is absent throughout camera flights and outside the Sun's close-up pass. */
@@ -55,8 +54,7 @@ export function solarActivityVisible(
   return (
     solarVisible &&
     state.solarActivity &&
-    state.closeUp &&
-    state.selection?.kind === "sun" &&
+    state.closeUp?.kind === "sun" &&
     close?.id === "sun" &&
     close.phase === "on"
   );

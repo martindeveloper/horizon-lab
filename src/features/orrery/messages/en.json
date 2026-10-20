@@ -61,6 +61,7 @@
     "playRestart": "Play from the start",
     "closeUp": "Close-up",
     "leaveCloseUp": "Back to the map",
+    "backTo": "Back to {name}",
     "details": "Details",
     "hideDetails": "Hide details",
     "closeUpNote": "True size, turned as it is now.",

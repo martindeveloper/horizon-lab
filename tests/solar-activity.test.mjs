@@ -61,12 +61,11 @@ test("solar activity requires an explicit choice in a Sun close-up and resets on
   reset();
 });
 
-test("render gating rejects flights, other bodies, hidden solar maps and stale selection", () => {
+test("render gating rejects flights, other bodies, hidden solar maps and other close-ups", () => {
   const state = {
     solarActivity: true,
     solarActivityPaused: false,
-    closeUp: true,
-    selection: { kind: "sun" },
+    closeUp: { kind: "sun" },
   };
   const close = { id: "sun", phase: "on" };
   assert.ok(solarActivityVisible(state, close, true));
@@ -77,9 +76,8 @@ test("render gating rejects flights, other bodies, hidden solar maps and stale s
   assert.equal(solarActivityVisible(state, { ...close, id: "earth" }, true), false);
   for (const patch of [
     { solarActivity: false },
-    { closeUp: false },
-    { selection: null },
-    { selection: { kind: "planet" } },
+    { closeUp: null },
+    { closeUp: { kind: "planet" } },
   ])
     assert.equal(solarActivityVisible({ ...state, ...patch }, close, true), false);
 });

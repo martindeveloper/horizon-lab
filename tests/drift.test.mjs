@@ -136,12 +136,12 @@ test("each simulation's drift clears what stands in its way and leaves the rest 
 
   /* The Orrery: the tour ends, a close-up is left, and the clock keeps its playback. */
   useOrrery.getState().startGuide();
-  useOrrery.setState({ closeUp: true, panel: "objects", playing: true });
+  useOrrery.setState({ closeUp: { kind: "sun" }, panel: "objects", playing: true });
   useOrrery.getState().startDrift();
   const or = useOrrery.getState();
   assert.equal(or.drift, "playing");
   assert.equal(or.guideOpen, false);
-  assert.equal(or.closeUp, false);
+  assert.equal(or.closeUp, null);
   assert.equal(or.panel, "none");
   assert.equal(or.playing, false, "the tour's end stopped the playback it owned");
   or.stopDrift();

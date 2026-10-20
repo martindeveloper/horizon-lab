@@ -5,7 +5,7 @@ import { selectTapped } from "@/space/solar-system/model/framing";
 import { migrationProgress } from "@/space/solar-system/model/moment";
 import {
   hasSurface,
-  hostOf,
+  sameSystem,
   selectionKey,
   solarPick,
   type SolarSelection,
@@ -19,9 +19,6 @@ import { CLOSE_UP_LAYERS } from "./close-up-controller";
 
 /** A second tap on the same body within this window flies in for a close-up. */
 const DOUBLE_TAP_MS = 380;
-
-/** The planet (or Pluto) a body belongs with: itself, or a moon's. */
-const systemOf = (sel: SolarSelection) => selectionKey(sel.kind === "moon" ? hostOf(sel.id) : sel);
 
 export function createPicking(
   kit: SolarKit,
@@ -40,8 +37,9 @@ export function createPicking(
   let lastTapKey = "";
   let lastTapAt = 0;
 
-  /* In a close-up, taps never pull the camera away; Back, Escape or zooming out do. A tap on
-     another body of its planet's system (the Moon from the Earth) flies straight there. */
+  /* In a close-up, taps never pull the camera away; Back, Escape or zooming out do. Its own
+     system still answers: a tap on the Moon from the Earth's shows the Moon's card, and a
+     second tap flies on to it, as on the map. */
   createTapPicking(kit, canvas, {
     pickables: options.pickables,
     choose: chooseSolarHit,
@@ -51,18 +49,15 @@ export function createPicking(
     labelPick: options.labelPick,
     onTap: (target) => {
       const api = store.getState();
+      let pick;
       if (api.closeUp) {
-        const pick = target && solarPick(target.pick, target.instance);
-        const from = api.selection;
-        if (pick && from && hasSurface(pick) && systemOf(pick) === systemOf(from))
-          if (selectionKey(pick) !== selectionKey(from)) api.switchCloseUp(pick);
-        return;
-      }
-      if (!target) {
+        pick = target && solarPick(target.pick, target.instance);
+        if (!pick || !sameSystem(pick, api.closeUp)) return;
+        api.select(pick);
+      } else if (!target) {
         api.select(null);
         return;
-      }
-      const pick = selectTapped(api, target, migrationProgress(api.yearsAgo), options.distance());
+      } else pick = selectTapped(api, target, migrationProgress(api.yearsAgo), options.distance());
       if (!pick || pick.kind === "tracer") return;
       const key = selectionKey(pick);
       const at = performance.now();

@@ -61,6 +61,7 @@
     "playRestart": "Přehrát od začátku",
     "closeUp": "Zblízka",
     "leaveCloseUp": "Zpět na mapu",
+    "backTo": "Zpět: {name}",
     "details": "Podrobnosti",
     "hideDetails": "Skrýt podrobnosti",
     "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",

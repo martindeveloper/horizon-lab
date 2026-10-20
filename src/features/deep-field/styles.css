@@ -34,6 +34,21 @@
   box-shadow: 0 0 4px rgb(var(--solar) / 0.5);
 }
 
+/* The ladder's thumb and range glide between the zoom readouts (published every quarter second)
+   instead of stepping; a held thumb follows the finger at once. */
+:where([data-simulation="deep-field"])
+  .deep-field-glide
+  :is(span:has(> [role="slider"]), [data-orientation] > [data-orientation]) {
+  transition-property: top, bottom, left, right;
+  transition-duration: 240ms;
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where([data-simulation="deep-field"]) .deep-field-glide * {
+    transition-duration: 0s;
+  }
+}
+
 /* The journey's hold on a shot: a hairline that fills, freezes while paused, then moves on. */
 @keyframes deep-field-dwell {
   to {

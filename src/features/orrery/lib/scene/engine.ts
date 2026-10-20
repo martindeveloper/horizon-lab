@@ -19,7 +19,7 @@ import {
 } from "@/lib/scene-bridge";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { positionOf } from "@/space/solar-system/model/position";
-import { hasSurface, hostOf } from "@/space/solar-system/model/selection";
+import { hostOf } from "@/space/solar-system/model/selection";
 import { solarViewById, solarViewPose } from "@/space/solar-system/model/views";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
 import {
@@ -262,7 +262,7 @@ export function createOrreryEngine({
           rig.edgePush += Math.log(next.distance / far);
           if (rig.edgePush > 0.45) {
             rig.edgePush = 0;
-            store.getState().leaveCloseUp();
+            store.getState().leaveCloseUp(true);
             return true;
           }
         } else rig.edgePush = 0;
@@ -315,16 +315,15 @@ export function createOrreryEngine({
         controls.cancel();
       },
       after: (s) => {
-        const moved = s.selection !== lastSelection;
-        if (moved) {
+        if (s.selection !== lastSelection) {
           lastSelection = s.selection;
           if (isPresentEra(s.yearsAgo) && !s.guideOpen) closeUp.prefetch(s.selection);
         }
-        /* A close-up that moves on to another body (a moon from its planet) flies straight there. */
-        if (s.closeUp !== lastCloseUp || (s.closeUp && moved)) {
+        /* From one close-up to another (the Earth's to the Moon's) is one flight. */
+        if (s.closeUp !== lastCloseUp) {
           lastCloseUp = s.closeUp;
-          if (s.closeUp && hasSurface(s.selection)) closeUp.start(s.selection);
-          else if (!s.closeUp) closeUp.leave();
+          if (s.closeUp) closeUp.start(s.closeUp);
+          else closeUp.leave();
         }
       },
     });

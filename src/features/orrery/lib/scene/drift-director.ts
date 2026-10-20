@@ -147,7 +147,7 @@ export function createDriftDirector(
       const state = store.getState();
       /* A close-up left from a pause (or the visitor's own) flies out before the drift goes on. */
       const leaving = state.drift === "playing" && !drift.flying && closeUp() !== null;
-      if (leaving && state.closeUp) state.leaveCloseUp();
+      if (leaving && state.closeUp) state.leaveCloseUp(true);
       if (state.drift !== "playing") visit = null;
       drift.step(state.drift, dt, leaving);
     },

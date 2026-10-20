@@ -117,6 +117,7 @@ export function DepthLadder() {
           onKeyDown={onKeyDown}
           className={cn(
             "relative flex touch-none select-none",
+            held === null && "deep-field-glide",
             wide ? "h-full w-9 flex-col items-center" : "h-full w-full items-center",
           )}
         >

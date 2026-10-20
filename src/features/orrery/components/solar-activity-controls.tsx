@@ -18,7 +18,7 @@ const serverMotion = () => false;
 export function SolarActivityNotice() {
   const t = useTranslations("orrery.solarActivity");
   const immersive = useImmersive();
-  const active = useOrrery((s) => s.solarActivity && s.closeUp && s.selection?.kind === "sun");
+  const active = useOrrery((s) => s.solarActivity && s.closeUp?.kind === "sun");
   const panel = useOrrery((s) => s.panel);
   if (!active || (!immersive && panel === "none")) return null;
   return (
