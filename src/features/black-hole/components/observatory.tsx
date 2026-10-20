@@ -6,7 +6,7 @@ import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-vi
 import { BlackHoleCanvas } from "@/features/black-hole/components/canvas";
 import { HorizonLoader } from "@/features/black-hole/components/loader";
 import { ObservatoryOverlay } from "@/features/black-hole/components/overlay";
-import { DRIFT } from "@/features/black-hole/lib/drift";
+import { driftFor } from "@/features/black-hole/lib/drift";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { presetFromPath } from "@/features/black-hole/routing";
 import { usePathname } from "@/i18n/navigation";
@@ -27,7 +27,7 @@ export function Observatory() {
   const drift = useSimulationDrift(
     useBlackHole((s) => s.drift),
     driftStore,
-    DRIFT,
+    driftFor(useBlackHole((s) => s.diskBrightness)),
   );
 
   useLayoutEffect(() => {

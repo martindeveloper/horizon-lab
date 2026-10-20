@@ -23,6 +23,8 @@ come from a user gesture.
     `track` is the current track.
   - `setLevel(level, seconds = 2)`: fades to a level 0..1 (a quieter bed, a lift
     for a cinematic mode); paused, the next play fades up to it. `getLevel()` reads it.
+  - `position`: seconds into the track now audible (or loaded to play next), or null
+    before any is; a camera timed to a track reads it to meet the music where it is.
   - `hold(index | null)`: holds the playlist on one track, which plays next (blending
     over `skipFade` if something else is playing) and loops until released; released,
     the playlist runs on from it. `getHeld()` reads it.
@@ -35,6 +37,21 @@ come from a user gesture.
     and every listener.
 - `equalPowerCurve`, `crossfadeDelay` and `chooseSource` are the pure helpers
   behind the loop and the source choice.
+
+## Audio maps
+
+An `AudioMap` is what a track does over time, measured once and published beside it
+(a track's `map` URL): its `duration`, the `period` it plays before looping (the
+duration less the player's crossfade), short-term `loudness` (LUFS) and spectral
+`brightness` (Hz) one sample per `step` seconds, and `cues`. `detectCues(loudness,
+brightness, step, period)` finds the cues from the envelopes alone: `start` and `end`
+always, `rise` (the steepest climb), `peak` (the loudest moment), `swell-n` and
+`breath-n` (louder and quieter than the music around them), `bright-n` (the brightest
+timbre) and `fade` (where the final decline begins); several of a kind are numbered in
+time order. `buildAudioMap` makes a map from measured envelopes, `parseAudioMap(json)`
+validates a published one (null otherwise), `cueTime(map, id)` reads a cue and
+`loadAudioMap(url)` fetches one, resolving null on any failure so a camera can fall
+back to the timing it was written with.
 
 Two streaming `<audio>` decks crossfade where a track ends, so there is no codec
 gap or decoded-buffer memory cost. Nothing downloads before the first play or a

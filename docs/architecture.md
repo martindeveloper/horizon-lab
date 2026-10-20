@@ -534,6 +534,15 @@ ffmpeg -ss <start> -to <end> -i source.wav -map_metadata -1 -fflags +bitexact \
 libopus still writes an `ENCODER` stream tag; remux the WebM once to drop it:
 `ffmpeg -i track.webm -map_metadata -1 -map_metadata:s:a -1 -fflags +bitexact -c copy clean.webm`.
 
+Each track also has an audio map, `audio/<slug>.map.json`, beside it on the CDN: its
+loudness and brightness per second, the period it plays before looping and named cues
+(rise, quiet, swell, breath, surge, peak, fade), measured by `scripts/analyse-audio.mjs`
+(ffmpeg). A drift timed to a track names those cues in its shots (`at`, `land`) and
+`timeShots` sets its holds so the flights meet them. The published map is the only one
+the page reads: a drift waits for it (and for the track to buffer) behind its loader, and
+falls back to the timing it was written with if the map never comes. `bench/fixtures/
+audio-maps/` mirrors the maps for the bench and the tests. After a track is re-cut, run
+the script and upload the map with it.
 Tracks live on the CDN as `audio/<slug>.webm` and `.m4a` (see CDN assets). Without
 the bucket's CORS headers Web Audio plays silence.
 

@@ -6,6 +6,7 @@
  * selection go so the close-up flies out, and resumes the drift from there. Flying on after a
  * pause leaves any close-up first.
  */
+import { driftRunState } from "@/lib/drift";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { clamp, lerp, smootherstep } from "@horizon/toolkit/math";
 import { createRigDrift } from "@horizon/toolkit/scene";
@@ -149,7 +150,7 @@ export function createDriftDirector(
       const leaving = state.drift === "playing" && !drift.flying && closeUp() !== null;
       if (leaving && state.closeUp) state.leaveCloseUp(true);
       if (state.drift !== "playing") visit = null;
-      drift.step(state.drift, dt, leaving);
+      drift.step(driftRunState(state.drift), dt, leaving);
     },
   };
 }

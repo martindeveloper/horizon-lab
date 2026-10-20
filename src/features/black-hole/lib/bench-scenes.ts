@@ -1,6 +1,11 @@
+import type { DriftProgramme } from "@/lib/drift";
+import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene } from "@horizon/toolkit/bench";
 import { lerp } from "@horizon/toolkit/math";
 
+import aeolianMap from "../../../../bench/fixtures/audio-maps/aeolian-static.json";
+import lowDroneMap from "../../../../bench/fixtures/audio-maps/low-drone-rises.json";
+import { driftFor, timedDrift, DRIFT, type HoleShot } from "./drift";
 import type { CameraPose } from "./frame";
 import { holeById, PRESETS, type Quality } from "./holes";
 import { MAX_SPIN } from "./physics";
@@ -15,6 +20,8 @@ type BlackHoleMotion =
   | { kind: "dolly"; from: number; to: number }
   | { kind: "spin"; from: number; to: number }
   | { kind: "tour" }
+  /** The drift's programme flown in order at zero variance (the target steps its camera). */
+  | { kind: "drift" }
   | { kind: "input" };
 
 type BlackHoleBenchScene = BenchScene & {
@@ -33,6 +40,16 @@ type BlackHoleBenchScene = BenchScene & {
 
 const tourSeconds = (presetId: string) =>
   holeById(presetId).tour.reduce((sum, beat) => sum + beat.duration, 0);
+
+/** The fixture map of a programme's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
+export const bundledAudioMap = (programme: DriftProgramme<HoleShot>) =>
+  parseAudioMap(programme === DRIFT ? lowDroneMap : aeolianMap);
+
+/** One loop of a hole's drift timed to its bundled map: every flight and hold, in order. */
+export const driftSeconds = (presetId: string) => {
+  const programme = driftFor(holeById(presetId).diskBrightness);
+  return timedDrift(programme, bundledAudioMap(programme)).loop;
+};
 
 /**
  * Every preset at its home view, a quality sweep, stress views that bound
@@ -193,6 +210,19 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
       keyframes: [0, 0.2, 0.4, 0.6, 0.8, 1],
     },
   },
+  ...(["lensed", "gaia-bh3"] as const).map((presetId): BlackHoleBenchScene => ({
+    id: presetId === "lensed" ? "drift" : "drift-dormant",
+    description: `One loop of the ${presetId === "lensed" ? "lit" : "dormant"} hole's drift, flown in order at zero variance, from the home view`,
+    tags: ["sequence", "camera", "drift"],
+    presetId,
+    quality: "standard",
+    motion: { kind: "drift" },
+    script: {
+      frames: 480,
+      duration: driftSeconds(presetId),
+      keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
+    },
+  })),
   {
     id: "drag-zoom",
     description: "Scripted visitor: drag to orbit, wheel in, wheel out (real orbit input)",
@@ -236,7 +266,7 @@ export function benchMotion(
   const home = benchPose(scene);
   const spin = holeById(scene.presetId).spin;
   const motion = scene.motion;
-  if (!motion || motion.kind === "input") return { pose: home, spin };
+  if (!motion || motion.kind === "input" || motion.kind === "drift") return { pose: home, spin };
   if (motion.kind === "orbit")
     return {
       pose: { ...home, azimuth: home.azimuth + motion.turns * 2 * Math.PI * progress },

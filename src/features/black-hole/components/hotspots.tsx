@@ -221,13 +221,13 @@ export function Hotspots() {
           role="group"
           aria-label={t("gaugeLabel")}
           className={cn(
-            "absolute top-[calc(50%-5rem)] left-[max(1rem,env(safe-area-inset-left))] w-40 -translate-y-1/2 md:top-1/2 md:w-44 short:top-3 short:translate-y-0",
+            "absolute top-[calc(50%-5rem)] left-[max(1rem,env(safe-area-inset-left))] w-40 -translate-y-1/2 md:top-1/2 md:w-48 short:top-3 short:translate-y-0",
             active && "not-md:invisible",
           )}
         >
           <p
             aria-hidden
-            className="gauge-label mb-3 flex items-baseline gap-2 font-mono text-xs tracking-widest uppercase"
+            className="gauge-label mb-3 flex items-baseline gap-2 font-mono text-[0.6875rem] tracking-widest uppercase"
           >
             <span className="text-space-muted">{t("gaugeYou")}</span>
             <span ref={youValueRef} className="tracking-normal text-solar tabular-nums" />
@@ -312,12 +312,12 @@ export function Hotspots() {
                       onBlur={() => setHover(null)}
                       style={{ top: labelY[i] }}
                       className={cn(
-                        "gauge-label pointer-events-auto absolute left-5 flex h-11 max-w-[calc(100%-1.25rem)] min-w-11 -translate-y-1/2 items-center gap-2 rounded-sm px-1 font-mono text-xs tracking-widest uppercase outline-hidden transition-[color,top] duration-500 focus-visible:ring-1 focus-visible:ring-ring",
+                        "gauge-label pointer-events-auto absolute left-5 flex h-11 max-w-[calc(100%-1.25rem)] min-w-11 -translate-y-1/2 items-center gap-2 rounded-sm px-1 font-mono text-[0.6875rem] tracking-widest uppercase outline-hidden transition-[color,top] duration-500 focus-visible:ring-1 focus-visible:ring-ring",
                         lit ? "text-space-fg" : "text-space-muted hover:text-space-fg",
                       )}
                     >
                       <span className="truncate">{labels[id]}</span>
-                      <span className="hidden tracking-normal text-space-muted normal-case tabular-nums md:inline">
+                      <span className="hidden shrink-0 tracking-normal whitespace-nowrap text-space-muted normal-case tabular-nums md:inline">
                         {formatR(r)} M
                       </span>
                     </button>

@@ -354,6 +354,7 @@
     "pause": "Pozastavit Drift",
     "resume": "Pokračovat v Driftu",
     "stop": "Ukončit Drift",
+    "preparing": "Drift se připravuje",
     "muteMusic": "Ztlumit hudbu",
     "playMusic": "Pustit hudbu"
   },

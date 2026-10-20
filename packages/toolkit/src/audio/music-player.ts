@@ -7,6 +7,8 @@ export type MusicTrack = {
   artist?: string;
   /** In order of preference; the first the browser can play is used. */
   sources: readonly { src: string; type: string }[];
+  /** URL of the track's audio map (`loadAudioMap`), for a camera timed to it. */
+  map?: string;
 };
 
 export type MusicPlayerOptions = {
@@ -125,6 +127,12 @@ export class MusicPlayer {
   /* Arrow properties: stable references for React stores and event handlers. */
 
   getState = (): MusicState => this.state;
+
+  /** Seconds into the track now audible (or loaded to play next), or null before any is. */
+  get position(): number | null {
+    const el = this.decks[this.current]?.el ?? this.primed?.el;
+    return el && Number.isFinite(el.currentTime) ? el.currentTime : null;
+  }
 
   /** Playlist index of `track`. */
   getTrack = (): number => this.index;

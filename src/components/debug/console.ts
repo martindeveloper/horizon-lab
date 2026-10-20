@@ -35,31 +35,19 @@ function isLoseContext(value: unknown): value is LoseContext {
   );
 }
 
-const COMMANDS = {
-  "help()": "List these commands",
-  "info()": "Device, GPU and layout snapshot",
-  "crash()": "Throw inside the page → route error page (500)",
-  "crashRoot()": "Throw inside the shell → global error page",
-  "notFound()": "Open a missing page → 404",
-  'webgl("unavailable" | "software" | "ready")':
-    "Force the WebGL check for this tab (persists across reloads)",
-  "webgl()": "Back to the real WebGL check",
-  "loseContext(ms = 1000)":
-    "Lose the simulation's GPU context; restore after ms, or never with Infinity",
-  "desktopNotice()": "Show the phone “best on a larger screen” notice now, on any device",
-  "updateNotice()": "Show the “new version available” notice now, without a new deployment",
-  'time("2026-12-21 16:00" | ms | Date)':
-    "Set the hero and star sky to this moment (local time); keeps the time scale",
-  "time()": "Back to the real time",
-  "timeScale(600)": "Run the sky 600× faster (10 minutes a second); 0 freezes, 1 is real speed",
-  "freeCamera()":
-    "Fly the simulation's camera freely: drag to look, W/S/A/D move, R/F up and down, Q/E roll, Shift faster, wheel sets the speed, Space stops",
-  "freeCamera(false)": "Back to the simulation's own camera",
-  "ride(1)":
-    "Move the camera with the scene's flow (the black hole's disk gas): the sky aberrates and shifts with its motion; 0 hovers",
-  "ride()": "Back to the simulation's own ride",
-  "reset()": "Clear every override",
-} as const;
+/** One way to call a command: its arguments as typed in the console, and what it does. */
+type Usage = readonly [args: string, help: string];
+
+/**
+ * A command carries its own help, so `help()` lists it by name with no table to keep in step.
+ * Arguments are written out rather than read from the function: production minifies their names.
+ */
+function command<F extends (...args: never[]) => unknown>(
+  run: F,
+  ...usage: [Usage, ...Usage[]]
+): F & { readonly usage: readonly Usage[] } {
+  return Object.assign(run, { usage });
+}
 
 // The simulation canvas already owns a context, so getContext returns it rather than creating one.
 function simulationContext() {
@@ -85,11 +73,14 @@ function gpuDetails() {
 const media = (query: string) => window.matchMedia(query).matches;
 
 export function createDebug() {
-  return {
-    help() {
-      console.table(COMMANDS);
-    },
-    info() {
+  const debug = {
+    help: command(() => {
+      const table: Record<string, string> = {};
+      for (const [name, { usage }] of Object.entries(debug))
+        for (const [args, help] of usage) table[`${name}(${args})`] = help;
+      console.table(table);
+    }, ["", "List these commands"]),
+    info: command(() => {
       const snapshot = {
         environment: ENVIRONMENT,
         deployment: DEPLOYMENT_ID || "none (update notice off)",
@@ -110,72 +101,110 @@ export function createDebug() {
       };
       console.table(snapshot);
       return snapshot;
-    },
-    crash() {
+    }, ["", "Device, GPU and layout snapshot"]),
+    crash: command(() => {
       if (!triggerCrash("route"))
         console.warn("Horizon.Debug: this page has no route crash trigger");
-    },
-    crashRoot() {
+    }, ["", "Throw inside the page → route error page (500)"]),
+    crashRoot: command(() => {
       triggerCrash("root");
-    },
-    notFound() {
+    }, ["", "Throw inside the shell → global error page"]),
+    notFound: command(() => {
       window.location.assign("/horizon-debug-not-found");
-    },
-    webgl(mode?: WebGLSupport) {
-      if (mode !== undefined && !["ready", "software", "unavailable"].includes(mode))
-        throw new TypeError('Use "unavailable", "software", "ready" or nothing');
-      setWebGLOverride(mode ?? null);
-      return mode ?? "auto";
-    },
-    loseContext(ms = 1000) {
-      const extension: unknown = simulationContext()?.getExtension("WEBGL_lose_context");
-      if (!isLoseContext(extension)) return console.warn("Horizon.Debug: open a simulation first");
-      const lose = extension;
-      lose.loseContext();
-      if (Number.isFinite(ms)) setTimeout(() => lose.restoreContext(), Math.max(0, ms));
-    },
-    desktopNotice() {
+    }, ["", "Open a missing page → 404"]),
+    webgl: command(
+      (mode?: WebGLSupport) => {
+        if (mode !== undefined && !["ready", "software", "unavailable"].includes(mode))
+          throw new TypeError('Use "unavailable", "software", "ready" or nothing');
+        setWebGLOverride(mode ?? null);
+        return mode ?? "auto";
+      },
+      [
+        '"unavailable" | "software" | "ready"',
+        "Force the WebGL check for this tab (persists across reloads)",
+      ],
+      ["", "Back to the real WebGL check"],
+    ),
+    loseContext: command(
+      (ms = 1000) => {
+        const extension: unknown = simulationContext()?.getExtension("WEBGL_lose_context");
+        if (!isLoseContext(extension))
+          return console.warn("Horizon.Debug: open a simulation first");
+        const lose = extension;
+        lose.loseContext();
+        if (Number.isFinite(ms)) setTimeout(() => lose.restoreContext(), Math.max(0, ms));
+      },
+      ["ms = 1000", "Lose the simulation's GPU context; restore after ms, or never with Infinity"],
+    ),
+    desktopNotice: command(() => {
       if (!showDesktopNotice()) console.warn("Horizon.Debug: the notice is not mounted");
-    },
-    updateNotice() {
+    }, ["", "Show the phone “best on a larger screen” notice now, on any device"]),
+    updateNotice: command(() => {
       if (!showUpdateNotice()) console.warn("Horizon.Debug: the update notice is not mounted");
-    },
-    time(when?: string | number | Date) {
-      if (when === undefined) {
-        setSkyTime(null);
+    }, ["", "Show the “new version available” notice now, without a new deployment"]),
+    time: command(
+      (when?: string | number | Date) => {
+        if (when === undefined) {
+          setSkyTime(null);
+          return new Date(skyNow()).toString();
+        }
+        const ms = new Date(when).getTime();
+        if (!Number.isFinite(ms))
+          throw new TypeError('Use a date such as "2026-12-21 16:00", milliseconds, or a Date');
+        setSkyTime(ms);
         return new Date(skyNow()).toString();
-      }
-      const ms = new Date(when).getTime();
-      if (!Number.isFinite(ms))
-        throw new TypeError('Use a date such as "2026-12-21 16:00", milliseconds, or a Date');
-      setSkyTime(ms);
-      return new Date(skyNow()).toString();
-    },
-    timeScale(scale = 1) {
-      if (!Number.isFinite(scale)) throw new TypeError("Use a finite number, e.g. 600");
-      setSkyTimeScale(scale);
-      return scale;
-    },
-    freeCamera(on = true) {
-      if (!setFreeCamera(on)) console.warn("Horizon.Debug: this page has no free camera");
-      else if (on)
-        console.info("Horizon.Debug: click the scene, then W/S/A/D, R/F, Q/E, Shift, wheel, Space");
-      return on;
-    },
-    ride(fraction?: number) {
-      if (fraction !== undefined && !Number.isFinite(fraction))
-        throw new TypeError("Use a fraction from 0 (hover) to 1 (ride with the flow)");
-      if (!setRide(fraction ?? null)) console.warn("Horizon.Debug: this page has no ride");
-      return fraction ?? "auto";
-    },
-    reset() {
+      },
+      [
+        '"2026-12-21 16:00" | ms | Date',
+        "Set the hero and star sky to this moment (local time); keeps the time scale",
+      ],
+      ["", "Back to the real time"],
+    ),
+    timeScale: command(
+      (scale = 1) => {
+        if (!Number.isFinite(scale)) throw new TypeError("Use a finite number, e.g. 600");
+        setSkyTimeScale(scale);
+        return scale;
+      },
+      ["600", "Run the sky 600× faster (10 minutes a second); 0 freezes, 1 is real speed"],
+    ),
+    freeCamera: command(
+      (on = true) => {
+        if (!setFreeCamera(on)) console.warn("Horizon.Debug: this page has no free camera");
+        else if (on)
+          console.info(
+            "Horizon.Debug: click the scene, then W/S/A/D, R/F, Q/E, Shift, wheel, Space",
+          );
+        return on;
+      },
+      [
+        "",
+        "Fly the simulation's camera freely: drag to look, W/S/A/D move, R/F up and down, Q/E roll, Shift faster, wheel sets the speed, Space stops",
+      ],
+      ["false", "Back to the simulation's own camera"],
+    ),
+    ride: command(
+      (fraction?: number) => {
+        if (fraction !== undefined && !Number.isFinite(fraction))
+          throw new TypeError("Use a fraction from 0 (hover) to 1 (ride with the flow)");
+        if (!setRide(fraction ?? null)) console.warn("Horizon.Debug: this page has no ride");
+        return fraction ?? "auto";
+      },
+      [
+        "1",
+        "Move the camera with the scene's flow (the black hole's disk gas): the sky aberrates and shifts with its motion; 0 hovers",
+      ],
+      ["", "Back to the simulation's own ride"],
+    ),
+    reset: command(() => {
       setFreeCamera(false);
       setRide(null);
       setWebGLOverride(null);
       setSkyTimeScale(1);
       setSkyTime(null);
-    },
+    }, ["", "Clear every override"]),
   };
+  return debug;
 }
 
 export type HorizonDebug = ReturnType<typeof createDebug>;

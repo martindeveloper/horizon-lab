@@ -1,7 +1,12 @@
+import { ambientMusic } from "@/components/shell/ambient-music";
+import { audioMapNow } from "@/lib/audio-maps";
 import { freeCameraOn, onFreeCamera, onRide, rideOverride } from "@/lib/debug";
+import { driftRunState } from "@/lib/drift";
+import type { AudioMap } from "@horizon/toolkit/audio";
 import {
   createDriftRun,
   createFlightInput,
+  type DriftRun,
   createOrbitInput,
   orbitFromFree,
   stepFreeFly,
@@ -22,7 +27,7 @@ import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
 import fragmentShader from "./black-hole.frag.glsl";
-import { DRIFT } from "./drift";
+import { DRIFT, driftFor, openingFor, timedDrift, type TimedDrift } from "./drift";
 import {
   cameraDistance,
   cameraOf,
@@ -166,16 +171,33 @@ export function createBlackHoleEngine(
     const reduce = prefersReducedMotion();
     const warmup = createWarmup();
     const tour = createTourDirector(reduce);
-    /* The drift (lib/drift.ts) flies the camera itself while the store says it plays. */
-    const drift = createDriftRun(DRIFT.shots, {
-      ...DRIFT.camera,
-      reduceMotion: window.matchMedia(REDUCED_MOTION_QUERY),
-      /* A riding shot orbits with the gas where it landed, for this hole's spin. */
-      holdDrift: (landed, shot) =>
-        shot.ride
-          ? -gasTurnRate(landed.distance, useBlackHole.getState().spin) * shot.ride
-          : undefined,
-    });
+    /* The drifts (lib/drift.ts) fly the camera themselves while the store says one plays: the
+       lit hole's and the dormant hole's, chosen each frame by how the disk is lit. Each is timed
+       by its track's published map, which the drift's loader has fetched by the time it plays
+       (`audioMapNow`), or by the timing it was written with until then. */
+    const driftRun = (timed: TimedDrift) =>
+      createDriftRun(timed.shots, {
+        ...timed.programme.camera,
+        reduceMotion: window.matchMedia(REDUCED_MOTION_QUERY),
+        /* The camera meets the music where it is: it opens on the shot whose cue is nearest. */
+        opening: () => openingFor(timed, ambientMusic.position),
+        /* A riding shot orbits with the gas where it landed, for this hole's spin. */
+        holdDrift: (landed, shot) =>
+          shot.ride
+            ? -gasTurnRate(landed.distance, useBlackHole.getState().spin) * shot.ride
+            : undefined,
+      });
+    const drifts = new Map<typeof DRIFT, { map: AudioMap | null; run: DriftRun }>();
+    /** A programme's run, timed by its map as loaded now; one flying keeps its timing to the end. */
+    function runFor(programme: typeof DRIFT) {
+      const map = audioMapNow(programme.music?.track);
+      const current = drifts.get(programme);
+      if (current && (current.map === map || current.run.flying)) return current.run;
+      const run = driftRun(timedDrift(programme, map));
+      drifts.set(programme, { map, run });
+      return run;
+    }
+    let drift = runFor(DRIFT);
     let announced = false;
     let time = 0;
 
@@ -348,8 +370,15 @@ export function createBlackHoleEngine(
       /* The guide or the drift starting takes the camera back from the free camera. */
       if (free && (state.guideOpen || state.drift !== "off")) setFree(false);
       flyingFree = flyFree(stepDt, state.spin);
+      /* A hole lit differently flies the other drift, from wherever the camera is now; a drift
+         not flying yet takes the timing of a map that has since arrived. */
+      const run = runFor(driftFor(state.diskBrightness));
+      if (run !== drift) {
+        drift.step("off", camera, 0);
+        drift = run;
+      }
       /* The drift's camera comes back to the visitor where it stopped, roll easing out. */
-      const drifted = drift.step(state.drift, camera, stepDt);
+      const drifted = drift.step(driftRunState(state.drift), camera, stepDt);
       if (drifted.ended) storeCamera();
       if (state.guideOpen) moveCamera(tour.step(state, camera, stepDt), state.spin);
       else if (drifted.pose) {

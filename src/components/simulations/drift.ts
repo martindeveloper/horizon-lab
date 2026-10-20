@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, type ReactNode } from "react";
 
-import type { DriftMusic, DriftProgramme, DriftSlice, DriftState } from "@/lib/drift";
+import { audioMapFor } from "@/lib/audio-maps";
+import {
+  DRIFT_LOADING,
+  driftReady,
+  type DriftMusic,
+  type DriftProgramme,
+  type DriftSlice,
+  type DriftState,
+} from "@/lib/drift";
 
 import { MUSIC_LEVEL, ambientMusic } from "../shell/ambient-music";
 
@@ -18,6 +26,8 @@ export type SimulationDrift = {
   caption?: ReactNode;
   onToggle: () => void;
   onStop: () => void;
+  /** The loader has gathered the drift's music and map: it may fly. */
+  onReady: () => void;
 };
 
 /** A simulation's store as the drift's controls reach it: its state, read outside rendering. */
@@ -40,6 +50,7 @@ export function useSimulationDrift<S extends DriftSlice>(
     () => ({
       onToggle: () => store.getState().toggleDrift(),
       onStop: () => store.getState().stopDrift(),
+      onReady: () => store.getState().readyDrift(),
     }),
     [store],
   );
@@ -69,4 +80,55 @@ export function useDriftMusic(music: DriftMusic | undefined, on: boolean) {
       ambientMusic.setLevel(MUSIC_LEVEL.ambient, SETTLE_SECONDS);
     };
   }, [on, music]);
+}
+
+/**
+ * The loader's wait while a drift is `loading`: its track's audio map is fetched (a failure
+ * counts as settled; the camera then keeps its written timing) and, when the music plays, the
+ * held track must be audible (buffered and blended in). Then, after the loader's minimum and
+ * never later than its timeout, the drift is told it is ready.
+ */
+export function useDriftReady(drift: SimulationDrift | undefined) {
+  const loading = drift?.state === "loading";
+  const music = drift?.music;
+  const onReady = drift?.onReady;
+  useEffect(() => {
+    if (!loading || !onReady) return;
+    const started = performance.now();
+    const title = music?.track;
+    const index =
+      title === undefined ? -1 : ambientMusic.tracks.findIndex((t) => t.title === title);
+    let map: "loading" | "settled" = "loading";
+    let done = false;
+    /* The player blends to the held track within its skip fade; when it cannot (a loop
+       crossfade is under way, and the hold waits for it), the music playing now is what plays. */
+    const switchGrace = ambientMusic.skipFade + 1;
+    const musicStatus = (elapsed: number) => {
+      if (ambientMusic.getState() !== "playing") return "off";
+      const held = index < 0 || ambientMusic.getTrack() === index;
+      if (!held) return elapsed >= switchGrace ? "audible" : "buffering";
+      return ambientMusic.getBuffering() ? "buffering" : "audible";
+    };
+    const check = () => {
+      if (done) return;
+      const elapsed = (performance.now() - started) / 1000;
+      if (!driftReady({ map, music: musicStatus(elapsed), elapsed })) return;
+      done = true;
+      onReady();
+    };
+    void (title === undefined ? Promise.resolve(null) : audioMapFor(title)).then(() => {
+      map = "settled";
+      check();
+    });
+    const unsubscribe = ambientMusic.subscribe(check);
+    const timers = [DRIFT_LOADING.minimum, switchGrace, DRIFT_LOADING.timeout].map((seconds) =>
+      window.setTimeout(check, seconds * 1000 + 20),
+    );
+    check();
+    return () => {
+      done = true;
+      unsubscribe();
+      for (const timer of timers) window.clearTimeout(timer);
+    };
+  }, [loading, music, onReady]);
 }

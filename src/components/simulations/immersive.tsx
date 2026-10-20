@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 
-import { ExperienceMenu, ImmersiveScene, useImmersive } from "@horizon/toolkit/ui";
+import { DriftVeil, ExperienceMenu, ImmersiveScene, useImmersive } from "@horizon/toolkit/ui";
 
 import { ambientMusic } from "../shell/ambient-music";
-import { useDriftMusic, type SimulationDrift } from "./drift";
+import { type SimulationDrift, useDriftMusic, useDriftReady } from "./drift";
 import { FrameRateReadout } from "./frame-rate";
 
 /** Every simulation stage carries `data-simulation`; it is what covers the window and goes fullscreen. */
@@ -37,6 +37,7 @@ export function SimulationImmersive({
   const immersive = useImmersive();
   const drifting = drift !== undefined && drift.state !== "off";
   useDriftMusic(drift?.music, drifting);
+  useDriftReady(drift);
   /* The drift's own music control: the ambient music, silenced or brought back without leaving. */
   const musicOn =
     useSyncExternalStore(ambientMusic.subscribe, ambientMusic.getState, serverMusic) === "playing";
@@ -63,7 +64,8 @@ export function SimulationImmersive({
           ? {
               drift: {
                 active: drifting,
-                playing: drift.state === "playing",
+                /* Loading counts as playing: the control is not a resume, and pausing waits. */
+                playing: drift.state !== "paused",
                 onToggle: drift.onToggle,
                 ...(drift.caption !== undefined ? { caption: drift.caption } : {}),
                 labels: {
@@ -82,6 +84,10 @@ export function SimulationImmersive({
       >
         {children}
       </ImmersiveScene>
+      {/* Beside the scene, not among its children, which step aside once a drift is under way. */}
+      {drift !== undefined ? (
+        <DriftVeil active={drift.state === "loading"} label={tDrift("preparing")} />
+      ) : null}
     </>
   );
 }

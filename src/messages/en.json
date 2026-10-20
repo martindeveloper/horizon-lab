@@ -354,6 +354,7 @@
     "pause": "Pause Drift",
     "resume": "Resume Drift",
     "stop": "Stop Drift",
+    "preparing": "Preparing the drift",
     "muteMusic": "Mute music",
     "playMusic": "Play music"
   },

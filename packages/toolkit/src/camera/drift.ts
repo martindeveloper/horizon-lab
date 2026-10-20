@@ -53,6 +53,16 @@ export type DriftSettings = {
   speed: number;
   /** 0 flies every shot exactly as written; 1 spreads angles, distance and timing widely. */
   variance: number;
+  /**
+   * The spread of flight and hold lengths alone, 0..1; the `variance` given, by default. 0 keeps
+   * every loop the same length (a camera timed to music), while angles and distances still vary.
+   */
+  timeVariance: number;
+  /**
+   * The shot a sequence opens on at each start, by index (e.g. the one whose cue the music is
+   * nearest); undefined, or out of range, opens on the shot after the one nearest the camera.
+   */
+  opening?: () => number | undefined;
   /** Orbit rate, rad/s: the camera keeps turning at it through flights and holds alike. */
   drift: number;
   /** Slow rise and fall of the tilt, radians either way (a third of it in roll); 0 for none. */
@@ -79,6 +89,7 @@ export const DRIFT_DEFAULTS: Omit<DriftSettings, "random" | "reduceMotion"> = {
   hold: 12,
   speed: 1,
   variance: 0.3,
+  timeVariance: 0.3,
   drift: 0.01,
   sway: 0.035,
   creep: 0.05,
@@ -102,8 +113,14 @@ export function createDriftCamera(
   options: Partial<DriftSettings> = {},
 ) {
   if (!shots.length) throw new Error("Drift needs at least one shot");
-  const settings: DriftSettings = { ...DRIFT_DEFAULTS, random: Math.random, ...options };
+  const settings: DriftSettings = {
+    ...DRIFT_DEFAULTS,
+    random: Math.random,
+    ...options,
+    timeVariance: options.timeVariance ?? options.variance ?? DRIFT_DEFAULTS.timeVariance,
+  };
   const spread = () => (settings.random() * 2 - 1) * settings.variance;
+  const spreadTime = () => (settings.random() * 2 - 1) * settings.timeVariance;
   const instant = () => settings.reduceMotion?.matches === true;
 
   const copy = (p: DriftPose): DriftPose => ({ ...p, look: { ...p.look } });
@@ -238,9 +255,9 @@ export function createDriftCamera(
     const pace = Math.max(0.05, settings.speed);
     duration = Math.max(
       0.4,
-      ((shot.flight?.duration ?? settings.flight) * (1 + SPREAD.time * spread())) / pace,
+      ((shot.flight?.duration ?? settings.flight) * (1 + SPREAD.time * spreadTime())) / pace,
     );
-    hold = Math.max(0, ((shot.hold ?? settings.hold) * (1 + SPREAD.time * spread())) / pace);
+    hold = Math.max(0, ((shot.hold ?? settings.hold) * (1 + SPREAD.time * spreadTime())) / pace);
     turning ||= Math.sign(target.yaw) || 1;
     drift = shot.drift ?? settings.drift * turning;
     creep = shot.creep ?? settings.creep;
@@ -265,7 +282,10 @@ export function createDriftCamera(
     get pose(): Readonly<DriftPose> {
       return pose;
     },
-    /** Begins (or begins again) from the camera's pose: the first flight starts at once. */
+    /**
+     * Begins (or begins again) from the camera's pose: the first flight starts at once, to the
+     * settings' `opening` shot when it names one.
+     */
     start(current: AimedPose) {
       turn = 0;
       spin = 0;
@@ -273,7 +293,9 @@ export function createDriftCamera(
       clock = 0;
       adopt(current);
       index = -1;
-      aim(pick());
+      const opening = settings.opening?.();
+      const open = opening !== undefined && opening >= 0 && opening < shots.length ? opening : -1;
+      aim(open >= 0 && !("handoff" in shots[open]!) ? open : pick());
     },
     /** The host has flown its shot: goes on to the next from the camera's pose. */
     resume(current: AimedPose) {

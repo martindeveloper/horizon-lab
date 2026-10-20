@@ -331,6 +331,11 @@ for the one recommended action and `statusActionClass` (glass) for the rest.
 Error pages show translated recovery copy rather than raw exceptions. These
 components must not import simulation state or rendering libraries.
 
+`DriftVeil` is the veil a scene shows while its drift gathers its music and timing: the
+scene dims behind a hairline horizon that draws out and breathes, and the veil lifts
+as the drift begins. It takes no pointer events, so the immersive controls stay in
+reach; `label` is read to assistive technology only.
+
 ## Additional shared components
 
 `Equation` and `Sub` format mathematical text without a parser. `Dialog` provides

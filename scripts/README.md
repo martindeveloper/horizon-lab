@@ -16,6 +16,7 @@ One-off data builds, run by hand when a source changes, and the docs that descri
 | `fetch-model-atmospheres.mjs` | `src/features/spectroscopy/lib/model/atmospheres.json`        | `docs/architecture.md`    |
 | `fetch-probe-tracks.mjs`      | `src/features/deep-field/lib/model/probe-tracks.json`         | `docs/architecture.md`    |
 | `generate-social-assets.mjs`  | share images under `public/`                                  | `docs/branding.md`        |
+| `analyse-audio.mjs`           | `cdn/audio/<slug>.map.json` and `bench/fixtures/audio-maps/` (audio maps) | `docs/architecture.md`    |
 
 `pull-cdn.mjs` (`npm run cdn:pull`) mirrors the published maps into `cdn/` for the tests.
 Each body's maps are versioned on their own. After rebuilding one, bump its `version` in

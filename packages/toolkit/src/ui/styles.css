@@ -723,3 +723,68 @@
     translate: none !important;
   }
 }
+
+/* The drift's veil: the scene dims, a hairline horizon draws out and breathes, and the veil
+   lifts as the drift begins. */
+.drift-veil {
+  background-color: color-mix(in srgb, var(--color-space) 62%, transparent);
+}
+.drift-veil-in {
+  animation: drift-veil-in 700ms ease-out both;
+}
+.drift-veil-out {
+  animation: drift-veil-out 900ms ease-in both;
+}
+.drift-veil-line {
+  display: block;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, transparent, var(--color-solar), transparent);
+  box-shadow: 0 0 12px 0 color-mix(in srgb, var(--color-solar) 55%, transparent);
+  animation:
+    drift-veil-draw 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) both,
+    drift-veil-breathe 3.2s ease-in-out 2.4s infinite;
+}
+@keyframes drift-veil-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes drift-veil-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes drift-veil-draw {
+  from {
+    width: 0;
+  }
+  to {
+    width: min(38vw, 22rem);
+  }
+}
+@keyframes drift-veil-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drift-veil-in,
+  .drift-veil-out {
+    animation-duration: 1ms;
+  }
+  .drift-veil-line {
+    width: min(38vw, 22rem);
+    animation: none;
+  }
+}

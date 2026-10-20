@@ -55,3 +55,4 @@ export { TechnicalDetails, type TechnicalDocument } from "./technical-details";
 
 export { Dialog, type DialogHandle } from "./dialog";
 export { LoadingOverlay } from "./loading-overlay";
+export { DriftVeil } from "./drift-veil";

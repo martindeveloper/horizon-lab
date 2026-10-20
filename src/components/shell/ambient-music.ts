@@ -17,6 +17,7 @@ export const ambientMusic = new MusicPlayer(
         { src: assetUrl("/audio/interstellar-drift.webm"), type: 'audio/webm; codecs="opus"' },
         { src: assetUrl("/audio/interstellar-drift.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
+      map: assetUrl("/audio/interstellar-drift.map.json"),
     },
     {
       title: "Aeolian Static",
@@ -25,6 +26,7 @@ export const ambientMusic = new MusicPlayer(
         { src: assetUrl("/audio/aeolian-static.webm"), type: 'audio/webm; codecs="opus"' },
         { src: assetUrl("/audio/aeolian-static.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
+      map: assetUrl("/audio/aeolian-static.map.json"),
     },
     {
       title: "Drifting Probe",
@@ -33,6 +35,7 @@ export const ambientMusic = new MusicPlayer(
         { src: assetUrl("/audio/drifting-probe.webm"), type: 'audio/webm; codecs="opus"' },
         { src: assetUrl("/audio/drifting-probe.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
+      map: assetUrl("/audio/drifting-probe.map.json"),
     },
     {
       title: "Low Drone Rises",
@@ -41,6 +44,7 @@ export const ambientMusic = new MusicPlayer(
         { src: assetUrl("/audio/low-drone-rises.webm"), type: 'audio/webm; codecs="opus"' },
         { src: assetUrl("/audio/low-drone-rises.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
+      map: assetUrl("/audio/low-drone-rises.map.json"),
     },
   ],
   { storageKey: "music", level: MUSIC_LEVEL.ambient },

@@ -82,7 +82,10 @@ periods. Settings give the defaults (`flight` 20 s, `hold` 12 s, `drift` 0.01,
 `sway` 0.035, `creep` 0.05), a `speed` that scales every duration, a `variance` 0..1 that spreads each shot's
 angles (±0.5 rad azimuth, ±0.2 rad inclination, within `inclination` bounds),
 distance (±0.3 e-folds) and timing (±35 %), the `order` (`sequence` wraps, `shuffle`
-never repeats a shot) and the `random` source; `reduceMotion` cuts flights and
+never repeats a shot) and the `random` source; `timeVariance` (default `variance`) is the spread of flight and hold lengths alone: 0 keeps
+every loop the same length, for a camera timed to music, while angles and distances still vary.
+`opening()` names the shot a sequence opens on at each start (e.g. the one whose cue the music is
+nearest); otherwise it opens on the shot after the one nearest the camera. `reduceMotion` cuts flights and
 stills the orbit, sway and holds while it matches. `start(pose)` begins from the camera's pose (a
 sequence goes on from the shot nearest it); `step(dt)` returns the pose for the
 frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
