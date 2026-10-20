@@ -94,7 +94,7 @@ function SimulationTile({
               <Link
                 href={simulation.href}
                 prefetch={false}
-                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-accent pr-4 pl-5 text-sm font-medium text-accent-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:translate-x-0.5"
+                className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:translate-x-0.5"
               >
                 {t(`${key}.open`)}
                 <ArrowUpRight className="size-4" aria-hidden />

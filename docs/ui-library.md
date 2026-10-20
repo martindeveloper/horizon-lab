@@ -197,8 +197,12 @@ sets the default to dark, persists the preference, and supports system changes.
 The shared `AppHeader` supplies localized labels using `next-intl`.
 
 The `:root.light` block in `theme.css` overrides UI colors and material variables.
-Glass surfaces become warm, nearly opaque panels to keep dark text legible over
-the scene. `bg-space`, `text-space-fg`, and `text-space-muted` are invariant:
+Light is stone paper and ink: glass becomes pearl (a translucent fill under a
+top-lit `--glass-sheen`, a white inner edge and an ink rim), still dense enough for
+ink text over the scene. `--sky-wash` and `--sky-glow` give the page something for
+the glass to refract. Filled calls to action use `action-fill` (`--color-action`):
+solar in the dark, ink glass with solar text in light; gold otherwise stays on lines
+and `text-accent`. `bg-space`, `text-space-fg`, and `text-space-muted` are invariant:
 use them for space canvases and text drawn directly over space. `hud-title` also
 stays light. Use the normal `fg`/`muted`/`subtle` palette for panel contents.
 `VisualizationShell` uses `bg-space`. Do not invert canvas pixels or shaders.

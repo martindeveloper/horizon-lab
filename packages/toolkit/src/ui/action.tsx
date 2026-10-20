@@ -9,7 +9,7 @@ const base =
 
 const variants: Record<ActionVariant, string> = {
   glass: "glass-hud text-fg hover:text-accent hover:solar-ring",
-  solar: "bg-accent text-accent-fg shadow-[0_0_28px_rgb(var(--solar)/0.22)] hover:brightness-110",
+  solar: "action-fill shadow-(--action-glow) hover:brightness-110",
   ghost: "text-muted hover:text-fg",
 };
 

@@ -20,6 +20,7 @@
 }
 
 .simulation-tile {
+  box-shadow: var(--tile-frame);
   transition: box-shadow 320ms ease;
 }
 
@@ -32,7 +33,7 @@
 
 /* Tile copy panel: frosted glass resting on the artwork at every size. */
 .cover-panel {
-  background: var(--panel-bg);
+  background: var(--glass-sheen), var(--panel-bg);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--hud-shadow);
 }

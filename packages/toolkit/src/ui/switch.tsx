@@ -8,7 +8,7 @@ import { cn } from "./utils";
 
 /**
  * The on/off mark every switch shows: a small track whose knob slides right and turns the
- * track gold when on. Visual only (aria-hidden); the control around it carries `role="switch"`
+ * track to the action colour when on (gold in the dark, ink in light). Visual only (aria-hidden); the control around it carries `role="switch"`
  * and `aria-checked`. `sm` fits a chip.
  */
 export function SwitchMark({ on, size = "md" }: { on: boolean; size?: "sm" | "md" }) {
@@ -19,14 +19,14 @@ export function SwitchMark({ on, size = "md" }: { on: boolean; size?: "sm" | "md
       className={cn(
         "relative shrink-0 rounded-full transition-colors duration-300",
         small ? "h-3 w-5" : "h-4 w-7",
-        on ? "bg-accent" : "bg-fg/15",
+        on ? "bg-action" : "bg-fg/15",
       )}
     >
       <span
         className={cn(
           "absolute top-0.5 left-0.5 rounded-full transition-[translate,background-color] duration-300",
           small ? "size-2" : "size-3",
-          on ? cn("bg-accent-fg", small ? "translate-x-2" : "translate-x-3") : "bg-fg/60",
+          on ? cn("bg-action-fg", small ? "translate-x-2" : "translate-x-3") : "bg-fg/60",
         )}
       />
     </span>

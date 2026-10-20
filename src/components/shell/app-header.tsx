@@ -34,7 +34,7 @@ export function AppHeader() {
     <div className="app-bar flex h-full items-center gap-2.5 md:gap-3">
       <a
         href="#main-content"
-        className="sr-only rounded-full bg-accent px-4 py-2 text-accent-fg focus:not-sr-only focus:absolute focus:left-4 focus:z-[120]"
+        className="action-fill sr-only rounded-full px-4 py-2 focus:not-sr-only focus:absolute focus:left-4 focus:z-[120]"
       >
         {t("shell.skip")}
       </a>
