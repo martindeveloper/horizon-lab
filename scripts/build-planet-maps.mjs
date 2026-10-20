@@ -18,8 +18,9 @@
  * work (Irwin et al. 2024 for Uranus and Neptune). Mercury and Pluto mosaics
  * give brightness; their colour follows true-colour images.
  */
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createReadStream, mkdirSync } from "node:fs";
+import { createReadStream, existsSync, mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -315,6 +316,31 @@ async function pluto(width) {
   return brightness("pluto", file, width, tint, false);
 }
 
+/**
+ * The brightest mean a bounded response reaches with detail left: Enceladus (albedo 1.0)
+ * would otherwise saturate to a blank white disc.
+ */
+const WHITEST = 0.85;
+
+/**
+ * Restores albedo contrast a mosaic evened out between its images: its own large-scale
+ * brightness (2° box blur) is raised to `power`, keeping the boundary where the data puts it
+ * and the detail inside. Iapetus's Cassini Regio is ~1.8× darker than the ice in the
+ * mosaic but ~10× in reality (ln 10 / ln 1.8 ≈ 3.9).
+ */
+function stretch(img, power) {
+  const { w, h } = img;
+  const lum = Float32Array.from({ length: w * h }, (_, i) =>
+    luminance(img.rgb[i * 3], img.rgb[i * 3 + 1], img.rgb[i * 3 + 2]),
+  );
+  const broad = filter(lum, w, h, Math.max(1, Math.round(w / 180)), "mean");
+  const mean = broad.reduce((a, b) => a + b, 0) / broad.length;
+  for (let i = 0; i < w * h; i += 1) {
+    const k = (Math.max(1e-4, broad[i]) / mean) ** (power - 1);
+    for (let c = 0; c < 3; c += 1) img.rgb[i * 3 + c] *= k;
+  }
+}
+
 /** Spacecraft moon mosaics: preserve geography, never invent terrain in gaps.
  * RGB products include non-visible filters: muted colour is illustrative, not
  * calibrated true colour. Grayscale products stay grayscale. A bounded response
@@ -322,10 +348,14 @@ async function pluto(width) {
  */
 async function observedMoon(id, width) {
   const source = MOON_MAP_SOURCES[id];
-  const file = await fetchCached(source.file);
+  const download = await fetchCached(source.file);
   const hash = createHash("sha256");
-  for await (const chunk of createReadStream(file)) hash.update(chunk);
+  for await (const chunk of createReadStream(download)) hash.update(chunk);
   if (hash.digest("hex") !== source.sha256) throw new Error(`${id}: source checksum mismatch`);
+  /* An archive's one map, unpacked beside it. */
+  const file = source.entry ? path.join(cache, path.basename(source.entry)) : download;
+  if (source.entry && !existsSync(file))
+    execFileSync("unzip", ["-o", "-j", download, source.entry, "-d", cache]);
   const px = await raster(file, width, 3, false);
   const img = image(width, width / 2);
   const valid = new Float32Array(width * img.h);
@@ -340,6 +370,7 @@ async function observedMoon(id, width) {
       for (let c = 0; c < 3; c += 1) img.rgb[i * 3 + c] = l + (rgb[c] - l) * source.saturation;
     }
   }
+  if (source.contrast) stretch(img, source.contrast);
   const mask = softMask(valid, width, img.h, 2, 3);
   const mean = meanColour(img, mask);
   // A bounded photographic response preserves bright terrain instead of clipping
@@ -359,7 +390,7 @@ async function observedMoon(id, width) {
         weight += w;
       }
     }
-    if (sum / weight < GEOMETRIC_ALBEDO[id]) low = gain;
+    if (sum / weight < Math.min(GEOMETRIC_ALBEDO[id], WHITEST)) low = gain;
     else high = gain;
   }
   const gain = (low + high) / 2;
@@ -370,6 +401,21 @@ async function observedMoon(id, width) {
   }
   fill(img, mask, reference);
   return img;
+}
+
+/** The far tier's mean colour as written (sRGB hex, averaged in linear light): its `MAPS` entry's `mean`. */
+async function shippedMean(file) {
+  const { data, info } = await sharp(file)
+    .removeAlpha()
+    .resize(256, 128, { fit: "fill" })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const img = image(256, 128);
+  for (let i = 0; i < 256 * 128; i += 1)
+    for (let c = 0; c < 3; c += 1) img.rgb[i * 3 + c] = LUT[data[i * info.channels + c]];
+  return `#${meanColour(img)
+    .map((v) => encode(v).toString(16).padStart(2, "0"))
+    .join("")}`;
 }
 
 const BUILDERS = {
@@ -413,4 +459,5 @@ for (const [id, map] of Object.entries(MAPS)) {
       `  ${path.basename(file.pathname)} ${w} × ${w / 2}, ${(info.size / 1024).toFixed(0)} KB`,
     );
   }
+  console.log(`  mean ${await shippedMean(new URL(mapFile(".", id, "far"), outDir).pathname)}`);
 }

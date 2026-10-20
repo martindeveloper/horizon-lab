@@ -14,11 +14,18 @@
  * miss them by up to 163° and 13°. Phobos's and Deimos's angles, inclinations, mean
  * motions and precession periods are fitted the same way (MAR099): the table rounds
  * its angles to 0.1° and Phobos's apsidal period to 0.1 yr, which over decades turns
- * its small eccentricity the wrong way. Every moon then matches Horizons to 0.3°, the
- * Moon to 3° (its mean elements leave out the Sun's perturbations).
+ * its small eccentricity the wrong way. So are Saturn's mid-size moons (SAT441) and
+ * Uranus's five (URA182 elements, Horizons' URA184 vectors), keeping the table's node
+ * periods where fitting them gains nothing. Mimas, Tethys, Enceladus and Miranda add
+ * the librations their resonances drive in mean longitude: Mimas swings 43.6° over the
+ * 70.56-year Mimas–Tethys cycle. Every moon then matches Horizons to 0.3°, the Moon
+ * to 3° (its mean elements leave out the Sun's perturbations).
+ *
+ * Uranus's moons orbit its equator on the side of the pole their orbits turn about,
+ * RA 77.311°, Dec 15.175°: the IAU's north pole for Uranus is the opposite one.
  */
 import { wrap } from "../math/index";
-import { J2000_JD, julianDay } from "../science";
+import { J2000_JD, julianDay, RAD_PER_DEG as RAD } from "../science";
 import { LUNAR_EQUATOR_INCLINATION_DEG } from "./almanac";
 import { DAYS_PER_JULIAN_YEAR, type PlanetId } from "./ephemeris";
 
@@ -30,7 +37,18 @@ export type MoonId =
   | "europa"
   | "ganymede"
   | "callisto"
+  | "mimas"
+  | "enceladus"
+  | "tethys"
+  | "dione"
+  | "rhea"
   | "titan"
+  | "iapetus"
+  | "miranda"
+  | "ariel"
+  | "umbriel"
+  | "titania"
+  | "oberon"
   | "triton"
   | "charon";
 export type MoonHost = PlanetId | "pluto";
@@ -56,9 +74,17 @@ export type Moon = {
   plane: "ecliptic" | readonly [ra: number, dec: number];
   /** Spin axis tilt from the plane's pole, away from the orbit normal (Cassini state). */
   cassini?: number;
+  /**
+   * Resonant librations of the mean longitude, added to M:
+   * amplitude · sin(phase + 360° · years since J2000 / period).
+   */
+  libration?: readonly (readonly [degrees: number, years: number, phase: number])[];
 };
 
 const JUPITER_LAPLACE = [268.1, 64.5] as const;
+/** The inner Saturnian moons' Laplace plane, close to Saturn's equator. */
+const SATURN_LAPLACE = [40.6, 83.5] as const;
+const URANUS_EQUATOR = [77.311, 15.175] as const;
 /** IAU 2015 synchronous rotation rates (degrees per day) as sidereal periods. */
 const spinPeriod = (rate: number) => 360 / rate;
 
@@ -172,6 +198,93 @@ export const MOONS: readonly Moon[] = [
     plane: [268.7, 64.8],
   },
   {
+    id: "mimas",
+    host: "saturn",
+    radiusKm: 198.2,
+    aKm: 186_000,
+    e: 0.0197,
+    omega: 332.778,
+    M: 14.194,
+    i: 1.568,
+    node: 172.905,
+    periodDays: 0.942421799,
+    apsisYears: 0.49273,
+    nodeYears: -0.98615,
+    plane: SATURN_LAPLACE,
+    /** Locked with Tethys in a 4:2 resonance: the pair trade longitude over 70.56 years. */
+    libration: [
+      [43.597, 70.56, 140.24],
+      [0.717, 23.556, 66.82],
+    ],
+  },
+  {
+    id: "enceladus",
+    host: "saturn",
+    radiusKm: 252.1,
+    aKm: 238_400,
+    e: 0.005,
+    omega: 346.873,
+    M: 10.537,
+    i: 0.037,
+    node: 184.844,
+    periodDays: 1.37021809,
+    apsisYears: 2.9167,
+    nodeYears: 0,
+    plane: SATURN_LAPLACE,
+    /** The 2:1 resonance with Dione: swings of 3.9 and 11 years. */
+    libration: [
+      [0.188, 3.886, 317.37],
+      [0.261, 11.043, 73.58],
+    ],
+  },
+  {
+    id: "tethys",
+    host: "saturn",
+    radiusKm: 531.1,
+    aKm: 295_000,
+    e: 0.001,
+    omega: 279.237,
+    M: 9.009,
+    i: 1.093,
+    node: 259.884,
+    periodDays: 1.88780217,
+    apsisYears: 0.005,
+    nodeYears: -4.9815,
+    plane: SATURN_LAPLACE,
+    /** Mimas's partner, swinging the opposite way. */
+    libration: [[1.99, 70.56, 325.46]],
+  },
+  {
+    id: "dione",
+    host: "saturn",
+    radiusKm: 561.4,
+    aKm: 377_700,
+    e: 0.002,
+    omega: 25.043,
+    M: 322.796,
+    i: 0.043,
+    node: 189.061,
+    periodDays: 2.73691556,
+    apsisYears: 11.689,
+    nodeYears: 0,
+    plane: SATURN_LAPLACE,
+  },
+  {
+    id: "rhea",
+    host: "saturn",
+    radiusKm: 763.5,
+    aKm: 527_200,
+    e: 0.001,
+    omega: 221.831,
+    M: 198.777,
+    i: 0.338,
+    node: 351.559,
+    periodDays: 4.51750274,
+    apsisYears: 36.051,
+    nodeYears: -35.775,
+    plane: SATURN_LAPLACE,
+  },
+  {
     id: "titan",
     host: "saturn",
     radiusKm: 2574.76,
@@ -185,6 +298,101 @@ export const MOONS: readonly Moon[] = [
     apsisYears: 346.68,
     nodeYears: -687.37,
     plane: [36.4, 84],
+  },
+  {
+    id: "iapetus",
+    host: "saturn",
+    radiusKm: 734.3,
+    aKm: 3_561_700,
+    e: 0.028,
+    omega: 276.705,
+    M: 208.748,
+    i: 7.574,
+    node: 74.757,
+    periodDays: 79.3308997,
+    apsisYears: 1670.8,
+    nodeYears: -3130.3,
+    plane: [288.7, 78.9],
+  },
+  {
+    id: "miranda",
+    host: "uranus",
+    radiusKm: 235.8,
+    aKm: 129_846,
+    e: 0.001,
+    omega: 156.618,
+    M: 71.221,
+    i: 4.427,
+    node: 100.855,
+    periodDays: 1.41347939,
+    apsisYears: 8.96,
+    nodeYears: -17.787,
+    plane: URANUS_EQUATOR,
+    /** A 12.5-year swing and its harmonic, measured in the Horizons vectors. */
+    libration: [
+      [1.434, 12.545, 318.04],
+      [0.175, 6.277, 276],
+    ],
+  },
+  {
+    id: "ariel",
+    host: "uranus",
+    radiusKm: 578.9,
+    aKm: 190_929,
+    e: 0.001,
+    omega: 304.204,
+    M: 169.032,
+    i: 0.009,
+    node: 89.885,
+    periodDays: 2.52037922,
+    apsisYears: 46.302,
+    nodeYears: 0,
+    plane: URANUS_EQUATOR,
+  },
+  {
+    id: "umbriel",
+    host: "uranus",
+    radiusKm: 584.7,
+    aKm: 265_986,
+    e: 0.004,
+    omega: 166.676,
+    M: 266.494,
+    i: 0.066,
+    node: 178.084,
+    periodDays: 4.14417714,
+    apsisYears: 60.942,
+    nodeYears: -129.75,
+    plane: URANUS_EQUATOR,
+  },
+  {
+    id: "titania",
+    host: "uranus",
+    radiusKm: 788.9,
+    aKm: 436_298,
+    e: 0.002,
+    omega: 232.355,
+    M: 55.791,
+    i: 0.066,
+    node: 353.422,
+    periodDays: 8.70586922,
+    apsisYears: 227.07,
+    nodeYears: -1644.6,
+    plane: URANUS_EQUATOR,
+  },
+  {
+    id: "oberon",
+    host: "uranus",
+    radiusKm: 761.4,
+    aKm: 583_511,
+    e: 0.002,
+    omega: 116.335,
+    M: 176.814,
+    i: 0.193,
+    node: 59.416,
+    periodDays: 13.4632385,
+    apsisYears: 143.51,
+    nodeYears: -192.8,
+    plane: URANUS_EQUATOR,
   },
   {
     id: "triton",
@@ -230,6 +438,14 @@ export function moonById(id: MoonId) {
 
 const perDay = (years: number) => (years ? 360 / (years * DAYS_PER_JULIAN_YEAR) : 0);
 
+/** The moon's librations in mean longitude at d days from J2000, degrees. */
+export function libration(moon: Moon, d: number) {
+  let sum = 0;
+  for (const [degrees, years, phase] of moon.libration ?? [])
+    sum += degrees * Math.sin((phase + perDay(years) * d) * RAD);
+  return sum;
+}
+
 /**
  * Rates in degrees per day. The mean longitude advances once per sidereal
  * period; a retrograde orbit counts its longitude backwards, Ω − ω − M.
@@ -241,12 +457,12 @@ export function meanRates(moon: Moon) {
   return { omega, node, M: 360 / moon.periodDays - omega - sense * node };
 }
 
-/** Mean longitude Ω ± (ω + M) in the moon's reference plane, degrees. */
+/** Mean longitude Ω ± (ω + M) in the moon's reference plane, with its librations, degrees. */
 export function meanLongitude(id: MoonId, date: Date) {
   const moon = moonById(id);
   const rates = meanRates(moon);
   const d = julianDay(date) - J2000_JD;
   const sense = moon.i > 90 ? -1 : 1;
-  const along = moon.omega + moon.M + (rates.omega + rates.M) * d;
+  const along = moon.omega + moon.M + (rates.omega + rates.M) * d + libration(moon, d);
   return wrap(moon.node + rates.node * d + sense * along, 360);
 }

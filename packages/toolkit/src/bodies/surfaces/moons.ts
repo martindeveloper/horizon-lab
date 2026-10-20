@@ -1,9 +1,10 @@
 /** The major moons, from spacecraft maps. */
 import { smoothstep as smooth } from "../../math/index";
-import { RAD, fbm, mix, ridge, scale, spot, type Painter } from "./raster";
+import { RAD, fbm, mix, ridge, scale, spot, type Painter, type Point } from "./raster";
 
 /* Moon maps put longitude 0 at the sub-planet point; west longitudes from the
-   literature are written as east, 360 − W. */
+   literature are written as east, 360 − W. The trailing hemisphere is centred on 90° E,
+   the leading one on 270° E. */
 
 /** Lunar maria: [east lon, lat, half-width, half-height, depth] (USGS lunar nomenclature). */
 const MARIA = [
@@ -132,6 +133,244 @@ export const deimos: Painter = (p) => {
   }
   const streaks = smooth(0.62, 0.7, fbm(p, 3, 14, 2, 42));
   return mix(rgb, [105, 97, 87], streaks * 0.4);
+};
+
+/** A unit vector in the painters' frame (Point's x, y, z). */
+function unit(lon: number, lat: number) {
+  const c = Math.cos(lat * RAD);
+  return [c * Math.cos(lon * RAD), Math.sin(lat * RAD), c * Math.sin(lon * RAD)] as const;
+}
+
+/**
+ * A canyon along the great circle through (lon, lat) heading `azimuth` degrees east of
+ * north, `reach` degrees each way: 1 on its line, fading to 0 by `width` degrees off it.
+ */
+function chasma(lon: number, lat: number, azimuth: number, reach: number, width: number) {
+  const [cx, cy, cz] = unit(lon, lat);
+  const sinLat = Math.sin(lat * RAD);
+  const north = [-sinLat * Math.cos(lon * RAD), Math.cos(lat * RAD), -sinLat * Math.sin(lon * RAD)];
+  const east = [-Math.sin(lon * RAD), 0, Math.cos(lon * RAD)];
+  const ca = Math.cos(azimuth * RAD);
+  const sa = Math.sin(azimuth * RAD);
+  const tx = ca * north[0]! + sa * east[0]!;
+  const ty = ca * north[1]! + sa * east[1]!;
+  const tz = ca * north[2]! + sa * east[2]!;
+  /* The circle's pole, c × t. */
+  const nx = cy * tz - cz * ty;
+  const ny = cz * tx - cx * tz;
+  const nz = cx * ty - cy * tx;
+  return (p: Point) => {
+    const off = Math.abs(Math.asin(p.x * nx + p.y * ny + p.z * nz)) / RAD;
+    if (off > width) return 0;
+    const along = Math.atan2(p.x * tx + p.y * ty + p.z * tz, p.x * cx + p.y * cy + p.z * cz);
+    return smooth(width, 0, off) * smooth(reach, reach - 8, Math.abs(along / RAD));
+  };
+}
+
+/** How much of a moon's trailing hemisphere a point is on, 0..1 (its apex at 90° E). */
+const trailing = (p: Point) => Math.max(0, p.cosLat * Math.cos((p.lon - 90) * RAD));
+
+/**
+ * Mimas (Voyager, Cassini ISS): grey ice saturated with craters, and Herschel, 139 km across
+ * (1.4° S, 111.8° W) with its central peak, near the leading hemisphere's centre.
+ */
+export const mimas: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 43);
+  let rgb = scale([226, 224, 220], 0.97 + (n - 0.5) * 0.16);
+  rgb = mix(rgb, [174, 172, 168], smooth(0.6, 0.7, fbm(p, 14, 14, 2, 44)) * 0.55);
+  const herschel = spot(p, 248.2, -1.4, 20, 20);
+  rgb = mix(rgb, [180, 178, 174], smooth(1.05, 0.8, herschel) * 0.4);
+  rgb = mix(rgb, [238, 237, 234], smooth(0.18, 0, Math.abs(herschel - 1)) * 0.7);
+  return mix(rgb, [230, 229, 226], smooth(0.22, 0.06, herschel));
+};
+
+/** Enceladus's tiger stripes: four sulci ~35 km apart, ~130 km long, about the south pole. */
+const STRIPES = [-12, -4, 4, 12] as const;
+/**
+ * Enceladus (Cassini ISS; Porco et al. 2006): fresh, nearly white ice, older cratered plains
+ * a shade greyer, and the bluer south polar terrain inside ~55° S, crossed by the four
+ * parallel tiger stripes (Alexandria, Cairo, Baghdad and Damascus Sulci) that vent its plumes.
+ */
+export const enceladus: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 45);
+  let rgb = scale([250, 251, 252], 0.99 + (n - 0.5) * 0.03);
+  const plains = smooth(0.62, 0.72, fbm(p, 10, 10, 2, 46)) * smooth(-40, -10, p.lat);
+  rgb = mix(rgb, [232, 232, 230], plains * 0.6);
+  const colat = 90 + p.lat;
+  rgb = mix(rgb, [238, 246, 252], smooth(38, 32, colat + (n - 0.5) * 6));
+  if (colat > 24) return rgb;
+  /* The stripes in a polar plane, degrees from the pole, turned 45° to the Saturn meridian. */
+  const x = colat * Math.cos((p.lon - 45) * RAD);
+  const y = colat * Math.sin((p.lon - 45) * RAD) + (fbm(p, 8, 8, 2, 47) - 0.5) * 2;
+  let stripe = 0;
+  for (const at of STRIPES) stripe = Math.max(stripe, smooth(1.4, 0, Math.abs(y - at)));
+  return mix(rgb, [188, 200, 206], stripe * smooth(17, 13, Math.abs(x)) * 0.8);
+};
+
+const ITHACA = chasma(332, 0, 15, 135, 5.4);
+/**
+ * Tethys (Voyager, Cassini ISS; Schenk et al. 2011): bright ice; Odysseus, 445 km across
+ * (32.8° N, 128.9° W), a flattened basin on the leading side; Ithaca Chasma, a 100 km-wide
+ * graben three-quarters of the way round a near-polar circle whose pole lies ~20° from
+ * Odysseus; a faintly darker, bluish band across the leading hemisphere's equator.
+ */
+export const tethys: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 48);
+  let rgb = scale([250, 249, 246], 0.98 + (n - 0.5) * 0.08);
+  rgb = mix(rgb, [214, 214, 212], smooth(0.62, 0.72, fbm(p, 12, 12, 2, 49)) * 0.45);
+  const lens = smooth(1.2, 0.3, spot(p, 270, 0, 75, 20) + (n - 0.5) * 0.4);
+  rgb = mix(rgb, [210, 216, 224], lens * 0.5);
+  rgb = mix(rgb, [226, 222, 214], trailing(p) * 0.3);
+  const odysseus = spot(p, 231.1, 32.8, 24, 24);
+  rgb = mix(rgb, [222, 222, 220], smooth(1, 0.7, odysseus) * 0.5);
+  rgb = mix(rgb, [250, 250, 248], smooth(0.15, 0, Math.abs(odysseus - 1)) * 0.6);
+  const ithaca = ITHACA(p);
+  return mix(rgb, [196, 194, 190], ithaca * (0.55 + ridge(fbm(p, 6, 30, 2, 50), 0.1) * 0.35));
+};
+
+/**
+ * Dione (Voyager, Cassini ISS): a bright, cratered leading hemisphere; the darker trailing
+ * side crossed by the bright wispy fractures of Padua, Eurotas and Palatine Chasmata,
+ * between ~40° N and 60° S and 260–350° W.
+ */
+export const dione: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 51);
+  let rgb = scale([246, 244, 240], 0.97 + (n - 0.5) * 0.12);
+  rgb = mix(rgb, [204, 202, 198], smooth(0.62, 0.72, fbm(p, 12, 12, 2, 52)) * 0.5);
+  const wispy = smooth(1.1, 0.7, spot(p, 55, -10, 50, 50));
+  rgb = mix(rgb, [176, 174, 170], Math.max(trailing(p), wispy) * 0.55);
+  const wisps = Math.max(ridge(fbm(p, 3, 7, 3, 53), 0.025), ridge(fbm(p, 5, 9, 2, 54), 0.02));
+  return mix(rgb, [244, 244, 242], wisps * wispy * 0.85);
+};
+
+/**
+ * Rhea (Voyager, Cassini ISS): bright, heavily cratered ice; wispy fractures on the darker
+ * trailing hemisphere; Inktomi (14.1° S, 112.1° W), a young 47 km crater whose bright rays
+ * reach across much of the leading side.
+ */
+export const rhea: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 55);
+  let rgb = scale([242, 240, 236], 0.97 + (n - 0.5) * 0.14);
+  rgb = mix(rgb, [198, 196, 192], smooth(0.6, 0.7, fbm(p, 14, 14, 2, 56)) * 0.55);
+  const back = trailing(p);
+  rgb = mix(rgb, [182, 180, 176], back * 0.5);
+  const wisps = ridge(fbm(p, 4, 8, 3, 57), 0.022);
+  rgb = mix(rgb, [240, 240, 238], wisps * smooth(0.4, 0.8, back) * 0.8);
+  /* Spot distances stop at 3 radii, so the rays take a spot of their own. */
+  const reach = spot(p, 247.9, -14.1, 32, 32);
+  if (reach >= 1) return rgb;
+  rgb = mix(rgb, [250, 250, 248], smooth(1, 0.3, reach) * 0.6);
+  const rays = smooth(0.46, 0.56, fbm(p, 12, 12, 2, 58)) * smooth(1, 0.1, reach);
+  const crater = smooth(2.5, 0.8, spot(p, 247.9, -14.1, 1.8, 1.8));
+  return mix(rgb, [255, 255, 254], Math.max(crater, rays));
+};
+
+/**
+ * Iapetus (Cassini ISS; Porco et al. 2005): Cassini Regio, the reddish-black leading
+ * hemisphere (p ≈ 0.05) centred on its apex at 90° W and reaching ~40° N and S, against
+ * bright trailing ice and poles (~0.5), with a diffuse, spotty boundary between them.
+ */
+export const iapetus: Painter = (p) => {
+  const n = fbm(p, 5, 5, 4, 59);
+  const d = spot(p, 270, 0, 105, 46);
+  const dark = smooth(1.08, 0.85, d + (n - 0.5) * 0.45 + (fbm(p, 16, 16, 2, 60) - 0.5) * 0.3);
+  const ice = scale([204, 196, 182], 0.97 + (n - 0.5) * 0.1);
+  return mix(ice, scale([66, 46, 34], 0.92 + (n - 0.5) * 0.3), dark);
+};
+
+/* Voyager 2 saw only the Uranian moons' southern hemispheres. The maps' north follows the
+   orbits' angular momentum, which is the IAU south there, so latitudes from the literature
+   flip sign and east longitudes become 360 − E; the map's south stays plain fill. */
+const seen = (p: Point) => smooth(-25, 0, p.lat);
+
+/** Miranda's coronae: [east lon, lat, radius] in map coordinates. */
+const CORONAE = [
+  [286.3, 29.1, 39], // Arden, 29.1° S 73.7° E, 318 km
+  [102.9, 24.8, 39], // Elsinore, 24.8° S 257.1° E, 323 km
+  [34.3, 66.9, 28], // Inverness, 66.9° S 325.7° E, 234 km
+] as const;
+/**
+ * Miranda (Voyager 2): grey, cratered rolling terrain broken by three coronae of banded
+ * ridges and grooves: Arden on the leading side, Elsinore on the trailing side and
+ * Inverness, with its bright chevron, near the south pole.
+ */
+export const miranda: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 61);
+  let rgb = scale([168, 166, 162], 0.98 + (n - 0.5) * 0.12);
+  const view = seen(p);
+  if (view === 0) return rgb;
+  rgb = mix(rgb, [138, 136, 133], smooth(0.62, 0.72, fbm(p, 12, 12, 2, 62)) * view * 0.5);
+  /* Each corona: a mottled core inside a belt of parallel bright and dark ridges. */
+  for (const [lon, lat, r] of CORONAE) {
+    const d = spot(p, lon, lat, r * 1.25, r * 0.8) + (fbm(p, 5, 5, 2, 75) - 0.5) * 0.3;
+    if (d > 1.1) continue;
+    const bands = 0.5 + 0.5 * Math.sin(d * 22);
+    const belt = smooth(0.45, 0.6, d) * smooth(1.05, 0.9, d);
+    rgb = mix(rgb, [150, 148, 145], smooth(1.05, 0.9, d) * view * 0.5);
+    rgb = mix(rgb, mix([112, 110, 107], [214, 212, 208], bands), belt * view * 0.85);
+  }
+  const chevron = spot(p, 34.3, 66.9, 12, 6);
+  return mix(rgb, [222, 220, 216], smooth(0.9, 0.4, chevron) * view * 0.7);
+};
+
+/**
+ * Ariel (Voyager 2): the brightest and youngest Uranian surface: grey ice cut by a network
+ * of fault canyons (chasmata) with smooth floors, and fresh bright craters.
+ */
+export const ariel: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 63);
+  let rgb = scale([180, 179, 176], 0.98 + (n - 0.5) * 0.12);
+  const view = seen(p);
+  if (view === 0) return rgb;
+  const canyons = Math.max(ridge(fbm(p, 4, 4, 3, 64), 0.025), ridge(fbm(p, 7, 7, 2, 65), 0.018));
+  rgb = mix(rgb, [138, 137, 134], canyons * view * 0.6);
+  return mix(rgb, [232, 231, 228], smooth(0.7, 0.78, fbm(p, 16, 16, 2, 66)) * view * 0.7);
+};
+
+/**
+ * Umbriel (Voyager 2): the darkest Uranian moon, uniformly old and cratered, with Wunda
+ * (7.9° S, 273.6° E), 131 km across, its floor ringed by bright material.
+ */
+export const umbriel: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 67);
+  let rgb = scale([134, 133, 131], 0.98 + (n - 0.5) * 0.12);
+  const view = seen(p);
+  if (view === 0) return rgb;
+  rgb = mix(rgb, [112, 111, 109], smooth(0.62, 0.72, fbm(p, 12, 12, 2, 68)) * view * 0.5);
+  const wunda = spot(p, 86.4, 7.9, 6.4, 6.4);
+  return mix(rgb, [218, 214, 206], smooth(0.3, 0.05, Math.abs(wunda - 0.6)) * view);
+};
+
+const MESSINA = chasma(25, 33.3, 130, 54, 2.2);
+/**
+ * Titania (Voyager 2): grey ice, cratered and cut by long fault canyons, Messina Chasmata
+ * (33.3° S, 335° E) the longest at ~1,500 km; Gertrude (15.8° S, 287.1° E), 326 km across;
+ * bright-rayed young craters.
+ */
+export const titania: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 69);
+  let rgb = scale([156, 152, 148], 0.98 + (n - 0.5) * 0.12);
+  const view = seen(p);
+  if (view === 0) return rgb;
+  rgb = mix(rgb, [128, 125, 122], smooth(0.62, 0.72, fbm(p, 12, 12, 2, 70)) * view * 0.5);
+  rgb = mix(rgb, [116, 113, 110], MESSINA(p) * view * 0.7);
+  const gertrude = spot(p, 72.9, 15.8, 11.8, 11.8);
+  rgb = mix(rgb, [176, 172, 168], smooth(0.2, 0, Math.abs(gertrude - 1)) * view * 0.6);
+  return mix(rgb, [216, 214, 210], smooth(0.72, 0.8, fbm(p, 16, 16, 2, 71)) * view * 0.7);
+};
+
+/**
+ * Oberon (Voyager 2): slightly reddish grey, old and heavily cratered; dark-floored craters
+ * such as Hamlet (46.1° S, 44.4° E), 206 km across, and bright ray systems.
+ */
+export const oberon: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 72);
+  let rgb = scale([144, 138, 132], 0.98 + (n - 0.5) * 0.12);
+  const view = seen(p);
+  if (view === 0) return rgb;
+  rgb = mix(rgb, [84, 80, 76], smooth(0.68, 0.74, fbm(p, 14, 14, 2, 73)) * view * 0.7);
+  rgb = mix(rgb, [70, 66, 62], smooth(1, 0.6, spot(p, 315.6, 46.1, 7.8, 7.8)) * view * 0.85);
+  return mix(rgb, [208, 204, 198], smooth(0.72, 0.8, fbm(p, 16, 16, 2, 74)) * view * 0.6);
 };
 
 /** Callisto: dark, saturated with bright craters; Valhalla's ringed basin. */

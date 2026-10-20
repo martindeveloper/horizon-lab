@@ -42,7 +42,8 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
   `writeOrbit` / `createOrbitWriter` fill a flat XYZ buffer with the ellipse
   (the writer skips work when only M changed). `eccentricAnomaly`, `periodYears`.
 - `MOONS`: JPL mean elements per moon with its host, reference plane and
-  precession periods; `meanRates(moon)` and `meanLongitude(id, date)`.
+  precession periods, and the resonant librations of Mimas, Tethys, Enceladus
+  and Miranda; `meanRates(moon)`, `libration(moon, d)` and `meanLongitude(id, date)`.
   Positions from them are left to the lab for now.
 
 ## Sun and Moon in the sky (`almanac.ts`)
@@ -77,8 +78,8 @@ mean distance 385 000.56 km) stay in their functions.
 
 ## Measured maps (`maps.ts`)
 
-`MAPS` lists the bodies with a measured map: tier widths, source, credit,
-licence and link. The host decides where the files live and passes that base:
+`MAPS` lists the bodies with a measured map: tier widths, the far tier's mean
+colour (a placeholder while the map streams in), source, credit, licence and link. The host decides where the files live and passes that base:
 
 ```ts
 tierFile("/textures/orrery", "earth", "near"); // "/textures/orrery/earth-near.webp"
@@ -94,12 +95,13 @@ removes the source display colour and limb profile during preprocessing and
 applies view-dependent limb darkening at render time. The painted Sun is a
 uniform neutral fallback while the observation map loads.
 
-The Moon, Phobos, Deimos, Io, Europa, Ganymede, Callisto, Triton and Charon
-have spacecraft mosaics. The host ships one tier for each (512 pixels for the two
+The Moon, Phobos, Deimos, Io, Europa, Ganymede, Callisto, Saturn's six mid-size
+moons, Triton and Charon have spacecraft mosaics. The host ships one tier for each (512 pixels for the two
 small Martian moons, 1024 for the rest), with plain missing-data
 fill. Some sources are monochrome or enhanced multispectral colour; metadata
-and the host's credits document these limits. Venus, Titan, Sedna and Halley
-retain illustrative maps. Fallback painters remain available if an asset fails.
+and the host's credits document these limits. Venus, Titan, Sedna, Halley and
+Uranus's five moons retain illustrative maps. Fallback
+painters remain available if an asset fails.
 
 ## Painted surfaces (`@horizon/toolkit/bodies/surfaces`)
 

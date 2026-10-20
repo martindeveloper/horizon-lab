@@ -134,11 +134,25 @@ type Surface = {
   glint?: [number, number];
 };
 
-function lit(map: Texture, look: Surface, defines?: Record<string, string>) {
+/** What a lit body shows: a map, times a tint (white, or a placeholder's colour on `WHITE`). */
+type Face = { texture: Texture; tint: Color };
+
+/** A single white texel: a placeholder's map, and the prior once nothing is fading. */
+const WHITE = new DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+WHITE.needsUpdate = true;
+const NO_TINT = new Color(1, 1, 1);
+/** Seconds a newly arrived map takes to fade in over what showed before. */
+const FADE_S = 0.6;
+
+function lit(face: Face, look: Surface, defines?: Record<string, string>) {
   return new ShaderMaterial({
     ...(defines ? { defines } : {}),
     uniforms: {
-      map: { value: map },
+      map: { value: face.texture },
+      mapTint: { value: face.tint.clone() },
+      prior: { value: WHITE },
+      priorTint: { value: NO_TINT.clone() },
+      fade: { value: 1 },
       atmos: { value: new Color(look.atmos?.[0] ?? "#000000") },
       atmosStrength: { value: look.atmos?.[1] ?? 0 },
       ambient: { value: look.ambient ?? 0.035 },
@@ -207,8 +221,19 @@ const SURFACES: Record<PlanetId | NamedId | MoonId, Surface> = {
   europa: { minnaert: 0.55 },
   ganymede: { minnaert: 0.55 },
   callisto: { minnaert: 0.55 },
+  mimas: { minnaert: 0.55 },
+  enceladus: { minnaert: 0.55 },
+  tethys: { minnaert: 0.55 },
+  dione: { minnaert: 0.55 },
+  rhea: { minnaert: 0.55 },
   /* Titan's disc is all haze: nearly Lambertian, with a bright orange limb. */
   titan: { atmos: ["#e0a868", 0.45], minnaert: 0.85 },
+  iapetus: { minnaert: 0.55 },
+  miranda: { minnaert: 0.55 },
+  ariel: { minnaert: 0.55 },
+  umbriel: { minnaert: 0.55 },
+  titania: { minnaert: 0.55 },
+  oberon: { minnaert: 0.55 },
   triton: { atmos: ["#c8d8f0", 0.04], minnaert: 0.6 },
   charon: { minnaert: 0.55 },
 };
@@ -234,7 +259,18 @@ const MAP_SIZE: Record<BodyId, number> = {
   europa: 128,
   ganymede: 128,
   callisto: 128,
+  mimas: 128,
+  enceladus: 128,
+  tethys: 128,
+  dione: 128,
+  rhea: 128,
   titan: 256,
+  iapetus: 128,
+  miranda: 128,
+  ariel: 128,
+  umbriel: 128,
+  titania: 128,
+  oberon: 128,
   triton: 128,
   charon: 128,
 };
@@ -272,13 +308,35 @@ function shell(opacity: number) {
 export type Looks = ReturnType<typeof createLooks>;
 
 /**
- * `light` halves the largest maps for coarse-pointer or low-memory devices.
+ * `light` halves the largest maps for coarse-pointer or low-memory devices. `streamed`: the
+ * host streams measured maps in (`setMeasured`), so a body with one shows its map's mean
+ * colour until then and is painted only if its map fails (`setFailed`); otherwise every body
+ * starts on its painted map.
  */
-export function createLooks(light = false) {
+export function createLooks(light = false, streamed = false) {
   /* A body with a measured map (`MAPS`) paints only a stand-in until that loads. */
   const size = (id: BodyId) => (MAPS[id] || light ? Math.min(256, MAP_SIZE[id]) : MAP_SIZE[id]);
   const texture = (id: BodyId) => mapTexture(id, size(id), size(id) / 2);
-  const maps = recordFrom(PLANET_IDS, (id) => texture(id));
+  /* Painted maps are made the first time a body needs one. */
+  const painted: Partial<Record<BodyId, Texture>> = {};
+  const paintedOf = (id: BodyId) => (painted[id] ??= texture(id));
+  /** Retained even when a moon material has not been created yet. */
+  const measured: Partial<Record<BodyId, Texture>> = {};
+  const failed = new Set<BodyId>();
+  const placeholders = new Map<BodyId, Color>();
+  /** What a body shows now: its measured map, its placeholder while that streams, or its painted map. */
+  const faceOf = (id: BodyId): Face => {
+    const map = measured[id];
+    if (map) return { texture: map, tint: NO_TINT };
+    /* The Sun's shader takes no tint: it keeps its painted map, already a plain disc. */
+    const mean = id === "sun" ? undefined : MAPS[id]?.mean;
+    if (streamed && mean && !failed.has(id)) {
+      let tint = placeholders.get(id);
+      if (!tint) placeholders.set(id, (tint = new Color(mean)));
+      return { texture: WHITE, tint };
+    }
+    return { texture: paintedOf(id), tint: NO_TINT };
+  };
   const ringMaps = partialFrom(
     keysOf(RINGS).flatMap((id) => {
       const system = RINGS[id];
@@ -288,7 +346,7 @@ export function createLooks(light = false) {
   const planets = recordFrom(PLANET_IDS, (id) => {
     const system = RINGS[id];
     const shadow = id === "saturn" ? ringMaps[id] : undefined;
-    const material = lit(maps[id], SURFACES[id], shadow ? { RING_SHADOW: "" } : undefined);
+    const material = lit(faceOf(id), SURFACES[id], shadow ? { RING_SHADOW: "" } : undefined);
     if (shadow && system) {
       const eq = FIGURES[id].equatorialKm;
       Object.assign(material.uniforms, {
@@ -309,23 +367,14 @@ export function createLooks(light = false) {
         : ([[id, ringMaterial(map, id, system)]] as const);
     }),
   );
-  const namedMaps: Record<NamedId, Texture> = {
-    pluto: texture("pluto"),
-    sedna: texture("sedna"),
-    halley: texture("halley"),
-  };
   const named: Record<NamedId, ShaderMaterial> = {
-    pluto: lit(namedMaps.pluto, SURFACES.pluto),
-    sedna: lit(namedMaps.sedna, SURFACES.sedna),
-    halley: lit(namedMaps.halley, SURFACES.halley),
+    pluto: lit(faceOf("pluto"), SURFACES.pluto),
+    sedna: lit(faceOf("sedna"), SURFACES.sedna),
+    halley: lit(faceOf("halley"), SURFACES.halley),
   };
-  /** Retained even when a moon material has not been created yet. */
-  const measured: Partial<Record<BodyId, Texture>> = {};
   /* Moon materials are created the first time their planet shows them. */
-  const moonMaps: Partial<Record<MoonId, Texture>> = {};
   const moons: Partial<Record<MoonId, ShaderMaterial>> = {};
-  const moonMap = (id: MoonId) => (moonMaps[id] ??= texture(id));
-  const moon = (id: MoonId) => (moons[id] ??= lit(measured[id] ?? moonMap(id), SURFACES[id]));
+  const moon = (id: MoonId) => (moons[id] ??= lit(faceOf(id), SURFACES[id]));
   /* Atmosphere shells are created the first time a close-up of their body opens. */
   let airSteps = AIR_STEPS;
   const airs: Partial<Record<BodyId, ShaderMaterial>> = {};
@@ -334,7 +383,7 @@ export function createLooks(light = false) {
     if (!look) return undefined;
     return (airs[id] ??= airMaterial(look, airSteps));
   };
-  const sunMap = texture("sun");
+  const sunMap = paintedOf("sun");
   const sun = new ShaderMaterial({
     uniforms: { map: { value: sunMap } },
     vertexShader: VERT,
@@ -413,22 +462,7 @@ export function createLooks(light = false) {
       toneMapped: false,
     }),
   };
-  const textures = [
-    ...Object.values(maps),
-    ...Object.values(ringMaps),
-    ...Object.values(namedMaps),
-    sunMap,
-    diskMap,
-    gasMap,
-    sunHalo,
-    glow,
-  ];
-  const paintedOf = (id: BodyId): Texture => {
-    if (id === "sun") return sunMap;
-    if (includesId(PLANET_IDS, id)) return maps[id];
-    if (id === "pluto" || id === "sedna" || id === "halley") return namedMaps[id];
-    return moonMap(id);
-  };
+  const textures = [...Object.values(ringMaps), diskMap, gasMap, sunHalo, glow];
   const surfaceOf = (id: BodyId): ShaderMaterial | undefined => {
     if (id === "sun") return sun;
     if (includesId(PLANET_IDS, id)) return planets[id];
@@ -436,25 +470,91 @@ export function createLooks(light = false) {
     if (includesId(MOON_IDS, id)) return moons[id];
     return undefined;
   };
+
+  /* Fades: each material eases from what it showed (`prior`) to its new map. */
+  const fading = new Set<ShaderMaterial>();
+  /** Bodies whose surface a close-up has taken over; their own map waits until it gives it back. */
+  const held = new Set<BodyId>();
+  const finish = (material: ShaderMaterial) => {
+    material.uniforms.fade!.value = 1;
+    material.uniforms.prior!.value = WHITE;
+    fading.delete(material);
+  };
+  /**
+   * Puts `face` on a body, fading over what it showed unless `atOnce`; a change mid-fade
+   * keeps fading from the same prior. The Sun has no fade.
+   */
+  const show = (id: BodyId, face: Face, atOnce = false) => {
+    const material = surfaceOf(id);
+    if (!material) return;
+    const u = material.uniforms;
+    if (!u.fade) {
+      u.map!.value = face.texture;
+      return;
+    }
+    if (u.map!.value === face.texture && u.mapTint!.value.equals(face.tint)) return;
+    if (atOnce) finish(material);
+    else if (!fading.has(material)) {
+      u.prior!.value = u.map!.value;
+      u.priorTint!.value.copy(u.mapTint!.value);
+      u.fade.value = 0;
+      fading.add(material);
+    }
+    u.map!.value = face.texture;
+    u.mapTint!.value.copy(face.tint);
+  };
+  /** Disposes a map no body shows any more, ending any fade still drawing it. */
+  const retire = (texture: Texture) => {
+    for (const material of fading) if (material.uniforms.prior!.value === texture) finish(material);
+    texture.dispose();
+  };
+  /** Shows a body's own face again, unless a close-up holds its surface. */
+  const refresh = (id: BodyId, atOnce = false) => {
+    if (!held.has(id)) show(id, faceOf(id), atOnce);
+  };
+
   return {
     ...materials,
     moon,
     surfaceOf,
-    /** Retains a measured map, including for moons that are not visible yet. */
+    /** Retains a measured map, including for moons that are not visible yet, and fades it in. */
     setMeasured(id: BodyId, texture: Texture) {
-      const material = surfaceOf(id);
-      measured[id]?.dispose();
+      const old = measured[id];
       measured[id] = texture;
-      if (material) material.uniforms.map!.value = texture;
+      refresh(id);
+      if (old) retire(old);
     },
-    /** Frees a measured map; the body goes back to its painted stand-in. */
+    /** Frees a measured map; the body goes back to its placeholder or painted map. */
     clearMeasured(id: BodyId) {
       const texture = measured[id];
       if (!texture) return;
       delete measured[id];
-      const map = surfaceOf(id)?.uniforms.map;
-      if (map?.value === texture) map.value = paintedOf(id);
-      texture.dispose();
+      refresh(id, true);
+      retire(texture);
+    },
+    /** A streamed map could not load: the body fades to its painted map instead. */
+    setFailed(id: BodyId) {
+      failed.add(id);
+      refresh(id);
+    },
+    /** A close-up takes the body's surface and fades `texture` in over it (its detailed map). */
+    hold(id: BodyId, texture: Texture) {
+      held.add(id);
+      show(id, { texture, tint: NO_TINT });
+    },
+    /** The close-up gives the surface back: the body's own face returns at once. */
+    release(id: BodyId) {
+      held.delete(id);
+      show(id, faceOf(id), true);
+    },
+    /** Advances the fades; true while one is still running. */
+    step(dt: number) {
+      for (const material of fading) {
+        const u = material.uniforms;
+        u.fade!.value = Math.min(1, u.fade!.value + dt / FADE_S);
+        if (u.fade!.value >= 1) finish(material);
+      }
+      return fading.size > 0;
     },
     /** The scattering shell over a body with air, for its close-up; none for the rest. */
     air,
@@ -473,8 +573,8 @@ export function createLooks(light = false) {
     detailTexture,
     dispose() {
       for (const tex of textures) tex.dispose();
+      for (const tex of Object.values(painted)) tex.dispose();
       for (const tex of Object.values(measured)) tex.dispose();
-      for (const tex of Object.values(moonMaps)) tex.dispose();
       for (const mat of Object.values(moons)) mat.dispose();
       for (const mat of Object.values(airs)) mat.dispose();
       for (const mat of Object.values(materials)) {

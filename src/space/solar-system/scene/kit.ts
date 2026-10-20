@@ -40,9 +40,12 @@ export type SolarShow = {
  */
 export type SolarKit = SceneKit<Looks, Lod>;
 
-/** The kit for a host's scene: painted looks (lighter on tight devices) and a level of detail. */
-export function createSolarKit(basics: SceneHostBasics): SolarKit {
-  const looks = basics.scope.own(createLooks(basics.tight));
+/**
+ * The kit for a host's scene: painted looks (lighter on tight devices) and a level of detail.
+ * `streamed`: the host streams measured maps in, and bodies wait for them in their mean colour.
+ */
+export function createSolarKit(basics: SceneHostBasics, streamed = false): SolarKit {
+  const looks = basics.scope.own(createLooks(basics.tight, streamed));
   return sceneKit(basics, looks, createLod(basics.camera, basics.viewport));
 }
 

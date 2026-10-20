@@ -40,7 +40,8 @@ test("every tier exists at its declared size, inside its budget", { skip }, asyn
     }
     assert.ok(map.widths.nearLight <= map.widths.near && map.widths.far <= map.widths.nearLight);
   }
-  assert.ok(far <= 1e6, `all far maps together are ${far} bytes`);
+  // Far maps stream in by need (one per body on screen), so this caps a full tour, not a page load.
+  assert.ok(far <= 2e6, `all far maps together are ${far} bytes`);
 });
 
 test("measured maps keep each body's geometric albedo", { skip }, async () => {
@@ -66,5 +67,28 @@ test("measured maps keep each body's geometric albedo", { skip }, async () => {
     const ratio = sum / total / GEOMETRIC_ALBEDO[id];
     // Earth sits lowest: the shader adds its limb haze and ocean glint, which a map lacks.
     assert.ok(ratio > 0.7 && ratio < 1.6, `${id}: luminance / albedo = ${ratio}`);
+  }
+});
+
+test("each streaming placeholder is its far map's mean colour", { skip }, async () => {
+  for (const [id, map] of Object.entries(MAPS)) {
+    const { data, info } = await sharp(publicFile(tierFile(id, "far")).pathname)
+      .removeAlpha()
+      .resize(256, 128, { fit: "fill" })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const sum = [0, 0, 0];
+    let total = 0;
+    for (let y = 0; y < info.height; y += 1) {
+      const weight = Math.cos(((90 - ((y + 0.5) / info.height) * 180) * Math.PI) / 180);
+      for (let x = 0; x < info.width; x += 1) {
+        const i = (y * info.width + x) * info.channels;
+        for (let c = 0; c < 3; c += 1) sum[c] += linear(data[i + c]) * weight;
+        total += weight;
+      }
+    }
+    const mean = [1, 3, 5].map((k) => linear(Number.parseInt(map.mean.slice(k, k + 2), 16)));
+    for (let c = 0; c < 3; c += 1)
+      assert.ok(Math.abs(sum[c] / total - mean[c]) < 0.01, `${id} mean ${map.mean}, channel ${c}`);
   }
 });

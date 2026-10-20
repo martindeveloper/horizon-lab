@@ -6,7 +6,7 @@ import {
   Vector3,
   type Object3D,
   type Scene,
-  Texture,
+  type Texture,
   type WebGLRenderer,
 } from "three";
 
@@ -67,8 +67,6 @@ type CloseUp = {
   frame: number;
   /** The body's meshes, drawn in their own depth pass on layer 1. */
   objects: Object3D[];
-  material: ShaderMaterial;
-  base: Texture;
   /** The detailed map, painted a few rows per frame, then swapped in. */
   job: SurfaceJob | null;
   /** The measured close-up map on its way, if the body has one. */
@@ -220,20 +218,13 @@ export function createCloseUpController(
       Math.min((height - 2 * shift.y) / height, (width - 2 * shift.x) / height)
     );
   };
-  const materialOf = (sel: BodySelection): ShaderMaterial =>
-    sel.kind === "sun"
-      ? looks.sun
-      : sel.kind === "planet"
-        ? looks.planets[sel.id]
-        : looks.named[sel.id];
-
-  /** Leaves the close-up at once: shared map back, detail map freed, normal layers. */
+  /** Leaves the close-up at once: the body's own map back, detail map freed, normal layers. */
   const end = (landHome: boolean) => {
     if (!close) return;
     unshell(close);
     setLayer(close.objects, 0);
     close.loading?.abort();
-    close.material.uniforms.map!.value = close.base;
+    looks.release(close.id);
     close.detail?.dispose();
     if (landHome) Object.assign(pose, close.home);
     close = null;
@@ -260,9 +251,6 @@ export function createCloseUpController(
     /* The planet's moons and their orbits share its depth pass: the Moon sits inside the
        wide pass's near plane once the camera is at the Earth. */
     const objects = deps.objectsOf(sel);
-    const material = materialOf(sel);
-    const map = material.uniforms.map?.value;
-    if (!(map instanceof Texture)) throw new Error("Close-up surface has no map.");
     setLayer(objects, BODY_LAYER);
     close = {
       sel,
@@ -277,8 +265,6 @@ export function createCloseUpController(
       radius,
       frame,
       objects,
-      material,
-      base: map,
       /* Measured bodies fetch a detailed map; painted ones paint one during the flight. */
       job: MAPS[id] ? null : detailJob(id),
       loading: null,
@@ -307,7 +293,7 @@ export function createCloseUpController(
             mine.loading = null;
             mine.detail = texture;
             upload(texture);
-            mine.material.uniforms.map!.value = texture;
+            looks.hold(id, texture);
             invalidate();
           },
           () => {
@@ -356,7 +342,7 @@ export function createCloseUpController(
     if (!done) return;
     close.detail = looks.detailTexture(close.job);
     upload(close.detail);
-    close.material.uniforms.map!.value = close.detail;
+    looks.hold(close.id, close.detail);
     close.job = null;
     invalidate();
   };
@@ -404,12 +390,6 @@ export function createCloseUpController(
       if (sel?.kind !== "sun" && sel?.kind !== "planet" && sel?.kind !== "named") return;
       const near = nearFile(bodyKey(sel));
       if (near) void bytesOf(near).catch(() => undefined);
-    },
-    /** A measured far map arrived; a close-up of that body returns to it and keeps its detail. */
-    applyMeasured(id: BodyId, texture: Texture) {
-      if (close?.id !== id) return;
-      close.base = texture;
-      if (close.detail) close.material.uniforms.map!.value = close.detail;
     },
     /** Flies in or out, keeps the aim on the body and the globe clear of the card. */
     step(dt: number) {

@@ -26,7 +26,8 @@ test("moon rasters align eastward longitudes without mirroring west-labelled cat
   }
 });
 
-test("moon textures survive loading before material creation and dispose exactly once", async () => {
+/** Builds `looks.ts` for Node and runs `fn(createLooks)` with a minimal canvas stub. */
+async function withLooks(fn) {
   const bundle = await rolldown({
     input: fileURLToPath(new URL("../src/space/solar-system/graphics/looks.ts", import.meta.url)),
     platform: "node",
@@ -44,7 +45,6 @@ test("moon textures survive loading before material creation and dispose exactly
     ],
   });
   const original = globalThis.document;
-  let looks;
   try {
     const { output } = await bundle.generate({ format: "esm" });
     const { createLooks } = await import(
@@ -69,30 +69,99 @@ test("moon textures survive loading before material creation and dispose exactly
         };
       },
     };
-    looks = createLooks(true);
-    const early = new Texture();
-    let earlyDisposed = 0;
-    early.addEventListener("dispose", () => earlyDisposed++);
-    looks.setMeasured("moon", early);
-    assert.equal(earlyDisposed, 0);
-    assert.equal(looks.moon("moon").uniforms.map.value, early);
-    const replacement = new Texture();
-    let replacementDisposed = 0;
-    replacement.addEventListener("dispose", () => replacementDisposed++);
-    looks.setMeasured("moon", replacement);
-    assert.equal(earlyDisposed, 1);
-    assert.equal(looks.moon("moon").uniforms.map.value, replacement);
-    const lateMaterial = looks.moon("io");
-    const late = new Texture();
-    looks.setMeasured("io", late);
-    assert.equal(lateMaterial.uniforms.map.value, late);
-    looks.dispose();
-    looks = undefined;
-    assert.equal(earlyDisposed, 1);
-    assert.equal(replacementDisposed, 1);
+    await fn(createLooks);
   } finally {
-    looks?.dispose();
     globalThis.document = original;
     await bundle.close();
   }
+}
+
+const disposals = (texture) => {
+  const count = { n: 0 };
+  texture.addEventListener("dispose", () => count.n++);
+  return count;
+};
+
+test("moon textures survive loading before material creation and dispose exactly once", async () => {
+  await withLooks((createLooks) => {
+    let looks = createLooks(true);
+    try {
+      const early = new Texture();
+      const earlyDisposed = disposals(early);
+      looks.setMeasured("moon", early);
+      assert.equal(earlyDisposed.n, 0);
+      assert.equal(looks.moon("moon").uniforms.map.value, early);
+      const replacement = new Texture();
+      const replacementDisposed = disposals(replacement);
+      looks.setMeasured("moon", replacement);
+      assert.equal(earlyDisposed.n, 1);
+      assert.equal(looks.moon("moon").uniforms.map.value, replacement);
+      const lateMaterial = looks.moon("io");
+      const late = new Texture();
+      looks.setMeasured("io", late);
+      assert.equal(lateMaterial.uniforms.map.value, late);
+      looks.dispose();
+      looks = undefined;
+      assert.equal(earlyDisposed.n, 1);
+      assert.equal(replacementDisposed.n, 1);
+    } finally {
+      looks?.dispose();
+    }
+  });
+});
+
+test("streamed maps: bodies wait in their map's mean colour and fade each map in", async () => {
+  await withLooks((createLooks) => {
+    const looks = createLooks(true, true);
+    try {
+      const mars = looks.planets.mars.uniforms;
+      const placeholder = mars.map.value;
+      // A single white texel tinted with the far map's mean colour: no painted map yet.
+      assert.equal(placeholder.image.width, 1);
+      assert.equal(`#${mars.mapTint.value.getHexString()}`, MAPS.mars.mean);
+
+      const far = new Texture();
+      const farDisposed = disposals(far);
+      looks.setMeasured("mars", far);
+      assert.equal(mars.map.value, far);
+      assert.equal(mars.fade.value, 0, "the map fades in");
+      assert.equal(mars.prior.value, placeholder);
+      assert.equal(`#${mars.priorTint.value.getHexString()}`, MAPS.mars.mean);
+      assert.equal(looks.step(0.3), true, "still fading");
+      assert.equal(looks.step(0.4), false, "faded in");
+      assert.equal(mars.fade.value, 1);
+
+      // A close-up's detailed map fades in over the far map and gives it back at once.
+      const detail = new Texture();
+      looks.hold("mars", detail);
+      assert.equal(mars.map.value, detail);
+      assert.equal(mars.prior.value, far);
+      // A far map replaced mid-fade is never drawn after it is disposed.
+      const newer = new Texture();
+      looks.setMeasured("mars", newer);
+      assert.equal(farDisposed.n, 1);
+      assert.notEqual(mars.prior.value, far);
+      assert.equal(mars.map.value, detail, "the close-up keeps its surface");
+      looks.release("mars");
+      assert.equal(mars.map.value, newer);
+      assert.equal(mars.fade.value, 1);
+
+      // Released for the memory budget: back to the placeholder, at once.
+      const newerDisposed = disposals(newer);
+      looks.clearMeasured("mars");
+      assert.equal(mars.map.value.image.width, 1);
+      assert.equal(mars.fade.value, 1);
+      assert.equal(newerDisposed.n, 1);
+
+      // A map that cannot load leaves its body painted.
+      const jupiter = looks.planets.jupiter.uniforms;
+      looks.setFailed("jupiter");
+      assert.ok(jupiter.map.value.image.width > 1, "painted map");
+      assert.equal(jupiter.mapTint.value.getHexString(), "ffffff");
+      // Bodies without a measured map are painted from the start.
+      assert.ok(looks.named.sedna.uniforms.map.value.image.width > 1);
+    } finally {
+      looks.dispose();
+    }
+  });
 });

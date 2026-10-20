@@ -77,7 +77,9 @@ src/
                                close-ups (close-up-controller.ts, close-up-flight.ts; the
                                atmosphere shell over a body with air, from
                                src/space/solar-system/graphics/air.ts),
-                               measured maps, the guide, solar activity, picking and the HUD
+                               streamed measured maps (measured-maps.ts: each body waits in
+                               its map's mean colour, then fades it in), the guide, solar
+                               activity, picking and the HUD
       lib/store.ts             Zustand store (orrery namespace messages)
     deep-field/
       index.ts                 Public client entry: DeepFieldApp
@@ -538,8 +540,9 @@ folder mirrors the bucket's keys:
 
 - `audio/<slug>.webm`, `.m4a`: the ambient playlist.
 - `textures/orrery/v1/<body>-<tier>.webp`: the measured maps (`MAPS_KEY`), written by
-  `scripts/build-planet-maps.mjs`. `npm run cdn:pull` fetches the published set, which
-  the map tests check; without it they skip.
+  `scripts/build-planet-maps.mjs`, which also prints each far tier's mean colour for its
+  `MAPS` entry (the placeholder while it streams). `npm run cdn:pull` fetches the
+  published set, which the map tests check; without it they skip.
 
 A published key is never overwritten, so older deployments keep their assets: rebuilt
 maps take the next `MAPS_KEY` version and a new mix takes a new name. Uploading is in

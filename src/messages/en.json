@@ -192,7 +192,7 @@
     "groups": {
       "imagery": {
         "label": "Imagery",
-        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. These four bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
+        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. Uranus’s moons are painted from Voyager 2 views. These bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
       },
       "data": {
         "label": "Data",
@@ -264,6 +264,12 @@
       "tritonMap": "Triton: the USGS Voyager 2 synthetic-colour mosaic (orange, violet and ultraviolet filters), with muted saturation. The unobserved northern region uses a plain fill. Source grid lines were interpolated by USGS; this is not natural-colour photography.",
       "phobosMap": "Phobos: Philip Stooke's monochrome mosaic of Viking images with later Mars Express, Mars Global Surveyor and MRO views, on the DLR control network. Phobos is irregular; its map is drawn on a sphere.",
       "deimosMap": "Deimos: Philip Stooke's monochrome Viking mosaic with MRO HiRISE detail, from the NASA Planetary Data System. Deimos is irregular; its map is drawn on a sphere.",
+      "mimasMap": "Mimas: DLR's monochrome Cassini atlas mosaic, with Herschel on the leading side.",
+      "enceladusMap": "Enceladus: the USGS monochrome Cassini mosaic. Its albedo is near 1, so its brightness is held just below white to keep its terrain visible.",
+      "tethysMap": "Tethys: the USGS monochrome Cassini mosaic, with Odysseus and Ithaca Chasma.",
+      "dioneMap": "Dione: the USGS monochrome Cassini and Voyager mosaic, with the bright wispy fractures of its trailing side.",
+      "rheaMap": "Rhea: the USGS monochrome Cassini and Voyager mosaic, with the rays of Inktomi.",
+      "iapetusMap": "Iapetus: the USGS monochrome Cassini and Voyager mosaic. The mosaic evens out the dark leading hemisphere, Cassini Regio; we restore its contrast from the mosaic's own brightness, keeping the boundary where the data puts it.",
       "charonMap": "Charon: the USGS New Horizons monochrome mosaic. The unobserved southern region uses a plain fill. No surface colour is inferred from the monochrome data.",
       "feather": "Original Feather icons used by Lucide, including navigation and interface controls.",
       "ned": "Galaxy and cluster positions and redshifts. This work uses NED, operated by Caltech under contract with NASA.",
@@ -284,6 +290,12 @@
       "mars": "Mars",
       "phobos": "Phobos",
       "deimos": "Deimos",
+      "mimas": "Mimas",
+      "enceladus": "Enceladus",
+      "tethys": "Tethys",
+      "dione": "Dione",
+      "rhea": "Rhea",
+      "iapetus": "Iapetus",
       "jupiter": "Jupiter",
       "saturn": "Saturn",
       "uranus": "Uranus",

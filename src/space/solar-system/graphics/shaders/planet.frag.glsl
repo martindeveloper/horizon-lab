@@ -2,9 +2,14 @@
 // Minnaert's law I = μ₀ᵏ μᵏ⁻¹ sets the limb: k = 1 is Lambert (cloudy giants),
 // k ≈ 0.6 the flat-looking disc of airless regolith. A narrow wrap softens the
 // terminator; Earth adds an ocean glint, hazy bodies a Fresnel rim, and Saturn
-// the shadow of its rings.
+// the shadow of its rings. A new map fades in over what showed before (a streaming
+// placeholder's flat colour, or a coarser map).
 
 uniform sampler2D map;       // surface colour (sRGB texture, read as linear)
+uniform vec3 mapTint;        // multiplies the map: a placeholder is a white texel times its colour
+uniform sampler2D prior;     // what the map is fading in over
+uniform vec3 priorTint;
+uniform float fade;          // 0 shows the prior, 1 the map
 uniform vec3 atmos;          // haze tint at the limb
 uniform float atmosStrength; // 0 = airless body
 uniform float ambient;       // linear floor so the night side is not pure black
@@ -49,7 +54,9 @@ void main() {
   diffuse *= mix(1.0, exp(-tau / max(abs(across), 0.02)), inRing);
 #endif
 
-  vec3 col = texture2D(map, vUv).rgb * (ambient + (1.0 - ambient) * diffuse);
+  vec3 albedo = texture2D(map, vUv).rgb * mapTint;
+  if (fade < 1.0) albedo = mix(texture2D(prior, vUv).rgb * priorTint, albedo, fade);
+  vec3 col = albedo * (ambient + (1.0 - ambient) * diffuse);
 
   // Specular glint, only on the day side of bodies with specular reflection.
   if (specStrength > 0.0 && ndl > 0.0) {

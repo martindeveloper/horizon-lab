@@ -1,10 +1,11 @@
 /**
- * The map budget: measured far maps (`MAPS`) replace the painted stand-ins by need. Each
- * frame the layers report how large each globe is now and where the zoom is heading
- * (`Lod.see`); a map loads once its body reaches a few pixels there, largest first and one
- * at a time, after the first frame. Over the memory budget, maps of bodies that have stayed
- * below a pixel the longest go back to their painted stand-ins, which reads the same at
- * that size. A failure keeps the painted map.
+ * Texture streaming: measured far maps (`MAPS`) load by need and fade in over each body's
+ * placeholder, its map's mean colour (`createLooks`, streamed). Each frame the layers report
+ * how large each globe is now and where the zoom is heading (`Lod.see`); a map loads once its
+ * body reaches a few pixels there, largest first and one at a time, after the first frame.
+ * Over the memory budget, maps of bodies that have stayed below a pixel the longest go back
+ * to their placeholders, which read the same at that size. A failed map leaves its body
+ * painted.
  */
 import type { Texture } from "three";
 
@@ -38,8 +39,10 @@ export function createMeasuredMaps(
     quality: () => MapQuality;
     /** A map arrived: upload it and put it on its body. */
     onLoad: (id: BodyId, texture: Texture) => void;
-    /** A map was released: the body goes back to its painted map. */
+    /** A map was released: the body goes back to its placeholder. */
     onRelease: (id: BodyId) => void;
+    /** A map could not load: the body falls back to its painted map. */
+    onFail: (id: BodyId) => void;
     /** Asks for a frame, so the first load starts without waiting for input. */
     wake: () => void;
   },
@@ -76,6 +79,7 @@ export function createMeasuredMaps(
       () => {
         loading = false;
         slot.state = "failed";
+        if (!abort.signal.aborted) options.onFail(id);
       },
     );
   };

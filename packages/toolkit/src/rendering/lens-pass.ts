@@ -69,9 +69,11 @@ const FINE_STEPS = 2;
 
 /**
  * Diffraction spikes for a frame's bright light: `render` finds the compact lights in a
- * level of the bloom chain (`levelOf`, after a `render` or `mask` of it) and draws each one's
- * star as thin lines through its centre, brightness falling as 1/r² and red reaching furthest,
- * into a target at half the frame's size, to be added `strength` times. One instanced draw:
+ * level of the bloom chain (`levelOf`, after a `render` or `mask` of it), measures each one
+ * through a Gaussian window centred on the light itself in a finer level, so its star holds
+ * steady as it or a neighbour moves, and draws the star as thin lines through its centre,
+ * brightness falling as 1/r² and red reaching furthest, into a target at half the frame's
+ * size, to be added `strength` times. One instanced draw:
  * an instance per cell and line, all but the lights' collapsing in their vertex shader, so
  * the fill is the lines' pixels alone. The fringe is the resolve shader's (`lens.glsl`). One
  * half-float target where the GPU renders into it, bytes otherwise, reallocated when the
@@ -88,6 +90,7 @@ export function createLensPass(renderer: WebGLRenderer) {
     uFine: { value: null as Texture | null },
     uFrame: { value: new Vector2(1, 1) },
     uCellArea: { value: 1 },
+    uFineArea: { value: 1 },
     uAxes: { value: 2 },
     uReach: { value: 1 },
     uThreshold: { value: 1 },
@@ -152,6 +155,7 @@ export function createLensPass(renderer: WebGLRenderer) {
       uniforms.uFine.value = fine.texture;
       uniforms.uFrame.value.set(width, height);
       uniforms.uCellArea.value = (width / cells.width) * (height / cells.height);
+      uniforms.uFineArea.value = (width / fine.width) * (height / fine.height);
       uniforms.uAxes.value = axes;
       uniforms.uReach.value = settings.reach * height;
       uniforms.uThreshold.value = Math.max(settings.threshold, 1e-6);

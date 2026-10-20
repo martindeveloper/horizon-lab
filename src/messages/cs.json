@@ -192,7 +192,7 @@
     "groups": {
       "imagery": {
         "label": "Snímky",
-        "intro": "Mapy planet a měsíců upravené pro model sluneční soustavy. Venuše a Titan si ponechávají ilustrační mapy oblačnosti a zákalu: radarové či infračervené mapy povrchu neodpovídají jejich vzhledu ve viditelném světle. U Sedny nemáme rozlišené snímky povrchu; částečné snímky Halleyovy komety z průletů neposkytují globální mapu pro kouli. Tyto čtyři objekty zůstávají ilustrační. Mapy jsou reprezentativní mozaiky, nikoli snímky k datu zvolenému na časové ose."
+        "intro": "Mapy planet a měsíců upravené pro model sluneční soustavy. Venuše a Titan si ponechávají ilustrační mapy oblačnosti a zákalu: radarové či infračervené mapy povrchu neodpovídají jejich vzhledu ve viditelném světle. U Sedny nemáme rozlišené snímky povrchu; částečné snímky Halleyovy komety z průletů neposkytují globální mapu pro kouli. Měsíce Uranu jsou malované podle snímků sondy Voyager 2. Tyto objekty zůstávají ilustrační. Mapy jsou reprezentativní mozaiky, nikoli snímky k datu zvolenému na časové ose."
       },
       "data": {
         "label": "Data",
@@ -264,6 +264,12 @@
       "tritonMap": "Triton: mozaika USGS ze snímků Voyageru 2 v syntetických barvách (oranžový, fialový a ultrafialový filtr), se sníženou sytostí. Nepozorovaná severní oblast má jednolitou výplň. USGS interpoloval původní čáry souřadnicové sítě; nejde o fotografii v přirozených barvách.",
       "phobosMap": "Phobos: monochromatická mozaika Philipa Stooka ze snímků Vikingů doplněná pozdějšími snímky Mars Express, Mars Global Surveyor a MRO, podle kontrolní sítě DLR. Phobos je nepravidelný; jeho mapa je vykreslena na kouli.",
       "deimosMap": "Deimos: monochromatická mozaika Philipa Stooka ze snímků Vikingů s detaily z HiRISE na MRO, z archivu NASA Planetary Data System. Deimos je nepravidelný; jeho mapa je vykreslena na kouli.",
+      "mimasMap": "Mimas: monochromatická mozaika z atlasu DLR ze snímků Cassini, s kráterem Herschel na přivrácené straně ve směru pohybu.",
+      "enceladusMap": "Enceladus: monochromatická mozaika USGS ze snímků Cassini. Jeho albedo se blíží 1, proto držíme jas těsně pod bílou, aby zůstal vidět terén.",
+      "tethysMap": "Tethys: monochromatická mozaika USGS ze snímků Cassini, s kráterem Odysseus a kaňonem Ithaca Chasma.",
+      "dioneMap": "Dione: monochromatická mozaika USGS ze snímků Cassini a Voyageru, se světlými jemnými zlomy na zadní polokouli.",
+      "rheaMap": "Rhea: monochromatická mozaika USGS ze snímků Cassini a Voyageru, s paprsky kráteru Inktomi.",
+      "iapetusMap": "Iapetus: monochromatická mozaika USGS ze snímků Cassini a Voyageru. Mozaika vyrovnává tmavou přední polokouli, Cassini Regio; její kontrast obnovujeme z vlastního jasu mozaiky, takže hranice zůstává tam, kde ji ukazují data.",
       "charonMap": "Charon: monochromatická mozaika USGS ze snímků New Horizons. Nepozorovaná jižní oblast má jednolitou výplň. Z monochromatických dat neodvozujeme barvu povrchu.",
       "feather": "Původní ikony Feather používané v Lucide, včetně navigace a ovládacích prvků rozhraní.",
       "ned": "Polohy a rudé posuvy galaxií a kup galaxií. Tato práce využívá NED, který provozuje Caltech na základě smlouvy s NASA.",
@@ -284,6 +290,12 @@
       "mars": "Mars",
       "phobos": "Phobos",
       "deimos": "Deimos",
+      "mimas": "Mimas",
+      "enceladus": "Enceladus",
+      "tethys": "Tethys",
+      "dione": "Dione",
+      "rhea": "Rhea",
+      "iapetus": "Iapetus",
       "jupiter": "Jupiter",
       "saturn": "Saturn",
       "uranus": "Uran",

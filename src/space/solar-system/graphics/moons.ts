@@ -7,6 +7,7 @@ import { Matrix4, Quaternion, Vector3 } from "three";
 import {
   MOONS,
   eccentricAnomaly,
+  libration,
   meanRates,
   type Moon,
   type MoonId,
@@ -31,7 +32,10 @@ const TRACKS = new Map<MoonId, Track>(
   MOONS.map((moon) => [moon.id, { moon, frame: frameOf(moon), rates: meanRates(moon) }]),
 );
 
-/** Perifocal axes P̂ (to periapsis) and Q̂ (90° on) in the scene frame at d days from J2000. */
+/**
+ * Perifocal axes P̂ (to periapsis) and Q̂ (90° on) in the scene frame at d days from J2000;
+ * returns the mean anomaly with its librations, radians.
+ */
 const P_AXIS = new Vector3();
 const Q_AXIS = new Vector3();
 function axesAt(track: Track, d: number) {
@@ -53,7 +57,7 @@ function axesAt(track: Track, d: number) {
     .addScaledVector(frame.x, -sw * cn - cw * sn * ci)
     .addScaledVector(frame.y, -sw * sn + cw * cn * ci)
     .addScaledVector(frame.z, cw * si);
-  return wrap(moon.M + rates.M * d, 360) * RAD;
+  return wrap(moon.M + rates.M * d + libration(moon, d), 360) * RAD;
 }
 
 const daysOf = (date: Date) => julianDay(date) - J2000_JD;

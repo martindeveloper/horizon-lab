@@ -102,6 +102,12 @@ Processing and limits:
 - **Triton**: [Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill](https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m). Credit: NASA/JPL; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Triton_Voyager2_ClrMosaic_GlobalFill_600m.tif).
 - **Phobos**: [Viking Orbiter mosaic with Mars Express, MGS and MRO images (DLR control), monochrome](https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m). Credit: NASA/JPL; Philip Stooke, University of Western Ontario; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Phobos_Viking_Mosaic_40ppd_DLRcontrol.tif).
 - **Deimos**: [Viking Orbiter mosaic with MRO HiRISE detail, monochrome](https://sbn.psi.edu/pds/resource/stookemaps.html) (Stooke small bodies maps V2.0, PDS Small Bodies Node). Credit: NASA/JPL; Philip Stooke, University of Western Ontario, with C. Jongkind and M. Arntz; control by P. Thomas, Cornell. [Original image](https://sbnarchive.psi.edu/pds3/multi_mission/MULTI_SA_MULTI_6_STOOKEMAPS_V2_0/document/m2deimos/deimos_cyl_viking_mro.jpg).
+- **Mimas**: [Cassini ISS final atlas mosaic (DLR, 2017), monochrome](https://www.usgs.gov/publications/final-mimas-and-enceladus-atlases-derived-cassini-iss-images). Credit: NASA/JPL/Space Science Institute; DLR (T. Roatsch et al. 2018); USGS Astrogeology. [Original archive](https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mimas/Cassini_DLR_Mimas.zip) (`MI_170630_DLR_basemap_degrees.tif`).
+- **Enceladus**: [Cassini ISS global mosaic, monochrome](https://astrogeology.usgs.gov/search/map/enceladus_cassini_global_mosaic_110m). Credit: NASA/JPL/Space Science Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Enceladus_Cassini_mosaic_global_110m.tif).
+- **Tethys**: [Cassini ISS global mosaic, monochrome](https://astrogeology.usgs.gov/search/map/tethys_cassini_global_mosaic_293m). Credit: NASA/JPL/Space Science Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Tethys_Cassini_mosaic_global_293m.tif).
+- **Dione**: [Cassini ISS and Voyager global mosaic, monochrome](https://astrogeology.usgs.gov/search/map/dione_cassini_voyager_global_mosaic_154m). Credit: NASA/JPL/Space Science Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Dione_Cassini_Voyager_mosaic_global_154m.tif).
+- **Rhea**: [Cassini ISS and Voyager global mosaic, monochrome](https://astrogeology.usgs.gov/search/map/rhea_cassini_voyager_global_mosaic_417m). Credit: NASA/JPL/Space Science Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Rhea_Cassini_Voyager_mosaic_global_417m.tif).
+- **Iapetus**: [Cassini ISS and Voyager global mosaic, monochrome; Cassini Regio's albedo contrast restored](https://astrogeology.usgs.gov/search/map/iapetus_cassini_voyager_global_mosaic_803m). Credit: NASA/JPL/Space Science Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Iapetus_Cassini_Voyager_mosaic_global_783m.tif).
 - **Charon**: [New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill](https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m). Credit: NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology. [Original raster](https://planetarymaps.usgs.gov/mosaic/Charon_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif).
 
 NASA imagery and USGS-produced mosaics are public domain; see
@@ -120,7 +126,9 @@ Processing and limits:
   The former are rolled half a map; the latter already start at 0° east.
   LROC is centred on 0° and is also rolled. Stooke's Phobos and Deimos maps are
   centred on 0° with east to the right (USGS labels its Phobos copy PositiveEast,
-  which puts Stickney at its IAU 49° W) and are rolled too. No raster is mirrored. Rounded
+  which puts Stickney at its IAU 49° W) and are rolled too. The Saturnian mosaics start
+  at 180° whichever central meridian they record, and are rolled; Herschel, Odysseus,
+  Inktomi's rays and Dione's trailing wisps land on their IAU longitudes. No raster is mirrored. Rounded
   source pixel bounds are resampled to the full 360° × 180° spherical extent.
   The scene retains its approximate synchronous moon orientation, not a
   precision libration/IAU moon-attitude ephemeris.
@@ -131,9 +139,15 @@ Processing and limits:
 - Io, Ganymede and Triton include non-visible filters; their chroma is reduced
   to 40% before brightness normalization. This is an illustrative colour
   treatment, **not** a reconstruction of calibrated natural colour.
-- Europa, Callisto, Charon, Phobos and Deimos remain monochrome. No colour terrain
-  is inferred. Phobos and Deimos are irregular; their planetocentric maps are drawn
+- Europa, Callisto, Charon, Phobos, Deimos and Saturn's moons remain monochrome. No
+  colour terrain is inferred. Phobos and Deimos are irregular; their planetocentric maps are drawn
   on spheres, and Phobos's seams between reverse-lit images carry Stooke's blending.
+- Enceladus's albedo is near 1; the brightness response would need to saturate every
+  pixel to reach it, so its mean is held at 0.85 and its terrain stays visible.
+- The Iapetus mosaic evens out Cassini Regio: the dark leading hemisphere is only ~1.8×
+  darker than the ice there, against ~10× in reality. The mosaic's own large-scale
+  brightness (2° box blur) is raised to the power 3.9 (ln 10 / ln 1.8), which restores
+  that contrast while keeping the boundary and the detail where the data puts them.
 - Zero/nodata coverage is softly blended into a uniform mean-colour fill, not
   procedural craters. Europa's unobserved region below 83°S is masked explicitly.
   Triton's missing north and Charon's missing south remain plain.
@@ -151,9 +165,10 @@ infrared maps would incorrectly expose surfaces hidden in visible light.
 The [JPL Venus texture](https://space.jpl.nasa.gov/tmaps/venus.html) explicitly
 clones a Mariner image and labels it fictitious; it is not a measured global map.
 Sedna has no resolved surface imagery. Halley's partial Giotto flyby views of
-an irregular nucleus are not a global spherical texture. These four bodies
-remain illustrations built from published physical constraints; generated maps
-also remain temporary load/error fallbacks:
+an irregular nucleus are not a global spherical texture. Uranus's five moons are
+painted from Voyager 2's views, which saw only their southern hemispheres (their USGS
+global mosaics are not adopted yet). These bodies remain illustrations built from published physical
+constraints; generated maps also remain temporary load/error fallbacks:
 
 - **Venus**: H₂SO₄ cloud deck (`p_V = 0.689`) with the planetary-scale horizontal
   Y (ψ) wave, chevron-sheared mid-latitude streaks from 4-day westward
@@ -173,3 +188,8 @@ also remain temporary load/error fallbacks:
   central saddle waist, mapped Giotto HMC topography (Crater, Mountain, Chain,
   Ducktail) and localized active outgassing vents covering ~10–15 % of the
   surface (Keller et al. 1986, 1987; Stooke & Abergel 1991).
+- **Miranda, Ariel, Umbriel, Titania and Oberon**: Grey ice (`p_V = 0.32`, `0.39`,
+  `0.21`, `0.27`, `0.23`) with Miranda's three coronae, Ariel's canyon network,
+  Umbriel's bright Wunda ring, Titania's Messina Chasmata and Gertrude, and
+  Oberon's dark-floored Hamlet. Features stop where Voyager 2's coverage did:
+  their northern hemispheres are plain fill.

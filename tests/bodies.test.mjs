@@ -205,7 +205,18 @@ test("moons: IAU mean radii and sidereal periods", () => {
     europa: 1560.8,
     ganymede: 2631.2,
     callisto: 2410.3,
+    mimas: 198.2,
+    enceladus: 252.1,
+    tethys: 531.1,
+    dione: 561.4,
+    rhea: 763.5,
     titan: 2574.76,
+    iapetus: 734.3,
+    miranda: 235.8,
+    ariel: 578.9,
+    umbriel: 584.7,
+    titania: 788.9,
+    oberon: 761.4,
     triton: 1352.6,
     charon: 606,
   };
@@ -218,7 +229,18 @@ test("moons: IAU mean radii and sidereal periods", () => {
     europa: 3.551181,
     ganymede: 7.154553,
     callisto: 16.689018,
+    mimas: 0.9424218,
+    enceladus: 1.370218,
+    tethys: 1.887802,
+    dione: 2.736915,
+    rhea: 4.5175,
     titan: 15.945421,
+    iapetus: 79.330183,
+    miranda: 1.413479,
+    ariel: 2.520379,
+    umbriel: 4.144176,
+    titania: 8.705867,
+    oberon: 13.463234,
     triton: 5.876854,
     charon: 6.387221,
   };
@@ -234,7 +256,7 @@ test("moons: IAU mean radii and sidereal periods", () => {
 
 test("moons sit where JPL Horizons puts them today", () => {
   // Horizons planet-centred ICRF vectors (km) for 2026-10-15 00:00 TDB: DE441/LE441,
-  // MAR099, JUP365, SAT441, NEP097, PLU060.
+  // MAR099, JUP365, SAT441, URA184, NEP097, PLU060.
   const horizons = {
     moon: [-128_936.0, -334_443.7, -182_898.8],
     phobos: [-5_640.2, -7_566.3, -842.6],
@@ -243,7 +265,18 @@ test("moons sit where JPL Horizons puts them today", () => {
     europa: [-559_924.8, -320_120.3, -162_863.7],
     ganymede: [986_502.4, 362_873.3, 190_067.5],
     callisto: [-1_782_107.0, 590_853.7, 251_952.9],
+    mimas: [159_409.6, -87_847.6, -2_224.2],
+    enceladus: [232_544.6, -42_434.4, -16_870.8],
+    tethys: [-205_093.1, 211_547.3, -2_791.3],
+    dione: [-376_072.0, 2_661.9, 32_058.3],
+    rhea: [174_129.3, 494_679.0, -53_121.7],
     titan: [1_108_664.4, -418_700.5, -70_154.1],
+    iapetus: [3_059_929.4, -1_410_485.1, -870_214.7],
+    miranda: [123_178.4, -40_359.9, 8_207.9],
+    ariel: [70_818.5, -62_128.2, 166_157.1],
+    umbriel: [256_138.5, -65_718.8, 30_271.7],
+    titania: [401_587.7, -44_922.2, -164_097.8],
+    oberon: [325_631.8, 58_886.6, -479_858.3],
     triton: [-231_759.2, -225_181.6, -146_460.0],
     charon: [13_430.2, 11_206.9, -8_829.0],
   };
@@ -261,6 +294,33 @@ test("moons sit where JPL Horizons puts them today", () => {
       truth.length() * 0.02,
       `${moon.id} distance`,
     );
+  }
+});
+
+test("resonant moons follow their librations through the fitted decades", () => {
+  // Horizons planet-centred ICRF vectors (km) at 00:00 TDB (SAT441, URA184). Mimas swings
+  // 44° in longitude over the 70.56-year Mimas–Tethys cycle: a steady mean motion that fits
+  // one date misses the others by degrees.
+  const horizons = {
+    "2002-06-01": {
+      mimas: [32_623.7, 177_778.2, -20_366.5],
+      enceladus: [76_696.0, 225_301.9, -23_226.1],
+      tethys: [140_171.0, -258_862.5, 12_597.3],
+      miranda: [123_154.8, -10_884.2, -39_804.4],
+    },
+    "2031-06-01": {
+      mimas: [73_504.7, 173_689.1, -14_171.3],
+      enceladus: [-142_556.3, 190_686.3, -1_758.8],
+      tethys: [-245_293.8, -160_869.5, 27_756.9],
+      miranda: [-99_663.7, -7_133.6, 83_044.4],
+    },
+  };
+  for (const [day, moons] of Object.entries(horizons)) {
+    const date = new Date(`${day}T00:00:00Z`);
+    for (const [id, [x, y, z]] of Object.entries(moons)) {
+      const model = moonOffset(id, date);
+      near(model.angleTo(equatorialFrameToScene(x, y, z)) / RAD, 0, 0.5, `${id} ${day}`);
+    }
   }
 });
 

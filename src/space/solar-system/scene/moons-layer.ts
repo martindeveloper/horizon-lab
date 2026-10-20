@@ -18,6 +18,12 @@ const MOON_CLEAR_PX = 12;
 /** A moon shows once it clears its planet's marker by this many pixels (eased over the span). */
 const SEPARATE_PX = [6, 10] as const;
 const SELECTED_PX = [3, 6] as const;
+/**
+ * A magnified system reaches at most this many times its innermost orbit: Jupiter's and
+ * Uranus's moons fit (4.5) and spread evenly; Saturn's, Mimas to Iapetus (19), are drawn
+ * closer by a power law that keeps their order.
+ */
+const SPREAD = 5;
 
 type Host = { position: Vector3; extent: number; on: boolean };
 export type MoonHosts = ReadonlyMap<string, Host>;
@@ -28,6 +34,8 @@ type MoonSlot = {
   orbit: LineSlot;
   orbitDay: number;
   dotPx: number;
+  /** Its magnification relative to the innermost moon's, (inner / a)^(1 − squeeze). */
+  lift: number;
 };
 
 export function createMoonsLayer(
@@ -44,14 +52,18 @@ export function createMoonsLayer(
       orbit.line.visible = false;
       parent.add(mesh, orbit.line);
       const dotPx = Math.max(MOON_PX_MIN, MOON_PX * Math.sqrt(moon.radiusKm / 2631.2));
-      return { moon, mesh, offset: new Vector3(), orbit, orbitDay: NaN, dotPx };
+      return { moon, mesh, offset: new Vector3(), orbit, orbitDay: NaN, dotPx, lift: 1 };
     });
     const apsides = moons.map((m) => m.moon.aKm / AU_KM);
     const host: Host = { position: new Vector3(), extent: 0, on: false };
     const inner = Math.min(...apsides);
     const outer = Math.max(...apsides);
+    /* Magnified radii go as (a / inner)^squeeze: 1 keeps the system's shape. */
+    const squeeze = Math.min(1, Math.log(SPREAD) / Math.log(outer / inner));
+    for (const slot of moons) slot.lift = (inner / (slot.moon.aKm / AU_KM)) ** (1 - squeeze);
+    const outerLift = (inner / outer) ** (1 - squeeze);
     /** How far the drawn system reaches from the planet, for the close-up depth pass. */
-    return { id, host, moons, inner, outer, reach: 0, focus: lod.fader(0.7) };
+    return { id, host, moons, inner, outer, outerLift, reach: 0, focus: lod.fader(0.7) };
   });
   const present = lod.fader();
   const names = lod.fader();
@@ -73,7 +85,8 @@ export function createMoonsLayer(
     /* Moons sit at today's positions (the clock, not the Motion speed-up, which
        would whirl them). A selected planet's system is magnified about the
        planet until its innermost moon clears the marker, but never past the
-       planet's distance from the Sun; True size keeps every distance real. */
+       planet's distance from the Sun; a wide system's outer moons less (SPREAD).
+       True size keeps every distance real. */
     update({ now, show, sel, present: today }: SolarFrame) {
       const day = Math.floor(now.getTime() / 86_400_000);
       const era = present.to(today);
@@ -95,17 +108,18 @@ export function createMoonsLayer(
             smoothstep(SEPARATE_PX[0], SEPARATE_PX[1], (system.outer - host.extent) * perPx),
           );
         /* The selected system magnifies smoothly as the selection eases in. */
-        let magnify = 1;
+        let spread = 0;
         if (shown > 0 && focus > 0 && !show.trueSize) {
           const clear = Math.max(host.extent + pxWorld(range, MOON_CLEAR_PX), pxWorld(range, 26));
-          const room = host.position.length() / system.outer;
-          magnify = 1 + (Math.max(1, Math.min(clear / system.inner, room)) - 1) * focus;
+          const room = host.position.length() / (system.outer * system.outerLift);
+          spread = Math.min(clear / system.inner, room);
         }
         const hidden = host.extent + (show.trueSize ? 0 : pxWorld(range, 3));
         const [from, to] = selected ? SELECTED_PX : SEPARATE_PX;
         system.reach = 0;
         for (const slot of system.moons) {
           const { moon, mesh, offset, orbit } = slot;
+          const magnify = 1 + (Math.max(1, spread * slot.lift) - 1) * focus;
           if (shown > 0) moonOffset(moon.id, now, offset);
           const reach = offset.length() * magnify;
           const clears = reach > hidden ? smoothstep(from, to, (reach - host.extent) * perPx) : 0;

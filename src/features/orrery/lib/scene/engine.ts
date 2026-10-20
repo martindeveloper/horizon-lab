@@ -80,7 +80,8 @@ export function createOrreryEngine({
     sceneHost.setResolution(quality.resolution);
     sceneHost.setBloom({ enabled: useOrrery.getState().bloom, ...quality.bloom });
     sceneHost.setLens({ enabled: useOrrery.getState().lens, ...quality.lens });
-    const kit = createSolarKit(basics);
+    /* Measured maps stream in by need (measured-maps.ts); bodies wait in their mean colour. */
+    const kit = createSolarKit(basics, true);
     const { looks, lod } = kit;
     looks.setAirSteps(quality.closeUp.airSteps);
     const scene = new Scene();
@@ -180,12 +181,17 @@ export function createOrreryEngine({
       /* The drift's visits fly in and out at a lean-back pace. */
       pace: () => (store.getState().drift === "off" ? 1 : DRIFT.closeUp.pace),
     });
+    /** A body's new map is still fading in over its placeholder: keep frames coming. */
+    let surfacesFading = false;
     const maps = createMeasuredMaps(scope, {
       quality: () => quality.maps,
       onLoad: (id, texture) => {
         renderer.initTexture(texture);
         looks.setMeasured(id, texture);
-        closeUp.applyMeasured(id, texture);
+        engine.invalidate();
+      },
+      onFail: (id) => {
+        looks.setFailed(id);
         engine.invalidate();
       },
       onRelease: (id) => {
@@ -217,6 +223,7 @@ export function createOrreryEngine({
         sky.easing ||
         lod.busy ||
         closeUp.busy() ||
+        surfacesFading ||
         (activity.current !== null && activityMoving())
       );
     };
@@ -368,6 +375,7 @@ export function createOrreryEngine({
         rig.step(dt);
         rig.home();
         closeUp.step(dt);
+        surfacesFading = looks.step(dt);
         rig.applyPose();
         const dist = pose.distance;
         lod.begin(dt, dist, rig.target);

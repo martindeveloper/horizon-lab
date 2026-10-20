@@ -4,7 +4,11 @@
  * These spherical maps need no oblate-latitude conversion. Phobos and Deimos are
  * Stooke's simple-cylindrical mosaics on each shape model's planetocentric grid,
  * 0° at the centre and east to the right: USGS labels its copy of the Phobos map
- * PositiveEast, which puts Stickney at its IAU 49° W.
+ * PositiveEast, which puts Stickney at its IAU 49° W. The Saturnian mosaics (Cassini, with
+ * Voyager fill) have central meridian 0° or 180° with the left edge at 180° either way, so
+ * all are rolled; Herschel, Odysseus, Inktomi's rays and Dione's trailing wisps land on their
+ * IAU longitudes. Mimas comes as DLR's basemap inside a zip (`entry`); `contrast` restores
+ * large-scale albedo contrast a mosaic evened out between its images.
  */
 export const MOON_MAP_SOURCES = {
   moon: {
@@ -61,6 +65,45 @@ export const MOON_MAP_SOURCES = {
     sha256: "90ff4ac7f23ece9255774cf72f9ed9ca5be861d9f2aa136977fc2d460141ad6d",
     centered: true,
     saturation: 1,
+  },
+  mimas: {
+    file: "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mimas/Cassini_DLR_Mimas.zip",
+    entry: "Cassini_DLR/MI_170630_DLR_basemap_degrees.tif",
+    sha256: "4d339571ad645b2b7b43b732633574e8dc8fae7ebbed833aa4f90b10588e20f0",
+    centered: true,
+    saturation: 1,
+  },
+  enceladus: {
+    file: "https://planetarymaps.usgs.gov/mosaic/Enceladus_Cassini_mosaic_global_110m.tif",
+    sha256: "c9d29292141dd986e52b2a24b692df34701d1dabaee69bcb9fb64ebc6baba335",
+    centered: true,
+    saturation: 1,
+  },
+  tethys: {
+    file: "https://planetarymaps.usgs.gov/mosaic/Tethys_Cassini_mosaic_global_293m.tif",
+    sha256: "40723c3ebfaaa52a657827b37309bc84234811db1cf26a21d086e26aba2b3640",
+    centered: true,
+    saturation: 1,
+  },
+  dione: {
+    file: "https://planetarymaps.usgs.gov/mosaic/Dione_Cassini_Voyager_mosaic_global_154m.tif",
+    sha256: "5c5d796c02e3c99fde5dd034e01dd1f25905699a4885843aed445ded955e08b5",
+    centered: true,
+    saturation: 1,
+  },
+  rhea: {
+    file: "https://planetarymaps.usgs.gov/mosaic/Rhea_Cassini_Voyager_mosaic_global_417m.tif",
+    sha256: "ce537c3c93670a0d4ea5a64b99bffb76ff308727eb3eabeee0a38cf9f6f1abc7",
+    centered: true,
+    saturation: 1,
+  },
+  /* The mosaic evens out Cassini Regio's tenfold contrast to ~1.8×; a power restores it. */
+  iapetus: {
+    file: "https://planetarymaps.usgs.gov/mosaic/Iapetus_Cassini_Voyager_mosaic_global_783m.tif",
+    sha256: "eb8acdbed3af495102b6ec6d3efce1f03dc6bc39bb43323c23231ce590494d6e",
+    centered: true,
+    saturation: 1,
+    contrast: 3.9,
   },
 };
 
