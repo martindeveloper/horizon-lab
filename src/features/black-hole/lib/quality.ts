@@ -11,8 +11,12 @@ import type { Quality } from "./holes/types";
 /** The bloom chain's size: its levels, and the first level's share of the traced frame. */
 type BloomChain = Pick<BloomSettings, "mips" | "scale">;
 
-/** The lens's spikes: taps out each way along an arm, and an arm's reach as a share of the frame's height. */
-type LensChain = Pick<LensSettings, "taps" | "reach">;
+/**
+ * The lens's spikes: the bloom chain level its lights are found in (cells about a thirty-second
+ * of the traced frame, at the chain's scale), and a spike's greatest length as a share of its
+ * height.
+ */
+type LensChain = Pick<LensSettings, "level" | "reach">;
 
 /** A frame's work: buffer pixels and pixels per CSS pixel at most, frames per second, the bloom chain, the lens. */
 type WorkBudget = {
@@ -28,12 +32,12 @@ type WorkBudget = {
 const SMALL_BLOOM: BloomChain = { mips: 4, scale: 0.25 };
 /** Half-resolution bloom through five levels. */
 const BLOOM: BloomChain = { mips: 5, scale: 0.5 };
-/** Short spikes from six taps, for Economy and for touch or battery operation. */
-const SMALL_LENS: LensChain = { taps: 6, reach: 0.05 };
-/** Spikes over 7 % of the frame from ten taps. */
-const LENS: LensChain = { taps: 10, reach: 0.07 };
-/** Max's spikes: longer, from fourteen taps. */
-const LONG_LENS: LensChain = { taps: 14, reach: 0.09 };
+/** Shorter spikes at most, from the quarter-size chain, for Economy and for touch or battery operation. */
+const SMALL_LENS: LensChain = { level: 3, reach: 0.18 };
+/** Spikes over a quarter of the frame at most, from the half-size chain. */
+const LENS: LensChain = { level: 4, reach: 0.25 };
+/** Max's spikes: the brightest reach further. */
+const LONG_LENS: LensChain = { level: 4, reach: 0.32 };
 
 type BlackHoleQuality = {
   /** Integration steps per pixel. */
@@ -157,13 +161,20 @@ export function bloomSettings(
 }
 
 /**
- * The observatory's lens, in radiance before the exposure is applied: a four-point star on
- * light the bloom's mask holds brighter than 1.5, about the disk's hot side and nothing
- * fainter, added at six tenths, and a fringe of 1.5 pixels at the corners.
+ * The observatory's lens, in radiance before the exposure is applied: a four-point star on each
+ * compact light the bloom's mask holds (a hot spot, a bright star; the disk itself is too wide
+ * to spike), its spikes drawn until they fade to 0.01, carrying twice their light, and
+ * a fringe of 1.5 pixels at the corners. The frame is radiance, so every light spikes in full.
  */
-export const BLACK_HOLE_LENS = { strength: 0.6, threshold: 1.5, arms: 4, fringe: 1.5 } as const;
+export const BLACK_HOLE_LENS = {
+  strength: 2,
+  threshold: 0.01,
+  full: 0,
+  arms: 4,
+  fringe: 1.5,
+} as const;
 
-/** This frame's lens: the look above in the scene's units, with the level's reach and taps. */
+/** This frame's lens: the look above in the scene's units, with the level's cells and reach. */
 export function lensSettings(
   quality: Quality,
   constrained: boolean,
@@ -172,8 +183,8 @@ export function lensSettings(
   const scale = 1 / Math.max(exposure, 0.05);
   return {
     mask: bloomSettings(quality, constrained, exposure),
-    level: 0,
     threshold: BLACK_HOLE_LENS.threshold * scale,
+    full: BLACK_HOLE_LENS.full,
     arms: BLACK_HOLE_LENS.arms,
     strength: BLACK_HOLE_LENS.strength,
     fringe: BLACK_HOLE_LENS.fringe,

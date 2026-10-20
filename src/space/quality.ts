@@ -36,17 +36,18 @@ function sceneResolution(quality: RenderQuality, tight: boolean): SceneResolutio
   return { dprCap: tight ? 2 : 3, fps: Infinity };
 }
 
-/** The lens's spikes: taps out each way along an arm, and an arm's reach as a share of the frame's height. */
-export type LensChain = { taps: number; reach: number };
-
 /**
- * Light devices draw short spikes from few taps; the full tier longer ones from ten; Max
- * longer still from fourteen.
+ * The lens's spikes: the bloom chain level its lights are found in (cells about a thirty-second
+ * of the frame wide, at the tier's chain scale), and a spike's greatest length as a share of the
+ * frame's height.
  */
+export type LensChain = { level: number; reach: number };
+
+/** Light devices draw shorter spikes at most; Max lets the brightest reach further. */
 const LENS: ByTier<LensChain> = {
-  light: { taps: 6, reach: 0.05 },
-  full: { taps: 10, reach: 0.07 },
-  max: { taps: 14, reach: 0.09 },
+  light: { level: 3, reach: 0.18 },
+  full: { level: 4, reach: 0.25 },
+  max: { level: 4, reach: 0.32 },
 };
 
 /** The bloom chain's size: its levels, and the first level's share of the frame. */

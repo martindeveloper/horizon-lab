@@ -10,9 +10,26 @@ import {
   watchContextLoss,
   createEngineHost,
   ContextLostError,
+  gamutMatrix,
 } from "@horizon/toolkit/rendering";
 
 import { close, event } from "./toolkit-helpers.mjs";
+
+test("the gamut matrix is the identity for sRGB and moves sRGB primaries into Display P3", () => {
+  const apply = (m, [r, g, b]) => {
+    const e = m.elements;
+    return [0, 1, 2].map((i) => e[i] * r + e[3 + i] * g + e[6 + i] * b);
+  };
+  const near = (actual, expected, tolerance) =>
+    actual.every((v, i) => Math.abs(v - expected[i]) <= tolerance);
+  assert.deepEqual(gamutMatrix("srgb").elements, [1, 0, 0, 0, 1, 0, 0, 0, 1]);
+  const p3 = gamutMatrix("p3");
+  assert.ok(near(apply(p3, [1, 1, 1]), [1, 1, 1], 2e-3), "white stays white");
+  assert.ok(near(apply(p3, [1, 0, 0]), [0.8225, 0.0332, 0.0171], 2e-3), "sRGB red inside P3");
+  assert.ok(near(apply(p3, [0, 0, 1]), [0, 0, 0.9108], 2e-3), "sRGB blue inside P3");
+  const out = gamutMatrix("p3", gamutMatrix("srgb"));
+  assert.deepEqual(out.elements, p3.elements, "writes the matrix given");
+});
 
 test("buffer sizing preserves CSS aspect and caps DPR while warming up", () => {
   assert.deepEqual(bufferSize(1000, 500, { scale: 0.9, dpr: 3, dprCap: 2 }), {

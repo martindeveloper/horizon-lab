@@ -11,7 +11,10 @@
  *
  * Titan's ω, M, Ω and Triton's i, Ω, M and nodal period are fitted to JPL
  * Horizons vectors (SAT441, NEP097/NEP098) for 2000–2032: the table's epoch angles
- * miss them by up to 163° and 13°. Every moon then matches Horizons to 0.2°, the
+ * miss them by up to 163° and 13°. Phobos's and Deimos's angles, inclinations, mean
+ * motions and precession periods are fitted the same way (MAR099): the table rounds
+ * its angles to 0.1° and Phobos's apsidal period to 0.1 yr, which over decades turns
+ * its small eccentricity the wrong way. Every moon then matches Horizons to 0.3°, the
  * Moon to 3° (its mean elements leave out the Sun's perturbations).
  */
 import { wrap } from "../math/index";
@@ -21,6 +24,8 @@ import { DAYS_PER_JULIAN_YEAR, type PlanetId } from "./ephemeris";
 
 export type MoonId =
   | "moon"
+  | "phobos"
+  | "deimos"
   | "io"
   | "europa"
   | "ganymede"
@@ -74,6 +79,36 @@ export const MOONS: readonly Moon[] = [
     plane: "ecliptic",
     /** Cassini's third law: the spin axis leans 1.54° from the ecliptic pole, opposite the orbit's. */
     cassini: LUNAR_EQUATOR_INCLINATION_DEG,
+  },
+  {
+    id: "phobos",
+    host: "mars",
+    radiusKm: 11.08,
+    aKm: 9375,
+    e: 0.0151,
+    omega: 216.548,
+    M: 189.266,
+    i: 1.075,
+    node: 169.138,
+    periodDays: 0.318910074,
+    apsisYears: 1.132,
+    nodeYears: -2.262,
+    plane: [317.7, 52.9],
+  },
+  {
+    id: "deimos",
+    host: "mars",
+    radiusKm: 6.2,
+    aKm: 23_457,
+    e: 0.0002,
+    omega: 197.011,
+    M: 6.643,
+    i: 1.78,
+    node: 55.966,
+    periodDays: 1.262440819,
+    apsisYears: 27.157,
+    nodeYears: -53.855,
+    plane: [316.6, 53.5],
   },
   {
     id: "io",

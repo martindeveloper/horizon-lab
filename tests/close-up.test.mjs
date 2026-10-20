@@ -5,15 +5,20 @@ import assert from "node:assert/strict";
  */
 import test from "node:test";
 
+import { orreryQuality } from "../src/features/orrery/lib/quality.ts";
 import {
   CLOSE_UP_FILL,
   CLOSE_UP_SWING,
   closeUpLimits,
   closeUpMapWidth,
   closeUpPose,
+  MOON_FILL,
+  moonFraming,
+  moonSwing,
   sampleCloseUp,
 } from "../src/features/orrery/lib/scene/close-up-flight.ts";
 import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
+import { AIR, AIR_BODIES, airUniforms } from "../src/space/solar-system/graphics/air.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
   assert.ok(
@@ -66,6 +71,68 @@ test("the flight pans first and dives after, and ends exactly on its poses", () 
   const out = sampleCloseUp(0.3, to, from, false);
   assert.equal(out.aim, 0);
   assert.ok(out.pose.distance > to.distance * 10, "already pulling back");
+});
+
+test("the drift's swing frames the body with its moon, side-on, and comes back", () => {
+  const halfTan = Math.tan((48 * Math.PI) / 360);
+  const base = { azimuth: 0.4, inclination: 0.3, distance: 4.3e-5 };
+  // The Moon 60 Earth radii out, nearly behind the body from the arrival pose; Phobos close in.
+  for (const moon of [
+    [-6e-4, -2e-4, -2.2e-3],
+    [5e-5, 1e-6, -3e-5],
+  ]) {
+    const pose = moonFraming(moon, base, halfTan);
+    assert.ok(pose.distance >= base.distance, "never nearer than the hold");
+    assert.ok(Math.abs(pose.inclination) <= 0.6 + 1e-12, "never down a pole");
+    const camera = cameraDir(pose).map((v) => v * pose.distance);
+    const toMoon = moon.map((v, k) => v - camera[k]);
+    const toBody = camera.map((v) => -v);
+    const cos =
+      (toMoon[0] * toBody[0] + toMoon[1] * toBody[1] + toMoon[2] * toBody[2]) /
+      (Math.hypot(...toMoon) * Math.hypot(...toBody));
+    const off = Math.tan(Math.acos(Math.min(1, cos)));
+    assert.ok(off <= halfTan * MOON_FILL + 1e-9, "the moon is inside the free view");
+    assert.ok(off > halfTan * 0.1, "and clear of the body");
+  }
+  const marks = [0.22, 0.42, 0.62, 0.82];
+  assert.equal(moonSwing(0, marks), 0);
+  assert.equal(moonSwing(0.5, marks), 1);
+  assert.equal(moonSwing(1, marks), 0);
+});
+
+test("the atmosphere shell: thin shells of scattering air on the bodies that have it, sampled by tier", () => {
+  assert.deepEqual([...AIR_BODIES].sort(), ["earth", "mars", "titan", "venus"]);
+  for (const id of AIR_BODIES) {
+    const air = AIR[id];
+    assert.ok(air.shell > 0 && air.shell <= 0.2, `${id}: a shell of a few percent`);
+    assert.ok(
+      air.scale.every((h) => h > 0 && h < air.shell),
+      `${id}: the air lies within the shell`,
+    );
+    assert.ok(
+      [...air.rayleigh, ...air.mie].every((depth) => depth >= 0),
+      `${id}: no negative depth`,
+    );
+    assert.ok(air.g > 0 && air.g < 1, `${id}: haze scatters forward`);
+    assert.ok(air.deep > 0 && air.deep <= 1, `${id}: the Sun's path counts in part or whole`);
+    const u = airUniforms(air);
+    assert.ok(u.planet < 1 && u.planet > 0.8, `${id}: the body sits inside the unit shell`);
+    /* The coefficients keep each column's depth: coefficient × scale height, in the body's own radii. */
+    const unit = 1 + air.shell;
+    u.rayleigh.forEach((k, i) =>
+      near(k * u.scale[0] * unit, air.rayleigh[i] * unit, 1e-9, `${id} rayleigh ${i}`),
+    );
+    u.mie.forEach((k, i) => near(k * u.scale[1] * unit, air.mie[i] * unit, 1e-9, `${id} mie ${i}`));
+  }
+  /* Earth's air is bluest: Rayleigh scattering rises with frequency. */
+  assert.ok(
+    AIR.earth.rayleigh[2] > AIR.earth.rayleigh[1] && AIR.earth.rayleigh[1] > AIR.earth.rayleigh[0],
+  );
+  /* The quality level sets how finely the shell is marched, never whether it draws. */
+  const steps = (q, tight = false) => orreryQuality(q, tight).closeUp.airSteps;
+  assert.ok(steps("economy") < steps("standard") && steps("standard") < steps("max"));
+  assert.equal(steps("standard", true), steps("economy"), "tight devices keep the light tier");
+  assert.ok(steps("economy") >= 4, "even the lightest march resolves the limb");
 });
 
 test("close-up maps: detailed where there is detail, lighter on small devices", () => {

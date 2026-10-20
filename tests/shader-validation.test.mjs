@@ -56,7 +56,12 @@ const FRAGMENT_PREFIX = [
  * Flags three.js sets for the materials that use them (instanced rocks), and
  * the orrery's ring-shadow variant of the planet shader, so both branches parse.
  */
-const THREE_FLAGS = { USE_INSTANCING: "", USE_INSTANCING_COLOR: "", RING_SHADOW: "" };
+const THREE_FLAGS = {
+  USE_INSTANCING: "",
+  USE_INSTANCING_COLOR: "",
+  RING_SHADOW: "",
+  AIR_STEPS: "12",
+};
 
 function expand(file) {
   const output = loader.call(
@@ -73,7 +78,7 @@ function validate(source, stage) {
   parse(expanded, { stage, failOnWarn: true, quiet: true });
 }
 
-const shaders = ["src/features", "packages/toolkit/src/shaders"].flatMap((dir) =>
+const shaders = ["src/features", "src/space", "packages/toolkit/src/shaders"].flatMap((dir) =>
   readdirSync(dir, { recursive: true })
     .filter((file) => /\.(vert|frag)\.glsl$/.test(file))
     .map((file) => path.join(dir, file)),
@@ -101,7 +106,6 @@ test("shader variants parse with the defines their passes compile them with", ()
       "#define HORIZON_FXAA 1\n#define HORIZON_BLOOM 1\n#define HORIZON_LENS 1",
     ],
     [post("bloom-down.frag.glsl"), "#define HORIZON_BLOOM_PREFILTER 1"],
-    [post("lens-spike.frag.glsl"), "#define HORIZON_LENS_ARMS 3\n#define HORIZON_LENS_TAPS 6"],
     [post("black-hole-resolve.frag.glsl"), "#define HORIZON_LENS 1"],
   );
   assert.ok(variants.length > 3);

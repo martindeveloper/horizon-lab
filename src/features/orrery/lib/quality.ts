@@ -14,8 +14,8 @@ export type SkyCounts = { milkyWay: number; fieldStars: number };
 /** Far measured maps: bytes kept resident, and texture filtering at grazing angles. */
 export type MapQuality = { budget: number; anisotropy: number };
 
-/** Close-up maps: the lighter near tier and painted detail, and their filtering. */
-export type CloseUpQuality = { light: boolean; anisotropy: number };
+/** Close-ups: the lighter near map tier and painted detail, their filtering, and the atmosphere shell's samples. */
+export type CloseUpQuality = { light: boolean; anisotropy: number; airSteps: number };
 
 type OrreryQuality = SpaceQuality & {
   sky: SkyCounts;
@@ -37,10 +37,11 @@ const MAPS: ByTier<MapQuality> = {
   max: { budget: 128e6, anisotropy: 16 },
 };
 
+/** The atmosphere shell marches 6, 12 or 20 samples along each view ray; it draws at every level. */
 const CLOSE_UP: ByTier<CloseUpQuality> = {
-  light: { light: true, anisotropy: 4 },
-  full: { light: false, anisotropy: 4 },
-  max: { light: false, anisotropy: 16 },
+  light: { light: true, anisotropy: 4, airSteps: 6 },
+  full: { light: false, anisotropy: 4, airSteps: 12 },
+  max: { light: false, anisotropy: 16, airSteps: 20 },
 };
 
 const ACTIVITY_STEPS: ByTier<number> = {

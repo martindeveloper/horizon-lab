@@ -1,19 +1,25 @@
 import {
+  Matrix4,
+  Mesh,
+  ShaderMaterial,
+  SphereGeometry,
   Vector3,
   type Object3D,
   type Scene,
-  type ShaderMaterial,
   Texture,
   type WebGLRenderer,
 } from "three";
 
+import { AIR, AIR_BODIES } from "@/space/solar-system/graphics/air";
+import { moonOffset } from "@/space/solar-system/graphics/moons";
 /**
  * The close-up: a flight to a body at true size, its detailed map (measured or
- * painted a few rows per frame) and a depth pass of its own.
+ * painted a few rows per frame), the atmosphere shell over a body with air (its own and its
+ * moons', drawn in place of the surface shader's haze rim) and a depth pass of its own.
  */
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
-import { FIGURES, MAPS, tierFile, type BodyId } from "@horizon/toolkit/bodies";
+import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horizon/toolkit/bodies";
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
@@ -29,6 +35,7 @@ import {
   FRAME_RADII,
   closeUpMapWidth,
   closeUpPose,
+  moonFraming,
   sampleCloseUp,
 } from "./close-up-flight";
 
@@ -36,6 +43,10 @@ import {
 const BODY_LAYER = 1;
 /** Prefetched close-up maps kept as compressed bytes (a few MB at most). */
 const PREFETCH_KEEP = 2;
+/** Each body's largest moon: the one a drift's visit swings out to. */
+const LARGEST_MOON = new Map<BodyId, MoonId>();
+for (const moon of [...MOONS].sort((a, b) => a.radiusKm - b.radiusKm))
+  LARGEST_MOON.set(moon.host, moon.id);
 
 export type BodySelection = Extract<SolarSelection, { kind: "sun" | "planet" | "named" }>;
 
@@ -67,6 +78,18 @@ type CloseUp = {
   blend: number;
   /** How many times the usual flight time this flight takes (a drift flies in and out slowly). */
   pace: number;
+  /** Atmosphere shells over the bodies with air, and the haze rims they replace meanwhile. */
+  shells: Shell[];
+};
+
+/** A scattering shell over a globe, in place of its surface shader's haze rim, and its camera and Sun uniforms. */
+type Shell = {
+  mesh: Mesh;
+  globe: Mesh;
+  surface: ShaderMaterial;
+  rim: number;
+  camera: Vector3;
+  sun: Vector3;
 };
 
 const bodyKey = (sel: BodySelection): BodyId => (sel.kind === "sun" ? "sun" : sel.id);
@@ -124,12 +147,79 @@ export function createCloseUpController(
     return bytes;
   };
   const target = new Vector3();
+  const moonAt = new Vector3();
+  /** The shells' sphere; each shell is scaled to its body's air. */
+  const shellGeometry = scope.own(new SphereGeometry(1, 96, 64));
+  const shellInverse = new Matrix4();
+  /** Which body with air a globe is, by its surface material, or none. */
+  const airOf = (object: Object3D) =>
+    object instanceof Mesh
+      ? AIR_BODIES.find((id) => looks.surfaceOf(id) === object.material)
+      : undefined;
+  /**
+   * Puts a shell over every globe with air in the close-up that has none yet: the body's own
+   * at once, a moon's once it is drawn (its material arrives with it). The surface's haze
+   * rim goes off meanwhile, so the air is not counted twice.
+   */
+  const shellGlobes = (close: CloseUp) => {
+    for (const object of close.objects) {
+      const id = airOf(object);
+      if (!id || !(object instanceof Mesh) || close.shells.some((s) => s.globe === object))
+        continue;
+      const material = looks.air(id);
+      const surface = object.material;
+      if (!material || !(surface instanceof ShaderMaterial)) continue;
+      const cameraAt: unknown = material.uniforms.uCamera?.value;
+      const sunAt: unknown = material.uniforms.uSun?.value;
+      if (!(cameraAt instanceof Vector3) || !(sunAt instanceof Vector3)) continue;
+      const mesh = new Mesh(shellGeometry, material);
+      mesh.scale.setScalar(1 + AIR[id]!.shell);
+      mesh.layers.set(BODY_LAYER);
+      object.add(mesh);
+      const rim = surface.uniforms.atmosStrength;
+      close.shells.push({
+        mesh,
+        globe: object,
+        surface,
+        rim: rim ? Number(rim.value) : 0,
+        camera: cameraAt,
+        sun: sunAt,
+      });
+      if (rim) rim.value = 0;
+    }
+  };
+  /** Takes the shells off and gives the surfaces their haze rims back. */
+  const unshell = (close: CloseUp) => {
+    for (const { mesh, globe, surface, rim } of close.shells) {
+      globe.remove(mesh);
+      const haze = surface.uniforms.atmosStrength;
+      if (haze) haze.value = rim;
+    }
+    close.shells.length = 0;
+  };
+  /** Each shell's camera and Sun in its own space, from its world matrix in double precision. */
+  const aimShells = (close: CloseUp) => {
+    for (const shell of close.shells) {
+      shellInverse.copy(shell.mesh.matrixWorld).invert();
+      shell.camera.copy(camera.position).applyMatrix4(shellInverse);
+      shell.sun.set(0, 0, 0).applyMatrix4(shellInverse).normalize();
+    }
+  };
   const wide = window.matchMedia(WIDE_QUERY);
   /** Room the card leaves: the globe sits left of it on wide screens, above the bar on phones. */
   const framing = () =>
     wide.matches
       ? { x: Math.min(176, viewport.width * 0.2), y: 0 }
       : { x: 0, y: Math.min(80, viewport.height * 0.1) };
+  /** Tangent of half the view's shorter side, less the card's room. */
+  const freeHalfTan = () => {
+    const shift = framing();
+    const { width, height } = viewport;
+    return (
+      Math.tan((camera.fov * Math.PI) / 360) *
+      Math.min((height - 2 * shift.y) / height, (width - 2 * shift.x) / height)
+    );
+  };
   const materialOf = (sel: BodySelection): ShaderMaterial =>
     sel.kind === "sun"
       ? looks.sun
@@ -140,6 +230,7 @@ export function createCloseUpController(
   /** Leaves the close-up at once: shared map back, detail map freed, normal layers. */
   const end = (landHome: boolean) => {
     if (!close) return;
+    unshell(close);
     setLayer(close.objects, 0);
     close.loading?.abort();
     close.material.uniforms.map!.value = close.base;
@@ -164,13 +255,8 @@ export function createCloseUpController(
     const id = bodyKey(sel);
     const radius = id === "sun" ? SUN_R : FIGURES[id].equatorialKm / AU_KM;
     const frame = radius * (FRAME_RADII[id] ?? 1);
-    const shift = framing();
-    const { width, height } = viewport;
-    const halfTan =
-      Math.tan((camera.fov * Math.PI) / 360) *
-      Math.min((height - 2 * shift.y) / height, (width - 2 * shift.x) / height);
     locate(sel, target);
-    const to = closeUpPose([target.x, target.y, target.z], frame, halfTan, pose.azimuth);
+    const to = closeUpPose([target.x, target.y, target.z], frame, freeHalfTan(), pose.azimuth);
     /* The planet's moons and their orbits share its depth pass: the Moon sits inside the
        wide pass's near plane once the camera is at the Earth. */
     const objects = deps.objectsOf(sel);
@@ -199,7 +285,9 @@ export function createCloseUpController(
       detail: null,
       blend: 0,
       pace: deps.pace?.() ?? 1,
+      shells: [],
     };
+    shellGlobes(close);
     const near = nearFile(id);
     if (near) {
       const mine = close;
@@ -298,6 +386,13 @@ export function createCloseUpController(
     busy() {
       return close !== null && (close.phase !== "on" || close.job !== null);
     },
+    /** The pose `base` swings to so the body's largest moon shares the view; null without one. */
+    moonPose(base: OrbitPose): OrbitPose | null {
+      const moon = close && LARGEST_MOON.get(close.id);
+      if (!moon) return null;
+      const { x, y, z } = moonOffset(moon, new Date(), moonAt);
+      return moonFraming([x, y, z], base, freeHalfTan());
+    },
     /** The focused body's own label, orbit and marker fade as it comes to fill the view. */
     shownFor(id: BodyId) {
       return close !== null && close.id === id
@@ -350,6 +445,7 @@ export function createCloseUpController(
           height,
         );
       else camera.clearViewOffset();
+      shellGlobes(close);
       paintDetail();
     },
     /* After the main pass: the body alone in a depth range of its own, so a true-size
@@ -365,6 +461,7 @@ export function createCloseUpController(
       camera.far = toBody + extent;
       camera.updateProjectionMatrix();
       camera.layers.set(BODY_LAYER);
+      aimShells(close);
       const autoClear = renderer.autoClear;
       renderer.autoClear = false;
       renderer.clearDepth();

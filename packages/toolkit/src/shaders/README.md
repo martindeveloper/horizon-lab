@@ -67,10 +67,12 @@ engines import already expanded shader strings and do not invoke it at runtime.
   red a little further out and the blue a little further in, by `uFringe` pixels at the
   corners and nothing at the centre (blended in by the same measure, so the centre keeps the
   colour it was given), and `lensSpikes(colour, uv)` adds the lens pass's star (`uSpikes`)
-  `uSpikeStrength` times. `lens-spike.frag.glsl` draws that star in one pass: the mask
-  summed `HORIZON_LENS_TAPS` taps out each way along each of `HORIZON_LENS_ARMS` directions
-  (`uSteps`), tapering, each tap gated by its brightness over the threshold
-  (`uInvThreshold`); both counts are compile-time, so the loops unroll.
+  `uSpikeStrength` times. `lens-star.vert.glsl` and `lens-star.frag.glsl` draw those stars
+  in one instanced draw, an instance per cell of a bloom chain level (`uCells`) and line of a
+  star (`uAxes`): the vertex shader keeps only compact local maxima, places each at its centre
+  in a finer level (`uFine`) and sizes its line to where it fades below `uThreshold`; the
+  fragment shader draws a Gaussian line box-filtered over the target's texel, falling as
+  1/r² along it from a core per channel (red widest).
 - `composite.frag.glsl`, `bloom-down.frag.glsl` and `bloom-up.frag.glsl` are the fragment
   shaders of the rendering module's composite and bloom passes (`createCompositePass`,
   `createBloomPass`), drawn with `fullscreen.vert.glsl`. The composite copies or FXAA-filters

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   createCameraSnapshot,
+  DRIFT_DEFAULTS,
   createDriftCamera,
   createDriftRun,
   writeCameraSnapshot,
@@ -174,7 +175,14 @@ test("a drift flies each shot exactly as written at zero variance and holds for 
     { azimuth: 1, inclination: 0.6, distance: 100, flight: { duration: 4 }, hold: 2, roll: 0.1 },
     { azimuth: 2, inclination: 0.1, distance: 30 },
   ];
-  const drift = createDriftCamera(shots, { variance: 0, creep: 0, drift: 0, flight: 3, hold: 1 });
+  const drift = createDriftCamera(shots, {
+    variance: 0,
+    creep: 0,
+    drift: 0,
+    sway: 0,
+    flight: 3,
+    hold: 1,
+  });
   assert.equal(drift.index, -1);
   /* From beside the first shot the sequence goes on from the one after it. */
   drift.start({ azimuth: 0.1, inclination: 0.2, distance: 11 });
@@ -261,6 +269,37 @@ test("a drift's hold orbits and pushes in, speed scales its clock and reduced mo
   assert.deepEqual(still.pose, at, "and holds still");
 });
 
+test("a drift never stands still: the orbit and sway carry through every landing and hold", () => {
+  const shots = [0, 1.5, 3, 4.5].map((azimuth) => ({
+    azimuth,
+    inclination: 0.4,
+    distance: 20,
+    flight: { duration: 6 },
+    hold: 5,
+  }));
+  const drift = createDriftCamera(shots, { variance: 0, creep: 0 });
+  drift.start({ azimuth: 0, inclination: 0.4, distance: 20 });
+  const dt = 1 / 60;
+  /* The orbit eases up from the visitor's still camera first. */
+  for (let i = 0; i < 60 * 10; i++) drift.step(dt);
+  let slowest = Infinity;
+  let landings = 0;
+  let last = { ...drift.pose };
+  for (let i = 0; i < 60 * 60; i++) {
+    if (drift.step(dt).landed) landings++;
+    const { pose } = drift;
+    const moved = Math.hypot(
+      pose.azimuth - last.azimuth,
+      pose.inclination - last.inclination,
+      Math.log(pose.distance / last.distance),
+    );
+    slowest = Math.min(slowest, moved / dt);
+    last = { ...pose };
+  }
+  assert.ok(landings >= 4, `${landings} landings and holds were crossed`);
+  assert.ok(slowest > DRIFT_DEFAULTS.drift * 0.6, `slowest ${slowest} rad/s`);
+});
+
 test("a drift's variance stays within its spread, keeps inclination in bounds and shuffles without repeats", () => {
   /* A generator that always answers 1 pushes every spread to its limit. */
   const edge = createDriftCamera(
@@ -313,7 +352,7 @@ test("a handoff shot waits for the host and the drift goes on from where the hos
     { handoff: true },
     { azimuth: 2, inclination: 0.4, distance: 40, flight: { duration: 1 }, hold: 0 },
   ];
-  const drift = createDriftCamera(shots, { variance: 0, drift: 0, creep: 0 });
+  const drift = createDriftCamera(shots, { variance: 0, drift: 0, sway: 0, creep: 0 });
   drift.start({ azimuth: 2, inclination: 0.4, distance: 40 });
   assert.equal(drift.index, 0, "from beside the last shot the sequence wraps to the first");
   drift.start({ azimuth: 0, inclination: 0.2, distance: 10 });

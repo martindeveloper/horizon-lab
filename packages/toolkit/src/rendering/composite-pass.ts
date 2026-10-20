@@ -12,13 +12,13 @@ export type CompositeAntialias = "off" | "msaa" | "fxaa";
  * The resolve stage of a scene: `paint` draws into an offscreen frame of the drawing buffer's
  * size, holding the bytes the canvas would, which one full-screen pass then writes onto the
  * canvas, anti-aliased as `antialias` says (`msaa` draws the frame multisampled; `fxaa`
- * filters it), with `lens` with the frame's brightest light spiked and its colours fringed
+ * filters it), with `lens` with the frame's brightest compact lights spiked and its colours fringed
  * towards the corners (`createLensPass`), and with `bloom` with its bright light blurred and
  * added back (`createBloomPass`), either effect dithered. `bloom` and `lens` are read on every
  * frame, so their numbers may change in place; turning either on or off, or changing
- * `antialias`, takes a new pass. With bloom off, the lens draws its spikes from the mask
- * levels it needs alone. Create the renderer with `antialias: false`. Call only on the client;
- * no GPU memory is allocated until the first `paint`.
+ * `antialias`, takes a new pass. With bloom off, the lens finds its lights in the mask levels
+ * it needs alone. Create the renderer with `antialias: false`. Call only on the client; no GPU
+ * memory is allocated until the first `paint`.
  */
 export function createCompositePass(
   renderer: WebGLRenderer,
@@ -45,11 +45,10 @@ export function createCompositePass(
       uniforms.uBloomStrength.value = bloom.strength;
     }
     if (lens) {
-      const mask = bloom
-        ? chain.level(lens.level)!
-        : chain.mask(target.texture, size.x, size.y, lens.mask, lens.level);
+      const levels = chain;
+      if (!bloom) levels.mask(target.texture, size.x, size.y, lens.mask, lens.level);
       spikes ??= createLensPass(renderer);
-      uniforms.uSpikes.value = spikes.render(mask.texture, mask.width, mask.height, lens);
+      uniforms.uSpikes.value = spikes.render((i) => levels.level(i)!, size.x, size.y, lens);
       uniforms.uSpikeStrength.value = lens.strength;
       uniforms.uFringe.value = lens.fringe;
     }

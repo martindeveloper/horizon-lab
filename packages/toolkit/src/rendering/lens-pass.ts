@@ -1,5 +1,8 @@
 import {
+  AdditiveBlending,
+  Color,
   HalfFloatType,
+  InstancedBufferGeometry,
   LinearFilter,
   LinearSRGBColorSpace,
   Mesh,
@@ -14,97 +17,101 @@ import {
   type WebGLRenderer,
 } from "three";
 
-import fullscreenVertex from "../shaders/fullscreen.vert.glsl";
-import lensSpikeFragment from "../shaders/lens-spike.frag.glsl";
-import { halfFloatRenderable, type BloomSettings } from "./bloom-pass";
+import lensStarFragment from "../shaders/lens-star.frag.glsl";
+import lensStarVertex from "../shaders/lens-star.vert.glsl";
+import { halfFloatRenderable, type BloomLevel, type BloomSettings } from "./bloom-pass";
 
 /**
- * How a frame is finished as a lens would: diffraction spikes on its brightest light and a
- * mild chromatic aberration towards the corners. The spikes are drawn from the bloom chain's
- * bright mask, so their threshold is in that mask's units: display values for an 8-bit
- * frame, radiance for a floating-point one.
+ * How a frame is finished as a telescope would: diffraction spikes on its brightest compact
+ * lights and a mild chromatic aberration towards the corners. The lights are found in the
+ * bloom chain's bright mask, so the threshold is in the frame's units: display values for an
+ * 8-bit frame, radiance for a floating-point one.
  */
 export type LensSettings = {
   /**
-   * The bright mask the spikes are drawn from when bloom is off: the bloom's own numbers, so
-   * the spikes sit on the same light the glow does (`mips` and `strength` are not read).
-   * With bloom on, its chain serves.
+   * The bright mask the lights are found in when bloom is off: the bloom's own numbers, so the
+   * spikes sit on the same light the glow does (`mips` and `strength` are not read). With
+   * bloom on, its chain serves.
    */
   mask: BloomSettings;
-  /** The chain level the spikes are drawn from: 0 is the prefiltered frame, each level coarser and blurrier. */
+  /**
+   * The chain level lights are found in, each of its texels a cell of the frame (0 is the
+   * prefiltered frame; each level halves it): a light about a cell or two wide spikes, a wider
+   * one does not. The quality's, with the chain's `scale`: about a thirty-second of the frame.
+   */
   level: number;
-  /** Mask brightness (the brightest channel) from which a light spikes in full; dimmer ones in proportion, squared. */
+  /** The faintest light a spike is drawn to: a brighter light's spikes reach further. */
   threshold: number;
-  /** A four- or six-point star. */
+  /**
+   * The energy (frame pixels of light above the mask's threshold) from which a light spikes in
+   * full; a fainter one spikes as the cube of its share. An 8-bit frame clips every bright light
+   * to white, so only the dominant ones should carry stars there; 0 spikes every light in full,
+   * for a radiance frame that knows how bright each is.
+   */
+  full: number;
+  /** A four-point star (two vanes across, as Hubble's spider) or six (as JWST's struts). */
   arms: 4 | 6;
-  /** A spike's length, as a share of the frame's height. */
+  /** A spike's greatest length, as a share of the frame's height. */
   reach: number;
-  /** Bilinear taps out each way along an arm: the quality's. */
-  taps: number;
-  /** How much of the spikes is added to the frame. */
+  /** How much of a light the spikes carry, added to the frame. */
   strength: number;
   /** The red and blue channels' offset at the frame's corners, in frame pixels; none at the centre. */
   fringe: number;
 };
 
-/** Directions of a star's arms, each running both ways: across and up, or every 60°. */
-const DIRECTIONS: Readonly<Record<4 | 6, readonly (readonly [number, number])[]>> = {
-  4: [
-    [1, 0],
-    [0, 1],
-  ],
-  6: [
-    [1, 0],
-    [0.5, Math.sqrt(3) / 2],
-    [-0.5, Math.sqrt(3) / 2],
-  ],
-};
+/** A line's Gaussian width and a spike's core, frame pixels: a vane's diffraction is thin. */
+const LINE_WIDTH = 0.8;
+const SPIKE_CORE = 2.5;
+/** The star target's share of the frame: lines are box-filtered over its texels. */
+const STAR_SCALE = 0.5;
+/** Levels between the one lights are found in and the one they are placed by. */
+const FINE_STEPS = 2;
 
 /**
- * Diffraction spikes for any bright mask: `render` sums the mask along each arm of a star
- * (two directions for four points, three for six, all in one draw), `taps` taps out each
- * way over `reach` of the frame's height, tapering, and returns the star at the mask's size.
- * The fringe is the resolve shader's (`lens.glsl`); this pass only draws the spikes. One
+ * Diffraction spikes for a frame's bright light: `render` finds the compact lights in a
+ * level of the bloom chain (`levelOf`, after a `render` or `mask` of it) and draws each one's
+ * star as thin lines through its centre, brightness falling as 1/r² and red reaching furthest,
+ * into a target at half the frame's size, to be added `strength` times. One instanced draw:
+ * an instance per cell and line, all but the lights' collapsing in their vertex shader, so
+ * the fill is the lines' pixels alone. The fringe is the resolve shader's (`lens.glsl`). One
  * half-float target where the GPU renders into it, bytes otherwise, reallocated when the
- * mask's size changes; one program per star shape and tap count, compiled on first use. Call
- * only on the client.
+ * frame's size changes. Call only on the client.
  */
 export function createLensPass(renderer: WebGLRenderer) {
   const floating = halfFloatRenderable(renderer);
-  const geometry = new PlaneGeometry(2, 2);
-  /* Shared by every program: what changes per frame. */
-  const shared = {
-    uImage: { value: null as Texture | null },
-    uTexel: { value: new Vector2(1, 1) },
-    uNorm: { value: 1 },
-    uInvThreshold: { value: 1 },
+  const plane = new PlaneGeometry(2, 2);
+  const geometry = new InstancedBufferGeometry();
+  geometry.setIndex(plane.getIndex());
+  geometry.setAttribute("position", plane.getAttribute("position"));
+  const uniforms = {
+    uCells: { value: null as Texture | null },
+    uFine: { value: null as Texture | null },
+    uFrame: { value: new Vector2(1, 1) },
+    uCellArea: { value: 1 },
+    uAxes: { value: 2 },
+    uReach: { value: 1 },
+    uThreshold: { value: 1 },
+    uStrength: { value: 1 },
+    uFull: { value: 0 },
+    uWidth: { value: LINE_WIDTH },
+    uCore: { value: SPIKE_CORE },
+    uTexelFrame: { value: 1 / STAR_SCALE },
   };
-  type Program = { material: ShaderMaterial; steps: Vector2[] };
-  const programs = new Map<string, Program>();
-  const programFor = (arms: 4 | 6, taps: number) => {
-    const key = `${arms}/${taps}`;
-    let program = programs.get(key);
-    if (program) return program;
-    const steps = DIRECTIONS[arms].map(() => new Vector2());
-    program = {
-      steps,
-      material: new ShaderMaterial({
-        vertexShader: fullscreenVertex,
-        fragmentShader: lensSpikeFragment,
-        uniforms: { ...shared, uSteps: { value: steps } },
-        defines: { HORIZON_LENS_ARMS: `${arms / 2}`, HORIZON_LENS_TAPS: `${taps}` },
-        depthTest: false,
-        depthWrite: false,
-      }),
-    };
-    programs.set(key, program);
-    return program;
-  };
-  const quad = new Mesh(geometry);
-  quad.frustumCulled = false;
+  const material = new ShaderMaterial({
+    vertexShader: lensStarVertex,
+    fragmentShader: lensStarFragment,
+    uniforms,
+    blending: AdditiveBlending,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const lines = new Mesh(geometry, material);
+  lines.frustumCulled = false;
   const scene = new Scene();
-  scene.add(quad);
+  scene.add(lines);
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const clear = new Color();
 
   let target: WebGLRenderTarget | null = null;
   const targetFor = (width: number, height: number) => {
@@ -120,43 +127,51 @@ export function createLensPass(renderer: WebGLRenderer) {
     target.texture.colorSpace = LinearSRGBColorSpace;
     return target;
   };
-  /** The sum of one way's tap weights, by tap count. */
-  const sums = new Map<number, number>();
-  const weightsOf = (taps: number) => {
-    let sum = sums.get(taps);
-    if (sum === undefined) {
-      sum = 0;
-      for (let i = 1; i <= taps; i++) sum += (1 - i / (taps + 1)) ** 2;
-      sums.set(taps, sum);
-    }
-    return sum;
-  };
 
   let disposed = false;
   return {
-    /** Draws the star of `mask`, a `width` × `height` texture, and returns it at that size. */
-    render(mask: Texture, width: number, height: number, settings: LensSettings): Texture {
-      const into = targetFor(width, height);
-      const taps = Math.max(1, Math.round(settings.taps));
-      const { material, steps } = programFor(settings.arms, taps);
-      /* The arm's length in the mask's pixels, split over its taps. */
-      const step = (settings.reach * height) / taps;
-      DIRECTIONS[settings.arms].forEach(([x, y], i) =>
-        steps[i]!.set((x * step) / width, (y * step) / height),
+    /**
+     * Draws the stars of a `width` × `height` frame's lights, found in level `settings.level`
+     * of its bloom chain (`levelOf` reads a level of the chain's last render or mask), and
+     * returns them at half the frame's size.
+     */
+    render(
+      levelOf: (index: number) => BloomLevel,
+      width: number,
+      height: number,
+      settings: LensSettings,
+    ): Texture {
+      const cells = levelOf(settings.level);
+      const fine = levelOf(Math.max(0, settings.level - FINE_STEPS));
+      const into = targetFor(
+        Math.max(1, Math.round(width * STAR_SCALE)),
+        Math.max(1, Math.round(height * STAR_SCALE)),
       );
-      shared.uTexel.value.set(1 / width, 1 / height);
-      shared.uNorm.value = 1 / weightsOf(taps);
-      shared.uInvThreshold.value = 1 / Math.max(settings.threshold, 1e-4);
-      shared.uImage.value = mask;
-      quad.material = material;
+      const axes = settings.arms / 2;
+      uniforms.uCells.value = cells.texture;
+      uniforms.uFine.value = fine.texture;
+      uniforms.uFrame.value.set(width, height);
+      uniforms.uCellArea.value = (width / cells.width) * (height / cells.height);
+      uniforms.uAxes.value = axes;
+      uniforms.uReach.value = settings.reach * height;
+      uniforms.uThreshold.value = Math.max(settings.threshold, 1e-6);
+      uniforms.uStrength.value = settings.strength;
+      uniforms.uFull.value = Math.max(0, settings.full);
+      uniforms.uTexelFrame.value = width / into.width;
+      geometry.instanceCount = cells.width * cells.height * axes;
       const previous = renderer.getRenderTarget();
       const autoClear = renderer.autoClear;
+      renderer.getClearColor(clear);
+      const alpha = renderer.getClearAlpha();
       renderer.autoClear = false;
       try {
         renderer.setRenderTarget(into);
+        renderer.setClearColor(0x000000, 0);
+        renderer.clear(true, false, false);
         renderer.render(scene, camera);
         return into.texture;
       } finally {
+        renderer.setClearColor(clear, alpha);
         renderer.autoClear = autoClear;
         renderer.setRenderTarget(previous);
       }
@@ -166,9 +181,9 @@ export function createLensPass(renderer: WebGLRenderer) {
       disposed = true;
       target?.dispose();
       target = null;
-      for (const { material } of programs.values()) material.dispose();
-      programs.clear();
+      material.dispose();
       geometry.dispose();
+      plane.dispose();
     },
   };
 }

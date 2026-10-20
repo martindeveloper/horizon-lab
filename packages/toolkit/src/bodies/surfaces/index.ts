@@ -10,7 +10,18 @@
 import type { BodyId } from "../figures";
 import { earth } from "./earth";
 import { jupiter, neptune, saturn, uranus } from "./giants";
-import { callisto, charon, europa, ganymede, io, moon, titan, triton } from "./moons";
+import {
+  callisto,
+  charon,
+  deimos,
+  europa,
+  ganymede,
+  io,
+  moon,
+  phobos,
+  titan,
+  triton,
+} from "./moons";
 import { halley, mars, mercury, pluto, sedna, sun, venus } from "./planets";
 import { raster, rasterJob, type Painter } from "./raster";
 
@@ -44,6 +55,8 @@ export const GEOMETRIC_ALBEDO: Partial<Record<BodyId, number>> = {
   sedna: 0.32,
   halley: 0.04,
   moon: 0.12,
+  phobos: 0.071,
+  deimos: 0.068,
   io: 0.63,
   europa: 0.67,
   ganymede: 0.43,
@@ -66,6 +79,8 @@ const PAINTERS: Partial<Record<BodyId, Painter>> = {
   sedna,
   halley,
   moon,
+  phobos,
+  deimos,
   io,
   europa,
   ganymede,

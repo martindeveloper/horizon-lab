@@ -26,6 +26,8 @@ type BlackHoleBenchScene = BenchScene & {
   bloom?: boolean;
   /** Lens on: the frame is traced as radiance, spiked and fringed, and resolved. */
   lens?: boolean;
+  /** Wide colour on: the canvas shows Display P3, the display step converting the radiance. */
+  wideColour?: boolean;
   motion?: BlackHoleMotion;
 };
 
@@ -34,8 +36,8 @@ const tourSeconds = (presetId: string) =>
 
 /**
  * Every preset at its home view, a quality sweep, stress views that bound
- * the per-pixel cost, the lensed disk with bloom and with the lens (against its
- * plain home view, each effect's cost), and sequences.
+ * the per-pixel cost, the lensed disk with bloom, with the lens and in wide colour (against
+ * its plain home view, each effect's cost), and sequences.
  *
  * The sweep is edge-on at zero spin: there the ISCO gap lets rays near the
  * critical curve wind around the hole, so the step budget decides the image.
@@ -92,6 +94,14 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     presetId: "lensed",
     quality: "standard",
     lens: true,
+  },
+  {
+    id: "lensed-wide",
+    description: "Lensed disk, home view, standard quality, wide colour on",
+    tags: ["effects"],
+    presetId: "lensed",
+    quality: "standard",
+    wideColour: true,
   },
   {
     id: "orbit",

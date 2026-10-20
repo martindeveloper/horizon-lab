@@ -12,9 +12,10 @@ toolkit's `.glsl` loader (see the package README).
   Output is LinearSRGB with Three.js tone mapping disabled: the shader owns its
   color pipeline. Shader diagnostics are enabled by default. The optional `powerPreference` is a
   browser GPU-selection hint; its default is `default`, not forced discrete GPU.
-  `render({ antialias, bloom, lens })` takes `antialias` `off` (default), `fxaa` or
-  `supersample`, `bloom` as `BloomSettings` or null (default) and `lens` as `LensSettings` or
-  null (default).
+  `render({ antialias, bloom, lens, gamut })` takes `antialias` `off` (default), `fxaa` or
+  `supersample`, `bloom` as `BloomSettings` or null (default), `lens` as `LensSettings` or
+  null (default) and `gamut` `srgb` (default) or `p3` (the canvas in wide colour; the shader's
+  `display` multiplies linear radiance by the pass's `uGamut` before encoding).
   `supersample` needs `supersample: true` at creation and a fragment shader that
   defines `vec3 shade(vec2 fragCoord, bool derivatives)` (one ray's radiance) and
   `vec3 display(vec3 radiance, vec2 fragCoord)` (its display colour) and includes
@@ -43,10 +44,22 @@ toolkit's `.glsl` loader (see the package README).
   any WebGL 2 device and materials compile alike for the canvas and the frame. The canvas's
   hardware MSAA does not apply offscreen, so create the renderer with `antialias: false`.
   `bloom` and `lens` are read every frame, so their numbers may change in place; switching
-  either or the anti-aliasing takes a new pass. With bloom off, the lens builds only the mask
-  levels its spikes need (`mask` below). `target` is the offscreen frame; nothing is allocated until
+  either or the anti-aliasing takes a new pass. With bloom off, the lens builds only
+  the mask levels its spikes need (`mask` below). `target` is the offscreen frame; nothing is allocated until
   the first `paint`. `createFxaaPass(renderer)` and `createMsaaPass(renderer)` are this pass
   at `fxaa` and `msaa` without bloom (`render(scene, camera)` on the former draws one scene).
+- Wide colour: `setDrawingBufferGamut(renderer, gamut)` switches a renderer's canvas to show
+  its bytes in Display P3 (or back to sRGB) and returns the gamut it took: a browser whose
+  WebGL cannot switch keeps sRGB, so draw for what comes back; `drawingBufferGamut(renderer)`
+  reads it. It is for a shader that owns its display pipeline: it multiplies its linear
+  radiance by `gamutMatrix(gamut)` (linear sRGB to the canvas's primaries from the science
+  module's colour matrices; the identity for sRGB, so it may apply it always at no cost)
+  before it tone-maps and encodes. A scene of ordinary materials encodes sRGB and would gain
+  nothing, so the scene host offers no wide colour. `createFullscreenPass`'s `render({ gamut })`
+  switches its canvas and sets the pass's `uGamut` (`mat3`) for the shader's display step.
+  three.js's own Display P3 output (`outputColorSpace` set to a P3 definition) is not used:
+  in r186 its encoder composes the primaries' matrices in the wrong order (white renders as
+  0.83, 1, 0.96).
 - `createBloomPass(renderer)`: bloom for any texture, dual Kawase. `render(source, w, h,
   settings)` takes the source's light above `threshold` (eased in over `knee` below it, each
   pixel capped at `clamp`, all in the source's units) down a chain of `mips` levels, the
@@ -59,18 +72,29 @@ toolkit's `.glsl` loader (see the package README).
   `level(i)` reads a level of the last render or mask. The quality level decides `mips` and
   `scale`, never whether bloom is on: a switch is the consumer's, off by default. Only what
   is drawn into the frame blooms; DOM labels and readouts sit above the canvas.
-- `createLensPass(renderer)`: diffraction spikes for any bright mask (a bloom chain level).
-  `render(mask, w, h, settings)` sums the mask along each arm of a four- or six-point star
-  (`arms`: two or three directional blurs in one draw, `lens-spike.frag.glsl`), `taps`
-  bilinear taps out each way over `reach` of the frame's height, tapering, each tap counting in proportion to
-  the square of its brightness over `threshold` (in the mask's units), so only the brightest
-  light spikes; returns the star at the mask's size, to be added `strength` times. The
-  fringe (`fringe` pixels at the corners, none at the centre) is the resolve shader's, from
-  `<horizon/lens>`. `LensSettings.mask` is the bloom's settings, which the spikes draw from
-  when bloom is off, and `level` the chain level they read (0: the prefiltered frame at the
-  chain's `scale`; each further level coarser and softer). The quality level decides `taps` and `reach`; the switch
-  is the consumer's, off by default. One half-float target at the mask's size; one program
-  per star shape and tap count (compile-time loop bounds), compiled on first use.
+- `createLensPass(renderer)`: diffraction spikes as a telescope's spider vanes make them: thin
+  lines through each compact bright light, not the light smeared along the arms.
+  `render(levelOf, w, h, settings)` finds the lights in level `level` of a frame's bloom chain
+  (`levelOf` reads the chain's last render or mask; each texel a cell about a thirty-second of
+  the frame): a cell brighter than its eight neighbours, with the ring of cells two out dark
+  beside it and its glow no wider than about half a cell around its centre, is a point; a
+  wider light (a disc filling the view, a galaxy's core, the black hole's disk) fades out of
+  spiking. Each point is placed at its light-weighted centre in a level two finer and gets a
+  four- or six-point star (`arms`: two vanes across, as Hubble's spider, or three, as JWST's
+  struts): lines a pixel or two wide whose brightness falls as 1/r² from a small core, red
+  reaching furthest (a vane's diffraction grows as the wavelength squared), drawn until they
+  fade below `threshold` (in the frame's units) and at most `reach` of the frame's height, so
+  a brighter light's spikes are longer. An 8-bit frame clips every bright light to white, so
+  `full` (frame pixels of light above the mask's threshold) is the energy from which a light
+  spikes in full, a fainter one as the cube of its share; 0 spikes every light in full, for a
+  radiance frame. Returns the stars at half the frame's size, to be added `strength` times.
+  One instanced draw (`lens-star.vert.glsl`, `lens-star.frag.glsl`), an instance per cell and
+  line: all but the lights' collapse in their vertex shader, so the fill is the lines' pixels
+  alone. The fringe (`fringe` pixels at the corners, none at the centre) is the resolve
+  shader's, from `<horizon/lens>`. `LensSettings.mask` is the bloom's settings, which the
+  lights are found in when bloom is off. The quality level decides `level` (with the chain's
+  `scale`) and `reach`; the switch is the consumer's, off by default. One half-float target
+  at half the frame's size.
 - `RenderQuality`: the four quality levels every simulation offers (`economy`,
   `standard`, `cinema`, `max`, which lifts the device caps), in that order in
   `RENDER_QUALITIES`. Each consumer maps a level to concrete settings in one place (in

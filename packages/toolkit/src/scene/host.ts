@@ -56,24 +56,27 @@ export const DEFAULT_SCENE_BLOOM: Readonly<BloomSettings> = {
 };
 
 /**
- * A scene's lens: whether its brightest light gets diffraction spikes and its corners a
- * colour fringe, and any of the lens's settings to change (`LensSettings` but its mask,
+ * A scene's lens: whether its brightest compact lights get diffraction spikes and its corners
+ * a colour fringe, and any of the lens's settings to change (`LensSettings` but its mask,
  * which is the scene's bloom). What a switch leaves out keeps its value.
  */
 export type SceneLens = Partial<Omit<LensSettings, "mask">> & { enabled: boolean };
 
 /**
- * What a scene's lens does until told otherwise: a four-point star on light whose bloom mask
- * (its first level) is brighter than 0.2, reaching 7 % of the frame's height over ten taps
- * each way, added at eight tenths, and a fringe of 1.5 pixels at the corners.
+ * What a scene's lens does until told otherwise: a four-point star on each compact light the
+ * bloom's mask holds, found in cells a thirty-second of the frame wide (level 4 of a half-size
+ * chain), its spikes drawn until they fade below 0.015, at most a quarter of the frame's
+ * height, and a fringe of 1.5 pixels at the corners. The frame is clipped at white, so its
+ * lights carry their spikes at ten times their clipped energy, in full from 150 frame pixels of
+ * it (the Sun's disc) and far less below, so a white speck gets no star.
  */
 export const DEFAULT_SCENE_LENS: Readonly<Omit<LensSettings, "mask">> = {
-  level: 0,
-  threshold: 0.2,
+  level: 4,
+  threshold: 0.015,
+  full: 150,
   arms: 4,
-  reach: 0.07,
-  taps: 10,
-  strength: 0.8,
+  reach: 0.25,
+  strength: 10,
   fringe: 1.5,
 };
 
@@ -241,14 +244,14 @@ export function createSceneHost(
     },
     /**
      * Switches the lens for the next frame on or off and takes the settings given (a quality
-     * level's reach and taps, a look's strength); off frees its buffers.
+     * level's cells and reach, a look's strength); off frees its buffers.
      */
-    setLens({ enabled, level, threshold, arms, reach, taps, strength, fringe }: SceneLens) {
+    setLens({ enabled, level, threshold, full, arms, reach, strength, fringe }: SceneLens) {
       lens.level = level ?? lens.level;
       lens.threshold = threshold ?? lens.threshold;
+      lens.full = full ?? lens.full;
       lens.arms = arms ?? lens.arms;
       lens.reach = reach ?? lens.reach;
-      lens.taps = taps ?? lens.taps;
       lens.strength = strength ?? lens.strength;
       lens.fringe = fringe ?? lens.fringe;
       if (enabled !== lensOn) {

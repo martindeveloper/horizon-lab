@@ -117,7 +117,7 @@ export function createPopulationsLayer(
       (show.trueSize ? 32 : 0);
     /* Size is a uniform, so the zoom alone never rewrites the instances. */
     looks.tracers.uniforms.radius!.value = show.trueSize ? 30 / AU_KM : pxWorld(dist, 3.1);
-    const stamp = `${yearsAgo}|${show.drift ? Math.round(driftYears * 200) : 0}|${mask}`;
+    const stamp = `${yearsAgo}|${Math.round(driftYears * 200)}|${mask}`;
     if (stamp === tracerStamp) return;
     tracerStamp = stamp;
     const allow: Record<Bin, boolean> = {

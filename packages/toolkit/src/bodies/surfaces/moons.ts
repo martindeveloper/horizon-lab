@@ -99,6 +99,41 @@ export const ganymede: Painter = (p) => {
   return mix(rgb, [226, 228, 230], smooth(42, 60, Math.abs(p.lat) + (n - 0.5) * 16) * 0.7);
 };
 
+/**
+ * Phobos (Viking, Mars Express HRSC, MRO HiRISE): dark reddish regolith, the 9 km Stickney
+ * crater (1° S, 49° W) ringed by bluer, brighter ejecta, and the parallel grooves that cross
+ * most of the moon but spare the trailing side around 90° E.
+ */
+export const phobos: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 38);
+  let rgb = scale([92, 82, 73], 0.94 + (n - 0.5) * 0.3);
+  const stickney = spot(p, 311, -1, 23, 23);
+  rgb = mix(rgb, [105, 101, 98], smooth(1.8, 0.9, stickney) * 0.7);
+  rgb = mix(rgb, [62, 57, 53], smooth(1, 0.75, stickney) * 0.8);
+  const trailing = Math.max(0, p.cosLat * Math.cos((p.lon - 90) * RAD));
+  const grooves = ridge(fbm(p, 1.5, 18, 2, 39), 0.03) * (1 - smooth(0.4, 0.8, trailing));
+  rgb = mix(rgb, [59, 53, 50], grooves * 0.6);
+  return mix(rgb, [117, 110, 103], smooth(0.66, 0.74, fbm(p, 16, 16, 2, 40)) * 0.5);
+};
+
+/**
+ * Deimos (Viking, HiRISE): smoother than Phobos, its craters filled with regolith, the rims of
+ * Voltaire (22° N, 3.5° W) and Swift (12.5° N, 1.5° W) and downslope streaks a little brighter.
+ */
+export const deimos: Painter = (p) => {
+  const n = fbm(p, 4, 4, 4, 41);
+  let rgb = scale([89, 79, 69], 0.96 + (n - 0.5) * 0.2);
+  for (const [lon, lat, r] of [
+    [356.5, 22, 9],
+    [358.5, 12.5, 5],
+  ] as const) {
+    const d = spot(p, lon, lat, r, r);
+    rgb = mix(rgb, [108, 102, 93], smooth(0.35, 0, Math.abs(d - 1)) * 0.6);
+  }
+  const streaks = smooth(0.62, 0.7, fbm(p, 3, 14, 2, 42));
+  return mix(rgb, [105, 97, 87], streaks * 0.4);
+};
+
 /** Callisto: dark, saturated with bright craters; Valhalla's ringed basin. */
 export const callisto: Painter = (p) => {
   const n = fbm(p, 6, 6, 4, 30);

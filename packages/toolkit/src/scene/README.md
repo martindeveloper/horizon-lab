@@ -61,11 +61,13 @@ of white, eased in from 0.3, added back at six tenths through a five-level chain
 resolution). A simulation's `lib/quality.ts` maps its level and the device class to the
 chain's `mips` and `scale` and passes them here; the switch itself is the visitor's, off by
 default (`bloom` reads it). `setLens({ enabled, ...settings })` (a `SceneLens`) switches the
-lens the same way: on, the brightest light gets a four-point diffraction star drawn from the
-bloom's mask (light brighter than 0.2 there), reaching 7 % of the frame's height, and the corners a colour fringe of 1.5 pixels, with `DEFAULT_SCENE_LENS` for what the
-call leaves out; the quality table passes the star's `taps` and `reach`. With bloom off, only
-the mask levels the spikes need are built. Only the current mode's and switches' buffers are
-held. Only what `paint` draws blooms, spikes or fringes: DOM labels and HUD readouts sit above
+lens the same way: on, each compact bright light the bloom's mask holds gets a thin four-point
+diffraction star (`createLensPass`), fading out below 0.015 and reaching at most a quarter of
+the frame's height, and the corners a colour fringe of 1.5 pixels, with `DEFAULT_SCENE_LENS`
+for what the call leaves out. The frame is clipped at white, so lights spike at ten times their
+clipped energy, in full from that of the Sun's disc and far less below it (`full`), so a white
+speck gets no star. The quality table passes the star's `level` and `reach`. With bloom off,
+only the mask levels the lights are found in are built. Only the current mode's and switches' buffers are held. Only what `paint` draws blooms, spikes or fringes: DOM labels and HUD readouts sit above
 the canvas, so text never does.
 
 ## Orbit rig and controls

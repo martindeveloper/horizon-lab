@@ -2,6 +2,7 @@ import {
   HalfFloatType,
   LinearFilter,
   LinearSRGBColorSpace,
+  Matrix3,
   Mesh,
   NearestFilter,
   NoToneMapping,
@@ -16,6 +17,7 @@ import {
   type IUniform,
 } from "three";
 
+import type { Gamut } from "../science/color";
 import {
   createBloomPass,
   halfFloatRenderable,
@@ -24,6 +26,7 @@ import {
 } from "./bloom-pass";
 import { createCompositePass, type CompositePass } from "./composite-pass";
 import { createLensPass, type LensPass, type LensSettings } from "./lens-pass";
+import { gamutMatrix, setDrawingBufferGamut } from "./wide-colour";
 
 /**
  * Anti-aliasing for one frame: `fxaa` filters the finished image; `supersample`
@@ -31,11 +34,15 @@ import { createLensPass, type LensPass, type LensSettings } from "./lens-pass";
  */
 export type PassAntialias = "off" | "fxaa" | "supersample";
 
-/** What one frame asks for: its anti-aliasing (default off), its bloom and its lens (default none). */
+/**
+ * What one frame asks for: its anti-aliasing (default off), its bloom and its lens (default
+ * none) and the gamut the canvas shows (default sRGB).
+ */
 export type PassFrame = {
   antialias?: PassAntialias;
   bloom?: BloomSettings | null;
   lens?: LensSettings | null;
+  gamut?: Gamut;
 };
 
 /** A single shader pass. Call only on the client; importing this module creates no GPU resources. */
@@ -64,7 +71,8 @@ export function createFullscreenPass(options: {
    * with `uBloomStrength`, includes `<horizon/lens>` and applies it under `HORIZON_LENS`
    * (defined while the lens is on), and has `uniforms` of its own (share the ray shader's
    * where `display` needs them). Without it, or without half-float rendering, bloom and the
-   * lens work on the display frame instead.
+   * lens work on the display frame instead. Both shaders' `display` multiply linear radiance
+   * by `uGamut` (`mat3`, the pass's) before encoding, for a canvas in wide colour.
    */
   hdr?: { fragmentShader: string; uniforms: Record<string, IUniform> };
 }) {
@@ -82,7 +90,11 @@ export function createFullscreenPass(options: {
   renderer.outputColorSpace = LinearSRGBColorSpace;
   renderer.toneMapping = NoToneMapping;
   const hdrOutput = { value: 0 };
-  const uniforms = { ...options.uniforms, uHdrOutput: hdrOutput };
+  /* Linear sRGB to the canvas's primaries: the identity until a frame asks for P3 and the
+     canvas takes it, so the shader may apply it always. */
+  const gamut = { value: new Matrix3() };
+  let gamutAsked: Gamut = "srgb";
+  const uniforms = { ...options.uniforms, uHdrOutput: hdrOutput, uGamut: gamut };
   const geometry = new PlaneGeometry(2, 2);
   const material = new ShaderMaterial({
     vertexShader: options.vertexShader,
@@ -169,9 +181,9 @@ export function createFullscreenPass(options: {
     mask: ldrBloom,
     level: 1,
     threshold: 1,
+    full: 0,
     arms: 4,
     reach: 0,
-    taps: 1,
     strength: 0,
     fringe: 0,
   };
@@ -205,6 +217,7 @@ export function createFullscreenPass(options: {
       uniforms: {
         ...hdr.uniforms,
         ...resolveUniforms,
+        uGamut: gamut,
         uImage: { value: target.texture },
         uTexel: { value: texel },
       },
@@ -235,10 +248,19 @@ export function createFullscreenPass(options: {
     compile() {
       renderer.compile(scene, camera);
     },
-    /** Draws the shader to the canvas, anti-aliased, bloomed and lensed as `frame` asks (all default off). */
+    /**
+     * Draws the shader to the canvas, anti-aliased, bloomed and lensed as `frame` asks (all
+     * default off), in the gamut it asks (sRGB by default): for P3 the canvas is switched and
+     * `uGamut` holds the conversion for the shader's display step.
+     */
     render(frame?: PassFrame) {
       if (disposed) return;
       const mode = frame?.antialias ?? "off";
+      const wanted = frame?.gamut ?? "srgb";
+      if (wanted !== gamutAsked) {
+        gamutAsked = wanted;
+        gamutMatrix(setDrawingBufferGamut(renderer, wanted), gamut.value);
+      }
       const bloom = frame?.bloom ?? null;
       const lens = frame?.lens ?? null;
       const floating = (bloom !== null || lens !== null) && hdr !== null;
@@ -281,11 +303,15 @@ export function createFullscreenPass(options: {
         resolveUniforms.uBloomStrength.value = bloom.strength;
       } else resolveUniforms.uBloomStrength.value = 0;
       if (lens) {
-        const mask = bloom
-          ? chain.level(lens.level)!
-          : chain.mask(source, size.x, size.y, lens.mask, lens.level);
+        const levels = chain;
+        if (!bloom) levels.mask(source, size.x, size.y, lens.mask, lens.level);
         spikes ??= createLensPass(renderer);
-        resolveUniforms.uSpikes.value = spikes.render(mask.texture, mask.width, mask.height, lens);
+        resolveUniforms.uSpikes.value = spikes.render(
+          (i) => levels.level(i)!,
+          size.x,
+          size.y,
+          lens,
+        );
         resolveUniforms.uSpikeStrength.value = lens.strength;
         resolveUniforms.uFringe.value = lens.fringe;
       }

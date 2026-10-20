@@ -192,7 +192,7 @@
     "groups": {
       "imagery": {
         "label": "Imagery",
-        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. These four bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
+        "intro": "Planet and moon maps, reprocessed for the orrery. Venus and Titan retain illustrative cloud and haze maps: radar or infrared surface maps would not show their visible appearance. Sedna has no resolved surface imagery; Halley’s partial flyby views do not provide a global spherical map. Phobos and Deimos are painted from spacecraft views. These six bodies remain explicitly illustrative. Maps are representative mosaics, not imagery for the selected timeline date."
       },
       "data": {
         "label": "Data",

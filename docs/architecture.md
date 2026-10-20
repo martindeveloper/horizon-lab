@@ -74,7 +74,9 @@ src/
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
                                toolkit's scene host, orbit rig and controls, moves it along
                                the timeline and adds what is the Orrery's own: the sky,
-                               close-ups (close-up-controller.ts, close-up-flight.ts),
+                               close-ups (close-up-controller.ts, close-up-flight.ts; the
+                               atmosphere shell over a body with air, from
+                               src/space/solar-system/graphics/air.ts),
                                measured maps, the guide, solar activity, picking and the HUD
       lib/store.ts             Zustand store (orrery namespace messages)
     deep-field/
@@ -382,11 +384,18 @@ only its layers, its views and its store of its own:
   render quality (Economy, Standard, Cinematic, Max: `RenderQuality`), anti-aliasing (the modes
   the simulation can draw), the simulation's render switches (`BloomSwitch`: bloom on the
   Sun, the gas disk, the Milky Way and bright stars, or on the black hole's disk, jet and
-  sky; `LensSwitch`: diffraction spikes on the brightest of that light and a colour fringe
+  sky; `LensSwitch`: thin diffraction spikes on the brightest compact lights and a colour fringe
   towards the corners; `GlowSwitch`: a soft layer under Stellar Spectra's lights and a halo
-  on its ribbon's strong emission lines; each off by default, stored like anti-aliasing), an
+  on its ribbon's strong emission lines; `WideColourSwitch`: the canvas in Display P3, offered
+  only where the screen shows it (`useWideGamutScreen`, on the toolkit's `WIDE_GAMUT_QUERY`),
+  and for WebGL stages where the browser's canvases can switch: Stellar Spectra and the black
+  hole; each off by default, stored
+  like anti-aliasing, and costing nothing while off), an
   optional note and Reset, which puts the panel back as a visit starts (`resetView`; the
-  black hole re-applies its preset and turns bloom and the lens off). Its copy is the shared `render`
+  black hole re-applies its preset and turns bloom, the lens and wide colour off). The black
+  hole's display step moves its radiance into the canvas's primaries before the tone map, so
+  the disk's hottest colours reach past sRGB. The Orrery and Deep Field offer no wide colour:
+  their materials encode sRGB, so a P3 canvas would only cost a pass. Its copy is the shared `render`
   namespace. Standard is always the default and what the simulation drew before the choice
   existed; what each level and mode does is the simulation's own. `useSceneEscape` lets Escape undo
   one thing at a time.

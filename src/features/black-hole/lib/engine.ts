@@ -285,6 +285,7 @@ export function createBlackHoleEngine(
         antialias: state.antialiasing,
         bloom: state.bloom ? bloomSettings(state.quality, constrained, state.exposure) : null,
         lens: state.lens ? lensSettings(state.quality, constrained, state.exposure) : null,
+        gamut: state.wideColour ? "p3" : "srgb",
       });
       if (warmup.advance()) engine.refresh();
       announceFirstFrame();

@@ -144,7 +144,8 @@ infrared maps would incorrectly expose surfaces hidden in visible light.
 The [JPL Venus texture](https://space.jpl.nasa.gov/tmaps/venus.html) explicitly
 clones a Mariner image and labels it fictitious; it is not a measured global map.
 Sedna has no resolved surface imagery. Halley's partial Giotto flyby views of
-an irregular nucleus are not a global spherical texture. These four bodies
+an irregular nucleus are not a global spherical texture. Phobos and Deimos are
+painted from Viking, Mars Express and HiRISE views. These six bodies
 remain illustrations built from published physical constraints; generated maps
 also remain temporary load/error fallbacks:
 
@@ -166,3 +167,6 @@ also remain temporary load/error fallbacks:
   central saddle waist, mapped Giotto HMC topography (Crater, Mountain, Chain,
   Ducktail) and localized active outgassing vents covering ~10–15 % of the
   surface (Keller et al. 1986, 1987; Stooke & Abergel 1991).
+- **Phobos and Deimos**: Dark reddish regolith (`p_V = 0.071`, `0.068`) drawn on
+  spheres. Phobos has Stickney's bluer ejecta and grooves that spare the trailing
+  side; Deimos has smooth fill with brighter Voltaire and Swift rims and streaks.

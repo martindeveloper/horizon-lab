@@ -199,6 +199,8 @@ test("moons: IAU mean radii and sidereal periods", () => {
   // IAU WGCCRE 2015 (Archinal et al. 2018); Charon from New Horizons.
   const radius = {
     moon: 1737.4,
+    phobos: 11.08,
+    deimos: 6.2,
     io: 1821.49,
     europa: 1560.8,
     ganymede: 2631.2,
@@ -210,6 +212,8 @@ test("moons: IAU mean radii and sidereal periods", () => {
   // NSSDC satellite fact sheets, days; Triton's is retrograde.
   const period = {
     moon: 27.321661,
+    phobos: 0.31891023,
+    deimos: 1.2624407,
     io: 1.769138,
     europa: 3.551181,
     ganymede: 7.154553,
@@ -230,9 +234,11 @@ test("moons: IAU mean radii and sidereal periods", () => {
 
 test("moons sit where JPL Horizons puts them today", () => {
   // Horizons planet-centred ICRF vectors (km) for 2026-10-15 00:00 TDB: DE441/LE441,
-  // JUP365, SAT441, NEP097, PLU060.
+  // MAR099, JUP365, SAT441, NEP097, PLU060.
   const horizons = {
     moon: [-128_936.0, -334_443.7, -182_898.8],
+    phobos: [-5_640.2, -7_566.3, -842.6],
+    deimos: [-21_450.2, -4_733.1, 8_225.6],
     io: [254_581.1, 300_375.9, 147_380.7],
     europa: [-559_924.8, -320_120.3, -162_863.7],
     ganymede: [986_502.4, 362_873.3, 190_067.5],

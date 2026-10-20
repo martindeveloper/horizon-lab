@@ -54,12 +54,15 @@ for as long as it runs, with no rig and no renderer. Each `DriftShot` is a pose
 (`azimuth`, `inclination`, `distance`, optional `roll`) with an optional `flight`
 (`lift`, `swing`, `lead` and a `duration`), a `hold` in seconds, a hold `drift`
 (rad/s) and a `creep` (the fraction of the distance pushed in over the hold).
-Settings give the defaults (`flight` 20 s, `hold` 12 s, `drift` 0.01, `creep` 0.05),
-a `speed` that scales every duration, a `variance` 0..1 that spreads each shot's
+The camera never stands still: an orbit at the `drift` rate runs under flights and
+holds alike (a shot's own `drift` eases in and out over its hold), and the tilt
+rises and falls by `sway` radians (a third of that in roll) on slow, unrelated
+periods. Settings give the defaults (`flight` 20 s, `hold` 12 s, `drift` 0.01,
+`sway` 0.035, `creep` 0.05), a `speed` that scales every duration, a `variance` 0..1 that spreads each shot's
 angles (±0.5 rad azimuth, ±0.2 rad inclination, within `inclination` bounds),
 distance (±0.3 e-folds) and timing (±35 %), the `order` (`sequence` wraps, `shuffle`
 never repeats a shot) and the `random` source; `reduceMotion` cuts flights and
-stills holds while it matches. `start(pose)` begins from the camera's pose (a
+stills the orbit, sway and holds while it matches. `start(pose)` begins from the camera's pose (a
 sequence goes on from the shot nearest it); `step(dt)` returns the pose for the
 frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
 `sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot of

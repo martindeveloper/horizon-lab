@@ -1,10 +1,12 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useSimulationDrift, type DriftStore } from "@/components/simulations/drift";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
 import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
+import { formatAu } from "@/lib/facts";
+import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
 import { DRIFT } from "../lib/drift";
@@ -26,6 +28,19 @@ function leaveGuide() {
   if (state.guideOpen) state.endGuide();
 }
 
+/** The drift's one readout: how far out the camera is, since the journey is up and down that scale. */
+function DriftDistance() {
+  const t = useTranslations("deepField");
+  const locale = useLocale();
+  const ly = useDeepField((s) => s.viewLy);
+  const unit = useDeepField((s) => s.distanceUnit);
+  return (
+    <>
+      {t("hud.distance")} · {formatAu(t, { unit, locale }, ly * LIGHT_YEAR_AU)}
+    </>
+  );
+}
+
 export function DeepField() {
   const t = useTranslations("deepField");
   const ready = useDeepField((s) => s.ready);
@@ -34,6 +49,7 @@ export function DeepField() {
     useDeepField((s) => s.drift),
     driftStore,
     DRIFT,
+    <DriftDistance />,
   );
 
   useViewFromPath(views, viewFromPath);

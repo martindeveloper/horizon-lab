@@ -56,6 +56,9 @@ type BlackHoleStore = BlackHoleParams &
     /** Diffraction spikes on the disk's hot side and a colour fringe at the corners (off by default); Reset turns it off. */
     lens: boolean;
     setLens: (v: boolean) => void;
+    /** The canvas in Display P3 where the screen shows it (off by default); Reset turns it off. */
+    wideColour: boolean;
+    setWideColour: (v: boolean) => void;
     startGuide: () => void;
     advanceGuide: () => void;
     /** Back one beat; the camera flies back to it. */
@@ -122,6 +125,8 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   setBloom: (bloom) => set({ bloom }),
   lens: false,
   setLens: (lens) => set({ lens }),
+  wideColour: false,
+  setWideColour: (wideColour) => set({ wideColour }),
   startGuide: () => {
     const s = get();
     if (s.activePin) s.setActivePin(null);

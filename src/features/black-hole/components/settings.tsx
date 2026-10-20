@@ -5,6 +5,7 @@ import {
   BloomSwitch,
   LensSwitch,
   RenderSection,
+  WideColourSwitch,
   type AntialiasMode,
 } from "@/components/simulations/render-settings";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
@@ -95,6 +96,8 @@ export function SettingsBody() {
   const setBloom = useBlackHole((s) => s.setBloom);
   const lens = useBlackHole((s) => s.lens);
   const setLens = useBlackHole((s) => s.setLens);
+  const wideColour = useBlackHole((s) => s.wideColour);
+  const setWideColour = useBlackHole((s) => s.setWideColour);
   const applyPreset = useBlackHole((s) => s.applyPreset);
   const presetId = useBlackHole((s) => s.presetId);
   const selectHole = useSelectHole();
@@ -221,12 +224,14 @@ export function SettingsBody() {
         onReset={() => {
           setBloom(false);
           setLens(false);
+          setWideColour(false);
           if (presetId === "custom") selectHole("lensed");
           else applyPreset(presetId);
         }}
       >
         <BloomSwitch on={bloom} onToggle={() => setBloom(!bloom)} />
         <LensSwitch on={lens} onToggle={() => setLens(!lens)} />
+        <WideColourSwitch webgl on={wideColour} onToggle={() => setWideColour(!wideColour)} />
       </RenderSection>
     </>
   );

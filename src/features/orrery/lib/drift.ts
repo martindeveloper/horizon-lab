@@ -12,6 +12,8 @@ import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
 import type { DriftPoseShot, OrbitPose } from "@horizon/toolkit/camera";
 
+import type { MoonSwing } from "./scene/close-up-flight";
+
 /** A body the close-up can frame: the Sun, a planet or a named body. */
 export type CloseUpBody = Extract<SolarSelection, { kind: "sun" | "planet" | "named" }>;
 
@@ -34,17 +36,18 @@ export type OrreryDrift = DriftProgramme<OrreryDriftShot> & {
   clock: number;
   /**
    * At a body: seconds held, the slow orbit's rate (rad/s), how near the camera drifts (a
-   * fraction of the arrival distance), and how many times slower than a tap's the flights in
-   * and out are.
+   * fraction of the arrival distance), how many times slower than a tap's the flights in
+   * and out are, and when in the hold (fractions) the camera swings out to frame the body
+   * with its largest moon, arrives, leaves and is back.
    */
-  closeUp: { hold: number; orbit: number; dive: number; pace: number };
+  closeUp: { hold: number; orbit: number; dive: number; pace: number; moon: MoonSwing };
 };
 
 export const DRIFT: OrreryDrift = {
   music: { track: "Interstellar Drift" },
   camera: { flight: 22, hold: 12, variance: 0.3, drift: 0.01, creep: 0.05, order: "sequence" },
   clock: 0.04,
-  closeUp: { hold: 20, orbit: 0.045, dive: 0.55, pace: 2.6 },
+  closeUp: { hold: 20, orbit: 0.045, dive: 0.55, pace: 2.6, moon: [0.22, 0.42, 0.62, 0.82] },
   shots: [
     /* Low among the inner planets, then down to Earth. */
     {

@@ -2,8 +2,9 @@
  * Drift: a camera that flies itself, for as long as it is left alone. It takes a list of shots
  * and goes from one to the next: a long flight (`sampleOrbitFlight`, log-linear in distance, so
  * a zoom across scales keeps an even pace), then a hold with a slow orbit and a gentle push,
- * then the next shot. Variance jitters each shot's angles, distance and timing, so no two
- * passes look alike. Pure: no rig, no renderer; a host assigns the pose to its own camera. A
+ * then the next shot. Under it all the camera keeps turning and its tilt slowly breathes, so
+ * it never stands dead still between a landing and the next flight. Variance jitters each
+ * shot's angles, distance and timing, so no two passes look alike. Pure: no rig, no renderer; a host assigns the pose to its own camera. A
  * shot the host flies itself (a close-up on its own rig) is a handoff: the camera waits there
  * until the host says `resume`.
  */
@@ -25,7 +26,7 @@ export type DriftPoseShot = OrbitPose & {
   flight?: Pick<OrbitFlight, "lift" | "swing" | "lead"> & { duration?: number };
   /** Seconds the shot holds once landed, before the next flight. */
   hold?: number;
-  /** Slow orbit while held, rad/s; by default the settings' rate, the way the flight turned. */
+  /** Orbit rate while held, rad/s, eased in and out; by default the settings' rate. */
   drift?: number;
   /** Fraction of the distance pushed in (+) or out (−) over the hold. */
   creep?: number;
@@ -40,8 +41,10 @@ export type DriftSettings = {
   speed: number;
   /** 0 flies every shot exactly as written; 1 spreads angles, distance and timing widely. */
   variance: number;
-  /** Hold orbit rate, rad/s. */
+  /** Orbit rate, rad/s: the camera keeps turning at it through flights and holds alike. */
   drift: number;
+  /** Slow rise and fall of the tilt, radians either way (a third of it in roll); 0 for none. */
+  sway: number;
   /** Hold push, as a fraction of the distance. */
   creep: number;
   /** `sequence` runs the shots in order and wraps; `shuffle` never shows the same shot twice running. */
@@ -60,6 +63,7 @@ export const DRIFT_DEFAULTS: Omit<DriftSettings, "random" | "reduceMotion"> = {
   speed: 1,
   variance: 0.3,
   drift: 0.01,
+  sway: 0.035,
   creep: 0.05,
   order: "sequence",
   inclination: { min: -1.45, max: 1.45 },
@@ -67,8 +71,10 @@ export const DRIFT_DEFAULTS: Omit<DriftSettings, "random" | "reduceMotion"> = {
 
 /** How far a full variance (1) spreads each quantity. */
 const SPREAD = { azimuth: 0.5, inclination: 0.2, distance: 0.3, time: 0.35 };
-/** Seconds the hold's orbit takes to reach its full rate. */
+/** Seconds the orbit takes to ease to a new rate. */
 const DRIFT_RAMP = 3;
+/** Seconds per sway of the tilt and of the roll; unrelated, so the two never fall into step. */
+const SWAY_PERIOD = { inclination: 47, roll: 61 };
 
 export type DriftCamera = ReturnType<typeof createDriftCamera>;
 
@@ -81,7 +87,16 @@ export function createDriftCamera(
   const spread = () => (settings.random() * 2 - 1) * settings.variance;
   const instant = () => settings.reduceMotion?.matches === true;
 
+  /** The camera drawn: `base` turned by the running orbit and swayed. */
   const pose: DriftPose = { azimuth: 0, inclination: 0, distance: 1, roll: 0 };
+  /** The pose the flights and holds fly, before the orbit and the sway. */
+  const base: DriftPose = { ...pose };
+  /* The running orbit: its angle, rate (rad/s) and direction (that of the first flight). */
+  let turn = 0;
+  let spin = 0;
+  let turning = 0;
+  /** Seconds of motion so far, the sway's clock. */
+  let clock = 0;
   /* The shot flown to (by index), the varied flight to it and what the hold does there. */
   let index = -1;
   /** The shot is the host's: nothing moves until `resume`. */
@@ -96,6 +111,28 @@ export function createDriftCamera(
   let t = 1;
   let landed: DriftPose = { ...pose };
   let held = 0;
+
+  const wave = (period: number) => Math.sin((clock / period) * Math.PI * 2);
+  /** The pose drawn from `base`, the orbit and the sway. */
+  function show() {
+    const { min, max } = settings.inclination;
+    pose.azimuth = base.azimuth + turn;
+    pose.inclination = clamp(
+      base.inclination + settings.sway * wave(SWAY_PERIOD.inclination),
+      min,
+      max,
+    );
+    pose.distance = base.distance;
+    pose.roll = base.roll + (settings.sway / 3) * wave(SWAY_PERIOD.roll);
+  }
+  /** Takes over a camera at `current`: the base that draws exactly it now. */
+  function adopt(current: OrbitPose & { roll?: number }) {
+    base.azimuth = current.azimuth - turn;
+    base.inclination = current.inclination - settings.sway * wave(SWAY_PERIOD.inclination);
+    base.distance = current.distance;
+    base.roll = (current.roll ?? 0) - (settings.sway / 3) * wave(SWAY_PERIOD.roll);
+    show();
+  }
 
   /**
    * The next shot: in order after the current one (first, the flown shot after the one nearest
@@ -138,7 +175,10 @@ export function createDriftCamera(
       return;
     }
     handoff = false;
-    from = { ...pose };
+    /* The orbit so far becomes part of the base, so it never piles up across shots. */
+    base.azimuth += turn;
+    turn = 0;
+    from = { ...base };
     const inclination = clamp(
       shot.inclination + SPREAD.inclination * spread(),
       settings.inclination.min,
@@ -159,7 +199,8 @@ export function createDriftCamera(
       ((shot.flight?.duration ?? settings.flight) * (1 + SPREAD.time * spread())) / pace,
     );
     hold = Math.max(0, ((shot.hold ?? settings.hold) * (1 + SPREAD.time * spread())) / pace);
-    drift = shot.drift ?? settings.drift * (Math.sign(target.yaw) || 1);
+    turning ||= Math.sign(target.yaw) || 1;
+    drift = shot.drift ?? settings.drift * turning;
     creep = shot.creep ?? settings.creep;
     t = 0;
     held = 0;
@@ -184,45 +225,51 @@ export function createDriftCamera(
     },
     /** Begins (or begins again) from the camera's pose: the first flight starts at once. */
     start(current: OrbitPose & { roll?: number }) {
-      pose.azimuth = current.azimuth;
-      pose.inclination = current.inclination;
-      pose.distance = current.distance;
-      pose.roll = current.roll ?? 0;
+      turn = 0;
+      spin = 0;
+      turning = 0;
+      clock = 0;
+      adopt(current);
       index = -1;
       aim(pick());
     },
     /** The host has flown its shot: goes on to the next from the camera's pose. */
     resume(current: OrbitPose & { roll?: number }) {
       if (!handoff) return;
-      pose.azimuth = current.azimuth;
-      pose.inclination = current.inclination;
-      pose.distance = current.distance;
-      pose.roll = current.roll ?? 0;
+      adopt(current);
       aim(pick());
     },
     /** Advances `dt` seconds. `landed` is true on the one frame a flight ends. */
     step(dt: number): { pose: Readonly<DriftPose>; landed: boolean } {
       if (index < 0 || handoff) return { pose, landed: false };
-      if (t < 1) {
+      const flying = t < 1;
+      if (!instant()) {
+        /* The orbit eases toward the hold's rate, or the running rate in flight, never to rest. */
+        const rate = flying ? settings.drift * turning : drift;
+        spin += (rate - spin) * (1 - Math.exp(-dt / DRIFT_RAMP));
+        turn += spin * dt;
+        clock += dt;
+      }
+      if (flying) {
         t = instant() ? 1 : Math.min(1, t + dt / duration);
         const at = sampleOrbitFlight(t, from, target);
-        pose.azimuth = at.azimuth;
-        pose.inclination = at.inclination;
-        pose.distance = at.distance;
-        pose.roll = lerp(from.roll, target.roll, smootherstep(t));
+        base.azimuth = at.azimuth;
+        base.inclination = at.inclination;
+        base.distance = at.distance;
+        base.roll = lerp(from.roll, target.roll, smootherstep(t));
+        show();
         if (t < 1) return { pose, landed: false };
-        landed = { ...pose };
+        landed = { ...base };
         held = 0;
         return { pose, landed: true };
       }
       held += dt;
       if (!instant()) {
-        /* The orbit eases up to its rate; the push eases over the whole hold. */
-        pose.azimuth =
-          landed.azimuth + drift * (held - DRIFT_RAMP * (1 - Math.exp(-held / DRIFT_RAMP)));
+        /* The push eases over the whole hold. */
         const along = hold > 0 ? Math.min(1, held / hold) : 1;
-        pose.distance = landed.distance * (1 - creep * smootherstep(along));
+        base.distance = landed.distance * (1 - creep * smootherstep(along));
       }
+      show();
       if (held >= hold) aim(pick());
       return { pose, landed: false };
     },

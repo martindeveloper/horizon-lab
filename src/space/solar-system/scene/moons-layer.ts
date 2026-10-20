@@ -31,7 +31,7 @@ type MoonSlot = {
 };
 
 export function createMoonsLayer(
-  { scope, looks, pxWorld, lod }: SolarKit,
+  { scope, looks, camera, pxWorld, lod }: SolarKit,
   parent: Object3D,
   globes: Globes,
   place: PlaceLabel,
@@ -74,14 +74,17 @@ export function createMoonsLayer(
        would whirl them). A selected planet's system is magnified about the
        planet until its innermost moon clears the marker, but never past the
        planet's distance from the Sun; True size keeps every distance real. */
-    update({ now, show, sel, dist, present: today }: SolarFrame) {
+    update({ now, show, sel, present: today }: SolarFrame) {
       const day = Math.floor(now.getTime() / 86_400_000);
       const era = present.to(today);
       const labelled = names.to(show.names);
-      /** Screen pixels per world unit at the aim. */
-      const perPx = 1 / pxWorld(dist, 1);
       for (const system of systems) {
         const { host } = system;
+        /* Pixel sizes at the planet, not the aim: a far system (Charon seen from Mars) is a
+           point, so it neither shows nor labels; at the aim the two agree. */
+        const range = Math.max(1e-12, camera.position.distanceTo(host.position));
+        /** Screen pixels per world unit at the planet. */
+        const perPx = 1 / pxWorld(range, 1);
         const selected = (sel?.kind === "planet" || sel?.kind === "named") && sel.id === system.id;
         const focus = system.focus.to(selected);
         const shown =
@@ -94,11 +97,11 @@ export function createMoonsLayer(
         /* The selected system magnifies smoothly as the selection eases in. */
         let magnify = 1;
         if (shown > 0 && focus > 0 && !show.trueSize) {
-          const clear = Math.max(host.extent + pxWorld(dist, MOON_CLEAR_PX), pxWorld(dist, 26));
+          const clear = Math.max(host.extent + pxWorld(range, MOON_CLEAR_PX), pxWorld(range, 26));
           const room = host.position.length() / system.outer;
           magnify = 1 + (Math.max(1, Math.min(clear / system.inner, room)) - 1) * focus;
         }
-        const hidden = host.extent + (show.trueSize ? 0 : pxWorld(dist, 3));
+        const hidden = host.extent + (show.trueSize ? 0 : pxWorld(range, 3));
         const [from, to] = selected ? SELECTED_PX : SEPARATE_PX;
         system.reach = 0;
         for (const slot of system.moons) {
@@ -115,7 +118,7 @@ export function createMoonsLayer(
             const real = moon.radiusKm / AU_KM;
             const radius = show.trueSize
               ? real
-              : Math.max(real * magnify, pxWorld(dist, slot.dotPx));
+              : Math.max(real * magnify, pxWorld(range, slot.dotPx));
             /* Markers grow in; true size never changes size. */
             mesh.scale.setScalar(show.trueSize ? radius : radius * presence);
             system.reach = Math.max(

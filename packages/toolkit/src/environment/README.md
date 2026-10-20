@@ -12,8 +12,9 @@ touches no browser globals.
   when deciding, so a preference changed while the page is open applies at once.
   Spell the breakpoint through these, never as a literal, so layout code and the
   stylesheet's `md` agree.
-- `prefersReducedMotion()`: a one-off snapshot, false on the server or where
-  `matchMedia` is missing. Use it for decisions made once, such as a store's
+- `WIDE_GAMUT_QUERY`: a screen that shows Display P3, where wide colour can be offered.
+- `prefersReducedMotion()` and `showsWideGamut()`: one-off snapshots, false on the server
+  or where `matchMedia` is missing. Use them for decisions made once, such as a store's
   initial state.
 
 Reduced motion stills automatic movement (rotation, drifting, flights, pulses);

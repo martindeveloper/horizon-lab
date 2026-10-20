@@ -28,7 +28,7 @@ export type DriftStore<S extends DriftSlice> = { getState: () => S };
  * state, its music, and the controls the immersive view calls. The caller selects `state` from
  * its own store hook (a hook passed in would be called dynamically, which the rules of hooks
  * forbid); `store` only serves the controls. `caption` is the one readout shown under them
- * (the Orrery's clock), if the simulation has one.
+ * (the Orrery's clock, Deep Field's distance), if the simulation has one.
  */
 export function useSimulationDrift<S extends DriftSlice>(
   state: DriftState,

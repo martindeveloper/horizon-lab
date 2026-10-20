@@ -46,9 +46,6 @@ export function canvasScale(dpr: number, quality: RenderQuality, antialias: Canv
   return antialias === "supersample" ? Math.min(MOST_PIXELS, base * 2) : base;
 }
 
-/** Whether this screen shows Display P3, so wide colour can be offered. */
-export const WIDE_GAMUT_QUERY = "(color-gamut: p3)";
-
 /** The gamut to draw in: P3 when the visitor asked for wide colour and the screen shows it. */
 export function drawingGamut(wide: boolean, screenP3: boolean): Gamut {
   return wide && screenP3 ? "p3" : "srgb";

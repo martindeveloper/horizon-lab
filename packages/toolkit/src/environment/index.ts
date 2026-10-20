@@ -15,6 +15,8 @@ export const WIDE_LAYOUT_QUERY = `${WIDE_QUERY} and (min-height: 30rem)`;
  */
 export const PHONE_QUERY =
   "(pointer: coarse) and (max-width: 47.98rem), (pointer: coarse) and (max-height: 29.98rem)";
+/** A screen that shows Display P3: wide colour can be offered. */
+export const WIDE_GAMUT_QUERY = "(color-gamut: p3)";
 
 function matches(query: string) {
   return typeof window !== "undefined" && typeof window.matchMedia === "function"
@@ -28,4 +30,9 @@ function matches(query: string) {
  */
 export function prefersReducedMotion() {
   return matches(REDUCED_MOTION_QUERY);
+}
+
+/** A snapshot: whether the screen shows Display P3; false on the server. */
+export function showsWideGamut() {
+  return matches(WIDE_GAMUT_QUERY);
 }

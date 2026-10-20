@@ -59,6 +59,7 @@ export const benchTarget: BenchTarget = {
     let spin = settings.spin;
     const bloom = scene.bloom ? bloomSettings(scene.quality, false, settings.exposure) : null;
     const lens = scene.lens ? lensSettings(scene.quality, false, settings.exposure) : null;
+    const gamut = scene.wideColour ? "p3" : "srgb";
 
     const gl = canvas.getContext("webgl2");
     if (!gl) throw new Error("WebGL 2 is unavailable");
@@ -72,7 +73,7 @@ export const benchTarget: BenchTarget = {
         }
         writeCamera(uniforms, pose, spin);
         writeScene({ ...settings, spin, gravity: true }, frame.time, steps);
-        pass.render({ bloom, lens });
+        pass.render({ bloom, lens, gamut });
       },
       describe: () => ({
         azimuth: pose.azimuth,
@@ -83,6 +84,7 @@ export const benchTarget: BenchTarget = {
         fovDeg: (uniforms.uFov.value * 180) / Math.PI,
         bloom: bloom !== null,
         lens: lens !== null,
+        wideColour: gamut === "p3",
       }),
       dispose() {
         input?.dispose();

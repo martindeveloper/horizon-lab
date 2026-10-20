@@ -18,10 +18,10 @@ export type DeepFieldDriftShot = Omit<DriftPoseShot, keyof OrbitPose> & {
 
 export const DRIFT: DriftProgramme<DeepFieldDriftShot> = {
   music: { track: "Drifting Probe" },
-  camera: { flight: 26, hold: 12, variance: 0.35, drift: 0.008, creep: 0.06, order: "sequence" },
+  camera: { flight: 26, hold: 12, variance: 0.35, drift: 0.012, creep: 0.06, order: "sequence" },
   shots: [
     /* Home, from wherever the camera was: a long dive. */
-    { view: "inner", pose: { inclination: 0.95 }, flight: { lift: 0.12, lead: 0.3 }, drift: 0.012 },
+    { view: "inner", pose: { inclination: 0.95 }, flight: { lift: 0.12, lead: 0.3 }, drift: 0.016 },
     { view: "giants", pose: { inclination: 0.8 }, flight: { duration: 22, lead: -0.3 } },
     { view: "heliosphere", flight: { duration: 24, lift: 0.1 } },
     { view: "oort", flight: { duration: 30, lead: 0.2 } },
@@ -33,8 +33,9 @@ export const DRIFT: DriftProgramme<DeepFieldDriftShot> = {
     { view: "laniakea", flight: { duration: 26 } },
     { view: "cosmic-web", flight: { duration: 28, lead: 0.3 } },
     { view: "observable-universe", flight: { duration: 30 }, hold: 18, creep: -0.04 },
-    /* And all the way back in, in two long falls. */
+    /* And all the way back in, in two long falls: the second lands inside the heliopause, whose
+       faint bubble would fill the whole frame from just outside it. */
     { view: "galaxy", pose: { inclination: 1.1 }, flight: { duration: 36, lift: 0.1 }, hold: 14 },
-    { view: "kuiper", flight: { duration: 34, lead: 0.3 } },
+    { view: "kuiper", pose: { distance: 95 }, flight: { duration: 34, lead: 0.3 } },
   ],
 };

@@ -44,6 +44,9 @@ import {
   type TexelPainter,
 } from "@horizon/toolkit/scene";
 
+import { AIR, airUniforms, type Air } from "./air";
+import AIR_FRAG from "./shaders/air.frag.glsl";
+import AIR_VERT from "./shaders/air.vert.glsl";
 import FOCUS_FRAG from "./shaders/focus.frag.glsl";
 import FOCUS_VERT from "./shaders/focus.vert.glsl";
 import GAS_FRAG from "./shaders/gas.frag.glsl";
@@ -148,6 +151,38 @@ function lit(map: Texture, look: Surface, defines?: Record<string, string>) {
   });
 }
 
+/** The samples a shell marches until a quality says otherwise (the full tier's). */
+const AIR_STEPS = 12;
+
+/**
+ * A body's atmosphere shell for its close-up (air.frag.glsl): single scattering through a
+ * thin shell over the globe, premultiplied over the surface. `steps` is the march's sample
+ * count, a compile-time loop bound; the camera and Sun uniforms are written each frame by the
+ * close-up.
+ */
+function airMaterial(air: Air, steps: number) {
+  const u = airUniforms(air);
+  return new ShaderMaterial({
+    defines: { AIR_STEPS: String(steps) },
+    uniforms: {
+      uCamera: { value: new Vector3() },
+      uSun: { value: new Vector3(0, 0, 1) },
+      uPlanet: { value: u.planet },
+      uScale: { value: new Vector2(u.scale[0], u.scale[1]) },
+      uRayleigh: { value: new Vector3(...u.rayleigh) },
+      uMie: { value: new Vector3(...u.mie) },
+      uMieG: { value: u.g },
+      uDeep: { value: u.deep },
+      uLight: { value: u.light },
+    },
+    vertexShader: AIR_VERT,
+    fragmentShader: AIR_FRAG,
+    transparent: true,
+    premultipliedAlpha: true,
+    depthWrite: false,
+  });
+}
+
 /**
  * Limb and haze per body. Minnaert k from disc-resolved photometry: airless
  * regolith ≈ 0.55–0.6 (Moon, Mercury, Pluto), Mars ≈ 0.8, cloud-topped
@@ -166,6 +201,8 @@ const SURFACES: Record<PlanetId | NamedId | MoonId, Surface> = {
   sedna: { minnaert: 0.6 },
   halley: { atmos: ["#d5e2ea", 0.1], minnaert: 0.6, ambient: 0.05 },
   moon: { minnaert: 0.55 },
+  phobos: { minnaert: 0.55 },
+  deimos: { minnaert: 0.55 },
   io: { minnaert: 0.6 },
   europa: { minnaert: 0.55 },
   ganymede: { minnaert: 0.55 },
@@ -191,6 +228,8 @@ const MAP_SIZE: Record<BodyId, number> = {
   sedna: 128,
   halley: 128,
   moon: 256,
+  phobos: 128,
+  deimos: 128,
   io: 128,
   europa: 128,
   ganymede: 128,
@@ -287,6 +326,14 @@ export function createLooks(light = false) {
   const moons: Partial<Record<MoonId, ShaderMaterial>> = {};
   const moonMap = (id: MoonId) => (moonMaps[id] ??= texture(id));
   const moon = (id: MoonId) => (moons[id] ??= lit(measured[id] ?? moonMap(id), SURFACES[id]));
+  /* Atmosphere shells are created the first time a close-up of their body opens. */
+  let airSteps = AIR_STEPS;
+  const airs: Partial<Record<BodyId, ShaderMaterial>> = {};
+  const air = (id: BodyId) => {
+    const look = AIR[id];
+    if (!look) return undefined;
+    return (airs[id] ??= airMaterial(look, airSteps));
+  };
   const sunMap = texture("sun");
   const sun = new ShaderMaterial({
     uniforms: { map: { value: sunMap } },
@@ -409,6 +456,17 @@ export function createLooks(light = false) {
       if (map?.value === texture) map.value = paintedOf(id);
       texture.dispose();
     },
+    /** The scattering shell over a body with air, for its close-up; none for the rest. */
+    air,
+    /** Gives every shell the quality's march: `steps` samples along each view ray. */
+    setAirSteps(steps: number) {
+      if (steps === airSteps) return;
+      airSteps = steps;
+      for (const material of Object.values(airs)) {
+        material.defines.AIR_STEPS = String(steps);
+        material.needsUpdate = true;
+      }
+    },
     /** Width of a body's painted map, px. */
     mapWidth: size,
     /** A finished detailed map (a painted `SurfaceJob`) as a texture; disposed by the caller. */
@@ -418,6 +476,7 @@ export function createLooks(light = false) {
       for (const tex of Object.values(measured)) tex.dispose();
       for (const tex of Object.values(moonMaps)) tex.dispose();
       for (const mat of Object.values(moons)) mat.dispose();
+      for (const mat of Object.values(airs)) mat.dispose();
       for (const mat of Object.values(materials)) {
         if (canDispose(mat)) mat.dispose();
         else if (isRecord(mat)) {

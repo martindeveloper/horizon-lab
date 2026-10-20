@@ -6,16 +6,16 @@ import { Rail, RailSection, SwitchGroup } from "@/components/simulations/rail";
 import {
   GlowSwitch,
   RenderSection,
+  WideColourSwitch,
   type AntialiasMode,
 } from "@/components/simulations/render-settings";
 import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
 import { FULL_RANGE, RESOLUTION_RANGE } from "../lib/model/scenes";
-import type { CanvasAntialias } from "../lib/quality";
+import { canvasShowsP3, type CanvasAntialias } from "../lib/quality";
 import { useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
-import { useWideGamut } from "./use-gamut";
 import { useFormedLines, useObservation } from "./use-spectrum";
 
 /** How many of an element's lines the panel lists. */
@@ -115,8 +115,6 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const antialias = useSpectroscopy((s) => s.antialias);
   const wideColour = useSpectroscopy((s) => s.wideColour);
   const glow = useSpectroscopy((s) => s.glow);
-  const wideGamut = useWideGamut();
-  const tRender = useTranslations("render");
   const api = useSpectroscopy.getState;
   const [lo, hi] = RESOLUTION_RANGE;
   const toSlider = (R: number) => Math.round((Math.log(R / lo) / Math.log(hi / lo)) * 1000);
@@ -188,11 +186,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         onReset={() => api().resetView()}
       >
         <GlowSwitch on={glow} onToggle={() => api().setGlow(!glow)} />
-        {wideGamut ? (
-          <SwitchRow on={wideColour} onToggle={() => api().setWideColour(!wideColour)}>
-            {tRender("wideColour")}
-          </SwitchRow>
-        ) : null}
+        <WideColourSwitch
+          canvas={canvasShowsP3}
+          on={wideColour}
+          onToggle={() => api().setWideColour(!wideColour)}
+        />
       </RenderSection>
     </Rail>
   );

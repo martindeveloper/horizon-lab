@@ -30,6 +30,7 @@ import {
 } from "@/space/solar-system/scene/solar-system";
 import type { BodyId, Vec3 } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
+import { clamp01, smootherstep } from "@horizon/toolkit/math";
 import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
 import {
   SOLAR_GOLD,
@@ -60,6 +61,9 @@ import { createPicking } from "./picking";
 import { createSkyLayer } from "./sky-layer";
 import { createSolarActivityLifecycle } from "./solar-activity-lifecycle";
 
+/** Seconds the Motion toggle takes to ease the orbits to a stop or back up to speed. */
+const MOTION_RAMP = 0.7;
+
 export function createOrreryEngine({
   canvas,
   host,
@@ -78,12 +82,15 @@ export function createOrreryEngine({
     sceneHost.setLens({ enabled: useOrrery.getState().lens, ...quality.lens });
     const kit = createSolarKit(basics);
     const { looks, lod } = kit;
+    looks.setAirSteps(quality.closeUp.airSteps);
     const scene = new Scene();
 
     const store = useOrrery;
     const reduceMotion = window.matchMedia(REDUCED_MOTION_QUERY);
     const reducedMotion = prefersReducedMotion();
     let driftYears = 0;
+    /** Ramp position of the Motion toggle, 0 (held) to 1 (full rate); eased so orbits glide to a stop and back. */
+    let motionRamp = store.getState().show.drift ? 1 : 0;
 
     const rig = createCameraRig(camera, {
       reduceMotion,
@@ -134,6 +141,7 @@ export function createOrreryEngine({
     const drift = createDriftDirector(rig, store, {
       reduceMotion,
       closeUp: () => closeUp.current,
+      moonPose: (base) => closeUp.moonPose(base),
     });
     /* The drift veils the line art: orbits, the grid and rulers fade, the bodies and sky stay. */
     const veil = createLineVeil();
@@ -200,6 +208,7 @@ export function createOrreryEngine({
       return (
         s.playing ||
         (s.show.drift && !closeUp.current) ||
+        motionRamp !== (s.show.drift ? 1 : 0) ||
         rig.moving ||
         guide.busy() ||
         drift.busy ||
@@ -311,6 +320,7 @@ export function createOrreryEngine({
       activity.current?.setSteps(quality.activitySteps);
       maps.refilter();
       closeUp.refilter();
+      looks.setAirSteps(quality.closeUp.airSteps);
       engine.invalidate();
     });
     invalidateOnMotionChange(scope, engine, reduceMotion);
@@ -365,11 +375,13 @@ export function createOrreryEngine({
         const yearsAgo = advanceClock(state, dt);
         /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. The
            drift holds the rate down, so the inner planets glide through its wide framings. */
-        const motion = show.drift && !closeUp.current;
+        const step = reduceMotion.matches ? 1 : dt / MOTION_RAMP;
+        motionRamp = clamp01(motionRamp + (show.drift ? step : -step));
+        const motion = motionRamp > 0 && !closeUp.current;
         const driftRate = motion
           ? Math.min(driftYearsPerSecond(dist), state.drift === "off" ? Infinity : DRIFT.clock)
           : 0;
-        driftYears += dt * driftRate;
+        driftYears += dt * driftRate * smootherstep(motionRamp);
 
         const frame: SolarFrame = {
           ...momentAt(yearsAgo, driftYears),
@@ -398,7 +410,7 @@ export function createOrreryEngine({
 
         hud.update(dt, invalidated || engine.dirty, {
           dist,
-          driftRate,
+          driftRate: show.drift ? driftRate : 0,
           driftYears,
           syncView: !rig.flying && !closeUp.current && !state.guideOpen,
           angles: pose,

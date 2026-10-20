@@ -1,16 +1,19 @@
-import { clamp, smootherstep } from "@horizon/toolkit/math";
 /**
  * The Orrery's drift on its rig (the toolkit's rig drift). The programme's framed shots fly on
  * the drift camera; its close-ups are handoffs: the director selects the body and opens the
  * close-up, whose own flight takes the camera in, then circles the body slowly and drifts
- * nearer for the hold, lets the selection go so the close-up flies out, and resumes the drift
- * from there. Flying on after a pause leaves any close-up first.
+ * nearer for the hold, swinging out midway to show the body with its largest moon, lets the
+ * selection go so the close-up flies out, and resumes the drift from there. Flying on after a
+ * pause leaves any close-up first.
  */
+import type { OrbitPose } from "@horizon/toolkit/camera";
+import { clamp, lerp, smootherstep } from "@horizon/toolkit/math";
 import { createRigDrift } from "@horizon/toolkit/scene";
 
 import { DRIFT } from "../drift";
 import { canCloseUp, type useOrrery } from "../store";
 import type { CameraRig } from "./camera-rig";
+import { moonSwing } from "./close-up-flight";
 
 /** What the director needs to know about a close-up in progress. */
 type CloseUpFrame = { phase: "in" | "on" | "out" };
@@ -21,15 +24,27 @@ const SWAY = 0.12;
 /** A visit to a body: waiting for the flight in, circling, or waiting for the flight out. */
 type Visit =
   | { phase: "in" }
-  | { phase: "on"; held: number; hold: number; distance: number; inclination: number }
+  | {
+      phase: "on";
+      held: number;
+      hold: number;
+      distance: number;
+      inclination: number;
+      azimuth: number;
+    }
   | { phase: "out" };
 
 export function createDriftDirector(
   rig: CameraRig,
   store: typeof useOrrery,
-  options: { reduceMotion: { matches: boolean }; closeUp: () => CloseUpFrame | null },
+  options: {
+    reduceMotion: { matches: boolean };
+    closeUp: () => CloseUpFrame | null;
+    /** The pose that frames the visited body with its largest moon, from a pose; null without one. */
+    moonPose: (base: OrbitPose) => OrbitPose | null;
+  },
 ) {
-  const { reduceMotion, closeUp } = options;
+  const { reduceMotion, closeUp, moonPose } = options;
   let visit: Visit | null = null;
 
   /** Begins the close-up the handoff names, or skips it when the clock forbids one. */
@@ -43,16 +58,31 @@ export function createDriftDirector(
     visit = { phase: "in" };
   }
 
-  /** Circles the body and drifts nearer through the hold. */
+  /** Circles the body and drifts nearer through the hold, swinging out to its moon midway. */
   function circle(at: Extract<Visit, { phase: "on" }>, dt: number) {
     at.held += dt;
     if (!reduceMotion.matches) {
-      const along = smootherstep(Math.min(1, at.held / at.hold));
+      const t = Math.min(1, at.held / at.hold);
       const ramp = 1 - Math.exp(-at.held / 3);
-      rig.pose.azimuth += DRIFT.closeUp.orbit * ramp * dt;
-      rig.pose.inclination = at.inclination + SWAY * Math.sin((at.held / at.hold) * Math.PI);
+      at.azimuth += DRIFT.closeUp.orbit * ramp * dt;
       const { min, max } = rig.limits();
-      rig.pose.distance = clamp(at.distance * DRIFT.closeUp.dive ** along, min, max);
+      const base = {
+        azimuth: at.azimuth,
+        inclination: at.inclination + SWAY * Math.sin(t * Math.PI),
+        distance: clamp(at.distance * DRIFT.closeUp.dive ** smootherstep(t), min, max),
+      };
+      const swing = moonSwing(t, DRIFT.closeUp.moon);
+      const moon = swing > 0 ? moonPose(base) : null;
+      Object.assign(
+        rig.pose,
+        moon
+          ? {
+              azimuth: lerp(base.azimuth, moon.azimuth, swing),
+              inclination: lerp(base.inclination, moon.inclination, swing),
+              distance: Math.exp(lerp(Math.log(base.distance), Math.log(moon.distance), swing)),
+            }
+          : base,
+      );
       rig.settle();
     }
     if (at.held >= at.hold) {
@@ -77,6 +107,7 @@ export function createDriftDirector(
           hold,
           distance: rig.pose.distance,
           inclination: rig.pose.inclination,
+          azimuth: rig.pose.azimuth,
         };
       }
       return;

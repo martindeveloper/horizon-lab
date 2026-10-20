@@ -97,8 +97,8 @@ uniform neutral fallback while the observation map loads.
 The Moon, Io, Europa, Ganymede, Callisto, Triton and Charon have spacecraft
 mosaics. The host ships one 1024-pixel tier for each, with plain missing-data
 fill. Some sources are monochrome or enhanced multispectral colour; metadata
-and the host's credits document these limits. Venus, Titan, Sedna and Halley
-retain illustrative maps. Fallback painters remain available if an asset fails.
+and the host's credits document these limits. Venus, Titan, Sedna, Halley,
+Phobos and Deimos retain illustrative maps. Fallback painters remain available if an asset fails.
 
 ## Painted surfaces (`@horizon/toolkit/bodies/surfaces`)
 

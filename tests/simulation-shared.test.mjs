@@ -114,7 +114,12 @@ test("the store's render settings reach the engine: the level now, later ones af
   await settle();
   assert.deepEqual(levels, ["standard", "economy"], "quick changes arrive as the last");
   /* A reset clears the choice; the device's default comes back, not the last mode. */
-  store.setState({ antialias: null, quality: "standard", bloom: false, lens: false });
+  store.setState({
+    antialias: null,
+    quality: "standard",
+    bloom: false,
+    lens: false,
+  });
   assert.equal(store.getState().antialias, "off");
   assert.equal(host.antialias, "off");
   assert.deepEqual(host.bloom.at(-1), { enabled: false });
@@ -159,9 +164,9 @@ test("space scenes: Standard keeps each device's old budgets, the other levels m
   assert.equal(spaceQuality("economy", false).resolution.fps, 30);
   /* The level sizes the effects, never switches them: a longer, finer star up the levels. */
   const lens = (q) => spaceQuality(q, false).lens;
-  assert.ok(
-    lens("economy").taps < lens("standard").taps && lens("standard").taps < lens("max").taps,
-  );
+  /* Lights are found in cells of the same size of the frame, whatever the chain's scale. */
+  for (const q of ["economy", "standard", "max"])
+    assert.equal(spaceQuality(q, false).bloom.scale / 2 ** lens(q).level, 1 / 32);
   assert.ok(
     lens("economy").reach < lens("standard").reach && lens("standard").reach < lens("max").reach,
   );
@@ -184,22 +189,23 @@ test("the black hole's bloom and lens follow the exposure, so a darker scene glo
     bloomSettings("standard", false, 0.5),
     "the spikes read the bloom's mask",
   );
-  assert.ok(
-    bright.threshold > bright.mask.threshold,
-    "only light the bloom holds brightest spikes",
-  );
   /* The level sizes the star; touch or battery operation takes the small one. */
-  assert.ok(lensSettings("economy", false, 1).taps < lensSettings("max", false, 1).taps);
+  assert.ok(lensSettings("economy", false, 1).reach < lensSettings("max", false, 1).reach);
   assert.deepEqual(
     {
-      taps: lensSettings("standard", true, 1).taps,
+      level: lensSettings("standard", true, 1).level,
       reach: lensSettings("standard", true, 1).reach,
     },
     {
-      taps: lensSettings("economy", false, 1).taps,
+      level: lensSettings("economy", false, 1).level,
       reach: lensSettings("economy", false, 1).reach,
     },
   );
+  /* Lights are found in cells of the same share of the frame, whatever the chain's scale. */
+  for (const q of ["economy", "standard", "max"]) {
+    const s = lensSettings(q, false, 1);
+    assert.equal(s.mask.scale / 2 ** s.level, 1 / 32);
+  }
 });
 
 test("the shared space copy merges under a simulation's own, and is never written twice", () => {

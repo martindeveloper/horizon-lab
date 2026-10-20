@@ -9,6 +9,7 @@ import { ControlRow, SegmentedControl, SwitchRow } from "@horizon/toolkit/ui";
 
 import { FrameRateSwitches } from "./frame-rate";
 import { RailSection } from "./rail";
+import { useWideGamutScreen } from "./use-wide-gamut";
 
 /* Listed here, not imported: the rendering module's values would pull the renderer into the page. */
 const QUALITIES: readonly RenderQuality[] = ["economy", "standard", "cinema", "max"];
@@ -29,7 +30,7 @@ function EffectSwitch({
   on,
   onToggle,
 }: {
-  name: "bloom" | "lens" | "glow";
+  name: "bloom" | "lens" | "glow" | "wideColour";
   on: boolean;
   onToggle: () => void;
 }) {
@@ -51,6 +52,20 @@ export const LensSwitch = (props: Switch) => <EffectSwitch name="lens" {...props
 
 /** The Rendering section's Glow switch, for a 2D stage: its lights get a soft blurred layer. */
 export const GlowSwitch = (props: Switch) => <EffectSwitch name="glow" {...props} />;
+
+/**
+ * The Rendering section's Wide colour switch: the canvas shows Display P3. Offered only where
+ * the screen shows it; for a WebGL stage, where the browser's WebGL canvases can switch too;
+ * `canvas` adds a stage's own check, asked only on the client once the screen qualifies.
+ */
+export function WideColourSwitch({
+  canvas,
+  webgl = false,
+  ...props
+}: Switch & { canvas?: () => boolean; webgl?: boolean }) {
+  const screen = useWideGamutScreen(webgl);
+  return screen && (canvas?.() ?? true) ? <EffectSwitch name="wideColour" {...props} /> : null;
+}
 
 /** Puts a settings panel back as a visit starts; the last thing in it. */
 function ResetButton({ label, onReset }: { label: string; onReset: () => void }) {

@@ -10,7 +10,9 @@ import { DRIFT as BLACK_HOLE } from "../src/features/black-hole/lib/drift.ts";
 import { MAX_DIST, MIN_DIST } from "../src/features/black-hole/lib/physics.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
 import { DRIFT as DEEP_FIELD } from "../src/features/deep-field/lib/drift.ts";
+import { HELIOPAUSE_AU } from "../src/features/deep-field/lib/model/probes.ts";
 import { VIEW_IDS } from "../src/features/deep-field/lib/model/view-ids.ts";
+import { viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { DRIFT as ORRERY } from "../src/features/orrery/lib/drift.ts";
 import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
@@ -35,8 +37,20 @@ test("every drift programme is one the camera and the music can play", () => {
       }
     }
   }
-  for (const shot of DEEP_FIELD.shots)
+  for (const shot of DEEP_FIELD.shots) {
     assert.ok(VIEW_IDS.includes(shot.view), `deep field view ${shot.view}`);
+    /* Just outside the heliopause its bubble fills the frame: no hold may land or creep there,
+       at any spread of the distance (±0.3 e-folds at full variance). */
+    const distance = shot.pose?.distance ?? worldDistance(viewById(shot.view).ly);
+    const spread = Math.exp(0.3 * (DEEP_FIELD.camera.variance ?? DRIFT_DEFAULTS.variance));
+    const creep = shot.creep ?? DEEP_FIELD.camera.creep ?? DRIFT_DEFAULTS.creep;
+    const nearest = (distance / spread) * Math.min(1, 1 - creep);
+    const farthest = distance * spread * Math.max(1, 1 - creep);
+    assert.ok(
+      farthest < HELIOPAUSE_AU || nearest > HELIOPAUSE_AU * 2,
+      `deep field ${shot.view} holds clear of the heliopause (${nearest}–${farthest} au)`,
+    );
+  }
   for (const shot of ORRERY.shots) {
     if ("closeUp" in shot) {
       assert.ok(
