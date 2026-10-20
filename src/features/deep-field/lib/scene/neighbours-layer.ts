@@ -38,7 +38,9 @@ export function createNeighboursLayer(
   },
 ) {
   const { place, rulers, labels, distanceText } = deps;
+  /* Proxima's distance, drawn as a ring: annotation, which the drift's veil fades with the lines. */
   const ring = new Mesh(scope.own(new TorusGeometry(PROXIMA_AU, 1_800, 8, 80)), looks.proxima);
+  ring.userData.annotation = true;
   ring.rotation.x = Math.PI / 2;
   ring.userData.pick = { kind: "star", id: "proxima" } satisfies Selection;
   parent.add(ring);

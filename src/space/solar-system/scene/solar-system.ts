@@ -27,7 +27,7 @@ const REACH = 1_300_000;
 
 const BODY_KEYS = ["sun", ...PLANET_IDS, ...NAMED.map((b) => b.id)];
 /** Labels the scene places, hidden together before the Sun exists. */
-export const SOLAR_LABEL_KEYS = [...BODY_KEYS, "snowLine", ...MOON_IDS];
+export const SOLAR_LABEL_KEYS = [...BODY_KEYS, "snowLine", "oortInner", "oortOuter", ...MOON_IDS];
 /** Ruler anchors the scene writes: the Sun first (home), then the planets and named bodies. */
 export const SOLAR_RULER_KEYS = BODY_KEYS;
 
@@ -120,7 +120,7 @@ export function createSolarSystem(
     ...planets.named.map(({ body, mesh }) => ({ key: body.id, mesh })),
     ...moons.labelBodies,
   ]);
-  const populations = createPopulationsLayer(kit, root, deps.swarms);
+  const populations = createPopulationsLayer(kit, root, deps.swarms, place);
   /* The reticle sits on a moon where its (maybe magnified) system draws it. */
   const focus = createFocusRing(kit, root, (sel: SolarSelection) =>
     sel.kind === "moon" ? moons.drawnAt(sel.id) : undefined,

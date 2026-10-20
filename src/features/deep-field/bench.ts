@@ -84,8 +84,8 @@ export const benchTarget: BenchTarget = {
     return {
       ...instance,
       describe: () => {
-        const { view, quality, antialias, bloom, lens } = store.getState();
-        return { view, quality, antialias: antialias ?? "default", bloom, lens };
+        const { view, quality, antialias, bloom, lens, drift } = store.getState();
+        return { view, quality, antialias: antialias ?? "default", bloom, lens, drift };
       },
     };
   },

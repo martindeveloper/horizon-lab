@@ -12,7 +12,7 @@ import {
 
 import { keplerPosition, type Elements } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
-import { fade, SOLAR_GOLD } from "@horizon/toolkit/scene";
+import { fade, type PlaceLabel, SOLAR_GOLD } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import type { SwarmCounts } from "../../quality";
@@ -45,6 +45,7 @@ export function createPopulationsLayer(
   { scope, looks, tight, dpr, pxWorld, lod }: SolarKit,
   parent: Object3D,
   counts: SwarmCounts,
+  place: PlaceLabel,
 ) {
   const rock = scope.own(new SphereGeometry(1, tight ? 16 : 24, tight ? 12 : 16));
   const seeds = new Float32Array(TRACERS.length);
@@ -75,23 +76,29 @@ export function createPopulationsLayer(
   kuiperHit.userData.pick = { kind: "population", id: "kuiper" } satisfies SolarSelection;
   parent.add(belt.points, trojanSwarm.points, kuiper.points, oort.points, beltHit, kuiperHit);
 
+  /* The disc's tint and the Oort cloud's shells are boundaries drawn as surfaces: annotation, which a
+     drift's veil fades with the lines; the swarms beneath them stay. */
   const diskRing = new Mesh(scope.own(new RingGeometry(16, 34, 64)), looks.disk);
+  diskRing.userData.annotation = true;
   diskRing.rotation.x = Math.PI / 2;
   diskRing.renderOrder = -1;
   const shellInner = new Mesh(
     scope.own(new SphereGeometry(OORT_SHELLS_AU[0], 40, 24)),
     looks.shellInner,
   );
+  shellInner.userData.annotation = true;
   const shellOuter = new Mesh(
     scope.own(new SphereGeometry(OORT_SHELLS_AU[1], 40, 24)),
     looks.shellOuter,
   );
+  shellOuter.userData.annotation = true;
   parent.add(diskRing, shellInner, shellOuter);
   const shellOpacity = [
     Number(looks.shellInner.uniforms.opacity!.value),
     Number(looks.shellOuter.uniforms.opacity!.value),
   ];
   /* Display switches fade their layers in and out. */
+  const names = lod.fader();
   const kuiperOn = lod.fader();
   const oortOn = lod.fader();
   const diskOn = lod.fader();
@@ -198,6 +205,10 @@ export function createPopulationsLayer(
       shellInner.visible = shellOuter.visible = shells > 0.004;
       looks.shellInner.uniforms.opacity!.value = shellOpacity[0]! * shells;
       looks.shellOuter.uniforms.opacity!.value = shellOpacity[1]! * shells;
+      /* Each shell is named at its pole, where the label sits clear of the swarm inside it. */
+      const labelled = names.to(show.names) * shells;
+      place("oortInner", 0, OORT_SHELLS_AU[0], 0, labelled);
+      place("oortOuter", 0, OORT_SHELLS_AU[1], 0, labelled);
     },
   };
 }

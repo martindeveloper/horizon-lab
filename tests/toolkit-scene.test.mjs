@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { Color, Group, PerspectiveCamera } from "three";
+import {
+  Color,
+  Group,
+  Mesh,
+  MeshBasicMaterial,
+  PerspectiveCamera,
+  Scene,
+  SphereGeometry,
+} from "three";
 
 import { atViewScale, nearestView } from "@horizon/toolkit/camera";
 import { DisposalScope } from "@horizon/toolkit/rendering";
@@ -420,4 +428,34 @@ test("a line veil fades every line out together and gives the layers' own state 
   veil.step(0.6, true);
   assert.equal(veil.presence, 1);
   assert.equal(veil.busy, false);
+});
+
+test("the line veil fades annotation surfaces with the lines and leaves content alone", () => {
+  const scene = new Scene();
+  const line = lineOf(0xffffff, 0.5).line;
+  const content = lineOf(0xffffff, 0.5).line;
+  content.userData.content = true;
+  const shell = new Mesh(
+    new SphereGeometry(1, 4, 2),
+    new MeshBasicMaterial({ opacity: 0.3, transparent: true }),
+  );
+  shell.userData.annotation = true;
+  const body = new Mesh(new SphereGeometry(1, 4, 2), new MeshBasicMaterial({ opacity: 1 }));
+  scene.add(line, content, shell, body);
+  const veil = createLineVeil(1);
+  veil.step(0.5, false);
+  veil.cover(scene);
+  assert.ok(line.material.opacity < 0.5 && shell.material.opacity < 0.3, "halfway down, both dim");
+  assert.equal(content.material.opacity, 0.5, "content lines keep their opacity");
+  assert.equal(body.material.opacity, 1, "a body is untouched");
+  veil.uncover();
+  assert.equal(line.material.opacity, 0.5);
+  assert.equal(shell.material.opacity, 0.3);
+  veil.step(1, false);
+  veil.cover(scene);
+  assert.equal(line.visible, false, "fully down, lines are hidden");
+  assert.equal(shell.visible, false, "and so is the shell");
+  assert.equal(body.visible, true);
+  veil.uncover();
+  assert.equal(shell.visible, true);
 });

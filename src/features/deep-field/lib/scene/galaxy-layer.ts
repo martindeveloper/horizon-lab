@@ -77,10 +77,12 @@ export function createGalaxyLayer(
   const bulgeHit = new Mesh(scope.own(new SphereGeometry(3_200, 16, 12)), looks.ghost);
   bulgeHit.userData.pick = { kind: "galaxy", id: "bulge" } satisfies Selection;
   /** Dark-matter halo out to R₂₀₀ (~200 kpc, Bland-Hawthorn & Gerhard 2016). */
+  /* The halo is a boundary drawn as a surface: annotation, which the drift's veil fades with the lines. */
   const halo = new Mesh(
     scope.own(new SphereGeometry(convert(HALO_R200_KPC, "kpc", "ly"), 24, 14)),
     looks.halo,
   );
+  halo.userData.annotation = true;
   const diskHit = new Mesh(scope.own(new RingGeometry(48_000, 52_000, 64)), looks.ghost);
   diskHit.rotation.x = Math.PI / 2;
   diskHit.userData.pick = { kind: "galaxy", id: "milkyway" } satisfies Selection;

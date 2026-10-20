@@ -63,9 +63,11 @@ export type LineVeil = ReturnType<typeof createLineVeil>;
 /**
  * A veil over a scene's line art (orbits, grids, rings, rulers, trails): while it is down, every
  * `Line` fades out together and the picture is left to the bodies and the sky. Lines that are
- * content, not annotation (a web's filaments), opt out with `userData.content = true`. Call
- * `step` each frame, then `cover` just before rendering and `uncover` right after, so the
- * layers' own visibility and opacity are never disturbed between frames.
+ * content, not annotation (a web's filaments), opt out with `userData.content = true`; any other
+ * object that is annotation (a boundary drawn as a surface, such as a translucent shell) opts in
+ * with `userData.annotation = true`. Call `step` each frame, then `cover` just before rendering
+ * and `uncover` right after, so the layers' own visibility and opacity are never disturbed
+ * between frames.
  */
 export function createLineVeil(seconds = VEIL_SECONDS) {
   /** 1 with the lines fully shown, 0 with them gone. */
@@ -90,19 +92,21 @@ export function createLineVeil(seconds = VEIL_SECONDS) {
       presence =
         target > presence ? Math.min(target, presence + rate) : Math.max(target, presence - rate);
     },
-    /** Dims or hides every line under `root` for this render. */
+    /** Dims or hides every line, and every object marked annotation, under `root` for this render. */
     cover(root: Object3D) {
       if (presence >= 1) return;
       const k = smootherstep(presence);
       root.traverse((object) => {
-        if (!(object instanceof Line) || object.userData.content === true || !object.visible)
-          return;
+        const annotation =
+          object.userData.annotation === true ||
+          (object instanceof Line && object.userData.content !== true);
+        if (!annotation || !object.visible) return;
         if (k <= 0.002) {
           object.visible = false;
           hidden.push(object);
           return;
         }
-        const material: unknown = object.material;
+        const material: unknown = "material" in object ? object.material : null;
         if (!(material instanceof Material) || dimmed.has(material)) return;
         dimmed.set(material, { opacity: material.opacity, transparent: material.transparent });
         material.transparent = true;

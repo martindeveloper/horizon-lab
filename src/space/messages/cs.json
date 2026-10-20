@@ -54,7 +54,9 @@
     "oberon": "Oberon",
     "triton": "Triton",
     "charon": "Charon",
-    "asteroids": "Pás planetek"
+    "asteroids": "Pás planetek",
+    "oortInner": "Vnitřní Oortův oblak",
+    "oortOuter": "Vnější Oortův oblak"
   },
   "hud": {
     "controls": "Ovládání",

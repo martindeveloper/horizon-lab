@@ -185,8 +185,9 @@ point when given. `createPointWriter(count)` fills one a point at a time:
 many so far, and `geometry()` views what was written; the buffers grow if a
 sketch writes past `count`, so nothing is dropped. `lineOf`, `ownedLine` and
 `rulerOf` are reusable line buffers. `createLineVeil(seconds = 0.8)` fades a
-scene's line art (every `Line`, bar those marked `userData.content = true`) out
-and back together: `step(dt, shown)` eases its `presence`, `cover(root)` just
+scene's line art (every `Line`, bar those marked `userData.content = true`, and any
+other object marked `userData.annotation = true`, such as a boundary drawn as a
+translucent shell) out and back together: `step(dt, shown)` eases its `presence`, `cover(root)` just
 before a render scales each line material's opacity (or hides the line once the
 veil is down) and `uncover()` right after gives everything back, so the layers'
 own visibility and opacity are never disturbed; `busy` asks for frames while it

@@ -66,6 +66,8 @@ export function createReachLayer(
   /* The bubble: a faint fill, and its limb, the circle where the sightline grazes it. */
   const bubble = new Mesh(scope.own(new SphereGeometry(HELIOPAUSE_AU, 48, 32)), looks.heliopause);
   bubble.renderOrder = -1;
+  /* A boundary drawn as a surface: annotation, which the drift's veil fades with the lines. */
+  bubble.userData.annotation = true;
   const bubbleOpacity = looks.heliopause.opacity;
   const limb = ownedLine(scope, LIMB_COLOR, LIMB_OPACITY, RING_SEGMENTS);
   for (let i = 0; i <= RING_SEGMENTS; i++) {

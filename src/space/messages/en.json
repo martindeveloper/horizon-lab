@@ -54,7 +54,9 @@
     "oberon": "Oberon",
     "triton": "Triton",
     "charon": "Charon",
-    "asteroids": "Asteroid belt"
+    "asteroids": "Asteroid belt",
+    "oortInner": "Inner Oort cloud",
+    "oortOuter": "Outer Oort cloud"
   },
   "hud": {
     "controls": "Controls",
