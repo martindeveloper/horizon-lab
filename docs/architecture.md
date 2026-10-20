@@ -484,6 +484,11 @@ Each page or simulation layout also renders `<DebugCrash scope="route" />` so
 They mount only with `DEBUG` from `src/config.ts` (development and previews), and
 without it the stored overrides in `src/lib/debug.ts` are ignored.
 
+`UpdateNotice` (`src/components/shell/`) offers a refresh once a newer deployment is live,
+never reloading itself. `/version.json` is prerendered with this build's `DEPLOYMENT_ID`
+(Vercel's `VERCEL_DEPLOYMENT_ID`, via `next.config.ts`); a visible tab re-reads it on return
+and every 15 minutes. Without an ID nothing runs.
+
 The locale `error.tsx` provides translated retry/catalogue actions and retains
 shared navigation. `global-error.tsx` supplies a standalone recovery document for
 root-layout failures. Next.js retains its own emergency server error HTML; the

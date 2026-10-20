@@ -30,6 +30,9 @@
     "loadingMusic": "Načítám hudbu",
     "desktopNotice": "Nejlépe vynikne na větší obrazovce",
     "closeDesktopNotice": "Zavřít",
+    "updateNotice": "Je k dispozici nová verze",
+    "updateAction": "Aktualizovat",
+    "closeUpdateNotice": "Zavřít",
     "starMagnitude": "{value} mag",
     "starNames": {
       "Arcturus": "Arktur",

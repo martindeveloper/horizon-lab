@@ -1,9 +1,10 @@
-import { ENVIRONMENT } from "@/config";
+import { DEPLOYMENT_ID, ENVIRONMENT } from "@/config";
 import {
   setSkyTime,
   setSkyTimeScale,
   setWebGLOverride,
   showDesktopNotice,
+  showUpdateNotice,
   skyNow,
   skyTimeScale,
   triggerCrash,
@@ -44,6 +45,7 @@ const COMMANDS = {
   "loseContext(ms = 1000)":
     "Lose the simulation's GPU context; restore after ms, or never with Infinity",
   "desktopNotice()": "Show the phone “best on a larger screen” notice now, on any device",
+  "updateNotice()": "Show the “new version available” notice now, without a new deployment",
   'time("2026-12-21 16:00" | ms | Date)':
     "Set the hero and star sky to this moment (local time); keeps the time scale",
   "time()": "Back to the real time",
@@ -82,6 +84,7 @@ export function createDebug() {
     info() {
       const snapshot = {
         environment: ENVIRONMENT,
+        deployment: DEPLOYMENT_ID || "none (update notice off)",
         webgl: probeWebGL(),
         webglOverride: webglOverride(),
         ...gpuDetails(),
@@ -125,6 +128,9 @@ export function createDebug() {
     },
     desktopNotice() {
       if (!showDesktopNotice()) console.warn("Horizon.Debug: the notice is not mounted");
+    },
+    updateNotice() {
+      if (!showUpdateNotice()) console.warn("Horizon.Debug: the update notice is not mounted");
     },
     time(when?: string | number | Date) {
       if (when === undefined) {

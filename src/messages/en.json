@@ -30,6 +30,9 @@
     "loadingMusic": "Loading music",
     "desktopNotice": "Best experienced on a larger screen",
     "closeDesktopNotice": "Dismiss",
+    "updateNotice": "New version available",
+    "updateAction": "Update",
+    "closeUpdateNotice": "Dismiss",
     "starMagnitude": "{value} mag",
     "starNames": {
       "Arcturus": "Arcturus",

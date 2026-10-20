@@ -276,6 +276,46 @@ html {
   display: none;
 }
 
+/* Update notice: placed as the phone notice is, clear of the dock over a simulation. */
+.update-notice {
+  bottom: calc(var(--app-footer-height) + 0.75rem);
+}
+.app-shell:has(.simulation-stage) .update-notice {
+  top: calc(var(--app-header-height) + 4rem);
+  bottom: auto;
+}
+/* A gold halo: three slow pulses on arrival, then a faint steady glow. Only opacity
+   animates, so the scene underneath never repaints. Reduced motion keeps the glow. */
+.update-notice-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-accent) 50%, transparent),
+    0 0 18px 1px color-mix(in oklab, var(--color-accent) 30%, transparent);
+  opacity: 0.4;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .update-notice-pill::before {
+    animation: update-halo 2.4s ease-in-out 0.4s 3;
+  }
+  .update-notice-dot {
+    animation: update-dot 2.4s ease-in-out infinite alternate;
+  }
+}
+@keyframes update-halo {
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes update-dot {
+  from {
+    opacity: 0.45;
+  }
+}
+
 /* Music: a fine waveform arched like the rising sun. At rest it is a quiet,
    low silhouette; playing, the gold lens lights and each bar breathes on its
    own slow cycle. Registered properties let the bars ease between the two

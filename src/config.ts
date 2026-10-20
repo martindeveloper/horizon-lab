@@ -37,6 +37,12 @@ export const ENVIRONMENT: "development" | "preview" | "production" =
  */
 export const DEBUG = flag(process.env.NEXT_PUBLIC_DEBUG, ENVIRONMENT !== "production");
 
+/**
+ * This build's deployment, for the update notice: Vercel's `VERCEL_DEPLOYMENT_ID`, passed
+ * through `next.config.ts` (`NEXT_PUBLIC_DEPLOYMENT_ID` overrides it). Blank turns it off.
+ */
+export const DEPLOYMENT_ID = process.env.NEXT_PUBLIC_DEPLOYMENT_ID?.trim() ?? "";
+
 /** Large static assets (music, maps): the `horizon-cdn` R2 bucket. */
 export const CDN_URL = withoutSlash(
   env(process.env.NEXT_PUBLIC_CDN_URL, "https://cdn.horizonlab.observer"),

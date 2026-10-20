@@ -60,6 +60,19 @@ export function onDesktopNotice(listener: () => void) {
   return () => void noticeListeners.delete(listener);
 }
 
+const updateListeners = new Set<() => void>();
+
+/** Show the new-version notice now, without a newer deployment. */
+export function showUpdateNotice() {
+  for (const listener of updateListeners) listener();
+  return updateListeners.size > 0;
+}
+
+export function onUpdateNotice(listener: () => void) {
+  updateListeners.add(listener);
+  return () => void updateListeners.delete(listener);
+}
+
 /** Sky time = `sky` + (wall time − `wall`) × `scale`, in milliseconds. */
 const skyCell = storageCell({
   key: ["debug", "sky"],

@@ -9,6 +9,7 @@ import { AppHeader } from "./app-header";
 import { Wordmark } from "./brand";
 import { DesktopNotice } from "./desktop-notice";
 import { Sky } from "./sky";
+import { UpdateNotice } from "./update-notice";
 
 /**
  * One sky, one glass header, one preferences surface for the whole collection.
@@ -34,6 +35,7 @@ export function AppShell({ children, locale }: { children: ReactNode; locale: Lo
       {children}
       <AppFooter locale={locale} />
       <DesktopNotice />
+      <UpdateNotice />
       {DEBUG ? <DebugTools /> : null}
     </div>
   );
