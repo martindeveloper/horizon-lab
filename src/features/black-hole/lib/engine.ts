@@ -22,8 +22,8 @@ import {
   sceneWriter,
   writeCamera,
 } from "./frame";
-import { MAX_DIST, MIN_DIST, QUALITY_STEPS } from "./presets";
-import { renderBudget, renderScale } from "./render-policy";
+import { MAX_DIST, MIN_DIST, type Quality } from "./presets";
+import { BLACK_HOLE_QUALITY, renderBudget, renderScale } from "./quality";
 import { useBlackHole } from "./store";
 import { tourFor } from "./tours";
 
@@ -147,8 +147,8 @@ export function createBlackHoleEngine(
       );
     }
 
-    function stepCount(quality: keyof typeof QUALITY_STEPS): number {
-      const full = QUALITY_STEPS[quality];
+    function stepCount(quality: Quality): number {
+      const full = BLACK_HOLE_QUALITY[quality].steps;
       if (stage === 0) return Math.min(48, full);
       if (stage === 1) return Math.min(full, Math.max(80, Math.round(full * 0.72)));
       return full;

@@ -148,7 +148,7 @@ test("repeated On/Off detaches the actual scene node and disposes all three GPU 
   const camera = new PerspectiveCamera();
   camera.position.set(0, 0, 3);
   const lifecycle = createSolarActivityLifecycle(
-    async () => () => createSolarActivity({ camera, tight: true }, sun),
+    async () => () => createSolarActivity({ camera, tight: true }, sun, 20),
     () => {},
     assert.fail,
   );

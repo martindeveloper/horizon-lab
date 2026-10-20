@@ -60,10 +60,10 @@ engines import already expanded shader strings and do not invoke it at runtime.
   `gl_PointCoord`; star and swarm points share it with their own falloff.
 - `fxaa.frag.glsl` and `resolve.frag.glsl` are the fragment shaders of the
   rendering module's FXAA and MSAA passes (`createFxaaPass`, `createMsaaPass`).
-  Both read the offscreen frame as `uImage` with one pixel `uTexel`, and encode
-  with three.js's `linearToOutputTexel`; FXAA judges edges on approximately
-  perceptual luma when `FXAA_LINEAR_INPUT` is defined (sRGB output). They draw
-  with `fullscreen.vert.glsl`.
+  Both read the offscreen frame as `uImage` with one pixel `uTexel`; it holds
+  display-ready bytes, encoded as the canvas would be, so they write their result
+  as it is and FXAA judges edges where they are seen. They draw with
+  `fullscreen.vert.glsl`.
 - `#include <horizon/supersample>` supplies `main()` for a full-screen ray shader
   that defines `vec3 shade(vec2 fragCoord, bool derivatives)`. Pass 0 traces one
   ray per pixel; pass 1 (`HORIZON_PASS 1`, compiled by `createFullscreenPass` with

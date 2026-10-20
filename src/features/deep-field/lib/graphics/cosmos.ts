@@ -128,14 +128,27 @@ function group(w: Writer, rnd: Rnd, centre: Vec, count: number, sigma: number, f
   }
 }
 
-const scaled = (tight: boolean) => (count: number) => Math.round(count * (tight ? 0.6 : 1));
+/** How densely the cosmic maps are sampled; `DeepFieldQuality.cosmos` gives one per level. */
+export type CosmosDetail = {
+  /** Share of each cloud's full count of galaxies. */
+  share: number;
+  /** Laniakea's filaments from its edge to the Great Attractor. */
+  filaments: number;
+  /** The seeded web's random knots. */
+  knots: number;
+  /** Galaxies per unit length along the measured chains and walls, and along the web's bridges. */
+  strand: number;
+  bridgeStrand: number;
+};
+
+const scaled = (detail: CosmosDetail) => (count: number) => Math.round(count * detail.share);
 
 /**
  * The Local Group's dwarfs: those bound to the Milky Way (with the Magellanic Clouds) and the
  * loose ones, around the galactic centre; Andromeda's own, around Andromeda.
  */
-export function localGroupClouds(tight: boolean) {
-  const size = scaled(tight);
+export function localGroupClouds(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(41);
   const local = writer(size(70));
   const andromeda = writer(size(50));
@@ -167,8 +180,8 @@ export function localGroupClouds(tight: boolean) {
  * The Local Sheet: the nearby groups in a thin slab about the supergalactic equator, 7 Mpc
  * (~23 Mly) in radius and ±1.5 Mpc (~±5 Mly) thick (Tully et al. 2008).
  */
-export function localSheet(tight: boolean) {
-  const size = scaled(tight);
+export function localSheet(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(53);
   const w = writer(size(520));
   for (const id of ["m81", "centaurusA", "sculptor"] as const)
@@ -207,8 +220,8 @@ export function clusterCloud(count: number, core: number, reach: number, seed: n
 }
 
 /** The Virgo Supercluster: spurs and clouds fanning out from Virgo in the supergalactic plane. */
-export function localSupercluster(tight: boolean) {
-  const size = scaled(tight);
+export function localSupercluster(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(67);
   const w = writer(size(3200));
   const virgo = sgOf("virgoCluster");
@@ -262,8 +275,8 @@ export function localSupercluster(tight: boolean) {
  * the rest spread evenly. Not a map of anything; the layer draws it far around the camera
  * until the real web of Laniakea takes over.
  */
-export function deepField(tight: boolean) {
-  const size = scaled(tight);
+export function deepField(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(97);
   const gauss = gaussOf(rnd);
   const count = size(2400);
@@ -305,8 +318,8 @@ const FLOW_BRIGHT = new Color("#cfe2ec");
  * Laniakea: filaments from its edge to the Great Attractor, galaxies strung along them, and
  * flow lines that follow them inward. The Local Supercluster's own spur joins at Centaurus.
  */
-export function laniakeaWeb(tight: boolean) {
-  const size = scaled(tight);
+export function laniakeaWeb(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(79);
   const gauss = gaussOf(rnd);
   const heart = sgOf("greatAttractor");
@@ -314,7 +327,7 @@ export function laniakeaWeb(tight: boolean) {
   const centaurus = sgOf("centaurusCluster");
   const hydra = sgOf("hydraCluster");
   const starts: Vec[] = [virgo, hydra];
-  for (let k = 0; k < (tight ? 26 : 38); k += 1) {
+  for (let k = 0; k < detail.filaments; k += 1) {
     const [x, y, z] = onSphere(rnd, 1);
     const r = 150 + rnd() * 120;
     /* Flatter than round, like the basin. */
@@ -433,8 +446,8 @@ const BASIN_MLY = 280;
  * are measured, and a seeded web of knots joined to their nearest neighbours, so voids open
  * between filaments. Laniakea's own basin is left to `laniakeaWeb`.
  */
-export function cosmicWeb(tight: boolean) {
-  const size = scaled(tight);
+export function cosmicWeb(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(131);
   const w = writer(size(21_000));
   const heart = anchorToday(anchorById("greatAttractor"));
@@ -444,7 +457,7 @@ export function cosmicWeb(tight: boolean) {
   /* Perseus–Pisces: groups strung along the measured chain. */
   const chain = PERSEUS_PISCES_CHAIN.map((p) => skyPlace(p.ra, p.dec, p.cz));
   for (let i = 1; i < chain.length; i += 1)
-    filament(w, rnd, chain[i - 1]!, chain[i]!, 4, 2.2, tight ? 1.2 : 2);
+    filament(w, rnd, chain[i - 1]!, chain[i]!, 4, 2.2, detail.strand);
   /* Shapley: its rich clusters, each a dense knot. */
   const shapley = SHAPLEY_CLUSTERS.map((p) => skyPlace(p.ra, p.dec, p.cz));
   for (const at of shapley) knot(w, rnd, at, size(120), 2, 12);
@@ -465,7 +478,7 @@ export function cosmicWeb(tight: boolean) {
     );
   }
   for (let i = 1; i < wall.length; i += 1)
-    filament(w, rnd, wall[i - 1]!, wall[i]!, 6, 6, tight ? 1.2 : 2);
+    filament(w, rnd, wall[i - 1]!, wall[i]!, 6, 6, detail.strand);
   for (let i = 1; i < wall.length; i += 3) knot(w, rnd, wall[i]!, size(90), 3, 14);
 
   /* The seeded web: the landmarks and random knots, each joined to its nearest three. */
@@ -473,7 +486,7 @@ export function cosmicWeb(tight: boolean) {
   nodes.push(wall[0]!, wall[wall.length - 1]!);
   const coma = anchorToday(anchorById("comaCluster"));
   nodes.push(coma);
-  for (let k = 0; k < (tight ? 70 : 110); k += 1) {
+  for (let k = 0; k < detail.knots; k += 1) {
     const p = onSphere(rnd, Math.cbrt(rnd()) * WEB_RADIUS_MLY);
     if (dist(p, heart) < BASIN_MLY) continue;
     nodes.push(p);
@@ -504,7 +517,7 @@ export function cosmicWeb(tight: boolean) {
       const pair = i < j ? `${i}:${j}` : `${j}:${i}`;
       if (joined.has(pair) || d > 650 || !missesBasin(a, nodes[j]!)) continue;
       joined.add(pair);
-      filament(w, rnd, a, nodes[j]!, 30, 5, tight ? 0.38 : 0.6, outside);
+      filament(w, rnd, a, nodes[j]!, 30, 5, detail.bridgeStrand, outside);
     }
   }
   return geometryOf(w);
@@ -520,8 +533,8 @@ const CMB_WARM = new Color("#f0a35e");
  * sample out to the first galaxies (the unit there is their distance), thinning toward it; and
  * a unit circle the layer turns into each lookback ring.
  */
-export function observableUniverse(tight: boolean) {
-  const size = scaled(tight);
+export function observableUniverse(detail: CosmosDetail) {
+  const size = scaled(detail);
   const rnd = lcg(173);
   const spots = Array.from({ length: 40 }, () => ({
     at: onSphere(rnd, 1),

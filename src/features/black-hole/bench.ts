@@ -12,7 +12,8 @@ import {
   writeCamera,
   type CameraPose,
 } from "./lib/frame";
-import { holeById, MAX_DIST, MIN_DIST, paramsFromPreset, QUALITY_STEPS } from "./lib/presets";
+import { holeById, MAX_DIST, MIN_DIST, paramsFromPreset } from "./lib/presets";
+import { BLACK_HOLE_QUALITY } from "./lib/quality";
 
 /**
  * Headless benchmark target: the observatory's shader, uniforms, camera and
@@ -38,7 +39,7 @@ export const benchTarget: BenchTarget = {
     pass.resize(width, height);
     uniforms.uResolution.value.set(width, height);
     const settings = paramsFromPreset(holeById(scene.presetId), scene.quality, false);
-    const steps = QUALITY_STEPS[scene.quality];
+    const steps = BLACK_HOLE_QUALITY[scene.quality].steps;
     const writeScene = sceneWriter(uniforms);
 
     // Input scenes steer the camera with the app's own orbit input.

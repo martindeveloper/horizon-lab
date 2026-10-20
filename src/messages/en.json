@@ -345,6 +345,7 @@
     "fxaa": "FXAA",
     "edges": "Edge rays",
     "supersample": "SSAA",
+    "wideColour": "Wide colour (P3)",
     "reset": "Reset"
   },
   "webgl": {

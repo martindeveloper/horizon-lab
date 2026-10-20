@@ -23,6 +23,8 @@ import type { SolarActivity } from "./solar-activity-lifecycle";
 export function createSolarActivity(
   { camera, tight }: Pick<SolarKit, "camera" | "tight">,
   sun: Object3D,
+  /** Ray-march steps through the prominences (`OrreryQuality.activity`). */
+  steps: number,
 ): SolarActivity {
   const scope = new DisposalScope();
   try {
@@ -36,7 +38,7 @@ export function createSolarActivity(
       activityTime: { value: 0 },
       activityMotion: { value: dynamics.values },
       localCamera: { value: new Vector3() },
-      activitySteps: { value: tight ? 20 : SUN_ACTIVITY_MAX_STEPS },
+      activitySteps: { value: Math.min(steps, SUN_ACTIVITY_MAX_STEPS) },
       densityMap: { value: texture },
     };
     const material = scope.own(
@@ -63,6 +65,9 @@ export function createSolarActivity(
         dynamics.advance(dt, animate);
         uniforms.activityTime.value = dynamics.time;
         sun.worldToLocal(uniforms.localCamera.value.copy(camera.position));
+      },
+      setSteps(next) {
+        uniforms.activitySteps.value = Math.min(next, SUN_ACTIVITY_MAX_STEPS);
       },
       dispose: () => scope.dispose(),
     };

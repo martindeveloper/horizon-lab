@@ -4,7 +4,7 @@ import test from "node:test";
 import { createStore } from "zustand/vanilla";
 
 import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
-import { defaultSceneAntialias, sceneQuality } from "../packages/toolkit/src/scene/host.ts";
+import { defaultSceneAntialias } from "../packages/toolkit/src/scene/host.ts";
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
 import { bridgeRender, bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
@@ -67,42 +67,70 @@ test("the store bridge acts once on each turn and flight, never on the engine's 
   assert.deepEqual(seen.flights, ["b", "c"], "disposed, it listens no more");
 });
 
-test("a scene draws at standard quality with MSAA, or none on tight devices, until the visitor picks", () => {
+test("the store's render settings reach the engine: the level now, later ones after paint, AA at once", async () => {
   assert.equal(defaultSceneAntialias(false), "msaa");
   assert.equal(defaultSceneAntialias(true), "off");
-  /* Standard is what scenes always drew with; economy and cinema move the pixel cap. */
-  assert.deepEqual(sceneQuality("standard", false), { dprCap: 1.5, fps: Infinity });
-  assert.deepEqual(sceneQuality("standard", true), { dprCap: 1.25, fps: Infinity });
-  assert.deepEqual(sceneQuality("economy", false), { dprCap: 1, fps: 30 });
-  assert.ok(sceneQuality("cinema", true).dprCap > sceneQuality("standard", true).dprCap);
-  assert.deepEqual(sceneQuality("max", true), sceneQuality("max", false), "max ignores the device");
   const store = createStore((set) => ({
     antialias: null,
     quality: "standard",
     setAntialias: (antialias) => set({ antialias }),
   }));
-  const host = {
-    tight: true,
-    antialias: "off",
-    quality: "standard",
-    setAntialias: (m) => (host.antialias = m),
-    setQuality: (q) => (host.quality = q),
-  };
+  const host = { tight: true, antialias: "off", setAntialias: (m) => (host.antialias = m) };
+  const levels = [];
   const scope = new DisposalScope();
-  bridgeRender(store, scope, host);
+  const settle = () => new Promise((done) => setTimeout(done, 5));
+  bridgeRender(store, scope, host, (level) => levels.push(level));
+  assert.deepEqual(levels, ["standard"], "the engine starts at the store's level");
   assert.equal(store.getState().antialias, "off", "the device's default is published");
   store.getState().setAntialias("fxaa");
-  store.setState({ quality: "economy" });
   assert.equal(host.antialias, "fxaa");
-  assert.equal(host.quality, "economy");
+  store.setState({ quality: "max" });
+  store.setState({ quality: "economy" });
+  assert.deepEqual(levels, ["standard"], "a new level waits for the control to answer");
+  await settle();
+  assert.deepEqual(levels, ["standard", "economy"], "quick changes arrive as the last");
   /* A reset clears the choice; the device's default comes back, not the last mode. */
   store.setState({ antialias: null, quality: "standard" });
   assert.equal(store.getState().antialias, "off");
   assert.equal(host.antialias, "off");
-  assert.equal(host.quality, "standard");
+  await settle();
+  assert.deepEqual(levels, ["standard", "economy", "standard"]);
+  store.setState({ quality: "max" });
   scope.dispose();
+  await settle();
   store.getState().setAntialias("msaa");
   assert.equal(host.antialias, "off", "disposed, it listens no more");
+  assert.equal(levels.length, 3, "a level pending at disposal never arrives");
+});
+
+test("space scenes: Standard keeps each device's old budgets, the other levels move them", async () => {
+  const { spaceQuality, sceneTier } = await import("../src/space/quality.ts");
+  const { orreryQuality } = await import("../src/features/orrery/lib/quality.ts");
+  const { deepFieldQuality } = await import("../src/features/deep-field/lib/quality.ts");
+  /* What phones and desktops drew before the levels existed. */
+  assert.deepEqual(spaceQuality("standard", true).resolution, { dprCap: 1.25, fps: 48 });
+  assert.deepEqual(spaceQuality("standard", false).resolution, { dprCap: 1.5, fps: Infinity });
+  assert.equal(orreryQuality("standard", true).sky.milkyWay, 12_000);
+  assert.equal(orreryQuality("standard", false).maps.budget, 64e6);
+  assert.equal(deepFieldQuality("standard", true).cosmos.share, 0.6);
+  /* Economy and Cinematic pin a tier whatever the device; Max goes past both, phones too. */
+  for (const tight of [true, false]) {
+    assert.equal(sceneTier("economy", tight), "light");
+    assert.equal(sceneTier("cinema", tight), "full");
+    assert.equal(sceneTier("max", tight), "max");
+  }
+  /* Max holds a low-memory device's buffer and resident maps to what it can keep. */
+  assert.ok(
+    spaceQuality("max", true).resolution.dprCap < spaceQuality("max", false).resolution.dprCap,
+  );
+  assert.ok(orreryQuality("max", true).maps.budget < orreryQuality("max", false).maps.budget);
+  assert.equal(
+    orreryQuality("max", true).maps.anisotropy,
+    orreryQuality("max", false).maps.anisotropy,
+  );
+  const counts = (q) => Object.values(orreryQuality(q, false).swarms).reduce((a, b) => a + b);
+  assert.ok(counts("economy") < counts("standard") && counts("standard") < counts("max"));
+  assert.equal(spaceQuality("economy", false).resolution.fps, 30);
 });
 
 test("the shared space copy merges under a simulation's own, and is never written twice", () => {

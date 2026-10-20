@@ -452,3 +452,17 @@ test("the periodic table's rows close on the noble gases and its blocks fill the
     ],
   );
 });
+
+test("Display P3 shares sRGB's white and holds sRGB's red as a less saturated P3 colour", async () => {
+  const { xyzToLinearP3, xyzToLinearSrgb, encodeSrgb, cssColor } =
+    await import("@horizon/toolkit/science");
+  const white = [0.9505, 1, 1.089];
+  for (const v of xyzToLinearP3(white)) assert.ok(Math.abs(v - 1) < 0.002);
+  /* sRGB's red primary, in Display P3 (encoded): about (0.917, 0.200, 0.139). */
+  const red = [0.4124, 0.2126, 0.0193];
+  const p3 = xyzToLinearP3(red).map(encodeSrgb);
+  [0.9175, 0.2003, 0.1386].forEach((want, i) => assert.ok(Math.abs(p3[i] - want) < 0.002));
+  assert.ok(Math.abs(xyzToLinearSrgb(red)[0] - 1) < 0.002);
+  assert.equal(cssColor([1, 0, 0], 0.5, "p3"), "color(display-p3 1.0000 0.0000 0.0000 / 0.5)");
+  assert.equal(cssColor([1, 0, 0], 0.5), "rgb(255 0 0 / 0.5)");
+});

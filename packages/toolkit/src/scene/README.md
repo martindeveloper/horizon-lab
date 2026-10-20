@@ -28,15 +28,15 @@ gold for scene materials.
 perspective camera, the viewport and the engine host (frame loop,
 resize, context loss). `tight` marks phones and low-memory devices; `basics` is
 `SceneBasics` plus `tight` and `dpr`, the buffer's pixels per CSS pixel as a live
-`{ value }`: pass it as a shader uniform so point sizes follow the quality. `warmUp(scene)`,
+`{ value }`: pass it as a shader uniform so point sizes follow the resolution. `warmUp(scene)`,
 called once after the first frame, compiles every material in idle time, hidden objects
 included.
 
-`setQuality(quality)` takes a `RenderQuality` (`@horizon/toolkit/rendering`) and resizes
-the buffer for the next frame; `quality` reads it. `sceneQuality(quality, tight)` gives
-each level's pixel-ratio and frame-rate caps: `standard` (the default) is 1.5, or 1.25 on
-tight devices, `economy` 1 at 30 fps, `cinema` 2, or 1.5 on tight devices, `max` the device's own up to 3, tight or not. Wrap the
-engine's frame-rate cap in `capFps(fps)` so economy holds.
+`setResolution({ dprCap, fps })` (a `SceneResolution`) resizes the buffer for the next frame;
+`resolution` reads it, and the engine caps its frame rate at its `fps`. A host starts at
+`defaultSceneResolution(tight)`: 1.5 px per CSS px, or 1.25 at 48 fps on tight devices. The
+host knows no quality levels: each simulation maps a `RenderQuality` to a resolution and
+its own budgets in its `lib/quality.ts`.
 
 Draw every frame through `render(paint)`: `paint` makes the frame's renders (several
 may share a depth buffer, with `autoClear` off and `clearDepth()` between them) and the
@@ -45,8 +45,9 @@ hardware antialiasing, so a mode switches at once, without a new context: `off` 
 straight to the canvas, `msaa` into a 4× multisampled offscreen frame (`createMsaaPass`)
 and `fxaa` through `createFxaaPass`. Only the current mode holds buffers.
 `defaultSceneAntialias(tight)` is the mode a host starts with: MSAA, off on tight
-devices. `antialias` reads the current mode; the first switch between the canvas and an
-offscreen frame after warm-up compiles the scene again, for linear output.
+devices. `antialias` reads the current mode. An offscreen frame holds the canvas's own
+bytes, so a mode never changes how a scene looks beyond its edges, and needs no second
+shader compile.
 
 ## Orbit rig and controls
 

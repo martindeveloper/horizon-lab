@@ -8,9 +8,10 @@ import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/t
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
 import { FULL_RANGE } from "../lib/model/tour";
-import type { CanvasAntialias } from "../lib/render";
+import type { CanvasAntialias } from "../lib/quality";
 import { RESOLUTION_RANGE, useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
+import { useWideGamut } from "./use-gamut";
 import { useFormedLines, useObservation } from "./use-spectrum";
 
 /** How many of an element's lines the panel lists. */
@@ -108,6 +109,9 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const range = useSpectroscopy((s) => s.range);
   const quality = useSpectroscopy((s) => s.quality);
   const antialias = useSpectroscopy((s) => s.antialias);
+  const wideColour = useSpectroscopy((s) => s.wideColour);
+  const wideGamut = useWideGamut();
+  const tRender = useTranslations("render");
   const api = useSpectroscopy.getState;
   const [lo, hi] = RESOLUTION_RANGE;
   const toSlider = (R: number) => Math.round((Math.log(R / lo) / Math.log(hi / lo)) * 1000);
@@ -177,7 +181,15 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         modes={ANTIALIAS_MODES}
         onAntialias={(mode) => api().setAntialias(mode)}
         onReset={() => api().resetView()}
-      />
+      >
+        {wideGamut ? (
+          <div className="-mx-3 grid gap-0.5">
+            <SwitchRow on={wideColour} onToggle={() => api().setWideColour(!wideColour)}>
+              {tRender("wideColour")}
+            </SwitchRow>
+          </div>
+        ) : null}
+      </RenderSection>
     </Rail>
   );
 }

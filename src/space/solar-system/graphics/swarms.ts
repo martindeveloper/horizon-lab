@@ -97,6 +97,8 @@ export function swarmMaterial(
 export type Swarm = {
   points: Points;
   material: ShaderMaterial;
+  /** Draws these bodies instead, as a new quality asks for more or fewer. */
+  refill: (bodies: SwarmBody[]) => void;
   set: (mig: number, drift: number, near: number, anchorLon?: number) => void;
   /** Shows the swarm at `presence` (0..1) of its opacity; returns whether it draws at all. */
   fade: (presence: number) => boolean;
@@ -110,13 +112,19 @@ export function createSwarm(
   additive: boolean,
   dpr: { value: number },
 ): Swarm {
-  const geometry = swarmGeometry(bodies);
+  let geometry = swarmGeometry(bodies);
   const material = swarmMaterial(size, opacity, additive, dpr);
   const points = new Points(geometry, material);
   points.frustumCulled = false;
   return {
     points,
     material,
+    refill(next) {
+      const old = geometry;
+      geometry = swarmGeometry(next);
+      points.geometry = geometry;
+      old.dispose();
+    },
     set(mig, drift, near, anchorLon = 0) {
       material.uniforms.mig!.value = mig;
       material.uniforms.drift!.value = drift;

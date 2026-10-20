@@ -23,6 +23,22 @@ export const ambientMusic = new MusicPlayer(
         { src: assetUrl("/audio/aeolian-static.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
     },
+    {
+      title: "Drifting Probe",
+      artist: "Horizon",
+      sources: [
+        { src: assetUrl("/audio/drifting-probe.webm"), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl("/audio/drifting-probe.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+      ],
+    },
+    {
+      title: "Low Drone Rises",
+      artist: "Horizon",
+      sources: [
+        { src: assetUrl("/audio/low-drone-rises.webm"), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl("/audio/low-drone-rises.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+      ],
+    },
   ],
   { storageKey: "horizon:music" },
 );

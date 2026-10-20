@@ -38,7 +38,8 @@ function ResetButton({ label, onReset }: { label: string; onReset: () => void })
 
 /**
  * The last section of every simulation's settings, the same in each: render quality, then
- * anti-aliasing (hidden while `antialias` is still unknown), an optional note, then Reset.
+ * anti-aliasing (hidden while `antialias` is still unknown), the simulation's own render
+ * switches (`children`), an optional note, then Reset.
  * Copy is the shared `render` namespace; each simulation decides what its levels and modes do.
  */
 export function RenderSection<A extends string>({
@@ -49,6 +50,7 @@ export function RenderSection<A extends string>({
   onAntialias,
   note,
   onReset,
+  children,
 }: {
   quality: RenderQuality;
   onQuality: (quality: RenderQuality) => void;
@@ -56,6 +58,7 @@ export function RenderSection<A extends string>({
   modes: readonly AntialiasMode<A>[];
   onAntialias: (mode: A) => void;
   note?: ReactNode;
+  children?: ReactNode;
   onReset: () => void;
 }) {
   const t = useTranslations("render");
@@ -80,6 +83,7 @@ export function RenderSection<A extends string>({
             />
           </ControlRow>
         ) : null}
+        {children}
         {note}
         <ResetButton label={t("reset")} onReset={onReset} />
       </div>

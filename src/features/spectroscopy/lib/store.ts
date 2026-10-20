@@ -23,7 +23,7 @@ import {
 } from "./model/scenes";
 import { FULL_RANGE, TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
-import type { CanvasAntialias } from "./render";
+import type { CanvasAntialias } from "./quality";
 
 export type Panel = "none" | "elements" | "view";
 
@@ -79,6 +79,8 @@ export type SpectroscopyStore = Settings & {
   /** How sharply the canvases are drawn (`canvasScale`), for this visit. */
   quality: RenderQuality;
   antialias: CanvasAntialias;
+  /** Spectral colours in Display P3, where the screen shows it (`drawingGamut`). */
+  wideColour: boolean;
   setReady: () => void;
   setView: (view: ViewId) => void;
   setStar: (star: StarChoice) => void;
@@ -115,6 +117,7 @@ export type SpectroscopyStore = Settings & {
   setPhotons: (photons: boolean) => void;
   setQuality: (quality: RenderQuality) => void;
   setAntialias: (antialias: CanvasAntialias) => void;
+  setWideColour: (wideColour: boolean) => void;
   /** The View panel's settings as a visit starts: spectrograph, switches, window, render quality. */
   resetView: () => void;
   guideOpen: boolean;
@@ -206,6 +209,7 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   photons: true,
   quality: "standard",
   antialias: "off",
+  wideColour: false,
   setReady: () => set({ ready: true }),
   setView: (view) =>
     set((s) => {
@@ -311,6 +315,7 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   setPhotons: (photons) => set({ photons }),
   setQuality: (quality) => set({ quality }),
   setAntialias: (antialias) => set({ antialias }),
+  setWideColour: (wideColour) => set({ wideColour }),
   resetView: () =>
     set({
       resolution: 20_000,
@@ -319,6 +324,7 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
       range: FULL_RANGE,
       quality: "standard",
       antialias: "off",
+      wideColour: false,
     }),
   guideOpen: false,
   guideStep: 0,

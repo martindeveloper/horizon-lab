@@ -9,6 +9,7 @@ import { Group, type Object3D } from "three";
 import { MOON_IDS, NAMED, PLANET_IDS, type BodyId } from "@horizon/toolkit/bodies";
 import type { AnchoredRulers, LabelBody, PlaceLabel } from "@horizon/toolkit/scene";
 
+import type { SwarmCounts } from "../../quality";
 import { sunExists } from "../model/moment";
 import type { SolarSelection } from "../model/selection";
 import { createFocusRing } from "./focus-ring";
@@ -58,6 +59,8 @@ export function createSolarSystem(
     shownFor?: ShownFor;
     /** The body in close-up, which stays drawn whatever the switches say. */
     closeId?: () => BodyId | null;
+    /** Small bodies in each swarm, from the host's quality (`spaceQuality`). */
+    swarms: SwarmCounts;
   },
 ) {
   const { place, rulers } = deps;
@@ -81,7 +84,7 @@ export function createSolarSystem(
     ...planets.named.map(({ body, mesh }) => ({ key: body.id, mesh })),
     ...moons.labelBodies,
   ]);
-  const populations = createPopulationsLayer(kit, root);
+  const populations = createPopulationsLayer(kit, root, deps.swarms);
   const focus = createFocusRing(kit, root);
 
   return {
@@ -91,6 +94,8 @@ export function createSolarSystem(
     planets,
     moons,
     pickables: [sun.sun, ...planets.pickables, ...populations.pickables],
+    /** Redraws the swarms at a new quality's counts. */
+    setSwarms: (counts: SwarmCounts) => populations.setCounts(counts),
     /**
      * Draws a frame. Returns where the selection is, for rulers and close-ups, or null;
      * `focusHidden` keeps the reticle off (a close-up fills the view).

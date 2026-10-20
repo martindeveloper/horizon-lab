@@ -1,7 +1,7 @@
 import type { StoreApi } from "zustand";
 
 import { nearestView, type OrbitTurn } from "@horizon/toolkit/camera";
-import type { DisposalScope } from "@horizon/toolkit/rendering";
+import type { DisposalScope, RenderQuality } from "@horizon/toolkit/rendering";
 import {
   createReadoutClock,
   defaultSceneAntialias,
@@ -72,18 +72,40 @@ export function bridgeStore<S extends SceneStoreState>(
   };
 }
 
+/** Runs `run` once the browser is idle after painting (a task later where it cannot say). */
+function afterPaint(run: () => void) {
+  if (typeof requestIdleCallback === "function") {
+    const id = requestIdleCallback(run, { timeout: 250 });
+    return () => cancelIdleCallback(id);
+  }
+  const id = setTimeout(run, 0);
+  return () => clearTimeout(id);
+}
+
 /**
- * The store's render settings drive the host's: the quality as chosen, and the anti-aliasing,
- * where an unset choice (at first, or after a reset) takes this device's default (published, so
- * the settings show it).
+ * The store's render settings drive the engine: `quality` hears the level now, and each later one
+ * in the next idle moment (the engine maps it to its settings in `lib/quality.ts`, and may
+ * resample whole point clouds, so the control answers first; quick changes arrive as the last).
+ * The anti-aliasing reaches the host at once, an unset choice (at first, or after a reset) taking
+ * this device's default, published so the settings show it.
  */
 export function bridgeRender<S extends Pick<SceneSlice, "antialias" | "setAntialias" | "quality">>(
   store: Pick<StoreApi<S>, "getState" | "subscribe">,
   scope: DisposalScope,
-  host: Pick<SceneHost, "tight" | "setAntialias" | "setQuality">,
+  host: Pick<SceneHost, "tight" | "setAntialias">,
+  quality: (level: RenderQuality) => void,
 ) {
+  let level = store.getState().quality;
+  quality(level);
+  let cancel: (() => void) | null = null;
+  scope.defer(() => cancel?.());
   const apply = (s: S) => {
-    host.setQuality(s.quality);
+    if (s.quality !== level && cancel === null)
+      cancel = afterPaint(() => {
+        cancel = null;
+        const next = store.getState().quality;
+        if (next !== level) quality((level = next));
+      });
     if (s.antialias === null) s.setAntialias(defaultSceneAntialias(host.tight));
     else host.setAntialias(s.antialias);
   };

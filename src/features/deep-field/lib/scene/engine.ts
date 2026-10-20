@@ -39,6 +39,7 @@ import { LADDER_LY, LADDER_SIDE_QUERY } from "../model/depth";
 import { NEIGHBOURS } from "../model/neighbours";
 import { PROBES } from "../model/probes";
 import { viewById, worldDistance, type Realm } from "../model/views";
+import { deepFieldQuality } from "../quality";
 import { dropsSelection, useDeepField, type Selection } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCosmosLayer } from "./cosmos-layer";
@@ -66,6 +67,9 @@ export function createDeepFieldEngine({
   try {
     const sceneHost = createSceneHost(scope, { canvas, host, onError });
     const { renderer, camera, engine, tight, basics, viewport, warmUp } = sceneHost;
+    /** The visitor's render quality as Deep Field's settings; `bridgeRender` keeps it current. */
+    let quality = deepFieldQuality(useDeepField.getState().quality, tight);
+    sceneHost.setResolution(quality.resolution);
     const looks = scope.own(createLooks());
     const scene = new Scene();
     const lod = createLod(camera, viewport);
@@ -97,11 +101,23 @@ export function createDeepFieldEngine({
     const sky = createSkyLayer(kit, scene);
     /* The solar system today, on its own looks and level of detail. */
     const solarKit = createSolarKit(basics);
-    const solar = createSolarSystem(solarKit, scene, { place, hideAll, setBodies, rulers });
+    const solar = createSolarSystem(solarKit, scene, {
+      place,
+      hideAll,
+      setBodies,
+      rulers,
+      swarms: quality.swarms,
+    });
     const reach = createReachLayer(kit, scene, { place, rulers });
     const neighbours = createNeighboursLayer(kit, scene, { place, rulers, labels, distanceText });
     const galaxy = createGalaxyLayer(kit, scene, { place, rulers, distanceText });
-    const cosmos = createCosmosLayer(kit, scene, { place, rulers, labels, distanceText });
+    const cosmos = createCosmosLayer(kit, scene, {
+      place,
+      rulers,
+      labels,
+      distanceText,
+      detail: quality.cosmos,
+    });
     const hud = createHud(store, camera, viewport);
 
     const { view } = store.getState();
@@ -168,7 +184,14 @@ export function createDeepFieldEngine({
         controls.cancel();
       },
     });
-    bridgeRender(store, scope, sceneHost);
+    bridgeRender(store, scope, sceneHost, (level) => {
+      const next = deepFieldQuality(level, tight);
+      sceneHost.setResolution(next.resolution);
+      solar.setSwarms(next.swarms);
+      if (next.cosmos !== quality.cosmos) cosmos.setDetail(next.cosmos);
+      quality = next;
+      engine.invalidate();
+    });
     const onMotionChange = () => engine.invalidate();
     reduceMotion.addEventListener("change", onMotionChange);
     scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
@@ -267,7 +290,7 @@ export function createDeepFieldEngine({
     engine.start({
       render: tick,
       paused: () => !(engine.dirty || continuous()),
-      fps: () => sceneHost.capFps(tight ? 48 : Infinity),
+      fps: () => quality.resolution.fps,
     });
     engine.refresh();
     return { dispose: () => scope.dispose() };

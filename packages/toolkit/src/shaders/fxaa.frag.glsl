@@ -4,10 +4,9 @@
 // softens single-pixel sparkle. One texture, no history, so it works on moving and
 // still frames alike.
 //
-// uImage is the frame, uTexel one pixel in texture coordinates. Define
-// FXAA_LINEAR_INPUT when the frame holds linear light (a renderer with sRGB output):
-// edges are then judged on approximately perceptual luma, and three.js's
-// linearToOutputTexel encodes the result.
+// uImage is the frame, uTexel one pixel in texture coordinates. It holds display-ready
+// values, encoded as the canvas would be, so edges are judged where they are seen and the
+// result is written as it is.
 
 uniform sampler2D uImage;
 uniform vec2 uTexel;
@@ -20,11 +19,7 @@ uniform vec2 uTexel;
 #define FXAA_SEARCH 10
 
 float fxaaLumaOf(vec3 rgb) {
-  float l = dot(rgb, vec3(0.299, 0.587, 0.114));
-#ifdef FXAA_LINEAR_INPUT
-  l = sqrt(l); // close to the display's gamma, where edges are seen
-#endif
-  return l;
+  return dot(rgb, vec3(0.299, 0.587, 0.114));
 }
 
 float fxaaLuma(vec2 uv) {
@@ -44,7 +39,7 @@ void main() {
   float hi = max(lM, max(max(lN, lS), max(lE, lW)));
   float range = hi - lo;
   if (range < max(FXAA_EDGE_MIN, hi * FXAA_EDGE_REL)) {
-    gl_FragColor = linearToOutputTexel(vec4(centre.rgb, 1.0));
+    gl_FragColor = vec4(centre.rgb, 1.0);
     return;
   }
 
@@ -113,5 +108,5 @@ void main() {
   offset = max(offset, soft * soft * FXAA_SUBPIXEL);
 
   vec2 sampleAt = uv + (horizontal ? vec2(0.0, offset * across) : vec2(offset * across, 0.0));
-  gl_FragColor = linearToOutputTexel(vec4(texture2D(uImage, sampleAt).rgb, 1.0));
+  gl_FragColor = vec4(texture2D(uImage, sampleAt).rgb, 1.0);
 }

@@ -11,7 +11,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
-import { dopplerFactor, wavelengthColor } from "@horizon/toolkit/science";
+import { dopplerFactor, wavelengthColor, type Gamut, type Rgb } from "@horizon/toolkit/science";
 import { IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { LINES, NAMED, labStrength, lineById, type ElementId, type Line } from "../lib/model/atoms";
@@ -19,22 +19,31 @@ import { markerVelocity } from "../lib/model/scenes";
 import { depthAt, type Spectrum } from "../lib/model/spectrum";
 import { BAND_HEADS } from "../lib/model/telluric";
 import { FULL_RANGE } from "../lib/model/tour";
-import { qualityScale } from "../lib/render";
+import { context2d, qualityScale } from "../lib/quality";
 import { useSpectroscopy } from "../lib/store";
 import { digitsFor, lineName, wavelength } from "./format";
+import { useDrawingGamut } from "./use-gamut";
 import { useFormedLines, useObservation, useSettings, useSpectrum } from "./use-spectrum";
 import { measuredElement } from "./velocity-lens";
 
-/** Hues of each nanometre, computed once: the ribbon's colours. */
-const HUES = Array.from({ length: FULL_RANGE[1] - FULL_RANGE[0] + 2 }, (_, i) =>
-  wavelengthColor(FULL_RANGE[0] + i),
-);
-function hueAt(nm: number): readonly [number, number, number] {
-  const x = Math.min(HUES.length - 1.001, Math.max(0, nm - FULL_RANGE[0]));
+/** Hues of each nanometre in each gamut, computed once: the ribbon's colours. */
+const HUES = new Map<Gamut, readonly Rgb[]>();
+function huesIn(gamut: Gamut) {
+  let hues = HUES.get(gamut);
+  if (!hues) {
+    hues = Array.from({ length: FULL_RANGE[1] - FULL_RANGE[0] + 2 }, (_, i) =>
+      wavelengthColor(FULL_RANGE[0] + i, gamut),
+    );
+    HUES.set(gamut, hues);
+  }
+  return hues;
+}
+function hueAt(nm: number, hues: readonly Rgb[]): readonly [number, number, number] {
+  const x = Math.min(hues.length - 1.001, Math.max(0, nm - FULL_RANGE[0]));
   const i = Math.floor(x);
   const t = x - i;
-  const a = HUES[i]!;
-  const b = HUES[i + 1]!;
+  const a = hues[i]!;
+  const b = hues[i + 1]!;
   return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]), a[2] + t * (b[2] - a[2])];
 }
 
@@ -95,6 +104,7 @@ export function SpectrumView({ className }: { className?: string }) {
 
   const box = useRef<HTMLDivElement>(null);
   const ribbon = useRef<HTMLCanvasElement>(null);
+  const gamut = useDrawingGamut();
   const [width, setWidth] = useState(0);
   const [dpr, setDpr] = useState(1);
   /* The plot is SVG, smoothed by the browser: anti-aliasing has nothing to add, and must not
@@ -144,13 +154,16 @@ export function SpectrumView({ className }: { className?: string }) {
     const n = spectrum.wavelengths.length;
     canvas.width = n;
     canvas.height = 1;
-    const ctx = canvas.getContext("2d");
+    const ctx = context2d(canvas, gamut);
     if (!ctx) return;
-    const image = ctx.createImageData(n, 1);
+    const image = ctx.createImageData(n, 1, {
+      colorSpace: gamut === "p3" ? "display-p3" : "srgb",
+    });
+    const hues = huesIn(gamut);
     const top = spectrum.peak || 1;
     for (let i = 0; i < n; i++) {
       const nm = spectrum.wavelengths[i]!;
-      const [r, g, b] = hueAt(nm);
+      const [r, g, b] = hueAt(nm, hues);
       const level = Math.sqrt(Math.max(0, spectrum.flux[i]! / top)) * edgeFade(nm);
       image.data[i * 4] = r * level * 255;
       image.data[i * 4 + 1] = g * level * 255;
@@ -158,7 +171,7 @@ export function SpectrumView({ className }: { className?: string }) {
       image.data[i * 4 + 3] = 255;
     }
     ctx.putImageData(image, 0, 0);
-  }, [spectrum]);
+  }, [spectrum, gamut]);
 
   /* The plot's path, in a viewBox one unit per sample by 100. */
   const plot = useMemo(() => {
@@ -398,7 +411,9 @@ export function SpectrumView({ className }: { className?: string }) {
             </span>
           ))}
         </div>
+        {/* A canvas keeps the colour space of its first context: a new gamut takes a new one. */}
         <canvas
+          key={gamut}
           ref={ribbon}
           aria-hidden
           className="spectroscopy-ribbon block h-[clamp(1.5rem,5dvh,3rem)] w-full rounded-[3px]"

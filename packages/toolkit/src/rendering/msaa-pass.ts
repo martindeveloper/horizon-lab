@@ -7,7 +7,7 @@ import { createOffscreenFrame } from "./offscreen-frame";
  * Hardware multisampling that can be switched on and off without recreating the
  * renderer: create the renderer with `antialias: false` and draw through this.
  * `paint` renders into a 4× multisampled offscreen frame of the drawing buffer's
- * size (linear half floats with sRGB output), which is then copied onto the
+ * size, holding the bytes the canvas would, which is then copied onto the
  * canvas. Call only on the client; no GPU memory is allocated until the first
  * `paint`.
  */

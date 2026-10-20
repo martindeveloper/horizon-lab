@@ -266,16 +266,20 @@ export function createMilkyWay(dpr: { value: number }, grains: number) {
   band.renderOrder = -4;
   band.frustumCulled = false;
   /* Resolved grains plus a clumpy unresolved haze of large soft points, both from the map. */
-  const todayGeometry = today.sample(grains, 17);
-  const earlyGeometry = early.sample(Math.round(grains * 0.6), 23);
-  const todayHazeGeometry = today.sample(Math.round(grains * 0.35), 31, 7, 0.3);
-  const earlyHazeGeometry = early.sample(Math.round(grains * 0.24), 37, 9, 0.26);
+  const sampled = (n: number) => [
+    today.sample(n, 17),
+    early.sample(Math.round(n * 0.6), 23),
+    today.sample(Math.round(n * 0.35), 31, 7, 0.3),
+    early.sample(Math.round(n * 0.24), 37, 9, 0.26),
+  ];
+  const [todayGeometry, earlyGeometry, todayHazeGeometry, earlyHazeGeometry] = sampled(grains);
   const todayMaterial = starMaterial(dpr);
   const earlyMaterial = starMaterial(dpr);
   const todayGrains = new Points(todayGeometry, todayMaterial);
   const earlyGrains = new Points(earlyGeometry, earlyMaterial);
   const todayHaze = new Points(todayHazeGeometry, todayMaterial);
   const earlyHaze = new Points(earlyHazeGeometry, earlyMaterial);
+  const clouds = [todayGrains, earlyGrains, todayHaze, earlyHaze];
   for (const p of [todayGrains, earlyGrains, todayHaze, earlyHaze]) {
     p.renderOrder = -3;
     p.frustumCulled = false;
@@ -303,15 +307,20 @@ export function createMilkyWay(dpr: { value: number }, grains: number) {
       earlyGrains.visible = earlyHaze.visible = era < 0.99;
     },
     tint,
+    /** Samples `n` resolved grains (and their share of haze) afresh, for a new quality. */
+    setGrains(n: number) {
+      sampled(n).forEach((next, i) => {
+        const cloud = clouds[i]!;
+        cloud.geometry.dispose();
+        cloud.geometry = next;
+      });
+    },
     dispose() {
       today.texture.dispose();
       early.texture.dispose();
       material.dispose();
       geometry.dispose();
-      todayGeometry.dispose();
-      earlyGeometry.dispose();
-      todayHazeGeometry.dispose();
-      earlyHazeGeometry.dispose();
+      for (const cloud of clouds) cloud.geometry.dispose();
       todayMaterial.dispose();
       earlyMaterial.dispose();
     },

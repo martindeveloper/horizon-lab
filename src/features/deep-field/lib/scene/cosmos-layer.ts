@@ -38,6 +38,7 @@ import {
 
 import {
   clusterCloud,
+  type CosmosDetail,
   cosmicWeb,
   deepField,
   laniakeaWeb,
@@ -108,14 +109,40 @@ type Mark = {
   range: (ly: number) => number;
 };
 
+/** Every cloud the cosmic maps sample at one detail. */
+function sample(detail: CosmosDetail) {
+  const lg = localGroupClouds(detail);
+  const web = laniakeaWeb(detail);
+  const universe = observableUniverse(detail);
+  return {
+    local: lg.local,
+    andromeda: lg.andromeda,
+    sheet: localSheet(detail),
+    supercluster: localSupercluster(detail),
+    laniakea: web.points,
+    flows: web.flows,
+    web: cosmicWeb(detail),
+    cmb: universe.cmb,
+    fill: universe.fill,
+    circle: universe.circle,
+    field: deepField(detail),
+    clusters: CLUSTERS.map((spec, i) =>
+      clusterCloud(Math.round(spec.count * detail.share), spec.core, spec.reach, 101 + i * 13),
+    ),
+  };
+}
+type Sampled = ReturnType<typeof sample>;
+
 export function createCosmosLayer(
-  { scope, looks, camera, pxWorld, lod, tight }: SceneKit,
+  { scope, looks, camera, pxWorld, lod }: SceneKit,
   parent: Object3D,
   deps: {
     place: PlaceLabel;
     rulers: AnchoredRulers;
     labels: LabelText;
     distanceText: DistanceText;
+    /** How densely to sample, from the render quality (`DeepFieldQuality.cosmos`). */
+    detail: CosmosDetail;
   },
 ) {
   const { place, rulers, labels, distanceText } = deps;
@@ -127,35 +154,40 @@ export function createCosmosLayer(
   galaxyToWorld(0, 0, 0, root.position);
   parent.add(root);
 
-  const points = (geometry: BufferGeometry, material: Material, into: Object3D) => {
-    const cloud = new Points(scope.own(geometry), material);
+  /* Each drawn cloud remembers which sample it shows, so a new detail can swap them all. */
+  const drawn: { object: Points | LineSegments; of: (s: Sampled) => BufferGeometry }[] = [];
+  scope.defer(() => {
+    for (const { object } of drawn) object.geometry.dispose();
+  });
+  /* Let go once the layer is built; a new detail samples afresh. */
+  let first: Sampled | null = sample(deps.detail);
+  const points = (of: (s: Sampled) => BufferGeometry, material: Material, into: Object3D) => {
+    const cloud = new Points(of(first!), material);
     cloud.frustumCulled = false;
     into.add(cloud);
+    drawn.push({ object: cloud, of });
     return cloud;
   };
   const position = (object: Object3D, p: Readonly<[number, number, number]>) =>
     object.position.set(p[0], p[1], p[2]);
-  const lg = localGroupClouds(tight);
-  points(lg.local, m.dwarfs, root);
+  points((s) => s.local, m.dwarfs, root);
   const m31Group = new Group();
   root.add(m31Group);
-  points(lg.andromeda, m.dwarfs, m31Group);
-  points(localSheet(tight), m.sheet, root);
-  points(localSupercluster(tight), m.supercluster, root);
-  const web = laniakeaWeb(tight);
-  const laniakeaCloud = points(web.points, m.laniakea, root);
-  const webCloud = points(cosmicWeb(tight), m.web, root);
+  points((s) => s.andromeda, m.dwarfs, m31Group);
+  points((s) => s.sheet, m.sheet, root);
+  points((s) => s.supercluster, m.supercluster, root);
+  const laniakeaCloud = points((s) => s.laniakea, m.laniakea, root);
+  const webCloud = points((s) => s.web, m.web, root);
 
   /* The observable universe: the microwave background, galaxies beyond the web and rings
      where light set out 1, 5 and 10 billion years ago. Each is scaled every frame. */
-  const universe = observableUniverse(tight);
-  const cmbShell = points(universe.cmb, m.cmb, root);
-  const deepFill = points(universe.fill, m.deep, root);
+  const cmbShell = points((s) => s.cmb, m.cmb, root);
+  const deepFill = points((s) => s.fill, m.deep, root);
   cmbShell.scale.setScalar(CMB_MLY);
   /* The galaxies beyond the web fill space out to the first galaxies; the dark ages lie between
      them and the microwave background. */
   deepFill.scale.setScalar(FIRST_GALAXIES_MLY);
-  const circle = scope.own(universe.circle);
+  const circle = scope.own(first.circle);
   const rings = LOOKBACK_RINGS_GYR.map((gyr) => {
     const line = new LineLoop(circle, looks.cosmosRing);
     line.frustumCulled = false;
@@ -163,24 +195,20 @@ export function createCosmosLayer(
     return { gyr, mly: lookbackMly(gyr), line, key: `lookback${gyr}` };
   });
   const RING_KEYS = rings.map((ring) => ring.key);
-  const flows = new LineSegments(scope.own(web.flows), looks.cosmosFlow);
+  const flows = new LineSegments(first.flows, looks.cosmosFlow);
   flows.frustumCulled = false;
   root.add(flows);
+  drawn.push({ object: flows, of: (s) => s.flows });
 
   /* Far galaxies all round the camera: depth behind the Local Group and Virgo. */
   const field = new Group();
-  points(deepField(tight), m.field, field);
+  points((s) => s.field, m.field, field);
   parent.add(field);
 
   const clusters = CLUSTERS.map((spec, i) => {
     const group = new Group();
     root.add(group);
-    const count = Math.round(spec.count * (tight ? 0.6 : 1));
-    const cloud = points(
-      clusterCloud(count, spec.core, spec.reach, 101 + i * 13),
-      spec.far ? m.far : m.near,
-      group,
-    );
+    const cloud = points((s) => s.clusters[i]!, spec.far ? m.far : m.near, group);
     const glow = new Sprite(looks.cosmosCluster);
     group.add(glow);
     position(group, anchorToday(anchorById(spec.id)));
@@ -411,8 +439,19 @@ export function createCosmosLayer(
 
   const labelPicks = new Map<string, Selection>(marks.map((mark) => [mark.key, mark.pick]));
 
+  first = null;
+
   return {
     pickables: [...spots.values()],
+    /** Samples every cloud afresh at a new quality's detail. */
+    setDetail(detail: CosmosDetail) {
+      const next = sample(detail);
+      for (const entry of drawn) {
+        entry.object.geometry.dispose();
+        entry.object.geometry = entry.of(next);
+      }
+      next.circle.dispose();
+    },
     /** What a tap on a label opens. */
     labelPick: (key: string) => labelPicks.get(key),
     get visible() {

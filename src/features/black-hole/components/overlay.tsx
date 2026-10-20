@@ -172,6 +172,7 @@ export function ObservatoryOverlay() {
                   {
                     id: "clocks",
                     label: clocksOpen ? t("close") : t("clocks"),
+                    menuLabel: t("clocks"),
                     ariaLabel: clocksOpen ? t("ariaCloseClocks") : t("ariaDropClocks"),
                     icon: Timer,
                     active: clocksOpen,

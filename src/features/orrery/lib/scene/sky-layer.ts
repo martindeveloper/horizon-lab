@@ -19,19 +19,23 @@ import {
   starMaterial,
   starSize,
 } from "../graphics/sky";
+import type { SkyCounts } from "../quality";
 
 const TAU = Math.PI * 2;
 
 export function createSkyLayer(
-  { scope, camera, tight, dpr }: SolarKit,
+  { scope, camera, dpr }: SolarKit,
   parent: Object3D,
   yearsAgo: number,
+  counts: SkyCounts,
 ) {
   /* A band sphere, the real bright stars, a field. */
   const sky = new Group();
-  const milkyWay = scope.own(createMilkyWay(dpr, tight ? 12000 : 30000));
+  const milkyWay = scope.own(createMilkyWay(dpr, counts.milkyWay));
   const fieldMaterial = scope.own(starMaterial(dpr));
-  const field = new Points(scope.own(fieldStars(tight ? 900 : 1600)), fieldMaterial);
+  const field = new Points(fieldStars(counts.fieldStars), fieldMaterial);
+  scope.defer(() => field.geometry.dispose());
+  let drawn = counts;
   field.renderOrder = -3;
   field.frustumCulled = false;
   const brightMaterial = scope.own(starMaterial(dpr));
@@ -56,6 +60,15 @@ export function createSkyLayer(
   let easing = false;
 
   return {
+    /** Resamples the Milky Way's grains and the field stars at a new quality's counts. */
+    setCounts(next: SkyCounts) {
+      if (next.milkyWay !== drawn.milkyWay) milkyWay.setGrains(next.milkyWay);
+      if (next.fieldStars !== drawn.fieldStars) {
+        field.geometry.dispose();
+        field.geometry = fieldStars(next.fieldStars);
+      }
+      drawn = next;
+    },
     get easing() {
       return easing;
     },

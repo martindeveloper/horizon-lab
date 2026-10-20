@@ -10,6 +10,12 @@ export type Xyz = readonly [X: number, Y: number, Z: number];
 export type Rgb = readonly [r: number, g: number, b: number];
 
 /**
+ * The colour space a screen is drawn in: sRGB, or the wider Display P3 (same D65 white and
+ * transfer curve, more saturated primaries), which shows spectral colours closer to the eye's.
+ */
+export type Gamut = "srgb" | "p3";
+
+/**
  * The CIE 1931 2° standard observer's colour-matching functions x̄, ȳ, z̄ from 380 to 780 nm
  * in 5 nm steps (CIE 018:2019 dataset, four significant figures).
  */
@@ -140,7 +146,16 @@ export function xyzToLinearSrgb([X, Y, Z]: Xyz): Rgb {
   ];
 }
 
-/** The sRGB transfer curve, linear light (0–1) to an encoded value (0–1). */
+/** Linear Display P3 from XYZ (D65); components fall outside 0–1 out of gamut. */
+export function xyzToLinearP3([X, Y, Z]: Xyz): Rgb {
+  return [
+    2.4935 * X - 0.9314 * Y - 0.4027 * Z,
+    -0.8295 * X + 1.7627 * Y + 0.0236 * Z,
+    0.0358 * X - 0.0762 * Y + 0.9569 * Z,
+  ];
+}
+
+/** The sRGB transfer curve (Display P3 shares it), linear light (0–1) to an encoded value (0–1). */
 export function encodeSrgb(linear: number) {
   const v = Math.min(1, Math.max(0, linear));
   return v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
@@ -151,8 +166,8 @@ export function encodeSrgb(linear: number) {
  * (it cannot subtract light) are clipped, then the brightest channel is scaled to 1.
  * Brightness is the caller's to apply.
  */
-export function displayColor(xyz: Xyz): Rgb {
-  const [lr, lg, lb] = xyzToLinearSrgb(xyz);
+export function displayColor(xyz: Xyz, gamut: Gamut = "srgb"): Rgb {
+  const [lr, lg, lb] = gamut === "p3" ? xyzToLinearP3(xyz) : xyzToLinearSrgb(xyz);
   const r = Math.max(0, lr);
   const g = Math.max(0, lg);
   const b = Math.max(0, lb);
@@ -162,15 +177,29 @@ export function displayColor(xyz: Xyz): Rgb {
 }
 
 /** The colour of a black body at a temperature, as `displayColor` shows it. */
-export function blackbodyColor(kelvin: number): Rgb {
-  return displayColor(spectrumXyz((nm) => planckRadiance(nm, kelvin), 380, 780, 5));
+export function blackbodyColor(kelvin: number, gamut: Gamut = "srgb"): Rgb {
+  return displayColor(
+    spectrumXyz((nm) => planckRadiance(nm, kelvin), 380, 780, 5),
+    gamut,
+  );
 }
 
 /** The hue of one wavelength of light, as `displayColor` shows it. */
-export const wavelengthColor = (nm: number): Rgb => displayColor(cieObserver(nm));
+export const wavelengthColor = (nm: number, gamut: Gamut = "srgb"): Rgb =>
+  displayColor(cieObserver(nm), gamut);
 
 /** A CSS colour from encoded sRGB components (0–1), optionally scaled in brightness. */
 export function cssRgb([r, g, b]: Rgb, brightness = 1) {
   const c = (v: number) => Math.round(Math.min(1, Math.max(0, v * brightness)) * 255);
   return `rgb(${c(r)} ${c(g)} ${c(b)})`;
+}
+
+/** A CSS colour from components encoded in `gamut` (0–1), with an opacity. */
+export function cssColor([r, g, b]: Rgb, alpha = 1, gamut: Gamut = "srgb") {
+  if (gamut === "p3") {
+    const c = (v: number) => Math.min(1, Math.max(0, v)).toFixed(4);
+    return `color(display-p3 ${c(r)} ${c(g)} ${c(b)} / ${alpha})`;
+  }
+  const c = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 255);
+  return `rgb(${c(r)} ${c(g)} ${c(b)} / ${alpha})`;
 }

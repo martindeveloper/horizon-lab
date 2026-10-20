@@ -18,7 +18,6 @@ import type { DisposalScope } from "../rendering/disposal";
 import { createEngineHost } from "../rendering/engine-host";
 import { createFxaaPass, type FxaaPass } from "../rendering/fxaa-pass";
 import { createMsaaPass, type MsaaPass } from "../rendering/msaa-pass";
-import type { RenderQuality } from "../rendering/quality";
 import type { SceneBasics, Viewport } from "./kit";
 
 /** Vertical field of view of the scenes, degrees. */
@@ -34,17 +33,12 @@ export function defaultSceneAntialias(tight: boolean): SceneAntialias {
   return tight ? "off" : "msaa";
 }
 
-/**
- * What each render quality draws with: the cap on buffer pixels per CSS pixel and on frames
- * per second. `standard` is what scenes always drew with; `economy` drops to one pixel per CSS
- * pixel at 30 fps, `cinema` allows two (1.5 on tight devices), `max` the device's own up to
- * three, tight or not.
- */
-export function sceneQuality(quality: RenderQuality, tight: boolean) {
-  if (quality === "economy") return { dprCap: 1, fps: 30 };
-  if (quality === "max") return { dprCap: 3, fps: Infinity };
-  if (quality === "cinema") return { dprCap: tight ? 1.5 : 2, fps: Infinity };
-  return { dprCap: tight ? 1.25 : 1.5, fps: Infinity };
+/** How finely a scene is drawn: buffer pixels per CSS pixel at most, and frames per second. */
+export type SceneResolution = { dprCap: number; fps: number };
+
+/** What a host draws at until told otherwise: 1.5 px per CSS px, or 1.25 at 48 fps when tight. */
+export function defaultSceneResolution(tight: boolean): SceneResolution {
+  return tight ? { dprCap: 1.25, fps: 48 } : { dprCap: 1.5, fps: Infinity };
 }
 
 /** `SceneBasics` plus the device class and pixel ratio every layer may size itself by. */
@@ -52,7 +46,7 @@ export type SceneHostBasics = SceneBasics & {
   /** Phones and low-memory devices: smaller samples and buffers. */
   tight: boolean;
   /**
-   * Buffer pixels per CSS pixel, kept current as the quality changes: share the object as a
+   * Buffer pixels per CSS pixel, kept current as the resolution changes: share the object as a
    * shader uniform (`{ dpr: basics.dpr }`) so point sizes follow.
    */
   dpr: { value: number };
@@ -74,7 +68,7 @@ export function createSceneHost(
   const coarse = window.matchMedia(COARSE_POINTER_QUERY).matches;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const tight = coarse || (memory != null && memory <= 4);
-  let quality: RenderQuality = "standard";
+  let resolution = defaultSceneResolution(tight);
   const dpr = { value: 1 };
   const renderer = new WebGLRenderer({
     canvas,
@@ -98,11 +92,11 @@ export function createSceneHost(
       resolution: () => ({
         scale: 1,
         dpr: window.devicePixelRatio || 1,
-        dprCap: sceneQuality(quality, tight).dprCap,
+        dprCap: resolution.dprCap,
       }),
       onResize: (w, h) => {
         const rect = host.getBoundingClientRect();
-        dpr.value = Math.min(window.devicePixelRatio || 1, sceneQuality(quality, tight).dprCap);
+        dpr.value = Math.min(window.devicePixelRatio || 1, resolution.dprCap);
         viewport.width = Math.max(1, rect.width);
         viewport.height = Math.max(1, rect.height);
         renderer.setSize(w, h, false);
@@ -119,47 +113,11 @@ export function createSceneHost(
     mode === "msaa" ? createMsaaPass(renderer) : mode === "fxaa" ? createFxaaPass(renderer) : null;
   scope.defer(() => pass?.dispose());
 
-  /* Programs differ between the canvas (sRGB) and an offscreen frame (linear): warm both as used. */
-  let warmScene: Scene | null = null;
-  const warmed = new Set<boolean>();
+  let warmed = false;
   let alive = true;
   scope.defer(() => {
     alive = false;
   });
-  const idle =
-    "requestIdleCallback" in window && typeof window.requestIdleCallback === "function"
-      ? window.requestIdleCallback.bind(window)
-      : (run: () => void) => window.setTimeout(run, 200);
-  const warm = () => {
-    const offscreen = antialias !== "off";
-    if (!warmScene || warmed.has(offscreen)) return;
-    warmed.add(offscreen);
-    const scene = warmScene;
-    idle(() => {
-      if (!alive) return;
-      /* Switched back before idle time: the next switch warms it. */
-      if (offscreen !== (antialias !== "off")) {
-        warmed.delete(offscreen);
-        return;
-      }
-      /* Compiling walks visible objects only; show the hidden ones for that walk alone. */
-      const hidden: Object3D[] = [];
-      scene.traverse((object) => {
-        if (!object.visible) {
-          hidden.push(object);
-          object.visible = true;
-        }
-      });
-      const previous = renderer.getRenderTarget();
-      try {
-        if (offscreen) renderer.setRenderTarget((pass ??= passFor(antialias))?.target ?? null);
-        renderer.compileAsync(scene, camera).catch(() => undefined);
-      } finally {
-        renderer.setRenderTarget(previous);
-        for (const object of hidden) object.visible = false;
-      }
-    });
-  };
   const basics: SceneHostBasics = {
     scope,
     camera,
@@ -175,18 +133,16 @@ export function createSceneHost(
     engine,
     tight,
     basics,
-    /** The render quality frames are drawn with (`sceneQuality`). */
-    get quality() {
-      return quality;
+    /** The resolution frames are drawn at; an engine caps its frame rate at `fps`. */
+    get resolution() {
+      return resolution;
     },
-    /** Resizes the buffer for the next frame to `quality`'s pixel ratio. */
-    setQuality(next: RenderQuality) {
-      if (next === quality) return;
-      quality = next;
+    /** Resizes the buffer for the next frame to `next`'s pixel ratio. */
+    setResolution(next: SceneResolution) {
+      if (next.dprCap === resolution.dprCap && next.fps === resolution.fps) return;
+      resolution = next;
       engine.refresh();
     },
-    /** An engine's frame-rate cap, lowered further by the render quality. */
-    capFps: (fps: number) => Math.min(fps, sceneQuality(quality, tight).fps),
     /** The anti-aliasing frames are drawn with. */
     get antialias() {
       return antialias;
@@ -197,7 +153,6 @@ export function createSceneHost(
       pass?.dispose();
       pass = null;
       antialias = mode;
-      warm();
       engine.invalidate();
     },
     /**
@@ -211,13 +166,32 @@ export function createSceneHost(
     },
     /**
      * Once, in idle time after the first frame: compiles every material in `scene`, hidden
-     * objects included, so no zoom or switch ever waits on a shader; again for an
-     * anti-aliasing that draws offscreen. Uses parallel compilation where the browser offers it.
+     * objects included, so no zoom, switch or anti-aliasing mode ever waits on a shader. Uses
+     * parallel compilation where the browser offers it.
      */
     warmUp: (scene: Scene) => {
-      if (warmScene) return;
-      warmScene = scene;
-      warm();
+      if (warmed) return;
+      warmed = true;
+      const idle =
+        "requestIdleCallback" in window && typeof window.requestIdleCallback === "function"
+          ? window.requestIdleCallback.bind(window)
+          : (run: () => void) => window.setTimeout(run, 200);
+      idle(() => {
+        if (!alive) return;
+        /* Compiling walks visible objects only; show the hidden ones for that walk alone. */
+        const hidden: Object3D[] = [];
+        scene.traverse((object) => {
+          if (!object.visible) {
+            hidden.push(object);
+            object.visible = true;
+          }
+        });
+        try {
+          renderer.compileAsync(scene, camera).catch(() => undefined);
+        } finally {
+          for (const object of hidden) object.visible = false;
+        }
+      });
     },
   };
 }

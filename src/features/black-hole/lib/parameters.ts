@@ -1,7 +1,7 @@
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
 import { RAIN_FLOOR } from "./clocks";
-import { QUALITY_STEPS } from "./presets";
+import { BLACK_HOLE_QUALITY } from "./quality";
 
 /**
  * The observatory's model numbers, once. The renderer receives them as shader
@@ -58,7 +58,7 @@ export const GAS_TURN_CELLS = 12;
 export const GAS_SPIRAL_CELLS = 16;
 export const GAS_PITCH = 4;
 /** The highest quality's step budget bounds the shader loop. */
-export const MAX_STEPS = Math.max(...Object.values(QUALITY_STEPS));
+export const MAX_STEPS = Math.max(...Object.values(BLACK_HOLE_QUALITY).map((level) => level.steps));
 
 /** Compile-time constants for `black-hole.frag.glsl`. */
 export const SHADER_DEFINES = glslDefines({
@@ -99,8 +99,8 @@ export const BLACK_HOLE_COPY = {
   stepFar: Math.round(STEP_FAR * 100),
   stepFarMax: Math.round(STEP_FAR * STEP_FAR_GROWTH * 100),
   rainFloor: RAIN_FLOOR,
-  stepsEconomy: QUALITY_STEPS.economy,
-  stepsStandard: QUALITY_STEPS.standard,
-  stepsCinema: QUALITY_STEPS.cinema,
-  stepsMax: QUALITY_STEPS.max,
+  stepsEconomy: BLACK_HOLE_QUALITY.economy.steps,
+  stepsStandard: BLACK_HOLE_QUALITY.standard.steps,
+  stepsCinema: BLACK_HOLE_QUALITY.cinema.steps,
+  stepsMax: BLACK_HOLE_QUALITY.max.steps,
 };

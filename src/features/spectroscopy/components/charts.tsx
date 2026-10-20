@@ -2,11 +2,12 @@
 
 import { useFormatter } from "next-intl";
 
-import { cssRgb, wavelengthColor } from "@horizon/toolkit/science";
+import { cssColor, wavelengthColor } from "@horizon/toolkit/science";
 
 import { ionizationEnergy, type Line } from "../lib/model/atoms";
 import { SPECTRAL_CLASSES } from "../lib/model/stars";
 import { levelName } from "./format";
+import { useDrawingGamut } from "./use-gamut";
 
 const W = 280;
 
@@ -24,10 +25,11 @@ export function LevelDiagram({
   labels: { ground: string; limit: string; title: string };
 }) {
   const f = useFormatter();
+  const gamut = useDrawingGamut();
   const limit = ionizationEnergy(line.species);
   const H = 132;
   const y = (eV: number) => H - 14 - (eV / limit) * (H - 30);
-  const colour = cssRgb(wavelengthColor(line.wavelength));
+  const colour = cssColor(wavelengthColor(line.wavelength, gamut), 1, gamut);
   const lower = y(line.lower);
   const upper = y(line.upper);
   const x = 132;

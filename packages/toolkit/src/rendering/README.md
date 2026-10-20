@@ -20,19 +20,21 @@ toolkit's `.glsl` loader (see the package README).
   edge. Post resources are created on first use.
 - `createFxaaPass(renderer)`: FXAA for any three.js renderer. `render(scene,
   camera)` draws into an offscreen frame of the drawing buffer's size, then onto
-  the canvas through the FXAA shader; with sRGB output the frame is stored as
-  linear half floats and encoded on the way out. The canvas's hardware MSAA does
+  the canvas through the FXAA shader. The frame holds exactly the bytes the canvas
+  would (8-bit, encoded and blended for the renderer's output colour space), so a
+  scene looks the same through it on any WebGL 2 device. The canvas's hardware MSAA does
   not apply offscreen, so use it instead of MSAA, not with it. `paint(draw)` takes
   any number of renders (passes over one depth buffer) and filters their result.
 - `createMsaaPass(renderer, samples = 4)`: hardware multisampling that switches on
   and off with the renderer kept (create it with `antialias: false`). `paint(draw)`
-  renders into a multisampled offscreen frame of the drawing buffer's size, linear
-  half floats with sRGB output, then copies it onto the canvas, encoded. Both passes
-  expose their offscreen `target`, to compile materials for it, and allocate nothing
-  until first drawn.
+  renders into a multisampled offscreen frame of the drawing buffer's size, holding
+  the canvas's own bytes and resolved as the canvas's MSAA would be, then copies it
+  onto the canvas. Both passes expose their offscreen `target` and allocate nothing
+  until first drawn. Materials compile alike for the canvas and these frames.
 - `RenderQuality`: the four quality levels every simulation offers (`economy`,
-  `standard`, `cinema`, `max`, which lifts the device caps). A type only; each consumer decides what a level costs, and
-  `standard` is its default.
+  `standard`, `cinema`, `max`, which lifts the device caps). A type only: each consumer
+  maps a level to concrete settings in one place (in Horizon, each simulation's
+  `lib/quality.ts`), and `standard` is its default.
 - `observeViewport`: ResizeObserver plus explicit `refresh()` when quality changes.
   `bufferSize` multiplies CSS dimensions by resolution scale, capped DPR and an
   optional warm-up factor. It does not set CSS dimensions.

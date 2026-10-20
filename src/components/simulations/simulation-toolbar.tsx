@@ -17,6 +17,8 @@ export type SimulationTool = {
   label: string;
   /** The accessible name, when it says more than the tooltip. */
   ariaLabel?: string;
+  /** Its row in the phone's More menu, when `label` names what a click does now ("Close"). */
+  menuLabel?: string;
   icon: LucideIcon;
   active?: boolean;
   /** The id of the panel it discloses while open. */
@@ -89,9 +91,9 @@ export function SimulationToolbar({
       icon: Info,
       onSelect: () => dialog.current?.open(),
     },
-    ...tools.map(({ id, label: name, icon, active, onSelect }) => ({
+    ...tools.map(({ id, label: name, menuLabel, icon, active, onSelect }) => ({
       id,
-      label: name,
+      label: menuLabel ?? name,
       icon,
       onSelect,
       ...(active !== undefined ? { active } : {}),

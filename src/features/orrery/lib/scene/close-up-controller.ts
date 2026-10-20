@@ -20,6 +20,7 @@ import { rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { MAP_BASE, decodeMap, fetchMap } from "../graphics/map-loader";
+import type { CloseUpQuality } from "../quality";
 import type { CameraRig } from "./camera-rig";
 import {
   CLOSE_UP_IN_S,
@@ -90,6 +91,8 @@ export function createCloseUpController(
     onRelease: () => void;
     /** Uploads a texture now, so the swap never stalls a frame mid-flight. */
     upload: (texture: Texture) => void;
+    /** The current quality's close-up maps, read as each close-up starts. */
+    quality: () => CloseUpQuality;
   },
 ) {
   const { rig, reduceMotion, invalidate, locate, upload } = deps;
@@ -100,7 +103,7 @@ export function createCloseUpController(
   const prefetchAbort = new AbortController();
   scope.defer(() => prefetchAbort.abort());
   const nearFile = (id: BodyId) => {
-    const near = tierFile(MAP_BASE, id, tight ? "nearLight" : "near");
+    const near = tierFile(MAP_BASE, id, deps.quality().light ? "nearLight" : "near");
     return near && near !== tierFile(MAP_BASE, id, "far") ? near : null;
   };
   const bytesOf = (file: string) => {
@@ -149,7 +152,7 @@ export function createCloseUpController(
   const detailJob = (id: BodyId) => {
     // Keep the observed far map if the Sun's close-up tier fails to load.
     if (id === "sun") return null;
-    const w = closeUpMapWidth(id, tight);
+    const w = closeUpMapWidth(id, deps.quality().light);
     return w > looks.mapWidth(id) ? surfaceJob(id, w, w / 2) : null;
   };
 
@@ -201,7 +204,7 @@ export function createCloseUpController(
       bytesOf(near)
         .then((blob) => {
           abort.signal.throwIfAborted();
-          return decodeMap(blob, 4);
+          return decodeMap(blob, deps.quality().anisotropy);
         })
         .then(
           (texture) => {
@@ -266,6 +269,14 @@ export function createCloseUpController(
   };
 
   return {
+    /** Gives the open close-up's map the current quality's filtering, re-uploading it. */
+    refilter() {
+      const detail = close?.detail;
+      const { anisotropy } = deps.quality();
+      if (!detail || detail.anisotropy === anisotropy) return;
+      detail.anisotropy = anisotropy;
+      detail.needsUpdate = true;
+    },
     get current(): Readonly<CloseUp> | null {
       return close;
     },

@@ -39,6 +39,7 @@ import {
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay } from "../model/timeline";
 import { driftYearsPerSecond } from "../model/views";
+import { orreryQuality } from "../quality";
 import { useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createCloseUpController, type BodySelection } from "./close-up-controller";
@@ -64,6 +65,9 @@ export function createOrreryEngine({
   try {
     const sceneHost = createSceneHost(scope, { canvas, host, onError });
     const { renderer, camera, viewport, engine, tight, basics, warmUp } = sceneHost;
+    /** The visitor's render quality as the Orrery's settings; `bridgeRender` keeps it current. */
+    let quality = orreryQuality(useOrrery.getState().quality, tight);
+    sceneHost.setResolution(quality.resolution);
     const kit = createSolarKit(basics);
     const { looks, lod } = kit;
     const scene = new Scene();
@@ -87,7 +91,7 @@ export function createOrreryEngine({
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     const shownFor = (id: BodyId) => closeUp.shownFor(id);
 
-    const sky = createSkyLayer(kit, scene, store.getState().yearsAgo);
+    const sky = createSkyLayer(kit, scene, store.getState().yearsAgo, quality.sky);
     /* Rulers from the selection (or the Sun) to every planet and named body on screen. */
     const rulers = createAnchoredRulers(scope, scene, place, {
       keys: SOLAR_RULER_KEYS,
@@ -102,13 +106,14 @@ export function createOrreryEngine({
       rulers,
       shownFor,
       closeId: () => closeUp.current?.id ?? null,
+      swarms: quality.swarms,
     });
     const { planets, moons } = solar;
     const activity = scope.own(
       createSolarActivityLifecycle(
         async () => {
           const { createSolarActivity } = await import("./solar-activity");
-          return () => createSolarActivity(kit, solar.sun);
+          return () => createSolarActivity(kit, solar.sun, quality.activitySteps);
         },
         () => engine.invalidate(),
         onError,
@@ -149,9 +154,10 @@ export function createOrreryEngine({
       },
       onRelease: () => controls.cancel(),
       upload: (texture) => renderer.initTexture(texture),
+      quality: () => quality.closeUp,
     });
     const maps = createMeasuredMaps(scope, {
-      budget: tight ? 24e6 : 64e6,
+      quality: () => quality.maps,
       onLoad: (id, texture) => {
         renderer.initTexture(texture);
         looks.setMeasured(id, texture);
@@ -278,7 +284,16 @@ export function createOrreryEngine({
       },
     });
     activity.setEnabled(store.getState().solarActivity);
-    bridgeRender(store, scope, sceneHost);
+    bridgeRender(store, scope, sceneHost, (level) => {
+      quality = orreryQuality(level, tight);
+      sceneHost.setResolution(quality.resolution);
+      sky.setCounts(quality.sky);
+      solar.setSwarms(quality.swarms);
+      activity.current?.setSteps(quality.activitySteps);
+      maps.refilter();
+      closeUp.refilter();
+      engine.invalidate();
+    });
     const onMotionChange = () => engine.invalidate();
     reduceMotion.addEventListener("change", onMotionChange);
     scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
@@ -373,7 +388,8 @@ export function createOrreryEngine({
       paused: () => !(engine.dirty || continuous()),
       // Limit model-only playback, preserving responsive camera motion and flights.
       fps: () =>
-        sceneHost.capFps(
+        Math.min(
+          quality.resolution.fps,
           activity.current !== null &&
             activityMoving() &&
             !controls.interacting &&
@@ -382,9 +398,7 @@ export function createOrreryEngine({
             ? tight
               ? 24
               : 30
-            : tight
-              ? 48
-              : Infinity,
+            : Infinity,
         ),
     });
     engine.refresh();

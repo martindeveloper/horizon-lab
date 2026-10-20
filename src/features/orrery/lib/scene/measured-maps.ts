@@ -12,6 +12,7 @@ import { MAPS, tierFile, type BodyId } from "@horizon/toolkit/bodies";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 
 import { MAP_BASE, loadMap } from "../graphics/map-loader";
+import type { MapQuality } from "../quality";
 
 /** On-screen radius (px, at the zoom's destination) that asks for the measured map. */
 const LOAD_PX = 3;
@@ -33,8 +34,8 @@ type Slot = {
 export function createMeasuredMaps(
   scope: DisposalScope,
   options: {
-    /** Bytes of far maps to keep resident before idle ones are released. */
-    budget: number;
+    /** The current quality's map settings: the bytes of far maps to keep resident before idle ones are released, and the filtering new maps load with. */
+    quality: () => MapQuality;
     /** A map arrived: upload it and put it on its body. */
     onLoad: (id: BodyId, texture: Texture) => void;
     /** A map was released: the body goes back to its painted map. */
@@ -59,7 +60,7 @@ export function createMeasuredMaps(
     const slot: Slot = { state: "loading", texture: null, bytes: 0, seen: clock };
     slots.set(id, slot);
     loading = true;
-    loadMap(file, abort.signal).then(
+    loadMap(file, abort.signal, options.quality().anisotropy).then(
       (texture) => {
         loading = false;
         if (abort.signal.aborted) {
@@ -81,7 +82,7 @@ export function createMeasuredMaps(
 
   /** Releases the longest-idle maps while over budget; `keep` is never released. */
   const trim = (keep: BodyId | null) => {
-    while (resident > options.budget) {
+    while (resident > options.quality().budget) {
       let oldest: BodyId | null = null;
       let oldestSeen = clock - IDLE_S;
       for (const [id, slot] of slots) {
@@ -99,6 +100,19 @@ export function createMeasuredMaps(
   };
 
   return {
+    /**
+     * Gives every resident map the current quality's filtering, re-uploading those that change
+     * (each keeps its decoded image for that); maps that load later take it as they load.
+     */
+    refilter() {
+      const { anisotropy } = options.quality();
+      for (const slot of slots.values()) {
+        const texture = slot.texture;
+        if (!texture || texture.anisotropy === anisotropy) continue;
+        texture.anisotropy = anisotropy;
+        texture.needsUpdate = true;
+      }
+    },
     /** Starts once, after the first frame, when the browser is idle. */
     start() {
       if (ready) return;

@@ -30,12 +30,12 @@ import {
   rainRedshift,
   rainDrDt,
 } from "../src/features/black-hole/lib/physics.ts";
-import { QUALITY_STEPS } from "../src/features/black-hole/lib/presets.ts";
 import {
+  BLACK_HOLE_QUALITY,
   renderBudget,
   renderScale,
-  framedRayFov,
-} from "../src/features/black-hole/lib/render-policy.ts";
+} from "../src/features/black-hole/lib/quality.ts";
+import { framedRayFov } from "../src/features/black-hole/lib/render-policy.ts";
 import {
   dragStreamline,
   orbitBasis,
@@ -95,9 +95,11 @@ test("render budgets bound high-DPI desktops and phones without battery API supp
       }
     }
   }
-  /* Max is the visitor's choice to spend everything: the device's caps no longer apply. */
-  assert.deepEqual(renderBudget("max", true, false), renderBudget("max", false, true));
-  assert.ok(renderBudget("max", true, false).pixels > renderBudget("cinema", false, true).pixels);
+  /* Max spends the most everywhere, but within a phone's means on touch or battery. */
+  const phone = renderBudget("max", true, true);
+  assert.ok(phone.pixels > renderBudget("cinema", true, true).pixels);
+  assert.ok(phone.pixels < renderBudget("max", false, true).pixels);
+  assert.ok(renderBudget("max", false, false).pixels > renderBudget("cinema", false, true).pixels);
   const base = (50 * Math.PI) / 180;
   close(Math.tan(framedRayFov(base, 0.5) / 2) * 0.5, Math.tan(framedRayFov(base, 1) / 2));
 });
@@ -180,7 +182,7 @@ test("traced Kerr rays are captured exactly inside the camera's critical curve",
         `a=${spin} d=${d} θ=${angle}: ${converged * d} vs ${exact * d}`,
       );
       // The standard budget leaves near-critical rays dark, never inside the curve.
-      const shipped = captureEdge(cam, spin, angle, QUALITY_STEPS.standard);
+      const shipped = captureEdge(cam, spin, angle, BLACK_HOLE_QUALITY.standard.steps);
       assert.ok(
         shipped / exact > 0.999 && shipped / exact < 1.035,
         `a=${spin} d=${d} θ=${angle}: ${shipped * d} vs ${exact * d}`,
@@ -196,7 +198,7 @@ test("rays that run out of steps are reported apart from captured ones", () => {
   const dir = pixel(cam, x, 0);
   assert.equal(traceRay(cam.pos, dir, 0.998, { budget: 4000 }).outcome, "escaped");
   assert.equal(
-    traceRay(cam.pos, dir, 0.998, { budget: QUALITY_STEPS.economy }).outcome,
+    traceRay(cam.pos, dir, 0.998, { budget: BLACK_HOLE_QUALITY.economy.steps }).outcome,
     "exhausted",
   );
 });
@@ -275,7 +277,9 @@ test("plunging gas stays faint beside the disk, even blueshifted edge-on", () =>
         );
         for (
           let k = 0;
-          k < QUALITY_STEPS.standard && ray.u * 28 > 0.5 && ray.u * horizonOverM(spin) < 0.99;
+          k < BLACK_HOLE_QUALITY.standard.steps &&
+          ray.u * 28 > 0.5 &&
+          ray.u * horizonOverM(spin) < 0.99;
           k++
         ) {
           const next = kerrStep(ray, spin);
@@ -339,7 +343,7 @@ test("with gravity off, rays run straight to the disk point they aim at or out t
         const dir = pixel(cam, (k * Math.cos(i * 2.4) * 8) / d, (k * Math.sin(i * 2.4) * 8) / d);
         const b = dir.reduce((sum, v, j) => sum + v * cam.pos[j], 0);
         const meetsBall = b < 0 && d * d - b * b < rh * rh;
-        const ray = traceFlatRay(cam.pos, dir, spin, { budget: QUALITY_STEPS.economy });
+        const ray = traceFlatRay(cam.pos, dir, spin, { budget: BLACK_HOLE_QUALITY.economy.steps });
         assert.equal(
           ray.outcome,
           meetsBall ? "captured" : "escaped",

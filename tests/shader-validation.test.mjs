@@ -88,13 +88,10 @@ test("every application shader preprocesses and parses as three.js compiles it",
 });
 
 test("shader variants parse with the defines their passes compile them with", () => {
-  const variants = [
-    ["packages/toolkit/src/shaders/fxaa.frag.glsl", "#define FXAA_LINEAR_INPUT"],
-    ...shaders
-      .filter((file) => readFileSync(file, "utf8").includes("#include <horizon/supersample>"))
-      .map((file) => [file, "#define HORIZON_PASS 1"]),
-  ];
-  assert.ok(variants.length > 1);
+  const variants = shaders
+    .filter((file) => readFileSync(file, "utf8").includes("#include <horizon/supersample>"))
+    .map((file) => [file, "#define HORIZON_PASS 1"]);
+  assert.ok(variants.length > 0);
   for (const [file, define] of variants)
     assert.doesNotThrow(
       () =>

@@ -2,6 +2,8 @@ import { startEngine, type SimulationEngine } from "@/lib/engine-lifecycle";
 
 export type SolarActivity = {
   update: (dt: number, visible: boolean, animate: boolean) => void;
+  /** Ray-march steps through the prominences, as the render quality changes. */
+  setSteps: (steps: number) => void;
   dispose: () => void;
 };
 

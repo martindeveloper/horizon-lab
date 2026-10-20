@@ -1,10 +1,8 @@
 import {
-  HalfFloatType,
   LinearFilter,
   Mesh,
   OrthographicCamera,
   PlaneGeometry,
-  SRGBColorSpace,
   Scene,
   ShaderMaterial,
   UnsignedByteType,
@@ -16,28 +14,36 @@ import {
 import fullscreenVertex from "../shaders/fullscreen.vert.glsl";
 
 /**
- * A frame drawn offscreen at the drawing buffer's size, then onto the canvas through a
- * full-screen `fragmentShader` that reads it as `uImage` (one pixel is `uTexel`). With sRGB
- * output the frame holds linear half floats and the shader encodes them with
- * `linearToOutputTexel`; otherwise it holds display-ready bytes. `samples` above 0
- * multisamples the frame; three.js resolves it after each render into it. Allocates no GPU
- * memory until the first `render`.
+ * A frame drawn offscreen at the drawing buffer's size, holding exactly the bytes the canvas
+ * would: materials encode for the renderer's output colour space into it and blend there, as on
+ * the canvas, so a scene looks the same through it. 8-bit RGBA, like the canvas: no float
+ * buffers needed. A full-screen `fragmentShader` then reads it as `uImage` (one pixel is
+ * `uTexel`) and writes its display-ready result straight to the canvas. `samples` above 0
+ * multisamples the frame; three.js resolves it after each render into it, as the canvas's own
+ * MSAA would. Allocates no GPU memory until the first `render`.
  */
 export function createOffscreenFrame(
   renderer: WebGLRenderer,
   options: { fragmentShader: string; defines?: Record<string, string>; samples?: number },
 ) {
-  const linear = renderer.outputColorSpace === SRGBColorSpace;
   const size = new Vector2(1, 1);
   const texel = new Vector2(1, 1);
   const target = new WebGLRenderTarget(1, 1, {
-    type: linear ? HalfFloatType : UnsignedByteType,
+    type: UnsignedByteType,
     minFilter: LinearFilter,
     magFilter: LinearFilter,
     depthBuffer: true,
     stencilBuffer: false,
     samples: options.samples ?? 0,
   });
+  target.texture.colorSpace = renderer.outputColorSpace;
+  /* Plain bytes, never the GPU's sRGB storage: encoded values are stored, blended and sampled
+     as they are, with no decode on read. */
+  target.texture.internalFormat = "RGBA8";
+  /* three.js encodes and tone-maps for the canvas and for an XR target's own colour space, and
+     writes linear light into any other target; marked so, this frame gets the canvas's
+     programs and output. */
+  Object.assign(target, { isXRRenderTarget: true });
   const geometry = new PlaneGeometry(2, 2);
   const material = new ShaderMaterial({
     vertexShader: fullscreenVertex,
@@ -55,7 +61,7 @@ export function createOffscreenFrame(
   let disposed = false;
 
   return {
-    /** The offscreen frame; bind it to compile materials for linear output. */
+    /** The offscreen frame. */
     target,
     /**
      * Runs `paint` with the offscreen frame bound, so every render it makes lands there, then

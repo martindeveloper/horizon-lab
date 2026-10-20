@@ -311,8 +311,21 @@ only its layers, its views and its store of its own:
   `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias` and the scale bar; the
   feature adds its view, selection and switches. `bridgeStore` acts once on each button turn
   and view flight, ignores the view the HUD writes during a frame, and reports the first frame;
-  `bridgeRender` hands the host the quality and anti-aliasing, publishing the device's default
-  anti-aliasing while none is chosen.
+  `bridgeRender` hands the engine each new quality level and the host the anti-aliasing,
+  publishing the device's default anti-aliasing while none is chosen.
+- **Quality:** every simulation maps the shared `RenderQuality` to its own settings in one
+  file, `lib/quality.ts`, and passes the result down: engines and layers take numbers (a
+  resolution, point counts, map budgets, ray steps), never the level or the device class.
+  The space scenes share `src/space/quality.ts`: `sceneTier` (Standard keeps each device's
+  old tier, Economy and Cinematic pin one, Max goes past both), `sceneResolution` and the
+  solar system's swarm counts; the Orrery (`orreryQuality`: sky counts, map budget and
+  filtering, close-up maps, prominence steps) and Deep Field (`deepFieldQuality`: the cosmic
+  maps' sampling) add their own. A change of level reaches the layers live, right after the
+  control repaints: point clouds are sampled afresh, budgets change, and resident maps take
+  the new filtering. Max holds a low-memory device's buffer and resident maps to what it can
+  keep. The
+  black hole's `BLACK_HOLE_QUALITY` holds ray steps, traced share and work budget; Spectra's
+  `lib/quality.ts` holds its canvas pixel caps and its wide-colour rule.
 - **Panels:** `Rail` and `RailSection` for side panels (`sheetLead` adds phone-only
   sections), `SelectionSheet` for cards, both
   ending above the dock, which publishes its height as `--hud-clear` on the stage

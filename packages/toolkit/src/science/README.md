@@ -76,6 +76,9 @@ wavelengths spectroscopists quote. Photon energies and line physics use vacuum w
 `spectrumXyz` integrates a spectrum against it, `chromaticity` gives (x, y), and
 `displayColor` turns XYZ into sRGB at full brightness, clipping primaries a screen cannot
 make. `blackbodyColor(K)` and `wavelengthColor(nm)` are the usual two; `cssRgb` prints one.
+Each takes an optional `Gamut`: `p3` computes the colour in Display P3 instead
+(`xyzToLinearP3`), where spectral hues clip far less; `cssColor(rgb, alpha, gamut)` prints it
+as `color(display-p3 …)` for a P3 canvas or page.
 
 ## Elements (`elements.ts`)
 

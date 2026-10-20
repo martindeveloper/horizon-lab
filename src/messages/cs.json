@@ -345,6 +345,7 @@
     "fxaa": "FXAA",
     "edges": "Paprsky hran",
     "supersample": "SSAA",
+    "wideColour": "Široký gamut (P3)",
     "reset": "Obnovit nastavení"
   },
   "webgl": {

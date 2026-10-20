@@ -15,6 +15,7 @@ import { smoothstep } from "@horizon/toolkit/math";
 import { fade, SOLAR_GOLD } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
+import type { SwarmCounts } from "../../quality";
 import { createSwarm, kuiperBelt, mainBelt, oortCloud, trojans } from "../graphics/swarms";
 import { planetElements } from "../model/elements";
 import { MODEL_START, OORT_SHELLS_AU, SUN_BIRTH } from "../model/parameters";
@@ -43,6 +44,7 @@ const SHELLS = fade(2_800, 5_600, 500_000, 1_000_000);
 export function createPopulationsLayer(
   { scope, looks, tight, dpr, pxWorld, lod }: SolarKit,
   parent: Object3D,
+  counts: SwarmCounts,
 ) {
   const rock = scope.own(new SphereGeometry(1, tight ? 16 : 24, tight ? 12 : 16));
   const seeds = new Float32Array(TRACERS.length);
@@ -60,10 +62,11 @@ export function createPopulationsLayer(
   const focusOrbit = orbitOf(scope, SOLAR_GOLD, 0.95);
   parent.add(focusOrbit.line);
 
-  const belt = scope.own(createSwarm(mainBelt(tight ? 1400 : 2600), 2.6, 1, false, dpr));
-  const trojanSwarm = scope.own(createSwarm(trojans(tight ? 360 : 640), 2.7, 1, false, dpr));
-  const kuiper = scope.own(createSwarm(kuiperBelt(tight ? 1600 : 3000), 2.2, 0.9, true, dpr));
-  const oort = scope.own(createSwarm(oortCloud(tight ? 2000 : 3800), 1.9, 0.85, true, dpr));
+  const belt = scope.own(createSwarm(mainBelt(counts.belt), 2.6, 1, false, dpr));
+  const trojanSwarm = scope.own(createSwarm(trojans(counts.trojans), 2.7, 1, false, dpr));
+  const kuiper = scope.own(createSwarm(kuiperBelt(counts.kuiper), 2.2, 0.9, true, dpr));
+  const oort = scope.own(createSwarm(oortCloud(counts.oort), 1.9, 0.85, true, dpr));
+  let drawn = counts;
   const beltHit = new Mesh(scope.own(new TorusGeometry(2.7, 0.42, 6, 28)), looks.ghost);
   beltHit.rotation.x = Math.PI / 2;
   beltHit.userData.pick = { kind: "population", id: "asteroids" } satisfies SolarSelection;
@@ -153,6 +156,14 @@ export function createPopulationsLayer(
 
   return {
     pickables: [tracers, beltHit, kuiperHit],
+    /** Refills the swarms whose count changed. */
+    setCounts(next: SwarmCounts) {
+      if (next.belt !== drawn.belt) belt.refill(mainBelt(next.belt));
+      if (next.trojans !== drawn.trojans) trojanSwarm.refill(trojans(next.trojans));
+      if (next.kuiper !== drawn.kuiper) kuiper.refill(kuiperBelt(next.kuiper));
+      if (next.oort !== drawn.oort) oort.refill(oortCloud(next.oort));
+      drawn = next;
+    },
     update(f: SolarFrame) {
       const { show, sel, yearsAgo, mig, driftYears, dist, now } = f;
       const planetesimals = SUN_BIRTH - yearsAgo > 1e6;

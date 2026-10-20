@@ -6,16 +6,19 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import {
   blackbodyColor,
   cieObserver,
+  cssColor,
   displayColor,
   planckRadiance,
   wavelengthColor,
+  type Gamut,
   type Rgb,
 } from "@horizon/toolkit/science";
 
 import { absorbedWidth, slabProfiles, type Observation } from "../lib/model/spectrum";
 import { BAND_HEADS } from "../lib/model/telluric";
-import { canvasScale } from "../lib/render";
+import { canvasScale, context2d } from "../lib/quality";
 import { useSpectroscopy } from "../lib/store";
+import { useDrawingGamut } from "./use-gamut";
 
 /** What the scene needs to say about itself, already translated. */
 export type SceneLabels = {
@@ -42,7 +45,7 @@ type Photon = {
 };
 
 /** The light a slab of gas gives off on its own: its colour and how bright, for the flame's glow. */
-function glowOf(obs: Observation): { rgb: Rgb; level: number } | null {
+function glowOf(obs: Observation, gamut: Gamut): { rgb: Rgb; level: number } | null {
   if (obs.kind !== "slab") return null;
   const lines = slabProfiles(obs);
   if (lines.length === 0) return null;
@@ -60,7 +63,7 @@ function glowOf(obs: Observation): { rgb: Rgb; level: number } | null {
   /* A dim flame still shows; a bright one saturates. */
   const reference = planckRadiance(555, obs.gas.temperature) * 0.05;
   return {
-    rgb: displayColor([X, Y, Z]),
+    rgb: displayColor([X, Y, Z], gamut),
     level: Math.min(1, 0.25 + Math.log10(1 + (X + Y + Z) / reference) / 3),
   };
 }
@@ -69,8 +72,8 @@ function glowOf(obs: Observation): { rgb: Rgb; level: number } | null {
 const SCENE_GOLD = "rgb(226 192 122 / 0.9)";
 const SCENE_MUTED = "rgb(178 178 174 / 0.8)";
 
-const css = ([r, g, b]: Rgb, alpha = 1) =>
-  `rgb(${Math.round(r * 255)} ${Math.round(g * 255)} ${Math.round(b * 255)} / ${alpha})`;
+/** Model colours are computed in the canvas's gamut and printed for it. */
+const css = (rgb: Rgb, alpha: number, gamut: Gamut) => cssColor(rgb, alpha, gamut);
 
 /** Everything a frame draws from, refreshed on every render and read by the running loop. */
 type Inputs = {
@@ -84,6 +87,8 @@ type Inputs = {
   strong: readonly { centre: number; tau: number }[];
   range: readonly [number, number];
   labels: SceneLabels;
+  /** The canvas's colour space, which the colours above are computed in. */
+  gamut: Gamut;
 };
 
 /** Whether two inputs draw the same still scene (the photons' lines aside). */
@@ -95,7 +100,8 @@ const sameScene = (a: Inputs, b: Inputs) =>
   a.teff === b.teff &&
   a.lampColor === b.lampColor &&
   a.range === b.range &&
-  a.labels === b.labels;
+  a.labels === b.labels &&
+  a.gamut === b.gamut;
 
 type Geometry = {
   midY: number;
@@ -170,7 +176,13 @@ function granulation() {
 const limbCoefficient = (teff: number) => (teff < 7000 ? 0.6 : teff < 12_000 ? 0.5 : 0.35);
 
 /** The star's disc: limb-darkened in its own colour, granulated if it is cool enough to convect. */
-function drawStar(ctx: CanvasRenderingContext2D, star: Geometry["star"], rgb: Rgb, teff: number) {
+function drawStar(
+  ctx: CanvasRenderingContext2D,
+  star: Geometry["star"],
+  rgb: Rgb,
+  teff: number,
+  gamut: Gamut,
+) {
   const u = limbCoefficient(teff);
   const disc = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.r);
   for (const s of [0, 0.4, 0.6, 0.75, 0.85, 0.92, 0.96, 0.985, 1]) {
@@ -179,11 +191,11 @@ function drawStar(ctx: CanvasRenderingContext2D, star: Geometry["star"], rgb: Rg
     /* The limb darkens most in the blue, so it also reddens a little. */
     disc.addColorStop(
       s,
-      css([
-        rgb[0] * level,
-        rgb[1] * level * (0.96 + 0.04 * mu),
-        rgb[2] * level * (0.88 + 0.12 * mu),
-      ]),
+      css(
+        [rgb[0] * level, rgb[1] * level * (0.96 + 0.04 * mu), rgb[2] * level * (0.88 + 0.12 * mu)],
+        1,
+        gamut,
+      ),
     );
   }
   ctx.fillStyle = disc;
@@ -212,17 +224,17 @@ function drawStar(ctx: CanvasRenderingContext2D, star: Geometry["star"], rgb: Rg
     star.y,
     star.r * 1.3,
   );
-  halo.addColorStop(0, css(rgb, 0.2));
-  halo.addColorStop(0.4, css(rgb, 0.06));
-  halo.addColorStop(1, css(rgb, 0));
+  halo.addColorStop(0, css(rgb, 0.2, gamut));
+  halo.addColorStop(0.4, css(rgb, 0.06, gamut));
+  halo.addColorStop(1, css(rgb, 0, gamut));
   ctx.fillStyle = halo;
   ctx.beginPath();
   ctx.arc(star.x, star.y, star.r * 1.3, 0, Math.PI * 2);
   ctx.fill();
   /* Its atmosphere: the thin, cooler shell the lines form in, a veil just above the limb. */
   const shell = ctx.createRadialGradient(star.x, star.y, star.r, star.x, star.y, star.r * 1.05);
-  shell.addColorStop(0, css(rgb, 0.16));
-  shell.addColorStop(1, css(rgb, 0));
+  shell.addColorStop(0, css(rgb, 0.16, gamut));
+  shell.addColorStop(1, css(rgb, 0, gamut));
   ctx.fillStyle = shell;
   ctx.beginPath();
   ctx.arc(star.x, star.y, star.r * 1.05, 0, Math.PI * 2);
@@ -240,14 +252,15 @@ function drawLamp(
   at: Geometry["source"],
   rgb: Rgb | null,
   height: number,
+  gamut: Gamut,
 ) {
   if (rgb) {
     const reach = height * 0.36;
     const light = ctx.createRadialGradient(at.x, at.y, 0, at.x, at.y, reach);
-    light.addColorStop(0, css(rgb, 0.95));
-    light.addColorStop(0.12, css(rgb, 0.6));
-    light.addColorStop(0.4, css(rgb, 0.14));
-    light.addColorStop(1, css(rgb, 0));
+    light.addColorStop(0, css(rgb, 0.95, gamut));
+    light.addColorStop(0.12, css(rgb, 0.6, gamut));
+    light.addColorStop(0.4, css(rgb, 0.14, gamut));
+    light.addColorStop(1, css(rgb, 0, gamut));
     ctx.fillStyle = light;
     ctx.fillRect(at.x - reach, at.y - reach, reach * 2, reach * 2);
   }
@@ -256,7 +269,7 @@ function drawLamp(
   ctx.beginPath();
   ctx.arc(at.x, at.y, 10, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.strokeStyle = rgb ? css([1, 1, 1], 0.9) : "rgb(255 255 255 / 0.3)";
+  ctx.strokeStyle = rgb ? css([1, 1, 1], 0.9, "srgb") : "rgb(255 255 255 / 0.3)";
   ctx.beginPath();
   for (let i = 0; i <= 6; i++) ctx.lineTo(at.x - 5 + (10 * i) / 6, at.y + (i % 2 ? -2.5 : 2.5));
   ctx.stroke();
@@ -269,14 +282,15 @@ function drawCell(
   midY: number,
   height: number,
   glow: Inputs["glow"],
+  gamut: Gamut,
 ) {
   const top = midY - height * 0.3;
   const h = height * 0.6;
   if (glow) {
     const cell = ctx.createRadialGradient(gas.x, midY, 0, gas.x, midY, h * 0.75);
-    cell.addColorStop(0, css(glow.rgb, 0.6 * glow.level));
-    cell.addColorStop(0.5, css(glow.rgb, 0.18 * glow.level));
-    cell.addColorStop(1, css(glow.rgb, 0));
+    cell.addColorStop(0, css(glow.rgb, 0.6 * glow.level, gamut));
+    cell.addColorStop(0.5, css(glow.rgb, 0.18 * glow.level, gamut));
+    cell.addColorStop(1, css(glow.rgb, 0, gamut));
     ctx.fillStyle = cell;
     ctx.fillRect(gas.x - h * 0.75, midY - h * 0.75, h * 1.5, h * 1.5);
   }
@@ -304,7 +318,7 @@ function drawScene(
   font: string,
   inputs: Inputs,
 ) {
-  const { kind, glowing, glow, starColor, teff, lampColor, range, labels } = inputs;
+  const { kind, glowing, glow, starColor, teff, lampColor, range, labels, gamut } = inputs;
   const g = layout(kind, width, height);
   const { midY, star, source, gas, airBand, slit, grating } = g;
   ctx.clearRect(0, 0, width, height);
@@ -319,7 +333,7 @@ function drawScene(
   for (let i = 0; i < slices; i++) {
     /* As bright as the eye finds each colour (CIE ȳ), so the far red and violet stay dim. */
     const nm = from + ((to - from) * (i + 0.5)) / slices;
-    ctx.fillStyle = css(wavelengthColor(nm), 0.03 + 0.14 * cieObserver(nm)[1]);
+    ctx.fillStyle = css(wavelengthColor(nm, gamut), 0.03 + 0.14 * cieObserver(nm)[1], gamut);
     ctx.beginPath();
     ctx.moveTo(grating.x, grating.y);
     ctx.lineTo((width * i) / slices - 0.5, height);
@@ -375,16 +389,16 @@ function drawScene(
     [0.6, 0.3],
   ] as const) {
     const beam = ctx.createLinearGradient(beamStart, 0, slit.x, 0);
-    beam.addColorStop(0, css(tint, alpha));
-    beam.addColorStop(1, css(tint, alpha * 0.45));
+    beam.addColorStop(0, css(tint, alpha, gamut));
+    beam.addColorStop(1, css(tint, alpha * 0.45, gamut));
     ctx.fillStyle = beam;
     ctx.fillRect(beamStart, midY - half, slit.x - beamStart, half * 2);
   }
 
-  if (kind === "star" && starColor && teff) drawStar(ctx, star, starColor, teff);
+  if (kind === "star" && starColor && teff) drawStar(ctx, star, starColor, teff, gamut);
   else if (kind === "slab") {
-    drawLamp(ctx, source, lampColor, height);
-    drawCell(ctx, gas, midY, height, glow);
+    drawLamp(ctx, source, lampColor, height, gamut);
+    drawCell(ctx, gas, midY, height, glow, gamut);
   }
 
   /* The spectrograph: slit jaws, then a ruled grating in gold that spreads the light. */
@@ -479,10 +493,11 @@ export function SceneCanvas({
   teff: number | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const glow = useMemo(() => glowOf(obs), [obs]);
+  const gamut = useDrawingGamut();
+  const glow = useMemo(() => glowOf(obs, gamut), [obs, gamut]);
   const lamp = obs.kind === "slab" ? obs.background : null;
-  const starColor = useMemo(() => (teff ? blackbodyColor(teff) : null), [teff]);
-  const lampColor = useMemo(() => (lamp ? blackbodyColor(lamp) : null), [lamp]);
+  const starColor = useMemo(() => (teff ? blackbodyColor(teff, gamut) : null), [teff, gamut]);
+  const lampColor = useMemo(() => (lamp ? blackbodyColor(lamp, gamut) : null), [lamp, gamut]);
   const strong = useMemo(
     () =>
       lines.filter((l) => l.tau > 0.3 && l.centre >= range[0] && l.centre <= range[1]).slice(0, 24),
@@ -498,6 +513,7 @@ export function SceneCanvas({
     strong,
     range,
     labels,
+    gamut,
   };
   const latest = useRef(inputs);
   /** Brings the still layer up to date after a render; set by the drawing effect. */
@@ -509,9 +525,9 @@ export function SceneCanvas({
 
   useEffect(() => {
     const el = canvas.current;
-    const ctx = el?.getContext("2d");
+    const ctx = el ? context2d(el, gamut) : null;
     const layer = document.createElement("canvas");
-    const back = layer.getContext("2d");
+    const back = context2d(layer, gamut);
     if (!el || !ctx || !back) return;
     let width = 0;
     let height = 0;
@@ -592,7 +608,7 @@ export function SceneCanvas({
         : (Math.random() - 0.5) * 0.02;
       flock.push({
         nm,
-        rgb: wavelengthColor(nm),
+        rgb: wavelengthColor(nm, gamut),
         x: glowing ? gas.x : source.x,
         y: midY + (Math.random() - 0.5) * (glowing ? height * 0.4 : 6),
         vx: Math.cos(angle) * speed,
@@ -654,17 +670,17 @@ export function SceneCanvas({
         /* A short streak with a bright head: its motion reads even at 30 frames a second. */
         const alpha = Math.min(1, p.life / (p.scattered ? 1.2 : 0.4));
         const tail = 0.05;
-        ctx.strokeStyle = css(p.rgb, 0.35 * alpha);
+        ctx.strokeStyle = css(p.rgb, 0.35 * alpha, gamut);
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(p.x - p.vx * tail, p.y - p.vy * tail);
         ctx.lineTo(p.x, p.y);
         ctx.stroke();
-        ctx.fillStyle = css(p.rgb, 0.18 * alpha);
+        ctx.fillStyle = css(p.rgb, 0.18 * alpha, gamut);
         ctx.beginPath();
         ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = css(p.rgb, 0.95 * alpha);
+        ctx.fillStyle = css(p.rgb, 0.95 * alpha, gamut);
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
         ctx.fill();
@@ -698,7 +714,15 @@ export function SceneCanvas({
       unsubscribe();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [photons]);
+  }, [photons, gamut]);
 
-  return <canvas ref={canvas} aria-hidden className="spectroscopy-scene block h-full w-full" />;
+  /* A canvas keeps the colour space of its first context: a new gamut takes a new canvas. */
+  return (
+    <canvas
+      key={gamut}
+      ref={canvas}
+      aria-hidden
+      className="spectroscopy-scene block h-full w-full"
+    />
+  );
 }
