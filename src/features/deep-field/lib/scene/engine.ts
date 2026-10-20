@@ -12,7 +12,7 @@
 import { Scene } from "three";
 
 import { carryPose, takeHandoff } from "@/lib/handoff";
-import { bridgeAntialias, bridgeStore } from "@/lib/scene-bridge";
+import { bridgeRender, bridgeStore } from "@/lib/scene-bridge";
 import { TODAY } from "@/space/solar-system/model/moment";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
@@ -168,7 +168,7 @@ export function createDeepFieldEngine({
         controls.cancel();
       },
     });
-    bridgeAntialias(store, scope, sceneHost);
+    bridgeRender(store, scope, sceneHost);
     const onMotionChange = () => engine.invalidate();
     reduceMotion.addEventListener("change", onMotionChange);
     scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
@@ -267,7 +267,7 @@ export function createDeepFieldEngine({
     engine.start({
       render: tick,
       paused: () => !(engine.dirty || continuous()),
-      fps: () => (tight ? 48 : Infinity),
+      fps: () => sceneHost.capFps(tight ? 48 : Infinity),
     });
     engine.refresh();
     return { dispose: () => scope.dispose() };

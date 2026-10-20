@@ -72,7 +72,7 @@ included in the application's public exports.
 | `Sheet`                   | Small-screen bottom sheet with scrim, grab handle and `pad-sheet`. While displayed it is modal within its parent: focus moves in, sibling layers turn `inert`, Escape and a focusable close button dismiss it, focus returns. When CSS hides it (e.g. `md:hidden`) it does nothing.                                                                                                                     |
 | `Dock`                    | The one bottom HUD bar for every simulation: panel glass, `rounded-lg`, centered at one width (full on phones, 56rem max) inside `pad-hud-bottom`, a little tighter on phones. Don't resize it; `className` lays out the content, `footerClassName` clears an open side rail.                                                                                                                           |
 | `ImmersiveScene`          | Canvas-only view: hides its children, marks the `stage` ancestor `data-immersive`, F / Esc, exit control, optional fullscreen. Labels in props.                                                                                                                                                                                                                                                         |
-| `ImmersiveToggle`         | Toolbar entry for `ImmersiveScene` with shortcut hint; returns focus on exit. `useImmersive()` reads the state anywhere.                                                                                                                                                                                                                                                                                |
+| `ImmersiveToggle`         | Toolbar entry for `ImmersiveScene` with shortcut hint; returns focus on exit. `align` anchors its tooltip (`end` at a toolbar's right edge). `useImmersive()` reads the state anywhere.                                                                                                                                                                                                                 |
 | `Tilt`                    | Apple TV–style hover tilt: compositor-only (transform, translate, opacity), frame-rate independent easing, a small pointer glare and a moved (not repainted) lift shadow; mark children `tilt-back` / `tilt-front` for depth (they only move, so glass inside keeps its blur; never give them opacity, filter or mask). Mouse and pen only; reduced motion is honoured live. Give it the card's radius. |
 | `OrbitPad`                | A round glass dial of four labelled step buttons, with optional `centre` content (such as the step size), (spaced on phones so touch targets never overlap) (left/right turn, up/down tilt) with tooltips, a non-drag camera alternative (WCAG 2.5.7). Emits signed `{ azimuth, inclination }` steps; apply them with `stepOrbit` from `@horizon/toolkit/camera`, which snaps.                          |
 | `useFocusHandoff`         | Hook for panels opened on demand: a displayed element (`tabIndex={-1}`) takes focus on mount and hands it back (or to `fallback()`) on unmount.                                                                                                                                                                                                                                                         |
@@ -340,9 +340,9 @@ and look alike everywhere: technical details, the guide (graduation cap), the fi
 (the Objects, Elements or atlas list of what to look at), the simulation's other tools
 (the Orrery's reading guide, the black hole's clocks), its settings panel (sliders),
 then the immersive view. Each button carries `data-return` with its id, so what it
-opens can hand focus back. Every settings panel ends with render quality: the
-labelled anti-aliasing choice (`AntialiasRow`) and `ResetButton`
-(`src/components/simulations/render-settings.tsx`).
+opens can hand focus back. Every settings panel ends with `RenderSection`
+(`src/components/simulations/render-settings.tsx`): quality levels, anti-aliasing, then
+Reset, worded by the shared `render` copy.
 
 Below `md` the toolbar keeps the guide, the finder and the settings and folds the rest,
 in the same order, into

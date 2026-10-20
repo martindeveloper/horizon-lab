@@ -3,16 +3,24 @@
 import { useFormatter, useTranslations } from "next-intl";
 
 import { Rail, RailSection } from "@/components/simulations/rail";
+import { RenderSection, type AntialiasMode } from "@/components/simulations/render-settings";
 import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
 import { FULL_RANGE } from "../lib/model/tour";
+import type { CanvasAntialias } from "../lib/render";
 import { RESOLUTION_RANGE, useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
 import { useFormedLines, useObservation } from "./use-spectrum";
 
 /** How many of an element's lines the panel lists. */
 const PER_ELEMENT = 6;
+
+/** A 2D canvas is always smoothed; SSAA draws the scene at twice the pixels as well. */
+const ANTIALIAS_MODES: readonly AntialiasMode<CanvasAntialias>[] = [
+  { value: "off", name: "off" },
+  { value: "supersample", name: "supersample" },
+];
 
 /**
  * Every element: its laboratory pattern to compare, and its strongest lines in view, each a
@@ -98,6 +106,8 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const photons = useSpectroscopy((s) => s.photons);
   const view = useSpectroscopy((s) => s.view);
   const range = useSpectroscopy((s) => s.range);
+  const quality = useSpectroscopy((s) => s.quality);
+  const antialias = useSpectroscopy((s) => s.antialias);
   const api = useSpectroscopy.getState;
   const [lo, hi] = RESOLUTION_RANGE;
   const toSlider = (R: number) => Math.round((Math.log(R / lo) / Math.log(hi / lo)) * 1000);
@@ -160,6 +170,14 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
       {view !== "kirchhoff" ? null : (
         <p className="text-xs leading-relaxed text-muted">{t("panel.benchNote")}</p>
       )}
+      <RenderSection<CanvasAntialias>
+        quality={quality}
+        onQuality={(level) => api().setQuality(level)}
+        antialias={antialias}
+        modes={ANTIALIAS_MODES}
+        onAntialias={(mode) => api().setAntialias(mode)}
+        onReset={() => api().resetView()}
+      />
     </Rail>
   );
 }

@@ -18,6 +18,7 @@ import type { DisposalScope } from "../rendering/disposal";
 import { createEngineHost } from "../rendering/engine-host";
 import { createFxaaPass, type FxaaPass } from "../rendering/fxaa-pass";
 import { createMsaaPass, type MsaaPass } from "../rendering/msaa-pass";
+import type { RenderQuality } from "../rendering/quality";
 import type { SceneBasics, Viewport } from "./kit";
 
 /** Vertical field of view of the scenes, degrees. */
@@ -33,11 +34,28 @@ export function defaultSceneAntialias(tight: boolean): SceneAntialias {
   return tight ? "off" : "msaa";
 }
 
+/**
+ * What each render quality draws with: the cap on buffer pixels per CSS pixel and on frames
+ * per second. `standard` is what scenes always drew with; `economy` drops to one pixel per CSS
+ * pixel at 30 fps, `cinema` allows two (1.5 on tight devices), `max` the device's own up to
+ * three, tight or not.
+ */
+export function sceneQuality(quality: RenderQuality, tight: boolean) {
+  if (quality === "economy") return { dprCap: 1, fps: 30 };
+  if (quality === "max") return { dprCap: 3, fps: Infinity };
+  if (quality === "cinema") return { dprCap: tight ? 1.5 : 2, fps: Infinity };
+  return { dprCap: tight ? 1.25 : 1.5, fps: Infinity };
+}
+
 /** `SceneBasics` plus the device class and pixel ratio every layer may size itself by. */
 export type SceneHostBasics = SceneBasics & {
   /** Phones and low-memory devices: smaller samples and buffers. */
   tight: boolean;
-  dpr: number;
+  /**
+   * Buffer pixels per CSS pixel, kept current as the quality changes: share the object as a
+   * shader uniform (`{ dpr: basics.dpr }`) so point sizes follow.
+   */
+  dpr: { value: number };
 };
 
 export function createSceneHost(
@@ -56,7 +74,8 @@ export function createSceneHost(
   const coarse = window.matchMedia(COARSE_POINTER_QUERY).matches;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const tight = coarse || (memory != null && memory <= 4);
-  const dprCap = tight ? 1.25 : 1.5;
+  let quality: RenderQuality = "standard";
+  const dpr = { value: 1 };
   const renderer = new WebGLRenderer({
     canvas,
     /* Anti-aliasing happens offscreen (`setAntialias`), so it can change without a new context. */
@@ -76,9 +95,14 @@ export function createSceneHost(
     createEngineHost({
       canvas,
       host,
-      resolution: () => ({ scale: 1, dpr: window.devicePixelRatio || 1, dprCap }),
+      resolution: () => ({
+        scale: 1,
+        dpr: window.devicePixelRatio || 1,
+        dprCap: sceneQuality(quality, tight).dprCap,
+      }),
       onResize: (w, h) => {
         const rect = host.getBoundingClientRect();
+        dpr.value = Math.min(window.devicePixelRatio || 1, sceneQuality(quality, tight).dprCap);
         viewport.width = Math.max(1, rect.width);
         viewport.height = Math.max(1, rect.height);
         renderer.setSize(w, h, false);
@@ -141,7 +165,7 @@ export function createSceneHost(
     camera,
     viewport,
     tight,
-    dpr: Math.min(window.devicePixelRatio || 1, dprCap),
+    dpr,
   };
 
   return {
@@ -151,6 +175,18 @@ export function createSceneHost(
     engine,
     tight,
     basics,
+    /** The render quality frames are drawn with (`sceneQuality`). */
+    get quality() {
+      return quality;
+    },
+    /** Resizes the buffer for the next frame to `quality`'s pixel ratio. */
+    setQuality(next: RenderQuality) {
+      if (next === quality) return;
+      quality = next;
+      engine.refresh();
+    },
+    /** An engine's frame-rate cap, lowered further by the render quality. */
+    capFps: (fps: number) => Math.min(fps, sceneQuality(quality, tight).fps),
     /** The anti-aliasing frames are drawn with. */
     get antialias() {
       return antialias;

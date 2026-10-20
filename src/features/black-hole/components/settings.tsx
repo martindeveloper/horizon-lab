@@ -1,14 +1,21 @@
 import { useTranslations } from "next-intl";
 
 import { RailSection } from "@/components/simulations/rail";
-import { AntialiasRow, ResetButton } from "@/components/simulations/render-settings";
+import { RenderSection, type AntialiasMode } from "@/components/simulations/render-settings";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
 import { cameraFloor, formatSpin } from "@/features/black-hole/lib/physics";
-import { MAX_DIST, type Quality } from "@/features/black-hole/lib/presets";
+import { MAX_DIST } from "@/features/black-hole/lib/presets";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { toLogFraction, fromLogFraction } from "@horizon/toolkit/math";
 import type { PassAntialias } from "@horizon/toolkit/rendering";
-import { ControlRow, SegmentedControl, Slider, SwitchRow } from "@horizon/toolkit/ui";
+import { ControlRow, Slider, SwitchRow } from "@horizon/toolkit/ui";
+
+/** Every ray is re-traced on the GPU, so anti-aliasing can trace extra rays at edges. */
+const ANTIALIAS_MODES: readonly AntialiasMode<PassAntialias>[] = [
+  { value: "off", name: "off" },
+  { value: "fxaa", name: "fxaa" },
+  { value: "supersample", name: "edges" },
+];
 
 /** The observatory rail's id, for its toggle and for pin cards that keep clear of it. */
 export const SETTINGS_PANEL_ID = "observatory-panel";
@@ -162,35 +169,15 @@ export function SettingsBody() {
           </div>
         </div>
       </RailSection>
-      <RailSection title={t("renderQuality")}>
-        <div className="flex flex-col gap-3">
-          <SegmentedControl<Quality>
-            aria-label={t("renderQuality")}
-            value={quality}
-            onValueChange={setQuality}
-            options={[
-              { value: "economy", label: t("qualityEconomy") },
-              { value: "standard", label: t("qualityStandard") },
-              { value: "cinema", label: t("qualityCinema") },
-            ]}
-          />
-          <AntialiasRow<PassAntialias>
-            label={t("antialiasing")}
-            value={antialiasing}
-            onChange={setAntialiasing}
-            options={[
-              { value: "off", label: t("antialiasOff") },
-              { value: "fxaa", label: t("antialiasFxaa") },
-              { value: "supersample", label: t("antialiasEdges") },
-            ]}
-          />
-          <p className="text-xs text-muted">{t("modelNotice")}</p>
-          <ResetButton
-            label={t("reset")}
-            onReset={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
-          />
-        </div>
-      </RailSection>
+      <RenderSection<PassAntialias>
+        quality={quality}
+        onQuality={setQuality}
+        antialias={antialiasing}
+        modes={ANTIALIAS_MODES}
+        onAntialias={setAntialiasing}
+        note={<p className="text-xs text-muted">{t("modelNotice")}</p>}
+        onReset={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
+      />
     </>
   );
 }

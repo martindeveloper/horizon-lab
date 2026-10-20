@@ -2,38 +2,28 @@
 
 import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
-import type { SceneAntialias } from "@horizon/toolkit/scene";
-import { ControlRow, SegmentedControl, type SegmentedOption } from "@horizon/toolkit/ui";
+import type { RenderQuality } from "@horizon/toolkit/rendering";
+import { ControlRow, SegmentedControl } from "@horizon/toolkit/ui";
 
 import { RailSection } from "./rail";
 
-/** A simulation's anti-aliasing choices under their label, the same in every settings panel. */
-export function AntialiasRow<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: T;
-  options: readonly SegmentedOption<T>[];
-  onChange: (mode: T) => void;
-}) {
-  return (
-    <ControlRow label={label} value={null}>
-      <SegmentedControl<T>
-        aria-label={label}
-        value={value}
-        onValueChange={onChange}
-        options={options}
-      />
-    </ControlRow>
-  );
-}
+/* Listed here, not imported: the rendering module's values would pull the renderer into the page. */
+const QUALITIES: readonly RenderQuality[] = ["economy", "standard", "cinema", "max"];
+
+/** An anti-aliasing mode and the `render.*` copy key that names it. */
+export type AntialiasMode<A extends string> = { value: A; name: string };
+
+/** A zoomable scene's modes: the Orrery and Deep Field. */
+export const SCENE_ANTIALIAS = [
+  { value: "off", name: "off" },
+  { value: "msaa", name: "msaa" },
+  { value: "fxaa", name: "fxaa" },
+] as const satisfies readonly AntialiasMode<string>[];
 
 /** Puts a settings panel back as a visit starts; the last thing in it. */
-export function ResetButton({ label, onReset }: { label: string; onReset: () => void }) {
+function ResetButton({ label, onReset }: { label: string; onReset: () => void }) {
   return (
     <button
       type="button"
@@ -46,37 +36,52 @@ export function ResetButton({ label, onReset }: { label: string; onReset: () => 
   );
 }
 
-/* Listed here, not imported: the scene module's values would pull the renderer into the page. */
-const SCENE_MODES: readonly SceneAntialias[] = ["off", "msaa", "fxaa"];
-
 /**
- * A zoomable scene's render quality, worded by the shared space copy in `namespace`: its
- * anti-aliasing (once the engine has published the device's default) and the View panel's reset.
+ * The last section of every simulation's settings, the same in each: render quality, then
+ * anti-aliasing (hidden while `antialias` is still unknown), an optional note, then Reset.
+ * Copy is the shared `render` namespace; each simulation decides what its levels and modes do.
  */
-export function SceneRenderSection({
-  namespace,
+export function RenderSection<A extends string>({
+  quality,
+  onQuality,
   antialias,
+  modes,
   onAntialias,
+  note,
   onReset,
 }: {
-  namespace: string;
-  antialias: SceneAntialias | null;
-  onAntialias: (mode: SceneAntialias) => void;
+  quality: RenderQuality;
+  onQuality: (quality: RenderQuality) => void;
+  antialias: A | null;
+  modes: readonly AntialiasMode<A>[];
+  onAntialias: (mode: A) => void;
+  note?: ReactNode;
   onReset: () => void;
 }) {
-  const t = useTranslations(namespace);
+  const t = useTranslations("render");
   return (
-    <RailSection title={t("hud.renderQuality")}>
+    <RailSection title={t("title")}>
       <div className="flex flex-col gap-3">
-        {antialias ? (
-          <AntialiasRow<SceneAntialias>
-            label={t("hud.antialiasing")}
-            value={antialias}
-            onChange={onAntialias}
-            options={SCENE_MODES.map((mode) => ({ value: mode, label: t(`antialias.${mode}`) }))}
+        <ControlRow label={t("quality")} value={null}>
+          <SegmentedControl<RenderQuality>
+            aria-label={t("quality")}
+            value={quality}
+            onValueChange={onQuality}
+            options={QUALITIES.map((level) => ({ value: level, label: t(level) }))}
           />
+        </ControlRow>
+        {antialias ? (
+          <ControlRow label={t("antialiasing")} value={null}>
+            <SegmentedControl<A>
+              aria-label={t("antialiasing")}
+              value={antialias}
+              onValueChange={onAntialias}
+              options={modes.map(({ value, name }) => ({ value, label: t(name) }))}
+            />
+          </ControlRow>
         ) : null}
-        <ResetButton label={t("hud.reset")} onReset={onReset} />
+        {note}
+        <ResetButton label={t("reset")} onReset={onReset} />
       </div>
     </RailSection>
   );

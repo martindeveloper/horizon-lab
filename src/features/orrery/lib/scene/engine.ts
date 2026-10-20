@@ -11,7 +11,7 @@
 import { Scene, type Object3D, type Vector3 } from "three";
 
 import { carryPose, takeHandoff } from "@/lib/handoff";
-import { bridgeAntialias, bridgeStore } from "@/lib/scene-bridge";
+import { bridgeRender, bridgeStore } from "@/lib/scene-bridge";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { positionOf } from "@/space/solar-system/model/position";
 import { hasSurface } from "@/space/solar-system/model/selection";
@@ -278,7 +278,7 @@ export function createOrreryEngine({
       },
     });
     activity.setEnabled(store.getState().solarActivity);
-    bridgeAntialias(store, scope, sceneHost);
+    bridgeRender(store, scope, sceneHost);
     const onMotionChange = () => engine.invalidate();
     reduceMotion.addEventListener("change", onMotionChange);
     scope.defer(() => reduceMotion.removeEventListener("change", onMotionChange));
@@ -373,17 +373,19 @@ export function createOrreryEngine({
       paused: () => !(engine.dirty || continuous()),
       // Limit model-only playback, preserving responsive camera motion and flights.
       fps: () =>
-        activity.current !== null &&
-        activityMoving() &&
-        !controls.interacting &&
-        !rig.moving &&
-        !closeUp.busy()
-          ? tight
-            ? 24
-            : 30
-          : tight
-            ? 48
-            : Infinity,
+        sceneHost.capFps(
+          activity.current !== null &&
+            activityMoving() &&
+            !controls.interacting &&
+            !rig.moving &&
+            !closeUp.busy()
+            ? tight
+              ? 24
+              : 30
+            : tight
+              ? 48
+              : Infinity,
+        ),
     });
     engine.refresh();
     return { dispose: () => scope.dispose() };

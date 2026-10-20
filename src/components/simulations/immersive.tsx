@@ -37,8 +37,8 @@ export function SimulationImmersive({
   );
 }
 
-/** Entry button for a simulation's HUD toolbar. */
+/** Entry button for a simulation's HUD toolbar; the last one, so its tooltip opens leftward. */
 export function SimulationImmersiveToggle() {
   const t = useTranslations("immersive");
-  return <ImmersiveToggle label={t("enter")} tooltip={t("title")} />;
+  return <ImmersiveToggle label={t("enter")} tooltip={t("title")} align="end" />;
 }

@@ -1,4 +1,5 @@
 import type { OrbitFlight } from "@horizon/toolkit/camera";
+import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import type { Sketch } from "../sketches";
 
@@ -62,7 +63,8 @@ export type HoleSpec = Preset & {
   tour: TourPose[];
 };
 
-export type Quality = "economy" | "standard" | "cinema";
+/** The shared render quality steps; what each costs here is in `presets.ts`. */
+export type Quality = RenderQuality;
 
 export type BlackHoleParams = {
   presetId: string;

@@ -4,6 +4,7 @@
  * only from the toolkit's scene, so a store never pulls the renderer into the page.
  */
 import type { OrbitTurn } from "@horizon/toolkit/camera";
+import type { RenderQuality } from "@horizon/toolkit/rendering";
 import type { SceneAntialias, ScaleReadout } from "@horizon/toolkit/scene";
 import type { DistanceChoice } from "@horizon/toolkit/science";
 
@@ -29,9 +30,12 @@ export type SceneSlice = Omit<SceneStoreState, "view"> &
     distanceUnit: DistanceChoice;
     /** The visitor's anti-aliasing, for this visit; null (the device's default) until the engine publishes it. */
     antialias: SceneAntialias | null;
+    /** The visitor's render quality (`sceneQuality`), for this visit. */
+    quality: RenderQuality;
     rotate: (turn: OrbitTurn) => void;
     setDistanceUnit: (unit: DistanceChoice) => void;
     setAntialias: (mode: SceneAntialias) => void;
+    setQuality: (quality: RenderQuality) => void;
   };
 
 /** The shared fields at rest, with the scale bar's first reading, and their actions. */
@@ -45,11 +49,13 @@ export function sceneSlice(
     ready: false,
     distanceUnit: "auto",
     antialias: null,
+    quality: "standard",
     cameraAngles: { heading: 0, tilt: 0 },
     ...scale,
     rotate: (turn) => set({ turn: { ...turn } }),
     setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
     setAntialias: (antialias) => set({ antialias }),
+    setQuality: (quality) => set({ quality }),
     setReady: (ready) => set({ ready }),
   };
 }

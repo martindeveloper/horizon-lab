@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import { viewFromPath } from "../routing";
 import { ELEMENT_IDS, lineById, type ElementId } from "./model/atoms";
@@ -22,6 +23,7 @@ import {
 } from "./model/scenes";
 import { FULL_RANGE, TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
+import type { CanvasAntialias } from "./render";
 
 export type Panel = "none" | "elements" | "view";
 
@@ -74,6 +76,9 @@ export type SpectroscopyStore = Settings & {
   result: MysteryResult | null;
   /** The scene's schematic photons fly (never under reduced motion). */
   photons: boolean;
+  /** How sharply the canvases are drawn (`canvasScale`), for this visit. */
+  quality: RenderQuality;
+  antialias: CanvasAntialias;
   setReady: () => void;
   setView: (view: ViewId) => void;
   setStar: (star: StarChoice) => void;
@@ -108,6 +113,10 @@ export type SpectroscopyStore = Settings & {
   setNormalized: (normalized: boolean) => void;
   setLetters: (letters: boolean) => void;
   setPhotons: (photons: boolean) => void;
+  setQuality: (quality: RenderQuality) => void;
+  setAntialias: (antialias: CanvasAntialias) => void;
+  /** The View panel's settings as a visit starts: spectrograph, switches, window, render quality. */
+  resetView: () => void;
   guideOpen: boolean;
   guideStep: number;
   /** The guide moves on by itself once a step has been read; off under reduced motion. */
@@ -195,6 +204,8 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   letters: true,
   compare: [],
   photons: true,
+  quality: "standard",
+  antialias: "off",
   setReady: () => set({ ready: true }),
   setView: (view) =>
     set((s) => {
@@ -298,6 +309,17 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   setNormalized: (normalized) => set({ normalized }),
   setLetters: (letters) => set({ letters }),
   setPhotons: (photons) => set({ photons }),
+  setQuality: (quality) => set({ quality }),
+  setAntialias: (antialias) => set({ antialias }),
+  resetView: () =>
+    set({
+      resolution: 20_000,
+      normalized: false,
+      photons: true,
+      range: FULL_RANGE,
+      quality: "standard",
+      antialias: "off",
+    }),
   guideOpen: false,
   guideStep: 0,
   guidePlaying: false,

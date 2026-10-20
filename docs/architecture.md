@@ -308,10 +308,11 @@ only its layers, its views and its store of its own:
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
 - **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
-  `flight`, `turn`, `ready`, `distanceUnit`, `antialias` and the scale bar; the feature adds
-  its view, selection and switches. `bridgeStore` acts once on each button turn and view flight,
-  ignores the view the HUD writes during a frame, and reports the first frame;
-  `bridgeAntialias` publishes the host's default and switches it on each choice.
+  `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias` and the scale bar; the
+  feature adds its view, selection and switches. `bridgeStore` acts once on each button turn
+  and view flight, ignores the view the HUD writes during a frame, and reports the first frame;
+  `bridgeRender` hands the host the quality and anti-aliasing, publishing the device's default
+  anti-aliasing while none is chosen.
 - **Panels:** `Rail` and `RailSection` for side panels (`sheetLead` adds phone-only
   sections), `SelectionSheet` for cards, both
   ending above the dock, which publishes its height as `--hud-clear` on the stage
@@ -319,9 +320,13 @@ only its layers, its views and its store of its own:
   (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
   is drawn: layers, switches, the distance unit, the `CameraPad`, then render quality), built from
   `SwitchChips` (the toolkit's switch rows in a panel, its switch chips in a dock),
-  `DistanceUnitControl`, `SceneRenderSection` and `MapScale`. Render quality ends every
-  settings panel, the black hole's too: `AntialiasRow` (the labelled anti-aliasing choice)
-  and `ResetButton`, which puts the panel back as a visit starts (`resetView` in the scenes). `useSceneEscape` lets Escape undo
+  `DistanceUnitControl`, `RenderSection` and `MapScale`. `RenderSection`
+  (`src/components/simulations/render-settings.tsx`) ends every simulation's settings panel:
+  render quality (Economy, Standard, Cinematic, Max: `RenderQuality`), anti-aliasing (the modes
+  the simulation can draw), an optional note and Reset, which puts the panel back as a visit
+  starts (`resetView`; the black hole re-applies its preset). Its copy is the shared `render`
+  namespace. Standard is always the default and what the simulation drew before the choice
+  existed; what each level and mode does is the simulation's own. `useSceneEscape` lets Escape undo
   one thing at a time.
 
 **Shared worlds.** What more than one simulation draws lives in `src/space/`, below the

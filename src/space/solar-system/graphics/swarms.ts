@@ -67,14 +67,20 @@ export function swarmGeometry(bodies: SwarmBody[]) {
   return geometry;
 }
 
-export function swarmMaterial(size: number, opacity: number, additive: boolean, dpr: number) {
+/** `dpr` is the host's live pixel ratio, shared as the uniform so sizes follow the quality. */
+export function swarmMaterial(
+  size: number,
+  opacity: number,
+  additive: boolean,
+  dpr: { value: number },
+) {
   return new ShaderMaterial({
     uniforms: {
       mig: { value: 1 },
       drift: { value: 0 },
       anchorLon: { value: 0 },
       size: { value: size },
-      dpr: { value: dpr },
+      dpr,
       near: { value: 0 },
       opacity: { value: opacity },
     },
@@ -102,7 +108,7 @@ export function createSwarm(
   size: number,
   opacity: number,
   additive: boolean,
-  dpr: number,
+  dpr: { value: number },
 ): Swarm {
   const geometry = swarmGeometry(bodies);
   const material = swarmMaterial(size, opacity, additive, dpr);

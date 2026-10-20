@@ -27,8 +27,16 @@ gold for scene materials.
 `createSceneHost(scope, { canvas, host, onError })` makes the WebGL renderer, a 48°
 perspective camera, the viewport and the engine host (frame loop,
 resize, context loss). `tight` marks phones and low-memory devices; `basics` is
-`SceneBasics` plus `tight` and `dpr`. `warmUp(scene)`, called once after the first
-frame, compiles every material in idle time, hidden objects included.
+`SceneBasics` plus `tight` and `dpr`, the buffer's pixels per CSS pixel as a live
+`{ value }`: pass it as a shader uniform so point sizes follow the quality. `warmUp(scene)`,
+called once after the first frame, compiles every material in idle time, hidden objects
+included.
+
+`setQuality(quality)` takes a `RenderQuality` (`@horizon/toolkit/rendering`) and resizes
+the buffer for the next frame; `quality` reads it. `sceneQuality(quality, tight)` gives
+each level's pixel-ratio and frame-rate caps: `standard` (the default) is 1.5, or 1.25 on
+tight devices, `economy` 1 at 30 fps, `cinema` 2, or 1.5 on tight devices, `max` the device's own up to 3, tight or not. Wrap the
+engine's frame-rate cap in `capFps(fps)` so economy holds.
 
 Draw every frame through `render(paint)`: `paint` makes the frame's renders (several
 may share a depth buffer, with `autoClear` off and `clearDepth()` between them) and the

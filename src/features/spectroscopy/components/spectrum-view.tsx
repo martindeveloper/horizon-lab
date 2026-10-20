@@ -19,6 +19,7 @@ import { markerVelocity } from "../lib/model/scenes";
 import { depthAt, type Spectrum } from "../lib/model/spectrum";
 import { BAND_HEADS } from "../lib/model/telluric";
 import { FULL_RANGE } from "../lib/model/tour";
+import { qualityScale } from "../lib/render";
 import { useSpectroscopy } from "../lib/store";
 import { digitsFor, lineName, wavelength } from "./format";
 import { useFormedLines, useObservation, useSettings, useSpectrum } from "./use-spectrum";
@@ -95,13 +96,16 @@ export function SpectrumView({ className }: { className?: string }) {
   const box = useRef<HTMLDivElement>(null);
   const ribbon = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
-  const [scale, setScale] = useState(1);
+  const [dpr, setDpr] = useState(1);
+  /* The plot is SVG, smoothed by the browser: anti-aliasing has nothing to add, and must not
+     change how finely the spectrum is sampled. */
+  const scale = useSpectroscopy((s) => qualityScale(dpr, s.quality));
   useEffect(() => {
     const el = box.current;
     if (!el) return;
     const observer = new ResizeObserver(() => {
       setWidth(el.clientWidth);
-      setScale(Math.min(2, window.devicePixelRatio || 1));
+      setDpr(window.devicePixelRatio || 1);
     });
     observer.observe(el);
     return () => observer.disconnect();

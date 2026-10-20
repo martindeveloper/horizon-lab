@@ -102,4 +102,5 @@ export const BLACK_HOLE_COPY = {
   stepsEconomy: QUALITY_STEPS.economy,
   stepsStandard: QUALITY_STEPS.standard,
   stepsCinema: QUALITY_STEPS.cinema,
+  stepsMax: QUALITY_STEPS.max,
 };

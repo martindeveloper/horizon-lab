@@ -30,6 +30,9 @@ toolkit's `.glsl` loader (see the package README).
   half floats with sRGB output, then copies it onto the canvas, encoded. Both passes
   expose their offscreen `target`, to compile materials for it, and allocate nothing
   until first drawn.
+- `RenderQuality`: the four quality levels every simulation offers (`economy`,
+  `standard`, `cinema`, `max`, which lifts the device caps). A type only; each consumer decides what a level costs, and
+  `standard` is its default.
 - `observeViewport`: ResizeObserver plus explicit `refresh()` when quality changes.
   `bufferSize` multiplies CSS dimensions by resolution scale, capped DPR and an
   optional warm-up factor. It does not set CSS dimensions.

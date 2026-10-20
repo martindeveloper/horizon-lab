@@ -12,10 +12,12 @@ export const QUALITY_STEPS: Record<Quality, number> = {
   economy: 144,
   standard: 192,
   cinema: 256,
+  max: 384,
 };
 
 export const QUALITY_SCALE: Record<Quality, number> = {
   economy: 0.72,
   standard: 0.9,
   cinema: 1,
+  max: 1,
 };

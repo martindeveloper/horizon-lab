@@ -332,6 +332,21 @@
     "close": "Ukončit",
     "fullscreen": "Celá obrazovka"
   },
+  "render": {
+    "title": "Vykreslování",
+    "quality": "Kvalita",
+    "economy": "Úsporná",
+    "standard": "Standardní",
+    "cinema": "Filmová",
+    "max": "Max",
+    "antialiasing": "Vyhlazování hran",
+    "off": "Vyp.",
+    "msaa": "MSAA",
+    "fxaa": "FXAA",
+    "edges": "Paprsky hran",
+    "supersample": "SSAA",
+    "reset": "Obnovit nastavení"
+  },
   "webgl": {
     "unavailableTitle": "Tento prohlížeč scénu nevykreslí",
     "unavailableBody": "Potřebuje WebGL 2. Zapněte hardwarovou akceleraci nebo použijte aktuální prohlížeč.",

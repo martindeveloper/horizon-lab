@@ -6,11 +6,6 @@
   "close": "Zavřít",
   "orbit": "Otáčet pohled",
   "animation": "Animace",
-  "antialiasing": "Vyhlazování hran",
-  "antialiasOff": "Vyp.",
-  "antialiasFxaa": "FXAA",
-  "antialiasEdges": "Paprsky hran",
-  "reset": "Obnovit nastavení",
   "custom": "Vlastní",
   "holes": "Černé díry",
   "story": "Příběh",
@@ -56,9 +51,6 @@
   "photon": "Fotonová dráha",
   "isco": "ISCO",
   "period": "Oběžná doba na ISCO",
-  "qualityEconomy": "Úsporná",
-  "qualityStandard": "Standardní",
-  "qualityCinema": "Filmová",
   "atlasTitle": "Kde je najdete",
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Mléčná dráha  ·  pohled shora  ·  střed v jádře Galaxie",
@@ -843,7 +835,6 @@
   "storyNumber": "Příběh {number}",
   "sun": "Slunce",
   "asSpin": "pro a",
-  "renderQuality": "Kvalita vykreslování",
   "spiralArms": {
     "perseus": "Perseus",
     "sagittarius": "Střelec–Lodní kýl",
@@ -891,7 +882,7 @@
       },
       "performance": {
         "title": "Nároky na vykreslování v reálném čase",
-        "body": "Úsporná, standardní a filmová kvalita dovolují {stepsEconomy, number}, {stepsStandard, number} a {stepsCinema, number} kroků na pixel. Násobky rozlišení 0,72, 0,90 a 1,00 dále omezuje limit 0,6, 1,2 a 2,4 milionu pixelů. DPR je nejvýše 1, ve filmové kvalitě bez dalších omezení 1,5. Dotyková zařízení nebo zařízení, která hlásí provoz na baterii, mají limit 0,8 milionu pixelů. Úsporná kvalita cílí na 24 fps, standardní na 30 fps; filmová může při interakci na neomezeném zařízení dosáhnout 60 fps. Jde o limity výpočetní zátěže, nikoli záruku výdrže baterie. Prohlížeč dostává požadavek na úsporné GPU. Při skrytí stránky nebo otevření atlasu se vykreslování pozastaví. Vypnutí animace zastaví průběžné vykreslování, ovládání však scénu stále překreslí. Při zapnutém omezení pohybu se scéna načte s pozastavenou animací. Tok disku se přepočítává jen při změně spinu; při spuštění se používají menší vykreslovací buffery a méně kroků. Při odebrání scény se uvolní prostředky GPU. Experimentální vyhlazování, ve výchozím stavu vypnuté: FXAA vyhladí schodovité hrany jedním průchodem přes hotový snímek; Paprsky hran vyšlou čtyři další paprsky jen tam, kde se pixel liší od sousedů, takže spojí i prstence tenčí než pixel."
+        "body": "Úsporná, standardní a filmová kvalita dovolují {stepsEconomy, number}, {stepsStandard, number} a {stepsCinema, number} kroků na pixel. Násobky rozlišení 0,72, 0,90 a 1,00 dále omezuje limit 0,6, 1,2 a 2,4 milionu pixelů. DPR je nejvýše 1, ve filmové kvalitě bez dalších omezení 1,5. Dotyková zařízení nebo zařízení, která hlásí provoz na baterii, mají limit 0,8 milionu pixelů. Úsporná kvalita cílí na 24 fps, standardní na 30 fps; filmová může při interakci na neomezeném zařízení dosáhnout 60 fps. Kvalita Max zruší všechny limity: {stepsMax, number} kroků, plné rozlišení až do 8,3 milionu pixelů při DPR 2 a 60 fps, i na dotykových zařízeních a baterii. Jde o limity výpočetní zátěže, nikoli záruku výdrže baterie. Prohlížeč dostává požadavek na úsporné GPU. Při skrytí stránky nebo otevření atlasu se vykreslování pozastaví. Vypnutí animace zastaví průběžné vykreslování, ovládání však scénu stále překreslí. Při zapnutém omezení pohybu se scéna načte s pozastavenou animací. Tok disku se přepočítává jen při změně spinu; při spuštění se používají menší vykreslovací buffery a méně kroků. Při odebrání scény se uvolní prostředky GPU. Experimentální vyhlazování, ve výchozím stavu vypnuté: FXAA vyhladí schodovité hrany jedním průchodem přes hotový snímek; Paprsky hran vyšlou čtyři další paprsky jen tam, kde se pixel liší od sousedů, takže spojí i prstence tenčí než pixel."
       },
       "limits": {
         "title": "Co obraz nemodeluje",

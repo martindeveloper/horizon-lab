@@ -48,10 +48,12 @@ export type ImmersiveToggleProps = {
   label: string;
   /** Short visible tooltip; the shortcut is appended. */
   tooltip: string;
+  /** The tooltip's anchor (`Tooltip`); `end` when the toggle ends the toolbar at the viewport's edge. */
+  align?: "start" | "center" | "end";
 };
 
 /** Entry control for a HUD toolbar. It takes focus back when the view closes. */
-export function ImmersiveToggle({ label, tooltip }: ImmersiveToggleProps) {
+export function ImmersiveToggle({ label, tooltip, align = "center" }: ImmersiveToggleProps) {
   const button = useRef<HTMLButtonElement>(null);
   const immersive = useImmersive();
 
@@ -60,7 +62,7 @@ export function ImmersiveToggle({ label, tooltip }: ImmersiveToggleProps) {
   }, [immersive]);
 
   return (
-    <Tooltip label={`${tooltip} · ${IMMERSIVE_SHORTCUT}`}>
+    <Tooltip label={`${tooltip} · ${IMMERSIVE_SHORTCUT}`} align={align}>
       <IconButton
         ref={button}
         aria-label={label}

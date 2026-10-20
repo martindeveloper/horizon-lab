@@ -4,9 +4,9 @@ import test from "node:test";
 import { createStore } from "zustand/vanilla";
 
 import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
-import { defaultSceneAntialias } from "../packages/toolkit/src/scene/host.ts";
+import { defaultSceneAntialias, sceneQuality } from "../packages/toolkit/src/scene/host.ts";
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
-import { bridgeAntialias, bridgeStore } from "../src/lib/scene-bridge.ts";
+import { bridgeRender, bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
 import { framingView, viewOf } from "../src/space/solar-system/model/framing.ts";
 import { TODAY } from "../src/space/solar-system/model/moment.ts";
@@ -67,23 +67,39 @@ test("the store bridge acts once on each turn and flight, never on the engine's 
   assert.deepEqual(seen.flights, ["b", "c"], "disposed, it listens no more");
 });
 
-test("a scene draws with MSAA, or none on tight devices, until the visitor picks another", () => {
+test("a scene draws at standard quality with MSAA, or none on tight devices, until the visitor picks", () => {
   assert.equal(defaultSceneAntialias(false), "msaa");
   assert.equal(defaultSceneAntialias(true), "off");
+  /* Standard is what scenes always drew with; economy and cinema move the pixel cap. */
+  assert.deepEqual(sceneQuality("standard", false), { dprCap: 1.5, fps: Infinity });
+  assert.deepEqual(sceneQuality("standard", true), { dprCap: 1.25, fps: Infinity });
+  assert.deepEqual(sceneQuality("economy", false), { dprCap: 1, fps: 30 });
+  assert.ok(sceneQuality("cinema", true).dprCap > sceneQuality("standard", true).dprCap);
+  assert.deepEqual(sceneQuality("max", true), sceneQuality("max", false), "max ignores the device");
   const store = createStore((set) => ({
     antialias: null,
+    quality: "standard",
     setAntialias: (antialias) => set({ antialias }),
   }));
-  const host = { tight: true, antialias: "off", setAntialias: (m) => (host.antialias = m) };
+  const host = {
+    tight: true,
+    antialias: "off",
+    quality: "standard",
+    setAntialias: (m) => (host.antialias = m),
+    setQuality: (q) => (host.quality = q),
+  };
   const scope = new DisposalScope();
-  bridgeAntialias(store, scope, host);
+  bridgeRender(store, scope, host);
   assert.equal(store.getState().antialias, "off", "the device's default is published");
   store.getState().setAntialias("fxaa");
+  store.setState({ quality: "economy" });
   assert.equal(host.antialias, "fxaa");
+  assert.equal(host.quality, "economy");
   /* A reset clears the choice; the device's default comes back, not the last mode. */
-  store.setState({ antialias: null });
+  store.setState({ antialias: null, quality: "standard" });
   assert.equal(store.getState().antialias, "off");
   assert.equal(host.antialias, "off");
+  assert.equal(host.quality, "standard");
   scope.dispose();
   store.getState().setAntialias("msaa");
   assert.equal(host.antialias, "off", "disposed, it listens no more");

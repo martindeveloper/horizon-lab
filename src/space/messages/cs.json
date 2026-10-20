@@ -61,10 +61,7 @@
     "show": "Zobrazit",
     "units": "Vzdálenosti v",
     "smallWorlds": "Trpasličí planety a komety",
-    "belts": "Pásy a oblaky",
-    "antialiasing": "Vyhlazování hran",
-    "renderQuality": "Kvalita vykreslování",
-    "reset": "Obnovit nastavení"
+    "belts": "Pásy a oblaky"
   },
   "badges": {
     "measured": "Z měření",
@@ -109,10 +106,5 @@
     "scattered": "Rozptýlený disk",
     "oort": "Oortův oblak",
     "ejected": "Vyvržená tělesa"
-  },
-  "antialias": {
-    "off": "Vyp.",
-    "msaa": "MSAA",
-    "fxaa": "FXAA"
   }
 }

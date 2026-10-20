@@ -332,6 +332,21 @@
     "close": "Exit",
     "fullscreen": "Full screen"
   },
+  "render": {
+    "title": "Rendering",
+    "quality": "Quality",
+    "economy": "Economy",
+    "standard": "Standard",
+    "cinema": "Cinematic",
+    "max": "Max",
+    "antialiasing": "Anti-aliasing",
+    "off": "Off",
+    "msaa": "MSAA",
+    "fxaa": "FXAA",
+    "edges": "Edge rays",
+    "supersample": "SSAA",
+    "reset": "Reset"
+  },
   "webgl": {
     "unavailableTitle": "This browser can't draw the scene",
     "unavailableBody": "It needs WebGL 2. Turn on hardware acceleration or use a current browser.",

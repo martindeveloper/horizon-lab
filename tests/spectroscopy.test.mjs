@@ -503,3 +503,17 @@ test("a guide step switches its elements at once and opens its line only on land
   api().endGuide();
   assert.equal(api().guideTarget, null);
 });
+
+test("the spectrum's canvases: standard keeps today's scale, economy and 2× move it within bounds", async () => {
+  const { canvasScale, qualityScale } = await import("../src/features/spectroscopy/lib/render.ts");
+  assert.equal(canvasScale(3, "standard", "off"), 2);
+  assert.equal(canvasScale(1.5, "standard", "off"), 1.5);
+  assert.equal(canvasScale(3, "economy", "off"), 1);
+  assert.equal(canvasScale(3, "cinema", "off"), 3);
+  assert.equal(canvasScale(5, "max", "off"), 4);
+  assert.equal(canvasScale(1, "standard", "supersample"), 2, "2× doubles the pixels");
+  assert.equal(canvasScale(3, "cinema", "supersample"), 4, "never past 4");
+  assert.equal(canvasScale(0, "standard", "off"), 1, "an unknown ratio counts as 1");
+  /* The spectrum's sampling follows the quality alone: 2× must not reshape its lines. */
+  assert.equal(qualityScale(1, "standard"), canvasScale(1, "standard", "off"));
+});

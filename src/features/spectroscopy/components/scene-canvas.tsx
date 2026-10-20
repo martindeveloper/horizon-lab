@@ -14,6 +14,8 @@ import {
 
 import { absorbedWidth, slabProfiles, type Observation } from "../lib/model/spectrum";
 import { BAND_HEADS } from "../lib/model/telluric";
+import { canvasScale } from "../lib/render";
+import { useSpectroscopy } from "../lib/store";
 
 /** What the scene needs to say about itself, already translated. */
 export type SceneLabels = {
@@ -533,7 +535,8 @@ export function SceneCanvas({
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
     };
     const resize = () => {
-      scale = Math.min(2, window.devicePixelRatio || 1);
+      const { quality, antialias } = useSpectroscopy.getState();
+      scale = canvasScale(window.devicePixelRatio || 1, quality, antialias);
       width = el.clientWidth;
       height = el.clientHeight;
       el.width = layer.width = Math.round(width * scale);
@@ -552,6 +555,10 @@ export function SceneCanvas({
 
     const observer = new ResizeObserver(resize);
     observer.observe(el);
+    /* A new quality or anti-aliasing redraws at its scale, like a resize. */
+    const unsubscribe = useSpectroscopy.subscribe((s, before) => {
+      if (s.quality !== before.quality || s.antialias !== before.antialias) resize();
+    });
 
     if (!animate) {
       refresh.current = () => {
@@ -560,6 +567,7 @@ export function SceneCanvas({
       return () => {
         refresh.current = null;
         observer.disconnect();
+        unsubscribe();
       };
     }
 
@@ -687,6 +695,7 @@ export function SceneCanvas({
       stop();
       sight.disconnect();
       observer.disconnect();
+      unsubscribe();
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [photons]);

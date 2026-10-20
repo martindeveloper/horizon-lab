@@ -61,10 +61,7 @@
     "show": "Show",
     "units": "Distances in",
     "smallWorlds": "Dwarf planets and comets",
-    "belts": "Belts and clouds",
-    "antialiasing": "Anti-aliasing",
-    "renderQuality": "Render quality",
-    "reset": "Reset"
+    "belts": "Belts and clouds"
   },
   "badges": {
     "measured": "Measured",
@@ -109,10 +106,5 @@
     "scattered": "Scattered disk",
     "oort": "Oort cloud",
     "ejected": "Ejected bodies"
-  },
-  "antialias": {
-    "off": "Off",
-    "msaa": "MSAA",
-    "fxaa": "FXAA"
   }
 }

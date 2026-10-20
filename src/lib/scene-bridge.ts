@@ -73,15 +73,17 @@ export function bridgeStore<S extends SceneStoreState>(
 }
 
 /**
- * The store's anti-aliasing drives the host's: an unset choice (at first, or after a reset)
- * takes this device's default (published, so the settings show it), and every choice switches it.
+ * The store's render settings drive the host's: the quality as chosen, and the anti-aliasing,
+ * where an unset choice (at first, or after a reset) takes this device's default (published, so
+ * the settings show it).
  */
-export function bridgeAntialias<S extends Pick<SceneSlice, "antialias" | "setAntialias">>(
+export function bridgeRender<S extends Pick<SceneSlice, "antialias" | "setAntialias" | "quality">>(
   store: Pick<StoreApi<S>, "getState" | "subscribe">,
   scope: DisposalScope,
-  host: Pick<SceneHost, "tight" | "setAntialias">,
+  host: Pick<SceneHost, "tight" | "setAntialias" | "setQuality">,
 ) {
   const apply = (s: S) => {
+    host.setQuality(s.quality);
     if (s.antialias === null) s.setAntialias(defaultSceneAntialias(host.tight));
     else host.setAntialias(s.antialias);
   };

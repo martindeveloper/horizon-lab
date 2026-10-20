@@ -82,10 +82,10 @@ function pointsGeometry(pos: Float32Array, col: Float32Array, size: Float32Array
 }
 
 /** `fade` is presence (real stars fade in the deep past), `tint` the extinction colour. */
-export function starMaterial(dpr: number) {
+export function starMaterial(dpr: { value: number }) {
   return new ShaderMaterial({
     uniforms: {
-      dpr: { value: dpr },
+      dpr,
       fade: { value: 1 },
       tint: { value: new Color("#ffffff") },
     },
@@ -238,7 +238,7 @@ export type MilkyWay = ReturnType<typeof createMilkyWay>;
  * the same map, for today's thin disk and for the early thick disk. Everything
  * sits in one group that turns about the galactic pole with the Sun's orbit.
  */
-export function createMilkyWay(dpr: number, grains: number) {
+export function createMilkyWay(dpr: { value: number }, grains: number) {
   const today = bandMap("today");
   const early = bandMap("early");
   const material = new ShaderMaterial({

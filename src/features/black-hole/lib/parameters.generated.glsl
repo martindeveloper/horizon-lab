@@ -9,7 +9,7 @@
 #define DISK_PROFILE_LAST  511.0
 #define LIMB_DARKENING     2.06
 #define LIMB_NORMALIZATION 0.4213483146
-#define MAX_STEPS          256
+#define MAX_STEPS          384
 #define STEP_NEAR          0.07
 #define STEP_FAR           0.1
 #define STEP_FAR_GROWTH    3.0

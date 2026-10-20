@@ -64,7 +64,7 @@ export type OrreryStore = SceneSlice & {
   toggleSolarActivity: () => void;
   toggleSolarActivityPaused: () => void;
   patchShow: (patch: Partial<Show>) => void;
-  /** The View panel's settings as a visit starts: layers, switches, anti-aliasing. */
+  /** The View panel's settings as a visit starts: layers, switches, render quality. */
   resetView: () => void;
   setPanel: (panel: Panel) => void;
   startGuide: () => void;
@@ -166,7 +166,11 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
   /* Motion starts off under reduced motion (the engine), so a reset keeps it off there. */
   resetView: () =>
-    set({ show: { ...DEFAULT_SHOW, drift: !prefersReducedMotion() }, antialias: null }),
+    set({
+      show: { ...DEFAULT_SHOW, drift: !prefersReducedMotion() },
+      antialias: null,
+      quality: "standard",
+    }),
   setPanel: (panel) => set({ panel }),
   startGuide: () => {
     set((s) => ({

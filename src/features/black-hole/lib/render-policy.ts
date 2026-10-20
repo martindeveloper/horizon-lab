@@ -1,8 +1,12 @@
 import type { Quality } from "./presets";
 import { QUALITY_SCALE } from "./presets";
 
-/** Hard work budgets apply even when the browser cannot report battery state. */
+/**
+ * Hard work budgets apply even when the browser cannot report battery state. Max is the
+ * visitor's choice to spend everything: no touch or battery cap, DPR 2 and 60 fps.
+ */
 export function renderBudget(quality: Quality, constrained: boolean, active: boolean) {
+  if (quality === "max") return { pixels: 8_300_000, dprCap: 2, fps: 60 };
   const pixels = { economy: 600_000, standard: 1_200_000, cinema: 2_400_000 }[quality];
   return {
     pixels: constrained ? Math.min(pixels, 800_000) : pixels,

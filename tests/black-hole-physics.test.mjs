@@ -74,7 +74,7 @@ test("disk orbit energies and flux converge independently of texture resolution"
   close(far.at(-1) * outer ** 3, 1.5, 0.03);
 });
 test("render budgets bound high-DPI desktops and phones without battery API support", () => {
-  for (const quality of ["economy", "standard", "cinema"]) {
+  for (const quality of ["economy", "standard", "cinema", "max"]) {
     for (const constrained of [false, true]) {
       for (const [w, h, dpr] of [
         [3840, 2160, 3],
@@ -86,10 +86,18 @@ test("render budgets bound high-DPI desktops and phones without battery API supp
         const density = Math.min(dpr, budget.dprCap);
         assert.ok(w * h * (scale * density) ** 2 <= budget.pixels + 1);
         assert.ok(budget.fps <= 60);
-        if (quality !== "cinema" || constrained) assert.ok(budget.fps <= 30);
+        if (
+          quality === "economy" ||
+          quality === "standard" ||
+          (quality === "cinema" && constrained)
+        )
+          assert.ok(budget.fps <= 30);
       }
     }
   }
+  /* Max is the visitor's choice to spend everything: the device's caps no longer apply. */
+  assert.deepEqual(renderBudget("max", true, false), renderBudget("max", false, true));
+  assert.ok(renderBudget("max", true, false).pixels > renderBudget("cinema", false, true).pixels);
   const base = (50 * Math.PI) / 180;
   close(Math.tan(framedRayFov(base, 0.5) / 2) * 0.5, Math.tan(framedRayFov(base, 1) / 2));
 });

@@ -28,8 +28,9 @@ catalogue and `examples/visualization-example.tsx` for composition.
   where `document.fullscreenEnabled` is true; leaving it leaves immersive view.
   Entry focuses a non-interactive scene container, keeping F / Escape available
   without highlighting the exit button; Tab still reaches the controls normally.
-  The canvas is never remounted. `immersive-state.ts` holds the framework-free
-  state, shortcut and Fullscreen API helpers.
+  The canvas is never remounted. `ImmersiveToggle`'s `align` anchors its tooltip
+  like `Tooltip`'s (`end` when it ends a toolbar at the viewport's right edge).
+  `immersive-state.ts` holds the framework-free state, shortcut and Fullscreen API helpers.
 - `OrbitPad`: step buttons for a camera without dragging, round a glass dial with
   optional `centre` content. Labels come in props; pair it with `stepOrbit` (or an orbit
   rig's eased `turnBy`) and `ORBIT_STEP` from `@horizon/toolkit/camera`.

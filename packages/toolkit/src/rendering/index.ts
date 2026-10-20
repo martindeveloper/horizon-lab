@@ -1,6 +1,7 @@
 export { createFullscreenPass, type PassAntialias } from "./fullscreen-pass";
 export { createFxaaPass, type FxaaPass } from "./fxaa-pass";
 export { createMsaaPass, type MsaaPass } from "./msaa-pass";
+export type { RenderQuality } from "./quality";
 export { bufferSize, observeViewport, type ResolutionOptions } from "./viewport";
 export { FrameClock, createFrameLoop } from "./frame-loop";
 export { observePowerPreference } from "./power";
