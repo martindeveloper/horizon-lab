@@ -6,6 +6,9 @@ A missing or blocked store never throws: the value stays for this page and is
 forgotten on reload.
 
 - `storageCell({ key, area, lifetime, decay, codec })` returns `{ get, freshness, set, clear }`.
+  - `key`: `"music"` or `["debug", "webgl"]`, stored as `horizon:music` or
+    `horizon:debug:webgl`. Segments are lowercase letters, digits and hyphens.
+    `storageKey(key)` gives the stored name for code that writes storage itself.
   - `area`: `"session"` (default; this tab, including reloads) or `"local"` (this
     origin, until `clear()`).
   - `lifetime`: milliseconds the value stays at full strength. Omit it and the

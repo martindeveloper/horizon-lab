@@ -13,7 +13,7 @@ const listeners = new Set<() => void>();
 const crashListeners = new Map<CrashScope, Set<() => void>>();
 
 const webglCell = storageCell({
-  key: "horizon:debug:webgl",
+  key: ["debug", "webgl"],
   codec: oneOf("ready", "software", "unavailable"),
 });
 
@@ -62,7 +62,7 @@ export function onDesktopNotice(listener: () => void) {
 
 /** Sky time = `sky` + (wall time − `wall`) × `scale`, in milliseconds. */
 const skyCell = storageCell({
-  key: "horizon:debug:sky",
+  key: ["debug", "sky"],
   codec: numbers("sky", "wall", "scale"),
 });
 

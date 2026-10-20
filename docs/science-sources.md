@@ -854,11 +854,17 @@ the live catalogue source registry.
 - `toolkit/temperature.glsl`: Tanner Helland 2012, temperature-to-RGB fit,
   based on Mitchell Charity's blackbody colour table. The GLSL adaptation's
   BSD-2-Clause notice is included in the public third-party notices.
-- `orrery/solar-activity.ts`: NASA/MSFC solar features,
+- `orrery/solar-activity*.ts`: Parenti 2014, LRSP 11, 1 (prominence plasma, hedgerow
+  threads, barbs, flows); Gibson 2018, LRSP 15, 7 (the magnetic dips and cavity);
+  Vial & Engvold 2015, ASSL 415 (sizes); Zirker, Engvold & Martin 1998, Nature 396, 440
+  (counter-streaming); Arregui, Oliver & Ballester 2018, LRSP 15, 3 (large-amplitude
+  oscillations); Sterling & Moore 2005, ApJ 630, 1148 and Chen 2011, LRSP 8, 1 (slow then
+  fast rise of eruptions); NASA/MSFC solar features,
   <https://solarscience.msfc.nasa.gov/feature2.shtml>;
   <https://www.nasa.gov/image-article/what-solar-prominence/>;
   <https://www.nasa.gov/image-article/suns-corona-seen-during-2017-solar-eclipse/>.
-  Geometry, positions, timing and dynamics are illustrative, not observations.
+  Heights, lengths, thread speeds and the dilution of photospheric light are physical;
+  shapes, positions, the cycle and its timing are illustrative, not observations.
 - `toolkit/science/laws.ts`: Kepler, Astronomia Nova (1609) and Harmonices
   Mundi (1619); Schwarzschild (1916); Sinnott 1984, Sky & Telescope 68, 159;
   Hubble 1929, PNAS 15, 168; Lemaître (1927).

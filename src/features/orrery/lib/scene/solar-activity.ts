@@ -35,7 +35,6 @@ export function createSolarActivity(
     texture.minFilter = texture.magFilter = LinearFilter;
     texture.needsUpdate = true;
     const uniforms = {
-      activityTime: { value: 0 },
       activityMotion: { value: dynamics.values },
       localCamera: { value: new Vector3() },
       activitySteps: { value: Math.min(steps, SUN_ACTIVITY_MAX_STEPS) },
@@ -63,7 +62,6 @@ export function createSolarActivity(
         mesh.visible = visible;
         if (!visible) return;
         dynamics.advance(dt, animate);
-        uniforms.activityTime.value = dynamics.time;
         sun.worldToLocal(uniforms.localCamera.value.copy(camera.position));
       },
       setSteps(next) {

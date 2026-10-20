@@ -8,6 +8,19 @@ export { flag, json, numbers, oneOf, text, type StorageCodec } from "./codecs";
 
 export type StorageArea = "session" | "local";
 
+/** A key, or a key and a subkey: lowercase letters, digits and hyphens. */
+export type StorageKey = string | readonly [key: string, subkey: string];
+
+const SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** The stored name: `horizon:<key>` or `horizon:<key>:<subkey>`. */
+export function storageKey(key: StorageKey): string {
+  const parts = typeof key === "string" ? [key] : key;
+  for (const part of parts)
+    if (!SEGMENT.test(part)) throw new TypeError(`Invalid storage key segment "${part}"`);
+  return ["horizon", ...parts].join(":");
+}
+
 export type StorageCell<T> = {
   /** The stored value, or null when it is missing or fully decayed. */
   get(now?: number): T | null;
@@ -21,7 +34,8 @@ export type StorageCell<T> = {
 };
 
 export type StorageCellOptions<T> = {
-  key: string;
+  /** Stored under `horizon:`; see `storageKey`. */
+  key: StorageKey;
   /** Defaults to session: this tab, including reloads. `"local"` lasts until cleared. */
   area?: StorageArea;
   /**
@@ -101,8 +115,7 @@ function checkSpan(name: string, value: number | undefined) {
  * A local cell picks up another tab's write on the next read.
  */
 export function storageCell<T>(options: StorageCellOptions<T>): StorageCell<T> {
-  const key = options.key;
-  if (key === "") throw new TypeError("Expected a storage key");
+  const key = storageKey(options.key);
   checkSpan("lifetime", options.lifetime);
   checkSpan("decay", options.decay);
   const area = options.area ?? "session";

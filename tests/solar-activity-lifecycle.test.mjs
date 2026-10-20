@@ -164,15 +164,20 @@ test("repeated On/Off detaches the actual scene node and disposes all three GPU 
       texture: mesh.material.uniforms.densityMap.value,
     }))
       resource.addEventListener("dispose", () => released.push(name));
+    const rest = mesh.material.uniforms.activityMotion.value.slice();
     lifecycle.current.update(1 / 30, true, true);
     assert.equal(mesh.visible, true);
-    const time = mesh.material.uniforms.activityTime.value;
-    assert.ok(time > 0);
+    const pose = mesh.material.uniforms.activityMotion.value.slice();
+    assert.notDeepEqual(pose, rest, "a frame advances the model");
     lifecycle.setEnabled(false);
     assert.equal(sun.children.length, 0, "no hidden object remains in scene traversal");
     assert.deepEqual(released.sort(), ["geometry", "material", "texture"]);
     for (let frame = 0; frame < 100; frame++) lifecycle.current?.update(1 / 30, true, true);
-    assert.equal(mesh.material.uniforms.activityTime.value, time, "Off never advances dynamics");
+    assert.deepEqual(
+      mesh.material.uniforms.activityMotion.value,
+      pose,
+      "Off never advances dynamics",
+    );
     lifecycle.setEnabled(false);
     assert.equal(released.length, 3, "each resource is disposed exactly once");
   }

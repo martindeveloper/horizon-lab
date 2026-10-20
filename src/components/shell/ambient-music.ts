@@ -43,5 +43,5 @@ export const ambientMusic = new MusicPlayer(
       ],
     },
   ],
-  { storageKey: "horizon:music", level: MUSIC_LEVEL.ambient },
+  { storageKey: "music", level: MUSIC_LEVEL.ambient },
 );

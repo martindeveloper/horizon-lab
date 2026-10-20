@@ -36,7 +36,7 @@
   "solarActivity": {
     "toggle": "Solar activity",
     "model": "Illustrative model",
-    "description": "Plasma arches rise, twist and recoil as bright clumps flow along them. Motion is accelerated and illustrative, independent of the NASA surface map.",
+    "description": "Hα prominences over the visible-light map: cool plasma held in magnetic dips above polarity-inversion lines, glowing past the limb and dark against the disc. Shapes and timing are authored; a second shows a quarter of an hour, with threads draining and the occasional slow then sudden eruption.",
     "pause": "Pause illustrative solar activity",
     "resume": "Resume illustrative solar activity",
     "paused": "Model paused",

@@ -1,7 +1,7 @@
 import { flag, storageCell } from "@horizon/toolkit/storage";
 
 // Session only: a reload keeps the notice dismissed, a new visit may show it again.
-const notice = storageCell({ key: "horizon:desktop-notice", codec: flag() });
+const notice = storageCell({ key: "desktop-notice", codec: flag() });
 
 export function noticeDismissed() {
   return notice.get() === true;

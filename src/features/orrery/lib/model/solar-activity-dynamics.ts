@@ -1,87 +1,127 @@
 import {
-  SUN_ACTIVITY_CYCLE_SECONDS,
-  SUN_ACTIVITY_LEAN_LIMIT,
-  SUN_ACTIVITY_MAX_STRETCH,
-  SUN_ACTIVITY_REGION_COUNT,
-  SUN_ACTIVITY_TWIST_LIMIT,
   PROMINENCE_REGIONS,
+  SUN_ACTIVITY_CYCLE_SECONDS,
+  SUN_ACTIVITY_DRAIN_SPEED,
+  SUN_ACTIVITY_ERUPTION_DRAIN,
+  SUN_ACTIVITY_FAST_RISE_END,
+  SUN_ACTIVITY_FAST_RISE_START,
+  SUN_ACTIVITY_MAX_LIFT,
+  SUN_ACTIVITY_REGION_COUNT,
+  SUN_ACTIVITY_SLOW_RISE_LIFT,
+  SUN_ACTIVITY_SLOW_RISE_START,
+  SUN_ACTIVITY_SWAY_DAMPING,
+  SUN_ACTIVITY_SWAY_KICK,
+  SUN_ACTIVITY_SWAY_LIMIT,
+  SUN_ACTIVITY_SWAY_PERIOD_MIN,
+  SUN_ACTIVITY_TIME_SCALE,
 } from "./solar-activity";
 
 const STEP = 1 / 120;
 const CYCLE_TICKS = SUN_ACTIVITY_CYCLE_SECONDS * 120;
-const TAU = Math.PI * 2;
+const SWAY_OMEGA = (Math.PI * 2) / ((SUN_ACTIVITY_SWAY_PERIOD_MIN * 60) / SUN_ACTIVITY_TIME_SCALE);
+/** The drained length wraps far beyond a thread's streak period, keeping the uniform precise. */
+const FLOW_WRAP = 256;
 
-function ramp(start: number, end: number, phase: number) {
-  const t = Math.max(0, Math.min(1, (phase - start) / (end - start)));
-  return t * t * (3 - 2 * t);
-}
+const smooth = (t: number) => {
+  const s = Math.max(0, Math.min(1, t));
+  return s * s * (3 - 2 * s);
+};
 
-function pulse(start: number, peak: number, end: number, phase: number) {
-  return ramp(start, peak, phase) * (1 - ramp(peak, end, phase));
+/** Each region's eruption rocks the others, less the farther apart they are on the sphere. */
+const KICKS = PROMINENCE_REGIONS.map(([lat, lon]) =>
+  PROMINENCE_REGIONS.map(([lat2, lon2]) => {
+    const cosine =
+      Math.sin(lat) * Math.sin(lat2) + Math.cos(lat) * Math.cos(lat2) * Math.cos(lon - lon2);
+    return SUN_ACTIVITY_SWAY_KICK * Math.exp(-Math.acos(Math.max(-1, Math.min(1, cosine))));
+  }),
+);
+
+/**
+ * A region's course through its cycle, from its phase alone: how far the body has risen
+ * (the slow rise of hours, then the fast rise of an eruption), how much of it is still
+ * condensed (it thins away as it erupts and re-forms over hours), and how fast its threads
+ * drain. The schedule is authored (Sterling & Moore 2005, ApJ 630, 1148; Chen 2011, LRSP 8, 1).
+ */
+export function regionCourse(phase: number) {
+  if (phase < SUN_ACTIVITY_SLOW_RISE_START) return { lift: 1, fade: 1, drain: 1 };
+  if (phase < SUN_ACTIVITY_FAST_RISE_START) {
+    const t =
+      (phase - SUN_ACTIVITY_SLOW_RISE_START) /
+      (SUN_ACTIVITY_FAST_RISE_START - SUN_ACTIVITY_SLOW_RISE_START);
+    return { lift: 1 + (SUN_ACTIVITY_SLOW_RISE_LIFT - 1) * t * t, fade: 1, drain: 1 + 0.5 * t };
+  }
+  if (phase < SUN_ACTIVITY_FAST_RISE_END) {
+    const t =
+      (phase - SUN_ACTIVITY_FAST_RISE_START) /
+      (SUN_ACTIVITY_FAST_RISE_END - SUN_ACTIVITY_FAST_RISE_START);
+    return {
+      lift:
+        SUN_ACTIVITY_SLOW_RISE_LIFT * (SUN_ACTIVITY_MAX_LIFT / SUN_ACTIVITY_SLOW_RISE_LIFT) ** t,
+      // The rising body stays condensed until late in its climb, then thins away quickly.
+      fade: 1 - smooth(t * t * t),
+      drain: SUN_ACTIVITY_ERUPTION_DRAIN,
+    };
+  }
+  const t = (phase - SUN_ACTIVITY_FAST_RISE_END) / (1 - SUN_ACTIVITY_FAST_RISE_END);
+  return { lift: 1, fade: smooth(t), drain: 0.5 };
 }
 
 /**
- * Four damped modes per prominence: height, two bends, and twist. An authored
- * stress/release cycle drives their inertia and recoil; this is NOT an MHD solver.
- * The shader deforms the density continuously, with zero displacement at the roots.
- * Fixed steps make 24/30/60 Hz playback agree. Only 24 floats reach the GPU per frame.
+ * Four values per prominence reach the GPU: lift, fade, sway and drained length. Lift, fade
+ * and the drain rate follow the authored cycle; the sway is a damped kink oscillation, kicked
+ * by the other regions' eruptions; the drained length integrates the drain rate so a change
+ * of speed never jumps the threads. Fixed steps make 24/30/60 Hz playback agree. This is
+ * NOT an MHD solver.
  */
 export function createSolarActivityDynamics() {
-  const position = new Float64Array(SUN_ACTIVITY_REGION_COUNT * 4);
-  const velocity = new Float64Array(position.length);
-  const values = new Float32Array(position.length);
+  const values = new Float32Array(SUN_ACTIVITY_REGION_COUNT * 4);
+  const sway = new Float64Array(SUN_ACTIVITY_REGION_COUNT);
+  const swayRate = new Float64Array(SUN_ACTIVITY_REGION_COUNT);
+  const flow = new Float64Array(SUN_ACTIVITY_REGION_COUNT);
   let tick = 0;
   let pending = 0;
 
+  const phaseOf = (region: number, at: number) =>
+    (at / CYCLE_TICKS + PROMINENCE_REGIONS[region]![5]) % 1;
+
   function integrate() {
-    const phase = tick / CYCLE_TICKS;
     for (let region = 0; region < SUN_ACTIVITY_REGION_COUNT; region++) {
-      const p = (phase + PROMINENCE_REGIONS[region]![5]) % 1;
-      const rise = ramp(0.04, 0.34, p) * (1 - ramp(0.64, 0.88, p));
-      const launch = pulse(0.42, 0.51, 0.63, p);
-      const recoil = pulse(0.55, 0.62, 0.71, p);
-      const sign = region % 2 === 0 ? 1 : -1;
-      for (let axis = 0; axis < 4; axis++) {
-        const i = region * 4 + axis;
-        let target: number, frequency: number, damping: number, force: number, limit: number;
-        if (axis === 0) {
-          target = 0.36 + 0.94 * rise + 0.62 * launch;
-          frequency = 2.8;
-          damping = 0.58;
-          force = 0;
-          limit = SUN_ACTIVITY_MAX_STRETCH;
-        } else {
-          frequency = axis === 3 ? 2.5 : 2.1;
-          damping = axis === 3 ? 0.42 : 0.34;
-          target =
-            sign *
-            (0.08 * Math.sin(TAU * p + axis) +
-              (axis === 1 ? 0.27 : axis === 2 ? -0.18 : 0.24) * rise);
-          force = sign * (axis === 2 ? -1 : 1) * (1.35 * launch - 2.5 * recoil);
-          limit = axis === 3 ? SUN_ACTIVITY_TWIST_LIMIT : SUN_ACTIVITY_LEAN_LIMIT;
-        }
-        const acceleration =
-          frequency * frequency * (target - position[i]!) -
-          2 * damping * frequency * velocity[i]! +
-          force;
-        velocity[i] = velocity[i]! + acceleration * STEP;
-        const next = position[i]! + velocity[i] * STEP;
-        const bounded = Math.max(axis === 0 ? 0.25 : -limit, Math.min(limit, next));
-        position[i] = bounded;
-        if (bounded !== next) velocity[i] = 0;
+      const before = phaseOf(region, tick);
+      const after = phaseOf(region, tick + 1);
+      if (before < SUN_ACTIVITY_FAST_RISE_START && after >= SUN_ACTIVITY_FAST_RISE_START) {
+        for (let other = 0; other < SUN_ACTIVITY_REGION_COUNT; other++)
+          if (other !== region)
+            swayRate[other] = swayRate[other]! + KICKS[region]![other]! * SWAY_OMEGA;
       }
     }
     tick = (tick + 1) % CYCLE_TICKS;
+    for (let region = 0; region < SUN_ACTIVITY_REGION_COUNT; region++) {
+      const { lift, fade, drain } = regionCourse(phaseOf(region, tick));
+      const acceleration =
+        -SWAY_OMEGA * SWAY_OMEGA * sway[region]! -
+        2 * SUN_ACTIVITY_SWAY_DAMPING * SWAY_OMEGA * swayRate[region]!;
+      swayRate[region] = swayRate[region]! + acceleration * STEP;
+      const next = sway[region]! + swayRate[region]! * STEP;
+      sway[region] = Math.max(-SUN_ACTIVITY_SWAY_LIMIT, Math.min(SUN_ACTIVITY_SWAY_LIMIT, next));
+      if (sway[region] !== next) swayRate[region] = 0;
+      flow[region] = (flow[region]! + SUN_ACTIVITY_DRAIN_SPEED * drain * STEP) % FLOW_WRAP;
+      values[region * 4] = lift;
+      values[region * 4 + 1] = fade;
+      values[region * 4 + 2] = sway[region]!;
+      values[region * 4 + 3] = flow[region]!;
+    }
   }
 
   function reset() {
-    position.fill(0);
-    velocity.fill(0);
     tick = 0;
     pending = 0;
-    // Settle the staggered regions before the first image, including reduced-motion views.
-    for (let i = 0; i < CYCLE_TICKS * 2; i++) integrate();
-    values.set(position);
+    sway.fill(0);
+    swayRate.fill(0);
+    flow.fill(0);
+    for (let region = 0; region < SUN_ACTIVITY_REGION_COUNT; region++) {
+      const { lift, fade } = regionCourse(phaseOf(region, 0));
+      values.set([lift, fade, 0, 0], region * 4);
+    }
   }
   reset();
 
@@ -99,7 +139,6 @@ export function createSolarActivityDynamics() {
         integrate();
         pending = Math.max(0, pending - STEP);
       }
-      values.set(position);
     },
   };
 }

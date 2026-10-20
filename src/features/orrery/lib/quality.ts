@@ -44,9 +44,10 @@ const CLOSE_UP: ByTier<CloseUpQuality> = {
   max: { light: false, anisotropy: 16, airSteps: 20 },
 };
 
+/** Ray-march steps through a prominence's bound; the march itself shortens for thin crossings. */
 const ACTIVITY_STEPS: ByTier<number> = {
-  light: 20,
-  full: SUN_ACTIVITY_MAX_STEPS,
+  light: 24,
+  full: 40,
   max: SUN_ACTIVITY_MAX_STEPS,
 };
 

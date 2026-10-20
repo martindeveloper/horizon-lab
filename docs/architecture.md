@@ -66,7 +66,8 @@ src/
         views.ts               The default view and the Motion speed-up by scale
         tour.ts                Guide steps and their flights
         catalogue/             The timeline's figures: value or span, unit, source, status
-        solar-activity*.ts     The Sun's illustrative activity
+        solar-activity*.ts     The Sun's illustrative Hα activity: one baked hedgerow
+                               prominence, each region's slow cycle of flows and eruption
         parameters.ts, equations.ts, model-check.ts
       lib/graphics/            The time-dependent sky (sky.ts), tour-sketch.ts,
                                map-loader.ts (WebP maps from MAP_BASE; scripts/build-planet-maps.mjs),

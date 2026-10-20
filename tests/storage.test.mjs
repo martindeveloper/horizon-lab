@@ -19,7 +19,7 @@ const deny = () => {
 
 test("a session cell stores the codec payload and reads it from memory", () => {
   const { saved, store } = install();
-  const cell = storageCell({ key: "horizon:text", codec: text });
+  const cell = storageCell({ key: "text", codec: text });
   assert.equal(cell.get(), null);
   assert.equal(cell.freshness(), 0);
   cell.set("a\nb");
@@ -36,7 +36,7 @@ test("a session cell stores the codec payload and reads it from memory", () => {
 
 test("flags, string sets and number records skip JSON", () => {
   const { saved } = install();
-  const on = storageCell({ key: "horizon:music", codec: flag("on") });
+  const on = storageCell({ key: "music", codec: flag("on") });
   on.set(true);
   assert.equal(saved.get("horizon:music"), "on");
   assert.equal(on.get(), true);
@@ -45,7 +45,7 @@ test("flags, string sets and number records skip JSON", () => {
   assert.equal(on.get(), null);
 
   const mode = storageCell({
-    key: "horizon:debug:webgl",
+    key: ["debug", "webgl"],
     codec: oneOf("ready", "software", "unavailable"),
   });
   mode.set("software");
@@ -53,7 +53,7 @@ test("flags, string sets and number records skip JSON", () => {
   assert.equal(mode.get(), "software");
 
   const clock = storageCell({
-    key: "horizon:debug:sky",
+    key: ["debug", "sky"],
     codec: numbers("sky", "wall", "scale"),
   });
   clock.set({ sky: 10, wall: 20, scale: 1.5 });
@@ -66,7 +66,7 @@ test("a bad payload is dropped, and JSON keeps only values the guard accepts", (
   const { saved } = install();
   saved.set("horizon:debug:webgl", "nope");
   const mode = storageCell({
-    key: "horizon:debug:webgl",
+    key: ["debug", "webgl"],
     codec: oneOf("ready", "software", "unavailable"),
   });
   assert.equal(mode.get(), null);
@@ -76,19 +76,19 @@ test("a bad payload is dropped, and JSON keeps only values the guard accepts", (
     (value) =>
       !!value && typeof value === "object" && Number.isFinite(value.x) && Number.isFinite(value.y),
   );
-  const cell = storageCell({ key: "horizon:point", codec: point });
+  const cell = storageCell({ key: "point", codec: point });
   cell.set({ x: 1, y: -2 });
   assert.equal(saved.get("horizon:point"), '{"x":1,"y":-2}');
   assert.deepEqual(cell.get(), { x: 1, y: -2 });
   saved.set("horizon:point", '{"x":1}');
-  const again = storageCell({ key: "horizon:point", codec: point });
+  const again = storageCell({ key: "point", codec: point });
   assert.equal(again.get(), null);
 });
 
 test("lifetime keeps a value, then decay lowers its strength and removes it", () => {
   const { saved } = install();
   const cell = storageCell({
-    key: "horizon:fading",
+    key: "fading",
     codec: text,
     lifetime: 1000,
     decay: 1000,
@@ -111,13 +111,13 @@ test("lifetime keeps a value, then decay lowers its strength and removes it", ()
 
 test("without a decay the value ends at the lifetime, and a bare decay fades from the write", () => {
   const { saved } = install();
-  const step = storageCell({ key: "horizon:step", codec: text, lifetime: 100 });
+  const step = storageCell({ key: "step", codec: text, lifetime: 100 });
   step.set("a", 0);
   assert.equal(step.get(100), "a");
   assert.equal(step.get(101), null);
   assert.equal(saved.has("horizon:step"), false);
 
-  const fade = storageCell({ key: "horizon:fade", codec: text, decay: 100 });
+  const fade = storageCell({ key: "fade", codec: text, decay: 100 });
   fade.set("b", 0);
   assert.equal(fade.freshness(0), 1);
   assert.equal(fade.freshness(50), 0.5);
@@ -128,12 +128,12 @@ test("a lifetime rejects an unstamped payload, and each area has its own store",
   const session = install("session");
   const local = install("local");
   session.saved.set("horizon:aged", "plain");
-  const aged = storageCell({ key: "horizon:aged", codec: text, lifetime: 50 });
+  const aged = storageCell({ key: "aged", codec: text, lifetime: 50 });
   assert.equal(aged.get(0), null);
   assert.equal(session.saved.has("horizon:aged"), false);
 
-  const tab = storageCell({ key: "horizon:shared", codec: text });
-  const origin = storageCell({ key: "horizon:shared", area: "local", codec: text });
+  const tab = storageCell({ key: "shared", codec: text });
+  const origin = storageCell({ key: "shared", area: "local", codec: text });
   tab.set("tab");
   origin.set("origin");
   assert.equal(session.saved.get("horizon:shared"), "tab");
@@ -144,7 +144,7 @@ test("a lifetime rejects an unstamped payload, and each area has its own store",
 
 test("blocked or missing storage never throws and still serves this page", () => {
   globalThis.sessionStorage = { getItem: deny, setItem: deny, removeItem: deny };
-  const blocked = storageCell({ key: "horizon:blocked", codec: text });
+  const blocked = storageCell({ key: "blocked", codec: text });
   assert.equal(blocked.get(), null);
   assert.doesNotThrow(() => blocked.set("kept"));
   assert.equal(blocked.get(), "kept");
@@ -152,7 +152,7 @@ test("blocked or missing storage never throws and still serves this page", () =>
   assert.equal(blocked.get(), null);
 
   globalThis.sessionStorage = undefined;
-  const missing = storageCell({ key: "horizon:missing", codec: flag() });
+  const missing = storageCell({ key: "missing", codec: flag() });
   assert.equal(missing.get(), null);
   assert.doesNotThrow(() => missing.set(true));
   assert.equal(missing.get(), true);
@@ -166,7 +166,7 @@ test("a local cell sees another tab's write and a cleared origin", () => {
     removeEventListener: (_type, fn) => listeners.delete(fn),
   };
   try {
-    const cell = storageCell({ key: "horizon:local", area: "local", codec: text });
+    const cell = storageCell({ key: "local", area: "local", codec: text });
     cell.set("dark");
     saved.set("horizon:local", "light");
     assert.equal(cell.get(), "dark", "This tab keeps its copy until told otherwise");
@@ -181,8 +181,9 @@ test("a local cell sees another tab's write and a cleared origin", () => {
   }
 });
 
-test("a cell rejects an empty key or a negative span", () => {
-  assert.throws(() => storageCell({ key: "", codec: text }), TypeError);
+test("a cell rejects a malformed key or a negative span", () => {
+  for (const key of ["", "horizon:music", "Music", ["debug", ""], ["a", "b:c"]])
+    assert.throws(() => storageCell({ key, codec: text }), TypeError);
   assert.throws(() => storageCell({ key: "k", codec: text, lifetime: -1 }), TypeError);
   assert.throws(() => storageCell({ key: "k", codec: text, decay: -1 }), TypeError);
   assert.throws(() => oneOf(), TypeError);

@@ -36,7 +36,7 @@
   "solarActivity": {
     "toggle": "Sluneční aktivita",
     "model": "Ilustrační model",
-    "description": "Oblouky plazmatu rostou, stáčejí se a vracejí zpět; podél nich proudí jasné shluky. Pohyb je zrychlený a ilustrační, nezávislý na povrchové mapě NASA.",
+    "description": "Protuberance v Hα nad mapou ve viditelném světle: chladné plazma zachycené v prohlubních magnetického pole nad liniemi obratu polarity, zářící za okrajem a tmavé na disku. Tvary i načasování jsou autorské; sekunda ukazuje čtvrt hodiny, vlákna odtékají dolů a občas přijde pomalá a pak náhlá erupce.",
     "pause": "Pozastavit ilustrační sluneční aktivitu",
     "resume": "Obnovit ilustrační sluneční aktivitu",
     "paused": "Model pozastaven",

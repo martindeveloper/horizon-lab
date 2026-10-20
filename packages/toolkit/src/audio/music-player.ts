@@ -1,4 +1,4 @@
-import { flag, storageCell, type StorageCell } from "../storage";
+import { flag, storageCell, type StorageCell, type StorageKey } from "../storage";
 
 export type MusicState = "playing" | "paused";
 
@@ -19,7 +19,7 @@ export type MusicPlayerOptions = {
   /** Seconds before a blend that the next track starts to buffer. */
   prefetch?: number;
   /** sessionStorage key that remembers "on" across reloads; null disables it. */
-  storageKey?: string | null;
+  storageKey?: StorageKey | null;
   /** Playback level 0..1 the music fades up to; 1 by default. `setLevel` moves it. */
   level?: number;
 };
@@ -113,8 +113,8 @@ export class MusicPlayer {
     this.skipFade = options.skipFade ?? 2.5;
     this.prefetch = options.prefetch ?? 30;
     this.level = clampLevel(options.level ?? 1);
-    const storageKey = options.storageKey ?? null;
-    this.memory = storageKey ? storageCell({ key: storageKey, codec: flag("on") }) : null;
+    const key = options.storageKey ?? null;
+    this.memory = key ? storageCell({ key, codec: flag("on") }) : null;
   }
 
   /** The track playing, or next to play. */

@@ -2,19 +2,31 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createSolarActivityDensity } from "../src/features/orrery/lib/model/solar-activity-density.ts";
-import { createSolarActivityDynamics } from "../src/features/orrery/lib/model/solar-activity-dynamics.ts";
+import {
+  createSolarActivityDynamics,
+  regionCourse,
+} from "../src/features/orrery/lib/model/solar-activity-dynamics.ts";
 import {
   PROMINENCE_REGIONS,
   SUN_ACTIVITY_CYCLE_SECONDS,
-  SUN_ACTIVITY_DEPTH_RATIO,
-  SUN_ACTIVITY_LEAN_LIMIT,
-  SUN_ACTIVITY_MAX_STRETCH,
+  SUN_ACTIVITY_DRAIN_SPEED,
+  SUN_ACTIVITY_ERUPTION_DRAIN,
+  SUN_ACTIVITY_FAST_RISE_END,
+  SUN_ACTIVITY_FAST_RISE_START,
+  SUN_ACTIVITY_MAX_HEIGHT,
+  SUN_ACTIVITY_MAX_LIFT,
   SUN_ACTIVITY_REGION_COUNT,
-  SUN_ACTIVITY_TWIST_LIMIT,
-  SUN_ACTIVITY_WAVE_AMPLITUDE,
+  SUN_ACTIVITY_SLOW_RISE_LIFT,
+  SUN_ACTIVITY_SLOW_RISE_START,
+  SUN_ACTIVITY_SWAY_LIMIT,
+  SUN_ACTIVITY_TIME_SCALE,
+  SUN_RADIUS_MM,
   solarActivityVisible,
 } from "../src/features/orrery/lib/model/solar-activity.ts";
-import { createSolarActivityGeometry } from "../src/features/orrery/lib/scene/solar-activity-geometry.ts";
+import {
+  activityReach,
+  createSolarActivityGeometry,
+} from "../src/features/orrery/lib/scene/solar-activity-geometry.ts";
 import { useOrrery } from "../src/features/orrery/lib/store.ts";
 
 const api = useOrrery.getState;
@@ -94,17 +106,62 @@ test("dynamics preserve the complete pose and momentum across pause and tab rest
   held.advance(120, false);
   for (const dt of [-1, NaN, Infinity]) held.advance(dt, true);
   assert.equal(held.time, time);
-  assert.deepEqual(held.values, pose, "pause/reduced motion freezes deformation and plasma flow");
+  assert.deepEqual(held.values, pose, "pause/reduced motion freezes the body and its flows");
   held.advance(120, true);
   reference.advance(0.1, true);
   assert.equal(held.time, reference.time);
-  assert.deepEqual(held.values, reference.values, "resume preserves inertia without catch-up");
+  assert.deepEqual(held.values, reference.values, "resume preserves momentum without catch-up");
   held.reset();
   assert.equal(held.time, 0);
   assert.deepEqual(held.values, createSolarActivityDynamics().values);
 });
 
-test("prominence growth, sideways release and recoil are independent of playback frame rate", () => {
+test("a region's cycle is a quiescent spell, a slow then fast rise that thins it away, and re-formation", () => {
+  const quiet = regionCourse(SUN_ACTIVITY_SLOW_RISE_START / 2);
+  assert.deepEqual(quiet, { lift: 1, fade: 1, drain: 1 });
+  const slow = regionCourse((SUN_ACTIVITY_SLOW_RISE_START + SUN_ACTIVITY_FAST_RISE_START) / 2);
+  assert.ok(
+    slow.lift > 1 && slow.lift < SUN_ACTIVITY_SLOW_RISE_LIFT,
+    "the slow rise lifts a little",
+  );
+  assert.equal(slow.fade, 1, "the body stays condensed through the slow rise");
+  const fast = regionCourse(SUN_ACTIVITY_FAST_RISE_START + 1e-9);
+  assert.ok(
+    Math.abs(fast.lift - SUN_ACTIVITY_SLOW_RISE_LIFT) < 1e-6,
+    "the fast rise continues the slow one",
+  );
+  assert.equal(fast.drain, SUN_ACTIVITY_ERUPTION_DRAIN, "the legs drain fastest while it erupts");
+  const gone = regionCourse(SUN_ACTIVITY_FAST_RISE_END - 1e-9);
+  assert.ok(
+    Math.abs(gone.lift - SUN_ACTIVITY_MAX_LIFT) < 1e-3 && gone.fade < 1e-6,
+    "thinned away at its top lift",
+  );
+  const reforming = regionCourse((SUN_ACTIVITY_FAST_RISE_END + 1) / 2);
+  assert.equal(reforming.lift, 1, "a new body condenses at its quiescent height");
+  assert.ok(
+    reforming.fade > 0 && reforming.fade < 1 && reforming.drain < 1,
+    "condensing, draining slowly",
+  );
+  const wrapped = regionCourse(1 - 1e-12);
+  assert.ok(wrapped.lift === 1 && wrapped.fade > 1 - 1e-6, "the cycle wraps without a jump");
+  // The fast rise is tens of kilometres per second (Sterling & Moore 2005): neither a crawl nor a flash.
+  const riseMm =
+    (SUN_ACTIVITY_MAX_LIFT - SUN_ACTIVITY_SLOW_RISE_LIFT) * SUN_ACTIVITY_MAX_HEIGHT * SUN_RADIUS_MM;
+  const riseSeconds =
+    (SUN_ACTIVITY_FAST_RISE_END - SUN_ACTIVITY_FAST_RISE_START) *
+    SUN_ACTIVITY_CYCLE_SECONDS *
+    SUN_ACTIVITY_TIME_SCALE;
+  const kms = (riseMm * 1000) / riseSeconds;
+  assert.ok(kms > 10 && kms < 100, `fast rise at ${kms.toFixed(0)} km/s`);
+  // Thread flows of 10–20 km/s cross a quiescent body's height within a minute of display time.
+  const drainSeconds = SUN_ACTIVITY_MAX_HEIGHT / SUN_ACTIVITY_DRAIN_SPEED;
+  assert.ok(
+    drainSeconds > 3 && drainSeconds < 60,
+    `a thread drains in ${drainSeconds.toFixed(1)} s`,
+  );
+});
+
+test("the live model is frame-rate independent, continuous while visible, bounded and rocked by eruptions", () => {
   const results = [];
   for (const fps of [24, 30, 60, 120]) {
     const model = createSolarActivityDynamics();
@@ -112,52 +169,70 @@ test("prominence growth, sideways release and recoil are independent of playback
     results.push(model.values.slice());
   }
   for (const result of results) assert.deepEqual(result, results[0]);
+
   const model = createSolarActivityDynamics();
-  const heights = [],
-    bends = [];
   let previous = model.values.slice();
-  for (let i = 0; i < SUN_ACTIVITY_CYCLE_SECONDS * 120 * 3; i++) {
+  let swayPeak = 0;
+  let eruptions = 0;
+  const lifts = new Set();
+  for (let i = 0; i < SUN_ACTIVITY_CYCLE_SECONDS * 120 * 2; i++) {
     model.advance(1 / 120, true);
-    heights.push(model.values[0]);
-    bends.push(model.values[1]);
-    for (let j = 0; j < model.values.length; j++) {
-      const value = model.values[j];
-      const axis = j % 4;
-      const limit =
-        axis === 0
-          ? SUN_ACTIVITY_MAX_STRETCH
-          : axis === 3
-            ? SUN_ACTIVITY_TWIST_LIMIT
-            : SUN_ACTIVITY_LEAN_LIMIT;
-      assert.ok(Number.isFinite(value) && Math.abs(value) <= limit + 1e-6);
-      if (axis === 0) assert.ok(value >= 0.25, "no inverted or collapsed volume");
-      assert.ok(Math.abs(value - previous[j]) < 0.025, "no pose pop, including across cycle wrap");
+    for (let region = 0; region < SUN_ACTIVITY_REGION_COUNT; region++) {
+      const [lift, fade, sway, drained] = model.values.subarray(region * 4, region * 4 + 4);
+      const [oldLift, oldFade, oldSway, oldDrained] = previous.subarray(region * 4, region * 4 + 4);
+      assert.ok(lift >= 1 && lift <= SUN_ACTIVITY_MAX_LIFT + 1e-6, "lift stays in its range");
+      assert.ok(fade >= 0 && fade <= 1, "fade stays in its range");
+      assert.ok(Math.abs(sway) <= SUN_ACTIVITY_SWAY_LIMIT + 1e-6, "sway stays in its range");
+      assert.ok(drained >= 0 && Number.isFinite(drained));
+      // The visible body never pops: the lift only snaps back once nothing is left to see.
+      if (Math.abs(lift - oldLift) > 0.02) {
+        assert.ok(oldFade < 1e-3 && fade < 1e-3, "lift resets only while thinned away");
+        eruptions++;
+      }
+      assert.ok(Math.abs(fade - oldFade) < 0.02, "no visibility pop");
+      assert.ok(Math.abs(sway - oldSway) < 0.005, "no sideways pop");
+      const drainedStep = drained - oldDrained;
+      assert.ok(
+        drainedStep < 0 ||
+          drainedStep <= (SUN_ACTIVITY_DRAIN_SPEED * SUN_ACTIVITY_ERUPTION_DRAIN) / 120 + 1e-4,
+        "threads drain at the schedule's rate",
+      );
+      swayPeak = Math.max(swayPeak, Math.abs(sway));
+      lifts.add(Math.round(lift * 100));
     }
     previous = model.values.slice();
   }
-  assert.ok(
-    Math.max(...heights) > 1.7 && Math.min(...heights) < 0.45,
-    "visible growth and descent",
-  );
-  assert.ok(Math.max(...bends) > 0.4 && Math.min(...bends) < -0.35, "release reverses the bend");
+  assert.equal(eruptions, SUN_ACTIVITY_REGION_COUNT * 2, "every region erupts once per cycle");
+  assert.ok(swayPeak > 0.01, "eruptions rock the other bodies visibly");
+  assert.ok(swayPeak <= SUN_ACTIVITY_SWAY_LIMIT, "but gently");
+  assert.ok(lifts.size > 20, "the rise is gradual, not a jump");
   assert.equal(model.time, 0, "clock stays bounded over repeated cycles");
+
+  // Left alone, a rocked body settles: the kink oscillation is damped.
+  const settle = createSolarActivityDynamics();
+  for (let i = 0; i < SUN_ACTIVITY_CYCLE_SECONDS * 120; i++) settle.advance(1 / 120, true);
+  const kicked = [...settle.values].filter((_, i) => i % 4 === 2).map(Math.abs);
+  assert.ok(Math.max(...kicked) < SUN_ACTIVITY_SWAY_LIMIT * 0.5, "damped within the cycle");
 });
 
-test("prominence bounds use one small draw and contain the expanded, anchored volumes", () => {
+test("prominence bounds use one small draw and contain the erupting, swaying volumes", () => {
   const geometry = createSolarActivityGeometry();
   try {
     const p = geometry.getAttribute("position");
     const anchor = geometry.getAttribute("aAnchor");
     const along = geometry.getAttribute("aAlong");
     const shape = geometry.getAttribute("aShape");
+    const mirror = geometry.getAttribute("aMirror");
     assert.ok(p.count / 3 <= 72, "only the six volume bounds are geometry");
     assert.ok(
       geometry.boundingSphere.radius < 1.3,
       "camera stays outside every volume at minimum zoom",
     );
+    assert.equal(geometry.boundingSphere.radius, activityReach());
     assert.equal(geometry.groups.length, 0, "one material/draw group");
     for (const attribute of Object.values(geometry.attributes))
       assert.ok(attribute.array.every(Number.isFinite));
+    const mirrors = new Set();
     for (let i = 0; i < p.count; i++) {
       const normal = [anchor.getX(i), anchor.getY(i), anchor.getZ(i)];
       const tangent = [along.getX(i), along.getY(i), along.getZ(i)];
@@ -169,24 +244,18 @@ test("prominence bounds use one small draw and contain the expanded, anchored vo
       assert.ok(
         Math.abs(p.getX(i)) <= 1 && p.getY(i) >= 0 && p.getY(i) <= 1 && Math.abs(p.getZ(i)) <= 1,
       );
-      const span = shape.getY(i);
+      assert.ok(Math.abs(mirror.getX(i)) === 1 && Math.abs(mirror.getY(i)) === 1);
+      mirrors.add(`${mirror.getX(i)}${mirror.getY(i)}`);
+      const halfSpan = shape.getY(i);
       assert.ok(Number.isInteger(shape.getW(i)) && shape.getW(i) < SUN_ACTIVITY_REGION_COUNT);
-      const top = 1 - span * span * 0.3 + shape.getX(i) * SUN_ACTIVITY_MAX_STRETCH;
-      const extent = Math.hypot(
-        top,
-        span * (1.25 + SUN_ACTIVITY_LEAN_LIMIT + 2 * SUN_ACTIVITY_WAVE_AMPLITUDE),
-        span *
-          SUN_ACTIVITY_DEPTH_RATIO *
-          (1 +
-            SUN_ACTIVITY_TWIST_LIMIT +
-            SUN_ACTIVITY_LEAN_LIMIT +
-            2 * SUN_ACTIVITY_WAVE_AMPLITUDE),
-      );
+      assert.ok(shape.getX(i) <= SUN_ACTIVITY_MAX_HEIGHT && halfSpan <= 0.2);
+      const top = 1 + shape.getX(i) * SUN_ACTIVITY_MAX_LIFT;
       assert.ok(
-        extent <= geometry.boundingSphere.radius + 1e-6,
+        Math.hypot(top, halfSpan) <= geometry.boundingSphere.radius + 1e-6,
         "animated corners cannot be culled early",
       );
     }
+    assert.ok(mirrors.size >= 4, "the one baked body is mirrored four ways");
   } finally {
     geometry.dispose();
   }
@@ -229,31 +298,55 @@ test("the baked density is small, sparse, reproducible and transparent at every 
   }
 });
 
-test("flux-rope density roots both legs, clears the sub-arch cavity and follows Joy's law", () => {
+test("the hedgerow stands on pillars with dark arches between, as a thin sheet with barbs to both sides", () => {
   const { data, width, height, depth } = createSolarActivityDensity(false);
   const stride = width * height;
-  let leftFoot = 0,
-    rightFoot = 0,
-    cavity = 0,
-    crown = 0;
-  for (let z = 1; z < depth - 1; z++) {
-    for (let y = 1; y <= Math.floor(height * 0.14); y++) {
-      for (let x = 1; x < width - 1; x++) {
-        const d = data[x + y * width + z * stride];
-        if (x < width * 0.34) leftFoot += d;
-        else if (x > width * 0.66) rightFoot += d;
-        else if (x > width * 0.44 && x < width * 0.56) cavity += d;
-      }
-    }
-    for (let y = Math.floor(height * 0.45); y <= Math.floor(height * 0.85); y++) {
-      for (let x = Math.floor(width * 0.3); x <= Math.floor(width * 0.7); x++) {
-        crown += data[x + y * width + z * stride];
-      }
-    }
+  const at = (x, y, z) => data[x + y * width + z * stride];
+  // Along the sheet, where the plasma reaches the chromosphere: the pillars and the two legs.
+  const column = (x) => {
+    let mass = 0;
+    for (let y = 1; y <= Math.floor(height * 0.06); y++)
+      for (let z = 1; z < depth - 1; z++) mass += at(x, y, z);
+    return mass;
+  };
+  const masses = Array.from({ length: width }, (_, x) => column(x));
+  const peak = Math.max(...masses);
+  let pillars = 0,
+    inside = false;
+  for (const mass of masses) {
+    const standing = mass > peak * 0.25;
+    if (standing && !inside) pillars++;
+    inside = standing;
   }
-  assert.ok(leftFoot > 20_000 && rightFoot > 20_000, "both chromospheric legs stay firmly rooted");
-  assert.ok(cavity < Math.min(leftFoot, rightFoot) * 0.25, "open magnetic cavity beneath the arch");
-  assert.ok(crown > leftFoot + rightFoot, "dense dipped spine across the upper arch");
+  assert.ok(pillars >= 4, `${pillars} rooted pillars along the sheet`);
+  const arches = masses.filter(
+    (mass, x) => x > width * 0.1 && x < width * 0.9 && mass < peak * 0.05,
+  );
+  assert.ok(arches.length > width * 0.2, "dark arches between the pillars");
+  // The body hangs in the corona above those arches.
+  let body = 0;
+  for (let y = Math.floor(height * 0.3); y <= Math.floor(height * 0.7); y++)
+    for (let x = Math.floor(width * 0.2); x <= Math.floor(width * 0.8); x++)
+      for (let z = 1; z < depth - 1; z++) body += at(x, y, z);
+  assert.ok(body > masses.reduce((sum, mass) => sum + mass, 0), "a dense suspended sheet");
+  // Across it, the sheet is thin at mid-height and its barbs reach out on either side lower down.
+  const across = (yFrom, yTo) => {
+    const profile = Array.from({ length: depth }, () => 0);
+    for (let z = 1; z < depth - 1; z++)
+      for (let y = Math.floor(height * yFrom); y <= Math.floor(height * yTo); y++)
+        for (let x = 1; x < width - 1; x++) profile[z] += at(x, y, z);
+    return profile;
+  };
+  const high = across(0.55, 0.85);
+  const highTotal = high.reduce((sum, mass) => sum + mass, 0);
+  const core = high
+    .slice(Math.floor(depth * 0.3), Math.ceil(depth * 0.7))
+    .reduce((s, m) => s + m, 0);
+  assert.ok(core > highTotal * 0.8, "the upper body is a thin sheet across its middle");
+  const low = across(0.02, 0.25);
+  const left = low.slice(1, Math.floor(depth * 0.25)).reduce((s, m) => s + m, 0);
+  const right = low.slice(Math.ceil(depth * 0.75), depth - 1).reduce((s, m) => s + m, 0);
+  assert.ok(left > 0 && right > 0, "barbs reach the chromosphere on both sides");
   for (const [lat, , tilt] of PROMINENCE_REGIONS) {
     assert.ok(lat * tilt < 0, "Joy's law: opposite polarity-inversion tilt in N and S hemispheres");
   }

@@ -44,7 +44,7 @@ const isCrossing = (value: unknown): value is Crossing => {
  * as one place. Read once, then cleared; it lapses after half a minute.
  */
 const handoff = storageCell({
-  key: "horizon-handoff",
+  key: "handoff",
   area: "session",
   lifetime: 30_000,
   codec: json(isCrossing),

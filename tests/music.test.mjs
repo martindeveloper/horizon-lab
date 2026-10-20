@@ -41,7 +41,7 @@ test("players construct without browser globals and remember only when asked", (
   assert.equal(plain.remembered, false, "No storage key, no memory");
   assert.equal(ambientMusic.remembered, true);
   assert.equal(saved.get("horizon:music"), "on");
-  const quiet = new MusicPlayer(track, { storageKey: "horizon:music:off" });
+  const quiet = new MusicPlayer(track, { storageKey: ["music", "off"] });
   assert.equal(quiet.remembered, false);
   assert.ok(
     ambientMusic.tracks.every((item) =>
