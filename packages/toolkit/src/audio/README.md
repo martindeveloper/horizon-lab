@@ -10,6 +10,8 @@ come from a user gesture.
     order of preference, e.g. Opus/WebM, then AAC/M4A. Safari and iOS skip WebM
     when another source exists: WebKit plays it outside Web Audio, so gains
     cannot fade it.
+    Sources may live on another origin (a CDN) if it sends CORS headers;
+    without them Web Audio plays silence.
   - `options`: `fadeIn` (3 s), `fadeOut` (1.5 s), `crossfade` (8 s), `skipFade`
     (2.5 s), `prefetch` (30 s) and `storageKey` (default `null`; set it to
     remember "on" in sessionStorage).

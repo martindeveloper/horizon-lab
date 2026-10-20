@@ -62,7 +62,9 @@
     "units": "Vzdálenosti v",
     "smallWorlds": "Trpasličí planety a komety",
     "belts": "Pásy a oblaky",
-    "antialiasing": "Vyhlazování hran"
+    "antialiasing": "Vyhlazování hran",
+    "renderQuality": "Kvalita vykreslování",
+    "reset": "Obnovit nastavení"
   },
   "badges": {
     "measured": "Z měření",

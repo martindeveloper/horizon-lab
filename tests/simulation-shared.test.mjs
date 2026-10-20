@@ -74,18 +74,19 @@ test("a scene draws with MSAA, or none on tight devices, until the visitor picks
     antialias: null,
     setAntialias: (antialias) => set({ antialias }),
   }));
-  const host = {
-    antialias: defaultSceneAntialias(true),
-    setAntialias: (m) => (host.antialias = m),
-  };
+  const host = { tight: true, antialias: "off", setAntialias: (m) => (host.antialias = m) };
   const scope = new DisposalScope();
   bridgeAntialias(store, scope, host);
   assert.equal(store.getState().antialias, "off", "the device's default is published");
   store.getState().setAntialias("fxaa");
   assert.equal(host.antialias, "fxaa");
+  /* A reset clears the choice; the device's default comes back, not the last mode. */
+  store.setState({ antialias: null });
+  assert.equal(store.getState().antialias, "off");
+  assert.equal(host.antialias, "off");
   scope.dispose();
   store.getState().setAntialias("msaa");
-  assert.equal(host.antialias, "fxaa", "disposed, it listens no more");
+  assert.equal(host.antialias, "off", "disposed, it listens no more");
 });
 
 test("the shared space copy merges under a simulation's own, and is never written twice", () => {

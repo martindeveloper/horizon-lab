@@ -1,9 +1,9 @@
-import { Globe2, Orbit, SlidersHorizontal, Timer } from "lucide-react";
+import { Globe2, GraduationCap, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
-import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
 import { Rail, RailSection } from "@/components/simulations/rail";
+import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { AtlasOverlay } from "@/features/black-hole/components/atlas";
@@ -24,10 +24,7 @@ import { useBlackHole } from "@/features/black-hole/lib/store";
 import {
   DataReadout,
   Dock,
-  IconButton,
   Kicker,
-  Toolbar,
-  Tooltip,
   VisualizationOverlay,
   cn,
   useFocusHandoff,
@@ -159,53 +156,35 @@ export function ObservatoryOverlay() {
               {/* The picker (desktop) and the dock kicker (phones) show the name. */}
               <h1 className="sr-only">{holeName}</h1>
               <HolePicker />
-              <Toolbar aria-label={t("controls")} className="ml-auto shrink-0">
-                <BlackHoleTechnicalDetails />
-                <Tooltip label={t("guide")}>
-                  <IconButton
-                    type="button"
-                    data-return="guide"
-                    onClick={startGuide}
-                    aria-label={t("ariaStartGuide")}
-                  >
-                    <Orbit className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip label={t("atlas")}>
-                  <IconButton
-                    type="button"
-                    data-return="atlas"
-                    onClick={() => setMapOpen(true)}
-                    aria-label={t("ariaOpenAtlas")}
-                  >
-                    <Globe2 className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <SimulationImmersiveToggle />
-                <Tooltip label={clocksOpen ? t("close") : t("clocks")}>
-                  <IconButton
-                    type="button"
-                    onClick={() => setClocksOpen(!clocksOpen)}
-                    data-return="clocks"
-                    active={clocksOpen}
-                    aria-label={clocksOpen ? t("ariaCloseClocks") : t("ariaDropClocks")}
-                  >
-                    <Timer className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip label={t("observatory")} align="end">
-                  <IconButton
-                    type="button"
-                    onClick={toggleMenu}
-                    active={settingsOpen}
-                    aria-label={t("observatory")}
-                    aria-expanded={settingsOpen}
-                    aria-controls={settingsOpen ? SETTINGS_PANEL_ID : undefined}
-                  >
-                    <SlidersHorizontal className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-              </Toolbar>
+              <SimulationToolbar
+                label={t("controls")}
+                details={(access) => <BlackHoleTechnicalDetails {...access} />}
+                detailsLabel={t("technicalDetails.open")}
+                guide={{ label: t("guide"), ariaLabel: t("ariaStartGuide"), onSelect: startGuide }}
+                finder={{
+                  id: "atlas",
+                  label: t("atlas"),
+                  ariaLabel: t("ariaOpenAtlas"),
+                  icon: Globe2,
+                  onSelect: () => setMapOpen(true),
+                }}
+                tools={[
+                  {
+                    id: "clocks",
+                    label: clocksOpen ? t("close") : t("clocks"),
+                    ariaLabel: clocksOpen ? t("ariaCloseClocks") : t("ariaDropClocks"),
+                    icon: Timer,
+                    active: clocksOpen,
+                    onSelect: () => setClocksOpen(!clocksOpen),
+                  },
+                ]}
+                settings={{
+                  label: t("observatory"),
+                  active: settingsOpen,
+                  controls: SETTINGS_PANEL_ID,
+                  onSelect: toggleMenu,
+                }}
+              />
             </div>
           </header>
 
@@ -227,7 +206,7 @@ export function ObservatoryOverlay() {
                       }}
                       className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-xs tracking-widest text-fg uppercase"
                     >
-                      <Orbit className="size-3.5" />
+                      <GraduationCap className="size-3.5" />
                       {t("startGuide")}
                     </button>
                     <PresetNav stacked />

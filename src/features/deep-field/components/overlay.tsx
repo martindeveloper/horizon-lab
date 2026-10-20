@@ -1,23 +1,12 @@
-import { Info, Maximize2, Orbit } from "lucide-react";
+import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
 import { MapScale } from "@/components/simulations/map-readouts";
-import { SceneMoreMenu } from "@/components/simulations/more-menu";
-import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
+import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import {
-  IconButton,
-  Toolbar,
-  Tooltip,
-  VisualizationOverlay,
-  cn,
-  isSceneShortcut,
-  setImmersive,
-  type DialogHandle,
-} from "@horizon/toolkit/ui";
+import { VisualizationOverlay, cn, isSceneShortcut } from "@horizon/toolkit/ui";
 
 import { useDeepField } from "../lib/store";
 import { DepthLadder } from "./depth-ladder";
@@ -40,8 +29,6 @@ const escapeSteps = (): EscapeStep[] => {
 
 export function DeepFieldOverlay() {
   const t = useTranslations("deepField");
-  const tImmersive = useTranslations("immersive");
-  const details = useRef<DialogHandle>(null);
   const ready = useDeepField((s) => s.ready);
   const view = useDeepField((s) => s.view);
   const panel = useDeepField((s) => s.panel);
@@ -91,46 +78,31 @@ export function DeepFieldOverlay() {
                   {t(`viewHints.${view}`)}
                 </p>
               </div>
-              <Toolbar aria-label={t("hud.controls")} className="ml-auto shrink-0">
-                {/* Phones keep the guide and the two panels in reach; the rest is under More. */}
-                <DeepFieldTechnicalDetails ref={details} triggerClassName="not-md:hidden" />
-                <Tooltip label={t("hud.guide")}>
-                  <IconButton
-                    ref={guideButton}
-                    aria-label={t("tour.start")}
-                    onClick={() => useDeepField.getState().startGuide()}
-                  >
-                    <Orbit className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <ScenePanelButtons
-                  simulationId="deep-field"
-                  panel={panel}
-                  objectsLabel={t("hud.objects")}
-                  viewLabel={t("hud.view")}
-                  onPanelChange={setPanel}
-                />
-                <div className="not-md:hidden md:contents">
-                  <SimulationImmersiveToggle />
-                </div>
-                <SceneMoreMenu
-                  className="md:hidden"
-                  items={[
-                    {
-                      id: "details",
-                      label: t("technicalDetails.open"),
-                      icon: Info,
-                      onSelect: () => details.current?.open(),
-                    },
-                    {
-                      id: "immersive",
-                      label: tImmersive("title"),
-                      icon: Maximize2,
-                      onSelect: () => setImmersive(true),
-                    },
-                  ]}
-                />
-              </Toolbar>
+              <SimulationToolbar
+                label={t("hud.controls")}
+                details={(access) => <DeepFieldTechnicalDetails {...access} />}
+                detailsLabel={t("technicalDetails.open")}
+                guide={{
+                  label: t("hud.guide"),
+                  ariaLabel: t("tour.start"),
+                  onSelect: () => useDeepField.getState().startGuide(),
+                }}
+                guideRef={guideButton}
+                finder={{
+                  id: "objects",
+                  label: t("hud.objects"),
+                  icon: Crosshair,
+                  active: panel === "objects",
+                  controls: "deep-field-objects",
+                  onSelect: () => setPanel(panel === "objects" ? "none" : "objects"),
+                }}
+                settings={{
+                  label: t("hud.view"),
+                  active: panel === "view",
+                  controls: "deep-field-view",
+                  onSelect: () => setPanel(panel === "view" ? "none" : "view"),
+                }}
+              />
             </div>
           </header>
           {/* The map's scale sits under the ladder, where wide screens keep the depth instruments. */}

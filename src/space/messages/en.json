@@ -62,7 +62,9 @@
     "units": "Distances in",
     "smallWorlds": "Dwarf planets and comets",
     "belts": "Belts and clouds",
-    "antialiasing": "Anti-aliasing"
+    "antialiasing": "Anti-aliasing",
+    "renderQuality": "Render quality",
+    "reset": "Reset"
   },
   "badges": {
     "measured": "Measured",

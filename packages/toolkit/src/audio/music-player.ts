@@ -264,6 +264,8 @@ export class MusicPlayer {
     // Decks start empty: nothing downloads until a track is assigned.
     this.decks = [0, 1].map((index) => {
       const el = new Audio();
+      // A cross-origin source needs CORS, or Web Audio hears silence.
+      el.crossOrigin = "anonymous";
       el.preload = "none";
       const gain = ctx.createGain();
       gain.gain.value = index === 0 ? 1 : 0;

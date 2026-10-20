@@ -1,29 +1,17 @@
 "use client";
 
-import { Atom, GraduationCap, Info, Maximize2, SlidersHorizontal } from "lucide-react";
+import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
-import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
-import { SceneMoreMenu } from "@/components/simulations/more-menu";
+import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import {
-  IconButton,
-  ListItem,
-  Picker,
-  Toolbar,
-  Tooltip,
-  VisualizationOverlay,
-  cn,
-  kickerClass,
-  setImmersive,
-  type DialogHandle,
-} from "@horizon/toolkit/ui";
+import { ListItem, Picker, VisualizationOverlay, cn, kickerClass } from "@horizon/toolkit/ui";
 
 import { VIEW_IDS, type ViewId } from "../lib/model/view-ids";
-import { useSpectroscopy, type Panel } from "../lib/store";
+import { useSpectroscopy } from "../lib/store";
 import { pathForView } from "../routing";
 import { SpectroscopyDock } from "./dock";
 import { GuideCaption } from "./guide";
@@ -76,15 +64,8 @@ function ViewPicker() {
   );
 }
 
-const PANELS: { id: Exclude<Panel, "none">; Icon: typeof Atom }[] = [
-  { id: "elements", Icon: Atom },
-  { id: "view", Icon: SlidersHorizontal },
-];
-
 export function SpectroscopyOverlay() {
   const t = useTranslations("spectroscopy");
-  const tImmersive = useTranslations("immersive");
-  const details = useRef<DialogHandle>(null);
   const ready = useSpectroscopy((s) => s.ready);
   const view = useSpectroscopy((s) => s.view);
   const panel = useSpectroscopy((s) => s.panel);
@@ -108,54 +89,31 @@ export function SpectroscopyOverlay() {
                 {t(`views.${view}.hint`)}
               </p>
             </div>
-            <Toolbar aria-label={t("hud.controls")} className="ml-auto shrink-0">
-              <SpectroscopyTechnicalDetails ref={details} triggerClassName="not-md:hidden" />
-              <Tooltip label={t("hud.guide")}>
-                <IconButton
-                  ref={guideButton}
-                  aria-label={t("tour.start")}
-                  onClick={() => api().startGuide()}
-                >
-                  <GraduationCap className="size-4 md:size-3.5" />
-                </IconButton>
-              </Tooltip>
-              {PANELS.map(({ id, Icon }) => {
-                const active = panel === id;
-                return (
-                  <Tooltip key={id} label={t(`hud.${id}`)}>
-                    <IconButton
-                      aria-label={t(`hud.${id}`)}
-                      aria-expanded={active}
-                      aria-controls={active ? `spectroscopy-${id}` : undefined}
-                      active={active}
-                      onClick={() => api().setPanel(active ? "none" : id)}
-                    >
-                      <Icon className="size-4 md:size-3.5" />
-                    </IconButton>
-                  </Tooltip>
-                );
-              })}
-              <div className="not-md:hidden md:contents">
-                <SimulationImmersiveToggle />
-              </div>
-              <SceneMoreMenu
-                className="md:hidden"
-                items={[
-                  {
-                    id: "details",
-                    label: t("technicalDetails.open"),
-                    icon: Info,
-                    onSelect: () => details.current?.open(),
-                  },
-                  {
-                    id: "immersive",
-                    label: tImmersive("title"),
-                    icon: Maximize2,
-                    onSelect: () => setImmersive(true),
-                  },
-                ]}
-              />
-            </Toolbar>
+            <SimulationToolbar
+              label={t("hud.controls")}
+              details={(access) => <SpectroscopyTechnicalDetails {...access} />}
+              detailsLabel={t("technicalDetails.open")}
+              guide={{
+                label: t("hud.guide"),
+                ariaLabel: t("tour.start"),
+                onSelect: () => api().startGuide(),
+              }}
+              guideRef={guideButton}
+              finder={{
+                id: "elements",
+                label: t("hud.elements"),
+                icon: Atom,
+                active: panel === "elements",
+                controls: "spectroscopy-elements",
+                onSelect: () => api().setPanel(panel === "elements" ? "none" : "elements"),
+              }}
+              settings={{
+                label: t("hud.view"),
+                active: panel === "view",
+                controls: "spectroscopy-view",
+                onSelect: () => api().setPanel(panel === "view" ? "none" : "view"),
+              }}
+            />
           </div>
         </header>
       )}

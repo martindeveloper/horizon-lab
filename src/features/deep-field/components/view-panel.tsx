@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
 
-import { AntialiasSection } from "@/components/simulations/antialias-section";
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { DistanceUnitControl } from "@/components/simulations/map-readouts";
 import { Rail, RailSection } from "@/components/simulations/rail";
+import { SceneRenderSection } from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
 
 import { useDeepField, type Show } from "../lib/store";
@@ -42,10 +42,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onRotate={(turn) => useDeepField.getState().rotate(turn)}
         />
       </RailSection>
-      <AntialiasSection
+      <SceneRenderSection
         namespace="deepField"
-        value={antialias}
-        onChange={(mode) => useDeepField.getState().setAntialias(mode)}
+        antialias={antialias}
+        onAntialias={(mode) => useDeepField.getState().setAntialias(mode)}
+        onReset={() => useDeepField.getState().resetView()}
       />
     </Rail>
   );

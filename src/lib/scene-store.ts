@@ -27,7 +27,7 @@ export type SceneSlice = Omit<SceneStoreState, "view"> &
     cameraAngles: CameraAngles;
     /** The visitor's readout unit; `auto` picks au or ly by each distance's size. */
     distanceUnit: DistanceChoice;
-    /** The visitor's anti-aliasing, for this visit; null until the engine publishes its device's default. */
+    /** The visitor's anti-aliasing, for this visit; null (the device's default) until the engine publishes it. */
     antialias: SceneAntialias | null;
     rotate: (turn: OrbitTurn) => void;
     setDistanceUnit: (unit: DistanceChoice) => void;

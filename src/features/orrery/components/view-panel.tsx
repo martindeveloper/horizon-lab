@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import { AntialiasSection } from "@/components/simulations/antialias-section";
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { Rail, RailSection } from "@/components/simulations/rail";
+import { SceneRenderSection } from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
 import { BINS, tallyAt } from "@/space/solar-system/model/tracers";
 
@@ -40,10 +40,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onRotate={(turn) => useOrrery.getState().rotate(turn)}
         />
       </RailSection>
-      <AntialiasSection
+      <SceneRenderSection
         namespace="orrery"
-        value={antialias}
-        onChange={(mode) => useOrrery.getState().setAntialias(mode)}
+        antialias={antialias}
+        onAntialias={(mode) => useOrrery.getState().setAntialias(mode)}
+        onReset={() => useOrrery.getState().resetView()}
       />
     </Rail>
   );

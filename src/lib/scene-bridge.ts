@@ -4,6 +4,7 @@ import { nearestView, type OrbitTurn } from "@horizon/toolkit/camera";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 import {
   createReadoutClock,
+  defaultSceneAntialias,
   scaleChanged,
   scaleReadout,
   type SceneHost,
@@ -72,16 +73,16 @@ export function bridgeStore<S extends SceneStoreState>(
 }
 
 /**
- * The store's anti-aliasing drives the host's: an unset choice takes the host's default for
- * this device (published, so the settings show it), and every later choice switches it.
+ * The store's anti-aliasing drives the host's: an unset choice (at first, or after a reset)
+ * takes this device's default (published, so the settings show it), and every choice switches it.
  */
 export function bridgeAntialias<S extends Pick<SceneSlice, "antialias" | "setAntialias">>(
   store: Pick<StoreApi<S>, "getState" | "subscribe">,
   scope: DisposalScope,
-  host: Pick<SceneHost, "antialias" | "setAntialias">,
+  host: Pick<SceneHost, "tight" | "setAntialias">,
 ) {
   const apply = (s: S) => {
-    if (s.antialias === null) s.setAntialias(host.antialias);
+    if (s.antialias === null) s.setAntialias(defaultSceneAntialias(host.tight));
     else host.setAntialias(s.antialias);
   };
   apply(store.getState());

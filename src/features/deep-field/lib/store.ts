@@ -84,6 +84,8 @@ export type DeepFieldStore = SceneSlice & {
   seekTo: (ly: number) => void;
   select: (selection: Selection | null) => void;
   patchShow: (patch: Partial<Show>) => void;
+  /** The View panel's settings as a visit starts: switches, distance unit, anti-aliasing. */
+  resetView: () => void;
   setPanel: (panel: Panel) => void;
   /* The guided journey (model/tour.ts). */
   guideOpen: boolean;
@@ -117,6 +119,7 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   seekTo: (ly) => set({ seek: { ly } }),
   select: (selection) => set({ selection }),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
+  resetView: () => set({ show: DEFAULT_SHOW, distanceUnit: "auto", antialias: null }),
   setPanel: (panel) => set({ panel }),
   guideOpen: false,
   guideStep: 0,

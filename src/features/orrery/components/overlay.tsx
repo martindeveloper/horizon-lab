@@ -1,22 +1,11 @@
-import { BookOpen, Info, Maximize2, Orbit } from "lucide-react";
+import { BookOpen, Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-import { SimulationImmersiveToggle } from "@/components/simulations/immersive";
-import { SceneMoreMenu } from "@/components/simulations/more-menu";
-import { ScenePanelButtons } from "@/components/simulations/panel-buttons";
+import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import {
-  IconButton,
-  Toolbar,
-  Tooltip,
-  VisualizationOverlay,
-  cn,
-  isSceneShortcut,
-  setImmersive,
-  type DialogHandle,
-} from "@horizon/toolkit/ui";
+import { VisualizationOverlay, cn, isSceneShortcut } from "@horizon/toolkit/ui";
 
 import { sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
 import { useOrrery } from "../lib/store";
@@ -42,8 +31,6 @@ const escapeSteps = (): EscapeStep[] => {
 
 export function OrreryOverlay() {
   const t = useTranslations("orrery");
-  const tImmersive = useTranslations("immersive");
-  const details = useRef<DialogHandle>(null);
   const ready = useOrrery((s) => s.ready);
   const panel = useOrrery((s) => s.panel);
   const setPanel = useOrrery((s) => s.setPanel);
@@ -93,64 +80,41 @@ export function OrreryOverlay() {
                 take the tools a row lower. */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <ViewPicker />
-              <Toolbar aria-label={t("hud.controls")} className="ml-auto shrink-0">
-                {/* Phones keep the guide and the two panels in reach; the rest is under More. */}
-                <OrreryTechnicalDetails ref={details} triggerClassName="not-md:hidden" />
-                <Tooltip label={t("hud.guide")}>
-                  <IconButton
-                    ref={guideButton}
-                    aria-label={t("tour.start")}
-                    onClick={() => useOrrery.getState().startGuide()}
-                  >
-                    <Orbit className="size-4 md:size-3.5" />
-                  </IconButton>
-                </Tooltip>
-                <ScenePanelButtons
-                  simulationId="orrery"
-                  panel={panel}
-                  objectsLabel={t("hud.objects")}
-                  viewLabel={t("hud.view")}
-                  onPanelChange={setPanel}
-                />
-                <div className="not-md:hidden md:contents">
-                  <Tooltip label={t("guide.title")}>
-                    <IconButton
-                      aria-label={t("guide.title")}
-                      aria-expanded={panel === "reading"}
-                      aria-controls={panel === "reading" ? "orrery-reading" : undefined}
-                      active={panel === "reading"}
-                      onClick={() => setPanel(panel === "reading" ? "none" : "reading")}
-                    >
-                      <BookOpen className="size-4 md:size-3.5" />
-                    </IconButton>
-                  </Tooltip>
-                  <SimulationImmersiveToggle />
-                </div>
-                <SceneMoreMenu
-                  className="md:hidden"
-                  items={[
-                    {
-                      id: "reading",
-                      label: t("guide.title"),
-                      icon: BookOpen,
-                      active: panel === "reading",
-                      onSelect: () => setPanel(panel === "reading" ? "none" : "reading"),
-                    },
-                    {
-                      id: "details",
-                      label: t("technicalDetails.open"),
-                      icon: Info,
-                      onSelect: () => details.current?.open(),
-                    },
-                    {
-                      id: "immersive",
-                      label: tImmersive("title"),
-                      icon: Maximize2,
-                      onSelect: () => setImmersive(true),
-                    },
-                  ]}
-                />
-              </Toolbar>
+              <SimulationToolbar
+                label={t("hud.controls")}
+                details={(access) => <OrreryTechnicalDetails {...access} />}
+                detailsLabel={t("technicalDetails.open")}
+                guide={{
+                  label: t("hud.guide"),
+                  ariaLabel: t("tour.start"),
+                  onSelect: () => useOrrery.getState().startGuide(),
+                }}
+                guideRef={guideButton}
+                finder={{
+                  id: "objects",
+                  label: t("hud.objects"),
+                  icon: Crosshair,
+                  active: panel === "objects",
+                  controls: "orrery-objects",
+                  onSelect: () => setPanel(panel === "objects" ? "none" : "objects"),
+                }}
+                tools={[
+                  {
+                    id: "reading",
+                    label: t("guide.title"),
+                    icon: BookOpen,
+                    active: panel === "reading",
+                    controls: "orrery-reading",
+                    onSelect: () => setPanel(panel === "reading" ? "none" : "reading"),
+                  },
+                ]}
+                settings={{
+                  label: t("hud.view"),
+                  active: panel === "view",
+                  controls: "orrery-view",
+                  onSelect: () => setPanel(panel === "view" ? "none" : "view"),
+                }}
+              />
             </div>
           </header>
 

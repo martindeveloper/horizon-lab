@@ -267,8 +267,10 @@ helpers from `@/i18n/navigation`.
 4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx`. Load only that feature's
    translations and styles in its layout. Use the shared stage/shell components
    and keep browser-dependent scenes behind a client-only boundary.
-   Wrap the overlay in `SimulationImmersive` and put `SimulationImmersiveToggle`
-   in its toolbar (see [Immersive view](#immersive-view)).
+   Wrap the overlay in `SimulationImmersive` and give its header `SimulationToolbar`
+   (`src/components/simulations/simulation-toolbar.tsx`), which keeps every
+   simulation's tools in one order and holds the immersive toggle (see
+   [Immersive view](#immersive-view)).
    Give it a lifecycle: its store is a module and outlives the page, so the root
    component the layout keeps mounted calls `useFreshVisit(freshVisit(store))`
    (`src/components/simulations/use-fresh-visit.ts`). Leaving the simulation puts the store
@@ -315,9 +317,11 @@ only its layers, its views and its store of its own:
   ending above the dock, which publishes its height as `--hud-clear` on the stage
   (`useDockClearance`). Each zoomable simulation keeps two panels apart: **Objects**
   (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
-  is drawn: layers, switches, the distance unit, the `CameraPad` and anti-aliasing), built from
+  is drawn: layers, switches, the distance unit, the `CameraPad`, then render quality), built from
   `SwitchChips` (the toolkit's switch rows in a panel, its switch chips in a dock),
-  `DistanceUnitControl`, `AntialiasSection` and `MapScale`. `useSceneEscape` lets Escape undo
+  `DistanceUnitControl`, `SceneRenderSection` and `MapScale`. Render quality ends every
+  settings panel, the black hole's too: `AntialiasRow` (the labelled anti-aliasing choice)
+  and `ResetButton`, which puts the panel back as a visit starts (`resetView` in the scenes). `useSceneEscape` lets Escape undo
   one thing at a time.
 
 **Shared worlds.** What more than one simulation draws lives in `src/space/`, below the
@@ -412,7 +416,7 @@ catch-all dynamic route or backend is introduced.
 ## Ambient music
 
 The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-music.ts`),
-one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from `public/audio/`:
+one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
 `interstellar-drift` and `aeolian-static`, each as `.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
 the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). Nothing
@@ -425,7 +429,7 @@ after a reload the music resumes on the first interaction.
 
 To add a track, cut its intro and outro fades so it blends at full level, strip
 metadata and encode at −22 LUFS (measure with `-af ebur128` and set the gain),
-then add it to the playlist:
+keep each file under 4.5 MB, upload it and add it to the playlist:
 
 ```sh
 ffmpeg -ss <start> -to <end> -i source.wav -map_metadata -1 -fflags +bitexact \
@@ -436,6 +440,12 @@ ffmpeg -ss <start> -to <end> -i source.wav -map_metadata -1 -fflags +bitexact \
 
 libopus still writes an `ENCODER` stream tag; remux the WebM once to drop it:
 `ffmpeg -i track.webm -map_metadata -1 -map_metadata:s:a -1 -fflags +bitexact -c copy clean.webm`.
+
+Tracks live in the `horizon-cdn` R2 bucket (`horizon-cdn.martinpernica.xyz`) as
+`audio/<slug>.webm` and `.m4a`, not in the repo; `assetUrl()` builds their URLs and
+`NEXT_PUBLIC_ASSETS_URL` points it elsewhere. The bucket sends CORS headers, or Web
+Audio plays silence. Never overwrite a published key: a new mix takes a new name.
+Other large assets follow the same layout (`textures/<feature>/`, `models/<feature>/`).
 
 ## Immersive view
 
@@ -448,7 +458,7 @@ in the root catalogs) and the `[data-simulation]` stage:
 <VisualizationShell id="main-content" tabIndex={-1} className="h-full">
   <MyCanvas />
   <SimulationImmersive onEnter={closeMyTour}>
-    <MyOverlay /> {/* toolbar includes <SimulationImmersiveToggle /> */}
+    <MyOverlay /> {/* its SimulationToolbar holds the immersive toggle */}
   </SimulationImmersive>
 </VisualizationShell>
 ```

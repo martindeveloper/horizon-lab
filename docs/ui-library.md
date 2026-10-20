@@ -334,12 +334,21 @@ visual, and `LoadingOverlay` owns its ready-to-hidden lifecycle. `TextReveal`
 is exported separately from `@horizon/toolkit/ui/motion` and respects reduced motion.
 Their API contracts are in [UI README](../packages/toolkit/src/ui/README.md).
 
-Below `md` a scene toolbar keeps its guide and main panels and folds the rest into
+Every simulation's header uses `SimulationToolbar`
+(`src/components/simulations/simulation-toolbar.tsx`), so the tools sit in one order
+and look alike everywhere: technical details, the guide (graduation cap), the finder
+(the Objects, Elements or atlas list of what to look at), the simulation's other tools
+(the Orrery's reading guide, the black hole's clocks), its settings panel (sliders),
+then the immersive view. Each button carries `data-return` with its id, so what it
+opens can hand focus back. Every settings panel ends with render quality: the
+labelled anti-aliasing choice (`AntialiasRow`) and `ResetButton`
+(`src/components/simulations/render-settings.tsx`).
+
+Below `md` the toolbar keeps the guide, the finder and the settings and folds the rest,
+in the same order, into
 `SceneMoreMenu` (`src/components/simulations/more-menu.tsx`): an ellipsis button at
 the toolbar's end that drops a short list of named tools (`MoreItem`: label, icon,
 `onSelect`, optional `active`). Escape, an outside tap and tabbing away close it, and
 a choice leaves focus on the button, so a dialog it opens returns there. The folded
 buttons stay in the toolbar for `md` (`not-md:hidden md:contents`); technical details
-hide only their trigger and open through their handle. The Orrery and Deep Field fold
-technical details and the immersive view (the Orrery its reading guide too); the
-black-hole toolbar has room for all six tools on phones.
+hide only their trigger and open through their handle.

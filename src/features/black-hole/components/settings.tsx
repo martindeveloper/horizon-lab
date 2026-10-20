@@ -1,7 +1,7 @@
-import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { RailSection } from "@/components/simulations/rail";
+import { AntialiasRow, ResetButton } from "@/components/simulations/render-settings";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
 import { cameraFloor, formatSpin } from "@/features/black-hole/lib/physics";
 import { MAX_DIST, type Quality } from "@/features/black-hole/lib/presets";
@@ -174,10 +174,10 @@ export function SettingsBody() {
               { value: "cinema", label: t("qualityCinema") },
             ]}
           />
-          <SegmentedControl<PassAntialias>
-            aria-label={t("antialiasing")}
+          <AntialiasRow<PassAntialias>
+            label={t("antialiasing")}
             value={antialiasing}
-            onValueChange={setAntialiasing}
+            onChange={setAntialiasing}
             options={[
               { value: "off", label: t("antialiasOff") },
               { value: "fxaa", label: t("antialiasFxaa") },
@@ -185,14 +185,10 @@ export function SettingsBody() {
             ]}
           />
           <p className="text-xs text-muted">{t("modelNotice")}</p>
-          <button
-            type="button"
-            className="inline-flex min-h-11 items-center gap-1.5 self-start text-xs tracking-wide text-muted transition-colors duration-300 hover:text-fg md:min-h-6"
-            onClick={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
-          >
-            <RotateCcw className="size-3" />
-            {t("reset")}
-          </button>
+          <ResetButton
+            label={t("reset")}
+            onReset={() => (presetId === "custom" ? selectHole("lensed") : applyPreset(presetId))}
+          />
         </div>
       </RailSection>
     </>
