@@ -38,7 +38,7 @@ export const ENVIRONMENT: "development" | "preview" | "production" =
 export const DEBUG = flag(process.env.NEXT_PUBLIC_DEBUG, ENVIRONMENT !== "production");
 
 /** A simulation or part behind a feature switch. */
-export type FeatureId = "voyage";
+export type FeatureId = "voyage" | "giants";
 
 /**
  * A feature switch's value: on in development while the debug tools are on, off in
@@ -59,6 +59,7 @@ export function featureFlag(
  */
 export const FEATURES: Readonly<Record<FeatureId, boolean>> = {
   voyage: featureFlag(process.env.NEXT_PUBLIC_FEATURE_VOYAGE, ENVIRONMENT, DEBUG),
+  giants: featureFlag(process.env.NEXT_PUBLIC_FEATURE_GIANTS, ENVIRONMENT, DEBUG),
 };
 
 /**

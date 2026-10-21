@@ -291,6 +291,7 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   const { useBlackHole } = await import("../src/features/black-hole/lib/store.ts");
   const { useSpectroscopy } = await import("../src/features/spectroscopy/lib/store.ts");
   const { useVoyage } = await import("../src/features/voyage/lib/store.ts");
+  const { useGiants } = await import("../src/features/giants/lib/store.ts");
 
   useDeepField.getState().patchShow({ halo: true });
   useDeepField.getState().startGuide();
@@ -300,7 +301,16 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   useSpectroscopy.getState().startGuide();
   useVoyage.getState().setDrive("sail");
   useVoyage.getState().startGuide();
-  for (const store of [useDeepField, useOrrery, useBlackHole, useSpectroscopy, useVoyage]) {
+  useGiants.getState().setOrbits(true);
+  useGiants.getState().startGuide();
+  for (const store of [
+    useDeepField,
+    useOrrery,
+    useBlackHole,
+    useSpectroscopy,
+    useVoyage,
+    useGiants,
+  ]) {
     assert.equal(store.getState().guideOpen, true);
     freshVisit(store)();
     const s = store.getState();
@@ -314,7 +324,7 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   }
   assert.equal(useDeepField.getState().show.halo, false, "switches go back too");
   assert.equal(useDeepField.getState().savedBeforeGuide, null);
-  assert.equal(useBlackHole.getState().orbitBeforeGuide, null);
+  assert.equal(useBlackHole.getState().savedBeforeGuide, null);
   assert.deepEqual(useSpectroscopy.getState().compare, [], "marked elements go back too");
 });
 

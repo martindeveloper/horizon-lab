@@ -10,6 +10,7 @@ const blackHole = await artwork("black-hole");
 const orrery = await artwork("orrery");
 const deepField = await artwork("deep-field");
 const spectroscopy = await artwork("spectroscopy");
+const giants = await artwork("giants");
 const voyage = await artwork("voyage");
 /** The card's ink, which every artwork's sky must end in. */
 const INK = "#08080b";
@@ -22,6 +23,7 @@ const copy = {
   orrery: "In motion, from its birth to tonight",
   deepField: "As far out as we can see",
   spectroscopy: "Fingerprints in starlight",
+  giants: "How big stars get",
   voyage: "At true scale, on two clocks",
 };
 const messages = JSON.parse(
@@ -53,6 +55,12 @@ const cards = [
     title: messages.catalogue.spectroscopy.title,
     subtitle: copy.spectroscopy,
     art: spectroscopy,
+  },
+  {
+    path: "simulations/giants/og",
+    title: messages.catalogue.giants.title,
+    subtitle: copy.giants,
+    art: giants,
   },
   {
     path: "simulations/voyage/og",

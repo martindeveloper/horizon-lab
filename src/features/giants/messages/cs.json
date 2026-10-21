@@ -1,0 +1,384 @@
+{
+  "app": "Obři",
+  "metadataDescription": "Vyšplhejte od neutronové hvězdy velké jako město přes největší hvězdy až k horizontům černých děr, vše ve skutečném měřítku.",
+  "canvasLabel": "Hvězdy, planety a horizonty černých děr vedle sebe na jednom obzoru, ve skutečném měřítku",
+  "hud": {
+    "hint": "Šplhejte kolečkem nebo tažením. Karta sleduje těleso v záběru.",
+    "stars": "Tělesa",
+    "previous": "Menší",
+    "next": "Větší",
+    "ladder": "Žebřík",
+    "ruler": "Měřítko: {value}",
+    "showCard": "Zobrazit kartu",
+    "hideCard": "Skrýt kartu",
+    "swallowsEarth": "Pohltila by Zemi →",
+    "swallowsEarthHint": "Tato značka je 1 au, poloměr dráhy Země. Kdyby kterékoli těleso vpravo od ní stálo na místě Slunce, Země by byla uvnitř něj."
+  },
+  "rungs": {
+    "neutron-star": {
+      "name": "Neutronová hvězda",
+      "note": "PSR J0030+0451: zhroucené jádro hvězdy, široké jako město a těžší než Slunce.",
+      "caution": "Hmotnost a poloměr přebíráme z jedné analýzy NICER (2019); závisejí na modelu záření. Dvě protilehlé horké čepičky a svazky jsou obecnou ilustrací pulsaru, nikoli rekonstrukcí pozorovaných horkých oblastí PSR J0030+0451."
+    },
+    "cygnus-x1": {
+      "name": "Cygnus X-1",
+      "note": "Černá díra hvězdné hmotnosti, která přitahuje plyn z hmotné průvodní hvězdy.",
+      "caution": "Zlatý obrys značí referenční poloměr nerotující díry 2GM/c², nikoli viditelný povrch. Rotace mění geometrii horizontu; jediný menší kulový poloměr by byl zavádějící."
+    },
+    "sirius-b": {
+      "name": "Sírius B",
+      "note": "Bílý trpaslík: menší než Země, zhruba tak těžký jako Slunce."
+    },
+    "earth": {
+      "name": "Země",
+      "note": "Žádná hvězda: je tu jako měřítko."
+    },
+    "brown-dwarf": {
+      "name": "LHS 6343 C",
+      "note": "Hnědý trpaslík, příliš lehký na spalování vodíku: velký jako Jupiter, ale mnohonásobně těžší."
+    },
+    "jupiter": {
+      "name": "Jupiter",
+      "note": "Největší planeta Sluneční soustavy. Točí se nejrychleji ze všech, a tak má rovník viditelně vyboulený."
+    },
+    "trappist-1": {
+      "name": "TRAPPIST-1",
+      "note": "Chladný červený trpaslík s planetami velikosti Země těsně u sebe, sotva širší než Jupiter."
+    },
+    "proxima": {
+      "name": "Proxima Centauri",
+      "note": "Nejbližší hvězda ke Slunci. Většina hvězd jsou červení trpaslíci jako ona."
+    },
+    "sun": {
+      "name": "Slunce",
+      "note": "Naše měřítko: každá velikost tu je poměřena jím."
+    },
+    "sirius": {
+      "name": "Sírius",
+      "note": "Nejjasnější hvězda noční oblohy a partner Síria B."
+    },
+    "vega": {
+      "name": "Vega",
+      "note": "Rychlá rotace jí vytlačuje rovník ven, takže se vyboulí a je tam chladnější než na pólech. Ze Země ji vidíme od pólu, kulatou; tady je natočená, aby bylo vyboulení vidět."
+    },
+    "achernar": {
+      "name": "Achernar",
+      "note": "Jedna z nejzploštělejších známých hvězd: točí se tak rychle, že se jí ven vytlačený rovník téměř odtrhává.",
+      "caution": "Změna jasu od pólu k rovníku je ilustrativní: jednoduchý model gravitačního ztemnění vynechává odstředivé zrychlení a není teplotní mapou odvozenou z pozorování."
+    },
+    "sgr-a": {
+      "name": "Sagittarius A*",
+      "note": "Černá díra v centru naší Galaxie: miliony Sluncí v horizontu menším než dráha Merkuru.",
+      "caution": "Zlatý obrys značí referenční poloměr nerotující díry 2GM/c², nikoli viditelný povrch. Rotace mění geometrii horizontu; jediný menší kulový poloměr by byl zavádějící."
+    },
+    "arcturus": {
+      "name": "Arcturus",
+      "note": "Oranžový obr: hvězda podobná Slunci ve stáří, nafouklá a chladnější."
+    },
+    "r136a1": {
+      "name": "R136a1",
+      "note": "Jedna z nejhmotnějších známých hvězd, přesto velikostí srovnatelná s Aldebaranem: hmotnost není velikost.",
+      "caution": "Její hmotnost se odhaduje ze světla; publikované hodnoty se značně liší."
+    },
+    "aldebaran": {
+      "name": "Aldebaran",
+      "note": "Rudé oko Býka, obr zhruba tak těžký jako Slunce."
+    },
+    "rigel": {
+      "name": "Rigel",
+      "note": "Modrý veleobr, který vyzařuje přibližně stotisícinásobek výkonu Slunce."
+    },
+    "deneb": {
+      "name": "Deneb",
+      "note": "Jedna z nejzářivějších hvězd viditelných pouhým okem.",
+      "caution": "Tyto údaje přebírají jednu analýzu s předpokládanou vzdáleností hvězdné asociace; jiné odhady vzdálenosti vedou k jiným zářivostem a poloměrům."
+    },
+    "antares": {
+      "name": "Antares",
+      "note": "Srdce Štíra. Na místě Slunce by pohltil Mars."
+    },
+    "betelgeuse": {
+      "name": "Betelgeuze",
+      "note": "Orionovo rameno: rudý veleobr s pouhou hrstkou obřích konvekčních buněk.",
+      "caution": "Pulzuje a nemá ostrý okraj; jeho velikost se mění podle světla, ve kterém ho měříme."
+    },
+    "uy-scuti": {
+      "name": "UY Scuti",
+      "note": "Rudý veleobr, jehož odvozená velikost silně závisí na zvolené vzdálenosti a teplotě.",
+      "caution": "Poloměr se konzistentně odvozuje ze zářivosti a teploty podle Healyové a kol. (2024). Jiné analýzy dávají jiné velikosti. Starší předpokládanou hmotnost neuvádíme, a proto neuvádíme ani hustotu."
+    },
+    "vy-cma": {
+      "name": "VY Canis Majoris",
+      "note": "Hyperobr, který odhazuje vnější vrstvy do prachového oblaku."
+    },
+    "stephenson-2-18": {
+      "name": "Stephenson 2-18",
+      "note": "Možná největší známá hvězda: na místě Slunce by sahala za Jupiter.",
+      "caution": "Tato velikost vychází ze zářivosti a teploty podle Foka a kol. (2012) při jimi předpokládané vzdálenosti 5,5 kpc. Vzdálenost a příslušnost ke hvězdokupě jsou nejisté; chybějící rozmezí poloměru neznamená přesné měření."
+    },
+    "m87": {
+      "name": "M87*",
+      "note": "První vyfotografovaná černá díra. Její horizont zastíní každou hvězdu.",
+      "caution": "Zlatý obrys značí referenční poloměr nerotující díry 2GM/c², nikoli viditelný povrch. Rotace mění geometrii horizontu; jediný menší kulový poloměr by byl zavádějící."
+    },
+    "ton-618": {
+      "name": "TON 618",
+      "note": "Jedna z nejhmotnějších známých černých děr, pohánějící kvasar z mladého vesmíru.",
+      "caution": "Hmotnost se odvozuje z okolního plynu; zobrazené rozmezí zahrnuje odhady z literatury, nejde o interval spolehlivosti. Zlatý obrys je referenční poloměr nerotující díry 2GM/c², nikoli viditelný horizont."
+    }
+  },
+  "kinds": {
+    "star": "Hvězda",
+    "remnant": "Mrtvá hvězda",
+    "planet": "Planeta",
+    "horizon": "Černá díra"
+  },
+  "facts": {
+    "horizon": "Schwarzschildův poloměr",
+    "teff": "Povrch",
+    "luminosity": "Zářivý výkon",
+    "lap": "Obvod ÷ c",
+    "density": "Střední hustota",
+    "teaspoon": "Čajová lžička",
+    "distance": "Vzdálenost",
+    "fate": "Pravděpodobný pozůstatek",
+    "bulge": "Vyboulení rovníku",
+    "engine": "Zdroj energie",
+    "gravity": "Gravitace na povrchu",
+    "rotation": "Doba rotace"
+  },
+  "rows": {
+    "km": "{value} km",
+    "suns": "{value} R☉",
+    "massSuns": "{value} M☉",
+    "earths": "{value} M⊕",
+    "kelvin": "{value} K",
+    "luminosity": "{value} × Slunce",
+    "denser": "{value} × voda",
+    "thinner": "{value} × řidší než vzduch",
+    "kg": "{value} kg",
+    "lap": {
+      "s": "{value} s",
+      "min": "{value} min",
+      "h": "{value} h",
+      "d": "{value} dní"
+    },
+    "bulge": "o {value} % širší než od pólu k pólu",
+    "gravity": "{value} m/s² ({earths} × zemská)",
+    "watts": "{value} W",
+    "period": {
+      "ms": "{value} ms",
+      "h": "{value} h",
+      "d": "{value} dne",
+      "yr": "{value} let"
+    },
+    "periodUpTo": {
+      "ms": "nejvýš {value} ms",
+      "h": "nejvýš {value} h",
+      "d": "nejvýš {value} dne",
+      "yr": "nejvýš {value} let"
+    },
+    "gravityWeaker": "{value} m/s² ({earths} × slabší než zemská)",
+    "gravityAlone": "{value} m/s²"
+  },
+  "fates": {
+    "whiteDwarf": "Bílý trpaslík",
+    "neutronStar": "Neutronová hvězda",
+    "blackHole": "Černá díra",
+    "neutronOrHole": "Supernova: neutronová hvězda, nebo černá díra"
+  },
+  "card": {
+    "close": "Zavřít",
+    "light": "Měřítko: obvod ÷ c",
+    "upClose": "Zblízka",
+    "upCloseHint": "Disk, ohyb světla a výtrysk trasované v Černých dírách",
+    "sources": "Zdroje a nejistoty",
+    "ranges": "Rozmezí zachovávají intervaly převzaté z literatury. Odvozená rozmezí zahrnují všechny kombinace vstupních mezí; nejsou společnými intervaly spolehlivosti a nezahrnují neznámé systematické chyby. Údaj bez rozmezí není přesný. Teplotní rozmezí Vegy popisuje rovník až pól; rozmezí hmotnosti TON 618 zahrnuje odhady z různých prací.",
+    "comparison": "Obvod ÷ c porovnává velikost pomocí rychlosti světla ve vakuu. Značka používá poloměr zvolený pro kresbu, případně geometrický střed rozmezí bez centrální hodnoty. Nejde o oběžnou dráhu fotonu a výpočet nezahrnuje gravitační zpoždění. Velmi krátké periody se zobrazují bez pohybu.",
+    "status": {
+      "verified": "Z literatury",
+      "derived": "Odvozeno",
+      "teaching-choice": "Ilustrativní",
+      "flag": "K ověření"
+    }
+  },
+  "panel": {
+    "orbits": "Dráhy planet",
+    "orbitsNote": "Merkur až Saturn, jako by těleso stálo na místě Slunce.",
+    "ruler": "Měřítko",
+    "rulers": {
+      "auto": "Auto",
+      "km": "km",
+      "earth": "Země",
+      "sun": "Slunce",
+      "au": "au",
+      "light": "Světlo"
+    }
+  },
+  "orbits": {
+    "mercury": "Merkur",
+    "venus": "Venuše",
+    "earth": "Země",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn"
+  },
+  "units": {
+    "km": "km",
+    "earth": "R⊕",
+    "sun": "R☉",
+    "ls": "sv. s",
+    "lmin": "sv. min",
+    "lh": "sv. h"
+  },
+  "tour": {
+    "figures": {
+      "earths": "{value} Zemí napříč",
+      "density": "{value} × hustota vody",
+      "radius": "Poloměr {value}",
+      "orbit": "Její povrch by ležel {value} od středu",
+      "luminosity": "{value} × světlo Slunce"
+    },
+    "steps": {
+      "ruler": {
+        "title": "Slunce jako měřítko",
+        "body": "Všechna tělesa stojí na stejném obzoru ve skutečném měřítku. Začněte tím, které známe."
+      },
+      "dwarf": {
+        "title": "Malý a těžký",
+        "body": "Sírius B je jádro mrtvé hvězdy: menší než Země, zhruba tak těžké jako Slunce. Jeho hmota je stlačená na minimum."
+      },
+      "pulsar": {
+        "title": "Hvězda velká jako město",
+        "body": "Neutronová hvězda vtěsná víc než Slunce do koule, kterou byste přejeli autem za pár minut."
+      },
+      "giants": {
+        "title": "Pohlcené planety",
+        "body": "Postavte Betelgeuzi na místo Slunce a její povrch bude za Marsem. Její rovníkový obvod dělený rychlostí světla odpovídá několika hodinám."
+      },
+      "heavy": {
+        "title": "Těžký neznamená velký",
+        "body": "R136a1 je jedna z nejhmotnějších známých hvězd, a přesto menší než mnoho obrů. Výkon hvězdy roste s druhou mocninou velikosti a se čtvrtou mocninou teploty."
+      },
+      "horizons": {
+        "title": "Za hvězdami",
+        "body": "Horizont M87* je mnohem větší než jakákoli hvězda a nemá žádný povrch: jen hranici, odkud světlo neunikne."
+      }
+    }
+  },
+  "technicalDetails": {
+    "title": "Uvnitř Obrů",
+    "summary": "Tělesa používají převzaté rovníkové poloměry nebo výslovně odvozené velikosti. Měření a modelové odhady z literatury uvádíme se zdroji a rozmezími; detaily povrchů jsou ilustrativní.",
+    "features": {
+      "ladder": "{bodies} těles na jednom logaritmickém žebříku, od neutronové hvězdy po horizont TON 618.",
+      "figures": "Každý údaj se zdrojem a rozptylem; odvozené nesou rozptyl toho, z čeho vycházejí.",
+      "surfaces": "Otáčející se tělesa s barvami podle teploty a zjednodušenými modely konvekce, pulzací, gravitačního a okrajového ztemnění.",
+      "weather": "Hvězda, u které se kamera zastaví, ožije: skvrny, erupce, protuberance a výrony hmoty, u veleobra chocholy plynu a prach.",
+      "horizons": "Referenční horizonty nerotujících děr podle převzatých hmotností, se schematickými stíny a zářícími prstenci."
+    },
+    "sections": {
+      "ladder": {
+        "title": "Žebřík",
+        "body": "Tělesa stojí vedle sebe podle poloměru. Na celé příčce zabírá těleso pevný podíl scény; mezi dvěma roste měřítko geometricky a pohled se oddaluje kolem menšího tělesa, takže zůstává na očích, dokud nepřevezme větší."
+      },
+      "sizes": {
+        "title": "Jak známe velikosti",
+        "body": "Velké blízké hvězdy měří interferometrie (úhlový průměr θ ve vzdálenosti d); jiné zákryty a tranzity; ty nejvzdálenější jejich zářivost a teplota. Poloměr známý jen s rozptylem měkce září až k horní mezi rozptylu. Kresba používá centrální hodnotu, je-li dostupná, jinak geometrický střed převzatého intervalu. Odvozené intervaly obalují kombinace vstupních mezí; neurčují statistickou hladinu spolehlivosti."
+      },
+      "light": {
+        "title": "Světlo",
+        "body": "U kulové hvězdy určují poloměr a efektivní teplota bolometrickou zářivost podle Stefanova–Boltzmannova zákona, s T☉ = {solarTeff} K. Poloměr UY Scuti odvozujeme z jedné převzaté sady zářivosti a teploty. Údaj a animace obvod/c jsou eukleidovským srovnáním velikostí, nikoli dráhami fotonů nebo relativistickými dobami letu; gravitaci a dilataci času nezahrnují."
+      },
+      "surfaces": {
+        "title": "Povrchy",
+        "body": "Tělesa se otáčejí zobrazovací rychlostí. Barvy hvězd přibližují barvy černého tělesa; jas používá Planckův zákon při {visibleNm} nm a okrajové ztemnění šedé atmosféry (T⁴ = ¾ T⁴ₑ (μ + ⅔)), nikoli úplné spektrum hvězdné atmosféry. Pod {convectiveK} K určuje výukový model velikost buněk na {cellHeights} tlakových výšek (střední molekulová hmotnost {mu}); viditelnou texturu zvýrazňuje a tam, kde hmotnost není v katalogu, ji předpokládá. Stejný symbol μ ve vzorci pro okraj označuje kosinus úhlu pohledu. Pulzace horkých hvězd a obálky veleobrů jsou ilustrativní. Vega používá teploty pólu a rovníku z literatury; stínování Achernaru zjednodušený předpis gravitačního ztemnění bez odstředivého zrychlení. Dvě protilehlé čepičky a svazky pulsaru jsou obecným dipólovým náčrtem, nikoli geometrií horkých oblastí odvozenou pro PSR J0030+0451. Země a Jupiter používají obrazové mapy."
+      },
+      "weather": {
+        "title": "Počasí",
+        "body": "Kde se kamera zastaví, ukáže hvězda s konvektivní obálkou své magnetické počasí, rozmístěné a načasované modelem aktivních oblastí: skupiny skvrn v pásech, natočené podle Joyova zákona a unášené šířkami, které se k pólům otáčejí pomaleji (k = {differential}); fakule u okraje; erupce, které vzplanou během sekund, doznívají desítky sekund a zanechají smyčky; protuberance zářící růžově v Balmerových čarách; a každých pár erupcí výbuch u okraje, který protuberanci odnese jako výron hmoty. Ilustrace ukazuje u Slunce a červených trpaslíků horkou korónu, u vybraných chladných obrů hlavně chromosféru a u rudých veleobrů chocholy plynu, které chladnou v prach. Také obří hvězdy mohou mít korónu. Horké hvězdy zde ilustrativně pulzují; ve skutečnosti mohou mít také hvězdný vítr a magnetickou aktivitu. Tempa jsou zobrazovací a slabá koróna i protuberance jsou zjasněny, aby byly vedle disku vidět."
+      },
+      "matter": {
+        "title": "Hmota",
+        "body": "Střední hustota je hmotnost dělená modelovým objemem: 4πa²b/3 pro zploštělý elipsoid s rovníkovým poloměrem a a polárním poloměrem b, nebo objemem koule, není-li polární poloměr dostupný. Jde o přiblížení skutečných tvarů hvězd; jádra jsou mnohem hustší než povrchy. Lžička hmoty hvězdného pozůstatku používá tento celkový průměr a objem 5 ml, nikoli vzorek kůry. U neutronových hvězd jde o srovnání s eukleidovským objemem, nikoli o hustotu vztaženou k relativistickému vlastnímu objemu."
+      },
+      "horizons": {
+        "title": "Horizonty",
+        "body": "Zlatý obrys je značkou velikosti na Schwarzschildově referenčním poloměru r_s = 2GM/c², nikoli viditelným horizontem. Kerrova rotace mění geometrii horizontu; jeho souřadnicový poloměr nelze chápat jako poloměr menší eukleidovské koule. Ve Schwarzschildově prostoročase má fotonová sféra plošný poloměr r_ph = 3GM/c². Odlišný kritický záměrný parametr b_c = 3√3 GM/c² popisuje paprsky přicházející z nekonečna: pod touto mezí jsou zachyceny, nad ní mohou uniknout. Určuje zdánlivý poloměr stínu pro vzdáleného pozorovatele, asi 2,6 r_s. Zářící prstenec tuto zdánlivou velikost značí schematicky; šířka, barva a jas jsou zvoleny pro zobrazení. Široký emisní prstenec EHT není úzkým fotonovým prstencem. Čočkování pozadí používá aproximaci bodové hmotnosti pro slabý ohyb s D = {lensDistance} r_s a b_E = √(2D r_s); nejde o přesný pohled v silném gravitačním poli z této vzdálenosti. Samostatná laboratoř Černé díry trasuje světlo disku a ohnuté oblouky."
+      },
+      "limits": {
+        "title": "Omezení",
+        "body": "Tělesa mají ilustrativní sklony os a jsou bez průvodců; rudí veleobři nemají ostrý okraj. Převzaté velikosti a jejich nejistoty neurčují definitivní pořadí největších hvězd. Obrysy černých děr porovnávají Schwarzschildovy referenční poloměry; okolní záře je schematická. Rotace, pulzace a počasí používají zobrazovací tempo. Dráhy planet jsou kružnice o poloměrech jejich velkých poloos."
+      }
+    }
+  },
+  "compare": {
+    "title": "Ve srovnání",
+    "references": {
+      "sun": "Slunce",
+      "earth": "Země",
+      "previous": "Menší"
+    },
+    "width": {
+      "label": "Šířka",
+      "more": "{value}× širší",
+      "less": "{value}× užší"
+    },
+    "volume": {
+      "label": "Modelový objem",
+      "more": "{value}× větší",
+      "less": "{value}× menší"
+    },
+    "mass": {
+      "label": "Hmotnost",
+      "more": "{value}× těžší",
+      "less": "{value}× lehčí"
+    },
+    "light": {
+      "label": "Zářivý výkon",
+      "more": "{value}× jasnější",
+      "less": "{value}× slabší"
+    },
+    "itself": {
+      "sun": "Tohle je Slunce, samo měřítko.",
+      "earth": "Tohle je Země, samo měřítko.",
+      "previous": "Nic menšího na žebříku není."
+    },
+    "note": "Poměry používají převzaté hodnoty; je-li uvedeno pouze rozmezí, používá se jeho geometrický střed. Šířka je rovníková; objem vychází z modelu elipsoidu a u černých děr se neuvádí. Výkon znamená celkovou zářivost, nikoli zdánlivou jasnost ze Země."
+  },
+  "hr": {
+    "title": "Mezi hvězdami",
+    "label": "Hertzsprungův–Russellův diagram: {name} mezi hvězdami žebříku podle reprezentativní teploty a bolometrické zářivosti",
+    "light": "Zářivost (L☉)",
+    "hotter": "← Teplejší",
+    "cooler": "Chladnější →",
+    "groups": {
+      "whiteDwarfs": "Bílí trpaslíci",
+      "mainSequence": "Hlavní posloupnost",
+      "giants": "Obři",
+      "supergiants": "Veleobři"
+    },
+    "lesson": "Čárkované čáry ukazují stejné poloměry kulových hvězd: nahoru a doprava znamená větší. Body používají převzaté hodnoty bez chybových úseček; teplota Vegy je geometrickým středem rozmezí od rovníku k pólu. U zploštělých hvězd proto čáry nemusejí odpovídat rovníkovému poloměru."
+  },
+  "engines": {
+    "ppChain": "Vodík → helium (proton-protonový řetězec)",
+    "cnoCycle": "Vodík → helium (cyklus CNO)",
+    "hydrogenShell": "Vodík → helium ve slupce kolem vyhořelého heliového jádra",
+    "heliumCore": "Helium → uhlík a kyslík v jádře",
+    "cooling": "Žádná fúze: uložené teplo, které pomalu uniká",
+    "spinDown": "Žádná fúze: zpomalující se rotace",
+    "contraction": "Žádná fúze: pomalé smršťování a chladnutí",
+    "radioactivity": "Žádná fúze: radioaktivní rozpad a zbytkové teplo",
+    "accretion": "Žádná fúze: padající plyn rozžhavený, až září",
+    "debated": "{first}, nebo {second} (sporné)",
+    "lead": {
+      "hydrogenShell": "Vodík ve slupce",
+      "heliumCore": "Helium v jádře",
+      "cnoCycle": "Vodík v jádře"
+    },
+    "then": {
+      "cnoCycle": "vodík v jádře",
+      "hydrogenShell": "vodík ve slupce",
+      "heliumCore": "helium v jádře"
+    }
+  }
+}

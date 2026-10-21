@@ -1,0 +1,384 @@
+{
+  "app": "Giants",
+  "metadataDescription": "Climb from a city-sized neutron star past the largest stars to black-hole horizons, all at true scale.",
+  "canvasLabel": "Stars, planets and black-hole horizons side by side on one horizon, at true scale",
+  "hud": {
+    "hint": "Scroll or drag to climb. The card follows the body in focus.",
+    "stars": "Bodies",
+    "previous": "Smaller",
+    "next": "Larger",
+    "ladder": "The ladder",
+    "ruler": "Scale bar: {value}",
+    "showCard": "Show the card",
+    "hideCard": "Hide the card",
+    "swallowsEarth": "Would swallow Earth →",
+    "swallowsEarthHint": "This mark is 1 au, the radius of Earth's orbit. Put any body to its right where the Sun is, and Earth would be inside it."
+  },
+  "rungs": {
+    "neutron-star": {
+      "name": "Neutron star",
+      "note": "PSR J0030+0451: a star's collapsed core, as wide as a city and heavier than the Sun.",
+      "caution": "Mass and radius adopt one NICER analysis (2019) and depend on the emission model. The two opposite hot caps and beams are a generic pulsar illustration, not a reconstruction of PSR J0030+0451’s observed hot spots."
+    },
+    "cygnus-x1": {
+      "name": "Cygnus X-1",
+      "note": "A stellar-mass black hole drawing gas from a massive companion star.",
+      "caution": "The gold outline marks the non-spinning reference radius 2GM/c², not a visible surface. Spin changes the horizon geometry; a single smaller spherical radius would be misleading."
+    },
+    "sirius-b": {
+      "name": "Sirius B",
+      "note": "A white dwarf: smaller than Earth, about as heavy as the Sun."
+    },
+    "earth": {
+      "name": "Earth",
+      "note": "Not a star: here as a ruler."
+    },
+    "brown-dwarf": {
+      "name": "LHS 6343 C",
+      "note": "A brown dwarf, too light to burn hydrogen: Jupiter's size, dozens of times its mass."
+    },
+    "jupiter": {
+      "name": "Jupiter",
+      "note": "The largest planet in the Solar System. It spins faster than any other, so its equator is flung outward into a visible bulge."
+    },
+    "trappist-1": {
+      "name": "TRAPPIST-1",
+      "note": "A cool red dwarf with Earth-sized planets packed close, barely wider than Jupiter."
+    },
+    "proxima": {
+      "name": "Proxima Centauri",
+      "note": "The nearest star to the Sun. Most stars are red dwarfs like it."
+    },
+    "sun": {
+      "name": "Sun",
+      "note": "Our ruler: every size here is measured against it."
+    },
+    "sirius": {
+      "name": "Sirius",
+      "note": "The brightest star in our night sky, and Sirius B's partner."
+    },
+    "vega": {
+      "name": "Vega",
+      "note": "Its fast spin flings its equator outward, so it bulges and runs cooler there than at the poles. From Earth we see it pole-on and round; here it is turned to show the bulge."
+    },
+    "achernar": {
+      "name": "Achernar",
+      "note": "One of the flattest stars known: it spins so fast that its equator, flung outward, nearly breaks away.",
+      "caution": "The pole-to-equator shading is illustrative: this simple gravity-darkening model omits centrifugal acceleration and is not a fitted temperature map."
+    },
+    "sgr-a": {
+      "name": "Sagittarius A*",
+      "note": "The black hole at our Galaxy's centre: millions of Suns in a horizon smaller than Mercury's orbit.",
+      "caution": "The gold outline marks the non-spinning reference radius 2GM/c², not a visible surface. Spin changes the horizon geometry; a single smaller spherical radius would be misleading."
+    },
+    "arcturus": {
+      "name": "Arcturus",
+      "note": "An orange giant: a Sun-like star in old age, swollen and cooler."
+    },
+    "r136a1": {
+      "name": "R136a1",
+      "note": "One of the most massive stars known, yet comparable in size to Aldebaran: mass is not size.",
+      "caution": "Its mass is estimated from its light; published values range widely."
+    },
+    "aldebaran": {
+      "name": "Aldebaran",
+      "note": "The red eye of Taurus, a giant about as heavy as the Sun."
+    },
+    "rigel": {
+      "name": "Rigel",
+      "note": "A blue supergiant radiating roughly a hundred thousand times the Sun’s power."
+    },
+    "deneb": {
+      "name": "Deneb",
+      "note": "One of the most luminous stars visible to the naked eye.",
+      "caution": "These figures adopt one analysis at an assumed association distance; other distance estimates imply different luminosities and radii."
+    },
+    "antares": {
+      "name": "Antares",
+      "note": "The heart of Scorpius. In the Sun's place it would swallow Mars."
+    },
+    "betelgeuse": {
+      "name": "Betelgeuse",
+      "note": "Orion's shoulder: a red supergiant with only a handful of huge convection cells.",
+      "caution": "It pulsates and has no sharp edge; its size changes with the light used to measure it."
+    },
+    "uy-scuti": {
+      "name": "UY Scuti",
+      "note": "A red supergiant whose inferred size depends strongly on its adopted distance and temperature.",
+      "caution": "Radius is derived consistently from Healy et al.’s (2024) luminosity and temperature. Other analyses give different sizes. The older assumed mass is omitted, so no density is claimed."
+    },
+    "vy-cma": {
+      "name": "VY Canis Majoris",
+      "note": "A hypergiant shedding its outer layers into a dusty cloud."
+    },
+    "stephenson-2-18": {
+      "name": "Stephenson 2-18",
+      "note": "Perhaps the largest star known: in the Sun's place it would reach past Jupiter.",
+      "caution": "This size uses Fok et al.’s (2012) luminosity and temperature at their assumed distance of 5.5 kpc. Distance and cluster membership are uncertain; the lack of a quoted radius range does not make this a precise measurement."
+    },
+    "m87": {
+      "name": "M87*",
+      "note": "The first black hole ever imaged. Its horizon dwarfs every star.",
+      "caution": "The gold outline marks the non-spinning reference radius 2GM/c², not a visible surface. Spin changes the horizon geometry; a single smaller spherical radius would be misleading."
+    },
+    "ton-618": {
+      "name": "TON 618",
+      "note": "One of the most massive black holes known, lighting a quasar from the young universe.",
+      "caution": "Its mass is inferred from surrounding gas; the displayed span is a spread of literature estimates, not a confidence interval. The gold outline is the non-spinning reference radius 2GM/c², not a visible horizon."
+    }
+  },
+  "kinds": {
+    "star": "Star",
+    "remnant": "Dead star",
+    "planet": "Planet",
+    "horizon": "Black hole"
+  },
+  "facts": {
+    "horizon": "Schwarzschild radius",
+    "teff": "Surface",
+    "luminosity": "Radiated power",
+    "lap": "Circumference ÷ c",
+    "density": "Mean density",
+    "teaspoon": "A teaspoon",
+    "distance": "Distance",
+    "fate": "Likely remnant",
+    "bulge": "Bulge at the equator",
+    "engine": "Powered by",
+    "gravity": "Surface gravity",
+    "rotation": "Rotation period"
+  },
+  "rows": {
+    "km": "{value} km",
+    "suns": "{value} R☉",
+    "massSuns": "{value} M☉",
+    "earths": "{value} M⊕",
+    "kelvin": "{value} K",
+    "luminosity": "{value} × the Sun",
+    "denser": "{value} × water",
+    "thinner": "{value} × thinner than air",
+    "kg": "{value} kg",
+    "lap": {
+      "s": "{value} s",
+      "min": "{value} min",
+      "h": "{value} h",
+      "d": "{value} days"
+    },
+    "bulge": "{value} % wider than pole to pole",
+    "gravity": "{value} m/s² ({earths} × Earth's)",
+    "watts": "{value} W",
+    "period": {
+      "ms": "{value} ms",
+      "h": "{value} h",
+      "d": "{value} days",
+      "yr": "{value} years"
+    },
+    "periodUpTo": {
+      "ms": "up to {value} ms",
+      "h": "up to {value} h",
+      "d": "up to {value} days",
+      "yr": "up to {value} years"
+    },
+    "gravityWeaker": "{value} m/s² ({earths} × weaker than Earth's)",
+    "gravityAlone": "{value} m/s²"
+  },
+  "fates": {
+    "whiteDwarf": "A white dwarf",
+    "neutronStar": "A neutron star",
+    "blackHole": "A black hole",
+    "neutronOrHole": "A supernova: a neutron star or a black hole"
+  },
+  "card": {
+    "close": "Close",
+    "light": "Size scale: circumference ÷ c",
+    "upClose": "See it up close",
+    "upCloseHint": "Its disk, lensing and jet, ray-traced in Black holes",
+    "sources": "Sources and uncertainty",
+    "ranges": "Ranges retain the adopted literature intervals. Derived ranges enclose all combinations of input bounds; they are not joint confidence intervals and omit unknown systematic errors. A value without a range is not exact. Vega’s temperature range describes equator to pole; TON 618’s mass range spans literature estimates.",
+    "comparison": "Circumference ÷ c compares size using the speed of light in vacuum. The marker uses the adopted drawing radius, or the geometric middle of a range without a central value. It is not a photon orbit and includes no gravitational time delay. Very short periods are shown still.",
+    "status": {
+      "verified": "Literature",
+      "derived": "Derived",
+      "teaching-choice": "Illustrative",
+      "flag": "Needs verification"
+    }
+  },
+  "panel": {
+    "orbits": "Planets' orbits",
+    "orbitsNote": "Mercury to Saturn, as if the body stood in the Sun's place.",
+    "ruler": "Ruler",
+    "rulers": {
+      "auto": "Auto",
+      "km": "km",
+      "earth": "Earths",
+      "sun": "Suns",
+      "au": "au",
+      "light": "Light"
+    }
+  },
+  "orbits": {
+    "mercury": "Mercury",
+    "venus": "Venus",
+    "earth": "Earth",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn"
+  },
+  "units": {
+    "km": "km",
+    "earth": "R⊕",
+    "sun": "R☉",
+    "ls": "light-s",
+    "lmin": "light-min",
+    "lh": "light-h"
+  },
+  "tour": {
+    "figures": {
+      "earths": "{value} Earths across",
+      "density": "{value} × the density of water",
+      "radius": "Radius {value}",
+      "orbit": "Its surface would lie {value} from the centre",
+      "luminosity": "{value} × the Sun's light"
+    },
+    "steps": {
+      "ruler": {
+        "title": "The Sun as a ruler",
+        "body": "Every body here stands on the same horizon at true scale. Start with the one we know."
+      },
+      "dwarf": {
+        "title": "Small and heavy",
+        "body": "Sirius B is a dead star's core: smaller than Earth, about as heavy as the Sun. Its matter is crushed tight."
+      },
+      "pulsar": {
+        "title": "A star the size of a city",
+        "body": "A neutron star packs more than a Sun into a ball you could drive across in minutes."
+      },
+      "giants": {
+        "title": "Swallowing the planets",
+        "body": "Put Betelgeuse in the Sun's place and its surface lies beyond Mars. Its equatorial circumference divided by c is several hours."
+      },
+      "heavy": {
+        "title": "Heavy is not big",
+        "body": "R136a1 is one of the most massive stars known, yet smaller than many giants. A star's power grows with its size squared and its temperature to the fourth."
+      },
+      "horizons": {
+        "title": "Past the stars",
+        "body": "M87*'s horizon is far larger than any star, with no surface at all: just the edge light cannot leave."
+      }
+    }
+  },
+  "technicalDetails": {
+    "title": "Inside Giants",
+    "summary": "Bodies use adopted equatorial radii or explicitly derived sizes. Literature measurements and model estimates carry their sources and ranges; surface details are illustrative.",
+    "features": {
+      "ladder": "{bodies} bodies on one logarithmic ladder, from a neutron star to TON 618's horizon.",
+      "figures": "Each figure with its source and spread; derived ones carry the spread of what they come from.",
+      "surfaces": "Turning globes with temperature-based colours and simplified models of convection, pulsation, gravity darkening and limb darkening.",
+      "weather": "The star the camera rests on comes alive: spots, flares, prominences and ejections, or a supergiant's plumes and dust.",
+      "horizons": "Non-spinning reference horizons from the adopted masses, with schematic shadows and emission rings."
+    },
+    "sections": {
+      "ladder": {
+        "title": "The ladder",
+        "body": "Bodies stand side by side in order of radius. At a whole rung the body fills a fixed share of the stage; between two the scale grows geometrically and the view zooms about the smaller body, so it stays in sight until the larger one takes over."
+      },
+      "sizes": {
+        "title": "How sizes are known",
+        "body": "Large nearby stars are measured by interferometry (an angular diameter θ at a distance d); others from eclipses or transits; the most distant from their luminosity and temperature. A radius known only to a spread glows softly out to the top of it. The drawing uses a central value when available, otherwise the geometric middle of the adopted interval. Derived intervals are envelopes of input bounds, not statistical confidence levels."
+      },
+      "light": {
+        "title": "Light",
+        "body": "For a spherical star, radius and effective temperature set bolometric luminosity through Stefan–Boltzmann, with T☉ = {solarTeff} K. UY Scuti uses one adopted luminosity/temperature set to derive its radius. The circumference/c readout and animation are Euclidean size comparisons, not photon orbits or relativistic travel times; gravity and time dilation are omitted."
+      },
+      "surfaces": {
+        "title": "Surfaces",
+        "body": "Bodies turn at a display pace. Stellar colours approximate blackbody colours; brightness uses Planck’s law at {visibleNm} nm and grey-atmosphere limb darkening (T⁴ = ¾ T⁴ₑ (μ + ⅔)), not a full stellar-atmosphere spectrum. Below {convectiveK} K, a teaching model sizes cells at {cellHeights} pressure scale heights (mean molecular weight {mu}); it exaggerates the visible texture and uses an assumed mass where none is catalogued. The same μ symbol in the limb formula denotes the viewing-angle cosine. Hot stars’ pulsations and supergiant envelopes are illustrative. Vega uses literature pole/equator temperatures; Achernar’s shading uses a simplified gravity-darkening prescription that omits centrifugal acceleration. The pulsar’s two opposite caps and beams are a generic dipole sketch, not the hot-spot geometry inferred for PSR J0030+0451. Earth and Jupiter use image maps."
+      },
+      "weather": {
+        "title": "Weather",
+        "body": "Where the camera rests, a star with a convective envelope shows its magnetic weather, placed and timed by a model of active regions: spot groups in its belts, tilted by Joy's law and carried by latitudes that turn more slowly towards the poles (k = {differential}); faculae towards the limb; flares that flash up in seconds and fade over tens, leaving loops; prominences glowing pink in the Balmer lines; and, every few flares, an eruption at the limb that lifts its prominence away as an ejection. This illustration gives the Sun and red dwarfs hot coronae, the selected cool giants mainly chromospheres, and red supergiants plumes that cool into dust. Giant stars can also have coronae. Hot stars are shown with illustrative pulsations; real hot stars may also have winds and magnetic activity. Paces are display paces, and the faint corona and prominences are brightened to show beside the face."
+      },
+      "matter": {
+        "title": "Matter",
+        "body": "Mean density is mass divided by the model volume: 4πa²b/3 for an oblate spheroid with equatorial radius a and polar radius b, or a sphere when no polar radius is available. This approximates real stellar shapes; cores are much denser than surfaces. Remnant teaspoons use this bulk mean and a 5 mL volume, not a sample of crust material. For neutron stars this Euclidean-volume comparison is not a relativistic proper-volume density."
+      },
+      "horizons": {
+        "title": "Horizons",
+        "body": "The gold outline is a size marker at the Schwarzschild reference radius r_s = 2GM/c², not a visible horizon. Kerr spin changes the horizon geometry; its coordinate radius cannot be read as the radius of a smaller Euclidean sphere. In Schwarzschild spacetime the photon sphere has areal radius r_ph = 3GM/c². The distinct critical impact parameter b_c = 3√3 GM/c² describes incoming rays at infinity: below it they are captured, above it they can escape. It sets the distant shadow radius, about 2.6 r_s. Our glowing ring marks that apparent scale schematically; its width, colour and brightness are chosen for display. EHT’s broad emission ring is not the narrow photon ring. Background lensing uses a weak-deflection point-mass approximation with D = {lensDistance} r_s and b_E = √(2D r_s); it is not an exact strong-gravity view at that distance. The separate Black holes lab traces disk light and lensed arcs."
+      },
+      "limits": {
+        "title": "Limits",
+        "body": "Bodies are shown at illustrative inclinations, without companions; red supergiants have no sharp edge. Adopted sizes and their uncertainties do not establish a definitive ranking of the largest stars. Black-hole outlines compare Schwarzschild reference radii; the surrounding glow is schematic. Spins, pulsations and weather use display paces. Planetary orbits are circles at their semimajor axes."
+      }
+    }
+  },
+  "compare": {
+    "title": "Compared with",
+    "references": {
+      "sun": "Sun",
+      "earth": "Earth",
+      "previous": "Smaller"
+    },
+    "width": {
+      "label": "Width",
+      "more": "{value} × wider",
+      "less": "{value} × narrower"
+    },
+    "volume": {
+      "label": "Model volume",
+      "more": "{value} × larger",
+      "less": "{value} × smaller"
+    },
+    "mass": {
+      "label": "Mass",
+      "more": "{value} × heavier",
+      "less": "{value} × lighter"
+    },
+    "light": {
+      "label": "Radiated power",
+      "more": "{value} × brighter",
+      "less": "{value} × fainter"
+    },
+    "itself": {
+      "sun": "This is the Sun, the yardstick itself.",
+      "earth": "This is Earth, the yardstick itself.",
+      "previous": "Nothing on the ladder is smaller."
+    },
+    "note": "Ratios use adopted values; where only a range is given, its geometric middle is used. Width is equatorial; volume uses the spheroid model and is omitted for black holes. Power is total luminosity, not apparent brightness from Earth."
+  },
+  "hr": {
+    "title": "Among the stars",
+    "label": "Hertzsprung–Russell diagram: {name} among the ladder’s stars, by representative temperature and bolometric luminosity",
+    "light": "Luminosity (L☉)",
+    "hotter": "← Hotter",
+    "cooler": "Cooler →",
+    "groups": {
+      "whiteDwarfs": "White dwarfs",
+      "mainSequence": "Main sequence",
+      "giants": "Giants",
+      "supergiants": "Supergiants"
+    },
+    "lesson": "Dashed lines show equal radii for spherical stars: up and to the right means larger. Points use adopted values, without error bars; Vega’s temperature is the geometric middle of its equator-to-pole range. For flattened stars these lines need not match the equatorial radius."
+  },
+  "engines": {
+    "ppChain": "Hydrogen → helium (proton–proton chain)",
+    "cnoCycle": "Hydrogen → helium (CNO cycle)",
+    "hydrogenShell": "Hydrogen → helium in a shell round a spent helium core",
+    "heliumCore": "Helium → carbon and oxygen in the core",
+    "cooling": "No fusion: stored heat, slowly leaking away",
+    "spinDown": "No fusion: its slowing spin",
+    "contraction": "No fusion: slow contraction and cooling",
+    "radioactivity": "No fusion: radioactive decay and leftover heat",
+    "accretion": "No fusion: infalling gas, heated until it glows",
+    "debated": "{first}, or {second} (debated)",
+    "lead": {
+      "hydrogenShell": "Hydrogen in a shell",
+      "heliumCore": "Helium in the core",
+      "cnoCycle": "Hydrogen in the core"
+    },
+    "then": {
+      "cnoCycle": "hydrogen in the core",
+      "hydrogenShell": "hydrogen in a shell",
+      "heliumCore": "helium in the core"
+    }
+  }
+}

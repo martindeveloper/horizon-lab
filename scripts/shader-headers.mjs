@@ -1,6 +1,7 @@
 import { glslHeader } from "@horizon/toolkit/shaders/defines";
 
 import { SHADER_DEFINES } from "../src/features/black-hole/lib/parameters.ts";
+import { SHADER_DEFINES as GIANTS_SHADER_DEFINES } from "../src/features/giants/lib/parameters.ts";
 import { ORRERY_SHADER_DEFINES } from "../src/features/orrery/lib/graphics/shader-defines.ts";
 import { SOLAR_SHADER_DEFINES } from "../src/space/solar-system/graphics/shader-defines.ts";
 
@@ -15,6 +16,14 @@ export const SHADER_HEADERS = [
     defines: SHADER_DEFINES,
     guard: "HORIZON_BLACK_HOLE_PARAMETERS",
     source: "src/features/black-hole/lib/parameters.ts",
+  },
+  {
+    lab: "giants",
+    path: "src/features/giants/lib/graphics/parameters.generated.glsl",
+    shaders: "src/features/giants/lib/graphics/",
+    defines: GIANTS_SHADER_DEFINES,
+    guard: "HORIZON_GIANTS_PARAMETERS",
+    source: "src/features/giants/lib/parameters.ts",
   },
   {
     lab: "orrery",

@@ -3,18 +3,27 @@ import test from "node:test";
 
 import { UNITS } from "@horizon/toolkit/science";
 
+import { holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { catalogueFacts as deepFieldFacts } from "../src/features/deep-field/lib/model/catalogue/index.ts";
+import { catalogueFacts as giantsFacts } from "../src/features/giants/lib/model/catalogue.ts";
 import { catalogueFacts as orreryFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { factSources } from "../src/lib/facts.ts";
+import { SOURCES } from "../src/lib/sources.ts";
 import { solarCatalogueFacts } from "../src/space/solar-system/model/catalogue.ts";
+import { BLACK_HOLES, ENGINES, NAMED_STARS, stellarCatalogueFacts } from "../src/space/stellar.ts";
 
 for (const [name, facts] of [
   ["Solar System", solarCatalogueFacts],
+  ["Stars and black holes", stellarCatalogueFacts],
   ["Orrery", orreryFacts],
   ["Deep Field", deepFieldFacts],
+  ["Giants", giantsFacts],
 ]) {
   test(`${name} quantities have supported units and finite, consistent ranges`, () => {
     const plain = new Set(["count", "percent", "ratio"]);
     for (const { path, fact } of facts()) {
+      for (const source of factSources(fact))
+        assert.ok(SOURCES[source], `${path}: known source ${source}`);
       assert.ok(fact.unit in UNITS || plain.has(fact.unit), `${path}: unit ${fact.unit}`);
       assert.ok(!fact.show || fact.show in UNITS, `${path}: shown in ${fact.show}`);
       assert.ok(fact.value !== undefined || fact.range, `${path}: a value or a published span`);
@@ -29,3 +38,30 @@ for (const [name, facts] of [
     }
   });
 }
+
+test("the black-hole lab draws the measured masses of the shared catalogue", () => {
+  /* Its presets load with the routing config, so they keep their own numbers; these must agree. */
+  for (const id of ["sgr-a", "m87", "ton-618"])
+    assert.equal(holeById(id).massSolar, BLACK_HOLES[id].mass.value, id);
+});
+
+/* Where the CNO cycle overtakes the proton–proton chain, and the least mass that burns hydrogen, M☉. */
+const CNO_ABOVE_MSUN = 1.3;
+const HYDROGEN_BURNING_MSUN = 0.075;
+const centre = (fact) => fact.value ?? Math.sqrt(fact.range[0] * fact.range[1]);
+
+test("every star's engine agrees with its mass, and no black hole fuses anything", () => {
+  for (const id of Object.keys(BLACK_HOLES)) assert.equal(ENGINES[id].process, "accretion", id);
+  for (const [id, star] of Object.entries(NAMED_STARS)) {
+    const { process, sources } = ENGINES[id];
+    assert.ok(sources.length > 0, `${id} cites its engine`);
+    if (!star.mass || star.mass.unit !== "Msun") continue;
+    const mass = centre(star.mass);
+    const fusing = !["cooling", "spinDown", "contraction"].includes(process);
+    if (mass < HYDROGEN_BURNING_MSUN) assert.ok(!fusing, `${id} is too light to fuse hydrogen`);
+    if (process === "ppChain")
+      assert.ok(mass < CNO_ABOVE_MSUN, `${id} is light enough for the pp chain`);
+    if (process === "cnoCycle")
+      assert.ok(mass > CNO_ABOVE_MSUN, `${id} is heavy enough for the CNO cycle`);
+  }
+});

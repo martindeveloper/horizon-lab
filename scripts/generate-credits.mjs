@@ -71,6 +71,7 @@ const LABS = {
   "black-hole": "Black-hole observatory",
   orrery: "Orrery",
   "deep-field": "Deep Field",
+  giants: "Giants",
   spectroscopy: "Stellar Spectra",
   voyage: "Voyage",
 };

@@ -3,6 +3,7 @@ import {
   pathForView as pathForDeepView,
   viewRouteParams as deepViewRouteParams,
 } from "@/features/deep-field/routing";
+import { pathForRung, rungRouteParams } from "@/features/giants/routing";
 import { pathForView, viewRouteParams } from "@/features/orrery/routing";
 import {
   pathForView as pathForSpectroscopyView,
@@ -23,6 +24,7 @@ const subpages: Record<SimulationId, () => string[]> = {
   orrery: () => viewRouteParams().map(({ view }) => pathForView(view)),
   "deep-field": () => deepViewRouteParams().map(({ view }) => pathForDeepView(view)),
   spectroscopy: () => spectroscopyRouteParams().map(({ view }) => pathForSpectroscopyView(view)),
+  giants: () => rungRouteParams().map(({ star }) => pathForRung(star)),
   voyage: () => voyageRouteParams().map(({ view }) => pathForVoyageView(view)),
 };
 

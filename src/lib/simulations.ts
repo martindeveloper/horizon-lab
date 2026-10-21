@@ -1,6 +1,7 @@
 import { FEATURES } from "@/config";
 import { blackHoleManifest } from "@/features/black-hole/manifest";
 import { deepFieldManifest } from "@/features/deep-field/manifest";
+import { giantsManifest } from "@/features/giants/manifest";
 import { orreryManifest } from "@/features/orrery/manifest";
 import { spectroscopyManifest } from "@/features/spectroscopy/manifest";
 import { voyageManifest } from "@/features/voyage/manifest";
@@ -13,6 +14,7 @@ export const registered = [
   orreryManifest,
   deepFieldManifest,
   spectroscopyManifest,
+  giantsManifest,
   voyageManifest,
 ] as const satisfies readonly SimulationManifest[];
 

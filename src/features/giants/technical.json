@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "features": ["ladder", "figures", "surfaces", "weather", "horizons"],
+  "sections": [
+    {
+      "id": "ladder",
+      "equations": [
+        "s(t) = s_i (s_{i+1} / s_i)^f,  t = i + f",
+        "x(t) = x_i + (x_{i+1} − x_i) (s(t) − s_i) / (s_{i+1} − s_i)"
+      ]
+    },
+    {
+      "id": "sizes",
+      "equations": ["R = θ d / 2"]
+    },
+    {
+      "id": "light",
+      "equations": [
+        {
+          "equation": "stefan-boltzmann"
+        },
+        {
+          "equation": "light-lap"
+        }
+      ]
+    },
+    {
+      "id": "surfaces",
+      "equations": [
+        "T(μ)⁴ = ¾ Tₑ⁴ (μ + ⅔)",
+        "I ∝ 1 / (e^(hc / λkT) − 1)",
+        {
+          "equation": "scale-height"
+        },
+        {
+          "equation": "granules-across"
+        }
+      ]
+    },
+    {
+      "id": "weather",
+      "equations": [
+        "Ω(φ) = Ω₀ (1 − k sin² φ)",
+        "L(t) ∝ (1 − e^(−t/τᵣ)) e^(−t/τ_d)",
+        "K(ρ) ∝ 0.0532 ρ^−2.5 + 1.425 ρ^−7 + 2.565 ρ^−17"
+      ]
+    },
+    {
+      "id": "matter",
+      "equations": [
+        {
+          "equation": "spheroid-density"
+        }
+      ]
+    },
+    {
+      "id": "horizons",
+      "equations": [
+        {
+          "equation": "schwarzschild-radius"
+        },
+        {
+          "equation": "photon-sphere"
+        },
+        {
+          "equation": "critical-impact"
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "equations": []
+    }
+  ],
+  "references": [
+    {
+      "title": "IAU 2015 Resolution B3: nominal solar and planetary conversion constants",
+      "url": "https://www.iau.org/static/resolutions/IAU2015_English.pdf"
+    },
+    {
+      "title": "Joyce et al. (2020), Standing on the shoulders of giants: Betelgeuse, ApJ 902, 63",
+      "url": "https://doi.org/10.3847/1538-4357/abb8db"
+    },
+    {
+      "title": "Riley et al. (2019), A NICER view of PSR J0030+0451, ApJL 887, L21",
+      "url": "https://doi.org/10.3847/2041-8213/ab481c"
+    },
+    {
+      "title": "Event Horizon Telescope Collaboration (2019), Paper VI: the shadow and mass of M87*, ApJL 875, L6",
+      "url": "https://arxiv.org/abs/1906.11243"
+    },
+    {
+      "title": "Schwarzschild (1975), On the scale of photospheric convection in red giants and supergiants, ApJ 195, 137",
+      "url": "https://ui.adsabs.harvard.edu/abs/1975ApJ...195..137S"
+    },
+    {
+      "title": "Baumbach (1937), Strahlung, Ergiebigkeit und Elektronendichte der Sonnenkorona, AN 263, 121",
+      "url": "https://ui.adsabs.harvard.edu/abs/1937AN....263..121B"
+    },
+    {
+      "title": "Snodgrass & Ulrich (1990), Rotation of Doppler features in the solar photosphere, ApJ 351, 309",
+      "url": "https://ui.adsabs.harvard.edu/abs/1990ApJ...351..309S"
+    },
+    {
+      "title": "Hale et al. (1919), The magnetic polarity of sun-spots, ApJ 49, 153",
+      "url": "https://ui.adsabs.harvard.edu/abs/1919ApJ....49..153H"
+    },
+    {
+      "title": "Linsky & Haisch (1979), Outer atmospheres of cool stars: the sharp division into solar-type and non-solar-type stars, ApJ 229, L27",
+      "url": "https://ui.adsabs.harvard.edu/abs/1979ApJ...229L..27L"
+    },
+    {
+      "title": "Montargès et al. (2021), A dusty veil shading Betelgeuse during its Great Dimming, Nature 594, 365",
+      "url": "https://doi.org/10.1038/s41586-021-03546-8"
+    },
+    {
+      "title": "Burrows et al. (2001), The theory of brown dwarfs and extrasolar giant planets, Rev. Mod. Phys. 73, 719",
+      "url": "https://doi.org/10.1103/RevModPhys.73.719"
+    },
+    {
+      "title": "Healy et al. (2024), Red Supergiant Candidates for Multimessenger Monitoring, MNRAS 529, 3630",
+      "url": "https://arxiv.org/abs/2307.08785"
+    },
+    {
+      "title": "Healy et al., accompanying catalogue dated 2024-04-11 (UY Sct row)",
+      "url": "https://github.com/SNEWS2/candidate_list/blob/main/RSG_and_close_stars_catalog_4_11_24.csv"
+    },
+    {
+      "title": "Gralla, Holz & Wald (2019), Black Hole Shadows, Photon Rings, and Lensing Rings",
+      "url": "https://arxiv.org/abs/1906.00873"
+    },
+    {
+      "title": "Visser (2007), The Kerr spacetime: A brief introduction",
+      "url": "https://arxiv.org/abs/0706.0622"
+    },
+    {
+      "title": "Domiciano de Souza et al. (2014), The environment of the fast rotating star Achernar",
+      "url": "https://doi.org/10.1051/0004-6361/201424144"
+    },
+    {
+      "title": "Brinkman et al. (2000), First Light Measurements of Capella with Chandra LETGS",
+      "url": "https://arxiv.org/abs/astro-ph/0001034"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { withSpaceMessages } from "../src/space/messages.ts";
 const read = (path) => JSON.parse(readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8"));
 
 /** The simulations whose layouts merge the shared space copy under their own messages. */
-const SPACE = new Set(["orrery", "deep-field", "voyage"]);
+const SPACE = new Set(["orrery", "deep-field", "voyage", "giants"]);
 
 /** A simulation's messages as its layout loads them: the space copy under its own, for a space one. */
 export const featureMessages = (feature, locale) => {
