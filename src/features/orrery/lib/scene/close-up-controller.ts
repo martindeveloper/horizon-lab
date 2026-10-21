@@ -11,7 +11,9 @@ import {
 } from "three";
 
 import { AIR, AIR_BODIES } from "@/space/solar-system/graphics/air";
+import { MAP_BASE } from "@/space/solar-system/graphics/maps";
 import { moonOffset } from "@/space/solar-system/graphics/moons";
+import { FRAME_RADII } from "@/space/solar-system/model/framing";
 /**
  * The close-up: a flight to a body at true size, its detailed map (measured or
  * painted a few rows per frame), the atmosphere shell over a body with air (its own and its
@@ -27,16 +29,14 @@ import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horiz
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
-import { rising } from "@horizon/toolkit/scene";
+import { decodeMap, fetchMap, rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
-import { MAP_BASE, decodeMap, fetchMap } from "../graphics/map-loader";
 import type { CloseUpQuality } from "../quality";
 import type { CameraRig } from "./camera-rig";
 import {
   CLOSE_UP_IN_S,
   CLOSE_UP_OUT_S,
-  FRAME_RADII,
   closeUpMapWidth,
   closeUpPose,
   moonFraming,

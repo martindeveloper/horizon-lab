@@ -37,6 +37,30 @@ export const ENVIRONMENT: "development" | "preview" | "production" =
  */
 export const DEBUG = flag(process.env.NEXT_PUBLIC_DEBUG, ENVIRONMENT !== "production");
 
+/** A simulation or part behind a feature switch. */
+export type FeatureId = "voyage";
+
+/**
+ * A feature switch's value: on in development while the debug tools are on, off in
+ * previews and production; `override` (`on`/`off`) decides either way.
+ */
+export function featureFlag(
+  override: string | undefined,
+  environment: typeof ENVIRONMENT,
+  debug: boolean,
+) {
+  return flag(override, environment === "development" && debug);
+}
+
+/**
+ * Feature switches, by id. A feature that is off is not in the catalogue and its routes
+ * answer not found, in every language. `NEXT_PUBLIC_FEATURE_<ID>` overrides a switch for
+ * a build or a preview; `process.env` is read by its full name so the value is inlined.
+ */
+export const FEATURES: Readonly<Record<FeatureId, boolean>> = {
+  voyage: featureFlag(process.env.NEXT_PUBLIC_FEATURE_VOYAGE, ENVIRONMENT, DEBUG),
+};
+
 /**
  * This build's deployment, for the update notice: Vercel's `VERCEL_DEPLOYMENT_ID`, passed
  * through `next.config.ts` (`NEXT_PUBLIC_DEPLOYMENT_ID` overrides it). Blank turns it off.

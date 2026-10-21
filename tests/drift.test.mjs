@@ -16,7 +16,6 @@ import {
 import { MAX_DIST, MIN_DIST } from "../src/features/black-hole/lib/physics.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
 import { DRIFT as DEEP_FIELD } from "../src/features/deep-field/lib/drift.ts";
-import { HELIOPAUSE_AU } from "../src/features/deep-field/lib/model/probes.ts";
 import { VIEW_IDS } from "../src/features/deep-field/lib/model/view-ids.ts";
 import { viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { useDeepField } from "../src/features/deep-field/lib/store.ts";
@@ -30,6 +29,7 @@ import {
   timedDrift,
   timeShots,
 } from "../src/lib/drift.ts";
+import { HELIOPAUSE_AU } from "../src/space/solar-system/model/probes.ts";
 import { isSolarView } from "../src/space/solar-system/model/views.ts";
 
 const PROGRAMMES = {

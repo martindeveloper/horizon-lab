@@ -1,12 +1,12 @@
 import { readFileSync } from "node:fs";
 
-import { simulations } from "../src/lib/simulations.ts";
+import { registered } from "../src/lib/simulations.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
 
 const read = (path) => JSON.parse(readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8"));
 
 /** The simulations whose layouts merge the shared space copy under their own messages. */
-const SPACE = new Set(["orrery", "deep-field"]);
+const SPACE = new Set(["orrery", "deep-field", "voyage"]);
 
 /** A simulation's messages as its layout loads them: the space copy under its own, for a space one. */
 export const featureMessages = (feature, locale) => {
@@ -21,7 +21,8 @@ export const featureMessages = (feature, locale) => {
 export function layoutMessages(feature, locale) {
   const shared = read(`messages/${locale}.json`);
   if (!feature) return shared;
-  const { messageKey } = simulations.find((simulation) => simulation.id === feature);
+  /* Every registered simulation's copy is checked, whether or not its switch is on. */
+  const { messageKey } = registered.find((simulation) => simulation.id === feature);
   return { ...shared, [messageKey]: featureMessages(feature, locale) };
 }
 

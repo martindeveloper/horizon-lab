@@ -72,6 +72,7 @@ const LABS = {
   orrery: "Orrery",
   "deep-field": "Deep Field",
   spectroscopy: "Stellar Spectra",
+  voyage: "Voyage",
 };
 for (const [slug, title] of Object.entries(LABS)) {
   const { references } = JSON.parse(read(`src/features/${slug}/technical.json`));

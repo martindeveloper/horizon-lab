@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createTranslator, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 
+import { FEATURES, type FeatureId } from "@/config";
 import { routing, type Locale } from "@/i18n/routing";
 
 /** Supply complete social objects: Next replaces nested metadata rather than merging it. */
@@ -51,6 +52,8 @@ export async function localeParam<Params extends { locale: string }>(params: Pro
 type SimulationMessages = Record<string, unknown> & { app: string; metadataDescription: string };
 
 type SimulationMetadataSpec<Messages extends SimulationMessages, Id extends string> = {
+  /** The feature switch the simulation is behind: off, the route's metadata is not found too. */
+  feature?: FeatureId;
   /** Server-only loader of the feature's copy. */
   messages: (locale: Locale) => Promise<Messages>;
   /** The simulation's social card under `public/`. */
@@ -86,6 +89,7 @@ export function simulationMetadata<Messages extends SimulationMessages, Id exten
   }: {
     params: Promise<{ locale: string } & Record<string, string>>;
   }): Promise<Metadata> {
+    if (spec.feature && !FEATURES[spec.feature]) notFound();
     const resolved = await localeParam(params);
     const messages = await spec.messages("en");
     const card = {

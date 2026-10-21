@@ -138,6 +138,27 @@
           "title": "Záhadná spektra"
         }
       }
+    },
+    "voyage": {
+      "title": "Výprava",
+      "eyebrow": "Výprava · Ve skutečném měřítku",
+      "category": "Měřítko a relativita",
+      "description": "Leťte lodí od Měsíce k vnějším planetám ve skutečném měřítku. Skutečné pohony, dvoje hodiny, světlo takové, jaké tam dopadá.",
+      "open": "Otevřít Výpravu",
+      "scale": "Každý svět ve skutečné velikosti",
+      "clocks": "Lodní a pozemské hodiny",
+      "horizon": "Skutečné pohony, poctivé cesty",
+      "entryPoints": {
+        "moon": {
+          "title": "Měsíc"
+        },
+        "saturn": {
+          "title": "Saturn"
+        },
+        "pluto": {
+          "title": "Pluto"
+        }
+      }
     }
   },
   "about": {

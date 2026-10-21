@@ -1,0 +1,199 @@
+{
+  "app": "Výprava",
+  "metadataDescription": "Leťte lodí ve skutečném měřítku od Měsíce k vnějším planetám. Skutečné pohony, dvoje hodiny, světlo takové, jaké tam dopadá.",
+  "canvasLabel": "Sluneční soustava ve skutečném měřítku z paluby lodi",
+  "views": {
+    "earth": "Země",
+    "moon": "Měsíc",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn",
+    "pluto": "Pluto",
+    "stars": "α Centauri",
+    "galaxy": "Galaktický střed",
+    "andromeda": "Andromeda",
+    "edge": "Okraj"
+  },
+  "viewHints": {
+    "earth": "Domov z několika poloměrů. Tažením obíhejte, kolečkem se vzdalte.",
+    "moon": "Třicet průměrů Země daleko. Země je odsud malý modrý kotouč.",
+    "mars": "Slunce tu svítí méně než poloviční silou.",
+    "jupiter": "Jeho měsíce vrhají na oblaka skutečné stíny.",
+    "saturn": "Prstence zevnitř soustavy.",
+    "pluto": "Poledne je tu temnější než pozemský soumrak. Slunce je jasná hvězda.",
+    "stars": "Čtyři světelné roky, u slunce jako naše. Slunce je jasná hvězda za vámi.",
+    "galaxy": "Nad diskem, dvě stě tisíc světelných let daleko.",
+    "andromeda": "Dva a půl milionu světelných let. Na Zemi uběhlo tolik let.",
+    "edge": "Dál už nic nikdy nedoletí. Galaxie všemi směry, žádná z nich zmapovaná."
+  },
+  "toggles": {
+    "instruments": "Přístroje",
+    "canopy": "Kabina",
+    "orbits": "Dráhy"
+  },
+  "hud": {
+    "guide": "Průvodce",
+    "moonsOf": "Měsíce: {body}",
+    "hold": "Zastavit hodiny",
+    "run": "Spustit hodiny",
+    "drive": "Pohon",
+    "rate": "Tempo hodin",
+    "shipClock": "Lodní čas",
+    "earthClock": "Pozemský čas",
+    "speed": "Rychlost",
+    "range": "Vzdálenost",
+    "sunlight": "Sluneční svit",
+    "lightToEarth": "Světlo k Zemi",
+    "flyHere": "Letět sem",
+    "flyingTo": "Let: {body}",
+    "parkedAt": "U {body}",
+    "mode": "Loď",
+    "modeOrbit": "Zaparkováno",
+    "modeFree": "Volný let",
+    "nearBody": "Poblíž {body}",
+    "freeKeys": "W/S · A/D · R/F · Q/E náklon · Shift zrychlení · X brzda · mezerník zaparkovat · tažením rozhled",
+    "farPlaces": "Za sluneční soustavou",
+    "cmb": "Pozadí",
+    "cmbValue": "{value} K",
+    "clocksApart": "Rozdíl hodin",
+    "closing": "Přibližování",
+    "target": "Cíl"
+  },
+  "drives": {
+    "voyager": "Voyager",
+    "sail": "Světelná plachta",
+    "torch": "Plamenná loď"
+  },
+  "rates": {
+    "realTime": "reálný čas",
+    "minute": "minuta za sekundu",
+    "hour": "hodina za sekundu",
+    "day": "den za sekundu",
+    "month": "měsíc za sekundu",
+    "decade": "deset let za sekundu",
+    "millennium": "tisíc let za sekundu"
+  },
+  "time": {
+    "seconds": "{value} s",
+    "minutesSeconds": "{minutes} min {seconds} s",
+    "hoursMinutes": "{hours} h {minutes} min",
+    "daysHours": "{days} d {hours} h",
+    "years": "{value} let"
+  },
+  "units": {
+    "kmValue": "{value} km",
+    "kmPerS": "{value} km/s",
+    "lightSpeed": "{value} c",
+    "irradiance": "{value} W/m²",
+    "gamma": "γ {value}"
+  },
+  "facts": {
+    "fromShip": "Od lodi",
+    "fromSun": "Od Slunce",
+    "lightAge": "Světlo vyšlo před"
+  },
+  "cards": {
+    "bodies": {
+      "sun": "Každý povrch tu osvětluje tento kotouč. K Zemi jeho světlo letí osm minut.",
+      "earth": "Jediné místo s kapalnou vodou na povrchu a jediné, které odpoví na rádiové volání.",
+      "moon": "Jeho odvrácená strana Zemi nikdy neukáže. Z přivrácené strany Země nikdy nezapadá.",
+      "mars": "Poloviční šířka Země; den o čtyřicet minut delší než náš.",
+      "jupiter": "Jedenáct Zemí napříč. Io, Europa, Ganymed a Callisto před ním přecházejí a stíní jeho oblaka.",
+      "saturn": "Prstence jsou převážně vodní led, jen desítky metrů tlusté, a sahaly by tři čtvrtiny cesty k Měsíci.",
+      "io": "Nejsopečtější známý svět, hnětený Jupiterovými slapy.",
+      "europa": "Oceán pod ledem, hlubší než všechny pozemské dohromady.",
+      "titan": "Dusíková obloha hustší než pozemská a jezera metanu.",
+      "pluto": "Charon je tak velký, že dvojice obíhá bod mimo Pluto."
+    },
+    "far": {
+      "alphaCen": "Dvě slunce 11 až 36 au od sebe, obíhající kolem sebe každých 80 let, s Proximou pětinu světelného roku stranou.",
+      "proxima": "Nejbližší hvězda ke Slunci: červený trpaslík o sedmině šířky Slunce, který vzplává."
+    }
+  },
+  "technicalDetails": {
+    "title": "Jak se Výprava kreslí",
+    "summary": "Každé těleso ve skutečné velikosti a poloze, v kilometrech, s lodí v počátku scény a logaritmickou hloubkou, aby povrch měsíce i vzdálené planety sdílely jeden průchod. Lety trvají skutečný čas pohonu na dvojích hodinách. Sluneční svit slábne s kvadrátem vzdálenosti; měsíce se navzájem zastiňují.",
+    "features": {
+      "scale": "Slunce, planety, pojmenované malé světy a měsíce ve skutečné velikosti, umístěné podle elementů JPL s rozlišenými barycentry Země–Měsíc a Pluto–Charon.",
+      "flight": "Tři pohony: 17 km/s Voyageru, světelná plachta na desetině rychlosti světla, plamenná loď s jedním g a obratem v polovině.",
+      "clocks": "Lodní a pozemské hodiny v tempu, které zvolíte; rozcházejí se jen při vysoké rychlosti.",
+      "light": "Sluneční svit slábnoucí se vzdáleností, doba letu světla domů a zatmění od měsíců a planet.",
+      "sky": "Jasné hvězdy v naměřených vzdálenostech a pás Mléčné dráhy: posouvají se, jak loď ujíždí světelné roky, při rychlosti se tísní vpředu a mění barvu; α Centauri jako tři slunce naměřené velikosti."
+    },
+    "sections": {
+      "scale": {
+        "title": "Polohy a měřítko",
+        "body": "Tělesa jsou tam, kam je ve zobrazeném okamžiku kladou Keplerovy elementy JPL, v kilometrech kolem Slunce; Měsíc se řídí lunární teorií ELP-2000 s přesností na úhlovou minutu. Elementy Země–Měsíc a Pluto–Charon udávají barycentra, proto je střed planety posunut o odstup měsíce násobený jeho podílem na hmotnosti. Loď je počátkem kresby; vše se umisťuje podle odstupu od lodi ve dvojnásobné přesnosti a hloubka je logaritmická, takže povrch kilometr daleko i planeta miliardu kilometrů daleko drží pořadí."
+      },
+      "flight": {
+        "title": "Lety a hodiny",
+        "body": "Setrvačný pohon trvá D / v pozemského času a na lodi méně o Lorentzův faktor. Plamenná loď drží vlastní zrychlení, každá polovina cesty je hyperbolický pohyb: lodní čas je 2(c/a) acosh(1 + aD/2c²). Zaparkovaná loď letí se svým tělesem a hodiny se shodují. Kamera letí několik sekund; hodiny mezitím ujdou skutečnou cestu pohonu a planety se pod ní pohnou."
+      },
+      "light": {
+        "title": "Světlo",
+        "body": "Každý povrch je osvětlen z polohy Slunce a odečet udává svit podle převrácené kvadratické úměry. Až čtyři tělesa vlastní soustavy se u každého bodu porovnají se slunečním kotoučem: v úplném stínu je Slunce skryté, v polostínu se odkrývá přes svůj úhlový poloměr a kotouč menší než sluneční nechá svítit prstenec."
+      },
+      "sky": {
+        "title": "Obloha z lodi",
+        "body": "Každá katalogová hvězda sedí ve vzdálenosti podle paralaxy ze SIMBADu, takže se souhvězdí deformují, jak loď ujíždí světelné roky, a Slunce mezi nimi pohasne v hvězdu. Mléčná dráha je malovaný pás z Planetária, nesený s lodí a světelné roky daleko předaný mapě Galaxie; jeho zrna i slabé pole jsou malovaná, ne katalogová. α Centauri se kreslí jako kotouče: A tam, kam ji klade katalog, B na své naměřené dráze, Proxima na svém místě, každá v barvě své teploty. Při rychlosti se obloha kreslí tak, jak ji loď vidí: směry se podle vzorce pro aberaci tísní ke směru letu, světlo každé hvězdy je posunuto Dopplerovým faktorem D, barva se čte z tabulky černého tělesa při D-násobku Ballesterosovy teploty, tok hvězdy roste s druhou mocninou D, záře pásu a pozadí se čtvrtou. Pod tisícinou rychlosti světla se nic nemění. I koule se kreslí tam, kde je letící loď vidí: směr s aberací a šířka dělená D (obrys koule zůstává kruhem), jen barva jejich světla se nemění; bez aberace zůstává jedině mapa Galaxie. Za zmapovanými strukturami stojí pole galaxií kreslené kolem lodi za síť, kam žádný katalog nesahá. Karta vzdáleného místa říká, jak dlouho je světlo, které loď vidí, na cestě; sama mapa kreslí každou galaxii tam, kde je teď."
+      }
+    }
+  },
+  "tour": {
+    "label": "Průvodce",
+    "start": "Spustit průvodce",
+    "progress": "{step} / {total}",
+    "previous": "Předchozí krok",
+    "next": "Další",
+    "play": "Přehrát průvodce",
+    "pause": "Pozastavit průvodce",
+    "finish": "Dokončit",
+    "exit": "Ukončit průvodce",
+    "steps": {
+      "moon": {
+        "title": "Měsíc",
+        "body": "Třicet průměrů Země prázdna. Světlo mezeru překoná za 1,3 sekundy."
+      },
+      "earth": {
+        "title": "Země",
+        "body": "Krátký skok: i při jednom g trvá cesta několik hodin lodního času."
+      },
+      "mars": {
+        "title": "Mars",
+        "body": "Měsíce rychlostí Voyageru, dny pro plamennou loď. Slunce tu dává 43 % pozemského svitu."
+      },
+      "jupiter": {
+        "title": "Io před Jupiterem",
+        "body": "Sledujte stín Io na oblacích. Rádiový hovor domů trvá většinu hodiny."
+      },
+      "saturn": {
+        "title": "Saturn",
+        "body": "Vzdalte se a prstence se otočí hranou; přibližte se a zaplní oblohu."
+      },
+      "pluto": {
+        "title": "Pluto",
+        "body": "Slunce je jasná hvězda. Přepněte pohon na Voyager a podívejte se, jak dlouho trvá cesta zpět."
+      },
+      "stars": {
+        "title": "α Centauri",
+        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za 80 let; Proxima je ta červená. Voyager by potřeboval 77 000 let."
+      },
+      "galaxy": {
+        "title": "Galaxie shora",
+        "body": "Dvacet čtyři let na palubě při jednom g; dvě stě tisíc na Zemi. Slunce je jeden bod v disku pod vámi."
+      },
+      "andromeda": {
+        "title": "Andromeda",
+        "body": "Dvacet devět lodních let. Pozemský kalendář ušel dva a půl milionu let; Slunce stále svítí."
+      },
+      "edge": {
+        "title": "Okraj",
+        "body": "Dál žádná loď nedoletí: nic vyslané odsud dnes za tuto hranici nikdy nedorazí. Mikrovlnné pozadí je tak daleko jako vždy. Nikdy nebylo místem."
+      }
+    }
+  },
+  "anchors": {
+    "galacticCentre": "Galaxie shora",
+    "edge": "Okraj dosažitelného"
+  }
+}

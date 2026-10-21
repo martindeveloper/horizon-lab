@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 
+import { FEATURES } from "../../src/config.ts";
+
 const root = new URL("../../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 function attributes(tag) {
@@ -12,7 +14,13 @@ function attributes(tag) {
 
 for (const locale of ["en", "cs"]) {
   test(`${locale}: every page has route-specific social metadata and shared English artwork`, () => {
-    const features = ["lab/black-hole", "lab/orrery", "lab/deep-field", "lab/spectroscopy"];
+    const features = [
+      "lab/black-hole",
+      "lab/orrery",
+      "lab/deep-field",
+      "lab/spectroscopy",
+      ...(FEATURES.voyage ? ["lab/voyage"] : []),
+    ];
     const subpages = features.flatMap((feature) =>
       readdirSync(new URL(`.next/server/app/${locale}/${feature}/`, root))
         .filter((name) => name.endsWith(".html"))

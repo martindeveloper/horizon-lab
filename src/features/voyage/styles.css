@@ -1,0 +1,260 @@
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
+
+/* The journey's hold on a step: a hairline that fills, freezes while paused, then moves on. */
+@keyframes voyage-dwell {
+  to {
+    transform: scaleX(1);
+  }
+}
+:where([data-simulation="voyage"]) .voyage-dwell {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+:where([data-simulation="voyage"]) .voyage-dwell:is([data-state="running"], [data-state="paused"]) {
+  animation-name: voyage-dwell;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+:where([data-simulation="voyage"]) .voyage-dwell[data-state="paused"] {
+  animation-play-state: paused;
+}
+
+/* The console (components/flight-dock.tsx): two glass panels angled in towards the pilot,
+   the scanner's place between them. Phones stack them flat. */
+@media (width >= 48rem) {
+  :where([data-simulation="voyage"]) .voyage-console {
+    perspective: 1400px;
+  }
+  :where([data-simulation="voyage"]) .voyage-console-left {
+    transform: rotateY(-11deg);
+    transform-origin: right center;
+  }
+  :where([data-simulation="voyage"]) .voyage-console-right {
+    transform: rotateY(11deg);
+    transform-origin: left center;
+  }
+}
+
+/* The cockpit over the scene (lib/scene/cockpit.ts): lines in the accent with a faint glow,
+   placed by the engine. A parked ship shows the canopy and the scanner; a flight the aim too;
+   free flight all of it. The View panel's switches take the canopy and the instruments away. */
+:where([data-simulation="voyage"]) .voyage-cockpit {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--color-accent);
+  transition: transform 240ms ease-out;
+  --voyage-line: color-mix(in oklab, var(--color-accent) 88%, transparent);
+  --voyage-faint: color-mix(in oklab, var(--color-accent) 30%, transparent);
+  --voyage-glow: drop-shadow(0 0 3px color-mix(in oklab, var(--color-accent) 55%, transparent));
+}
+:where([data-simulation="voyage"]) .voyage-cockpit:not([data-canopy]) .voyage-canopy,
+:where([data-simulation="voyage"]) .voyage-cockpit:not([data-instruments]) > :not(.voyage-canopy),
+:where([data-simulation="voyage"])
+  .voyage-cockpit[data-mode="parked"]
+  > :not(.voyage-canopy, .voyage-scanner),
+:where([data-simulation="voyage"])
+  .voyage-cockpit[data-mode="flight"]
+  > :not(.voyage-canopy, .voyage-aim, .voyage-scanner) {
+  display: none;
+}
+
+/* The canopy: the glass darkens to the corners with a sheen across it; the pillars rise from
+   the dash with their inner edges lit. */
+:where([data-simulation="voyage"]) .voyage-canopy {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.035) 0%, transparent 38%),
+    radial-gradient(ellipse 112% 92% at 50% 58%, transparent 60%, rgb(0 0 0 / 0.62) 100%);
+}
+:where([data-simulation="voyage"]) .voyage-canopy svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+:where([data-simulation="voyage"]) .voyage-pillar {
+  fill: rgb(8 8 11 / 0.94);
+}
+:where([data-simulation="voyage"]) .voyage-pillar-edge {
+  stroke: var(--voyage-faint);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The boresight: a ring with four ticks at the centre of the view. */
+:where([data-simulation="voyage"]) .voyage-boresight {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--voyage-line);
+  border-radius: 50%;
+  translate: -50% -50%;
+  filter: var(--voyage-glow);
+}
+:where([data-simulation="voyage"]) .voyage-boresight::before,
+:where([data-simulation="voyage"]) .voyage-boresight::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: var(--voyage-line);
+  translate: -50% -50%;
+}
+:where([data-simulation="voyage"]) .voyage-boresight::before {
+  width: 76px;
+  height: 1.5px;
+  /* The horizontal ticks, the ring's width left clear in the middle. */
+  mask: linear-gradient(90deg, #000 0 14px, transparent 14px 62px, #000 62px);
+}
+:where([data-simulation="voyage"]) .voyage-boresight::after {
+  width: 1.5px;
+  height: 76px;
+  mask: linear-gradient(180deg, #000 0 14px, transparent 14px 62px, #000 62px);
+}
+
+/* The markers: placed by transform from the top left; a marker sits at its centre. */
+:where([data-simulation="voyage"]) .voyage-mark {
+  position: absolute;
+  left: -11px;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  filter: var(--voyage-glow);
+}
+:where([data-simulation="voyage"]) .voyage-mark[data-on] {
+  opacity: 1;
+}
+/* Prograde: a ring with three ticks; retrograde: the ring crossed. */
+:where([data-simulation="voyage"]) .voyage-prograde,
+:where([data-simulation="voyage"]) .voyage-retrograde {
+  border: 1.5px solid var(--voyage-line);
+  border-radius: 50%;
+}
+:where([data-simulation="voyage"]) .voyage-prograde::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  width: 38px;
+  height: 1.5px;
+  background: var(--voyage-line);
+  translate: 0 -50%;
+  mask: linear-gradient(90deg, #000 0 8px, transparent 8px 30px, #000 30px);
+}
+:where([data-simulation="voyage"]) .voyage-prograde::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  width: 1.5px;
+  height: 8px;
+  background: var(--voyage-line);
+  translate: -50% 0;
+}
+:where([data-simulation="voyage"]) .voyage-retrograde::before,
+:where([data-simulation="voyage"]) .voyage-retrograde::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 1.5px;
+  background: var(--voyage-line);
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+:where([data-simulation="voyage"]) .voyage-retrograde::after {
+  rotate: -45deg;
+}
+/* The aim: a diamond with its range beneath; at the edge, a chevron pointing the way. */
+:where([data-simulation="voyage"]) .voyage-aim::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--color-accent);
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+:where([data-simulation="voyage"]) .voyage-aim[data-off]::before {
+  width: 16px;
+  height: 16px;
+  border-width: 1.5px 1.5px 0 0;
+  translate: -70% -50%;
+}
+:where([data-simulation="voyage"]) .voyage-aim-tag {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  color: var(--color-accent);
+  translate: -50% 0;
+}
+:where([data-simulation="voyage"]) .voyage-aim[data-off] .voyage-aim-tag {
+  display: none;
+}
+
+/* The scanner: the ship's plane seen at a slant, between the console's panels. */
+:where([data-simulation="voyage"]) .voyage-scanner {
+  position: absolute;
+  left: 50%;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  width: 240px;
+  height: 150px;
+  translate: -50% 0;
+}
+@media (width < 48rem), (height < 30rem) {
+  :where([data-simulation="voyage"]) .voyage-scanner {
+    display: none;
+  }
+}
+
+/* The throttle on the right: a track and its fill, scaled by the thrust. */
+:where([data-simulation="voyage"]) .voyage-throttle {
+  position: absolute;
+  right: max(2rem, env(safe-area-inset-right));
+  top: 50%;
+  width: 4px;
+  height: 140px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--color-fg) 16%, transparent);
+  translate: 0 -50%;
+}
+:where([data-simulation="voyage"]) .voyage-throttle-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  filter: var(--voyage-glow);
+}
+
+/* The burn: a warm glow from below while the drive thrusts. */
+:where([data-simulation="voyage"]) .voyage-burn {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 40% at 50% 115%,
+    color-mix(in oklab, var(--color-accent) 22%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+:where([data-simulation="voyage"]) .voyage-cockpit[data-burn] .voyage-burn {
+  opacity: 1;
+}

@@ -290,6 +290,7 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   const { useOrrery } = await import("../src/features/orrery/lib/store.ts");
   const { useBlackHole } = await import("../src/features/black-hole/lib/store.ts");
   const { useSpectroscopy } = await import("../src/features/spectroscopy/lib/store.ts");
+  const { useVoyage } = await import("../src/features/voyage/lib/store.ts");
 
   useDeepField.getState().patchShow({ halo: true });
   useDeepField.getState().startGuide();
@@ -297,7 +298,9 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   useBlackHole.getState().startGuide();
   useSpectroscopy.getState().toggleCompare("Fe");
   useSpectroscopy.getState().startGuide();
-  for (const store of [useDeepField, useOrrery, useBlackHole, useSpectroscopy]) {
+  useVoyage.getState().setDrive("sail");
+  useVoyage.getState().startGuide();
+  for (const store of [useDeepField, useOrrery, useBlackHole, useSpectroscopy, useVoyage]) {
     assert.equal(store.getState().guideOpen, true);
     freshVisit(store)();
     const s = store.getState();

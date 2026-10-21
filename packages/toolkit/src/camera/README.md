@@ -56,7 +56,7 @@ pixels; the wheel calls `onWheel(deltaPixels, trackpadPinch)` with the same line
 normalization as the orbit input and ctrl+wheel as the pinch. Keys write one reusable
 `FlightAxes` object (`axes`, never reallocated) and call `onAxes(axes)` on every change: W/S
 `thrust`, A/D `strafe`, R/F `lift`, Q/E `roll` (each −1…1, opposed keys cancel), Shift `boost`
-(0…1), Space `park`. Keys are read by `event.code` on the window, only while focus is on the
+(0…1), X `brake` (0…1), Space `park`. Keys are read by `event.code` on the window, only while focus is on the
 canvas or inside `stage` (default: the canvas's parent) so a single key never fires from a
 form elsewhere on the page (WCAG 2.1.4), never with ctrl, alt or meta held, and only when the
 host's `isShortcut(event)` agrees; a window blur lets everything go. When a gamepad connects

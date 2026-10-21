@@ -4,6 +4,11 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import { gzipSync } from "node:zlib";
 
+import { FEATURES } from "../../src/config.ts";
+
+/* A simulation behind a switch has routes only in a build with the switch on. */
+const voyageRoutes = (routes) => (FEATURES.voyage ? routes : []);
+
 // Run after `npm run build`; inspect production artifacts without starting a server.
 const build = new URL("../../.next/", import.meta.url);
 const read = (path) => readFileSync(new URL(path, build), "utf8");
@@ -39,7 +44,13 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
     const gzipBytes = [...initial].reduce((total, path) => total + gzipSync(read(path)).length, 0);
     console.log(`${locale}: initial JS ${(gzipBytes / 1024).toFixed(1)} KiB gzip`);
     // The WebGL gate runs first on simulation routes; the renderer stays lazy behind it.
-    for (const suffix of ["lab/black-hole", "lab/orrery", "lab/deep-field", "lab/spectroscopy"]) {
+    for (const suffix of [
+      "lab/black-hole",
+      "lab/orrery",
+      "lab/deep-field",
+      "lab/spectroscopy",
+      ...voyageRoutes(["lab/voyage"]),
+    ]) {
       const route = assets(`${locale}/${suffix}`, ".js");
       for (const path of heavy) assert.ok(!route.has(path), `${locale}/${suffix} loads ${path}`);
     }
@@ -86,7 +97,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
     const shared = assets(locale, ".css");
     assert.doesNotMatch(
       contents(shared),
-      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon/,
+      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-dwell/,
     );
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
@@ -94,6 +105,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       orrery: /scene-label/,
       "deep-field": /deep-field-rung/,
       spectroscopy: /spectroscopy-ribbon/,
+      voyage: /voyage-dwell/,
     };
     for (const suffix of [
       "lab/black-hole",
@@ -104,6 +116,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       "lab/deep-field/laniakea",
       "lab/spectroscopy",
       "lab/spectroscopy/kirchhoff",
+      ...voyageRoutes(["lab/voyage", "lab/voyage/saturn"]),
     ]) {
       const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
         (path) => !shared.has(path),
@@ -111,7 +124,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
       assert.match(contents(feature), marker[suffix.split("/")[1]]);
       /* The zoomable scenes label their objects; the black hole and the spectra draw no labels. */
-      if (/^lab\/(?:orrery|deep-field)/.test(suffix))
+      if (/^lab\/(?:orrery|deep-field|voyage)/.test(suffix))
         assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
       assert.doesNotMatch(
         contents(feature),

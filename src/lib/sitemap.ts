@@ -8,6 +8,10 @@ import {
   pathForView as pathForSpectroscopyView,
   viewRouteParams as spectroscopyRouteParams,
 } from "@/features/spectroscopy/routing";
+import {
+  pathForView as pathForVoyageView,
+  viewRouteParams as voyageRouteParams,
+} from "@/features/voyage/routing";
 
 import { simulations } from "./simulations";
 
@@ -19,6 +23,7 @@ const subpages: Record<SimulationId, () => string[]> = {
   orrery: () => viewRouteParams().map(({ view }) => pathForView(view)),
   "deep-field": () => deepViewRouteParams().map(({ view }) => pathForDeepView(view)),
   spectroscopy: () => spectroscopyRouteParams().map(({ view }) => pathForSpectroscopyView(view)),
+  voyage: () => voyageRouteParams().map(({ view }) => pathForVoyageView(view)),
 };
 
 /** Canonical clean paths: no language prefix and no redirect sources. */

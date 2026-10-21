@@ -138,6 +138,27 @@
           "title": "Mystery spectra"
         }
       }
+    },
+    "voyage": {
+      "title": "Voyage",
+      "eyebrow": "Voyage · At true scale",
+      "category": "Scale & relativity",
+      "description": "Fly a spacecraft from the Moon to the far planets at true scale. Real drives, two clocks, the light as it falls there.",
+      "open": "Open Voyage",
+      "scale": "Every world at true size",
+      "clocks": "A ship clock and an Earth clock",
+      "horizon": "Real drives, honest trips",
+      "entryPoints": {
+        "moon": {
+          "title": "The Moon"
+        },
+        "saturn": {
+          "title": "Saturn"
+        },
+        "pluto": {
+          "title": "Pluto"
+        }
+      }
     }
   },
   "about": {

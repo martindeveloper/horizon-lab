@@ -5,7 +5,7 @@ import test from "node:test";
 import manifest from "../src/app/manifest.ts";
 import robots from "../src/app/robots.ts";
 import sitemap from "../src/app/sitemap.ts";
-import { siteUrl } from "../src/config.ts";
+import { FEATURES, siteUrl } from "../src/config.ts";
 import { BLACK_HOLE_PATH } from "../src/features/black-hole/manifest.ts";
 import { presetRouteParams } from "../src/features/black-hole/routing.ts";
 import { DEEP_FIELD_PATH } from "../src/features/deep-field/manifest.ts";
@@ -14,6 +14,8 @@ import { ORRERY_PATH } from "../src/features/orrery/manifest.ts";
 import { viewRouteParams } from "../src/features/orrery/routing.ts";
 import { SPECTROSCOPY_PATH } from "../src/features/spectroscopy/manifest.ts";
 import { viewRouteParams as spectroscopyViewParams } from "../src/features/spectroscopy/routing.ts";
+import { VOYAGE_PATH } from "../src/features/voyage/manifest.ts";
+import { viewRouteParams as voyageViewParams } from "../src/features/voyage/routing.ts";
 import { routing } from "../src/i18n/routing.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
 import { simulations } from "../src/lib/simulations.ts";
@@ -33,7 +35,10 @@ test("sitemap lists the catalogue, the about and credits pages, every simulation
     ...viewRouteParams().map(({ view }) => `${ORRERY_PATH}/${view}`),
     ...deepViewRouteParams().map(({ view }) => `${DEEP_FIELD_PATH}/${view}`),
     ...spectroscopyViewParams().map(({ view }) => `${SPECTROSCOPY_PATH}/${view}`),
+    ...(FEATURES.voyage ? voyageViewParams().map(({ view }) => `${VOYAGE_PATH}/${view}`) : []),
   ];
+  /* A simulation behind a switch that is off is nowhere in the sitemap. */
+  if (!FEATURES.voyage) assert.ok(!paths.some((path) => path.startsWith(VOYAGE_PATH)));
   assert.deepEqual([...paths].sort(), [...new Set(expected)].sort());
   for (const { entryPoints } of simulations)
     for (const { href } of entryPoints) assert.ok(paths.includes(href), href);

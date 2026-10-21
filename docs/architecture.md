@@ -25,6 +25,7 @@ src/
         [view]/page.tsx        View route: static params + simulationMetadata
       deep-field/              The same three routes for Deep Field's views
       spectroscopy/            The same three routes for Stellar Spectra's views
+      voyage/                  The same three routes for Voyage's places
   components/
     shell/                     AppShell, header, phone menu, preferences, theme switch, stage sizing
     simulations/               Shared simulation stage: the lab route layout
@@ -69,9 +70,9 @@ src/
         solar-activity*.ts     The Sun's illustrative Hα activity: one baked hedgerow
                                prominence, each region's slow cycle of flows and eruption
         parameters.ts, equations.ts, model-check.ts
-      lib/graphics/            The time-dependent sky (sky.ts), tour-sketch.ts,
-                               map-loader.ts (WebP maps from MAP_BASE; scripts/build-planet-maps.mjs),
-                               shader-defines.ts, shaders/
+      lib/graphics/            The time-dependent sky (sky.ts, on the shared band in src/space/sky),
+                               tour-sketch.ts, shader-defines.ts, shaders/ (the WebP map loader is
+                               @horizon/toolkit/scene; MAP_BASE is src/space/solar-system/graphics/maps.ts)
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
                                toolkit's scene host, orbit rig and controls, moves it along
                                the timeline and adds what is the Orrery's own: the sky,
@@ -88,30 +89,28 @@ src/
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
       components/              Overlay, depth ladder, sightline, guide caption, the Objects
                                and View panels, cards, canvas host
-      lib/model/               Today's sky at every scale, without three.js scenes:
+      lib/model/               Deep Field's own, without three.js scenes; the worlds it draws
+                               are the shared ones (src/space/galaxy, cosmos, the solar system
+                               and its reach):
         view-ids.ts, views.ts  The fifteen views, inner planets to the observable universe,
                                and how each one's distances are known (METHOD_OF)
         depth.ts               The ladder's log scale and the sightline (distance,
                                light-travel time, redshift, Earth when the light set out)
         tour.ts                The guided journey, planets to the first light: its shots
-        cosmos.ts              Named galaxies and clusters at today's places, the observable
-                               universe, camera aims
-        neighbours.ts          Nearest stars and their closest approaches (Gaia astrometry)
-        galactic-orbit.ts      The Sun's place in the Galaxy and its recent path
-        probes.ts              Our reach: five probes on their JPL Horizons tracks
-                               (probe-tracks.json, scripts/fetch-probe-tracks.mjs), the
-                               heliopause they crossed, sunlight's light-time rings
-        catalogue/             Every figure a card prints: value or span, unit, source, status
-      lib/graphics/            Point clouds (galaxy.ts, cosmos.ts), the bright-star sky, looks.ts
+        equations.ts           The formulas technical.json prints, gathered from the worlds
+        catalogue/             The shared catalogues composed as the cards read them, and the
+                               figures the technical notes quote (PROSE_FIGURES)
+      lib/graphics/looks.ts    The bright-star sky's points and the shared worlds' looks on one
+                               brush (src/space/brush.ts)
       lib/scene/               The engine: the shared solar system held at today, then the
-                               reach (probes, heliopause, light-time rings), stars, Galaxy and
-                               cosmos layers (cosmos-layer.ts fades what cosmos-clouds.ts draws,
-                               cosmos-rings.ts and cosmos-marks.ts), on the toolkit's scene
-                               pieces; each layer registers what its names open (label-picks.ts);
-                               camera-rig.ts turns the orbit rig's frame and aim between the
-                               scales, lod.ts blends them, guide-director.ts flies the journey on the
-                               toolkit's tour camera (as the Orrery's guide does)
-      lib/store.ts             Zustand store (deepField namespace messages)
+                               reach, the nearest stars, the Galaxy and the cosmic map (the
+                               shared layers) on the toolkit's scene pieces, with Deep Field's
+                               own sky layer, picking and HUD; camera-rig.ts turns the orbit
+                               rig's frame and aim between the scales, guide-director.ts flies
+                               the journey on the toolkit's tour camera (as the Orrery's guide
+                               does); kit.ts holds the label insets and the solar switches
+      lib/store.ts             Zustand store (deepField namespace messages); its switches and
+                               selection are the shared worlds' (src/space/galaxy/show.ts)
     spectroscopy/
       index.ts                 Public client entry: SpectroscopyApp
       manifest.ts, routing.ts, server.ts, technical.json
@@ -137,6 +136,39 @@ src/
         glow.ts                A glowing gas's colour and brightness, for the scene
         equations.ts, tour.ts  The formulas the documents print; the guided journey
       lib/store.ts             Zustand store (spectroscopy namespace messages)
+    voyage/
+      index.ts                 Public client entry: VoyageApp
+      manifest.ts, routing.ts, server.ts, technical.json
+      components/              Overlay, the flight dock (clocks, hold, rate, drive), the Objects
+                               and View panels, cards, guide caption, canvas host
+      lib/model/               The ship and its world:
+        parameters.ts          Drives (Voyager, light sail, one-g torch), clock rates, floors
+        relativity.ts, ship.ts Trip times on both clocks; the ship's state and its integrator
+                               on proper velocity (four-acceleration, rapidity)
+        bodies.ts              Where every body is in km, doubles, barycentres resolved
+        anchors.ts             Every destination: bodies, α Centauri, the Galaxy from above,
+                               Andromeda, the edge of the reachable
+        alpha-centauri.ts      α Centauri's three suns: B on its visual orbit, Proxima at its place
+        calendar.ts            Earth's calendar held within the JavaScript date's reach
+        comoving.ts            The expansion with the clocks, the background's temperature,
+                               the event horizon
+        places.ts, view-ids.ts The places the address names; tour.ts the guided journey
+      lib/scene/               The engine on the toolkit's host with a logarithmic depth
+                               buffer: the ship at the origin (floating origin), every body
+                               at true size placed by its offset from the ship (bodies-layer.ts,
+                               eclipse occluders, rings, orbits), the ship camera parked about a
+                               body, flying free on the keys, or on an autopilot flight
+                               (ship-camera.ts), the bright stars at their distances and the
+                               painted Milky Way with aberration and Doppler colour
+                               (stars-layer.ts), α Centauri as discs (alpha-centauri-layer.ts),
+                               the shared worlds about the ship (worlds-layer.ts: the reach, the
+                               Galaxy and the cosmic map scaled by the expansion), the microwave
+                               background's shell centred on the ship (cmb-layer.ts), the shared
+                               map budget streaming tiers by on-screen size, the HUD readouts,
+                               the cockpit drawn in DOM (cockpit.ts: canopy, velocity markers,
+                               the aim's range, a log-scale scanner, the throttle; the geometry
+                               in model/instruments.ts)
+      lib/store.ts             Zustand store (voyage namespace messages)
   lib/
     sources.ts                 Shared bibliography the catalogue figures cite
     facts.ts                   Catalogue fact and card-spec types, and their printers
@@ -163,20 +195,58 @@ src/
     observer-sky.ts             Observer location and apparent Sun, Moon and star positions
     bright-stars.ts            The catalogue's bright stars on the sky sphere, as points
                                carried with the camera (`createBrightSky`, `carrySky`)
+    star-distances.ts          Their SIMBAD distances (star-distances.json, from
+                               scripts/fetch-star-distances.mjs), for a sky flown through
+    sky/                       The Milky Way as the sky shows it: the painted band in galactic
+                               coordinates, its grains and a faint field (`createMilkyWay`),
+                               drawn by the Orrery along its timeline and by Voyage from the ship
     bench.ts                   A scene engine on the bench: its frame loop driven frame by frame
     quality.ts                 What a render quality means for every space scene: tier,
                                resolution, swarms, the bloom chain, the lens's star
+    brush.ts                   What the worlds' looks paint with, once per engine: a soft glow,
+                               a soft point, the touch targets' invisible material
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
                                disk), elements, tracers, catalogue, views (and the solar
-                               framing every host engine shares), framing, position,
-                               moon-orbits (the moons' orbits, without three.js)
-      graphics/                looks.ts, swarms.ts, moons.ts, shader-defines.ts, shaders/
+                               framing every host engine shares), framing (and the radii an
+                               arrival frames), position, moon-orbits (the moons' orbits, the
+                               Moon from the toolkit's lunar theory, without three.js),
+                               barycentre (the Earth–Moon and Pluto–Charon offsets); its reach:
+                               probes.ts (five probes on their JPL Horizons tracks,
+                               probe-tracks.json from scripts/fetch-probe-tracks.mjs, the
+                               heliopause they crossed, sunlight's light-time rings) and
+                               probes-catalogue.ts (the Voyagers' crossings)
+      graphics/                looks.ts (the Sun's place and the eclipse slots a host may
+                               write), swarms.ts, moons.ts, shader-defines.ts, shaders/,
+                               maps.ts (MAP_BASE) and map-tiers.ts (tiers by on-screen size);
+                               reach-looks.ts (the probes' glow and the wind bubble)
       scene/                   solar-system.ts composes the Sun, planets, moons, populations
                                and the reticle (*-layer.ts, focus-ring.ts) on a kit (kit.ts)
-                               with its own level of detail (lod.ts)
+                               with its own level of detail (lod.ts); map-budget.ts streams
+                               measured maps by on-screen size under a byte budget; reach-layer.ts draws the
+                               reach on a host's kit
       format.ts                Names and orbit rows both simulations print
       cards.ts                 The figures the population cards quote (`POPULATION_FIGURES`)
+    galaxy/                    The Galaxy and the nearest stars, today, for any host engine:
+      show.ts                  What the worlds beyond the solar system draw with: the realm,
+                               the switches (GalaxyShow), the selection (WorldSelection) and
+                               the frame (WorldFrame) a host's store composes
+      model/                   parameters, equations (the Sun's epicycles, the arms, the warp),
+                               galactic-orbit (the Sun's place and its recent path),
+                               neighbours (nearest stars and their closest approaches, Gaia
+                               astrometry), catalogue/ (the Galaxy's and the stars' figures)
+      graphics/                galaxy.ts (today's spiral as point clouds), looks.ts
+      scene/                   frames.ts (one world in au: the galactic and supergalactic
+                               frames, LY and MLY, galaxyToWorld, the scale blends and
+                               realmOf), lod.ts (faders, screen scale and the blends, per
+                               frame), kit.ts, label-picks.ts (what a tap on a name opens),
+                               galaxy-layer.ts and neighbours-layer.ts
+    cosmos/                    The cosmic map beyond the Galaxy, for any host engine:
+      model/                   cosmos.ts (named galaxies and clusters at today's places, the
+                               observable universe, camera aims), catalogue.ts
+      graphics/                cosmos.ts (the sampled clouds, web and far field), looks.ts
+      scene/                   cosmos-layer.ts fades what cosmos-clouds.ts draws,
+                               cosmos-rings.ts and cosmos-marks.ts, in the Galaxy's pass
   i18n/                        Shared request/routing/navigation configuration
   messages/                    Shared catalogue, shell, and error copy
 bench/                         Headless rendering benchmark: CLI, bundling, reports
@@ -237,6 +307,8 @@ page scrolling.
 | `/lab/deep-field/laniakea` | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
 | `/lab/spectroscopy`        | Stellar Spectra, default view (the Sun)                                                                                                      |
 | `/lab/spectroscopy/stars`  | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
+| `/lab/voyage`              | Voyage, default place (Earth)                                                                                                                |
+| `/lab/voyage/saturn`       | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
 | `/black-hole/...`          | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/orrery/...`              | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/en/...`, `/cs/...`       | Served in that language, then shown as the clean path                                                                                        |
@@ -292,13 +364,16 @@ helpers from `@/i18n/navigation`.
 2. Add a serializable `manifest.ts` satisfying `SimulationManifest`, with a
    stable ID, URL from `simulationPath(slug)`, static artwork, message key, highlight keys, and optional
    entry points (an empty list is fine). Never import the renderer into a manifest.
-3. Register the manifest in `src/lib/simulations.ts`. Add its catalogue copy to
+3. Register the manifest in `src/lib/simulations.ts`. A simulation not ready for
+   production names a `feature` switch (`FEATURES` in `src/config.ts`, on only in
+   development with the debug tools on, or by `NEXT_PUBLIC_FEATURE_<ID>`): off, it
+   is out of the catalogue and the sitemap and its routes are not found. Add its catalogue copy to
    both shared locale files under `catalogue.<messageKey>`: `title`, `eyebrow`,
    `category`, a one-sentence `description`, `open`, one short label per
    highlight key, and `entryPoints.<id>.title` for each entry point. The
    catalogue tile and header then pick it up automatically; keep the copy short.
 4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx`. The layout imports the
-   feature's stylesheets and exports `simulationLayout({ slug, namespace, App, messages })`
+   feature's stylesheets and exports `simulationLayout({ slug, feature?, namespace, App, messages })`
    (`src/components/simulations/simulation-layout.tsx`), which loads only that feature's
    translations beside the shared ones and keeps the scene mounted across its routes.
    Use the shared stage/shell components and keep browser-dependent scenes behind a
@@ -410,10 +485,19 @@ a feature. It holds the bright-star sky (`brightStarGeometry`) and the solar sys
 one unit: `createSolarKit(basics)` and
 `createSolarSystem(kit, parent, { place, hideAll, setBodies, rulers })`, drawn each frame at
 a `SolarMoment`. The Orrery moves that moment along its timeline and adds close-ups, its sky
-and the guide; Deep Field holds it at `TODAY`, adds what we have sent out (the probes, the
-heliopause, light-time rings) and carries on past it. Its copy (names,
-views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged under each
-simulation's namespace by its `server.ts` (`withSpaceCopy`); a key in both is an error.
+and the guide; Deep Field holds it at `TODAY`, adds its reach (`solar-system/scene/reach-layer.ts`:
+the probes, the heliopause, light-time rings) and carries on past it into the worlds beyond:
+`galaxy/` (the nearest stars and the Galaxy map, with the frames, blends and level of detail
+that place every scale in one world in au) and `cosmos/` (the cosmic map out to the microwave
+background). Their layers are built on a host's kit (its basics, looks painted on
+`src/space/brush.ts`, the world's `Lod`) and draw a `WorldFrame` (`galaxy/show.ts`: the
+switches, the selection, the camera distance); a host's store composes `GalaxyShow` and
+`WorldSelection` with its own state, and its label picks (`galaxy/scene/label-picks.ts`)
+gather what each layer's names open. Their model files import no three.js, so cards and
+tests read them as Deep Field's do. The shared copy (names of the solar system, the stars, the
+Galaxy and the cosmos, views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged
+under each simulation's namespace by its `server.ts` (`withSpaceCopy`); a key in both is an
+error.
 
 The Orrery and Deep Field name the solar system's views alike. `HandoffLink` opens the same
 view in the other, and `src/lib/handoff.ts` carries the camera's pose so it opens where this

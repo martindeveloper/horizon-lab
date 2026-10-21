@@ -1,0 +1,199 @@
+{
+  "app": "Voyage",
+  "metadataDescription": "Fly a spacecraft at true scale from the Moon to the far planets. Real drives, two clocks, the light as it falls there.",
+  "canvasLabel": "The solar system at true scale, seen from a spacecraft",
+  "views": {
+    "earth": "Earth",
+    "moon": "The Moon",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "saturn": "Saturn",
+    "pluto": "Pluto",
+    "stars": "α Centauri",
+    "galaxy": "Galactic centre",
+    "andromeda": "Andromeda",
+    "edge": "The edge"
+  },
+  "viewHints": {
+    "earth": "Home, from a few radii out. Drag to orbit, scroll to back off.",
+    "moon": "Thirty Earth diameters away. Earth is a small blue disc from here.",
+    "mars": "Sunlight is less than half as strong as on Earth.",
+    "jupiter": "Its moons cast real shadows on the clouds.",
+    "saturn": "The rings, from inside the system.",
+    "pluto": "Noon here is dimmer than Earth's dusk. The Sun is a bright star.",
+    "stars": "Four light-years out, at a sun like ours. The Sun is a bright star behind you.",
+    "galaxy": "Above the disk, two hundred thousand light-years out.",
+    "andromeda": "Two and a half million light-years. On Earth, that many years have passed.",
+    "edge": "Nothing can ever go farther. Galaxies in every direction, none of them mapped."
+  },
+  "toggles": {
+    "instruments": "Instruments",
+    "canopy": "Canopy",
+    "orbits": "Orbits"
+  },
+  "hud": {
+    "guide": "Guide",
+    "moonsOf": "Moons of {body}",
+    "hold": "Hold the clocks",
+    "run": "Run the clocks",
+    "drive": "Drive",
+    "rate": "Clock rate",
+    "shipClock": "Ship clock",
+    "earthClock": "Earth clock",
+    "speed": "Speed",
+    "range": "Range",
+    "sunlight": "Sunlight",
+    "lightToEarth": "Light to Earth",
+    "flyHere": "Fly here",
+    "flyingTo": "Flying to {body}",
+    "parkedAt": "At {body}",
+    "mode": "Ship",
+    "modeOrbit": "Parked",
+    "modeFree": "Free flight",
+    "nearBody": "Near {body}",
+    "freeKeys": "W/S · A/D · R/F · Q/E roll · Shift boost · X brake · Space park · drag to look",
+    "farPlaces": "Beyond the solar system",
+    "cmb": "Background",
+    "cmbValue": "{value} K",
+    "clocksApart": "Clocks apart",
+    "closing": "Closing",
+    "target": "Target"
+  },
+  "drives": {
+    "voyager": "Voyager",
+    "sail": "Light sail",
+    "torch": "Torch ship"
+  },
+  "rates": {
+    "realTime": "real time",
+    "minute": "a minute per second",
+    "hour": "an hour per second",
+    "day": "a day per second",
+    "month": "a month per second",
+    "decade": "ten years per second",
+    "millennium": "a thousand years per second"
+  },
+  "time": {
+    "seconds": "{value} s",
+    "minutesSeconds": "{minutes} min {seconds} s",
+    "hoursMinutes": "{hours} h {minutes} min",
+    "daysHours": "{days} d {hours} h",
+    "years": "{value} years"
+  },
+  "units": {
+    "kmValue": "{value} km",
+    "kmPerS": "{value} km/s",
+    "lightSpeed": "{value} c",
+    "irradiance": "{value} W/m²",
+    "gamma": "γ {value}"
+  },
+  "facts": {
+    "fromShip": "From the ship",
+    "fromSun": "From the Sun",
+    "lightAge": "Light left"
+  },
+  "cards": {
+    "bodies": {
+      "sun": "Every surface here is lit from this disc. Its light reaches Earth in eight minutes.",
+      "earth": "The only place with liquid water on the surface, and the only one that answers a radio call.",
+      "moon": "Its far side never faces Earth. Earth never sets from the near side.",
+      "mars": "Half Earth's width; a day forty minutes longer than ours.",
+      "jupiter": "Eleven Earths across. Io, Europa, Ganymede and Callisto pass in front of it and shade its clouds.",
+      "saturn": "The rings are mostly water ice, a few tens of metres thick, and would reach three-quarters of the way to the Moon.",
+      "io": "The most volcanic world known, squeezed by Jupiter's tides.",
+      "europa": "An ocean under the ice, deeper than all of Earth's together.",
+      "titan": "A nitrogen sky thicker than Earth's, and lakes of methane.",
+      "pluto": "Charon is so large that the pair orbits a point outside Pluto."
+    },
+    "far": {
+      "alphaCen": "Two suns 11 to 36 au apart, circling each other every 80 years, with Proxima a fifth of a light-year off.",
+      "proxima": "The nearest star to the Sun: a red dwarf, a seventh of the Sun's width, that flares."
+    }
+  },
+  "technicalDetails": {
+    "title": "How Voyage is drawn",
+    "summary": "Every body at its true size and place, in kilometres, with the ship as the scene's origin and a logarithmic depth buffer so a moon's surface and the far planets share one pass. Flights take the drive's real trip time on two clocks. Sunlight falls as the inverse square; moons shade one another in eclipses.",
+    "features": {
+      "scale": "The Sun, the planets, the named small worlds and the moons at true size, placed from the JPL elements with the Earth–Moon and Pluto–Charon barycentres resolved.",
+      "flight": "Three drives: Voyager's 17 km/s, a light sail at a tenth of light speed, a torch ship at one g turning over halfway.",
+      "clocks": "A ship clock and an Earth clock, run at the visitor's rate, that part only when the ship goes fast.",
+      "light": "Sunlight weaker with distance, the light-time home, and eclipses cast by moons and planets.",
+      "sky": "The bright stars at their measured distances and the Milky Way's band, shifting as the ship covers light-years, crowding ahead and changing colour at speed; α Centauri as three suns of their measured size."
+    },
+    "sections": {
+      "scale": {
+        "title": "Positions and scale",
+        "body": "Bodies sit where the JPL Keplerian elements put them at the moment shown, in kilometres about the Sun; the Moon follows the ELP-2000 lunar theory, good to an arcminute. The Earth–Moon and Pluto–Charon elements place the barycentres, so each planet's centre is moved by the moon's offset times the moon's share of the mass. The ship is the origin of what is drawn; everything is placed by its offset from the ship in double precision, and depth is logarithmic, so a surface a kilometre away and a planet a billion kilometres away keep their order."
+      },
+      "flight": {
+        "title": "Flights and clocks",
+        "body": "A coasting drive takes D / v on Earth's clock and less on the ship's by the Lorentz factor. The torch ship holds its proper acceleration, so each half of the trip is hyperbolic motion: the ship's time is 2(c/a) acosh(1 + aD/2c²). Parked, the ship rides with its body and the clocks agree. The camera's flight is a few seconds long; the clocks advance by the drive's real trip meanwhile, and the planets move on underneath."
+      },
+      "light": {
+        "title": "Light",
+        "body": "Each surface is lit from the Sun's position with an inverse-square readout of the sunlight there. Up to four bodies of a surface's own system are tested against the Sun's disc as seen from each point: inside the umbra the Sun is hidden, across the penumbra it is uncovered over the Sun's angular radius, and a disc smaller than the Sun's leaves an annulus lit."
+      },
+      "sky": {
+        "title": "The sky from a ship",
+        "body": "Each catalogue star sits at its SIMBAD parallax distance, so the constellations deform as the ship covers light-years and the Sun fades to a star among them. The Milky Way is the Orrery's painted band, carried with the ship and handed over to the Galaxy map light-years out; its grains and a faint field are painted, not catalogued. α Centauri is drawn as discs: A where the catalogue puts it, B on its measured orbit, Proxima at its own place, each the colour of its temperature. At speed the sky is drawn as the ship sees it: directions crowd toward the direction of travel by the aberration formula, each star's light is shifted by the Doppler factor D, its colour read from a blackbody lookup at D times its Ballesteros temperature, a star's flux raised by D squared, the band's and the background's glow by D to the fourth. Below a thousandth of light speed nothing is changed. Globes too are drawn where a moving ship sees them, their direction aberrated and their width divided by D (a sphere's outline stays a circle), though their light keeps its colour; the Galaxy map alone is drawn where it is. Beyond the mapped structures a field of galaxies drawn round the ship stands for the web no catalogue reaches. A far card says how long the light the ship sees has been under way; the map itself draws every galaxy where it is now."
+      }
+    }
+  },
+  "tour": {
+    "label": "Guided tour",
+    "start": "Start guide",
+    "progress": "{step} / {total}",
+    "previous": "Previous step",
+    "next": "Next",
+    "play": "Play guide",
+    "pause": "Pause guide",
+    "finish": "Finish",
+    "exit": "Exit guide",
+    "steps": {
+      "moon": {
+        "title": "The Moon",
+        "body": "Thirty Earth diameters of nothing. Light crosses the gap in 1.3 seconds."
+      },
+      "earth": {
+        "title": "Earth",
+        "body": "A short hop: even at one g the trip takes a few hours of ship time."
+      },
+      "mars": {
+        "title": "Mars",
+        "body": "Months at Voyager's speed, days for the torch ship. Sunlight here is 43 % of Earth's."
+      },
+      "jupiter": {
+        "title": "Io, in front of Jupiter",
+        "body": "Watch Io's shadow cross the clouds. A radio call home takes most of an hour."
+      },
+      "saturn": {
+        "title": "Saturn",
+        "body": "Back off and the rings turn edge-on; come in and they fill the sky."
+      },
+      "pluto": {
+        "title": "Pluto",
+        "body": "The Sun is a bright star. Set the drive to Voyager and see how long the way back takes."
+      },
+      "stars": {
+        "title": "α Centauri",
+        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in 80 years; Proxima is the red one. Voyager would need 77,000 years."
+      },
+      "galaxy": {
+        "title": "The Galaxy, from above",
+        "body": "Twenty-four years on board at one g; two hundred thousand on Earth. The Sun is one point in the disk below."
+      },
+      "andromeda": {
+        "title": "Andromeda",
+        "body": "Twenty-nine ship years. Earth's calendar has run two and a half million years; the Sun still shines."
+      },
+      "edge": {
+        "title": "The edge",
+        "body": "No ship can go farther: nothing sent from here today ever arrives beyond this. The microwave background is as far as it ever was. It was never a place."
+      }
+    }
+  },
+  "anchors": {
+    "galacticCentre": "The Galaxy, from above",
+    "edge": "The edge of the reachable"
+  }
+}
