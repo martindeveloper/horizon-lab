@@ -18,9 +18,6 @@ const CLOSE_UP_FARTHEST = 40;
 export const CLOSE_UP_SWING = 0.9;
 const CLOSE_UP_INCLINATION = 0.3;
 
-/** Radius to frame, in equatorial radii: Saturn's bright rings, Halley's glow. */
-export const FRAME_RADII: Partial<Record<BodyId, number>> = { saturn: 2.3, halley: 2.2 };
-
 /**
  * The pose that frames a body of `frameRadius` (scene units) at `body`, lit
  * three-quarters from the Sun. `halfTan` is the tangent of half the view's
@@ -46,23 +43,24 @@ export function closeUpLimits(radius: number, frameRadius: number) {
 }
 
 const TAU = Math.PI * 2;
+
+const shortest = (from: number, to: number) =>
+  ((((to - from + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
+
 /** Monotonic time warp with fixed ends; positive `l` front-loads, negative back-loads. */
 function warp(t: number, l: number) {
   const p = 1 + 1.6 * Math.abs(l);
   return l >= 0 ? 1 - (1 - t) ** p : t ** p;
 }
 
-const shortest = (from: number, to: number) =>
-  ((((to - from + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
-
 /**
  * Pose and aim blend `t` (0..1) of the way through a close-up flight. Going in,
- * `lead` (0..1) spends more of the flight where the body is large: the dive
- * covers its far reaches early and settles slowly onto the body, and the pull
- * back leaves the body slowly before it falls away; 0 paces the zoom evenly.
  * the view pans onto the body first and dives after; coming out it pulls back
  * first and pans home after, so the body never leaves the frame mid-flight.
  * Distance moves in log space: 10 au to a few thousand km reads as one dive.
+ * `lead` (0..1) spends more of the flight where the body is large: the dive
+ * covers its far reaches early and settles slowly onto the body, and the pull
+ * back leaves the body slowly before it falls away; 0 paces the zoom evenly.
  */
 export function sampleCloseUp(
   t: number,
@@ -131,10 +129,10 @@ export function moonFraming(moon: Vec, base: OrbitPose, halfTan: number): OrbitP
  * first two marks, there until the third, back by the fourth. Marks that leave no time to come
  * back (`home` at or before `back`) keep the camera out at the moon to the end of the hold, so
  * the flight out leaves from there and the body is pulled away from only once.
-  if (home <= back) return go;
  */
 export function moonSwing(t: number, [out, there, back, home]: MoonSwing) {
   const go = smootherstep(clamp((t - out) / (there - out), 0, 1));
+  if (home <= back) return go;
   return go * (1 - smootherstep(clamp((t - back) / (home - back), 0, 1)));
 }
 export type MoonSwing = readonly [out: number, there: number, back: number, home: number];
