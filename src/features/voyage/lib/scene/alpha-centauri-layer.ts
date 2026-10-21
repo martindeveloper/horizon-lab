@@ -3,16 +3,17 @@
  * orbit about A, and Proxima a fifth of a light-year off, each with a glow, placed about the
  * ship as the solar bodies are, where a moving ship sees them and in the colour its motion
  * shifts their light to. From the solar system they are below a pixel and the sky's
- * catalogue point stands for them; parked at the system the discs take over.
+ * catalogue point stands for them; as A's disc grows from drawn to named the discs take over
+ * (`takeover`), and the sky lets its point go.
  */
-import { Mesh, ShaderMaterial, Sprite, Vector2, type DataTexture, type Object3D } from "three";
+import { Mesh, ShaderMaterial, Sprite, type DataTexture, type Object3D } from "three";
 
 import SURFACE_VERT from "@/space/solar-system/graphics/shaders/surface.vert.glsl";
 import { smoothstep } from "@horizon/toolkit/math";
 import { STRONG, spriteMaterial, vec3d, type PlaceLabel, type Vec3d } from "@horizon/toolkit/scene";
 import { blackbodyColor, cssRgb } from "@horizon/toolkit/science";
 
-import { LUT_RANGE_K } from "../graphics/looks";
+import { lutSpecUniform } from "../graphics/looks";
 import STAR_GLOBE_FRAG from "../graphics/shaders/star-globe.frag.glsl";
 import {
   ALPHA_CENTAURI,
@@ -52,7 +53,7 @@ export function createAlphaCentauriLayer(
         uniforms: {
           kelvin: { value: star.kelvin },
           bbLut: { value: lut },
-          lutRange: { value: new Vector2(LUT_RANGE_K[0], LUT_RANGE_K[1]) },
+          bbLutSpec: lutSpecUniform(),
         },
         vertexShader: SURFACE_VERT,
         fragmentShader: STAR_GLOBE_FRAG,
@@ -71,9 +72,14 @@ export function createAlphaCentauriLayer(
   });
   const names = lod.fader();
   const nearest = { id: "alphaCen" as AnchorId, gap: Infinity };
+  /** How far A's disc has taken over from the catalogue's point, 0–1, this frame. */
+  let takeover = 0;
 
   return {
     pickables: slots.map((slot) => slot.mesh),
+    get takeover() {
+      return takeover;
+    },
     labelBodies: slots.map((slot) => ({ key: anchorOf(slot.star.id), mesh: slot.mesh })),
     /** The three suns with their positions as drawn this frame, km (the scanner's blips). */
     positions: slots.map((slot) => ({
@@ -101,6 +107,7 @@ export function createAlphaCentauriLayer(
         material.uniforms.kelvin!.value = star.kelvin * D;
         mesh.scale.setScalar(star.radiusKm);
         const rPx = lod.px(star.radiusKm, mesh.position);
+        if (star.id === "alphaCenA") takeover = smoothstep(DRAW_PX, NAME_PX[1], rPx);
         const drawn = rPx >= DRAW_PX;
         mesh.visible = glow.visible = drawn;
         const key = anchorOf(star.id);

@@ -1,8 +1,9 @@
 /** The Orrery's views are the solar system's framings; here the default, and drift by scale. */
 /* Relative, not `@/`: routing.ts reaches this file from next.config.ts, which resolves no path aliases. */
 import type { SolarViewId } from "../../../../space/solar-system/model/views";
+import { orreryManifest } from "../../manifest";
 
-export const DEFAULT_VIEW: SolarViewId = "giants";
+export const DEFAULT_VIEW: SolarViewId = orreryManifest.solarSystem.defaultView;
 
 /** Along-orbit speed-up steps: up to each camera distance (au), model years per real second. */
 const DRIFT_STEPS: readonly (readonly [number, number])[] = [

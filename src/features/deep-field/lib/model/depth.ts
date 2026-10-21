@@ -5,13 +5,14 @@
  */
 import {
   CMB_AGE_YEARS,
-  CMB_MLY,
+  CMB_LY,
   LAST_SCATTERING_Z,
   UNIVERSE_AGE_GYR,
 } from "@/space/cosmos/model/cosmos";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { clamp01 } from "@horizon/toolkit/math";
 import {
+  JULIAN_YEAR_SECONDS,
   LIGHT_YEAR_AU,
   PLANCK_2018,
   convert,
@@ -39,8 +40,6 @@ export const RUNGS: readonly { id: ViewId; depth: number }[] = VIEWS.map((v) => 
 
 /** Below this, light's travel time is its distance in years to better than a part in 10⁴. */
 const NEARBY_LY = 1e6;
-/** The microwave background's distance today, ly: nothing farther can be seen. */
-export const CMB_LY = CMB_MLY * 1e6;
 
 type Sightline = {
   /** Today's distance, ly (capped at the microwave background). */
@@ -101,13 +100,11 @@ export type Then =
   | { kind: "era"; id: EraId }
   | { kind: "cmb" };
 
-const YEAR_MS = 365.25 * 86_400_000;
-
 export function thenOf(line: Sightline, now: Date): Then {
   if (line.ly >= CMB_LY) return { kind: "cmb" };
   const era = EARTH_THEN.filter((band) => line.years >= band.from).at(-1);
   if (era) return { kind: "era", id: era.id };
-  const at = new Date(now.getTime() - line.years * YEAR_MS);
+  const at = new Date(now.getTime() - line.years * JULIAN_YEAR_SECONDS * 1000);
   if (line.years >= 1) return { kind: "year", year: at.getFullYear() };
   return { kind: at.toDateString() === now.toDateString() ? "clock" : "date", at };
 }

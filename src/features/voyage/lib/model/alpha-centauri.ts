@@ -8,9 +8,10 @@
 import { Vector3 } from "three";
 
 import { STARS } from "@/space/star-catalogue";
-import { SUN_RADIUS_KM } from "@horizon/toolkit/bodies";
+import { SUN_RADIUS_KM, eccentricAnomaly } from "@horizon/toolkit/bodies";
+import { TAU } from "@horizon/toolkit/math";
 import { equatorialToScene, type Vec3d } from "@horizon/toolkit/scene";
-import { AU_KM, PARSEC_KM } from "@horizon/toolkit/science";
+import { AU_KM, PARSEC_KM, RAD_PER_DEG, julianEpoch } from "@horizon/toolkit/science";
 
 import { starDistance } from "./star-distances";
 
@@ -54,7 +55,12 @@ export const AB_ORBIT = {
 /** Proxima's J2000 place: 14h 29m 42.95s, −62° 40′ 46.1″, parallax 768.07 mas (Gaia DR3). */
 const PROXIMA = { raHours: 14.495264, decDeg: -62.679486, pc: 1000 / 768.07 } as const;
 
-const RIGIL = STARS.find(([name]) => name === "Rigil Kentaurus")!;
+/**
+ * The catalogue's name for the pair: its one point stands for A and B together until the
+ * ship comes close enough for the discs to take over.
+ */
+export const ALPHA_CENTAURI_CATALOGUE_NAME = "Rigil Kentaurus";
+const RIGIL = STARS.find(([name]) => name === ALPHA_CENTAURI_CATALOGUE_NAME)!;
 const A_PC = starDistance(RIGIL[0]);
 
 /** A's place, and the sky's north and east there (scene axes), from the catalogue direction. */
@@ -76,21 +82,6 @@ const PROXIMA_AT = equatorialToScene(
   new Vector3(),
 ).multiplyScalar(PROXIMA.pc * PARSEC_KM);
 
-const J2000_MS = Date.UTC(2000, 0, 1, 12);
-const YEAR_MS = 365.25 * 86_400_000;
-const rad = (deg: number) => (deg * Math.PI) / 180;
-
-/** Kepler's equation by Newton's method: the eccentric anomaly for a mean anomaly. */
-function eccentricAnomaly(meanAnomaly: number, e: number) {
-  let E = meanAnomaly;
-  for (let i = 0; i < 12; i += 1) {
-    const d = (E - e * Math.sin(E) - meanAnomaly) / (1 - e * Math.cos(E));
-    E -= d;
-    if (Math.abs(d) < 1e-12) break;
-  }
-  return E;
-}
-
 /**
  * B's offset from A at a Julian year, in au: the Thiele–Innes constants put the orbit on the
  * sky (north, east) and along the line of sight (away from the Sun).
@@ -98,13 +89,12 @@ function eccentricAnomaly(meanAnomaly: number, e: number) {
 export function companionOffsetAu(year: number) {
   const { periodYr, periastronYr, e, aArcsec, iDeg, omegaDeg, nodeDeg } = AB_ORBIT;
   const a = aArcsec * A_PC;
-  const M = ((2 * Math.PI * (year - periastronYr)) / periodYr) % (2 * Math.PI);
-  const E = eccentricAnomaly(M, e);
+  const E = eccentricAnomaly((TAU * (year - periastronYr)) / periodYr, e);
   const X = Math.cos(E) - e;
   const Y = Math.sqrt(1 - e * e) * Math.sin(E);
-  const i = rad(iDeg);
-  const w = rad(omegaDeg);
-  const node = rad(nodeDeg);
+  const i = iDeg * RAD_PER_DEG;
+  const w = omegaDeg * RAD_PER_DEG;
+  const node = nodeDeg * RAD_PER_DEG;
   const A = a * (Math.cos(node) * Math.cos(w) - Math.sin(node) * Math.sin(w) * Math.cos(i));
   const B = a * (Math.sin(node) * Math.cos(w) + Math.cos(node) * Math.sin(w) * Math.cos(i));
   const F = a * (-Math.cos(node) * Math.sin(w) - Math.sin(node) * Math.cos(w) * Math.cos(i));
@@ -115,9 +105,6 @@ export function companionOffsetAu(year: number) {
     away: a * Math.sin(i) * (X * Math.sin(w) + Y * Math.cos(w)),
   };
 }
-
-/** The Julian year of a date. */
-export const julianYear = (date: Date) => 2000 + (date.getTime() - J2000_MS) / YEAR_MS;
 
 /** Where a star of the system is at `date`, km, heliocentric. */
 export function alphaCentauriAt(id: AlphaCentauriId, date: Date, out: Vec3d): Vec3d {
@@ -131,7 +118,7 @@ export function alphaCentauriAt(id: AlphaCentauriId, date: Date, out: Vec3d): Ve
   out[1] = A_AT.y;
   out[2] = A_AT.z;
   if (id === "alphaCenA") return out;
-  const { north, east, away } = companionOffsetAu(julianYear(date));
+  const { north, east, away } = companionOffsetAu(julianEpoch(date));
   out[0] += (north * NORTH.x + east * EAST.x + away * AWAY.x) * AU_KM;
   out[1] += (north * NORTH.y + east * EAST.y + away * AWAY.y) * AU_KM;
   out[2] += (north * NORTH.z + east * EAST.z + away * AWAY.z) * AU_KM;

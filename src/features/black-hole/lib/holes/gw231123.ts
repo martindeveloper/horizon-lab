@@ -30,7 +30,6 @@ export const gw231123: HoleSpec = {
   tempScale: 1,
   sky: "lensed",
   jet: 0,
-  aliases: ["gw231123", "gw-231123"],
   tour: [
     {
       phase: "wide",

@@ -4,6 +4,7 @@
  */
 import {
   AU_KM,
+  SOLAR_IRRADIANCE_W_M2,
   STANDARD_GRAVITY,
   defineEquation,
   formatNumber,
@@ -17,15 +18,15 @@ import {
   type Formula,
 } from "@horizon/toolkit/science";
 
-import { SOLAR_CONSTANT_W_M2, STANDARD_GRAVITY_KM_S2, irradianceAt } from "./parameters";
+import { irradianceAt } from "./parameters";
 
 const n = (value: number) => formatNumber(value, "en", 4);
 
 /** Sunlight falls off as the inverse square of the distance from the Sun. */
 export const irradiance = defineEquation({
   id: "solar-irradiance",
-  text: `S = ${n(SOLAR_CONSTANT_W_M2)} W/m² · (1 au / r)²`,
-  latex: `S = ${n(SOLAR_CONSTANT_W_M2)}\\,\\mathrm{W/m^2}\\left(\\frac{1\\,\\mathrm{au}}{r}\\right)^2`,
+  text: `S = ${n(SOLAR_IRRADIANCE_W_M2)} W/m² · (1 au / r)²`,
+  latex: `S = ${n(SOLAR_IRRADIANCE_W_M2)}\\,\\mathrm{W/m^2}\\left(\\frac{1\\,\\mathrm{au}}{r}\\right)^2`,
   output: "S",
   variables: {
     r: { symbol: "r", latex: "r", unit: "au" },
@@ -36,14 +37,14 @@ export const irradiance = defineEquation({
 });
 
 /**
- * A torch ship at one g, turning over halfway: its own time for a trip of D. The number in
- * the formula is c/a in years: a year and a little, the time a one-g ship takes to reach c in
- * Newtonian terms.
+ * A torch ship at one g, turning over halfway: its own time for a trip of D. The formula
+ * prints the acceleration it holds, standard gravity in m/s²; c/a, the time scale in front, is
+ * a little under a year at one g.
  */
 export const torchTrip = defineEquation({
   id: "torch-trip",
-  text: `τ = 2 (c / a) acosh(1 + a D / 2c²),  a = ${n(STANDARD_GRAVITY_KM_S2 * 1000)} m/s²`,
-  latex: `\\tau = \\frac{2c}{a}\\,\\operatorname{acosh}\\!\\left(1 + \\frac{aD}{2c^2}\\right), \\quad a = ${n(STANDARD_GRAVITY_KM_S2 * 1000)}\\,\\mathrm{m/s^2}`,
+  text: `τ = 2 (c / a) acosh(1 + a D / 2c²),  a = ${n(STANDARD_GRAVITY)} m/s²`,
+  latex: `\\tau = \\frac{2c}{a}\\,\\operatorname{acosh}\\!\\left(1 + \\frac{aD}{2c^2}\\right), \\quad a = ${n(STANDARD_GRAVITY)}\\,\\mathrm{m/s^2}`,
   output: "tau",
   variables: {
     D: { symbol: "D", latex: "D", unit: "km" },

@@ -11,7 +11,6 @@ import { cardFor, NEIGHBOUR_IDS } from "../src/features/deep-field/components/ca
 import { formatAgo, formatThen } from "../src/features/deep-field/components/format.ts";
 import { PROSE_FIGURES } from "../src/features/deep-field/lib/model/catalogue/index.ts";
 import {
-  CMB_LY,
   EARTH_THEN,
   LADDER_LY,
   RUNGS,
@@ -27,6 +26,7 @@ import { pathForView, resolveView, viewFromPath } from "../src/features/deep-fie
 import { proseArgs } from "../src/lib/facts.ts";
 import {
   ANCHORS,
+  CMB_LY,
   CMB_AGE_YEARS,
   CMB_MLY,
   COSMIC_VIEW_LY,

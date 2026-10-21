@@ -5,7 +5,7 @@ import type { Sketch } from "../sketches";
 
 export type HoleKind = "catalog" | "theory";
 
-/** The shot the header names while the camera flies to a beat. */
+/** The shot the header names while the camera flies to a guide step. */
 export type TourPhase = "wide" | "dolly" | "detail" | "hold";
 
 export type SkyId = "lensed" | "sgr" | "m87" | "cyg" | "lab" | "host";
@@ -46,8 +46,8 @@ export type Preset = {
   massSolar: number;
   /** The mass is only a lower limit (shown with ≥). */
   massLowerLimit?: boolean;
-  /** How the readout qualifies the mass: one study's bound, or a value adopted among estimates. */
-  massNote?: "bound" | "adopted";
+  /** The readout qualifies the mass as one study's bound. */
+  massNote?: "bound";
   /**
    * The real flow is hot and optically thin (synchrotron at horizon scales);
    * the shared thin-disk renderer only stands in for it.
@@ -65,7 +65,6 @@ export type Preset = {
 export type HoleSpec = Preset & {
   sky: SkyId;
   jet: number;
-  aliases: string[];
   tour: TourPose[];
 };
 
@@ -83,14 +82,10 @@ export type BlackHoleParams = {
   starIntensity: number;
   tempScale: number;
   autoRotate: boolean;
-  quality: Quality;
 };
 
-export function paramsFromPreset(
-  preset: Preset,
-  quality: Quality,
-  autoRotate: boolean,
-): BlackHoleParams {
+/** A preset's scene; the orbit switch is the visitor's and carries over. */
+export function paramsFromPreset(preset: Preset, autoRotate: boolean): BlackHoleParams {
   return {
     presetId: preset.id,
     massSolar: preset.massSolar,
@@ -102,6 +97,5 @@ export function paramsFromPreset(
     starIntensity: preset.starIntensity,
     tempScale: preset.tempScale,
     autoRotate,
-    quality,
   };
 }

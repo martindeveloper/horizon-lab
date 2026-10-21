@@ -5,26 +5,29 @@
  * with its grains and a faint field, carried with the ship and faded out as the Galaxy map
  * takes over light-years out. At speed the whole sky crowds ahead and shifts colour
  * (star.vert.glsl, band.frag.glsl): the ship's velocity reaches the shaders as β, γ and the
- * direction of travel.
+ * direction of travel. α Centauri's catalogue point gives way as the α Centauri layer's discs
+ * take over: a point a few million km from the ship, placed in single precision, would point
+ * anywhere.
  */
 import { BufferAttribute, Points, Vector3, type DataTexture, type Object3D } from "three";
 
 import { brightStarGeometry } from "@/space/bright-stars";
 import { LY } from "@/space/galaxy/scene/frames";
 import { createMilkyWay, fieldStars, starSize, type SkyCounts } from "@/space/sky/milky-way";
+import { STARS } from "@/space/star-catalogue";
 import { pointsGeometry, rising, type Vec3d } from "@horizon/toolkit/scene";
-import { PARSEC_KM } from "@horizon/toolkit/science";
+import { PARSEC_KM, SOLAR_TEFF_K } from "@horizon/toolkit/science";
 
-import { LUT_RANGE_K, PAINTED_PEAK, starMaterial, type MotionUniforms } from "../graphics/looks";
+import { LUT_SPEC, starMaterial, SURFACE_PEAK, type MotionUniforms } from "../graphics/looks";
+import { ALPHA_CENTAURI_CATALOGUE_NAME } from "../model/alpha-centauri";
 import { BAND_TO_MAP_LY } from "../model/parameters";
 import { starDistance } from "../model/star-distances";
 import type { VoyageKit } from "./kit";
 
 /** The sky sphere's radius, km: inside the frustum, beyond the solar system's bodies. */
 const SKY_RADIUS_KM = 1e10;
-/** The Sun's apparent magnitude from a parsec (absolute 4.83 − 5), and its temperature. */
+/** The Sun's apparent magnitude from a parsec (absolute 4.83 − 5). */
 const SUN_MAG_AT_PC = -0.17;
-const SUN_KELVIN = 5772;
 
 /** The Sun as a sky point at the origin, a parsec's distance as its brightness reference. */
 function sunGeometry() {
@@ -34,7 +37,23 @@ function sunGeometry() {
     new Float32Array([starSize(SUN_MAG_AT_PC)]),
   );
   geometry.setAttribute("distance", new BufferAttribute(new Float32Array([1]), 1));
-  geometry.setAttribute("temperature", new BufferAttribute(new Float32Array([SUN_KELVIN]), 1));
+  geometry.setAttribute("temperature", new BufferAttribute(new Float32Array([SOLAR_TEFF_K]), 1));
+  geometry.setAttribute("handover", new BufferAttribute(new Float32Array([0]), 1));
+  return geometry;
+}
+
+/** The catalogue's stars, with α Centauri's point marked as the one another layer takes over. */
+function catalogueGeometry() {
+  const geometry = brightStarGeometry({
+    floor: 0.55,
+    full: 1.4,
+    size: starSize,
+    distanceOf: starDistance,
+  });
+  const handover = new Float32Array(
+    STARS.map(([name]) => +(name === ALPHA_CENTAURI_CATALOGUE_NAME)),
+  );
+  geometry.setAttribute("handover", new BufferAttribute(handover, 1));
   return geometry;
 }
 
@@ -47,19 +66,10 @@ export function createStarsLayer(
 ) {
   const shipPc = new Vector3();
   const material = scope.own(starMaterial(dpr, lut, motion, shipPc));
-  /* The painted sky's points share the motion but fade on their own and brighten less. */
-  const paintedMaterial = () => {
-    const made = starMaterial(dpr, lut, motion, shipPc);
-    made.uniforms.peak!.value = PAINTED_PEAK;
-    return made;
-  };
+  /* The painted sky's points share the motion but fade on their own and brighten as a surface. */
+  const paintedMaterial = () => starMaterial(dpr, lut, motion, shipPc, true);
   const painted = scope.own(paintedMaterial());
-  const sky = new Points(
-    scope.own(
-      brightStarGeometry({ floor: 0.55, full: 1.4, size: starSize, distanceOf: starDistance }),
-    ),
-    material,
-  );
+  const sky = new Points(scope.own(catalogueGeometry()), material);
   const sun = new Points(scope.own(sunGeometry()), material);
   const field = new Points(fieldStars(counts.fieldStars, true), painted);
   scope.defer(() => field.geometry.dispose());
@@ -74,7 +84,8 @@ export function createStarsLayer(
         beta: motion.beta,
         gamma: motion.gamma,
         lut,
-        lutRange: LUT_RANGE_K,
+        lutSpec: LUT_SPEC,
+        peak: SURFACE_PEAK,
       },
     }),
   );
@@ -99,9 +110,13 @@ export function createStarsLayer(
       }
       drawn = next;
     },
-    /** Draws the sky for the ship at `x` (km, heliocentric), `distAu` from the Sun. */
-    update(x: Readonly<Vec3d>, distAu: number) {
+    /**
+     * Draws the sky for the ship at `x` (km, heliocentric), `distAu` from the Sun, with α
+     * Centauri's point given over to its discs by `handedOver` (0–1).
+     */
+    update(x: Readonly<Vec3d>, distAu: number, handedOver: number) {
       shipPc.set(x[0] / PARSEC_KM, x[1] / PARSEC_KM, x[2] / PARSEC_KM);
+      material.uniforms.handedOver!.value = handedOver;
       /* The painted band is the sky from here; the Galaxy map takes over light-years out. */
       const band = 1 - rising(distAu / LY, BAND_TO_MAP_LY[0], BAND_TO_MAP_LY[1]);
       if (band !== presence) {

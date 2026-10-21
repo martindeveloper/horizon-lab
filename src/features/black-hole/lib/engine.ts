@@ -37,6 +37,7 @@ import {
   orbitWheelSensitivity,
   passOptions,
   sceneWriter,
+  uniformTextures,
   writeCamera,
   type CameraPose,
 } from "./frame";
@@ -51,6 +52,7 @@ import {
   renderScale,
 } from "./quality";
 import { useBlackHole } from "./store";
+import { toneExposure } from "./tone";
 import { holdPose, tourEnd, tourPose } from "./tour-flight";
 import { tourFor } from "./tours";
 
@@ -95,68 +97,74 @@ function createWarmup() {
 }
 
 /**
- * Flies the camera into each guide beat from wherever it is, then holds it there with
+ * Flies the camera into each guide step from wherever it is, then holds it there with
  * a slow drift. The card's timer may land first; the flight still finishes unless motion
  * is reduced.
  */
 function createTourDirector(reduce: boolean) {
   let open = false;
-  let beatIndex = -1;
+  let stepIndex = -1;
   let t = 0;
   let from: CameraPose = { azimuth: 0, inclination: 0, distance: 0, roll: 0 };
   let landed: CameraPose | null = null;
   let held = 0;
   return {
-    /** The current beat's flight is still under way. */
+    /** The current step's flight is still under way. */
     flying: () => t < 1,
     /** The camera for this frame while the guide is open. */
     step(state: State, camera: CameraPose, dt: number): CameraPose {
-      if (!open || state.guideBeat !== beatIndex) {
+      if (!open || state.guideStep !== stepIndex) {
         open = true;
-        beatIndex = state.guideBeat;
+        stepIndex = state.guideStep;
         from = { ...camera };
         t = 0;
         landed = null;
       }
-      const beat = tourFor(state.presetId)[state.guideBeat];
-      if (!beat) return camera;
+      const step = tourFor(state.presetId)[state.guideStep];
+      if (!step) return camera;
       if (t < 1 && !(state.guideArrived && reduce)) {
-        t = Math.min(1, t + dt / Math.max(beat.duration, 0.4));
+        t = Math.min(1, t + dt / Math.max(step.duration, 0.4));
         if (t >= 1 && !state.guideArrived) state.setGuideArrived(true);
-        return tourPose(beat, from, t);
+        return tourPose(step, from, t);
       }
       if (!state.guideArrived) return camera;
       if (!landed) {
-        landed = tourEnd(beat, from);
+        landed = tourEnd(step, from);
         t = 1;
         held = 0;
       }
       if (!state.animationPaused && !reduce) held += dt;
-      return holdPose(beat, landed, held);
+      return holdPose(step, landed, held);
     },
     /** The guide closed; true once, when a tour was running. */
     close() {
       const was = open;
       open = false;
-      beatIndex = -1;
+      stepIndex = -1;
       landed = null;
       return was;
     },
   };
 }
 
+/** What the page hears from the engine: its first frame, every frame drawn (with the frame-rate cap) and errors. */
+type EngineHooks = {
+  onFirstFrame?: () => void;
+  onFrame?: (fps: number) => void;
+  onError?: (error: unknown) => void;
+};
+
 /** Feature orchestration only: physics, uniforms, tours and application state. */
 export function createBlackHoleEngine(
   canvas: HTMLCanvasElement,
   host: HTMLElement,
   snapshot: CameraSnapshot,
-  onFirstFrame?: () => void,
-  onError?: (error: unknown) => void,
+  { onFirstFrame, onFrame, onError }: EngineHooks = {},
 ): BlackHoleEngine {
   const resources = new DisposalScope();
   try {
     const uniforms = createUniforms();
-    const profile = resources.own(uniforms.uDiskProfile.value);
+    const textures = uniformTextures(uniforms).map((texture) => resources.own(texture));
     const writeScene = sceneWriter(uniforms);
     const pass = resources.own(
       createFullscreenPass({
@@ -366,6 +374,9 @@ export function createBlackHoleEngine(
       (state.guideOpen && (!state.guideArrived || tour.flying())) ||
       state.drift === "playing" ||
       flyingFree;
+    /** The frame-rate cap now: higher while the camera moves. */
+    const frameCap = (state: State) =>
+      renderBudget(state.quality, constrained, input.active || busy(state)).fps;
 
     function tick(stepDt: number) {
       const state = useBlackHole.getState();
@@ -428,21 +439,23 @@ export function createBlackHoleEngine(
       if (!state.animationPaused) time += stepDt;
       writeScene(state, time, stepCount(state.quality));
       applyCamera();
+      const exposure = toneExposure(state.exposure);
       pass.render({
-        antialias: state.antialiasing,
-        bloom: state.bloom ? bloomSettings(state.quality, constrained, state.exposure) : null,
-        lens: state.lens ? lensSettings(state.quality, constrained, state.exposure) : null,
+        antialias: state.antialias,
+        bloom: state.bloom ? bloomSettings(state.quality, constrained, exposure) : null,
+        lens: state.lens ? lensSettings(state.quality, constrained, exposure) : null,
         gamut: state.wideColour ? "p3" : "srgb",
       });
       if (warmup.advance()) engine.refresh();
       announceFirstFrame();
+      onFrame?.(frameCap(state));
     }
     applyCamera();
     pass.compile();
     engine.start({
       render: tick,
       onRestored: () => {
-        profile.needsUpdate = true;
+        for (const texture of textures) texture.needsUpdate = true;
       },
       paused: () => {
         const state = useBlackHole.getState();
@@ -450,10 +463,7 @@ export function createBlackHoleEngine(
           state.mapOpen || (state.animationPaused && !engine.dirty && warmup.done() && !busy(state))
         );
       },
-      fps: () => {
-        const state = useBlackHole.getState();
-        return renderBudget(state.quality, constrained, input.active || busy(state)).fps;
-      },
+      fps: () => frameCap(useBlackHole.getState()),
     });
     resources.defer(
       useBlackHole.subscribe((state, previous) => {

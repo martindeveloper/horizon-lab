@@ -11,15 +11,17 @@
  *                     and molecular outflow (Li et al., ApJL 922, L29, 2021)
  *   i                 unknown; a type-1 quasar is seen within ~45° of its axis, so the view is fairly face-on
  *
- * Mass on the dial is the lower estimate. Sky: host galaxy (weather = host).
+ * Mass on the dial is the lower estimate (`BLACK_HOLES` in src/space/stellar.ts). Sky: host galaxy (weather = host).
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
 import type { HoleSpec } from "./types";
 
 export const ton618: HoleSpec = {
   id: "ton-618",
   name: "TON 618",
   kind: "catalog",
-  massSolar: 4.07e10,
+  massSolar: BLACK_HOLES["ton-618"].mass.value,
   spin: 0.6,
   inclination: 1.0,
   distance: 30,
@@ -29,7 +31,6 @@ export const ton618: HoleSpec = {
   tempScale: 0.8,
   sky: "host",
   jet: 0.5,
-  aliases: ["ton-618", "ton618"],
   tour: [
     // A long fall in from far away, as its light did.
     {

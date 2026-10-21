@@ -3,7 +3,6 @@ import { useTranslations } from "next-intl";
 import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
 import {
   criticalImpactParameters,
-  formatSpin,
   horizonOverM,
   iscoOverM,
   iscoPeriodSeconds,
@@ -68,7 +67,7 @@ function HorizonLesson({
   rh: number;
   spin: number;
 }) {
-  const { formatMass, formatLengthKm } = usePhysicsFormat();
+  const { formatMass, formatLengthKm, formatSpin } = usePhysicsFormat();
   const rPlusKm = (rh / 2) * rs;
   const t = useTranslations("blackHole");
   return (
@@ -141,7 +140,7 @@ function IscoLesson({
   spin: number;
   massSolar: number;
 }) {
-  const { formatMass, formatDuration } = usePhysicsFormat();
+  const { formatMass, formatDuration, formatSpin } = usePhysicsFormat();
   const t = useTranslations("blackHole");
   return (
     <>

@@ -19,6 +19,7 @@ import { formatYearsAgo } from "./format";
 /** The tour card: one concept per step, on the shared guide card. The scene flies the camera. */
 export function OrreryGuide() {
   const t = useTranslations("orrery");
+  const tGuide = useTranslations("guide");
   const f = useFormatter();
   const figures = proseArgs(PROSE_FIGURES, useLocale());
   const index = useOrrery((s) => s.guideStep);
@@ -31,17 +32,17 @@ export function OrreryGuide() {
 
   return (
     <GuideCard
-      label={t("tour.label")}
-      kicker={t("tour.progress", {
+      label={tGuide("label")}
+      kicker={tGuide("progressWith", {
         step: index + 1,
         total: TOUR.length,
-        time: formatYearsAgo(t, f, yearsAgo),
+        detail: formatYearsAgo(t, f, yearsAgo),
       })}
       stepKey={step.id}
       focusNext
       progress={{ step: index, total: TOUR.length }}
       controls={{
-        ...tourControls(t, index, TOUR.length, api),
+        ...tourControls(tGuide, index, TOUR.length, api),
         /* The tour may run the clock; it can always be stopped. */
         play:
           playing || step.playing

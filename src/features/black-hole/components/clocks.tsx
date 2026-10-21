@@ -31,8 +31,8 @@ import {
 } from "@horizon/toolkit/ui";
 
 import { ClockRow } from "./clock-row";
-import { drawOverHole, fitOverlay, frameLoop } from "./overlay-canvas";
-import { useSceneCamera } from "./scene-camera";
+import { drawOverHole, overlayFit, overlayLoop } from "./overlay-canvas";
+import { useSceneCamera, useSceneFrames } from "./scene-camera";
 
 const PULSE: Keyframe[] = [
   { transform: "scale(1.9)", opacity: 1 },
@@ -73,6 +73,7 @@ function ClockRun({
   onRestart: () => void;
 }) {
   const cam = useSceneCamera();
+  const frames = useSceneFrames();
   const t = useTranslations("blackHole");
   const setOpen = useBlackHole((s) => s.setClocksOpen);
   const layerRef = useRef<HTMLDivElement>(null);
@@ -84,6 +85,7 @@ function ClockRun({
     DROP_START.map(() => ({ row: null, dot: null, label: null, bar: null, rate: null })),
   );
   const hoverRef = useRef<number | null>(null);
+  const wakeRef = useRef<(() => void) | null>(null);
   const drops = useRef<Drop[]>(freshDrops());
   const speedRef = useRef(2.2);
   useEffect(() => {
@@ -105,7 +107,9 @@ function ClockRun({
       el.animate(PULSE, { duration: 700, easing: "cubic-bezier(0.2, 0.7, 0.3, 1)" });
     };
 
-    return frameLoop((dt) => {
+    /* The clocks fall while the scene animates, when the engine draws every frame; paused, they
+       redraw only when the camera moves. */
+    const frame = (dt: number) => {
       // Reduced motion starts paused (store); resuming is the user's explicit choice.
       const realDt = useBlackHole.getState().animationPaused ? 0 : dt;
       const dT = speedRef.current * realDt;
@@ -157,8 +161,8 @@ function ClockRun({
         shown[i] = { label, rate: rateText, gone: d.gone };
       });
 
-      const fit = fitOverlay(layer, canvas);
-      if (!fit) return;
+      const fit = boxes.fit();
+      if (!fit) return false;
       drawOverHole(ctx, fit);
       const { width, height } = fit.holeBox;
 
@@ -209,8 +213,17 @@ function ClockRun({
           ctx.stroke();
         }
       });
-    });
-  }, [cam]);
+      return false;
+    };
+    const loop = overlayLoop(frames, frame);
+    const boxes = overlayFit(layer, canvas, loop.wake);
+    wakeRef.current = loop.wake;
+    return () => {
+      wakeRef.current = null;
+      loop.dispose();
+      boxes.dispose();
+    };
+  }, [cam, frames]);
 
   const restart = (
     <Tooltip label={t("dropAgain")} align="end">
@@ -284,6 +297,7 @@ function ClockRun({
                 label={`r ${r.toFixed(1)}`}
                 onHover={(on) => {
                   hoverRef.current = on ? i : null;
+                  wakeRef.current?.();
                 }}
               />
             ))}

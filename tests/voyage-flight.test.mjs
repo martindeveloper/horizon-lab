@@ -4,6 +4,7 @@ import { test } from "node:test";
 /** Voyage's flights: gravity and its stepping, and the autopilot's schedule against the drive's trip. */
 import {
   ALIGN_S,
+  driveLit,
   progressOf,
   transit,
   transitPhase,
@@ -70,7 +71,7 @@ test("autopilot: the transit runs from home to the destination without stepping 
   assert.ok(transitSeconds(2e19, 2.5e4, 3e18) > transitSeconds(4e5, 2.5e4, 5e3));
 });
 
-test("autopilot: each point is the drive's real trip there, and the torch flips halfway", () => {
+test("autopilot: each point is the drive's real trip there, and the torch flips halfway, drive off", () => {
   const torch = DRIVES.torch;
   const km = 4.1e13; // α Centauri
   for (const s of [0.01, 0.2, 0.5, 0.73, 0.999]) {
@@ -82,6 +83,11 @@ test("autopilot: each point is the drive's real trip there, and the torch flips 
   assert.equal(transitPhase(torch, 0.6, 0.2), "flip");
   assert.equal(transitPhase(torch, 0.6, 5), "brake");
   assert.equal(transitPhase(DRIVES.sail, 0.6, 0.2), "cruise");
+  /* The drive thrusts out and in, never while the ship turns end over end, never on a coast. */
+  assert.deepEqual(
+    ["burn", "flip", "brake", "cruise"].map((phase) => driveLit(phase)),
+    [true, false, true, false],
+  );
   assert.ok(ALIGN_S > 0);
 });
 

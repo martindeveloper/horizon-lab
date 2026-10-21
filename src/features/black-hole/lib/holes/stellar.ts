@@ -2,7 +2,8 @@
  * Cygnus X-1  —  catalog hole, stellar-mass HMXB.
  *
  *   D = 2.22 kpc                 Miller-Jones et al. 2021 VLBA parallax
- *   M ≈ 15 M☉ on the dial        21.2 ± 2.2 (2021); 13–18 (Ramachandran 2025)
+ *   M = 21.2 M☉     dynamical, with the parallax (Miller-Jones 2021; `BLACK_HOLES` in
+ *                   src/space/stellar.ts); wind models give 13–18 (Ramachandran 2025)
  *   a/M ≈ 0.95      disputed; most methods find a > 0.9: continuum fitting > 0.9985 (Zhao 2021),
  *                   IXPE soft state ≳ 0.96 (Steiner 2024). Comptonised-reflection fits find it
  *                   low (Zdziarski 2024; Niedźwiecki 2026; XRISM, arXiv:2605.24664).
@@ -11,21 +12,22 @@
  *
  * Disk temperature at fixed Eddington ratio:
  *   T_max ∝ (Ṁ / M²)^(1/4) ∝ M^(−1/4)
- * So a 15 M☉ hole is ~23× hotter than Sgr A* at the same ṁ. X-rays, not UV.
+ * So a 21 M☉ hole is ~21× hotter than Sgr A* at the same ṁ. X-rays, not UV.
  *
  * Scale in geometric units (same silhouette as Sgr A*):
  *   GM☉/c² ≈ 1.48 km, GM☉/c³ ≈ 4.93 μs
  *
  * Sky: Cygnus / Orion Spur (weather = cyg). The distant wind-feeding companion is not drawn at this scale.
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
 import type { HoleSpec } from "./types";
 
 export const stellar: HoleSpec = {
   id: "stellar",
   name: "Cygnus X-1",
   kind: "catalog",
-  massSolar: 15,
-  massNote: "adopted",
+  massSolar: BLACK_HOLES["cygnus-x1"].mass.value,
   spin: 0.95,
   inclination: 1.09,
   distance: 26,
@@ -35,7 +37,6 @@ export const stellar: HoleSpec = {
   tempScale: 1.85,
   sky: "cyg",
   jet: 0,
-  aliases: ["stellar", "cygnus-x-1", "cyg-x-1", "cygnus"],
   tour: [
     {
       phase: "wide",

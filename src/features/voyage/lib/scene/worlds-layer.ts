@@ -1,10 +1,12 @@
 /**
  * The shared worlds beyond the solar system, placed about the ship: our reach (the probes and
  * the heliopause), the Galaxy and the cosmic map. Each layer draws in the au world it was
- * written for; two groups carry them, scaled to km and placed by the ship's offset (the
- * floating origin). The cosmic map is also scaled by the universe's expansion as the clocks
- * run, so galaxies recede. The layers fade by the ship's distance from the Sun; beyond the
- * mapped structures the field of galaxies is kept round the ship.
+ * written for; one group carries them, scaled to km and placed by the ship's offset (the
+ * floating origin). The cosmic map draws the universe's expansion as the clocks run: what lies
+ * beyond the Local Group recedes by the shared rule (`expansionFactor`), the one the anchors
+ * the ship flies to stand by, and the Local Group keeps its place. The layers fade by the
+ * ship's distance from the Sun; beyond the mapped structures the field of galaxies is kept
+ * round the ship.
  */
 import { Group, PerspectiveCamera, type Object3D } from "three";
 
@@ -75,18 +77,17 @@ export function createWorldsLayer(
   const cosmosKit = sceneKit(worldBasics, cosmosLooks, lod);
   const reachKit = sceneKit(worldBasics, reachLooks, lod);
 
-  /* The bound worlds in au about the Sun, and the cosmic map scaled by the expansion. */
+  /* The worlds in au about the Sun; the cosmic map draws its own expansion (`setExpansion`). */
   const bound = new Group();
   bound.scale.setScalar(AU_KM);
-  const expanding = new Group();
-  parent.add(bound, expanding);
+  parent.add(bound);
 
   /** The ship this frame, km: the au world's labels come out in km about it. */
   let ship: Vec3d = [0, 0, 0];
   const placeBound: PlaceLabel = (key, x, y, z, on, style) =>
     deps.place(key, x * AU_KM - ship[0], y * AU_KM - ship[1], z * AU_KM - ship[2], on, style);
   /* The cosmic map's labels pass through its root's world matrix, so they arrive in km already. */
-  const placeExpanding: PlaceLabel = deps.place;
+  const placeCosmic: PlaceLabel = deps.place;
 
   /* The frames handed to the layers, rewritten in place each frame. */
   const galaxyShow = { halo: false, names: true, distances: false, lightTime: false };
@@ -113,8 +114,8 @@ export function createWorldsLayer(
     distanceText,
     picks,
   });
-  const cosmos = createCosmosLayer(cosmosKit, expanding, {
-    place: placeExpanding,
+  const cosmos = createCosmosLayer(cosmosKit, bound, {
+    place: placeCosmic,
     rulers,
     labels,
     distanceText,
@@ -132,7 +133,7 @@ export function createWorldsLayer(
     setDetail: (detail: CosmosDetail) => cosmos.setDetail(detail),
     /**
      * Draws a frame about the ship at `at` (km, heliocentric), `aimKm` from its aim, with the
-     * universe at scale `a` on Earth's clock.
+     * universe at scale `a` on Earth's clock (held at `MAX_SCALE_FACTOR`, inside the far plane).
      * The maps' presence follows the ship's distance from the Sun (the Galaxy appears
      * once the ship is light-years out, the cosmic map once it has left the Galaxy); the
      * probes' markers are sized for the ship's distance to its aim.
@@ -158,9 +159,8 @@ export function createWorldsLayer(
       worldCamera.updateMatrixWorld();
       lod.begin(dt, Math.max(1e-6, distAu));
       bound.position.set(-at[0], -at[1], -at[2]);
-      expanding.position.copy(bound.position);
-      expanding.scale.setScalar(AU_KM * a);
-      expanding.updateMatrixWorld(true);
+      bound.updateMatrixWorld(true);
+      cosmos.setExpansion(a);
       /* The Galaxy map comes in as the painted band gives way; beyond the mapped structures
          the field of galaxies is drawn round the ship. */
       const ly = distAu / LY;

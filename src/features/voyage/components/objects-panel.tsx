@@ -13,11 +13,10 @@ import {
   selectionOfAnchor,
   type AnchorId,
 } from "../lib/model/anchors";
-import { dateAt } from "../lib/model/calendar";
 import { courseOf, useVoyage } from "../lib/store";
 import { DriveControl } from "./flight-dock";
-import { NONE, formatDuration } from "./format";
-import { tripTo } from "./trips";
+import { NONE, formatTrip } from "./format";
+import { momentOf, tripTo } from "./trips";
 
 const HOME: readonly AnchorId[] = ["moon", "earth", "sun"];
 const PLANETS: readonly AnchorId[] = [...PLANET_IDS, "pluto"];
@@ -30,8 +29,8 @@ const SYSTEMS = [...PLANET_IDS, "pluto" as const]
 /**
  * Where the autopilot can take the ship, near to far: home, the planets, our probes, the
  * nearest stars, the galaxies and the edge, each with how long the chosen drive takes from
- * the ship's last fix on its clock; then the moons by planet. Picking one sets course and
- * opens its card.
+ * the ship's last fix on its clock (never, to the edge: the ship is put there); then the moons
+ * by planet. Picking one sets course and opens its card.
  */
 export function ObjectsPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("voyage");
@@ -40,7 +39,7 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
   const fix = useVoyage((s) => s.fix);
   const epochMs = useVoyage((s) => s.epochMs);
   const course = useVoyage(courseOf);
-  const now = dateAt(epochMs, fix.seconds);
+  const moment = momentOf(epochMs, fix);
   const go = (id: AnchorId) => {
     const api = useVoyage.getState();
     api.goTo(id);
@@ -52,7 +51,7 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
       <ListItem key={id} {...(here ? { selected: true } : {})} onClick={() => go(id)}>
         <span className="min-w-0 truncate">{t(anchorNameKey(id))}</span>
         <span className="shrink-0 font-mono text-[11px] text-muted tabular-nums">
-          {here ? NONE : formatDuration(t, f, tripTo(drive, id, fix.km, now).tau)}
+          {here ? NONE : formatTrip(t, f, tripTo(drive, id, fix.km, moment).tau)}
         </span>
       </ListItem>
     );

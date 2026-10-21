@@ -15,6 +15,8 @@ type VoyageBenchScene = BenchScene & {
   flyTo?: AnchorId;
   /** A flight by hand from the place on the light sail, the dust streaming past. */
   cruise?: boolean;
+  /** Faint ring systems' long exposure, when the scene sets it rather than the visit's default. */
+  faintRings?: boolean;
 };
 
 /** Ship seconds per real second on the burn: about four months a second. */
@@ -28,6 +30,9 @@ const CRUISE_WARP = 60;
  */
 const BURN_S = 20;
 const BURN_FRAMES = 240;
+/** The autopilot's flight from Earth to Neptune, its arrival in the last keyframes. */
+const NEPTUNE_FLIGHT = { frames: 600, duration: 40, keyframes: [0.6, 0.8, 0.9, 1] };
+
 /** Pad steps that turn the ship round: twelve of 15°. */
 const ABOUT_FACE = 12;
 
@@ -101,6 +106,24 @@ const SCENES: readonly VoyageBenchScene[] = [
     script: { frames: 330, duration: 22, keyframes: [0.05, 0.2, 0.4, 0.6, 0.8, 0.95, 1] },
   },
   {
+    id: "neptune",
+    description:
+      "The autopilot flies from Earth to Neptune: its rings in a long exposure, as a visit starts",
+    tags: ["sequence"],
+    view: "earth",
+    flyTo: "neptune",
+    script: NEPTUNE_FLIGHT,
+  },
+  {
+    id: "neptune-plain",
+    description: "The same flight to Neptune with Faint rings off: the rings as the eye sees them",
+    tags: ["sequence", "effects"],
+    view: "earth",
+    flyTo: "neptune",
+    faintRings: false,
+    script: NEPTUNE_FLIGHT,
+  },
+  {
     id: "cruise",
     description: "By hand from Earth on the light sail at a minute a second: the dust streams past",
     tags: ["sequence"],
@@ -128,6 +151,8 @@ export const benchTarget: BenchTarget = {
       quality: "standard",
       compression: 0,
     });
+    if (scene.faintRings !== undefined)
+      store.getState().patchShow({ faintRings: scene.faintRings });
     /* Flown by hand, the bench holds the warp fixed rather than the flight assist's. */
     const warp = scene.burn ? BURN_WARP : scene.cruise ? CRUISE_WARP : null;
     const instance = mountSceneEngine(

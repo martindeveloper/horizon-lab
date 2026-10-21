@@ -37,6 +37,10 @@ export function formatDuration(t: Translate, f: Format, seconds: number) {
   return t("time.billion", { value: f.number(years / 1e9, { maximumSignificantDigits: 3 }) });
 }
 
+/** A trip's duration (`formatDuration`), or "never" for one no drive completes. */
+export const formatTrip = (t: Translate, f: Format, seconds: number) =>
+  seconds === Infinity ? t("hud.never") : formatDuration(t, f, seconds);
+
 /** Earth's calendar at a moment, when the calendar still reaches; null past it. */
 export function formatCalendar(f: Format, epochMs: number, seconds: number) {
   if (!Number.isFinite(seconds) || !withinCalendar(seconds)) return null;

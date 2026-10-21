@@ -138,13 +138,13 @@ export function renderBudget(quality: Quality, constrained: boolean, active: boo
 }
 
 /**
- * The observatory's bloom, in radiance before the exposure is applied: light the tone map would
+ * The observatory's bloom, in radiance before the tone map's exposure is applied: light it would
  * show brighter than about two thirds of white glows in full, eased in from about a fifth, a
  * pixel counting at most eight times the threshold, and the glow returns at half strength.
  */
 export const BLACK_HOLE_BLOOM = { strength: 0.5, threshold: 0.7, knee: 0.5, clamp: 8 };
 
-/** This frame's bloom: the look above in the scene's units, through the level's chain. */
+/** This frame's bloom at the tone map's `exposure` (`toneExposure`): the look above in the scene's units, through the level's chain. */
 export function bloomSettings(
   quality: Quality,
   constrained: boolean,
@@ -161,7 +161,7 @@ export function bloomSettings(
 }
 
 /**
- * The observatory's lens, in radiance before the exposure is applied: a four-point star on each
+ * The observatory's lens, in radiance before the tone map's exposure is applied: a four-point star on each
  * compact light the bloom's mask holds (a hot spot, a bright star; the disk itself is too wide
  * to spike), its spikes drawn until they fade to 0.01, carrying twice their light, and
  * a fringe of 1.5 pixels at the corners. The frame is radiance, so every light spikes in full.
@@ -174,7 +174,7 @@ export const BLACK_HOLE_LENS = {
   fringe: 1.5,
 } as const;
 
-/** This frame's lens: the look above in the scene's units, with the level's cells and reach. */
+/** This frame's lens at the tone map's `exposure`: the look above in the scene's units, with the level's cells and reach. */
 export function lensSettings(
   quality: Quality,
   constrained: boolean,

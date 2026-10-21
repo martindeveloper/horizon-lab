@@ -16,4 +16,5 @@ export const orreryManifest = {
     { id: "inner", href: `${ORRERY_PATH}/inner` },
     { id: "oort", href: `${ORRERY_PATH}/oort` },
   ],
+  solarSystem: { defaultView: "giants" },
 } as const satisfies SimulationManifest;

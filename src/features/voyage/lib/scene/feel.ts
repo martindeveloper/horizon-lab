@@ -12,7 +12,7 @@ import { Euler, Quaternion, type PerspectiveCamera } from "three";
 
 import { clamp, smootherstep } from "@horizon/toolkit/math";
 
-import { ALIGN_S, type FlightPhase } from "../model/autopilot";
+import { ALIGN_S, driveLit, type FlightPhase } from "../model/autopilot";
 
 /** Real seconds the scene holds after an impact before the crash is told and the jolt starts. */
 const HOLD_S = 0.12;
@@ -60,10 +60,12 @@ export function createShipFeel(camera: PerspectiveCamera) {
       if (since > HOLD_S + JOLT_S) since = -1;
       return dt;
     },
-    /** How far the autopilot's drive has spooled up, 0…1, `t` real seconds into a flight. */
+    /**
+     * How far the autopilot's drive has spooled up, 0…1, `t` real seconds into a flight: rising
+     * through the align, full while it burns or brakes, off through the flip and on a coast.
+     */
     spool(phase: FlightPhase | null, t: number) {
-      if (phase === null || phase === "cruise") return 0;
-      if (phase !== "align") return 1;
+      if (phase !== "align") return driveLit(phase) ? 1 : 0;
       return smootherstep(clamp((t - (ALIGN_S - SPOOL_S)) / SPOOL_S, 0, 1));
     },
     /**

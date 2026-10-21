@@ -7,7 +7,7 @@ import { carrySky, createBrightSky } from "@/space/bright-stars";
 import { sunExists } from "@/space/solar-system/model/moment";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import type { SolarFrame, SolarKit } from "@/space/solar-system/scene/kit";
-import { clamp } from "@horizon/toolkit/math";
+import { TAU, clamp } from "@horizon/toolkit/math";
 
 import {
   cloudMaterial,
@@ -20,8 +20,6 @@ import {
   starSize,
 } from "../graphics/sky";
 import type { SkyCounts } from "../quality";
-
-const TAU = Math.PI * 2;
 
 export function createSkyLayer(
   { scope, camera, dpr }: SolarKit,

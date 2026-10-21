@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import test from "node:test";
 
 import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
-import { presetFromPath, presetRouteParams } from "../src/features/black-hole/routing.ts";
+import { presetIdFromPath, presetRouteParams } from "../src/features/black-hole/routing.ts";
 import {
   resolveView as resolveDeepView,
   viewFromPath as deepViewFromPath,
@@ -51,10 +51,10 @@ test("legacy redirects reach the new app without loops or catalogue collisions",
   ])
     assert.equal(redirects.has(path), false, `${path} is a canonical page`);
   for (const { hole } of presetRouteParams()) {
-    assert.equal(presetFromPath(`/lab/black-hole/${hole}`).id, hole);
+    assert.equal(presetIdFromPath(`/lab/black-hole/${hole}`), hole);
     // Prerendering still runs under the internal /en and /cs segments.
     for (const locale of routing.locales)
-      assert.equal(presetFromPath(`/${locale}/lab/black-hole/${hole}`).id, hole);
+      assert.equal(presetIdFromPath(`/${locale}/lab/black-hole/${hole}`), hole);
   }
   for (const { view } of viewRouteParams()) {
     assert.equal(viewFromPath(`/lab/orrery/${view}`), view);

@@ -1,4 +1,4 @@
-import { lcg, valueNoise2, valueNoise3 } from "@horizon/toolkit/math";
+import { lcg, smoothstep, valueNoise2, valueNoise3 } from "@horizon/toolkit/math";
 
 type DensityVolume = {
   readonly data: Uint8Array;
@@ -61,12 +61,12 @@ export function createSolarActivityDensity(tight: boolean): DensityVolume {
   }
 
   /* The sheet's profiles along x: its crest, its lower edge and where it winds across. */
-  const ends = (x: number) => 1 - 0.75 * smooth((Math.abs(x) - 0.68) / 0.27);
+  const ends = (x: number) => 1 - 0.75 * smoothstep(0.68, 0.95, Math.abs(x));
   const crest = (x: number) => (0.5 + 0.42 * valueNoise2(x * 2.4 + 3.1, 0.5)) * ends(x);
   const floor = (x: number) => {
     let pillars = 0;
     for (const foot of FEET) pillars += Math.exp(-(((x - foot) / 0.085) ** 2));
-    const legs = smooth((Math.abs(x) - 0.78) / 0.12);
+    const legs = smoothstep(0.78, 0.9, Math.abs(x));
     return (0.1 + 0.16 * valueNoise2(x * 2.6 + 7.3, 2.5)) * Math.max(0, 1 - pillars - legs);
   };
   const course = (x: number) => 0.18 * Math.sin(2.3 * x + 0.7) + 0.08 * Math.sin(5.1 * x + 2.9);
@@ -146,9 +146,4 @@ export function createSolarActivityDensity(tight: boolean): DensityVolume {
   if (tight) tightCache = result;
   else fullCache = result;
   return result;
-}
-
-function smooth(t: number) {
-  const s = Math.max(0, Math.min(1, t));
-  return s * s * (3 - 2 * s);
 }

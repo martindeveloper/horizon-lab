@@ -1,6 +1,7 @@
 import {
   ATOMIC_MASS_KG,
   BOLTZMANN_CONSTANT,
+  PLANCK_CONSTANT,
   SPEED_OF_LIGHT,
   vacuumToAir,
 } from "@horizon/toolkit/science";
@@ -18,8 +19,8 @@ import type { Profile } from "./profile";
  * rotational constants and integrated strengths are the measured ones.
  */
 
-/** cm⁻¹ per K (hc/k inverse): kT / (hc) at 1 K. */
-const WAVENUMBER_PER_KELVIN = 0.6950348;
+/** cm⁻¹ per K: kT / (hc) at 1 K, 0.695 cm⁻¹ (k / hc in m⁻¹, over 100). */
+const WAVENUMBER_PER_KELVIN = BOLTZMANN_CONSTANT / (PLANCK_CONSTANT * SPEED_OF_LIGHT) / 100;
 const COLUMN_TEMPERATURE = 255;
 /** O₂ molecules above sea level, cm⁻²: 20.95 % of the air's 2.15 × 10²⁵ molecules cm⁻². */
 const O2_COLUMN = 0.2095 * 2.147e25;

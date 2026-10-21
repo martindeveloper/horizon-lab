@@ -67,6 +67,12 @@ export function progressOf(drive: Drive, km: number, covered: number, trip = tri
 }
 
 /**
+ * Whether the drive thrusts in a phase: out on the burn, in on the brake. It is off while the
+ * ship turns end over end at the flip, and a coast never lights it; the align spools it up.
+ */
+export const driveLit = (phase: FlightPhase | null) => phase === "burn" || phase === "brake";
+
+/**
  * The phase at `s` of the trip's proper time, `sinceFlip` real seconds after the midpoint
  * (negative before it): a coast cruises; the torch ship burns, flips at the midpoint, brakes.
  */

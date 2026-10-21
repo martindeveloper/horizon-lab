@@ -3,6 +3,7 @@ import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 import { RAIN_FLOOR } from "./clocks";
 import { SKY_CODE } from "./holes/types";
 import { BLACK_HOLE_QUALITY } from "./quality";
+import { DISPLAY_CONTRAST } from "./tone";
 
 /**
  * The observatory's model numbers, once. The renderer receives them as shader
@@ -22,6 +23,13 @@ export const DISK_PROFILE_SIZE = 512;
 export const DISK_OUTER_RADIUS = 15.6;
 /** The disk's inner edge sits at max(1.08 r₊, r_ISCO). */
 export const DISK_INNER_HORIZON_FACTOR = 1.08;
+/**
+ * The black-body colours the disk reads (CIE 1931 from Planck's law, `blackbodyLut`): texels,
+ * log-spaced from the coolest to the hottest temperature in kelvin.
+ */
+export const BLACKBODY_LUT_SIZE = 256;
+export const BLACKBODY_MIN_K = 1_000;
+export const BLACKBODY_MAX_K = 40_000;
 /** Display scales for temperature and flux, not accretion-rate predictions. */
 export const DISK_PEAK_K = 15_800;
 export const DISK_PEAK_FLUX = 1.68;
@@ -84,6 +92,9 @@ export const SHADER_DEFINES = glslDefines({
   PLUNGE_GLOW,
   DISK_PROFILE_SIZE,
   DISK_PROFILE_LAST: DISK_PROFILE_SIZE - 1,
+  BLACKBODY_LUT_SIZE,
+  BLACKBODY_MIN_K,
+  BLACKBODY_MAX_K,
   LIMB_DARKENING,
   LIMB_NORMALIZATION,
   MAX_STEPS: glslInt(MAX_STEPS),
@@ -102,6 +113,7 @@ export const SHADER_DEFINES = glslDefines({
   GLOW_WIDTH,
   GLOW_CONE,
   GLOW_OUTER,
+  DISPLAY_CONTRAST,
   // The sky each preset looks out on, as `uWeather` names it.
   ...Object.fromEntries(
     Object.entries(SKY_CODE).map(([sky, code]) => [`SKY_${sky.toUpperCase()}`, code]),

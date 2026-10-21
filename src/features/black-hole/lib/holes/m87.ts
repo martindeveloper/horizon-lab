@@ -1,7 +1,7 @@
 /**
  * Messier 87*  —  catalog hole, Virgo cluster.
  *
- *   M ≈ 6.5e9 M☉     (EHT 2019)
+ *   M ≈ 6.5e9 M☉     (EHT 2019; `BLACK_HOLES` in src/space/stellar.ts)
  *   D = 16.8 Mpc
  *   a/M ≈ 0.9        not measured: EHT polarimetry favours magnetically arrested flows with
  *                   nonzero spin; ring asymmetry disfavours |a| ≲ 0.2 (arXiv:2601.00394);
@@ -15,6 +15,8 @@
  * Jet (shader uJet): Blandford–Znajek sketch, P_BZ ∝ Ω_H² Φ².
  * Sky: old elliptical stellar halo (weather = m87).
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
 import type { HoleSpec } from "./types";
 
 /** Elevation of the home view above the disk: the jet sits 90° − 1.27 rad ≈ 17° off our line of sight. */
@@ -24,7 +26,7 @@ export const m87: HoleSpec = {
   id: "m87",
   name: "Messier 87*",
   kind: "catalog",
-  massSolar: 6.5e9,
+  massSolar: BLACK_HOLES.m87.mass.value,
   illustrativeFlow: true,
   spin: 0.9,
   inclination: HOME_INCLINATION,
@@ -35,7 +37,6 @@ export const m87: HoleSpec = {
   tempScale: 0.72,
   sky: "m87",
   jet: 1,
-  aliases: ["m87", "m87-star", "messier-87", "powehi", "pōwehi"],
   tour: [
     {
       phase: "wide",

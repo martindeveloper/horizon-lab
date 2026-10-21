@@ -4,14 +4,19 @@
  * camera sees, a Schwarzschild null geodesic, zero-angular-momentum Kerr infall and
  * a Keplerian ellipse. Builders are pure; the canvas layer only projects.
  */
-import { smootherstep, TAU } from "@horizon/toolkit/math";
+import { eccentricAnomaly } from "@horizon/toolkit/bodies";
+import { add3, scale3, smootherstep, TAU, type Vec3 } from "@horizon/toolkit/math";
 
 import type { Basis } from "./frame";
-import { criticalCurve, type Vec3 } from "./kerr-rays";
+import { criticalCurve } from "./kerr-rays";
 import { B_CRIT, horizonOverM, iscoOverM, photonOverM } from "./physics";
 import { pinRadius } from "./pins";
 
 export type RingId = "horizon" | "photon" | "isco" | "ergo";
+
+/** A ring animated in from another radius starts growing after this many seconds, and takes this long. */
+const GROW_DELAY = 1.6;
+const GROW_TIME = 3.4;
 
 export type Sketch =
   /** Equatorial coordinate radii; `from` animates a ring in from another radius. */
@@ -46,6 +51,9 @@ type Stroke = {
 };
 type Label = { at: Vec3; text: string; tone: Tone; delay: number; place: "right" | "above" };
 
+/** Seconds a label takes to fade in after its delay. */
+export const LABEL_FADE = 0.6;
+
 export type SketchContext = {
   spin: number;
   /** Schwarzschild radius 2M in kilometres. */
@@ -68,9 +76,8 @@ export type SketchContext = {
   criticalCurve: string;
 };
 
-const add = (a: Vec3, b: Vec3, s = 1): Vec3 => [a[0] + b[0] * s, a[1] + b[1] * s, a[2] + b[2] * s];
-const scale = (a: Vec3, s: number): Vec3 => [a[0] * s, a[1] * s, a[2] * s];
-const inPlane = (u: Vec3, v: Vec3, x: number, y: number): Vec3 => add(scale(u, x), v, y);
+/** The point x u + y v. */
+const inPlane = (u: Vec3, v: Vec3, x: number, y: number): Vec3 => add3(scale3(u, x), scale3(v, y));
 
 /** Ring point at parameter t, matching `ringPoints`: (r sin t, 0, r cos t). */
 const ringAt = (r: number, t: number): Vec3 => [r * Math.sin(t), 0, r * Math.cos(t)];
@@ -81,6 +88,33 @@ function arc(r: number, t0: number, t1: number, n = 96): Vec3[] {
   const pts: Vec3[] = [];
   for (let i = 0; i <= n; i++) pts.push(ringAt(r, t0 + ((t1 - t0) * i) / n));
   return pts;
+}
+
+/** Relative step to which the critical curve's camera distance and inclination are rounded. */
+const CURVE_QUANTUM = 1e-3;
+let curveCache: { key: string; curve: [number, number][] } | null = null;
+
+/**
+ * The critical curve in the camera's tangent plane, scaled to M at the hole. It depends on the
+ * spin and the camera's distance and inclination, not its azimuth (the hole is symmetric about
+ * its axis and the camera does not roll), so one curve serves an orbiting camera; with the
+ * distance and the inclination's cosine rounded to `CURVE_QUANTUM` (under a tenth of a pixel)
+ * it also serves one that drifts.
+ */
+function shadowCurve(spin: number, distance: number, cosPolar: number) {
+  const d = Math.exp(Math.round(Math.log(distance) / CURVE_QUANTUM) * CURVE_QUANTUM);
+  const mu = Math.round(cosPolar / CURVE_QUANTUM) * CURVE_QUANTUM;
+  const key = `${spin}:${d}:${mu}`;
+  if (curveCache?.key !== key) {
+    // The camera at azimuth 0 and its roll-free frame (`orbitBasis` there).
+    const sin = Math.sqrt(Math.max(1 - mu * mu, 0));
+    const basis: Basis = { right: [1, 0, 0], up: [0, sin, -mu], fwd: [0, -mu, -sin] };
+    const curve = criticalCurve(spin, scale3(basis.fwd, -d), basis).map(
+      ([x, y]): [number, number] => [x * d, y * d],
+    );
+    curveCache = { key, curve };
+  }
+  return curveCache.curve;
 }
 
 /**
@@ -156,13 +190,6 @@ function limbDoppler(r: number, a: number, inclination: number): [number, number
   return [1 / (gamma * (1 - los)), 1 / (gamma * (1 + los))];
 }
 
-/** Kepler's equation by Newton iteration: E − e sin E = M. */
-function eccentricAnomaly(mean: number, e: number) {
-  let E = e < 0.8 ? mean : Math.PI;
-  for (let i = 0; i < 12; i++) E -= (E - e * Math.sin(E) - mean) / (1 - e * Math.cos(E));
-  return E;
-}
-
 function ringRadius(id: RingId, spin: number) {
   if (id === "horizon") return horizonOverM(spin);
   if (id === "photon") return photonOverM(spin);
@@ -187,7 +214,8 @@ function trimmed(c: SketchContext, n: number) {
   return c.number(n, digits);
 }
 
-type Drawing = { strokes: Stroke[]; labels: Label[] };
+/** A drawing, and the elapsed seconds from which it no longer changes with time. */
+type Drawing = { strokes: Stroke[]; labels: Label[]; still: number };
 type Builder<Kind extends Sketch["kind"]> = (
   s: Extract<Sketch, { kind: Kind }>,
   c: SketchContext,
@@ -196,7 +224,8 @@ type Builder<Kind extends Sketch["kind"]> = (
 
 /** One builder per drawing; each adds its strokes and labels to the beat's drawing. */
 const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
-  rings: (s, c, { strokes, labels }) => {
+  rings: (s, c, out) => {
+    const { strokes, labels } = out;
     const { live } = c;
     s.rings.forEach((id, i) => {
       const to = ringRadius(id, c.spin);
@@ -211,13 +240,14 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
           duration: 1.6,
         });
         labels.push({
-          at: scale(live.right, -from),
+          at: scale3(live.right, -from),
           text: `${trimmed(c, from)}M`,
           tone: "quiet",
           delay: 1.2,
           place: "above",
         });
-        r = from + (to - from) * smootherstep((c.elapsed - 1.6) / 3.4);
+        r = from + (to - from) * smootherstep((c.elapsed - GROW_DELAY) / GROW_TIME);
+        out.still = Math.max(out.still, GROW_DELAY + GROW_TIME);
       }
       const delay = 0.25 + i * 0.55;
       strokes.push({
@@ -227,7 +257,7 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
         duration: 1.8,
       });
       labels.push({
-        at: scale(live.right, r),
+        at: scale3(live.right, r),
         // With spin, photon orbit and ISCO differ by direction; these follow the disk's.
         text: `${RING_SYMBOL[id]}${c.spin !== 0 && (id === "photon" || id === "isco") ? (c.spin > 0 ? ",pro" : ",retro") : ""} = ${trimmed(c, r)}M`,
         tone: id === "horizon" ? "accent" : "quiet",
@@ -239,10 +269,7 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
   shadow: (s, c, { strokes, labels }) => {
     const { live } = c;
     // Photons from the spherical photon orbits, as this camera receives them.
-    const d = c.distance;
-    const curve = criticalCurve(c.spin, scale(live.fwd, -d), live).map(
-      ([x, y]): [number, number] => [x * d, y * d],
-    );
+    const curve = shadowCurve(c.spin, c.distance, -live.fwd[1]);
     const points = curve.map(([x, y]) => inPlane(live.right, live.up, x, y));
     strokes.push({ points, tone: "accent", delay: 0.2, duration: 2.6 });
     let minX = Infinity;
@@ -308,7 +335,7 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
   jet: (s, c, { strokes, labels }) => {
     const { anchor } = c;
     const H = 30;
-    const side = scale(anchor.right, -1);
+    const side = scale3(anchor.right, -1);
     strokes.push({
       points: [
         [0, -H * 0.6, 0],
@@ -329,8 +356,8 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
       delay: 0.3,
       duration: 2,
     });
-    const dir = add(scale([0, 1, 0], Math.cos(s.angle)), side, Math.sin(s.angle));
-    const earth = scale(dir, H * 0.82);
+    const dir = inPlane([0, 1, 0], side, Math.cos(s.angle), Math.sin(s.angle));
+    const earth = scale3(dir, H * 0.82);
     strokes.push({
       points: [[0, 0, 0], earth],
       tone: "accent",
@@ -342,25 +369,26 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
     const swing: Vec3[] = [];
     for (let i = 0; i <= 24; i++) {
       const q = (s.angle * i) / 24;
-      swing.push(add(scale([0, 1, 0], 12 * Math.cos(q)), side, 12 * Math.sin(q)));
+      swing.push(inPlane([0, 1, 0], side, 12 * Math.cos(q), 12 * Math.sin(q)));
     }
     strokes.push({ points: swing, tone: "accent", delay: 2.6, duration: 1 });
     labels.push({ at: earth, text: "⊕", tone: "accent", delay: 3.2, place: "above" });
     labels.push({
-      at: add(scale([0, 1, 0], 13), side, 13 * Math.sin(s.angle) * 1.6),
+      at: inPlane([0, 1, 0], side, 13, 13 * Math.sin(s.angle) * 1.6),
       text: `i ≈ ${Math.round((s.angle * 180) / Math.PI)}°`,
       tone: "accent",
       delay: 3.4,
       place: "right",
     });
   },
-  orbit: (s, c, { strokes, labels }) => {
+  orbit: (s, c, out) => {
+    const { strokes, labels } = out;
     const { anchor } = c;
     const e = s.eccentricity;
     const a = s.periapsis / (1 - e);
     const p = a * (1 - e * e);
     const P = anchor.right;
-    const Q = add(scale(anchor.up, Math.cos(s.tilt)), anchor.fwd, -Math.sin(s.tilt));
+    const Q = inPlane(anchor.up, anchor.fwd, Math.cos(s.tilt), -Math.sin(s.tilt));
     const at = (nu: number) =>
       inPlane(
         P,
@@ -375,7 +403,8 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
       points.push(at(nu));
     }
     strokes.push({ points, tone: "quiet", delay: 0.2, duration: 3 });
-    // Kepler time: 14 s per loop, starting just after apocentre.
+    // Kepler time: 14 s per loop, starting just after apocentre; it never comes to rest.
+    out.still = Infinity;
     const mean = ((((c.elapsed - 1) / 14) % 1) + 1) % 1;
     const E = eccentricAnomaly(TAU * mean + Math.PI, e);
     const nu =
@@ -395,7 +424,7 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
       place: "right",
     });
     labels.push({
-      at: add(at(0), Q, -3.2),
+      at: add3(at(0), scale3(Q, -3.2)),
       text: c.notToScale,
       tone: "quiet",
       delay: 2.8,
@@ -455,7 +484,7 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
     });
     strokes.push({ points: arc(rh, 0, TAU, 96), tone: "quiet", delay: 0.4, duration: 1.2 });
     labels.push({
-      at: scale(live.right, 2),
+      at: scale3(live.right, 2),
       text: "r_E = 2M",
       tone: "quiet",
       delay: 1.2,
@@ -493,7 +522,7 @@ const BUILDERS: { [Kind in Sketch["kind"]]: Builder<Kind> } = {
 };
 
 export function buildSketch(s: Sketch, c: SketchContext): Drawing {
-  const out: Drawing = { strokes: [], labels: [] };
+  const out: Drawing = { strokes: [], labels: [], still: 0 };
   // Each case narrows s to its builder's kind; a lookup by s.kind would not.
   switch (s.kind) {
     case "rings":
@@ -521,5 +550,7 @@ export function buildSketch(s: Sketch, c: SketchContext): Drawing {
       BUILDERS.ruler(s, c, out);
       break;
   }
+  for (const stroke of out.strokes) out.still = Math.max(out.still, stroke.delay + stroke.duration);
+  for (const label of out.labels) out.still = Math.max(out.still, label.delay + LABEL_FADE);
   return out;
 }

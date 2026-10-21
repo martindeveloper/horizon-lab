@@ -52,8 +52,7 @@
     "backInTime": "Back in time · Orrery",
     "backInTimeHint": "This place through the solar system's history",
     "lightLeftAgo": "Light left {ago}",
-    "outToValue": "out to {distance}",
-    "guide": "Guide"
+    "outToValue": "out to {distance}"
   },
   "time": {
     "years": "{value} years ago",
@@ -396,15 +395,6 @@
     }
   },
   "tour": {
-    "label": "Guided tour",
-    "start": "Start guide",
-    "progress": "{step} / {total}",
-    "previous": "Previous step",
-    "next": "Next",
-    "play": "Play guide",
-    "pause": "Pause guide",
-    "finish": "Finish",
-    "exit": "Exit guide",
     "steps": {
       "sunlight": {
         "title": "Light takes time",

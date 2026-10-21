@@ -10,7 +10,14 @@ import { atViewScale } from "@horizon/toolkit/camera";
 import { ORRERY_EDGE } from "../lib/scene/kit";
 import { useOrrery, type Show } from "../lib/store";
 
-export const DISPLAY: (keyof Show)[] = ["elliptical", "trueSize", "drift", "names", "distances"];
+export const DISPLAY: (keyof Show)[] = [
+  "elliptical",
+  "trueSize",
+  "faintRings",
+  "drift",
+  "names",
+  "distances",
+];
 export const EXTRA: (keyof Show)[] = ["plane"];
 
 const VIEW_IDS = SOLAR_VIEWS.map((v) => v.id);

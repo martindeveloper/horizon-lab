@@ -1,6 +1,6 @@
 "use client";
 
-import { Atom } from "lucide-react";
+import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
@@ -83,16 +83,12 @@ export function SpectroscopyOverlay() {
               label={t("hud.controls")}
               details={(access) => <SpectroscopyTechnicalDetails {...access} />}
               detailsLabel={t("technicalDetails.open")}
-              guide={{
-                label: t("hud.guide"),
-                ariaLabel: t("tour.start"),
-                onSelect: () => api().startGuide(),
-              }}
+              guide={{ onSelect: () => api().startGuide() }}
               guideRef={guideButton}
               finder={{
                 id: "elements",
                 label: t("hud.elements"),
-                icon: Atom,
+                icon: Crosshair,
                 active: panel === "elements",
                 controls: "spectroscopy-elements",
                 onSelect: () => api().setPanel(panel === "elements" ? "none" : "elements"),

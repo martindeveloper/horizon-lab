@@ -16,7 +16,9 @@ import {
   formatIrradiance,
   formatRange,
   formatSpeed,
+  formatTrip,
 } from "../src/features/voyage/components/format.ts";
+import { tripTo } from "../src/features/voyage/components/trips.ts";
 import { bodyPositionKm, WORLD_BODIES } from "../src/features/voyage/lib/model/bodies.ts";
 import {
   C_KM_S,
@@ -25,7 +27,12 @@ import {
   irradianceAt,
 } from "../src/features/voyage/lib/model/parameters.ts";
 import { PLACE_BODY, placeFor } from "../src/features/voyage/lib/model/places.ts";
-import { tripProgress, tripTimes } from "../src/features/voyage/lib/model/relativity.ts";
+import {
+  speedOfProper,
+  tripProgress,
+  tripProperVelocity,
+  tripTimes,
+} from "../src/features/voyage/lib/model/relativity.ts";
 import {
   createShip,
   shipGamma,
@@ -57,12 +64,38 @@ test("the torch ship reaches Andromeda in 28.6 years of its own time while Earth
   assert.ok(tripProgress(DRIVES.torch, 2.5e6 * LIGHT_YEAR_KM, 0.1).covered < 0.01);
 });
 
-test("Voyager coasts to α Centauri in about 77,000 years, the sail in 44", () => {
+test("Voyager coasts to α Centauri in about 77,000 years, Starshot's sail at 0.2 c in 22", () => {
   const km = 4.37 * LIGHT_YEAR_KM;
   near(tripTimes(DRIVES.voyager, km).t / YEAR_S, 77_000, 0.02);
   const sail = tripTimes(DRIVES.sail, km);
-  near(sail.t / YEAR_S, 43.7, 0.01);
-  near(sail.tau / sail.t, Math.sqrt(1 - 0.01), 1e-9, "the sail's clock runs slow by γ");
+  near(sail.t / YEAR_S, 21.85, 0.01);
+  near(sail.tau / sail.t, Math.sqrt(1 - 0.04), 1e-9, "the sail's clock runs slow by γ");
+});
+
+test("a long torch flight stays finite: its proper velocity grows past where β rounds to 1", () => {
+  /* Across the Virgo Cluster's 54 million light-years the burn reaches aτ/c ≈ 19, where tanh is 1. */
+  const trip = tripTimes(DRIVES.torch, 5.4e7 * LIGHT_YEAR_KM);
+  assert.ok(Number.isFinite(trip.peak) && trip.peak <= C_KM_S, `${trip.peak} km/s`);
+  let last = 0;
+  for (const s of [0, 0.1, 0.3, 0.5]) {
+    const u = tripProperVelocity(DRIVES.torch, s, trip);
+    assert.ok(Number.isFinite(u) && u >= last, `${u} km/s at ${s}`);
+    assert.ok(speedOfProper(u) <= C_KM_S);
+    last = u;
+  }
+  /* γ at the turnover is in the tens of millions, as the closed form has it. */
+  near(
+    Math.hypot(1, last / C_KM_S),
+    1 + (STANDARD_GRAVITY_KM_S2 * 5.4e7 * LIGHT_YEAR_KM) / (2 * C_KM_S ** 2),
+    1e-6,
+  );
+  /* Braking mirrors the burn; a coast holds its speed. */
+  near(
+    tripProperVelocity(DRIVES.torch, 0.9, trip),
+    tripProperVelocity(DRIVES.torch, 0.1, trip),
+    1e-12,
+  );
+  near(speedOfProper(tripProperVelocity(DRIVES.sail, 0.4, trip)), DRIVES.sail.speed, 1e-12);
 });
 
 test("the ship's integrator matches hyperbolic motion at one g", () => {
@@ -217,6 +250,11 @@ test("readouts carry into the larger unit, tell a speed from c, and print nothin
   assert.equal(formatRange(t, f, { unit: "auto", locale: "en" }, Number.NaN), "—");
   assert.notEqual(formatSpeed(t, f, 0.99999 * C_KM_S), "1 c");
   assert.match(formatSpeed(t, f, 0.99999 * C_KM_S), /0\.99999 c/);
+  /* Below c never reads c: not at γ = 2·10⁴, nor where β itself rounds to 1. */
+  for (const gamma of [2e4, 1e9]) {
+    const speed = formatSpeed(t, f, C_KM_S * Math.sqrt(1 - 1 / gamma ** 2), gamma);
+    assert.match(speed, /^0\.9{9} c/, speed);
+  }
   assert.match(formatSpeed(t, f, 0.9 * C_KM_S, 2.29), /0\.9 c · γ 2\.29/);
   assert.doesNotMatch(formatSpeed(t, f, 17), /γ/);
   assert.match(formatIrradiance(t, f, 5.3e-20), /E-20/);
@@ -244,7 +282,7 @@ for (const locale of ["en", "cs"]) {
     for (const body of WORLD_BODIES) {
       const sel = body.kind === "sun" ? { kind: "sun" } : { kind: body.kind, id: body.id };
       for (const unit of ["auto", "au", "ly"]) {
-        const card = cardFor(t, f, sel, { unit, locale }, now, ship);
+        const card = cardFor(t, f, sel, { unit, locale }, { now, a: 1 }, ship);
         clean(card.title);
         for (const fact of card.facts) {
           clean(fact.label);
@@ -254,6 +292,11 @@ for (const locale of ["en", "cs"]) {
     }
     for (const seconds of [3, 75, 5_000, 90_000, 1e7, 4e9, 1e14, 1e17])
       clean(formatDuration(t, f, seconds));
+    /* No drive reaches the edge: its trips read never, on both clocks. */
+    const edge = tripTo("torch", "edge", ship, { now, a: 1 });
+    assert.equal(formatTrip(t, f, edge.tau), t("hud.never"));
+    assert.equal(formatTrip(t, f, edge.t), t("hud.never"));
+    clean(formatTrip(t, f, tripTo("sail", "andromeda", ship, { now, a: 1 }).tau));
     for (const km of [12, 12_400, 3e6, 1.5e8, 6e9])
       clean(formatRange(t, f, { unit: "auto", locale }, km));
     for (const v of [0.3, 17, 2500, 0.1 * C_KM_S, 0.999 * C_KM_S]) clean(formatSpeed(t, f, v));

@@ -16,6 +16,7 @@ export const SOLAR_SHOW: SolarShow = {
   plane: true,
   names: true,
   trueSize: false,
+  faintRings: false,
   elliptical: true,
   drift: false,
 };

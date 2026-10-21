@@ -31,10 +31,10 @@
     "canopy": "Canopy",
     "orbits": "Orbits",
     "streaks": "Speed streaks",
+    "faintRings": "Faint rings",
     "feel": "Ship feel"
   },
   "hud": {
-    "guide": "Guide",
     "moonsOf": "Moons of {body}",
     "hold": "Hold the clocks",
     "run": "Run the clocks",
@@ -47,6 +47,8 @@
     "sunlight": "Sunlight",
     "lightToEarth": "Light to Earth",
     "flyHere": "Fly here",
+    "jumpHere": "Jump here",
+    "never": "Never",
     "cmb": "Background",
     "cmbValue": "{value} K",
     "clocksApart": "Clocks apart",
@@ -163,7 +165,7 @@
     "summary": "Every body at its true size and place, in kilometres, with the ship as the scene's origin and a logarithmic depth buffer so a moon's surface and the far planets share one pass. Flights take the drive's real trip time on two clocks. Sunlight falls as the inverse square; moons shade one another in eclipses.",
     "features": {
       "scale": "The Sun, the planets, the named small worlds and the moons at true size, placed from the JPL elements with the Earth–Moon and Pluto–Charon barycentres resolved.",
-      "flight": "Three drives: Voyager's 17 km/s, a light sail at a tenth of light speed, a torch ship at one g that burns, flips at the midpoint and brakes. The autopilot flies the real trip on an automatic time warp; by hand the ship falls in real gravity.",
+      "flight": "Three drives: Voyager's 17 km/s, a light sail at a fifth of light speed, a torch ship at one g that burns, flips at the midpoint and brakes. The autopilot flies the real trip on an automatic time warp; by hand the ship falls in real gravity.",
       "clocks": "A ship clock and an Earth clock, run at the visitor's rate, that part only when the ship goes fast.",
       "light": "Sunlight weaker with distance, the light-time home, and eclipses cast by moons and planets.",
       "sky": "The bright stars at their measured distances and the Milky Way's band, shifting as the ship covers light-years, crowding ahead and changing colour at speed; α Centauri as three suns of their measured size."
@@ -188,15 +190,6 @@
     }
   },
   "tour": {
-    "label": "Guided tour",
-    "start": "Start guide",
-    "progress": "{step} / {total}",
-    "previous": "Previous step",
-    "next": "Next",
-    "play": "Play guide",
-    "pause": "Pause guide",
-    "finish": "Finish",
-    "exit": "Exit guide",
     "steps": {
       "moon": {
         "title": "The Moon",

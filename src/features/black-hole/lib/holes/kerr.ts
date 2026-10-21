@@ -37,7 +37,6 @@ export const kerr: HoleSpec = {
   tempScale: 1.2,
   sky: "host",
   jet: 0,
-  aliases: ["kerr", "extreme-kerr"],
   tour: [
     // Every move turns with the hole and leans into the drag.
     {

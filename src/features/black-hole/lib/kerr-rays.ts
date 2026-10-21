@@ -20,25 +20,12 @@
  * radius outside the horizon, and the frequency it measures sets g for the disk.
  */
 
+import { dot3, normalize3, type Vec3 } from "@horizon/toolkit/math";
+
 import { circularOrbit } from "./disk-profile";
 import { diskRedshift } from "./equations";
 import { ESCAPE_RADIUS, STEP_FAR, STEP_FAR_GROWTH, STEP_NEAR, TRACE_STEPS } from "./parameters";
-import { horizonOverM, photonOverM } from "./physics";
-
-export type Vec3 = [number, number, number];
-
-const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const norm = (a: Vec3): Vec3 => {
-  const l = Math.hypot(a[0], a[1], a[2]) || 1;
-  return [a[0] / l, a[1] / l, a[2] / l];
-};
-
-/** Boyer–Lindquist r and cosθ of an oblate-spheroidal Cartesian point. */
-export function blRadius(p: Vec3, a: number): { r: number; mu: number } {
-  const R2 = dot(p, p) - a * a;
-  const r = Math.sqrt(0.5 * (R2 + Math.sqrt(R2 * R2 + 4 * a * a * p[1] * p[1])));
-  return { r, mu: r > 0 ? p[1] / r : 0 };
-}
+import { blRadius, horizonOverM, photonOrbitImpact, photonOverM } from "./physics";
 
 /** Kerr metric functions at (r, cosθ): Σ, Δ, A, the lapse α, ω = −g_tφ/g_φφ and ϖ = √g_φφ. */
 export function kerrMetric(r: number, mu: number, a: number) {
@@ -91,9 +78,9 @@ export function cameraRay(cam: Vec3, dir: Vec3, a: number): RayState {
   const s: Vec3 = cl > 1e-9 ? [(sinT * cam[0]) / cl, mu, (sinT * cam[2]) / cl] : [sinT, mu, 0];
   const { er, et, ep } = localAxes(s);
   const m = kerrMetric(r, mu, a);
-  const nr = dot(dir, er);
-  const nt = dot(dir, et);
-  const np = dot(dir, ep);
+  const nr = dot3(dir, er);
+  const nt = dot3(dir, et);
+  const np = dot3(dir, ep);
 
   const L = m.varpi * np;
   const E = m.omega * L - m.alpha;
@@ -125,7 +112,7 @@ export function inversePotential(ray: Pick<RayState, "E" | "L" | "Q">, u: number
 export function carterOf(ray: RayState, a: number) {
   const mu = ray.s[1];
   const sin2 = Math.max(1 - mu * mu, 1e-12);
-  const thetaDot2 = dot(ray.sd, ray.sd) - (ray.L * ray.L) / sin2;
+  const thetaDot2 = dot3(ray.sd, ray.sd) - (ray.L * ray.L) / sin2;
   return thetaDot2 + mu * mu * ((ray.L * ray.L) / sin2 - a * a * ray.E * ray.E);
 }
 
@@ -171,7 +158,7 @@ export function kerrStep(ray: RayState, a: number, refine = 1): RayState {
     sd[2] + 0.5 * dl * a0[2],
   ];
   const u1 = u + dl * udHalf;
-  let s1 = norm([s[0] + dl * sdHalf[0], s[1] + dl * sdHalf[1], s[2] + dl * sdHalf[2]]);
+  let s1 = normalize3([s[0] + dl * sdHalf[0], s[1] + dl * sdHalf[1], s[2] + dl * sdHalf[2]]);
   let ud1 = udHalf + 0.5 * dl * accU(u1);
   // Unless the ray turned during the step, reset du/dλ to ±√U.
   const U1 = inversePotential(ray, u1, a);
@@ -183,7 +170,7 @@ export function kerrStep(ray: RayState, a: number, refine = 1): RayState {
     sdHalf[2] + 0.5 * dl * a1[2],
   ];
   // Back onto the sphere's tangent plane, at the speed Carter's constant fixes.
-  const radial = dot(s1, sd1);
+  const radial = dot3(s1, sd1);
   sd1 = [sd1[0] - radial * s1[0], sd1[1] - radial * s1[1], sd1[2] - radial * s1[2]];
   const want = Math.sqrt(Math.max(sphere + a2E2 * s1[1] * s1[1], 0));
   const have = Math.hypot(...sd1);
@@ -258,8 +245,8 @@ export function traceFlatRay(
 ): FlatTraceResult {
   const at = (t: number): Vec3 => [cam[0] + t * dir[0], cam[1] + t * dir[1], cam[2] + t * dir[2]];
   const rh = horizonOverM(a);
-  const b = dot(cam, dir);
-  const c = dot(cam, cam);
+  const b = dot3(cam, dir);
+  const c = dot3(cam, cam);
   const ballDisc = b * b - c + rh * rh;
   const tBall = ballDisc > 0 && b < 0 ? -b - Math.sqrt(ballDisc) : Infinity;
   const exitDisc = Math.max(b * b - c + escapeR * escapeR, 0);
@@ -298,7 +285,7 @@ export function traceFlatRay(
 export function flatDiskShift(hit: Vec3, dir: Vec3, rho: number, a: number) {
   const omega = 1 / (rho * Math.sqrt(rho) + a);
   const v: Vec3 = [-omega * hit[2], 0, omega * hit[0]];
-  const g = Math.sqrt(1 - Math.min(dot(v, v), 0.98)) / Math.max(1 + dot(v, dir), 1e-4);
+  const g = Math.sqrt(1 - Math.min(dot3(v, v), 0.98)) / Math.max(1 + dot3(v, dir), 1e-4);
   return { g, mu: Math.min(g * Math.abs(dir[1]), 1) };
 }
 
@@ -353,7 +340,7 @@ export function criticalCurve(
   const m = kerrMetric(ro, mu, aa);
 
   // Spherical photon orbits with Ẽ = 1: λ = L/E and η = Q/E².
-  const lambda = (r: number) => -(r ** 3 - 3 * r * r + aa * aa * r + aa * aa) / (aa * (r - 1));
+  const lambda = (r: number) => photonOrbitImpact(r, aa);
   const eta = (r: number) =>
     -(r ** 3 * (r ** 3 - 6 * r * r + 9 * r - 4 * aa * aa)) / (aa * aa * (r - 1) ** 2);
   // Θ(θ_o) ≥ 0 selects the orbits this observer can see.
@@ -394,8 +381,8 @@ export function criticalCurve(
       nR * er[1] + nTheta * et[1] + nPhi * ep[1],
       nR * er[2] + nTheta * et[2] + nPhi * ep[2],
     ];
-    const depth = dot(d, basis.fwd);
-    return [dot(d, basis.right) / depth, dot(d, basis.up) / depth];
+    const depth = dot3(d, basis.fwd);
+    return [dot3(d, basis.right) / depth, dot3(d, basis.up) / depth];
   };
   const upper: [number, number][] = [];
   for (let i = 0; i <= n; i++) {

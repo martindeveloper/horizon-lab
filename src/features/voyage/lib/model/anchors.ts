@@ -6,23 +6,24 @@
  * Galaxy seen from above, the Magellanic Clouds, Andromeda,
  * Triangulum, the Virgo Cluster, and the edge of what can ever be reached. Each anchor has a
  * place at a moment in km (heliocentric, scene axes) and a radius that frames an arrival and
- * keeps the ship off it.
+ * keeps the ship off it. The far places stand where the cosmic map has them today, and those
+ * beyond the Local Group recede with the expansion by the map's own rule (`expansionAt`).
  */
 import { Vector3 } from "three";
 
-import { anchorById, anchorToday } from "@/space/cosmos/model/cosmos";
+import { EVENT_HORIZON_LY, anchorById, anchorToday } from "@/space/cosmos/model/cosmos";
 import { cosmicToWorld, galaxyToWorld } from "@/space/galaxy/scene/frames";
 import type { WorldSelection } from "@/space/galaxy/show";
 import { PROBES, probePosition, yearOf, type ProbeId } from "@/space/solar-system/model/probes";
 import { hasSurface, isSolarSelection } from "@/space/solar-system/model/selection";
 import { MOON_IDS, NAMED, PLANET_IDS, type BodyId } from "@horizon/toolkit/bodies";
 import { includesId } from "@horizon/toolkit/records";
-import { vec3d, type Vec3d } from "@horizon/toolkit/scene";
+import { lengthVec3d, vec3d, type Vec3d } from "@horizon/toolkit/scene";
 import { AU_KM, LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 
 import { alphaCentauriAt, alphaCentauriStar } from "./alpha-centauri";
 import { bodyPositionKm, radiusKm, selectionOfBody, worldBody } from "./bodies";
-import { EDGE_LY } from "./comoving";
+import { expansionAt } from "./comoving";
 
 /** The galaxies and the cluster the ship can go to, placed by the cosmic map. */
 type GalaxyAnchorId = "lmc" | "smc" | "andromeda" | "triangulum" | "virgoCluster";
@@ -65,6 +66,13 @@ const isProbe = (id: AnchorId): id is ProbeId => includesId(PROBE_ANCHOR_IDS, id
 export const isBodyAnchor = (id: AnchorId): id is BodyId => includesId(BODY_IDS, id);
 
 /**
+ * Whether a drive can take the ship there. The edge stands on the cosmic event horizon, and
+ * nothing that leaves Earth today ever gets that far, even at light speed: the ship can only
+ * be put there, and its trips there take forever.
+ */
+export const isFlyable = (id: AnchorId) => id !== "edge";
+
+/**
  * Radii that frame an arrival and keep the ship off, km: a probe's standoff (a few metres of
  * spacecraft, seen from a little way off with its name on it), a star's photosphere, the
  * Galaxy seen whole from above its disk, a galaxy's disc, the cluster's core, the edge's
@@ -100,11 +108,12 @@ export const GALACTIC_NORTH = galaxyToWorld(0, 1, 0, new Vector3())
   .normalize();
 
 /**
- * Where an anchor is at `date`, km, heliocentric. The far places stand where they are today
- * (the cosmic map in comoving positions; the host scales it by the universe's expansion).
+ * Where an anchor stands at `date` as the map has it today, km, heliocentric: the bodies,
+ * probes and stars where they are then, the far places at their comoving places (`host`, a
+ * moon's planet placed already, saves solving it again).
  */
-export function anchorAt(id: AnchorId, date: Date, out: Vec3d): Vec3d {
-  if (isBodyAnchor(id)) return bodyPositionKm(id, date, out);
+function placeToday(id: AnchorId, date: Date, out: Vec3d, host?: Readonly<Vec3d>): Vec3d {
+  if (isBodyAnchor(id)) return bodyPositionKm(id, date, out, host);
   if (id === "alphaCen") return alphaCentauriAt("alphaCenA", date, out);
   if (id === "alphaCenB" || id === "proxima") return alphaCentauriAt(id, date, out);
   if (isProbe(id)) {
@@ -115,7 +124,8 @@ export function anchorAt(id: AnchorId, date: Date, out: Vec3d): Vec3d {
     return out;
   }
   if (id === "galacticCentre") galaxyToWorld(0, 0, 0, v);
-  else if (id === "edge") v.copy(GALACTIC_NORTH).multiplyScalar((EDGE_LY * LIGHT_YEAR_KM) / AU_KM);
+  else if (id === "edge")
+    v.copy(GALACTIC_NORTH).multiplyScalar((EVENT_HORIZON_LY * LIGHT_YEAR_KM) / AU_KM);
   else cosmicToWorld(anchorToday(anchorById(id)), v);
   out[0] = v.x * AU_KM;
   out[1] = v.y * AU_KM;
@@ -123,39 +133,61 @@ export function anchorAt(id: AnchorId, date: Date, out: Vec3d): Vec3d {
   return out;
 }
 
+/** Moves a place from today's map to the universe at scale `a` (`expansionAt`), in place. */
+function expand(out: Vec3d, a: number): Vec3d {
+  const k = expansionAt(lengthVec3d(out), a);
+  out[0] *= k;
+  out[1] *= k;
+  out[2] *= k;
+  return out;
+}
+
+/** Where an anchor is at `date`, with the universe at scale `a`, km, heliocentric. */
+export const anchorAt = (id: AnchorId, date: Date, a: number, out: Vec3d): Vec3d =>
+  expand(placeToday(id, date, out), a);
+
 /**
- * `anchorAt`, remembering each anchor's place at the last two instants asked for: a frame asks
- * for the same bodies at its moment, and a minute on for their velocities, many times over.
+ * `anchorAt` for the engine. The universe's scale is the clock's (`scaleNow`), not read from
+ * the date: Earth's calendar stops at the JavaScript date's reach while the clock runs on, and
+ * the dates a frame asks for lie within a minute of the clock's moment, where a does not move.
+ * Each anchor's place today is remembered at the last two instants asked for (a frame asks for
+ * the same bodies at its moment, and a minute on for their velocities, many times over), and a
+ * moon is placed from its planet's remembered place.
  */
-export function createAnchorCache() {
+export function createAnchorCache(scaleNow: () => number) {
   type Memo = { t: [number, number]; pos: [Vec3d, Vec3d]; next: 0 | 1 };
   const memos = new Map<AnchorId, Memo>();
-  return (id: AnchorId, date: Date, out: Vec3d): Vec3d => {
+  const today = (id: AnchorId, date: Date): Readonly<Vec3d> => {
     const t = date.getTime();
     let memo = memos.get(id);
     if (!memo) memos.set(id, (memo = { t: [NaN, NaN], pos: [vec3d(), vec3d()], next: 0 }));
-    let i: 0 | 1;
-    if (memo.t[0] === t) i = 0;
-    else if (memo.t[1] === t) i = 1;
-    else {
-      i = memo.next;
-      memo.next = i === 0 ? 1 : 0;
-      memo.t[i] = t;
-      anchorAt(id, date, memo.pos[i]);
-    }
-    const pos = memo.pos[i];
+    if (memo.t[0] === t) return memo.pos[0];
+    if (memo.t[1] === t) return memo.pos[1];
+    const i = memo.next;
+    memo.next = i === 0 ? 1 : 0;
+    memo.t[i] = t;
+    const body = isBodyAnchor(id) ? worldBody(id) : null;
+    return placeToday(
+      id,
+      date,
+      memo.pos[i],
+      body?.kind === "moon" ? today(body.host, date) : undefined,
+    );
+  };
+  return (id: AnchorId, date: Date, out: Vec3d): Vec3d => {
+    const pos = today(id, date);
     out[0] = pos[0];
     out[1] = pos[1];
     out[2] = pos[2];
-    return out;
+    return expand(out, scaleNow());
   };
 }
 
 const there: Vec3d = [0, 0, 0];
 
-/** How far an anchor is from `from` (km, heliocentric) at `date`, km. */
-export function distanceTo(id: AnchorId, date: Date, from: ArrayLike<number>) {
-  anchorAt(id, date, there);
+/** How far an anchor is from `from` (km, heliocentric) at `date`, the universe at scale `a`, km. */
+export function distanceTo(id: AnchorId, date: Date, a: number, from: ArrayLike<number>) {
+  anchorAt(id, date, a, there);
   return Math.hypot(there[0] - from[0]!, there[1] - from[1]!, there[2] - from[2]!);
 }
 

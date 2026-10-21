@@ -1,4 +1,4 @@
-import { dopplerFactor } from "@horizon/toolkit/science";
+import { dopplerWavelengthRatio } from "@horizon/toolkit/science";
 
 import { LINES, NAMED, markWeight, type ElementId, type Line } from "../../lib/model/atoms";
 import { depthAt, emissionAt, type Spectrum } from "../../lib/model/spectrum";
@@ -62,7 +62,7 @@ export function lineLabels(input: {
     const formedIds = new Set(visible.map((v) => v.line.id));
     for (const named of NAMED) {
       if (!named.letter || !formedIds.has(named.line.id)) continue;
-      const centre = named.line.wavelength * dopplerFactor(velocity);
+      const centre = named.line.wavelength * dopplerWavelengthRatio(velocity);
       out.push({ key: named.line.id, x: xOf(centre), text: named.letter, letter: true });
     }
     if (air)

@@ -6,12 +6,13 @@ import { createBlackHoleEngine } from "@/features/black-hole/lib/engine";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import type { StartEngine } from "@horizon/toolkit/rendering";
 
-import { useSceneCamera } from "./scene-camera";
+import { useSceneCamera, useSceneFrames } from "./scene-camera";
 
 const resetReady = () => useBlackHole.getState().setSkyReady(false);
 
 export function BlackHoleCanvas() {
   const camera = useSceneCamera();
+  const frames = useSceneFrames();
   const t = useTranslations("blackHole");
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,22 +22,20 @@ export function BlackHoleCanvas() {
       const canvas = canvasRef.current;
       if (!host || !canvas) return;
       useBlackHole.getState().calibrateDevice();
-      return createBlackHoleEngine(
-        canvas,
-        host,
-        camera,
-        () => useBlackHole.getState().setSkyReady(true),
+      return createBlackHoleEngine(canvas, host, camera, {
+        onFirstFrame: () => useBlackHole.getState().setSkyReady(true),
+        onFrame: frames.notify,
         onError,
-      );
+      });
     },
-    [camera],
+    [camera, frames],
   );
   useSimulationEngine(create, resetReady);
 
   return (
     <div ref={hostRef} className="absolute inset-0 z-0 bg-space">
       <canvas
-        data-black-hole-canvas
+        data-simulation-canvas="black-hole"
         ref={canvasRef}
         className="block size-full"
         role="img"

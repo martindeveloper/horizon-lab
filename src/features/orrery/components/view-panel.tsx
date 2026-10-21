@@ -29,6 +29,9 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const tally = useMemo(() => tallyAt(yearsAgo), [yearsAgo]);
   return (
     <Rail id="orrery-view" title={t("hud.view")} closeLabel={t("hud.close")} onClose={onClose}>
+      <RailSection title={t("hud.show")}>
+        <Switches list keys={[...DISPLAY, ...EXTRA]} />
+      </RailSection>
       <RailSection title={t("layers.title")} note={t("hud.legend")}>
         <SwitchChips
           list
@@ -37,9 +40,6 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           label={(bin) => t("layers.count", { label: t(`layers.${bin}`), count: tally[bin] })}
           onToggle={(bin) => patchShow({ [bin]: !show[bin] })}
         />
-      </RailSection>
-      <RailSection title={t("hud.show")}>
-        <Switches list keys={[...DISPLAY, ...EXTRA]} />
       </RailSection>
       <RailSection title={t("hud.camera")}>
         <CameraPad

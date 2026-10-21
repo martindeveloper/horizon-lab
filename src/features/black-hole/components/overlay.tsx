@@ -1,4 +1,4 @@
-import { Globe2, GraduationCap, Timer } from "lucide-react";
+import { Crosshair, GraduationCap, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 
@@ -43,12 +43,7 @@ function Readout() {
   const presetId = useBlackHole((s) => s.presetId);
   const preset = PRESETS.find((p) => p.id === presetId);
   const lowerLimit = preset?.massLowerLimit;
-  const massLabel =
-    preset?.massNote === "bound"
-      ? t("massBound")
-      : preset?.massNote === "adopted"
-        ? t("massAdopted")
-        : t("mass");
+  const massLabel = preset?.massNote === "bound" ? t("massBound") : t("mass");
   const rs = schwarzschildKm(massSolar);
   const rh = horizonOverM(spin);
   const rp = photonOverM(spin);
@@ -115,6 +110,7 @@ const escapeSteps = (): EscapeStep[] => {
 export function ObservatoryOverlay() {
   const { formatMassShort } = usePhysicsFormat();
   const t = useTranslations("blackHole");
+  const tGuide = useTranslations("guide");
   const presetId = useBlackHole((s) => s.presetId);
   const settingsOpen = useBlackHole((s) => s.settingsOpen);
   const setSettingsOpen = useBlackHole((s) => s.setSettingsOpen);
@@ -160,12 +156,12 @@ export function ObservatoryOverlay() {
                 label={t("controls")}
                 details={(access) => <BlackHoleTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
-                guide={{ label: t("guide"), ariaLabel: t("ariaStartGuide"), onSelect: startGuide }}
+                guide={{ onSelect: startGuide }}
                 finder={{
                   id: "atlas",
                   label: t("atlas"),
                   ariaLabel: t("ariaOpenAtlas"),
-                  icon: Globe2,
+                  icon: Crosshair,
                   onSelect: () => setMapOpen(true),
                 }}
                 tools={[
@@ -180,7 +176,7 @@ export function ObservatoryOverlay() {
                   },
                 ]}
                 settings={{
-                  label: t("observatory"),
+                  label: t("view"),
                   active: settingsOpen,
                   controls: SETTINGS_PANEL_ID,
                   onSelect: toggleMenu,
@@ -193,8 +189,8 @@ export function ObservatoryOverlay() {
           {settingsOpen ? (
             <Rail
               id={SETTINGS_PANEL_ID}
-              title={t("observatory")}
-              closeLabel={t("ariaCloseObs")}
+              title={t("view")}
+              closeLabel={t("close")}
               onClose={() => setSettingsOpen(false)}
               sheetLead={
                 <>
@@ -209,7 +205,7 @@ export function ObservatoryOverlay() {
                       className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-xs tracking-widest text-fg uppercase"
                     >
                       <GraduationCap className="size-3.5" />
-                      {t("startGuide")}
+                      {tGuide("start")}
                     </button>
                     <PresetNav stacked />
                   </RailSection>

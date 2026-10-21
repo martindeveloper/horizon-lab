@@ -18,6 +18,7 @@ import { JULIAN_YEAR_SECONDS } from "@horizon/toolkit/science";
 import { anchorAt, anchorNameKey, anchorOfSelection, type AnchorId } from "../lib/model/anchors";
 import { lookbackYears } from "../lib/model/comoving";
 import { formatDuration, formatRange } from "./format";
+import type { Moment } from "./trips";
 
 type T = ReturnType<typeof useTranslations<"voyage">>;
 
@@ -38,10 +39,10 @@ function whereRows(
   f: Format,
   d: DistanceSettings,
   id: AnchorId,
-  now: Date,
+  { now, a }: Moment,
   ship: ArrayLike<number>,
 ) {
-  anchorAt(id, now, at);
+  anchorAt(id, now, a, at);
   const range = Math.hypot(at[0] - ship[0]!, at[1] - ship[1]!, at[2] - ship[2]!);
   const rows: CardFact[] = [
     { id: "fromShip", label: t("facts.fromShip"), value: formatRange(t, f, d, range) },
@@ -60,30 +61,32 @@ function rowsOf(
   f: Format,
   d: DistanceSettings,
   sel: SolarSelection,
-  now: Date,
+  moment: Moment,
   ship: ArrayLike<number>,
 ): CardFact[] {
   switch (sel.kind) {
     case "sun":
       return [
-        ...whereRows(t, f, d, "sun", now, ship).rows,
+        ...whereRows(t, f, d, "sun", moment, ship).rows,
         radiusRow(t, d, SOLAR_CATALOGUE.sun.sun.radius),
       ];
     case "planet":
       return [
-        ...whereRows(t, f, d, sel.id, now, ship).rows,
+        ...whereRows(t, f, d, sel.id, moment, ship).rows,
         radiusRow(t, d, SOLAR_CATALOGUE.planets[sel.id].radius),
-        ...orbitFacts(t, f, d, planetElements(sel.id, 1, 0, now)).filter((r) => r.id === "period"),
+        ...orbitFacts(t, f, d, planetElements(sel.id, 1, 0, moment.now)).filter(
+          (r) => r.id === "period",
+        ),
       ];
     case "named":
       return [
-        ...whereRows(t, f, d, sel.id, now, ship).rows,
-        ...orbitFacts(t, f, d, namedElements(namedById(sel.id), 1, 0, now)).filter(
+        ...whereRows(t, f, d, sel.id, moment, ship).rows,
+        ...orbitFacts(t, f, d, namedElements(namedById(sel.id), 1, 0, moment.now)).filter(
           (r) => r.id === "nearFar" || r.id === "period",
         ),
       ];
     case "moon":
-      return [...whereRows(t, f, d, sel.id, now, ship).rows, ...moonRows(t, f, d, sel.id)];
+      return [...whereRows(t, f, d, sel.id, moment, ship).rows, ...moonRows(t, f, d, sel.id)];
     default:
       return [];
   }
@@ -95,13 +98,13 @@ function farCard(
   f: Format,
   sel: Exclude<WorldSelection, SolarSelection>,
   d: DistanceSettings,
-  now: Date,
+  moment: Moment,
   ship: ArrayLike<number>,
 ): Card {
   const anchor = anchorOfSelection(sel);
   const facts: CardFact[] = [];
   if (anchor) {
-    const { rows, range } = whereRows(t, f, d, anchor, now, ship);
+    const { rows, range } = whereRows(t, f, d, anchor, moment, ship);
     facts.push(...rows, {
       id: "lightAge",
       label: t("facts.lightAge"),
@@ -124,16 +127,16 @@ export function cardFor(
   f: Format,
   sel: WorldSelection,
   d: DistanceSettings,
-  now: Date,
+  moment: Moment,
   ship: ArrayLike<number>,
 ): Card {
-  if (!isSolarSelection(sel)) return farCard(t, f, sel, d, now, ship);
+  if (!isSolarSelection(sel)) return farCard(t, f, sel, d, moment, ship);
   const body = anchorOfSelection(sel);
   const note = body ? `cards.bodies.${body}` : null;
   return {
     badge: t("badges.measured"),
     title: t(solarNameKey(sel)),
-    facts: rowsOf(t, f, d, sel, now, ship),
+    facts: rowsOf(t, f, d, sel, moment, ship),
     body: note && t.has(note) ? t(note) : "",
     caution: "",
   };

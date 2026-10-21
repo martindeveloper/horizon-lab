@@ -8,7 +8,7 @@ import { MAPS } from "@horizon/toolkit/bodies";
 import { keysOf } from "@horizon/toolkit/records";
 
 import { HOLE_ALIASES, PRESETS } from "../src/features/black-hole/lib/holes/index.ts";
-import { pathForHole, presetFromPath, resolveHole } from "../src/features/black-hole/routing.ts";
+import { pathForHole, presetIdFromPath, resolveHole } from "../src/features/black-hole/routing.ts";
 import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
 import { CREDITS } from "../src/lib/credits.ts";
@@ -182,12 +182,12 @@ test("localized preset links, aliases, and initial scene state agree", () => {
     for (const preset of PRESETS) {
       const url = getPathname({ locale, href: pathForHole(preset.id) });
       assert.equal(url, pathForHole(preset.id), "URLs carry no language");
-      assert.equal(presetFromPath(url).id, preset.id);
+      assert.equal(presetIdFromPath(url), preset.id);
     }
     for (const [alias, id] of Object.entries(HOLE_ALIASES)) {
       if (id === "custom") continue;
       assert.equal(resolveHole(alias), id);
-      assert.equal(presetFromPath(`/${locale}/${alias}`).id, id);
+      assert.equal(presetIdFromPath(`/${locale}/${alias}`), id);
     }
   }
   assert.equal(resolveHole("unknown-black-hole"), null);

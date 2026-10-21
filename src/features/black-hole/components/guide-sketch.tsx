@@ -1,12 +1,12 @@
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
 import { orbitBasis, type Basis } from "@/features/black-hole/lib/frame";
-import type { Vec3 } from "@/features/black-hole/lib/kerr-rays";
 import { B_CRIT, schwarzschildKm } from "@/features/black-hole/lib/physics";
 import {
   buildSketch,
+  LABEL_FADE,
   shadowScale,
   type Sketch,
   type SketchContext,
@@ -16,17 +16,33 @@ import { useBlackHole } from "@/features/black-hole/lib/store";
 import { tourFor } from "@/features/black-hole/lib/tours";
 import { projectWorld } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import type { Vec3 } from "@horizon/toolkit/math";
 
-import { drawOverHole, fitOverlay, frameLoop } from "./overlay-canvas";
-import { useSceneCamera } from "./scene-camera";
+import { clearOverlay, drawOverHole, overlayFit, overlayLoop } from "./overlay-canvas";
+import { useSceneCamera, useSceneFrames } from "./scene-camera";
 
 const FADE_OUT = 0.7;
+/**
+ * A drawing at rest is rebuilt only when the camera has moved this share of its distance
+ * (about 0.06°, under a pixel at the drawings' size) or the spin or the words changed.
+ */
+const POSE_QUANTUM = 1e-3;
 
-type Shown = { key: string; sketches: Sketch[]; start: number; anchor: Basis; fade: number };
+type Built = ReturnType<typeof buildSketch>;
+type Shown = {
+  key: string;
+  sketches: Sketch[];
+  start: number;
+  anchor: Basis;
+  fade: number;
+  /** Each sketch's drawing at rest and what it was built for. */
+  built: ({ key: string; drawing: Built } | null)[];
+};
 
-/** Hairline drawings over the hole for the current guide beat; decorative, the card carries the text. */
+/** Hairline drawings over the hole for the current guide step; decorative, the card carries the text. */
 export function GuideSketch() {
   const cam = useSceneCamera();
+  const frames = useSceneFrames();
   const t = useTranslations("blackHole");
   const fmt = useFormatter();
   const { formatLengthKm } = usePhysicsFormat();
@@ -36,7 +52,11 @@ export function GuideSketch() {
     SketchContext,
     "number" | "km" | "notToScale" | "spinZero" | "assumedSpin" | "criticalCurve"
   > | null>(null);
+  const locale = useLocale();
+  /** The words' language, so drawings at rest are rebuilt in a new one. */
+  const language = useRef(locale);
   useEffect(() => {
+    language.current = locale;
     text.current = {
       number: (n, digits) =>
         fmt.number(n, { minimumFractionDigits: digits, maximumFractionDigits: digits }),
@@ -63,42 +83,52 @@ export function GuideSketch() {
 
     const clear = () => {
       if (!drawn) return;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      clearOverlay(ctx);
       drawn = false;
     };
 
-    return frameLoop((dt, now) => {
-      if (document.hidden || !text.current) return;
+    /** True while a drawing is still being revealed or fading, or moves by itself while the scene animates. */
+    const frame = (dt: number, now: number) => {
+      if (!text.current) return false;
       const state = useBlackHole.getState();
-      const beat = tourFor(state.presetId)[state.guideBeat];
+      const step = tourFor(state.presetId)[state.guideStep];
       const key =
-        state.guideArrived && beat?.sketch?.length ? `${state.presetId}:${state.guideBeat}` : null;
+        state.guideArrived && step?.sketch?.length ? `${state.presetId}:${state.guideStep}` : null;
       if (shown && shown.key !== key) {
         shown.fade -= dt / FADE_OUT;
         if (shown.fade <= 0) shown = null;
       }
-      if (!shown && key && beat?.sketch) {
+      if (!shown && key && step?.sketch) {
         shown = {
           key,
-          sketches: beat.sketch,
+          sketches: step.sketch,
           start: now,
           anchor: orbitBasis(cam.posX, cam.posY, cam.posZ),
           fade: 1,
+          built: step.sketch.map(() => null),
         };
       }
       if (!shown) {
         clear();
-        return;
+        return false;
       }
 
-      const fit = fitOverlay(layer, canvas);
-      if (!fit) return;
+      const fit = boxes.fit();
+      if (!fit) return false;
       const { width, height } = fit.holeBox;
       drawOverHole(ctx, fit);
       drawn = true;
 
       const live = orbitBasis(cam.posX, cam.posY, cam.posZ);
+      const q = POSE_QUANTUM * cam.dist;
+      const pose = [
+        state.spin,
+        state.massSolar,
+        language.current,
+        Math.round(cam.posX / q),
+        Math.round(cam.posY / q),
+        Math.round(cam.posZ / q),
+      ].join(":");
       const context: SketchContext = {
         spin: state.spin,
         rsKm: schwarzschildKm(state.massSolar),
@@ -128,6 +158,7 @@ export function GuideSketch() {
         return Math.min(1, Math.max(0.06, (r - 0.9) / 0.14));
       };
       const fade = shown.fade;
+      let moving = fade < 1;
       const small = width < 640;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -135,8 +166,15 @@ export function GuideSketch() {
       const colour = (tone: Tone) => (tone === "accent" ? accent : quiet);
       const labelBoxes: { x: number; y: number; w: number; h: number }[] = [];
 
-      for (const sketch of shown.sketches) {
-        const { strokes, labels } = buildSketch(sketch, context);
+      for (const [index, sketch] of shown.sketches.entries()) {
+        /* A drawing at rest is kept until the camera, the spin or the words change. */
+        const kept = shown.built[index];
+        const drawing = kept?.key === pose ? kept.drawing : buildSketch(sketch, context);
+        const resting = context.elapsed >= drawing.still;
+        shown.built[index] = resting ? { key: pose, drawing } : null;
+        /* One that never rests (a dot in Kepler time) moves while the scene animates. */
+        if (!resting && (drawing.still < Infinity || !state.animationPaused)) moving = true;
+        const { strokes, labels } = drawing;
         for (const stroke of strokes) {
           const q = Math.min(1, Math.max(0, (context.elapsed - stroke.delay) / stroke.duration));
           if (q <= 0) continue;
@@ -207,7 +245,7 @@ export function GuideSketch() {
         ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
         ctx.shadowBlur = 6;
         for (const label of labels) {
-          const a = Math.min(1, Math.max(0, (context.elapsed - label.delay) / 0.6)) * fade;
+          const a = Math.min(1, Math.max(0, (context.elapsed - label.delay) / LABEL_FADE)) * fade;
           if (a <= 0) continue;
           const s = project(label.at);
           if (!s.visible) continue;
@@ -228,8 +266,15 @@ export function GuideSketch() {
       }
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
-    });
-  }, [cam]);
+      return moving;
+    };
+    const loop = overlayLoop(frames, frame);
+    const boxes = overlayFit(layer, canvas, loop.wake);
+    return () => {
+      loop.dispose();
+      boxes.dispose();
+    };
+  }, [cam, frames]);
 
   return (
     <div ref={layerRef} className="pointer-events-none absolute inset-0 z-[65]" aria-hidden>

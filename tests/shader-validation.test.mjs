@@ -54,12 +54,14 @@ const FRAGMENT_PREFIX = [
 ].join("\n");
 /**
  * Flags three.js sets for the materials that use them (instanced rocks), and
- * the orrery's ring-shadow variant of the planet shader, so both branches parse.
+ * the orrery's ring-shadow variant of the planet shader and the exposed rings' variant of
+ * the ring shader, so both branches parse.
  */
 const THREE_FLAGS = {
   USE_INSTANCING: "",
   USE_INSTANCING_COLOR: "",
   RING_SHADOW: "",
+  RING_EXPOSURE: "600.0",
   AIR_STEPS: "12",
 };
 
@@ -114,6 +116,11 @@ test("shader variants parse with the defines their passes compile them with", ()
     if (readFileSync(file, "utf8").includes("#include <horizon/log-depth>"))
       variants.push([file, LOG_DEPTH]);
   variants.push([post("planet.frag.glsl"), `#define OCCLUDERS 4\n${LOG_DEPTH}`]);
+  /* The stars drawn as surfaces (D⁴ beaming) rather than points. */
+  variants.push([
+    path.join("src/features/voyage/lib/graphics/shaders", "star.vert.glsl"),
+    "#define SURFACE 1",
+  ]);
   variants.push([
     path.join("src/space/sky/shaders", "band.frag.glsl"),
     "#define RELATIVITY 1\n#define TODAY_ONLY 1",

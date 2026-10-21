@@ -1,18 +1,11 @@
 import { Pause, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useId, useSyncExternalStore } from "react";
+import { useId } from "react";
 
-import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
-import { IconButton, Surface, SwitchChip, useImmersive } from "@horizon/toolkit/ui";
+import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
+import { IconButton, Surface, SwitchChip, useImmersive, useMediaQuery } from "@horizon/toolkit/ui";
 
 import { useOrrery } from "../lib/store";
-
-function subscribeMotion(changed: () => void) {
-  const query = window.matchMedia(REDUCED_MOTION_QUERY);
-  query.addEventListener("change", changed);
-  return () => query.removeEventListener("change", changed);
-}
-const serverMotion = () => false;
 
 /** Keep the scientific qualification on screen when the normal facts/controls are hidden. */
 export function SolarActivityNotice() {
@@ -36,7 +29,7 @@ export function SolarActivityControls() {
   const t = useTranslations("orrery.solarActivity");
   const enabled = useOrrery((s) => s.solarActivity);
   const paused = useOrrery((s) => s.solarActivityPaused);
-  const reduced = useSyncExternalStore(subscribeMotion, prefersReducedMotion, serverMotion);
+  const reduced = useMediaQuery(REDUCED_MOTION_QUERY);
   const description = useId();
   return (
     <div className="w-full border-t border-border pt-2">

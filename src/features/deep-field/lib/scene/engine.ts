@@ -29,7 +29,7 @@ import { createNeighboursLayer } from "@/space/galaxy/scene/neighbours-layer";
 import { TODAY } from "@/space/solar-system/model/moment";
 import { PROBES } from "@/space/solar-system/model/probes";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
-import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
+import { createSolarKit, type SolarFrame, type SolarShow } from "@/space/solar-system/scene/kit";
 import { createReachLayer } from "@/space/solar-system/scene/reach-layer";
 import {
   SOLAR_RULER_KEYS,
@@ -249,6 +249,18 @@ export function createDeepFieldEngine({
      * at first, so a selection the store kept from an earlier visit is checked on arrival.
      */
     let lastRealm: Realm | null = null;
+    /* Rewritten each frame (the clock's date afresh, since a layer may keep it); the layers read
+       them only while they update. */
+    const solarShow: SolarShow = { ...SOLAR_SHOW };
+    const solarFrame: SolarFrame = {
+      ...TODAY,
+      dt: 0,
+      now: new Date(),
+      show: solarShow,
+      sel: null,
+      playing: false,
+      dist: 0,
+    };
     const tick = (dt: number, invalidated: boolean) =>
       bridge.frame(() => {
         const state = store.getState();
@@ -277,15 +289,11 @@ export function createDeepFieldEngine({
           dist,
           lines: veil.presence,
         };
-        const solarFrame: SolarFrame = {
-          ...TODAY,
-          dt,
-          now: new Date(),
-          show: { ...SOLAR_SHOW, names: state.show.names },
-          sel: frame.sel && isSolarSelection(frame.sel) ? frame.sel : null,
-          playing: false,
-          dist,
-        };
+        solarShow.names = state.show.names;
+        solarFrame.dt = dt;
+        solarFrame.now = new Date();
+        solarFrame.sel = frame.sel && isSolarSelection(frame.sel) ? frame.sel : null;
+        solarFrame.dist = dist;
         sky.update(frame);
         const at = solar.update(solarFrame);
         reach.update(frame);

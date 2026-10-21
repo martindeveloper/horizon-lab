@@ -1,9 +1,15 @@
 import { create } from "zustand";
 
-import { guideSlice, type GuideSlice } from "@/lib/scene-store";
+import {
+  guideSlice,
+  LAB_RENDER,
+  renderSlice,
+  type GuideSlice,
+  type RenderFields,
+  type RenderSlice,
+} from "@/lib/scene-store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { clamp } from "@horizon/toolkit/math";
-import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import { viewFromPath } from "../routing";
 import { ELEMENT_IDS, lineById, type ElementId } from "./model/atoms";
@@ -43,11 +49,26 @@ type Saved = Pick<Settings, "view" | "star" | "velocity" | "air" | "bench" | "my
 /** A case's answer so far: the elements marked and the shift given the markers. */
 type Draft = { marked: readonly ElementId[]; velocity: number };
 
+/**
+ * The render settings a visit starts with, and their setters (`renderSlice`): how sharply the
+ * canvases are drawn (`canvasScale`), anti-aliasing, and spectral colours in Display P3 where
+ * the screen shows it (`drawingGamut`).
+ */
+const RENDER_DEFAULTS: Pick<
+  RenderFields<CanvasAntialias>,
+  "quality" | "antialias" | "wideColour"
+> = {
+  quality: LAB_RENDER.quality,
+  antialias: "off",
+  wideColour: LAB_RENDER.wideColour,
+};
+
 /** The narrowest window the spectrum zooms to, nm. */
 export const MIN_SPAN = 0.4;
 
 type SpectroscopyStore = Settings &
-  GuideSlice<Saved> & {
+  GuideSlice<Saved> &
+  RenderSlice<typeof RENDER_DEFAULTS> & {
     /** The first spectrum is drawn. */
     ready: boolean;
     panel: Panel;
@@ -73,11 +94,6 @@ type SpectroscopyStore = Settings &
     result: MysteryResult | null;
     /** The scene's schematic photons fly (never under reduced motion). */
     photons: boolean;
-    /** How sharply the canvases are drawn (`canvasScale`), for this visit. */
-    quality: RenderQuality;
-    antialias: CanvasAntialias;
-    /** Spectral colours in Display P3, where the screen shows it (`drawingGamut`). */
-    wideColour: boolean;
     /** A soft blurred layer under the scene's lights and a halo on the ribbon's strong emission lines; off by default. */
     glow: boolean;
     setReady: () => void;
@@ -114,9 +130,6 @@ type SpectroscopyStore = Settings &
     setNormalized: (normalized: boolean) => void;
     setLetters: (letters: boolean) => void;
     setPhotons: (photons: boolean) => void;
-    setQuality: (quality: RenderQuality) => void;
-    setAntialias: (antialias: CanvasAntialias) => void;
-    setWideColour: (wideColour: boolean) => void;
     setGlow: (glow: boolean) => void;
     /** The View panel's settings as a visit starts: spectrograph, switches, window, render quality. */
     resetView: () => void;
@@ -159,10 +172,8 @@ const VIEW_DEFAULTS = {
   normalized: false,
   photons: true,
   range: FULL_RANGE,
-  quality: "standard",
-  antialias: "off",
-  wideColour: false,
   glow: false,
+  ...RENDER_DEFAULTS,
 } as const satisfies Partial<SpectroscopyStore>;
 
 const replaced = <T>(items: readonly T[], index: number, item: T) => {
@@ -208,6 +219,7 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   panel: "none",
   selection: null,
   ...VIEW_DEFAULTS,
+  ...renderSlice(set, RENDER_DEFAULTS),
   letters: true,
   compare: [],
   setReady: () => set({ ready: true }),
@@ -313,9 +325,6 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
   setNormalized: (normalized) => set({ normalized }),
   setLetters: (letters) => set({ letters }),
   setPhotons: (photons) => set({ photons }),
-  setQuality: (quality) => set({ quality }),
-  setAntialias: (antialias) => set({ antialias }),
-  setWideColour: (wideColour) => set({ wideColour }),
   setGlow: (glow) => set({ glow }),
   resetView: () => set(VIEW_DEFAULTS),
   ...guideSlice(set, get, {

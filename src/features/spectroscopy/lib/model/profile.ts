@@ -8,12 +8,7 @@ import {
 } from "@horizon/toolkit/science";
 
 import { ELEMENTS, ionizationEnergy, type ElementId, type Line } from "./atoms";
-import {
-  absorberShare,
-  atomsPerKilogram,
-  ionizationFractions,
-  NUCLEI_PER_KILOGRAM,
-} from "./populations";
+import { absorberShare, atomsPerKilogram, ionizationIn, NUCLEI_PER_KILOGRAM } from "./populations";
 import { voigt } from "./voigt";
 
 /** The state of a gas in local thermodynamic equilibrium. */
@@ -94,7 +89,7 @@ function hydrogenCollisionRate(line: Line, c: Conditions) {
 /** Neutral hydrogen atoms per cm³: the Sun's share of the heavy particles, by Saha. */
 function neutralHydrogen(c: Conditions) {
   const heavy = (c.gasPressure - c.electronPressure) / (BOLTZMANN_CONSTANT * c.temperature);
-  const neutral = ionizationFractions("H", c.temperature, c.electronPressure)[0]!;
+  const neutral = ionizationIn(c, "H")[0]!;
   return Math.max(0, heavy) * HYDROGEN_SHARE * neutral * 1e-6;
 }
 const HYDROGEN_SHARE = atomsPerKilogram("H") / NUCLEI_PER_KILOGRAM;
@@ -131,17 +126,42 @@ function vanDerWaalsFwhm(line: Line, c: Conditions) {
 
 /**
  * Hydrogen's levels split in the electric fields of nearby ions (the linear Stark effect), so
- * its lines widen with electron density: Hβ's half-maximum width is 4.8 nm at nₑ = 10²³ m⁻³
- * and grows as nₑ^0.68 (Gigosos, González & Cardeñoso 2003). The other Balmer lines scale with
- * n_upper² − n_lower², as the linear Stark splitting does. The core is drawn as a Lorentzian;
- * past the Stark width the wings steepen to Holtsmark's Δλ^(−5/2).
+ * its lines widen with electron density. Gigosos, González & Cardeñoso (2003, Spectrochim.
+ * Acta B 58, 1489) fit their simulated Balmer profiles as a width at nₑ = 10²³ m⁻³ times a
+ * power of nₑ; by upper level: Hα's half width at half area, 0.549 nm (the full width is twice
+ * it, and for the Lorentzian core drawn here also the width at half maximum), and Hβ's full
+ * width at half maximum, 4.800 nm.
  */
-function starkFwhm(line: Line, c: Conditions) {
+const STARK_FITS: Readonly<Record<number, { width: number; exponent: number }>> = {
+  3: { width: 2 * 0.549, exponent: 0.67965 },
+  4: { width: 4.8, exponent: 0.68116 },
+};
+const FITTED_LEVELS = Object.keys(STARK_FITS).map(Number);
+/** The electron density the fits are quoted at, m⁻³. */
+const STARK_DENSITY = 1e23;
+
+/**
+ * A line's Stark width (full width at half maximum), nm; 0 but for hydrogen. A line without
+ * its own fit scales from the nearest fitted one: the splitting in frequency grows as
+ * n_upper² − n_lower², so in wavelength as λ² (n_upper² − n_lower²), λ from Rydberg's formula.
+ * The core is drawn as a Lorentzian; past the Stark width the wings steepen to Holtsmark's
+ * Δλ^(−5/2).
+ */
+export function starkFwhm(line: Line, c: Conditions) {
   if (line.species !== "H I") return 0;
   const upper = Number.parseInt(line.upperLevel.configuration, 10);
   const lower = Number.parseInt(line.lowerLevel.configuration, 10);
+  const fitted = FITTED_LEVELS.reduce((best, n) =>
+    Math.abs(n - upper) < Math.abs(best - upper) ? n : best,
+  );
+  const fit = STARK_FITS[fitted]!;
+  /* 1/λ ∝ 1/n_lower² − 1/n_upper², so the two lines' ratio of λ² needs no constant. */
+  const wavenumber = (n: number) => 1 / lower ** 2 - 1 / n ** 2;
+  const splitting = (n: number) => n ** 2 - lower ** 2;
+  const scale =
+    (wavenumber(fitted) / wavenumber(upper)) ** 2 * (splitting(upper) / splitting(fitted));
   const density = c.electronPressure / (BOLTZMANN_CONSTANT * c.temperature);
-  return 4.8 * (density / 1e23) ** 0.681 * ((upper ** 2 - lower ** 2) / 12);
+  return fit.width * (density / STARK_DENSITY) ** fit.exponent * scale;
 }
 
 /**
@@ -162,6 +182,13 @@ export function dopplerWidth(
 const lorentzFwhm = (line: Line, c: Conditions) =>
   RADIATIVE_FWHM + vanDerWaalsFwhm(line, c) + starkFwhm(line, c);
 
+/** A shape moved by `shift` (λ_observed / λ_rest): its centre and widths stretch alike. */
+export const shifted = <S extends Shape>(shape: S, shift: number): S => ({
+  ...shape,
+  centre: shape.centre * shift,
+  doppler: shape.doppler * shift,
+});
+
 /** The line's shape under some conditions, its centre moved by `shift` (λ_observed / λ_rest). */
 export function lineShape(line: Line, c: Conditions, shift = 1): Shape {
   const doppler = dopplerWidth(
@@ -172,11 +199,12 @@ export function lineShape(line: Line, c: Conditions, shift = 1): Shape {
   );
   const stark = starkFwhm(line, c);
   const damping = lorentzFwhm(line, c) / (2 * doppler);
-  const shape = { centre: line.wavelength * shift, doppler: doppler * shift, damping };
-  if (!(stark > 0)) return shape;
+  const shape = { centre: line.wavelength, doppler, damping };
+  if (!(stark > 0)) return shifted(shape, shift);
   const holtsmark = Math.max(3, stark / doppler);
   const root = Math.sqrt(Math.PI);
-  return { ...shape, holtsmark, scale: root / (root - holtsmarkLoss(damping, holtsmark)) };
+  const scale = root / (root - holtsmarkLoss(damping, holtsmark));
+  return shifted({ ...shape, holtsmark, scale }, shift);
 }
 
 /**
@@ -187,7 +215,7 @@ export function lineShape(line: Line, c: Conditions, shift = 1): Shape {
 export function lineCrossSection(line: Line, c: Conditions) {
   const metres = line.vacuum * 1e-9;
   const stimulated = -Math.expm1(-SECOND_RADIATION_CONSTANT / (metres * c.temperature));
-  const share = absorberShare(line, c.temperature, c.electronPressure);
+  const share = absorberShare(line, c);
   return share * Math.PI * CLASSICAL_ELECTRON_RADIUS_M * metres ** 2 * stimulated;
 }
 

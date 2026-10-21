@@ -25,11 +25,7 @@
   },
   "hud": {
     "views": "Pohledy",
-    "controls": "Ovládání spektra",
-    "guide": "Průvodce",
-    "elements": "Prvky",
-    "view": "Zobrazení",
-    "close": "Zavřít"
+    "elements": "Prvky"
   },
   "spectrum": {
     "label": "Spektrum",
@@ -222,7 +218,6 @@
     "resolutionNote": "Rozlišovací schopnost R = λ / Δλ: při nízkém R sousední čáry splývají.",
     "resolution": "Rozlišovací schopnost",
     "resolutionValue": "R {power} · {width} nm na 600 nm",
-    "show": "Zobrazit",
     "normalized": "Dělit kontinuem",
     "photons": "Fotony ve scéně",
     "windows": "Výřezy",
@@ -238,15 +233,6 @@
     "oxygen": "Kyslíkové pásy zemského vzduchu"
   },
   "tour": {
-    "label": "Průvodce",
-    "start": "Spustit průvodce",
-    "progress": "{step} / {total}",
-    "previous": "Předchozí krok",
-    "next": "Další",
-    "play": "Přehrát průvodce",
-    "pause": "Pozastavit průvodce",
-    "finish": "Dokončit",
-    "exit": "Ukončit průvodce",
     "steps": {
       "rainbow": {
         "title": "Duha s mezerami",
@@ -295,12 +281,8 @@
     }
   },
   "technicalDetails": {
-    "open": "Technické podrobnosti",
-    "close": "Zavřít",
     "title": "Uvnitř Spekter hvězd",
     "summary": "Každé spektrum se tu počítá, nekreslí: atomová data NIST, populace podle Sahy a Boltzmanna a přenos záření, na stole skrz homogenní vrstvu plynu, u hvězd skrz modelové fotosféry ATLAS9.",
-    "featuresTitle": "Co ukazuje",
-    "references": "Zdroje",
     "features": {
       "bench": "Kirchhoffův stůl: lampa, plyn a spektrograf, s tmavými, jasnými i mizejícími čarami z jedné rovnice.",
       "stars": "Slunce a šest jasných hvězd od O9,5 po K5 a libovolná hvězda hlavní posloupnosti od 3 900 do 30 000 K (bez M trpaslíků).",
@@ -326,7 +308,7 @@
       },
       "shapes": {
         "title": "Tvary čar",
-        "body": "Voigtovy profily (Humlíček 1982) z tepelného a turbulentního Dopplerova rozšíření, radiačního tlumení, srážek s atomy vodíku (Barklem, Piskunov a O'Mara 2000, kde čáru uvádějí, jinak Unsöldova aproximace × 1,15, jejich mediánový poměr) a u vodíku z lineárního Starkova jevu škálovaného podle měření Hβ, s Holtsmarkovými křídly Δλ^(−5/2). Každá vrstva rozšiřuje čáru podle své teploty a tlaků; tvar vodíkových čar se bere v τ_Ross = 0,3."
+        "body": "Voigtovy profily (Humlíček 1982) z tepelného a turbulentního Dopplerova rozšíření, radiačního tlumení, srážek s atomy vodíku (Barklem, Piskunov a O'Mara 2000, kde čáru uvádějí, jinak Unsöldova aproximace × 1,15, jejich mediánový poměr) a u vodíku z lineárního Starkova jevu (Gigosos, González a Cardeñoso 2003: jejich simulované šířky Hα a Hβ, vyšší čáry škálované podle Hβ), s Holtsmarkovými křídly Δλ^(−5/2). Každá vrstva rozšiřuje čáru podle své teploty a tlaků; tvar vodíkových čar se bere v τ_Ross = 0,3."
       },
       "motion": {
         "title": "Pohyb a přístroj",

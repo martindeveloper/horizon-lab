@@ -1,3 +1,6 @@
+import type { Fact } from "@/lib/facts";
+import { NAMED_STARS } from "@/space/stellar";
+
 import { mainSequencePhotosphere, SEQUENCE_RANGE } from "./atmospheres";
 
 /**
@@ -17,76 +20,93 @@ export const STAR_IDS = [
 ] as const;
 export type StarId = (typeof STAR_IDS)[number];
 
+/**
+ * A star's effective temperature, K: the shared catalogue's figure (`NAMED_STARS`, sourced and
+ * checked there), or the lab's own where the catalogue has no single value for it.
+ */
+type Temperature =
+  | { kelvin: number; catalogue: Fact }
+  | {
+      kelvin: number;
+      /** The catalogue's figure beside it, where there is one (a span, say), else null. */
+      catalogue: Fact | null;
+      /** Where the lab's value comes from, and why it is not the catalogue's. */
+      source: string;
+    };
+
 type Star = {
   id: StarId;
   /** MK spectral type. */
   type: string;
-  /** Measured effective temperature, K. */
-  teff: number;
+  teff: Temperature;
   /** Measured radial velocity, km/s (heliocentric, as SIMBAD lists it; positive receding). */
   velocity: number;
   /** km/s: the Sun's measured one; elsewhere the models' own 2 km/s. */
   microturbulence: number;
-  /** Where the effective temperature comes from. */
-  source: string;
 };
+
+/** The catalogue's effective temperature of a star it gives one value for. */
+function catalogued(fact: Fact): Temperature {
+  if (fact.value === undefined) throw new Error("The catalogue gives only a span");
+  return { kelvin: fact.value, catalogue: fact };
+}
 
 export const STARS: Record<StarId, Star> = {
   alnitak: {
     id: "alnitak",
     type: "O9.5 Iab",
-    teff: 29_500,
+    teff: catalogued(NAMED_STARS.alnitak.teff),
     velocity: 18.1,
     microturbulence: 2,
-    source: "Hummel et al. 2013, A&A 554, A52",
   },
   rigel: {
     id: "rigel",
     type: "B8 Ia",
-    teff: 12_000,
+    teff: catalogued(NAMED_STARS.rigel.teff),
     velocity: 17.8,
     microturbulence: 2,
-    source: "Przybilla et al. 2006, A&A 445, 1099",
   },
   vega: {
     id: "vega",
     type: "A0 V",
-    teff: 9_550,
+    /* Vega is a rapid rotator seen pole-on: the catalogue's span runs from its equator to its
+       pole. A spectrum integrates the whole disc, which one plane-parallel model fits best at
+       this temperature. */
+    teff: {
+      kelvin: 9_550,
+      catalogue: NAMED_STARS.vega.teff,
+      source: "Castelli & Kurucz 1994, A&A 281, 817 (a model-atmosphere fit to the disc's light)",
+    },
     velocity: -13.5,
     microturbulence: 2,
-    source: "Castelli & Kurucz 1994, A&A 281, 817",
   },
   procyon: {
     id: "procyon",
     type: "F5 IV–V",
-    teff: 6_530,
+    teff: catalogued(NAMED_STARS.procyon.teff),
     velocity: -4.5,
     microturbulence: 2,
-    source: "Kervella et al. 2004, A&A 413, 251",
   },
   sun: {
     id: "sun",
     type: "G2 V",
-    teff: 5_772,
+    teff: catalogued(NAMED_STARS.sun.teff),
     velocity: 0,
     microturbulence: 1,
-    source: "IAU 2015 Resolution B3",
   },
   arcturus: {
     id: "arcturus",
     type: "K1.5 III",
-    teff: 4_286,
+    teff: catalogued(NAMED_STARS.arcturus.teff),
     velocity: -5.2,
     microturbulence: 2,
-    source: "Ramírez & Allende Prieto 2011, ApJ 743, 135",
   },
   aldebaran: {
     id: "aldebaran",
     type: "K5 III",
-    teff: 3_900,
+    teff: catalogued(NAMED_STARS.aldebaran.teff),
     velocity: 54.4,
     microturbulence: 2,
-    source: "Heiter et al. 2015, A&A 582, A49",
   },
 };
 

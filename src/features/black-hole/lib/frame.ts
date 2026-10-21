@@ -1,4 +1,13 @@
-import { DataTexture, FloatType, Matrix4, RGBAFormat, Vector2, Vector3 } from "three";
+import {
+  DataTexture,
+  FloatType,
+  LinearFilter,
+  Matrix4,
+  RGBAFormat,
+  SRGBColorSpace,
+  Vector2,
+  Vector3,
+} from "three";
 
 import {
   freeFromOrbit,
@@ -6,14 +15,21 @@ import {
   type FreeLook,
   type FreePose,
 } from "@horizon/toolkit/camera";
-import { clamp, smoothstep } from "@horizon/toolkit/math";
+import { clamp, cross3, length3, smoothstep, type Vec3 } from "@horizon/toolkit/math";
+import { blackbodyLut } from "@horizon/toolkit/science";
 
 import resolveShader from "./black-hole-resolve.frag.glsl";
 import { DISK_OUTER_RADIUS, DISK_PROFILE_SIZE, diskProfilePixels } from "./disk-profile";
 import { holeById, SKY_CODE } from "./holes";
-import type { Vec3 } from "./kerr-rays";
-import { DISK_INNER_HORIZON_FACTOR, SPIN_LIMIT } from "./parameters";
 import {
+  BLACKBODY_LUT_SIZE,
+  BLACKBODY_MAX_K,
+  BLACKBODY_MIN_K,
+  DISK_INNER_HORIZON_FACTOR,
+  SPIN_LIMIT,
+} from "./parameters";
+import {
+  blRadius,
   cameraFloor,
   diskFlowVelocity,
   horizonOverM,
@@ -22,6 +38,7 @@ import {
   MAX_DIST,
 } from "./physics";
 import { framedRayFov } from "./render-policy";
+import { toneExposure } from "./tone";
 
 /**
  * Shader inputs for one frame, shared by the live engine and the headless
@@ -29,6 +46,8 @@ import { framedRayFov } from "./render-policy";
  */
 type Uniforms = {
   uDiskProfile: { value: DataTexture };
+  /** Black-body colours; sampled as linear light, since the texels are sRGB-encoded. */
+  uBlackbody: { value: DataTexture };
   uResolution: { value: InstanceType<typeof Vector2> };
   /** Camera to world, column-major: right, up, back (−forward) and the position in M. */
   uCamera: { value: InstanceType<typeof Matrix4> };
@@ -38,6 +57,7 @@ type Uniforms = {
   uSpin: { value: number };
   uInner: { value: number };
   uOuter: { value: number };
+  /** The tone map's exposure (`toneExposure`). */
   uExposure: { value: number };
   uDiskBright: { value: number };
   uStars: { value: number };
@@ -82,12 +102,7 @@ export type Basis = { right: Vec3; up: Vec3; fwd: Vec3 };
 /** The frame looking along `fwd` from `azimuth`; right follows the azimuth alone, so the image never rolls near the pole. */
 function rollFreeBasis(azimuth: number, fwd: Vec3): Basis {
   const right: Vec3 = [Math.cos(azimuth), 0, -Math.sin(azimuth)];
-  const up: Vec3 = [
-    right[1] * fwd[2] - right[2] * fwd[1],
-    right[2] * fwd[0] - right[0] * fwd[2],
-    right[0] * fwd[1] - right[1] * fwd[0],
-  ];
-  return { right, up, fwd };
+  return { right, up: cross3(right, fwd), fwd };
 }
 
 /** Basis of the camera at (px, py, pz) without roll, as the guide's drawings and the critical curve need it. */
@@ -121,7 +136,21 @@ export function passOptions(uniforms: Uniforms) {
   } as const;
 }
 
-/** Fresh uniforms; the caller owns (and disposes) the disk-profile texture. */
+/** The black-body lookup: one row, filtered between texels, decoded to linear light by the GPU. */
+function blackbodyTexture() {
+  const texture = new DataTexture(
+    blackbodyLut(BLACKBODY_LUT_SIZE, BLACKBODY_MIN_K, BLACKBODY_MAX_K),
+    BLACKBODY_LUT_SIZE,
+    1,
+  );
+  texture.colorSpace = SRGBColorSpace;
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/** Fresh uniforms; the caller owns (and disposes) their textures (`uniformTextures`). */
 export function createUniforms(): Uniforms {
   return {
     uDiskProfile: {
@@ -133,6 +162,7 @@ export function createUniforms(): Uniforms {
         FloatType,
       ),
     },
+    uBlackbody: { value: blackbodyTexture() },
     uResolution: { value: new Vector2(1, 1) },
     uCamera: { value: new Matrix4().makeTranslation(0, 0, 24) },
     uCamVelocity: { value: new Vector3() },
@@ -153,6 +183,12 @@ export function createUniforms(): Uniforms {
   };
 }
 
+/** The uniforms' textures, for their owner to dispose and to re-upload after a lost context. */
+export const uniformTextures = (uniforms: Uniforms) => [
+  uniforms.uDiskProfile.value,
+  uniforms.uBlackbody.value,
+];
+
 /** Writes scene uniforms; the Page–Thorne profile is re-integrated only when spin changes. */
 export function sceneWriter(uniforms: Uniforms) {
   let profileSpin = NaN;
@@ -171,7 +207,7 @@ export function sceneWriter(uniforms: Uniforms) {
       profile.needsUpdate = true;
       profileSpin = scene.spin;
     }
-    uniforms.uExposure.value = scene.exposure;
+    uniforms.uExposure.value = toneExposure(scene.exposure);
     uniforms.uDiskBright.value = scene.diskBrightness;
     uniforms.uStars.value = scene.starIntensity;
     uniforms.uTemp.value = scene.tempScale;
@@ -225,13 +261,10 @@ export function writeCamera(uniforms: Uniforms, pose: FreePose, spin: number, ri
   const flow = ride > 0 ? diskFlowVelocity(pose.position, spin) : null;
   if (flow) uniforms.uCamVelocity.value.set(...flow).multiplyScalar(Math.min(ride, 1));
   else uniforms.uCamVelocity.value.set(0, 0, 0);
-  const [x, y, z] = pose.position;
-  const dist = Math.hypot(x, y, z);
+  const dist = length3(pose.position);
   /* The vignette eases off with the camera's Boyer–Lindquist radius: a tenth of the way to the
      corners' black up close, under half that from 160 M out. */
-  const a = clamp(spin, -SPIN_LIMIT, SPIN_LIMIT);
-  const camR2 = dist * dist - a * a;
-  const rc = Math.sqrt(0.5 * (camR2 + Math.sqrt(camR2 * camR2 + 4 * a * a * y * y)));
+  const { r: rc } = blRadius(pose.position, clamp(spin, -SPIN_LIMIT, SPIN_LIMIT));
   uniforms.uVignette.value = 0.1 * (1 - 0.55 * smoothstep(40, 160, rc));
   const far = Math.min(1, Math.max(0, (dist - 48) / 240));
   const near = Math.min(1, Math.max(0, (14 - dist) / 12));

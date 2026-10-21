@@ -71,11 +71,7 @@ export function DeepFieldOverlay() {
                 label={t("hud.controls")}
                 details={(access) => <DeepFieldTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
-                guide={{
-                  label: t("hud.guide"),
-                  ariaLabel: t("tour.start"),
-                  onSelect: () => useDeepField.getState().startGuide(),
-                }}
+                guide={{ onSelect: () => useDeepField.getState().startGuide() }}
                 guideRef={guideButton}
                 finder={{
                   id: "objects",

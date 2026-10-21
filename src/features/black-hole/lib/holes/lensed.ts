@@ -30,7 +30,6 @@ export const lensed: HoleSpec = {
   tempScale: 1.05,
   sky: "lensed",
   jet: 0,
-  aliases: ["lensed", "disk"],
   tour: [
     // Crane up and out, the turn leading the pull-back.
     {

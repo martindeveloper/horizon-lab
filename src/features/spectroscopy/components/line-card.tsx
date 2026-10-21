@@ -1,11 +1,11 @@
 "use client";
 
 import { ZoomIn } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
-import { HC_EV_NM } from "@horizon/toolkit/science";
+import { HC_EV_NM, dopplerWavelengthRatio, formatReadout } from "@horizon/toolkit/science";
 import { Action, Chip, PanelHeader, cn } from "@horizon/toolkit/ui";
 
 import { lineById, namedLine } from "../lib/model/atoms";
@@ -13,8 +13,8 @@ import { sequenceWidths, temperatureInView } from "../lib/model/scenes";
 import { curveOfGrowth, reportLine } from "../lib/model/spectrum";
 import { useSpectroscopy } from "../lib/store";
 import { GrowthChart, LevelDiagram, SequenceChart } from "./charts";
-import { kelvin, levelName, lineName, scientific, wavelength } from "./format";
-import { useObservation } from "./use-spectrum";
+import { kelvin, levelName, lineName, wavelength } from "./format";
+import { useObservation, useRestObservation } from "./use-spectrum";
 
 /** The card covers the stage's whole width at its foot only as a phone's bottom sheet. */
 const isSheet: DockInTheWay = (card, stage) =>
@@ -48,6 +48,7 @@ function useCardFocus(root: RefObject<HTMLElement | null>, open: boolean) {
 export function LineCard() {
   const t = useTranslations("spectroscopy");
   const f = useFormatter();
+  const locale = useLocale();
   const id = useSpectroscopy((s) => s.selection);
   const view = useSpectroscopy((s) => s.view);
   const star = useSpectroscopy((s) => s.star);
@@ -60,8 +61,10 @@ export function LineCard() {
   /* On phones the card is a sheet over the stage's foot: the spectrum ends above it. */
   useDockClearance(root, isSheet, "--sheet-clear");
 
-  const report = useMemo(() => (line ? reportLine(line, obs) : null), [line, obs]);
-  const growth = useMemo(() => (line ? curveOfGrowth(line, obs) : []), [line, obs]);
+  /* A line's strength is measured at rest: dragging the velocity only moves where it sits. */
+  const rest = useRestObservation();
+  const report = useMemo(() => (line ? reportLine(line, rest) : null), [line, rest]);
+  const growth = useMemo(() => (line ? curveOfGrowth(line, rest) : []), [line, rest]);
   const sequence = useMemo(
     () => (line && obs.kind === "star" && view !== "mystery" ? sequenceWidths(line) : []),
     [line, obs.kind, view],
@@ -74,7 +77,7 @@ export function LineCard() {
   const emitting =
     glowing ||
     (obs.kind === "slab" && obs.background !== null && obs.background < obs.gas.temperature);
-  const observed = report.shape.centre;
+  const observed = report.shape.centre * dopplerWavelengthRatio(obs.velocity);
   const shifted = Math.abs(observed - line.wavelength) > 1e-4;
   const element = t(`elements.${line.element}`);
   const stage = t(`stages.${line.stage}`);
@@ -104,7 +107,7 @@ export function LineCard() {
     {
       id: "tau",
       label: t("card.tau"),
-      value: scientific(f, report.tau),
+      value: formatReadout(report.tau, locale),
     },
     {
       id: "width",

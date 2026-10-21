@@ -135,6 +135,16 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
       closeLabel={t("hud.close")}
       onClose={onClose}
     >
+      <RailSection title={t("hud.show")}>
+        <SwitchGroup>
+          <SwitchRow on={normalized} onToggle={() => api().setNormalized(!normalized)}>
+            {t("panel.normalized")}
+          </SwitchRow>
+          <SwitchRow on={photons} onToggle={() => api().setPhotons(!photons)}>
+            {t("panel.photons")}
+          </SwitchRow>
+        </SwitchGroup>
+      </RailSection>
       <RailSection title={t("panel.spectrograph")} note={t("panel.resolutionNote")}>
         <ControlRow label={t("panel.resolution")} value={describe(resolution)}>
           <Slider
@@ -147,16 +157,6 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
             onValueChange={([v]) => api().setResolution(fromSlider(v ?? 0))}
           />
         </ControlRow>
-      </RailSection>
-      <RailSection title={t("panel.show")}>
-        <SwitchGroup>
-          <SwitchRow on={normalized} onToggle={() => api().setNormalized(!normalized)}>
-            {t("panel.normalized")}
-          </SwitchRow>
-          <SwitchRow on={photons} onToggle={() => api().setPhotons(!photons)}>
-            {t("panel.photons")}
-          </SwitchRow>
-        </SwitchGroup>
       </RailSection>
       <RailSection title={t("panel.windows")}>
         <SwitchGroup>

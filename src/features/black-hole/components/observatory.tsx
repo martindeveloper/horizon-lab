@@ -8,7 +8,7 @@ import { HorizonLoader } from "@/features/black-hole/components/loader";
 import { ObservatoryOverlay } from "@/features/black-hole/components/overlay";
 import { driftFor } from "@/features/black-hole/lib/drift";
 import { useBlackHole } from "@/features/black-hole/lib/store";
-import { presetFromPath } from "@/features/black-hole/routing";
+import { presetIdFromPath } from "@/features/black-hole/routing";
 import { usePathname } from "@/i18n/navigation";
 import { VisualizationShell } from "@horizon/toolkit/ui";
 
@@ -31,7 +31,7 @@ export function Observatory() {
   );
 
   useLayoutEffect(() => {
-    const id = presetFromPath(pathname).id;
+    const id = presetIdFromPath(pathname);
     if (!id) return;
     const state = useBlackHole.getState();
     if (pathname === BLACK_HOLE_PATH && state.presetId === "custom") return;

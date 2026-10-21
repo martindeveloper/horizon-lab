@@ -17,8 +17,8 @@ uniform vec3 streak;    // the ship's motion over the exposure, cells
 uniform float alpha;
 uniform vec3 dust;      // the motes' colour at rest: gold-white, cooler as the regime climbs
 uniform float stars;    // 0…1: how far the motes have become stars (warp)
-uniform sampler2D bbLut; // blackbody colours, log-spaced from lutRange.x to lutRange.y kelvin
-uniform vec2 lutRange;
+uniform sampler2D bbLut; // blackbody colours, log-spaced in temperature (`blackbodyLut`)
+uniform vec3 bbLutSpec; // its lowest and highest temperature, kelvin, and its width in texels
 uniform vec2 viewport;  // CSS px
 uniform float widthPx;  // the ribbon's width at the head for a mote a cell away
 uniform float longestPx; // the longest streak on the screen
@@ -34,6 +34,7 @@ varying vec3 vTint;
 #include <horizon/relativity>
 #include <horizon/seeded-hash>
 #include <horizon/log-depth>
+#include <horizon/temperature>
 
 const vec3 BLUE = vec3(0.7, 0.82, 1.0);
 const vec3 WARM = vec3(1.0, 0.55, 0.32);
@@ -52,7 +53,7 @@ void main() {
   /* A star's temperature: a second hash, cubed, so most are cool and dim and few are hot. */
   float heat = seededHash3(position, 7.0);
   heat *= heat * heat;
-  float u = mix(log(2600.0 / lutRange.x), log(30000.0 / lutRange.x), heat) / log(lutRange.y / lutRange.x);
+  float u = blackbodyLutTexel(2600.0 * pow(30000.0 / 2600.0, heat), bbLutSpec);
   vec3 starColour = texture2D(bbLut, vec2(u, 0.5)).rgb;
   bright *= mix(1.0, mix(0.35, 1.6, heat), stars);
   size *= mix(1.0, mix(0.7, 1.4, heat), stars);

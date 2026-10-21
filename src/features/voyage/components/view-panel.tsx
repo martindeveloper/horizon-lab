@@ -14,7 +14,14 @@ import { SwitchRow } from "@horizon/toolkit/ui";
 
 import { useVoyage, type Show } from "../lib/store";
 
-const SWITCHES: (keyof Show)[] = ["instruments", "canopy", "streaks", "names", "orbits"];
+const SWITCHES: (keyof Show)[] = [
+  "instruments",
+  "canopy",
+  "streaks",
+  "names",
+  "orbits",
+  "faintRings",
+];
 
 /** How the scene is drawn: what it shows, the distance unit, buttons to turn the ship, rendering. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {

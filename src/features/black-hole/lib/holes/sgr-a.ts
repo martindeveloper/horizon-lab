@@ -2,7 +2,7 @@
  * Sagittarius A*  —  catalog hole, Galactic Centre.
  *
  * Geometric units G = c = 1. Lengths on screen are in M = GM/c².
- *   M = 4.297e6 M☉  (GRAVITY Collaboration, A&A 657 L12, 2022)
+ *   M = 4.297e6 M☉  (GRAVITY Collaboration, A&A 657 L12, 2022; `BLACK_HOLES` in src/space/stellar.ts)
  *   D = 8.277 kpc
  *   a/M ≈ 0.94      not measured: the only EHT model passing every test (EHT 2022 Paper V;
  *                   2024 Paper VIII, a = 0.94, i = 150°). Later work is split (arXiv:2509.22639
@@ -21,13 +21,15 @@
  * Sky: Milky Way nuclear cluster (shader weather = sgr). The star field is procedural;
  * S2 is not drawn at this near-horizon scale.
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
 import type { HoleSpec } from "./types";
 
 export const sgrA: HoleSpec = {
   id: "sgr-a",
   name: "Sagittarius A*",
   kind: "catalog",
-  massSolar: 4.297e6,
+  massSolar: BLACK_HOLES["sgr-a"].mass.value,
   illustrativeFlow: true,
   spin: 0.94,
   inclination: 1.05,
@@ -38,7 +40,6 @@ export const sgrA: HoleSpec = {
   tempScale: 1,
   sky: "sgr",
   jet: 0,
-  aliases: ["sgr-a", "sgra", "sagittarius-a", "sagittarius-a-star"],
   tour: [
     // Back away low through the cluster, turning against the usual direction and looking up
     // into the crowded sky: the hole sits off to one side of the nuclear star cluster.

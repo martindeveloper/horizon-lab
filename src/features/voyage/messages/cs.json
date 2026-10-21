@@ -31,10 +31,10 @@
     "canopy": "Kabina",
     "orbits": "Dráhy",
     "streaks": "Proudy rychlosti",
+    "faintRings": "Slabé prstence",
     "feel": "Odezva lodi"
   },
   "hud": {
-    "guide": "Průvodce",
     "moonsOf": "Měsíce: {body}",
     "hold": "Zastavit hodiny",
     "run": "Spustit hodiny",
@@ -47,6 +47,8 @@
     "sunlight": "Sluneční svit",
     "lightToEarth": "Světlo k Zemi",
     "flyHere": "Letět sem",
+    "jumpHere": "Skočit sem",
+    "never": "Nikdy",
     "cmb": "Pozadí",
     "cmbValue": "{value} K",
     "clocksApart": "Rozdíl hodin",
@@ -163,7 +165,7 @@
     "summary": "Každé těleso ve skutečné velikosti a poloze, v kilometrech, s lodí v počátku scény a logaritmickou hloubkou, aby povrch měsíce i vzdálené planety sdílely jeden průchod. Lety trvají skutečný čas pohonu na dvojích hodinách. Sluneční svit slábne s kvadrátem vzdálenosti; měsíce se navzájem zastiňují.",
     "features": {
       "scale": "Slunce, planety, pojmenované malé světy a měsíce ve skutečné velikosti, umístěné podle elementů JPL s rozlišenými barycentry Země–Měsíc a Pluto–Charon.",
-      "flight": "Tři pohony: Voyager se 17 km/s, světelná plachta s desetinou rychlosti světla a plamenná loď s jedním g, která zrychluje, v polovině se obrátí a brzdí. Autopilot letí skutečnou cestu s automatickým zrychlením času; v ručním letu loď padá ve skutečné gravitaci.",
+      "flight": "Tři pohony: Voyager se 17 km/s, světelná plachta s pětinou rychlosti světla a plamenná loď s jedním g, která zrychluje, v polovině se obrátí a brzdí. Autopilot letí skutečnou cestu s automatickým zrychlením času; v ručním letu loď padá ve skutečné gravitaci.",
       "clocks": "Lodní a pozemské hodiny v tempu, které zvolíte; rozcházejí se jen při vysoké rychlosti.",
       "light": "Sluneční svit slábnoucí se vzdáleností, doba letu světla domů a zatmění od měsíců a planet.",
       "sky": "Jasné hvězdy v naměřených vzdálenostech a pás Mléčné dráhy: posouvají se, jak loď ujíždí světelné roky, při rychlosti se tísní vpředu a mění barvu; α Centauri jako tři slunce naměřené velikosti."
@@ -188,15 +190,6 @@
     }
   },
   "tour": {
-    "label": "Průvodce",
-    "start": "Spustit průvodce",
-    "progress": "{step} / {total}",
-    "previous": "Předchozí krok",
-    "next": "Další",
-    "play": "Přehrát průvodce",
-    "pause": "Pozastavit průvodce",
-    "finish": "Dokončit",
-    "exit": "Ukončit průvodce",
     "steps": {
       "moon": {
         "title": "Měsíc",

@@ -42,6 +42,7 @@ const DEFAULT_SHOW: Show = {
   names: true,
   distances: false,
   trueSize: false,
+  faintRings: false,
   elliptical: true,
   drift: true,
 };

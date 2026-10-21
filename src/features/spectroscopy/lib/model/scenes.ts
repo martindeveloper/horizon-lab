@@ -1,6 +1,12 @@
 import { mainSequencePhotosphere, SEQUENCE_RANGE, starPhotosphere } from "./atmospheres";
 import { ELEMENT_IDS, type ElementId, type Line } from "./atoms";
-import { reportLine, synthesize, type Observation, type StarObservation } from "./spectrum";
+import {
+  reportLine,
+  synthesize,
+  synthesizeWithout,
+  type Observation,
+  type StarObservation,
+} from "./spectrum";
 import { SEQUENCE_TEMPERATURES, spectralClass, STARS, type StarId } from "./stars";
 import type { ViewId } from "./view-ids";
 
@@ -198,7 +204,7 @@ export const mysteryVelocity = (m: Mystery) =>
 
 /** The case's temperature, K: the gas's, or the star's effective temperature. */
 export const mysteryTemperature = (m: Mystery) =>
-  m.kind === "dwarf" ? m.teff : m.kind === "giant" ? STARS[m.star].teff : m.temperature;
+  m.kind === "dwarf" ? m.teff : m.kind === "giant" ? STARS[m.star].teff.kelvin : m.temperature;
 
 export type Settings = {
   view: ViewId;
@@ -259,8 +265,9 @@ export function temperatureInView(
   obs: Observation,
 ) {
   if (obs.kind !== "star") return null;
-  if (s.view === "sun") return STARS.sun.teff;
-  if (s.view === "stars") return s.star === "sequence" ? s.sequenceTemperature : STARS[s.star].teff;
+  if (s.view === "sun") return STARS.sun.teff.kelvin;
+  if (s.view === "stars")
+    return s.star === "sequence" ? s.sequenceTemperature : STARS[s.star].teff.kelvin;
   return obs.photosphere.teff;
 }
 
@@ -291,22 +298,9 @@ function mysteryChanges(m: Mystery, resolution: number, airmass: number) {
   const obs = mysteryObservation(m, resolution, airmass);
   const samples = 3000;
   const base = synthesize(obs, ...FULL_RANGE, samples);
+  const elements = ELEMENT_IDS.filter((e) => obs.kind === "star" || obs.gas.columns[e]);
   const changes = new Map<ElementId, number>();
-  for (const element of ELEMENT_IDS) {
-    if (obs.kind === "slab" && !obs.gas.columns[element]) continue;
-    const without: Observation =
-      obs.kind === "slab"
-        ? {
-            ...obs,
-            gas: {
-              ...obs.gas,
-              columns: Object.fromEntries(
-                Object.entries(obs.gas.columns).filter(([el]) => el !== element),
-              ),
-            },
-          }
-        : { ...obs, abundances: { ...obs.abundances, [element]: -20 } };
-    const other = synthesize(without, ...FULL_RANGE, samples);
+  for (const [element, other] of synthesizeWithout(obs, ...FULL_RANGE, samples, elements)) {
     let change = 0;
     for (let i = 0; i < samples; i++) {
       const scale = base.continuum[i]! > 0 ? base.continuum[i]! : base.peak;

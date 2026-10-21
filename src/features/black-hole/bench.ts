@@ -14,6 +14,7 @@ import {
   orbitWheelSensitivity,
   passOptions,
   sceneWriter,
+  uniformTextures,
   writeCamera,
   type CameraPose,
 } from "./lib/frame";
@@ -21,6 +22,7 @@ import { holeById, paramsFromPreset } from "./lib/holes";
 import { gasTurnRate } from "./lib/parameters";
 import { MAX_DIST, MIN_DIST } from "./lib/physics";
 import { BLACK_HOLE_QUALITY, bloomSettings, lensSettings } from "./lib/quality";
+import { toneExposure } from "./lib/tone";
 
 /**
  * Headless benchmark target: the observatory's shader, uniforms, camera and
@@ -44,7 +46,7 @@ export const benchTarget: BenchTarget = {
     });
     pass.resize(width, height);
     uniforms.uResolution.value.set(width, height);
-    const settings = paramsFromPreset(holeById(scene.presetId), scene.quality, false);
+    const settings = paramsFromPreset(holeById(scene.presetId), false);
     const steps = BLACK_HOLE_QUALITY[scene.quality].steps;
     const writeScene = sceneWriter(uniforms);
 
@@ -79,8 +81,9 @@ export const benchTarget: BenchTarget = {
           })
         : null;
     if (drift) drift.start(pose);
-    const bloom = scene.bloom ? bloomSettings(scene.quality, false, settings.exposure) : null;
-    const lens = scene.lens ? lensSettings(scene.quality, false, settings.exposure) : null;
+    const exposure = toneExposure(settings.exposure);
+    const bloom = scene.bloom ? bloomSettings(scene.quality, false, exposure) : null;
+    const lens = scene.lens ? lensSettings(scene.quality, false, exposure) : null;
     const gamut = scene.wideColour ? "p3" : "srgb";
 
     const gl = canvas.getContext("webgl2");
@@ -114,7 +117,7 @@ export const benchTarget: BenchTarget = {
       dispose() {
         input?.dispose();
         pass.dispose();
-        uniforms.uDiskProfile.value.dispose();
+        for (const texture of uniformTextures(uniforms)) texture.dispose();
       },
     };
   },

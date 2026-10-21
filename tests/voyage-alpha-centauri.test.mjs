@@ -9,7 +9,6 @@ import {
   ALPHA_CENTAURI,
   alphaCentauriAt,
   companionOffsetAu,
-  julianYear,
 } from "../src/features/voyage/lib/model/alpha-centauri.ts";
 
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
@@ -45,7 +44,6 @@ test("B orbits A between periastron and apastron, closing after one period", () 
 
 test("the three stars stand at their published places about the Sun", () => {
   const date = new Date("2026-10-20T00:00:00Z");
-  assert.ok(Math.abs(julianYear(date) - 2026.8) < 0.01);
   const a = at("alphaCenA", date);
   const b = at("alphaCenB", date);
   const proxima = at("proxima", date);

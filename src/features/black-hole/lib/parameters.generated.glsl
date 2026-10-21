@@ -9,6 +9,9 @@
 #define PLUNGE_GLOW        0.06
 #define DISK_PROFILE_SIZE  512.0
 #define DISK_PROFILE_LAST  511.0
+#define BLACKBODY_LUT_SIZE 256.0
+#define BLACKBODY_MIN_K    1000.0
+#define BLACKBODY_MAX_K    40000.0
 #define LIMB_DARKENING     2.06
 #define LIMB_NORMALIZATION 0.4213483146
 #define MAX_STEPS          384
@@ -27,6 +30,7 @@
 #define GLOW_WIDTH         0.12
 #define GLOW_CONE          0.26
 #define GLOW_OUTER         1.5
+#define DISPLAY_CONTRAST   1.4
 #define SKY_LENSED         0.0
 #define SKY_SGR            1.0
 #define SKY_M87            2.0

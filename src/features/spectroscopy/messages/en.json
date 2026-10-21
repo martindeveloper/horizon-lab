@@ -25,11 +25,7 @@
   },
   "hud": {
     "views": "Views",
-    "controls": "Spectrum controls",
-    "guide": "Guided tour",
-    "elements": "Elements",
-    "view": "Display",
-    "close": "Close"
+    "elements": "Elements"
   },
   "spectrum": {
     "label": "Spectrum",
@@ -222,7 +218,6 @@
     "resolutionNote": "Resolving power R = λ / Δλ: at low R, neighbouring lines blend.",
     "resolution": "Resolving power",
     "resolutionValue": "R {power} · {width} nm at 600 nm",
-    "show": "Show",
     "normalized": "Divide by the continuum",
     "photons": "Photons in the scene",
     "windows": "Windows",
@@ -238,15 +233,6 @@
     "oxygen": "Earth's oxygen bands"
   },
   "tour": {
-    "label": "Guided tour",
-    "start": "Start guided tour",
-    "progress": "{step} / {total}",
-    "previous": "Previous step",
-    "next": "Next",
-    "play": "Play guide",
-    "pause": "Pause guide",
-    "finish": "Finish",
-    "exit": "Exit guide",
     "steps": {
       "rainbow": {
         "title": "A rainbow with gaps",
@@ -295,12 +281,8 @@
     }
   },
   "technicalDetails": {
-    "open": "Technical details",
-    "close": "Close",
     "title": "Inside Stellar Spectra",
     "summary": "Every spectrum here is computed, not drawn: NIST atomic data, Saha–Boltzmann populations and radiative transfer, through a uniform slab on the bench and through ATLAS9 model photospheres for the stars.",
-    "featuresTitle": "What it shows",
-    "references": "Sources",
     "features": {
       "bench": "Kirchhoff's bench: a lamp, a gas and a spectrograph, with dark, bright and vanishing lines from one equation.",
       "stars": "The Sun and six bright stars from O9.5 to K5, and any main-sequence star from 3,900 to 30,000 K (no M dwarfs).",
@@ -326,7 +308,7 @@
       },
       "shapes": {
         "title": "Line shapes",
-        "body": "Voigt profiles (Humlíček 1982) from thermal and turbulent Doppler broadening, radiation damping, collisions with hydrogen atoms (Barklem, Piskunov & O'Mara 2000 where they list the line, otherwise Unsöld's approximation × 1.15, their median ratio) and, for hydrogen, the linear Stark effect scaled from Hβ measurements, with Holtsmark's Δλ^(−5/2) wings. Each layer broadens a line by its own temperature and pressures; hydrogen's shape is taken at τ_Ross = 0.3."
+        "body": "Voigt profiles (Humlíček 1982) from thermal and turbulent Doppler broadening, radiation damping, collisions with hydrogen atoms (Barklem, Piskunov & O'Mara 2000 where they list the line, otherwise Unsöld's approximation × 1.15, their median ratio) and, for hydrogen, the linear Stark effect (Gigosos, González & Cardeñoso 2003: their simulated widths for Hα and Hβ, the higher lines scaled from Hβ), with Holtsmark's Δλ^(−5/2) wings. Each layer broadens a line by its own temperature and pressures; hydrogen's shape is taken at τ_Ross = 0.3."
       },
       "motion": {
         "title": "Motion and the instrument",

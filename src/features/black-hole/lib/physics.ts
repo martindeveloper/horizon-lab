@@ -1,7 +1,12 @@
 /** Geometric units: G = c = 1. Horizon of a Schwarzschild hole is r = 2M = Rs. */
 
-import { clamp } from "@horizon/toolkit/math";
-import { geometricMassTime, measure, schwarzschildRadius } from "@horizon/toolkit/science";
+import { clamp, dot3, type Vec3 } from "@horizon/toolkit/math";
+import {
+  geometricMassTime,
+  measure,
+  schwarzschildRadius,
+  SHADOW_PER_RS,
+} from "@horizon/toolkit/science";
 
 import {
   innermostStableOrbit,
@@ -38,13 +43,35 @@ export function photonOverM(a: number): number {
   return photonOrbit.compute({ a: clamp(a, -SPIN_LIMIT, SPIN_LIMIT) });
 }
 
-/** Critical impact parameter 3√3 M of a Schwarzschild hole: the shadow's radius on the sky. */
-export const B_CRIT = 3 * Math.sqrt(3);
+/**
+ * Critical impact parameter of a Schwarzschild hole, the shadow's radius on the sky: 3√3 M,
+ * the toolkit's `SHADOW_PER_RS` in units of M = Rs / 2.
+ */
+export const B_CRIT = 2 * SHADOW_PER_RS;
+
+/**
+ * Boyer–Lindquist r and cosθ of a scene point. The scene draws Boyer–Lindquist coordinates as
+ * oblate spheroids, x = √(r² + a²) sinθ cosφ, y = r cosθ, z = √(r² + a²) sinθ sinφ, so r is the
+ * root of r⁴ − (|p|² − a²) r² − a²y² = 0.
+ */
+export function blRadius(p: Readonly<Vec3>, a: number): { r: number; mu: number } {
+  const R2 = dot3(p, p) - a * a;
+  const r = Math.sqrt(0.5 * (R2 + Math.sqrt(R2 * R2 + 4 * a * a * p[1] * p[1])));
+  return { r, mu: r > 0 ? p[1] / r : 0 };
+}
+
+/**
+ * The impact parameter λ = L/E of the spherical photon orbit at radius r, in units of M
+ * (Bardeen 1973; Teo 2003): λ = −(r³ − 3r² + a²r + a²) / (a (r − 1)), for a ≠ 0.
+ */
+export function photonOrbitImpact(r: number, a: number) {
+  return -(r * r * r - 3 * r * r + a * a * r + a * a) / (a * (r - 1));
+}
 
 /**
  * Critical impact parameters |λ| of the equatorial prograde and retrograde
- * photon orbits in units of M (Bardeen 1973): λ = −(r³ − 3r² + a²r + a²) / (a (r − 1))
- * at the photon-orbit radius. Both equal 3√3 ≈ 5.20 at zero spin; as a → 1 they
+ * photon orbits in units of M (`photonOrbitImpact` at the photon-orbit radius).
+ * Both equal 3√3 ≈ 5.20 at zero spin; as a → 1 they
  * tend to 2 and 7, so the shadow's equatorial width shrinks from 10.4 M to 9 M
  * (its polar height stays near 10.4 M).
  */
@@ -52,17 +79,14 @@ export function criticalImpactParameters(a: number): { prograde: number; retrogr
   // Prograde and retrograde refer to the hole's own rotation, so only |a| matters.
   const aa = clamp(Math.abs(a), 0, SPIN_LIMIT);
   if (Math.abs(aa) < 1e-3) return { prograde: B_CRIT, retrograde: B_CRIT };
-  const lambda = (r: number) => -(r * r * r - 3 * r * r + aa * aa * r + aa * aa) / (aa * (r - 1));
   const prograde = photonOrbit.compute({ a: aa });
   const retrograde = photonOrbit.compute({ a: -aa });
-  return { prograde: Math.abs(lambda(prograde)), retrograde: Math.abs(lambda(retrograde)) };
+  return {
+    prograde: Math.abs(photonOrbitImpact(prograde, aa)),
+    retrograde: Math.abs(photonOrbitImpact(retrograde, aa)),
+  };
 }
 
-/**
- * Closest camera distance for spin a. The camera is a zero-angular-momentum
- * observer, which exists only outside the horizon; it stays 0.3 M clear of
- * r₊ on the equator, where Boyer–Lindquist r = √(d² − a²) is smallest.
- */
 /** Camera distance bounds in M; MIN_DIST sits below every spin's `cameraFloor`. */
 export const MIN_DIST = 1.6;
 export const MAX_DIST = 480;
@@ -73,9 +97,16 @@ export const INCLINATION_LIMIT = 1.35;
  * accreting hole can reach. Formulas still accept up to `SPIN_LIMIT`.
  */
 export const MAX_SPIN = 0.998;
+/** The hovering camera keeps this far (M) outside the horizon. */
+const HORIZON_CLEARANCE = 0.3;
 
+/**
+ * Closest camera distance for spin a. The camera is a zero-angular-momentum
+ * observer, which exists only outside the horizon; it stays `HORIZON_CLEARANCE` clear of
+ * r₊ on the equator, where Boyer–Lindquist r = √(d² − a²) is smallest.
+ */
 export function cameraFloor(a: number): number {
-  const r = horizonOverM(a) + 0.3;
+  const r = horizonOverM(a) + HORIZON_CLEARANCE;
   return Math.sqrt(r * r + a * a);
 }
 
@@ -94,13 +125,12 @@ export function diskFlowVelocity(
   spin: number,
 ): [number, number, number] {
   const a = clamp(spin, -SPIN_LIMIT, SPIN_LIMIT);
-  const [x, y, z] = position;
+  const [x, , z] = position;
   const cyl = Math.hypot(x, z);
-  const r2 = x * x + y * y + z * z - a * a;
-  const r = Math.sqrt(0.5 * (r2 + Math.sqrt(r2 * r2 + 4 * a * a * y * y)));
+  const { r, mu } = blRadius(position, a);
   const delta = r * r - 2 * r + a * a;
   if (cyl < 1e-9 || delta <= 0) return [0, 0, 0];
-  const cos = clamp(y / r, -1, 1);
+  const cos = clamp(mu, -1, 1);
   const sin2 = 1 - cos * cos;
   const sigma = r * r + a * a * cos * cos;
   const bigA = (r * r + a * a) ** 2 - a * a * delta * sin2;
@@ -138,8 +168,4 @@ export function rainRedshift(rOverM: number): number {
 /** dr/dT for a rain geodesic, T in units of M. Freezes as r → 2M. */
 export function rainDrDt(rOverM: number): number {
   return rainFallSpeed.compute({ r: Math.max(rOverM, 2.001) });
-}
-
-export function formatSpin(a: number): string {
-  return a < 0 ? `−${(-a).toFixed(3)}` : a.toFixed(3);
 }

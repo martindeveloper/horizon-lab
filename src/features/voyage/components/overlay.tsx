@@ -83,11 +83,7 @@ export function VoyageOverlay() {
                 label={t("hud.controls")}
                 details={(access) => <VoyageTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
-                guide={{
-                  label: t("hud.guide"),
-                  ariaLabel: t("tour.start"),
-                  onSelect: () => useVoyage.getState().startGuide(),
-                }}
+                guide={{ onSelect: () => useVoyage.getState().startGuide() }}
                 guideRef={guideButton}
                 finder={{
                   id: "objects",

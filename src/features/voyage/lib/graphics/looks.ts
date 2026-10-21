@@ -9,7 +9,6 @@ import {
   LinearFilter,
   ShaderMaterial,
   SRGBColorSpace,
-  Vector2,
   Vector3,
 } from "three";
 
@@ -21,17 +20,19 @@ import ORBIT_VERT from "./shaders/orbit.vert.glsl";
 import STAR_FRAG from "./shaders/star.frag.glsl";
 import STAR_VERT from "./shaders/star.vert.glsl";
 
-/** The lookup's temperature range, kelvin: a red dwarf to a star blue-shifted a hundredfold. */
-export const LUT_RANGE_K = [1_000, 1_000_000] as const;
-const LUT_SIZE = 256;
+/**
+ * The black-body lookup: its temperature range, kelvin (a red dwarf to a star blue-shifted a
+ * hundredfold), and its width in texels, as the shaders' `bbLutSpec` reads it.
+ */
+export const LUT_SPEC = [1_000, 1_000_000, 256] as const;
 
-/** Blackbody colours, log-spaced over `LUT_RANGE_K`, as a one-row texture. */
+/** The shaders' `bbLutSpec` uniform. */
+export const lutSpecUniform = () => ({ value: new Vector3(...LUT_SPEC) });
+
+/** Blackbody colours, log-spaced over `LUT_SPEC`'s range, as a one-row texture. */
 export function blackbodyTexture() {
-  const texture = new DataTexture(
-    blackbodyLut(LUT_SIZE, LUT_RANGE_K[0], LUT_RANGE_K[1]),
-    LUT_SIZE,
-    1,
-  );
+  const [minK, maxK, size] = LUT_SPEC;
+  const texture = new DataTexture(blackbodyLut(size, minK, maxK), size, 1);
   texture.colorSpace = SRGBColorSpace;
   texture.magFilter = LinearFilter;
   texture.minFilter = LinearFilter;
@@ -40,11 +41,12 @@ export function blackbodyTexture() {
 }
 
 /**
- * The most the Doppler factor's D² may brighten a point: a star's point may go far (it is a
- * point), the painted band's soft grains and haze much less, or the sky ahead is a white sheet.
+ * The most beaming may brighten the sky, approached softly (beamingSeen): a star's point by
+ * its D² may go far (it is a point); a surface, the band's glow and the painted points that
+ * stand for it, by its D⁴ much less, or the sky ahead is a white sheet.
  */
 const STAR_PEAK = 16;
-export const PAINTED_PEAK = 4;
+export const SURFACE_PEAK = 3;
 
 /** The ship's motion as the shaders read it: one set the engine writes each frame, every material shares. */
 export type MotionUniforms = {
@@ -90,7 +92,8 @@ export function orbitMaterial(motion: MotionUniforms, color: number, opacity: nu
 
 /**
  * The sky's points: the catalogue's stars, and the painted band's grains and field drawn the
- * same way. `fade` and `tint` are the band's presence and extinction (`createMilkyWay`).
+ * same way. `fade` and `tint` are the band's presence and extinction (`createMilkyWay`); a
+ * star's `handover` attribute marks it as drawn by another layer once `handedOver` rises.
  */
 export function starMaterial(
   dpr: { value: number },
@@ -98,20 +101,24 @@ export function starMaterial(
   motion: MotionUniforms,
   /** The ship from the Sun, parsecs. */
   shipPc: Vector3,
+  /** The points stand for a surface (the painted band and field), not for stars. */
+  surface = false,
 ) {
   return new ShaderMaterial({
+    defines: surface ? { SURFACE: "" } : {},
     uniforms: {
       dpr,
       fade: { value: 1 },
       tint: { value: new Color("#ffffff") },
-      peak: { value: STAR_PEAK },
+      peak: { value: surface ? SURFACE_PEAK : STAR_PEAK },
       shipPc: { value: shipPc },
       forward: { value: motion.forward },
       beta: motion.beta,
       gamma: motion.gamma,
       bbLut: { value: lut },
-      lutRange: { value: new Vector2(LUT_RANGE_K[0], LUT_RANGE_K[1]) },
+      bbLutSpec: lutSpecUniform(),
       radius: { value: 1 },
+      handedOver: { value: 0 },
     },
     vertexShader: STAR_VERT,
     fragmentShader: STAR_FRAG,

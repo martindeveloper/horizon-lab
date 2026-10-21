@@ -1,6 +1,5 @@
 {
   "app": "Horizont událostí",
-  "guide": "Průvodce",
   "clocks": "Hodiny",
   "controls": "Ovládání",
   "close": "Zavřít",
@@ -13,12 +12,6 @@
   "spacetime": "Prostoročas",
   "camera": "Kamera",
   "optics": "Optika",
-  "startGuide": "Spustit průvodce",
-  "exit": "Ukončit průvodce",
-  "next": "Další",
-  "previousBeat": "Předchozí krok",
-  "guideProgress": "{step} / {total} · {kicker}",
-  "finish": "Dokončit",
   "open": "Otevřít",
   "fold": "Sbalit",
   "read": "Číst dál",
@@ -42,7 +35,6 @@
   "stars": "Jas hvězd",
   "nearHorizon": "blízko horizontu",
   "massBound": "Hmotnost · mez jedné studie",
-  "massAdopted": "Hmotnost · zvolená hodnota",
   "flowNotice": "Ilustrativní tenký disk, ne snímek EHT: skutečný tok tvoří horké, průhledné plazma.",
   "mass": "Hmotnost",
   "horizon": "Horizont",
@@ -83,11 +75,9 @@
   "sketchSpinZero": "příklad pro a = 0",
   "sketchAssumedSpin": "předpokládaný spin, dosud neměřený",
   "sketchCriticalCurve": "teoretická kritická křivka",
-  "ariaStartGuide": "Spustit průvodce",
   "ariaOpenAtlas": "Otevřít atlas",
   "ariaCloseClocks": "Zavřít panel hodin",
   "ariaDropClocks": "Pustit hodiny",
-  "ariaCloseObs": "Zavřít nastavení",
   "ariaClose": "Zavřít",
   "presets": {
     "sgr-a": "Sagittarius A*",
@@ -491,7 +481,7 @@
       "3": {
         "kicker": "stejná geometrie",
         "title": "Stejný tvar, jiné měřítko",
-        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro 15 M☉ jsou odpovídající délky a časy zhruba 300 000krát menší než pro Sgr A*: pravítko 10 M tu měří asi 220 km, ne 63 milionů, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
+        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro 21 M☉ černé díry v Cygnus X-1 jsou odpovídající délky a časy zhruba 200 000krát menší než pro Sgr A*: pravítko 10 M tu měří asi 310 km, ne 63 milionů, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
       },
       "4": {
         "kicker": "oddálení",
@@ -766,7 +756,7 @@
   },
   "canvasLabel": "Vizualizace černé díry",
   "metadataDescription": "Prozkoumejte černé díry, gravitační čočkování a prostoročas v interaktivní observatoři.",
-  "observatory": "Nastavení",
+  "view": "Zobrazení",
   "previousStory": "Předchozí příběh",
   "nextStory": "Další příběh",
   "storyNumber": "Příběh {number}",
@@ -811,7 +801,7 @@
       },
       "disk": {
         "title": "Záření disku a posun frekvence",
-        "body": "E, L a Ω kruhových drah vstupují do Pageova–Thorneova profilu toku s nulovým momentem síly na vnitřním okraji. CPU jej při změně spinu integruje v {diskIntervals, number} radiálních intervalech. Textura s {diskSamples, number} vzorky je normalizována na maximum a shader ji lineárně interpoluje. Vnitřní okraj je max({innerFactor, number} r₊; r_ISCO), pro podporované spiny tedy ISCO. Chybí normalizace podle rychlosti akrece. Jas je úměrný tomuto toku bez konstantního minima a efektivní teplota se řídí vztahem T ∝ F^(1/4); maximální teplota {peakK, number} K je zvolena pro zobrazení, nikoli určena měřením, a barvy nejsou vázány na pozorovací pásmo. Faktor g = 1/[uᵗ(E − ΩL)] používá zachovávané E a L fotonu v normalizaci kamery, takže zahrnuje i gravitační posun a strhávání v místě kamery. Posouvá přibližnou RGB barvu záření absolutně černého tělesa a násobí bolometrický jas g⁴; světlo hvězd stejně získá modrý posuv kamery 1/E. Závislost intenzity záření neprůhledného disku na úhlu odpovídá modelu atmosféry s rozptylem na elektronech, I ∝ 1 + {limbDarkening, number} μ (Chandrasekhar 1960), přičemž μ = g√Q/r se měří v klidové soustavě plynu. Plyn uvnitř ISCO padá s energií a momentem hybnosti ISCO (Cunningham 1975), což určuje jeho g; jeho slabá, opticky tenká záře je ilustrativní a je vidět před vším, na co paprsek narazí dál. Šum, pohyblivá skvrna a prolínání okrajů slouží k výtvarnému ztvárnění. Animace není škálována hmotností a nezahrnuje dobu šíření světla. Detaily plynu napodobují turbulenci protahovanou smykovým prouděním: vlákna s úhlem vinutí asi 14° a poměrem stran 5 : 1 ve dvou prolínaných strukturách s omezenou životností a diferenciální orbitální rotací. Při pohledu pod malým úhlem vůči rovině disku se jejich kontrast snižuje; jde o ilustraci nepravidelné emise, nikoli simulaci dynamiky plazmatu."
+        "body": "E, L a Ω kruhových drah vstupují do Pageova–Thorneova profilu toku s nulovým momentem síly na vnitřním okraji. CPU jej při změně spinu integruje v {diskIntervals, number} radiálních intervalech. Textura s {diskSamples, number} vzorky je normalizována na maximum a shader ji lineárně interpoluje. Vnitřní okraj je max({innerFactor, number} r₊; r_ISCO), pro podporované spiny tedy ISCO. Chybí normalizace podle rychlosti akrece. Jas je úměrný tomuto toku bez konstantního minima a efektivní teplota se řídí vztahem T ∝ F^(1/4); maximální teplota {peakK, number} K je zvolena pro zobrazení, nikoli určena měřením, a barvy nejsou vázány na pozorovací pásmo. Faktor g = 1/[uᵗ(E − ΩL)] používá zachovávané E a L fotonu v normalizaci kamery, takže zahrnuje i gravitační posun a strhávání v místě kamery. Posouvá barvu záření absolutně černého tělesa (Planckův zákon přes standardního pozorovatele CIE 1931) a násobí bolometrický jas g⁴; světlo hvězd stejně získá modrý posuv kamery 1/E. Závislost intenzity záření neprůhledného disku na úhlu odpovídá modelu atmosféry s rozptylem na elektronech, I ∝ 1 + {limbDarkening, number} μ (Chandrasekhar 1960), přičemž μ = g√Q/r se měří v klidové soustavě plynu. Plyn uvnitř ISCO padá s energií a momentem hybnosti ISCO (Cunningham 1975), což určuje jeho g; jeho slabá, opticky tenká záře je ilustrativní a je vidět před vším, na co paprsek narazí dál. Šum, pohyblivá skvrna a prolínání okrajů slouží k výtvarnému ztvárnění. Animace není škálována hmotností a nezahrnuje dobu šíření světla. Detaily plynu napodobují turbulenci protahovanou smykovým prouděním: vlákna s úhlem vinutí asi 14° a poměrem stran 5 : 1 ve dvou prolínaných strukturách s omezenou životností a diferenciální orbitální rotací. Při pohledu pod malým úhlem vůči rovině disku se jejich kontrast snižuje; jde o ilustraci nepravidelné emise, nikoli simulaci dynamiky plazmatu."
       },
       "clocks": {
         "title": "Padající hodiny jsou samostatný model",

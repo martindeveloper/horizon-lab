@@ -14,6 +14,10 @@ export function usePhysicsFormat() {
     return quantity.scale ? t(quantity.scale, { value, unit }) : `${value} ${unit}`;
   }
   return {
+    /** A number with fixed digits, in the visitor's locale. */
+    formatNumber: number,
+    /** A spin a/M to three places, with a true minus sign. */
+    formatSpin: (a: number) => `${a < 0 ? "−" : ""}${number(Math.abs(a), 3)}`,
     formatMass: (n: number) => scaled(n, "M☉"),
     formatMassShort: (n: number) =>
       `${fmt.number(n, { notation: "compact", maximumFractionDigits: 1 })} M☉`,

@@ -3,7 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useId, useMemo, type ReactNode } from "react";
 
-import { dopplerFactor } from "@horizon/toolkit/science";
+import { dopplerWavelengthRatio } from "@horizon/toolkit/science";
 import { Chip, Slider, cn } from "@horizon/toolkit/ui";
 
 import { measuredElement, measureLine } from "../lib/model/atoms";
@@ -20,7 +20,7 @@ const SAMPLES = 240;
  * Measuring a velocity the way astronomers do: one line, close up, on an axis of velocity.
  * The dashed line is where the line lies in the laboratory; the gold marker is where the
  * visitor says it lies in the spectrum. Sliding the marker onto the line's centre reads the
- * source's radial velocity, v = c·Δλ/λ (relativistic, `dopplerFactor`), and every lab line of
+ * source's radial velocity, v = c·Δλ/λ (relativistic, `dopplerWavelengthRatio`), and every lab line of
  * every marked element shifts by the same factor under the spectrum.
  */
 export function VelocityLens({ step }: { step: ReactNode }) {
@@ -38,7 +38,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
   const line = element ? measureLine(element, formed) : undefined;
   const lab = line?.wavelength ?? 500;
   const range: readonly [number, number] = useMemo(
-    () => [lab * dopplerFactor(-REACH), lab * dopplerFactor(REACH)],
+    () => [lab * dopplerWavelengthRatio(-REACH), lab * dopplerWavelengthRatio(REACH)],
     [lab],
   );
   const spectrum = useSpectrum(obs, range, line ? SAMPLES : 0);
@@ -66,7 +66,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
       .join("");
   }, [spectrum, glowing]);
 
-  const observed = lab * dopplerFactor(velocity);
+  const observed = lab * dopplerWavelengthRatio(velocity);
   const kms = (v: number) => t("dock.kms", { value: signed(f, v) });
 
   return (
@@ -124,8 +124,8 @@ export function VelocityLens({ step }: { step: ReactNode }) {
               {TICKS.map((v) => (
                 <line
                   key={v}
-                  x1={xOf(lab * dopplerFactor(v))}
-                  x2={xOf(lab * dopplerFactor(v))}
+                  x1={xOf(lab * dopplerWavelengthRatio(v))}
+                  x2={xOf(lab * dopplerWavelengthRatio(v))}
                   y1={0}
                   y2={100}
                   className={v === 0 ? "stroke-fg/45" : "stroke-fg/8"}
@@ -178,7 +178,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
               <span
                 key={v}
                 className="absolute top-1 -translate-x-1/2 tabular-nums"
-                style={{ left: `${xOf(lab * dopplerFactor(v))}%` }}
+                style={{ left: `${xOf(lab * dopplerWavelengthRatio(v))}%` }}
               >
                 {v === 0 ? t("dock.lab") : signed(f, v)}
               </span>

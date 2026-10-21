@@ -1,7 +1,7 @@
-import { airToVacuum, dopplerFactor, planckRadiance } from "@horizon/toolkit/science";
+import { airToVacuum, dopplerWavelengthRatio, planckRadiance } from "@horizon/toolkit/science";
 
 import { layerAt, type Photosphere } from "./atmospheres";
-import { LINES, type ElementId, type Line } from "./atoms";
+import { ELEMENT_IDS, LINES, type ElementId, type Line } from "./atoms";
 import {
   continuumOf,
   continuumWavelength,
@@ -15,11 +15,13 @@ import {
   lineShape,
   reach,
   shapeAt,
+  shifted,
   type Conditions,
   type Gas,
   type Profile,
   type Shape,
 } from "./profile";
+import { recentCache } from "./recent";
 import { TELLURIC } from "./telluric";
 import { voigt } from "./voigt";
 
@@ -34,7 +36,10 @@ import { voigt } from "./voigt";
  * A star (`star`): light integrated up through the layers of a model photosphere, each in
  * local thermodynamic equilibrium at its own temperature and pressure, its continuum opacity
  * worked out at each wavelength from H⁻, hydrogen and free electrons (`continuum`). The
- * emergent flux is taken in the Eddington–Barbier approximation, F ≈ π I(μ = 2/3).
+ * emergent flux is taken in the Eddington–Barbier approximation, F ≈ π I(μ = 2/3). It is
+ * worked out at rest and kept (`starModel`): the star's velocity moves its whole spectrum, so
+ * a slider or a dragged window costs no new radiative transfer. Its lines' widths are
+ * measured at rest too.
  *
  * Both then cross Earth's air (`airmass`) and the spectrograph (`resolution`).
  */
@@ -252,7 +257,7 @@ function render(
 
 /** Every line the slab's gas absorbs, with its profile at the source's velocity. */
 export function slabProfiles(obs: SlabObservation) {
-  const shift = dopplerFactor(obs.velocity);
+  const shift = dopplerWavelengthRatio(obs.velocity);
   const out: { line: Line; profile: Profile }[] = [];
   for (const line of LINES) {
     const profile = lineProfile(line, obs.gas, shift);
@@ -330,12 +335,105 @@ function cellsOf(atmosphere: Photosphere, microturbulence: number): Cell[] {
 }
 
 /**
+ * The cells at one wavelength, as one row: the Planck function of each, then the source below
+ * them all, then each cell's continuum optical depth.
+ */
+function columnAt(cells: Cell[], nm: number, deepTemperature: number) {
+  const K = cells.length;
+  const row = new Float64Array(2 * K + 1);
+  const w = continuumWavelength(nm);
+  cells.forEach((cell, k) => {
+    row[k] = planck(nm, cell.temperature);
+    row[K + 1 + k] = cell.opacity(w) * cell.mass;
+  });
+  row[K] = planck(nm, deepTemperature);
+  return row;
+}
+
+/** The rows' spacing in the column table, nm: the Planck functions and continuum vary slowly. */
+const COLUMN_STEP = 0.5;
+
+/** Two rows of the cells (`columnAt`) and a wavelength `t` of the way from the first to the second. */
+type Between = { below: Float64Array; above: Float64Array; t: number };
+
+/**
+ * The cells' rows at wavelengths `COLUMN_STEP` apart, each with the continuum flux it gives,
+ * worked out the first time a wavelength near it is asked for; between rows, both are
+ * interpolated.
+ */
+function columnTable(cells: Cell[], deepTemperature: number) {
+  const K = cells.length;
+  const rows = new Map<number, { row: Float64Array; continuum: number }>();
+  const rowAt = (g: number) => {
+    let known = rows.get(g);
+    if (!known) {
+      const row = columnAt(cells, g * COLUMN_STEP, deepTemperature);
+      known = { row, continuum: emerge({ below: row, above: row, t: 0 }, K, null, 0) };
+      rows.set(g, known);
+    }
+    return known;
+  };
+  return {
+    /** Fills `out` with the rows either side of `nm`. */
+    between(nm: number, out: Between) {
+      const x = nm / COLUMN_STEP;
+      const g = Math.floor(x);
+      out.below = rowAt(g).row;
+      out.above = rowAt(g + 1).row;
+      out.t = x - g;
+      return out;
+    },
+    /** The continuum's surface flux at `nm`. */
+    continuum(nm: number) {
+      const x = nm / COLUMN_STEP;
+      const g = Math.floor(x);
+      const below = rowAt(g).continuum;
+      return below + (x - g) * (rowAt(g + 1).continuum - below);
+    },
+  };
+}
+
+/** What a star's cells are, whatever its lines: they depend on its model and microturbulence alone. */
+type Cells = {
+  cells: Cell[];
+  /** The temperature of the source below them all, K. */
+  deepTemperature: number;
+  /** The cells' rows by wavelength (`columnTable`). */
+  columns: ReturnType<typeof columnTable>;
+  /** The conditions a line's reference shape is taken at (`SHAPE_DEPTH`). */
+  reference: { metal: Conditions; hydrogen: Conditions };
+};
+
+const cellsByModel = new WeakMap<Photosphere, Map<number, Cells>>();
+
+/** The star's cells, worked out once per model and microturbulence. */
+function cellsFor(photosphere: Photosphere, microturbulence: number): Cells {
+  let byTurbulence = cellsByModel.get(photosphere);
+  if (!byTurbulence) cellsByModel.set(photosphere, (byTurbulence = new Map()));
+  let known = byTurbulence.get(microturbulence);
+  if (!known) {
+    const cells = cellsOf(photosphere, microturbulence);
+    const deepTemperature = photosphere.layers.at(-1)!.temperature;
+    const at = (depth: number) => ({ ...layerAt(photosphere, depth), microturbulence });
+    known = {
+      cells,
+      deepTemperature,
+      columns: columnTable(cells, deepTemperature),
+      reference: { metal: at(SHAPE_DEPTH.metal), hydrogen: at(SHAPE_DEPTH.hydrogen) },
+    };
+    byTurbulence.set(microturbulence, known);
+  }
+  return known;
+}
+
+/**
  * Within this many Doppler widths (or Lorentz half-widths, if wider) of its centre, a line's
  * opacity in each cell is its own Voigt function; beyond, its Lorentz wings,
  * H ≈ (a / √π v²)(1 + (3/2 − a²) / v²), good there to better than 1 %.
  */
 const CORE_REACH = 5;
 
+/** A line in a star, at rest: the source's velocity moves the whole spectrum (`synthesizeStar`). */
 type StarLine = {
   line: Line;
   /** The line's shape at one depth: its centre, and what the line card shows. */
@@ -372,124 +470,96 @@ function addLine(sl: StarLine, offset: number, out: Float32Array, at: number) {
 }
 
 /**
- * Every line the star forms, with its optical depth layer by layer. Each cell broadens a metal
- * line by its own temperature and pressures; hydrogen's shape is taken at one depth.
+ * A line's optical depth in the star, cell by cell, for `perAtom` of its atoms per kilogram.
+ * Each cell broadens a metal line by its own temperature and pressures; hydrogen's shape is
+ * taken at one depth.
  */
-function starLines(obs: StarObservation, only?: Line) {
-  const cells = cellsOf(obs.photosphere, obs.microturbulence);
+function starLine({ cells, reference }: Cells, line: Line, perAtom: number): StarLine {
   const K = cells.length;
-  const shift = dopplerFactor(obs.velocity);
-  const at = (depth: number) => ({
-    ...layerAt(obs.photosphere, depth),
-    microturbulence: obs.microturbulence,
+  const frozen = line.element === "H";
+  const shape = lineShape(line, frozen ? reference.hydrogen : reference.metal);
+  const w = continuumWavelength(line.wavelength);
+  const strength = new Float64Array(K);
+  const doppler = new Float64Array(K);
+  const damping = new Float64Array(K);
+  const wing = new Float64Array(K);
+  const wing2 = new Float64Array(K);
+  let core = 0;
+  let tau = 0;
+  let wings = 0;
+  let continuum = 0;
+  cells.forEach((cell, k) => {
+    const own = frozen ? shape : lineShape(line, cell);
+    const d = own.doppler;
+    const a = own.damping;
+    const s =
+      (perAtom * cell.mass * lineCrossSection(line, cell)) / (Math.sqrt(Math.PI) * d * 1e-9);
+    const lorentz = (s * a * d * d) / Math.sqrt(Math.PI);
+    strength[k] = s;
+    doppler[k] = d;
+    damping[k] = a;
+    wing[k] = lorentz;
+    wing2[k] = lorentz * (1.5 - a * a) * d * d;
+    core = Math.max(core, CORE_REACH * d * Math.max(1, a));
+    const step = cell.opacity(w) * cell.mass;
+    if (continuum + step / 2 < 1) {
+      tau += s * (frozen ? shapeAt(shape, 0) : voigt(a, 0));
+      wings += lorentz;
+    }
+    continuum += step;
   });
-  const reference = { metal: at(SHAPE_DEPTH.metal), hydrogen: at(SHAPE_DEPTH.hydrogen) };
-  const out: StarLine[] = [];
-  for (const line of only ? [only] : LINES) {
-    const frozen = line.element === "H";
-    const shape = lineShape(line, frozen ? reference.hydrogen : reference.metal, shift);
-    const perAtom = atomsPerKilogram(line.element, obs.abundances?.[line.element]);
-    const w = continuumWavelength(line.wavelength);
-    const strength = new Float64Array(K);
-    const doppler = new Float64Array(K);
-    const damping = new Float64Array(K);
-    const wing = new Float64Array(K);
-    const wing2 = new Float64Array(K);
-    let core = 0;
-    let tau = 0;
-    let wings = 0;
-    let continuum = 0;
-    cells.forEach((cell, k) => {
-      const own = frozen ? shape : lineShape(line, cell, shift);
-      const d = own.doppler;
-      const a = own.damping;
-      const s =
-        (perAtom * cell.mass * lineCrossSection(line, cell)) /
-        (Math.sqrt(Math.PI) * (d / shift) * 1e-9);
-      const lorentz = (s * a * d * d) / Math.sqrt(Math.PI);
-      strength[k] = s;
-      doppler[k] = d;
-      damping[k] = a;
-      wing[k] = lorentz;
-      wing2[k] = lorentz * (1.5 - a * a) * d * d;
-      core = Math.max(core, CORE_REACH * d * Math.max(1, a));
-      const step = cell.opacity(w) * cell.mass;
-      if (continuum + step / 2 < 1) {
-        tau += s * (frozen ? shapeAt(shape, 0) : voigt(a, 0));
-        wings += lorentz;
-      }
-      continuum += step;
-    });
-    /* The single profile with the same centre depth and the same wings. */
-    const extent = {
-      ...shape,
-      peak: tau,
-      damping: tau > 0 ? (Math.sqrt(Math.PI) * wings) / (tau * shape.doppler ** 2) : shape.damping,
-    };
-    if (only || tau > TAU_FLOOR)
-      out.push({ line, shape, strength, doppler, damping, wing, wing2, core, frozen, tau, extent });
-  }
-  return { cells, lines: out };
+  /* The single profile with the same centre depth and the same wings. */
+  const extent = {
+    ...shape,
+    peak: tau,
+    damping: tau > 0 ? (Math.sqrt(Math.PI) * wings) / (tau * shape.doppler ** 2) : shape.damping,
+  };
+  return { line, shape, strength, doppler, damping, wing, wing2, core, frozen, tau, extent };
 }
 
 /**
- * The cells at one wavelength, as one row: the Planck function of each, then the source below
- * them all, then each cell's continuum optical depth.
+ * The line with `factor` times its atoms: every cell's opacity scales with them, its widths
+ * do not.
  */
-function columnAt(cells: Cell[], nm: number, deepTemperature: number, out?: Float64Array) {
-  const K = cells.length;
-  const row = out ?? new Float64Array(2 * K + 1);
-  const w = continuumWavelength(nm);
-  cells.forEach((cell, k) => {
-    row[k] = planck(nm, cell.temperature);
-    row[K + 1 + k] = cell.opacity(w) * cell.mass;
-  });
-  row[K] = planck(nm, deepTemperature);
-  return row;
+function scaledLine(sl: StarLine, factor: number): StarLine {
+  const times = (values: Float64Array) => values.map((v) => v * factor);
+  return {
+    ...sl,
+    strength: times(sl.strength),
+    wing: times(sl.wing),
+    wing2: times(sl.wing2),
+    tau: sl.tau * factor,
+    extent: { ...sl.extent, peak: sl.extent.peak * factor },
+  };
 }
 
 /**
  * Integrates the light up through the cells at one wavelength (along μ = 2/3), given
- * their row from `columnAt` and the line opacity in each (or null): the surface flux.
+ * their rows from `columnAt` (interpolated between two) and the line opacity in each (or
+ * null): the surface flux.
  */
-function emerge(column: Float64Array, K: number, lines: Float32Array | null, offset: number) {
+function emerge(
+  { below, above: next, t }: Between,
+  K: number,
+  lines: Float32Array | null,
+  offset: number,
+) {
   let tau = 0;
   let above = 1;
   let intensity = 0;
-  for (let k = 0; k < K; k++) {
-    tau += column[K + 1 + k]! + (lines ? lines[offset + k]! : 0);
-    const below = Math.exp(-tau / MU);
-    intensity += column[k]! * (above - below);
-    above = below;
+  for (let k = 0, j = K + 1; k < K; k++, j++) {
+    tau += below[j]! + t * (next[j]! - below[j]!) + (lines ? lines[offset + k]! : 0);
+    const deeper = Math.exp(-tau / MU);
+    intensity += (below[k]! + t * (next[k]! - below[k]!)) * (above - deeper);
+    above = deeper;
   }
+  const deep = below[K]! + t * (next[K]! - below[K]!);
   /* Eddington–Barbier: the surface flux is π times the intensity along μ = 2/3. */
-  return Math.PI * (intensity + column[K]! * above);
+  return Math.PI * (intensity + deep * above);
 }
 
-/** The cells' rows on a coarse wavelength grid, interpolated when used: both vary slowly. */
-function columnTable(cells: Cell[], from: number, to: number, deepTemperature: number) {
-  const step = 0.5;
-  const start = from - 1;
-  const count = Math.ceil((to + 1 - start) / step) + 1;
-  const width = 2 * cells.length + 1;
-  const table = new Float64Array(count * width);
-  for (let g = 0; g < count; g++)
-    columnAt(cells, start + g * step, deepTemperature, table.subarray(g * width, (g + 1) * width));
-  const row = new Float64Array(width);
-  return (nm: number) => {
-    const x = Math.min(count - 1.001, Math.max(0, (nm - start) / step));
-    const g = Math.floor(x);
-    const t = x - g;
-    for (let k = 0; k < width; k++)
-      row[k] = table[g * width + k]! * (1 - t) + table[(g + 1) * width + k]! * t;
-    return row;
-  };
-}
-
-function synthesizeStar(obs: StarObservation, from: number, to: number, samples: number) {
-  const grid = gridFor(from, to, obs.resolution, MAX_FINE.star);
-  const { cells, lines } = starLines(obs);
-  const K = cells.length;
+/** Line opacity on a grid: each cell's, sample by sample, and which samples any line reaches. */
+function lineOpacity(K: number, lines: readonly StarLine[], grid: Grid) {
   const opacity = new Float32Array(grid.count * K);
   const touched = new Uint8Array(grid.count);
   for (const sl of lines)
@@ -497,26 +567,156 @@ function synthesizeStar(obs: StarObservation, from: number, to: number, samples:
       touched[i] = 1;
       addLine(sl, offset, opacity, i * K);
     });
-  const deepTemperature = obs.photosphere.layers.at(-1)!.temperature;
-  const columns = columnTable(
-    cells,
-    Math.exp(grid.lnStart),
-    Math.exp(grid.lnStart + grid.count * grid.step),
-    deepTemperature,
-  );
-  const continuumAt = (nm: number) => emerge(columns(nm), K, null, 0);
-  return render(
-    grid,
-    obs,
-    from,
-    to,
-    samples,
-    (i, nm) => {
-      const column = columns(nm);
-      return touched[i] ? emerge(column, K, opacity, i * K) : emerge(column, K, null, 0);
-    },
-    continuumAt,
-  );
+  return { opacity, touched };
+}
+
+/** The surface flux at rest on a grid, through the cells and `lines`. */
+function emergentFlux({ cells, columns }: Cells, lines: readonly StarLine[], grid: Grid) {
+  const K = cells.length;
+  const { opacity, touched } = lineOpacity(K, lines, grid);
+  const flux = new Float32Array(grid.count);
+  const rows: Between = { below: new Float64Array(), above: new Float64Array(), t: 0 };
+  forEachSample(grid, (i, nm) => {
+    flux[i] = touched[i]
+      ? emerge(columns.between(nm, rows), K, opacity, i * K)
+      : columns.continuum(nm);
+  });
+  return flux;
+}
+
+/**
+ * A star's spectrum is worked out at rest, on a lattice in ln λ: samples at whole multiples of
+ * `FINE_STEP` · 2^level, the level the coarsest a window needs (`MAX_FINE`). A velocity only
+ * moves the lattice (ln λ_observed = ln λ_rest + ln(λ/λ₀)), and a window that slides or a
+ * velocity that changes reuses what was worked out: the lattice is kept in chunks of this many
+ * samples, each filled the first time a window reaches it.
+ */
+const CHUNK = 2048;
+
+type StarModel = Cells & {
+  /** Every line the star forms, at rest. */
+  lines: StarLine[];
+  /** Surface flux at rest, display precision, by level and then by chunk. */
+  lattices: Map<number, Map<number, Float32Array>>;
+};
+
+/** Star models kept with their lattices: the one in view and the few a visit switches between. */
+const MODELS_KEPT = 4;
+const starModels = recentCache<string, StarModel>(MODELS_KEPT);
+/** Photospheres are told apart by identity (`starPhotosphere` gives the same object each time). */
+const photosphereIds = new WeakMap<Photosphere, number>();
+let photospheresSeen = 0;
+
+/** The star's model: its cells, lines and lattices, by everything they depend on. */
+function starModel(obs: StarObservation): StarModel {
+  let id = photosphereIds.get(obs.photosphere);
+  if (id === undefined) photosphereIds.set(obs.photosphere, (id = photospheresSeen++));
+  const abundances = ELEMENT_IDS.map((element) => obs.abundances?.[element] ?? 0).join();
+  return starModels(`${id}|${obs.microturbulence}|${abundances}`, () => {
+    const cells = cellsFor(obs.photosphere, obs.microturbulence);
+    const lines: StarLine[] = [];
+    for (const line of LINES) {
+      const sl = starLine(
+        cells,
+        line,
+        atomsPerKilogram(line.element, obs.abundances?.[line.element]),
+      );
+      if (sl.tau > TAU_FLOOR) lines.push(sl);
+    }
+    return { ...cells, lines, lattices: new Map() };
+  });
+}
+
+/** A star's fine grid for a window: on the lattice at rest, moved by the source's `shift`. */
+type LatticeGrid = Grid & { level: number; first: number };
+
+function latticeFor(from: number, to: number, resolution: number, shift: number): LatticeGrid {
+  const sigma = 1 / (resolution * FWHM_PER_SIGMA);
+  const lnShift = Math.log(shift);
+  const lo = Math.log(from) - 5 * sigma - lnShift;
+  const hi = Math.log(to) + 5 * sigma - lnShift;
+  for (let level = 0; ; level++) {
+    const step = FINE_STEP * 2 ** level;
+    const first = Math.floor(lo / step);
+    const count = Math.ceil(hi / step) - first + 1;
+    if (count <= MAX_FINE.star)
+      return { lnStart: first * step + lnShift, step, count, level, first };
+  }
+}
+
+/** The surface flux at rest on the grid's samples, from the model's lattice. */
+function latticeFlux(model: StarModel, { level, first, count, step }: LatticeGrid) {
+  let chunks = model.lattices.get(level);
+  if (!chunks) model.lattices.set(level, (chunks = new Map()));
+  const flux = new Float32Array(count);
+  for (let c = Math.floor(first / CHUNK); c * CHUNK < first + count; c++) {
+    let chunk = chunks.get(c);
+    if (!chunk) {
+      chunk = emergentFlux(model, model.lines, { lnStart: c * CHUNK * step, step, count: CHUNK });
+      chunks.set(c, chunk);
+    }
+    const from = Math.max(first, c * CHUNK);
+    const to = Math.min(first + count, (c + 1) * CHUNK);
+    flux.set(chunk.subarray(from - c * CHUNK, to - c * CHUNK), from - first);
+  }
+  return flux;
+}
+
+/** The star's continuum flux at an observed wavelength. */
+const starContinuum = (model: StarModel, shift: number) => (nm: number) =>
+  model.columns.continuum(nm / shift);
+
+function synthesizeStar(obs: StarObservation, from: number, to: number, samples: number) {
+  const model = starModel(obs);
+  const shift = dopplerWavelengthRatio(obs.velocity);
+  const grid = latticeFor(from, to, obs.resolution, shift);
+  const flux = latticeFlux(model, grid);
+  return render(grid, obs, from, to, samples, (i) => flux[i]!, starContinuum(model, shift));
+}
+
+/**
+ * The star's spectrum without each element's lines, from the same lattice: opacities add, so
+ * where an element's lines reach, their opacity is taken back out and the light worked out
+ * again; everywhere else the spectrum is the same.
+ */
+function starWithout(
+  obs: StarObservation,
+  from: number,
+  to: number,
+  samples: number,
+  elements: readonly ElementId[],
+) {
+  const model = starModel(obs);
+  const K = model.cells.length;
+  const shift = dopplerWavelengthRatio(obs.velocity);
+  const grid = latticeFor(from, to, obs.resolution, shift);
+  const base = latticeFlux(model, grid);
+  /* The lines sit at rest on the lattice: the same samples, without the shift. */
+  const atRest: Grid = { ...grid, lnStart: grid.first * grid.step };
+  const all = lineOpacity(K, model.lines, atRest).opacity;
+  const continuumAt = starContinuum(model, shift);
+  const out = new Map<ElementId, Spectrum>();
+  const others = new Float32Array(K);
+  const rows: Between = { below: new Float64Array(), above: new Float64Array(), t: 0 };
+  for (const element of elements) {
+    const own = lineOpacity(
+      K,
+      model.lines.filter((sl) => sl.line.element === element),
+      atRest,
+    );
+    const flux = base.slice();
+    forEachSample(atRest, (i, nm) => {
+      if (!own.touched[i]) return;
+      for (let k = 0; k < K; k++)
+        others[k] = Math.max(0, all[i * K + k]! - own.opacity[i * K + k]!);
+      flux[i] = emerge(model.columns.between(nm, rows), K, others, 0);
+    });
+    out.set(
+      element,
+      render(grid, obs, from, to, samples, (i) => flux[i]!, continuumAt),
+    );
+  }
+  return out;
 }
 
 /** The spectrum between `from` and `to` nm in `samples` pixels. */
@@ -524,6 +724,24 @@ export function synthesize(obs: Observation, from: number, to: number, samples: 
   return obs.kind === "slab"
     ? synthesizeSlab(obs, from, to, samples)
     : synthesizeStar(obs, from, to, samples);
+}
+
+/** The spectrum as `synthesize` gives it with each of `elements` taken out, by element. */
+export function synthesizeWithout(
+  obs: Observation,
+  from: number,
+  to: number,
+  samples: number,
+  elements: readonly ElementId[],
+): Map<ElementId, Spectrum> {
+  if (obs.kind === "star") return starWithout(obs, from, to, samples, elements);
+  return new Map(
+    elements.map((element) => {
+      const columns = { ...obs.gas.columns };
+      delete columns[element];
+      return [element, synthesizeSlab({ ...obs, gas: { ...obs.gas, columns } }, from, to, samples)];
+    }),
+  );
 }
 
 /* ─── One line at a time ─── */
@@ -581,50 +799,62 @@ function integrateLine(doppler: number, width: number, points: number, f: (v: nu
   return sum * du * doppler;
 }
 
-/** A star's equivalent width of one line alone, nm, by the same integration as the spectrum. */
-function starWidth(obs: StarObservation, line: Line) {
-  const { cells, lines } = starLines(obs, line);
-  const one = lines[0]!;
+/**
+ * One line alone in a star, at rest: its opacity cell by cell, and the cells' row at its
+ * centre, where the continuum and source functions are taken across the whole line.
+ */
+function lineAlone(obs: StarObservation, line: Line) {
+  const cells = cellsFor(obs.photosphere, obs.microturbulence);
+  const one = starLine(cells, line, atomsPerKilogram(line.element, obs.abundances?.[line.element]));
+  const column = columnAt(cells.cells, line.wavelength, cells.deepTemperature);
+  const exact: Between = { below: column, above: column, t: 0 };
+  const continuum = emerge(exact, cells.cells.length, null, 0);
+  return { cells: cells.cells, one, column, exact, continuum };
+}
+type LineAlone = ReturnType<typeof lineAlone>;
+
+/**
+ * A star's equivalent width of the line alone (or of `one`, the line with more or fewer
+ * atoms), nm at rest, by the same integration as the spectrum.
+ */
+function starWidth({ cells, exact, continuum, one: line }: LineAlone, one = line) {
   const K = cells.length;
-  const width = integrationReach(one.extent, 30);
-  /* The continuum and source functions are taken at line centre across the whole line. */
-  const column = columnAt(cells, one.shape.centre, obs.photosphere.layers.at(-1)!.temperature);
-  const continuum = emerge(column, K, null, 0);
   const row = new Float32Array(K);
-  const sum = integrateLine(one.shape.doppler, width, 801, (v) => {
+  return integrateLine(one.shape.doppler, integrationReach(one.extent, 30), 801, (v) => {
     row.fill(0);
     addLine(one, v * one.shape.doppler, row, 0);
-    return 1 - emerge(column, K, row, 0) / continuum;
+    return 1 - emerge(exact, K, row, 0) / continuum;
   });
-  /* Where the core reaches τ = μ: the layer the core's light comes from. */
-  let tau = 0;
-  let coreTemperature = cells.at(-1)!.temperature;
-  row.fill(0);
+}
+
+/** Where the line's core reaches τ = μ: the temperature of the layer its light comes from, K. */
+function coreTemperature({ cells, column, one }: LineAlone) {
+  const K = cells.length;
+  const row = new Float32Array(K);
   addLine(one, 0, row, 0);
+  let tau = 0;
   for (let k = 0; k < K; k++) {
     tau += column[K + 1 + k]! + row[k]!;
-    if (tau >= MU) {
-      coreTemperature = cells[k]!.temperature;
-      break;
-    }
+    if (tau >= MU) return cells[k]!.temperature;
   }
-  return { one, width: sum, coreTemperature };
+  return cells.at(-1)!.temperature;
 }
 
 /** One line's strength in this observation, as if no other line were there. */
 export function reportLine(line: Line, obs: Observation): LineReport | null {
   if (obs.kind === "star") {
-    const { one, width, coreTemperature } = starWidth(obs, line);
+    const alone = lineAlone(obs, line);
+    const { one } = alone;
     return {
       line,
-      shape: one.shape,
+      shape: shifted(one.shape, dopplerWavelengthRatio(obs.velocity)),
       tau: one.tau,
-      equivalentWidth: width,
+      equivalentWidth: starWidth(alone),
       regime: regimeOf(one.tau, one.extent.damping),
-      coreTemperature,
+      coreTemperature: coreTemperature(alone),
     };
   }
-  const profile = lineProfile(line, obs.gas, dopplerFactor(obs.velocity));
+  const profile = lineProfile(line, obs.gas, dopplerWavelengthRatio(obs.velocity));
   if (!profile) return null;
   const tau = profile.peak * shapeAt(profile, 0);
   let equivalentWidth: number | null = null;
@@ -650,21 +880,17 @@ export function reportLine(line: Line, obs: Observation): LineReport | null {
  * from 1 (weak) through ≈ 0 (saturated) to ½ (damped).
  */
 export function curveOfGrowth(line: Line, obs: Observation, points = 25) {
+  /* The line's opacity scales with its atoms, so it is worked out once and scaled. */
+  const alone = obs.kind === "star" ? lineAlone(obs, line) : null;
+  const profile = obs.kind === "slab" ? lineProfile(line, obs.gas) : null;
+  if (!alone && !profile) return [];
   const out: [number, number][] = [];
   for (let i = 0; i < points; i++) {
     const exponent = -4 + (6 * i) / (points - 1);
-    let width: number;
-    if (obs.kind === "star") {
-      const abundances = {
-        ...obs.abundances,
-        [line.element]: (obs.abundances?.[line.element] ?? 0) + exponent,
-      };
-      width = starWidth({ ...obs, abundances }, line).width;
-    } else {
-      const profile = lineProfile(line, obs.gas, 1);
-      if (!profile) return [];
-      width = absorbedWidth({ ...profile, peak: profile.peak * 10 ** exponent });
-    }
+    const factor = 10 ** exponent;
+    const width = alone
+      ? starWidth(alone, scaledLine(alone.one, factor))
+      : absorbedWidth({ ...profile!, peak: profile!.peak * factor });
     if (width > 0) out.push([exponent, Math.log10(width)]);
   }
   return out;
@@ -703,6 +929,10 @@ export function formedLines(obs: Observation) {
           centre: profile.centre,
           tau: profile.peak * shapeAt(profile, 0),
         }))
-      : starLines(obs).lines.map(({ line, shape, tau }) => ({ line, centre: shape.centre, tau }));
+      : starModel(obs).lines.map(({ line, shape, tau }) => ({
+          line,
+          centre: shape.centre * dopplerWavelengthRatio(obs.velocity),
+          tau,
+        }));
   return list.sort((a, b) => b.tau - a.tau);
 }

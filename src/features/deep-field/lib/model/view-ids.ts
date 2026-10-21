@@ -1,6 +1,8 @@
 /** Deep Field's view ids, near to far, and its default. Light: routes read them. */
 import { SOLAR_VIEWS, type SolarViewId } from "@/space/solar-system/model/views";
 
+import { deepFieldManifest } from "../../manifest";
+
 /** Deep Field's own views past the solar system's framings, and the one it adds among them. */
 const HELIOSPHERE = "heliosphere";
 const DEEP_VIEW_IDS = [
@@ -22,4 +24,4 @@ export const VIEW_IDS: readonly ViewId[] = [
   ...SOLAR_VIEWS.flatMap((v): ViewId[] => (v.id === "kuiper" ? [v.id, HELIOSPHERE] : [v.id])),
   ...DEEP_VIEW_IDS,
 ];
-export const DEFAULT_VIEW: ViewId = "galaxy";
+export const DEFAULT_VIEW: ViewId = deepFieldManifest.solarSystem.defaultView;

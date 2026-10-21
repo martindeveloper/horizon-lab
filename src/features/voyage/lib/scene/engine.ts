@@ -15,6 +15,7 @@ import {
 } from "@/lib/scene-bridge";
 import { createLooks } from "@/space/solar-system/graphics/looks";
 import { MAP_BASE } from "@/space/solar-system/graphics/maps";
+import type { BodyId } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
 import {
@@ -99,13 +100,27 @@ export function createVoyageEngine(
     const { place, flush, hits, setBodies } = createLabels(kit, labelRoot, labels, {
       insets: () => labelInsets(dockClear(), captionClear()),
     });
+    /**
+     * The visit's epoch: the solar system is drawn at the epoch plus Earth's clock, and the
+     * universe at its scale then; the clock sets both, and every place is read through them.
+     */
+    const epoch = Date.now();
+    const now = new Date(epoch);
+    /** The universe's scale at the clock's moment, set with the date (`dateOf`). */
+    let expansion = 1;
+    const dateOf = (t: number) => {
+      expansion = scaleFactorAt(t);
+      return dateAt(epoch, t, now);
+    };
+    const anchorAt = createAnchorCache(() => expansion);
+
     const lut = scope.own(blackbodyTexture());
     /* The ship's motion: written once a frame, read by every shader that sees it. */
     const moving = motionUniforms();
     const globes = createGlobes(scope, quality.globe);
     const cmb = createCmbLayer(kit, scene, lut, moving);
     const stars = createStarsLayer(kit, scene, lut, moving, quality.sky);
-    const bodies = createBodiesLayer(kit, scene, { place, globes, motion: moving });
+    const bodies = createBodiesLayer(kit, scene, { place, globes, motion: moving, at: anchorAt });
     const dust = createSpeedLayer(kit, scene, lut, moving, quality.streaks);
     const alphaCen = createAlphaCentauriLayer(kit, scene, lut, { place, globes });
     setBodies([...bodies.labelBodies, ...alphaCen.labelBodies]);
@@ -118,12 +133,6 @@ export function createVoyageEngine(
     });
     /* The Galaxy and the cosmic map draw on a layer of their own; one pass takes them all. */
     camera.layers.enable(GALAXY_LAYER);
-
-    /** The visit's epoch: the solar system is drawn at the epoch plus Earth's clock. */
-    const epoch = Date.now();
-    const now = new Date(epoch);
-    const dateOf = (t: number) => dateAt(epoch, t, now);
-    const anchorAt = createAnchorCache();
 
     const feel = createShipFeel(camera);
 
@@ -288,6 +297,8 @@ export function createVoyageEngine(
       aim: aimRel,
       axes: ship.axes,
     };
+    /* The map budget's frame, rewritten each tick. */
+    const mapFrame: { keep: BodyId | null; cruising: boolean } = { keep: null, cruising: false };
     let clocksRunning = false;
     /* This frame's figures the cockpit draws and the readouts publish. */
     let speed = 0;
@@ -342,11 +353,7 @@ export function createVoyageEngine(
         if (feeling) {
           const axes = ship.axes;
           const drive = ship.flying
-            ? phase === "align"
-              ? spool
-              : phase === "cruise"
-                ? 0
-                : 1
+            ? spool
             : ship.mode === "free"
               ? axes.boost * Math.min(1, Math.abs(axes.thrust))
               : 0;
@@ -368,16 +375,14 @@ export function createVoyageEngine(
         frame.aim = ship.destination;
         bodies.update(frame);
         alphaCen.update(frame);
-        stars.update(x, lengthVec3d(x) / AU_KM);
-        const expansion = scaleFactorAt(ship.ship.t);
-        cmb.update(ship.ship.t, expansion, motion);
+        stars.update(x, lengthVec3d(x) / AU_KM, alphaCen.takeover);
+        cmb.update(expansion, motion);
         worlds.update(dt, x, range, expansion, state.show, state.selection);
         looks.step(dt);
         flush();
-        budget.update(dt, lod.need, {
-          keep: isBodyAnchor(ship.destination) ? ship.destination : null,
-          cruising: ship.flying && range > CRUISE_KM,
-        });
+        mapFrame.keep = isBodyAnchor(ship.destination) ? ship.destination : null;
+        mapFrame.cruising = ship.flying && range > CRUISE_KM;
+        budget.update(dt, lod.need, mapFrame);
 
         speed = ship.speed;
         /* Free, the ship closes on its aim by its motion relative to it; a flight at the drive's speed. */

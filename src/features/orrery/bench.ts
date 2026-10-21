@@ -19,6 +19,8 @@ type OrreryBenchScene = BenchScene & {
   closeUp?: PlanetId | "sun";
   /** The Sun's close-up with its optional activity switched on and loaded. */
   solarActivity?: boolean;
+  /** Faint ring systems in a long exposure. */
+  faintRings?: boolean;
   drift?: boolean;
 };
 
@@ -49,12 +51,21 @@ const MARS_EVERY = 2;
 /** Frames the mount runs before a close-up scene's first one: the flight in, then its map painted. */
 const CLOSE_UP_PREROLL = 600;
 
+/** A close-up swung round from the landed three-quarter view to the night side, against the Sun. */
+const NIGHT_SIDE: BenchScene["script"] = {
+  frames: 300,
+  duration: 30,
+  input: [{ kind: "drag", from: [0.62, 0.5], to: [0.3, 0.5], start: 0.05, end: 0.6 }],
+  keyframes: [0, 0.2, 0.35, 0.5, 0.6, 0.99],
+};
+
 /** The activity's dynamics advance at most a tenth of a second per frame (`advance`). */
 const ACTIVITY_FRAME_S = 0.1;
 
 /**
  * The home view at standard quality, as a visitor first sees it, the same with bloom on and
- * with the lens on, a close-up of the Earth (its atmosphere shell over the globe), and the
+ * with the lens on, a close-up of the Earth (its atmosphere shell over the globe), Neptune's
+ * from the sunlit side and swung round against the Sun (its dusty rings), and the
  * Sun's close-up: as landed, with its activity on, and the activity's cycle as a sequence.
  */
 const SCENES: readonly OrreryBenchScene[] = [
@@ -86,6 +97,45 @@ const SCENES: readonly OrreryBenchScene[] = [
     bloom: false,
     lens: false,
     closeUp: "earth",
+  },
+  {
+    id: "neptune-close-up",
+    description:
+      "Close-up of Neptune, standard quality: its faint dusty rings from the sunlit side",
+    tags: ["close-up"],
+    bloom: false,
+    lens: false,
+    closeUp: "neptune",
+  },
+  {
+    id: "neptune-faint-rings",
+    description:
+      "Close-up of Neptune, standard quality, Faint rings on: the rings in a long exposure",
+    tags: ["close-up", "effects"],
+    bloom: false,
+    lens: false,
+    closeUp: "neptune",
+    faintRings: true,
+  },
+  {
+    id: "neptune-backlit",
+    description: "Close-up of Neptune, swung round to its night side: the rings against the Sun",
+    tags: ["sequence", "close-up"],
+    bloom: false,
+    lens: false,
+    closeUp: "neptune",
+    script: NIGHT_SIDE,
+  },
+  {
+    id: "neptune-faint-rings-backlit",
+    description:
+      "Neptune swung round to its night side, Faint rings on: the dusty rings toward the Sun",
+    tags: ["sequence", "close-up", "effects"],
+    bloom: false,
+    lens: false,
+    closeUp: "neptune",
+    faintRings: true,
+    script: NIGHT_SIDE,
   },
   {
     id: "sun-close-up",
@@ -187,6 +237,7 @@ export const benchTarget: BenchTarget = {
       lens: scene.lens,
       playing: false,
     });
+    store.getState().patchShow({ faintRings: scene.faintRings ?? false });
     /* A drift scene plays the drift as the page would once its map has loaded and its loader lifted. */
     if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
     store.getState().stopDrift();

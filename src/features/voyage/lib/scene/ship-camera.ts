@@ -9,7 +9,8 @@
  *   (model/assist.ts), and the ship falls in the Sun's, its body's and that body's partner's
  *   gravity. Striking a surface faster than a hard landing wrecks it.
  * - The autopilot turns onto its route, then flies the drive's real trip (model/autopilot.ts)
- *   and settles into orbit; disengaged, the ship flies on by hand at the speed it had.
+ *   and settles into orbit; disengaged, the ship flies on by hand at the speed it had. A place
+ *   no drive reaches (the edge) is jumped to instead.
  */
 import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from "three";
 
@@ -37,7 +38,13 @@ import {
 } from "@horizon/toolkit/scene";
 import { properVelocity } from "@horizon/toolkit/science";
 
-import { GALACTIC_NORTH, anchorRadius, isBodyAnchor, type AnchorId } from "../model/anchors";
+import {
+  GALACTIC_NORTH,
+  anchorRadius,
+  isBodyAnchor,
+  isFlyable,
+  type AnchorId,
+} from "../model/anchors";
 import { MANOEUVRE_ACCEL, assistWarp } from "../model/assist";
 import {
   ALIGN_S,
@@ -65,7 +72,13 @@ import {
   SUN_ALTITUDE_FLOOR,
   type Drive,
 } from "../model/parameters";
-import { tripProgress, tripTimes, type TripTimes } from "../model/relativity";
+import {
+  speedOfProper,
+  tripProgress,
+  tripProperVelocity,
+  tripTimes,
+  type TripTimes,
+} from "../model/relativity";
 import {
   createShip,
   haltShip,
@@ -93,8 +106,9 @@ const STEP_EASE = 0.08;
 const RELEASE_MS = 700;
 /** Radians of look per CSS pixel of drag in free flight. */
 const LOOK_RAD_PER_PX = 0.0035;
-/** Radians of roll per second at full deflection. */
+/** Radians of roll per second at full deflection, about the camera's own z (the line of sight). */
 const ROLL_RAD_PER_S = 1.2;
+const ROLL_AXIS = new Vector3(0, 0, 1);
 /** Boost multiplies the drive's thrust or speed. */
 const BOOST = 10;
 /** Seconds the velocity of the body the ship rides is measured over. */
@@ -218,6 +232,7 @@ export function createShipCamera(
   const fwd = new Vector3();
   const right = new Vector3();
   const top = new Vector3();
+  const roll = new Quaternion();
   const dateLater = new Date();
   const hands = createFlightAxes();
   const earlier = vec3d();
@@ -456,13 +471,12 @@ export function createShipCamera(
     setMode("orbit");
   };
 
-  /** The ship's speed on a flight, km/s: none while it aligns, then the drive's at this point of its trip. */
-  const flightSpeed = ({ t, s, drive: engine, trip }: Flight) => {
-    if (t < ALIGN_S) return 0;
-    if (engine.kind === "coast") return engine.speed;
-    const tauLeg = Math.min(s, 1 - s) * trip.tau;
-    return C_KM_S * Math.tanh((engine.accel * tauLeg) / C_KM_S);
-  };
+  /**
+   * The ship's proper velocity on a flight, km/s: none while it aligns, then the drive's at
+   * this point of its trip. The speed and the sky's motion both follow from it.
+   */
+  const flightProper = ({ t, s, drive: engine, trip }: Flight) =>
+    t < ALIGN_S ? 0 : tripProperVelocity(engine, s, trip);
 
   /**
    * Leaves the orbit at rest beside the body, riding its motion, looking where the camera
@@ -577,7 +591,13 @@ export function createShipCamera(
       park();
       return;
     }
-    if (axes.roll !== 0) attitude = turnFree(attitude, 0, 0, axes.roll * ROLL_RAD_PER_S * dt);
+    /* A roll turns about the nose, in place: the frame loop allocates nothing. */
+    if (axes.roll !== 0)
+      facing
+        .fromArray(attitude)
+        .multiply(roll.setFromAxisAngle(ROLL_AXIS, axes.roll * ROLL_RAD_PER_S * dt))
+        .normalize()
+        .toArray(attitude);
     if (compression <= 0 || dt <= 0) return;
     const near = options.nearest(ship.x);
     bodyAt(near, options.now(), aimPos);
@@ -702,7 +722,7 @@ export function createShipCamera(
     },
     /** The ship's speed relative to the Sun, km/s: the drive's on a flight, the body's parked. */
     get speed() {
-      if (flight) return flightSpeed(flight);
+      if (flight) return speedOfProper(flightProper(flight));
       if (mode === "free") return shipSpeed(ship);
       bodyVelocity(aim, velocity);
       return Math.hypot(velocity[0], velocity[1], velocity[2]);
@@ -743,10 +763,15 @@ export function createShipCamera(
     /**
      * Flies the ship to a body with the drive: it turns onto the route, then flies the drive's
      * real trip on the auto warp, the clocks keeping its time, and settles into orbit. With
-     * reduced motion the ship arrives at once, the clocks jump.
+     * reduced motion the ship arrives at once, the clocks jump. A place no drive reaches is
+     * jumped to, the clocks untouched.
      */
     flyTo(id: AnchorId) {
       if (flight?.to.aim === id || crashed) return;
+      if (!isFlyable(id)) {
+        land({ aim: id, pose: arrival(id) });
+        return;
+      }
       const now = options.now();
       /* From where the ship is: the body it orbits, or, flown by hand or under way, the nearest. */
       const from = mode === "orbit" && !flight ? aim : options.nearest(ship.x);
@@ -873,10 +898,9 @@ export function createShipCamera(
         ship.x[0] = ax + route[0] * covered;
         ship.x[1] = ay + route[1] * covered;
         ship.x[2] = az + route[2] * covered;
-        /* The sky sees the drive's speed along the route, as the dock reports it. */
+        /* The sky sees the drive's motion along the route, as the dock reports it. */
         const way = Math.hypot(route[0], route[1], route[2]);
-        const v = way > 0 ? flightSpeed(f) : 0;
-        const u = v > 0 ? properVelocity(v / C_KM_S) / way : 0;
+        const u = way > 0 ? flightProper(f) / way : 0;
         ship.u[0] = route[0] * u;
         ship.u[1] = route[1] * u;
         ship.u[2] = route[2] * u;

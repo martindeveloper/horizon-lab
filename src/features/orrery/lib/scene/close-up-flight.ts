@@ -4,7 +4,7 @@ import type { OrbitPose } from "@horizon/toolkit/camera";
  * Close-ups: flying from the map to one body at its true size, and back.
  * Pure helpers; the engine owns the state and the frame loop.
  */
-import { clamp, lerp, smootherstep } from "@horizon/toolkit/math";
+import { TAU, clamp, dot3, lerp, smootherstep, wrapSigned } from "@horizon/toolkit/math";
 
 /** Seconds for the flight in (pan, then dive) and back out (pull back, then pan). */
 export const CLOSE_UP_IN_S = 3.4;
@@ -42,12 +42,9 @@ export function closeUpLimits(radius: number, frameRadius: number) {
   return { min: radius * CLOSE_UP_NEAREST, max: frameRadius * CLOSE_UP_FARTHEST };
 }
 
-const TAU = Math.PI * 2;
-
 type Vec = readonly [number, number, number];
 
-const shortest = (from: number, to: number) =>
-  ((((to - from + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
+const shortest = (from: number, to: number) => wrapSigned(to - from, TAU);
 
 /**
  * 0..1 at rest at both ends, its speed rising as t² and settling as (1 − t)⁴: most of the
@@ -124,7 +121,6 @@ export const MOON_FILL = 0.6;
 /** Steepest tilt the swing turns to, so it never looks straight down a pole. */
 const MOON_TILT = 0.6;
 
-const dot = (a: Vec, b: Vec) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const cameraDirection = ({ azimuth, inclination }: Omit<OrbitPose, "distance">): Vec => [
   Math.cos(inclination) * Math.sin(azimuth),
   Math.sin(inclination),
@@ -139,7 +135,7 @@ const cameraDirection = ({ azimuth, inclination }: Omit<OrbitPose, "distance">):
 export function moonFraming(moon: Vec, base: OrbitPose, halfTan: number): OrbitPose {
   const r = Math.hypot(...moon);
   const now = cameraDirection(base);
-  const toward = dot(now, moon) / (r * r);
+  const toward = dot3(now, moon) / (r * r);
   const x = now[0] - toward * moon[0];
   const y = now[1] - toward * moon[1];
   const z = now[2] - toward * moon[2];
@@ -147,7 +143,7 @@ export function moonFraming(moon: Vec, base: OrbitPose, halfTan: number): OrbitP
   const azimuth =
     level > 1e-9 ? base.azimuth + shortest(base.azimuth, Math.atan2(x, z)) : base.azimuth;
   const inclination = clamp(Math.atan2(y, level), -MOON_TILT, MOON_TILT);
-  const along = dot(cameraDirection({ azimuth, inclination }), moon);
+  const along = dot3(cameraDirection({ azimuth, inclination }), moon);
   const across = Math.sqrt(Math.max(0, r * r - along * along));
   return {
     azimuth,

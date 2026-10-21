@@ -1,6 +1,5 @@
 {
   "app": "Event Horizon",
-  "guide": "Guide",
   "clocks": "Clocks",
   "controls": "Controls",
   "close": "Close",
@@ -13,12 +12,6 @@
   "spacetime": "Spacetime",
   "camera": "Camera",
   "optics": "Optics",
-  "startGuide": "Start guide",
-  "exit": "Exit guide",
-  "next": "Next",
-  "previousBeat": "Previous step",
-  "guideProgress": "{step} / {total} · {kicker}",
-  "finish": "Finish",
   "open": "Open",
   "fold": "Collapse",
   "read": "Read",
@@ -42,7 +35,6 @@
   "stars": "Stars",
   "nearHorizon": "near horizon",
   "massBound": "Mass · one study’s bound",
-  "massAdopted": "Mass · adopted value",
   "flowNotice": "Illustrative thin disk, not an EHT image: the real flow is hot, transparent plasma.",
   "mass": "Mass",
   "horizon": "Horizon",
@@ -83,11 +75,9 @@
   "sketchSpinZero": "example for a = 0",
   "sketchAssumedSpin": "assumed spin, not yet measured",
   "sketchCriticalCurve": "theoretical critical curve",
-  "ariaStartGuide": "Start guide",
   "ariaOpenAtlas": "Open atlas",
   "ariaCloseClocks": "Close clocks panel",
   "ariaDropClocks": "Drop clocks",
-  "ariaCloseObs": "Close observatory",
   "ariaClose": "Close",
   "presets": {
     "sgr-a": "Sagittarius A*",
@@ -491,7 +481,7 @@
       "3": {
         "kicker": "same geometry",
         "title": "The same shape at a different scale",
-        "body": "At the same dimensionless spin and viewing angle, stellar-mass and supermassive black holes can have the same shadow shape in units of M. For a 15 M☉ example, lengths and times are roughly 300,000 times smaller than for Sgr A*: the 10 M ruler spans about 220 km here, not 63 million, and inner orbits last milliseconds. Spectrum and brightness do not simply rescale; they also depend on the amount, temperature and motion of the surrounding gas."
+        "body": "At the same dimensionless spin and viewing angle, stellar-mass and supermassive black holes can have the same shadow shape in units of M. At Cygnus X-1’s 21 M☉, lengths and times are roughly 200,000 times smaller than for Sgr A*: the 10 M ruler spans about 310 km here, not 63 million, and inner orbits last milliseconds. Spectrum and brightness do not simply rescale; they also depend on the amount, temperature and motion of the surrounding gas."
       },
       "4": {
         "kicker": "pull back",
@@ -766,7 +756,7 @@
   },
   "canvasLabel": "Black hole visualization",
   "metadataDescription": "Explore black holes, gravitational lensing, and spacetime in an interactive observatory.",
-  "observatory": "Observatory",
+  "view": "View",
   "previousStory": "Previous story",
   "nextStory": "Next story",
   "storyNumber": "Story {number}",
@@ -811,7 +801,7 @@
       },
       "disk": {
         "title": "Disk emission and frequency shifts",
-        "body": "Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over {diskIntervals} radial intervals when spin changes. The {diskSamples}-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max({innerFactor} r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the {peakK} K peak is a display scale, not a measured temperature, and colours are not tied to an observing band. The frequency factor g = 1/[uᵗ(E − ΩL)] uses the photon’s conserved E and L in the camera’s normalisation, so it includes the camera’s own gravitational and frame-dragging shift. It shifts an approximate blackbody RGB colour and weights bolometric brightness by g⁴; starlight gains the camera’s blueshift 1/E the same way. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + {limbDarkening} μ (Chandrasekhar 1960), with μ = g√Q/r measured in the gas’s rest frame. Gas inside the ISCO plunges with the ISCO’s E and L (Cunningham 1975), which sets its g; its faint, optically thin glow is illustrative and shows in front of whatever a ray meets next. Noise, a moving hotspot and edge fades remain artistic. Animation is not scaled by mass and has no light-travel delays. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics."
+        "body": "Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over {diskIntervals} radial intervals when spin changes. The {diskSamples}-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max({innerFactor} r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the {peakK} K peak is a display scale, not a measured temperature, and colours are not tied to an observing band. The frequency factor g = 1/[uᵗ(E − ΩL)] uses the photon’s conserved E and L in the camera’s normalisation, so it includes the camera’s own gravitational and frame-dragging shift. It shifts a blackbody colour (Planck’s law through the CIE 1931 observer) and weights bolometric brightness by g⁴; starlight gains the camera’s blueshift 1/E the same way. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + {limbDarkening} μ (Chandrasekhar 1960), with μ = g√Q/r measured in the gas’s rest frame. Gas inside the ISCO plunges with the ISCO’s E and L (Cunningham 1975), which sets its g; its faint, optically thin glow is illustrative and shows in front of whatever a ray meets next. Noise, a moving hotspot and edge fades remain artistic. Animation is not scaled by mass and has no light-travel delays. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics."
       },
       "clocks": {
         "title": "Falling clocks are a separate model",

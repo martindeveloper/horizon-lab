@@ -183,6 +183,7 @@ export function SceneCanvas({
       key={gamut}
       ref={canvas}
       aria-hidden
+      data-simulation-canvas="spectroscopy"
       className="spectroscopy-scene block h-full w-full"
     />
   );

@@ -23,6 +23,7 @@ precision highp float;
 
 uniform vec2 uResolution;      // framebuffer size in pixels
 uniform sampler2D uDiskProfile; // 512×1 Page–Thorne flux, preintegrated on the CPU
+uniform sampler2D uBlackbody;  // black-body colours, log-spaced in kelvin, read as linear light
 uniform mat4 uCamera;          // camera to world: columns right, up, back (−forward), position in M
 uniform vec3 uCamVelocity;     // camera velocity through the hovering observer's frame, units of c (0: hovering)
 uniform float uTime;           // seconds, drives the disk animation
@@ -34,7 +35,7 @@ uniform float uDiskBright;     // disk brightness multiplier
 uniform float uStars;          // sky brightness multiplier
 uniform float uTemp;           // disk temperature multiplier
 uniform float uFov;            // vertical field of view, radians
-uniform float uSteps;          // step budget per ray (≤ 180)
+uniform float uSteps;          // step budget per ray: the quality's (lib/quality.ts), ≤ MAX_STEPS
 uniform float uJet;            // jet brightness, 0 = off
 uniform float uWeather;        // sky preset: 1 Sgr A*, 2 M87, 3 Cyg X-1, 4 lab, 5 host, else generic
 uniform float uGravity;        // 1 Kerr; 0 the same scene in flat space, for comparison
@@ -251,6 +252,13 @@ float plungeG(float r, float udHit) {
   return 1.0 / max(-gE * ut + gL * uphi - kr * ur, 1e-4);
 }
 
+// Black-body colour in linear light at full brightness, from the CIE lookup (frame.ts):
+// one texture read, the texel centres spanning BLACKBODY_MIN_K to BLACKBODY_MAX_K.
+vec3 blackbodyLight(float kelvin) {
+  vec3 spec = vec3(BLACKBODY_MIN_K, BLACKBODY_MAX_K, BLACKBODY_LUT_SIZE);
+  return texture2D(uBlackbody, vec2(blackbodyLutTexel(kelvin, spec), 0.5)).rgb;
+}
+
 // Display scales at the flux peak (the previous artistic look's peak values).
 // DISK_PEAK_K, DISK_PEAK_FLUX, DISK_PROFILE_SIZE/LAST, LIMB_*, the march limits
 // and GLOW_* come from parameters.generated.glsl (lib/parameters.ts).
@@ -354,19 +362,19 @@ vec3 diskColor(vec3 hit, float rho) {
   // DISK_PEAK_K and DISK_PEAK_FLUX are display scales, not accretion rates.
   float tScale = uWeather == SKY_CYG ? 1.28 : 1.0;
   float tEm = DISK_PEAK_K * pow(fpt * gas, 0.25) * uTemp * tScale;
-  vec3 color = blackbody(clamp(tEm * g, 1200.0, 19000.0));
+  vec3 color = blackbodyLight(clamp(tEm * g, 1200.0, 19000.0));
   float flux = DISK_PEAK_FLUX * fpt;
   if (uWeather == SKY_M87) flux *= 0.72 + 0.85 * exp(-pow((rho - rin) / 1.15, 2.0));
   if (uWeather == SKY_SGR) {
     flux *= 0.48 * (0.72 + 0.28 * wrapFbm(phi, rlog, uTime * 0.22, 0.85, 0.4));
   }
 
-  // An illustrative hot spot orbiting just outside the inner edge.
+  // An illustrative hot spot orbiting just outside the inner edge, with the gas around it.
   float rSpot = rin * 1.18;
-  float omSpot = 2.9 / (pow(rSpot, 1.5) + gA);
+  float omSpot = GAS_RATE / (pow(rSpot, 1.5) + gA);
   float dphi = atan(sin(phi - uTime * omSpot), cos(phi - uTime * omSpot));
   float spot = exp(-dphi * dphi * 18.0 - pow(rho - rSpot, 2.0) * 2.6);
-  color += blackbody(clamp(14000.0 * uTemp * g, 1200.0, 22000.0)) * spot * 0.65;
+  color += blackbodyLight(clamp(14000.0 * uTemp * g, 1200.0, 22000.0)) * spot * 0.65;
   flux += spot * 0.25;
 
   // Limb darkening of an optically thick, electron-scattering atmosphere
@@ -380,13 +388,14 @@ vec3 diskColor(vec3 hit, float rho) {
 }
 
 // Faint, illustrative emission from gas plunging between the ISCO and the
-// horizon; its frequency shift g follows the plunging geodesic. A zero-torque
+// horizon r₊; its frequency shift g follows the plunging geodesic. A zero-torque
 // disk's flux vanishes at the ISCO, so this glow stays well below the disk's peak.
-vec3 plungeColor(vec3 hit, float rho, float g) {
+// It fades with the share of the fall from the disk's inner edge to the horizon.
+vec3 plungeColor(vec3 hit, float rho, float g, float horizon) {
   float phi = atan(hit.z, hit.x);
-  float fall = clamp((uInner - rho) / max(uInner - 2.2, 0.35), 0.0, 1.0);
+  float fall = clamp((uInner - rho) / (uInner - horizon), 0.0, 1.0);
   float spiral = 0.75 + 0.25 * sin(3.0 * phi + 2.2 * log(max(rho, 0.5)) - uTime * 1.6);
-  vec3 color = blackbody(clamp(3200.0 * g * uTemp, 1200.0, 8000.0));
+  vec3 color = blackbodyLight(clamp(3200.0 * g * uTemp, 1200.0, 8000.0));
   float fade = 1.0 - fall * 0.7;
   return color * spiral * fade * g * g * g * g * uDiskBright * PLUNGE_GLOW;
 }
@@ -514,7 +523,7 @@ bool collect(
     // Without gravity it is drawn unshifted.
     if (rho > horizon * DISK_INNER_FACTOR && rho < uInner) {
       float g = uGravity > 0.5 ? plungeG(rho, mix(udStep.x, udStep.y, t)) : 1.0;
-      fore += transmission * plungeColor(hitp, rho, g * gCam);
+      fore += transmission * plungeColor(hitp, rho, g * gCam, horizon);
     }
   }
   return false;

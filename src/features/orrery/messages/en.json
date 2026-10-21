@@ -30,6 +30,7 @@
   "toggles": {
     "elliptical": "Ellipses",
     "trueSize": "True size",
+    "faintRings": "Faint rings",
     "drift": "Motion",
     "plane": "Ecliptic grid"
   },
@@ -48,7 +49,6 @@
   },
   "hud": {
     "views": "Views",
-    "guide": "Guide",
     "play": "Play time",
     "pause": "Pause time",
     "replay": "Replay the clearing",
@@ -196,7 +196,7 @@
       },
       "size": {
         "title": "Dot size is not size",
-        "body": "Markers are enlarged so a finger can hit them. True size shrinks planets to real radii and they vanish unless you are very close. That emptiness is the lesson. Colours follow true-colour images; the bright side faces the Sun."
+        "body": "Markers are enlarged so a finger can hit them. True size shrinks planets to real radii and they vanish unless you are very close. That emptiness is the lesson. Colours follow true-colour images; the bright side faces the Sun. Uranus and Neptune's rings are too dark to see; Faint rings shows them in a long exposure, as bright as Saturn's."
       },
       "today": {
         "title": "Today is computed",
@@ -217,13 +217,6 @@
     }
   },
   "tour": {
-    "label": "Guided tour",
-    "start": "Start guide",
-    "progress": "{step} / {total} · {time}",
-    "exit": "Exit guide",
-    "previous": "Previous step",
-    "next": "Next",
-    "finish": "Finish",
     "further": "On to Deep Field",
     "steps": {
       "today": {

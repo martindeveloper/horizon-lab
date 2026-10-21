@@ -30,7 +30,6 @@ export const schwarzschild: HoleSpec = {
   tempScale: 0.9,
   sky: "lab",
   jet: 0,
-  aliases: ["schwarzschild"],
   tour: [
     // Symmetric geometry, symmetric camera: straight dollies, level horizon.
     {

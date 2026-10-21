@@ -3,7 +3,8 @@
  * origin) in km: the Sun with its glow, the planets with their rings, the named small worlds
  * and the moons, each lit by the Sun from where the ship sees it, shadowing one another in
  * eclipses, and their orbits as faint lines. A moving ship sees each globe aberrated and
- * resized (`seen.ts`) and the orbit lines aberrated point by point (orbit.vert.glsl).
+ * resized (`seen.ts`) and the orbit lines aberrated point by point (orbit.vert.glsl). The
+ * places come from the engine's anchor cache, so a frame solves each body's ephemeris once.
  * Reports each globe's size for the map budget.
  */
 import {
@@ -45,7 +46,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 
 import { orbitMaterial, type MotionUniforms } from "../graphics/looks";
 import { isBodyAnchor, type AnchorId } from "../model/anchors";
-import { WORLD_BODIES, bodyPositionKm, selectionOfBody, type WorldBody } from "../model/bodies";
+import { WORLD_BODIES, selectionOfBody, type WorldBody } from "../model/bodies";
 import { DRAW_PX, GLOW_RADII, NAME_PX, type Globes } from "./globes";
 import type { Frame, VoyageKit } from "./kit";
 import { placeSeen } from "./seen";
@@ -68,7 +69,7 @@ type Slot = {
   mesh: Mesh;
   /** Heliocentric position this frame, km. */
   pos: Vec3d;
-  /** The host whose place this moon is offset from. */
+  /** The planet this moon orbits. */
   host: Slot | null;
   /** The bodies of its own system that may stand before the Sun. */
   shadowers: Slot[];
@@ -108,10 +109,12 @@ export function createBodiesLayer(
     globes: Globes;
     /** The ship's motion, for the orbit lines' aberration. */
     motion: MotionUniforms;
+    /** Where a body is at a date, km, heliocentric: the engine's anchor cache. */
+    at: (id: AnchorId, date: Date, out: Vec3d) => Vec3d;
   },
 ) {
   const { scope, looks, lod } = kit;
-  const { place, globes, motion } = deps;
+  const { place, globes, motion, at } = deps;
   looks.sunRadius.value = SUN_RADIUS_KM;
 
   const slots: Slot[] = WORLD_BODIES.map((body) => {
@@ -292,10 +295,10 @@ export function createBodiesLayer(
     update({ now, show, sel, ship, aim, motion: moving }: Frame) {
       const labelled = names.to(show.names);
       const orbitsOn = orbits.to(show.orbits);
+      looks.exposeRings(show.faintRings);
       /* The Sun as every surface sees it: from the ship's origin. */
       looks.sunPos.set(-ship[0], -ship[1], -ship[2]);
-      /* Hosts come before their moons, so a moon is placed from its host's place this frame. */
-      for (const slot of slots) bodyPositionKm(slot.body.id, now, slot.pos, slot.host?.pos);
+      for (const slot of slots) at(slot.body.id, now, slot.pos);
       for (const slot of slots) {
         const { body, mesh, pos, radius, shape } = slot;
         placeSeen(mesh, pos, ship, moving);

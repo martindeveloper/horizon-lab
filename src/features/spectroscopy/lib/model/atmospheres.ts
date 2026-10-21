@@ -1,6 +1,7 @@
 import { lerp } from "@horizon/toolkit/math";
 
 import data from "./atmospheres.json";
+import { recentCache } from "./recent";
 
 /**
  * Stellar photospheres from Castelli & Kurucz's (2003) ATLAS9 models
@@ -67,14 +68,21 @@ const rowsOf = (model: Model): Row[] =>
     return [T!, logPe!, logPg!, logColumn!];
   });
 
-/** The ATLAS9 model nearest a named star. */
-export function starPhotosphere(id: string): Photosphere {
-  const model = (data.stars as Record<string, Model>)[id];
-  if (!model) throw new Error(`No model atmosphere for ${id}`);
-  return photosphere(model.teff, model.logg, rowsOf(model));
-}
+const STAR_MODELS = data.stars as Record<string, Model>;
+
+const starPhotospheres = recentCache<string, Photosphere>(Object.keys(STAR_MODELS).length);
+
+/** The ATLAS9 model nearest a named star; the same object every time, so caches can key on it. */
+export const starPhotosphere = (id: string) =>
+  starPhotospheres(id, () => {
+    const model = STAR_MODELS[id];
+    if (!model) throw new Error(`No model atmosphere for ${id}`);
+    return photosphere(model.teff, model.logg, rowsOf(model));
+  });
 
 const SEQUENCE = data.sequence as Model[];
+/** Each main-sequence model's layers, checked once. */
+const SEQUENCE_ROWS = SEQUENCE.map(rowsOf);
 /** The main-sequence models' temperature span, K. */
 const GRID_RANGE = [SEQUENCE[0]!.teff, SEQUENCE[SEQUENCE.length - 1]!.teff] as const;
 
@@ -84,22 +92,34 @@ const GRID_RANGE = [SEQUENCE[0]!.teff, SEQUENCE[SEQUENCE.length - 1]!.teff] as c
  */
 export const SEQUENCE_RANGE = [3900, GRID_RANGE[1]] as const;
 
-/**
- * A main-sequence (log g = 4) photosphere at any effective temperature in the grid's span,
- * between its two neighbouring models (linear in log T_eff, depth by depth).
- */
-export function mainSequencePhotosphere(teff: number): Photosphere {
-  const clamped = Math.min(GRID_RANGE[1], Math.max(GRID_RANGE[0], teff));
+/** Main-sequence photospheres kept: the star in view and the few temperatures it glides through. */
+const SEQUENCE_KEPT = 8;
+
+const sequencePhotospheres = recentCache<number, Photosphere>(SEQUENCE_KEPT);
+
+function sequencePhotosphere(teff: number) {
   const i = Math.max(
     1,
-    SEQUENCE.findIndex((m) => m.teff >= clamped),
+    SEQUENCE.findIndex((m) => m.teff >= teff),
   );
   const a = SEQUENCE[i - 1]!;
   const b = SEQUENCE[i]!;
-  const t = Math.log(clamped / a.teff) / Math.log(b.teff / a.teff);
-  const rows = rowsOf(a).map((row, k) => mix(row, rowsOf(b)[k]!, t));
-  return photosphere(clamped, 4, rows);
+  const t = Math.log(teff / a.teff) / Math.log(b.teff / a.teff);
+  const above = SEQUENCE_ROWS[i]!;
+  return photosphere(
+    teff,
+    4,
+    SEQUENCE_ROWS[i - 1]!.map((row, k) => mix(row, above[k]!, t)),
+  );
 }
+
+/**
+ * A main-sequence (log g = 4) photosphere at any effective temperature in the grid's span,
+ * between its two neighbouring models (linear in log T_eff, depth by depth); the same object
+ * for the same temperature while it is in use.
+ */
+export const mainSequencePhotosphere = (teff: number): Photosphere =>
+  sequencePhotospheres(Math.min(GRID_RANGE[1], Math.max(GRID_RANGE[0], teff)), sequencePhotosphere);
 
 /** The layer at a depth, interpolated (pressures and column in logs). */
 export function layerAt(atmosphere: Photosphere, logTau: number): Layer {

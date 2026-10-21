@@ -2,15 +2,30 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 import { createCameraSnapshot, type CameraSnapshot } from "@horizon/toolkit/camera";
-const CameraContext = createContext<CameraSnapshot | null>(null);
 
-/** One snapshot per mounted observatory, shared by its canvas and projected overlays. */
+import { createFrameSignal, type FrameSignal } from "./overlay-canvas";
+
+type SceneView = { camera: CameraSnapshot; frames: FrameSignal };
+
+const SceneContext = createContext<SceneView | null>(null);
+
+/**
+ * One camera snapshot per mounted observatory, shared by its canvas and projected overlays,
+ * and the signal of the engine's drawn frames that those overlays follow.
+ */
 export function SceneCameraProvider({ children }: { children: ReactNode }) {
-  const [camera] = useState(createCameraSnapshot);
-  return <CameraContext.Provider value={camera}>{children}</CameraContext.Provider>;
+  const [view] = useState<SceneView>(() => ({
+    camera: createCameraSnapshot(),
+    frames: createFrameSignal(),
+  }));
+  return <SceneContext.Provider value={view}>{children}</SceneContext.Provider>;
 }
-export function useSceneCamera() {
-  const camera = useContext(CameraContext);
-  if (!camera) throw new Error("SceneCameraProvider is required");
-  return camera;
+
+function useSceneView() {
+  const view = useContext(SceneContext);
+  if (!view) throw new Error("SceneCameraProvider is required");
+  return view;
 }
+
+export const useSceneCamera = () => useSceneView().camera;
+export const useSceneFrames = () => useSceneView().frames;

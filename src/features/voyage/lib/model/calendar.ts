@@ -4,10 +4,11 @@
  * that reach. Beyond it the elapsed time is all that can be said; the planets stand still.
  */
 import { clamp } from "@horizon/toolkit/math";
+import { JULIAN_YEAR_SECONDS } from "@horizon/toolkit/science";
 
 /** The calendar's reach either way, years. */
 const DATE_REACH_YEARS = 250_000;
-const DATE_REACH_S = DATE_REACH_YEARS * 365.25 * 86_400;
+const DATE_REACH_S = DATE_REACH_YEARS * JULIAN_YEAR_SECONDS;
 
 /** Whether `seconds` after the epoch still has a date. */
 export const withinCalendar = (seconds: number) => Math.abs(seconds) <= DATE_REACH_S;

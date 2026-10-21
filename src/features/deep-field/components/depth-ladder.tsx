@@ -3,31 +3,21 @@
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { History } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useSyncExternalStore, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 import { HandoffLink } from "@/components/simulations/handoff-link";
 import { formatAu } from "@/lib/facts";
 import { isSolarView } from "@/space/solar-system/model/views";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
-import { Tooltip, cn } from "@horizon/toolkit/ui";
+import { Tooltip, cn, useMediaQuery } from "@horizon/toolkit/ui";
 
 import { RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
 import { METHOD_OF } from "../lib/model/views";
 import { useDeepField } from "../lib/store";
 
-const subscribe = (change: () => void) => {
-  /* Down the left wherever a column fits beside the scene, a phone held sideways included. */
-  const query = window.matchMedia(WIDE_QUERY);
-  query.addEventListener("change", change);
-  return () => query.removeEventListener("change", change);
-};
-const useWide = () =>
-  useSyncExternalStore(
-    subscribe,
-    () => window.matchMedia(WIDE_QUERY).matches,
-    () => true,
-  );
+/* Down the left wherever a column fits beside the scene, a phone held sideways included. */
+const useWide = () => useMediaQuery(WIDE_QUERY, true);
 
 /** Ladder positions run 0..STEPS so a drag reads smoothly at any height. */
 const STEPS = 1000;

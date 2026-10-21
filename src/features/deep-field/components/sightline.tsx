@@ -6,7 +6,7 @@ import { useMemo, useRef } from "react";
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
 import { formatAu } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
-import { anchorById, type AnchorId } from "@/space/cosmos/model/cosmos";
+import { CMB_LY, anchorById, type AnchorId } from "@/space/cosmos/model/cosmos";
 import { NEIGHBOURS, neighbourDistanceLy } from "@/space/galaxy/model/neighbours";
 import { SUN_GALACTIC_RADIUS_LY } from "@/space/galaxy/model/parameters";
 import { solarNameKey } from "@/space/solar-system/format";
@@ -17,7 +17,7 @@ import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { cn } from "@horizon/toolkit/ui";
 
-import { CMB_LY, sightline, thenOf } from "../lib/model/depth";
+import { sightline, thenOf } from "../lib/model/depth";
 import { METHOD_OF } from "../lib/model/views";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
 import { formatAgo, formatThen } from "./format";

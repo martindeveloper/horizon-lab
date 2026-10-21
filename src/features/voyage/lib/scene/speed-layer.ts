@@ -29,7 +29,7 @@ import {
 import { clamp, lerp } from "@horizon/toolkit/math";
 import { vec3d, type Vec3d } from "@horizon/toolkit/scene";
 
-import { LUT_RANGE_K, type MotionUniforms } from "../graphics/looks";
+import { lutSpecUniform, type MotionUniforms } from "../graphics/looks";
 import APEX_FRAG from "../graphics/shaders/apex.frag.glsl";
 import APEX_VERT from "../graphics/shaders/apex.vert.glsl";
 import SPEED_FRAG from "../graphics/shaders/speed.frag.glsl";
@@ -145,7 +145,7 @@ export function createSpeedLayer(
       dust,
       stars,
       bbLut: { value: lut },
-      lutRange: { value: new Vector2(LUT_RANGE_K[0], LUT_RANGE_K[1]) },
+      bbLutSpec: lutSpecUniform(),
       viewport: size,
       widthPx: { value: WIDTH_PX },
       longestPx,

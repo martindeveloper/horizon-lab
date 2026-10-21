@@ -1,3 +1,5 @@
+import { TAU, smoothstep } from "@horizon/toolkit/math";
+
 import {
   PROMINENCE_REGIONS,
   SUN_ACTIVITY_CYCLE_SECONDS,
@@ -18,14 +20,9 @@ import {
 
 const STEP = 1 / 120;
 const CYCLE_TICKS = SUN_ACTIVITY_CYCLE_SECONDS * 120;
-const SWAY_OMEGA = (Math.PI * 2) / ((SUN_ACTIVITY_SWAY_PERIOD_MIN * 60) / SUN_ACTIVITY_TIME_SCALE);
+const SWAY_OMEGA = TAU / ((SUN_ACTIVITY_SWAY_PERIOD_MIN * 60) / SUN_ACTIVITY_TIME_SCALE);
 /** The drained length wraps far beyond a thread's streak period, keeping the uniform precise. */
 const FLOW_WRAP = 256;
-
-const smooth = (t: number) => {
-  const s = Math.max(0, Math.min(1, t));
-  return s * s * (3 - 2 * s);
-};
 
 /** Each region's eruption rocks the others, less the farther apart they are on the sphere. */
 const KICKS = PROMINENCE_REGIONS.map(([lat, lon]) =>
@@ -58,12 +55,12 @@ export function regionCourse(phase: number) {
       lift:
         SUN_ACTIVITY_SLOW_RISE_LIFT * (SUN_ACTIVITY_MAX_LIFT / SUN_ACTIVITY_SLOW_RISE_LIFT) ** t,
       // The rising body stays condensed until late in its climb, then thins away quickly.
-      fade: 1 - smooth(t * t * t),
+      fade: 1 - smoothstep(0, 1, t * t * t),
       drain: SUN_ACTIVITY_ERUPTION_DRAIN,
     };
   }
   const t = (phase - SUN_ACTIVITY_FAST_RISE_END) / (1 - SUN_ACTIVITY_FAST_RISE_END);
-  return { lift: 1, fade: smooth(t), drain: 0.5 };
+  return { lift: 1, fade: smoothstep(0, 1, t), drain: 0.5 };
 }
 
 /**

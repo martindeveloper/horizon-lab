@@ -52,8 +52,7 @@
     "backInTime": "Zpět v čase · Orrery",
     "backInTimeHint": "Toto místo napříč dějinami sluneční soustavy",
     "lightLeftAgo": "Světlo vyšlo {ago}",
-    "outToValue": "až do {distance}",
-    "guide": "Průvodce"
+    "outToValue": "až do {distance}"
   },
   "time": {
     "years": "před {value} lety",
@@ -396,15 +395,6 @@
     }
   },
   "tour": {
-    "label": "Průvodce",
-    "start": "Spustit průvodce",
-    "progress": "{step} / {total}",
-    "previous": "Předchozí krok",
-    "next": "Další",
-    "play": "Spustit průvodce",
-    "pause": "Pozastavit průvodce",
-    "finish": "Dokončit",
-    "exit": "Ukončit průvodce",
     "steps": {
       "sunlight": {
         "title": "Světlo potřebuje čas",

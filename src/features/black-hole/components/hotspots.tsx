@@ -14,19 +14,27 @@ import {
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { cn, isSceneShortcut, useFocusHandoff } from "@horizon/toolkit/ui";
 
-import { drawOverHole, fitOverlay, frameLoop } from "./overlay-canvas";
+import { clearOverlay, drawOverHole, overlayFit, overlayLoop } from "./overlay-canvas";
 import { PinLesson } from "./pin-lessons";
 import { drawRing, ringTarget } from "./pin-rings";
-import { useSceneCamera } from "./scene-camera";
+import { useSceneCamera, useSceneFrames } from "./scene-camera";
 import { SETTINGS_PANEL_ID } from "./settings";
 
 /** Minimum label spacing on the gauge: one 44px touch target. */
 const LABEL_GAP = 44;
 /** Horizontal offset of the rail inside the gauge. */
 const RAIL_X = 4.5;
+/** From this layer width (the md breakpoint) the lesson card sits beside the gauge, joined by the leader. */
+const DESKTOP_WIDTH = 768;
+/** The lit ring fades and resizes with this time constant, in seconds… */
+const RING_EASE = 0.22;
+/** …until within this share of its target, where it settles; below this opacity it is not drawn. */
+const RING_SETTLED = 0.002;
+const RING_HIDDEN = 0.02;
 
 export function Hotspots() {
   const cam = useSceneCamera();
+  const frames = useSceneFrames();
   const t = useTranslations("blackHole");
   const layerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -46,8 +54,10 @@ export function Hotspots() {
   const [railH, setRailH] = useState(0);
   const focus = hover ?? active;
   const focusRef = useRef<PinId | null>(focus);
+  const wakeRef = useRef<(() => void) | null>(null);
   useEffect(() => {
     focusRef.current = focus;
+    wakeRef.current?.();
   }, [focus]);
 
   useEffect(() => {
@@ -56,19 +66,19 @@ export function Hotspots() {
     const measure = () => {
       railHRef.current = rail.clientHeight;
       setRailH(rail.clientHeight);
+      wakeRef.current?.();
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(rail);
     return () => ro.disconnect();
-  }, [guideOpen, clocksOpen]);
+  }, [guideOpen, clocksOpen, mapOpen]);
 
   useEffect(() => {
     const layer = layerRef.current;
     const canvas = canvasRef.current;
-    if (!layer || !canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctx = canvas?.getContext("2d");
+    if (!layer || !canvas || !ctx) return;
     let ringA = 0;
     let ringR = 0;
     let ringId: PinId | null = null;
@@ -76,9 +86,41 @@ export function Hotspots() {
     let youY = -1;
     let youText = "";
 
-    return frameLoop((dt) => {
-      if (document.hidden || useBlackHole.getState().mapOpen) return;
+    const clearRing = () => {
+      if (!ringDrawn) return;
+      clearOverlay(ctx);
+      ringDrawn = false;
+    };
 
+    /* Each frame reads every box it places against before it writes a style, so the browser
+       lays the page out at most once; true while the ring is still easing. */
+    const frame = (dt: number) => {
+      const state = useBlackHole.getState();
+      const fit = boxes.fit();
+      if (!fit) return false;
+      if (fit.resized) ringDrawn = true;
+      const { layerBox, holeBox } = fit;
+      const { width, height } = holeBox;
+
+      const lit = focusRef.current;
+      if (lit) ringId = lit;
+      const openId = state.activePin;
+      const desktop = layerBox.width >= DESKTOP_WIDTH;
+      const card = cardRef.current;
+      const openLabel = openId && desktop ? labelRefs.current[openId] : null;
+      const leaderLabel = ringId && (desktop || !openId) ? labelRefs.current[ringId] : null;
+
+      /* Reads. */
+      const openBox = card && openLabel ? openLabel.getBoundingClientRect() : null;
+      const gaugeRight = openBox ? railRef.current?.getBoundingClientRect().right : undefined;
+      const cardSize = openBox && card ? [card.offsetWidth, card.offsetHeight] : null;
+      const settingsRail =
+        openBox && state.settingsOpen
+          ? document.getElementById(SETTINGS_PANEL_ID)?.getBoundingClientRect()
+          : undefined;
+      const leaderBox = leaderLabel?.getBoundingClientRect() ?? null;
+
+      /* Writes. */
       const you = youRef.current;
       const railHeight = railHRef.current;
       if (you && railHeight > 0) {
@@ -93,87 +135,81 @@ export function Hotspots() {
           youValueRef.current.textContent = text;
         }
       }
-
-      const fit = fitOverlay(layer, canvas);
-      if (!fit) return;
-      if (fit.resized) ringDrawn = true;
-      const { layerBox, holeBox } = fit;
-      const { width, height } = holeBox;
-
-      const state = useBlackHole.getState();
-      const openId = state.activePin;
-      const desktop = layerBox.width >= 768;
-      const card = cardRef.current;
-      const openLabel = openId ? labelRefs.current[openId] : null;
-      let cardBox: DOMRect | null = null;
-      if (card && openId && desktop && openLabel) {
-        const labelBox = openLabel.getBoundingClientRect();
-        const gaugeRight = railRef.current?.getBoundingClientRect().right ?? labelBox.right;
-        const cw = card.offsetWidth || 352;
-        const ch = card.offsetHeight || 260;
+      let cardBox: { top: number; right: number; bottom: number } | null = null;
+      if (card && openBox && cardSize) {
+        const [cw = 0, ch = 0] = cardSize;
         // Keep clear of the open settings rail.
-        const rail = state.settingsOpen ? document.getElementById(SETTINGS_PANEL_ID) : null;
-        const rightLimit = rail
-          ? rail.getBoundingClientRect().left - layerBox.left - 8
+        const rightLimit = settingsRail
+          ? settingsRail.left - layerBox.left - 8
           : layerBox.width - 16;
-        const x = Math.max(16, Math.min(gaugeRight - layerBox.left + 8, rightLimit - cw));
-        const labelMid = labelBox.top + labelBox.height / 2 - layerBox.top;
+        const x = Math.max(
+          16,
+          Math.min((gaugeRight ?? openBox.right) - layerBox.left + 8, rightLimit - cw),
+        );
+        const labelMid = openBox.top + openBox.height / 2 - layerBox.top;
         const y = Math.max(52, Math.min(labelMid - 28, layerBox.height - ch - 16));
         card.style.left = `${x}px`;
         card.style.top = `${y}px`;
-        cardBox = card.getBoundingClientRect();
+        const top = layerBox.top + y;
+        cardBox = { top, right: layerBox.left + x + cw, bottom: top + ch };
       }
 
-      const lit = focusRef.current;
-      if (lit) ringId = lit;
-      const k = 1 - Math.exp(-dt / 0.22);
-      ringA += ((lit ? 1 : 0) - ringA) * k;
-      if (!ringId || ringA <= 0.02) {
-        if (ringDrawn) {
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ringDrawn = false;
-        }
-        return;
+      /* The ring and its leader. */
+      const target = lit ? 1 : 0;
+      const k = 1 - Math.exp(-dt / RING_EASE);
+      ringA += (target - ringA) * k;
+      if (Math.abs(target - ringA) < RING_SETTLED) ringA = target;
+      if (!ringId || ringA <= RING_HIDDEN) {
+        clearRing();
+        return ringA !== target;
       }
-
-      const spinNow = state.spin;
-      const tr = pinRadius(ringId, spinNow);
+      const tr = pinRadius(ringId, state.spin);
       ringR = ringR < 0.2 ? tr : ringR + (tr - ringR) * k;
+      if (Math.abs(tr - ringR) < RING_SETTLED * tr) ringR = tr;
+      const easing = ringA !== target || ringR !== tr;
       drawOverHole(ctx, fit);
       const color = PIN_RING_COLOR[ringId];
       drawRing(cam, ctx, ringR, color, width, height, ringA);
       ringDrawn = true;
 
       // Leader: a hairline from the gauge label (or its open card) to the ring.
-      const label = labelRefs.current[ringId];
-      if (!label || (!desktop && openId)) return;
-      const lb = label.getBoundingClientRect();
-      let ax = lb.right + 6 - holeBox.left;
-      let ay = lb.top + lb.height / 2 - holeBox.top;
+      if (!leaderBox) return easing;
+      let ax = leaderBox.right + 6 - holeBox.left;
+      let ay = leaderBox.top + leaderBox.height / 2 - holeBox.top;
       if (cardBox && openId === ringId) {
         ax = cardBox.right + 4 - holeBox.left;
         ay =
-          Math.max(cardBox.top + 24, Math.min(lb.top + lb.height / 2, cardBox.bottom - 24)) -
-          holeBox.top;
+          Math.max(
+            cardBox.top + 24,
+            Math.min(leaderBox.top + leaderBox.height / 2, cardBox.bottom - 24),
+          ) - holeBox.top;
       }
-      const target = ringTarget(cam, ringId, ringR, ax, ay, width, height);
-      if (!target) return;
+      const end = ringTarget(cam, ringId, ringR, ax, ay, width, height);
+      if (!end) return easing;
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
       ctx.lineWidth = 1;
       ctx.globalAlpha = 0.5 * ringA;
       ctx.beginPath();
       ctx.moveTo(ax, ay);
-      ctx.lineTo(target.x, target.y);
+      ctx.lineTo(end.x, end.y);
       ctx.stroke();
       ctx.globalAlpha = ringA;
       ctx.beginPath();
-      ctx.arc(target.x, target.y, 2.5, 0, Math.PI * 2);
+      ctx.arc(end.x, end.y, 2.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 1;
-    });
-  }, [guideOpen, clocksOpen, cam]);
+      return easing;
+    };
+    const loop = overlayLoop(frames, frame);
+    const boxes = overlayFit(layer, canvas, loop.wake);
+    wakeRef.current = loop.wake;
+    return () => {
+      wakeRef.current = null;
+      loop.dispose();
+      boxes.dispose();
+    };
+  }, [guideOpen, clocksOpen, mapOpen, cam, frames]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

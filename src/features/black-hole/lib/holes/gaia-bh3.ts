@@ -30,7 +30,6 @@ export const gaiaBh3: HoleSpec = {
   tempScale: 1,
   sky: "cyg",
   jet: 0,
-  aliases: ["gaia-bh3", "gaiabh3", "bh3"],
   tour: [
     // A slow, level drift in from the star field: nothing glows, only the stars bend.
     {

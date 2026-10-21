@@ -3,8 +3,9 @@ import test from "node:test";
 
 import {
   airToVacuum,
+  BOLTZMANN_CONSTANT,
   CLASSICAL_ELECTRON_RADIUS_M,
-  dopplerFactor,
+  dopplerWavelengthRatio,
   HC_EV_NM,
   planckRadiance,
 } from "@horizon/toolkit/science";
@@ -42,7 +43,12 @@ import {
   ionizationFractions,
   levelShare,
 } from "../src/features/spectroscopy/lib/model/populations.ts";
-import { lineProfile, lineShape, shapeAt } from "../src/features/spectroscopy/lib/model/profile.ts";
+import {
+  lineProfile,
+  lineShape,
+  shapeAt,
+  starkFwhm,
+} from "../src/features/spectroscopy/lib/model/profile.ts";
 import {
   drawDeck,
   grade,
@@ -59,6 +65,7 @@ import {
   reportLine,
   slabIntensity,
   synthesize,
+  synthesizeWithout,
 } from "../src/features/spectroscopy/lib/model/spectrum.ts";
 import { BAND_HEADS } from "../src/features/spectroscopy/lib/model/telluric.ts";
 import { voigt } from "../src/features/spectroscopy/lib/model/voigt.ts";
@@ -254,7 +261,7 @@ test("a star's lines shift with its velocity; Earth's oxygen bands stay put", ()
   near(BAND_HEADS.B, 686.75, 0.2, "B band head");
   const moving = star(starPhotosphere("sun"), { velocity: 300, airmass: 1, resolution: 20_000 });
   const s = synthesize(moving, 650, 770, 6000);
-  const shifted = 656.279 * dopplerFactor(300);
+  const shifted = 656.279 * dopplerWavelengthRatio(300);
   assert.ok(depthAt(s, shifted) > depthAt(s, 656.279) + 0.2, "Hα moved by λv/c");
   assert.ok(depthAt(s, BAND_HEADS.A + 0.4) > 0.3, "the A band is where it always is");
   const space = synthesize({ ...moving, airmass: 0 }, 650, 770, 6000);
@@ -607,4 +614,48 @@ test("the Glow switch: the ribbon's halo spreads strong emission alone, and repa
   };
   assert.ok(sameScene(inputs, { ...inputs, strong: [{ centre: 500, tau: 1 }] }));
   assert.ok(!sameScene(inputs, { ...inputs, halo: true }));
+});
+
+test("Balmer Stark widths follow Gigosos et al.'s fits: Hα and Hβ their own, higher lines scaled from Hβ", () => {
+  const T = 10_000;
+  const at = (density) => ({
+    temperature: T,
+    electronPressure: density * BOLTZMANN_CONSTANT * T,
+    gasPressure: 1e4,
+    microturbulence: 0,
+  });
+  const [alpha, beta, gamma] = [656.279, 486.135, 434.047].map((nm) => lineNear("H I", nm));
+  // Gigosos, González & Cardeñoso 2003: Hα 2 × 0.549 nm (half width at half area), Hβ 4.800 nm.
+  near(starkFwhm(alpha, at(1e23)), 1.098, 1e-9, "Hα");
+  near(starkFwhm(beta, at(1e23)), 4.8, 1e-9, "Hβ");
+  near(starkFwhm(alpha, at(1e22)) / starkFwhm(alpha, at(1e23)), 10 ** -0.67965, 1e-9, "Hα power");
+  near(starkFwhm(beta, at(1e22)) / starkFwhm(beta, at(1e23)), 10 ** -0.68116, 1e-9, "Hβ power");
+  // Hγ: Hβ's width times λ² (n_u² − n_l²), the linear Stark splitting seen in wavelength.
+  const expected = 4.8 * (434.047 / 486.135) ** 2 * (21 / 12);
+  near(starkFwhm(gamma, at(1e23)) / expected, 1, 2e-4, "Hγ");
+  assert.equal(starkFwhm(lineNear("Na I", 588.995), at(1e23)), 0, "no linear Stark effect");
+});
+
+test("a star's caches change nothing: windows, velocities, the curve of growth and the mystery check", () => {
+  const sun = starPhotosphere("sun");
+  const obs = star(sun, { microturbulence: 1, resolution: 20_000, airmass: 1 });
+  // Fill the lattice from other windows and velocities, then ask for one that overlaps them.
+  synthesize(obs, 580, 600, 800);
+  synthesize({ ...obs, velocity: -25 }, 586, 592, 800);
+  const cached = synthesize({ ...obs, velocity: 40 }, 585, 595, 1200);
+  // The same model under a new identity is worked out from nothing.
+  const fresh = synthesize({ ...obs, photosphere: { ...sun }, velocity: 40 }, 585, 595, 1200);
+  assert.deepEqual(cached.flux, fresh.flux);
+  assert.deepEqual(cached.continuum, fresh.continuum);
+  // The curve of growth scales one line's opacity; changing the abundance gives the same widths.
+  const iron = lineNear("Fe I", 526.954);
+  for (const [exponent, logWidth] of curveOfGrowth(iron, obs).filter((_, i) => i % 6 === 0)) {
+    const width = reportLine(iron, { ...obs, abundances: { Fe: exponent } }).equivalentWidth;
+    near(Math.log10(width), logWidth, 1e-9, `log N + ${exponent}`);
+  }
+  // Taking an element's opacity out matches removing the element.
+  const without = synthesizeWithout(obs, 585, 595, 600, ["Na"]).get("Na");
+  const removed = synthesize({ ...obs, abundances: { Na: -20 } }, 585, 595, 600);
+  for (let i = 0; i < 600; i++)
+    near(without.flux[i] / removed.flux[i], 1, 1e-5, `${removed.wavelengths[i]} nm`);
 });

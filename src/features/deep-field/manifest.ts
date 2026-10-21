@@ -15,4 +15,5 @@ export const deepFieldManifest = {
     { id: "laniakea", href: `${DEEP_FIELD_PATH}/laniakea` },
     { id: "universe", href: `${DEEP_FIELD_PATH}/observable-universe` },
   ],
+  solarSystem: { defaultView: "galaxy" },
 } as const satisfies SimulationManifest;

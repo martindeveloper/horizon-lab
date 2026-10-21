@@ -13,7 +13,7 @@ Routes carry no language prefix. Mass and spin below are initial preset values, 
 
 | Preset         | Route                           | Mass (solar masses) | Spin  | Sky    | Jet strength |
 | -------------- | ------------------------------- | ------------------- | ----- | ------ | ------------ |
-| Cygnus X-1     | `/lab/black-hole/stellar`       | 15                  | 0.95  | cyg    | 0            |
+| Cygnus X-1     | `/lab/black-hole/stellar`       | 21.2                | 0.95  | cyg    | 0            |
 | Gaia BH3       | `/lab/black-hole/gaia-bh3`      | 32.7                | 0     | cyg    | 0            |
 | GW231123       | `/lab/black-hole/gw231123`      | 222                 | 0.84  | lensed | 0            |
 | ω Centauri     | `/lab/black-hole/omega-cen`     | 8200                | 0     | sgr    | 0            |
@@ -42,7 +42,7 @@ Routes carry no language prefix. Mass and spin below are initial preset values, 
 - [Miller-Jones et al. (2021) · Cygnus X-1 mass](https://arxiv.org/abs/2102.09091)
 - [Ramachandran et al. (2025) · Cygnus X-1 companion and mass estimates](https://arxiv.org/abs/2504.05885)
 - [Chandrasekhar (1960) · Radiative Transfer, limb darkening](https://archive.org/details/radiativetransfe0000chan)
-- [Helland (2012) · Blackbody temperature to RGB fit](https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
+- [CIE (1931) · Colour-matching functions, 2° observer](https://cie.co.at/datatable/cie-1931-colour-matching-functions-2-degree-observer)
 - [NASA · Lensed disks and Doppler contrast](https://www.nasa.gov/universe/nasa-visualization-shows-a-black-holes-warped-world/)
 
 See [physics audit](../../../docs/black-hole-physics-audit.md) for verification scope and remaining limits.
@@ -89,7 +89,7 @@ T = 2\pi\left[\left(\frac{r}{M}\right)^{3/2} + a\right]\frac{G M_{phys}}{c^3}
 
 ## Disk emission and frequency shifts
 
-Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over 511 radial intervals when spin changes. The 512-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max(1.08 r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the 15,800 K peak is a display scale, not a measured temperature, and colours are not tied to an observing band. The frequency factor g = 1/[uᵗ(E − ΩL)] uses the photon’s conserved E and L in the camera’s normalisation, so it includes the camera’s own gravitational and frame-dragging shift. It shifts an approximate blackbody RGB colour and weights bolometric brightness by g⁴; starlight gains the camera’s blueshift 1/E the same way. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + 2.06 μ (Chandrasekhar 1960), with μ = g√Q/r measured in the gas’s rest frame. Gas inside the ISCO plunges with the ISCO’s E and L (Cunningham 1975), which sets its g; its faint, optically thin glow is illustrative and shows in front of whatever a ray meets next. Noise, a moving hotspot and edge fades remain artistic. Animation is not scaled by mass and has no light-travel delays. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics.
+Circular-orbit E, L and Ω enter a Page–Thorne zero-torque flux profile, integrated on the CPU over 511 radial intervals when spin changes. The 512-sample texture is peak-normalized and linearly interpolated in the shader. The disk starts at max(1.08 r₊, r_ISCO); at supported spins this is the ISCO. There is no accretion-rate normalization. Brightness is proportional to this flux, with no constant floor, and effective temperature follows T ∝ F^(1/4); the 15,800 K peak is a display scale, not a measured temperature, and colours are not tied to an observing band. The frequency factor g = 1/[uᵗ(E − ΩL)] uses the photon’s conserved E and L in the camera’s normalisation, so it includes the camera’s own gravitational and frame-dragging shift. It shifts a blackbody colour (Planck’s law through the CIE 1931 observer) and weights bolometric brightness by g⁴; starlight gains the camera’s blueshift 1/E the same way. The opaque disk is limb-darkened like an electron-scattering atmosphere, I ∝ 1 + 2.06 μ (Chandrasekhar 1960), with μ = g√Q/r measured in the gas’s rest frame. Gas inside the ISCO plunges with the ISCO’s E and L (Cunningham 1975), which sets its g; its faint, optically thin glow is illustrative and shows in front of whatever a ray meets next. Noise, a moving hotspot and edge fades remain artistic. Animation is not scaled by mass and has no light-travel delays. Gas detail imitates shear-stretched turbulence: trailing filaments with about 14° pitch and 5:1 aspect, in two crossfaded, finite-lived patches with differential orbital shear. Its contrast is reduced at grazing angles; it illustrates irregular emission, not simulated plasma dynamics.
 
 ```text
 F(r) ∝ −Ω′ / [r(E − ΩL)²] ∫(E − ΩL) dL

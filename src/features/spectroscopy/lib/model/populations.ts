@@ -85,6 +85,21 @@ export function ionizationFractions(element: ElementId, kelvin: number, electron
   return weights.map((w) => w / sum);
 }
 
+/** What Saha's equation needs of a gas: K and Pa. */
+export type SahaGas = { temperature: number; electronPressure: number };
+
+const fractionsByGas = new WeakMap<SahaGas, Partial<Record<ElementId, readonly number[]>>>();
+
+/**
+ * `ionizationFractions` in one gas, worked out once per gas and element: a star's cells are
+ * asked for every line of an element. A gas is never changed once made, so it is its own key.
+ */
+export function ionizationIn(gas: SahaGas, element: ElementId): readonly number[] {
+  let known = fractionsByGas.get(gas);
+  if (!known) fractionsByGas.set(gas, (known = {}));
+  return (known[element] ??= ionizationFractions(element, gas.temperature, gas.electronPressure));
+}
+
 /**
  * Boltzmann's factor g e^(−E/kT) for a level of statistical weight g at E eV: atoms in it per
  * atom in a level of weight 1 at the ground state. The printed equation computes from this too.
@@ -103,9 +118,9 @@ function levelFraction(species: string, g: number, energy: number, kelvin: numbe
  * strength: (N_stage / N_element) · gf · e^(−E_lower/kT) / U. Multiplied by the element's
  * column it gives Σ n_lower f, which sets the line's strength.
  */
-export function absorberShare(line: Line, kelvin: number, electronPressure: number) {
-  const fraction = ionizationFractions(line.element, kelvin, electronPressure)[line.stage] ?? 0;
-  return fraction * levelFraction(line.species, 10 ** line.logGf, line.lower, kelvin);
+export function absorberShare(line: Line, gas: SahaGas) {
+  const fraction = ionizationIn(gas, line.element)[line.stage] ?? 0;
+  return fraction * levelFraction(line.species, 10 ** line.logGf, line.lower, gas.temperature);
 }
 
 /** The fraction of an element's atoms in one level of one stage: a point on Payne's curves. */

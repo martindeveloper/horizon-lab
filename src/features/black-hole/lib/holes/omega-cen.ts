@@ -32,7 +32,6 @@ export const omegaCen: HoleSpec = {
   tempScale: 1,
   sky: "sgr",
   jet: 0,
-  aliases: ["omega-cen", "omega-centauri", "omegacen", "ngc-5139"],
   tour: [
     // Sink slowly through the crowded core.
     {

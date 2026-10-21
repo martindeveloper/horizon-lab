@@ -9,7 +9,7 @@ import { ionizationEnergy, partitionFunction } from "./atoms";
 import {
   atomsPerKilogram,
   BOLTZMANN_EV,
-  ionizationFractions,
+  ionizationIn,
   NUCLEI_PER_KILOGRAM,
   RYDBERG_HYDROGEN,
 } from "./populations";
@@ -148,8 +148,7 @@ export function continuumOf(gas: ContinuumGas) {
   const kT = BOLTZMANN_EV * temperature;
   /* Neutral hydrogen per kg, with cm² turned into m²; free electrons per kg from Pₑ / (P_g − Pₑ),
      electrons per heavy particle. */
-  const neutral =
-    atomsPerKilogram("H") * ionizationFractions("H", temperature, electronPressure)[0]! * 1e-4;
+  const neutral = atomsPerKilogram("H") * ionizationIn(gas, "H")[0]! * 1e-4;
   const electrons =
     THOMSON *
     NUCLEI_PER_KILOGRAM *

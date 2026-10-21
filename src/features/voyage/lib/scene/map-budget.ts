@@ -45,7 +45,13 @@ type Slot = {
   seen: number;
 };
 
-const key = (id: BodyId, tier: MapTier) => `${id}:${tier}`;
+/** Each body's slot keys by tier, written once: the frame loop looks them up, not builds them. */
+const KEYS = new Map<BodyId, Map<MapTier, string>>();
+const key = (id: BodyId, tier: MapTier) => {
+  let keys = KEYS.get(id);
+  if (!keys) KEYS.set(id, (keys = new Map(TIERS.map((t) => [t, `${id}:${t}`]))));
+  return keys.get(tier)!;
+};
 
 export type MapBudget = ReturnType<typeof createMapBudget>;
 

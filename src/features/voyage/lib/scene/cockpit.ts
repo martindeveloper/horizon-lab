@@ -20,7 +20,7 @@ import type { DistanceText, Vec3d, Viewport } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import type { AnchorId } from "../model/anchors";
-import type { FlightPhase } from "../model/autopilot";
+import { driveLit, type FlightPhase } from "../model/autopilot";
 import {
   blipOnScanner,
   markOnScreen,
@@ -500,13 +500,14 @@ export function createCockpit(
       }
       const mode = frame.flying ? "flight" : frame.mode === "free" ? "free" : "orbit";
       if (mode !== modeWas) root.dataset.mode = modeWas = mode;
-      /* The hands' thrust, or the autopilot's drive while it burns or brakes: the gauge and the glow read it. */
+      /* The hands' thrust, or the autopilot's drive while it burns or brakes (off through the
+         flip, the ship turning end over end): the gauge and the glow read it. */
       const { phase } = frame;
-      const braking = phase === "brake" || phase === "flip";
+      const braking = phase === "brake";
       const thrust =
         mode === "free"
           ? Math.min(1, Math.hypot(axes.thrust, axes.strafe, axes.lift)) || axes.brake
-          : phase === "burn" || braking
+          : driveLit(phase)
             ? 1
             : phase === "align"
               ? frame.spool

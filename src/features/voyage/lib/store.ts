@@ -30,6 +30,8 @@ export type Show = {
   orbits: boolean;
   /** Dust streaming past the ship whenever it moves: the sense of speed. */
   streaks: boolean;
+  /** Faint ring systems in a long exposure, each as bright as Saturn's: on, as an experience shows off. */
+  faintRings: boolean;
   /**
    * The ship's feel: a crash's jolt, the drive spooling up, the view widening, an arrival's
    * settle. On, as an experience's effects are; reduced motion keeps only what does not move.
@@ -45,6 +47,7 @@ const DEFAULT_SHOW: Show = {
   names: true,
   orbits: true,
   streaks: true,
+  faintRings: true,
   feel: true,
 };
 

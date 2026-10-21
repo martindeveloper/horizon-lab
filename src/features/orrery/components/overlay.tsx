@@ -74,11 +74,7 @@ export function OrreryOverlay() {
                 label={t("hud.controls")}
                 details={(access) => <OrreryTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
-                guide={{
-                  label: t("hud.guide"),
-                  ariaLabel: t("tour.start"),
-                  onSelect: () => useOrrery.getState().startGuide(),
-                }}
+                guide={{ onSelect: () => useOrrery.getState().startGuide() }}
                 guideRef={guideButton}
                 finder={{
                   id: "objects",

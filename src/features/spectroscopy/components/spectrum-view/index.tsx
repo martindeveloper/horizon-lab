@@ -2,9 +2,9 @@
 
 import { Minus, Plus, ScanLine } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef } from "react";
 
-import { dopplerFactor } from "@horizon/toolkit/science";
+import { dopplerWavelengthRatio } from "@horizon/toolkit/science";
 import { IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { lineById, measuredElement, type Line } from "../../lib/model/atoms";
@@ -35,7 +35,9 @@ export function SpectrumView({ className }: { className?: string }) {
   const settings = useSettings();
   /* The settings leave out a velocity that only moves the markers (a mystery's); read it here. */
   const rawVelocity = useSpectroscopy((s) => s.velocity);
-  const obs = useObservation();
+  /* A new star (a temperature dragged, a guide gliding) costs a fresh synthesis: the controls
+     answer first, and the spectrum follows as soon as it is ready. */
+  const obs = useDeferredValue(useObservation());
   const formed = useFormedLines(obs);
   const range = useSpectroscopy((s) => s.range);
   const normalizedSetting = useSpectroscopy((s) => s.normalized);
@@ -97,7 +99,9 @@ export function SpectrumView({ className }: { className?: string }) {
   /* Lab lines straight through the ribbon and the plot: the element in focus (previewed, or
      the one measured on, else the last marked) in full gold, the others faint, so a line that
      sits in a dip reads at a glance. */
-  const markerShift = dopplerFactor(markerVelocity({ view: settings.view, velocity: rawVelocity }));
+  const markerShift = dopplerWavelengthRatio(
+    markerVelocity({ view: settings.view, velocity: rawVelocity }),
+  );
   const previewing = preview !== null && !compare.includes(preview) ? preview : null;
   const focus = preview ?? measuredElement(compare, measure);
   const marked = previewing ? [...compare, previewing] : compare;
@@ -107,7 +111,7 @@ export function SpectrumView({ className }: { className?: string }) {
   const selected = selection ? lineById(selection) : undefined;
   const selectedCentre = selected
     ? (visible.find((v) => v.line.id === selected.id)?.centre ??
-      selected.wavelength * dopplerFactor(obs.velocity))
+      selected.wavelength * dopplerWavelengthRatio(obs.velocity))
     : null;
 
   const { hover, hovered, handlers } = useWindowGestures({

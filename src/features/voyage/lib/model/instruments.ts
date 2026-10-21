@@ -5,16 +5,23 @@
  */
 import { C_KM_S } from "./parameters";
 
+/** The most fraction digits a share of light speed prints with. */
+const MAX_C_DIGITS = 9;
+
 /**
  * A speed as the readouts print it: km/s, or a share of light speed once it is a hundredth of
- * c, with as many digits as it takes to tell it from c ("0.99999 c").
+ * c, with as many digits as it takes to tell it from c ("0.99999 c"). Past what those digits
+ * can tell, the share holds at the last step below 1: a ship below c never reads c.
  */
 export function speedFigure(kmPerS: number) {
   const beta = kmPerS / C_KM_S;
   if (beta < 0.01)
     return { ofC: false, value: kmPerS, digits: kmPerS < 10 ? 2 : kmPerS < 1000 ? 1 : 0 };
-  const digits = Math.min(9, Math.max(3, Math.ceil(-Math.log10(Math.max(1e-9, 1 - beta))) + 1));
-  return { ofC: true, value: beta, digits };
+  const digits = Math.min(
+    MAX_C_DIGITS,
+    Math.max(3, Math.ceil(-Math.log10(Math.max(10 ** -MAX_C_DIGITS, 1 - beta))) + 1),
+  );
+  return { ofC: true, value: Math.min(beta, 1 - 10 ** -digits), digits };
 }
 
 /** A marker on the screen: normalised −1…1 across and up, or at the edge pointing the way. */

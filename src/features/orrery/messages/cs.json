@@ -30,6 +30,7 @@
   "toggles": {
     "elliptical": "Elipsy",
     "trueSize": "Skutečná velikost",
+    "faintRings": "Slabé prstence",
     "drift": "Pohyb",
     "plane": "Mřížka ekliptiky"
   },
@@ -48,7 +49,6 @@
   },
   "hud": {
     "views": "Pohledy",
-    "guide": "Průvodce",
     "play": "Spustit čas",
     "pause": "Zastavit čas",
     "replay": "Přehrát odklízení těles",
@@ -196,7 +196,7 @@
       },
       "size": {
         "title": "Velikost značky není velikost tělesa",
-        "body": "Značky těles jsou zvětšené, aby byly vidět a daly se snadno vybrat. Přepínač Skutečná velikost zobrazí planety ve správném měřítku vůči vzdálenostem; pokud nejste dost blízko, přestanou být patrné. Ukazuje tím, jak malou část prostoru planety zabírají. Barvy vycházejí ze snímků ve skutečných barvách a osvětlená strana směřuje ke Slunci."
+        "body": "Značky těles jsou zvětšené, aby byly vidět a daly se snadno vybrat. Přepínač Skutečná velikost zobrazí planety ve správném měřítku vůči vzdálenostem; pokud nejste dost blízko, přestanou být patrné. Ukazuje tím, jak malou část prostoru planety zabírají. Barvy vycházejí ze snímků ve skutečných barvách a osvětlená strana směřuje ke Slunci. Prstence Uranu a Neptunu jsou příliš tmavé, než aby byly vidět; Slabé prstence je ukážou na dlouhé expozici, jasné jako Saturnovy."
       },
       "today": {
         "title": "Současné polohy jsou vypočtené",
@@ -217,13 +217,6 @@
     }
   },
   "tour": {
-    "label": "Průvodce",
-    "start": "Spustit průvodce",
-    "progress": "{step} / {total} · {time}",
-    "exit": "Ukončit průvodce",
-    "previous": "Předchozí krok",
-    "next": "Další",
-    "finish": "Dokončit",
     "further": "Dál do Deep Field",
     "steps": {
       "today": {

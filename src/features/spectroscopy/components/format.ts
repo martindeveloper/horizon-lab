@@ -1,7 +1,5 @@
 import type { useFormatter } from "next-intl";
 
-import { powerOfTen } from "@horizon/toolkit/science";
-
 import type { Level, Line } from "../lib/model/atoms";
 
 type Format = ReturnType<typeof useFormatter>;
@@ -85,15 +83,6 @@ export function wavelength(f: Format, nm: number, digits = 2) {
 export const digitsFor = (span: number) => (span < 2 ? 3 : span < 30 ? 2 : 1);
 
 export const kelvin = (f: Format, k: number) => f.number(Math.round(k));
-
-/** A large or small number as "3.6 × 10⁴", plain in between. */
-export function scientific(f: Format, v: number) {
-  if (v === 0 || (Math.abs(v) >= 0.01 && Math.abs(v) < 1e4))
-    return f.number(v, { maximumSignificantDigits: 2 });
-  const exponent = Math.floor(Math.log10(Math.abs(v)));
-  const mantissa = v / 10 ** exponent;
-  return `${f.number(mantissa, { maximumFractionDigits: 1 })} × ${powerOfTen(exponent)}`;
-}
 
 export const signed = (f: Format, v: number, digits = 0) =>
   f.number(v, { maximumFractionDigits: digits, signDisplay: "exceptZero" });

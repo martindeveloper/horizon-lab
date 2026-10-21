@@ -1,9 +1,10 @@
 /**
  * The microwave background's shell, centred on the ship: whoever looks sees it 45 billion
- * light-years out in every direction, so flying toward it never brings it nearer. At rest it
- * is invisible (2.7 K); a ship fast enough that the Doppler factor ahead lifts that past red
- * heat sees the sky glow (cmb.frag.glsl). The shell's temperature falls as the universe
- * expands with the clocks.
+ * light-years out in every direction, so flying toward it never brings it nearer. Centred on
+ * the ship it shows no parallax, so it is drawn at today's radius, inside the far plane, and
+ * only its temperature follows the expansion. At rest it is invisible (2.7 K); a ship fast
+ * enough that the Doppler factor ahead lifts that past red heat sees the sky glow
+ * (cmb.frag.glsl).
  */
 import {
   AdditiveBlending,
@@ -11,17 +12,17 @@ import {
   Mesh,
   ShaderMaterial,
   SphereGeometry,
-  Vector2,
   type DataTexture,
   type Object3D,
 } from "three";
 
+import { CMB_LY } from "@/space/cosmos/model/cosmos";
 import { LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 
-import { LUT_RANGE_K, type MotionUniforms } from "../graphics/looks";
+import { lutSpecUniform, type MotionUniforms } from "../graphics/looks";
 import CMB_FRAG from "../graphics/shaders/cmb.frag.glsl";
 import CMB_VERT from "../graphics/shaders/cmb.vert.glsl";
-import { CMB_LY, cmbKelvinAt } from "../model/comoving";
+import { cmbKelvin } from "../model/comoving";
 import type { ShipMotion } from "../model/ship";
 import type { VoyageKit } from "./kit";
 
@@ -34,7 +35,7 @@ export function createCmbLayer(
   lut: DataTexture,
   motion: MotionUniforms,
 ) {
-  const kelvin = { value: cmbKelvinAt(0) };
+  const kelvin = { value: cmbKelvin(1) };
   const material = scope.own(
     new ShaderMaterial({
       uniforms: {
@@ -43,7 +44,7 @@ export function createCmbLayer(
         gamma: motion.gamma,
         kelvin,
         bbLut: { value: lut },
-        lutRange: { value: new Vector2(LUT_RANGE_K[0], LUT_RANGE_K[1]) },
+        bbLutSpec: lutSpecUniform(),
         visibleK: { value: VISIBLE_K },
       },
       vertexShader: CMB_VERT,
@@ -60,6 +61,7 @@ export function createCmbLayer(
   shell.renderOrder = -5;
   shell.frustumCulled = false;
   shell.visible = false;
+  shell.scale.setScalar(CMB_LY * LIGHT_YEAR_KM);
   parent.add(shell);
 
   return {
@@ -67,10 +69,9 @@ export function createCmbLayer(
     get kelvin() {
       return kelvin.value;
     },
-    /** The shell at Earth's time `t` (seconds since today) and the universe's scale `a` then. */
-    update(t: number, a: number, motion: ShipMotion) {
-      kelvin.value = cmbKelvinAt(t);
-      shell.scale.setScalar(CMB_LY * LIGHT_YEAR_KM * a);
+    /** The shell with the universe at scale `a`, for the ship's motion. */
+    update(a: number, motion: ShipMotion) {
+      kelvin.value = cmbKelvin(a);
       /* Nothing to see until the factor ahead, γ(1 + β), lifts the background toward red heat. */
       const ahead = kelvin.value * motion.gamma * (1 + motion.beta);
       shell.visible = ahead > VISIBLE_K * 0.25;

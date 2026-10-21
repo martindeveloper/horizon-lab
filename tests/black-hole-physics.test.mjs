@@ -19,10 +19,10 @@ import {
   plungeShift,
   traceFlatRay,
   traceRay,
-  blRadius,
 } from "../src/features/black-hole/lib/kerr-rays.ts";
 import { DISK_PEAK_FLUX, PLUNGE_GLOW } from "../src/features/black-hole/lib/parameters.ts";
 import {
+  blRadius,
   cameraFloor,
   horizonOverM,
   photonOverM,

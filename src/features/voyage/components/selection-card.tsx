@@ -3,18 +3,18 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
 import { Action, ListItem } from "@horizon/toolkit/ui";
 
-import { anchorOfSelection } from "../lib/model/anchors";
-import { dateAt } from "../lib/model/calendar";
+import { anchorOfSelection, isFlyable } from "../lib/model/anchors";
 import { DRIVE_IDS } from "../lib/model/parameters";
 import { courseOf, useVoyage } from "../lib/store";
 import { cardFor } from "./cards";
-import { formatDuration } from "./format";
-import { clocksPart, tripTo } from "./trips";
+import { formatDuration, formatTrip } from "./format";
+import { clocksPart, momentOf, tripTo } from "./trips";
 
 /**
  * Facts for the selected body, from the ship's last fix, and the way to fly there unless the
  * ship is bound for it already: each drive's trip on the ship's clock (and Earth's, where they
- * part), the chosen one lit; tapping another chooses it.
+ * part), the chosen one lit; tapping another chooses it. Where no drive goes, the trips read
+ * never and the ship jumps there.
  */
 export function SelectionCard() {
   const t = useTranslations("voyage");
@@ -29,11 +29,11 @@ export function SelectionCard() {
   const select = useVoyage((s) => s.select);
   if (!selection) return null;
   const body = anchorOfSelection(selection);
-  const now = dateAt(epochMs, fix.seconds);
+  const moment = momentOf(epochMs, fix);
   const ship = fix.km;
   return (
     <SelectionSheet
-      card={cardFor(t, f, selection, { unit, locale }, now, ship)}
+      card={cardFor(t, f, selection, { unit, locale }, moment, ship)}
       closeLabel={t("hud.close")}
       onClose={() => select(null)}
       footer={
@@ -41,7 +41,7 @@ export function SelectionCard() {
           <div className="flex flex-col gap-2">
             <div role="group" aria-label={t("hud.drive")} className="flex flex-col gap-0.5">
               {DRIVE_IDS.map((id) => {
-                const trip = tripTo(id, body, ship, now);
+                const trip = tripTo(id, body, ship, moment);
                 return (
                   <ListItem
                     key={id}
@@ -51,7 +51,7 @@ export function SelectionCard() {
                   >
                     <span className="min-w-0 truncate">{t(`drives.${id}`)}</span>
                     <span className="shrink-0 text-right font-mono text-[11px] text-muted tabular-nums">
-                      {formatDuration(t, f, trip.tau)}
+                      {formatTrip(t, f, trip.tau)}
                       {clocksPart(trip) ? (
                         <span className="block text-[10px] text-subtle">
                           {t("hud.earthTime", { value: formatDuration(t, f, trip.t) })}
@@ -63,7 +63,7 @@ export function SelectionCard() {
               })}
             </div>
             <Action className="w-full" onClick={() => useVoyage.getState().goTo(body)}>
-              {t("hud.flyHere")}
+              {t(isFlyable(body) ? "hud.flyHere" : "hud.jumpHere")}
             </Action>
           </div>
         ) : null

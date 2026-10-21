@@ -29,7 +29,8 @@ import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horiz
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
-import { decodeMap, fetchMap, logFraction, rising } from "@horizon/toolkit/scene";
+import { logFraction } from "@horizon/toolkit/math";
+import { decodeMap, fetchMap, rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import type { CloseUpQuality } from "../quality";

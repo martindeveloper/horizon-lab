@@ -8,17 +8,19 @@ import {
   WideColourSwitch,
   type AntialiasMode,
 } from "@/components/simulations/render-settings";
+import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
 import {
   cameraFloor,
-  formatSpin,
   INCLINATION_LIMIT,
   MAX_DIST,
   MAX_SPIN,
 } from "@/features/black-hole/lib/physics";
+import { DEFAULT_PRESET_ID } from "@/features/black-hole/lib/holes/routes";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { toLogFraction, fromLogFraction } from "@horizon/toolkit/math";
 import type { PassAntialias } from "@horizon/toolkit/rendering";
+import { RAD_PER_DEG } from "@horizon/toolkit/science";
 import { ControlRow, Slider, SwitchRow } from "@horizon/toolkit/ui";
 
 /** Every ray is re-traced on the GPU, so anti-aliasing can trace extra rays at edges. */
@@ -63,17 +65,23 @@ function SliderRow({
   );
 }
 
-/** The observatory rail's id, for its toggle and for pin cards that keep clear of it. */
-export const SETTINGS_PANEL_ID = "observatory-panel";
+/** Below this distance (M) the readout says the camera is near the horizon. */
+const NEAR_HORIZON = 8;
+/** From this distance (M) the readout drops its decimal. */
+const FAR_DISTANCE = 80;
 
-/** Observatory controls as rail sections: spin, camera, optics and quality. */
+/** The View rail's id, for its toggle and for pin cards that keep clear of it. */
+export const SETTINGS_PANEL_ID = "black-hole-view";
+
+/** The View rail's sections: spin, camera, optics and rendering. */
 export function SettingsBody() {
   const t = useTranslations("blackHole");
+  const { formatNumber, formatSpin } = usePhysicsFormat();
   const spin = useBlackHole((s) => s.spin);
   const gravity = useBlackHole((s) => s.gravity);
   const setGravity = useBlackHole((s) => s.setGravity);
   // Whole degrees, so the auto-orbit re-renders this a few times a second, not every frame.
-  const heading = useBlackHole((s) => Math.round((s.azimuth * 180) / Math.PI) % 360);
+  const heading = useBlackHole((s) => Math.round(s.azimuth / RAD_PER_DEG) % 360);
   const inclination = useBlackHole((s) => s.inclination);
   const distance = useBlackHole((s) => s.distance);
   const exposure = useBlackHole((s) => s.exposure);
@@ -90,8 +98,9 @@ export function SettingsBody() {
   const setStarIntensity = useBlackHole((s) => s.setStarIntensity);
   const setAutoRotate = useBlackHole((s) => s.setAutoRotate);
   const setQuality = useBlackHole((s) => s.setQuality);
-  const antialiasing = useBlackHole((s) => s.antialiasing);
-  const setAntialiasing = useBlackHole((s) => s.setAntialiasing);
+  const antialias = useBlackHole((s) => s.antialias);
+  const setAntialias = useBlackHole((s) => s.setAntialias);
+  const resetRender = useBlackHole((s) => s.resetRender);
   const bloom = useBlackHole((s) => s.bloom);
   const setBloom = useBlackHole((s) => s.setBloom);
   const lens = useBlackHole((s) => s.lens);
@@ -106,13 +115,13 @@ export function SettingsBody() {
   // Negative spin: the hole turns against the disk, which then orbits retrograde.
   const spinText = (a: number) =>
     a < 0 ? `${formatSpin(a)} · ${t("retrogradeDisk")}` : formatSpin(a);
-  const degrees = (inclination * 180) / Math.PI;
-  const elevationText = `${degrees.toFixed(0)}° · i ≈ ${(90 - Math.abs(degrees)).toFixed(0)}°`;
+  const degrees = inclination / RAD_PER_DEG;
+  const elevationText = `${formatNumber(degrees, 0)}° · i ≈ ${formatNumber(90 - Math.abs(degrees), 0)}°`;
   const floor = cameraFloor(spin);
+  const distanceValue = `${formatNumber(distance, distance < FAR_DISTANCE ? 1 : 0)} M`;
   const distanceText =
-    distance < 8
-      ? `${distance.toFixed(1)} M · ${t("nearHorizon")}`
-      : `${distance < 80 ? distance.toFixed(1) : distance.toFixed(0)} M`;
+    distance < NEAR_HORIZON ? `${distanceValue} · ${t("nearHorizon")}` : distanceValue;
+  const scaleText = (v: number) => formatNumber(v, 2);
 
   return (
     <>
@@ -146,7 +155,7 @@ export function SettingsBody() {
             max={359}
             step={1}
             value={heading}
-            onChange={(v) => setAzimuth((v * Math.PI) / 180)}
+            onChange={(v) => setAzimuth(v * RAD_PER_DEG)}
           />
           <SliderRow
             label={t("elevation")}
@@ -179,8 +188,8 @@ export function SettingsBody() {
         <div className="flex flex-col gap-4">
           <SliderRow
             label={t("exposure")}
-            text={exposure.toFixed(2)}
-            valueText={(v) => v.toFixed(2)}
+            text={scaleText(exposure)}
+            valueText={scaleText}
             min={0.4}
             max={1.8}
             step={0.01}
@@ -189,8 +198,8 @@ export function SettingsBody() {
           />
           <SliderRow
             label={t("disk")}
-            text={diskBrightness.toFixed(2)}
-            valueText={(v) => v.toFixed(2)}
+            text={scaleText(diskBrightness)}
+            valueText={scaleText}
             min={0}
             max={2}
             step={0.01}
@@ -199,8 +208,8 @@ export function SettingsBody() {
           />
           <SliderRow
             label={t("stars")}
-            text={starIntensity.toFixed(2)}
-            valueText={(v) => v.toFixed(2)}
+            text={scaleText(starIntensity)}
+            valueText={scaleText}
             min={0}
             max={2}
             step={0.01}
@@ -217,15 +226,13 @@ export function SettingsBody() {
       <RenderSection<PassAntialias>
         quality={quality}
         onQuality={setQuality}
-        antialias={antialiasing}
+        antialias={antialias}
         modes={ANTIALIAS_MODES}
-        onAntialias={setAntialiasing}
+        onAntialias={setAntialias}
         note={<p className="text-xs text-muted">{t("modelNotice")}</p>}
         onReset={() => {
-          setBloom(false);
-          setLens(false);
-          setWideColour(false);
-          if (presetId === "custom") selectHole("lensed");
+          resetRender();
+          if (presetId === "custom") selectHole(DEFAULT_PRESET_ID);
           else applyPreset(presetId);
         }}
       >

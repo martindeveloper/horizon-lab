@@ -21,7 +21,6 @@ export const custom: HoleSpec = {
   tempScale: 1,
   sky: "lensed",
   jet: 0,
-  aliases: ["custom"],
   tour: [
     {
       phase: "wide",
