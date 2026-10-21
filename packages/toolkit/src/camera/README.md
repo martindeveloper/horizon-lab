@@ -93,7 +93,10 @@ keeps its timing, for a host that shows the opening behind a curtain. A shot's `
 (`look`, `rest`, `turn`) plays only on such a cut: the camera begins looking off at `look`,
 rests, then turns onto the shot's own look over `turn` seconds of the hold, a reveal for the
 opening that a loop flying back to the shot never repeats. `step(dt)` returns the pose for the
-frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
+frame and `landed` on the one frame a flight ends; `landing` is the pose the flight under way
+lands on (before the orbit and sway), null between flights; `motion` is how the drawn pose
+turned at the last step (azimuth and inclination, rad/s), kept through a handoff so the host's
+own flight can carry the camera's turn on rather than halt it; `reset()` stops. Flights use
 `sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot's `look` eases in over its flight and holds through the hold, so the orbit glides along
 wherever it looks; its `ride` (0–1, how far the camera moves with the scene's own flow, which the
 host defines, such as orbiting gas) eases the same way. The drawn pose always carries `look` (zero

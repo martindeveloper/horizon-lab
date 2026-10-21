@@ -44,23 +44,35 @@ export function closeUpLimits(radius: number, frameRadius: number) {
 
 const TAU = Math.PI * 2;
 
+type Vec = readonly [number, number, number];
+
 const shortest = (from: number, to: number) =>
   ((((to - from + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
 
-/** Monotonic time warp with fixed ends; positive `l` front-loads, negative back-loads. */
-function warp(t: number, l: number) {
-  const p = 1 + 1.6 * Math.abs(l);
-  return l >= 0 ? 1 - (1 - t) ** p : t ** p;
-}
+/**
+ * 0..1 at rest at both ends, its speed rising as t² and settling as (1 − t)⁴: most of the
+ * way early, then a long, gentle landing.
+ */
+const early = (t: number) => t ** 3 * (35 - t * (105 - t * (126 - t * (70 - 15 * t))));
+
+/** Smootherstep, skewed by `lead` (0..1) toward `early`; reversed, `late` lifts off gently instead. */
+const ease = (t: number, lead: number) => lerp(smootherstep(t), early(t), lead);
+const late = (t: number, lead: number) => 1 - ease(1 - t, lead);
+
+/** Leaves at speed 1 and lands at rest back at 0: a turn already under way, carried on and eased out. */
+const carried = (t: number) => t * (1 - t * t * (6 - t * (8 - 3 * t)));
 
 /**
  * Pose and aim blend `t` (0..1) of the way through a close-up flight. Going in,
  * the view pans onto the body first and dives after; coming out it pulls back
- * first and pans home after, so the body never leaves the frame mid-flight.
+ * first and pans home after (`aimAt` keeps the body in frame meanwhile).
  * Distance moves in log space: 10 au to a few thousand km reads as one dive.
  * `lead` (0..1) spends more of the flight where the body is large: the dive
  * covers its far reaches early and settles slowly onto the body, and the pull
  * back leaves the body slowly before it falls away; 0 paces the zoom evenly.
+ * Either way the zoom leaves and lands at rest, never braking hard. `motion` is how the
+ * camera was already turning as the flight set off (radians per whole flight): it carries on
+ * and eases out, so a camera that was orbiting never halts as the flight takes it.
  */
 export function sampleCloseUp(
   t: number,
@@ -68,22 +80,43 @@ export function sampleCloseUp(
   to: OrbitPose,
   entering: boolean,
   lead = 0,
+  motion: Omit<OrbitPose, "distance"> = { azimuth: 0, inclination: 0 },
 ) {
   const aim = entering
     ? smootherstep(clamp(t / 0.55, 0, 1))
     : smootherstep(clamp((t - 0.3) / 0.7, 0, 1));
   const zoom = entering
-    ? smootherstep(warp(clamp((t - 0.12) / 0.88, 0, 1), lead))
-    : smootherstep(warp(clamp(t / 0.85, 0, 1), -lead));
+    ? ease(clamp((t - 0.12) / 0.88, 0, 1), clamp(lead, 0, 1))
+    : late(clamp(t / 0.85, 0, 1), clamp(lead, 0, 1));
   const turn = smootherstep(t);
+  const carry = carried(t);
   return {
     aim,
     pose: {
-      azimuth: from.azimuth + shortest(from.azimuth, to.azimuth) * turn,
-      inclination: lerp(from.inclination, to.inclination, turn),
+      azimuth: from.azimuth + shortest(from.azimuth, to.azimuth) * turn + motion.azimuth * carry,
+      inclination: lerp(from.inclination, to.inclination, turn) + motion.inclination * carry,
       distance: Math.exp(lerp(Math.log(from.distance), Math.log(to.distance), zoom)),
     } satisfies OrbitPose,
   };
+}
+
+/**
+ * Where the camera looks, off the body at `body`: `blend` (0..1) of the way from `from.look`
+ * (as seen from `from.distance`) to `to.look` (as seen from `to.distance`), both offsets from
+ * the body, with the camera `distance` from the aim. The body moves across the view by that
+ * blend however far the zoom has gone, so a dive or a pull back that outruns the pan never
+ * loses it from the frame, and the aim moves on with the body as it travels.
+ */
+export function aimAt(
+  body: Vec,
+  from: { look: Vec; distance: number },
+  to: { look: Vec; distance: number },
+  distance: number,
+  blend: number,
+): [number, number, number] {
+  const at = (k: 0 | 1 | 2) =>
+    body[k] + distance * lerp(from.look[k] / from.distance, to.look[k] / to.distance, blend);
+  return [at(0), at(1), at(2)];
 }
 
 /** Where the swing puts the moon: this share of the free half-view off the body. */
@@ -91,7 +124,6 @@ export const MOON_FILL = 0.6;
 /** Steepest tilt the swing turns to, so it never looks straight down a pole. */
 const MOON_TILT = 0.6;
 
-type Vec = readonly [number, number, number];
 const dot = (a: Vec, b: Vec) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const cameraDirection = ({ azimuth, inclination }: Omit<OrbitPose, "distance">): Vec => [
   Math.cos(inclination) * Math.sin(azimuth),

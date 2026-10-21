@@ -24,8 +24,27 @@ type OrreryBenchScene = BenchScene & {
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
 const DRIFT_MAP = parseAudioMap(interstellarDriftMap);
-/** One loop of the drift timed to its map, two plays of the track; the engine steps at most a tenth of a second a frame. */
-const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
+/** The drift timed to its map: one loop is two plays of the track. */
+const DRIFT_TIMED = timedDrift(DRIFT, DRIFT_MAP);
+/** One loop of the drift; the engine steps at most a tenth of a second a frame. */
+const DRIFT_LOOP = DRIFT_TIMED.loop;
+
+/**
+ * Seconds into the drift of its visit to Mars: from just before the dive to just past landing
+ * on the shot it pulls away onto.
+ */
+const MARS_VISIT = (() => {
+  const { shots, starts } = DRIFT_TIMED;
+  const at = shots.findIndex(
+    (shot) => "closeUp" in shot && shot.closeUp.kind === "planet" && shot.closeUp.id === "mars",
+  );
+  const onward = shots[at + 1];
+  if (at < 0 || !onward || "closeUp" in onward) throw new Error("the drift pulls away from Mars");
+  const lands = starts[at + 1]! + (onward.flight?.duration ?? DRIFT.camera.flight ?? 20);
+  return { start: Math.floor(starts[at]! - 3), end: Math.ceil(lands + 4) };
+})();
+/** Seconds between the visit's keyframes. */
+const MARS_EVERY = 2;
 
 /** Frames the mount runs before a close-up scene's first one: the flight in, then its map painted. */
 const CLOSE_UP_PREROLL = 600;
@@ -110,6 +129,23 @@ const SCENES: readonly OrreryBenchScene[] = [
       frames: Math.ceil(DRIFT_LOOP / 0.1),
       duration: DRIFT_LOOP,
       keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
+    },
+  },
+  {
+    id: "drift-mars",
+    description:
+      "The drift into its visit to Mars: the dive, the hold and the pull away onto the giants",
+    tags: ["sequence", "camera", "drift"],
+    bloom: false,
+    lens: false,
+    drift: true,
+    script: {
+      frames: MARS_VISIT.end * 10,
+      duration: MARS_VISIT.end,
+      keyframes: Array.from(
+        { length: Math.floor((MARS_VISIT.end - MARS_VISIT.start) / MARS_EVERY) + 1 },
+        (_, i) => (MARS_VISIT.start + i * MARS_EVERY) / MARS_VISIT.end,
+      ),
     },
   },
   {

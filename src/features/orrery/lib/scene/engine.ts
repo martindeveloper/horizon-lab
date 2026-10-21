@@ -51,7 +51,7 @@ import { driftYearsPerSecond } from "../model/views";
 import { orreryQuality } from "../quality";
 import { useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
-import { createCloseUpController, type BodySelection } from "./close-up-controller";
+import { TAP_STYLE, createCloseUpController, type BodySelection } from "./close-up-controller";
 import { createDriftDirector } from "./drift-director";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
@@ -143,6 +143,9 @@ export function createOrreryEngine({
       reduceMotion,
       closeUp: () => closeUp.current,
       moonPose: (base) => closeUp.moonPose(base),
+      release: (landing) => closeUp.release(landing),
+      reclaim: () => closeUp.reclaim(),
+      finish: () => closeUp.end(false),
     });
     /* The drift veils the line art: orbits, the grid and rulers fade, the bodies and sky stay. */
     const veil = createLineVeil();
@@ -187,9 +190,10 @@ export function createOrreryEngine({
       onRelease: () => controls.cancel(),
       upload: (texture) => renderer.initTexture(texture),
       quality: () => quality.closeUp,
-      /* The drift's visits fly in and out at a lean-back pace, settling slowly onto the body. */
-      pace: () => (store.getState().drift === "off" ? 1 : DRIFT.closeUp.pace),
-      lead: () => (store.getState().drift === "off" ? 0 : DRIFT.closeUp.lead),
+      /* The drift's visits are its own (`visitStyle`); the card shows only outside it. */
+      style: () => (store.getState().drift === "off" ? TAP_STYLE : drift.visitStyle()),
+      paused: () => store.getState().drift === "paused",
+      card: () => store.getState().drift === "off",
     });
     /** A body's new map is still fading in over its placeholder: keep frames coming. */
     let surfacesFading = false;
@@ -384,6 +388,23 @@ export function createOrreryEngine({
         const show = state.show;
         const now = new Date();
 
+        /* The clock first, so the camera steps on where the bodies are this frame: a close-up
+           tracking a moving body would otherwise trail it by a frame. A close-up holds the clock:
+           at true size the speed-up would whirl the Sun around (a drift's visit eases it out on
+           the way in and back in on the way out, so the system never freezes mid-glide). The
+           drift holds the rate down, so the inner planets glide through its wide framings. */
+        const yearsAgo = advanceClock(state, dt);
+        const step = reduceMotion.matches ? 1 : dt / MOTION_RAMP;
+        motionRamp = clamp01(motionRamp + (show.drift ? step : -step));
+        const driftRate =
+          motionRamp > 0
+            ? Math.min(
+                driftYearsPerSecond(pose.distance),
+                state.drift === "off" ? Infinity : DRIFT.clock,
+              ) * closeUp.clockShare()
+            : 0;
+        driftYears += dt * driftRate * smootherstep(motionRamp);
+
         guide.stepCamera(state, dt);
         drift.step(dt);
         veil.step(dt, state.drift === "off");
@@ -394,17 +415,6 @@ export function createOrreryEngine({
         rig.applyPose();
         const dist = pose.distance;
         lod.begin(dt, dist, rig.target);
-
-        const yearsAgo = advanceClock(state, dt);
-        /* A close-up holds the clock: at true size the speed-up would whirl the Sun around. The
-           drift holds the rate down, so the inner planets glide through its wide framings. */
-        const step = reduceMotion.matches ? 1 : dt / MOTION_RAMP;
-        motionRamp = clamp01(motionRamp + (show.drift ? step : -step));
-        const motion = motionRamp > 0 && !closeUp.current;
-        const driftRate = motion
-          ? Math.min(driftYearsPerSecond(dist), state.drift === "off" ? Infinity : DRIFT.clock)
-          : 0;
-        driftYears += dt * driftRate * smootherstep(motionRamp);
 
         const frame: SolarFrame = {
           ...momentAt(yearsAgo, driftYears),

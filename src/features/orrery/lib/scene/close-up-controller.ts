@@ -29,7 +29,7 @@ import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horiz
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
-import { decodeMap, fetchMap, rising } from "@horizon/toolkit/scene";
+import { decodeMap, fetchMap, logFraction, rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import type { CloseUpQuality } from "../quality";
@@ -37,6 +37,7 @@ import type { CameraRig } from "./camera-rig";
 import {
   CLOSE_UP_IN_S,
   CLOSE_UP_OUT_S,
+  aimAt,
   closeUpMapWidth,
   closeUpPose,
   moonFraming,
@@ -51,12 +52,35 @@ const BODY_LAYER = 1;
 export const CLOSE_UP_LAYERS = [BODY_LAYER, HOST_LAYER] as const;
 /** Prefetched close-up maps kept as compressed bytes (a few MB at most). */
 const PREFETCH_KEEP = 2;
+/** Looking straight at the body. */
+const AT_BODY = [0, 0, 0] as const;
+/** Seconds the globe takes to slide aside for the card, or back to the middle without it. */
+const ROOM_EASE = 0.4;
 /** Each body's largest moon: the one a drift's visit swings out to. */
 const LARGEST_MOON = new Map<BodyId, MoonId>();
 for (const moon of [...MOONS].sort((a, b) => a.radiusKm - b.radiusKm))
   LARGEST_MOON.set(moon.host, moon.id);
 
 export type BodySelection = SurfaceSelection;
+
+/** How a close-up's flights go, read as each one starts. */
+export type CloseUpStyle = {
+  /** How many times the usual flight time a flight takes. */
+  pace: number;
+  /** The zoom's lead on it (`sampleCloseUp`); 0 paces it evenly. */
+  lead: number;
+  /**
+   * A scripted visit (a drift's), or null for the visitor's own. A scripted visit never stops
+   * anything dead: the clock eases out and back in with its flights (`clockShare`) rather than
+   * holding at once, the arrival follows the body's light while the clock still runs, the flight
+   * in carries on `motion` (rad/s, how the camera was already turning), and a pause holds the
+   * flights where they are.
+   */
+  scripted: { motion: Omit<OrbitPose, "distance"> } | null;
+};
+
+/** A visitor's close-up: flights at their own pace, the clock held at once. */
+export const TAP_STYLE: CloseUpStyle = { pace: 1, lead: 0, scripted: null };
 
 type CloseUp = {
   sel: BodySelection;
@@ -65,7 +89,8 @@ type CloseUp = {
   /** Progress through the current flight, 0..1. */
   t: number;
   from: OrbitPose;
-  fromAim: Vector3;
+  /** Where the view looked as the flight set off, off the body: it moves on with the body. */
+  fromLook: Vector3;
   to: OrbitPose;
   /** Where the flight out lands: the pose and aim before the close-up, or a new view. */
   home: OrbitPose;
@@ -82,12 +107,18 @@ type CloseUp = {
   /** The measured close-up map on its way, if the body has one. */
   loading: AbortController | null;
   detail: Texture | null;
-  /** 0..1 of the framing offset applied, eased with the flight. */
+  /**
+   * How far the view is the body's, 0..1, eased with the flights: it moves the globe clear of
+   * the card and, on a scripted visit, holds the clock.
+   */
   blend: number;
-  /** How many times the usual flight time this flight takes (a drift flies in and out slowly). */
-  pace: number;
-  /** The zoom's lead on this flight (`sampleCloseUp`); 0 paces it evenly. */
-  lead: number;
+  /** How the current flight goes. */
+  style: CloseUpStyle;
+  /**
+   * The flight out is another camera's (a drift's next flight, landing on this pose): it moves
+   * the pose, the close-up keeps the body in view until it hands the aim home. Null otherwise.
+   */
+  released: OrbitPose | null;
   /** Atmosphere shells over the bodies with air, and the haze rims they replace meanwhile. */
   shells: Shell[];
 };
@@ -129,10 +160,12 @@ export function createCloseUpController(
     upload: (texture: Texture) => void;
     /** The current quality's close-up maps, read as each close-up starts. */
     quality: () => CloseUpQuality;
-    /** A multiplier on the flight times, read as each flight starts; 1 by default. */
-    pace?: () => number;
-    /** The zoom's lead on each flight (`sampleCloseUp`), read as it starts; 0 by default. */
-    lead?: () => number;
+    /** How each flight goes, read as it starts; a visitor's (`TAP_STYLE`) by default. */
+    style?: () => CloseUpStyle;
+    /** A scripted visit's flights wait while this holds (its drift is paused). */
+    paused?: () => boolean;
+    /** The card shows beside the globe, which stands aside for it; true by default. */
+    card?: () => boolean;
   },
 ) {
   const { rig, reduceMotion, invalidate, locate, upload } = deps;
@@ -162,6 +195,7 @@ export function createCloseUpController(
   };
   const target = new Vector3();
   const moonAt = new Vector3();
+  const homeOff = new Vector3();
   const hostAt = new Vector3();
   /** The shells' sphere; each shell is scaled to its body's air. */
   const shellGeometry = scope.own(new SphereGeometry(1, 96, 64));
@@ -221,14 +255,18 @@ export function createCloseUpController(
     }
   };
   const wide = window.matchMedia(WIDE_QUERY);
-  /** Room the card leaves: the globe sits left of it on wide screens, above the bar on phones. */
-  const framing = () =>
+  const style = () => deps.style?.() ?? TAP_STYLE;
+  const carded = () => deps.card?.() ?? true;
+  /** How far the globe stands aside for the card, 0..1: without the card it frames the middle. */
+  let room = carded() ? 1 : 0;
+  /** Room the card takes: the globe sits left of it on wide screens, above the bar on phones. */
+  const card = () =>
     wide.matches
       ? { x: Math.min(176, viewport.width * 0.2), y: 0 }
       : { x: 0, y: Math.min(80, viewport.height * 0.1) };
-  /** Tangent of half the view's shorter side, less the card's room. */
+  /** Tangent of half the view's shorter side, less the card's room while it shows. */
   const freeHalfTan = () => {
-    const shift = framing();
+    const shift = carded() ? card() : { x: 0, y: 0 };
     const { width, height } = viewport;
     return (
       Math.tan((camera.fov * Math.PI) / 360) *
@@ -265,6 +303,7 @@ export function createCloseUpController(
       ? { pose: close.home, aim: close.homeAim }
       : { pose: { ...pose }, aim: aim.clone() };
     end(false);
+    room = carded() ? 1 : 0;
     const id = bodyKey(sel);
     const radius = id === "sun" ? SUN_R : FIGURES[id].equatorialKm / AU_KM;
     const frame = radius * (FRAME_RADII[id] ?? 1);
@@ -284,7 +323,7 @@ export function createCloseUpController(
       phase: "in",
       t: 0,
       from: { ...pose },
-      fromAim: aim.clone(),
+      fromLook: aim.clone().sub(target),
       to,
       home: home.pose,
       homeAim: home.aim,
@@ -297,8 +336,8 @@ export function createCloseUpController(
       loading: null,
       detail: null,
       blend: 0,
-      pace: deps.pace?.() ?? 1,
-      lead: deps.lead?.() ?? 0,
+      style: style(),
+      released: null,
       shells: [],
     };
     shellGlobes(close);
@@ -345,21 +384,30 @@ export function createCloseUpController(
     invalidate();
   };
 
-  const leave = () => {
-    if (!close || close.phase === "out") return;
+  /** Flies out to `close.home` from wherever the camera is. */
+  const flyOut = (close: CloseUp) => {
     if (reduceMotion.matches) {
       end(true);
       return;
     }
     close.phase = "out";
     close.t = 0;
-    close.pace = deps.pace?.() ?? 1;
-    close.lead = deps.lead?.() ?? 0;
+    close.style = style();
+    close.released = null;
     close.from = { ...pose };
-    close.fromAim = aim.clone();
+    close.fromLook = aim.clone().sub(target);
     deps.onRelease();
     invalidate();
   };
+
+  const leave = () => {
+    if (!close || close.phase === "out") return;
+    flyOut(close);
+  };
+
+  /** A scripted visit's flight waits while its drift is paused. */
+  const held = (close: CloseUp) =>
+    close.phase !== "on" && close.style.scripted !== null && (deps.paused?.() ?? false);
 
   /** Paints detail rows within a frame budget; swaps the map in when it is complete. */
   const paintDetail = () => {
@@ -393,13 +441,41 @@ export function createCloseUpController(
     leave,
     /** Flies out of the body and on to `home` in one flight. */
     leaveTo(home: OrbitPose) {
-      if (!close) return;
+      if (!close || close.released) return;
       close.home = home;
       leave();
     },
+    /**
+     * Hands the flight out to another camera, which lands on `landing` (a drift's next flight,
+     * so the pull away flows on into it): the close-up only keeps the body in view meanwhile.
+     */
+    release(landing: OrbitPose) {
+      if (!close || close.phase === "out") return;
+      close.phase = "out";
+      close.released = { ...landing };
+      close.from = { ...pose };
+      close.fromLook = aim.clone().sub(target);
+      deps.onRelease();
+      invalidate();
+    },
+    /** A released flight its camera no longer flies: the close-up flies on to the landing itself. */
+    reclaim() {
+      if (!close?.released) return;
+      close.home = close.released;
+      flyOut(close);
+    },
+    /**
+     * The share of the clock's speed-up left running: all of it without a close-up, none in a
+     * visitor's; a scripted visit's eases with its flights, out as the view becomes the body's
+     * and back in as it leaves.
+     */
+    clockShare() {
+      if (!close) return 1;
+      return close.style.scripted ? 1 - close.blend : 0;
+    },
     /** Flights or a map still on its way keep frames coming. */
     busy() {
-      return close !== null && (close.phase !== "on" || close.job !== null);
+      return close !== null && ((close.phase !== "on" && !held(close)) || close.job !== null);
     },
     /** The pose `base` swings to so the body's largest moon shares the view; null without one. */
     moonPose(base: OrbitPose): OrbitPose | null {
@@ -424,23 +500,47 @@ export function createCloseUpController(
     step(dt: number) {
       if (!close) return;
       locate(close.sel, target);
+      const body = [target.x, target.y, target.z] as const;
+      const from = { look: close.fromLook.toArray(), distance: close.from.distance };
+      /* The view's aim home, off the body. */
+      const homeLook = homeOff.subVectors(close.homeAim, target).toArray();
       if (close.phase === "on") aim.copy(target);
-      else {
+      else if (close.released) {
+        /* The other camera moves the pose; the body slides home as the pull back nears its landing. */
+        const lands = close.released.distance;
+        const blend =
+          lands === close.from.distance
+            ? 1
+            : logFraction(pose.distance, close.from.distance, lands);
+        const home = { look: homeLook, distance: close.released.distance };
+        aim.fromArray(aimAt(body, from, home, pose.distance, blend));
+        close.blend = 1 - blend;
+      } else {
         const entering = close.phase === "in";
-        close.t = Math.min(
-          1,
-          close.t + dt / ((entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * close.pace),
-        );
-        const step = sampleCloseUp(
-          close.t,
-          close.from,
-          entering ? close.to : close.home,
-          entering,
-          close.lead,
-        );
+        const { pace, lead, scripted } = close.style;
+        const seconds = (entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * pace;
+        close.t = Math.min(1, close.t + (held(close) ? 0 : dt) / seconds);
+        /* While the clock still runs on the way in, the arrival keeps its light three-quarters. */
+        if (entering && scripted)
+          close.to.azimuth = closeUpPose(
+            body,
+            close.frame,
+            freeHalfTan(),
+            close.to.azimuth,
+          ).azimuth;
+        const to = entering ? close.to : close.home;
+        /* The camera's own turn as the flight took it, carried on and eased out. */
+        const motion =
+          entering && scripted
+            ? {
+                azimuth: scripted.motion.azimuth * seconds,
+                inclination: scripted.motion.inclination * seconds,
+              }
+            : undefined;
+        const step = sampleCloseUp(close.t, close.from, to, entering, lead, motion);
         Object.assign(pose, step.pose);
-        if (entering) aim.lerpVectors(close.fromAim, target, step.aim);
-        else aim.lerpVectors(target, close.homeAim, step.aim);
+        const toward = { look: entering ? AT_BODY : homeLook, distance: to.distance };
+        aim.fromArray(aimAt(body, from, toward, pose.distance, step.aim));
         close.blend = entering ? step.aim : 1 - step.aim;
         if (close.t >= 1) {
           if (entering) close.phase = "on";
@@ -448,7 +548,10 @@ export function createCloseUpController(
         }
       }
       if (!close) return;
-      const shift = framing();
+      /* The globe eases aside as the card shows, back to the middle as it hides. */
+      room += ((carded() ? 1 : 0) - room) * (1 - Math.exp(-dt / ROOM_EASE));
+      const aside = card();
+      const shift = { x: aside.x * room, y: aside.y * room };
       const { width, height } = viewport;
       if (shift.x || shift.y)
         camera.setViewOffset(

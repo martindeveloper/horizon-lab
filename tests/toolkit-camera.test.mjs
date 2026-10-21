@@ -294,6 +294,9 @@ test("a drift never stands still: the orbit and sway carry through every landing
       Math.log(pose.distance / last.distance),
     );
     slowest = Math.min(slowest, moved / dt);
+    /* It reports how it turned, for a host taking the camera over to carry on. */
+    close(drift.motion.azimuth, (pose.azimuth - last.azimuth) / dt, 1e-9);
+    close(drift.motion.inclination, (pose.inclination - last.inclination) / dt, 1e-9);
     last = { ...pose };
   }
   assert.ok(landings >= 4, `${landings} landings and holds were crossed`);
@@ -367,12 +370,21 @@ test("a handoff shot waits for the host and the drift goes on from where the hos
   assert.equal(drift.index, 1);
   assert.equal(drift.flying, false);
   const before = { ...drift.pose };
+  const turning = { ...drift.motion };
   for (let i = 0; i < 120; i++) drift.step(dt);
   assert.deepEqual(drift.pose, before, "nothing moves while the host has the shot");
+  assert.deepEqual(
+    drift.motion,
+    turning,
+    "and it still says how it was turning as the host took it",
+  );
+  assert.equal(drift.landing, null, "no flight to land while the host has the shot");
   /* The host brings the camera back somewhere else; the next flight starts from there. */
   drift.resume({ azimuth: 1, inclination: 0.9, distance: 0.01, roll: 0 });
   assert.equal(drift.index, 2);
   assert.ok(drift.flying);
+  const landing = drift.landing;
+  assert.ok(landing && Math.abs(landing.distance - 40) < 1e-9, "the flight says where it lands");
   const first = drift.step(dt).pose;
   assert.ok(
     first.distance > 0.01 && first.distance < 0.02,
@@ -381,6 +393,7 @@ test("a handoff shot waits for the host and the drift goes on from where the hos
   assert.ok(first.inclination < 0.9 && first.inclination > 0.4);
   while (drift.flying) drift.step(dt);
   assert.ok(Math.abs(drift.pose.distance - 40) < 1e-9);
+  assert.equal(drift.landing, null);
   drift.resume(drift.pose);
   assert.equal(drift.index, 2, "resume outside a handoff does nothing");
 });

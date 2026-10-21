@@ -9,7 +9,9 @@ import type { CuedShot, DriftProgramme } from "@/lib/drift";
  * nudged in distance and tilt, or a close-up: the drift selects the body, flies in on the
  * close-up's own flight, slowed to a lean-back pace and settling onto the body, circles it
  * while it drifts nearer, then pulls out once to frame it with its largest moon and flies on
- * from there, so a body is dived to and pulled away from once each. The holds
+ * from there, so a body is dived to and pulled away from once each: before a framed shot the
+ * pull away is that shot's own flight (`withVisitFlights` gives it the flight out's seconds), before
+ * another visit the close-up's own flight out. The holds
  * written here are the timing without a map and add up to the two plays; `timeShots` sets them
  * so the cued shots meet their cues, a hold at a body lingering as needed. The camera
  * (`createDriftCamera`) spreads angles and distance a little each pass; lengths never vary.
@@ -39,7 +41,7 @@ export type OrreryDriftShot = CuedShot &
         closeUp: CloseUpBody;
         /** Seconds at the body; the programme's default otherwise. */
         hold?: number;
-        /** Seconds the close-up's flights in and out take together, for timing (`closeUpShot`). */
+        /** Seconds the close-up's own flights take, for timing (`withVisitFlights` sets it). */
         flight?: { duration: number };
       }
   );
@@ -69,27 +71,54 @@ export type OrreryDrift = DriftProgramme<OrreryDriftShot> & {
 const CLOSE_UP_PACE = 4;
 const CLOSE_UP_HOLD = 16;
 
-/**
- * A visit to a body: its hold written out and its flights in and out counted, so the timing can
- * place the shots after it.
- */
+/** A visit to a body, its hold written out. */
 function closeUpShot(
   closeUp: CloseUpBody,
   hold = CLOSE_UP_HOLD,
   cue?: Pick<CuedShot, "at">,
 ): OrreryDriftShot {
-  return {
-    ...cue,
-    closeUp,
-    hold,
-    flight: { duration: (CLOSE_UP_IN_S + CLOSE_UP_OUT_S) * CLOSE_UP_PACE },
-  };
+  return { ...cue, closeUp, hold };
+}
+
+/** Seconds of a framed shot's flight when its shot names none. */
+const FLIGHT = 22;
+
+/**
+ * Whether the visit at `index` pulls away on the next shot's own flight, a framed shot
+ * following it in the sequence, rather than on the close-up's flight out before another visit.
+ */
+export function pullsAwayOnward(shots: readonly OrreryDriftShot[], index: number) {
+  const next = shots[(index + 1) % shots.length];
+  return next !== undefined && !("closeUp" in next);
+}
+
+/**
+ * The shots with each visit's flights counted, so the timing can place the shots after it: a
+ * visit flies in on its own and out on its own only before another visit; pulling away onward
+ * (`pullsAwayOnward`), the next shot's flight takes the flight out's seconds on top of its own.
+ * The loop's length stays as written.
+ */
+function withVisitFlights(shots: readonly OrreryDriftShot[]): OrreryDriftShot[] {
+  const out = CLOSE_UP_OUT_S * CLOSE_UP_PACE;
+  return shots.map((shot, i) => {
+    if ("closeUp" in shot) {
+      const own = CLOSE_UP_IN_S * CLOSE_UP_PACE + (pullsAwayOnward(shots, i) ? 0 : out);
+      return { ...shot, flight: { duration: own } };
+    }
+    /* A framed shot after a visit is the one that visit pulls away on. */
+    const before = shots[(i + shots.length - 1) % shots.length]!;
+    if (!("closeUp" in before)) return shot;
+    return {
+      ...shot,
+      flight: { ...shot.flight, duration: (shot.flight?.duration ?? FLIGHT) + out },
+    };
+  });
 }
 
 export const DRIFT: OrreryDrift = {
   music: { track: "Interstellar Drift", period: 251, loops: 2 },
   camera: {
-    flight: 22,
+    flight: FLIGHT,
     hold: 12,
     variance: 0.3,
     timeVariance: 0,
@@ -103,11 +132,11 @@ export const DRIFT: OrreryDrift = {
     orbit: 0.045,
     dive: 0.55,
     pace: CLOSE_UP_PACE,
-    lead: 0.5,
+    lead: 1,
     /* Out to the moon over the hold's last part, and left there: the flight out goes from it. */
     moon: [0.55, 0.85, 1, 1],
   },
-  shots: [
+  shots: withVisitFlights([
     /* Low among the inner planets as the track opens, then down to Earth. */
     {
       at: "start",
@@ -144,5 +173,5 @@ export const DRIFT: OrreryDrift = {
     { land: "peak@2", view: "oort", flight: { duration: 28 }, hold: 36, creep: -0.04 },
     /* And one long fall back to the giants, from above, as the track settles. */
     { view: "giants", pose: { inclination: 1.3 }, flight: { duration: 40, lift: -0.1 }, hold: 14 },
-  ],
+  ]),
 };

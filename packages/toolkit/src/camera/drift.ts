@@ -179,6 +179,8 @@ export function createDriftCamera(
   let held = 0;
   /** The opening's reveal under way: the look it turns from, and its rest and turn in seconds. */
   let unveiling: { from: FreeLook; rest: number; turn: number } | null = null;
+  /** How the drawn pose turned over the last step, rad/s; kept through a handoff. */
+  const motion = { azimuth: 0, inclination: 0 };
 
   const wave = (period: number) => Math.sin((clock / period) * Math.PI * 2);
   /** The pose drawn from `base`, the orbit and the sway. */
@@ -317,6 +319,58 @@ export function createDriftCamera(
     show();
   }
 
+  /** One step of the flight or hold under way. */
+  function advance(dt: number): { pose: Readonly<DriftPose>; landed: boolean } {
+    const flying = t < 1;
+    if (!instant()) {
+      /* The orbit eases toward the hold's rate, or the running rate in flight, never to rest. */
+      const rate = flying ? settings.drift * turning : drift;
+      spin += (rate - spin) * (1 - Math.exp(-dt / DRIFT_RAMP));
+      turn += spin * dt;
+      clock += dt;
+    }
+    if (flying) {
+      t = instant() ? 1 : Math.min(1, t + dt / duration);
+      const at = sampleOrbitFlight(t, from, target);
+      base.azimuth = at.azimuth;
+      base.inclination = at.inclination;
+      base.distance = at.distance;
+      const e = smootherstep(t);
+      base.roll = lerp(from.roll, target.roll, e);
+      base.look.yaw = lerp(from.look.yaw, target.look.yaw, e);
+      base.look.pitch = lerp(from.look.pitch, target.look.pitch, e);
+      base.ride = lerp(from.ride, target.ride, e);
+      show();
+      if (t < 1) return { pose, landed: false };
+      landed = copy(base);
+      const shot = shots[index];
+      if (shot && !("handoff" in shot)) drift = settings.holdDrift?.(landed, shot) ?? drift;
+      held = 0;
+      return { pose, landed: true };
+    }
+    held += dt;
+    if (!instant()) {
+      /* The push eases over the whole hold. */
+      const along = hold > 0 ? Math.min(1, held / hold) : 1;
+      base.distance = landed.distance * (1 - creep * smootherstep(along));
+    }
+    if (unveiling) {
+      /* The reveal: at rest on the look away, then one slow turn onto the shot's look. */
+      const { from, rest, turn } = unveiling;
+      const e = smootherstep(clamp((held - rest) / Math.max(turn, 1e-3), 0, 1));
+      base.look.yaw = lerp(from.yaw, landed.look.yaw, e);
+      base.look.pitch = lerp(from.pitch, landed.look.pitch, e);
+      if (e >= 1 || instant()) {
+        base.look.yaw = landed.look.yaw;
+        base.look.pitch = landed.look.pitch;
+        unveiling = null;
+      }
+    }
+    show();
+    if (held >= hold) aim(pick());
+    return { pose, landed: false };
+  }
+
   return {
     /** The shot being flown to or held, or -1 before `start`. */
     get index() {
@@ -325,6 +379,17 @@ export function createDriftCamera(
     /** A flight is under way. */
     get flying() {
       return index >= 0 && t < 1;
+    },
+    /** The pose the flight under way lands on, before the orbit and the sway; null between flights. */
+    get landing(): OrbitPose | null {
+      return index >= 0 && t < 1 && !handoff ? sampleOrbitFlight(1, from, target) : null;
+    },
+    /**
+     * How the drawn pose was turning at the last step, rad/s (azimuth and inclination): through
+     * a handoff, how the camera was moving as the host took it, so its flight can carry it on.
+     */
+    get motion(): Readonly<Omit<OrbitPose, "distance">> {
+      return motion;
     },
     /** The current shot is the host's to fly (`DriftHandoff`); `resume` moves on. */
     get handoff() {
@@ -340,6 +405,8 @@ export function createDriftCamera(
      * camera begins landed on that shot instead, its hold under way.
      */
     start(current: AimedPose, options: { cut?: boolean } = {}) {
+      motion.azimuth = 0;
+      motion.inclination = 0;
       turn = 0;
       spin = 0;
       turning = 0;
@@ -360,54 +427,13 @@ export function createDriftCamera(
     /** Advances `dt` seconds. `landed` is true on the one frame a flight ends. */
     step(dt: number): { pose: Readonly<DriftPose>; landed: boolean } {
       if (index < 0 || handoff) return { pose, landed: false };
-      const flying = t < 1;
-      if (!instant()) {
-        /* The orbit eases toward the hold's rate, or the running rate in flight, never to rest. */
-        const rate = flying ? settings.drift * turning : drift;
-        spin += (rate - spin) * (1 - Math.exp(-dt / DRIFT_RAMP));
-        turn += spin * dt;
-        clock += dt;
+      const { azimuth, inclination } = pose;
+      const result = advance(dt);
+      if (dt > 0) {
+        motion.azimuth = (pose.azimuth - azimuth) / dt;
+        motion.inclination = (pose.inclination - inclination) / dt;
       }
-      if (flying) {
-        t = instant() ? 1 : Math.min(1, t + dt / duration);
-        const at = sampleOrbitFlight(t, from, target);
-        base.azimuth = at.azimuth;
-        base.inclination = at.inclination;
-        base.distance = at.distance;
-        const e = smootherstep(t);
-        base.roll = lerp(from.roll, target.roll, e);
-        base.look.yaw = lerp(from.look.yaw, target.look.yaw, e);
-        base.look.pitch = lerp(from.look.pitch, target.look.pitch, e);
-        base.ride = lerp(from.ride, target.ride, e);
-        show();
-        if (t < 1) return { pose, landed: false };
-        landed = copy(base);
-        const shot = shots[index];
-        if (shot && !("handoff" in shot)) drift = settings.holdDrift?.(landed, shot) ?? drift;
-        held = 0;
-        return { pose, landed: true };
-      }
-      held += dt;
-      if (!instant()) {
-        /* The push eases over the whole hold. */
-        const along = hold > 0 ? Math.min(1, held / hold) : 1;
-        base.distance = landed.distance * (1 - creep * smootherstep(along));
-      }
-      if (unveiling) {
-        /* The reveal: at rest on the look away, then one slow turn onto the shot's look. */
-        const { from, rest, turn } = unveiling;
-        const e = smootherstep(clamp((held - rest) / Math.max(turn, 1e-3), 0, 1));
-        base.look.yaw = lerp(from.yaw, landed.look.yaw, e);
-        base.look.pitch = lerp(from.pitch, landed.look.pitch, e);
-        if (e >= 1 || instant()) {
-          base.look.yaw = landed.look.yaw;
-          base.look.pitch = landed.look.pitch;
-          unveiling = null;
-        }
-      }
-      show();
-      if (held >= hold) aim(pick());
-      return { pose, landed: false };
+      return result;
     },
     /** Stops; the next `start` begins afresh. */
     reset() {

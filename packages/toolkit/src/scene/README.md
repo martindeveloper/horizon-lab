@@ -114,7 +114,9 @@ in the camera module) on an orbit rig: `step(state, dt, hold?)` writes each
 playing frame's pose to the rig and settles it, cancels the rig's own motion as a
 flight begins, and gives a handoff shot to `handoff(index, dt, resume)` each
 frame until the host resumes the drift from wherever it left the camera.
-`flying` says the drift has the camera now.
+`flying` says the drift has the camera now; `landing` is where its flight under way
+lands, so a host can fly alongside it (a close-up keeping its body in view on the way out),
+and `motion` how it was turning the camera, so a host taking over can carry that on.
 
 ## Labels
 

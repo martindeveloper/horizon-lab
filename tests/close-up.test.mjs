@@ -9,6 +9,7 @@ import { orreryQuality } from "../src/features/orrery/lib/quality.ts";
 import {
   CLOSE_UP_FILL,
   CLOSE_UP_SWING,
+  aimAt,
   closeUpLimits,
   closeUpMapWidth,
   closeUpPose,
@@ -71,6 +72,65 @@ test("the flight pans first and dives after, and ends exactly on its poses", () 
   const out = sampleCloseUp(0.3, to, from, false);
   assert.equal(out.aim, 0);
   assert.ok(out.pose.distance > to.distance * 10, "already pulling back");
+});
+
+test("a slow dive and pull back keep the body in frame and leave and land at rest", () => {
+  /* From a wide view aimed at the Sun down to Mars, and back: the zoom outruns the pan. */
+  const mars = [1.2, 0.02, -0.9];
+  const sun = [0, 0, 0];
+  const wide = { azimuth: 0.6, inclination: 1.2, distance: 9 };
+  const close = { azimuth: 2.4, inclination: 0.3, distance: 3e-5 };
+  /* The body's offset from the middle of the view, as a tangent of the angle off it. */
+  const off = (aim, distance) => Math.hypot(...aim.map((v, k) => v - mars[k])) / distance;
+  for (const entering of [true, false]) {
+    const [from, to] = entering ? [wide, close] : [close, wide];
+    const [fromAim, toAim] = entering ? [sun, mars] : [mars, sun];
+    const most = Math.max(off(fromAim, from.distance), off(toAim, to.distance));
+    const zoom = (t) => Math.log(sampleCloseUp(t, from, to, entering, 1).pose.distance);
+    const speeds = [];
+    for (let t = 0; t <= 1 + 1e-9; t += 0.01) {
+      const { aim, pose } = sampleCloseUp(t, from, to, entering, 1);
+      const at = aimAt(
+        mars,
+        { look: fromAim.map((v, k) => v - mars[k]), distance: from.distance },
+        { look: toAim.map((v, k) => v - mars[k]), distance: to.distance },
+        pose.distance,
+        aim,
+      );
+      assert.ok(off(at, pose.distance) <= most + 1e-9, `body off the frame at ${t.toFixed(2)}`);
+      if (t > 0) speeds.push(Math.abs(zoom(t) - zoom(t - 0.01)));
+    }
+    const peak = Math.max(...speeds);
+    /* No hard braking or lurch: the zoom starts and ends far below its peak pace. */
+    assert.ok(speeds[0] < peak * 0.01 && speeds.at(-1) < peak * 0.01, "leaves and lands at rest");
+    const ends = aimAt(
+      mars,
+      { look: fromAim.map((v, k) => v - mars[k]), distance: from.distance },
+      { look: toAim.map((v, k) => v - mars[k]), distance: to.distance },
+      to.distance,
+      1,
+    );
+    ends.forEach((v, k) => near(v, toAim[k], 1e-12, "lands on its aim"));
+  }
+  /* The clock may run on a visit: as the body travels the aim travels with it, mid-flight. */
+  const looks = [
+    { look: [0, 0, 0], distance: 3e-5 },
+    { look: sun.map((v, k) => v - mars[k]), distance: 9 },
+  ];
+  const step = [0.3, -0.01, 0.2];
+  const moved = mars.map((v, k) => v + step[k]);
+  const here = aimAt(mars, ...looks, 0.05, 0.4);
+  aimAt(moved, ...looks, 0.05, 0.4).forEach((v, k) => near(v - here[k], step[k], 1e-12, "travels"));
+  /* A camera already orbiting carries its turn into the dive and eases it out, landing as written. */
+  const spin = { azimuth: 0.2, inclination: -0.05 };
+  const h = 1e-4;
+  const turned = sampleCloseUp(h, wide, close, true, 1, spin).pose;
+  const still = sampleCloseUp(h, wide, close, true, 1).pose;
+  near((turned.azimuth - still.azimuth) / h, spin.azimuth, 1e-3, "leaves turning");
+  near((turned.inclination - still.inclination) / h, spin.inclination, 1e-3, "and tilting");
+  const landed = sampleCloseUp(1, wide, close, true, 1, spin).pose;
+  near(landed.azimuth, close.azimuth, 1e-12, "lands on its azimuth");
+  near(landed.inclination, close.inclination, 1e-12, "and its tilt");
 });
 
 test("the drift's swing frames the body with its moon, side-on, and comes back", () => {

@@ -3,9 +3,11 @@
  * the drift camera; its close-ups are handoffs: the director selects the body and opens the
  * close-up, whose own flight takes the camera in, then circles the body slowly and drifts
  * nearer for the hold, pulls out over its last part to show the body with its largest moon
- * and stays there, lets the selection go so the close-up flies out from that framing, and
- * resumes the drift from there: one dive to a body and one pull away. Flying on after a pause
- * leaves any close-up first.
+ * and stays there, then lets go: one dive to a body and one pull away. A visit before a
+ * framed shot pulls away on that shot's own flight (the close-up released to it, keeping the
+ * body in view until the flight hands the aim home), so the release flows on without a stop;
+ * before another visit the close-up flies out itself. Flying on after a pause leaves any
+ * close-up first.
  */
 import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
@@ -15,13 +17,14 @@ import type { OrbitPose } from "@horizon/toolkit/camera";
 import { clamp, lerp, smootherstep } from "@horizon/toolkit/math";
 import { createRigDrift, type RigDrift } from "@horizon/toolkit/scene";
 
-import { DRIFT } from "../drift";
+import { DRIFT, pullsAwayOnward } from "../drift";
 import { canCloseUp, type useOrrery } from "../store";
 import type { CameraRig } from "./camera-rig";
+import type { CloseUpStyle } from "./close-up-controller";
 import { moonSwing } from "./close-up-flight";
 
 /** What the director needs to know about a close-up in progress. */
-type CloseUpFrame = { phase: "in" | "on" | "out" };
+type CloseUpFrame = { phase: "in" | "on" | "out"; released: OrbitPose | null };
 
 /** Radians the camera sways above and below its arrival tilt at a body. */
 const SWAY = 0.12;
@@ -47,6 +50,12 @@ export function createDriftDirector(
     closeUp: () => CloseUpFrame | null;
     /** The pose that frames the visited body with its largest moon, from a pose; null without one. */
     moonPose: (base: OrbitPose) => OrbitPose | null;
+    /** Hands the close-up's flight out to the drift's flight landing on `landing`. */
+    release: (landing: OrbitPose) => void;
+    /** The close-up flies a released flight on to its landing itself. */
+    reclaim: () => void;
+    /** The released flight has landed: the close-up ends where the drift left the camera. */
+    finish: () => void;
   },
 ) {
   const { reduceMotion, closeUp, moonPose } = options;
@@ -64,6 +73,21 @@ export function createDriftDirector(
     s.select(shot.closeUp);
     s.enterCloseUp();
     visit = { phase: "in" };
+  }
+
+  /**
+   * Lets the body go at the end of its hold: on the drift's next flight when a framed shot
+   * follows (the drift flies on at once), else on the close-up's own flight out.
+   */
+  function letGo(index: number, resume: () => void) {
+    if (pullsAwayOnward(timed.shots, index)) {
+      resume();
+      const landing = drift.landing;
+      if (landing) options.release(landing);
+      visit = null;
+    } else visit = { phase: "out" };
+    /* Letting the selection go leaves the close-up too, and takes the body's marker with it. */
+    store.getState().select(null);
   }
 
   /** Circles the body and drifts nearer through the hold, pulling out to its moon toward the end. */
@@ -93,11 +117,6 @@ export function createDriftDirector(
       );
       rig.settle();
     }
-    if (at.held >= at.hold) {
-      /* Letting the selection go leaves the close-up too, and takes the body's marker with it. */
-      store.getState().select(null);
-      visit = { phase: "out" };
-    }
   }
 
   /** The handoff shot's visit, frame by frame, until the close-up has closed again. */
@@ -122,7 +141,10 @@ export function createDriftDirector(
     }
     if (visit.phase === "on") {
       if (!close) visit = { phase: "out" };
-      else circle(visit, dt);
+      else {
+        circle(visit, dt);
+        if (visit.held >= visit.hold) return letGo(index, resume);
+      }
     }
     if (visit.phase === "out" && !close) {
       visit = null;
@@ -155,6 +177,17 @@ export function createDriftDirector(
   build(audioMapNow(DRIFT.music?.track));
 
   return {
+    /**
+     * How the drift's visits fly: at a lean-back pace, settling slowly onto the body, and
+     * scripted, so the clock eases with them and the flight in carries on the camera's turn.
+     */
+    visitStyle(): CloseUpStyle {
+      return {
+        pace: DRIFT.closeUp.pace,
+        lead: DRIFT.closeUp.lead,
+        scripted: { motion: { ...drift.motion } },
+      };
+    },
     /** Frames are needed while the drift plays. */
     get busy() {
       return store.getState().drift === "playing";
@@ -166,6 +199,14 @@ export function createDriftDirector(
     /** Call before the rig steps. */
     step(dt: number) {
       const state = store.getState();
+      /* A released pull away ends as the drift's flight lands; one the drift no longer flies
+         (it was paused, then resumed afresh, or stopped) the close-up flies on itself. A pause
+         holds it where it is. */
+      if (closeUp()?.released) {
+        if (state.drift === "playing" && drift.flying) {
+          if (!drift.landing) options.finish();
+        } else if (state.drift !== "paused") options.reclaim();
+      }
       /* A close-up left from a pause (or the visitor's own) flies out before the drift goes on. */
       const leaving = state.drift === "playing" && !drift.flying && closeUp() !== null;
       if (leaving && state.closeUp) state.leaveCloseUp(true);

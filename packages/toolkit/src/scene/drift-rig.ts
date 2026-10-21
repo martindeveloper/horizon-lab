@@ -24,6 +24,14 @@ export function createRigDrift(
     get flying() {
       return run.flying;
     },
+    /** Where the drift's flight under way lands (a host may fly alongside it); null between flights. */
+    get landing() {
+      return run.flying ? run.camera.landing : null;
+    },
+    /** How the drift was turning the camera at its last step, rad/s; through a handoff, as the host took it. */
+    get motion() {
+      return run.camera.motion;
+    },
     /**
      * Flies the drift for this frame, or lets the rig be. `hold` keeps it from starting while
      * something else owns the camera. Call before the rig steps.
