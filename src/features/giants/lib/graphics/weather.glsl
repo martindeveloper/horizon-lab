@@ -224,3 +224,48 @@ vec3 flash(vec2 o) {
   }
   return light;
 }
+
+struct OutflowLight {
+  vec3 emission;
+  vec3 transmission;
+};
+
+// Integral of a unit Gaussian in front of the photosphere, including clouds straddling
+// its depth. A far-side cloud cannot shine through or darken the intervening star.
+float foregroundColumn(float depth, float centre, float width) {
+  float x = (depth - centre) / (1.41421356 * width);
+  float a = abs(x);
+  float t = 1.0 / (1.0 + 0.3275911 * a);
+  float tail = (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t
+    - 0.284496736) * t + 0.254829592) * t * exp(-a * a);
+  return x >= 0.0 ? 0.5 * tail : 1.0 - 0.5 * tail;
+}
+
+// Expelled surface gas cools and dilutes; condensed dust absorbs/reddens background light
+// and weakly scatters starlight. This is not a bright magnetic loop or a glowing dust ember.
+OutflowLight outflowLight(vec2 o, float frontDepth, vec4 face) {
+  OutflowLight result = OutflowLight(vec3(0.0), vec3(1.0));
+  for (int k = 0; k < OUTFLOW_SLOTS; k++) {
+    float row = (float(k) + 0.5) / float(OUTFLOW_SLOTS);
+    vec4 state = texture2D(uOutflows, vec2(0.75, row));
+    if (state.x + state.y <= 0.0) continue;
+    vec4 cloud = texture2D(uOutflows, vec2(0.25, row));
+    vec2 q = (o - cloud.xy) / cloud.w;
+    float squared = dot(q, q);
+    if (squared > 12.25) continue;
+    float density = exp(-0.5 * squared)
+      * (0.8 + 0.2 * gradientNoise3(vec3(q * 1.4, state.w * 11.0)))
+      * foregroundColumn(frontDepth, cloud.z, cloud.w) * uWeather.y;
+    // Extinction and scattering are approximate broadband responses; no dust mineralogy
+    // or observed optical depth is inferred from these illustrative coefficients.
+    vec3 tau = density * (0.15 * state.x + state.y * vec3(0.65, 1.0, 1.45));
+    vec3 transmission = exp(-tau);
+    float radius = length(cloud.xyz);
+    float forward = 0.25 + 0.75 * pow(max(cloud.z / radius, 0.0), 4.0);
+    vec3 emission = density * (0.35 * state.x * glowAt(state.z, face.a)
+      + 0.04 * state.y * face.rgb * forward / (radius * radius));
+    result.emission = result.emission * transmission + emission;
+    result.transmission *= transmission;
+  }
+  return result;
+}

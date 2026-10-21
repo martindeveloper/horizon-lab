@@ -54,6 +54,7 @@ uniform vec4 uLoopBound[LOOPS];         // centre x, y and reach, radii; brightn
 uniform vec4 uLoop[LOOPS * LOOP_POINTS]; // x, y, z; width, radii
 uniform vec4 uEjection[EJECTIONS];      // position angle; front, radii; spread, radians; brightness
 uniform vec4 uFlash[ARCADES];           // each flare lit: its site x, y, z; its light
+uniform highp sampler2D uOutflows;      // supergiant clouds: centre/width, gas/dust/temperature/seed
 uniform vec3 uOrbitCentre;              // centre x, y; 1 while any ring shows (0: none)
 uniform vec2 uOrbits[ORBIT_COUNT];      // each ring's radius, CSS pixels, and how much of it shows
 uniform vec3 uAccent;                   // the house gold, linear
@@ -148,7 +149,8 @@ float reachOf(int i, int style) {
 }
 
 // One body at a pixel: its light (premultiplied) and how much of the pixel it covers.
-vec4 shade(vec2 p, int i, int style) {
+vec4 shade(vec2 p, int i, int style, out float frontDepth) {
+  frontDepth = -1e4;
   vec4 shape = uShape[i];
   vec4 body = uBody[i];
   vec4 surface = uSurface[i];
@@ -196,7 +198,7 @@ vec4 shade(vec2 p, int i, int style) {
     vec3 faceNormal;
     vec3 facePoint = hitSpheroid(o, globe.y, globe.z, faceNormal);
     vec3 physicalPoint = facePoint * vec3(1.0, globe.z, 1.0);
-    float frontDepth = d < 1.0 ? toView(physicalPoint, 0.0, globe.y).z : -1e4;
+    frontDepth = d < 1.0 ? toView(physicalPoint, 0.0, globe.y).z : -1e4;
     front = uWeather.y * (loops(o, r, shape.z, frontDepth) + flash(o));
   }
 
@@ -292,8 +294,14 @@ void main() {
     vec2 offset = abs(p - shape.xy);
     float reach = shape.z * reachOf(i, style) + 2.0;
     if (offset.x > reach || offset.y > reach) continue;
-    vec4 body = shade(p, i, style);
+    float frontDepth;
+    vec4 body = shade(p, i, style, frontDepth);
     colour = colour * (1.0 - body.a) + body.rgb;
+    if (float(i) == uWeather.x && uWeather.y > 0.0 && uSurface[i].w > 0.0) {
+      vec2 o = vec2(p.x - shape.x, shape.y - p.y) / shape.z;
+      OutflowLight cloud = outflowLight(o, frontDepth, tintOf(i, TINT_FACE));
+      colour = colour * cloud.transmission + cloud.emission;
+    }
   }
 
   /* Hue kept through the tone curve, so a red star stays red and keeps its limb darkening. */

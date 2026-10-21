@@ -23,13 +23,16 @@
 #define EJECTIONS           2
 #define CELL_CONTRAST_FINE  0.035
 #define CELL_CONTRAST_GIANT 0.065
+#define GIANT_CONTRAST      0.09
+#define GIANT_FINE_CONTRAST 0.012
+#define OUTFLOW_SLOTS       2
 #define UMBRA_DEPTH         0.31
 #define PENUMBRA_DEPTH      0.1
 #define FACULA_CONTRAST     0.09
 #define NETWORK_GRANULES    30.0
 #define NETWORK_CONTRAST    0.03
 #define DEEP_CELLS          2.6
-#define LIMB_ROUGHNESS      0.03
+#define LIMB_ROUGHNESS      0.02
 #define VEIL_DEPTH          0.6
 #define GLOW                0.14
 #define GLOW_FALLOFF        14.0

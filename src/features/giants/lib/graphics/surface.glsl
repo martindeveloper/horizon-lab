@@ -135,14 +135,14 @@ vec3 starSurface(vec3 s, float mu, int style, vec4 body, vec4 surface, vec4 glob
     float quiet = mix(0.35, 1.0, mu) * (1.0 - marks.spot);
     vec3 p = s * across + seed * 17.0;
     float fine = min(detail, 1.0) * resolvedFeature(across, radiusPx, mu);
-    if (fine > 0.0) {
-      /* Warped, so cells are not straight-edged polygons. A giant's own granules are a soft
-         turbulence over its giant cells. */
+    if (fine > 0.0 && giant < 0.5) {
+      /* Dwarf granules have cool intergranular lanes. Red supergiants use the continuous
+         multiscale field below: a tiled Voronoi network makes them look like cracked clay. */
       vec3 advected = p + 0.3 * sin(p.yzx * 0.83 + vec3(1.7, 4.1, 2.3) + uTime * 0.02);
       vec3 cells = convectionCells(advected, uTime * (giant > 0.5 ? 0.12 : 1.0));
       float lane = 1.0 - smoothstep(0.0, 0.1, cells.y - cells.x);
       float cell = mix((0.35 + 0.65 * cells.z) * (1.0 - 0.75 * clamp(cells.x, 0.0, 1.0)) * 1.5 - 0.15, -1.0, lane);
-      dT += contrast * fine * quiet * cell * mix(1.0, 0.4, giant);
+      dT += contrast * fine * quiet * cell;
       // Sparse magnetic bright points in intergranular lanes; never on a hot/radiative star.
       if (weather && giant < 0.5 && detail > 1.0) {
         float tiny = resolvedFeature(across * 5.0, radiusPx, mu);
@@ -153,7 +153,17 @@ vec3 starSurface(vec3 s, float mu, int style, vec4 body, vec4 surface, vec4 glob
     if (giant > 0.0) {
       /* The giant cells beneath: few, broad and slow. */
       float field = giantField(s, seed);
-      dT += contrast * giant * mix(0.5, 1.0, mu) * field;
+      dT += GIANT_CONTRAST * giant * mix(0.7, 1.0, mu) * field;
+      if (detail > 0.0) {
+        // Continuous, irregular intermediate structure and restrained fine turbulence.
+        // Both are attached to the rotating globe and fade at their projected resolution.
+        vec3 flow = 0.55 * sin(s.yzx * 3.7 + seed * 9.0 + uTime * 0.012);
+        float medium = gradientNoise3(s * 6.5 + flow + seed * 13.0 + vec3(0.0, uTime * 0.018, 0.0));
+        dT += 0.025 * min(detail, 1.0) * resolvedFeature(6.5, radiusPx, mu) * medium;
+        if (fine > 0.0)
+          dT += GIANT_FINE_CONTRAST * fine * quiet
+            * gradientNoise3(p + flow * 2.0 + vec3(uTime * 0.025, 0.0, 0.0));
+      }
       // Small optical-surface relief changes the emission angle, not external illumination.
       if (detail > 1.0) {
         vec3 east = normalize(cross(s, vec3(0.0, 1.0, 0.01)));
@@ -166,7 +176,7 @@ vec3 starSurface(vec3 s, float mu, int style, vec4 body, vec4 surface, vec4 glob
     }
     /* Where a dwarf's granules are too small to see, its supergranules' faint mottle shows instead. */
     float network = across / NETWORK_GRANULES;
-    float shows = resolvedFeature(network, radiusPx, mu)
+    float shows = (1.0 - giant) * resolvedFeature(network, radiusPx, mu)
       * smoothstep(100.0, 300.0, across) * (1.0 - fine);
     if (shows > 0.0) dT += NETWORK_CONTRAST * shows * gradientNoise3(s * network + seed * 3.0 + vec3(0.0, 0.0, uTime * 0.01));
   } else if (style == STYLE_RADIATIVE || style == STYLE_WHITE_DWARF) {

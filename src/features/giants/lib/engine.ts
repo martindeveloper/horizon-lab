@@ -133,7 +133,7 @@ export function createGiantsEngine(
       0,
       LENSES,
     );
-    const weather = weatherUniforms();
+    const weather = resources.own(weatherUniforms());
     const forecast = createForecast();
     const tints = resources.own(discTints(LOOKS));
     const stellar = resources.own(stellarTables(LOOKS));
@@ -204,6 +204,7 @@ export function createGiantsEngine(
       spin: look.spin,
       tilt: look.tilt,
       twist: 0,
+      temperature: (look.equatorK + look.poleK) / 2,
     }));
     const poses = LOOKS.map(restPose);
     const posesRest = () => poses.every(poseRests);

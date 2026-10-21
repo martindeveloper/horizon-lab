@@ -32,10 +32,12 @@ export const GIANTS_QUALITY: Readonly<Record<RenderQuality, Level>> = {
 /** Bloom on the stars' discs: soft light round the brightest surfaces only. */
 export function bloomSettings(quality: RenderQuality): BloomSettings {
   return {
-    strength: 0.55,
-    threshold: 0.82,
-    knee: 0.25,
-    clamp: 4,
+    // This pass blooms display-referred light. A broad, strong shoulder adds enough
+    // light to clip entire stellar faces, erasing the resolved temperature structure.
+    strength: 0.16,
+    threshold: 0.94,
+    knee: 0.08,
+    clamp: 2,
     mips: quality === "economy" ? 4 : 5,
     scale: quality === "economy" ? 0.25 : 0.5,
   };

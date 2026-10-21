@@ -282,6 +282,7 @@ const shown = (weather) => ({
   sheets: weather.sheets.filter((sheet) => sheet.brightness > 0),
   loops: weather.loops.filter((loop) => loop.brightness > 0),
   ejections: weather.ejections.filter((ejection) => ejection.brightness > 0),
+  outflows: weather.outflows.filter((cloud) => cloud.gas + cloud.dust > 0),
   flashes: weather.flashes.filter((flash) => flash.strength > 0),
 });
 

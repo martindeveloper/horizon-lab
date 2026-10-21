@@ -49,6 +49,13 @@ import {
   SHEETS,
   SHEET_POINTS,
 } from "../parameters";
+import {
+  blankOutflow,
+  evolveOutflow,
+  OUTFLOW_SLOTS,
+  OUTFLOW_WINDOW_S,
+  type Outflow,
+} from "./mass-loss";
 
 /**
  * What a star does: a Sun-like star's spots, flares, prominences and ejections; a red dwarf's
@@ -120,7 +127,7 @@ export const ACTIVITY: Readonly<Record<ActivityKind, Profile>> = {
     chromosphere: 1,
   },
   quiet: { ...NONE, regions: 1, size: 0.1, latitudes: [0.1, 0.7], chromosphere: 0.55 },
-  plumes: { ...NONE, regions: 1, size: 0.55, latitudes: [0, 1.2], sheets: 2, height: 0.55 },
+  plumes: { ...NONE, size: 0.55, latitudes: [0, 1.2], sheets: 2, height: 0.55 },
   none: NONE,
 };
 
@@ -168,6 +175,8 @@ export type Weather = {
   sheets: Sheet[];
   loops: Loop[];
   ejections: Ejection[];
+  /** Broad surface mass loss; separate from solar coronal mass ejections and flares. */
+  outflows: Outflow[];
   /** The flares lit now, at most `ARCADES`. */
   flashes: Flash[];
   corona: number;
@@ -178,7 +187,13 @@ export type Weather = {
  * The globe a weather sits on: its seed, display spin and the pole's tilt towards us, and any
  * turn a hand has given it on top of its spin (`grab.ts`), radians.
  */
-export type Globe = { seed: number; spin: number; tilt: number; twist?: number };
+export type Globe = {
+  seed: number;
+  spin: number;
+  tilt: number;
+  twist?: number;
+  temperature?: number;
+};
 
 const vec3 = (): Vec3 => [0, 0, 0];
 const slots = <T>(count: number, make: () => T) => Array.from({ length: count }, make);
@@ -402,6 +417,7 @@ export function createForecast() {
       brightness: 0,
     })),
     ejections: slots(EJECTIONS, () => ({ angle: 0, front: 0, spread: 0, brightness: 0 })),
+    outflows: slots(OUTFLOW_SLOTS, blankOutflow),
     flashes: slots(ARCADES, () => ({ at: vec3(), strength: 0 })),
     corona: 0,
     chromosphere: 0,
@@ -600,6 +616,27 @@ export function createForecast() {
     const turn = turnAt(globe, time);
     const regions = Math.min(profile.regions, REGIONS);
     const count = flaresAt(globe, profile, time);
+    weather.outflows.forEach((outflow, slot) => {
+      outflow.gas = 0;
+      outflow.dust = 0;
+      if (!plumes) return;
+      // Deterministic launch windows, with quiet intervals. The ejected gas retains its
+      // launch direction instead of rotating rigidly with the photosphere afterwards.
+      const offset = globe.seed * OUTFLOW_WINDOW_S;
+      const window = Math.floor((time + offset) / OUTFLOW_WINDOW_S) - slot;
+      const start =
+        (window + 0.15 + 0.3 * dice(globe.seed, 91, window)) * OUTFLOW_WINDOW_S - offset;
+      const radius = evolveOutflow(outflow, time - start, globe.temperature ?? 3600);
+      if (outflow.gas + outflow.dust <= 0) return;
+      const y = 2 * dice(globe.seed, 92, window) - 1;
+      const lon = TAU * dice(globe.seed, 93, window);
+      const equator = Math.sqrt(1 - y * y);
+      foot[0] = equator * Math.cos(lon);
+      foot[1] = y;
+      foot[2] = equator * Math.sin(lon);
+      toView(scale3(foot, radius, foot), turnAt(globe, start), globe.tilt, outflow.centre);
+      outflow.seed = dice(globe.seed, 94, window);
+    });
     /* A flare's ribbons light its region while that region lives. */
     const on = (flare: Flare, slot: number) =>
       flare.outbreak.slot === slot && flare.outbreak.site.epoch === sites[slot]!.epoch;

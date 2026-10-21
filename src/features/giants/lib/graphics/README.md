@@ -59,6 +59,30 @@ Supergiant heat, relief and silhouette use one rotating, smoothly evolving low-f
 field, informed by the broad behaviour of convection simulations
 ([Chiavassa et al. 2011](https://doi.org/10.1051/0004-6361/201015768)). It is a procedural
 surrogate, not a hydrodynamic solution. Rotation, convection and activity use display time.
+Red supergiants deliberately use continuous, warped noise at several scales instead of
+the dwarfs' Voronoi cell lanes. Broad patches dominate; intermediate structures and faint
+fine turbulence appear only in focus. The apparent edge varies by at most 2% of the radius,
+an illustrative bound rather than an interferometric fit. Optical and infrared intensity
+patterns differ; the continuum rendering cannot reproduce molecular-band images exactly.
+
+## Surface mass loss
+
+Red-supergiant `outflows` are independent of solar flares and CMEs. They follow the
+sequence motivated by [Dupree et al. (2022)](https://arxiv.org/abs/2208.01676): surface gas
+is expelled, expands and cools, and dust can form later. A cloud retains its launch
+direction rather than rotating rigidly with the star. Its column dilutes with inverse
+projected area. A simple adiabatic cooling surrogate has an irradiation floor given by
+grey-grain equilibrium, T⁴ = ½[1 − √(1 − R²/r²)] T⋆⁴. The assumed condensation interval
+1300–1700 K, optical depth, recurrence and display speed are illustrative; no specific
+dust mineralogy, mass-loss rate or historical event is inferred.
+
+The shader integrates a Gaussian column in front of the photosphere. Foreground dust
+attenuates blue light more strongly than red, while off-limb dust weakly scatters starlight.
+Cold dust is not drawn as a bright thermal emitter in visible light. Far-side material is
+occluded by the star. Clouds fade with the focused weather owner, and inactive textures
+are cleared once rather than uploaded every frame. Tests protect cooling before dust
+formation, expansion/dilution, radial detachment, quiet intervals, absence of solar flares,
+and cleanup when focus changes.
 
 ## Atmosphere and shader limits
 

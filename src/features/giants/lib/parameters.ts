@@ -7,6 +7,8 @@ import {
 } from "@horizon/toolkit/science";
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
+import { OUTFLOW_SLOTS } from "./model/mass-loss";
+
 /**
  * Giants' model numbers, once. The physics computes with them, the shader receives the visual
  * ones as `#define`s (`npm run shaders:generate` writes `graphics/parameters.generated.glsl`)
@@ -124,6 +126,9 @@ export const SUPERGIANT_MASS = 15;
 /** Granules' temperature contrast: a few per cent when there are hundreds, more for a handful. */
 export const CELL_CONTRAST_FINE = 0.035;
 export const CELL_CONTRAST_GIANT = 0.065;
+/** Red-supergiant broad temperature variations dominate the much fainter fine turbulence. */
+export const GIANT_CONTRAST = 0.09;
+export const GIANT_FINE_CONTRAST = 0.012;
 /** Resolve cells only above 2–4 drawing-buffer pixels, including foreshortening. */
 export const SURFACE_RESOLVE_PX = 2;
 /** Spicule columns around a circumference (~0.002 radians apart), independent of zoom/DPR. */
@@ -150,8 +155,8 @@ export const NETWORK_CONTRAST = 0.03;
 export const DEEP_CELLS = 2.6;
 /** A supergiant's dust veil dims the face behind it by up to this share (Betelgeuse's Great Dimming: about two thirds). */
 export const VEIL_DEPTH = 0.6;
-/** Those giant cells make the limb lumpy too: the bumps, as a share of the radius. */
-export const LIMB_ROUGHNESS = 0.03;
+/** Conservative illustrative optical-surface relief; no measured shape is implied. */
+export const LIMB_ROUGHNESS = 0.02;
 /**
  * The most the shader's `gradientFbm3` can reach either way: each octave mixes its cell's
  * corners' g · (f − o), gradients' components within ±1, and along each axis those weights
@@ -385,6 +390,9 @@ export const SHADER_DEFINES = glslDefines({
   EJECTIONS: glslInt(EJECTIONS),
   CELL_CONTRAST_FINE,
   CELL_CONTRAST_GIANT,
+  GIANT_CONTRAST,
+  GIANT_FINE_CONTRAST,
+  OUTFLOW_SLOTS: glslInt(OUTFLOW_SLOTS),
   UMBRA_DEPTH,
   PENUMBRA_DEPTH,
   FACULA_CONTRAST,

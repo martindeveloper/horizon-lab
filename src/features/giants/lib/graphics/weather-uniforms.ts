@@ -4,7 +4,10 @@
  * ejections and the flares' glare, in fixed slots that stay dark when empty (`weather-fade.ts`
  * says how much of it shows).
  */
+import { DataTexture, FloatType, RGBAFormat } from "three";
+
 import type { Weather } from "../model/activity";
+import { OUTFLOW_SLOTS } from "../model/mass-loss";
 import {
   ARCADES,
   EJECTIONS,
@@ -23,7 +26,28 @@ export function weatherUniforms() {
   const loops = { bound: vectors(LOOPS), points: vectors(LOOPS * LOOP_POINTS) };
   const ejections = vectors(EJECTIONS);
   const flashes = vectors(ARCADES);
+  // Keep the fragment-uniform budget unchanged apart from one sampler.
+  const outflowData = new Float32Array(OUTFLOW_SLOTS * 8);
+  const outflows = new DataTexture(outflowData, 2, OUTFLOW_SLOTS, RGBAFormat, FloatType);
+  outflows.needsUpdate = true;
+  let hadOutflow = false;
   function fill(weather: Weather | null) {
+    const hasOutflow = weather?.outflows.some((cloud) => cloud.gas + cloud.dust > 0) ?? false;
+    if (hasOutflow || hadOutflow) {
+      outflowData.fill(0);
+      if (hasOutflow)
+        weather?.outflows.forEach((outflow, k) => {
+          const at = k * 8;
+          outflowData.set(outflow.centre, at);
+          outflowData[at + 3] = outflow.width;
+          outflowData[at + 4] = outflow.gas;
+          outflowData[at + 5] = outflow.dust;
+          outflowData[at + 6] = outflow.temperature;
+          outflowData[at + 7] = outflow.seed;
+        });
+      outflows.needsUpdate = true;
+    }
+    hadOutflow = hasOutflow;
     regions.state.forEach((state, k) => {
       const region = weather?.regions[k];
       if (!region || region.strength <= 0) {
@@ -86,7 +110,9 @@ export function weatherUniforms() {
       uLoop: { value: loops.points },
       uEjection: { value: ejections },
       uFlash: { value: flashes },
+      uOutflows: { value: outflows },
     },
     fill,
+    dispose: () => outflows.dispose(),
   };
 }
