@@ -15,6 +15,7 @@ import {
 
 import { blackbodyLut } from "@horizon/toolkit/science";
 
+import type { ShipMotion } from "../model/ship";
 import ORBIT_FRAG from "./shaders/orbit.frag.glsl";
 import ORBIT_VERT from "./shaders/orbit.vert.glsl";
 import STAR_FRAG from "./shaders/star.frag.glsl";
@@ -45,7 +46,7 @@ export function blackbodyTexture() {
 const STAR_PEAK = 16;
 export const PAINTED_PEAK = 4;
 
-/** The ship's motion as the shaders read it: uniforms a layer writes each frame and its materials share. */
+/** The ship's motion as the shaders read it: one set the engine writes each frame, every material shares. */
 export type MotionUniforms = {
   /** The direction of travel, unit. */
   forward: Vector3;
@@ -59,13 +60,12 @@ export const motionUniforms = (): MotionUniforms => ({
   gamma: { value: 1 },
 });
 
-/** The star shader's motion: the ship's place from the Sun as well. */
-type StarMotion = MotionUniforms & {
-  /** The ship from the Sun, parsecs. */
-  shipPc: Vector3;
-};
-
-export const starMotion = (): StarMotion => ({ ...motionUniforms(), shipPc: new Vector3() });
+/** Writes the ship's motion into the shared uniforms. */
+export function writeMotion(out: MotionUniforms, motion: ShipMotion) {
+  out.forward.fromArray(motion.forward);
+  out.beta.value = motion.beta;
+  out.gamma.value = motion.gamma;
+}
 
 /**
  * An orbit line as the ship sees it: aberrated per vertex with the shared motion, in one
@@ -92,14 +92,20 @@ export function orbitMaterial(motion: MotionUniforms, color: number, opacity: nu
  * The sky's points: the catalogue's stars, and the painted band's grains and field drawn the
  * same way. `fade` and `tint` are the band's presence and extinction (`createMilkyWay`).
  */
-export function starMaterial(dpr: { value: number }, lut: DataTexture, motion: StarMotion) {
+export function starMaterial(
+  dpr: { value: number },
+  lut: DataTexture,
+  motion: MotionUniforms,
+  /** The ship from the Sun, parsecs. */
+  shipPc: Vector3,
+) {
   return new ShaderMaterial({
     uniforms: {
       dpr,
       fade: { value: 1 },
       tint: { value: new Color("#ffffff") },
       peak: { value: STAR_PEAK },
-      shipPc: { value: motion.shipPc },
+      shipPc: { value: shipPc },
       forward: { value: motion.forward },
       beta: motion.beta,
       gamma: motion.gamma,

@@ -29,7 +29,9 @@
   "toggles": {
     "instruments": "Instruments",
     "canopy": "Canopy",
-    "orbits": "Orbits"
+    "orbits": "Orbits",
+    "streaks": "Speed streaks",
+    "feel": "Ship feel"
   },
   "hud": {
     "guide": "Guide",
@@ -37,7 +39,7 @@
     "hold": "Hold the clocks",
     "run": "Run the clocks",
     "drive": "Drive",
-    "rate": "Clock rate",
+    "rate": "Time warp",
     "shipClock": "Ship clock",
     "earthClock": "Earth clock",
     "speed": "Speed",
@@ -45,19 +47,54 @@
     "sunlight": "Sunlight",
     "lightToEarth": "Light to Earth",
     "flyHere": "Fly here",
-    "flyingTo": "Flying to {body}",
-    "parkedAt": "At {body}",
-    "mode": "Ship",
-    "modeOrbit": "Parked",
-    "modeFree": "Free flight",
-    "nearBody": "Near {body}",
-    "freeKeys": "W/S · A/D · R/F · Q/E roll · Shift boost · X brake · Space park · drag to look",
-    "farPlaces": "Beyond the solar system",
     "cmb": "Background",
     "cmbValue": "{value} K",
     "clocksApart": "Clocks apart",
     "closing": "Closing",
-    "target": "Target"
+    "target": "Target",
+    "state": {
+      "orbit": "Orbit",
+      "free": "Manual",
+      "flight": "Autopilot",
+      "crash": "Impact"
+    },
+    "takeHelm": "Take the helm",
+    "enterOrbit": "Enter orbit",
+    "throttle": "Throttle",
+    "throttleValue": "{value} %",
+    "keys": "W S thrust · A D · R F · Q E roll · Shift boost · X brake · Space orbit · drag to look",
+    "slower": "Slower",
+    "faster": "Faster",
+    "phase": {
+      "align": "Aligning",
+      "burn": "Burn",
+      "flip": "Flip",
+      "brake": "Braking",
+      "cruise": "Cruise"
+    },
+    "disengage": "Disengage autopilot",
+    "setCourse": "Set course",
+    "destinations": "Destinations",
+    "tripsBy": "Ship time by drive",
+    "home": "Home",
+    "planets": "Planets",
+    "reach": "Our reach",
+    "stars": "Stars",
+    "galaxies": "Galaxies",
+    "gravity": "Gravity",
+    "gravityFrom": "{value} · {body}",
+    "warpAuto": "Time warp {value}",
+    "earthTime": "Earth {value}",
+    "regime": {
+      "cruise": "Cruise",
+      "warp": "Warp"
+    },
+    "crash": {
+      "title": "Impact",
+      "body": "{body} · {speed}",
+      "retry": "Back to orbit",
+      "alarm": "Hull breach"
+    }
   },
   "drives": {
     "voyager": "Voyager",
@@ -73,6 +110,15 @@
     "decade": "ten years per second",
     "millennium": "a thousand years per second"
   },
+  "ratesShort": {
+    "realTime": "1 s/s",
+    "minute": "1 min/s",
+    "hour": "1 h/s",
+    "day": "1 d/s",
+    "month": "1 mo/s",
+    "decade": "10 yr/s",
+    "millennium": "1,000 yr/s"
+  },
   "time": {
     "seconds": "{value} s",
     "minutesSeconds": "{minutes} min {seconds} s",
@@ -85,7 +131,9 @@
     "kmPerS": "{value} km/s",
     "lightSpeed": "{value} c",
     "irradiance": "{value} W/m²",
-    "gamma": "γ {value}"
+    "gamma": "γ {value}",
+    "gravity": "{value} g",
+    "warp": "{value}×"
   },
   "facts": {
     "fromShip": "From the ship",
@@ -115,7 +163,7 @@
     "summary": "Every body at its true size and place, in kilometres, with the ship as the scene's origin and a logarithmic depth buffer so a moon's surface and the far planets share one pass. Flights take the drive's real trip time on two clocks. Sunlight falls as the inverse square; moons shade one another in eclipses.",
     "features": {
       "scale": "The Sun, the planets, the named small worlds and the moons at true size, placed from the JPL elements with the Earth–Moon and Pluto–Charon barycentres resolved.",
-      "flight": "Three drives: Voyager's 17 km/s, a light sail at a tenth of light speed, a torch ship at one g turning over halfway.",
+      "flight": "Three drives: Voyager's 17 km/s, a light sail at a tenth of light speed, a torch ship at one g that burns, flips at the midpoint and brakes. The autopilot flies the real trip on an automatic time warp; by hand the ship falls in real gravity.",
       "clocks": "A ship clock and an Earth clock, run at the visitor's rate, that part only when the ship goes fast.",
       "light": "Sunlight weaker with distance, the light-time home, and eclipses cast by moons and planets.",
       "sky": "The bright stars at their measured distances and the Milky Way's band, shifting as the ship covers light-years, crowding ahead and changing colour at speed; α Centauri as three suns of their measured size."
@@ -127,7 +175,7 @@
       },
       "flight": {
         "title": "Flights and clocks",
-        "body": "A coasting drive takes D / v on Earth's clock and less on the ship's by the Lorentz factor. The torch ship holds its proper acceleration, so each half of the trip is hyperbolic motion: the ship's time is 2(c/a) acosh(1 + aD/2c²). Parked, the ship rides with its body and the clocks agree. The camera's flight is a few seconds long; the clocks advance by the drive's real trip meanwhile, and the planets move on underneath."
+        "body": "A coasting drive takes D / v on Earth's clock and less on the ship's by the Lorentz factor. The torch ship holds its proper acceleration, so each half of the trip is hyperbolic motion: the ship's time is 2(c/a) acosh(1 + aD/2c²). The autopilot first turns onto its route, then plays the trip back in a few seconds: the distance from home grows in even steps of scale, the distance to go shrinks the same way, and at every moment the position, the speed and both clocks are the drive's real ones there; only the playback rate, the time warp the dock shows, is chosen. In orbit, the ship rides with its body and the clocks agree. Flown by hand, the ship leaves orbit at rest beside its body, every drive manoeuvres at one g (the coasting drives no faster than their cruise), and the clocks run at a flight-assist warp that grows with the square root of the height above the nearest surface, so a full burn from rest carries the ship 8 % of that height in two seconds wherever it is. It falls in the gravity of the Sun, the body it is near and that body's planet or largest moon (JPL gravitational parameters), stepped by leapfrog at no less than forty steps per dynamical time; near a body the warp is held back rather than step it coarsely."
       },
       "light": {
         "title": "Light",
@@ -135,7 +183,7 @@
       },
       "sky": {
         "title": "The sky from a ship",
-        "body": "Each catalogue star sits at its SIMBAD parallax distance, so the constellations deform as the ship covers light-years and the Sun fades to a star among them. The Milky Way is the Orrery's painted band, carried with the ship and handed over to the Galaxy map light-years out; its grains and a faint field are painted, not catalogued. α Centauri is drawn as discs: A where the catalogue puts it, B on its measured orbit, Proxima at its own place, each the colour of its temperature. At speed the sky is drawn as the ship sees it: directions crowd toward the direction of travel by the aberration formula, each star's light is shifted by the Doppler factor D, its colour read from a blackbody lookup at D times its Ballesteros temperature, a star's flux raised by D squared, the band's and the background's glow by D to the fourth. Below a thousandth of light speed nothing is changed. Globes too are drawn where a moving ship sees them, their direction aberrated and their width divided by D (a sphere's outline stays a circle), though their light keeps its colour; the Galaxy map alone is drawn where it is. Beyond the mapped structures a field of galaxies drawn round the ship stands for the web no catalogue reaches. A far card says how long the light the ship sees has been under way; the map itself draws every galaxy where it is now."
+        "body": "Each catalogue star sits at its SIMBAD parallax distance, so the constellations deform as the ship covers light-years and the Sun fades to a star among them. The Milky Way is the Orrery's painted band, carried with the ship and handed over to the Galaxy map light-years out; its grains and a faint field are painted, not catalogued. α Centauri is drawn as discs: A where the catalogue puts it, B on its measured orbit, Proxima at its own place, each the colour of its temperature. At speed the sky is drawn as the ship sees it: directions crowd toward the direction of travel by the aberration formula, each star's light is shifted by the Doppler factor D, its colour read from a blackbody lookup at D times its Ballesteros temperature, a star's flux raised by D squared, the band's and the background's glow by D to the fourth. Below a thousandth of light speed nothing is changed. Globes too are drawn where a moving ship sees them, their direction aberrated and their width divided by D (a sphere's outline stays a circle), though their light keeps its colour; the Galaxy map alone is drawn where it is. Beyond the mapped structures a field of galaxies drawn round the ship stands for the web no catalogue reaches. A far card says how long the light the ship sees has been under way; the map itself draws every galaxy where it is now. Dust streaming past the ship shows its motion through the near body's frame as seen at the time warp: two lattices of motes a decade apart, blended by that speed, streak longer and brighter the faster the ship goes, and take the Doppler tint near light speed. Past light speed as seen the ship is in cruise, past ten thousand times it in warp: the streaks lengthen and cool, and at warp, the lattice light-years wide, the motes are stars and take blackbody colours, most of them red dwarfs. At true relativistic speed the sky's diffuse light crowds ahead and shifts blue: a glow dead ahead that strengthens with speed. The dust is a cue, not a measurement."
       }
     }
   },
@@ -194,6 +242,8 @@
   },
   "anchors": {
     "galacticCentre": "The Galaxy, from above",
-    "edge": "The edge of the reachable"
+    "edge": "The edge of the reachable",
+    "lmc": "Large Magellanic Cloud",
+    "smc": "Small Magellanic Cloud"
   }
 }

@@ -1,12 +1,6 @@
-/**
- * Every body the ship can fly to, and where each is at a moment in km (heliocentric, scene
- * axes), in doubles: the shared ephemeris in au times the astronomical unit, the Earth–Moon
- * and Pluto–Charon barycentres resolved to the planets' centres, and each moon at its true
- * offset from its planet. The engine places what it draws from these.
- */
-import { barycentreOffset, isBarycentreHost } from "@/space/solar-system/model/barycentre";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
 import { moonOffset } from "@/space/solar-system/model/moon-orbits";
+import type { SolarSelection } from "@/space/solar-system/model/selection";
 import {
   FIGURES,
   MOONS,
@@ -22,6 +16,14 @@ import {
 } from "@horizon/toolkit/bodies";
 import type { Vec3d } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
+
+/**
+ * Every body the ship can fly to, and where each is at a moment in km (heliocentric, scene
+ * axes), in doubles: the shared ephemeris in au times the astronomical unit, the Earth–Moon
+ * and Pluto–Charon barycentres resolved to the planets' centres, and each moon at its true
+ * offset from its planet. The engine places what it draws from these.
+ */
+import { barycentreOffset, isBarycentreHost } from "./barycentre";
 
 export type WorldBody =
   | { id: "sun"; kind: "sun" }
@@ -39,6 +41,20 @@ export const WORLD_BODIES: readonly WorldBody[] = [
 
 const byId = new Map(WORLD_BODIES.map((body) => [body.id, body]));
 export const worldBody = (id: BodyId) => byId.get(id)!;
+
+/** The card a body opens. */
+export function selectionOfBody(body: WorldBody): SolarSelection {
+  switch (body.kind) {
+    case "sun":
+      return { kind: "sun" };
+    case "planet":
+      return { kind: "planet", id: body.id };
+    case "named":
+      return { kind: "named", id: body.id };
+    case "moon":
+      return { kind: "moon", id: body.id };
+  }
+}
 
 /** A body's mean radius, km. */
 export const radiusKm = (id: BodyId) => FIGURES[id].meanKm;

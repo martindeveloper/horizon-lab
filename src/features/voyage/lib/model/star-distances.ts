@@ -3,7 +3,7 @@
  * `scripts/fetch-star-distances.mjs`), for a sky flown through. The sky carried with a camera
  * never reads them, so only that sky's bundle carries the table.
  */
-import DISTANCES from "@/space/star-distances.json";
+import DISTANCES from "./star-distances.json";
 
 const DISTANCE_PC: Readonly<Record<string, number>> = DISTANCES.stars;
 

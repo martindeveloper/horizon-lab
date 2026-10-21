@@ -1,37 +1,71 @@
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
-import { Action } from "@horizon/toolkit/ui";
+import { Action, ListItem } from "@horizon/toolkit/ui";
 
+import { anchorOfSelection } from "../lib/model/anchors";
 import { dateAt } from "../lib/model/calendar";
-import { useVoyage } from "../lib/store";
-import { bodyOfSelection, cardFor } from "./cards";
+import { DRIVE_IDS } from "../lib/model/parameters";
+import { courseOf, useVoyage } from "../lib/store";
+import { cardFor } from "./cards";
+import { formatDuration } from "./format";
+import { clocksPart, tripTo } from "./trips";
 
-/** Facts for the selected body, from where the ship is, and the way to fly there. */
+/**
+ * Facts for the selected body, from the ship's last fix, and the way to fly there unless the
+ * ship is bound for it already: each drive's trip on the ship's clock (and Earth's, where they
+ * part), the chosen one lit; tapping another chooses it.
+ */
 export function SelectionCard() {
   const t = useTranslations("voyage");
   const f = useFormatter();
   const locale = useLocale();
   const selection = useVoyage((s) => s.selection);
   const unit = useVoyage((s) => s.distanceUnit);
-  const destination = useVoyage((s) => s.destination);
-  const earthSeconds = useVoyage((s) => s.earthSeconds);
+  const course = useVoyage(courseOf);
+  const fix = useVoyage((s) => s.fix);
   const epochMs = useVoyage((s) => s.epochMs);
-  const ship = useVoyage((s) => s.shipKm);
+  const drive = useVoyage((s) => s.drive);
   const select = useVoyage((s) => s.select);
   if (!selection) return null;
-  const body = bodyOfSelection(selection);
-  const now = dateAt(epochMs, earthSeconds);
+  const body = anchorOfSelection(selection);
+  const now = dateAt(epochMs, fix.seconds);
+  const ship = fix.km;
   return (
     <SelectionSheet
       card={cardFor(t, f, selection, { unit, locale }, now, ship)}
       closeLabel={t("hud.close")}
       onClose={() => select(null)}
       footer={
-        body && body !== destination ? (
-          <Action className="w-full" onClick={() => useVoyage.getState().goTo(body)}>
-            {t("hud.flyHere")}
-          </Action>
+        body && body !== course ? (
+          <div className="flex flex-col gap-2">
+            <div role="group" aria-label={t("hud.drive")} className="flex flex-col gap-0.5">
+              {DRIVE_IDS.map((id) => {
+                const trip = tripTo(id, body, ship, now);
+                return (
+                  <ListItem
+                    key={id}
+                    {...(id === drive ? { selected: true } : {})}
+                    aria-pressed={id === drive}
+                    onClick={() => useVoyage.getState().setDrive(id)}
+                  >
+                    <span className="min-w-0 truncate">{t(`drives.${id}`)}</span>
+                    <span className="shrink-0 text-right font-mono text-[11px] text-muted tabular-nums">
+                      {formatDuration(t, f, trip.tau)}
+                      {clocksPart(trip) ? (
+                        <span className="block text-[10px] text-subtle">
+                          {t("hud.earthTime", { value: formatDuration(t, f, trip.t) })}
+                        </span>
+                      ) : null}
+                    </span>
+                  </ListItem>
+                );
+              })}
+            </div>
+            <Action className="w-full" onClick={() => useVoyage.getState().goTo(body)}>
+              {t("hud.flyHere")}
+            </Action>
+          </div>
         ) : null
       }
     />

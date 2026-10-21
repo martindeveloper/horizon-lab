@@ -5,18 +5,17 @@
  * texel per pixel (`tierFor`), up to what the quality allows. Loads go one at a time, far
  * maps first so something measured shows soon, then the body in most need. Decoded maps wait
  * for an upload slot, so a swap never stalls a frame mid-flight: one per `UPLOAD_GAP_S`
- * unless the scene says it is cruising. Over the memory budget, the maps of bodies that have
+ * unless the scene says it is cruising, the budget waking the scene when the slot opens. Over the memory budget, the maps of bodies that have
  * stayed small the longest are released, close-up tiers first; at most one `near` and one
  * `nearLight` map stay resident, the body being flown by and the next. A failed far map
  * leaves its body painted; a failed close-up tier leaves the far map showing.
  */
 import type { Texture } from "three";
 
+import { TIERS, bytesOf, tierFor, tierRank } from "@/space/solar-system/graphics/map-tiers";
 import { MAPS, tierFile, type BodyId, type MapTier } from "@horizon/toolkit/bodies";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 import { decodeMap, fetchMap } from "@horizon/toolkit/scene";
-
-import { TIERS, bytesOf, tierFor, tierRank } from "../graphics/map-tiers";
 
 /** On-screen radius (device px) that asks for a body's far map. */
 const LOAD_PX = 3;
@@ -64,8 +63,10 @@ export function createMapBudget(
     onFail: (id: BodyId) => void;
     /** Uploads a decoded texture now (`renderer.initTexture`), in an upload slot. */
     upload: (texture: Texture) => void;
-    /** Asks for a frame, so a load that finished off-screen is shown. */
+    /** Asks for a frame, so a load that finished off-screen, or a slot that opened, is shown. */
     wake: () => void;
+    /** Seconds on a steady clock, for the upload pacing; `performance.now` by default. */
+    now?: () => number;
     /** The loader, for tests; fetches then decodes by default. */
     load?: (file: string, signal: AbortSignal, anisotropy: number) => Promise<Texture>;
   },
@@ -80,7 +81,11 @@ export function createMapBudget(
   let loading = false;
   let resident = 0;
   let lastUpload = -Infinity;
+  const now = options.now ?? (() => performance.now() / 1000);
+  /** The wake asked for when the next upload slot opens. */
+  let slotTimer: ReturnType<typeof setTimeout> | undefined;
   scope.defer(() => {
+    clearTimeout(slotTimer);
     abort.abort();
     for (const slot of slots.values()) slot.texture?.dispose();
     slots.clear();
@@ -161,15 +166,16 @@ export function createMapBudget(
   const upload = (cruising: boolean) => {
     let uploaded = false;
     let waiting = false;
+    const at = now();
     for (const slot of slots.values()) {
       if (slot.state !== "decoded") continue;
-      if (uploaded || (!cruising && clock - lastUpload < UPLOAD_GAP_S)) {
+      if (uploaded || (!cruising && at - lastUpload < UPLOAD_GAP_S)) {
         waiting = true;
         continue;
       }
       options.upload(slot.texture!);
       uploaded = true;
-      lastUpload = clock;
+      lastUpload = at;
       slot.state = "ready";
       slot.seen = clock;
       resident += slot.bytes;
@@ -178,6 +184,16 @@ export function createMapBudget(
         for (const other of slots.values())
           if (other !== slot && other.tier === slot.tier && other.state === "ready") release(other);
       refresh(slot.id);
+    }
+    if (waiting && slotTimer === undefined) {
+      const left = uploaded ? UPLOAD_GAP_S : UPLOAD_GAP_S - (at - lastUpload);
+      slotTimer = setTimeout(
+        () => {
+          slotTimer = undefined;
+          options.wake();
+        },
+        Math.max(0, left) * 1000,
+      );
     }
     return waiting;
   };
@@ -242,7 +258,7 @@ export function createMapBudget(
      * Each frame, after the layers reported their sizes (`need`: on-screen radius in device
      * pixels per body, at the flight's destination where one is under way). `keep` is a body
      * whose maps are never released; `cruising` lifts the upload pacing. True while a decoded
-     * map still waits for its upload slot.
+     * map still waits for its upload slot (the budget wakes the scene when it opens).
      */
     update(
       dt: number,

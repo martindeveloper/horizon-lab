@@ -12,14 +12,13 @@ import {
   ShaderMaterial,
   SphereGeometry,
   Vector2,
-  Vector3,
   type DataTexture,
   type Object3D,
 } from "three";
 
 import { LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 
-import { LUT_RANGE_K } from "../graphics/looks";
+import { LUT_RANGE_K, type MotionUniforms } from "../graphics/looks";
 import CMB_FRAG from "../graphics/shaders/cmb.frag.glsl";
 import CMB_VERT from "../graphics/shaders/cmb.vert.glsl";
 import { CMB_LY, cmbKelvinAt } from "../model/comoving";
@@ -29,17 +28,19 @@ import type { VoyageKit } from "./kit";
 /** The background's temperature at which its glow reads at full brightness, kelvin. */
 const VISIBLE_K = 1000;
 
-export function createCmbLayer({ scope }: VoyageKit, parent: Object3D, lut: DataTexture) {
-  const forward = new Vector3(0, 0, -1);
-  const beta = { value: 0 };
-  const gamma = { value: 1 };
+export function createCmbLayer(
+  { scope }: VoyageKit,
+  parent: Object3D,
+  lut: DataTexture,
+  motion: MotionUniforms,
+) {
   const kelvin = { value: cmbKelvinAt(0) };
   const material = scope.own(
     new ShaderMaterial({
       uniforms: {
-        forward: { value: forward },
-        beta,
-        gamma,
+        forward: { value: motion.forward },
+        beta: motion.beta,
+        gamma: motion.gamma,
         kelvin,
         bbLut: { value: lut },
         lutRange: { value: new Vector2(LUT_RANGE_K[0], LUT_RANGE_K[1]) },
@@ -73,10 +74,6 @@ export function createCmbLayer({ scope }: VoyageKit, parent: Object3D, lut: Data
       /* Nothing to see until the factor ahead, γ(1 + β), lifts the background toward red heat. */
       const ahead = kelvin.value * motion.gamma * (1 + motion.beta);
       shell.visible = ahead > VISIBLE_K * 0.25;
-      if (!shell.visible) return;
-      forward.fromArray(motion.forward);
-      beta.value = motion.beta;
-      gamma.value = motion.gamma;
     },
   };
 }

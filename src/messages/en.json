@@ -48,8 +48,10 @@
   },
   "catalogue": {
     "title": "A little closer <em>to the universe.</em>",
-    "collection": "Simulations",
-    "available": "{count} available",
+    "labs": "Labs",
+    "experiences": "Experiences",
+    "experiencesNote": "Sit back and fly. Real physics, less to read.",
+    "available": "{labs, plural, one {# lab} other {# labs}}{experiences, plural, =0 {} one { · # experience} other { · # experiences}}",
     "sky": "Approximate sky over Ondřejov",
     "sun": "Sun",
     "moon": "Moon",
@@ -143,11 +145,11 @@
       "title": "Voyage",
       "eyebrow": "Voyage · At true scale",
       "category": "Scale & relativity",
-      "description": "Fly a spacecraft from the Moon to the far planets at true scale. Real drives, two clocks, the light as it falls there.",
+      "description": "Fly a spacecraft from the Moon to the edge of the reachable universe, at true scale. Let the autopilot take you, or take the helm.",
       "open": "Open Voyage",
       "scale": "Every world at true size",
       "clocks": "A ship clock and an Earth clock",
-      "horizon": "Real drives, honest trips",
+      "horizon": "Autopilot or the helm",
       "entryPoints": {
         "moon": {
           "title": "The Moon"

@@ -1,11 +1,10 @@
 /**
  * The shared worlds beyond the solar system, placed about the ship: our reach (the probes and
- * the heliopause), the Galaxy and the cosmic map. Each layer
- * draws in the au world it was written for; two groups carry them, scaled to km and placed by
- * the ship's offset (the floating origin). The bound worlds keep their size; the cosmic map is
- * scaled by the universe's expansion as the clocks run, so galaxies recede. The layers fade by
- * the ship's distance from the Sun, as they fade by the camera's in Deep Field; out beyond
- * the mapped structures the cosmic map's field of galaxies is kept round the ship.
+ * the heliopause), the Galaxy and the cosmic map. Each layer draws in the au world it was
+ * written for; two groups carry them, scaled to km and placed by the ship's offset (the
+ * floating origin). The cosmic map is also scaled by the universe's expansion as the clocks
+ * run, so galaxies recede. The layers fade by the ship's distance from the Sun; beyond the
+ * mapped structures the field of galaxies is kept round the ship.
  */
 import { Group, PerspectiveCamera, type Object3D } from "three";
 
@@ -149,6 +148,11 @@ export function createWorldsLayer(
       ship = at;
       const distAu = Math.hypot(at[0], at[1], at[2]) / AU_KM;
       const aimAu = Math.max(1e-9, aimKm / AU_KM);
+      if (worldCamera.fov !== camera.fov || worldCamera.aspect !== camera.aspect) {
+        worldCamera.fov = camera.fov;
+        worldCamera.aspect = camera.aspect;
+        worldCamera.updateProjectionMatrix();
+      }
       worldCamera.position.set(at[0] / AU_KM, at[1] / AU_KM, at[2] / AU_KM);
       worldCamera.quaternion.copy(camera.quaternion);
       worldCamera.updateMatrixWorld();

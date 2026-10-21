@@ -11,15 +11,7 @@
  */
 import { wrap } from "../math/index";
 import { J2000_JD, SOLAR_RADIUS_KM, julianDay } from "../science";
-import {
-  argumentOfPerihelion,
-  eccentricAnomaly,
-  keplerPosition,
-  meanAnomaly,
-  periodYears,
-  secularElement,
-  type Elements,
-} from "./kepler";
+import { eccentricAnomaly, keplerPosition, periodYears, type Elements } from "./kepler";
 
 export const SUN_RADIUS_KM = SOLAR_RADIUS_KM;
 export const DAYS_PER_JULIAN_YEAR = 365.25;
@@ -124,40 +116,30 @@ export function centuriesSinceJ2000(date: Date) {
   return (julianDay(date) - J2000_JD) / 36525;
 }
 
-/** Osculating elements at the given epoch from the JPL table. */
-function six(values: readonly number[]): [number, number, number, number, number, number] {
-  const [a, e, i, L, varpi, node] = values;
-  if (
-    a === undefined ||
-    e === undefined ||
-    i === undefined ||
-    L === undefined ||
-    varpi === undefined ||
-    node === undefined
-  ) {
-    throw new Error("JPL elements need six secular terms.");
-  }
-  return [a, e, i, L, varpi, node];
-}
-
 /**
  * Elements from the JPL table `T` Julian centuries after J2000; the fit holds for 1800–2050.
  * `driftYears` carries the body on along that orbit at its mean rate (the mean longitude
- * alone), never ageing the orbit itself: the secular rates do not extrapolate.
+ * alone), never ageing the orbit itself: the secular rates do not extrapolate. A scene asks
+ * many times a frame, so the sums of `secularElement`, `argumentOfPerihelion` and
+ * `meanAnomaly` are written out here, and `out` takes the result without allocating.
  */
-export function jplElements(id: PlanetId | "pluto", T: number, driftYears = 0): Elements {
+export function jplElements(
+  id: PlanetId | "pluto",
+  T: number,
+  driftYears = 0,
+  out: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 },
+): Elements {
   const r = JPL[id];
-  const at = (k: number) => secularElement.compute({ x0: r[k]!, rate: r[k + 6]!, T });
-  const [a, e, i, L0, varpi, node] = six(Array.from({ length: 6 }, (_, k) => at(k)));
-  const L = L0 + r[9] * (driftYears / 100);
-  return {
-    a,
-    e,
-    i,
-    omega: wrap(argumentOfPerihelion.compute({ varpi, node }), 360),
-    node: wrap(node, 360),
-    M: wrap(meanAnomaly.compute({ L, varpi }), 360),
-  };
+  const varpi = r[4] + r[10] * T;
+  const node = r[5] + r[11] * T;
+  const L = r[3] + r[9] * T + r[9] * (driftYears / 100);
+  out.a = r[0] + r[6] * T;
+  out.e = r[1] + r[7] * T;
+  out.i = r[2] + r[8] * T;
+  out.omega = wrap(varpi - node, 360);
+  out.node = wrap(node, 360);
+  out.M = wrap(L - varpi, 360);
+  return out;
 }
 
 export type NamedId = "pluto" | "sedna" | "halley";

@@ -6,6 +6,7 @@ export const ORRERY_PATH = simulationPath("orrery");
 
 export const orreryManifest = {
   id: "orrery",
+  kind: "lab",
   href: ORRERY_PATH,
   artwork: "/simulations/orrery.svg",
   messageKey: "orrery",

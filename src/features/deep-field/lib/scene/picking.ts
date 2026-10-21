@@ -2,6 +2,7 @@
 import type { Object3D } from "three";
 
 import { GALAXY_LAYER } from "@/space/galaxy/scene/frames";
+import { isWorldPick } from "@/space/galaxy/show";
 import { selectTapped } from "@/space/solar-system/model/framing";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
@@ -34,21 +35,7 @@ export function createPicking(
       const api = store.getState();
       if (!target) return api.select(null);
       if (selectTapped(api, target, 1, options.distance())) return;
-      if (isSelection(target.pick)) api.select(target.pick);
+      if (isWorldPick(target.pick)) api.select(target.pick);
     },
   });
-}
-
-function isSelection(value: unknown): value is Selection {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "kind" in value &&
-    (value.kind === "galaxy" ||
-      value.kind === "cosmos" ||
-      value.kind === "star" ||
-      value.kind === "reach") &&
-    "id" in value &&
-    typeof value.id === "string"
-  );
 }

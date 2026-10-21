@@ -29,7 +29,9 @@
   "toggles": {
     "instruments": "Přístroje",
     "canopy": "Kabina",
-    "orbits": "Dráhy"
+    "orbits": "Dráhy",
+    "streaks": "Proudy rychlosti",
+    "feel": "Odezva lodi"
   },
   "hud": {
     "guide": "Průvodce",
@@ -37,7 +39,7 @@
     "hold": "Zastavit hodiny",
     "run": "Spustit hodiny",
     "drive": "Pohon",
-    "rate": "Tempo hodin",
+    "rate": "Zrychlení času",
     "shipClock": "Lodní čas",
     "earthClock": "Pozemský čas",
     "speed": "Rychlost",
@@ -45,19 +47,54 @@
     "sunlight": "Sluneční svit",
     "lightToEarth": "Světlo k Zemi",
     "flyHere": "Letět sem",
-    "flyingTo": "Let: {body}",
-    "parkedAt": "U {body}",
-    "mode": "Loď",
-    "modeOrbit": "Zaparkováno",
-    "modeFree": "Volný let",
-    "nearBody": "Poblíž {body}",
-    "freeKeys": "W/S · A/D · R/F · Q/E náklon · Shift zrychlení · X brzda · mezerník zaparkovat · tažením rozhled",
-    "farPlaces": "Za sluneční soustavou",
     "cmb": "Pozadí",
     "cmbValue": "{value} K",
     "clocksApart": "Rozdíl hodin",
     "closing": "Přibližování",
-    "target": "Cíl"
+    "target": "Cíl",
+    "state": {
+      "orbit": "Orbita",
+      "free": "Ručně",
+      "flight": "Autopilot",
+      "crash": "Náraz"
+    },
+    "takeHelm": "Převzít řízení",
+    "enterOrbit": "Na oběžnou dráhu",
+    "throttle": "Tah",
+    "throttleValue": "{value} %",
+    "keys": "W S tah · A D · R F · Q E náklon · Shift zrychlení · X brzda · mezerník orbita · tažením rozhled",
+    "slower": "Pomaleji",
+    "faster": "Rychleji",
+    "phase": {
+      "align": "Natáčení",
+      "burn": "Zážeh",
+      "flip": "Obrat",
+      "brake": "Brzdění",
+      "cruise": "Let"
+    },
+    "disengage": "Vypnout autopilota",
+    "setCourse": "Nastavit kurz",
+    "destinations": "Cíle",
+    "tripsBy": "Lodní čas podle pohonu",
+    "home": "Domov",
+    "planets": "Planety",
+    "reach": "Náš dosah",
+    "stars": "Hvězdy",
+    "galaxies": "Galaxie",
+    "gravity": "Gravitace",
+    "gravityFrom": "{value} · {body}",
+    "warpAuto": "Zrychlení času {value}",
+    "earthTime": "Země {value}",
+    "regime": {
+      "cruise": "Cruise",
+      "warp": "Warp"
+    },
+    "crash": {
+      "title": "Náraz",
+      "body": "{body} · {speed}",
+      "retry": "Zpět na oběžnou dráhu",
+      "alarm": "Porušený trup"
+    }
   },
   "drives": {
     "voyager": "Voyager",
@@ -73,6 +110,15 @@
     "decade": "deset let za sekundu",
     "millennium": "tisíc let za sekundu"
   },
+  "ratesShort": {
+    "realTime": "1 s/s",
+    "minute": "1 min/s",
+    "hour": "1 h/s",
+    "day": "1 d/s",
+    "month": "1 měs./s",
+    "decade": "10 let/s",
+    "millennium": "1 000 let/s"
+  },
   "time": {
     "seconds": "{value} s",
     "minutesSeconds": "{minutes} min {seconds} s",
@@ -85,7 +131,9 @@
     "kmPerS": "{value} km/s",
     "lightSpeed": "{value} c",
     "irradiance": "{value} W/m²",
-    "gamma": "γ {value}"
+    "gamma": "γ {value}",
+    "gravity": "{value} g",
+    "warp": "{value}×"
   },
   "facts": {
     "fromShip": "Od lodi",
@@ -115,7 +163,7 @@
     "summary": "Každé těleso ve skutečné velikosti a poloze, v kilometrech, s lodí v počátku scény a logaritmickou hloubkou, aby povrch měsíce i vzdálené planety sdílely jeden průchod. Lety trvají skutečný čas pohonu na dvojích hodinách. Sluneční svit slábne s kvadrátem vzdálenosti; měsíce se navzájem zastiňují.",
     "features": {
       "scale": "Slunce, planety, pojmenované malé světy a měsíce ve skutečné velikosti, umístěné podle elementů JPL s rozlišenými barycentry Země–Měsíc a Pluto–Charon.",
-      "flight": "Tři pohony: 17 km/s Voyageru, světelná plachta na desetině rychlosti světla, plamenná loď s jedním g a obratem v polovině.",
+      "flight": "Tři pohony: Voyager se 17 km/s, světelná plachta s desetinou rychlosti světla a plamenná loď s jedním g, která zrychluje, v polovině se obrátí a brzdí. Autopilot letí skutečnou cestu s automatickým zrychlením času; v ručním letu loď padá ve skutečné gravitaci.",
       "clocks": "Lodní a pozemské hodiny v tempu, které zvolíte; rozcházejí se jen při vysoké rychlosti.",
       "light": "Sluneční svit slábnoucí se vzdáleností, doba letu světla domů a zatmění od měsíců a planet.",
       "sky": "Jasné hvězdy v naměřených vzdálenostech a pás Mléčné dráhy: posouvají se, jak loď ujíždí světelné roky, při rychlosti se tísní vpředu a mění barvu; α Centauri jako tři slunce naměřené velikosti."
@@ -127,7 +175,7 @@
       },
       "flight": {
         "title": "Lety a hodiny",
-        "body": "Setrvačný pohon trvá D / v pozemského času a na lodi méně o Lorentzův faktor. Plamenná loď drží vlastní zrychlení, každá polovina cesty je hyperbolický pohyb: lodní čas je 2(c/a) acosh(1 + aD/2c²). Zaparkovaná loď letí se svým tělesem a hodiny se shodují. Kamera letí několik sekund; hodiny mezitím ujdou skutečnou cestu pohonu a planety se pod ní pohnou."
+        "body": "Setrvačný pohon trvá D / v pozemského času a na lodi méně o Lorentzův faktor. Plamenná loď drží vlastní zrychlení, každá polovina cesty je hyperbolický pohyb: lodní čas je 2(c/a) acosh(1 + aD/2c²). Autopilot se nejprve natočí na kurz a pak cestu přehraje za několik sekund: vzdálenost od domova roste v rovnoměrných krocích měřítka, zbývající vzdálenost stejně klesá a v každém okamžiku jsou poloha, rychlost i oboje hodiny skutečnými hodnotami pohonu v tom místě; zvolené je jen tempo přehrávání, zrychlení času, které ukazuje panel. Na oběžné dráze loď letí se svým tělesem a hodiny se shodují. V ručním letu loď opouští oběžnou dráhu v klidu vedle svého tělesa, každý pohon manévruje s jedním g (setrvačné pohony nejvýš svou cestovní rychlostí) a hodiny běží s asistenčním zrychlením času, které roste s odmocninou výšky nad nejbližším povrchem, takže plný zážeh z klidu nese loď kdekoli za dvě sekundy 8 % té výšky. Padá v gravitaci Slunce, nejbližšího tělesa a jeho planety nebo největšího měsíce (gravitační parametry JPL), počítané metodou leapfrog nejméně čtyřiceti kroky na dynamický čas; u tělesa se zrychlení času raději zbrzdí, než aby kroky zhrubly."
       },
       "light": {
         "title": "Světlo",
@@ -135,7 +183,7 @@
       },
       "sky": {
         "title": "Obloha z lodi",
-        "body": "Každá katalogová hvězda sedí ve vzdálenosti podle paralaxy ze SIMBADu, takže se souhvězdí deformují, jak loď ujíždí světelné roky, a Slunce mezi nimi pohasne v hvězdu. Mléčná dráha je malovaný pás z Planetária, nesený s lodí a světelné roky daleko předaný mapě Galaxie; jeho zrna i slabé pole jsou malovaná, ne katalogová. α Centauri se kreslí jako kotouče: A tam, kam ji klade katalog, B na své naměřené dráze, Proxima na svém místě, každá v barvě své teploty. Při rychlosti se obloha kreslí tak, jak ji loď vidí: směry se podle vzorce pro aberaci tísní ke směru letu, světlo každé hvězdy je posunuto Dopplerovým faktorem D, barva se čte z tabulky černého tělesa při D-násobku Ballesterosovy teploty, tok hvězdy roste s druhou mocninou D, záře pásu a pozadí se čtvrtou. Pod tisícinou rychlosti světla se nic nemění. I koule se kreslí tam, kde je letící loď vidí: směr s aberací a šířka dělená D (obrys koule zůstává kruhem), jen barva jejich světla se nemění; bez aberace zůstává jedině mapa Galaxie. Za zmapovanými strukturami stojí pole galaxií kreslené kolem lodi za síť, kam žádný katalog nesahá. Karta vzdáleného místa říká, jak dlouho je světlo, které loď vidí, na cestě; sama mapa kreslí každou galaxii tam, kde je teď."
+        "body": "Každá katalogová hvězda sedí ve vzdálenosti podle paralaxy ze SIMBADu, takže se souhvězdí deformují, jak loď ujíždí světelné roky, a Slunce mezi nimi pohasne v hvězdu. Mléčná dráha je malovaný pás z Planetária, nesený s lodí a světelné roky daleko předaný mapě Galaxie; jeho zrna i slabé pole jsou malovaná, ne katalogová. α Centauri se kreslí jako kotouče: A tam, kam ji klade katalog, B na své naměřené dráze, Proxima na svém místě, každá v barvě své teploty. Při rychlosti se obloha kreslí tak, jak ji loď vidí: směry se podle vzorce pro aberaci tísní ke směru letu, světlo každé hvězdy je posunuto Dopplerovým faktorem D, barva se čte z tabulky černého tělesa při D-násobku Ballesterosovy teploty, tok hvězdy roste s druhou mocninou D, záře pásu a pozadí se čtvrtou. Pod tisícinou rychlosti světla se nic nemění. I koule se kreslí tam, kde je letící loď vidí: směr s aberací a šířka dělená D (obrys koule zůstává kruhem), jen barva jejich světla se nemění; bez aberace zůstává jedině mapa Galaxie. Za zmapovanými strukturami stojí pole galaxií kreslené kolem lodi za síť, kam žádný katalog nesahá. Karta vzdáleného místa říká, jak dlouho je světlo, které loď vidí, na cestě; sama mapa kreslí každou galaxii tam, kde je teď. Prach proudící kolem lodi ukazuje její pohyb vůči soustavě blízkého tělesa, jak se jeví při zrychlení času: dvě mřížky smítek o řád od sebe, prolnuté podle té rychlosti, táhnou tím delší a jasnější stopy, čím rychleji loď letí, a blízko rychlosti světla se zbarví Dopplerovým posuvem. Nad zdánlivou rychlostí světla je loď v režimu cruise, nad desetitisícinásobkem v režimu warp: stopy se prodlužují a chladnou a ve warpu, kdy je mřížka široká světelné roky, jsou smítka hvězdami a mají barvy černého tělesa, většinou červených trpaslíků. Při skutečně relativistické rychlosti se rozptýlené světlo oblohy stahuje před loď a posouvá k modré: vpředu vzniká záře, která s rychlostí sílí. Prach je vodítko, ne měření."
       }
     }
   },
@@ -194,6 +242,8 @@
   },
   "anchors": {
     "galacticCentre": "Galaxie shora",
-    "edge": "Okraj dosažitelného"
+    "edge": "Okraj dosažitelného",
+    "lmc": "Velký Magellanův oblak",
+    "smc": "Malý Magellanův oblak"
   }
 }

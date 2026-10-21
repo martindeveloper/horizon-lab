@@ -24,12 +24,8 @@ import {
   STANDARD_GRAVITY_KM_S2,
   irradianceAt,
 } from "../src/features/voyage/lib/model/parameters.ts";
-import { PLACES, placeById, placeFor } from "../src/features/voyage/lib/model/places.ts";
-import {
-  gammaOfSpeed,
-  tripProgress,
-  tripTimes,
-} from "../src/features/voyage/lib/model/relativity.ts";
+import { PLACE_BODY, placeFor } from "../src/features/voyage/lib/model/places.ts";
+import { tripProgress, tripTimes } from "../src/features/voyage/lib/model/relativity.ts";
 import {
   createShip,
   shipGamma,
@@ -67,7 +63,6 @@ test("Voyager coasts to α Centauri in about 77,000 years, the sail in 44", () =
   const sail = tripTimes(DRIVES.sail, km);
   near(sail.t / YEAR_S, 43.7, 0.01);
   near(sail.tau / sail.t, Math.sqrt(1 - 0.01), 1e-9, "the sail's clock runs slow by γ");
-  near(gammaOfSpeed(0.6 * C_KM_S), 1.25, 1e-9);
 });
 
 test("the ship's integrator matches hyperbolic motion at one g", () => {
@@ -128,16 +123,13 @@ test("sunlight falls as the inverse square: 1,361 W/m² at Earth, under a watt a
 });
 
 test("places and routes: every place is a body with a route, and slugs round-trip", () => {
-  assert.deepEqual(
-    PLACES.map((p) => p.id),
-    VIEW_IDS,
-  );
+  assert.deepEqual(Object.keys(PLACE_BODY), [...VIEW_IDS]);
   for (const id of VIEW_IDS) {
     assert.equal(resolveView(id), id);
     assert.equal(viewFromPath(pathForView(id)), id);
-    assert.equal(placeFor(placeById(id).body), id);
+    assert.equal(placeFor(PLACE_BODY[id]), id);
   }
-  assert.equal(pathForView("earth"), "/lab/voyage");
+  assert.equal(pathForView("earth"), "/experience/voyage");
   assert.equal(resolveView("constructor"), null);
   assert.equal(placeFor("io"), "jupiter");
 });
@@ -168,6 +160,44 @@ test("the store: going to a body bumps the flight, a moon shows its host's place
   s.endGuide();
   assert.equal(useVoyage.getState().show.orbits, false);
   assert.equal(useVoyage.getState().selection, null);
+  useVoyage.setState(useVoyage.getInitialState(), true);
+});
+
+test("the store: the throttle stays on its travel and closes for orbit and the autopilot", () => {
+  const s = useVoyage.getState();
+  s.setThrottle(1.4);
+  assert.equal(useVoyage.getState().throttle, 1);
+  s.setThrottle(-0.2);
+  assert.equal(useVoyage.getState().throttle, 0);
+  s.setThrottle(0.4);
+  s.setMode("free");
+  assert.equal(useVoyage.getState().throttle, 0.4, "taking the helm keeps the lever");
+  s.setMode("orbit");
+  assert.equal(useVoyage.getState().throttle, 0);
+  s.setThrottle(0.6);
+  s.goTo("mars");
+  assert.equal(useVoyage.getState().throttle, 0, "the autopilot flies with the lever closed");
+  /* Disengaging asks the scene to hand a flight over only while one is under way. */
+  const aborts = useVoyage.getState().abort;
+  s.disengage();
+  assert.equal(useVoyage.getState().abort, aborts);
+  useVoyage.setState({ flying: true });
+  s.disengage();
+  assert.equal(useVoyage.getState().abort, aborts + 1);
+  useVoyage.setState({ flying: false });
+  /* A crash is the scene's to report; recovering clears it and asks the scene for orbit. */
+  const recoveries = useVoyage.getState().recoveries;
+  s.recover();
+  assert.equal(useVoyage.getState().recoveries, recoveries);
+  useVoyage.setState({ crash: { body: "earth", speed: 3 }, throttle: 0.5 });
+  s.recover();
+  assert.equal(useVoyage.getState().crash, null);
+  assert.equal(useVoyage.getState().recoveries, recoveries + 1);
+  assert.equal(useVoyage.getState().throttle, 0);
+  s.setThrottle(0.6);
+  s.startGuide();
+  assert.equal(useVoyage.getState().throttle, 0);
+  s.endGuide();
   useVoyage.setState(useVoyage.getInitialState(), true);
 });
 

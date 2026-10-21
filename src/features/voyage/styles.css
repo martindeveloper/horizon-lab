@@ -1,68 +1,432 @@
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
 
-/* The console (components/flight-dock.tsx): two glass panels angled in towards the pilot,
-   the scanner's place between them. Phones stack them flat. */
-@media (width >= 48rem) {
-  :where([data-simulation="voyage"]) .voyage-console {
-    perspective: 1400px;
+/* The HUD the cockpit projects (components/overlay.tsx): it rides a spring the engine
+   moves (lib/scene/cockpit.ts), scaling about the console. */
+:where([data-simulation="voyage"]) .voyage-hud {
+  transform-origin: 50% 85%;
+  will-change: transform;
+}
+
+/* The console (components/flight-dock.tsx): two projected displays tilted back over the
+   dash and angled in towards the pilot, the scanner's place between them. Phones keep one
+   flat glass panel. */
+@media (width >= 48rem) and (height >= 30rem) {
+  /* On the displays' own parent: perspective reaches only an element's children, and the
+     displays tilted without it would neither foreshorten nor take clicks in their receded
+     corners (Chromium leaves those parts out of hit testing). */
+  :where([data-simulation="voyage"]) .voyage-console-grid {
+    perspective: 1100px;
   }
   :where([data-simulation="voyage"]) .voyage-console-left {
-    transform: rotateY(-11deg);
-    transform-origin: right center;
+    transform: rotateY(-15deg) rotateX(7deg);
+    transform-origin: right bottom;
   }
   :where([data-simulation="voyage"]) .voyage-console-right {
-    transform: rotateY(11deg);
-    transform-origin: left center;
+    transform: rotateY(15deg) rotateX(7deg);
+    transform-origin: left bottom;
   }
 }
 
-/* The cockpit over the scene (lib/scene/cockpit.ts): lines in the accent with a faint glow,
-   placed by the engine. A parked ship shows the canopy and the scanner; a flight the aim too;
-   free flight all of it. The View panel's switches take the canopy and the instruments away. */
+/* Each ship's console. Voyager's is one flat strip of two boxy screens side by side, square
+   cornered, heavier scanlines, a dimmer glow: a capsule's panel. The sail's displays sit wide
+   at the edges and tilt further in, their wash lighter, their brackets longer: pure light.
+   The torch ship's are the two tilted displays either side of the scanner. */
+:where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-console-grid {
+  grid-template-columns: 1fr 15rem 1fr;
+}
+:where([data-simulation="voyage"]) .voyage-hud[data-ship="sail"] .voyage-console-grid {
+  grid-template-columns: 1fr 24rem 1fr;
+}
+@media (width >= 48rem) and (height >= 30rem) {
+  :where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-console-left,
+  :where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-console-right {
+    transform: none;
+  }
+  :where([data-simulation="voyage"]) .voyage-hud[data-ship="sail"] .voyage-console-left {
+    transform: rotateY(-24deg) rotateX(9deg);
+  }
+  :where([data-simulation="voyage"]) .voyage-hud[data-ship="sail"] .voyage-console-right {
+    transform: rotateY(24deg) rotateX(9deg);
+  }
+}
+:where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-holo {
+  --holo-corner: 0px;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-solar) 22%, transparent);
+  text-shadow: none;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 3px),
+    linear-gradient(
+      0deg,
+      color-mix(in oklab, var(--color-solar) 8%, rgb(20 20 24 / 0.94)) 0%,
+      color-mix(in oklab, var(--color-solar) 4%, rgb(12 12 16 / 0.8)) 100%
+    );
+}
+:where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-holo::before {
+  display: none;
+}
+:where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-holo .font-display {
+  text-shadow: none;
+}
+:where([data-simulation="voyage"]) .voyage-hud[data-ship="sail"] .voyage-holo {
+  --holo-corner: 22px;
+  --holo-line: color-mix(in oklab, var(--color-solar) 80%, transparent);
+  box-shadow: 0 0 36px -12px color-mix(in oklab, var(--color-solar) 40%, transparent);
+}
+
+/* A projected display: light on the canopy rather than glass. Corner brackets, a lit rule and
+   a faint outline in the solar gold over the barest wash and scanlines; the light pools at
+   the foot as a projector's would, and there the wash turns milky (a plain fill, no blur:
+   it costs nothing as the HUD sways), so the dash and the scanner never show through the
+   figures; figures in starlight with a soft glow, labels gold. It is part of the dark scene, so its tokens are the dark theme's in both
+   themes, tooltips included. Its element places itself (relative or absolute): the rule
+   along the top needs it positioned, and this stylesheet comes after the utilities. */
+:where([data-simulation="voyage"]) .voyage-holo {
+  --color-fg: var(--color-space-fg);
+  --color-muted: var(--color-space-muted);
+  --color-subtle: color-mix(in oklab, var(--color-solar) 70%, var(--color-space-muted));
+  --color-accent: var(--color-solar);
+  --color-accent-fg: #15110a;
+  --color-action: var(--color-solar);
+  --color-action-fg: #15110a;
+  --action-sheen: none;
+  --action-shadow: none;
+  --action-glow: 0 0 28px rgb(226 192 122 / 0.22);
+  --color-danger: #c45b4a;
+  --color-ring: var(--color-solar);
+  --color-bg: var(--color-space);
+  --color-border: color-mix(in oklab, var(--color-solar) 22%, transparent);
+  --color-border-strong: color-mix(in oklab, var(--color-solar) 38%, transparent);
+  --tip-bg: rgb(14 14 18 / 0.9);
+  --solar: 226 192 122;
+  --holo-line: color-mix(in oklab, var(--color-solar) 65%, transparent);
+  --holo-corner: 12px;
+  border-radius: 3px;
+  color: var(--color-fg);
+  text-shadow: 0 0 10px color-mix(in oklab, var(--color-solar) 26%, transparent);
+  background:
+    linear-gradient(var(--holo-line), var(--holo-line)) top left / var(--holo-corner) 1px no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) top left / 1px var(--holo-corner) no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) top right / var(--holo-corner) 1px no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) top right / 1px var(--holo-corner) no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) bottom left / var(--holo-corner) 1px
+      no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) bottom left / 1px var(--holo-corner)
+      no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) bottom right / var(--holo-corner) 1px
+      no-repeat,
+    linear-gradient(var(--holo-line), var(--holo-line)) bottom right / 1px var(--holo-corner)
+      no-repeat,
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.016) 0 1px, transparent 1px 3px),
+    linear-gradient(
+      0deg,
+      color-mix(in oklab, var(--color-solar) 12%, rgb(24 24 30 / 0.92)) 0%,
+      color-mix(in oklab, var(--color-solar) 7%, rgb(14 14 18 / 0.58)) 36%,
+      color-mix(in oklab, var(--color-solar) 2%, rgb(8 8 11 / 0.12)) 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-solar) 9%, transparent),
+    0 0 28px -10px color-mix(in oklab, var(--color-solar) 30%, transparent);
+}
+:where([data-simulation="voyage"]) .voyage-holo::before {
+  content: "";
+  position: absolute;
+  inset: 0 10% auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-solar) 55%, transparent),
+    transparent
+  );
+}
+:where([data-simulation="voyage"]) .voyage-holo .font-display {
+  text-shadow: 0 0 14px color-mix(in oklab, var(--color-solar) 38%, transparent);
+}
+
+/* The key card a ship taken by hand shows for a few seconds, then lets go. */
+@keyframes voyage-keys {
+  0%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+:where([data-simulation="voyage"]) .voyage-keys {
+  animation: voyage-keys 7s ease-in forwards;
+}
+
+/* The throttle lever (components/throttle.tsx): what the drive gives now, beside the setting
+   (lib/scene/cockpit.ts scales it). */
+:where([data-simulation="voyage"]) .voyage-push {
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 120ms linear;
+  will-change: transform;
+  filter: drop-shadow(0 0 3px rgb(var(--solar) / 0.6));
+}
+
+/* The cockpit over the scene (lib/scene/cockpit.ts): lines in the solar gold with a faint glow,
+   placed by the engine. In orbit it shows the canopy and the scanner; on autopilot the aim
+   and the burn too; flown by hand all of it. The View panel's switches take the canopy and the
+   instruments away. */
 :where([data-simulation="voyage"]) .voyage-cockpit {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  color: var(--color-accent);
-  transition: transform 240ms ease-out;
-  --voyage-line: color-mix(in oklab, var(--color-accent) 88%, transparent);
-  --voyage-faint: color-mix(in oklab, var(--color-accent) 30%, transparent);
-  --voyage-glow: drop-shadow(0 0 3px color-mix(in oklab, var(--color-accent) 55%, transparent));
+  color: var(--color-solar);
+  --voyage-line: color-mix(in oklab, var(--color-solar) 88%, transparent);
+  --voyage-glow: drop-shadow(0 0 3px color-mix(in oklab, var(--color-solar) 55%, transparent));
+  /* It leans with the HUD every frame: composited, so the canopy is not repainted. */
+  will-change: transform;
 }
 :where([data-simulation="voyage"]) .voyage-cockpit:not([data-canopy]) .voyage-canopy,
-:where([data-simulation="voyage"]) .voyage-cockpit:not([data-instruments]) > :not(.voyage-canopy),
 :where([data-simulation="voyage"])
-  .voyage-cockpit[data-mode="parked"]
+  .voyage-cockpit:not([data-instruments])
+  > :not(.voyage-canopy, .voyage-alarm),
+:where([data-simulation="voyage"])
+  .voyage-cockpit[data-mode="orbit"]
   > :not(.voyage-canopy, .voyage-scanner),
 :where([data-simulation="voyage"])
   .voyage-cockpit[data-mode="flight"]
-  > :not(.voyage-canopy, .voyage-aim, .voyage-scanner) {
+  > :not(.voyage-canopy, .voyage-aim, .voyage-scanner, .voyage-burn, .voyage-floats) {
   display: none;
 }
 
-/* The canopy: the glass darkens to the corners with a sheen across it; the pillars rise from
-   the dash with their inner edges lit. */
+/* The canopy: the glass's sheen, its corners darkening, two slender struts at the outer
+   edges, and a fade up from the slim dash so the projected displays read over a bright
+   world. Part of the scene, so dark in both themes. */
 :where([data-simulation="voyage"]) .voyage-canopy {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(115deg, rgb(255 255 255 / 0.035) 0%, transparent 38%),
-    radial-gradient(ellipse 112% 92% at 50% 58%, transparent 60%, rgb(0 0 0 / 0.62) 100%);
+    linear-gradient(245deg, rgb(255 255 255 / 0.02) 0%, transparent 22%),
+    linear-gradient(to top, rgb(8 8 11 / 0.72) 0%, rgb(8 8 11 / 0.32) 16%, transparent 36%),
+    radial-gradient(ellipse 112% 92% at 50% 48%, transparent 60%, rgb(0 0 0 / 0.55) 100%);
 }
-:where([data-simulation="voyage"]) .voyage-canopy svg {
+:where([data-simulation="voyage"]) .voyage-frame {
+  position: absolute;
+  inset: 0;
+}
+:where([data-simulation="voyage"]) .voyage-frame-layer,
+:where([data-simulation="voyage"]) .voyage-frame svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
-:where([data-simulation="voyage"]) .voyage-pillar {
-  fill: rgb(8 8 11 / 0.94);
+/* The metal's light (lib/scene/cockpit.ts sets `--voyage-bevel-x/y` towards the Sun): the
+   lit copy nudged that way, the shadow copy the other, the body over both. */
+:where([data-simulation="voyage"]) .voyage-frame-layer[data-light="lit"] {
+  translate: var(--voyage-bevel-x, 2px) var(--voyage-bevel-y, -2px);
 }
-:where([data-simulation="voyage"]) .voyage-pillar-edge {
-  stroke: var(--voyage-faint);
-  stroke-width: 1.5;
+:where([data-simulation="voyage"]) .voyage-frame-layer[data-light="shade"] {
+  translate: calc(-1 * var(--voyage-bevel-x, 2px)) calc(-1 * var(--voyage-bevel-y, -2px));
+}
+/* A strut: a few pixels of dark metal at any size, no line on it (the lines are the HUD's).
+   Voyager's posts are heavier, a capsule's; the sail's shroud lines are grey hairlines of
+   rigging, no bar at all. */
+:where([data-simulation="voyage"]) .voyage-strut {
+  fill: none;
+  stroke: #15151a;
+  stroke-width: 9;
+  stroke-linecap: round;
   vector-effect: non-scaling-stroke;
+}
+:where([data-simulation="voyage"]) .voyage-strut-post {
+  stroke-width: 14;
+  stroke-linecap: square;
+}
+:where([data-simulation="voyage"]) [data-light="lit"] .voyage-strut {
+  stroke: rgb(236 236 232 / 0.34);
+}
+:where([data-simulation="voyage"]) [data-light="shade"] .voyage-strut {
+  stroke: rgb(0 0 0 / 0.7);
+}
+:where([data-simulation="voyage"]) .voyage-shroud {
+  fill: none;
+  stroke: rgb(236 236 232 / 0.2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+/* The sail rides above: a little of its light at the top of the canopy, more when pushed. */
+:where([data-simulation="voyage"]) .voyage-cockpit[data-ship="sail"] .voyage-canopy {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-solar) 9%, transparent),
+      transparent 22%
+    ),
+    linear-gradient(115deg, rgb(255 255 255 / 0.035) 0%, transparent 38%),
+    linear-gradient(245deg, rgb(255 255 255 / 0.02) 0%, transparent 22%),
+    linear-gradient(to top, rgb(8 8 11 / 0.72) 0%, rgb(8 8 11 / 0.32) 16%, transparent 36%),
+    radial-gradient(ellipse 112% 92% at 50% 48%, transparent 60%, rgb(0 0 0 / 0.55) 100%);
+}
+:where([data-simulation="voyage"])
+  .voyage-cockpit[data-ship="sail"][data-burn="ahead"]
+  .voyage-burn {
+  background: radial-gradient(
+    ellipse 80% 40% at 50% -14%,
+    color-mix(in oklab, var(--color-solar) 24%, transparent),
+    transparent 70%
+  );
+}
+/* Voyager looks through a capsule's window: the glass darker to the edges, the reticle a cross. */
+:where([data-simulation="voyage"]) .voyage-cockpit[data-ship="voyager"] .voyage-canopy {
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.03) 0%, transparent 38%),
+    linear-gradient(to top, rgb(8 8 11 / 0.72) 0%, rgb(8 8 11 / 0.32) 16%, transparent 36%),
+    radial-gradient(ellipse 100% 86% at 50% 48%, transparent 52%, rgb(0 0 0 / 0.78) 100%);
+}
+:where([data-simulation="voyage"]) .voyage-cockpit[data-ship="voyager"] .voyage-boresight {
+  border-radius: 0;
+  width: 26px;
+  height: 26px;
+}
+:where([data-simulation="voyage"]) .voyage-dash {
+  position: absolute;
+  inset: auto 0 0;
+  height: clamp(2.5rem, 6vh, 4rem);
+  /* The rim's glow: the cowl's own outline, lit. */
+  filter: var(--voyage-glow);
+}
+:where([data-simulation="voyage"]) .voyage-dash svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+:where([data-simulation="voyage"]) .voyage-dash-body {
+  fill: rgb(8 8 11 / 0.92);
+}
+:where([data-simulation="voyage"]) .voyage-dash-rim {
+  fill: none;
+  stroke: color-mix(in oklab, var(--color-solar) 45%, transparent);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+/* Phones and a phone held sideways keep the scene: no dash, the struts hugging the edges. */
+@media (width < 48rem), (height < 30rem) {
+  :where([data-simulation="voyage"]) .voyage-dash {
+    display: none;
+  }
+  :where([data-simulation="voyage"]) .voyage-frame {
+    inset: 0 -12%;
+  }
+}
+
+/* The floating readouts about the boresight, projected with the HUD: two faint arcs either
+   side of the reticle, a ladder of the ship's speed to the left and of the closing speed to
+   the right, each a hairline with ticks a decade apart, a gold mark sliding up it with the
+   figure beside, the word beneath. */
+:where([data-simulation="voyage"]) .voyage-floats {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+:where([data-simulation="voyage"]) .voyage-arc {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 280px;
+  height: 280px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  translate: -50% -50%;
+  opacity: 0.45;
+}
+:where([data-simulation="voyage"]) .voyage-arc-left {
+  border-left-color: var(--voyage-line);
+}
+:where([data-simulation="voyage"]) .voyage-arc-right {
+  border-right-color: var(--voyage-line);
+}
+:where([data-simulation="voyage"]) .voyage-ladder {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 120px;
+  translate: 0 -50%;
+  background: color-mix(in oklab, var(--color-solar) 40%, transparent);
+}
+:where([data-simulation="voyage"]) .voyage-ladder-speed {
+  left: calc(50% - 196px);
+}
+:where([data-simulation="voyage"]) .voyage-ladder-closing {
+  left: calc(50% + 196px);
+}
+/* Six ticks, a decade of speed apart. */
+:where([data-simulation="voyage"]) .voyage-ladder::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 7px;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-solar) 45%, transparent) 0 1px,
+    transparent 1px 18.3px
+  );
+}
+:where([data-simulation="voyage"]) .voyage-ladder-mark {
+  position: absolute;
+  top: 0;
+  left: -5px;
+  width: 11px;
+  height: 2px;
+  background: var(--color-solar);
+  filter: var(--voyage-glow);
+  transition: transform 120ms linear;
+  will-change: transform;
+}
+:where([data-simulation="voyage"]) .voyage-ladder-value,
+:where([data-simulation="voyage"]) .voyage-ladder-word {
+  position: absolute;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  color: var(--color-solar);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--color-solar) 35%, transparent);
+}
+:where([data-simulation="voyage"]) .voyage-ladder-value {
+  top: 50%;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  translate: 0 -50%;
+}
+:where([data-simulation="voyage"]) .voyage-ladder-speed .voyage-ladder-value {
+  right: 16px;
+}
+:where([data-simulation="voyage"]) .voyage-ladder-closing .voyage-ladder-value {
+  left: 16px;
+}
+:where([data-simulation="voyage"]) .voyage-ladder-word {
+  top: 100%;
+  margin-top: 8px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+:where([data-simulation="voyage"]) .voyage-ladder-speed .voyage-ladder-word {
+  right: 0;
+}
+:where([data-simulation="voyage"]) .voyage-ladder-closing .voyage-ladder-word {
+  left: 0;
+}
+/* Phones have no room beside the boresight. */
+@media (width < 48rem), (height < 30rem) {
+  :where([data-simulation="voyage"]) .voyage-floats {
+    display: none;
+  }
 }
 
 /* The boresight: a ring with four ticks at the centre of the view. */
@@ -98,7 +462,8 @@
   mask: linear-gradient(180deg, #000 0 14px, transparent 14px 62px, #000 62px);
 }
 
-/* The markers: placed by transform from the top left; a marker sits at its centre. */
+/* The markers: placed by transform from the top left each frame (composited); a marker sits at
+   its centre. */
 :where([data-simulation="voyage"]) .voyage-mark {
   position: absolute;
   left: -11px;
@@ -108,6 +473,7 @@
   opacity: 0;
   transition: opacity 180ms ease;
   filter: var(--voyage-glow);
+  will-change: transform;
 }
 :where([data-simulation="voyage"]) .voyage-mark[data-on] {
   opacity: 1;
@@ -162,7 +528,7 @@
   top: 50%;
   width: 14px;
   height: 14px;
-  border: 1.5px solid var(--color-accent);
+  border: 1.5px solid var(--color-solar);
   translate: -50% -50%;
   rotate: 45deg;
 }
@@ -181,18 +547,19 @@
   font-size: 11px;
   letter-spacing: 0.1em;
   white-space: nowrap;
-  color: var(--color-accent);
+  color: var(--color-solar);
   translate: -50% 0;
 }
 :where([data-simulation="voyage"]) .voyage-aim[data-off] .voyage-aim-tag {
   display: none;
 }
 
-/* The scanner: the ship's plane seen at a slant, between the console's panels. */
+/* The scanner: the ship's plane seen at a slant, in the dash between the console's panels
+   (the console's centre column keeps its place). */
 :where([data-simulation="voyage"]) .voyage-scanner {
   position: absolute;
   left: 50%;
-  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  bottom: max(1rem, env(safe-area-inset-bottom));
   width: 240px;
   height: 150px;
   translate: -50% 0;
@@ -203,34 +570,13 @@
   }
 }
 
-/* The throttle on the right: a track and its fill, scaled by the thrust. */
-:where([data-simulation="voyage"]) .voyage-throttle {
-  position: absolute;
-  right: max(2rem, env(safe-area-inset-right));
-  top: 50%;
-  width: 4px;
-  height: 140px;
-  border-radius: 2px;
-  background: color-mix(in oklab, var(--color-fg) 16%, transparent);
-  translate: 0 -50%;
-}
-:where([data-simulation="voyage"]) .voyage-throttle-fill {
-  position: absolute;
-  inset: 0;
-  border-radius: 2px;
-  background: var(--color-accent);
-  transform: scaleY(0);
-  transform-origin: bottom;
-  filter: var(--voyage-glow);
-}
-
 /* The burn: a warm glow from below while the drive thrusts. */
 :where([data-simulation="voyage"]) .voyage-burn {
   position: absolute;
   inset: 0;
   background: radial-gradient(
     ellipse 70% 40% at 50% 115%,
-    color-mix(in oklab, var(--color-accent) 22%, transparent),
+    color-mix(in oklab, var(--color-solar) 22%, transparent),
     transparent 70%
   );
   opacity: 0;
@@ -238,4 +584,122 @@
 }
 :where([data-simulation="voyage"]) .voyage-cockpit[data-burn] .voyage-burn {
   opacity: 1;
+}
+/* Braking, the drive faces the destination: the glow comes from the nose. */
+:where([data-simulation="voyage"]) .voyage-cockpit[data-burn="brake"] .voyage-burn {
+  background: radial-gradient(
+    ellipse 70% 38% at 50% -12%,
+    color-mix(in oklab, var(--color-solar) 20%, transparent),
+    transparent 70%
+  );
+}
+
+/* The flip at the midpoint: one sweep of light across the canopy glass. */
+@keyframes voyage-flip {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+:where([data-simulation="voyage"]) .voyage-canopy::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    color-mix(in oklab, var(--color-solar) 14%, transparent) 50%,
+    transparent 65%
+  );
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where([data-simulation="voyage"]) .voyage-cockpit[data-flip] .voyage-canopy::after {
+    opacity: 1;
+    animation: voyage-flip 1.2s ease-in-out forwards;
+  }
+}
+
+/* A crash (lib/scene/cockpit.ts `data-crash`, components/crash-card.tsx): the alarm pulses red
+   through the cockpit, the HUD's displays go dark, and the card's light blinks. */
+@keyframes voyage-alarm {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes voyage-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+:where([data-simulation="voyage"]) .voyage-alarm {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: radial-gradient(
+    ellipse 120% 100% at 50% 55%,
+    transparent 45%,
+    color-mix(in oklab, var(--color-danger) 38%, transparent) 100%
+  );
+  opacity: 0.6;
+}
+:where([data-simulation="voyage"]) .voyage-cockpit[data-crash] .voyage-alarm {
+  display: block;
+}
+/* With the ship's feel on, the impact flashes red across the view first (half as bright for
+   reduced motion). */
+@keyframes voyage-impact {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--impact-flash);
+  }
+}
+:where([data-simulation="voyage"]) .voyage-alarm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-danger);
+  opacity: 0;
+  --impact-flash: 0.55;
+}
+:where([data-simulation="voyage"]) .voyage-cockpit[data-feel][data-crash] .voyage-alarm::before {
+  animation: voyage-impact 390ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  :where([data-simulation="voyage"]) .voyage-alarm::before {
+    /* The alarm itself stands at 0.6 here, unpulsed. */
+    --impact-flash: 0.45;
+  }
+}
+:where([data-simulation="voyage"]) .voyage-hud[data-crashed] {
+  opacity: 0.3;
+  transition: opacity 400ms ease;
+}
+:where([data-simulation="voyage"]) .voyage-holo-danger {
+  --holo-line: color-mix(in oklab, var(--color-danger) 75%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-danger) 18%, transparent),
+    0 0 36px -8px color-mix(in oklab, var(--color-danger) 45%, transparent);
+}
+:where([data-simulation="voyage"]) .voyage-crash-title {
+  color: var(--color-danger);
+  text-shadow: 0 0 18px color-mix(in oklab, var(--color-danger) 55%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where([data-simulation="voyage"]) .voyage-cockpit[data-crash] .voyage-alarm {
+    animation: voyage-alarm 1.6s ease-in-out infinite;
+  }
+  :where([data-simulation="voyage"]) .voyage-blink {
+    animation: voyage-blink 1s steps(1) infinite;
+  }
 }

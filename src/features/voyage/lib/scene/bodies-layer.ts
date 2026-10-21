@@ -12,7 +12,6 @@ import {
   Line,
   Mesh,
   RingGeometry,
-  SphereGeometry,
   Sprite,
   Vector3,
   type Object3D,
@@ -22,8 +21,7 @@ import {
 import { moonOrientation } from "@/space/solar-system/graphics/moons";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
 import { writeMoonOrbit } from "@/space/solar-system/model/moon-orbits";
-import type { SolarSelection } from "@/space/solar-system/model/selection";
-import { ORBIT_COLOR } from "@/space/solar-system/scene/kit";
+import { COMET_ORBIT_COLOR, ORBIT_COLOR, SMALL_ORBIT_COLOR } from "@/space/solar-system/scene/kit";
 import {
   FIGURES,
   MAPS,
@@ -38,7 +36,6 @@ import {
   SOLAR_GOLD,
   STRONG,
   bodyOrientation,
-  pickLevel,
   placeRelative,
   vec3d,
   type PlaceLabel,
@@ -46,23 +43,15 @@ import {
 } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
-import { motionUniforms, orbitMaterial } from "../graphics/looks";
+import { orbitMaterial, type MotionUniforms } from "../graphics/looks";
 import { isBodyAnchor, type AnchorId } from "../model/anchors";
-import { WORLD_BODIES, bodyPositionKm, type WorldBody } from "../model/bodies";
-import type { GlobeDetail } from "../quality";
+import { WORLD_BODIES, bodyPositionKm, selectionOfBody, type WorldBody } from "../model/bodies";
+import { DRAW_PX, GLOW_RADII, NAME_PX, type Globes } from "./globes";
 import type { Frame, VoyageKit } from "./kit";
 import { placeSeen } from "./seen";
 
-/** Globe levels by on-screen radius (CSS px): fine, close, then the quality's finest. */
-const SPHERE_PX = [36, 360, 1400] as const;
-/** Below this on-screen radius a body is not drawn (it would be a flickering sub-pixel). */
-const DRAW_PX = 0.3;
-/** A body's name reads once it is this large on screen (eased over the span). */
-const NAME_PX = [1.5, 3] as const;
 /** Samples along an orbit's ellipse. */
 const ORBIT_SEGMENTS = 256;
-/** How far the Sun's glow reaches, in its radii. */
-const GLOW_RADII = 2.8;
 
 type Orbit = {
   line: Line;
@@ -98,27 +87,14 @@ const shapeOf = (id: BodyId) =>
 
 const ORIGIN = vec3d();
 
-function pickOf(body: WorldBody): SolarSelection {
-  switch (body.kind) {
-    case "sun":
-      return { kind: "sun" };
-    case "planet":
-      return { kind: "planet", id: body.id };
-    case "named":
-      return { kind: "named", id: body.id };
-    case "moon":
-      return { kind: "moon", id: body.id };
-  }
-}
-
 function orbitColor(body: WorldBody) {
   switch (body.kind) {
     case "planet":
       return ORBIT_COLOR[body.id];
     case "moon":
-      return body.host === "pluto" ? 0x9ebccc : ORBIT_COLOR[body.host];
+      return body.host === "pluto" ? SMALL_ORBIT_COLOR : ORBIT_COLOR[body.host];
     case "named":
-      return body.id === "halley" ? 0xc4705a : 0x9ebccc;
+      return body.id === "halley" ? COMET_ORBIT_COLOR : SMALL_ORBIT_COLOR;
     case "sun":
       return 0;
   }
@@ -129,30 +105,14 @@ export function createBodiesLayer(
   parent: Object3D,
   deps: {
     place: PlaceLabel;
-    globe: GlobeDetail;
+    globes: Globes;
+    /** The ship's motion, for the orbit lines' aberration. */
+    motion: MotionUniforms;
   },
 ) {
   const { scope, looks, lod } = kit;
-  const { place } = deps;
-  /* Globes: coarse while a body is small, finer as it fills the view. */
-  const coarse = scope.own(new SphereGeometry(1, 24, 16));
-  const fine = scope.own(new SphereGeometry(1, 72, 48));
-  const close = scope.own(new SphereGeometry(1, 128, 80));
-  const levels: BufferGeometry[] = [
-    coarse,
-    fine,
-    close,
-    new SphereGeometry(1, deps.globe.segments, deps.globe.rings),
-  ];
-  scope.defer(() => levels[3]!.dispose());
-  const fit = (mesh: Mesh, rPx: number) => {
-    const current = Math.max(0, levels.indexOf(mesh.geometry));
-    mesh.geometry = levels[pickLevel(current, rPx, SPHERE_PX)]!;
-  };
-
+  const { place, globes, motion } = deps;
   looks.sunRadius.value = SUN_RADIUS_KM;
-  /* The ship's motion, for the orbit lines' aberration; written each frame. */
-  const motion = motionUniforms();
 
   const slots: Slot[] = WORLD_BODIES.map((body) => {
     const material =
@@ -163,8 +123,8 @@ export function createBodiesLayer(
           : body.kind === "named"
             ? looks.named[body.id]
             : looks.moon(body.id);
-    const mesh = new Mesh(coarse, material);
-    mesh.userData.pick = pickOf(body);
+    const mesh = new Mesh(globes.coarse, material);
+    mesh.userData.pick = selectionOfBody(body);
     mesh.userData.globe = mesh;
     mesh.visible = false;
     parent.add(mesh);
@@ -232,6 +192,7 @@ export function createBodiesLayer(
   const orbits = lod.fader();
   /* Orbit writers in au, scaled to km by the line: the buffer's floats stay small. */
   const writers = new Map<BodyId, ReturnType<typeof createOrbitWriter>>();
+  const nearest = { id: "sun" as BodyId, gap: Infinity };
 
   /** Fills a body's eclipse slots with those of its shadowers that stand before the Sun. */
   const occlude = (slot: Slot, ship: Vec3d) => {
@@ -309,42 +270,28 @@ export function createBodiesLayer(
     /** Everything a tap may land on. */
     pickables: slots.map((slot) => slot.mesh),
     labelBodies: slots.map((slot) => ({ key: slot.body.id, mesh: slot.mesh })),
-    /** A body's heliocentric position as drawn this frame, km. */
-    positionOf: (id: BodyId): Readonly<Vec3d> => byId.get(id)!.pos,
     /** Every body with its position as drawn this frame, km (the scanner's blips). */
     positions: slots.map((slot) => ({
       id: slot.body.id as string,
       pos: slot.pos as Readonly<Vec3d>,
     })),
-    /** The body whose surface is nearest a point, km, heliocentric. */
-    nearest(at: ArrayLike<number>): BodyId {
-      let best: Slot = slots[0]!;
-      let bestGap = Infinity;
+    /** The body whose surface is nearest a point (km, heliocentric), and how far it is (a reused object). */
+    nearest(at: ArrayLike<number>) {
+      nearest.gap = Infinity;
       for (const slot of slots) {
         const gap =
           Math.hypot(slot.pos[0] - at[0]!, slot.pos[1] - at[1]!, slot.pos[2] - at[2]!) -
           slot.radius;
-        if (gap < bestGap) {
-          bestGap = gap;
-          best = slot;
+        if (gap < nearest.gap) {
+          nearest.gap = gap;
+          nearest.id = slot.body.id;
         }
       }
-      return best.body.id;
-    },
-    /** The quality's finest globe changed. */
-    setGlobe(detail: GlobeDetail) {
-      const top = levels[3]!;
-      const next = new SphereGeometry(1, detail.segments, detail.rings);
-      for (const slot of slots) if (slot.mesh.geometry === top) slot.mesh.geometry = next;
-      top.dispose();
-      levels[3] = next;
+      return nearest;
     },
     update({ now, show, sel, ship, aim, motion: moving }: Frame) {
       const labelled = names.to(show.names);
       const orbitsOn = orbits.to(show.orbits);
-      motion.beta.value = moving.beta;
-      motion.gamma.value = moving.gamma;
-      motion.forward.fromArray(moving.forward);
       /* The Sun as every surface sees it: from the ship's origin. */
       looks.sunPos.set(-ship[0], -ship[1], -ship[2]);
       /* Hosts come before their moons, so a moon is placed from its host's place this frame. */
@@ -368,7 +315,7 @@ export function createBodiesLayer(
         }
         if (body.kind === "moon") moonOrientation(body.id, now, mesh.quaternion);
         else bodyOrientation(body.id, now, mesh.quaternion);
-        fit(mesh, rPx);
+        globes.fit(mesh, rPx);
         if (MAPS[body.id]) lod.see(body.id, rPx);
         if (slot.ring && body.kind === "planet") {
           poleWorld.set(0, 1, 0).applyQuaternion(mesh.quaternion);

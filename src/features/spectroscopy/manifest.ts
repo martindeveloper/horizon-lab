@@ -6,6 +6,7 @@ export const SPECTROSCOPY_PATH = simulationPath("spectroscopy");
 
 export const spectroscopyManifest = {
   id: "spectroscopy",
+  kind: "lab",
   href: SPECTROSCOPY_PATH,
   artwork: "/simulations/spectroscopy.svg",
   messageKey: "spectroscopy",

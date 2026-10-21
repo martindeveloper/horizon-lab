@@ -7,18 +7,17 @@
  * (star.vert.glsl, band.frag.glsl): the ship's velocity reaches the shaders as β, γ and the
  * direction of travel.
  */
-import { BufferAttribute, Points, type DataTexture, type Object3D } from "three";
+import { BufferAttribute, Points, Vector3, type DataTexture, type Object3D } from "three";
 
 import { brightStarGeometry } from "@/space/bright-stars";
 import { LY } from "@/space/galaxy/scene/frames";
 import { createMilkyWay, fieldStars, starSize, type SkyCounts } from "@/space/sky/milky-way";
-import { starDistance } from "@/space/star-distances";
 import { pointsGeometry, rising, type Vec3d } from "@horizon/toolkit/scene";
 import { PARSEC_KM } from "@horizon/toolkit/science";
 
-import { LUT_RANGE_K, PAINTED_PEAK, starMaterial, starMotion } from "../graphics/looks";
+import { LUT_RANGE_K, PAINTED_PEAK, starMaterial, type MotionUniforms } from "../graphics/looks";
 import { BAND_TO_MAP_LY } from "../model/parameters";
-import type { ShipMotion } from "../model/ship";
+import { starDistance } from "../model/star-distances";
 import type { VoyageKit } from "./kit";
 
 /** The sky sphere's radius, km: inside the frustum, beyond the solar system's bodies. */
@@ -43,13 +42,14 @@ export function createStarsLayer(
   { scope, dpr }: VoyageKit,
   parent: Object3D,
   lut: DataTexture,
+  motion: MotionUniforms,
   counts: SkyCounts,
 ) {
-  const motion = starMotion();
-  const material = scope.own(starMaterial(dpr, lut, motion));
+  const shipPc = new Vector3();
+  const material = scope.own(starMaterial(dpr, lut, motion, shipPc));
   /* The painted sky's points share the motion but fade on their own and brighten less. */
   const paintedMaterial = () => {
-    const made = starMaterial(dpr, lut, motion);
+    const made = starMaterial(dpr, lut, motion, shipPc);
     made.uniforms.peak!.value = PAINTED_PEAK;
     return made;
   };
@@ -84,7 +84,6 @@ export function createStarsLayer(
     points.frustumCulled = false;
   }
   parent.add(milkyWay.group, field, sky, sun);
-  const { shipPc, forward, beta, gamma } = motion;
   material.uniforms.radius!.value = SKY_RADIUS_KM;
   painted.uniforms.radius!.value = SKY_RADIUS_KM;
   let drawn = counts;
@@ -100,8 +99,8 @@ export function createStarsLayer(
       }
       drawn = next;
     },
-    /** Draws the sky for the ship at `x` (km, heliocentric), `distAu` from the Sun, moving as `motion`. */
-    update(x: Readonly<Vec3d>, distAu: number, motion: ShipMotion) {
+    /** Draws the sky for the ship at `x` (km, heliocentric), `distAu` from the Sun. */
+    update(x: Readonly<Vec3d>, distAu: number) {
       shipPc.set(x[0] / PARSEC_KM, x[1] / PARSEC_KM, x[2] / PARSEC_KM);
       /* The painted band is the sky from here; the Galaxy map takes over light-years out. */
       const band = 1 - rising(distAu / LY, BAND_TO_MAP_LY[0], BAND_TO_MAP_LY[1]);
@@ -111,9 +110,6 @@ export function createStarsLayer(
         painted.uniforms.fade!.value = band;
         field.visible = band > 0.004;
       }
-      beta.value = motion.beta;
-      gamma.value = motion.gamma;
-      forward.fromArray(motion.forward);
     },
   };
 }

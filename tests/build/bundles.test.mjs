@@ -49,7 +49,7 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
       "lab/orrery",
       "lab/deep-field",
       "lab/spectroscopy",
-      ...voyageRoutes(["lab/voyage"]),
+      ...voyageRoutes(["experience/voyage"]),
     ]) {
       const route = assets(`${locale}/${suffix}`, ".js");
       for (const path of heavy) assert.ok(!route.has(path), `${locale}/${suffix} loads ${path}`);
@@ -116,7 +116,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       "lab/deep-field/laniakea",
       "lab/spectroscopy",
       "lab/spectroscopy/kirchhoff",
-      ...voyageRoutes(["lab/voyage", "lab/voyage/saturn"]),
+      ...voyageRoutes(["experience/voyage", "experience/voyage/saturn"]),
     ]) {
       const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
         (path) => !shared.has(path),
@@ -124,7 +124,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
       assert.match(contents(feature), marker[suffix.split("/")[1]]);
       /* The zoomable scenes label their objects; the black hole and the spectra draw no labels. */
-      if (/^lab\/(?:orrery|deep-field|voyage)/.test(suffix))
+      if (/^(?:lab\/(?:orrery|deep-field)|experience\/voyage)/.test(suffix))
         assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
       assert.doesNotMatch(
         contents(feature),

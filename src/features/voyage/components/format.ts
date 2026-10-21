@@ -2,10 +2,11 @@ import { formatAu, type DistanceSettings, type Format, type Translate } from "@/
 import { AU_KM, convert } from "@horizon/toolkit/science";
 
 import { dateAt, withinCalendar } from "../lib/model/calendar";
-import { C_KM_S } from "../lib/model/parameters";
+import { speedFigure } from "../lib/model/instruments";
+import { STANDARD_GRAVITY_KM_S2 } from "../lib/model/parameters";
 
 /** What a readout shows for a value it has none of. */
-const NONE = "—";
+export const NONE = "—";
 /** A clock time is the visitor's, as Deep Field's dates are. */
 const VISITOR_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -54,22 +55,33 @@ export function formatRange(t: Translate, f: Format, d: DistanceSettings, km: nu
   return formatAu(t, d, km / AU_KM, true);
 }
 
-/**
- * A speed: km/s, or a fraction of light speed once it is a hundredth of c, with as many
- * digits as it takes to tell it from c ("0.99999 c"), and the Lorentz factor once that is
- * more than one.
- */
+/** A speed (`speedFigure`), and the Lorentz factor once that is more than one. */
 export function formatSpeed(t: Translate, f: Format, kmPerS: number, gamma = 1) {
   if (!Number.isFinite(kmPerS)) return NONE;
-  const beta = kmPerS / C_KM_S;
-  if (beta < 0.01)
-    return t("units.kmPerS", {
-      value: f.number(kmPerS, { maximumFractionDigits: kmPerS < 10 ? 2 : kmPerS < 1000 ? 1 : 0 }),
-    });
-  const digits = Math.min(9, Math.max(3, Math.ceil(-Math.log10(Math.max(1e-9, 1 - beta))) + 1));
-  const speed = t("units.lightSpeed", { value: f.number(beta, { maximumFractionDigits: digits }) });
+  const { ofC, value, digits } = speedFigure(kmPerS);
+  const number = f.number(value, { maximumFractionDigits: digits });
+  const speed = t(ofC ? "units.lightSpeed" : "units.kmPerS", { value: number });
   if (!(gamma >= 1.01)) return speed;
   return `${speed} · ${t("units.gamma", { value: f.number(gamma, { maximumSignificantDigits: 3 }) })}`;
+}
+
+/** A pull in standard gravities: "0.06 g", "6E-4 g", "2.1E-14 g" between the stars. */
+export function formatGravity(t: Translate, f: Format, kmPerS2: number) {
+  if (!Number.isFinite(kmPerS2)) return NONE;
+  const g = kmPerS2 / STANDARD_GRAVITY_KM_S2;
+  const value =
+    g < 1e-3
+      ? f.number(g, { notation: "scientific", maximumSignificantDigits: 2 })
+      : f.number(g, { maximumSignificantDigits: 2 });
+  return t("units.gravity", { value });
+}
+
+/** A time warp: "3,600×", "3.2M×". */
+export function formatWarp(t: Translate, f: Format, warp: number) {
+  if (!Number.isFinite(warp)) return NONE;
+  return t("units.warp", {
+    value: f.number(warp, { notation: "compact", maximumSignificantDigits: 2 }),
+  });
 }
 
 /** Sunlight: "1,361 W/m²", "0.9 W/m²", "5.3E-20 W/m²" out among the galaxies. */

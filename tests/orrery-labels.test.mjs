@@ -1,13 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { Group, Mesh, PerspectiveCamera, Vector3 } from "three";
+import { Group, Mesh, PerspectiveCamera, Ray, Sphere, Vector3 } from "three";
 
 import {
   bodyLabelBounds,
   bodyVisible,
   labelAt,
   labelDepthMask,
+  labelMaskCache,
+  labelOccluders,
   overlapsBody,
 } from "../packages/toolkit/src/scene/label-geometry.ts";
 
@@ -24,11 +26,10 @@ test("depth masks cover only intersecting text pixels and retain foreground labe
   const mesh = new Mesh();
   mesh.updateMatrixWorld();
   const bodies = [{ key: "sun", mesh }];
-  const bounds = [bodyLabelBounds(mesh, camera, 800, 800)];
   // Cross the solar limb: some of the label remains readable outside it.
   const rect = { left: 470, right: 520, top: 395, bottom: 405 };
   const mask = (anchor, key = "moon") =>
-    labelDepthMask(rect, anchor, key, bodies, bounds, camera, 800, 800);
+    labelDepthMask(rect, anchor, key, labelOccluders(bodies, camera), camera, 800, 800);
   const partial = mask(new Vector3(0, 0, -4));
   assert.notEqual(partial, "none");
   const svg = decodeURIComponent(partial);
@@ -41,8 +42,7 @@ test("depth masks cover only intersecting text pixels and retain foreground labe
     { left: 390, right: 410, top: 395, bottom: 405 },
     new Vector3(0, 0, -4),
     "moon",
-    bodies,
-    bounds,
+    labelOccluders(bodies, camera),
     camera,
     800,
     800,
@@ -53,6 +53,116 @@ test("depth masks cover only intersecting text pixels and retain foreground labe
   parent.visible = false;
   assert.equal(bodyVisible(mesh), false);
   assert.equal(mask(new Vector3(0, 0, -4)), "none");
+});
+
+/* Every pixel's ray against every globe, as the mask is defined. */
+function marchedMask(rect, anchor, key, bodies, camera, width, height) {
+  const origin = camera.getWorldPosition(new Vector3());
+  const depth = -anchor.clone().applyMatrix4(camera.matrixWorldInverse).z;
+  const w = Math.ceil(rect.right - rect.left);
+  const h = Math.ceil(rect.bottom - rect.top);
+  const globes = bodies
+    .filter((body) => body.key !== key && bodyVisible(body.mesh))
+    .map(({ mesh }) => ({ inverse: mesh.matrixWorld.clone().invert(), world: mesh.matrixWorld }));
+  const sphere = new Sphere(new Vector3(), 1);
+  const rows = [];
+  for (let y = 0; y < h; y += 1) {
+    let row = "";
+    for (let x = 0; x < w; x += 1) {
+      const direction = new Vector3(
+        ((rect.left + x + 0.5) / width) * 2 - 1,
+        1 - ((rect.top + y + 0.5) / height) * 2,
+        0.5,
+      )
+        .unproject(camera)
+        .sub(origin)
+        .normalize();
+      const covered = globes.some((globe) => {
+        const hit = new Ray(origin.clone(), direction.clone())
+          .applyMatrix4(globe.inverse)
+          .intersectSphere(sphere, new Vector3());
+        if (!hit) return false;
+        hit.applyMatrix4(globe.world).applyMatrix4(camera.matrixWorldInverse);
+        return -hit.z < depth * (1 - 1e-7);
+      });
+      row += covered ? "#" : ".";
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+/* The pixels a mask leaves visible, row by row, from its SVG runs. */
+function maskRows(mask, rect) {
+  const w = Math.ceil(rect.right - rect.left);
+  const h = Math.ceil(rect.bottom - rect.top);
+  const rows = Array.from({ length: h }, () => Array(w).fill(mask === "none" ? "." : "#"));
+  if (mask !== "none") {
+    const path = decodeURIComponent(mask).match(/d="([^"]*)"/)[1];
+    for (const [, start, y, length] of path.matchAll(/M(\d+) (\d+)h(\d+)/g))
+      for (let x = Number(start); x < Number(start) + Number(length); x += 1) rows[y][x] = ".";
+  }
+  return rows.map((row) => row.join(""));
+}
+
+test("depth masks match a ray march for oblique, oblate, near and straddling globes", () => {
+  const camera = new PerspectiveCamera(48, 1.5, 0.01, 1e6);
+  camera.position.set(0.3, -0.2, 0.1);
+  camera.lookAt(0.4, 0.1, -10);
+  camera.updateMatrixWorld();
+  const globe = (key, x, y, z, scale, tilt) => {
+    const mesh = new Mesh();
+    mesh.position.set(x, y, z);
+    mesh.scale.set(scale, scale * 0.9, scale);
+    mesh.rotation.set(tilt, tilt * 0.5, 0);
+    mesh.updateMatrixWorld();
+    return { key, mesh };
+  };
+  const bodies = [
+    globe("far", 0.5, 0.2, -12, 3, 0.4),
+    // Across the camera plane, beside the camera: its bounding box has no screen bounds.
+    globe("beside", 2.6, 0, 0.5, 2.2, 0.2),
+    globe("behind", 0, 0, 6, 1, 0),
+    globe("small", -0.6, -0.3, -4, 0.35, 1.1),
+  ];
+  const occluders = labelOccluders(bodies, camera);
+  const [width, height] = [900, 600];
+  let masked = 0;
+  for (let i = 0; i < 60; i += 1) {
+    const left = (i * 137) % 860;
+    const top = (i * 211) % 580;
+    const rect = { left: left + 0.3, right: left + 37.6, top: top + 0.7, bottom: top + 12.2 };
+    const anchor = new Vector3(0.4, 0.1, -10).addScaledVector(new Vector3(0, 0, 1), (i % 5) * 3);
+    const key = i % 7 === 0 ? "far" : "label";
+    const mask = labelDepthMask(rect, anchor, key, occluders, camera, width, height);
+    const expected = marchedMask(rect, anchor, key, bodies, camera, width, height);
+    assert.deepEqual(maskRows(mask, rect), expected, `label ${i}`);
+    if (mask !== "none") masked += 1;
+  }
+  assert.ok(masked > 5, "some labels sit behind a globe");
+});
+
+test("a cached mask is the same string until its pixels change", () => {
+  const camera = cameraAt();
+  const mesh = new Mesh();
+  mesh.updateMatrixWorld();
+  const occluders = labelOccluders([{ key: "sun", mesh }], camera);
+  const cache = labelMaskCache();
+  const at = (left) =>
+    labelDepthMask(
+      { left, right: left + 50, top: 395, bottom: 405 },
+      new Vector3(0, 0, -4),
+      "moon",
+      occluders,
+      camera,
+      800,
+      800,
+      cache,
+    );
+  const first = at(470);
+  assert.equal(at(470.01), first);
+  assert.notEqual(at(480), first);
+  assert.equal(at(480), at(480));
 });
 
 test("projected bounds provide clearance for the whole label and grow with rendered size", () => {

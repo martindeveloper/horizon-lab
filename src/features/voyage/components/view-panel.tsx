@@ -10,10 +10,11 @@ import {
   SCENE_ANTIALIAS,
 } from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
+import { SwitchRow } from "@horizon/toolkit/ui";
 
 import { useVoyage, type Show } from "../lib/store";
 
-const SWITCHES: (keyof Show)[] = ["instruments", "canopy", "names", "orbits"];
+const SWITCHES: (keyof Show)[] = ["instruments", "canopy", "streaks", "names", "orbits"];
 
 /** How the scene is drawn: what it shows, the distance unit, buttons to turn the ship, rendering. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {
@@ -60,6 +61,12 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
       >
         <BloomSwitch on={bloom} onToggle={() => useVoyage.getState().setBloom(!bloom)} />
         <LensSwitch on={lens} onToggle={() => useVoyage.getState().setLens(!lens)} />
+        <SwitchRow
+          on={show.feel}
+          onToggle={() => useVoyage.getState().patchShow({ feel: !show.feel })}
+        >
+          {t("toggles.feel")}
+        </SwitchRow>
       </RenderSection>
     </Rail>
   );

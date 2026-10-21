@@ -6,8 +6,12 @@ import {
   bodyLabelBounds,
   bodyVisible,
   labelDepthMask,
+  labelMaskCache,
+  labelOccluders,
   type LabelBody,
   type LabelBounds,
+  type LabelMaskCache,
+  type LabelOccluder,
   type LabelTarget,
 } from "./label-geometry";
 
@@ -38,6 +42,43 @@ const LABEL_GAP = 2;
 export type LabelHit = LabelTarget & { clear: boolean };
 type Target = LabelBounds & { alpha: number; clear: boolean; shown: boolean };
 
+/* One label across frames: what `place` last asked, its element and what was last written. */
+type Entry = {
+  key: string;
+  el: HTMLSpanElement | null;
+  rect: Target;
+  x: number;
+  y: number;
+  z: number;
+  on: boolean | number;
+  style: LabelStyle | undefined;
+  /* Placed since the last flush. */
+  queued: boolean;
+  text: string | null;
+  strong: boolean;
+  kind: LabelStyle["kind"];
+  /* Live readouts gain and lose a digit as they play; a pill keeps its widest recent text
+     and lets go only when the text gets much shorter (another body, another unit). */
+  chars: number;
+  /* CSS size, measured again only after the text, weight or kind change. */
+  width: number;
+  height: number;
+  measured: boolean;
+  /* The anchor on screen this frame. */
+  sx: number;
+  sy: number;
+  // CSSOM may normalize "10.0px" to "10px"; compare our last output strings.
+  display: string;
+  transform: string;
+  mask: string;
+  masks: LabelMaskCache;
+  /* Opacity in 1/32 steps, written only when the step changes. */
+  step: number;
+  /* Drawn last frame: it keeps its place when another one comes to overlap it. */
+  kept: boolean;
+  rank: number;
+};
+
 export const STRONG: LabelStyle = { strong: true };
 export const BELOW: LabelStyle = { below: true };
 
@@ -46,6 +87,8 @@ export type LabelInsets = { top: number; bottom: number; left: number; right: nu
 
 /** Where labels keep clear by default: a 56 px header, a 150 px dock and a 4 px edge each side. */
 export const DEFAULT_INSETS: LabelInsets = { top: 56, bottom: 150, left: 4, right: 4 };
+
+const byRank = (a: Entry, b: Entry) => a.rank - b.rank;
 
 export function createLabels(
   { scope, camera, viewport }: SceneBasics,
@@ -61,88 +104,124 @@ export function createLabels(
   const { className = "scene-label", insets = DEFAULT_INSETS } = options;
   let inset = DEFAULT_INSETS;
   let bodies: readonly LabelBody[] = [];
-  const pending = new Map<string, Parameters<PlaceLabel>>();
+  /* Every label by key, in the order first placed; `queue` holds this frame's, `drawn` those
+     on screen, `shown` and `placed` the declutter's, all reused from frame to frame. */
+  const entries = new Map<string, Entry>();
+  const all: Entry[] = [];
+  const queue: Entry[] = [];
+  const drawn: Entry[] = [];
+  const shown: Entry[] = [];
+  const placed: Target[] = [];
   const point = new Vector3();
-  const spans = new Map<string, HTMLSpanElement>();
-  // CSSOM may normalize "10.0px" to "10px"; compare our last output string.
-  const masks = new WeakMap<HTMLSpanElement, string>();
-  const transforms = new WeakMap<HTMLSpanElement, string>();
-  /* Opacity in 1/32 steps, written only when the step changes. */
-  const alphas = new WeakMap<HTMLSpanElement, number>();
-  /* Live readouts gain and lose a digit as they play; a pill keeps its widest recent text
-     and lets go only when the text gets much shorter (another body, another unit). */
-  const held = new WeakMap<HTMLSpanElement, number>();
   const projected = new Vector3();
-  /* Where each label sits on screen, for taps: one record per label, rewritten each frame. */
-  const targets = new Map<string, Target>();
   /* Each body's place in `bodies` and `bounds`. */
   const indexOf = new Map<string, number>();
-  /* Labels drawn last frame, which keep their place when another one comes to overlap them. */
-  let kept = new Set<string>();
-  const hide = (key: string, el: HTMLSpanElement) => {
-    const target = targets.get(key);
-    if (target) target.shown = false;
-    if (el.style.display !== "none") el.style.display = "none";
+  const bounds: (LabelBounds | null)[] = [];
+  const boxes: LabelBounds[] = [];
+  const occluders: LabelOccluder[] = [];
+  let measuredWidth = 0;
+  let measuredHeight = 0;
+  const remeasure = () => {
+    for (const entry of all) entry.measured = false;
   };
+  /* A web font arriving changes every label's size. */
+  const fonts = typeof document === "undefined" ? undefined : document.fonts;
+  fonts?.addEventListener("loadingdone", remeasure);
   scope.defer(() => {
-    for (const el of spans.values()) el.remove();
-    spans.clear();
-    targets.clear();
+    fonts?.removeEventListener("loadingdone", remeasure);
+    for (const entry of all) entry.el?.remove();
+    entries.clear();
+    all.length = 0;
+    queue.length = 0;
   });
 
-  let bounds: ReturnType<typeof bodyLabelBounds>[] = [];
-  const draw: PlaceLabel = (key, x, y, z, on, style) => {
-    let el = spans.get(key);
+  const hide = (entry: Entry) => {
+    entry.rect.shown = false;
+    if (entry.el && entry.display !== "none") {
+      entry.el.style.display = "none";
+      entry.display = "none";
+    }
+  };
+
+  const hidden = (entry: Entry) => {
+    hide(entry);
+    return false;
+  };
+
+  /* First pass, writes only: content, weight, kind, opacity and whether the anchor is on
+     screen. True when the label needs its size and a place. */
+  const write = (entry: Entry, text: Record<string, string>) => {
+    let el = entry.el;
     if (!el) {
       el = document.createElement("span");
       el.className = className;
       root.appendChild(el);
-      spans.set(key, el);
+      entry.el = el;
     }
-    const label = style?.text ?? labels()[key] ?? key;
+    const { key, style } = entry;
+    const label = style?.text ?? text[key] ?? key;
     const kind = style?.kind;
-    if (el.textContent !== label) {
+    if (entry.text !== label) {
       el.textContent = label;
+      entry.text = label;
+      entry.measured = false;
       if (kind) {
-        const last = held.get(el) ?? 0;
+        const last = entry.chars;
         const chars = label.length > last || label.length < last - 3 ? label.length : last;
         if (chars !== last) {
           el.style.setProperty("--chars", String(chars));
-          held.set(el, chars);
+          entry.chars = chars;
         }
       }
     }
-    const weight = style?.strong ? "strong" : undefined;
-    if (el.dataset.weight !== weight) {
-      if (weight) el.dataset.weight = weight;
+    const strong = style?.strong === true;
+    if (entry.strong !== strong) {
+      if (strong) el.dataset.weight = "strong";
       else delete el.dataset.weight;
+      entry.strong = strong;
+      entry.measured = false;
     }
-    if (el.dataset.kind !== kind) {
+    if (entry.kind !== kind) {
       if (kind) el.dataset.kind = kind;
       else delete el.dataset.kind;
+      entry.kind = kind;
+      entry.measured = false;
     }
+    const { on } = entry;
     const alpha = typeof on === "number" ? on : on ? 1 : 0;
-    if (alpha < 0.02) return hide(key, el);
+    if (alpha < 0.02) return hidden(entry);
     const step = Math.round(alpha * 32);
-    if (alphas.get(el) !== step) {
+    if (entry.step !== step) {
       el.style.opacity = step >= 32 ? "" : String(step / 32);
-      alphas.set(el, step);
+      entry.step = step;
     }
-    point.set(x, y, z);
+    entry.rect.alpha = alpha;
+    point.set(entry.x, entry.y, entry.z);
     projected.copy(point).applyMatrix4(camera.matrixWorldInverse);
-    if (projected.z >= 0) return hide(key, el);
+    if (projected.z >= 0) return hidden(entry);
     projected.copy(point).project(camera);
-    if (projected.z > 1) return hide(key, el);
+    if (projected.z > 1) return hidden(entry);
     const { width, height } = viewport;
     const sx = (projected.x * 0.5 + 0.5) * width;
-    let sy = (-projected.y * 0.5 + 0.5) * height;
+    const sy = (-projected.y * 0.5 + 0.5) * height;
     if (sx < inset.left || sy < inset.top || sx > width - inset.right || sy > height - inset.bottom)
-      return hide(key, el);
-    if (el.style.display !== "block") el.style.display = "block";
+      return hidden(entry);
+    if (entry.display !== "block") {
+      el.style.display = "block";
+      entry.display = "block";
+    }
+    entry.sx = sx;
+    entry.sy = sy;
+    return true;
+  };
+
+  /* Last pass, after every size is known: place, mask and move. */
+  const draw = (entry: Entry, el: HTMLSpanElement) => {
+    const { key, kind, style, rect, sx, width: w, height: h } = entry;
+    const { width, height } = viewport;
+    let sy = entry.sy;
     const ownIndex = indexOf.get(key);
     const own = ownIndex === undefined ? undefined : bounds[ownIndex];
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
     if (own && !kind) sy = style?.below ? own.bottom + 6 : own.top - 6;
     const dy =
       own && !kind
@@ -165,11 +244,6 @@ export function createLabels(
             : dy === "-140%"
               ? -h * 1.4
               : 0);
-    let rect = targets.get(key);
-    if (!rect) {
-      rect = { left: 0, right: 0, top: 0, bottom: 0, alpha: 0, clear: false, shown: false };
-      targets.set(key, rect);
-    }
     rect.left = sx - w / 2;
     rect.right = sx + w / 2;
     rect.top = top;
@@ -180,65 +254,112 @@ export function createLabels(
       rect.top < inset.top ||
       rect.bottom > height - inset.bottom
     )
-      return hide(key, el);
+      return hide(entry);
     // DOM labels cannot share WebGL's depth buffer. Mask only the covered pixels,
     // at the anchor's depth, rather than hiding the label when its anchor is covered.
-    const mask = labelDepthMask(rect, point, key, bodies, bounds, camera, width, height);
-    rect.alpha = alpha;
+    point.set(entry.x, entry.y, entry.z);
+    const mask = labelDepthMask(rect, point, key, occluders, camera, width, height, entry.masks);
     rect.clear = mask === "none";
     rect.shown = true;
-    if (masks.get(el) !== mask) {
+    if (entry.mask !== mask) {
       el.style.maskImage = mask;
-      masks.set(el, mask);
+      entry.mask = mask;
     }
     const transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) translate(-50%, ${dy})`;
-    if (transforms.get(el) !== transform) {
+    if (entry.transform !== transform) {
       el.style.transform = transform;
-      transforms.set(el, transform);
+      entry.transform = transform;
     }
   };
 
-  const place: PlaceLabel = (...args) => {
-    pending.set(args[0], args);
+  const place: PlaceLabel = (key, x, y, z, on, style) => {
+    let entry = entries.get(key);
+    if (!entry) {
+      entry = {
+        key,
+        el: null,
+        rect: { left: 0, right: 0, top: 0, bottom: 0, alpha: 0, clear: false, shown: false },
+        x: 0,
+        y: 0,
+        z: 0,
+        on: false,
+        style: undefined,
+        queued: false,
+        text: null,
+        strong: false,
+        kind: undefined,
+        chars: 0,
+        width: 0,
+        height: 0,
+        measured: false,
+        sx: 0,
+        sy: 0,
+        display: "",
+        transform: "",
+        mask: "",
+        masks: labelMaskCache(),
+        step: -1,
+        kept: false,
+        rank: 0,
+      };
+      entries.set(key, entry);
+      all.push(entry);
+    }
+    entry.x = x;
+    entry.y = y;
+    entry.z = z;
+    entry.on = on;
+    entry.style = style;
+    if (!entry.queued) {
+      entry.queued = true;
+      queue.push(entry);
+    }
   };
 
   /**
    * Strong names first, then names, then distances; a label already shown before a new one,
    * and a faint one (fading in or out) after every readable one.
    */
-  const rank = (key: string, el: HTMLSpanElement, rect: Target) =>
-    (el.dataset.weight ? 0 : el.dataset.kind ? 4 : 2) +
-    (kept.has(key) ? 0 : 1) +
-    (rect.alpha < READABLE ? 6 : 0);
+  const rank = (entry: Entry) =>
+    (entry.strong ? 0 : entry.kind ? 4 : 2) +
+    (entry.kept ? 0 : 1) +
+    (entry.rect.alpha < READABLE ? 6 : 0);
   /**
    * Overlapping labels cannot both be read, least of all on a phone: each label is drawn only
    * where no more important one already sits, so names win over rulers and nothing flickers
    * as two labels cross.
    */
   const declutter = () => {
-    const shown: { key: string; el: HTMLSpanElement; rect: Target; rank: number }[] = [];
-    for (const [key, rect] of targets) {
-      const el = spans.get(key);
-      if (rect.shown && el) shown.push({ key, el, rect, rank: rank(key, el, rect) });
+    shown.length = 0;
+    for (const entry of all) {
+      if (entry.rect.shown && entry.el) {
+        entry.rank = rank(entry);
+        shown.push(entry);
+      }
+      entry.kept = false;
     }
-    shown.sort((a, b) => a.rank - b.rank);
-    const placed: Target[] = [];
-    const next = new Set<string>();
-    for (const { key, el, rect } of shown) {
-      const blocked = placed.some(
-        (o) =>
+    shown.sort(byRank);
+    placed.length = 0;
+    for (const entry of shown) {
+      const { rect } = entry;
+      let blocked = false;
+      for (const o of placed) {
+        if (
           rect.left < o.right + LABEL_GAP &&
           rect.right > o.left - LABEL_GAP &&
           rect.top < o.bottom + LABEL_GAP &&
-          rect.bottom > o.top - LABEL_GAP,
-      );
-      if (blocked) hide(key, el);
+          rect.bottom > o.top - LABEL_GAP
+        ) {
+          blocked = true;
+          break;
+        }
+      }
+      if (blocked) hide(entry);
       else {
         placed.push(rect);
-        next.add(key);
+        entry.kept = true;
       }
     }
-    kept = next;
   };
 
   return {
@@ -251,20 +372,45 @@ export function createLabels(
     /** Resolve after all bodies have their current frame positions and scales. */
     flush: () => {
       inset = typeof insets === "function" ? insets() : insets;
+      const { width, height } = viewport;
       for (const body of bodies) body.mesh.updateWorldMatrix(true, false);
-      bounds = bodies.map(({ mesh }) =>
-        bodyVisible(mesh) ? bodyLabelBounds(mesh, camera, viewport.width, viewport.height) : null,
-      );
-      for (const args of pending.values()) draw(...args);
-      pending.clear();
+      bounds.length = bodies.length;
+      for (let i = 0; i < bodies.length; i += 1) {
+        const { mesh } = bodies[i]!;
+        const box = (boxes[i] ??= { left: 0, right: 0, top: 0, bottom: 0 });
+        bounds[i] = bodyVisible(mesh) ? bodyLabelBounds(mesh, camera, width, height, box) : null;
+      }
+      labelOccluders(bodies, camera, occluders);
+      /* A resized stage may restyle the labels (a phone's smaller type). */
+      if (measuredWidth !== width || measuredHeight !== height) {
+        measuredWidth = width;
+        measuredHeight = height;
+        remeasure();
+      }
+      // Writes, one read of the sizes that changed, then writes: one layout a frame at most.
+      const text = labels();
+      drawn.length = 0;
+      for (const entry of queue) {
+        entry.queued = false;
+        if (write(entry, text)) drawn.push(entry);
+      }
+      queue.length = 0;
+      for (const entry of drawn) {
+        if (entry.measured || !entry.el) continue;
+        entry.width = entry.el.offsetWidth;
+        entry.height = entry.el.offsetHeight;
+        // A label root not laid out yet measures nothing; try again next frame.
+        entry.measured = entry.width > 0 || entry.height > 0;
+      }
+      for (const entry of drawn) if (entry.el) draw(entry, entry.el);
       declutter();
     },
     /** Labels readable enough to tap, in viewport px, of the keys `accept` takes. */
     hits: (accept: (key: string) => boolean): LabelHit[] => {
       const out: LabelHit[] = [];
-      for (const [key, target] of targets)
-        if (target.shown && target.alpha >= READABLE && accept(key))
-          out.push({ key, rect: target, clear: target.clear });
+      for (const { key, rect } of all)
+        if (rect.shown && rect.alpha >= READABLE && accept(key))
+          out.push({ key, rect, clear: rect.clear });
       return out;
     },
     /** Hides every label in `keys`. */

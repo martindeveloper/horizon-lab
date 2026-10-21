@@ -140,7 +140,12 @@ export function createSceneHost(
     stencil: false,
     logarithmicDepthBuffer: logarithmicDepth,
   });
-  scope.defer(() => renderer.dispose());
+  scope.defer(() => {
+    renderer.dispose();
+    /* Hand the GPU context back now rather than at garbage collection. A canvas still in the
+       page may get a new renderer (a remount, Fast Refresh), and a lost context cannot. */
+    if (!canvas.isConnected) renderer.forceContextLoss();
+  });
   renderer.toneMapping = NoToneMapping;
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.setClearColor(clearColor, 1);

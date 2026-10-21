@@ -25,6 +25,10 @@ export const simulationOn = (manifest: RegisteredSimulation) =>
 /** The catalogue: every registered simulation whose feature switch is on. */
 export const simulations: readonly RegisteredSimulation[] = registered.filter(simulationOn);
 
+/** Its two shelves: the labs first, then the experiences. */
+export const labs = simulations.filter((simulation) => simulation.kind === "lab");
+export const experiences = simulations.filter((simulation) => simulation.kind === "experience");
+
 export function simulationForPath(pathname: string) {
   return simulations.find(({ href }) => pathname === href || pathname.startsWith(`${href}/`));
 }

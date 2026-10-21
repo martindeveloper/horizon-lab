@@ -23,7 +23,15 @@ import { planetGrowth } from "../model/moment";
 import { SUN_BIRTH } from "../model/parameters";
 import type { SolarSelection } from "../model/selection";
 import { orbitOf, type Globes } from "./geometry";
-import { ORBIT_COLOR, type ShownFor, type SolarFrame, type SolarKit, type SolarShow } from "./kit";
+import {
+  COMET_ORBIT_COLOR,
+  ORBIT_COLOR,
+  SMALL_ORBIT_COLOR,
+  type ShownFor,
+  type SolarFrame,
+  type SolarKit,
+  type SolarShow,
+} from "./kit";
 import { orbitShown } from "./lod";
 import type { MoonHosts } from "./moons-layer";
 
@@ -87,7 +95,7 @@ export function createPlanetsLayer(
       mesh.add(coma);
     }
     parent.add(mesh);
-    const orbit = orbitOf(scope, body.id === "halley" ? 0xc4705a : 0x9ebccc, 0.7);
+    const orbit = orbitOf(scope, body.id === "halley" ? COMET_ORBIT_COLOR : SMALL_ORBIT_COLOR, 0.7);
     /* Layer switches and eras grow the marker in and out rather than popping it. */
     return { body, mesh, orbit, on: lod.fader() };
   });

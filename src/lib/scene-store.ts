@@ -32,9 +32,9 @@ export type SceneSlice = Omit<SceneStoreState, "view"> &
     antialias: SceneAntialias | null;
     /** The visitor's render quality (`sceneQuality`), for this visit. */
     quality: RenderQuality;
-    /** Whether bright light blooms, for this visit; off until the visitor turns it on. */
+    /** Whether bright light blooms, for this visit: off in a lab until turned on, on in an experience. */
     bloom: boolean;
-    /** Whether the brightest light gets diffraction spikes and the corners a colour fringe; off until turned on. */
+    /** Whether the brightest light gets diffraction spikes and the corners a colour fringe; as bloom. */
     lens: boolean;
     rotate: (turn: OrbitTurn) => void;
     setDistanceUnit: (unit: DistanceChoice) => void;
@@ -44,7 +44,7 @@ export type SceneSlice = Omit<SceneStoreState, "view"> &
     setLens: (lens: boolean) => void;
   };
 
-/** The shared settings as a visit starts, for every `resetView`: the unit, anti-aliasing, quality, bloom and lens. */
+/** A lab's shared settings as a visit starts, for every `resetView`: the unit, anti-aliasing, quality, bloom and lens. */
 export const RESET_SCENE_SETTINGS: Pick<
   SceneSlice,
   "distanceUnit" | "antialias" | "quality" | "bloom" | "lens"
@@ -56,20 +56,27 @@ export const RESET_SCENE_SETTINGS: Pick<
   lens: false,
 };
 
-/** The shared fields at rest, with the scale bar's first reading, and their actions. */
+/** An experience's: it shows off, so its effects start on (still nothing while turned off). */
+export const EXPERIENCE_SCENE_SETTINGS: typeof RESET_SCENE_SETTINGS = {
+  ...RESET_SCENE_SETTINGS,
+  bloom: true,
+  lens: true,
+};
+
+/**
+ * The shared fields at rest, with the scale bar's first reading and the visit's starting
+ * settings (a lab's by default), and their actions.
+ */
 export function sceneSlice(
   set: (patch: Partial<SceneSlice>) => void,
   scale: ScaleReadout,
+  settings = RESET_SCENE_SETTINGS,
 ): SceneSlice {
   return {
     flight: 0,
     turn: null,
     ready: false,
-    distanceUnit: "auto",
-    antialias: null,
-    quality: "standard",
-    bloom: false,
-    lens: false,
+    ...settings,
     cameraAngles: { heading: 0, tilt: 0 },
     ...scale,
     rotate: (turn) => set({ turn: { ...turn } }),

@@ -114,7 +114,10 @@ test("shader variants parse with the defines their passes compile them with", ()
     if (readFileSync(file, "utf8").includes("#include <horizon/log-depth>"))
       variants.push([file, LOG_DEPTH]);
   variants.push([post("planet.frag.glsl"), `#define OCCLUDERS 4\n${LOG_DEPTH}`]);
-  variants.push([path.join("src/space/sky/shaders", "band.frag.glsl"), "#define RELATIVITY 1"]);
+  variants.push([
+    path.join("src/space/sky/shaders", "band.frag.glsl"),
+    "#define RELATIVITY 1\n#define TODAY_ONLY 1",
+  ]);
   assert.ok(variants.length > 3);
   for (const [file, define] of variants)
     assert.doesNotThrow(

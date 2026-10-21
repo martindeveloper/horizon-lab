@@ -128,14 +128,21 @@ control; `DEFAULT_INSETS` is 56, 150, 4 and 4, so spread it and override a side)
 Pass a function to read them once a frame when the controls over the stage move. Bodies passed to `setBodies` mask the
 pixels of a label they cover, at the label's depth; their meshes are unit globes
 (geometry within radius 1) scaled by their transforms. `hits(accept)` lists the
-labels readable enough to tap.
+labels readable enough to tap. A flush writes every label's content first, reads the
+sizes of only those whose text, weight or kind changed (again after a resize or a web
+font arriving), then places, masks and moves them: one layout a frame at most.
 
 Labels take the class `scene-label`, styled by `@horizon/toolkit/scene.css` under
 an element marked `data-scene-labels`. Import that stylesheet from the routes that
 draw a scene, so other pages never load it.
 
-`label-geometry.ts` holds the projections: conservative globe bounds, the depth
-mask and `labelAt`, the label nearest a point with a finger's reach.
+`label-geometry.ts` holds the projections: conservative globe bounds
+(`bodyLabelBounds`, into a reused `out`), the depth mask and `labelAt`, the label
+nearest a point with a finger's reach. `labelOccluders(bodies, camera, out?)` readies
+each globe once a frame; `labelDepthMask(rect, anchor, key, occluders, camera, width,
+height, cache?)` then marches only the globes nearer than the anchor whose cone of sight
+meets the label's, and with a `labelMaskCache()` returns the same string while the
+covered pixels stay the same.
 
 ## Taps
 

@@ -156,8 +156,9 @@ function toScene(xp: number, yp: number, i: number, omega: number, node: number,
 export function keplerPosition(el: Elements, out: Vec3 = [0, 0, 0]): Vec3 {
   const e = Math.min(0.995, Math.max(0, el.e));
   const E = eccentricAnomaly(el.M * RAD, e);
-  const xp = perifocalX.compute({ a: el.a, e, E });
-  const yp = perifocalY.compute({ a: el.a, e, E });
+  /* `perifocalX` and `perifocalY`, inline: this runs for every body every frame. */
+  const xp = el.a * (Math.cos(E) - e);
+  const yp = el.a * Math.sqrt(1 - e * e) * Math.sin(E);
   return toScene(xp, yp, el.i, el.omega, el.node, out);
 }
 

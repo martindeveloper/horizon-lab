@@ -34,6 +34,11 @@ test("the far places sit at their published distances from the Sun", () => {
     assert.equal(isBodyAnchor(id), false);
     assert.match(anchorNameKey(id), /^(names|anchors)\./);
   }
+  /* The probes on their JPL tracks, the nearest star, the Magellanic Clouds. */
+  const au = (v) => Math.hypot(...v) / 149_597_870.7;
+  assert.ok(au(at("voyager1")) > 165 && au(at("voyager1")) < 175, `${au(at("voyager1"))} au`);
+  assert.ok(Math.abs(ly(at("proxima")) - 4.25) < 0.05, `${ly(at("proxima"))} ly`);
+  assert.ok(Math.abs(ly(at("lmc")) / 1000 - 163) < 8, `${ly(at("lmc"))} ly`);
   assert.equal(isBodyAnchor("moon"), true);
   assert.equal(anchorNameKey("moon"), "names.moon");
 });

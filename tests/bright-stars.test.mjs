@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import DISTANCES from "../src/features/voyage/lib/model/star-distances.json" with { type: "json" };
+import { starDistance } from "../src/features/voyage/lib/model/star-distances.ts";
 import { ballesterosTemperature, brightStarGeometry } from "../src/space/bright-stars.ts";
 import { STARS } from "../src/space/star-catalogue.ts";
-import DISTANCES from "../src/space/star-distances.json" with { type: "json" };
-import { starDistance } from "../src/space/star-distances.ts";
 
 test("every catalogue star has a positive SIMBAD distance, and the nearest is α Centauri", () => {
   for (const [name] of STARS) {

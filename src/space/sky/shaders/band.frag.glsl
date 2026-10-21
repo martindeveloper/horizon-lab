@@ -57,9 +57,11 @@ void main() {
   float b = asin(clamp(z, -1.0, 1.0)) / PI + 0.5;   // 0 = south pole, 1 = north pole
   vec2 uv = vec2(l, b);
 
-  vec4 now = texture2D(today, uv);
-  vec4 was = texture2D(early, uv);
-  vec4 band = mix(was, now, era);
+#ifdef TODAY_ONLY
+  vec4 band = texture2D(today, uv);
+#else
+  vec4 band = mix(texture2D(early, uv), texture2D(today, uv), era);
+#endif
 
   // Additive blending: alpha is folded into the colour.
   gl_FragColor = vec4(band.rgb * band.a * strength * tint * shift, 1.0);

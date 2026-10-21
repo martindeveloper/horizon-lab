@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
-import { simulationForPath, simulations } from "@/lib/simulations";
+import { experiences, labs, simulationForPath } from "@/lib/simulations";
 import { SegmentedControl, cn } from "@horizon/toolkit/ui";
 
 import { FooterLinks } from "./footer-links";
@@ -14,10 +14,15 @@ import { ThemeSwitch, useThemeLabels } from "./theme-switch";
 import { useDismissOnEscape } from "./use-dismiss-on-escape";
 
 const kicker = "font-mono text-[10px] tracking-[0.22em] text-subtle uppercase";
+/** The menu's two shelves, as the catalogue's: the labs, then the experiences. */
+const shelves = [
+  { id: "labs", shelf: labs },
+  { id: "experiences", shelf: experiences },
+] as const;
 
 /**
  * Phones fold the header's way back, its preferences and the footer's links into one menu
- * that drops from the bar: the simulations, language and appearance, then About, Credits,
+ * that drops from the bar: the labs and the experiences, language and appearance, then About, Credits,
  * GitHub and the sidereal clock. Over a simulation the footer gives its line to the scene.
  */
 export function PhoneMenu({
@@ -84,41 +89,47 @@ export function PhoneMenu({
           >
             {/* Held sideways, the simulations and the preferences sit side by side. */}
             <div className="grid sm:grid-cols-2 sm:gap-x-10">
-              <div>
-                <p aria-hidden className={kicker}>
-                  {t("catalogue.collection")}
-                </p>
-                <ul className="-mx-3 mt-1.5">
-                  {simulations.map((simulation) => {
-                    const here = simulation.id === current?.id;
-                    return (
-                      <li key={simulation.id}>
-                        <Link
-                          href={simulation.href}
-                          prefetch={false}
-                          aria-current={here ? "page" : undefined}
-                          onClick={close}
-                          className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
-                        >
-                          <span className="min-w-0">
-                            <span className="block text-[15px] font-medium tracking-tight text-fg">
-                              {t(`catalogue.${simulation.messageKey}.title`)}
-                            </span>
-                            <span className="block text-xs text-muted">
-                              {t(`catalogue.${simulation.messageKey}.category`)}
-                            </span>
-                          </span>
-                          {here ? (
-                            <span
-                              aria-hidden
-                              className="size-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_10px_rgb(var(--solar)/0.7)]"
-                            />
-                          ) : null}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
+              <div className="grid content-start gap-3">
+                {shelves.map(({ id, shelf }) =>
+                  shelf.length ? (
+                    <div key={id}>
+                      <p aria-hidden className={kicker}>
+                        {t(`catalogue.${id}`)}
+                      </p>
+                      <ul className="-mx-3 mt-1.5">
+                        {shelf.map((simulation) => {
+                          const here = simulation.id === current?.id;
+                          return (
+                            <li key={simulation.id}>
+                              <Link
+                                href={simulation.href}
+                                prefetch={false}
+                                aria-current={here ? "page" : undefined}
+                                onClick={close}
+                                className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-[15px] font-medium tracking-tight text-fg">
+                                    {t(`catalogue.${simulation.messageKey}.title`)}
+                                  </span>
+                                  <span className="block text-xs text-muted">
+                                    {t(`catalogue.${simulation.messageKey}.category`)}
+                                  </span>
+                                </span>
+                                {here ? (
+                                  <span
+                                    aria-hidden
+                                    className="size-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_10px_rgb(var(--solar)/0.7)]"
+                                  />
+                                ) : null}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ) : null,
+                )}
               </div>
 
               <div className="mt-3 grid content-start gap-4 border-t border-border pt-4 sm:mt-0 sm:border-t-0 sm:pt-0">

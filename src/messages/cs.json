@@ -48,8 +48,10 @@
   },
   "catalogue": {
     "title": "O kousek blíž <em>vesmíru.</em>",
-    "collection": "Simulace",
-    "available": "K dispozici: {count}",
+    "labs": "Laboratoře",
+    "experiences": "Zážitky",
+    "experiencesNote": "Opřete se a leťte. Skutečná fyzika, méně čtení.",
+    "available": "{labs, plural, one {# laboratoř} few {# laboratoře} other {# laboratoří}}{experiences, plural, =0 {} one { · # zážitek} few { · # zážitky} other { · # zážitků}}",
     "sky": "Přibližný pohled na oblohu nad Ondřejovem",
     "sun": "Slunce",
     "moon": "Měsíc",
@@ -143,11 +145,11 @@
       "title": "Výprava",
       "eyebrow": "Výprava · Ve skutečném měřítku",
       "category": "Měřítko a relativita",
-      "description": "Leťte lodí od Měsíce k vnějším planetám ve skutečném měřítku. Skutečné pohony, dvoje hodiny, světlo takové, jaké tam dopadá.",
+      "description": "Leťte lodí od Měsíce až k okraji dosažitelného vesmíru, ve skutečném měřítku. Nechte řídit autopilota, nebo převezměte kormidlo.",
       "open": "Otevřít Výpravu",
       "scale": "Každý svět ve skutečné velikosti",
       "clocks": "Lodní a pozemské hodiny",
-      "horizon": "Skutečné pohony, poctivé cesty",
+      "horizon": "Autopilot, nebo kormidlo",
       "entryPoints": {
         "moon": {
           "title": "Měsíc"

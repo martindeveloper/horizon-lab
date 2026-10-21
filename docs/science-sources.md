@@ -15,51 +15,51 @@ rows were re-checked on 19 October 2026 after a science review of both simulatio
 
 `cs.json` files mirror `en.json` line for line, so each `en.json` row covers both catalogs.
 
-| Short name                  | Path                                                 |
-| --------------------------- | ---------------------------------------------------- |
-| `bh/en.json`                | `src/features/black-hole/messages/en.json`           |
-| `bh/sgr-a.ts`               | `src/features/black-hole/lib/holes/sgr-a.ts`         |
-| `bh/m87.ts`                 | `src/features/black-hole/lib/holes/m87.ts`           |
-| `bh/stellar.ts`             | `src/features/black-hole/lib/holes/stellar.ts`       |
-| `bh/gaia-bh3.ts`            | `src/features/black-hole/lib/holes/gaia-bh3.ts`      |
-| `bh/omega-cen.ts`           | `src/features/black-hole/lib/holes/omega-cen.ts`     |
-| `bh/ton-618.ts`             | `src/features/black-hole/lib/holes/ton-618.ts`       |
-| `bh/gw231123.ts`            | `src/features/black-hole/lib/holes/gw231123.ts`      |
-| `bh/kerr.ts`                | `src/features/black-hole/lib/holes/kerr.ts`          |
-| `bh/schwarzschild.ts`       | `src/features/black-hole/lib/holes/schwarzschild.ts` |
-| `bh/lensed.ts`              | `src/features/black-hole/lib/holes/lensed.ts`        |
-| `bh/custom.ts`              | `src/features/black-hole/lib/holes/custom.ts`        |
-| `bh/parameters.ts`          | `src/features/black-hole/lib/parameters.ts`          |
-| `bh/technical.json`         | `src/features/black-hole/technical.json`             |
-| `orrery/en.json`            | `src/features/orrery/messages/en.json`               |
-| `orrery/parameters.ts`      | `src/features/orrery/lib/model/parameters.ts`        |
-| `solar/swarms.ts`           | `src/features/orrery/lib/graphics/swarms.ts`         |
-| `solar/elements.ts`         | `src/features/orrery/lib/model/elements.ts`          |
-| `orrery/catalogue/`         | `src/features/orrery/lib/model/catalogue/`           |
-| `orrery/technical.json`     | `src/features/orrery/technical.json`                 |
-| `deep-field/en.json`        | `src/features/deep-field/messages/en.json`           |
-| `deep-field/technical.json` | `src/features/deep-field/technical.json`             |
-| `solar/probes.ts`           | `src/space/solar-system/model/probes.ts`             |
-| `galaxy/parameters.ts`      | `src/space/galaxy/model/parameters.ts`               |
-| `galaxy/neighbours.ts`      | `src/space/galaxy/model/neighbours.ts`               |
-| `galaxy/galaxy.ts`          | `src/space/galaxy/graphics/galaxy.ts`                |
-| `galaxy/galaxy-layer.ts`    | `src/space/galaxy/scene/galaxy-layer.ts`             |
-| `galaxy/catalogue/`         | `src/space/galaxy/model/catalogue/`                  |
-| `cosmos/cosmos.ts`          | `src/space/cosmos/model/cosmos.ts`                   |
-| `cosmos/graphics/cosmos.ts` | `src/space/cosmos/graphics/cosmos.ts`                |
-| `cosmos/cosmos-layer.ts`    | `src/space/cosmos/scene/cosmos-layer.ts`             |
-| `cosmos/catalogue.ts`       | `src/space/cosmos/model/catalogue.ts`                |
-| `toolkit/ephemeris.ts`      | `packages/toolkit/src/bodies/ephemeris.ts`           |
-| `toolkit/figures.ts`        | `packages/toolkit/src/bodies/figures.ts`             |
-| `toolkit/moons.ts`          | `packages/toolkit/src/bodies/moons.ts`               |
-| `toolkit/rings.ts`          | `packages/toolkit/src/bodies/rings.ts`               |
-| `toolkit/cosmology.ts`      | `packages/toolkit/src/science/cosmology.ts`          |
-| `space/star-catalogue.ts`   | `src/space/star-catalogue.ts`                        |
-| `lib/sources.ts`            | `src/lib/sources.ts`                                 |
-| `deep-field/catalogue/`     | `src/features/deep-field/lib/model/catalogue/`       |
-| `space/star-distances.json` | `src/space/star-distances.json`                      |
-| `space/bright-stars.ts`     | `src/space/bright-stars.ts`                          |
-| `toolkit/relativity.ts`     | `packages/toolkit/src/science/relativity.ts`         |
+| Short name                   | Path                                                 |
+| ---------------------------- | ---------------------------------------------------- |
+| `bh/en.json`                 | `src/features/black-hole/messages/en.json`           |
+| `bh/sgr-a.ts`                | `src/features/black-hole/lib/holes/sgr-a.ts`         |
+| `bh/m87.ts`                  | `src/features/black-hole/lib/holes/m87.ts`           |
+| `bh/stellar.ts`              | `src/features/black-hole/lib/holes/stellar.ts`       |
+| `bh/gaia-bh3.ts`             | `src/features/black-hole/lib/holes/gaia-bh3.ts`      |
+| `bh/omega-cen.ts`            | `src/features/black-hole/lib/holes/omega-cen.ts`     |
+| `bh/ton-618.ts`              | `src/features/black-hole/lib/holes/ton-618.ts`       |
+| `bh/gw231123.ts`             | `src/features/black-hole/lib/holes/gw231123.ts`      |
+| `bh/kerr.ts`                 | `src/features/black-hole/lib/holes/kerr.ts`          |
+| `bh/schwarzschild.ts`        | `src/features/black-hole/lib/holes/schwarzschild.ts` |
+| `bh/lensed.ts`               | `src/features/black-hole/lib/holes/lensed.ts`        |
+| `bh/custom.ts`               | `src/features/black-hole/lib/holes/custom.ts`        |
+| `bh/parameters.ts`           | `src/features/black-hole/lib/parameters.ts`          |
+| `bh/technical.json`          | `src/features/black-hole/technical.json`             |
+| `orrery/en.json`             | `src/features/orrery/messages/en.json`               |
+| `orrery/parameters.ts`       | `src/features/orrery/lib/model/parameters.ts`        |
+| `solar/swarms.ts`            | `src/features/orrery/lib/graphics/swarms.ts`         |
+| `solar/elements.ts`          | `src/features/orrery/lib/model/elements.ts`          |
+| `orrery/catalogue/`          | `src/features/orrery/lib/model/catalogue/`           |
+| `orrery/technical.json`      | `src/features/orrery/technical.json`                 |
+| `deep-field/en.json`         | `src/features/deep-field/messages/en.json`           |
+| `deep-field/technical.json`  | `src/features/deep-field/technical.json`             |
+| `solar/probes.ts`            | `src/space/solar-system/model/probes.ts`             |
+| `galaxy/parameters.ts`       | `src/space/galaxy/model/parameters.ts`               |
+| `galaxy/neighbours.ts`       | `src/space/galaxy/model/neighbours.ts`               |
+| `galaxy/galaxy.ts`           | `src/space/galaxy/graphics/galaxy.ts`                |
+| `galaxy/galaxy-layer.ts`     | `src/space/galaxy/scene/galaxy-layer.ts`             |
+| `galaxy/catalogue/`          | `src/space/galaxy/model/catalogue/`                  |
+| `cosmos/cosmos.ts`           | `src/space/cosmos/model/cosmos.ts`                   |
+| `cosmos/graphics/cosmos.ts`  | `src/space/cosmos/graphics/cosmos.ts`                |
+| `cosmos/cosmos-layer.ts`     | `src/space/cosmos/scene/cosmos-layer.ts`             |
+| `cosmos/catalogue.ts`        | `src/space/cosmos/model/catalogue.ts`                |
+| `toolkit/ephemeris.ts`       | `packages/toolkit/src/bodies/ephemeris.ts`           |
+| `toolkit/figures.ts`         | `packages/toolkit/src/bodies/figures.ts`             |
+| `toolkit/moons.ts`           | `packages/toolkit/src/bodies/moons.ts`               |
+| `toolkit/rings.ts`           | `packages/toolkit/src/bodies/rings.ts`               |
+| `toolkit/cosmology.ts`       | `packages/toolkit/src/science/cosmology.ts`          |
+| `space/star-catalogue.ts`    | `src/space/star-catalogue.ts`                        |
+| `lib/sources.ts`             | `src/lib/sources.ts`                                 |
+| `deep-field/catalogue/`      | `src/features/deep-field/lib/model/catalogue/`       |
+| `voyage/star-distances.json` | `src/features/voyage/lib/model/star-distances.json`  |
+| `space/bright-stars.ts`      | `src/space/bright-stars.ts`                          |
+| `toolkit/relativity.ts`      | `packages/toolkit/src/science/relativity.ts`         |
 
 | Status          | Meaning                                                                             |
 | --------------- | ----------------------------------------------------------------------------------- |
@@ -739,30 +739,36 @@ crossing dates, and land on the published distances. The dates below were not re
 
 ## Voyage: the ship and its drives
 
-`voyage/parameters.ts`, `voyage/anchors.ts`, `voyage/comoving.ts` and `solar/barycentre.ts`:
+`voyage/parameters.ts`, `voyage/anchors.ts`, `voyage/comoving.ts` and `voyage/barycentre.ts`:
 what the ship can do and where it can go. Trips are closed-form special relativity
 (`toolkit/relativity.ts`); the ship's own integrator steps the proper velocity by the
 four-acceleration and is tested against hyperbolic motion.
 
-| Where                         | Figure                                 | Value                                                                      | Source                                                                                                          | Status          | Note                                                                |
-| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------- |
-| `DRIVES.voyager`              | Voyager's cruising speed               | 17 km/s                                                                    | [JPL, Voyager mission status](https://science.nasa.gov/mission/voyager/mission-status/)                         | verified        | Voyager 1 at 16.9 km/s relative to the Sun in 2026, rounded         |
-| `DRIVES.sail`                 | A light sail's speed                   | 0.1 c                                                                      | Breakthrough Starshot's design goal                                                                             | teaching-choice | no sail has flown at this speed                                     |
-| `DRIVES.torch`                | The torch ship's acceleration          | 9.80665 m/s²                                                               | CGPM 1901 (standard gravity)                                                                                    | verified        | held for the whole trip, turning over halfway                       |
-| `SOLAR_CONSTANT_W_M2`         | Sunlight at 1 au                       | 1361 W/m²                                                                  | Kopp & Lean 2011, GRL 38, L01706                                                                                | verified        | the inverse square from there                                       |
-| `MOON_EARTH_MASS_RATIO`       | The Moon's mass over Earth's           | 0.0123000371                                                               | DE440 (Park et al. 2021, AJ 161, 105)                                                                           | verified        | Earth's centre 4,670 km from the Earth–Moon barycentre              |
-| `CHARON_PLUTO_MASS_RATIO`     | Charon's mass over Pluto's             | 0.1221                                                                     | Brozović et al. 2015, Icarus 246, 317                                                                           | verified        | the barycentre lies 2,100 km from Pluto's centre, above its surface |
-| `EDGE_LY`                     | The cosmic event horizon               | 16.6 billion light-years, comoving                                         | c/H₀ ∫₁^∞ da / (a² E(a)) in Planck 2018's flat ΛCDM, integrated in code                                         | derived         | nothing farther today can ever be reached; the "edge" place         |
-| `CMB_LY`, `cmbKelvinAt`       | The background's distance, temperature | 45 billion light-years comoving (z∗ = 1089.8); 2.7255 K / a                | Planck 2018 VI; Fixsen 2009                                                                                     | derived         | the shell is centred on the ship; its temperature falls as T₀ / a   |
-| `ALTITUDE_FLOOR`              | The ship's closest approach            | 1.02 radii (the Sun 1.5)                                                   | —                                                                                                               | teaching-choice | keeps the camera off the surface                                    |
-| `FAR_RADIUS_KM`               | Framing radii of the far places        | α Cen A's radius; centre 50 kly; M31 110 kly; edge 10⁹ ly                  | —                                                                                                               | teaching-choice | what an arrival frames                                              |
-| `ALPHA_CENTAURI` radii        | α Cen A, B, Proxima's radii            | 1.2234, 0.8632, 0.1542 R☉                                                  | Kervella et al. 2017, A&A 597, A137 (A, B, VLTI); Mann et al. 2015 relation as adopted in A&A 598, L7 (Proxima) | verified        | the discs the ship parks at                                         |
-| `ALPHA_CENTAURI` kelvin       | Their effective temperatures           | 5795, 5231, 3042 K                                                         | Kervella et al. 2017, A&A 597, A137 (A, B); Ségransan et al. 2003, A&A 397, L5 (Proxima)                        | verified        | the discs' colours, from the blackbody lookup                       |
-| `AB_ORBIT`                    | B's visual orbit about A               | P 79.91 yr, T 1875.66, e 0.5179, a 17.57″, i 79.205°, ω 231.65°, Ω 204.85° | Pourbaix et al. 2002, A&A 386, 280                                                                              | verified        | Thiele–Innes on the sky at A's SIMBAD distance; periastron 2035     |
-| `PROXIMA`                     | Proxima's place                        | 14h 29m 42.95s, −62° 40′ 46.1″, ϖ 768.07 mas                               | Gaia DR3 (SIMBAD)                                                                                               | verified        | a fifth of a light-year from A and B                                |
-| `BAND_KELVIN`                 | The painted band's colour temperature  | 5500 K                                                                     | —                                                                                                               | teaching-choice | what the Doppler shift of the Milky Way's glow is read against      |
-| `SUN_MAG_AT_PC`, `SUN_KELVIN` | The Sun as a star                      | M_V 4.83 (−0.17 from a parsec); 5772 K                                     | Allen's Astrophysical Quantities (4th ed.); IAU 2015 Resolution B3                                              | verified        | the point the Sun becomes once its disc is below a pixel            |
-| `STAR_PEAK`, `PAINTED_PEAK`   | Doppler brightening, capped            | a star's flux D² to 16×; the painted sky's points to 4×                    | —                                                                                                               | teaching-choice | a display cannot show more; the band's glow is capped at 6× D⁴      |
+| Where                           | Figure                                 | Value                                                                          | Source                                                                                                          | Status          | Note                                                                              |
+| ------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------- |
+| `DRIVES.voyager`                | Voyager's cruising speed               | 17 km/s                                                                        | [JPL, Voyager mission status](https://science.nasa.gov/mission/voyager/mission-status/)                         | verified        | Voyager 1 at 16.9 km/s relative to the Sun in 2026, rounded                       |
+| `DRIVES.sail`                   | A light sail's speed                   | 0.1 c                                                                          | Breakthrough Starshot's design goal                                                                             | teaching-choice | no sail has flown at this speed                                                   |
+| `DRIVES.torch`                  | The torch ship's acceleration          | 9.80665 m/s²                                                                   | CGPM 1901 (standard gravity)                                                                                    | verified        | held for the whole trip, turning over halfway                                     |
+| `SOLAR_CONSTANT_W_M2`           | Sunlight at 1 au                       | 1361 W/m²                                                                      | Kopp & Lean 2011, GRL 38, L01706                                                                                | verified        | the inverse square from there                                                     |
+| `MOON_EARTH_MASS_RATIO`         | The Moon's mass over Earth's           | 0.0123000371                                                                   | DE440 (Park et al. 2021, AJ 161, 105)                                                                           | verified        | Earth's centre 4,670 km from the Earth–Moon barycentre                            |
+| `CHARON_PLUTO_MASS_RATIO`       | Charon's mass over Pluto's             | 0.1221                                                                         | Brozović et al. 2015, Icarus 246, 317                                                                           | verified        | the barycentre lies 2,100 km from Pluto's centre, above its surface               |
+| `EDGE_LY`                       | The cosmic event horizon               | 16.6 billion light-years, comoving                                             | c/H₀ ∫₁^∞ da / (a² E(a)) in Planck 2018's flat ΛCDM, integrated in code                                         | derived         | nothing farther today can ever be reached; the "edge" place                       |
+| `CMB_LY`, `cmbKelvinAt`         | The background's distance, temperature | 45 billion light-years comoving (z∗ = 1089.8); 2.7255 K / a                    | Planck 2018 VI; Fixsen 2009                                                                                     | derived         | the shell is centred on the ship; its temperature falls as T₀ / a                 |
+| `ALTITUDE_FLOOR`                | The ship's closest approach            | 1.02 radii (the Sun 1.5)                                                       | —                                                                                                               | teaching-choice | keeps the camera off the surface                                                  |
+| `FAR_RADIUS_KM`                 | Framing radii of the far places        | α Cen A's radius; centre 50 kly; M31 110 kly; edge 10⁹ ly                      | —                                                                                                               | teaching-choice | what an arrival frames                                                            |
+| `ALPHA_CENTAURI` radii          | α Cen A, B, Proxima's radii            | 1.2234, 0.8632, 0.1542 R☉                                                      | Kervella et al. 2017, A&A 597, A137 (A, B, VLTI); Mann et al. 2015 relation as adopted in A&A 598, L7 (Proxima) | verified        | the discs the ship parks at                                                       |
+| `ALPHA_CENTAURI` kelvin         | Their effective temperatures           | 5795, 5231, 3042 K                                                             | Kervella et al. 2017, A&A 597, A137 (A, B); Ségransan et al. 2003, A&A 397, L5 (Proxima)                        | verified        | the discs' colours, from the blackbody lookup                                     |
+| `AB_ORBIT`                      | B's visual orbit about A               | P 79.91 yr, T 1875.66, e 0.5179, a 17.57″, i 79.205°, ω 231.65°, Ω 204.85°     | Pourbaix et al. 2002, A&A 386, 280                                                                              | verified        | Thiele–Innes on the sky at A's SIMBAD distance; periastron 2035                   |
+| `PROXIMA`                       | Proxima's place                        | 14h 29m 42.95s, −62° 40′ 46.1″, ϖ 768.07 mas                                   | Gaia DR3 (SIMBAD)                                                                                               | verified        | a fifth of a light-year from A and B                                              |
+| `BAND_KELVIN`                   | The painted band's colour temperature  | 5500 K                                                                         | —                                                                                                               | teaching-choice | what the Doppler shift of the Milky Way's glow is read against                    |
+| `SUN_MAG_AT_PC`, `SUN_KELVIN`   | The Sun as a star                      | M_V 4.83 (−0.17 from a parsec); 5772 K                                         | Allen's Astrophysical Quantities (4th ed.); IAU 2015 Resolution B3                                              | verified        | the point the Sun becomes once its disc is below a pixel                          |
+| `STAR_PEAK`, `PAINTED_PEAK`     | Doppler brightening, capped            | a star's flux D² to 16×; the painted sky's points to 4×                        | —                                                                                                               | teaching-choice | a display cannot show more; the band's glow is capped at 6× D⁴                    |
+| `GM_KM3_S2`                     | Gravitational parameters               | Sun, Earth IAU 2015 B3; planets DE440; moons JPL satellite ephemerides         | [JPL SSD, planetary and satellite physical parameters](https://ssd.jpl.nasa.gov/sats/phys_par/); IAU 2015 B3    | verified        | a planet's own GM, without its moons; small moons included, minor bodies left out |
+| `GM_KM3_S2` α Cen               | The three suns' masses                 | A 1.0788, B 0.9092, Proxima 0.1221 M☉                                          | Akeson et al. 2021, AJ 162, 14 (A, B); Mann et al. 2015 relation via Kervella et al. 2017 (Proxima)             | derived         | A and B verified; Proxima's to check against Kervella 2017                        |
+| `PIECES_PER_DYNAMICAL_TIME`     | Gravity's step                         | 40 leapfrog steps per √(r³/GM), at most 400 a frame                            | —                                                                                                               | teaching-choice | keeps an orbit's energy; past it the time warp holds back                         |
+| `assistWarp`, `MANOEUVRE_ACCEL` | Flight assist by hand                  | warp √(2 · 0.08 · h / a) / 2 s, from 50 km; thrusters at one g for every drive | —                                                                                                               | teaching-choice | a full burn from rest covers 8 % of the height in two seconds, at any scale       |
+| `transit`, `ALIGN_S`            | The autopilot's playback               | 2 s to align; 12–32 s of transit, log-distance from each end                   | —                                                                                                               | teaching-choice | positions, speeds and clocks are the drive's; only the playback rate is chosen    |
+| `PROBE_RADIUS_KM`, galaxies     | Framing of the new destinations        | probes 400 km; LMC 7 kly, SMC 3.5 kly, M33 30 kly, Virgo 2.5 Mly               | —                                                                                                               | teaching-choice | what an arrival frames                                                            |
 
 ## Toolkit: moons
 
@@ -854,21 +860,21 @@ All 188 entries of `space/star-catalogue.ts:11` were compared with SIMBAD (TAP `
 
 ## Bright-star distances and temperatures
 
-`space/star-distances.json` holds a distance for all 188 catalogue stars, written by
+`voyage/star-distances.json` holds a distance for all 188 catalogue stars, written by
 `scripts/fetch-star-distances.mjs` from SIMBAD TAP (20 Oct 2026): each star is found by a 3′ cone
 around its catalogue position (the brightest object there with a parallax, so multiple systems
 resolve to their primary; for the four combined entries without a V flux, the nearest parallax in
 the cone), and the distance is 1000 / `plx_value`. SIMBAD adopts Gaia DR3 where it has one and
 Hipparcos (van Leeuwen 2007) otherwise; the file's `references` field counts each bibcode.
 
-| Where                       | Quantity               | Value                                                   | Source                                                                                                                                                            | Status          | Note                                                                                                  |
-| --------------------------- | ---------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------- |
-| `space/star-distances.json` | 110 stars' parallaxes  | pc                                                      | van Leeuwen 2007, A&A 474, 653, [doi:10.1051/0004-6361:20078357](https://doi.org/10.1051/0004-6361:20078357) (Hipparcos, the new reduction), via SIMBAD           | verified        | the bright stars Gaia saturates on; Sirius 2.64, Vega 7.68, Polaris 133, Betelgeuse 153, Deneb 433 pc |
-| `space/star-distances.json` | 73 stars' parallaxes   | pc                                                      | Gaia Collaboration 2020, Gaia EDR3 / DR3 (I/350) and Gaia DR2 (I/345), [doi:10.1051/0004-6361/202039657](https://doi.org/10.1051/0004-6361/202039657), via SIMBAD | verified        | fainter catalogue stars                                                                               |
-| `space/star-distances.json` | Rigil Kentaurus, α Cen | 1.33 pc                                                 | Akeson et al. 2021, AJ 162, 14, [doi:10.3847/1538-3881/abfaff](https://doi.org/10.3847/1538-3881/abfaff), via SIMBAD                                              | verified        | 750 mas; the nearest catalogue star                                                                   |
-| `space/star-distances.json` | Almaaz, ε Aur          | 1,010 pc                                                | van Leeuwen 2007, via SIMBAD                                                                                                                                      | verified        | the only catalogue star beyond 1 kpc; 0.99 ± 0.37 mas, poorly known                                   |
-| `space/bright-stars.ts`     | Unknown distance       | 1,000 pc                                                | —                                                                                                                                                                 | teaching-choice | far enough that the parallax of a flight vanishes; no catalogue star uses it today                    |
-| `space/bright-stars.ts`     | Temperature from B−V   | T = 4600 (1/(0.92 (B−V) + 1.7) + 1/(0.92 (B−V) + 0.62)) | Ballesteros 2012, EPL 97, 34008, [doi:10.1209/0295-5075/97/34008](https://doi.org/10.1209/0295-5075/97/34008)                                                     | verified        | eq. 14; the Sun's B−V 0.65 gives 5,780 K                                                              |
+| Where                        | Quantity               | Value                                                   | Source                                                                                                                                                            | Status          | Note                                                                                                  |
+| ---------------------------- | ---------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------- |
+| `voyage/star-distances.json` | 110 stars' parallaxes  | pc                                                      | van Leeuwen 2007, A&A 474, 653, [doi:10.1051/0004-6361:20078357](https://doi.org/10.1051/0004-6361:20078357) (Hipparcos, the new reduction), via SIMBAD           | verified        | the bright stars Gaia saturates on; Sirius 2.64, Vega 7.68, Polaris 133, Betelgeuse 153, Deneb 433 pc |
+| `voyage/star-distances.json` | 73 stars' parallaxes   | pc                                                      | Gaia Collaboration 2020, Gaia EDR3 / DR3 (I/350) and Gaia DR2 (I/345), [doi:10.1051/0004-6361/202039657](https://doi.org/10.1051/0004-6361/202039657), via SIMBAD | verified        | fainter catalogue stars                                                                               |
+| `voyage/star-distances.json` | Rigil Kentaurus, α Cen | 1.33 pc                                                 | Akeson et al. 2021, AJ 162, 14, [doi:10.3847/1538-3881/abfaff](https://doi.org/10.3847/1538-3881/abfaff), via SIMBAD                                              | verified        | 750 mas; the nearest catalogue star                                                                   |
+| `voyage/star-distances.json` | Almaaz, ε Aur          | 1,010 pc                                                | van Leeuwen 2007, via SIMBAD                                                                                                                                      | verified        | the only catalogue star beyond 1 kpc; 0.99 ± 0.37 mas, poorly known                                   |
+| `space/bright-stars.ts`      | Unknown distance       | 1,000 pc                                                | —                                                                                                                                                                 | teaching-choice | far enough that the parallax of a flight vanishes; no catalogue star uses it today                    |
+| `space/bright-stars.ts`      | Temperature from B−V   | T = 4600 (1/(0.92 (B−V) + 1.7) + 1/(0.92 (B−V) + 0.62)) | Ballesteros 2012, EPL 97, 34008, [doi:10.1209/0295-5075/97/34008](https://doi.org/10.1209/0295-5075/97/34008)                                                     | verified        | eq. 14; the Sun's B−V 0.65 gives 5,780 K                                                              |
 
 ## Toolkit: relativity
 

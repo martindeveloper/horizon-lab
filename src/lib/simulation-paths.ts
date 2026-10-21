@@ -1,12 +1,19 @@
 import { LOCALES } from "../i18n/locales";
 
-/** Shared URL prefix: every simulation lives under it. */
+/** Shared URL prefixes: the labs live under one, the experiences under the other. */
 export const SIMULATION_PREFIX = "/lab";
+export const EXPERIENCE_PREFIX = "/experience";
 
-export type SimulationPath = `${typeof SIMULATION_PREFIX}/${string}`;
+export type SimulationPath = `${typeof SIMULATION_PREFIX | typeof EXPERIENCE_PREFIX}/${string}`;
 
+/** A lab's path: a simulation to learn from. */
 export function simulationPath<const Slug extends string>(slug: Slug) {
   return `${SIMULATION_PREFIX}/${slug}` as const;
+}
+
+/** An experience's path: a simulation to sit back in. */
+export function experiencePath<const Slug extends string>(slug: Slug) {
+  return `${EXPERIENCE_PREFIX}/${slug}` as const;
 }
 
 /** Path segments after `base`, ignoring the internal locale segment. */

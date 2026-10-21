@@ -3,8 +3,8 @@
  * coordinates (today's thin disk with its bulge, the Great Rift and the Coalsack; the early
  * thick disk without the dust), drawn as a faint unresolved glow on a sphere round the camera
  * and as grains sampled from the same map, with a thin even field of faint stars away from
- * the band. The Orrery turns the band with the Sun's orbit and blends the eras along its
- * timeline; Voyage carries it with the ship and fades it as the Galaxy map takes over.
+ * the band. A host may turn the band with the Sun's orbit and blend the eras, or carry it
+ * with a moving camera and fade it as a map of the Galaxy takes over.
  */
 import {
   AdditiveBlending,
@@ -269,7 +269,8 @@ export function createMilkyWay(grains: number, options: MilkyWayOptions) {
   const early = both ? bandMap("early", parallax) : today;
   const { motion } = options;
   const material = new ShaderMaterial({
-    ...(motion ? { defines: { RELATIVITY: "" } } : {}),
+    /* Today's disk alone samples one map; a moving host reads the motion. */
+    defines: { ...(motion ? { RELATIVITY: "" } : {}), ...(both ? {} : { TODAY_ONLY: "" }) },
     uniforms: {
       today: { value: today.texture },
       early: { value: early.texture },

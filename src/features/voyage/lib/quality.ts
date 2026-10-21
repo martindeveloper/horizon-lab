@@ -8,8 +8,9 @@
 import type { CosmosDetail } from "@/space/cosmos/graphics/cosmos";
 import { spaceQuality, type ByTier, type SpaceQuality } from "@/space/quality";
 import type { SkyCounts } from "@/space/sky/milky-way";
-import type { MapBudgetQuality } from "@/space/solar-system/scene/map-budget";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
+
+import type { MapBudgetQuality } from "./scene/map-budget";
 
 /** The finest globe: segments around and across, for the body being flown by. */
 export type GlobeDetail = { segments: number; rings: number };
@@ -25,6 +26,8 @@ type VoyageQuality = SpaceQuality & {
   cosmos: CosmosDetail;
   /** The painted sky's points: the Milky Way's grains and the faint field. */
   sky: SkyCounts;
+  /** Motes of dust streaming past a moving ship. */
+  streaks: number;
 };
 
 const GLOBE: ByTier<GlobeDetail> = {
@@ -57,6 +60,8 @@ const SKY: ByTier<SkyCounts> = {
   max: { milkyWay: 45_000, fieldStars: 2_400 },
 };
 
+const STREAKS: ByTier<number> = { light: 260, full: 480, max: 720 };
+
 export function voyageQuality(quality: RenderQuality, tight: boolean): VoyageQuality {
   const space = spaceQuality(quality, tight);
   const { tier } = space;
@@ -68,5 +73,6 @@ export function voyageQuality(quality: RenderQuality, tight: boolean): VoyageQua
     ringTexels: RING_TEXELS[tier],
     cosmos: COSMOS[tier],
     sky: SKY[tier],
+    streaks: STREAKS[tier],
   };
 }

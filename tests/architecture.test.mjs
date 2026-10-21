@@ -13,7 +13,7 @@ import { resolveView, viewFromPath, viewRouteParams } from "../src/features/orre
 import { getPathname } from "../src/i18n/navigation.ts";
 import { routing } from "../src/i18n/routing.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
-import { SIMULATION_PREFIX, slugRoutes } from "../src/lib/simulation-paths.ts";
+import { EXPERIENCE_PREFIX, SIMULATION_PREFIX, slugRoutes } from "../src/lib/simulation-paths.ts";
 import { simulations, simulationForPath } from "../src/lib/simulations.ts";
 
 const root = new URL("../", import.meta.url);
@@ -21,7 +21,8 @@ const root = new URL("../", import.meta.url);
 test("catalogue routes resolve by path segment and entry points stay within their simulation", () => {
   assert.equal(new Set(simulations.map((entry) => entry.id)).size, simulations.length);
   for (const simulation of simulations) {
-    assert.ok(simulation.href.startsWith(`${SIMULATION_PREFIX}/`), "Simulations share one prefix");
+    const prefix = simulation.kind === "lab" ? SIMULATION_PREFIX : EXPERIENCE_PREFIX;
+    assert.ok(simulation.href.startsWith(`${prefix}/`), "Each shelf shares one prefix");
     assert.ok(existsSync(new URL(`public${simulation.artwork}`, root)));
     assert.ok(existsSync(new URL(`src/app/[locale]${simulation.href}/page.tsx`, root)));
     assert.equal(simulationForPath(simulation.href)?.id, simulation.id);

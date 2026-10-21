@@ -1,7 +1,8 @@
 import { mountSceneEngine } from "@/space/bench";
 import type { BenchFrame, BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 
-import { placeById } from "./lib/model/places";
+import type { AnchorId } from "./lib/model/anchors";
+import { PLACE_BODY } from "./lib/model/places";
 import type { ViewId } from "./lib/model/view-ids";
 import { createVoyageEngine } from "./lib/scene/engine";
 import { useVoyage } from "./lib/store";
@@ -10,10 +11,16 @@ type VoyageBenchScene = BenchScene & {
   view: ViewId;
   /** A free flight from the place: the ship turns its back on it and burns at one g. */
   burn?: boolean;
+  /** The autopilot flies the torch ship from the place to this anchor. */
+  flyTo?: AnchorId;
+  /** A flight by hand from the place on the light sail, the dust streaming past. */
+  cruise?: boolean;
 };
 
 /** Ship seconds per real second on the burn: about four months a second. */
-const BURN_COMPRESSION = 1e7;
+const BURN_WARP = 1e7;
+/** And on the sail's cruise: a minute a second. */
+const CRUISE_WARP = 60;
 /**
  * Real seconds of the burn, and its frames: six ship-years at one g, past rapidity 6. The
  * starbow forms in the first year (β ≈ 0.75 at 15 %); by the end γ is in the hundreds and
@@ -84,6 +91,23 @@ const SCENES: readonly VoyageBenchScene[] = [
       keyframes: [0, 0.15, 0.3, 0.5, 0.8, 1],
     },
   },
+  {
+    id: "autopilot",
+    description:
+      "The autopilot flies the torch ship from Earth to Jupiter: align, burn, flip, brake, arrival",
+    tags: ["sequence"],
+    view: "earth",
+    flyTo: "jupiter",
+    script: { frames: 330, duration: 22, keyframes: [0.05, 0.2, 0.4, 0.6, 0.8, 0.95, 1] },
+  },
+  {
+    id: "cruise",
+    description: "By hand from Earth on the light sail at a minute a second: the dust streams past",
+    tags: ["sequence"],
+    view: "earth",
+    cruise: true,
+    script: { frames: 60, duration: 3, keyframes: [0.5, 1] },
+  },
 ];
 
 /**
@@ -100,18 +124,33 @@ export const benchTarget: BenchTarget = {
     store.setState(store.getInitialState(), true);
     store.setState({
       view: scene.view,
-      destination: placeById(scene.view).body,
+      destination: PLACE_BODY[scene.view],
       quality: "standard",
       compression: 0,
     });
-    const instance = mountSceneEngine(surface, createVoyageEngine, () => store.setState({}));
-    if (scene.burn) {
-      /* One parked frame places the camera; then leave, turn round and hold the thrust. */
+    /* Flown by hand, the bench holds the warp fixed rather than the flight assist's. */
+    const warp = scene.burn ? BURN_WARP : scene.cruise ? CRUISE_WARP : null;
+    const instance = mountSceneEngine(
+      surface,
+      (mount) => createVoyageEngine(mount, warp === null ? {} : { warp: () => warp }),
+      () => store.setState({}),
+    );
+    if (scene.burn || scene.flyTo || scene.cruise) {
+      /* One parked frame places the camera. */
       const first: BenchFrame = { index: 0, count: 1, progress: 0, time: 0, dt: 1 / 60 };
       instance.render(first);
-      store.setState({ mode: "free", drive: "torch", compression: BURN_COMPRESSION });
+    }
+    if (scene.burn) {
+      /* Leave, turn round and open the lever. */
+      store.setState({ mode: "free", drive: "torch", compression: 1 });
       store.getState().rotate({ azimuth: ABOUT_FACE, inclination: 0 });
-      store.getState().setPilot({ thrust: 1 });
+      store.getState().setThrottle(1);
+    } else if (scene.flyTo) {
+      store.setState({ drive: "torch" });
+      store.getState().goTo(scene.flyTo);
+    } else if (scene.cruise) {
+      store.setState({ mode: "free", drive: "sail", compression: 1 });
+      store.getState().setThrottle(1);
     }
     return {
       ...instance,

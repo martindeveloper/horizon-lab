@@ -19,6 +19,9 @@ export const ORBIT_COLOR: Record<PlanetId, number> = {
   uranus: 0x8ec9c4,
   neptune: 0x6f98c8,
 };
+/** The small worlds' orbits and Pluto's moons': a cool grey-blue; Halley's a comet's rust. */
+export const SMALL_ORBIT_COLOR = 0x9ebccc;
+export const COMET_ORBIT_COLOR = 0xc4705a;
 
 /** The scene's switches. */
 export type SolarShow = {

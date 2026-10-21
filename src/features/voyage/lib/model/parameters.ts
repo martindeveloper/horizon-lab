@@ -2,14 +2,15 @@
  * Voyage's numbers, once: the ship's drives and clocks, how close it may come, the irradiance
  * scale. The model computes with them and the technical notes print them.
  */
-import { AU_KM, SPEED_OF_LIGHT } from "@horizon/toolkit/science";
+import { AU_KM, SPEED_OF_LIGHT_KM_S, STANDARD_GRAVITY } from "@horizon/toolkit/science";
 
 /** The speed of light, km/s. */
-export const C_KM_S = SPEED_OF_LIGHT / 1000;
-/** Standard gravity, km/s² (CGPM 1901): the torch ship's one g. */
-export const STANDARD_GRAVITY_KM_S2 = 9.80665e-3;
+export const C_KM_S = SPEED_OF_LIGHT_KM_S;
+/** Standard gravity, km/s²: the torch ship's one g. */
+export const STANDARD_GRAVITY_KM_S2 = STANDARD_GRAVITY / 1000;
 
-export type DriveId = "voyager" | "sail" | "torch";
+export const DRIVE_IDS = ["voyager", "sail", "torch"] as const;
+export type DriveId = (typeof DRIVE_IDS)[number];
 
 /** A drive: what it does when the ship goes somewhere, and how fast it gets there. */
 export type Drive =
@@ -50,6 +51,8 @@ export const DEFAULT_COMPRESSION = 3_600;
 /** The ship stops this far from a body's centre, in its radii (the Sun's photosphere is hot). */
 export const ALTITUDE_FLOOR = 1.02;
 export const SUN_ALTITUDE_FLOOR = 1.5;
+/** Striking a surface faster than this, km/s, relative to it, wrecks the ship; slower is a hard landing. */
+export const CRASH_KM_S = 0.25;
 /** The nearest the frustum comes, km: a stop above a moon's surface still fits. */
 export const NEAR_PLANE_KM = 0.5;
 /**

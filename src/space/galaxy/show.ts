@@ -56,6 +56,21 @@ export type WorldSelection =
   /** The probes leaving the solar system, and the heliopause the Voyagers crossed. */
   | ReachSelection;
 
+/** A tapped object's `userData.pick`, if it is one of the worlds beyond the solar system. */
+export function isWorldPick(value: unknown): value is Exclude<WorldSelection, SolarSelection> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "kind" in value &&
+    (value.kind === "galaxy" ||
+      value.kind === "cosmos" ||
+      value.kind === "star" ||
+      value.kind === "reach") &&
+    "id" in value &&
+    typeof value.id === "string"
+  );
+}
+
 /** The model state one frame draws. */
 export type WorldFrame = {
   show: GalaxyShow;
@@ -71,7 +86,7 @@ export type WorldFrame = {
   afield?: number;
   /**
    * 0..1: how much of the Galaxy map is drawn (default 1). A host whose near sky is the painted
-   * band (Voyage) brings the map in only as the band gives way.
+   * band brings the map in only as the band gives way.
    */
   galaxyPresence?: number;
 };

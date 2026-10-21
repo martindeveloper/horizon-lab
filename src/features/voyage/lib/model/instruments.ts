@@ -1,8 +1,21 @@
 /**
  * Where the cockpit's instruments draw a direction from the ship, in camera space (x right,
- * y up, −z ahead): a marker on the screen, and a blip on the scanner disc. Pure, so the
- * geometry is tested without a DOM.
+ * y up, −z ahead): a marker on the screen, and a blip on the scanner disc; and how every
+ * readout prints a speed. Pure, so the geometry is tested without a DOM.
  */
+import { C_KM_S } from "./parameters";
+
+/**
+ * A speed as the readouts print it: km/s, or a share of light speed once it is a hundredth of
+ * c, with as many digits as it takes to tell it from c ("0.99999 c").
+ */
+export function speedFigure(kmPerS: number) {
+  const beta = kmPerS / C_KM_S;
+  if (beta < 0.01)
+    return { ofC: false, value: kmPerS, digits: kmPerS < 10 ? 2 : kmPerS < 1000 ? 1 : 0 };
+  const digits = Math.min(9, Math.max(3, Math.ceil(-Math.log10(Math.max(1e-9, 1 - beta))) + 1));
+  return { ofC: true, value: beta, digits };
+}
 
 /** A marker on the screen: normalised −1…1 across and up, or at the edge pointing the way. */
 export type ScreenMark = {

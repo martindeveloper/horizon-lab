@@ -24,7 +24,7 @@ export const SCENE_ANTIALIAS = [
   { value: "fxaa", name: "fxaa" },
 ] as const satisfies readonly AntialiasMode<string>[];
 
-/** A render switch, off until the visitor turns it on, named by its `render.*` copy key. */
+/** A render switch, named by its `render.*` copy key; the visit's settings say how it starts. */
 function EffectSwitch({
   name,
   on,

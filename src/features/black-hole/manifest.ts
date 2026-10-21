@@ -5,6 +5,7 @@ import { simulationPath } from "../../lib/simulation-paths";
 export const BLACK_HOLE_PATH = simulationPath("black-hole");
 export const blackHoleManifest = {
   id: "black-hole",
+  kind: "lab",
   href: BLACK_HOLE_PATH,
   artwork: "/simulations/black-hole.svg",
   messageKey: "blackHole",

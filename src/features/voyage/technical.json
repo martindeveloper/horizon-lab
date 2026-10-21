@@ -18,6 +18,7 @@
           "equation": "torch-trip"
         },
         "t_coast = D / v,  τ = t / γ",
+        "a_grav = Σ GM_i (x_i − x) / |x_i − x|³,  h ≤ √(r³ / GM) / 40",
         {
           "equation": "lorentz-factor"
         },

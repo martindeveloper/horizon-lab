@@ -16,7 +16,13 @@ import { AU_KM } from "@horizon/toolkit/science";
 import { moonOffset, moonOrientation, writeMoonOrbit } from "../graphics/moons";
 import { hostOf, type SolarSelection } from "../model/selection";
 import type { Globes } from "./geometry";
-import { ORBIT_COLOR, type ShownFor, type SolarFrame, type SolarKit } from "./kit";
+import {
+  ORBIT_COLOR,
+  SMALL_ORBIT_COLOR,
+  type ShownFor,
+  type SolarFrame,
+  type SolarKit,
+} from "./kit";
 
 /** Moon dots: Ganymede's size in pixels; smaller moons scale with radius, down to the floor. */
 const MOON_PX = 4.5;
@@ -76,7 +82,7 @@ export function createMoonsLayer(
       hit.userData.pick = { kind: "moon", id: moon.id } satisfies SolarSelection;
       hit.userData.globe = mesh;
       hit.visible = false;
-      const orbit = ownedLine(scope, id === "pluto" ? 0x9ebccc : ORBIT_COLOR[id], 0.45);
+      const orbit = ownedLine(scope, id === "pluto" ? SMALL_ORBIT_COLOR : ORBIT_COLOR[id], 0.45);
       orbit.line.visible = false;
       parent.add(mesh, hit, orbit.line);
       const dotPx = Math.max(MOON_PX_MIN, MOON_PX * Math.sqrt(moon.radiusKm / 2631.2));

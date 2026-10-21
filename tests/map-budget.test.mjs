@@ -9,8 +9,8 @@ import test from "node:test";
 import { MAPS } from "@horizon/toolkit/bodies";
 import { DisposalScope } from "@horizon/toolkit/rendering";
 
+import { createMapBudget } from "../src/features/voyage/lib/scene/map-budget.ts";
 import { bytesOf, tierFor, widthFor } from "../src/space/solar-system/graphics/map-tiers.ts";
-import { createMapBudget } from "../src/space/solar-system/scene/map-budget.ts";
 
 const EARTH = MAPS.earth.widths;
 
@@ -36,6 +36,7 @@ function harness({ budget = 1e9, allow = "near", cruising = true } = {}) {
   const released = [];
   const failed = [];
   const uploaded = [];
+  let time = 0;
   const map = createMapBudget(scope, {
     base: "/maps",
     quality: () => ({ budget, anisotropy: 4, allow }),
@@ -44,6 +45,7 @@ function harness({ budget = 1e9, allow = "near", cruising = true } = {}) {
     onFail: (id) => failed.push(id),
     upload: (texture) => uploaded.push(texture),
     wake: () => {},
+    now: () => time,
     load: (file, _signal, anisotropy) =>
       new Promise((resolve, reject) => loads.push({ file, anisotropy, resolve, reject })),
   });
@@ -55,7 +57,10 @@ function harness({ budget = 1e9, allow = "near", cruising = true } = {}) {
     else load.reject(new Error("HTTP 404"));
     await new Promise((resolve) => setImmediate(resolve));
   };
-  const frame = (need, options = { cruising }) => map.update(1 / 60, new Map(need), options);
+  const frame = (need, options = { cruising }) => {
+    time += 1 / 60;
+    return map.update(1 / 60, new Map(need), options);
+  };
   return { map, loads, shown, released, failed, uploaded, settle, frame, scope };
 }
 

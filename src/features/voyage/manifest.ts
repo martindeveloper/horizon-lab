@@ -1,10 +1,11 @@
 import type { SimulationManifest } from "@/lib/simulation-types";
 
-import { simulationPath } from "../../lib/simulation-paths";
+import { experiencePath } from "../../lib/simulation-paths";
 
-export const VOYAGE_PATH = simulationPath("voyage");
+export const VOYAGE_PATH = experiencePath("voyage");
 export const voyageManifest = {
   id: "voyage",
+  kind: "experience",
   feature: "voyage",
   href: VOYAGE_PATH,
   artwork: "/simulations/voyage.svg",

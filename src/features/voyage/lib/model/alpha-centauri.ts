@@ -8,10 +8,11 @@
 import { Vector3 } from "three";
 
 import { STARS } from "@/space/star-catalogue";
-import { starDistance } from "@/space/star-distances";
 import { SUN_RADIUS_KM } from "@horizon/toolkit/bodies";
 import { equatorialToScene, type Vec3d } from "@horizon/toolkit/scene";
 import { AU_KM, PARSEC_KM } from "@horizon/toolkit/science";
+
+import { starDistance } from "./star-distances";
 
 export type AlphaCentauriId = "alphaCenA" | "alphaCenB" | "proxima";
 

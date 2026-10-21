@@ -77,6 +77,6 @@ export function selectTapped(
 /**
  * How much of a body an arriving camera frames, in the body's radii, where the body alone
  * would cut something off: Saturn's bright rings, Halley's glow. Every other body frames its
- * globe. The Orrery's close-ups and Voyage's arrivals share it.
+ * globe. Every host's close-ups and arrivals share it.
  */
 export const FRAME_RADII: Partial<Record<BodyId, number>> = { saturn: 2.3, halley: 2.2 };

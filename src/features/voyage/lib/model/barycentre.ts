@@ -1,3 +1,8 @@
+import { moonOffset } from "@/space/solar-system/model/moon-orbits";
+import {
+  CHARON_PLUTO_MASS_RATIO,
+  MOON_EARTH_MASS_RATIO,
+} from "@/space/solar-system/model/parameters";
 /**
  * Where a planet's centre is beside its system's barycentre. The planetary elements
  * (`@horizon/toolkit/bodies`, JPL) place the Earth–Moon and Pluto–Charon barycentres, not the
@@ -6,9 +11,6 @@
  * that is below a pixel; a camera at a planet sees it.
  */
 import type { MoonId, PlanetId, Vec3 } from "@horizon/toolkit/bodies";
-
-import { moonOffset } from "./moon-orbits";
-import { CHARON_PLUTO_MASS_RATIO, MOON_EARTH_MASS_RATIO } from "./parameters";
 
 /** The hosts whose elements are their system's barycentre, and the moon that moves them. */
 export type BarycentreHost = Extract<PlanetId, "earth"> | "pluto";

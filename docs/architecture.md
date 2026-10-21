@@ -25,6 +25,7 @@ src/
         [view]/page.tsx        View route: static params + simulationMetadata
       deep-field/              The same three routes for Deep Field's views
       spectroscopy/            The same three routes for Stellar Spectra's views
+    experience/                Shared experience prefix (EXPERIENCE_PREFIX)
       voyage/                  The same three routes for Voyage's places
   components/
     shell/                     AppShell, header, phone menu, preferences, theme switch, stage sizing
@@ -146,13 +147,19 @@ src/
         relativity.ts, ship.ts Trip times on both clocks; the ship's state and its integrator
                                on proper velocity (four-acceleration, rapidity)
         bodies.ts              Where every body is in km, doubles, barycentres resolved
+                               (barycentre.ts: the Earth–Moon and Pluto–Charon offsets)
         anchors.ts             Every destination: bodies, α Centauri, the Galaxy from above,
-                               Andromeda, the edge of the reachable
-        alpha-centauri.ts      α Centauri's three suns: B on its visual orbit, Proxima at its place
+                               Andromeda, the edge of the reachable; the card each opens
+        alpha-centauri.ts      α Centauri's three suns: B on its visual orbit, Proxima at its
+                               place; star-distances.ts the catalogue stars' SIMBAD distances
+                               (star-distances.json, from scripts/fetch-star-distances.mjs)
         calendar.ts            Earth's calendar held within the JavaScript date's reach
         comoving.ts            The expansion with the clocks, the background's temperature,
                                the event horizon
         places.ts, view-ids.ts The places the address names; tour.ts the guided journey
+        assist.ts, gravity.ts, autopilot.ts, regime.ts
+                               Flying by hand: the warp, the wells; the autopilot's schedule;
+                               the speed regimes
       lib/scene/               The engine on the toolkit's host with a logarithmic depth
                                buffer: the ship at the origin (floating origin), every body
                                at true size placed by its offset from the ship (bodies-layer.ts,
@@ -163,11 +170,13 @@ src/
                                (stars-layer.ts), α Centauri as discs (alpha-centauri-layer.ts),
                                the shared worlds about the ship (worlds-layer.ts: the reach, the
                                Galaxy and the cosmic map scaled by the expansion), the microwave
-                               background's shell centred on the ship (cmb-layer.ts), the shared
-                               map budget streaming tiers by on-screen size, the HUD readouts,
+                               background's shell centred on the ship (cmb-layer.ts), the map
+                               budget streaming tiers by on-screen size (map-budget.ts), the HUD
+                               readouts,
                                the cockpit drawn in DOM (cockpit.ts: canopy, velocity markers,
                                the aim's range, a log-scale scanner, the throttle; the geometry
-                               in model/instruments.ts)
+                               in model/instruments.ts), and the optional ship feel (feel.ts: a
+                               crash's hold and jolt, the drive's spool-up, the view widening)
       lib/store.ts             Zustand store (voyage namespace messages)
   lib/
     sources.ts                 Shared bibliography the catalogue figures cite
@@ -195,8 +204,6 @@ src/
     observer-sky.ts             Observer location and apparent Sun, Moon and star positions
     bright-stars.ts            The catalogue's bright stars on the sky sphere, as points
                                carried with the camera (`createBrightSky`, `carrySky`)
-    star-distances.ts          Their SIMBAD distances (star-distances.json, from
-                               scripts/fetch-star-distances.mjs), for a sky flown through
     sky/                       The Milky Way as the sky shows it: the painted band in galactic
                                coordinates, its grains and a faint field (`createMilkyWay`),
                                drawn by the Orrery along its timeline and by Voyage from the ship
@@ -210,8 +217,7 @@ src/
                                disk), elements, tracers, catalogue, views (and the solar
                                framing every host engine shares), framing (and the radii an
                                arrival frames), position, moon-orbits (the moons' orbits, the
-                               Moon from the toolkit's lunar theory, without three.js),
-                               barycentre (the Earth–Moon and Pluto–Charon offsets); its reach:
+                               Moon from the toolkit's lunar theory, without three.js); its reach:
                                probes.ts (five probes on their JPL Horizons tracks,
                                probe-tracks.json from scripts/fetch-probe-tracks.mjs, the
                                heliopause they crossed, sunlight's light-time rings) and
@@ -222,8 +228,7 @@ src/
                                reach-looks.ts (the probes' glow and the wind bubble)
       scene/                   solar-system.ts composes the Sun, planets, moons, populations
                                and the reticle (*-layer.ts, focus-ring.ts) on a kit (kit.ts)
-                               with its own level of detail (lod.ts); map-budget.ts streams
-                               measured maps by on-screen size under a byte budget; reach-layer.ts draws the
+                               with its own level of detail (lod.ts); reach-layer.ts draws the
                                reach on a host's kit
       format.ts                Names and orbit rows both simulations print
       cards.ts                 The figures the population cards quote (`POPULATION_FIGURES`)
@@ -293,29 +298,34 @@ page scrolling.
 
 ## Routes and compatibility
 
-| Route                      | Purpose                                                                                                                                      |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                        | Catalogue                                                                                                                                    |
-| `/lab/black-hole`          | Default black-hole scene                                                                                                                     |
-| `/lab/black-hole/m87`      | Preset                                                                                                                                       |
-| `/m87`                     | Permanent redirect to the preset route                                                                                                       |
-| `/lensed`                  | Permanent redirect to the default scene                                                                                                      |
-| `/lab/orrery`              | Orrery, default view (the giant planets)                                                                                                     |
-| `/lab/orrery/oort`         | Orrery view (inner, kuiper, scattered, oort)                                                                                                 |
-| `/lab/orrery/oort-cloud`   | Permanent redirect to the canonical view                                                                                                     |
-| `/lab/deep-field`          | Deep Field, default view (the Milky Way)                                                                                                     |
-| `/lab/deep-field/laniakea` | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
-| `/lab/spectroscopy`        | Stellar Spectra, default view (the Sun)                                                                                                      |
-| `/lab/spectroscopy/stars`  | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
-| `/lab/voyage`              | Voyage, default place (Earth)                                                                                                                |
-| `/lab/voyage/saturn`       | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
-| `/black-hole/...`          | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
-| `/orrery/...`              | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
-| `/en/...`, `/cs/...`       | Served in that language, then shown as the clean path                                                                                        |
+| Route                       | Purpose                                                                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                         | Catalogue                                                                                                                                    |
+| `/lab/black-hole`           | Default black-hole scene                                                                                                                     |
+| `/lab/black-hole/m87`       | Preset                                                                                                                                       |
+| `/m87`                      | Permanent redirect to the preset route                                                                                                       |
+| `/lensed`                   | Permanent redirect to the default scene                                                                                                      |
+| `/lab/orrery`               | Orrery, default view (the giant planets)                                                                                                     |
+| `/lab/orrery/oort`          | Orrery view (inner, kuiper, scattered, oort)                                                                                                 |
+| `/lab/orrery/oort-cloud`    | Permanent redirect to the canonical view                                                                                                     |
+| `/lab/deep-field`           | Deep Field, default view (the Milky Way)                                                                                                     |
+| `/lab/deep-field/laniakea`  | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
+| `/lab/spectroscopy`         | Stellar Spectra, default view (the Sun)                                                                                                      |
+| `/lab/spectroscopy/stars`   | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
+| `/experience/voyage`        | Voyage, default place (Earth)                                                                                                                |
+| `/experience/voyage/saturn` | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
+| `/black-hole/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
+| `/orrery/...`               | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
+| `/en/...`, `/cs/...`        | Served in that language, then shown as the clean path                                                                                        |
 
-Every simulation lives under `SIMULATION_PREFIX` (`src/lib/simulation-paths.ts`).
-Build manifest paths with `simulationPath(slug)`; the manifest type rejects any
-other `href`. Redirects go straight to the canonical page, never through a chain.
+A simulation is a lab or an experience (the manifest's `kind`). Labs, the
+catalogue's primary shelf, live under `SIMULATION_PREFIX` (`/lab`); experiences,
+its quieter second shelf (less to learn, more to sit back in), under
+`EXPERIENCE_PREFIX` (`/experience`), both in `src/lib/simulation-paths.ts`. Build
+manifest paths with `simulationPath(slug)` or `experiencePath(slug)`; the manifest
+type rejects any other `href`. `labs` and `experiences` (`src/lib/simulations.ts`)
+are the catalogue's and the phone menu's two shelves. Redirects go straight to the
+canonical page, never through a chain.
 
 URLs never carry the language. Pages are still prerendered under an internal
 `[locale]` segment (`/en/...`, `/cs/...`). Static `afterFiles` rewrites in
@@ -372,7 +382,8 @@ helpers from `@/i18n/navigation`.
    `category`, a one-sentence `description`, `open`, one short label per
    highlight key, and `entryPoints.<id>.title` for each entry point. The
    catalogue tile and header then pick it up automatically; keep the copy short.
-4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx`. The layout imports the
+4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx` (`[locale]/experience/<slug>/`
+   for an experience). The layout imports the
    feature's stylesheets and exports `simulationLayout({ slug, feature?, namespace, App, messages })`
    (`src/components/simulations/simulation-layout.tsx`), which loads only that feature's
    translations beside the shared ones and keeps the scene mounted across its routes.
@@ -468,8 +479,8 @@ only its layers, its views and its store of its own:
   on its ribbon's strong emission lines; `WideColourSwitch`: the canvas in Display P3, offered
   only where the screen shows it (`useWideGamutScreen`, on the toolkit's `WIDE_GAMUT_QUERY`),
   and for WebGL stages where the browser's canvases can switch: Stellar Spectra and the black
-  hole; each off by default, stored
-  like anti-aliasing, and costing nothing while off), an
+  hole; each off by default in a lab and on in an experience (`EXPERIENCE_SCENE_SETTINGS`: an
+  experience shows off), stored like anti-aliasing, and costing nothing while off), an
   optional note and Reset, which puts the panel back as a visit starts (`resetView`; the
   black hole re-applies its preset and turns bloom, the lens and wide colour off). The black
   hole's display step moves its radiance into the canvas's primaries before the tone map, so

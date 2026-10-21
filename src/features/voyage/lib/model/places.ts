@@ -1,44 +1,27 @@
-/**
- * Each place the address names: the body the ship parks at, and how the arrival frames it.
- * Saturn is framed with its rings; a moon's place looks back at its planet.
- */
+/** The body each place the address names parks the ship at. */
 import { isBodyAnchor, type AnchorId } from "./anchors";
 import { worldBody } from "./bodies";
-import type { ViewId } from "./view-ids";
+import { VIEW_IDS, type ViewId } from "./view-ids";
 
-type Place = {
-  id: ViewId;
-  body: AnchorId;
+export const PLACE_BODY: Readonly<Record<ViewId, AnchorId>> = {
+  earth: "earth",
+  moon: "moon",
+  mars: "mars",
+  jupiter: "jupiter",
+  saturn: "saturn",
+  pluto: "pluto",
+  stars: "alphaCen",
+  galaxy: "galacticCentre",
+  andromeda: "andromeda",
+  edge: "edge",
 };
 
-export const PLACES: readonly Place[] = [
-  { id: "earth", body: "earth" },
-  { id: "moon", body: "moon" },
-  { id: "mars", body: "mars" },
-  { id: "jupiter", body: "jupiter" },
-  { id: "saturn", body: "saturn" },
-  { id: "pluto", body: "pluto" },
-  { id: "stars", body: "alphaCen" },
-  { id: "galaxy", body: "galacticCentre" },
-  { id: "andromeda", body: "andromeda" },
-  { id: "edge", body: "edge" },
-];
-
-/** A place by id; an id that is not a place is a bug, not a quiet fallback. */
-export function placeById(id: ViewId): Place {
-  const place = PLACES.find((p) => p.id === id);
-  if (!place) throw new Error(`Unknown place "${id}"`);
-  return place;
-}
-
-/** The place at a body, if the address has one. */
-const placeOfBody = (body: AnchorId): ViewId | null =>
-  PLACES.find((p) => p.body === body)?.id ?? null;
+const placeOfBody = new Map(VIEW_IDS.map((view) => [PLACE_BODY[view], view]));
 
 /** The place the ship is at when it is at a body: its own, or, for a moon without one, its host's. */
 export function placeFor(body: AnchorId): ViewId | null {
-  const own = placeOfBody(body);
-  if (own || !isBodyAnchor(body)) return own;
+  const own = placeOfBody.get(body);
+  if (own || !isBodyAnchor(body)) return own ?? null;
   const world = worldBody(body);
-  return world.kind === "moon" ? placeOfBody(world.host) : null;
+  return world.kind === "moon" ? (placeOfBody.get(world.host) ?? null) : null;
 }

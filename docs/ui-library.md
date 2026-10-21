@@ -179,7 +179,7 @@ Every simulation:
 - Place browser-only scenes behind a client-only boundary, as `ObservatoryClient`
   and `OrreryClient` do. Do not initialize browser-dependent state on a server.
 - Give each simulation its own feature directory and App Router layout below
-  `[locale]/lab/<slug>`. Mount the scene in that layout to preserve it between presets;
+  `[locale]/lab/<slug>` (`[locale]/experience/<slug>` for an experience). Mount the scene in that layout to preserve it between presets;
   the root locale layout owns shared navigation and never mounts simulations.
 - Render inside `.simulation-stage` and use `VisualizationShell className="h-full"`
   for a full-viewport canvas behind the shared chrome. Keep HUDs within the

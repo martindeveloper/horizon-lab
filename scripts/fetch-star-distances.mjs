@@ -1,6 +1,6 @@
 /**
  * Fetches a distance for every star of the shared bright-star catalogue from SIMBAD and writes
- * src/space/star-distances.json: parsecs keyed by the catalogue name, from the trigonometric
+ * src/features/voyage/lib/model/star-distances.json: parsecs keyed by the catalogue name, from the trigonometric
  * parallax SIMBAD holds for the star (Gaia DR3 where it has one, else Hipparcos, van Leeuwen
  * 2007), so a sky can show parallax as a ship covers light-years. Each star is found by a cone
  * search around its catalogue position (3′), taking the brightest object there with a
@@ -15,7 +15,7 @@ import { STARS } from "../src/space/star-catalogue.ts";
 import { fetchText } from "./lib/net.mjs";
 
 const TAP = "https://simbad.cds.unistra.fr/simbad/sim-tap/sync";
-const OUT = new URL("../src/space/star-distances.json", import.meta.url);
+const OUT = new URL("../src/features/voyage/lib/model/star-distances.json", import.meta.url);
 /** Search radius, degrees (3′: the catalogue is good to about an arcminute). */
 const RADIUS = 0.05;
 /** How many stars are queried at once. */

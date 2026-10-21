@@ -5,12 +5,12 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import type { SimulationManifest } from "@/lib/simulation-types";
-import { simulations } from "@/lib/simulations";
+import { experiences, labs } from "@/lib/simulations";
 import { cn, kickerClass, Tilt } from "@horizon/toolkit/ui";
 
 import { HeroScene } from "./hero-sun";
 import { TileLink } from "./tile-link";
-import { TILE_FRAME, tileSpan } from "./tiles";
+import { EXPERIENCE_FRAME, TILE_FRAME, tileSpan } from "./tiles";
 
 type Translate = Awaited<ReturnType<typeof getTranslations<"catalogue">>>;
 
@@ -19,22 +19,34 @@ type Translate = Awaited<ReturnType<typeof getTranslations<"catalogue">>>;
  * sit on the scene, and a frosted panel rests on the art with the name, one
  * sentence, the one solar action and the entry points. Labels are instrument
  * readouts with rules, not pills. With a mouse the tile tilts toward the
- * pointer: the art drifts behind, the copy floats in front.
+ * pointer: the art drifts behind, the copy floats in front. An experience's
+ * tile is shorter, its panel narrower, so more of the art shows.
  */
 function SimulationTile({
   simulation,
   index,
   count,
+  order,
   t,
 }: {
   simulation: SimulationManifest;
   index: number;
   count: number;
+  /** Its place among every tile on the page, for the opening's stagger. */
+  order: number;
   t: Translate;
 }) {
   const key = simulation.messageKey;
+  const experience = simulation.kind === "experience";
   return (
-    <Tilt style={{ "--i": index }} className={cn("intro-tile", TILE_FRAME, tileSpan(index, count))}>
+    <Tilt
+      style={{ "--i": order }}
+      className={cn(
+        "intro-tile",
+        experience ? EXPERIENCE_FRAME : TILE_FRAME,
+        tileSpan(index, count),
+      )}
+    >
       <article className="simulation-tile glass-edge group focus-within:solar-ring hover:solar-ring relative isolate flex h-full min-h-[inherit] flex-col justify-between overflow-hidden rounded-3xl bg-space">
         <div className="catalogue-art tilt-back absolute -inset-3">
           <Image
@@ -64,17 +76,22 @@ function SimulationTile({
         </div>
 
         <div className="tilt-front pointer-events-none relative z-20 p-3 sm:p-4">
-          <div className="cover-panel pointer-events-auto relative rounded-2xl p-5 sm:p-6">
+          <div
+            className={cn(
+              "cover-panel pointer-events-auto relative rounded-2xl p-5 sm:p-6",
+              experience && "lg:max-w-2xl",
+            )}
+          >
             <TileLink href={simulation.href} className="absolute inset-0 rounded-2xl" />
             <p className="font-mono text-[10px] tracking-[0.22em] text-accent uppercase">
               {t(`${key}.eyebrow`)}
             </p>
-            <h2
+            <h3
               id={`tile-${simulation.id}`}
               className="mt-2 font-headline text-3xl leading-[1.05] font-medium tracking-[-0.015em] text-balance sm:text-4xl xl:text-5xl"
             >
               {t(`${key}.title`)}
-            </h2>
+            </h3>
             <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-pretty text-muted">
               {t(`${key}.description`)}
             </p>
@@ -130,6 +147,59 @@ function SimulationTile({
   );
 }
 
+/**
+ * One shelf of tiles under a quiet heading: a gold rule and a mono label, and for the
+ * experiences one line on what sets them apart. The labs come first, as the bento; the
+ * experiences follow, a little apart, on shorter tiles.
+ */
+function Shelf({
+  id,
+  title,
+  note,
+  shelf,
+  offset,
+  className,
+  t,
+}: {
+  id: string;
+  title: string;
+  note?: string;
+  shelf: readonly SimulationManifest[];
+  offset: number;
+  className?: string;
+  t: Translate;
+}) {
+  return (
+    <section aria-labelledby={`${id}-heading`} className={cn("app-container", className)}>
+      <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 sm:mb-6">
+        <h2
+          id={`${id}-heading`}
+          className={cn(
+            "inline-flex items-center gap-3 text-[11px] tracking-[0.24em]",
+            kickerClass,
+          )}
+        >
+          <span className="h-px w-8 bg-solar/70" aria-hidden />
+          {title}
+        </h2>
+        {note ? <p className="text-sm text-muted">{note}</p> : null}
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+        {shelf.map((simulation, index) => (
+          <SimulationTile
+            key={simulation.id}
+            simulation={simulation}
+            index={index}
+            count={shelf.length}
+            order={offset + index}
+            t={t}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export async function Catalogue({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "catalogue" });
   return (
@@ -138,7 +208,7 @@ export async function Catalogue({ locale }: { locale: Locale }) {
         <HeroScene locale={locale} sunLabel={t("sun")} moonLabel={t("moon")} skyLabel={t("sky")}>
           <p className={cn("intro-kicker inline-flex items-center gap-3", kickerClass)}>
             <span className="h-px w-8 bg-solar/70" aria-hidden />
-            {t("available", { count: simulations.length })}
+            {t("available", { labs: labs.length, experiences: experiences.length })}
           </p>
           <h1
             id="catalogue-heading"
@@ -149,20 +219,18 @@ export async function Catalogue({ locale }: { locale: Locale }) {
         </HeroScene>
       </section>
 
-      <section
-        aria-label={t("collection")}
-        className="app-container grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6"
-      >
-        {simulations.map((simulation, index) => (
-          <SimulationTile
-            key={simulation.id}
-            simulation={simulation}
-            index={index}
-            count={simulations.length}
-            t={t}
-          />
-        ))}
-      </section>
+      <Shelf id="labs" title={t("labs")} t={t} shelf={labs} offset={0} />
+      {experiences.length ? (
+        <Shelf
+          id="experiences"
+          title={t("experiences")}
+          note={t("experiencesNote")}
+          t={t}
+          shelf={experiences}
+          offset={labs.length}
+          className="mt-20 sm:mt-28"
+        />
+      ) : null}
     </main>
   );
 }

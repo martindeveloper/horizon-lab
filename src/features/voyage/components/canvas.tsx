@@ -24,16 +24,18 @@ const LABEL_KEYS = [
   ...DISTANCE_WORDS,
 ];
 
-/* A template the scene fills with each ring's age. */
-const lookbackRing = (t: ReturnType<typeof useTranslations>) => ({
+/* A template the scene fills with each ring's age, and the words the floating readouts print. */
+const sceneWords = (t: ReturnType<typeof useTranslations>) => ({
   lookbackRing: String(t.raw("names.lookbackRing")),
+  speedWord: t("hud.speed"),
+  closingWord: t("hud.closing"),
 });
 
 const resetReady = () => useVoyage.getState().setReady(false);
 
 export function VoyageCanvas() {
   const t = useTranslations("voyage");
-  const translated = useSceneLabels(t, LABEL_KEYS, lookbackRing);
+  const translated = useSceneLabels(t, LABEL_KEYS, sceneWords);
   return (
     <SceneCanvas
       id="voyage"

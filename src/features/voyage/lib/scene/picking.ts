@@ -1,7 +1,7 @@
 /** Taps on the canvas or a name select the body under them; a tap on nothing lets go. */
 import type { Object3D } from "three";
 
-import type { WorldSelection } from "@/space/galaxy/show";
+import { isWorldPick, type WorldSelection } from "@/space/galaxy/show";
 import { solarPick } from "@/space/solar-system/model/selection";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
@@ -36,21 +36,7 @@ export function createPicking(
       if (!target) return api.select(null);
       const sel = solarPick(target.pick, target.instance);
       if (sel) return api.select(sel);
-      if (isFarSelection(target.pick)) api.select(target.pick);
+      if (isWorldPick(target.pick)) api.select(target.pick);
     },
   });
-}
-
-function isFarSelection(value: unknown): value is WorldSelection {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "kind" in value &&
-    (value.kind === "galaxy" ||
-      value.kind === "cosmos" ||
-      value.kind === "star" ||
-      value.kind === "reach") &&
-    "id" in value &&
-    typeof value.id === "string"
-  );
 }

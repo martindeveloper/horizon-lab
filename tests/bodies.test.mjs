@@ -456,6 +456,18 @@ test("Motion's sped-up clock moves the planets along today's orbits without agei
   assert.ok(Math.abs(year.M - now.M - 360 / 29.45) < 0.05, `${year.M - now.M}`);
 });
 
+test("planet elements written into a reused record match fresh ones", () => {
+  const out = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
+  for (const id of [...PLANET_IDS, "pluto"])
+    for (const [T, drift] of [
+      [T2026, 0],
+      [-1.7, 250],
+    ]) {
+      assert.equal(jplElements(id, T, drift, out), out);
+      assert.deepEqual(out, jplElements(id, T, drift), `${id} ${T}`);
+    }
+});
+
 test("the ephemeris passes its own consistency checks, here rather than on every WebGL startup", () => {
   assert.deepEqual(ephemerisSelfCheck(), []);
 });

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import {
-  RESET_SCENE_SETTINGS,
+  EXPERIENCE_SCENE_SETTINGS,
   guideSlice,
   sceneSlice,
   type GuideSlice,
@@ -9,31 +9,44 @@ import {
 } from "@/lib/scene-store";
 import { CMB_KELVIN } from "@/space/cosmos/model/cosmos";
 import type { WorldSelection } from "@/space/galaxy/show";
-import type { FlightAxes } from "@horizon/toolkit/camera";
 
 import { viewFromPath } from "../routing";
-import type { AnchorId } from "./model/anchors";
+import { selectionOfAnchor, type AnchorId } from "./model/anchors";
+import type { FlightPhase } from "./model/autopilot";
 import { DEFAULT_COMPRESSION, DEFAULT_DRIVE, type DriveId } from "./model/parameters";
-import { placeById, placeFor } from "./model/places";
+import { PLACE_BODY, placeFor } from "./model/places";
+import type { Regime } from "./model/regime";
 import type { ShipMode } from "./model/ship";
-
-export type { ShipMode };
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 
 export type Show = {
   /** The cockpit's canopy: the glass and its struts. */
   canopy: boolean;
-  /** The cockpit's instruments: the markers, the scanner, the throttle. */
+  /** The cockpit's instruments: the markers and the scanner. */
   instruments: boolean;
   names: boolean;
   /** The bodies' orbits, as faint lines. */
   orbits: boolean;
+  /** Dust streaming past the ship whenever it moves: the sense of speed. */
+  streaks: boolean;
+  /**
+   * The ship's feel: a crash's jolt, the drive spooling up, the view widening, an arrival's
+   * settle. On, as an experience's effects are; reduced motion keeps only what does not move.
+   */
+  feel: boolean;
 };
 
 type Panel = "none" | "objects" | "view";
 
-const DEFAULT_SHOW: Show = { canopy: true, instruments: true, names: true, orbits: true };
+const DEFAULT_SHOW: Show = {
+  canopy: true,
+  instruments: true,
+  names: true,
+  orbits: true,
+  streaks: true,
+  feel: true,
+};
 
 /** The HUD readouts the engine writes a few times a second. */
 export type Readouts = {
@@ -55,24 +68,39 @@ export type Readouts = {
   lightToEarth: number;
   /** Sunlight on the ship, W/m². */
   irradiance: number;
-  /** A flight is under way. */
+  /** A flight is under way, and what its autopilot is doing. */
   flying: boolean;
-  /** Parked about a body, or flying free. The scene writes it when the keys take the ship. */
-  mode: ShipMode;
+  phase: FlightPhase | null;
+  /** The speed regime by what flows past: normal space, cruise between planets, warp beyond. */
+  regime: Regime;
+  /** Ship seconds per real second: the rate asked for, the autopilot's, or one gravity held back. */
+  warp: number;
+  /** The pull on the ship, km/s², and the body pulling hardest. */
+  gravity: number;
+  gravityFrom: AnchorId;
   /** The microwave background's temperature at the ship's instant, kelvin. */
   cmbKelvin: number;
-  /** The ship's heliocentric position, km, as last published. */
-  shipKm: readonly [number, number, number];
   /** The visit's epoch (ms since 1970), as the scene set it: the clocks count from it. */
   epochMs: number;
+};
+
+/** Where the ship is and Earth's clock then, about once a second: the lists measure from it. */
+export type Fix = {
+  /** The ship's heliocentric position, km. */
+  km: readonly [number, number, number];
+  /** Earth's clock, seconds since the epoch. */
+  seconds: number;
 };
 
 export type VoyageStore = SceneSlice &
   GuideSlice<Show> &
   Readouts & {
+    fix: Fix;
     view: ViewId;
-    /** The anchor the ship is parked at, or flying to. */
+    /** The anchor the visitor last sent the ship to (`courseOf` says where it is bound now). */
     destination: AnchorId;
+    /** In orbit about a body, or flown by hand. The scene writes it when the keys take the ship. */
+    mode: ShipMode;
     selection: WorldSelection | null;
     panel: Panel;
     show: Show;
@@ -81,8 +109,14 @@ export type VoyageStore = SceneSlice &
     compression: number;
     /** The rate to go back to from a hold. */
     heldCompression: number;
-    /** A scripted pilot holding the ship's axes (a scene's flight), or none: the keys fly. */
-    pilot: Partial<FlightAxes> | null;
+    /** The throttle lever, 0…1: thrust ahead in manual flight. Opening it in orbit takes the helm. */
+    throttle: number;
+    /** Bumped to hand a flight to the pilot where it is. */
+    abort: number;
+    /** The ship lies wrecked on a body, struck at this speed (km/s); null while it flies. */
+    crash: { body: AnchorId; speed: number } | null;
+    /** Bumped to take the wreck back to orbit. */
+    recoveries: number;
     setView: (view: ViewId) => void;
     /** Flies the ship to an anchor. */
     goTo: (anchor: AnchorId) => void;
@@ -94,7 +128,11 @@ export type VoyageStore = SceneSlice &
     setDrive: (drive: DriveId) => void;
     setMode: (mode: ShipMode) => void;
     setCompression: (compression: number) => void;
-    setPilot: (pilot: Partial<FlightAxes> | null) => void;
+    setThrottle: (throttle: number) => void;
+    /** Takes the ship off the autopilot: it flies on by hand at the speed it had. */
+    disengage: () => void;
+    /** After a crash: back to orbit about the body struck. */
+    recover: () => void;
     /** Holds the clocks, or lets them run again at the rate they held. */
     toggleHold: () => void;
     /* The guided journey (model/tour.ts). */
@@ -109,55 +147,72 @@ export const READOUTS: Readouts = {
   earthSeconds: 0,
   speed: 0,
   gamma: 1,
-  aim: placeById(DEFAULT_VIEW).body,
+  aim: PLACE_BODY[DEFAULT_VIEW],
   range: 0,
   closing: 0,
   fromSun: 0,
   lightToEarth: 0,
   irradiance: 0,
   flying: false,
-  mode: "orbit",
+  phase: null,
+  regime: "normal",
+  warp: DEFAULT_COMPRESSION,
+  gravity: 0,
+  gravityFrom: "sun",
   cmbKelvin: CMB_KELVIN,
-  shipKm: [0, 0, 0],
   epochMs: 0,
 };
+
+/** The anchor the ship is parked at or flying to; none while flown by hand or wrecked. */
+export const courseOf = (s: VoyageStore): AnchorId | null =>
+  s.crash || (s.mode === "free" && !s.flying) ? null : s.aim;
 
 /** The place the address opens at. */
 const INITIAL_VIEW = typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath();
 
 export const useVoyage = create<VoyageStore>((set, get) => ({
-  ...sceneSlice(set, { scalePx: 120, scaleValue: 1, scaleUnit: "au" }),
+  ...sceneSlice(set, { scalePx: 120, scaleValue: 1, scaleUnit: "au" }, EXPERIENCE_SCENE_SETTINGS),
   ...READOUTS,
+  fix: { km: [0, 0, 0], seconds: 0 },
   view: INITIAL_VIEW,
-  destination: placeById(INITIAL_VIEW).body,
+  destination: PLACE_BODY[INITIAL_VIEW],
+  mode: "orbit",
   selection: null,
   panel: "none",
   show: DEFAULT_SHOW,
   drive: DEFAULT_DRIVE,
   compression: DEFAULT_COMPRESSION,
   heldCompression: DEFAULT_COMPRESSION,
-  pilot: null,
-  setView: (view) =>
-    set((s) => ({ view, destination: placeById(view).body, flight: s.flight + 1 })),
+  throttle: 0,
+  abort: 0,
+  crash: null,
+  recoveries: 0,
+  setView: (view) => set((s) => ({ view, destination: PLACE_BODY[view], flight: s.flight + 1 })),
   goTo: (body) =>
     set((s) => ({
       destination: body,
       view: placeFor(body) ?? s.view,
       flight: s.flight + 1,
       panel: "none",
+      throttle: 0,
     })),
   select: (selection) => set({ selection }),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
-  resetView: () => set({ show: DEFAULT_SHOW, ...RESET_SCENE_SETTINGS }),
+  resetView: () => set({ show: DEFAULT_SHOW, ...EXPERIENCE_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
   setDrive: (drive) => set({ drive }),
-  setMode: (mode) => set({ mode, panel: "none" }),
+  setMode: (mode) => set({ mode, panel: "none", ...(mode === "orbit" ? { throttle: 0 } : {}) }),
   setCompression: (compression) =>
     set((s) => ({
       compression,
       heldCompression: compression > 0 ? compression : s.heldCompression,
     })),
-  setPilot: (pilot) => set({ pilot }),
+  setThrottle: (throttle) => set({ throttle: Math.min(1, Math.max(0, throttle)) }),
+  disengage: () => set((s) => (s.flying ? { abort: s.abort + 1, panel: "none" } : {})),
+  recover: () =>
+    set((s) =>
+      s.crash ? { crash: null, recoveries: s.recoveries + 1, throttle: 0, panel: "none" } : {},
+    ),
   toggleHold: () => set((s) => ({ compression: s.compression > 0 ? 0 : s.heldCompression })),
   ...guideSlice(set, get, {
     tour: TOUR,
@@ -169,7 +224,8 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
       destination: step.body,
       view: placeFor(step.body) ?? s.view,
       flight: s.flight + 1,
-      selection: step.focus ?? null,
+      throttle: 0,
+      selection: selectionOfAnchor(step.body),
       show: s.savedBeforeGuide ?? DEFAULT_SHOW,
     }),
     close: () => ({ guideLanded: false }),

@@ -19,7 +19,7 @@ for (const locale of ["en", "cs"]) {
       "lab/orrery",
       "lab/deep-field",
       "lab/spectroscopy",
-      ...(FEATURES.voyage ? ["lab/voyage"] : []),
+      ...(FEATURES.voyage ? ["experience/voyage"] : []),
     ];
     const subpages = features.flatMap((feature) =>
       readdirSync(new URL(`.next/server/app/${locale}/${feature}/`, root))
