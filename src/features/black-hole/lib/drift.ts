@@ -138,14 +138,17 @@ export const DRIFT: DriftProgramme<HoleShot> = {
 };
 
 /**
- * The drift of a dormant hole (no disk light): the warp made visible. It opens far out with
- * the hole already in frame, an eye of lensed stars on the right third, approaches along the
+ * The drift of a dormant hole (no disk light): the warp made visible. As the curtain lifts it
+ * looks at plain stars with nothing there, rests, then pans until the warp slides in, an eye of
+ * lensed stars on the right third (the opening's `unveil`, played once: the loop flies back to
+ * that shot with the hole in frame, so it never turns away again), approaches along the
  * thinning Einstein ring, crosses over the top, rides the edge where starlight smears along
  * the limb, then falls into motion: riding at half of c the sky collapses into a bright beam
  * ahead, swings off as the head turns, and relaxes as the camera lets go. The release shrinks
  * the ring back to an eye in the star field, where the next loop's arrival picks it up. The
- * hole never leaves the frame: every look stays within the view of the shadow and its ring at
- * that distance. Holds stay at 7 M or more: closer, the shadow fills the frame.
+ * hole never leaves the frame after the unveil: every look stays within the view of the shadow
+ * and its ring at that distance. Holds stay at 7 M or more: closer, the shadow fills the frame.
+ * The lit hole's drift has no unveil; it opens on its push-in, so the two never feel alike.
  */
 export const DORMANT_DRIFT: DriftProgramme<HoleShot> = {
   /*
@@ -167,12 +170,15 @@ export const DORMANT_DRIFT: DriftProgramme<HoleShot> = {
     order: "sequence",
   },
   shots: [
-    /* 0 s: the arrival, far and low, the ring an eye among the stars on the right third. */
+    /* 0 s: the arrival, far and low, the ring an eye among the stars on the right third. A drift
+       opening here behind the curtain first looks off at plain stars, rests, and pans the warp
+       into frame; flown to at the loop's wrap, it arrives with the ring already there. */
     {
       azimuth: 0.6,
       inclination: 0.2,
       distance: 48,
       look: { yaw: -0.3, pitch: 0.04 },
+      unveil: { look: { yaw: -1.5, pitch: 0.2 }, rest: 4, turn: 16 },
       flight: { duration: 22, lift: 0.1 },
       hold: 10,
       creep: 0,

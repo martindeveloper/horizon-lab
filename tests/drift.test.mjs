@@ -264,6 +264,52 @@ test("a cut lands the camera on the opening shot behind the curtain; a resume fl
   assert.equal(again.pose?.distance, 10, "the next fresh start cuts again");
 });
 
+test("an unveil plays once on a cut: rests looking away, turns onto the shot, never on a wrap", () => {
+  const shots = [
+    {
+      azimuth: 0,
+      inclination: 0,
+      distance: 10,
+      look: { yaw: -0.3, pitch: 0 },
+      unveil: { look: { yaw: -1.5, pitch: 0.2 }, rest: 2, turn: 4 },
+      flight: { duration: 2 },
+      hold: 6,
+    },
+    { azimuth: 1, inclination: 0, distance: 10, flight: { duration: 2 }, hold: 1 },
+  ];
+  const settings = { variance: 0, sway: 0, drift: 0, creep: 0, opening: () => 0 };
+  const run = (seconds, camera) => {
+    for (let i = 0; i < Math.round(seconds * 60); i++) camera.step(1 / 60);
+  };
+  const camera = createDriftCamera(shots, settings);
+  camera.start({ azimuth: 0, inclination: 0, distance: 10 }, { cut: true });
+  assert.equal(camera.pose.look.yaw, -1.5, "the cut opens looking away");
+  run(1.5, camera);
+  assert.equal(camera.pose.look.yaw, -1.5, "and rests there");
+  run(2.5, camera);
+  const mid = camera.pose.look.yaw;
+  assert.ok(mid > -1.5 && mid < -0.3, `then turns (${mid})`);
+  run(2.5, camera);
+  assert.equal(camera.pose.look.yaw, -0.3, "onto the shot's own look");
+  assert.equal(camera.pose.look.pitch, 0);
+  /* The loop wraps back to the shot: it arrives on its own look and stays there. */
+  const yaws = [];
+  for (let i = 0; i < 60 * 30 && yaws.length < 60 * 6; i++) {
+    camera.step(1 / 60);
+    if (camera.index === 0 && !camera.flying) yaws.push(camera.pose.look.yaw);
+  }
+  assert.ok(yaws.length > 0, "the loop came back to the shot");
+  assert.ok(
+    yaws.every((yaw) => Math.abs(yaw + 0.3) < 1e-9),
+    "a wrap never plays the unveil",
+  );
+  /* Without a cut the shot is flown to and never looks away either. */
+  const flown = createDriftCamera(shots, settings);
+  flown.start({ azimuth: 0, inclination: 0, distance: 10 });
+  run(2.2, flown);
+  assert.equal(flown.pose.look.yaw, -0.3);
+});
+
 test("the drift's machine starts once, pauses and resumes, and runs its hooks before writing", () => {
   const log = [];
   const store = createStore((set, get) => ({

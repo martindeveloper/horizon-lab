@@ -290,28 +290,119 @@
   width: 26px;
   height: 26px;
 }
+/* The dash (lib/scene/cockpit.ts draws each ship's): dark metal like the frame, lit along its
+   lip, gold only in its lamps. The wings stretch to the edges; the pedestal under the scanner
+   keeps its width, and carries the house's horizon: the gold hairline of the sun-under-horizon
+   motif (as `hairline-solar`, in the scene's own gold) along its top, a faint glow rising behind it. Each ship says
+   where its pedestal's top is (`--dash-horizon`, from the dash's top) and how wide. */
 :where([data-simulation="voyage"]) .voyage-dash {
   position: absolute;
   inset: auto 0 0;
-  height: clamp(2.5rem, 6vh, 4rem);
-  /* The rim's glow: the cowl's own outline, lit. */
-  filter: var(--voyage-glow);
+  display: flex;
+  height: clamp(3rem, 6vh, 4rem);
+  --dash-face: #0b0b0f;
+  --dash-top: #1a1a20;
+  --dash-mount: #14141a;
+  --dash-horizon: 23.4%;
+  --dash-horizon-width: 15rem;
+}
+:where([data-simulation="voyage"]) .voyage-dash::before,
+:where([data-simulation="voyage"]) .voyage-dash::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  pointer-events: none;
+}
+:where([data-simulation="voyage"]) .voyage-dash::before {
+  bottom: calc(100% - var(--dash-horizon));
+  width: calc(var(--dash-horizon-width) * 1.3);
+  height: 3rem;
+  background: radial-gradient(
+    ellipse 50% 100% at 50% 100%,
+    color-mix(in oklab, var(--color-solar) 16%, transparent),
+    transparent 70%
+  );
+}
+:where([data-simulation="voyage"]) .voyage-dash::after {
+  top: var(--dash-horizon);
+  z-index: 1;
+  width: var(--dash-horizon-width);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-solar) 50%, transparent) 30%,
+    color-mix(in oklab, var(--color-solar) 70%, transparent) 50%,
+    color-mix(in oklab, var(--color-solar) 50%, transparent) 70%,
+    transparent
+  );
 }
 :where([data-simulation="voyage"]) .voyage-dash svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
   height: 100%;
   overflow: visible;
 }
-:where([data-simulation="voyage"]) .voyage-dash-body {
-  fill: rgb(8 8 11 / 0.92);
+:where([data-simulation="voyage"]) .voyage-dash-wing {
+  flex: 1 1 0;
+  min-width: 0;
 }
-:where([data-simulation="voyage"]) .voyage-dash-rim {
+:where([data-simulation="voyage"]) .voyage-dash-wing:last-child {
+  scale: -1 1;
+}
+:where([data-simulation="voyage"]) .voyage-dash-pod {
+  flex: none;
+  width: 22rem;
+}
+:where([data-simulation="voyage"]) .voyage-cockpit[data-ship="voyager"] .voyage-dash {
+  --dash-face: #0e0e10;
+  --dash-top: #202022;
+  --dash-mount: #18181b;
+  --dash-horizon: 18.75%;
+  --dash-horizon-width: 19rem;
+}
+:where([data-simulation="voyage"]) .voyage-cockpit[data-ship="sail"] .voyage-dash {
+  --dash-face: rgb(9 9 12 / 0.82);
+  --dash-top: rgb(236 236 232 / 0.06);
+  --dash-horizon: 40.6%;
+  --dash-horizon-width: 9rem;
+}
+:where([data-simulation="voyage"])
+  .voyage-dash
+  :is(.dash-lip, .dash-under, .dash-edge, .dash-seam, .dash-grille) {
   fill: none;
-  stroke: color-mix(in oklab, var(--color-solar) 45%, transparent);
-  stroke-width: 1.25;
   vector-effect: non-scaling-stroke;
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-face {
+  fill: var(--dash-face);
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-top {
+  fill: var(--dash-top);
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-mount {
+  fill: var(--dash-mount);
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-lip {
+  stroke: rgb(236 236 232 / 0.36);
+  stroke-width: 1.25;
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-under {
+  stroke: rgb(0 0 0 / 0.65);
+  stroke-width: 1.5;
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-edge {
+  stroke: rgb(236 236 232 / 0.1);
+  stroke-width: 1;
+}
+:where([data-simulation="voyage"]) .voyage-dash :is(.dash-seam, .dash-grille) {
+  stroke: rgb(0 0 0 / 0.65);
+  stroke-width: 1.5;
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-lamp {
+  fill: var(--color-solar);
+  opacity: 0.9;
+}
+:where([data-simulation="voyage"]) .voyage-dash .dash-lamp[data-dim] {
+  opacity: 0.28;
 }
 /* Phones and a phone held sideways keep the scene: no dash, the struts hugging the edges. */
 @media (width < 48rem), (height < 30rem) {

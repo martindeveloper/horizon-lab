@@ -118,13 +118,65 @@ const LADDER_DECADES = Math.log10(C_KM_S / LADDER_SLOWEST);
 const LADDER_PX = 120;
 
 /**
- * The dash: a slim cowl along the foot of the view, rising gently towards the middle, its rim
- * lit. The displays float over it as projections; only the scanner's base sits on it.
+ * Each ship's dash along the foot of the view, the same dark metal as its frame: a wing to each
+ * edge (drawn for the left, stretched, mirrored for the right) and a pedestal under the scanner
+ * that keeps its shape. Each part shows its face, its top seen from above, the lit lip between
+ * them with a shadow under it, and the far edge. The torch ship's is faceted, with mounts where
+ * its struts land; Voyager's a capsule's stepped panel between its posts, with lamps; the
+ * sail's a hairline sill and a light cradle. The displays float over it; the scanner sits on
+ * the pedestal, on the house's gold horizon (styles.css).
  */
-const DASH_SVG = `<svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
-<path class="voyage-dash-body" d="M0,100V46C220,16 380,6 500,6C620,6 780,16 1000,46V100Z"/>
-<path class="voyage-dash-rim" d="M0,46C220,16 380,6 500,6C620,6 780,16 1000,46"/>
-</svg>`;
+const DASHES: Readonly<Record<DriveId, { wing: string; pod: string }>> = {
+  torch: {
+    wing: `<path class="dash-face" d="M0,64V40L326,32L356,27H600V64Z"/>
+<path class="dash-top" d="M0,40V31L330,22L360,17H600V27H356L326,32Z"/>
+<path class="dash-edge" d="M0,31L330,22L360,17H600"/>
+<path class="dash-lip" d="M0,40L326,32L356,27H600"/>
+<path class="dash-under" d="M0,43L326,35L356,30H600"/>
+<path class="dash-mount" d="M322,64V33L332,24H352L362,30V64Z"/>
+<path class="dash-seam" d="M342,30V64M486,27V64"/>`,
+    pod: `<path class="dash-face" d="M0,64V27H30L56,15H296L322,27H352V64Z"/>
+<path class="dash-top" d="M0,17H44L66,5H286L308,17H352V27H322L296,15H56L30,27H0Z"/>
+<path class="dash-edge" d="M0,17H44L66,5H286L308,17H352"/>
+<path class="dash-lip" d="M0,27H30L56,15H296L322,27H352"/>
+<path class="dash-under" d="M0,30H31L57,18H295L321,30H352"/>
+<path class="dash-seam" d="M56,15V64M296,15V64"/>
+<circle class="dash-lamp" cx="18" cy="42" r="1.6"/><circle class="dash-lamp" data-dim cx="18" cy="50" r="1.6"/>
+<circle class="dash-lamp" cx="334" cy="42" r="1.6"/><circle class="dash-lamp" data-dim cx="334" cy="50" r="1.6"/>`,
+  },
+  voyager: {
+    wing: `<path class="dash-face" d="M0,64V38H232V24H600V64Z"/>
+<path class="dash-top" d="M0,30H226V14H600V24H232V38H0Z"/>
+<path class="dash-edge" d="M0,30H226V14H600"/>
+<path class="dash-lip" d="M0,38H232V24H600"/>
+<path class="dash-under" d="M0,41H235V27H600"/>
+<path class="dash-mount" d="M218,64V22H252V64Z"/>
+<path class="dash-seam" d="M420,24V64"/>
+<path class="dash-grille" d="M40,46H180M40,51H180M40,56H180M300,34H380M300,39H380M300,44H380"/>`,
+    pod: `<path class="dash-face" d="M0,64V24H22V12H330V24H352V64Z"/>
+<path class="dash-top" d="M0,14H18V4Q18,1 21,1H331Q334,1 334,4V14H352V24H330V12H22V24H0Z"/>
+<path class="dash-edge" d="M0,14H18V4Q18,1 21,1H331Q334,1 334,4V14H352"/>
+<path class="dash-lip" d="M0,24H22V12H330V24H352"/>
+<path class="dash-under" d="M0,27H25V15H327V27H352"/>
+<path class="dash-seam" d="M22,24V64M330,24V64"/>
+<circle class="dash-lamp" cx="11" cy="36" r="2"/><circle class="dash-lamp" data-dim cx="11" cy="45" r="2"/><circle class="dash-lamp" data-dim cx="11" cy="54" r="2"/>
+<circle class="dash-lamp" data-dim cx="341" cy="36" r="2"/><circle class="dash-lamp" cx="341" cy="45" r="2"/><circle class="dash-lamp" data-dim cx="341" cy="54" r="2"/>`,
+  },
+  sail: {
+    wing: `<path class="dash-face" d="M0,64V54L600,47V64Z"/>
+<path class="dash-lip" d="M0,54L600,47"/>`,
+    pod: `<path class="dash-face" d="M0,64V47C66,47 84,26 140,26H212C268,26 286,47 352,47V64Z"/>
+<path class="dash-top" d="M40,47C92,47 104,20 146,20H206C248,20 260,47 312,47C286,47 268,26 212,26H140C84,26 66,47 40,47Z"/>
+<path class="dash-lip" d="M0,47C66,47 84,26 140,26H212C268,26 286,47 352,47"/>
+<path class="dash-edge" d="M40,47C92,47 104,20 146,20H206C248,20 260,47 312,47"/>`,
+  },
+};
+const dashSvg = (ship: DriveId) => {
+  const { wing, pod } = DASHES[ship];
+  const part = (kind: string, width: number, body: string) =>
+    `<svg class="voyage-dash-${kind}" viewBox="0 0 ${width} 64" preserveAspectRatio="none" aria-hidden="true">${body}</svg>`;
+  return part("wing", 600, wing) + part("pod", 352, pod) + part("wing", 600, wing);
+};
 
 const el = <T extends "span" | "div" | "canvas">(tag: T, className: string) => {
   const node = document.createElement(tag);
@@ -158,7 +210,7 @@ export function createCockpit(
   const bevel = { x: 0, y: 0, settled: true };
   const sun = deps.bodies.find((b) => b.id === "sun");
   const dash = el("div", "voyage-dash");
-  dash.innerHTML = DASH_SVG;
+  dash.innerHTML = dashSvg("torch");
   canopy.append(frameArt, dash);
   /* The floating readouts: projected with the HUD, so they ride its whole sway. */
   const floats = el("div", "voyage-floats");
@@ -420,6 +472,7 @@ export function createCockpit(
         shipWas = frame.drive;
         root.dataset.ship = shipWas;
         frameArt.innerHTML = frameSvg(shipWas);
+        dash.innerHTML = dashSvg(shipWas);
       }
       if (frame.crashed !== crashWas) flag("crash", (crashWas = frame.crashed));
       if (show.feel !== feelWas) flag("feel", (feelWas = show.feel));

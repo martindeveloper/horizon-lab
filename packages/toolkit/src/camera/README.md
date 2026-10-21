@@ -89,7 +89,10 @@ nearest); otherwise it opens on the shot after the one nearest the camera. `redu
 stills the orbit, sway and holds while it matches. `start(pose)` begins from the camera's pose (a
 sequence goes on from the shot nearest it); with `cut` (a setting, or `start(pose, { cut })`) it
 begins landed on the opening shot instead, the flight's length given to that hold so the loop
-keeps its timing, for a host that shows the opening behind a curtain. `step(dt)` returns the pose for the
+keeps its timing, for a host that shows the opening behind a curtain. A shot's `unveil`
+(`look`, `rest`, `turn`) plays only on such a cut: the camera begins looking off at `look`,
+rests, then turns onto the shot's own look over `turn` seconds of the hold, a reveal for the
+opening that a loop flying back to the shot never repeats. `step(dt)` returns the pose for the
 frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
 `sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot's `look` eases in over its flight and holds through the hold, so the orbit glides along
 wherever it looks; its `ride` (0–1, how far the camera moves with the scene's own flow, which the

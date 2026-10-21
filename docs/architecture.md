@@ -721,7 +721,10 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   and `createRigDrift` on an orbit rig, both with `cut`: a fresh start lands the
   camera on the opening shot behind the loader's curtain (`DriftVeil`, opaque), so
   the first image is the staged shot already in its hold, never a flight away from
-  what the visitor was looking at; a resume after a pause flies from where they are. A director beside each rig engine
+  what the visitor was looking at; a resume after a pause flies from where they are.
+  An opening shot may carry an `unveil` that plays only on that cut (the dormant
+  hole's drift opens on plain stars and pans the warp in; the lit hole's opens on
+  its push-in, so the two never feel alike). A director beside each rig engine
   (`lib/scene/drift-director.ts`) resolves the shots to the rig's framings and
   adds what is the simulation's own (the Orrery's close-up visits); the
   observatory's engine runs the drift directly on its raymarched camera. The

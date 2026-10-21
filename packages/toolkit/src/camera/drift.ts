@@ -44,6 +44,12 @@ export type DriftPoseShot = OrbitPose & {
   drift?: number;
   /** Fraction of the distance pushed in (+) or out (−) over the hold. */
   creep?: number;
+  /**
+   * A reveal for the opening, played only when a start cuts to this shot (behind a curtain):
+   * the camera begins looking off at `look`, rests there `rest` seconds, then turns onto the
+   * shot's own look over `turn` seconds of the hold. Flown to in a loop, the shot never plays it.
+   */
+  unveil?: { look: FreeLook; rest: number; turn: number };
 };
 
 export type DriftSettings = {
@@ -171,6 +177,8 @@ export function createDriftCamera(
   let t = 1;
   let landed: DriftPose = copy(pose);
   let held = 0;
+  /** The opening's reveal under way: the look it turns from, and its rest and turn in seconds. */
+  let unveiling: { from: FreeLook; rest: number; turn: number } | null = null;
 
   const wave = (period: number) => Math.sin((clock / period) * Math.PI * 2);
   /** The pose drawn from `base`, the orbit and the sway. */
@@ -233,6 +241,7 @@ export function createDriftCamera(
 
   function aim(next: number) {
     index = next;
+    unveiling = null;
     const shot = shots[next]!;
     if ("handoff" in shot) {
       handoff = true;
@@ -292,7 +301,19 @@ export function createDriftCamera(
     landed = copy(base);
     held = 0;
     const shot = shots[index];
-    if (shot && !("handoff" in shot)) drift = settings.holdDrift?.(landed, shot) ?? drift;
+    if (shot && !("handoff" in shot)) {
+      drift = settings.holdDrift?.(landed, shot) ?? drift;
+      /* The reveal starts the hold looking away; the landed pose keeps the shot's own look. */
+      if (shot.unveil && !instant()) {
+        unveiling = {
+          from: { ...shot.unveil.look },
+          rest: shot.unveil.rest,
+          turn: shot.unveil.turn,
+        };
+        base.look.yaw = shot.unveil.look.yaw;
+        base.look.pitch = shot.unveil.look.pitch;
+      }
+    }
     show();
   }
 
@@ -371,6 +392,18 @@ export function createDriftCamera(
         /* The push eases over the whole hold. */
         const along = hold > 0 ? Math.min(1, held / hold) : 1;
         base.distance = landed.distance * (1 - creep * smootherstep(along));
+      }
+      if (unveiling) {
+        /* The reveal: at rest on the look away, then one slow turn onto the shot's look. */
+        const { from, rest, turn } = unveiling;
+        const e = smootherstep(clamp((held - rest) / Math.max(turn, 1e-3), 0, 1));
+        base.look.yaw = lerp(from.yaw, landed.look.yaw, e);
+        base.look.pitch = lerp(from.pitch, landed.look.pitch, e);
+        if (e >= 1 || instant()) {
+          base.look.yaw = landed.look.yaw;
+          base.look.pitch = landed.look.pitch;
+          unveiling = null;
+        }
       }
       show();
       if (held >= hold) aim(pick());
