@@ -30,6 +30,8 @@ export function createDriftDirector(
       timed.shots.map(({ view, pose, ...shot }) => ({ ...rig.framing(view), ...pose, ...shot })),
       {
         ...DRIFT.camera,
+        /* The drift's curtain covers a fresh start: the camera cuts to the opening shot. */
+        cut: true,
         reduceMotion,
         opening: () => openingFor(timed, ambientMusic.position),
       },

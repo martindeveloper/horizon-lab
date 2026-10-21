@@ -724,16 +724,17 @@
   }
 }
 
-/* The drift's veil: the scene dims, a hairline horizon draws out and breathes, and the veil
-   lifts as the drift begins. */
+/* The drift's curtain: the scene fades to black while a hairline horizon draws out and
+   breathes; once the drift begins the curtain holds a beat (its camera has cut to the opening
+   shot behind it) and lifts slowly, so the first image is the staged shot already in motion. */
 .drift-veil {
-  background-color: color-mix(in srgb, var(--color-space) 62%, transparent);
+  background-color: var(--color-space);
 }
 .drift-veil-in {
-  animation: drift-veil-in 700ms ease-out both;
+  animation: drift-veil-in 700ms cubic-bezier(0.4, 0, 0.6, 1) both;
 }
 .drift-veil-out {
-  animation: drift-veil-out 900ms ease-in both;
+  animation: drift-veil-out 1800ms cubic-bezier(0.5, 0, 0.3, 1) 350ms both;
 }
 .drift-veil-line {
   display: block;

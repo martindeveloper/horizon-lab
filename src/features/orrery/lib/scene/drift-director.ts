@@ -2,9 +2,10 @@
  * The Orrery's drift on its rig (the toolkit's rig drift). The programme's framed shots fly on
  * the drift camera; its close-ups are handoffs: the director selects the body and opens the
  * close-up, whose own flight takes the camera in, then circles the body slowly and drifts
- * nearer for the hold, swinging out midway to show the body with its largest moon, lets the
- * selection go so the close-up flies out, and resumes the drift from there. Flying on after a
- * pause leaves any close-up first.
+ * nearer for the hold, pulls out over its last part to show the body with its largest moon
+ * and stays there, lets the selection go so the close-up flies out from that framing, and
+ * resumes the drift from there: one dive to a body and one pull away. Flying on after a pause
+ * leaves any close-up first.
  */
 import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
@@ -65,7 +66,7 @@ export function createDriftDirector(
     visit = { phase: "in" };
   }
 
-  /** Circles the body and drifts nearer through the hold, swinging out to its moon midway. */
+  /** Circles the body and drifts nearer through the hold, pulling out to its moon toward the end. */
   function circle(at: Extract<Visit, { phase: "on" }>, dt: number) {
     at.held += dt;
     if (!reduceMotion.matches) {
@@ -143,6 +144,8 @@ export function createDriftDirector(
       }),
       {
         ...DRIFT.camera,
+        /* The drift's curtain covers a fresh start: the camera cuts to the opening shot. */
+        cut: true,
         reduceMotion,
         opening: () => openingFor(timed, ambientMusic.position),
       },

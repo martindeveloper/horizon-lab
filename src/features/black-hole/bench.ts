@@ -62,7 +62,8 @@ export const benchTarget: BenchTarget = {
           })
         : null;
     let spin = settings.spin;
-    /* Drift scenes fly the hole's programme exactly as written, in order, with the engine's hold rule. */
+    /* Drift scenes fly the hole's programme exactly as written, in order, with the engine's hold
+       rule, cut to the opening shot as the page's curtain does. */
     const programme = driftFor(settings.diskBrightness);
     const timed = timedDrift(programme, bundledAudioMap(programme));
     const drift =
@@ -72,6 +73,7 @@ export const benchTarget: BenchTarget = {
             variance: 0,
             order: "sequence",
             opening: () => 0,
+            cut: true,
             holdDrift: (landed, shot) =>
               shot.ride ? -gasTurnRate(landed.distance, spin) * shot.ride : undefined,
           })

@@ -13,15 +13,24 @@ import type { CuedShot, DriftProgramme } from "@/lib/drift";
  *               arrival at a like distance.
  *
  * Both programmes are timed to their track (see `music.period`) and open on the shot whose cue
- * the music is nearest (`openingFor`). Variance is kept low so the arc holds. Distances stay
- * above every spin's floor
- * (`clampDistance`), which the engine applies as it moves the camera; a riding shot's hold
- * turns at the gas's rate for the hole's spin (the engine's `holdDrift`).
+ * the music is nearest (`openingFor`). Variance is kept low so the arc holds. Every look keeps
+ * the hole in frame: a shot's `yaw` stays within the view of the shadow at its distance, so the
+ * camera never turns away to empty sky (`tests/drift.test.mjs` holds it to `LOOK_LIMIT`).
+ * Distances stay above every spin's floor (`clampDistance`), which the engine applies as it
+ * moves the camera; a riding shot's hold turns at the gas's rate for the hole's spin (the
+ * engine's `holdDrift`).
  */
 import type { DriftShot } from "@horizon/toolkit/camera";
 
 /** A black-hole drift shot: a toolkit shot that may begin or land on a cue of the track's map. */
 export type HoleShot = DriftShot & CuedShot;
+
+/**
+ * The farthest a shot's look turns off the hole, radians: within it the shadow, or its Einstein
+ * ring, stays in the frame at every distance the programmes hold (the view is 50° tall and
+ * widens up close), so the camera never faces empty sky.
+ */
+export const LOOK_LIMIT = { yaw: 1, pitch: 0.5 };
 
 export const DRIFT: DriftProgramme<HoleShot> = {
   /*
@@ -94,7 +103,7 @@ export const DRIFT: DriftProgramme<HoleShot> = {
       azimuth: 4.2,
       inclination: 0.09,
       distance: 9,
-      look: { yaw: 1.15, pitch: -0.03 },
+      look: { yaw: 1.0, pitch: -0.03 },
       ride: 1,
       flight: { duration: 20, lift: 0.06 },
       hold: 24,
@@ -129,13 +138,14 @@ export const DRIFT: DriftProgramme<HoleShot> = {
 };
 
 /**
- * The drift of a dormant hole (no disk light): the invisible made visible. It opens on plain
- * sky with nothing there, pans until the warp slides into frame, approaches along the thinning
- * Einstein ring, rides the edge where starlight smears along the limb, then falls into motion:
- * riding at half of c the whole sky collapses into a bright beam ahead, swings off as the head
- * turns, and relaxes as the camera lets go. The release shrinks the ring back to an eye in the
- * star field and the wrap pans away again. Holds stay at 7 M or more: closer, the shadow fills
- * the frame.
+ * The drift of a dormant hole (no disk light): the warp made visible. It opens far out with
+ * the hole already in frame, an eye of lensed stars on the right third, approaches along the
+ * thinning Einstein ring, crosses over the top, rides the edge where starlight smears along
+ * the limb, then falls into motion: riding at half of c the sky collapses into a bright beam
+ * ahead, swings off as the head turns, and relaxes as the camera lets go. The release shrinks
+ * the ring back to an eye in the star field, where the next loop's arrival picks it up. The
+ * hole never leaves the frame: every look stays within the view of the shadow and its ring at
+ * that distance. Holds stay at 7 M or more: closer, the shadow fills the frame.
  */
 export const DORMANT_DRIFT: DriftProgramme<HoleShot> = {
   /*
@@ -157,56 +167,55 @@ export const DORMANT_DRIFT: DriftProgramme<HoleShot> = {
     order: "sequence",
   },
   shots: [
-    /* 0 s: nothing there, a plain patch of stars above the galactic band, the hole behind. */
+    /* 0 s: the arrival, far and low, the ring an eye among the stars on the right third. */
     {
       azimuth: 0.6,
       inclination: 0.2,
       distance: 48,
-      look: { yaw: -2.4, pitch: 0.45 },
-      flight: { duration: 22 },
+      look: { yaw: -0.3, pitch: 0.04 },
+      flight: { duration: 22, lift: 0.1 },
       hold: 10,
       creep: 0,
     },
-    /* 32 s: the pan, at the same distance the head turns and the warp slides into frame. */
+    /* 32 s: approach along the ring, the black disc growing, the ring thinning to a razor. */
     {
-      azimuth: 0.9,
-      inclination: 0.22,
-      distance: 48,
-      roll: 0.02,
-      look: { yaw: -0.25, pitch: 0.05 },
-      flight: { duration: 22 },
-      hold: 12,
-      creep: 0,
-    },
-    /* 66 s: approach along the ring, the black disc growing, the ring thinning to a razor. */
-    {
-      azimuth: 1.8,
+      azimuth: 1.5,
       inclination: 0.3,
       distance: 22,
-      look: { yaw: 0.35, pitch: 0.08 },
+      look: { yaw: 0.3, pitch: 0.06 },
       flight: { duration: 24, lead: 0.4 },
       hold: 10,
     },
-    /* 100 s: the edge, the shadow filling half the frame, starlight smeared along the limb. */
+    /* 66 s: over the top, looking down into the shadow, the ring a halo round it. */
     {
-      azimuth: 2.7,
+      azimuth: 2.2,
+      inclination: 0.9,
+      distance: 12,
+      roll: -0.04,
+      look: { yaw: 0.2, pitch: 0 },
+      flight: { duration: 20, lift: 0.1 },
+      hold: 12,
+    },
+    /* 98 s: the edge, the shadow filling half the frame, starlight smeared along the limb. */
+    {
+      azimuth: 2.9,
       inclination: 0.25,
       distance: 9,
       roll: 0.04,
-      look: { yaw: 0.6, pitch: 0.05 },
-      flight: { duration: 18, lift: 0.08 },
-      hold: 18,
+      look: { yaw: 0.45, pitch: 0.05 },
+      flight: { duration: 16, lift: -0.1 },
+      hold: 20,
       drift: 0.03,
       creep: 0,
     },
     /* Into motion, landing on the track's quietest moment: riding a circular orbit at half of
-       c, the sky collapses into a beam ahead as the music drops. */
+       c, the sky collapses into a beam ahead as the music drops, the limb at the frame's edge. */
     {
       land: "quiet",
-      azimuth: 3.6,
+      azimuth: 3.7,
       inclination: 0.1,
       distance: 7,
-      look: { yaw: 1.05, pitch: 0 },
+      look: { yaw: 0.95, pitch: 0 },
       ride: 1,
       flight: { duration: 18 },
       hold: 22,
@@ -226,25 +235,25 @@ export const DORMANT_DRIFT: DriftProgramme<HoleShot> = {
       hold: 21,
       creep: 0,
     },
-    /* Letting go, the shadow at the frame's edge, the sky relaxing back as the camera slows to
+    /* Letting go, the shadow sliding to a third, the sky relaxing back as the camera slows to
        hovering and creeps. */
     {
       azimuth: 5.3,
       inclination: 0.3,
       distance: 14,
-      look: { yaw: -0.5, pitch: 0.06 },
+      look: { yaw: -0.35, pitch: 0.06 },
       flight: { duration: 10 },
       hold: 6,
       creep: 0.06,
     },
-    /* The darkening: release, the ring shrinking back to an eye in the star field; the wrap
-       pans away again. */
+    /* The darkening: release, the ring shrinking back to an eye in the star field, where the
+       loop's arrival takes it up again. */
     {
       azimuth: 6.2,
-      inclination: 0.35,
+      inclination: 0.3,
       distance: 60,
-      look: { yaw: 0.3, pitch: 0.05 },
-      flight: { duration: 18, lift: 0.25 },
+      look: { yaw: -0.25, pitch: 0.05 },
+      flight: { duration: 20, lift: 0.25 },
       hold: 1,
       creep: 0,
     },

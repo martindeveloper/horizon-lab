@@ -615,13 +615,18 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   view plus nudges; the observatory's are poses in M with roll. The Orrery's
   programme also visits bodies: a `closeUp` shot is a handoff to the close-up
   (the drift selects the body, the close-up flies in at `closeUp.pace` times its
-  usual flight time, the director circles it and drifts nearer for the hold, then
-  lets the selection go so the close-up flies out and no marker stays), and `clock` holds the
+  usual flight time with `closeUp.lead` settling the dive onto the body, the director
+  circles it and drifts nearer for the hold, pulls out once to frame it with its
+  largest moon, then lets the selection go so the close-up flies out from there and
+  no marker stays: one dive and one pull away per body), and `clock` holds the
   Motion speed-up to a few hundredths of a year per second while the drift is on,
   so the inner planets and the belt glide rather than whirl; the rate shows under
   the drift's controls (`SimulationImmersive`'s `drift.caption`).
 - The toolkit runs the camera: `createDriftRun` from the store's `drift` state,
-  and `createRigDrift` on an orbit rig. A director beside each rig engine
+  and `createRigDrift` on an orbit rig, both with `cut`: a fresh start lands the
+  camera on the opening shot behind the loader's curtain (`DriftVeil`, opaque), so
+  the first image is the staged shot already in its hold, never a flight away from
+  what the visitor was looking at; a resume after a pause flies from where they are. A director beside each rig engine
   (`lib/scene/drift-director.ts`) resolves the shots to the rig's framings and
   adds what is the simulation's own (the Orrery's close-up visits); the
   observatory's engine runs the drift directly on its raymarched camera. The

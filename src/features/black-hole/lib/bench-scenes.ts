@@ -212,7 +212,7 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
   },
   ...(["lensed", "gaia-bh3"] as const).map((presetId): BlackHoleBenchScene => ({
     id: presetId === "lensed" ? "drift" : "drift-dormant",
-    description: `One loop of the ${presetId === "lensed" ? "lit" : "dormant"} hole's drift, flown in order at zero variance, from the home view`,
+    description: `One loop of the ${presetId === "lensed" ? "lit" : "dormant"} hole's drift, flown in order at zero variance, cut to its opening shot`,
     tags: ["sequence", "camera", "drift"],
     presetId,
     quality: "standard",

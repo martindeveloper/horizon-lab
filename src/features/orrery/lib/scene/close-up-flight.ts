@@ -46,22 +46,37 @@ export function closeUpLimits(radius: number, frameRadius: number) {
 }
 
 const TAU = Math.PI * 2;
+/** Monotonic time warp with fixed ends; positive `l` front-loads, negative back-loads. */
+function warp(t: number, l: number) {
+  const p = 1 + 1.6 * Math.abs(l);
+  return l >= 0 ? 1 - (1 - t) ** p : t ** p;
+}
+
 const shortest = (from: number, to: number) =>
   ((((to - from + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
 
 /**
  * Pose and aim blend `t` (0..1) of the way through a close-up flight. Going in,
+ * `lead` (0..1) spends more of the flight where the body is large: the dive
+ * covers its far reaches early and settles slowly onto the body, and the pull
+ * back leaves the body slowly before it falls away; 0 paces the zoom evenly.
  * the view pans onto the body first and dives after; coming out it pulls back
  * first and pans home after, so the body never leaves the frame mid-flight.
  * Distance moves in log space: 10 au to a few thousand km reads as one dive.
  */
-export function sampleCloseUp(t: number, from: OrbitPose, to: OrbitPose, entering: boolean) {
+export function sampleCloseUp(
+  t: number,
+  from: OrbitPose,
+  to: OrbitPose,
+  entering: boolean,
+  lead = 0,
+) {
   const aim = entering
     ? smootherstep(clamp(t / 0.55, 0, 1))
     : smootherstep(clamp((t - 0.3) / 0.7, 0, 1));
   const zoom = entering
-    ? smootherstep(clamp((t - 0.12) / 0.88, 0, 1))
-    : smootherstep(clamp(t / 0.85, 0, 1));
+    ? smootherstep(warp(clamp((t - 0.12) / 0.88, 0, 1), lead))
+    : smootherstep(warp(clamp(t / 0.85, 0, 1), -lead));
   const turn = smootherstep(t);
   return {
     aim,
@@ -113,7 +128,10 @@ export function moonFraming(moon: Vec, base: OrbitPose, halfTan: number): OrbitP
 
 /**
  * How far into the swing to the moon a hold is at `t` (0..1 of the hold): out between the
- * first two marks, there until the third, back by the fourth.
+ * first two marks, there until the third, back by the fourth. Marks that leave no time to come
+ * back (`home` at or before `back`) keep the camera out at the moon to the end of the hold, so
+ * the flight out leaves from there and the body is pulled away from only once.
+  if (home <= back) return go;
  */
 export function moonSwing(t: number, [out, there, back, home]: MoonSwing) {
   const go = smootherstep(clamp((t - out) / (there - out), 0, 1));

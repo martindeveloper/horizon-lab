@@ -86,6 +86,8 @@ type CloseUp = {
   blend: number;
   /** How many times the usual flight time this flight takes (a drift flies in and out slowly). */
   pace: number;
+  /** The zoom's lead on this flight (`sampleCloseUp`); 0 paces it evenly. */
+  lead: number;
   /** Atmosphere shells over the bodies with air, and the haze rims they replace meanwhile. */
   shells: Shell[];
 };
@@ -129,6 +131,8 @@ export function createCloseUpController(
     quality: () => CloseUpQuality;
     /** A multiplier on the flight times, read as each flight starts; 1 by default. */
     pace?: () => number;
+    /** The zoom's lead on each flight (`sampleCloseUp`), read as it starts; 0 by default. */
+    lead?: () => number;
   },
 ) {
   const { rig, reduceMotion, invalidate, locate, upload } = deps;
@@ -294,6 +298,7 @@ export function createCloseUpController(
       detail: null,
       blend: 0,
       pace: deps.pace?.() ?? 1,
+      lead: deps.lead?.() ?? 0,
       shells: [],
     };
     shellGlobes(close);
@@ -349,6 +354,7 @@ export function createCloseUpController(
     close.phase = "out";
     close.t = 0;
     close.pace = deps.pace?.() ?? 1;
+    close.lead = deps.lead?.() ?? 0;
     close.from = { ...pose };
     close.fromAim = aim.clone();
     deps.onRelease();
@@ -425,7 +431,13 @@ export function createCloseUpController(
           1,
           close.t + dt / ((entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * close.pace),
         );
-        const step = sampleCloseUp(close.t, close.from, entering ? close.to : close.home, entering);
+        const step = sampleCloseUp(
+          close.t,
+          close.from,
+          entering ? close.to : close.home,
+          entering,
+          close.lead,
+        );
         Object.assign(pose, step.pose);
         if (entering) aim.lerpVectors(close.fromAim, target, step.aim);
         else aim.lerpVectors(target, close.homeAim, step.aim);

@@ -87,7 +87,9 @@ every loop the same length, for a camera timed to music, while angles and distan
 `opening()` names the shot a sequence opens on at each start (e.g. the one whose cue the music is
 nearest); otherwise it opens on the shot after the one nearest the camera. `reduceMotion` cuts flights and
 stills the orbit, sway and holds while it matches. `start(pose)` begins from the camera's pose (a
-sequence goes on from the shot nearest it); `step(dt)` returns the pose for the
+sequence goes on from the shot nearest it); with `cut` (a setting, or `start(pose, { cut })`) it
+begins landed on the opening shot instead, the flight's length given to that hold so the loop
+keeps its timing, for a host that shows the opening behind a curtain. `step(dt)` returns the pose for the
 frame and `landed` on the one frame a flight ends; `reset()` stops. Flights use
 `sampleOrbitFlight`, so a zoom across scales keeps an even pace. A shot's `look` eases in over its flight and holds through the hold, so the orbit glides along
 wherever it looks; its `ride` (0–1, how far the camera moves with the scene's own flow, which the
@@ -102,7 +104,8 @@ wherever `resume(pose)` says the host left the camera.
 
 `createDriftRun(shots, settings)` runs that camera from a host's `off`, `playing`
 or `paused` state: `step(state, current, dt, hold?)` starts the camera from
-`current` on the first playing frame (and again after a pause), returns the
+`current` on the first playing frame (cutting to the opening shot when the settings say
+`cut`) and again after a pause (always flying from `current`), returns the
 `pose` to draw or null, `started`, `ended` (once, so the host can give the camera
 back where it stopped) and `handoff`; `hold` keeps it from starting or flying
 while something else owns the camera. The scene module's `createRigDrift` puts it

@@ -7,7 +7,9 @@ import type { CuedShot, DriftProgramme } from "@/lib/drift";
  * it: Jupiter's dive begins on the first crest, and the Oort cloud lands on the second, the
  * widest view at the music's height before the long fall home. A shot is a view's framing,
  * nudged in distance and tilt, or a close-up: the drift selects the body, flies in on the
- * close-up's own flight, circles it slowly while it drifts nearer, and flies back out. The holds
+ * close-up's own flight, slowed to a lean-back pace and settling onto the body, circles it
+ * while it drifts nearer, then pulls out once to frame it with its largest moon and flies on
+ * from there, so a body is dived to and pulled away from once each. The holds
  * written here are the timing without a map and add up to the two plays; `timeShots` sets them
  * so the cued shots meet their cues, a hold at a body lingering as needed. The camera
  * (`createDriftCamera`) spreads angles and distance a little each pass; lengths never vary.
@@ -48,15 +50,24 @@ export type OrreryDrift = DriftProgramme<OrreryDriftShot> & {
   /**
    * At a body: seconds held, the slow orbit's rate (rad/s), how near the camera drifts (a
    * fraction of the arrival distance), how many times slower than a tap's the flights in
-   * and out are, and when in the hold (fractions) the camera swings out to frame the body
-   * with its largest moon, arrives, leaves and is back.
+   * and out are, the zoom's lead on them (`sampleCloseUp`: most of the flight spent where the
+   * body is large), and when in the hold (fractions) the camera swings out to frame the body
+   * with its largest moon, arrives, leaves and is back (`moonSwing`: left at the moon when the
+   * last two marks leave no time, so the flight out goes from there).
    */
-  closeUp: { hold: number; orbit: number; dive: number; pace: number; moon: MoonSwing };
+  closeUp: {
+    hold: number;
+    orbit: number;
+    dive: number;
+    pace: number;
+    lead: number;
+    moon: MoonSwing;
+  };
 };
 
 /** How many times slower than a tap's the drift's close-up flights are, and seconds held at a body. */
-const CLOSE_UP_PACE = 2.6;
-const CLOSE_UP_HOLD = 20;
+const CLOSE_UP_PACE = 4;
+const CLOSE_UP_HOLD = 16;
 
 /**
  * A visit to a body: its hold written out and its flights in and out counted, so the timing can
@@ -92,7 +103,9 @@ export const DRIFT: OrreryDrift = {
     orbit: 0.045,
     dive: 0.55,
     pace: CLOSE_UP_PACE,
-    moon: [0.22, 0.42, 0.62, 0.82],
+    lead: 0.5,
+    /* Out to the moon over the hold's last part, and left there: the flight out goes from it. */
+    moon: [0.55, 0.85, 1, 1],
   },
   shots: [
     /* Low among the inner planets as the track opens, then down to Earth. */
@@ -103,33 +116,33 @@ export const DRIFT: OrreryDrift = {
       flight: { duration: 20, lift: 0.15, lead: 0.3 },
       hold: 4,
     },
-    closeUpShot({ kind: "planet", id: "earth" }, 24),
+    closeUpShot({ kind: "planet", id: "earth" }, 18),
     {
       view: "inner",
       pose: { distance: 9, inclination: 1.2 },
-      flight: { duration: 18, lead: -0.2 },
+      flight: { duration: 16, lead: -0.2 },
       hold: 6,
     },
-    closeUpShot({ kind: "planet", id: "mars" }),
+    closeUpShot({ kind: "planet", id: "mars" }, 14),
     /* The giants framed and held across the music's first crest, then the dive to Jupiter on it. */
-    { view: "giants", pose: { inclination: 0.5 }, flight: { duration: 26, lift: 0.1 }, hold: 21 },
-    closeUpShot({ kind: "planet", id: "jupiter" }, undefined, { at: "peak" }),
+    { view: "giants", pose: { inclination: 0.5 }, flight: { duration: 22, lift: 0.1 }, hold: 16 },
+    closeUpShot({ kind: "planet", id: "jupiter" }, 18, { at: "peak" }),
     /* Edge-on across the giants' orbits, then Saturn's rings, over the loop's seam. */
     {
       view: "giants",
       pose: { distance: 40, inclination: 0.15 },
-      flight: { duration: 20, swing: 0.1 },
-      hold: 6,
+      flight: { duration: 18, swing: 0.1 },
+      hold: 4,
     },
-    closeUpShot({ kind: "planet", id: "saturn" }, 24),
+    closeUpShot({ kind: "planet", id: "saturn" }, 18),
     /* Out through the belt to Neptune and Pluto. */
-    { view: "kuiper", pose: { inclination: 0.9 }, flight: { duration: 24 }, hold: 8 },
-    closeUpShot({ kind: "planet", id: "neptune" }),
-    closeUpShot({ kind: "named", id: "pluto" }, 14),
+    { view: "kuiper", pose: { inclination: 0.9 }, flight: { duration: 20 }, hold: 6 },
+    closeUpShot({ kind: "planet", id: "neptune" }, 12),
+    closeUpShot({ kind: "named", id: "pluto" }, 10),
     /* On to the Oort cloud, landing on the second crest, held at the music's height. */
-    { view: "scattered", flight: { duration: 22, lead: 0.3 }, hold: 3 },
-    { land: "peak@2", view: "oort", flight: { duration: 30 }, hold: 20, creep: -0.04 },
+    { view: "scattered", flight: { duration: 20, lead: 0.3 }, hold: 2 },
+    { land: "peak@2", view: "oort", flight: { duration: 28 }, hold: 36, creep: -0.04 },
     /* And one long fall back to the giants, from above, as the track settles. */
-    { view: "giants", pose: { inclination: 1.3 }, flight: { duration: 46, lift: -0.1 }, hold: 16 },
+    { view: "giants", pose: { inclination: 1.3 }, flight: { duration: 40, lift: -0.1 }, hold: 14 },
   ],
 };

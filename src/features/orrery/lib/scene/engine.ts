@@ -187,8 +187,9 @@ export function createOrreryEngine({
       onRelease: () => controls.cancel(),
       upload: (texture) => renderer.initTexture(texture),
       quality: () => quality.closeUp,
-      /* The drift's visits fly in and out at a lean-back pace. */
+      /* The drift's visits fly in and out at a lean-back pace, settling slowly onto the body. */
       pace: () => (store.getState().drift === "off" ? 1 : DRIFT.closeUp.pace),
+      lead: () => (store.getState().drift === "off" ? 0 : DRIFT.closeUp.lead),
     });
     /** A body's new map is still fading in over its placeholder: keep frames coming. */
     let surfacesFading = false;
@@ -319,10 +320,13 @@ export function createOrreryEngine({
           lastSelection = s.selection;
           if (isPresentEra(s.yearsAgo) && !s.guideOpen) closeUp.prefetch(s.selection);
         }
-        /* From one close-up to another (the Earth's to the Moon's) is one flight. */
+        /* From one close-up to another (the Earth's to the Moon's) is one flight. A close-up
+           a drift's start clears ends at once behind the drift's curtain, which the camera's
+           cut to the opening shot follows. */
         if (s.closeUp !== lastCloseUp) {
           lastCloseUp = s.closeUp;
           if (s.closeUp) closeUp.start(s.closeUp);
+          else if (s.drift === "loading") closeUp.end(true);
           else closeUp.leave();
         }
       },

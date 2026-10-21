@@ -4,12 +4,14 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { cn } from "./utils";
 
-/** Milliseconds the veil takes to lift once the drift is ready, before it unmounts. */
-const LIFT_MS = 900;
+/** Milliseconds the veil takes to lift once the drift is ready (its hold at black included), before it unmounts. */
+const LIFT_MS = 2200;
 
 /**
- * The veil over a scene while its drift gathers what it needs (its music, its timing): the
- * scene dims, a hairline horizon draws out and breathes, and the veil lifts as the drift begins.
+ * The curtain over a scene while its drift gathers what it needs (its music, its timing): the
+ * scene fades to black, a hairline horizon draws out and breathes, and the curtain lifts slowly
+ * as the drift begins. It is opaque once drawn in, so the drift cuts its camera to the opening
+ * shot behind it and the visitor sees that shot first, already in motion, as the black lifts.
  * It takes no pointer events, so the immersive controls stay in reach. `label` is read to
  * assistive technology; nothing is printed.
  */

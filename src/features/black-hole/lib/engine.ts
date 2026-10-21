@@ -178,6 +178,8 @@ export function createBlackHoleEngine(
     const driftRun = (timed: TimedDrift<HoleShot>) =>
       createDriftRun(timed.shots, {
         ...timed.programme.camera,
+        /* The drift's curtain covers a fresh start: the camera cuts to the opening shot. */
+        cut: true,
         reduceMotion: window.matchMedia(REDUCED_MOTION_QUERY),
         /* The camera meets the music where it is: it opens on the shot whose cue is nearest. */
         opening: () => openingFor(timed, ambientMusic.position),

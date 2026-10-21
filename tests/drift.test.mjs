@@ -5,12 +5,13 @@ import test from "node:test";
 import { createStore } from "zustand/vanilla";
 
 import { parseAudioMap } from "@horizon/toolkit/audio";
-import { DRIFT_DEFAULTS, createDriftCamera } from "@horizon/toolkit/camera";
+import { DRIFT_DEFAULTS, createDriftCamera, createDriftRun } from "@horizon/toolkit/camera";
 
 import { MUSIC_LEVEL, ambientMusic } from "../src/components/shell/ambient-music.ts";
 import {
   DRIFT as BLACK_HOLE,
   DORMANT_DRIFT as BLACK_HOLE_DORMANT,
+  LOOK_LIMIT,
 } from "../src/features/black-hole/lib/drift.ts";
 import { MAX_DIST, MIN_DIST } from "../src/features/black-hole/lib/physics.ts";
 import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
@@ -101,6 +102,12 @@ test("every drift programme is one the camera and the music can play", () => {
       /* Closer than this a dormant hole's shadow fills the frame, at any spread of the distance. */
       if (programme === BLACK_HOLE_DORMANT)
         assert.ok((shot.distance / spread) * (1 - creep) >= 6, `dormant hold at ${shot.distance}`);
+      /* The hole never leaves the frame: no shot looks away to empty sky. */
+      const look = shot.look ?? { yaw: 0, pitch: 0 };
+      assert.ok(
+        Math.abs(look.yaw) <= LOOK_LIMIT.yaw && Math.abs(look.pitch) <= LOOK_LIMIT.pitch,
+        `the hole stays in frame at ${shot.distance} M (yaw ${look.yaw}, pitch ${look.pitch})`,
+      );
     }
   }
   /* Both are timed to their track: as written, a loop is the track's period; by the track's
@@ -213,6 +220,48 @@ test("every drift programme is one the camera and the music can play", () => {
   );
   assert.equal(timeShots({ camera, shots, music: { period: 42 } }, null).period, 42);
   assert.ok(MUSIC_LEVEL.drift > MUSIC_LEVEL.ambient, "a drift lifts the music");
+});
+
+test("a cut lands the camera on the opening shot behind the curtain; a resume flies", () => {
+  const shots = [
+    { azimuth: 1, inclination: 0.2, distance: 10, roll: 0.1, look: { yaw: 0.3, pitch: 0 } },
+    { azimuth: 2, inclination: 0.4, distance: 20 },
+  ];
+  const settings = { flight: 10, hold: 5, variance: 0, sway: 0, drift: 0, creep: 0 };
+  const far = { azimuth: 0, inclination: 0, distance: 100 };
+  const flown = createDriftCamera(shots, settings);
+  flown.start(far);
+  assert.ok(flown.flying, "without a cut the camera flies to the opening shot");
+  assert.equal(flown.pose.distance, 100);
+  const cut = createDriftCamera(shots, { ...settings, cut: true });
+  cut.start(far);
+  assert.ok(!cut.flying, "a cut begins landed");
+  assert.equal(cut.pose.azimuth, 1);
+  assert.equal(cut.pose.distance, 10);
+  assert.equal(cut.pose.roll, 0.1);
+  assert.equal(cut.pose.look.yaw, 0.3);
+  /* The skipped flight's length goes to the hold: the next flight begins when it would have. */
+  let frames = 0;
+  while (cut.index === 0 && frames < 10_000) {
+    cut.step(1 / 60);
+    frames++;
+  }
+  assert.ok(Math.abs(frames / 60 - 15) <= 2 / 60, `next flight after ${frames / 60} s`);
+  /* A run cuts on a start from off, and flies from the visitor's camera after a pause. */
+  const run = createDriftRun(shots, { ...settings, cut: true });
+  const first = run.step("playing", far, 1 / 60);
+  assert.ok(first.started && first.pose && first.pose.distance === 10, "fresh start cuts");
+  run.step("paused", far, 1 / 60);
+  const resumed = run.step("playing", { ...far, distance: 50 }, 1 / 60);
+  assert.ok(resumed.started && resumed.pose, "a resume starts the camera again");
+  assert.ok(
+    resumed.pose.distance > 20 && resumed.pose.distance <= 50,
+    "and flies from the visitor's pose",
+  );
+  const stopped = run.step("off", far, 1 / 60);
+  assert.ok(stopped.ended);
+  const again = run.step("playing", far, 1 / 60);
+  assert.equal(again.pose?.distance, 10, "the next fresh start cuts again");
 });
 
 test("the drift's machine starts once, pauses and resumes, and runs its hooks before writing", () => {

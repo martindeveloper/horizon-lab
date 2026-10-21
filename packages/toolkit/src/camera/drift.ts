@@ -6,7 +6,9 @@
  * it never stands dead still between a landing and the next flight. Variance jitters each
  * shot's angles, distance and timing, so no two passes look alike. Pure: no rig, no renderer; a host assigns the pose to its own camera. A
  * shot the host flies itself (a close-up on its own rig) is a handoff: the camera waits there
- * until the host says `resume`.
+ * until the host says `resume`. A host with a curtain may `cut`: a fresh start then begins
+ * landed on its opening shot, already in its hold, instead of flying there from wherever the
+ * visitor left the camera.
  */
 import { clamp, lerp, smootherstep, wrapSigned } from "../math";
 import { sampleOrbitFlight, type OrbitFlight, type OrbitPose } from "./flight";
@@ -71,6 +73,12 @@ export type DriftSettings = {
   creep: number;
   /** `sequence` runs the shots in order and wraps; `shuffle` never shows the same shot twice running. */
   order: "sequence" | "shuffle";
+  /**
+   * A fresh start cuts to the opening shot (the host shows it behind a curtain): the camera
+   * begins landed on it, the flight's length given to its hold so the loop keeps its timing.
+   * Off, every start flies to it from the camera's pose. A resume after a pause always flies.
+   */
+  cut: boolean;
   /** Inclination bounds the variance keeps to, radians. */
   inclination: { min: number; max: number };
   /** The source of variance; `Math.random` by default. */
@@ -94,6 +102,7 @@ export const DRIFT_DEFAULTS: Omit<DriftSettings, "random" | "reduceMotion"> = {
   sway: 0.035,
   creep: 0.05,
   order: "sequence",
+  cut: false,
   inclination: { min: -1.45, max: 1.45 },
 };
 
@@ -265,6 +274,28 @@ export function createDriftCamera(
     held = 0;
   }
 
+  /**
+   * Skips the flight just aimed: the camera stands where it would land, the flight's length
+   * given to the hold, and the hold's orbit eases in from rest as it would after landing.
+   */
+  function land() {
+    const at = sampleOrbitFlight(1, from, target);
+    base.azimuth = at.azimuth;
+    base.inclination = at.inclination;
+    base.distance = at.distance;
+    base.roll = target.roll;
+    base.look.yaw = target.look.yaw;
+    base.look.pitch = target.look.pitch;
+    base.ride = target.ride;
+    hold += duration;
+    t = 1;
+    landed = copy(base);
+    held = 0;
+    const shot = shots[index];
+    if (shot && !("handoff" in shot)) drift = settings.holdDrift?.(landed, shot) ?? drift;
+    show();
+  }
+
   return {
     /** The shot being flown to or held, or -1 before `start`. */
     get index() {
@@ -284,9 +315,10 @@ export function createDriftCamera(
     },
     /**
      * Begins (or begins again) from the camera's pose: the first flight starts at once, to the
-     * settings' `opening` shot when it names one.
+     * settings' `opening` shot when it names one. With `cut` (the settings' by default) the
+     * camera begins landed on that shot instead, its hold under way.
      */
-    start(current: AimedPose) {
+    start(current: AimedPose, options: { cut?: boolean } = {}) {
       turn = 0;
       spin = 0;
       turning = 0;
@@ -296,6 +328,7 @@ export function createDriftCamera(
       const opening = settings.opening?.();
       const open = opening !== undefined && opening >= 0 && opening < shots.length ? opening : -1;
       aim(open >= 0 && !("handoff" in shots[open]!) ? open : pick());
+      if (options.cut ?? settings.cut) land();
     },
     /** The host has flown its shot: goes on to the next from the camera's pose. */
     resume(current: AimedPose) {
@@ -359,8 +392,10 @@ export type DriftRun = ReturnType<typeof createDriftRun>;
 /**
  * A drift as a host runs it, frame by frame, from its on/off/paused state: the camera starts
  * flying from wherever the host's camera is on the first playing frame (and again after a
- * pause), leaves it alone while paused or handed off, and resets when the drift ends. Pure, so
- * a raymarched scene and an orbit rig share it (`createRigDrift` builds on it for the rig).
+ * pause), leaves it alone while paused or handed off, and resets when the drift ends. With the
+ * settings' `cut`, a start from off cuts to the opening shot (the host's curtain covers it); a
+ * start after a pause flies from the visitor's camera. Pure, so a raymarched scene and an
+ * orbit rig share it (`createRigDrift` builds on it for the rig).
  */
 export function createDriftRun(shots: readonly DriftShot[], settings: Partial<DriftSettings> = {}) {
   const camera = createDriftCamera(shots, settings);
@@ -368,6 +403,8 @@ export function createDriftRun(shots: readonly DriftShot[], settings: Partial<Dr
   let active = false;
   /** The camera is flying the drift now. */
   let flying = false;
+  /** The next start is a fresh one, from off (it may cut); after a pause it flies. */
+  let fresh = true;
 
   return {
     camera,
@@ -384,6 +421,8 @@ export function createDriftRun(shots: readonly DriftShot[], settings: Partial<Dr
     step(state: DriftRunState, current: AimedPose, dt: number, hold = false) {
       const ended = active && state === "off";
       active = state !== "off";
+      if (state === "off") fresh = true;
+      else if (state === "paused") fresh = false;
       const result = {
         pose: null as Readonly<DriftPose> | null,
         started: false,
@@ -398,7 +437,8 @@ export function createDriftRun(shots: readonly DriftShot[], settings: Partial<Dr
       if (!flying) {
         flying = true;
         result.started = true;
-        camera.start(current);
+        camera.start(current, { cut: (settings.cut ?? false) && fresh });
+        fresh = false;
       }
       if (camera.handoff) {
         result.handoff = true;
