@@ -11,6 +11,7 @@ import {
   type BufferGeometry,
   type Material,
   type Object3D,
+  type Vector3,
 } from "three";
 
 import type { DisposalScope } from "@horizon/toolkit/rendering";
@@ -32,6 +33,7 @@ import {
   FIRST_GALAXIES_MLY,
   anchorById,
   anchorToday,
+  expansionFactor,
   type AnchorId,
 } from "../model/cosmos";
 
@@ -60,6 +62,15 @@ const CLUSTERS: readonly ClusterSpec[] = [
 
 /** Visible diameters (Mly) of the galaxies drawn whole: the glow never shrinks below a few px. */
 export const DISC_MLY = { milkyWay: 0.1, andromeda: 0.15, triangulum: 0.06 };
+
+/**
+ * Where a place `today` (root-local Mly) stands with the universe at scale `a`, expanding about
+ * `sun`: farther from it by the shared rule (`expansionFactor`). Written into `out`.
+ */
+export function expandAbout(out: Vector3, today: Vector3, sun: Vector3, a: number) {
+  out.subVectors(today, sun);
+  return out.multiplyScalar(expansionFactor(out.length(), a)).add(sun);
+}
 
 /** Every cloud the cosmic maps sample at one detail. */
 function sample(detail: CosmosDetail) {
@@ -116,8 +127,8 @@ export function createCosmosClouds(
   const m31Group = new Group();
   root.add(m31Group);
   points((s) => s.andromeda, m.dwarfs, m31Group);
-  points((s) => s.sheet, m.sheet, root);
-  points((s) => s.supercluster, m.supercluster, root);
+  const sheet = points((s) => s.sheet, m.sheet, root);
+  const supercluster = points((s) => s.supercluster, m.supercluster, root);
   const laniakea = points((s) => s.laniakea, m.laniakea, root);
   const web = points((s) => s.web, m.web, root);
 
@@ -169,6 +180,14 @@ export function createCosmosClouds(
 
   first = null;
 
+  /* What the expansion moves (`setExpansion`): the clouds of the structures beyond the Local
+     Group (sampled from its reach outward, so wholly unbound) stretch, and the clusters, bound
+     themselves, recede at their size. The Local Group's galaxies and dwarfs keep their places. */
+  const stretching = [sheet, supercluster, laniakea, web, flows, cmbShell, deepFill].map(
+    (object) => ({ object, today: object.scale.x }),
+  );
+  const receding = clusters.map(({ group }) => ({ object: group, today: group.position.clone() }));
+
   return {
     circle,
     laniakea,
@@ -183,6 +202,14 @@ export function createCosmosClouds(
     milkyWay,
     andromeda,
     triangulum,
+    /** Draws the universe at scale `a` (1 today), expanding about `sun` (the Sun, root-local). */
+    setExpansion(a: number, sun: Vector3) {
+      for (const { object, today } of stretching) {
+        object.scale.setScalar(today * a);
+        object.position.copy(sun).multiplyScalar(1 - a);
+      }
+      for (const { object, today } of receding) expandAbout(object.position, today, sun, a);
+    },
     /** Samples every cloud afresh at a new quality's detail. */
     setDetail(detail: CosmosDetail) {
       const next = sample(detail);

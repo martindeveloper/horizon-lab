@@ -23,9 +23,16 @@ import {
 export { type Status } from "@horizon/toolkit/science";
 
 /** A measured or modelled value, with an optional published spread. */
-export type Value = FactValue<SourceId>;
+export type Value = FactValue<SourceId> & Provenance;
 /** Only a published span ("2,000–5,000 au"): no central value is claimed. */
-export type Span = FactSpan<SourceId>;
+export type Span = FactSpan<SourceId> & Provenance;
+
+/** Additional input sources for a figure derived from more than one catalogue. */
+type Provenance = { sources?: readonly SourceId[] };
+
+export const factSources = (fact: Fact): SourceId[] => [
+  ...new Set([fact.source, ...(fact.sources ?? [])]),
+];
 
 export type Fact = Value | Span;
 /** One object's figures, by fact id. */
@@ -33,6 +40,45 @@ export type Facts = Readonly<Record<string, Fact>>;
 
 /** A catalogue: groups of objects, each object's facts by id. */
 type Catalogue = Readonly<Record<string, Readonly<Record<string, Facts>>>>;
+
+/**
+ * A literature figure, as a catalogue types it: a value with an optional published spread, or,
+ * with `value` null, the spread alone.
+ */
+type LiteratureExtra = Provenance & {
+  range?: Range;
+  digits?: number;
+  show?: NonNullable<Value["show"]>;
+  note?: string;
+};
+export function literatureFact(
+  value: number,
+  unit: Value["unit"],
+  source: SourceId,
+  status: Value["status"],
+  extra?: LiteratureExtra,
+): Value;
+export function literatureFact(
+  value: null,
+  unit: Value["unit"],
+  source: SourceId,
+  status: Value["status"],
+  extra: LiteratureExtra & { range: Range },
+): Span;
+export function literatureFact(
+  value: number | null,
+  unit: Value["unit"],
+  source: SourceId,
+  status: Value["status"],
+  extra: LiteratureExtra = {},
+): Fact {
+  const { range, ...rest } = extra;
+  if (value === null) {
+    if (!range) throw new Error("A span needs its range");
+    return { range, unit, source, status, ...rest };
+  }
+  return { value, unit, source, status, ...(range ? { range } : {}), ...rest };
+}
 
 /** Every fact with its path ("planets.earth.radius"), for tests and the ledger. */
 export function factsOf(catalogue: Catalogue): { path: string; fact: Fact }[] {
@@ -53,6 +99,10 @@ export const r = (fact: (Value | Span) & { range: Range }): Extract<Ref, { kind:
   kind: "span",
   fact,
 });
+
+/** Prefer the supplied interval; keep a central value only when there is no interval. */
+export const factRef = (fact: Fact): Ref =>
+  fact.value === undefined ? r(fact) : fact.range ? r({ ...fact, range: fact.range }) : v(fact);
 
 export type Args = Readonly<Record<string, Ref>>;
 

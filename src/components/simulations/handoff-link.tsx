@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
 import type { ComponentProps, MouseEvent } from "react";
 
+import { CrossingContent, crossingRowClass } from "@/components/simulations/crossing-row";
 import { Link } from "@/i18n/navigation";
 import { handoffPath, leaveFor, type HandoffSide } from "@/lib/handoff";
 import type { SolarViewId } from "@/space/solar-system/model/views";
@@ -51,18 +51,8 @@ export function HandoffRow({
   ...props
 }: Omit<ComponentProps<typeof HandoffLink>, "children"> & { title: string; hint: string }) {
   return (
-    <HandoffLink
-      {...props}
-      className={cn(
-        "flex min-h-11 w-full items-start justify-between gap-3 rounded-md px-3 py-2 text-left text-sm tracking-wide text-fg transition-colors duration-300 hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-9",
-        className,
-      )}
-    >
-      <span className="flex flex-col">
-        <span>{title}</span>
-        <span className="text-xs text-muted">{hint}</span>
-      </span>
-      <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+    <HandoffLink {...props} className={cn(crossingRowClass, className)}>
+      <CrossingContent title={title} hint={hint} />
     </HandoffLink>
   );
 }

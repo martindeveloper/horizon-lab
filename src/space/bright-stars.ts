@@ -4,18 +4,9 @@
  */
 import { BufferAttribute, Points, Vector3, type Material, type Object3D } from "three";
 
-import { STARS, starColor } from "@/space/star-catalogue";
+import { STARS, ballesterosTemperature, starColor } from "@/space/star-catalogue";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 import { equatorialToScene, pointsGeometry } from "@horizon/toolkit/scene";
-
-/**
- * Effective temperature from B−V by Ballesteros (2012, EPL 97, 34008): the black-body fit
- * T = 4600 (1/(0.92 (B−V) + 1.7) + 1/(0.92 (B−V) + 0.62)), good to a few per cent for
- * main-sequence stars (the Sun's 0.65 gives 5,780 K).
- */
-export function ballesterosTemperature(bv: number) {
-  return 4600 * (1 / (0.92 * bv + 1.7) + 1 / (0.92 * bv + 0.62));
-}
 
 /**
  * How bright the faintest star draws (`floor`), the magnitude drawn at full, and a `size` per

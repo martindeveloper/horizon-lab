@@ -1,3 +1,5 @@
+import { blackbodyColor } from "@horizon/toolkit/science";
+
 /**
  * The brightest naked-eye stars, J2000: the sky over mid-northern latitudes
  * in full, plus the bright southern stars so the sphere is complete.
@@ -218,12 +220,27 @@ export const STARS: readonly Star[] = [
   ["Ankaa", 0.4381, -42.3061, 2.4, 1.09],
 ];
 
-/** Approximate star colour from B−V, as an RGB triple. */
+/**
+ * Effective temperature from B−V by Ballesteros (2012, EPL 97, 34008): the black-body fit
+ * T = 4600 (1/(0.92 (B−V) + 1.7) + 1/(0.92 (B−V) + 0.62)), good to a few per cent for
+ * main-sequence stars (the Sun's 0.65 gives 5,780 K).
+ */
+export function ballesterosTemperature(bv: number) {
+  return 4600 * (1 / (0.92 * bv + 1.7) + 1 / (0.92 * bv + 0.62));
+}
+
+const colours = new Map<number, [number, number, number]>();
+
+/**
+ * A star's colour from B−V, as 0–255 RGB: the black body at its Ballesteros temperature, as
+ * the screen shows it. Each index is worked out once.
+ */
 export function starColor(bv: number): [number, number, number] {
-  if (bv < 0) return [178, 198, 255];
-  if (bv < 0.3) return [228, 236, 255];
-  if (bv < 0.6) return [255, 250, 240];
-  if (bv < 1.0) return [255, 236, 200];
-  if (bv < 1.5) return [255, 214, 160];
-  return [255, 190, 130];
+  let colour = colours.get(bv);
+  if (!colour) {
+    const [r, g, b] = blackbodyColor(ballesterosTemperature(bv));
+    colour = [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    colours.set(bv, colour);
+  }
+  return colour;
 }

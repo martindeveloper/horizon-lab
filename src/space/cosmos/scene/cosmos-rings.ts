@@ -1,6 +1,7 @@
 /**
- * Rings where light set out 1, 5 and 10 billion years ago: each shell drawn as the outline the
- * camera sees of it, named on its far side. A sphere of radius R seen from d shows a circle of
+ * Rings where the light reaching us today set out 1, 5 and 10 billion years ago: each shell drawn
+ * as the outline the camera sees of it, named on its far side. A map drawn at a later scale
+ * carries them outward with what they ring (`expansion`). A sphere of radius R seen from d shows a circle of
  * R √(1 − R²/d²), R²/d nearer than its centre (`shellOutline`).
  */
 import {
@@ -40,10 +41,16 @@ export function createLookbackRings(root: Object3D, circle: BufferGeometry, mate
       for (const ring of rings) place(ring.key, 0, 0, 0, false);
     },
     /** This frame's outlines; `shown` is the names' presence, `text` the template for a ring's age. */
-    update(view: RootView, shown: number, text: string | undefined, place: PlaceLabel) {
+    update(
+      view: RootView,
+      expansion: number,
+      shown: number,
+      text: string | undefined,
+      place: PlaceLabel,
+    ) {
       const { d, toward, up, facing } = view;
       for (const ring of rings) {
-        const R = ring.mly;
+        const R = ring.mly * expansion;
         const outside = d > R * 1.001;
         ring.line.visible = outside && material.opacity > 0.002;
         if (!outside) {

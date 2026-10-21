@@ -19,7 +19,6 @@ import {
   RepeatWrapping,
   ShaderMaterial,
   SphereGeometry,
-  Vector2,
   Vector3,
   type BufferGeometry,
   type Texture,
@@ -239,8 +238,10 @@ export type BandMotion = {
   beta: { value: number };
   gamma: { value: number };
   lut: Texture;
-  /** The lookup's temperature range, kelvin. */
-  lutRange: readonly [number, number];
+  /** The lookup's lowest and highest temperature, kelvin, and its width in texels. */
+  lutSpec: readonly [number, number, number];
+  /** The most beaming may brighten the glow, approached softly. */
+  peak: number;
 };
 
 export type MilkyWayOptions = {
@@ -286,7 +287,8 @@ export function createMilkyWay(grains: number, options: MilkyWayOptions) {
             beta: motion.beta,
             gamma: motion.gamma,
             bbLut: { value: motion.lut },
-            lutRange: { value: new Vector2(motion.lutRange[0], motion.lutRange[1]) },
+            bbLutSpec: { value: new Vector3(...motion.lutSpec) },
+            peak: { value: motion.peak },
           }
         : {}),
     },

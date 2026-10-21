@@ -2,14 +2,24 @@
  * Works the card figures are checked against (docs/science-sources.md lists them with the
  * figures that cite them). Links only where the ledger opened one.
  */
-type Source = { cite: string; link?: string };
+export type Source = { cite: string; link?: string };
 
 export const SOURCES = {
+  agol2021: {
+    cite: "Agol et al. 2021, PSJ 2, 1 (TRAPPIST-1: radius, mass and temperature)",
+    link: "https://doi.org/10.3847/PSJ/abd022",
+  },
   akeson2021: {
     cite: "Akeson et al. 2021, AJ 162, 14 (α Cen AB barycentre, Tables 8–9)",
     link: "https://doi.org/10.3847/1538-3881/abfaff",
   },
   allen2001: { cite: "Allen, Bernstein & Malhotra 2001, ApJ 549, L241 (the Kuiper cliff)" },
+  archinal2018: {
+    cite: "Archinal et al. 2018, Celest. Mech. Dyn. Astron. 130, 22 (IAU WGCCRE 2015: rotational elements of the planets)",
+  },
+  arroyoTorres2013: {
+    cite: "Arroyo-Torres et al. 2013, A&A 554, A76 (UY Scuti's angular diameter)",
+  },
   avdellidou2024: {
     cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878; Edwards et al. 2024, Nat. Astron. 8, 1264 (an earlier instability)",
     link: "https://doi.org/10.1126/science.adg8092",
@@ -30,23 +40,59 @@ export const SOURCES = {
     cite: "Bland-Hawthorn & Gerhard 2016, ARA&A 54, 529",
     link: "https://arxiv.org/abs/1602.07702",
   },
+  bogdanov2019: {
+    cite: "Bogdanov et al. 2019, ApJL 887, L25 (PSR J0030+0451's NICER data set: spin period 4.87 ms)",
+    link: "https://arxiv.org/abs/1912.05706",
+  },
+  bond2017: {
+    cite: "Bond et al. 2017, ApJ 840, 70 (the masses of Sirius A and B; Sirius B's radius and temperature; Sirius A's temperature after Davis et al. 2011)",
+    link: "https://doi.org/10.3847/1538-4357/aa6af8",
+  },
+  borexino2018: {
+    cite: "Borexino Collaboration 2018, Nature 562, 505 (the Sun's proton–proton chain, measured by its neutrinos)",
+    link: "https://doi.org/10.1038/s41586-018-0624-y",
+  },
+  borexino2020: {
+    cite: "Borexino Collaboration 2020, Nature 587, 577 (the Sun's CNO cycle, measured by its neutrinos: about 1 % of its power)",
+    link: "https://doi.org/10.1038/s41586-020-2934-0",
+  },
   bovy2017: { cite: "Bovy 2017, MNRAS 468, L63 (Oort constants)" },
+  brands2022: {
+    cite: "Brands et al. 2022, A&A 663, A36 (R136's most massive stars)",
+    link: "https://doi.org/10.1051/0004-6361/202142742",
+  },
   breuval2023: {
     cite: "Breuval et al. 2023, ApJ 951, 118 (M33 at 840 ± 11 kpc from HST Cepheids)",
     link: "https://doi.org/10.3847/1538-4357/acd3f4",
+  },
+  chabrier2000: {
+    cite: "Chabrier & Baraffe 2000, ARA&A 38, 337 (low-mass stars and brown dwarfs: fully convective below about 0.4 M☉; brown dwarfs too light to burn hydrogen)",
+    link: "https://doi.org/10.1146/annurev.astro.38.1.337",
   },
   chen2019: {
     cite: "Chen et al. 2019, Nat. Astron. 3, 320 (Cepheid warp, Table 1)",
     link: "https://arxiv.org/abs/1902.00998",
   },
+  collins2017: {
+    cite: "Collins, Jones & Barnes 2017, A&A 602, A48 (Proxima Centauri's rotation, 82.6 ± 0.1 d)",
+    link: "https://arxiv.org/abs/1608.07834",
+  },
   connelly2012: {
     cite: "Connelly et al. 2012, Science 338, 651",
     link: "https://doi.org/10.1126/science.1226919",
   },
+  crowther2010: {
+    cite: "Crowther et al. 2010, MNRAS 408, 731 (R136's WN5h stars, hydrogen-rich and very massive)",
+  },
+  davies2007: { cite: "Davies et al. 2007, ApJ 671, 781 (the red supergiants of Stephenson 2)" },
   devaucouleurs1958: { cite: "de Vaucouleurs 1958 (the Local Supercluster)" },
   diskLifetimes: {
     cite: "Haisch, Lada & Lada 2001, ApJ 553, L153; Mamajek 2009",
     link: "https://arxiv.org/abs/0906.5011",
+  },
+  domiciano2014: {
+    cite: "Domiciano de Souza et al. 2014, A&A 569, A10 (Achernar's flattened shape)",
+    link: "https://doi.org/10.1051/0004-6361/201424144",
   },
   drinkwater2001: { cite: "Drinkwater et al. 2001, ApJ 548, L139" },
   duncan1987: { cite: "Duncan, Quinn & Tremaine 1987, AJ 94, 1330; NASA Oort cloud facts" },
@@ -60,10 +106,15 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/1906.11243",
   },
   eilers2019: { cite: "Eilers et al. 2019, ApJ 871, 120" },
+  farr2018: { cite: "Farr et al. 2018, AJ 156, 18 (Aldebaran's mass from its oscillations)" },
   ferguson1989: { cite: "Ferguson 1989, AJ 98, 367 (Fornax Cluster Catalog)" },
   fixsen2009: {
     cite: "Fixsen 2009, ApJ 707, 916 (T₀ = 2.7255 K; adopted by Planck 2018)",
     link: "https://arxiv.org/abs/0911.1955",
+  },
+  fok2012: {
+    cite: "Fok et al. 2012, ApJ 760, 65 (Tables 6 and 8: Stephenson 2-18's adopted distance, temperature and luminosity)",
+    link: "https://doi.org/10.1088/0004-637X/760/1/65",
   },
   gaiaDr3: {
     cite: "Gaia Collaboration 2023, A&A 674, A1 (Gaia DR3)",
@@ -75,6 +126,10 @@ export const SOURCES = {
   galanti2026: {
     cite: "Galanti et al. 2026, Nat. Astron. 10, 493 (Jupiter's 1-bar radii from Juno radio occultations)",
     link: "https://doi.org/10.1038/s41550-026-02777-x",
+  },
+  ge2019: {
+    cite: "Ge et al. 2019, AJ 157, 148 (Table 2: TON 618, log M/M☉ = 10.610)",
+    link: "https://arxiv.org/abs/1903.08830",
   },
   geller1999: {
     cite: "Geller, Diaferio & Kurtz 1999, ApJ 517, L23 (Coma: centre and median cz 7,090 km/s)",
@@ -89,6 +144,14 @@ export const SOURCES = {
     cite: "GRAVITY Collaboration 2022, A&A 657, L12 (Sgr A*: 4.297 × 10⁶ M☉, R₀ = 8,277 pc)",
     link: "https://doi.org/10.1051/0004-6361/202142465",
   },
+  healy2024: {
+    cite: "Healy et al. 2024, MNRAS 529, 3630; catalogue 2024-04-11, V* UY Sct (temperature, luminosity and distance)",
+    link: "https://github.com/SNEWS2/candidate_list/blob/main/RSG_and_close_stars_catalog_4_11_24.csv",
+  },
+  heiter2015: {
+    cite: "Heiter et al. 2015, A&A 582, A49 (Gaia benchmark stars: Aldebaran's temperature and luminosity)",
+    link: "https://doi.org/10.1051/0004-6361/201526319",
+  },
   horizon: { cite: "Horizon model: a labelled teaching choice" },
   horizonsProbes: {
     cite: "JPL Horizons trajectories of Pioneer 10–11, Voyager 1–2 and New Horizons (heliocentric, ecliptic J2000)",
@@ -97,6 +160,9 @@ export const SOURCES = {
   hubbleFlow: {
     cite: "NED (cz 3,418 km/s) and Christlein & Zabludoff 2003 (cz 3,683 km/s), at the model's H₀",
   },
+  hummel2013: {
+    cite: "Hummel et al. 2013, A&A 554, A52 (ζ Orionis A, Alnitak: the orbit and the stars' parameters)",
+  },
   iau2012b2: { cite: "IAU 2012 Resolution B2 (the astronomical unit)" },
   iau2015b3: { cite: "IAU 2015 Resolution B3 (nominal solar and planetary values)" },
   iodice2019: {
@@ -104,6 +170,10 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/1812.01050",
   },
   iorio2012: { cite: "Iorio 2012, Sol. Phys. 281, 815; NSSDC fact sheets" },
+  joyce2020: {
+    cite: "Joyce et al. 2020, ApJ 902, 63 (Betelgeuse: radius, mass, distance, and early core helium burning)",
+    link: "https://doi.org/10.3847/1538-4357/abb8db",
+  },
   jplElements: {
     cite: "JPL approximate planetary elements (Standish & Williams)",
     link: "https://ssd.jpl.nasa.gov/planets/approx_pos.html",
@@ -125,11 +195,30 @@ export const SOURCES = {
     cite: "Kaib & Volk 2022, Dynamical population of comet reservoirs, in Comets III (Univ. of Arizona Press, 2024; after Heisler & Tremaine 1986)",
     link: "https://arxiv.org/abs/2206.00010",
   },
+  kamland2011: {
+    cite: "KamLAND Collaboration 2011, Nat. Geosci. 4, 647 (geoneutrinos: radioactive decay supplies about half of Earth's heat)",
+    link: "https://doi.org/10.1038/ngeo1205",
+  },
   karachentsev2009: {
     cite: "Karachentsev et al. 2009, MNRAS 393, 1265 (Local Group zero-velocity radius 0.96 ± 0.03 Mpc)",
     link: "https://doi.org/10.1111/j.1365-2966.2008.14300.x",
   },
+  kervella2003: { cite: "Kervella et al. 2003, A&A 408, 681 (Sirius A's angular diameter)" },
+  kervella2004: {
+    cite: "Kervella et al. 2004, A&A 413, 251 (Procyon A's diameter and temperature)",
+  },
   kervella2017: { cite: "Kervella, Thévenin & Lovis 2017, A&A 598, L7" },
+  kervella2018: {
+    cite: "Kervella et al. 2018, A&A 609, A67 (Betelgeuse's rotation from ALMA: P/sin i = 36 ± 8 yr)",
+    link: "https://arxiv.org/abs/1711.07983",
+  },
+  kervella2022: {
+    cite: "Kervella et al. 2022, A&A 667, A111 (Achernar A: mass, temperature and luminosity)",
+    link: "https://doi.org/10.1051/0004-6361/202244009",
+  },
+  kippenhahn2012: {
+    cite: "Kippenhahn, Weigert & Weiss 2012, Stellar Structure and Evolution, 2nd ed., Springer (hydrogen burning by the pp chain and CNO cycle, shell burning, helium burning, white-dwarf cooling)",
+  },
   kokubo1998: {
     cite: "Kokubo & Ida 1998, Icarus 131, 171",
     link: "https://doi.org/10.1006/icar.1997.5840",
@@ -139,6 +228,10 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/astro-ph/0602217",
   },
   lhb: { cite: "Zellner 2017, OLEB 47, 261; Boehnke & Harrison 2016, PNAS 113, 10802" },
+  li2018: {
+    cite: "Li et al. 2018, Nat. Commun. 9, 3709 (Jupiter's internal heat, from Cassini)",
+    link: "https://doi.org/10.1038/s41467-018-06107-2",
+  },
   li2021: {
     cite: "Li et al. 2021, ApJ 920, 84",
     link: "https://doi.org/10.3847/1538-4357/ac1597",
@@ -147,6 +240,10 @@ export const SOURCES = {
   lucey2023: {
     cite: "Wegg, Gerhard & Portail 2015 (5.0 ± 0.2 kpc half-length); Lucey et al. 2023, MNRAS 520, 4779 (~3.5 kpc)",
     link: "https://arxiv.org/abs/2206.01798",
+  },
+  luger2017: {
+    cite: "Luger et al. 2017, Nat. Astron. 1, 0129 (TRAPPIST-1 from K2: rotation 3.3 d)",
+    link: "https://arxiv.org/abs/1703.04166",
   },
   lyndenBell1988: { cite: "Lynden-Bell et al. 1988, ApJ 326, 19" },
   m31Merger: {
@@ -167,6 +264,16 @@ export const SOURCES = {
   },
   mclaughlin1999: { cite: "McLaughlin 1999, ApJ 512, L9 (Virgo r₂₀₀ = 1.55 Mpc)" },
   mei2007: { cite: "Mei et al. 2007, ApJ 655, 144" },
+  millerJones2021: {
+    cite: "Miller-Jones et al. 2021, Science 371, 1046 (Cygnus X-1: 21.2 M☉ at 2.22 kpc)",
+    link: "https://doi.org/10.1126/science.abb3363",
+  },
+  monnier2012: { cite: "Monnier et al. 2012, ApJL 761, L3 (Vega, a rapid rotator seen pole-on)" },
+  montet2015: {
+    cite: "Montet et al. 2015, ApJ 800, 134 (LHS 6343 C: refined mass and radius)",
+    link: "https://doi.org/10.1088/0004-637X/800/2/134",
+  },
+  moravveji2012: { cite: "Moravveji et al. 2012, ApJ 747, 108 (Rigel)" },
   morbidelli2005: {
     cite: "Morbidelli 2005 review, after Gomes et al. 2005; Tsiganis et al. 2005, Nature 435, 459",
     link: "https://arxiv.org/abs/astro-ph/0512256",
@@ -182,6 +289,7 @@ export const SOURCES = {
   nasaM33: { cite: "NASA/HST, Triangulum Galaxy (M33): 18.7 kpc optical diameter" },
   nasaMilkyWay: { cite: "NASA Science, Beyond Our Solar System: the Milky Way" },
   nssdc: { cite: "NSSDC planetary fact sheets" },
+  ohnaka2013: { cite: "Ohnaka et al. 2013, A&A 555, A24 (Antares)" },
   pasquini2004: {
     cite: "Pasquini et al. 2004, A&A 426, 651",
     link: "https://arxiv.org/abs/astro-ph/0407524",
@@ -189,6 +297,9 @@ export const SOURCES = {
   pedratti2026: {
     cite: "Pedratti et al. 2026, A&A 710, A218 (Coma members and M₂₀₀ from DESI)",
     link: "https://arxiv.org/abs/2603.16706",
+  },
+  pietrzynski2019: {
+    cite: "Pietrzyński et al. 2019, Nature 567, 200 (the Large Magellanic Cloud at 49.59 kpc)",
   },
   pitjeva2018: {
     cite: "Pitjeva & Pitjev 2018, Astron. Lett. 44, 554",
@@ -202,11 +313,36 @@ export const SOURCES = {
     cite: "Proust et al. 2006, A&A 447, 133 (the Shapley Supercluster)",
     link: "https://arxiv.org/abs/astro-ph/0509903",
   },
+  przybilla2010: {
+    cite: "Przybilla et al. 2010, A&A 517, A38 (Rigel's evolutionary mass, Table 1)",
+    link: "https://doi.org/10.1051/0004-6361/201014164",
+  },
+  ramirez2011: { cite: "Ramírez & Allende Prieto 2011, ApJ 743, 135 (Arcturus)" },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },
+  ribas2017: {
+    cite: "Ribas et al. 2017, A&A 603, A58 (Proxima's temperature and luminosity)",
+    link: "https://doi.org/10.1051/0004-6361/201730582",
+  },
+  richichi2005: {
+    cite: "Richichi & Roccatagliata 2005, A&A 433, 305 (Aldebaran's angular diameter)",
+  },
   richter1989: {
     cite: "Richter 1989, A&AS 77, 237 (the Hydra I cluster: a catalogue of 581 galaxies in its area)",
   },
+  riley2019: {
+    cite: "Riley et al. 2019, ApJL 887, L21 (PSR J0030+0451 measured with NICER)",
+    link: "https://doi.org/10.3847/2041-8213/ab481c",
+  },
   sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
+  schiller2008: { cite: "Schiller & Przybilla 2008, A&A 479, 849 (Deneb)" },
+  shemmer2004: {
+    cite: "Shemmer et al. 2004, ApJ 614, 547 (Table 2: TON 618, log M/M☉ = 10.82)",
+    link: "https://arxiv.org/abs/astro-ph/0406559",
+  },
+  snodgrass1990: {
+    cite: "Snodgrass & Ulrich 1990, ApJ 351, 309 (the Sun's rotation from Doppler features, by latitude)",
+    link: "https://doi.org/10.1086/168467",
+  },
   stone2005: {
     cite: "Stone et al. 2005, Science 309, 2017 (Voyager 1 crosses the termination shock)",
     link: "https://doi.org/10.1126/science.1117684",
@@ -240,11 +376,13 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/1711.05228",
   },
   vanDerMarel2012: { cite: "van der Marel et al. 2012, ApJ 753, 8" },
+  vanLeeuwen2007: { cite: "van Leeuwen 2007, A&A 474, 653 (Hipparcos, the new reduction)" },
   wegg2015: {
     cite: "Wegg, Gerhard & Portail 2015, MNRAS 450, 4050",
     link: "https://arxiv.org/abs/1504.01401",
   },
   wegner1993: { cite: "Wegner, Haynes & Giovanelli 1993, AJ 105, 1251 (the Perseus–Pisces ridge)" },
+  wittkowski2012: { cite: "Wittkowski et al. 2012, A&A 540, L12 (VY Canis Majoris)" },
   woudt2008: {
     cite: "Woudt et al. 2008, MNRAS 383, 445 (the Norma cluster: 4,871 ± 54 km/s)",
     link: "https://doi.org/10.1111/j.1365-2966.2007.12571.x",

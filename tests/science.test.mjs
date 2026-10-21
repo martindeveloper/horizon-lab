@@ -14,10 +14,12 @@ import {
   convert,
   keplerThirdLaw,
   lightTravelTime,
+  meanDensity,
   measure,
   parallaxDistance,
-  pythagoras,
+  pressureScaleHeight,
   schwarzschildRadius,
+  stefanBoltzmann,
   tangentialVelocity,
 } from "@horizon/toolkit/science";
 
@@ -64,6 +66,8 @@ test("physical constants match published values", () => {
   near(CONSTANTS.lightYear.value, 9.4607304725808e15, 1, "ly");
   assert.equal(CONSTANTS.gravitationalConstant.value, 6.6743e-11);
   assert.equal(CONSTANTS.solarRadius.value, 6.957e8);
+  assert.equal(CONSTANTS.solarEffectiveTemperature.value, 5772);
+  assert.equal(CONSTANTS.jupiterGravitationalParameter.value, 1.2668653e17);
   for (const [id, constant] of Object.entries(CONSTANTS)) {
     assert.ok(Number.isFinite(constant.value) && constant.value > 0, id);
   }
@@ -94,7 +98,6 @@ test("measures convert, choose a readable unit and print for the UI and LaTeX", 
 });
 
 test("shared laws reproduce textbook values", () => {
-  assert.equal(pythagoras.compute({ a: 3, b: 4 }), 5);
   assert.equal(keplerThirdLaw.compute({ a: 1 }), 1);
   near(keplerThirdLaw.compute({ a: 5.2026 }), 11.87, 0.01, "Jupiter");
   near(keplerThirdLaw.compute({ a: 30.07 }), 164.9, 0.1, "Neptune");
@@ -103,6 +106,15 @@ test("shared laws reproduce textbook values", () => {
   near(schwarzschildRadius.measure({ M: measure(1, "Msun") }).in("km"), 2.953, 0.001, "Sun Rs");
   near(parallaxDistance.compute({ p: 0.7685 }), 1.3012, 1e-4, "Proxima");
   near(tangentialVelocity.compute({ mu: 1, d: 1 }), 4.74047, 1e-5, "1″/yr at 1 pc");
+  assert.equal(stefanBoltzmann.compute({ R: 1, T: 5772 }), 1, "the Sun's own light");
+  near(stefanBoltzmann.compute({ R: 2, T: 2886 }), 0.25, 1e-12, "twice as wide, half as hot");
+  near(
+    pressureScaleHeight.compute({ T: 288, mu: 28.96, g: 9.80665 }) / 1e3,
+    8.43,
+    0.01,
+    "Earth's air",
+  );
+  near(meanDensity.compute({ M: measure(1, "Msun"), R: measure(1, "Rsun") }), 1409, 1, "the Sun");
   assert.equal(keplerThirdLaw.example({ a: 5.2 }), "a = 5.2 au → P = 11.9 yr");
   assert.equal(keplerThirdLaw.units(), "a [au], P [yr]");
 });

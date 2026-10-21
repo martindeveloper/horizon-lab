@@ -51,9 +51,7 @@ function command<F extends (...args: never[]) => unknown>(
 
 // The simulation canvas already owns a context, so getContext returns it rather than creating one.
 function simulationContext() {
-  const canvas = document.querySelector<HTMLCanvasElement>(
-    "[data-black-hole-canvas], [data-scene-canvas]",
-  );
+  const canvas = document.querySelector<HTMLCanvasElement>("[data-simulation-canvas]");
   return canvas?.getContext("webgl2") ?? null;
 }
 
@@ -192,7 +190,7 @@ export function createDebug() {
       },
       [
         "1",
-        "Move the camera with the scene's flow (the black hole's disk gas): the sky aberrates and shifts with its motion; 0 hovers",
+        "Move the camera with the scene's flow (a disk's gas, say): the sky aberrates and shifts with its motion; 0 hovers",
       ],
       ["", "Back to the simulation's own ride"],
     ),

@@ -9,8 +9,8 @@
 import { Matrix4, Quaternion, Vector3 } from "three";
 
 import { SUPERGALACTIC } from "@/space/cosmos/model/cosmos";
-import { smootherstep } from "@horizon/toolkit/math";
-import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE, logFraction } from "@horizon/toolkit/scene";
+import { logFraction, smootherstep } from "@horizon/toolkit/math";
+import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE } from "@horizon/toolkit/scene";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
 import { sunGalactic } from "../model/galactic-orbit";

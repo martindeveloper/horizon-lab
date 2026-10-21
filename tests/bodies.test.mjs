@@ -26,6 +26,8 @@ import {
   meanLongitude,
   meanRates,
   ringStrip,
+  ringExposure,
+  ringStripLevels,
   writeOrbit,
 } from "@horizon/toolkit/bodies";
 import {
@@ -127,7 +129,7 @@ test("rings: Saturn's divisions and Uranus's epsilon ring sit at their radii", (
   const texels = 1024;
   const at = (system, km) => {
     const t = Math.floor(((km - system.innerKm) / (system.outerKm - system.innerKm)) * texels);
-    return ringStrip(system, texels)[t * 4 + 3] / 255;
+    return ringStrip(system, texels).opacity[t];
   };
   const saturn = RINGS.saturn;
   assert.ok(at(saturn, 105_000) > 0.9, "B ring is nearly opaque");
@@ -140,6 +142,32 @@ test("rings: Saturn's divisions and Uranus's epsilon ring sit at their radii", (
   assert.ok(at(uranus, 51_149) > 0.5, "ε ring");
   assert.ok(at(uranus, 50_500) === 0, "gap inside ε");
   assert.equal(RINGS.jupiter, undefined, "Jupiter's τ ≈ 5 × 10⁻⁶ rings stay undrawn");
+});
+
+test("rings: Neptune's faint dusty rings survive the strip and its mipmaps", () => {
+  const neptune = RINGS.neptune;
+  const levels = ringStripLevels(neptune, 1024);
+  const strip = levels[0];
+  const at = (km) =>
+    Math.floor(((km - neptune.innerKm) / (neptune.outerKm - neptune.innerKm)) * strip.texels);
+  near(strip.opacity[at(41_900)], 1e-4, 1e-6, "Galle, τ ≈ 10⁻⁴");
+  near(strip.dust[at(41_900)], 0.55, 1e-6, "Galle's dust");
+  assert.equal(strip.opacity[at(50_000)], 0, "the gap inside Lassell");
+  assert.equal(levels.at(-1).texels, 1, "the chain ends at one texel");
+  const total = (level) => level.opacity.reduce((sum, a) => sum + a, 0) / level.texels;
+  for (const level of levels)
+    near(total(level), total(strip), 1e-6, `mean opacity at ${level.texels}`);
+  const weighted = (level) =>
+    level.opacity.reduce((sum, a, t) => sum + a * level.dust[t], 0) / level.texels;
+  near(weighted(levels.at(-1)), weighted(strip), 1e-7, "dust, weighted by opacity, is kept");
+});
+
+test("rings: a long exposure lifts only the systems darker than Saturn's", () => {
+  assert.equal(ringExposure(RINGS.saturn), 1);
+  const uranus = ringExposure(RINGS.uranus);
+  const neptune = ringExposure(RINGS.neptune);
+  assert.ok(uranus > 10 && uranus < 30, `Uranus ${uranus}`);
+  assert.ok(neptune > 20 * uranus, `Neptune's dusty rings are far fainter: ${neptune}`);
 });
 
 const W = 128;
@@ -482,6 +510,8 @@ test("orbit buffers preserve periapsis/apoapsis and skip changes to mean anomaly
   const initial = buffer.slice();
   assert.equal(update({ ...el, M: 180 }, true), false);
   assert.deepEqual(buffer, initial);
+  // A frame's secular drift (Ω moving by 1e-12°) cannot move a float32 vertex: no rewrite.
+  assert.equal(update({ ...el, node: el.node + 1e-12 }, true), false);
   assert.equal(update(el, false), true);
   for (let i = 0; i < buffer.length; i += 3)
     assert.ok(Math.abs(Math.hypot(...buffer.slice(i, i + 3)) - 20) < 1e-5);

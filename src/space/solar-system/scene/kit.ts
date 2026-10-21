@@ -33,6 +33,8 @@ export type SolarShow = {
   plane: boolean;
   names: boolean;
   trueSize: boolean;
+  /** Faint ring systems in a long exposure, each as bright as Saturn's. */
+  faintRings: boolean;
   elliptical: boolean;
   drift: boolean;
 };

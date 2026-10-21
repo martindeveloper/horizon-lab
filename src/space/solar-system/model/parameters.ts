@@ -71,3 +71,12 @@ export const SUN_LIMB_CHROMA = 0.2;
 export const PLANET_WRAP = 0.12;
 /** Floor of a ring's brightness, as a fraction of its particles' colour, so an unlit face still reads. */
 export const RING_AMBIENT = 0.08;
+/**
+ * Micrometre dust's phase function as three Henyey–Greenstein lobes, asymmetries and weights:
+ * the fit to Saturn's G ring (Hedman & Stark 2015, ApJ 811, 67, table 7), measured from 0.5°
+ * to 170° of scattering. A narrow diffraction peak, a broad forward lobe and a nearly
+ * isotropic rest: within a few degrees of the Sun a dusty ring outshines its sunlit face a
+ * hundredfold.
+ */
+export const RING_DUST_HG_G = [0.995, 0.665, 0.035] as const;
+export const RING_DUST_HG_W = [0.643, 0.176, 0.181] as const;

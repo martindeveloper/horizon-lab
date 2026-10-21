@@ -19,6 +19,98 @@
     linear-gradient(to bottom, rgb(8 8 11 / 0.35), transparent 30%);
 }
 
+/* An experience has no panel: the scene darkens toward the foot, where its copy stands, and
+   more toward the left, under the title. */
+.simulation-tile[data-kind="experience"] .catalogue-art::after {
+  background:
+    linear-gradient(to top, rgb(8 8 11 / 0.94), rgb(8 8 11 / 0.62) 38%, transparent 72%),
+    linear-gradient(to right, rgb(8 8 11 / 0.6), transparent 60%),
+    linear-gradient(to bottom, rgb(8 8 11 / 0.35), transparent 30%);
+}
+
+/* An experience's art drifts slowly, as a film's opening shot does; a lab's holds still.
+   Individual transforms, so the hover's zoom still composes, and only the compositor works. */
+@media (prefers-reduced-motion: no-preference) {
+  .simulation-tile[data-kind="experience"] .catalogue-art img {
+    animation: experience-drift 28s ease-in-out infinite alternate;
+  }
+}
+@keyframes experience-drift {
+  from {
+    scale: 1.02;
+    translate: -1% 0.5%;
+  }
+  to {
+    scale: 1.08;
+    translate: 1% -1%;
+  }
+}
+
+/* The play disc: dark glass ringed in gold on the scene, filling with the solar gold as the
+   tile is approached. The scene's own colours, so it reads the same in both themes. */
+.experience-play {
+  color: var(--color-solar);
+  background: rgb(8 8 11 / 0.45);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 0 0 1px color-mix(in srgb, var(--color-solar) 60%, transparent),
+    0 0 36px color-mix(in srgb, var(--color-solar) 20%, transparent);
+  transition:
+    background-color 320ms ease,
+    color 320ms ease,
+    scale 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.simulation-tile:hover .experience-play,
+.simulation-tile:focus-within .experience-play {
+  color: var(--color-space);
+  background: var(--color-solar);
+  scale: 1.06;
+}
+a:focus-visible > .experience-play {
+  outline: 2px solid var(--color-solar);
+  outline-offset: 4px;
+}
+
+/* The route: a gold line along the stops, fading on past the last into the distance. Each
+   stop is a ring on the line, filled gold when it is the one about to be taken. */
+.experience-route {
+  position: relative;
+}
+.experience-route::before {
+  content: "";
+  position: absolute;
+  top: calc(0.3125rem - 0.5px);
+  inset-inline: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-solar) 75%, transparent),
+    color-mix(in srgb, var(--color-solar) 30%, transparent) 70%,
+    transparent
+  );
+}
+.experience-stop-mark {
+  position: relative;
+  background: var(--color-space);
+  box-shadow: 0 0 0 1px var(--color-solar);
+  transition:
+    background-color 240ms ease,
+    box-shadow 240ms ease;
+}
+.experience-stop:hover .experience-stop-mark,
+.experience-stop:focus-visible .experience-stop-mark {
+  background: var(--color-solar);
+  box-shadow:
+    0 0 0 1px var(--color-solar),
+    0 0 14px color-mix(in srgb, var(--color-solar) 60%, transparent);
+}
+.experience-stop:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: var(--color-solar);
+  text-underline-offset: 4px;
+}
+
 .simulation-tile {
   box-shadow: var(--tile-frame);
   transition: box-shadow 320ms ease;
@@ -371,6 +463,14 @@
   }
   .catalogue-intro .intro-tile {
     animation: intro-tile 1.4s var(--intro-ease) calc(2.35s + var(--i, 0) * 0.14s) backwards;
+  }
+  /* A shelf heading arrives with its first tile, its stroke drawing like the kicker's. */
+  .catalogue-intro .intro-shelf {
+    animation: intro-fade 1s ease-out calc(2.35s + var(--i, 0) * 0.14s) backwards;
+  }
+  .catalogue-intro .intro-shelf h2 > :first-child {
+    transform-origin: left;
+    animation: intro-stroke 1s var(--intro-ease) calc(2.25s + var(--i, 0) * 0.14s) backwards;
   }
   /* HeroScene marks a tile while it rises: hover, tilt and halo wait for it. */
   .catalogue-intro .intro-tile[data-entering],

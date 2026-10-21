@@ -9,23 +9,28 @@ import { PanelHeader, cn, useFocusHandoff } from "@horizon/toolkit/ui";
 /**
  * A selection's card: a bottom sheet on phones, a rail beside the scene on wide screens,
  * ending above the dock (`--hud-clear`). The first short figure leads; `footer` holds the
- * simulation's actions. `folded` keeps only the header and footer on phones.
+ * simulation's actions. `folded` keeps only the header and footer on phones. A card that is
+ * open as the scene starts passes `takeFocus={false}`, so it does not take focus from the page.
  */
 export function SelectionSheet({
   card,
   closeLabel,
   onClose,
   folded = false,
+  takeFocus = true,
+  details,
   footer,
 }: {
   card: Card;
   closeLabel: string;
   onClose: () => void;
   folded?: boolean;
+  takeFocus?: boolean;
+  details?: ReactNode;
   footer?: ReactNode;
 }) {
   const root = useRef<HTMLElement>(null);
-  useFocusHandoff(root);
+  useFocusHandoff(takeFocus ? root : NO_ELEMENT);
   const facts = card.facts.map((fact) => ({ ...fact, ...splitValue(fact.value) }));
   /* A short first figure leads the card; prose-length values stay in the list. */
   const lead = facts[0] && facts[0].main.length <= 16 ? facts[0] : null;
@@ -98,6 +103,7 @@ export function SelectionSheet({
             {card.caution}
           </p>
         ) : null}
+        {details}
       </div>
       {footer ? (
         <div className="flex flex-wrap items-center gap-2 border-t border-border px-3.5 py-3 md:px-4">
@@ -107,6 +113,9 @@ export function SelectionSheet({
     </article>
   );
 }
+
+/** The ref a card that leaves focus be hands the focus hook. */
+const NO_ELEMENT = { current: null };
 
 /** "39.5 au · light-time 5.5 h" reads as a figure and its note. */
 function splitValue(value: string) {

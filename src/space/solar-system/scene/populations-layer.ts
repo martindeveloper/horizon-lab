@@ -60,7 +60,8 @@ export function createPopulationsLayer(
   for (let i = 0; i < TRACERS.length; i += 1) tracers.setColorAt(i, BIN_COLOR.kuiper);
   parent.add(tracers);
   const tracerCodes = new Uint8Array(TRACERS.length);
-  let tracerStamp = "";
+  /* What the tracer instances were last written for; NaN forces the next write. */
+  const tracerStamp = { yearsAgo: NaN, drift: NaN, mask: NaN };
   const dummy = new Object3D();
 
   const focusOrbit = orbitOf(scope, SOLAR_GOLD, 0.95);
@@ -108,6 +109,7 @@ export function createPopulationsLayer(
   const age = lod.fader();
 
   const tmp: [number, number, number] = [0, 0, 0];
+  const jupiterEl: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
 
   /** Instance matrices and tints, rewritten only when the inputs that move them change. */
   const updateTracers = ({ show, yearsAgo, mig, driftYears, dist }: SolarFrame, on: boolean) => {
@@ -116,7 +118,7 @@ export function createPopulationsLayer(
     // Hidden buffers stay untouched. Invalidate so the first visible frame
     // always uses current positions, sizes and population filters.
     if (!tracers.visible) {
-      tracerStamp = "";
+      tracerStamp.yearsAgo = NaN;
       return;
     }
     const mask =
@@ -130,9 +132,16 @@ export function createPopulationsLayer(
     looks.tracers.uniforms.radius!.value = show.trueSize
       ? 30 / AU_KM
       : pxWorld(dist, 3.1) * presence;
-    const stamp = `${yearsAgo}|${Math.round(driftYears * 200)}|${mask}`;
-    if (stamp === tracerStamp) return;
-    tracerStamp = stamp;
+    const drift = Math.round(driftYears * 200);
+    if (
+      yearsAgo === tracerStamp.yearsAgo &&
+      drift === tracerStamp.drift &&
+      mask === tracerStamp.mask
+    )
+      return;
+    tracerStamp.yearsAgo = yearsAgo;
+    tracerStamp.drift = drift;
+    tracerStamp.mask = mask;
     const allow: Record<Bin, boolean> = {
       disk: show.disk,
       kuiper: show.kuiper,
@@ -191,7 +200,7 @@ export function createPopulationsLayer(
       focusOrbit.line.visible = !!focus;
       if (focus) focusOrbit.update(focus, show.elliptical);
 
-      const jupiterEl = planetElements("jupiter", mig, driftYears, now);
+      planetElements("jupiter", mig, driftYears, now, jupiterEl);
       const jupiterLon = ((jupiterEl.node + jupiterEl.omega + jupiterEl.M) * Math.PI) / 180;
       const formed = age.to(planetesimals);
       const belts = BELT(dist) * formed;

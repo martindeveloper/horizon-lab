@@ -1,6 +1,6 @@
 /**
  * The space scenes' side of the shared render quality: what a level (and the device class)
- * means for the scene host and for the solar system both the Orrery and Deep Field draw. Each
+ * means for the scene host and for the shared solar system any space scene draws. Each
  * simulation's own `lib/quality.ts` extends this with its layers' budgets; engines pass the
  * result down, so no layer reads the level or the device class itself.
  */

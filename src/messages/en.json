@@ -10,7 +10,7 @@
   "notFoundTitle": "Nothing on this horizon",
   "notFoundBody": "The page you are looking for does not exist.",
   "returnHome": "Back to all simulations",
-  "metadataDescription": "Interactive simulations of space and gravity, starting with a black-hole observatory.",
+  "metadataDescription": "Interactive simulations of space, light and gravity.",
   "shell": {
     "home": "Horizon home",
     "catalogue": "Home",
@@ -141,6 +141,27 @@
         }
       }
     },
+    "giants": {
+      "title": "Giants",
+      "eyebrow": "Giants · How big stars get",
+      "category": "Scale & stars",
+      "description": "Climb from a city-sized neutron star past the largest stars to black-hole horizons, at true scale. Stop anywhere and open a star.",
+      "open": "Open Giants",
+      "ladder": "One ladder, true scale",
+      "physics": "Size, mass and light",
+      "uncertainty": "Every size with its doubt",
+      "entryPoints": {
+        "sun": {
+          "title": "The Sun"
+        },
+        "pulsar": {
+          "title": "A neutron star"
+        },
+        "betelgeuse": {
+          "title": "Betelgeuse"
+        }
+      }
+    },
     "voyage": {
       "title": "Voyage",
       "eyebrow": "Voyage · At true scale",
@@ -263,7 +284,7 @@
       "plex": "Text and figures.",
       "next": "Pages, routing and prerendering.",
       "react": "The interface.",
-      "three": "The orrery's WebGL rendering.",
+      "three": "The WebGL rendering of every simulation.",
       "nextIntl": "English and Czech.",
       "nextThemes": "Dark and light themes.",
       "zustand": "Simulation state.",
@@ -370,6 +391,19 @@
     "close": "Exit",
     "fullscreen": "Full screen",
     "experiences": "Viewing modes"
+  },
+  "guide": {
+    "title": "Guide",
+    "label": "Guided tour",
+    "start": "Start guide",
+    "progress": "{step} / {total}",
+    "progressWith": "{step} / {total} · {detail}",
+    "previous": "Previous step",
+    "next": "Next",
+    "finish": "Finish",
+    "exit": "Exit guide",
+    "play": "Play guide",
+    "pause": "Pause guide"
   },
   "drift": {
     "title": "Drift",

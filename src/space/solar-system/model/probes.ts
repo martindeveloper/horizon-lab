@@ -1,5 +1,11 @@
 import type { Vec3 } from "@horizon/toolkit/bodies";
-import { AU_LIGHT_SECONDS, JULIAN_YEAR_SECONDS } from "@horizon/toolkit/science";
+import { length3 } from "@horizon/toolkit/math";
+import {
+  AU_LIGHT_SECONDS,
+  JULIAN_YEAR_SECONDS,
+  julianEpoch,
+  julianEpochMs,
+} from "@horizon/toolkit/science";
 
 /**
  * Our reach: the five spacecraft leaving the solar system, the heliopause the Voyagers
@@ -49,10 +55,8 @@ export const PROBES: readonly Probe[] = [
 
 export const probeById = (id: ProbeId) => PROBES.find((p) => p.id === id)!;
 
-const J2000_MS = Date.UTC(2000, 0, 1, 12);
-/** A date as a decimal year on the tracks' clock (Julian years from J2000). */
-export const yearOf = (date: Date | string) =>
-  2000 + (new Date(date).getTime() - J2000_MS) / (JULIAN_YEAR_SECONDS * 1000);
+/** A date as a decimal year on the tracks' clock (the Julian epoch). */
+export const yearOf = (date: Date | string) => julianEpoch(new Date(date));
 
 type Track = { years: readonly number[]; au: readonly number[] };
 const trackOf = (id: ProbeId): Track => TRACKS.probes[id];
@@ -97,14 +101,13 @@ export function probePath(id: ProbeId, year: number): Float32Array {
   return out;
 }
 
-const length = (v: Vec3) => Math.hypot(v[0], v[1], v[2]);
 const there: Vec3 = [0, 0, 0];
 const later: Vec3 = [0, 0, 0];
 const earth: Vec3 = [0, 0, 0];
 
 /** How far a probe is from the Sun at a date, au. */
 export const probeFromSun = (id: ProbeId, date: Date) =>
-  length(probePosition(id, yearOf(date), there));
+  length3(probePosition(id, yearOf(date), there));
 
 /** How far a probe is from Earth at a date, au: the gap its signal crosses. */
 export function probeFromEarth(id: ProbeId, date: Date) {
@@ -136,7 +139,7 @@ const lightDays = new Map<ProbeId, Date | null>();
 export function firstLightDay(id: ProbeId): Date | null {
   if (lightDays.has(id)) return lightDays.get(id)!;
   const { years } = trackOf(id);
-  const end = J2000_MS + (years.at(-1)! - 2000) * JULIAN_YEAR_SECONDS * 1000;
+  const end = julianEpochMs(years.at(-1)!);
   const past = (ms: number) => probeFromEarth(id, new Date(ms)) >= LIGHT_DAY_AU;
   let ms = new Date(probeById(id).launched).getTime();
   while (ms < end && probeFromSun(id, new Date(ms)) < LIGHT_DAY_AU - 1.1) ms += 30 * DAY_MS;
@@ -159,7 +162,7 @@ export function firstLightDay(id: ProbeId): Date | null {
 export function crossingAu(id: ProbeId, boundary: "shock" | "heliopause") {
   const date = probeById(id).crossed?.[boundary];
   if (!date) throw new Error(`${id} has no ${boundary} crossing`);
-  return length(probePosition(id, yearOf(date), there));
+  return length3(probePosition(id, yearOf(date), there));
 }
 
 /**

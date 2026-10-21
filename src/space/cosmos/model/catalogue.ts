@@ -1,5 +1,6 @@
 import { factsOf, type Facts, type Status, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
+import { BLACK_HOLES } from "@/space/stellar";
 /** Beyond the Milky Way: figures from the cosmos model and the literature. */
 import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
 
@@ -209,7 +210,7 @@ export const COSMOS = {
       status: "derived",
       note: "2 r₂₀₀; McLaughlin's 1.55 Mpc at 15 Mpc, scaled to 16.5 Mpc",
     },
-    blackHole: { value: 6.5e9, unit: "Msun", source: "eht2019", status: "verified" },
+    blackHole: BLACK_HOLES.m87.mass,
   },
   fornax: {
     distance: anchorDistance("fornaxCluster", "blakeslee2009", { note: "20.0 ± 0.3 Mpc" }),

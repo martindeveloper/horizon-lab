@@ -1,10 +1,12 @@
 /**
  * Everything Horizon is built on that someone else made: imagery, data,
  * fonts and code, with the credit line and licence each asks for. The credits
- * page renders this list; tests check it against the orrery's measured maps
- * and the installed packages' own licence fields. Descriptions are translated
- * under `credits.items.<id>`; names, credit lines and licences stay as published.
+ * page renders this list. The moons' map credits are the toolkit's measured maps'
+ * own records; tests check the rest against those maps and the installed packages'
+ * own licence fields. Descriptions are translated under `credits.items.<id>`;
+ * names, credit lines and licences stay as published.
  */
+import { MAPS } from "@horizon/toolkit/bodies";
 
 export type Licence =
   | "Public domain"
@@ -46,160 +48,68 @@ export type CreditGroup = {
   items: Credit[];
 };
 
-export const CREDITS: readonly CreditGroup[] = [
+/** The planet maps' data products, each credited once for every map made from it. */
+const MAP_PRODUCTS: readonly Credit[] = [
   {
-    id: "imagery",
-    items: [
-      {
-        id: "moonMap",
-        name: "LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill",
-        by: "NASA’s Scientific Visualization Studio; NASA/LRO/LROC, Arizona State University",
-        licence: "Public domain",
-        url: "https://svs.gsfc.nasa.gov/4720/",
-      },
-      {
-        id: "ioMap",
-        name: "Galileo SSI / Voyager merged mosaic, muted enhanced colour; interpolated poles",
-        by: "NASA/JPL; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km",
-      },
-      {
-        id: "europaMap",
-        name: "Voyager / Galileo SSI mosaic, monochrome; plain south-polar fill",
-        by: "NASA/JPL; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m",
-      },
-      {
-        id: "ganymedeMap",
-        name: "Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles",
-        by: "NASA/JPL; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km",
-      },
-      {
-        id: "callistoMap",
-        name: "Voyager / Galileo SSI mosaic, monochrome",
-        by: "NASA/JPL; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km",
-      },
-      {
-        id: "tritonMap",
-        name: "Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill",
-        by: "NASA/JPL; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m",
-      },
-      {
-        id: "phobosMap",
-        name: "Phobos Viking global mosaic (DLR control), monochrome",
-        by: "NASA/JPL; Philip Stooke, University of Western Ontario; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m",
-      },
-      {
-        id: "deimosMap",
-        name: "Stooke small bodies maps: Deimos, Viking with MRO HiRISE, monochrome",
-        by: "NASA/JPL; Philip Stooke, University of Western Ontario (with C. Jongkind, M. Arntz); P. Thomas, Cornell; PDS Small Bodies Node",
-        licence: "Public domain",
-        url: "https://sbn.psi.edu/pds/resource/stookemaps.html",
-      },
-      {
-        id: "mimasMap",
-        name: "Cassini ISS final atlas mosaic (DLR, 2017), monochrome",
-        by: "NASA/JPL/Space Science Institute; DLR (T. Roatsch et al. 2018); USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://www.usgs.gov/publications/final-mimas-and-enceladus-atlases-derived-cassini-iss-images",
-      },
-      {
-        id: "enceladusMap",
-        name: "Cassini ISS global mosaic, monochrome",
-        by: "NASA/JPL/Space Science Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/enceladus_cassini_global_mosaic_110m",
-      },
-      {
-        id: "tethysMap",
-        name: "Cassini ISS global mosaic, monochrome",
-        by: "NASA/JPL/Space Science Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/tethys_cassini_global_mosaic_293m",
-      },
-      {
-        id: "dioneMap",
-        name: "Cassini ISS and Voyager global mosaic, monochrome",
-        by: "NASA/JPL/Space Science Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/dione_cassini_voyager_global_mosaic_154m",
-      },
-      {
-        id: "rheaMap",
-        name: "Cassini ISS and Voyager global mosaic, monochrome",
-        by: "NASA/JPL/Space Science Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/rhea_cassini_voyager_global_mosaic_417m",
-      },
-      {
-        id: "iapetusMap",
-        name: "Cassini ISS and Voyager global mosaic, monochrome; Cassini Regio's albedo contrast restored",
-        by: "NASA/JPL/Space Science Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/iapetus_cassini_voyager_global_mosaic_803m",
-      },
-      {
-        id: "charonMap",
-        name: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
-        by: "NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m",
-      },
-
-      {
-        id: "sdoHmi",
-        name: "SDO/HMI continuum intensity (May 2024)",
-        by: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
-        licence: "Public domain",
-        url: "https://sdo.gsfc.nasa.gov/data/",
-      },
-      {
-        id: "opal",
-        name: "Hubble OPAL global maps (2025)",
-        by: "NASA, ESA, A.A. Simon, M.H. Wong. Hubble programme GO13937 (PI: Simon), archived by STScI; DOI 10.17909/T9G593",
-        licence: "CC BY 4.0",
-        url: "https://archive.stsci.edu/hlsp/opal",
-      },
-      {
-        id: "blueMarble",
-        name: "Blue Marble Next Generation and Blue Marble clouds",
-        by: "NASA Earth Observatory (Reto Stöckli)",
-        licence: "Public domain",
-        url: "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
-      },
-      {
-        id: "viking",
-        name: "Mars Viking global colour mosaic, 925 m",
-        by: "NASA, USGS Astrogeology Science Center",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m",
-      },
-      {
-        id: "messenger",
-        name: "Mercury MESSENGER MDIS global mosaic, 665 m",
-        by: "NASA, Johns Hopkins University APL, Carnegie Institution of Washington; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_basemap_md3_color_global_mosaic_665m",
-      },
-      {
-        id: "newHorizons",
-        name: "Pluto New Horizons global mosaic, 300 m",
-        by: "NASA, Johns Hopkins University APL, Southwest Research Institute, Lunar and Planetary Institute; USGS Astrogeology",
-        licence: "Public domain",
-        url: "https://www.usgs.gov/media/images/pluto-global-mosaic-new-horizons-july-2017",
-      },
-    ],
+    id: "sdoHmi",
+    name: "SDO/HMI continuum intensity (May 2024)",
+    by: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
+    licence: "Public domain",
+    url: "https://sdo.gsfc.nasa.gov/data/",
   },
+  {
+    id: "opal",
+    name: "Hubble OPAL global maps (2025)",
+    by: "NASA, ESA, A.A. Simon, M.H. Wong. Hubble programme GO13937 (PI: Simon), archived by STScI; DOI 10.17909/T9G593",
+    licence: "CC BY 4.0",
+    url: "https://archive.stsci.edu/hlsp/opal",
+  },
+  {
+    id: "blueMarble",
+    name: "Blue Marble Next Generation and Blue Marble clouds",
+    by: "NASA Earth Observatory (Reto Stöckli)",
+    licence: "Public domain",
+    url: "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+  },
+  {
+    id: "viking",
+    name: "Mars Viking global colour mosaic, 925 m",
+    by: "NASA, USGS Astrogeology Science Center",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m",
+  },
+  {
+    id: "messenger",
+    name: "Mercury MESSENGER MDIS global mosaic, 665 m",
+    by: "NASA, Johns Hopkins University APL, Carnegie Institution of Washington; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_basemap_md3_color_global_mosaic_665m",
+  },
+  {
+    id: "newHorizons",
+    name: "Pluto New Horizons global mosaic, 300 m",
+    by: "NASA, Johns Hopkins University APL, Southwest Research Institute, Lunar and Planetary Institute; USGS Astrogeology",
+    licence: "Public domain",
+    url: "https://www.usgs.gov/media/images/pluto-global-mosaic-new-horizons-july-2017",
+  },
+];
+
+/**
+ * Every measured map the toolkit serves (`MAPS`) whose source no data product above covers,
+ * credited as the map records it: the moons' mosaics, one each.
+ */
+const MAP_CREDITS: readonly Credit[] = Object.entries(MAPS)
+  .filter(([, map]) => !MAP_PRODUCTS.some((product) => product.url === map.url))
+  .map(([body, map]) => ({
+    id: `${body}Map`,
+    name: map.source,
+    by: map.credit,
+    licence: map.licence,
+    url: map.url,
+  }));
+
+export const CREDITS: readonly CreditGroup[] = [
+  { id: "imagery", items: [...MAP_CREDITS, ...MAP_PRODUCTS] },
   {
     id: "data",
     items: [

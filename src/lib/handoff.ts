@@ -2,23 +2,27 @@ import type { OrbitPose } from "@horizon/toolkit/camera";
 import { clamp } from "@horizon/toolkit/math";
 import { json, storageCell } from "@horizon/toolkit/storage";
 
-import { pathForView as deepFieldPath } from "../features/deep-field/routing";
-import { pathForView as orreryPath } from "../features/orrery/routing";
 import type { SolarViewId } from "../space/solar-system/model/views";
+import { slugPath } from "./simulation-paths";
+import { simulations, type RegisteredSimulation } from "./simulations";
+
+type SolarSimulation = Extract<RegisteredSimulation, { solarSystem: object }>;
 
 /**
- * The simulations that share the solar system, by id: the Orrery through time, Deep Field
- * today. Each names the solar system's views alike.
+ * The simulations that show the shared solar system (their manifests' `solarSystem`), by id.
+ * Each names the solar system's views alike, so a view in one is the same view in another.
  */
-const SIDES = { orrery: orreryPath, "deep-field": deepFieldPath } satisfies Record<
-  string,
-  (view: SolarViewId) => string
->;
-export type HandoffSide = keyof typeof SIDES;
+const SIDES = new Map<string, SolarSimulation>(
+  simulations
+    .filter((manifest): manifest is SolarSimulation => "solarSystem" in manifest)
+    .map((manifest) => [manifest.id, manifest]),
+);
+export type HandoffSide = SolarSimulation["id"];
 
 /** A solar system view in one of them. */
 export function handoffPath(to: HandoffSide, view: SolarViewId) {
-  return SIDES[to](view);
+  const side = SIDES.get(to);
+  return side ? slugPath(side.href, side.solarSystem.defaultView, view) : "/";
 }
 
 /** A crossing under way: who it is for, and the camera pose the other side left at. */
@@ -35,12 +39,11 @@ const isCrossing = (value: unknown): value is Crossing => {
       finite(pose.azimuth) &&
       finite(pose.inclination) &&
       finite(pose.distance));
-  return typeof to === "string" && Object.hasOwn(SIDES, to) && poseOk;
+  return typeof to === "string" && SIDES.has(to) && poseOk;
 };
 
 /**
- * A one-shot note that the visitor crossed between the Orrery and Deep Field at a view they
- * share: the side arrived at opens where the other left off, the same pose, so the swap reads
+ * A one-shot note that the visitor crossed between two of them at a view they share: the side arrived at opens where the other left off, the same pose, so the swap reads
  * as one place. Read once, then cleared; it lapses after half a minute.
  */
 const handoff = storageCell({

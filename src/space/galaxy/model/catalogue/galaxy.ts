@@ -1,6 +1,7 @@
 import type { Facts, Value } from "@/lib/facts";
 /** The Milky Way and the Sun's orbit in it, from the model's parameters. */
 import { GALACTIC_YEAR, SUN_BIRTH } from "@/space/solar-system/model/parameters";
+import { BLACK_HOLES } from "@/space/stellar";
 import { convert } from "@horizon/toolkit/science";
 
 import {
@@ -135,7 +136,7 @@ export const GALAXY = {
       status: "verified",
       note: "Wegg 2015: 5.0 ± 0.2; Lucey 2023: ~3.5",
     },
-    blackHole: { value: 4.3e6, unit: "Msun", source: "gravity2022", status: "verified" },
+    blackHole: BLACK_HOLES["sgr-a"].mass,
   },
   halo: {
     r200: {

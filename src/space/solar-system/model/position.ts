@@ -1,5 +1,5 @@
 /** Where a selection is at a moment, as the scene draws it (au, scene axes). */
-import { keplerPosition, namedById, type Vec3 } from "@horizon/toolkit/bodies";
+import { keplerPosition, namedById, type Elements, type Vec3 } from "@horizon/toolkit/bodies";
 
 import { namedElements, planetElements } from "./elements";
 import type { SolarMoment } from "./moment";
@@ -8,6 +8,7 @@ import { hostOf, type SolarSelection } from "./selection";
 import { TRACERS, tracerElements, tracerVisible } from "./tracers";
 
 const offset: Vec3 = [0, 0, 0];
+const elements: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
 
 /**
  * The Sun at the origin, a body on its orbit at `now` plus the Motion offset, a moon at its
@@ -26,9 +27,9 @@ export function positionOf(
       out[0] = out[1] = out[2] = 0;
       return out;
     case "planet":
-      return keplerPosition(planetElements(sel.id, mig, driftYears, now), out);
+      return keplerPosition(planetElements(sel.id, mig, driftYears, now, elements), out);
     case "named":
-      return keplerPosition(namedElements(namedById(sel.id), mig, driftYears, now), out);
+      return keplerPosition(namedElements(namedById(sel.id), mig, driftYears, now, elements), out);
     case "moon": {
       const at = positionOf(hostOf(sel.id), { mig, driftYears }, now, out);
       if (!at) return null;

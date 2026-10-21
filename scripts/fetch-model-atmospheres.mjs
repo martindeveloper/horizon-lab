@@ -5,28 +5,33 @@
  * optical depth from 10⁻⁴ to 10^1.5, in steps of 0.25 dex. Stellar Spectra integrates its stars'
  * light through these layers. Run by hand:
  *
- *   node scripts/fetch-model-atmospheres.mjs
+ *   node --import tsx scripts/fetch-model-atmospheres.mjs
  *
  * Kept: every model at log g = 4.0 (the main sequence, near enough, from 3500 to 30 000 K)
  * and the grid models nearest the lab's named stars.
  */
 import { writeFile } from "node:fs/promises";
 
+import { STARS as NAMED } from "../src/features/spectroscopy/lib/model/stars.ts";
+
 const URL_GRID = "http://kurucz.harvard.edu/grids/gridp00odfnew/ap00k2odfnew.dat";
 const OUT = new URL("../src/features/spectroscopy/lib/model/atmospheres.json", import.meta.url);
 /** log₁₀ τ_Ross the layers are read at. */
 const DEPTHS = Array.from({ length: 23 }, (_, i) => -4 + i * 0.25);
 const BOLTZMANN_CGS = 1.380649e-16;
-/** The named stars' effective temperature and surface gravity (log g, cgs). */
-const STARS = {
-  alnitak: [29500, 3.25],
-  rigel: [12000, 1.75],
-  vega: [9550, 3.95],
-  procyon: [6530, 4.0],
-  sun: [5772, 4.44],
-  arcturus: [4286, 1.66],
-  aldebaran: [3900, 1.1],
+/** The named stars' surface gravity (log g, cgs); their temperatures are the lab's (stars.ts). */
+const LOG_G = {
+  alnitak: 3.25,
+  rigel: 1.75,
+  vega: 3.95,
+  procyon: 4.0,
+  sun: 4.44,
+  arcturus: 1.66,
+  aldebaran: 1.1,
 };
+const STARS = Object.fromEntries(
+  Object.entries(LOG_G).map(([id, logg]) => [id, [NAMED[id].teff.kelvin, logg]]),
+);
 
 const res = await fetch(URL_GRID);
 if (!res.ok) throw new Error(`ATLAS9 grid: HTTP ${res.status}`);

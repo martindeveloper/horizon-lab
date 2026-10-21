@@ -10,7 +10,7 @@
  */
 import { SUN_GALACTIC_RADIUS_LY, SUN_HEIGHT_LY } from "@/space/galaxy/model/parameters";
 import type { Vec3 } from "@horizon/toolkit/bodies";
-import { clamp01 } from "@horizon/toolkit/math";
+import { cross3, logFraction, smootherstep } from "@horizon/toolkit/math";
 import {
   PLANCK_2018,
   RAD_PER_DEG as RAD,
@@ -21,6 +21,7 @@ import {
   equatorialToGalactic,
   formatNumber,
   hubbleLaw,
+  eventHorizonMpc,
   particleHorizonMpc,
   redshiftAtLookback,
 } from "@horizon/toolkit/science";
@@ -58,6 +59,13 @@ export const LAST_SCATTERING_Z = 1089.8;
 export const HORIZON_MLY = convert(particleHorizonMpc(PLANCK_2018), "Mpc", "Mly");
 /** Today's distance to where the microwave background we see set out, Mly. */
 export const CMB_MLY = comovingMly(LAST_SCATTERING_Z);
+/** The same, light-years. */
+export const CMB_LY = convert(CMB_MLY, "Mly", "ly");
+/**
+ * Today's distance to the cosmic event horizon, light-years: nothing farther can ever be
+ * reached, even at light speed (16.6 billion light-years).
+ */
+export const EVENT_HORIZON_LY = convert(eventHorizonMpc(PLANCK_2018), "Mpc", "ly");
 /**
  * The farthest galaxy yet confirmed by its spectrum, redshift: MoM-z14 (Naidu et al. 2025,
  * z = 14.44 ± 0.02), checked 19 October 2026. Photometric candidates beyond it do not count.
@@ -174,17 +182,11 @@ export function cmbCz(l: number, b: number, cz: number) {
   return cz + CMB_DIPOLE.kms * (x * tx + y * ty + z * tz);
 }
 
-const cross = (a: Vec3, b: Vec3): Vec3 => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0],
-];
-
 /** Supergalactic axes in Galaxy-model axes: SGX, SGY, SGZ (the pole). */
 export const SUPERGALACTIC = (() => {
   const x = galacticDirection(137.37, 0);
   const z = galacticDirection(47.37, 6.32);
-  return { x, y: cross(z, x), z };
+  return { x, y: cross3(z, x), z };
 })();
 
 /** A supergalactic Cartesian vector in Galaxy-model axes. */
@@ -405,6 +407,20 @@ export const STRUCTURES = {
   perseusPisces: { length: convert(50 / (HUBBLE / 100), "Mpc", "Mly") },
 } as const;
 
+/**
+ * The Local Group's reach, Mly: its zero-velocity radius. Inside it gravity has won over the
+ * expansion: the Galaxy, the Magellanic Clouds, Andromeda and Triangulum keep their places.
+ */
+export const LOCAL_GROUP_BOUND_MLY = STRUCTURES.localGroup.width / 2;
+
+/**
+ * The one rule for what the expansion moves: a place `mly` from us today (comoving) stands at
+ * that place times this factor when the universe is at scale `a`. Beyond the Local Group it is
+ * a, so the place recedes with the Hubble flow; within it, 1. (Galaxies and clusters, being
+ * bound, keep their own size as they recede.)
+ */
+export const expansionFactor = (mly: number, a: number) => (mly > LOCAL_GROUP_BOUND_MLY ? a : 1);
+
 /** The Local Group's mass centre, Mly from the galactic centre: along the line to Andromeda. */
 export const LOCAL_GROUP_CENTRE: Readonly<Vec3> = (() => {
   const d = ANDROMEDA_DIRECTION;
@@ -466,8 +482,6 @@ const AIM_STOPS: readonly AimStop[] = [
   { ly: COSMIC_VIEW_LY.universe, at: ZERO },
 ];
 
-const ease = (t: number) => t * t * t * (t * (6 * t - 15) + 10);
-
 /** The camera's turning point (Mly from the galactic centre) at a camera distance in ly. */
 export function cosmicAim(ly: number, out: Vec3 = [0, 0, 0]): Vec3 {
   const first = AIM_STOPS[0]!;
@@ -479,7 +493,7 @@ export function cosmicAim(ly: number, out: Vec3 = [0, 0, 0]): Vec3 {
     const to = AIM_STOPS[i]!;
     if (ly > to.ly && i < AIM_STOPS.length - 1) continue;
     const from = AIM_STOPS[i - 1]!;
-    const k = ease(clamp01(Math.log(ly / from.ly) / Math.log(to.ly / from.ly)));
+    const k = smootherstep(logFraction(ly, from.ly, to.ly));
     out[0] = from.at[0] + (to.at[0] - from.at[0]) * k;
     out[1] = from.at[1] + (to.at[1] - from.at[1]) * k;
     out[2] = from.at[2] + (to.at[2] - from.at[2]) * k;

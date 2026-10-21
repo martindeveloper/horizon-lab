@@ -18,7 +18,7 @@ import {
   anchorById,
   anchorToday,
 } from "../model/cosmos";
-import type { CosmosClouds } from "./cosmos-clouds";
+import { expandAbout, type CosmosClouds } from "./cosmos-clouds";
 
 type LabelKey = (typeof COSMOS_LABELS)[number];
 type Mark = {
@@ -53,7 +53,8 @@ export function createCosmosMarks(
   const virgo = cluster("virgoCluster");
   const heart = cluster("greatAttractor");
   const lgCentre = new Vector3(...LOCAL_GROUP_CENTRE);
-  const wallCentre = new Vector3(...anchorToday(anchorById("sloanGreatWall")));
+  const wallToday = new Vector3(...anchorToday(anchorById("sloanGreatWall")));
+  const wallCentre = wallToday.clone();
   /* Laniakea's inner landmarks give way once the web is in frame. */
   const insideWeb = (ly: number) => 1 - rising(ly, 1.3e9, 2.2e9);
   /* The web's names give way to the observable universe. */
@@ -226,7 +227,8 @@ export function createCosmosMarks(
   }
 
   const at = new Vector3();
-  const best = new Map<string, { mark: Mark; alpha: number; fit: number }>();
+  /* Each spot's best-framed mark this frame: one record per spot, rewritten in place. */
+  const best = new Map<string, { mark: Mark | null; fit: number }>();
 
   return {
     pickables: [...spots.values()],
@@ -246,24 +248,32 @@ export function createCosmosMarks(
       place: PlaceLabel,
       toPx: (object: Object3D, local: Vector3, px: number) => void,
     ) {
-      best.clear();
+      for (const record of best.values()) record.mark = null;
       for (const mark of marks) {
         const alpha = mark.range(ly);
         root.localToWorld(at.copy(mark.at));
         place(mark.key, at.x, at.y, at.z, labelled * alpha, mark.style);
         if (alpha * shown < 0.3) continue;
         const fit = Math.abs(Math.log(ly / mark.frame));
-        const current = best.get(mark.spot);
-        if (!current || fit < current.fit) best.set(mark.spot, { mark, alpha, fit });
+        let record = best.get(mark.spot);
+        if (!record) best.set(mark.spot, (record = { mark: null, fit: 0 }));
+        if (!record.mark || fit < record.fit) {
+          record.mark = mark;
+          record.fit = fit;
+        }
       }
       for (const [spot, mesh] of spots) {
-        const chosen = best.get(spot);
+        const chosen = best.get(spot)?.mark;
         mesh.visible = !!chosen;
         if (!chosen) continue;
-        mesh.userData.pick = chosen.mark.pick;
-        mesh.position.copy(chosen.mark.at);
+        mesh.userData.pick = chosen.pick;
+        mesh.position.copy(chosen.at);
         toPx(mesh, mesh.position, 22);
       }
+    },
+    /** Moves the marks that are no cluster's (the Great Wall's) with the universe at scale `a`. */
+    setExpansion(a: number, sun: Vector3) {
+      expandAbout(wallCentre, wallToday, sun, a);
     },
     /** Where the distance ruler ends (root-local): the selected structure, or what the scale frames. */
     rulerEnd(sel: Selection | null, ly: number): Vector3 {

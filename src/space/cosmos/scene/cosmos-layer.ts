@@ -110,6 +110,13 @@ export function createCosmosLayer(
   };
   const turn = new Quaternion();
   const Z = new Vector3(0, 0, 1);
+  /** The universe's scale factor the map is drawn at (`setExpansion`); 1 is today. */
+  let expansion = 1;
+  /* The Sun, root-local Mly: what the map expands about, as the places a host flies to do. */
+  const sun = new Vector3()
+    .sub(root.position)
+    .applyQuaternion(root.quaternion.clone().invert())
+    .divideScalar(MLY);
 
   /** Size a sprite or target (in the root's Mly) to `px` pixels where it stands. */
   const toPx = (object: Object3D, local: Vector3, px: number) => {
@@ -121,12 +128,22 @@ export function createCosmosLayer(
     pickables: marks.pickables,
     /** Samples every cloud afresh at a new quality's detail. */
     setDetail: (detail: CosmosDetail) => clouds.setDetail(detail),
+    /**
+     * Draws the universe at scale `a` (1, today, unless a host runs a clock through cosmic
+     * time): what lies beyond the Local Group recedes by the shared rule (`expansionFactor`).
+     */
+    setExpansion(a: number) {
+      if (a === expansion) return;
+      expansion = a;
+      clouds.setExpansion(a, sun);
+      marks.setExpansion(a, sun);
+    },
     get visible() {
       return root.visible;
     },
     /** Camera distance to the far side of everything drawn, au: shared with the Galaxy pass. */
     reach() {
-      return camera.position.distanceTo(centre) + EXTENT_MLY * MLY;
+      return camera.position.distanceTo(centre) + EXTENT_MLY * expansion * MLY;
     },
     update({ show, sel, lines, afield = 0 }: Frame) {
       const shown = lod.cosmos;
@@ -187,8 +204,8 @@ export function createCosmosLayer(
       view.up.setFromMatrixColumn(camera.matrixWorld, 1).applyQuaternion(turn);
       view.up.addScaledVector(view.toward, -view.up.dot(view.toward)).normalize();
       view.facing.setFromUnitVectors(Z, view.toward);
-      rings.update(view, labelled * ringsOn * lines, labels().lookbackRing, place);
-      const edge = shellOutline(CMB_MLY, view.d);
+      rings.update(view, expansion, labelled * ringsOn * lines, labels().lookbackRing, place);
+      const edge = shellOutline(CMB_MLY * expansion, view.d);
       edgeMark.copy(view.toward).multiplyScalar(edge.offset).addScaledVector(view.up, -edge.radius);
       /* At their real size once that is larger than a dozen pixels. */
       for (const [sprite, mly] of [

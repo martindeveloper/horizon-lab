@@ -6,7 +6,7 @@
 export const TILE_FRAME =
   "min-h-[38rem] rounded-3xl sm:min-h-[42rem] lg:h-[clamp(38rem,48vw,46rem)] lg:min-h-0";
 
-/** An experience's tile: the same card, shorter, on the quieter second shelf. */
+/** An experience's tile: the same frame, shorter, with its copy on the scene, on the second shelf. */
 export const EXPERIENCE_FRAME =
   "min-h-[30rem] rounded-3xl sm:min-h-[32rem] lg:h-[clamp(28rem,34vw,34rem)] lg:min-h-0";
 

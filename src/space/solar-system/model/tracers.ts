@@ -1,6 +1,7 @@
 /** The planetesimal sample: where each leftover of the disk starts and where the clearing sends it. */
 import { periodYears, type Elements } from "@horizon/toolkit/bodies";
-import { clamp, lerp, mulberry32, wrap } from "@horizon/toolkit/math";
+import { clamp, lerp, mulberry32, smoothstep, wrap } from "@horizon/toolkit/math";
+import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import { tracerSemiMajorAxis } from "./equations";
 import { migrationProgress } from "./moment";
@@ -28,8 +29,7 @@ type Tracer = {
 const logLerp = (a0: number, a1: number, s: number) => tracerSemiMajorAxis.compute({ a0, a1, s });
 
 function scatterS(tr: Tracer, mig: number) {
-  const u = clamp((mig - tr.p0) / Math.max(1e-6, tr.p1 - tr.p0), 0, 1);
-  return u * u * (3 - 2 * u);
+  return smoothstep(tr.p0, Math.max(tr.p0 + 1e-6, tr.p1), mig);
 }
 
 /**
@@ -105,7 +105,7 @@ function createTracers(count: number, seed = 20261014): Tracer[] {
         e1: clamp(1 - q1 / a1, 0.15, 0.9),
         i0,
         /* Isotropic: cos i uniform, so polar orbits are no likelier than on a sphere. */
-        i1: Math.acos(1 - 2 * rng()) * (180 / Math.PI),
+        i1: Math.acos(1 - 2 * rng()) / RAD_PER_DEG,
         ...angles,
         p0,
         p1,

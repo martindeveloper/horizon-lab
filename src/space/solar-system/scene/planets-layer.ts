@@ -8,6 +8,7 @@ import {
   RINGS,
   keplerPosition,
   type BodyId,
+  type Elements,
 } from "@horizon/toolkit/bodies";
 import {
   bodyOrientation,
@@ -102,13 +103,16 @@ export function createPlanetsLayer(
   for (const slot of [...planets, ...named]) parent.add(slot.orbit.line);
 
   const tmp: [number, number, number] = [0, 0, 0];
+  /* Each body's elements, used up within its turn of the loop. */
+  const el: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
   const orientation = new Quaternion();
   const poleWorld = new Vector3();
 
   const updatePlanets = ({ now, show, sel, yearsAgo, mig, driftYears, dist }: SolarFrame) => {
     const labelled = names.to(show.names);
+    looks.exposeRings(show.faintRings);
     for (const planet of planets) {
-      const el = planetElements(planet.id, mig, driftYears, now);
+      planetElements(planet.id, mig, driftYears, now, el);
       keplerPosition(el, tmp);
       planet.group.position.set(tmp[0], tmp[1], tmp[2]);
       const real = FIGURES[planet.id].meanKm / AU_KM;
@@ -177,7 +181,7 @@ export function createPlanetsLayer(
   }: SolarFrame) => {
     const labelled = names.value;
     for (const { body, mesh, orbit, on } of named) {
-      const el = namedElements(body, mig, driftYears, now);
+      namedElements(body, mig, driftYears, now, el);
       keplerPosition(el, tmp);
       mesh.position.set(tmp[0], tmp[1], tmp[2]);
       const selected = sel?.kind === "named" && sel.id === body.id;

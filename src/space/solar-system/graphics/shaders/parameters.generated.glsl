@@ -14,5 +14,7 @@
 #define SUN_DISPLAY_LIMB_V      vec3(-0.20576288, -0.20916288, -0.19896288)
 #define PLANET_WRAP             0.12
 #define RING_AMBIENT            0.08
+#define RING_DUST_HG_G          vec3(0.995, 0.665, 0.035)
+#define RING_DUST_HG_W          vec3(0.643, 0.176, 0.181)
 
 #endif // HORIZON_SOLAR_SYSTEM_PARAMETERS

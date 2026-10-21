@@ -8,6 +8,57 @@ import type { RenderQuality } from "@horizon/toolkit/rendering";
 import type { SceneAntialias, ScaleReadout } from "@horizon/toolkit/scene";
 import type { DistanceChoice } from "@horizon/toolkit/science";
 
+/**
+ * The render settings a simulation's settings panel offers (`RenderSection`): quality,
+ * anti-aliasing (each renderer has its own modes), bloom, the lens and wide colour. A store
+ * keeps the ones its renderer has.
+ */
+export type RenderFields<A = unknown> = {
+  quality: RenderQuality;
+  antialias: A;
+  bloom: boolean;
+  lens: boolean;
+  wideColour: boolean;
+};
+
+/** A setter per kept setting: `setQuality`, `setAntialias`, … */
+export type RenderSetters<T> = {
+  [K in keyof T & string as `set${Capitalize<K>}`]: (value: T[K]) => void;
+};
+
+/** Those settings as a visit starts and their setters, as a store composes them. */
+export type RenderSlice<T> = T & RenderSetters<T>;
+
+/** A lab's: standard quality, its effects off until turned on. */
+export const LAB_RENDER = {
+  quality: "standard",
+  bloom: false,
+  lens: false,
+  wideColour: false,
+} as const;
+/** An experience's: it shows off, so its effects start on (still nothing while turned off). */
+export const EXPERIENCE_RENDER = { ...LAB_RENDER, bloom: true, lens: true } as const;
+
+/**
+ * The settings a store keeps (`defaults`, the values a visit starts with and every reset
+ * gives back) with a setter for each, the same in every simulation.
+ */
+export function renderSlice<T extends Partial<RenderFields>>(
+  set: (patch: Partial<T>) => void,
+  defaults: T,
+): RenderSlice<T> {
+  /* Each key is one of the defaults' own, so its patch holds for `T`. */
+  const patch = (fields: object) => fields as Partial<T>;
+  const setters = Object.fromEntries(
+    Object.keys(defaults).map((key) => [
+      `set${key[0]!.toUpperCase()}${key.slice(1)}`,
+      (value: unknown) => set(patch({ [key]: value })),
+    ]),
+  );
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a setter named `set<Key>` for each of the defaults' own keys is exactly `RenderSetters<T>`; TypeScript cannot follow the template-literal names through `Object.fromEntries`.
+  return { ...defaults, ...setters } as RenderSlice<T>;
+}
+
 /** What the engine's bridge reads of a simulation's store. */
 export type SceneStoreState = {
   view: unknown;
@@ -22,45 +73,43 @@ export type SceneStoreState = {
 /** The camera's angles round its aim, whole degrees: heading 0–359, tilt the elevation above the map's plane. */
 export type CameraAngles = { heading: number; tilt: number };
 
+/**
+ * A zoomable scene's render settings: anti-aliasing is null (the device's default) until the
+ * engine publishes it; bloom brightens light, the lens spikes the brightest and fringes the
+ * corners. Quality is read through `sceneQuality`.
+ */
+type SceneRender = Pick<
+  RenderFields<SceneAntialias | null>,
+  "quality" | "antialias" | "bloom" | "lens"
+>;
+
 export type SceneSlice = Omit<SceneStoreState, "view"> &
-  ScaleReadout & {
+  ScaleReadout &
+  RenderSlice<SceneRender> & {
     /** Written by the HUD with the scale bar, for the camera pad's readout. */
     cameraAngles: CameraAngles;
     /** The visitor's readout unit; `auto` picks au or ly by each distance's size. */
     distanceUnit: DistanceChoice;
-    /** The visitor's anti-aliasing, for this visit; null (the device's default) until the engine publishes it. */
-    antialias: SceneAntialias | null;
-    /** The visitor's render quality (`sceneQuality`), for this visit. */
-    quality: RenderQuality;
-    /** Whether bright light blooms, for this visit: off in a lab until turned on, on in an experience. */
-    bloom: boolean;
-    /** Whether the brightest light gets diffraction spikes and the corners a colour fringe; as bloom. */
-    lens: boolean;
     rotate: (turn: OrbitTurn) => void;
     setDistanceUnit: (unit: DistanceChoice) => void;
-    setAntialias: (mode: SceneAntialias) => void;
-    setQuality: (quality: RenderQuality) => void;
-    setBloom: (bloom: boolean) => void;
-    setLens: (lens: boolean) => void;
   };
 
-/** A lab's shared settings as a visit starts, for every `resetView`: the unit, anti-aliasing, quality, bloom and lens. */
-export const RESET_SCENE_SETTINGS: Pick<
-  SceneSlice,
-  "distanceUnit" | "antialias" | "quality" | "bloom" | "lens"
-> = {
+type SceneSettings = SceneRender & Pick<SceneSlice, "distanceUnit">;
+
+/** A lab's shared settings as a visit starts, for every `resetView`: the unit and the render settings. */
+export const RESET_SCENE_SETTINGS: SceneSettings = {
   distanceUnit: "auto",
   antialias: null,
-  quality: "standard",
-  bloom: false,
-  lens: false,
+  quality: LAB_RENDER.quality,
+  bloom: LAB_RENDER.bloom,
+  lens: LAB_RENDER.lens,
 };
 
-/** An experience's: it shows off, so its effects start on (still nothing while turned off). */
-export const EXPERIENCE_SCENE_SETTINGS: typeof RESET_SCENE_SETTINGS = {
+/** An experience's. */
+export const EXPERIENCE_SCENE_SETTINGS: SceneSettings = {
   ...RESET_SCENE_SETTINGS,
-  bloom: true,
-  lens: true,
+  bloom: EXPERIENCE_RENDER.bloom,
+  lens: EXPERIENCE_RENDER.lens,
 };
 
 /**
@@ -72,19 +121,17 @@ export function sceneSlice(
   scale: ScaleReadout,
   settings = RESET_SCENE_SETTINGS,
 ): SceneSlice {
+  const { distanceUnit, ...render } = settings;
   return {
     flight: 0,
     turn: null,
     ready: false,
-    ...settings,
+    distanceUnit,
+    ...renderSlice<SceneRender>(set, render),
     cameraAngles: { heading: 0, tilt: 0 },
     ...scale,
     rotate: (turn) => set({ turn: { ...turn } }),
-    setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
-    setAntialias: (antialias) => set({ antialias }),
-    setQuality: (quality) => set({ quality }),
-    setBloom: (bloom) => set({ bloom }),
-    setLens: (lens) => set({ lens }),
+    setDistanceUnit: (unit) => set({ distanceUnit: unit }),
     setReady: (ready) => set({ ready }),
   };
 }
@@ -107,20 +154,22 @@ export type GuideSlice<Saved> = {
 
 /**
  * The guide's machine, the same in every simulation: starting it keeps the visitor's settings
- * (`save`), closes the panel and applies the first step; each step is `apply`'d within the
+ * (`save`), closes the panel (where the store has one) and applies the first step; each step is `apply`'d within the
  * tour, and the step past the last ends the guide; ending it gives the settings back
- * (`restore`) and lets go of the selection. `open` and `close` add what else a simulation's
- * guide sets as it starts and ends.
+ * (`restore`) and lets go of the selection, where the store has one (a card that follows the
+ * view needs none). `open` and `close` add what else a simulation's guide sets as it starts
+ * and ends. `tour` is the steps, or a function of the state that gives them, for a simulation
+ * whose tour depends on what it shows.
  */
 export function guideSlice<
-  S extends GuideSlice<Saved> & { panel: string; selection: unknown },
+  S extends GuideSlice<Saved> & { panel?: string; selection?: unknown },
   Step,
   Saved,
 >(
   set: NoInfer<(patch: (state: S) => Partial<S>) => void>,
   get: () => S,
   guide: {
-    tour: readonly Step[];
+    tour: readonly Step[] | ((state: S) => readonly Step[]);
     save: (state: S) => Saved;
     restore: (saved: Saved) => Partial<S>;
     apply: (step: Step, state: S) => Partial<S>;
@@ -128,8 +177,10 @@ export function guideSlice<
     close?: (state: S) => Partial<S>;
   },
 ): GuideSlice<Saved> {
-  /* `panel: "none"` and `selection: null` hold in every store with a panel and a selection. */
+  /* `panel: "none"` and `selection: null` hold in every store with a panel or a selection. */
   const patch = (fields: object) => fields as Partial<S>;
+  const { tour } = guide;
+  const stepsOf = typeof tour === "function" ? tour : () => tour;
   return {
     guideOpen: false,
     guideStep: 0,
@@ -139,14 +190,14 @@ export function guideSlice<
         patch({
           guideOpen: true,
           savedBeforeGuide: s.savedBeforeGuide ?? guide.save(s),
-          panel: "none",
+          ...("panel" in s ? { panel: "none" } : {}),
           ...guide.open?.(s),
         }),
       );
       get().goGuide(0);
     },
     goGuide: (index) => {
-      const step = guide.tour[index];
+      const step = stepsOf(get())[index];
       if (!get().guideOpen || index < 0) return;
       if (!step) return get().endGuide();
       set((s) => patch({ guideStep: index, ...guide.apply(step, s) }));
@@ -156,7 +207,7 @@ export function guideSlice<
         patch({
           guideOpen: false,
           guideStep: 0,
-          selection: null,
+          ...("selection" in s ? { selection: null } : {}),
           ...(s.savedBeforeGuide === null ? {} : guide.restore(s.savedBeforeGuide)),
           savedBeforeGuide: null,
           ...guide.close?.(s),

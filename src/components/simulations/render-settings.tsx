@@ -4,20 +4,17 @@ import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
-import type { RenderQuality } from "@horizon/toolkit/rendering";
+import { RENDER_QUALITIES, type RenderQuality } from "@horizon/toolkit/rendering/quality";
 import { ControlRow, SegmentedControl, SwitchRow } from "@horizon/toolkit/ui";
 
 import { FrameRateSwitches } from "./frame-rate";
 import { RailSection } from "./rail";
 import { useWideGamutScreen } from "./use-wide-gamut";
 
-/* Listed here, not imported: the rendering module's values would pull the renderer into the page. */
-const QUALITIES: readonly RenderQuality[] = ["economy", "standard", "cinema", "max"];
-
 /** An anti-aliasing mode and the `render.*` copy key that names it. */
 export type AntialiasMode<A extends string> = { value: A; name: string };
 
-/** A zoomable scene's modes: the Orrery and Deep Field. */
+/** A zoomable scene's modes: the shared scene host's. */
 export const SCENE_ANTIALIAS = [
   { value: "off", name: "off" },
   { value: "msaa", name: "msaa" },
@@ -116,7 +113,7 @@ export function RenderSection<A extends string>({
             aria-label={t("quality")}
             value={quality}
             onValueChange={onQuality}
-            options={QUALITIES.map((level) => ({ value: level, label: t(level) }))}
+            options={RENDER_QUALITIES.map((level) => ({ value: level, label: t(level) }))}
           />
         </ControlRow>
         {antialias ? (

@@ -17,4 +17,11 @@ export type SimulationManifest = {
   messageKey: string;
   highlights: readonly string[];
   entryPoints: readonly { id: string; href: SimulationPath }[];
+  /**
+   * Set when the simulation shows the shared solar system's views (`src/space/solar-system`),
+   * each at `href/<view>`: a visitor may cross to the same view in another that does, which
+   * opens at the same camera pose (`src/lib/handoff.ts`). `defaultView` is its own default,
+   * which lives at `href`.
+   */
+  solarSystem?: { defaultView: string };
 };

@@ -4,7 +4,9 @@
 // with the Sun's orbit around the Galaxy. With RELATIVITY the band is drawn
 // as a fast ship sees it: each pixel's rest-frame direction is found by undoing
 // the aberration, and its light is shifted by the Doppler factor (brightness
-// as D⁴, colour as a blackbody of the band's mean temperature).
+// as D⁴, colour as a blackbody of the band's mean temperature). The brightening is shown as
+// an eye adapting to it (beamingSeen) and the colour shifts hue only, so the band ahead turns
+// bluer and brighter and keeps its lanes instead of burning into a white sheet.
 
 uniform sampler2D today;  // thin disk, bulge, Great Rift, Coalsack
 uniform sampler2D early;  // thicker, bluer disk without the dust lane
@@ -19,22 +21,26 @@ varying vec3 vDir;
 
 #include <horizon/math>
 #include <horizon/relativity>
+#include <horizon/temperature>
 
 #ifdef RELATIVITY
 uniform vec3 forward;     // the ship's direction of travel, unit
 uniform float beta;       // v / c
 uniform float gamma;
-uniform sampler2D bbLut;  // blackbody colours, log-spaced from lutRange.x to lutRange.y kelvin
-uniform vec2 lutRange;
+uniform sampler2D bbLut; // blackbody colours, log-spaced in temperature (`blackbodyLut`)
+uniform vec3 bbLutSpec; // its lowest and highest temperature, kelvin, and its width in texels
+uniform float peak;       // the most the Doppler factor's D⁴ may brighten the glow, approached softly
 
 // The disk's integrated starlight is about a G star's colour.
 const float BAND_KELVIN = 5500.0;
-// The most the Doppler factor may brighten the glow: past this the sky ahead is a white sheet.
-const float BAND_PEAK = 6.0;
+// Rec. 709 luminance weights, for the blackbody's hue at unit brightness.
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
-vec3 blackbody(float kelvin) {
-  float u = clamp(log(kelvin / lutRange.x) / log(lutRange.y / lutRange.x), 0.0, 1.0);
-  return texture2D(bbLut, vec2(u, 0.5)).rgb;
+// A blackbody's colour at unit luminance: its hue, the brightness left to the D⁴ term.
+vec3 blackbodyHue(float kelvin) {
+  float u = blackbodyLutTexel(kelvin, bbLutSpec);
+  vec3 colour = texture2D(bbLut, vec2(u, 0.5)).rgb;
+  return colour / max(dot(colour, LUMA), 1e-3);
 }
 #endif
 
@@ -45,7 +51,7 @@ void main() {
   if (beta > 0.0) {
     float D = dopplerFactorObserved(beta, gamma, dot(d, forward));
     d = aberrate(d, forward, -beta, gamma);
-    shift = min(D * D * D * D, BAND_PEAK) * blackbody(BAND_KELVIN * D) / max(blackbody(BAND_KELVIN), vec3(1e-3));
+    shift = beamingSeen(D * D * D * D, peak) * blackbodyHue(BAND_KELVIN * D) / blackbodyHue(BAND_KELVIN);
   }
 #endif
 

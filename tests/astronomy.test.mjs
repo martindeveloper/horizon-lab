@@ -12,7 +12,7 @@ import {
   centuriesSinceJ2000,
   jplElements,
   keplerPosition,
-  moonEcliptic,
+  lunarPosition,
   namedById,
   periodYears,
   keplerEquation,
@@ -139,15 +139,15 @@ test("the Moon is new at every published 2026 new moon and keeps to its distance
     "2026-12-09T00:52:00Z",
   ]) {
     const jde = julianEphemerisDay(new Date(iso));
-    near(angle(moonEcliptic(jde).longitude, solarEcliptic(jde).longitude), 0, 0.03, iso);
+    near(angle(lunarPosition(jde).longitude, solarEcliptic(jde).longitude), 0, 0.03, iso);
   }
   // Geocentric distance stays within the known extremes (356,400–406,700 km).
   let min = Infinity;
   let max = 0;
   for (let hour = 0; hour < 365 * 24; hour += 1) {
-    const { distance } = moonEcliptic(julianEphemerisDay(new Date(Date.UTC(2026, 0, 1, hour))));
-    min = Math.min(min, distance);
-    max = Math.max(max, distance);
+    const { distanceKm } = lunarPosition(julianEphemerisDay(new Date(Date.UTC(2026, 0, 1, hour))));
+    min = Math.min(min, distanceKm);
+    max = Math.max(max, distanceKm);
   }
   assert.ok(min > 356_400 && min < 357_500, `perigee ${min}`);
   assert.ok(max > 405_800 && max < 406_700, `apogee ${max}`);

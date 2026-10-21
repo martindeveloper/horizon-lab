@@ -85,7 +85,7 @@ function group(w: PointWriter, rnd: Rnd, centre: Vec3, count: number, sigma: num
   }
 }
 
-/** How densely the cosmic maps are sampled; a host's render quality gives one per level (Deep Field's `deepFieldQuality`). */
+/** How densely the cosmic maps are sampled; a host's render quality gives one per level. */
 export type CosmosDetail = {
   /** Share of each cloud's full count of galaxies. */
   share: number;

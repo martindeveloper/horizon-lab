@@ -1,6 +1,7 @@
 "use client";
 
 import { GraduationCap, Info, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRef, type ReactNode, type Ref } from "react";
 
 import { IconButton, Toolbar, Tooltip, type DialogHandle } from "@horizon/toolkit/ui";
@@ -75,7 +76,8 @@ export function SimulationToolbar({
   details: (access: TechnicalDetailsAccess) => ReactNode;
   /** Its name in the phone's More menu. */
   detailsLabel: string;
-  guide: Omit<SimulationTool, "id" | "icon">;
+  /** The guide button; its wording is the shared `guide` copy. */
+  guide: Omit<SimulationTool, "id" | "icon" | "label" | "ariaLabel">;
   /** The guide button, for focus to return to when the guide ends. */
   guideRef?: Ref<HTMLButtonElement>;
   finder?: SimulationTool;
@@ -85,6 +87,7 @@ export function SimulationToolbar({
   drift?: () => void;
 }) {
   const dialog = useRef<DialogHandle>(null);
+  const tGuide = useTranslations("guide");
   const more: MoreItem[] = [
     {
       id: "details",
@@ -103,7 +106,16 @@ export function SimulationToolbar({
   return (
     <Toolbar aria-label={label} className="ml-auto shrink-0">
       {details({ ref: dialog, triggerClassName: "not-md:hidden" })}
-      <ToolButton ref={guideRef} tool={{ ...guide, id: "guide", icon: GraduationCap }} />
+      <ToolButton
+        ref={guideRef}
+        tool={{
+          ...guide,
+          id: "guide",
+          icon: GraduationCap,
+          label: tGuide("title"),
+          ariaLabel: tGuide("start"),
+        }}
+      />
       {finder ? <ToolButton tool={finder} /> : null}
       <div className="not-md:hidden md:contents">
         {tools.map((tool) => (

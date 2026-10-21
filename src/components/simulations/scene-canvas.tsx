@@ -20,7 +20,7 @@ export function SceneCanvas({
   create,
   resetReady,
 }: {
-  /** The simulation's slug, marked on the canvas (`data-scene-canvas`). */
+  /** The simulation's slug, marked on the canvas (`data-simulation-canvas`, as every simulation marks its stage). */
   id: string;
   /** The canvas's accessible name. */
   label: string;
@@ -62,7 +62,7 @@ export function SceneCanvas({
     <div ref={hostRef} className="absolute inset-0 z-0 bg-space">
       <canvas
         ref={canvasRef}
-        data-scene-canvas={id}
+        data-simulation-canvas={id}
         className="block size-full"
         role="img"
         aria-label={label}

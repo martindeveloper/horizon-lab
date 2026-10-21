@@ -29,8 +29,8 @@ export type JourneyState = GuideState & {
 export type JourneyStep = { id: string; dwell?: number | undefined };
 
 /**
- * The guide's back, on and out buttons, worded by the namespace's `tour.*` copy; a guide adds
- * play and whatever else it has beside them.
+ * The guide's back, on and out buttons, worded by the shared `guide` copy (`t` is
+ * `useTranslations("guide")`); a guide adds play and whatever else it has beside them.
  */
 export function tourControls(
   t: Translate,
@@ -41,16 +41,16 @@ export function tourControls(
   const last = index >= total - 1;
   return {
     previous: {
-      label: t("tour.previous"),
+      label: t("previous"),
       disabled: index === 0,
       onClick: () => getState().goGuide(index - 1),
     },
     next: {
-      label: last ? t("tour.finish") : t("tour.next"),
+      label: last ? t("finish") : t("next"),
       last,
       onClick: () => getState().goGuide(index + 1),
     },
-    exit: { label: t("tour.exit"), onClick: () => getState().endGuide() },
+    exit: { label: t("exit"), onClick: () => getState().endGuide() },
   };
 }
 
@@ -115,6 +115,7 @@ export function GuideCaption<Step extends JourneyStep>({
   extra?: ((step: Step) => ReactNode) | undefined;
 }) {
   const t = useTranslations(namespace);
+  const tGuide = useTranslations("guide");
   const card = useRef<HTMLElement>(null);
   useDockClearance(card, clearance?.inTheWay, clearance?.property);
   const step = tour[index] ?? tour[0]!;
@@ -125,8 +126,8 @@ export function GuideCaption<Step extends JourneyStep>({
 
   return (
     <GuideCard
-      label={t("tour.label")}
-      kicker={t("tour.progress", { step: index + 1, total: tour.length })}
+      label={tGuide("label")}
+      kicker={tGuide("progress", { step: index + 1, total: tour.length })}
       stepKey={step.id}
       focusNext
       className={className}
@@ -143,11 +144,11 @@ export function GuideCaption<Step extends JourneyStep>({
             },
       }}
       controls={{
-        ...tourControls(t, index, tour.length, getState),
+        ...tourControls(tGuide, index, tour.length, getState),
         play: last
           ? undefined
           : {
-              label: playing ? t("tour.pause") : t("tour.play"),
+              label: playing ? tGuide("pause") : tGuide("play"),
               playing,
               onClick: () => getState().toggleGuidePlaying(),
             },

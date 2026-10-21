@@ -4,6 +4,7 @@
  * velocities, good to a few per cent for about ±300,000 years.
  */
 import { equatorialFrameToScene, equatorialToScene, type Vec3 } from "@horizon/toolkit/bodies";
+import { dot3 } from "@horizon/toolkit/math";
 import {
   LIGHT_YEAR_AU,
   PARSEC_AU,
@@ -98,8 +99,6 @@ const KMS_AU_YEAR = convert(1, "km/s", "au/yr");
 type Track = { p0: Vec3; v: Vec3 };
 const tracks = new Map<NeighbourId, Track>();
 
-const dot = (a: Readonly<Vec3>, b: Readonly<Vec3>) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-
 function trackOf(star: Neighbour): Track {
   let track = tracks.get(star.id);
   if (track) return track;
@@ -151,7 +150,7 @@ export function neighbourSeparationAu(a: Neighbour, b: Neighbour, yearsAgo: numb
 /** Closest approach of the straight-line track: distance in light-years and when (years ago; negative is future). */
 export function closestApproach(star: Neighbour) {
   const { p0, v } = trackOf(star);
-  const t = dot(p0, v) / dot(v, v);
+  const t = dot3(p0, v) / dot3(v, v);
   const p = neighbourPosition(star, t);
   return { ly: Math.hypot(p[0], p[1], p[2]) / LIGHT_YEAR_AU, yearsAgo: t };
 }

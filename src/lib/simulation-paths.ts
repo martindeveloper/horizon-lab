@@ -24,6 +24,10 @@ function segmentsAfter(base: string, pathname: string): string[] {
   return parts.every((part, i) => segments[i] === part) ? segments.slice(parts.length) : segments;
 }
 
+/** The path of a preset or view: the default at `base`, the rest at `base/<id>`. */
+export const slugPath = (base: string, defaultId: string, id: string) =>
+  id === defaultId ? base : `${base}/${id}`;
+
 /**
  * URL slugs for a simulation's presets or views: the default lives at `base`,
  * the rest at `base/<id>`. Aliases (lower-case) map old or friendly names to
@@ -50,7 +54,7 @@ export function slugRoutes<Id extends string>({
     return known(key) ? key : null;
   };
   /** Canonical path; unknown ids fall back to the default. */
-  const pathFor = (id: string) => (id === defaultId || !known(id) ? base : `${base}/${id}`);
+  const pathFor = (id: string) => (known(id) ? slugPath(base, defaultId, id) : base);
   return {
     resolve,
     pathFor,

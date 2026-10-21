@@ -1,3 +1,4 @@
+import { TAU } from "@horizon/toolkit/math";
 import { defineEquation, RAD_PER_DEG as RAD, formatNumber } from "@horizon/toolkit/science";
 
 import {
@@ -23,7 +24,6 @@ import {
  * the host's `technical.json`.
  */
 
-const TAU = Math.PI * 2;
 /** Numbers inside printed formulas: "27,000", "4.567". */
 const n = (value: number) => formatNumber(value, "en", 3);
 const myr = (years: number) => n(years / 1e6);

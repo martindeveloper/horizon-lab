@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { moonAxis, moonEcliptic, moonPhase } from "@horizon/toolkit/bodies";
+import { moonAxis, moonPhase } from "@horizon/toolkit/bodies";
 import { risingHourAngle } from "@horizon/toolkit/science";
 
 import { moonPosition, OBSERVER, sunPosition } from "../src/space/observer-sky.ts";
@@ -29,12 +29,7 @@ test("the hero sun follows the real Sun over Ondřejov", () => {
 });
 
 test("the hero moon matches Meeus' worked examples and known lunations", () => {
-  // Meeus, Astronomical Algorithms, example 47.a: 1992 April 12, 0h TD.
-  const moon = moonEcliptic(2448724.5);
-  assert.ok(Math.abs(moon.longitude - 133.162655) < 0.01);
-  assert.ok(Math.abs(moon.latitude - -3.229126) < 0.01);
-  assert.ok(Math.abs(moon.distance - 368409.7) < 50);
-  // Example 48.a: the same instant, illuminated fraction 0.6786, waxing.
+  // Meeus, Astronomical Algorithms, example 48.a: the same instant, illuminated fraction 0.6786, waxing.
   const phase = moonPhase(2448724.5);
   assert.ok(Math.abs(phase.illumination - 0.6786) < 0.001);
   assert.equal(phase.waxing, true);

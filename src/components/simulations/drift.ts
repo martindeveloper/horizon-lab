@@ -22,7 +22,7 @@ const SETTLE_SECONDS = 3;
 export type SimulationDrift = {
   state: DriftState;
   music?: DriftMusic | undefined;
-  /** A short readout shown under the drift's controls (the Orrery's clock rate). */
+  /** A short readout shown under the drift's controls (a clock's rate, say). */
   caption?: ReactNode;
   onToggle: () => void;
   onStop: () => void;

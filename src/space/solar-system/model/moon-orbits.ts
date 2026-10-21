@@ -16,22 +16,17 @@ import {
   type MoonId,
   type Vec3,
 } from "@horizon/toolkit/bodies";
-import { wrap } from "@horizon/toolkit/math";
+import { cross3, wrap } from "@horizon/toolkit/math";
 import { AU_KM, J2000_JD, julianDay, RAD_PER_DEG as RAD } from "@horizon/toolkit/science";
 
 /** The reference plane's axes in the scene frame: node, 90° on, pole. */
 type Frame = { x: Vec3; y: Vec3; z: Vec3 };
-const cross = (a: Vec3, b: Vec3): Vec3 => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0],
-];
 function frameOf(moon: Moon): Frame {
   if (moon.plane === "ecliptic") return { x: [1, 0, 0], y: [0, 0, -1], z: [0, 1, 0] };
   const [ra, dec] = moon.plane;
   const z = equatorialToScene(ra, dec);
   const x = equatorialToScene(ra + 90, 0);
-  return { x, y: cross(z, x), z };
+  return { x, y: cross3(z, x), z };
 }
 
 type Track = { moon: Moon; frame: Frame; rates: ReturnType<typeof meanRates> };

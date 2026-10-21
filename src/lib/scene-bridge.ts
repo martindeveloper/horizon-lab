@@ -37,10 +37,10 @@ export function invalidateOnMotionChange(
 }
 
 /**
- * The camera's side of a crossing between the Orrery and Deep Field (`handoff.ts`). Arriving,
- * the rig snaps to where `arriveAt` says the other side left off (by default its pose, if it
- * carried one) and flies on to this view; leaving, as the scope is disposed, it carries the
- * pose `leaveAt` gives (null carries none).
+ * The camera's side of a crossing between two simulations that show the solar system
+ * (`handoff.ts`). Arriving, the rig snaps to where `arriveAt` says the other side left off (by
+ * default its pose, if it carried one) and flies on to this view; leaving, as the scope is
+ * disposed, it carries the pose `leaveAt` gives (null carries none).
  */
 export function bridgeHandoff<View>(
   scope: DisposalScope,

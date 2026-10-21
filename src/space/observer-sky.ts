@@ -1,7 +1,7 @@
 import {
   EARTH_EQUATORIAL_RADIUS_KM,
   moonAxis,
-  moonEcliptic,
+  lunarPosition,
   moonPhase,
   solarEcliptic,
 } from "@horizon/toolkit/bodies";
@@ -83,12 +83,12 @@ function skyBearing(fromAz: number, fromAlt: number, toAz: number, toAlt: number
  */
 export function moonPosition(date: Date, latitude: number, longitude: number) {
   const jde = julianEphemerisDay(date);
-  const moon = moonEcliptic(jde);
+  const moon = lunarPosition(jde);
   const sun = solarEcliptic(jde);
   const lst = siderealTime(date, longitude);
   const eq = eclipticToEquatorial(moon.longitude, moon.latitude, sun.obliquity);
   const geo = toHorizontal(eq.ra, eq.dec, lst, latitude);
-  const parallax = Math.asin(EARTH_EQUATORIAL_RADIUS_KM / moon.distance);
+  const parallax = Math.asin(EARTH_EQUATORIAL_RADIUS_KM / moon.distanceKm);
   const altitude =
     geo.altitude - Math.asin(Math.sin(parallax) * Math.cos(geo.altitude * RAD)) / RAD;
   const solar = eclipticToEquatorial(sun.longitude, 0, sun.obliquity);

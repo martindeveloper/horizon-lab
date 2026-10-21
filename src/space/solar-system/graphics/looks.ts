@@ -4,13 +4,17 @@ import {
   Color,
   CustomBlending,
   DataTexture,
+  DataUtils,
   DoubleSide,
+  HalfFloatType,
   LinearFilter,
   LinearMipmapLinearFilter,
   LineBasicMaterial,
   MeshBasicMaterial,
   OneMinusSrcAlphaFactor,
+  RedFormat,
   RepeatWrapping,
+  RGBAFormat,
   ShaderMaterial,
   SrcAlphaFactor,
   SRGBColorSpace,
@@ -26,11 +30,13 @@ import {
   MOON_IDS,
   PLANET_IDS,
   RINGS,
-  ringStrip,
+  ringExposure,
+  ringStripLevels,
   type BodyId,
   type MoonId,
   type NamedId,
   type PlanetId,
+  type RingStrip,
   type RingSystem,
 } from "@horizon/toolkit/bodies";
 import { mix, surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
@@ -44,6 +50,7 @@ import {
   spriteMaterial,
   type TexelPainter,
 } from "@horizon/toolkit/scene";
+import { glslFloat } from "@horizon/toolkit/shaders/defines";
 
 import { AIR, airUniforms, type Air } from "./air";
 import AIR_FRAG from "./shaders/air.frag.glsl";
@@ -112,17 +119,62 @@ function mapTexture(id: BodyId, w: number, h: number): Texture {
 /** A finished detailed map as a sharp surface texture. */
 const detailTexture = (job: SurfaceJob): Texture => dataTexture(job, 4);
 
-/** A ring system's radial strip: colour and normal opacity per 1/`texels` of its width. */
+/** Texels across a ring strip unless the host asks for more. */
 const RING_TEXELS = 1024;
-function ringTexture(system: RingSystem, texels: number) {
-  const tex = new DataTexture(ringStrip(system, texels), texels, 1);
-  tex.colorSpace = SRGBColorSpace;
+
+/**
+ * A strip's mipmap chain as one half-float texture, `channels` values per texel from `pick`.
+ * Half floats keep a faint ring's opacity (τ ≈ 10⁻⁴) that 8 bits round to nothing; the
+ * levels come from the toolkit, weighted by opacity.
+ */
+function stripTexture(
+  levels: readonly RingStrip[],
+  channels: 1 | 4,
+  pick: (strip: RingStrip, t: number, out: number[]) => void,
+) {
+  const texel: number[] = [];
+  const mipmaps = levels.map((strip) => {
+    const data = new Uint16Array(strip.texels * channels);
+    for (let t = 0; t < strip.texels; t += 1) {
+      pick(strip, t, texel);
+      for (let c = 0; c < channels; c += 1)
+        data[t * channels + c] = DataUtils.toHalfFloat(texel[c]!);
+    }
+    return { data, width: strip.texels, height: 1 };
+  });
+  const base = mipmaps[0]!;
+  const format = channels === 4 ? RGBAFormat : RedFormat;
+  const tex = new DataTexture(base.data, base.width, 1, format, HalfFloatType);
+  tex.mipmaps = mipmaps;
   tex.magFilter = LinearFilter;
   tex.minFilter = LinearMipmapLinearFilter;
-  tex.generateMipmaps = true;
+  tex.generateMipmaps = false;
   tex.needsUpdate = true;
   return tex;
 }
+
+/**
+ * A ring system's radial strips across `texels`: `map` the particles' linear colour and normal
+ * opacity, `dust` the fraction of that opacity in micrometre dust.
+ */
+function ringTextures(system: RingSystem, texels: number) {
+  const levels = ringStripLevels(system, texels);
+  const colour = new Color();
+  return {
+    map: stripTexture(levels, 4, (strip, t, out) => {
+      const [r, g, b] = strip.rgb.subarray(t * 3, t * 3 + 3);
+      colour.setRGB(r! / 255, g! / 255, b! / 255, SRGBColorSpace);
+      out[0] = colour.r;
+      out[1] = colour.g;
+      out[2] = colour.b;
+      out[3] = strip.opacity[t]!;
+    }),
+    dust: stripTexture(levels, 1, (strip, t, out) => {
+      out[0] = strip.dust[t]!;
+    }),
+  };
+}
+type RingTextures = ReturnType<typeof ringTextures>;
 
 type Surface = {
   /** Haze tint at the limb and its strength (0 = airless). */
@@ -295,13 +347,17 @@ const MAP_SIZE: Record<BodyId, number> = {
   charon: 128,
 };
 
-/** A ring's material: shadow uniforms are written each frame by the scene. */
-function ringMaterial(map: Texture, id: PlanetId, system: RingSystem, sun: SunLight) {
+/**
+ * A ring's material: shadow uniforms are written each frame by the scene. Premultiplied, so
+ * light a faint dusty ring scatters forward can outshine its opacity.
+ */
+function ringMaterial(strips: RingTextures, id: PlanetId, system: RingSystem, sun: SunLight) {
   const eq = FIGURES[id].equatorialKm;
   return new ShaderMaterial({
     uniforms: {
       sunPos: { value: sun.sunPos },
-      map: { value: map },
+      map: { value: strips.map },
+      dust: { value: strips.dust },
       span: { value: new Vector2(system.innerKm / eq, system.outerKm / eq) },
       pole: { value: new Vector3(0, 1, 0) },
       radius: { value: 1 },
@@ -310,6 +366,7 @@ function ringMaterial(map: Texture, id: PlanetId, system: RingSystem, sun: SunLi
     vertexShader: VERT,
     fragmentShader: RING_FRAG,
     transparent: true,
+    premultipliedAlpha: true,
     depthWrite: false,
     side: DoubleSide,
   });
@@ -373,7 +430,7 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
   const ringMaps = partialFrom(
     keysOf(RINGS).flatMap((id) => {
       const system = RINGS[id];
-      return system === undefined ? [] : ([[id, ringTexture(system, ringTexels)]] as const);
+      return system === undefined ? [] : ([[id, ringTextures(system, ringTexels)]] as const);
     }),
   );
   const planets = recordFrom(PLANET_IDS, (id) => {
@@ -383,7 +440,7 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
     if (shadow && system) {
       const eq = FIGURES[id].equatorialKm;
       Object.assign(material.uniforms, {
-        ringMap: { value: shadow },
+        ringMap: { value: shadow.map },
         ringPole: { value: new Vector3(0, 1, 0) },
         ringRadius: { value: 1 },
         ringSpan: { value: new Vector2(system.innerKm / eq, system.outerKm / eq) },
@@ -394,12 +451,21 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
   const rings = partialFrom(
     keysOf(RINGS).flatMap((id) => {
       const system = RINGS[id];
-      const map = ringMaps[id];
-      return system === undefined || map === undefined
+      const strips = ringMaps[id];
+      return system === undefined || strips === undefined
         ? []
-        : ([[id, ringMaterial(map, id, system, sun)]] as const);
+        : ([[id, ringMaterial(strips, id, system, sun)]] as const);
     }),
   );
+  /* Faint ring systems' long exposures, compiled in only while shown. */
+  const exposures = partialFrom(
+    keysOf(rings).flatMap((id) => {
+      const system = RINGS[id];
+      const exposure = system === undefined ? 1 : ringExposure(system);
+      return exposure > 1 ? ([[id, glslFloat(exposure)]] as const) : [];
+    }),
+  );
+  let exposed = false;
   const named: Record<NamedId, ShaderMaterial> = {
     pluto: lit(faceOf("pluto"), SURFACES.pluto, sun),
     sedna: lit(faceOf("sedna"), SURFACES.sedna, sun),
@@ -495,7 +561,13 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
       toneMapped: false,
     }),
   };
-  const textures = [...Object.values(ringMaps), diskMap, gasMap, sunHalo, glow];
+  const textures = [
+    ...Object.values(ringMaps).flatMap((strips) => [strips.map, strips.dust]),
+    diskMap,
+    gasMap,
+    sunHalo,
+    glow,
+  ];
   const surfaceOf = (id: BodyId): ShaderMaterial | undefined => {
     if (id === "sun") return sunSurface;
     if (includesId(PLANET_IDS, id)) return planets[id];
@@ -611,6 +683,18 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
     },
     /** The scattering shell over a body with air, for its close-up; none for the rest. */
     air,
+    /** Shows faint ring systems in a long exposure, each as bright as Saturn's, or as the eye sees them. */
+    exposeRings(on: boolean) {
+      if (on === exposed) return;
+      exposed = on;
+      for (const id of keysOf(exposures)) {
+        const material = rings[id];
+        if (!material) continue;
+        if (on) material.defines.RING_EXPOSURE = exposures[id]!;
+        else delete material.defines.RING_EXPOSURE;
+        material.needsUpdate = true;
+      }
+    },
     /** Gives every shell the quality's march: `steps` samples along each view ray. */
     setAirSteps(steps: number) {
       if (steps === airSteps) return;

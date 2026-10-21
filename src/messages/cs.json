@@ -10,7 +10,7 @@
   "notFoundTitle": "Na tomto horizontu nic není",
   "notFoundBody": "Hledaná stránka neexistuje.",
   "returnHome": "Zpět na všechny simulace",
-  "metadataDescription": "Interaktivní simulace vesmíru a gravitace, na začátku s observatoří černých děr.",
+  "metadataDescription": "Interaktivní simulace vesmíru, světla a gravitace.",
   "shell": {
     "home": "Horizon – úvod",
     "catalogue": "Domů",
@@ -141,6 +141,27 @@
         }
       }
     },
+    "giants": {
+      "title": "Obři",
+      "eyebrow": "Obři · Jak velké jsou hvězdy",
+      "category": "Měřítko a hvězdy",
+      "description": "Vyšplhejte od neutronové hvězdy velké jako město přes největší hvězdy až k horizontům černých děr, ve skutečném měřítku. Kdykoli zastavte a otevřete hvězdu.",
+      "open": "Otevřít Obry",
+      "ladder": "Jeden žebřík, skutečné měřítko",
+      "physics": "Velikost, hmotnost a světlo",
+      "uncertainty": "Každá velikost i s nejistotou",
+      "entryPoints": {
+        "sun": {
+          "title": "Slunce"
+        },
+        "pulsar": {
+          "title": "Neutronová hvězda"
+        },
+        "betelgeuse": {
+          "title": "Betelgeuze"
+        }
+      }
+    },
     "voyage": {
       "title": "Výprava",
       "eyebrow": "Výprava · Ve skutečném měřítku",
@@ -263,7 +284,7 @@
       "plex": "Text a čísla.",
       "next": "Stránky, směrování a předgenerování.",
       "react": "Rozhraní.",
-      "three": "Vykreslování modelu sluneční soustavy ve WebGL.",
+      "three": "Vykreslování všech simulací ve WebGL.",
       "nextIntl": "Angličtina a čeština.",
       "nextThemes": "Tmavý a světlý vzhled.",
       "zustand": "Stav simulací.",
@@ -370,6 +391,19 @@
     "close": "Ukončit",
     "fullscreen": "Celá obrazovka",
     "experiences": "Režimy prohlížení"
+  },
+  "guide": {
+    "title": "Průvodce",
+    "label": "Průvodce",
+    "start": "Spustit průvodce",
+    "progress": "{step} / {total}",
+    "progressWith": "{step} / {total} · {detail}",
+    "previous": "Předchozí krok",
+    "next": "Další",
+    "finish": "Dokončit",
+    "exit": "Ukončit průvodce",
+    "play": "Přehrát průvodce",
+    "pause": "Pozastavit průvodce"
   },
   "drift": {
     "title": "Drift",
