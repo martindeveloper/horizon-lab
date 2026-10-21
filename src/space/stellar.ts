@@ -132,6 +132,10 @@ export const NAMED_STARS = {
     }),
   },
   procyon: {
+    radius: literatureFact(2.031, "Rsun", "aufdenberg2005", "flag", {
+      range: [2.018, 2.044],
+      digits: 4,
+    }),
     teff: literatureFact(6_530, "K", "kervella2004", "flag", { range: [6_480, 6_580], digits: 3 }),
   },
   sirius: {
@@ -227,6 +231,16 @@ export const NAMED_STARS = {
     distance: literatureFact(36.7, "ly", "vanLeeuwen2007", "verified", { digits: 3 }),
   },
   alnitak: {
+    radius: literatureFact(20, "Rsun", "hummel2013", "verified", {
+      range: [16.8, 23.2],
+      digits: 2,
+      note: "Aa, from its angular diameter at a parallax of 2.6 mas",
+    }),
+    mass: literatureFact(33, "Msun", "hummel2013", "verified", {
+      range: [23, 43],
+      digits: 2,
+      note: "Aa, from the orbit at the photometric distance",
+    }),
     teff: literatureFact(29_500, "K", "hummel2013", "flag", { range: [28_500, 30_500], digits: 3 }),
   },
   r136a1: {
@@ -624,4 +638,32 @@ export const ENGINES: Readonly<
     "derived",
     "no fusion: a quasar, lit by gas falling in at a furious rate",
   ),
+};
+
+/**
+ * Each star's spectral type as catalogued (not translated): its MK class and luminosity class,
+ * DA… for a white dwarf, T… for a brown dwarf. The pulsar has none.
+ */
+export const SPECTRAL_TYPES: Readonly<Partial<Record<keyof typeof NAMED_STARS, string>>> = {
+  "sirius-b": "DA2",
+  /* T1.5 ± 1 from its HST/WFC3 eclipse spectrum (arXiv:2408.05173). */
+  "lhs-6343-c": "T1.5",
+  "trappist-1": "M8 V",
+  proxima: "M5.5 Ve",
+  sun: "G2 V",
+  procyon: "F5 IV–V",
+  sirius: "A1 V",
+  vega: "A0 Va",
+  achernar: "B6 Vep",
+  arcturus: "K1.5 III",
+  alnitak: "O9.5 Iab",
+  r136a1: "WN5h",
+  aldebaran: "K5 III",
+  rigel: "B8 Ia",
+  deneb: "A2 Ia",
+  antares: "M1.5 Iab",
+  betelgeuse: "M1–M2 Ia–ab",
+  "uy-scuti": "M4 Ia",
+  "vy-cma": "M5e Ia",
+  "stephenson-2-18": "M6",
 };

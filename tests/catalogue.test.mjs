@@ -65,3 +65,21 @@ test("every star's engine agrees with its mass, and no black hole fuses anything
       assert.ok(mass > CNO_ABOVE_MSUN, `${id} is heavy enough for the CNO cycle`);
   }
 });
+
+test("the HR diagram places every star it can, each light true to its radius and temperature", async () => {
+  const { HR_POINTS, hrPointsOf } = await import("../src/space/hr-diagram.ts");
+  const placed = Object.keys(HR_POINTS);
+  /* Neither a pulsar nor a brown dwarf without a catalogued temperature stands on it. */
+  assert.ok(!placed.includes("psr-j0030"));
+  for (const point of Object.values(HR_POINTS)) {
+    /* L = R² (T/T☉)⁴ within the catalogue's spreads: never a factor of two out. */
+    const expected = point.radius ** 2 * (point.kelvin / 5772) ** 4;
+    assert.ok(Math.abs(Math.log2(point.light / expected)) < 1, point.id);
+  }
+  /* Spectroscopy's stars all stand on it, so its diagram leaves none out. */
+  const { STAR_IDS } = await import("../src/features/spectroscopy/lib/model/stars.ts");
+  assert.deepEqual(
+    hrPointsOf(STAR_IDS).map((point) => point.id),
+    [...STAR_IDS],
+  );
+});

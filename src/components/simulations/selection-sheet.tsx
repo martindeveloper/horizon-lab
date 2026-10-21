@@ -123,7 +123,8 @@ function splitValue(value: string) {
   return at < 0 ? { main: value } : { main: value.slice(0, at), note: value.slice(at + 3) };
 }
 
-/** Label and value side by side when both fit the 20rem rail; prose stacks. */
-function inline(fact: { label: string; main: string }) {
-  return fact.label.length * 6.5 + fact.main.length * 7.8 < 250;
+/** Label and value (and its note) side by side when both fit the 20rem rail; prose stacks. */
+function inline(fact: { label: string; main: string; note?: string }) {
+  const value = Math.max(fact.main.length, fact.note?.length ?? 0);
+  return fact.label.length * 6.5 + value * 7.8 < 250;
 }

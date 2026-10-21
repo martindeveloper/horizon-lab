@@ -20,6 +20,9 @@ export const SOURCES = {
   arroyoTorres2013: {
     cite: "Arroyo-Torres et al. 2013, A&A 554, A76 (UY Scuti's angular diameter)",
   },
+  aufdenberg2005: {
+    cite: "Aufdenberg, Ludwig & Kervella 2005, ApJ 633, 424 (Procyon A's limb-darkened diameter: R = 2.031 ± 0.013 R☉)",
+  },
   avdellidou2024: {
     cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878; Edwards et al. 2024, Nat. Astron. 8, 1264 (an earlier instability)",
     link: "https://doi.org/10.1126/science.adg8092",

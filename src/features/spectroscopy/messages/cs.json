@@ -323,5 +323,21 @@
         "body": "Žádné molekuly kromě O₂ (žádné TiO, proto laboratoř končí u 3 900 K, před M trpaslíky), žádné chromosféry ani odchylky od LTE, žádná vázaně-volná kontinua kovů (důležitá pod 400 nm u chladných hvězd), žádné vlastní rozšíření vodíku, srážky s heliem, rotace ani makroturbulence; rozptyl se počítá jako absorpce. Ve Slunci vycházejí silné čáry až 1,7krát silnější (Fe I 438 nm); Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
       }
     }
+  },
+  "hr": {
+    "title": "HR diagram",
+    "label": "Hertzsprungův–Russellův diagram: {name} mezi hvězdami laboratoře podle teploty a svítivosti",
+    "labelAll": "Hertzsprungův–Russellův diagram hvězd laboratoře podle teploty a svítivosti",
+    "light": "Svítivost (L☉)",
+    "hotter": "← Teplejší",
+    "cooler": "Chladnější →",
+    "radius": "{value} R☉",
+    "groups": {
+      "whiteDwarfs": "Bílí trpaslíci",
+      "mainSequence": "Hlavní posloupnost",
+      "giants": "Obři",
+      "supergiants": "Veleobři"
+    },
+    "lesson": "Čárkované čáry spojují hvězdy stejné velikosti: nahoru a doprava znamená větší."
   }
 }

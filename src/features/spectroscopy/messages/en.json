@@ -323,5 +323,21 @@
         "body": "No molecules besides O₂ (no TiO, so the lab stops at 3,900 K, short of the M dwarfs), no chromospheres or departures from LTE, no metal bound-free continua (they matter below about 400 nm in cool stars), no hydrogen self-broadening, collisions with helium, rotation or macroturbulence; scattering counts as absorption. In the Sun, strong lines come out up to 1.7 times too strong (Fe I 438 nm); cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
       }
     }
+  },
+  "hr": {
+    "title": "HR diagram",
+    "label": "Hertzsprung–Russell diagram: {name} among the lab's stars, by temperature and light",
+    "labelAll": "Hertzsprung–Russell diagram of the lab's stars, by temperature and light",
+    "light": "Luminosity (L☉)",
+    "hotter": "← Hotter",
+    "cooler": "Cooler →",
+    "radius": "{value} R☉",
+    "groups": {
+      "whiteDwarfs": "White dwarfs",
+      "mainSequence": "Main sequence",
+      "giants": "Giants",
+      "supergiants": "Supergiants"
+    },
+    "lesson": "Dashed lines join stars of equal size: up and to the right means bigger."
   }
 }

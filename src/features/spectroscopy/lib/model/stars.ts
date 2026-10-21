@@ -1,5 +1,5 @@
 import type { Fact } from "@/lib/facts";
-import { NAMED_STARS } from "@/space/stellar";
+import { NAMED_STARS, SPECTRAL_TYPES } from "@/space/stellar";
 
 import { mainSequencePhotosphere, SEQUENCE_RANGE } from "./atmospheres";
 
@@ -36,7 +36,7 @@ type Temperature =
 
 type Star = {
   id: StarId;
-  /** MK spectral type. */
+  /** MK spectral type, the shared catalogue's. */
   type: string;
   teff: Temperature;
   /** Measured radial velocity, km/s (heliocentric, as SIMBAD lists it; positive receding). */
@@ -44,6 +44,13 @@ type Star = {
   /** km/s: the Sun's measured one; elsewhere the models' own 2 km/s. */
   microturbulence: number;
 };
+
+/** A star's spectral type from the shared catalogue, which lists every star the lab draws. */
+function typeOf(id: StarId) {
+  const type = SPECTRAL_TYPES[id];
+  if (!type) throw new Error(`The catalogue has no spectral type for ${id}`);
+  return type;
+}
 
 /** The catalogue's effective temperature of a star it gives one value for. */
 function catalogued(fact: Fact): Temperature {
@@ -54,21 +61,21 @@ function catalogued(fact: Fact): Temperature {
 export const STARS: Record<StarId, Star> = {
   alnitak: {
     id: "alnitak",
-    type: "O9.5 Iab",
+    type: typeOf("alnitak"),
     teff: catalogued(NAMED_STARS.alnitak.teff),
     velocity: 18.1,
     microturbulence: 2,
   },
   rigel: {
     id: "rigel",
-    type: "B8 Ia",
+    type: typeOf("rigel"),
     teff: catalogued(NAMED_STARS.rigel.teff),
     velocity: 17.8,
     microturbulence: 2,
   },
   vega: {
     id: "vega",
-    type: "A0 V",
+    type: typeOf("vega"),
     /* Vega is a rapid rotator seen pole-on: the catalogue's span runs from its equator to its
        pole. A spectrum integrates the whole disc, which one plane-parallel model fits best at
        this temperature. */
@@ -82,28 +89,28 @@ export const STARS: Record<StarId, Star> = {
   },
   procyon: {
     id: "procyon",
-    type: "F5 IV–V",
+    type: typeOf("procyon"),
     teff: catalogued(NAMED_STARS.procyon.teff),
     velocity: -4.5,
     microturbulence: 2,
   },
   sun: {
     id: "sun",
-    type: "G2 V",
+    type: typeOf("sun"),
     teff: catalogued(NAMED_STARS.sun.teff),
     velocity: 0,
     microturbulence: 1,
   },
   arcturus: {
     id: "arcturus",
-    type: "K1.5 III",
+    type: typeOf("arcturus"),
     teff: catalogued(NAMED_STARS.arcturus.teff),
     velocity: -5.2,
     microturbulence: 2,
   },
   aldebaran: {
     id: "aldebaran",
-    type: "K5 III",
+    type: typeOf("aldebaran"),
     teff: catalogued(NAMED_STARS.aldebaran.teff),
     velocity: 54.4,
     microturbulence: 2,

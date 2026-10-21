@@ -4,8 +4,10 @@ import { Check, Shuffle, X } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 
+import { HrDiagram } from "@/components/simulations/hr-diagram";
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
 import { asideOpen } from "@/lib/scene-store";
+import { hrPointsOf, type StarId as CatalogueStarId } from "@/space/hr-diagram";
 import {
   Action,
   Chip,
@@ -186,7 +188,16 @@ function VelocitySlider({ label, range }: { label: string; range: number }) {
   );
 }
 
-/** The Sun and the stars: which star, its motion, Earth's air and the elements to compare. */
+/** The lab's stars on the HR diagram, from the shared catalogue. */
+const HR_STARS = hrPointsOf(STAR_IDS);
+/** A dot on the diagram picks its star: the lab's own id for a catalogue one it draws. */
+const labStar = (id: CatalogueStarId) => STAR_IDS.find((star) => star === id);
+
+/**
+ * The Sun and the stars: which star, its motion, Earth's air and the elements to compare; with
+ * the stars, where the one shown sits on the HR diagram (any main-sequence star as a line at
+ * its temperature).
+ */
 function SkyControls() {
   const t = useTranslations("spectroscopy");
   const f = useFormatter();
@@ -206,7 +217,7 @@ function SkyControls() {
         {
           id: "source",
           label: view === "stars" ? t("dock.star") : t("dock.motion"),
-          className: "md:col-span-6 lg:col-span-5",
+          className: cn("md:col-span-6", view === "stars" ? "lg:col-span-4" : "lg:col-span-5"),
           children: (
             <>
               <PanelTitle>{view === "stars" ? t("dock.star") : t("dock.motion")}</PanelTitle>
@@ -272,7 +283,7 @@ function SkyControls() {
         {
           id: "compare",
           label: t("dock.compare"),
-          className: "md:col-span-6 lg:col-span-7",
+          className: cn("md:col-span-6", view === "stars" ? "lg:col-span-4" : "lg:col-span-7"),
           children: (
             <>
               <PanelTitle>{t("dock.compare")}</PanelTitle>
@@ -288,6 +299,36 @@ function SkyControls() {
             </>
           ),
         },
+        /* Beside the other two only where a desktop row has room for three. */
+        ...(view === "stars"
+          ? [
+              {
+                id: "hr",
+                label: t("hr.title"),
+                className: "md:hidden lg:col-span-4 lg:flex",
+                children: (
+                  <>
+                    <PanelTitle>{t("hr.title")}</PanelTitle>
+                    <HrDiagram
+                      namespace="spectroscopy"
+                      points={HR_STARS}
+                      nameOf={(id) => {
+                        const own = labStar(id);
+                        return own ? t(`stars.${own}`) : id;
+                      }}
+                      focus={star === "sequence" ? null : star}
+                      {...(star === "sequence" ? { temperature: sequenceTemperature } : {})}
+                      onPick={(id) => {
+                        const own = labStar(id);
+                        if (own) api().setStar(own);
+                      }}
+                      compact
+                    />
+                  </>
+                ),
+              },
+            ]
+          : []),
       ]}
     />
   );
