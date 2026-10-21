@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { CameraPad } from "@/components/simulations/camera-pad";
+import { DistanceUnitControl } from "@/components/simulations/map-readouts";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import {
   BloomSwitch,
@@ -15,12 +16,13 @@ import { BINS, tallyAt } from "@/space/solar-system/model/tracers";
 import { useOrrery } from "../lib/store";
 import { DISPLAY, EXTRA, Switches } from "./view-controls";
 
-/** How the map is drawn: its layers, what it shows, and buttons to turn the camera. */
+/** How the map is drawn: its layers, what it shows, the distance unit, and buttons to turn the camera. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("orrery");
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const show = useOrrery((s) => s.show);
   const patchShow = useOrrery((s) => s.patchShow);
+  const unit = useOrrery((s) => s.distanceUnit);
   const angles = useOrrery((s) => s.cameraAngles);
   const antialias = useOrrery((s) => s.antialias);
   const quality = useOrrery((s) => s.quality);
@@ -39,6 +41,13 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           values={show}
           label={(bin) => t("layers.count", { label: t(`layers.${bin}`), count: tally[bin] })}
           onToggle={(bin) => patchShow({ [bin]: !show[bin] })}
+        />
+      </RailSection>
+      <RailSection title={t("hud.units")}>
+        <DistanceUnitControl
+          namespace="orrery"
+          value={unit}
+          onChange={(next) => useOrrery.getState().setDistanceUnit(next)}
         />
       </RailSection>
       <RailSection title={t("hud.camera")}>

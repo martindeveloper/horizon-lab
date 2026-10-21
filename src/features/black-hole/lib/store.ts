@@ -23,8 +23,8 @@ import {
   type TourPose,
 } from "./holes";
 import { cameraFloor } from "./physics";
-import { tourFor } from "./tours";
 import type { PinId } from "./pins";
+import { tourFor } from "./tours";
 
 /**
  * The render settings (quality, anti-aliasing, which is experimental, bloom on the disk, jet

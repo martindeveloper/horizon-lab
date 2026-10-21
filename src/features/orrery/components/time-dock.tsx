@@ -2,7 +2,7 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useRef } from "react";
 
-import { DistanceUnitControl, MapScale } from "@/components/simulations/map-readouts";
+import { MapScale } from "@/components/simulations/map-readouts";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
@@ -52,7 +52,7 @@ export function motionRateLabel(
   return t("hud.driftThousand", { value: f.number(rate / 1000, { maximumFractionDigits: 1 }) });
 }
 
-/** The timeline dock: date and playback, era note, epoch track, then map settings. */
+/** The timeline dock: date and playback, era note, epoch track, then the scale and display switches. */
 export function TimeDock() {
   const t = useTranslations("orrery");
   const f = useFormatter();
@@ -65,7 +65,6 @@ export function TimeDock() {
   const scalePx = useOrrery((s) => s.scalePx);
   const scaleValue = useOrrery((s) => s.scaleValue);
   const scaleUnit = useOrrery((s) => s.scaleUnit);
-  const unit = useOrrery((s) => s.distanceUnit);
   // Phones give an open sheet or card the bottom of the screen.
   const aside = useOrrery(asideOpen);
   const surface = useRef<HTMLDivElement>(null);
@@ -129,15 +128,7 @@ export function TimeDock() {
       </p>
       <Timeline yearsAgo={yearsAgo} />
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-2.5 md:mt-1 md:pt-3 short:hidden">
-        <div className="flex min-w-0 items-center gap-4 not-md:flex-1">
-          <MapScale namespace="orrery" value={scaleValue} unit={scaleUnit} px={scalePx} />
-          <DistanceUnitControl
-            namespace="orrery"
-            value={unit}
-            onChange={(next) => useOrrery.getState().setDistanceUnit(next)}
-            className="shrink-0 not-md:ml-auto"
-          />
-        </div>
+        <MapScale namespace="orrery" value={scaleValue} unit={scaleUnit} px={scalePx} />
         <div className="hidden md:block">
           <Switches keys={DISPLAY} />
         </div>
