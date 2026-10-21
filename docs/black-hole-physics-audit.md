@@ -71,15 +71,17 @@ relative profile, not the final displayed RGB intensity or a real accretion flow
   120 au, approximately 2,800 M, not tens of M. Corrected the attribution of
   the 4.297-million-solar-mass and 8.277-kpc values to
   [GRAVITY (2022)](https://www.aanda.org/articles/aa/full_html/2022/01/aa42465-21/aa42465-21.html).
-- Retained the qualified Cygnus X-1 discussion: the adopted 15 M☉ is an
-  illustrative value, not a unique measurement. Compare the dynamical result
-  [Miller-Jones et al. (2021)](https://arxiv.org/abs/2102.09091) with
-  [Ramachandran et al. (2025)](https://arxiv.org/abs/2504.05885).
+- Cygnus X-1 now uses the shared catalogue's dynamical mass, 21.2 M☉ (19–23.4) from
+  [Miller-Jones et al. (2021)](https://arxiv.org/abs/2102.09091), the figure the Giants lab
+  shows too; [Ramachandran et al. (2025)](https://arxiv.org/abs/2504.05885) is the comparison.
   The M87* 43.9 ± 0.6 μas ring statement is supported by
   [EHT's multi-epoch study (2025)](https://arxiv.org/abs/2509.24593).
 - The blackbody fit's hot-branch green coefficient used the red constant
   (1.293 instead of 288.12/255 = 1.130), tinting every disk above 6,600 K
-  cyan by 10–15% in green. It now matches [Helland's fit](https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html).
+  cyan by 10–15% in green. It matched [Helland's fit](https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
+  after the fix; the disk now reads the CIE 1931 black-body lookup (`blackbodyLut`) as linear
+  light instead, and the display encodes sRGB at the end, so the wide-colour matrix works on
+  linear light.
 - Disk brightness had a constant floor (0.22 + 0.95 F/0.65), which made the
   outer disk up to 2.3× too bright relative to the Page–Thorne peak at spin
   0.82. Brightness is now proportional to F and temperature to F^(1/4), with
@@ -132,7 +134,7 @@ An external review was checked against the code; each point held.
   inner edge shape it ([Gralla, Holz & Wald 2019](https://arxiv.org/abs/1906.00873)). The guide's
   overlay is now the exact critical curve for the renderer's camera, labelled as theory.
 - Readouts qualify ω Centauri's ≥ 8,200 M☉ as one study's bound for a debated candidate and
-  Cygnus X-1's 15 M☉ as an adopted value.
+  Cygnus X-1's mass with its published range.
 
 ## Gravity off: the flat-space comparison
 

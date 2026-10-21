@@ -25,6 +25,7 @@ src/
         [view]/page.tsx        View route: static params + simulationMetadata
       deep-field/              The same three routes for Deep Field's views
       spectroscopy/            The same three routes for Stellar Spectra's views
+      giants/                  The same three routes for Giants' rungs ([star])
     experience/                Shared experience prefix (EXPERIENCE_PREFIX)
       voyage/                  The same three routes for Voyage's places
   components/
@@ -137,6 +138,41 @@ src/
         glow.ts                A glowing gas's colour and brightness, for the scene
         equations.ts, tour.ts  The formulas the documents print; the guided journey
       lib/store.ts             Zustand store (spectroscopy namespace messages)
+    giants/
+      index.ts                 Public client entry: GiantsApp
+      manifest.ts, routing.ts, server.ts, technical.json
+      components/              Canvas with the bodies' names, overlay, dock (the ladder as a
+                               slider, the ruler), card with light circling at true speed,
+                               Bodies and Display panels, guide
+      lib/model/               The ladder, without React or WebGL:
+        rungs.ts               The bodies in order of size, neutron star to TON 618; kind, fate
+        catalogue.ts           Every card figure: the measured ones from src/space/stellar.ts and
+                               what follows from them (luminosity, horizon, light's lap, density)
+        physics.ts, equations.ts
+                               Convection cells, light's lap, density words over the toolkit's
+                               Stefan–Boltzmann, scale height and mean density; the formulas
+                               the documents print
+        ladder.ts              Bodies side by side on one horizon; the camera's place `t`, its
+                               scale and the zoom about the smaller body between two rungs
+        ruler.ts, tour.ts      The ruler's round length and unit; the guided climb
+        looks.ts               Each body's surface: style, pole and equator temperatures,
+                               convection cells, haze, pulsation, weather kind, display spin
+        activity.ts            A star's weather as a function of its seed and the time: active
+                               regions, flares, prominences, post-flare loops, ejections
+      lib/graphics/            giants.frag.glsl: every body a ray-traced globe in one pass
+                               (Earth and Jupiter from their measured maps, horizons, orbits,
+                               the tone curve); surface.glsl the stars' faces (Planck colour,
+                               grey-atmosphere limb, convection, spots, faculae, pulsation);
+                               weather.glsl beyond the limb (winds, corona, chromosphere,
+                               prominences, loops, ejections); hole.glsl a black hole's
+                               horizon and its photon ring at the shadow's edge, to scale; the
+                               noise, convection, Planck, tone curve and display encode are
+                               toolkit snippets; tints.ts each body's glow colours, worked out
+                               once per rung into a small texture; weather-uniforms.ts and
+                               vectors.ts what the frame writes to the pass
+      lib/engine.ts            The pass, the hands (wheel, drag, tap, keys) and the snap to a
+                               rung; lib/store.ts the Zustand store (giants namespace messages)
+      bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     voyage/
       index.ts                 Public client entry: VoyageApp
       manifest.ts, routing.ts, server.ts, technical.json
@@ -154,8 +190,9 @@ src/
                                place; star-distances.ts the catalogue stars' SIMBAD distances
                                (star-distances.json, from scripts/fetch-star-distances.mjs)
         calendar.ts            Earth's calendar held within the JavaScript date's reach
-        comoving.ts            The expansion with the clocks, the background's temperature,
-                               the event horizon
+        comoving.ts            The expansion with the clocks (a held inside the far plane)
+                               on the shared rule of what it moves (`expansionFactor` in
+                               src/space/cosmos), the background's temperature
         places.ts, view-ids.ts The places the address names; tour.ts the guided journey
         assist.ts, gravity.ts, autopilot.ts, regime.ts
                                Flying by hand: the warp, the wells; the autopilot's schedule;
@@ -181,16 +218,19 @@ src/
   lib/
     sources.ts                 Shared bibliography the catalogue figures cite
     facts.ts                   Catalogue fact and card-spec types, and their printers
-    scene-store.ts             What a zoomable scene's store shares (`sceneSlice`), the guide
-                               machine of every stepped guide (`guideSlice`) and `asideOpen`
+    scene-store.ts             Every simulation's render settings and their setters
+                               (`renderSlice`), what a zoomable scene's store shares
+                               (`sceneSlice`), the guide machine of every stepped guide
+                               (`guideSlice`) and `asideOpen`
     scene-bridge.ts            An engine's side of that store: turns, flights, ready, the HUD
                                readouts it publishes (`createSceneHud`), what the HUD publishes
                                on the stage (`stageClearance`), redraws on a motion-preference
                                change and the camera's side of the Orrery–Deep Field crossing
                                (`bridgeHandoff`)
-    handoff.ts                 One-shot note that a visitor crossed between the Orrery and
-                               Deep Field at a solar system view, with the camera's pose, so
-                               the other side opens where this one left off
+    handoff.ts                 One-shot note that a visitor crossed between two simulations
+                               that show the solar system (manifest `solarSystem`) at a view,
+                               with the camera's pose, so the other side opens where this one
+                               left off
     simulation-types.ts        Registry contract
     simulation-paths.ts        Shared `/lab` prefix, path helpers and preset slug routes
     simulations.ts             Registry and active-app matching
@@ -201,6 +241,8 @@ src/
     messages/                  The shared copy (units, distance words, HUD chrome, the solar
                                system's names), merged under each one's namespace (messages.ts)
     star-catalogue.ts           Shared bright-star positions, magnitudes and colours
+    stellar.ts                 Measured radii, masses, temperatures, light and distances of
+                               named stars, remnants and black holes, each with its source
     observer-sky.ts             Observer location and apparent Sun, Moon and star positions
     bright-stars.ts            The catalogue's bright stars on the sky sphere, as points
                                carried with the camera (`createBrightSky`, `carrySky`)
@@ -291,8 +333,8 @@ server-only and must never be imported from a Client Component.
 Each simulation's layout owns its canvas lifetime. Navigating between its presets
 or views keeps that layout mounted; leaving the feature unmounts it and runs the existing renderer,
 listener, subscription, and WebGL resource cleanup. Canvas discovery is scoped
-to the feature root through data attributes, never translated accessible labels
-or a global selector. Feature CSS is scoped to that same root. The shared stage
+to the feature root through data attributes (every stage marks its canvas
+`data-simulation-canvas="<slug>"`), never translated accessible labels or a global selector. Feature CSS is scoped to that same root. The shared stage
 fits the remaining viewport below the header; the catalogue retains normal
 page scrolling.
 
@@ -312,6 +354,8 @@ page scrolling.
 | `/lab/deep-field/laniakea`  | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
 | `/lab/spectroscopy`         | Stellar Spectra, default view (the Sun)                                                                                                      |
 | `/lab/spectroscopy/stars`   | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
+| `/lab/giants`               | Giants, the Sun in focus (behind the `giants` feature switch)                                                                                |
+| `/lab/giants/betelgeuse`    | Giants with that body in focus (every rung in `rungs.ts`)                                                                                    |
 | `/experience/voyage`        | Voyage, default place (Earth)                                                                                                                |
 | `/experience/voyage/saturn` | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
 | `/black-hole/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
@@ -434,7 +478,8 @@ only its layers, its views and its store of its own:
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
 - **Store:** `sceneSlice` (`src/lib/scene-store.ts`) gives the shared fields and actions:
-  `flight`, `turn`, `ready`, `distanceUnit`, `quality`, `antialias`, `bloom`, `lens` and the scale bar; the
+  `flight`, `turn`, `ready`, `distanceUnit`, the render settings (`renderSlice`: `quality`,
+  `antialias`, `bloom`, `lens`, each with its setter) and the scale bar; the
   feature adds its view, selection and switches. `guideSlice` is the guide's machine (open
   keeping the visitor's settings, step within the tour, end giving them back); the feature adds
   what its own guide sets per step. Its caption is `GuideCaption`, its keys `useGuideKeys`, and
@@ -478,14 +523,15 @@ only its layers, its views and its store of its own:
   towards the corners; `GlowSwitch`: a soft layer under Stellar Spectra's lights and a halo
   on its ribbon's strong emission lines; `WideColourSwitch`: the canvas in Display P3, offered
   only where the screen shows it (`useWideGamutScreen`, on the toolkit's `WIDE_GAMUT_QUERY`),
-  and for WebGL stages where the browser's canvases can switch: Stellar Spectra and the black
-  hole; each off by default in a lab and on in an experience (`EXPERIENCE_SCENE_SETTINGS`: an
-  experience shows off), stored like anti-aliasing, and costing nothing while off), an
+  and for WebGL stages where the browser's canvases can switch: Stellar Spectra, the black
+  hole and Giants; each off by default in a lab and on in an experience
+  (`EXPERIENCE_SCENE_SETTINGS`: an experience shows off), stored like anti-aliasing, and costing nothing while off), an
   optional note and Reset, which puts the panel back as a visit starts (`resetView`; the
   black hole re-applies its preset and turns bloom, the lens and wide colour off). The black
   hole's display step moves its radiance into the canvas's primaries before the tone map, so
-  the disk's hottest colours reach past sRGB. The Orrery and Deep Field offer no wide colour:
-  their materials encode sRGB, so a P3 canvas would only cost a pass. Its copy is the shared `render`
+  the disk's hottest colours reach past sRGB; Giants does the same before its hue-keeping
+  tone map, so its saturated surfaces keep colour sRGB would clip. The Orrery and Deep Field
+  offer no wide colour: their materials encode sRGB, so a P3 canvas would only cost a pass. Its copy is the shared `render`
   namespace. Standard is always the default and what the simulation drew before the choice
   existed; what each level and mode does is the simulation's own. `useSceneEscape` lets Escape undo
   one thing at a time.
@@ -507,12 +553,13 @@ switches, the selection, the camera distance); a host's store composes `GalaxySh
 gather what each layer's names open. Their model files import no three.js, so cards and
 tests read them as Deep Field's do. The shared copy (names of the solar system, the stars, the
 Galaxy and the cosmos, views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged
-under each simulation's namespace by its `server.ts` (`withSpaceCopy`); a key in both is an
+under each simulation's namespace by its `server.ts` (`withSpaceMessages`); a key in both is an
 error.
 
-The Orrery and Deep Field name the solar system's views alike. `HandoffLink` opens the same
-view in the other, and `src/lib/handoff.ts` carries the camera's pose so it opens where this
-one left off; neither feature imports the other.
+The Orrery and Deep Field name the solar system's views alike, and their manifests say so
+(`solarSystem: { defaultView }`). `HandoffLink` opens the same view in the other, and
+`src/lib/handoff.ts`, which finds the sides through the registry rather than by name, carries
+the camera's pose so it opens where this one left off; neither feature imports the other.
 
 ## Technical documentation
 
