@@ -1,7 +1,7 @@
 import { convert } from "@horizon/toolkit/science";
 
 /**
- * Deep Field's model numbers, once. The model code computes with them and the printed
+ * The Galaxy model's numbers, once. The model code computes with them and the printed
  * formulas in `equations.ts` are built from them, so changing a value here changes the
  * scene, the technical notes and the tests together.
  */

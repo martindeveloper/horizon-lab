@@ -11,9 +11,9 @@ import { ListItem } from "@horizon/toolkit/ui";
 import { RailSection } from "./rail";
 
 /**
- * The solar system's objects to pick from, in the Objects panel of either simulation: the Sun
- * and planets, the named small worlds, then the belts and clouds this simulation draws. Named
- * by the shared space copy in `namespace`.
+ * The solar system's objects to pick from, in the Objects panel of every simulation: the Sun
+ * and planets, the named small worlds, then the belts and clouds this simulation draws (none,
+ * for one that draws no belt). Named by the shared space copy in `namespace`.
  */
 export function SolarObjectPicks({
   namespace,
@@ -43,9 +43,13 @@ export function SolarObjectPicks({
           {NAMED.map(({ id }) => item({ kind: "named", id }, id))}
         </div>
       </RailSection>
-      <RailSection title={t("hud.belts")}>
-        <div className="grid gap-1">{belts.map((id) => item({ kind: "population", id }, id))}</div>
-      </RailSection>
+      {belts.length > 0 ? (
+        <RailSection title={t("hud.belts")}>
+          <div className="grid gap-1">
+            {belts.map((id) => item({ kind: "population", id }, id))}
+          </div>
+        </RailSection>
+      ) : null}
     </>
   );
 }

@@ -13,9 +13,6 @@ import {
   type Format,
   type Translate,
 } from "@/lib/facts";
-import { convert } from "@horizon/toolkit/science";
-
-import { CATALOGUE } from "../lib/model/catalogue";
 import {
   HELIOPAUSE_AU,
   firstLightDay,
@@ -24,7 +21,10 @@ import {
   probeFromSun,
   probeSpeed,
   type ProbeId,
-} from "../lib/model/probes";
+} from "@/space/solar-system/model/probes";
+import { convert } from "@horizon/toolkit/science";
+
+import { CATALOGUE } from "../lib/model/catalogue";
 
 const C = CATALOGUE.probes;
 

@@ -8,52 +8,21 @@ import {
   type GuideSlice,
   type SceneSlice,
 } from "@/lib/scene-store";
-import type { SolarSelection } from "@/space/solar-system/model/selection";
+import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
-import type { NeighbourId } from "./model/neighbours";
-import type { ProbeId } from "./model/probes";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
-import { viewById, type Realm } from "./model/views";
+import { viewById } from "./model/views";
 
-export type Show = {
-  /** The dark-matter halo's sphere. */
-  halo: boolean;
-  names: boolean;
-  /** Dashed rulers with distances from the selection (or home) to what is in view. */
-  distances: boolean;
-  /** Rings round the Sun at the distance sunlight covers in a minute, an hour, a day… */
-  lightTime: boolean;
-};
+/** Deep Field's switches are the shared worlds' (`@/space/galaxy/show`). */
+export type Show = GalaxyShow;
 
-/** Structures beyond the Galaxy with a card. */
-export type CosmosId =
-  | "localGroup"
-  | "localSheet"
-  | "andromeda"
-  | "triangulum"
-  | "virgo"
-  | "fornax"
-  | "supercluster"
-  | "centaurus"
-  | "hydra"
-  | "greatAttractor"
-  | "laniakea"
-  | "perseusPisces"
-  | "coma"
-  | "shapley"
-  | "sloanGreatWall"
-  | "observableUniverse";
+export type { CosmosId } from "@/space/galaxy/show";
 
-export type Selection =
-  | SolarSelection
-  | { kind: "star"; id: NeighbourId }
-  | { kind: "galaxy"; id: "milkyway" | "sun" | "bulge" | "halo" }
-  | { kind: "cosmos"; id: CosmosId }
-  /** The probes leaving the solar system, and the heliopause the Voyagers crossed. */
-  | { kind: "reach"; id: ProbeId | "heliopause" };
+/** What Deep Field can select: anything the shared worlds name, the solar system's included. */
+export type Selection = WorldSelection;
 
 /** The scale a selection belongs to; zooming into another lets it go. */
 const realmOfSelection = (sel: Selection): Realm =>

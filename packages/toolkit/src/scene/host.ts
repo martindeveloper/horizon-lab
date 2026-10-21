@@ -109,9 +109,23 @@ export function createSceneHost(
     clearColor?: number;
     near?: number;
     far?: number;
+    /**
+     * A logarithmic depth buffer: depth resolution in proportion to distance, so one pass
+     * holds a planet's surface and the edge of the universe (`<horizon/log-depth>` in every
+     * custom shader the scene draws). Fixed for the renderer's life.
+     */
+    logarithmicDepth?: boolean;
   },
 ) {
-  const { canvas, host, onError, clearColor = 0x07080c, near = 0.05, far = 2_000_000 } = options;
+  const {
+    canvas,
+    host,
+    onError,
+    clearColor = 0x07080c,
+    near = 0.05,
+    far = 2_000_000,
+    logarithmicDepth = false,
+  } = options;
   const coarse = window.matchMedia(COARSE_POINTER_QUERY).matches;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const tight = coarse || (memory != null && memory <= 4);
@@ -124,6 +138,7 @@ export function createSceneHost(
     powerPreference: "low-power",
     alpha: false,
     stencil: false,
+    logarithmicDepthBuffer: logarithmicDepth,
   });
   scope.defer(() => renderer.dispose());
   renderer.toneMapping = NoToneMapping;

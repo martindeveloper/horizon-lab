@@ -12,21 +12,34 @@
 import { Group, Quaternion, Vector3, type Object3D } from "three";
 
 import {
+  GALAXY_FRAME,
+  GALAXY_LAYER,
+  LY,
+  MLY,
+  cosmicToWorld,
+  galaxyToWorld,
+} from "@/space/galaxy/scene/frames";
+import type { LabelPicks } from "@/space/galaxy/scene/label-picks";
+import type { Lod } from "@/space/galaxy/scene/lod";
+import type { WorldFrame as Frame } from "@/space/galaxy/show";
+import {
   rising,
   type AnchoredRulers,
   type DistanceText,
   type LabelText,
   type PlaceLabel,
+  type SceneKit,
 } from "@horizon/toolkit/scene";
 
 import type { CosmosDetail } from "../graphics/cosmos";
+import type { CosmosLooks } from "../graphics/looks";
 import { CMB_MLY } from "../model/cosmos";
 import { DISC_MLY, createCosmosClouds } from "./cosmos-clouds";
 import { createCosmosMarks } from "./cosmos-marks";
 import { createLookbackRings, shellOutline, type RootView } from "./cosmos-rings";
-import type { Frame, SceneKit } from "./kit";
-import type { LabelPicks } from "./label-picks";
-import { GALAXY_FRAME, GALAXY_LAYER, LY, MLY, cosmicToWorld, galaxyToWorld } from "./lod";
+
+/** What the cosmic map's layer is built with: the host's basics, its looks and the world's level of detail. */
+export type CosmosKit = SceneKit<CosmosLooks, Lod>;
 
 /** Farthest anything drawn reaches from the galactic centre, Mly: the microwave background. */
 const EXTENT_MLY = 48_000;
@@ -34,7 +47,7 @@ const EXTENT_MLY = 48_000;
 const FIELD_MLY = 450;
 
 export function createCosmosLayer(
-  { scope, looks, camera, pxWorld, lod }: SceneKit,
+  { scope, looks, camera, pxWorld, lod }: CosmosKit,
   parent: Object3D,
   deps: {
     place: PlaceLabel;
@@ -42,7 +55,7 @@ export function createCosmosLayer(
     labels: LabelText;
     distanceText: DistanceText;
     picks: LabelPicks;
-    /** How densely to sample, from the render quality (`DeepFieldQuality.cosmos`). */
+    /** How densely to sample, from the render quality (the host's `cosmos` detail). */
     detail: CosmosDetail;
   },
 ) {
@@ -68,6 +81,7 @@ export function createCosmosLayer(
   const base = {
     dwarfs: m.dwarfs.opacity,
     field: m.field.opacity,
+    fieldSize: m.field.size,
     sheet: m.sheet.opacity,
     near: m.near.opacity,
     supercluster: m.supercluster.opacity,
@@ -82,6 +96,8 @@ export function createCosmosLayer(
     flow: looks.cosmosFlow.opacity,
   };
   const names = lod.fader();
+  /** How far out among the galaxies the camera stood last frame (`afield`). */
+  let standing = 0;
   const centre = root.position;
   const at = new Vector3();
   const from = cosmicToWorld([0, 0, 0], new Vector3());
@@ -112,7 +128,7 @@ export function createCosmosLayer(
     reach() {
       return camera.position.distanceTo(centre) + EXTENT_MLY * MLY;
     },
-    update({ show, sel, lines }: Frame) {
+    update({ show, sel, lines, afield = 0 }: Frame) {
       const shown = lod.cosmos;
       root.visible = field.visible = shown > 0.001;
       const labelled = names.to(show.names) * shown;
@@ -131,7 +147,14 @@ export function createCosmosLayer(
       const near = rising(ly, 8e6, 30e6);
       const far = rising(ly, 60e6, 200e6);
       m.dwarfs.opacity = base.dwarfs * shown * (1 - rising(ly, 60e6, 160e6));
-      m.field.opacity = base.field * shown * (1 - rising(ly, 60e6, 250e6));
+      /* Out among the galaxies the field is all there is: fuller, larger, and doubled. */
+      m.field.opacity = base.field * shown * Math.max(1 - rising(ly, 60e6, 250e6), afield);
+      if (afield !== standing) {
+        standing = afield;
+        m.field.size = base.fieldSize * (1 + 1.5 * afield);
+        m.field.color.setScalar(1 + 1.2 * afield);
+        clouds.fieldBeyond.visible = afield > 0.002;
+      }
       m.sheet.opacity = base.sheet * shown * rising(ly, 3e6, 9e6) * (1 - rising(ly, 300e6, 900e6));
       m.near.opacity = base.near * shown * near;
       m.supercluster.opacity = base.supercluster * shown * rising(ly, 25e6, 80e6);

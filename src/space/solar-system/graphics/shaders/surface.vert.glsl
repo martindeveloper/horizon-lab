@@ -14,6 +14,8 @@ varying vec3 vView;   // world-space direction toward the camera
 varying vec3 vOffset; // world-space offset from the object's origin (the body's centre)
 varying vec2 vUv;
 
+#include <horizon/log-depth>
+
 void main() {
   vUv = uv;
 
@@ -25,4 +27,5 @@ void main() {
   vView = normalize((vec4(-eye.xyz, 0.0) * viewMatrix).xyz);
 
   gl_Position = projectionMatrix * eye;
+  logDepthVertex();
 }

@@ -1,4 +1,9 @@
-/** Which solar system view shows a selection, and when a tap should fly there. */
+/**
+ * Which solar system view shows a selection, when a tap should fly there, and how much of a
+ * body a camera frames on arrival.
+ */
+import type { BodyId } from "@horizon/toolkit/bodies";
+
 import { planetElements } from "./elements";
 import { hostOf, solarPick, type SolarSelection } from "./selection";
 import { TRACERS, tracerElements } from "./tracers";
@@ -68,3 +73,10 @@ export function selectTapped(
   api.select(sel);
   return sel;
 }
+
+/**
+ * How much of a body an arriving camera frames, in the body's radii, where the body alone
+ * would cut something off: Saturn's bright rings, Halley's glow. Every other body frames its
+ * globe. The Orrery's close-ups and Voyage's arrivals share it.
+ */
+export const FRAME_RADII: Partial<Record<BodyId, number>> = { saturn: 2.3, halley: 2.2 };

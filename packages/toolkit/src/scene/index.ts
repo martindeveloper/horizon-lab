@@ -16,3 +16,5 @@ export * from "./points";
 export * from "./log-zoom";
 export * from "./tour-camera";
 export * from "./drift-rig";
+export * from "./map-loader";
+export * from "./floating-origin";

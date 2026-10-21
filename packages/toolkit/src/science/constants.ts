@@ -183,6 +183,10 @@ export type ConstantId = keyof typeof CONSTANTS;
 /** Named values for code, in the units their names state. */
 export const GRAVITATIONAL_CONSTANT = CONSTANTS.gravitationalConstant.value; // m³ kg⁻¹ s⁻²
 export const SPEED_OF_LIGHT = CONSTANTS.speedOfLight.value; // m s⁻¹
+/** The speed of light in km/s, the unit a ship's velocity is kept in. */
+export const SPEED_OF_LIGHT_KM_S = SPEED_OF_LIGHT / 1e3;
+/** Standard acceleration of gravity, m s⁻² (CGPM 1901, exact). */
+export const STANDARD_GRAVITY = 9.80665;
 export const SOLAR_MASS_KG = CONSTANTS.solarMass.value;
 export const SOLAR_RADIUS_KM = CONSTANTS.solarRadius.value / 1e3;
 export const AU_KM = CONSTANTS.astronomicalUnit.value / 1e3;

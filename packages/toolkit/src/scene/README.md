@@ -37,6 +37,11 @@ resize, context loss). `tight` marks phones and low-memory devices; `basics` is
 called once after the first frame, compiles every material in idle time, hidden objects
 included.
 
+`logarithmicDepth: true` makes the renderer with a logarithmic depth buffer, fixed for its
+life: depth resolution in proportion to distance, so one pass holds a planet's surface and
+the edge of the universe. Every custom shader such a scene draws includes
+`<horizon/log-depth>` and calls its two macros; the shared surface shaders do.
+
 `setResolution({ dprCap, fps })` (a `SceneResolution`) resizes the buffer for the next frame;
 `resolution` reads it, and the engine caps its frame rate at its `fps`. A host starts at
 `defaultSceneResolution(tight)`: 1.5 px per CSS px, or 1.25 at 48 fps on tight devices. The
@@ -211,3 +216,21 @@ caller can turn angles along with it. A change written by someone else between
 steps carries its speed on, unless it was a cut (over half an e-fold). The orbit
 rig is built on it. `camera/sampleOrbitFlight` remains the tool for scripted tours
 from rest.
+
+## Map loader
+
+`fetchMap(url, signal)` fetches a measured map's compressed bytes (a `Blob`, cheap to hold
+ahead of need); `decodeMap(blob, anisotropy)` decodes them into a mipmapped sRGB surface
+texture off the main thread where the browser allows (`createImageBitmap`, flipped while
+decoding), falling back to an image element; `loadMap(url, signal, anisotropy)` does both.
+The bitmap stays with the texture so a lost context re-uploads it, and is closed when the
+texture is disposed. The app owns where the tiers are served from.
+
+## Floating origin
+
+For a scene that flies from a moon's surface to the edge of the universe, float32 world
+positions are coarser than a planet tens of au out. Keep every model position as a `Vec3d`
+(three doubles: `vec3d`, `addVec3d`, `subVec3d`, `lengthVec3d`, `distanceVec3d`), keep the
+camera at the scene's origin, and place each object by `placeRelative(object, at, viewer)`:
+the subtraction happens in doubles before the float write. Point clouds that span the
+scene (the sky, the cosmic map) keep their own local origin and are placed the same way.

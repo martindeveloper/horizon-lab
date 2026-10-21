@@ -1,13 +1,13 @@
 /** Taps on the canvas or a name select what is under them; a tap on nothing lets go. */
 import type { Object3D } from "three";
 
+import { GALAXY_LAYER } from "@/space/galaxy/scene/frames";
 import { selectTapped } from "@/space/solar-system/model/framing";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
 import type { Selection, useDeepField } from "../store";
 import type { SceneKit } from "./kit";
-import { GALAXY_LAYER } from "./lod";
 
 export function createPicking(
   kit: SceneKit,

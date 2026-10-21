@@ -3,6 +3,12 @@
  * camera distance; the eyepiece reads how far a place is and how long its light has been on
  * the way, which is the same thing said twice: looking farther is looking back.
  */
+import {
+  CMB_AGE_YEARS,
+  CMB_MLY,
+  LAST_SCATTERING_Z,
+  UNIVERSE_AGE_GYR,
+} from "@/space/cosmos/model/cosmos";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { clamp01 } from "@horizon/toolkit/math";
 import {
@@ -13,7 +19,6 @@ import {
   redshiftAtComovingDistance,
 } from "@horizon/toolkit/science";
 
-import { CMB_AGE_YEARS, CMB_MLY, LAST_SCATTERING_Z, UNIVERSE_AGE_GYR } from "./cosmos";
 import type { ViewId } from "./view-ids";
 import { VIEWS } from "./views";
 

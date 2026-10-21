@@ -30,17 +30,17 @@ import {
   rainClockRate,
 } from "../src/features/black-hole/lib/equations.ts";
 import {
-  galacticHeight,
-  galacticRadius,
-  galacticWarp,
-  spiralArm,
-} from "../src/features/deep-field/lib/model/equations.ts";
-import {
   advancePlay,
   noteOf,
   sliderToYearsAgo,
   yearsAgoToSlider,
 } from "../src/features/orrery/lib/model/timeline.ts";
+import {
+  galacticHeight,
+  galacticRadius,
+  galacticWarp,
+  spiralArm,
+} from "../src/space/galaxy/model/equations.ts";
 import { SOLAR_CATALOGUE } from "../src/space/solar-system/model/catalogue.ts";
 import {
   galacticAngle,

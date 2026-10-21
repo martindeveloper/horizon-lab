@@ -1,8 +1,8 @@
 /**
- * Loads a measured map (`MAPS` in `@horizon/toolkit/bodies`) as a texture. Decoding happens off the main
- * thread through createImageBitmap where the browser allows; the bitmap stays
- * with the texture so a lost WebGL context can upload it again, and is closed
- * when the texture is disposed.
+ * Loads a measured map (`MAPS` in `@horizon/toolkit/bodies`) as a texture. Decoding happens
+ * off the main thread through createImageBitmap where the browser allows; the bitmap stays
+ * with the texture so a lost WebGL context can upload it again, and is closed when the
+ * texture is disposed. The app owns where the tiers are served from (`tierFile(base, …)`).
  */
 import {
   LinearFilter,
@@ -11,11 +11,6 @@ import {
   SRGBColorSpace,
   Texture,
 } from "three";
-
-import { MAPS_KEY, assetUrl } from "@/lib/assets";
-
-/** Where the orrery fetches the measured maps' WebP tiers: the CDN. */
-export const MAP_BASE = assetUrl(MAPS_KEY);
 
 function surface(texture: Texture, anisotropy: number) {
   texture.colorSpace = SRGBColorSpace;

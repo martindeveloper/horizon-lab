@@ -1,6 +1,6 @@
 /**
  * Fetches the five probes leaving the solar system from JPL Horizons and writes their tracks
- * for Deep Field (src/features/deep-field/lib/model/probe-tracks.json): heliocentric positions
+ * for the shared solar system (src/space/solar-system/model/probe-tracks.json): heliocentric positions
  * in the J2000 ecliptic, au, from just after launch to 2040, monthly through the planetary
  * flybys and twice a year after. Run by hand when the trajectories are refit:
  *
@@ -9,7 +9,7 @@
 import { writeFile } from "node:fs/promises";
 
 const API = "https://ssd.jpl.nasa.gov/api/horizons.api";
-const OUT = new URL("../src/features/deep-field/lib/model/probe-tracks.json", import.meta.url);
+const OUT = new URL("../src/space/solar-system/model/probe-tracks.json", import.meta.url);
 const END = "2040-01-01";
 
 /** Horizons id, the first sample after launch, and when the monthly steps stop. */

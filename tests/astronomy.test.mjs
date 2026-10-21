@@ -27,13 +27,13 @@ import {
   toHorizontal,
 } from "@horizon/toolkit/science";
 
-import { sunGalactic } from "../src/features/deep-field/lib/model/galactic-orbit.ts";
+import { galacticLaps } from "../src/features/orrery/lib/model/timeline.ts";
+import { sunGalactic } from "../src/space/galaxy/model/galactic-orbit.ts";
 import {
   NEIGHBOURS,
   closestApproach,
   neighbourDistanceLy,
-} from "../src/features/deep-field/lib/model/neighbours.ts";
-import { galacticLaps } from "../src/features/orrery/lib/model/timeline.ts";
+} from "../src/space/galaxy/model/neighbours.ts";
 import { GALACTIC_YEAR, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
 
 const near = (actual, expected, tolerance, label = "") =>

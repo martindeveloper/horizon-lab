@@ -15,8 +15,8 @@ import {
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
 import { NEIGHBOURS, neighbourDistanceLy, neighbourPosition } from "../model/neighbours";
-import type { Selection } from "../store";
-import type { Frame, SceneKit } from "./kit";
+import type { WorldFrame as Frame, WorldSelection as Selection } from "../show";
+import type { GalaxyKit } from "./kit";
 import type { LabelPicks } from "./label-picks";
 
 const PROXIMA = NEIGHBOURS[0]!;
@@ -27,7 +27,7 @@ const RING = fade(0, 0, 600_000, 1_100_000);
 const RING_NAME = fade(0, 0, 500_000, 900_000);
 
 export function createNeighboursLayer(
-  { scope, looks, pxWorld, lod }: SceneKit,
+  { scope, looks, pxWorld, lod }: GalaxyKit,
   parent: Object3D,
   deps: {
     place: PlaceLabel;

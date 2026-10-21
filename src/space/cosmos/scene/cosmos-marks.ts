@@ -6,10 +6,11 @@
  */
 import { Mesh, SphereGeometry, Vector3, type Object3D } from "three";
 
+import type { WorldSelection as Selection } from "@/space/galaxy/show";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 import { BELOW, STRONG, rising, type LabelStyle, type PlaceLabel } from "@horizon/toolkit/scene";
 
-import type { Looks } from "../graphics/looks";
+import type { CosmosLooks } from "../graphics/looks";
 import {
   COSMIC_VIEW_LY,
   COSMOS_LABELS,
@@ -17,7 +18,6 @@ import {
   anchorById,
   anchorToday,
 } from "../model/cosmos";
-import type { Selection } from "../store";
 import type { CosmosClouds } from "./cosmos-clouds";
 
 type LabelKey = (typeof COSMOS_LABELS)[number];
@@ -44,7 +44,7 @@ const samePick = (a: Selection, b: Selection) =>
  */
 export function createCosmosMarks(
   scope: DisposalScope,
-  looks: Looks,
+  looks: CosmosLooks,
   root: Object3D,
   clouds: Pick<CosmosClouds, "milkyWay" | "andromeda" | "triangulum" | "cluster">,
   edgeMark: Vector3,

@@ -1,3 +1,4 @@
+import type { CosmosDetail } from "@/space/cosmos/graphics/cosmos";
 import { spaceQuality, type ByTier, type SpaceQuality } from "@/space/quality";
 /**
  * What each render quality means for Deep Field, on top of the space scenes' share
@@ -5,8 +6,6 @@ import { spaceQuality, type ByTier, type SpaceQuality } from "@/space/quality";
  * level here once and hands each layer its part; no layer reads the level or the device class.
  */
 import type { RenderQuality } from "@horizon/toolkit/rendering";
-
-import type { CosmosDetail } from "./graphics/cosmos";
 
 type DeepFieldQuality = SpaceQuality & { cosmos: CosmosDetail };
 

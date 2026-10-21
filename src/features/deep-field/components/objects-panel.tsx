@@ -3,9 +3,9 @@ import { useTranslations } from "next-intl";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { SolarObjectPicks } from "@/components/simulations/solar-picks";
 import { viewOf } from "@/space/solar-system/model/framing";
+import { PROBES } from "@/space/solar-system/model/probes";
 import { ListItem } from "@horizon/toolkit/ui";
 
-import { PROBES } from "../lib/model/probes";
 import type { ViewId } from "../lib/model/view-ids";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
 import { NEIGHBOUR_IDS } from "./cards";

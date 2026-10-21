@@ -9,8 +9,10 @@ varying vec3 vView;
 varying vec2 vUv;
 
 #include "./parameters.generated.glsl"
+#include <horizon/log-depth>
 
 void main() {
+  logDepthFragment();
   vec3 n = normalize(vNormal);
   vec3 viewDir = normalize(vView);
 

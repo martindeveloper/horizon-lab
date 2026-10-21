@@ -5,11 +5,11 @@ import { PerspectiveCamera, Vector3 } from "three";
 
 import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE } from "@horizon/toolkit/scene";
 
-import { modernGalaxy } from "../src/features/deep-field/lib/graphics/galaxy.ts";
-import { anchorById, anchorToday } from "../src/features/deep-field/lib/model/cosmos.ts";
 import { VIEWS, viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { createCameraRig } from "../src/features/deep-field/lib/scene/camera-rig.ts";
 import { labelInsets } from "../src/features/deep-field/lib/scene/kit.ts";
+import { anchorById, anchorToday } from "../src/space/cosmos/model/cosmos.ts";
+import { modernGalaxy } from "../src/space/galaxy/graphics/galaxy.ts";
 import {
   COSMIC_HANDOFF,
   GALAXY_FRAME,
@@ -22,7 +22,7 @@ import {
   galaxyMix,
   galaxyToWorld,
   realmOf,
-} from "../src/features/deep-field/lib/scene/lod.ts";
+} from "../src/space/galaxy/scene/frames.ts";
 import { assertSmoothFlight } from "./toolkit-helpers.mjs";
 
 const near = (actual, expected, tolerance, message) =>

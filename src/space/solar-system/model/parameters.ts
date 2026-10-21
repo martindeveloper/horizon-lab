@@ -28,6 +28,14 @@ export const CLEAR_DONE = 4.45e9;
  */
 export const GALACTIC_YEAR = 206e6;
 
+/**
+ * The Moon's mass over Earth's (IAU 2015 nominal, DE440: 0.0123000371): the Earth–Moon
+ * barycentre lies 1/82.3 of the way to the Moon, 4,670 km from Earth's centre.
+ */
+export const MOON_EARTH_MASS_RATIO = 0.0123000371;
+/** Charon's mass over Pluto's (Brozović et al. 2015, Icarus 246, 317): the barycentre is 1/9.19 of the way to Charon. */
+export const CHARON_PLUTO_MASS_RATIO = 0.1221;
+
 /** The primordial planetesimal disk outside the packed giants (Morbidelli 2005, Nice model). */
 export const DISK_AU = [16, 34] as const;
 /** Cold classicals form near here and stay (Kaib & Volk 2022: 42–48 au). */

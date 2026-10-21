@@ -9,10 +9,12 @@
  */
 import type { Texture } from "three";
 
+import { bytesOf } from "@/space/solar-system/graphics/map-tiers";
+import { MAP_BASE } from "@/space/solar-system/graphics/maps";
 import { MAPS, tierFile, type BodyId } from "@horizon/toolkit/bodies";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
+import { loadMap } from "@horizon/toolkit/scene";
 
-import { MAP_BASE, loadMap } from "../graphics/map-loader";
 import type { MapQuality } from "../quality";
 
 /** On-screen radius (px, at the zoom's destination) that asks for the measured map. */
@@ -21,8 +23,6 @@ const LOAD_PX = 3;
 const IDLE_PX = 1;
 /** Seconds a map must stay idle before the budget may release it. */
 const IDLE_S = 20;
-/** GPU bytes of a far map with its mip chain (RGBA, height half the width). */
-const bytesOf = (width: number) => ((width * width * 4) / 2) * (4 / 3);
 
 type Slot = {
   state: "loading" | "ready" | "failed";

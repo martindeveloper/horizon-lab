@@ -2,12 +2,15 @@
  * The major moons' orbits in the scene frame, from the toolkit's mean elements
  * (`@horizon/toolkit/bodies`): planet-centred positions and orbit samples, in plain arrays so
  * cards and positions need no renderer. graphics/moons.ts draws and spins them in three.js.
+ * The Moon alone is placed by the lunar theory (`lunarPositionJ2000`): its mean elements
+ * wander by degrees, and it is the one moon seen from close enough to tell.
  */
 import {
   MOONS,
   eccentricAnomaly,
   equatorialToScene,
   libration,
+  lunarPositionJ2000,
   meanRates,
   type Moon,
   type MoonId,
@@ -73,14 +76,25 @@ function axesAt(track: Track, d: number) {
 
 const daysOf = (date: Date) => julianDay(date) - J2000_JD;
 
+const lunar: Vec3 = [0, 0, 0];
+
 /**
  * The moon's offset from its planet in the scene frame, au; leaves `P_AXIS` and `Q_AXIS` at
  * that date. `mean` puts it at its mean anomaly on a circle: the direction a synchronous
- * rotator faces.
+ * rotator faces. The Moon's true place comes from the lunar theory; its axes still serve the
+ * orbit line and the face it turns to Earth.
  */
 export function moonOffset(id: MoonId, date: Date, out: Vec3 = [0, 0, 0], mean = false): Vec3 {
   const track = TRACKS.get(id)!;
   const M = axesAt(track, daysOf(date));
+  if (id === "moon" && !mean) {
+    /* J2000 ecliptic km to the scene frame (x the equinox, y the pole, z away from 90°), au. */
+    lunarPositionJ2000(date, lunar);
+    out[0] = lunar[0] / AU_KM;
+    out[1] = lunar[2] / AU_KM;
+    out[2] = -lunar[1] / AU_KM;
+    return out;
+  }
   const { aKm, e } = track.moon;
   const a = aKm / AU_KM;
   let x: number;

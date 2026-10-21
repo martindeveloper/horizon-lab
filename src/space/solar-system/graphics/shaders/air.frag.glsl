@@ -25,6 +25,7 @@ uniform float uLight;    // sunlight on the shell
 varying vec3 vObject;
 
 #include <horizon/math>
+#include <horizon/log-depth>
 
 // Air above altitude h (in scale heights) along a ray at zenith angle χ, in scale heights
 // times the surface density, for a body X scale heights in radius: Schüler's approximation
@@ -39,6 +40,7 @@ float chapman(float X, float h, float cosChi) {
 }
 
 void main() {
+  logDepthFragment();
   // The ray enters the shell at this fragment (only the shell's outside faces draw, so the
   // camera is outside it). Intersections are taken from here, where every term is about 1,
   // not from the camera, which may be hundreds of radii away: float32 would cancel there.

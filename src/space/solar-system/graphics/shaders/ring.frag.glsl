@@ -10,6 +10,7 @@ uniform vec2 span;         // inner and outer edge, equatorial radii (the geomet
 uniform vec3 pole;         // ring-plane normal, world
 uniform float radius;      // planet's equatorial radius, world units
 uniform float squash;      // equatorial over polar radius
+uniform vec3 sunPos;       // the Sun, world; the origin unless a host moves it
 
 varying vec3 vNormal;
 varying vec3 vWorld;
@@ -18,15 +19,17 @@ varying vec3 vOffset;
 varying vec2 vUv;
 
 #include "./parameters.generated.glsl"
+#include <horizon/log-depth>
 
 void main() {
+  logDepthFragment();
   // RingGeometry maps the plane to uv across its outer diameter.
   float r = length(vUv - 0.5) * 2.0 * span.y;
   float s = (r - span.x) / (span.y - span.x);
   vec4 tex = texture2D(map, vec2(clamp(s, 0.0, 1.0), 0.5));
   float tau = -log(max(1.0 - tex.a * step(0.0, s) * step(s, 1.0), 0.005));
 
-  vec3 sunDir = normalize(-vWorld);
+  vec3 sunDir = normalize(sunPos - vWorld);
   vec3 viewDir = normalize(vView);
   float nl = dot(pole, sunDir);
   float nv = dot(pole, viewDir);

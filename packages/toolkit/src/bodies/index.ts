@@ -6,3 +6,4 @@ export * from "./figures";
 export * from "./rings";
 export * from "./maps";
 export * from "./almanac";
+export * from "./lunar-theory";

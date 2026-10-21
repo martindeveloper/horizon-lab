@@ -1,15 +1,13 @@
 /** Deep Field's framed views, from the inner planets to the observable universe. */
+import { COSMIC_VIEW_LY } from "@/space/cosmos/model/cosmos";
+import type { Realm } from "@/space/galaxy/show";
 import { SOLAR_VIEWS } from "@/space/solar-system/model/views";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
-import { COSMIC_VIEW_LY } from "./cosmos";
 import type { ViewId } from "./view-ids";
 
-/**
- * The map that dominates a scale: the solar system, the nearest stars round it, the Galaxy,
- * and the cosmic map beyond it. Cards, rulers and readouts follow it.
- */
-export type Realm = "solar" | "stars" | "galaxy" | "cosmos";
+/** The map that dominates a scale (`@/space/galaxy/show`); cards, rulers and readouts follow it. */
+export type { Realm } from "@/space/galaxy/show";
 type View = {
   id: ViewId;
   realm: Realm;

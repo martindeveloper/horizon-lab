@@ -9,10 +9,10 @@ import {
   type Of,
   type Translate,
 } from "@/lib/facts";
+import { NEIGHBOURS, closestApproach, neighbourDistanceLy } from "@/space/galaxy/model/neighbours";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
 import { CATALOGUE } from "../lib/model/catalogue";
-import { NEIGHBOURS, closestApproach, neighbourDistanceLy } from "../lib/model/neighbours";
 import type { Selection } from "../lib/store";
 import { COSMOS_CARDS, GALAXY_CARDS, STAR_CARDS } from "./card-specs";
 import { reachCard } from "./reach-cards";

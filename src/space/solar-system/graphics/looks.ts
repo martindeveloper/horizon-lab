@@ -16,6 +16,7 @@ import {
   SRGBColorSpace,
   Vector2,
   Vector3,
+  Vector4,
   type Texture,
 } from "three";
 
@@ -111,10 +112,10 @@ function mapTexture(id: BodyId, w: number, h: number): Texture {
 /** A finished detailed map as a sharp surface texture. */
 const detailTexture = (job: SurfaceJob): Texture => dataTexture(job, 4);
 
-/** A ring system's radial strip: colour and normal opacity per 1/RING_TEXELS of its width. */
+/** A ring system's radial strip: colour and normal opacity per 1/`texels` of its width. */
 const RING_TEXELS = 1024;
-function ringTexture(system: RingSystem) {
-  const tex = new DataTexture(ringStrip(system, RING_TEXELS), RING_TEXELS, 1);
+function ringTexture(system: RingSystem, texels: number) {
+  const tex = new DataTexture(ringStrip(system, texels), texels, 1);
   tex.colorSpace = SRGBColorSpace;
   tex.magFilter = LinearFilter;
   tex.minFilter = LinearMipmapLinearFilter;
@@ -144,10 +145,29 @@ const NO_TINT = new Color(1, 1, 1);
 /** Seconds a newly arrived map takes to fade in over what showed before. */
 const FADE_S = 0.6;
 
-function lit(face: Face, look: Surface, defines?: Record<string, string>) {
+/**
+ * The Sun as the lit materials see it, shared by every one: where it is (world units; the
+ * origin unless the host moves it), its radius (0 lights from a point), and how many bodies
+ * each surface tests for an eclipse (0 compiles none).
+ */
+type SunLight = { sunPos: Vector3; sunRadius: { value: number }; occluders: number };
+
+function lit(face: Face, look: Surface, sun: SunLight, defines?: Record<string, string>) {
+  const occluders =
+    sun.occluders > 0
+      ? {
+          defines: { OCCLUDERS: String(sun.occluders) },
+          uniforms: {
+            occluders: { value: Array.from({ length: sun.occluders }, () => new Vector4()) },
+          },
+        }
+      : { defines: {}, uniforms: {} };
   return new ShaderMaterial({
-    ...(defines ? { defines } : {}),
+    defines: { ...occluders.defines, ...defines },
     uniforms: {
+      ...occluders.uniforms,
+      sunPos: { value: sun.sunPos },
+      sunRadius: sun.sunRadius,
       map: { value: face.texture },
       mapTint: { value: face.tint.clone() },
       prior: { value: WHITE },
@@ -276,10 +296,11 @@ const MAP_SIZE: Record<BodyId, number> = {
 };
 
 /** A ring's material: shadow uniforms are written each frame by the scene. */
-function ringMaterial(map: Texture, id: PlanetId, system: RingSystem) {
+function ringMaterial(map: Texture, id: PlanetId, system: RingSystem, sun: SunLight) {
   const eq = FIGURES[id].equatorialKm;
   return new ShaderMaterial({
     uniforms: {
+      sunPos: { value: sun.sunPos },
       map: { value: map },
       span: { value: new Vector2(system.innerKm / eq, system.outerKm / eq) },
       pole: { value: new Vector3(0, 1, 0) },
@@ -307,13 +328,25 @@ function shell(opacity: number) {
 
 export type Looks = ReturnType<typeof createLooks>;
 
+export type LooksOptions = {
+  /** Bodies each lit surface tests for an eclipse; 0 (the default) compiles no test. */
+  occluders?: number;
+  /** Texels across a ring strip; 1024 by default, more for rings seen from close by. */
+  ringTexels?: number;
+};
+
 /**
  * `light` halves the largest maps for coarse-pointer or low-memory devices. `streamed`: the
  * host streams measured maps in (`setMeasured`), so a body with one shows its map's mean
  * colour until then and is painted only if its map fails (`setFailed`); otherwise every body
- * starts on its painted map.
+ * starts on its painted map. The Sun lights every surface from `sunPos` (the origin until a
+ * host writes it) with `sunRadius` (0, a point, until written).
  */
-export function createLooks(light = false, streamed = false) {
+export function createLooks(light = false, streamed = false, options: LooksOptions = {}) {
+  const sunPos = new Vector3();
+  const sunRadius = { value: 0 };
+  const sun: SunLight = { sunPos, sunRadius, occluders: options.occluders ?? 0 };
+  const ringTexels = options.ringTexels ?? RING_TEXELS;
   /* A body with a measured map (`MAPS`) paints only a stand-in until that loads. */
   const size = (id: BodyId) => (MAPS[id] || light ? Math.min(256, MAP_SIZE[id]) : MAP_SIZE[id]);
   const texture = (id: BodyId) => mapTexture(id, size(id), size(id) / 2);
@@ -340,13 +373,13 @@ export function createLooks(light = false, streamed = false) {
   const ringMaps = partialFrom(
     keysOf(RINGS).flatMap((id) => {
       const system = RINGS[id];
-      return system === undefined ? [] : ([[id, ringTexture(system)]] as const);
+      return system === undefined ? [] : ([[id, ringTexture(system, ringTexels)]] as const);
     }),
   );
   const planets = recordFrom(PLANET_IDS, (id) => {
     const system = RINGS[id];
     const shadow = id === "saturn" ? ringMaps[id] : undefined;
-    const material = lit(faceOf(id), SURFACES[id], shadow ? { RING_SHADOW: "" } : undefined);
+    const material = lit(faceOf(id), SURFACES[id], sun, shadow ? { RING_SHADOW: "" } : undefined);
     if (shadow && system) {
       const eq = FIGURES[id].equatorialKm;
       Object.assign(material.uniforms, {
@@ -364,17 +397,17 @@ export function createLooks(light = false, streamed = false) {
       const map = ringMaps[id];
       return system === undefined || map === undefined
         ? []
-        : ([[id, ringMaterial(map, id, system)]] as const);
+        : ([[id, ringMaterial(map, id, system, sun)]] as const);
     }),
   );
   const named: Record<NamedId, ShaderMaterial> = {
-    pluto: lit(faceOf("pluto"), SURFACES.pluto),
-    sedna: lit(faceOf("sedna"), SURFACES.sedna),
-    halley: lit(faceOf("halley"), SURFACES.halley),
+    pluto: lit(faceOf("pluto"), SURFACES.pluto, sun),
+    sedna: lit(faceOf("sedna"), SURFACES.sedna, sun),
+    halley: lit(faceOf("halley"), SURFACES.halley, sun),
   };
   /* Moon materials are created the first time their planet shows them. */
   const moons: Partial<Record<MoonId, ShaderMaterial>> = {};
-  const moon = (id: MoonId) => (moons[id] ??= lit(faceOf(id), SURFACES[id]));
+  const moon = (id: MoonId) => (moons[id] ??= lit(faceOf(id), SURFACES[id], sun));
   /* Atmosphere shells are created the first time a close-up of their body opens. */
   let airSteps = AIR_STEPS;
   const airs: Partial<Record<BodyId, ShaderMaterial>> = {};
@@ -384,7 +417,7 @@ export function createLooks(light = false, streamed = false) {
     return (airs[id] ??= airMaterial(look, airSteps));
   };
   const sunMap = paintedOf("sun");
-  const sun = new ShaderMaterial({
+  const sunSurface = new ShaderMaterial({
     uniforms: { map: { value: sunMap } },
     vertexShader: VERT,
     fragmentShader: SUN_FRAG,
@@ -416,7 +449,7 @@ export function createLooks(light = false, streamed = false) {
     planets,
     rings,
     named,
-    sun,
+    sun: sunSurface,
     disk,
     gasDisk: new ShaderMaterial({
       uniforms: { map: { value: gasMap }, opacity: { value: 0 } },
@@ -464,7 +497,7 @@ export function createLooks(light = false, streamed = false) {
   };
   const textures = [...Object.values(ringMaps), diskMap, gasMap, sunHalo, glow];
   const surfaceOf = (id: BodyId): ShaderMaterial | undefined => {
-    if (id === "sun") return sun;
+    if (id === "sun") return sunSurface;
     if (includesId(PLANET_IDS, id)) return planets[id];
     if (id === "pluto" || id === "sedna" || id === "halley") return named[id];
     if (includesId(MOON_IDS, id)) return moons[id];
@@ -513,10 +546,30 @@ export function createLooks(light = false, streamed = false) {
     if (!held.has(id)) show(id, faceOf(id), atOnce);
   };
 
+  /* Each body's eclipse slots, found once: a host asks for them every frame. */
+  const occluderSlots = new Map<BodyId, Vector4[] | null>();
+
   return {
     ...materials,
     moon,
     surfaceOf,
+    /** Where the Sun lights every surface from, world units: write it when the Sun is not at the origin. */
+    sunPos,
+    /** The Sun's radius for the eclipses' penumbrae, world units; 0 lights from a point. */
+    sunRadius,
+    /** A body's eclipse slots (centre xyz, radius w; w = 0 empty), to write each frame; none when `occluders` is 0 or the body has no surface. */
+    occludersOf(id: BodyId): Vector4[] | undefined {
+      let slots = occluderSlots.get(id);
+      if (slots === undefined) {
+        const value: unknown = surfaceOf(id)?.uniforms.occluders?.value;
+        slots =
+          Array.isArray(value) && value.every((v): v is Vector4 => v instanceof Vector4)
+            ? value
+            : null;
+        occluderSlots.set(id, slots);
+      }
+      return slots ?? undefined;
+    },
     /** Retains a measured map, including for moons that are not visible yet, and fades it in. */
     setMeasured(id: BodyId, texture: Texture) {
       const old = measured[id];

@@ -1,3 +1,6 @@
+import type { Vec3 } from "@horizon/toolkit/bodies";
+import { AU_LIGHT_SECONDS, JULIAN_YEAR_SECONDS } from "@horizon/toolkit/science";
+
 /**
  * Our reach: the five spacecraft leaving the solar system, the heliopause the Voyagers
  * crossed, and the light-time rings round the Sun. The probes fly their real paths, the JPL
@@ -5,14 +8,17 @@
  * visitor's date; everything else here is measured on those tracks or follows from the speed
  * of light.
  */
-import { TODAY } from "@/space/solar-system/model/moment";
-import { positionOf } from "@/space/solar-system/model/position";
-import type { Vec3 } from "@horizon/toolkit/bodies";
-import { AU_LIGHT_SECONDS, JULIAN_YEAR_SECONDS } from "@horizon/toolkit/science";
-
+import { TODAY } from "./moment";
+import { positionOf } from "./position";
 import TRACKS from "./probe-tracks.json";
 
 export type ProbeId = "voyager1" | "voyager2" | "pioneer10" | "pioneer11" | "newHorizons";
+
+/** What a tap on our reach opens: a probe, or the heliopause the Voyagers crossed. */
+export type ReachSelection = { kind: "reach"; id: ProbeId | "heliopause" };
+
+export const isReachSelection = (sel: { kind: string }): sel is ReachSelection =>
+  sel.kind === "reach";
 
 type Probe = {
   id: ProbeId;

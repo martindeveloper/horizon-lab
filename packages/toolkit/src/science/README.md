@@ -18,7 +18,8 @@ whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConst
 (CODATA 2022).
 A page can print the table; code uses the named values whose names state their
 units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`,
-`JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `GRAVITATIONAL_CONSTANT` in SI,
+`JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `SPEED_OF_LIGHT_KM_S`, `STANDARD_GRAVITY`
+(9.80665 m s⁻², CGPM 1901), `GRAVITATIONAL_CONSTANT` in SI,
 `PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`,
 `ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`, `RYDBERG_INFINITY` in m⁻¹). `RAD_PER_DEG` (π/180) is
 the one degree-to-radian factor; do not retype it.
@@ -61,9 +62,34 @@ Shared laws: `pythagoras`, `keplerThirdLaw`, `lightTravelTime`,
 `schwarzschildRadius`, `parallaxDistance`, `geometricMassTime`, `tangentialVelocity`,
 `angularSeparation` (haversine, degrees), `resonanceSemiMajorAxis` (Kepler III for an orbit
 of k times a planet's period), `hubbleLaw` (d = v / H₀, in Mpc), and for light `planckLaw`,
-`wienDisplacement`, `photonEnergy` (E = hc/λ, nm to eV) and `dopplerShift` (relativistic). A simulation's
+`wienDisplacement`, `photonEnergy` (E = hc/λ, nm to eV) and `dopplerShift` (relativistic); for
+a ship `lorentzFactor`, `timeDilation`, `relativisticDopplerLaw` and `rapidity` (below). A simulation's
 own formulas live in its feature (`lib/equations.ts`) and are built the same
 way. `Formula` is the print-only view documents use.
+
+## Relativity (`relativity.ts`)
+
+Special relativity for a ship that flies at a real fraction of c. The state is the proper
+velocity u = γβc in km/s (scalar, or any `{x, y, z}` as `Vector3Like`): unbounded, so |β| < 1 by
+construction, and du/dτ = a under thrust. Distances are km, times s, accelerations m s⁻².
+
+- `gammaOf(u)` and `betaOf(u)` (a magnitude, or with `out` the β vector), `properVelocity(β)`,
+  `rapidityOf(β)` = atanh β and `betaFromRapidity(φ)`.
+- `relativisticDoppler(β, γ, cos θ)` = γ(1 + β cos θ) with θ in the source frame;
+  `relativisticDopplerObserved(β, γ, cos θ′)` = 1/(γ(1 − β cos θ′)) from the aberrated angle a
+  shader knows. Dead ahead both give √((1 + β)/(1 − β)).
+- `aberrate(n, forward, β, γ, out)` moves a rest-frame unit direction to where the moving
+  observer sees it (closed form; `out` may be `n`); aberrating with −β undoes it.
+- `addVelocities(a, b)` composes proper velocities, two scalars along a line or two vectors
+  with an `out` (the Sun's motion against the microwave background with the ship's).
+- `coastTrip(D, v)` → `{ t, tau }`; `torchTrip(D, a)` is the brachistochrone (accelerate to
+  the midpoint, decelerate to rest: τ = 2(c/a) acosh(1 + aD/2c²), t = 2(c/a) sinh(aτ/2c),
+  plus `gammaMax`); `torchOneWay(τ, a)` → `{ distance, t, u }` for a ship that only accelerates.
+  At 1 g, Andromeda is 28.6 years of ship time and 2.5 million years of the Sun's.
+- Equations: `lorentzFactor` (β in `c`), `timeDilation` (t = γτ), `relativisticDopplerLaw`
+  (θ in degrees) and `rapidity`, for technical pages.
+
+`@horizon/toolkit/shaders` has the same `aberrate` and `dopplerFactor` in GLSL (`<horizon/relativity>`).
 
 ## Spectra and colour (`spectra.ts`, `color.ts`)
 
@@ -79,7 +105,10 @@ wavelengths spectroscopists quote. Photon energies and line physics use vacuum w
 make. `blackbodyColor(K)` and `wavelengthColor(nm)` are the usual two; `cssRgb` prints one.
 Each takes an optional `Gamut`: `p3` computes the colour in Display P3 instead
 (`xyzToLinearP3`), where spectral hues clip far less; `cssColor(rgb, alpha, gamut)` prints it
-as `color(display-p3 …)` for a P3 canvas or page.
+as `color(display-p3 …)` for a P3 canvas or page. `blackbodyLut(size, minK, maxK, gamut)` bakes
+`blackbodyColor` into RGBA bytes for a `size` × 1 texture, log-spaced in temperature (256 texels
+from 1,000 to 40,000 K by default); `blackbodyLutCoordinate(K, minK, maxK)` is the texture
+coordinate a shader samples at, which the shaders that read the lookup mirror in GLSL.
 
 ## Elements (`elements.ts`)
 

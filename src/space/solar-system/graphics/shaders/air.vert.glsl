@@ -6,7 +6,10 @@
 
 varying vec3 vObject;
 
+#include <horizon/log-depth>
+
 void main() {
   vObject = position;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  logDepthVertex();
 }

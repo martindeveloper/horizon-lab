@@ -203,3 +203,30 @@ export function cssColor([r, g, b]: Rgb, alpha = 1, gamut: Gamut = "srgb") {
   const c = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 255);
   return `rgb(${c(r)} ${c(g)} ${c(b)} / ${alpha})`;
 }
+
+/**
+ * Black-body colours as a `size` × 1 RGBA texture, encoded sRGB at full brightness,
+ * log-spaced in temperature from `minK` to `maxK` (texel i is minK (maxK/minK)^(i/(size−1))),
+ * so a shader reads the colour of T at u = log(T/minK) / log(maxK/minK). Alpha is 255.
+ */
+export function blackbodyLut(size = 256, minK = 1000, maxK = 40_000, gamut: Gamut = "srgb") {
+  if (!(size >= 2) || !(minK > 0) || !(maxK > minK))
+    throw new RangeError("blackbodyLut needs size ≥ 2 and 0 < minK < maxK");
+  const lut = new Uint8Array(size * 4);
+  const ratio = Math.log(maxK / minK);
+  for (let i = 0; i < size; i += 1) {
+    const kelvin = minK * Math.exp((ratio * i) / (size - 1));
+    const [r, g, b] = blackbodyColor(kelvin, gamut);
+    lut[i * 4] = Math.round(r * 255);
+    lut[i * 4 + 1] = Math.round(g * 255);
+    lut[i * 4 + 2] = Math.round(b * 255);
+    lut[i * 4 + 3] = 255;
+  }
+  return lut;
+}
+
+/** The texture coordinate (0–1) at which `blackbodyLut(size, minK, maxK)` holds a temperature. */
+export function blackbodyLutCoordinate(kelvin: number, minK = 1000, maxK = 40_000) {
+  const t = Math.log(kelvin / minK) / Math.log(maxK / minK);
+  return Math.min(1, Math.max(0, t));
+}

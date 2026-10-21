@@ -26,7 +26,7 @@ import {
   observableUniverse,
   type CosmosDetail,
 } from "../graphics/cosmos";
-import type { Looks } from "../graphics/looks";
+import type { CosmosLooks } from "../graphics/looks";
 import {
   CMB_MLY,
   FIRST_GALAXIES_MLY,
@@ -90,7 +90,7 @@ export type CosmosClouds = ReturnType<typeof createCosmosClouds>;
 /** Builds every drawn thing under `root` (the far field under `parent`, round the camera). */
 export function createCosmosClouds(
   scope: DisposalScope,
-  looks: Looks,
+  looks: CosmosLooks,
   root: Object3D,
   parent: Object3D,
   detail: CosmosDetail,
@@ -141,6 +141,10 @@ export function createCosmosClouds(
   /* Far galaxies all round the camera: depth behind the Local Group and Virgo. */
   const field = new Group();
   points((s) => s.field, m.field, field);
+  /* The same cloud turned round, for a camera out among the galaxies (`afield`): twice as many. */
+  const fieldBeyond = points((s) => s.field, m.field, field);
+  fieldBeyond.rotation.set(1.1, 2.3, 0.4);
+  fieldBeyond.visible = false;
   parent.add(field);
 
   const clusters = CLUSTERS.map((spec, i) => {
@@ -173,6 +177,7 @@ export function createCosmosClouds(
     deepFill,
     flows,
     field,
+    fieldBeyond,
     clusters,
     cluster,
     milkyWay,

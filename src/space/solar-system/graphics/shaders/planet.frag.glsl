@@ -16,6 +16,14 @@ uniform float ambient;       // linear floor so the night side is not pure black
 uniform float minnaert;      // limb-darkening exponent k
 uniform float specStrength;  // ocean glint
 uniform float specPower;     // glint tightness
+uniform vec3 sunPos;         // the Sun, world; the origin unless a host moves it
+uniform float sunRadius;     // the Sun's radius, world units; 0 lights from a point
+
+#ifdef OCCLUDERS
+// Bodies that may stand between this surface and the Sun: centre (world) and radius, world
+// units; a radius of 0 is an empty slot. A host writes them per body each frame.
+uniform vec4 occluders[OCCLUDERS];
+#endif
 
 #ifdef RING_SHADOW
 uniform sampler2D ringMap;   // radial strip, alpha = normal opacity 1 − e^(−τ)
@@ -32,10 +40,14 @@ varying vec2 vUv;
 
 #include <horizon/fresnel>
 #include "./parameters.generated.glsl"
+#include <horizon/log-depth>
 
 void main() {
+  logDepthFragment();
   vec3 n = normalize(vNormal);
-  vec3 sunDir = normalize(-vWorld);
+  vec3 toSun = sunPos - vWorld;
+  float sunDist = length(toSun);
+  vec3 sunDir = toSun / sunDist;
   vec3 viewDir = normalize(vView);
   float ndl = dot(n, sunDir);
   float mu0 = clamp((ndl + PLANET_WRAP) / (1.0 + PLANET_WRAP), 0.0, 1.0);
@@ -52,6 +64,28 @@ void main() {
   float inRing = step(0.0, t) * step(0.0, s) * step(s, 1.0);
   float tau = -log(max(1.0 - opacity, 0.005));
   diffuse *= mix(1.0, exp(-tau / max(abs(across), 0.02)), inRing);
+#endif
+
+#ifdef OCCLUDERS
+  // An eclipse: each occluder's disc against the Sun's, as angles seen from this point. Inside
+  // the umbra the Sun is hidden; across the penumbra it is uncovered over the Sun's own
+  // angular radius; a disc smaller than the Sun's leaves an annulus (the antumbra) lit.
+  float sunAngle = max(sunRadius / sunDist, 1e-6);
+  float shadow = 1.0;
+  for (int k = 0; k < OCCLUDERS; k++) {
+    vec4 body = occluders[k];
+    if (body.w <= 0.0) continue;
+    vec3 toBody = body.xyz - vWorld;
+    float along = dot(toBody, sunDir);
+    if (along <= 0.0 || along >= sunDist) continue;
+    float apart = length(toBody - sunDir * along) / along;
+    float cover = body.w / along;
+    // A disc at least the Sun's size hides it fully inside |cover − sun|; a smaller one hides
+    // (cover / sun)² of it at most, the antumbra's annulus staying lit.
+    float part = min(cover / sunAngle, 1.0);
+    shadow *= 1.0 - part * part * (1.0 - smoothstep(abs(cover - sunAngle), cover + sunAngle, apart));
+  }
+  diffuse *= shadow;
 #endif
 
   vec3 albedo = texture2D(map, vUv).rgb * mapTint;

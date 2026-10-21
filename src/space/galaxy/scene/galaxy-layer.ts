@@ -29,16 +29,16 @@ import { LIGHT_YEAR_AU, convert } from "@horizon/toolkit/science";
 import { modernGalaxy } from "../graphics/galaxy";
 import { writeSunTrail } from "../model/galactic-orbit";
 import { HALO_R200_KPC } from "../model/parameters";
-import type { Selection } from "../store";
-import { type Frame, type SceneKit } from "./kit";
+import type { WorldFrame as Frame, WorldSelection as Selection } from "../show";
+import { GALAXY_FRAME, GALAXY_LAYER, LY, SUN_ANCHOR, galaxyToWorld } from "./frames";
+import type { GalaxyKit } from "./kit";
 import type { LabelPicks } from "./label-picks";
-import { GALAXY_FRAME, GALAXY_LAYER, LY, SUN_ANCHOR, galaxyToWorld } from "./lod";
 
 /** Farthest the drawn Galaxy reaches from its centre (ly), halo included. */
 const EXTENT_LY = 660_000;
 
 export function createGalaxyLayer(
-  { scope, looks, camera, pxWorld, lod }: SceneKit,
+  { scope, looks, camera, pxWorld, lod }: GalaxyKit,
   parent: Object3D,
   deps: {
     place: PlaceLabel;
@@ -116,9 +116,9 @@ export function createGalaxyLayer(
     reach() {
       return camera.position.distanceTo(centre) + EXTENT_LY * LY;
     },
-    update({ show, dist }: Frame) {
+    update({ show, dist, galaxyPresence = 1 }: Frame) {
       /* The band of our own sky up close, the disk farther out, then one galaxy of many. */
-      const shown = 1 - lod.cosmos;
+      const shown = (1 - lod.cosmos) * galaxyPresence;
       /* The Sun's path, its marker's name and rulers belong to the Galaxy's scale. */
       const near = lod.galaxy * shown;
       const labelled = names.to(show.names);

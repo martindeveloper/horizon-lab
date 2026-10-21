@@ -4,16 +4,16 @@
  * ("About {value} galaxies"); components/format.ts prints it in the visitor's distance unit
  * and language.
  *
- * Values the model computes with stay in the model (`parameters.ts`, `cosmos.ts`,
- * `neighbours.ts`) and are referenced here, not copied. docs/science-sources.md lists the
- * catalogue (`npm run docs:catalogue`).
+ * The figures are the shared worlds' (`@/space/galaxy`, `@/space/cosmos`, the solar system's
+ * reach); this composes them as Deep Field's cards read them. Values the model computes with
+ * stay in the model and are referenced there, not copied. docs/science-sources.md lists the
+ * catalogues (`npm run docs:catalogue`).
  */
 import { factsOf, type Fact } from "@/lib/facts";
-
-import { COSMOS } from "./cosmos";
-import { GALAXY } from "./galaxy";
-import { PROBES } from "./probes";
-import { STARS } from "./stars";
+import { COSMOS } from "@/space/cosmos/model/catalogue";
+import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
+import { STARS } from "@/space/galaxy/model/catalogue/stars";
+import { PROBE_CATALOGUE as PROBES } from "@/space/solar-system/model/probes-catalogue";
 
 export const CATALOGUE = {
   stars: STARS,

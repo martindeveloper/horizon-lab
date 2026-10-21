@@ -1,7 +1,7 @@
 import type { Format, Translate } from "@/lib/facts";
+import { CMB_AGE_YEARS } from "@/space/cosmos/model/cosmos";
 import { convert } from "@horizon/toolkit/science";
 
-import { CMB_AGE_YEARS } from "../lib/model/cosmos";
 import type { Then } from "../lib/model/depth";
 
 /**

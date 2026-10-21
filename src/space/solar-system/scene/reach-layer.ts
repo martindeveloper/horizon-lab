@@ -12,20 +12,41 @@ import {
   ownedLine,
   rising,
   type AnchoredRulers,
+  type Fader,
   type PlaceLabel,
+  type SceneKit,
 } from "@horizon/toolkit/scene";
 
+import type { ReachLooks } from "../graphics/reach-looks";
 import {
   HELIOPAUSE_AU,
   LIGHT_RINGS,
   PROBES,
   probePath,
   probePosition,
+  isReachSelection,
   yearOf,
+  type ReachSelection,
 } from "../model/probes";
-import type { Selection } from "../store";
-import type { Frame, SceneKit } from "./kit";
-import type { LabelPicks } from "./label-picks";
+
+/** What the reach is built with: the host's basics, its looks and faders that ease its switches. */
+export type ReachKit = SceneKit<
+  ReachLooks,
+  { pxWorld: (dist: number, px: number) => number; fader: () => Fader }
+>;
+
+/** The state one frame draws: the switches the reach reads, the selection, the camera distance and the line art's presence. */
+export type ReachFrame = {
+  show: { names: boolean; lightTime: boolean };
+  sel: { kind: string } | null;
+  /** Camera distance from its aim, au. */
+  dist: number;
+  /** The line art's presence 0..1 (a drift veils it); the rings follow it. */
+  lines: number;
+};
+
+/** Registers what a tap on the reach's names opens; a host's label picks (`@/space/galaxy/scene/label-picks`). */
+type ReachPicks = { register(pick: (key: string) => ReachSelection | undefined): void };
 
 const RING_SEGMENTS = 192;
 const RING_COLOR = 0x8ea4ba;
@@ -47,9 +68,9 @@ const bubbleShown = (dist: number) =>
   rising(HELIOPAUSE_AU / dist, 0.02, 0.05) * (1 - rising(HELIOPAUSE_AU / dist, 1.2, 2));
 
 export function createReachLayer(
-  { scope, looks, camera, pxWorld, lod }: SceneKit,
+  { scope, looks, camera, pxWorld, lod }: ReachKit,
   parent: Object3D,
-  deps: { place: PlaceLabel; rulers: AnchoredRulers; picks: LabelPicks },
+  deps: { place: PlaceLabel; rulers: AnchoredRulers; picks: ReachPicks },
 ) {
   const { place, rulers } = deps;
 
@@ -86,7 +107,7 @@ export function createReachLayer(
     trail.positions.set(path);
     const marker = new Sprite(looks.probe);
     const hit = new Mesh(hitGeometry, looks.ghost);
-    hit.userData.pick = { kind: "reach", id: probe.id } satisfies Selection;
+    hit.userData.pick = { kind: "reach", id: probe.id } satisfies ReachSelection;
     marker.position.fromArray(at);
     hit.position.fromArray(at);
     parent.add(trail.line, marker, hit);
@@ -101,7 +122,7 @@ export function createReachLayer(
   const up = new Vector3();
 
   /* What a tap on a name opens: the heliopause, or the probe. */
-  deps.picks.register((key): Selection | undefined => {
+  deps.picks.register((key): ReachSelection | undefined => {
     if (key === "heliopause") return { kind: "reach", id: "heliopause" };
     const probe = probes.find((p) => p.id === key);
     return probe && { kind: "reach", id: probe.id };
@@ -109,7 +130,7 @@ export function createReachLayer(
 
   return {
     pickables: probes.map((p) => p.hit),
-    update({ show, sel, dist, lines }: Frame) {
+    update({ show, sel, dist, lines }: ReachFrame) {
       const labelled = names.to(show.names);
       const lightTime = lit.to(show.lightTime) * lines;
       for (const ring of rings) {
@@ -150,7 +171,7 @@ export function createReachLayer(
       } else place("heliopause", 0, 0, 0, false);
 
       for (const p of probes) {
-        const picked = sel?.kind === "reach" && sel.id === p.id;
+        const picked = !!sel && isReachSelection(sel) && sel.id === p.id;
         const shown = probeShown(p.r, dist);
         const on = shown > 0.004;
         p.marker.visible = p.trail.line.visible = p.hit.visible = on;

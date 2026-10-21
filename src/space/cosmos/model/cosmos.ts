@@ -8,6 +8,7 @@
  * Named galaxies and clusters sit at their measured directions and distances (comoving ones
  * from their redshifts, in flat ΛCDM); the rest is a sketch shaped like each structure.
  */
+import { SUN_GALACTIC_RADIUS_LY, SUN_HEIGHT_LY } from "@/space/galaxy/model/parameters";
 import type { Vec3 } from "@horizon/toolkit/bodies";
 import { clamp01 } from "@horizon/toolkit/math";
 import {
@@ -23,8 +24,6 @@ import {
   particleHorizonMpc,
   redshiftAtLookback,
 } from "@horizon/toolkit/science";
-
-import { SUN_GALACTIC_RADIUS_LY, SUN_HEIGHT_LY } from "./parameters";
 
 /** Numbers inside printed formulas. */
 const n = (value: number) => formatNumber(value, "en", 4);

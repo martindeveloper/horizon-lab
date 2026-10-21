@@ -45,6 +45,9 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
   precession periods, and the resonant librations of Mimas, Tethys, Enceladus
   and Miranda; `meanRates(moon)`, `libration(moon, d)` and `meanLongitude(id, date)`.
   Positions from them are left to the lab for now.
+- `lunar-theory.ts`: the Moon's geocentric place from the truncated ELP-2000/82 theory
+  (Meeus ch. 47; about 10″ and 4 km): `lunarPosition(jde)` in the ecliptic of date,
+  `lunarPositionJ2000(date, out)` as J2000 ecliptic km for a scene with fixed axes.
 
 ## Sun and Moon in the sky (`almanac.ts`)
 
@@ -122,7 +125,8 @@ colour helpers the painters share are public too: `mix(a, b, t)` blends two
 ## Consumers and tests
 
 The shared solar system (`src/space/solar-system/graphics/moons.ts`) keeps the three.js
-moon adapters; the orrery (`src/features/orrery`) keeps its materials, shaders and map loading.
+moon adapters; the orrery (`src/features/orrery`) keeps its materials and shaders, and the
+WebP map loader is `@horizon/toolkit/scene`.
 The shell's header sky and the catalogue hero (`src/space/observer-sky.ts`)
 keep the observer, the star list and the drawn bearings, built on the almanac.
 `tests/bodies.test.mjs`, `tests/astronomy.test.mjs`, `tests/sky.test.mjs` and

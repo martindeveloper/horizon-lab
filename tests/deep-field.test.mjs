@@ -11,6 +11,21 @@ import { cardFor, NEIGHBOUR_IDS } from "../src/features/deep-field/components/ca
 import { formatAgo, formatThen } from "../src/features/deep-field/components/format.ts";
 import { PROSE_FIGURES } from "../src/features/deep-field/lib/model/catalogue/index.ts";
 import {
+  CMB_LY,
+  EARTH_THEN,
+  LADDER_LY,
+  RUNGS,
+  depthOf,
+  lyAtDepth,
+  sightline,
+  thenOf,
+} from "../src/features/deep-field/lib/model/depth.ts";
+import { TOUR } from "../src/features/deep-field/lib/model/tour.ts";
+import { VIEWS } from "../src/features/deep-field/lib/model/views.ts";
+import { dropsSelection, useDeepField } from "../src/features/deep-field/lib/store.ts";
+import { pathForView, resolveView, viewFromPath } from "../src/features/deep-field/routing.ts";
+import { proseArgs } from "../src/lib/facts.ts";
+import {
   ANCHORS,
   CMB_AGE_YEARS,
   CMB_MLY,
@@ -27,23 +42,14 @@ import {
   cosmicAim,
   lookbackMly,
   supergalacticLatitude,
-} from "../src/features/deep-field/lib/model/cosmos.ts";
-import {
-  CMB_LY,
-  EARTH_THEN,
-  LADDER_LY,
-  RUNGS,
-  depthOf,
-  lyAtDepth,
-  sightline,
-  thenOf,
-} from "../src/features/deep-field/lib/model/depth.ts";
+} from "../src/space/cosmos/model/cosmos.ts";
 import {
   TRAIL_LAPS,
   sunGalactic,
   writeSunTrail,
-} from "../src/features/deep-field/lib/model/galactic-orbit.ts";
-import { neighboursSelfCheck } from "../src/features/deep-field/lib/model/neighbours.ts";
+} from "../src/space/galaxy/model/galactic-orbit.ts";
+import { neighboursSelfCheck } from "../src/space/galaxy/model/neighbours.ts";
+import { GALACTIC_YEAR } from "../src/space/solar-system/model/parameters.ts";
 import {
   HELIOPAUSE_AU,
   LIGHT_DAY_AU,
@@ -54,13 +60,7 @@ import {
   probeFromEarth,
   probePath,
   probeSpeed,
-} from "../src/features/deep-field/lib/model/probes.ts";
-import { TOUR } from "../src/features/deep-field/lib/model/tour.ts";
-import { VIEWS } from "../src/features/deep-field/lib/model/views.ts";
-import { dropsSelection, useDeepField } from "../src/features/deep-field/lib/store.ts";
-import { pathForView, resolveView, viewFromPath } from "../src/features/deep-field/routing.ts";
-import { proseArgs } from "../src/lib/facts.ts";
-import { GALACTIC_YEAR } from "../src/space/solar-system/model/parameters.ts";
+} from "../src/space/solar-system/model/probes.ts";
 import { featureMessages, leaves } from "./messages-helper.mjs";
 
 const near = (actual, expected, tolerance, message) =>

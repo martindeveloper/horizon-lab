@@ -5,9 +5,10 @@
  * stale, so an idle view costs no GPU time.
  *
  * Each layer builds its objects once and draws one `Frame`; this file wires them to the
- * store, the camera, input and the level of detail (lod.ts): one world in au, the Galaxy and
- * the cosmic map drawn in a pass of their own, then the solar system (the shared unit, held at
- * today) and the nearest stars over them.
+ * store, the camera, input and the level of detail (`@/space/galaxy/scene/lod`): one world in
+ * au, the Galaxy and the cosmic map (the shared worlds, `@/space/galaxy` and `@/space/cosmos`)
+ * drawn in a pass of their own, then the solar system (the shared unit, held at today), its
+ * reach and the nearest stars over them.
  */
 import { Scene } from "three";
 
@@ -18,9 +19,18 @@ import {
   invalidateOnMotionChange,
   stageClearance,
 } from "@/lib/scene-bridge";
+import { createCosmosLayer } from "@/space/cosmos/scene/cosmos-layer";
+import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
+import { GALAXY_LAYER, LY, galaxyMix } from "@/space/galaxy/scene/frames";
+import { createGalaxyLayer } from "@/space/galaxy/scene/galaxy-layer";
+import { createLabelPicks } from "@/space/galaxy/scene/label-picks";
+import { createLod } from "@/space/galaxy/scene/lod";
+import { createNeighboursLayer } from "@/space/galaxy/scene/neighbours-layer";
 import { TODAY } from "@/space/solar-system/model/moment";
+import { PROBES } from "@/space/solar-system/model/probes";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
+import { createReachLayer } from "@/space/solar-system/scene/reach-layer";
 import {
   SOLAR_RULER_KEYS,
   createSolarSystem,
@@ -43,23 +53,15 @@ import {
 
 import { createLooks } from "../graphics/looks";
 import { LADDER_LY } from "../model/depth";
-import { NEIGHBOURS } from "../model/neighbours";
-import { PROBES } from "../model/probes";
 import { viewById, worldDistance, type Realm } from "../model/views";
 import { deepFieldQuality } from "../quality";
 import { dropsSelection, useDeepField } from "../store";
 import { createCameraRig } from "./camera-rig";
-import { createCosmosLayer } from "./cosmos-layer";
 import { createDriftDirector } from "./drift-director";
-import { createGalaxyLayer } from "./galaxy-layer";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
 import { SOLAR_SHOW, labelInsets, type Frame, type SceneKit } from "./kit";
-import { createLabelPicks } from "./label-picks";
-import { GALAXY_LAYER, LY, createLod, galaxyMix } from "./lod";
-import { createNeighboursLayer } from "./neighbours-layer";
 import { createPicking } from "./picking";
-import { createReachLayer } from "./reach-layer";
 import { createSkyLayer } from "./sky-layer";
 
 export function createDeepFieldEngine({

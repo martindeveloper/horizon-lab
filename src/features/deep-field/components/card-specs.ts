@@ -7,9 +7,9 @@
  * given here, in both languages.
  */
 import { figureRow, r, row, v, type CardSpec, type StaticCard, type Badge } from "@/lib/facts";
+import type { NeighbourId } from "@/space/galaxy/model/neighbours";
 
 import { CATALOGUE } from "../lib/model/catalogue";
-import type { NeighbourId } from "../lib/model/neighbours";
 import type { CosmosId } from "../lib/store";
 
 /** What a card's kicker says about how far its figures can be trusted (`badges.<id>`). */

@@ -1,5 +1,15 @@
 import { Vector3, type PerspectiveCamera } from "three";
 
+import { cosmicAim } from "@/space/cosmos/model/cosmos";
+import {
+  GALAXY_FRAME,
+  LY,
+  MLY,
+  SUPERGALACTIC_FRAME,
+  galaxyMix,
+  galaxyToWorld,
+  realmOf,
+} from "@/space/galaxy/scene/frames";
 import { SOLAR_FRAMING } from "@/space/solar-system/model/views";
 /**
  * Deep Field's orbit camera (the toolkit's orbit rig): one zoom from the Sun's neighbourhood to
@@ -12,21 +22,11 @@ import type { Vec3 } from "@horizon/toolkit/bodies";
 import { smootherstep, toLogFraction } from "@horizon/toolkit/math";
 import { createOrbitRig, createViewMoves } from "@horizon/toolkit/scene";
 
-import { cosmicAim } from "../model/cosmos";
 import { LADDER_LY } from "../model/depth";
 import type { ViewId } from "../model/view-ids";
 import { viewById, worldDistance, type Realm } from "../model/views";
 import type { Selection } from "../store";
 import { GALAXY_NEAR } from "./kit";
-import {
-  GALAXY_FRAME,
-  LY,
-  MLY,
-  SUPERGALACTIC_FRAME,
-  galaxyMix,
-  galaxyToWorld,
-  realmOf,
-} from "./lod";
 
 export type CameraRig = ReturnType<typeof createCameraRig>;
 

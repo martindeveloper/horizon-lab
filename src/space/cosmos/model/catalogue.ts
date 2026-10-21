@@ -1,4 +1,4 @@
-import type { Facts, Status, Value } from "@/lib/facts";
+import { factsOf, type Facts, type Status, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
 /** Beyond the Milky Way: figures from the cosmos model and the literature. */
 import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
@@ -20,7 +20,7 @@ import {
   WEB_SKY,
   anchorById,
   type AnchorId,
-} from "../cosmos";
+} from "./cosmos";
 
 type Extra = { status?: Status; note?: string; digits?: number };
 
@@ -424,3 +424,6 @@ export const COSMOS = {
     ringFar: ring(LOOKBACK_RINGS_GYR[2]),
   },
 } satisfies Record<string, Facts>;
+
+/** Every fact with its path ("cosmos.virgo.members"), for tests and the ledger. */
+export const cosmosCatalogueFacts = () => factsOf({ cosmos: COSMOS });

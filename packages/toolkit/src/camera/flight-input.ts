@@ -16,7 +16,7 @@ export type FlightAxes = {
   roll: number;
   /** 0…1: Shift, or the right trigger's travel. */
   boost: number;
-  /** 0…1: the left trigger's travel (the keyboard has no brake). */
+  /** 0…1: X, or the left trigger's travel; the integrator says what it brakes against. */
   brake: number;
   /** Space held: hold position, the integrator's way. */
   park: boolean;
@@ -75,6 +75,7 @@ export const FLIGHT_KEYS = new Set([
   "KeyE",
   "KeyR",
   "KeyF",
+  "KeyX",
   "ShiftLeft",
   "ShiftRight",
   "Space",
@@ -94,7 +95,7 @@ export function flightAxesFromKeys(keys: ReadonlySet<string>, out: FlightAxes) {
   out.lift = axis(keys, "KeyR", "KeyF");
   out.roll = axis(keys, "KeyE", "KeyQ");
   out.boost = keys.has("ShiftLeft") || keys.has("ShiftRight") ? 1 : 0;
-  out.brake = 0;
+  out.brake = keys.has("KeyX") ? 1 : 0;
   out.park = keys.has("Space");
   return out;
 }

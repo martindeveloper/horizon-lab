@@ -2,12 +2,12 @@ import { useTranslations } from "next-intl";
 
 import { SceneCanvas } from "@/components/simulations/scene-canvas";
 import { useSceneLabels } from "@/components/simulations/use-scene-labels";
+import { COSMOS_LABELS } from "@/space/cosmos/model/cosmos";
+import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
+import { LIGHT_RINGS, PROBES } from "@/space/solar-system/model/probes";
 import { SOLAR_LABEL_KEYS } from "@/space/solar-system/scene/solar-system";
 import { DISTANCE_WORDS } from "@horizon/toolkit/scene";
 
-import { COSMOS_LABELS } from "../lib/model/cosmos";
-import { NEIGHBOURS } from "../lib/model/neighbours";
-import { LIGHT_RINGS, PROBES } from "../lib/model/probes";
 import { createDeepFieldEngine } from "../lib/scene/engine";
 import { useDeepField } from "../lib/store";
 

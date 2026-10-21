@@ -1,10 +1,10 @@
 /** Shared pieces of the Deep Field renderer: constants, the per-engine kit and the per-frame state. */
+import type { Lod } from "@/space/galaxy/scene/lod";
+import type { WorldFrame } from "@/space/galaxy/show";
 import type { SolarShow } from "@/space/solar-system/scene/kit";
 import { DEFAULT_INSETS, type LabelInsets, type SceneKit as Kit } from "@horizon/toolkit/scene";
 
 import type { Looks } from "../graphics/looks";
-import type { Selection, Show } from "../store";
-import type { Lod } from "./lod";
 
 /** The solar system as Deep Field draws it: today's populations and orbits, still. */
 export const SOLAR_SHOW: SolarShow = {
@@ -36,16 +36,9 @@ export function labelInsets(wide: boolean, clear: number, caption = 0): LabelIns
 
 /**
  * What every layer is built with: the host's basics, the looks and the level of detail (screen
- * size, presence bands, faders and the scale blend; see lod.ts).
+ * size, presence bands, faders and the scale blend; `@/space/galaxy/scene/lod`).
  */
 export type SceneKit = Kit<Looks, Lod>;
 
-/** The model state one frame draws. */
-export type Frame = {
-  show: Show;
-  sel: Selection | null;
-  /** Camera distance from its aim, au. */
-  dist: number;
-  /** The line art's presence 0..1 (a drift veils it); labels that name a line follow it. */
-  lines: number;
-};
+/** The model state one frame draws: the shared worlds' frame (`@/space/galaxy/show`). */
+export type Frame = WorldFrame;

@@ -2,7 +2,7 @@
  * What a tap on a label opens, by the label's key. Each layer registers the keys it places;
  * picking asks the registry, so the engine chains nothing. A key no layer owns opens nothing.
  */
-import type { Selection } from "../store";
+import type { WorldSelection as Selection } from "../show";
 
 export type LabelPick = (key: string) => Selection | undefined;
 
