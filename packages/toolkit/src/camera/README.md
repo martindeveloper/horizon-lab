@@ -30,7 +30,8 @@ label padding is 48 CSS pixels, and viewports smaller than 8 pixels are hidden.
 cancellation and listener cleanup. Get/commit poses through callbacks. Distances
 and inclination bounds, drag sensitivity, wheel sensitivity and enabled state
 are configurable. Wheel deltas are normalized to pixels (16 pixels per line,
-viewport height per page) before applying sensitivity. Call `cancel()` when a scripted tour takes control and
+canvas height per page, `wheelPixels`) before applying sensitivity. A press that moves
+farther than `TAP_SLOP_PX` (6) is a drag, not a tap; the scene's tap picking uses the same. Call `cancel()` when a scripted tour takes control and
 `dispose()` on unmount. A pinch does not jump into drag when one finger lifts.
 
 `stepOrbit(pose, turn, options)` applies one discrete button or key step: signed

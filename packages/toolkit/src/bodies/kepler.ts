@@ -183,7 +183,20 @@ export function writeOrbit(out: Float32Array, el: Elements, elliptical: boolean)
   }
 }
 
-/** Mean anomaly moves a body along its orbit; it does not change the orbit geometry. */
+/**
+ * A float32 vertex keeps 24 bits: a change that moves it by less than one part in 2²⁴ of the
+ * orbit's size cannot move it, so the buffer stays. A vertex moves by a·Δe for e, and by
+ * a·Δθ (radians) for an angle, so the angles in degrees compare on one radian's worth.
+ */
+const unmoved = (from: number, to: number, scale: number) =>
+  Math.abs(to - from) <= scale * 2 ** -24;
+const RADIAN_DEG = 1 / RAD;
+
+/**
+ * Mean anomaly moves a body along its orbit; it does not change the orbit geometry. Elements
+ * that drift with the clock (the planets' secular rates) rewrite the buffer only once the
+ * drift could move a vertex.
+ */
 export function createOrbitWriter(out: Float32Array) {
   let previous: { a: number; e: number; i: number; omega: number; node: number } | undefined;
   return (el: Elements, elliptical: boolean) => {
@@ -191,11 +204,11 @@ export function createOrbitWriter(out: Float32Array) {
     const i = elliptical ? el.i : 0;
     if (
       previous &&
-      previous.a === el.a &&
-      previous.e === e &&
-      previous.i === i &&
-      previous.omega === el.omega &&
-      previous.node === el.node
+      unmoved(previous.a, el.a, Math.abs(el.a)) &&
+      unmoved(previous.e, e, 1) &&
+      unmoved(previous.i, i, RADIAN_DEG) &&
+      unmoved(previous.omega, el.omega, RADIAN_DEG) &&
+      unmoved(previous.node, el.node, RADIAN_DEG)
     )
       return false;
     writeOrbit(out, el, elliptical);

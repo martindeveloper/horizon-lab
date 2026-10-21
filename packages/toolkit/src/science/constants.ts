@@ -113,6 +113,33 @@ export const CONSTANTS = {
     exact: true,
     source: "IAU 2015 Resolution B3 nominal value",
   },
+  solarEffectiveTemperature: {
+    symbol: "T☉",
+    latex: "T_\\odot",
+    value: 5772,
+    unit: "K",
+    unitLatex: "\\mathrm{K}",
+    exact: true,
+    source: "IAU 2015 Resolution B3 nominal value",
+  },
+  solarIrradiance: {
+    symbol: "S☉",
+    latex: "S_\\odot",
+    value: 1361,
+    unit: "W m⁻²",
+    unitLatex: "\\mathrm{W\\,m^{-2}}",
+    exact: true,
+    source: "IAU 2015 Resolution B3 nominal value",
+  },
+  jupiterGravitationalParameter: {
+    symbol: "GM♃",
+    latex: "GM_\\mathrm{J}",
+    value: 1.266_865_3e17,
+    unit: "m³ s⁻²",
+    unitLatex: "\\mathrm{m^3\\,s^{-2}}",
+    exact: true,
+    source: "IAU 2015 Resolution B3 nominal value",
+  },
   planckConstant: {
     symbol: "h",
     latex: "h",
@@ -189,6 +216,10 @@ export const SPEED_OF_LIGHT_KM_S = SPEED_OF_LIGHT / 1e3;
 export const STANDARD_GRAVITY = 9.80665;
 export const SOLAR_MASS_KG = CONSTANTS.solarMass.value;
 export const SOLAR_RADIUS_KM = CONSTANTS.solarRadius.value / 1e3;
+export const SOLAR_TEFF_K = CONSTANTS.solarEffectiveTemperature.value;
+/** Sunlight's power per square metre at 1 au, W m⁻² (the total solar irradiance). */
+export const SOLAR_IRRADIANCE_W_M2 = CONSTANTS.solarIrradiance.value;
+export const JUPITER_GM_SI = CONSTANTS.jupiterGravitationalParameter.value; // m³ s⁻²
 export const AU_KM = CONSTANTS.astronomicalUnit.value / 1e3;
 export const LIGHT_YEAR_KM = CONSTANTS.lightYear.value / 1e3;
 export const JULIAN_YEAR_SECONDS = CONSTANTS.julianYear.value;

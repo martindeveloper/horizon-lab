@@ -11,7 +11,7 @@ outside this package.
 | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `@horizon/toolkit/ui`                | Controls, surfaces, equations, loading, dialogs, technical documents                                                                           | React; Radix Slider; Lucide; class utilities              |
 | `@horizon/toolkit/ui/motion`         | `TextReveal`, `textStagger`                                                                                                                    | React, Motion                                             |
-| `@horizon/toolkit/math`              | Clamp, wrap, easing, log sliders, seeded random, CPU value noise                                                                               | None                                                      |
+| `@horizon/toolkit/math`              | Clamp, wrap, easing, log sliders, seeded random, CPU value noise, `Vec3` tuple helpers                                                         | None                                                      |
 | `@horizon/toolkit/science`           | Constants, units, equations, readouts, Julian dates, sky coordinates, spectra, colour, periodic table                                          | None                                                      |
 | `@horizon/toolkit/camera`            | Camera snapshots, screen projection, orbit and flight input, free poses and matrices, flight interpolation, views                              | DOM only when creating input controls                     |
 | `@horizon/toolkit/rendering`         | Shader pass, composite (MSAA, FXAA, bloom, lens) passes, engine host, frame loop, sizing, power hints, WebGL probe                             | Three.js; DOM only when creating a renderer/observer/loop |
@@ -25,6 +25,9 @@ outside this package.
 | `@horizon/toolkit/bodies`            | Sun, planets, moons: orbits, figures, spin, rings, Sun/Moon almanac                                                                            | None                                                      |
 | `@horizon/toolkit/bodies/surfaces`   | Painted equirectangular body maps, albedos                                                                                                     | None                                                      |
 | `@horizon/toolkit/shaders`           | GLSL snippets and build-time includes                                                                                                          | Bundler text imports                                      |
+| `@horizon/toolkit/shaders/defines`   | `glslDefines`, `glslHeader`: numbers handed to GLSL as `#define`s from the TypeScript that owns them                                           | None                                                      |
+| `@horizon/toolkit/glsl/*`            | One snippet's source file (`glsl/temperature`), for a loader that resolves `#include <horizon/…>`                                              | Bundler text imports                                      |
+| `@horizon/toolkit/shaders/loader`    | The webpack/Turbopack loader that expands those includes                                                                                       | Node, at build time                                       |
 
 There is intentionally no root barrel exporting everything. UI does not import
 Three.js or shader code. Camera and numerical functions can be tested without a

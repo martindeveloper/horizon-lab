@@ -73,8 +73,13 @@ export function risingHourAngle(declination: number, latitude: number, horizon =
   return Math.acos(Math.max(-1, Math.min(1, cos))) / RAD;
 }
 
-/** The north galactic pole and the galactic longitude of the north celestial pole, J2000. */
-const GALACTIC_POLE = { ra: 192.85948, dec: 27.12825, lNcp: 122.93192 };
+/**
+ * The IAU galactic frame in J2000 equatorial degrees (Hipparcos, ESA 1997): the north galactic
+ * pole, the galactic longitude of the north celestial pole, and the origin of longitude.
+ */
+export const GALACTIC_POLE_J2000 = { ra: 192.85948, dec: 27.12825, lNcp: 122.93192 } as const;
+export const GALACTIC_CENTRE_J2000 = { ra: 266.40499, dec: -28.93617 } as const;
+const GALACTIC_POLE = GALACTIC_POLE_J2000;
 
 /** J2000 right ascension and declination to galactic longitude (0…360) and latitude. */
 export function equatorialToGalactic(ra: number, dec: number) {

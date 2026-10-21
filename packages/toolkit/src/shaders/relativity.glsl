@@ -20,3 +20,10 @@ float dopplerFactor(float beta, float gamma, float cosTheta) {
 float dopplerFactorObserved(float beta, float gamma, float cosThetaObserved) {
   return 1.0 / (gamma * (1.0 - beta * cosThetaObserved));
 }
+
+// Not physics but its display: a brightening `boost` by beaming (D² for a point, D⁴ for a
+// surface) as an eye adapting to it sees it. Like `boost` while small, 1 at rest, easing
+// toward `peak` instead of clipping there, so the sky ahead brightens without burning out.
+float beamingSeen(float boost, float peak) {
+  return boost * peak / (boost + peak - 1.0);
+}

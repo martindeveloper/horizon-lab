@@ -30,6 +30,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <horizon/srgb>
+
 // Approximate colour of a black body from its temperature in kelvin, using
 // the common piecewise fit to the Planckian locus (Tanner Helland's curve).
 // Input is clamped to 1,000–40,000 K. This is a display mapping, not a
@@ -59,4 +61,39 @@ vec3 blackbody(float kelvin) {
   }
 
   return c;
+}
+
+// The same colour in linear light: the curve above is encoded sRGB.
+vec3 blackbodyLinear(float kelvin) {
+  return decodeSrgb(blackbody(kelvin));
+}
+
+// How far along `blackbodyLut(size, minK, maxK)` from science/color.ts a temperature lies, 0–1
+// (texel i at i / (size − 1)); `range` is (minK, maxK).
+float blackbodyLutCoordinate(float kelvin, vec2 range) {
+  return clamp(log(kelvin / range.x) / log(range.y / range.x), 0.0, 1.0);
+}
+
+// The texture coordinate that reads a temperature from that lookup: the share above on the
+// texels' centres. `spec` is (minK, maxK, size).
+float blackbodyLutTexel(float kelvin, vec3 spec) {
+  return (blackbodyLutCoordinate(kelvin, spec.xy) * (spec.z - 1.0) + 0.5) / spec.z;
+}
+
+// Eddington's grey limb darkening, the brightness at μ over the disc's centre: (2 + 3μ) / 5.
+float eddingtonLimb(float mu) {
+  return 0.4 + 0.6 * mu;
+}
+
+// Planck's law in one band, up to a constant: 1 / (e^(hc/λkT) − 1), with `hcOverLambdaK`
+// the band's hc/λk in kelvin (26,160 K at 550 nm). Divide two to compare surfaces.
+float planckBand(float kelvin, float hcOverLambdaK) {
+  return 1.0 / (exp(hcOverLambdaK / max(kelvin, 300.0)) - 1.0);
+}
+
+// The temperature seen at `mu` (the cosine between the surface normal and the sightline) on a
+// star with a grey atmosphere (Eddington): we see down to optical depth μ, where
+// T⁴ = ¾ T⁴ₑ (μ + ⅔), so the limb shows higher, cooler layers.
+float greyAtmosphereKelvin(float effectiveKelvin, float mu) {
+  return effectiveKelvin * pow(0.75 * (mu + 2.0 / 3.0), 0.25);
 }

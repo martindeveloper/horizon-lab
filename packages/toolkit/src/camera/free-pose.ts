@@ -5,10 +5,11 @@
  * the scene, +Y is up, +X right), so `camera.quaternion.fromArray(pose.orientation)` applies it.
  * The host owns the pose and may overwrite it every frame; nothing here holds on to it.
  */
-import { clamp, lerp, smootherstep } from "../math";
+import { clamp, cross3 as cross, dot3 as dot, lerp, normalize3, smootherstep } from "../math";
+import type { Vec3 } from "../math";
 import type { OrbitPose } from "./flight";
 
-export type Vec3 = [x: number, y: number, z: number];
+export type { Vec3 };
 export type Quat = [x: number, y: number, z: number, w: number];
 
 export type FreePose = { position: Vec3; orientation: Quat };
@@ -23,16 +24,7 @@ const WORLD_UP: Vec3 = [0, 1, 0];
 /** Pitch stops this far short of straight up or down, radians, so the horizon stays defined. */
 const PITCH_LIMIT = Math.PI / 2 - 0.02;
 
-const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const cross = (a: Vec3, b: Vec3): Vec3 => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0],
-];
-function normalize(v: Vec3): Vec3 {
-  const length = Math.hypot(v[0], v[1], v[2]) || 1;
-  return [v[0] / length, v[1] / length, v[2] / length];
-}
+const normalize = (v: Vec3) => normalize3(v);
 
 function normalizeQuat(q: Quat): Quat {
   const length = Math.hypot(q[0], q[1], q[2], q[3]) || 1;

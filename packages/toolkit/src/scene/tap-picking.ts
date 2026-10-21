@@ -1,14 +1,13 @@
 /** Taps on a canvas: a name tapped squarely wins, then the objects under the pointer, then a near miss. */
 import { Raycaster, Vector2, type Intersection, type Object3D, type Ray } from "three";
 
+import { TAP_SLOP_PX } from "../camera";
 import type { SceneBasics } from "./kit";
 import { labelAt } from "./label-geometry";
 import type { LabelHit } from "./labels";
 
 /** A fingertip: near misses on touch still reach a name this close. */
 const FINGER_PX = 44;
-/** A press that moved farther than this was a drag, not a tap. */
-const DRAG_PX = 6;
 
 /** What a tap landed on: an object's `userData.pick` (and instance), or what a label opens. */
 export type TapTarget = { pick: unknown; instance?: number | undefined };
@@ -78,7 +77,7 @@ export function createTapPicking(
   const onUp = (event: PointerEvent) => {
     const start = down.get(event.pointerId);
     if (!release(event) || !start || options.blocked()) return;
-    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > DRAG_PX) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > TAP_SLOP_PX) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     options.onTap(under(event));
   };

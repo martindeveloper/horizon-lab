@@ -2,6 +2,7 @@
  * Ring systems as radial zones of optical depth and colour, and the strip a
  * renderer textures a ring annulus with.
  */
+import { decodeSrgb } from "../science/color";
 import type { PlanetId } from "./ephemeris";
 
 /**
@@ -15,6 +16,8 @@ export type RingZone = {
   /** τ at `from` and `to`, linear between. */
   tau: readonly [number, number];
   rgb: readonly [number, number, number];
+  /** Fraction of τ in micrometre dust, which scatters light forward; 0 when absent. */
+  dust?: number;
 };
 export type RingSystem = { innerKm: number; outerKm: number; zones: readonly RingZone[] };
 
@@ -31,11 +34,18 @@ const gap = (centre: number, width: number): RingZone => ({
   tau: [0, 0],
   rgb: C_RING,
 });
-const narrow = (centre: number, width: number, tau: number, rgb: RingZone["rgb"]): RingZone => ({
+const narrow = (
+  centre: number,
+  width: number,
+  tau: number,
+  rgb: RingZone["rgb"],
+  dust = 0,
+): RingZone => ({
   from: centre - width / 2,
   to: centre + width / 2,
   tau: [tau, tau],
   rgb,
+  dust,
 });
 
 /**
@@ -80,7 +90,8 @@ const SATURN_RINGS: RingSystem = {
     gap(133_584, 322),
     gap(136_505, 35),
     { from: 136_770, to: 139_380, tau: [0.0001, 0.0001], rgb: CASSINI },
-    narrow(140_224, 50, 0.15, A_RING),
+    /* The F ring: 98 % fine dust in the light it scatters (Showalter et al. 1992). */
+    narrow(140_224, 50, 0.15, A_RING, 0.98),
   ],
 };
 
@@ -109,17 +120,20 @@ const URANUS_RINGS: RingSystem = {
 /**
  * Neptune: NSSDC Neptunian Rings Fact Sheet and the PDS table. Dusty and faint
  * (τ ≈ 10⁻⁴–10⁻²); the Adams ring arcs (τ ≈ 0.1 over ~40° of longitude) are averaged
- * into the ring. Arago has no published τ: 0.002 is an estimate.
+ * into the ring. Arago has no published τ: 0.002 is an estimate. Dust fractions are the
+ * middles of the Voyager ranges (Porco et al. 1995; de Pater et al. 2018): Galle and
+ * Le Verrier 0.4–0.7, Lassell and Adams 0.2–0.4, the arcs 0.4–0.7, so 0.5 for Adams with
+ * its arcs; Arago, unmeasured, as Lassell, whose outer edge it is.
  */
 const NEPTUNE_RINGS: RingSystem = {
   innerKm: 40_900,
   outerKm: 63_000,
   zones: [
-    { from: 40_900, to: 42_900, tau: [0.0001, 0.0001], rgb: NEPTUNE_RING },
-    { from: 53_200, to: 57_200, tau: [0.0001, 0.0001], rgb: NEPTUNE_RING },
-    narrow(53_200, 100, 0.01, NEPTUNE_RING),
-    narrow(57_200, 100, 0.002, NEPTUNE_RING),
-    narrow(62_933, 15, 0.02, NEPTUNE_RING),
+    { from: 40_900, to: 42_900, tau: [0.0001, 0.0001], rgb: NEPTUNE_RING, dust: 0.55 },
+    { from: 53_200, to: 57_200, tau: [0.0001, 0.0001], rgb: NEPTUNE_RING, dust: 0.3 },
+    narrow(53_200, 100, 0.01, NEPTUNE_RING, 0.55),
+    narrow(57_200, 100, 0.002, NEPTUNE_RING, 0.3),
+    narrow(62_933, 15, 0.02, NEPTUNE_RING, 0.5),
   ],
 };
 
@@ -133,15 +147,80 @@ export const RINGS: Partial<Record<PlanetId, RingSystem>> = {
   neptune: NEPTUNE_RINGS,
 };
 
-/** Normal opacity 1 − e^(−τ) and colour per texel of a radial strip, inner to outer edge. */
-export function ringStrip(system: RingSystem, texels: number, samples = 32) {
-  const out = new Uint8ClampedArray(texels * 4);
+/**
+ * A ring system baked across its width, inner to outer edge: per texel the normal opacity
+ * 1 − e^(−τ) averaged over the texel, and the particles' colour (sRGB, 0–255, three per
+ * texel) and dust fraction, both weighted by opacity. Floats, so a ring of τ ≈ 10⁻⁴ is kept.
+ */
+export type RingStrip = {
+  texels: number;
+  opacity: Float32Array;
+  rgb: Float32Array;
+  dust: Float32Array;
+};
+
+/** Rec. 709 luminance weights of linear sRGB. */
+const LUMA = [0.2126, 0.7152, 0.0722] as const;
+
+/** A system's brightest ring as normal reflectance: a zone's peak opacity times its particles' linear luminance. */
+function peakReflectance(system: RingSystem) {
+  let peak = 0;
+  for (const zone of system.zones) {
+    const luminance = zone.rgb.reduce((sum, c, i) => sum + decodeSrgb(c / 255) * LUMA[i]!, 0);
+    peak = Math.max(peak, (1 - Math.exp(-Math.max(...zone.tau))) * luminance);
+  }
+  return peak;
+}
+
+/**
+ * The exposure that shows a system's brightest ring as bright as Saturn's: 1 for Saturn,
+ * about 18 for Uranus, about 600 for Neptune. A long exposure of the rings, as Voyager took
+ * them; the eye never sees them so.
+ */
+export function ringExposure(system: RingSystem) {
+  return Math.max(1, peakReflectance(SATURN_RINGS) / peakReflectance(system));
+}
+
+/** One texel's running sums: opacity, and colour and dust weighted by it. */
+function texelSums() {
+  let a = 0;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let d = 0;
+  return {
+    add(opacity: number, red: number, green: number, blue: number, dust: number) {
+      a += opacity;
+      r += red * opacity;
+      g += green * opacity;
+      b += blue * opacity;
+      d += dust * opacity;
+    },
+    /** Writes texel `t` of `out` as the mean of `count` samples. */
+    write(out: RingStrip, t: number, count: number) {
+      out.opacity[t] = a / count;
+      if (a <= 0) return;
+      out.rgb[t * 3] = r / a;
+      out.rgb[t * 3 + 1] = g / a;
+      out.rgb[t * 3 + 2] = b / a;
+      out.dust[t] = d / a;
+    },
+  };
+}
+
+const emptyStrip = (texels: number): RingStrip => ({
+  texels,
+  opacity: new Float32Array(texels),
+  rgb: new Float32Array(texels * 3),
+  dust: new Float32Array(texels),
+});
+
+/** The system's strip at `texels`, each texel averaged over `samples` radii. */
+export function ringStrip(system: RingSystem, texels: number, samples = 32): RingStrip {
+  const out = emptyStrip(texels);
   const span = system.outerKm - system.innerKm;
   for (let t = 0; t < texels; t += 1) {
-    let opacity = 0;
-    let r = 0;
-    let g = 0;
-    let b = 0;
+    const sums = texelSums();
     for (let s = 0; s < samples; s += 1) {
       const km = system.innerKm + ((t + (s + 0.5) / samples) / texels) * span;
       let zone: RingZone | undefined;
@@ -149,16 +228,33 @@ export function ringStrip(system: RingSystem, texels: number, samples = 32) {
       if (!zone) continue;
       const f = (km - zone.from) / (zone.to - zone.from);
       const a = 1 - Math.exp(-(zone.tau[0] + (zone.tau[1] - zone.tau[0]) * f));
-      opacity += a;
-      r += zone.rgb[0] * a;
-      g += zone.rgb[1] * a;
-      b += zone.rgb[2] * a;
+      sums.add(a, zone.rgb[0], zone.rgb[1], zone.rgb[2], zone.dust ?? 0);
     }
-    const i = t * 4;
-    out[i] = opacity > 0 ? r / opacity : 0;
-    out[i + 1] = opacity > 0 ? g / opacity : 0;
-    out[i + 2] = opacity > 0 ? b / opacity : 0;
-    out[i + 3] = Math.round((opacity / samples) * 255);
+    sums.write(out, t, samples);
   }
   return out;
+}
+
+/** The strip at half the texels, by the same weighting: one mipmap level down. */
+function halve(strip: RingStrip): RingStrip {
+  const out = emptyStrip(Math.max(1, Math.floor(strip.texels / 2)));
+  for (let t = 0; t < out.texels; t += 1) {
+    /* The last texel also takes an odd one left over. */
+    const end = t === out.texels - 1 ? strip.texels : 2 * t + 2;
+    const sums = texelSums();
+    for (let i = 2 * t; i < end; i += 1) {
+      const { opacity, rgb, dust } = strip;
+      sums.add(opacity[i]!, rgb[i * 3]!, rgb[i * 3 + 1]!, rgb[i * 3 + 2]!, dust[i]!);
+    }
+    sums.write(out, t, end - 2 * t);
+  }
+  return out;
+}
+
+/** The strip and its mipmap chain, down to one texel. */
+export function ringStripLevels(system: RingSystem, texels: number): RingStrip[] {
+  let level = ringStrip(system, texels);
+  const levels = [level];
+  while (level.texels > 1) levels.push((level = halve(level)));
+  return levels;
 }

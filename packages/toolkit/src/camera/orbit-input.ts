@@ -1,5 +1,6 @@
 import { clamp } from "../math/index";
 import type { OrbitPose } from "./flight";
+import { wheelPixels } from "./flight-input";
 
 export type OrbitInputOptions = {
   getPose: () => OrbitPose;
@@ -14,8 +15,8 @@ export type OrbitInputOptions = {
 /** Canvas-local input. No store, camera singleton, animation loop or renderer dependency. */
 /** Two fingers closer than this (CSS px) are not yet a pinch; the zoom baseline waits. */
 const PINCH_MIN_PX = 24;
-/** Pixels one page of wheel scroll stands for when the canvas has no height yet. */
-const PAGE_FALLBACK_PX = 800;
+/** A press that moved farther than this (CSS px) was a drag, not a tap. */
+export const TAP_SLOP_PX = 6;
 
 export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputOptions) {
   if (
@@ -113,15 +114,10 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     if (pointers.size >= 2) return;
     const pose = options.getPose();
     const sensitivity = options.wheelSensitivity?.(pose.distance, event.ctrlKey) ?? 0.001;
-    const unit =
-      event.deltaMode === 1
-        ? 16
-        : event.deltaMode === 2
-          ? canvas.clientHeight || PAGE_FALLBACK_PX
-          : 1;
+    const pixels = wheelPixels(event.deltaY, event.deltaMode, canvas.clientHeight);
     options.onChange({
       ...pose,
-      distance: distance(pose.distance * Math.exp(event.deltaY * unit * sensitivity)),
+      distance: distance(pose.distance * Math.exp(pixels * sensitivity)),
     });
   }
   canvas.style.touchAction = "none";

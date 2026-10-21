@@ -161,6 +161,18 @@ export function encodeSrgb(linear: number) {
   return v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
 }
 
+/** The same curve inverted: an encoded value (0–1) back to linear light (0–1). */
+export function decodeSrgb(encoded: number) {
+  const v = Math.min(1, Math.max(0, encoded));
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+}
+
+/** A CSS hex colour ("#e2c07a") as linear sRGB light. */
+export function hexToLinear(hex: string): Rgb {
+  const channel = (at: number) => decodeSrgb(parseInt(hex.slice(at, at + 2), 16) / 255);
+  return [channel(1), channel(3), channel(5)];
+}
+
 /**
  * The colour at full brightness, sRGB-encoded: primaries the screen would need below zero
  * (it cannot subtract light) are clipped, then the brightest channel is scaled to 1.
@@ -182,6 +194,31 @@ export function blackbodyColor(kelvin: number, gamut: Gamut = "srgb"): Rgb {
     spectrumXyz((nm) => planckRadiance(nm, kelvin), 380, 780, 5),
     gamut,
   );
+}
+
+/**
+ * The display mapping the shaders' `blackbody` uses (`<horizon/temperature>`): Tanner Helland's
+ * piecewise fit to the Planckian locus (2012, BSD-2-Clause, see temperature.glsl), encoded sRGB,
+ * input clamped to 1,000–40,000 K. For CPU work that must match a shader's colour exactly;
+ * `blackbodyColor` is the accurate one.
+ */
+export function hellandBlackbody(kelvin: number): Rgb {
+  const t = Math.min(40_000, Math.max(1_000, kelvin)) / 100;
+  const unit = (v: number) => Math.min(1, Math.max(0, v));
+  const tt = Math.max(t - 60, 0.01);
+  const r = t <= 66 ? 1 : unit(1.292936186 * tt ** -0.1332047592);
+  const g =
+    t <= 66
+      ? unit(0.390081578 * Math.log(t) - 0.631841443)
+      : unit(1.129890861 * tt ** -0.0755148492);
+  const b = t >= 66 ? 1 : t <= 19 ? 0 : unit(0.543206789 * Math.log(t - 10) - 1.19625389);
+  return [r, g, b];
+}
+
+/** `hellandBlackbody` in linear light, as the shaders' `blackbodyLinear` gives it. */
+export function hellandBlackbodyLinear(kelvin: number): Rgb {
+  const [r, g, b] = hellandBlackbody(kelvin);
+  return [decodeSrgb(r), decodeSrgb(g), decodeSrgb(b)];
 }
 
 /** The hue of one wavelength of light, as `displayColor` shows it. */
@@ -225,7 +262,10 @@ export function blackbodyLut(size = 256, minK = 1000, maxK = 40_000, gamut: Gamu
   return lut;
 }
 
-/** The texture coordinate (0–1) at which `blackbodyLut(size, minK, maxK)` holds a temperature. */
+/**
+ * How far along `blackbodyLut(size, minK, maxK)` a temperature lies, 0–1 (texel i at
+ * i / (size − 1)); a texture read takes it onto the texel centres (GLSL `blackbodyLutTexel`).
+ */
 export function blackbodyLutCoordinate(kelvin: number, minK = 1000, maxK = 40_000) {
   const t = Math.log(kelvin / minK) / Math.log(maxK / minK);
   return Math.min(1, Math.max(0, t));

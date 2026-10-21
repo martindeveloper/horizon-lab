@@ -1,6 +1,6 @@
 /**
  * Special relativity for a ship that flies at a real fraction of c: the sky's aberration and
- * Doppler shift, velocity composition, and the clocks of coasting and torch-ship trips.
+ * Doppler shift and the clocks of coasting and torch-ship trips.
  *
  * The state is the proper velocity u = γβc in km/s (momentum per unit mass): it is
  * unbounded, so |β| < 1 is guaranteed by construction, and it adds plainly under
@@ -40,11 +40,6 @@ export function properVelocity(beta: number) {
   return (beta * SPEED_OF_LIGHT_KM_S) / Math.sqrt(1 - beta * beta);
 }
 
-/** Rapidity φ = atanh β, the velocity measure that adds: u = c sinh φ, γ = cosh φ. */
-export const rapidityOf = (beta: number) => Math.atanh(beta);
-/** β = tanh φ, the inverse of `rapidityOf`. */
-export const betaFromRapidity = (phi: number) => Math.tanh(phi);
-
 /**
  * Doppler factor D = ν_obs/ν_src = λ_src/λ_obs for light arriving from the direction at
  * angle θ from the velocity, measured in the source frame: D = γ(1 + β cos θ). Light from
@@ -52,14 +47,6 @@ export const betaFromRapidity = (phi: number) => Math.tanh(phi);
  */
 export function relativisticDoppler(beta: number, gamma: number, cosTheta: number) {
   return gamma * (1 + beta * cosTheta);
-}
-
-/**
- * The same factor from the angle θ′ the observer measures (after aberration):
- * D = 1 / (γ(1 − β cos θ′)). Use it in a shader that knows the screen direction.
- */
-export function relativisticDopplerObserved(beta: number, gamma: number, cosThetaObserved: number) {
-  return 1 / (gamma * (1 - beta * cosThetaObserved));
 }
 
 /**
@@ -81,48 +68,6 @@ export function aberrate(
   out.x = (n.x + forward.x * along) * scale;
   out.y = (n.y + forward.y * along) * scale;
   out.z = (n.z + forward.z * along) * scale;
-  return out;
-}
-
-/**
- * Relativistic velocity composition: a body moving at proper velocity `b` in a frame that
- * itself moves at `a`, as seen from the outer frame (so the Sun's motion against the
- * microwave background composed with the ship's motion against the Sun). Scalars compose
- * along one line; vectors use the general formula and write the result into `out`.
- */
-export function addVelocities(a: number, b: number): number;
-export function addVelocities(a: Vector3Like, b: Vector3Like, out: Vector3Like): Vector3Like;
-export function addVelocities(a: number | Vector3Like, b: number | Vector3Like, out?: Vector3Like) {
-  if (typeof a === "number" && typeof b === "number") {
-    const ba = betaOf(a);
-    const bb = betaOf(b);
-    return properVelocity((ba + bb) / (1 + ba * bb));
-  }
-  if (typeof a === "number" || typeof b === "number" || !out)
-    throw new TypeError("addVelocities takes two scalars or two vectors and an output");
-  const ga = gammaOf(a);
-  const gb = gammaOf(b);
-  // β_a and β_b, then w = (β_a + β_b/γ_a + (γ_a/(1+γ_a)) (β_a·β_b) β_a) / (1 + β_a·β_b).
-  const ka = 1 / (SPEED_OF_LIGHT_KM_S * ga);
-  const kb = 1 / (SPEED_OF_LIGHT_KM_S * gb);
-  const ax = a.x * ka;
-  const ay = a.y * ka;
-  const az = a.z * ka;
-  const bx = b.x * kb;
-  const by = b.y * kb;
-  const bz = b.z * kb;
-  const dot = ax * bx + ay * by + az * bz;
-  const parallel = (ga / (1 + ga)) * dot;
-  const scale = 1 / (1 + dot);
-  const wx = (ax + bx / ga + parallel * ax) * scale;
-  const wy = (ay + by / ga + parallel * ay) * scale;
-  const wz = (az + bz / ga + parallel * az) * scale;
-  const beta = Math.hypot(wx, wy, wz);
-  const gamma = 1 / Math.sqrt(Math.max(Number.EPSILON, 1 - beta * beta));
-  const k = gamma * SPEED_OF_LIGHT_KM_S;
-  out.x = wx * k;
-  out.y = wy * k;
-  out.z = wz * k;
   return out;
 }
 

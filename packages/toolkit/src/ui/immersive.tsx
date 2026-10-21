@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 
+import { REDUCED_MOTION_QUERY } from "../environment";
 import { IconButton } from "./icon-button";
 import {
   IMMERSIVE_SHORTCUT,
@@ -179,7 +180,7 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
   }
   useEffect(() => {
     if (!immersive) return;
-    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 460;
+    const delay = window.matchMedia(REDUCED_MOTION_QUERY).matches ? 0 : 460;
     const timeout = window.setTimeout(() => setOverlaysMounted(false), delay);
     return () => window.clearTimeout(timeout);
   }, [immersive]);

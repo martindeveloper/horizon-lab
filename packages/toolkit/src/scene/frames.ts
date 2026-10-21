@@ -13,6 +13,7 @@ import {
   type SpinningId,
   type Vec3,
 } from "../bodies";
+import { GALACTIC_CENTRE_J2000, GALACTIC_POLE_J2000 } from "../science";
 
 const v: Vec3 = [0, 0, 0];
 const q: Quat = [0, 0, 0, 1];
@@ -41,7 +42,10 @@ export function bodyOrientation(id: SpinningId, date: Date, out = new Quaternion
  * The IAU galactic frame (J2000) as scene directions: longitude 0 on the plane (0.06° from
  * Sgr A*), the north galactic pole, and longitude 90° (east).
  */
-export const GALACTIC_CENTRE = equatorialToScene(266.40499, -28.93617);
-export const GALACTIC_POLE = equatorialToScene(192.85948, 27.12825);
+export const GALACTIC_CENTRE = equatorialToScene(
+  GALACTIC_CENTRE_J2000.ra,
+  GALACTIC_CENTRE_J2000.dec,
+);
+export const GALACTIC_POLE = equatorialToScene(GALACTIC_POLE_J2000.ra, GALACTIC_POLE_J2000.dec);
 GALACTIC_CENTRE.addScaledVector(GALACTIC_POLE, -GALACTIC_CENTRE.dot(GALACTIC_POLE)).normalize();
 export const GALACTIC_EAST = new Vector3().crossVectors(GALACTIC_POLE, GALACTIC_CENTRE).normalize();

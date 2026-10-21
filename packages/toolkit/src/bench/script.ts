@@ -1,3 +1,4 @@
+import { lerp } from "../math";
 import type { BenchFrame, BenchInput, BenchScript } from "./types";
 
 /** One low-level input step, in canvas fractions; the harness turns it into browser input. */
@@ -26,8 +27,6 @@ function reaches(at: number, index: number, count: number) {
   const progress = progressOf(index, count);
   return progress >= at && (index === 0 || progressOf(index - 1, count) < at);
 }
-
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /** Input to deliver before frame `index` renders. */
 export function inputActions(

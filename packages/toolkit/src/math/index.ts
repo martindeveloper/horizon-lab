@@ -38,6 +38,14 @@ export function toLogFraction(value: number, min: number, max: number) {
   checkLogRange(min, max);
   return Math.log(clamp(value, min, max) / min) / Math.log(max / min);
 }
+/**
+ * Where `x` sits between `from` and `to` in log space, clamped to 0..1, either way round (a
+ * flight from far to near counts up as the distance falls). Unchecked, for per-frame blends;
+ * a control's bounds go through `toLogFraction`.
+ */
+export function logFraction(x: number, from: number, to: number) {
+  return clamp01(Math.log(x / from) / Math.log(to / from));
+}
 export function fromLogFraction(t: number, min: number, max: number) {
   checkLogRange(min, max);
   return min * (max / min) ** clamp(t, 0, 1);
@@ -45,3 +53,4 @@ export function fromLogFraction(t: number, min: number, max: number) {
 
 export { gaussian, lcg, minstd, mulberry32, onSphere } from "./random";
 export { fbm3, valueNoise2, valueNoise3 } from "./noise";
+export * from "./vector";

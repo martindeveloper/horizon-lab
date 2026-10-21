@@ -1,5 +1,5 @@
 import { formatDistance, formatDistanceRange, type DistanceFormat } from "./distance";
-import { formatSignificant } from "./format";
+import { formatSignificant, joinSpan } from "./format";
 import { convert, type UnitId } from "./units";
 
 /**
@@ -70,9 +70,9 @@ function plain(format: DistanceFormat, values: number[], digits: number, fixed: 
   const top = Math.max(...values.map(Math.abs));
   const whole = top > 0 && digits > Math.floor(Math.log10(top));
   const scale = whole || top < 1e6 || top >= 1e12 ? 1 : top >= 1e9 ? 1e9 : 1e6;
-  const text = values
-    .map((v) => formatSignificant(v / scale, format.locale, digits, fixed))
-    .join("–");
+  const text = joinSpan(
+    values.map((v) => formatSignificant(v / scale, format.locale, digits, fixed)),
+  );
   if (scale === 1) return text;
   const word = scale === 1e9 ? format.billionWord : format.millionWord;
   return `${text} ${word ?? (scale === 1e9 ? "billion" : "million")}`;
@@ -118,5 +118,5 @@ export function quoteFact(locale: string, fact: FactBase & { value?: number; ran
   const ends = fact.value !== undefined ? [fact.value] : fact.range ? [...fact.range] : [];
   const digits = fact.digits ?? significantOf(...ends);
   const fixed = fact.digits !== undefined;
-  return ends.map((v) => formatSignificant(shown(fact, v), locale, digits, fixed)).join("–");
+  return joinSpan(ends.map((v) => formatSignificant(shown(fact, v), locale, digits, fixed)));
 }

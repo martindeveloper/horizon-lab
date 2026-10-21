@@ -8,12 +8,8 @@
  */
 import type { PerspectiveCamera, Vector3 } from "three";
 
-import { clamp01, smoothstep } from "../math";
+import { logFraction, smoothstep } from "../math";
 import { worldPerPixel, type Viewport } from "./kit";
-
-/** Where `x` sits between `from` and `to` in log space, 0..1. */
-export const logFraction = (x: number, from: number, to: number) =>
-  clamp01(Math.log(x / from) / Math.log(to / from));
 
 /** 0 below `from`, 1 above `to`, eased in log space. */
 export const rising = (x: number, from: number, to: number) =>

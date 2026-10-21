@@ -303,7 +303,7 @@ test("radiation laws: Planck integrates to Stefan–Boltzmann, Wien, photon ener
     SPEED_OF_LIGHT,
     WIEN_CONSTANT,
     convert,
-    dopplerFactor,
+    dopplerWavelengthRatio,
     dopplerShift,
     photonEnergy,
     planckRadiance,
@@ -328,7 +328,7 @@ test("radiation laws: Planck integrates to Stefan–Boltzmann, Wien, photon ener
   near(photonEnergy.compute({ lambda: 656.28 }), 1.8892, 1e-4);
   assert.equal(convert(1, "eV", "J"), CONSTANTS.elementaryCharge.value);
   // Receding then approaching at the same speed undoes the shift exactly.
-  near(dopplerFactor(300) * dopplerFactor(-300), 1, 1e-15);
+  near(dopplerWavelengthRatio(300) * dopplerWavelengthRatio(-300), 1, 1e-15);
   // β = 0.001: λ/λ₀ = √(1.001 / 0.999), a shade more than 1 + β.
   near(dopplerShift.compute({ lambda0: 500, v: 299.792458 }) - 500, 0.50025, 1e-6);
   // NIST's vacuum and air wavelengths of sodium D₂ and Hα.
@@ -472,8 +472,12 @@ test("the periodic table's rows close on the noble gases and its blocks fill the
 });
 
 test("Display P3 shares sRGB's white and holds sRGB's red as a less saturated P3 colour", async () => {
-  const { xyzToLinearP3, xyzToLinearSrgb, encodeSrgb, cssColor } =
+  const { xyzToLinearP3, xyzToLinearSrgb, encodeSrgb, decodeSrgb, hexToLinear, cssColor } =
     await import("@horizon/toolkit/science");
+  for (const v of [0, 0.002, 0.2, 0.8, 1])
+    assert.ok(Math.abs(decodeSrgb(encodeSrgb(v)) - v) < 1e-12);
+  assert.deepEqual(hexToLinear("#ffffff"), [1, 1, 1]);
+  assert.ok(Math.abs(hexToLinear("#808080")[1] - 0.2158605) < 1e-6);
   const white = [0.9505, 1, 1.089];
   for (const v of xyzToLinearP3(white)) assert.ok(Math.abs(v - 1) < 0.002);
   /* sRGB's red primary, in Display P3 (encoded): about (0.917, 0.200, 0.139). */
@@ -483,4 +487,15 @@ test("Display P3 shares sRGB's white and holds sRGB's red as a less saturated P3
   assert.ok(Math.abs(xyzToLinearSrgb(red)[0] - 1) < 0.002);
   assert.equal(cssColor([1, 0, 0], 0.5, "p3"), "color(display-p3 1.0000 0.0000 0.0000 / 0.5)");
   assert.equal(cssColor([1, 0, 0], 0.5), "rgb(255 0 0 / 0.5)");
+});
+
+test("a span whose ends round alike prints as one figure", async () => {
+  const { joinSpan, printFactSpan } = await import("@horizon/toolkit/science");
+  const format = { unit: "auto", locale: "en" };
+  assert.equal(printFactSpan({ unit: "K", range: [3_598, 3_602], digits: 2 }, format), "3,600");
+  assert.equal(
+    printFactSpan({ unit: "K", range: [3_500, 3_700], digits: 2 }, format),
+    "3,500–3,700",
+  );
+  assert.equal(joinSpan(["0.12", "0.12"]), "0.12");
 });

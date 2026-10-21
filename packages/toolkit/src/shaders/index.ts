@@ -11,11 +11,15 @@ export {
   type GlslInt,
   type GlslValue,
 } from "./defines";
+export { default as convectionGLSL } from "./convection.glsl";
+export { default as displayGLSL } from "./display.glsl";
 export { default as fullscreenVertex } from "./fullscreen.vert.glsl";
+export { default as gradientNoiseGLSL } from "./gradient-noise.glsl";
 export { default as logDepthGLSL } from "./log-depth.glsl";
 export { default as mathGLSL } from "./math.glsl";
 export { default as noiseGLSL } from "./noise.glsl";
 export { default as relativityGLSL } from "./relativity.glsl";
+export { default as srgbGLSL } from "./srgb.glsl";
 export { default as temperatureGLSL } from "./temperature.glsl";
 export { default as starsGLSL } from "./stars.glsl";
 export { default as tonemapGLSL } from "./tonemap.glsl";

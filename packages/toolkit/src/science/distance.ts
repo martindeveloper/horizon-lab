@@ -1,5 +1,5 @@
 import { AU_KM, LIGHT_YEAR_KM, SPEED_OF_LIGHT } from "./constants";
-import { formatReadout, formatSignificant, numberFormat } from "./format";
+import { formatReadout, formatSignificant, joinSpan, numberFormat } from "./format";
 import { convert } from "./units";
 
 /** IAU symbols: au (2012 Resolution B2), ly, pc. */
@@ -140,5 +140,6 @@ export function formatDistanceRange(lowAu: number, highAu: number, options: Dist
   const magnitude = Math.max(Math.abs(lowAu), Math.abs(highAu));
   const low = scaled(lowAu, magnitude, options);
   const high = scaled(highAu, magnitude, options);
-  return `${formatValue(low.value, options)}–${formatValue(high.value, options)} ${unitText(high.unit, high.scale, options)}`;
+  const ends = joinSpan([formatValue(low.value, options), formatValue(high.value, options)]);
+  return `${ends} ${unitText(high.unit, high.scale, options)}`;
 }

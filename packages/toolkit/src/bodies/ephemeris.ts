@@ -147,14 +147,19 @@ export type NamedId = "pluto" | "sedna" | "halley";
 export type NamedBody = {
   id: NamedId;
   radiusKm: number;
-  /** Present-day elements at the given date, shifted by `extraYears`. */
-  elementsAt: (date: Date, extraYears: number) => Elements;
+  /** Present-day elements at the given date, shifted by `extraYears`; written into `out` when given. */
+  elementsAt: (date: Date, extraYears: number, out?: Elements) => Elements;
 };
 
 /** Mean anomaly from a perihelion passage date and period. */
 function meanAnomalyFromPerihelion(date: Date, extraYears: number, periYear: number, P: number) {
   const year = 2000 + (julianDay(date) - J2000_JD) / DAYS_PER_JULIAN_YEAR + extraYears;
   return wrap(((year - periYear) / P) * 360, 360);
+}
+
+/** A fixed orbit's elements with this mean anomaly, into `out` when given. */
+function fixedOrbit(orbit: Omit<Elements, "M">, M: number, out?: Elements): Elements {
+  return Object.assign(out ?? { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 }, orbit, { M });
 }
 
 /**
@@ -167,33 +172,30 @@ export const NAMED: readonly NamedBody[] = [
     id: "pluto",
     /* New Horizons, 1188.3 ± 1.6 km (Nimmo et al. 2017, Icarus 287, 12). */
     radiusKm: 1188.3,
-    elementsAt: (date, extraYears) => jplElements("pluto", centuriesSinceJ2000(date), extraYears),
+    elementsAt: (date, extraYears, out) =>
+      jplElements("pluto", centuriesSinceJ2000(date), extraYears, out),
   },
   {
     id: "sedna",
     /* Herschel thermal fit, D = 995 ± 80 km (Pál et al. 2012, A&A 541, L6). */
     radiusKm: 497.5,
-    elementsAt: (date, extraYears) => ({
-      a: 506,
-      e: 0.8496,
-      i: 11.93,
-      omega: 311.29,
-      node: 144.4,
-      M: meanAnomalyFromPerihelion(date, extraYears, 2076.12, periodYears(506)),
-    }),
+    elementsAt: (date, extraYears, out) =>
+      fixedOrbit(
+        { a: 506, e: 0.8496, i: 11.93, omega: 311.29, node: 144.4 },
+        meanAnomalyFromPerihelion(date, extraYears, 2076.12, periodYears(506)),
+        out,
+      ),
   },
   {
     id: "halley",
     /* Giotto: a ~15 × 8 × 8 km nucleus (Keller et al. 1987); 5.5 km effective radius (Lamy et al. 2004). */
     radiusKm: 5.5,
-    elementsAt: (date, extraYears) => ({
-      a: 17.834,
-      e: 0.96714,
-      i: 162.26,
-      omega: 111.33,
-      node: 58.42,
-      M: meanAnomalyFromPerihelion(date, extraYears, 1986.108, 75.464),
-    }),
+    elementsAt: (date, extraYears, out) =>
+      fixedOrbit(
+        { a: 17.834, e: 0.96714, i: 162.26, omega: 111.33, node: 58.42 },
+        meanAnomalyFromPerihelion(date, extraYears, 1986.108, 75.464),
+        out,
+      ),
   },
 ];
 

@@ -45,7 +45,7 @@ export function scaleFactorAtAge(ageGyr: number, model: FlatLcdm = PLANCK_2018) 
   return (Math.sinh(ageGyr / factor) / ratio) ** (2 / 3);
 }
 
-/** Steps of the Simpson rule in `comovingDistanceMpc`: below a part in 10⁶ at any z. */
+/** Steps of the Simpson rule the distances integrate with: below a part in 10⁶ at any z. */
 const COMOVING_STEPS = 256;
 
 /**
@@ -62,16 +62,41 @@ export function comovingDistanceMpc(z: number, model: FlatLcdm = PLANCK_2018) {
         ? 0
         : 2 / Math.sqrt(omegaM)
       : (2 * u) / Math.sqrt(omegaR + omegaM * u * u + omegaL * u ** 8);
-  const from = Math.sqrt(1 / (1 + z));
-  const h = (1 - from) / COMOVING_STEPS;
-  let sum = integrand(from) + integrand(1);
-  for (let i = 1; i < COMOVING_STEPS; i += 1) sum += (i % 2 ? 4 : 2) * integrand(from + i * h);
-  return (convert(1, "c", "km/s") / H0) * ((sum * h) / 3);
+  return (convert(1, "c", "km/s") / H0) * simpson(integrand, Math.sqrt(1 / (1 + z)), 1);
 }
 
+/** Simpson's rule over `from`–`to` in `COMOVING_STEPS` steps. */
+function simpson(f: (x: number) => number, from: number, to: number) {
+  const h = (to - from) / COMOVING_STEPS;
+  let sum = f(from) + f(to);
+  for (let i = 1; i < COMOVING_STEPS; i += 1) sum += (i % 2 ? 4 : 2) * f(from + i * h);
+  return (sum * h) / 3;
+}
+
+/* Each model's horizon, once: `redshiftAtComovingDistance` asks for it on every call. */
+const particleHorizons = new WeakMap<FlatLcdm, number>();
+
 /** Today's distance (Mpc) to the edge of the observable universe: light since the Big Bang. */
-export const particleHorizonMpc = (model: FlatLcdm = PLANCK_2018) =>
-  comovingDistanceMpc(Number.POSITIVE_INFINITY, model);
+export function particleHorizonMpc(model: FlatLcdm = PLANCK_2018) {
+  let mpc = particleHorizons.get(model);
+  if (mpc === undefined) {
+    mpc = comovingDistanceMpc(Number.POSITIVE_INFINITY, model);
+    particleHorizons.set(model, mpc);
+  }
+  return mpc;
+}
+
+/**
+ * Today's distance (Mpc) to the cosmic event horizon: the farthest place light sent today can
+ * ever reach, as dark energy carries everything beyond away, (c / H₀) ∫₁^∞ da / (a² E(a)),
+ * integrated in x = 1/a. About 5.1 Gpc (16.6 billion light-years) in Planck 2018's model.
+ */
+export function eventHorizonMpc(model: FlatLcdm = PLANCK_2018) {
+  const { H0, omegaM, omegaR = 0 } = model;
+  const omegaL = 1 - omegaM - omegaR;
+  const integrand = (x: number) => 1 / Math.sqrt(omegaR * x ** 4 + omegaM * x ** 3 + omegaL);
+  return (convert(1, "c", "km/s") / H0) * simpson(integrand, 0, 1);
+}
 
 /**
  * Redshift of a source at today's (comoving) distance `mpc`: the inverse of

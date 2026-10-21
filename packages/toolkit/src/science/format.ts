@@ -29,6 +29,11 @@ export function readout(value: number): Readout {
 
 const SUPERSCRIPT = "⁰¹²³⁴⁵⁶⁷⁸⁹";
 
+/** A span's printed ends, joined by an en dash; one figure when both print alike ("3,600", not "3,600–3,600"). */
+export function joinSpan(ends: readonly string[]) {
+  return ends.every((end) => end === ends[0]) ? (ends[0] ?? "") : ends.join("–");
+}
+
 /** 10 and an exponent in superscript digits, e.g. "10⁻⁵". */
 export function powerOfTen(exponent: number) {
   const digits = String(Math.abs(Math.trunc(exponent)))

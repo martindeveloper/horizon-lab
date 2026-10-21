@@ -41,7 +41,8 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
   likewise only advance each body along its orbit.
 - `keplerPosition(elements)` gives a heliocentric position in au;
   `writeOrbit` / `createOrbitWriter` fill a flat XYZ buffer with the ellipse
-  (the writer skips work when only M changed). `eccentricAnomaly`, `periodYears`.
+  (the writer skips work when only M changed, or the shape moved by less than a
+  float32 vertex can show, as the planets' secular drift does frame to frame). `eccentricAnomaly`, `periodYears`.
 - `MOONS`: JPL mean elements per moon with its host, reference plane and
   precession periods, and the resonant librations of Mimas, Tethys, Enceladus
   and Miranda; `meanRates(moon)`, `libration(moon, d)` and `meanLongitude(id, date)`.
@@ -52,13 +53,11 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
 
 ## Sun and Moon in the sky (`almanac.ts`)
 
-The low-precision series a sky view needs, about 0.01°, from the Julian
-Ephemeris Day (`julianEphemerisDay` in the science module):
+The series a sky view needs, from the Julian Ephemeris Day (`julianEphemerisDay`
+in the science module); the Moon's place is `lunarPosition` (below):
 
 - `solarEcliptic(jde)`: the Sun's apparent longitude, distance (au) and the mean
   obliquity of the date (Astronomical Almanac, good 1950–2050).
-- `moonEcliptic(jde)`: the Moon's longitude, latitude and distance (km) from
-  Meeus' tables 47.A/B, truncated to their largest terms.
 - `moonPhase(jde)`: illuminated fraction and waxing (Meeus ch. 48);
   `moonAxis(jde)`: position angle of its axis east of celestial north (ch. 53,
   within 0.2°).
@@ -77,8 +76,10 @@ mean distance 385 000.56 km) stay in their functions.
 - `SPINS`: pole α₀, δ₀ at T and prime meridian W at d days. `poleVector(id, T)`
   is the pole in the scene frame; `bodyOrientation(id, date)` orients a unit
   sphere whose texture longitude 0 starts at local −X and whose +Y is north.
-- `RINGS`: Saturn, Uranus and Neptune as radial zones of optical depth and
-  colour; `ringStrip(system, texels)` bakes them into an RGBA strip.
+- `RINGS`: Saturn, Uranus and Neptune as radial zones of optical depth, colour
+  and dust fraction; `ringStrip(system, texels)` bakes them into a float strip
+  (opacity, opacity-weighted colour and dust), and `ringStripLevels` adds its
+  mipmap chain.
 
 ## Measured maps (`maps.ts`)
 

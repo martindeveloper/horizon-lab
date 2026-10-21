@@ -46,8 +46,7 @@ toolkit's `.glsl` loader (see the package README).
   `bloom` and `lens` are read every frame, so their numbers may change in place; switching
   either or the anti-aliasing takes a new pass. With bloom off, the lens builds only
   the mask levels its spikes need (`mask` below). `target` is the offscreen frame; nothing is allocated until
-  the first `paint`. `createFxaaPass(renderer)` and `createMsaaPass(renderer)` are this pass
-  at `fxaa` and `msaa` without bloom (`render(scene, camera)` on the former draws one scene).
+  the first `paint`.
 - Wide colour: `setDrawingBufferGamut(renderer, gamut)` switches a renderer's canvas to show
   its bytes in Display P3 (or back to sRGB) and returns the gamut it took: a browser whose
   WebGL cannot switch keeps sRGB, so draw for what comes back; `drawingBufferGamut(renderer)`

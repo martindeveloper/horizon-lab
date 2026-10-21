@@ -13,6 +13,8 @@ export const SOLAR_GM_SI = 1.3271244e20;
 export const EARTH_GM_SI = 3.986004e14;
 /** Nominal solar radius, m (IAU 2015 Resolution B3). */
 export const SOLAR_RADIUS_SI = 6.957e8;
+/** Nominal solar luminosity, W (IAU 2015 Resolution B3). */
+export const SOLAR_LUMINOSITY_SI = 3.828e26;
 /** Astronomical unit, m (exact, IAU 2012 Resolution B2). */
 export const AU_SI = 149_597_870_700;
 /** Julian year, s (exact, IAU). */

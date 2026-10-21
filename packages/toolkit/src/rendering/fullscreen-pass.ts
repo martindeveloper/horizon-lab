@@ -187,7 +187,8 @@ export function createFullscreenPass(options: {
     strength: 0,
     fringe: 0,
   };
-  let ldr: { pass: CompositePass; key: string } | null = null;
+  /** The byte-frame pass and what it was built for: FXAA, bloom and lens, as bits. */
+  let ldr: { pass: CompositePass; key: number } | null = null;
   /* Bloom and the lens on radiance: the half-float frame, its glow and spikes, and the
      resolve that finishes them. */
   let chain: BloomPass | null = null;
@@ -274,9 +275,12 @@ export function createFullscreenPass(options: {
       }
       if (!floating) {
         if (bloom) Object.assign(ldrBloom, bloom);
-        if (lens) Object.assign(ldrLens, lens, { mask: ldrBloom });
+        if (lens) {
+          Object.assign(ldrLens, lens);
+          ldrLens.mask = ldrBloom;
+        }
         if (lens && !bloom) Object.assign(ldrBloom, lens.mask);
-        const key = `${mode === "fxaa"}/${bloom !== null}/${lens !== null}`;
+        const key = (mode === "fxaa" ? 1 : 0) | (bloom ? 2 : 0) | (lens ? 4 : 0);
         if (ldr && ldr.key !== key) {
           ldr.pass.dispose();
           ldr = null;

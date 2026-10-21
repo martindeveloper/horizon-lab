@@ -29,6 +29,15 @@ const WIEN_X = (() => {
 export const WIEN_CONSTANT = SECOND_RADIATION_CONSTANT / WIEN_X;
 
 /**
+ * Planck's law in one band up to a constant, 1 / (e^(hc/λkT) − 1), with `hcOverLambdaK` the
+ * band's hc/λk in kelvin: divide two to compare surfaces. The same as GLSL `planckBand`
+ * (`<horizon/temperature>`), whose 300 K floor keeps the exponential finite.
+ */
+export function planckBand(kelvin: number, hcOverLambdaK: number) {
+  return 1 / Math.expm1(hcOverLambdaK / Math.max(kelvin, 300));
+}
+
+/**
  * Planck's law per unit wavelength: the radiance of a black body at `kelvin`, at `nm`
  * nanometres, in W m⁻² sr⁻¹ m⁻¹. Zero for a body at absolute zero and where the exponential
  * would overflow.
@@ -97,12 +106,12 @@ export const dopplerShift = defineEquation({
     v: { symbol: "v", latex: "v", unit: "km/s" },
     lambda: { symbol: "λ", latex: "\\lambda", unit: "nm" },
   },
-  compute: ({ lambda0, v }) => lambda0 * dopplerFactor(v),
+  compute: ({ lambda0, v }) => lambda0 * dopplerWavelengthRatio(v),
   source: "Doppler (1842); Einstein (1905)",
 });
 
 /** λ / λ₀ for a source receding at `kmPerS` (negative when it approaches). */
-export function dopplerFactor(kmPerS: number) {
+export function dopplerWavelengthRatio(kmPerS: number) {
   const beta = (kmPerS * 1e3) / SPEED_OF_LIGHT_SI;
   return Math.sqrt((1 + beta) / (1 - beta));
 }

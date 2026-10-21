@@ -1,4 +1,4 @@
-import { CONSTANTS, RAD_PER_DEG } from "./constants";
+import { BOLTZMANN_CONSTANT, ATOMIC_MASS_KG, CONSTANTS, RAD_PER_DEG } from "./constants";
 import { defineEquation } from "./equation";
 import { UNITS } from "./units";
 
@@ -6,19 +6,6 @@ import { UNITS } from "./units";
  * Laws shared by every simulation. A simulation's own formulas (Kerr radii,
  * migration sketches) live in the feature, built with `defineEquation` too.
  */
-
-export const pythagoras = defineEquation({
-  id: "pythagoras",
-  text: "c = √(a² + b²)",
-  latex: "c = \\sqrt{a^2 + b^2}",
-  output: "c",
-  variables: {
-    a: { symbol: "a", latex: "a" },
-    b: { symbol: "b", latex: "b" },
-    c: { symbol: "c", latex: "c" },
-  },
-  compute: ({ a, b }) => Math.hypot(a, b),
-});
 
 /** For a body circling the Sun with negligible mass: years and astronomical units. */
 export const keplerThirdLaw = defineEquation({
@@ -59,6 +46,39 @@ export const schwarzschildRadius = defineEquation({
   compute: ({ M }) =>
     (2 * CONSTANTS.gravitationalConstant.value * M) / CONSTANTS.speedOfLight.value ** 2,
   source: "Schwarzschild (1916)",
+});
+
+/** A Schwarzschild hole's photon sphere, in horizon radii: r = 3GM/c². */
+export const PHOTON_SPHERE_PER_RS = 1.5;
+/**
+ * Its critical impact parameter, in horizon radii: b = r / √(1 − Rs/r) at the photon sphere,
+ * 3√3 GM/c². Rays aimed inside it fall in, so it is the shadow's radius on a distant sky.
+ */
+export const SHADOW_PER_RS = PHOTON_SPHERE_PER_RS / Math.sqrt(1 - 1 / PHOTON_SPHERE_PER_RS);
+
+export const photonSphereRadius = defineEquation({
+  id: "photon-sphere",
+  text: "r_ph = 3GM / c²",
+  latex: "r_{\\rm ph} = \\frac{3GM}{c^2}",
+  output: "r",
+  variables: {
+    M: { symbol: "M", latex: "M", unit: "kg" },
+    r: { symbol: "r_ph", latex: "r_{\\rm ph}", unit: "m" },
+  },
+  compute: ({ M }) => PHOTON_SPHERE_PER_RS * schwarzschildRadius.compute({ M }),
+});
+
+export const shadowRadius = defineEquation({
+  id: "critical-impact",
+  text: "b_c = 3√3 GM / c²",
+  latex: "b_c = \\frac{3\\sqrt{3}GM}{c^2}",
+  output: "b",
+  variables: {
+    M: { symbol: "M", latex: "M", unit: "kg" },
+    b: { symbol: "b_c", latex: "b_c", unit: "m" },
+  },
+  compute: ({ M }) => SHADOW_PER_RS * schwarzschildRadius.compute({ M }),
+  source: "Synge (1966); Luminet (1979)",
 });
 
 /** Distance from annual parallax: the definition of the parsec. */
@@ -165,4 +185,52 @@ export const hubbleLaw = defineEquation({
   },
   compute: ({ v, H0 }) => v / H0,
   source: "Hubble 1929, PNAS 15, 168; Lemaître 1927",
+});
+
+/** Stefan–Boltzmann in solar units: how a star's radius and temperature set its power. */
+export const stefanBoltzmann = defineEquation({
+  id: "stefan-boltzmann",
+  text: "L / L☉ = (R / R☉)² (T / T☉)⁴",
+  latex:
+    "\\frac{L}{L_\\odot} = \\left(\\frac{R}{R_\\odot}\\right)^2 \\left(\\frac{T}{T_\\odot}\\right)^4",
+  output: "L",
+  variables: {
+    R: { symbol: "R / R☉", latex: "R/R_\\odot" },
+    T: { symbol: "T", latex: "T", unit: "K" },
+    L: { symbol: "L / L☉", latex: "L/L_\\odot" },
+  },
+  compute: ({ R, T }) => R ** 2 * (T / CONSTANTS.solarEffectiveTemperature.value) ** 4,
+  source: "Stefan (1879), Boltzmann (1884)",
+});
+
+/**
+ * An atmosphere's pressure scale height: how far up its pressure falls by a factor e, for a
+ * gas of mean particle mass μ (in atomic mass units) under gravity g.
+ */
+export const pressureScaleHeight = defineEquation({
+  id: "scale-height",
+  text: "H = kT / (μ mᵤ g)",
+  latex: "H = \\frac{k T}{\\mu\\, m_u\\, g}",
+  output: "H",
+  variables: {
+    T: { symbol: "T", latex: "T", unit: "K" },
+    mu: { symbol: "μ", latex: "\\mu" },
+    g: { symbol: "g", latex: "g" },
+    H: { symbol: "H", latex: "H", unit: "m" },
+  },
+  compute: ({ T, mu, g }) => (BOLTZMANN_CONSTANT * T) / (mu * ATOMIC_MASS_KG * g),
+});
+
+/** Mean density: a body's mass spread evenly through its sphere. */
+export const meanDensity = defineEquation({
+  id: "mean-density",
+  text: "ρ = 3M / (4πR³)",
+  latex: "\\rho = \\frac{3 M}{4 \\pi R^3}",
+  output: "rho",
+  variables: {
+    M: { symbol: "M", latex: "M", unit: "kg" },
+    R: { symbol: "R", latex: "R", unit: "m" },
+    rho: { symbol: "ρ", latex: "\\rho" },
+  },
+  compute: ({ M, R }) => M / ((4 / 3) * Math.PI * R ** 3),
 });

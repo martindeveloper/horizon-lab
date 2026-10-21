@@ -25,8 +25,12 @@
 - `smootherstep(t)`: quintic `6t⁵ − 15t⁴ + 10t³`, clamped to [0, 1].
 - `toLogFraction(value, min, max)` / `fromLogFraction(t, min, max)`: inverses for
   logarithmic controls; clamp to their ranges. Bounds must be finite and
-  `0 < min < max`, otherwise a RangeError is thrown.
+  `0 < min < max`, otherwise a RangeError is thrown. `logFraction(x, from, to)` is the
+  unchecked per-frame form, clamped to [0, 1], which also runs from a larger `from` to a
+  smaller `to`.
+- `Vec3` tuples and `dot3`, `cross3`, `add3`, `scale3`, `length3`, `normalize3` for
+  model code without three.js; each writes an optional `out` (which may alias an input).
 
 Inputs should be finite. Use Three.js vector/matrix types in rendering code;
-this module does not duplicate a linear-algebra library. Physics equations
+the tuple helpers are for plain-number model code, not a linear-algebra library. Physics equations
 belong to their simulation unless multiple consumers share the same assumptions.

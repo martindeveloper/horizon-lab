@@ -3,10 +3,11 @@
  * vernal equinox, Y = ecliptic north (up), Z = −y of the right-handed J2000
  * ecliptic frame, so planets run counter-clockwise seen from ecliptic north.
  */
+import type { Vec3 } from "../math";
 import { RAD_PER_DEG as RAD } from "../science/constants";
 
 /** A scene-frame vector or point: x, y (ecliptic north), z. */
-export type Vec3 = [x: number, y: number, z: number];
+export type { Vec3 };
 /** A rotation as quaternion components, three.js order. */
 export type Quat = [x: number, y: number, z: number, w: number];
 

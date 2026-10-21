@@ -236,6 +236,20 @@
 .hud-tip[data-side="top"] > [data-tip]::before {
   inset: 100% 0 -0.5rem;
 }
+/* A sentence rather than a label: sentence case, wrapped to a readable measure. */
+.hud-tip[data-prose] > [data-tip] {
+  width: max-content;
+  max-width: min(16rem, calc(100vw - 2rem));
+  white-space: normal;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.65rem;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-transform: none;
+  text-wrap: pretty;
+}
 .hud-tip[data-dismissed] > [data-tip] {
   opacity: 0 !important;
   visibility: hidden !important;

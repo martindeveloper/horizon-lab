@@ -9,8 +9,6 @@ export {
 export { createCompositePass, type CompositeAntialias, type CompositePass } from "./composite-pass";
 export { createLensPass, type LensPass, type LensSettings } from "./lens-pass";
 export { drawingBufferGamut, gamutMatrix, setDrawingBufferGamut } from "./wide-colour";
-export { createFxaaPass, type FxaaPass } from "./fxaa-pass";
-export { createMsaaPass, type MsaaPass } from "./msaa-pass";
 export { RENDER_QUALITIES, type RenderQuality } from "./quality";
 export { bufferSize, observeViewport, type ResolutionOptions } from "./viewport";
 export { FrameClock, createFrameLoop } from "./frame-loop";

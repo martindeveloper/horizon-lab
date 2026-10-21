@@ -9,8 +9,6 @@ import test from "node:test";
 import {
   STANDARD_GRAVITY,
   aberrate,
-  addVelocities,
-  betaFromRapidity,
   betaOf,
   blackbodyLut,
   blackbodyLutCoordinate,
@@ -19,10 +17,8 @@ import {
   lorentzFactor,
   properVelocity,
   rapidity,
-  rapidityOf,
   relativisticDoppler,
   relativisticDopplerLaw,
-  relativisticDopplerObserved,
   timeDilation,
   torchOneWay,
   torchTrip,
@@ -46,38 +42,24 @@ test("proper velocity keeps β below 1 and γ(u = c) is √2", () => {
   near(timeDilation.compute({ tau: 1, beta: 0.8 }), 5 / 3);
 });
 
-test("rapidity adds and inverts: two boosts of 0.5c make 0.8c", () => {
-  near(betaFromRapidity(rapidityOf(0.6)), 0.6);
+test("rapidity is the measure that adds: two boosts of 0.5c make 0.8c", () => {
   near(rapidity.compute({ beta: 0.6 }), Math.atanh(0.6));
-  const half = properVelocity(0.5);
-  near(betaOf(addVelocities(half, half)), 0.8);
-  near(rapidityOf(0.5) * 2, rapidityOf(0.8));
-  // The vector form: collinear agrees with the scalar, and perpendicular follows Rindler eq. 3.7.
-  const out = { x: 0, y: 0, z: 0 };
-  addVelocities({ x: half, y: 0, z: 0 }, { x: half, y: 0, z: 0 }, out);
-  near(betaOf(out), 0.8);
-  near(out.y, 0);
-  addVelocities({ x: half, y: 0, z: 0 }, { x: 0, y: half, z: 0 }, out);
-  const beta = betaOf(out, { x: 0, y: 0, z: 0 });
-  near(beta.x, 0.5);
-  near(beta.y, 0.5 * Math.sqrt(1 - 0.25));
-  assert.throws(() => addVelocities(1, { x: 0, y: 0, z: 0 }), TypeError);
+  near(Math.tanh(2 * rapidity.compute({ beta: 0.5 })), 0.8);
 });
 
-test("the Doppler factor dead ahead is √((1+β)/(1−β)), both angle forms agree", () => {
+test("the Doppler factor dead ahead is √((1+β)/(1−β)) and abeam is γ", () => {
   const beta = 0.6;
   const gamma = 1 / Math.sqrt(1 - beta * beta);
   near(relativisticDoppler(beta, gamma, 1), Math.sqrt(1.6 / 0.4));
-  near(relativisticDopplerObserved(beta, gamma, 1), Math.sqrt(1.6 / 0.4));
   near(relativisticDoppler(beta, gamma, -1), Math.sqrt(0.4 / 1.6));
   near(relativisticDopplerLaw.compute({ beta, theta: 0 }), 2);
   // Light the source sent straight abeam arrives blueshifted by γ (the transverse Doppler effect).
   near(relativisticDoppler(beta, gamma, 0), gamma);
-  // A direction aberrated to the observed frame gives the same D through the other form.
+  // A direction aberrated to the observed frame gives the same D from the observed angle.
   const forward = { x: 0, y: 0, z: 1 };
   const n = { x: Math.sin(1), y: 0, z: Math.cos(1) };
   const seen = aberrate(n, forward, beta, gamma, { x: 0, y: 0, z: 0 });
-  near(relativisticDopplerObserved(beta, gamma, seen.z), relativisticDoppler(beta, gamma, n.z));
+  near(1 / (gamma * (1 - beta * seen.z)), relativisticDoppler(beta, gamma, n.z));
 });
 
 test("aberration keeps forward fixed, keeps unit length, crowds the sky ahead and round-trips", () => {

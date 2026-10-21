@@ -1,5 +1,5 @@
 /**
- * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, K, J).
+ * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, m/s², K, J, W).
  * Symbols follow the SI and the IAU (au, ly, pc, M☉); hosts may translate them
  * for display. Astronomical definitions are exact where the IAU fixed them.
  */
@@ -11,6 +11,7 @@ import {
   GRAVITATIONAL_CONSTANT_SI,
   JULIAN_YEAR_SI,
   SOLAR_GM_SI,
+  SOLAR_LUMINOSITY_SI,
   SOLAR_RADIUS_SI,
   SPEED_OF_LIGHT_SI,
 } from "./definitions";
@@ -22,9 +23,11 @@ export type Dimension =
   | "angularRate"
   | "mass"
   | "speed"
+  | "acceleration"
   | "rate"
   | "temperature"
-  | "energy";
+  | "energy"
+  | "power";
 
 export type UnitDefinition = {
   dimension: Dimension;
@@ -67,6 +70,7 @@ export const UNITS = {
   kpc: unit("length", "kpc", 1e3 * PC),
   Mpc: unit("length", "Mpc", 1e6 * PC),
   // Time
+  ms: unit("time", "ms", 1e-3),
   s: unit("time", "s", 1),
   min: unit("time", "min", 60),
   h: unit("time", "h", 3_600),
@@ -97,6 +101,8 @@ export const UNITS = {
   "km/s": unit("speed", "km/s", 1e3, "\\mathrm{km\\,s^{-1}}"),
   "au/yr": unit("speed", "au/yr", AU / YEAR, "\\mathrm{au\\,yr^{-1}}"),
   c: unit("speed", "c", C, "c"),
+  // Acceleration
+  "m/s2": unit("acceleration", "m/s²", 1, "\\mathrm{m\\,s^{-2}}"),
   // Rate (per second)
   Hz: unit("rate", "s⁻¹", 1, "\\mathrm{s^{-1}}"),
   /** The Hubble constant's unit: km/s of recession per Mpc of distance. */
@@ -107,6 +113,10 @@ export const UNITS = {
   J: unit("energy", "J", 1),
   /** Electronvolt: the energy one elementary charge gains across one volt (exact). */
   eV: unit("energy", "eV", ELEMENTARY_CHARGE_SI),
+  // Power
+  W: unit("power", "W", 1),
+  /** Nominal solar luminosity (IAU 2015 Resolution B3). */
+  Lsun: unit("power", "L☉", SOLAR_LUMINOSITY_SI, "L_\\odot"),
 } as const satisfies Record<string, UnitDefinition>;
 
 export type UnitId = keyof typeof UNITS;

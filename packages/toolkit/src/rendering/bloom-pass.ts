@@ -94,7 +94,12 @@ export function createBloomPass(renderer: WebGLRenderer) {
     down: WebGLRenderTarget[];
     up: WebGLRenderTarget[];
     read: BloomLevel[];
-    key: string;
+    /** What the chain was built for; a frame that asks the same reuses it. */
+    width: number;
+    height: number;
+    mips: number;
+    scale: number;
+    climb: boolean;
   } | null = null;
   const targetOf = (width: number, height: number) => {
     const target = new WebGLRenderTarget(width, height, {
@@ -119,11 +124,19 @@ export function createBloomPass(renderer: WebGLRenderer) {
     mips: number,
     climb: boolean,
   ) => {
-    const key = `${width}x${height}/${mips}@${settings.scale}${climb ? "" : "/down"}`;
-    if (levels?.key === key) return levels;
+    const { scale } = settings;
+    if (
+      levels &&
+      levels.width === width &&
+      levels.height === height &&
+      levels.mips === mips &&
+      levels.scale === scale &&
+      levels.climb === climb
+    )
+      return levels;
     free();
     const sizes = Array.from({ length: mips }, (_, i) => {
-      const share = settings.scale / 2 ** i;
+      const share = scale / 2 ** i;
       return {
         w: Math.max(1, Math.round(width * share)),
         h: Math.max(1, Math.round(height * share)),
@@ -131,7 +144,11 @@ export function createBloomPass(renderer: WebGLRenderer) {
     });
     const down = sizes.map(({ w, h }) => targetOf(w, h));
     levels = {
-      key,
+      width,
+      height,
+      mips,
+      scale,
+      climb,
       down,
       /* The coarsest level needs no sum: the chain turns there. A mask never comes back up. */
       up: climb ? sizes.slice(0, -1).map(({ w, h }) => targetOf(w, h)) : [],

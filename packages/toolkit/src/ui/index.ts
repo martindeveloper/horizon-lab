@@ -48,6 +48,7 @@ export {
 export { cn } from "./utils";
 export { isSceneShortcut } from "./keyboard";
 export { useFocusHandoff } from "./focus";
+export { useMediaQuery } from "./media-query";
 
 export { Equation, Sub } from "./equation";
 export { LoadingScreen } from "./loading-screen";

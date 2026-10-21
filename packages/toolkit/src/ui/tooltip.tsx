@@ -10,7 +10,8 @@ import { cn } from "./utils";
  * until the pointer or focus leaves (WCAG 1.4.13). `align="start"` and `"end"`
  * anchor the tip to the trigger's left or right edge, for controls at that side
  * of the viewport. `side="top"` opens it above, for controls with a dock or panel
- * just below them.
+ * just below them. `prose` sets a sentence rather than a label: sentence case,
+ * wrapped to a readable measure.
  */
 export function Tooltip({
   label,
@@ -18,11 +19,13 @@ export function Tooltip({
   className,
   align = "center",
   side = "bottom",
+  prose = false,
   ...props
 }: ComponentProps<"span"> & {
   label: ReactNode;
   align?: "start" | "center" | "end";
   side?: "top" | "bottom";
+  prose?: boolean;
 }) {
   const root = useRef<HTMLSpanElement>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -51,6 +54,7 @@ export function Tooltip({
       data-dismissed={dismissed || undefined}
       data-align={align === "center" ? undefined : align}
       data-side={side === "bottom" ? undefined : side}
+      data-prose={prose || undefined}
       {...props}
     >
       {children}

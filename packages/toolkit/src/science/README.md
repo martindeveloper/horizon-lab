@@ -12,12 +12,13 @@ symbols follow the SI and the IAU.
 whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConstant`
 (CODATA 2022), `astronomicalUnit` (exact, IAU 2012 B2), `parsec` (exactly
 648 000/π au, IAU 2015 B2), `lightYear` (c × Julian year), `julianYear`,
-`solarMass`, `solarRadius` (IAU 2015 B3 nominal), and for atoms and light
+`solarMass`, `solarRadius`, `solarEffectiveTemperature` and `jupiterGravitationalParameter`
+(IAU 2015 B3 nominal), and for atoms and light
 `planckConstant`, `boltzmannConstant`, `elementaryCharge` (exact, SI 2019),
 `electronMass`, `atomicMassConstant`, `classicalElectronRadius` and `rydbergConstant`
 (CODATA 2022).
 A page can print the table; code uses the named values whose names state their
-units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`,
+units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `SOLAR_TEFF_K`, `SOLAR_IRRADIANCE_W_M2`, `JUPITER_GM_SI`,
 `JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `SPEED_OF_LIGHT_KM_S`, `STANDARD_GRAVITY`
 (9.80665 m s⁻², CGPM 1901), `GRAVITATIONAL_CONSTANT` in SI,
 `PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`,
@@ -26,9 +27,9 @@ the one degree-to-radian factor; do not retype it.
 
 ## Units and measures (`units.ts`, `measure.ts`)
 
-`UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (s … Gyr,
+`UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (ms … Gyr,
 Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
-c), K and energies (J, eV), each as a factor to its SI base. `convert(value, from, to)` refuses to
+c), accelerations (m/s²), K, energies (J, eV) and powers (W, L☉), each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 
 ```ts
@@ -58,11 +59,14 @@ keplerThirdLaw.example({ a: 5.2 }); // "a = 5.2 au → P = 11.9 yr"
 schwarzschildRadius.measure({ M: measure(1, "Msun") }).in("km"); // 2.95
 ```
 
-Shared laws: `pythagoras`, `keplerThirdLaw`, `lightTravelTime`,
-`schwarzschildRadius`, `parallaxDistance`, `geometricMassTime`, `tangentialVelocity`,
+Shared laws: `keplerThirdLaw`, `lightTravelTime`,
+`schwarzschildRadius` with `photonSphereRadius` and `shadowRadius` (the critical impact
+parameter 3√3 GM/c²; `PHOTON_SPHERE_PER_RS` and `SHADOW_PER_RS` in horizon radii), `parallaxDistance`, `geometricMassTime`, `tangentialVelocity`,
 `angularSeparation` (haversine, degrees), `resonanceSemiMajorAxis` (Kepler III for an orbit
 of k times a planet's period), `hubbleLaw` (d = v / H₀, in Mpc), and for light `planckLaw`,
 `wienDisplacement`, `photonEnergy` (E = hc/λ, nm to eV) and `dopplerShift` (relativistic); for
+stars and planets `stefanBoltzmann` (L/L☉ from R/R☉ and T), `pressureScaleHeight`
+(H = kT / μ mᵤ g) and `meanDensity`; for
 a ship `lorentzFactor`, `timeDilation`, `relativisticDopplerLaw` and `rapidity` (below). A simulation's
 own formulas live in its feature (`lib/equations.ts`) and are built the same
 way. `Formula` is the print-only view documents use.
@@ -73,15 +77,11 @@ Special relativity for a ship that flies at a real fraction of c. The state is t
 velocity u = γβc in km/s (scalar, or any `{x, y, z}` as `Vector3Like`): unbounded, so |β| < 1 by
 construction, and du/dτ = a under thrust. Distances are km, times s, accelerations m s⁻².
 
-- `gammaOf(u)` and `betaOf(u)` (a magnitude, or with `out` the β vector), `properVelocity(β)`,
-  `rapidityOf(β)` = atanh β and `betaFromRapidity(φ)`.
-- `relativisticDoppler(β, γ, cos θ)` = γ(1 + β cos θ) with θ in the source frame;
-  `relativisticDopplerObserved(β, γ, cos θ′)` = 1/(γ(1 − β cos θ′)) from the aberrated angle a
-  shader knows. Dead ahead both give √((1 + β)/(1 − β)).
+- `gammaOf(u)` and `betaOf(u)` (a magnitude, or with `out` the β vector), `properVelocity(β)`.
+- `relativisticDoppler(β, γ, cos θ)` = ν_obs/ν_src = γ(1 + β cos θ) with θ in the source frame;
+  dead ahead it is √((1 + β)/(1 − β)).
 - `aberrate(n, forward, β, γ, out)` moves a rest-frame unit direction to where the moving
   observer sees it (closed form; `out` may be `n`); aberrating with −β undoes it.
-- `addVelocities(a, b)` composes proper velocities, two scalars along a line or two vectors
-  with an `out` (the Sun's motion against the microwave background with the ship's).
 - `coastTrip(D, v)` → `{ t, tau }`; `torchTrip(D, a)` is the brachistochrone (accelerate to
   the midpoint, decelerate to rest: τ = 2(c/a) acosh(1 + aD/2c²), t = 2(c/a) sinh(aτ/2c),
   plus `gammaMax`); `torchOneWay(τ, a)` → `{ distance, t, u }` for a ship that only accelerates.
@@ -89,13 +89,16 @@ construction, and du/dτ = a under thrust. Distances are km, times s, accelerati
 - Equations: `lorentzFactor` (β in `c`), `timeDilation` (t = γτ), `relativisticDopplerLaw`
   (θ in degrees) and `rapidity`, for technical pages.
 
-`@horizon/toolkit/shaders` has the same `aberrate` and `dopplerFactor` in GLSL (`<horizon/relativity>`).
+`@horizon/toolkit/shaders` has `aberrate` and the same frequency ratio in GLSL (`<horizon/relativity>`):
+`dopplerFactor(β, γ, cos θ)` is `relativisticDoppler`, and `dopplerFactorObserved(β, γ, cos θ′)` =
+1/(γ(1 − β cos θ′)) takes the aberrated angle a shader knows.
 
 ## Spectra and colour (`spectra.ts`, `color.ts`)
 
 `planckRadiance(nm, K)` is Planck's law per unit wavelength (W m⁻² sr⁻¹ m⁻¹), with
 `SECOND_RADIATION_CONSTANT` (hc/k), `WIEN_CONSTANT` (b, from h, c and k) and `HC_EV_NM`
-(1239.84 eV nm). `dopplerFactor(km/s)` is λ/λ₀ for a receding source; `vacuumToAir(nm)`, its inverse
+(1239.84 eV nm). `dopplerWavelengthRatio(km/s)` is λ/λ₀ for a receding source (the inverse of the
+frequency ratio above, for a line of sight); `vacuumToAir(nm)`, its inverse
 `airToVacuum(nm)` and `airIndex` follow the IAU convention (Morton 2000) for the air
 wavelengths spectroscopists quote. Photon energies and line physics use vacuum wavelengths.
 
@@ -103,9 +106,13 @@ wavelengths spectroscopists quote. Photon energies and line physics use vacuum w
 `spectrumXyz` integrates a spectrum against it, `chromaticity` gives (x, y), and
 `displayColor` turns XYZ into sRGB at full brightness, clipping primaries a screen cannot
 make. `blackbodyColor(K)` and `wavelengthColor(nm)` are the usual two; `cssRgb` prints one.
+`hellandBlackbody(K)` is the shaders' `blackbody` display fit on the CPU, and `hellandBlackbodyLinear(K)`
+their `blackbodyLinear`, for work that must match a shader's colour exactly; `planckBand(K, hc/λk)` is
+their `planckBand`.
 Each takes an optional `Gamut`: `p3` computes the colour in Display P3 instead
 (`xyzToLinearP3`), where spectral hues clip far less; `cssColor(rgb, alpha, gamut)` prints it
-as `color(display-p3 …)` for a P3 canvas or page. `blackbodyLut(size, minK, maxK, gamut)` bakes
+as `color(display-p3 …)` for a P3 canvas or page. `encodeSrgb` and `decodeSrgb` are the transfer
+curve both ways; `hexToLinear("#e2c07a")` turns a theme colour into linear light for a shader. `blackbodyLut(size, minK, maxK, gamut)` bakes
 `blackbodyColor` into RGBA bytes for a `size` × 1 texture, log-spaced in temperature (256 texels
 from 1,000 to 40,000 K by default); `blackbodyLutCoordinate(K, minK, maxK)` is the texture
 coordinate a shader samples at, which the shaders that read the lookup mirror in GLSL.
@@ -159,7 +166,8 @@ are the closed forms for matter and Λ alone (13.79 Gyr today, about 5.6 million
 than with radiation).
 `comovingDistanceMpc(z)` integrates (c / H₀) ∫ da / (a² E(a)) over √a, so it holds back to
 the Big Bang (3.40 Gpc at z = 1, Planck's 13.88 Gpc at last scattering);
-`particleHorizonMpc()` is the edge of the observable universe (~14.2 Gpc), and
+`particleHorizonMpc()` is the edge of the observable universe (~14.2 Gpc, worked out once per
+model), `eventHorizonMpc()` the farthest place light sent today can ever reach (~5.1 Gpc), and
 `redshiftAtComovingDistance(mpc)` inverts the distance (Infinity at the horizon).
 `cosmicAgeAtRedshiftGyr(z)` gives the age then (13.787 Gyr today, Planck's value; ~372,000
 years at the microwave background), and `lookbackTimeGyr(z)` and its inverse
@@ -173,6 +181,9 @@ J2000.0 epoch (2 451 545.0), so `julianDay(date) − J2000_JD` is days from J200
 (`JULIAN_CENTURY_DAYS` = 36 525 per century). Dates are taken as UTC; the ~69 s
 TT − UTC offset is below what most simulations resolve. Series in TT (the Sun
 and the Moon) take `julianEphemerisDay(date)`, which adds `DELTA_T_SECONDS` (69).
+`J2000_MS` is the same epoch as a JavaScript time; `julianEpoch(date)` is the Julian epoch
+(2000.0 plus Julian years, as orbits and astrometry are dated) and `julianEpochMs(epoch)` its
+inverse.
 
 ## Sky coordinates (`sky.ts`)
 
@@ -183,7 +194,8 @@ from J2000 (ch. 21), `eclipticToEquatorial(λ, β, ε)`, `toHorizontal(ra, dec, 
 latitude)`, `hourAngle(lst, ra)` (−180…180, negative while rising) and
 `risingHourAngle(dec, latitude, horizon)` (half the arc above an altitude; 0 never
 rises, 180 never sets). `equatorialToGalactic(ra, dec)` turns J2000 coordinates into
-galactic longitude and latitude (IAU pole). No nutation, aberration or refraction. The Sun's and the
+galactic longitude and latitude (IAU pole, `GALACTIC_POLE_J2000`; `GALACTIC_CENTRE_J2000` is the
+origin of longitude). No nutation, aberration or refraction. The Sun's and the
 Moon's own positions are in `@horizon/toolkit/bodies` (almanac).
 
 ## Catalogued facts (`facts.ts`)
