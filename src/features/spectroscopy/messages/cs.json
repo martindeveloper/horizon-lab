@@ -248,13 +248,17 @@
     "finish": "Dokončit",
     "exit": "Ukončit průvodce",
     "steps": {
+      "rainbow": {
+        "title": "Duha s mezerami",
+        "body": "Rozložte sluneční světlo mnohem jemněji, než to dokážou dešťové kapky, a v duze se objeví tmavé mezery. Každý prvek pohlcuje svou vlastní sadu barev, takže mezery fungují jako čárový kód: prozradí, z čeho je Slunce, aniž bychom tam letěli."
+      },
       "continuum": {
         "title": "Světlo z tepla",
         "body": "Horké husté těleso září na všech vlnových délkách, nejjasněji tam, kam maximum klade Wienův zákon. Tato lampa má teplotu Slunce."
       },
       "absorption": {
         "title": "Plyn si bere své barvy",
-        "body": "Sodíkové páry před lampou pohlcují na 589,0 a 589,6 nm: fotony, jejichž energie přesně zvedne vnější elektron z 3s do 3p."
+        "body": "Sodíkové páry před lampou pohlcují na 589,0 a 589,6 nm fotony, jejichž energie přesně zvedne vnější elektron z 3s do 3p."
       },
       "emission": {
         "title": "Tytéž čáry září",
@@ -262,7 +266,7 @@
       },
       "hydrogen": {
         "title": "Vodíkový žebřík",
-        "body": "Horký vodík pohlcuje Balmerovu sérii, skoky nahoru z n = 2, na vlnových délkách podle Rydbergova vzorce. Chladný plamen žádné nemá: v n = 2 nesedí žádné atomy."
+        "body": "Horký vodík pohlcuje Balmerovu sérii, přeskoky z n = 2, na vlnových délkách podle Rydbergova vzorce. Chladný plamen ji nemá: hladina n = 2 je téměř prázdná."
       },
       "fraunhofer": {
         "title": "Fraunhoferovy tmavé čáry",
@@ -270,15 +274,15 @@
       },
       "fingerprint": {
         "title": "Otisky prstů",
-        "body": "Každý prvek pohlcuje svůj vlastní vzor. Když mnoho označených laboratorních čar padne na tmavé čáry najednou, prvek tam je: jedna shoda může být náhoda, vzor ne."
+        "body": "Když mnoho označených laboratorních čar padne na tmavé čáry najednou, prvek tam je: jedna shoda může být náhoda, vzor ne."
       },
       "air": {
         "title": "Čáry našeho vzduchu",
-        "body": "Rozhýbejte Slunce na 300 km/s: jeho čáry se posunou o λv/c, ale pásy A a B zůstanou na místě. Pocházejí z kyslíku v zemském vzduchu, který se nepohybuje."
+        "body": "Při 300 km/s se čáry Slunce posunou zhruba o λv/c, ale pásy A a B zůstanou na místě: pocházejí z kyslíku v zemském vzduchu, který se nepohybuje."
       },
       "sequence": {
         "title": "Teplota, ne složení",
-        "body": "I se složením Slunce má Vega mnohem silnější vodíkové čáry. Kolem 10 000 K sedí v n = 2 nejvíce atomů vodíku; při vyšší teplotě se vodík ionizuje. Payneová to roku 1925 ukázala Sahovou rovnicí."
+        "body": "I se složením Slunce má Vega mnohem silnější vodíkové čáry. Kolem 10 000 K sedí v n = 2 největší podíl vodíku; při vyšší teplotě se ionizuje. Payneová to roku 1925 ukázala Sahovou rovnicí."
       },
       "cool": {
         "title": "Chladné hvězdy, čáry kovů",

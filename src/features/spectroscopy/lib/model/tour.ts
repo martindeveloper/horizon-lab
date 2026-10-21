@@ -3,7 +3,8 @@ import { BENCH_DEFAULT, type Bench, type Mystery, type StarChoice } from "./scen
 import type { ViewId } from "./view-ids";
 
 /**
- * The guided journey: continuous light, then a gas that takes some of it, the same gas
+ * The guided journey: the idea first (sunlight spread into a rainbow whose dark gaps read like
+ * a barcode), then continuous light, a gas that takes some of it, the same gas
  * glowing, hydrogen's ladder, the Sun's dark lines, fingerprints, Earth's own lines, the
  * spectral sequence, and a mystery to solve. Each step sets the bench or the sky it needs;
  * `equation` names a formula the caption prints (`SPECTROSCOPY_EQUATIONS`).
@@ -31,6 +32,16 @@ export type TourStep = {
 export const GUIDE_DWELL = 14;
 
 export const TOUR: readonly TourStep[] = [
+  /* The whole solar spectrum, plain: the barcode before anything names its lines. */
+  {
+    id: "rainbow",
+    view: "sun",
+    letters: false,
+    air: false,
+    velocity: 0,
+    compare: [],
+    range: [380, 770],
+  },
   {
     id: "continuum",
     view: "kirchhoff",

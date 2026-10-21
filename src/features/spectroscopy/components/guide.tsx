@@ -31,7 +31,6 @@ export function SpectroscopyGuide() {
       index={index}
       playing={playing}
       landed={landed}
-      hold="spectroscopy-dwell"
       extra={equationOf}
     />
   );

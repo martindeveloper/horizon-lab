@@ -484,8 +484,9 @@ test("the store zooms within the visible range and the guide gives the visitor's
   api().patchBench({ column: 21, gas: 99_999 });
   assert.equal(api().bench.gas, 12_000, "the bench clamps its gas temperature");
   const before = { view: api().view, bench: api().bench, compare: api().compare };
+  const { TOUR } = await import("../src/features/spectroscopy/lib/model/tour.ts");
   api().startGuide();
-  api().goGuide(3);
+  api().goGuide(TOUR.findIndex((step) => step.id === "hydrogen"));
   assert.equal(api().bench.elements[0], "H");
   api().endGuide();
   assert.deepEqual({ view: api().view, bench: api().bench, compare: api().compare }, before);
@@ -529,9 +530,10 @@ test("the guide glides between steps: zooms stay in range, a lamp switched off s
 
 test("a guide step switches its elements at once and opens its line only on landing", async () => {
   const { useSpectroscopy } = await import("../src/features/spectroscopy/lib/store.ts");
+  const { TOUR } = await import("../src/features/spectroscopy/lib/model/tour.ts");
   const api = useSpectroscopy.getState;
   api().startGuide();
-  api().goGuide(1);
+  api().goGuide(TOUR.findIndex((step) => step.id === "absorption"));
   assert.deepEqual(api().bench.elements, ["Na"]);
   assert.equal(api().selection, null, "the card waits for the motion");
   assert.equal(api().guideLanded, false);

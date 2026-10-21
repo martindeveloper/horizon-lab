@@ -163,12 +163,12 @@
         "body": "Měsíce rychlostí Voyageru, dny pro plamennou loď. Slunce tu dává 43 % pozemského svitu."
       },
       "jupiter": {
-        "title": "Io před Jupiterem",
-        "body": "Sledujte stín Io na oblacích. Rádiový hovor domů trvá většinu hodiny."
+        "title": "Io a Jupiter",
+        "body": "Stín Io přejde Jupiter každých 42 hodin. Signál domů letí skoro hodinu."
       },
       "saturn": {
         "title": "Saturn",
-        "body": "Vzdalte se a prstence se otočí hranou; přibližte se a zaplní oblohu."
+        "body": "V rovině prstenců téměř zmizí: silné jsou jen asi deset metrů."
       },
       "pluto": {
         "title": "Pluto",
@@ -184,11 +184,11 @@
       },
       "andromeda": {
         "title": "Andromeda",
-        "body": "Dvacet devět lodních let. Pozemský kalendář ušel dva a půl milionu let; Slunce stále svítí."
+        "body": "Dvacet devět lodních let. Na Zemi uběhlo dva a půl milionu let; Slunce stále svítí."
       },
       "edge": {
         "title": "Okraj",
-        "body": "Dál žádná loď nedoletí: nic vyslané odsud dnes za tuto hranici nikdy nedorazí. Mikrovlnné pozadí je tak daleko jako vždy. Nikdy nebylo místem."
+        "body": "Dál žádná loď nedoletí: nic, co dnes opustí Zemi, tuto hranici nepřekročí. Mikrovlnné pozadí je stejně daleko jako doma. Nikdy nebylo místem."
       }
     }
   },

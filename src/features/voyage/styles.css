@@ -1,24 +1,5 @@
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
 
-/* The journey's hold on a step: a hairline that fills, freezes while paused, then moves on. */
-@keyframes voyage-dwell {
-  to {
-    transform: scaleX(1);
-  }
-}
-:where([data-simulation="voyage"]) .voyage-dwell {
-  transform: scaleX(0);
-  transform-origin: left;
-}
-:where([data-simulation="voyage"]) .voyage-dwell:is([data-state="running"], [data-state="paused"]) {
-  animation-name: voyage-dwell;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-:where([data-simulation="voyage"]) .voyage-dwell[data-state="paused"] {
-  animation-play-state: paused;
-}
-
 /* The console (components/flight-dock.tsx): two glass panels angled in towards the pilot,
    the scanner's place between them. Phones stack them flat. */
 @media (width >= 48rem) {

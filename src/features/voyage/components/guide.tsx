@@ -27,7 +27,6 @@ export function VoyageGuide() {
       index={index}
       playing={playing}
       landed={landed}
-      hold="voyage-dwell"
       className="bottom-(--hud-clear,6rem) pb-2"
       clearance={clearance}
     />

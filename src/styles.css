@@ -3,6 +3,7 @@
 @import "@horizon/toolkit/base.css";
 @import "@horizon/toolkit/styles.css";
 @import "./components/shell/styles.css";
+@import "./components/simulations/styles.css";
 @import "./features/catalogue/styles.css";
 
 /* The one utilities bundle for every route. Feature stylesheets hold only

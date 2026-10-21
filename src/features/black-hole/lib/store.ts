@@ -145,7 +145,7 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => ({
   },
   advanceGuide: () => {
     const s = get();
-    if (!s.guideOpen || !s.guideArrived) return;
+    if (!s.guideOpen) return;
     const beats = tourFor(s.presetId);
     if (s.guideBeat + 1 >= beats.length) {
       s.endGuide();

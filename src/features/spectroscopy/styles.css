@@ -25,26 +25,6 @@
     0 0 24px rgb(var(--solar) / 0.06);
 }
 
-/* The guide's hold on a step: a hairline that fills, freezes while paused, then moves on. */
-@keyframes spectroscopy-dwell {
-  to {
-    transform: scaleX(1);
-  }
-}
-:where([data-simulation="spectroscopy"]) .spectroscopy-dwell {
-  transform: scaleX(0);
-  transform-origin: left;
-}
-:where([data-simulation="spectroscopy"])
-  .spectroscopy-dwell:is([data-state="running"], [data-state="paused"]) {
-  animation-name: spectroscopy-dwell;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-:where([data-simulation="spectroscopy"]) .spectroscopy-dwell[data-state="paused"] {
-  animation-play-state: paused;
-}
-
 /* Names rise into place over their lines, one after another. */
 @keyframes spectroscopy-label-in {
   from {

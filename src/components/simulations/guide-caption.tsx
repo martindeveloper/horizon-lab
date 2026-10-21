@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import type { Translate } from "@/lib/facts";
-import { cn } from "@horizon/toolkit/ui";
 
 import { GuideBody, GuideCard, GuideTitle, type GuideControls } from "./guide-card";
 import { useDockClearance, type DockInTheWay } from "./use-dock-clearance";
@@ -86,10 +85,10 @@ function useGuideDwell(
 
 /**
  * A guided journey's caption, on the shared guide card: where we are (`tour.steps.<id>`), what
- * to notice, `extra` under them (a formula), and a gold hairline (`hold`, the feature's class
- * for it) that fills while a landed step holds before the journey moves on. It can always be
- * paused (WCAG 2.2.2), stepped or left. The caption publishes its height on the stage
- * (`clearance`), so the scene's names end above it.
+ * to notice, `extra` under them (a formula), and the current step's segment filling while a
+ * landed step holds before the journey moves on. It can always be paused (WCAG 2.2.2), stepped
+ * or left. The caption publishes its height on the stage (`clearance`), so the scene's names
+ * end above it.
  */
 export function GuideCaption<Step extends JourneyStep>({
   namespace,
@@ -99,7 +98,6 @@ export function GuideCaption<Step extends JourneyStep>({
   index,
   playing,
   landed,
-  hold,
   className,
   clearance,
   extra,
@@ -112,8 +110,6 @@ export function GuideCaption<Step extends JourneyStep>({
   index: number;
   playing: boolean;
   landed: boolean;
-  /** The feature's class animating the hairline's fill. */
-  hold: string;
   className?: string | undefined;
   clearance?: { inTheWay?: DockInTheWay; property?: string } | undefined;
   extra?: ((step: Step) => ReactNode) | undefined;
@@ -135,23 +131,17 @@ export function GuideCaption<Step extends JourneyStep>({
       focusNext
       className={className}
       cardRef={card}
-      hold={
-        /* The step's hold: fills while the journey waits, freezes while it is paused. */
-        <div
-          aria-hidden
-          className={cn(
-            "mt-3 h-px w-32 shrink-0 overflow-hidden bg-fg/15 short:mt-1.5",
-            last && "hidden",
-          )}
-        >
-          <span
-            key={index}
-            className={cn(hold, "block h-full bg-solar")}
-            data-state={counting ? "running" : landed ? "paused" : "waiting"}
-            style={{ animationDuration: `${stepDwell}s` }}
-          />
-        </div>
-      }
+      progress={{
+        step: index,
+        total: tour.length,
+        /* The last step holds for nothing: the journey ends there. */
+        hold: last
+          ? undefined
+          : {
+              seconds: stepDwell,
+              state: counting ? "running" : landed ? "paused" : "waiting",
+            },
+      }}
       controls={{
         ...tourControls(t, index, tour.length, getState),
         play: last

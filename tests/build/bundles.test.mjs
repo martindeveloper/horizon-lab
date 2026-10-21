@@ -97,7 +97,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
     const shared = assets(locale, ".css");
     assert.doesNotMatch(
       contents(shared),
-      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-dwell/,
+      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit/,
     );
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
@@ -105,7 +105,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       orrery: /scene-label/,
       "deep-field": /deep-field-rung/,
       spectroscopy: /spectroscopy-ribbon/,
-      voyage: /voyage-dwell/,
+      voyage: /voyage-cockpit/,
     };
     for (const suffix of [
       "lab/black-hole",

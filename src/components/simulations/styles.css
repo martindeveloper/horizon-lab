@@ -1,0 +1,70 @@
+/* Every guide's step (guide-card.tsx): its lines rise in together, a beat apart. The step
+   clips them, so a line still below its place never overflows the scroller into a scrollbar. */
+@keyframes guide-line {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.guide-step {
+  overflow: clip;
+}
+.guide-step > * {
+  animation: guide-line 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.guide-step > :nth-child(2) {
+  animation-delay: 70ms;
+}
+.guide-step > :nth-child(n + 3) {
+  animation-delay: 140ms;
+}
+
+/* More words below the fold: the foot of the text fades out and an arrow breathes over it,
+   slowly, until the end is in view. */
+.guide-words[data-more] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2rem), transparent);
+}
+@keyframes guide-more {
+  50% {
+    opacity: 0.85;
+    translate: 0 3px;
+  }
+}
+.guide-more {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-out;
+}
+.guide-more[data-shown] {
+  opacity: 0.45;
+  pointer-events: auto;
+  animation: guide-more 2.4s ease-in-out infinite;
+}
+
+/* The closed card's likeness (guide-card.tsx) holds still as it fades: a copy would replay
+   every entrance it carries. */
+.guide-leaving,
+.guide-leaving * {
+  animation: none !important;
+}
+
+/* The current step's segment: fills as the step is reached, or over a journey's hold,
+   frozen while it is paused. The duration comes with the element. */
+@keyframes guide-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+.guide-fill {
+  transform-origin: left;
+}
+.guide-fill:is([data-state="running"], [data-state="paused"]) {
+  animation-name: guide-fill;
+  animation-fill-mode: both;
+}
+.guide-fill[data-state="waiting"] {
+  transform: scaleX(0);
+}
+.guide-fill[data-state="paused"] {
+  animation-play-state: paused;
+}

@@ -246,8 +246,12 @@
     "play": "Play guide",
     "pause": "Pause guide",
     "finish": "Finish",
-    "exit": "Exit tour",
+    "exit": "Exit guide",
     "steps": {
+      "rainbow": {
+        "title": "A rainbow with gaps",
+        "body": "Spread sunlight far more finely than raindrops do and the rainbow shows dark gaps. Every element blocks its own set of colours, so the gaps work like a barcode: they tell us what the Sun is made of, without going there."
+      },
       "continuum": {
         "title": "Light from heat",
         "body": "A hot, dense body glows at every wavelength, brightest where Wien's law puts the peak. This lamp is at the Sun's temperature."
@@ -262,7 +266,7 @@
       },
       "hydrogen": {
         "title": "Hydrogen's ladder",
-        "body": "Hot hydrogen absorbs the Balmer series, jumps up from n = 2, at wavelengths Rydberg's formula predicts. A cool flame shows none: no atoms sit in n = 2."
+        "body": "Hot hydrogen absorbs the Balmer series, jumps up from n = 2, at wavelengths Rydberg's formula predicts. A cool flame has none: n = 2 is all but empty."
       },
       "fraunhofer": {
         "title": "Fraunhofer's dark lines",
@@ -270,15 +274,15 @@
       },
       "fingerprint": {
         "title": "Fingerprints",
-        "body": "Each element absorbs its own pattern. When many marked lab lines fall on dark lines at once, the element is there: one match could be chance, a pattern is not."
+        "body": "When many marked lab lines fall on dark lines at once, the element is there: one match could be chance, a pattern is not."
       },
       "air": {
         "title": "Lines from our own air",
-        "body": "Move the Sun at 300 km/s: its lines shift by λv/c, but the A and B bands stay put. They come from oxygen in Earth's air, which isn't moving."
+        "body": "At 300 km/s the Sun's lines shift by about λv/c, but the A and B bands stay put: they come from oxygen in Earth's air, which isn't moving."
       },
       "sequence": {
         "title": "Temperature, not composition",
-        "body": "Modelled with the Sun's composition, Vega still has far stronger hydrogen lines. Near 10,000 K the most hydrogen atoms sit in n = 2; hotter, hydrogen ionizes. Payne showed this with Saha's equation in 1925."
+        "body": "Modelled with the Sun's composition, Vega still has far stronger hydrogen lines. Near 10,000 K the share of hydrogen in n = 2 peaks; hotter, it ionizes. Payne showed this with Saha's equation in 1925."
       },
       "cool": {
         "title": "Cool stars, metal lines",

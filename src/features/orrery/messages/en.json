@@ -204,7 +204,7 @@
       },
       "past": {
         "title": "The past slider is a model",
-        "body": "Nobody has a video of planet positions 4 billion years ago. The old end of the slider is a sketch in the family of the giant-planet instability (the Nice model): giants start packed in a chain of resonances with a disk of leftovers outside them; the chain breaks, encounters with an ice giant kick Jupiter and Saturn past their 2:1 resonance and the system turns unstable; Neptune's outward move stirs the disk; most bodies are ejected, some stay in the Kuiper belt or the scattered disk, some are handed to the Oort cloud. The original model tied this to the Late Heavy Bombardment 3.9 billion years ago. Recent studies favour an earlier instability, within about 100 million years of the first solids, so a single spike of impacts is no longer the usual picture."
+        "body": "Nobody has a video of planet positions 4 billion years ago. The old end of the slider is a sketch in the family of the giant-planet instability (the Nice model): giants start closer together with a disk of leftovers outside them; Jupiter and Saturn slowly drift across their 2:1 resonance and the system turns unstable; Neptune's outward move stirs the disk; most bodies are ejected, some stay in the Kuiper belt or the scattered disk, some are handed to the Oort cloud. Newer versions start the giants in a tight chain of resonances that later breaks; the sketch draws the 2005 original, which tied this to the Late Heavy Bombardment 3.9 billion years ago. Recent studies favour an earlier instability, within about 100 million years of the first solids, so a single spike of impacts is no longer the usual picture."
       },
       "ellipses": {
         "title": "Ellipses",
@@ -232,7 +232,7 @@
       },
       "periods": {
         "title": "Farther out, slower",
-        "body": "Earth laps the Sun in a year, Jupiter in {jupiterYears}, Neptune in {neptuneYears}. Kepler's third law ties the period to the distance.",
+        "body": "Earth laps the Sun in a year, Jupiter in {jupiterYears} years, Neptune in {neptuneYears}. Kepler's third law ties period to distance.",
         "eq": "{equation} · P in years, a in au"
       },
       "ellipses": {
@@ -254,11 +254,11 @@
       },
       "clearing": {
         "title": "The clearing, as a model",
-        "body": "The packed giants start in a chain of resonances. When it breaks they scatter each other, Jupiter and Saturn jump past their 2:1 resonance, and Neptune moves out through the icy disk: most is ejected, some stays in the Kuiper belt or the scattered disk, and some reaches the Oort cloud."
+        "body": "The giants start closer together inside a disk of icy leftovers. Jupiter and Saturn drift apart until Saturn's year is twice Jupiter's; that 2:1 resonance shakes the giants loose, and Neptune ploughs out through the disk: most is ejected, some stays in the Kuiper belt or scattered disk, some reaches the Oort cloud."
       },
       "oort": {
         "title": "The Oort cloud",
-        "body": "A proposed shell of icy bodies extending perhaps to {oortShellAu} au. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets seen as they approach the Sun."
+        "body": "A proposed shell of icy bodies reaching perhaps {oortShellAu} au. No one has seen it directly; we infer it from long-period comets falling in from it."
       }
     }
   },
@@ -309,7 +309,7 @@
     "belt": "Slow collisions far from Jupiter merge embryos into rocky planets. Near Jupiter they are fast and shatter: the asteroid belt.",
     "moon": "In the leading model a Mars-size body strikes Earth and the Moon forms from the debris. Estimates span about {moonImpactGyr} billion years ago; the younger ages may record later remelting.",
     "disk": "Disk intact: giants packed in, a heavy icy disk outside them. Starting orbits are a teaching sketch.",
-    "clearing": "Clearing, as a model: the giants' resonant chain breaks, they scatter each other and Neptune scatters the disk.",
+    "clearing": "Clearing, as a model: Jupiter and Saturn cross a resonance, the giants scatter each other and Neptune scatters the disk.",
     "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that may be debris from one basin, Imbrium. A spike or a long tail? Debated.",
     "today": "Measured orbits. Planet positions are computed for today's date."
   }

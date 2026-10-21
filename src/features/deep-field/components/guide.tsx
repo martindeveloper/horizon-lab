@@ -30,7 +30,6 @@ export function DeepFieldGuide() {
       index={index}
       playing={playing}
       landed={landed}
-      hold="deep-field-dwell"
       className="bottom-(--hud-clear,6rem) pb-2"
       clearance={clearance}
     />

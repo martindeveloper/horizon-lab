@@ -163,12 +163,12 @@
         "body": "Months at Voyager's speed, days for the torch ship. Sunlight here is 43 % of Earth's."
       },
       "jupiter": {
-        "title": "Io, in front of Jupiter",
-        "body": "Watch Io's shadow cross the clouds. A radio call home takes most of an hour."
+        "title": "Io and Jupiter",
+        "body": "Io's shadow crosses Jupiter every 42 hours. Radio home: most of an hour."
       },
       "saturn": {
         "title": "Saturn",
-        "body": "Back off and the rings turn edge-on; come in and they fill the sky."
+        "body": "Orbit into their plane: ten metres thick, the rings all but vanish."
       },
       "pluto": {
         "title": "Pluto",
@@ -188,7 +188,7 @@
       },
       "edge": {
         "title": "The edge",
-        "body": "No ship can go farther: nothing sent from here today ever arrives beyond this. The microwave background is as far as it ever was. It was never a place."
+        "body": "No ship can go farther: nothing leaving Earth today ever gets beyond this. The microwave background is as far away as from home. It was never a place."
       }
     }
   },

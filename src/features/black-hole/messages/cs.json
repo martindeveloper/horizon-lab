@@ -14,12 +14,11 @@
   "camera": "Kamera",
   "optics": "Optika",
   "startGuide": "Spustit průvodce",
-  "exit": "Ukončit",
-  "continue": "Pokračovat",
+  "exit": "Ukončit průvodce",
+  "next": "Další",
   "previousBeat": "Předchozí krok",
   "guideProgress": "{step} / {total} · {kicker}",
   "finish": "Dokončit",
-  "skip": "Přeskočit",
   "open": "Otevřít",
   "fold": "Sbalit",
   "read": "Číst dál",
@@ -80,20 +79,15 @@
   "pinDoppler": "Doppler",
   "gaugeLabel": "Vzdálenost od středu, r / M",
   "gaugeYou": "Vy",
-  "phaseWide": "Celkový pohled",
   "sketchNotToScale": "není v měřítku",
   "sketchSpinZero": "příklad pro a = 0",
   "sketchAssumedSpin": "předpokládaný spin, dosud neměřený",
   "sketchCriticalCurve": "teoretická kritická křivka",
-  "phaseDolly": "Přiblížení",
-  "phaseDetail": "Detail",
-  "phaseHold": "Zastavení",
   "ariaStartGuide": "Spustit průvodce",
   "ariaOpenAtlas": "Otevřít atlas",
   "ariaCloseClocks": "Zavřít panel hodin",
   "ariaDropClocks": "Pustit hodiny",
   "ariaCloseObs": "Zavřít nastavení",
-  "ariaShowText": "Zobrazit zbývající text",
   "ariaClose": "Zavřít",
   "presets": {
     "sgr-a": "Sagittarius A*",
@@ -352,17 +346,17 @@
       "1": {
         "kicker": "přiblížení",
         "title": "Tmavá oblast není povrch",
-        "body": "Tmavou oblast snadno zaměníte za horizont událostí. Ve skutečnosti je to stín černé díry, jehož podobu určuje záchyt světla, gravitační čočkování a záření okolního plynu. Jeho zdánlivá velikost není prostým průmětem horizontu. Světlý prstenec kolem něj tvoří záření okolního plynu. Část světla se k nám dostává po silně zakřivených drahách. Nevidíme tedy žádný povrch, ale vliv černé díry na světlo v okolí."
+        "body": "Tmavou oblast snadno zaměníte za horizont událostí. Ve skutečnosti je to stín černé díry, který utváří záchyt světla, gravitační čočkování a zářící plyn. Zakreslená čára je kritická křivka, hranice záchytu světla; je mnohem větší než prstenec horizontu a tmavá oblast ji nemusí vyplnit. Světlý prstenec tvoří plyn vně díry, jehož světlo se k nám ohýbá."
       },
       "2": {
         "kicker": "fotonové dráhy",
         "title": "Světlo může obíhat",
-        "body": "U nerotující černé díry existují na r = 3M nestabilní kruhové dráhy světla. Společně tvoří fotonovou sféru. U rotující černé díry je struktura vázaných fotonových drah složitější a závisí i na směru oběhu. Světlo z disku může černou díru částečně obletět a vytvořit další obrazy. Pás nad stínem není druhý disk, ale odvrácená strana téhož disku, kterou do zorného pole zvedá gravitační čočkování. Široký jasný prstenec na snímcích EHT není přímým zobrazením jediné fotonové dráhy."
+        "body": "U nerotující černé díry leží nestabilní kruhové dráhy světla na r = 3M a tvoří zakreslenou fotonovou sféru. U rotující díry se rovníková dráha ve směru rotace zmenší a protisměrná zvětší: to je ∓ ve vzorci. Světlo z disku může černou díru částečně obletět a vytvořit další obrazy. Pás nad stínem není druhý disk, ale odvrácená strana téhož disku, kterou do zorného pole zvedá gravitační čočkování."
       },
       "3": {
         "kicker": "dopplerovské zesílení",
         "title": "Jedna strana září jasněji",
-        "body": "Na protilehlých stranách stejného prstence může mít plyn stejnou teplotu, ale odlišnou rychlost vůči nám. Přibližující se část vypadá jasnější, vzdalující se obvykle slábne a rudne. Spektrální intenzita se při odpovídajícím posunu frekvence mění s třetí mocninou dopplerovského faktoru, δ³; intenzita integrovaná přes celé spektrum s δ⁴. Po započtení gravitačního rudého posuvu nahrazuje δ celkový posuv g; obraz dále ovlivňuje sklon disku a rozložení zářícího plynu. Jasný srpek tedy nevyžaduje, aby byla jedna strana sama o sobě teplejší."
+        "body": "Na protilehlých stranách prstence může mít plyn stejnou teplotu, ale odlišnou rychlost vůči nám. Přibližující se strana je díky dopplerovskému zesílení jasnější, vzdalující se slábne a rudne. Popisky udávají dopplerovský faktor δ. Se započtením gravitačního rudého posuvu vzniká celkový posuv g; světlo sečtené přes všechny frekvence se mění s g⁴. Jasný srpek tedy nevyžaduje, aby byla jedna strana teplejší."
       },
       "4": {
         "kicker": "oddálení",
@@ -374,7 +368,7 @@
       "0": {
         "kicker": "8,28 kpc",
         "title": "Černá díra v naší vlastní Galaxii",
-        "body": "Sagittarius A* není vzdálený kvasar. Je to černá díra v centru Mléčné dráhy, asi 27 000 světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie mezihvězdný prach. Její hmotnost, přibližně 4,3 milionu Sluncí, určujeme z drah okolních hvězd. Jako kompaktní rádiový zdroj byla objevena v roce 1974. Husté hvězdné okolí v této scéně představuje jadernou hvězdokupu. Nedíváte se na Mléčnou dráhu zvenčí. Jste uvnitř."
+        "body": "Sagittarius A* je černá díra v centru Mléčné dráhy, asi 27 000 světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie prach. Jako kompaktní rádiový zdroj byla objevena v roce 1974; její hmotnost, asi 4,3 milionu Sluncí, určujeme z drah okolních hvězd. Hustý roj hvězd v této scéně představuje jadernou hvězdokupu."
       },
       "1": {
         "kicker": "S2",
@@ -384,12 +378,12 @@
       "2": {
         "kicker": "52 μas",
         "title": "Světlo kolem stínu",
-        "body": "Dne 12. května 2022 zveřejnil Event Horizon Telescope snímek Sgr A* s jasným prstencem o úhlovém průměru přibližně 52 miliontin obloukové vteřiny (μas). Tak malý úhel by zabíral předmět velký asi deset centimetrů na Měsíci při pohledu ze Země. Prstenec tvoří záření horkého plynu, jehož obraz mění silná gravitace; není to samotný horizont ani izolovaná fotonová dráha. Okolí Sgr A* se mění už během minut. Právě tato rychlá proměnlivost rekonstrukci snímku výrazně ztížila."
+        "body": "Dne 12. května 2022 zveřejnil Event Horizon Telescope snímek Sgr A*: jasný prstenec o průměru asi 52 miliontin obloukové vteřiny (μas), tedy jako deseticentimetrový předmět na Měsíci při pohledu ze Země. Prstenec je světlo horkého plynu ohnuté gravitací, ne samotný horizont. Nakreslená čára je kritická křivka, okraj stínu podle teorie. Plyn se mění během minut, což rekonstrukci snímku výrazně ztížilo."
       },
       "3": {
         "kicker": "nízká zářivá účinnost",
         "title": "Hmotný objekt, slabý zdroj",
-        "body": "Sgr A* přijímá jen málo plynu a její akreční tok navíc vyzařuje neefektivně. V klidovém stavu dosahuje její celkový zářivý výkon řádově miliardtiny Eddingtonovy svítivosti. Tento poměr svítivostí však není totéž co poměr rychlostí akrece. Horký řídký tok, označovaný zkratkou RIAF, nevypadá jako standardní tenký disk zářivého kvasaru. Proměnlivé rádiové, infračervené a rentgenové záření nám přesto umožňuje sledovat dění blízko horizontu. Jasný tenký disk v této scéně slouží jen pro ilustraci; nejde o doslovnou rekonstrukci toku kolem Sgr A*."
+        "body": "Sgr A* přijímá jen málo plynu a její horký řídký tok vyzařuje neefektivně. V klidu svítí asi miliardtinou Eddingtonovy svítivosti, tedy meze, při níž tlak záření odtlačuje plyn stejně silně, jako ho gravitace přitahuje. Tento radiačně neefektivní akreční tok (RIAF) se nepodobá jasnému tenkému disku kvasaru, takže disk ve scéně je jen ilustrační. Jeho záblesky v rádiovém, infračerveném i rentgenovém oboru přesto prozrazují dění u horizontu."
       },
       "4": {
         "kicker": "oddálení",
@@ -401,12 +395,12 @@
       "0": {
         "kicker": "Panna",
         "title": "Černá díra vzdálená 55 milionů světelných let",
-        "body": "M87* se nachází v jádře Messier 87, obří eliptické galaxie v kupě galaxií v Panně. Leží přibližně na rektascenzi 12 h 30 min a deklinaci +12°; z naší polohy je asi 74° nad galaktickou rovinou. Vzdálenost odhadujeme na 16,8 Mpc a hmotnost černé díry na 6,5 miliardy Sluncí. Směr našeho pohledu svírá s osou výtrysku jen asi 17°, takže okolní tok vidíme téměř shora. Žlutavá záře scény představuje převážně staré hvězdy této galaxie."
+        "body": "M87* se nachází v jádře Messier 87, obří eliptické galaxie v kupě galaxií v Panně, asi 16,8 Mpc od nás. Hmotnost černé díry se odhaduje na 6,5 miliardy Sluncí. Žlutavá záře scény představuje převážně staré hvězdy této galaxie."
       },
       "1": {
         "kicker": "17°",
         "title": "Výtrysk prozrazuje směr osy",
-        "body": "Heber Curtis popsal výtrysk galaxie M87 už v roce 1918. Rádiová pozorování pomocí interferometrie s velmi dlouhou základnou ukazují, že jeho osa svírá s naším směrem pohledu přibližně 17°. Jedním z hlavních vysvětlení jeho pohonu je Blandfordův–Znajekův mechanismus: magnetické siločáry procházející rotujícím horizontem umožňují čerpat rotační energii černé díry a napájet relativistický výtrysk. Plazma není vyvrhováno zpod horizontu. Modrý útvar v této scéně znázorňuje oblast výtrysku."
+        "body": "Heber Curtis popsal výtrysk galaxie M87 už v roce 1918. Rádiová pozorování pomocí interferometrie s velmi dlouhou základnou ukazují, že jeho osa svírá s naším směrem pohledu přibližně 17°. Jedním z hlavních vysvětlení jeho výkonu je Blandfordův–Znajekův mechanismus: magnetické siločáry procházející rotujícím horizontem umožňují čerpat rotační energii černé díry a napájet relativistický výtrysk. Plazma není vyvrhováno zpod horizontu. Modrý útvar v této scéně znázorňuje oblast výtrysku."
       },
       "2": {
         "kicker": "přibližně 44 μas",
@@ -416,12 +410,12 @@
       "3": {
         "kicker": "10. dubna 2019",
         "title": "První snímek na škále horizontu",
-        "body": "Síť EHT spojila radioteleskopy na různých kontinentech, včetně observatoří na Maunakea, a na vlnové délce 1,3 mm dosáhla rozlišení srovnatelného s teleskopem o velikosti Země. Z dat pořízených v roce 2017 vznikl snímek zveřejněný o dva roky později. Oranžová barva znázorňuje intenzitu rádiového záření, ne skutečnou barvu plynu. Pro nerotující černou díru o této hmotnosti by průměr horizontu činil asi 38 miliard kilometrů, tedy 260 au. U rotující černé díry je třeba přesně určit, jak její rozměr definujeme."
+        "body": "Síť EHT spojila radioteleskopy na různých kontinentech a na vlnové délce 1,3 mm dosáhla rozlišení srovnatelného s teleskopem o velikosti Země. Z dat pořízených v roce 2017 vznikl snímek zveřejněný o dva roky později. Oranžová barva na tomto snímku znázorňuje intenzitu rádiového záření, ne skutečnou barvu plynu. Pro nerotující černou díru o této hmotnosti by průměr horizontu činil asi 38 miliard kilometrů, tedy 260 au. U rotující černé díry je třeba přesně určit, jak její rozměr definujeme."
       },
       "4": {
         "kicker": "oddálení",
         "title": "Pomalejší dění v kupě galaxií",
-        "body": "Při stejném bezrozměrném poloměru a spinu rostou charakteristické časové škály úměrně hmotnosti. Dění, které u Sgr A* trvá minuty, tak může u M87* probíhat ve dnech až týdnech. To usnadňuje skládání rádiových pozorování do jednoho obrazu. Galaxii obklopují tisíce kulových hvězdokup a v jejím okolí najdete další velké galaxie, například M84 a M86. Vysoká galaktická šířka znamená, že v tomto směru hledíme daleko od prašné roviny Mléčné dráhy."
+        "body": "Při stejném bezrozměrném poloměru a spinu rostou charakteristické časové škály úměrně hmotnosti. Dění, které u Sgr A* trvá minuty, tak může u M87* probíhat ve dnech až týdnech. To usnadňuje skládání rádiových pozorování do jednoho obrazu. Galaxii obklopují tisíce kulových hvězdokup a v jejím okolí najdete další velké galaxie, například M84 a M86. Vidíme ji vysoko nad prašnou rovinou Mléčné dráhy."
       }
     },
     "schwarzschild": {
@@ -433,17 +427,17 @@
       "1": {
         "kicker": "tři poloměry",
         "title": "2M, 3M, 6M: tři klíčové hranice",
-        "body": "Na r = 2M leží horizont událostí, hranice, za kterou žádný signál neunikne ke vzdáleným pozorovatelům. Na r = 3M je fotonová sféra s nestabilními kruhovými drahami světla. Na r = 6M leží ISCO, nejvnitřnější stabilní kruhová dráha hmotné částice. Mezi 3M a 6M kruhové dráhy existují, ale jsou nestabilní. U rotující černé díry se horizont a rovníkové dráhy ve směru rotace posouvají k menším souřadnicovým poloměrům; protisměrné dráhy se naopak posouvají ven."
+        "body": "Na r = 2M leží horizont událostí, hranice, za kterou žádný signál neunikne ke vzdáleným pozorovatelům. Na r = 3M je fotonová sféra s nestabilními kruhovými drahami světla. Na r = 6M leží ISCO, nejvnitřnější stabilní kruhová dráha hmotné částice. Mezi 3M a 6M kruhové dráhy existují, ale jsou nestabilní."
       },
       "2": {
         "kicker": "horizont",
         "title": "Hranice není viditelný povrch",
-        "body": "Horizont událostí je hranice v prostoročase, nikoli hmotný povrch s texturou. Z jeho nitra se žádný světelný signál k vzdálenému pozorovateli nedostane. Světlo vyslané těsně vně horizontu může uniknout, ale při cestě ven může utrpět velmi silný gravitační rudý posuv. Tmavá oblast snímku není jednoduchým průmětem r = 2M: její tvar určuje gravitační čočkování a okolní zářící plyn. Světlo se přitom lokálně stále pohybuje rychlostí c. Jeho souřadnicová rychlost dr/dt klesá na r = 2M k nule jen proto, že tam Schwarzschildovy souřadnice selhávají."
+        "body": "Horizont událostí je hranice v prostoročase, nikoli hmotný povrch. Zevnitř žádný signál ke vzdálenému pozorovateli nedorazí; světlo těsně vně může uniknout, ale se silným rudým posuvem. Zakreslená kritická křivka o průměru asi 10M je čočkovaný obraz fotonové sféry, mnohem větší než prstenec horizontu na 2M. Kolik z ní vypadá tmavě, určuje zářící plyn."
       },
       "3": {
         "kicker": "symetrie a pohyb",
         "title": "Nulový spin neznamená stejně jasné strany",
-        "body": "Schwarzschildova geometrie je sféricky symetrická, takže sama neupřednostňuje směr rotace. Disk kolem černé díry však obíhat může a jeho přibližující se část může být dopplerovsky zesílená. Jasný srpek proto není sám o sobě důkazem rotace černé díry. Při pohledu podél osy disku je tento rozdíl menší; z boku bývá výrazný. Souměrnost obrazu ovlivňuje také model plynu a způsob zobrazení, nejen spin."
+        "body": "Schwarzschildova geometrie je sféricky symetrická, takže sama neupřednostňuje směr rotace. Disk však obíhá: šipky značí jeho přibližující se a vzdalující se stranu s faktorem zesílení δ. Přibližující se strana je dopplerovsky zjasněná, takže srpek sám o sobě rotaci černé díry nedokazuje. Při pohledu podél osy disku je rozdíl menší, z boku jako zde největší."
       },
       "4": {
         "kicker": "oddálení",
@@ -455,27 +449,27 @@
       "0": {
         "kicker": "1963",
         "title": "Rotace blízko krajní hodnoty",
-        "body": "Roy Kerr nalezl rotující vakuové řešení Einsteinových rovnic v roce 1963. Zde zkoumáte rychle rotující nenabitou černou díru se spinem a/M ≈ 0,998. Tato hodnota odpovídá Thorneově rovnovážné mezi pro akreci ze standardního tenkého disku. Není to přesně extremální případ, pro který platí a/M = 1. Stabilní dráhy ve směru rotace mohou dosahovat mnohem menších souřadnicových poloměrů než u nerotující černé díry. Skutečné černé díry mají různé spiny; tento krajní příklad není jejich univerzální podobou."
+        "body": "Roy Kerr nalezl rotující vakuové řešení Einsteinových rovnic v roce 1963. Tato nenabitá černá díra má spin a/M ≈ 0,998, těsně pod extremální hodnotou a/M = 1. Její horizont se zmenší ze 2M bez rotace na asi 1,06M. Skutečné černé díry mají různé spiny; tohle je krajní příklad, ne typický."
       },
       "1": {
         "kicker": "ISCO",
-        "title": "Z 6M přibližně na 1,24M",
+        "title": "Ze 6M na zhruba 1,24M",
         "body": "U nerotující černé díry leží nejvnitřnější stabilní kruhová dráha na 6M. Blíže mohou kruhové dráhy ještě existovat, ale nejsou stabilní. Bardeen, Press a Teukolsky popsali, jak se rovníková ISCO ve směru rotace s rostoucím spinem posouvá dovnitř. Pro a/M ≈ 0,998 vychází přibližně na 1,24M; v limitě a/M → 1 se její souřadnicový poloměr blíží M. Disk tak může zasahovat hlouběji do gravitačního pole. Jeho teplota a jas však závisí také na akreci a přenosu záření."
       },
       "2": {
         "kicker": "ergosféra",
         "title": "Rotace strhává inerciální soustavy",
-        "body": "Lenseův–Thirringův jev popisuje strhávání inerciálních soustav rotující hmotou. U Kerrovy černé díry je zvlášť výrazný v ergosféře mezi horizontem a statickou mezí, která na rovníku leží na r = 2M. Zde nelze zůstat v klidu vůči vzdáleným hvězdám: ve směru rotace se musí pohybovat i světlo. Penroseův proces umožňuje část rotační energie získat rozpadem částice; Blandfordův–Znajekův mechanismus využívá magnetické pole. U ideální extremální černé díry lze teoreticky získat až asi 29 % její energie Mc²."
+        "body": "Rotující černá díra strhává vše ve svém okolí ve směru rotace. Zakreslené dráhy začínají s nulovým momentem hybnosti, přesto je rotace při pádu stáčí. Uvnitř ergosféry, která na rovníku sahá k r = 2M, nemůže nic, ani světlo, zůstat v klidu vůči vzdáleným hvězdám. Penroseův proces nebo magnetické pole (Blandfordův–Znajekův mechanismus) mohou tuto energii čerpat: až asi 29 % energie Mc² extremální černé díry."
       },
       "3": {
         "kicker": "Thorneova mez",
         "title": "Proč se objevuje číslo 0,998",
-        "body": "Kip Thorne v roce 1974 ukázal, že záření zachycené ze standardního tenkého disku brzdí další růst spinu. Při a/M ≈ 0,998 zachycené záření v tomto modelu vyváží vliv akrece, který by bezrozměrný spin dále zvyšoval. Výsledek závisí na modelu akrece; není to univerzální zákaz vyšších spinů. Matematicky extremální Kerrova černá díra má a/M = 1 a splývající vnější a vnitřní horizont. Jasný srpek disku ale vzniká především pohybem zářícího plynu, nikoli samotnou existencí vysokého spinu."
+        "body": "Kip Thorne v roce 1974 ukázal, že tenký disk roztočí černou díru jen do určité míry: díra pohlcuje víc světla disku letícího proti směru rotace, a to ji brzdí. Rovnováha nastane u a/M ≈ 0,998, ovšem jen v tomto modelu; není to univerzální mez. Teď letíte s plynem: kvůli vašemu pohybu se hvězdy před vámi nahlučují a modrají."
       },
       "4": {
         "kicker": "oddálení",
         "title": "Porovnejte rotující a nerotující případ",
-        "body": "Přepněte zpět na Schwarzschildovu černou díru a zachovejte stejný směr pohledu. ISCO se vrátí na 6M a fotonové dráhy opět splynou v jedinou sféru na 3M. To jsou poloměry drah v prostoru, nikoli přímo poloměry prstenců na obrazovce. Dopplerovská asymetrie nemusí zmizet, protože disk stále obíhá. Hmotnost a spin určují nenabitou vakuovou geometrii; struktura plynu, jeho rychlost a sklon pohledu rozhodují o tom, jak tato geometrie zazáří."
+        "body": "Nastavte spin na 0 a ponechte tento pohled. ISCO se vrátí na 6M a fotonové dráhy splynou v jedinou sféru na 3M; jsou to poloměry drah, ne prstence na obrazovce. Dopplerovská asymetrie zůstane, protože disk dál obíhá. Hmotnost a spin určují vakuovou geometrii; plyn a úhel pohledu rozhodují, jak zazáří."
       }
     },
     "stellar": {
@@ -497,7 +491,7 @@
       "3": {
         "kicker": "stejná geometrie",
         "title": "Stejný tvar, jiné měřítko",
-        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro 15 M☉ jsou odpovídající délky a časy zhruba 300 000krát menší než pro Sgr A*. Místo milionů kilometrů tak pracujete s desítkami kilometrů a dění u vnitřního okraje disku může probíhat v milisekundách. Samotná geometrie se přeskáluje jednoduše. Spektrum a jas ale závisejí také na množství, teplotě a pohybu okolního plynu."
+        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro 15 M☉ jsou odpovídající délky a časy zhruba 300 000krát menší než pro Sgr A*: pravítko 10 M tu měří asi 220 km, ne 63 milionů, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
       },
       "4": {
         "kicker": "oddálení",
@@ -508,18 +502,18 @@
     "custom": {
       "0": {
         "kicker": "vlastní nastavení",
-        "title": "Zvolená hmotnost a spin",
-        "body": "Tento průlet používá právě zvolenou černou díru. V geometrických jednotkách G = c = 1 určuje hmotnost převod na kilometry a sekundy, zatímco bezrozměrný spin a/M mění geometrii. Při porovnávání ponechte stejný směr pohledu. Změna hmotnosti přeskáluje rozměry; změna spinu posune horizont, rovníkové fotonové dráhy a ISCO. Dva parametry stačí k popisu izolované nenabité Kerrovy černé díry, nikoli však k úplnému popisu jejího zářícího okolí."
+        "title": "Vlastní spin",
+        "body": "Tento průlet používá vámi nastavený spin a hmotnost předvolby, ze které jste přišli. V geometrických jednotkách G = c = 1 určuje hmotnost jen převod na kilometry a sekundy, zatímco bezrozměrný spin a* = a/M mění geometrii. Dva parametry stačí k popisu izolované nenabité Kerrovy černé díry, nikoli však jejího zářícího okolí."
       },
       "1": {
         "kicker": "jednotky",
         "title": "Hmotnost jako jednotka délky a času",
-        "body": "Při volbě G = c = 1 zapisujeme Schwarzschildův poloměr jako 2M. Pro hmotnost jednoho Slunce odpovídá gravitační délková jednotka GM☉/c² přibližně 1,48 km a časová jednotka GM☉/c³ asi 4,93 mikrosekundy. Pro jinou hmotnost se obě hodnoty mění přímo úměrně. Údaje na obrazovce převádějí toto měřítko zpět na běžné jednotky. Při stejném spinu, směru pohledu a vzdálenosti v jednotkách M změna hmotnosti bezrozměrný stín nezmění."
+        "body": "Při volbě G = c = 1 zapisujeme Schwarzschildův poloměr jako 2M. Pro hmotnost jednoho Slunce odpovídá délka GM☉/c² přibližně 1,48 km a čas GM☉/c³ asi 4,93 mikrosekundy; obě hodnoty rostou přímo úměrně hmotnosti. Pravítko převádí 10M na kilometry pro tuto černou díru."
       },
       "2": {
         "kicker": "dva parametry",
         "title": "Hmotnost určí měřítko. Spin změní geometrii.",
-        "body": "Zdvojnásobte hmotnost a při stejné vzdálenosti v jednotkách M zůstane geometrický obraz stejný; délky v kilometrech i časové škály se zdvojnásobí. Změnou a/M posunete souřadnicový poloměr horizontu, rovníkové fotonové dráhy a ISCO. U drah ve směru rotace a proti ní je účinek odlišný. Tak procházíte rodinou Kerrových řešení. Jasová asymetrie vychází hlavně z pohybu obíhajícího plynu a ze směru pohledu, nejen ze spinu."
+        "body": "Při dvojnásobné hmotnosti a stejné vzdálenosti v jednotkách M zůstane obraz stejný; zdvojnásobí se jen kilometry a časy. Spin je jiný: změnou a/M se zakreslený horizont, fotonová dráha i ISCO posunou. Dráhy ve směru rotace se posouvají dovnitř, protisměrné ven a horizont se s rostoucím |a/M| zmenšuje."
       },
       "3": {
         "kicker": "omezení modelu",
@@ -528,7 +522,7 @@
       },
       "4": {
         "kicker": "oddálení",
-        "title": "Dva parametry. A prostor k objevování.",
+        "title": "Dva parametry. Vesmír k objevování.",
         "body": "Hmotnost a spin určují geometrii idealizované nenabité černé díry. Plyn, hvězdy a zvolený směr pohledu jí dávají konkrétní podobu. Ukončete průvodce, vyberte některý ze skutečných objektů nebo měňte spin a sledujte posun ISCO. Značky odpovídají poloměrům použitého modelu, zatímco obraz je názornou aproximací. To nejdůležitější už znáte: jak může gravitace proměnit světlo v obraz něčeho, co samo nevidíte."
       }
     },
@@ -573,17 +567,17 @@
       "2": {
         "kicker": "nejméně 8 200 M☉",
         "title": "Dolní mez, ne přesná hmotnost",
-        "body": "Aby tyto hvězdy zůstaly vázané, musí být podle této studie ve středu soustředěna hmota odpovídající nejméně asi 8 200 Sluncím; srovnání se simulacemi vychází nejlépe pro zhruba 40 000. Šlo by tedy o černou díru střední hmotnosti, mezi pozůstatky jednotlivých hvězd a supermasivními černými dírami v centrech galaxií. Dolní mez hmotnosti vychází jen z pohybů po obloze. Sledovat celé oběžné dráhy by trvalo přes sto let. Jiné analýzy dosud zpochybňují, zda jde o jedinou černou díru."
+        "body": "Aby tyto hvězdy zůstaly vázané, musí být podle této studie ve středu soustředěna hmota odpovídající nejméně asi 8 200 Sluncím; srovnání se simulacemi vychází nejlépe pro zhruba 40 000. Šlo by tedy o černou díru střední hmotnosti, mezi pozůstatky jednotlivých hvězd a supermasivními černými dírami v centrech galaxií. Dolní mez hmotnosti vychází jen z pohybů po obloze. Sledovat celé oběžné dráhy by trvalo přes sto let."
       },
       "3": {
         "kicker": "spor",
         "title": "Zatím nerozhodnuto",
-        "body": "Ne všichni s tímto závěrem souhlasí. Analýza zrychlení pulsarů a pohybů hvězd z roku 2025 dává přednost roji temných hvězdných pozůstatků, například černých děr hvězdné hmotnosti, ve středu a hmotnost jediné černé díry omezuje na zhruba 6 000 Sluncí. Rádiová a infračervená pozorování zveřejněná v roce 2026 — nejcitlivější rádiový snímek hvězdokupy a data Webbova dalekohledu — neodhalila záření centrálního zdroje. To odpovídá černé díře, která téměř nepřijímá látku, ale její existenci to nepotvrzuje ani nevylučuje."
+        "body": "Ne všichni s tímto závěrem souhlasí. Analýza zrychlení pulsarů a pohybů hvězd z roku 2025 dává přednost roji temných hvězdných pozůstatků ve středu, například černých děr hvězdné hmotnosti, a hmotnost jediné černé díry omezuje na zhruba 6 000 Sluncí. Rádiová a infračervená pozorování zveřejněná v roce 2026 — nejcitlivější rádiový snímek hvězdokupy a data Webbova dalekohledu — neodhalila záření centrálního zdroje. To odpovídá černé díře, která téměř nepřijímá látku, ale její existenci to nepotvrzuje ani nevylučuje."
       },
       "4": {
         "kicker": "oddálení",
         "title": "Blíž než Sgr A*",
-        "body": "Pokud se potvrdí, půjde o nejbližší známou hmotnou černou díru, bližší než Sgr A* v centru Galaxie. Přístroje jako GRAVITY+ na interferometru VLTI a MICADO na Extrémně velkém dalekohledu (ELT) by měly tyto rychlé hvězdy změřit přesněji a celou otázku prověřit."
+        "body": "Pokud se potvrdí, půjde o nejbližší černou díru těžší než pozůstatky hvězd, bližší i než Sgr A*. Přístroje jako GRAVITY+ na interferometru VLTI a MICADO na Extrémně velkém dalekohledu (ELT) by měly tyto rychlé hvězdy změřit přesněji a celou otázku prověřit."
       }
     },
     "ton-618": {
@@ -600,17 +594,17 @@
       "2": {
         "kicker": "40–70 miliard M☉",
         "title": "Hmotnost odhadnutá z pohybu plynu",
-        "body": "Hmotnost je odhad, nikoli přímé měření. Plyn v blízkosti černé díry se pohybuje tak rychle, že způsobuje rozšíření vodíkové emisní čáry odpovídající rychlosti zhruba 10 000 kilometrů za sekundu. Spojení této rychlosti se svítivostí kvasaru dává přibližně 40 až 70 miliard Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru."
+        "body": "Hmotnost je odhad, nikoli přímé měření. Plyn u černé díry se pohybuje tak rychle, že rozšiřuje vodíkovou emisní čáru na zhruba 10 000 km/s. Tato rychlost spolu se vzdáleností plynu od díry, odvozenou ze svítivosti kvasaru, dává přibližně 40 až 70 miliard Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru."
       },
       "3": {
         "kicker": "800–1 300 au",
         "title": "Blízko teoretické meze",
-        "body": "Pro nerotující černou díru této hmotnosti by Schwarzschildův poloměr činil zhruba 800 až 1 300 astronomických jednotek, tedy by byl desítkykrát větší než poloměr dráhy Neptunu. Podle teorie černá díra živená svítivým tenkým diskem při obvyklých parametrech nepřeroste přibližně 50 miliard Sluncí, takže se TON 618 této mezi blíží. Její spin změřen nebyl."
+        "body": "Pro nerotující černou díru této hmotnosti by Schwarzschildův poloměr činil zhruba 800 až 1 300 astronomických jednotek, tedy desítkykrát víc než poloměr dráhy Neptunu. Podle teorie černá díra živená svítivým tenkým diskem při obvyklých parametrech nepřeroste přibližně 50 miliard Sluncí, takže se TON 618 této mezi blíží. Její spin změřen nebyl."
       },
       "4": {
         "kicker": "oddálení",
         "title": "Mezi nejhmotnějšími známými",
-        "body": "TON 618 patří k nejhmotnějším známým černým dírám, ale není jisté, že je nejhmotnější. Černé díry zvážené přímočařejšími metodami, například Holm 15A podle pohybů hvězd její galaxie, dosahují také desítek miliard Sluncí, i když odhady závisejí na metodě. TON 618 navíc leží uvnitř obrovské zářící vodíkové mlhoviny a zásobárny chladného plynu o průměru asi 100 kiloparseků."
+        "body": "TON 618 patří k nejhmotnějším známým černým dírám, ale není jisté, že je nejhmotnější. Černé díry zvážené přímějšími metodami, například Holm 15A podle pohybů hvězd její galaxie, dosahují také desítek miliard Sluncí, i když odhady závisejí na metodě. TON 618 navíc leží uvnitř obrovské zářící vodíkové mlhoviny a zásobárny chladného plynu o průměru asi 100 kiloparseků."
       }
     },
     "gw231123": {
@@ -632,7 +626,7 @@
       "3": {
         "kicker": "mezera v hmotnostech",
         "title": "Příliš těžké pro jedinou hvězdu",
-        "body": "Od jednotlivých hvězd se neočekávají černé díry o hmotnosti zhruba 60 až 130 Sluncí, protože párová nestabilita způsobí, že velmi hmotné hvězdy v pulzech odvrhnou velkou část hmoty, nebo je úplně roztrhne. Lehčí z obou černých děr do této mezery nejspíš spadá. Jedním z hlavních vysvětlení je, že jedna nebo obě samy vznikly dřívějšími splynutími v hustém prostředí, například v hvězdokupě."
+        "body": "Od jednotlivých hvězd se neočekávají černé díry o hmotnosti zhruba 60 až 130 Sluncí, protože párová nestabilita způsobí, že velmi hmotné hvězdy v pulzech odvrhnou velkou část hmoty, nebo je úplně roztrhne. Lehčí z obou černých děr do této mezery nejspíš spadá. Jedním z hlavních vysvětlení je, že jedna nebo obě samy vznikly dřívějšími splynutími v hustém prostředí, třeba ve hvězdokupě."
       },
       "4": {
         "kicker": "oddálení",

@@ -1,8 +1,17 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
-import { useEffect, useRef, type CSSProperties, type ReactNode, type Ref } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type Ref,
+} from "react";
 
+import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { Action, IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
 
 /** The guide's buttons, in one row: back, play, on (with `extra` beside it), and out. */
@@ -30,11 +39,20 @@ const VEIL = {
   "--glass-bg": "color-mix(in srgb, var(--panel-bg) 60%, transparent)",
 } as CSSProperties;
 
+/** Where the guide is: the step (from 0), the steps in all and, on a journey, the step's hold. */
+export type GuideProgress = {
+  step: number;
+  total: number;
+  /** A journey's wait before it moves on: `waiting` until the shot lands, then running or paused. */
+  hold?: { seconds: number; state: "waiting" | "running" | "paused" } | undefined;
+};
+
 /**
  * Every simulation's guide card: one sheet of glass low and centred over the scene, like a film's
  * caption, with the step count above the words (`kicker`), the title and body (`GuideTitle`,
- * `GuideBody`, `GuideEquation` as children), an optional `hold` under them (the time left on
- * a shot) and the controls. The card keeps the words readable over a bright scene; held
+ * `GuideBody`, `GuideEquation` as children, rising in line by line with each step), a row of
+ * gold segments for the steps (`progress`; the current one fills as it is reached, or over a
+ * journey's hold) and the controls. The card keeps the words readable over a bright scene; held
  * sideways on a phone it moves to the corner. `className` places it (by default at the foot
  * of the stage) and `cardRef` reaches the panel, to measure it. `focusNext` gives the Next
  * button focus as the card opens.
@@ -44,7 +62,7 @@ export function GuideCard({
   kicker,
   stepKey,
   live = true,
-  hold,
+  progress,
   controls,
   className,
   cardRef,
@@ -57,7 +75,7 @@ export function GuideCard({
   stepKey: string | number;
   /** Announce each step through one polite live region (off when the caller moves focus). */
   live?: boolean;
-  hold?: ReactNode;
+  progress: GuideProgress;
   controls: GuideControls;
   className?: string | undefined;
   cardRef?: Ref<HTMLElement> | undefined;
@@ -67,11 +85,41 @@ export function GuideCard({
 }) {
   const { previous, play, next, exit, extra } = controls;
   const nextRef = useRef<HTMLButtonElement>(null);
+  const words = useRef<HTMLDivElement>(null);
+  const shell = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (focusNext) nextRef.current?.focus({ preventScroll: true });
   }, [focusNext]);
+  /* However the guide ends (Finish, the cross, Escape, another view), the card fades away. */
+  useLayoutEffect(() => {
+    const node = shell.current;
+    return () => {
+      if (node) leaveBehind(node);
+    };
+  }, []);
+  /* A new step reads from its first line, wherever the last one was scrolled to. */
+  useLayoutEffect(() => {
+    if (words.current) words.current.scrollTop = 0;
+  }, [stepKey]);
+  /* Words below the fold: the foot fades and a slow arrow points on, until the end is in view. */
+  const [more, setMore] = useState(false);
+  useEffect(() => {
+    const el = words.current;
+    if (!el) return;
+    const check = () => setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+    /* The observer reports each box once as it starts, then on every resize. */
+    const resize = new ResizeObserver(check);
+    resize.observe(el);
+    if (el.firstElementChild) resize.observe(el.firstElementChild);
+    el.addEventListener("scroll", check, { passive: true });
+    return () => {
+      resize.disconnect();
+      el.removeEventListener("scroll", check);
+    };
+  }, [stepKey]);
   return (
     <div
+      ref={shell}
       className={cn(
         "pad-hud-bottom pointer-events-none absolute inset-x-0 bottom-0 z-[60]",
         className,
@@ -86,16 +134,37 @@ export function GuideCard({
         <p className="font-mono text-[10px] tracking-[0.14em] text-subtle uppercase tabular-nums">
           {kicker}
         </p>
-        <div
-          className="mt-1.5 max-h-[min(13rem,32dvh)] w-full overflow-x-hidden overflow-y-auto overscroll-contain short:mt-1 short:max-h-[38dvh]"
-          aria-live={live ? "polite" : undefined}
-          aria-atomic={live ? true : undefined}
-        >
-          <div key={stepKey} className="anim-fade">
-            {children}
+        <div className="relative mt-1.5 w-full short:mt-1">
+          <div
+            ref={words}
+            data-more={more || undefined}
+            className="guide-words scroll-thin max-h-[min(13rem,32dvh)] w-full overflow-x-hidden overflow-y-auto overscroll-contain short:max-h-[38dvh]"
+            aria-live={live ? "polite" : undefined}
+            aria-atomic={live ? true : undefined}
+          >
+            <div key={stepKey} className="guide-step">
+              {children}
+            </div>
           </div>
+          {/* A pointer's shortcut down the words; keys and wheels scroll the words themselves. */}
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-hidden
+            data-shown={more || undefined}
+            className="guide-more absolute inset-x-0 -bottom-1 mx-auto flex size-6 items-center justify-center text-fg"
+            onClick={() => {
+              const el = words.current;
+              el?.scrollBy({
+                top: el.clientHeight * 0.7,
+                behavior: prefersReducedMotion() ? "instant" : "smooth",
+              });
+            }}
+          >
+            <ChevronDown className="size-4" />
+          </button>
         </div>
-        {hold}
+        <GuideSegments {...progress} />
         <div className="mt-3 flex items-center gap-2 short:mt-2">
           {previous ? (
             <IconButton
@@ -132,6 +201,73 @@ export function GuideCard({
   );
 }
 
+/**
+ * The closing card's likeness, left in its place to fade and sink away: the card itself unmounts
+ * with its guide, whose store has already moved on. Taken as React removes the card and shown
+ * only once it has really gone (Strict Mode's rehearsal keeps it), frozen as it was, inert and
+ * hidden from assistive technology.
+ */
+function leaveBehind(node: HTMLElement) {
+  const host = node.parentElement;
+  if (!host) return;
+  const ghost = node.cloneNode(true);
+  if (!(ghost instanceof HTMLElement)) return;
+  const scrolled = node.querySelector(".guide-words")?.scrollTop ?? 0;
+  const fill = node.querySelector(".guide-fill");
+  const filled = fill ? getComputedStyle(fill).transform : "none";
+  queueMicrotask(() => {
+    if (node.isConnected || !host.isConnected) return;
+    ghost.classList.add("guide-leaving");
+    ghost.setAttribute("aria-hidden", "true");
+    ghost.inert = true;
+    ghost.querySelector<HTMLElement>(".guide-fill")?.style.setProperty("transform", filled);
+    host.append(ghost);
+    const words = ghost.querySelector(".guide-words");
+    if (words) words.scrollTop = scrolled;
+    const card = ghost.firstElementChild;
+    const still = prefersReducedMotion();
+    const leave = card?.animate(
+      still
+        ? [{ opacity: 1 }, { opacity: 0 }]
+        : [
+            { opacity: 1, transform: "none" },
+            { opacity: 0, transform: "translateY(10px) scale(0.985)" },
+          ],
+      { duration: still ? 160 : 320, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
+    );
+    if (!leave) return ghost.remove();
+    leave.finished.then(
+      () => ghost.remove(),
+      () => ghost.remove(),
+    );
+  });
+}
+
+/** One hairline per step: those behind lit, the current one filling, those ahead dim. */
+function GuideSegments({ step, total, hold }: GuideProgress) {
+  return (
+    <div aria-hidden className="mt-3 flex w-full max-w-48 gap-1 short:mt-1.5">
+      {Array.from({ length: total }, (_, i) => (
+        <span key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-fg/15">
+          {i < step ? <span className="block h-full bg-solar/60" /> : null}
+          {i === step ? (
+            <span
+              key={step}
+              className="guide-fill block h-full bg-solar"
+              data-state={hold?.state ?? "running"}
+              style={
+                hold
+                  ? { animationDuration: `${hold.seconds}s`, animationTimingFunction: "linear" }
+                  : { animationDuration: "0.6s", animationTimingFunction: "ease-out" }
+              }
+            />
+          ) : null}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /** The step's title; focusable from script, so a caller can move focus to each new step. */
 export function GuideTitle({
   ref,
@@ -162,7 +298,7 @@ export function GuideBody({ children }: { children: ReactNode }) {
 /** A formula under the body, in the mono face, scrolling sideways when it is long. */
 export function GuideEquation({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-2 overflow-x-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-fg tabular-nums md:text-sm">
+    <p className="scroll-thin mt-2 overflow-x-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-fg tabular-nums md:text-sm">
       {children}
     </p>
   );

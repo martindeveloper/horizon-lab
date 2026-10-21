@@ -69,7 +69,7 @@ export const m87: HoleSpec = {
       distance: 34,
       lead: -0.3,
       sketch: [{ kind: "shadow", assumed: true }],
-      eq: "d_crit ≈ 10.4 GM / (c² D) ≈ 40 μas (a = 0)    ·    observed ring 42–44 μas",
+      eq: "θ_crit = 6√3 GM / (c² D) ≈ 40 μas (a = 0)    ·    observed ring 42–44 μas",
     },
     {
       phase: "hold",

@@ -48,23 +48,3 @@
     transition-duration: 0s;
   }
 }
-
-/* The journey's hold on a shot: a hairline that fills, freezes while paused, then moves on. */
-@keyframes deep-field-dwell {
-  to {
-    transform: scaleX(1);
-  }
-}
-:where([data-simulation="deep-field"]) .deep-field-dwell {
-  transform: scaleX(0);
-  transform-origin: left;
-}
-:where([data-simulation="deep-field"])
-  .deep-field-dwell:is([data-state="running"], [data-state="paused"]) {
-  animation-name: deep-field-dwell;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-:where([data-simulation="deep-field"]) .deep-field-dwell[data-state="paused"] {
-  animation-play-state: paused;
-}

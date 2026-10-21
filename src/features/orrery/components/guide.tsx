@@ -39,6 +39,7 @@ export function OrreryGuide() {
       })}
       stepKey={step.id}
       focusNext
+      progress={{ step: index, total: TOUR.length }}
       controls={{
         ...tourControls(t, index, TOUR.length, api),
         /* The tour may run the clock; it can always be stopped. */
