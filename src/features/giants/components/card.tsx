@@ -1,7 +1,9 @@
 "use client";
 
 import { CrossingRow } from "@/components/simulations/crossing-row";
+import { HrDiagram } from "@/components/simulations/hr-diagram";
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
+import { HR_POINTS, hrPointsOf, isStarId } from "@/space/hr-diagram";
 
 import { RUNG_FACTS, drawn } from "../lib/model/catalogue";
 import { RUNG_IDS } from "../lib/model/rungs";
@@ -10,8 +12,12 @@ import { CardSources } from "./card-sources";
 import { UP_CLOSE } from "./card-specs";
 import { Compare } from "./compare";
 import { rungCard, useDistance, useGiantsT } from "./format";
-import { HrDiagram } from "./hr-diagram";
 import { LightLap } from "./light-lap";
+
+/** The ladder's stars on the HR diagram, from the shared catalogue: every rung that is one. */
+const LADDER_STARS = hrPointsOf(RUNG_IDS.flatMap((id) => (isStarId(id) ? [id] : [])));
+/** A dot on the diagram flies to its rung. */
+const rungOf = (star: string) => RUNG_IDS.find((id) => id === star);
 
 /**
  * The card of the body in focus, following it as the camera climbs: its figures, how it
@@ -38,7 +44,18 @@ export function RungCard() {
       details={
         <>
           <Compare id={id} />
-          <HrDiagram id={id} />
+          {isStarId(id) && HR_POINTS[id] ? (
+            <HrDiagram
+              namespace="giants"
+              points={LADDER_STARS}
+              nameOf={(star) => t(`rungs.${star}.name`)}
+              focus={id}
+              onPick={(star) => {
+                const rung = rungOf(star);
+                if (rung) useGiants.getState().goTo(rung);
+              }}
+            />
+          ) : null}
           <CardSources key={id} id={id} t={t} />
         </>
       }

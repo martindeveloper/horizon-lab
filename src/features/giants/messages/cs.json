@@ -3,7 +3,7 @@
   "metadataDescription": "Vyšplhejte od neutronové hvězdy velké jako město přes největší hvězdy až k horizontům černých děr, vše ve skutečném měřítku.",
   "canvasLabel": "Hvězdy, planety a horizonty černých děr vedle sebe na jednom obzoru, ve skutečném měřítku",
   "hud": {
-    "hint": "Šplhejte kolečkem nebo tažením. Karta sleduje těleso v záběru.",
+    "hint": "Šplhejte kolečkem nebo tažením oblohy. Tažením hvězdy ji otočíte.",
     "stars": "Tělesa",
     "previous": "Menší",
     "next": "Větší",
@@ -59,12 +59,13 @@
     },
     "vega": {
       "name": "Vega",
-      "note": "Rychlá rotace jí vytlačuje rovník ven, takže se vyboulí a je tam chladnější než na pólech. Ze Země ji vidíme od pólu, kulatou; tady je natočená, aby bylo vyboulení vidět."
+      "note": "Rychlá rotace jí vytlačuje rovník ven, takže se vyboulí a je tam chladnější než na pólech. Ze Země ji vidíme téměř od pólu, kulatou; tažením za hvězdu si můžete vyboulení prohlédnout.",
+      "caution": "Povrch používá rotační teplotní profil ELR a publikovaný sklon osy 6,2°. Místní modelové teploty se mohou lišit od krajních hodnot na kartě; neporušený teplotní profil zachovává převzatou zářivost."
     },
     "achernar": {
       "name": "Achernar",
       "note": "Jedna z nejzploštělejších známých hvězd: točí se tak rychle, že se jí ven vytlačený rovník téměř odtrhává.",
-      "caution": "Změna jasu od pólu k rovníku je ilustrativní: jednoduchý model gravitačního ztemnění vynechává odstředivé zrychlení a není teplotní mapou odvozenou z pozorování."
+      "caution": "Povrch používá rotační teplotní model ELR včetně odstředivého zrychlení, se základním teplotním profilem normalizovaným na převzatou zářivost. Zobrazený tvar zůstává elipsoidem; jde o aproximaci, nikoli o rekonstrukci snímku."
     },
     "sgr-a": {
       "name": "Sagittarius A*",
@@ -131,7 +132,13 @@
     "star": "Hvězda",
     "remnant": "Mrtvá hvězda",
     "planet": "Planeta",
-    "horizon": "Černá díra"
+    "horizon": "Černá díra",
+    "pulsar": "Pulsar",
+    "whiteDwarf": "Bílý trpaslík",
+    "brownDwarf": "Hnědý trpaslík",
+    "mainSequence": "Hvězda hlavní posloupnosti",
+    "giants": "Obr",
+    "supergiants": "Veleobr"
   },
   "facts": {
     "horizon": "Schwarzschildův poloměr",
@@ -145,7 +152,8 @@
     "bulge": "Vyboulení rovníku",
     "engine": "Zdroj energie",
     "gravity": "Gravitace na povrchu",
-    "rotation": "Doba rotace"
+    "rotation": "Doba rotace",
+    "spectral": "Spektrální typ"
   },
   "rows": {
     "km": "{value} km",
@@ -200,7 +208,8 @@
       "derived": "Odvozeno",
       "teaching-choice": "Ilustrativní",
       "flag": "K ověření"
-    }
+    },
+    "spectralHint": "písmeno = teplota, horká O B A F G K M chladná (L, T u hnědých trpaslíků; DA značí bílého trpaslíka s vodíkem, W Wolfovu–Rayetovu hvězdu); číslice = jemnější krok 0–9; římská číslice = velikost, V hlavní posloupnost až I veleobr"
   },
   "panel": {
     "orbits": "Dráhy planet",
@@ -213,7 +222,9 @@
       "sun": "Slunce",
       "au": "au",
       "light": "Světlo"
-    }
+    },
+    "surfaceZoom": "Detail povrchu",
+    "surfaceZoomNote": "Přiblíží scénu při zachování poměrů velikostí povrchových útvarů. Tažením těleso otočíte; přechod k jinému tělesu vrátí zvětšení na 1×."
   },
   "orbits": {
     "mercury": "Merkur",
@@ -291,7 +302,7 @@
       },
       "surfaces": {
         "title": "Povrchy",
-        "body": "Tělesa se otáčejí zobrazovací rychlostí. Barvy hvězd přibližují barvy černého tělesa; jas používá Planckův zákon při {visibleNm} nm a okrajové ztemnění šedé atmosféry (T⁴ = ¾ T⁴ₑ (μ + ⅔)), nikoli úplné spektrum hvězdné atmosféry. Pod {convectiveK} K určuje výukový model velikost buněk na {cellHeights} tlakových výšek (střední molekulová hmotnost {mu}); viditelnou texturu zvýrazňuje a tam, kde hmotnost není v katalogu, ji předpokládá. Stejný symbol μ ve vzorci pro okraj označuje kosinus úhlu pohledu. Pulzace horkých hvězd a obálky veleobrů jsou ilustrativní. Vega používá teploty pólu a rovníku z literatury; stínování Achernaru zjednodušený předpis gravitačního ztemnění bez odstředivého zrychlení. Dvě protilehlé čepičky a svazky pulsaru jsou obecným dipólovým náčrtem, nikoli geometrií horkých oblastí odvozenou pro PSR J0030+0451. Země a Jupiter používají obrazové mapy."
+        "body": "Tělesa se otáčejí zobrazovacím tempem. Barvy kontinua a relativní viditelný výkon vycházejí z integrace Planckova spektra v rozsahu 380–780 nm s barevnými funkcemi CIE. Okrajové ztemnění podle teploty a gravitace popisují atmosférické modely Clareta a Bloemena; pásma Johnson–Cousins R, V a B přibližují úhlovou odezvu RGB, nikoli celé hvězdné spektrum. Předpokládá se sluneční složení a mikroturbulence 2 km/s; mimo tabulku se používá její okraj a pro kompaktní pozůstatky a hnědé trpaslíky šedá atmosféra. Pod {convectiveK} K mají ilustrativní buňky velikost {cellHeights} tlakových výšek (střední molekulová hmotnost {mu}); chybějící hmotnost nahrazuje zobrazovací předpoklad. Veleobři sdílejí jedno vyvíjející se pole pro rozsáhlé teplotní útvary a reliéf okraje. Jen těleso v záběru získává rozlišitelné jemné buňky, magnetické jasné body, vlákna skvrn a atmosféry; nerozlišitelné útvary mizí místo zvětšování. Vega a Achernar používají rotační model ELR včetně odstředivého zrychlení, se základním teplotním profilem normalizovaným na převzatou zářivost zobrazeného elipsoidu. Ten přibližuje Rocheův povrch; procedurální teplotní změny se každý snímek znovu nenormalizují. Pulsar zůstává obecným dipólovým náčrtem; Země a Jupiter používají obrazové mapy."
       },
       "weather": {
         "title": "Počasí",
@@ -307,7 +318,7 @@
       },
       "limits": {
         "title": "Omezení",
-        "body": "Tělesa mají ilustrativní sklony os a jsou bez průvodců; rudí veleobři nemají ostrý okraj. Převzaté velikosti a jejich nejistoty neurčují definitivní pořadí největších hvězd. Obrysy černých děr porovnávají Schwarzschildovy referenční poloměry; okolní záře je schematická. Rotace, pulzace a počasí používají zobrazovací tempo. Dráhy planet jsou kružnice o poloměrech jejich velkých poloos."
+        "body": "Vega a Achernar začínají s publikovanými sklony os 6,2° a 60,6°; ostatní sklony jsou ilustrativní a tažení mění směr pohledu. Průvodci jsou vynecháni. Rudí veleobři nemají ostrý okraj; jejich konvekce a reliéf optického povrchu jsou procedurální aproximace, nikoli hydrodynamické simulace. Barvy kontinua vynechávají spektrální čáry a molekulovou absorpci kromě ilustrativního alkalického zabarvení hnědého trpaslíka. Koróny, protuberance a erupční smyčky mají zvýšený kontrast; nejde o jedinou kalibrovanou expozici ve viditelném světle. Převzaté velikosti neurčují definitivní pořadí největších hvězd. Obrysy černých děr porovnávají Schwarzschildovy referenční poloměry; okolní záře je schematická. Rotace, pulzace a počasí používají zobrazovací tempo. Dráhy planet jsou kružnice o poloměrech jejich velkých poloos."
       }
     }
   },
@@ -357,7 +368,9 @@
       "giants": "Obři",
       "supergiants": "Veleobři"
     },
-    "lesson": "Čárkované čáry ukazují stejné poloměry kulových hvězd: nahoru a doprava znamená větší. Body používají převzaté hodnoty bez chybových úseček; teplota Vegy je geometrickým středem rozmezí od rovníku k pólu. U zploštělých hvězd proto čáry nemusejí odpovídat rovníkovému poloměru."
+    "lesson": "Čárkované čáry ukazují stejné poloměry kulových hvězd: nahoru a doprava znamená větší. Body používají převzaté hodnoty bez chybových úseček; teplota Vegy je geometrickým středem rozmezí od rovníku k pólu. U zploštělých hvězd proto čáry nemusejí odpovídat rovníkovému poloměru.",
+    "labelAll": "Hertzsprungův–Russellův diagram hvězd žebříku podle teploty a svítivosti",
+    "radius": "{value} R☉"
   },
   "engines": {
     "ppChain": "Vodík → helium (proton-protonový řetězec)",

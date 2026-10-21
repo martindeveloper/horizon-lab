@@ -12,6 +12,7 @@ import {
   BLACK_HOLES,
   ENGINES,
   NAMED_STARS,
+  SPECTRAL_TYPES,
   type Engine,
   type StellarFigures,
 } from "@/space/stellar";
@@ -100,6 +101,38 @@ const MEASURED: Record<RungId, Measured> = {
   m87: BLACK_HOLES.m87,
   "ton-618": BLACK_HOLES["ton-618"],
 };
+
+/** The shared catalogue's star behind each rung that has a spectral type of its own. */
+const CATALOGUE_STAR: Partial<Record<RungId, keyof typeof SPECTRAL_TYPES>> = {
+  "sirius-b": "sirius-b",
+  "brown-dwarf": "lhs-6343-c",
+  "trappist-1": "trappist-1",
+  proxima: "proxima",
+  sun: "sun",
+  sirius: "sirius",
+  vega: "vega",
+  achernar: "achernar",
+  arcturus: "arcturus",
+  r136a1: "r136a1",
+  aldebaran: "aldebaran",
+  rigel: "rigel",
+  deneb: "deneb",
+  antares: "antares",
+  betelgeuse: "betelgeuse",
+  "uy-scuti": "uy-scuti",
+  "vy-cma": "vy-cma",
+  "stephenson-2-18": "stephenson-2-18",
+};
+
+/**
+ * A rung's spectral type, the shared catalogue's (not translated): MK class and luminosity
+ * class for a star, DA… for a white dwarf, T… for a brown dwarf; none for a pulsar, a planet
+ * or a horizon.
+ */
+export function spectralOf(id: RungId): string | undefined {
+  const star = CATALOGUE_STAR[id];
+  return star ? SPECTRAL_TYPES[star] : undefined;
+}
 
 /**
  * What powers each rung: the shared catalogue's engines for stars, remnants and holes, and the

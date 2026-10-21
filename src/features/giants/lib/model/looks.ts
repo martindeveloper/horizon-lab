@@ -16,6 +16,7 @@ import {
   HOLE_REACH,
   LIMB_ROUGHNESS,
   PULSAR_DISPLAY_K,
+  PROFILE_SAMPLES,
   SPIN_SECONDS,
   SUPERGIANT_MASS,
   type Style,
@@ -23,6 +24,7 @@ import {
 import type { ActivityKind } from "./activity";
 import { RUNG_FACTS, drawn, inUnit } from "./catalogue";
 import { granulesAcross } from "./physics";
+import { rotatingTemperatures, ROTATOR_INCLINATIONS } from "./rotation";
 import { RUNGS, type Rung, type RungId } from "./rungs";
 
 export type Look = {
@@ -30,6 +32,8 @@ export type Look = {
   /** Surface temperature at the equator and at the poles, K: apart only for fast rotators. */
   equatorK: number;
   poleK: number;
+  /** ELR latitude temperatures, normalized to the adopted luminosity on the drawn spheroid. */
+  temperatures: Float64Array | undefined;
   /** Convection cells across the radius (0: none). */
   cells: number;
   /** An extended atmosphere or wind glowing past the limb, 0–1. */
@@ -88,9 +92,8 @@ const HAZE: Partial<Record<RungId, number>> = {
   arcturus: 0.2,
 };
 /**
- * Weather by star (`activity.ts`): the Sun's; the red dwarfs' flares; the red giants' quiet
- * chromospheres; the red supergiants' plumes. Hot stars have no convective envelope to wind
- * up magnetic fields, so no spots or flares; nor do the remnants.
+ * Selected illustrative weather profiles, not a claim that hot stars cannot have magnetic
+ * fields or activity. The Sun's; red dwarf flares; quiet giants; supergiant plumes.
  */
 const ACTIVITY: Partial<Record<RungId, ActivityKind>> = {
   sun: "solar",
@@ -133,30 +136,25 @@ function styleOf(rung: Rung, kelvin: number): Style {
   return kelvin < CONVECTIVE_BELOW_K ? "convective" : "radiative";
 }
 
-/**
- * A fast rotator's surface: hot poles, a cooler equator (gravity darkening). A published span
- * from equator to pole is used as it is; a star with only a flattening gets von Zeipel's
- * T ∝ g^¼ with g ∝ 1/R² (the spin's own pull at the equator left out, a teaching choice).
- */
-function poleAndEquator(rung: Rung, kelvin: number): readonly [number, number] {
-  if (rung.kind !== "star") return [kelvin, kelvin];
-  const { teff, radius, polar } = RUNG_FACTS[rung.id];
-  if (teff?.range && teff.value === undefined) return teff.range;
-  if (!polar) return [kelvin, kelvin];
-  const flattening =
-    drawn(radius) / inUnit(polar, radius.unit === "km" ? "km" : "Rsun")(drawn(polar));
-  return [kelvin * flattening ** -0.25, kelvin * flattening ** 0.25];
-}
-
 function lookOf(rung: Rung, index: number): Look {
-  const { teff, mass, radius } = RUNG_FACTS[rung.id];
+  const { teff, mass, radius, polar, luminosity } = RUNG_FACTS[rung.id];
   const kelvin = teff
     ? drawn(teff)
     : rung.id === "brown-dwarf"
       ? BROWN_DWARF_DISPLAY_K
       : PULSAR_DISPLAY_K;
   const style = styleOf(rung, kelvin);
-  const [equatorK, poleK] = poleAndEquator(rung, kelvin);
+  const temperatures =
+    rung.kind === "star" && polar && luminosity
+      ? rotatingTemperatures(
+          inUnit(polar, "m")(drawn(polar)) / inUnit(radius, "m")(drawn(radius)),
+          inUnit(radius, "Rsun")(drawn(radius)),
+          inUnit(luminosity, "Lsun")(drawn(luminosity)),
+          PROFILE_SAMPLES,
+        )
+      : undefined;
+  const equatorK = temperatures?.[0] ?? kelvin;
+  const poleK = temperatures?.[PROFILE_SAMPLES - 1] ?? kelvin;
   /* No adopted mass (UY Scuti, Stephenson 2-18): a display assumption sizes its cells. */
   const massSuns = mass?.unit === "Msun" ? drawn(mass) : SUPERGIANT_MASS;
   const cells =
@@ -180,6 +178,7 @@ function lookOf(rung: Rung, index: number): Look {
     style,
     equatorK,
     poleK,
+    temperatures,
     cells,
     haze,
     rough: GIANT_CELLS.has(rung.id) ? LIMB_ROUGHNESS : 0,
@@ -188,7 +187,10 @@ function lookOf(rung: Rung, index: number): Look {
     ring: RINGS[rung.id] ?? null,
     reach,
     spin: SPIN_SECONDS[style] * (fast ? 0.35 : 1),
-    tilt: 0.22 + 0.18 * Math.sin(index * 2.4),
+    tilt:
+      rung.id === "vega" || rung.id === "achernar"
+        ? ((90 - ROTATOR_INCLINATIONS[rung.id]) * Math.PI) / 180
+        : 0.22 + 0.18 * Math.sin(index * 2.4),
     seed: (index * 0.618_034) % 1,
   };
 }

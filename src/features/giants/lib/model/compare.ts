@@ -1,11 +1,12 @@
 /**
- * How one body measures against another, and where the stars sit on a Hertzsprung–Russell
- * diagram: what the card teaches with beside its own figures. Ratios use the figures the
+ * How one body measures against another, and which band of the Hertzsprung–Russell diagram a
+ * star belongs to: what the card teaches with beside its own figures. Ratios use the figures the
  * ladder draws (`drawn`), so they agree with the scene; spreads stay on the card's rows.
  */
+import { groupOfType, type HrGroup } from "@/space/hr-diagram";
 import { stefanBoltzmann } from "@horizon/toolkit/science";
 
-import { RUNG_FACTS, drawn, inUnit, radiusMetres } from "./catalogue";
+import { RUNG_FACTS, drawn, inUnit, radiusMetres, spectralOf } from "./catalogue";
 import { RUNGS, RUNG_IDS, rungIndex, type RungId } from "./rungs";
 
 /** What a body is measured against: the Sun, Earth, or the next smaller body on the ladder. */
@@ -63,32 +64,8 @@ export function compare(id: RungId, against: RungId): Comparison {
   return result;
 }
 
-/** A star on the diagram: its temperature (K), its light (Suns) and its radius (R☉). */
-export type HrPoint = { id: RungId; kelvin: number; light: number; radius: number };
-
-/** Every body on the ladder that shines by its temperature, in ladder order. */
-export const HR_POINTS: readonly HrPoint[] = RUNG_IDS.flatMap((id) => {
-  const kelvin = kelvinOf(id);
-  const light = lightOf(id);
-  if (kelvin === undefined || light === undefined) return [];
-  const { radius } = RUNG_FACTS[id];
-  return [{ id, kelvin, light, radius: inUnit(radius, "Rsun")(drawn(radius)) }];
-});
-
-/** The bands an HR diagram is read by, as a star's luminosity class names them. */
-export const HR_GROUPS = ["whiteDwarfs", "mainSequence", "giants", "supergiants"] as const;
-export type HrGroup = (typeof HR_GROUPS)[number];
-
-/** MK luminosity classes: D a white dwarf, V the main sequence, III a giant, I a supergiant. */
-const CLASSES: readonly (readonly [RegExp, HrGroup])[] = [
-  [/^D/, "whiteDwarfs"],
-  [/\bV[a-z]*$/, "mainSequence"],
-  [/\bIII$/, "giants"],
-  [/\bI[ab–]*$/, "supergiants"],
-];
-
-/** A body's band by its spectral type; none for a type without a luminosity class. */
+/** A star's band on the HR diagram, by the luminosity class of its spectral type. */
 export function groupOf(id: RungId): HrGroup | undefined {
-  const type = RUNGS.find((rung) => rung.id === id)!.type;
-  return CLASSES.find(([pattern]) => pattern.test(type))?.[1];
+  const spectral = spectralOf(id);
+  return spectral ? groupOfType(spectral) : undefined;
 }

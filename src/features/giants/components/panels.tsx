@@ -10,6 +10,7 @@ import {
 import { buildCard } from "@/lib/facts";
 import { ListItem, SegmentedControl, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
+import { SURFACE_ZOOMS } from "../lib/model/inspection";
 import { RULERS } from "../lib/model/ruler";
 import { RUNGS, rungIndex } from "../lib/model/rungs";
 import type { GiantsAntialias } from "../lib/quality";
@@ -54,6 +55,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const { t } = useGiantsT();
   const orbits = useGiants((s) => s.orbits);
   const ruler = useGiants((s) => s.ruler);
+  const surfaceZoom = useGiants((s) => s.surfaceZoom);
   const quality = useGiants((s) => s.quality);
   const antialias = useGiants((s) => s.antialias);
   const bloom = useGiants((s) => s.bloom);
@@ -77,6 +79,17 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onValueChange={(value) => api().setRuler(value)}
           className="flex-wrap"
         />
+      </RailSection>
+      <RailSection title={t("panel.surfaceZoom")}>
+        <SegmentedControl
+          aria-label={t("panel.surfaceZoom")}
+          options={SURFACE_ZOOMS.map((value) => ({ value: String(value), label: `${value}×` }))}
+          value={String(surfaceZoom)}
+          onValueChange={(value) =>
+            api().setSurfaceZoom(SURFACE_ZOOMS.find((zoom) => String(zoom) === value) ?? 1)
+          }
+        />
+        <p className="mt-1 text-xs text-muted">{t("panel.surfaceZoomNote")}</p>
       </RailSection>
       <RenderSection<GiantsAntialias>
         quality={quality}

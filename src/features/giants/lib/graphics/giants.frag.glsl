@@ -6,8 +6,8 @@
 //
 // Stars shine by their own light (`surface.glsl`): each point has a temperature (pole to
 // equator on the fast spinners, up and down with the convection cells and pulsations, cooler
-// in spots, hotter in faculae) and leaves the photosphere from higher and cooler layers towards
-// the limb (a grey atmosphere), so the limb darkens and reddens as Planck's law has it. Beyond
+// in spots, hotter in faculae). Integrated Planck colours and atmosphere-based limb profiles
+// describe the continuum; only the focused star evaluates its resolved fine structure. Beyond
 // the limb (`weather.glsl`) glow the winds and shells of the stars that have them, and the star
 // the camera rests on comes alive: corona, chromosphere and spicules, prominences, flares,
 // their loops and ejections, as the activity model places them. Earth and Jupiter are lit from
@@ -31,6 +31,9 @@ uniform float uPixelRatio;              // buffer pixels per CSS pixel
 uniform float uBaseline;                // the line the bodies stand on, CSS pixels from the top
 uniform float uTime;                    // seconds, drives everything that moves
 uniform float uDetail;                  // 0: the main layers; 1: their finer companions too
+uniform vec2 uFocus;                    // one detailed surface's slot, and its faded quality budget
+uniform highp sampler2D uSpectrum;      // CIE continuum: normalized RGB, log Y
+uniform highp sampler2D uProfiles;      // each disc: R,V,B limb laws; latitude temperature
 uniform int uCount;                     // bodies in use
 uniform vec4 uShape[MAX_DISCS];         // centre x, y; equatorial and polar radius
 uniform vec4 uBody[MAX_DISCS];          // style; equator and pole temperature, K; seed
@@ -38,7 +41,7 @@ uniform vec4 uSurface[MAX_DISCS];       // cells across the radius; haze; uncert
 uniform vec4 uGlobe[MAX_DISCS];         // turn, radians; pole tilt towards us, radians; polar over equatorial radius; pulsation (a hole's flaring)
 uniform vec4 uLens[LENSES];             // each black hole, in view or not: centre x, y; horizon radius, CSS px; how strongly it bends the stars
 uniform vec4 uRing[MAX_DISCS];          // a hole's photon ring: glow; its light's temperature, K; flicker; angle it is brightest at
-uniform highp sampler2D uTints;         // each disc's tints, a row of TINT_COUNT: light, linear; 1 / its face's band (`tints.ts`)
+uniform highp sampler2D uTints;         // each disc's tints: linear light; log reference radiance (`tints.ts`)
 uniform int uHoles[LENSES];             // the discs that are black holes in view, the first `uHoleCount`
 uniform int uHoleCount;
 uniform vec4 uWeather;                  // the star in focus's disc (−1: none); its weather's presence, 0–1; corona; chromosphere
@@ -51,8 +54,8 @@ uniform vec4 uLoopBound[LOOPS];         // centre x, y and reach, radii; brightn
 uniform vec4 uLoop[LOOPS * LOOP_POINTS]; // x, y, z; width, radii
 uniform vec4 uEjection[EJECTIONS];      // position angle; front, radii; spread, radians; brightness
 uniform vec4 uFlash[ARCADES];           // each flare lit: its site x, y, z; its light
-uniform vec3 uOrbitCentre;              // centre x, y; opacity (0: no orbits)
-uniform float uOrbits[ORBIT_COUNT];     // orbit radii, CSS pixels
+uniform vec3 uOrbitCentre;              // centre x, y; 1 while any ring shows (0: none)
+uniform vec2 uOrbits[ORBIT_COUNT];      // each ring's radius, CSS pixels, and how much of it shows
 uniform vec3 uAccent;                   // the house gold, linear
 uniform vec3 uBalmer;                   // the Balmer lines' pink, linear
 uniform vec3 uAlkali;                   // what a brown dwarf's sodium and potassium leave of its light
@@ -67,7 +70,7 @@ uniform mat3 uGamut;                    // linear sRGB to the canvas's primaries
 const float PI = 3.14159265;
 const float TAU = 6.2831853;
 
-// Disc `i`'s tint `tint` (`TINT_*`): its light in rgb, 1 / its face's band in alpha.
+// Disc `i`'s tint `tint` (`TINT_*`): linear RGB, log reference visible radiance in alpha.
 vec4 tintOf(int i, int tint) {
   return texture2D(uTints, (vec2(float(tint), float(i)) + 0.5) / vec2(float(TINT_COUNT), float(MAX_DISCS)));
 }
@@ -104,6 +107,7 @@ vec3 turned(vec3 p, float angle) {
   return vec3(ca * p.x + sa * p.z, p.y, -sa * p.x + ca * p.z);
 }
 
+#include "./stellar-light.glsl"
 #include "./surface.glsl"
 #include "./weather.glsl"
 #include "./hole.glsl"
@@ -159,13 +163,18 @@ vec4 shade(vec2 p, int i, int style) {
 
   bool star = style != STYLE_EARTH && style != STYLE_JUPITER;
   bool weather = float(i) == uWeather.x && uWeather.y > 0.0;
+  float detail = float(i) == uFocus.x ? uFocus.y : 0.0;
   vec2 dir = o / max(r, 1e-5);
   /* A lumpy limb: the relief of a few giant cells. Its bumps move the edge by at most
      `GRADIENT_FBM_BOUND` times its roughness, so a pixel further out than that past the face
      and its veil is beyond them whatever they do, and they are not worked out there. */
   float lumps = 1.0 + surface.w * GRADIENT_FBM_BOUND;
-  if (surface.w > 0.0 && length(q) < (1.0 + max(surface.z, aa)) * lumps)
-    q /= 1.0 + surface.w * gradientFbm3(vec3(dir * 1.6, uTime * 0.03 + body.w * 13.0));
+  if (surface.w > 0.0 && length(q) < (1.0 + max(surface.z, aa)) * lumps) {
+    vec3 limbNormal;
+    vec2 limb = normalize(q + vec2(1e-8)) * 0.99999;
+    vec3 limbPoint = turned(hitSpheroid(vec2(limb.x, limb.y * shape.w / shape.z), globe.y, globe.z, limbNormal), globe.x);
+    q /= 1.0 + surface.w * giantField(limbPoint, body.w);
+  }
   float d = length(q);
 
   vec3 outside = vec3(0.0);
@@ -178,12 +187,18 @@ vec4 shade(vec2 p, int i, int style) {
       float phi = atan(o.y, o.x);
       vec3 tint = tintOf(i, TINT_FACE).rgb;
       vec3 live = sheets(r, phi, shape.z, tintOf(i, TINT_PLUME).rgb) + ejections(o, r, tint, body.w);
-      if (uWeather.z > 0.0 && r < CORONA_REACH) live += uWeather.z * corona(r, dir, tint, body.w);
+      if (uWeather.z > 0.0 && r < CORONA_REACH) live += uWeather.z * corona(r, dir, tint, body.w, globe);
       if (uWeather.w > 0.0) live += uWeather.w * chromosphere(max(r - 1.0, 0.0), phi, shape.z, body.w);
       outside += uWeather.y * live;
     }
   }
-  if (weather) front = uWeather.y * (loops(o, r, shape.z) + flash(o));
+  if (weather) {
+    vec3 faceNormal;
+    vec3 facePoint = hitSpheroid(o, globe.y, globe.z, faceNormal);
+    vec3 physicalPoint = facePoint * vec3(1.0, globe.z, 1.0);
+    float frontDepth = d < 1.0 ? toView(physicalPoint, 0.0, globe.y).z : -1e4;
+    front = uWeather.y * (loops(o, r, shape.z, frontDepth) + flash(o));
+  }
 
   /* The face is sharp at its catalogued radius; one known only to a spread glows softly out
      to the top of it, a veil the ball stands in. */
@@ -203,7 +218,7 @@ vec4 shade(vec2 p, int i, int style) {
   vec3 s = turned(hitSpheroid(v, globe.y, globe.z, n), globe.x);
   float mu = clamp(n.z, 0.0, 1.0);
   vec3 light = star
-    ? starSurface(s, mu, style, body, surface, globe, shape.z, weather, tintOf(i, TINT_FACE).a)
+    ? starSurface(s, mu, style, body, surface, globe, shape.z, weather, tintOf(i, TINT_FACE).a, i, detail)
     : planetSurface(n, s, mu, style);
   if (star && surface.y > 0.0) {
     /* Seen through its own shell or wind towards the limb. */
@@ -291,12 +306,13 @@ void main() {
     float line = 0.0;
     float casing = 0.0;
     for (int k = 0; k < ORBIT_COUNT; k++) {
-      float d = abs(r - uOrbits[k]);
-      line = max(line, 1.0 - smoothstep(0.35, 1.25, d));
-      casing = max(casing, 1.0 - smoothstep(1.25, ORBIT_CASE_PX, d));
+      vec2 ring = uOrbits[k];
+      float d = abs(r - ring.x);
+      line = max(line, ring.y * (1.0 - smoothstep(0.35, 1.25, d)));
+      casing = max(casing, ring.y * (1.0 - smoothstep(1.25, ORBIT_CASE_PX, d)));
     }
-    shown *= 1.0 - ORBIT_CASE_DEPTH * casing * uOrbitCentre.z;
-    shown = mix(shown, uGamut * uAccent, ORBIT_LINE_ALPHA * line * uOrbitCentre.z);
+    shown *= 1.0 - ORBIT_CASE_DEPTH * casing;
+    shown = mix(shown, uGamut * uAccent, ORBIT_LINE_ALPHA * line);
   }
   gl_FragColor = vec4(displayEncode(shown), 1.0);
 }

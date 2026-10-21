@@ -16,10 +16,11 @@ import {
   useMediaQuery,
 } from "@horizon/toolkit/ui";
 
+import { spectralOf } from "../lib/model/catalogue";
 import { rulerFor } from "../lib/model/ruler";
 import { RUNGS, RUNG_IDS } from "../lib/model/rungs";
 import { useGiants } from "../lib/store";
-import { keyFigures, useDistance, useGiantsT } from "./format";
+import { badgeOf, keyFigures, useDistance, useGiantsT } from "./format";
 import { LadderStrip } from "./ladder-strip";
 
 const LAST = RUNG_IDS.length - 1;
@@ -55,6 +56,7 @@ export function GiantsDock() {
   const api = useGiants.getState;
   const id = RUNG_IDS[focus]!;
   const rung = RUNGS[focus]!;
+  const spectral = spectralOf(rung.id);
   const name = t(`rungs.${id}.name`);
   const figures = keyFigures(t, distance, id);
   return (
@@ -75,7 +77,7 @@ export function GiantsDock() {
         </Tooltip>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className={cn(kickerClass, "truncate")}>
-            {rung.kind === "star" ? rung.type : t(`kinds.${rung.kind}`)}
+            {spectral ? `${badgeOf(t, rung)} · ${spectral}` : badgeOf(t, rung)}
           </span>
           <span className="flex min-w-0 items-baseline gap-x-3 not-md:flex-col">
             <span className="truncate font-display text-base leading-tight text-fg">{name}</span>

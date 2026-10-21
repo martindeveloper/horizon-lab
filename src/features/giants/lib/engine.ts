@@ -25,12 +25,16 @@ import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
 import fragmentShader from "./graphics/giants.frag.glsl";
+import { stellarTables } from "./graphics/stellar-tables";
 import { discTints } from "./graphics/tints";
 import { vectors } from "./graphics/vectors";
 import { weatherUniforms } from "./graphics/weather-uniforms";
 import { createForecast, turnAt } from "./model/activity";
 import { radiusMetres } from "./model/catalogue";
 import { glideAt, glideFrom, glideRests, glideSeconds, glideTowards } from "./model/glide";
+import { letGo, poseRests, restPose, settlePose, turnBy } from "./model/grab";
+import { NOBODY, handOver, handOverAtOnce, type HandOver } from "./model/hand-over";
+import { inspectCamera } from "./model/inspection";
 import {
   blankPlaced,
   bodyAt,
@@ -46,16 +50,21 @@ import {
   type Stage,
 } from "./model/ladder";
 import { LOOKS } from "./model/looks";
+import { ringRadius, ringShown } from "./model/orbit-rings";
 import { RUNG_IDS } from "./model/rungs";
+import { surfaceDetail } from "./model/surface-detail";
 import { NO_WEATHER, fadeWeather, weatherShown } from "./model/weather-fade";
 import {
   ACCENT_SRGB,
   BALMER_SRGB,
   BROWN_DWARF_ALKALI,
   DRAG_RUNGS,
+  GRAB_MIN_PX,
   IDLE_FPS,
   MAX_DISCS,
-  ORBIT_FADE,
+  MIN_DISC_PX,
+  ORBIT_FADE_IN_S,
+  ORBIT_FADE_OUT_S,
   ORBIT_IDS,
   ORBIT_LABEL_GAP_PX,
   ORBIT_LABEL_MIN_PX,
@@ -127,12 +136,15 @@ export function createGiantsEngine(
     const weather = weatherUniforms();
     const forecast = createForecast();
     const tints = resources.own(discTints(LOOKS));
+    const stellar = resources.own(stellarTables(LOOKS));
     const uniforms = {
       uResolution: { value: new Vector2(1, 1) },
       uPixelRatio: { value: 1 },
       uBaseline: { value: 0 },
       uTime: { value: 0 },
       uDetail: { value: 1 },
+      uFocus: { value: new Vector2(-1, 0) },
+      ...stellar.uniforms,
       uCount: { value: 0 },
       uShape: { value: discs.shape },
       uBody: { value: discs.body },
@@ -146,7 +158,7 @@ export function createGiantsEngine(
       uWeather: { value: new Vector4(-1, 0, 0, 0) },
       ...weather.uniforms,
       uOrbitCentre: { value: new Vector3() },
-      uOrbits: { value: ORBIT_METRES.map(() => 0) },
+      uOrbits: { value: ORBIT_METRES.map(() => new Vector2()) },
       uAccent: { value: linearRgb(ACCENT_SRGB) },
       uBalmer: { value: linearRgb(BALMER_SRGB) },
       uAlkali: { value: new Vector3(...BROWN_DWARF_ALKALI) },
@@ -186,8 +198,15 @@ export function createGiantsEngine(
           /* Offline or blocked: the globe keeps its mean colour. */
         });
     });
-    /** Each body's globe as its turn and weather see it. */
-    const globes = LOOKS.map((look) => ({ seed: look.seed, spin: look.spin, tilt: look.tilt }));
+    /** Each body's globe as its turn and weather see it, and the pose a hand has given it. */
+    const globes = LOOKS.map((look) => ({
+      seed: look.seed,
+      spin: look.spin,
+      tilt: look.tilt,
+      twist: 0,
+    }));
+    const poses = LOOKS.map(restPose);
+    const posesRest = () => poses.every(poseRests);
 
     const reduce = prefersReducedMotion();
     const opening = useGiants.getState();
@@ -196,17 +215,21 @@ export function createGiantsEngine(
     let target = place;
     let glide = glideAt(place);
     let weatherFade = NO_WEATHER;
+    let detailFade = NO_WEATHER;
     let seconds = glideSeconds(1);
     let lastFlight = opening.flight;
     let stage: Stage = { width: host.clientWidth || 1, height: host.clientHeight || 1 };
-    let orbitShown = opening.orbits ? 1 : 0;
+    /* The orbits belong to the body the camera has landed on; a visit that opens with them on has them already. */
+    let orbitFade: HandOver = opening.orbits ? handOverAtOnce(nearestRung(ladder, place)) : NOBODY;
     let time = 0;
+    let surfaceZoom: number = opening.surfaceZoom;
     let announced = false;
     let published = { place: Number.NaN, focus: -1, scale: 0 };
     let lastPublish = 0;
 
     const settled = () => glideRests(glide, target);
     const fly = (to: number) => {
+      if (useGiants.getState().surfaceZoom !== 1) useGiants.getState().setSurfaceZoom(1);
       target = clampRung(ladder, to);
       seconds = glideSeconds(target - place);
       if (reduce) {
@@ -237,7 +260,10 @@ export function createGiantsEngine(
     host.addEventListener("wheel", onWheel, { passive: false });
     resources.defer(() => host.removeEventListener("wheel", onWheel));
 
-    /** One pointer's drag: where it started, how far it went, and its recent speed in rungs a second. */
+    /**
+     * One pointer's drag: where it started, how far it went, its recent speed in rungs a second,
+     * and the globe it turns when it started on one (else it climbs the ladder).
+     */
     let drag: {
       id: number;
       x: number;
@@ -245,16 +271,32 @@ export function createGiantsEngine(
       moved: number;
       last: number;
       velocity: number;
+      globe: number | null;
     } | null = null;
+    const grabbed = blankPlaced();
+    /** A globe's radius on screen now, CSS px (the camera as the last frame placed it). */
+    const radiusOnScreen = (index: number) =>
+      placeBody(ladder, camera, stage, index, grabbed).radius;
+    /** The globe under a point, if it has a surface to turn and is large enough to take hold of. */
+    const globeAt = (clientX: number, clientY: number) => {
+      const box = host.getBoundingClientRect();
+      const index = bodyAt(ladder, place, stage, clientX - box.left, clientY - box.top, 10, camera);
+      if (index === null || LOOKS[index]!.style === "horizon") return null;
+      return radiusOnScreen(index) >= GRAB_MIN_PX ? index : null;
+    };
     const climbOf = (dx: number, dy: number) => (-(dx + dy) / stage.height) * DRAG_RUNGS;
     const onDown = (event: PointerEvent) => {
       if (!inputAllowed() || (event.pointerType === "mouse" && event.button !== 0)) return;
       /* A body's name is a button: its own click opens the card, so it starts no drag. */
       if (event.target instanceof Element && event.target.closest("[data-rung]")) return;
-      /* The hand takes the camera where it is: a glide or a pending snap stops here. */
-      window.clearTimeout(snapTimer);
-      target = place;
-      glide = glideAt(place);
+      /* On a globe the hand turns it and leaves the camera be; elsewhere it takes the camera
+         where it is, and a glide or a pending snap stops here. */
+      const globe = globeAt(event.clientX, event.clientY);
+      if (globe === null) {
+        window.clearTimeout(snapTimer);
+        target = place;
+        glide = glideAt(place);
+      }
       drag = {
         id: event.pointerId,
         x: event.clientX,
@@ -262,6 +304,7 @@ export function createGiantsEngine(
         moved: 0,
         last: event.timeStamp,
         velocity: 0,
+        globe,
       };
       host.setPointerCapture(event.pointerId);
     };
@@ -272,10 +315,17 @@ export function createGiantsEngine(
       drag.moved += Math.hypot(dx, dy);
       drag.x = event.clientX;
       drag.y = event.clientY;
-      const climb = climbOf(dx, dy);
       const dt = Math.max(1, event.timeStamp - drag.last) / 1000;
-      drag.velocity = 0.7 * drag.velocity + 0.3 * (climb / dt);
       drag.last = event.timeStamp;
+      if (drag.globe !== null) {
+        if (drag.moved <= TAP_SLOP_PX) return;
+        const index = drag.globe;
+        turnBy(poses[index]!, dx, dy, radiusOnScreen(index), LOOKS[index]!.tilt, dt);
+        engine.invalidate();
+        return;
+      }
+      const climb = climbOf(dx, dy);
+      drag.velocity = 0.7 * drag.velocity + 0.3 * (climb / dt);
       if (drag.moved > TAP_SLOP_PX) {
         window.clearTimeout(snapTimer);
         target = clampRung(ladder, target + climb);
@@ -297,13 +347,17 @@ export function createGiantsEngine(
           stage,
           event.clientX - box.left,
           event.clientY - box.top,
+          10,
+          camera,
         );
         if (index === null) return;
         useGiants.getState().goTo(RUNG_IDS[index]!);
         return;
       }
-      /* A flick carries on a little, then settles on a rung, the glide taking over the hand's speed. */
       const moving = event.timeStamp - ended.last < 80;
+      /* A turned globe coasts if flicked, and later goes home by itself (`grab.ts`). */
+      if (ended.globe !== null) return letGo(poses[ended.globe]!, moving);
+      /* A flick carries on a little, then settles on a rung, the glide taking over the hand's speed. */
       const coast = moving ? ended.velocity * 0.18 : 0;
       fly(Math.round(clampRung(ladder, target + coast)));
       if (!reduce && moving) glide = glideFrom(place, ended.velocity, seconds);
@@ -374,20 +428,23 @@ export function createGiantsEngine(
      * on top, the others' below, so neighbours stand twice as far apart. A ring too small to
      * name, or a name too close to the last one named on its side, is left out.
      */
-    function moveOrbitLabels(x: number, y: number, radii: readonly number[], shown: number) {
+    function moveOrbitLabels(x: number, y: number, rings: readonly Vector2[]) {
       const named = [-Infinity, -Infinity];
       orbitEls.forEach((el, k) => {
         if (!el) return;
-        const r = radii[k] ?? 0;
+        const { x: r, y: shown } = rings[k]!;
         const side = k % 2;
         const at = side === 0 ? y - r : y + r;
         const inside = x > 8 && x < stage.width - 8 && at > 60 && at < stage.height;
         const on =
-          shown > 0.5 && r > ORBIT_LABEL_MIN_PX && r - named[side]! >= ORBIT_LABEL_GAP_PX && inside;
+          shown > 0 && r > ORBIT_LABEL_MIN_PX && r - named[side]! >= ORBIT_LABEL_GAP_PX && inside;
         if (on) {
           named[side] = r;
           el.style.transform = `translate(${x.toFixed(1)}px, ${at.toFixed(1)}px) translate(-50%, -50%)`;
         }
+        /* Each name comes and goes with its ring. */
+        const opacity = on ? shown.toFixed(3) : "0";
+        if (el.style.opacity !== opacity) el.style.opacity = opacity;
         if ((el.dataset.shown === "true") !== on) el.dataset.shown = on ? "true" : "false";
       });
     }
@@ -419,6 +476,12 @@ export function createGiantsEngine(
     const placed: Placed[] = [];
     let placedCount = 0;
     const lensBody = blankPlaced();
+    const ownerBody = blankPlaced();
+    /** A body as this frame placed it (posed by a hand, if it was), or placed afresh if out of view. */
+    function placedOf(index: number) {
+      for (let i = 0; i < placedCount; i++) if (placed[i]!.index === index) return placed[i]!;
+      return placeBody(ladder, camera, stage, index, ownerBody);
+    }
 
     function frame(dt: number) {
       const state = useGiants.getState();
@@ -440,11 +503,34 @@ export function createGiantsEngine(
       if (state.guideOpen && !state.guideLanded && Math.abs(place - state.goal) < 0.02)
         state.landGuide();
       if (!reduce) time += dt;
+      poses.forEach((pose, index) => {
+        const tilt = LOOKS[index]!.tilt;
+        settlePose(pose, dt, tilt, reduce);
+        globes[index]!.twist = pose.twist;
+        globes[index]!.tilt = tilt + pose.pitch;
+      });
 
       cameraAt(ladder, place, stage, camera);
+      const zoomTarget = settled() ? state.surfaceZoom : 1;
+      surfaceZoom = reduce
+        ? zoomTarget
+        : Math.exp(
+            Math.log(surfaceZoom) +
+              (Math.log(zoomTarget) - Math.log(surfaceZoom)) * (1 - Math.exp(-dt * 6)),
+          );
+      if (Math.abs(surfaceZoom - zoomTarget) < 0.001) surfaceZoom = zoomTarget;
+      inspectCamera(camera, ladder, nearestRung(ladder, place), stage, surfaceZoom);
       placedCount = placeBodiesInto(placed, ladder, camera, stage);
       const count = Math.min(placedCount, MAX_DISCS);
       const focus = nearestRung(ladder, place);
+      const resting =
+        nearestRung(ladder, target) === focus && Math.abs(place - focus) < WEATHER_NEAR;
+      const surfaceWanted =
+        resting && !["earth", "jupiter", "horizon"].includes(LOOKS[focus]!.style) ? focus : -1;
+      detailFade = reduce
+        ? { star: surfaceWanted, level: surfaceWanted < 0 ? 0 : 1 }
+        : fadeWeather(detailFade, surfaceWanted, dt);
+      uniforms.uFocus.value.set(-1, 0);
       /* The star the camera lands on comes alive; one it passes through stays quiet. */
       const landing =
         nearestRung(ladder, target) === focus &&
@@ -456,32 +542,34 @@ export function createGiantsEngine(
         : fadeWeather(weatherFade, wanted, dt);
       const star = weatherFade.star;
 
-      /* Each body drawn into its slot; the slots of the holes, of the star with weather and of
-         the body in focus, the orbits' centre. */
+      /* Each body drawn into its slot; the slots of the holes and of the star with weather. */
       let holesInView = 0;
       let slot = -1;
-      let centre: Placed | null = null;
       for (let i = 0; i < count; i++) {
         const body = placed[i]!;
         const look = LOOKS[body.index]!;
+        const globe = globes[body.index]!;
+        /* A flattened globe tipped by hand stands as tall as its new tilt makes it look. */
+        if (poses[body.index]!.pitch !== 0) {
+          const shape = { radius: 1, polar: flattening[body.index]! };
+          body.polar = Math.max(MIN_DISC_PX, body.radius * apparentPolar(shape, globe.tilt));
+          body.y = (camera.horizon ?? horizonOf(stage)) - body.polar;
+        }
         const edge = Math.min(MAX_EDGE, (body.high - body.low) / (2 * body.radius));
         discs.shape[i]!.set(body.x, body.y, body.radius, body.polar);
         discs.body[i]!.set(STYLES.indexOf(look.style), look.equatorK, look.poleK, look.seed);
         discs.surface[i]!.set(look.cells, look.haze, Number.isFinite(edge) ? edge : 0, look.rough);
-        discs.globe[i]!.set(
-          turnAt(globes[body.index]!, time),
-          look.tilt,
-          flattening[body.index]!,
-          look.pulse,
-        );
+        discs.globe[i]!.set(turnAt(globe, time), globe.tilt, flattening[body.index]!, look.pulse);
         const ring = look.ring;
         if (ring) discs.ring[i]!.set(ring.glow, ring.kelvin, ring.flicker, ring.brightest);
         else discs.ring[i]!.set(0, 0, 0, 0);
         tints.assign(i, body.index);
+        stellar.assign(i, body.index);
+        const detail = surfaceDetail(body.index, detailFade, state.quality);
+        if (detail > 0) uniforms.uFocus.value.set(i, detail);
         if (look.style === "horizon" && holesInView < LENSES)
           uniforms.uHoles.value[holesInView++] = i;
         if (body.index === star) slot = i;
-        if (body.index === focus) centre = body;
       }
       uniforms.uHoleCount.value = holesInView;
       discs.lens.forEach((lens, k) => {
@@ -506,25 +594,30 @@ export function createGiantsEngine(
         forecastNow?.chromosphere ?? 0,
       );
       uniforms.uCount.value = count;
-      uniforms.uBaseline.value = horizonOf(stage);
+      uniforms.uBaseline.value = camera.horizon ?? horizonOf(stage);
       uniforms.uTime.value = time;
       uniforms.uDetail.value = GIANTS_QUALITY[state.quality].detail ? 1 : 0;
 
       const { scale } = camera;
-      const want = state.orbits ? 1 : 0;
-      orbitShown = reduce
-        ? want
-        : orbitShown +
-          Math.sign(want - orbitShown) * Math.min(Math.abs(want - orbitShown), ORBIT_FADE * dt);
-      if (centre && orbitShown > 0) {
-        /* The orbits are centred on the body, as if it stood where the Sun does. */
-        uniforms.uOrbitCentre.value.set(centre.x, centre.y, orbitShown);
-        ORBIT_METRES.forEach((m, k) => (uniforms.uOrbits.value[k] = m / scale));
-        moveOrbitLabels(centre.x, centre.y, uniforms.uOrbits.value, orbitShown);
+      /* The orbits ripple out round the body the camera lands on, as if it stood where the Sun
+         does, and fade round it as the camera leaves, before coming in round the next. */
+      const orbitsWanted = state.orbits && resting ? focus : -1;
+      orbitFade = reduce
+        ? handOverAtOnce(orbitsWanted)
+        : handOver(orbitFade, orbitsWanted, dt, ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S);
+      const rings = uniforms.uOrbits.value;
+      const around = orbitFade.level > 0 ? placedOf(orbitFade.owner) : null;
+      if (around) {
+        uniforms.uOrbitCentre.value.set(around.x, around.y, 1);
+        ORBIT_METRES.forEach((m, k) => {
+          const shown = ringShown(orbitFade.level, k, ORBIT_METRES.length);
+          rings[k]!.set(ringRadius(m / scale, shown), shown);
+        });
       } else {
         uniforms.uOrbitCentre.value.z = 0;
-        moveOrbitLabels(0, 0, uniforms.uOrbits.value, 0);
+        rings.forEach((ring) => ring.setY(0));
       }
+      moveOrbitLabels(around?.x ?? 0, around?.y ?? 0, rings);
 
       moveLabels(focus);
       pass.render({
@@ -551,8 +644,11 @@ export function createGiantsEngine(
     pass.compile();
     engine.start({
       render: frame,
-      paused: () => reduce && settled() && !engine.dirty && !drag,
-      fps: () => (settled() && !drag ? IDLE_FPS : GIANTS_QUALITY[useGiants.getState().quality].fps),
+      paused: () => reduce && settled() && !engine.dirty && !drag && posesRest(),
+      fps: () =>
+        settled() && !drag && posesRest()
+          ? IDLE_FPS
+          : GIANTS_QUALITY[useGiants.getState().quality].fps,
     });
     resources.defer(
       useGiants.subscribe((state, previous) => {
@@ -563,7 +659,8 @@ export function createGiantsEngine(
           state.bloom !== previous.bloom ||
           state.wideColour !== previous.wideColour ||
           state.antialias !== previous.antialias ||
-          state.quality !== previous.quality
+          state.quality !== previous.quality ||
+          state.surfaceZoom !== previous.surfaceZoom
         )
           engine.invalidate();
         if (state.guideOpen && !previous.guideOpen) drag = null;

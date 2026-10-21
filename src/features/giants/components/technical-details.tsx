@@ -12,7 +12,6 @@ import {
   GRANULE_SCALE_HEIGHTS,
   LENS_DISTANCE,
   MEAN_MOLECULAR_WEIGHT,
-  VISIBLE_NM,
 } from "../lib/parameters";
 import specification from "../technical.json";
 
@@ -28,7 +27,6 @@ export function GiantsTechnicalDetails(access: TechnicalDetailsAccess) {
         solarTeff: SOLAR_TEFF_K,
         mu: MEAN_MOLECULAR_WEIGHT,
         cellHeights: GRANULE_SCALE_HEIGHTS,
-        visibleNm: VISIBLE_NM,
         convectiveK: CONVECTIVE_BELOW_K,
         differential: DIFFERENTIAL_ROTATION,
         lensDistance: LENS_DISTANCE,

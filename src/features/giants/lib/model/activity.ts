@@ -174,8 +174,11 @@ export type Weather = {
   chromosphere: number;
 };
 
-/** The globe a weather sits on: its seed, display spin and the pole's tilt towards us. */
-export type Globe = { seed: number; spin: number; tilt: number };
+/**
+ * The globe a weather sits on: its seed, display spin and the pole's tilt towards us, and any
+ * turn a hand has given it on top of its spin (`grab.ts`), radians.
+ */
+export type Globe = { seed: number; spin: number; tilt: number; twist?: number };
 
 const vec3 = (): Vec3 => [0, 0, 0];
 const slots = <T>(count: number, make: () => T) => Array.from({ length: count }, make);
@@ -207,7 +210,8 @@ function dice(seed: number, a: number, b?: number, c?: number) {
  * the Earth's do seen with north up.
  */
 export function turnAt(globe: Globe, time: number) {
-  return globe.spin > 0 ? TAU * (globe.seed - time / globe.spin) : TAU * globe.seed;
+  const own = globe.spin > 0 ? TAU * (globe.seed - time / globe.spin) : TAU * globe.seed;
+  return own + (globe.twist ?? 0);
 }
 
 /**

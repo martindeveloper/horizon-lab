@@ -75,7 +75,7 @@ const rungScale = (ladder: Ladder, index: number, stage: Stage) =>
   ladder.sizes[index]!.radius / framedRadius(stage);
 
 /** The camera on the ladder: metres per CSS pixel, and the point of the horizon (metres from the first body's centre) under the middle of the stage. */
-export type Camera = { scale: number; centre: number };
+export type Camera = { scale: number; centre: number; horizon?: number };
 
 /** The camera at a place on the ladder, written into `out` (a frame reuses one). */
 export function cameraAt(
@@ -84,6 +84,7 @@ export function cameraAt(
   stage: Stage,
   out: Camera = { scale: 0, centre: 0 },
 ): Camera {
+  delete out.horizon;
   const at = clampRung(ladder, t);
   const i = Math.min(Math.floor(at), Math.max(0, ladder.last - 1));
   const f = at - i;
@@ -128,7 +129,7 @@ export function placeBody(
   const polar = Math.max(MIN_DISC_PX, size.polar / camera.scale);
   out.index = index;
   out.x = stage.width / 2 + (ladder.centres[index]! - camera.centre) / camera.scale;
-  out.y = horizonOf(stage) - polar;
+  out.y = (camera.horizon ?? horizonOf(stage)) - polar;
   out.radius = Math.max(MIN_DISC_PX, size.radius / camera.scale);
   out.polar = polar;
   out.low = size.low / camera.scale;
@@ -172,9 +173,19 @@ export function placeBodies(ladder: Ladder, t: number, stage: Stage, margin = 0.
 }
 
 /** The rung whose body is under a stage point, if any (the smallest wins where bodies overlap). */
-export function bodyAt(ladder: Ladder, t: number, stage: Stage, x: number, y: number, slop = 10) {
+export function bodyAt(
+  ladder: Ladder,
+  t: number,
+  stage: Stage,
+  x: number,
+  y: number,
+  slop = 10,
+  camera?: Camera,
+) {
   let best: Placed | null = null;
-  for (const body of placeBodies(ladder, t, stage, 0)) {
+  const placed: Placed[] = [];
+  placeBodiesInto(placed, ladder, camera ?? cameraAt(ladder, t, stage), stage, 0);
+  for (const body of placed) {
     const dx = (x - body.x) / (body.radius + slop);
     const dy = (y - body.y) / (body.polar + slop);
     if (dx * dx + dy * dy <= 1 && (!best || body.radius < best.radius)) best = body;

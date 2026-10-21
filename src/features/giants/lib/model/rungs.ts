@@ -45,43 +45,45 @@ export type RungKind = "star" | "remnant" | "planet" | "horizon";
 /** How a star ends, as its card says it. */
 export type Fate = "whiteDwarf" | "neutronStar" | "blackHole" | "neutronOrHole";
 
+/** What a remnant or a substellar body is called, where its kind alone says too little. */
+export type RungLabel = "pulsar" | "whiteDwarf" | "brownDwarf";
+
 export type Rung = {
   id: RungId;
   kind: RungKind;
-  /** MK spectral class, or the object's class where it has none. Not translated. */
-  type: string;
+  label?: RungLabel;
   fate?: Fate;
 };
 
-const rung = (id: RungId, kind: RungKind, type: string, fate?: Fate): Rung =>
-  fate ? { id, kind, type, fate } : { id, kind, type };
+const star = (id: RungId, fate?: Fate): Rung =>
+  fate ? { id, kind: "star", fate } : { id, kind: "star" };
 
 export const RUNGS: readonly Rung[] = [
-  rung("neutron-star", "remnant", "Pulsar"),
-  rung("cygnus-x1", "horizon", "Black hole"),
-  rung("sirius-b", "remnant", "DA2"),
-  rung("earth", "planet", "Planet"),
-  rung("brown-dwarf", "star", "Brown dwarf"),
-  rung("jupiter", "planet", "Planet"),
-  rung("trappist-1", "star", "M8 V", "whiteDwarf"),
-  rung("proxima", "star", "M5.5 Ve", "whiteDwarf"),
-  rung("sun", "star", "G2 V", "whiteDwarf"),
-  rung("sirius", "star", "A1 V", "whiteDwarf"),
-  rung("vega", "star", "A0 Va", "whiteDwarf"),
-  rung("achernar", "star", "B6 Vep", "whiteDwarf"),
-  rung("sgr-a", "horizon", "Black hole"),
-  rung("arcturus", "star", "K1.5 III", "whiteDwarf"),
-  rung("r136a1", "star", "WN5h", "blackHole"),
-  rung("aldebaran", "star", "K5 III", "whiteDwarf"),
-  rung("rigel", "star", "B8 Ia", "neutronOrHole"),
-  rung("deneb", "star", "A2 Ia", "neutronOrHole"),
-  rung("antares", "star", "M1.5 Iab", "neutronOrHole"),
-  rung("betelgeuse", "star", "M1–M2 Ia–ab", "neutronOrHole"),
-  rung("uy-scuti", "star", "M4 Ia", "neutronOrHole"),
-  rung("vy-cma", "star", "M5e Ia", "neutronOrHole"),
-  rung("stephenson-2-18", "star", "M6", "neutronOrHole"),
-  rung("m87", "horizon", "Black hole"),
-  rung("ton-618", "horizon", "Black hole"),
+  { id: "neutron-star", kind: "remnant", label: "pulsar" },
+  { id: "cygnus-x1", kind: "horizon" },
+  { id: "sirius-b", kind: "remnant", label: "whiteDwarf" },
+  { id: "earth", kind: "planet" },
+  { id: "brown-dwarf", kind: "star", label: "brownDwarf" },
+  { id: "jupiter", kind: "planet" },
+  star("trappist-1", "whiteDwarf"),
+  star("proxima", "whiteDwarf"),
+  star("sun", "whiteDwarf"),
+  star("sirius", "whiteDwarf"),
+  star("vega", "whiteDwarf"),
+  star("achernar", "whiteDwarf"),
+  { id: "sgr-a", kind: "horizon" },
+  star("arcturus", "whiteDwarf"),
+  star("r136a1", "blackHole"),
+  star("aldebaran", "whiteDwarf"),
+  star("rigel", "neutronOrHole"),
+  star("deneb", "neutronOrHole"),
+  star("antares", "neutronOrHole"),
+  star("betelgeuse", "neutronOrHole"),
+  star("uy-scuti", "neutronOrHole"),
+  star("vy-cma", "neutronOrHole"),
+  star("stephenson-2-18", "neutronOrHole"),
+  { id: "m87", kind: "horizon" },
+  { id: "ton-618", kind: "horizon" },
 ];
 
 export const rungIndex = (id: RungId) => RUNG_IDS.indexOf(id);

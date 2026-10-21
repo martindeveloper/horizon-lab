@@ -3,7 +3,7 @@
   "metadataDescription": "Climb from a city-sized neutron star past the largest stars to black-hole horizons, all at true scale.",
   "canvasLabel": "Stars, planets and black-hole horizons side by side on one horizon, at true scale",
   "hud": {
-    "hint": "Scroll or drag to climb. The card follows the body in focus.",
+    "hint": "Scroll or drag the sky to climb. Drag a star to turn it.",
     "stars": "Bodies",
     "previous": "Smaller",
     "next": "Larger",
@@ -59,12 +59,13 @@
     },
     "vega": {
       "name": "Vega",
-      "note": "Its fast spin flings its equator outward, so it bulges and runs cooler there than at the poles. From Earth we see it pole-on and round; here it is turned to show the bulge."
+      "note": "Its fast spin flings its equator outward, so it bulges and runs cooler there than at the poles. From Earth we see it almost pole-on and round; drag the globe to inspect its bulge.",
+      "caution": "The surface uses a rotation-aware ELR temperature profile and a published inclination of 6.2°. Local model temperatures need not equal the literature endpoints on the card; the unperturbed profile conserves the adopted luminosity."
     },
     "achernar": {
       "name": "Achernar",
       "note": "One of the flattest stars known: it spins so fast that its equator, flung outward, nearly breaks away.",
-      "caution": "The pole-to-equator shading is illustrative: this simple gravity-darkening model omits centrifugal acceleration and is not a fitted temperature map."
+      "caution": "The surface uses a rotation-aware ELR temperature model with centrifugal acceleration, with its unperturbed profile normalized to the adopted luminosity. The drawn shape remains a spheroid; this is an approximation, not a fitted image."
     },
     "sgr-a": {
       "name": "Sagittarius A*",
@@ -131,7 +132,13 @@
     "star": "Star",
     "remnant": "Dead star",
     "planet": "Planet",
-    "horizon": "Black hole"
+    "horizon": "Black hole",
+    "pulsar": "Pulsar",
+    "whiteDwarf": "White dwarf",
+    "brownDwarf": "Brown dwarf",
+    "mainSequence": "Main-sequence star",
+    "giants": "Giant",
+    "supergiants": "Supergiant"
   },
   "facts": {
     "horizon": "Schwarzschild radius",
@@ -145,7 +152,8 @@
     "bulge": "Bulge at the equator",
     "engine": "Powered by",
     "gravity": "Surface gravity",
-    "rotation": "Rotation period"
+    "rotation": "Rotation period",
+    "spectral": "Spectral type"
   },
   "rows": {
     "km": "{value} km",
@@ -200,7 +208,8 @@
       "derived": "Derived",
       "teaching-choice": "Illustrative",
       "flag": "Needs verification"
-    }
+    },
+    "spectralHint": "letter = temperature, hot O B A F G K M cool (L, T for brown dwarfs; DA marks a white dwarf showing hydrogen, W a Wolf–Rayet star); digit = a finer step, 0–9; numeral = size, V main sequence to I supergiant"
   },
   "panel": {
     "orbits": "Planets' orbits",
@@ -213,7 +222,9 @@
       "sun": "Suns",
       "au": "au",
       "light": "Light"
-    }
+    },
+    "surfaceZoom": "Surface close-up",
+    "surfaceZoomNote": "Zoom in without exaggerating the size of surface features. Drag the globe to inspect it; moving to another body returns to 1×."
   },
   "orbits": {
     "mercury": "Mercury",
@@ -291,7 +302,7 @@
       },
       "surfaces": {
         "title": "Surfaces",
-        "body": "Bodies turn at a display pace. Stellar colours approximate blackbody colours; brightness uses Planck’s law at {visibleNm} nm and grey-atmosphere limb darkening (T⁴ = ¾ T⁴ₑ (μ + ⅔)), not a full stellar-atmosphere spectrum. Below {convectiveK} K, a teaching model sizes cells at {cellHeights} pressure scale heights (mean molecular weight {mu}); it exaggerates the visible texture and uses an assumed mass where none is catalogued. The same μ symbol in the limb formula denotes the viewing-angle cosine. Hot stars’ pulsations and supergiant envelopes are illustrative. Vega uses literature pole/equator temperatures; Achernar’s shading uses a simplified gravity-darkening prescription that omits centrifugal acceleration. The pulsar’s two opposite caps and beams are a generic dipole sketch, not the hot-spot geometry inferred for PSR J0030+0451. Earth and Jupiter use image maps."
+        "body": "Bodies turn at a display pace. Continuum colours and relative visible brightness integrate Planck spectra over 380–780 nm with the CIE observer. Claret–Bloemen atmosphere fits supply limb darkening by temperature and gravity; Johnson–Cousins R, V and B bands approximate the RGB angular response, not a full stellar spectrum. Solar composition and 2 km/s microturbulence are assumed; values outside the grid use its boundary and compact remnants and brown dwarfs use a grey fallback. Below {convectiveK} K, illustrative cells span {cellHeights} pressure scale heights (mean molecular weight {mu}); missing masses use a display assumption. Supergiants share one evolving field for broad temperature patterns and limb relief. Only the focused star gains resolved fine cells, magnetic bright points, spot filaments and atmospheric threads; unresolved features fade rather than grow. Vega and Achernar use the ELR rotation model including centrifugal acceleration, with the unperturbed profile normalized to the adopted luminosity on the drawn spheroid. That shape approximates the Roche surface; procedural temperature changes are not re-normalized each frame. The pulsar remains a generic dipole illustration; Earth and Jupiter use image maps."
       },
       "weather": {
         "title": "Weather",
@@ -307,7 +318,7 @@
       },
       "limits": {
         "title": "Limits",
-        "body": "Bodies are shown at illustrative inclinations, without companions; red supergiants have no sharp edge. Adopted sizes and their uncertainties do not establish a definitive ranking of the largest stars. Black-hole outlines compare Schwarzschild reference radii; the surrounding glow is schematic. Spins, pulsations and weather use display paces. Planetary orbits are circles at their semimajor axes."
+        "body": "Vega and Achernar start at published inclinations of 6.2° and 60.6°; other inclinations are illustrative, and dragging changes the viewing orientation. Companions are omitted. Red supergiants have no sharp edge; their convection and optical-surface relief are procedural approximations, not hydrodynamic simulations. Continuum colours omit spectral lines and molecular absorption except for the brown dwarf’s illustrative alkali tint. Coronae, prominences and flare loops are contrast-enhanced illustrations, not a single calibrated visible-light exposure. Adopted sizes do not establish a definitive ranking. Black-hole outlines compare Schwarzschild reference radii; surrounding glow is schematic. Spins, pulsations and weather use display paces. Planetary orbits are circles at their semimajor axes."
       }
     }
   },
@@ -357,7 +368,9 @@
       "giants": "Giants",
       "supergiants": "Supergiants"
     },
-    "lesson": "Dashed lines show equal radii for spherical stars: up and to the right means larger. Points use adopted values, without error bars; Vega’s temperature is the geometric middle of its equator-to-pole range. For flattened stars these lines need not match the equatorial radius."
+    "lesson": "Dashed lines show equal radii for spherical stars: up and to the right means larger. Points use adopted values, without error bars; Vega’s temperature is the geometric middle of its equator-to-pole range. For flattened stars these lines need not match the equatorial radius.",
+    "labelAll": "Hertzsprung–Russell diagram of the ladder’s stars, by representative temperature and bolometric luminosity",
+    "radius": "{value} R☉"
   },
   "engines": {
     "ppChain": "Hydrogen → helium (proton–proton chain)",

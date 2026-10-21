@@ -72,6 +72,16 @@ export const WHEEL_RUNGS = 0.32;
 export const DRAG_RUNGS = 3.2;
 /** Quiet time after the last wheel step before the camera snaps to the nearest rung, ms. */
 export const SNAP_DELAY_MS = 160;
+/**
+ * A hand turning a globe (`grab.ts`): the smallest radius, CSS px, worth grabbing (smaller
+ * bodies let the drag climb instead); how long a flick keeps it turning (the time its speed
+ * takes to fall by e, s); how long it holds the pose the hand left before going home, s; and
+ * the pace of that return (the time it takes to cover all but 1/e of the way, s).
+ */
+export const GRAB_MIN_PX = 24;
+export const GRAB_COAST_S = 0.45;
+export const GRAB_HOLD_S = 2.5;
+export const GRAB_RETURN_S = 0.9;
 
 /**
  * Stars cooler than this carry their heat to the surface by convection, so their faces boil
@@ -79,20 +89,18 @@ export const SNAP_DELAY_MS = 160;
  */
 export const CONVECTIVE_BELOW_K = 7_000;
 /**
- * The visible band the surfaces' brightness is drawn in, nm. With it a cooler limb darkens more
- * on a red star than on a blue one, as Planck's law has it.
+ * Representative wavelength for the brown dwarf's small cloud-contrast approximation.
+ * Surface colour and brightness themselves use the CIE-integrated continuum lookup.
  */
 export const VISIBLE_NM = 550;
 /** hc / (k λ) at that wavelength, K: the exponent's scale in Planck's law. */
 export const PLANCK_KELVIN =
   (PLANCK_CONSTANT * SPEED_OF_LIGHT) / (BOLTZMANN_CONSTANT * VISIBLE_NM * 1e-9);
-/**
- * The temperature we see at the centre of a star's face, as a share of the mean of its
- * equator's and poles': a grey atmosphere shows (5/4)^¼ of the effective temperature there
- * (T⁴ = ¾ T⁴ₑ (μ + ⅔) at μ = 1). Every face is drawn against its own centre, so each is exposed
- * alike and its limb darkens from there.
- */
-export const FACE_KELVIN_SHARE = (5 / 4) ** 0.25;
+/** CIE/Planck continuum lookup and atmosphere/latitude tables, sampled at texel centres. */
+export const SPECTRUM_MIN_K = 500;
+export const SPECTRUM_MAX_K = 100_000;
+export const SPECTRUM_SAMPLES = 384;
+export const PROFILE_SAMPLES = 129;
 /**
  * The light round a star is drawn in its face's own colours: the light of a surface at a share
  * of the face's temperature, which Planck's law makes redder and dimmer the cooler it is. The
@@ -116,8 +124,10 @@ export const SUPERGIANT_MASS = 15;
 /** Granules' temperature contrast: a few per cent when there are hundreds, more for a handful. */
 export const CELL_CONTRAST_FINE = 0.035;
 export const CELL_CONTRAST_GIANT = 0.065;
-/** Cells smaller than this on screen fade out rather than shimmer or read as grain, CSS pixels. */
-export const GRANULE_MIN_PX = 4;
+/** Resolve cells only above 2–4 drawing-buffer pixels, including foreshortening. */
+export const SURFACE_RESOLVE_PX = 2;
+/** Spicule columns around a circumference (~0.002 radians apart), independent of zoom/DPR. */
+export const SPICULE_COLUMNS = 3_142;
 /**
  * A spot's umbra and penumbra are this much cooler than the surface, as a share of its
  * temperature (the Sun's: about 4,000 K and 5,200 K against 5,772 K).
@@ -280,12 +290,11 @@ export const FLASH_GLARE = 0.35;
 /** A flare's white light is a hot continuum, about this warm, K. */
 export const FLARE_K = 9_000;
 /**
- * The chromosphere's depth and its spicules' reach, in solar radii (2,000 km and 10,000 km),
- * and the spicules' spacing round the limb on screen, CSS pixels.
+ * Solar-inspired chromosphere depth and spicule reach, in stellar radii. On the Sun these
+ * correspond to about 2,000 km and 10,000 km; other stars use this illustrative scaling.
  */
 export const CHROMOSPHERE_HEIGHT = 0.003;
 export const SPICULE_HEIGHT = 0.014;
-export const SPICULE_PX = 2;
 /**
  * Prominences and the chromosphere glow in the Balmer lines, Hα with Hβ and Hγ: the pink of an
  * eclipse (encoded sRGB).
@@ -361,6 +370,12 @@ export const SHADER_DEFINES = glslDefines({
   ORBIT_CASE_PX,
   ORBIT_CASE_DEPTH,
   PLANCK_KELVIN,
+  SPECTRUM_MIN_K,
+  SPECTRUM_MAX_K,
+  SPECTRUM_SAMPLES: glslInt(SPECTRUM_SAMPLES),
+  PROFILE_SAMPLES: glslInt(PROFILE_SAMPLES),
+  SURFACE_RESOLVE_PX,
+  SPICULE_COLUMNS: glslInt(SPICULE_COLUMNS),
   REGIONS: glslInt(REGIONS),
   SHEETS: glslInt(SHEETS),
   SHEET_POINTS: glslInt(SHEET_POINTS),
@@ -370,7 +385,6 @@ export const SHADER_DEFINES = glslDefines({
   EJECTIONS: glslInt(EJECTIONS),
   CELL_CONTRAST_FINE,
   CELL_CONTRAST_GIANT,
-  GRANULE_MIN_PX,
   UMBRA_DEPTH,
   PENUMBRA_DEPTH,
   FACULA_CONTRAST,
@@ -403,7 +417,6 @@ export const SHADER_DEFINES = glslDefines({
   FLARE_K,
   CHROMOSPHERE_HEIGHT,
   SPICULE_HEIGHT,
-  SPICULE_PX,
   WIND_GLOW,
   ENVELOPE_GLOW,
   PULSAR_TILT,
@@ -429,6 +442,15 @@ export const SHADER_DEFINES = glslDefines({
 /** The stage's colours, as the theme's `space` and `solar` tokens (encoded sRGB). */
 export const SPACE_SRGB = [8 / 255, 8 / 255, 11 / 255] as const;
 export const ACCENT_SRGB = [226 / 255, 192 / 255, 122 / 255] as const;
-/** Frames a second while the camera rests and only the stars move, and how fast orbits fade in, per second. */
+/** Frames a second while the camera rests and only the stars move. */
 export const IDLE_FPS = 30;
-export const ORBIT_FADE = 4;
+/**
+ * The planets' orbits come in round the body the camera lands on and go as it leaves
+ * (`orbit-rings.ts`): over these many seconds, each ring starting this share of the way after
+ * the one inside it (and going this share before it), and growing into place from this share
+ * smaller.
+ */
+export const ORBIT_FADE_IN_S = 1.1;
+export const ORBIT_FADE_OUT_S = 0.5;
+export const ORBIT_STAGGER = 0.1;
+export const ORBIT_GROW = 0.06;

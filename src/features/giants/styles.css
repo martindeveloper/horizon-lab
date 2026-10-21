@@ -61,8 +61,8 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: opacity 0.3s ease;
-  will-change: transform;
+  /* Its opacity follows its ring, frame by frame (the engine sets it). */
+  will-change: transform, opacity;
 }
 :where([data-simulation="giants"]) .giants-orbit[data-shown="false"] {
   opacity: 0;

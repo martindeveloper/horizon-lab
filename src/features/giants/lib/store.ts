@@ -12,6 +12,7 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { rungFromPath } from "../routing";
 import type { Reference } from "./model/compare";
+import type { SurfaceZoom } from "./model/inspection";
 import type { Ruler } from "./model/ruler";
 import { DEFAULT_RUNG, RUNG_IDS, rungIndex, type RungId } from "./model/rungs";
 import { TOUR } from "./model/tour";
@@ -53,6 +54,8 @@ type GiantsStore = GuideSlice<Saved> &
     /** The planets' orbits round the body in focus, as if it stood in the Sun's place. */
     orbits: boolean;
     ruler: Ruler;
+    surfaceZoom: SurfaceZoom;
+    setSurfaceZoom: (zoom: SurfaceZoom) => void;
     /** The first frame is drawn. */
     ready: boolean;
     /** The guide moves on by itself once a step has been read; off under reduced motion. */
@@ -101,6 +104,7 @@ const RENDER_DEFAULTS: GiantsRender = {
 const VIEW_DEFAULTS = {
   orbits: false,
   ruler: "auto",
+  surfaceZoom: 1,
   ...RENDER_DEFAULTS,
 } as const satisfies Partial<GiantsStore>;
 
@@ -120,13 +124,14 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   panel: "none",
   orbits: VIEW_DEFAULTS.orbits,
   ruler: VIEW_DEFAULTS.ruler,
+  surfaceZoom: VIEW_DEFAULTS.surfaceZoom,
   ...renderSlice(set, RENDER_DEFAULTS),
   ready: false,
   guidePlaying: false,
   guideLanded: false,
   setReady: (ready) => set({ ready }),
-  setView: (view) => set({ view, goal: rungIndex(view), flight: nextFlight() }),
-  go: (index) => set({ goal: clampIndex(index), flight: nextFlight() }),
+  setView: (view) => set({ view, goal: rungIndex(view), flight: nextFlight(), surfaceZoom: 1 }),
+  go: (index) => set({ goal: clampIndex(index), flight: nextFlight(), surfaceZoom: 1 }),
   step: (by) => get().go(get().focus + by),
   publish: (place, focus, scale) => set({ place, focus, scale }),
   setCard: (open) => set({ card: open, sheet: open }),
@@ -138,12 +143,13 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   setPanel: (panel) => set({ panel }),
   setOrbits: (orbits) => set({ orbits }),
   setRuler: (ruler) => set({ ruler }),
+  setSurfaceZoom: (surfaceZoom) => set({ surfaceZoom }),
   resetView: () => set(VIEW_DEFAULTS),
   ...guideSlice(set, get, {
     tour: TOUR,
     save: (s) => ({ goal: s.focus, orbits: s.orbits }),
     restore: (saved) => ({ goal: saved.goal, orbits: saved.orbits, flight: nextFlight() }),
-    open: () => ({ guidePlaying: !prefersReducedMotion() }),
+    open: () => ({ guidePlaying: !prefersReducedMotion(), surfaceZoom: 1 as const }),
     apply: (step) => ({
       goal: rungIndex(step.rung),
       flight: nextFlight(),

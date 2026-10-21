@@ -27,8 +27,9 @@
     {
       "id": "surfaces",
       "equations": [
-        "T(μ)⁴ = ¾ Tₑ⁴ (μ + ⅔)",
-        "I ∝ 1 / (e^(hc / λkT) − 1)",
+        "I(μ)/I(1) = 1 − Σₙ₌₁⁴ aₙ (1 − μⁿ⸍²)",
+        "F = σT⁴,   ∫ F dA = L",
+        "gᵣ = −GM/r² + Ω²r sin²θ",
         {
           "equation": "scale-height"
         },
@@ -140,6 +141,26 @@
     {
       "title": "Brinkman et al. (2000), First Light Measurements of Capella with Chandra LETGS",
       "url": "https://arxiv.org/abs/astro-ph/0001034"
+    },
+    {
+      "title": "Claret & Bloemen (2011), atmosphere limb-darkening coefficients, corrected CDS tables",
+      "url": "https://cdsarc.cds.unistra.fr/viz-bin/cat/J/A+A/529/A75"
+    },
+    {
+      "title": "Espinosa Lara & Rieutord (2011), Gravity darkening in rotating stars",
+      "url": "https://arxiv.org/abs/1109.3038"
+    },
+    {
+      "title": "Monnier et al. (2012), Resolving Vega and the inclination controversy with CHARA/MIRC",
+      "url": "https://arxiv.org/abs/1211.6055"
+    },
+    {
+      "title": "Chiavassa et al. (2011), Radiative hydrodynamic simulations of red supergiant stars III",
+      "url": "https://doi.org/10.1051/0004-6361/201015768"
+    },
+    {
+      "title": "NSO (2020), Inouye Solar Telescope first-light granulation and magnetic bright points",
+      "url": "https://nso.edu/press-release/inouye-solar-telescope-first-light/"
     }
   ]
 }

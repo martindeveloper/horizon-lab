@@ -11,8 +11,9 @@ import {
 } from "@/lib/facts";
 import { formatSignificant } from "@horizon/toolkit/science";
 
-import { RUNG_ENGINES, RUNG_FACTS, drawn, inUnit } from "../lib/model/catalogue";
-import { RUNGS, type RungId } from "../lib/model/rungs";
+import { RUNG_ENGINES, RUNG_FACTS, drawn, inUnit, spectralOf } from "../lib/model/catalogue";
+import { groupOf } from "../lib/model/compare";
+import { RUNGS, type Rung, type RungId } from "../lib/model/rungs";
 import type { TourStep } from "../lib/model/tour";
 import { RUNG_CARDS } from "./card-specs";
 
@@ -55,7 +56,20 @@ export function useDistance(): DistanceSettings {
   return { unit: "auto", locale: useLocale() };
 }
 
-/** A rung's card: its class for a kicker, its name, figures, one remark and any caution. */
+/**
+ * What a body is, in words: a remnant's or brown dwarf's own name, a star's luminosity class
+ * (main sequence, giant, supergiant), or else its kind.
+ */
+export function badgeOf(t: Translate, rung: Rung) {
+  if (rung.label) return t(`kinds.${rung.label}`);
+  const group = rung.kind === "star" ? groupOf(rung.id) : undefined;
+  return t(`kinds.${group ?? rung.kind}`);
+}
+
+/**
+ * A rung's card: what it is for a kicker, its name, figures (its spectral type second, with how
+ * to read one), one remark and any caution.
+ */
 export function rungCard(
   t: Translate,
   d: DistanceSettings,
@@ -76,13 +90,18 @@ export function rungCard(
         })
       : process,
   };
+  const type = spectralOf(id);
+  const spectral = type
+    ? [{ id: "spectral", label: t("facts.spectral"), value: `${type} · ${t("card.spectralHint")}` }]
+    : [];
+  const [lead, ...rest] = built.facts;
   const fate = rung.fate
     ? [{ id: "fate", label: t("facts.fate"), value: t(`fates.${rung.fate}`) }]
     : [];
   return {
-    badge: rung.kind === "star" ? rung.type : t(`kinds.${rung.kind}`),
+    badge: badgeOf(t, rung),
     title: t(`rungs.${id}.name`),
-    facts: [...built.facts, powered, ...fate],
+    facts: [...(lead ? [lead] : []), ...spectral, ...rest, powered, ...fate],
     body: t(`rungs.${id}.note`),
     caution: has(`rungs.${id}.caution`) ? t(`rungs.${id}.caution`) : "",
   };

@@ -16,15 +16,17 @@ type Level = {
   scale: number;
   /** The layers' finer companions: off on economy. */
   detail: boolean;
+  /** Focused surface only: economy ½, standard 1, cinema/max add the finest layer. */
+  surfaceDetail: number;
   /** Frames a second while the camera moves. */
   fps: number;
 };
 
 export const GIANTS_QUALITY: Readonly<Record<RenderQuality, Level>> = {
-  economy: { dprCap: 1, scale: 0.75, detail: false, fps: 30 },
-  standard: { dprCap: 2, scale: 1, detail: true, fps: 60 },
-  cinema: { dprCap: 2, scale: 1, detail: true, fps: 60 },
-  max: { dprCap: 4, scale: 1, detail: true, fps: 60 },
+  economy: { dprCap: 1, scale: 0.75, detail: false, surfaceDetail: 0.5, fps: 30 },
+  standard: { dprCap: 2, scale: 1, detail: true, surfaceDetail: 1, fps: 60 },
+  cinema: { dprCap: 2, scale: 1, detail: true, surfaceDetail: 2, fps: 60 },
+  max: { dprCap: 4, scale: 1, detail: true, surfaceDetail: 2, fps: 60 },
 };
 
 /** Bloom on the stars' discs: soft light round the brightest surfaces only. */

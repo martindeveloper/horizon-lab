@@ -8,6 +8,12 @@
 #define ORBIT_CASE_PX       2.6
 #define ORBIT_CASE_DEPTH    0.55
 #define PLANCK_KELVIN       26159.57959
+#define SPECTRUM_MIN_K      500.0
+#define SPECTRUM_MAX_K      100000.0
+#define SPECTRUM_SAMPLES    384
+#define PROFILE_SAMPLES     129
+#define SURFACE_RESOLVE_PX  2.0
+#define SPICULE_COLUMNS     3142
 #define REGIONS             4
 #define SHEETS              3
 #define SHEET_POINTS        10
@@ -17,7 +23,6 @@
 #define EJECTIONS           2
 #define CELL_CONTRAST_FINE  0.035
 #define CELL_CONTRAST_GIANT 0.065
-#define GRANULE_MIN_PX      4.0
 #define UMBRA_DEPTH         0.31
 #define PENUMBRA_DEPTH      0.1
 #define FACULA_CONTRAST     0.09
@@ -50,7 +55,6 @@
 #define FLARE_K             9000.0
 #define CHROMOSPHERE_HEIGHT 0.003
 #define SPICULE_HEIGHT      0.014
-#define SPICULE_PX          2.0
 #define WIND_GLOW           0.16
 #define ENVELOPE_GLOW       0.4
 #define PULSAR_TILT         0.55

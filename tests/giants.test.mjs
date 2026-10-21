@@ -397,25 +397,13 @@ test("a comparison measures one body against its yardstick, and none against its
   assert.equal(sun.light, undefined);
 });
 
-test("the HR diagram holds the stars that shine by their temperature, each band populated", async () => {
-  const { HR_GROUPS, HR_POINTS, groupOf } =
-    await import("../src/features/giants/lib/model/compare.ts");
-  const ids = HR_POINTS.map((point) => point.id);
-  for (const absent of ["earth", "jupiter", "sgr-a", "ton-618"]) assert.ok(!ids.includes(absent));
-  /* A white dwarf's light follows from its radius and temperature: L = R² (T/T☉)⁴. */
-  const dwarf = HR_POINTS.find((point) => point.id === "sirius-b");
-  const expected = dwarf.radius ** 2 * (dwarf.kelvin / 5772) ** 4;
-  assert.ok(Math.abs(dwarf.light / expected - 1) < 1e-3);
+test("each ladder star falls in the HR band its luminosity class names", async () => {
+  const { groupOf } = await import("../src/features/giants/lib/model/compare.ts");
   assert.equal(groupOf("sun"), "mainSequence");
   assert.equal(groupOf("arcturus"), "giants");
   assert.equal(groupOf("betelgeuse"), "supergiants");
   assert.equal(groupOf("sirius-b"), "whiteDwarfs");
   assert.equal(groupOf("r136a1"), undefined);
-  for (const group of HR_GROUPS)
-    assert.ok(
-      ids.some((id) => groupOf(id) === group),
-      `${group} has a star to label`,
-    );
 });
 
 test("a body flattened by its spin says how much wider its equator is than its poles", () => {
@@ -463,4 +451,89 @@ test("the Sun's and Earth's cards give their figures in SI, and a rotation limit
   /* Betelgeuse's period is known only as P/sin i, an upper limit, printed as its one figure. */
   assert.equal(card("betelgeuse").rotation, "up to 36 years");
   assert.match(card("neutron-star").rotation, /ms$/);
+});
+
+test("a body's badge says what it is, and its spectral type reads second on its card", () => {
+  const t = createTranslator({
+    locale: "en",
+    messages: { giants: featureMessages("giants", "en") },
+    namespace: "giants",
+  });
+  const card = (id) => rungCard(t, { unit: "auto", locale: "en" }, id, (key) => t.has(key));
+  assert.equal(card("sun").badge, "Main-sequence star");
+  assert.equal(card("betelgeuse").badge, "Supergiant");
+  assert.equal(card("sirius-b").badge, "White dwarf");
+  /* The spectral type follows the lead figure; a pulsar, a planet or a horizon has none. */
+  assert.match(card("sirius-b").facts[1].value, /^DA2 · /);
+  for (const id of ["neutron-star", "jupiter", "m87"])
+    assert.ok(!card(id).facts.some((fact) => fact.id === "spectral"), id);
+});
+
+test("a grabbed globe turns under the finger, coasts, then goes home the short way", async () => {
+  const { letGo, poseRests, restPose, settlePose, turnBy } =
+    await import("../src/features/giants/lib/model/grab.ts");
+  const { GRAB_HOLD_S } = await import("../src/features/giants/lib/parameters.ts");
+  const { globe } = globeOf("sun");
+  const radius = 200;
+  /* Dragged a tenth of its radius right, the point facing us moves a tenth of a radius right. */
+  const pose = restPose();
+  turnBy(pose, 20, 0, radius, globe.tilt, 0.016);
+  const facing = (p) =>
+    toView([0, 0, 1], turnAt({ ...globe, twist: p.twist }, 0) - turnAt(globe, 0), globe.tilt)[0];
+  assert.ok(Math.abs(facing(pose) - Math.sin(0.1)) < 1e-9);
+  /* Never past a pole, however far it is dragged. */
+  turnBy(pose, 0, 10 * radius, radius, globe.tilt, 0.016);
+  assert.ok(Math.abs(globe.tilt + pose.pitch - Math.PI / 2) < 1e-9);
+
+  /* Let go at rest: it holds the pose, then heads home. */
+  const left = restPose();
+  turnBy(left, -radius * (2 * Math.PI - 0.1), 0, radius, globe.tilt, 1);
+  letGo(left, false);
+  settlePose(left, GRAB_HOLD_S * 0.9, globe.tilt, false);
+  assert.ok(Math.abs(left.twist) > 6, "held where the hand left it");
+  settlePose(left, GRAB_HOLD_S * 0.2, globe.tilt, false);
+  assert.ok(Math.abs(left.twist) <= 0.1, "a turn of almost 360° goes back the short way");
+  for (let k = 0; k < 600; k++) settlePose(left, 1 / 60, globe.tilt, false);
+  assert.ok(poseRests(left), "home within ten seconds");
+
+  /* Flicked, it keeps turning once let go. */
+  const flicked = restPose();
+  turnBy(flicked, 40, 0, radius, globe.tilt, 0.02);
+  letGo(flicked, true);
+  const before = flicked.twist;
+  settlePose(flicked, 0.1, globe.tilt, false);
+  assert.ok(flicked.twist < before, "it coasts on the way it was flung");
+
+  /* Under reduced motion it neither coasts nor glides: home at once after the hold. */
+  const still = restPose();
+  turnBy(still, 40, 30, radius, globe.tilt, 0.02);
+  letGo(still, true);
+  settlePose(still, GRAB_HOLD_S + 0.01, globe.tilt, true);
+  assert.ok(poseRests(still));
+});
+
+test("the orbits ripple in round the body landed on, and leave before the next body's come", async () => {
+  const { NOBODY, handOver } = await import("../src/features/giants/lib/model/hand-over.ts");
+  const { ringRadius, ringShown } = await import("../src/features/giants/lib/model/orbit-rings.ts");
+  const { ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S } =
+    await import("../src/features/giants/lib/parameters.ts");
+  const step = (fade, wanted, seconds) => {
+    for (let t = 0; t < seconds; t += 1 / 60)
+      fade = handOver(fade, wanted, 1 / 60, ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S);
+    return fade;
+  };
+  const rings = 6;
+  /* Landing on Betelgeuse: the inner rings come first, and all arrive at their true size. */
+  const half = step(NOBODY, 19, ORBIT_FADE_IN_S / 2);
+  assert.ok(ringShown(half.level, 0, rings) > ringShown(half.level, rings - 1, rings));
+  const landed = step(half, 19, ORBIT_FADE_IN_S);
+  for (let k = 0; k < rings; k++) assert.equal(ringShown(landed.level, k, rings), 1);
+  assert.equal(ringRadius(100, 1), 100);
+  assert.ok(ringRadius(100, 0) < 100, "a ring grows into place");
+  /* Flying on to Antares: they fade round Betelgeuse first, outer rings leaving first. */
+  const leaving = step(landed, 18, ORBIT_FADE_OUT_S / 2);
+  assert.equal(leaving.owner, 19);
+  assert.ok(ringShown(leaving.level, rings - 1, rings) < ringShown(leaving.level, 0, rings));
+  const handed = step(leaving, 18, ORBIT_FADE_OUT_S);
+  assert.equal(handed.owner, 18);
 });
