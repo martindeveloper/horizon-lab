@@ -11,7 +11,7 @@ import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
 import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import { parseAudioMap } from "@horizon/toolkit/audio";
-import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
+import type { BenchScene, BenchScript, BenchTarget } from "@horizon/toolkit/bench";
 import { PLANET_IDS, type PlanetId } from "@horizon/toolkit/bodies";
 import { includesId } from "@horizon/toolkit/records";
 
@@ -49,21 +49,43 @@ const DRIFT_TIMED = timedDrift(DRIFT, DRIFT_MAP);
 const DRIFT_LOOP = DRIFT_TIMED.loop;
 
 /**
- * Seconds into the drift of its visit to Mars: from just before the dive to just past landing
- * on the shot it pulls away onto.
+ * Seconds into the drift of its visit to a planet: from just before the dive to just past
+ * landing on the shot it pulls away onto.
  */
-const MARS_VISIT = (() => {
+function visitSpan(id: PlanetId) {
   const { shots, starts } = DRIFT_TIMED;
   const at = shots.findIndex(
-    (shot) => "closeUp" in shot && shot.closeUp.kind === "planet" && shot.closeUp.id === "mars",
+    (shot) => "closeUp" in shot && shot.closeUp.kind === "planet" && shot.closeUp.id === id,
   );
   const onward = shots[at + 1];
-  if (at < 0 || !onward || "closeUp" in onward) throw new Error("the drift pulls away from Mars");
+  if (at < 0 || !onward || "closeUp" in onward) throw new Error(`the drift pulls away from ${id}`);
   const lands = starts[at + 1]! + (onward.flight?.duration ?? DRIFT.camera.flight ?? 20);
   return { start: Math.floor(starts[at]! - 3), end: Math.ceil(lands + 4) };
-})();
-/** Seconds between the visit's keyframes. */
-const MARS_EVERY = 2;
+}
+/** Seconds between a visit's keyframes. */
+const VISIT_EVERY = 2;
+
+/** A drift sequence through its visit to a planet, a keyframe every `VISIT_EVERY` seconds. */
+function visitScript(id: PlanetId): BenchScript {
+  const { start, end } = visitSpan(id);
+  return {
+    frames: end * 10,
+    duration: end,
+    keyframes: Array.from(
+      { length: Math.floor((end - start) / VISIT_EVERY) + 1 },
+      (_, i) => (start + i * VISIT_EVERY) / end,
+    ),
+  };
+}
+
+/** The observatories the drift visits, on to or directly: a drift scene fetches their models first. */
+const DRIFT_CRAFTS = DRIFT.shots.flatMap((shot) =>
+  "closeUp" in shot
+    ? [shot.closeUp, shot.onward?.closeUp].flatMap((body) =>
+        body?.kind === "observatory" ? [body.id] : [],
+      )
+    : [],
+);
 
 /** Frames the mount runs before a close-up scene's first one: the flight in, then its map painted. */
 const CLOSE_UP_PREROLL = 600;
@@ -230,6 +252,16 @@ const SCENES: readonly OrreryBenchScene[] = [
     },
   },
   {
+    id: "drift-earth",
+    description:
+      "The drift into its visit to Earth: the dive, on to Hubble above it with Earth's air kept, and the pull away",
+    tags: ["sequence", "camera", "drift"],
+    bloom: false,
+    lens: false,
+    drift: true,
+    script: visitScript("earth"),
+  },
+  {
     id: "drift-mars",
     description:
       "The drift into its visit to Mars: the dive, the hold and the pull away onto the giants",
@@ -237,14 +269,7 @@ const SCENES: readonly OrreryBenchScene[] = [
     bloom: false,
     lens: false,
     drift: true,
-    script: {
-      frames: MARS_VISIT.end * 10,
-      duration: MARS_VISIT.end,
-      keyframes: Array.from(
-        { length: Math.floor((MARS_VISIT.end - MARS_VISIT.start) / MARS_EVERY) + 1 },
-        (_, i) => (MARS_VISIT.start + i * MARS_EVERY) / MARS_VISIT.end,
-      ),
-    },
+    script: visitScript("mars"),
   },
   {
     id: "sun-activity-zoom",
@@ -339,8 +364,12 @@ export const benchTarget: BenchTarget = {
     if (!scene) throw new Error(`Unknown orrery scene: ${sceneId}`);
     /* A bench sequence draws its frames in one go: an observatory's model is fetched first. */
     const target = scene.closeUp;
-    const craft = target && includesId(OBSERVATORY_IDS, target) ? target : null;
-    if (craft) await fetchSpacecraft(observatoryById(craft).model);
+    const crafts = scene.drift
+      ? DRIFT_CRAFTS
+      : target && includesId(OBSERVATORY_IDS, target)
+        ? [target]
+        : [];
+    await Promise.all(crafts.map((id) => fetchSpacecraft(observatoryById(id).model)));
     const store = useOrrery;
     /* The store outlives a mounted engine: leave an earlier scene's close-up and selection. */
     store.getState().leaveCloseUp(true);

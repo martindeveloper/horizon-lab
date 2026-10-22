@@ -131,8 +131,9 @@ test("streamed maps: bodies wait in their map's mean colour and fade each map in
       assert.equal(looks.step(0.4), false, "faded in");
       assert.equal(mars.fade.value, 1);
 
-      // A close-up's detailed map fades in over the far map and gives it back at once.
+      // A close-up's detailed map fades in over the far map, and fades back out when given back.
       const detail = new Texture();
+      const detailDisposed = disposals(detail);
       looks.hold("mars", detail);
       assert.equal(mars.map.value, detail);
       assert.equal(mars.prior.value, far);
@@ -142,9 +143,22 @@ test("streamed maps: bodies wait in their map's mean colour and fade each map in
       assert.equal(farDisposed.n, 1);
       assert.notEqual(mars.prior.value, far);
       assert.equal(mars.map.value, detail, "the close-up keeps its surface");
-      looks.release("mars");
+      looks.release("mars", detail);
       assert.equal(mars.map.value, newer);
+      assert.equal(mars.prior.value, detail, "the far map fades in over the detailed one");
+      assert.equal(detailDisposed.n, 0, "kept while the fade draws it");
+      assert.equal(looks.step(0.7), false);
       assert.equal(mars.fade.value, 1);
+      assert.equal(detailDisposed.n, 1, "disposed once the fade is done");
+
+      // Given back mid-fade, the detailed map is no longer drawn: disposed at once.
+      const brief = new Texture();
+      const briefDisposed = disposals(brief);
+      looks.hold("mars", brief);
+      looks.release("mars", brief);
+      assert.equal(briefDisposed.n, 1);
+      assert.equal(mars.map.value, newer);
+      looks.step(0.7);
 
       // Released for the memory budget: back to the placeholder, at once.
       const newerDisposed = disposals(newer);

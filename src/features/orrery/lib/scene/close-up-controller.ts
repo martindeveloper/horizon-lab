@@ -28,10 +28,10 @@ import { moonOffset } from "@/space/solar-system/graphics/moons";
 import { FRAME_RADII } from "@/space/solar-system/model/framing";
 /**
  * The close-up: a flight to a body at true size, its detailed map (measured or
- * painted a few rows per frame), the atmosphere shell over a body with air (its own and its
- * moons', drawn in place of the surface shader's haze rim) and a depth pass of its own; or a
- * flight to one of Earth's observatories at its true size, which its own pass draws, Earth
- * below it holding its detailed map in a depth pass of its own.
+ * painted a few rows per frame), the atmosphere shell over a body with air (its own, its moons'
+ * and a moon's planet's, drawn in place of the surface shader's haze rim) and a depth pass of
+ * its own; or a flight to one of Earth's observatories at its true size, which its own pass
+ * draws, Earth below it keeping its detailed map and its air in a depth pass of its own.
  */
 import { observatoryById, type ObservatoryId } from "@/space/solar-system/model/observatories";
 import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
@@ -243,12 +243,17 @@ export function createCloseUpController(
       ? AIR_BODIES.find((id) => looks.surfaceOf(id) === object.material)
       : undefined;
   /**
-   * Puts a shell over every globe with air in the close-up that has none yet: the body's own
-   * at once, a moon's once it is drawn (its material arrives with it). The surface's haze
-   * rim goes off meanwhile, so the air is not counted twice.
+   * Puts a shell over every globe with air in the close-up that has none yet, in its globe's
+   * pass: the body's own and its host's (the Earth below Hubble) at once, a moon's once it is
+   * drawn (its material arrives with it). The surface's haze rim goes off meanwhile, so the
+   * air is not counted twice.
    */
   const shellGlobes = (close: CloseUp) => {
-    for (const object of close.objects) {
+    const globes = [
+      ...close.objects.map((object) => [object, BODY_LAYER] as const),
+      ...close.host.map((object) => [object, HOST_LAYER] as const),
+    ];
+    for (const [object, layer] of globes) {
       const id = airOf(object);
       if (!id || !(object instanceof Mesh) || close.shells.some((s) => s.globe === object))
         continue;
@@ -260,7 +265,7 @@ export function createCloseUpController(
       if (!(cameraAt instanceof Vector3) || !(sunAt instanceof Vector3)) continue;
       const mesh = new Mesh(shellGeometry, material);
       mesh.scale.setScalar(1 + AIR[id]!.shell);
-      mesh.layers.set(BODY_LAYER);
+      mesh.layers.set(layer);
       object.add(mesh);
       const rim = surface.uniforms.atmosStrength;
       close.shells.push({
@@ -310,15 +315,19 @@ export function createCloseUpController(
       Math.min((height - 2 * shift.y) / height, (width - 2 * shift.x) / height)
     );
   };
-  /** Leaves the close-up at once: the body's own map back, detail map freed, normal layers. */
-  const end = (landHome: boolean) => {
+  /**
+   * Leaves the close-up at once: the body's own map fading back over the detailed one, normal
+   * layers; `keepMap` leaves the detailed map held for a close-up that follows on the same globe.
+   */
+  const end = (landHome: boolean, keepMap = false) => {
     if (!close) return;
     unshell(close);
     setLayer(close.objects, 0);
     setLayer(close.host, 0);
-    close.loading?.abort();
-    looks.release(close.globe);
-    close.detail?.dispose();
+    if (!keepMap) {
+      close.loading?.abort();
+      looks.release(close.globe, close.detail);
+    }
     if (landHome) Object.assign(pose, close.home);
     close = null;
     camera.clearViewOffset();
@@ -343,10 +352,15 @@ export function createCloseUpController(
     /* A flight interrupted mid-way hands its motion on; a landed close-up stands still. */
     const velocity = close && close.phase !== "on" ? close.velocity : STILL;
     const flightStyle = style();
-    end(false);
+    const globe = globeOf(sel);
+    /* On over the same globe (Earth, then Hubble above it), its detailed map stays as it is. */
+    const map =
+      close?.globe === globe
+        ? { job: close.job, loading: close.loading, detail: close.detail }
+        : null;
+    end(false, map !== null);
     room = carded() ? 1 : 0;
     const id = subjectOf(sel);
-    const globe = globeOf(sel);
     const { radius, frame } = sizeOf(sel);
     locate(sel, target);
     const to = closeUpPose([target.x, target.y, target.z], frame, freeHalfTan(), pose.azimuth);
@@ -374,9 +388,9 @@ export function createCloseUpController(
       objects,
       host,
       /* Measured bodies fetch a detailed map; painted ones paint one during the flight. */
-      job: MAPS[globe] ? null : detailJob(globe),
-      loading: null,
-      detail: null,
+      job: map ? map.job : MAPS[globe] ? null : detailJob(globe),
+      loading: map?.loading ?? null,
+      detail: map?.detail ?? null,
       blend: fromBlend,
       fromBlend,
       style: flightStyle,
@@ -387,11 +401,12 @@ export function createCloseUpController(
       shells: [],
     };
     shellGlobes(close);
-    const near = nearFile(globe);
+    const near = map ? null : nearFile(globe);
     if (near) {
-      const mine = close;
       const abort = new AbortController();
-      mine.loading = abort;
+      close.loading = abort;
+      /* The close-up holding this load now: the one that started it, or one on the same globe after it. */
+      const mine = () => (close?.loading === abort ? close : null);
       bytesOf(near)
         .then((blob) => {
           abort.signal.throwIfAborted();
@@ -399,21 +414,23 @@ export function createCloseUpController(
         })
         .then(
           (texture) => {
-            if (close !== mine) {
+            const holder = mine();
+            if (!holder) {
               texture.dispose();
               return;
             }
-            mine.loading = null;
-            mine.detail = texture;
+            holder.loading = null;
+            holder.detail = texture;
             upload(texture);
             looks.hold(globe, texture);
             invalidate();
           },
           () => {
             /* Offline or missing: paint the detailed map instead. */
-            if (close !== mine || abort.signal.aborted) return;
-            mine.loading = null;
-            mine.job = detailJob(globe);
+            const holder = mine();
+            if (!holder || abort.signal.aborted) return;
+            holder.loading = null;
+            holder.job = detailJob(globe);
             invalidate();
           },
         );
@@ -651,6 +668,7 @@ export function createCloseUpController(
         renderer.clearDepth();
         renderer.render(scene, camera);
       };
+      aimShells(close);
       const planet = close.host[0];
       if (planet) {
         const beyond = deps.hostReach?.(close.sel) ?? 0;
@@ -660,7 +678,6 @@ export function createCloseUpController(
           Math.max(planet.scale.x * 3, beyond * 1.02),
         );
       }
-      aimShells(close);
       const globe = close.objects[0];
       if (globe) {
         const moons = deps.reachOf(close.globe);

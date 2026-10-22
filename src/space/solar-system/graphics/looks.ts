@@ -21,7 +21,7 @@ import {
   Vector2,
   Vector3,
   Vector4,
-  type Texture,
+  Texture,
 } from "three";
 
 import {
@@ -608,10 +608,19 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
   const fading = new Set<ShaderMaterial>();
   /** Bodies whose surface a close-up has taken over; their own map waits until it gives it back. */
   const held = new Set<BodyId>();
+  /** Detailed maps a close-up gave back that a fade still draws from: disposed as it ends. */
+  const outgoing = new Set<Texture>();
+  const drawnFrom = (texture: Texture) =>
+    [...fading].some((material) => material.uniforms.prior!.value === texture);
   const finish = (material: ShaderMaterial) => {
+    const prior: unknown = material.uniforms.prior!.value;
     material.uniforms.fade!.value = 1;
     material.uniforms.prior!.value = WHITE;
     fading.delete(material);
+    if (prior instanceof Texture && outgoing.has(prior) && !drawnFrom(prior)) {
+      outgoing.delete(prior);
+      prior.dispose();
+    }
   };
   /**
    * Puts `face` on a body, fading over what it showed unless `atOnce`; a change mid-fade
@@ -695,10 +704,16 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
       held.add(id);
       show(id, { texture, tint: NO_TINT });
     },
-    /** The close-up gives the surface back: the body's own face returns at once. */
-    release(id: BodyId) {
+    /**
+     * The close-up gives the surface back: the body's own face fades in over its detailed map
+     * (`detail`, disposed once the fade no longer draws it).
+     */
+    release(id: BodyId, detail: Texture | null) {
       held.delete(id);
-      show(id, faceOf(id), true);
+      show(id, faceOf(id));
+      if (!detail) return;
+      if (drawnFrom(detail)) outgoing.add(detail);
+      else detail.dispose();
     },
     /**
      * With `paintWhenSeen`: paints the maps of waiting bodies drawn this frame (`seen`, the level
@@ -759,6 +774,7 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
       for (const tex of textures) tex.dispose();
       for (const tex of Object.values(painted)) tex.dispose();
       for (const tex of Object.values(measured)) tex.dispose();
+      for (const tex of outgoing) tex.dispose();
       for (const mat of Object.values(moons)) mat.dispose();
       for (const mat of Object.values(airs)) mat.dispose();
       for (const mat of Object.values(materials)) {
