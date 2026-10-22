@@ -62,7 +62,7 @@ export type FactValue<S extends string = string> = FactBase<S> & { value: number
 export type FactSpan<S extends string = string> = FactBase<S> & { range: Range; value?: never };
 
 /** Significant figures a literal is written with: 1,500 → 2, 4.57 → 3, 100 → 1. */
-function significantOf(...values: number[]) {
+export function significantOf(...values: number[]) {
   return Math.max(
     ...values.map((v) =>
       v === 0
@@ -73,7 +73,7 @@ function significantOf(...values: number[]) {
 }
 
 /** A plain figure in the unit the message words (`show`), as a number. */
-function shown(fact: FactBase, v: number) {
+export function shown(fact: FactBase, v: number) {
   const { unit, show } = fact;
   return show && unit !== "count" && unit !== "percent" && unit !== "ratio"
     ? convert(v, unit, show)
@@ -126,45 +126,4 @@ export function printFactSpan(fact: FactBase & { range: Range }, format: Distanc
     });
   const ends = [shown(fact, low), shown(fact, high)];
   return plain(format, ends, fact.digits ?? significantOf(low, high), fact.digits !== undefined);
-}
-
-/**
- * A figure as prose quotes it: a number, or a span, in the unit the sentence names (`show`,
- * lengths included), with the significant figures it is written with.
- */
-export function quoteFact(locale: string, fact: FactBase & { value?: number; range?: Range }) {
-  return joinSpan(quotedEnds(locale, fact));
-}
-
-/** A quoted figure's printed ends: its value, or its span's two. */
-function quotedEnds(locale: string, fact: FactBase & { value?: number; range?: Range }) {
-  const ends = fact.value !== undefined ? [fact.value] : fact.range ? [...fact.range] : [];
-  const digits = fact.digits ?? significantOf(...ends);
-  const fixed = fact.digits !== undefined;
-  return ends.map((v) => formatSignificant(shown(fact, v), locale, digits, fixed));
-}
-
-const pluralRules = new Map<string, Intl.PluralRules>();
-
-/**
- * The plural category (CLDR: one, few, many, other…) of a quoted figure as printed, for the
- * word after it: "10,8 miliardy" is many in Czech, "18 miliard" other. A span agrees with its
- * last number, and visible decimals count ("4,0" is not "4").
- */
-export function quotePlural(locale: string, fact: FactBase & { value?: number; range?: Range }) {
-  const printed = quotedEnds(locale, fact).at(-1) ?? "0";
-  const decimal = new Intl.NumberFormat(locale).formatToParts(1.1).find((p) => p.type === "decimal");
-  const [whole = "0", fraction = ""] = printed.split(decimal?.value ?? ".");
-  const decimals = fraction.replace(/\D/g, "").length;
-  const key = `${locale}|${decimals}`;
-  let rules = pluralRules.get(key);
-  if (!rules) {
-    rules = new Intl.PluralRules(locale, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-    pluralRules.set(key, rules);
-  }
-  const value = Number(`${whole.replace(/\D/g, "") || "0"}.${fraction.replace(/\D/g, "") || "0"}`);
-  return rules.select(value);
 }

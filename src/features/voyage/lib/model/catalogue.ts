@@ -3,7 +3,7 @@
  * messages use: the shared catalogues' (`@/space`), and what follows from them for the ship.
  * They print as numbers in the unit the prose names: "{ioPeriodHours} hours".
  */
-import { factsOf, type Fact } from "@/lib/facts";
+import { factsOf, proseFacts, quoteAs, type ProseFigure } from "@/lib/facts";
 import { STARS } from "@/space/galaxy/model/catalogue/stars";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import { jplElements } from "@horizon/toolkit/bodies";
@@ -44,9 +44,9 @@ export const PROSE_FIGURES = {
     status: "derived",
     note: "the inverse square at Mars's mean distance",
   },
-  ioPeriodHours: { ...SOLAR_CATALOGUE.moons.io.period, show: "h", digits: 2 },
+  ioPeriodHours: quoteAs(SOLAR_CATALOGUE.moons.io.period, { in: "h", digits: 2 }),
   abSeparationAu: ALPHA_CEN.abSeparation,
-  abPeriodYears: { ...ALPHA_CEN.abPeriod, digits: 2 },
+  abPeriodYears: quoteAs(ALPHA_CEN.abPeriod, { digits: 2 }),
   voyagerYears: {
     value:
       coastTrip(convertFigure(ALPHA_CEN.distance.value, ALPHA_CEN.distance.unit, "km"), voyagerKms)
@@ -57,7 +57,7 @@ export const PROSE_FIGURES = {
     status: "derived",
     note: "α Centauri's distance at Voyager's speed",
   },
-} satisfies Record<string, Fact>;
+} satisfies Record<string, ProseFigure>;
 
 /** Every figure, for tests. */
-export const catalogueFacts = () => factsOf({ voyage: { prose: PROSE_FIGURES } });
+export const catalogueFacts = () => factsOf({ voyage: { prose: proseFacts(PROSE_FIGURES) } });

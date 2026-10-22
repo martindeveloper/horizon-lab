@@ -118,7 +118,7 @@ export function Sightline() {
           <span className="deep-field-photon absolute top-1/2 size-1 -translate-y-1/2 rounded-full bg-solar" />
         </div>
         <p className="mt-2 font-display text-base font-medium tracking-tight text-space-fg tabular-nums md:text-lg short:mt-0.5 short:text-sm">
-          {t("hud.lightLeftAgo", { ago: formatAgo(t, f, line.years) })}
+          {t("hud.lightLeftAgo", { ago: formatAgo(t, f, line.years, locale) })}
         </p>
         {/* Phones wrap these rather than cut them; the era keeps two lines so the ladder above
             never jumps while it is dragged through the ages. */}

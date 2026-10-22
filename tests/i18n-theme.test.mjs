@@ -197,7 +197,7 @@ test("localized preset links, aliases, and initial scene state agree", () => {
 test("every Czech plural choice has its other form and reads in every category", async () => {
   const { createTranslator } = await import("next-intl");
   const { featureMessages, leaves } = await import("./messages-helper.mjs");
-  for (const feature of ["orrery", "deep-field", "voyage", "black-hole"]) {
+  for (const feature of ["orrery", "deep-field", "voyage", "giants", "black-hole"]) {
     const messages = featureMessages(feature, "cs");
     const t = createTranslator({
       locale: "cs",

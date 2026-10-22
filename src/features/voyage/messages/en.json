@@ -126,7 +126,7 @@
     "minutesSeconds": "{minutes} min {seconds} s",
     "hoursMinutes": "{hours} h {minutes} min",
     "daysHours": "{days} d {hours} h",
-    "years": "{value} years"
+    "years": "{value} {valuePlural, select, one {year} other {years}}"
   },
   "units": {
     "kmValue": "{value} km",

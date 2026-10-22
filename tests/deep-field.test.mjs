@@ -310,9 +310,18 @@ test("technical notes and light-travel times format in both languages", () => {
         assert.doesNotMatch(t(key, args), /[{}]|NaN|undefined/, `${locale}:${key}`);
     const f = createFormatter({ locale });
     for (const years of [1.6e-5, 7.9e-4, 0.05, 4.2465, 27_000, 2.5e6, 13.8e9])
-      assert.doesNotMatch(formatAgo(t, f, years), /[{}]|NaN/, `${locale}:${years}`);
+      assert.doesNotMatch(formatAgo(t, f, years, locale), /[{}]|NaN/, `${locale}:${years}`);
   }
-  const en = (years) => formatAgo(translator("en"), createFormatter({ locale: "en" }), years);
+  const ago = (locale) => (years) =>
+    formatAgo(translator(locale), createFormatter({ locale }), years, locale);
+  const en = ago("en");
+  /* The unit's word agrees with the number as printed, in both languages. */
+  const cs = ago("cs");
+  assert.equal(en(1), "1 year ago");
+  assert.equal(cs(1), "před 1 rokem");
+  assert.equal(cs(3), "před 3 lety");
+  assert.equal(cs(1.5), "před 1,5 roku");
+  assert.equal(cs(convert(1, "min", "yr")), "před 1 minutou");
   /* Light from the Sun to Earth, Jupiter at opposition, Proxima, Andromeda. */
   assert.equal(en(convert(8.3, "min", "yr")), "8.3 minutes ago");
   assert.equal(en(convert(4.3, "au", "ly")), "35.8 minutes ago");

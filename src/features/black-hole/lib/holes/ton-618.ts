@@ -16,8 +16,7 @@
 import { BLACK_HOLES } from "@/space/stellar";
 import { formatSignificant, measure, schwarzschildRadius } from "@horizon/toolkit/science";
 
-import { figureArgs } from "../figures";
-import { quoteSpan } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 const TON_618 = BLACK_HOLES["ton-618"];
@@ -78,7 +77,7 @@ export const ton618: HoleSpec = {
         { kind: "shadow", assumed: true },
         { kind: "ruler", length: 10 },
       ],
-      eq: `M = f R v² / G ≈ ${quoteSpan(TON_618.mass)}`,
+      eq: `M = f R v² / G ≈ ${inLine(TON_618.mass, { span: true, digits: 2 })}`,
     },
     {
       phase: "hold",

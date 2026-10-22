@@ -145,7 +145,7 @@
       "s": "{value} s",
       "min": "{value} min",
       "h": "{value} h",
-      "d": "{value} dní"
+      "d": "{value} {valuePlural, select, one {den} few {dny} many {dne} other {dní}}"
     },
     "bulge": "o {value} % širší než od pólu k pólu",
     "gravity": "{value} m/s² ({earths} × zemská)",
@@ -153,14 +153,14 @@
     "period": {
       "ms": "{value} ms",
       "h": "{value} h",
-      "d": "{value} dne",
-      "yr": "{value} let"
+      "d": "{value} {valuePlural, select, one {den} few {dny} many {dne} other {dní}}",
+      "yr": "{value} {valuePlural, select, one {rok} few {roky} many {roku} other {let}}"
     },
     "periodUpTo": {
       "ms": "nejvýš {value} ms",
       "h": "nejvýš {value} h",
-      "d": "nejvýš {value} dne",
-      "yr": "nejvýš {value} let"
+      "d": "nejvýš {value} {valuePlural, select, one {den} few {dny} many {dne} other {dní}}",
+      "yr": "nejvýš {value} {valuePlural, select, one {rok} few {roky} many {roku} other {let}}"
     },
     "gravityWeaker": "{value} m/s² ({earths} × slabší než zemská)",
     "gravityAlone": "{value} m/s²"

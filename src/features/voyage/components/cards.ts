@@ -115,7 +115,7 @@ function farCard(
     facts.push(...rows, {
       id: "lightAge",
       label: t("facts.lightAge"),
-      value: formatDuration(t, f, lookbackYears(range) * JULIAN_YEAR_SECONDS),
+      value: formatDuration(t, f, lookbackYears(range) * JULIAN_YEAR_SECONDS, d.locale),
     });
   }
   const note = `cards.far.${sel.id}`;

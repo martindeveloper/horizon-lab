@@ -26,6 +26,9 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
 - Use next-themes for theme state. Dark is the default; light mode changes UI
   materials while `bg-space`/`text-space-fg` preserve the dark astronomical scene.
 - Run `npm test` for translation, routing, and contrast checks as well.
+- Messages stay untyped for next-intl: shared components take a lab's namespace, which typed
+  keys cannot represent. Guard placeholders with strict render tests (`onError` throws) over
+  every message that quotes figures, in both languages.
 
 - Keep the standard `next build`; prerender known locales and presets at build time.
 - Do not add request-time proxy, dynamic fallback routes, or server-only caching.
@@ -44,10 +47,11 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
 - Catalogue a number when more than one lab uses it, code computes with it, it is a
   revisable measurement, or it derives from other figures. A one-off literature number
   used once may stay in the copy; do not catalogue formulas, years or vague phrases.
-- Copy quotes catalogued figures as placeholders (`proseArgs`), never typed digits, and
-  names of catalogued bodies come from the shared `names.<id>`. A Czech word whose form
-  depends on the number takes `{<name>Plural, select, one {…} few {…} many {…} other {…}}`
-  in its sentence's case.
+- Copy quotes catalogued figures as placeholders (`proseArgs`, `quoteAs` for how a sentence
+  prints one), never typed digits; print catalogue figures through `formatFigure`, not a local
+  formatter. Names of catalogued bodies come from the shared `names.<id>`. A word whose form
+  depends on a number takes `{<name>Plural, select, one {…} few {…} many {…} other {…}}` in its
+  sentence's case; live readouts pass the same category (`pluralOf`).
 - The catalogue must not mount WebGL or load simulation-specific message packs.
 - Keep catalogue pages scrollable; size simulation stages beneath the common header.
 

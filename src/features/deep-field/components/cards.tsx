@@ -1,8 +1,9 @@
 import {
   buildCard,
-  figure,
   formatAu,
+  printAll,
   staticCard,
+  v,
   type Card,
   type DistanceSettings,
   type Format,
@@ -43,10 +44,10 @@ function starCard(t: Translate, d: DistanceSettings, sel: Of<Selection, "star">)
       {
         id: "closest",
         label: t("facts.closest"),
-        value: t(closestApproach(star).yearsAgo > 0 ? "facts.closestPast" : "facts.closestFuture", {
-          distance: figure(t, d, c.approach),
-          years: figure(t, d, c.approachWhen),
-        }),
+        value: t(
+          closestApproach(star).yearsAgo > 0 ? "facts.closestPast" : "facts.closestFuture",
+          printAll(t, d, { distance: v(c.approach), years: v(c.approachWhen) }),
+        ),
       },
     ],
     body: t(`cards.stars.${sel.id}.body`, built.body),

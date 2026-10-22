@@ -4,8 +4,17 @@
  * Andromeda's, and what follows from them through the science kit's laws (horizon sizes, the
  * M = 10 ruler, how M87* compares with Sgr A*). Plain figures print in the unit the sentence
  * names; the atlas's catalogue lines print with their unit, scientific where the lab always has.
+ * The guide's equation lines are English throughout (`inLine`).
  */
-import { factsOf, inPowerOfTen, proseArgs, type Fact, type Span, type Value } from "@/lib/facts";
+import {
+  factsOf,
+  proseArgs,
+  proseFacts,
+  quoteAs,
+  type Fact,
+  type ProseFigure,
+  type Value,
+} from "@/lib/facts";
 import { COSMOS } from "@/space/cosmos/model/catalogue";
 import { BLACK_HOLES, NAMED_STARS } from "@/space/stellar";
 import {
@@ -14,15 +23,16 @@ import {
   convert,
   convertFigure,
   cosmicAgeAtRedshiftGyr,
+  formatFigure,
   lookbackTimeGyr,
   SHADOW_PER_RS,
   SPEED_OF_LIGHT_KM_S,
   measure,
   schwarzschildRadius,
+  type FigureOptions,
 } from "@horizon/toolkit/science";
 
 import { OBSERVATORY as OBS } from "./catalogue";
-import { quote, quoteError, quoteSpan } from "./quote";
 
 const SGR = BLACK_HOLES["sgr-a"];
 const M87 = BLACK_HOLES.m87;
@@ -52,12 +62,7 @@ const derived = (value: number, unit: Value["unit"], digits: number, ...from: Fa
 });
 
 const kpc = (fact: Value) => convertFigure(fact.value, fact.unit, "kpc");
-/** A figure's published span alone, for prose that quotes the whole spread. */
-const spanOf = ({ value, range, ...rest }: Value): Span => ({
-  ...rest,
-  range: range ?? [value, value],
-});
-const [TON_LOW, TON_HIGH] = spanOf(TON.mass).range;
+const [TON_LOW, TON_HIGH] = TON.mass.range ?? [TON.mass.value, TON.mass.value];
 const ANDROMEDA = COSMOS.andromeda.distance;
 /** TON 618's redshift, and what Planck 2018's universe makes of it. */
 const TON_Z = TON.redshift.value;
@@ -85,8 +90,8 @@ const percentOfLight = (kms: number, digits: number, from: Fact) =>
   derived((100 * kms) / SPEED_OF_LIGHT_KM_S, "percent", digits, from);
 /** A distance in kpc and ly as the atlas prints it. */
 const kpcAndLy = (fact: Fact, kpcDigits: number, lyDigits: number) => ({
-  kpc: { ...fact, show: "kpc" as const, digits: kpcDigits },
-  ly: { ...fact, show: "ly" as const, digits: lyDigits },
+  kpc: quoteAs(fact, { in: "kpc", digits: kpcDigits }),
+  ly: quoteAs(fact, { in: "ly", digits: lyDigits }),
 });
 const GRS = kpcAndLy(OBS.grs1915.distance, 2, 2);
 const SS433 = kpcAndLy(OBS.ss433.distance, 2, 2);
@@ -108,13 +113,13 @@ const GW150914_ISCO_HZ =
 
 export const PROSE_FIGURES = {
   sgrKpc: SGR.distance,
-  sgrKpcShort: { ...SGR.distance, digits: 3 },
-  sgrLy: { ...SGR.distance, show: "ly", digits: 2 },
-  sgrMassMillions: inPowerOfTen(SGR.mass, 6, 2),
+  sgrKpcShort: quoteAs(SGR.distance, { digits: 3 }),
+  sgrLy: quoteAs(SGR.distance, { in: "ly", digits: 2 }),
+  sgrMassMillions: quoteAs(SGR.mass, { perPower: 6, digits: 2 }),
   m87Mpc: M87.distance,
-  m87Mly: { ...M87.distance, show: "Mly", digits: 3 },
-  m87MlyRound: { ...M87.distance, show: "Mly", digits: 2 },
-  m87MassBillions: inPowerOfTen(M87.mass, 9, 2),
+  m87Mly: quoteAs(M87.distance, { in: "Mly", digits: 3 }),
+  m87MlyRound: quoteAs(M87.distance, { in: "Mly", digits: 2 }),
+  m87MassBillions: quoteAs(M87.mass, { perPower: 9, digits: 2 }),
   m87FartherThanSgr: derived(
     kpc(M87.distance) / kpc(SGR.distance),
     "ratio",
@@ -133,9 +138,9 @@ export const PROSE_FIGURES = {
   m87HorizonBillionKm: derived((2 * horizonKm(M87.mass.value)) / 1e9, "count", 2, M87.mass),
   m87HorizonAu: derived(auOf(2 * horizonKm(M87.mass.value)), "au", 2, M87.mass),
   cygKpc: CYG.distance,
-  cygLy: { ...CYG.distance, show: "ly", digits: 3 },
+  cygLy: quoteAs(CYG.distance, { in: "ly", digits: 3 }),
   cygMass: CYG.mass,
-  cygMassRound: { ...CYG.mass, digits: 2 },
+  cygMassRound: quoteAs(CYG.mass, { digits: 2 }),
   cygLighterThanSgr: derived(SGR.mass.value / CYG.mass.value, "ratio", 1, SGR.mass, CYG.mass),
   cygRulerKm: derived(RULER_M * gravitationalKm(CYG.mass.value), "km", 2, CYG.mass),
   sgrRulerMillionKm: derived(
@@ -145,16 +150,16 @@ export const PROSE_FIGURES = {
     SGR.mass,
   ),
   gaiaMass: GAIA.mass,
-  gaiaMassRound: { ...GAIA.mass, digits: 2 },
-  gaiaKpc: { ...GAIA.distance, show: "kpc", digits: 3 },
-  gaiaLy: { ...GAIA.distance, show: "ly", digits: 3 },
-  gaiaLyRound: { ...GAIA.distance, show: "ly", digits: 2 },
+  gaiaMassRound: quoteAs(GAIA.mass, { digits: 2 }),
+  gaiaKpc: quoteAs(GAIA.distance, { in: "kpc", digits: 3 }),
+  gaiaLy: quoteAs(GAIA.distance, { in: "ly", digits: 3 }),
+  gaiaLyRound: quoteAs(GAIA.distance, { in: "ly", digits: 2 }),
   gaiaHorizonKm: derived(horizonKm(GAIA.mass.value), "km", 2, GAIA.mass),
   gaiaHorizonAcrossKm: derived(2 * horizonKm(GAIA.mass.value), "km", 2, GAIA.mass),
   omegaKpc: OMEGA.distance,
-  omegaLy: { ...OMEGA.distance, show: "ly", digits: 3 },
+  omegaLy: quoteAs(OMEGA.distance, { in: "ly", digits: 3 }),
   omegaMass: OMEGA.mass,
-  tonMassBillions: inPowerOfTen(spanOf(TON.mass), 9, 1),
+  tonMassBillions: quoteAs(TON.mass, { span: true, perPower: 9, digits: 1 }),
   tonHorizonAu: {
     range: [auOf(horizonKm(TON_LOW)), auOf(horizonKm(TON_HIGH))],
     unit: "au",
@@ -163,7 +168,7 @@ export const PROSE_FIGURES = {
     status: "derived",
   },
   gwMass: GW.mass,
-  gwMassRound: { ...GW.mass, digits: 2 },
+  gwMassRound: quoteAs(GW.mass, { digits: 2 }),
   gwHorizonKm: derived(horizonKm(GW.mass.value), "km", 2, GW.mass),
   gwGpc: GW.distance,
   gwSpin: GW.spin,
@@ -175,7 +180,7 @@ export const PROSE_FIGURES = {
     GW.mass,
     GW.spin,
   ),
-  s2Years: { ...SGR.companionPeriod, digits: 2 },
+  s2Years: quoteAs(SGR.companionPeriod, { digits: 2 }),
   s2PeriodYears: SGR.companionPeriod,
   s2PericentreAu: SGR.companionPericentre,
   s2PericentreRs: derived(
@@ -190,9 +195,9 @@ export const PROSE_FIGURES = {
   gwPrimaryMass: GW.primaryMass,
   gwSecondaryMass: GW.secondaryMass,
   cygWindMass: CYG.massOtherModels,
-  cygWindLowest: { ...CYG.massOtherModels, value: CYG.massOtherModels.range[0], digits: 2 },
+  cygWindLowest: derived(CYG.massOtherModels.range[0], "Msun", 2, CYG.massOtherModels),
   tonRedshift: TON.redshift,
-  tonRedshiftShort: { ...TON.redshift, digits: 3 },
+  tonRedshiftShort: quoteAs(TON.redshift, { digits: 3 }),
   tonLightGyr: cosmology(lookbackTimeGyr(TON_Z, PLANCK_2018), "Gyr", 3),
   tonComovingBillionLy: cosmology(
     convert(comovingDistanceMpc(TON_Z, PLANCK_2018), "Mpc", "ly") / 1e9,
@@ -201,11 +206,11 @@ export const PROSE_FIGURES = {
   ),
   tonUniverseThenGyr: cosmology(cosmicAgeAtRedshiftGyr(TON_Z, PLANCK_2018), "Gyr", 1),
   universeGyr: COSMOS.universe.age,
-  andromedaKpc: { ...ANDROMEDA, show: "kpc", digits: 3 },
-  andromedaMly: { ...ANDROMEDA, digits: 2 },
+  andromedaKpc: quoteAs(ANDROMEDA, { in: "kpc", digits: 3 }),
+  andromedaMly: quoteAs(ANDROMEDA, { digits: 2 }),
   lmcKpc: LMC,
-  lmcLy: { ...LMC, show: "ly", digits: 3 },
-  sgrRing: { ...OBS.sgrA.ring, digits: 2 },
+  lmcLy: quoteAs(LMC, { in: "ly", digits: 3 }),
+  sgrRing: quoteAs(OBS.sgrA.ring, { digits: 2 }),
   sgrRingPrecise: OBS.sgrA.ring,
   sgrShadowUas: shadowUas(SGR.mass, SGR.distance),
   s2SpeedPercent: percentOfLight(OBS.s2.pericentreSpeed.value, 2, OBS.s2.pericentreSpeed),
@@ -213,18 +218,18 @@ export const PROSE_FIGURES = {
   s301SpeedPercent: percentOfLight(OBS.s301.pericentreSpeed.range[0], 1, OBS.s301.pericentreSpeed),
   m87JetDeg: OBS.m87.jetAngle,
   m87Ring: OBS.m87.ring,
-  m87RingRound: { ...OBS.m87.ring, digits: 2 },
+  m87RingRound: quoteAs(OBS.m87.ring, { digits: 2 }),
   m87ShadowUas: shadowUas(M87.mass, M87.distance),
-  gaiaEccentricity: { ...OBS.gaiaBh3.eccentricity, digits: 2 },
+  gaiaEccentricity: quoteAs(OBS.gaiaBh3.eccentricity, { digits: 2 }),
   gaiaSeparationAu: OBS.gaiaBh3.separation,
-  omegaTrackedMillions: inPowerOfTen(OBS.omegaCen.trackedStars, 6, 2),
+  omegaTrackedMillions: quoteAs(OBS.omegaCen.trackedStars, { perPower: 6, digits: 2 }),
   omegaImages: OBS.omegaCen.images,
   omegaFastestKms: OBS.omegaCen.fastestStar,
   omegaEscapeKms: OBS.omegaCen.escapeSpeed,
   omegaModelMass: OBS.omegaCen.modelMass,
   omegaLimitAgainst: OBS.omegaCen.massLimitAgainst,
   tonLineKms: OBS.ton618.lineWidth,
-  tonLimitBillions: inPowerOfTen(OBS.ton618.thinDiskLimit, 9, 2),
+  tonLimitBillions: quoteAs(OBS.ton618.thinDiskLimit, { perPower: 9, digits: 2 }),
   gwFrequenciesHz: OBS.gw231123.frequencies,
   gwDurationS: OBS.gw231123.duration,
   gwSkyDeg2: OBS.gw231123.skyArea,
@@ -235,7 +240,7 @@ export const PROSE_FIGURES = {
   gwGapMsun: OBS.gw231123.pairInstabilityGap,
   gw150914Primary: OBS.gw150914.primaryMass,
   gw150914Secondary: OBS.gw150914.secondaryMass,
-  gw150914BillionLy: inPowerOfTen(OBS.gw150914.distance, 9, 2),
+  gw150914BillionLy: quoteAs(OBS.gw150914.distance, { perPower: 9, digits: 2 }),
   gw150914Radiated: OBS.gw150914.radiated,
   gw150914IscoHz: derived(GW150914_ISCO_HZ, "Hz", 1, OBS.gw150914.primaryMass),
   /* The same frequency for one solar mass, kHz: c³ / (6^{3/2} π G M☉). */
@@ -245,7 +250,7 @@ export const PROSE_FIGURES = {
     2,
     OBS.gw150914.primaryMass,
   ),
-  m87Ring2019Round: { ...OBS.m87.ring2019, digits: 2 },
+  m87Ring2019Round: quoteAs(OBS.m87.ring2019, { digits: 2 }),
   grsKpc: GRS.kpc,
   grsLy: GRS.ly,
   grsMass: OBS.grs1915.mass,
@@ -264,29 +269,31 @@ export const PROSE_FIGURES = {
   wd1Ly: WD1.ly,
   wd1Mass: OBS.westerlund1.mass,
   lmcX1Mass: OBS.lmc.x1Mass,
-} satisfies Record<string, Fact>;
+  /* The atlas's catalogue lines: with their unit, scientific or with their error. */
+  sgrMassSci: quoteAs(SGR.mass, { style: "scientific", withUnit: true }),
+  m87MassSci: quoteAs(M87.mass, { style: "scientific", withUnit: true }),
+  cygMassError: quoteAs(CYG.mass, { style: "error", withUnit: true }),
+  gaiaMassError: quoteAs(GAIA.mass, { style: "error", withUnit: true }),
+  tonMassSci: quoteAs(TON.mass, { style: "scientific", span: true, digits: 2, withUnit: true }),
+  m87RingError: quoteAs(OBS.m87.ring, { style: "error", withUnit: true }),
+  m87Ring2019Error: quoteAs(OBS.m87.ring2019, { style: "error" }),
+  omegaClusterSci: quoteAs(OBS.omegaCen.clusterMass, {
+    style: "scientific",
+    digits: 1,
+    withUnit: true,
+  }),
+  m31HoleSci: quoteAs(OBS.m31.holeMass, { style: "scientific", withUnit: true }),
+} satisfies Record<string, ProseFigure>;
 
-/** The atlas's catalogue lines: figures with their unit, scientific or with their error. */
-const quoted = (locale: string) => ({
-  sgrMassSci: quote(SGR.mass, locale),
-  m87MassSci: quote(M87.mass, locale),
-  cygMassError: quoteError(CYG.mass, locale),
-  gaiaMassError: quoteError(GAIA.mass, locale),
-  tonMassSci: quoteSpan(TON.mass, locale),
-  m87RingError: quoteError(OBS.m87.ring, locale),
-  m87Ring2019Error: quoteError(OBS.m87.ring2019, locale, false),
-  omegaClusterSci: quote({ ...OBS.omegaCen.clusterMass, digits: 1 }, locale),
-  m31HoleSci: quote(OBS.m31.holeMass, locale),
-});
+/** Every placeholder's text in a language, and its plural category, for `t()`. */
+export const figureArgs = (locale: string) => proseArgs(PROSE_FIGURES, locale);
 
-const cache = new Map<string, Record<string, string>>();
-
-/** Every placeholder's text in a language, for `t()`. */
-export function figureArgs(locale: string) {
-  let args = cache.get(locale);
-  if (!args) cache.set(locale, (args = { ...proseArgs(PROSE_FIGURES, locale), ...quoted(locale) }));
-  return args;
-}
+/**
+ * A figure as the guide's equation lines print it: English, with its unit, scientific from
+ * 10⁵ ("4.297 × 10⁶ M☉"), and with any other way of printing it (`FigureOptions`).
+ */
+export const inLine = (fact: Fact, as: FigureOptions = {}) =>
+  formatFigure("en", fact, { style: "scientific", withUnit: true, ...as }).text;
 
 /** Every figure, for tests. */
-export const catalogueFacts = () => factsOf({ blackHole: { prose: PROSE_FIGURES } });
+export const catalogueFacts = () => factsOf({ blackHole: { prose: proseFacts(PROSE_FIGURES) } });

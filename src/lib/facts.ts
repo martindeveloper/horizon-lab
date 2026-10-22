@@ -12,12 +12,13 @@ import {
   lightTime,
   printFact,
   printFactSpan,
-  quoteFact,
-  quotePlural,
+  formatFigure,
+  pluralOf,
   type DistanceChoice,
   type DistanceFormat,
   type FactSpan,
   type FactValue,
+  type FigureOptions,
   type Range,
 } from "@horizon/toolkit/science";
 
@@ -198,9 +199,20 @@ export function print(t: Translate, d: DistanceSettings, ref: Ref) {
   return ref.kind === "value" ? figure(t, d, ref.fact) : span(t, d, ref.fact);
 }
 
-/** Every referenced figure, printed, as `t()` arguments. */
+/**
+ * Every referenced figure, printed, as `t()` arguments, each with its plural category as
+ * printed (`<name>Plural`) for a word that agrees with it.
+ */
 export function printAll(t: Translate, d: DistanceSettings, args: Args = {}) {
-  return Object.fromEntries(Object.entries(args).map(([name, ref]) => [name, print(t, d, ref)]));
+  return Object.fromEntries(
+    Object.entries(args).flatMap(([name, ref]) => {
+      const text = print(t, d, ref);
+      return [
+        [name, text],
+        [`${name}Plural`, pluralOf(d.locale, text)],
+      ];
+    }),
+  );
 }
 
 /** A spec's rows, and its body and caution arguments, printed. */
@@ -225,24 +237,22 @@ export function staticCard(t: Translate, d: DistanceSettings, key: string, spec:
   };
 }
 
+/** A figure as one sentence quotes it: a catalogue fact and how that sentence prints it. */
+export type ProseFigure = Fact | { fact: Fact; as: FigureOptions };
+
 /**
- * A figure counted in a power of ten its sentence words, for prose only: "{massMillions}
- * million Suns" quotes 4.297 × 10⁶ M☉ as "4.3" (exponent 6, two digits). A plain count, so no
- * unit converts it again.
+ * A fact printed the way its sentence words it: in another unit ("{sgrLy} light-years"), to
+ * other significant figures, per power of ten ("{massMillions} million"), as scientific
+ * notation, an error or bounds, with its unit.
  */
-export function inPowerOfTen(fact: Fact, exponent: number, digits: number): Fact {
-  const { show: _show, value, range, ...rest } = fact;
-  const scale = (v: number) => v / 10 ** exponent;
-  const spread = range ? ([scale(range[0]), scale(range[1])] as const) : undefined;
-  const base = { ...rest, unit: "count" as const, digits };
-  if (value === undefined) {
-    if (!spread) throw new Error("A span needs its range");
-    return { ...base, range: spread };
-  }
-  return spread
-    ? { ...base, value: scale(value), range: spread }
-    : { ...base, value: scale(value) };
-}
+export const quoteAs = (fact: Fact, as: FigureOptions): ProseFigure => ({ fact, as });
+
+const factOf = (figure: ProseFigure): Fact => ("fact" in figure ? figure.fact : figure);
+const optionsOf = (figure: ProseFigure): FigureOptions => ("as" in figure ? figure.as : {});
+
+/** The catalogue facts behind a map of prose figures, for tests and the ledger. */
+export const proseFacts = (figures: Readonly<Record<string, ProseFigure>>) =>
+  Object.fromEntries(Object.entries(figures).map(([name, figure]) => [name, factOf(figure)]));
 
 const proseCache = new WeakMap<object, Map<string, Record<string, string>>>();
 
@@ -252,16 +262,19 @@ const proseCache = new WeakMap<object, Map<string, Record<string, string>>>();
  * the plural category of the number as printed, for the word after it:
  * `{lhbGyr} {lhbGyrPlural, select, one {miliardou} many {miliardy} other {miliardami}}`.
  */
-export function proseArgs(figures: Readonly<Record<string, Fact>>, locale: string) {
+export function proseArgs(figures: Readonly<Record<string, ProseFigure>>, locale: string) {
   let byLocale = proseCache.get(figures);
   if (!byLocale) proseCache.set(figures, (byLocale = new Map()));
   let args = byLocale.get(locale);
   if (!args) {
     args = Object.fromEntries(
-      Object.entries(figures).flatMap(([name, fact]) => [
-        [name, quoteFact(locale, fact)],
-        [`${name}Plural`, quotePlural(locale, fact)],
-      ]),
+      Object.entries(figures).flatMap(([name, figure]) => {
+        const { text, plural } = formatFigure(locale, factOf(figure), optionsOf(figure));
+        return [
+          [name, text],
+          [`${name}Plural`, plural],
+        ];
+      }),
     );
     byLocale.set(locale, args);
   }

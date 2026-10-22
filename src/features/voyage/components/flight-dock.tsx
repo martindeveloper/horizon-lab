@@ -294,7 +294,8 @@ export function FlightDock() {
   const apartText =
     Math.abs(apart) >= 1 ? (
       <>
-        <span className="sr-only">{t("hud.clocksApart")} </span>+{formatDuration(t, f, apart)}
+        <span className="sr-only">{t("hud.clocksApart")} </span>+
+        {formatDuration(t, f, apart, locale)}
       </>
     ) : null;
   const speedText = <Glide value={speed} format={(v) => formatSpeed(t, f, v, gamma)} />;
@@ -307,8 +308,8 @@ export function FlightDock() {
     />
   );
   const rangeText = <Glide value={range} format={(v) => formatRange(t, f, { unit, locale }, v)} />;
-  const shipClock = formatDuration(t, f, shipSeconds);
-  const earthClock = formatDuration(t, f, earthSeconds);
+  const shipClock = formatDuration(t, f, shipSeconds, locale);
+  const earthClock = formatDuration(t, f, earthSeconds, locale);
   /* In orbit the ship rides with its body: nothing closes. Receding reads negative. */
   const closingText =
     status === "orbit" ? (
@@ -387,7 +388,9 @@ export function FlightDock() {
             <dl className="grid grid-cols-3 gap-x-3 border-t border-border pt-2.5">
               <Instrument
                 label={t("hud.lightToEarth")}
-                value={<Glide value={lightToEarth} format={(v) => formatDuration(t, f, v)} />}
+                value={
+                  <Glide value={lightToEarth} format={(v) => formatDuration(t, f, v, locale)} />
+                }
               />
               <Instrument
                 label={t("hud.sunlight")}

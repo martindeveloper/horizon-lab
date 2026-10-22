@@ -23,8 +23,7 @@ import { BLACK_HOLES } from "@/space/stellar";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import { OBSERVATORY } from "../catalogue";
-import { figureArgs } from "../figures";
-import { quote } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 const CYGNUS_X1 = BLACK_HOLES["cygnus-x1"];
@@ -55,7 +54,7 @@ export const stellar: HoleSpec = {
       distance: 122,
       lift: 0.25,
       lead: 0.3,
-      eq: `M = ${quote(CYGNUS_X1.mass)}    ·    D = ${quote(CYGNUS_X1.distance)}    ·    b ≈ +3°`,
+      eq: `M = ${inLine(CYGNUS_X1.mass)}    ·    D = ${inLine(CYGNUS_X1.distance)}    ·    b ≈ +3°`,
     },
     // Out and back in around the hole, the way the companion circles it.
     {

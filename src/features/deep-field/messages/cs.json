@@ -55,10 +55,10 @@
     "outToValue": "až do {distance}"
   },
   "time": {
-    "years": "před {value} lety",
-    "minutes": "před {value} minutami",
-    "hours": "před {value} hodinami",
-    "days": "před {value} dny"
+    "years": "před {value} {valuePlural, select, one {rokem} few {lety} many {roku} other {lety}}",
+    "minutes": "před {value} {valuePlural, select, one {minutou} few {minutami} many {minuty} other {minutami}}",
+    "hours": "před {value} {valuePlural, select, one {hodinou} few {hodinami} many {hodiny} other {hodinami}}",
+    "days": "před {value} {valuePlural, select, one {dnem} few {dny} many {dne} other {dny}}"
   },
   "then": {
     "clock": "Vyšlo v {time}",
@@ -107,8 +107,8 @@
     "diskWidth": "Průměr hvězdného disku",
     "thickness": "Škálová výška tenkého disku",
     "stars": "Hvězdy",
-    "closestFuture": "{distance} za {years} let",
-    "closestPast": "{distance} před {years} lety",
+    "closestFuture": "{distance} za {years} {yearsPlural, select, one {rok} few {roky} many {roku} other {let}}",
+    "closestPast": "{distance} před {years} {yearsPlural, select, one {rokem} few {lety} many {roku} other {lety}}",
     "closest": "Nejtěsnější přiblížení",
     "motion": "Pohyb",
     "direction": "Směr",
@@ -141,10 +141,10 @@
       "sun": {
         "title": "Slunce v Galaxii",
         "centre": "Asi {value}",
-        "lap": "Asi {value} milionů let (odhady {range})",
+        "lap": "Asi {value} {valuePlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let (odhady {range})",
         "speed": "Kruhová rychlost v této vzdálenosti je asi {value} km/s; rychlost Slunce vůči středu Galaxie je přibližně {sun} km/s",
-        "radial": "Rozdíl mezi nejmenší a největší vzdáleností od středu ~{value}, perioda ~{period} milionů let",
-        "vertical": "Kmitání ±{value} s periodou ~{period} milionů let; nyní ~{height} severně od roviny Galaxie a vzdaluje se od ní",
+        "radial": "Rozdíl mezi nejmenší a největší vzdáleností od středu ~{value}, perioda ~{period} {periodPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let",
+        "vertical": "Kmitání ±{value} s periodou ~{period} {periodPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let; nyní ~{height} severně od roviny Galaxie a vzdaluje se od ní",
         "body": "Slunce leží na vnitřním okraji Místního ramene (Orionova výběžku), mezi rameny Střelce–Lodního kýlu a Persea. Od svého vzniku oběhlo střed Galaxie asi {laps}krát, při pohledu od severního galaktického pólu po směru hodinových ručiček. Zlatá čára ukazuje jeho dráhu za poslední dva oběhy, schematicky: skutečnou polohu Slunce na dráze v tak dávné minulosti neznáme.",
         "caution": "Amplitudy kmitání vycházejí z odhadů hvězdné dynamiky, které se mezi studiemi liší. Dráha hvězdy kolem středu Galaxie není uzavřená elipsa."
       },
@@ -167,8 +167,8 @@
         "diskWidth": "Řádově {value}",
         "thickness": "Řádově {value}",
         "stars": "Nejméně {value}",
-        "age": "Asi {value} miliardy let",
-        "body": "Pohled na naši Galaxii zvenčí vychází z měření její stavby: zahrnuje tenký a tlustý disk, výduť uvnitř příčky natočené o {bar}°, čtyři spirální ramena s úhlem vinutí přibližně {pitch}° a krátké Místní rameno, které leží o něco dále od středu než Slunce. Polohy ramen v našem okolí vycházejí z měření vzdáleností maserů. Podél vnitřních okrajů ramen jsou prachové pásy a vnější disk je zvlněný. Podobu odvrácené části Galaxie odhadujeme, protože ji zakrývá oblast středu. Asi před {merger} miliardami let ji rozvířilo splynutí s galaxií Gaia-Enceladus a zesílilo její disk.",
+        "age": "Asi {value} {valuePlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let",
+        "body": "Pohled na naši Galaxii zvenčí vychází z měření její stavby: zahrnuje tenký a tlustý disk, výduť uvnitř příčky natočené o {bar}°, čtyři spirální ramena s úhlem vinutí přibližně {pitch}° a krátké Místní rameno, které leží o něco dále od středu než Slunce. Polohy ramen v našem okolí vycházejí z měření vzdáleností maserů. Podél vnitřních okrajů ramen jsou prachové pásy a vnější disk je zvlněný. Podobu odvrácené části Galaxie odhadujeme, protože ji zakrývá oblast středu. Asi před {merger} {mergerPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let ji rozvířilo splynutí s galaxií Gaia-Enceladus a zesílilo její disk.",
         "caution": "Spirální ramena nejsou pevné útvary: hvězdy jimi procházejí, ať jsou ramena dlouhověké hustotní vlny, nebo vznikají a zanikají, což je stále předmětem diskuse. Rovina oběhu planet svírá s rovinou Galaxie úhel asi {tilt}°, proto se pohled při oddalování od nejbližších hvězd natáčí."
       }
     },
@@ -181,17 +181,17 @@
       "alphaCen": {
         "where": "Kentaur, {separation}° od Proximy",
         "motion": "{velocity} km/s ke Slunci; Proxima dvojici obíhá",
-        "body": "Dvojice hvězd podobných Slunci ve vzdálenosti {distance}, zobrazená jako jediný bod. Proxima, vzdálená od této dvojice asi {proxima}, je k ní slabě gravitačně vázána. Dvojice se ke Slunci přiblíží na {approach} přibližně za {years} let."
+        "body": "Dvojice hvězd podobných Slunci ve vzdálenosti {distance}, zobrazená jako jediný bod. Proxima, vzdálená od této dvojice asi {proxima}, je k ní slabě gravitačně vázána. Dvojice se ke Slunci přiblíží na {approach} přibližně za {years} {yearsPlural, select, one {rok} few {roky} many {roku} other {let}}."
       },
       "barnard": {
         "where": "Hadonoš",
         "motion": "{velocity} km/s ke Slunci, {proper}″ za rok, největší známý vlastní pohyb hvězdy",
-        "body": "Slabý červený trpaslík ve vzdálenosti {distance}, který se k nám rychle přibližuje. Asi za {years} let se dostane na vzdálenost {approach} od Slunce a poté se začne vzdalovat."
+        "body": "Slabý červený trpaslík ve vzdálenosti {distance}, který se k nám rychle přibližuje. Asi za {years} {yearsPlural, select, one {rok} few {roky} many {roku} other {let}} se dostane na vzdálenost {approach} od Slunce a poté se začne vzdalovat."
       },
       "scholz": {
         "where": "Jednorožec, dnes {distance} daleko",
         "motion": "{velocity} km/s od Slunce, téměř přesně podél zorného paprsku",
-        "body": "Vzdalující se dvojice červeného a hnědého trpaslíka. Zpětný výpočet dráhy ukazuje, že asi před {flyby} tisíci lety prošla vnějším Oortovým oblakem, zhruba světelný rok od Slunce. Jde o nejtěsnější dobře doložený průlet hvězdné soustavy kolem Slunce. Tehdejší lidé možná mohli spatřit její vzplanutí."
+        "body": "Vzdalující se dvojice červeného a hnědého trpaslíka. Zpětný výpočet dráhy ukazuje, že asi před {flyby} {flybyPlural, select, one {tisícem} few {tisíci} many {tisíce} other {tisíci}} lety prošla vnějším Oortovým oblakem, zhruba světelný rok od Slunce. Jde o nejtěsnější dobře doložený průlet hvězdné soustavy kolem Slunce. Tehdejší lidé možná mohli spatřit její vzplanutí."
       },
       "caution": "Vzdálenosti a směry jsou měřené. Největší přiblížení vycházejí z přímočarých drah podle měřených rychlostí; aproximace platí několik set tisíc let do minulosti i budoucnosti."
     },
@@ -201,16 +201,16 @@
         "width": "Asi {value}",
         "members": "Asi {value} galaxií, většinou trpasličích",
         "mass": "Několik bilionů Sluncí, hlavně temná hmota",
-        "body": "Skupina naší Galaxie: dva obři, Mléčná dráha a Andromeda, s Trojúhelníkem a desítkami trpaslíků, držená vlastní gravitací, takže se s vesmírem nerozpíná. Podle argumentu časování se obři po Velkém třesku vzdalovali, asi před {turnaroundAgo} miliardami let se ve vzdálenosti {turnaround} obrátili a od té doby k sobě padají.",
+        "body": "Skupina naší Galaxie: dva obři, Mléčná dráha a Andromeda, s Trojúhelníkem a desítkami trpaslíků, držená vlastní gravitací, takže se s vesmírem nerozpíná. Podle argumentu časování se obři po Velkém třesku vzdalovali, asi před {turnaroundAgo} {turnaroundAgoPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let se ve vzdálenosti {turnaround} obrátili a od té doby k sobě padají.",
         "caution": "Na změřených místech jsou jen pojmenované galaxie; trpaslíci kolem obrů jsou náčrt."
       },
       "andromeda": {
         "title": "Galaxie v Andromedě",
         "approach": "Asi {value} km/s k Mléčné dráze ({sun} km/s ke Slunci)",
         "width": "Asi {range}, od jasného disku po jeho slabý vnější okraj",
-        "future": "První těsné míjení za ~{range} miliard let je pravděpodobné; splynutí je možné, ne jisté",
+        "future": "První těsné míjení za ~{range} {rangePlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let je pravděpodobné; splynutí je možné, ne jisté",
         "body": "Nejbližší velká galaxie a největší v Místní skupině, spirála jako naše, viděná šikmo. Její spektrum ukazuje, že se ke Slunci blíží asi {sun} km/s; po odečtení oběhu Slunce kolem Galaxie se k Mléčné dráze blíží asi {approach} km/s. Samotná gravitace, tato rychlost, dnešní vzdálenost {distance} a stáří vesmíru určují jednu radiální dráhu: argument časování.",
-        "caution": "Její pohyb napříč je nejistý, takže studie dávají šanci na splynutí do {within} miliard let od zhruba poloviny po devět z deseti."
+        "caution": "Její pohyb napříč je nejistý, takže studie dávají šanci na splynutí do {within} {withinPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} let od zhruba poloviny po devět z deseti."
       },
       "virgo": {
         "title": "Kupa galaxií v Panně",
@@ -316,7 +316,7 @@
       },
       "observableUniverse": {
         "title": "Pozorovatelný vesmír",
-        "cmb": "Z {distance}, vyšlo {age} tisíc let po velkém třesku",
+        "cmb": "Z {distance}, vyšlo {age} {agePlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let po velkém třesku",
         "temperature": "{value} K nad absolutní nulou",
         "age": "{value} mld. let světla na cestě",
         "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Nejvzdálenějším viditelným světlem je reliktní záření z doby, kdy vesmír poprvé zprůhledněl: mez toho, co světlo ukáže, ne okraj. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",

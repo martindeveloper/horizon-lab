@@ -842,13 +842,18 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
 - **Figures in copy are arguments, not typed digits**: "One lap in {galacticYearMyr} million
   years". Every one comes from a catalogue: cards through `components/card-specs.ts`, and
   notes, hints, guide and technical prose through the feature's `PROSE_FIGURES` and
-  `proseArgs(figures, locale)` (`src/lib/facts.ts`), which print each figure in the unit its
-  sentence names (`inPowerOfTen` for "{massMillions} million Suns"), and beside each its plural
-  category as printed (`<name>Plural`), which Czech words that depend on it select on. The Orrery and Deep Field
-  keep them in `lib/model/catalogue/`, Voyage, Stellar Spectra and Giants in `lib/model/catalogue.ts`,
-  the Black Hole in `lib/figures.ts` (`figureArgs`, which adds the atlas's scientific and ±
-  lines) over its own literature figures in `lib/catalogue.ts` (`OBSERVATORY`). Pass them to `t()`; for technical prose, pass `figures` (or plain `values`) to
-  `SimulationTechnicalDetails`, and for a guided journey to `GuideCaption`.
+  `proseArgs(figures, locale)` (`src/lib/facts.ts`). One formatter prints every figure,
+  `formatFigure` in `@horizon/toolkit/science`: a map entry is a fact, or `quoteAs(fact, options)`
+  for the way its sentence words it (another unit, other digits, a power of ten for
+  "{massMillions} million Suns", scientific notation, ± error, bounds, with its unit). Beside each
+  figure goes its plural category as printed, `<name>Plural`, which a word that depends on it
+  selects on. Card arguments (`printAll`) and the labs' live readouts (Deep Field's `formatAgo`,
+  Voyage's `formatDuration`) pass the same `<name>Plural` / `valuePlural`. The Orrery and Deep
+  Field keep their maps in `lib/model/catalogue/`, Voyage, Stellar Spectra and Giants in
+  `lib/model/catalogue.ts`, the Black Hole in `lib/figures.ts` (`figureArgs`; `inLine` prints
+  the guide's English equation lines) over its own literature figures in `lib/catalogue.ts`
+  (`OBSERVATORY`). Pass them to `t()`; for technical prose, pass `figures` (or plain `values`)
+  to `SimulationTechnicalDetails`, and for a guided journey to `GuideCaption`.
 - **Card figures come from a catalogue.** A model's catalogue (the solar system's
   `src/space/solar-system/model/catalogue.ts`, each feature's `lib/model/catalogue/`) holds every
   number a selection card prints, literature values included: a value or a published span

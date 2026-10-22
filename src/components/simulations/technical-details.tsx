@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import type { Ref } from "react";
 
-import { proseArgs, type Fact } from "@/lib/facts";
+import { proseArgs, type ProseFigure } from "@/lib/facts";
 import type { Formula } from "@horizon/toolkit/science";
 import { TechnicalDetails, type DialogHandle, type TechnicalDocument } from "@horizon/toolkit/ui";
 
@@ -48,7 +48,7 @@ export function SimulationTechnicalDetails({
   /** ICU arguments for prose that quotes the feature's own parameters. */
   values?: Record<string, number | string>;
   /** Catalogue figures the prose quotes, by placeholder, printed in the page's language. */
-  figures?: Readonly<Record<string, Fact>>;
+  figures?: Readonly<Record<string, ProseFigure>>;
 }) {
   const t = useTranslations(`${namespace}.technicalDetails`);
   const locale = useLocale();

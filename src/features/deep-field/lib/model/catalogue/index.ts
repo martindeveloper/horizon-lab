@@ -9,7 +9,7 @@
  * stay in the model and are referenced there, not copied. docs/science-sources.md lists the
  * catalogues (`npm run docs:catalogue`).
  */
-import { factsOf, type Fact } from "@/lib/facts";
+import { factsOf, quoteAs, type ProseFigure } from "@/lib/facts";
 import { COSMOS } from "@/space/cosmos/model/catalogue";
 import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
 import { STARS } from "@/space/galaxy/model/catalogue/stars";
@@ -51,14 +51,14 @@ export const PROSE_FIGURES = {
   andromedaMly: COSMOS.andromeda.distance,
   andromedaKms: COSMOS.andromeda.approach,
   kuiperAu: POPULATIONS.kuiper.region,
-  oortLy: { ...POPULATIONS.oort.outerEdge, show: "ly", digits: 2 },
+  oortLy: quoteAs(POPULATIONS.oort.outerEdge, { in: "ly", digits: 2 }),
   galaxyLy: GALAXY.milkyway.diskWidth,
   localGroupMly: COSMOS.localGroup.width,
   localSheetMly: COSMOS.localSheet.width,
   virgoGalaxies: COSMOS.virgo.members,
-  virgoMly: { ...COSMOS.virgo.distance, digits: 2 },
+  virgoMly: quoteAs(COSMOS.virgo.distance, { digits: 2 }),
   superclusterMly: COSMOS.supercluster.width,
-} satisfies Record<string, Fact>;
+} satisfies Record<string, ProseFigure>;
 
 /** Every fact with its path ("cosmos.virgo.members"), for tests and the ledger. */
 export const catalogueFacts = () => factsOf(CATALOGUE);

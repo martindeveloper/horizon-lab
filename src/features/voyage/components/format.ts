@@ -1,5 +1,5 @@
 import { formatAu, type DistanceSettings, type Format, type Translate } from "@/lib/facts";
-import { AU_KM, convert } from "@horizon/toolkit/science";
+import { AU_KM, convert, pluralOf } from "@horizon/toolkit/science";
 
 import { dateAt, withinCalendar } from "../lib/model/calendar";
 import { speedFigure } from "../lib/model/instruments";
@@ -11,8 +11,11 @@ export const NONE = "—";
 const VISITOR_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 /** Durations: "4 min 12 s", "3 h 5 min", "12 d 4 h", "1.8 years", "2.5 million years". */
-export function formatDuration(t: Translate, f: Format, seconds: number) {
+export function formatDuration(t: Translate, f: Format, seconds: number, locale: string) {
   if (!Number.isFinite(seconds)) return NONE;
+  /* Years as printed, and their plural category for the word "years". */
+  const inYears = (value: string) =>
+    t("time.years", { value, valuePlural: pluralOf(locale, value) });
   const n = (v: number, digits = 0) => f.number(v, { maximumFractionDigits: digits });
   const s = Math.abs(seconds);
   if (s < 10) return t("time.seconds", { value: n(s, 1) });
@@ -28,18 +31,16 @@ export function formatDuration(t: Translate, f: Format, seconds: number) {
   if (hours < 60 * 24)
     return t("time.daysHours", { days: n(Math.floor(hours / 24)), hours: n(hours % 24) });
   const years = convert(s, "s", "yr");
-  if (years < 1e4)
-    return t("time.years", { value: n(years, years < 10 ? 2 : years < 100 ? 1 : 0) });
-  if (years < 1e6)
-    return t("time.years", { value: f.number(years, { maximumSignificantDigits: 3 }) });
+  if (years < 1e4) return inYears(n(years, years < 10 ? 2 : years < 100 ? 1 : 0));
+  if (years < 1e6) return inYears(f.number(years, { maximumSignificantDigits: 3 }));
   if (years < 1e9)
     return t("time.million", { value: f.number(years / 1e6, { maximumSignificantDigits: 3 }) });
   return t("time.billion", { value: f.number(years / 1e9, { maximumSignificantDigits: 3 }) });
 }
 
 /** A trip's duration (`formatDuration`), or "never" for one no drive completes. */
-export const formatTrip = (t: Translate, f: Format, seconds: number) =>
-  seconds === Infinity ? t("hud.never") : formatDuration(t, f, seconds);
+export const formatTrip = (t: Translate, f: Format, seconds: number, locale: string) =>
+  seconds === Infinity ? t("hud.never") : formatDuration(t, f, seconds, locale);
 
 /** Earth's calendar at a moment, when the calendar still reaches; null past it. */
 export function formatCalendar(f: Format, epochMs: number, seconds: number) {

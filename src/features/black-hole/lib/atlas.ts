@@ -7,8 +7,7 @@ import { keysOf } from "@horizon/toolkit/records";
 import { RAD_PER_DEG as DEG, convertFigure } from "@horizon/toolkit/science";
 
 import { OBSERVATORY } from "./catalogue";
-import { WD1_KPC, figureArgs } from "./figures";
-import { quote } from "./quote";
+import { WD1_KPC, figureArgs, inLine } from "./figures";
 
 export type AtlasKind = "hole" | "body" | "extragalactic" | "lab";
 
@@ -302,10 +301,10 @@ export const ATLAS: AtlasSite[] = [
  * et al. 2019, as for R136a1 in it), Andromeda and M87*; the two farthest by redshift.
  */
 export const DISTANCE_ROWS: readonly { id: string; k: string }[] = [
-  { id: "sgr-a", k: quote({ ...BLACK_HOLES["sgr-a"].distance, digits: 2 }) },
-  { id: "lmc", k: quote(NAMED_STARS.r136a1.distance) },
-  { id: "m31", k: quote({ ...ANDROMEDA, show: "kpc", digits: 3 }) },
-  { id: "m87", k: quote(BLACK_HOLES.m87.distance) },
+  { id: "sgr-a", k: inLine(BLACK_HOLES["sgr-a"].distance, { digits: 2 }) },
+  { id: "lmc", k: inLine(NAMED_STARS.r136a1.distance) },
+  { id: "m31", k: inLine(ANDROMEDA, { in: "kpc", digits: 3 }) },
+  { id: "m87", k: inLine(BLACK_HOLES.m87.distance) },
   { id: "gw231123", k: "z ≈ 0.4" },
   { id: "ton618", k: `z = ${figureArgs("en").tonRedshiftShort}` },
 ];

@@ -23,8 +23,7 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
-import { figureArgs } from "../figures";
-import { quote } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 const SGR_A = BLACK_HOLES["sgr-a"];
@@ -59,7 +58,7 @@ export const sgrA: HoleSpec = {
       lead: -0.5,
       look: { yaw: 0.4, pitch: 0.12 },
       drift: -0.01,
-      eq: `D = ${quote(SGR_A.distance)}    ·    M = ${quote(SGR_A.mass)}`,
+      eq: `D = ${inLine(SGR_A.distance)}    ·    M = ${inLine(SGR_A.mass)}`,
     },
     // A long sweeping orbit that dips inward mid-way, like a star at pericentre.
     {
@@ -72,7 +71,7 @@ export const sgrA: HoleSpec = {
       lead: 0.6,
       roll: 0.04,
       sketch: [{ kind: "orbit", eccentricity: 0.88, periapsis: 7, tilt: 0.95, name: "S2" }],
-      eq: `P² = 4π² a_S2³ / GM    ·    P = ${quote(SGR_A.companionPeriod)}`,
+      eq: `P² = 4π² a_S2³ / GM    ·    P = ${inLine(SGR_A.companionPeriod)}`,
     },
     {
       phase: "detail",

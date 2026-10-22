@@ -101,7 +101,7 @@
     "sun": {
       "title": "Slunce",
       "radius": "{km} km · asi {au}",
-      "age": "Asi {value} miliardy let",
+      "age": "Asi {value} {valuePlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let",
       "oneAu": "{au} km · světlo letí {minutes} min",
       "body": "Slunce obsahuje přes {mass} % hmotnosti sluneční soustavy, ale připadá na něj méně než {spin} % jejího momentu hybnosti. Ten je z větší části spojen s oběžným pohybem planet. Od vzniku Slunce se odvíjí časová osa tohoto modelu. Současné polohy planet počítáme z přibližných dráhových elementů JPL pro aktuální datum.",
       "caution": "Značky těles jsou zvětšené, dokud nezapnete Skutečnou velikost. Průměr Slunce je přibližně {diameters}krát větší než průměr Země, ale v měřítku celé sluneční soustavy i Slunce vypadá jako nepatrný bod."

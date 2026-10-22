@@ -16,8 +16,7 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
-import { figureArgs } from "../figures";
-import { quote, quoteError } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 const GAIA_BH3 = BLACK_HOLES["gaia-bh3"];
@@ -48,7 +47,7 @@ export const gaiaBh3: HoleSpec = {
       distance: 120,
       lift: 0.2,
       lead: 0.3,
-      eq: `M = ${quoteError(GAIA_BH3.mass)}    ·    D = ${quoteError(GAIA_BH3.distance)}`,
+      eq: `M = ${inLine(GAIA_BH3.mass, { style: "error" })}    ·    D = ${inLine(GAIA_BH3.distance, { style: "error" })}`,
     },
     // Trace the giant's long, stretched orbit.
     {
@@ -61,7 +60,7 @@ export const gaiaBh3: HoleSpec = {
       lead: 0.5,
       roll: 0.03,
       sketch: [{ kind: "orbit", eccentricity: 0.73, periapsis: 9, tilt: 0.85, name: "★" }],
-      eq: `P = ${quote(GAIA_BH3.companionPeriod)}    ·    e = ${EN.gaiaEccentricity}`,
+      eq: `P = ${inLine(GAIA_BH3.companionPeriod)}    ·    e = ${EN.gaiaEccentricity}`,
     },
     {
       phase: "detail",

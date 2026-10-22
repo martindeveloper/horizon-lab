@@ -19,8 +19,7 @@ import { BLACK_HOLES } from "@/space/stellar";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import { OBSERVATORY } from "../catalogue";
-import { figureArgs } from "../figures";
-import { quote } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 /** Elevation of the home view above the disk: 90° less the jet's angle to our line of sight. */
@@ -52,7 +51,7 @@ export const m87: HoleSpec = {
       distance: 134,
       lift: -0.15,
       lead: 0.4,
-      eq: `M ≈ ${quote(BLACK_HOLES.m87.mass)}    ·    D = ${quote(BLACK_HOLES.m87.distance)}`,
+      eq: `M ≈ ${inLine(BLACK_HOLES.m87.mass)}    ·    D = ${inLine(BLACK_HOLES.m87.distance)}`,
     },
     // A slow helix up along the jet.
     {

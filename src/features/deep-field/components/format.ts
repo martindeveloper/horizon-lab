@@ -1,6 +1,6 @@
 import type { Format, Translate } from "@/lib/facts";
 import { CMB_AGE_YEARS } from "@/space/cosmos/model/cosmos";
-import { convert } from "@horizon/toolkit/science";
+import { convert, pluralOf } from "@horizon/toolkit/science";
 
 import type { Then } from "../lib/model/depth";
 
@@ -8,16 +8,20 @@ import type { Then } from "../lib/model/depth";
  * How long ago light set out: "43 minutes ago" from Jupiter, "4.25 years ago" from Proxima,
  * "2.5 million years ago" from Andromeda.
  */
-export function formatAgo(t: Translate, f: Format, years: number) {
-  const n = (v: number) => f.number(v, { maximumSignificantDigits: 3 });
+export function formatAgo(t: Translate, f: Format, years: number, locale: string) {
+  /* The number as printed, and its plural category for the unit's word. */
+  const n = (v: number) => {
+    const value = f.number(v, { maximumSignificantDigits: 3 });
+    return { value, valuePlural: pluralOf(locale, value) };
+  };
   const minutes = convert(years, "yr", "min");
-  if (minutes < 120) return t("time.minutes", { value: n(minutes) });
+  if (minutes < 120) return t("time.minutes", n(minutes));
   const hours = minutes / 60;
-  if (hours < 48) return t("time.hours", { value: n(hours) });
-  if (years < 1) return t("time.days", { value: n(convert(years, "yr", "d")) });
-  if (years < 1e6) return t("time.years", { value: n(years) });
-  if (years < 1e9) return t("time.million", { value: n(years / 1e6) });
-  return t("time.billion", { value: n(years / 1e9) });
+  if (hours < 48) return t("time.hours", n(hours));
+  if (years < 1) return t("time.days", n(convert(years, "yr", "d")));
+  if (years < 1e6) return t("time.years", n(years));
+  if (years < 1e9) return t("time.million", n(years / 1e6));
+  return t("time.billion", n(years / 1e9));
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { solarNameKey } from "@/space/solar-system/format";
@@ -35,6 +35,7 @@ const SYSTEMS = [...PLANET_IDS, "pluto" as const]
 export function ObjectsPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("voyage");
   const f = useFormatter();
+  const locale = useLocale();
   const drive = useVoyage((s) => s.drive);
   const fix = useVoyage((s) => s.fix);
   const epochMs = useVoyage((s) => s.epochMs);
@@ -51,7 +52,7 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
       <ListItem key={id} {...(here ? { selected: true } : {})} onClick={() => go(id)}>
         <span className="min-w-0 truncate">{t(anchorNameKey(id))}</span>
         <span className="shrink-0 font-mono text-[11px] text-muted tabular-nums">
-          {here ? NONE : formatTrip(t, f, tripTo(drive, id, fix.km, moment).tau)}
+          {here ? NONE : formatTrip(t, f, tripTo(drive, id, fix.km, moment).tau, locale)}
         </span>
       </ListItem>
     );

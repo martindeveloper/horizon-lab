@@ -212,9 +212,14 @@ lengths, in the visitor's unit, at least two significant figures. Other units
 print as plain numbers in the `show` unit, with "million" and "billion" as words
 from `format` and scientific notation from 10¹². `live` values print at the
 readout's precision. `printFactSpan` prints a range with the unit once.
-`quoteFact(locale, fact)` gives the bare number prose quotes, and `quotePlural(locale, fact)` the
-plural category of that number as printed (decimals count; a span agrees with its end), for
-the word after it.
+`formatFigure(locale, fact, options)` prints a figure the way one sentence words it and returns
+`{ text, plural }`: `in` reads it in another unit, `digits` sets its significant figures,
+`perPower` counts it in a power of ten its sentence names ("4.3" million), `span` quotes the
+published span beside a value, `style` gives `scientific` (a mantissa × 10ⁿ from 10⁵), `error`
+(value ± half the span) or `bounds` ("0.84 (+0.08 / −0.16)"), and `withUnit` adds the unit's
+symbol. `plural` is the CLDR category of the number as printed (decimals count; a span agrees
+with its end), for the word after it; `pluralOf(locale, printed)` gives it for any printed
+number. `quoteFact(locale, fact)` is the plain text alone.
 
 ## Display scales (`quantities.ts`)
 

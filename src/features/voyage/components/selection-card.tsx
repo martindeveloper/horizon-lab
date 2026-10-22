@@ -51,10 +51,10 @@ export function SelectionCard() {
                   >
                     <span className="min-w-0 truncate">{t(`drives.${id}`)}</span>
                     <span className="shrink-0 text-right font-mono text-[11px] text-muted tabular-nums">
-                      {formatTrip(t, f, trip.tau)}
+                      {formatTrip(t, f, trip.tau, locale)}
                       {clocksPart(trip) ? (
                         <span className="block text-[10px] text-subtle">
-                          {t("hud.earthTime", { value: formatDuration(t, f, trip.t) })}
+                          {t("hud.earthTime", { value: formatDuration(t, f, trip.t, locale) })}
                         </span>
                       ) : null}
                     </span>

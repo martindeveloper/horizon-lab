@@ -500,27 +500,84 @@ test("a span whose ends round alike prints as one figure", async () => {
   assert.equal(joinSpan(["0.12", "0.12"]), "0.12");
 });
 
-test("a quoted figure's plural category follows the number as printed, decimals included", async () => {
-  const { quotePlural } = await import("@horizon/toolkit/science");
-  const fact = (value, digits, range) => ({
+test("a figure prints as its sentence asks and gives the plural category it prints with", async () => {
+  const { formatFigure } = await import("@horizon/toolkit/science");
+  const fact = (value, digits, extra = {}) => ({
     value,
     digits,
-    range,
     unit: "Gyr",
     source: "x",
     status: "verified",
+    ...extra,
   });
-  /* Czech: 1 miliarda, 3 miliardy, 18 miliard, 10,8 miliardy. */
-  assert.equal(quotePlural("cs", fact(1, 1)), "one");
-  assert.equal(quotePlural("cs", fact(2.95, 1)), "few");
-  assert.equal(quotePlural("cs", fact(18.3, 2)), "other");
-  assert.equal(quotePlural("cs", fact(10.83, 3)), "many");
-  /* "4,0" is printed as a decimal, so it takes the decimal form; a span agrees with its end. */
-  assert.equal(quotePlural("cs", fact(4, 2)), "many");
+  const plural = (locale, f, as) => formatFigure(locale, f, as).plural;
+  /* Czech: 1 miliarda, 3 miliardy, 18 miliard, 10,8 miliardy; "4,0" reads as a decimal. */
+  assert.equal(plural("cs", fact(1, 1)), "one");
+  assert.equal(plural("cs", fact(2.95, 1)), "few");
+  assert.equal(plural("cs", fact(18.3, 2)), "other");
+  assert.equal(plural("cs", fact(10.83, 3)), "many");
+  assert.equal(plural("cs", fact(4, 2)), "many");
+  /* A span agrees with its end. */
   assert.equal(
-    quotePlural("cs", { range: [2, 6], unit: "Gyr", digits: 1, source: "x", status: "verified" }),
+    plural("cs", { range: [2, 6], unit: "Gyr", digits: 1, source: "x", status: "verified" }),
     "other",
   );
-  assert.equal(quotePlural("cs", fact(77_060, 2)), "other");
-  assert.equal(quotePlural("en", fact(1, 1)), "one");
+  assert.equal(plural("en", fact(1, 1)), "one");
+  const mass = {
+    value: 4.297e6,
+    range: [4.285e6, 4.309e6],
+    unit: "Msun",
+    digits: 4,
+    source: "x",
+    status: "verified",
+  };
+  assert.equal(formatFigure("en", mass, { perPower: 6, digits: 2 }).text, "4.3");
+  assert.equal(
+    formatFigure("cs", mass, { style: "scientific", withUnit: true }).text,
+    "4,297 × 10⁶ M☉",
+  );
+  assert.equal(
+    formatFigure(
+      "en",
+      { ...mass, value: 21.2, range: [19, 23.4], digits: 3 },
+      { style: "error", withUnit: true },
+    ).text,
+    "21.2 ± 2.2 M☉",
+  );
+  assert.equal(
+    formatFigure(
+      "en",
+      { ...mass, value: 0.84, range: [0.68, 0.92], unit: "ratio", digits: 2 },
+      { style: "bounds" },
+    ).text,
+    "0.84 (+0.08 / −0.16)",
+  );
+  assert.equal(
+    formatFigure(
+      "en",
+      {
+        value: 4.07e10,
+        range: [4.07e10, 6.6e10],
+        unit: "Msun",
+        digits: 3,
+        source: "x",
+        status: "verified",
+      },
+      { style: "scientific", span: true, digits: 2 },
+    ).text,
+    "4.1–6.6 × 10¹⁰",
+  );
+  /* Read in another unit, with the catalogued figures' precision: 8.277 kpc is 27,000 ly to two. */
+  assert.equal(
+    formatFigure(
+      "en",
+      { value: 8.277, unit: "kpc", digits: 2, source: "x", status: "verified" },
+      { in: "ly" },
+    ).text,
+    "27,000",
+  );
+  assert.equal(
+    formatFigure("en", { value: 68, unit: "ly", show: "pc", source: "x", status: "verified" }).text,
+    "21",
+  );
 });

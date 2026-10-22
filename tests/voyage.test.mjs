@@ -7,7 +7,7 @@ import { createTranslator } from "next-intl";
  * Voyage's model against independent arithmetic: the ship's relativity, where the bodies are,
  * its places and routes, and that every card and readout prints in both languages.
  */
-import { AU_KM, LIGHT_YEAR_KM } from "@horizon/toolkit/science";
+import { AU_KM, JULIAN_YEAR_SECONDS, LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 
 import { cardFor } from "../src/features/voyage/components/cards.ts";
 import {
@@ -244,12 +244,14 @@ test("readouts carry into the larger unit, tell a speed from c, and print nothin
     number: (v, o) => new Intl.NumberFormat("en", o).format(v),
     dateTime: (v, o) => new Intl.DateTimeFormat("en", o).format(v),
   };
-  assert.equal(formatDuration(t, f, 119.6), "2 min 0 s");
-  assert.equal(formatDuration(t, f, 3599.9), "1 h 0 min");
-  assert.equal(formatDuration(t, f, 86_399), "1 d 0 h");
-  assert.equal(formatDuration(t, f, 172_790), "2 d 0 h");
-  assert.equal(formatDuration(t, f, 9.96), "10 s");
-  assert.equal(formatDuration(t, f, Number.NaN), "—");
+  assert.equal(formatDuration(t, f, 119.6, "en"), "2 min 0 s");
+  assert.equal(formatDuration(t, f, 3599.9, "en"), "1 h 0 min");
+  assert.equal(formatDuration(t, f, 86_399, "en"), "1 d 0 h");
+  assert.equal(formatDuration(t, f, 172_790, "en"), "2 d 0 h");
+  assert.equal(formatDuration(t, f, 9.96, "en"), "10 s");
+  assert.equal(formatDuration(t, f, Number.NaN, "en"), "—");
+  /* A year count's word agrees with it. */
+  assert.equal(formatDuration(t, f, JULIAN_YEAR_SECONDS, "en"), "1 year");
   assert.equal(formatRange(t, f, { unit: "auto", locale: "en" }, Number.NaN), "—");
   assert.notEqual(formatSpeed(t, f, 0.99999 * C_KM_S), "1 c");
   assert.match(formatSpeed(t, f, 0.99999 * C_KM_S), /0\.99999 c/);
@@ -294,12 +296,12 @@ for (const locale of ["en", "cs"]) {
       }
     }
     for (const seconds of [3, 75, 5_000, 90_000, 1e7, 4e9, 1e14, 1e17])
-      clean(formatDuration(t, f, seconds));
+      clean(formatDuration(t, f, seconds, locale));
     /* No drive reaches the edge: its trips read never, on both clocks. */
     const edge = tripTo("torch", "edge", ship, { now, a: 1 });
-    assert.equal(formatTrip(t, f, edge.tau), t("hud.never"));
-    assert.equal(formatTrip(t, f, edge.t), t("hud.never"));
-    clean(formatTrip(t, f, tripTo("sail", "andromeda", ship, { now, a: 1 }).tau));
+    assert.equal(formatTrip(t, f, edge.tau, locale), t("hud.never"));
+    assert.equal(formatTrip(t, f, edge.t, locale), t("hud.never"));
+    clean(formatTrip(t, f, tripTo("sail", "andromeda", ship, { now, a: 1 }).tau, locale));
     for (const km of [12, 12_400, 3e6, 1.5e8, 6e9])
       clean(formatRange(t, f, { unit: "auto", locale }, km));
     for (const v of [0.3, 17, 2500, 0.1 * C_KM_S, 0.999 * C_KM_S]) clean(formatSpeed(t, f, v));

@@ -17,8 +17,7 @@
 import { BLACK_HOLES } from "@/space/stellar";
 
 import { OBSERVATORY } from "../catalogue";
-import { figureArgs } from "../figures";
-import { quote } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 const OMEGA_CEN = BLACK_HOLES["omega-cen"];
@@ -52,7 +51,7 @@ export const omegaCen: HoleSpec = {
       lift: 0.3,
       lead: -0.4,
       drift: -0.008,
-      eq: `D = ${quote(OMEGA_CEN.distance)}    ·    M_cluster ≈ ${quote({ ...OBSERVATORY.omegaCen.clusterMass, digits: 2 })}`,
+      eq: `D = ${inLine(OMEGA_CEN.distance)}    ·    M_cluster ≈ ${inLine(OBSERVATORY.omegaCen.clusterMass, { digits: 2 })}`,
     },
     // A long survey sweep, like twenty years of Hubble images.
     {
@@ -77,7 +76,7 @@ export const omegaCen: HoleSpec = {
         { kind: "shadow", assumed: true },
         { kind: "ruler", length: 10 },
       ],
-      eq: `M_• ≥ ${quote(OMEGA_CEN.mass)}    ·    models ≈ ${EN.omegaModelMass} M☉`,
+      eq: `M_• ≥ ${inLine(OMEGA_CEN.mass)}    ·    models ≈ ${EN.omegaModelMass} M☉`,
     },
     {
       phase: "hold",

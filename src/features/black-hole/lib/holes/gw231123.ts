@@ -16,8 +16,7 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
-import { figureArgs } from "../figures";
-import { quote, quoteSpin } from "../quote";
+import { figureArgs, inLine } from "../figures";
 import type { HoleSpec } from "./types";
 
 const GW231123 = BLACK_HOLES.gw231123;
@@ -47,7 +46,7 @@ export const gw231123: HoleSpec = {
       distance: 130,
       lift: 0.3,
       lead: 0.3,
-      eq: `m₁ ≈ ${quote(GW231123.primaryMass)}  +  m₂ ≈ ${quote(GW231123.secondaryMass)}   →   M_f ≈ ${quote(GW231123.mass)}`,
+      eq: `m₁ ≈ ${inLine(GW231123.primaryMass)}  +  m₂ ≈ ${inLine(GW231123.secondaryMass)}   →   M_f ≈ ${inLine(GW231123.mass)}`,
     },
     // A quick tightening spiral, like the final orbits before the merger.
     {
@@ -59,7 +58,7 @@ export const gw231123: HoleSpec = {
       lead: 0.5,
       roll: -0.04,
       drift: -0.012,
-      eq: `f ≈ ${EN.gwFrequenciesHz} Hz    ·    D_L ≈ ${quote(GW231123.distance)}`,
+      eq: `f ≈ ${EN.gwFrequenciesHz} Hz    ·    D_L ≈ ${inLine(GW231123.distance)}`,
     },
     {
       phase: "detail",
@@ -70,7 +69,7 @@ export const gw231123: HoleSpec = {
       lead: -0.3,
       roll: -0.03,
       sketch: [{ kind: "shadow" }, { kind: "rings", rings: ["horizon"] }],
-      eq: `χ_f = ${quoteSpin(GW231123.spin)}`,
+      eq: `χ_f = ${inLine(GW231123.spin, { style: "bounds" })}`,
     },
     {
       phase: "hold",

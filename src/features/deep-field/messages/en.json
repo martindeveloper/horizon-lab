@@ -55,10 +55,10 @@
     "outToValue": "out to {distance}"
   },
   "time": {
-    "years": "{value} years ago",
-    "minutes": "{value} minutes ago",
-    "hours": "{value} hours ago",
-    "days": "{value} days ago"
+    "years": "{value} {valuePlural, select, one {year} other {years}} ago",
+    "minutes": "{value} {valuePlural, select, one {minute} other {minutes}} ago",
+    "hours": "{value} {valuePlural, select, one {hour} other {hours}} ago",
+    "days": "{value} {valuePlural, select, one {day} other {days}} ago"
   },
   "then": {
     "clock": "It set out at {time}",
@@ -107,8 +107,8 @@
     "diskWidth": "Stellar disk diameter",
     "thickness": "Thin-disk scale height",
     "stars": "Stars",
-    "closestFuture": "{distance}, in {years} years",
-    "closestPast": "{distance}, {years} years ago",
+    "closestFuture": "{distance}, in {years} {yearsPlural, select, one {year} other {years}}",
+    "closestPast": "{distance}, {years} {yearsPlural, select, one {year} other {years}} ago",
     "closest": "Closest approach",
     "motion": "Motion",
     "direction": "Direction",

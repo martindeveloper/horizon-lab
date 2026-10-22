@@ -145,7 +145,7 @@
       "s": "{value} s",
       "min": "{value} min",
       "h": "{value} h",
-      "d": "{value} days"
+      "d": "{value} {valuePlural, select, one {day} other {days}}"
     },
     "bulge": "{value} % wider than pole to pole",
     "gravity": "{value} m/s² ({earths} × Earth's)",
@@ -153,14 +153,14 @@
     "period": {
       "ms": "{value} ms",
       "h": "{value} h",
-      "d": "{value} days",
-      "yr": "{value} years"
+      "d": "{value} {valuePlural, select, one {day} other {days}}",
+      "yr": "{value} {valuePlural, select, one {year} other {years}}"
     },
     "periodUpTo": {
       "ms": "up to {value} ms",
       "h": "up to {value} h",
-      "d": "up to {value} days",
-      "yr": "up to {value} years"
+      "d": "up to {value} {valuePlural, select, one {day} other {days}}",
+      "yr": "up to {value} {valuePlural, select, one {year} other {years}}"
     },
     "gravityWeaker": "{value} m/s² ({earths} × weaker than Earth's)",
     "gravityAlone": "{value} m/s²"
