@@ -48,14 +48,18 @@ uniform int uHoleCount;
 uniform vec4 uWeather;                  // the star in focus's disc (−1: none); its weather's presence, 0–1; corona; chromosphere
 uniform vec4 uRegion[REGIONS];          // active region's centre (body frame); angular radius
 uniform vec4 uRegionState[REGIONS];     // strength; tilt; flare light; 1 for a dust veil
+uniform vec3 uRegionAxis[REGIONS];      // precomputed leader-follower axes in the body frame
+uniform vec3 uRegionSide[REGIONS];
 uniform vec4 uRegionView[REGIONS];      // its centre in the view; strength
 uniform vec4 uSheetInfo[SHEETS];        // first column's position angle; step; brightness; own light
 uniform vec4 uSheet[SHEETS * SHEET_POINTS]; // column's underside and top, radii; top's depth; hollow
 uniform vec4 uLoopBound[LOOPS];         // centre x, y and reach, radii; brightness
 uniform vec4 uLoop[LOOPS * LOOP_POINTS]; // x, y, z; width, radii
 uniform vec4 uEjection[EJECTIONS];      // position angle; front, radii; spread, radians; brightness
+uniform vec3 uEjectionDirection[EJECTIONS]; // projected direction and angular cutoff cosine
+uniform vec3 uFlareColour;             // the existing spectrum table sampled once at FLARE_K
 uniform vec4 uFlash[ARCADES];           // each flare lit: its site x, y, z; its light
-uniform highp sampler2D uOutflows;      // supergiant clouds: centre/width, gas/dust/temperature/seed
+uniform highp sampler2D uOutflows;      // clouds: centre/width, gas/dust/temperature/seed, emission
 uniform vec3 uOrbitCentre;              // centre x, y; 1 while any ring shows (0: none)
 uniform vec2 uOrbits[ORBIT_COUNT];      // each ring's radius, CSS pixels, and how much of it shows
 uniform vec3 uAccent;                   // the house gold, linear
@@ -300,7 +304,7 @@ void main() {
     colour = colour * (1.0 - body.a) + body.rgb;
     if (float(i) == uWeather.x && uWeather.y > 0.0 && uSurface[i].w > 0.0) {
       vec2 o = vec2(p.x - shape.x, shape.y - p.y) / shape.z;
-      OutflowLight cloud = outflowLight(o, frontDepth, tintOf(i, TINT_FACE));
+      OutflowLight cloud = outflowLight(o, frontDepth);
       colour = colour * cloud.transmission + cloud.emission;
     }
   }

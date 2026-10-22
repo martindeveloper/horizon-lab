@@ -24,6 +24,8 @@ export function createCompositePass(
   renderer: WebGLRenderer,
   options: {
     antialias: CompositeAntialias;
+    /** Scene draws need depth by default; full-screen shader callers can omit it. */
+    depthBuffer?: boolean;
     bloom?: BloomSettings | null;
     lens?: LensSettings | null;
   },
@@ -61,6 +63,7 @@ export function createCompositePass(
       ...(lens ? { HORIZON_LENS: "1" } : {}),
     },
     samples: antialias === "msaa" ? 4 : 0,
+    depthBuffer: options.depthBuffer ?? true,
     uniforms,
     ...(bloom || lens ? { before } : {}),
   });

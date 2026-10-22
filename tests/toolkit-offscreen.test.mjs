@@ -3,7 +3,24 @@ import test from "node:test";
 
 import { LinearSRGBColorSpace } from "three";
 
+import { createCompositePass } from "../packages/toolkit/src/rendering/composite-pass.ts";
 import { createOffscreenFrame } from "../packages/toolkit/src/rendering/offscreen-frame.ts";
+
+test("composites retain scene depth by default and allow full-screen callers to omit it", () => {
+  const renderer = { outputColorSpace: LinearSRGBColorSpace };
+  for (const antialias of ["off", "fxaa", "msaa"]) {
+    const scene = createCompositePass(renderer, { antialias });
+    const image = createCompositePass(renderer, { antialias, depthBuffer: false });
+    try {
+      assert.equal(scene.target.depthBuffer, true);
+      assert.equal(image.target.depthBuffer, false);
+      assert.equal(image.target.samples, antialias === "msaa" ? 4 : 0);
+    } finally {
+      scene.dispose();
+      image.dispose();
+    }
+  }
+});
 
 test("nested image filters preserve their destination, resize, restore on errors and release resources", () => {
   const destination = { name: "canvas" };

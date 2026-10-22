@@ -38,7 +38,7 @@ toolkit's `.glsl` loader (see the package README).
   and buffer-pixel size as `uTexel`, after any FXAA, bloom or lens. Its byte target has no
   depth attachment, resizes with the drawing buffer, and is reused until disposal. The
   consumer owns its uniforms and any masking or colour decoding the effect needs.
-- `createCompositePass(renderer, { antialias, bloom, lens })`: the resolve stage of a scene.
+- `createCompositePass(renderer, { antialias, bloom, lens, depthBuffer })`: the resolve stage of a scene.
   `paint(draw)` runs any number of renders (passes over one depth buffer) into an offscreen
   frame of the drawing buffer's size, then writes it onto the canvas in one full-screen pass
   (`composite.frag.glsl`): copied, or anti-aliased as `antialias` says (`msaa` draws the frame
@@ -52,7 +52,9 @@ toolkit's `.glsl` loader (see the package README).
   `bloom` and `lens` are read every frame, so their numbers may change in place; switching
   either or the anti-aliasing takes a new pass. With bloom off, the lens builds only
   the mask levels its spikes need (`mask` below). `target` is the offscreen frame; nothing is allocated until
-  the first `paint`.
+  the first `paint`. `depthBuffer` defaults to `true` for scene geometry; callers that draw
+  only full-screen shaders may set it to `false`. `createFullscreenPass` does this for its
+  composite targets, avoiding unused depth attachments and clears.
 - Wide colour: `setDrawingBufferGamut(renderer, gamut)` switches a renderer's canvas to show
   its bytes in Display P3 (or back to sRGB) and returns the gamut it took: a browser whose
   WebGL cannot switch keeps sRGB, so draw for what comes back; `drawingBufferGamut(renderer)`

@@ -287,7 +287,7 @@ export function createFullscreenPass(options: {
       hdrOutput.value = floating ? 1 : 0;
       if (bloom === null && lens === null) {
         if (mode === "fxaa") {
-          fxaa ??= createCompositePass(renderer, { antialias: "fxaa" });
+          fxaa ??= createCompositePass(renderer, { antialias: "fxaa", depthBuffer: false });
           fxaa.paint(() => drawRays(mode, false));
         } else drawRays(mode, false);
         return;
@@ -308,6 +308,7 @@ export function createFullscreenPass(options: {
           key,
           pass: createCompositePass(renderer, {
             antialias: mode === "fxaa" ? "fxaa" : "off",
+            depthBuffer: false,
             bloom: bloom ? ldrBloom : null,
             lens: lens ? ldrLens : null,
           }),
@@ -340,7 +341,7 @@ export function createFullscreenPass(options: {
         resolveUniforms.uFringe.value = lens.fringe;
       }
       if (mode === "fxaa") {
-        fxaa ??= createCompositePass(renderer, { antialias: "fxaa" });
+        fxaa ??= createCompositePass(renderer, { antialias: "fxaa", depthBuffer: false });
         fxaa.paint(() => renderer.render(hdrFrame.scene, camera));
       } else renderer.render(hdrFrame.scene, camera);
     },

@@ -45,7 +45,7 @@ import {
   type DriftPath,
   type Framing,
 } from "./model/drift-path";
-import { fadeFocusBlur, focusBlurRadius } from "./model/focus-blur";
+import { fadeFocusBlur, focusBlurRadius, needsFocusBlur } from "./model/focus-blur";
 import { glideAt, glideFrom, glideRests, glideSeconds, glideTowards } from "./model/glide";
 import { letGo, poseRests, restPose, settlePose, turnBy } from "./model/grab";
 import { NOBODY, handOver, handOverAtOnce, type HandOver } from "./model/hand-over";
@@ -150,10 +150,10 @@ export function createGiantsEngine(
       0,
       LENSES,
     );
-    const weather = resources.own(weatherUniforms());
     const forecast = createForecast();
     const tints = resources.own(discTints(LOOKS));
     const stellar = resources.own(stellarTables(LOOKS));
+    const weather = resources.own(weatherUniforms(stellar.spectrumData));
     const uniforms = {
       uResolution: { value: new Vector2(1, 1) },
       uPixelRatio: { value: 1 },
@@ -738,7 +738,10 @@ export function createGiantsEngine(
       const presence = weatherShown(weatherFade.level);
       const live = slot >= 0 && presence > 0;
       const forecastNow = live ? forecast.at(LOOKS[star]!.activity, globes[star]!, time) : null;
-      weather.fill(forecastNow);
+      weather.fill(
+        forecastNow,
+        live ? (LOOKS[star]!.equatorK + LOOKS[star]!.poleK) / 2 : undefined,
+      );
       uniforms.uWeather.value.set(
         live ? slot : -1,
         presence,
@@ -783,7 +786,8 @@ export function createGiantsEngine(
         antialias: state.antialias,
         bloom: state.bloom ? bloomSettings(state.quality) : null,
         gamut: state.wideColour ? "p3" : "srgb",
-        filter: blurLevel > 0,
+        filter:
+          blurLevel > 0 && needsFocusBlur(discs.shape, blurRadii, count, stage.width, stage.height),
       });
 
       const now = performance.now();

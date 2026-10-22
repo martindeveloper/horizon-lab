@@ -8,7 +8,8 @@ import { RUNG_IDS } from "../model/rungs";
 import { MAX_DISCS, PROFILE_SAMPLES, SPECTRUM_SAMPLES } from "../parameters";
 
 export function stellarTables(looks: readonly Look[]) {
-  const spectrum = new DataTexture(continuumTable(), SPECTRUM_SAMPLES, 1, RGBAFormat, FloatType);
+  const spectrumData = continuumTable();
+  const spectrum = new DataTexture(spectrumData, SPECTRUM_SAMPLES, 1, RGBAFormat, FloatType);
   spectrum.needsUpdate = true;
   const rows = looks.map((look, j) => {
     const facts = RUNG_FACTS[RUNG_IDS[j]!];
@@ -28,6 +29,7 @@ export function stellarTables(looks: readonly Look[]) {
     profiles.needsUpdate = true;
   }
   return {
+    spectrumData,
     uniforms: { uSpectrum: { value: spectrum }, uProfiles: { value: profiles } },
     assign,
     dispose() {

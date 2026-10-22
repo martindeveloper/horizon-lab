@@ -14,13 +14,18 @@ averaging decoded light. The nearest body remains sharp throughout navigation, w
 continuous handover, conservative limb protection, and unfiltered measurement lines and
 DOM labels. Background sky outside the bodies is copied. Fine surface work remains limited
 to the focus owner; the filter never re-evaluates the stellar shader. Turning it off fades
-to the original path with no extra pass; reduced motion switches immediately.
+to the original path with no extra pass; reduced motion switches immediately. Even while
+enabled, a conservative viewport test bypasses the filter if no blurred body can contribute,
+including when a sharp foreground body covers the entire viewport.
 
 ## Continuum and limb darkening
 
 `atmosphere.ts` integrates Planck radiance over 380–780 nm in 5 nm steps using the toolkit's
 CIE observer. The spectrum texture stores linear sRGB divided by CIE Y and log Y.
 Interpolation is manual, so nearest-filtered float textures need no float-linear extension.
+The constant flare colour and each active cloud's emission per unit column are sampled
+on the CPU from that same table. Region axes and ejection directions are also computed
+once per weather update; their spatial masks and foreground occlusion remain in the shader.
 Each star has its own exposure reference; displayed brightness is not an apparent-magnitude
 comparison. Negative out-of-gamut components survive until the final display mapping.
 

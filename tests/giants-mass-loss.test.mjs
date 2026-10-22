@@ -103,8 +103,8 @@ test("outflow textures clear when focus leaves and switching to the Sun does not
   texture.addEventListener("dispose", () => {
     disposed = true;
   });
-  uniforms.fill(weather);
-  assert.ok(texture.image.data[5] > 0 || texture.image.data[13] > 0);
+  uniforms.fill(weather, (look.equatorK + look.poleK) / 2);
+  assert.ok(texture.image.data.some((n) => n > 0));
   uniforms.fill(null);
   assert.ok(texture.image.data.every((n) => n === 0));
   const clearedVersion = texture.version;

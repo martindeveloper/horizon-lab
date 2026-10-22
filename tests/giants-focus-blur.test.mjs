@@ -1,9 +1,40 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { fadeFocusBlur, focusBlurRadius } from "../src/features/giants/lib/model/focus-blur.ts";
+import {
+  fadeFocusBlur,
+  focusBlurRadius,
+  needsFocusBlur,
+} from "../src/features/giants/lib/model/focus-blur.ts";
 import { RUNG_IDS } from "../src/features/giants/lib/model/rungs.ts";
 import { useGiants } from "../src/features/giants/lib/store.ts";
+
+test("blur bypass preserves offscreen feathering, foreground ordering and changing viewports", () => {
+  const disc = (x, y, z, w = z) => ({ x, y, z, w });
+  const visible = disc(50, 50, 20);
+  assert.equal(needsFocusBlur([visible], [0], 1, 100, 100), false);
+  assert.equal(needsFocusBlur([visible], [2], 1, 100, 100), true);
+  assert.equal(needsFocusBlur([disc(-100, 50, 20)], [2], 1, 100, 100), false);
+  assert.equal(
+    needsFocusBlur([disc(-30, 50, 20)], [2], 1, 100, 100),
+    true,
+    "a body outside the frame can still contribute the filter's feathered edge",
+  );
+  assert.equal(
+    needsFocusBlur([disc(-150, 50, 100, 10)], [2], 1, 100, 100),
+    true,
+    "flattened discs need a proportionally wider fade on their long axis",
+  );
+  const covering = disc(50, 50, 100);
+  assert.equal(needsFocusBlur([visible, covering], [2, 0], 2, 100, 100), false);
+  assert.equal(needsFocusBlur([covering, visible], [0, 2], 2, 100, 100), true);
+  assert.equal(
+    needsFocusBlur([visible, covering], [2, 0], 2, 200, 200),
+    true,
+    "resizing can expose a neighbour again",
+  );
+  assert.equal(needsFocusBlur([visible], [2], 0, 100, 100), false, "stale disc slots are ignored");
+});
 
 test("focus blur keeps the nearest body sharp and hands over continuously in either direction", () => {
   for (let place = 0; place <= RUNG_IDS.length - 1; place += 0.01) {

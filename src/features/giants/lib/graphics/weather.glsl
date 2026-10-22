@@ -19,7 +19,8 @@ vec3 envelope(float r, vec2 dir, int style, float haze, int i, float seed) {
     float clumps = 0.6 + 0.4 * gradientNoise3(vec3(dir * 7.0, log(r) * 10.0 - uTime * 0.3 + seed * 5.0));
     if (float(i) == uFocus.x && uFocus.y > 0.0) {
       float fine = resolvedFeature(28.0, uShape[i].z, 1.0);
-      clumps += 0.12 * min(uFocus.y, 1.0) * fine * gradientNoise3(vec3(dir * 28.0, log(r) * 24.0 - uTime * 0.5 + seed));
+      if (fine > 0.0)
+        clumps += 0.12 * min(uFocus.y, 1.0) * fine * gradientNoise3(vec3(dir * 28.0, log(r) * 24.0 - uTime * 0.5 + seed));
     }
     float thin = pow(r, -3.0) * (1.0 - smoothstep(0.5 * ENVELOPE_REACH, ENVELOPE_REACH, r));
     return tintOf(i, TINT_FACE).rgb * WIND_GLOW * haze * clumps * thin;
@@ -75,13 +76,13 @@ vec3 chromosphere(float h, float phi, float radiusPx, float seed) {
   float rim = exp(-h / (CHROMOSPHERE_HEIGHT + 0.5 * px)) * (0.75 + 0.25 * gradientNoise2(direction * 35.0 + seed));
   float jets = 0.0;
   float top = SPICULE_HEIGHT;
-  if (h < top && uDetail > 0.5) {
-    float columns = float(SPICULE_COLUMNS);
+  float columns = float(SPICULE_COLUMNS);
+  float resolved = resolvedFeature(columns / TAU, radiusPx, 1.0);
+  if (h < top && uDetail > 0.5 && resolved > 0.0) {
     float a = (phi / TAU + 0.5) * columns;
     vec3 dice = hash33(vec3(floor(a), seed * 13.0, 5.0));
     float reach = top * (0.3 + 0.7 * dice.x) * (0.6 + 0.4 * sin(uTime * (0.6 + 0.7 * dice.y) + TAU * dice.z));
     float thin = 1.0 - smoothstep(0.12, 0.42, abs(fract(a) - 0.5));
-    float resolved = resolvedFeature(columns / TAU, radiusPx, 1.0);
     jets = resolved * thin * (1.0 - smoothstep(0.5 * reach, reach, h)) * (1.0 - 0.5 * h / top);
   }
   return uBalmer * CHROMOSPHERE * (rim + 0.35 * jets);
@@ -110,13 +111,17 @@ vec3 sheets(float r, float phi, float radiusPx, vec3 own) {
     /* A prominence: tongues of plasma of many heights, threaded with fine bright strands that
        lean and wave, knots sliding down them. A plume: a broad, lumpy cloud. */
     float grain = mix(1.0, 9.0, info.w);
-    float lean = along + 0.25 * rise * gradientNoise2(vec2(along / 40.0, salt));
-    float strand = 1.0 - abs(gradientNoise2(vec2(lean / (2.6 * grain), rise / 26.0 + uTime * 0.05 + salt)));
     float resolved = resolvedFeature(200.0 / (2.6 * grain), radiusPx, 1.0);
-    float threads = mix(0.3, pow(strand, 5.0), resolved);
-    if (uDetail > 0.5) {
-      float strand2 = 1.0 - abs(gradientNoise2(vec2(lean / (1.3 * grain), rise / 14.0 - uTime * 0.04 + salt + 3.0)));
-      threads += 0.6 * resolvedFeature(200.0 / (1.3 * grain), radiusPx, 1.0) * pow(strand2, 7.0);
+    float threads = 0.3;
+    if (resolved > 0.0) {
+      float lean = along + 0.25 * rise * gradientNoise2(vec2(along / 40.0, salt));
+      float strand = 1.0 - abs(gradientNoise2(vec2(lean / (2.6 * grain), rise / 26.0 + uTime * 0.05 + salt)));
+      threads = mix(0.3, pow(strand, 5.0), resolved);
+      float finer = resolvedFeature(200.0 / (1.3 * grain), radiusPx, 1.0);
+      if (uDetail > 0.5 && finer > 0.0) {
+        float strand2 = 1.0 - abs(gradientNoise2(vec2(lean / (1.3 * grain), rise / 14.0 - uTime * 0.04 + salt + 3.0)));
+        threads += 0.6 * finer * pow(strand2, 7.0);
+      }
     }
     float knots = 0.5 + 0.5 * gradientNoise2(vec2(along / (7.0 * grain), rise / (7.0 * grain) + uTime * mix(0.6, 0.05, info.w) + salt));
     float tongues = 0.8 + 0.4 * gradientNoise2(vec2(along / (22.0 * grain), uTime * 0.06 + salt))
@@ -165,7 +170,9 @@ vec3 loops(vec2 o, float r, float radiusPx, float frontDepth) {
     float salt = float(k) * 5.3;
     float bundle = exp(-best * best / (w * w)) * min(1.0, width / w);
     float resolved = resolvedFeature(2.2 / max(width, 1e-5), radiusPx, 1.0);
-    float threads = mix(0.65, 0.25 + pow(1.0 - abs(gradientNoise2(vec2(along * 3.0 + salt, x * 2.2))), 4.0), resolved);
+    float threads = 0.65;
+    if (resolved > 0.0)
+      threads = mix(0.65, 0.25 + pow(1.0 - abs(gradientNoise2(vec2(along * 3.0 + salt, x * 2.2))), 4.0), resolved);
     /* Rain: knots sliding from the top down both legs. */
     float fall = abs(along - 0.5);
     float rain = 0.6 + 0.6 * max(0.0, gradientNoise2(vec2(fall * 16.0 - uTime * 0.8, salt)));
@@ -183,8 +190,8 @@ vec3 ejections(vec2 o, float r, vec3 tint, float seed) {
   for (int k = 0; k < EJECTIONS; k++) {
     vec4 e = uEjection[k];
     if (e.w <= 0.0 || r < 1.0) continue;
-    vec2 dir = vec2(cos(e.x), sin(e.x));
-    if (dot(o, dir) < r * cos(min(1.2 * e.z, PI))) continue;
+    vec2 dir = uEjectionDirection[k].xy;
+    if (dot(o, dir) < r * uEjectionDirection[k].z) continue;
     /* The angle from its axis, in shares of its spread. */
     float theta = atan(o.x * dir.y - o.y * dir.x, dot(o, dir));
     float w = theta / e.z;
@@ -220,7 +227,7 @@ vec3 flash(vec2 o) {
     if (site.w <= 0.0) continue;
     float facing = smoothstep(-0.12, 0.15, site.z);
     float d = length(o - site.xy);
-    light += spectrumAt(FLARE_K).rgb * FLASH_GLARE * site.w * facing * (exp(-d * 16.0) + 0.25 * exp(-d * 3.5));
+    light += uFlareColour * FLASH_GLARE * site.w * facing * (exp(-d * 16.0) + 0.25 * exp(-d * 3.5));
   }
   return light;
 }
@@ -243,13 +250,13 @@ float foregroundColumn(float depth, float centre, float width) {
 
 // Expelled surface gas cools and dilutes; condensed dust absorbs/reddens background light
 // and weakly scatters starlight. This is not a bright magnetic loop or a glowing dust ember.
-OutflowLight outflowLight(vec2 o, float frontDepth, vec4 face) {
+OutflowLight outflowLight(vec2 o, float frontDepth) {
   OutflowLight result = OutflowLight(vec3(0.0), vec3(1.0));
   for (int k = 0; k < OUTFLOW_SLOTS; k++) {
     float row = (float(k) + 0.5) / float(OUTFLOW_SLOTS);
-    vec4 state = texture2D(uOutflows, vec2(0.75, row));
+    vec4 state = texture2D(uOutflows, vec2(0.5, row));
     if (state.x + state.y <= 0.0) continue;
-    vec4 cloud = texture2D(uOutflows, vec2(0.25, row));
+    vec4 cloud = texture2D(uOutflows, vec2(1.0 / 6.0, row));
     vec2 q = (o - cloud.xy) / cloud.w;
     float squared = dot(q, q);
     if (squared > 12.25) continue;
@@ -260,10 +267,7 @@ OutflowLight outflowLight(vec2 o, float frontDepth, vec4 face) {
     // or observed optical depth is inferred from these illustrative coefficients.
     vec3 tau = density * (0.15 * state.x + state.y * vec3(0.65, 1.0, 1.45));
     vec3 transmission = exp(-tau);
-    float radius = length(cloud.xyz);
-    float forward = 0.25 + 0.75 * pow(max(cloud.z / radius, 0.0), 4.0);
-    vec3 emission = density * (0.35 * state.x * glowAt(state.z, face.a)
-      + 0.04 * state.y * face.rgb * forward / (radius * radius));
+    vec3 emission = density * texture2D(uOutflows, vec2(5.0 / 6.0, row)).rgb;
     result.emission = result.emission * transmission + emission;
     result.transmission *= transmission;
   }

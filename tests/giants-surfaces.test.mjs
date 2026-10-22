@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { SOLAR_TEFF_K, blackbodyColor, decodeSrgb } from "@horizon/toolkit/science";
 
+import { sampleSpectrum } from "../src/features/giants/lib/graphics/spectrum-sample.ts";
 import { stellarTables } from "../src/features/giants/lib/graphics/stellar-tables.ts";
 import { discTints } from "../src/features/giants/lib/graphics/tints.ts";
 import {
@@ -137,20 +138,18 @@ test("the continuum texture preserves spectral colours and relative light betwee
     previous = logY;
   }
   for (const T of [1500, 3000, 5772, 10070, 46000, 90000]) {
-    const at =
-      (Math.log(T / SPECTRUM_MIN_K) / Math.log(SPECTRUM_MAX_K / SPECTRUM_MIN_K)) *
-      (SPECTRUM_SAMPLES - 1);
-    const k = Math.floor(at);
-    const actual = Array.from(
-      { length: 4 },
-      (_, c) => table[k * 4 + c] + (table[(k + 1) * 4 + c] - table[k * 4 + c]) * (at - k),
-    );
+    const actual = sampleSpectrum(table, T, new Float32Array(4));
     const expected = stellarContinuum(T);
     actual.forEach((v, c) => near(v, expected[c], 0.0006));
     const rgb = blackbodyColor(T).map(decodeSrgb);
     const peak = Math.max(...actual.slice(0, 3));
     rgb.forEach((v, c) => near(Math.max(0, actual[c]) / peak, v, 0.001));
   }
+  assert.deepEqual(
+    sampleSpectrum(table, SPECTRUM_MIN_K / 2, new Float32Array(4)),
+    table.slice(0, 4),
+  );
+  assert.deepEqual(sampleSpectrum(table, SPECTRUM_MAX_K * 2, new Float32Array(4)), table.slice(-4));
 });
 
 test("stellar textures follow disc ownership, avoid repeated uploads, and release resources", () => {

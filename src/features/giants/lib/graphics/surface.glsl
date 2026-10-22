@@ -72,11 +72,7 @@ void markRegion(inout Marks marks, vec3 s, float mu, int k, float seed, float pr
   float reach = 2.2 * size;
   /* 1 − cos of the angle from the centre: about half its square. */
   if (1.0 - dot(s, region.xyz) > 0.5 * reach * reach) return;
-  vec3 east = normalize(cross(vec3(0.0, 1.0, 0.0), region.xyz) + vec3(1e-5, 0.0, 0.0));
-  vec3 north = cross(region.xyz, east);
-  vec3 axis = cos(state.y) * east + sin(state.y) * north;
-  vec3 side = cross(region.xyz, axis);
-  vec2 l = vec2(dot(s, axis), dot(s, side)) / size;
+  vec2 l = vec2(dot(s, uRegionAxis[k]), dot(s, uRegionSide[k])) / size;
   float rs = seed + float(k) * 3.7;
 
   if (state.w > 0.5) {
@@ -113,7 +109,7 @@ void markRegion(inout Marks marks, vec3 s, float mu, int k, float seed, float pr
     float knots = max(0.0, 0.45 + 0.75 * gradientNoise2(vec2(l.y * 9.0, rs + uTime * 0.7)));
     float ribbons = (exp(-a * a) + exp(-b * b)) * extent * knots;
     float kernel = exp(-dot(l, l) / 0.03);
-    marks.glow += spectrumAt(FLARE_K).rgb * RIBBON * flare * (ribbons + 1.2 * kernel);
+    marks.glow += uFlareColour * RIBBON * flare * (ribbons + 1.2 * kernel);
   }
 }
 
@@ -159,8 +155,11 @@ vec3 starSurface(vec3 s, float mu, int style, vec4 body, vec4 surface, vec4 glob
         // Continuous, irregular intermediate structure and restrained fine turbulence.
         // Both are attached to the rotating globe and fade at their projected resolution.
         vec3 flow = 0.55 * sin(s.yzx * 3.7 + seed * 9.0 + uTime * 0.012);
-        float medium = gradientNoise3(s * 6.5 + flow + seed * 13.0 + vec3(0.0, uTime * 0.018, 0.0));
-        dT += 0.025 * min(detail, 1.0) * resolvedFeature(6.5, radiusPx, mu) * medium;
+        float mediumResolved = resolvedFeature(6.5, radiusPx, mu);
+        if (mediumResolved > 0.0) {
+          float medium = gradientNoise3(s * 6.5 + flow + seed * 13.0 + vec3(0.0, uTime * 0.018, 0.0));
+          dT += 0.025 * min(detail, 1.0) * mediumResolved * medium;
+        }
         if (fine > 0.0)
           dT += GIANT_FINE_CONTRAST * fine * quiet
             * gradientNoise3(p + flow * 2.0 + vec3(uTime * 0.025, 0.0, 0.0));
@@ -195,7 +194,9 @@ vec3 starSurface(vec3 s, float mu, int style, vec4 body, vec4 surface, vec4 glob
     float b = fract(uTime / 24.0 + 0.5);
     float wa = 1.0 - abs(2.0 * a - 1.0);
     vec3 stretch = vec3(2.6, 9.0, 2.6);
-    float clouds = gradientNoise3(s * stretch + seed * 7.0);
+    // At full detail the two advected phases replace the coarse field completely.
+    float clouds = 0.0;
+    if (detail < 1.0) clouds = gradientNoise3(s * stretch + seed * 7.0);
     if (detail > 0.0) {
       float ca = gradientFbm3(turned(s, jet * a) * stretch + seed * 7.0);
       float cb = gradientFbm3(turned(s, jet * b) * stretch + seed * 7.0 + 31.0);
