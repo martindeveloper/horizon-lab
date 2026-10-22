@@ -152,7 +152,7 @@ export function DepthLadder() {
             />
             <span
               className={cn(
-                "deep-field-rung relative font-mono text-[10px] tracking-[0.14em] whitespace-nowrap uppercase transition-opacity duration-feedback ease-standard",
+                "deep-field-rung relative font-mono text-micro tracking-instrument whitespace-nowrap uppercase transition-opacity duration-feedback ease-standard",
                 i === current
                   ? "text-space-fg opacity-100"
                   : "text-space-muted opacity-0 group-hover:opacity-100",
@@ -162,7 +162,7 @@ export function DepthLadder() {
               {t(`views.${rung.id}`)}
               {/* How that distance is known; phones read it in the sightline. */}
               {wide && i === current ? (
-                <span className="absolute top-full left-0 mt-1 w-32 text-left font-sans text-[11px] leading-snug tracking-normal text-pretty whitespace-normal text-space-muted normal-case">
+                <span className="absolute top-full left-0 mt-1 w-32 text-left font-sans text-caption leading-snug tracking-normal text-pretty whitespace-normal text-space-muted normal-case">
                   {t(`methods.${METHOD_OF[rung.id]}`)}
                 </span>
               ) : null}

@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
+import { kickerClass } from "./kicker";
 import { Tooltip } from "./tooltip";
 import { cn } from "./utils";
 
@@ -22,7 +23,7 @@ export type DataReadoutProps = ComponentProps<"dl"> & {
 export function DataReadout({ items, variant = "grid", className, ...props }: DataReadoutProps) {
   if (variant === "inline")
     return (
-      <dl className={cn("flex flex-wrap items-center gap-x-4 gap-y-1", className)} {...props}>
+      <dl className={cn("flex flex-wrap items-center gap-x-section gap-y-1", className)} {...props}>
         {items.map((item) => (
           <div key={item.id} className={cn("flex items-center", item.className)}>
             <dt className="sr-only">{item.label}</dt>
@@ -34,7 +35,7 @@ export function DataReadout({ items, variant = "grid", className, ...props }: Da
                   </span>
                   <span
                     className={cn(
-                      "font-mono text-xs whitespace-nowrap text-fg-primary tabular-nums",
+                      "font-mono text-ui whitespace-nowrap text-fg-primary tabular-nums",
                       item.valueClassName,
                     )}
                   >
@@ -48,15 +49,13 @@ export function DataReadout({ items, variant = "grid", className, ...props }: Da
       </dl>
     );
   return (
-    <dl className={cn("grid grid-cols-3 gap-x-4 gap-y-3", className)} {...props}>
+    <dl className={cn("grid grid-cols-3 gap-x-section gap-y-3", className)} {...props}>
       {items.map((item) => (
         <div key={item.id} className={cn("min-w-0", item.className)}>
-          <dt className="font-mono text-xs tracking-widest text-fg-tertiary uppercase">
-            {item.label}
-          </dt>
+          <dt className={kickerClass}>{item.label}</dt>
           <dd
             className={cn(
-              "mt-0.5 font-mono text-xs text-fg-primary tabular-nums",
+              "mt-0.5 font-mono text-ui text-fg-primary tabular-nums",
               item.valueClassName,
             )}
           >

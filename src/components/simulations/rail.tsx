@@ -16,7 +16,7 @@ export function RailSection({
   return (
     <section>
       <h3 className={kickerClass}>{title}</h3>
-      {note ? <p className="mt-1 text-xs text-fg-secondary">{note}</p> : null}
+      {note ? <p className="mt-1 text-ui text-fg-secondary">{note}</p> : null}
       <div className="mt-2">{children}</div>
     </section>
   );
@@ -63,9 +63,9 @@ export function Rail({
           title={title}
           onClose={onClose}
           closeLabel={closeLabel}
-          className="items-center border-b border-border px-4 py-3"
+          className="items-center border-b border-border px-panel py-panel-row"
         />
-        <div className="flex flex-col gap-5 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4">
+        <div className="flex flex-col gap-section overflow-x-hidden overflow-y-auto overscroll-contain px-panel py-panel">
           {children}
         </div>
       </aside>
@@ -82,7 +82,7 @@ export function Rail({
           closeLabel={closeLabel}
           className="items-center py-1.5"
         />
-        <div className="no-scrollbar -mx-3 flex min-h-0 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3 pt-2 pb-2">
+        <div className="no-scrollbar -mx-3 flex min-h-0 flex-col gap-section overflow-x-hidden overflow-y-auto overscroll-contain px-3 pt-2 pb-2">
           {sheetLead}
           {children}
         </div>

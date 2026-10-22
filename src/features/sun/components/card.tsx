@@ -55,7 +55,7 @@ export function PlaceCard({ id }: { id: PlaceId }) {
                 <ChevronUp className="size-4" aria-hidden />
               )}
             </Action>
-            <p className="w-full text-xs text-fg-secondary">
+            <p className="w-full text-ui text-fg-secondary">
               {t(ride ? "hud.rideNote" : "hud.closeUpNote")}
             </p>
           </>

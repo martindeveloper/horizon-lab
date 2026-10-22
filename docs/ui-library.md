@@ -181,6 +181,45 @@ with `rounded-lg`, display titles, mono kickers, HUD-glass chips for the current
 choice, bottom sheets on phones, and gold only for small markers. Build a
 feature's chrome from them before adding local classes.
 
+### Typography and panel spacing
+
+Use the shared roles from `theme.css` for ordinary interface text. Sizes are rem-based;
+the table gives their nominal pixel sizes at the default root font size. Families,
+colors and weights remain separate so a role can serve both prose and mono readouts.
+
+| Utility        | Size | Use                                         |
+| -------------- | ---- | ------------------------------------------- |
+| `text-micro`   | 10px | Compact instrument labels and kickers       |
+| `text-caption` | 11px | Secondary metadata and small readouts       |
+| `text-ui`      | 12px | Control labels, notes and ordinary readouts |
+| `text-detail`  | 13px | Fact rows and compact supporting copy       |
+| `text-body`    | 14px | Explanatory prose, with relaxed leading     |
+| `text-panel`   | 16px | Panel headings                              |
+| `text-section` | 20px | Prominent object names and guide headings   |
+| `text-feature` | 24px | Expanded guide and dialog headings          |
+
+`text-body/5` retains a control or menu row's tighter 20px line. Explicit line heights
+and responsive variants are supported. Use `font-mono tabular-nums` for live values,
+and medium `font-display` with tight tracking for ordinary headings. `Kicker` keeps
+the 12px standard label; `size="compact"` uses 10px with `tracking-instrument`.
+The standard `tracking-label` and compact tracking replace repeated letter-spacing
+literals. `PanelHeader titleSize="section"` supplies a selected object's larger
+heading and kicker separation without nesting a styled title inside it.
+
+Align each panel's header, body and footer with the same inset utilities:
+`panel-compact` (14px) for compact phone cards, `panel` (16px) for ordinary rails,
+and `panel-roomy` / `panel-wide` (20px / 28px) for dialogs. For example, selected
+cards use `px-panel-compact md:px-panel`, while dialog sections use
+`px-panel-roomy sm:px-panel-wide`. `py-panel-row` is the 12px vertical row inset.
+Use `gap-section` or `space-y-section` (16px) for ordinary panel groups and
+`section-roomy` (24px) when the composition needs more room. `Surface` continues
+to own material only; its consumers choose padding and layout.
+
+Preserve the catalogue and editorial reading rhythm, brand lettering, cockpit
+type, small scientific axes and projected scene labels. Their existing sizes,
+spacing and optical adjustments are intentional exceptions. Safe-area gutters,
+touch targets and computed simulation geometry also keep their own rules.
+
 ### Motion contract
 
 Use the toolkit's four duration categories throughout ordinary UI:

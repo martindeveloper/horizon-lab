@@ -19,7 +19,7 @@ export function ScaleBar({ text, px, label, onScene = false, className }: ScaleB
     <Tooltip label={label} className={cn("min-w-0 shrink-0", className)}>
       <span
         className={cn(
-          "flex flex-col items-start gap-1 font-mono text-[11px] leading-none tracking-wide tabular-nums",
+          "flex flex-col items-start gap-1 font-mono text-caption leading-none tracking-wide tabular-nums",
           onScene ? "text-space-muted" : "text-fg-tertiary",
         )}
       >

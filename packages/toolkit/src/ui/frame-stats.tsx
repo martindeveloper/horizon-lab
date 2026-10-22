@@ -150,7 +150,7 @@ export function FrameStats({
   return (
     <div
       className={cn(
-        "glass-pill font-mono text-[11px] text-fg-primary tabular-nums",
+        "glass-pill font-mono text-caption text-fg-primary tabular-nums",
         detailed ? "flex flex-col gap-1 rounded-lg px-2.5 py-1.5" : "rounded-full px-2.5 py-1",
         className,
       )}

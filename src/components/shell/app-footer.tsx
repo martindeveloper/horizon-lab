@@ -8,7 +8,7 @@ import { FooterLinks } from "./footer-links";
 export async function AppFooter({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "shell" });
   return (
-    <footer className="app-footer mt-auto shrink-0 font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">
+    <footer className="app-footer mt-auto shrink-0 font-mono text-micro tracking-[0.18em] text-fg-tertiary uppercase">
       <div className="app-bar flex h-full items-center justify-between gap-4">
         <FooterLinks
           t={t}

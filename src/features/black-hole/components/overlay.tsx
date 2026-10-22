@@ -77,7 +77,7 @@ function FlowNotice({ className }: { className?: string }) {
   const t = useTranslations("blackHole");
   const flow = useBlackHole((s) => PRESETS.find((p) => p.id === s.presetId)?.illustrativeFlow);
   return flow ? (
-    <p className={cn("text-xs text-fg-tertiary", className)}>{t("flowNotice")}</p>
+    <p className={cn("text-ui text-fg-tertiary", className)}>{t("flowNotice")}</p>
   ) : null;
 }
 
@@ -207,7 +207,7 @@ export function ObservatoryOverlay() {
                         setSettingsOpen(false);
                         startGuide();
                       }}
-                      className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-xs tracking-widest text-fg-primary uppercase"
+                      className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-ui tracking-label text-fg-primary uppercase"
                     >
                       <GraduationCap className="size-3.5" />
                       {tGuide("start")}
@@ -231,7 +231,7 @@ export function ObservatoryOverlay() {
 
           {!activePin && !settingsOpen && !clocksOpen ? (
             <Dock footerClassName="md:hidden" className="overflow-hidden">
-              <Kicker className="mb-1.5 text-[11px]">
+              <Kicker className="mb-1.5 text-caption">
                 {active ? t(`presets.${active.id}`) : t("custom")}
                 <span className="text-fg-tertiary">
                   {" "}
@@ -279,7 +279,7 @@ function MobilePinCard({ children }: { children: ReactNode }) {
     <div
       ref={card}
       tabIndex={-1}
-      className="pin-card-mobile lesson-card no-scrollbar anim-sheet overflow-x-hidden overflow-y-auto rounded-t-xl p-3.5 outline-hidden"
+      className="pin-card-mobile lesson-card no-scrollbar anim-sheet overflow-x-hidden overflow-y-auto rounded-t-xl p-panel-compact outline-hidden"
     >
       {children}
     </div>

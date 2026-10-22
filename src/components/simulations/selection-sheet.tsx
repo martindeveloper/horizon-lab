@@ -49,25 +49,26 @@ export function SelectionSheet({
             {card.badge}
           </span>
         }
-        title={<span className="mt-1 block text-xl leading-tight">{card.title}</span>}
+        title={card.title}
+        titleSize="section"
         onClose={onClose}
         closeLabel={closeLabel}
-        className="px-3.5 pt-3.5 md:px-4 md:pt-4"
+        className="px-panel-compact pt-panel-compact md:px-panel md:pt-panel"
       />
       <div
         className={cn(
-          "scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4",
+          "scroll-thin flex min-h-0 flex-1 flex-col gap-section overflow-x-hidden overflow-y-auto overscroll-contain px-panel-compact pt-panel-row pb-panel md:px-panel",
           folded && "not-md:hidden",
         )}
       >
         {lead ? (
           <div>
-            <p className="text-xs text-fg-secondary">{lead.label}</p>
+            <p className="text-ui text-fg-secondary">{lead.label}</p>
             <p className="mt-0.5 font-mono text-2xl tracking-tight text-fg-primary tabular-nums">
               {lead.main}
             </p>
             {lead.note ? (
-              <p className="font-mono text-xs text-fg-secondary tabular-nums">{lead.note}</p>
+              <p className="font-mono text-ui text-fg-secondary tabular-nums">{lead.note}</p>
             ) : null}
           </div>
         ) : null}
@@ -76,18 +77,18 @@ export function SelectionSheet({
             {rows.map((fact) =>
               inline(fact) ? (
                 <div key={fact.id} className="flex items-baseline justify-between gap-4 py-2">
-                  <dt className="shrink-0 text-xs text-fg-secondary">{fact.label}</dt>
-                  <dd className="text-right font-mono text-[13px] text-fg-primary tabular-nums">
+                  <dt className="shrink-0 text-ui text-fg-secondary">{fact.label}</dt>
+                  <dd className="text-right font-mono text-detail text-fg-primary tabular-nums">
                     {fact.main}
                     {fact.note ? (
-                      <span className="block text-xs text-fg-secondary">{fact.note}</span>
+                      <span className="block text-ui text-fg-secondary">{fact.note}</span>
                     ) : null}
                   </dd>
                 </div>
               ) : (
                 <div key={fact.id} className="py-2">
-                  <dt className="text-xs text-fg-secondary">{fact.label}</dt>
-                  <dd className="mt-0.5 text-[13px] leading-snug text-fg-primary">
+                  <dt className="text-ui text-fg-secondary">{fact.label}</dt>
+                  <dd className="mt-0.5 text-detail leading-snug text-fg-primary">
                     {fact.main}
                     {fact.note ? <span className="text-fg-secondary"> · {fact.note}</span> : null}
                   </dd>
@@ -96,11 +97,9 @@ export function SelectionSheet({
             )}
           </dl>
         ) : null}
-        {card.body ? (
-          <p className="text-sm leading-relaxed text-fg-primary/80">{card.body}</p>
-        ) : null}
+        {card.body ? <p className="text-body text-fg-primary/80">{card.body}</p> : null}
         {card.caution ? (
-          <p className="flex gap-2 text-xs leading-relaxed text-fg-secondary">
+          <p className="flex gap-2 text-ui leading-relaxed text-fg-secondary">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
             {card.caution}
           </p>
@@ -108,7 +107,7 @@ export function SelectionSheet({
         {details}
       </div>
       {footer ? (
-        <div className="flex flex-wrap items-center gap-2 border-t border-border px-3.5 py-3 md:px-4">
+        <div className="flex flex-wrap items-center gap-2 border-t border-border px-panel-compact py-panel-row md:px-panel">
           {footer}
         </div>
       ) : null}

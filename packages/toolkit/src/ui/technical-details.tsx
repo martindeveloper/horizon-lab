@@ -49,18 +49,18 @@ export function TechnicalDetails({
         title={labels.open}
         onClick={() => dialog.current?.open()}
         className={cn(
-          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-xs text-fg-secondary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
+          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-ui text-fg-secondary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
           triggerClassName,
         )}
       >
         <Sigma className="size-4 md:size-3.5" aria-hidden />
       </button>
       <Dialog ref={dialog} title={document.title} closeLabel={labels.close}>
-        <div className="space-y-8 px-5 py-6 sm:px-7">
-          <p className="text-sm leading-relaxed text-fg-secondary">{document.summary}</p>
+        <div className="space-y-8 px-panel-roomy py-section-roomy sm:px-panel-wide">
+          <p className="text-body text-fg-secondary">{document.summary}</p>
           <section>
-            <h3 className="mb-3 font-display text-xl">{labels.features}</h3>
-            <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-fg-secondary">
+            <h3 className="mb-3 font-display text-section">{labels.features}</h3>
+            <ul className="list-disc space-y-2 pl-5 text-body text-fg-secondary">
               {document.features.map((feature) => (
                 <li key={feature}>{feature}</li>
               ))}
@@ -68,8 +68,8 @@ export function TechnicalDetails({
           </section>
           {document.references?.length ? (
             <section>
-              <h3 className="mb-3 font-display text-xl">{labels.references}</h3>
-              <ul className="space-y-2 text-sm text-fg-secondary">
+              <h3 className="mb-3 font-display text-section">{labels.references}</h3>
+              <ul className="space-y-2 text-body/5 text-fg-secondary">
                 {document.references.map((reference) => (
                   <li key={reference.url}>
                     <a
@@ -87,14 +87,14 @@ export function TechnicalDetails({
           ) : null}
           {document.sections.map((section) => (
             <section key={section.id} className="border-t border-border pt-5">
-              <h3 className="mb-3 font-display text-xl">{section.title}</h3>
-              <p className="text-sm leading-relaxed text-fg-secondary">{section.body}</p>
+              <h3 className="mb-3 font-display text-section">{section.title}</h3>
+              <p className="text-body text-fg-secondary">{section.body}</p>
               {section.equations.length > 0 ? (
-                <div className="mt-4 space-y-2 rounded-lg border border-border bg-surface-secondary p-4">
+                <div className="mt-4 space-y-2 rounded-lg border border-border bg-surface-secondary p-panel">
                   {section.equations.map((equation) => (
                     <p
                       key={equation}
-                      className="font-mono text-xs leading-relaxed break-words whitespace-pre-wrap"
+                      className="font-mono text-ui leading-relaxed break-words whitespace-pre-wrap"
                     >
                       {equation}
                     </p>

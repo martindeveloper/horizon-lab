@@ -17,7 +17,7 @@ function StepExtra({ step }: { step: TourStep }) {
   return (
     <>
       {value && step.figure ? (
-        <p className="mt-2 font-mono text-xs text-fg-secondary tabular-nums">
+        <p className="mt-2 font-mono text-ui text-fg-secondary tabular-nums">
           {t(`tour.figures.${step.figure}`, { value })}
         </p>
       ) : null}

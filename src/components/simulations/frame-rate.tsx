@@ -47,7 +47,7 @@ export function FrameRateSwitches() {
               key={part}
               on={parts[part]}
               onToggle={() => togglePart(part)}
-              className="anim-fade pl-7 text-xs md:min-h-8"
+              className="anim-fade pl-7 text-ui md:min-h-8"
             >
               {t(`parts.${part}`)}
             </SwitchRow>

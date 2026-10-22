@@ -61,8 +61,8 @@ export function Dialog({
       aria-labelledby={titleId}
       className="m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-surface-primary p-0 pb-1.5 text-fg-primary shadow-2xl backdrop:bg-space/75 backdrop:backdrop-blur-sm open:flex"
     >
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-5 py-4 sm:px-7">
-        <h2 id={titleId} className="font-display text-2xl">
+      <header className="flex shrink-0 items-center justify-between gap-section border-b border-border px-panel-roomy py-panel sm:px-panel-wide">
+        <h2 id={titleId} className="font-display text-feature">
           {title}
         </h2>
         <IconButton autoFocus aria-label={closeLabel} onClick={() => modal.current?.close()}>

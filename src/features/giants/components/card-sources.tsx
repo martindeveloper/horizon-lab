@@ -7,7 +7,7 @@ import { cardSources } from "./card-specs";
 /** Keep provenance in the card's existing scroll area, within an optional disclosure. */
 export function CardSources({ id, t }: { id: RungId; t: Translate }) {
   return (
-    <details className="text-xs leading-relaxed text-fg-secondary">
+    <details className="text-ui leading-relaxed text-fg-secondary">
       <summary className="min-h-11 cursor-pointer rounded-sm py-3 outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
         {t("card.sources")}
       </summary>

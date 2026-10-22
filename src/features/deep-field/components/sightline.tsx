@@ -106,7 +106,7 @@ export function Sightline() {
         aria-label={t("hud.eyepiece")}
         className="deep-field-sightline mx-auto flex max-w-xl flex-col items-center text-center"
       >
-        <p className="max-w-full truncate font-mono text-[10px] tracking-[0.14em] text-space-muted uppercase tabular-nums">
+        <p className="max-w-full truncate font-mono text-micro tracking-instrument text-space-muted uppercase tabular-nums">
           {/* Phones name the view in the caption up top, so the numbers keep the line. */}
           <span className={selection ? undefined : "not-md:hidden"}>{name} · </span>
           {reach}
@@ -118,16 +118,16 @@ export function Sightline() {
           <span className="absolute top-1/2 right-0 size-2 -translate-y-1/2 rounded-full border border-solar bg-space shadow-[0_0_10px_rgb(var(--solar)/0.6)]" />
           <span className="deep-field-photon absolute top-1/2 size-1 -translate-y-1/2 rounded-full bg-solar" />
         </div>
-        <p className="mt-2 font-display text-base font-medium tracking-tight text-space-fg tabular-nums md:text-lg short:mt-0.5 short:text-sm">
+        <p className="mt-2 font-display text-panel font-medium tracking-tight text-space-fg tabular-nums md:text-lg short:mt-0.5 short:text-body/5">
           {t("hud.lightLeftAgo", { ago: formatAgo(t, f, line.years, locale) })}
         </p>
         {/* Phones wrap these rather than cut them; the era keeps two lines so the ladder above
             never jumps while it is dragged through the ages. */}
-        <p className="mt-0.5 max-w-full text-xs text-balance text-space-muted not-md:line-clamp-2 not-md:min-h-[2lh] md:truncate short:hidden">
+        <p className="mt-0.5 max-w-full text-ui text-balance text-space-muted not-md:line-clamp-2 not-md:min-h-[2lh] md:truncate short:hidden">
           {formatThen(t, f, thenOf(line, now))}
         </p>
         {/* How that distance is known; wide screens read it beside the ladder's rung. */}
-        <p className="mt-0.5 line-clamp-2 max-w-full text-[11px] text-balance text-space-muted/80 md:hidden short:hidden">
+        <p className="mt-0.5 line-clamp-2 max-w-full text-caption text-balance text-space-muted/80 md:hidden short:hidden">
           {t(`methods.${METHOD_OF[view]}`)}
         </p>
       </section>

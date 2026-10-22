@@ -3,7 +3,20 @@ import { extendTailwindMerge } from "tailwind-merge";
 
 const twMerge = extendTailwindMerge({
   extend: {
-    theme: { ease: ["standard", "enter", "exit"] },
+    theme: {
+      ease: ["standard", "enter", "exit"],
+      text: ["micro", "caption", "ui", "detail", "body", "panel", "section", "feature"],
+      tracking: ["label", "instrument"],
+      spacing: [
+        "panel-compact",
+        "panel",
+        "panel-roomy",
+        "panel-wide",
+        "panel-row",
+        "section",
+        "section-roomy",
+      ],
+    },
     classGroups: {
       duration: [{ duration: ["feedback", "control", "reveal", "scene"] }],
       animate: ["anim-rise", "anim-sheet", "anim-rail", "anim-fade"],

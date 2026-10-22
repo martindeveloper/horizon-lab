@@ -100,7 +100,7 @@ function SoftwareNotice() {
           setOpen(false);
         }}
       />
-      <p className="mt-1 text-sm leading-relaxed text-fg-secondary">{t("softwareBody")}</p>
+      <p className="mt-1 text-body text-fg-secondary">{t("softwareBody")}</p>
     </Surface>
   );
 }

@@ -19,10 +19,10 @@ export function ReadingPanel({ onClose }: { onClose: () => void }) {
     >
       {sections.map((id) => (
         <section key={id}>
-          <h3 className="font-display text-sm font-medium tracking-tight text-fg-primary">
+          <h3 className="font-display text-body/5 font-medium tracking-tight text-fg-primary">
             {t(`guide.sections.${id}.title`)}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-fg-secondary">
+          <p className="mt-1 text-body text-fg-secondary">
             {t(`guide.sections.${id}.body`, figures)}
           </p>
         </section>

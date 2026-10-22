@@ -88,7 +88,7 @@ function LightRuler({ className }: { className?: string }) {
               <span className="block h-2 w-px -translate-y-1 bg-fg-primary/35" />
               <span
                 className={cn(
-                  "mt-1 font-mono text-[10px] leading-none tabular-nums not-md:hidden",
+                  "mt-1 font-mono text-micro leading-none tabular-nums not-md:hidden",
                   index === shown && onScale >= 0 ? "text-fg-primary" : "text-fg-tertiary",
                 )}
               >
@@ -139,9 +139,9 @@ function LightLegend() {
   const distance = useDistance();
   const light = useSun((s) => s.light);
   return (
-    <p className="min-w-0 flex-1 basis-48 text-sm leading-snug tracking-tight short:hidden">
+    <p className="min-w-0 flex-1 basis-48 text-body leading-snug tracking-tight short:hidden">
       <span className="text-fg-primary">{t(`lights.${light}`)}</span>
-      <span className="ml-2 text-xs text-fg-secondary">
+      <span className="ml-2 text-ui text-fg-secondary">
         {t(`lightNotes.${light}`)} · {lightLegend(t, distance, light)}
       </span>
     </p>
@@ -150,7 +150,7 @@ function LightLegend() {
 
 /** Room for the widest everyday reading ("399.9 d"), so a new digit or unit doesn't nudge the row. */
 const ELAPSED_CLASS =
-  "inline-block min-w-[9ch] text-right font-mono text-xs text-fg-secondary tabular-nums";
+  "inline-block min-w-[9ch] text-right font-mono text-ui text-fg-secondary tabular-nums";
 
 /** The clock: play or pause, its rate a step slower or faster, and the Sun's time passed beside it. */
 function Clock() {
@@ -213,7 +213,7 @@ function ActionRow({
         valueText={() => text}
         onValueChange={([next]) => onValue(next ?? 0)}
       />
-      <span className="font-mono text-xs text-fg-primary tabular-nums not-md:basis-full md:truncate">
+      <span className="font-mono text-ui text-fg-primary tabular-nums not-md:basis-full md:truncate">
         {text}
       </span>
     </div>

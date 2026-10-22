@@ -72,16 +72,14 @@ function HorizonLesson({
   const t = useTranslations("blackHole");
   return (
     <>
-      <p className="text-sm leading-relaxed text-fg-primary/80">
-        {t("pins.horizon1", { rh: rh.toFixed(2) })}
-      </p>
+      <p className="text-body text-fg-primary/80">{t("pins.horizon1", { rh: rh.toFixed(2) })}</p>
       <Equation>
         R<Sub>s</Sub> = 2GM / c² = {formatLengthKm(rs)}
       </Equation>
       <Equation>
         r₊ / M = 1 + √(1 − a<Sub>*</Sub>²)
       </Equation>
-      <p className="text-sm leading-relaxed text-fg-primary/80">
+      <p className="text-body text-fg-primary/80">
         {t("pins.horizon2", {
           mass: formatMass(massSolar),
           spin: formatSpin(spin),
@@ -99,7 +97,7 @@ function PhotonLesson({ rp, rs, spin }: { rp: number; rs: number; spin: number }
   const t = useTranslations("blackHole");
   return (
     <>
-      <p className="text-sm leading-relaxed text-fg-primary/80">{t("pins.photon1")}</p>
+      <p className="text-body text-fg-primary/80">{t("pins.photon1")}</p>
       <Equation>
         r<Sub>ph</Sub> = 3M = {formatLengthKm((3 / 2) * rs)}
         <span className="text-fg-tertiary"> (a</span>
@@ -124,7 +122,7 @@ function PhotonLesson({ rp, rs, spin }: { rp: number; rs: number; spin: number }
           <span className="text-fg-tertiary"> = 0)</span>
         </Equation>
       )}
-      <p className="text-sm leading-relaxed text-fg-primary/80">
+      <p className="text-body text-fg-primary/80">
         {t(spin < 0 ? "pins.photon2Retro" : "pins.photon2", { rp: rp.toFixed(2) })}
       </p>
     </>
@@ -146,7 +144,7 @@ function IscoLesson({
   const t = useTranslations("blackHole");
   return (
     <>
-      <p className="text-sm leading-relaxed text-fg-primary/80">{t("pins.isco1")}</p>
+      <p className="text-body text-fg-primary/80">{t("pins.isco1")}</p>
       <Equation>
         r<Sub>ISCO</Sub> = 6M
         <span className="text-fg-tertiary"> (Schwarzschild)</span>
@@ -157,9 +155,9 @@ function IscoLesson({
         <span className="text-fg-tertiary"> → 1</span>
       </Equation>
       <Equation>
-        P = 2π ((r/M)<sup className="text-xs">3/2</sup> + a<Sub>*</Sub>) GM/c³
+        P = 2π ((r/M)<sup className="text-ui">3/2</sup> + a<Sub>*</Sub>) GM/c³
       </Equation>
-      <p className="text-sm leading-relaxed text-fg-primary/80">
+      <p className="text-body text-fg-primary/80">
         {t(spin < 0 ? "pins.isco2Retro" : "pins.isco2", {
           spin: formatSpin(spin),
           ri: ri.toFixed(2),
@@ -175,7 +173,7 @@ function DopplerLesson() {
   const t = useTranslations("blackHole");
   return (
     <>
-      <p className="text-sm leading-relaxed text-fg-primary/80">{t("pins.doppler1")}</p>
+      <p className="text-body text-fg-primary/80">{t("pins.doppler1")}</p>
       <Equation>δ = 1 / (γ (1 − β μ))</Equation>
       <Equation>
         I<Sub>ν,obs</Sub>(ν) = g³ I<Sub>ν,em</Sub>(ν/g)
@@ -187,7 +185,7 @@ function DopplerLesson() {
         g<Sub>static</Sub> = √(1 − 2M/r)
         <span className="text-fg-tertiary"> {t("pins.dopplerRedshift")}</span>
       </Equation>
-      <p className="text-sm leading-relaxed text-fg-primary/80">{t("pins.doppler2")}</p>
+      <p className="text-body text-fg-primary/80">{t("pins.doppler2")}</p>
     </>
   );
 }

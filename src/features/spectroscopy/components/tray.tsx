@@ -61,7 +61,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
                   aria-pressed={i === active}
                   onClick={() => go(i)}
                   className={cn(
-                    "relative h-9 rounded-full px-3.5 text-xs transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+                    "relative h-9 rounded-full px-3.5 text-ui transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
                     "after:absolute after:inset-x-0 after:-inset-y-1",
                     i === active
                       ? "bg-fg-primary/10 font-medium text-fg-primary"
@@ -106,7 +106,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
 /** A panel's heading on a desktop card; on a phone its tab names it. */
 export function PanelTitle({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
   return (
-    <div className="hidden h-5 items-center justify-between gap-3 text-xs text-fg-secondary md:flex">
+    <div className="hidden h-5 items-center justify-between gap-3 text-ui text-fg-secondary md:flex">
       <span className="min-w-0 truncate">{children}</span>
       {aside}
     </div>

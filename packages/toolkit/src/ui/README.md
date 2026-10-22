@@ -5,6 +5,10 @@ translated strings and domain values in props. No component reads application
 state or routing. See the repository's `docs/ui-library.md` for the full component
 catalogue and `examples/visualization-example.tsx` for composition.
 
+- `Kicker`: mono uppercase label; `size="compact"` uses the instrument-label role.
+  `kickerClass` remains available for labels on other elements.
+- `PanelHeader`: standard panel title; `titleSize="section"` gives a selected
+  object's name the larger heading and kicker separation without a nested styled span.
 - `Slider`: standard Radix slider with translated labels and optional scientific
   track styling supplied by the caller. Its `slider-thumb` CSS utility also serves
   custom Radix sliders: shared focus ring, feedback transition, rounded shape and
@@ -90,6 +94,28 @@ catalogue and `examples/visualization-example.tsx` for composition.
 - `TextReveal` keeps its `@horizon/toolkit/ui/motion` entry point, using CSS for
   each letter's fade. Its reading cadence and total stagger cap are independent of
   the control fade duration. Reduced motion and `instant` render full text immediately.
+
+## Typography and spacing
+
+`theme.css` owns the interface size/line-height pairs: `text-micro` (10px),
+`text-caption` (11px), `text-ui` (12px), `text-detail` (13px), `text-body` (14px),
+`text-panel` (16px), `text-section` (20px) and `text-feature` (24px). Values are
+stored in rem; these are their nominal sizes at the default root font size.
+Body text includes relaxed leading; `text-body/5` keeps a control or menu row's
+tighter 20px line. Explicit leading and responsive variants still work normally.
+Families, colors and weights are independent: use mono/tabular numerals for data,
+and medium display text with tight tracking for panel and guide headings.
+Kickers use `tracking-label`, compact kickers use `tracking-instrument`.
+
+Panel headers, bodies and footers share inset tokens: `panel-compact` (14px),
+`panel` (16px), `panel-roomy` (20px) and `panel-wide` (28px). Use them as spacing
+utilities, for example `px-panel-compact md:px-panel`; `panel-row` is the 12px
+vertical inset. `gap-section` / `space-y-section` separate ordinary panel groups
+by 16px; `section-roomy` supplies 24px where more room is needed. The class-merging
+helper recognizes these tokens, so consumer overrides remain predictable.
+`Surface` stays material-only. Keep safe-area gutters, touch targets, calculated
+scene geometry, editorial composition, cockpit lettering and plotted labels local
+to their existing contracts rather than forcing them onto the interface scale.
 
 ## Colors
 

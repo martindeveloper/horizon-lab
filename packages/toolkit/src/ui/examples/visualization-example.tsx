@@ -28,7 +28,7 @@ export function VisualizationExample() {
       <div className="absolute inset-0 bg-surface-primary" />
       <VisualizationOverlay>
         <header className="hud-top pad-hud-top absolute inset-x-0 top-0 flex items-center gap-3">
-          <h1 className="hud-title font-display text-xl">New visualization</h1>
+          <h1 className="hud-title font-display text-section">New visualization</h1>
           <Toolbar aria-label="Playback" className="ml-auto">
             <Tooltip label={running ? "Pause" : "Play"}>
               <IconButton
@@ -46,7 +46,7 @@ export function VisualizationExample() {
           aria-label="Simulation controls"
           className="pad-hud-bottom absolute inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:w-80"
         >
-          <Surface className="pointer-events-auto space-y-4 rounded-lg p-4">
+          <Surface className="pointer-events-auto space-y-section rounded-lg p-panel">
             <ControlRow label="Speed" value={`${speed.toFixed(1)}×`}>
               <Slider
                 aria-label="Simulation speed"

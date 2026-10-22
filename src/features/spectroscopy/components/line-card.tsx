@@ -163,21 +163,22 @@ export function LineCard() {
             {named?.letter ? ` · ${t("card.letter", { letter: named.letter })}` : ""}
           </span>
         }
-        title={<span className="mt-1 block text-xl leading-tight">{lineName(line, f)}</span>}
+        title={lineName(line, f)}
+        titleSize="section"
         onClose={() => api().select(null)}
         closeLabel={t("hud.close")}
-        className="px-3.5 pt-3.5 md:px-4 md:pt-4"
+        className="px-panel-compact pt-panel-compact md:px-panel md:pt-panel"
       />
-      <div className="scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4">
+      <div className="scroll-thin flex min-h-0 flex-1 flex-col gap-section overflow-x-hidden overflow-y-auto overscroll-contain px-panel-compact pt-panel-row pb-panel md:px-panel">
         <div>
-          <p className="text-xs text-fg-secondary">
+          <p className="text-ui text-fg-secondary">
             {shifted ? t("card.observed") : t("card.wavelength")}
           </p>
           <p className="mt-0.5 font-mono text-2xl tracking-tight text-fg-primary tabular-nums">
             {wavelength(f, observed, 3)} nm
           </p>
           {shifted ? (
-            <p className="font-mono text-xs text-fg-secondary tabular-nums">
+            <p className="font-mono text-ui text-fg-secondary tabular-nums">
               {t("card.rest", {
                 rest: wavelength(f, line.wavelength, 3),
                 shift: f.number(observed - line.wavelength, {
@@ -205,8 +206,8 @@ export function LineCard() {
         <dl className="divide-y divide-border border-y border-border">
           {facts.map((fact) => (
             <div key={fact.id} className="flex items-baseline justify-between gap-4 py-1.5">
-              <dt className="shrink-0 text-xs text-fg-secondary">{fact.label}</dt>
-              <dd className="text-right font-mono text-[12px] text-fg-primary tabular-nums">
+              <dt className="shrink-0 text-ui text-fg-secondary">{fact.label}</dt>
+              <dd className="text-right font-mono text-ui text-fg-primary tabular-nums">
                 {fact.value}
               </dd>
             </div>
@@ -214,7 +215,7 @@ export function LineCard() {
         </dl>
 
         <section>
-          <h3 className="text-xs text-fg-secondary">
+          <h3 className="text-ui text-fg-secondary">
             {t("card.growthTitle")} ·{" "}
             <span className="text-fg-primary">{t(`regime.${report.regime}`)}</span>
           </h3>
@@ -229,7 +230,7 @@ export function LineCard() {
               damped: t("regime.damped"),
             }}
           />
-          <p className="text-xs leading-relaxed text-fg-secondary">
+          <p className="text-ui leading-relaxed text-fg-secondary">
             {/* Hydrogen's Holtsmark wings fall as Δλ^(−5/2), so its damped lines grow as N^(2/5). */}
             {t(
               report.regime === "damped" && line.species === "H I"
@@ -241,7 +242,7 @@ export function LineCard() {
 
         {sequence.length ? (
           <section>
-            <h3 className="text-xs text-fg-secondary">{t("card.sequenceTitle")}</h3>
+            <h3 className="text-ui text-fg-secondary">{t("card.sequenceTitle")}</h3>
             <SequenceChart
               points={sequence}
               marker={marker}
@@ -250,14 +251,12 @@ export function LineCard() {
           </section>
         ) : null}
 
-        {named ? (
-          <p className="text-sm leading-relaxed text-fg-primary/80">{t(`notes.${named.note}`)}</p>
-        ) : null}
+        {named ? <p className="text-body text-fg-primary/80">{t(`notes.${named.note}`)}</p> : null}
       </div>
-      <div className="flex flex-wrap items-center gap-2 border-t border-border px-3.5 py-3 md:px-4">
+      <div className="flex flex-wrap items-center gap-2 border-t border-border px-panel-compact py-panel-row md:px-panel">
         <Action
           variant="glass"
-          className="min-h-9 px-3 text-xs md:min-h-8"
+          className="min-h-9 px-3 text-ui md:min-h-8"
           onClick={() => api().setRange([observed - 1.5, observed + 1.5])}
         >
           <ZoomIn className="size-3.5" />

@@ -23,6 +23,37 @@
   --font-headline: "Bodoni Moda Variable", "Bodoni Moda", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
+  /* Interface type roles. Editorial titles, cockpit lettering and plotted labels stay local.
+     Families and colors remain independent, so readouts can use the same sizes in mono. */
+  --text-micro: 0.625rem;
+  --text-micro--line-height: 1.5;
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 1.5;
+  --text-ui: 0.75rem;
+  --text-ui--line-height: calc(1 / 0.75);
+  --text-detail: 0.8125rem;
+  --text-detail--line-height: 1.5;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.625;
+  --text-panel: 1rem;
+  --text-panel--line-height: 1.5;
+  --text-section: 1.25rem;
+  --text-section--line-height: 1.4;
+  --text-feature: 1.5rem;
+  --text-feature--line-height: calc(2 / 1.5);
+  --tracking-label: 0.1em;
+  --tracking-instrument: 0.14em;
+
+  /* Panel insets: compact phone cards, ordinary rails, then roomy dialogs.
+     Keep header/body/footer edges aligned; Surface itself still supplies only material. */
+  --spacing-panel-compact: 0.875rem;
+  --spacing-panel: 1rem;
+  --spacing-panel-roomy: 1.25rem;
+  --spacing-panel-wide: 1.75rem;
+  --spacing-panel-row: 0.75rem;
+  --spacing-section: 1rem;
+  --spacing-section-roomy: 1.5rem;
+
   --color-space: #08080b;
   --color-space-fg: #ecece8;
   --color-space-title: #f4f4f0;

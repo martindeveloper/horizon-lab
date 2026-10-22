@@ -63,7 +63,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
       })}
       <span
         aria-hidden
-        className="col-start-2 row-start-2 font-mono text-[10px] tracking-wide text-fg-tertiary tabular-nums"
+        className="col-start-2 row-start-2 font-mono text-micro tracking-wide text-fg-tertiary tabular-nums"
       >
         {centre}
       </span>

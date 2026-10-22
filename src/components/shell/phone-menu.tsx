@@ -13,7 +13,7 @@ import { FooterLinks } from "./footer-links";
 import { ThemeSwitch, useThemeLabels } from "./theme-switch";
 import { useDismissOnEscape } from "./use-dismiss-on-escape";
 
-const kicker = "font-mono text-[10px] tracking-[0.22em] text-fg-tertiary uppercase";
+const kicker = "font-mono text-micro tracking-[0.22em] text-fg-tertiary uppercase";
 const shelves = [
   { id: "labs", shelf: labs },
   { id: "experiences", shelf: experiences },
@@ -100,10 +100,10 @@ export function PhoneMenu({
                                 className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                               >
                                 <span className="min-w-0">
-                                  <span className="block text-[15px] font-medium tracking-tight text-fg-primary">
+                                  <span className="block text-panel font-medium tracking-tight text-fg-primary">
                                     {t(`catalogue.${simulation.messageKey}.title`)}
                                   </span>
-                                  <span className="block text-xs text-fg-secondary">
+                                  <span className="block text-ui text-fg-secondary">
                                     {t(`catalogue.${simulation.messageKey}.category`)}
                                   </span>
                                 </span>
@@ -147,7 +147,7 @@ export function PhoneMenu({
               </div>
             </div>
 
-            <div className="mt-4 flex h-10 items-center justify-between gap-4 border-t border-border pt-1 font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">
+            <div className="mt-4 flex h-10 items-center justify-between gap-4 border-t border-border pt-1 font-mono text-micro tracking-[0.18em] text-fg-tertiary uppercase">
               <FooterLinks t={shell} menu onNavigate={close} />
             </div>
           </nav>

@@ -14,6 +14,7 @@ import {
   type CoachRect,
 } from "./coach-model";
 import { isSceneShortcut } from "./keyboard";
+import { Kicker } from "./kicker";
 import { uiMotion } from "./motion";
 import { cn } from "./utils";
 
@@ -489,7 +490,7 @@ export function CoachMark({
         aria-describedby={bodyId}
         data-side={place?.side}
         style={place ? { left: place.left, top: place.top } : { visibility: "hidden" }}
-        className="coach-card pointer-events-auto absolute z-[81] w-[min(19rem,calc(100%-1.5rem))] rounded-lg px-4 pt-3 pb-1.5 md:pb-2"
+        className="coach-card pointer-events-auto absolute z-[81] w-[min(19rem,calc(100%-1.5rem))] rounded-lg px-panel pt-panel-row pb-1.5 md:pb-2"
       >
         {/* The horizon: gold fills along the top edge as the tour goes on, a sun at its head. */}
         <span aria-hidden className="coach-horizon">
@@ -497,9 +498,9 @@ export function CoachMark({
           <span className="coach-horizon-sun" style={{ left: reached }} />
         </span>
         <div className="flex items-center gap-2">
-          <p className="font-mono text-[10px] tracking-[0.14em] text-accent uppercase tabular-nums">
+          <Kicker size="compact" className="text-accent tabular-nums">
             {kicker}
-          </p>
+          </Kicker>
           <button
             type="button"
             aria-label={labels.close}
@@ -512,10 +513,10 @@ export function CoachMark({
         </div>
         <div className="-mt-2 md:-mt-1" aria-live="polite" aria-atomic>
           <div key={step} className="anim-fade">
-            <h2 className="font-display text-[15px] leading-tight tracking-tight text-fg-primary">
+            <h2 className="font-display text-panel leading-tight tracking-tight text-fg-primary">
               {title}
             </h2>
-            <p id={bodyId} className="mt-1 text-[13px] leading-snug text-fg-secondary">
+            <p id={bodyId} className="mt-1 text-detail leading-snug text-fg-secondary">
               {body}
             </p>
           </div>
@@ -534,7 +535,7 @@ export function CoachMark({
           </button>
           <span
             aria-hidden
-            className="ml-auto hidden font-mono text-[10px] text-fg-secondary md:inline"
+            className="ml-auto hidden font-mono text-micro text-fg-secondary md:inline"
           >
             ← →
           </span>

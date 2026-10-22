@@ -69,7 +69,7 @@ export function RateStepper({
       </IconButton>
       <output
         aria-live="polite"
-        className={cn("min-w-16 text-center font-mono text-[11px] tabular-nums", readoutClassName)}
+        className={cn("min-w-16 text-center font-mono text-caption tabular-nums", readoutClassName)}
       >
         {spoken === undefined ? (
           readout

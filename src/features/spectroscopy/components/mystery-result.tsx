@@ -104,7 +104,7 @@ export function MysteryActions({
   const t = useTranslations("spectroscopy");
   const api = useSpectroscopy.getState;
   const { own, nextIndex } = useNextCase();
-  const size = compact ? "min-h-9 px-3.5 text-xs" : "min-h-8 px-4 text-xs";
+  const size = compact ? "min-h-9 px-3.5 text-ui" : "min-h-8 px-4 text-ui";
   const onward = () => (nextIndex < 0 ? api().shuffleCases() : api().setCase(nextIndex));
   return (
     <div className="flex shrink-0 items-center gap-1.5">
@@ -166,11 +166,11 @@ export function MysteryResultCard({ result }: { result: MysteryResult }) {
     >
       <OutcomeMark outcome={outcome} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm leading-6 font-medium text-fg-primary md:leading-5">
+        <p className="text-body leading-6 font-medium text-fg-primary md:leading-5">
           {t(`dock.outcome.${outcome}`)}
         </p>
-        <p className="line-clamp-2 text-xs text-pretty text-fg-secondary">{reveal}</p>
-        <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs">
+        <p className="line-clamp-2 text-ui text-pretty text-fg-secondary">{reveal}</p>
+        <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-ui">
           <Score ok={result.found === result.total && result.unseen === 0}>
             {t("dock.elementsScore", {
               found: result.found,

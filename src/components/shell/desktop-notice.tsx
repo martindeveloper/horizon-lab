@@ -90,7 +90,7 @@ export function DesktopNotice() {
           focused.current = false;
         }}
         className={cn(
-          "pointer-events-auto flex items-center gap-2.5 rounded-full py-0.5 pr-0.5 pl-4 text-xs text-fg-primary",
+          "pointer-events-auto flex items-center gap-2.5 rounded-full py-0.5 pr-0.5 pl-4 text-ui text-fg-primary",
           phase === "leaving"
             ? "opacity-0 transition-opacity duration-control ease-exit"
             : "anim-rise",

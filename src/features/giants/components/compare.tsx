@@ -51,7 +51,7 @@ export function Compare({ id }: { id: RungId }) {
   return (
     <section className="flex flex-col gap-2" aria-label={t("compare.title")}>
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-xs text-fg-secondary">{t("compare.title")}</h3>
+        <h3 className="text-ui text-fg-secondary">{t("compare.title")}</h3>
         <SegmentedControl
           aria-label={t("compare.title")}
           options={REFERENCES.map((value) => ({ value, label: t(`compare.references.${value}`) }))}
@@ -60,7 +60,7 @@ export function Compare({ id }: { id: RungId }) {
         />
       </div>
       {reference === "other" ? (
-        <label className="flex items-center justify-between gap-3 text-xs text-fg-secondary">
+        <label className="flex items-center justify-between gap-3 text-ui text-fg-secondary">
           {t("compare.pick")}
           <select
             value={otherBody}
@@ -68,7 +68,7 @@ export function Compare({ id }: { id: RungId }) {
               const picked = RUNG_IDS.find((rung) => rung === event.target.value);
               if (picked) api().setOtherBody(picked);
             }}
-            className="min-w-0 rounded-md border border-border bg-surface-secondary px-2 py-1 text-sm text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+            className="min-w-0 rounded-md border border-border bg-surface-secondary px-2 py-1 text-body/5 text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             {RUNG_IDS.map((rung) => (
               <option key={rung} value={rung}>
@@ -82,17 +82,17 @@ export function Compare({ id }: { id: RungId }) {
         <dl className="divide-y divide-border border-y border-border">
           {lines.map(({ measure, text }) => (
             <div key={measure} className="flex items-baseline justify-between gap-4 py-2">
-              <dt className="shrink-0 text-xs text-fg-secondary">
+              <dt className="shrink-0 text-ui text-fg-secondary">
                 {t(`compare.${measure}.label`)}
               </dt>
-              <dd className="text-right font-mono text-[13px] text-fg-primary tabular-nums">
+              <dd className="text-right font-mono text-detail text-fg-primary tabular-nums">
                 {text}
               </dd>
             </div>
           ))}
         </dl>
       ) : (
-        <p className="text-xs text-fg-secondary">{t(`compare.itself.${reference}`)}</p>
+        <p className="text-ui text-fg-secondary">{t(`compare.itself.${reference}`)}</p>
       )}
       {other ? (
         <Action
@@ -105,7 +105,7 @@ export function Compare({ id }: { id: RungId }) {
         </Action>
       ) : null}
       {lines ? (
-        <p className="text-xs leading-relaxed text-fg-secondary">{t("compare.note")}</p>
+        <p className="text-ui leading-relaxed text-fg-secondary">{t("compare.note")}</p>
       ) : null}
     </section>
   );

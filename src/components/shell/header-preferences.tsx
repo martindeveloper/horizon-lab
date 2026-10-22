@@ -115,7 +115,7 @@ export function HeaderPreferences({
             }))}
             onChange={onLocale}
             render={(value) => (
-              <span className="font-mono text-[10.5px] font-medium tracking-[0.14em] uppercase">
+              <span className="font-mono text-micro font-medium tracking-instrument uppercase">
                 {value}
               </span>
             )}

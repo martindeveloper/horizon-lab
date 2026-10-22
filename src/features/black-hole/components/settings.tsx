@@ -124,7 +124,7 @@ export function SettingsBody() {
   return (
     <>
       <RailSection title={t("spacetime")}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-section">
           <SliderRow
             label={t("spin")}
             text={spinText(spin)}
@@ -140,11 +140,11 @@ export function SettingsBody() {
               {t("gravity")}
             </SwitchRow>
           </SwitchGroup>
-          {gravity ? null : <p className="text-xs text-fg-secondary">{t("gravityOff")}</p>}
+          {gravity ? null : <p className="text-ui text-fg-secondary">{t("gravityOff")}</p>}
         </div>
       </RailSection>
       <RailSection title={t("camera")}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-section">
           <SliderRow
             label={t("azimuth")}
             text={`${heading}°`}
@@ -183,7 +183,7 @@ export function SettingsBody() {
         </div>
       </RailSection>
       <RailSection title={t("optics")}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-section">
           <SliderRow
             label={t("exposure")}
             text={scaleText(exposure)}
@@ -227,7 +227,7 @@ export function SettingsBody() {
         antialias={antialias}
         modes={ANTIALIAS_MODES}
         onAntialias={setAntialias}
-        note={<p className="text-xs text-fg-secondary">{t("modelNotice")}</p>}
+        note={<p className="text-ui text-fg-secondary">{t("modelNotice")}</p>}
         onReset={() => {
           resetRender();
           if (presetId === "custom") selectHole(DEFAULT_PRESET_ID);

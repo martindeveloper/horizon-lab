@@ -4,7 +4,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-r
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from "react";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { Action, IconButton, Tooltip, cn, uiMotion } from "@horizon/toolkit/ui";
+import { Action, IconButton, Kicker, Tooltip, cn, uiMotion } from "@horizon/toolkit/ui";
 
 export type GuideControls = {
   /** Back a step; `disabled` on the first keeps focus where it is (aria-disabled). */
@@ -110,11 +110,11 @@ export function GuideCard({
       <section
         ref={cardRef}
         aria-label={label}
-        className="guide-card glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-4 pt-3.5 pb-3 text-center md:px-6 md:pt-5 md:pb-4 short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
+        className="guide-card glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-panel pt-panel-compact pb-panel-row text-center md:px-section-roomy md:pt-panel-roomy md:pb-panel short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
       >
-        <p className="font-mono text-[10px] tracking-[0.14em] text-fg-tertiary uppercase tabular-nums">
+        <Kicker size="compact" className="tabular-nums">
           {kicker}
-        </p>
+        </Kicker>
         <div className="relative mt-1.5 w-full short:mt-1">
           <div
             ref={words}
@@ -257,7 +257,7 @@ export function GuideTitle({
     <h2
       ref={ref}
       tabIndex={-1}
-      className="font-display text-xl font-medium tracking-tight text-balance text-fg-primary outline-hidden md:text-2xl short:text-base"
+      className="font-display text-section font-medium tracking-tight text-balance text-fg-primary outline-hidden md:text-feature short:text-panel"
     >
       {children}
     </h2>
@@ -266,7 +266,7 @@ export function GuideTitle({
 
 export function GuideBody({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-1.5 text-sm leading-relaxed text-pretty text-fg-secondary short:mt-0.5 short:text-xs">
+    <p className="mt-1.5 text-body leading-relaxed text-pretty text-fg-secondary short:mt-0.5 short:text-ui">
       {children}
     </p>
   );
@@ -275,7 +275,7 @@ export function GuideBody({ children }: { children: ReactNode }) {
 /** A formula under the body, in the mono face, scrolling sideways when it is long. */
 export function GuideEquation({ children }: { children: ReactNode }) {
   return (
-    <p className="scroll-thin mt-2 overflow-x-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-fg-primary tabular-nums md:text-sm">
+    <p className="scroll-thin mt-2 overflow-x-auto font-mono text-ui leading-relaxed whitespace-pre-wrap text-fg-primary tabular-nums md:text-body">
       {children}
     </p>
   );

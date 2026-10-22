@@ -36,8 +36,8 @@ export function LoadingScreen({ title, status, className }: Props) {
             <circle cx="24" cy="4" r="1.5" className="fill-solar" />
           </g>
         </svg>
-        <p className="mt-5 text-[15px] font-semibold tracking-tight">{title}</p>
-        <p className="mt-1 text-[13px] text-space-muted">{status}</p>
+        <p className="mt-5 text-panel font-semibold tracking-tight">{title}</p>
+        <p className="mt-1 text-detail text-space-muted">{status}</p>
       </div>
     </div>
   );

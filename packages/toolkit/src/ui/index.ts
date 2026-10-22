@@ -15,7 +15,7 @@ export {
 export { DataReadout, type DataReadoutProps, type ReadoutItem } from "./data-readout";
 export { FrameStats, type FrameSource, type FrameStatsProps } from "./frame-stats";
 export { ScaleBar, type ScaleBarProps } from "./scale-bar";
-export { Kicker, kickerClass } from "./kicker";
+export { Kicker, kickerClass, type KickerProps } from "./kicker";
 export { PanelHeader, type PanelHeaderProps } from "./panel-header";
 export { Chip, outlineClass, type ChipProps } from "./chip";
 export { ListItem, type ListItemProps } from "./list-item";
