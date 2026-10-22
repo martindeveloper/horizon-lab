@@ -8,7 +8,8 @@
  */
 import { DataTexture, FloatType, RGBAFormat } from "three";
 
-import { stellarContinuum } from "../model/atmosphere";
+import { stellarContinuum } from "@/space/sun/graphics/atmosphere";
+
 import type { Look } from "../model/looks";
 import { MAX_DISCS, TINTS, TINT_SHARES } from "../parameters";
 

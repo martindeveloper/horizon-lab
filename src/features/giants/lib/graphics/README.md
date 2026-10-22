@@ -20,7 +20,7 @@ including when a sharp foreground body covers the entire viewport.
 
 ## Continuum and limb darkening
 
-`atmosphere.ts` integrates Planck radiance over 380–780 nm in 5 nm steps using the toolkit's
+The Sun's shared `src/space/sun/graphics/atmosphere.ts` integrates Planck radiance over 380–780 nm in 5 nm steps using the toolkit's
 CIE observer. The spectrum texture stores linear sRGB divided by CIE Y and log Y.
 Interpolation is manual, so nearest-filtered float textures need no float-linear extension.
 The constant flare colour and each active cloud's emission per unit column are sampled
@@ -29,7 +29,7 @@ once per weather update; their spatial masks and foreground occlusion remain in 
 Each star has its own exposure reference; displayed brightness is not an apparent-magnitude
 comparison. Negative out-of-gamut components survive until the final display mapping.
 
-`limb-grid.json` contains the corrected
+Its `limb-grid.json` contains the corrected
 [Claret & Bloemen (2011) CDS table](https://cdsarc.cds.unistra.fr/ftp/J/A+A/529/A75/ReadMe):
 508 atmosphere models at solar metallicity, microturbulence 2 km/s, least-squares fits,
 Johnson–Cousins R/V/B. ATLAS is used above 3500 K; the subset also includes PHOENIX below

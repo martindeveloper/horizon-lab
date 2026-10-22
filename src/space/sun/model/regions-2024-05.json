@@ -1,0 +1,344 @@
+{
+  "source": "NOAA/SWPC Joint USAF/NOAA Solar Region Summary (SRS), archived by NOAA NCEI: regions with sunspots at 00:00 UT of each HMI disc the map is built from",
+  "reference": "NOAA Space Weather Prediction Center, Solar Region Summary; NCEI archive",
+  "urls": [
+    "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries/2024/05/20240501SRS.txt",
+    "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries/2024/05/20240508SRS.txt",
+    "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries/2024/05/20240515SRS.txt",
+    "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries/2024/05/20240522SRS.txt"
+  ],
+  "fetched": "2026-10-22",
+  "note": "Each region from the disc on which it stood nearest the central meridian, within 76° of it; numbers are the full NOAA numbers; longitudes in degrees, Stonyhurst west positive; areas in millionths of a hemisphere",
+  "reports": [
+    {
+      "date": "2024-05-01T00:00:00Z",
+      "centralMeridianCarringtonLon": 72
+    },
+    {
+      "date": "2024-05-08T00:00:00Z",
+      "centralMeridianCarringtonLon": 339.4
+    },
+    {
+      "date": "2024-05-15T00:00:00Z",
+      "centralMeridianCarringtonLon": 248
+    },
+    {
+      "date": "2024-05-22T00:00:00Z",
+      "centralMeridianCarringtonLon": 154.1
+    }
+  ],
+  "regions": [
+    {
+      "number": 13654,
+      "lat": -7,
+      "stonyhurstLon": 63,
+      "carringtonLon": 134,
+      "areaMsh": 550,
+      "mcintosh": "Fkc",
+      "extentDeg": 16,
+      "spots": 20,
+      "hale": "Beta-Delta",
+      "date": "2024-05-01T00:00:00Z"
+    },
+    {
+      "number": 13655,
+      "lat": -26,
+      "stonyhurstLon": 58,
+      "carringtonLon": 130,
+      "areaMsh": 40,
+      "mcintosh": "Hsx",
+      "extentDeg": 2,
+      "spots": 1,
+      "hale": "Alpha",
+      "date": "2024-05-01T00:00:00Z"
+    },
+    {
+      "number": 13661,
+      "lat": 22,
+      "stonyhurstLon": 42,
+      "carringtonLon": 21,
+      "areaMsh": 10,
+      "mcintosh": "Axx",
+      "extentDeg": 1,
+      "spots": 1,
+      "hale": "Alpha",
+      "date": "2024-05-08T00:00:00Z"
+    },
+    {
+      "number": 13662,
+      "lat": 30,
+      "stonyhurstLon": -10,
+      "carringtonLon": 63,
+      "areaMsh": 30,
+      "mcintosh": "Cro",
+      "extentDeg": 6,
+      "spots": 6,
+      "hale": "Beta",
+      "date": "2024-05-01T00:00:00Z"
+    },
+    {
+      "number": 13663,
+      "lat": 25,
+      "stonyhurstLon": -34,
+      "carringtonLon": 38,
+      "areaMsh": 10,
+      "mcintosh": "Bxo",
+      "extentDeg": 6,
+      "spots": 7,
+      "hale": "Beta",
+      "date": "2024-05-01T00:00:00Z"
+    },
+    {
+      "number": 13664,
+      "lat": -20,
+      "stonyhurstLon": 9,
+      "carringtonLon": 349,
+      "areaMsh": 630,
+      "mcintosh": "Fkc",
+      "extentDeg": 16,
+      "spots": 37,
+      "hale": "Beta-Gamma-Delta",
+      "date": "2024-05-08T00:00:00Z"
+    },
+    {
+      "number": 13666,
+      "lat": 7,
+      "stonyhurstLon": 40,
+      "carringtonLon": 20,
+      "areaMsh": 80,
+      "mcintosh": "Hsx",
+      "extentDeg": 2,
+      "spots": 2,
+      "hale": "Alpha",
+      "date": "2024-05-08T00:00:00Z"
+    },
+    {
+      "number": 13667,
+      "lat": 26,
+      "stonyhurstLon": -32,
+      "carringtonLon": 307,
+      "areaMsh": 150,
+      "mcintosh": "Hsx",
+      "extentDeg": 3,
+      "spots": 1,
+      "hale": "Alpha",
+      "date": "2024-05-08T00:00:00Z"
+    },
+    {
+      "number": 13668,
+      "lat": -16,
+      "stonyhurstLon": -1,
+      "carringtonLon": 338,
+      "areaMsh": 30,
+      "mcintosh": "Cso",
+      "extentDeg": 6,
+      "spots": 6,
+      "hale": "Beta",
+      "date": "2024-05-08T00:00:00Z"
+    },
+    {
+      "number": 13669,
+      "lat": -9,
+      "stonyhurstLon": -15,
+      "carringtonLon": 324,
+      "areaMsh": 10,
+      "mcintosh": "Axx",
+      "extentDeg": 1,
+      "spots": 1,
+      "hale": "Alpha",
+      "date": "2024-05-08T00:00:00Z"
+    },
+    {
+      "number": 13670,
+      "lat": 19,
+      "stonyhurstLon": 37,
+      "carringtonLon": 285,
+      "areaMsh": 20,
+      "mcintosh": "Dao",
+      "extentDeg": 3,
+      "spots": 5,
+      "hale": "Beta-Gamma",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13671,
+      "lat": 23,
+      "stonyhurstLon": 38,
+      "carringtonLon": 286,
+      "areaMsh": 20,
+      "mcintosh": "Cro",
+      "extentDeg": 5,
+      "spots": 6,
+      "hale": "Beta",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13672,
+      "lat": 19,
+      "stonyhurstLon": 11,
+      "carringtonLon": 259,
+      "areaMsh": 60,
+      "mcintosh": "Cso",
+      "extentDeg": 6,
+      "spots": 4,
+      "hale": "Beta",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13673,
+      "lat": -9,
+      "stonyhurstLon": -13,
+      "carringtonLon": 235,
+      "areaMsh": 10,
+      "mcintosh": "Hrx",
+      "extentDeg": 1,
+      "spots": 1,
+      "hale": "Alpha",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13674,
+      "lat": -12,
+      "stonyhurstLon": -25,
+      "carringtonLon": 223,
+      "areaMsh": 140,
+      "mcintosh": "Cso",
+      "extentDeg": 7,
+      "spots": 11,
+      "hale": "Beta",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13675,
+      "lat": -15,
+      "stonyhurstLon": 71,
+      "carringtonLon": 319,
+      "areaMsh": 30,
+      "mcintosh": "Dro",
+      "extentDeg": 4,
+      "spots": 8,
+      "hale": "Beta-Gamma",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13676,
+      "lat": -22,
+      "stonyhurstLon": 19,
+      "carringtonLon": 267,
+      "areaMsh": 120,
+      "mcintosh": "Cso",
+      "extentDeg": 8,
+      "spots": 9,
+      "hale": "Beta-Gamma",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13678,
+      "lat": 9,
+      "stonyhurstLon": -37,
+      "carringtonLon": 211,
+      "areaMsh": 10,
+      "mcintosh": "Axx",
+      "extentDeg": 1,
+      "spots": 3,
+      "hale": "Alpha",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13679,
+      "lat": -9,
+      "stonyhurstLon": -46,
+      "carringtonLon": 202,
+      "areaMsh": 230,
+      "mcintosh": "Dso",
+      "extentDeg": 6,
+      "spots": 6,
+      "hale": "Beta-Gamma",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13680,
+      "lat": 18,
+      "stonyhurstLon": -51,
+      "carringtonLon": 197,
+      "areaMsh": 10,
+      "mcintosh": "Dao",
+      "extentDeg": 1,
+      "spots": 3,
+      "hale": "Beta",
+      "date": "2024-05-15T00:00:00Z"
+    },
+    {
+      "number": 13682,
+      "lat": 13,
+      "stonyhurstLon": 36,
+      "carringtonLon": 191,
+      "areaMsh": 0,
+      "mcintosh": "Axx",
+      "extentDeg": 1,
+      "spots": 2,
+      "hale": "Alpha",
+      "date": "2024-05-22T00:00:00Z"
+    },
+    {
+      "number": 13684,
+      "lat": -6,
+      "stonyhurstLon": 19,
+      "carringtonLon": 173,
+      "areaMsh": 80,
+      "mcintosh": "Dao",
+      "extentDeg": 8,
+      "spots": 8,
+      "hale": "Beta",
+      "date": "2024-05-22T00:00:00Z"
+    },
+    {
+      "number": 13685,
+      "lat": -12,
+      "stonyhurstLon": -2,
+      "carringtonLon": 151,
+      "areaMsh": 380,
+      "mcintosh": "Ehc",
+      "extentDeg": 11,
+      "spots": 17,
+      "hale": "Beta-Gamma",
+      "date": "2024-05-22T00:00:00Z"
+    },
+    {
+      "number": 13686,
+      "lat": -7,
+      "stonyhurstLon": -12,
+      "carringtonLon": 142,
+      "areaMsh": 120,
+      "mcintosh": "Cao",
+      "extentDeg": 4,
+      "spots": 5,
+      "hale": "Beta",
+      "date": "2024-05-22T00:00:00Z"
+    },
+    {
+      "number": 13688,
+      "lat": -12,
+      "stonyhurstLon": -28,
+      "carringtonLon": 126,
+      "areaMsh": 10,
+      "mcintosh": "Bxo",
+      "extentDeg": 4,
+      "spots": 3,
+      "hale": "Beta",
+      "date": "2024-05-22T00:00:00Z"
+    },
+    {
+      "number": 13689,
+      "lat": -8,
+      "stonyhurstLon": -55,
+      "carringtonLon": 100,
+      "areaMsh": 30,
+      "mcintosh": "Cro",
+      "extentDeg": 3,
+      "spots": 3,
+      "hale": "Beta",
+      "date": "2024-05-22T00:00:00Z"
+    }
+  ]
+}

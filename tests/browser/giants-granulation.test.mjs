@@ -9,7 +9,7 @@ import { after, before, test } from "node:test";
 
 import { chromium } from "playwright-core";
 
-import granulation from "../../src/features/giants/lib/graphics/granulation.glsl";
+import granulation from "../../src/space/sun/graphics/shaders/granulation.glsl";
 
 let browser;
 let page;

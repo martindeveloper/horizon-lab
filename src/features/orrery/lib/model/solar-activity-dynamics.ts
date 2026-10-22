@@ -1,3 +1,4 @@
+import { SUN_ACTIVITY_FLOW_WRAP } from "@/space/sun/graphics/prominence/parameters";
 import { TAU, smoothstep } from "@horizon/toolkit/math";
 
 import {
@@ -21,8 +22,6 @@ import {
 const STEP = 1 / 120;
 const CYCLE_TICKS = SUN_ACTIVITY_CYCLE_SECONDS * 120;
 const SWAY_OMEGA = TAU / ((SUN_ACTIVITY_SWAY_PERIOD_MIN * 60) / SUN_ACTIVITY_TIME_SCALE);
-/** The drained length wraps far beyond a thread's streak period, keeping the uniform precise. */
-const FLOW_WRAP = 256;
 
 /** Each region's eruption rocks the others, less the farther apart they are on the sphere. */
 const KICKS = PROMINENCE_REGIONS.map(([lat, lon]) =>
@@ -101,7 +100,8 @@ export function createSolarActivityDynamics() {
       const next = sway[region]! + swayRate[region]! * STEP;
       sway[region] = Math.max(-SUN_ACTIVITY_SWAY_LIMIT, Math.min(SUN_ACTIVITY_SWAY_LIMIT, next));
       if (sway[region] !== next) swayRate[region] = 0;
-      flow[region] = (flow[region]! + SUN_ACTIVITY_DRAIN_SPEED * drain * STEP) % FLOW_WRAP;
+      flow[region] =
+        (flow[region]! + SUN_ACTIVITY_DRAIN_SPEED * drain * STEP) % SUN_ACTIVITY_FLOW_WRAP;
       values[region * 4] = lift;
       values[region * 4 + 1] = fade;
       values[region * 4 + 2] = sway[region]!;

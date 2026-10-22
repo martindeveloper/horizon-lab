@@ -16,6 +16,9 @@ One-off data builds, run by hand when a source changes, and the docs that descri
 | `fetch-model-atmospheres.mjs` | `src/features/spectroscopy/lib/model/atmospheres.json`                    | `docs/architecture.md`    |
 | `fetch-probe-tracks.mjs`      | `src/space/solar-system/model/probe-tracks.json`                          | `docs/architecture.md`    |
 | `fetch-star-distances.mjs`    | `src/space/star-distances.json`                                           | `docs/science-sources.md` |
+| `fetch-solar-structure.mjs`   | `src/space/sun/model/structure.json` (Model S)                            | `docs/science-sources.md` |
+| `fetch-sunspots.mjs`          | `src/space/sun/model/sunspots.json` (SILSO, group numbers)                | `docs/science-sources.md` |
+| `fetch-solar-regions.mjs`     | `src/space/sun/model/regions-2024-05.json` (NOAA/SWPC regions)            | `docs/science-sources.md` |
 | `generate-social-assets.mjs`  | share images under `public/`                                              | `docs/branding.md`        |
 | `analyse-audio.mjs`           | `cdn/audio/<slug>.map.json` and `bench/fixtures/audio-maps/` (audio maps) | `docs/architecture.md`    |
 

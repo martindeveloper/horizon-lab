@@ -6,6 +6,7 @@
  * teaching choices.
  */
 import { CONVECTIVE_BELOW_K } from "@/space/hr-diagram";
+import { PROFILE_SAMPLES } from "@/space/sun/graphics/parameters";
 
 import {
   BEAM_REACH,
@@ -17,7 +18,6 @@ import {
   HOLE_REACH,
   LIMB_ROUGHNESS,
   PULSAR_DISPLAY_K,
-  PROFILE_SAMPLES,
   SPIN_SECONDS,
   SUPERGIANT_MASS,
   type Style,

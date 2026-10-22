@@ -1,7 +1,7 @@
 // Integrate only inside each small prominence bound. No full-screen pass.
 #include <horizon/math>
 #include <horizon/noise>
-#include "./parameters.generated.glsl"
+#include "../shaders/parameters.generated.glsl"
 
 precision highp sampler3D;
 uniform sampler3D densityMap;

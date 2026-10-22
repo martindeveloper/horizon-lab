@@ -22,6 +22,9 @@ export const SOURCES = {
     link: SOURCE_URLS.akeson2021,
   },
   allen2001: { cite: "Allen, Bernstein & Malhotra 2001, ApJ 549, L241 (the Kuiper cliff)" },
+  altschulerNewkirk1969: {
+    cite: "Altschuler & Newkirk 1969, Sol. Phys. 9, 131 (the potential-field source-surface model: the source surface at 2.5 R☉)",
+  },
   andersen2017: {
     cite: "Andersen et al. 2017, A&A 602, A22 (Westerlund 1's mass)",
   },
@@ -30,6 +33,10 @@ export const SOURCES = {
   },
   arroyoTorres2013: {
     cite: "Arroyo-Torres et al. 2013, A&A 554, A76 (UY Scuti's angular diameter)",
+  },
+  aschwanden2005: {
+    cite: "Aschwanden 2005, Physics of the Solar Corona, 2nd ed., Springer (coronal temperatures; the flare frequency distribution, α ≈ 1.8)",
+    link: SOURCE_URLS.aschwanden2005,
   },
   asplund2009: {
     cite: "Asplund et al. 2009, ARA&A 47, 481 (the Sun's photospheric composition)",
@@ -47,6 +54,9 @@ export const SOURCES = {
   },
   barboni2017: {
     cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70; Nimmo, Kleine & Morbidelli 2024, Nature 636, 598 (younger ages as remelting)",
+  },
+  baumbach1937: {
+    cite: "Baumbach 1937, Astron. Nachr. 263, 121 (the corona's brightness with radius: 0.0532 r⁻²·⁵ + 1.425 r⁻⁷ + 2.565 r⁻¹⁷)",
   },
   baumgardt2021: {
     cite: "Baumgardt & Vasiliev 2021, MNRAS 505, 5957 (globular cluster distances: ω Cen 5.43 kpc)",
@@ -70,6 +80,10 @@ export const SOURCES = {
   blundell2004: {
     cite: "Blundell & Bowler 2004, ApJ 616, L159 (SS 433's distance: 5.5 kpc)",
     link: SOURCE_URLS.blundell2004,
+  },
+  boerner2012: {
+    cite: "Boerner et al. 2012, Sol. Phys. 275, 41 (SDO/AIA: the temperature response of each passband and the ions behind it)",
+    link: SOURCE_URLS.boerner2012,
   },
   bogdanov2019: {
     cite: "Bogdanov et al. 2019, ApJL 887, L25 (PSR J0030+0451's NICER data set: spin period 4.87 ms)",
@@ -104,9 +118,17 @@ export const SOURCES = {
     cite: "Chabrier & Baraffe 2000, ARA&A 38, 337 (low-mass stars and brown dwarfs: fully convective below about 0.4 M☉; brown dwarfs too light to burn hydrogen)",
     link: SOURCE_URLS.chabrier2000,
   },
+  charbonneau1999: {
+    cite: "Charbonneau et al. 1999, ApJ 527, 445 (the tachocline from helioseismology: thickness 0.039 ± 0.013 R☉ under the convection zone's base at 0.713 R☉)",
+    link: SOURCE_URLS.charbonneau1999,
+  },
   chen2019: {
     cite: "Chen et al. 2019, Nat. Astron. 3, 320 (Cepheid warp, Table 1)",
     link: SOURCE_URLS.chen2019,
+  },
+  christensenDalsgaard1996: {
+    cite: "Christensen-Dalsgaard et al. 1996, Science 272, 1286 (Model S: the standard solar model's run of temperature, density, pressure, luminosity and opacity)",
+    link: SOURCE_URLS.christensenDalsgaard1996,
   },
   clark2005: {
     cite: "Clark et al. 2005, A&A 434, 949 (Westerlund 1's mass)",
@@ -123,6 +145,10 @@ export const SOURCES = {
     cite: "Crowther et al. 2010, MNRAS 408, 731 (R136's WN5h stars, hydrogen-rich and very massive)",
   },
   davies2007: { cite: "Davies et al. 2007, ApJ 671, 781 (the red supergiants of Stephenson 2)" },
+  deRosa2012: {
+    cite: "DeRosa, Brun & Hoeksema 2012, ApJ 757, 96 (the Sun's dipole through the cycle: the equatorial dipole dominates near maximum)",
+    link: SOURCE_URLS.deRosa2012,
+  },
   devaucouleurs1958: { cite: "de Vaucouleurs 1958 (the Local Supercluster)" },
   diskLifetimes: {
     cite: "Haisch, Lada & Lada 2001, ApJ 553, L153; Mamajek 2009",
@@ -139,6 +165,10 @@ export const SOURCES = {
     link: SOURCE_URLS.dupuy2019,
   },
   dupuyCourtois2023: { cite: "Dupuy & Courtois 2023, A&A 678, A176" },
+  eddy1976: {
+    cite: "Eddy 1976, Science 192, 1189 (the Maunder minimum, 1645–1715)",
+    link: SOURCE_URLS.eddy1976,
+  },
   eht2019: {
     cite: "Event Horizon Telescope Collaboration 2019, Paper VI, ApJL 875, L6",
     link: SOURCE_URLS.eht2019,
@@ -208,6 +238,10 @@ export const SOURCES = {
   },
   haberle2024: {
     cite: "Häberle et al. 2024, Nature 631, 285 (ω Cen's fast central stars: an IMBH of at least 8,200 M☉)",
+  },
+  hathaway2015: {
+    cite: "Hathaway 2015, LRSP 12, 4 (the solar cycle: period, rise and shape, spot latitudes, Joy's law, polar fields, the named minima and maxima)",
+    link: SOURCE_URLS.hathaway2015,
   },
   healy2024: {
     cite: "Healy et al. 2024, MNRAS 529, 3630; catalogue 2024-04-11, V* UY Sct (temperature, luminosity and distance)",
@@ -311,6 +345,10 @@ export const SOURCES = {
     cite: "Lecar et al. 2006, ApJ 640, 1115",
     link: SOURCE_URLS.lecar2006,
   },
+  lemen2012: {
+    cite: "Lemen et al. 2012, Sol. Phys. 275, 17 (SDO/AIA: the passbands and the temperatures of their peak response)",
+    link: SOURCE_URLS.lemen2012,
+  },
   lhb: { cite: "Zellner 2017, OLEB 47, 261; Boehnke & Harrison 2016, PNAS 113, 10802" },
   li2018: {
     cite: "Li et al. 2018, Nat. Commun. 9, 3709 (Jupiter's internal heat, from Cassini)",
@@ -319,6 +357,10 @@ export const SOURCES = {
   li2021: {
     cite: "Li et al. 2021, ApJ 920, 84",
     link: SOURCE_URLS.li2021,
+  },
+  linForbes2000: {
+    cite: "Lin & Forbes 2000, JGR 105, 2375 (the two-dimensional flux-rope catastrophe model of a coronal mass ejection with reconnection)",
+    link: SOURCE_URLS.linForbes2000,
   },
   liu2011: { cite: "Liu, Zhu & Zhang 2011, A&A 526, A16" },
   lucey2023: {
@@ -350,6 +392,10 @@ export const SOURCES = {
   margot2021: {
     cite: "Margot et al. 2021, Nature Astronomy 5, 676 (Venus's rotation: 243.0226 days, retrograde)",
   },
+  mccomas2000: {
+    cite: "McComas et al. 2000, JGR 105, 10419 (Ulysses: the slow and fast solar wind by latitude)",
+    link: SOURCE_URLS.mccomas2000,
+  },
   mcconnachie2012: {
     cite: "McConnachie 2012, AJ 144, 4",
     link: SOURCE_URLS.mcconnachie2012,
@@ -363,6 +409,10 @@ export const SOURCES = {
   millerJones2021: {
     cite: "Miller-Jones et al. 2021, Science 371, 1046 (Cygnus X-1: 21.2 M☉ at 2.22 kpc)",
     link: SOURCE_URLS.millerJones2021,
+  },
+  mitalasSills1992: {
+    cite: "Mitalas & Sills 1992, ApJ 401, 759 (a photon's diffusion time from the Sun's centre: 1.7 × 10⁵ yr)",
+    link: SOURCE_URLS.mitalasSills1992,
   },
   monnier2012: { cite: "Monnier et al. 2012, ApJL 761, L3 (Vega, a rapid rotator seen pole-on)" },
   montet2015: {
@@ -388,6 +438,10 @@ export const SOURCES = {
     cite: "Navarete et al. 2022; Negueruela et al. 2022, A&A 664, A146 (Westerlund 1's distance: 4.0–4.3 kpc)",
     link: SOURCE_URLS.navarete2022,
   },
+  nordlund2009: {
+    cite: "Nordlund, Stein & Asplund 2009, LRSP 6, 2 (solar surface convection: granule sizes and lifetimes, the photosphere's thickness)",
+    link: SOURCE_URLS.nordlund2009,
+  },
   nssdc: { cite: "NSSDC planetary fact sheets" },
   ohnaka2013: { cite: "Ohnaka et al. 2013, A&A 555, A24 (Antares)" },
   orosz2009: {
@@ -395,6 +449,10 @@ export const SOURCES = {
   },
   panuzzo2024: {
     cite: "Gaia Collaboration (Panuzzo et al.) 2024, A&A 686, L2 (Gaia BH3: mass and distance)",
+  },
+  parenti2014: {
+    cite: "Parenti 2014, LRSP 11, 1 (solar prominences: sizes, lifetimes and kinds)",
+    link: SOURCE_URLS.parenti2014,
   },
   park2021: { cite: "Park et al. 2021, AJ 161, 105 (JPL DE440/DE441: the planets' GMs)" },
   pasquini2004: {
@@ -417,6 +475,9 @@ export const SOURCES = {
     link: SOURCE_URLS.planck2018,
   },
   pourbaix2002: { cite: "Pourbaix et al. 2002, A&A 386, 280 (α Cen B's visual orbit about A)" },
+  priest2014: {
+    cite: "Priest 2014, Magnetohydrodynamics of the Sun, Cambridge Univ. Press (the Sun's layers and their temperatures, the mean field, the coronal green line)",
+  },
   proust2006: {
     cite: "Proust et al. 2006, A&A 447, 133 (the Shapley Supercluster)",
     link: SOURCE_URLS.proust2006,
@@ -430,6 +491,10 @@ export const SOURCES = {
     link: SOURCE_URLS.ramachandran2025,
   },
   ramirez2011: { cite: "Ramírez & Allende Prieto 2011, ApJ 743, 135 (Arcturus)" },
+  reale2014: {
+    cite: "Reale 2014, LRSP 11, 4 (coronal loops: the RTV scaling laws, temperatures of 0.8–3 MK from fans to active-region cores)",
+    link: SOURCE_URLS.reale2014,
+  },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },
   reid2023: {
     cite: "Reid & Miller-Jones 2023, ApJ 959, 85 (GRS 1915+105: 9.4 kpc, 11.2 M☉)",
@@ -445,6 +510,10 @@ export const SOURCES = {
   richter1989: {
     cite: "Richter 1989, A&AS 77, 237 (the Hydra I cluster: a catalogue of 581 galaxies in its area)",
   },
+  rieutordRincon2010: {
+    cite: "Rieutord & Rincon 2010, LRSP 7, 2 (the Sun's supergranulation: cells of ~30,000 km)",
+    link: SOURCE_URLS.rieutordRincon2010,
+  },
   riley2019: {
     cite: "Riley et al. 2019, ApJL 887, L21 (PSR J0030+0451 measured with NICER)",
     link: SOURCE_URLS.riley2019,
@@ -455,9 +524,16 @@ export const SOURCES = {
   },
   sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
   schiller2008: { cite: "Schiller & Przybilla 2008, A&A 479, 849 (Deneb)" },
+  schwabe1844: {
+    cite: "Schwabe 1844, Astron. Nachr. 21, 233 (the sunspot period, announced in 1843 from the observations of 1826–1843)",
+  },
   shemmer2004: {
     cite: "Shemmer et al. 2004, ApJ 614, 547 (Table 2: TON 618, log M/M☉ = 10.82)",
     link: SOURCE_URLS.shemmer2004,
+  },
+  silso: {
+    cite: "WDC-SILSO, Royal Observatory of Belgium, Brussels (the sunspot number, version 2.0: Clette & Lefèvre 2016, Sol. Phys. 291, 2629)",
+    link: SOURCE_URLS.silso,
   },
   simbad: {
     cite: "SIMBAD Astronomical Database, CDS Strasbourg (radial velocities as it adopts them)",
@@ -469,6 +545,10 @@ export const SOURCES = {
   snodgrass1990: {
     cite: "Snodgrass & Ulrich 1990, ApJ 351, 309 (the Sun's rotation from Doppler features, by latitude)",
     link: SOURCE_URLS.snodgrass1990,
+  },
+  solanki2003: {
+    cite: "Solanki 2003, A&ARv 11, 153 (sunspots: umbral intensity and temperature, field strengths, sizes)",
+    link: SOURCE_URLS.solanki2003,
   },
   steiner2024: { cite: "Steiner et al. 2024 (IXPE: Cygnus X-1's spin ≳ 0.96 in its soft state)" },
   stone2005: {
@@ -489,6 +569,14 @@ export const SOURCES = {
   },
   struble1999: {
     cite: "Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)",
+  },
+  swpcSrs: {
+    cite: "NOAA/SWPC Joint USAF/NOAA Solar Region Summary, 1–22 May 2024 (NCEI archive: the regions with sunspots on the HMI discs the Sun's map is built from)",
+    link: SOURCE_URLS.swpcSrs,
+  },
+  svalgaardSchatten2016: {
+    cite: "Svalgaard & Schatten 2016, Sol. Phys. 291, 2653 (the sunspot group number by the backbone method, 1610 onwards)",
+    link: SOURCE_URLS.svalgaardSchatten2016,
   },
   tully1982: {
     cite: "Tully 1982, ApJ 257, 389 (Table 1: the Virgo Cluster and ten clouds)",
@@ -515,6 +603,9 @@ export const SOURCES = {
   },
   wegner1993: { cite: "Wegner, Haynes & Giovanelli 1993, AJ 105, 1251 (the Perseus–Pisces ridge)" },
   wittkowski2012: { cite: "Wittkowski et al. 2012, A&A 540, L12 (VY Canis Majoris)" },
+  wolf1852: {
+    cite: "Wolf 1852, Mitt. Naturforsch. Ges. Bern (the relative sunspot number R = k (10 g + s), defined in 1848)",
+  },
   woudt2008: {
     cite: "Woudt et al. 2008, MNRAS 383, 445 (the Norma cluster: 4,871 ± 54 km/s)",
     link: SOURCE_URLS.woudt2008,

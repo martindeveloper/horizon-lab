@@ -3,16 +3,8 @@ import test from "node:test";
 
 import { SOLAR_TEFF_K, blackbodyColor, decodeSrgb } from "@horizon/toolkit/science";
 
-import { sampleSpectrum } from "../src/features/giants/lib/graphics/spectrum-sample.ts";
 import { stellarTables } from "../src/features/giants/lib/graphics/stellar-tables.ts";
 import { discTints } from "../src/features/giants/lib/graphics/tints.ts";
-import {
-  atmosphereProfile,
-  continuumTable,
-  limbCoefficients,
-  limbIntensity,
-  stellarContinuum,
-} from "../src/features/giants/lib/model/atmosphere.ts";
 import { RUNG_FACTS, drawn, radiusMetres } from "../src/features/giants/lib/model/catalogue.ts";
 import { inspectCamera } from "../src/features/giants/lib/model/inspection.ts";
 import {
@@ -30,14 +22,22 @@ import {
 } from "../src/features/giants/lib/model/rotation.ts";
 import { RUNG_IDS, rungIndex } from "../src/features/giants/lib/model/rungs.ts";
 import { surfaceDetail } from "../src/features/giants/lib/model/surface-detail.ts";
-import {
-  MAX_DISCS,
-  PROFILE_SAMPLES,
-  SPECTRUM_SAMPLES,
-  SPECTRUM_MIN_K,
-  SPECTRUM_MAX_K,
-} from "../src/features/giants/lib/parameters.ts";
+import { MAX_DISCS } from "../src/features/giants/lib/parameters.ts";
 import { useGiants } from "../src/features/giants/lib/store.ts";
+import {
+  atmosphereProfile,
+  continuumTable,
+  limbCoefficients,
+  limbIntensity,
+  stellarContinuum,
+} from "../src/space/sun/graphics/atmosphere.ts";
+import {
+  PROFILE_SAMPLES,
+  SPECTRUM_MAX_K,
+  SPECTRUM_MIN_K,
+  SPECTRUM_SAMPLES,
+} from "../src/space/sun/graphics/parameters.ts";
+import { sampleSpectrum } from "../src/space/sun/graphics/spectrum-sample.ts";
 
 const near = (a, b, tolerance = 1e-9) =>
   assert.ok(Math.abs(a - b) <= tolerance * Math.max(1, Math.abs(b)), `${a} != ${b}`);

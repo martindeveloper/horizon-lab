@@ -1,8 +1,8 @@
 // Small oriented bounds for a 3D prominence density field, anchored to the rotating Sun.
 #include <horizon/math>
-#include "./parameters.generated.glsl"
+#include "../shaders/parameters.generated.glsl"
 
-uniform vec4 activityMotion[SUN_ACTIVITY_REGION_COUNT]; // lift, fade, sway, drained length
+uniform vec4 activityMotion[SUN_ACTIVITY_MAX_REGIONS]; // lift, fade, sway, drained length
 uniform vec3 localCamera;
 attribute vec3 aAnchor;
 attribute vec3 aAlong;

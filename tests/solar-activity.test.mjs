@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createSolarActivityDensity } from "../src/features/orrery/lib/model/solar-activity-density.ts";
 import {
   createSolarActivityDynamics,
   regionCourse,
@@ -23,11 +22,13 @@ import {
   SUN_RADIUS_MM,
   solarActivityVisible,
 } from "../src/features/orrery/lib/model/solar-activity.ts";
-import {
-  activityReach,
-  createSolarActivityGeometry,
-} from "../src/features/orrery/lib/scene/solar-activity-geometry.ts";
+import { solarActivityBounds } from "../src/features/orrery/lib/scene/solar-activity.ts";
 import { useOrrery } from "../src/features/orrery/lib/store.ts";
+import { createProminenceDensity } from "../src/space/sun/graphics/prominence/density.ts";
+import {
+  createProminenceGeometry,
+  prominenceReach,
+} from "../src/space/sun/graphics/prominence/geometry.ts";
 
 const api = useOrrery.getState;
 const reset = () => useOrrery.setState(useOrrery.getInitialState(), true);
@@ -216,7 +217,7 @@ test("the live model is frame-rate independent, continuous while visible, bounde
 });
 
 test("prominence bounds use one small draw and contain the erupting, swaying volumes", () => {
-  const geometry = createSolarActivityGeometry();
+  const geometry = createProminenceGeometry(solarActivityBounds());
   try {
     const p = geometry.getAttribute("position");
     const anchor = geometry.getAttribute("aAnchor");
@@ -228,7 +229,7 @@ test("prominence bounds use one small draw and contain the erupting, swaying vol
       geometry.boundingSphere.radius < 1.3,
       "camera stays outside every volume at minimum zoom",
     );
-    assert.equal(geometry.boundingSphere.radius, activityReach());
+    assert.equal(geometry.boundingSphere.radius, prominenceReach(solarActivityBounds()));
     assert.equal(geometry.groups.length, 0, "one material/draw group");
     for (const attribute of Object.values(geometry.attributes))
       assert.ok(attribute.array.every(Number.isFinite));
@@ -264,7 +265,7 @@ test("prominence bounds use one small draw and contain the erupting, swaying vol
 test("the baked density is small, sparse, reproducible and transparent at every volume boundary", () => {
   let fullSize = 0;
   for (const tight of [false, true]) {
-    const { data, width, height, depth } = createSolarActivityDensity(tight);
+    const { data, width, height, depth } = createProminenceDensity(tight);
     assert.equal(data.length, width * height * depth);
     assert.ok(data.byteLength < 1024 * 1024, "single-channel volume stays under 1 MiB");
     if (tight) assert.ok(data.byteLength < fullSize / 3);
@@ -294,12 +295,12 @@ test("the baked density is small, sparse, reproducible and transparent at every 
       "threads and transparent gaps, not a filled box",
     );
     assert.ok(maximum > 128, "retain bright density knots");
-    assert.deepEqual(data, createSolarActivityDensity(tight).data);
+    assert.deepEqual(data, createProminenceDensity(tight).data);
   }
 });
 
 test("the hedgerow stands on pillars with dark arches between, as a thin sheet with barbs to both sides", () => {
-  const { data, width, height, depth } = createSolarActivityDensity(false);
+  const { data, width, height, depth } = createProminenceDensity(false);
   const stride = width * height;
   const at = (x, y, z) => data[x + y * width + z * stride];
   // Along the sheet, where the plasma reaches the chromosphere: the pillars and the two legs.

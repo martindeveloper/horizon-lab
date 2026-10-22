@@ -1,13 +1,4 @@
-// Manually interpolate nearest-filtered float textures: no float-linear extension needed.
-vec4 spectrumAt(float kelvin) {
-  float at = clamp(log(max(kelvin, SPECTRUM_MIN_K) / SPECTRUM_MIN_K)
-    / log(SPECTRUM_MAX_K / SPECTRUM_MIN_K), 0.0, 1.0) * float(SPECTRUM_SAMPLES - 1);
-  float lo = floor(at);
-  vec4 a = texture2D(uSpectrum, vec2((lo + 0.5) / float(SPECTRUM_SAMPLES), 0.5));
-  vec4 b = texture2D(uSpectrum, vec2((min(lo + 1.0, float(SPECTRUM_SAMPLES - 1)) + 0.5) / float(SPECTRUM_SAMPLES), 0.5));
-  return mix(a, b, at - lo);
-}
-
+// `spectrumAt` and `glowAt` are the shared continuum's (src/space/sun/graphics/shaders/continuum.glsl).
 vec4 profileAt(int i, float x) {
   float at = clamp(x, 0.0, 1.0) * float(PROFILE_SAMPLES - 1);
   float lo = floor(at);
@@ -15,12 +6,6 @@ vec4 profileAt(int i, float x) {
   vec4 a = texture2D(uProfiles, vec2((lo + 0.5) / float(PROFILE_SAMPLES), row));
   vec4 b = texture2D(uProfiles, vec2((min(lo + 1.0, float(PROFILE_SAMPLES - 1)) + 0.5) / float(PROFILE_SAMPLES), row));
   return mix(a, b, at - lo);
-}
-
-// CIE/Planck continuum colour and relative photopic brightness, before tone mapping.
-vec3 glowAt(float kelvin, float referenceLogY) {
-  vec4 light = spectrumAt(kelvin);
-  return light.rgb * exp(light.a - referenceLogY);
 }
 
 // The narrowest projected cell dimension in actual drawing-buffer pixels. Filtering

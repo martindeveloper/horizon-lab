@@ -23,6 +23,7 @@
 precision highp float;
 
 #include "./parameters.generated.glsl"
+#include "../../../../space/sun/graphics/shaders/continuum.glsl"
 #include <horizon/noise>
 #include <horizon/convection>
 #include <horizon/temperature>
@@ -36,7 +37,6 @@ uniform float uTime;                    // seconds, drives everything that moves
 uniform float uDetail;                  // 0: the main layers; 1: their finer companions too
 uniform float uLines;                   // the line art's presence (baseline, orbits): 0 while a drift veils it
 uniform vec2 uFocus;                    // one detailed surface's slot, and its faded quality budget
-uniform highp sampler2D uSpectrum;      // CIE continuum: normalized RGB, log Y
 uniform highp sampler2D uProfiles;      // each disc: R,V,B limb laws; latitude temperature
 uniform int uCount;                     // bodies in use
 uniform vec4 uShape[MAX_DISCS];         // centre x, y; equatorial and polar radius

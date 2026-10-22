@@ -6,8 +6,10 @@
  */
 import { DataTexture, FloatType, RGBAFormat, Vector3 } from "three";
 
+import { continuumTable, stellarContinuum } from "@/space/sun/graphics/atmosphere";
+import { sampleSpectrum } from "@/space/sun/graphics/spectrum-sample";
+
 import type { Weather } from "../model/activity";
-import { continuumTable, stellarContinuum } from "../model/atmosphere";
 import { OUTFLOW_SLOTS } from "../model/mass-loss";
 import {
   ARCADES,
@@ -19,7 +21,6 @@ import {
   SHEETS,
   SHEET_POINTS,
 } from "../parameters";
-import { sampleSpectrum } from "./spectrum-sample";
 import { vectors } from "./vectors";
 
 /** The weather's uniforms, and `fill` to write a moment's weather into them (null: none). */

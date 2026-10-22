@@ -1,4 +1,5 @@
 import { SOLAR_MEAN_MOLECULAR_WEIGHT } from "@/space/solar-composition";
+import { NETWORK_GRANULES, PROFILE_SAMPLES } from "@/space/sun/graphics/parameters";
 import type { PlanetId } from "@horizon/toolkit/bodies";
 import {
   BOLTZMANN_CONSTANT,
@@ -133,11 +134,6 @@ export const VISIBLE_NM = 550;
 /** hc / (k λ) at that wavelength, K: the exponent's scale in Planck's law. */
 export const PLANCK_KELVIN =
   (PLANCK_CONSTANT * SPEED_OF_LIGHT) / (BOLTZMANN_CONSTANT * VISIBLE_NM * 1e-9);
-/** CIE/Planck continuum lookup and atmosphere/latitude tables, sampled at texel centres. */
-export const SPECTRUM_MIN_K = 500;
-export const SPECTRUM_MAX_K = 100_000;
-export const SPECTRUM_SAMPLES = 384;
-export const PROFILE_SAMPLES = 129;
 /**
  * The light round a star is drawn in its face's own colours: the light of a surface at a share
  * of the face's temperature, which Planck's law makes redder and dimmer the cooler it is. The
@@ -177,11 +173,9 @@ export const PENUMBRA_DEPTH = 0.1;
 /** Faculae round an active region: this much hotter where they show best, at the limb. */
 export const FACULA_CONTRAST = 0.09;
 /**
- * The supergranules' network: each supergranule about 30 granules across (30,000 km against
- * 1,000 km on the Sun), and its contrast as a share of the temperature, a teaching
- * exaggeration of white light's faint network so the scale shows.
+ * The supergranules' network's contrast as a share of the temperature (its scale is the shared
+ * `NETWORK_GRANULES`), a teaching exaggeration of white light's faint network so the scale shows.
  */
-export const NETWORK_GRANULES = 30;
 export const NETWORK_CONTRAST = 0.03;
 /**
  * Red supergiants also carry a few giant cells as deep as their envelopes (Schwarzschild 1975;
@@ -413,9 +407,6 @@ export const SHADER_DEFINES = glslDefines({
   ORBIT_CASE_PX,
   ORBIT_CASE_DEPTH,
   PLANCK_KELVIN,
-  SPECTRUM_MIN_K,
-  SPECTRUM_MAX_K,
-  SPECTRUM_SAMPLES: glslInt(SPECTRUM_SAMPLES),
   PROFILE_SAMPLES: glslInt(PROFILE_SAMPLES),
   SURFACE_RESOLVE_PX,
   SPICULE_COLUMNS: glslInt(SPICULE_COLUMNS),

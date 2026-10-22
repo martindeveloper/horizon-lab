@@ -16,6 +16,7 @@ import {
 } from "../scripts/lib/sun-map.mjs";
 import { MAPS_KEY } from "../src/lib/assets.ts";
 import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
+import { OBSERVED_REGIONS, mapUv } from "../src/space/sun/model/observed.ts";
 
 const near = (a, b, tolerance = 1e-10) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
 
@@ -89,5 +90,46 @@ test(
     assert.ok(seam / h < 3, "no hard longitude seam");
     const polarRow = Array.from({ length: w }, (_, x) => data[x * c]);
     assert.ok(Math.max(...polarRow) - Math.min(...polarRow) < 3, "no invented polar features");
+  },
+);
+
+test(
+  "the shipped Sun is dark where the regions read off it stand, by the rule the globe samples it with",
+  { skip },
+  async () => {
+    const { data, info } = await sharp(shippedSun.pathname)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width: w, height: h, channels: c } = info;
+    const at = (u, v) => {
+      const x = Math.min(w - 1, Math.floor((((u % 1) + 1) % 1) * w));
+      const y = Math.min(h - 1, Math.floor((1 - v) * h));
+      return data[(y * w + x) * c];
+    };
+    /* The darkest pixel within `reach` radians of where the model places a group. */
+    const darkest = (region, reach) => {
+      let min = 255;
+      for (let dlat = -reach; dlat <= reach; dlat += reach / 12)
+        for (let dlon = -reach; dlon <= reach; dlon += reach / 12) {
+          const [u, v] = mapUv(region.lat + dlat, region.lon + dlon);
+          min = Math.min(min, at(u, v));
+        }
+      return min;
+    };
+    const umbral = 255 * SUN_MAP_QUIET_INTENSITY * 0.7;
+    const degree = Math.PI / 180;
+    /* The mosaic's largest group, AR 13664, stands where its report puts it. */
+    const ar13664 = OBSERVED_REGIONS.find((region) => region.number === 13_664);
+    assert.ok(darkest(ar13664, degree) < umbral, "AR 13664 is under its model position");
+    /* The mosaic prefers each longitude's most face-on disc, so a group that decayed before
+       that disc was taken is missing; the rest stand within a few degrees of their reports. */
+    const large = OBSERVED_REGIONS.filter((region) => region.areaMsh >= 100);
+    const found = large.filter((region) => darkest(region, 3 * degree) < umbral);
+    assert.ok(large.length >= 6, "several large groups were reported");
+    assert.ok(
+      found.length >= large.length - 2,
+      `${found.length} of ${large.length} large groups have spots under them`,
+    );
   },
 );

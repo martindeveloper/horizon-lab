@@ -1,13 +1,14 @@
 /**
- * Display atmosphere: CIE-integrated Planck continuum plus empirical atmosphere limb fits.
+ * A star's display atmosphere, shared by Giants and the Sun lab: CIE-integrated Planck continuum
+ * plus empirical atmosphere limb fits.
  * R,V,B passbands approximate the display's RGB angular response; they are NOT RGB spectra.
  * Solar metallicity and xi=2 km/s are display assumptions. Outside the grid, clamp to its
  * boundary; compact remnants use the Eddington grey fallback, never extrapolated ATLAS fits.
  */
 import { planckRadiance, spectrumXyz, xyzToLinearSrgb } from "@horizon/toolkit/science";
 
-import { SPECTRUM_MIN_K, SPECTRUM_MAX_K, SPECTRUM_SAMPLES, PROFILE_SAMPLES } from "../parameters";
 import grid from "./limb-grid.json";
+import { PROFILE_SAMPLES, SPECTRUM_MAX_K, SPECTRUM_MIN_K, SPECTRUM_SAMPLES } from "./parameters";
 
 export type Coefficients = readonly [number, number, number, number];
 type Row = readonly [string, number, number, Coefficients, Coefficients, Coefficients];

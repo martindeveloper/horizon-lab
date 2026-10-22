@@ -3,10 +3,10 @@ import test from "node:test";
 
 import { weatherUniforms } from "../src/features/giants/lib/graphics/weather-uniforms.ts";
 import { weatherAt } from "../src/features/giants/lib/model/activity.ts";
-import { stellarContinuum } from "../src/features/giants/lib/model/atmosphere.ts";
 import { LOOKS } from "../src/features/giants/lib/model/looks.ts";
 import { rungIndex } from "../src/features/giants/lib/model/rungs.ts";
 import { FLARE_K } from "../src/features/giants/lib/parameters.ts";
+import { stellarContinuum } from "../src/space/sun/graphics/atmosphere.ts";
 
 const near = (actual, expected, tolerance = 2e-6) =>
   assert.ok(

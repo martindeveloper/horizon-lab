@@ -11,9 +11,6 @@
 #define ORBIT_CASE_PX       2.6
 #define ORBIT_CASE_DEPTH    0.55
 #define PLANCK_KELVIN       26159.57959
-#define SPECTRUM_MIN_K      500.0
-#define SPECTRUM_MAX_K      100000.0
-#define SPECTRUM_SAMPLES    384
 #define PROFILE_SAMPLES     129
 #define SURFACE_RESOLVE_PX  2.0
 #define SPICULE_COLUMNS     3142

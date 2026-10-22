@@ -1,4 +1,4 @@
-import { SPECTRUM_MAX_K, SPECTRUM_MIN_K, SPECTRUM_SAMPLES } from "../parameters";
+import { SPECTRUM_MAX_K, SPECTRUM_MIN_K, SPECTRUM_SAMPLES } from "./parameters";
 
 /** The shader's logarithmic, linearly interpolated float table; no new spectrum model. */
 export function sampleSpectrum(table: Float32Array, kelvin: number, out: Float32Array) {

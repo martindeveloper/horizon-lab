@@ -15,10 +15,12 @@ import { factSources } from "../src/lib/facts.ts";
 import { SOURCES } from "../src/lib/sources.ts";
 import { solarCatalogueFacts } from "../src/space/solar-system/model/catalogue.ts";
 import { BLACK_HOLES, ENGINES, NAMED_STARS, stellarCatalogueFacts } from "../src/space/stellar.ts";
+import { sunFacts } from "../src/space/sun/catalogue.ts";
 
 for (const [name, facts] of [
   ["Solar System", solarCatalogueFacts],
   ["Stars and black holes", stellarCatalogueFacts],
+  ["Sun", sunFacts],
   ["Orrery", orreryFacts],
   ["Deep Field", deepFieldFacts],
   ["Giants", giantsFacts],

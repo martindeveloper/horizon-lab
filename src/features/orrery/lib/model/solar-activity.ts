@@ -7,6 +7,10 @@
  * ASSL 415). Lengths and heights are fractions of the solar radius; positions, the timing of
  * each region's cycle and the course of its eruption are authored.
  */
+import {
+  SUN_ACTIVITY_DRAIN_RADII_PER_S,
+  SUN_ACTIVITY_MAX_HEIGHT,
+} from "@/space/sun/graphics/prominence/parameters";
 import { SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
 
 /** The nominal solar radius, Mm. */
@@ -19,47 +23,32 @@ export const SUN_ACTIVITY_CYCLE_SECONDS = 150;
 export const SUN_ACTIVITY_SLOW_RISE_START = 0.62;
 export const SUN_ACTIVITY_FAST_RISE_START = 0.74;
 export const SUN_ACTIVITY_FAST_RISE_END = 0.775;
-/** Height multipliers: the end of the slow rise, and where the erupting plasma has thinned away. */
+/** Height multiplier at the end of the slow rise (the shared `SUN_ACTIVITY_MAX_LIFT` ends the fast one). */
 export const SUN_ACTIVITY_SLOW_RISE_LIFT = 1.2;
-export const SUN_ACTIVITY_MAX_LIFT = 2.4;
-/**
- * Thread flows, km/s: downflows draining the hedgerow's threads and counter-streaming along
- * them (Zirker, Engvold & Martin 1998, Nature 396, 440; Parenti 2014 §4), and how much faster
- * the legs drain while the body erupts.
- */
-export const SUN_ACTIVITY_DRAIN_KMS = 15;
-export const SUN_ACTIVITY_STREAM_KMS = 20;
-export const SUN_ACTIVITY_ERUPTION_DRAIN = 3;
+/** The hedgerow body itself (its volume, flows and colours) is the Sun's shared one. */
+export {
+  SUN_ACTIVITY_DEPTH_RATIO,
+  SUN_ACTIVITY_ERUPTION_DRAIN,
+  SUN_ACTIVITY_EXTINCTION,
+  SUN_ACTIVITY_FILAMENT_RGB,
+  SUN_ACTIVITY_KNOT_RGB,
+  SUN_ACTIVITY_LIFT_WIDENING,
+  SUN_ACTIVITY_MAX_HEIGHT,
+  SUN_ACTIVITY_MAX_LIFT,
+  SUN_ACTIVITY_MAX_STEPS,
+  SUN_ACTIVITY_SINK,
+  SUN_ACTIVITY_STREAM_RATIO,
+  SUN_ACTIVITY_SWAY_LIMIT,
+  SUN_ACTIVITY_THREAD_RGB,
+} from "@/space/sun/graphics/prominence/parameters";
 /** Kink oscillation of the whole body: period in minutes and damping ratio (Arregui et al. 2018, LRSP 15, 3). */
 export const SUN_ACTIVITY_SWAY_PERIOD_MIN = 40;
 export const SUN_ACTIVITY_SWAY_DAMPING = 0.08;
-/** Sideways sway at the apex, in half-spans; one eruption's disturbance rocks the others. */
-export const SUN_ACTIVITY_SWAY_LIMIT = 0.12;
+/** One eruption's disturbance rocks the others by this much, in half-spans. */
 export const SUN_ACTIVITY_SWAY_KICK = 0.1;
-/** The baked volume's half-thickness across the sheet, as a fraction of the half-length. */
-export const SUN_ACTIVITY_DEPTH_RATIO = 0.24;
-/** A bound's floor sinks below the photosphere by this times the half-length squared, so the sheet's ends stay rooted on the curving surface. */
-export const SUN_ACTIVITY_SINK = 0.55;
-/** An erupting body widens across the sheet as it rises: the depth's growth per unit of lift. */
-export const SUN_ACTIVITY_LIFT_WIDENING = 0.6;
-/** The tallest quiescent body, solar radii (quiescent prominences reach 10–100 Mm). */
-export const SUN_ACTIVITY_MAX_HEIGHT = 0.11;
-export const SUN_ACTIVITY_MAX_STEPS = 48;
-/** Hα optical depth per solar radius of unit density: a thread is translucent, a knot opaque. */
-export const SUN_ACTIVITY_EXTINCTION = 150;
-/**
- * Linear RGB display colours. Beyond the limb the threads glow in Balmer Hα (656.3 nm) with
- * Hβ and He I D₃ whitening the dense knots; against the disc a filament absorbs the
- * chromosphere's Hα. Authored for visibility over the visible-light map, not a spectral fit.
- */
-export const SUN_ACTIVITY_THREAD_RGB = [0.95, 0.24, 0.2] as const;
-export const SUN_ACTIVITY_KNOT_RGB = [1.5, 0.72, 0.62] as const;
-export const SUN_ACTIVITY_FILAMENT_RGB = [0.12, 0.05, 0.04] as const;
 
-/** The drain in solar radii per displayed second, and the counter-streaming relative to it. */
-export const SUN_ACTIVITY_DRAIN_SPEED =
-  (SUN_ACTIVITY_DRAIN_KMS * SUN_ACTIVITY_TIME_SCALE) / (SUN_RADIUS_MM * 1000);
-export const SUN_ACTIVITY_STREAM_RATIO = SUN_ACTIVITY_STREAM_KMS / SUN_ACTIVITY_DRAIN_KMS;
+/** The drain in solar radii per displayed second. */
+export const SUN_ACTIVITY_DRAIN_SPEED = SUN_ACTIVITY_DRAIN_RADII_PER_S * SUN_ACTIVITY_TIME_SCALE;
 
 /**
  * Latitude, longitude, Joy's-law tilt, height, length, cycle offset (radians, solar radii).

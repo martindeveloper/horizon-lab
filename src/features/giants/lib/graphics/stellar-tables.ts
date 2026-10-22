@@ -1,11 +1,13 @@
 /** Small cached textures; all integration and atmosphere interpolation happen off the GPU. */
 import { DataTexture, FloatType, RGBAFormat } from "three";
 
-import { atmosphereProfile, continuumTable } from "../model/atmosphere";
+import { atmosphereProfile, continuumTable } from "@/space/sun/graphics/atmosphere";
+import { PROFILE_SAMPLES, SPECTRUM_SAMPLES } from "@/space/sun/graphics/parameters";
+
 import { RUNG_FACTS, drawn } from "../model/catalogue";
 import type { Look } from "../model/looks";
 import { RUNG_IDS } from "../model/rungs";
-import { MAX_DISCS, PROFILE_SAMPLES, SPECTRUM_SAMPLES } from "../parameters";
+import { MAX_DISCS } from "../parameters";
 
 export function stellarTables(looks: readonly Look[]) {
   const spectrumData = continuumTable();

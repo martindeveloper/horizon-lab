@@ -29,7 +29,7 @@ const rows = [...selected.values()].sort(
 );
 assert.equal(rows.length, 508);
 assert.ok(rows.every((row) => row.slice(3).every((channel) => channel?.every(Number.isFinite))));
-const output = new URL("../src/features/giants/lib/model/limb-grid.json", import.meta.url);
+const output = new URL("../src/space/sun/graphics/limb-grid.json", import.meta.url);
 const current = JSON.parse(await readFile(output, "utf8"));
 if (process.argv.includes("--check")) {
   assert.deepEqual(rows, current.rows);
