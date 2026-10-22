@@ -45,7 +45,7 @@
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Mléčná dráha  ·  pohled shora  ·  střed v jádře Galaxie",
   "localGroup": "Za hranicemi Mléčné dráhy",
-  "localGroupBody": "Mapa zobrazuje oblast galaktického disku o průměru 28 kpc. Galaxie v Andromedě je od nás vzdálena asi {andromedaKpc} kpc, M87* přibližně {m87Mpc} Mpc. To je zhruba {m87FartherThanAndromeda}krát dál než Andromeda a {m87FartherThanSgr}krát dál než Sagittarius A*. Světlo kvasaru TON 618 cestovalo asi {tonLightGyr} miliardy let, vlny z GW231123 zhruba {gwTravelGyr} miliard let.",
+  "localGroupBody": "Mapa zobrazuje oblast galaktického disku o průměru 28 kpc. Galaxie v Andromedě je od nás vzdálena asi {andromedaKpc} kpc, M87* přibližně {m87Mpc} Mpc. To je zhruba {m87FartherThanAndromeda}krát dál než Andromeda a {m87FartherThanSgr}krát dál než Sagittarius A*. Světlo kvasaru TON 618 cestovalo asi {tonLightGyr} {tonLightGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let, vlny z GW231123 zhruba {gwTravelGyr} {gwTravelGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let.",
   "theorySolutions": "Teorie  ·  řešení obecné relativity",
   "theoryBody": "Nejde o konkrétní objekty na obloze. Scéna „Disk v gravitační čočce“ ukazuje, jak gravitace mění obraz akrečního disku. Schwarzschildova a Kerrova metrika jsou přesná vakuová řešení Einsteinových rovnic; světlo zde sleduje Kerrovy dráhy, zářící plyn je ilustrativní.",
   "landmark": "Orientační bod  ·  nelze k němu přiletět",
@@ -129,7 +129,7 @@
       "0": {
         "kicker": "Domov",
         "title": "Supermasivní černá díra v srdci Galaxie",
-        "body": "Sagittarius A* leží ve směru souhvězdí Střelce a má hmotnost přibližně {sgrMassMillions} milionu Sluncí. Prozrazují ji dráhy okolních hvězd, zejména S2, která jeden oběh dokončí asi za {s2Years} let a přiblíží se zhruba na {s2PericentreAu} au. Černou díru dnes obklopuje horký akreční tok s nízkou zářivou účinností. Na svou hmotnost je překvapivě málo zářivá."
+        "body": "Sagittarius A* leží ve směru souhvězdí Střelce a má hmotnost přibližně {sgrMassMillions} {sgrMassMillionsPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} Sluncí. Prozrazují ji dráhy okolních hvězd, zejména S2, která jeden oběh dokončí asi za {s2Years} {s2YearsPlural, select, one {rok} few {roky} many {roku} other {let}} a přiblíží se zhruba na {s2PericentreAu} au. Černou díru dnes obklopuje horký akreční tok s nízkou zářivou účinností. Na svou hmotnost je překvapivě málo zářivá."
       },
       "1": {
         "kicker": "EHT",
@@ -151,7 +151,7 @@
       "0": {
         "kicker": "Původ",
         "title": "Obr, který rostl s galaxií",
-        "body": "M87* sídlí v jádře obří eliptické galaxie Messier 87 v kupě galaxií v Panně. Její hmotnost odhadujeme přibližně na {m87MassBillions} miliardy Sluncí. Galaxie rostla i pohlcováním menších sousedů a její centrální černá díra mohla nabývat hmotnost jak akrecí plynu, tak slučováním s dalšími černými dírami. Přesný průběh jejího růstu však neznáme."
+        "body": "M87* sídlí v jádře obří eliptické galaxie Messier 87 v kupě galaxií v Panně. Její hmotnost odhadujeme přibližně na {m87MassBillions} {m87MassBillionsPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} Sluncí. Galaxie rostla i pohlcováním menších sousedů a její centrální černá díra mohla nabývat hmotnost jak akrecí plynu, tak slučováním s dalšími černými dírami. Přesný průběh jejího růstu však neznáme."
       },
       "1": {
         "kicker": "10. dubna 2019",
@@ -217,7 +217,7 @@
       "2": {
         "kicker": "14. září 2015",
         "title": "LIGO zachycuje gravitační vlny",
-        "body": "Detektory LIGO zachytily gravitační vlny ze splynutí dvou černých děr o hmotnostech přibližně {gw150914Primary} a {gw150914Secondary} Sluncí, vzdálených asi {gw150914BillionLy} miliardy světelných let. Při přibližování rostla frekvence i amplituda signálu. Po splynutí následovalo krátké doznívání nově vzniklé černé díry. Po převodu na zvuk připomíná tento signál krátké cvrliknutí."
+        "body": "Detektory LIGO zachytily gravitační vlny ze splynutí dvou černých děr o hmotnostech přibližně {gw150914Primary} a {gw150914Secondary} Sluncí, vzdálených asi {gw150914BillionLy} {gw150914BillionLyPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} světelných let. Při přibližování rostla frekvence i amplituda signálu. Po splynutí následovalo krátké doznívání nově vzniklé černé díry. Po převodu na zvuk připomíná tento signál krátké cvrliknutí."
       },
       "3": {
         "kicker": "Velikost města",
@@ -244,9 +244,9 @@
         "body": "Gaia BH3 se objevila, když tým mise Gaia kontroloval předběžná data pro čtvrté vydání katalogu. Protože šlo o mimořádný nález, tým jej ověřil spektry z pozemních dalekohledů a oznámil ho předem, v dubnu 2024, ještě před úplným vydáním dat."
       },
       "1": {
-        "kicker": "{gaiaOrbitYears} roku",
+        "kicker": "{gaiaOrbitYears} {gaiaOrbitYearsPlural, select, one {rok} few {roky} many {roku} other {let}}",
         "title": "Protáhlá dráha",
-        "body": "Obří průvodce oběhne černou díru přibližně za {gaiaOrbitYears} roku po velmi protáhlé dráze s výstředností asi {gaiaEccentricity}. Jeho vzdálenost od černé díry kolísá zhruba v rozmezí {gaiaSeparationAu} astronomických jednotek, takže se nikdy nepřiblíží tolik, aby mu černá díra strhávala plyn."
+        "body": "Obří průvodce oběhne černou díru přibližně za {gaiaOrbitYears} {gaiaOrbitYearsPlural, select, one {rok} few {roky} many {roku} other {let}} po velmi protáhlé dráze s výstředností asi {gaiaEccentricity}. Jeho vzdálenost od černé díry kolísá zhruba v rozmezí {gaiaSeparationAu} astronomických jednotek, takže se nikdy nepřiblíží tolik, aby mu černá díra strhávala plyn."
       },
       "2": {
         "kicker": "ED-2",
@@ -266,9 +266,9 @@
         "body": "Omega Centauri obsahuje hvězdy různého stáří a chemického složení, což u běžné kulové hvězdokupy nevídáme. Astronomové se domnívají, že jde o jádro trpasličí galaxie, jejíž vnější části Mléčná dráha strhla."
       },
       "1": {
-        "kicker": "{omegaTrackedMillions} milionu hvězd",
+        "kicker": "{omegaTrackedMillions} {omegaTrackedMillionsPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} hvězd",
         "title": "Pohyby z archivních snímků",
-        "body": "Studie z roku 2024 sestavila katalog pohybů {omegaTrackedMillions} milionu hvězd ze snímků Hubbleova dalekohledu pokrývajících asi 20 let. Mnohé z nich byly původně pořízeny ke kalibraci jeho kamer."
+        "body": "Studie z roku 2024 sestavila katalog pohybů {omegaTrackedMillions} {omegaTrackedMillionsPlural, select, one {milionu} few {milionů} many {milionu} other {milionů}} hvězd ze snímků Hubbleova dalekohledu pokrývajících asi 20 let. Mnohé z nich byly původně pořízeny ke kalibraci jeho kamer."
       },
       "2": {
         "kicker": "Střední hmotnost",
@@ -289,13 +289,13 @@
       },
       "1": {
         "kicker": "Dvě vzdálenosti",
-        "title": "{tonLightGyr}, nebo {tonComovingBillionLy} miliard světelných let?",
-        "body": "Jeho světlo cestovalo asi {tonLightGyr} miliardy let, ale vesmír se mezitím rozpínal. Dnešní, takzvaná souhybná vzdálenost kvasaru je asi {tonComovingBillionLy} miliard světelných let. Ani jedno číslo není v rozporu se stářím vesmíru {universeGyr} miliardy let."
+        "title": "{tonLightGyr}, nebo {tonComovingBillionLy} {tonComovingBillionLyPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} světelných let?",
+        "body": "Jeho světlo cestovalo asi {tonLightGyr} {tonLightGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let, ale vesmír se mezitím rozpínal. Dnešní, takzvaná souhybná vzdálenost kvasaru je asi {tonComovingBillionLy} {tonComovingBillionLyPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} světelných let. Ani jedno číslo není v rozporu se stářím vesmíru {universeGyr} {universeGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let."
       },
       "2": {
         "kicker": "Viriálová hmotnost",
         "title": "Proč je odhad hrubý",
-        "body": "Odhady hmotnosti z jediného spektra využívají vztahy kalibrované na slabších a bližších aktivních galaxiích. TON 618 je mnohem svítivější, takže odhad {tonMassBillions} miliard hmotností Slunce může být zatížen nejistotou až několikanásobku hodnoty."
+        "body": "Odhady hmotnosti z jediného spektra využívají vztahy kalibrované na slabších a bližších aktivních galaxiích. TON 618 je mnohem svítivější, takže odhad {tonMassBillions} {tonMassBillionsPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} hmotností Slunce může být zatížen nejistotou až několikanásobku hodnoty."
       },
       "3": {
         "kicker": "Severní galaktický pól",
@@ -358,12 +358,12 @@
       "0": {
         "kicker": "{sgrKpcShort} kpc",
         "title": "Černá díra v naší vlastní Galaxii",
-        "body": "Sagittarius A* je černá díra v centru Mléčné dráhy, asi {sgrLy} světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie prach. Jako kompaktní rádiový zdroj byla objevena v roce 1974; její hmotnost, asi {sgrMassMillions} milionu Sluncí, určujeme z drah okolních hvězd. Hustý roj hvězd v této scéně představuje jadernou hvězdokupu."
+        "body": "Sagittarius A* je černá díra v centru Mléčné dráhy, asi {sgrLy} světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie prach. Jako kompaktní rádiový zdroj byla objevena v roce 1974; její hmotnost, asi {sgrMassMillions} {sgrMassMillionsPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} Sluncí, určujeme z drah okolních hvězd. Hustý roj hvězd v této scéně představuje jadernou hvězdokupu."
       },
       "1": {
         "kicker": "S2",
         "title": "Hvězdná dráha jako kosmické váhy",
-        "body": "Hvězda S2 spektrálního typu B oběhne Sgr A* přibližně za {s2Years} let. V nejbližším bodě dráhy, pericentru, se přiblíží asi na {s2PericentreAu} au, tedy zhruba {s2PericentreRs} Schwarzschildových poloměrů, a pohybuje se rychlostí asi {s2SpeedPercent} % rychlosti světla. Z velikosti a periody dráhy lze určit hmotnost centrálního objektu. Pozorování odhalila také relativistický rudý posuv a Schwarzschildovu precesi. Studie GRAVITY+ z roku 2026 popsala hvězdu S301, jejíž proložená dráha předpovídá přiblížení asi na {s301PericentreAu} au při rychlosti přes {s301SpeedPercent} % rychlosti světla. Budoucí pozorování její dráhy by mohla umožnit změřit spin Sgr A*."
+        "body": "Hvězda S2 spektrálního typu B oběhne Sgr A* přibližně za {s2Years} {s2YearsPlural, select, one {rok} few {roky} many {roku} other {let}}. V nejbližším bodě dráhy, pericentru, se přiblíží asi na {s2PericentreAu} au, tedy zhruba {s2PericentreRs} Schwarzschildových poloměrů, a pohybuje se rychlostí asi {s2SpeedPercent} % rychlosti světla. Z velikosti a periody dráhy lze určit hmotnost centrálního objektu. Pozorování odhalila také relativistický rudý posuv a Schwarzschildovu precesi. Studie GRAVITY+ z roku 2026 popsala hvězdu S301, jejíž proložená dráha předpovídá přiblížení asi na {s301PericentreAu} au při rychlosti přes {s301SpeedPercent} % rychlosti světla. Budoucí pozorování její dráhy by mohla umožnit změřit spin Sgr A*."
       },
       "2": {
         "kicker": "{sgrRing} μas",
@@ -384,8 +384,8 @@
     "m87": {
       "0": {
         "kicker": "Panna",
-        "title": "Černá díra vzdálená {m87MlyRound} milionů světelných let",
-        "body": "M87* se nachází v jádře Messier 87, obří eliptické galaxie v kupě galaxií v Panně, asi {m87Mpc} Mpc od nás. Hmotnost černé díry se odhaduje na {m87MassBillions} miliardy Sluncí. Žlutavá záře scény představuje převážně staré hvězdy této galaxie."
+        "title": "Černá díra vzdálená {m87MlyRound} {m87MlyRoundPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} světelných let",
+        "body": "M87* se nachází v jádře Messier 87, obří eliptické galaxie v kupě galaxií v Panně, asi {m87Mpc} Mpc od nás. Hmotnost černé díry se odhaduje na {m87MassBillions} {m87MassBillionsPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} Sluncí. Žlutavá záře scény představuje převážně staré hvězdy této galaxie."
       },
       "1": {
         "kicker": "{m87JetDeg}°",
@@ -400,7 +400,7 @@
       "3": {
         "kicker": "10. dubna 2019",
         "title": "První snímek na škále horizontu",
-        "body": "Síť EHT spojila radioteleskopy na různých kontinentech a na vlnové délce 1,3 mm dosáhla rozlišení srovnatelného s teleskopem o velikosti Země. Z dat pořízených v roce 2017 vznikl snímek zveřejněný o dva roky později. Oranžová barva na tomto snímku znázorňuje intenzitu rádiového záření, ne skutečnou barvu plynu. Pro nerotující černou díru o této hmotnosti by průměr horizontu činil asi {m87HorizonBillionKm} miliard kilometrů, tedy {m87HorizonAu} au. U rotující černé díry je třeba přesně určit, jak její rozměr definujeme."
+        "body": "Síť EHT spojila radioteleskopy na různých kontinentech a na vlnové délce 1,3 mm dosáhla rozlišení srovnatelného s teleskopem o velikosti Země. Z dat pořízených v roce 2017 vznikl snímek zveřejněný o dva roky později. Oranžová barva na tomto snímku znázorňuje intenzitu rádiového záření, ne skutečnou barvu plynu. Pro nerotující černou díru o této hmotnosti by průměr horizontu činil asi {m87HorizonBillionKm} {m87HorizonBillionKmPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} kilometrů, tedy {m87HorizonAu} au. U rotující černé díry je třeba přesně určit, jak její rozměr definujeme."
       },
       "4": {
         "kicker": "oddálení",
@@ -481,12 +481,12 @@
       "3": {
         "kicker": "stejná geometrie",
         "title": "Stejný tvar, jiné měřítko",
-        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro {cygMassRound} M☉ černé díry v Cygnus X-1 jsou odpovídající délky a časy zhruba {cygLighterThanSgr}krát menší než pro Sgr A*: pravítko 10 M tu měří asi {cygRulerKm} km, ne {sgrRulerMillionKm} milionů, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
+        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro {cygMassRound} M☉ černé díry v Cygnus X-1 jsou odpovídající délky a časy zhruba {cygLighterThanSgr}krát menší než pro Sgr A*: pravítko 10 M tu měří asi {cygRulerKm} km, ne {sgrRulerMillionKm} {sgrRulerMillionKmPlural, select, one {milion} few {miliony} many {milionu} other {milionů}}, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
       },
       "4": {
         "kicker": "oddálení",
         "title": "Černé díry můžeme zachytit i gravitačními vlnami",
-        "body": "Dne 14. září 2015 detektory LIGO zachytily signál GW150914: splynutí dvou černých děr o hmotnostech přibližně {gw150914Primary} a {gw150914Secondary} Sluncí. Zdroj byl vzdálen asi {gw150914BillionLy} miliardy světelných let a v gravitačních vlnách vyzářil energii odpovídající přibližně {gw150914Radiated} slunečním hmotnostem. Nešlo o zvuk šířící se vesmírem, ale o změny geometrie prostoročasu. Cygnus X-1 ukazuje jinou tvář hvězdných černých děr: dvojhvězdu s trvalým přísunem plynu. Izolované černé díry bez výrazné akrece zůstávají mnohem hůře odhalitelné."
+        "body": "Dne 14. září 2015 detektory LIGO zachytily signál GW150914: splynutí dvou černých děr o hmotnostech přibližně {gw150914Primary} a {gw150914Secondary} Sluncí. Zdroj byl vzdálen asi {gw150914BillionLy} {gw150914BillionLyPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} světelných let a v gravitačních vlnách vyzářil energii odpovídající přibližně {gw150914Radiated} slunečním hmotnostem. Nešlo o zvuk šířící se vesmírem, ale o změny geometrie prostoročasu. Cygnus X-1 ukazuje jinou tvář hvězdných černých děr: dvojhvězdu s trvalým přísunem plynu. Izolované černé díry bez výrazné akrece zůstávají mnohem hůře odhalitelné."
       }
     },
     "custom": {
@@ -552,7 +552,7 @@
       "1": {
         "kicker": "Hubble, 2002–2023",
         "title": "Dvacet let snímků z Hubbleova dalekohledu",
-        "body": "Tým vedený Maximilianem Häberlem v roce 2024 porovnal více než {omegaImages} snímků Hubbleova vesmírného dalekohledu pořízených během dvou desetiletí a změřil pohyby {omegaTrackedMillions} milionu hvězd. Poblíž středu našel sedm hvězd rychlejších, než je úniková rychlost hvězdokupy; nejrychlejší má příčnou rychlost v rovině oblohy {omegaFastestKms} kilometrů za sekundu. Bez další neviditelné hmoty ve středu by tyto hvězdy už dávno unikly."
+        "body": "Tým vedený Maximilianem Häberlem v roce 2024 porovnal více než {omegaImages} snímků Hubbleova vesmírného dalekohledu pořízených během dvou desetiletí a změřil pohyby {omegaTrackedMillions} {omegaTrackedMillionsPlural, select, one {milionu} few {milionů} many {milionu} other {milionů}} hvězd. Poblíž středu našel sedm hvězd rychlejších, než je úniková rychlost hvězdokupy; nejrychlejší má příčnou rychlost v rovině oblohy {omegaFastestKms} kilometrů za sekundu. Bez další neviditelné hmoty ve středu by tyto hvězdy už dávno unikly."
       },
       "2": {
         "kicker": "nejméně {omegaMass} M☉",
@@ -574,7 +574,7 @@
       "0": {
         "kicker": "z = {tonRedshift}",
         "title": "Světlo z mladého vesmíru",
-        "body": "TON 618 je kvasar: plyn padající na obří černou díru září tak jasně, že přezáří celou mateřskou galaxii. Jeho světlo se vydalo na cestu asi před {tonLightGyr} miliardy let, kdy byly vesmíru zhruba {tonUniverseThenGyr} miliardy let. Rozpínání vesmíru ho od té doby odneslo do vzdálenosti asi {tonComovingBillionLy} miliard světelných let. V dalekohledu přesto vypadá jen jako slabá hvězda 16. magnitudy."
+        "body": "TON 618 je kvasar: plyn padající na obří černou díru září tak jasně, že přezáří celou mateřskou galaxii. Jeho světlo se vydalo na cestu asi před {tonLightGyr} {tonLightGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let, kdy byly vesmíru zhruba {tonUniverseThenGyr} {tonUniverseThenGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let. Rozpínání vesmíru ho od té doby odneslo do vzdálenosti asi {tonComovingBillionLy} {tonComovingBillionLyPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} světelných let. V dalekohledu přesto vypadá jen jako slabá hvězda 16. magnitudy."
       },
       "1": {
         "kicker": "Tonantzintla, 1957",
@@ -582,14 +582,14 @@
         "body": "V roce 1957 ji astronomové z observatoře Tonantzintla v Mexiku zapsali jako slabou modrou hvězdu číslo 618. Rádiová přehlídka ji zachytila v roce 1970 a v roce 1976 odhalilo spektrum pořízené Marie-Hélène Ulrichovou její velký rudý posuv. Nešlo o blízkou hvězdu, ale o mimořádně svítivý kvasar vzdálený miliardy světelných let."
       },
       "2": {
-        "kicker": "{tonMassBillions} miliard M☉",
+        "kicker": "{tonMassBillions} {tonMassBillionsPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} M☉",
         "title": "Hmotnost odhadnutá z pohybu plynu",
-        "body": "Hmotnost je odhad, nikoli přímé měření. Plyn u černé díry se pohybuje tak rychle, že rozšiřuje vodíkovou emisní čáru na zhruba {tonLineKms} km/s. Tato rychlost spolu se vzdáleností plynu od díry, odvozenou ze svítivosti kvasaru, dává přibližně {tonMassBillions} miliard Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru."
+        "body": "Hmotnost je odhad, nikoli přímé měření. Plyn u černé díry se pohybuje tak rychle, že rozšiřuje vodíkovou emisní čáru na zhruba {tonLineKms} km/s. Tato rychlost spolu se vzdáleností plynu od díry, odvozenou ze svítivosti kvasaru, dává přibližně {tonMassBillions} {tonMassBillionsPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru."
       },
       "3": {
         "kicker": "{tonHorizonAu} au",
         "title": "Blízko teoretické meze",
-        "body": "Pro nerotující černou díru této hmotnosti by Schwarzschildův poloměr činil zhruba {tonHorizonAu} astronomických jednotek, tedy desítkykrát víc než poloměr dráhy Neptunu. Podle teorie černá díra živená svítivým tenkým diskem při obvyklých parametrech nepřeroste přibližně {tonLimitBillions} miliard Sluncí, takže se TON 618 této mezi blíží. Její spin změřen nebyl."
+        "body": "Pro nerotující černou díru této hmotnosti by Schwarzschildův poloměr činil zhruba {tonHorizonAu} astronomických jednotek, tedy desítkykrát víc než poloměr dráhy Neptunu. Podle teorie černá díra živená svítivým tenkým diskem při obvyklých parametrech nepřeroste přibližně {tonLimitBillions} {tonLimitBillionsPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} Sluncí, takže se TON 618 této mezi blíží. Její spin změřen nebyl."
       },
       "4": {
         "kicker": "oddálení",
@@ -606,7 +606,7 @@
       "1": {
         "kicker": "{gwDurationS} s",
         "title": "Desetina sekundy",
-        "body": "Signál trval jen asi desetinu sekundy, protože takto hmotné černé díry splývají při nízkých frekvencích, blízko spodního okraje citlivého pásma LIGO. V provozu byly pouze dva detektory LIGO, takže polohu zdroje známe jen zhruba, v oblasti asi {gwSkyDeg2} čtverečních stupňů oblohy. Jeho vlny cestovaly k Zemi zhruba {gwTravelGyr} miliard let."
+        "body": "Signál trval jen asi desetinu sekundy, protože takto hmotné černé díry splývají při nízkých frekvencích, blízko spodního okraje citlivého pásma LIGO. V provozu byly pouze dva detektory LIGO, takže polohu zdroje známe jen zhruba, v oblasti asi {gwSkyDeg2} čtverečních stupňů oblohy. Jeho vlny cestovaly k Zemi zhruba {gwTravelGyr} {gwTravelGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let."
       },
       "2": {
         "kicker": "χ ≈ {gwSpin}",

@@ -45,8 +45,9 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
   revisable measurement, or it derives from other figures. A one-off literature number
   used once may stay in the copy; do not catalogue formulas, years or vague phrases.
 - Copy quotes catalogued figures as placeholders (`proseArgs`), never typed digits, and
-  names of catalogued bodies come from the shared `names.<id>`. Check Czech grammar
-  around each placeholder.
+  names of catalogued bodies come from the shared `names.<id>`. A Czech word whose form
+  depends on the number takes `{<name>Plural, select, one {…} few {…} many {…} other {…}}`
+  in its sentence's case.
 - The catalogue must not mount WebGL or load simulation-specific message packs.
 - Keep catalogue pages scrollable; size simulation stages beneath the common header.
 

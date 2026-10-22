@@ -499,3 +499,28 @@ test("a span whose ends round alike prints as one figure", async () => {
   );
   assert.equal(joinSpan(["0.12", "0.12"]), "0.12");
 });
+
+test("a quoted figure's plural category follows the number as printed, decimals included", async () => {
+  const { quotePlural } = await import("@horizon/toolkit/science");
+  const fact = (value, digits, range) => ({
+    value,
+    digits,
+    range,
+    unit: "Gyr",
+    source: "x",
+    status: "verified",
+  });
+  /* Czech: 1 miliarda, 3 miliardy, 18 miliard, 10,8 miliardy. */
+  assert.equal(quotePlural("cs", fact(1, 1)), "one");
+  assert.equal(quotePlural("cs", fact(2.95, 1)), "few");
+  assert.equal(quotePlural("cs", fact(18.3, 2)), "other");
+  assert.equal(quotePlural("cs", fact(10.83, 3)), "many");
+  /* "4,0" is printed as a decimal, so it takes the decimal form; a span agrees with its end. */
+  assert.equal(quotePlural("cs", fact(4, 2)), "many");
+  assert.equal(
+    quotePlural("cs", { range: [2, 6], unit: "Gyr", digits: 1, source: "x", status: "verified" }),
+    "other",
+  );
+  assert.equal(quotePlural("cs", fact(77_060, 2)), "other");
+  assert.equal(quotePlural("en", fact(1, 1)), "one");
+});

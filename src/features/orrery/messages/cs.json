@@ -10,7 +10,7 @@
     "oort": "Kulové plochy vyznačují vzdálenosti {oortInnerShellAu} a {oortShellAu} au; hustota bodů klesá jako r⁻³·⁵. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet."
   },
   "epochs": {
-    "sketch": "Před {timelineGyr} miliardami let",
+    "sketch": "Před {timelineGyr} {timelineGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let",
     "birth": "Vznik Slunce",
     "disk": "Neporušený disk",
     "clearing": "Odklízení těles",
@@ -204,7 +204,7 @@
       },
       "past": {
         "title": "Dávná minulost je modelová",
-        "body": "Polohy planet před 4 miliardami let neznáme. Raná část časové osy je náčrt vycházející z modelů nestability obřích planet (model z Nice): obři začínají blíž u sebe, za nimi leží disk zbylých těles. Jupiter a Saturn pomalu projdou rezonancí 2:1 a soustava se stane nestabilní. Neptun při migraci směrem od Slunce rozptýlí tělesa disku; většina je vyvržena, část zůstane v Kuiperově pásu či rozptýleném disku a část skončí v Oortově oblaku. Novější verze nechávají obry začínat v těsném řetězci rezonancí, který se později rozpadne; náčrt kreslí původní verzi z roku 2005. Ta tento děj spojovala s pozdním těžkým bombardováním před {lhbGyr} miliardy let. Novější studie upřednostňují ranější nestabilitu, do asi 100 milionů let od vzniku prvních pevných látek. Jediné krátké období prudce zvýšeného počtu dopadů proto už není obvyklým výkladem."
+        "body": "Polohy planet před 4 miliardami let neznáme. Raná část časové osy je náčrt vycházející z modelů nestability obřích planet (model z Nice): obři začínají blíž u sebe, za nimi leží disk zbylých těles. Jupiter a Saturn pomalu projdou rezonancí 2:1 a soustava se stane nestabilní. Neptun při migraci směrem od Slunce rozptýlí tělesa disku; většina je vyvržena, část zůstane v Kuiperově pásu či rozptýleném disku a část skončí v Oortově oblaku. Novější verze nechávají obry začínat v těsném řetězci rezonancí, který se později rozpadne; náčrt kreslí původní verzi z roku 2005. Ta tento děj spojovala s pozdním těžkým bombardováním před {lhbGyr} {lhbGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let. Novější studie upřednostňují ranější nestabilitu, do asi 100 milionů let od vzniku prvních pevných látek. Jediné krátké období prudce zvýšeného počtu dopadů proto už není obvyklým výkladem."
       },
       "ellipses": {
         "title": "Elipsy",
@@ -225,7 +225,7 @@
       },
       "periods": {
         "title": "Čím dál, tím pomaleji",
-        "body": "Země oběhne Slunce za rok, Jupiter za {jupiterYears} let, Neptun za {neptuneYears}. Třetí Keplerův zákon spojuje oběžnou dobu s velkou poloosou dráhy.",
+        "body": "Země oběhne Slunce za rok, Jupiter za {jupiterYears} {jupiterYearsPlural, select, one {rok} few {roky} many {roku} other {let}}, Neptun za {neptuneYears}. Třetí Keplerův zákon spojuje oběžnou dobu s velkou poloosou dráhy.",
         "eq": "{equation} · P v letech, a v au"
       },
       "ellipses": {
@@ -260,7 +260,7 @@
     "summary": "Současné polohy vypočtené z přibližných dráhových elementů JPL a výslovně označený výukový model rané sluneční soustavy, až po Oortův oblak. Uvedené zdroje pomáhají rozlišit údaje založené na měření od názorných modelů.",
     "features": {
       "views": "Pět pohledů od vnitřních planet po Oortův oblak, každý v lineárním měřítku.",
-      "time": "Časová osa pokrývající {timelineGyr} miliard let, s přehráváním, pěti předvolenými obdobími a přehledem konečných osudů zbylých těles.",
+      "time": "Časová osa pokrývající {timelineGyr} {timelineGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let, s přehráváním, pěti předvolenými obdobími a přehledem konečných osudů zbylých těles.",
       "bodies": "Planety, Pluto, Sedna, Halleyova kometa, {tracers} modelových planetesimál, soubory bodů vykreslované na GPU pro pás planetek, trojány, Kuiperův pás a Oortův oblak a karty rozlišující měřené údaje od modelových."
     },
     "sections": {
@@ -270,11 +270,11 @@
       },
       "migration": {
         "title": "Vznik soustavy a model odklízení těles",
-        "body": "První pevné látky zkondenzovaly před {sunBirthGyr} miliardy let (podle stáří vápenato-hlinitých inkluzí, CAI). Pozorované disky přetrvávají asi {diskLifetimesMyr} milionů let, a tak zde obří planety dokončují růst během existence plynového disku s životností {gasMyr} milionů let, zatímco terestrické planety většinou dorostou do doby před {modelStartGyr} miliardy let; srážka, při níž vznikl Měsíc, jedna z posledních obřích srážek, se datuje přibližně do doby před {moonImpactGyr} miliardy let. V období před {modelStartGyr} až {clearDoneGyr} miliardy let se dráhy obrů interpolují z výchozích drah modelu z Nice ({jupiterStartAu}; {saturnStartAu}; {uranusStartAu} a {neptuneStartAu} au) na současné dráhy odvozené z měření. Pseudonáhodný vzorek planetesimál s pevným počátečním nastavením se přesouvá z disku {diskAu} au do Kuiperova pásu, rozptýleného disku, Oortova oblaku nebo ven ze soustavy. Načasování je sporné: jiné studie meteoritů kladou nestabilitu brzy po rozptýlení plynu. Dráhové elementy se interpolují plynule; nejde o numerickou integraci pohybu N těles. Před vznikem Slunce zobrazuje pohled na sluneční soustavu schematický molekulární oblak s datovanými milníky vývoje Galaxie. Během existence plynového disku má posuvník logaritmické měřítko času od vzniku prvních pevných látek, aby bylo možné rozlišit vývoj prachu (do {planetesimalsKyr} tisíc let), planetesimál a planetárních embryí o hmotnosti Měsíce (do {embryosMyr} mil. let). Sněžná čára je zakreslena ve vzdálenosti {snowLineAu} au; odhady pro mladý disk se pohybují kolem {snowLineEstimatesAu} au."
+        "body": "První pevné látky zkondenzovaly před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let (podle stáří vápenato-hlinitých inkluzí, CAI). Pozorované disky přetrvávají asi {diskLifetimesMyr} {diskLifetimesMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let, a tak zde obří planety dokončují růst během existence plynového disku s životností {gasMyr} {gasMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let, zatímco terestrické planety většinou dorostou do doby před {modelStartGyr} {modelStartGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let; srážka, při níž vznikl Měsíc, jedna z posledních obřích srážek, se datuje přibližně do doby před {moonImpactGyr} {moonImpactGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let. V období před {modelStartGyr} až {clearDoneGyr} {clearDoneGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let se dráhy obrů interpolují z výchozích drah modelu z Nice ({jupiterStartAu}; {saturnStartAu}; {uranusStartAu} a {neptuneStartAu} au) na současné dráhy odvozené z měření. Pseudonáhodný vzorek planetesimál s pevným počátečním nastavením se přesouvá z disku {diskAu} au do Kuiperova pásu, rozptýleného disku, Oortova oblaku nebo ven ze soustavy. Načasování je sporné: jiné studie meteoritů kladou nestabilitu brzy po rozptýlení plynu. Dráhové elementy se interpolují plynule; nejde o numerickou integraci pohybu N těles. Před vznikem Slunce zobrazuje pohled na sluneční soustavu schematický molekulární oblak s datovanými milníky vývoje Galaxie. Během existence plynového disku má posuvník logaritmické měřítko času od vzniku prvních pevných látek, aby bylo možné rozlišit vývoj prachu (do {planetesimalsKyr} {planetesimalsKyrPlural, select, one {tisíce} few {tisíc} many {tisíce} other {tisíc}} let), planetesimál a planetárních embryí o hmotnosti Měsíce (do {embryosMyr} mil. let). Sněžná čára je zakreslena ve vzdálenosti {snowLineAu} au; odhady pro mladý disk se pohybují kolem {snowLineEstimatesAu} au."
       },
       "sky": {
         "title": "Obloha v pozadí",
-        "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než {thinDiskGyr} miliardami let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně {namedStarsYears} let od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí."
+        "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně {namedStarsYears} {namedStarsYearsPlural, select, one {rok} few {roky} many {roku} other {let}} od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí."
       },
       "swarms": {
         "title": "Pásy a oblaky na GPU",
@@ -291,19 +291,19 @@
     }
   },
   "notes": {
-    "merger": "Asi před {mergerGyr} miliardami let Mléčná dráha pohltila galaxii Gaia-Enceladus, která rozvířila a zesílila už vznikající tlustý disk. Atomy budoucího Slunce jsou zatím součástí mezihvězdného plynu.",
-    "thinDisk": "V tenkém disku vznikají hvězdy a nejpozději před přibližně {thinDiskGyr} miliardami let je již přítomna příčka. Dřívější generace hvězd vytvářejí těžké prvky, které se později stanou součástí Slunce.",
+    "merger": "Asi před {mergerGyr} {mergerGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let Mléčná dráha pohltila galaxii Gaia-Enceladus, která rozvířila a zesílila už vznikající tlustý disk. Atomy budoucího Slunce jsou zatím součástí mezihvězdného plynu.",
+    "thinDisk": "V tenkém disku vznikají hvězdy a nejpozději před přibližně {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je již přítomna příčka. Dřívější generace hvězd vytvářejí těžké prvky, které se později stanou součástí Slunce.",
     "ingredients": "Mezihvězdný plyn obohacený dřívějšími generacemi hvězd. Oblak, z něhož vznikne Slunce, se ještě nezhroutil.",
     "collapse": "Jádro molekulárního oblaku se hroutí za méně než milion let. Krátce žijící hliník-26 v meteoritech může ukazovat na blízkou hmotnou hvězdu.",
-    "dust": "První pevné látky před {sunBirthGyr} miliardy let: nula této časové osy. Prachová zrna se při pomalých srážkách spojují do částic o velikosti milimetrů až centimetrů.",
-    "planetesimals": "Podle modelů během prvních {planetesimalsKyr} tisíc let se první oblázky shlukují do kilometrových planetesimál; dál od Slunce to trvá miliony let. Jedním z dochovaných těles tohoto typu je Arrokoth.",
+    "dust": "První pevné látky před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let: nula této časové osy. Prachová zrna se při pomalých srážkách spojují do částic o velikosti milimetrů až centimetrů.",
+    "planetesimals": "Podle modelů během prvních {planetesimalsKyr} {planetesimalsKyrPlural, select, one {tisíce} few {tisíc} many {tisíce} other {tisíc}} let se první oblázky shlukují do kilometrových planetesimál; dál od Slunce to trvá miliony let. Jedním z dochovaných těles tohoto typu je Arrokoth.",
     "gasDisk": "Podle modelů do zhruba {embryosMyr} mil. let vznikají planetární embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led dost rychle, aby gravitačně zachytila okolní plyn: vznikají obří planety.",
     "accretion": "Záření a hvězdný vítr mladého Slunce rozptylují plyn. Ve vnitřní části soustavy zbývá mnoho planetárních embryí velikosti Měsíce. Jupiter mění jejich dráhy, které se začínají křížit.",
     "belt": "Daleko od Jupiteru se planetární embrya při pomalých srážkách spojují v kamenné planety. Blízko Jupiteru jsou srážky rychlé a tělesa tříští: zůstává pás planetek.",
-    "moon": "Podle převládajícího modelu srážka Země s tělesem velikosti Marsu vyvrhne materiál, z něhož vznikne Měsíc. Odhady doby této události se pohybují přibližně v rozmezí {moonImpactGyr} miliardy let před současností; mladší stáří mohou zachycovat pozdější přetavení.",
+    "moon": "Podle převládajícího modelu srážka Země s tělesem velikosti Marsu vyvrhne materiál, z něhož vznikne Měsíc. Odhady doby této události se pohybují přibližně v rozmezí {moonImpactGyr} {moonImpactGyrPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} let před současností; mladší stáří mohou zachycovat pozdější přetavení.",
     "disk": "Výchozí stav modelu: obří planety na těsně sousedících drahách, za nimi hmotný disk ledových těles. Počáteční dráhy jsou zvoleny pro výukový model.",
     "clearing": "Model odklízení těles: Jupiter a Saturn projdou rezonancí, obři si navzájem rozhodí dráhy a Neptun rozptýlí tělesa disku.",
-    "bombardment": "Mnoho impaktních tavenin přivezených misemi Apollo má stáří asi {lhbGyr} miliardy let. To vedlo k představě pozdního těžkého bombardování. Vzorky ale mohou z velké části pocházet z jediné pánve, Imbria. Zda nastalo krátké období zvýšeného počtu dopadů, nebo jejich četnost dlouhodobě klesala, zůstává sporné.",
+    "bombardment": "Mnoho impaktních tavenin přivezených misemi Apollo má stáří asi {lhbGyr} {lhbGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let. To vedlo k představě pozdního těžkého bombardování. Vzorky ale mohou z velké části pocházet z jediné pánve, Imbria. Zda nastalo krátké období zvýšeného počtu dopadů, nebo jejich četnost dlouhodobě klesala, zůstává sporné.",
     "today": "Měřené dráhy. Polohy planet jsou spočteny pro dnešní datum."
   }
 }

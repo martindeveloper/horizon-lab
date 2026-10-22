@@ -843,7 +843,8 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   years". Every one comes from a catalogue: cards through `components/card-specs.ts`, and
   notes, hints, guide and technical prose through the feature's `PROSE_FIGURES` and
   `proseArgs(figures, locale)` (`src/lib/facts.ts`), which print each figure in the unit its
-  sentence names (`inPowerOfTen` for "{massMillions} million Suns"). The Orrery and Deep Field
+  sentence names (`inPowerOfTen` for "{massMillions} million Suns"), and beside each its plural
+  category as printed (`<name>Plural`), which Czech words that depend on it select on. The Orrery and Deep Field
   keep them in `lib/model/catalogue/`, Voyage, Stellar Spectra and Giants in `lib/model/catalogue.ts`,
   the Black Hole in `lib/figures.ts` (`figureArgs`, which adds the atlas's scientific and ±
   lines) over its own literature figures in `lib/catalogue.ts` (`OBSERVATORY`). Pass them to `t()`; for technical prose, pass `figures` (or plain `values`) to

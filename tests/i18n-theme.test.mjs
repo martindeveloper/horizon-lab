@@ -193,3 +193,33 @@ test("localized preset links, aliases, and initial scene state agree", () => {
   assert.equal(resolveHole("unknown-black-hole"), null);
   assert.equal(resolveHole("M87"), "m87");
 });
+
+test("every Czech plural choice has its other form and reads in every category", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { featureMessages, leaves } = await import("./messages-helper.mjs");
+  for (const feature of ["orrery", "deep-field", "voyage", "black-hole"]) {
+    const messages = featureMessages(feature, "cs");
+    const t = createTranslator({
+      locale: "cs",
+      messages,
+      onError(error) {
+        throw error;
+      },
+    });
+    for (const [key, message] of leaves(messages)) {
+      const selects = [
+        ...String(message).matchAll(/\{(\w+Plural), select, ([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g),
+      ];
+      if (selects.length === 0) continue;
+      for (const [, , body] of selects)
+        assert.match(body, /\bother \{[^{}]+\}/, `${feature}:${key} has no other form`);
+      /* Every other placeholder gets a stand-in; each plural takes each form in turn. */
+      const names = [...String(message).matchAll(/\{(\w+)\}/g)].map(([, name]) => name);
+      for (const form of ["one", "few", "many", "other"]) {
+        const values = Object.fromEntries(names.map((name) => [name, "1"]));
+        for (const [, plural] of selects) values[plural] = form;
+        assert.doesNotMatch(t(key, values), /[{}]|undefined/, `${feature}:${key} (${form})`);
+      }
+    }
+  }
+});

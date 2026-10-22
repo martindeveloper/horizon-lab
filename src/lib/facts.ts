@@ -13,6 +13,7 @@ import {
   printFact,
   printFactSpan,
   quoteFact,
+  quotePlural,
   type DistanceChoice,
   type DistanceFormat,
   type FactSpan,
@@ -247,7 +248,9 @@ const proseCache = new WeakMap<object, Map<string, Record<string, string>>>();
 
 /**
  * Every figure a simulation's prose quotes (`figures`, by placeholder name), each in the unit
- * its sentence names, as `t()` arguments; once per language.
+ * its sentence names, as `t()` arguments; once per language. Beside each, `<name>Plural` is
+ * the plural category of the number as printed, for the word after it:
+ * `{lhbGyr} {lhbGyrPlural, select, one {miliardou} many {miliardy} other {miliardami}}`.
  */
 export function proseArgs(figures: Readonly<Record<string, Fact>>, locale: string) {
   let byLocale = proseCache.get(figures);
@@ -255,7 +258,10 @@ export function proseArgs(figures: Readonly<Record<string, Fact>>, locale: strin
   let args = byLocale.get(locale);
   if (!args) {
     args = Object.fromEntries(
-      Object.entries(figures).map(([name, fact]) => [name, quoteFact(locale, fact)]),
+      Object.entries(figures).flatMap(([name, fact]) => [
+        [name, quoteFact(locale, fact)],
+        [`${name}Plural`, quotePlural(locale, fact)],
+      ]),
     );
     byLocale.set(locale, args);
   }

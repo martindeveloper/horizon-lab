@@ -212,7 +212,9 @@ lengths, in the visitor's unit, at least two significant figures. Other units
 print as plain numbers in the `show` unit, with "million" and "billion" as words
 from `format` and scientific notation from 10¹². `live` values print at the
 readout's precision. `printFactSpan` prints a range with the unit once.
-`quoteFact(locale, fact)` gives the bare number prose quotes.
+`quoteFact(locale, fact)` gives the bare number prose quotes, and `quotePlural(locale, fact)` the
+plural category of that number as printed (decimals count; a span agrees with its end), for
+the word after it.
 
 ## Display scales (`quantities.ts`)
 

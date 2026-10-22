@@ -156,7 +156,7 @@
       "pluto": "Charon je tak velký, že dvojice obíhá bod mimo Pluto."
     },
     "far": {
-      "alphaCen": "Dvě slunce {abSeparationAu} au od sebe, obíhající kolem sebe každých {abPeriodYears} let, s Proximou pětinu světelného roku stranou.",
+      "alphaCen": "Dvě slunce {abSeparationAu} au od sebe, obíhající kolem sebe {abPeriodYearsPlural, select, one {každý} few {každé} other {každých}} {abPeriodYears} {abPeriodYearsPlural, select, one {rok} few {roky} many {roku} other {let}}, s Proximou pětinu světelného roku stranou.",
       "proxima": "Nejbližší hvězda ke Slunci: červený trpaslík o sedmině šířky Slunce, který vzplává."
     }
   },
@@ -193,7 +193,7 @@
     "steps": {
       "moon": {
         "title": "Měsíc",
-        "body": "Třicet průměrů Země prázdna. Světlo mezeru překoná za {moonLightSeconds} sekundy."
+        "body": "Třicet průměrů Země prázdna. Světlo mezeru překoná za {moonLightSeconds} {moonLightSecondsPlural, select, one {sekundu} few {sekundy} many {sekundy} other {sekund}}."
       },
       "earth": {
         "title": "Země",
@@ -205,7 +205,7 @@
       },
       "jupiter": {
         "title": "Io a Jupiter",
-        "body": "Stín Io přejde Jupiter každých {ioPeriodHours} hodin. Signál domů letí skoro hodinu."
+        "body": "Stín Io přejde Jupiter {ioPeriodHoursPlural, select, one {každou} few {každé} other {každých}} {ioPeriodHours} {ioPeriodHoursPlural, select, one {hodinu} few {hodiny} many {hodiny} other {hodin}}. Signál domů letí skoro hodinu."
       },
       "saturn": {
         "title": "Saturn",
@@ -217,7 +217,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} let; Proxima je ta červená. Voyager by potřeboval {voyagerYears} let."
+        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} {abPeriodYearsPlural, select, one {rok} few {roky} many {roku} other {let}}; Proxima je ta červená. Voyager by potřeboval {voyagerYears} {voyagerYearsPlural, select, one {rok} few {roky} many {roku} other {let}}."
       },
       "galaxy": {
         "title": "Galaxie shora",
