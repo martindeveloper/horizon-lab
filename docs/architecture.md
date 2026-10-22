@@ -26,6 +26,7 @@ src/
       deep-field/              The same three routes for Deep Field's views
       spectroscopy/            The same three routes for Stellar Spectra's views
       giants/                  The same three routes for Giants' rungs ([star])
+      sun/                     The same three routes for the Sun's views ([view])
     experience/                Shared experience prefix (EXPERIENCE_PREFIX)
       voyage/                  The same three routes for Voyage's places
   components/
@@ -69,12 +70,12 @@ src/
         views.ts               The default view and the Motion speed-up by scale
         tour.ts                Guide steps and their flights
         catalogue/             The timeline's figures: value or span, unit, source, status
-        solar-activity*.ts     The Sun's illustrative Hα activity: one hedgerow prominence,
-                               baked on a worker (solar-activity-density.worker.ts), each
+        solar-activity*.ts     The Sun's illustrative Hα activity: where the shared hedgerow
+                               prominence (src/space/sun/graphics/prominence) stands, each
                                region's slow cycle of flows and eruption
         parameters.ts, equations.ts, model-check.ts
       lib/graphics/            The time-dependent sky (sky.ts, on the shared band in src/space/sky),
-                               tour-sketch.ts, shader-defines.ts, shaders/ (the WebP map loader is
+                               tour-sketch.ts, shaders/ (the WebP map loader is
                                @horizon/toolkit/scene; MAP_BASE is src/space/solar-system/graphics/maps.ts)
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
                                toolkit's scene host, orbit rig and controls, moves it along
@@ -191,6 +192,24 @@ src/
       lib/engine.ts            The pass, the hands (wheel, drag, tap, keys) and the snap to a
                                rung; lib/store.ts the Zustand store (giants namespace messages)
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
+    sun/
+      index.ts                 Public client entry: SunApp
+      manifest.ts, routing.ts, server.ts, technical.json
+      components/              Canvas (the scene's names), overlay, dock (the light, the clock, the
+                               view's own slider: the cut, the eruption, the cycle), Places and
+                               View panels, the place card, guide
+      lib/model/               The lab's own, without WebGL: views.ts (the seven views and what
+                               each opens with), lights.ts (the dial's ids), clock.ts (the rates),
+                               places.ts (what the finder lists), tour.ts (the guided journey);
+                               the Sun's physics is the shared src/space/sun
+      lib/scene/               The engine on the toolkit's scene host: the globe ray-traced on a
+                               proxy sphere with its cut (globe-layer.ts), the atmosphere beyond
+                               the limb (atmosphere-layer.ts), the field's ribbons (field-layer.ts),
+                               the shared prominence volume placed (prominence-layer.ts), the seven
+                               framings (views.ts); lib/graphics/ its GLSL and light tables;
+                               lib/quality.ts its budgets by render level
+      lib/store.ts             Zustand store (sun namespace messages); lib/drift.ts the drift
+      bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     voyage/
       index.ts                 Public client entry: VoyageApp
       manifest.ts, routing.ts, server.ts, technical.json
@@ -272,6 +291,13 @@ src/
                                drawn by the Orrery along its timeline and by Voyage from the ship;
                                band.ts paints the maps and grains on a worker (band.worker.ts),
                                the last sky per set of eras kept for the next mount
+    sun/graphics/              The Sun as any host draws it: the CIE/Planck continuum and Claret
+                               limb tables (atmosphere.ts, limb-grid.json, spectrum-sample.ts),
+                               the GLSL Giants and the Sun lab share (shaders/: continuum,
+                               granulation, spots) with its own header (shader-defines.ts), and
+                               the hedgerow prominence volume (prominence/: the bake on a worker,
+                               its bounds' geometry, the two shaders) the Orrery and the Sun lab
+                               both place
     bench.ts                   A scene engine on the bench: its frame loop driven frame by frame
     quality.ts                 What a render quality means for every space scene: tier,
                                resolution, swarms, the bloom chain, the lens's star
@@ -383,6 +409,8 @@ page scrolling.
 | `/lab/spectroscopy/stars`   | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
 | `/lab/giants`               | Giants, the Sun in focus (behind the `giants` feature switch, released: on)                                                                  |
 | `/lab/giants/betelgeuse`    | Giants with that body in focus (every rung in `rungs.ts`)                                                                                    |
+| `/lab/sun`                  | The Sun, its surface (behind the `sun` feature switch, unreleased)                                                                           |
+| `/lab/sun/eruption`         | The Sun's view (inside, sunspot, chromosphere, corona, eruption, cycle)                                                                      |
 | `/experience/voyage`        | Voyage, default place (Earth)                                                                                                                |
 | `/experience/voyage/saturn` | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
 | `/black-hole/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
