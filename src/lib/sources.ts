@@ -8,7 +8,7 @@ export type Source = { cite: string; link?: string };
 export const SOURCES = {
   nistIsotopeMasses: {
     cite: "NIST, Atomic Weights and Isotopic Compositions (neutral ¹H and ⁴He isotope masses, not natural-abundance atomic weights)",
-    link: "https://physics.nist.gov/PhysRefData/Compositions/index.html",
+    link: SOURCE_URLS.nistIsotopeMasses,
   },
   abbott2016: {
     cite: "Abbott et al. 2016, PRL 116, 061102; GWOSC GWTC-2.1 (GW150914: 34.6 and 30.0 M☉, ~1.3 Gly, ~3 M☉c² radiated)",

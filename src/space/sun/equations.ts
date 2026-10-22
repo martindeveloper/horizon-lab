@@ -54,11 +54,11 @@ export const hydrostaticEquilibrium = defineEquation({
 /** Net atomic bookkeeping, including positron annihilation; Q includes escaping neutrinos. */
 export const ppChainEnergy = defineEquation({
   id: "pp-chain-energy",
-  text: `4 ¹H → ⁴He + 2ν_e,  E = Δm c²,  Δm = ${(100 * PP_MASS_FRACTION).toFixed(2)} % of 4 m_H`,
-  latex: `4\\,{}^1\\mathrm{H} \\to {}^4\\mathrm{He} + 2\\nu_e,\\quad E = \\Delta m\\, c^2,\\quad \\Delta m = ${(100 * PP_MASS_FRACTION).toFixed(2)}\\,\\%\\ \\text{of}\\ 4 m_H`,
+  text: `4 ¹H → ⁴He + 2ν_e,  E = Δm c²,  Δm = ${(100 * PP_MASS_FRACTION).toFixed(2)} % of m_fuel`,
+  latex: `4\\,{}^1\\mathrm{H} \\to {}^4\\mathrm{He} + 2\\nu_e,\\quad E = \\Delta m\\, c^2,\\quad \\Delta m = ${(100 * PP_MASS_FRACTION).toFixed(2)}\\,\\%\\ \\text{of}\\ m_{\\mathrm{fuel}}`,
   output: "E",
   variables: {
-    m: { symbol: "m_H", latex: "m_H", unit: "kg" },
+    m: { symbol: "m_fuel", latex: "m_{\\mathrm{fuel}}", unit: "kg" },
     E: { symbol: "E", latex: "E", unit: "J" },
   },
   compute: ({ m }) => fusionEnergy(m),

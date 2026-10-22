@@ -38,6 +38,44 @@ float penumbralFlow(vec2 offset, float radius, float regionRadius, float travell
   return gradientNoise3(vec3(direction * 32.0 + seed, (r - flow) * EVERSHED_WAVES));
 }
 
+// Illustrative umbral convection: isolated, locally anchored brightenings, not an
+// advected noise field. Each cell has its own clock; a new dot appears only after
+// the old one has faded completely. Time uses the existing granulation lifetime.
+float umbralDots(vec2 offset, float radius, float seed, float footprint, float time) {
+  float cellPixels = footprint / UMBRAL_DOTS;
+  float seen = smoothstep(2.0, 5.0, cellPixels);
+  if (seen <= 0.0) return 0.0;
+  vec2 p = offset / max(radius, 1e-4) * UMBRAL_DOTS;
+  vec2 cell = floor(p);
+  float light = 0.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 id = cell + vec2(float(x), float(y));
+      vec3 schedule = hash33(vec3(id, seed));
+      float clock = time / mix(1.1, 2.6, schedule.x) + schedule.y;
+      float age = fract(clock);
+      vec3 birth = hash33(vec3(id + seed, floor(clock) + 9.7));
+      float life = smoothstep(0.04, 0.24, age) * (1.0 - smoothstep(0.58, 0.9, age));
+      vec2 centre = id + mix(vec2(0.2), vec2(0.8), birth.xy);
+      vec2 d = p - centre;
+      float angle = TWO_PI * schedule.z;
+      d = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * d;
+      // Modest growth and changing elongation stay centred on this individual dot.
+      float size = mix(0.085, 0.13, birth.x) * mix(0.7, 1.0, life);
+      float aspect = 1.0 + 0.3 * birth.y * sin(PI * age);
+      vec2 sigma = size * vec2(aspect, 1.0 / aspect);
+      // Pixel integration broadens small dots and lowers their peak, avoiding sparkle.
+      vec2 variance = sigma * sigma + vec2(1.0 / (12.0 * cellPixels * cellPixels));
+      float q = dot(d * d, 1.0 / variance);
+      float profile = exp(-0.5 * q) * (1.0 - smoothstep(4.0, 9.0, q));
+      float filtered = sigma.x * sigma.y / sqrt(variance.x * variance.y);
+      float brightness = smoothstep(0.25, 0.45, birth.z) * mix(0.55, 1.0, schedule.z);
+      light = max(light, life * brightness * filtered * profile);
+    }
+  }
+  return seen * light;
+}
+
 // Fine mottles and fibrils laid over a warped magnetic network. The field is
 // continuous in 3D, including the longitude seam and both poles.
 float chromosphericNetwork(vec3 body, float cells, float px, float mu, float detail) {

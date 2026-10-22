@@ -6,6 +6,7 @@
  */
 
 export const SOURCE_URLS = {
+  nistIsotopeMasses: "https://physics.nist.gov/PhysRefData/Compositions/index.html",
   abdElDayem2026: "https://doi.org/10.1038/s41586-026-10894-w",
   agol2021: "https://doi.org/10.3847/PSJ/abd022",
   akeson2021: "https://doi.org/10.3847/1538-3881/abfaff",

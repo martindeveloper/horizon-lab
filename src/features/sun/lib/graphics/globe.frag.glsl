@@ -134,10 +134,12 @@ Face faceAt(vec3 s, float mu, float px) {
     if (lead.y > 0.0 && uFine > 0.0) {
       float seen = resolvedFeature(EVERSHED_WAVES / (leadRadius * dir.w), px, mu);
       ripple += seen * lead.y * penumbralFlow(leadAt, leadRadius, dir.w, uEvershed, seed);
-      /* Umbral dots: specks of convection breaking through the umbra. */
-      float dotSeen = resolvedFeature(UMBRAL_DOTS / (leadRadius * dir.w), px, mu);
-      dots = max(dots, dotSeen * lead.x * smoothstep(0.35, 0.6, gradientNoise2(leadAt / leadRadius * UMBRAL_DOTS + uClock.x * 0.2 + seed)));
     }
+    /* Independent umbral dots in both spots, masked away from the penumbra. */
+    if (uFine > 0.0 && lead.x > 0.0)
+      dots = max(dots, lead.x * umbralDots(leadAt, leadRadius, seed, footprint * leadRadius, uClock.x));
+    if (uFine > 0.0 && follow.x > 0.0)
+      dots = max(dots, follow.x * umbralDots(followAt, followRadius, seed + 7.3, footprint * followRadius, uClock.x));
     /* A flare's ribbons astride the neutral line, knotted, and the kernel between them. */
     if (state.x > 0.0) {
       /* The flare's light saturates softly: an X-class ribbon is bright, not a white frame. */

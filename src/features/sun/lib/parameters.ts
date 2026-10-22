@@ -115,9 +115,9 @@ export const EVERSHED_KMS = 2;
 export const EVERSHED_RADII_PER_S = EVERSHED_KMS / SOLAR_RADIUS_KM;
 export const EVERSHED_RIPPLE = 0.035;
 export const EVERSHED_WAVES = 36;
-/** Umbral dots: how many across a spot's radius, and how much they brighten the umbra. */
+/** Umbral-dot cell density across a spot radius and maximum fractional temperature lift; illustrative. */
 export const UMBRAL_DOTS = 14;
-export const UMBRAL_DOT_CONTRAST = 0.6;
+export const UMBRAL_DOT_CONTRAST = 0.12;
 /** Flare ribbons' light in white light: a hot continuum, K, and its glare as a share of the face. */
 export const WHITE_FLARE_K = 9_000;
 export const RIBBON_GLARE = 1.2;

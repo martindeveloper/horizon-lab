@@ -24,7 +24,7 @@
       "body": "Fly to a feature and open its card."
     },
     "settings": {
-      "title": "View",
+      "title": "Settings",
       "body": "Layers, the camera pad and render quality."
     },
     "guide": {
@@ -122,7 +122,7 @@
     "eruption": {
       "storing": "Storing energy",
       "rising": "Rope rising",
-      "xpoint": "X-point forms",
+      "xpoint": "Reconnection begins",
       "reconnecting": "Reconnecting",
       "loops": "Post-flare loops"
     },
@@ -366,7 +366,7 @@
     "sections": {
       "interior": {
         "title": "Interior",
-        "body": "The cut shows Model S (1996): temperature, density, pressure, luminosity and hydrogen fraction. Its centre is {coreTemperatureMK} million kelvin and {centralDensity} times water; nearly all luminosity is generated inside {coreRadius} of the radius. The convection zone begins at {tachocline}. A conventional shell random-walk estimate through the model opacity to that boundary gives {photonWalkKyr} thousand years; Mitalas & Sills report {photonWalkLiteratureKyr} using a different solar model. This is neither a thermal transport solution nor the lifetime of an individual photon. Fusion energy uses neutral hydrogen-1 and helium-4 isotope masses, including annihilation and neutrino energy; L/c² describes photon mass loss only."
+        "body": "The cut shows Model S (1996): temperature, density, pressure, luminosity and hydrogen fraction. Its centre is {coreTemperatureMK} million kelvin and {centralDensity} times water; nearly all luminosity is generated inside {coreRadius} of the radius. The convection zone begins at {tachocline} of the solar radius. A conventional shell random-walk estimate through the model opacity to that boundary gives {photonWalkKyr} thousand years; Mitalas & Sills report {photonWalkLiteratureKyr} using a different solar model. This is neither a thermal transport solution nor the lifetime of an individual photon. Fusion energy uses neutral hydrogen-1 and helium-4 isotope masses, including annihilation and neutrino energy; L/c² describes photon mass loss only."
       },
       "rotation": {
         "title": "Rotation",

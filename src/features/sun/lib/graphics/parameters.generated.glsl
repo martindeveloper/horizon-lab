@@ -21,7 +21,7 @@
 #define EVERSHED_RIPPLE           0.035
 #define EVERSHED_WAVES            36.0
 #define UMBRAL_DOTS               14.0
-#define UMBRAL_DOT_CONTRAST       0.6
+#define UMBRAL_DOT_CONTRAST       0.12
 #define WHITE_FLARE_K             9000.0
 #define MAP_FADE_FROM_PX          1.25
 #define MAP_FADE_TO_PX            2.5

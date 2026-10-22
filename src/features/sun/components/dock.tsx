@@ -236,7 +236,7 @@ function ViewActionRow({ kind }: { kind: ViewAction }) {
   const t = useTranslations("sun");
   const { on, button, act, value, set, text } = useAction(kind);
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 md:flex-nowrap">
       <Chip selected={on} aria-pressed={on} onClick={act} className="shrink-0 not-md:h-9">
         {button}
       </Chip>
@@ -250,7 +250,9 @@ function ViewActionRow({ kind }: { kind: ViewAction }) {
         valueText={() => text}
         onValueChange={([next]) => set(next ?? 0)}
       />
-      <span className="truncate font-mono text-xs text-fg tabular-nums">{text}</span>
+      <span className="font-mono text-xs text-fg tabular-nums not-md:basis-full md:truncate">
+        {text}
+      </span>
     </div>
   );
 }

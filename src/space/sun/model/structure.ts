@@ -111,14 +111,34 @@ export function layerAt(x: number): Layer {
   return LAYER_ZONES.find((layer) => x < layer.outer) ?? photosphere;
 }
 
-/* Mass inside each row by the trapezium rule over 4πr²ρ, and the gravity there. */
+/** Integrate 4πr²ρ through a full or partial table shell with three-point Gaussian quadrature.
+ * Density uses the same log-linear interpolation as structureAt. In particular the central
+ * shell has M ∝ r³, rather than the unphysical M ∝ r of interpolated enclosed mass. */
+function shellMass(lo: number, outerX: number) {
+  const x0 = XS[lo]!;
+  const x1 = XS[lo + 1]!;
+  const half = (outerX - x0) / 2;
+  if (half <= 0) return 0;
+  const mid = x0 + half;
+  const rho0 = column(lo, COLUMN.rho);
+  const rho1 = column(lo + 1, COLUMN.rho);
+  const integrand = (x: number) => x * x * logLinear(rho0, rho1, (x - x0) / (x1 - x0));
+  const offset = half * Math.sqrt(3 / 5);
+  return (
+    4 *
+    Math.PI *
+    RADIUS_M ** 3 *
+    half *
+    ((5 / 9) * integrand(mid - offset) +
+      (8 / 9) * integrand(mid) +
+      (5 / 9) * integrand(mid + offset))
+  );
+}
+
+/* Mass inside each row; queries integrate the remainder of their own shell. */
 const MASS_KG: number[] = [0];
 for (let i = 1; i < ROWS.length; i++) {
-  const r0 = XS[i - 1]! * RADIUS_M;
-  const r1 = XS[i]! * RADIUS_M;
-  const shell0 = 4 * Math.PI * r0 * r0 * column(i - 1, COLUMN.rho);
-  const shell1 = 4 * Math.PI * r1 * r1 * column(i, COLUMN.rho);
-  MASS_KG.push(MASS_KG[i - 1]! + 0.5 * (shell0 + shell1) * (r1 - r0));
+  MASS_KG.push(MASS_KG[i - 1]! + shellMass(i - 1, XS[i]!));
 }
 /** The mass the model holds inside the photosphere, kg (within a percent of M☉: the table's resolution). */
 export const MODEL_MASS_KG = MASS_KG[MASS_KG.length - 1]!;
@@ -127,8 +147,7 @@ export const MODEL_MASS_KG = MASS_KG[MASS_KG.length - 1]!;
 export function massAt(x: number) {
   const xc = x <= 0 ? 0 : x >= 1 ? 1 : x;
   const hi = upperIndex(xc);
-  const t = (xc - XS[hi - 1]!) / (XS[hi]! - XS[hi - 1]!);
-  return linear(MASS_KG[hi - 1]!, MASS_KG[hi]!, t);
+  return MASS_KG[hi - 1]! + shellMass(hi - 1, xc);
 }
 
 /** Gravity at radius `x`, m/s² (G m(r) / r²; zero at the centre). */

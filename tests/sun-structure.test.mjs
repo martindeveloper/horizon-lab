@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { SOLAR_MASS_KG, SOLAR_TEFF_K } from "@horizon/toolkit/science";
+import { GRAVITATIONAL_CONSTANT, SOLAR_MASS_KG, SOLAR_TEFF_K } from "@horizon/toolkit/science";
 
-import { TACHOCLINE_R } from "../src/space/sun/model/parameters.ts";
+import { RADIUS_M, TACHOCLINE_R } from "../src/space/sun/model/parameters.ts";
 import {
   CORE_EDGE_R,
   LAYERS,
@@ -115,4 +115,19 @@ test("the shell estimate has the Mitalas–Sills constant-mean-free-path limit",
   // Their eq. 9 gives 3 R²/(c l). For R=10 m and l=0.01 m,
   // the opacity-walk integral is R²/(2l) = 5000 m.
   assert.ok(Math.abs(diffusionTime(5000) - 0.00010006922855944561) < 1e-15);
+});
+
+test("finite central density gives M proportional to r cubed and gravity proportional to r", () => {
+  const rho = structureAt(0).rho;
+  for (const x of [1e-9, 1e-7, 1e-6, 1e-5]) {
+    const r = x * RADIUS_M;
+    const centralMass = (4 * Math.PI * rho * r ** 3) / 3;
+    const centralGravity = (4 * Math.PI * GRAVITATIONAL_CONSTANT * rho * r) / 3;
+    assert.ok(Math.abs(massAt(x) / centralMass - 1) < 0.001, `mass at ${x} R`);
+    assert.ok(Math.abs(gravityAt(x) / centralGravity - 1) < 0.001, `gravity at ${x} R`);
+  }
+  for (const x of STRUCTURE_RADII.slice(1, -1)) {
+    assert.ok(massAt(x - 1e-10) <= massAt(x));
+    assert.ok(massAt(x) <= massAt(x + 1e-10));
+  }
 });

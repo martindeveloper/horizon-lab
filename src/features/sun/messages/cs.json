@@ -24,7 +24,7 @@
       "body": "Přeletí k útvaru a otevře jeho kartu."
     },
     "settings": {
-      "title": "Zobrazení",
+      "title": "Nastavení",
       "body": "Vrstvy, ovládání kamery a kvalita vykreslení."
     },
     "guide": {
@@ -122,7 +122,7 @@
     "eruption": {
       "storing": "Hromadí energii",
       "rising": "Lano stoupá",
-      "xpoint": "Vzniká X-bod",
+      "xpoint": "Začíná rekonexe",
       "reconnecting": "Přepojování",
       "loops": "Poerupční smyčky"
     },
@@ -366,7 +366,7 @@
     "sections": {
       "interior": {
         "title": "Nitro",
-        "body": "Řez ukazuje model S (1996): teplotu, hustotu, tlak, svítivost a podíl vodíku. Ve středu má {coreTemperatureMK} milionu kelvinů a {centralDensity} hustot vody; téměř veškerá svítivost vzniká uvnitř {coreRadius} poloměru. Konvektivní zóna začíná v {tachocline}. Konvenční odhad náhodné procházky po slupkách přes modelovou opacitu k této hranici dává {photonWalkKyr} tisíc let; Mitalas a Sills uvádějí {photonWalkLiteratureKyr} pro jiný model Slunce. Nejde o řešení tepelného transportu ani o životnost jednotlivého fotonu. Energie fúze používá hmotnosti neutrálních izotopů vodíku-1 a helia-4, včetně anihilace a energie neutrin; L/c² vyjadřuje pouze ztrátu hmotnosti fotony."
+        "body": "Řez ukazuje model S (1996): teplotu, hustotu, tlak, svítivost a podíl vodíku. Ve středu má {coreTemperatureMK} milionu kelvinů a {centralDensity} hustot vody; téměř veškerá svítivost vzniká uvnitř {coreRadius} poloměru. Konvektivní zóna začíná v {tachocline} slunečního poloměru. Konvenční odhad náhodné procházky po slupkách přes modelovou opacitu k této hranici dává {photonWalkKyr} tisíc let; Mitalas a Sills uvádějí {photonWalkLiteratureKyr} pro jiný model Slunce. Nejde o řešení tepelného transportu ani o životnost jednotlivého fotonu. Energie fúze používá hmotnosti neutrálních izotopů vodíku-1 a helia-4, včetně anihilace a energie neutrin; L/c² vyjadřuje pouze ztrátu hmotnosti fotony."
       },
       "rotation": {
         "title": "Rotace",
