@@ -6,6 +6,13 @@ import { SOURCE_URLS } from "@horizon/toolkit/urls";
 export type Source = { cite: string; link?: string };
 
 export const SOURCES = {
+  abbott2016: {
+    cite: "Abbott et al. 2016, PRL 116, 061102; GWOSC GWTC-2.1 (GW150914: 34.6 and 30.0 M☉, ~1.3 Gly, ~3 M☉c² radiated)",
+  },
+  abdElDayem2026: {
+    cite: "Abd El Dayem et al. 2026, Nature (S301: within 11.5–12.0 au of Sgr A* at 25,000–25,600 km/s)",
+    link: SOURCE_URLS.abdElDayem2026,
+  },
   agol2021: {
     cite: "Agol et al. 2021, PSJ 2, 1 (TRAPPIST-1: radius, mass and temperature)",
     link: SOURCE_URLS.agol2021,
@@ -15,6 +22,9 @@ export const SOURCES = {
     link: SOURCE_URLS.akeson2021,
   },
   allen2001: { cite: "Allen, Bernstein & Malhotra 2001, ApJ 549, L241 (the Kuiper cliff)" },
+  andersen2017: {
+    cite: "Andersen et al. 2017, A&A 602, A22 (Westerlund 1's mass)",
+  },
   archinal2018: {
     cite: "Archinal et al. 2018, Celest. Mech. Dyn. Astron. 130, 22 (IAU WGCCRE 2015: rotational elements of the planets)",
   },
@@ -31,11 +41,18 @@ export const SOURCES = {
     cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878; Edwards et al. 2024, Nat. Astron. 8, 1264 (an earlier instability)",
     link: SOURCE_URLS.avdellidou2024,
   },
+  banares2025: {
+    cite: "Bañares-Hernández et al. 2025, A&A 693, A104 (ω Cen: any single IMBH below 6,000 M☉ at 3σ)",
+    link: SOURCE_URLS.banares2025,
+  },
   barboni2017: {
     cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70; Nimmo, Kleine & Morbidelli 2024, Nature 636, 598 (younger ages as remelting)",
   },
   baumgardt2021: {
     cite: "Baumgardt & Vasiliev 2021, MNRAS 505, 5957 (globular cluster distances: ω Cen 5.43 kpc)",
+  },
+  bender2005: {
+    cite: "Bender et al. 2005, ApJ 631, 280 (M31*: 1.4 × 10⁸ M☉)",
   },
   bennettBovy2019: {
     cite: "Bennett & Bovy 2019, MNRAS 482, 1417",
@@ -49,6 +66,10 @@ export const SOURCES = {
   blandHawthorn2016: {
     cite: "Bland-Hawthorn & Gerhard 2016, ARA&A 54, 529",
     link: SOURCE_URLS.blandHawthorn2016,
+  },
+  blundell2004: {
+    cite: "Blundell & Bowler 2004, ApJ 616, L159 (SS 433's distance: 5.5 kpc)",
+    link: SOURCE_URLS.blundell2004,
   },
   bogdanov2019: {
     cite: "Bogdanov et al. 2019, ApJL 887, L25 (PSR J0030+0451's NICER data set: spin period 4.87 ms)",
@@ -87,6 +108,9 @@ export const SOURCES = {
     cite: "Chen et al. 2019, Nat. Astron. 3, 320 (Cepheid warp, Table 1)",
     link: SOURCE_URLS.chen2019,
   },
+  clark2005: {
+    cite: "Clark et al. 2005, A&A 434, 949 (Westerlund 1's mass)",
+  },
   collins2017: {
     cite: "Collins, Jones & Barnes 2017, A&A 602, A48 (Proxima Centauri's rotation, 82.6 ± 0.1 d)",
     link: SOURCE_URLS.collins2017,
@@ -122,7 +146,19 @@ export const SOURCES = {
   eht2022: {
     cite: "EHT Collaboration 2022, ApJL 930, L16 (Paper V); 2024 Paper VIII (Sgr A*: the a = 0.94 model)",
   },
+  eht2022a: {
+    cite: "EHT Collaboration 2022, ApJL 930, L12 (Paper I: Sgr A*'s 51.8 ± 2.3 μas ring)",
+    link: SOURCE_URLS.eht2022a,
+  },
+  eht2025: {
+    cite: "EHT Collaboration 2025, A&A 704, A91 (M87*'s ring over 2017, 2018 and 2021: 43.9 ± 0.6 μas)",
+    link: SOURCE_URLS.eht2025,
+  },
   ehtM87Spin2026: { cite: "arXiv:2601.00394 (M87*'s ring asymmetry disfavours |a| ≲ 0.2)" },
+  eikenberry2001: {
+    cite: "Eikenberry et al. 2001, ApJ 561, 1027 (SS 433's jets: β = 0.2647)",
+    link: SOURCE_URLS.eikenberry2001,
+  },
   eilers2019: { cite: "Eilers et al. 2019, ApJ 871, 120" },
   farr2018: { cite: "Farr et al. 2018, AJ 156, 18 (Aldebaran's mass from its oscillations)" },
   ferguson1989: { cite: "Ferguson 1989, AJ 98, 367 (Fornax Cluster Catalog)" },
@@ -157,9 +193,13 @@ export const SOURCES = {
     cite: "Gott et al. 2005, ApJ 624, 463 (the Sloan Great Wall)",
     link: SOURCE_URLS.gott2005,
   },
+  gravity2018: {
+    cite: "GRAVITY Collaboration 2018, A&A 615, L15 (S2 at pericentre: 7,650 km/s)",
+    link: SOURCE_URLS.gravity2018,
+  },
   gravity2020: {
     cite: "GRAVITY Collaboration 2020, A&A 636, L5 (S2's orbit: P = 16.0455 yr, pericentre ~120 au)",
-    link: "https://doi.org/10.1051/0004-6361/202037813",
+    link: SOURCE_URLS.gravity2020,
   },
   gravity2021: { cite: "GRAVITY Collaboration 2021, A&A 647, A59; GRAVITY Collaboration 2022" },
   gravity2022: {
@@ -176,6 +216,9 @@ export const SOURCES = {
   heiter2015: {
     cite: "Heiter et al. 2015, A&A 582, A49 (Gaia benchmark stars: Aldebaran's temperature and luminosity)",
     link: SOURCE_URLS.heiter2015,
+  },
+  hillier2001: {
+    cite: "Hillier et al. 2001, ApJ 553, 837 (η Carinae's primary: ≳ 90 M☉)",
   },
   horizon: { cite: "Horizon model: a labelled teaching choice" },
   horizonsProbes: {
@@ -228,6 +271,9 @@ export const SOURCES = {
     cite: "Karachentsev et al. 2009, MNRAS 393, 1265 (Local Group zero-velocity radius 0.96 ± 0.03 Mpc)",
     link: SOURCE_URLS.karachentsev2009,
   },
+  karkoschka2011: {
+    cite: "Karkoschka 2011, Icarus 215, 439 (Neptune's rotation from cloud features: 15.9663 h)",
+  },
   kervella2003: { cite: "Kervella et al. 2003, A&A 408, 681 (Sirius A's angular diameter)" },
   kervella2004: {
     cite: "Kervella et al. 2004, A&A 413, 251 (Procyon A's diameter and temperature)",
@@ -254,6 +300,13 @@ export const SOURCES = {
     cite: "Kokubo & Ida 1998, Icarus 131, 171",
     link: SOURCE_URLS.kokubo1998,
   },
+  kounkel2017: {
+    cite: "Kounkel et al. 2017, ApJ 834, 142 (the Orion Nebula's distance: 388 ± 5 pc)",
+    link: SOURCE_URLS.kounkel2017,
+  },
+  lamy2025: {
+    cite: "Lamy et al. 2025, Nature Astronomy 9, 658 (Uranus's rotation from auroral tracking: 17.247864 h)",
+  },
   lecar2006: {
     cite: "Lecar et al. 2006, ApJ 640, 1115",
     link: SOURCE_URLS.lecar2006,
@@ -279,6 +332,9 @@ export const SOURCES = {
   lvk2025: {
     cite: "LIGO–Virgo–KAGRA Collaboration 2025, ApJL 993, L25 (GW231123: remnant mass, spin and distance)",
   },
+  lvkSummary2025: {
+    cite: "LIGO–Virgo–KAGRA science summary of GW231123, 2025 (the pair-instability gap, ~60–130 M☉)",
+  },
   lyndenBell1988: { cite: "Lynden-Bell et al. 1988, ApJ 326, 19" },
   m31Merger: {
     cite: "van der Marel et al. 2019, ApJ 872, 24; Sawala et al. 2025, Nat. Astron. 9, 1206; Wu et al. 2026, ApJL 1001, L19",
@@ -288,6 +344,12 @@ export const SOURCES = {
     link: SOURCE_URLS.m31Width,
   },
   mamajek2015: { cite: "Mamajek et al. 2015, ApJL 800, L17" },
+  mankovich2019: {
+    cite: "Mankovich et al. 2019, ApJ 871, 1 (Saturn's interior rotation from ring seismology)",
+  },
+  margot2021: {
+    cite: "Margot et al. 2021, Nature Astronomy 5, 676 (Venus's rotation: 243.0226 days, retrograde)",
+  },
   mcconnachie2012: {
     cite: "McConnachie 2012, AJ 144, 4",
     link: SOURCE_URLS.mcconnachie2012,
@@ -322,11 +384,19 @@ export const SOURCES = {
   },
   nasaM33: { cite: "NASA/HST, Triangulum Galaxy (M33): 18.7 kpc optical diameter" },
   nasaMilkyWay: { cite: "NASA Science, Beyond Our Solar System: the Milky Way" },
+  navarete2022: {
+    cite: "Navarete et al. 2022; Negueruela et al. 2022, A&A 664, A146 (Westerlund 1's distance: 4.0–4.3 kpc)",
+    link: SOURCE_URLS.navarete2022,
+  },
   nssdc: { cite: "NSSDC planetary fact sheets" },
   ohnaka2013: { cite: "Ohnaka et al. 2013, A&A 555, A24 (Antares)" },
+  orosz2009: {
+    cite: "Orosz et al. 2009, ApJ 697, 573 (LMC X-1: 10.91 ± 1.41 M☉)",
+  },
   panuzzo2024: {
     cite: "Gaia Collaboration (Panuzzo et al.) 2024, A&A 686, L2 (Gaia BH3: mass and distance)",
   },
+  park2021: { cite: "Park et al. 2021, AJ 161, 105 (JPL DE440/DE441: the planets' GMs)" },
   pasquini2004: {
     cite: "Pasquini et al. 2004, A&A 426, 651",
     link: SOURCE_URLS.pasquini2004,
@@ -357,10 +427,14 @@ export const SOURCES = {
   },
   ramachandran2025: {
     cite: "Ramachandran et al. 2025, A&A 698, A37 (Cygnus X-1 from wind models: 12.7–17.8 M☉)",
-    link: "https://arxiv.org/abs/2504.05885",
+    link: SOURCE_URLS.ramachandran2025,
   },
   ramirez2011: { cite: "Ramírez & Allende Prieto 2011, ApJ 743, 135 (Arcturus)" },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },
+  reid2023: {
+    cite: "Reid & Miller-Jones 2023, ApJ 959, 85 (GRS 1915+105: 9.4 kpc, 11.2 M☉)",
+    link: SOURCE_URLS.reid2023,
+  },
   ribas2017: {
     cite: "Ribas et al. 2017, A&A 603, A58 (Proxima's temperature and luminosity)",
     link: SOURCE_URLS.ribas2017,
@@ -375,6 +449,10 @@ export const SOURCES = {
     cite: "Riley et al. 2019, ApJL 887, L21 (PSR J0030+0451 measured with NICER)",
     link: SOURCE_URLS.riley2019,
   },
+  rygl2012: {
+    cite: "Rygl et al. 2012, A&A 539, A79 (Cygnus X: 1.40 ± 0.08 kpc)",
+    link: SOURCE_URLS.rygl2012,
+  },
   sanders2024: { cite: "Sanders et al. 2024, MNRAS 530, 2972; Xiang & Rix 2022, Nature 603, 599" },
   schiller2008: { cite: "Schiller & Przybilla 2008, A&A 479, 849 (Deneb)" },
   shemmer2004: {
@@ -383,6 +461,10 @@ export const SOURCES = {
   },
   simbad: {
     cite: "SIMBAD Astronomical Database, CDS Strasbourg (radial velocities as it adopts them)",
+  },
+  smith2006: {
+    cite: "Smith 2006, ApJ 644, 1151 (the Carina Nebula's distance: 2.35 kpc)",
+    link: SOURCE_URLS.smith2006,
   },
   snodgrass1990: {
     cite: "Snodgrass & Ulrich 1990, ApJ 351, 309 (the Sun's rotation from Doppler features, by latitude)",
@@ -423,6 +505,10 @@ export const SOURCES = {
   },
   vanDerMarel2012: { cite: "van der Marel et al. 2012, ApJ 753, 8" },
   vanLeeuwen2007: { cite: "van Leeuwen 2007, A&A 474, 653 (Hipparcos, the new reduction)" },
+  walker2018: {
+    cite: "Walker et al. 2018, ApJ 855, 128 (M87's jet: ~17° from the line of sight)",
+    link: SOURCE_URLS.walker2018,
+  },
   wegg2015: {
     cite: "Wegg, Gerhard & Portail 2015, MNRAS 450, 4050",
     link: SOURCE_URLS.wegg2015,

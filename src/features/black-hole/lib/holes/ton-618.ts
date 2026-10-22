@@ -16,10 +16,13 @@
 import { BLACK_HOLES } from "@/space/stellar";
 import { formatSignificant, measure, schwarzschildRadius } from "@horizon/toolkit/science";
 
+import { figureArgs } from "../figures";
 import { quoteSpan } from "../quote";
 import type { HoleSpec } from "./types";
 
 const TON_618 = BLACK_HOLES["ton-618"];
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 /** The horizon's radius across the mass estimates, au. */
 const HORIZON_AU = `${(TON_618.mass.range ?? [TON_618.mass.value])
   .map((m) =>
@@ -51,7 +54,7 @@ export const ton618: HoleSpec = {
       distance: 160,
       lift: 0.3,
       lead: -0.3,
-      eq: "z = 2.219    ·    t_light ≈ 10.8 Gyr",
+      eq: `z = ${EN.tonRedshift}    ·    t_light ≈ ${EN.tonLightGyr} Gyr`,
     },
     {
       phase: "dolly",

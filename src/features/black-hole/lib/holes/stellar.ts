@@ -20,11 +20,16 @@
  * Sky: Cygnus / Orion Spur (weather = cyg). The distant wind-feeding companion is not drawn at this scale.
  */
 import { BLACK_HOLES } from "@/space/stellar";
+import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
+import { OBSERVATORY } from "../catalogue";
+import { figureArgs } from "../figures";
 import { quote } from "../quote";
 import type { HoleSpec } from "./types";
 
 const CYGNUS_X1 = BLACK_HOLES["cygnus-x1"];
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 
 export const stellar: HoleSpec = {
   id: "stellar",
@@ -32,7 +37,8 @@ export const stellar: HoleSpec = {
   kind: "catalog",
   massSolar: CYGNUS_X1.mass.value,
   spin: CYGNUS_X1.spin.value,
-  inclination: 1.09,
+  /* Seen from the orbit's inclination: the camera's elevation above the disk is 90° − i. */
+  inclination: (90 - OBSERVATORY.cygnusX1.inclination.value) * RAD_PER_DEG,
   distance: 26,
   exposure: 1.05,
   diskBrightness: 1.2,
@@ -94,7 +100,7 @@ export const stellar: HoleSpec = {
       distance: 140,
       lift: 0.2,
       swing: 0.1,
-      eq: "E_GW ≈ 3 M☉ c²    ·    f_GW,ISCO ≈ 4.4 kHz × M☉/M_tot ≈ 70 Hz",
+      eq: `E_GW ≈ ${EN.gw150914Radiated} M☉ c²    ·    f_GW,ISCO ≈ ${EN.iscoKhzPerMsun} kHz × M☉/M_tot ≈ ${EN.gw150914IscoHz} Hz`,
     },
   ],
 };

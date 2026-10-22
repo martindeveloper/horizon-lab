@@ -1,21 +1,29 @@
+import { useLocale } from "next-intl";
+
 import {
   SimulationTechnicalDetails,
   type TechnicalDetailsAccess,
 } from "@/components/simulations/technical-details";
-import { SOLAR_TEFF_K } from "@horizon/toolkit/science";
+import { CONVECTIVE_BELOW_K } from "@/space/hr-diagram";
+import { SHADOW_PER_RS, SOLAR_TEFF_K, formatSignificant } from "@horizon/toolkit/science";
 
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { GIANTS_EQUATIONS } from "../lib/model/equations";
 import { RUNG_IDS } from "../lib/model/rungs";
 import {
-  CONVECTIVE_BELOW_K,
   DIFFERENTIAL_ROTATION,
   GRANULE_SCALE_HEIGHTS,
   LENS_DISTANCE,
   MEAN_MOLECULAR_WEIGHT,
+  TEASPOON_M3,
 } from "../lib/parameters";
 import specification from "../technical.json";
 
+/** A millilitre, m³: the teaspoon's volume as the notes word it. */
+const ML_M3 = 1e-6;
+
 export function GiantsTechnicalDetails(access: TechnicalDetailsAccess) {
+  const locale = useLocale();
   return (
     <SimulationTechnicalDetails
       {...access}
@@ -25,12 +33,15 @@ export function GiantsTechnicalDetails(access: TechnicalDetailsAccess) {
       values={{
         bodies: RUNG_IDS.length,
         solarTeff: SOLAR_TEFF_K,
-        mu: MEAN_MOLECULAR_WEIGHT,
+        mu: formatSignificant(MEAN_MOLECULAR_WEIGHT, locale, 3),
         cellHeights: GRANULE_SCALE_HEIGHTS,
         convectiveK: CONVECTIVE_BELOW_K,
         differential: DIFFERENTIAL_ROTATION,
         lensDistance: LENS_DISTANCE,
+        shadowPerRs: formatSignificant(SHADOW_PER_RS, locale, 2),
+        teaspoonMl: TEASPOON_M3 / ML_M3,
       }}
+      figures={PROSE_FIGURES}
     />
   );
 }

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { UNITS } from "@horizon/toolkit/science";
 
+import { catalogueFacts as observatoryFacts } from "../src/features/black-hole/lib/catalogue.ts";
 import { catalogueFacts as blackHoleFacts } from "../src/features/black-hole/lib/figures.ts";
 import { holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { catalogueFacts as deepFieldFacts } from "../src/features/deep-field/lib/model/catalogue/index.ts";
@@ -24,6 +25,7 @@ for (const [name, facts] of [
   ["Voyage", voyageFacts],
   ["Stellar Spectra", spectroscopyFacts],
   ["Black Hole", blackHoleFacts],
+  ["Black Hole observatory", observatoryFacts],
 ]) {
   test(`${name} quantities have supported units and finite, consistent ranges`, () => {
     const plain = new Set(["count", "percent", "ratio"]);

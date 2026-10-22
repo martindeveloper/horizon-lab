@@ -555,8 +555,8 @@ background). Their layers are built on a host's kit (its basics, looks painted o
 switches, the selection, the camera distance); a host's store composes `GalaxyShow` and
 `WorldSelection` with its own state, and its label picks (`galaxy/scene/label-picks.ts`)
 gather what each layer's names open. Their model files import no three.js, so cards and
-tests read them as Deep Field's do. The shared copy (names of the solar system, the stars, the
-Galaxy and the cosmos, views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged
+tests read them as Deep Field's do. The shared copy (names of the solar system, the catalogued stars and holes by their
+`stellar.ts` ids, the Galaxy and the cosmos, views, orbit rows, units, HUD chrome) is `src/space/messages/`, merged
 under each simulation's namespace by its `server.ts` (`withSpaceMessages`); a key in both is an
 error.
 
@@ -825,9 +825,9 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   notes, hints, guide and technical prose through the feature's `PROSE_FIGURES` and
   `proseArgs(figures, locale)` (`src/lib/facts.ts`), which print each figure in the unit its
   sentence names (`inPowerOfTen` for "{massMillions} million Suns"). The Orrery and Deep Field
-  keep them in `lib/model/catalogue/`, Voyage and Stellar Spectra in `lib/model/catalogue.ts`,
+  keep them in `lib/model/catalogue/`, Voyage, Stellar Spectra and Giants in `lib/model/catalogue.ts`,
   the Black Hole in `lib/figures.ts` (`figureArgs`, which adds the atlas's scientific and ±
-  lines). Pass them to `t()`; for technical prose, pass `figures` (or plain `values`) to
+  lines) over its own literature figures in `lib/catalogue.ts` (`OBSERVATORY`). Pass them to `t()`; for technical prose, pass `figures` (or plain `values`) to
   `SimulationTechnicalDetails`, and for a guided journey to `GuideCaption`.
 - **Card figures come from a catalogue.** A model's catalogue (the solar system's
   `src/space/solar-system/model/catalogue.ts`, each feature's `lib/model/catalogue/`) holds every

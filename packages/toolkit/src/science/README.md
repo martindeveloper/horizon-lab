@@ -28,7 +28,7 @@ the one degree-to-radian factor; do not retype it.
 ## Units and measures (`units.ts`, `measure.ts`)
 
 `UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc, Gpc), times (ms … Gyr,
-Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
+Julian century), angles (rad, °, ′, ″, mas, μas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
 c), accelerations (m/s²), K, energies (J, eV) and powers (W, L☉), each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 

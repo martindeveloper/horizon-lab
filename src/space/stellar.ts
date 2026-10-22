@@ -520,8 +520,14 @@ export const BLACK_HOLES = {
       digits: 2,
       note: "the remnant's χ_f, waveform-model dependent",
     }),
-    primaryMass: literatureFact(137, "Msun", "lvk2025", "verified", { range: [119, 160], digits: 3 }),
-    secondaryMass: literatureFact(101, "Msun", "lvk2025", "verified", { range: [51, 123], digits: 3 }),
+    primaryMass: literatureFact(137, "Msun", "lvk2025", "verified", {
+      range: [119, 160],
+      digits: 3,
+    }),
+    secondaryMass: literatureFact(101, "Msun", "lvk2025", "verified", {
+      range: [51, 123],
+      digits: 3,
+    }),
   },
   "omega-cen": {
     mass: literatureFact(8_200, "Msun", "haberle2024", "verified", {

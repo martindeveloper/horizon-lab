@@ -16,10 +16,13 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
+import { figureArgs } from "../figures";
 import { quote, quoteSpin } from "../quote";
 import type { HoleSpec } from "./types";
 
 const GW231123 = BLACK_HOLES.gw231123;
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 
 export const gw231123: HoleSpec = {
   id: "gw231123",
@@ -44,7 +47,7 @@ export const gw231123: HoleSpec = {
       distance: 130,
       lift: 0.3,
       lead: 0.3,
-      eq: `m₁ ≈ 137 M☉  +  m₂ ≈ 101 M☉   →   M_f ≈ ${quote(GW231123.mass)}`,
+      eq: `m₁ ≈ ${quote(GW231123.primaryMass)}  +  m₂ ≈ ${quote(GW231123.secondaryMass)}   →   M_f ≈ ${quote(GW231123.mass)}`,
     },
     // A quick tightening spiral, like the final orbits before the merger.
     {
@@ -56,7 +59,7 @@ export const gw231123: HoleSpec = {
       lead: 0.5,
       roll: -0.04,
       drift: -0.012,
-      eq: `f ≈ 30–80 Hz    ·    D_L ≈ ${quote(GW231123.distance)}`,
+      eq: `f ≈ ${EN.gwFrequenciesHz} Hz    ·    D_L ≈ ${quote(GW231123.distance)}`,
     },
     {
       phase: "detail",
@@ -76,7 +79,7 @@ export const gw231123: HoleSpec = {
       inclination: 0.3,
       distance: 30,
       swing: 0.2,
-      eq: "pair-instability gap ≈ 60–130 M☉",
+      eq: `pair-instability gap ≈ ${EN.gwGapMsun} M☉`,
     },
     {
       phase: "wide",

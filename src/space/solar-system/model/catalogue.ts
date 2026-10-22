@@ -6,14 +6,17 @@
  * (`npm run docs:catalogue`).
  */
 import { factsOf, type Facts, type Span, type Value } from "@/lib/facts";
+import type { SourceId } from "@/lib/sources";
 import {
   FIGURES,
+  GM_KM3_S2,
   MOON_IDS,
   NAMED,
   PLANET_RADIUS_KM,
   jplElements,
   moonById,
   periodYears,
+  siderealHours,
   type MoonId,
   type NamedId,
   type PlanetId,
@@ -86,6 +89,7 @@ function planetFacts(id: PlanetId) {
       status: "derived",
       note: "Kepler's third law from the J2000 semi-major axis",
     },
+    ...shapeFacts(id),
     radius: {
       value: PLANET_RADIUS_KM[id],
       unit: "km",
@@ -97,6 +101,59 @@ function planetFacts(id: PlanetId) {
             note: "volumetric mean of the Juno 1-bar axes, 71,488 and 66,842 km",
           }
         : { source: "jplRadii", status: "verified" }),
+    },
+  } satisfies Facts;
+}
+
+/** Where a planet's radii are measured: IAU 2015 B3 for Earth, Juno for Jupiter, the IAU WGCCRE 2015 otherwise. */
+const figureSource = (id: PlanetId): SourceId =>
+  id === "earth" ? "iau2015b3" : id === "jupiter" ? "galanti2026" : "archinal2018";
+/** Where a planet's spin rate is measured: the IAU WGCCRE 2015, or the newer work the toolkit turns it by. */
+const SPIN_SOURCES: Partial<Record<PlanetId, SourceId>> = {
+  venus: "margot2021",
+  saturn: "mankovich2019",
+  uranus: "lamy2025",
+  neptune: "karkoschka2011",
+};
+/** Significant figures of the IAU radii, the planets' masses and their rotation periods. */
+const SHAPE_DIGITS = 5;
+const MASS_DIGITS = 4;
+const ROTATION_DIGITS = 4;
+
+/** A planet's shape, mass and spin, from the toolkit's bodies: what a card sizes and weighs it by. */
+function shapeFacts(id: PlanetId) {
+  const { equatorialKm, polarKm } = FIGURES[id];
+  const source = figureSource(id);
+  const hours = siderealHours(id);
+  return {
+    equatorialRadius: {
+      value: equatorialKm,
+      unit: "km",
+      digits: SHAPE_DIGITS,
+      source,
+      status: "verified",
+    },
+    polarRadius: { value: polarKm, unit: "km", digits: SHAPE_DIGITS, source, status: "verified" },
+    mass: {
+      value: GM_KM3_S2[id] / GM_KM3_S2.earth,
+      unit: "Mearth",
+      digits: MASS_DIGITS,
+      ...(id === "earth"
+        ? { source: "iau2015b3", status: "verified", note: "the unit itself: nominal GM⊕ over G" }
+        : {
+            source: id === "jupiter" ? "iau2015b3" : "park2021",
+            sources: ["iau2015b3"],
+            status: "derived",
+            note: "its GM over Earth's",
+          }),
+    },
+    rotation: {
+      value: Math.abs(hours),
+      unit: "h",
+      digits: ROTATION_DIGITS,
+      source: SPIN_SOURCES[id] ?? "archinal2018",
+      status: "flag",
+      note: `sidereal${hours < 0 ? ", retrograde" : ""}, the rate the toolkit turns the globe by`,
     },
   } satisfies Facts;
 }

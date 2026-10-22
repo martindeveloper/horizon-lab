@@ -16,12 +16,17 @@
  * Sky: old elliptical stellar halo (weather = m87).
  */
 import { BLACK_HOLES } from "@/space/stellar";
+import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
+import { OBSERVATORY } from "../catalogue";
+import { figureArgs } from "../figures";
 import { quote } from "../quote";
 import type { HoleSpec } from "./types";
 
-/** Elevation of the home view above the disk: the jet sits 90° − 1.27 rad ≈ 17° off our line of sight. */
-const HOME_INCLINATION = 1.27;
+/** Elevation of the home view above the disk: 90° less the jet's angle to our line of sight. */
+const HOME_INCLINATION = (90 - OBSERVATORY.m87.jetAngle.value) * RAD_PER_DEG;
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 
 export const m87: HoleSpec = {
   id: "m87",
@@ -61,7 +66,7 @@ export const m87: HoleSpec = {
       roll: 0.035,
       drift: 0.012,
       sketch: [{ kind: "jet", angle: Math.PI / 2 - HOME_INCLINATION }],
-      eq: "i_jet ≈ 17°    ·    P_BZ ∝ Ω_H² Φ²",
+      eq: `i_jet ≈ ${EN.m87JetDeg}°    ·    P_BZ ∝ Ω_H² Φ²`,
     },
     {
       phase: "detail",
@@ -71,7 +76,7 @@ export const m87: HoleSpec = {
       distance: 34,
       lead: -0.3,
       sketch: [{ kind: "shadow", assumed: true }],
-      eq: "θ_crit = 6√3 GM / (c² D) ≈ 40 μas (a = 0)    ·    observed ring 42–44 μas",
+      eq: `θ_crit = 6√3 GM / (c² D) ≈ ${EN.m87ShadowUas} μas (a = 0)    ·    observed ring ${EN.m87Ring2019Round}–${EN.m87RingRound} μas`,
     },
     {
       phase: "hold",

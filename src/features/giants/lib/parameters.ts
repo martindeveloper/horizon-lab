@@ -1,3 +1,4 @@
+import { SOLAR_MEAN_MOLECULAR_WEIGHT } from "@/space/solar-composition";
 import type { PlanetId } from "@horizon/toolkit/bodies";
 import {
   BOLTZMANN_CONSTANT,
@@ -16,10 +17,11 @@ import { OUTFLOW_SLOTS } from "./model/mass-loss";
  */
 
 /**
- * Mean mass per particle of a star's photosphere in atomic mass units: neutral hydrogen with
- * the Sun's share of helium. A teaching choice for the scale height that sizes the granules.
+ * Mean mass per particle of a star's photosphere in atomic mass units: the Sun's neutral gas
+ * (`SOLAR_MEAN_MOLECULAR_WEIGHT`), for every star. A teaching choice for the scale height that
+ * sizes the granules.
  */
-export const MEAN_MOLECULAR_WEIGHT = 1.3;
+export const MEAN_MOLECULAR_WEIGHT = SOLAR_MEAN_MOLECULAR_WEIGHT;
 /** A convection cell spans about this many pressure scale heights (the Sun's: ~1,000 km over ~150 km). */
 export const GRANULE_SCALE_HEIGHTS = 8;
 /** A teaspoon, m³. */
@@ -87,11 +89,6 @@ export const GRAB_COAST_S = 0.45;
 export const GRAB_HOLD_S = 2.5;
 export const GRAB_RETURN_S = 0.9;
 
-/**
- * Stars cooler than this carry their heat to the surface by convection, so their faces boil
- * with granules; hotter ones are radiative and smooth (about the F-type stars' boundary).
- */
-export const CONVECTIVE_BELOW_K = 7_000;
 /**
  * Representative wavelength for the brown dwarf's small cloud-contrast approximation.
  * Surface colour and brightness themselves use the CIE-integrated continuum lookup.

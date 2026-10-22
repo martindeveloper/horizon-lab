@@ -7,6 +7,7 @@ import type { Value } from "@/lib/facts";
 import {
   UNITS,
   formatSignificant,
+  convertFigure,
   isUnitId,
   numberFormat,
   powerOfTen,
@@ -32,18 +33,28 @@ function number(value: number, digits: number, locale: string) {
   return `${mantissa} × ${powerOfTen(exponent)}`;
 }
 
+/** The figure in the unit it is shown in (`show`, else its own) and that unit's symbol. */
+function shown(fact: Value) {
+  const unit = fact.show ?? fact.unit;
+  const value = fact.show ? convertFigure(fact.value, fact.unit, fact.show) : fact.value;
+  return { value, symbol: symbolOf(unit) };
+}
+
 /** The figure and its unit. */
-export const quote = (fact: Value, locale = "en") =>
-  `${number(fact.value, fact.digits ?? DEFAULT_DIGITS, locale)} ${symbolOf(fact.unit)}`;
+export function quote(fact: Value, locale = "en") {
+  const { value, symbol } = shown(fact);
+  return `${number(value, fact.digits ?? DEFAULT_DIGITS, locale)} ${symbol}`;
+}
 
 /** The figure with half its published span as the error, at the figure's own decimals; the figure alone without one. */
-export function quoteError(fact: Value, locale = "en") {
-  if (!fact.range) return quote(fact, locale);
+export function quoteError(fact: Value, locale = "en", withUnit = true) {
+  const unit = withUnit ? ` ${symbolOf(fact.unit)}` : "";
+  if (!fact.range) return `${number(fact.value, fact.digits ?? DEFAULT_DIGITS, locale)}${unit}`;
   const digits = fact.digits ?? DEFAULT_DIGITS;
   const error = (fact.range[1] - fact.range[0]) / 2;
   const decimals = decimalsOf(fact.value, digits);
   const text = `${number(fact.value, digits, locale)} ± ${numberFormat(locale, decimals, true).format(error)}`;
-  return `${text} ${symbolOf(fact.unit)}`;
+  return `${text}${unit}`;
 }
 
 /** The published span, one power of ten for both ends; the figure alone without one. */

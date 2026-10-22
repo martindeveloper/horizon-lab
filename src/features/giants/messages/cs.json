@@ -21,109 +21,85 @@
       "caution": "Hmotnost a poloměr přebíráme z jedné analýzy NICER (2019); závisejí na modelu záření. Dvě protilehlé horké čepičky a svazky jsou obecnou ilustrací pulsaru, nikoli rekonstrukcí pozorovaných horkých oblastí PSR J0030+0451."
     },
     "cygnus-x1": {
-      "name": "Cygnus X-1",
       "note": "Černá díra hvězdné hmotnosti, která přitahuje plyn z hmotné průvodní hvězdy.",
       "caution": "Zlatý obrys značí referenční poloměr nerotující díry 2GM/c², nikoli viditelný povrch. Rotace mění geometrii horizontu; jediný menší kulový poloměr by byl zavádějící."
     },
     "sirius-b": {
-      "name": "Sírius B",
       "note": "Bílý trpaslík: menší než Země, zhruba tak těžký jako Slunce."
     },
     "earth": {
-      "name": "Země",
       "note": "Žádná hvězda: je tu jako měřítko."
     },
     "brown-dwarf": {
-      "name": "LHS 6343 C",
       "note": "Hnědý trpaslík, příliš lehký na spalování vodíku: velký jako Jupiter, ale mnohonásobně těžší."
     },
     "jupiter": {
-      "name": "Jupiter",
       "note": "Největší planeta Sluneční soustavy. Točí se nejrychleji ze všech, a tak má rovník viditelně vyboulený."
     },
     "trappist-1": {
-      "name": "TRAPPIST-1",
       "note": "Chladný červený trpaslík s planetami velikosti Země těsně u sebe, sotva širší než Jupiter."
     },
     "proxima": {
-      "name": "Proxima Centauri",
       "note": "Nejbližší hvězda ke Slunci. Většina hvězd jsou červení trpaslíci jako ona."
     },
     "sun": {
-      "name": "Slunce",
       "note": "Naše měřítko: každá velikost tu je poměřena jím."
     },
     "sirius": {
-      "name": "Sírius",
       "note": "Nejjasnější hvězda noční oblohy a partner Síria B."
     },
     "vega": {
-      "name": "Vega",
       "note": "Rychlá rotace jí vytlačuje rovník ven, takže se vyboulí a je tam chladnější než na pólech. Ze Země ji vidíme téměř od pólu, kulatou; tažením za hvězdu si můžete vyboulení prohlédnout.",
-      "caution": "Povrch používá rotační teplotní profil ELR a publikovaný sklon osy 6,2°. Místní modelové teploty se mohou lišit od krajních hodnot na kartě; neporušený teplotní profil zachovává převzatou zářivost."
+      "caution": "Povrch používá rotační teplotní profil ELR a publikovaný sklon osy {vegaInclinationDeg}°. Místní modelové teploty se mohou lišit od krajních hodnot na kartě; neporušený teplotní profil zachovává převzatou zářivost."
     },
     "achernar": {
-      "name": "Achernar",
       "note": "Jedna z nejzploštělejších známých hvězd: točí se tak rychle, že se jí ven vytlačený rovník téměř odtrhává.",
       "caution": "Povrch používá rotační teplotní model ELR včetně odstředivého zrychlení, se základním teplotním profilem normalizovaným na převzatou zářivost. Zobrazený tvar zůstává elipsoidem; jde o aproximaci, nikoli o rekonstrukci snímku."
     },
     "sgr-a": {
-      "name": "Sagittarius A*",
       "note": "Černá díra v centru naší Galaxie: miliony Sluncí v horizontu menším než dráha Merkuru.",
       "caution": "Zlatý obrys značí referenční poloměr nerotující díry 2GM/c², nikoli viditelný povrch. Rotace mění geometrii horizontu; jediný menší kulový poloměr by byl zavádějící."
     },
     "arcturus": {
-      "name": "Arcturus",
       "note": "Oranžový obr: hvězda podobná Slunci ve stáří, nafouklá a chladnější."
     },
     "r136a1": {
-      "name": "R136a1",
       "note": "Jedna z nejhmotnějších známých hvězd, přesto velikostí srovnatelná s Aldebaranem: hmotnost není velikost.",
       "caution": "Její hmotnost se odhaduje ze světla; publikované hodnoty se značně liší."
     },
     "aldebaran": {
-      "name": "Aldebaran",
       "note": "Rudé oko Býka, obr zhruba tak těžký jako Slunce."
     },
     "rigel": {
-      "name": "Rigel",
       "note": "Modrý veleobr, který vyzařuje přibližně stotisícinásobek výkonu Slunce."
     },
     "deneb": {
-      "name": "Deneb",
       "note": "Jedna z nejzářivějších hvězd viditelných pouhým okem.",
       "caution": "Tyto údaje přebírají jednu analýzu s předpokládanou vzdáleností hvězdné asociace; jiné odhady vzdálenosti vedou k jiným zářivostem a poloměrům."
     },
     "antares": {
-      "name": "Antares",
       "note": "Srdce Štíra. Na místě Slunce by pohltil Mars."
     },
     "betelgeuse": {
-      "name": "Betelgeuze",
       "note": "Orionovo rameno: rudý veleobr s pouhou hrstkou obřích konvekčních buněk.",
       "caution": "Pulzuje a nemá ostrý okraj; jeho velikost se mění podle světla, ve kterém ho měříme."
     },
     "uy-scuti": {
-      "name": "UY Scuti",
       "note": "Rudý veleobr, jehož odvozená velikost silně závisí na zvolené vzdálenosti a teplotě.",
       "caution": "Poloměr se konzistentně odvozuje ze zářivosti a teploty podle Healyové a kol. (2024). Jiné analýzy dávají jiné velikosti. Starší předpokládanou hmotnost neuvádíme, a proto neuvádíme ani hustotu."
     },
     "vy-cma": {
-      "name": "VY Canis Majoris",
       "note": "Hyperobr, který odhazuje vnější vrstvy do prachového oblaku."
     },
     "stephenson-2-18": {
-      "name": "Stephenson 2-18",
       "note": "Možná největší známá hvězda: na místě Slunce by sahala za Jupiter.",
-      "caution": "Tato velikost vychází ze zářivosti a teploty podle Foka a kol. (2012) při jimi předpokládané vzdálenosti 5,5 kpc. Vzdálenost a příslušnost ke hvězdokupě jsou nejisté; chybějící rozmezí poloměru neznamená přesné měření."
+      "caution": "Tato velikost vychází ze zářivosti a teploty podle Foka a kol. (2012) při jimi předpokládané vzdálenosti {stephensonKpc} kpc. Vzdálenost a příslušnost ke hvězdokupě jsou nejisté; chybějící rozmezí poloměru neznamená přesné měření."
     },
     "m87": {
-      "name": "M87*",
       "note": "První vyfotografovaná černá díra. Její horizont zastíní každou hvězdu.",
       "caution": "Zlatý obrys značí referenční poloměr nerotující díry 2GM/c², nikoli viditelný povrch. Rotace mění geometrii horizontu; jediný menší kulový poloměr by byl zavádějící."
     },
     "ton-618": {
-      "name": "TON 618",
       "note": "Jedna z nejhmotnějších známých černých děr, pohánějící kvasar z mladého vesmíru.",
       "caution": "Hmotnost se odvozuje z okolního plynu; zobrazené rozmezí zahrnuje odhady z literatury, nejde o interval spolehlivosti. Zlatý obrys je referenční poloměr nerotující díry 2GM/c², nikoli viditelný horizont."
     }
@@ -312,15 +288,15 @@
       },
       "matter": {
         "title": "Hmota",
-        "body": "Střední hustota je hmotnost dělená modelovým objemem: 4πa²b/3 pro zploštělý elipsoid s rovníkovým poloměrem a a polárním poloměrem b, nebo objemem koule, není-li polární poloměr dostupný. Jde o přiblížení skutečných tvarů hvězd; jádra jsou mnohem hustší než povrchy. Lžička hmoty hvězdného pozůstatku používá tento celkový průměr a objem 5 ml, nikoli vzorek kůry. U neutronových hvězd jde o srovnání s eukleidovským objemem, nikoli o hustotu vztaženou k relativistickému vlastnímu objemu."
+        "body": "Střední hustota je hmotnost dělená modelovým objemem: 4πa²b/3 pro zploštělý elipsoid s rovníkovým poloměrem a a polárním poloměrem b, nebo objemem koule, není-li polární poloměr dostupný. Jde o přiblížení skutečných tvarů hvězd; jádra jsou mnohem hustší než povrchy. Lžička hmoty hvězdného pozůstatku používá tento celkový průměr a objem {teaspoonMl} ml, nikoli vzorek kůry. U neutronových hvězd jde o srovnání s eukleidovským objemem, nikoli o hustotu vztaženou k relativistickému vlastnímu objemu."
       },
       "horizons": {
         "title": "Horizonty",
-        "body": "Zlatý obrys je značkou velikosti na Schwarzschildově referenčním poloměru r_s = 2GM/c², nikoli viditelným horizontem. Kerrova rotace mění geometrii horizontu; jeho souřadnicový poloměr nelze chápat jako poloměr menší eukleidovské koule. Ve Schwarzschildově prostoročase má fotonová sféra plošný poloměr r_ph = 3GM/c². Odlišný kritický záměrný parametr b_c = 3√3 GM/c² popisuje paprsky přicházející z nekonečna: pod touto mezí jsou zachyceny, nad ní mohou uniknout. Určuje zdánlivý poloměr stínu pro vzdáleného pozorovatele, asi 2,6 r_s. Zářící prstenec tuto zdánlivou velikost značí schematicky; šířka, barva a jas jsou zvoleny pro zobrazení. Široký emisní prstenec EHT není úzkým fotonovým prstencem. Čočkování pozadí používá aproximaci bodové hmotnosti pro slabý ohyb s D = {lensDistance} r_s a b_E = √(2D r_s); nejde o přesný pohled v silném gravitačním poli z této vzdálenosti. Samostatná laboratoř Černé díry trasuje světlo disku a ohnuté oblouky."
+        "body": "Zlatý obrys je značkou velikosti na Schwarzschildově referenčním poloměru r_s = 2GM/c², nikoli viditelným horizontem. Kerrova rotace mění geometrii horizontu; jeho souřadnicový poloměr nelze chápat jako poloměr menší eukleidovské koule. Ve Schwarzschildově prostoročase má fotonová sféra plošný poloměr r_ph = 3GM/c². Odlišný kritický záměrný parametr b_c = 3√3 GM/c² popisuje paprsky přicházející z nekonečna: pod touto mezí jsou zachyceny, nad ní mohou uniknout. Určuje zdánlivý poloměr stínu pro vzdáleného pozorovatele, asi {shadowPerRs} r_s. Zářící prstenec tuto zdánlivou velikost značí schematicky; šířka, barva a jas jsou zvoleny pro zobrazení. Široký emisní prstenec EHT není úzkým fotonovým prstencem. Čočkování pozadí používá aproximaci bodové hmotnosti pro slabý ohyb s D = {lensDistance} r_s a b_E = √(2D r_s); nejde o přesný pohled v silném gravitačním poli z této vzdálenosti. Samostatná laboratoř Černé díry trasuje světlo disku a ohnuté oblouky."
       },
       "limits": {
         "title": "Omezení",
-        "body": "Vega a Achernar začínají s publikovanými sklony os 6,2° a 60,6°; ostatní sklony jsou ilustrativní a tažení mění směr pohledu. Průvodci jsou vynecháni. Rudí veleobři nemají ostrý okraj; jejich konvekce a reliéf optického povrchu jsou procedurální aproximace, nikoli hydrodynamické simulace. Barvy kontinua vynechávají spektrální čáry a molekulovou absorpci kromě ilustrativního alkalického zabarvení hnědého trpaslíka. Koróny, protuberance a erupční smyčky mají zvýšený kontrast; nejde o jedinou kalibrovanou expozici ve viditelném světle. Převzaté velikosti neurčují definitivní pořadí největších hvězd. Obrysy černých děr porovnávají Schwarzschildovy referenční poloměry; okolní záře je schematická. Rotace, pulzace a počasí používají zobrazovací tempo. Dráhy planet jsou kružnice o poloměrech jejich velkých poloos."
+        "body": "Vega a Achernar začínají s publikovanými sklony os {vegaInclinationDeg}° a {achernarInclinationDeg}°; ostatní sklony jsou ilustrativní a tažení mění směr pohledu. Průvodci jsou vynecháni. Rudí veleobři nemají ostrý okraj; jejich konvekce a reliéf optického povrchu jsou procedurální aproximace, nikoli hydrodynamické simulace. Barvy kontinua vynechávají spektrální čáry a molekulovou absorpci kromě ilustrativního alkalického zabarvení hnědého trpaslíka. Koróny, protuberance a erupční smyčky mají zvýšený kontrast; nejde o jedinou kalibrovanou expozici ve viditelném světle. Převzaté velikosti neurčují definitivní pořadí největších hvězd. Obrysy černých děr porovnávají Schwarzschildovy referenční poloměry; okolní záře je schematická. Rotace, pulzace a počasí používají zobrazovací tempo. Dráhy planet jsou kružnice o poloměrech jejich velkých poloos."
       }
     }
   },

@@ -6,8 +6,9 @@
  * light's lap, the mean density) are derived through `equations.ts`, over every corner of
  * their inputs' spans, so a derived figure is never surer than what it comes from.
  */
-import { factsOf, factSources, literatureFact, type Fact, type Value } from "@/lib/facts";
+import { factsOf, factSources, type Fact, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
+import { PLANETS } from "@/space/solar-system/model/catalogue";
 import {
   BLACK_HOLES,
   ENGINES,
@@ -16,7 +17,6 @@ import {
   type Engine,
   type StellarFigures,
 } from "@/space/stellar";
-import { FIGURES, GM_KM3_S2, siderealHours } from "@horizon/toolkit/bodies";
 import { recordFrom } from "@horizon/toolkit/records";
 import {
   STANDARD_GRAVITY,
@@ -39,40 +39,20 @@ type Show = NonNullable<Value["show"]>;
 /** The figures a rung's card may print, measured or catalogued; derived ones are added below. */
 type Measured = StellarFigures;
 
+/** A planet's figures as a rung reads them: the shared planet catalogue's radii, mass and spin. */
+const planetFigures = (id: "earth" | "jupiter"): Measured => {
+  const { equatorialRadius, polarRadius, mass, rotation } = PLANETS[id];
+  return { radius: equatorialRadius, polar: polarRadius, mass, rotation };
+};
+
 /** Each rung's measured figures: the shared catalogue's for stars and holes, the IAU's figures for the planets. */
 const MEASURED: Record<RungId, Measured> = {
   "neutron-star": NAMED_STARS["psr-j0030"],
   "cygnus-x1": BLACK_HOLES["cygnus-x1"],
   "sirius-b": NAMED_STARS["sirius-b"],
-  earth: {
-    radius: literatureFact(FIGURES.earth.equatorialKm, "km", "iau2015b3", "verified", {
-      digits: 5,
-    }),
-    polar: literatureFact(FIGURES.earth.polarKm, "km", "iau2015b3", "verified", { digits: 5 }),
-    mass: literatureFact(1, "Mearth", "iau2015b3", "verified", {
-      digits: 4,
-      note: "the unit itself: nominal GM⊕ over G",
-    }),
-    rotation: literatureFact(siderealHours("earth"), "h", "archinal2018", "flag", {
-      digits: 5,
-      note: "sidereal, from the IAU rotation rate the toolkit turns Earth by",
-    }),
-  },
+  earth: planetFigures("earth"),
   "brown-dwarf": NAMED_STARS["lhs-6343-c"],
-  jupiter: {
-    radius: literatureFact(FIGURES.jupiter.equatorialKm, "km", "galanti2026", "verified", {
-      digits: 5,
-    }),
-    polar: literatureFact(FIGURES.jupiter.polarKm, "km", "galanti2026", "verified", { digits: 5 }),
-    rotation: literatureFact(siderealHours("jupiter"), "h", "archinal2018", "flag", {
-      digits: 4,
-      note: "System III, from the IAU rotation rate the toolkit turns Jupiter by",
-    }),
-    mass: literatureFact(GM_KM3_S2.jupiter / GM_KM3_S2.earth, "Mearth", "iau2015b3", "derived", {
-      digits: 4,
-      note: "nominal GM of Jupiter over Earth's",
-    }),
-  },
+  jupiter: planetFigures("jupiter"),
   "trappist-1": NAMED_STARS["trappist-1"],
   proxima: NAMED_STARS.proxima,
   sun: NAMED_STARS.sun,
@@ -379,3 +359,13 @@ export function radiusMetres(id: RungId) {
     polar: polar ? metres(polar)(drawn(polar)) : toM(drawn(radius)),
   };
 }
+
+/**
+ * The catalogue figures the cards' cautions and the technical notes quote, by placeholder,
+ * in the unit their sentences name: "{vegaInclinationDeg}°".
+ */
+export const PROSE_FIGURES = {
+  vegaInclinationDeg: NAMED_STARS.vega.inclination,
+  achernarInclinationDeg: NAMED_STARS.achernar.inclination,
+  stephensonKpc: NAMED_STARS["stephenson-2-18"].distance,
+} satisfies Record<string, Fact>;

@@ -88,6 +88,7 @@ export const UNITS = {
   arcmin: unit("angle", "′", Math.PI / 10_800, "'"),
   arcsec: unit("angle", "″", Math.PI / 648_000, "''"),
   mas: unit("angle", "mas", Math.PI / 648_000_000),
+  uas: unit("angle", "μas", Math.PI / 648_000_000_000),
   // Angular rate (proper motion)
   "arcsec/yr": unit("angularRate", "″/yr", Math.PI / 648_000 / YEAR, "''\\,\\mathrm{yr^{-1}}"),
   "mas/yr": unit("angularRate", "mas/yr", Math.PI / 648_000_000 / YEAR, "\\mathrm{mas\\,yr^{-1}}"),

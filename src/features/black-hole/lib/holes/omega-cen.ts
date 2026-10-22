@@ -16,10 +16,14 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
+import { OBSERVATORY } from "../catalogue";
+import { figureArgs } from "../figures";
 import { quote } from "../quote";
 import type { HoleSpec } from "./types";
 
 const OMEGA_CEN = BLACK_HOLES["omega-cen"];
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 
 export const omegaCen: HoleSpec = {
   id: "omega-cen",
@@ -48,7 +52,7 @@ export const omegaCen: HoleSpec = {
       lift: 0.3,
       lead: -0.4,
       drift: -0.008,
-      eq: `D = ${quote(OMEGA_CEN.distance)}    ·    M_cluster ≈ 3.9 × 10⁶ M☉`,
+      eq: `D = ${quote(OMEGA_CEN.distance)}    ·    M_cluster ≈ ${quote({ ...OBSERVATORY.omegaCen.clusterMass, digits: 2 })}`,
     },
     // A long survey sweep, like twenty years of Hubble images.
     {
@@ -60,7 +64,7 @@ export const omegaCen: HoleSpec = {
       swing: -0.12,
       lead: 0.5,
       roll: 0.03,
-      eq: "v_esc ≈ 62 km/s    ·    v_max ≈ 113 km/s",
+      eq: `v_esc ≈ ${EN.omegaEscapeKms} km/s    ·    v_max ≈ ${EN.omegaFastestKms} km/s`,
     },
     {
       phase: "detail",
@@ -73,7 +77,7 @@ export const omegaCen: HoleSpec = {
         { kind: "shadow", assumed: true },
         { kind: "ruler", length: 10 },
       ],
-      eq: `M_• ≥ ${quote(OMEGA_CEN.mass)}    ·    models ≈ 39,000–47,000 M☉`,
+      eq: `M_• ≥ ${quote(OMEGA_CEN.mass)}    ·    models ≈ ${EN.omegaModelMass} M☉`,
     },
     {
       phase: "hold",
@@ -83,7 +87,7 @@ export const omegaCen: HoleSpec = {
       distance: 30,
       swing: 0.25,
       roll: -0.03,
-      eq: "M_• < 6,000 M☉ (3σ, stars + pulsars)",
+      eq: `M_• < ${EN.omegaLimitAgainst} M☉ (3σ, stars + pulsars)`,
     },
     {
       phase: "wide",

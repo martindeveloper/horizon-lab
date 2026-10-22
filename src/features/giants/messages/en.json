@@ -21,109 +21,85 @@
       "caution": "Mass and radius adopt one NICER analysis (2019) and depend on the emission model. The two opposite hot caps and beams are a generic pulsar illustration, not a reconstruction of PSR J0030+0451’s observed hot spots."
     },
     "cygnus-x1": {
-      "name": "Cygnus X-1",
       "note": "A stellar-mass black hole drawing gas from a massive companion star.",
       "caution": "The gold outline marks the non-spinning reference radius 2GM/c², not a visible surface. Spin changes the horizon geometry; a single smaller spherical radius would be misleading."
     },
     "sirius-b": {
-      "name": "Sirius B",
       "note": "A white dwarf: smaller than Earth, about as heavy as the Sun."
     },
     "earth": {
-      "name": "Earth",
       "note": "Not a star: here as a ruler."
     },
     "brown-dwarf": {
-      "name": "LHS 6343 C",
       "note": "A brown dwarf, too light to burn hydrogen: Jupiter's size, dozens of times its mass."
     },
     "jupiter": {
-      "name": "Jupiter",
       "note": "The largest planet in the Solar System. It spins faster than any other, so its equator is flung outward into a visible bulge."
     },
     "trappist-1": {
-      "name": "TRAPPIST-1",
       "note": "A cool red dwarf with Earth-sized planets packed close, barely wider than Jupiter."
     },
     "proxima": {
-      "name": "Proxima Centauri",
       "note": "The nearest star to the Sun. Most stars are red dwarfs like it."
     },
     "sun": {
-      "name": "Sun",
       "note": "Our ruler: every size here is measured against it."
     },
     "sirius": {
-      "name": "Sirius",
       "note": "The brightest star in our night sky, and Sirius B's partner."
     },
     "vega": {
-      "name": "Vega",
       "note": "Its fast spin flings its equator outward, so it bulges and runs cooler there than at the poles. From Earth we see it almost pole-on and round; drag the globe to inspect its bulge.",
-      "caution": "The surface uses a rotation-aware ELR temperature profile and a published inclination of 6.2°. Local model temperatures need not equal the literature endpoints on the card; the unperturbed profile conserves the adopted luminosity."
+      "caution": "The surface uses a rotation-aware ELR temperature profile and a published inclination of {vegaInclinationDeg}°. Local model temperatures need not equal the literature endpoints on the card; the unperturbed profile conserves the adopted luminosity."
     },
     "achernar": {
-      "name": "Achernar",
       "note": "One of the flattest stars known: it spins so fast that its equator, flung outward, nearly breaks away.",
       "caution": "The surface uses a rotation-aware ELR temperature model with centrifugal acceleration, with its unperturbed profile normalized to the adopted luminosity. The drawn shape remains a spheroid; this is an approximation, not a fitted image."
     },
     "sgr-a": {
-      "name": "Sagittarius A*",
       "note": "The black hole at our Galaxy's centre: millions of Suns in a horizon smaller than Mercury's orbit.",
       "caution": "The gold outline marks the non-spinning reference radius 2GM/c², not a visible surface. Spin changes the horizon geometry; a single smaller spherical radius would be misleading."
     },
     "arcturus": {
-      "name": "Arcturus",
       "note": "An orange giant: a Sun-like star in old age, swollen and cooler."
     },
     "r136a1": {
-      "name": "R136a1",
       "note": "One of the most massive stars known, yet comparable in size to Aldebaran: mass is not size.",
       "caution": "Its mass is estimated from its light; published values range widely."
     },
     "aldebaran": {
-      "name": "Aldebaran",
       "note": "The red eye of Taurus, a giant about as heavy as the Sun."
     },
     "rigel": {
-      "name": "Rigel",
       "note": "A blue supergiant radiating roughly a hundred thousand times the Sun’s power."
     },
     "deneb": {
-      "name": "Deneb",
       "note": "One of the most luminous stars visible to the naked eye.",
       "caution": "These figures adopt one analysis at an assumed association distance; other distance estimates imply different luminosities and radii."
     },
     "antares": {
-      "name": "Antares",
       "note": "The heart of Scorpius. In the Sun's place it would swallow Mars."
     },
     "betelgeuse": {
-      "name": "Betelgeuse",
       "note": "Orion's shoulder: a red supergiant with only a handful of huge convection cells.",
       "caution": "It pulsates and has no sharp edge; its size changes with the light used to measure it."
     },
     "uy-scuti": {
-      "name": "UY Scuti",
       "note": "A red supergiant whose inferred size depends strongly on its adopted distance and temperature.",
       "caution": "Radius is derived consistently from Healy et al.’s (2024) luminosity and temperature. Other analyses give different sizes. The older assumed mass is omitted, so no density is claimed."
     },
     "vy-cma": {
-      "name": "VY Canis Majoris",
       "note": "A hypergiant shedding its outer layers into a dusty cloud."
     },
     "stephenson-2-18": {
-      "name": "Stephenson 2-18",
       "note": "Perhaps the largest star known: in the Sun's place it would reach past Jupiter.",
-      "caution": "This size uses Fok et al.’s (2012) luminosity and temperature at their assumed distance of 5.5 kpc. Distance and cluster membership are uncertain; the lack of a quoted radius range does not make this a precise measurement."
+      "caution": "This size uses Fok et al.’s (2012) luminosity and temperature at their assumed distance of {stephensonKpc} kpc. Distance and cluster membership are uncertain; the lack of a quoted radius range does not make this a precise measurement."
     },
     "m87": {
-      "name": "M87*",
       "note": "The first black hole ever imaged. Its horizon dwarfs every star.",
       "caution": "The gold outline marks the non-spinning reference radius 2GM/c², not a visible surface. Spin changes the horizon geometry; a single smaller spherical radius would be misleading."
     },
     "ton-618": {
-      "name": "TON 618",
       "note": "One of the most massive black holes known, lighting a quasar from the young universe.",
       "caution": "Its mass is inferred from surrounding gas; the displayed span is a spread of literature estimates, not a confidence interval. The gold outline is the non-spinning reference radius 2GM/c², not a visible horizon."
     }
@@ -312,15 +288,15 @@
       },
       "matter": {
         "title": "Matter",
-        "body": "Mean density is mass divided by the model volume: 4πa²b/3 for an oblate spheroid with equatorial radius a and polar radius b, or a sphere when no polar radius is available. This approximates real stellar shapes; cores are much denser than surfaces. Remnant teaspoons use this bulk mean and a 5 mL volume, not a sample of crust material. For neutron stars this Euclidean-volume comparison is not a relativistic proper-volume density."
+        "body": "Mean density is mass divided by the model volume: 4πa²b/3 for an oblate spheroid with equatorial radius a and polar radius b, or a sphere when no polar radius is available. This approximates real stellar shapes; cores are much denser than surfaces. Remnant teaspoons use this bulk mean and a {teaspoonMl} mL volume, not a sample of crust material. For neutron stars this Euclidean-volume comparison is not a relativistic proper-volume density."
       },
       "horizons": {
         "title": "Horizons",
-        "body": "The gold outline is a size marker at the Schwarzschild reference radius r_s = 2GM/c², not a visible horizon. Kerr spin changes the horizon geometry; its coordinate radius cannot be read as the radius of a smaller Euclidean sphere. In Schwarzschild spacetime the photon sphere has areal radius r_ph = 3GM/c². The distinct critical impact parameter b_c = 3√3 GM/c² describes incoming rays at infinity: below it they are captured, above it they can escape. It sets the distant shadow radius, about 2.6 r_s. Our glowing ring marks that apparent scale schematically; its width, colour and brightness are chosen for display. EHT’s broad emission ring is not the narrow photon ring. Background lensing uses a weak-deflection point-mass approximation with D = {lensDistance} r_s and b_E = √(2D r_s); it is not an exact strong-gravity view at that distance. The separate Black holes lab traces disk light and lensed arcs."
+        "body": "The gold outline is a size marker at the Schwarzschild reference radius r_s = 2GM/c², not a visible horizon. Kerr spin changes the horizon geometry; its coordinate radius cannot be read as the radius of a smaller Euclidean sphere. In Schwarzschild spacetime the photon sphere has areal radius r_ph = 3GM/c². The distinct critical impact parameter b_c = 3√3 GM/c² describes incoming rays at infinity: below it they are captured, above it they can escape. It sets the distant shadow radius, about {shadowPerRs} r_s. Our glowing ring marks that apparent scale schematically; its width, colour and brightness are chosen for display. EHT’s broad emission ring is not the narrow photon ring. Background lensing uses a weak-deflection point-mass approximation with D = {lensDistance} r_s and b_E = √(2D r_s); it is not an exact strong-gravity view at that distance. The separate Black holes lab traces disk light and lensed arcs."
       },
       "limits": {
         "title": "Limits",
-        "body": "Vega and Achernar start at published inclinations of 6.2° and 60.6°; other inclinations are illustrative, and dragging changes the viewing orientation. Companions are omitted. Red supergiants have no sharp edge; their convection and optical-surface relief are procedural approximations, not hydrodynamic simulations. Continuum colours omit spectral lines and molecular absorption except for the brown dwarf’s illustrative alkali tint. Coronae, prominences and flare loops are contrast-enhanced illustrations, not a single calibrated visible-light exposure. Adopted sizes do not establish a definitive ranking. Black-hole outlines compare Schwarzschild reference radii; surrounding glow is schematic. Spins, pulsations and weather use display paces. Planetary orbits are circles at their semimajor axes."
+        "body": "Vega and Achernar start at published inclinations of {vegaInclinationDeg}° and {achernarInclinationDeg}°; other inclinations are illustrative, and dragging changes the viewing orientation. Companions are omitted. Red supergiants have no sharp edge; their convection and optical-surface relief are procedural approximations, not hydrodynamic simulations. Continuum colours omit spectral lines and molecular absorption except for the brown dwarf’s illustrative alkali tint. Coronae, prominences and flare loops are contrast-enhanced illustrations, not a single calibrated visible-light exposure. Adopted sizes do not establish a definitive ranking. Black-hole outlines compare Schwarzschild reference radii; surrounding glow is schematic. Spins, pulsations and weather use display paces. Planetary orbits are circles at their semimajor axes."
       }
     }
   },

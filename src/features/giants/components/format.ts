@@ -4,6 +4,7 @@ import {
   buildCard,
   factRef,
   print,
+  proseArgs,
   type Card,
   type Fact,
   type DistanceSettings,
@@ -11,8 +12,16 @@ import {
 } from "@/lib/facts";
 import { formatSignificant } from "@horizon/toolkit/science";
 
-import { RUNG_ENGINES, RUNG_FACTS, drawn, inUnit, spectralOf } from "../lib/model/catalogue";
+import {
+  PROSE_FIGURES,
+  RUNG_ENGINES,
+  RUNG_FACTS,
+  drawn,
+  inUnit,
+  spectralOf,
+} from "../lib/model/catalogue";
 import { groupOf } from "../lib/model/compare";
+import { rungNameKey } from "../lib/model/names";
 import { RUNGS, type Rung, type RungId } from "../lib/model/rungs";
 import type { TourStep } from "../lib/model/tour";
 import { RUNG_CARDS } from "./card-specs";
@@ -100,10 +109,12 @@ export function rungCard(
     : [];
   return {
     badge: badgeOf(t, rung),
-    title: t(`rungs.${id}.name`),
+    title: t(rungNameKey(id)),
     facts: [...(lead ? [lead] : []), ...spectral, ...rest, powered, ...fate],
     body: t(`rungs.${id}.note`),
-    caution: has(`rungs.${id}.caution`) ? t(`rungs.${id}.caution`) : "",
+    caution: has(`rungs.${id}.caution`)
+      ? t(`rungs.${id}.caution`, proseArgs(PROSE_FIGURES, d.locale))
+      : "",
   };
 }
 

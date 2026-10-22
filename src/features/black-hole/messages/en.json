@@ -45,7 +45,7 @@
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Milky Way  ·  face-on  ·  galactocentric",
   "localGroup": "Beyond the Milky Way",
-  "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about {andromedaKpc} kpc from us; M87* is about {m87Mpc} Mpc away. That is roughly {m87FartherThanAndromeda} times farther than Andromeda and {m87FartherThanSgr} times farther than Sagittarius A*. TON 618’s light travelled about 10.8 billion years; the waves from GW231123 travelled roughly 2 to 6 billion.",
+  "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about {andromedaKpc} kpc from us; M87* is about {m87Mpc} Mpc away. That is roughly {m87FartherThanAndromeda} times farther than Andromeda and {m87FartherThanSgr} times farther than Sagittarius A*. TON 618’s light travelled about {tonLightGyr} billion years; the waves from GW231123 travelled roughly {gwTravelGyr} billion.",
   "theorySolutions": "Theory  ·  GR solutions",
   "theoryBody": "These are not specific objects in the sky. Lensed disk illustrates gravitational lensing. The Schwarzschild and Kerr metrics are exact vacuum solutions of Einstein’s equations; light here follows Kerr paths, while the glowing gas is illustrative.",
   "landmark": "Landmark  ·  not an explorable black hole",
@@ -129,12 +129,12 @@
       "0": {
         "kicker": "Home",
         "title": "Our own supermassive black hole",
-        "body": "Sagittarius A* lies in the direction of Sagittarius and has a mass of about {sgrMassMillions} million Suns. The orbits of nearby stars reveal its mass, especially S2, which completes an orbit in about 16 years and passes within roughly 120 au. The black hole is surrounded by a hot accretion flow with low radiative efficiency. For something so massive, it is remarkably faint."
+        "body": "Sagittarius A* lies in the direction of Sagittarius and has a mass of about {sgrMassMillions} million Suns. The orbits of nearby stars reveal its mass, especially S2, which completes an orbit in about {s2Years} years and passes within roughly {s2PericentreAu} au. The black hole is surrounded by a hot accretion flow with low radiative efficiency. For something so massive, it is remarkably faint."
       },
       "1": {
         "kicker": "EHT",
-        "title": "The 52 μas ring",
-        "body": "The Event Horizon Telescope imaged a bright ring about 52 microarcseconds across around Sgr A*. It is emission from hot gas, shaped by strong gravity and the motion of the material. A central brightness depression marks the black hole’s shadow. The ring is neither the event horizon nor a direct image of a single photon orbit."
+        "title": "The {sgrRing} μas ring",
+        "body": "The Event Horizon Telescope imaged a bright ring about {sgrRing} microarcseconds across around Sgr A*. It is emission from hot gas, shaped by strong gravity and the motion of the material. A central brightness depression marks the black hole’s shadow. The ring is neither the event horizon nor a direct image of a single photon orbit."
       },
       "2": {
         "kicker": "Growth",
@@ -156,7 +156,7 @@
       "1": {
         "kicker": "10 April 2019",
         "title": "The first image of a black hole’s shadow",
-        "body": "The Event Horizon Telescope released its first image of M87*’s immediate surroundings: a bright ring of emitting gas around a dark shadow. It was not a photograph of the event horizon itself. M87’s jet points roughly 17° from our line of sight, so we view it fairly close to its axis."
+        "body": "The Event Horizon Telescope released its first image of M87*’s immediate surroundings: a bright ring of emitting gas around a dark shadow. It was not a photograph of the event horizon itself. M87’s jet points roughly {m87JetDeg}° from our line of sight, so we view it fairly close to its axis."
       },
       "2": {
         "kicker": "Pōwehi",
@@ -166,7 +166,7 @@
       "3": {
         "kicker": "Why M87* first",
         "title": "Mass over distance",
-        "body": "A black hole shadow’s angular size scales mainly with mass divided by distance. M87* is about 2,000 times farther away than Sgr A*, but about 1,500 times more massive, so the two shadows have comparable sizes in the sky. M87*’s surroundings also change more slowly, making the first image easier to reconstruct."
+        "body": "A black hole shadow’s angular size scales mainly with mass divided by distance. M87* is about {m87FartherThanSgr} times farther away than Sgr A*, but about {m87HeavierThanSgr} times more massive, so the two shadows have comparable sizes in the sky. M87*’s surroundings also change more slowly, making the first image easier to reconstruct."
       }
     },
     "schwarzschild": {
@@ -207,7 +207,7 @@
       "0": {
         "kicker": "Origin",
         "title": "The remains of a massive star",
-        "body": "The black hole in Cygnus X-1 formed through the collapse of a massive star. Its companion, the supergiant HDE 226868, still supplies gas through its stellar wind. Published mass estimates vary with the binary model, from roughly 13 to {cygMassRound} M☉, well above neutron-star masses. Unlike Sgr A* and M87*, this is a stellar-origin black hole rather than a supermassive one."
+        "body": "The black hole in Cygnus X-1 formed through the collapse of a massive star. Its companion, the supergiant HDE 226868, still supplies gas through its stellar wind. Published mass estimates vary with the binary model, from roughly {cygWindLowest} to {cygMassRound} M☉, well above neutron-star masses. Unlike Sgr A* and M87*, this is a stellar-origin black hole rather than a supermassive one."
       },
       "1": {
         "kicker": "Cygnus X-1",
@@ -217,7 +217,7 @@
       "2": {
         "kicker": "14 September 2015",
         "title": "LIGO hears the chirp",
-        "body": "LIGO detected gravitational waves from two black holes of about 35 and 30 solar masses merging roughly 1.3 billion light-years away. The signal rose in frequency and amplitude as they spiralled together, then faded as the newly formed black hole settled. Converted to audio, it sounds like a brief chirp."
+        "body": "LIGO detected gravitational waves from two black holes of about {gw150914Primary} and {gw150914Secondary} solar masses merging roughly {gw150914BillionLy} billion light-years away. The signal rose in frequency and amplitude as they spiralled together, then faded as the newly formed black hole settled. Converted to audio, it sounds like a brief chirp."
       },
       "3": {
         "kicker": "City-sized",
@@ -244,9 +244,9 @@
         "body": "Gaia BH3 turned up while the Gaia team was checking preliminary data for the mission’s fourth release. Because the find was exceptional, the team confirmed it with ground-based spectra and announced it early, in April 2024, before the full release."
       },
       "1": {
-        "kicker": "11.6 years",
+        "kicker": "{gaiaOrbitYears} years",
         "title": "A stretched orbit",
-        "body": "The companion giant takes about 11.6 years to complete one orbit, on a very elongated path with eccentricity about 0.73. Its distance from the black hole swings from roughly 4.4 to 28 astronomical units, never close enough for the black hole to strip gas from it."
+        "body": "The companion giant takes about {gaiaOrbitYears} years to complete one orbit, on a very elongated path with eccentricity about {gaiaEccentricity}. Its distance from the black hole swings from roughly {gaiaSeparationAu} astronomical units, never close enough for the black hole to strip gas from it."
       },
       "2": {
         "kicker": "ED-2",
@@ -254,7 +254,7 @@
         "body": "The pair moves with the ED-2 stellar stream, the remains of an ancient star cluster disrupted by the Milky Way’s tides. Gaia BH3 was the first black hole clearly linked to such a disrupted cluster."
       },
       "3": {
-        "kicker": "About 190 km",
+        "kicker": "About {gaiaHorizonAcrossKm} km",
         "title": "A horizon smaller than a small country",
         "body": "For a non-spinning black hole of {gaiaMass} solar masses, the Schwarzschild radius is about {gaiaHorizonKm} km, so the horizon would be about {gaiaHorizonAcrossKm} km across. Its spin has not been measured: with no gas falling in, the X-ray methods used for Cygnus X-1 cannot be applied."
       }
@@ -266,9 +266,9 @@
         "body": "Omega Centauri holds stars with a wide range of ages and chemical compositions, unlike a typical globular cluster. Astronomers think it is the nucleus of a dwarf galaxy whose outer parts the Milky Way stripped away."
       },
       "1": {
-        "kicker": "1.4 million stars",
+        "kicker": "{omegaTrackedMillions} million stars",
         "title": "Motions from archive images",
-        "body": "The 2024 study built a catalogue of 1.4 million stellar motions from Hubble images spanning about 20 years, many of them originally taken to calibrate the telescope’s cameras."
+        "body": "The 2024 study built a catalogue of {omegaTrackedMillions} million stellar motions from Hubble images spanning about 20 years, many of them originally taken to calibrate the telescope’s cameras."
       },
       "2": {
         "kicker": "Intermediate mass",
@@ -289,8 +289,8 @@
       },
       "1": {
         "kicker": "Two distances",
-        "title": "10.8 or 18 billion light-years?",
-        "body": "Its light travelled for about 10.8 billion years, but the universe expanded in the meantime. The quasar’s present distance, the comoving distance, is about 18 billion light-years. Neither number conflicts with the universe’s age of 13.8 billion years."
+        "title": "{tonLightGyr} or {tonComovingBillionLy} billion light-years?",
+        "body": "Its light travelled for about {tonLightGyr} billion years, but the universe expanded in the meantime. The quasar’s present distance, the comoving distance, is about {tonComovingBillionLy} billion light-years. Neither number conflicts with the universe’s age of {universeGyr} billion years."
       },
       "2": {
         "kicker": "Virial mass",
@@ -312,7 +312,7 @@
       "1": {
         "kicker": "Not sound",
         "title": "Waves in spacetime",
-        "body": "Gravitational waves are not sound. This signal’s frequencies, roughly 30 to 80 hertz, happen to lie in the audible range, so the data can be converted into an audio chirp, but nothing travelled through space as sound."
+        "body": "Gravitational waves are not sound. This signal’s frequencies, roughly {gwFrequenciesHz} hertz, happen to lie in the audible range, so the data can be converted into an audio chirp, but nothing travelled through space as sound."
       },
       "2": {
         "kicker": "Five models",
@@ -320,7 +320,7 @@
         "body": "Five state-of-the-art waveform models gave noticeably different values for some parameters, such as the lighter mass and the distance. Researchers therefore quote wide ranges. Every model finds a rapidly spinning heavier black hole, and a 2026 follow-up study found the high masses and spins robust to detector noise."
       },
       "3": {
-        "kicker": "About 500 km",
+        "kicker": "About {gwKerrHorizonKm} km",
         "title": "Horizon size",
         "body": "A non-spinning black hole of {gwMass} solar masses would have a Schwarzschild radius of about {gwHorizonKm} kilometres. At the measured spin of about {gwSpin}, the outer horizon’s coordinate radius is smaller, about {gwKerrHorizonKm} km."
       }
@@ -363,12 +363,12 @@
       "1": {
         "kicker": "S2",
         "title": "A stellar orbit becomes a set of scales",
-        "body": "S2 is a B-type star on an orbit of about 16 years. At its closest approach, or pericentre, it passes roughly 120 au from Sgr A*, about 1,400 Schwarzschild radii, and moves at over 2.5% of the speed of light. Its orbit constrains the central mass and reveals relativistic redshift and orbital precession. A 2026 GRAVITY+ study reported S301, whose fitted orbit brings it within about 12 au at over 8% of the speed of light. Future observations of that orbit could measure Sgr A*’s spin."
+        "body": "S2 is a B-type star on an orbit of about {s2Years} years. At its closest approach, or pericentre, it passes roughly {s2PericentreAu} au from Sgr A*, about {s2PericentreRs} Schwarzschild radii, and moves at about {s2SpeedPercent}% of the speed of light. Its orbit constrains the central mass and reveals relativistic redshift and orbital precession. A 2026 GRAVITY+ study reported S301, whose fitted orbit brings it within about {s301PericentreAu} au at over {s301SpeedPercent}% of the speed of light. Future observations of that orbit could measure Sgr A*’s spin."
       },
       "2": {
-        "kicker": "52 μas",
+        "kicker": "{sgrRing} μas",
         "title": "Light around a shadow",
-        "body": "On 12 May 2022, the Event Horizon Telescope released an image of Sgr A*: a bright ring about 52 microarcseconds across, as wide as a ten-centimetre object on the Moon seen from Earth. The ring is light from hot gas bent by gravity, not the horizon itself. The drawn line is the critical curve, the shadow’s edge as theory predicts it. The gas changes within minutes, which made the image hard to reconstruct."
+        "body": "On 12 May 2022, the Event Horizon Telescope released an image of Sgr A*: a bright ring about {sgrRing} microarcseconds across, as wide as a ten-centimetre object on the Moon seen from Earth. The ring is light from hot gas bent by gravity, not the horizon itself. The drawn line is the critical curve, the shadow’s edge as theory predicts it. The gas changes within minutes, which made the image hard to reconstruct."
       },
       "3": {
         "kicker": "RIAF",
@@ -388,14 +388,14 @@
         "body": "M87* sits in the nucleus of Messier 87, a giant elliptical galaxy in the Virgo cluster, about {m87Mpc} Mpc away. Its estimated mass is {m87MassBillions} billion Suns. The yellow glow in this scene represents the galaxy’s predominantly old stars."
       },
       "1": {
-        "kicker": "17°",
+        "kicker": "{m87JetDeg}°",
         "title": "The jet reveals the axis",
-        "body": "Heber Curtis described M87’s jet in 1918. Very-long-baseline radio observations place its axis roughly 17° from our line of sight. A leading explanation for its power is the Blandford–Znajek mechanism: magnetic field lines threading the spinning horizon extract rotational energy from the black hole and help power a relativistic jet. The plasma is not being expelled from inside the horizon. The blue feature in this scene represents the jet region."
+        "body": "Heber Curtis described M87’s jet in 1918. Very-long-baseline radio observations place its axis roughly {m87JetDeg}° from our line of sight. A leading explanation for its power is the Blandford–Znajek mechanism: magnetic field lines threading the spinning horizon extract rotational energy from the black hole and help power a relativistic jet. The plasma is not being expelled from inside the horizon. The blue feature in this scene represents the jet region."
       },
       "2": {
-        "kicker": "about 44 μas",
+        "kicker": "about {m87RingRound} μas",
         "title": "Two black holes, similar sizes in the sky",
-        "body": "The M87* image released in 2019 showed a ring 42 ± 3 microarcseconds across. A 2025 analysis combining observations from 2017, 2018 and 2021 found an average diameter of 43.9 ± 0.6 μas. A shadow’s angular size scales mainly with mass divided by distance. M87* is roughly {m87FartherThanSgr} times farther away than Sgr A* but {m87HeavierThanSgr} times more massive. Their shadows therefore have comparable angular sizes, within reach of the same global radio interferometer."
+        "body": "The M87* image released in 2019 showed a ring {m87Ring2019Error} microarcseconds across. A 2025 analysis combining observations from 2017, 2018 and 2021 found an average diameter of {m87RingError}. A shadow’s angular size scales mainly with mass divided by distance. M87* is roughly {m87FartherThanSgr} times farther away than Sgr A* but {m87HeavierThanSgr} times more massive. Their shadows therefore have comparable angular sizes, within reach of the same global radio interferometer."
       },
       "3": {
         "kicker": "10 April 2019",
@@ -466,7 +466,7 @@
       "0": {
         "kicker": "Cyg X-1",
         "title": "A black hole in Cygnus",
-        "body": "Cygnus X-1 was one of the first convincing black hole candidates. VLBA parallax places the binary about {cygKpc} kpc away, or {cygLy} light-years, near the Galactic plane in Cygnus. Miller-Jones and colleagues derived a black hole mass of {cygMassError} in 2021. A 2025 analysis by Ramachandran and colleagues inferred roughly 13–18 M☉ using different estimates for the companion. That companion is HDE 226868, an O9.7 Iab supergiant. The X-ray source itself was discovered in 1964."
+        "body": "Cygnus X-1 was one of the first convincing black hole candidates. VLBA parallax places the binary about {cygKpc} kpc away, or {cygLy} light-years, near the Galactic plane in Cygnus. Miller-Jones and colleagues derived a black hole mass of {cygMassError} in 2021. A 2025 analysis by Ramachandran and colleagues inferred roughly {cygWindMass} M☉ using different estimates for the companion. That companion is HDE 226868, an O9.7 Iab supergiant. The X-ray source itself was discovered in 1964."
       },
       "1": {
         "kicker": "stellar wind",
@@ -486,7 +486,7 @@
       "4": {
         "kicker": "pull back",
         "title": "Another way to detect a black hole",
-        "body": "On 14 September 2015, LIGO detected GW150914: the merger of black holes of about 35 and 30 solar masses, roughly 1.3 billion light-years away. Gravitational waves carried away energy equivalent to about three solar masses. This was a ripple in spacetime, not sound travelling through space. Cygnus X-1 shows a different side of the stellar-mass population: a binary supplied with gas by a companion. Isolated black holes without bright accretion are much harder to find."
+        "body": "On 14 September 2015, LIGO detected GW150914: the merger of black holes of about {gw150914Primary} and {gw150914Secondary} solar masses, roughly {gw150914BillionLy} billion light-years away. Gravitational waves carried away energy equivalent to about {gw150914Radiated} solar masses. This was a ripple in spacetime, not sound travelling through space. Cygnus X-1 shows a different side of the stellar-mass population: a binary supplied with gas by a companion. Isolated black holes without bright accretion are much harder to find."
       }
     },
     "custom": {
@@ -530,7 +530,7 @@
       "2": {
         "kicker": "dormant",
         "title": "Why it stays dark",
-        "body": "The giant star stays between about 4.4 and 28 astronomical units from the black hole, never close enough to spill gas onto it. Its weak stellar wind delivers very little, so no bright accretion disk forms, and X-ray telescopes have detected nothing. Most black holes in the Milky Way are probably dormant like this one. That is why only a few dozen of them have been found."
+        "body": "The giant star stays about {gaiaSeparationAu} astronomical units from the black hole, never close enough to spill gas onto it. Its weak stellar wind delivers very little, so no bright accretion disk forms, and X-ray telescopes have detected nothing. Most black holes in the Milky Way are probably dormant like this one. That is why only a few dozen of them have been found."
       },
       "3": {
         "kicker": "ED-2",
@@ -552,17 +552,17 @@
       "1": {
         "kicker": "Hubble, 2002–2023",
         "title": "Twenty years of Hubble images",
-        "body": "In 2024, a team led by Maximilian Häberle compared more than 500 Hubble Space Telescope images taken over two decades and measured the motions of 1.4 million stars. Near the centre they found seven stars moving faster than the cluster’s escape speed, the fastest at 113 kilometres per second across the sky. Without an extra unseen mass at the centre, those stars would have escaped long ago."
+        "body": "In 2024, a team led by Maximilian Häberle compared more than {omegaImages} Hubble Space Telescope images taken over two decades and measured the motions of {omegaTrackedMillions} million stars. Near the centre they found seven stars moving faster than the cluster’s escape speed, the fastest at {omegaFastestKms} kilometres per second across the sky. Without an extra unseen mass at the centre, those stars would have escaped long ago."
       },
       "2": {
         "kicker": "at least {omegaMass} M☉",
         "title": "A lower limit, not a weight",
-        "body": "In that study, keeping those stars bound requires a central mass of at least about {omegaMass} Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century."
+        "body": "In that study, keeping those stars bound requires a central mass of at least about {omegaMass} Suns; comparisons with simulations favour roughly {omegaModelMass}. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century."
       },
       "3": {
         "kicker": "debate",
         "title": "Not yet settled",
-        "body": "Not everyone agrees. A 2025 analysis of pulsar accelerations and stellar motions prefers a central swarm of dark stellar remnants, such as stellar-mass black holes, and limits any single black hole to about 6,000 Suns. The most sensitive radio image of the cluster and infrared observations with the James Webb Space Telescope, published in 2026, found no glow from the centre. That fits a black hole that barely feeds, but it neither confirms nor rules one out."
+        "body": "Not everyone agrees. A 2025 analysis of pulsar accelerations and stellar motions prefers a central swarm of dark stellar remnants, such as stellar-mass black holes, and limits any single black hole to about {omegaLimitAgainst} Suns. The most sensitive radio image of the cluster and infrared observations with the James Webb Space Telescope, published in 2026, found no glow from the centre. That fits a black hole that barely feeds, but it neither confirms nor rules one out."
       },
       "4": {
         "kicker": "pull back",
@@ -572,9 +572,9 @@
     },
     "ton-618": {
       "0": {
-        "kicker": "z = 2.219",
+        "kicker": "z = {tonRedshift}",
         "title": "Light from a young universe",
-        "body": "TON 618 is a quasar: gas falling onto a giant black hole shines so brightly that it outshines its entire host galaxy. Its light left about 10.8 billion years ago, when the universe was roughly 3 billion years old. Cosmic expansion has since carried it to about 18 billion light-years from us. Through a telescope it still looks like a faint star of the 16th magnitude."
+        "body": "TON 618 is a quasar: gas falling onto a giant black hole shines so brightly that it outshines its entire host galaxy. Its light left about {tonLightGyr} billion years ago, when the universe was roughly {tonUniverseThenGyr} billion years old. Cosmic expansion has since carried it to about {tonComovingBillionLy} billion light-years from us. Through a telescope it still looks like a faint star of the 16th magnitude."
       },
       "1": {
         "kicker": "Tonantzintla, 1957",
@@ -584,12 +584,12 @@
       "2": {
         "kicker": "{tonMassBillions} billion M☉",
         "title": "Weighed by moving gas",
-        "body": "Its mass is estimated, not measured directly. Gas near the black hole moves so fast that it broadens a hydrogen line to about 10,000 km/s. That speed, and the gas’s distance inferred from the quasar’s brightness, give roughly {tonMassBillions} billion Suns. Such estimates are uncertain by a factor of a few, especially for a quasar this bright."
+        "body": "Its mass is estimated, not measured directly. Gas near the black hole moves so fast that it broadens a hydrogen line to about {tonLineKms} km/s. That speed, and the gas’s distance inferred from the quasar’s brightness, give roughly {tonMassBillions} billion Suns. Such estimates are uncertain by a factor of a few, especially for a quasar this bright."
       },
       "3": {
         "kicker": "{tonHorizonAu} au",
         "title": "Near a theoretical limit",
-        "body": "For a non-spinning black hole of this mass, the Schwarzschild radius would be roughly {tonHorizonAu} astronomical units, dozens of times the radius of Neptune’s orbit. Theory suggests that a black hole fed by a luminous thin disk cannot grow much beyond about 50 billion Suns for typical parameters, so TON 618 sits close to that limit. Its spin has not been measured."
+        "body": "For a non-spinning black hole of this mass, the Schwarzschild radius would be roughly {tonHorizonAu} astronomical units, dozens of times the radius of Neptune’s orbit. Theory suggests that a black hole fed by a luminous thin disk cannot grow much beyond about {tonLimitBillions} billion Suns for typical parameters, so TON 618 sits close to that limit. Its spin has not been measured."
       },
       "4": {
         "kicker": "pull back",
@@ -601,22 +601,22 @@
       "0": {
         "kicker": "23 November 2023",
         "title": "The heaviest merger so far",
-        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about 137 and 101 solar masses merging into one of about {gwMassRound}. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
+        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about {gwPrimaryMass} and {gwSecondaryMass} solar masses merging into one of about {gwMassRound}. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
       },
       "1": {
-        "kicker": "0.1 s",
+        "kicker": "{gwDurationS} s",
         "title": "A tenth of a second",
-        "body": "The signal lasted only about a tenth of a second, because black holes this heavy merge at low frequencies, near the bottom of LIGO’s sensitive band. Only the two LIGO detectors were observing, so the source is located only roughly, within about 1,700 square degrees of sky. Its waves travelled for roughly 2 to 6 billion years before reaching Earth."
+        "body": "The signal lasted only about a tenth of a second, because black holes this heavy merge at low frequencies, near the bottom of LIGO’s sensitive band. Only the two LIGO detectors were observing, so the source is located only roughly, within about {gwSkyDeg2} square degrees of sky. Its waves travelled for roughly {gwTravelGyr} billion years before reaching Earth."
       },
       "2": {
-        "kicker": "χ ≈ 0.84",
+        "kicker": "χ ≈ {gwSpin}",
         "title": "Spins near the limit",
-        "body": "Both black holes spun fast: about 0.9 and 0.8 of the maximum allowed by general relativity. The remnant’s spin, about 0.84, is inferred from the shape of the waves, not from light, unlike the spin estimates for Sgr A* or Cygnus X-1. Some values depend on which waveform model is used, so they carry wide uncertainties."
+        "body": "Both black holes spun fast: about {gwPrimarySpin} and {gwSecondarySpin} of the maximum allowed by general relativity. The remnant’s spin, about {gwSpin}, is inferred from the shape of the waves, not from light, unlike the spin estimates for Sgr A* or Cygnus X-1. Some values depend on which waveform model is used, so they carry wide uncertainties."
       },
       "3": {
         "kicker": "mass gap",
         "title": "Too heavy for one star",
-        "body": "Single stars are not expected to leave black holes between about 60 and 130 solar masses, because pair instability makes very massive stars shed much of their mass in pulses or blows them apart entirely. The lighter black hole here probably lies in that gap. A leading explanation is that one or both were themselves products of earlier mergers in a dense environment such as a star cluster."
+        "body": "Single stars are not expected to leave black holes between about {gwGapMsun} solar masses, because pair instability makes very massive stars shed much of their mass in pulses or blows them apart entirely. The lighter black hole here probably lies in that gap. A leading explanation is that one or both were themselves products of earlier mergers in a dense environment such as a star cluster."
       },
       "4": {
         "kicker": "pull back",
@@ -639,7 +639,7 @@
       "found": "1964  ·  X-ray source discovered",
       "source": "X-ray binary with supergiant companion HDE 226868. Model-dependent mass estimates: Miller-Jones et al. (2021) and Ramachandran et al. (2025).",
       "distance": "{cygKpc} kpc  ·  {cygLy} ly",
-      "mass": "{cygMassError} (2021); 13–18 M☉ (2025)"
+      "mass": "{cygMassError} (2021); {cygWindMass} M☉ (2025)"
     },
     "gaiabh3": {
       "name": "Gaia BH3",
@@ -652,55 +652,55 @@
       "name": "GRS 1915+105",
       "found": "1992  ·  GRANAT",
       "source": "A Galactic microquasar with apparently superluminal jet motion; the plasma itself travels below light speed. Distance and mass from Reid & Miller-Jones (2023).",
-      "distance": "9.4 kpc  ·  31,000 ly",
-      "mass": "≈11 M☉"
+      "distance": "{grsKpc} kpc  ·  {grsLy} ly",
+      "mass": "≈{grsMass} M☉"
     },
     "ss433": {
       "name": "SS 433",
       "found": "1977  ·  Stephenson & Sanduleak catalogue",
-      "source": "A microquasar in the W50 nebula. Its jets precess, changing the direction of their axis, and carry plasma at about 0.26c.",
-      "distance": "5.5 kpc  ·  18,000 ly",
+      "source": "A microquasar in the W50 nebula. Its jets precess, changing the direction of their axis, and carry plasma at about {ss433JetC}c.",
+      "distance": "{ss433Kpc} kpc  ·  {ss433Ly} ly",
       "mass": "compact object + A-type supergiant"
     },
     "orion": {
       "name": "Orion Nebula",
       "found": "M42  ·  nearby massive-star nursery",
       "source": "A nebula in the local Orion Arm, the same arm as the Sun. Its bright central region is visible to the naked eye.",
-      "distance": "0.39 kpc  ·  1,270 ly",
+      "distance": "{orionKpc} kpc  ·  {orionLy} ly",
       "mass": "Trapezium cluster"
     },
     "carina": {
       "name": "Carina Nebula",
       "found": "NGC 3372  ·  Sagittarius–Carina Arm",
       "source": "The Carina Nebula and the Eta Carinae binary lie in the Sagittarius–Carina Arm, closer to the Galactic Centre than the Sun.",
-      "distance": "2.35 kpc  ·  7,700 ly",
-      "mass": "η Carinae  ·  primary star ≳90 M☉"
+      "distance": "{carinaKpc} kpc  ·  {carinaLy} ly",
+      "mass": "η Carinae  ·  primary star ≳{etaCarinaeMass} M☉"
     },
     "cygx": {
       "name": "Cygnus X",
       "found": "A vast star-forming complex",
       "source": "A complex of gas, dust and young stars in Cygnus. It lies in roughly the same direction as Cygnus X-1 but is a different object.",
-      "distance": "1.4 kpc  ·  4,600 ly",
+      "distance": "{cygnusXKpc} kpc  ·  {cygnusXLy} ly",
       "mass": "Cygnus OB2 association"
     },
     "wd1": {
       "name": "Westerlund 1",
       "found": "1961  ·  Bengt Westerlund",
-      "source": "One of the Milky Way’s most massive young star clusters. Its massive stars can end their lives as neutron stars or black holes. Gaia-based distance estimates lie between 4.0 and 4.3 kpc.",
-      "distance": "≈4 kpc  ·  ≈13,000 ly",
-      "mass": "≈50,000–100,000 M☉  ·  cluster"
+      "source": "One of the Milky Way’s most massive young star clusters. Its massive stars can end their lives as neutron stars or black holes. Gaia-based distance estimates span {wd1Span} kpc.",
+      "distance": "≈{wd1Kpc} kpc  ·  ≈{wd1Ly} ly",
+      "mass": "≈{wd1Mass} M☉  ·  cluster"
     },
     "omegacen": {
       "name": "ω Centauri",
       "found": "The Milky Way’s most massive globular cluster",
       "source": "Likely the stripped nucleus of a dwarf galaxy. Fast central stars point to an intermediate-mass black hole (2024), but a 2025 study of star motions and pulsar timing prefers a cluster of dark remnants; it remains debated.",
       "distance": "{omegaKpc} kpc  ·  {omegaLy} ly",
-      "mass": "≈4 × 10⁶ M☉  ·  cluster"
+      "mass": "≈{omegaClusterSci}  ·  cluster"
     },
     "m87": {
       "name": "M87*",
       "found": "1918  ·  jet; 2019  ·  EHT image",
-      "source": "Supermassive black hole in the Virgo cluster galaxy Messier 87. Mass from EHT (2019); a 2025 multi-epoch analysis gives a mean ring diameter of 43.9 μas.",
+      "source": "Supermassive black hole in the Virgo cluster galaxy Messier 87. Mass from EHT (2019); a 2025 multi-epoch analysis gives a mean ring diameter of {m87Ring} μas.",
       "distance": "{m87Mpc} Mpc  ·  {m87Mly} Mly",
       "mass": "≈{m87MassSci}"
     },
@@ -709,14 +709,14 @@
       "found": "Nearest large spiral galaxy",
       "source": "A Local Group galaxy with its own supermassive black hole. Shown here as a landmark, not an explorable destination.",
       "distance": "{andromedaKpc} kpc  ·  {andromedaMly} Mly",
-      "mass": "M31*  ·  ≈1.4 × 10⁸ M☉"
+      "mass": "M31*  ·  ≈{m31HoleSci}"
     },
     "lmc": {
       "name": "Large Magellanic Cloud",
       "found": "The Milky Way’s largest satellite galaxy",
       "source": "Home to LMC X-1 and LMC X-3, X-ray binaries containing stellar-mass black holes.",
       "distance": "{lmcKpc} kpc  ·  {lmcLy} ly",
-      "mass": "LMC X-1  ·  ≈11 M☉"
+      "mass": "LMC X-1  ·  ≈{lmcX1Mass} M☉"
     },
     "lensed": {
       "name": "Lensed disk",
@@ -743,14 +743,14 @@
       "name": "TON 618",
       "found": "1957  ·  catalogued; 1976  ·  quasar redshift",
       "source": "Hyperluminous radio-loud quasar. Single-epoch Hβ mass estimates: Shemmer et al. (2004) and Ge et al. (2019).",
-      "distance": "z = 2.219  ·  light travel ≈ 10.8 Gyr",
+      "distance": "z = {tonRedshift}  ·  light travel ≈ {tonLightGyr} Gyr",
       "mass": "≈{tonMassSci} (estimate)"
     },
     "gw231123": {
       "name": "GW231123",
       "found": "2023  ·  gravitational waves (LIGO)",
-      "source": "Merger of black holes of about 137 and 101 M☉ (LIGO–Virgo–KAGRA, 2025). Two-detector event, so the sky position spans about 1,700 square degrees.",
-      "distance": "z ≈ 0.40  ·  D_L ≈ {gwGpc} Gpc",
+      "source": "Merger of black holes of about {gwPrimaryMass} and {gwSecondaryMass} M☉ (LIGO–Virgo–KAGRA, 2025). Two-detector event, so the sky position spans about {gwSkyDeg2} square degrees.",
+      "distance": "z ≈ {gwRedshift}  ·  D_L ≈ {gwGpc} Gpc",
       "mass": "≈{gwMass} M☉ remnant  ·  χ ≈ {gwSpin}"
     }
   },

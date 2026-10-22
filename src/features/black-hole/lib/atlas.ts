@@ -6,6 +6,8 @@ import { BLACK_HOLES, NAMED_STARS } from "@/space/stellar";
 import { keysOf } from "@horizon/toolkit/records";
 import { RAD_PER_DEG as DEG, convertFigure } from "@horizon/toolkit/science";
 
+import { OBSERVATORY } from "./catalogue";
+import { WD1_KPC, figureArgs } from "./figures";
 import { quote } from "./quote";
 
 export type AtlasKind = "hole" | "body" | "extragalactic" | "lab";
@@ -129,7 +131,7 @@ export const ATLAS: AtlasSite[] = [
     label: "always",
     lonDeg: 45.37,
     latDeg: -0.22,
-    dKpc: 9.4,
+    dKpc: kpcOf(OBSERVATORY.grs1915.distance),
   }),
   // Blundell & Bowler, ApJ 616, L159 (2004)
   site({
@@ -142,7 +144,7 @@ export const ATLAS: AtlasSite[] = [
     label: "hover",
     lonDeg: 39.69,
     latDeg: -2.24,
-    dKpc: 5.5,
+    dKpc: kpcOf(OBSERVATORY.ss433.distance),
   }),
   // Kounkel et al., ApJ 834, 142 (2017); Maíz Apellániz et al., A&A 657, A131 (2022)
   site({
@@ -155,7 +157,7 @@ export const ATLAS: AtlasSite[] = [
     label: "hover",
     lonDeg: 209.01,
     latDeg: -19.38,
-    dKpc: 0.39,
+    dKpc: kpcOf(OBSERVATORY.orion.distance),
   }),
   // η Carinae; Göppl & Preibisch, A&A 660, A11 (2022)
   site({
@@ -168,7 +170,7 @@ export const ATLAS: AtlasSite[] = [
     label: "always",
     lonDeg: 287.6,
     latDeg: -0.63,
-    dKpc: 2.35,
+    dKpc: kpcOf(OBSERVATORY.carina.distance),
   }),
   // Centre of Cygnus OB2; Rygl et al., A&A 539, A79 (2012)
   site({
@@ -181,7 +183,7 @@ export const ATLAS: AtlasSite[] = [
     label: "hover",
     lonDeg: 80.22,
     latDeg: 0.8,
-    dKpc: 1.4,
+    dKpc: kpcOf(OBSERVATORY.cygnusX.distance),
   }),
   // Negueruela et al., A&A 664, A146 (2022); Navarete et al., MNRAS 516, 1289 (2022)
   site({
@@ -194,7 +196,7 @@ export const ATLAS: AtlasSite[] = [
     label: "hover",
     lonDeg: 339.55,
     latDeg: -0.4,
-    dKpc: 4.1,
+    dKpc: WD1_KPC,
   }),
   // Baumgardt & Vasiliev, MNRAS 505, 5957 (2021)
   site({
@@ -302,18 +304,10 @@ export const ATLAS: AtlasSite[] = [
 export const DISTANCE_ROWS: readonly { id: string; k: string }[] = [
   { id: "sgr-a", k: quote({ ...BLACK_HOLES["sgr-a"].distance, digits: 2 }) },
   { id: "lmc", k: quote(NAMED_STARS.r136a1.distance) },
-  {
-    id: "m31",
-    k: quote({
-      ...ANDROMEDA,
-      value: convertFigure(ANDROMEDA.value, ANDROMEDA.unit, "kpc"),
-      unit: "kpc",
-      digits: 3,
-    }),
-  },
+  { id: "m31", k: quote({ ...ANDROMEDA, show: "kpc", digits: 3 }) },
   { id: "m87", k: quote(BLACK_HOLES.m87.distance) },
   { id: "gw231123", k: "z ≈ 0.4" },
-  { id: "ton618", k: "z = 2.22" },
+  { id: "ton618", k: `z = ${figureArgs("en").tonRedshiftShort}` },
 ];
 
 export function atlasFor(id: string): AtlasSite | undefined {

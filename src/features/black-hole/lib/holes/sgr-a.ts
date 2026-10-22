@@ -23,10 +23,13 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
+import { figureArgs } from "../figures";
 import { quote } from "../quote";
 import type { HoleSpec } from "./types";
 
 const SGR_A = BLACK_HOLES["sgr-a"];
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 
 export const sgrA: HoleSpec = {
   id: "sgr-a",
@@ -69,7 +72,7 @@ export const sgrA: HoleSpec = {
       lead: 0.6,
       roll: 0.04,
       sketch: [{ kind: "orbit", eccentricity: 0.88, periapsis: 7, tilt: 0.95, name: "S2" }],
-      eq: "P² = 4π² a_S2³ / GM    ·    P = 16.05 yr",
+      eq: `P² = 4π² a_S2³ / GM    ·    P = ${quote(SGR_A.companionPeriod)}`,
     },
     {
       phase: "detail",
@@ -80,7 +83,7 @@ export const sgrA: HoleSpec = {
       lift: 0.15,
       roll: -0.03,
       sketch: [{ kind: "shadow", assumed: true }],
-      eq: "θ_crit = 6√3 GM / (c² D) ≈ 53 μas (a = 0)    ·    ring 51.8 μas",
+      eq: `θ_crit = 6√3 GM / (c² D) ≈ ${EN.sgrShadowUas} μas (a = 0)    ·    ring ${EN.sgrRingPrecise} μas`,
     },
     {
       phase: "hold",

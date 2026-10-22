@@ -5,10 +5,11 @@
  * the catalogue and the physics; hazes, pulsations, weather and display spins are labelled
  * teaching choices.
  */
+import { CONVECTIVE_BELOW_K } from "@/space/hr-diagram";
+
 import {
   BEAM_REACH,
   BROWN_DWARF_DISPLAY_K,
-  CONVECTIVE_BELOW_K,
   CORONA_REACH,
   EJECTION_REACH,
   ENVELOPE_REACH,

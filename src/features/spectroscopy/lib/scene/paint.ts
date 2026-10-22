@@ -1,3 +1,4 @@
+import { CONVECTIVE_BELOW_K } from "@/space/hr-diagram";
 import { minstd } from "@horizon/toolkit/math";
 import {
   cieObserver,
@@ -95,7 +96,8 @@ function granulation() {
  * Linear limb darkening, I(μ) / I(1) = 1 − u (1 − μ): about 0.6 for the Sun in visible light,
  * less in hotter stars, whose light comes from a shallower temperature gradient.
  */
-const limbCoefficient = (teff: number) => (teff < 7000 ? 0.6 : teff < 12_000 ? 0.5 : 0.35);
+const limbCoefficient = (teff: number) =>
+  teff < CONVECTIVE_BELOW_K ? 0.6 : teff < 12_000 ? 0.5 : 0.35;
 
 /** The star's disc: limb-darkened in its own colour, granulated if it is cool enough to convect. */
 function drawStar(
@@ -124,8 +126,8 @@ function drawStar(
   ctx.beginPath();
   ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
   ctx.fill();
-  /* Convection reaches the surface only in stars cooler than about 7,000 K. */
-  const tile = teff < 7000 ? granulation() : null;
+  /* Convection reaches the surface only in stars cooler than about `CONVECTIVE_BELOW_K`. */
+  const tile = teff < CONVECTIVE_BELOW_K ? granulation() : null;
   const pattern = tile ? ctx.createPattern(tile, "repeat") : null;
   if (pattern) {
     ctx.save();

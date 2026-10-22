@@ -35,6 +35,12 @@ export const SPECTRAL_CLASSES = [
   ["M", 0],
 ] as const;
 
+/**
+ * Stars cooler than this carry their heat to the surface by convection, so their faces boil
+ * with granules; hotter ones are radiative and smooth (about the F-type stars' boundary), K.
+ */
+export const CONVECTIVE_BELOW_K = 7_000;
+
 /** A main-sequence star's spectral class. */
 export const spectralClass = (teff: number) =>
   SPECTRAL_CLASSES.find(([, from]) => teff >= from)?.[0] ?? "M";

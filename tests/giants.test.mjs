@@ -538,3 +538,56 @@ test("the orbits ripple in round the body landed on, and leave before the next b
   const handed = step(leaving, 18, ORBIT_FADE_OUT_S);
   assert.equal(handed.owner, 18);
 });
+
+test("cautions and technical notes quote the shared catalogue's figures in both languages", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { featureMessages, leaves } = await import("./messages-helper.mjs");
+  const { proseArgs } = await import("../src/lib/facts.ts");
+  const { PROSE_FIGURES } = await import("../src/features/giants/lib/model/catalogue.ts");
+  for (const locale of ["en", "cs"]) {
+    const messages = featureMessages("giants", locale);
+    const t = createTranslator({
+      locale,
+      messages,
+      onError(error) {
+        throw error;
+      },
+    });
+    /* The notes' own model numbers, as the technical details pass them. */
+    const values = { shadowPerRs: "2.6", teaspoonMl: 5, lensDistance: 1 };
+    const args = { ...proseArgs(PROSE_FIGURES, locale), ...values };
+    for (const [key] of leaves(messages))
+      if (
+        /^rungs\..*\.caution$|^technicalDetails\.sections\.(limits|horizons|matter)\.body$/.test(
+          key,
+        )
+      )
+        assert.doesNotMatch(t(key, args), /[{}]|NaN|undefined/, `${locale}:${key}`);
+  }
+});
+
+test("every rung and every Stellar Spectra star is named by the shared copy, in both languages", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { featureMessages } = await import("./messages-helper.mjs");
+  const { rungNameKey } = await import("../src/features/giants/lib/model/names.ts");
+  const { STAR_IDS } = await import("../src/features/spectroscopy/lib/model/stars.ts");
+  for (const locale of ["en", "cs"]) {
+    const strict = (feature) =>
+      createTranslator({
+        locale,
+        messages: featureMessages(feature, locale),
+        onError(error) {
+          throw error;
+        },
+      });
+    const giants = strict("giants");
+    for (const id of RUNG_IDS) assert.ok(giants(rungNameKey(id)).length > 0, `${locale}:${id}`);
+    /* A star both labs show reads the same in each. */
+    const spectra = strict("spectroscopy");
+    for (const id of STAR_IDS) {
+      const name = spectra(`names.${id}`);
+      assert.ok(name.length > 0, `${locale}:${id}`);
+      if (RUNG_IDS.includes(id)) assert.equal(giants(rungNameKey(id)), name, `${locale}:${id}`);
+    }
+  }
+});

@@ -16,10 +16,13 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
-import { quoteError } from "../quote";
+import { figureArgs } from "../figures";
+import { quote, quoteError } from "../quote";
 import type { HoleSpec } from "./types";
 
 const GAIA_BH3 = BLACK_HOLES["gaia-bh3"];
+/** The catalogue figures the equation lines quote, in their English. */
+const EN = figureArgs("en");
 
 export const gaiaBh3: HoleSpec = {
   id: "gaia-bh3",
@@ -58,7 +61,7 @@ export const gaiaBh3: HoleSpec = {
       lead: 0.5,
       roll: 0.03,
       sketch: [{ kind: "orbit", eccentricity: 0.73, periapsis: 9, tilt: 0.85, name: "★" }],
-      eq: "P = 11.6 yr    ·    e = 0.73",
+      eq: `P = ${quote(GAIA_BH3.companionPeriod)}    ·    e = ${EN.gaiaEccentricity}`,
     },
     {
       phase: "detail",
