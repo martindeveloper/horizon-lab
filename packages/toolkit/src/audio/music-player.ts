@@ -175,20 +175,10 @@ export class MusicPlayer {
    * `skipFade` seconds; paused, the next play starts there. A skip while the
    * incoming track is still starting is ignored.
    */
-  next = () => {
-    if (this.tracks.length < 2) return;
-    if (this.state === "playing" && this.ctx) {
-      if (this.blending && this.settleTimer === undefined) return;
-      this.settle();
-      this.blend(this.skipFade);
-      return;
-    }
-    this.index = this.upcoming;
-    const deck = this.decks[this.current] ?? this.primed;
-    if (deck) this.load(deck, this.index);
-    this.updateMetadata();
-    this.notify();
-  };
+  next = () => this.skip(1);
+
+  /** Move to the previous track, wrapping at the start; otherwise as `next`. */
+  previous = () => this.skip(-1);
 
   /**
    * Fade to a level 0..1 over `seconds`: a quieter bed under speech, a lift for a
@@ -262,7 +252,7 @@ export class MusicPlayer {
       clearTimeout(timer);
     document.removeEventListener("visibilitychange", this.onVisibility);
     if ("mediaSession" in navigator) {
-      for (const action of ["play", "pause", "nexttrack"] as const)
+      for (const action of ["play", "pause", "previoustrack", "nexttrack"] as const)
         navigator.mediaSession.setActionHandler(action, null);
     }
     for (const deck of this.primed ? [...this.decks, this.primed] : this.decks) {
@@ -280,15 +270,34 @@ export class MusicPlayer {
     this.emit("paused");
   }
 
-  /** The next blend starts the current track again (`restart`). */
-  private restarting = false;
+  /** The track the next blend starts, set by `restart` and `previous`; null runs the playlist on. */
+  private target: number | null = null;
 
   private get upcoming() {
-    if (this.restarting) {
-      this.restarting = false;
-      return this.index;
+    const target = this.target;
+    if (target !== null) {
+      this.target = null;
+      return target;
     }
     return this.held ?? (this.index + 1) % this.tracks.length;
+  }
+
+  private skip(step: 1 | -1) {
+    const count = this.tracks.length;
+    if (count < 2) return;
+    const back = (this.index - 1 + count) % count;
+    if (this.state === "playing" && this.ctx) {
+      if (this.blending && this.settleTimer === undefined) return;
+      if (step < 0) this.target = back;
+      this.settle();
+      this.blend(this.skipFade);
+      return;
+    }
+    this.index = step < 0 ? back : this.upcoming;
+    const deck = this.decks[this.current] ?? this.primed;
+    if (deck) this.load(deck, this.index);
+    this.updateMetadata();
+    this.notify();
   }
 
   /**
@@ -299,7 +308,7 @@ export class MusicPlayer {
   restart = () => {
     if (this.state !== "playing" || !this.ctx) return false;
     if (this.blending && this.settleTimer === undefined) return false;
-    this.restarting = true;
+    this.target = this.index;
     this.settle();
     this.blend(this.skipFade);
     return true;
@@ -387,10 +396,9 @@ export class MusicPlayer {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", () => void this.play());
       navigator.mediaSession.setActionHandler("pause", () => this.pause());
-      navigator.mediaSession.setActionHandler(
-        "nexttrack",
-        this.tracks.length > 1 ? () => this.next() : null,
-      );
+      const many = this.tracks.length > 1;
+      navigator.mediaSession.setActionHandler("previoustrack", many ? this.previous : null);
+      navigator.mediaSession.setActionHandler("nexttrack", many ? this.next : null);
     }
     this.updateMetadata();
     return ctx;

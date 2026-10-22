@@ -712,10 +712,9 @@ preconnects to the CDN; the first track buffers when the toggle is hovered or
 focused, or at once when the session had music on. Otherwise nothing loads before
 the first play; the next track buffers 30 s before its crossfade, or on
 a skip, which blends over 2.5 s. Hidden tabs fade out and resume on return. The
-waveform plays and pauses; while music plays, a golden record opens beside it:
-each track is a groove, the first outermost, the disc turns, and a click lights
-the next groove. Until sound arrives (the first play, a skip, a stall), the lens
-stays half lit, light runs across the waveform and the current groove pulses. The choice lasts for the browser session;
+toggle is previous, play or pause, and next; the waveform breathes behind the
+play glyph, and both skips wrap. Until sound arrives (the first play, a skip, a
+stall), the lens stays half lit and light runs across the waveform. The choice lasts for the browser session;
 after a reload the music resumes on the first interaction.
 
 To add a track, cut its intro and outro fades so it blends at full level, strip

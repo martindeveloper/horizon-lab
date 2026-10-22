@@ -50,7 +50,7 @@ test("players construct without browser globals and remember only when asked", (
   );
 });
 
-test("a playlist skips while paused and wraps; a single track has nowhere to go", () => {
+test("a playlist skips both ways while paused and wraps; a single track has nowhere to go", () => {
   const tracks = ["A", "B", "C"].map((title) => ({
     title,
     sources: [{ src: `/${title}.webm`, type: "audio/webm" }],
@@ -67,6 +67,10 @@ test("a playlist skips while paused and wraps; a single track has nowhere to go"
   assert.equal(playlist.getTrack(), 0, "Past the last track it wraps");
   assert.equal(heard, 3);
   assert.equal(playlist.getBuffering(), false, "A paused skip loads nothing");
+  playlist.previous();
+  assert.equal(playlist.getTrack(), 2, "Back past the first track it wraps");
+  playlist.previous();
+  assert.equal(playlist.track.title, "B");
   stop();
   const single = new MusicPlayer(tracks[0]);
   single.next();
