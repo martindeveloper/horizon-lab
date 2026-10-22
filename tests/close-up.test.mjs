@@ -131,6 +131,31 @@ test("a slow dive and pull back keep the body in frame and leave and land at res
   const landed = sampleCloseUp(1, wide, close, true, 1, spin).pose;
   near(landed.azimuth, close.azimuth, 1e-12, "lands on its azimuth");
   near(landed.inclination, close.inclination, 1e-12, "and its tilt");
+  /* A flight interrupted mid-way hands its zoom and its pan on: the next leaves at that
+     pace, eases it out, and still lands where it was going. */
+  const motion = { distance: -0.8, look: [0.3, 0, -0.1] };
+  const zoomed = sampleCloseUp(h, close, wide, false, 1, motion);
+  const stillOut = sampleCloseUp(h, close, wide, false, 1);
+  near(
+    Math.log(zoomed.pose.distance / stillOut.pose.distance) / h,
+    motion.distance,
+    1e-3,
+    "leaves zooming",
+  );
+  const looksOut = [
+    { look: [0, 0, 0], distance: close.distance },
+    { look: sun.map((v, k) => v - mars[k]), distance: wide.distance },
+  ];
+  const panned = aimAt(mars, ...looksOut, close.distance, zoomed.aim, motion.look, zoomed.carry);
+  const stillAim = aimAt(mars, ...looksOut, close.distance, stillOut.aim);
+  panned.forEach((v, k) =>
+    near((v - stillAim[k]) / (close.distance * h), motion.look[k], 1e-3, "leaves panning"),
+  );
+  const arrived = sampleCloseUp(1, close, wide, false, 1, motion);
+  near(arrived.pose.distance, wide.distance, 1e-9, "lands on its distance");
+  aimAt(mars, ...looksOut, wide.distance, arrived.aim, motion.look, arrived.carry).forEach((v, k) =>
+    near(v, sun[k], 1e-9, "and on its aim"),
+  );
 });
 
 test("the drift's swing frames the body with its moon, side-on, and comes back", () => {

@@ -42,7 +42,16 @@ export function closeUpLimits(radius: number, frameRadius: number) {
   return { min: radius * CLOSE_UP_NEAREST, max: frameRadius * CLOSE_UP_FARTHEST };
 }
 
-type Vec = readonly [number, number, number];
+export type Vec = readonly [number, number, number];
+
+/**
+ * The camera's motion as a flight sets off, per whole flight: how the angles turn, the
+ * distance zooms (in e-folds) and the aim's look off the body (per distance, `aimAt`) moves.
+ * A flight carries it on and eases it out (`carried`), so a flight that interrupts another,
+ * or a visit that begins mid-orbit, never halts the camera dead. Parts not given are still.
+ */
+export type FlightMotion = { azimuth: number; inclination: number; distance: number; look: Vec };
+export const STILL: FlightMotion = { azimuth: 0, inclination: 0, distance: 0, look: [0, 0, 0] };
 
 const shortest = (from: number, to: number) => wrapSigned(to - from, TAU);
 
@@ -68,8 +77,9 @@ const carried = (t: number) => t * (1 - t * t * (6 - t * (8 - 3 * t)));
  * covers its far reaches early and settles slowly onto the body, and the pull
  * back leaves the body slowly before it falls away; 0 paces the zoom evenly.
  * Either way the zoom leaves and lands at rest, never braking hard. `motion` is how the
- * camera was already turning as the flight set off (radians per whole flight): it carries on
- * and eases out, so a camera that was orbiting never halts as the flight takes it.
+ * camera was already moving as the flight set off (`FlightMotion`): it carries on and eases
+ * out, so a camera that was orbiting, or mid-flight, never halts as the flight takes it;
+ * `carry` is how much of it is left, for the aim's look (`aimAt`).
  */
 export function sampleCloseUp(
   t: number,
@@ -77,7 +87,7 @@ export function sampleCloseUp(
   to: OrbitPose,
   entering: boolean,
   lead = 0,
-  motion: Omit<OrbitPose, "distance"> = { azimuth: 0, inclination: 0 },
+  motion: Partial<FlightMotion> = STILL,
 ) {
   const aim = entering
     ? smootherstep(clamp(t / 0.55, 0, 1))
@@ -87,12 +97,16 @@ export function sampleCloseUp(
     : late(clamp(t / 0.85, 0, 1), clamp(lead, 0, 1));
   const turn = smootherstep(t);
   const carry = carried(t);
+  const { azimuth: turning = 0, inclination: tilting = 0, distance: zooming = 0 } = motion;
   return {
     aim,
+    carry,
     pose: {
-      azimuth: from.azimuth + shortest(from.azimuth, to.azimuth) * turn + motion.azimuth * carry,
-      inclination: lerp(from.inclination, to.inclination, turn) + motion.inclination * carry,
-      distance: Math.exp(lerp(Math.log(from.distance), Math.log(to.distance), zoom)),
+      azimuth: from.azimuth + shortest(from.azimuth, to.azimuth) * turn + turning * carry,
+      inclination: lerp(from.inclination, to.inclination, turn) + tilting * carry,
+      distance: Math.exp(
+        lerp(Math.log(from.distance), Math.log(to.distance), zoom) + zooming * carry,
+      ),
     } satisfies OrbitPose,
   };
 }
@@ -102,7 +116,9 @@ export function sampleCloseUp(
  * (as seen from `from.distance`) to `to.look` (as seen from `to.distance`), both offsets from
  * the body, with the camera `distance` from the aim. The body moves across the view by that
  * blend however far the zoom has gone, so a dive or a pull back that outruns the pan never
- * loses it from the frame, and the aim moves on with the body as it travels.
+ * loses it from the frame, and the aim moves on with the body as it travels. `motion` is how
+ * the look was moving as the flight set off (per distance, per whole flight) and `carry` how
+ * much of it the flight still carries (`sampleCloseUp`).
  */
 export function aimAt(
   body: Vec,
@@ -110,9 +126,13 @@ export function aimAt(
   to: { look: Vec; distance: number },
   distance: number,
   blend: number,
+  motion: Vec = STILL.look,
+  carry = 0,
 ): [number, number, number] {
   const at = (k: 0 | 1 | 2) =>
-    body[k] + distance * lerp(from.look[k] / from.distance, to.look[k] / to.distance, blend);
+    body[k] +
+    distance *
+      (lerp(from.look[k] / from.distance, to.look[k] / to.distance, blend) + motion[k] * carry);
   return [at(0), at(1), at(2)];
 }
 

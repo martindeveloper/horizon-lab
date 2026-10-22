@@ -29,7 +29,7 @@ import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horiz
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
-import { logFraction } from "@horizon/toolkit/math";
+import { lerp, logFraction } from "@horizon/toolkit/math";
 import { decodeMap, fetchMap, rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
@@ -38,11 +38,14 @@ import type { CameraRig } from "./camera-rig";
 import {
   CLOSE_UP_IN_S,
   CLOSE_UP_OUT_S,
+  STILL,
   aimAt,
   closeUpMapWidth,
   closeUpPose,
   moonFraming,
   sampleCloseUp,
+  type FlightMotion,
+  type Vec,
 } from "./close-up-flight";
 
 /** The layer of a moon's planet in a moon's close-up: its own depth pass, behind the moon's. */
@@ -113,8 +116,26 @@ type CloseUp = {
    * the card and, on a scripted visit, holds the clock.
    */
   blend: number;
+  /**
+   * The blend as the current flight set off: a flight eases it from there to where it lands,
+   * so a close-up that follows another (a planet's to its moon's, and back) keeps the view
+   * the body's, the globe aside for the card, rather than starting over from the map's.
+   */
+  fromBlend: number;
   /** How the current flight goes. */
   style: CloseUpStyle;
+  /** The camera's motion as the current flight set off, per whole flight: carried on, eased out. */
+  motion: FlightMotion;
+  /**
+   * How the current flight moves the camera now, per second: what a flight that interrupts
+   * it sets off with. Still once landed; a visitor's drags are their own, not carried.
+   */
+  velocity: FlightMotion;
+  /**
+   * Where the view looked off the body as of the last step, per distance from it (`aimAt`):
+   * the look's motion is measured against it, since the rig re-homes its aim before each step.
+   */
+  look: Vec;
   /**
    * The flight out is another camera's (a drift's next flight, landing on this pose): it moves
    * the pose, the close-up keeps the body in view until it hands the aim home. Null otherwise.
@@ -135,6 +156,27 @@ type Shell = {
 };
 
 const bodyKey = (sel: BodySelection): BodyId => (sel.kind === "sun" ? "sun" : sel.id);
+
+/** Seconds a flight takes, in or out, at its style's pace. */
+const flightSeconds = (entering: boolean, { pace }: CloseUpStyle) =>
+  (entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * pace;
+
+/**
+ * The motion a flight sets off with, per whole flight of `seconds`: a scripted visit's flight
+ * in turns as its drift was turning; any other flight carries on what the flight it interrupts
+ * was doing (`velocity`, per second).
+ */
+function settingOff(velocity: FlightMotion, entering: boolean, style: CloseUpStyle): FlightMotion {
+  const seconds = flightSeconds(entering, style);
+  const { azimuth, inclination, distance, look } =
+    entering && style.scripted ? { ...STILL, ...style.scripted.motion } : velocity;
+  return {
+    azimuth: azimuth * seconds,
+    inclination: inclination * seconds,
+    distance: distance * seconds,
+    look: [look[0] * seconds, look[1] * seconds, look[2] * seconds],
+  };
+}
 
 const setLayer = (objects: Object3D[], layer: number) => {
   for (const object of objects) object.traverse((child) => child.layers.set(layer));
@@ -198,6 +240,12 @@ export function createCloseUpController(
   const moonAt = new Vector3();
   const homeOff = new Vector3();
   const hostAt = new Vector3();
+  /** Where the view looks off the body at `target`, per `distance` from it (`aimAt`). */
+  const lookOf = (distance: number): Vec => [
+    (aim.x - target.x) / distance,
+    (aim.y - target.y) / distance,
+    (aim.z - target.z) / distance,
+  ];
   /** The shells' sphere; each shell is scaled to its body's air. */
   const shellGeometry = scope.own(new SphereGeometry(1, 96, 64));
   const shellInverse = new Matrix4();
@@ -303,6 +351,10 @@ export function createCloseUpController(
     const home = close
       ? { pose: close.home, aim: close.homeAim }
       : { pose: { ...pose }, aim: aim.clone() };
+    const fromBlend = close?.blend ?? 0;
+    /* A flight interrupted mid-way hands its motion on; a landed close-up stands still. */
+    const velocity = close && close.phase !== "on" ? close.velocity : STILL;
+    const flightStyle = style();
     end(false);
     room = carded() ? 1 : 0;
     const id = bodyKey(sel);
@@ -336,8 +388,12 @@ export function createCloseUpController(
       job: MAPS[id] ? null : detailJob(id),
       loading: null,
       detail: null,
-      blend: 0,
-      style: style(),
+      blend: fromBlend,
+      fromBlend,
+      style: flightStyle,
+      motion: settingOff(velocity, true, flightStyle),
+      velocity: STILL,
+      look: lookOf(pose.distance),
       released: null,
       shells: [],
     };
@@ -394,9 +450,11 @@ export function createCloseUpController(
     close.phase = "out";
     close.t = 0;
     close.style = style();
+    close.motion = settingOff(close.velocity, false, close.style);
     close.released = null;
     close.from = { ...pose };
     close.fromLook = aim.clone().sub(target);
+    close.fromBlend = close.blend;
     deps.onRelease();
     invalidate();
   };
@@ -454,8 +512,10 @@ export function createCloseUpController(
       if (!close || close.phase === "out") return;
       close.phase = "out";
       close.released = { ...landing };
+      close.motion = STILL;
       close.from = { ...pose };
       close.fromLook = aim.clone().sub(target);
+      close.fromBlend = close.blend;
       deps.onRelease();
       invalidate();
     },
@@ -515,12 +575,14 @@ export function createCloseUpController(
             : logFraction(pose.distance, close.from.distance, lands);
         const home = { look: homeLook, distance: close.released.distance };
         aim.fromArray(aimAt(body, from, home, pose.distance, blend));
-        close.blend = 1 - blend;
+        close.blend = lerp(close.fromBlend, 0, blend);
       } else {
         const entering = close.phase === "in";
-        const { pace, lead, scripted } = close.style;
-        const seconds = (entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * pace;
-        close.t = Math.min(1, close.t + (held(close) ? 0 : dt) / seconds);
+        const { lead, scripted } = close.style;
+        close.t = Math.min(
+          1,
+          close.t + (held(close) ? 0 : dt) / flightSeconds(entering, close.style),
+        );
         /* While the clock still runs on the way in, the arrival keeps its light three-quarters. */
         if (entering && scripted)
           close.to.azimuth = closeUpPose(
@@ -530,25 +592,40 @@ export function createCloseUpController(
             close.to.azimuth,
           ).azimuth;
         const to = entering ? close.to : close.home;
-        /* The camera's own turn as the flight took it, carried on and eased out. */
-        const motion =
-          entering && scripted
-            ? {
-                azimuth: scripted.motion.azimuth * seconds,
-                inclination: scripted.motion.inclination * seconds,
-              }
-            : undefined;
-        const step = sampleCloseUp(close.t, close.from, to, entering, lead, motion);
+        const was = {
+          azimuth: pose.azimuth,
+          inclination: pose.inclination,
+          distance: Math.log(pose.distance),
+          look: close.look,
+        };
+        const step = sampleCloseUp(close.t, close.from, to, entering, lead, close.motion);
         Object.assign(pose, step.pose);
         const toward = { look: entering ? AT_BODY : homeLook, distance: to.distance };
-        aim.fromArray(aimAt(body, from, toward, pose.distance, step.aim));
-        close.blend = entering ? step.aim : 1 - step.aim;
+        aim.fromArray(
+          aimAt(body, from, toward, pose.distance, step.aim, close.motion.look, step.carry),
+        );
+        close.blend = lerp(close.fromBlend, entering ? 1 : 0, step.aim);
+        if (dt > 0) {
+          const look = lookOf(pose.distance);
+          close.velocity = {
+            azimuth: (pose.azimuth - was.azimuth) / dt,
+            inclination: (pose.inclination - was.inclination) / dt,
+            distance: (Math.log(pose.distance) - was.distance) / dt,
+            look: [
+              (look[0] - was.look[0]) / dt,
+              (look[1] - was.look[1]) / dt,
+              (look[2] - was.look[2]) / dt,
+            ],
+          };
+        }
         if (close.t >= 1) {
+          close.velocity = STILL;
           if (entering) close.phase = "on";
           else end(true);
         }
       }
       if (!close) return;
+      close.look = lookOf(pose.distance);
       /* The globe eases aside as the card shows, back to the middle as it hides. */
       room += ((carded() ? 1 : 0) - room) * (1 - Math.exp(-dt / ROOM_EASE));
       const aside = card();
