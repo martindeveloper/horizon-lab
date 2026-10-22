@@ -712,8 +712,9 @@ preconnects to the CDN; the first track buffers when the toggle is hovered or
 focused, or at once when the session had music on. Otherwise nothing loads before
 the first play; the next track buffers 30 s before its crossfade, or on
 a skip, which blends over 2.5 s. Hidden tabs fade out and resume on return. The
-toggle is previous, play or pause, and next; the waveform breathes behind the
-play glyph, and both skips wrap. Until sound arrives (the first play, a skip, a
+toggle is previous, play or pause, and next; both skips wrap. Playing, the
+controls rest and a waveform fills the pill; hover or focus brings them back,
+and on a touch screen the first tap wakes them for a few idle seconds. Until sound arrives (the first play, a skip, a
 stall), the lens stays half lit and light runs across the waveform. The choice lasts for the browser session;
 after a reload the music resumes on the first interaction.
 

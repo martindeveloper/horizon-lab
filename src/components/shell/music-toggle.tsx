@@ -55,7 +55,7 @@ export function MusicToggle({ className }: { className?: string }) {
   );
   useEffect(() => ambientMusic.resumeOnInteraction(() => ref.current), []);
 
-  // Each touch while awake restarts the idle wait; zero is asleep.
+  // Each touch on the pill restarts the idle wait; zero is asleep.
   const [awake, setAwake] = useState(0);
   const wake = () => setAwake((n) => n + 1);
   useEffect(() => {
@@ -81,7 +81,7 @@ export function MusicToggle({ className }: { className?: string }) {
         data-playing={playing}
         data-awake={awake > 0}
         onPointerDown={(event) => {
-          if (awake && event.pointerType !== "mouse") wake();
+          if (event.pointerType !== "mouse") wake();
         }}
       >
         <div className="music-controls flex items-center">
@@ -137,26 +137,22 @@ export function MusicToggle({ className }: { className?: string }) {
             </Tooltip>
           ) : null}
         </div>
-        {/* Over the controls while they rest; a tap on a touch screen lands here and wakes them. */}
-        <span
-          className="music-wave music-wave-fill"
-          data-playing={playing}
-          data-loading={loading}
-          onClick={wake}
-          aria-hidden
-        >
-          {BARS.map(([rest, peak, period], i) => (
-            <span
-              key={i}
-              style={{
-                "--rest": rest,
-                "--peak": peak,
-                "--dur": `${period}s`,
-                "--delay": `${-period * ((i * 0.37) % 1)}s`,
-                "--i": i,
-              }}
-            />
-          ))}
+        {/* Over the controls while they rest, so the tap that wakes them presses nothing. */}
+        <span className="music-wave-fill" aria-hidden>
+          <span className="music-wave" data-playing={playing} data-loading={loading}>
+            {BARS.map(([rest, peak, period], i) => (
+              <span
+                key={i}
+                style={{
+                  "--rest": rest,
+                  "--peak": peak,
+                  "--dur": `${period}s`,
+                  "--delay": `${-period * ((i * 0.37) % 1)}s`,
+                  "--i": i,
+                }}
+              />
+            ))}
+          </span>
         </span>
       </div>
     </div>

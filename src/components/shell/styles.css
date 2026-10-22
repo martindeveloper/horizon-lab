@@ -423,17 +423,66 @@ html {
   opacity: 0.45;
 }
 
-/* Playing, the waveform breathes faintly behind the pause glyph; paused, it
-   is gone, leaving the play glyph alone like the rails' icons. */
-.music-wave-backdrop {
-  position: absolute;
-  height: 18px;
-  gap: 2.5px;
-  opacity: 0;
-  transition: opacity 700ms ease;
+/* Playing, the controls rest and the waveform fills the pill. Hover, keyboard
+   focus or a touch (`data-awake`) brings them back. While they rest the
+   waveform takes the pointer, so the tap that wakes them presses nothing.
+   Resting is slow: the controls drift out after a beat and the waveform rises
+   through them. Waking is prompt but soft, the waveform stepping aside. */
+.music-transport {
+  --music-ease: cubic-bezier(0.45, 0, 0.2, 1);
+  --music-rest-out: opacity 1.6s var(--music-ease) 0.5s;
+  --music-rest-in: opacity 2.4s var(--music-ease) 1.1s;
+  --music-wake-in: opacity 900ms var(--music-ease);
+  --music-wake-out: opacity 700ms var(--music-ease);
 }
-.music-wave-backdrop[data-playing="true"] {
-  opacity: 0.3;
+.music-controls {
+  transition: var(--music-wake-in);
+}
+.music-wave-fill {
+  position: absolute;
+  inset: 6px 14px;
+  display: flex;
+  color: rgb(var(--solar));
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--music-wake-out);
+}
+.music-wave-fill > .music-wave {
+  flex: 1;
+  height: 100%;
+  justify-content: space-between;
+}
+.music-transport[data-playing="true"] .music-controls {
+  opacity: 0;
+  transition: var(--music-rest-out);
+}
+.music-transport[data-playing="true"] .music-wave-fill {
+  opacity: 1;
+  transition: var(--music-rest-in);
+}
+.music-transport[data-playing="true"]:not([data-awake="true"]) .music-wave-fill {
+  pointer-events: auto;
+}
+.music-transport[data-awake="true"] .music-controls,
+.music-transport:has(:focus-visible) .music-controls {
+  opacity: 1;
+  transition: var(--music-wake-in);
+}
+.music-transport[data-awake="true"] .music-wave-fill,
+.music-transport:has(:focus-visible) .music-wave-fill {
+  opacity: 0;
+  transition: var(--music-wake-out);
+}
+@media (hover: hover) {
+  .music-transport:hover .music-controls {
+    opacity: 1;
+    transition: var(--music-wake-in);
+  }
+  .music-transport:hover .music-wave-fill {
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--music-wake-out);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
