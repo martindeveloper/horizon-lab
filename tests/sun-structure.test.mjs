@@ -11,6 +11,7 @@ import {
   MODEL_MASS_KG,
   OPACITY_WALK_M,
   STRUCTURE_RADII,
+  diffusionTime,
   gravityAt,
   hydrostaticGradient,
   layerAt,
@@ -104,8 +105,14 @@ test("the table holds a solar mass and is in hydrostatic equilibrium", () => {
   }
 });
 
-test("a photon's walk out takes a hundred thousand years or so, far below the light-time", () => {
+test("the conventional shell diffusion estimate to the convection boundary is of order 10⁵ years", () => {
   const years = photonDiffusionTime() / YEAR_S;
   assert.ok(years > 5e4 && years < 3e5, `${years} yr`);
   assert.ok(OPACITY_WALK_M > 0);
+});
+
+test("the shell estimate has the Mitalas–Sills constant-mean-free-path limit", () => {
+  // Their eq. 9 gives 3 R²/(c l). For R=10 m and l=0.01 m,
+  // the opacity-walk integral is R²/(2l) = 5000 m.
+  assert.ok(Math.abs(diffusionTime(5000) - 0.00010006922855944561) < 1e-15);
 });

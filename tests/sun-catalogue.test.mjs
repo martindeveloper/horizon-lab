@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { UNITS, convertFigure, formatFigure } from "@horizon/toolkit/science";
+import {
+  CONSTANTS,
+  ELECTRON_VOLT_J,
+  UNITS,
+  convertFigure,
+  formatFigure,
+} from "@horizon/toolkit/science";
 
 import { factSources, proseArgs, proseFacts } from "../src/lib/facts.ts";
 import { SOURCES } from "../src/lib/sources.ts";
@@ -13,7 +19,7 @@ import {
   goesClass,
   wolfNumberLaw,
 } from "../src/space/sun/equations.ts";
-import { PP_MASS_FRACTION } from "../src/space/sun/model/fusion.ts";
+import { fusionEnergy, PP_MASS_FRACTION } from "../src/space/sun/model/fusion.ts";
 import { surfaceRateDegPerDay } from "../src/space/sun/model/rotation.ts";
 
 const STATUSES = new Set(["verified", "derived", "teaching-choice", "flag"]);
@@ -108,7 +114,7 @@ test("every prose figure prints in both languages, with its plural category besi
   );
   assert.equal(
     formatFigure("en", SUN_CATALOGUE.layers.interior.photonWalk, { in: "kyr", digits: 2 }).text,
-    "120",
+    "190",
   );
 });
 
@@ -136,8 +142,16 @@ test("the equations compute with the model's own functions", () => {
   );
   assert.ok(
     SUN_EQUATIONS["reconnection-energy"].compute({ B: 0.01, V: 1e24 }) > 1e25,
-    "an X-class flare's 10²⁵ J from 10 mT over (10⁸ m)³",
+    "total uniform-field energy, not the free energy available to a flare",
   );
   assert.ok(SUN_EQUATIONS["photon-diffusion-time"].compute({ ell: 1e12 }) > 0);
   assert.equal(SUN_EQUATIONS["hydrostatic-equilibrium"].compute({ rho: 2, g: 10 }), -20);
+});
+
+// NIST neutral isotope masses imply Q = 26.73097 MeV, including annihilation and neutrinos.
+// A natural-abundance hydrogen atomic weight instead gives about 27.38 MeV.
+test("pp-chain mass defect agrees with the isotope Q value, not terrestrial atomic weights", () => {
+  const qMeV = fusionEnergy(4 * CONSTANTS.hydrogen1AtomicMass.value) / ELECTRON_VOLT_J / 1e6;
+  assert.ok(Math.abs(qMeV - 26.73097) < 0.00001, `${qMeV} MeV`);
+  assert.ok(Math.abs(PP_MASS_FRACTION - 0.007118516) < 1e-9);
 });

@@ -216,27 +216,19 @@ export const WHITE_LIGHT_NM = 550;
 
 /* ------------------------------------------------------------- the eruption */
 
-/** The Lin & Forbes model's length unit λ₀ (half the source separation at the critical point), R: an active region's half-width. */
+/** Length unit of the illustrative reconnection cross-section, R: an active region's half-width. */
 export const ERUPTION_SCALE_R = 0.05;
 /** Stage ends on the 0–1 timeline: shearing and storage, loss of equilibrium and rise, breakaway with reconnection, then post-flare loops. */
 export const ERUPTION_STAGES = { storage: 0.3, rise: 0.5, breakaway: 0.7 } as const;
-/** When the X-point forms under the rising rope, and where (as a share of the rope's height). */
+/** When flux transfer begins in the illustrative reconnection sequence. */
 export const X_POINT_S = 0.4;
-export const X_POINT_SHARE = 0.3;
 /** Source half-separation λ/λ₀ as shearing starts and at the critical point. */
 export const STORAGE_LAMBDA = [2, 1] as const;
 /** The rope's height at breakaway (λ₀) and the ejection's front at the sequence's end (R from the centre). */
 export const ROPE_HEIGHT_AT_BREAKAWAY = 3;
 export const CME_FINAL_HEIGHT_R = 5;
-/** The rope's radius (λ₀) at the critical point; it expands as the square root of its height after. */
-export const ROPE_RADIUS = 0.2;
-/** The sheet's top stays this far under the rope's edge; its bottom, the post-flare loops' top, rises to here (λ₀). */
-export const SHEET_GAP = 0.3;
-export const POST_FLARE_TOP = 1.5;
 /** The flare's light decays over this share of the timeline after each release of energy. */
 export const FLARE_LIGHT_DECAY_S01 = 0.12;
-/** Ribbons are read where the newest post-flare loop crosses this height (λ₀), the chromosphere. */
-export const RIBBON_HEIGHT = 0.1;
 /** An ejection's angular half-width, radians (CME widths ~ 60°, Yashiro et al. 2004). */
 export const CME_SPREAD_RAD = 30 * RAD_PER_DEG;
 /** Field lines one eruption frame carries, and the arcade slices they are extruded into. */
@@ -244,6 +236,25 @@ export const ERUPTION_LINES = 24;
 export const ARCADE_SLICES = 7;
 /** The arcade's length along the neutral line, in region sizes. */
 export const ARCADE_LENGTH = 2;
+/**
+ * Dimensionless recipe for a kinematic 2D reconnection model, not measured solar parameters.
+ * A = (y−1)²/2 − (y−1)³/3 − βδ² log cosh(x/δ) − ψ(s) w(x,y).
+ * The X-point is (0,1), the island centre (0,2); w vanishes at the photosphere and centre.
+ * β and ψ keep the X-point hyperbolic and its resistivity positive throughout the sequence.
+ */
+export const RECONNECTION = {
+  fieldGradient: 8,
+  sheetWidth: 0.15,
+  fluxWidth: 1.5,
+  transferredFlux: 0.3,
+  diffusionWidth: 0.12,
+  diffusionHeight: 0.25,
+  outerFlux: -0.39,
+  coreLines: 3,
+  // Monotonic schematic height mapping resolves the small lower arcade beside the CME.
+  lowCoronalLift: 2,
+  lowCoronalScale: 0.7,
+} as const;
 
 /* -------------------------------------------------------------- the corona */
 

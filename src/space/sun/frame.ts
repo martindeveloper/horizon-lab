@@ -18,35 +18,20 @@ import type {
 } from "./model/contract";
 import { cyclePhaseOf } from "./model/cycle";
 import { dice } from "./model/dice";
-import {
-  PLANE_LINE_POINTS,
-  blankEruptionState,
-  blankPlaneLine,
-  contours,
-  eruptionAt,
-  type PlaneLine,
-} from "./model/eruption";
-import {
-  bipoleAxis,
-  blankPolyline,
-  fieldLines,
-  poleOf,
-  setSources,
-  surfacePoint,
-} from "./model/field";
+import { blankEruptionState, blankPlaneLine, contours, eruptionAt } from "./model/eruption";
+import { eruptionFlow, FLOW_PARTICLES } from "./model/eruption-flow";
+import { blankEruptionLine, eruptionLines } from "./model/eruption-lines";
+import { blankPolyline, fieldLines, poleOf, setSources, surfacePoint } from "./model/field";
 import type { ObservedRegion } from "./model/observed";
 import {
-  ARCADE_LENGTH,
   ARCADE_SLICES,
   CHROMOSPHERE_THICKNESS_KM,
   EQUATORIAL_DIPOLE,
   ERUPTION_LINES,
-  ERUPTION_SCALE_R,
   MAX_FIELD_LINES,
   PARKER_PERIHELION_R,
   RADIUS_M,
   SOURCE_SURFACE_R,
-  TEMPERATURES,
 } from "./model/parameters";
 import { surfaceRate } from "./model/rotation";
 import { LAYERS } from "./model/structure";
@@ -97,68 +82,6 @@ function fieldKey(dipole: number, equatorial: number, regions: readonly Region[]
   return key;
 }
 
-const up: Vec3 = [0, 0, 0];
-const across: Vec3 = [0, 0, 0];
-const along: Vec3 = [0, 0, 0];
-
-/** A polyline with room for an extruded plane line. */
-const blankArcadeLine = (): Polyline => ({
-  points: new Float32Array(3 * PLANE_LINE_POINTS),
-  count: 0,
-  polarity: 1,
-  open: false,
-  strength: 1,
-  kelvin: TEMPERATURES.activeRegion,
-});
-
-const KELVIN_OF: Record<PlaneLine["kind"], number> = {
-  arcade: TEMPERATURES.activeRegion,
-  postflare: TEMPERATURES.flare,
-  rope: TEMPERATURES.prominence,
-  open: TEMPERATURES.activeRegion,
-};
-
-/**
- * Extrudes the eruption's plane lines into `ARCADE_SLICES` copies along the region's neutral
- * line: x runs across the bipole from the following pole to the leading one, y up from the
- * photosphere, both in λ₀. Returns the lines used.
- */
-function extrude(region: Region, plane: readonly PlaneLine[], planeCount: number, out: Polyline[]) {
-  surfacePoint(region.lat, region.lon, up);
-  bipoleAxis(region, across);
-  along[0] = up[1] * across[2] - up[2] * across[1];
-  along[1] = up[2] * across[0] - up[0] * across[2];
-  along[2] = up[0] * across[1] - up[1] * across[0];
-  let used = 0;
-  for (let k = 0; k < ARCADE_SLICES; k++) {
-    const t = (k / (ARCADE_SLICES - 1) - 0.5) * ARCADE_LENGTH * region.size;
-    for (let i = 0; i < planeCount && used < out.length; i++) {
-      const line = plane[i]!;
-      const target = out[used++]!;
-      for (let j = 0; j < line.count; j++) {
-        const x = line.points[2 * j]! * ERUPTION_SCALE_R;
-        const y = line.points[2 * j + 1]! * ERUPTION_SCALE_R;
-        let dx = up[0] + x * across[0] + t * along[0];
-        let dy = up[1] + x * across[1] + t * along[1];
-        let dz = up[2] + x * across[2] + t * along[2];
-        const n = Math.hypot(dx, dy, dz);
-        dx /= n;
-        dy /= n;
-        dz /= n;
-        target.points[3 * j] = dx * (1 + y);
-        target.points[3 * j + 1] = dy * (1 + y);
-        target.points[3 * j + 2] = dz * (1 + y);
-      }
-      target.count = line.count;
-      target.polarity = region.polarity;
-      target.open = line.kind === "open";
-      target.kelvin = KELVIN_OF[line.kind];
-      target.strength = region.strength;
-    }
-  }
-  return used;
-}
-
 export type SunModelOptions = {
   /** Regions to start the visit with, in the first slots (`OBSERVED_REGIONS`: the map's); the weather takes over as they decay. */
   observed?: readonly ObservedRegion[];
@@ -170,7 +93,7 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
   const { weather } = forecast;
   const lines = Array.from({ length: MAX_FIELD_LINES }, blankPolyline);
   const planeLines = Array.from({ length: ERUPTION_LINES }, blankPlaneLine);
-  const arcade = Array.from({ length: ERUPTION_LINES * ARCADE_SLICES }, blankArcadeLine);
+  const arcade = Array.from({ length: ERUPTION_LINES * ARCADE_SLICES }, blankEruptionLine);
   const eruptionState = blankEruptionState();
   const eruption: Eruption = {
     regionId: 0,
@@ -184,7 +107,9 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     ribbonGap: 0,
     cmeFront: 1,
     cmeSpread: 0,
+    cmePresence: 0,
     lines: [],
+    flow: new Float32Array(3 * FLOW_PARTICLES),
   };
   const frame: SunFrame = {
     time: 0,
@@ -194,11 +119,14 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     regions: weather.regions,
     prominences: weather.prominences,
     fieldLines: [],
+    fieldRevision: 0,
+    eruptionRevision: 0,
     eruption: null,
     wolfNumber: 0,
     surfaceTurn: 0,
   };
   let lastKey = "";
+  let lastEruptionKey = "";
   const equatorialLon = TAU * dice(seed, EQUATORIAL_LON_SALT);
 
   function frameAt(input: SunFrameInput): SunFrame {
@@ -220,6 +148,7 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     const key = fieldKey(frame.dipole, equatorial, weather.regions, count);
     if (key !== lastKey) {
       lastKey = key;
+      frame.fieldRevision++;
       const used = fieldLines(seed, count, lines);
       frame.fieldLines.length = used;
       for (let i = 0; i < used; i++) frame.fieldLines[i] = lines[i]!;
@@ -227,13 +156,32 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
 
     const { outbreak } = weather;
     if (outbreak.slot < 0) {
+      if (frame.eruption) frame.eruptionRevision++;
+      lastEruptionKey = "";
       frame.eruption = null;
       return frame;
     }
     const region = weather.regions[outbreak.slot]!;
     eruptionAt(outbreak.s, eruptionState);
-    const planeCount = contours(outbreak.s, ERUPTION_LINES - 3, planeLines, eruptionState.geometry);
-    const used = extrude(region, planeLines, planeCount, arcade);
+    const eruptionKey = [
+      outbreak.s,
+      region.id,
+      region.lat,
+      region.lon,
+      region.tilt,
+      region.size,
+      region.strength,
+      region.polarity,
+    ].join(":");
+    if (eruptionKey !== lastEruptionKey) {
+      lastEruptionKey = eruptionKey;
+      frame.eruptionRevision++;
+      const planeCount = contours(outbreak.s, ERUPTION_LINES, planeLines, eruptionState.geometry);
+      const used = eruptionLines(region, planeLines, planeCount, arcade);
+      eruption.lines.length = used;
+      for (let i = 0; i < used; i++) eruption.lines[i] = arcade[i]!;
+      eruptionFlow(region, eruptionState.geometry, eruption.flow);
+    }
     eruption.regionId = outbreak.regionId;
     eruption.s = eruptionState.s;
     eruption.ropeHeight = eruptionState.ropeHeight;
@@ -245,8 +193,7 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     eruption.ribbonGap = eruptionState.ribbonGap;
     eruption.cmeFront = eruptionState.cmeFront;
     eruption.cmeSpread = eruptionState.cmeSpread;
-    eruption.lines.length = used;
-    for (let i = 0; i < used; i++) eruption.lines[i] = arcade[i]!;
+    eruption.cmePresence = eruptionState.cmePresence;
     frame.eruption = eruption;
     return frame;
   }
@@ -399,7 +346,7 @@ export function placeAnchor(frame: SunFrame, place: PlaceId): Vec3 | null {
     case "ejection": {
       const { eruption } = frame;
       const region =
-        eruption && eruption.cmeFront > 1 ? regionById(frame, eruption.regionId) : null;
+        eruption && eruption.cmePresence > 0 ? regionById(frame, eruption.regionId) : null;
       return region && eruption ? at(region.lat, region.lon, eruption.cmeFront) : null;
     }
     case "wind": {

@@ -6,10 +6,13 @@
  *
  * Responses: the AIA bands answer the ions Lemen et al. 2012 (Table 1) name, at the
  * temperatures of their peak response (log T), with the second ion each band also sees; the
- * curves are the broad, asymmetric peaks of Boerner et al. 2012 (Fig. 11), drawn as two-sided
- * log-normals (σ below and above the peak, dex; FWHM ≈ 2.35 σ, 0.3–0.5 dex). White light is
- * Planck's law against the photosphere's; Hα forms in 6–10 kK gas; an eclipse's K-corona is
- * Thomson scattering, blind to temperature; a magnetogram reads the field, not light.
+ * curves are hand-chosen two-sided log-normal approximations inspired by those papers,
+ * not their calibrated response functions. Widths, weights and layer visibility are display
+ * choices. Density, line-of-sight emission measure and time-dependent calibration are absent. White light is
+ * Planck's law against the photosphere's; Hα is represented by a cool-gas visibility proxy; an eclipse's K-corona is
+ * Thomson scattering, blind to temperature; the displayed magnetogram projects a synthetic radial field along the line of sight.
+ * Hα and He II 304 require optically thick, non-LTE transfer and can be out of ionization
+ * equilibrium; this renderer does not solve either (Golding et al. 2017).
  *
  * Colours: the SDO/AIA standard tables (SolarSoft `aia_lct.pro`), built from their defining
  * curves (c0–c3 and IDL's "red temperature" table) in linear sRGB; white light is Planck's
@@ -58,18 +61,18 @@ export type Passband = {
   peakK: number;
   /** The primary peak's mean σ, dex. */
   widthDex: number;
-  /** Every temperature it answers to; empty for the magnetogram. */
+  /** Representative response peaks, not an exhaustive line spectrum; empty for the magnetogram. */
   peaks: readonly Peak[];
   /** Colour ramp, dark to bright, linear sRGB. */
   ramp: readonly Rgb[];
   weights: LayerWeights;
   /** An occulting disc hides the photosphere (an eclipse). */
   occultDisc: boolean;
-  /** Reads the radial field rather than light. */
+  /** Selects the synthetic magnetic view rather than an intensity passband. */
   magnetogram: boolean;
 };
 
-/** A peak at log T with its ion, weight and σ below/above (Boerner et al. 2012's shapes). */
+/** A peak at log T with its ion, weight and σ below/above (illustrative width and weight). */
 const peak = (ion: string, logT: number, weight: number, below: number, above: number): Peak => ({
   ion,
   logT,
@@ -84,7 +87,7 @@ const peak = (ion: string, logT: number, weight: number, below: number, above: n
  * primary ion at its log T, and the second ion each band also sees. 94 Å: Fe XVIII in flares
  * and Fe X in the quiet corona; 131 Å: Fe VIII in the transition region and Fe XXI in flares;
  * 193 Å: Fe XII in the corona and Fe XXIV in flares; 304 Å: He II with a Si XI coronal
- * contribution. Weights are the second peak's response against the first's.
+ * contribution. Relative weights and widths are hand-chosen rendering parameters.
  */
 export const AIA_PEAKS_K = {
   he304: [peak("He II", 4.7, 1, 0.12, 0.2), peak("Si XI", 6.2, 0.15, 0.1, 0.1)],

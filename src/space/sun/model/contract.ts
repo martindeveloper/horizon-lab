@@ -80,7 +80,7 @@ export type Eruption = {
   s: number;
   /** The rope's height over the photosphere, R. */
   ropeHeight: number;
-  /** The current sheet's ends over the photosphere, R; equal while there is only an X-point, 0 before. */
+  /** The displayed diffusion region's ends over the photosphere, R; 0 before reconnection. */
   sheetBottom: number;
   sheetTop: number;
   /** Reconnection rate, 0–1 of its peak. */
@@ -90,12 +90,24 @@ export type Eruption = {
   goesClass: string;
   /** Separation of the flare ribbons across the neutral line, radians of arc on the surface. */
   ribbonGap: number;
-  /** The ejection's front, R from the centre; 1 before it leaves. */
+  /** Geometric outer separatrix radius, R from the centre, including before envelope visibility. */
   cmeFront: number;
   /** Its angular half-width, radians. */
   cmeSpread: number;
-  /** The arcade's field lines over the region, in the body frame. */
-  lines: Polyline[];
+  /** Visibility of the illustrative CME envelope, 0–1. */
+  cmePresence: number;
+  /** Contours of one reconnecting field, extruded along the neutral line into the body frame. */
+  lines: EruptionLine[];
+  /** Passive plasma tracer positions in the body frame, integrated from the same transport. */
+  flow: Float32Array;
+};
+
+export type EruptionLine = Polyline & {
+  kind: "arcade" | "postflare" | "open" | "rope";
+  /** Position along the invariant direction of the reduced cross-section model. */
+  slice: number;
+  /** Stable flux label index, shared by both reconnection products. */
+  strand: number;
 };
 
 export type SunFrame = {
@@ -110,6 +122,9 @@ export type SunFrame = {
   prominences: Prominence[];
   /** In solar radii, body frame (y the pole). */
   fieldLines: Polyline[];
+  /** In-place geometry revisions; array identity is stable across model updates. */
+  fieldRevision: number;
+  eruptionRevision: number;
   eruption: Eruption | null;
   wolfNumber: number;
   /** The equator's rotation angle, rad. */

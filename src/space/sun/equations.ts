@@ -51,11 +51,11 @@ export const hydrostaticEquilibrium = defineEquation({
   compute: ({ rho, g }) => hydrostaticGradient(rho, g),
 });
 
-/** Four protons become one helium nucleus; the mass they lose becomes light. */
+/** Net atomic bookkeeping, including positron annihilation; Q includes escaping neutrinos. */
 export const ppChainEnergy = defineEquation({
   id: "pp-chain-energy",
-  text: `4 ¹H → ⁴He + 2e⁺ + 2ν_e,  E = Δm c²,  Δm = ${(100 * PP_MASS_FRACTION).toFixed(2)} % of 4 m_H`,
-  latex: `4\\,{}^1\\mathrm{H} \\to {}^4\\mathrm{He} + 2e^+ + 2\\nu_e,\\quad E = \\Delta m\\, c^2,\\quad \\Delta m = ${(100 * PP_MASS_FRACTION).toFixed(2)}\\,\\%\\ \\text{of}\\ 4 m_H`,
+  text: `4 ¹H → ⁴He + 2ν_e,  E = Δm c²,  Δm = ${(100 * PP_MASS_FRACTION).toFixed(2)} % of 4 m_H`,
+  latex: `4\\,{}^1\\mathrm{H} \\to {}^4\\mathrm{He} + 2\\nu_e,\\quad E = \\Delta m\\, c^2,\\quad \\Delta m = ${(100 * PP_MASS_FRACTION).toFixed(2)}\\,\\%\\ \\text{of}\\ 4 m_H`,
   output: "E",
   variables: {
     m: { symbol: "m_H", latex: "m_H", unit: "kg" },
@@ -81,15 +81,15 @@ export const massLossRate = defineEquation({
 /** A photon's random walk out through the opacity: ℓ is the integral over the model. */
 export const photonDiffusionTime = defineEquation({
   id: "photon-diffusion-time",
-  text: "t ≈ (3 / c) ∫ κ ρ r dr",
-  latex: "t \\approx \\frac{3}{c} \\int_0^R \\kappa \\rho\\, r\\, dr",
+  text: "t ≈ (6 / c) ∫₀ᴿᶜᶻ κ ρ r dr",
+  latex: "t \\approx \\frac{6}{c} \\int_0^{R_{\\mathrm{cz}}} \\kappa \\rho\\, r\\, dr",
   output: "t",
   variables: {
     ell: { symbol: "∫ κ ρ r dr", latex: "\\int \\kappa \\rho\\, r\\, dr", unit: "m" },
     t: { symbol: "t", latex: "t", unit: "s" },
   },
   compute: ({ ell }) => diffusionTime(ell),
-  source: "Mitalas & Sills 1992 (the fuller treatment)",
+  source: "Mitalas & Sills 1992, eq. 9 (continuum shell estimate to convection-zone base)",
 });
 
 /** Wolf's relative number: a group counts ten, a spot one. */
@@ -123,16 +123,16 @@ export const alfvenSpeedLaw = defineEquation({
   source: "Alfvén 1942",
 });
 
-/** The energy a volume of field stores, which reconnection sets free. */
+/** Total energy of a uniform field. Only free energy above a reference field can be released. */
 export const reconnectionEnergy = defineEquation({
   id: "reconnection-energy",
-  text: "E = (B² / 2μ₀) V",
-  latex: "E = \\frac{B^2}{2\\mu_0}\\, V",
+  text: "E_B = (B² / 2μ₀) V",
+  latex: "E_B = \\frac{B^2}{2\\mu_0}\\, V",
   output: "E",
   variables: {
     B: { symbol: "B", latex: "B", unit: "T" },
     V: { symbol: "V (m³)", latex: "V\\;(\\mathrm{m^3})" },
-    E: { symbol: "E", latex: "E", unit: "J" },
+    E: { symbol: "E_B", latex: "E_B", unit: "J" },
   },
   compute: ({ B, V }) => magneticEnergy(B, V),
 });

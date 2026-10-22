@@ -149,23 +149,27 @@ export function pressureGradientAt(x: number) {
 }
 
 /**
- * A random-walk estimate of a photon's journey from the centre to the surface: with mean free
- * path l = 1/(κρ), the diffusion time of a sphere is t ≈ (3/c) ∫ κ ρ r dr over the table. It
- * is an order-of-magnitude figure (~10⁵ yr), below Mitalas & Sills 1992's 1.7 × 10⁵ yr from a
- * fuller treatment; both say ten thousand centuries, not the eight minutes of the last lap.
+ * Conventional shell random-walk estimate to the convection-zone base, not a photon's age
+ * or a thermal relaxation time. Mitalas & Sills (1992), eq. 9, use
+ * t = (3/c) Σ κρ Δ(r²), whose continuum limit is (6/c) ∫ κρ r dr.
+ * Their discussion stops the walk at the convection-zone base: integrating a radiative
+ * walk to the photosphere would ignore convection. Absorption/re-emission is not tracked.
  */
 export const OPACITY_WALK_M = (() => {
   let integral = 0;
   for (let i = 1; i < ROWS.length; i++) {
+    if (XS[i - 1]! >= TACHOCLINE_R) break;
     const r0 = XS[i - 1]! * RADIUS_M;
-    const r1 = XS[i]! * RADIUS_M;
+    const x1 = Math.min(XS[i]!, TACHOCLINE_R);
+    const r1 = x1 * RADIUS_M;
     const f0 = column(i - 1, COLUMN.kappa) * column(i - 1, COLUMN.rho) * r0;
-    const f1 = column(i, COLUMN.kappa) * column(i, COLUMN.rho) * r1;
+    const point = structureAt(x1);
+    const f1 = point.kappa * point.rho * r1;
     integral += 0.5 * (f0 + f1) * (r1 - r0);
   }
   return integral;
 })();
 /** The diffusion time for a walk integral `ell` = ∫ κ ρ r dr (m), seconds. */
-export const diffusionTime = (ell: number) => (3 * ell) / SPEED_OF_LIGHT;
+export const diffusionTime = (ell: number) => (6 * ell) / SPEED_OF_LIGHT;
 /** The estimate for Model S, seconds. */
 export const photonDiffusionTime = () => diffusionTime(OPACITY_WALK_M);

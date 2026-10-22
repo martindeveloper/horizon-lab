@@ -35,11 +35,11 @@ import {
   SUNSPOT_NUMBERS,
   type YearlyCount,
 } from "./model/cycle";
+import { eruptionAt } from "./model/eruption";
 import { PP_MASS_FRACTION, SOLAR_MASS_LOSS_KG_S } from "./model/fusion";
 import { MAP_CENTRAL_MERIDIAN_DEG, OBSERVED_REGIONS } from "./model/observed";
 import {
   CHROMOSPHERE_THICKNESS_KM,
-  CME_FINAL_HEIGHT_R,
   CYCLE_PERIOD_YR,
   CYCLE_RISE_YR,
   EQUATORIAL_DIPOLE,
@@ -70,7 +70,7 @@ import {
   WIND_SLOW_KM_S,
 } from "./model/parameters";
 import { AIA_NM, AIA_PEAKS_K, HALPHA_NM, type Peak } from "./model/passbands";
-import { INTERIOR_RATE, surfacePeriod } from "./model/rotation";
+import { CARRINGTON_SIDEREAL_RATE, INTERIOR_RATE, surfacePeriod } from "./model/rotation";
 import { CORE_EDGE_R, photonDiffusionTime, structureAt } from "./model/structure";
 
 const SUN = NAMED_STARS.sun;
@@ -125,15 +125,15 @@ const BODY = {
     digits: 3,
     source: "iau2015b3",
     status: "derived",
-    note: "each second, L☉ / c²",
+    note: "each second, photon luminosity L☉ / c²; excludes neutrinos and solar-wind mass loss",
   },
   ppMassFraction: {
     value: 100 * PP_MASS_FRACTION,
     unit: "percent",
     digits: 2,
-    source: "kippenhahn2012",
+    source: "nistIsotopeMasses",
     status: "derived",
-    note: "(4 m_H − m_He) / 4 m_H from the CIAAW atomic weights; the electrons cancel",
+    note: "(4 m(¹H) − m(⁴He)) / 4 m(¹H), neutral isotope masses; includes annihilation and neutrino energy",
   },
   schwarzschildRadius: {
     value: schwarzschildRadius.compute({ M: SOLAR_MASS_KG }),
@@ -205,7 +205,7 @@ const INTERIOR = {
     source: MODEL_S,
     sources: ["mitalasSills1992"],
     status: "derived",
-    note: "an estimate: (3/c) ∫ κ ρ r dr over the model's opacity",
+    note: "Mitalas–Sills shell estimate: (6/c) ∫₀ᴿᶜᶻ κρr dr through Model S; not a thermal relaxation time",
   },
   photonWalkLiterature: literatureFact(1.7e5, "yr", "mitalasSills1992", "flag", {
     show: "kyr",
@@ -302,14 +302,20 @@ const CORONA = {
     note: "the K-corona at the limb over the mean disc, from Baumbach's fit",
   },
   windSlow: literatureFact(WIND_SLOW_KM_S, "km/s", "mccomas2000", "flag", {
-    note: "over the streamer belt",
+    note: "representative slow-wind speed near Earth's orbit; sources are diverse",
   }),
   windFast: literatureFact(WIND_FAST_KM_S, "km/s", "mccomas2000", "flag", {
-    note: "from the polar coronal holes",
+    note: "representative fast-wind speed near Earth's orbit; coronal holes occur at multiple latitudes",
   }),
-  sourceSurface: literatureFact(SOURCE_SURFACE_R, "Rsun", "altschulerNewkirk1969", "flag", {
-    note: "where the model's field is made radial",
-  }),
+  sourceSurface: literatureFact(
+    SOURCE_SURFACE_R,
+    "Rsun",
+    "altschulerNewkirk1969",
+    "teaching-choice",
+    {
+      note: "chosen radial boundary for the global dipole only; added active-region dipoles do not satisfy that boundary",
+    },
+  ),
 } satisfies Facts;
 
 const FIELD = {
@@ -373,13 +379,13 @@ const ROTATION = {
     note: "the surface law at the pole",
   },
   carringtonPeriod: {
-    value: surfacePeriod(26 * RAD_PER_DEG),
+    value: (2 * Math.PI) / CARRINGTON_SIDEREAL_RATE,
     unit: "s",
     show: "d",
     digits: 4,
     source: "snodgrass1990",
     status: "derived",
-    note: "the surface law at 26°: Carrington's sidereal 25.38 d",
+    note: "conventional Carrington frame, 360° / 14.1844° per day (sidereal)",
   },
   interiorPeriod: {
     value: (2 * Math.PI) / INTERIOR_RATE,
@@ -387,8 +393,8 @@ const ROTATION = {
     show: "d",
     digits: 3,
     source: "snodgrass1990",
-    status: "derived",
-    note: "the surface law's mean over the sphere; helioseismology gives ~26.9 d",
+    status: "teaching-choice",
+    note: "a chosen rigid interior at the surface law's spherical mean; not a helioseismic core measurement",
   },
 } satisfies Facts;
 
@@ -463,12 +469,15 @@ const ERUPTION = {
     note: "dN/dF ∝ F^−α for the peak flux",
   }),
   cmeSpeed: {
-    value: (CME_FINAL_HEIGHT_R * RADIUS_M) / ((1 - ERUPTION_STAGES.rise) * ERUPTION_SECONDS) / 1e3,
+    value:
+      ((eruptionAt(1).cmeFront - eruptionAt(ERUPTION_STAGES.rise).cmeFront) * RADIUS_M) /
+      ((1 - ERUPTION_STAGES.rise) * ERUPTION_SECONDS) /
+      1e3,
     unit: "km/s",
     digits: 2,
     source: "horizon",
     status: "teaching-choice",
-    note: "the model's front: five radii in the hour after the flare",
+    note: "mean radial displacement from model rise stage to end, divided by the chosen event duration; includes display stretching, not an observed CME speed",
   },
 } satisfies Facts;
 
@@ -546,14 +555,14 @@ const PASSBANDS = recordFrom(keysOf(AIA_PEAKS_K), (id) => {
     temperature: literatureFact(first!.kelvin, "K", "lemen2012", "flag", {
       digits: 2,
       sources: ["boerner2012"],
-      note: `${first!.ion}, log T = ${first!.logT}`,
+      note: `${first!.ion}, representative log T = ${first!.logT}; approximate ion-response peak, not a unique formation temperature`,
     }),
   };
   if (second)
     facts.secondaryTemperature = literatureFact(second.kelvin, "K", "boerner2012", "flag", {
       digits: 2,
       sources: ["lemen2012"],
-      note: `${second.ion}, log T = ${second.logT}, answering at ${Math.round(100 * second.weight)} % of the first`,
+      note: `${second.ion}, representative log T = ${second.logT}; relative rendering weights and widths are teaching choices, not calibrated responses`,
     });
   return facts;
 });
@@ -567,7 +576,7 @@ const PROBES = {
       digits: 3,
       source: "nasaParker",
       status: "flag",
-      note: "24 December 2024, 6.1 million km above the photosphere",
+      note: "record orbit first reached 24 December 2024; radius from solar centre, not height above the photosphere",
     },
     speed: {
       value: PARKER_PERIHELION_SPEED_KM_S,
@@ -575,7 +584,7 @@ const PROBES = {
       digits: 3,
       source: "nasaParker",
       status: "flag",
-      note: "at that perihelion, 692,000 km/h",
+      note: "approximate speed at the December 2024 perihelion",
     },
   },
 } as const;

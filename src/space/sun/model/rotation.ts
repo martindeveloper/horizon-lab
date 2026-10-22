@@ -1,7 +1,7 @@
 /**
  * How the Sun turns: at the surface by latitude (Snodgrass & Ulrich 1990, from Doppler
- * features), rigidly below the tachocline at the surface law's mean rate (helioseismology's
- * ~430 nHz core), and between them the shear of the tachocline (Charbonneau et al. 1999).
+ * features), with a chosen rigid interior below the tachocline at the surface law's mean.
+ * This is not a helioseismic core-rotation measurement, and between them the shear of the tachocline (Charbonneau et al. 1999).
  */
 import { smoothstep } from "@horizon/toolkit/math";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";

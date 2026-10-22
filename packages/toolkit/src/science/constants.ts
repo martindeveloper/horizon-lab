@@ -196,6 +196,25 @@ export const CONSTANTS = {
     exact: false,
     source: "CODATA 2022",
   },
+  hydrogen1AtomicMass: {
+    symbol: "m(¹H)",
+    latex: "m({}^1\\mathrm{H})",
+    value: 1.00782503223 * ATOMIC_MASS_CONSTANT_SI,
+    unit: "kg",
+    unitLatex: "\\mathrm{kg}",
+    exact: false,
+    source: "NIST Atomic Weights and Isotopic Compositions, ¹H relative atomic mass (neutral atom)",
+  },
+  helium4AtomicMass: {
+    symbol: "m(⁴He)",
+    latex: "m({}^4\\mathrm{He})",
+    value: 4.00260325413 * ATOMIC_MASS_CONSTANT_SI,
+    unit: "kg",
+    unitLatex: "\\mathrm{kg}",
+    exact: false,
+    source:
+      "NIST Atomic Weights and Isotopic Compositions, ⁴He relative atomic mass (neutral atom)",
+  },
   classicalElectronRadius: {
     symbol: "rₑ",
     latex: "r_e",

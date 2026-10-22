@@ -100,6 +100,29 @@ test("a scrubbed eruption carries its arcade over its region, in solar radii", (
   );
 });
 
+test("geometry revisions track reused buffers, without changing for a light-only redraw", () => {
+  const model = createSunModel(5);
+  const frame = model.frameAt(input({ eruptionScrub: 0.35 }));
+  const field = frame.fieldLines;
+  const arcade = frame.eruption.lines;
+  const fieldRevision = frame.fieldRevision;
+  const eruptionRevision = frame.eruptionRevision;
+  const positions = arcade.map((line) => Array.from(line.points.slice(0, line.count * 3)));
+  model.frameAt(input({ eruptionScrub: 0.35, light: "halpha" }));
+  assert.equal(frame.fieldRevision, fieldRevision);
+  assert.equal(frame.eruptionRevision, eruptionRevision);
+  model.frameAt(input({ eruptionScrub: 0.75 }));
+  assert.equal(frame.eruption.lines, arcade, "the geometry pool is reused");
+  assert.ok(frame.eruptionRevision > eruptionRevision, "a renderer must upload the new arcade");
+  assert.notDeepEqual(
+    arcade.map((line) => Array.from(line.points.slice(0, line.count * 3))),
+    positions,
+  );
+  model.frameAt(input({ eruptionScrub: 0.75, fieldLineCount: 24 }));
+  assert.equal(frame.fieldLines, field);
+  assert.ok(frame.fieldRevision > fieldRevision, "the corona must reshape with the field");
+});
+
 test("every place has an anchor in the body frame, or none when the Sun lacks it", () => {
   const model = createSunModel(5);
   const frame = model.frameAt(input({ eruptionScrub: 0.7 }));
@@ -135,6 +158,10 @@ test("every place has an anchor in the body frame, or none when the Sun lacks it
   );
   const wind = placeAnchor(frame, "wind");
   assert.ok(wind && Math.abs(radius(wind) - SOURCE_SURFACE_R) < 1e-3, "where an open line leaves");
+  model.frameAt(input({ eruptionScrub: 0.5 }));
+  assert.ok(frame.eruption.cmeFront > 1, "the geometric front already exists before visibility");
+  assert.equal(frame.eruption.cmePresence, 0);
+  assert.equal(placeAnchor(frame, "ejection"), null, "do not label a hidden CME envelope");
   /* A quiet Sun with no eruption has no flare or ejection to name. */
   const quiet = createSunModel(5).frameAt(input({ cyclePhase: 25.0, fieldLineCount: 0 }));
   assert.equal(placeAnchor(quiet, "ejection"), null);

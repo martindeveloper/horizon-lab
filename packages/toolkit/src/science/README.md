@@ -16,7 +16,9 @@ whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConst
 (IAU 2015 B3 nominal), and for atoms and light
 `planckConstant`, `boltzmannConstant`, `elementaryCharge` (exact, SI 2019),
 `electronMass`, `protonMass`, `atomicMassConstant`, `classicalElectronRadius`, `rydbergConstant`
-and `vacuumPermeability` (CODATA 2022).
+and `vacuumPermeability` (CODATA 2022). `hydrogen1AtomicMass` and `helium4AtomicMass`
+are neutral isotope masses from the NIST isotope tables, converted to kg; use these,
+not natural-abundance element weights, for hydrogen-burning mass defects.
 A page can print the table; code uses the named values whose names state their
 units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `SOLAR_TEFF_K`, `SOLAR_ABSOLUTE_MAGNITUDE_V`, `SOLAR_IRRADIANCE_W_M2`, `JUPITER_GM_SI`,
 `JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `SPEED_OF_LIGHT_KM_S`, `STANDARD_GRAVITY`

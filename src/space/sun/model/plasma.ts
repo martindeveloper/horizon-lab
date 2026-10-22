@@ -1,6 +1,7 @@
 /**
  * Two plasma figures the eruption's notes quote: how fast a disturbance runs along the field,
- * and how much energy a volume of field stores for reconnection to release.
+ * and total magnetic energy in a uniform volume. Reconnection can release only free energy
+ * above an appropriate reference field, not this entire total.
  */
 import { VACUUM_PERMEABILITY } from "@horizon/toolkit/science";
 
