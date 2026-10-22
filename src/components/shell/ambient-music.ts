@@ -46,6 +46,15 @@ export const ambientMusic = new MusicPlayer(
       ],
       map: assetUrl("/audio/low-drone-rises.map.json"),
     },
+    {
+      title: "Vast Empty Space",
+      artist: "Horizon",
+      sources: [
+        { src: assetUrl("/audio/vast-empty-space.webm"), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl("/audio/vast-empty-space.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+      ],
+      map: assetUrl("/audio/vast-empty-space.map.json"),
+    },
   ],
   { storageKey: "music", level: MUSIC_LEVEL.ambient },
 );

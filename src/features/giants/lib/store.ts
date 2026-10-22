@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { driftSlice, type DriftSlice } from "@/lib/drift";
 import {
   LAB_RENDER,
   guideSlice,
@@ -29,8 +30,12 @@ type GiantsRender = Pick<
   "quality" | "antialias" | "bloom" | "wideColour"
 >;
 
-type GiantsStore = GuideSlice<Saved> &
-  RenderSlice<GiantsRender> & {
+/** The effects a drift shows off, as the visitor had them before it began. */
+type DriftEffects = { focusBlur: boolean; bloom: boolean };
+
+export type GiantsStore = GuideSlice<Saved> &
+  RenderSlice<GiantsRender> &
+  DriftSlice & {
     /** The rung the address names; reaching the page or a link flies there. */
     view: RungId;
     /** The rung the camera heads for, and a count that changes with every flight asked for. */
@@ -86,6 +91,8 @@ type GiantsStore = GuideSlice<Saved> &
     /** The engine's report that the guide's flight has arrived. */
     landGuide: () => void;
     toggleGuidePlaying: () => void;
+    /** The visitor's effects while a drift shows its own; null with no drift. */
+    effectsBeforeDrift: DriftEffects | null;
   };
 
 const LAST = RUNG_IDS.length - 1;
@@ -168,4 +175,22 @@ export const useGiants = create<GiantsStore>((set, get) => ({
     if (get().guideOpen && !get().guideLanded) set({ guideLanded: true });
   },
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
+  effectsBeforeDrift: null,
+  /* The drift ends the guide, closes the panel and the card and flies the camera itself; as a
+     show piece it turns the focus blur and bloom on, and gives the visitor's back as it ends. */
+  ...driftSlice(set, get, {
+    open: (s) => {
+      if (s.guideOpen) s.endGuide();
+      return {
+        panel: "none" as const,
+        card: false,
+        sheet: false,
+        surfaceZoom: 1 as const,
+        effectsBeforeDrift: { focusBlur: s.focusBlur, bloom: s.bloom },
+        focusBlur: true,
+        bloom: true,
+      };
+    },
+    close: (s) => ({ ...s.effectsBeforeDrift, effectsBeforeDrift: null }),
+  }),
 }));

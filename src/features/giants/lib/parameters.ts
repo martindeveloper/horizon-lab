@@ -69,6 +69,8 @@ export const MIN_DISC_PX = 0.6;
  */
 export const GLIDE_SECONDS = 1.1;
 export const GLIDE_SECONDS_PER_DOUBLING = 0.45;
+/** Seconds a resumed drift takes to carry the camera from where the visitor left it back onto its path. */
+export const DRIFT_RESUME_S = 4;
 /** A wheel's 100 px step moves the camera this many rungs; a drag of a stage height, this many. */
 export const WHEEL_RUNGS = 0.32;
 export const DRAG_RUNGS = 3.2;

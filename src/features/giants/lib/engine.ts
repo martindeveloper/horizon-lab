@@ -8,11 +8,15 @@
  */
 import { Vector2, Vector3, Vector4, type Texture } from "three";
 
+import { ambientMusic } from "@/components/shell/ambient-music";
 import { assetUrl, MAPS_KEY } from "@/lib/assets";
+import { audioMapNow } from "@/lib/audio-maps";
+import { openingFor, timedDrift, type DriftState } from "@/lib/drift";
+import type { AudioMap } from "@horizon/toolkit/audio";
 import { MAPS, jplElements, mapFile } from "@horizon/toolkit/bodies";
 import { TAP_SLOP_PX, wheelPixels } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { smoothstep } from "@horizon/toolkit/math";
+import { lerp, smoothstep } from "@horizon/toolkit/math";
 import {
   DisposalScope,
   createEngineHost,
@@ -24,6 +28,7 @@ import { convert, decodeSrgb, hexToLinear } from "@horizon/toolkit/science";
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
+import { DRIFT } from "./drift";
 import focusBlurShader from "./graphics/focus-blur.frag.glsl";
 import fragmentShader from "./graphics/giants.frag.glsl";
 import { stellarTables } from "./graphics/stellar-tables";
@@ -32,6 +37,7 @@ import { vectors } from "./graphics/vectors";
 import { weatherUniforms } from "./graphics/weather-uniforms";
 import { createForecast, turnAt } from "./model/activity";
 import { radiusMetres } from "./model/catalogue";
+import { blankDriftFrame, createDriftPath, type DriftPath } from "./model/drift-path";
 import { fadeFocusBlur, focusBlurRadius } from "./model/focus-blur";
 import { glideAt, glideFrom, glideRests, glideSeconds, glideTowards } from "./model/glide";
 import { letGo, poseRests, restPose, settlePose, turnBy } from "./model/grab";
@@ -61,6 +67,7 @@ import {
   BALMER_SRGB,
   BROWN_DWARF_ALKALI,
   DRAG_RUNGS,
+  DRIFT_RESUME_S,
   GRAB_MIN_PX,
   IDLE_FPS,
   MAX_DISCS,
@@ -258,6 +265,82 @@ export function createGiantsEngine(
     };
     const inputAllowed = () => !useGiants.getState().guideOpen;
 
+    /* ---------------------------------------------------------------- drift */
+
+    /* The drift (lib/drift.ts) flies the camera itself while the store says it plays, timed by
+       its track's published map, which its loader has fetched by then (`audioMapNow`), or as
+       written until then. Its clock is seconds into the loop; a fresh start cuts to the opening
+       shot behind the loader's curtain, a resume carries the camera back onto the path. */
+    let drift: { map: AudioMap | null; path: DriftPath; opening: () => number } | null = null;
+    const driftPath = () => {
+      const map = audioMapNow(DRIFT.music?.track);
+      if (drift?.map !== map) {
+        const timed = timedDrift(DRIFT, map);
+        const path = createDriftPath(timed);
+        drift = {
+          map,
+          path,
+          /* The camera meets the music where it is: it opens on the shot whose cue is nearest. */
+          opening: () => path.opening(openingFor(timed, ambientMusic.position)),
+        };
+      }
+      return drift;
+    };
+    const driftFrame = blankDriftFrame();
+    let driftClock = 0;
+    let driftWas: DriftState = "off";
+    /** Where a resumed drift takes the camera from, and how long since. */
+    let driftResume: { place: number; zoom: number; elapsed: number } | null = null;
+    /** The canvas's light as the drift last set it (`seamLight`). */
+    let driftLight = 1;
+    const flyingDrift = () => useGiants.getState().drift === "playing";
+    /** The camera stays where the drift left it. */
+    const holdHere = () => {
+      target = place;
+      glide = glideAt(place);
+    };
+    /** A hand on the camera pauses the drift and takes the camera from where the drift left it. */
+    const takeCamera = () => {
+      const state = useGiants.getState();
+      if (state.drift !== "playing") return;
+      state.pauseDrift();
+      driftWas = "paused";
+      holdHere();
+    };
+    /** The drift's step: its state's changes, then the camera where its clock has it. */
+    function stepDrift(state: DriftState, dt: number) {
+      const was = driftWas;
+      driftWas = state;
+      if (state !== "playing") {
+        if (was === "playing") holdHere();
+        /* The drift ends: the camera settles on the body nearest where it heads, as a hand letting go does. */
+        if (state === "off" && was !== "off" && was !== "loading") fly(Math.round(target));
+        return false;
+      }
+      if (was !== "playing") {
+        if (was === "paused") driftResume = { place, zoom: surfaceZoom, elapsed: 0 };
+        else {
+          driftResume = null;
+          driftClock = driftPath().opening();
+        }
+      } else driftClock += dt;
+      const frame = driftPath().path.at(driftClock, reduce, driftFrame);
+      let blend = 1;
+      if (driftResume) {
+        driftResume.elapsed += dt;
+        blend = smoothstep(0, DRIFT_RESUME_S, driftResume.elapsed);
+        if (blend >= 1) driftResume = null;
+      }
+      place = driftResume ? lerp(driftResume.place, frame.place, blend) : frame.place;
+      surfaceZoom = driftResume
+        ? Math.exp(lerp(Math.log(driftResume.zoom), Math.log(frame.zoom), blend))
+        : frame.zoom;
+      glide = glideAt(place);
+      /* The rung it heads for is the one whose star comes alive; those flown past stay quiet. */
+      target = frame.heading;
+      return true;
+    }
+
     /* ---------------------------------------------------------------- input */
 
     let snapTimer: number | undefined;
@@ -270,6 +353,7 @@ export function createGiantsEngine(
     const onWheel = (event: WheelEvent) => {
       if (!inputAllowed()) return;
       event.preventDefault();
+      takeCamera();
       const pixels = wheelPixels(event.deltaY, event.deltaMode, host.clientHeight);
       const across = wheelPixels(event.deltaX, event.deltaMode, host.clientWidth);
       fly(target + ((pixels + across) / 100) * WHEEL_RUNGS);
@@ -311,6 +395,7 @@ export function createGiantsEngine(
          where it is, and a glide or a pending snap stops here. */
       const globe = globeAt(event.clientX, event.clientY);
       if (globe === null) {
+        takeCamera();
         window.clearTimeout(snapTimer);
         target = place;
         glide = glideAt(place);
@@ -405,6 +490,7 @@ export function createGiantsEngine(
       const step = STEPS[event.key];
       if (step === undefined || !inputAllowed() || !isSceneShortcut(event)) return;
       event.preventDefault();
+      takeCamera();
       const state = useGiants.getState();
       if (step === "first") state.go(0);
       else if (step === "last") state.go(ladder.last);
@@ -506,9 +592,11 @@ export function createGiantsEngine(
       blurLevel = fadeFocusBlur(blurLevel, state.focusBlur, dt, reduce);
       if (state.flight !== lastFlight) {
         lastFlight = state.flight;
+        takeCamera();
         fly(state.goal);
       }
-      if (!drag) {
+      const drifting = stepDrift(state.drift, dt);
+      if (!drifting && !drag) {
         if (reduce) place = target;
         else {
           glide = glideTowards(glide, target, dt, seconds);
@@ -530,14 +618,16 @@ export function createGiantsEngine(
       });
 
       cameraAt(ladder, place, stage, camera);
-      const zoomTarget = settled() ? state.surfaceZoom : 1;
-      surfaceZoom = reduce
-        ? zoomTarget
-        : Math.exp(
-            Math.log(surfaceZoom) +
-              (Math.log(zoomTarget) - Math.log(surfaceZoom)) * (1 - Math.exp(-dt * 6)),
-          );
-      if (Math.abs(surfaceZoom - zoomTarget) < 0.001) surfaceZoom = zoomTarget;
+      if (!drifting) {
+        const zoomTarget = settled() ? state.surfaceZoom : 1;
+        surfaceZoom = reduce
+          ? zoomTarget
+          : Math.exp(
+              Math.log(surfaceZoom) +
+                (Math.log(zoomTarget) - Math.log(surfaceZoom)) * (1 - Math.exp(-dt * 6)),
+            );
+        if (Math.abs(surfaceZoom - zoomTarget) < 0.001) surfaceZoom = zoomTarget;
+      }
       inspectCamera(camera, ladder, nearestRung(ladder, place), stage, surfaceZoom);
       placedCount = placeBodiesInto(placed, ladder, camera, stage);
       const count = Math.min(placedCount, MAX_DISCS);
@@ -621,7 +711,8 @@ export function createGiantsEngine(
       const { scale } = camera;
       /* The orbits ripple out round the body the camera lands on, as if it stood where the Sun
          does, and fade round it as the camera leaves, before coming in round the next. */
-      const orbitsWanted = state.orbits && resting ? focus : -1;
+      const orbitsOn = drifting ? driftFrame.orbits : state.orbits;
+      const orbitsWanted = orbitsOn && resting ? focus : -1;
       orbitFade = reduce
         ? handOverAtOnce(orbitsWanted)
         : handOver(orbitFade, orbitsWanted, dt, ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S);
@@ -640,6 +731,12 @@ export function createGiantsEngine(
       moveOrbitLabels(around?.x ?? 0, around?.y ?? 0, rings);
 
       moveLabels(focus);
+      /* A drift's loop fades through black on its seam: the canvas over the stage's own black. */
+      const light = drifting ? driftFrame.light : 1;
+      if (light !== driftLight) {
+        driftLight = light;
+        canvas.style.opacity = light < 1 ? light.toFixed(3) : "";
+      }
       pass.render({
         antialias: state.antialias,
         bloom: state.bloom ? bloomSettings(state.quality) : null,
@@ -665,9 +762,9 @@ export function createGiantsEngine(
     pass.compile();
     engine.start({
       render: frame,
-      paused: () => reduce && settled() && !engine.dirty && !drag && posesRest(),
+      paused: () => reduce && settled() && !engine.dirty && !drag && posesRest() && !flyingDrift(),
       fps: () =>
-        settled() && !drag && posesRest()
+        settled() && !drag && posesRest() && !flyingDrift()
           ? IDLE_FPS
           : GIANTS_QUALITY[useGiants.getState().quality].fps,
     });
@@ -676,6 +773,7 @@ export function createGiantsEngine(
         if (state.quality !== previous.quality) engine.refresh();
         if (
           state.flight !== previous.flight ||
+          state.drift !== previous.drift ||
           state.orbits !== previous.orbits ||
           state.bloom !== previous.bloom ||
           state.focusBlur !== previous.focusBlur ||

@@ -19,6 +19,11 @@ import { DRIFT as DEEP_FIELD } from "../src/features/deep-field/lib/drift.ts";
 import { VIEW_IDS } from "../src/features/deep-field/lib/model/view-ids.ts";
 import { viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { useDeepField } from "../src/features/deep-field/lib/store.ts";
+import { DRIFT as GIANTS } from "../src/features/giants/lib/drift.ts";
+import { createDriftPath } from "../src/features/giants/lib/model/drift-path.ts";
+import { RUNG_IDS } from "../src/features/giants/lib/model/rungs.ts";
+import { WEATHER_NEAR } from "../src/features/giants/lib/parameters.ts";
+import { useGiants } from "../src/features/giants/lib/store.ts";
 import { DRIFT as ORRERY } from "../src/features/orrery/lib/drift.ts";
 import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
 import {
@@ -26,6 +31,7 @@ import {
   driftReady,
   driftSlice,
   openingFor,
+  seamLight,
   timedDrift,
   timeShots,
 } from "../src/lib/drift.ts";
@@ -37,6 +43,7 @@ const PROGRAMMES = {
   orrery: ORRERY,
   "black-hole": BLACK_HOLE,
   "black-hole-dormant": BLACK_HOLE_DORMANT,
+  giants: GIANTS,
 };
 
 test("every drift programme is one the camera and the music can play", () => {
@@ -114,7 +121,7 @@ test("every drift programme is one the camera and the music can play", () => {
      map (the fixture mirrors the published one), every cue a shot names exists and the cued
      shots meet them, the loop still the period; and the camera opens on the shot whose cue the
      music is nearest. */
-  for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT, DEEP_FIELD, ORRERY]) {
+  for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT, DEEP_FIELD, ORRERY, GIANTS]) {
     const slug = programme.music.track.toLowerCase().replaceAll(" ", "-");
     const loops = programme.music.loops ?? 1;
     const map = parseAudioMap(
@@ -220,6 +227,56 @@ test("every drift programme is one the camera and the music can play", () => {
   );
   assert.equal(timeShots({ camera, shots, music: { period: 42 } }, null).period, 42);
   assert.ok(MUSIC_LEVEL.drift > MUSIC_LEVEL.ambient, "a drift lifts the music");
+});
+
+test("a loop that fades through black is dark on its seam and fully lit away from it", () => {
+  assert.equal(seamLight(0, 100, 3), 0);
+  assert.equal(seamLight(100, 100, 3), 0, "the loop's end is its start");
+  assert.equal(seamLight(50, 100, 3), 1);
+  assert.ok(seamLight(1.5, 100, 3) > 0 && seamLight(1.5, 100, 3) < 1);
+  assert.equal(seamLight(1.5, 100, 3), seamLight(98.5, 100, 3), "out as it comes in");
+  assert.equal(seamLight(0, 100, undefined), 1, "a loop without a fade flies on lit");
+});
+
+test("Giants' drift climbs without turning back, keeps each held star alive and zooms about one body", () => {
+  const slug = GIANTS.music.track.toLowerCase().replaceAll(" ", "-");
+  const map = parseAudioMap(
+    JSON.parse(
+      readFileSync(new URL(`../bench/fixtures/audio-maps/${slug}.json`, import.meta.url), "utf8"),
+    ),
+  );
+  for (const timed of [timedDrift(GIANTS, map), timedDrift(GIANTS, null)]) {
+    const path = createDriftPath(timed);
+    const last = RUNG_IDS.length - 1;
+    let previous = -Infinity;
+    for (let t = 0; t < path.loop; t += 0.05) {
+      const frame = path.at(t);
+      assert.ok(frame.place >= previous - 1e-9, `the camera climbs at ${t.toFixed(2)} s`);
+      assert.ok(frame.place >= 0 && frame.place <= last, `on the ladder at ${t.toFixed(2)} s`);
+      previous = frame.place;
+      /* The surface zoom magnifies about the body nearest the camera: it may only be on while
+         that body is the one the shot is at, or the view would jump where the nearest changes. */
+      if (frame.zoom > 1.001)
+        assert.equal(Math.round(frame.place), frame.heading, `zoomed about its body at ${t} s`);
+    }
+    timed.shots.forEach((shot, i) => {
+      const [from, to] = shot.creep;
+      assert.ok(from <= to, `shot ${i} creeps up the ladder`);
+      assert.ok(Math.max(-from, to) < WEATHER_NEAR, `shot ${i}'s hold keeps its star alive`);
+      /* Each hold sits where it was written, from its start to its end. */
+      const start = path.opening(i);
+      const end = start + shot.hold + (i === 0 ? shot.flight.duration : 0);
+      const rung = RUNG_IDS.indexOf(shot.rung);
+      assert.ok(Math.abs(path.at(start).place - (rung + from)) < 1e-9, `shot ${i} begins its hold`);
+      assert.ok(Math.abs(path.at(end - 1e-6).place - (rung + to)) < 1e-4, `shot ${i} ends it`);
+      assert.equal(path.at(start + 0.01).heading, rung);
+    });
+    assert.equal(path.at(0).light, 0, "the loop starts out of black");
+    assert.equal(path.at(path.loop / 2).light, 1);
+    /* Reduced motion: each flight cuts to its shot, each hold stands at its start. */
+    const still = path.at(path.opening(1) + 1, true);
+    assert.equal(still.place, RUNG_IDS.indexOf(timed.shots[1].rung) + timed.shots[1].creep[0]);
+  }
 });
 
 test("a cut lands the camera on the opening shot behind the curtain; a resume flies", () => {
@@ -397,6 +454,21 @@ test("each simulation's drift clears what stands in its way and leaves the rest 
   assert.equal(useBlackHole.getState().drift, "paused");
   bh.stopDrift();
   assert.equal(useBlackHole.getState().drift, "off");
+
+  /* Giants: the guide, the panel and the card go; the effects show off, then come back as they were. */
+  useGiants.getState().startGuide();
+  useGiants.setState({ panel: "view", focusBlur: false, bloom: false });
+  useGiants.getState().startDrift();
+  const gi = useGiants.getState();
+  assert.equal(gi.drift, "loading");
+  assert.equal(gi.guideOpen, false);
+  assert.equal(gi.panel, "none");
+  assert.equal(gi.card, false);
+  assert.equal(gi.focusBlur, true);
+  assert.equal(gi.bloom, true);
+  gi.stopDrift();
+  assert.equal(useGiants.getState().focusBlur, false);
+  assert.equal(useGiants.getState().bloom, false);
 });
 
 test("the Orrery's drift clock reads in both languages at every rate the engine can hand it", async () => {

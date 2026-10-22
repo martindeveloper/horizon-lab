@@ -1,6 +1,11 @@
+import { provideAudioMap } from "@/lib/audio-maps";
+import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 
+import vastEmptySpaceMap from "../../../bench/fixtures/audio-maps/vast-empty-space.json";
+import { DRIFT } from "./lib/drift";
 import { createGiantsEngine } from "./lib/engine";
 import { rungIndex, type RungId } from "./lib/model/rungs";
 import { IDLE_FPS } from "./lib/parameters";
@@ -15,7 +20,14 @@ type GiantsBenchScene = BenchScene & {
   wideColour?: boolean;
   /** Seconds the star has lived before the first frame: its weather is a function of time. */
   at?: number;
+  /** The drift plays, as the page would once its map has loaded and its loader lifted. */
+  drift?: boolean;
 };
+
+/** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
+const DRIFT_MAP = parseAudioMap(vastEmptySpaceMap);
+/** One loop of the drift timed to its map. */
+const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
 
 /** Seconds a sequence watches a star live: long enough for its flares, eruptions and pulses. */
 const WATCH_SECONDS = 90;
@@ -127,6 +139,19 @@ const SCENES: readonly GiantsBenchScene[] = [
     at: 53,
     script: { frames: 160, duration: 16, keyframes: Array.from({ length: 9 }, (_, i) => i / 8) },
   },
+  {
+    id: "drift",
+    description:
+      "One loop of the drift, timed to its track's map: the climb from a pulsar to TON 618",
+    tags: ["sequence", "camera", "drift"],
+    rung: "sun",
+    drift: true,
+    script: {
+      frames: Math.ceil(DRIFT_LOOP / WATCH_FRAME_S),
+      duration: DRIFT_LOOP,
+      keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
+    },
+  },
 ];
 
 /**
@@ -151,6 +176,12 @@ export const benchTarget: BenchTarget = {
       wideColour: scene.wideColour ?? false,
       orbits: scene.orbits ?? false,
     });
+    if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
+    store.getState().stopDrift();
+    if (scene.drift) {
+      store.getState().startDrift();
+      store.getState().readyDrift();
+    }
     const instance = mountSceneEngine(
       surface,
       ({ canvas, host, labelRoot, onError }) =>
@@ -172,8 +203,8 @@ export const benchTarget: BenchTarget = {
       /* A landed camera draws at the idle pace: each still frame is one of those, so none is skipped. */
       render: (frame) => instance.render(frame.dt > 0 ? frame : { ...frame, dt: 1 / IDLE_FPS }),
       describe: () => {
-        const { goal, place, quality, bloom, wideColour } = store.getState();
-        return { rung: scene.rung, goal, place, quality, bloom, wideColour };
+        const { goal, place, quality, bloom, wideColour, drift } = store.getState();
+        return { rung: scene.rung, goal, place, quality, bloom, wideColour, drift };
       },
     };
   },

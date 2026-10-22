@@ -649,7 +649,7 @@ catch-all dynamic route or backend is introduced.
 
 The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-music.ts`),
 one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
-`interstellar-drift`, `aeolian-static`, `drifting-probe` and `low-drone-rises`, each as
+`interstellar-drift`, `aeolian-static`, `drifting-probe`, `low-drone-rises` and `vast-empty-space`, each as
 `.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
 the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The bed
@@ -748,7 +748,7 @@ fails for any feature that skips the shared pieces or keeps its own.
 Drift is the lean-back mode: the scene enters immersive view, the music lifts,
 and the camera flies itself from shot to shot until the visitor pauses it, takes
 the camera (a drag or a zoom pauses it) or leaves (Esc, the exit control, the end
-of fullscreen). The Black Hole, the Orrery and Deep Field have one; Stellar
+of fullscreen). The Black Hole, the Orrery, Deep Field and Giants have one; Stellar
 Spectra has no camera, so its experiences button enters immersive view directly.
 
 - `src/lib/drift.ts` holds the shared state (`DriftState`, `driftSlice` for the
@@ -767,6 +767,15 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   Motion speed-up to a few hundredths of a year per second while the drift is on,
   so the inner planets and the belt glide rather than whirl; the rate shows under
   the drift's controls (`SimulationImmersive`'s `drift.caption`).
+- Giants' camera is a place on the ladder, not an orbit, so its drift is a path of its own
+  (`lib/model/drift-path.ts`): one climb that never turns back, a monotone cubic through each
+  shot's hold, which creeps up through its body (close enough that its star stays alive), and
+  the surface zoom as its one push-in. A climb cannot fly home, so the programme's `fade`
+  takes the loop through black on its seam (`seamLight`, the canvas's opacity over the
+  stage's black) and the first shot comes out of it at its body. The engine runs the path on
+  its own clock; a hand on the camera pauses it, and a resume carries the camera back onto
+  the path. As a show piece the drift turns the focus blur and bloom on and gives the
+  visitor's back as it ends.
 - The toolkit runs the camera: `createDriftRun` from the store's `drift` state,
   and `createRigDrift` on an orbit rig, both with `cut`: a fresh start lands the
   camera on the opening shot behind the loader's curtain (`DriftVeil`, opaque), so
@@ -807,11 +816,14 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   Deep Field's arm pitch and halo) feed both its code and the text of its formulas, which
   are built from them.
 - **Figures in copy are arguments, not typed digits**: "One lap in {galacticYearMyr} million
-  years". In the Orrery and Deep Field every one comes from the feature's catalogue: cards
-  through `components/card-specs.ts`, and notes, guide and technical prose through its
-  `PROSE_FIGURES` and `proseArgs(figures, locale)` (`src/lib/facts.ts`), which print each
-  figure in the unit its sentence names. Pass them to `t()`; for technical prose, pass
-  `figures` (or plain `values`) to `SimulationTechnicalDetails`.
+  years". Every one comes from a catalogue: cards through `components/card-specs.ts`, and
+  notes, hints, guide and technical prose through the feature's `PROSE_FIGURES` and
+  `proseArgs(figures, locale)` (`src/lib/facts.ts`), which print each figure in the unit its
+  sentence names (`inPowerOfTen` for "{massMillions} million Suns"). The Orrery and Deep Field
+  keep them in `lib/model/catalogue/`, Voyage and Stellar Spectra in `lib/model/catalogue.ts`,
+  the Black Hole in `lib/figures.ts` (`figureArgs`, which adds the atlas's scientific and ±
+  lines). Pass them to `t()`; for technical prose, pass `figures` (or plain `values`) to
+  `SimulationTechnicalDetails`, and for a guided journey to `GuideCaption`.
 - **Card figures come from a catalogue.** A model's catalogue (the solar system's
   `src/space/solar-system/model/catalogue.ts`, each feature's `lib/model/catalogue/`) holds every
   number a selection card prints, literature values included: a value or a published span

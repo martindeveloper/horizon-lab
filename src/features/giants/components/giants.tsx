@@ -1,13 +1,15 @@
 import { useTranslations } from "next-intl";
 
+import { useSimulationDrift, type DriftStore } from "@/components/simulations/drift";
 import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
 import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
-import type { RungId } from "../lib/model/rungs";
-import { useGiants } from "../lib/store";
+import { DRIFT } from "../lib/drift";
+import { RUNG_IDS, type RungId } from "../lib/model/rungs";
+import { useGiants, type GiantsStore } from "../lib/store";
 import { rungFromPath } from "../routing";
 import { GiantsCanvas } from "./canvas";
 import { GiantsOverlay } from "./overlay";
@@ -16,6 +18,7 @@ import { GiantsOverlay } from "./overlay";
 const reset = freshVisit(useGiants);
 /** The store as the address sees it: a link to a rung flies there; climbing leaves the address be. */
 const views: ViewStore<RungId> = useGiants;
+const driftStore: DriftStore<GiantsStore> = useGiants;
 
 /** The immersive view hides the guide's caption, so it ends the guide. */
 function leaveGuide() {
@@ -23,9 +26,22 @@ function leaveGuide() {
   if (state.guideOpen) state.endGuide();
 }
 
+/** The drift's one readout: the body in focus, since the stage's names step aside in immersive view. */
+function DriftBody() {
+  const t = useTranslations("giants");
+  const focus = useGiants((s) => s.focus);
+  return <>{t(`rungs.${RUNG_IDS[focus] ?? RUNG_IDS[0]}.name`)}</>;
+}
+
 export function Giants() {
   const t = useTranslations("giants");
   const ready = useGiants((s) => s.ready);
+  const drift = useSimulationDrift(
+    useGiants((s) => s.drift),
+    driftStore,
+    DRIFT,
+    <DriftBody />,
+  );
   useViewFromPath(views, rungFromPath);
   useFreshVisit(reset);
 
@@ -33,7 +49,7 @@ export function Giants() {
     <VisualizationShell id="main-content" tabIndex={-1} className="h-full">
       <h1 className="sr-only">{t("app")}</h1>
       <GiantsCanvas />
-      <SimulationImmersive onEnter={leaveGuide}>
+      <SimulationImmersive onEnter={leaveGuide} drift={drift}>
         <GiantsOverlay />
       </SimulationImmersive>
       <LoadingOverlay ready={ready}>

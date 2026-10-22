@@ -7,6 +7,7 @@
  */
 import { cueTime, type AudioMap } from "@horizon/toolkit/audio";
 import type { DriftRunState, DriftSettings } from "@horizon/toolkit/camera";
+import { smoothstep, wrap } from "@horizon/toolkit/math";
 
 /** `loading`: the drift is on and its loader shows while its music and map come; then it plays. */
 export type DriftState = "off" | "loading" | "playing" | "paused";
@@ -131,7 +132,19 @@ export type DriftProgramme<Shot> = {
   music?: DriftMusic;
   camera: Partial<Omit<DriftSettings, "random" | "reduceMotion">>;
   shots: readonly Shot[];
+  /**
+   * Seconds the scene takes to fade to black before the loop's seam and back after it
+   * (`seamLight`), for a camera that never turns back and so starts again unseen; none flies on.
+   */
+  fade?: number;
 };
+
+/** How lit the scene is `t` seconds into a loop of `loop` seconds: dark on its seam, over `fade` either side. */
+export function seamLight(t: number, loop: number, fade: number | undefined) {
+  if (fade === undefined || fade <= 0 || loop <= 0) return 1;
+  const at = wrap(t, loop);
+  return smoothstep(0, fade, at) * smoothstep(0, fade, loop - at);
+}
 
 /** A programme timed to its track's map (or as written, without one): its shots, loop and cues. */
 export type TimedDrift<Shot extends CuedShot & { flight?: { duration?: number }; hold?: number }> =

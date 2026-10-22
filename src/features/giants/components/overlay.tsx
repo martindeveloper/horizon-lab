@@ -52,6 +52,7 @@ export function GiantsOverlay() {
               details={(access) => <GiantsTechnicalDetails {...access} />}
               detailsLabel={t("technicalDetails.open")}
               guide={{ onSelect: () => api().startGuide() }}
+              drift={() => api().startDrift()}
               guideRef={guideButton}
               finder={{
                 id: "stars",
