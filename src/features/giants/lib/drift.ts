@@ -8,9 +8,10 @@ import type { CuedShot, DriftProgramme } from "@/lib/drift";
  * track's map: from a pulsar to the Sun landing on the swell, R136a1, the heaviest star, on the
  * brightest moment; the one push-in, the surface zoom onto Betelgeuse, begins on the surge and
  * arrives on the peak; the zoom eases out and the climb carries on past the largest stars to
- * TON 618's horizon, landing on the last breath, the planets' orbits drawn inside it. The other
- * rungs are flown through. Each hold creeps up through its body (`creep`, rungs either side,
- * within `WEATHER_NEAR` so its star stays alive), sliding it across the frame. A climb cannot
+ * TON 618's horizon, landing on the last breath. The other rungs are flown through, on one
+ * smooth zoom and pan from hold to hold (`model/drift-path.ts`). Each hold creeps up through
+ * its body (`creep`, rungs either side, within `WEATHER_NEAR` so its star stays alive), sliding
+ * it across the frame. The line art (the baseline, the orbits) fades while it plays. A climb cannot
  * fly back down: the scene fades through black on the loop's seam (`fade`) and the first shot
  * comes out of it at its body (`model/drift-path.ts`). The holds written here are the timing
  * without a map and add up to the period; `timeShots` sets them so the cued shots meet their cues.
@@ -24,8 +25,6 @@ export type GiantsDriftShot = CuedShot & {
   creep: readonly [number, number];
   /** The surface zoom held, as the View panel's (1 by default). */
   zoom?: number;
-  /** The planets' orbits round the body. */
-  orbits?: boolean;
   flight: { duration: number };
   hold: number;
 };
@@ -61,7 +60,6 @@ export const DRIFT: DriftProgramme<GiantsDriftShot> = {
       land: "breath-2",
       rung: "ton-618",
       creep: [-0.12, 0],
-      orbits: true,
       flight: { duration: 28 },
       hold: 24.5,
     },

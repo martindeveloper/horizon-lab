@@ -106,6 +106,20 @@ export function cameraAt(
   return out;
 }
 
+/**
+ * The place on the ladder whose camera has `scale` metres per CSS pixel: `cameraAt`'s scale
+ * undone. The rungs climb by size, so each scale has one place.
+ */
+export function placeAtScale(ladder: Ladder, scale: number, stage: Stage) {
+  for (let i = 0; i < ladder.last; i++) {
+    const to = rungScale(ladder, i + 1, stage);
+    if (scale > to && i + 1 < ladder.last) continue;
+    const from = rungScale(ladder, i, stage);
+    return clampRung(ladder, i + Math.log(scale / from) / Math.log(to / from));
+  }
+  return 0;
+}
+
 /** A placed body to fill in. */
 export const blankPlaced = (): Placed => ({
   index: 0,
