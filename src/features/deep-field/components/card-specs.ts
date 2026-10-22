@@ -190,6 +190,7 @@ export const COSMOS_CARDS: Record<CosmosId, StaticCard<Badge>> = {
   },
   fornax: {
     badge: "mixed",
+    body: { within: v({ ...C.fornax.distance, digits: 2 }) },
     rows: [
       figureRow("distance", v(C.fornax.distance)),
       row("members", "cards.cosmos.fornax.members", { value: v(C.fornax.members) }),

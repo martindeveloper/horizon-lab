@@ -1,0 +1,63 @@
+/**
+ * Every figure Voyage's guide, cards and technical notes quote, by the placeholder their
+ * messages use: the shared catalogues' (`@/space`), and what follows from them for the ship.
+ * They print as numbers in the unit the prose names: "{ioPeriodHours} hours".
+ */
+import { factsOf, type Fact } from "@/lib/facts";
+import { STARS } from "@/space/galaxy/model/catalogue/stars";
+import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
+import { jplElements } from "@horizon/toolkit/bodies";
+import {
+  JULIAN_YEAR_SECONDS,
+  SPEED_OF_LIGHT_KM_S,
+  coastTrip,
+  convertFigure,
+} from "@horizon/toolkit/science";
+
+import { DRIVES } from "./parameters";
+
+const ALPHA_CEN = STARS.alphaCen;
+const voyagerKms = DRIVES.voyager.kind === "coast" ? DRIVES.voyager.speed : 0;
+
+export const PROSE_FIGURES = {
+  voyagerKms: {
+    value: voyagerKms,
+    unit: "km/s",
+    digits: 2,
+    source: "horizonsProbes",
+    status: "teaching-choice",
+    note: "Voyager 1's 16.9 km/s in 2026, rounded",
+  },
+  moonLightSeconds: {
+    value: SOLAR_CATALOGUE.moons.moon.semiMajorAxis.value / SPEED_OF_LIGHT_KM_S,
+    unit: "s",
+    digits: 2,
+    source: "jplSatElements",
+    status: "derived",
+    note: "the Moon's mean distance over c",
+  },
+  marsSunlightPercent: {
+    value: 100 / jplElements("mars", 0).a ** 2,
+    unit: "percent",
+    digits: 2,
+    source: "jplElements",
+    status: "derived",
+    note: "the inverse square at Mars's mean distance",
+  },
+  ioPeriodHours: { ...SOLAR_CATALOGUE.moons.io.period, show: "h", digits: 2 },
+  abSeparationAu: ALPHA_CEN.abSeparation,
+  abPeriodYears: { ...ALPHA_CEN.abPeriod, digits: 2 },
+  voyagerYears: {
+    value:
+      coastTrip(convertFigure(ALPHA_CEN.distance.value, ALPHA_CEN.distance.unit, "km"), voyagerKms)
+        .t / JULIAN_YEAR_SECONDS,
+    unit: "yr",
+    digits: 2,
+    source: "akeson2021",
+    status: "derived",
+    note: "α Centauri's distance at Voyager's speed",
+  },
+} satisfies Record<string, Fact>;
+
+/** Every figure, for tests. */
+export const catalogueFacts = () => factsOf({ voyage: { prose: PROSE_FIGURES } });

@@ -5,12 +5,12 @@
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",
     "giants": "Jupiter to Neptune, and the early disk. The best view of the clearing.",
-    "kuiper": "Neptune's orbit through the classical belt, about 30–50 au.",
+    "kuiper": "Neptune's orbit through the classical belt, about {kuiperAu} au.",
     "scattered": "Bodies Neptune tossed onto long ellipses, hundreds of au out.",
-    "oort": "Guide shells at 5,000 and 100,000 au; the dots thin out as r⁻³·⁵. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets."
+    "oort": "Guide shells at {oortInnerShellAu} and {oortShellAu} au; the dots thin out as r⁻³·⁵. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets."
   },
   "epochs": {
-    "sketch": "10 Gyr sketch",
+    "sketch": "{timelineGyr} Gyr sketch",
     "birth": "Sun forms",
     "disk": "Disk intact",
     "clearing": "Clearing",
@@ -204,7 +204,7 @@
       },
       "past": {
         "title": "The past slider is a model",
-        "body": "Nobody has a video of planet positions 4 billion years ago. The old end of the slider is a sketch in the family of the giant-planet instability (the Nice model): giants start closer together with a disk of leftovers outside them; Jupiter and Saturn slowly drift across their 2:1 resonance and the system turns unstable; Neptune's outward move stirs the disk; most bodies are ejected, some stay in the Kuiper belt or the scattered disk, some are handed to the Oort cloud. Newer versions start the giants in a tight chain of resonances that later breaks; the sketch draws the 2005 original, which tied this to the Late Heavy Bombardment 3.9 billion years ago. Recent studies favour an earlier instability, within about 100 million years of the first solids, so a single spike of impacts is no longer the usual picture."
+        "body": "Nobody has a video of planet positions 4 billion years ago. The old end of the slider is a sketch in the family of the giant-planet instability (the Nice model): giants start closer together with a disk of leftovers outside them; Jupiter and Saturn slowly drift across their 2:1 resonance and the system turns unstable; Neptune's outward move stirs the disk; most bodies are ejected, some stay in the Kuiper belt or the scattered disk, some are handed to the Oort cloud. Newer versions start the giants in a tight chain of resonances that later breaks; the sketch draws the 2005 original, which tied this to the Late Heavy Bombardment {lhbGyr} billion years ago. Recent studies favour an earlier instability, within about 100 million years of the first solids, so a single spike of impacts is no longer the usual picture."
       },
       "ellipses": {
         "title": "Ellipses",

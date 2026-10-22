@@ -1,12 +1,14 @@
 import { ArrowUpRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { HandoffLink, HandoffRow } from "@/components/simulations/handoff-link";
 import { SwitchChips } from "@/components/simulations/switch-chips";
 import { ViewPicker as SharedViewPicker } from "@/components/simulations/view-picker";
+import { proseArgs } from "@/lib/facts";
 import { SOLAR_VIEWS, solarViewById } from "@/space/solar-system/model/views";
 import { atViewScale } from "@horizon/toolkit/camera";
 
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { ORRERY_EDGE } from "../lib/scene/kit";
 import { useOrrery, type Show } from "../lib/store";
 
@@ -29,6 +31,7 @@ export function ViewPicker() {
   const viewDist = useOrrery((s) => s.viewDist);
   const closeUp = useOrrery((s) => s.closeUp);
   const setView = useOrrery((s) => s.setView);
+  const figures = proseArgs(PROSE_FIGURES, useLocale());
   return (
     <SharedViewPicker
       ariaLabel={t("hud.views")}
@@ -38,7 +41,7 @@ export function ViewPicker() {
       ids={VIEW_IDS}
       selected={(id) => !closeUp && view === id && atViewScale(viewDist, solarViewById(id).dist)}
       labelOf={(id) => t(`views.${id}`)}
-      hintOf={(id) => t(`viewHints.${id}`)}
+      hintOf={(id) => t(`viewHints.${id}`, figures)}
       onPick={setView}
     >
       <DeepFieldLink className="mt-1 border-t border-border pt-3" />

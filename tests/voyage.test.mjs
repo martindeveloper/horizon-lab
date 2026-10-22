@@ -20,6 +20,7 @@ import {
 } from "../src/features/voyage/components/format.ts";
 import { tripTo } from "../src/features/voyage/components/trips.ts";
 import { bodyPositionKm, WORLD_BODIES } from "../src/features/voyage/lib/model/bodies.ts";
+import { PROSE_FIGURES } from "../src/features/voyage/lib/model/catalogue.ts";
 import {
   C_KM_S,
   DRIVES,
@@ -39,9 +40,11 @@ import {
   shipSpeed,
   stepShip,
 } from "../src/features/voyage/lib/model/ship.ts";
+import { TOUR } from "../src/features/voyage/lib/model/tour.ts";
 import { VIEW_IDS } from "../src/features/voyage/lib/model/view-ids.ts";
 import { useVoyage } from "../src/features/voyage/lib/store.ts";
 import { pathForView, resolveView, viewFromPath } from "../src/features/voyage/routing.ts";
+import { proseArgs } from "../src/lib/facts.ts";
 import { layoutMessages } from "./messages-helper.mjs";
 
 const YEAR_S = 365.25 * 86_400;
@@ -300,5 +303,18 @@ for (const locale of ["en", "cs"]) {
     for (const km of [12, 12_400, 3e6, 1.5e8, 6e9])
       clean(formatRange(t, f, { unit: "auto", locale }, km));
     for (const v of [0.3, 17, 2500, 0.1 * C_KM_S, 0.999 * C_KM_S]) clean(formatSpeed(t, f, v));
+    /* The guide, the far cards and the notes quote the catalogues' figures: none left unfilled. */
+    const strict = createTranslator({
+      locale,
+      messages,
+      namespace: "voyage",
+      onError(error) {
+        throw error;
+      },
+    });
+    const figures = proseArgs(PROSE_FIGURES, locale);
+    for (const step of TOUR) clean(strict(`tour.steps.${step.id}.body`, figures));
+    clean(strict("cards.far.alphaCen", figures));
+    clean(strict("technicalDetails.features.flight", figures));
   });
 }

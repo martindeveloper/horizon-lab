@@ -5,7 +5,13 @@
  */
 import type { useTranslations } from "next-intl";
 
-import type { Card, CardFact, DistanceSettings, Format } from "@/lib/facts";
+import {
+  proseArgs,
+  type Card,
+  type CardFact,
+  type DistanceSettings,
+  type Format,
+} from "@/lib/facts";
 import type { WorldSelection } from "@/space/galaxy/show";
 import { moonRows, orbitFacts, radiusRow, solarNameKey } from "@/space/solar-system/format";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
@@ -16,6 +22,7 @@ import { vec3d } from "@horizon/toolkit/scene";
 import { JULIAN_YEAR_SECONDS } from "@horizon/toolkit/science";
 
 import { anchorAt, anchorNameKey, anchorOfSelection, type AnchorId } from "../lib/model/anchors";
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { lookbackYears } from "../lib/model/comoving";
 import { formatDuration, formatRange } from "./format";
 import type { Moment } from "./trips";
@@ -116,7 +123,7 @@ function farCard(
     badge: t("badges.measured"),
     title: t(farNameKey(t, sel)),
     facts,
-    body: t.has(note) ? t(note) : "",
+    body: t.has(note) ? t(note, proseArgs(PROSE_FIGURES, d.locale)) : "",
     caution: "",
   };
 }

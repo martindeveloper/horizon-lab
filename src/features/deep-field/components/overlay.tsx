@@ -1,14 +1,16 @@
 import { Crosshair } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { MapScale } from "@/components/simulations/map-readouts";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
+import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { useDeepField, type DeepFieldStore } from "../lib/store";
 import { DepthLadder } from "./depth-ladder";
 import { DeepFieldGuide } from "./guide";
@@ -33,6 +35,7 @@ const guideKeys = { onSpace: (api: DeepFieldStore) => api.toggleGuidePlaying() }
 
 export function DeepFieldOverlay() {
   const t = useTranslations("deepField");
+  const locale = useLocale();
   const ready = useDeepField((s) => s.ready);
   const view = useDeepField((s) => s.view);
   const panel = useDeepField((s) => s.panel);
@@ -64,7 +67,7 @@ export function DeepFieldOverlay() {
                   {t(`views.${view}`)}
                 </p>
                 <p className="mt-0.5 line-clamp-2 max-w-md text-xs text-muted not-md:hidden">
-                  {t(`viewHints.${view}`)}
+                  {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
                 </p>
               </div>
               <SimulationToolbar

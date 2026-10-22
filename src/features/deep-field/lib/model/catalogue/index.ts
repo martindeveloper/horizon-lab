@@ -13,6 +13,7 @@ import { factsOf, type Fact } from "@/lib/facts";
 import { COSMOS } from "@/space/cosmos/model/catalogue";
 import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
 import { STARS } from "@/space/galaxy/model/catalogue/stars";
+import { POPULATIONS } from "@/space/solar-system/model/catalogue";
 import { PROBE_CATALOGUE as PROBES } from "@/space/solar-system/model/probes-catalogue";
 
 export const CATALOGUE = {
@@ -23,7 +24,7 @@ export const CATALOGUE = {
 } as const;
 
 /**
- * Every figure the technical notes quote, by the placeholder their messages use. They print
+ * Every figure the view hints and technical notes quote, by the placeholder their messages use. They print
  * as numbers in the unit the prose names (`show`), not in the visitor's distance unit:
  * "{sunRadiusKpc} kpc".
  */
@@ -49,6 +50,14 @@ export const PROSE_FIGURES = {
   universeGyr: COSMOS.universe.age,
   andromedaMly: COSMOS.andromeda.distance,
   andromedaKms: COSMOS.andromeda.approach,
+  kuiperAu: POPULATIONS.kuiper.region,
+  oortLy: { ...POPULATIONS.oort.outerEdge, show: "ly", digits: 2 },
+  galaxyLy: GALAXY.milkyway.diskWidth,
+  localGroupMly: COSMOS.localGroup.width,
+  localSheetMly: COSMOS.localSheet.width,
+  virgoGalaxies: COSMOS.virgo.members,
+  virgoMly: { ...COSMOS.virgo.distance, digits: 2 },
+  superclusterMly: COSMOS.supercluster.width,
 } satisfies Record<string, Fact>;
 
 /** Every fact with its path ("cosmos.virgo.members"), for tests and the ledger. */

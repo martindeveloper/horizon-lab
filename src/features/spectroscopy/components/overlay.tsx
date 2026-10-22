@@ -10,6 +10,7 @@ import { ViewPicker } from "@/components/simulations/view-picker";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { PROSE_TYPES } from "../lib/model/catalogue";
 import { VIEW_IDS, type ViewId } from "../lib/model/view-ids";
 import { useSpectroscopy } from "../lib/store";
 import { pathForView } from "../routing";
@@ -43,12 +44,12 @@ function SpectroscopyViews() {
     <ViewPicker
       ariaLabel={t("hud.views")}
       label={t(`views.${view}.title`)}
-      detail={t(`views.${view}.kicker`)}
+      detail={t(`views.${view}.kicker`, PROSE_TYPES)}
       ids={VIEW_IDS}
       selected={(id) => id === view}
       labelOf={(id) => t(`views.${id}.title`)}
       hintOf={(id) => t(`views.${id}.hint`)}
-      kickerOf={(id) => t(`views.${id}.kicker`)}
+      kickerOf={(id) => t(`views.${id}.kicker`, PROSE_TYPES)}
       onPick={go}
     />
   );

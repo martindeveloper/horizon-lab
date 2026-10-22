@@ -17,16 +17,16 @@
   "viewHints": {
     "inner": "Mercury to Mars, where they are today.",
     "giants": "Jupiter to Neptune, today.",
-    "kuiper": "Neptune and the icy belt beyond it, about 30–50 au.",
+    "kuiper": "Neptune and the icy belt beyond it, about {kuiperAu} au.",
     "heliosphere": "Five probes on their way out, and the edge of the Sun's wind they crossed.",
     "scattered": "Bodies on long ellipses, hundreds of au out.",
-    "oort": "The comet cloud, inferred from long-period comets, out to one to three light-years.",
+    "oort": "The comet cloud, inferred from long-period comets, out to {oortLy} light-years.",
     "stars": "Proxima, Alpha Centauri and Barnard's Star in their real directions. The ring is Proxima's distance; the sky behind is the real one.",
-    "galaxy": "Our galaxy, about 100,000 light-years across. The gold line is the Sun's path.",
-    "local-group": "The Milky Way, Andromeda and their dwarfs, about 6 million light-years across.",
-    "local-sheet": "The flat wall of nearby groups we live in, about 46 million light-years across.",
-    "virgo-cluster": "About 1,500 galaxies some 54 million light-years away. We sit outside it.",
-    "virgo-supercluster": "Groups and clouds fanned out around Virgo, about 110 million light-years across.",
+    "galaxy": "Our galaxy, about {galaxyLy} light-years across. The gold line is the Sun's path.",
+    "local-group": "The Milky Way, Andromeda and their dwarfs, about {localGroupMly} million light-years across.",
+    "local-sheet": "The flat wall of nearby groups we live in, about {localSheetMly} million light-years across.",
+    "virgo-cluster": "About {virgoGalaxies} galaxies some {virgoMly} million light-years away. We sit outside it.",
+    "virgo-supercluster": "Groups and clouds fanned out around Virgo, about {superclusterMly} million light-years across.",
     "laniakea": "Our home supercluster: with the expansion taken out, its galaxies drift toward the Great Attractor.",
     "cosmic-web": "Laniakea among its neighbours: filaments of galaxies around nearly empty voids, out to the Sloan Great Wall.",
     "observable-universe": "Everything light has had time to reach us from. The microwave background is the farthest light we can see."
@@ -249,7 +249,7 @@
         "members": "About {value} catalogued galaxies",
         "width": "About {value}",
         "heart": "NGC 1399",
-        "body": "After Virgo, the most massive cluster within about 65 million light-years, smaller and more compact, in the southern sky.",
+        "body": "After Virgo, the most massive cluster within about {within}, smaller and more compact, in the southern sky.",
         "caution": "The members are a drawn sample shaped like a cluster, not a catalogue."
       },
       "centaurus": {

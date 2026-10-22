@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useId, useRef, useState } from "react";
 
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
@@ -16,6 +16,7 @@ import {
   xyToPct,
   type AtlasSite,
 } from "@/features/black-hole/lib/atlas";
+import { figureArgs } from "@/features/black-hole/lib/figures";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { Kicker, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
 
@@ -89,23 +90,28 @@ function Marker({
   );
 }
 
-function siteCopy(site: AtlasSite, t: ReturnType<typeof useTranslations>) {
+/** A site's lines, its catalogue figures filled in (`figureArgs`). */
+function siteCopy(
+  site: AtlasSite,
+  t: ReturnType<typeof useTranslations>,
+  figures: Record<string, string>,
+) {
   return {
-    name: t(`atlasSites.${site.id}.name`),
+    name: siteName(site, t),
     found: t(`atlasSites.${site.id}.found`),
-    source: t(`atlasSites.${site.id}.source`),
-    distance: t(`atlasSites.${site.id}.distance`),
-    mass: t(`atlasSites.${site.id}.mass`),
+    source: t(`atlasSites.${site.id}.source`, figures),
+    distance: t(`atlasSites.${site.id}.distance`, figures),
+    mass: t(`atlasSites.${site.id}.mass`, figures),
   };
 }
 
 function siteName(site: AtlasSite, t: ReturnType<typeof useTranslations>) {
-  return siteCopy(site, t).name;
+  return t(`atlasSites.${site.id}.name`);
 }
 
 function Fact({ site }: { site: AtlasSite }) {
   const t = useTranslations("blackHole");
-  const copy = siteCopy(site, t);
+  const copy = siteCopy(site, t, figureArgs(useLocale()));
   const kindBit =
     site.kind === "lab"
       ? `${t("kindTheory")}  ·  `
@@ -144,6 +150,7 @@ function Fact({ site }: { site: AtlasSite }) {
 
 export function AtlasOverlay() {
   const t = useTranslations("blackHole");
+  const locale = useLocale();
   const presetId = useBlackHole((s) => s.presetId);
   const selectHole = useSelectHole();
   const setMapOpen = useBlackHole((s) => s.setMapOpen);
@@ -332,7 +339,9 @@ export function AtlasOverlay() {
 
           <section className="glass-panel rounded-lg p-3.5 md:p-4">
             <h3 className={kickerClass}>{t("localGroup")}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-muted">{t("localGroupBody")}</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              {t("localGroupBody", figureArgs(locale))}
+            </p>
             <div className="mt-3 flex flex-col gap-1.5">
               {DISTANCE_ROWS.map((row) => {
                 const s = atlasFor(row.id)!;

@@ -45,7 +45,7 @@
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Milky Way  ·  face-on  ·  galactocentric",
   "localGroup": "Beyond the Milky Way",
-  "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about 760 kpc from us; M87* is about 16.8 Mpc away. That is roughly 22 times farther than Andromeda and 2,000 times farther than Sagittarius A*. TON 618’s light travelled about 10.8 billion years; the waves from GW231123 travelled roughly 2 to 6 billion.",
+  "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about 760 kpc from us; M87* is about {m87Mpc} Mpc away. That is roughly {m87FartherThanAndromeda} times farther than Andromeda and {m87FartherThanSgr} times farther than Sagittarius A*. TON 618’s light travelled about 10.8 billion years; the waves from GW231123 travelled roughly 2 to 6 billion.",
   "theorySolutions": "Theory  ·  GR solutions",
   "theoryBody": "These are not specific objects in the sky. Lensed disk illustrates gravitational lensing. The Schwarzschild and Kerr metrics are exact vacuum solutions of Einstein’s equations; light here follows Kerr paths, while the glowing gas is illustrative.",
   "landmark": "Landmark  ·  not an explorable black hole",
@@ -129,7 +129,7 @@
       "0": {
         "kicker": "Home",
         "title": "Our own supermassive black hole",
-        "body": "Sagittarius A* lies in the direction of Sagittarius and has a mass of about 4.3 million Suns. The orbits of nearby stars reveal its mass, especially S2, which completes an orbit in about 16 years and passes within roughly 120 au. The black hole is surrounded by a hot accretion flow with low radiative efficiency. For something so massive, it is remarkably faint."
+        "body": "Sagittarius A* lies in the direction of Sagittarius and has a mass of about {sgrMassMillions} million Suns. The orbits of nearby stars reveal its mass, especially S2, which completes an orbit in about 16 years and passes within roughly 120 au. The black hole is surrounded by a hot accretion flow with low radiative efficiency. For something so massive, it is remarkably faint."
       },
       "1": {
         "kicker": "EHT",
@@ -151,7 +151,7 @@
       "0": {
         "kicker": "Origin",
         "title": "A giant that grew with its galaxy",
-        "body": "M87* lies at the centre of Messier 87, a giant elliptical galaxy in the Virgo cluster. Its estimated mass is about 6.5 billion Suns. The galaxy grew in part by absorbing smaller neighbours, and its central black hole could gain mass both by accreting gas and by merging with other black holes. The detailed history of that growth is still uncertain."
+        "body": "M87* lies at the centre of Messier 87, a giant elliptical galaxy in the Virgo cluster. Its estimated mass is about {m87MassBillions} billion Suns. The galaxy grew in part by absorbing smaller neighbours, and its central black hole could gain mass both by accreting gas and by merging with other black holes. The detailed history of that growth is still uncertain."
       },
       "1": {
         "kicker": "10 April 2019",
@@ -207,7 +207,7 @@
       "0": {
         "kicker": "Origin",
         "title": "The remains of a massive star",
-        "body": "The black hole in Cygnus X-1 formed through the collapse of a massive star. Its companion, the supergiant HDE 226868, still supplies gas through its stellar wind. Published mass estimates vary with the binary model, from roughly 13 to 21 M☉, well above neutron-star masses. Unlike Sgr A* and M87*, this is a stellar-origin black hole rather than a supermassive one."
+        "body": "The black hole in Cygnus X-1 formed through the collapse of a massive star. Its companion, the supergiant HDE 226868, still supplies gas through its stellar wind. Published mass estimates vary with the binary model, from roughly 13 to {cygMassRound} M☉, well above neutron-star masses. Unlike Sgr A* and M87*, this is a stellar-origin black hole rather than a supermassive one."
       },
       "1": {
         "kicker": "Cygnus X-1",
@@ -256,7 +256,7 @@
       "3": {
         "kicker": "About 190 km",
         "title": "A horizon smaller than a small country",
-        "body": "For a non-spinning black hole of 32.7 solar masses, the Schwarzschild radius is about 97 km, so the horizon would be about 190 km across. Its spin has not been measured: with no gas falling in, the X-ray methods used for Cygnus X-1 cannot be applied."
+        "body": "For a non-spinning black hole of {gaiaMass} solar masses, the Schwarzschild radius is about {gaiaHorizonKm} km, so the horizon would be about {gaiaHorizonAcrossKm} km across. Its spin has not been measured: with no gas falling in, the X-ray methods used for Cygnus X-1 cannot be applied."
       }
     },
     "omega-cen": {
@@ -295,7 +295,7 @@
       "2": {
         "kicker": "Virial mass",
         "title": "Why the estimate is rough",
-        "body": "Single-spectrum mass estimates rely on relations calibrated with fainter, nearby active galaxies. TON 618 is far brighter than those, so its 40 to 70 billion solar masses are uncertain by a factor of a few."
+        "body": "Single-spectrum mass estimates rely on relations calibrated with fainter, nearby active galaxies. TON 618 is far brighter than those, so its {tonMassBillions} billion solar masses are uncertain by a factor of a few."
       },
       "3": {
         "kicker": "North galactic pole",
@@ -322,7 +322,7 @@
       "3": {
         "kicker": "About 500 km",
         "title": "Horizon size",
-        "body": "A non-spinning black hole of 222 solar masses would have a Schwarzschild radius of about 650 kilometres. At the measured spin of about 0.84, the outer horizon’s coordinate radius is smaller, about 500 km."
+        "body": "A non-spinning black hole of {gwMass} solar masses would have a Schwarzschild radius of about {gwHorizonKm} kilometres. At the measured spin of about 0.84, the outer horizon’s coordinate radius is smaller, about 500 km."
       }
     }
   },
@@ -356,9 +356,9 @@
     },
     "sgr-a": {
       "0": {
-        "kicker": "8.28 kpc",
+        "kicker": "{sgrKpcShort} kpc",
         "title": "You are already inside this galaxy",
-        "body": "Sagittarius A* is the black hole at the centre of the Milky Way, about 27,000 light-years away in Sagittarius. Dust hides the Galactic Centre in visible light. Found as a compact radio source in 1974, it has a mass of about 4.3 million Suns, measured from the orbits of nearby stars. The crowded stars in this scene stand for the nuclear star cluster around it."
+        "body": "Sagittarius A* is the black hole at the centre of the Milky Way, about {sgrLy} light-years away in Sagittarius. Dust hides the Galactic Centre in visible light. Found as a compact radio source in 1974, it has a mass of about {sgrMassMillions} million Suns, measured from the orbits of nearby stars. The crowded stars in this scene stand for the nuclear star cluster around it."
       },
       "1": {
         "kicker": "S2",
@@ -384,8 +384,8 @@
     "m87": {
       "0": {
         "kicker": "Virgo",
-        "title": "A black hole 55 million light-years away",
-        "body": "M87* sits in the nucleus of Messier 87, a giant elliptical galaxy in the Virgo cluster, about 16.8 Mpc away. Its estimated mass is 6.5 billion Suns. The yellow glow in this scene represents the galaxy’s predominantly old stars."
+        "title": "A black hole {m87MlyRound} million light-years away",
+        "body": "M87* sits in the nucleus of Messier 87, a giant elliptical galaxy in the Virgo cluster, about {m87Mpc} Mpc away. Its estimated mass is {m87MassBillions} billion Suns. The yellow glow in this scene represents the galaxy’s predominantly old stars."
       },
       "1": {
         "kicker": "17°",
@@ -395,12 +395,12 @@
       "2": {
         "kicker": "about 44 μas",
         "title": "Two black holes, similar sizes in the sky",
-        "body": "The M87* image released in 2019 showed a ring 42 ± 3 microarcseconds across. A 2025 analysis combining observations from 2017, 2018 and 2021 found an average diameter of 43.9 ± 0.6 μas. A shadow’s angular size scales mainly with mass divided by distance. M87* is roughly 2,000 times farther away than Sgr A* but 1,500 times more massive. Their shadows therefore have comparable angular sizes, within reach of the same global radio interferometer."
+        "body": "The M87* image released in 2019 showed a ring 42 ± 3 microarcseconds across. A 2025 analysis combining observations from 2017, 2018 and 2021 found an average diameter of 43.9 ± 0.6 μas. A shadow’s angular size scales mainly with mass divided by distance. M87* is roughly {m87FartherThanSgr} times farther away than Sgr A* but {m87HeavierThanSgr} times more massive. Their shadows therefore have comparable angular sizes, within reach of the same global radio interferometer."
       },
       "3": {
         "kicker": "10 April 2019",
         "title": "The first image on horizon scales",
-        "body": "The EHT linked radio telescopes across continents to achieve Earth-sized resolving power at a wavelength of 1.3 mm. Data collected in 2017 became the image released two years later. In that image, orange marks radio brightness, not the gas’s visible colour. For a non-spinning black hole of this mass, the horizon diameter would be about 38 billion kilometres, or 260 au. For a rotating black hole, its size depends on which geometric measure you use."
+        "body": "The EHT linked radio telescopes across continents to achieve Earth-sized resolving power at a wavelength of 1.3 mm. Data collected in 2017 became the image released two years later. In that image, orange marks radio brightness, not the gas’s visible colour. For a non-spinning black hole of this mass, the horizon diameter would be about {m87HorizonBillionKm} billion kilometres, or {m87HorizonAu} au. For a rotating black hole, its size depends on which geometric measure you use."
       },
       "4": {
         "kicker": "pull back",
@@ -466,7 +466,7 @@
       "0": {
         "kicker": "Cyg X-1",
         "title": "A black hole in Cygnus",
-        "body": "Cygnus X-1 was one of the first convincing black hole candidates. VLBA parallax places the binary about 2.22 kpc away, or 7,240 light-years, near the Galactic plane in Cygnus. Miller-Jones and colleagues derived a black hole mass of 21.2 ± 2.2 M☉ in 2021. A 2025 analysis by Ramachandran and colleagues inferred roughly 13–18 M☉ using different estimates for the companion. That companion is HDE 226868, an O9.7 Iab supergiant. The X-ray source itself was discovered in 1964."
+        "body": "Cygnus X-1 was one of the first convincing black hole candidates. VLBA parallax places the binary about {cygKpc} kpc away, or {cygLy} light-years, near the Galactic plane in Cygnus. Miller-Jones and colleagues derived a black hole mass of {cygMassError} in 2021. A 2025 analysis by Ramachandran and colleagues inferred roughly 13–18 M☉ using different estimates for the companion. That companion is HDE 226868, an O9.7 Iab supergiant. The X-ray source itself was discovered in 1964."
       },
       "1": {
         "kicker": "stellar wind",
@@ -481,7 +481,7 @@
       "3": {
         "kicker": "same geometry",
         "title": "The same shape at a different scale",
-        "body": "At the same dimensionless spin and viewing angle, stellar-mass and supermassive black holes can have the same shadow shape in units of M. At Cygnus X-1’s 21 M☉, lengths and times are roughly 200,000 times smaller than for Sgr A*: the 10 M ruler spans about 310 km here, not 63 million, and inner orbits last milliseconds. Spectrum and brightness do not simply rescale; they also depend on the amount, temperature and motion of the surrounding gas."
+        "body": "At the same dimensionless spin and viewing angle, stellar-mass and supermassive black holes can have the same shadow shape in units of M. At Cygnus X-1’s {cygMassRound} M☉, lengths and times are roughly {cygLighterThanSgr} times smaller than for Sgr A*: the 10 M ruler spans about {cygRulerKm} km here, not {sgrRulerMillionKm} million, and inner orbits last milliseconds. Spectrum and brightness do not simply rescale; they also depend on the amount, temperature and motion of the surrounding gas."
       },
       "4": {
         "kicker": "pull back",
@@ -520,7 +520,7 @@
       "0": {
         "kicker": "Aquila",
         "title": "A sleeping giant nearby",
-        "body": "Gaia BH3 is a black hole of about 33 solar masses, roughly 1,900 light-years away in the constellation Aquila. It is the second-closest black hole known, after Gaia BH1, and the most massive known black hole of stellar origin in the Milky Way. It does not glow: no X-rays, radio waves or accretion disk have been detected. In this scene you see only background starlight bent by its gravity."
+        "body": "Gaia BH3 is a black hole of about {gaiaMassRound} solar masses, roughly {gaiaLyRound} light-years away in the constellation Aquila. It is the second-closest black hole known, after Gaia BH1, and the most massive known black hole of stellar origin in the Milky Way. It does not glow: no X-rays, radio waves or accretion disk have been detected. In this scene you see only background starlight bent by its gravity."
       },
       "1": {
         "kicker": "astrometry",
@@ -545,9 +545,9 @@
     },
     "omega-cen": {
       "0": {
-        "kicker": "17,700 ly",
+        "kicker": "{omegaLy} ly",
         "title": "A galaxy’s leftover heart",
-        "body": "Omega Centauri is the Milky Way’s most massive globular cluster, about 17,700 light-years away, with roughly 10 million stars. It is probably the stripped core of a small galaxy that the Milky Way absorbed long ago. A black hole at its centre would have stopped growing once the gas and outer stars of that galaxy were stripped away."
+        "body": "Omega Centauri is the Milky Way’s most massive globular cluster, about {omegaLy} light-years away, with roughly 10 million stars. It is probably the stripped core of a small galaxy that the Milky Way absorbed long ago. A black hole at its centre would have stopped growing once the gas and outer stars of that galaxy were stripped away."
       },
       "1": {
         "kicker": "Hubble, 2002–2023",
@@ -555,9 +555,9 @@
         "body": "In 2024, a team led by Maximilian Häberle compared more than 500 Hubble Space Telescope images taken over two decades and measured the motions of 1.4 million stars. Near the centre they found seven stars moving faster than the cluster’s escape speed, the fastest at 113 kilometres per second across the sky. Without an extra unseen mass at the centre, those stars would have escaped long ago."
       },
       "2": {
-        "kicker": "at least 8,200 M☉",
+        "kicker": "at least {omegaMass} M☉",
         "title": "A lower limit, not a weight",
-        "body": "In that study, keeping those stars bound requires a central mass of at least about 8,200 Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century."
+        "body": "In that study, keeping those stars bound requires a central mass of at least about {omegaMass} Suns; comparisons with simulations favour roughly 40,000. That would make it an intermediate-mass black hole, between the remnants of single stars and the supermassive black holes in galaxy centres. The mass limit uses motions across the sky only. Following full orbits would take more than a century."
       },
       "3": {
         "kicker": "debate",
@@ -582,14 +582,14 @@
         "body": "In 1957, astronomers at the Tonantzintla Observatory in Mexico listed it as faint blue star number 618. A radio survey detected it in 1970, and in 1976 a spectrum taken by Marie-Hélène Ulrich revealed its large redshift. It was not a nearby star but an extremely luminous quasar billions of light-years away."
       },
       "2": {
-        "kicker": "40–70 billion M☉",
+        "kicker": "{tonMassBillions} billion M☉",
         "title": "Weighed by moving gas",
-        "body": "Its mass is estimated, not measured directly. Gas near the black hole moves so fast that it broadens a hydrogen line to about 10,000 km/s. That speed, and the gas’s distance inferred from the quasar’s brightness, give roughly 40 to 70 billion Suns. Such estimates are uncertain by a factor of a few, especially for a quasar this bright."
+        "body": "Its mass is estimated, not measured directly. Gas near the black hole moves so fast that it broadens a hydrogen line to about 10,000 km/s. That speed, and the gas’s distance inferred from the quasar’s brightness, give roughly {tonMassBillions} billion Suns. Such estimates are uncertain by a factor of a few, especially for a quasar this bright."
       },
       "3": {
-        "kicker": "800–1,300 au",
+        "kicker": "{tonHorizonAu} au",
         "title": "Near a theoretical limit",
-        "body": "For a non-spinning black hole of this mass, the Schwarzschild radius would be roughly 800 to 1,300 astronomical units, dozens of times the radius of Neptune’s orbit. Theory suggests that a black hole fed by a luminous thin disk cannot grow much beyond about 50 billion Suns for typical parameters, so TON 618 sits close to that limit. Its spin has not been measured."
+        "body": "For a non-spinning black hole of this mass, the Schwarzschild radius would be roughly {tonHorizonAu} astronomical units, dozens of times the radius of Neptune’s orbit. Theory suggests that a black hole fed by a luminous thin disk cannot grow much beyond about 50 billion Suns for typical parameters, so TON 618 sits close to that limit. Its spin has not been measured."
       },
       "4": {
         "kicker": "pull back",
@@ -601,7 +601,7 @@
       "0": {
         "kicker": "23 November 2023",
         "title": "The heaviest merger so far",
-        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about 137 and 101 solar masses merging into one of about 220. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
+        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about 137 and 101 solar masses merging into one of about {gwMassRound}. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
       },
       "1": {
         "kicker": "0.1 s",
@@ -621,7 +621,7 @@
       "4": {
         "kicker": "pull back",
         "title": "Black holes without light",
-        "body": "Gravitational waves reveal black holes that emit no light at all. This remnant of about 220 solar masses counts as an intermediate-mass black hole, like the candidate in Omega Centauri, but it formed in a distant galaxy, and its waves reached us after billions of years."
+        "body": "Gravitational waves reveal black holes that emit no light at all. This remnant of about {gwMassRound} solar masses counts as an intermediate-mass black hole, like the candidate in Omega Centauri, but it formed in a distant galaxy, and its waves reached us after billions of years."
       }
     }
   },
@@ -631,22 +631,22 @@
       "name": "Sagittarius A*",
       "found": "1974  ·  Balick & Brown",
       "source": "Supermassive black hole at the Galactic Centre. Mass and distance from GRAVITY stellar-orbit measurements (2022), also adopted by the 2026 S301 study.",
-      "distance": "8.277 kpc  ·  27,000 ly",
-      "mass": "≈4.297 × 10⁶ M☉"
+      "distance": "{sgrKpc} kpc  ·  {sgrLy} ly",
+      "mass": "≈{sgrMassSci}"
     },
     "stellar": {
       "name": "Cygnus X-1",
       "found": "1964  ·  X-ray source discovered",
       "source": "X-ray binary with supergiant companion HDE 226868. Model-dependent mass estimates: Miller-Jones et al. (2021) and Ramachandran et al. (2025).",
-      "distance": "2.22 kpc  ·  7,240 ly",
-      "mass": "21.2 ± 2.2 M☉ (2021); 13–18 M☉ (2025)"
+      "distance": "{cygKpc} kpc  ·  {cygLy} ly",
+      "mass": "{cygMassError} (2021); 13–18 M☉ (2025)"
     },
     "gaiabh3": {
       "name": "Gaia BH3",
       "found": "announced 2024  ·  preliminary Gaia data",
       "source": "A dormant black hole discovered by the Gaia Collaboration. At its announcement in 2024, it was the most massive known stellar-origin black hole in the Milky Way.",
-      "distance": "0.591 kpc  ·  1,930 ly",
-      "mass": "32.7 ± 0.8 M☉"
+      "distance": "{gaiaKpc} kpc  ·  {gaiaLy} ly",
+      "mass": "{gaiaMassError}"
     },
     "grs1915": {
       "name": "GRS 1915+105",
@@ -694,15 +694,15 @@
       "name": "ω Centauri",
       "found": "The Milky Way’s most massive globular cluster",
       "source": "Likely the stripped nucleus of a dwarf galaxy. Fast central stars point to an intermediate-mass black hole (2024), but a 2025 study of star motions and pulsar timing prefers a cluster of dark remnants; it remains debated.",
-      "distance": "5.43 kpc  ·  17,700 ly",
+      "distance": "{omegaKpc} kpc  ·  {omegaLy} ly",
       "mass": "≈4 × 10⁶ M☉  ·  cluster"
     },
     "m87": {
       "name": "M87*",
       "found": "1918  ·  jet; 2019  ·  EHT image",
       "source": "Supermassive black hole in the Virgo cluster galaxy Messier 87. Mass from EHT (2019); a 2025 multi-epoch analysis gives a mean ring diameter of 43.9 μas.",
-      "distance": "16.8 Mpc  ·  54.8 Mly",
-      "mass": "≈6.5 × 10⁹ M☉"
+      "distance": "{m87Mpc} Mpc  ·  {m87Mly} Mly",
+      "mass": "≈{m87MassSci}"
     },
     "m31": {
       "name": "Andromeda Galaxy",
@@ -715,7 +715,7 @@
       "name": "Large Magellanic Cloud",
       "found": "The Milky Way’s largest satellite galaxy",
       "source": "Home to LMC X-1 and LMC X-3, X-ray binaries containing stellar-mass black holes.",
-      "distance": "49.6 kpc  ·  162,000 ly",
+      "distance": "{lmcKpc} kpc  ·  {lmcLy} ly",
       "mass": "LMC X-1  ·  ≈11 M☉"
     },
     "lensed": {
@@ -744,14 +744,14 @@
       "found": "1957  ·  catalogued; 1976  ·  quasar redshift",
       "source": "Hyperluminous radio-loud quasar. Single-epoch Hβ mass estimates: Shemmer et al. (2004) and Ge et al. (2019).",
       "distance": "z = 2.219  ·  light travel ≈ 10.8 Gyr",
-      "mass": "≈4–7 × 10¹⁰ M☉ (estimate)"
+      "mass": "≈{tonMassSci} (estimate)"
     },
     "gw231123": {
       "name": "GW231123",
       "found": "2023  ·  gravitational waves (LIGO)",
       "source": "Merger of black holes of about 137 and 101 M☉ (LIGO–Virgo–KAGRA, 2025). Two-detector event, so the sky position spans about 1,700 square degrees.",
-      "distance": "z ≈ 0.40  ·  D_L ≈ 2.2 Gpc",
-      "mass": "≈222 M☉ remnant  ·  χ ≈ 0.84"
+      "distance": "z ≈ 0.40  ·  D_L ≈ {gwGpc} Gpc",
+      "mass": "≈{gwMass} M☉ remnant  ·  χ ≈ 0.84"
     }
   },
   "canvasLabel": "Black hole visualization",

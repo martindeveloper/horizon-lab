@@ -156,7 +156,7 @@
       "pluto": "Charon je tak velký, že dvojice obíhá bod mimo Pluto."
     },
     "far": {
-      "alphaCen": "Dvě slunce 11 až 36 au od sebe, obíhající kolem sebe každých 80 let, s Proximou pětinu světelného roku stranou.",
+      "alphaCen": "Dvě slunce {abSeparationAu} au od sebe, obíhající kolem sebe každých {abPeriodYears} let, s Proximou pětinu světelného roku stranou.",
       "proxima": "Nejbližší hvězda ke Slunci: červený trpaslík o sedmině šířky Slunce, který vzplává."
     }
   },
@@ -165,7 +165,7 @@
     "summary": "Každé těleso ve skutečné velikosti a poloze, v kilometrech, s lodí v počátku scény a logaritmickou hloubkou, aby povrch měsíce i vzdálené planety sdílely jeden průchod. Lety trvají skutečný čas pohonu na dvojích hodinách. Sluneční svit slábne s kvadrátem vzdálenosti; měsíce se navzájem zastiňují.",
     "features": {
       "scale": "Slunce, planety, pojmenované malé světy a měsíce ve skutečné velikosti, umístěné podle elementů JPL s rozlišenými barycentry Země–Měsíc a Pluto–Charon.",
-      "flight": "Tři pohony: Voyager se 17 km/s, světelná plachta s pětinou rychlosti světla a plamenná loď s jedním g, která zrychluje, v polovině se obrátí a brzdí. Autopilot letí skutečnou cestu s automatickým zrychlením času; v ručním letu loď padá ve skutečné gravitaci.",
+      "flight": "Tři pohony: Voyager se {voyagerKms} km/s, světelná plachta s pětinou rychlosti světla a plamenná loď s jedním g, která zrychluje, v polovině se obrátí a brzdí. Autopilot letí skutečnou cestu s automatickým zrychlením času; v ručním letu loď padá ve skutečné gravitaci.",
       "clocks": "Lodní a pozemské hodiny v tempu, které zvolíte; rozcházejí se jen při vysoké rychlosti.",
       "light": "Sluneční svit slábnoucí se vzdáleností, doba letu světla domů a zatmění od měsíců a planet.",
       "sky": "Jasné hvězdy v naměřených vzdálenostech a pás Mléčné dráhy: posouvají se, jak loď ujíždí světelné roky, při rychlosti se tísní vpředu a mění barvu; α Centauri jako tři slunce naměřené velikosti."
@@ -193,7 +193,7 @@
     "steps": {
       "moon": {
         "title": "Měsíc",
-        "body": "Třicet průměrů Země prázdna. Světlo mezeru překoná za 1,3 sekundy."
+        "body": "Třicet průměrů Země prázdna. Světlo mezeru překoná za {moonLightSeconds} sekundy."
       },
       "earth": {
         "title": "Země",
@@ -201,11 +201,11 @@
       },
       "mars": {
         "title": "Mars",
-        "body": "Měsíce rychlostí Voyageru, dny pro plamennou loď. Slunce tu dává 43 % pozemského svitu."
+        "body": "Měsíce rychlostí Voyageru, dny pro plamennou loď. Slunce tu dává {marsSunlightPercent} % pozemského svitu."
       },
       "jupiter": {
         "title": "Io a Jupiter",
-        "body": "Stín Io přejde Jupiter každých 42 hodin. Signál domů letí skoro hodinu."
+        "body": "Stín Io přejde Jupiter každých {ioPeriodHours} hodin. Signál domů letí skoro hodinu."
       },
       "saturn": {
         "title": "Saturn",
@@ -217,7 +217,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za 80 let; Proxima je ta červená. Voyager by potřeboval 77 000 let."
+        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} let; Proxima je ta červená. Voyager by potřeboval {voyagerYears} let."
       },
       "galaxy": {
         "title": "Galaxie shora",

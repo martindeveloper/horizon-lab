@@ -305,7 +305,7 @@ test("technical notes and light-travel times format in both languages", () => {
     const t = translator(locale);
     const args = proseArgs(PROSE_FIGURES, locale);
     for (const [key] of leaves(messages[locale]))
-      if (key.startsWith("technicalDetails."))
+      if (key.startsWith("technicalDetails.") || key.startsWith("viewHints."))
         assert.doesNotMatch(t(key, args), /[{}]|NaN|undefined/, `${locale}:${key}`);
     const f = createFormatter({ locale });
     for (const years of [1.6e-5, 7.9e-4, 0.05, 4.2465, 27_000, 2.5e6, 13.8e9])

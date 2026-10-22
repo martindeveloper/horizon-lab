@@ -156,7 +156,7 @@
       "pluto": "Charon is so large that the pair orbits a point outside Pluto."
     },
     "far": {
-      "alphaCen": "Two suns 11 to 36 au apart, circling each other every 80 years, with Proxima a fifth of a light-year off.",
+      "alphaCen": "Two suns {abSeparationAu} au apart, circling each other every {abPeriodYears} years, with Proxima a fifth of a light-year off.",
       "proxima": "The nearest star to the Sun: a red dwarf, a seventh of the Sun's width, that flares."
     }
   },
@@ -165,7 +165,7 @@
     "summary": "Every body at its true size and place, in kilometres, with the ship as the scene's origin and a logarithmic depth buffer so a moon's surface and the far planets share one pass. Flights take the drive's real trip time on two clocks. Sunlight falls as the inverse square; moons shade one another in eclipses.",
     "features": {
       "scale": "The Sun, the planets, the named small worlds and the moons at true size, placed from the JPL elements with the Earth–Moon and Pluto–Charon barycentres resolved.",
-      "flight": "Three drives: Voyager's 17 km/s, a light sail at a fifth of light speed, a torch ship at one g that burns, flips at the midpoint and brakes. The autopilot flies the real trip on an automatic time warp; by hand the ship falls in real gravity.",
+      "flight": "Three drives: Voyager's {voyagerKms} km/s, a light sail at a fifth of light speed, a torch ship at one g that burns, flips at the midpoint and brakes. The autopilot flies the real trip on an automatic time warp; by hand the ship falls in real gravity.",
       "clocks": "A ship clock and an Earth clock, run at the visitor's rate, that part only when the ship goes fast.",
       "light": "Sunlight weaker with distance, the light-time home, and eclipses cast by moons and planets.",
       "sky": "The bright stars at their measured distances and the Milky Way's band, shifting as the ship covers light-years, crowding ahead and changing colour at speed; α Centauri as three suns of their measured size."
@@ -193,7 +193,7 @@
     "steps": {
       "moon": {
         "title": "The Moon",
-        "body": "Thirty Earth diameters of nothing. Light crosses the gap in 1.3 seconds."
+        "body": "Thirty Earth diameters of nothing. Light crosses the gap in {moonLightSeconds} seconds."
       },
       "earth": {
         "title": "Earth",
@@ -201,11 +201,11 @@
       },
       "mars": {
         "title": "Mars",
-        "body": "Months at Voyager's speed, days for the torch ship. Sunlight here is 43 % of Earth's."
+        "body": "Months at Voyager's speed, days for the torch ship. Sunlight here is {marsSunlightPercent} % of Earth's."
       },
       "jupiter": {
         "title": "Io and Jupiter",
-        "body": "Io's shadow crosses Jupiter every 42 hours. Radio home: most of an hour."
+        "body": "Io's shadow crosses Jupiter every {ioPeriodHours} hours. Radio home: most of an hour."
       },
       "saturn": {
         "title": "Saturn",
@@ -217,7 +217,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in 80 years; Proxima is the red one. Voyager would need 77,000 years."
+        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in {abPeriodYears} years; Proxima is the red one. Voyager would need {voyagerYears} years."
       },
       "galaxy": {
         "title": "The Galaxy, from above",

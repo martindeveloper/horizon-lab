@@ -95,7 +95,7 @@ test("runtime prose arguments format without missing substitutions in either loc
     const runtime = { step: "1", total: "9", time: "today", equation: "P² = a³" };
     const args = { ...proseArgs(PROSE_FIGURES, locale), ...runtime };
     for (const [key] of leaves(messages[locale]))
-      if (/^(notes|tour|technicalDetails)\./.test(key)) {
+      if (/^(notes|tour|technicalDetails|viewHints|epochs|guide)\./.test(key)) {
         const printed = t(key, args);
         assert.doesNotMatch(printed, /[{}]|NaN|undefined/, `${locale}:${key}`);
       }

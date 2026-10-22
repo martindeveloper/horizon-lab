@@ -9,7 +9,7 @@
     },
     "sun": {
       "title": "Slunce",
-      "kicker": "G2 V",
+      "kicker": "{sunType}",
       "hint": "Fraunhoferovy tmavé čáry a atomy, které je tvoří."
     },
     "stars": {
@@ -272,7 +272,7 @@
       },
       "cool": {
         "title": "Chladné hvězdy, čáry kovů",
-        "body": "Při 4 300 K zůstává víc atomů kovů neutrálních a mnoho jich sedí v nízkých hladinách: spektrum zaplní čáry neutrálních kovů a vodíkové slábnou."
+        "body": "Při {arcturusK} K zůstává víc atomů kovů neutrálních a mnoho jich sedí v nízkých hladinách: spektrum zaplní čáry neutrálních kovů a vodíkové slábnou."
       },
       "mystery": {
         "title": "Teď vy",
@@ -285,7 +285,7 @@
     "summary": "Každé spektrum se tu počítá, nekreslí: atomová data NIST, populace podle Sahy a Boltzmanna a přenos záření, na stole skrz homogenní vrstvu plynu, u hvězd skrz modelové fotosféry ATLAS9.",
     "features": {
       "bench": "Kirchhoffův stůl: lampa, plyn a spektrograf, s tmavými, jasnými i mizejícími čarami z jedné rovnice.",
-      "stars": "Slunce a šest jasných hvězd od O9,5 po K5 a libovolná hvězda hlavní posloupnosti od 3 900 do 30 000 K (bez M trpaslíků).",
+      "stars": "Slunce a šest jasných hvězd od {hottestType} po {coolestType} a libovolná hvězda hlavní posloupnosti od {sequenceFromK} do {sequenceToK} K (bez M trpaslíků).",
       "lines": "{lines} čar osmi prvků z NIST, každá se svými hladinami, silou, křivkou růstu a průběhem napříč spektrální posloupností.",
       "mystery": "Náhodně rozdávané záhadné případy: plameny, plyn před lampou, hvězdy od B po K, každá s vlastní teplotou a rychlostí."
     },
@@ -320,7 +320,7 @@
       },
       "limits": {
         "title": "Co tu chybí",
-        "body": "Žádné molekuly kromě O₂ (žádné TiO, proto laboratoř končí u 3 900 K, před M trpaslíky), žádné chromosféry ani odchylky od LTE, žádná vázaně-volná kontinua kovů (důležitá pod 400 nm u chladných hvězd), žádné vlastní rozšíření vodíku, srážky s heliem, rotace ani makroturbulence; rozptyl se počítá jako absorpce. Ve Slunci vycházejí silné čáry až 1,7krát silnější (Fe I 438 nm); Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
+        "body": "Žádné molekuly kromě O₂ (žádné TiO, proto laboratoř končí u {sequenceFromK} K, před M trpaslíky), žádné chromosféry ani odchylky od LTE, žádná vázaně-volná kontinua kovů (důležitá pod 400 nm u chladných hvězd), žádné vlastní rozšíření vodíku, srážky s heliem, rotace ani makroturbulence; rozptyl se počítá jako absorpce. Ve Slunci vycházejí silné čáry až 1,7krát silnější (Fe I 438 nm); Balmerovy čáry chladných hvězd poněkud slabé. Fotony ve scéně jsou schematické."
       }
     }
   },

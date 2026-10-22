@@ -224,6 +224,25 @@ export function staticCard(t: Translate, d: DistanceSettings, key: string, spec:
   };
 }
 
+/**
+ * A figure counted in a power of ten its sentence words, for prose only: "{massMillions}
+ * million Suns" quotes 4.297 × 10⁶ M☉ as "4.3" (exponent 6, two digits). A plain count, so no
+ * unit converts it again.
+ */
+export function inPowerOfTen(fact: Fact, exponent: number, digits: number): Fact {
+  const { show: _show, value, range, ...rest } = fact;
+  const scale = (v: number) => v / 10 ** exponent;
+  const spread = range ? ([scale(range[0]), scale(range[1])] as const) : undefined;
+  const base = { ...rest, unit: "count" as const, digits };
+  if (value === undefined) {
+    if (!spread) throw new Error("A span needs its range");
+    return { ...base, range: spread };
+  }
+  return spread
+    ? { ...base, value: scale(value), range: spread }
+    : { ...base, value: scale(value) };
+}
+
 const proseCache = new WeakMap<object, Map<string, Record<string, string>>>();
 
 /**

@@ -140,6 +140,7 @@ export function TimeDock() {
 /** The scrubber with the epochs as stations on it; wide screens label and link them. */
 function Timeline({ yearsAgo }: { yearsAgo: number }) {
   const t = useTranslations("orrery");
+  const figures = proseArgs(PROSE_FIGURES, useLocale());
   const f = useFormatter();
   const epoch = epochOf(yearsAgo);
   const api = useOrrery.getState;
@@ -185,7 +186,7 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
                 s.id === epoch ? "font-medium text-accent" : "text-subtle hover:text-fg",
               )}
             >
-              {t(`epochs.${s.id}`)}
+              {t(`epochs.${s.id}`, figures)}
             </button>
           );
         })}

@@ -45,7 +45,7 @@
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Mléčná dráha  ·  pohled shora  ·  střed v jádře Galaxie",
   "localGroup": "Za hranicemi Mléčné dráhy",
-  "localGroupBody": "Mapa zobrazuje oblast galaktického disku o průměru 28 kpc. Galaxie v Andromedě je od nás vzdálena asi 760 kpc, M87* přibližně 16,8 Mpc. To je zhruba 22krát dál než Andromeda a 2 000krát dál než Sagittarius A*. Světlo kvasaru TON 618 cestovalo asi 10,8 miliardy let, vlny z GW231123 zhruba 2 až 6 miliard let.",
+  "localGroupBody": "Mapa zobrazuje oblast galaktického disku o průměru 28 kpc. Galaxie v Andromedě je od nás vzdálena asi 760 kpc, M87* přibližně {m87Mpc} Mpc. To je zhruba {m87FartherThanAndromeda}krát dál než Andromeda a {m87FartherThanSgr}krát dál než Sagittarius A*. Světlo kvasaru TON 618 cestovalo asi 10,8 miliardy let, vlny z GW231123 zhruba 2 až 6 miliard let.",
   "theorySolutions": "Teorie  ·  řešení obecné relativity",
   "theoryBody": "Nejde o konkrétní objekty na obloze. Scéna „Disk v gravitační čočce“ ukazuje, jak gravitace mění obraz akrečního disku. Schwarzschildova a Kerrova metrika jsou přesná vakuová řešení Einsteinových rovnic; světlo zde sleduje Kerrovy dráhy, zářící plyn je ilustrativní.",
   "landmark": "Orientační bod  ·  nelze k němu přiletět",
@@ -129,7 +129,7 @@
       "0": {
         "kicker": "Domov",
         "title": "Supermasivní černá díra v srdci Galaxie",
-        "body": "Sagittarius A* leží ve směru souhvězdí Střelce a má hmotnost přibližně 4,3 milionu Sluncí. Prozrazují ji dráhy okolních hvězd, zejména S2, která jeden oběh dokončí asi za 16 let a přiblíží se zhruba na 120 au. Černou díru dnes obklopuje horký akreční tok s nízkou zářivou účinností. Na svou hmotnost je překvapivě málo zářivá."
+        "body": "Sagittarius A* leží ve směru souhvězdí Střelce a má hmotnost přibližně {sgrMassMillions} milionu Sluncí. Prozrazují ji dráhy okolních hvězd, zejména S2, která jeden oběh dokončí asi za 16 let a přiblíží se zhruba na 120 au. Černou díru dnes obklopuje horký akreční tok s nízkou zářivou účinností. Na svou hmotnost je překvapivě málo zářivá."
       },
       "1": {
         "kicker": "EHT",
@@ -151,7 +151,7 @@
       "0": {
         "kicker": "Původ",
         "title": "Obr, který rostl s galaxií",
-        "body": "M87* sídlí v jádře obří eliptické galaxie Messier 87 v kupě galaxií v Panně. Její hmotnost odhadujeme přibližně na 6,5 miliardy Sluncí. Galaxie rostla i pohlcováním menších sousedů a její centrální černá díra mohla nabývat hmotnost jak akrecí plynu, tak slučováním s dalšími černými dírami. Přesný průběh jejího růstu však neznáme."
+        "body": "M87* sídlí v jádře obří eliptické galaxie Messier 87 v kupě galaxií v Panně. Její hmotnost odhadujeme přibližně na {m87MassBillions} miliardy Sluncí. Galaxie rostla i pohlcováním menších sousedů a její centrální černá díra mohla nabývat hmotnost jak akrecí plynu, tak slučováním s dalšími černými dírami. Přesný průběh jejího růstu však neznáme."
       },
       "1": {
         "kicker": "10. dubna 2019",
@@ -207,7 +207,7 @@
       "0": {
         "kicker": "Původ",
         "title": "Pozůstatek hmotné hvězdy",
-        "body": "Černá díra v soustavě Cygnus X-1 v souhvězdí Labutě vznikla gravitačním kolapsem hmotné hvězdy. Její hvězdný průvodce, veleobr HDE 226868, dodnes dodává plyn svým hvězdným větrem. Odhady hmotnosti černé díry se podle použitého modelu pohybují přibližně mezi 13 a 21 M☉, tedy výrazně nad hmotnostmi neutronových hvězd. Na rozdíl od Sgr A* a M87* zde pozorujeme černou díru hvězdného původu."
+        "body": "Černá díra v soustavě Cygnus X-1 v souhvězdí Labutě vznikla gravitačním kolapsem hmotné hvězdy. Její hvězdný průvodce, veleobr HDE 226868, dodnes dodává plyn svým hvězdným větrem. Odhady hmotnosti černé díry se podle použitého modelu pohybují přibližně mezi 13 a {cygMassRound} M☉, tedy výrazně nad hmotnostmi neutronových hvězd. Na rozdíl od Sgr A* a M87* zde pozorujeme černou díru hvězdného původu."
       },
       "1": {
         "kicker": "Cygnus X-1",
@@ -256,7 +256,7 @@
       "3": {
         "kicker": "Asi 190 km",
         "title": "Horizont menší než malý stát",
-        "body": "Pro nerotující černou díru o hmotnosti 32,7 Sluncí vychází Schwarzschildův poloměr asi 97 km, takže by horizont měl průměr kolem 190 km. Spin změřen nebyl: bez padajícího plynu nelze použít rentgenové metody jako u Cygnus X-1."
+        "body": "Pro nerotující černou díru o hmotnosti {gaiaMass} Sluncí vychází Schwarzschildův poloměr asi {gaiaHorizonKm} km, takže by horizont měl průměr kolem {gaiaHorizonAcrossKm} km. Spin změřen nebyl: bez padajícího plynu nelze použít rentgenové metody jako u Cygnus X-1."
       }
     },
     "omega-cen": {
@@ -295,7 +295,7 @@
       "2": {
         "kicker": "Viriálová hmotnost",
         "title": "Proč je odhad hrubý",
-        "body": "Odhady hmotnosti z jediného spektra využívají vztahy kalibrované na slabších a bližších aktivních galaxiích. TON 618 je mnohem svítivější, takže odhad 40 až 70 miliard hmotností Slunce může být zatížen nejistotou až několikanásobku hodnoty."
+        "body": "Odhady hmotnosti z jediného spektra využívají vztahy kalibrované na slabších a bližších aktivních galaxiích. TON 618 je mnohem svítivější, takže odhad {tonMassBillions} miliard hmotností Slunce může být zatížen nejistotou až několikanásobku hodnoty."
       },
       "3": {
         "kicker": "Severní galaktický pól",
@@ -322,7 +322,7 @@
       "3": {
         "kicker": "Asi 500 km",
         "title": "Velikost horizontu",
-        "body": "Nerotující černá díra o hmotnosti 222 Sluncí by měla Schwarzschildův poloměr asi 650 kilometrů. Při změřeném spinu kolem 0,84 je souřadnicový poloměr vnějšího horizontu menší, asi 500 km."
+        "body": "Nerotující černá díra o hmotnosti {gwMass} Sluncí by měla Schwarzschildův poloměr asi {gwHorizonKm} kilometrů. Při změřeném spinu kolem 0,84 je souřadnicový poloměr vnějšího horizontu menší, asi 500 km."
       }
     }
   },
@@ -356,9 +356,9 @@
     },
     "sgr-a": {
       "0": {
-        "kicker": "8,28 kpc",
+        "kicker": "{sgrKpcShort} kpc",
         "title": "Černá díra v naší vlastní Galaxii",
-        "body": "Sagittarius A* je černá díra v centru Mléčné dráhy, asi 27 000 světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie prach. Jako kompaktní rádiový zdroj byla objevena v roce 1974; její hmotnost, asi 4,3 milionu Sluncí, určujeme z drah okolních hvězd. Hustý roj hvězd v této scéně představuje jadernou hvězdokupu."
+        "body": "Sagittarius A* je černá díra v centru Mléčné dráhy, asi {sgrLy} světelných let od nás ve směru souhvězdí Střelce. Ve viditelném světle zakrývá střed Galaxie prach. Jako kompaktní rádiový zdroj byla objevena v roce 1974; její hmotnost, asi {sgrMassMillions} milionu Sluncí, určujeme z drah okolních hvězd. Hustý roj hvězd v této scéně představuje jadernou hvězdokupu."
       },
       "1": {
         "kicker": "S2",
@@ -384,8 +384,8 @@
     "m87": {
       "0": {
         "kicker": "Panna",
-        "title": "Černá díra vzdálená 55 milionů světelných let",
-        "body": "M87* se nachází v jádře Messier 87, obří eliptické galaxie v kupě galaxií v Panně, asi 16,8 Mpc od nás. Hmotnost černé díry se odhaduje na 6,5 miliardy Sluncí. Žlutavá záře scény představuje převážně staré hvězdy této galaxie."
+        "title": "Černá díra vzdálená {m87MlyRound} milionů světelných let",
+        "body": "M87* se nachází v jádře Messier 87, obří eliptické galaxie v kupě galaxií v Panně, asi {m87Mpc} Mpc od nás. Hmotnost černé díry se odhaduje na {m87MassBillions} miliardy Sluncí. Žlutavá záře scény představuje převážně staré hvězdy této galaxie."
       },
       "1": {
         "kicker": "17°",
@@ -395,12 +395,12 @@
       "2": {
         "kicker": "přibližně 44 μas",
         "title": "Dvě černé díry, podobná velikost na obloze",
-        "body": "Snímek M87* zveřejněný v roce 2019 ukázal prstenec o průměru 42 ± 3 miliontin obloukové vteřiny (μas). Analýza pozorování z let 2017, 2018 a 2021, zveřejněná v roce 2025, uvádí průměrnou hodnotu 43,9 ± 0,6 μas. Úhlová velikost stínu závisí hlavně na poměru hmotnosti a vzdálenosti. M87* je oproti Sgr A* zhruba 2 000krát vzdálenější a 1 500krát hmotnější, takže jsou jejich stíny na obloze srovnatelné. Oba proto dokáže rozlišit stejná globální síť radioteleskopů."
+        "body": "Snímek M87* zveřejněný v roce 2019 ukázal prstenec o průměru 42 ± 3 miliontin obloukové vteřiny (μas). Analýza pozorování z let 2017, 2018 a 2021, zveřejněná v roce 2025, uvádí průměrnou hodnotu 43,9 ± 0,6 μas. Úhlová velikost stínu závisí hlavně na poměru hmotnosti a vzdálenosti. M87* je oproti Sgr A* zhruba {m87FartherThanSgr}krát vzdálenější a {m87HeavierThanSgr}krát hmotnější, takže jsou jejich stíny na obloze srovnatelné. Oba proto dokáže rozlišit stejná globální síť radioteleskopů."
       },
       "3": {
         "kicker": "10. dubna 2019",
         "title": "První snímek na škále horizontu",
-        "body": "Síť EHT spojila radioteleskopy na různých kontinentech a na vlnové délce 1,3 mm dosáhla rozlišení srovnatelného s teleskopem o velikosti Země. Z dat pořízených v roce 2017 vznikl snímek zveřejněný o dva roky později. Oranžová barva na tomto snímku znázorňuje intenzitu rádiového záření, ne skutečnou barvu plynu. Pro nerotující černou díru o této hmotnosti by průměr horizontu činil asi 38 miliard kilometrů, tedy 260 au. U rotující černé díry je třeba přesně určit, jak její rozměr definujeme."
+        "body": "Síť EHT spojila radioteleskopy na různých kontinentech a na vlnové délce 1,3 mm dosáhla rozlišení srovnatelného s teleskopem o velikosti Země. Z dat pořízených v roce 2017 vznikl snímek zveřejněný o dva roky později. Oranžová barva na tomto snímku znázorňuje intenzitu rádiového záření, ne skutečnou barvu plynu. Pro nerotující černou díru o této hmotnosti by průměr horizontu činil asi {m87HorizonBillionKm} miliard kilometrů, tedy {m87HorizonAu} au. U rotující černé díry je třeba přesně určit, jak její rozměr definujeme."
       },
       "4": {
         "kicker": "oddálení",
@@ -466,7 +466,7 @@
       "0": {
         "kicker": "Cyg X-1",
         "title": "Černá díra v souhvězdí Labutě",
-        "body": "Cygnus X-1 patří k prvním přesvědčivým kandidátům na černou díru. Paralaxa změřená sítí VLBA klade tuto dvojhvězdu do vzdálenosti přibližně 2,22 kpc, tedy 7 240 světelných let. Leží blízko galaktické roviny v souhvězdí Labutě. Miller-Jones a spoluautoři v roce 2021 odvodili hmotnost černé díry 21,2 ± 2,2 M☉. Ramachandranová a spoluautoři v roce 2025 při jiném modelování hvězdného průvodce získali přibližně 13–18 M☉. Průvodcem je veleobr HDE 226868 třídy O9.7 Iab. Rentgenový zdroj byl objeven už v roce 1964."
+        "body": "Cygnus X-1 patří k prvním přesvědčivým kandidátům na černou díru. Paralaxa změřená sítí VLBA klade tuto dvojhvězdu do vzdálenosti přibližně {cygKpc} kpc, tedy {cygLy} světelných let. Leží blízko galaktické roviny v souhvězdí Labutě. Miller-Jones a spoluautoři v roce 2021 odvodili hmotnost černé díry {cygMassError}. Ramachandranová a spoluautoři v roce 2025 při jiném modelování hvězdného průvodce získali přibližně 13–18 M☉. Průvodcem je veleobr HDE 226868 třídy O9.7 Iab. Rentgenový zdroj byl objeven už v roce 1964."
       },
       "1": {
         "kicker": "hvězdný vítr",
@@ -481,7 +481,7 @@
       "3": {
         "kicker": "stejná geometrie",
         "title": "Stejný tvar, jiné měřítko",
-        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro 21 M☉ černé díry v Cygnus X-1 jsou odpovídající délky a časy zhruba 200 000krát menší než pro Sgr A*: pravítko 10 M tu měří asi 310 km, ne 63 milionů, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
+        "body": "Při stejném spinu a směru pohledu může mít hvězdná černá díra v jednotkách M stejný stín jako supermasivní. Pro {cygMassRound} M☉ černé díry v Cygnus X-1 jsou odpovídající délky a časy zhruba {cygLighterThanSgr}krát menší než pro Sgr A*: pravítko 10 M tu měří asi {cygRulerKm} km, ne {sgrRulerMillionKm} milionů, a vnitřní oběhy trvají milisekundy. Spektrum a jas se ale jednoduše nepřeškálují; závisejí také na množství, teplotě a pohybu okolního plynu."
       },
       "4": {
         "kicker": "oddálení",
@@ -520,7 +520,7 @@
       "0": {
         "kicker": "Orel",
         "title": "Spící obr nedaleko od nás",
-        "body": "Gaia BH3 je černá díra o hmotnosti asi 33 Sluncí, vzdálená zhruba 1 900 světelných let v souhvězdí Orla. Je to druhá nejbližší známá černá díra po Gaia BH1 a nejhmotnější známá černá díra hvězdného původu v Mléčné dráze. Nezáří: nebylo u ní zjištěno rentgenové ani rádiové záření ani akreční disk. Ve scéně vidíte jen světlo vzdálených hvězd ohnuté její gravitací."
+        "body": "Gaia BH3 je černá díra o hmotnosti asi {gaiaMassRound} Sluncí, vzdálená zhruba {gaiaLyRound} světelných let v souhvězdí Orla. Je to druhá nejbližší známá černá díra po Gaia BH1 a nejhmotnější známá černá díra hvězdného původu v Mléčné dráze. Nezáří: nebylo u ní zjištěno rentgenové ani rádiové záření ani akreční disk. Ve scéně vidíte jen světlo vzdálených hvězd ohnuté její gravitací."
       },
       "1": {
         "kicker": "astrometrie",
@@ -545,9 +545,9 @@
     },
     "omega-cen": {
       "0": {
-        "kicker": "17 700 sv. r.",
+        "kicker": "{omegaLy} sv. r.",
         "title": "Pozůstatek srdce galaxie",
-        "body": "Omega Centauri je nejhmotnější kulová hvězdokupa Mléčné dráhy, vzdálená asi 17 700 světelných let, s přibližně 10 miliony hvězd. Nejspíš jde o obnažené jádro malé galaxie, kterou Mléčná dráha kdysi pohltila. Černá díra v jejím středu by přestala růst ve chvíli, kdy tato galaxie přišla o plyn a vnější hvězdy."
+        "body": "Omega Centauri je nejhmotnější kulová hvězdokupa Mléčné dráhy, vzdálená asi {omegaLy} světelných let, s přibližně 10 miliony hvězd. Nejspíš jde o obnažené jádro malé galaxie, kterou Mléčná dráha kdysi pohltila. Černá díra v jejím středu by přestala růst ve chvíli, kdy tato galaxie přišla o plyn a vnější hvězdy."
       },
       "1": {
         "kicker": "Hubble, 2002–2023",
@@ -555,9 +555,9 @@
         "body": "Tým vedený Maximilianem Häberlem v roce 2024 porovnal více než 500 snímků Hubbleova vesmírného dalekohledu pořízených během dvou desetiletí a změřil pohyby 1,4 milionu hvězd. Poblíž středu našel sedm hvězd rychlejších, než je úniková rychlost hvězdokupy; nejrychlejší má příčnou rychlost v rovině oblohy 113 kilometrů za sekundu. Bez další neviditelné hmoty ve středu by tyto hvězdy už dávno unikly."
       },
       "2": {
-        "kicker": "nejméně 8 200 M☉",
+        "kicker": "nejméně {omegaMass} M☉",
         "title": "Dolní mez, ne přesná hmotnost",
-        "body": "Aby tyto hvězdy zůstaly vázané, musí být podle této studie ve středu soustředěna hmota odpovídající nejméně asi 8 200 Sluncím; srovnání se simulacemi vychází nejlépe pro zhruba 40 000. Šlo by tedy o černou díru střední hmotnosti, mezi pozůstatky jednotlivých hvězd a supermasivními černými dírami v centrech galaxií. Dolní mez hmotnosti vychází jen z pohybů po obloze. Sledovat celé oběžné dráhy by trvalo přes sto let."
+        "body": "Aby tyto hvězdy zůstaly vázané, musí být podle této studie ve středu soustředěna hmota odpovídající nejméně asi {omegaMass} Sluncím; srovnání se simulacemi vychází nejlépe pro zhruba 40 000. Šlo by tedy o černou díru střední hmotnosti, mezi pozůstatky jednotlivých hvězd a supermasivními černými dírami v centrech galaxií. Dolní mez hmotnosti vychází jen z pohybů po obloze. Sledovat celé oběžné dráhy by trvalo přes sto let."
       },
       "3": {
         "kicker": "spor",
@@ -582,14 +582,14 @@
         "body": "V roce 1957 ji astronomové z observatoře Tonantzintla v Mexiku zapsali jako slabou modrou hvězdu číslo 618. Rádiová přehlídka ji zachytila v roce 1970 a v roce 1976 odhalilo spektrum pořízené Marie-Hélène Ulrichovou její velký rudý posuv. Nešlo o blízkou hvězdu, ale o mimořádně svítivý kvasar vzdálený miliardy světelných let."
       },
       "2": {
-        "kicker": "40–70 miliard M☉",
+        "kicker": "{tonMassBillions} miliard M☉",
         "title": "Hmotnost odhadnutá z pohybu plynu",
-        "body": "Hmotnost je odhad, nikoli přímé měření. Plyn u černé díry se pohybuje tak rychle, že rozšiřuje vodíkovou emisní čáru na zhruba 10 000 km/s. Tato rychlost spolu se vzdáleností plynu od díry, odvozenou ze svítivosti kvasaru, dává přibližně 40 až 70 miliard Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru."
+        "body": "Hmotnost je odhad, nikoli přímé měření. Plyn u černé díry se pohybuje tak rychle, že rozšiřuje vodíkovou emisní čáru na zhruba 10 000 km/s. Tato rychlost spolu se vzdáleností plynu od díry, odvozenou ze svítivosti kvasaru, dává přibližně {tonMassBillions} miliard Sluncí. Takové odhady jsou nejisté až několikanásobně, zvlášť u takto jasného kvasaru."
       },
       "3": {
-        "kicker": "800–1 300 au",
+        "kicker": "{tonHorizonAu} au",
         "title": "Blízko teoretické meze",
-        "body": "Pro nerotující černou díru této hmotnosti by Schwarzschildův poloměr činil zhruba 800 až 1 300 astronomických jednotek, tedy desítkykrát víc než poloměr dráhy Neptunu. Podle teorie černá díra živená svítivým tenkým diskem při obvyklých parametrech nepřeroste přibližně 50 miliard Sluncí, takže se TON 618 této mezi blíží. Její spin změřen nebyl."
+        "body": "Pro nerotující černou díru této hmotnosti by Schwarzschildův poloměr činil zhruba {tonHorizonAu} astronomických jednotek, tedy desítkykrát víc než poloměr dráhy Neptunu. Podle teorie černá díra živená svítivým tenkým diskem při obvyklých parametrech nepřeroste přibližně 50 miliard Sluncí, takže se TON 618 této mezi blíží. Její spin změřen nebyl."
       },
       "4": {
         "kicker": "oddálení",
@@ -601,7 +601,7 @@
       "0": {
         "kicker": "23. listopadu 2023",
         "title": "Zatím nejhmotnější splynutí",
-        "body": "Dne 23. listopadu 2023 zachytily oba detektory LIGO gravitační vlny ze splynutí dvou černých děr o hmotnostech asi 137 a 101 Sluncí v jednu o hmotnosti zhruba 220 Sluncí. Jde o zatím nejhmotnější spolehlivě zachycené splynutí černých děr. Černá díra v této scéně je jen ilustrací výsledného objektu: žádné světlo z něj zachyceno nebylo."
+        "body": "Dne 23. listopadu 2023 zachytily oba detektory LIGO gravitační vlny ze splynutí dvou černých děr o hmotnostech asi 137 a 101 Sluncí v jednu o hmotnosti zhruba {gwMassRound} Sluncí. Jde o zatím nejhmotnější spolehlivě zachycené splynutí černých děr. Černá díra v této scéně je jen ilustrací výsledného objektu: žádné světlo z něj zachyceno nebylo."
       },
       "1": {
         "kicker": "0,1 s",
@@ -621,7 +621,7 @@
       "4": {
         "kicker": "oddálení",
         "title": "Černé díry bez světla",
-        "body": "Gravitační vlny odhalují černé díry, které nevyzařují vůbec žádné světlo. Tento pozůstatek o hmotnosti asi 220 Sluncí patří mezi černé díry střední hmotnosti, podobně jako kandidát v Omega Centauri, vznikl však ve vzdálené galaxii a jeho vlny k nám dorazily po miliardách let."
+        "body": "Gravitační vlny odhalují černé díry, které nevyzařují vůbec žádné světlo. Tento pozůstatek o hmotnosti asi {gwMassRound} Sluncí patří mezi černé díry střední hmotnosti, podobně jako kandidát v Omega Centauri, vznikl však ve vzdálené galaxii a jeho vlny k nám dorazily po miliardách let."
       }
     }
   },
@@ -631,22 +631,22 @@
       "name": "Sagittarius A*",
       "found": "1974  ·  Balick a Brown",
       "source": "Supermasivní černá díra v centru Mléčné dráhy. Hmotnost a vzdálenost určené z drah hvězd přístrojem GRAVITY (2022), převzaté i studií S301 z roku 2026.",
-      "distance": "8,277 kpc  ·  27 000 sv. r.",
-      "mass": "≈4,297 × 10⁶ M☉"
+      "distance": "{sgrKpc} kpc  ·  {sgrLy} sv. r.",
+      "mass": "≈{sgrMassSci}"
     },
     "stellar": {
       "name": "Cygnus X-1",
       "found": "1964  ·  objev rentgenového zdroje",
       "source": "Rentgenová dvojhvězda s veleobrem HDE 226868. Hmotnost závisí na modelu: Miller-Jones a kol. (2021), Ramachandranová a kol. (2025).",
-      "distance": "2,22 kpc  ·  7 240 sv. r.",
-      "mass": "21,2 ± 2,2 M☉ (2021); 13–18 M☉ (2025)"
+      "distance": "{cygKpc} kpc  ·  {cygLy} sv. r.",
+      "mass": "{cygMassError} (2021); 13–18 M☉ (2025)"
     },
     "gaiabh3": {
       "name": "Gaia BH3",
       "found": "oznámeno 2024  ·  předběžná data Gaia",
       "source": "Černá díra bez výrazné akrece. Při oznámení objevu v roce 2024 šlo o nejhmotnější známou černou díru hvězdného původu v Mléčné dráze. Objev týmu Gaia.",
-      "distance": "0,591 kpc  ·  1 930 sv. r.",
-      "mass": "32,7 ± 0,8 M☉"
+      "distance": "{gaiaKpc} kpc  ·  {gaiaLy} sv. r.",
+      "mass": "{gaiaMassError}"
     },
     "grs1915": {
       "name": "GRS 1915+105",
@@ -694,15 +694,15 @@
       "name": "ω Centauri",
       "found": "Nejhmotnější kulová hvězdokupa Mléčné dráhy",
       "source": "Pravděpodobně obnažené jádro dávné trpasličí galaxie. Rychlé hvězdy v centru ukazují na černou díru střední hmotnosti (2024), studie pohybů hvězd a pulsarů z roku 2025 však dává přednost shluku temných pozůstatků; otázka zůstává otevřená.",
-      "distance": "5,43 kpc  ·  17 700 sv. r.",
+      "distance": "{omegaKpc} kpc  ·  {omegaLy} sv. r.",
       "mass": "≈4 × 10⁶ M☉  ·  hvězdokupa"
     },
     "m87": {
       "name": "M87*",
       "found": "1918  ·  výtrysk; 2019  ·  snímek EHT",
       "source": "Supermasivní černá díra v obří eliptické galaxii Messier 87 v kupě galaxií v Panně. Hmotnost podle EHT (2019); analýza více epoch z roku 2025 uvádí průměr prstence 43,9 μas.",
-      "distance": "16,8 Mpc  ·  54,8 mil. sv. r.",
-      "mass": "≈6,5 × 10⁹ M☉"
+      "distance": "{m87Mpc} Mpc  ·  {m87Mly} mil. sv. r.",
+      "mass": "≈{m87MassSci}"
     },
     "m31": {
       "name": "Galaxie v Andromedě",
@@ -715,7 +715,7 @@
       "name": "Velké Magellanovo mračno",
       "found": "Největší satelitní galaxie Mléčné dráhy",
       "source": "Obsahuje rentgenové dvojhvězdy LMC X-1 a LMC X-3 s černými dírami hvězdné hmotnosti.",
-      "distance": "49,6 kpc  ·  162 000 sv. r.",
+      "distance": "{lmcKpc} kpc  ·  {lmcLy} sv. r.",
       "mass": "LMC X-1  ·  ≈11 M☉"
     },
     "lensed": {
@@ -744,14 +744,14 @@
       "found": "1957  ·  katalog; 1976  ·  rudý posuv kvasaru",
       "source": "Mimořádně svítivý rádiově hlasitý kvasar. Odhady hmotnosti z čáry Hβ v jediném spektru: Shemmer a kol. (2004) a Ge a kol. (2019).",
       "distance": "z = 2,219  ·  světlo cestovalo ≈ 10,8 mld. let",
-      "mass": "≈4–7 × 10¹⁰ M☉ (odhad)"
+      "mass": "≈{tonMassSci} (odhad)"
     },
     "gw231123": {
       "name": "GW231123",
       "found": "2023  ·  gravitační vlny (LIGO)",
       "source": "Splynutí černých děr o hmotnostech asi 137 a 101 M☉ (LIGO–Virgo–KAGRA, 2025). Zachytily jej jen dva detektory, takže oblast nejistoty polohy na obloze zabírá asi 1 700 čtverečních stupňů.",
-      "distance": "z ≈ 0,40  ·  D_L ≈ 2,2 Gpc",
-      "mass": "≈222 M☉ pozůstatek  ·  χ ≈ 0,84"
+      "distance": "z ≈ 0,40  ·  D_L ≈ {gwGpc} Gpc",
+      "mass": "≈{gwMass} M☉ pozůstatek  ·  χ ≈ 0,84"
     }
   },
   "canvasLabel": "Vizualizace černé díry",

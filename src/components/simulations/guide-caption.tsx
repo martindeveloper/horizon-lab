@@ -1,9 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, type ReactNode } from "react";
 
-import type { Translate } from "@/lib/facts";
+import { proseArgs, type Fact, type Translate } from "@/lib/facts";
 
 import { GuideBody, GuideCard, GuideTitle, type GuideControls } from "./guide-card";
 import { useDockClearance, type DockInTheWay } from "./use-dock-clearance";
@@ -101,6 +101,7 @@ export function GuideCaption<Step extends JourneyStep>({
   className,
   clearance,
   extra,
+  figures,
 }: {
   namespace: string;
   getState: () => JourneyState;
@@ -113,8 +114,12 @@ export function GuideCaption<Step extends JourneyStep>({
   className?: string | undefined;
   clearance?: { inTheWay?: DockInTheWay; property?: string } | undefined;
   extra?: ((step: Step) => ReactNode) | undefined;
+  /** Catalogue figures the captions quote, by placeholder, printed in the page's language. */
+  figures?: Readonly<Record<string, Fact>> | undefined;
 }) {
   const t = useTranslations(namespace);
+  const locale = useLocale();
+  const args = figures ? proseArgs(figures, locale) : undefined;
   const tGuide = useTranslations("guide");
   const card = useRef<HTMLElement>(null);
   useDockClearance(card, clearance?.inTheWay, clearance?.property);
@@ -154,8 +159,8 @@ export function GuideCaption<Step extends JourneyStep>({
             },
       }}
     >
-      <GuideTitle>{t(`tour.steps.${step.id}.title`)}</GuideTitle>
-      <GuideBody>{t(`tour.steps.${step.id}.body`)}</GuideBody>
+      <GuideTitle>{t(`tour.steps.${step.id}.title`, args)}</GuideTitle>
+      <GuideBody>{t(`tour.steps.${step.id}.body`, args)}</GuideBody>
       {extra?.(step)}
     </GuideCard>
   );

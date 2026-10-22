@@ -1,6 +1,7 @@
 import { GuideCaption } from "@/components/simulations/guide-caption";
 import type { DockInTheWay } from "@/components/simulations/use-dock-clearance";
 
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { TOUR, TOUR_DWELL } from "../lib/model/tour";
 import { useVoyage } from "../lib/store";
 
@@ -29,6 +30,7 @@ export function VoyageGuide() {
       landed={landed}
       className="bottom-(--hud-clear,6rem) pb-2"
       clearance={clearance}
+      figures={PROSE_FIGURES}
     />
   );
 }

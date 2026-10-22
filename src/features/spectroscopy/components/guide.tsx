@@ -3,6 +3,7 @@
 import { GuideCaption } from "@/components/simulations/guide-caption";
 import { GuideEquation } from "@/components/simulations/guide-card";
 
+import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { SPECTROSCOPY_EQUATIONS } from "../lib/model/equations";
 import { GUIDE_DWELL, TOUR, type TourStep } from "../lib/model/tour";
 import { useSpectroscopy } from "../lib/store";
@@ -32,6 +33,7 @@ export function SpectroscopyGuide() {
       playing={playing}
       landed={landed}
       extra={equationOf}
+      figures={PROSE_FIGURES}
     />
   );
 }

@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight, Pause } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { figureArgs } from "@/features/black-hole/lib/figures";
 import { PRESETS } from "@/features/black-hole/lib/holes";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
@@ -16,10 +17,11 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
   const t = useTranslations("blackHole");
   const presetId = useBlackHole((s) => s.presetId);
   const storyKey = t.has(`stories.${presetId}`) ? presetId : "custom";
+  const figures = figureArgs(useLocale());
   const stories = Object.keys(t.raw(`stories.${storyKey}`)).map((index) => ({
-    kicker: t(`stories.${storyKey}.${index}.kicker`),
-    title: t(`stories.${storyKey}.${index}.title`),
-    body: t(`stories.${storyKey}.${index}.body`),
+    kicker: t(`stories.${storyKey}.${index}.kicker`, figures),
+    title: t(`stories.${storyKey}.${index}.title`, figures),
+    body: t(`stories.${storyKey}.${index}.body`, figures),
   }));
   const kind = useBlackHole((s) => PRESETS.find((p) => p.id === s.presetId)?.kind);
   const [index, setIndex] = useState(0);

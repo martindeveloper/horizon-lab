@@ -3,10 +3,13 @@ import test from "node:test";
 
 import { UNITS } from "@horizon/toolkit/science";
 
+import { catalogueFacts as blackHoleFacts } from "../src/features/black-hole/lib/figures.ts";
 import { holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { catalogueFacts as deepFieldFacts } from "../src/features/deep-field/lib/model/catalogue/index.ts";
 import { catalogueFacts as giantsFacts } from "../src/features/giants/lib/model/catalogue.ts";
 import { catalogueFacts as orreryFacts } from "../src/features/orrery/lib/model/catalogue/index.ts";
+import { catalogueFacts as spectroscopyFacts } from "../src/features/spectroscopy/lib/model/catalogue.ts";
+import { catalogueFacts as voyageFacts } from "../src/features/voyage/lib/model/catalogue.ts";
 import { factSources } from "../src/lib/facts.ts";
 import { SOURCES } from "../src/lib/sources.ts";
 import { solarCatalogueFacts } from "../src/space/solar-system/model/catalogue.ts";
@@ -18,6 +21,9 @@ for (const [name, facts] of [
   ["Orrery", orreryFacts],
   ["Deep Field", deepFieldFacts],
   ["Giants", giantsFacts],
+  ["Voyage", voyageFacts],
+  ["Stellar Spectra", spectroscopyFacts],
+  ["Black Hole", blackHoleFacts],
 ]) {
   test(`${name} quantities have supported units and finite, consistent ranges`, () => {
     const plain = new Set(["count", "percent", "ratio"]);

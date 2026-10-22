@@ -3,7 +3,16 @@ import type { SourceId } from "@/lib/sources";
 /** The nearest stars, from their astrometry (neighbours.ts) through the science kit's laws. */
 import { angularSeparation, convert, parallaxDistance } from "@horizon/toolkit/science";
 
-import { closestApproach, neighbour, neighbourSeparationAu, type NeighbourId } from "../neighbours";
+import {
+  ALPHA_CEN_AB_ORBIT,
+  closestApproach,
+  neighbour,
+  neighbourSeparationAu,
+  type NeighbourId,
+} from "../neighbours";
+
+/** B's orbit about A in au: its angular semi-major axis at the pair's distance (1″ at 1 pc is 1 au). */
+const AB_AU = ALPHA_CEN_AB_ORBIT.aArcsec * (1000 / neighbour("alphaCen").parallax);
 
 /**
  * A neighbour's figures: distance by the parallax law, radial and proper motion, and the
@@ -74,6 +83,21 @@ export const STARS = {
       source: "gaiaDr3",
       status: "derived",
       note: "2.19° on the sky",
+    },
+    abSeparation: {
+      range: [AB_AU * (1 - ALPHA_CEN_AB_ORBIT.e), AB_AU * (1 + ALPHA_CEN_AB_ORBIT.e)],
+      unit: "au",
+      digits: 2,
+      source: "pourbaix2002",
+      status: "derived",
+      note: "A to B from periastron to apastron, at the Akeson distance",
+    },
+    abPeriod: {
+      value: ALPHA_CEN_AB_ORBIT.periodYr,
+      unit: "yr",
+      digits: 4,
+      source: "pourbaix2002",
+      status: "verified",
     },
     proximaOut: {
       value: neighbourSeparationAu(neighbour("proxima"), neighbour("alphaCen"), 0),

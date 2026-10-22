@@ -659,3 +659,28 @@ test("a star's caches change nothing: windows, velocities, the curve of growth a
   for (let i = 0; i < 600; i++)
     near(without.flux[i] / removed.flux[i], 1, 1e-5, `${removed.wavelengths[i]} nm`);
 });
+
+test("the guide, views and notes quote the catalogue's figures in both languages", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { featureMessages, leaves } = await import("./messages-helper.mjs");
+  const { proseArgs } = await import("../src/lib/facts.ts");
+  const { PROSE_FIGURES, PROSE_TYPES } =
+    await import("../src/features/spectroscopy/lib/model/catalogue.ts");
+  for (const locale of ["en", "cs"]) {
+    const messages = featureMessages("spectroscopy", locale);
+    const t = createTranslator({
+      locale,
+      messages,
+      onError(error) {
+        throw error;
+      },
+    });
+    /* Placeholders the lab fills at run time, not figures. */
+    const args = { ...proseArgs(PROSE_FIGURES, locale), ...PROSE_TYPES, lines: 1 };
+    for (const [key] of leaves(messages))
+      if (/^(tour\.steps|views|technicalDetails\.(features|sections))\./.test(key))
+        assert.doesNotMatch(t(key, args), /[{}]|NaN|undefined/, `${locale}:${key}`);
+  }
+  assert.equal(PROSE_TYPES.hottestType, "O9.5");
+  assert.equal(PROSE_TYPES.coolestType, "K5");
+});

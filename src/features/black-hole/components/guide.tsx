@@ -1,5 +1,5 @@
 import { useReducedMotion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 
 import { tourControls } from "@/components/simulations/guide-caption";
@@ -10,6 +10,7 @@ import {
   GuideTitle,
 } from "@/components/simulations/guide-card";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
+import { figureArgs } from "@/features/black-hole/lib/figures";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { tourFor, type TourStep } from "@/features/black-hole/lib/tours";
 
@@ -31,15 +32,17 @@ export function GuideOverlay() {
   const index = useBlackHole((s) => s.guideStep);
   const arrived = useBlackHole((s) => s.guideArrived);
   const reduce = useReducedMotion();
+  const locale = useLocale();
   const steps = useMemo(() => {
     const key = t.has(`tours.${presetId}`) ? presetId : "custom";
+    const figures = figureArgs(locale);
     return tourFor(presetId).map((pose, i): TourStep => ({
       ...pose,
-      kicker: t(`tours.${key}.${i}.kicker`),
-      title: t(`tours.${key}.${i}.title`),
-      body: t(`tours.${key}.${i}.body`),
+      kicker: t(`tours.${key}.${i}.kicker`, figures),
+      title: t(`tours.${key}.${i}.title`, figures),
+      body: t(`tours.${key}.${i}.body`, figures),
     }));
-  }, [presetId, t]);
+  }, [presetId, t, locale]);
   const step = steps[index] ?? steps[0]!;
 
   useGuideKeys(useBlackHole.getState, guideKeys);

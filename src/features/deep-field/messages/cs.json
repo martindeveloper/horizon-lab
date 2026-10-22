@@ -17,16 +17,16 @@
   "viewHints": {
     "inner": "Merkur až Mars, tam, kde jsou dnes.",
     "giants": "Jupiter až Neptun, dnes.",
-    "kuiper": "Neptun a ledový pás za ním, asi 30–50 au.",
+    "kuiper": "Neptun a ledový pás za ním, asi {kuiperAu} au.",
     "heliosphere": "Pět sond na cestě ven a okraj slunečního větru, který překročily.",
     "scattered": "Tělesa na protáhlých elipsách, stovky au daleko.",
-    "oort": "Oblak komet odvozený z dlouhoperiodických komet, až do vzdálenosti jednoho až tří světelných let.",
+    "oort": "Oblak komet odvozený z dlouhoperiodických komet, až do vzdálenosti {oortLy} světelného roku.",
     "stars": "Proxima, Alfa Centauri a Barnardova hvězda ve skutečných směrech na obloze. Prstenec vyznačuje vzdálenost Proximy; hvězdy v pozadí jsou rozmístěné podle skutečné oblohy.",
-    "galaxy": "Naše Galaxie, napříč asi 100 000 světelných let. Zlatá čára je dráha Slunce.",
-    "local-group": "Mléčná dráha, Andromeda a jejich trpaslíci, asi 6 milionů světelných let napříč.",
-    "local-sheet": "Plochá stěna blízkých skupin, ve které žijeme, asi 46 milionů světelných let napříč.",
-    "virgo-cluster": "Asi 1 500 galaxií zhruba 54 milionů světelných let od nás. My stojíme mimo ni.",
-    "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi 110 milionů světelných let napříč.",
+    "galaxy": "Naše Galaxie, napříč asi {galaxyLy} světelných let. Zlatá čára je dráha Slunce.",
+    "local-group": "Mléčná dráha, Andromeda a jejich trpaslíci, asi {localGroupMly} milionů světelných let napříč.",
+    "local-sheet": "Plochá stěna blízkých skupin, ve které žijeme, asi {localSheetMly} milionů světelných let napříč.",
+    "virgo-cluster": "Asi {virgoGalaxies} galaxií zhruba {virgoMly} milionů světelných let od nás. My stojíme mimo ni.",
+    "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi {superclusterMly} milionů světelných let napříč.",
     "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru.",
     "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan.",
     "observable-universe": "Vše, odkud k nám světlo stihlo doletět. Reliktní záření je nejvzdálenější světlo, které můžeme spatřit."
@@ -249,7 +249,7 @@
         "members": "Asi {value} katalogizovaných galaxií",
         "width": "Asi {value}",
         "heart": "NGC 1399",
-        "body": "Po kupě v Panně nejhmotnější kupa do vzdálenosti asi 65 milionů světelných let, menší a hustší, na jižní obloze.",
+        "body": "Po kupě v Panně nejhmotnější kupa do vzdálenosti asi {within}, menší a hustší, na jižní obloze.",
         "caution": "Členové jsou nakreslený vzorek ve tvaru kupy, ne katalog."
       },
       "centaurus": {

@@ -5,12 +5,12 @@
   "viewHints": {
     "inner": "Merkur, Venuše, Země a Mars. Jupiter leží u okraje záběru.",
     "giants": "Jupiter až Neptun a raný disk planetesimál. V tomto pohledu nejlépe uvidíte odklízení zbylých těles.",
-    "kuiper": "Od dráhy Neptunu napříč klasickým Kuiperovým pásem, zhruba 30–50 au.",
+    "kuiper": "Od dráhy Neptunu napříč klasickým Kuiperovým pásem, zhruba {kuiperAu} au.",
     "scattered": "Tělesa, která Neptun rozptýlil na protáhlé eliptické dráhy sahající stovky au od Slunce.",
-    "oort": "Kulové plochy vyznačují vzdálenosti 5 000 a 100 000 au; hustota bodů klesá jako r⁻³·⁵. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet."
+    "oort": "Kulové plochy vyznačují vzdálenosti {oortInnerShellAu} a {oortShellAu} au; hustota bodů klesá jako r⁻³·⁵. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet."
   },
   "epochs": {
-    "sketch": "Před 10 miliardami let",
+    "sketch": "Před {timelineGyr} miliardami let",
     "birth": "Vznik Slunce",
     "disk": "Neporušený disk",
     "clearing": "Odklízení těles",
@@ -204,7 +204,7 @@
       },
       "past": {
         "title": "Dávná minulost je modelová",
-        "body": "Polohy planet před 4 miliardami let neznáme. Raná část časové osy je náčrt vycházející z modelů nestability obřích planet (model z Nice): obři začínají blíž u sebe, za nimi leží disk zbylých těles. Jupiter a Saturn pomalu projdou rezonancí 2:1 a soustava se stane nestabilní. Neptun při migraci směrem od Slunce rozptýlí tělesa disku; většina je vyvržena, část zůstane v Kuiperově pásu či rozptýleném disku a část skončí v Oortově oblaku. Novější verze nechávají obry začínat v těsném řetězci rezonancí, který se později rozpadne; náčrt kreslí původní verzi z roku 2005. Ta tento děj spojovala s pozdním těžkým bombardováním před 3,9 miliardy let. Novější studie upřednostňují ranější nestabilitu, do asi 100 milionů let od vzniku prvních pevných látek. Jediné krátké období prudce zvýšeného počtu dopadů proto už není obvyklým výkladem."
+        "body": "Polohy planet před 4 miliardami let neznáme. Raná část časové osy je náčrt vycházející z modelů nestability obřích planet (model z Nice): obři začínají blíž u sebe, za nimi leží disk zbylých těles. Jupiter a Saturn pomalu projdou rezonancí 2:1 a soustava se stane nestabilní. Neptun při migraci směrem od Slunce rozptýlí tělesa disku; většina je vyvržena, část zůstane v Kuiperově pásu či rozptýleném disku a část skončí v Oortově oblaku. Novější verze nechávají obry začínat v těsném řetězci rezonancí, který se později rozpadne; náčrt kreslí původní verzi z roku 2005. Ta tento děj spojovala s pozdním těžkým bombardováním před {lhbGyr} miliardy let. Novější studie upřednostňují ranější nestabilitu, do asi 100 milionů let od vzniku prvních pevných látek. Jediné krátké období prudce zvýšeného počtu dopadů proto už není obvyklým výkladem."
       },
       "ellipses": {
         "title": "Elipsy",

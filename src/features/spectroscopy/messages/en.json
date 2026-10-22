@@ -9,7 +9,7 @@
     },
     "sun": {
       "title": "The Sun",
-      "kicker": "G2 V",
+      "kicker": "{sunType}",
       "hint": "Fraunhofer's dark lines, and the atoms that make them."
     },
     "stars": {
@@ -272,7 +272,7 @@
       },
       "cool": {
         "title": "Cool stars, metal lines",
-        "body": "At 4,300 K more metal atoms stay neutral and many sit in low levels: lines of neutral metals crowd the spectrum while hydrogen's fade."
+        "body": "At {arcturusK} K more metal atoms stay neutral and many sit in low levels: lines of neutral metals crowd the spectrum while hydrogen's fade."
       },
       "mystery": {
         "title": "Your turn",
@@ -285,7 +285,7 @@
     "summary": "Every spectrum here is computed, not drawn: NIST atomic data, Saha–Boltzmann populations and radiative transfer, through a uniform slab on the bench and through ATLAS9 model photospheres for the stars.",
     "features": {
       "bench": "Kirchhoff's bench: a lamp, a gas and a spectrograph, with dark, bright and vanishing lines from one equation.",
-      "stars": "The Sun and six bright stars from O9.5 to K5, and any main-sequence star from 3,900 to 30,000 K (no M dwarfs).",
+      "stars": "The Sun and six bright stars from {hottestType} to {coolestType}, and any main-sequence star from {sequenceFromK} to {sequenceToK} K (no M dwarfs).",
       "lines": "{lines} lines of eight elements from NIST, each with its levels, strength, curve of growth and trend down the spectral sequence.",
       "mystery": "Mystery cases dealt at random: flames, gas in front of a lamp, stars from B to K, each with its own temperature and velocity."
     },
@@ -320,7 +320,7 @@
       },
       "limits": {
         "title": "What is left out",
-        "body": "No molecules besides O₂ (no TiO, so the lab stops at 3,900 K, short of the M dwarfs), no chromospheres or departures from LTE, no metal bound-free continua (they matter below about 400 nm in cool stars), no hydrogen self-broadening, collisions with helium, rotation or macroturbulence; scattering counts as absorption. In the Sun, strong lines come out up to 1.7 times too strong (Fe I 438 nm); cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
+        "body": "No molecules besides O₂ (no TiO, so the lab stops at {sequenceFromK} K, short of the M dwarfs), no chromospheres or departures from LTE, no metal bound-free continua (they matter below about 400 nm in cool stars), no hydrogen self-broadening, collisions with helium, rotation or macroturbulence; scattering counts as absorption. In the Sun, strong lines come out up to 1.7 times too strong (Fe I 438 nm); cool stars' Balmer lines are somewhat weak. The scene's photons are schematic."
       }
     }
   },

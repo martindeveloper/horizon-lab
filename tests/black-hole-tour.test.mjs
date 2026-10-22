@@ -58,3 +58,23 @@ test("a hold starts where the flight landed and drifts the way the beat turned",
   assert.ok(later.distance < landed.distance, "the push creeps inward");
   assert.equal(later.roll, landed.roll);
 });
+
+test("tours, stories and the atlas quote the shared catalogue's figures in both languages", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { featureMessages, leaves } = await import("./messages-helper.mjs");
+  const { figureArgs } = await import("../src/features/black-hole/lib/figures.ts");
+  for (const locale of ["en", "cs"]) {
+    const messages = featureMessages("black-hole", locale);
+    const t = createTranslator({
+      locale,
+      messages,
+      onError(error) {
+        throw error;
+      },
+    });
+    const args = figureArgs(locale);
+    for (const [key] of leaves(messages))
+      if (/^(tours|stories|atlasSites)\.|^localGroupBody$/.test(key))
+        assert.doesNotMatch(t(key, args), /[{}]|NaN|undefined/, `${locale}:${key}`);
+  }
+});
