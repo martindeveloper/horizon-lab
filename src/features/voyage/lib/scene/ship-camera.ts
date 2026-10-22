@@ -14,7 +14,6 @@
  */
 import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from "three";
 
-import { FRAME_RADII } from "@/space/solar-system/model/framing";
 import {
   ORBIT_STEP,
   createFlightAxes,
@@ -38,13 +37,7 @@ import {
 } from "@horizon/toolkit/scene";
 import { properVelocity } from "@horizon/toolkit/science";
 
-import {
-  GALACTIC_NORTH,
-  anchorRadius,
-  isBodyAnchor,
-  isFlyable,
-  type AnchorId,
-} from "../model/anchors";
+import { anchorRadius, isFlyable, type AnchorId } from "../model/anchors";
 import { MANOEUVRE_ACCEL, assistWarp } from "../model/assist";
 import {
   ALIGN_S,
@@ -54,22 +47,12 @@ import {
   transitSeconds,
   type FlightPhase,
 } from "../model/autopilot";
-import { worldBody } from "../model/bodies";
 import {
-  PIECES_PER_DYNAMICAL_TIME,
-  createWell,
-  dynamicalTime,
-  gmOf,
-  gravityAt,
-} from "../model/gravity";
-import {
-  ALTITUDE_FLOOR,
   COSMIC_FAR_KM,
   CRASH_KM_S,
   C_KM_S,
   DRIVES,
   NEAR_PLANE_KM,
-  SUN_ALTITUDE_FLOOR,
   type Drive,
 } from "../model/parameters";
 import {
@@ -84,22 +67,14 @@ import {
   haltShip,
   shipSpeed,
   stepShip,
-  type ShipGravity,
   type ShipMode,
   type ShipState,
 } from "../model/ship";
+import { createShipEnvironment } from "./ship-environment";
+import { createShipFraming, ARRIVE_INCLINATION, floorOf, offsetOf } from "./ship-framing";
 
-/** Arrival: this far round from the Sun (three-quarter light), this far above the ecliptic. */
-const ARRIVE_SWING = 0.9;
-const ARRIVE_INCLINATION = 0.3;
-/** The framed body's apparent radius, as a fraction of half the view's shorter side. */
-const ARRIVE_FILL = 0.55;
 /** The farthest a parked ship may back off, in the body's radii. */
 const FARTHEST_RADII = 20_000;
-/** How far an arrival may swing from its line of approach towards the lit side, radians. */
-const APPROACH_SWING = 1.1;
-/** Pieces a frame of manual flight is cut into at most; past it the warp holds back near a body. */
-const MAX_PIECES = 400;
 /** A button step eases out over about a third of a second: the time constant, seconds. */
 const STEP_EASE = 0.08;
 /** How long after the last input the scene still counts as handled, ms. */
@@ -111,8 +86,6 @@ const ROLL_RAD_PER_S = 1.2;
 const ROLL_AXIS = new Vector3(0, 0, 1);
 /** Boost multiplies the drive's thrust or speed. */
 const BOOST = 10;
-/** Seconds the velocity of the body the ship rides is measured over. */
-const VELOCITY_S = 60;
 /** Seconds entering or leaving orbit takes to turn the nose from where it pointed onto its new heading. */
 const SETTLE_S = 1.4;
 /** Leaving orbit, the nose comes up until its line passes the body this many radii from its centre. */
@@ -182,15 +155,13 @@ export function createShipCamera(
     onCrash?: (id: AnchorId, speed: number) => void;
   },
 ) {
-  const { reduceMotion, bodyAt, halfTan, warp: warpAt = assistWarp } = options;
+  const { reduceMotion, bodyAt, warp: warpAt = assistWarp } = options;
   const ship: ShipState = createShip();
   let mode: ShipMode = "orbit";
   let aim: AnchorId = "earth";
   const pose: OrbitPose = { azimuth: 0.6, inclination: ARRIVE_INCLINATION, distance: 1 };
   /** The attitude in free flight, camera to world (three's convention). */
   let attitude: Quat = [0, 0, 0, 1];
-  const floorOf = (id: AnchorId) =>
-    anchorRadius(id) * (id === "sun" ? SUN_ALTITUDE_FLOOR : ALTITUDE_FLOOR);
   /** An orbit entered farther out than the usual reach keeps its distance: no jump inwards. */
   let farthest = 0;
   const limits = () => ({
@@ -221,7 +192,6 @@ export function createShipCamera(
   const fromPos = vec3d();
   const toPos = vec3d();
   const route = vec3d();
-  const later = vec3d();
   const velocity = vec3d();
   const relative = vec3d();
   const thrustDir = vec3d();
@@ -237,146 +207,13 @@ export function createShipCamera(
   const right = new Vector3();
   const top = new Vector3();
   const roll = new Quaternion();
-  const dateLater = new Date();
   const hands = createFlightAxes();
-  const earlier = vec3d();
-  const pull = vec3d();
   /** Ship seconds per real second over the last frame: the rate asked for, or what held it back. */
   let warpNow = 0;
-  /** The pull on the ship, km/s², and the body pulling hardest, as last read. */
-  const pulled: { gravity: number; from: AnchorId } = { gravity: 0, from: "sun" };
-
-  /** A body's heliocentric velocity, km/s, from its motion over a minute. */
-  const bodyVelocity = (id: AnchorId, out: Vec3d) => {
-    const now = options.now();
-    bodyAt(id, now, earlier);
-    dateLater.setTime(now.getTime() + VELOCITY_S * 1000);
-    bodyAt(id, dateLater, later);
-    out[0] = (later[0] - earlier[0]) / VELOCITY_S;
-    out[1] = (later[1] - earlier[1]) / VELOCITY_S;
-    out[2] = (later[2] - earlier[2]) / VELOCITY_S;
-    return out;
-  };
-
-  /** The wells a ship near a body falls in: the Sun, the body, and its planet or its big moon. */
-  const wells = [createWell(), createWell(), createWell()];
-  const wellIds: (AnchorId | null)[] = [null, null, null];
-  const partnerOf = (id: AnchorId): AnchorId | null => {
-    if (id === "earth") return "moon";
-    if (!isBodyAnchor(id)) return null;
-    const world = worldBody(id);
-    return world.kind === "moon" ? world.host : null;
-  };
-  /** Loads the wells about `near` as they are now, with their velocities when the ship will fall. */
-  const loadWells = (near: AnchorId, moving: boolean) => {
-    const now = options.now();
-    const partner = partnerOf(near);
-    wellIds[0] = "sun";
-    wellIds[1] = near === "sun" ? null : near;
-    wellIds[2] = partner;
-    for (let i = 0; i < wells.length; i += 1) {
-      const id = wellIds[i];
-      const well = wells[i]!;
-      well.gm = id ? gmOf(id) : 0;
-      if (!id || well.gm <= 0) continue;
-      bodyAt(id, now, well.pos);
-      if (moving) bodyVelocity(id, well.vel);
-      else well.vel[0] = well.vel[1] = well.vel[2] = 0;
-    }
-  };
-  const gravity: ShipGravity = { at: (x, dt, out) => gravityAt(x, wells, dt, out), pieces: 1 };
+  const { bodyVelocity, readGravity, gravity, loadGravity } = createShipEnvironment(options, ship);
   const thrust = { accel: 0, dir: thrustDir };
 
-  /** Reads the pull where the ship is now, and the body pulling hardest. */
-  const readGravity = () => {
-    loadWells(options.nearest(ship.x), false);
-    gravityAt(ship.x, wells, 0, pull);
-    pulled.gravity = Math.hypot(pull[0], pull[1], pull[2]);
-    let hardest = 0;
-    for (let i = 0; i < wells.length; i += 1) {
-      const well = wells[i]!;
-      if (well.gm <= 0) continue;
-      const g = well.gm / Math.max(1e-9, distanceVec3d(ship.x, well.pos) ** 2);
-      if (g > hardest) {
-        hardest = g;
-        pulled.from = wellIds[i]!;
-      }
-    }
-    return pulled;
-  };
-
-  /**
-   * The pose that frames a body on arrival, lit three-quarters from the Sun; the Galaxy is
-   * framed from its north, so the disk lies below. Coming in along `from` (unit, from the
-   * body towards the ship), it keeps near that line, swinging towards the framing by at most
-   * a little over a radian, so the body stays ahead to the end.
-   */
-  const arrival = (id: AnchorId, from?: Readonly<Vec3d>): OrbitPose => {
-    const framed = framing(id);
-    if (!from) return framed;
-    const azimuth = Math.atan2(from[0], from[2]);
-    const inclination = clamp(
-      Math.asin(clamp(from[1], -1, 1)),
-      ORBIT_INCLINATION.min,
-      ORBIT_INCLINATION.max,
-    );
-    return {
-      azimuth:
-        azimuth +
-        clamp(wrapSigned(framed.azimuth - azimuth, Math.PI * 2), -APPROACH_SWING, APPROACH_SWING),
-      inclination:
-        inclination + clamp(framed.inclination - inclination, -APPROACH_SWING, APPROACH_SWING),
-      distance: framed.distance,
-    };
-  };
-
-  const framing = (id: AnchorId): OrbitPose => {
-    bodyAt(id, options.now(), toPos);
-    const sunward =
-      Math.hypot(toPos[0], toPos[2]) > 0 ? Math.atan2(-toPos[0], -toPos[2]) : pose.azimuth;
-    const frameRadius = anchorRadius(id) * ((isBodyAnchor(id) && FRAME_RADII[id]) || 1);
-    const distance = Math.max(floorOf(id), frameRadius / (halfTan() * ARRIVE_FILL));
-    if (id === "galacticCentre")
-      return {
-        azimuth: Math.atan2(GALACTIC_NORTH.x, GALACTIC_NORTH.z),
-        inclination: clamp(
-          Math.asin(GALACTIC_NORTH.y),
-          ORBIT_INCLINATION.min,
-          ORBIT_INCLINATION.max,
-        ),
-        distance,
-      };
-    return {
-      azimuth: id === "sun" ? pose.azimuth : sunward + ARRIVE_SWING,
-      inclination: ARRIVE_INCLINATION,
-      distance,
-    };
-  };
-
-  const offsetOf = ({ azimuth, inclination, distance }: OrbitPose, out: Vector3) =>
-    out.set(
-      distance * Math.cos(inclination) * Math.sin(azimuth),
-      distance * Math.sin(inclination),
-      distance * Math.cos(inclination) * Math.cos(azimuth),
-    );
-
-  /** The pose about `id` that puts the ship where it is now. */
-  const poseAbout = (id: AnchorId): OrbitPose => {
-    bodyAt(id, options.now(), aimPos);
-    const dx = ship.x[0] - aimPos[0];
-    const dy = ship.x[1] - aimPos[1];
-    const dz = ship.x[2] - aimPos[2];
-    const distance = Math.hypot(dx, dy, dz);
-    return {
-      azimuth: Math.atan2(dx, dz),
-      inclination: clamp(
-        Math.asin(dy / Math.max(distance, 1e-9)),
-        ORBIT_INCLINATION.min,
-        ORBIT_INCLINATION.max,
-      ),
-      distance,
-    };
-  };
+  const { arrival, poseAbout } = createShipFraming(options, pose, ship);
 
   const touched = () => {
     options.onInput?.();
@@ -614,14 +451,7 @@ export function createShipCamera(
     const near = options.nearest(ship.x);
     bodyAt(near, options.now(), aimPos);
     let dtau = warpAt(distanceVec3d(ship.x, aimPos) - anchorRadius(near)) * dt;
-    loadWells(near, true);
-    let shortest = Infinity;
-    for (const well of wells)
-      if (well.gm > 0)
-        shortest = Math.min(shortest, dynamicalTime(distanceVec3d(ship.x, well.pos), well.gm));
-    const piece = shortest / PIECES_PER_DYNAMICAL_TIME;
-    if (dtau > MAX_PIECES * piece) dtau = MAX_PIECES * piece;
-    gravity.pieces = Number.isFinite(piece) ? Math.ceil(dtau / piece) : 1;
+    dtau = loadGravity(near, dtau);
     warpNow = dtau / dt;
     facing.fromArray(attitude);
     fwd.set(0, 0, -1).applyQuaternion(facing);

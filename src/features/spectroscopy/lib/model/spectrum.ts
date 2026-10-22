@@ -1,30 +1,3 @@
-import { airToVacuum, dopplerWavelengthRatio, planckRadiance } from "@horizon/toolkit/science";
-
-import { layerAt, type Photosphere } from "./atmospheres";
-import { ELEMENT_IDS, LINES, type ElementId, type Line } from "./atoms";
-import {
-  continuumOf,
-  continuumWavelength,
-  totalOpacity,
-  type ContinuumWavelength,
-} from "./continuum";
-import { atomsPerKilogram } from "./populations";
-import {
-  lineCrossSection,
-  lineProfile,
-  lineShape,
-  reach,
-  shapeAt,
-  shifted,
-  type Conditions,
-  type Gas,
-  type Profile,
-  type Shape,
-} from "./profile";
-import { recentCache } from "./recent";
-import { TELLURIC } from "./telluric";
-import { voigt } from "./voigt";
-
 /**
  * What the spectrograph records, two ways.
  *
@@ -44,404 +17,56 @@ import { voigt } from "./voigt";
  *
  * Both then cross Earth's air (`airmass`) and the spectrograph (`resolution`).
  */
-type Instrument = {
-  /** Line-of-sight speed of the source, km/s, positive when receding. */
-  velocity: number;
-  /** Air masses of Earth's atmosphere in the beam: 0 in space or the lab. */
-  airmass: number;
-  /** Resolving power λ / Δλ of the spectrograph. */
-  resolution: number;
-};
+import { dopplerWavelengthRatio } from "@horizon/toolkit/science";
 
-export type SlabObservation = Instrument & {
-  kind: "slab";
-  gas: Gas;
-  /** Temperature of the black body behind the gas, K; null when only the gas shines. */
-  background: number | null;
-};
+import { layerAt, type Photosphere } from "./atmospheres";
+import { ELEMENT_IDS, LINES, type ElementId, type Line } from "./atoms";
+import {
+  continuumOf,
+  continuumWavelength,
+  totalOpacity,
+  type ContinuumWavelength,
+} from "./continuum";
+import { atomsPerKilogram } from "./populations";
+import {
+  lineCrossSection,
+  lineProfile,
+  lineShape,
+  reach,
+  shapeAt,
+  shifted,
+  type Conditions,
+  type Profile,
+  type Shape,
+} from "./profile";
+import { recentCache } from "./recent";
+import { planck } from "./spectrum/radiance";
+import {
+  TAU_FLOOR,
+  MAX_FINE,
+  MODELS_KEPT,
+  forEachSample,
+  sweep,
+  render,
+  latticeFor,
+  latticeSamples,
+  restGrid,
+  type Grid,
+  type Lattices,
+  type LatticeGrid,
+} from "./spectrum/sampling";
+import { slabProfiles, synthesizeSlab } from "./spectrum/slab";
+import type { Observation, Spectrum, StarObservation } from "./spectrum/types";
+import { voigt } from "./voigt";
 
-export type StarObservation = Instrument & {
-  kind: "star";
-  photosphere: Photosphere;
-  /** km/s. */
-  microturbulence: number;
-  /** Changes to the Sun's abundances, dex, by element. */
-  abundances?: Partial<Record<ElementId, number>>;
-};
+export { slabIntensity } from "./spectrum/radiance";
+export { slabProfiles } from "./spectrum/slab";
+export type { SlabObservation, StarObservation, Observation, Spectrum } from "./spectrum/types";
 
-export type Observation = SlabObservation | StarObservation;
-
-export type Spectrum = {
-  /** Pixel centres, nm, evenly spaced. */
-  wavelengths: Float64Array;
-  /**
-   * What reaches the detector: the bench's intensity, W m⁻² sr⁻¹ m⁻¹, or a star's surface
-   * flux, W m⁻² m⁻¹ (πI at μ = 2/3).
-   */
-  flux: Float64Array;
-  /** The source's continuum without lines; zeros when nothing shines behind the gas. */
-  continuum: Float64Array;
-  /** The largest flux or continuum in view, for scaling plots. */
-  peak: number;
-};
-
-/** Below this, a line's optical depth is ignored. */
-const TAU_FLOOR = 1e-4;
-/** The finest step in ln λ (0.45 km/s), and the most samples a window may take. */
-const FINE_STEP = 1.5e-6;
-const MAX_FINE = { slab: 160_000, star: 60_000 };
-const FWHM_PER_SIGMA = 2 * Math.sqrt(2 * Math.LN2);
 /** The Eddington–Barbier direction: F = π I(μ = 2/3), exact for a source function linear in τ. */
 const MU = 2 / 3;
 /** Where a line's reference shape is taken; hydrogen's (whose wings form deep) serves every cell. */
 const SHAPE_DEPTH = { metal: -1, hydrogen: -0.5 };
-
-/** Planck's law at a spectrum's air wavelength, evaluated (as it is defined) in vacuum. */
-const planck = (air: number, kelvin: number) => planckRadiance(airToVacuum(air), kelvin);
-
-/**
- * Light through a uniform slab: what shines `behind` it dimmed by e^(−τ), plus the slab's own
- * `source` function for the rest, I = I₀ e^(−τ) + B (1 − e^(−τ)). Kirchhoff's laws in one line;
- * the printed equation (`equations.ts`) computes from this too.
- */
-export function slabIntensity(behind: number, source: number, tau: number) {
-  const transmitted = Math.exp(-tau);
-  return behind * transmitted + source * (1 - transmitted);
-}
-
-type Grid = { lnStart: number; step: number; count: number };
-
-/** Calls `visit(i, nm)` at the grid's samples `first` through `last`, walking the log grid. */
-function forEachSample(
-  grid: Grid,
-  visit: (i: number, nm: number) => void,
-  first = 0,
-  last = grid.count - 1,
-) {
-  const ratio = Math.exp(grid.step);
-  let nm = Math.exp(grid.lnStart + first * grid.step);
-  for (let i = first; i <= last; i++) {
-    visit(i, nm);
-    nm *= ratio;
-  }
-}
-
-/**
- * Calls `visit(i, offset)` at every grid sample the profile reaches, offset from centre in nm,
- * out to at most `cap` widths.
- */
-function sweep(p: Profile, grid: Grid, visit: (i: number, offset: number) => void, cap = 40) {
-  const width = reach(p, TAU_FLOOR, cap);
-  /* Wings wider than the line's own wavelength start at the grid's first sample, not at λ ≤ 0. */
-  const blue = p.centre - width;
-  const first = blue > 0 ? Math.max(0, Math.ceil((Math.log(blue) - grid.lnStart) / grid.step)) : 0;
-  const last = Math.min(
-    grid.count - 1,
-    Math.floor((Math.log(p.centre + width) - grid.lnStart) / grid.step),
-  );
-  forEachSample(grid, (i, nm) => visit(i, nm - p.centre), first, last);
-}
-
-function airTransmission(grid: Grid, airmass: number) {
-  const tau = new Float64Array(grid.count);
-  if (airmass > 0)
-    for (const p of TELLURIC)
-      sweep({ ...p, peak: p.peak * airmass }, grid, (i, offset) => {
-        tau[i]! += p.peak * airmass * shapeAt(p, offset / p.doppler);
-      });
-  /* Most of the window has no O₂ line: e^0 is 1, no exponential needed. */
-  return tau.map((t) => (t > 0 ? Math.exp(-t) : 1));
-}
-
-/** Box-averages `values` in groups of `k`, then convolves with a Gaussian of σ samples. */
-function smooth(values: Float64Array, k: number, sigma: number) {
-  const n = Math.floor(values.length / k);
-  let binned = values;
-  if (k > 1) {
-    binned = new Float64Array(n);
-    for (let i = 0; i < n; i++) {
-      let sum = 0;
-      for (let j = 0; j < k; j++) sum += values[i * k + j]!;
-      binned[i] = sum / k;
-    }
-  }
-  if (sigma < 0.3) return binned;
-  /* One side of the kernel, which is symmetric, and its whole weight, which every sample away
-     from the ends receives. */
-  const half = Math.ceil(4 * sigma);
-  const kernel = new Float64Array(half + 1);
-  for (let j = 0; j <= half; j++) kernel[j] = Math.exp(-0.5 * (j / sigma) ** 2);
-  let whole = kernel[0]!;
-  for (let j = 1; j <= half; j++) whole += 2 * kernel[j]!;
-  const out = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    if (i >= half && i < n - half) {
-      let sum = binned[i]! * kernel[0]!;
-      for (let j = 1; j <= half; j++) sum += (binned[i - j]! + binned[i + j]!) * kernel[j]!;
-      out[i] = sum / whole;
-      continue;
-    }
-    let sum = 0;
-    let weight = 0;
-    for (let j = Math.max(-half, -i); j <= Math.min(half, n - 1 - i); j++) {
-      sum += binned[i + j]! * kernel[Math.abs(j)]!;
-      weight += kernel[Math.abs(j)]!;
-    }
-    out[i] = sum / weight;
-  }
-  return out;
-}
-
-/** The instrument's blur, then the fine grid resampled to `samples` evenly spaced pixels. */
-function observe(
-  fine: Float64Array,
-  grid: Grid,
-  resolution: number,
-  from: number,
-  to: number,
-  samples: number,
-  continuumAt: (nm: number) => number,
-): Spectrum {
-  const sigma = 1 / (resolution * FWHM_PER_SIGMA);
-  const k = Math.max(1, Math.floor(sigma / (3 * grid.step)));
-  const blurred = smooth(fine, k, sigma / (k * grid.step));
-  const coarseStep = k * grid.step;
-  const coarseStart = grid.lnStart + ((k - 1) / 2) * grid.step;
-  /* Running sums, so each pixel can average the light across its own width, as a detector does. */
-  const sums = new Float64Array(blurred.length + 1);
-  for (let i = 0; i < blurred.length; i++) sums[i + 1] = sums[i]! + blurred[i]!;
-  const indexOf = (nm: number) =>
-    Math.min(blurred.length - 1, Math.max(0, (Math.log(nm) - coarseStart) / coarseStep));
-  const sumTo = (x: number) => {
-    const i = Math.floor(x + 0.5);
-    return sums[i]! + (x + 0.5 - i) * (blurred[Math.min(i, blurred.length - 1)] ?? 0);
-  };
-  const pixel = samples > 1 ? (to - from) / (samples - 1) : 0;
-  const wavelengths = new Float64Array(samples);
-  const flux = new Float64Array(samples);
-  const continuum = new Float64Array(samples);
-  let peak = 0;
-  for (let s = 0; s < samples; s++) {
-    const nm = samples === 1 ? from : from + pixel * s;
-    wavelengths[s] = nm;
-    const a = indexOf(nm - pixel / 2);
-    const b = indexOf(nm + pixel / 2);
-    if (b - a >= 1) flux[s] = (sumTo(b) - sumTo(a)) / (b - a);
-    else {
-      const x = indexOf(nm);
-      const i = Math.min(blurred.length - 2, Math.floor(x));
-      const t = x - i;
-      flux[s] = blurred[i]! * (1 - t) + blurred[i + 1]! * t;
-    }
-    continuum[s] = continuumAt(nm);
-    peak = Math.max(peak, flux[s]!, continuum[s]!);
-  }
-  return { wavelengths, flux, continuum, peak };
-}
-
-/**
- * What both sources share once their light is known: `intensityAt(i, nm)` on the fine grid,
- * through Earth's air, then the instrument (`observe`), with `continuumAt` for the plot.
- */
-function render(
-  grid: Grid,
-  obs: Instrument,
-  from: number,
-  to: number,
-  samples: number,
-  intensityAt: (i: number, nm: number) => number,
-  continuumAt: (nm: number) => number,
-): Spectrum {
-  const air = airTransmission(grid, obs.airmass);
-  const fine = new Float64Array(grid.count);
-  forEachSample(grid, (i, nm) => {
-    fine[i] = intensityAt(i, nm) * air[i]!;
-  });
-  return observe(fine, grid, obs.resolution, from, to, samples, continuumAt);
-}
-
-/* ─── Lattices: samples kept between windows ─── */
-
-/**
- * A source's spectrum is worked out at rest, on a lattice in ln λ: samples at whole multiples
- * of `FINE_STEP` · 2^level, the level the coarsest a window needs (`MAX_FINE`). A velocity only
- * moves the lattice (ln λ_observed = ln λ_rest + ln(λ/λ₀)), and a window that slides or a
- * velocity that changes reuses what was worked out: the lattice is kept in chunks of this many
- * samples, each filled the first time a window reaches it.
- */
-const CHUNK = 2048;
-/** Sources kept with their lattices: the one in view and the few a visit switches between. */
-const MODELS_KEPT = 4;
-
-/** A source's samples at rest, by level and then by chunk. */
-type Lattices = Map<number, Map<number, Float32Array | Float64Array>>;
-
-/** A source's fine grid for a window: on the lattice at rest, moved by the source's `shift`. */
-type LatticeGrid = Grid & { level: number; first: number };
-
-function latticeFor(
-  from: number,
-  to: number,
-  resolution: number,
-  shift: number,
-  max: number,
-): LatticeGrid {
-  const sigma = 1 / (resolution * FWHM_PER_SIGMA);
-  const lnShift = Math.log(shift);
-  const lo = Math.log(from) - 5 * sigma - lnShift;
-  const hi = Math.log(to) + 5 * sigma - lnShift;
-  for (let level = 0; ; level++) {
-    const step = FINE_STEP * 2 ** level;
-    const first = Math.floor(lo / step);
-    const count = Math.ceil(hi / step) - first + 1;
-    if (count <= max) return { lnStart: first * step + lnShift, step, count, level, first };
-  }
-}
-
-/** The lattice's own samples for a grid: the same ones, at rest. */
-const restGrid = (grid: LatticeGrid): Grid => ({ ...grid, lnStart: grid.first * grid.step });
-
-/** The grid's samples from `lattices`, each chunk made by `fill` (at rest) when first reached. */
-function latticeSamples(
-  lattices: Lattices,
-  { level, first, count, step }: LatticeGrid,
-  fill: (chunk: Grid) => Float32Array | Float64Array,
-) {
-  let chunks = lattices.get(level);
-  if (!chunks) lattices.set(level, (chunks = new Map()));
-  const out = new Float64Array(count);
-  for (let c = Math.floor(first / CHUNK); c * CHUNK < first + count; c++) {
-    let chunk = chunks.get(c);
-    if (!chunk) {
-      chunk = fill({ lnStart: c * CHUNK * step, step, count: CHUNK });
-      chunks.set(c, chunk);
-    }
-    const from = Math.max(first, c * CHUNK);
-    const to = Math.min(first + count, (c + 1) * CHUNK);
-    out.set(chunk.subarray(from - c * CHUNK, to - c * CHUNK), from - first);
-  }
-  return out;
-}
-
-/* ─── The lab: a uniform slab ─── */
-
-/** Every line the slab's gas absorbs, with its profile at the source's velocity. */
-export function slabProfiles(obs: SlabObservation) {
-  const shift = dopplerWavelengthRatio(obs.velocity);
-  const out: { line: Line; profile: Profile }[] = [];
-  for (const line of LINES) {
-    const profile = lineProfile(line, obs.gas, shift);
-    if (profile && profile.peak * shapeAt(profile, 0) > TAU_FLOOR) out.push({ line, profile });
-  }
-  return out;
-}
-
-/** A slab's lines at rest and its optical depth on the lattice: they depend on the gas alone. */
-type SlabModel = { lines: { line: Line; profile: Profile }[]; lattices: Lattices };
-
-const slabModels = recentCache<string, SlabModel>(MODELS_KEPT);
-
-const slabModel = (obs: SlabObservation) =>
-  slabModels(JSON.stringify(obs.gas), () => ({
-    lines: slabProfiles({ ...obs, velocity: 0 }),
-    lattices: new Map(),
-  }));
-
-/** The optical depth of `lines` on a grid at rest. */
-function slabDepth(lines: SlabModel["lines"], grid: Grid) {
-  const tau = new Float64Array(grid.count);
-  for (const { profile } of lines)
-    /* A dense bench gas can keep its wings dark across the whole window: no cut-off. */
-    sweep(
-      profile,
-      grid,
-      (i, offset) => {
-        tau[i]! += profile.peak * shapeAt(profile, offset / profile.doppler);
-      },
-      Infinity,
-    );
-  return tau;
-}
-
-/**
- * The nodes' spacing for Planck's law on the bench, nm: linear between them it stays within
- * 4 × 10⁻⁶ of itself even at 1,500 K and 380 nm, where it curves most.
- */
-const PLANCK_STEP = 0.1;
-
-/**
- * Planck's law for the lamp (0 when it is off) and for the gas, at nodes `PLANCK_STEP` apart,
- * each worked out the first time a wavelength near it is asked for, and linear between them.
- */
-function planckTable(lamp: number | null, gas: number) {
-  type Node = readonly [lamp: number, gas: number];
-  const nodes = new Map<number, Node>();
-  const node = (g: number): Node => {
-    let known = nodes.get(g);
-    if (!known) {
-      const nm = g * PLANCK_STEP;
-      known = [lamp === null ? 0 : planck(nm, lamp), planck(nm, gas)];
-      nodes.set(g, known);
-    }
-    return known;
-  };
-  const out = { lamp: 0, gas: 0 };
-  /* The nodes either side of the last wavelength: the first call always sets them. */
-  let at = Number.NaN;
-  let below: Node;
-  let above: Node;
-  return (nm: number) => {
-    const x = nm / PLANCK_STEP;
-    const g = Math.floor(x);
-    const t = x - g;
-    if (g !== at) {
-      at = g;
-      below = node(g);
-      above = node(g + 1);
-    }
-    out.lamp = below[0] + t * (above[0] - below[0]);
-    out.gas = below[1] + t * (above[1] - below[1]);
-    return out;
-  };
-}
-
-/** The slab's spectrum, or (`without`) the spectrum without one element's atoms. */
-function synthesizeSlab(
-  obs: SlabObservation,
-  from: number,
-  to: number,
-  samples: number,
-  without?: ElementId,
-) {
-  const model = slabModel(obs);
-  const grid = latticeFor(
-    from,
-    to,
-    obs.resolution,
-    dopplerWavelengthRatio(obs.velocity),
-    MAX_FINE.slab,
-  );
-  const tau =
-    without === undefined
-      ? latticeSamples(model.lattices, grid, (chunk) => slabDepth(model.lines, chunk))
-      : slabDepth(
-          model.lines.filter(({ line }) => line.element !== without),
-          restGrid(grid),
-        );
-  const light = planckTable(obs.background, obs.gas.temperature);
-  return render(
-    grid,
-    obs,
-    from,
-    to,
-    samples,
-    (i, nm) => {
-      const { lamp, gas } = light(nm);
-      return slabIntensity(lamp, gas, tau[i]!);
-    },
-    (nm) => light(nm).lamp,
-  );
-}
 
 /* ─── A star: layers of a model photosphere ─── */
 

@@ -137,11 +137,14 @@ src/
         profile.ts, voigt.ts   Line shapes: Doppler, Voigt, hydrogen collisions (broadening.json
                                from scripts/fetch-line-broadening.mjs), Stark
         continuum.ts           The stars' continuous opacity: H⁻, hydrogen, scattering
-        spectrum.ts            The bench's uniform slab, the stars' layered LTE transfer, the
-                               instrument and pixels; line reports and curves of growth. Each
-                               source is worked out in its own frame on a grid in ln λ that all
-                               windows share, kept in chunks, so a pan, a zoom or a velocity
-                               reuses what it has met and only a new source starts afresh
+        spectrum.ts            The synthesis entry point, stars' layered LTE transfer, line
+                               reports and curves of growth; spectrum/slab.ts the bench's
+                               uniform gas, spectrum/radiance.ts their shared source light,
+                               spectrum/types.ts the observation and detector contracts
+        spectrum/sampling.ts   The shared grid in ln λ, its cached chunks, Earth's air and the
+                               instrument's pixels. Each source is worked out in its own frame,
+                               so a pan, a zoom or a velocity reuses what it has met and only a
+                               new source starts afresh
         telluric.ts            Earth's O₂ A and B bands
         scenes.ts, stars.ts    What each view observes: bench, named stars, mysteries; the
                                settings' ranges and defaults
@@ -192,8 +195,10 @@ src/
                                once per rung into a small texture; weather-uniforms.ts and
                                vectors.ts what the frame writes to the pass; dots.ts the
                                overview's flat dots, every body in one small texture
-      lib/engine.ts            The pass, the hands (wheel, drag, tap, keys) and the snap to a
-                               rung; lib/store.ts the Zustand store (giants namespace messages)
+      lib/engine.ts            The camera, drift and frame orchestration; graphics/renderer.ts
+                               owns the shader passes, uniforms and map loading; input.ts the
+                               wheel, drag, tap and keys; labels.ts the body and orbit names
+      lib/store.ts             Zustand store (giants namespace messages)
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     sun/
       index.ts                 Public client entry: SunApp
@@ -209,8 +214,10 @@ src/
                                proxy sphere with its cut (globe-layer.ts), the atmosphere beyond
                                the limb (atmosphere-layer.ts), the field's ribbons (field-layer.ts),
                                the shared prominence volume placed (prominence-layer.ts), the seven
-                               framings (views.ts); lib/graphics/ its GLSL and light tables;
-                               lib/quality.ts its budgets by render level
+                               framings (views.ts); picking.ts the targets and cut-face taps,
+                               labels.ts the visible feature and interior names, types.ts the
+                               engine's hooks and readouts; lib/graphics/ its GLSL and light
+                               tables; lib/quality.ts its budgets by render level
       lib/store.ts             Zustand store (sun namespace messages); lib/drift.ts the drift
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     voyage/
@@ -241,9 +248,10 @@ src/
                                at true size placed by its offset from the ship (bodies-layer.ts,
                                eclipse occluders, rings, orbits), the ship camera parked about a
                                body, flying free on the keys, or on an autopilot flight
-                               (ship-camera.ts), the bright stars at their distances and the
-                               painted Milky Way with aberration and Doppler colour
-                               (stars-layer.ts), α Centauri as discs (alpha-centauri-layer.ts),
+                               (ship-camera.ts, with arrival and parking poses in ship-framing.ts
+                               and moving gravity wells in ship-environment.ts), the bright stars
+                               at their distances and the painted Milky Way with aberration and
+                               Doppler colour (stars-layer.ts), α Centauri as discs (alpha-centauri-layer.ts),
                                the shared worlds about the ship (worlds-layer.ts: the reach, the
                                Galaxy and the cosmic map scaled by the expansion), the microwave
                                background's shell centred on the ship (cmb-layer.ts), the map
