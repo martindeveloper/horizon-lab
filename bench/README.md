@@ -159,6 +159,12 @@ Add `src/features/<slug>/bench.ts` exporting `benchTarget: BenchTarget` from
 `@horizon/toolkit/bench` with `id: "<slug>"`. The bench discovers it. It is a public
 feature entry like `index.ts`, so it may import the feature's own `lib`.
 
+No CLI, report or central registry changes are needed. Target and scene ids must
+start with a letter or digit and contain only letters, digits, hyphens or underscores.
+Scene ids must be unique within a target: they also become artifact filenames.
+The runtime validates these before mounting, along with positive integer frame counts,
+finite non-negative durations, and input/keyframe progress in 0–1.
+
 - `scenes`: each needs a stable `id` (results and baselines match on target, scene and
   size), a `description` and `tags` for `--scene tag:<tag>`. Add a `script`
   (`frames`, `duration`, optional `input` and `keyframes`) for a sequence.
@@ -176,6 +182,15 @@ feature entry like `index.ts`, so it may import the feature's own `lib`.
 Reuse the code the live engine uses for uniforms, camera and input, so the bench measures
 what visitors see. The black-hole target shares `lib/frame.ts` with `lib/engine.ts`, and
 its scenes and camera paths live in `lib/bench-scenes.ts`, plain data Node tests can read.
+Engines using the shared scene host can use `mountSceneEngine` from `src/space/bench.ts`
+to drive their real animation loop one frame at a time.
+
+Each mount must reset persistent stores and seed randomness so earlier scenes and rounds
+cannot change its starting state. Await required assets or preroll before returning the
+instance. A mount that fails must dispose resources it created before throwing; after
+mount succeeds, the runner owns disposal. `dispose` must remove input listeners,
+subscriptions and animation callbacks as well as renderer resources. The runner releases
+the canvas and WebGL context even if disposal throws.
 
 `tests/bench.test.mjs` checks the statistics, input scheduling, camera paths and report
 rendering, and builds the bundle. It does not launch a browser.

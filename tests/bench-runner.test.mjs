@@ -132,3 +132,127 @@ test("interactive measurement closes the scene after a failed frame", async () =
   );
   assert.deepEqual(calls, ["open", "warm", "frame", "close"]);
 });
+
+test("runtime rejects ambiguous scene keys and unreplayable scripts before mounting", async () => {
+  const { installBenchRuntime } = await import("@horizon/toolkit/bench");
+  const scene = { id: "demo", description: "Demo" };
+  const invalid = [
+    { scenes: [scene, scene], error: /duplicate scene id/ },
+    { scenes: [{ ...scene, id: "../escape" }], error: /id must use/ },
+    ...[0, 1.5, Infinity].map((frames) => ({
+      scenes: [{ ...scene, script: { frames, duration: 1 } }],
+      error: /frames must be/,
+    })),
+    { scenes: [{ ...scene, script: { frames: 2, duration: NaN } }], error: /duration/ },
+    {
+      scenes: [{ ...scene, script: { frames: 2, duration: 1, keyframes: [1.1] } }],
+      error: /progress/,
+    },
+    {
+      scenes: [
+        {
+          ...scene,
+          script: {
+            frames: 2,
+            duration: 1,
+            input: [{ kind: "drag", from: [0, 0], to: [1, 1], start: 0.8, end: 0.2 }],
+          },
+        },
+      ],
+      error: /drag end/,
+    },
+  ];
+  for (const { scenes, error } of invalid) {
+    const runtime = installBenchRuntime({
+      demo: async () => ({
+        id: "demo",
+        scenes,
+        mount() {
+          assert.fail("Invalid target must not mount");
+        },
+      }),
+    });
+    await assert.rejects(runtime.list(), error);
+    await assert.rejects(runtime.open("demo", "demo", {}), error);
+  }
+});
+
+test("failed disposal releases the canvas and context and clears the runtime session", async (t) => {
+  const { installBenchRuntime } = await import("@horizon/toolkit/bench");
+  const events = [];
+  const gl = {
+    getExtension: (name) =>
+      name === "WEBGL_lose_context"
+        ? {
+            loseContext() {
+              events.push("lose");
+            },
+          }
+        : name === "EXT_disjoint_timer_query_webgl2"
+          ? { TIME_ELAPSED_EXT: 1, GPU_DISJOINT_EXT: 2 }
+          : null,
+    getParameter: () => 0,
+    getSupportedExtensions: () => [],
+    createQuery: () => ({}),
+    beginQuery() {
+      events.push("begin");
+    },
+    endQuery() {
+      events.push("end");
+    },
+    getQueryParameter: () => true,
+    deleteQuery() {
+      events.push("delete");
+    },
+  };
+  const canvas = {
+    style: {},
+    remove() {
+      events.push("remove");
+    },
+  };
+  const originals = new Map(
+    ["document", "window"].map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]),
+  );
+  t.after(() => {
+    for (const [key, descriptor] of originals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  Object.defineProperty(globalThis, "document", {
+    configurable: true,
+    value: {
+      createElement: () => canvas,
+      body: { append() {} },
+    },
+  });
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: { devicePixelRatio: 1 },
+  });
+  const runtime = installBenchRuntime({
+    demo: async () => ({
+      id: "demo",
+      scenes: [{ id: "still", description: "Still" }],
+      mount: () => ({
+        gl,
+        render() {
+          throw new Error("render failed");
+        },
+        dispose() {
+          throw new Error("dispose failed");
+        },
+      }),
+    }),
+  });
+  await runtime.open("demo", "still", { width: 10, height: 10 });
+  assert.throws(() => runtime.frame({}), /render failed/);
+  assert.deepEqual(events, ["begin", "end"]);
+  await assert.rejects(runtime.close(), /dispose failed/);
+  assert.deepEqual(events, ["begin", "end", "delete", "lose", "remove"]);
+  assert.throws(() => runtime.warm({}), /No open bench session/);
+  // Opening again must not retain the failed scene.
+  await runtime.open("demo", "still", { width: 10, height: 10 });
+  await assert.rejects(runtime.close(), /dispose failed/);
+});

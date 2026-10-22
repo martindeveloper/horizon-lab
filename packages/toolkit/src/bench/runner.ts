@@ -8,6 +8,7 @@ import type {
   BenchResult,
   BenchTarget,
 } from "./types";
+import { validateTarget } from "./validate";
 
 type TimerQuery = { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number };
 
@@ -76,6 +77,7 @@ export class BenchSession {
   }
 
   static async open(target: BenchTarget, sceneId: string, options: BenchOptions) {
+    validateTarget(target);
     if (!target.scenes.some((scene) => scene.id === sceneId))
       throw new Error(`Unknown scene ${target.id}/${sceneId}`);
     const canvas = document.createElement("canvas");
@@ -86,15 +88,24 @@ export class BenchSession {
     canvas.style.height = `${options.height}px`;
     document.body.append(canvas);
     const start = performance.now();
+    let instance: BenchInstance | undefined;
     try {
-      const instance = await target.mount(sceneId, {
+      instance = await target.mount(sceneId, {
         canvas,
         width: options.width,
         height: options.height,
       });
       return new BenchSession(canvas, instance, performance.now() - start);
     } catch (error) {
-      canvas.remove();
+      try {
+        instance?.dispose();
+      } finally {
+        try {
+          canvas.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext();
+        } finally {
+          canvas.remove();
+        }
+      }
       throw error;
     }
   }
@@ -119,10 +130,14 @@ export class BenchSession {
     const query = this.timer ? gl.createQuery() : null;
     if (this.timer && query) gl.beginQuery(this.timer.TIME_ELAPSED_EXT, query);
     const start = performance.now();
-    this.instance.render(frame);
-    const submitted = performance.now();
-    if (this.timer && query) gl.endQuery(this.timer.TIME_ELAPSED_EXT);
     this.queries.push(query);
+    let submitted: number;
+    try {
+      this.instance.render(frame);
+      submitted = performance.now();
+    } finally {
+      if (this.timer && query) gl.endQuery(this.timer.TIME_ELAPSED_EXT);
+    }
     this.finish();
     const end = performance.now();
     // Read in the same task as the draw: the drawing buffer is not preserved.
@@ -172,9 +187,15 @@ export class BenchSession {
       }
       return { gpuMs };
     } finally {
-      this.instance.dispose();
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-      this.canvas.remove();
+      try {
+        this.instance.dispose();
+      } finally {
+        try {
+          gl.getExtension("WEBGL_lose_context")?.loseContext();
+        } finally {
+          this.canvas.remove();
+        }
+      }
     }
   }
 }
@@ -240,6 +261,7 @@ export async function runBenchSequence(
   sceneId: string,
   options: BenchOptions,
 ): Promise<BenchResult> {
+  validateTarget(target);
   const scene = target.scenes.find((s) => s.id === sceneId);
   if (!scene?.script) throw new Error(`${target.id}/${sceneId} has no script`);
   const frames = sequenceFrames(scene.script, options.time);
@@ -309,6 +331,7 @@ export function installBenchRuntime(registry: BenchRegistry): BenchRuntime {
     if (!Object.hasOwn(registry, id)) throw new Error(`Unknown bench target: ${id}`);
     const target = await registry[id]!();
     if (target.id !== id) throw new Error(`Bench target ${id} reports id ${target.id}`);
+    validateTarget(target);
     return target;
   };
   let session: BenchSession | null = null;
@@ -328,7 +351,9 @@ export function installBenchRuntime(registry: BenchRegistry): BenchRuntime {
       return runBenchSequence(await load(targetId), sceneId, options);
     },
     async open(targetId, sceneId, options) {
-      await session?.close();
+      const previous = session;
+      session = null;
+      await previous?.close();
       session = await BenchSession.open(await load(targetId), sceneId, options);
       return { environment: session.environment, mountMs: session.mountMs };
     },
@@ -336,9 +361,9 @@ export function installBenchRuntime(registry: BenchRegistry): BenchRuntime {
     frame: (frame, capture) => current().frame(frame, capture),
     grab: (frame, options) => current().grab(frame, options),
     async close() {
-      const result = await current().close();
+      const previous = current();
       session = null;
-      return result;
+      return previous.close();
     },
   };
   Object.assign(globalThis, { __horizonBench: runtime });

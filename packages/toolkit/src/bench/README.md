@@ -18,6 +18,16 @@ no browser globals. It imports no Three.js, UI or shader code.
 - `BenchFrame`: `index`, `count`, `progress`, `time`, `dt`. Static scenes always
   receive the same frame, so each timed frame does identical work.
 
+Target and scene ids start with a letter or digit and use only letters, digits,
+hyphens and underscores; scene ids are unique per target. The runtime rejects
+invalid ids and scripts before mounting: frame counts must be positive integers,
+durations finite and non-negative, and input/keyframe progress within 0–1 with
+each drag ending at or after its start.
+
+Mounts reset persistent scene state and clean up their own partial initialization
+if they throw. Once mounted, the runner owns disposal and releases its canvas and
+context even if the instance's disposal fails. Drivers issue runtime calls serially.
+
 ## Runner
 
 - `BenchSession`: one mounted scene on a fresh canvas. It has these methods:

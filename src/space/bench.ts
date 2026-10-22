@@ -57,8 +57,11 @@ export function mountSceneEngine(
   }
   const gl = canvas.getContext("webgl2");
   if (!gl) {
-    engine.dispose();
-    restore();
+    try {
+      engine.dispose();
+    } finally {
+      restore();
+    }
     throw new Error("WebGL 2 is unavailable");
   }
   /* The loop's clock: a sequence's simulation time, or a display frame per static frame. */
@@ -73,8 +76,11 @@ export function mountSceneEngine(
       tick?.(now);
     },
     dispose() {
-      engine.dispose();
-      restore();
+      try {
+        engine.dispose();
+      } finally {
+        restore();
+      }
     },
   };
 }
