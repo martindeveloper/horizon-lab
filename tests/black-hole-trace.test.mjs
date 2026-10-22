@@ -9,6 +9,8 @@ import {
   cameraOf,
   createUniforms,
   sceneCamera,
+  passOptions,
+  uniformTextures,
   sceneWriter,
   traceKeyWriter,
   writeOrbitCamera,
@@ -84,4 +86,55 @@ test("an orbit that only turns or animates traces the same rays, and its scene c
   assert.ok(changed(() => uniforms.uResolution.value.set(640, 360)));
   // The clock and the star and display scales only shade.
   assert.ok(!changed(() => writeScene({ ...SCENE, starIntensity: 2, exposure: 3 }, 9, 192)));
+});
+
+test("each tracing input invalidates replay while shading and display inputs preserve it", () => {
+  const changes = {
+    uResolution: (value) => value.set(640, 360),
+    uCamera: (value) => value.makeTranslation(1, 2, 30),
+    uCamVelocity: (value) => value.set(0.1, 0.2, 0.3),
+    uFov: 0.9,
+    uSpin: 0.5,
+    uInner: 4,
+    uOuter: 20,
+    uDiskBright: 2,
+    uSteps: 256,
+    uJet: 1,
+    uWeather: 3,
+    uGravity: 0,
+  };
+  for (const [name, change] of Object.entries(changes)) {
+    const uniforms = createUniforms();
+    try {
+      const key = traceKeyWriter(uniforms);
+      const before = key([]);
+      if (typeof change === "function") change(uniforms[name].value);
+      else uniforms[name].value = change;
+      assert.notDeepEqual(key([]), before, name);
+    } finally {
+      uniformTextures(uniforms).forEach((texture) => texture.dispose());
+    }
+  }
+  const uniforms = createUniforms();
+  try {
+    const key = traceKeyWriter(uniforms);
+    const before = key([]);
+    const resolve = passOptions(uniforms).hdr.uniforms;
+    for (const name of ["uTime", "uAzimuth", "uStars", "uTemp", "uExposure", "uVignette"]) {
+      uniforms[name].value += 0.5;
+      assert.deepEqual(key([]), before, name);
+    }
+    assert.equal(resolve.uExposure.value, uniforms.uExposure.value);
+    assert.equal(resolve.uVignette.value, uniforms.uVignette.value);
+    uniforms.uResolution.value.set(1920, 1080);
+    assert.deepEqual(resolve.uResolution.value.toArray(), [1920, 1080]);
+    const resized = key([]);
+    for (const texture of uniformTextures(uniforms)) {
+      texture.image.data[0] += 1;
+      texture.needsUpdate = true;
+      assert.deepEqual(key([]), resized);
+    }
+  } finally {
+    uniformTextures(uniforms).forEach((texture) => texture.dispose());
+  }
 });

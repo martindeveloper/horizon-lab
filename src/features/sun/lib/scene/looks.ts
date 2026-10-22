@@ -52,39 +52,54 @@ export function createSunLooks() {
   const prominenceAt = Array.from({ length: PROMINENCE_MAX }, () => new Vector4());
   const prominenceAlong = Array.from({ length: PROMINENCE_MAX }, () => new Vector4());
   const green = wavelengthColor(E_CORONA_NM);
-  const uniforms = {
+  const lightUniforms = {
     uLightMode: { value: 0 },
+    uBandScale: { value: 1 },
+    uWeights: { value: new Vector4(1, 0, 0, 0) },
+    uFlareWeight: { value: 1 },
+  };
+  const activityUniforms = {
     uProminenceCount: { value: 0 },
     uProminence: { value: prominenceAt },
     uProminenceAlong: { value: prominenceAlong },
-    uBandScale: { value: 1 },
     uStreamerCount: { value: 0 },
     uStreamer: { value: Array.from({ length: STREAMER_MAX }, () => new Vector4()) },
     uHoleCount: { value: 0 },
     uHole: { value: Array.from({ length: HOLE_MAX }, () => new Vector4()) },
-    uWeights: { value: new Vector4(1, 0, 0, 0) },
-    uFlareWeight: { value: 1 },
-    uCut: { value: new Vector2(0, 0) },
-    uClock: { value: new Vector4() },
-    uTurn: { value: 0 },
-    uPixelWorld: { value: 1e-3 },
-    uGamut: { value: new Matrix3() },
-    uGold: { value: new Vector3(...hexToLinear(`#${SOLAR_GOLD.toString(16).padStart(6, "0")}`)) },
     uRegionCount: { value: 0 },
     uRegionDir: { value: regionDir },
     uRegionAxis: { value: regionAxis },
     uRegionSide: { value: regionSide },
     uRegionState: { value: regionState },
     uDipole: { value: 0 },
+  };
+  const motionUniforms = {
+    uClock: { value: new Vector4() },
+    uTurn: { value: 0 },
     uEvershed: { value: 0 },
     uPlumeRise: { value: 0 },
     uSpiculeClock: { value: 0 },
+  };
+  const viewUniforms = {
+    uCut: { value: new Vector2(0, 0) },
+    uPixelWorld: { value: 1e-3 },
+    uGamut: { value: new Matrix3() },
+  };
+  const colourUniforms = {
+    uGold: { value: new Vector3(...hexToLinear(`#${SOLAR_GOLD.toString(16).padStart(6, "0")}`)) },
     uPositive: { value: linear(POSITIVE_HEX) },
     uNegative: { value: linear(NEGATIVE_HEX) },
     uMagPositive: { value: linear(POSITIVE_HEX) },
     uMagNegative: { value: linear(NEGATIVE_HEX) },
     uBalmer: { value: linear(BALMER_HEX) },
     uGreen: { value: new Vector3(green[0], green[1], green[2]) },
+  };
+  const uniforms = {
+    ...lightUniforms,
+    ...activityUniforms,
+    ...motionUniforms,
+    ...viewUniforms,
+    ...colourUniforms,
   };
   const dir: [number, number, number] = [0, 0, 0];
   const axis = new Vector3();
@@ -100,31 +115,32 @@ export function createSunLooks() {
      */
     /** The light's mode and layer weights; its exposure comes from the tables (`setResponse`). */
     setLight(light: SunLight, scale: number) {
-      uniforms.uLightMode.value = lightModeOf(light.id);
+      lightUniforms.uLightMode.value = lightModeOf(light.id);
       const w = light.weights;
-      uniforms.uWeights.value.set(w.photosphere, w.chromosphere, w.transition, w.corona);
-      uniforms.uFlareWeight.value = w.flare;
-      uniforms.uBandScale.value = lightModeOf(light.id) === LIGHT_MODES.indexOf("band") ? scale : 1;
+      lightUniforms.uWeights.value.set(w.photosphere, w.chromosphere, w.transition, w.corona);
+      lightUniforms.uFlareWeight.value = w.flare;
+      lightUniforms.uBandScale.value =
+        lightModeOf(light.id) === LIGHT_MODES.indexOf("band") ? scale : 1;
     },
     setGamut(gamut: Gamut) {
-      gamutMatrix(gamut, uniforms.uGamut.value);
+      gamutMatrix(gamut, viewUniforms.uGamut.value);
     },
     /** The frame's clocks and weather, once a frame. */
     setFrame(frame: SunFrame) {
       const t = frame.time;
-      uniforms.uClock.value.set(
+      motionUniforms.uClock.value.set(
         (t / GRANULE_LIFETIME_S) % CLOCK_WRAP,
         (t / NETWORK_LIFETIME_S) % CLOCK_WRAP,
         (t / CORE_SHIMMER_S) % CLOCK_WRAP,
         (t / RADIATIVE_DRIFT_S) % CLOCK_WRAP,
       );
-      uniforms.uTurn.value = frame.surfaceTurn;
-      uniforms.uEvershed.value = (t * EVERSHED_RADII_PER_S) % CLOCK_WRAP;
-      uniforms.uPlumeRise.value = (t * PLUME_RISE_RADII_PER_S) % CLOCK_WRAP;
-      uniforms.uSpiculeClock.value = (t / SPICULE_LIFETIME_S) % CLOCK_WRAP;
-      uniforms.uDipole.value = frame.dipole;
+      motionUniforms.uTurn.value = frame.surfaceTurn;
+      motionUniforms.uEvershed.value = (t * EVERSHED_RADII_PER_S) % CLOCK_WRAP;
+      motionUniforms.uPlumeRise.value = (t * PLUME_RISE_RADII_PER_S) % CLOCK_WRAP;
+      motionUniforms.uSpiculeClock.value = (t / SPICULE_LIFETIME_S) % CLOCK_WRAP;
+      activityUniforms.uDipole.value = frame.dipole;
       const count = Math.min(frame.regions.length, REGION_MAX);
-      uniforms.uRegionCount.value = count;
+      activityUniforms.uRegionCount.value = count;
       const eruption = frame.eruption;
       for (let k = 0; k < count; k++) {
         const region = frame.regions[k]!;
@@ -151,7 +167,7 @@ export function createSunLooks() {
       }
       /* The prominences' channels, for the filaments they cast on the disc. */
       const prominences = Math.min(frame.prominences.length, PROMINENCE_MAX);
-      uniforms.uProminenceCount.value = prominences;
+      activityUniforms.uProminenceCount.value = prominences;
       for (let k = 0; k < prominences; k++) {
         const p = frame.prominences[k]!;
         directionOf(p.lat, p.lon, dir);

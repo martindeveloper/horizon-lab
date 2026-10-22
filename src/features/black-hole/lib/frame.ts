@@ -45,37 +45,55 @@ import { toneExposure } from "./tone";
  * Shader inputs for one frame, shared by the live engine and the headless
  * benchmark so both draw exactly the same scene from the same state.
  */
-export type Uniforms = {
-  uDiskProfile: { value: DataTexture };
-  /** Black-body colours; sampled as linear light, since the texels are sRGB-encoded. */
-  uBlackbody: { value: DataTexture };
+type CameraUniforms = {
   uResolution: { value: InstanceType<typeof Vector2> };
   /**
    * Camera to the traced frame, column-major: right, up, back (−forward) and the position in M.
    * The traced frame is the scene turned about the spin axis by −uAzimuth (see `writeCamera`).
    */
   uCamera: { value: InstanceType<typeof Matrix4> };
-  /** The camera's azimuth about the spin axis, radians within ±π: the traced frame to the scene. */
-  uAzimuth: { value: number };
   /** The camera's velocity through the hovering observer's frame, traced frame, units of c; zero hovers. */
   uCamVelocity: { value: InstanceType<typeof Vector3> };
-  uTime: { value: number };
+  uFov: { value: number };
+};
+
+type MarchUniforms = {
   uSpin: { value: number };
   uInner: { value: number };
   uOuter: { value: number };
-  /** The tone map's exposure (`toneExposure`). */
-  uExposure: { value: number };
   uDiskBright: { value: number };
-  uStars: { value: number };
-  uTemp: { value: number };
-  uFov: { value: number };
   uSteps: { value: number };
   uJet: { value: number };
   uWeather: { value: number };
   uGravity: { value: number };
+};
+
+type ShadingUniforms = {
+  /** The camera's azimuth about the spin axis, radians within ±π: the traced frame to the scene. */
+  uAzimuth: { value: number };
+  uTime: { value: number };
+  uStars: { value: number };
+  uTemp: { value: number };
+};
+
+type DisplayUniforms = {
+  /** The tone map's exposure (`toneExposure`). */
+  uExposure: { value: number };
   /** The lens vignette's depth: how much the frame's corners darken, less from far away. */
   uVignette: { value: number };
 };
+
+type TextureUniforms = {
+  uDiskProfile: { value: DataTexture };
+  /** Black-body colours; sampled as linear light, since the texels are sRGB-encoded. */
+  uBlackbody: { value: DataTexture };
+};
+
+export type Uniforms = CameraUniforms &
+  MarchUniforms &
+  ShadingUniforms &
+  DisplayUniforms &
+  TextureUniforms;
 
 /** The scene settings the shader reads; the store and benchmark scenes both supply them. */
 type SceneSettings = {
@@ -127,7 +145,7 @@ export function orbitWheelSensitivity(distance: number, pinch: boolean) {
  * (the resolve shader, sharing the uniforms its display pipeline reads), for the engine and
  * the bench alike.
  */
-export function passOptions(uniforms: Uniforms) {
+export function passOptions(uniforms: DisplayUniforms & Pick<CameraUniforms, "uResolution">) {
   return {
     clearColor: 0x08080b,
     powerPreference: "low-power",
@@ -158,7 +176,33 @@ function blackbodyTexture() {
 
 /** Fresh uniforms; the caller owns (and disposes) their textures (`uniformTextures`). */
 export function createUniforms(): Uniforms {
-  return {
+  const camera: CameraUniforms = {
+    uResolution: { value: new Vector2(1, 1) },
+    uCamera: { value: new Matrix4().makeTranslation(0, 0, 24) },
+    uCamVelocity: { value: new Vector3() },
+    uFov: { value: (50 * Math.PI) / 180 },
+  };
+  const march: MarchUniforms = {
+    uSpin: { value: 0.82 },
+    uInner: { value: 3.2 },
+    uOuter: { value: 16.5 },
+    uDiskBright: { value: 1 },
+    uSteps: { value: 140 },
+    uJet: { value: 0 },
+    uWeather: { value: 0 },
+    uGravity: { value: 1 },
+  };
+  const shading: ShadingUniforms = {
+    uAzimuth: { value: 0 },
+    uTime: { value: 0 },
+    uStars: { value: 1 },
+    uTemp: { value: 1 },
+  };
+  const display: DisplayUniforms = {
+    uExposure: { value: 1 },
+    uVignette: { value: 0.1 },
+  };
+  const texture: TextureUniforms = {
     uDiskProfile: {
       value: new DataTexture(
         new Float32Array(DISK_PROFILE_SIZE * 4),
@@ -169,35 +213,20 @@ export function createUniforms(): Uniforms {
       ),
     },
     uBlackbody: { value: blackbodyTexture() },
-    uResolution: { value: new Vector2(1, 1) },
-    uCamera: { value: new Matrix4().makeTranslation(0, 0, 24) },
-    uAzimuth: { value: 0 },
-    uCamVelocity: { value: new Vector3() },
-    uTime: { value: 0 },
-    uSpin: { value: 0.82 },
-    uInner: { value: 3.2 },
-    uOuter: { value: 16.5 },
-    uExposure: { value: 1 },
-    uDiskBright: { value: 1 },
-    uStars: { value: 1 },
-    uTemp: { value: 1 },
-    uFov: { value: (50 * Math.PI) / 180 },
-    uSteps: { value: 140 },
-    uJet: { value: 0 },
-    uWeather: { value: 0 },
-    uGravity: { value: 1 },
-    uVignette: { value: 0.1 },
   };
+  return { ...camera, ...march, ...shading, ...display, ...texture };
 }
 
 /** The uniforms' textures, for their owner to dispose and to re-upload after a lost context. */
-export const uniformTextures = (uniforms: Uniforms) => [
+export const uniformTextures = (uniforms: TextureUniforms) => [
   uniforms.uDiskProfile.value,
   uniforms.uBlackbody.value,
 ];
 
 /** Writes scene uniforms; the Page–Thorne profile is re-integrated only when spin changes. */
-export function sceneWriter(uniforms: Uniforms) {
+export function sceneWriter(
+  uniforms: MarchUniforms & ShadingUniforms & DisplayUniforms & TextureUniforms,
+) {
   let profileSpin = NaN;
   return (scene: SceneSettings, time: number, steps: number) => {
     const hole = holeById(scene.presetId);
@@ -257,23 +286,23 @@ export function clampPosition(position: FreePose["position"], spin: number) {
  * azimuth about the spin axis, the disk profile (fixed by the spin), the black-body colours, and
  * the star, temperature and display scales. Every other uniform steers the march.
  */
-const SHADING_ONLY: ReadonlySet<keyof Uniforms> = new Set<keyof Uniforms>([
-  "uTime",
-  "uAzimuth",
-  "uDiskProfile",
-  "uBlackbody",
-  "uStars",
-  "uTemp",
-  "uExposure",
-  "uVignette",
-]);
+const SHADING_ONLY = {
+  uTime: true,
+  uAzimuth: true,
+  uDiskProfile: true,
+  uBlackbody: true,
+  uStars: true,
+  uTemp: true,
+  uExposure: true,
+  uVignette: true,
+} satisfies Record<keyof (ShadingUniforms & DisplayUniforms & TextureUniforms), true>;
 
 /**
  * Writes the march's inputs as numbers, in a fixed order, into `out`: frames whose keys are equal
  * trace the same rays, so one may replay the other's march.
  */
 export function traceKeyWriter(uniforms: Uniforms) {
-  const inputs = keysOf(uniforms).filter((name) => !SHADING_ONLY.has(name));
+  const inputs = keysOf(uniforms).filter((name) => !(name in SHADING_ONLY));
   return (out: number[]) => {
     out.length = 0;
     for (const name of inputs) {
@@ -289,7 +318,7 @@ export function traceKeyWriter(uniforms: Uniforms) {
 }
 
 /** The camera's distance from the hole, M. */
-export function cameraDistance(uniforms: Uniforms) {
+export function cameraDistance(uniforms: Pick<CameraUniforms, "uCamera">) {
   const m = uniforms.uCamera.value.elements;
   return Math.hypot(m[12], m[13], m[14]);
 }
@@ -340,6 +369,9 @@ export function writeOrbitCamera(
 }
 
 /** Camera to world, column-major, into `out`: the traced camera turned by its azimuth. */
-export function sceneCamera(uniforms: Uniforms, out: InstanceType<typeof Matrix4>) {
+export function sceneCamera(
+  uniforms: Pick<CameraUniforms, "uCamera"> & Pick<ShadingUniforms, "uAzimuth">,
+  out: InstanceType<typeof Matrix4>,
+) {
   return out.makeRotationY(uniforms.uAzimuth.value).multiply(uniforms.uCamera.value);
 }

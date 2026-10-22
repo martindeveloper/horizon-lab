@@ -196,7 +196,7 @@ export function createGiantsEngine(
     const dotTable = resources.own(overviewDots(LOOKS, tints.face, means));
     const stellar = resources.own(stellarTables(LOOKS));
     const weather = resources.own(weatherUniforms(stellar.spectrumData));
-    const uniforms = {
+    const frameUniforms = {
       uResolution: { value: new Vector2(1, 1) },
       uPixelRatio: { value: 1 },
       uBaseline: { value: 0 },
@@ -204,7 +204,8 @@ export function createGiantsEngine(
       uDetail: { value: 1 },
       uLines: { value: 1 },
       uFocus: { value: new Vector2(-1, 0) },
-      ...stellar.uniforms,
+    };
+    const bodyUniforms = {
       uCount: { value: 0 },
       uShape: { value: discs.shape },
       uBody: { value: discs.body },
@@ -215,22 +216,42 @@ export function createGiantsEngine(
       uTints: tints.uniform,
       uHoles: { value: Array.from({ length: LENSES }, () => 0) },
       uHoleCount: { value: 0 },
-      uWeather: { value: new Vector4(-1, 0, 0, 0) },
-      ...weather.uniforms,
-      uOrbitCentre: { value: new Vector3() },
-      uOrbits: { value: ORBIT_METRES.map(() => new Vector2()) },
+    };
+    const lightUniforms = {
+      ...stellar.uniforms,
       uAccent: { value: linearRgb(ACCENT_SRGB) },
       uBalmer: { value: linearRgb(BALMER_SRGB) },
       uAlkali: { value: new Vector3(...BROWN_DWARF_ALKALI) },
       uSky: { value: linearRgb(SPACE_SRGB) },
+    };
+    const activityUniforms = {
+      uWeather: { value: new Vector4(-1, 0, 0, 0) },
+      ...weather.uniforms,
+    };
+    const orbitUniforms = {
+      uOrbitCentre: { value: new Vector3() },
+      uOrbits: { value: ORBIT_METRES.map(() => new Vector2()) },
+    };
+    const mapUniforms = {
       uEarth: { value: null as Texture | null },
       uJupiter: { value: null as Texture | null },
       uMaps: { value: new Vector2(0, 0) },
       uEarthMean: { value: means.earth },
       uJupiterMean: { value: means.jupiter },
+    };
+    const overviewUniforms = {
       uDots: dotTable.uniform,
       uOverview: { value: 0 },
       uDotFocus: { value: -1 },
+    };
+    const uniforms = {
+      ...frameUniforms,
+      ...bodyUniforms,
+      ...lightUniforms,
+      ...activityUniforms,
+      ...orbitUniforms,
+      ...mapUniforms,
+      ...overviewUniforms,
     };
     const blurRadii = new Float32Array(MAX_DISCS);
     const pass = resources.own(
@@ -243,14 +264,14 @@ export function createGiantsEngine(
         filter: {
           fragmentShader: focusBlurShader,
           uniforms: {
-            uResolution: uniforms.uResolution,
-            uPixelRatio: uniforms.uPixelRatio,
-            uCount: uniforms.uCount,
-            uShape: uniforms.uShape,
+            uResolution: frameUniforms.uResolution,
+            uPixelRatio: frameUniforms.uPixelRatio,
+            uCount: bodyUniforms.uCount,
+            uShape: bodyUniforms.uShape,
             uBlurRadius: { value: blurRadii },
-            uBaseline: uniforms.uBaseline,
-            uOrbitCentre: uniforms.uOrbitCentre,
-            uOrbits: uniforms.uOrbits,
+            uBaseline: frameUniforms.uBaseline,
+            uOrbitCentre: orbitUniforms.uOrbitCentre,
+            uOrbits: orbitUniforms.uOrbits,
           },
         },
       }),
@@ -265,10 +286,10 @@ export function createGiantsEngine(
         .then((texture) => {
           if (maps.signal.aborted) return texture.dispose();
           resources.own(texture);
-          if (id === "earth") uniforms.uEarth.value = texture;
-          else uniforms.uJupiter.value = texture;
-          if (slot === 0) uniforms.uMaps.value.x = 1;
-          else uniforms.uMaps.value.y = 1;
+          if (id === "earth") mapUniforms.uEarth.value = texture;
+          else mapUniforms.uJupiter.value = texture;
+          if (slot === 0) mapUniforms.uMaps.value.x = 1;
+          else mapUniforms.uMaps.value.y = 1;
           engine.invalidate();
         })
         .catch(() => {
@@ -672,8 +693,8 @@ export function createGiantsEngine(
           canvas.style.width = "100%";
           canvas.style.height = "100%";
           stage = { width: host.clientWidth || 1, height: host.clientHeight || 1 };
-          uniforms.uResolution.value.set(width, height);
-          uniforms.uPixelRatio.value = width / stage.width;
+          frameUniforms.uResolution.value.set(width, height);
+          frameUniforms.uPixelRatio.value = width / stage.width;
         },
         ...(onError !== undefined ? { onError } : {}),
       }),
@@ -975,7 +996,7 @@ export function createGiantsEngine(
       detailFade = reduce
         ? { star: surfaceWanted, level: surfaceWanted < 0 ? 0 : 1 }
         : fadeWeather(detailFade, surfaceWanted, dt);
-      uniforms.uFocus.value.set(-1, 0);
+      frameUniforms.uFocus.value.set(-1, 0);
       /* The star the camera lands on comes alive; one it passes through stays quiet. */
       const landing = resting && LOOKS[landed]!.activity !== "none";
       const wanted = landing ? landed : -1;
@@ -1019,12 +1040,12 @@ export function createGiantsEngine(
         tints.assign(i, body.index);
         stellar.assign(i, body.index);
         const detail = surfaceDetail(body.index, detailFade, state.quality);
-        if (detail > 0) uniforms.uFocus.value.set(i, detail);
+        if (detail > 0) frameUniforms.uFocus.value.set(i, detail);
         if (look.style === "horizon" && holesInView < LENSES)
-          uniforms.uHoles.value[holesInView++] = i;
+          bodyUniforms.uHoles.value[holesInView++] = i;
         if (body.index === star) slot = i;
       }
-      uniforms.uHoleCount.value = holesInView;
+      bodyUniforms.uHoleCount.value = holesInView;
       discs.lens.forEach((lens, k) => {
         const hole = holes[k];
         if (hole === undefined) return void lens.setW(0);
@@ -1055,19 +1076,19 @@ export function createGiantsEngine(
         forecastNow,
         live ? (LOOKS[star]!.equatorK + LOOKS[star]!.poleK) / 2 : undefined,
       );
-      uniforms.uWeather.value.set(
+      activityUniforms.uWeather.value.set(
         live ? slot : -1,
         presence,
         forecastNow?.corona ?? 0,
         forecastNow?.chromosphere ?? 0,
       );
-      uniforms.uCount.value = count;
-      uniforms.uOverview.value = overview.dots;
-      uniforms.uDotFocus.value = focus;
-      uniforms.uBaseline.value = baseline;
-      uniforms.uTime.value = time;
-      uniforms.uDetail.value = GIANTS_QUALITY[state.quality].detail ? 1 : 0;
-      uniforms.uLines.value = smootherstep(lineVeil.presence);
+      bodyUniforms.uCount.value = count;
+      overviewUniforms.uOverview.value = overview.dots;
+      overviewUniforms.uDotFocus.value = focus;
+      frameUniforms.uBaseline.value = baseline;
+      frameUniforms.uTime.value = time;
+      frameUniforms.uDetail.value = GIANTS_QUALITY[state.quality].detail ? 1 : 0;
+      frameUniforms.uLines.value = smootherstep(lineVeil.presence);
 
       const { scale } = camera;
       /* The orbits ripple out round the body the camera lands on, as if it stood where the Sun
@@ -1076,16 +1097,16 @@ export function createGiantsEngine(
       orbitFade = reduce
         ? handOverAtOnce(orbitsWanted)
         : handOver(orbitFade, orbitsWanted, dt, ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S);
-      const rings = uniforms.uOrbits.value;
+      const rings = orbitUniforms.uOrbits.value;
       const around = orbitFade.level > 0 ? placedOf(orbitFade.owner) : null;
       if (around) {
-        uniforms.uOrbitCentre.value.set(around.x, around.y, 1);
+        orbitUniforms.uOrbitCentre.value.set(around.x, around.y, 1);
         ORBIT_METRES.forEach((m, k) => {
           const shown = ringShown(orbitFade.level, k, ORBIT_METRES.length);
           rings[k]!.set(ringRadius(m / scale, shown), shown);
         });
       } else {
-        uniforms.uOrbitCentre.value.z = 0;
+        orbitUniforms.uOrbitCentre.value.z = 0;
         rings.forEach((ring) => ring.setY(0));
       }
       moveOrbitLabels(around?.x ?? 0, around?.y ?? 0, rings);
