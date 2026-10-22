@@ -7,7 +7,8 @@ import type { OrbitRig, RigDrift } from "@horizon/toolkit/scene";
  * A drift's visits: shots the host flies as close-ups (`VisitShot`), one dive to a body and one
  * pull away. The visit opens the close-up the shot names, whose own flight takes the camera in,
  * slowed to a lean-back pace and settling onto the body; circles the body slowly through the
- * hold while it drifts nearer; then lets go. A visit before a framed shot pulls away on that
+ * hold while it drifts nearer; may fly on deeper to a body of the same system (`onward`, the
+ * dive's second stage) and circle that; then lets go. A visit before a framed shot pulls away on that
  * shot's own flight (the close-up released to it, keeping the body in view until the flight
  * hands the aim home), so the release flows on without a stop; before another visit the
  * close-up flies out itself. Flying on after a pause leaves any close-up first. Shared by the
@@ -20,7 +21,16 @@ export type VisitShot<Body> = CuedShot & {
   closeUp: Body;
   /** Seconds at the body; the programme's default otherwise. */
   hold?: number;
-  /** Seconds the close-up's own flights take, for timing (`withVisitFlights` sets it). */
+  /**
+   * A body of the same system the visit flies on to after its hold, deeper in, and holds at
+   * before it lets go: one push-in in two stages (Earth, then Hubble above it), never out and
+   * back in.
+   */
+  onward?: { closeUp: Body; hold: number };
+  /**
+   * Seconds the visit spends besides its first hold, for timing: its close-up's own flights and,
+   * flying onward, the hold there (`withVisitFlights` sets it).
+   */
   flight?: { duration: number };
 };
 
@@ -60,10 +70,10 @@ export function pullsAwayOnward(shots: readonly object[], index: number) {
 
 /**
  * The shots with each visit's flights counted at the visits' `pace`, so the timing can place the
- * shots after it: a visit flies in on its own and out on its own only before another visit;
- * pulling away onward (`pullsAwayOnward`), the next shot's flight (`flight` seconds when it
- * names none) takes the flight out's seconds on top of its own. The loop's length stays as
- * written.
+ * shots after it: a visit flies in on its own (twice, and holds again, when it flies onward) and
+ * out on its own only before another visit; pulling away onward (`pullsAwayOnward`), the next
+ * shot's flight (`flight` seconds when it names none) takes the flight out's seconds on top of
+ * its own. The loop's length stays as written.
  */
 export function withVisitFlights<Shot extends { flight?: { duration?: number } }>(
   shots: readonly Shot[],
@@ -73,7 +83,9 @@ export function withVisitFlights<Shot extends { flight?: { duration?: number } }
   const out = CLOSE_UP_OUT_S * pace;
   return shots.map((shot, i) => {
     if (isVisit(shot)) {
-      const own = CLOSE_UP_IN_S * pace + (pullsAwayOnward(shots, i) ? 0 : out);
+      const dive = CLOSE_UP_IN_S * pace;
+      const onward = shot.onward ? dive + shot.onward.hold : 0;
+      const own = dive + onward + (pullsAwayOnward(shots, i) ? 0 : out);
       return { ...shot, flight: { duration: own } };
     }
     /* A framed shot after a visit is the one that visit pulls away on. */
@@ -92,11 +104,15 @@ export type VisitFrame = { phase: "in" | "on" | "out"; released: OrbitPose | nul
 /** Radians the camera sways above and below its arrival tilt at a body. */
 const SWAY = 0.12;
 
-/** A visit to a body: waiting for the flight in, circling, or waiting for the flight out. */
+/**
+ * A visit to a body: waiting for a flight in, circling, or waiting for the flight out; `onward`
+ * once it has flown on to its second body.
+ */
 type Visit =
-  | { phase: "in" }
+  | { phase: "in"; onward: boolean }
   | {
       phase: "on";
+      onward: boolean;
       held: number;
       hold: number;
       distance: number;
@@ -128,7 +144,10 @@ export function createDriftVisits<Body>(
     reclaim: () => void;
     /** The released flight has landed: the close-up ends where the drift left the camera. */
     finish: () => void;
-    /** The pose a hold `t` (0..1) of the way through frames from its circling `base` (the Orrery's moon). */
+    /**
+     * The pose a visit's last hold `t` (0..1) of the way through frames from its circling `base`
+     * (the Orrery's moon); a hold the visit flies on from only circles.
+     */
     frame?: (base: OrbitPose, t: number) => OrbitPose;
   },
 ) {
@@ -139,7 +158,7 @@ export function createDriftVisits<Body>(
   function enter(index: number, resume: () => void) {
     const shot = options.shots()[index];
     if (!shot || !isVisit(shot) || !options.open(shot.closeUp)) return resume();
-    visit = { phase: "in" };
+    visit = { phase: "in", onward: false };
   }
 
   /**
@@ -156,8 +175,8 @@ export function createDriftVisits<Body>(
     options.letGo();
   }
 
-  /** Circles the body and drifts nearer through the hold. */
-  function circle(at: Extract<Visit, { phase: "on" }>, dt: number) {
+  /** Circles the body and drifts nearer through the hold; the last hold also frames (`frame`). */
+  function circle(at: Extract<Visit, { phase: "on" }>, dt: number, last: boolean) {
     at.held += dt;
     if (reduceMotion.matches) return;
     const t = Math.min(1, at.held / at.hold);
@@ -169,7 +188,7 @@ export function createDriftVisits<Body>(
       inclination: at.inclination + SWAY * Math.sin(t * Math.PI),
       distance: clamp(at.distance * settings.dive ** smootherstep(t), min, max),
     };
-    Object.assign(rig.pose, options.frame?.(base, t) ?? base);
+    Object.assign(rig.pose, (last && options.frame?.(base, t)) || base);
     rig.settle();
   }
 
@@ -178,14 +197,18 @@ export function createDriftVisits<Body>(
     handoff: (index: number, dt: number, resume: () => void) => {
       const close = closeUp();
       if (!visit) return enter(index, resume);
+      const shot = options.shots()[index];
+      const onward = shot && isVisit(shot) ? shot.onward : undefined;
       if (visit.phase === "in") {
         if (!close) return resume();
         if (close.phase === "on") {
-          const shot = options.shots()[index];
           visit = {
             phase: "on",
+            onward: visit.onward,
             held: 0,
-            hold: (shot && isVisit(shot) ? shot.hold : undefined) ?? settings.hold,
+            hold: visit.onward
+              ? onward!.hold
+              : ((shot && isVisit(shot) ? shot.hold : undefined) ?? settings.hold),
             distance: rig.pose.distance,
             inclination: rig.pose.inclination,
             azimuth: rig.pose.azimuth,
@@ -196,8 +219,15 @@ export function createDriftVisits<Body>(
       if (visit.phase === "on") {
         if (!close) visit = { phase: "out" };
         else {
-          circle(visit, dt);
-          if (visit.held >= visit.hold) return letGo(index, resume);
+          const last = visit.onward || !onward;
+          circle(visit, dt, last);
+          if (visit.held < visit.hold) return;
+          /* On deeper into the same system: one flight in, the close-up's own. */
+          if (!last && options.open(onward.closeUp)) {
+            visit = { phase: "in", onward: true };
+            return;
+          }
+          return letGo(index, resume);
         }
       }
       if (visit.phase === "out" && !close) {

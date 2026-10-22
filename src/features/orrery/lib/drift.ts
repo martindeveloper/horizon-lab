@@ -15,7 +15,8 @@ import {
  * nudged in distance and tilt, or a close-up: the drift selects the body, flies in on the
  * close-up's own flight, slowed to a lean-back pace and settling onto the body, circles it
  * while it drifts nearer, then pulls out once to frame it with its largest moon and flies on
- * from there, so a body is dived to and pulled away from once each: before a framed shot the
+ * from there, so a body is dived to and pulled away from once each. Earth's visit dives on
+ * deeper instead, to Hubble above it, and pulls away from there: before a framed shot the
  * pull away is that shot's own flight (`withVisitFlights` gives it the flight out's seconds), before
  * another visit the close-up's own flight out. The holds
  * written here are the timing without a map and add up to the two plays; `timeShots` sets them
@@ -25,14 +26,17 @@ import {
  * held to `clock` model years per real second, so the inner planets and the belt glide rather
  * than whirl when seen from the giants.
  */
+import type { ObservatorySelection } from "@/space/solar-system/model/observatories";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
 import type { DriftPoseShot, OrbitPose } from "@horizon/toolkit/camera";
 
 import type { MoonSwing } from "./scene/close-up-flight";
 
-/** A body the close-up can frame: the Sun, a planet or a named body. */
-export type CloseUpBody = Extract<SolarSelection, { kind: "sun" | "planet" | "named" }>;
+/** What the close-up can frame on a visit: the Sun, a planet, a named body or an observatory. */
+export type CloseUpBody =
+  | Extract<SolarSelection, { kind: "sun" | "planet" | "named" }>
+  | ObservatorySelection;
 
 export type OrreryDriftShot =
   | (CuedShot &
@@ -58,13 +62,13 @@ export type OrreryDrift = DriftProgramme<OrreryDriftShot> & {
 /** Seconds held at a body. */
 const CLOSE_UP_HOLD = 16;
 
-/** A visit to a body, its hold written out. */
+/** A visit to a body, its hold written out; a cue, or a body to fly on to (`onward`). */
 function closeUpShot(
   closeUp: CloseUpBody,
   hold = CLOSE_UP_HOLD,
-  cue?: Pick<CuedShot, "at">,
+  more?: Pick<VisitShot<CloseUpBody>, "at" | "onward">,
 ): OrreryDriftShot {
-  return { ...cue, closeUp, hold };
+  return { ...more, closeUp, hold };
 }
 
 /** Seconds of a framed shot's flight when its shot names none. */
@@ -90,7 +94,7 @@ export const DRIFT: OrreryDrift = {
   },
   shots: withVisitFlights(
     [
-      /* Low among the inner planets as the track opens, then down to Earth. */
+      /* Low among the inner planets as the track opens, then down to Earth and on to Hubble. */
       {
         at: "start",
         view: "inner",
@@ -98,14 +102,16 @@ export const DRIFT: OrreryDrift = {
         flight: { duration: 20, lift: 0.15, lead: 0.3 },
         hold: 4,
       },
-      closeUpShot({ kind: "planet", id: "earth" }, 18),
+      closeUpShot({ kind: "planet", id: "earth" }, 8, {
+        onward: { closeUp: { kind: "observatory", id: "hubble" }, hold: 12 },
+      }),
       {
         view: "inner",
         pose: { distance: 9, inclination: 1.2 },
         flight: { duration: 16, lead: -0.2 },
-        hold: 6,
+        hold: 4,
       },
-      closeUpShot({ kind: "planet", id: "mars" }, 14),
+      closeUpShot({ kind: "planet", id: "mars" }, 10),
       /* The giants framed and held across the music's first crest, then the dive to Jupiter on it. */
       { view: "giants", pose: { inclination: 0.5 }, flight: { duration: 22, lift: 0.1 }, hold: 16 },
       closeUpShot({ kind: "planet", id: "jupiter" }, 18, { at: "peak" }),
@@ -123,7 +129,7 @@ export const DRIFT: OrreryDrift = {
       closeUpShot({ kind: "named", id: "pluto" }, 10),
       /* On to the Oort cloud, landing on the second crest, held at the music's height. */
       { view: "scattered", flight: { duration: 20, lead: 0.3 }, hold: 2 },
-      { land: "peak@2", view: "oort", flight: { duration: 28 }, hold: 36, creep: -0.04 },
+      { land: "peak@2", view: "oort", flight: { duration: 28 }, hold: 27, creep: -0.04 },
       /* And one long fall back to the giants, from above, as the track settles. */
       {
         view: "giants",

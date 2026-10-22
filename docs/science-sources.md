@@ -1528,16 +1528,19 @@ lab and the Orrery's observatories, by the widths below.
 `solar/observatories.ts`: Hubble and Chandra move on their CelesTrak element sets
 (`observatory-orbits.json`, fetched by `scripts/fetch-observatory-orbits.mjs`; the epochs are in
 the file and the catalogue's notes). The mean motion gives the size by Kepler's third law about
-Earth's GM; Earth's J2 (IERS 2010) turns the node and perigee at their secular rates. The
+Earth's GM; Earth's J2 (IERS 2010) turns the node and perigee at their secular rates, and the
+element set's drag term (half the mean motion's rate of change) moves the place on as t². The
 elements are SGP4 mean elements of the equator of date, read as two-body elements of the J2000
 equator (the frames differ by under half a degree): good for the orbit's size, tilt and plane
-for months; the place along the orbit drifts within days (drag, lunisolar pulls). Webb flies its
+for months; the place along the orbit drifts within days to weeks (changing drag, lunisolar
+pulls). Webb flies its
 JPL Horizons trajectory (Goddard FDF: reconstructed, then predicted to October 2031; every four
 days, to 100 km), stored in the frame turning with Earth round the Sun and turned back with the
 Earth the scene draws; past the end the scene holds its last place. The L2 point is the
 restricted three-body solution for the Sun and the Earth–Moon pair at one au, from the shared
-GMs; NASA gives 1.5 million km. Euclid is left out: ESA publishes no 3D model licensed for
-redistribution. Gaia, retired to a heliocentric orbit in March 2025, is left out too: no
+GMs; NASA gives 1.5 million km. Euclid is left out: no Euclid 3D model under a licence that
+allows redistribution was found (the Euclid Consortium's printable model is for non-commercial
+use only). Gaia, retired to a heliocentric orbit in March 2025, is left out too: no
 sourced position.
 
 ## Voyage: the ship and its drives

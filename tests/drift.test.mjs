@@ -38,6 +38,7 @@ import {
   timedDrift,
   timeShots,
 } from "../src/lib/drift.ts";
+import { createDriftVisits } from "../src/space/drift-visits.ts";
 import { HELIOPAUSE_AU } from "../src/space/solar-system/model/probes.ts";
 import { isSolarView } from "../src/space/solar-system/model/views.ts";
 
@@ -87,12 +88,17 @@ test("every drift programme is one the camera and the music can play", () => {
   }
   for (const shot of ORRERY.shots) {
     if ("closeUp" in shot) {
-      assert.ok(
-        canCloseUp({ selection: shot.closeUp, guideOpen: false, yearsAgo: 0 }),
-        `orrery close-up ${JSON.stringify(shot.closeUp)}`,
-      );
+      for (const body of [shot.closeUp, shot.onward?.closeUp].filter(Boolean))
+        assert.ok(
+          canCloseUp({ selection: body, guideOpen: false, yearsAgo: 0 }),
+          `orrery close-up ${JSON.stringify(body)}`,
+        );
     } else assert.ok(isSolarView(shot.view), `orrery view ${shot.view}`);
   }
+  assert.ok(
+    ORRERY.shots.some((shot) => shot.onward?.closeUp.kind === "observatory"),
+    "the Orrery's drift visits an observatory",
+  );
   for (const programme of [ORRERY, DEEP_FIELD]) {
     assert.ok(
       programme.shots.some((shot) => "closeUp" in shot),
@@ -591,4 +597,61 @@ test("a loading drift begins once its map has settled and its music is audible, 
     "the timeout ends the wait",
   );
   assert.ok(DRIFT_LOADING.minimum > 0 && DRIFT_LOADING.timeout > DRIFT_LOADING.minimum);
+});
+
+test("a visit that flies onward dives once more, into the same system, and pulls away once", () => {
+  /* The close-up as the host runs it: each body opened flies in, then is held "on". */
+  let close = null;
+  const opened = [];
+  const calls = [];
+  const pose = { azimuth: 0, inclination: 0.3, distance: 1 };
+  const landing = { azimuth: 1, inclination: 0.5, distance: 9 };
+  const shots = [
+    { closeUp: "earth", hold: 2, onward: { closeUp: "hubble", hold: 3 } },
+    { view: "inner", flight: { duration: 10 } },
+  ];
+  const framedAt = [];
+  const visits = createDriftVisits(
+    { pose, settle() {}, limits: () => ({ min: 1e-12, max: 1e9 }) },
+    {
+      settings: { hold: 5, orbit: 0.05, dive: 0.5, pace: 4, lead: 1 },
+      reduceMotion: { matches: false },
+      shots: () => shots,
+      drift: () => ({ landing, motion: { azimuth: 0, inclination: 0 }, flying: false }),
+      open: (body) => {
+        opened.push(body);
+        close = { phase: "in", released: null };
+        return true;
+      },
+      letGo: () => calls.push("letGo"),
+      leave: () => calls.push("leave"),
+      closeUp: () => close,
+      release: () => calls.push("release"),
+      reclaim: () => calls.push("reclaim"),
+      finish: () => calls.push("finish"),
+      frame: (base) => {
+        framedAt.push(opened.at(-1));
+        return base;
+      },
+    },
+  );
+  let resumed = 0;
+  const step = (seconds) => {
+    for (let t = 0; t < seconds; t += 0.1) {
+      if (close?.phase === "in") close.phase = "on";
+      visits.handoff(0, 0.1, () => resumed++);
+    }
+  };
+  step(1);
+  assert.deepEqual(opened, ["earth"]);
+  step(2.5);
+  assert.deepEqual(opened, ["earth", "hubble"], "after its hold it flies on to Hubble");
+  assert.deepEqual(calls, [], "without letting go or pulling out first");
+  assert.ok(
+    framedAt.every((at) => at === "hubble"),
+    "only the last hold frames",
+  );
+  step(4);
+  assert.deepEqual(calls, ["release", "letGo"], "then it pulls away once, onto the next shot");
+  assert.equal(resumed, 1);
 });

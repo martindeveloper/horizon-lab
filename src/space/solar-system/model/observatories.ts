@@ -178,11 +178,13 @@ const DAY_MS = DAY_S * 1e3;
 const R_EARTH = EARTH_EQUATORIAL_RADIUS_KM;
 
 /**
- * An element set's orbit, derived once: its mean motion (rad/s), size (km), and how fast the
- * bulge turns its node and perigee (rad/s).
+ * An element set's orbit, derived once: its mean motion (rad/s), how drag quickens it (half its
+ * rate of change, rad/s²), its size (km), and how fast the bulge turns its node and perigee
+ * (rad/s).
  */
 function satelliteOrbit(set: ElementSet) {
   const n = (set.revsPerDay * 2 * Math.PI) / DAY_S;
+  const drag = (set.halfDecay * 2 * Math.PI) / DAY_S ** 2;
   const a = meanMotionAxis.compute({ GM: GM_KM3_S2.earth, n });
   const i = set.i * RAD;
   const rates = { n, J2: EARTH_J2.value, k: R_EARTH / (a * (1 - set.e ** 2)), i };
@@ -190,6 +192,7 @@ function satelliteOrbit(set: ElementSet) {
     set,
     epoch: new Date(set.epoch).getTime(),
     n,
+    drag,
     a,
     node: nodalRegression.compute(rates),
     perigee: apsidalPrecession.compute(rates),
@@ -233,7 +236,8 @@ function elementsAt(id: SatelliteId, date: Date): Elements {
   elements.i = set.i;
   elements.node = set.node + (orbit.node * t) / RAD;
   elements.omega = set.omega + (orbit.perigee * t) / RAD;
-  elements.M = set.M + (orbit.n * t) / RAD;
+  /* Drag lowers the orbit and speeds the craft along it: the place drifts ahead as t². */
+  elements.M = set.M + (orbit.n * t + orbit.drag * t * t) / RAD;
   return elements;
 }
 

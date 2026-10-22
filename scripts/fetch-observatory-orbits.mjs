@@ -34,6 +34,8 @@ async function elements(norad) {
     /* CelesTrak writes UTC without a zone. */
     epoch: `${gp.EPOCH}Z`,
     revsPerDay: gp.MEAN_MOTION,
+    /* Half the mean motion's rate of change, rev/day²: drag lowering and speeding the orbit. */
+    halfDecay: gp.MEAN_MOTION_DOT,
     e: gp.ECCENTRICITY,
     i: gp.INCLINATION,
     node: gp.RA_OF_ASC_NODE,
