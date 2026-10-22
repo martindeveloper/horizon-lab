@@ -3,14 +3,7 @@ import type { SourceId } from "@/lib/sources";
 /** The nearest stars, from their astrometry (neighbours.ts) through the science kit's laws. */
 import { angularSeparation, convert, parallaxDistance } from "@horizon/toolkit/science";
 
-import {
-  NEIGHBOURS,
-  closestApproach,
-  neighbourSeparationAu,
-  type NeighbourId,
-} from "../neighbours";
-
-const neighbour = (id: NeighbourId) => NEIGHBOURS.find((star) => star.id === id)!;
+import { closestApproach, neighbour, neighbourSeparationAu, type NeighbourId } from "../neighbours";
 
 /**
  * A neighbour's figures: distance by the parallax law, radial and proper motion, and the

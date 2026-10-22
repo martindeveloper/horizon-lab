@@ -24,6 +24,8 @@ export const VERTICAL_AMPLITUDE_LY = 330;
 export const VERTICAL_PERIOD = 85e6;
 /** Orientation of the Galactic bar relative to the Sun–centre line (~28°). */
 export const BAR_ANGLE_DEG = 28;
+/** The thin disk and bar are in place by ~8 Gyr ago (Sanders et al. 2024; Xiang & Rix 2022), years. */
+export const THIN_DISK_ERA = 8e9;
 /** Mean arm pitch angle (Vallée 2017, ~13°). */
 export const ARM_PITCH_DEG = 13;
 /** Bar half-length ~4.3 kpc, within the 3.5–5 kpc estimates; the arms start near its ends. */

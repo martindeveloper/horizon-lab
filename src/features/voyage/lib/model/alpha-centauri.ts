@@ -1,19 +1,26 @@
 /**
  * The α Centauri system as the ship finds it: A where the star catalogue draws Rigil
  * Kentaurus (its direction at its SIMBAD distance), B on its measured orbit about A, and
- * Proxima at its own catalogued place a fifth of a light-year away. Each star has a measured
- * radius and temperature, so it draws as a disc of the right size and colour.
- * Positions are km, heliocentric, scene axes.
+ * Proxima where its own astrometry puts it today, a fifth of a light-year away. Each star's
+ * radius and temperature are the shared catalogue's, so it draws as a disc of the right size
+ * and colour. Positions are km, heliocentric, scene axes.
  */
 import { Vector3 } from "three";
 
+import { ALPHA_CEN_AB_ORBIT, neighbour, neighbourPosition } from "@/space/galaxy/model/neighbours";
 import { STARS } from "@/space/star-catalogue";
-import { SUN_RADIUS_KM, eccentricAnomaly } from "@horizon/toolkit/bodies";
+import { starDistance } from "@/space/star-distances";
+import { NAMED_STARS } from "@/space/stellar";
+import { eccentricAnomaly } from "@horizon/toolkit/bodies";
 import { TAU } from "@horizon/toolkit/math";
 import { equatorialToScene, type Vec3d } from "@horizon/toolkit/scene";
-import { AU_KM, PARSEC_KM, RAD_PER_DEG, julianEpoch } from "@horizon/toolkit/science";
-
-import { starDistance } from "./star-distances";
+import {
+  AU_KM,
+  PARSEC_KM,
+  RAD_PER_DEG,
+  SOLAR_RADIUS_KM,
+  julianEpoch,
+} from "@horizon/toolkit/science";
 
 export type AlphaCentauriId = "alphaCenA" | "alphaCenB" | "proxima";
 
@@ -25,35 +32,23 @@ export type AlphaCentauriStar = {
   kelvin: number;
 };
 
-/**
- * A and B: radii 1.2234 and 0.8632 R☉ from VLTI interferometry and temperatures 5795 and
- * 5231 K (Kervella et al. 2017, A&A 597, A137). Proxima: 0.1542 R☉ (Mann et al. 2015's
- * mass–radius relation, as adopted by Kervella et al. 2017, A&A 598, L7) and 3042 K
- * (Ségransan et al. 2003, A&A 397, L5).
- */
+/** Each star's entry in the shared catalogue. */
+const CATALOGUED = {
+  alphaCenA: NAMED_STARS["alpha-cen-a"],
+  alphaCenB: NAMED_STARS["alpha-cen-b"],
+  proxima: NAMED_STARS.proxima,
+} as const satisfies Record<AlphaCentauriId, unknown>;
+
+const starOf = (id: AlphaCentauriId): AlphaCentauriStar => {
+  const { radius, teff } = CATALOGUED[id];
+  return { id, radiusKm: radius.value * SOLAR_RADIUS_KM, kelvin: teff.value };
+};
+
 export const ALPHA_CENTAURI: readonly AlphaCentauriStar[] = [
-  { id: "alphaCenA", radiusKm: 1.2234 * SUN_RADIUS_KM, kelvin: 5795 },
-  { id: "alphaCenB", radiusKm: 0.8632 * SUN_RADIUS_KM, kelvin: 5231 },
-  { id: "proxima", radiusKm: 0.1542 * SUN_RADIUS_KM, kelvin: 3042 },
+  starOf("alphaCenA"),
+  starOf("alphaCenB"),
+  starOf("proxima"),
 ];
-
-/**
- * The visual orbit of B about A (Pourbaix et al. 2002, A&A 386, 280): period in years,
- * periastron epoch (Julian year), eccentricity, semi-major axis in arcseconds, and the
- * inclination, argument of periastron and node in degrees.
- */
-export const AB_ORBIT = {
-  periodYr: 79.91,
-  periastronYr: 1875.66,
-  e: 0.5179,
-  aArcsec: 17.57,
-  iDeg: 79.205,
-  omegaDeg: 231.65,
-  nodeDeg: 204.85,
-} as const;
-
-/** Proxima's J2000 place: 14h 29m 42.95s, −62° 40′ 46.1″, parallax 768.07 mas (Gaia DR3). */
-const PROXIMA = { raHours: 14.495264, decDeg: -62.679486, pc: 1000 / 768.07 } as const;
 
 /**
  * The catalogue's name for the pair: its one point stands for A and B together until the
@@ -76,18 +71,17 @@ const EAST = equatorialToScene(RIGIL[1] * 15 + STEP_DEG, RIGIL[2], new Vector3()
   .normalize();
 const AWAY = A_AT.clone().normalize();
 
-const PROXIMA_AT = equatorialToScene(
-  PROXIMA.raHours * 15,
-  PROXIMA.decDeg,
-  new Vector3(),
-).multiplyScalar(PROXIMA.pc * PARSEC_KM);
+/** Proxima today, carried from its catalogued place along its proper motion. */
+const PROXIMA_AT = new Vector3()
+  .fromArray(neighbourPosition(neighbour("proxima"), 0))
+  .multiplyScalar(AU_KM);
 
 /**
  * B's offset from A at a Julian year, in au: the Thiele–Innes constants put the orbit on the
  * sky (north, east) and along the line of sight (away from the Sun).
  */
 export function companionOffsetAu(year: number) {
-  const { periodYr, periastronYr, e, aArcsec, iDeg, omegaDeg, nodeDeg } = AB_ORBIT;
+  const { periodYr, periastronYr, e, aArcsec, iDeg, omegaDeg, nodeDeg } = ALPHA_CEN_AB_ORBIT;
   const a = aArcsec * A_PC;
   const E = eccentricAnomaly((TAU * (year - periastronYr)) / periodYr, e);
   const X = Math.cos(E) - e;

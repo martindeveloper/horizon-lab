@@ -1,5 +1,6 @@
 /** The formation timeline and the model's clocks, as the notes, tour and technical prose quote them. */
 import type { Facts } from "@/lib/facts";
+import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
 import {
   CLEAR_DONE,
   GAS_DISK_LIFETIME,
@@ -11,10 +12,11 @@ import {
 import {
   EMBRYOS_AFTER,
   LHB_CLASSIC,
+  MOON_IMPACT_AFTER,
+  MOON_IMPACT_LATEST,
   NAMED_STARS_FADE,
   OLDEST,
   PLANETESIMALS_AFTER,
-  THIN_DISK_ERA,
 } from "../parameters";
 
 export const TIMELINE = {
@@ -76,7 +78,7 @@ export const TIMELINE = {
       note: "from under 2 to about 4 au in the young disk",
     },
     moonImpact: {
-      range: [4.35e9, 4.51e9],
+      range: [MOON_IMPACT_LATEST, SUN_BIRTH - MOON_IMPACT_AFTER],
       unit: "yr",
       show: "Gyr",
       source: "barboni2017",
@@ -116,14 +118,7 @@ export const TIMELINE = {
       status: "teaching-choice",
       note: "the timeline's far end",
     },
-    thinDisk: {
-      value: THIN_DISK_ERA,
-      unit: "yr",
-      show: "Gyr",
-      source: "sanders2024",
-      status: "verified",
-      note: "thin disk and bar in place",
-    },
+    thinDisk: GALAXY.milkyway.thinDiskEra,
     namedStarsFade: {
       value: NAMED_STARS_FADE,
       unit: "yr",
@@ -132,12 +127,6 @@ export const TIMELINE = {
       note: "proper motions scramble the constellations",
     },
     /** The Gaia-Enceladus merger the timeline's notes date. */
-    merger: {
-      value: 10,
-      unit: "Gyr",
-      range: [8, 11],
-      source: "gaiaEnceladus",
-      status: "verified",
-    },
+    merger: GALAXY.milkyway.gaiaEnceladus,
   },
 } satisfies Record<string, Facts>;

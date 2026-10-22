@@ -4,17 +4,18 @@ import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useMemo, useRef } from "react";
 
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
-import { formatAu } from "@/lib/facts";
+import { formatAu, type Facts } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
-import { CMB_LY, anchorById, type AnchorId } from "@/space/cosmos/model/cosmos";
-import { NEIGHBOURS, neighbourDistanceLy } from "@/space/galaxy/model/neighbours";
+import { COSMOS } from "@/space/cosmos/model/catalogue";
+import { CMB_LY } from "@/space/cosmos/model/cosmos";
+import { neighbour, neighbourDistanceLy } from "@/space/galaxy/model/neighbours";
 import { SUN_GALACTIC_RADIUS_LY } from "@/space/galaxy/model/parameters";
 import { solarNameKey } from "@/space/solar-system/format";
 import { TODAY } from "@/space/solar-system/model/moment";
 import { distanceFromEarth } from "@/space/solar-system/model/position";
 import { probeFromEarth } from "@/space/solar-system/model/probes";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
-import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
+import { LIGHT_YEAR_AU, convertFigure } from "@horizon/toolkit/science";
 import { cn } from "@horizon/toolkit/ui";
 
 import { sightline, thenOf } from "../lib/model/depth";
@@ -22,20 +23,12 @@ import { METHOD_OF } from "../lib/model/views";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
 import { formatAgo, formatThen } from "./format";
 
-/** Structures with a measured place: the anchor their distance is read from. */
-const ANCHOR_OF: Partial<Record<CosmosId, AnchorId>> = {
-  andromeda: "andromeda",
-  triangulum: "triangulum",
-  virgo: "virgoCluster",
-  fornax: "fornaxCluster",
-  centaurus: "centaurusCluster",
-  hydra: "hydraCluster",
-  greatAttractor: "greatAttractor",
-  perseusPisces: "perseusCluster",
-  coma: "comaCluster",
-  shapley: "shapleyCore",
-  sloanGreatWall: "sloanGreatWall",
-};
+/** A structure's distance from the shared catalogue, ly; null for one without a single place. */
+function cosmosDistanceLy(id: CosmosId) {
+  const facts: Facts = COSMOS[id];
+  const distance = facts.distance;
+  return distance?.value === undefined ? null : convertFigure(distance.value, distance.unit, "ly");
+}
 
 /**
  * How far a selection is from us (ly), when it is one place; null for what surrounds us. In
@@ -46,18 +39,13 @@ function distanceOf(sel: Selection, now: Date): number | null {
     const au = distanceFromEarth(sel, TODAY, now);
     return au === null ? null : au / LIGHT_YEAR_AU;
   }
-  if (sel.kind === "star")
-    return neighbourDistanceLy(
-      NEIGHBOURS.find((n) => n.id === sel.id)!,
-      0,
-    );
+  if (sel.kind === "star") return neighbourDistanceLy(neighbour(sel.id), 0);
   if (sel.kind === "galaxy") return sel.id === "bulge" ? SUN_GALACTIC_RADIUS_LY : null;
   /* A probe's signal crosses the gap to Earth; the heliopause is all round us. */
   if (sel.kind === "reach")
     return sel.id === "heliopause" ? null : probeFromEarth(sel.id, now) / LIGHT_YEAR_AU;
   if (sel.id === "observableUniverse") return CMB_LY;
-  const anchor = ANCHOR_OF[sel.id];
-  return anchor ? anchorById(anchor).mly * 1e6 : null;
+  return cosmosDistanceLy(sel.id);
 }
 
 /** The selection's name as its card titles it. */

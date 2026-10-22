@@ -1,4 +1,5 @@
 import type { Fact } from "@/lib/facts";
+import { SPECTRAL_CLASSES, spectralClass } from "@/space/hr-diagram";
 import { NAMED_STARS, SPECTRAL_TYPES } from "@/space/stellar";
 
 import { mainSequencePhotosphere, SEQUENCE_RANGE } from "./atmospheres";
@@ -39,7 +40,7 @@ type Star = {
   /** MK spectral type, the shared catalogue's. */
   type: string;
   teff: Temperature;
-  /** Measured radial velocity, km/s (heliocentric, as SIMBAD lists it; positive receding). */
+  /** Measured radial velocity, km/s (the shared catalogue's, heliocentric; positive receding); the Sun's own frame for the Sun. */
   velocity: number;
   /** km/s: the Sun's measured one; elsewhere the models' own 2 km/s. */
   microturbulence: number;
@@ -63,14 +64,14 @@ export const STARS: Record<StarId, Star> = {
     id: "alnitak",
     type: typeOf("alnitak"),
     teff: catalogued(NAMED_STARS.alnitak.teff),
-    velocity: 18.1,
+    velocity: NAMED_STARS.alnitak.radialVelocity.value,
     microturbulence: 2,
   },
   rigel: {
     id: "rigel",
     type: typeOf("rigel"),
     teff: catalogued(NAMED_STARS.rigel.teff),
-    velocity: 17.8,
+    velocity: NAMED_STARS.rigel.radialVelocity.value,
     microturbulence: 2,
   },
   vega: {
@@ -80,18 +81,18 @@ export const STARS: Record<StarId, Star> = {
        pole. A spectrum integrates the whole disc, which one plane-parallel model fits best at
        this temperature. */
     teff: {
-      kelvin: 9_550,
+      kelvin: NAMED_STARS.vega.discTeff.value,
       catalogue: NAMED_STARS.vega.teff,
-      source: "Castelli & Kurucz 1994, A&A 281, 817 (a model-atmosphere fit to the disc's light)",
+      source: "the shared catalogue's disc temperature (Castelli & Kurucz 1994)",
     },
-    velocity: -13.5,
+    velocity: NAMED_STARS.vega.radialVelocity.value,
     microturbulence: 2,
   },
   procyon: {
     id: "procyon",
     type: typeOf("procyon"),
     teff: catalogued(NAMED_STARS.procyon.teff),
-    velocity: -4.5,
+    velocity: NAMED_STARS.procyon.radialVelocity.value,
     microturbulence: 2,
   },
   sun: {
@@ -105,14 +106,14 @@ export const STARS: Record<StarId, Star> = {
     id: "arcturus",
     type: typeOf("arcturus"),
     teff: catalogued(NAMED_STARS.arcturus.teff),
-    velocity: -5.2,
+    velocity: NAMED_STARS.arcturus.radialVelocity.value,
     microturbulence: 2,
   },
   aldebaran: {
     id: "aldebaran",
     type: typeOf("aldebaran"),
     teff: catalogued(NAMED_STARS.aldebaran.teff),
-    velocity: 54.4,
+    velocity: NAMED_STARS.aldebaran.radialVelocity.value,
     microturbulence: 2,
   },
 };
@@ -122,23 +123,4 @@ export const SEQUENCE_TEMPERATURES = Array.from({ length: 30 }, (_, i) =>
   Math.round(SEQUENCE_RANGE[0] * (29_000 / SEQUENCE_RANGE[0]) ** (i / 29)),
 );
 
-/**
- * Main-sequence classes by effective temperature, hot to cool: where each begins, K, halfway
- * between the last subtype of the class above and its own first (Pecaut & Mamajek 2013, as
- * updated: O9.5 V 31,900 / B0 V 31,400 … K9 V 3,930 / M0 V 3,850).
- */
-export const SPECTRAL_CLASSES = [
-  ["O", 31_650],
-  ["B", 10_050],
-  ["A", 7310],
-  ["F", 5960],
-  ["G", 5325],
-  ["K", 3890],
-  ["M", 0],
-] as const;
-
-/** A main-sequence star's spectral class. */
-export const spectralClass = (teff: number) =>
-  SPECTRAL_CLASSES.find(([, from]) => teff >= from)?.[0] ?? "M";
-
-export { mainSequencePhotosphere };
+export { mainSequencePhotosphere, SPECTRAL_CLASSES, spectralClass };

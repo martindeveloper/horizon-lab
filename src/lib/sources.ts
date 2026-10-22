@@ -20,6 +20,9 @@ export const SOURCES = {
   arroyoTorres2013: {
     cite: "Arroyo-Torres et al. 2013, A&A 554, A76 (UY Scuti's angular diameter)",
   },
+  asplund2009: {
+    cite: "Asplund et al. 2009, ARA&A 47, 481 (the Sun's photospheric composition)",
+  },
   aufdenberg2005: {
     cite: "Aufdenberg, Ludwig & Kervella 2005, ApJ 633, 424 (Procyon A's limb-darkened diameter: R = 2.031 ± 0.013 R☉)",
   },
@@ -29,6 +32,9 @@ export const SOURCES = {
   },
   barboni2017: {
     cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70; Nimmo, Kleine & Morbidelli 2024, Nature 636, 598 (younger ages as remelting)",
+  },
+  baumgardt2021: {
+    cite: "Baumgardt & Vasiliev 2021, MNRAS 505, 5957 (globular cluster distances: ω Cen 5.43 kpc)",
   },
   bennettBovy2019: {
     cite: "Bennett & Bovy 2019, MNRAS 482, 1417",
@@ -67,6 +73,9 @@ export const SOURCES = {
   breuval2023: {
     cite: "Breuval et al. 2023, ApJ 951, 118 (M33 at 840 ± 11 kpc from HST Cepheids)",
     link: "https://doi.org/10.3847/1538-4357/acd3f4",
+  },
+  castelli1994: {
+    cite: "Castelli & Kurucz 1994, A&A 281, 817 (a model-atmosphere fit to Vega's disc-integrated light)",
   },
   chabrier2000: {
     cite: "Chabrier & Baraffe 2000, ARA&A 38, 337 (low-mass stars and brown dwarfs: fully convective below about 0.4 M☉; brown dwarfs too light to burn hydrogen)",
@@ -147,6 +156,9 @@ export const SOURCES = {
     cite: "GRAVITY Collaboration 2022, A&A 657, L12 (Sgr A*: 4.297 × 10⁶ M☉, R₀ = 8,277 pc)",
     link: "https://doi.org/10.1051/0004-6361/202142465",
   },
+  haberle2024: {
+    cite: "Häberle et al. 2024, Nature 631, 285 (ω Cen's fast central stars: an IMBH of at least 8,200 M☉)",
+  },
   healy2024: {
     cite: "Healy et al. 2024, MNRAS 529, 3630; catalogue 2024-04-11, V* UY Sct (temperature, luminosity and distance)",
     link: "https://github.com/SNEWS2/candidate_list/blob/main/RSG_and_close_stars_catalog_4_11_24.csv",
@@ -211,6 +223,9 @@ export const SOURCES = {
     cite: "Kervella et al. 2004, A&A 413, 251 (Procyon A's diameter and temperature)",
   },
   kervella2017: { cite: "Kervella, Thévenin & Lovis 2017, A&A 598, L7" },
+  kervella2017ab: {
+    cite: "Kervella et al. 2017, A&A 597, A137 (α Cen A and B: interferometric radii and temperatures)",
+  },
   kervella2018: {
     cite: "Kervella et al. 2018, A&A 609, A67 (Betelgeuse's rotation from ALMA: P/sin i = 36 ± 8 yr)",
     link: "https://arxiv.org/abs/1711.07983",
@@ -247,6 +262,9 @@ export const SOURCES = {
   luger2017: {
     cite: "Luger et al. 2017, Nat. Astron. 1, 0129 (TRAPPIST-1 from K2: rotation 3.3 d)",
     link: "https://arxiv.org/abs/1703.04166",
+  },
+  lvk2025: {
+    cite: "LIGO–Virgo–KAGRA Collaboration 2025, ApJL 993, L25 (GW231123: remnant mass, spin and distance)",
   },
   lyndenBell1988: { cite: "Lynden-Bell et al. 1988, ApJ 326, 19" },
   m31Merger: {
@@ -293,6 +311,9 @@ export const SOURCES = {
   nasaMilkyWay: { cite: "NASA Science, Beyond Our Solar System: the Milky Way" },
   nssdc: { cite: "NSSDC planetary fact sheets" },
   ohnaka2013: { cite: "Ohnaka et al. 2013, A&A 555, A24 (Antares)" },
+  panuzzo2024: {
+    cite: "Gaia Collaboration (Panuzzo et al.) 2024, A&A 686, L2 (Gaia BH3: mass and distance)",
+  },
   pasquini2004: {
     cite: "Pasquini et al. 2004, A&A 426, 651",
     link: "https://arxiv.org/abs/astro-ph/0407524",
@@ -312,6 +333,7 @@ export const SOURCES = {
     cite: "Planck Collaboration 2020, A&A 641, A6 (TT,TE,EE+lowE+lensing+BAO; Table 2: z∗ = 1089.80)",
     link: "https://arxiv.org/abs/1807.06209",
   },
+  pourbaix2002: { cite: "Pourbaix et al. 2002, A&A 386, 280 (α Cen B's visual orbit about A)" },
   proust2006: {
     cite: "Proust et al. 2006, A&A 447, 133 (the Shapley Supercluster)",
     link: "https://arxiv.org/abs/astro-ph/0509903",
@@ -341,6 +363,9 @@ export const SOURCES = {
   shemmer2004: {
     cite: "Shemmer et al. 2004, ApJ 614, 547 (Table 2: TON 618, log M/M☉ = 10.82)",
     link: "https://arxiv.org/abs/astro-ph/0406559",
+  },
+  simbad: {
+    cite: "SIMBAD Astronomical Database, CDS Strasbourg (radial velocities as it adopts them)",
   },
   snodgrass1990: {
     cite: "Snodgrass & Ulrich 1990, ApJ 351, 309 (the Sun's rotation from Doppler features, by latitude)",

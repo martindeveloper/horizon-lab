@@ -16,14 +16,12 @@ import {
   type Engine,
   type StellarFigures,
 } from "@/space/stellar";
-import { FIGURES } from "@horizon/toolkit/bodies";
+import { FIGURES, GM_KM3_S2, siderealHours } from "@horizon/toolkit/bodies";
 import { recordFrom } from "@horizon/toolkit/records";
 import {
-  CONSTANTS,
-  JUPITER_GM_SI,
   STANDARD_GRAVITY,
-  UNITS,
   convert,
+  convertFigure,
   schwarzschildRadius,
   stefanBoltzmann,
   type Range,
@@ -41,9 +39,6 @@ type Show = NonNullable<Value["show"]>;
 /** The figures a rung's card may print, measured or catalogued; derived ones are added below. */
 type Measured = StellarFigures;
 
-/** The planets' sidereal days, h, from the IAU rotation rates (degrees a day) the toolkit turns them by. */
-const SIDEREAL_HOURS = { earth: (360 * 24) / 360.9856235, jupiter: (360 * 24) / 870.536 };
-
 /** Each rung's measured figures: the shared catalogue's for stars and holes, the IAU's figures for the planets. */
 const MEASURED: Record<RungId, Measured> = {
   "neutron-star": NAMED_STARS["psr-j0030"],
@@ -58,9 +53,9 @@ const MEASURED: Record<RungId, Measured> = {
       digits: 4,
       note: "the unit itself: nominal GM⊕ over G",
     }),
-    rotation: literatureFact(SIDEREAL_HOURS.earth, "h", "archinal2018", "flag", {
+    rotation: literatureFact(siderealHours("earth"), "h", "archinal2018", "flag", {
       digits: 5,
-      note: "sidereal, from the IAU rotation rate W = 360.9856235°/day",
+      note: "sidereal, from the IAU rotation rate the toolkit turns Earth by",
     }),
   },
   "brown-dwarf": NAMED_STARS["lhs-6343-c"],
@@ -69,17 +64,14 @@ const MEASURED: Record<RungId, Measured> = {
       digits: 5,
     }),
     polar: literatureFact(FIGURES.jupiter.polarKm, "km", "galanti2026", "verified", { digits: 5 }),
-    rotation: literatureFact(SIDEREAL_HOURS.jupiter, "h", "archinal2018", "flag", {
+    rotation: literatureFact(siderealHours("jupiter"), "h", "archinal2018", "flag", {
       digits: 4,
-      note: "System III, from the IAU rotation rate W = 870.536°/day",
+      note: "System III, from the IAU rotation rate the toolkit turns Jupiter by",
     }),
-    mass: literatureFact(
-      convert(JUPITER_GM_SI / CONSTANTS.gravitationalConstant.value, "kg", "Mearth"),
-      "Mearth",
-      "iau2015b3",
-      "derived",
-      { digits: 4, note: "nominal GM of Jupiter over Earth's" },
-    ),
+    mass: literatureFact(GM_KM3_S2.jupiter / GM_KM3_S2.earth, "Mearth", "iau2015b3", "derived", {
+      digits: 4,
+      note: "nominal GM of Jupiter over Earth's",
+    }),
   },
   "trappist-1": NAMED_STARS["trappist-1"],
   proxima: NAMED_STARS.proxima,
@@ -217,13 +209,9 @@ function derive(
   return { ...fact, range };
 }
 
-const isUnitId = (unit: Unit): unit is UnitId => Object.hasOwn(UNITS, unit);
-
 /** A figure of a fact in another unit of the same dimension (a length in metres, a mass in kg). */
-export const inUnit = (fact: Fact, to: UnitId) => (value: number) => {
-  if (!isUnitId(fact.unit)) throw new TypeError(`A plain ${fact.unit} has no ${to}`);
-  return convert(value, fact.unit, to);
-};
+export const inUnit = (fact: Fact, to: UnitId) => (value: number) =>
+  convertFigure(value, fact.unit, to);
 const metres = (fact: Fact) => inUnit(fact, "m");
 const kilograms = (fact: Fact) => inUnit(fact, "kg");
 

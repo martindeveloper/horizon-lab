@@ -9,7 +9,12 @@ import {
   type Of,
   type Translate,
 } from "@/lib/facts";
-import { NEIGHBOURS, closestApproach, neighbourDistanceLy } from "@/space/galaxy/model/neighbours";
+import {
+  NEIGHBOURS,
+  closestApproach,
+  neighbour,
+  neighbourDistanceLy,
+} from "@/space/galaxy/model/neighbours";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 
 import { CATALOGUE } from "../lib/model/catalogue";
@@ -22,7 +27,7 @@ export const NEIGHBOUR_IDS = NEIGHBOURS.map((n) => n.id);
 
 /** A neighbour: its distance today and closest approach from its track, the rest from its definition. */
 function starCard(t: Translate, d: DistanceSettings, sel: Of<Selection, "star">): Card {
-  const star = NEIGHBOURS.find((s) => s.id === sel.id)!;
+  const star = neighbour(sel.id);
   const c = CATALOGUE.stars[sel.id];
   const built = buildCard(t, d, STAR_CARDS[sel.id]);
   return {

@@ -3,8 +3,9 @@
  * point, and the time scales that bound how finely a flight past them must be stepped. Newton
  * serves: near enough to a body for its pull to matter, the ship goes nowhere near light speed.
  */
-import type { BodyId } from "@horizon/toolkit/bodies";
-import { EARTH_GM_SI, SOLAR_GM_SI } from "@horizon/toolkit/science";
+import { NAMED_STARS } from "@/space/stellar";
+import { GM_KM3_S2 as BODY_GM, type BodyId } from "@horizon/toolkit/bodies";
+import { SOLAR_GM_SI } from "@horizon/toolkit/science";
 
 import type { AnchorId } from "./anchors";
 
@@ -12,47 +13,15 @@ import type { AnchorId } from "./anchors";
 const SUN_GM = SOLAR_GM_SI / 1e9;
 
 /**
- * Gravitational parameters GM, km³/s²: the IAU 2015 nominal Sun and Earth, the rest from the
- * JPL planetary (DE440) and satellite ephemerides; a planet's is its own, without its moons.
- * α Centauri A and B are 1.0788 and 0.9092 Sun masses (Akeson et al. 2021), Proxima 0.1221
- * (Mann et al. 2015's relation, as Kervella et al. 2017 adopt it). Small bodies left out pull
- * nothing the ship would notice.
+ * Gravitational parameters GM, km³/s²: the bodies' from the toolkit, the stars' from the
+ * shared catalogue's masses. Small bodies, probes and the far places pull nothing the ship
+ * would notice.
  */
 const GM_KM3_S2: Partial<Record<AnchorId, number>> = {
-  sun: SUN_GM,
-  mercury: 22_031.87,
-  venus: 324_858.59,
-  earth: EARTH_GM_SI / 1e9,
-  moon: 4_902.8,
-  mars: 42_828.37,
-  phobos: 7.1e-4,
-  deimos: 9.6e-5,
-  jupiter: 126_686_531.9,
-  io: 5_959.92,
-  europa: 3_202.71,
-  ganymede: 9_887.83,
-  callisto: 7_179.29,
-  saturn: 37_931_206.2,
-  mimas: 2.5,
-  enceladus: 7.21,
-  tethys: 41.21,
-  dione: 73.12,
-  rhea: 153.94,
-  titan: 8_978.14,
-  iapetus: 120.51,
-  uranus: 5_793_951.3,
-  miranda: 4.32,
-  ariel: 83.46,
-  umbriel: 85.09,
-  titania: 226.94,
-  oberon: 205.32,
-  neptune: 6_835_099.5,
-  triton: 1_428.5,
-  pluto: 869.3,
-  charon: 106.1,
-  alphaCen: 1.0788 * SUN_GM,
-  alphaCenB: 0.9092 * SUN_GM,
-  proxima: 0.1221 * SUN_GM,
+  ...BODY_GM,
+  alphaCen: NAMED_STARS["alpha-cen-a"].mass.value * SUN_GM,
+  alphaCenB: NAMED_STARS["alpha-cen-b"].mass.value * SUN_GM,
+  proxima: NAMED_STARS.proxima.mass.value * SUN_GM,
 };
 
 /** A body's GM, km³/s²; zero for one that pulls nothing worth stepping. */

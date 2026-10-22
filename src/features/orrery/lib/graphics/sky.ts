@@ -7,13 +7,14 @@
  */
 import { AdditiveBlending, Color, PointsMaterial, ShaderMaterial } from "three";
 
+import { THIN_DISK_ERA } from "@/space/galaxy/model/parameters";
 import { createMilkyWay as createSharedMilkyWay } from "@/space/sky/milky-way";
 import { galacticAngle } from "@/space/solar-system/model/equations";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { clamp01, gaussian, lcg } from "@horizon/toolkit/math";
 import { pointsGeometry, softCircle } from "@horizon/toolkit/scene";
 
-import { NAMED_STARS_FADE, THIN_DISK_ERA } from "../model/parameters";
+import { NAMED_STARS_FADE } from "../model/parameters";
 import STAR_FRAG from "./shaders/star.frag.glsl";
 import STAR_VERT from "./shaders/star.vert.glsl";
 

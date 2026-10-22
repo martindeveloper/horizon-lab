@@ -14,6 +14,7 @@ import {
   SUN_GALACTIC_RADIUS_LY,
   SUN_HEIGHT_LY,
   THICK_DISK_KPC,
+  THIN_DISK_ERA,
   THIN_DISK_KPC,
   VERTICAL_AMPLITUDE_LY,
   VERTICAL_PERIOD,
@@ -200,6 +201,14 @@ export const GALAXY = {
       range: [8, 11],
       source: "gaiaEnceladus",
       status: "verified",
+    },
+    thinDiskEra: {
+      value: THIN_DISK_ERA,
+      unit: "yr",
+      show: "Gyr",
+      source: "sanders2024",
+      status: "verified",
+      note: "thin disk and bar in place",
     },
     thinDiskLength: {
       value: THIN_DISK_KPC.length,

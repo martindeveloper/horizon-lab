@@ -14,13 +14,18 @@
  * Mass on the dial is the lower limit. Dormant, so the disk is off: lensing only.
  * Sky: crowded old stars (weather = sgr).
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
+import { quote } from "../quote";
 import type { HoleSpec } from "./types";
+
+const OMEGA_CEN = BLACK_HOLES["omega-cen"];
 
 export const omegaCen: HoleSpec = {
   id: "omega-cen",
   name: "ω Centauri",
   kind: "catalog",
-  massSolar: 8200,
+  massSolar: OMEGA_CEN.mass.value,
   massLowerLimit: true,
   massNote: "bound",
   spin: 0,
@@ -43,7 +48,7 @@ export const omegaCen: HoleSpec = {
       lift: 0.3,
       lead: -0.4,
       drift: -0.008,
-      eq: "D = 5.43 kpc    ·    M_cluster ≈ 3.9 × 10⁶ M☉",
+      eq: `D = ${quote(OMEGA_CEN.distance)}    ·    M_cluster ≈ 3.9 × 10⁶ M☉`,
     },
     // A long survey sweep, like twenty years of Hubble images.
     {
@@ -68,7 +73,7 @@ export const omegaCen: HoleSpec = {
         { kind: "shadow", assumed: true },
         { kind: "ruler", length: 10 },
       ],
-      eq: "M_• ≥ 8,200 M☉    ·    models ≈ 39,000–47,000 M☉",
+      eq: `M_• ≥ ${quote(OMEGA_CEN.mass)}    ·    models ≈ 39,000–47,000 M☉`,
     },
     {
       phase: "hold",

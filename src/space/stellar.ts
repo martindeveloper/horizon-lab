@@ -32,6 +32,12 @@ export type StellarFigures = {
   /** Luminosity over the Sun's. */
   luminosity?: Fact;
   distance?: Fact;
+  /** Inclination of the spin axis from the line of sight, where it is measured. */
+  inclination?: Fact;
+  /** For a star whose surface ranges in temperature: the one model fitted to its whole disc's light. */
+  discTeff?: Fact;
+  /** Heliocentric radial velocity, positive receding. */
+  radialVelocity?: Fact;
 };
 
 /** Stars and remnants: a pulsar, white and brown dwarfs, main-sequence stars, giants and supergiants. */
@@ -112,6 +118,18 @@ export const NAMED_STARS = {
     }),
     distance: NEIGHBOURS.proxima.distance,
   },
+  "alpha-cen-a": {
+    radius: literatureFact(1.2234, "Rsun", "kervella2017ab", "verified", { digits: 4 }),
+    mass: literatureFact(1.0788, "Msun", "akeson2021", "verified", { digits: 4 }),
+    teff: literatureFact(5_795, "K", "kervella2017ab", "verified", { digits: 3 }),
+    distance: NEIGHBOURS.alphaCen.distance,
+  },
+  "alpha-cen-b": {
+    radius: literatureFact(0.8632, "Rsun", "kervella2017ab", "verified", { digits: 4 }),
+    mass: literatureFact(0.9092, "Msun", "akeson2021", "verified", { digits: 4 }),
+    teff: literatureFact(5_231, "K", "kervella2017ab", "verified", { digits: 3 }),
+    distance: NEIGHBOURS.alphaCen.distance,
+  },
   sun: {
     rotation: literatureFact(24.47, "d", "snodgrass1990", "flag", {
       digits: 3,
@@ -137,6 +155,7 @@ export const NAMED_STARS = {
       digits: 4,
     }),
     teff: literatureFact(6_530, "K", "kervella2004", "flag", { range: [6_480, 6_580], digits: 3 }),
+    radialVelocity: literatureFact(-4.5, "km/s", "simbad", "flag", { digits: 3 }),
   },
   sirius: {
     radius: literatureFact(1.711, "Rsun", "kervella2003", "verified", {
@@ -179,6 +198,15 @@ export const NAMED_STARS = {
       digits: 2,
     }),
     distance: literatureFact(25, "ly", "vanLeeuwen2007", "verified", { digits: 3 }),
+    inclination: literatureFact(6.2, "deg", "monnier2012", "flag", {
+      digits: 2,
+      note: "Table 2, concordance Model 3: seen almost pole-on",
+    }),
+    discTeff: literatureFact(9_550, "K", "castelli1994", "flag", {
+      digits: 3,
+      note: "one plane-parallel model fitted to the light of the whole disc",
+    }),
+    radialVelocity: literatureFact(-13.5, "km/s", "simbad", "flag", { digits: 3 }),
   },
   achernar: {
     rotation: literatureFact(null, "d", "domiciano2014", "derived", {
@@ -214,6 +242,10 @@ export const NAMED_STARS = {
       digits: 2,
     }),
     distance: literatureFact(139, "ly", "vanLeeuwen2007", "verified", { digits: 3 }),
+    inclination: literatureFact(60.6, "deg", "domiciano2014", "flag", {
+      digits: 3,
+      note: "Table 2",
+    }),
   },
   arcturus: {
     radius: literatureFact(25.4, "Rsun", "ramirez2011", "verified", {
@@ -229,6 +261,7 @@ export const NAMED_STARS = {
       digits: 3,
     }),
     distance: literatureFact(36.7, "ly", "vanLeeuwen2007", "verified", { digits: 3 }),
+    radialVelocity: literatureFact(-5.2, "km/s", "simbad", "flag", { digits: 3 }),
   },
   alnitak: {
     radius: literatureFact(20, "Rsun", "hummel2013", "verified", {
@@ -242,6 +275,7 @@ export const NAMED_STARS = {
       note: "Aa, from the orbit at the photometric distance",
     }),
     teff: literatureFact(29_500, "K", "hummel2013", "flag", { range: [28_500, 30_500], digits: 3 }),
+    radialVelocity: literatureFact(18.1, "km/s", "simbad", "flag", { digits: 3 }),
   },
   r136a1: {
     mass: literatureFact(222, "Msun", "brands2022", "verified", {
@@ -276,6 +310,7 @@ export const NAMED_STARS = {
       digits: 2,
     }),
     distance: literatureFact(66.6, "ly", "vanLeeuwen2007", "verified", { digits: 3 }),
+    radialVelocity: literatureFact(54.4, "km/s", "simbad", "flag", { digits: 3 }),
   },
   rigel: {
     radius: literatureFact(78.9, "Rsun", "moravveji2012", "verified", {
@@ -299,6 +334,7 @@ export const NAMED_STARS = {
       range: [790, 950],
       digits: 2,
     }),
+    radialVelocity: literatureFact(17.8, "km/s", "simbad", "flag", { digits: 3 }),
   },
   deneb: {
     radius: literatureFact(203, "Rsun", "schiller2008", "verified", {
@@ -413,7 +449,11 @@ export const NAMED_STARS = {
   },
 } as const satisfies Readonly<Record<string, StellarFigures>>;
 
-/** Black holes whose masses are measured: a stellar one, the Milky Way's and two in other galaxies. */
+/**
+ * Black holes whose masses are measured: stellar ones (one feeding on its companion, one
+ * dormant, one born in a merger), a candidate in a globular cluster, the Milky Way's and two in
+ * other galaxies.
+ */
 export const BLACK_HOLES = {
   "cygnus-x1": {
     mass: literatureFact(21.2, "Msun", "millerJones2021", "verified", {
@@ -421,6 +461,35 @@ export const BLACK_HOLES = {
       digits: 3,
     }),
     distance: literatureFact(2.22, "kpc", "millerJones2021", "verified", { digits: 3 }),
+  },
+  "gaia-bh3": {
+    mass: literatureFact(32.7, "Msun", "panuzzo2024", "verified", {
+      range: [31.88, 33.52],
+      digits: 3,
+    }),
+    distance: literatureFact(590.6, "pc", "panuzzo2024", "verified", {
+      range: [584.8, 596.4],
+      digits: 4,
+    }),
+  },
+  gw231123: {
+    mass: literatureFact(222, "Msun", "lvk2025", "verified", {
+      range: [180, 250],
+      digits: 3,
+      note: "the remnant's mass after the merger of 137 and 101 M☉",
+    }),
+    distance: literatureFact(2.2, "Gpc", "lvk2025", "verified", {
+      range: [0.7, 4.1],
+      digits: 2,
+      note: "luminosity distance, z ≈ 0.40",
+    }),
+  },
+  "omega-cen": {
+    mass: literatureFact(8_200, "Msun", "haberle2024", "verified", {
+      digits: 2,
+      note: "a lower limit from seven fast central stars; N-body comparisons favour 39,000–47,000",
+    }),
+    distance: literatureFact(5.43, "kpc", "baumgardt2021", "verified", { digits: 3 }),
   },
   "sgr-a": {
     mass: literatureFact(4.297e6, "Msun", "gravity2022", "verified", {
@@ -460,7 +529,7 @@ export const stellarCatalogueFacts = () => factsOf(STELLAR_CATALOGUE);
  * spent helium core (a giant), or helium to carbon and oxygen in the core (a supergiant or a
  * giant in its later life). No fusion: a dead star's stored heat, a pulsar's spin, a brown
  * dwarf's or giant planet's slow contraction, a planet's radioactivity, a black hole's infalling
- * gas.
+ * gas, or nothing at all for a dormant hole.
  */
 export type EngineProcess =
   | "ppChain"
@@ -471,7 +540,8 @@ export type EngineProcess =
   | "spinDown"
   | "contraction"
   | "radioactivity"
-  | "accretion";
+  | "accretion"
+  | "dormant";
 
 /**
  * A body's engine as the evidence has it: only the Sun's is measured (by its neutrinos);
@@ -531,6 +601,18 @@ export const ENGINES: Readonly<
     ["chabrier2000"],
     "derived",
     "a fully convective red dwarf: all its hydrogen passes through the core",
+  ),
+  "alpha-cen-a": engine(
+    "ppChain",
+    [MODELS, "akeson2021"],
+    "derived",
+    `a main-sequence star a little heavier than the Sun, burning hydrogen in its core; ${fromMass}`,
+  ),
+  "alpha-cen-b": engine(
+    "ppChain",
+    [MODELS, "akeson2021"],
+    "derived",
+    `a main-sequence star a little lighter than the Sun, burning hydrogen in its core; ${fromMass}`,
   ),
   sun: engine(
     "ppChain",
@@ -620,6 +702,24 @@ export const ENGINES: Readonly<
     "derived",
     "no fusion: gas pulled from its blue supergiant companion heats up as it falls in",
   ),
+  "gaia-bh3": engine(
+    "dormant",
+    ["panuzzo2024"],
+    "derived",
+    "no fusion and no feeding: its giant companion is too far off to spill gas, so it gives out no light",
+  ),
+  gw231123: engine(
+    "dormant",
+    ["lvk2025"],
+    "derived",
+    "no fusion and no feeding: seen only by the gravitational waves of the merger that made it",
+  ),
+  "omega-cen": engine(
+    "dormant",
+    ["haberle2024"],
+    "derived",
+    "no fusion and no feeding: found only by the stars it flings about the cluster's core",
+  ),
   "sgr-a": engine(
     "accretion",
     ["gravity2022"],
@@ -650,6 +750,8 @@ export const SPECTRAL_TYPES: Readonly<Partial<Record<keyof typeof NAMED_STARS, s
   "lhs-6343-c": "T1.5",
   "trappist-1": "M8 V",
   proxima: "M5.5 Ve",
+  "alpha-cen-a": "G2 V",
+  "alpha-cen-b": "K1 V",
   sun: "G2 V",
   procyon: "F5 IV–V",
   sirius: "A1 V",

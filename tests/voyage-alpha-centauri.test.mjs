@@ -5,11 +5,11 @@ import test from "node:test";
 import { AU_KM, LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 
 import {
-  AB_ORBIT,
   ALPHA_CENTAURI,
   alphaCentauriAt,
   companionOffsetAu,
 } from "../src/features/voyage/lib/model/alpha-centauri.ts";
+import { ALPHA_CEN_AB_ORBIT as AB_ORBIT } from "../src/space/galaxy/model/neighbours.ts";
 
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const at = (id, date) => alphaCentauriAt(id, date, [0, 0, 0]);

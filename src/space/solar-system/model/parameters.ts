@@ -4,9 +4,12 @@
  * them and the printed formulas in `equations.ts` are built from them, so changing a value
  * here changes both simulations' scenes, their technical notes and the tests together.
  */
+import { GM_KM3_S2 } from "@horizon/toolkit/bodies";
 
 /** Sun's age: the oldest solids, CAIs, are 4567.3 ± 0.16 Myr old (Connelly et al. 2012). */
 export const SUN_BIRTH = 4.567e9;
+/** Earth's age: 4.54 ± 0.05 Gyr from meteorites and the oldest lead (Dalrymple 2001). */
+export const EARTH_AGE = 4.54e9;
 /** Gas disk lifetime after the first solids (observed disks last ~3–10 Myr). */
 export const GAS_DISK_LIFETIME = 5e6;
 /** Water ice condenses beyond ~2–4 au in the young disk: the snow line (drawn at 3 au). */
@@ -29,12 +32,13 @@ export const CLEAR_DONE = 4.45e9;
 export const GALACTIC_YEAR = 206e6;
 
 /**
- * The Moon's mass over Earth's (IAU 2015 nominal, DE440: 0.0123000371): the Earth–Moon
- * barycentre lies 1/82.3 of the way to the Moon, 4,670 km from Earth's centre.
+ * The Moon's mass over Earth's, from the toolkit's GMs (IAU 2015 nominal Earth, DE440 Moon:
+ * 0.0123000): the Earth–Moon barycentre lies 1/82.3 of the way to the Moon, 4,670 km from
+ * Earth's centre.
  */
-export const MOON_EARTH_MASS_RATIO = 0.0123000371;
-/** Charon's mass over Pluto's (Brozović et al. 2015, Icarus 246, 317): the barycentre is 1/9.19 of the way to Charon. */
-export const CHARON_PLUTO_MASS_RATIO = 0.1221;
+export const MOON_EARTH_MASS_RATIO = GM_KM3_S2.moon / GM_KM3_S2.earth;
+/** Charon's mass over Pluto's (their GMs from Brozović et al. 2015): the barycentre is 1/9.19 of the way to Charon. */
+export const CHARON_PLUTO_MASS_RATIO = GM_KM3_S2.charon / GM_KM3_S2.pluto;
 
 /** The primordial planetesimal disk outside the packed giants (Morbidelli 2005, Nice model). */
 export const DISK_AU = [16, 34] as const;

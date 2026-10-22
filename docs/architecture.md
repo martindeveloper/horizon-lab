@@ -186,9 +186,8 @@ src/
                                (barycentre.ts: the Earth–Moon and Pluto–Charon offsets)
         anchors.ts             Every destination: bodies, α Centauri, the Galaxy from above,
                                Andromeda, the edge of the reachable; the card each opens
-        alpha-centauri.ts      α Centauri's three suns: B on its visual orbit, Proxima at its
-                               place; star-distances.ts the catalogue stars' SIMBAD distances
-                               (star-distances.json, from scripts/fetch-star-distances.mjs)
+        alpha-centauri.ts      α Centauri's three suns from the shared catalogue: B on its
+                               visual orbit, Proxima at its place today
         calendar.ts            Earth's calendar held within the JavaScript date's reach
         comoving.ts            The expansion with the clocks (a held inside the far plane)
                                on the shared rule of what it moves (`expansionFactor` in
@@ -241,8 +240,12 @@ src/
     messages/                  The shared copy (units, distance words, HUD chrome, the solar
                                system's names), merged under each one's namespace (messages.ts)
     star-catalogue.ts           Shared bright-star positions, magnitudes and colours
-    stellar.ts                 Measured radii, masses, temperatures, light and distances of
-                               named stars, remnants and black holes, each with its source
+    star-distances.ts          Their distances: stellar.ts's for the stars it describes, else
+                               SIMBAD's (star-distances.json, from scripts/fetch-star-distances.mjs)
+    stellar.ts                 Measured radii, masses, temperatures, light, distances, tilts and
+                               radial velocities of named stars, remnants and black holes, each
+                               with its source
+    solar-composition.ts       The Sun's photospheric abundances and hydrogen mass fraction
     observer-sky.ts             Observer location and apparent Sun, Moon and star positions
     bright-stars.ts            The catalogue's bright stars on the sky sphere, as points
                                carried with the camera (`createBrightSky`, `carrySky`)

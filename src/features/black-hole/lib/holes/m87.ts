@@ -17,6 +17,7 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
+import { quote } from "../quote";
 import type { HoleSpec } from "./types";
 
 /** Elevation of the home view above the disk: the jet sits 90° − 1.27 rad ≈ 17° off our line of sight. */
@@ -46,7 +47,7 @@ export const m87: HoleSpec = {
       distance: 134,
       lift: -0.15,
       lead: 0.4,
-      eq: "M ≈ 6.5 × 10⁹ M☉    ·    D = 16.8 Mpc",
+      eq: `M ≈ ${quote(BLACK_HOLES.m87.mass)}    ·    D = ${quote(BLACK_HOLES.m87.distance)}`,
     },
     // A slow helix up along the jet.
     {

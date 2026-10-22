@@ -14,13 +14,18 @@
  * Dormant, so the disk is off (diskBrightness 0): only lensed starlight is drawn.
  * Sky: the Milky Way band (weather = cyg). The companion is not drawn at this scale.
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
+import { quoteError } from "../quote";
 import type { HoleSpec } from "./types";
+
+const GAIA_BH3 = BLACK_HOLES["gaia-bh3"];
 
 export const gaiaBh3: HoleSpec = {
   id: "gaia-bh3",
   name: "Gaia BH3",
   kind: "catalog",
-  massSolar: 32.7,
+  massSolar: GAIA_BH3.mass.value,
   spin: 0,
   inclination: 0.5,
   distance: 30,
@@ -40,7 +45,7 @@ export const gaiaBh3: HoleSpec = {
       distance: 120,
       lift: 0.2,
       lead: 0.3,
-      eq: "M = 32.7 ± 0.8 M☉    ·    D = 590.6 ± 5.8 pc",
+      eq: `M = ${quoteError(GAIA_BH3.mass)}    ·    D = ${quoteError(GAIA_BH3.distance)}`,
     },
     // Trace the giant's long, stretched orbit.
     {

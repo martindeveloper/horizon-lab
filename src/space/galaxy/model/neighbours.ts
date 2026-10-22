@@ -88,6 +88,24 @@ export const NEIGHBOURS: readonly Neighbour[] = [
   },
 ];
 
+/** A neighbour by id. */
+export const neighbour = (id: NeighbourId) => NEIGHBOURS.find((star) => star.id === id)!;
+
+/**
+ * The visual orbit of α Centauri B about A (Pourbaix et al. 2002, A&A 386, 280): period in
+ * years, periastron epoch (Julian year), eccentricity, semi-major axis in arcseconds, and the
+ * inclination, argument of periastron and node in degrees.
+ */
+export const ALPHA_CEN_AB_ORBIT = {
+  periodYr: 79.91,
+  periastronYr: 1875.66,
+  e: 0.5179,
+  aArcsec: 17.57,
+  iDeg: 79.205,
+  omegaDeg: 231.65,
+  nodeDeg: 204.85,
+} as const;
+
 const PC_AU = PARSEC_AU;
 /** The positions' epoch, and the year "today" stands for: the tracks carry them across. */
 const POSITION_EPOCH = 2000;

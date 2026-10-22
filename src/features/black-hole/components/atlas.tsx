@@ -6,7 +6,9 @@ import { useId, useRef, useState } from "react";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
 import {
   ATLAS,
+  BAR,
   DISK_STARS,
+  DISTANCE_ROWS,
   MAP_HALF_KPC,
   R0_KPC,
   SPIRAL_ARMS,
@@ -18,6 +20,8 @@ import { useBlackHole } from "@/features/black-hole/lib/store";
 import { Kicker, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
 
 const SCALE_KPC = 5;
+/** The bar's minor over major axis as drawn. */
+const BAR_ASPECT = 1.15 / 3.5;
 
 function Marker({
   site,
@@ -210,13 +214,13 @@ export function AtlasOverlay() {
               aria-hidden
             >
               <g transform="scale(1 -1)">
-                {/* Bar: ~3.5 kpc half-length, ~25° from the Sun–centre line, near end at ℓ > 0. */}
+                {/* Bar: the shared Galaxy model's half-length and angle, near end at ℓ > 0. */}
                 <ellipse
                   cx="0"
                   cy="0"
-                  rx="3.5"
-                  ry="1.15"
-                  transform="rotate(-25)"
+                  rx={BAR.halfKpc}
+                  ry={BAR.halfKpc * BAR_ASPECT}
+                  transform={`rotate(${-BAR.angleDeg})`}
                   fill="currentColor"
                   fillOpacity="0.14"
                 />
@@ -330,14 +334,7 @@ export function AtlasOverlay() {
             <h3 className={kickerClass}>{t("localGroup")}</h3>
             <p className="mt-1 text-xs leading-relaxed text-muted">{t("localGroupBody")}</p>
             <div className="mt-3 flex flex-col gap-1.5">
-              {[
-                { id: "sgr-a", k: "8.3 kpc" },
-                { id: "lmc", k: "49.6 kpc" },
-                { id: "m31", k: "760 kpc" },
-                { id: "m87", k: "16.8 Mpc" },
-                { id: "gw231123", k: "z ≈ 0.4" },
-                { id: "ton618", k: "z = 2.22" },
-              ].map((row) => {
+              {DISTANCE_ROWS.map((row) => {
                 const s = atlasFor(row.id)!;
                 const fly = Boolean(s.preset);
                 return (

@@ -11,7 +11,9 @@
  */
 import { Vector3 } from "three";
 
+import { COSMOS } from "@/space/cosmos/model/catalogue";
 import { EVENT_HORIZON_LY, anchorById, anchorToday } from "@/space/cosmos/model/cosmos";
+import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
 import { cosmicToWorld, galaxyToWorld } from "@/space/galaxy/scene/frames";
 import type { WorldSelection } from "@/space/galaxy/show";
 import { PROBES, probePosition, yearOf, type ProbeId } from "@/space/solar-system/model/probes";
@@ -83,11 +85,11 @@ const FAR_RADIUS_KM: Readonly<Record<Exclude<FarAnchorId, ProbeId>, number>> = {
   alphaCen: alphaCentauriStar("alphaCenA").radiusKm,
   alphaCenB: alphaCentauriStar("alphaCenB").radiusKm,
   proxima: alphaCentauriStar("proxima").radiusKm,
-  galacticCentre: 5e4 * LIGHT_YEAR_KM,
+  galacticCentre: (GALAXY.milkyway.diskWidth.value / 2) * LIGHT_YEAR_KM,
   lmc: 7e3 * LIGHT_YEAR_KM,
   smc: 3.5e3 * LIGHT_YEAR_KM,
   andromeda: 1.1e5 * LIGHT_YEAR_KM,
-  triangulum: 3e4 * LIGHT_YEAR_KM,
+  triangulum: (COSMOS.triangulum.width.value / 2) * LIGHT_YEAR_KM,
   virgoCluster: 2.5e6 * LIGHT_YEAR_KM,
   edge: 1e9 * LIGHT_YEAR_KM,
 };

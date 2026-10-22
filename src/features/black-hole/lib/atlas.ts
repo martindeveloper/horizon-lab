@@ -1,6 +1,11 @@
 /** Sky catalog for the atlas. Epoch J2000. Positions as of 2026. */
+import type { Value } from "@/lib/facts";
+import { ARM_START_KPC, BAR_ANGLE_DEG, REID_R0_KPC } from "@/space/galaxy/model/parameters";
+import { BLACK_HOLES, NAMED_STARS } from "@/space/stellar";
 import { keysOf } from "@horizon/toolkit/records";
-import { RAD_PER_DEG as DEG } from "@horizon/toolkit/science";
+import { RAD_PER_DEG as DEG, convertFigure } from "@horizon/toolkit/science";
+
+import { quote } from "./quote";
 
 export type AtlasKind = "hole" | "body" | "extragalactic" | "lab";
 
@@ -20,8 +25,11 @@ export type AtlasSite = {
   y?: number;
 };
 
-/** GRAVITY Collaboration, A&A 657 L12 (2022): R0 = 8277 pc */
-export const R0_KPC = 8.277;
+/** The Sun's distance from the centre: Sgr A*'s, GRAVITY Collaboration 2022. */
+export const R0_KPC = BLACK_HOLES["sgr-a"].distance.value;
+/** The bar as the shared Galaxy model draws it: half-length and angle from the Sun–centre line. */
+export const BAR = { halfKpc: ARM_START_KPC, angleDeg: BAR_ANGLE_DEG } as const;
+const kpcOf = (fact: Value) => convertFigure(fact.value, fact.unit, "kpc");
 export const MAP_HALF_KPC = 14;
 
 /**
@@ -92,7 +100,7 @@ export const ATLAS: AtlasSite[] = [
     label: "always",
     lonDeg: 71.34,
     latDeg: 3.07,
-    dKpc: 2.22,
+    dKpc: kpcOf(BLACK_HOLES["cygnus-x1"].distance),
   }),
   // Gaia Collaboration (Panuzzo et al.), A&A 686, L2 (2024)
   site({
@@ -106,7 +114,7 @@ export const ATLAS: AtlasSite[] = [
     label: "hover",
     lonDeg: 51.67,
     latDeg: -3.49,
-    dKpc: 0.591,
+    dKpc: kpcOf(BLACK_HOLES["gaia-bh3"].distance),
   }),
   // Reid & Miller-Jones, ApJ 959, 85 (2023)
   site({
@@ -198,7 +206,7 @@ export const ATLAS: AtlasSite[] = [
     label: "hover",
     lonDeg: 309.1,
     latDeg: 14.97,
-    dKpc: 5.43,
+    dKpc: kpcOf(BLACK_HOLES["omega-cen"].distance),
   }),
   // EHT Collaboration (2019, 2025)
   site({
@@ -285,6 +293,20 @@ export const ATLAS: AtlasSite[] = [
   },
 ];
 
+/**
+ * The distance ladder beside the map, from the shared catalogues: Sgr A*, the LMC (Pietrzyński
+ * et al. 2019, as for R136a1 in it) and M87*; Andromeda as its card quotes Li et al. 2021 (the
+ * cosmic map rounds it to 2.5 Mly); the two farthest by redshift.
+ */
+export const DISTANCE_ROWS: readonly { id: string; k: string }[] = [
+  { id: "sgr-a", k: quote({ ...BLACK_HOLES["sgr-a"].distance, digits: 2 }) },
+  { id: "lmc", k: quote(NAMED_STARS.r136a1.distance) },
+  { id: "m31", k: "760 kpc" },
+  { id: "m87", k: quote(BLACK_HOLES.m87.distance) },
+  { id: "gw231123", k: "z ≈ 0.4" },
+  { id: "ton618", k: "z = 2.22" },
+];
+
 export function atlasFor(id: string): AtlasSite | undefined {
   return ATLAS.find((s) => s.id === id);
 }
@@ -304,8 +326,8 @@ type ArmFit = {
   psiAfter: number;
 };
 
-/** The fit assumes R0 = 8.15 kpc; radii are rescaled to this map's R0. */
-const FIT_R0_KPC = 8.15;
+/** The fit assumes its own R0 (`REID_R0_KPC`); radii are rescaled to this map's R0. */
+const FIT_R0_KPC = REID_R0_KPC;
 
 function armPoint(fit: ArmFit, betaDeg: number): { x: number; y: number } {
   const psi = betaDeg < fit.betaKink ? fit.psiBefore : fit.psiAfter;

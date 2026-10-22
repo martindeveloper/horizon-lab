@@ -9,7 +9,7 @@ import {
   LAST_SCATTERING_Z,
   UNIVERSE_AGE_GYR,
 } from "@/space/cosmos/model/cosmos";
-import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
+import { EARTH_AGE, SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { clamp01 } from "@horizon/toolkit/math";
 import {
   JULIAN_YEAR_SECONDS,
@@ -83,7 +83,7 @@ export const EARTH_THEN = [
   { id: "simple", from: 538.8e6 },
   { id: "microbes", from: 2.4e9 },
   { id: "young", from: 3.5e9 },
-  { id: "noEarth", from: 4.54e9 },
+  { id: "noEarth", from: EARTH_AGE },
   { id: "noSun", from: SUN_BIRTH },
 ] as const;
 

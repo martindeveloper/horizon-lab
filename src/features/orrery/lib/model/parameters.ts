@@ -17,12 +17,11 @@ export const BELT_STIRRED_AFTER = 2e7;
  * Barboni et al. 2017); estimates run as late as 4.35 Gyr ago (Borg et al. 2011).
  */
 export const MOON_IMPACT_AFTER = 5.7e7;
+/** The latest estimate of the Moon-forming impact, years ago (Borg et al. 2011). */
+export const MOON_IMPACT_LATEST = 4.35e9;
 
 /** Classic Late Heavy Bombardment date from Apollo impact-melt ages, ~3.9 Gyr ago. */
 export const LHB_CLASSIC = 3.9e9;
-
-/** The thin disk and bar are in place by ~8 Gyr ago (Sanders et al. 2024; Xiang & Rix 2022). */
-export const THIN_DISK_ERA = 8e9;
 
 /** Bright stars' proper motions scramble the constellations within ~10⁵ years. */
 export const NAMED_STARS_FADE = 1e5;

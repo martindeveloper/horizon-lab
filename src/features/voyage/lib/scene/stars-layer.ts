@@ -15,19 +15,19 @@ import { brightStarGeometry } from "@/space/bright-stars";
 import { LY } from "@/space/galaxy/scene/frames";
 import { createMilkyWay, fieldStars, starSize, type SkyCounts } from "@/space/sky/milky-way";
 import { STARS } from "@/space/star-catalogue";
+import { starDistance } from "@/space/star-distances";
 import { pointsGeometry, rising, type Vec3d } from "@horizon/toolkit/scene";
-import { PARSEC_KM, SOLAR_TEFF_K } from "@horizon/toolkit/science";
+import { PARSEC_KM, SOLAR_ABSOLUTE_MAGNITUDE_V, SOLAR_TEFF_K } from "@horizon/toolkit/science";
 
 import { LUT_SPEC, starMaterial, SURFACE_PEAK, type MotionUniforms } from "../graphics/looks";
 import { ALPHA_CENTAURI_CATALOGUE_NAME } from "../model/alpha-centauri";
 import { BAND_TO_MAP_LY } from "../model/parameters";
-import { starDistance } from "../model/star-distances";
 import type { VoyageKit } from "./kit";
 
 /** The sky sphere's radius, km: inside the frustum, beyond the solar system's bodies. */
 const SKY_RADIUS_KM = 1e10;
-/** The Sun's apparent magnitude from a parsec (absolute 4.83 − 5). */
-const SUN_MAG_AT_PC = -0.17;
+/** The Sun's apparent magnitude from a parsec: its absolute magnitude (from 10 pc) − 5. */
+const SUN_MAG_AT_PC = SOLAR_ABSOLUTE_MAGNITUDE_V - 5;
 
 /** The Sun as a sky point at the origin, a parsec's distance as its brightness reference. */
 function sunGeometry() {

@@ -1,3 +1,4 @@
+import { SOLAR_ABUNDANCES } from "@/space/solar-composition";
 import { airToVacuum, PERIODIC_TABLE, type ChemicalElement } from "@horizon/toolkit/science";
 
 import data from "./atomic-data.json";
@@ -16,28 +17,28 @@ export type ElementId = (typeof ELEMENT_IDS)[number];
 /** A periodic-table element (`@horizon/toolkit/science`) with what the lab adds about it. */
 type Element = ChemicalElement & {
   id: ElementId;
-  /** The Sun's photospheric abundance log ε = log(N / N_H) + 12 (Asplund et al. 2009). */
+  /** The Sun's photospheric abundance log ε = log(N / N_H) + 12 (`SOLAR_ABUNDANCES`). */
   abundance: number;
   /** Its spectra from the neutral atom up, as NIST names them ("Ca I", "Ca II", …). */
   stages: readonly string[];
 };
 
-const element = (id: ElementId, abundance: number, stages: readonly string[]): Element => ({
+const element = (id: ElementId, stages: readonly string[]): Element => ({
   ...PERIODIC_TABLE[id],
   id,
-  abundance,
+  abundance: SOLAR_ABUNDANCES[id],
   stages,
 });
 
 export const ELEMENTS: Record<ElementId, Element> = {
-  H: element("H", 12, ["H I", "H II"]),
-  He: element("He", 10.93, ["He I", "He II", "He III"]),
-  Li: element("Li", 1.05, ["Li I", "Li II"]),
-  Na: element("Na", 6.24, ["Na I", "Na II"]),
-  K: element("K", 5.03, ["K I", "K II"]),
-  Mg: element("Mg", 7.6, ["Mg I", "Mg II", "Mg III"]),
-  Ca: element("Ca", 6.34, ["Ca I", "Ca II", "Ca III"]),
-  Fe: element("Fe", 7.5, ["Fe I", "Fe II", "Fe III"]),
+  H: element("H", ["H I", "H II"]),
+  He: element("He", ["He I", "He II", "He III"]),
+  Li: element("Li", ["Li I", "Li II"]),
+  Na: element("Na", ["Na I", "Na II"]),
+  K: element("K", ["K I", "K II"]),
+  Mg: element("Mg", ["Mg I", "Mg II", "Mg III"]),
+  Ca: element("Ca", ["Ca I", "Ca II", "Ca III"]),
+  Fe: element("Fe", ["Fe I", "Fe II", "Fe III"]),
 };
 
 type SpeciesData = { ionization: number; partition: number[] };

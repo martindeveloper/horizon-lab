@@ -21,13 +21,16 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
+import { quote } from "../quote";
 import type { HoleSpec } from "./types";
+
+const CYGNUS_X1 = BLACK_HOLES["cygnus-x1"];
 
 export const stellar: HoleSpec = {
   id: "stellar",
   name: "Cygnus X-1",
   kind: "catalog",
-  massSolar: BLACK_HOLES["cygnus-x1"].mass.value,
+  massSolar: CYGNUS_X1.mass.value,
   spin: 0.95,
   inclination: 1.09,
   distance: 26,
@@ -46,7 +49,7 @@ export const stellar: HoleSpec = {
       distance: 122,
       lift: 0.25,
       lead: 0.3,
-      eq: "M ≈ 13–23 M☉    ·    D = 2.22 kpc    ·    b ≈ +3°",
+      eq: `M = ${quote(CYGNUS_X1.mass)}    ·    D = ${quote(CYGNUS_X1.distance)}    ·    b ≈ +3°`,
     },
     // Out and back in around the hole, the way the companion circles it.
     {

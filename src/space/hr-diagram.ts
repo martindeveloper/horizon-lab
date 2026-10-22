@@ -6,8 +6,7 @@
 import type { Fact } from "@/lib/facts";
 import {
   SOLAR_TEFF_K,
-  UNITS,
-  convert,
+  convertFigure,
   stefanBoltzmann,
   type UnitId,
 } from "@horizon/toolkit/science";
@@ -19,6 +18,25 @@ export type StarId = keyof typeof NAMED_STARS;
 /** The bands an HR diagram is read by, as a star's luminosity class names them. */
 export const HR_GROUPS = ["whiteDwarfs", "mainSequence", "giants", "supergiants"] as const;
 export type HrGroup = (typeof HR_GROUPS)[number];
+
+/**
+ * Main-sequence classes by effective temperature, hot to cool: where each begins, K, halfway
+ * between the last subtype of the class above and its own first (Pecaut & Mamajek 2013, as
+ * updated: O9.5 V 31,900 / B0 V 31,400 … K9 V 3,930 / M0 V 3,850).
+ */
+export const SPECTRAL_CLASSES = [
+  ["O", 31_650],
+  ["B", 10_050],
+  ["A", 7310],
+  ["F", 5960],
+  ["G", 5325],
+  ["K", 3890],
+  ["M", 0],
+] as const;
+
+/** A main-sequence star's spectral class. */
+export const spectralClass = (teff: number) =>
+  SPECTRAL_CLASSES.find(([, from]) => teff >= from)?.[0] ?? "M";
 
 /** MK luminosity classes: D a white dwarf, V the main sequence, III a giant, I a supergiant. */
 const CLASSES: readonly (readonly [RegExp, HrGroup])[] = [
@@ -44,14 +62,10 @@ export type HrPoint = {
 /** A figure's central value, or its span's geometric middle where it has none. */
 const central = (fact: Fact) => fact.value ?? Math.sqrt(fact.range[0] * fact.range[1]);
 
-const isUnitId = (unit: string): unit is UnitId => Object.hasOwn(UNITS, unit);
 /** Whether an id names a star of the shared catalogue. */
 export const isStarId = (id: string): id is StarId => Object.hasOwn(NAMED_STARS, id);
 
-const inUnit = (fact: Fact, to: UnitId) => {
-  if (!isUnitId(fact.unit)) throw new TypeError(`A plain ${fact.unit} has no ${to}`);
-  return convert(central(fact), fact.unit, to);
-};
+const inUnit = (fact: Fact, to: UnitId) => convertFigure(central(fact), fact.unit, to);
 
 /**
  * A star's place, where its temperature and either its light or its radius are catalogued:

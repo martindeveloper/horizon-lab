@@ -3,6 +3,7 @@
  * omega is Ω / sqrt(GM/Re³), NOT Ω/Ωcritical at fixed polar radius.
  * https://arxiv.org/abs/1109.3038
  */
+import { NAMED_STARS } from "@/space/stellar";
 import { SOLAR_TEFF_K } from "@horizon/toolkit/science";
 
 /** The Roche equipotential's polar/equatorial ratio determines its rotation. */
@@ -81,8 +82,8 @@ export function rotatingTemperatures(
   return values.map((value) => value * scale);
 }
 
-/** Inclination from the sightline; shader tilt is measured from the sky plane. */
+/** Inclination from the sightline, degrees (the shared catalogue's); shader tilt is measured from the sky plane. */
 export const ROTATOR_INCLINATIONS = {
-  vega: 6.2, // Monnier et al. 2012, Table 2, concordance Model 3.
-  achernar: 60.6, // Domiciano de Souza et al. 2014, Table 2.
+  vega: NAMED_STARS.vega.inclination.value,
+  achernar: NAMED_STARS.achernar.inclination.value,
 } as const;

@@ -14,13 +14,18 @@
  * Mass and spin on the dial are the remnant's. No matter remains: the disk is off.
  * Sky: generic deep field (weather = lensed).
  */
+import { BLACK_HOLES } from "@/space/stellar";
+
+import { quote } from "../quote";
 import type { HoleSpec } from "./types";
+
+const GW231123 = BLACK_HOLES.gw231123;
 
 export const gw231123: HoleSpec = {
   id: "gw231123",
   name: "GW231123",
   kind: "catalog",
-  massSolar: 222,
+  massSolar: GW231123.mass.value,
   spin: 0.84,
   inclination: 0.6,
   distance: 28,
@@ -39,7 +44,7 @@ export const gw231123: HoleSpec = {
       distance: 130,
       lift: 0.3,
       lead: 0.3,
-      eq: "m₁ ≈ 137 M☉  +  m₂ ≈ 101 M☉   →   M_f ≈ 222 M☉",
+      eq: `m₁ ≈ 137 M☉  +  m₂ ≈ 101 M☉   →   M_f ≈ ${quote(GW231123.mass)}`,
     },
     // A quick tightening spiral, like the final orbits before the merger.
     {
@@ -51,7 +56,7 @@ export const gw231123: HoleSpec = {
       lead: 0.5,
       roll: -0.04,
       drift: -0.012,
-      eq: "f ≈ 30–80 Hz    ·    D_L ≈ 2.2 Gpc",
+      eq: `f ≈ 30–80 Hz    ·    D_L ≈ ${quote(GW231123.distance)}`,
     },
     {
       phase: "detail",

@@ -14,14 +14,24 @@
  * Mass on the dial is the lower estimate (`BLACK_HOLES` in src/space/stellar.ts). Sky: host galaxy (weather = host).
  */
 import { BLACK_HOLES } from "@/space/stellar";
+import { formatSignificant, measure, schwarzschildRadius } from "@horizon/toolkit/science";
 
+import { quoteSpan } from "../quote";
 import type { HoleSpec } from "./types";
+
+const TON_618 = BLACK_HOLES["ton-618"];
+/** The horizon's radius across the mass estimates, au. */
+const HORIZON_AU = `${(TON_618.mass.range ?? [TON_618.mass.value])
+  .map((m) =>
+    formatSignificant(schwarzschildRadius.measure({ M: measure(m, "Msun") }).in("au"), "en", 2),
+  )
+  .join("–")} au`;
 
 export const ton618: HoleSpec = {
   id: "ton-618",
   name: "TON 618",
   kind: "catalog",
-  massSolar: BLACK_HOLES["ton-618"].mass.value,
+  massSolar: TON_618.mass.value,
   spin: 0.6,
   inclination: 1.0,
   distance: 30,
@@ -65,7 +75,7 @@ export const ton618: HoleSpec = {
         { kind: "shadow", assumed: true },
         { kind: "ruler", length: 10 },
       ],
-      eq: "M = f R v² / G ≈ 4–7 × 10¹⁰ M☉",
+      eq: `M = f R v² / G ≈ ${quoteSpan(TON_618.mass)}`,
     },
     {
       phase: "hold",
@@ -74,7 +84,7 @@ export const ton618: HoleSpec = {
       inclination: 0.7,
       distance: 34,
       swing: 0.2,
-      eq: "R_s = 2GM/c² ≈ 800–1,300 au",
+      eq: `R_s = 2GM/c² ≈ ${HORIZON_AU}`,
     },
     {
       phase: "wide",

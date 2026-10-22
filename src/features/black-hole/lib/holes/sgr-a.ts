@@ -23,13 +23,16 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
+import { quote } from "../quote";
 import type { HoleSpec } from "./types";
+
+const SGR_A = BLACK_HOLES["sgr-a"];
 
 export const sgrA: HoleSpec = {
   id: "sgr-a",
   name: "Sagittarius A*",
   kind: "catalog",
-  massSolar: BLACK_HOLES["sgr-a"].mass.value,
+  massSolar: SGR_A.mass.value,
   illustrativeFlow: true,
   spin: 0.94,
   inclination: 1.05,
@@ -53,7 +56,7 @@ export const sgrA: HoleSpec = {
       lead: -0.5,
       look: { yaw: 0.4, pitch: 0.12 },
       drift: -0.01,
-      eq: "D = 8.277 kpc    ·    M = 4.297 × 10⁶ M☉",
+      eq: `D = ${quote(SGR_A.distance)}    ·    M = ${quote(SGR_A.mass)}`,
     },
     // A long sweeping orbit that dips inward mid-way, like a star at pericentre.
     {

@@ -1,9 +1,11 @@
+import { SOLAR_HYDROGEN_MASS_FRACTION } from "@/space/solar-composition";
 import {
   ATOMIC_MASS_KG,
   BOLTZMANN_CONSTANT,
   ELECTRON_MASS_KG,
   ELECTRON_VOLT_J,
   PLANCK_CONSTANT,
+  PROTON_MASS_KG,
   RYDBERG_INFINITY,
 } from "@horizon/toolkit/science";
 
@@ -25,11 +27,8 @@ import {
 /** k in eV per kelvin. */
 export const BOLTZMANN_EV = BOLTZMANN_CONSTANT / ELECTRON_VOLT_J;
 
-/** The proton's mass in mᵤ (CODATA 2022). */
-const PROTON_MASS_U = 1.007_276_466_578_9;
 /** Hydrogen's Rydberg constant, m⁻¹: R∞ for the proton's finite mass, R_H = R∞ / (1 + mₑ / m_p). */
-export const RYDBERG_HYDROGEN =
-  RYDBERG_INFINITY / (1 + ELECTRON_MASS_KG / (PROTON_MASS_U * ATOMIC_MASS_KG));
+export const RYDBERG_HYDROGEN = RYDBERG_INFINITY / (1 + ELECTRON_MASS_KG / PROTON_MASS_KG);
 
 /** (2π mₑ k / h²)^(3/2), m⁻³ K^(−3/2): the electron's quantum concentration per T^(3/2). */
 const QUANTUM_CONCENTRATION =
@@ -137,12 +136,9 @@ export function levelShare(
   return fraction * levelFraction(species, g, energy, kelvin);
 }
 
-/** The Sun's hydrogen mass fraction (Asplund et al. 2009). */
-const HYDROGEN_MASS_FRACTION = 0.7381;
-
 /** Atoms of an element in a kilogram of the star's gas, its abundance changed by `shift` dex. */
 export function atomsPerKilogram(element: ElementId, shift = 0) {
-  const hydrogen = HYDROGEN_MASS_FRACTION / (ELEMENTS.H.atomicWeight * ATOMIC_MASS_KG);
+  const hydrogen = SOLAR_HYDROGEN_MASS_FRACTION / (ELEMENTS.H.atomicWeight * ATOMIC_MASS_KG);
   return hydrogen * 10 ** (ELEMENTS[element].abundance + shift - 12);
 }
 

@@ -7,7 +7,10 @@
  * ASSL 415). Lengths and heights are fractions of the solar radius; positions, the timing of
  * each region's cycle and the course of its eruption are authored.
  */
-export const SUN_RADIUS_MM = 695.7;
+import { SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
+
+/** The nominal solar radius, Mm. */
+export const SUN_RADIUS_MM = SOLAR_RADIUS_KM / 1000;
 /** Model seconds per displayed second: a quarter of an hour of the Sun passes each second. */
 export const SUN_ACTIVITY_TIME_SCALE = 900;
 /** One region's cycle: a quiescent spell, a slow then fast rise, and re-formation (37.5 h). */

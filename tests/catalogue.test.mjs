@@ -40,9 +40,13 @@ for (const [name, facts] of [
 }
 
 test("the black-hole lab draws the measured masses of the shared catalogue", () => {
-  /* Its presets load with the routing config, so they keep their own numbers; these must agree. */
-  for (const id of ["sgr-a", "m87", "ton-618"])
-    assert.equal(holeById(id).massSolar, BLACK_HOLES[id].mass.value, id);
+  const catalogued = { stellar: "cygnus-x1" };
+  for (const preset of ["stellar", "gaia-bh3", "omega-cen", "gw231123", "sgr-a", "m87", "ton-618"])
+    assert.equal(
+      holeById(preset).massSolar,
+      BLACK_HOLES[catalogued[preset] ?? preset].mass.value,
+      preset,
+    );
 });
 
 /* Where the CNO cycle overtakes the proton–proton chain, and the least mass that burns hydrogen, M☉. */
@@ -51,7 +55,8 @@ const HYDROGEN_BURNING_MSUN = 0.075;
 const centre = (fact) => fact.value ?? Math.sqrt(fact.range[0] * fact.range[1]);
 
 test("every star's engine agrees with its mass, and no black hole fuses anything", () => {
-  for (const id of Object.keys(BLACK_HOLES)) assert.equal(ENGINES[id].process, "accretion", id);
+  for (const id of Object.keys(BLACK_HOLES))
+    assert.ok(["accretion", "dormant"].includes(ENGINES[id].process), id);
   for (const [id, star] of Object.entries(NAMED_STARS)) {
     const { process, sources } = ENGINES[id];
     assert.ok(sources.length > 0, `${id} cites its engine`);
