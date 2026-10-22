@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createSunModel, dipoleAt } from "../src/space/sun/frame.ts";
+import { createSunModel, dipoleAt, OBSERVED_REGIONS } from "../src/space/sun/frame.ts";
 import {
   DAY_S,
   MAX_FIELD_LINES,
@@ -118,4 +118,28 @@ test("geometry revisions track reused buffers, without changing for a light-only
   model.frameAt(input({ eruptionScrub: 0.75, fieldLineCount: 24 }));
   assert.equal(frame.fieldLines, field);
   assert.ok(frame.fieldRevision > fieldRevision, "the corona must reshape with the field");
+});
+
+test("a held eruption follows its ageing region and stays exact after scrubbing and re-entry", () => {
+  const options = { observed: OBSERVED_REGIONS };
+  const model = createSunModel(7, options);
+  let previous = null;
+  for (const [time, eruptionScrub] of [
+    [0, 0.6],
+    [DAY_S, 0.6],
+    [DAY_S, 1],
+    [2 * DAY_S, 1],
+    [2 * DAY_S, 0.3],
+    [2 * DAY_S, null],
+    [0, 0.6],
+  ]) {
+    const ask = input({ time, eruptionScrub, fieldLineCount: 0 });
+    const frame = model.frameAt(ask);
+    const expected = createSunModel(7, options).frameAt(ask);
+    assert.deepEqual(frame.eruption, expected.eruption, "reused contours match a fresh solve");
+    if (time === DAY_S && eruptionScrub === 0.6) {
+      assert.notDeepEqual(frame.eruption.lines, previous, "the arcade follows the moving region");
+    }
+    previous = frame.eruption ? structuredClone(frame.eruption.lines) : null;
+  }
 });

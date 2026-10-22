@@ -268,10 +268,13 @@ export const RECONNECTION = {
   fieldGradient: 8,
   sheetWidth: 0.15,
   fluxWidth: 1.5,
-  transferredFlux: 0.3,
-  diffusionWidth: 0.12,
+  transferredFlux: 0.42,
+  diffusionWidth: 0.08,
   diffusionHeight: 0.25,
   outerFlux: -0.39,
+  // Reference span still stretched into the sheet once flux transfer ends: the rest has
+  // relaxed into the rope. transferredFlux exceeds |outerFlux|, so every drawn line reconnects.
+  relaxedSheet: 0.02,
   coreLines: 3,
   // Monotonic schematic height mapping resolves the small lower arcade beside the CME.
   lowCoronalLift: 2,

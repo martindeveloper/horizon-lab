@@ -132,6 +132,7 @@
     "minute": "1 s = 1 min",
     "hour": "1 s = 1 h",
     "day": "1 s = 1 day",
+    "month": "1 s = 1 month",
     "year": "1 s = 1 year"
   },
   "stages": {

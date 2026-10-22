@@ -3,7 +3,7 @@
  * arcade and rope drawings. See reconnection.ts for the induction equation and limitations.
  * All lengths here are in the model's local unit, except the public EruptionState.
  */
-import { clamp01, smoothstep } from "@horizon/toolkit/math";
+import { clamp01, smootherstep, smoothstep } from "@horizon/toolkit/math";
 
 import {
   CME_FINAL_HEIGHT_R,
@@ -28,6 +28,8 @@ export type Geometry = {
   q: number;
   /** The line-tied lower arcade's height scale, kept from storage on. */
   base: number;
+  /** The sheet's top in the reference plane, where the rope's body begins. */
+  foot: number;
   /** The current sheet's added length above the X-point. */
   sheet: number;
   /** The ejected island's added vertical scale, and its added width. */
@@ -37,31 +39,34 @@ export type Geometry = {
 
 /*
  * The common ideal height map: base·y + sheet·σ(y) + body·ρ(y). Below the X-point the arcade
- * stays line-tied at its storage scale. Over the diffusion region's upper half σ steps from 0
- * to 1: the field between the X-point and the rope draws out into a long, thin current sheet.
- * Over the next such span ρ turns from flat to a unit slope and the width steps up with it,
- * so the rope above lifts away as one body, scaled uniformly.
+ * stays line-tied at its storage scale. From the X-point to the sheet's foot σ steps from 0 to
+ * 1: the field there draws out into a long, thin current sheet. Above it ρ turns from flat to
+ * a unit slope, so the rope lifts away as one body, and its width grows over its lower half.
+ * While flux transfers the foot is the diffusion region's top; as the transfer completes the
+ * stretched field relaxes into the rope and the foot sinks toward the X-point, so the last
+ * reconnected loops leave the sheet: the rope breaks free of the flare below it.
  */
-const SHEET_REACH = RECONNECTION.diffusionHeight;
-const BODY_FOOT = 1 + SHEET_REACH;
-const step = (y: number, from: number) => smoothstep(from, from + SHEET_REACH, y);
-function stepSlope(y: number, from: number) {
-  const t = (y - from) / SHEET_REACH;
-  return t > 0 && t < 1 ? (6 * t * (1 - t)) / SHEET_REACH : 0;
+const BODY_RAMP = RECONNECTION.diffusionHeight;
+const sheetFootAt = (s: number) =>
+  1 +
+  RECONNECTION.relaxedSheet +
+  (RECONNECTION.diffusionHeight - RECONNECTION.relaxedSheet) *
+    (1 - transferredFluxAt(s) / RECONNECTION.transferredFlux);
+function stepSlope(y: number, from: number, to: number) {
+  const t = (y - from) / (to - from);
+  return t > 0 && t < 1 ? (6 * t * (1 - t)) / (to - from) : 0;
 }
-/** C1: flat below `from`, a unit slope one span above it. */
+/** C1: flat below `from`, a unit slope one ramp above it. */
 function ramp(y: number, from: number) {
   if (y <= from) return 0;
-  return y < from + SHEET_REACH ? (y - from) ** 2 / (2 * SHEET_REACH) : y - from - SHEET_REACH / 2;
+  return y < from + BODY_RAMP ? (y - from) ** 2 / (2 * BODY_RAMP) : y - from - BODY_RAMP / 2;
 }
-const rampSlope = (y: number, from: number) => clamp01((y - from) / SHEET_REACH);
+const rampSlope = (y: number, from: number) => clamp01((y - from) / BODY_RAMP);
 
 const rawHeight = (y: number, g: Geometry) =>
-  g.base * y + g.sheet * step(y, 1) + g.body * ramp(y, BODY_FOOT);
+  g.base * y + g.sheet * smoothstep(1, g.foot, y) + g.body * ramp(y, g.foot);
 const rawSlope = (y: number, g: Geometry) =>
-  g.base + g.sheet * stepSlope(y, 1) + g.body * rampSlope(y, BODY_FOOT);
-/** How far the rope's centre sits up the body ramp: raw(2) = 2·base + sheet + body·this. */
-const CENTRE_RAMP = ramp(2, BODY_FOOT);
+  g.base + g.sheet * stepSlope(y, 1, g.foot) + g.body * rampSlope(y, g.foot);
 
 const liftHeight = (y: number) =>
   y + RECONNECTION.lowCoronalLift * Math.tanh(y / RECONNECTION.lowCoronalScale);
@@ -77,8 +82,14 @@ function unliftHeight(y: number) {
 }
 
 export const displayHeight = (y: number, g: Geometry) => liftHeight(rawHeight(y, g));
-/** The body widens with the step that lifts it; the arcade and the sheet keep their width. */
-export const displayWidth = (y: number, g: Geometry) => 1 + g.widen * step(y, BODY_FOOT);
+/** The body widens up to the rope's centre; the arcade and the sheet keep their width. C2, so
+ * the mapped field stays C1 through the rope's neck. */
+const widthStep = (y: number, g: Geometry) => smootherstep((y - g.foot) / (2 - g.foot));
+function widthStepSlope(y: number, g: Geometry) {
+  const t = (y - g.foot) / (2 - g.foot);
+  return t > 0 && t < 1 ? (30 * t * t * (1 - t) ** 2) / (2 - g.foot) : 0;
+}
+export const displayWidth = (y: number, g: Geometry) => 1 + g.widen * widthStep(y, g);
 export function referenceHeight(height: number, g: Geometry) {
   const raw = unliftHeight(height);
   let lo = 0;
@@ -105,10 +116,11 @@ const ARCADE_BASE = 1 / (2 * STORAGE_LAMBDA[1]);
  * axis and lies r·sin of that from it.
  */
 const FINAL_FLUX = -transferredFluxAt(1);
+const FINAL_FOOT = sheetFootAt(1);
 const finalTop = contourY(FINAL_FLUX, 1, 2, 4);
 const finalFront = (CME_FINAL_HEIGHT_R - 1) / ERUPTION_SCALE_R;
 const OUTLINE = Array.from({ length: 64 }, (_, i) => {
-  const y = BODY_FOOT + ((finalTop - BODY_FOOT) * i) / 63;
+  const y = FINAL_FOOT + ((finalTop - FINAL_FOOT) * i) / 63;
   return [y, contourX(y, FINAL_FLUX, 1)] as const;
 });
 function finalBody(share: number) {
@@ -122,7 +134,8 @@ function finalBody(share: number) {
     p: 0,
     q: 0,
     base: ARCADE_BASE,
-    sheet: rise * (1 - share * CENTRE_RAMP),
+    foot: FINAL_FOOT,
+    sheet: rise * (1 - share * ramp(2, FINAL_FOOT)),
     body: share * rise,
     widen: 0,
   };
@@ -134,7 +147,7 @@ function finalBody(share: number) {
         ([y, x]) => (1 + ERUPTION_SCALE_R * displayHeight(y, g)) * Math.sin(arc(y, x)),
       ),
     );
-  const radius = (ERUPTION_SCALE_R * (finalFront - displayHeight(BODY_FOOT, g))) / 2;
+  const radius = (ERUPTION_SCALE_R * (finalFront - displayHeight(FINAL_FOOT, g))) / 2;
   let lo = 0;
   let hi = 1e3;
   for (let i = 0; i < 60; i++) {
@@ -151,7 +164,7 @@ function finalBody(share: number) {
 /** The share of the rise that scales the body rather than lengthening the sheet. */
 const BODY_SHARE = (() => {
   let lo = 0;
-  let hi = 1 / CENTRE_RAMP;
+  let hi = 1 / ramp(2, FINAL_FOOT);
   for (let i = 0; i < 50; i++) {
     const mid = (lo + hi) / 2;
     if (finalBody(mid).angle < CME_SPREAD_RAD) lo = mid;
@@ -187,6 +200,7 @@ export function geometryAt(
     p: 0,
     q: 0,
     base: 0.5,
+    foot: sheetFootAt(0),
     sheet: 0,
     body: 0,
     widen: 0,
@@ -200,12 +214,13 @@ export function geometryAt(
   // keeps the whole display map C1 in time, including when reconnection starts.
   out.base = Math.min(height, 1) / 2;
   const rise = height - 2 * out.base;
+  out.foot = sheetFootAt(t);
   out.body = BODY_SHARE * rise;
-  out.sheet = rise - out.body * CENTRE_RAMP;
+  out.sheet = rise - out.body * ramp(2, out.foot);
   out.widen = BODY_WIDEN * out.body;
   out.h = displayHeight(2, out);
   out.p = t > X_POINT_S ? displayHeight(1 - RECONNECTION.diffusionHeight, out) : 0;
-  out.q = t > X_POINT_S ? displayHeight(1 + RECONNECTION.diffusionHeight, out) : 0;
+  out.q = t > X_POINT_S ? displayHeight(out.foot, out) : 0;
   const top = contourY(-transferredFluxAt(t), t, 2, 4);
   out.rope = displayHeight(top, out) - out.h;
   return out;
@@ -223,7 +238,7 @@ export function planeFieldAt(
   const width = displayWidth(refY, g);
   const refX = x / (g.lambda * width);
   const field = fluxAt(refX, refY, g.s);
-  const widthDerivative = g.widen * stepSlope(refY, BODY_FOOT);
+  const widthDerivative = g.widen * widthStepSlope(refY, g);
   const tanh = Math.tanh(rawHeight(refY, g) / RECONNECTION.lowCoronalScale);
   const liftDerivative =
     1 + (RECONNECTION.lowCoronalLift / RECONNECTION.lowCoronalScale) * (1 - tanh * tanh);
@@ -285,12 +300,22 @@ function component(
   const n = line.points.length / 2;
   line.count = n;
   line.flux = a;
-  for (let i = 0; i < n; i++) {
+  // The heights run up one side and back down the other, so each solve serves a point and
+  // its mirror; each starts from its neighbour's root.
+  let x = 1;
+  for (let i = 0; i <= (n - 1) / 2; i++) {
     const phase = (2 * Math.PI * i) / (n - 1);
     const y = low + ((high - low) * (1 - Math.cos(phase))) / 2;
-    const x = contourX(y, a, g.s) * (i <= (n - 1) / 2 ? 1 : -1);
-    line.points[2 * i] = x * g.lambda * displayWidth(y, g);
-    line.points[2 * i + 1] = displayHeight(y, g);
+    const root = contourX(y, a, g.s, x);
+    if (root > 0) x = root;
+    const across = root * g.lambda * displayWidth(y, g);
+    const height = displayHeight(y, g);
+    const mirror = n - 1 - i;
+    line.points[2 * i] = across;
+    line.points[2 * i + 1] = height;
+    if (mirror === i) continue;
+    line.points[2 * mirror] = -across;
+    line.points[2 * mirror + 1] = height;
   }
   if (closed) {
     line.points[0] = 0;

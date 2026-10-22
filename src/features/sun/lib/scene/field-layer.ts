@@ -187,34 +187,42 @@ export function createFieldLayer(
   let count = 0;
   /** Segments the field's own lines fill, ahead of the eruption's. */
   let fieldCount = 0;
-  const offset: [number, number, number] = [0, 0, 0];
-
-  /** One polyline's segments, resampled to at most `maxPoints` points, shifted by `offset`. */
+  /** One polyline's segments, resampled to at most `pointLimit` points. */
   function writeLine(line: Polyline, fade: number, tube = 1, pointLimit = maxPoints) {
     if (!data || line.count < 2) return;
+    const { points } = line;
     const n = Math.min(line.count, pointLimit);
-    const seed = line.points[0]! * 127.1 + line.points[1]! * 311.7 + line.points[2]! * 74.7;
-    const at = (i: number) => Math.round((i * (line.count - 1)) / (n - 1)) * 3;
-    const put = (array: Float32Array, index: number, point: number) => {
-      array[index * 3] = line.points[point]! + offset[0];
-      array[index * 3 + 1] = line.points[point + 1]! + offset[1];
-      array[index * 3 + 2] = line.points[point + 2]! + offset[2];
-    };
+    const seed = points[0]! * 127.1 + points[1]! * 311.7 + points[2]! * 74.7;
+    const strength = strengthShown(line.strength);
+    const { prev, start, end, next } = data;
+    const at = (i: number) =>
+      Math.round((Math.min(Math.max(i, 0), n - 1) * (line.count - 1)) / (n - 1)) * 3;
+    // Each segment's neighbours slide along: every resampled point is located once.
+    let before = at(-1);
+    let from = at(0);
+    let to = at(1);
     for (let i = 0; i < n - 1; i++) {
       if (count >= data.capacity) return;
-      put(data.prev, count, at(Math.max(i - 1, 0)));
-      put(data.start, count, at(i));
-      put(data.end, count, at(i + 1));
-      put(data.next, count, at(Math.min(i + 2, n - 1)));
+      const after = at(i + 2);
+      const o = count * 3;
+      for (let k = 0; k < 3; k++) {
+        prev[o + k] = points[before + k]!;
+        start[o + k] = points[from + k]!;
+        end[o + k] = points[to + k]!;
+        next[o + k] = points[after + k]!;
+      }
       data.line[count * 4] = line.polarity;
       data.line[count * 4 + 1] = line.open ? 1 : 0;
-      data.line[count * 4 + 2] = strengthShown(line.strength);
+      data.line[count * 4 + 2] = strength;
       data.line[count * 4 + 3] = line.kelvin;
       data.along[count * 2] = i / (n - 1);
       data.along[count * 2 + 1] = (i + 1) / (n - 1);
       data.fade[count] = fade;
       data.tube[count] = tube;
       data.seed[count] = seed;
+      before = from;
+      from = to;
+      to = after;
       count++;
     }
   }
@@ -250,7 +258,6 @@ export function createFieldLayer(
         flowPosition.needsUpdate = true;
         flowUniforms.uFlow.value = 0.15 * Math.sqrt(eruption.reconnection);
       }
-      offset.fill(0);
       const from = fieldChanged ? 0 : fieldCount;
       if (fieldChanged) {
         count = 0;

@@ -20,7 +20,7 @@ const ENTRIES = [
   { id: "chromosphere", defaults: { light: "halpha", clock: "minute" } },
   { id: "corona", defaults: { light: "eclipse", clock: "minute" } },
   { id: "eruption", defaults: { light: "fe171", clock: "minute" }, action: "eruption" },
-  { id: "cycle", defaults: { light: "magnetogram", clock: "year" }, action: "cycle" },
+  { id: "cycle", defaults: { light: "magnetogram", clock: "month" }, action: "cycle" },
   /* An 88-day orbit at a day a second: a lap in a minute and a half. */
   { id: "orbit", defaults: { light: "white", clock: "day" } },
 ] as const satisfies readonly Definition[];

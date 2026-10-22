@@ -112,7 +112,7 @@ test("transport tends continuously to rest at the X-point without reversing eith
         near(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current, 1e-12);
         previousSpeed = speed;
       }
-      assert.ok(previousSpeed < 2e-5);
+      assert.ok(previousSpeed < 1e-4, "the flow comes to rest at the null");
     }
     near(transportAt(0, 1, s).vx, 0, 1e-12);
     near(transportAt(0, 1, s).vy, 0, 1e-12);
@@ -327,7 +327,7 @@ test("light follows flux transfer, the eruption rises, and ribbon separation gro
   near(eruptionAt(1).cmeFront, 5);
 });
 
-test("the rope lifts off as one round body inside the CME's width, over a lengthening sheet", () => {
+test("the rope lifts off as one round body inside the CME's width and breaks free of the sheet", () => {
   let previousLength = 0;
   for (let i = 41; i <= 100; i++) {
     const g = geometryAt(i / 100);
@@ -337,12 +337,18 @@ test("the rope lifts off as one round body inside the CME's width, over a length
   const g = geometryAt(1);
   assert.ok(g.q - g.p > 4 * g.p, "the sheet is several times longer than the arcade is tall");
   const lines = Array.from({ length: 24 }, blankPlaneLine);
+  // Every overlying line reconnects while the sheet still glows; then the rope breaks free.
+  const late = ERUPTION_STAGES.breakaway + (1 - ERUPTION_STAGES.breakaway) / 2;
+  const lateCount = contours(late, lines.length, lines);
+  assert.ok(lines.slice(0, lateCount).every((line) => line.kind !== "arcade"));
+  assert.ok(reconnectionAt(late) > 0);
   const count = contours(1, lines.length, lines, g);
-  const cores = lines.slice(0, count).filter((line) => line.kind === "rope" && line.flux > 0);
-  assert.ok(cores.length > 0);
-  for (const line of cores)
+  const rope = lines.slice(0, count).filter((line) => line.kind === "rope");
+  assert.ok(rope.length > count / 2);
+  for (const line of rope)
     for (let j = 0; j < line.count; j++)
-      assert.ok(line.points[2 * j + 1] > g.q, "the rope's own field has left the sheet");
+      assert.ok(line.points[2 * j + 1] > g.q, "no reconnected line still trails down the sheet");
+  assert.equal(reconnectionAt(1), 0);
   // The outer separatrix above the sheet, its x an arc on the sphere: as wide as the span from
   // the sheet's top to the front, at the catalogued half-width.
   const a = fluxAt(0, 1, 1).a,
@@ -350,8 +356,7 @@ test("the rope lifts off as one round body inside the CME's width, over a length
   let lateral = 0,
     angle = 0;
   for (let k = 0; k <= 200; k++) {
-    const y =
-      1 + RECONNECTION.diffusionHeight + ((top - 1 - RECONNECTION.diffusionHeight) * k) / 200;
+    const y = g.foot + ((top - g.foot) * k) / 200;
     const arc = Math.atan(ERUPTION_SCALE_R * g.lambda * displayWidth(y, g) * contourX(y, a, 1));
     angle = Math.max(angle, arc);
     lateral = Math.max(lateral, (1 + ERUPTION_SCALE_R * displayHeight(y, g)) * Math.sin(arc));

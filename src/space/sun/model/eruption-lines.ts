@@ -39,7 +39,7 @@ export function eruptionPoint(out: Float32Array, offset: number, x: number, y: n
   const dx = up[0] + ERUPTION_SCALE_R * (x * across[0] + z * along[0]);
   const dy = up[1] + ERUPTION_SCALE_R * (x * across[1] + z * along[1]);
   const dz = up[2] + ERUPTION_SCALE_R * (x * across[2] + z * along[2]);
-  const scale = (1 + y * ERUPTION_SCALE_R) / Math.hypot(dx, dy, dz);
+  const scale = (1 + y * ERUPTION_SCALE_R) / Math.sqrt(dx * dx + dy * dy + dz * dz);
   out[offset] = dx * scale;
   out[offset + 1] = dy * scale;
   out[offset + 2] = dz * scale;

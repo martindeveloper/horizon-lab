@@ -121,6 +121,9 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
   const planeLines = Array.from({ length: ERUPTION_LINES }, blankPlaneLine);
   const arcade = Array.from({ length: ERUPTION_LINES * ARCADE_SLICES }, blankEruptionLine);
   const eruptionState = blankEruptionState();
+  /** The cross-section depends only on the scrub, not the region's rotation or ageing. */
+  let planeAt: number | null = null;
+  let planeCount = 0;
   const eruption: Eruption = {
     regionId: 0,
     s: 0,
@@ -187,7 +190,11 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
       return frame;
     }
     const region = weather.regions[outbreak.slot]!;
-    eruptionAt(outbreak.s, eruptionState);
+    if (outbreak.s !== planeAt) {
+      eruptionAt(outbreak.s, eruptionState);
+      planeCount = contours(outbreak.s, ERUPTION_LINES, planeLines, eruptionState.geometry);
+      planeAt = outbreak.s;
+    }
     eruptionShape.write(outbreak.s);
     eruptionShape.write(region.id);
     eruptionShape.write(region.lat);
@@ -198,7 +205,6 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     eruptionShape.write(region.polarity);
     if (eruptionShape.changed()) {
       frame.eruptionRevision++;
-      const planeCount = contours(outbreak.s, ERUPTION_LINES, planeLines, eruptionState.geometry);
       const used = eruptionLines(region, planeLines, planeCount, arcade);
       eruption.lines.length = used;
       for (let i = 0; i < used; i++) eruption.lines[i] = arcade[i]!;

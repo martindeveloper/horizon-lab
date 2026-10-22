@@ -102,27 +102,55 @@ export function transportAt(
   return out;
 }
 
-const rootSample = blankFluxSample();
-/** Positive x on A=a. A is strictly decreasing with x>0 in this parameter range. */
-export function contourX(y: number, a: number, s: number) {
-  if (fluxAt(0, y, s, rootSample).a <= a) return 0;
+/** Root finding needs only A: its derivatives and electric field belong to transportAt. */
+const axialFlux = (y: number) => {
+  const u = y - 1;
+  return (u * u) / 2 - u ** 3 / 3;
+};
+const fluxWindow = (y: number) => (y > 0 && y < 2 ? Math.sin((Math.PI * y) / 2) ** 4 : 0);
+
+/**
+ * Positive x on A=a. A is strictly decreasing with x>0 in this parameter range, so Newton's
+ * method, kept inside the bracket it narrows, converges in a few steps; a `guess` from the
+ * previous point along the same contour saves most of them.
+ */
+export function contourX(y: number, a: number, s: number, guess = 1) {
+  // y and s stay fixed through the solve; evaluate their contribution once.
+  const axial = axialFlux(y);
+  const transfer = transferredFluxAt(s) * fluxWindow(y);
+  if (axial - transfer <= a) return 0;
+  const sheet = P.fieldGradient * P.sheetWidth;
   let lo = 0;
-  let hi = 1;
-  while (fluxAt(hi, y, s, rootSample).a > a) hi *= 2;
-  for (let i = 0; i < 30; i++) {
-    const mid = (lo + hi) / 2;
-    if (fluxAt(mid, y, s, rootSample).a > a) lo = mid;
-    else hi = mid;
+  let hi = Infinity;
+  let x = guess > 0 ? guess : 1;
+  for (let i = 0; i < 60; i++) {
+    const t = x / P.sheetWidth;
+    const decay = Math.exp(-2 * t);
+    const gauss = Math.exp(-((x / P.fluxWidth) ** 2));
+    const f =
+      axial - sheet * P.sheetWidth * (t + Math.log1p(decay) - Math.LN2) - transfer * gauss - a;
+    if (f > 0) lo = x;
+    else if (f < 0) hi = x;
+    else return x;
+    const slope =
+      -sheet * ((1 - decay) / (1 + decay)) + (transfer * 2 * x * gauss) / P.fluxWidth ** 2;
+    const newton = x - f / slope;
+    const next =
+      slope < 0 && newton > lo && newton < hi ? newton : hi === Infinity ? 2 * x : (lo + hi) / 2;
+    if (Math.abs(next - x) <= 1e-12 * (1 + x)) return next;
+    x = next;
   }
-  return (lo + hi) / 2;
+  return x;
 }
 
 /** An axial intersection, on one monotonic branch of A(0,y). */
 export function contourY(a: number, s: number, lo: number, hi: number) {
-  const rising = fluxAt(0, hi, s, rootSample).a > fluxAt(0, lo, s, rootSample).a;
+  const transfer = transferredFluxAt(s);
+  const at = (y: number) => axialFlux(y) - transfer * fluxWindow(y);
+  const rising = at(hi) > at(lo);
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
-    if (fluxAt(0, mid, s, rootSample).a < a === rising) lo = mid;
+    if (at(mid) < a === rising) lo = mid;
     else hi = mid;
   }
   return (lo + hi) / 2;
