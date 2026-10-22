@@ -401,12 +401,6 @@ html {
     --music-breath: 1;
   }
 }
-/* Loading: first light runs across the arch, east to west, until sound arrives. */
-@media (prefers-reduced-motion: no-preference) {
-  .music-dial[data-loading="true"] .music-dial-halo {
-    animation: music-halo 1.4s ease-in-out infinite alternate;
-  }
-}
 @keyframes music-scan {
   0%,
   70%,
@@ -415,11 +409,6 @@ html {
   }
   35% {
     --music-scan: 1;
-  }
-}
-@keyframes music-halo {
-  from {
-    opacity: 0.2;
   }
 }
 .music-lens {
@@ -434,9 +423,9 @@ html {
   opacity: 0.45;
 }
 
-/* The sun dial: opens beside the waveform while music plays. Each track is an
-   hour on a day arc; a skip carries the sun on over the crossfade, and past
-   the last hour it sets under the horizon and rises in the east. */
+/* The golden record: opens beside the waveform while music plays. Each track is
+   a groove, the first outermost; the disc turns, and a skip lights the next
+   groove in over the crossfade. Hover previews the groove it will light. */
 .music-next {
   display: grid;
   grid-template-columns: 0fr;
@@ -449,53 +438,74 @@ html {
   grid-template-columns: 1fr;
   opacity: 1;
 }
-.music-dial svg * {
-  transform-box: view-box;
-  transform-origin: 14px 15px;
+.music-disc {
+  transform-box: fill-box;
+  transform-origin: center;
 }
-.music-dial-arc {
+.music-disc-face {
+  fill: rgb(var(--solar) / 0.08);
+  stroke: rgb(var(--solar) / 0.4);
+  stroke-width: 0.4;
+}
+:root.light .music-disc-face {
+  fill: rgb(var(--solar) / 0.16);
+}
+.music-groove {
   fill: none;
   stroke: currentColor;
-  stroke-width: 0.75;
-  stroke-dasharray: 0.6 2.2;
-  stroke-linecap: round;
-  opacity: 0.7;
+  stroke-width: 0.35;
+  opacity: 0.35;
+  transition:
+    stroke 2.4s ease,
+    stroke-width 2.4s ease,
+    opacity 2.4s ease;
 }
-.music-dial-horizon {
-  stroke: rgb(var(--solar) / 0.55);
-  stroke-width: 0.75;
+.music-groove[data-current="true"] {
+  stroke: rgb(var(--solar));
+  stroke-width: 0.85;
+  opacity: 1;
 }
-.music-dial-hour {
-  fill: currentColor;
+@media (hover: hover) {
+  .music-record:hover .music-groove[data-next="true"] {
+    stroke: rgb(var(--solar));
+    opacity: 0.6;
+    transition-duration: 450ms;
+  }
+}
+.music-record:focus-visible .music-groove[data-next="true"] {
+  stroke: rgb(var(--solar));
   opacity: 0.6;
+  transition-duration: 450ms;
 }
-.music-dial-orbit {
-  transition: rotate 2.4s cubic-bezier(0.45, 0, 0.2, 1);
-}
-.music-dial-nudge {
-  transition: rotate 450ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.music-dial-sun {
+.music-label {
   fill: rgb(var(--solar));
 }
-.music-dial-halo {
-  fill: rgb(var(--solar) / 0.22);
-  transition: fill 450ms ease;
+.music-label-cut {
+  stroke: var(--color-bg);
+  stroke-width: 0.45;
+  stroke-linecap: round;
 }
-/* Hover leans the sun toward the next hour. */
-@media (hover: hover) {
-  .music-dial:hover .music-dial-nudge {
-    rotate: 7deg;
+@media (prefers-reduced-motion: no-preference) {
+  .music-disc {
+    animation: music-spin 12s linear infinite paused;
   }
-  .music-dial:hover .music-dial-halo {
-    fill: rgb(var(--solar) / 0.34);
+  [data-playing="true"] > .music-disc {
+    animation-play-state: running;
+  }
+  /* Loading: the current groove pulses until sound arrives. */
+  [data-loading="true"] .music-groove[data-current="true"] {
+    animation: music-pulse 1.4s ease-in-out infinite alternate;
   }
 }
-.music-dial:focus-visible .music-dial-nudge {
-  rotate: 7deg;
+@keyframes music-spin {
+  to {
+    rotate: 360deg;
+  }
 }
-:root.light .music-dial-halo {
-  fill: rgb(var(--solar) / 0.3);
+@keyframes music-pulse {
+  from {
+    opacity: 0.3;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 import { Tooltip, cn } from "@horizon/toolkit/ui";
 
@@ -22,17 +22,27 @@ const BARS = [
   [0.16, 0.3, 2.5],
 ] as const;
 
-/** Each track has its hour on the dial: the first rises in the east, the last sets in the west. */
-const SPAN = 110;
+/** The golden record in its 28 × 28 view. Grooves run from the rim inward, one per track. */
+const DISC = { r: 12.5, label: 3.4, outer: 11.3, inner: 5.6 } as const;
+const HUB = 14;
+/** Cuts on the label, the one mark that shows the disc turning. */
+const CUTS = [0, 120, 240];
+
 const TRACKS = ambientMusic.tracks.length;
-const hour = (index: number) => (TRACKS < 2 ? 0 : -SPAN / 2 + (SPAN * index) / (TRACKS - 1));
+const groove = (index: number) =>
+  TRACKS < 2 ? DISC.outer : DISC.outer - ((DISC.outer - DISC.inner) * index) / (TRACKS - 1);
+
+/** Rounded to a hundredth: server and browser trig differ in the last digits, and would not hydrate. */
+const radial = (angle: number, r: number) => {
+  const a = (angle * Math.PI) / 180;
+  const at = (v: number) => Math.round(v * 100) / 100;
+  return { x: at(HUB + r * Math.cos(a)), y: at(HUB + r * Math.sin(a)) };
+};
 
 /**
- * The site's ambient music, built like the header's preference rails. The
- * waveform plays and pauses. Playing, a sun dial opens beside it: each track
- * is an hour on a day arc, and skipping carries the sun on to the next, over
- * the length of the crossfade. Past the last track it sets and rises again.
- * The first track buffers on hover or focus, so a click starts almost at once.
+ * The waveform plays and pauses. Playing, a golden record opens beside it: each
+ * track is a groove, the first outermost, and a click lights the next one.
+ * Prebuffers on hover or focus.
  */
 export function MusicToggle({ className }: { className?: string }) {
   const t = useTranslations("shell");
@@ -47,14 +57,9 @@ export function MusicToggle({ className }: { className?: string }) {
   );
   useEffect(() => ambientMusic.resumeOnInteraction(() => ref.current), []);
 
-  // Turns of the dial: wrapping to the first track goes on round, under the horizon.
-  const [dial, setDial] = useState({ track, days: 0 });
-  if (dial.track !== track) setDial({ track, days: dial.days + (track < dial.track ? 1 : 0) });
-  const angle = hour(track) + dial.days * 360;
-
   const label = playing ? t("pauseMusic") : t("playMusic");
-  const upcoming = ambientMusic.tracks[(track + 1) % TRACKS]!;
-  const nextLabel = t("nextTrack", { title: upcoming.title });
+  const next = (track + 1) % TRACKS;
+  const nextLabel = t("nextTrack", { title: ambientMusic.tracks[next]!.title });
   const skippable = TRACKS > 1;
 
   return (
@@ -116,35 +121,44 @@ export function MusicToggle({ className }: { className?: string }) {
                   type="button"
                   aria-label={nextLabel}
                   aria-busy={loading}
-                  data-loading={loading}
                   onClick={ambientMusic.next}
-                  className="music-dial group relative ml-0.5 flex h-7 w-10 items-center justify-center rounded-full text-subtle transition-colors duration-500 after:absolute after:-inset-y-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                  className="music-record relative ml-0.5 flex h-7 w-8 items-center justify-center rounded-full text-subtle transition-colors duration-500 after:absolute after:-inset-y-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                 >
-                  <svg viewBox="0 0 28 18" className="h-[18px] w-7 overflow-visible" aria-hidden>
-                    <defs>
-                      <clipPath id="music-dial-sky">
-                        <rect x="-4" y="-4" width="36" height="19" />
-                      </clipPath>
-                    </defs>
-                    <path className="music-dial-arc" d="M4 15A10 10 0 0 1 24 15" />
-                    <path className="music-dial-horizon" d="M1 15H27" />
-                    {ambientMusic.tracks.map((item, i) => (
-                      <circle
-                        key={item.title}
-                        className="music-dial-hour"
-                        cx="14"
-                        cy="5"
-                        r="0.9"
-                        style={{ rotate: `${hour(i)}deg` }}
-                      />
-                    ))}
-                    <g clipPath="url(#music-dial-sky)">
-                      <g className="music-dial-orbit" style={{ rotate: `${angle}deg` }}>
-                        <g className="music-dial-nudge">
-                          <circle className="music-dial-halo" cx="14" cy="5" r="4" />
-                          <circle className="music-dial-sun" cx="14" cy="5" r="2.1" />
-                        </g>
-                      </g>
+                  <svg
+                    viewBox="0 0 28 28"
+                    data-playing={playing}
+                    data-loading={loading}
+                    className="size-7"
+                    aria-hidden
+                  >
+                    <g className="music-disc">
+                      <circle className="music-disc-face" cx={HUB} cy={HUB} r={DISC.r} />
+                      {ambientMusic.tracks.map((item, i) => (
+                        <circle
+                          key={item.title}
+                          className="music-groove"
+                          data-current={i === track}
+                          data-next={i === next}
+                          cx={HUB}
+                          cy={HUB}
+                          r={groove(i)}
+                        />
+                      ))}
+                      <circle className="music-label" cx={HUB} cy={HUB} r={DISC.label} />
+                      {CUTS.map((angle) => {
+                        const from = radial(angle, DISC.label * 0.35);
+                        const to = radial(angle, DISC.label * 0.8);
+                        return (
+                          <line
+                            key={angle}
+                            className="music-label-cut"
+                            x1={from.x}
+                            y1={from.y}
+                            x2={to.x}
+                            y2={to.y}
+                          />
+                        );
+                      })}
                     </g>
                   </svg>
                 </button>
