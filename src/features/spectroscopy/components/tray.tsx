@@ -61,7 +61,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
                   aria-pressed={i === active}
                   onClick={() => go(i)}
                   className={cn(
-                    "relative h-9 rounded-full px-3.5 text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+                    "relative h-9 rounded-full px-3.5 text-xs transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
                     "after:absolute after:inset-x-0 after:-inset-y-1",
                     i === active ? "bg-fg/10 font-medium text-fg" : "text-muted",
                   )}
@@ -80,7 +80,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
           setActive(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
           fit();
         }}
-        className="no-scrollbar -mx-3.5 flex h-(--tray-height,auto) snap-x snap-mandatory items-start overflow-x-auto overflow-y-hidden overscroll-x-contain transition-[height] duration-300 ease-out motion-reduce:transition-none md:mx-0 md:grid md:h-auto md:grid-cols-12 md:items-stretch md:gap-3 md:overflow-visible"
+        className="no-scrollbar -mx-3.5 flex h-(--tray-height,auto) snap-x snap-mandatory items-start overflow-x-auto overflow-y-hidden overscroll-x-contain transition-[height] duration-control ease-enter motion-reduce:transition-none md:mx-0 md:grid md:h-auto md:grid-cols-12 md:items-stretch md:gap-3 md:overflow-visible"
       >
         {panels.map((panel) => (
           <section

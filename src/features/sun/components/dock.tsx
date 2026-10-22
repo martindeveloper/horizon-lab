@@ -314,7 +314,7 @@ export function SunDock() {
     <Dock
       ref={surface}
       footerClassName={cn(aside && "not-md:hidden")}
-      className="anim-rise flex flex-col gap-2"
+      className="flex anim-rise flex-col gap-2"
     >
       <div className={ROWS_CLASS}>
         <PlaceStrip className={cn(ROW_CLASS, "short:hidden")} />

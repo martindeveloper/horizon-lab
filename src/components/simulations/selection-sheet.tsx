@@ -39,7 +39,7 @@ export function SelectionSheet({
     <article
       ref={root}
       tabIndex={-1}
-      className="glass-panel anim-sheet md:anim-rail pointer-events-auto absolute inset-x-0 bottom-0 z-40 flex max-h-[min(24rem,46dvh)] flex-col overflow-hidden rounded-t-xl outline-hidden md:inset-x-auto md:top-14 md:right-(--hud-gutter) md:bottom-auto md:max-h-[calc(100%-3.5rem-var(--hud-clear,5.5rem))] md:w-80 md:rounded-lg"
+      className="glass-panel pointer-events-auto absolute inset-x-0 bottom-0 z-40 flex max-h-[min(24rem,46dvh)] anim-sheet flex-col overflow-hidden rounded-t-xl outline-hidden md:inset-x-auto md:top-14 md:right-(--hud-gutter) md:bottom-auto md:max-h-[calc(100%-3.5rem-var(--hud-clear,5.5rem))] md:w-80 md:anim-rail md:rounded-lg"
       aria-label={card.title}
     >
       <PanelHeader

@@ -10,7 +10,7 @@ outside this package.
 | Import                               | Owns                                                                                                                                           | Runtime dependencies                                      |
 | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `@horizon/toolkit/ui`                | Controls, surfaces, equations, loading, dialogs, technical documents                                                                           | React; Radix Slider; Lucide; class utilities              |
-| `@horizon/toolkit/ui/motion`         | `TextReveal`, `textStagger`                                                                                                                    | React, Motion                                             |
+| `@horizon/toolkit/ui/motion`         | `TextReveal`, `textStagger`                                                                                                                    | React                                                     |
 | `@horizon/toolkit/math`              | Clamp, wrap, easing, log sliders, seeded random, CPU value noise, `Vec3` tuple helpers                                                         | None                                                      |
 | `@horizon/toolkit/science`           | Constants, units, equations, readouts, Julian dates, sky coordinates, spectra, colour, periodic table                                          | None                                                      |
 | `@horizon/toolkit/camera`            | Camera snapshots, screen projection, orbit and flight input, free poses and matrices, flight interpolation, views                              | DOM only when creating input controls                     |
@@ -74,7 +74,7 @@ not a precompiled Node.js library. It has not been published to a registry.
 Create a local tarball with `npm pack --workspace @horizon/toolkit` and install
 that tarball in another project, or copy the workspace package. No app directory
 is needed. Install the optional peers used by your entry points: React/React DOM
-and Radix Slider for UI, Motion for animated text, and Three.js for rendering.
+and Radix Slider for UI, and Three.js for rendering. Animated text uses CSS.
 Separate entry points keep those runtimes out of math-only application bundles.
 TypeScript consumers also need the relevant `@types/react`, `@types/react-dom`
 and `@types/three` packages for the entry points they use.
@@ -144,7 +144,8 @@ agreement, camera independence, pointer transitions, frame lifecycle, cleanup,
 shader assembly and package boundaries. `tests/music.test.mjs`,
 `tests/storage.test.mjs`, `tests/toolkit-worker.test.mjs`, `tests/bench*.test.mjs` and
 `tests/bodies.test.mjs` (with `astronomy`, `sky`, `maps` and `moon-maps`) cover audio,
-storage, workers, bench and bodies. The UI components have no unit tests; `tests/i18n-theme.test.mjs`
+storage, workers, bench and bodies. `tests/ui-motion.test.mjs` covers exit completion/cancellation, CSS timing reads and HUD readiness;
+`tests/i18n-theme.test.mjs`
 checks their theme contrast. Bundle tests ensure the catalogue does not load
 WebGL or feature shaders. These are code/build checks, not GPU render or
 browser interaction tests.

@@ -26,9 +26,9 @@ export function StatusBadge({ label, visible, icon, accent, delayed, className }
       </span>
       <span
         className={cn(
-          "glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-opacity duration-500",
+          "glass-pill inline-flex h-8 items-center gap-2 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-opacity duration-reveal ease-standard",
           accent ? "text-solar" : "text-space-fg",
-          visible ? cn("opacity-100", delayed && "delay-500") : "opacity-0",
+          visible ? cn("opacity-100", delayed && "delay-(--loading-reveal-delay)") : "opacity-0",
         )}
         aria-hidden="true"
       >

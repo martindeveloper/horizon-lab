@@ -326,7 +326,7 @@ export function Hotspots() {
             <span
               ref={youRef}
               aria-hidden
-              className="absolute top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-solar shadow-[0_0_10px_var(--color-solar)] transition-opacity duration-500"
+              className="absolute top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-solar shadow-[0_0_10px_var(--color-solar)] transition-opacity duration-reveal ease-standard"
               style={{ left: RAIL_X, opacity: railH > 0 ? 1 : 0 }}
             />
             {railH > 0
@@ -349,7 +349,7 @@ export function Hotspots() {
                       onBlur={() => setHover(null)}
                       style={{ top: labelY[i] }}
                       className={cn(
-                        "gauge-label pointer-events-auto absolute left-5 flex h-11 max-w-[calc(100%-1.25rem)] min-w-11 -translate-y-1/2 items-center gap-2 rounded-sm px-1 font-mono text-[0.6875rem] tracking-widest uppercase outline-hidden transition-[color,top] duration-500 focus-visible:ring-1 focus-visible:ring-ring",
+                        "gauge-label pointer-events-auto absolute left-5 flex h-11 max-w-[calc(100%-1.25rem)] min-w-11 -translate-y-1/2 items-center gap-2 rounded-sm px-1 font-mono text-[0.6875rem] tracking-widest uppercase outline-hidden transition-[color,top] duration-reveal ease-standard focus-visible:ring-1 focus-visible:ring-ring",
                         lit ? "text-space-fg" : "text-space-muted hover:text-space-fg",
                       )}
                     >
@@ -369,7 +369,7 @@ export function Hotspots() {
         <aside
           ref={cardRef}
           aria-label={labels[active]}
-          className="pin-card lesson-card no-scrollbar anim-rise pointer-events-auto absolute z-[55] hidden overflow-y-auto rounded-lg p-4 md:block"
+          className="pin-card lesson-card no-scrollbar pointer-events-auto absolute z-[55] hidden anim-rise overflow-y-auto rounded-lg p-4 md:block"
         >
           <PinFocus key={active}>
             <PinLesson id={active} spin={spin} onClose={() => setActivePin(null)} />

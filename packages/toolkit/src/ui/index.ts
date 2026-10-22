@@ -48,6 +48,13 @@ export {
   subscribeImmersive,
 } from "./immersive-state";
 export { cn } from "./utils";
+export {
+  afterMotion,
+  controlSpring,
+  uiMotion,
+  type MotionDuration,
+  type MotionEase,
+} from "./motion";
 export { isSceneShortcut } from "./keyboard";
 export { useFocusHandoff } from "./focus";
 export { useMediaQuery } from "./media-query";

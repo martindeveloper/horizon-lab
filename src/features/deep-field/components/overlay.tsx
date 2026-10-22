@@ -59,10 +59,7 @@ export function DeepFieldOverlay() {
   useGuideKeys(useDeepField.getState, guideKeys);
 
   return (
-    <VisualizationOverlay
-      className={cn("transition-opacity duration-500", ready ? "opacity-100" : "opacity-0")}
-      inert={!ready}
-    >
+    <VisualizationOverlay ready={ready}>
       {guideOpen ? (
         <DeepFieldGuide />
       ) : (

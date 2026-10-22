@@ -142,10 +142,7 @@ export function ObservatoryOverlay() {
   }
 
   return (
-    <VisualizationOverlay
-      className={cn("transition-opacity duration-500", skyReady ? "opacity-100" : "opacity-0")}
-      inert={!skyReady}
-    >
+    <VisualizationOverlay ready={skyReady}>
       {guideOpen ? <GuideOverlay /> : null}
       {mapOpen ? <AtlasOverlay /> : null}
       {guideOpen || mapOpen ? <h1 className="sr-only">{holeName}</h1> : null}

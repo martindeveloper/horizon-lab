@@ -73,7 +73,7 @@ export function SceneMoreMenu({
           id={id}
           role="group"
           aria-label={label}
-          className="glass-popover anim-fade absolute top-[calc(100%+0.75rem)] right-0 z-[70] w-56 max-w-[calc(100vw-2rem)] rounded-lg p-1.5"
+          className="glass-popover absolute top-[calc(100%+0.75rem)] right-0 z-[70] w-56 max-w-[calc(100vw-2rem)] anim-fade rounded-lg p-1.5"
         >
           {items.map(({ id: key, label: name, icon: Icon, onSelect, active }) => (
             <ListItem

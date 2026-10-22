@@ -62,7 +62,7 @@ export function PhoneMenu({
         aria-expanded={open}
         aria-controls={open ? id : undefined}
         onClick={() => setOpenOn(open ? null : pathname)}
-        className="flex size-11 items-center justify-center rounded-full text-muted transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg"
+        className="flex size-11 items-center justify-center rounded-full text-muted transition-colors duration-feedback ease-standard hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg"
       >
         {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
       </button>
@@ -71,7 +71,7 @@ export function PhoneMenu({
         <>
           <div
             aria-hidden
-            className="phone-menu-scrim anim-fade absolute inset-x-0 top-full h-dvh"
+            className="phone-menu-scrim absolute inset-x-0 top-full h-dvh anim-fade"
             onClick={close}
           />
           <nav
@@ -97,7 +97,7 @@ export function PhoneMenu({
                                 prefetch={false}
                                 aria-current={here ? "page" : undefined}
                                 onClick={close}
-                                className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                                className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                               >
                                 <span className="min-w-0">
                                   <span className="block text-[15px] font-medium tracking-tight text-fg">

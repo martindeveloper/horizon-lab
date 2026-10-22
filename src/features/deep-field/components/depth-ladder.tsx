@@ -88,7 +88,7 @@ export function DepthLadder() {
           to="orrery"
           view={isSolarView(view) ? view : "oort"}
           aria-label={t("hud.backInTime")}
-          className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors duration-feedback ease-standard hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           <History className="size-4" aria-hidden />
         </HandoffLink>
@@ -123,7 +123,7 @@ export function DepthLadder() {
           <SliderPrimitive.Thumb
             aria-label={t("hud.depth")}
             aria-valuetext={valueText}
-            className="block size-3.5 rounded-full bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+            className="block size-3.5 rounded-full bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
           />
         </SliderPrimitive.Root>
         {/* Rungs beside the track: a tick each, named when current or pointed at. Phones name the
@@ -145,14 +145,14 @@ export function DepthLadder() {
           >
             <span
               className={cn(
-                "block bg-space-fg/40 transition-colors group-hover:bg-space-fg",
+                "block bg-space-fg/40 transition-colors duration-feedback ease-standard group-hover:bg-space-fg",
                 wide ? "h-px w-2" : "h-2 w-px",
                 i === current && "bg-accent",
               )}
             />
             <span
               className={cn(
-                "deep-field-rung relative font-mono text-[10px] tracking-[0.14em] whitespace-nowrap uppercase transition-opacity",
+                "deep-field-rung relative font-mono text-[10px] tracking-[0.14em] whitespace-nowrap uppercase transition-opacity duration-feedback ease-standard",
                 i === current
                   ? "text-space-fg opacity-100"
                   : "text-space-muted opacity-0 group-hover:opacity-100",

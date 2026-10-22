@@ -105,7 +105,7 @@ export function Picker({
         <ChevronDown
           aria-hidden
           className={cn(
-            "size-3.5 shrink-0 text-subtle transition-transform duration-200",
+            "size-3.5 shrink-0 text-subtle transition-transform duration-control ease-standard",
             open && "rotate-180",
           )}
         />
@@ -116,7 +116,7 @@ export function Picker({
           role="group"
           aria-label={ariaLabel}
           className={cn(
-            "glass-popover anim-fade absolute top-[calc(100%+0.5rem)] left-0 z-[70] max-h-[calc(100dvh-10rem)] w-[20rem] max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-lg p-3",
+            "glass-popover absolute top-[calc(100%+0.5rem)] left-0 z-[70] max-h-[calc(100dvh-10rem)] w-[20rem] max-w-[calc(100vw-2rem)] anim-fade overflow-y-auto overscroll-contain rounded-lg p-3",
             panelClassName,
           )}
         >

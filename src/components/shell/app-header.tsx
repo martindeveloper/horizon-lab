@@ -67,7 +67,7 @@ export function AppHeader() {
         <Link
           href={PAGE_URLS.home}
           prefetch={false}
-          className="glass-pill relative hidden h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-fg/90 transition-colors after:absolute after:-inset-1.5 hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:inline-flex"
+          className="glass-pill relative hidden h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-fg/90 transition-colors duration-feedback ease-standard after:absolute after:-inset-1.5 hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:inline-flex"
         >
           <ArrowLeft className="size-3.5" aria-hidden />
           {t("shell.catalogue")}

@@ -12,7 +12,7 @@ import {
 } from "react";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { Action, IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
+import { Action, IconButton, Tooltip, cn, uiMotion } from "@horizon/toolkit/ui";
 
 export type GuideControls = {
   /** Back a step; `disabled` on the first keeps focus where it is (aria-disabled). */
@@ -128,7 +128,7 @@ export function GuideCard({
         ref={cardRef}
         aria-label={label}
         style={VEIL}
-        className="glass glass-edge anim-rise pointer-events-auto relative mx-auto flex max-w-xl flex-col items-center rounded-xl px-4 pt-3.5 pb-3 text-center md:px-6 md:pt-5 md:pb-4 short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
+        className="glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-4 pt-3.5 pb-3 text-center md:px-6 md:pt-5 md:pb-4 short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
       >
         <p className="font-mono text-[10px] tracking-[0.14em] text-subtle uppercase tabular-nums">
           {kicker}
@@ -232,7 +232,7 @@ function leaveBehind(node: HTMLElement) {
             { opacity: 1, transform: "none" },
             { opacity: 0, transform: "translateY(10px) scale(0.985)" },
           ],
-      { duration: still ? 160 : 320, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
+      { ...uiMotion(card, "control", "exit"), fill: "forwards" },
     );
     if (!leave) return ghost.remove();
     leave.finished.then(
@@ -256,7 +256,7 @@ function GuideSegments({ step, total, hold }: GuideProgress) {
               style={
                 hold
                   ? { animationDuration: `${hold.seconds}s`, animationTimingFunction: "linear" }
-                  : { animationDuration: "0.6s", animationTimingFunction: "ease-out" }
+                  : undefined
               }
             />
           ) : null}

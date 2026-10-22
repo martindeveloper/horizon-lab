@@ -23,7 +23,7 @@ export function Chip({ selected = false, className, type = "button", ...props }:
     <button
       type={type}
       className={cn(
-        "inline-flex h-11 items-center justify-center gap-2 rounded-full px-3 text-xs tracking-wide transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8",
+        "inline-flex h-11 items-center justify-center gap-2 rounded-full px-3 text-xs tracking-wide transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8",
         selected ? "glass-hud font-medium text-fg" : outlineClass,
         className,
       )}

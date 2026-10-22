@@ -59,7 +59,7 @@ function LabPanel({ simulation, t }: TileProps) {
           <Link
             href={simulation.href}
             prefetch={false}
-            className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:translate-x-0.5"
+            className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-control motion-safe:ease-enter motion-safe:group-hover:translate-x-0.5"
           >
             {t(`${key}.open`)}
             <ArrowUpRight className="size-4" aria-hidden />
@@ -72,7 +72,7 @@ function LabPanel({ simulation, t }: TileProps) {
                     <Link
                       href={entry.href}
                       prefetch={false}
-                      className="inline-flex min-h-11 items-baseline gap-2 rounded-sm py-3 text-sm text-muted transition-colors hover:text-fg focus-visible:text-fg focus-visible:underline focus-visible:decoration-accent focus-visible:decoration-2 focus-visible:underline-offset-4 focus-visible:outline-hidden"
+                      className="inline-flex min-h-11 items-baseline gap-2 rounded-sm py-3 text-sm text-muted transition-colors duration-feedback ease-standard hover:text-fg focus-visible:text-fg focus-visible:underline focus-visible:decoration-accent focus-visible:decoration-2 focus-visible:underline-offset-4 focus-visible:outline-hidden"
                     >
                       <span className="font-mono text-[10px] text-accent tabular-nums" aria-hidden>
                         {String(entryIndex + 1).padStart(2, "0")}
@@ -139,7 +139,7 @@ function ExperienceCopy({ simulation, t }: TileProps) {
                 <Link
                   href={entry.href}
                   prefetch={false}
-                  className="experience-stop pointer-events-auto inline-flex min-h-11 flex-col gap-3 rounded-sm text-sm text-space-muted transition-colors hover:text-space-fg focus-visible:text-space-fg focus-visible:outline-hidden"
+                  className="experience-stop pointer-events-auto inline-flex min-h-11 flex-col gap-3 rounded-sm text-sm text-space-muted transition-colors duration-feedback ease-standard hover:text-space-fg focus-visible:text-space-fg focus-visible:outline-hidden"
                 >
                   <span className="experience-stop-mark size-2.5 rounded-full" aria-hidden />
                   {t(`${key}.entryPoints.${entry.id}.title`)}

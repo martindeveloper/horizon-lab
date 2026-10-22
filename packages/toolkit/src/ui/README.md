@@ -15,8 +15,12 @@ catalogue and `examples/visualization-example.tsx` for composition.
   while `triggerClassName` hides its own button; the dialog stays mounted.
 - `Equation`, `Sub`: semantic text styling, not a LaTeX parser or equation solver.
 - `LoadingScreen`: stateless loading content. `LoadingOverlay` fades supplied
-  children after `ready`, unmounts them after `exitDelayMs` (default 560 ms), and
-  resets when readiness becomes false. Its opacity transition lasts 500 ms.
+  children after `ready` and unmounts them when the reveal transition finishes;
+  optional `exitDelayMs` supplies a minimum hold. It resets when readiness becomes
+  false, cancelling the previous exit. Reduced motion completes without an artificial wait.
+- `VisualizationOverlay`: `ready` defaults to true. When false, the HUD fades out
+  using the reveal timing and becomes inert immediately; callers supply readiness
+  without exposing their scene state to the toolkit.
 - `StatusBadge`: a quiet glass pill (`label`, `visible`, optional `icon`, `accent`, `delayed`)
   that announces a state politely as it begins and keeps its place while hidden, so nothing
   moves. `LoadingBadge` is one for detail that streams in after the scene is up: the house
@@ -24,7 +28,7 @@ catalogue and `examples/visualization-example.tsx` for composition.
 - `useMediaQuery(query, serverValue = false)`: whether a media query (the environment
   module's `WIDE_QUERY`, `REDUCED_MOTION_QUERY`, …) matches, live; the server sees `serverValue`.
 - `ImmersiveScene`, `ImmersiveToggle`, `useImmersive`: one page-wide immersive
-  view. The scene fades its children out over 440 ms before unmounting them,
+  view. The scene fades its children out over the reveal timing before unmounting them,
   makes hidden controls inert immediately, and eases them back in on exit.
   HUD rows slide gently toward the edges; the exit control arrives after the HUD
   starts clearing. Only UI opacity and translation animate, never canvas sizing.
@@ -78,8 +82,45 @@ catalogue and `examples/visualization-example.tsx` for composition.
   gets it back. It reads the page a frame at a time only while mounted. `coach-model.ts` holds the
   arithmetic: `playCues` runs a step's cues (`{ at, run }`, seconds) on a clock and returns their
   stop; `placeCoach` picks the callout's place and `coachLeader` the leader's ends.
-- `TextReveal` lives at `@horizon/toolkit/ui/motion` to keep Motion optional.
-  Reduced motion and `instant` render full text immediately.
+- `TextReveal` keeps its `@horizon/toolkit/ui/motion` entry point, using CSS for
+  each letter's fade. Its reading cadence and total stagger cap are independent of
+  the control fade duration. Reduced motion and `instant` render full text immediately.
+
+## Motion
+
+`theme.css` owns the four UI durations: `feedback` (150 ms), `control` (300 ms),
+`reveal` (500 ms) and `scene` (800 ms). Use `duration-feedback`, `duration-control`,
+`duration-reveal` and `duration-scene` in Tailwind; CSS uses the corresponding
+`--transition-duration-<name>` properties. The easing tokens/utilities are
+`--ease-standard` / `ease-standard`, `--ease-enter` / `ease-enter`, and
+`--ease-exit` / `ease-exit`. `--motion-stagger` is the 60 ms step for short lists.
+
+`anim-rise`, `anim-sheet` and `anim-rail` are responsive Tailwind utilities over
+one `anim-enter` keyframe, with `--enter-from` supplying the starting transform.
+Features can use that same keyframe with their own starting transform, duration
+and stagger. It ends at the element's own opacity and transform. `anim-fade`
+is a control-duration opacity entrance. The shared reduced-motion rule removes
+decorative delays as well as movement.
+
+`uiMotion(element, duration, ease = "standard")` reads the mounted element's CSS
+tokens for Web Animations (milliseconds or seconds), respecting reduced motion;
+it returns `{duration, easing}`. Missing tokens produce immediate motion. It does
+not read browser state at import or render time. `controlSpring` names the header's
+responsive spring independently of fixed-duration transitions; it needs no Motion import.
+
+`afterMotion(element, onFinish, minimumMs = 0)` waits for the element's current
+finite animations/transitions, including delays, and returns a cancellation function.
+Use that as effect cleanup so reopening a view cancels its previous removal. It ignores
+descendant and infinite animations, settles cancellation as well as completion, and
+finishes asynchronously when there is no animation. `minimumMs` is an optional hold,
+not an estimate of the animation length. Loading, immersive HUDs and cinematic veils
+use completion rather than separately maintained removal timers.
+
+The shell and immersive HUD share `--immersive-enter`, `--immersive-exit`,
+`--immersive-step` and `--immersive-controls-delay`. Keep cinematic timelines,
+ambient loops, spring/damping constants, live-readout interpolation and simulation
+clocks outside the four-duration scale. Waiting before a tooltip/loading badge
+appears is also separate (`--tooltip-wait`, `--loading-reveal-delay`).
 
 Import `theme.css` for Tailwind v4 tokens and `styles.css` for glass materials,
 safe-area helpers and animations. HUD helpers pad their sides by `--hud-gutter`

@@ -7,6 +7,15 @@
 
 /* Shared tokens also support utilities compiled by individual simulations. */
 @theme static {
+  /* Ordinary UI motion. Cinematic timelines and simulation clocks keep their own timing. */
+  --transition-duration-feedback: 150ms;
+  --transition-duration-control: 300ms;
+  --transition-duration-reveal: 500ms;
+  --transition-duration-scene: 800ms;
+  --ease-standard: ease;
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* The variable (Fontsource) family first, then the static one if a host loads that. */
   --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
@@ -47,6 +56,15 @@
 }
 
 :root {
+  --motion-stagger: 60ms;
+  /* Waiting before showing information is separate from the transition itself. */
+  --tooltip-wait: 280ms;
+  --loading-reveal-delay: 500ms;
+  /* Shared by the shell bars, scene HUD and immersive controls. */
+  --immersive-enter: var(--transition-duration-scene);
+  --immersive-exit: var(--transition-duration-reveal);
+  --immersive-step: var(--motion-stagger);
+  --immersive-controls-delay: var(--transition-duration-feedback);
   /* Solar accent as an RGB triple for gradients, glows, and hairlines. */
   --solar: 226 192 122;
   --sky-glow: 0;

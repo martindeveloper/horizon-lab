@@ -562,7 +562,7 @@
   width: 22px;
   height: 22px;
   opacity: 0;
-  transition: opacity 180ms ease;
+  transition: opacity var(--transition-duration-feedback) var(--ease-standard);
   filter: var(--voyage-glow);
   will-change: transform;
 }
@@ -671,7 +671,7 @@
     transparent 70%
   );
   opacity: 0;
-  transition: opacity 320ms ease;
+  transition: opacity var(--transition-duration-control) var(--ease-standard);
 }
 :where([data-simulation="voyage"]) .voyage-cockpit[data-burn] .voyage-burn {
   opacity: 1;
@@ -789,7 +789,7 @@
 }
 :where([data-simulation="voyage"]) .voyage-hud[data-crashed] {
   opacity: 0.3;
-  transition: opacity 400ms ease;
+  transition: opacity var(--transition-duration-reveal) var(--ease-standard);
 }
 :where([data-simulation="voyage"]) .voyage-holo-danger {
   --holo-line: color-mix(in oklab, var(--color-danger) 75%, transparent);

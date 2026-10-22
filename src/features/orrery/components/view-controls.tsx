@@ -82,11 +82,11 @@ export function EdgeChip() {
   const atEdge = useOrrery((s) => !s.closeUp && s.viewDist >= ORRERY_EDGE * 0.8);
   if (!atEdge) return null;
   return (
-    <div className="anim-fade pointer-events-none absolute inset-x-0 top-16 z-30 flex justify-center md:top-20">
+    <div className="pointer-events-none absolute inset-x-0 top-16 z-30 flex anim-fade justify-center md:top-20">
       <HandoffLink
         to="deep-field"
         view="oort"
-        className="glass-hud pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full px-4 text-xs tracking-wide text-fg transition-colors hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
+        className="glass-hud pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full px-4 text-xs tracking-wide text-fg transition-colors duration-feedback ease-standard hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
       >
         {t("hud.keepGoing")}
         <ArrowUpRight className="size-3.5 text-accent" aria-hidden />

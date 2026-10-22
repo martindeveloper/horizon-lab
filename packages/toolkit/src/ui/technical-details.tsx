@@ -49,7 +49,7 @@ export function TechnicalDetails({
         title={labels.open}
         onClick={() => dialog.current?.open()}
         className={cn(
-          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-xs text-muted transition-colors not-md:after:absolute not-md:after:-inset-1 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
+          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-xs text-muted transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
           triggerClassName,
         )}
       >

@@ -35,8 +35,8 @@
     0 1px 8px rgb(8 8 11 / 0.9);
   pointer-events: auto;
   transition:
-    opacity 0.3s ease,
-    color 0.3s ease;
+    opacity var(--transition-duration-control) var(--ease-standard),
+    color var(--transition-duration-feedback) var(--ease-standard);
   will-change: transform;
 }
 :where([data-simulation="giants"]) .giants-label[data-shown="false"] {
@@ -113,7 +113,7 @@
   left: 100%;
   width: var(--leader, 0);
   border-top: 1px dotted color-mix(in srgb, var(--color-space-muted) 45%, transparent);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-duration-feedback) var(--ease-standard);
 }
 
 /* The overview's radius axis (`overview-scale.tsx`): faint gold gridlines up from the horizon,
@@ -123,7 +123,7 @@
   position: absolute;
   inset-inline: 0;
   pointer-events: none;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--transition-duration-reveal) var(--ease-standard);
 }
 :where([data-simulation="giants"]) .giants-scale[data-shown="false"] {
   opacity: 0;
@@ -168,7 +168,7 @@
   border: 1px solid var(--color-solar);
   border-radius: 999px;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-duration-control) var(--ease-standard);
   will-change: transform;
 }
 :where([data-simulation="giants"]) .giants-marker[data-shown="false"] {

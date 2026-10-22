@@ -29,7 +29,7 @@ export function ScaleBar({ text, px, label, onScene = false, className }: ScaleB
         <span
           aria-hidden
           className={cn(
-            "h-1.5 border-x border-b transition-[width] duration-300",
+            "h-1.5 border-x border-b transition-[width] duration-control ease-standard",
             onScene ? "border-space-fg/50" : "border-fg/50",
           )}
           style={{ width: px }}

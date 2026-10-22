@@ -17,14 +17,14 @@ export function SwitchMark({ on, size = "md" }: { on: boolean; size?: "sm" | "md
     <span
       aria-hidden
       className={cn(
-        "relative shrink-0 rounded-full transition-colors duration-300",
+        "relative shrink-0 rounded-full transition-colors duration-control ease-standard",
         small ? "h-3 w-5" : "h-4 w-7",
         on ? "bg-action" : "bg-fg/15",
       )}
     >
       <span
         className={cn(
-          "absolute top-0.5 left-0.5 rounded-full transition-[translate,background-color] duration-300",
+          "absolute top-0.5 left-0.5 rounded-full transition-[translate,background-color] duration-control ease-standard",
           small ? "size-2" : "size-3",
           on ? cn("bg-action-fg", small ? "translate-x-2" : "translate-x-3") : "bg-fg/60",
         )}

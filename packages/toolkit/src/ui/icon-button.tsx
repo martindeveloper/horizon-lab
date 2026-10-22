@@ -20,7 +20,7 @@ export function IconButton({
     <button
       type={type}
       className={cn(
-        "relative flex size-9 items-center justify-center rounded-full transition-colors duration-200 not-md:after:absolute not-md:after:-inset-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-8",
+        "relative flex size-9 items-center justify-center rounded-full transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-8",
         active ? "bg-fg/10 text-fg" : "text-fg/80 hover:text-fg",
         className,
       )}

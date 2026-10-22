@@ -104,7 +104,7 @@ function ElementTiles({
             /* A cell of the periodic table: atomic number in the corner, the symbol large, the
                name and atomic weight beneath. */
             className={cn(
-              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-md transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-md transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
               "md:aspect-square md:h-auto md:max-h-24 md:gap-1 md:px-1.5 md:pt-3.5 md:pb-1.5",
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */
@@ -603,7 +603,7 @@ export function SpectroscopyDock() {
       footerClassName={cn(aside && "not-md:hidden")}
       /* On a desktop the tray spans the stage, as the spectrum does; on phones the dock stops
          short of the spectrum and scrolls instead. */
-      className="anim-rise scroll-thin flex max-h-[50dvh] flex-col gap-2.5 overflow-x-hidden overflow-y-auto overscroll-contain md:max-h-none md:max-w-none md:gap-3 md:overflow-visible short:max-h-[42dvh]"
+      className="scroll-thin flex max-h-[50dvh] anim-rise flex-col gap-2.5 overflow-x-hidden overflow-y-auto overscroll-contain md:max-h-none md:max-w-none md:gap-3 md:overflow-visible short:max-h-[42dvh]"
     >
       {view === "kirchhoff" ? (
         <BenchControls />

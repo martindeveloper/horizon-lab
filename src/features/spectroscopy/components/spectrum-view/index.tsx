@@ -169,7 +169,7 @@ export function SpectrumView({ className }: { className?: string }) {
                 left: `${l.x * 100}%`,
                 translate: l.x < 0.05 ? "0" : l.x > 0.95 ? "-100%" : "-50%",
               }}
-              className="anim-fade absolute rounded-sm bg-space/80 px-1 whitespace-nowrap text-solar"
+              className="absolute anim-fade rounded-sm bg-space/80 px-1 whitespace-nowrap text-solar"
             >
               {l.text}
             </span>
@@ -301,7 +301,7 @@ export function SpectrumView({ className }: { className?: string }) {
                 key={line.id}
                 style={{ left: `${x * 100}%`, opacity: weight }}
                 className={cn(
-                  "absolute inset-y-0 w-px transition-opacity duration-300",
+                  "absolute inset-y-0 w-px transition-opacity duration-control ease-standard",
                   line.element === previewing
                     ? "bg-[repeating-linear-gradient(to_bottom,rgb(var(--solar))_0_3px,transparent_3px_6px)]"
                     : "bg-solar",

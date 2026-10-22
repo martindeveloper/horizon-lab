@@ -110,7 +110,11 @@ export function ExperienceMenu({
           onClick={() => setOpen(!open)}
         >
           <Telescope
-            className={cn(icon, "transition-transform duration-300", open && "-rotate-12")}
+            className={cn(
+              icon,
+              "transition-transform duration-control ease-standard",
+              open && "-rotate-12",
+            )}
           />
         </IconButton>
       </Tooltip>

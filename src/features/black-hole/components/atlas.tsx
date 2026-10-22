@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useRef, useState } from "react";
 
@@ -154,7 +153,6 @@ export function AtlasOverlay() {
   const presetId = useBlackHole((s) => s.presetId);
   const selectHole = useSelectHole();
   const setMapOpen = useBlackHole((s) => s.setMapOpen);
-  const reduce = useReducedMotion();
   const [inspect, setInspect] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const selected = atlasFor(inspect ?? "") ?? ATLAS.find((s) => s.preset === presetId) ?? ATLAS[0]!;
@@ -179,16 +177,13 @@ export function AtlasOverlay() {
   }
 
   return (
-    <motion.div
+    <div
       ref={dialog}
       role="dialog"
       aria-modal="true"
       aria-labelledby="atlas-title"
       tabIndex={-1}
-      className="pad-safe pointer-events-auto absolute inset-0 z-[80] flex flex-col bg-bg/80 outline-hidden"
-      initial={reduce ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
+      className="pad-safe pointer-events-auto absolute inset-0 z-[80] flex anim-fade flex-col bg-bg/80 outline-hidden"
     >
       <header className="flex items-center justify-between gap-3 pb-3 md:px-6 md:py-3">
         <div>
@@ -391,6 +386,6 @@ export function AtlasOverlay() {
           </section>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

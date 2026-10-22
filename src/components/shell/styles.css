@@ -134,7 +134,7 @@ html {
   align-items: center;
   border-radius: 2px;
   color: var(--color-muted);
-  transition: color 300ms ease;
+  transition: color var(--transition-duration-feedback) var(--ease-standard);
 }
 .footer-link::after {
   content: "";
@@ -145,8 +145,8 @@ html {
   scale: 0 1;
   opacity: 0;
   transition:
-    scale 420ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 300ms ease;
+    scale var(--transition-duration-control) var(--ease-enter),
+    opacity var(--transition-duration-control) var(--ease-standard);
 }
 .footer-link:hover,
 .footer-link:focus-visible {
@@ -206,21 +206,22 @@ html {
   visibility: visible;
   translate: 0 0;
   transition:
-    translate 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--bar-delay),
-    opacity 520ms ease var(--bar-delay),
+    translate var(--immersive-enter) var(--ease-enter) var(--bar-delay),
+    opacity var(--transition-duration-reveal) var(--ease-standard) var(--bar-delay),
     visibility 0s;
 }
 .app-shell:has(.simulation-stage[data-simulation]) .app-footer {
-  --bar-delay: 60ms;
+  --bar-delay: var(--immersive-step);
 }
 .app-shell:has(.simulation-stage[data-immersive]) :is(.app-header, .app-footer) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition:
-    translate 520ms cubic-bezier(0.4, 0, 0.2, 1) var(--bar-delay),
-    opacity 360ms ease calc(80ms + var(--bar-delay)),
-    visibility 0s calc(520ms + var(--bar-delay));
+    translate var(--immersive-exit) var(--ease-exit) var(--bar-delay),
+    opacity var(--transition-duration-control) var(--ease-exit)
+      calc(var(--immersive-step) + var(--bar-delay)),
+    visibility 0s calc(var(--immersive-exit) + var(--bar-delay));
 }
 .app-shell:has(.simulation-stage[data-immersive]) .app-header {
   translate: 0 -110%;
@@ -258,13 +259,8 @@ html {
 .phone-menu {
   background: var(--color-bg);
   box-shadow: var(--popover-shadow);
-  animation: phone-menu-drop 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes phone-menu-drop {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
+  --enter-from: translateY(-10px);
+  animation: anim-enter var(--transition-duration-control) var(--ease-enter) both;
 }
 
 /* Phone notice: above the footer on pages; over a simulation the dock owns the
@@ -505,8 +501,8 @@ html {
   opacity: 0;
   scale: 0.6;
   transition:
-    opacity 0.25s ease,
-    scale 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+    opacity var(--transition-duration-control) var(--ease-standard),
+    scale var(--transition-duration-control) var(--ease-enter);
 }
 .sky-label {
   position: absolute;
@@ -519,8 +515,8 @@ html {
   opacity: 0;
   translate: -4px 0;
   transition:
-    opacity 0.25s ease,
-    translate 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+    opacity var(--transition-duration-control) var(--ease-standard),
+    translate var(--transition-duration-control) var(--ease-enter);
 }
 .sky-label[data-side="left"] {
   margin-left: -0.875rem;

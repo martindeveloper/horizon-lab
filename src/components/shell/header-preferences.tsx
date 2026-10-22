@@ -7,12 +7,11 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { routing, type Locale } from "@/i18n/routing";
-import { Tooltip, cn } from "@horizon/toolkit/ui";
+import { Tooltip, cn, controlSpring } from "@horizon/toolkit/ui";
 
 import { themeModes, useThemeLabels, useThemeMode, type ThemeMode } from "./theme-switch";
 
 const loadFeatures = () => import("./motion-features").then((module) => module.default);
-const spring = { type: "spring", stiffness: 520, damping: 38, mass: 0.7 } as const;
 
 const themeIcons: Record<ThemeMode, { icon: typeof Sun; turn: number }> = {
   dark: { icon: Moon, turn: -24 },
@@ -53,7 +52,7 @@ function Rail<T extends string>({
           style={{ width }}
           initial={false}
           animate={{ x: index * width }}
-          transition={spring}
+          transition={controlSpring}
         />
       ) : null}
       {options.map((option, i) => {
@@ -73,7 +72,7 @@ function Rail<T extends string>({
               onClick={() => onChange(option.value)}
               style={{ width }}
               className={cn(
-                "relative flex h-7 items-center justify-center rounded-full transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:opacity-40",
+                "relative flex h-7 items-center justify-center rounded-full transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:opacity-40",
                 active ? "text-accent" : "text-subtle hover:text-fg",
               )}
             >
@@ -136,7 +135,7 @@ export function HeaderPreferences({
                   className="flex"
                   initial={false}
                   animate={{ rotate: active ? turn : 0, scale: active ? 1 : 0.86 }}
-                  transition={spring}
+                  transition={controlSpring}
                 >
                   <Icon className="size-3.5" aria-hidden />
                 </m.span>

@@ -154,6 +154,44 @@ with `rounded-lg`, display titles, mono kickers, HUD-glass chips for the current
 choice, bottom sheets on phones, and gold only for small markers. Build a
 feature's chrome from them before adding local classes.
 
+### Motion contract
+
+Use the toolkit's four duration categories throughout ordinary UI:
+
+| Role     | Utility             | Duration | Uses                                                     |
+| -------- | ------------------- | -------- | -------------------------------------------------------- |
+| Feedback | `duration-feedback` | 150 ms   | Hover colors, presses, tooltip fades                     |
+| Control  | `duration-control`  | 300 ms   | Switches, selection indicators, compact menus            |
+| Reveal   | `duration-reveal`   | 500 ms   | Panels, sheets, guide entrances, readiness/loading fades |
+| Scene    | `duration-scene`    | 800 ms   | Immersive chrome and broad UI changes                    |
+
+`packages/toolkit/src/ui/theme.css` is the single source. Plain CSS uses
+`var(--transition-duration-feedback)` (and the other three names). Pair durations with
+`ease-standard` for state changes, `ease-enter` for arrivals and `ease-exit` for departures;
+CSS uses the same `--ease-*` properties. Small list entrances step by `--motion-stagger`
+(60 ms). Choose durations by purpose rather than by distance to an old hardcoded value.
+
+`anim-rise`, `anim-sheet` and `anim-rail` share `anim-enter`, with a local
+`--enter-from` transform; each ends at the element's own opacity and transform. They
+support responsive variants, such as `anim-sheet md:anim-rail`. Compact menus,
+guide lines and spectral labels also use this pattern, preserving their own direction
+and travel. `anim-fade` is the shared control-duration fade.
+
+`VisualizationOverlay ready={ready}` owns the HUD's reveal fade and inert state.
+`uiMotion(element, "control", "exit")` reads the same CSS tokens for Web Animations
+inside client effects/handlers. `afterMotion` waits for actual finite animation completion
+and returns cleanup; reopening cancels the previous removal. The loading overlay,
+immersive HUD, notice and cinematic curtain use this instead of duplicated timers.
+Reduced motion removes decorative waits and completes exits promptly. The header's
+`controlSpring` retains its existing physical response.
+
+Preserve authored exceptions: the catalogue intro, slow artwork zoom/drift and sky,
+the music rest/wake choreography and waveform, the drift curtain, and Voyage's flip,
+impact and alarms. Simulation clocks, guide holds, pointer damping, the black-hole
+clock pulses, Giants' light lap and Deep Field's 240 ms readout smoothing retain their
+own timing. Tooltip intent and loading-badge waiting periods are separate from fade
+durations. Do not apply the four UI durations to these clocks or sequences.
+
 ### Accessibility contract
 
 Every simulation:
@@ -305,7 +343,7 @@ and carries one readout with the Sun's and Moon's altitudes and the illuminated
 fraction.
 
 A fresh load plays a short intro (`.catalogue-intro` in
-`src/features/catalogue/styles.css`, about 2.7 s): first the sky alone (the
+`src/features/catalogue/styles.css`, about 4 s): first the sky alone (the
 horizon line draws out, the Sun rises, its path sweeps across, the Moon follows),
 then the header settles in, then the title and the tiles. Navigation back and
 reduced motion skip it.

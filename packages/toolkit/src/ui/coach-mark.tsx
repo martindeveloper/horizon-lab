@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-import { REDUCED_MOTION_QUERY } from "../environment";
 import {
   coachLeader,
   keptOf,
@@ -15,6 +14,7 @@ import {
   type CoachRect,
 } from "./coach-model";
 import { isSceneShortcut } from "./keyboard";
+import { uiMotion } from "./motion";
 import { cn } from "./utils";
 
 /** A control the coach may point at carries `data-coach="<id>"`. */
@@ -124,7 +124,7 @@ function keptBy(
 }
 
 /** How far the HUD around a step quiets down, and how quickly. */
-const QUIET = { opacity: 0.35, ms: 320 };
+const QUIET_OPACITY = 0.35;
 
 /**
  * The HUD's surfaces in `root` (`avoid`) that a step is not about: every outermost one, except
@@ -170,12 +170,10 @@ function useQuietHud(
   const faded = useRef(new Map<Element, Animation>());
   useEffect(() => {
     if (!root) return;
-    const ms = window.matchMedia(REDUCED_MOTION_QUERY).matches ? 0 : QUIET.ms;
     const now = quietAround(root, avoid, keptBy(root, avoid, before.current, target));
     const fade = (el: Element) =>
-      el.animate([{ opacity: 1 }, { opacity: QUIET.opacity }], {
-        duration: ms,
-        easing: "ease-out",
+      el.animate([{ opacity: 1 }, { opacity: QUIET_OPACITY }], {
+        ...uiMotion(el, "control"),
         fill: "forwards",
       });
     for (const [el, animation] of faded.current) {

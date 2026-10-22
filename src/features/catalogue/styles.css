@@ -57,9 +57,9 @@
     0 0 0 1px color-mix(in srgb, var(--color-solar) 60%, transparent),
     0 0 36px color-mix(in srgb, var(--color-solar) 20%, transparent);
   transition:
-    background-color 320ms ease,
-    color 320ms ease,
-    scale 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    background-color var(--transition-duration-control) var(--ease-standard),
+    color var(--transition-duration-control) var(--ease-standard),
+    scale var(--transition-duration-control) var(--ease-enter);
 }
 .simulation-tile:hover .experience-play,
 .simulation-tile:focus-within .experience-play {
@@ -95,8 +95,8 @@ a:focus-visible > .experience-play {
   background: var(--color-space);
   box-shadow: 0 0 0 1px var(--color-solar);
   transition:
-    background-color 240ms ease,
-    box-shadow 240ms ease;
+    background-color var(--transition-duration-feedback) var(--ease-standard),
+    box-shadow var(--transition-duration-feedback) var(--ease-standard);
 }
 .experience-stop:hover .experience-stop-mark,
 .experience-stop:focus-visible .experience-stop-mark {
@@ -113,7 +113,7 @@ a:focus-visible > .experience-play {
 
 .simulation-tile {
   box-shadow: var(--tile-frame);
-  transition: box-shadow 320ms ease;
+  transition: box-shadow var(--transition-duration-control) var(--ease-standard);
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {

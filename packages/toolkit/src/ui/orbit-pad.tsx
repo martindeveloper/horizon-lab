@@ -54,7 +54,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
             <IconButton
               aria-label={labels[direction]}
               onClick={() => onRotate(turn)}
-              className="transition-[color,background-color,scale] hover:bg-fg/[0.06] hover:text-accent active:scale-90"
+              className="transition-[color,background-color,scale] duration-feedback ease-standard hover:bg-fg/[0.06] hover:text-accent active:scale-90"
             >
               <Icon className="size-4" />
             </IconButton>

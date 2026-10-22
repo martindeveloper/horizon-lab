@@ -6,13 +6,12 @@ import { useEffect, useRef, useState } from "react";
 
 import { onDesktopNotice } from "@/lib/debug";
 import { PHONE_QUERY } from "@horizon/toolkit/environment";
-import { IconButton, Surface, cn } from "@horizon/toolkit/ui";
+import { IconButton, Surface, afterMotion, cn } from "@horizon/toolkit/ui";
 
 import { dismissNotice, shouldShowNotice } from "./desktop-notice-state";
 
 const SHOW_AFTER = 1500;
 const HIDE_AFTER = 7000;
-const FADE = 400;
 
 type Phase = "hidden" | "shown" | "leaving";
 
@@ -20,6 +19,7 @@ type Phase = "hidden" | "shown" | "leaving";
 export function DesktopNotice() {
   const t = useTranslations("shell");
   const [phase, setPhase] = useState<Phase>("hidden");
+  const surface = useRef<HTMLDivElement>(null);
   const focused = useRef(false);
   // Once per mount even when storage is blocked and the flag cannot stick.
   const shown = useRef(false);
@@ -53,8 +53,8 @@ export function DesktopNotice() {
   useEffect(() => {
     if (phase === "hidden") return;
     if (phase === "leaving") {
-      const id = window.setTimeout(() => setPhase("hidden"), FADE);
-      return () => window.clearTimeout(id);
+      if (surface.current) return afterMotion(surface.current, () => setPhase("hidden"));
+      return;
     }
     // Auto-hide counts as dismissal, but never while the page is hidden (an
     // unseen notice is not dismissed) or focus rests on the close button.
@@ -80,6 +80,7 @@ export function DesktopNotice() {
   return (
     <div className="desktop-notice pointer-events-none fixed inset-x-0 z-[90] flex justify-center px-[var(--app-gutter)]">
       <Surface
+        ref={surface}
         variant="pill"
         role="status"
         onFocus={() => {
@@ -90,7 +91,9 @@ export function DesktopNotice() {
         }}
         className={cn(
           "pointer-events-auto flex items-center gap-2.5 rounded-full py-0.5 pr-0.5 pl-4 text-xs text-fg",
-          phase === "leaving" ? "opacity-0 transition-opacity duration-[400ms]" : "anim-rise",
+          phase === "leaving"
+            ? "opacity-0 transition-opacity duration-control ease-exit"
+            : "anim-rise",
         )}
       >
         <Monitor className="size-3.5 shrink-0 text-accent" aria-hidden />

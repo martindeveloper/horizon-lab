@@ -26,15 +26,10 @@
 }
 
 /* Names rise into place over their lines, one after another. */
-@keyframes spectroscopy-label-in {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-}
 :where([data-simulation="spectroscopy"]) .spectroscopy-label {
-  animation: spectroscopy-label-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--i, 0) * 45ms);
+  --enter-from: translateY(5px);
+  animation: anim-enter var(--transition-duration-reveal) var(--ease-enter) both;
+  animation-delay: calc(var(--i, 0) * var(--motion-stagger));
 }
 
 /* A picked line rings twice in gold, then holds as a hairline that glides to the next pick. */
@@ -49,7 +44,7 @@
   }
 }
 :where([data-simulation="spectroscopy"]) .spectroscopy-pulse {
-  animation: spectroscopy-pulse 1s ease-out 2 both;
+  animation: spectroscopy-pulse var(--transition-duration-scene) var(--ease-enter) 2 both;
 }
 
 /* A checked mystery's verdict lands like a stamp; its chips turn over one after another. */
@@ -64,7 +59,8 @@
   }
 }
 :where([data-simulation="spectroscopy"]) .spectroscopy-stamp {
-  animation: spectroscopy-stamp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  animation: spectroscopy-stamp var(--transition-duration-reveal) var(--ease-enter)
+    var(--motion-stagger) both;
 }
 @keyframes spectroscopy-verdict {
   from {
@@ -73,8 +69,8 @@
   }
 }
 :where([data-simulation="spectroscopy"]) .spectroscopy-verdict {
-  animation: spectroscopy-verdict 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--i, 0) * 50ms);
+  animation: spectroscopy-verdict var(--transition-duration-control) var(--ease-enter) both;
+  animation-delay: calc(var(--i, 0) * var(--motion-stagger));
 }
 
 @media (prefers-reduced-motion: reduce) {

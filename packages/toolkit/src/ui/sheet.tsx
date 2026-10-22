@@ -83,14 +83,14 @@ export function Sheet({
     <div ref={root} className={cn("absolute inset-0 z-50", className)} {...props}>
       <div
         aria-hidden
-        className="anim-fade pointer-events-auto absolute inset-0 bg-space/50"
+        className="pointer-events-auto absolute inset-0 anim-fade bg-space/50"
         onClick={() => dismiss.current()}
       />
       <div
         ref={panel}
         tabIndex={-1}
         className={cn(
-          "glass-panel pad-sheet anim-sheet pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-xl outline-hidden",
+          "glass-panel pad-sheet pointer-events-auto absolute inset-x-0 bottom-0 flex anim-sheet flex-col overflow-hidden rounded-t-xl outline-hidden",
           panelClassName,
         )}
         role="dialog"
@@ -103,7 +103,7 @@ export function Sheet({
             type="button"
             onClick={() => dismiss.current()}
             aria-label={dismissLabel}
-            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-muted opacity-0 transition-opacity focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-muted opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <X className="size-4" aria-hidden />
           </button>

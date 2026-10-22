@@ -81,7 +81,7 @@ function HoverLabel({ index, shown }: { index: number; shown: boolean }) {
       aria-hidden
       style={{ left: at(share), transform: `translateX(${-share * 100}%)` }}
       className={cn(
-        "glass-popover pointer-events-none absolute bottom-[calc(100%-0.5rem)] z-20 flex items-baseline gap-2 rounded-md px-2 py-1 whitespace-nowrap transition-[left,transform,opacity] duration-200 ease-out",
+        "glass-popover pointer-events-none absolute bottom-[calc(100%-0.5rem)] z-20 flex items-baseline gap-2 rounded-md px-2 py-1 whitespace-nowrap transition-[left,transform,opacity] duration-control ease-enter",
         shown ? "opacity-100" : "opacity-0",
       )}
     >
@@ -124,7 +124,7 @@ export function LadderStrip() {
           aria-hidden
           style={{ left: at(index / LAST), width: dot.px, height: dot.px, background: dot.colour }}
           className={cn(
-            "pointer-events-none absolute top-4 z-[1] block -translate-1/2 rounded-full ring-1 ring-fg/25 transition-transform duration-200 ease-out",
+            "pointer-events-none absolute top-4 z-[1] block -translate-1/2 rounded-full ring-1 ring-fg/25 transition-transform duration-control ease-enter",
             dot.kind === "planet" && "bg-muted",
             dot.kind === "horizon" && "bg-black ring-solar/80",
             hover.shown && hover.index === index && "scale-150",
@@ -161,7 +161,7 @@ export function LadderStrip() {
         <SliderPrimitive.Thumb
           aria-label={t("hud.ladder")}
           aria-valuetext={t(rungNameKey(RUNG_IDS[focus]!))}
-          className="relative z-[2] block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+          className="relative z-[2] block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
         />
       </SliderPrimitive.Root>
     </div>

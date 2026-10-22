@@ -25,7 +25,7 @@ export function ClockRow({
       ref={rowRef}
       onPointerEnter={() => onHover?.(true)}
       onPointerLeave={() => onHover?.(false)}
-      className="flex h-5 items-center gap-3 transition-opacity duration-700"
+      className="flex h-5 items-center gap-3 transition-opacity duration-scene ease-standard"
     >
       <span
         ref={dotRef}
@@ -45,7 +45,7 @@ export function ClockRow({
         <span
           ref={barRef}
           className={cn(
-            "absolute inset-0 origin-left transition-transform duration-300",
+            "absolute inset-0 origin-left transition-transform duration-control ease-standard",
             you ? "bg-accent/70" : "bg-fg/45",
           )}
         />

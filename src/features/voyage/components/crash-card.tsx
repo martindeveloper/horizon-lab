@@ -28,7 +28,7 @@ export function CrashCard() {
       aria-modal="false"
       aria-labelledby="voyage-crash-title"
       aria-describedby="voyage-crash-body"
-      className="voyage-holo voyage-holo-danger anim-fade pointer-events-auto absolute top-1/2 left-1/2 z-50 flex w-[min(22rem,calc(100%-2rem))] -translate-1/2 flex-col items-center gap-4 px-8 pt-6 pb-7 text-center"
+      className="voyage-holo voyage-holo-danger pointer-events-auto absolute top-1/2 left-1/2 z-50 flex w-[min(22rem,calc(100%-2rem))] -translate-1/2 anim-fade flex-col items-center gap-4 px-8 pt-6 pb-7 text-center"
     >
       <p className="flex items-center gap-2 font-mono text-[10px] tracking-[0.24em] text-danger uppercase">
         <span

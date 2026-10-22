@@ -41,7 +41,7 @@ export function UpdateNotice() {
       {state === "shown" && !immersive ? (
         <Surface
           variant="pill"
-          className="update-notice-pill anim-rise pointer-events-auto relative flex max-w-full min-w-0 items-center gap-1.5 rounded-full py-0.5 pr-0.5 pl-3.5 text-xs text-fg"
+          className="update-notice-pill pointer-events-auto relative flex max-w-full min-w-0 anim-rise items-center gap-1.5 rounded-full py-0.5 pr-0.5 pl-3.5 text-xs text-fg"
         >
           <span
             className="update-notice-dot size-1.5 shrink-0 rounded-full bg-accent"

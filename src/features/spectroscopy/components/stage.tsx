@@ -48,11 +48,11 @@ export function Stage() {
     <div
       key={view}
       className={cn(
-        "spectroscopy-stage pad-hud-top anim-fade absolute inset-x-0 flex flex-col",
+        "spectroscopy-stage pad-hud-top absolute inset-x-0 flex anim-fade flex-col",
         /* --hud-clear already counts the footer: the dock's or guide's top from the window's foot. */
         "top-[calc(var(--app-header-height)+2.75rem)] bottom-[max(var(--hud-clear,calc(var(--app-footer-height)+1rem)),var(--sheet-clear,0px))]",
         /* The dock leaving (the immersive view) or growing moves the foot: glide, as the HUD does. */
-        "transition-[top,bottom] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+        "transition-[top,bottom] duration-scene ease-enter motion-reduce:transition-none",
       )}
     >
       {/* The scene sets the stage but the spectrum is the instrument: the scene stops at a third

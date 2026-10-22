@@ -33,7 +33,7 @@ function BrakeButton() {
       onLostPointerCapture={release}
       onContextMenu={(event) => event.preventDefault()}
       className={cn(
-        "-mx-1 hidden h-11 w-12 touch-none rounded-sm border border-border font-mono text-[10px] tracking-[0.14em] uppercase transition-colors duration-150 select-none pointer-coarse:block",
+        "-mx-1 hidden h-11 w-12 touch-none rounded-sm border border-border font-mono text-[10px] tracking-[0.14em] uppercase transition-colors duration-feedback ease-standard select-none pointer-coarse:block",
         braking ? "bg-accent text-accent-fg" : "text-fg",
       )}
     >
@@ -89,7 +89,7 @@ export function ThrottleLever() {
           <SliderPrimitive.Thumb
             aria-label={t("hud.throttle")}
             aria-valuetext={t("hud.throttleValue", { value: percent })}
-            className="block h-2.5 w-7 rounded-full bg-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+            className="block h-2.5 w-7 rounded-full bg-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
           />
         </SliderPrimitive.Root>
       </div>

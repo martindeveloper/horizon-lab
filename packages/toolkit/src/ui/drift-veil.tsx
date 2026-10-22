@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import { afterMotion } from "./motion";
 import { cn } from "./utils";
-
-/** Milliseconds the veil takes to lift once the drift is ready (its hold at black included), before it unmounts. */
-const LIFT_MS = 2200;
 
 /**
  * The curtain over a scene while its drift gathers what it needs (its music, its timing): the
@@ -16,16 +14,17 @@ const LIFT_MS = 2200;
  * assistive technology; nothing is printed.
  */
 export function DriftVeil({ active, label }: { active: boolean; label: ReactNode }) {
+  const root = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(active);
   if (active && !shown) setShown(true);
   useEffect(() => {
-    if (active) return;
-    const timeout = window.setTimeout(() => setShown(false), LIFT_MS);
-    return () => window.clearTimeout(timeout);
+    if (active || !root.current) return;
+    return afterMotion(root.current, () => setShown(false));
   }, [active]);
   if (!shown) return null;
   return (
     <div
+      ref={root}
       className={cn(
         "drift-veil pointer-events-none absolute inset-0 z-10 flex items-center justify-center",
         active ? "drift-veil-in" : "drift-veil-out",

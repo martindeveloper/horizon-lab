@@ -156,7 +156,7 @@ export function MysteryResultCard({ result }: { result: MysteryResult }) {
       role="status"
       key={`${index}-${outcome}`}
       className={cn(
-        "anim-rise flex items-start gap-x-2.5 rounded-md px-3 py-2 ring-1 ring-inset md:items-center md:gap-x-3 md:py-2.5",
+        "flex anim-rise items-start gap-x-2.5 rounded-md px-3 py-2 ring-1 ring-inset md:items-center md:gap-x-3 md:py-2.5",
         outcome === "solved"
           ? "bg-accent/10 ring-accent/40"
           : outcome === "close"

@@ -79,7 +79,7 @@ export function GiantsDock() {
     <Dock
       ref={surface}
       footerClassName={cn(aside && "not-md:hidden")}
-      className="anim-rise flex flex-col gap-1"
+      className="flex anim-rise flex-col gap-1"
     >
       <div className="flex items-center gap-3 not-md:gap-2">
         <Tooltip label={t("hud.previous")} align="start">

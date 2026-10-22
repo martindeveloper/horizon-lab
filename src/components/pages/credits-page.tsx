@@ -13,7 +13,7 @@ import { Surface, cn, kickerClass } from "@horizon/toolkit/ui";
 import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
 
 const linkClass =
-  "rounded-sm text-fg underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
+  "rounded-sm text-fg underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
 const licenceClass = "font-mono text-[0.68rem] tracking-[0.14em] whitespace-nowrap uppercase";
 
 /** The worlds a map credit covers, in the order the toolkit lists them: one for most, four for OPAL. */
@@ -47,7 +47,7 @@ function LicenceTag({ t, licence }: { t: Translate; licence: Licence }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-sm transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="rounded-sm transition-colors duration-feedback ease-standard hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           {name}
           <span className="sr-only"> ({t("newTab")})</span>
@@ -229,12 +229,17 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                   <li key={group.id} className="border-b border-border">
                     <a
                       href={creditFragment(group.id)}
-                      className="group flex flex-col gap-1 rounded-sm py-3 pr-3 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                      className="group flex flex-col gap-1 rounded-sm py-3 pr-3 transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                     >
-                      <span className="font-mono text-2xl leading-none text-fg tabular-nums transition-colors group-hover:text-accent">
+                      <span className="font-mono text-2xl leading-none text-fg tabular-nums transition-colors duration-feedback ease-standard group-hover:text-accent">
                         {count(group.items.length)}
                       </span>
-                      <span className={cn(kickerClass, "transition-colors group-hover:text-fg")}>
+                      <span
+                        className={cn(
+                          kickerClass,
+                          "transition-colors duration-feedback ease-standard group-hover:text-fg",
+                        )}
+                      >
                         {t(`groups.${group.id}.label`)}
                       </span>
                     </a>

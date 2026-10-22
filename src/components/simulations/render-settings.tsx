@@ -69,7 +69,7 @@ function ResetButton({ label, onReset }: { label: string; onReset: () => void })
   return (
     <button
       type="button"
-      className="inline-flex min-h-11 items-center gap-1.5 self-start text-xs tracking-wide text-muted transition-colors duration-300 hover:text-fg md:min-h-6"
+      className="inline-flex min-h-11 items-center gap-1.5 self-start text-xs tracking-wide text-muted transition-colors duration-feedback ease-standard hover:text-fg md:min-h-6"
       onClick={onReset}
     >
       <RotateCcw className="size-3" />

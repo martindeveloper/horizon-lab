@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 
-import { REDUCED_MOTION_QUERY } from "../environment";
 import { IconButton } from "./icon-button";
 import {
   IMMERSIVE_SHORTCUT,
@@ -28,6 +27,7 @@ import {
   takeFocusReturn,
 } from "./immersive-state";
 import { kickerClass } from "./kicker";
+import { afterMotion } from "./motion";
 import { Toolbar } from "./toolbar";
 import { Tooltip } from "./tooltip";
 import { cn } from "./utils";
@@ -173,16 +173,15 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
     toggleDrift.current = drift?.onToggle;
   });
   const [overlaysMounted, setOverlaysMounted] = useState(!immersive);
+  const overlays = useRef<HTMLDivElement>(null);
   const [previousImmersive, setPreviousImmersive] = useState(immersive);
   if (previousImmersive !== immersive) {
     setPreviousImmersive(immersive);
     if (!immersive) setOverlaysMounted(true);
   }
   useEffect(() => {
-    if (!immersive) return;
-    const delay = window.matchMedia(REDUCED_MOTION_QUERY).matches ? 0 : 460;
-    const timeout = window.setTimeout(() => setOverlaysMounted(false), delay);
-    return () => window.clearTimeout(timeout);
+    if (!immersive || !overlays.current) return;
+    return afterMotion(overlays.current, () => setOverlaysMounted(false));
   }, [immersive]);
 
   const root = useRef<HTMLDivElement>(null);
@@ -262,7 +261,12 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
   return (
     <>
       {overlaysMounted ? (
-        <div className="immersive-overlays" data-hidden={immersive} inert={immersive}>
+        <div
+          ref={overlays}
+          className="immersive-overlays"
+          data-hidden={immersive}
+          inert={immersive}
+        >
           {children}
         </div>
       ) : null}
@@ -280,7 +284,7 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
         >
           <Toolbar
             aria-label={labels.group}
-            className="ml-auto w-fit opacity-70 transition-opacity duration-300 focus-within:opacity-100 hover:opacity-100"
+            className="ml-auto w-fit opacity-70 transition-opacity duration-control ease-standard focus-within:opacity-100 hover:opacity-100"
           >
             {canFullscreen && !fullscreen ? (
               <Tooltip label={labels.fullscreen}>

@@ -56,7 +56,7 @@ export function Rail({
         ref={rail}
         id={id}
         tabIndex={-1}
-        className="glass-panel anim-rail pointer-events-auto absolute top-14 right-(--hud-gutter) z-40 hidden max-h-[min(32rem,calc(100dvh-var(--app-header-height)-var(--app-footer-height)-6rem),calc(100%-3.5rem-var(--hud-clear,1rem)))] w-80 flex-col overflow-hidden rounded-lg outline-hidden md:flex"
+        className="glass-panel pointer-events-auto absolute top-14 right-(--hud-gutter) z-40 hidden max-h-[min(32rem,calc(100dvh-var(--app-header-height)-var(--app-footer-height)-6rem),calc(100%-3.5rem-var(--hud-clear,1rem)))] w-80 anim-rail flex-col overflow-hidden rounded-lg outline-hidden md:flex"
         aria-label={title}
       >
         <PanelHeader

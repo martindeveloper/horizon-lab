@@ -33,7 +33,7 @@ const TRACKS = ambientMusic.tracks.length;
 const slot = "relative flex h-7 w-[30px] items-center justify-center rounded-full";
 const skipClass = cn(
   slot,
-  "text-subtle transition-colors duration-300 after:absolute after:-inset-y-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+  "text-subtle transition-colors duration-feedback ease-standard after:absolute after:-inset-y-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
 );
 
 /**
@@ -116,7 +116,7 @@ export function MusicToggle({ className }: { className?: string }) {
               <span
                 className={cn(
                   slot,
-                  "transition-colors duration-500",
+                  "transition-colors duration-feedback ease-standard",
                   playing ? "text-accent" : "text-subtle group-hover:text-fg",
                 )}
               >

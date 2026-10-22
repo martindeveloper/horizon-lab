@@ -8,7 +8,7 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import { LoadingBadge, VisualizationOverlay, cn } from "@horizon/toolkit/ui";
+import { LoadingBadge, VisualizationOverlay } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
 import { useSun, type SunStore } from "../lib/store";
@@ -57,10 +57,7 @@ export function SunOverlay() {
   useGuideKeys(useSun.getState, guideKeys);
 
   return (
-    <VisualizationOverlay
-      className={cn("transition-opacity duration-500", ready ? "opacity-100" : "opacity-0")}
-      inert={!ready}
-    >
+    <VisualizationOverlay ready={ready}>
       {guideOpen ? (
         <SunGuide />
       ) : (

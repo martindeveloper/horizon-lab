@@ -71,12 +71,9 @@ export function SpectroscopyOverlay() {
   useSceneEscape(escapeSteps);
 
   return (
-    <VisualizationOverlay
-      className={cn("transition-opacity duration-500", ready ? "opacity-100" : "opacity-0")}
-      inert={!ready}
-    >
+    <VisualizationOverlay ready={ready}>
       {guideOpen ? null : (
-        <header className="hud-top pad-hud-top anim-fade absolute inset-x-0 top-0 z-[60]">
+        <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] anim-fade">
           <div className="flex items-start gap-3">
             <SpectroscopyViews />
             <SimulationToolbar

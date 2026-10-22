@@ -30,7 +30,7 @@ export function PresetNav({ stacked = false, onPick }: { stacked?: boolean; onPi
         aria-current={presetId === p.id ? "true" : undefined}
         onClick={() => choose(p.id)}
         className={cn(
-          "h-11 shrink-0 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-colors duration-300 md:h-8 md:px-2.5",
+          "h-11 shrink-0 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-colors duration-feedback ease-standard md:h-8 md:px-2.5",
           presetId === p.id ? "text-fg" : "text-muted hover:text-fg",
         )}
       >

@@ -1,22 +1,17 @@
 /* Every guide's step (guide-card.tsx): its lines rise in together, a beat apart. The step
    clips them, so a line still below its place never overflows the scroller into a scrollbar. */
-@keyframes guide-line {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
 .guide-step {
   overflow: clip;
 }
 .guide-step > * {
-  animation: guide-line 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --enter-from: translateY(6px);
+  animation: anim-enter var(--transition-duration-reveal) var(--ease-enter) both;
 }
 .guide-step > :nth-child(2) {
-  animation-delay: 70ms;
+  animation-delay: var(--motion-stagger);
 }
 .guide-step > :nth-child(n + 3) {
-  animation-delay: 140ms;
+  animation-delay: calc(2 * var(--motion-stagger));
 }
 
 /* More words below the fold: the foot of the text fades out and an arrow breathes over it,
@@ -33,7 +28,7 @@
 .guide-more {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease-out;
+  transition: opacity var(--transition-duration-control) var(--ease-standard);
 }
 .guide-more[data-shown] {
   opacity: 0.45;
@@ -60,6 +55,8 @@
 }
 .guide-fill:is([data-state="running"], [data-state="paused"]) {
   animation-name: guide-fill;
+  animation-duration: var(--transition-duration-reveal);
+  animation-timing-function: var(--ease-enter);
   animation-fill-mode: both;
 }
 .guide-fill[data-state="waiting"] {

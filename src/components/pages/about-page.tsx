@@ -20,7 +20,7 @@ const thanks = [
 const caveats = ["simplified", "approximate", "performance"] as const;
 
 const linkClass =
-  "font-medium text-fg underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors hover:decoration-accent focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden";
+  "font-medium text-fg underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden";
 
 /** One part of the letter: its label hangs in the margin on wide screens. */
 function Part({
