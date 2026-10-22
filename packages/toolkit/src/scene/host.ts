@@ -97,6 +97,8 @@ export type SceneHostBasics = SceneBasics & {
    * shader uniform (`{ dpr: basics.dpr }`) so point sizes follow.
    */
   dpr: { value: number };
+  /** Asks for a frame: for what a layer receives after it is built (a texture, a worker's result). */
+  invalidate: () => void;
 };
 
 export function createSceneHost(
@@ -209,6 +211,7 @@ export function createSceneHost(
     viewport,
     tight,
     dpr,
+    invalidate: engine.invalidate,
   };
 
   return {

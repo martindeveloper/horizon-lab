@@ -32,8 +32,10 @@ tall; the scale bar and `createScreenScale` are built on it.
 `createSceneHost(scope, { canvas, host, onError })` makes the WebGL renderer, a 48°
 perspective camera, the viewport and the engine host (frame loop,
 resize, context loss). `tight` marks phones and low-memory devices; `basics` is
-`SceneBasics` plus `tight` and `dpr`, the buffer's pixels per CSS pixel as a live
-`{ value }`: pass it as a shader uniform so point sizes follow the resolution. `warmUp(scene)`,
+`SceneBasics` plus `tight`, `dpr`, the buffer's pixels per CSS pixel as a live
+`{ value }` (pass it as a shader uniform so point sizes follow the resolution), and
+`invalidate`, which asks for a frame when a layer receives something after it is built
+(a texture, a worker's result). `warmUp(scene)`,
 called once after the first frame, compiles every material in idle time, hidden objects
 included.
 
@@ -152,8 +154,9 @@ covered pixels stay the same.
 that moved no more than 6 px; neither finger of a pinch taps. A name tapped squarely wins. Otherwise the
 pickables under the pointer give their `userData.pick` (and instance id): the
 nearest, or the one `choose(hits, ray)` takes. Then a near miss on a name counts:
-44 px on touch. `layers` adds render layers to the raycast. What a tap means is
-the caller's.
+44 px on touch (`FINGER_PX`). A small target reaches `TAP_REACH_PX` (half a fingertip) from
+its centre, however few pixels it is drawn across. `layers`
+adds render layers to the raycast. What a tap means is the caller's.
 
 ## Rulers and distances
 
@@ -186,6 +189,11 @@ switches that ease over time: call `begin(dt)` each frame, read `busy` to keep
 frames coming. `createScreenScale(camera, viewport)` gives `pxWorld` and `px` for
 detail and marker sizes; it counts a stage under 480 px tall as 480, so a small stage
 keeps a phone's detail, while `scaleBar` measures the true stage.
+`fadeMaterial(material, opacity)` is the rule for what a faded material draws: it sets the
+opacity and skips the material's draws (on every object it is on, each keeping its own
+`visible`) while that is under `FAINTEST_OPACITY`, half of one 8-bit step. A layer that fades
+through a shader's own uniform, or shrinks a thing by a presence, gates its `visible` by the
+same `FAINTEST_OPACITY`.
 
 ## Sprites, points and lines
 
@@ -198,7 +206,19 @@ point when given. `createPointWriter(count)` fills one a point at a time:
 `put(x, y, z, color, brightness)` writes `color × brightness`, `count` is how
 many so far, and `geometry()` views what was written; the buffers grow if a
 sketch writes past `count`, so nothing is dropped. `lineOf`, `ownedLine` and
-`rulerOf` are reusable line buffers. `createLineVeil(seconds = 0.8)` fades a
+`rulerOf` are reusable line buffers. `ownedOrbitLine(scope, color, opacity, segments = 96)`
+draws an orbit as `ownedLine` would (the same basic material, so colour, opacity and the
+veil work alike) but the GPU builds its vertices: the geometry (`orbitGeometry(scope,
+segments)`) holds static samples, one geometry for every orbit line of a resolution, held
+by each line's scope and disposed with the last of them, and `set(shape)` writes a `bodies` `OrbitShape` into three uniforms
+(`orbitUniforms`, `writeOrbitUniforms`, read by `<horizon/orbit>`), so a moving orbit costs no
+buffer upload. The shape is in the line's own units and frame; the line's scale and place
+carry it to the scene's (a floating origin keeps the place relative to the camera). The line
+starts and ends at the body, so it meets the body however coarse its segments, and its
+samples (`orbitSamples`) tighten towards the body, so it does not kink there seen from close
+by, while far from the body they are as fine as `segments` even steps; a material of its own
+(Voyage's aberrated orbits) includes `<horizon/orbit>`, spreads `orbitUniforms()` into its
+uniforms and draws `orbitGeometry(scope, segments)`. `createLineVeil(seconds = 0.8)` fades a
 scene's line art (every `Line`, bar those marked `userData.content = true`, and any
 other object marked `userData.annotation = true`, such as a boundary drawn as a
 translucent shell) out and back together: `step(dt, shown)` eases its `presence`, `cover(root)` just

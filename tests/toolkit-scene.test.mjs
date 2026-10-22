@@ -24,10 +24,13 @@ import {
   createTapPicking,
   createViewMoves,
   fade,
+  fadeMaterial,
   framed,
   lineOf,
   movedBy,
   niceNumber,
+  orbitSamples,
+  ownedOrbitLine,
   pickLevel,
   pointsGeometry,
   rising,
@@ -48,6 +51,24 @@ test("scale bars are round numbers in the visitor's unit, 44–140 px long", () 
   /* Light-years of world, shown in parsecs on request. */
   const pc = scaleBar({ fov: 48, dist: 9e4, width: 1200, height: 800, world: "ly", choice: "pc" });
   assert.equal(pc.unit, "pc");
+});
+
+test("a material faded past what a display shows skips its draws, and its objects keep theirs", () => {
+  const material = new MeshBasicMaterial({ transparent: true });
+  const shared = [new Mesh(undefined, material), new Mesh(undefined, material)];
+  shared[1].visible = false;
+  assert.equal(fadeMaterial(material, 0.4), true);
+  /* Under half of one 8-bit step a blend rounds to nothing: three.js draws nothing with it. */
+  assert.equal(fadeMaterial(material, 0.5 / 255 / 2), false);
+  assert.equal(material.visible, false);
+  assert.equal(material.opacity, 0.5 / 255 / 2);
+  assert.deepEqual(
+    shared.map((mesh) => mesh.visible),
+    [true, false],
+    "each object keeps its own switch",
+  );
+  assert.equal(fadeMaterial(material, 0.01), true);
+  assert.equal(material.visible, true);
 });
 
 test("presence bands ease in log space and close at their ends", () => {
@@ -458,4 +479,49 @@ test("the line veil fades annotation surfaces with the lines and leaves content 
   assert.equal(body.visible, true);
   veil.uncover();
   assert.equal(shell.visible, true);
+});
+
+test("orbit lines of a resolution share one geometry, disposed only with its last holder", () => {
+  const orrery = new DisposalScope();
+  const voyage = new DisposalScope();
+  const planet = ownedOrbitLine(orrery, 0xffffff, 1);
+  const moon = ownedOrbitLine(orrery, 0xffffff, 1);
+  const ship = ownedOrbitLine(voyage, 0xffffff, 1);
+  const fine = ownedOrbitLine(voyage, 0xffffff, 1, 256);
+  assert.equal(planet.line.geometry, moon.line.geometry);
+  assert.equal(planet.line.geometry, ship.line.geometry);
+  assert.notEqual(planet.line.geometry, fine.line.geometry);
+  let disposed = 0;
+  planet.line.geometry.addEventListener("dispose", () => (disposed += 1));
+  orrery.dispose();
+  assert.equal(disposed, 0, "still drawn by the other scope's line");
+  voyage.dispose();
+  assert.equal(disposed, 1);
+  /* A line made afterwards gets a fresh geometry, not the disposed one. */
+  const after = new DisposalScope();
+  assert.notEqual(ownedOrbitLine(after, 0xffffff, 1).line.geometry, ship.line.geometry);
+  after.dispose();
+});
+
+test("orbit samples run from the body round to it, no chord straying more near it than far", () => {
+  const segments = 96;
+  const samples = orbitSamples(segments);
+  const u = [];
+  for (let s = 0; s < samples.length; s += 2) {
+    const angle = Math.atan2(samples[s + 1], samples[s]);
+    u.push(s > 0 && angle <= 0 ? angle + 2 * Math.PI : angle);
+  }
+  assert.equal(u[0], 0);
+  close(u.at(-1), 2 * Math.PI, 1e-6);
+  /* Seen from the body, a chord spanning Δ at φ strays by Δ² / (16 sin(φ/2)) of the radius:
+     never more than an even ring's chord does on the far side, h² / 16. */
+  const h = (2 * Math.PI) / segments;
+  for (let k = 1; k < u.length; k += 1) {
+    const step = u[k] - u[k - 1];
+    assert.ok(step > 0, `samples run forward at ${k}`);
+    const stray = (step * step) / (16 * Math.sin((u[k] + u[k - 1]) / 4));
+    assert.ok(stray <= ((h * h) / 16) * (1 + 1e-4), `chord ${k} strays ${stray}`);
+  }
+  /* Next to the body, far finer than an even ring. */
+  assert.ok(u[1] < h / segments);
 });

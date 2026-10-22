@@ -21,6 +21,7 @@ outside this package.
 | `@horizon/toolkit/bench`             | Benchmark contract, in-page WebGL 2 runner, frame grab, statistics                                                                             | None; DOM and WebGL only when a scene runs                |
 | `@horizon/toolkit/environment`       | Shared media queries: reduced motion, pointers, the wide layout                                                                                | None; reads `matchMedia` only when called                 |
 | `@horizon/toolkit/storage`           | One session or local value: lifetime, decay, and a decode-once codec                                                                           | None; reads web storage only when a cell is called        |
+| `@horizon/toolkit/worker`            | A pure computation on a module worker, its arrays transferred, in place where no worker starts                                                 | None; starts a `Worker` only when a task runs             |
 | `@horizon/toolkit/records`           | Typed keys and records without casts: `keysOf`, `recordFrom`, `recordBy`, `partialFrom`, `includesId`                                          | None                                                      |
 | `@horizon/toolkit/bodies`            | Sun, planets, moons: orbits, figures, masses, spin, rings, Sun/Moon almanac                                                                    | None                                                      |
 | `@horizon/toolkit/bodies/surfaces`   | Painted equirectangular body maps, albedos                                                                                                     | None                                                      |
@@ -38,7 +39,7 @@ Directory READMEs describe the contracts:
 [camera](src/camera/README.md), [rendering](src/rendering/README.md), [scene](src/scene/README.md),
 [shaders](src/shaders/README.md), [audio](src/audio/README.md), [bench](src/bench/README.md),
 [environment](src/environment/README.md), [storage](src/storage/README.md),
-[bodies](src/bodies/README.md).
+[worker](src/worker/README.md), [bodies](src/bodies/README.md).
 
 ## External URLs (`@horizon/toolkit/urls`)
 
@@ -141,9 +142,9 @@ npm pack --workspace @horizon/toolkit --dry-run
 environment and the package exports: numerical boundaries, projection/ray
 agreement, camera independence, pointer transitions, frame lifecycle, cleanup,
 shader assembly and package boundaries. `tests/music.test.mjs`,
-`tests/storage.test.mjs`, `tests/bench*.test.mjs` and `tests/bodies.test.mjs`
-(with `astronomy`, `sky`, `maps` and `moon-maps`) cover audio, storage, bench
-and bodies. The UI components have no unit tests; `tests/i18n-theme.test.mjs`
+`tests/storage.test.mjs`, `tests/toolkit-worker.test.mjs`, `tests/bench*.test.mjs` and
+`tests/bodies.test.mjs` (with `astronomy`, `sky`, `maps` and `moon-maps`) cover audio,
+storage, workers, bench and bodies. The UI components have no unit tests; `tests/i18n-theme.test.mjs`
 checks their theme contrast. Bundle tests ensure the catalogue does not load
 WebGL or feature shaders. These are code/build checks, not GPU render or
 browser interaction tests.

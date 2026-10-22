@@ -21,6 +21,12 @@
 // colours straight to the canvas; 1 writes radiance into a floating-point frame for a
 // bloom chain and a resolve shader to finish. Edges are judged on display luma either
 // way, so the same pixels get extra rays.
+//
+// A pass of the consumer's own that writes main() itself (a ray shader recording its march
+// into targets of its own) defines HORIZON_CUSTOM_MAIN before this include, which then adds
+// nothing.
+
+#ifndef HORIZON_CUSTOM_MAIN
 
 #ifndef HORIZON_PASS
 #define HORIZON_PASS 0
@@ -89,3 +95,5 @@ void main() {
 }
 
 #endif
+
+#endif // HORIZON_CUSTOM_MAIN

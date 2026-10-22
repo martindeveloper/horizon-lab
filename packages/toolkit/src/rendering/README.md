@@ -8,7 +8,9 @@ toolkit's `.glsl` loader (see the package README).
 
 - `createFullscreenPass`: one Three.js full-screen quad and custom ShaderMaterial.
   Supply vertex/fragment source and uniforms. Call `compile()`, `resize(w,h)`,
-  `render()` and `dispose()`. Buffers have no depth/stencil or hardware antialiasing.
+  `render()` and `dispose()`; `renderer` is its WebGLRenderer, for a consumer that draws into
+  targets of its own before `render()` (the black hole's cached trace). Buffers have no
+  depth/stencil or hardware antialiasing.
   Output is LinearSRGB with Three.js tone mapping disabled: the shader owns its
   color pipeline. Shader diagnostics are enabled by default. The optional `powerPreference` is a
   browser GPU-selection hint; its default is `default`, not forced discrete GPU.

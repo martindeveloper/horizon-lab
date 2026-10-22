@@ -250,6 +250,8 @@ export function createFullscreenPass(options: {
   let filtered: OffscreenFrame | null = null;
   let disposed = false;
   const pass = {
+    /** The pass's renderer, for a consumer that draws its own targets before `render` (a cached trace). */
+    renderer,
     /** Whether bloom and the lens here work on radiance (an RGBA16F frame) rather than on the display frame. */
     hdr: hdr !== null,
     resize(width: number, height: number) {

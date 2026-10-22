@@ -4,9 +4,10 @@
  * - size: how many CSS pixels a world length covers at a distance (`createScreenScale`);
  * - bands: soft log-distance bands (`rising`, `fade`) and one framing rule (`framed`);
  * - switches: faders that ease in and out over time when a toggle flips (`createFaders`);
- * - levels: discrete choices with hysteresis (`pickLevel`).
+ * - levels: discrete choices with hysteresis (`pickLevel`);
+ * - draws: a material faded past what a display shows draws nothing (`fadeMaterial`).
  */
-import type { PerspectiveCamera, Vector3 } from "three";
+import type { Material, PerspectiveCamera, Vector3 } from "three";
 
 import { logFraction, smoothstep } from "../math";
 import { worldPerPixel, type Viewport } from "./kit";
@@ -34,6 +35,19 @@ export function framed(near: number, far: number, d: number) {
   return (
     rising(far / d, 0.025, 0.045) * (1 - rising(near / d, 0.8, 1.1)) * (1 - rising(far / d, 2.2, 3))
   );
+}
+
+/** The faintest opacity that shows: below half of one 8-bit step, a blended colour rounds away. */
+export const FAINTEST_OPACITY = 0.5 / 255;
+
+/**
+ * Fades `material` to `opacity` and skips its draws while that is too faint to show, on every
+ * object it is on; each object keeps its own `visible`. Returns whether it draws.
+ */
+export function fadeMaterial(material: Material, opacity: number) {
+  material.opacity = opacity;
+  material.visible = opacity > FAINTEST_OPACITY;
+  return material.visible;
 }
 
 /** Steps a level up past each threshold and back down only below `1 − gap` of it. */

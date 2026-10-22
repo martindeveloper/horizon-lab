@@ -30,6 +30,7 @@
     "./bench": "./src/bench/index.ts",
     "./environment": "./src/environment/index.ts",
     "./storage": "./src/storage/index.ts",
+    "./worker": "./src/worker/index.ts",
     "./records": "./src/records.ts",
     "./bodies": "./src/bodies/index.ts",
     "./bodies/surfaces": "./src/bodies/surfaces/index.ts",

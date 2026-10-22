@@ -40,9 +40,12 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
 - `NAMED`: Pluto, Sedna and Halley with `elementsAt(date, extraYears)`, which
   likewise only advance each body along its orbit.
 - `keplerPosition(elements)` gives a heliocentric position in au;
-  `writeOrbit` / `createOrbitWriter` fill a flat XYZ buffer with the ellipse
-  (the writer skips work when only M changed, or the shape moved by less than a
-  float32 vertex can show, as the planets' secular drift does frame to frame). `eccentricAnomaly`, `periodYears`.
+  `orbitShape(elements, elliptical, out?)` the ellipse it moves along (`OrbitShape`:
+  `a`, `e`, the perifocal axes `p` and `q` in the scene frame, and the body's eccentric
+  anomaly `E`; a circle in the ecliptic when not `elliptical`), which the scene module's
+  orbit lines draw on the GPU. Both hold the eccentricity under `MAX_ECCENTRICITY`
+  (0.995), so the ellipse stays closed; a lab framing or printing a drawn orbit uses the
+  same cap. `eccentricAnomaly`, `periodYears`.
 - `MOONS`: JPL mean elements per moon with its host, reference plane and
   precession periods, and the resonant librations of Mimas, Tethys, Enceladus
   and Miranda; `meanRates(moon)`, `libration(moon, d)` and `meanLongitude(id, date)`.

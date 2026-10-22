@@ -168,6 +168,8 @@ feature entry like `index.ts`, so it may import the feature's own `lib`.
     carries `index`, `count`, `progress` (0–1), `time` and `dt`.
   - `describe()` (optional): facts per frame, such as camera distance or quality.
   - `dispose()`
+- The bundle is one script without workers, so a `@horizon/toolkit/worker` task runs in
+  place: what a page computes on a worker, a mount computes before the first frame.
 - Input scenes: attach the app's real input handlers to the canvas. The bench delivers
   `drag`, `wheel`, `click` and `key` input at the scripted progress.
 

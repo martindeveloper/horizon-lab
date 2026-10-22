@@ -6,8 +6,10 @@ import type { SceneBasics } from "./kit";
 import { labelAt } from "./label-geometry";
 import type { LabelHit } from "./labels";
 
-/** A fingertip: near misses on touch still reach a name this close. */
-const FINGER_PX = 44;
+/** A fingertip, CSS px across: near misses on touch still reach a name this close. */
+export const FINGER_PX = 44;
+/** A small target's reach, CSS px from its centre: under a fingertip anywhere on it. */
+export const TAP_REACH_PX = FINGER_PX / 2;
 
 /** What a tap landed on: an object's `userData.pick` (and instance), or what a label opens. */
 export type TapTarget = { pick: unknown; instance?: number | undefined };

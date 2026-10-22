@@ -18,6 +18,7 @@ export { default as gradientNoiseGLSL } from "./gradient-noise.glsl";
 export { default as logDepthGLSL } from "./log-depth.glsl";
 export { default as mathGLSL } from "./math.glsl";
 export { default as noiseGLSL } from "./noise.glsl";
+export { default as orbitGLSL } from "./orbit.glsl";
 export { default as relativityGLSL } from "./relativity.glsl";
 export { default as srgbGLSL } from "./srgb.glsl";
 export { default as temperatureGLSL } from "./temperature.glsl";

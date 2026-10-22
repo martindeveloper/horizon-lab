@@ -152,9 +152,12 @@ function toScene(xp: number, yp: number, i: number, omega: number, node: number,
   return out;
 }
 
+/** The most eccentric an orbit is drawn or moved along: the ellipse stays closed. */
+export const MAX_ECCENTRICITY = 0.995;
+
 /** Heliocentric scene position for elements. Eccentricity is clamped below 1. */
 export function keplerPosition(el: Elements, out: Vec3 = [0, 0, 0]): Vec3 {
-  const e = Math.min(0.995, Math.max(0, el.e));
+  const e = Math.min(MAX_ECCENTRICITY, Math.max(0, el.e));
   const E = eccentricAnomaly(el.M * RAD, e);
   /* `perifocalX` and `perifocalY`, inline: this runs for every body every frame. */
   const xp = el.a * (Math.cos(E) - e);
@@ -162,57 +165,42 @@ export function keplerPosition(el: Elements, out: Vec3 = [0, 0, 0]): Vec3 {
   return toScene(xp, yp, el.i, el.omega, el.node, out);
 }
 
-/** Write the orbit ellipse sampled by true anomaly into a flat XYZ buffer. */
-export function writeOrbit(out: Float32Array, el: Elements, elliptical: boolean) {
-  const segments = out.length / 3 - 1;
-  const e = elliptical ? Math.min(0.995, Math.max(0, el.e)) : 0;
+/**
+ * An orbit's ellipse in the scene frame: its size, shape and plane, and the body's eccentric
+ * anomaly on it. A point at eccentric anomaly E is `p · a (cos E − e) + q · a √(1 − e²) sin E`
+ * from the focus.
+ */
+export type OrbitShape = {
+  /** Semi-major axis, in the unit of the elements' `a`. */
+  a: number;
+  e: number;
+  /** Perifocal axes, unit, scene frame: towards periapsis, and 90° on along the motion. */
+  p: Vec3;
+  q: Vec3;
+  /** The body's eccentric anomaly, radians: a line drawn from there meets the body. */
+  E: number;
+};
+
+/** An empty shape to write into. */
+export const orbitShapeOf = (): OrbitShape => ({
+  a: 0,
+  e: 0,
+  p: [1, 0, 0],
+  q: [0, 0, -1],
+  E: 0,
+});
+
+/**
+ * The ellipse `keplerPosition` moves a body along (the same clamp below 1), the body where
+ * `keplerPosition` puts it; with `elliptical` false, a circle of radius `a` in the ecliptic.
+ */
+export function orbitShape(el: Elements, elliptical: boolean, out = orbitShapeOf()): OrbitShape {
+  const e = elliptical ? Math.min(MAX_ECCENTRICITY, Math.max(0, el.e)) : 0;
   const i = elliptical ? el.i : 0;
-  const p = el.a * (1 - e * e);
-  // The orbital plane does not change between vertices. Rotate its basis once.
-  const xAxis = toScene(1, 0, i, el.omega, el.node, [0, 0, 0]);
-  const yAxis = toScene(0, 1, i, el.omega, el.node, [0, 0, 0]);
-  for (let s = 0; s <= segments; s += 1) {
-    const nu = (s / segments) * Math.PI * 2;
-    const cos = Math.cos(nu);
-    const r = p / (1 + e * cos);
-    const x = r * cos;
-    const y = r * Math.sin(nu);
-    out[s * 3] = xAxis[0] * x + yAxis[0] * y;
-    out[s * 3 + 1] = xAxis[1] * x + yAxis[1] * y;
-    out[s * 3 + 2] = xAxis[2] * x + yAxis[2] * y;
-  }
-}
-
-/**
- * A float32 vertex keeps 24 bits: a change that moves it by less than one part in 2²⁴ of the
- * orbit's size cannot move it, so the buffer stays. A vertex moves by a·Δe for e, and by
- * a·Δθ (radians) for an angle, so the angles in degrees compare on one radian's worth.
- */
-const unmoved = (from: number, to: number, scale: number) =>
-  Math.abs(to - from) <= scale * 2 ** -24;
-const RADIAN_DEG = 1 / RAD;
-
-/**
- * Mean anomaly moves a body along its orbit; it does not change the orbit geometry. Elements
- * that drift with the clock (the planets' secular rates) rewrite the buffer only once the
- * drift could move a vertex.
- */
-export function createOrbitWriter(out: Float32Array) {
-  let previous: { a: number; e: number; i: number; omega: number; node: number } | undefined;
-  return (el: Elements, elliptical: boolean) => {
-    const e = elliptical ? Math.min(0.995, Math.max(0, el.e)) : 0;
-    const i = elliptical ? el.i : 0;
-    if (
-      previous &&
-      unmoved(previous.a, el.a, Math.abs(el.a)) &&
-      unmoved(previous.e, e, 1) &&
-      unmoved(previous.i, i, RADIAN_DEG) &&
-      unmoved(previous.omega, el.omega, RADIAN_DEG) &&
-      unmoved(previous.node, el.node, RADIAN_DEG)
-    )
-      return false;
-    writeOrbit(out, el, elliptical);
-    previous = { a: el.a, e, i, omega: el.omega, node: el.node };
-    return true;
-  };
+  out.a = el.a;
+  out.e = e;
+  toScene(1, 0, i, el.omega, el.node, out.p);
+  toScene(0, 1, i, el.omega, el.node, out.q);
+  out.E = eccentricAnomaly(el.M * RAD, e);
+  return out;
 }
