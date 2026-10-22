@@ -103,7 +103,10 @@ test("gaussian deviates are standard normal and onSphere directions are uniform 
 });
 
 test("log controls retain finite endpoints and midpoints across extreme and narrow ranges", () => {
-  for (const [min, max] of [[1e-300, 1e300], [1, 1 + Number.EPSILON]]) {
+  for (const [min, max] of [
+    [1e-300, 1e300],
+    [1, 1 + Number.EPSILON],
+  ]) {
     assert.equal(fromLogFraction(0, min, max), min);
     assert.equal(fromLogFraction(1, min, max), max);
     assert.equal(toLogFraction(min, min, max), 0);
@@ -111,7 +114,12 @@ test("log controls retain finite endpoints and midpoints across extreme and narr
   }
   close(toLogFraction(1, 1e-300, 1e300), 0.5);
   close(fromLogFraction(0.5, 1e-300, 1e300), 1);
-  for (const [min, max] of [[NaN, 2], [1, Infinity], [-1, 2], [1, 1]]) {
+  for (const [min, max] of [
+    [NaN, 2],
+    [1, Infinity],
+    [-1, 2],
+    [1, 1],
+  ]) {
     assert.throws(() => fromLogFraction(0.5, min, max), RangeError);
     assert.throws(() => toLogFraction(1, min, max), RangeError);
   }

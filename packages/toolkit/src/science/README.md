@@ -74,8 +74,10 @@ way. `Formula` is the print-only view documents use.
 ## Relativity (`relativity.ts`)
 
 Special relativity for a ship that flies at a real fraction of c. The state is the proper
-velocity u = γβc in km/s (scalar, or any `{x, y, z}` as `Vector3Like`): unbounded, so |β| < 1 by
-construction, and du/dτ = a under thrust. Distances are km, times s, accelerations m s⁻².
+velocity u = γβc in km/s (scalar, or any `{x, y, z}` as `Vector3Like`): unbounded, with
+|β| < 1 mathematically (floating-point β can round to 1). Under collinear thrust, du/dt = a
+uses coordinate time t; d(rapidity)/dτ = a/c uses proper time τ. Distances are km, times s,
+accelerations m s⁻².
 
 - `gammaOf(u)` and `betaOf(u)` (a magnitude, or with `out` the β vector), `properVelocity(β)`.
 - `relativisticDoppler(β, γ, cos θ)` = ν_obs/ν_src = γ(1 + β cos θ) with θ in the source frame;

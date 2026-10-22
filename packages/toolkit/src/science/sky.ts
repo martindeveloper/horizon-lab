@@ -4,6 +4,7 @@
  * Algorithms, 2nd ed., 1998). Angles are degrees; azimuth runs from north
  * through east. No nutation, aberration or refraction.
  */
+import { clamp } from "../math";
 import { RAD_PER_DEG as RAD } from "./constants";
 import { J2000_JD, JULIAN_CENTURY_DAYS, julianDay } from "./time";
 
@@ -28,7 +29,7 @@ export function precess(ra: number, dec: number, date: Date) {
   const A = Math.cos(d) * Math.sin(a);
   const B = Math.cos(th) * Math.cos(d) * Math.cos(a) - Math.sin(th) * Math.sin(d);
   const C = Math.sin(th) * Math.cos(d) * Math.cos(a) + Math.cos(th) * Math.sin(d);
-  return { ra: Math.atan2(A, B) / RAD + z, dec: Math.asin(C) / RAD };
+  return { ra: Math.atan2(A, B) / RAD + z, dec: Math.asin(clamp(C, -1, 1)) / RAD };
 }
 
 /** Ecliptic longitude and latitude to right ascension and declination (Meeus 13.3–13.4). */
@@ -37,7 +38,9 @@ export function eclipticToEquatorial(longitude: number, latitude: number, obliqu
   const b = latitude * RAD;
   const e = obliquity * RAD;
   const ra = Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l)) / RAD;
-  const dec = Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l)) / RAD;
+  const dec =
+    Math.asin(clamp(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l), -1, 1)) /
+    RAD;
   return { ra, dec };
 }
 
@@ -50,7 +53,7 @@ export function toHorizontal(ra: number, declination: number, lst: number, latit
   const y = Math.sin(ha);
   const x = Math.cos(ha) * Math.sin(lat) - Math.tan(dec) * Math.cos(lat);
   return {
-    altitude: Math.asin(sinAlt) / RAD,
+    altitude: Math.asin(clamp(sinAlt, -1, 1)) / RAD,
     azimuth: (Math.atan2(y, x) / RAD + 180 + 360) % 360,
   };
 }
@@ -86,7 +89,9 @@ export function equatorialToGalactic(ra: number, dec: number) {
   const d = dec * RAD;
   const dp = GALACTIC_POLE.dec * RAD;
   const da = (ra - GALACTIC_POLE.ra) * RAD;
-  const b = Math.asin(Math.sin(d) * Math.sin(dp) + Math.cos(d) * Math.cos(dp) * Math.cos(da));
+  const b = Math.asin(
+    clamp(Math.sin(d) * Math.sin(dp) + Math.cos(d) * Math.cos(dp) * Math.cos(da), -1, 1),
+  );
   const y = Math.cos(d) * Math.sin(da);
   const x = Math.sin(d) * Math.cos(dp) - Math.cos(d) * Math.sin(dp) * Math.cos(da);
   const l = GALACTIC_POLE.lNcp - Math.atan2(y, x) / RAD;

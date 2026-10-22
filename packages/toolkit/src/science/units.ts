@@ -139,5 +139,5 @@ export function convert(value: number, from: UnitId, to: UnitId) {
   const b = UNITS[to];
   if (a.dimension !== b.dimension)
     throw new TypeError(`Cannot convert ${a.dimension} (${from}) to ${b.dimension} (${to})`);
-  return (value * a.factor) / b.factor;
+  return value * (a.factor / b.factor);
 }

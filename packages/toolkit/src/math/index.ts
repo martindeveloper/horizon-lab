@@ -35,9 +35,7 @@ function checkLogRange(min: number, max: number) {
 }
 function logRatio(value: number, base: number) {
   const ratio = value / base;
-  return ratio > 0 && Number.isFinite(ratio)
-    ? Math.log(ratio)
-    : Math.log(value) - Math.log(base);
+  return ratio > 0 && Number.isFinite(ratio) ? Math.log(ratio) : Math.log(value) - Math.log(base);
 }
 export function toLogFraction(value: number, min: number, max: number) {
   checkLogRange(min, max);

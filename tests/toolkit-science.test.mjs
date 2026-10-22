@@ -76,7 +76,7 @@ test("distance units convert through exact IAU definitions and read out consiste
   assert.ok(Math.abs(PARSEC_AU - 206264.806) < 0.001);
   assert.ok(Math.abs(PARSEC_KM / 3.0857e13 - 1) < 1e-4, "a parsec is 3.0857 × 10¹³ km");
   assert.ok(Math.abs(convertDistance(1, "pc", "ly") - 3.26156) < 1e-5);
-  assert.equal(convertDistance(convertDistance(42, "ly", "au"), "au", "ly"), 42);
+  near(convertDistance(convertDistance(42, "ly", "au"), "au", "ly"), 42, 1e-12);
   assert.throws(() => convertDistance(Number.NaN, "au", "ly"), RangeError);
 
   assert.deepEqual(readout(5.374), { mantissa: 5.374, exponent: 0, digits: 2 });
@@ -615,4 +615,17 @@ test("cosmology inverses bracket early sources without silently capping redshift
     assert.equal(redshiftAtLookback(cosmicAgeAtRedshiftGyr(0, model), model), Infinity);
     assert.equal(cosmicAgeAtRedshiftGyr(Infinity, model), 0);
   }
+});
+
+test("sky coordinates remain finite at the zenith and nadir across latitudes", () => {
+  for (let latitude = -89.9; latitude < 90; latitude += 0.1) {
+    near(toHorizontal(0, latitude, 0, latitude).altitude, 90, 2e-6);
+    near(toHorizontal(180, -latitude, 0, latitude).altitude, -90, 2e-6);
+  }
+});
+
+test("unit conversion avoids intermediate overflow for finite results", () => {
+  assert.equal(convert(1e308, "km", "km"), 1e308);
+  near(convert(1e308, "km", "au") / 1e308, 1 / AU_KM, 1e-23);
+  assert.equal(convert(-1e308, "km", "km"), -1e308);
 });

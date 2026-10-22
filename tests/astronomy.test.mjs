@@ -33,6 +33,8 @@ import {
   NEIGHBOURS,
   closestApproach,
   neighbourDistanceLy,
+  neighbourPosition,
+  neighbourSeparationAu,
 } from "../src/space/galaxy/model/neighbours.ts";
 import { GALACTIC_YEAR, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
 
@@ -255,4 +257,28 @@ test("the Sun's galactic orbit closes once per galactic year", () => {
   const lap = sunGalactic(GALACTIC_YEAR);
   near(Math.atan2(-lap[2], lap[0]), 0, 1e-9, "back after one lap");
   near(galacticLaps(0), SUN_BIRTH / GALACTIC_YEAR, 1e-12);
+});
+
+test("neighbour tracks have a stationary distance minimum and preserve output buffers", () => {
+  for (const star of NEIGHBOURS) {
+    const { yearsAgo, ly } = closestApproach(star);
+    const out = [NaN, NaN, NaN];
+    assert.equal(neighbourPosition(star, yearsAgo, out), out);
+    const before = neighbourPosition(star, yearsAgo - 100);
+    const after = neighbourPosition(star, yearsAgo + 100);
+    for (let k = 0; k < 3; k++) near((before[k] + after[k]) / 2, out[k], 1e-9);
+    const velocity = after.map((v, k) => (v - before[k]) / 200);
+    const cosine =
+      out.reduce((sum, v, k) => sum + v * velocity[k], 0) /
+      (Math.hypot(...out) * Math.hypot(...velocity));
+    near(cosine, 0, 1e-10);
+    assert.ok(neighbourDistanceLy(star, yearsAgo - 100) > ly);
+    assert.ok(neighbourDistanceLy(star, yearsAgo + 100) > ly);
+    near(
+      neighbourDistanceLy(star, yearsAgo - 100),
+      neighbourDistanceLy(star, yearsAgo + 100),
+      1e-12,
+    );
+    assert.equal(neighbourSeparationAu(star, star, yearsAgo), 0);
+  }
 });
