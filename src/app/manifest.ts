@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { BROWSER_THEME_COLOR } from "@/lib/metadata";
 import { PAGE_URLS, PUBLIC_ASSETS } from "@/lib/urls";
 
 import messages from "../messages/en.json";
@@ -12,8 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: messages.metadataDescription,
     start_url: PAGE_URLS.home,
     display: "standalone",
-    background_color: "#08080b",
-    theme_color: "#08080b",
+    background_color: BROWSER_THEME_COLOR,
+    theme_color: BROWSER_THEME_COLOR,
     icons: [
       { src: PUBLIC_ASSETS.favicon, sizes: "any", type: "image/svg+xml" },
       { src: PUBLIC_ASSETS.icon192, sizes: "192x192", type: "image/png" },

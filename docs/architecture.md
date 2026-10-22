@@ -62,7 +62,7 @@ src/
       styles.css               Scoped feature styles
     orrery/
       index.ts                 Public client entry: OrreryApp
-      manifest.ts, routing.ts, server.ts, technical.json
+      manifest.ts, routing.ts, server.ts, technical.ts
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
       components/              HUD overlay, selection cards, canvas host
       components/overlay.tsx   Overlay composition; panels, cards and the time dock beside it
@@ -92,7 +92,7 @@ src/
       lib/store.ts             Zustand store (orrery namespace messages)
     deep-field/
       index.ts                 Public client entry: DeepFieldApp
-      manifest.ts, routing.ts, server.ts, technical.json
+      manifest.ts, routing.ts, server.ts, technical.ts
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
       components/              Overlay, depth ladder, sightline, guide caption, the Objects
                                and Settings panels, cards, canvas host
@@ -104,7 +104,7 @@ src/
         depth.ts               The ladder's log scale and the sightline (distance,
                                light-travel time, redshift, Earth when the light set out)
         tour.ts                The guided journey, planets to the first light: its shots
-        equations.ts           The formulas technical.json prints, gathered from the worlds
+        equations.ts           The formulas technical.ts prints, gathered from the worlds
         catalogue/             The shared catalogues composed as the cards read them, and the
                                figures the technical notes quote (PROSE_FIGURES)
       lib/graphics/looks.ts    The bright-star sky's points and the shared worlds' looks on one
@@ -121,7 +121,7 @@ src/
                                selection are the shared worlds' (src/space/galaxy/show.ts)
     spectroscopy/
       index.ts                 Public client entry: SpectroscopyApp
-      manifest.ts, routing.ts, server.ts, technical.json
+      manifest.ts, routing.ts, server.ts, technical.ts
       components/              The stage (scene canvas and spectrum), dock, line card with its
                                level diagram and curves, Elements and Display panels, guide;
                                spectrum-view/ keeps the ribbon, plot, labels and gestures as
@@ -161,7 +161,7 @@ src/
       lib/store.ts             Zustand store (spectroscopy namespace messages)
     giants/
       index.ts                 Public client entry: GiantsApp
-      manifest.ts, routing.ts, server.ts, technical.json
+      manifest.ts, routing.ts, server.ts, technical.ts
       components/              Canvas with the bodies' names, overlay, dock (the ladder as a
                                slider, the ruler), card with light circling at true speed,
                                Bodies and Display panels, guide
@@ -202,7 +202,7 @@ src/
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     sun/
       index.ts                 Public client entry: SunApp
-      manifest.ts, routing.ts, server.ts, technical.json
+      manifest.ts, routing.ts, server.ts, technical.ts
       components/              Canvas (the scene's names), overlay, dock (the places in view, the
                                light, the clock, the view's own slider: the cut, the eruption, the
                                cycle; Parker's readout), the Places finder and Settings panels, the
@@ -231,7 +231,7 @@ src/
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     voyage/
       index.ts                 Public client entry: VoyageApp
-      manifest.ts, routing.ts, server.ts, technical.json
+      manifest.ts, routing.ts, server.ts, technical.ts
       components/              Overlay, the flight dock (clocks, hold, rate, drive), the Objects
                                and Settings panels, cards, guide caption, canvas host
       lib/model/               The ship and its world:
@@ -677,15 +677,17 @@ scene and gives it all back.
 
 ## Technical documentation
 
-Each simulation should own a `technical.json` specification (section IDs, equations,
+Each simulation should own a `technical.ts` specification (section IDs, equations,
 and source references) and localized prose in its feature message namespace.
+Reference URLs come from `@horizon/toolkit/urls` so the app and documentation share
+the same destinations.
 `packages/toolkit/src/ui/technical-details.tsx` renders an already localized
 `TechnicalDocument` in a native modal with shared UI tokens; it does not import
 feature state or physics. The feature adapter resolves the message keys.
 Keep these documents out of the lightweight catalogue manifest.
 
 For black-hole, `npm run docs:generate` produces the feature README from the same
-JSON, English messages, and preset definitions; `npm run docs:check` detects drift.
+specification, English messages, and preset definitions; `npm run docs:check` detects drift.
 All preset subpages share one renderer, so its README lists their configuration
 differences rather than repeating the technical explanation for each preset. Explain executed algorithms and approximations;
 do not infer capabilities from lesson captions or comments alone.
@@ -935,7 +937,7 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
 
 - **Formulas are written once.** Shared laws live in the toolkit; a simulation's
   own go in `src/features/<slug>/lib/equations.ts` via `defineEquation`. Its
-  `physics` code computes with them, and `technical.json` references them as
+  `physics` code computes with them, and `technical.ts` references them as
   `{ "equation": "<id>" }` instead of retyping the text. The technical-details
   adapter prints `toString()`; the generated README prints `toLatex()` in math
   blocks. Pass the feature's registry to `SimulationTechnicalDetails`.
@@ -977,7 +979,7 @@ Write the astronomical unit as `au` (IAU 2012 Resolution B2).
   `tests/deep-field.test.mjs` check sources, units, statuses and rendering in both
   languages; `tests/simulation-shared.test.mjs` checks every card message's placeholders.
 - Shader-only steps, vector rotations and sampling recipes stay as plain text in
-  `technical.json`.
+  `technical.ts`.
 - **Shaders type no numbers either.** A lab's shader parameters live in its
   TypeScript (`lib/parameters.ts`; the solar system and the Orrery collect theirs in
   `graphics/shader-defines.ts`) and are written by `npm run shaders:generate` into a

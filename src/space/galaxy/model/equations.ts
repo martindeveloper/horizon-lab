@@ -20,8 +20,8 @@ import {
 
 /**
  * The Galaxy model's formulas, each written once: the model computes with them, a host's
- * `technical.json` prints them by ID, and tests check them. Sampling recipes stay as text in
- * the host's `technical.json`.
+ * `technical.ts` prints them by ID, and tests check them. Sampling recipes stay as text in
+ * the host's `technical.ts`.
  */
 
 /** Numbers inside printed formulas: "27,000", "4.567". */

@@ -60,7 +60,9 @@ export function SolarActivityControls() {
         {enabled ? <> · {t("description")}</> : null}
       </p>
       {enabled && (reduced || paused) ? (
-        <p className="mt-1 text-xs text-fg-secondary">{reduced ? t("reducedMotion") : t("paused")}</p>
+        <p className="mt-1 text-xs text-fg-secondary">
+          {reduced ? t("reducedMotion") : t("paused")}
+        </p>
       ) : null}
     </div>
   );

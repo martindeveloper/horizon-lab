@@ -8,7 +8,7 @@ const n = (value: number, digits = 4) =>
 
 /**
  * The observatory's formulas, each written once: `physics.ts` computes with
- * them, `technical.json` prints them by ID, and tests check them. Radii are in
+ * them, `technical.ts` prints them by ID, and tests check them. Radii are in
  * geometric units of M (G = c = 1); `a` is the dimensionless spin.
  */
 
@@ -187,7 +187,7 @@ export const rainFallSpeed = defineEquation({
   compute: ({ r }) => -(1 - 2 / r) * Math.sqrt(2 / r),
 });
 
-/** Every formula `technical.json` may reference by ID. */
+/** Every formula `technical.ts` may reference by ID. */
 export const BLACK_HOLE_EQUATIONS = Object.fromEntries<Formula>(
   [
     schwarzschildRadius,

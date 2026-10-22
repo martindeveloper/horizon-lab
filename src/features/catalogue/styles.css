@@ -15,17 +15,39 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(to top, color-mix(in srgb, var(--color-space) 70%, transparent), color-mix(in srgb, var(--color-space) 25%, transparent) 40%, transparent 65%),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-space) 35%, transparent), transparent 30%);
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-space) 70%, transparent),
+      color-mix(in srgb, var(--color-space) 25%, transparent) 40%,
+      transparent 65%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-space) 35%, transparent),
+      transparent 30%
+    );
 }
 
 /* An experience has no panel: the scene darkens toward the foot, where its copy stands, and
    more toward the left, under the title. */
 .simulation-tile[data-kind="experience"] .catalogue-art::after {
   background:
-    linear-gradient(to top, color-mix(in srgb, var(--color-space) 94%, transparent), color-mix(in srgb, var(--color-space) 62%, transparent) 38%, transparent 72%),
-    linear-gradient(to right, color-mix(in srgb, var(--color-space) 60%, transparent), transparent 60%),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-space) 35%, transparent), transparent 30%);
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-space) 94%, transparent),
+      color-mix(in srgb, var(--color-space) 62%, transparent) 38%,
+      transparent 72%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-space) 60%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-space) 35%, transparent),
+      transparent 30%
+    );
 }
 
 /* An experience's art drifts slowly, as a film's opening shot does; a lab's holds still.
@@ -300,7 +322,8 @@ a:focus-visible > .experience-play {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   box-shadow:
-    inset calc(var(--moon-lx, 0) * -1px) calc(var(--moon-ly, -1) * -1px) 0 color-mix(in srgb, var(--color-highlight) 18%, transparent),
+    inset calc(var(--moon-lx, 0) * -1px) calc(var(--moon-ly, -1) * -1px) 0
+      color-mix(in srgb, var(--color-highlight) 18%, transparent),
     0 0 calc(var(--moon-d) * 1.2) calc(var(--moon-d) * -0.1)
       rgb(var(--moonlight) / calc(var(--moon-light, 0.5) * 0.28));
   opacity: 0;
@@ -346,7 +369,8 @@ a:focus-visible > .experience-play {
 }
 :root.light .hero-moon {
   box-shadow:
-    inset calc(var(--moon-lx, 0) * -1px) calc(var(--moon-ly, -1) * -1px) 0 color-mix(in srgb, var(--color-highlight) 90%, transparent),
+    inset calc(var(--moon-lx, 0) * -1px) calc(var(--moon-ly, -1) * -1px) 0
+      color-mix(in srgb, var(--color-highlight) 90%, transparent),
     0 0 0 0.5px color-mix(in srgb, var(--color-glass-ink) 18%, transparent);
 }
 :root.light .hero-moon::before {
@@ -357,7 +381,11 @@ a:focus-visible > .experience-play {
   );
 }
 :root.light .hero-moon-night {
-  fill: color-mix(in srgb, var(--color-glass-ink) calc(10% + var(--moon-earthshine, 0) * 4%), transparent);
+  fill: color-mix(
+    in srgb,
+    var(--color-glass-ink) calc(10% + var(--moon-earthshine, 0) * 4%),
+    transparent
+  );
 }
 :root.light .hero-moon-core {
   stop-color: var(--color-highlight);

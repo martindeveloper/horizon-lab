@@ -79,7 +79,9 @@ const LABS = {
   sun: "The Sun",
 };
 for (const [slug, title] of Object.entries(LABS)) {
-  const { references } = JSON.parse(read(`src/features/${slug}/technical.json`));
+  const {
+    default: { references },
+  } = await import(`../src/features/${slug}/technical.ts`);
   science.push({
     title,
     text: references.map(({ title, url }) => `${title}\n${url}`).join("\n\n"),

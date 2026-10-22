@@ -8,6 +8,9 @@ export const PAGE_URLS = {
   debugNotFound: "/horizon-debug-not-found",
 } as const;
 
+export const SIMULATION_PREFIX = "/lab";
+export const EXPERIENCE_PREFIX = "/experience";
+
 export const PUBLIC_ASSETS = {
   favicon: "/favicon.svg",
   faviconIco: "/favicon.ico",
@@ -33,6 +36,9 @@ export const SIMULATION_ASSETS = {
 } as const;
 
 export const MAPS_KEY = "/textures/bodies";
+
+/** Bucket folder of the built spacecraft models: `<key>/<id>/v<version>/<id>.glb`. */
+export const MODELS_KEY = "/models/spacecraft";
 
 const audioAssets = <const Id extends string>(id: Id) => ({
   opus: `/audio/${id}.webm` as const,

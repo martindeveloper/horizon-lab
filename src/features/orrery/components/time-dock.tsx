@@ -183,7 +183,9 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
                 "absolute h-4 rounded-sm text-[11px] leading-4 tracking-wide whitespace-nowrap transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
                 s.below ? "bottom-0" : "top-0",
                 end ? "-translate-x-full pr-2" : "pl-2",
-                s.id === epoch ? "font-medium text-accent" : "text-fg-tertiary hover:text-fg-primary",
+                s.id === epoch
+                  ? "font-medium text-accent"
+                  : "text-fg-tertiary hover:text-fg-primary",
               )}
             >
               {t(`epochs.${s.id}`, figures)}

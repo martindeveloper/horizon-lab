@@ -1,5 +1,6 @@
 import { assetUrl } from "@/lib/assets";
 import type { Value } from "@/lib/facts";
+import { MODELS_KEY } from "@/lib/urls";
 import { keysOf } from "@horizon/toolkit/records";
 import { CREDIT_URLS, DOWNLOAD_URLS } from "@horizon/toolkit/urls";
 
@@ -165,8 +166,7 @@ export const SPACECRAFT_IDS = keysOf(SPACECRAFT);
 export const spacecraftFrame = (id: SpacecraftId) =>
   SPACECRAFT[id].face.across.value * SPACECRAFT[id].frame;
 
-/** Bucket folder of the built models: `<key>/<id>/v<version>/<id>.glb`. */
-export const MODELS_KEY = "/models/spacecraft";
+export { MODELS_KEY } from "@/lib/urls";
 
 /** A model's file under `base`, the CDN or the local mirror (no trailing slash). */
 export const spacecraftFile = (base: string, id: SpacecraftId) =>

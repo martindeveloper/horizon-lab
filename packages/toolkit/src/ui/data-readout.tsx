@@ -51,8 +51,15 @@ export function DataReadout({ items, variant = "grid", className, ...props }: Da
     <dl className={cn("grid grid-cols-3 gap-x-4 gap-y-3", className)} {...props}>
       {items.map((item) => (
         <div key={item.id} className={cn("min-w-0", item.className)}>
-          <dt className="font-mono text-xs tracking-widest text-fg-tertiary uppercase">{item.label}</dt>
-          <dd className={cn("mt-0.5 font-mono text-xs text-fg-primary tabular-nums", item.valueClassName)}>
+          <dt className="font-mono text-xs tracking-widest text-fg-tertiary uppercase">
+            {item.label}
+          </dt>
+          <dd
+            className={cn(
+              "mt-0.5 font-mono text-xs text-fg-primary tabular-nums",
+              item.valueClassName,
+            )}
+          >
             {item.value}
           </dd>
         </div>

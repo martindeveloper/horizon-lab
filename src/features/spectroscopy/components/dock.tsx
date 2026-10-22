@@ -109,9 +109,12 @@ function ElementTiles({
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */
               !outcome &&
-                (on ? "bg-accent/10 text-fg-primary ring-1 ring-accent/60 ring-inset" : outlineClass),
+                (on
+                  ? "bg-accent/10 text-fg-primary ring-1 ring-accent/60 ring-inset"
+                  : outlineClass),
               outcome && "spectroscopy-verdict",
-              outcome === "found" && "bg-accent/15 text-fg-primary ring-1 ring-accent/70 ring-inset",
+              outcome === "found" &&
+                "bg-accent/15 text-fg-primary ring-1 ring-accent/70 ring-inset",
               outcome === "missed" &&
                 "text-accent outline-1 -outline-offset-1 outline-accent/80 outline-dashed",
               outcome === "unseen" && "text-danger ring-1 ring-danger/60 ring-inset",

@@ -63,7 +63,9 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
                   className={cn(
                     "relative h-9 rounded-full px-3.5 text-xs transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
                     "after:absolute after:inset-x-0 after:-inset-y-1",
-                    i === active ? "bg-fg-primary/10 font-medium text-fg-primary" : "text-fg-secondary",
+                    i === active
+                      ? "bg-fg-primary/10 font-medium text-fg-primary"
+                      : "text-fg-secondary",
                   )}
                 >
                   {panel.label}

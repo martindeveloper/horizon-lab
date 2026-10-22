@@ -17,7 +17,7 @@ import {
   MEAN_MOLECULAR_WEIGHT,
   TEASPOON_M3,
 } from "../lib/parameters";
-import specification from "../technical.json";
+import specification from "../technical";
 
 /** A millilitre, m³: the teaspoon's volume as the notes word it. */
 const ML_M3 = 1e-6;

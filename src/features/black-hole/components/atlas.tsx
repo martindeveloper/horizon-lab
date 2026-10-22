@@ -71,7 +71,12 @@ function Marker({
             <span className={cn("size-1.5 rounded-full", active ? "bg-fg-primary" : "bg-accent")} />
           </>
         ) : (
-          <span className={cn("size-1 rounded-full", dim || active ? "bg-fg-primary" : "bg-fg-secondary")} />
+          <span
+            className={cn(
+              "size-1 rounded-full",
+              dim || active ? "bg-fg-primary" : "bg-fg-secondary",
+            )}
+          />
         )}
       </span>
       {showLabel ? (
@@ -123,7 +128,9 @@ function Fact({ site }: { site: AtlasSite }) {
         {kindBit}
         {copy.found}
       </Kicker>
-      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-fg-primary">{copy.name}</h3>
+      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-fg-primary">
+        {copy.name}
+      </h3>
       <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 font-mono text-xs text-fg-secondary">
         {site.ra !== "-" ? (
           <>

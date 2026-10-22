@@ -5,7 +5,7 @@ import {
 
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { VOYAGE_EQUATIONS } from "../lib/model/equations";
-import specification from "../technical.json";
+import specification from "../technical";
 
 export function VoyageTechnicalDetails(access: TechnicalDetailsAccess) {
   return (

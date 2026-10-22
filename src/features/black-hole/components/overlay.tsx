@@ -76,7 +76,9 @@ function Readout() {
 function FlowNotice({ className }: { className?: string }) {
   const t = useTranslations("blackHole");
   const flow = useBlackHole((s) => PRESETS.find((p) => p.id === s.presetId)?.illustrativeFlow);
-  return flow ? <p className={cn("text-xs text-fg-tertiary", className)}>{t("flowNotice")}</p> : null;
+  return flow ? (
+    <p className={cn("text-xs text-fg-tertiary", className)}>{t("flowNotice")}</p>
+  ) : null;
 }
 
 /** The story dock on wide screens; the settings rail ends above it where they would meet. */

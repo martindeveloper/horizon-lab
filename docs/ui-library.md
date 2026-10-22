@@ -117,15 +117,32 @@ standard declaration, which silently turns every glass surface opaque.
 
 Use semantic utilities instead of new hex colors:
 
-| Role                           | Utilities                                                                            |
-| ------------------------------ | ------------------------------------------------------------------------------------ |
-| Canvas / surfaces              | `bg-bg`, `bg-surface`, `bg-surface-2`                                                |
-| Text                           | `text-fg`, `text-muted`, `text-subtle`                                               |
-| Accent / focus / danger        | `text-accent`, `ring-ring`, `text-danger`                                            |
-| Borders                        | `border-border`, `border-border-strong`                                              |
-| Over the dark scene or artwork | `bg-space`, `text-space-fg`, `text-space-muted`, `text-solar` (theme-invariant gold) |
-| Body / editorial titles / data | `font-sans`, `font-display`, `font-mono tabular-nums`                                |
-| Hero and tile titles (30px+)   | `font-headline` (Bodoni Moda, weight 500, optical sizing)                            |
+| Role                            | Utilities                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| Page / raised / nested surfaces | `bg-surface-primary`, `bg-surface-secondary`, `bg-surface-tertiary`                  |
+| Main / supporting / quiet text  | `text-fg-primary`, `text-fg-secondary`, `text-fg-tertiary`                           |
+| Accent / focus / danger         | `text-accent`, `ring-ring`, `text-danger`                                            |
+| Filled actions                  | `bg-action`, `text-action-fg` (prefer the `action-fill` material)                    |
+| Borders                         | `border-border`, `border-border-strong`                                              |
+| Over the dark scene or artwork  | `bg-space`, `text-space-fg`, `text-space-muted`, `text-solar` (theme-invariant gold) |
+| Body / editorial titles / data  | `font-sans`, `font-display`, `font-mono tabular-nums`                                |
+| Hero and tile titles (30px+)    | `font-headline` (Bodoni Moda, weight 500, optical sizing)                            |
+
+`theme.css` owns these colors and their light-theme overrides. Primary, secondary,
+and tertiary describe hierarchy separately for text and surfaces; accent, action,
+focus, and danger keep their own meanings. Use opacity modifiers for faint edges
+and fills, or `color-mix(in srgb, var(--color-…), transparent)` in CSS. Glass
+materials compose shared `highlight`, `shadow`, and `glass-ink` pigments; choose
+the existing glass material before inventing another fill or shadow.
+
+The old `fg`/`muted`/`subtle` and `bg`/`surface`/`surface-2` utilities remain
+compatibility aliases. New code uses the explicit hierarchy, including scoped
+palettes such as Voyage's holographic display. Direct canvas labels read the
+invariant `--color-space-*` and `--color-solar` tokens after mounting. `--solar`
+is decorative gold that adapts to the theme; `--scene-solar` is its fixed scene
+counterpart. Scientific color maps, spectra, body colors, and authored cockpit
+materials stay with their simulation. Static browser metadata and numeric WebGL
+scene constants retain their serialized forms; neither depends on a browser theme.
 
 The app layout loads IBM Plex Sans, IBM Plex Mono, and Bodoni Moda. Bodoni Moda
 is the headline voice, after the engraved star atlases: only the catalogue hero,
@@ -248,7 +265,7 @@ the glass to refract. Filled calls to action use `action-fill` (`--color-action`
 solar in the dark, ink glass with solar text in light; gold otherwise stays on lines
 and `text-accent`. `bg-space`, `text-space-fg`, and `text-space-muted` are invariant:
 use them for space canvases and text drawn directly over space. `hud-title` also
-stays light. Use the normal `fg`/`muted`/`subtle` palette for panel contents.
+stays light (`--color-space-title`). Use `fg-primary`/`fg-secondary`/`fg-tertiary` for panel contents.
 `VisualizationShell` uses `bg-space`. Do not invert canvas pixels or shaders.
 The theme is class-based; Tailwind's `dark:` variant follows the same class.
 

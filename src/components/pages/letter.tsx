@@ -9,7 +9,9 @@ import { HorizonMark } from "../shell/brand";
 export const letterGrid = "lg:grid lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-x-14";
 
 /** The title's quieter half: `<em>` in the message, muted on the page. */
-export const letterEmphasis = (chunks: ReactNode) => <span className="text-fg-secondary">{chunks}</span>;
+export const letterEmphasis = (chunks: ReactNode) => (
+  <span className="text-fg-secondary">{chunks}</span>
+);
 
 export function LetterHeader({
   id,

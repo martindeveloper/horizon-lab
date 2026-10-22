@@ -31,7 +31,7 @@ export type TechnicalDetailsAccess = {
   triggerClassName?: string;
 };
 
-/** Feature modules own their JSON; this adapter only supplies the common translation mapping. */
+/** Feature modules own their specifications; this adapter only supplies the common translation mapping. */
 export function SimulationTechnicalDetails({
   ref,
   triggerClassName,

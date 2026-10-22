@@ -12,7 +12,10 @@ export function HorizonMark({ className }: { className?: string }) {
 
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2 text-fg-primary", className)} data-brand="horizon">
+    <span
+      className={cn("inline-flex items-center gap-2 text-fg-primary", className)}
+      data-brand="horizon"
+    >
       <HorizonMark className="text-fg-secondary" />
       <span className="text-[15px] font-semibold tracking-[-0.01em]">Horizon</span>
     </span>

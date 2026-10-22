@@ -1,5 +1,5 @@
 /**
- * Voyage's formulas as `technical.json` prints them by ID: each computes through the model's
+ * Voyage's formulas as `technical.ts` prints them by ID: each computes through the model's
  * own function (`irradianceAt`, the toolkit's `torchTrip`), so there is one of each.
  */
 import {
@@ -53,7 +53,7 @@ export const torchTrip = defineEquation({
   compute: ({ D }) => torchTripClocks(D, STANDARD_GRAVITY).tau,
 });
 
-/** Every formula Voyage's `technical.json` may reference by ID. */
+/** Every formula Voyage's `technical.ts` may reference by ID. */
 export const VOYAGE_EQUATIONS = Object.fromEntries<Formula>(
   [
     keplerThirdLaw,

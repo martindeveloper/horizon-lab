@@ -95,7 +95,10 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
               >
                 <span
                   aria-hidden
-                  className={cn("size-1.5 rounded-full", i === index ? "bg-fg-primary" : "bg-fg-primary/50")}
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    i === index ? "bg-fg-primary" : "bg-fg-primary/50",
+                  )}
                 />
               </button>
             ))}

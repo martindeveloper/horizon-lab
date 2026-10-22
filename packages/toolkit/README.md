@@ -48,6 +48,8 @@ references, attribution and licence links, source downloads, and Horizon deploym
 defaults. Its named constant groups have no dependencies or environment reads, so
 Node scripts and browser code can share them without loading rendering modules.
 Consumers retain environment overrides and construct request paths and queries.
+Simulation `technical.ts` specifications import these constants for their references;
+the app and generated documentation use those same specifications.
 Documentation, generated datasets, third-party licence text, SVG namespaces and
 the benchmark’s local intercepted origin are not external link configuration.
 

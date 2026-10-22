@@ -7,7 +7,7 @@ import { SUN_EQUATIONS } from "@/space/sun/equations";
 
 import { PLACE_IDS } from "../lib/model/places";
 import { VIEW_IDS } from "../lib/model/views";
-import specification from "../technical.json";
+import specification from "../technical";
 
 export function SunTechnicalDetails(access: TechnicalDetailsAccess) {
   return (

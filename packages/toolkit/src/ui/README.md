@@ -86,6 +86,29 @@ catalogue and `examples/visualization-example.tsx` for composition.
   each letter's fade. Its reading cadence and total stagger cap are independent of
   the control fade duration. Reduced motion and `instant` render full text immediately.
 
+## Colors
+
+`theme.css` owns the palette in both themes. Text uses `fg-primary`, `fg-secondary`
+and `fg-tertiary` for main, supporting and quiet copy. Surfaces use
+`surface-primary`, `surface-secondary` and `surface-tertiary` for the page, raised
+containers and nested fills. Apply them with Tailwind (`text-fg-secondary`,
+`bg-surface-primary`) or their `--color-<role>` custom properties.
+
+`accent`, `action`/`action-fg`, `ring`, `danger` and `border`/`border-strong` remain
+semantic roles. Prefer the shared glass materials and `action-fill` for controls.
+Their highlights, shadows and glass rims use invariant `highlight`, `shadow` and
+`glass-ink` pigments with alpha, rather than repeating literal colors.
+
+`space`, `space-fg`, `space-title`, `space-muted`, `solar`, `on-solar` and
+`space-danger` stay fixed over astronomical scenes. Canvas UI can read them from
+the mounted element with `getComputedStyle`; physical spectra and authored scene
+materials keep their own colors. `--solar` is the theme-adaptive decorative RGB
+triple; `--scene-solar` is the invariant gold used by `--color-solar`.
+
+The old `fg`/`muted`/`subtle` and `bg`/`surface`/`surface-2` utilities remain as
+inline compatibility aliases. New components and scoped theme overrides use the
+explicit hierarchy. Theme choice and providers remain the host's responsibility.
+
 ## Motion
 
 `theme.css` owns the four UI durations: `feedback` (150 ms), `control` (300 ms),

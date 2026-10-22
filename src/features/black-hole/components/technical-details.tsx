@@ -5,7 +5,7 @@ import {
 
 import { BLACK_HOLE_EQUATIONS } from "../lib/equations";
 import { BLACK_HOLE_COPY } from "../lib/parameters";
-import specification from "../technical.json";
+import specification from "../technical";
 
 export function BlackHoleTechnicalDetails(access: TechnicalDetailsAccess) {
   return (

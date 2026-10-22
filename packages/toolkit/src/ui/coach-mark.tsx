@@ -532,7 +532,10 @@ export function CoachMark({
           >
             <ChevronLeft className="size-4" />
           </button>
-          <span aria-hidden className="ml-auto hidden font-mono text-[10px] text-fg-secondary md:inline">
+          <span
+            aria-hidden
+            className="ml-auto hidden font-mono text-[10px] text-fg-secondary md:inline"
+          >
             ← →
           </span>
           <button

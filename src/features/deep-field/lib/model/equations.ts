@@ -1,5 +1,5 @@
 /**
- * Every formula Deep Field's `technical.json` may reference by ID: the toolkit's laws, the
+ * Every formula Deep Field's `technical.ts` may reference by ID: the toolkit's laws, the
  * solar system's, the Galaxy's (`@/space/galaxy/model/equations`) and the cosmic map's. Each is
  * written once where its model computes with it; tests check them there.
  */

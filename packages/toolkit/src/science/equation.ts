@@ -13,7 +13,7 @@ export type Variable = {
 
 /** `V` names every variable, `O` the result; the inputs are the rest. */
 export type EquationSpec<V extends string, O extends V> = {
-  /** Stable ID that documents (technical.json) can reference. */
+  /** Stable ID that documents (technical.ts) can reference. */
   id: string;
   /** Unicode text for the UI; several lines allowed. */
   text: string;

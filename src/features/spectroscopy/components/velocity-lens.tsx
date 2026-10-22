@@ -80,7 +80,9 @@ export function VelocityLens({ step }: { step: ReactNode }) {
     >
       <div className="flex h-5 items-center justify-between gap-3 text-xs">
         <span className="text-fg-secondary">{step}</span>
-        <span className="font-mono text-fg-primary tabular-nums">{line ? kms(velocity) : null}</span>
+        <span className="font-mono text-fg-primary tabular-nums">
+          {line ? kms(velocity) : null}
+        </span>
       </div>
       {/* One shape whether or not there is a line to measure yet, so marking the first element
           never changes the dock's height. */}

@@ -63,8 +63,22 @@ export function LevelDiagram({
           </text>
         </>
       ) : null}
-      <line x1={70} x2={190} y1={lower} y2={lower} className="stroke-fg-primary" strokeWidth={1.4} />
-      <line x1={70} x2={190} y1={upper} y2={upper} className="stroke-fg-primary" strokeWidth={1.4} />
+      <line
+        x1={70}
+        x2={190}
+        y1={lower}
+        y2={lower}
+        className="stroke-fg-primary"
+        strokeWidth={1.4}
+      />
+      <line
+        x1={70}
+        x2={190}
+        y1={upper}
+        y2={upper}
+        className="stroke-fg-primary"
+        strokeWidth={1.4}
+      />
       <text
         x={64}
         y={lower + 3}

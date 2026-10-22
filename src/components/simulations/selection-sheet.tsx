@@ -96,7 +96,9 @@ export function SelectionSheet({
             )}
           </dl>
         ) : null}
-        {card.body ? <p className="text-sm leading-relaxed text-fg-primary/80">{card.body}</p> : null}
+        {card.body ? (
+          <p className="text-sm leading-relaxed text-fg-primary/80">{card.body}</p>
+        ) : null}
         {card.caution ? (
           <p className="flex gap-2 text-xs leading-relaxed text-fg-secondary">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />

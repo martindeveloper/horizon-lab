@@ -5,7 +5,7 @@ import {
 
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { DEEP_FIELD_EQUATIONS } from "../lib/model/equations";
-import specification from "../technical.json";
+import specification from "../technical";
 
 export function DeepFieldTechnicalDetails(access: TechnicalDetailsAccess) {
   return (

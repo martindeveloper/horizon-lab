@@ -5,7 +5,7 @@ import { CLEAR_DONE, GALACTIC_YEAR, GAS_DISK_LIFETIME, MODEL_START, SUN_BIRTH } 
 
 /**
  * The solar system model's formulas, each written once: the model computes with them, the
- * simulations' `technical.json` print them by ID, and tests check them.
+ * simulations' `technical.ts` print them by ID, and tests check them.
  */
 
 /** Numbers inside printed formulas: "27,000", "4.567". */

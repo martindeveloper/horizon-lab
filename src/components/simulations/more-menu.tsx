@@ -86,7 +86,9 @@ export function SceneMoreMenu({
               }}
               className="justify-start"
             >
-              <Icon className={cn("size-4 shrink-0", active ? "text-accent" : "text-fg-secondary")} />
+              <Icon
+                className={cn("size-4 shrink-0", active ? "text-accent" : "text-fg-secondary")}
+              />
               {name}
             </ListItem>
           ))}

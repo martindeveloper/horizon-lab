@@ -94,7 +94,9 @@ export function GiantsDock() {
         <div className="flex min-w-0 flex-1 flex-col">
           <span className={cn(kickerClass, "truncate")}>{kicker}</span>
           <span className="flex min-w-0 items-baseline gap-x-3 not-md:flex-col">
-            <span className="truncate font-display text-base leading-tight text-fg-primary">{name}</span>
+            <span className="truncate font-display text-base leading-tight text-fg-primary">
+              {name}
+            </span>
             <span className="truncate font-mono text-xs text-fg-secondary tabular-nums short:hidden">
               {figures.join("  ·  ")}
             </span>

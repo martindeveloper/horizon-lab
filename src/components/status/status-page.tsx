@@ -31,7 +31,13 @@ function StatusGlyph({ code }: { code: Code }) {
             strokeWidth="3"
             strokeDasharray="4 3"
           />
-          <circle cx="48" cy="48" r="14" className="fill-surface-primary stroke-accent" strokeWidth="1.5" />
+          <circle
+            cx="48"
+            cy="48"
+            r="14"
+            className="fill-surface-primary stroke-accent"
+            strokeWidth="1.5"
+          />
           <line x1="8" y1="48" x2="30" y2="48" className="stroke-accent" />
           <line x1="66" y1="48" x2="88" y2="48" className="stroke-accent" />
         </>

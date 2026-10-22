@@ -17,6 +17,7 @@ import {
   sameFan,
   sameScene,
   type SceneInputs,
+  type SceneInk,
   type SceneLabels,
 } from "../lib/scene/paint";
 import { useSpectroscopy } from "../lib/store";
@@ -97,7 +98,13 @@ export function SceneCanvas({
     let width = 0;
     let height = 0;
     let scale = 1;
-    const font = getComputedStyle(el).getPropertyValue("--font-mono") || "monospace";
+    const style = getComputedStyle(el);
+    const font = style.getPropertyValue("--font-mono") || "monospace";
+    const ink: SceneInk = {
+      gold: style.getPropertyValue("--color-solar").trim(),
+      muted: style.getPropertyValue("--color-space-muted").trim(),
+      background: style.getPropertyValue("--color-space").trim(),
+    };
     let fanDrawn: SceneInputs | null = null;
     let drawn: SceneInputs | null = null;
     let geometry = layout(latest.current.kind, 0, 0);
@@ -114,7 +121,7 @@ export function SceneCanvas({
       if (newScene) {
         drawn = inputs;
         still.setTransform(scale, 0, 0, scale, 0, 0);
-        geometry = drawScene(still, width, height, font, inputs);
+        geometry = drawScene(still, width, height, font, inputs, ink);
       }
       return newFan || newScene;
     };

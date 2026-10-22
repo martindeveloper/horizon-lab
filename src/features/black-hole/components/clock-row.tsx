@@ -37,7 +37,10 @@ export function ClockRow({
       />
       <span
         ref={labelRef}
-        className={cn("w-14 shrink-0 tracking-wide", you ? "text-accent uppercase" : "text-fg-secondary")}
+        className={cn(
+          "w-14 shrink-0 tracking-wide",
+          you ? "text-accent uppercase" : "text-fg-secondary",
+        )}
       >
         {label}
       </span>

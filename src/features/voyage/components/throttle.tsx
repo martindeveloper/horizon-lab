@@ -34,7 +34,7 @@ function BrakeButton() {
       onContextMenu={(event) => event.preventDefault()}
       className={cn(
         "-mx-1 hidden h-11 w-12 touch-none rounded-sm border border-border font-mono text-[10px] tracking-[0.14em] uppercase transition-colors duration-feedback ease-standard select-none pointer-coarse:block",
-        braking ? "bg-accent text-accent-fg" : "text-fg",
+        braking ? "bg-accent text-accent-fg" : "text-fg-primary",
       )}
     >
       {t("hud.brake")}
@@ -65,7 +65,7 @@ export function ThrottleLever() {
         flying && "opacity-50",
       )}
     >
-      <span aria-hidden="true" className="font-mono text-[10px] text-fg tabular-nums">
+      <span aria-hidden="true" className="font-mono text-[10px] text-fg-primary tabular-nums">
         {percent}
       </span>
       <div className="relative h-32 w-10 md:h-40 short:h-20">
@@ -83,17 +83,17 @@ export function ThrottleLever() {
           onValueChange={([value = 0]) => useVoyage.getState().setThrottle(value / 100)}
           className="relative flex h-full w-10 touch-none flex-col items-center select-none not-md:after:absolute not-md:after:-inset-x-1 not-md:after:inset-y-0"
         >
-          <SliderPrimitive.Track className="relative w-px grow rounded-full bg-fg/20">
+          <SliderPrimitive.Track className="relative w-px grow rounded-full bg-fg-primary/20">
             <SliderPrimitive.Range className="absolute w-full bg-accent/60" />
           </SliderPrimitive.Track>
           <SliderPrimitive.Thumb
             aria-label={t("hud.throttle")}
             aria-valuetext={t("hud.throttleValue", { value: percent })}
-            className="block h-2.5 w-7 rounded-full bg-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+            className="block h-2.5 w-7 rounded-full bg-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95"
           />
         </SliderPrimitive.Root>
       </div>
-      <Gauge aria-hidden="true" className="size-3.5 text-subtle" />
+      <Gauge aria-hidden="true" className="size-3.5 text-fg-tertiary" />
       {manual ? <BrakeButton /> : null}
     </div>
   );

@@ -6,7 +6,7 @@ import {
 import { LINES } from "../lib/model/atoms";
 import { PROSE_FIGURES, PROSE_TYPES } from "../lib/model/catalogue";
 import { SPECTROSCOPY_EQUATIONS } from "../lib/model/equations";
-import specification from "../technical.json";
+import specification from "../technical";
 
 export function SpectroscopyTechnicalDetails(access: TechnicalDetailsAccess) {
   return (

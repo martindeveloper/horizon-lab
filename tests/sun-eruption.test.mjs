@@ -14,9 +14,17 @@ import {
   referenceHeight,
   ropeHeight,
 } from "../src/space/sun/model/eruption.ts";
-import { ERUPTION_STAGES, RECONNECTION, X_POINT_S } from "../src/space/sun/model/parameters.ts";
+import {
+  CME_FINAL_HEIGHT_R,
+  CME_SPREAD_RAD,
+  ERUPTION_SCALE_R,
+  ERUPTION_STAGES,
+  RECONNECTION,
+  X_POINT_S,
+} from "../src/space/sun/model/parameters.ts";
 import {
   contourX,
+  contourY,
   fluxAt,
   fluxTransferRateAt,
   transferredFluxAt,
@@ -317,4 +325,38 @@ test("light follows flux transfer, the eruption rises, and ribbon separation gro
   assert.ok(lightPeak > ratePeak);
   assert.ok(flareLightAt(1) > 0 && flareLightAt(1) < 0.3);
   near(eruptionAt(1).cmeFront, 5);
+});
+
+test("the rope lifts off as one round body inside the CME's width, over a lengthening sheet", () => {
+  let previousLength = 0;
+  for (let i = 41; i <= 100; i++) {
+    const g = geometryAt(i / 100);
+    assert.ok(g.q - g.p > previousLength, "the current sheet lengthens under the rising rope");
+    previousLength = g.q - g.p;
+  }
+  const g = geometryAt(1);
+  assert.ok(g.q - g.p > 4 * g.p, "the sheet is several times longer than the arcade is tall");
+  const lines = Array.from({ length: 24 }, blankPlaneLine);
+  const count = contours(1, lines.length, lines, g);
+  const cores = lines.slice(0, count).filter((line) => line.kind === "rope" && line.flux > 0);
+  assert.ok(cores.length > 0);
+  for (const line of cores)
+    for (let j = 0; j < line.count; j++)
+      assert.ok(line.points[2 * j + 1] > g.q, "the rope's own field has left the sheet");
+  // The outer separatrix above the sheet, its x an arc on the sphere: as wide as the span from
+  // the sheet's top to the front, at the catalogued half-width.
+  const a = fluxAt(0, 1, 1).a,
+    top = contourY(a, 1, 2, 4);
+  let lateral = 0,
+    angle = 0;
+  for (let k = 0; k <= 200; k++) {
+    const y =
+      1 + RECONNECTION.diffusionHeight + ((top - 1 - RECONNECTION.diffusionHeight) * k) / 200;
+    const arc = Math.atan(ERUPTION_SCALE_R * g.lambda * displayWidth(y, g) * contourX(y, a, 1));
+    angle = Math.max(angle, arc);
+    lateral = Math.max(lateral, (1 + ERUPTION_SCALE_R * displayHeight(y, g)) * Math.sin(arc));
+  }
+  near(1 + ERUPTION_SCALE_R * displayHeight(top, g), CME_FINAL_HEIGHT_R, 1e-6);
+  near(2 * lateral, ERUPTION_SCALE_R * (displayHeight(top, g) - g.q), 0.02 * lateral);
+  near(angle, CME_SPREAD_RAD, 0.01);
 });

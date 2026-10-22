@@ -276,7 +276,10 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
 
           <section
             aria-labelledby="credits-notes"
-            className={cn("mt-16 text-[0.8125rem] leading-relaxed text-fg-secondary sm:mt-20", letterGrid)}
+            className={cn(
+              "mt-16 text-[0.8125rem] leading-relaxed text-fg-secondary sm:mt-20",
+              letterGrid,
+            )}
           >
             <h2 id="credits-notes" className={cn(kickerClass, "lg:pt-5 lg:text-right")}>
               {t("notes.label")}

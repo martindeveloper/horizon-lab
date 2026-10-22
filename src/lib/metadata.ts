@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { FEATURES, type FeatureId } from "@/config";
 import { routing, type Locale } from "@/i18n/routing";
 
+/** Browser chrome needs a serialized color, matching the invariant --color-space. */
+export const BROWSER_THEME_COLOR = "#08080b";
+
 /** Supply complete social objects: Next replaces nested metadata rather than merging it. */
 export function pageMetadata({
   path,

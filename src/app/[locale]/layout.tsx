@@ -12,7 +12,7 @@ import { LocaleUrl } from "@/components/shell/locale-url";
 import { ANALYTICS, siteUrl } from "@/config";
 import { routing } from "@/i18n/routing";
 import { assetOrigin } from "@/lib/assets";
-import { localeParam } from "@/lib/metadata";
+import { BROWSER_THEME_COLOR, localeParam } from "@/lib/metadata";
 import { PUBLIC_ASSETS } from "@/lib/urls";
 
 /* Fonts ship with the site (Fontsource, from npm): no request to a font CDN, and
@@ -46,7 +46,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#08080b",
+  themeColor: BROWSER_THEME_COLOR,
 };
 
 export default async function LocaleLayout({ children, params }: Props) {

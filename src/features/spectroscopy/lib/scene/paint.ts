@@ -56,9 +56,8 @@ export const sameScene = (a: SceneInputs, b: SceneInputs) =>
 export const sameFan = (a: SceneInputs, b: SceneInputs) =>
   a.kind === b.kind && a.range === b.range && a.gamut === b.gamut;
 
-/** The scene stays dark in both themes, so it keeps the dark theme's gold and muted text. */
-const SCENE_GOLD = "rgb(226 192 122 / 0.9)";
-const SCENE_MUTED = "rgb(178 178 174 / 0.8)";
+/** Fixed scene inks, read from the shared theme on the mounted canvas. */
+export type SceneInk = { gold: string; muted: string; background: string };
 
 /** Model colours are computed in the canvas's gamut and printed for it. */
 const css = (rgb: Rgb, alpha: number, gamut: Gamut) => cssColor(rgb, alpha, gamut);
@@ -392,6 +391,7 @@ function drawSpectrograph(
   slit: Geometry["slit"],
   grating: Geometry["grating"],
   midY: number,
+  ink: SceneInk,
 ) {
   ctx.strokeStyle = "rgb(255 255 255 / 0.6)";
   ctx.lineWidth = 2;
@@ -412,11 +412,11 @@ function drawSpectrograph(
   ctx.rotate(-GRATING_TILT);
   const metal = ctx.createLinearGradient(-2, 0, 2, 0);
   metal.addColorStop(0, "rgb(160 128 70)");
-  metal.addColorStop(0.5, SCENE_GOLD);
+  metal.addColorStop(0.5, `color-mix(in srgb, ${ink.gold} 90%, transparent)`);
   metal.addColorStop(1, "rgb(140 110 60)");
   ctx.fillStyle = metal;
   ctx.fillRect(-2, -10, 4, 20);
-  ctx.fillStyle = "rgb(8 8 11 / 0.45)";
+  ctx.fillStyle = `color-mix(in srgb, ${ink.background} 45%, transparent)`;
   for (let y = -9; y < 10; y += 2.5) ctx.fillRect(-2, y, 4, 0.6);
   ctx.restore();
 }
@@ -433,6 +433,7 @@ function drawLabels(
   width: number,
   height: number,
   font: string,
+  ink: SceneInk,
 ) {
   ctx.font = `10px ${font}`;
   ctx.textBaseline = "top";
@@ -446,10 +447,10 @@ function drawLabels(
     if (placed.some(([a, b]) => start < b + 8 && start + w > a - 8)) return;
     placed.push([start, start + w]);
     /* A dark backing, so a name over a bright disc still reads. */
-    ctx.fillStyle = "rgb(8 8 11 / 0.7)";
+    ctx.fillStyle = `color-mix(in srgb, ${ink.background} 70%, transparent)`;
     ctx.fillRect(start - 3, height - 16, w + 6, 14);
     ctx.textAlign = "left";
-    ctx.fillStyle = SCENE_MUTED;
+    ctx.fillStyle = `color-mix(in srgb, ${ink.muted} 80%, transparent)`;
     ctx.fillText(upper, start, height - 14);
   };
   const { star, source, gas, airBand, slit } = g;
@@ -475,6 +476,7 @@ export function drawScene(
   height: number,
   font: string,
   inputs: SceneInputs,
+  ink: SceneInk,
 ) {
   const { kind, glowing, glow, starColor, teff, lampColor, labels, gamut, halo } = inputs;
   const g = layout(kind, width, height);
@@ -495,7 +497,7 @@ export function drawScene(
     drawLamp(ctx, source, lampColor, height, gamut);
     drawCell(ctx, gas, midY, height, glow, gamut);
   }
-  drawSpectrograph(ctx, slit, grating, midY);
-  drawLabels(ctx, g, kind, labels, width, height, font);
+  drawSpectrograph(ctx, slit, grating, midY, ink);
+  drawLabels(ctx, g, kind, labels, width, height, font, ink);
   return g;
 }

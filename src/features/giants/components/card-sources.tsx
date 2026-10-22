@@ -24,7 +24,10 @@ export function CardSources({ id, t }: { id: RungId; t: Translate }) {
               return (
                 <dd key={key}>
                   {source.link ? (
-                    <a className="underline underline-offset-2 hover:text-fg-primary" href={source.link}>
+                    <a
+                      className="underline underline-offset-2 hover:text-fg-primary"
+                      href={source.link}
+                    >
                       {source.cite}
                     </a>
                   ) : (

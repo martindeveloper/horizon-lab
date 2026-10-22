@@ -55,7 +55,11 @@
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-solar) 22%, transparent);
   text-shadow: none;
   background:
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
     linear-gradient(
       0deg,
       color-mix(in oklab, var(--color-solar) 8%, rgb(20 20 24 / 0.94)) 0%,
@@ -117,12 +121,21 @@
       no-repeat,
     linear-gradient(var(--holo-line), var(--holo-line)) bottom right / 1px var(--holo-corner)
       no-repeat,
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--color-highlight) 1.6%, transparent) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--color-highlight) 1.6%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
     linear-gradient(
       0deg,
       color-mix(in oklab, var(--color-solar) 12%, rgb(24 24 30 / 0.92)) 0%,
       color-mix(in oklab, var(--color-solar) 7%, rgb(14 14 18 / 0.58)) 36%,
-      color-mix(in oklab, var(--color-solar) 2%, color-mix(in srgb, var(--color-space) 12%, transparent)) 100%
+      color-mix(
+          in oklab,
+          var(--color-solar) 2%,
+          color-mix(in srgb, var(--color-space) 12%, transparent)
+        )
+        100%
     );
   box-shadow:
     inset 0 0 0 1px color-mix(in oklab, var(--color-solar) 9%, transparent),
@@ -205,10 +218,27 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(115deg, color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 0%, transparent 38%),
-    linear-gradient(245deg, color-mix(in srgb, var(--color-highlight) 2%, transparent) 0%, transparent 22%),
-    linear-gradient(to top, color-mix(in srgb, var(--color-space) 72%, transparent) 0%, color-mix(in srgb, var(--color-space) 32%, transparent) 16%, transparent 36%),
-    radial-gradient(ellipse 112% 92% at 50% 48%, transparent 60%, color-mix(in srgb, var(--color-shadow) 55%, transparent) 100%);
+    linear-gradient(
+      115deg,
+      color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 0%,
+      transparent 38%
+    ),
+    linear-gradient(
+      245deg,
+      color-mix(in srgb, var(--color-highlight) 2%, transparent) 0%,
+      transparent 22%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-space) 72%, transparent) 0%,
+      color-mix(in srgb, var(--color-space) 32%, transparent) 16%,
+      transparent 36%
+    ),
+    radial-gradient(
+      ellipse 112% 92% at 50% 48%,
+      transparent 60%,
+      color-mix(in srgb, var(--color-shadow) 55%, transparent) 100%
+    );
 }
 :where([data-simulation="voyage"]) .voyage-frame {
   position: absolute;
@@ -264,10 +294,27 @@
       color-mix(in oklab, var(--color-solar) 9%, transparent),
       transparent 22%
     ),
-    linear-gradient(115deg, color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 0%, transparent 38%),
-    linear-gradient(245deg, color-mix(in srgb, var(--color-highlight) 2%, transparent) 0%, transparent 22%),
-    linear-gradient(to top, color-mix(in srgb, var(--color-space) 72%, transparent) 0%, color-mix(in srgb, var(--color-space) 32%, transparent) 16%, transparent 36%),
-    radial-gradient(ellipse 112% 92% at 50% 48%, transparent 60%, color-mix(in srgb, var(--color-shadow) 55%, transparent) 100%);
+    linear-gradient(
+      115deg,
+      color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 0%,
+      transparent 38%
+    ),
+    linear-gradient(
+      245deg,
+      color-mix(in srgb, var(--color-highlight) 2%, transparent) 0%,
+      transparent 22%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-space) 72%, transparent) 0%,
+      color-mix(in srgb, var(--color-space) 32%, transparent) 16%,
+      transparent 36%
+    ),
+    radial-gradient(
+      ellipse 112% 92% at 50% 48%,
+      transparent 60%,
+      color-mix(in srgb, var(--color-shadow) 55%, transparent) 100%
+    );
 }
 :where([data-simulation="voyage"])
   .voyage-cockpit[data-ship="sail"][data-burn="ahead"]
@@ -281,9 +328,22 @@
 /* Voyager looks through a capsule's window: the glass darker to the edges, the reticle a cross. */
 :where([data-simulation="voyage"]) .voyage-cockpit[data-ship="voyager"] .voyage-canopy {
   background:
-    linear-gradient(115deg, color-mix(in srgb, var(--color-highlight) 3%, transparent) 0%, transparent 38%),
-    linear-gradient(to top, color-mix(in srgb, var(--color-space) 72%, transparent) 0%, color-mix(in srgb, var(--color-space) 32%, transparent) 16%, transparent 36%),
-    radial-gradient(ellipse 100% 86% at 50% 48%, transparent 52%, color-mix(in srgb, var(--color-shadow) 78%, transparent) 100%);
+    linear-gradient(
+      115deg,
+      color-mix(in srgb, var(--color-highlight) 3%, transparent) 0%,
+      transparent 38%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-space) 72%, transparent) 0%,
+      color-mix(in srgb, var(--color-space) 32%, transparent) 16%,
+      transparent 36%
+    ),
+    radial-gradient(
+      ellipse 100% 86% at 50% 48%,
+      transparent 52%,
+      color-mix(in srgb, var(--color-shadow) 78%, transparent) 100%
+    );
 }
 :where([data-simulation="voyage"]) .voyage-cockpit[data-ship="voyager"] .voyage-boresight {
   border-radius: 0;

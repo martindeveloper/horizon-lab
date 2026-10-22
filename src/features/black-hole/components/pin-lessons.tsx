@@ -112,12 +112,14 @@ function PhotonLesson({ rp, rs, spin }: { rp: number; rs: number; spin: number }
       {spinning ? (
         <Equation>
           b<Sub>c</Sub> = {bc.prograde.toFixed(2)} M
-          <span className="text-fg-tertiary"> ({t("pins.prograde")})</span> · {bc.retrograde.toFixed(2)}{" "}
-          M<span className="text-fg-tertiary"> ({t("pins.retrograde")})</span>
+          <span className="text-fg-tertiary"> ({t("pins.prograde")})</span> ·{" "}
+          {bc.retrograde.toFixed(2)} M
+          <span className="text-fg-tertiary"> ({t("pins.retrograde")})</span>
         </Equation>
       ) : (
         <Equation>
-          b<Sub>c</Sub> = 3√3 M = {bc.prograde.toFixed(2)} M<span className="text-fg-tertiary"> (a</span>
+          b<Sub>c</Sub> = 3√3 M = {bc.prograde.toFixed(2)} M
+          <span className="text-fg-tertiary"> (a</span>
           <Sub>*</Sub>
           <span className="text-fg-tertiary"> = 0)</span>
         </Equation>

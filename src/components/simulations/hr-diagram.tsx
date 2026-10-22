@@ -103,7 +103,9 @@ export function HrDiagram({
   const focused = points.find((point) => point.id === focus);
   return (
     <figure className="flex flex-col gap-1.5">
-      {compact ? null : <figcaption className="text-xs text-fg-secondary">{t("hr.title")}</figcaption>}
+      {compact ? null : (
+        <figcaption className="text-xs text-fg-secondary">{t("hr.title")}</figcaption>
+      )}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full text-fg-secondary"
@@ -234,7 +236,9 @@ export function HrDiagram({
         <span>{t("hr.hotter")}</span>
         <span>{t("hr.cooler")}</span>
       </p>
-      {compact ? null : <p className="text-xs leading-relaxed text-fg-secondary">{t("hr.lesson")}</p>}
+      {compact ? null : (
+        <p className="text-xs leading-relaxed text-fg-secondary">{t("hr.lesson")}</p>
+      )}
     </figure>
   );
 }

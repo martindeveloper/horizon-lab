@@ -61,7 +61,9 @@ function Instrument({
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <dt className="font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">{label}</dt>
+      <dt className="font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">
+        {label}
+      </dt>
       <dd
         className={cn(
           "mt-0.5 truncate tabular-nums",
@@ -74,7 +76,9 @@ function Instrument({
         {extra ? <span className="ml-1.5 text-accent">{extra}</span> : null}
       </dd>
       {sub ? (
-        <dd className="mt-0.5 truncate font-mono text-[10px] text-fg-secondary tabular-nums">{sub}</dd>
+        <dd className="mt-0.5 truncate font-mono text-[10px] text-fg-secondary tabular-nums">
+          {sub}
+        </dd>
       ) : null}
     </div>
   );
@@ -386,7 +390,9 @@ export function FlightDock() {
           <div className="flex items-center gap-2.5">
             <StatusMark status={status} phase={phase} regime={regime} compact />
             <p className="min-w-0 flex-1 truncate text-sm font-medium text-fg-primary">{aimName}</p>
-            <span className="shrink-0 font-mono text-xs text-fg-primary tabular-nums">{rangeText}</span>
+            <span className="shrink-0 font-mono text-xs text-fg-primary tabular-nums">
+              {rangeText}
+            </span>
             <CourseButton />
             <HelmButton status={status} />
           </div>

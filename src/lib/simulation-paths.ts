@@ -1,8 +1,7 @@
 import { LOCALES } from "../i18n/locales";
-import { PAGE_URLS } from "./urls";
+import { EXPERIENCE_PREFIX, PAGE_URLS, SIMULATION_PREFIX } from "./urls";
 
-export const SIMULATION_PREFIX = "/lab";
-export const EXPERIENCE_PREFIX = "/experience";
+export { EXPERIENCE_PREFIX, SIMULATION_PREFIX } from "./urls";
 
 export type SimulationPath = `${typeof SIMULATION_PREFIX | typeof EXPERIENCE_PREFIX}/${string}`;
 

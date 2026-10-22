@@ -82,8 +82,12 @@ export function Compare({ id }: { id: RungId }) {
         <dl className="divide-y divide-border border-y border-border">
           {lines.map(({ measure, text }) => (
             <div key={measure} className="flex items-baseline justify-between gap-4 py-2">
-              <dt className="shrink-0 text-xs text-fg-secondary">{t(`compare.${measure}.label`)}</dt>
-              <dd className="text-right font-mono text-[13px] text-fg-primary tabular-nums">{text}</dd>
+              <dt className="shrink-0 text-xs text-fg-secondary">
+                {t(`compare.${measure}.label`)}
+              </dt>
+              <dd className="text-right font-mono text-[13px] text-fg-primary tabular-nums">
+                {text}
+              </dd>
             </div>
           ))}
         </dl>
@@ -100,7 +104,9 @@ export function Compare({ id }: { id: RungId }) {
           {t(sideBySide ? "compare.backToLadder" : "compare.sideBySide")}
         </Action>
       ) : null}
-      {lines ? <p className="text-xs leading-relaxed text-fg-secondary">{t("compare.note")}</p> : null}
+      {lines ? (
+        <p className="text-xs leading-relaxed text-fg-secondary">{t("compare.note")}</p>
+      ) : null}
     </section>
   );
 }

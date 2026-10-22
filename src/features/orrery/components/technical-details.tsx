@@ -5,7 +5,7 @@ import {
 
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { ORRERY_EQUATIONS } from "../lib/model/equations";
-import specification from "../technical.json";
+import specification from "../technical";
 
 export function OrreryTechnicalDetails(access: TechnicalDetailsAccess) {
   return (
