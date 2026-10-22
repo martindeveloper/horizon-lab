@@ -28,6 +28,7 @@ precision highp float;
 #include <horizon/convection>
 #include <horizon/temperature>
 #include <horizon/tonemap>
+#include <horizon/display-peak>
 #include <horizon/display>
 
 uniform vec2 uResolution;               // drawing buffer, pixels
@@ -77,7 +78,6 @@ uniform vec3 uJupiterMean;
 uniform highp sampler2D uDots;          // the overview's dots, a column each: centre x, y, radii; linear light, style (`dots.ts`)
 uniform float uOverview;                // the dots' share of the light, 0–1 (0: none drawn)
 uniform float uDotFocus;                // the body in focus's dot, ringed in gold
-uniform mat3 uGamut;                    // linear sRGB to the canvas's primaries (the pass's)
 
 const float PI = 3.14159265;
 const float TAU = 6.2831853;
@@ -360,8 +360,9 @@ void main() {
     colour = mix(colour, dots, uOverview);
   }
 
-  /* Hue kept through the tone curve, so a red star stays red and keeps its limb darkening. */
-  vec3 shown = tonemapHue(uGamut * colour, EXPOSURE, SHOULDER, SATURATION, HIGHLIGHT_WHITE);
+  /* Hue kept through the tone curve, so a red star stays red and keeps its limb darkening; the
+     curve ends at the canvas's peak (<horizon/display-peak>). */
+  vec3 shown = fromPeak(tonemapHue(toPeak(colour), EXPOSURE, SHOULDER, SATURATION, HIGHLIGHT_WHITE));
 
   /* The orbits over everything, after the tone curve so their gold is the theme's: a dark
      casing either side of each line keeps it legible across a bright face as on the sky. */

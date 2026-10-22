@@ -16,8 +16,10 @@ toolkit's `.glsl` loader (see the package README).
   browser GPU-selection hint; its default is `default`, not forced discrete GPU.
   `render({ antialias, bloom, lens, gamut })` takes `antialias` `off` (default), `fxaa` or
   `supersample`, `bloom` as `BloomSettings` or null (default), `lens` as `LensSettings` or
-  null (default) and `gamut` `srgb` (default) or `p3` (the canvas in wide colour; the shader's
-  `display` multiplies linear radiance by the pass's `uGamut` before encoding).
+  null (default) and `gamut` `srgb` (default) or `p3` (the canvas in wide colour). The
+  shader's `display` finishes through `<horizon/display-peak>`, which declares the pass's
+  `uGamut` (linear sRGB to the canvas's primaries) and `uDisplayPeak` (the brightest light
+  the canvas shows in units of SDR white; 1, as the canvas is SDR).
   `supersample` needs `supersample: true` at creation and a fragment shader that
   defines `vec3 shade(vec2 fragCoord, bool derivatives)` (one ray's radiance) and
   `vec3 display(vec3 radiance, vec2 fragCoord)` (its display colour) and includes

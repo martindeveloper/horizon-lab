@@ -69,6 +69,13 @@ engines import already expanded shader strings and do not invoke it at runtime.
   over a finished frame the including shader declares as `uniform sampler2D uImage` with one
   pixel `uniform vec2 uTexel`. The frame holds display-ready bytes, encoded as the canvas
   would be, so edges are judged where they are seen and the result is written as it is.
+- `#include <horizon/display-peak>` declares the two uniforms `createFullscreenPass` sets
+  for its shaders' display step, `uGamut` (linear sRGB to the canvas's primaries) and
+  `uDisplayPeak` (the brightest light the canvas shows, in units of SDR white; 1 on an SDR
+  canvas), and provides `toPeak(radiance)`, radiance in the canvas's primaries in units of
+  the peak, and `fromPeak(toned)`, back to units of SDR white. Between them, any tone curve
+  that ends at 1 ends at the peak; light the curve keeps linear keeps its value at any peak,
+  and at a peak of 1 both are exact identities. `displayEncode` follows.
 - `#include <horizon/lens>` provides the lens finishing of a resolve shader that declares
   `uniform sampler2D uImage` and `uniform vec2 uTexel`: `lensFringe(colour, uv)` reads the
   red a little further out and the blue a little further in, by `uFringe` pixels at the

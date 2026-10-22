@@ -84,8 +84,9 @@ export function createFullscreenPass(options: {
    * with `uBloomStrength`, includes `<horizon/lens>` and applies it under `HORIZON_LENS`
    * (defined while the lens is on), and has `uniforms` of its own (share the ray shader's
    * where `display` needs them). Without it, or without half-float rendering, bloom and the
-   * lens work on the display frame instead. Both shaders' `display` multiply linear radiance
-   * by `uGamut` (`mat3`, the pass's) before encoding, for a canvas in wide colour.
+   * lens work on the display frame instead. Both shaders' `display` finish through
+   * `<horizon/display-peak>`: the pass's `uGamut` (`mat3`) for a canvas in wide colour, and
+   * its `uDisplayPeak`, the brightest light the canvas shows in units of SDR white.
    */
   hdr?: { fragmentShader: string; uniforms: Record<string, IUniform> };
 }) {
@@ -107,7 +108,14 @@ export function createFullscreenPass(options: {
      canvas takes it, so the shader may apply it always. */
   const gamut = { value: new Matrix3() };
   let gamutAsked: Gamut = "srgb";
-  const uniforms = { ...options.uniforms, uHdrOutput: hdrOutput, uGamut: gamut };
+  /* The canvas is SDR: nothing it shows is brighter than its white. */
+  const displayPeak = { value: 1 };
+  const uniforms = {
+    ...options.uniforms,
+    uHdrOutput: hdrOutput,
+    uGamut: gamut,
+    uDisplayPeak: displayPeak,
+  };
   const geometry = new PlaneGeometry(2, 2);
   const material = new ShaderMaterial({
     vertexShader: options.vertexShader,
@@ -232,6 +240,7 @@ export function createFullscreenPass(options: {
         ...hdr.uniforms,
         ...resolveUniforms,
         uGamut: gamut,
+        uDisplayPeak: displayPeak,
         uImage: { value: target.texture },
         uTexel: { value: texel },
       },
