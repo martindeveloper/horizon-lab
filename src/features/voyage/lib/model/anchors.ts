@@ -16,8 +16,15 @@ import { EVENT_HORIZON_LY, anchorById, anchorToday } from "@/space/cosmos/model/
 import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
 import { cosmicToWorld, galaxyToWorld } from "@/space/galaxy/scene/frames";
 import type { WorldSelection } from "@/space/galaxy/show";
-import { PROBES, probePosition, yearOf, type ProbeId } from "@/space/solar-system/model/probes";
+import {
+  PROBES,
+  PROBE_SPACECRAFT,
+  probePosition,
+  yearOf,
+  type ProbeId,
+} from "@/space/solar-system/model/probes";
 import { hasSurface, isSolarSelection } from "@/space/solar-system/model/selection";
+import { spacecraftFrame } from "@/space/spacecraft/models";
 import { MOON_IDS, NAMED, PLANET_IDS, type BodyId } from "@horizon/toolkit/bodies";
 import { includesId } from "@horizon/toolkit/records";
 import { lengthVec3d, vec3d, type Vec3d } from "@horizon/toolkit/scene";
@@ -26,6 +33,7 @@ import { AU_KM, LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 import { alphaCentauriAt, alphaCentauriStar } from "./alpha-centauri";
 import { bodyPositionKm, radiusKm, selectionOfBody, worldBody } from "./bodies";
 import { expansionAt } from "./comoving";
+import { M_PER_KM } from "./parameters";
 
 /** The galaxies and the cluster the ship can go to, placed by the cosmic map. */
 type GalaxyAnchorId = "lmc" | "smc" | "andromeda" | "triangulum" | "virgoCluster";
@@ -63,7 +71,7 @@ export const FAR_ANCHOR_IDS: readonly FarAnchorId[] = [
   ...GALAXY_ANCHOR_IDS,
 ];
 
-const isProbe = (id: AnchorId): id is ProbeId => includesId(PROBE_ANCHOR_IDS, id);
+export const isProbeAnchor = (id: AnchorId): id is ProbeId => includesId(PROBE_ANCHOR_IDS, id);
 
 export const isBodyAnchor = (id: AnchorId): id is BodyId => includesId(BODY_IDS, id);
 
@@ -75,12 +83,11 @@ export const isBodyAnchor = (id: AnchorId): id is BodyId => includesId(BODY_IDS,
 export const isFlyable = (id: AnchorId) => id !== "edge";
 
 /**
- * Radii that frame an arrival and keep the ship off, km: a probe's standoff (a few metres of
- * spacecraft, seen from a little way off with its name on it), a star's photosphere, the
- * Galaxy seen whole from above its disk, a galaxy's disc, the cluster's core, the edge's
- * horizon.
+ * Radii that frame an arrival and keep the ship off, km: a probe's model's framing (its dish's
+ * width, which takes in the bus behind it), a star's photosphere, the Galaxy seen whole from
+ * above its disk, a galaxy's disc, the cluster's core, the edge's horizon.
  */
-const PROBE_RADIUS_KM = 400;
+const probeRadiusKm = (id: ProbeId) => spacecraftFrame(PROBE_SPACECRAFT[id]) / M_PER_KM;
 const FAR_RADIUS_KM: Readonly<Record<Exclude<FarAnchorId, ProbeId>, number>> = {
   alphaCen: alphaCentauriStar("alphaCenA").radiusKm,
   alphaCenB: alphaCentauriStar("alphaCenB").radiusKm,
@@ -96,7 +103,7 @@ const FAR_RADIUS_KM: Readonly<Record<Exclude<FarAnchorId, ProbeId>, number>> = {
 
 /** The anchor's radius, km. */
 export const anchorRadius = (id: AnchorId) =>
-  isBodyAnchor(id) ? radiusKm(id) : isProbe(id) ? PROBE_RADIUS_KM : FAR_RADIUS_KM[id];
+  isBodyAnchor(id) ? radiusKm(id) : isProbeAnchor(id) ? probeRadiusKm(id) : FAR_RADIUS_KM[id];
 
 const v = new Vector3();
 const probe: [number, number, number] = [0, 0, 0];
@@ -118,7 +125,7 @@ function placeToday(id: AnchorId, date: Date, out: Vec3d, host?: Readonly<Vec3d>
   if (isBodyAnchor(id)) return bodyPositionKm(id, date, out, host);
   if (id === "alphaCen") return alphaCentauriAt("alphaCenA", date, out);
   if (id === "alphaCenB" || id === "proxima") return alphaCentauriAt(id, date, out);
-  if (isProbe(id)) {
+  if (isProbeAnchor(id)) {
     probePosition(id, yearOf(date), probe);
     out[0] = probe[0] * AU_KM;
     out[1] = probe[1] * AU_KM;
@@ -214,7 +221,7 @@ export function anchorOfSelection(sel: WorldSelection): AnchorId | null {
 /** The card an anchor opens: its own, the pair's for B; none for the Magellanic Clouds. */
 export function selectionOfAnchor(id: AnchorId): WorldSelection | null {
   if (isBodyAnchor(id)) return selectionOfBody(worldBody(id));
-  if (isProbe(id)) return { kind: "reach", id };
+  if (isProbeAnchor(id)) return { kind: "reach", id };
   if (id === "alphaCen" || id === "alphaCenB") return { kind: "star", id: "alphaCen" };
   if (id === "proxima") return { kind: "star", id };
   if (id === "galacticCentre") return { kind: "galaxy", id: "bulge" };

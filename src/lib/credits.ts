@@ -6,6 +6,7 @@
  * own licence fields. Descriptions are translated under `credits.items.<id>`;
  * names, credit lines and licences stay as published.
  */
+import { SPACECRAFT } from "@/space/spacecraft/models";
 import { MAPS } from "@horizon/toolkit/bodies";
 import {
   CREDIT_URLS,
@@ -113,8 +114,20 @@ const MAP_CREDITS: readonly Credit[] = Object.entries(MAPS)
     url: map.url,
   }));
 
+/** The spacecraft models (`SPACECRAFT`), credited once: they share their maker and licence. */
+const { voyager } = SPACECRAFT;
+const MODEL_CREDITS: readonly Credit[] = [
+  {
+    id: "spacecraftModels",
+    name: "NASA 3D Resources: Voyager, Pioneer 10, New Horizons, Parker Solar Probe",
+    by: voyager.credit,
+    licence: voyager.licence,
+    url: voyager.url,
+  },
+];
+
 export const CREDITS: readonly CreditGroup[] = [
-  { id: "imagery", items: [...MAP_CREDITS, ...MAP_PRODUCTS] },
+  { id: "imagery", items: [...MAP_CREDITS, ...MAP_PRODUCTS, ...MODEL_CREDITS] },
   {
     id: "data",
     items: [
@@ -478,6 +491,31 @@ export const CREDITS: readonly CreditGroup[] = [
         licence: "Apache-2.0",
         url: CREDIT_URLS.sharp,
         package: "sharp",
+      },
+      {
+        id: "gltfTransform",
+        name: "glTF Transform",
+        by: "Don McCurdy and contributors",
+        licence: "MIT",
+        url: CREDIT_URLS.gltfTransform,
+        package: "@gltf-transform/core",
+        covers: ["@gltf-transform/extensions", "@gltf-transform/functions"],
+      },
+      {
+        id: "meshoptimizer",
+        name: "meshoptimizer",
+        by: "Arseny Kapoulkine",
+        licence: "MIT",
+        url: CREDIT_URLS.meshoptimizer,
+        package: "meshoptimizer",
+      },
+      {
+        id: "draco",
+        name: "Draco",
+        by: "Google",
+        licence: "Apache-2.0",
+        url: CREDIT_URLS.draco,
+        package: "draco3dgltf",
       },
       {
         id: "glslParser",

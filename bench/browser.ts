@@ -5,6 +5,7 @@ import { chromium, type Browser, type Page } from "playwright-core";
 
 import type { BenchRuntime, InputAction } from "@horizon/toolkit/bench";
 
+import { assetOrigin } from "../src/lib/assets";
 import { ROOT } from "./build";
 
 /** Launches the first Chromium-based browser available; GPU flags avoid a software fallback. */
@@ -39,10 +40,22 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Horizon bench</title>
 <style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
 <script src="/bench.js"></script>`;
 
-/** Serves the bundle and `public/` from memory and disk: no server, no network. */
+/**
+ * Serves the bundle and `public/` from memory and disk: no server, no network. The CDN is
+ * served from its local mirror (`cdn/`, `npm run cdn:pull`) where that has the file, so a map
+ * or model built but not yet uploaded renders; anything else goes to the CDN itself.
+ */
 export async function openBenchPage(browser: Browser, bundle: string): Promise<Page> {
   const page = await browser.newPage({ deviceScaleFactor: 1 });
   const publicDir = path.join(ROOT, "public");
+  const mirrorDir = path.join(ROOT, "cdn");
+  await page.route(`${assetOrigin}/**`, async (route) => {
+    const { pathname } = new URL(route.request().url());
+    const file = path.join(mirrorDir, decodeURIComponent(pathname));
+    if (file.startsWith(mirrorDir + path.sep) && existsSync(file))
+      return route.fulfill({ path: file, headers: { "access-control-allow-origin": "*" } });
+    return route.continue();
+  });
   await page.route(`${ORIGIN}/**`, async (route) => {
     const { pathname } = new URL(route.request().url());
     if (pathname === "/") return route.fulfill({ contentType: "text/html", body: PAGE });

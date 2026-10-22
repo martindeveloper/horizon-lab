@@ -283,6 +283,7 @@
     "items": {
       "sdoHmi": "Sun: a representative mosaic of SDO/HMI observations from 1–22 May 2024. Reprojected and blended across one rotation; poorly observed poles fade to a quiet surface. The intensity map is displayed near white with limb darkening, not as a colour photograph. This is not live imagery or a single-date map.",
       "opal": "Jupiter, Saturn, Uranus and Neptune: Hubble maps from 2025, in true colour.",
+      "spacecraftModels": "Voyager 1 and 2, Pioneer 10 and 11, New Horizons and Parker Solar Probe at their true size. Simplified and compressed, scaled to each dish's or heat shield's published width, and lit by the Sun in the scene.",
       "blueMarble": "Earth: October land and sea under a cloud layer.",
       "viking": "Mars.",
       "messenger": "Mercury's surface brightness.",
@@ -322,6 +323,9 @@
       "reactCompiler": "Automatic memoisation.",
       "oxc": "Linting and formatting.",
       "sharp": "Processing the planet maps.",
+      "gltfTransform": "Building the spacecraft models.",
+      "meshoptimizer": "Simplifying and compressing the spacecraft models.",
+      "draco": "Reading NASA's compressed spacecraft models.",
       "glslParser": "Offline shader checks.",
       "tsx": "Running TypeScript scripts and tests.",
       "solarProminences": "Qualitative reference for the optional prominence model: plasma arches above the surface, seen as filaments against the disc. Horizon supplies the illustrative geometry, flowing plasma and simplified spring dynamics for growth, release and recoil. Pink/crimson colours approximate the visible-light appearance, with enhanced visibility. Positions and timing are authored, not observed events or a magnetic-field simulation.",

@@ -4,6 +4,7 @@ import { SHADER_DEFINES } from "../src/features/black-hole/lib/parameters.ts";
 import { SHADER_DEFINES as GIANTS_SHADER_DEFINES } from "../src/features/giants/lib/parameters.ts";
 import { SHADER_DEFINES as SUN_SHADER_DEFINES } from "../src/features/sun/lib/parameters.ts";
 import { SOLAR_SHADER_DEFINES } from "../src/space/solar-system/graphics/shader-defines.ts";
+import { SPACECRAFT_SHADER_DEFINES } from "../src/space/spacecraft/graphics/shader-defines.ts";
 import { SUN_SHARED_SHADER_DEFINES } from "../src/space/sun/graphics/shader-defines.ts";
 
 const command = "npm run shaders:generate";
@@ -49,6 +50,14 @@ export const SHADER_HEADERS = [
     defines: SUN_SHARED_SHADER_DEFINES,
     guard: "HORIZON_SUN_SHARED_PARAMETERS",
     source: "src/space/sun/graphics/shader-defines.ts",
+  },
+  {
+    lab: "spacecraft",
+    path: "src/space/spacecraft/graphics/shaders/parameters.generated.glsl",
+    shaders: "src/space/spacecraft/graphics/shaders/",
+    defines: SPACECRAFT_SHADER_DEFINES,
+    guard: "HORIZON_SPACECRAFT_PARAMETERS",
+    source: "src/space/spacecraft/graphics/shader-defines.ts",
   },
 ].map((header) => ({
   ...header,

@@ -54,6 +54,7 @@ export const SOURCE_URLS = {
     "https://github.com/SNEWS2/candidate_list/blob/main/RSG_and_close_stars_catalog_4_11_24.csv",
   heiter2015: "https://doi.org/10.1051/0004-6361/201526319",
   horizonsProbes: "https://ssd.jpl.nasa.gov/horizons/",
+  horizonsParker: "https://ssd.jpl.nasa.gov/horizons/app.html#/",
   iodice2019: "https://arxiv.org/abs/1812.01050",
   joyce2020: "https://doi.org/10.3847/1538-4357/abb8db",
   jplElements: "https://ssd.jpl.nasa.gov/planets/approx_pos.html",
@@ -111,6 +112,11 @@ export const SOURCE_URLS = {
   stone2019: "https://doi.org/10.1038/s41550-019-0928-3",
   svalgaardSchatten2016: "https://doi.org/10.1007/s11207-015-0815-8",
   nasaParker: "https://science.nasa.gov/mission/parker-solar-probe/",
+  nasaParkerShield:
+    "https://www.nasa.gov/feature/goddard/2018/traveling-to-the-sun-why-wont-parker-solar-probe-melt/",
+  nasaVoyager: "https://science.nasa.gov/mission/voyager/spacecraft/",
+  nssdcPioneer10: "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1972-012A",
+  fountain2008: "https://arxiv.org/abs/0709.4288",
   swpcSrs:
     "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries/2024/05/",
   tully1982: "https://adsabs.harvard.edu/pdf/1982ApJ...257..389T",
@@ -151,6 +157,7 @@ export const CREDIT_URLS = {
   jpl: "https://ssd.jpl.nasa.gov/",
   iau: "https://doi.org/10.1007/s10569-017-9805-5",
   nssdc: "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+  nasa3d: "https://science.nasa.gov/3d-resources/",
   pds: "https://pds-rings.seti.org/",
   gaia: "https://www.cosmos.esa.int/web/gaia/dr3",
   simbad: "https://cds.unistra.fr/",
@@ -185,6 +192,9 @@ export const CREDIT_URLS = {
   oxc: "https://oxc.rs/",
   sharp: "https://sharp.pixelplumbing.com/",
   glslParser: "https://github.com/ShaderFrog/glsl-parser",
+  gltfTransform: "https://gltf-transform.dev/",
+  meshoptimizer: "https://github.com/zeux/meshoptimizer",
+  draco: "https://github.com/google/draco",
   tsx: "https://tsx.is/",
   tannerHellandCode: "https://tannerhelland.com/code.html",
 } as const;
@@ -259,6 +269,14 @@ export const DOWNLOAD_URLS = {
   swpcRegionSummaries:
     "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries",
   silsoGroupBackbone: "https://www.sidc.be/SILSO/DATA/GroupNumber/GNbb2_y.txt",
+  /** NASA 3D Resources spacecraft (glTF): science.nasa.gov, and the GitHub archive for Pioneer. */
+  voyagerModel:
+    "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/v/Voyager.glb",
+  pioneerModel:
+    "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Pioneer%2010/Pioneer%2010.glb",
+  newHorizonsModel:
+    "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/n/New_Horizons.glb",
+  parkerModel: "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/p/s/PSP.glb",
 } as const;
 
 export const EXTERNAL_URLS = {

@@ -1,7 +1,9 @@
 import { mountSceneEngine } from "@/space/bench";
+import { PROBE_SPACECRAFT } from "@/space/solar-system/model/probes";
+import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import type { BenchFrame, BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 
-import type { AnchorId } from "./lib/model/anchors";
+import { isProbeAnchor, type AnchorId } from "./lib/model/anchors";
 import { PLACE_BODY } from "./lib/model/places";
 import type { ViewId } from "./lib/model/view-ids";
 import { createVoyageEngine } from "./lib/scene/engine";
@@ -9,6 +11,8 @@ import { useVoyage } from "./lib/store";
 
 type VoyageBenchScene = BenchScene & {
   view: ViewId;
+  /** Parked at this anchor rather than the view's place (a probe has no view of its own). */
+  destination?: AnchorId;
   /** A free flight from the place: the ship turns its back on it and burns at one g. */
   burn?: boolean;
   /** The autopilot flies the torch ship from the place to this anchor. */
@@ -32,6 +36,9 @@ const BURN_S = 20;
 const BURN_FRAMES = 240;
 /** The autopilot's flight from Earth to Neptune, its arrival in the last keyframes. */
 const NEPTUNE_FLIGHT = { frames: 600, duration: 40, keyframes: [0.6, 0.8, 0.9, 1] };
+
+/** Parked at a probe: its model loads and fades in over the first second, then holds. */
+const PROBE_ARRIVAL = { frames: 120, duration: 2, keyframes: [0.25, 1] };
 
 /** Pad steps that turn the ship round: twelve of 15°. */
 const ABOUT_FACE = 12;
@@ -82,6 +89,22 @@ const SCENES: readonly VoyageBenchScene[] = [
     description: "Parked at the edge of the reachable, standard quality",
     tags: ["preset"],
     view: "edge",
+  },
+  {
+    id: "voyager1",
+    description: "Parked at Voyager 1 at its true size, its dish to Earth",
+    tags: ["preset", "sequence"],
+    view: "pluto",
+    destination: "voyager1",
+    script: PROBE_ARRIVAL,
+  },
+  {
+    id: "new-horizons",
+    description: "Parked at New Horizons at its true size, its dish to Earth",
+    tags: ["preset", "sequence"],
+    view: "pluto",
+    destination: "newHorizons",
+    script: PROBE_ARRIVAL,
   },
   {
     id: "torch-burn",
@@ -140,14 +163,17 @@ const SCENES: readonly VoyageBenchScene[] = [
 export const benchTarget: BenchTarget = {
   id: "voyage",
   scenes: SCENES,
-  mount(sceneId, surface) {
+  async mount(sceneId, surface) {
     const scene = SCENES.find((s) => s.id === sceneId);
     if (!scene) throw new Error(`Unknown voyage scene: ${sceneId}`);
+    /* A bench sequence draws its frames in one go: a probe's model is fetched first. */
+    if (scene.destination && isProbeAnchor(scene.destination))
+      await fetchSpacecraft(PROBE_SPACECRAFT[scene.destination]);
     const store = useVoyage;
     store.setState(store.getInitialState(), true);
     store.setState({
       view: scene.view,
-      destination: PLACE_BODY[scene.view],
+      destination: scene.destination ?? PLACE_BODY[scene.view],
       quality: "standard",
       compression: 0,
     });

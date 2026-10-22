@@ -204,6 +204,10 @@ export const SOURCES = {
     cite: "Fok et al. 2012, ApJ 760, 65 (Tables 6 and 8: Stephenson 2-18's adopted distance, temperature and luminosity)",
     link: SOURCE_URLS.fok2012,
   },
+  fountain2008: {
+    cite: "Fountain et al. 2008, Space Sci. Rev. 140, 23 (the New Horizons spacecraft: the 2.1 m high-gain antenna)",
+    link: SOURCE_URLS.fountain2008,
+  },
   gaiaDr3: {
     cite: "Gaia Collaboration 2023, A&A 674, A1 (Gaia DR3)",
     link: SOURCE_URLS.gaiaDr3,
@@ -259,6 +263,10 @@ export const SOURCES = {
     cite: "Hillier et al. 2001, ApJ 553, 837 (η Carinae's primary: ≳ 90 M☉)",
   },
   horizon: { cite: "Horizon model: a labelled teaching choice" },
+  horizonsParker: {
+    cite: "JPL Horizons, Parker Solar Probe (-96): heliocentric osculating elements, 1 June 2025 (e = 0.882, q = 6.862 million km, period 88.4 d)",
+    link: SOURCE_URLS.horizonsParker,
+  },
   horizonsProbes: {
     cite: "JPL Horizons trajectories of Pioneer 10–11, Voyager 1–2 and New Horizons (heliocentric, ecliptic J2000)",
     link: SOURCE_URLS.horizonsProbes,
@@ -450,7 +458,19 @@ export const SOURCES = {
     cite: "Nordlund, Stein & Asplund 2009, LRSP 6, 2 (solar surface convection: granule sizes and lifetimes, the photosphere's thickness)",
     link: SOURCE_URLS.nordlund2009,
   },
+  nasaParkerShield: {
+    cite: "NASA, Traveling to the Sun: Why Won’t Parker Solar Probe Melt? (2018; the heat shield, 2.4 m across)",
+    link: SOURCE_URLS.nasaParkerShield,
+  },
+  nasaVoyager: {
+    cite: "NASA Science, Voyager: the spacecraft (the 3.7 m high-gain antenna)",
+    link: SOURCE_URLS.nasaVoyager,
+  },
   nssdc: { cite: "NSSDC planetary fact sheets" },
+  nssdcPioneer10: {
+    cite: "NSSDC Master Catalog, Pioneer 10 (1972-012A; the 2.74 m dish)",
+    link: SOURCE_URLS.nssdcPioneer10,
+  },
   ohnaka2013: { cite: "Ohnaka et al. 2013, A&A 555, A24 (Antares)" },
   orosz2009: {
     cite: "Orosz et al. 2009, ApJ 697, 573 (LMC X-1: 10.91 ± 1.41 M☉)",

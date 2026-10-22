@@ -1,3 +1,11 @@
+/**
+ * Our reach: the five spacecraft leaving the solar system, the heliopause the Voyagers
+ * crossed, and the light-time rings round the Sun. The probes fly their real paths, the JPL
+ * Horizons trajectories (probe-tracks.json, from scripts/fetch-probe-tracks.mjs) read at the
+ * visitor's date; everything else here is measured on those tracks or follows from the speed
+ * of light.
+ */
+import type { SpacecraftId } from "@/space/spacecraft/models";
 import type { Vec3 } from "@horizon/toolkit/bodies";
 import { length3 } from "@horizon/toolkit/math";
 import {
@@ -7,13 +15,6 @@ import {
   julianEpochMs,
 } from "@horizon/toolkit/science";
 
-/**
- * Our reach: the five spacecraft leaving the solar system, the heliopause the Voyagers
- * crossed, and the light-time rings round the Sun. The probes fly their real paths, the JPL
- * Horizons trajectories (probe-tracks.json, from scripts/fetch-probe-tracks.mjs) read at the
- * visitor's date; everything else here is measured on those tracks or follows from the speed
- * of light.
- */
 import { TODAY } from "./moment";
 import { positionOf } from "./position";
 import TRACKS from "./probe-tracks.json";
@@ -55,6 +56,15 @@ export const PROBES: readonly Probe[] = [
 
 export const probeById = (id: ProbeId) => PROBES.find((p) => p.id === id)!;
 
+/** Each probe's model: the twins share their hardware. */
+export const PROBE_SPACECRAFT: Readonly<Record<ProbeId, SpacecraftId>> = {
+  voyager1: "voyager",
+  voyager2: "voyager",
+  pioneer10: "pioneer",
+  pioneer11: "pioneer",
+  newHorizons: "newHorizons",
+};
+
 /** A date as a decimal year on the tracks' clock (the Julian epoch). */
 export const yearOf = (date: Date | string) => julianEpoch(new Date(date));
 
@@ -90,14 +100,25 @@ export function probePosition(id: ProbeId, year: number, out: Vec3 = [0, 0, 0]):
   return out;
 }
 
+/** Every sample of a probe's track, scene axes, au: a flat xyz list. */
+export function probeTrack(id: ProbeId): Float32Array {
+  const { au } = trackOf(id);
+  const out = new Float32Array(au.length);
+  const p: Vec3 = [0, 0, 0];
+  for (let i = 0; i < au.length / 3; i++) out.set(toScene(au, i, p), i * 3);
+  return out;
+}
+
+/** How many of a probe's track samples come before `year`. */
+export const samplesBefore = (id: ProbeId, year: number) =>
+  trackOf(id).years.filter((y) => y < year).length;
+
 /** The track from launch up to `year`, scene axes, au: a flat xyz list. */
 export function probePath(id: ProbeId, year: number): Float32Array {
-  const { years, au } = trackOf(id);
-  const count = years.filter((y) => y < year).length;
+  const count = samplesBefore(id, year);
   const out = new Float32Array((count + 1) * 3);
-  const p: Vec3 = [0, 0, 0];
-  for (let i = 0; i < count; i++) out.set(toScene(au, i, p), i * 3);
-  out.set(probePosition(id, year, p), count * 3);
+  out.set(probeTrack(id).subarray(0, count * 3));
+  out.set(probePosition(id, year, [0, 0, 0]), count * 3);
   return out;
 }
 

@@ -6,6 +6,7 @@ import test from "node:test";
 import { MAPS } from "@horizon/toolkit/bodies";
 
 import { CREDITS, LICENCE_URLS } from "../src/lib/credits.ts";
+import { SPACECRAFT } from "../src/space/spacecraft/models.ts";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
@@ -32,9 +33,9 @@ test("distributed notices match dependencies and retain font and Feather terms v
   assert.ok(notices.includes(read("scripts/licenses/tanner-helland-LICENSE.txt")));
 });
 
-test("every measured planet map is credited with its licence", () => {
+test("every measured planet map and spacecraft model is credited with its licence", () => {
   const imagery = CREDITS.find((group) => group.id === "imagery").items;
-  for (const [id, map] of Object.entries(MAPS)) {
+  for (const [id, map] of [...Object.entries(MAPS), ...Object.entries(SPACECRAFT)]) {
     const match = imagery.find((item) => item.url === map.url);
     assert.ok(match, `${id}: ${map.url}`);
     assert.equal(match.licence, map.licence, id);

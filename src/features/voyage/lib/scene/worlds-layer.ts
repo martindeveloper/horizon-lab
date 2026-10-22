@@ -21,8 +21,8 @@ import { createLabelPicks } from "@/space/galaxy/scene/label-picks";
 import { createLod } from "@/space/galaxy/scene/lod";
 import type { WorldFrame, WorldSelection } from "@/space/galaxy/show";
 import { createReachLooks } from "@/space/solar-system/graphics/reach-looks";
-import { PROBES } from "@/space/solar-system/model/probes";
-import { createReachLayer } from "@/space/solar-system/scene/reach-layer";
+import { PROBES, yearOf } from "@/space/solar-system/model/probes";
+import { createReachLayer, type ReachFrame } from "@/space/solar-system/scene/reach-layer";
 import { solarLabelPick } from "@/space/solar-system/scene/solar-system";
 import {
   SOLAR_GOLD,
@@ -92,11 +92,13 @@ export function createWorldsLayer(
   /* The frames handed to the layers, rewritten in place each frame. */
   const galaxyShow = { halo: false, names: true, distances: false, lightTime: false };
   const maps: WorldFrame = { show: galaxyShow, sel: null, dist: 1, lines: 1 };
-  const reachFrame = {
+  const reachFrame: ReachFrame = {
     show: { names: true, lightTime: false },
-    sel: null as WorldSelection | null,
+    sel: null,
     dist: 1,
     lines: 1,
+    year: 0,
+    approach: null,
   };
 
   const picks = createLabelPicks();
@@ -133,18 +135,21 @@ export function createWorldsLayer(
     setDetail: (detail: CosmosDetail) => cosmos.setDetail(detail),
     /**
      * Draws a frame about the ship at `at` (km, heliocentric), `aimKm` from its aim, with the
-     * universe at scale `a` on Earth's clock (held at `MAX_SCALE_FACTOR`, inside the far plane).
-     * The maps' presence follows the ship's distance from the Sun (the Galaxy appears
-     * once the ship is light-years out, the cosmic map once it has left the Galaxy); the
-     * probes' markers are sized for the ship's distance to its aim.
+     * universe at scale `a` on Earth's clock (held at `MAX_SCALE_FACTOR`, inside the far plane)
+     * on the clock's `date`. The maps' presence follows the ship's distance from the Sun (the
+     * Galaxy appears once the ship is light-years out, the cosmic map once it has left the
+     * Galaxy); the probes' markers are sized for the ship's distance to its aim, and the one it
+     * closes on gives way to its model (`approach`).
      */
     update(
       dt: number,
       at: Vec3d,
       aimKm: number,
       a: number,
+      date: Date,
       show: Show,
       sel: WorldSelection | null,
+      approach: ReachFrame["approach"],
     ) {
       ship = at;
       const distAu = Math.hypot(at[0], at[1], at[2]) / AU_KM;
@@ -172,6 +177,8 @@ export function createWorldsLayer(
       reachFrame.show.names = show.names;
       reachFrame.sel = sel;
       reachFrame.dist = aimAu;
+      reachFrame.year = yearOf(date);
+      reachFrame.approach = approach;
       reach.update(reachFrame);
       galaxy.update(maps);
       cosmos.update(maps);

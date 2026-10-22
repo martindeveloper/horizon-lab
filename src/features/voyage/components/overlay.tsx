@@ -6,7 +6,7 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
+import { LoadingBadge, VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
 import { useVoyage, type VoyageStore } from "../lib/store";
@@ -57,6 +57,7 @@ export function VoyageOverlay() {
   const setPanel = useVoyage((s) => s.setPanel);
   const selection = useVoyage((s) => s.selection);
   const guideOpen = useVoyage((s) => s.guideOpen);
+  const sharpening = useVoyage((s) => s.sharpening);
   const drive = useVoyage((s) => s.drive);
   const crashed = useVoyage((s) => s.crash !== null);
   const guideButton = useGuideFocusReturn(guideOpen);
@@ -107,6 +108,7 @@ export function VoyageOverlay() {
                 }}
               />
             </div>
+            <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}
           {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}

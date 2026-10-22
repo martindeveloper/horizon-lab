@@ -77,6 +77,25 @@ test("catalogues do not load the toolkit body catalogue or painted surfaces", ()
   }
 });
 
+test("the spacecraft models' glTF loader stays in an optional chunk, off every route's first load", () => {
+  const marker = /glTF versions >=2\.0 are supported/;
+  const loaders = readdirSync(new URL("static/chunks/", build))
+    .filter((name) => name.endsWith(".js"))
+    .map((name) => `static/chunks/${name}`)
+    .filter((path) => marker.test(read(path)));
+  assert.ok(loaders.length > 0, "find the glTF loader chunk");
+  for (const locale of ["en", "cs"])
+    for (const suffix of [
+      "",
+      "/lab/deep-field",
+      ...voyageRoutes(["/experience/voyage"]),
+      ...sunRoutes(["/lab/sun"]),
+    ]) {
+      const initial = assets(`${locale}${suffix}`, ".js");
+      for (const path of loaders) assert.ok(!initial.has(path), `${locale}${suffix} loads ${path}`);
+    }
+});
+
 test("solar activity stays in an optional chunk, outside the Orrery engine and initial route", () => {
   const chunks = readdirSync(new URL("static/chunks/", build))
     .filter((name) => name.endsWith(".js"))

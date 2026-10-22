@@ -121,6 +121,8 @@ export type VoyageStore = SceneSlice &
     /** The ship has left its first orbit this visit, by hand, autopilot or journey: the dock stops inviting. */
     flown: boolean;
     selection: WorldSelection | null;
+    /** A probe's model the view would show is still on its way (written by the scene). */
+    sharpening: boolean;
     panel: Panel;
     show: Show;
     drive: DriveId;
@@ -201,6 +203,7 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
   mode: "orbit",
   flown: false,
   selection: null,
+  sharpening: false,
   panel: "none",
   show: DEFAULT_SHOW,
   drive: DEFAULT_DRIVE,

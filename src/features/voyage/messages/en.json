@@ -48,6 +48,7 @@
     "feel": "Ship feel"
   },
   "hud": {
+    "sharpening": "Loading detail",
     "moonsOf": "Moons of {body}",
     "hold": "Hold the clocks",
     "run": "Run the clocks",

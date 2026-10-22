@@ -16,6 +16,8 @@ import {
 } from "@/lib/scene-bridge";
 import { createLooks } from "@/space/solar-system/graphics/looks";
 import { MAP_BASE } from "@/space/solar-system/graphics/maps";
+import type { ProbeId } from "@/space/solar-system/model/probes";
+import { createProbeCrafts } from "@/space/solar-system/scene/probe-crafts";
 import type { BodyId } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
 import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
@@ -28,15 +30,23 @@ import {
   sceneKit,
   vec3d,
   type SceneMount,
+  type Vec3d,
 } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
 import { blackbodyTexture, motionUniforms, writeMotion } from "../graphics/looks";
-import { createAnchorCache, isBodyAnchor } from "../model/anchors";
+import { createAnchorCache, isBodyAnchor, isProbeAnchor } from "../model/anchors";
 import { dateAt } from "../model/calendar";
 import { scaleFactorAt } from "../model/comoving";
-import { C_KM_S, COSMIC_FAR_KM, DRIVES, NEAR_PLANE_KM, irradianceAt } from "../model/parameters";
+import {
+  C_KM_S,
+  COSMIC_FAR_KM,
+  DRIVES,
+  M_PER_KM,
+  NEAR_PLANE_KM,
+  irradianceAt,
+} from "../model/parameters";
 import { createShipMotion, shipMotion } from "../model/ship";
 import { voyageQuality } from "../quality";
 import { READOUTS, useVoyage, type Readouts } from "../store";
@@ -134,6 +144,12 @@ export function createVoyageEngine(
     });
     /* The Galaxy and the cosmic map draw on a layer of their own; one pass takes them all. */
     camera.layers.enable(GALAXY_LAYER);
+    /* The probes at their true size, after the scene in a depth range of their own. */
+    const probes = createProbeCrafts(basics, {
+      unitM: M_PER_KM,
+      invalidate: () => engine.invalidate(),
+    });
+    const probeAt = (id: ProbeId, out: Vec3d) => anchorAt(id, now, out);
 
     const feel = createShipFeel(camera);
 
@@ -399,7 +415,18 @@ export function createVoyageEngine(
         alphaCen.update(frame);
         stars.update(x, lengthVec3d(x) / AU_KM, alphaCen.takeover);
         cmb.update(expansion, motion);
-        worlds.update(dt, x, range, expansion, state.show, state.selection);
+        anchorAt("earth", now, earth);
+        const approach = probes.update({
+          dt,
+          probeAt,
+          earth,
+          /* The camera stands at the ship. */
+          base: x,
+          offset: still,
+          approach: isProbeAnchor(ship.destination) ? ship.destination : null,
+        });
+        worlds.update(dt, x, range, expansion, now, state.show, state.selection, approach);
+        if (probes.waiting !== state.sharpening) store.setState({ sharpening: probes.waiting });
         looks.step(dt);
         flush();
         mapFrame.keep = isBodyAnchor(ship.destination) ? ship.destination : null;
@@ -438,7 +465,10 @@ export function createVoyageEngine(
         hud.update(dt, storeChanged, { distance: range / AU_KM, ship: x, angles: ship.pose }, read);
         storeChanged = false;
 
-        sceneHost.render(() => renderer.render(scene, camera));
+        sceneHost.render(() => {
+          renderer.render(scene, camera);
+          probes.render(renderer);
+        });
         if (bridge.ready()) {
           warmUp(scene);
           budget.start();

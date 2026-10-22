@@ -2,7 +2,8 @@
  * Our reach, in the solar system's scales: how far sunlight gets in a given time (rings in
  * the ecliptic, ten light-minutes to a light-year), the heliopause where the Sun's wind gives
  * way to the gas between the stars, and the five probes past the planets on their real tracks,
- * where they are today.
+ * where they are at the frame's date. A probe the camera approaches keeps its marker and name
+ * until its model (`@/space/spacecraft`) takes over.
  */
 import { Mesh, Quaternion, SphereGeometry, Sprite, Vector3, type Object3D } from "three";
 
@@ -22,10 +23,11 @@ import {
   HELIOPAUSE_AU,
   LIGHT_RINGS,
   PROBES,
-  probePath,
   probePosition,
+  probeTrack,
   isReachSelection,
-  yearOf,
+  samplesBefore,
+  type ProbeId,
   type ReachSelection,
 } from "../model/probes";
 
@@ -43,6 +45,10 @@ export type ReachFrame = {
   dist: number;
   /** The line art's presence 0..1 (a drift veils it); the rings follow it. */
   lines: number;
+  /** Where the probes are: a decimal year on the tracks' clock (`yearOf`). */
+  year: number;
+  /** The probe the camera is closing on, and how far its model has taken over from its marker, 0..1. */
+  approach: { id: ProbeId; model: number } | null;
 };
 
 /** Registers what a tap on the reach's names opens; a host's label picks (`@/space/galaxy/scene/label-picks`). */
@@ -97,22 +103,40 @@ export function createReachLayer(
   }
   parent.add(bubble, limb.line);
 
-  /* The probes where they are today, each with its path since launch and a touch target. */
-  const year = yearOf(new Date());
+  /* The probes, each with its path since launch and a touch target. A trail holds the whole
+     track and draws the samples before the date, then the probe itself. */
   const hitGeometry = scope.own(new SphereGeometry(1, 8, 6));
   const probes = PROBES.map((probe) => {
-    const at = probePosition(probe.id, year, [0, 0, 0] as Vec3);
-    const path = probePath(probe.id, year);
-    const trail = ownedLine(scope, TRAIL_COLOR, TRAIL_OPACITY, path.length / 3 - 1);
-    trail.positions.set(path);
+    const track = probeTrack(probe.id);
+    const trail = ownedLine(scope, TRAIL_COLOR, TRAIL_OPACITY, track.length / 3);
+    trail.positions.set(track);
     const marker = new Sprite(looks.probe);
     const hit = new Mesh(hitGeometry, looks.ghost);
     hit.userData.pick = { kind: "reach", id: probe.id } satisfies ReachSelection;
-    marker.position.fromArray(at);
-    hit.position.fromArray(at);
     parent.add(trail.line, marker, hit);
-    return { id: probe.id, at, r: Math.hypot(...at), trail, marker, hit };
+    return { id: probe.id, at: [0, 0, 0] as Vec3, r: 0, track, drawn: -1, trail, marker, hit };
   });
+  let year = Number.NaN;
+
+  /** Moves the probes to `next`: markers, touch targets, and each trail's end. */
+  function moveTo(next: number) {
+    if (next === year) return;
+    year = next;
+    for (const p of probes) {
+      probePosition(p.id, year, p.at);
+      p.r = Math.hypot(...p.at);
+      p.marker.position.fromArray(p.at);
+      p.hit.position.fromArray(p.at);
+      const count = samplesBefore(p.id, year);
+      const { positions, geometry } = p.trail;
+      /* The sample the probe stood on last time goes back where it was. */
+      if (p.drawn >= 0) positions.set(p.track.subarray(p.drawn * 3, p.drawn * 3 + 3), p.drawn * 3);
+      positions.set(p.at, count * 3);
+      p.drawn = count;
+      geometry.setDrawRange(0, count + 1);
+      geometry.attributes.position!.needsUpdate = true;
+    }
+  }
 
   const names = lod.fader();
   const lit = lod.fader();
@@ -130,7 +154,8 @@ export function createReachLayer(
 
   return {
     pickables: probes.map((p) => p.hit),
-    update({ show, sel, dist, lines }: ReachFrame) {
+    update({ show, sel, dist, lines, year: date, approach }: ReachFrame) {
+      moveTo(date);
       const labelled = names.to(show.names);
       const lightTime = lit.to(show.lightTime) * lines;
       for (const ring of rings) {
@@ -172,7 +197,8 @@ export function createReachLayer(
 
       for (const p of probes) {
         const picked = !!sel && isReachSelection(sel) && sel.id === p.id;
-        const shown = probeShown(p.r, dist);
+        const closing = approach?.id === p.id;
+        const shown = closing ? 1 - approach.model : probeShown(p.r, dist);
         const on = shown > 0.004;
         p.marker.visible = p.trail.line.visible = p.hit.visible = on;
         const anchor = rulers.anchor(p.id);
@@ -185,7 +211,7 @@ export function createReachLayer(
           p.hit.scale.setScalar(pxWorld(dist, 14));
           p.trail.material.opacity = (picked ? 0.6 : TRAIL_OPACITY) * shown;
         }
-        place(p.id, p.at[0], p.at[1], p.at[2], labelled * shown, PROBE_LABEL);
+        place(p.id, p.at[0], p.at[1], p.at[2], labelled * (closing ? 1 : shown), PROBE_LABEL);
       }
     },
   };
