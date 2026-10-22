@@ -54,6 +54,10 @@ export type SceneMount = {
 
 /** The theme's solar gold (`--color-solar`) for scene materials: selections, rulers, trails. */
 export const SOLAR_GOLD = 0xe2c07a;
+/** The theme's space (`--color-space`): the clear colour behind every scene. */
+export const SPACE_BLACK = 0x08080b;
+/** A scene colour (`0xrrggbb`) as CSS hex, for the colour helpers that read `#rrggbb`. */
+export const cssHex = (color: number) => `#${color.toString(16).padStart(6, "0")}`;
 
 /**
  * World length one CSS pixel covers `distance` from a perspective camera with a vertical

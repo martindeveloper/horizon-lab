@@ -1,4 +1,10 @@
-import { BOLTZMANN_CONSTANT, ATOMIC_MASS_KG, CONSTANTS, RAD_PER_DEG } from "./constants";
+import {
+  BOLTZMANN_CONSTANT,
+  ATOMIC_MASS_KG,
+  CONSTANTS,
+  GRAVITATIONAL_CONSTANT,
+  RAD_PER_DEG,
+} from "./constants";
 import { defineEquation } from "./equation";
 import { UNITS } from "./units";
 
@@ -220,6 +226,23 @@ export const pressureScaleHeight = defineEquation({
   },
   compute: ({ T, mu, g }) => (BOLTZMANN_CONSTANT * T) / (mu * ATOMIC_MASS_KG * g),
 });
+
+/** Surface gravity: a body's pull at its radius. */
+export const surfaceGravity = defineEquation({
+  id: "surface-gravity",
+  text: "g = GM / R²",
+  latex: "g = \\frac{G M}{R^2}",
+  output: "g",
+  variables: {
+    M: { symbol: "M", latex: "M", unit: "kg" },
+    R: { symbol: "R", latex: "R", unit: "m" },
+    g: { symbol: "g", latex: "g", unit: "m/s2" },
+  },
+  compute: ({ M, R }) => (GRAVITATIONAL_CONSTANT * M) / R ** 2,
+});
+
+/** log₁₀ g with g in cm s⁻², the scale model atmospheres are gridded on, from g in m s⁻². */
+export const logGravityCgs = (gravity: number) => Math.log10(gravity * 100);
 
 /** Mean density: a body's mass spread evenly through its sphere. */
 export const meanDensity = defineEquation({

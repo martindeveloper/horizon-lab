@@ -14,10 +14,12 @@ import {
   convert,
   keplerThirdLaw,
   lightTravelTime,
+  logGravityCgs,
   meanDensity,
   measure,
   parallaxDistance,
   pressureScaleHeight,
+  surfaceGravity,
   schwarzschildRadius,
   stefanBoltzmann,
   tangentialVelocity,
@@ -113,6 +115,9 @@ test("shared laws reproduce textbook values", () => {
     "Earth's air",
   );
   near(meanDensity.compute({ M: measure(1, "Msun"), R: measure(1, "Rsun") }), 1409, 1, "the Sun");
+  const sunGravity = surfaceGravity.compute({ M: measure(1, "Msun"), R: measure(1, "Rsun") });
+  near(sunGravity, 274, 0.5, "the Sun's surface gravity");
+  near(logGravityCgs(sunGravity), 4.438, 0.001, "the Sun's log g");
   assert.equal(keplerThirdLaw.example({ a: 5.2 }), "a = 5.2 au → P = 11.9 yr");
   assert.equal(keplerThirdLaw.units(), "a [au], P [yr]");
 });

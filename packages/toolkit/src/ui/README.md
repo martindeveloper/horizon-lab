@@ -17,9 +17,10 @@ catalogue and `examples/visualization-example.tsx` for composition.
 - `LoadingScreen`: stateless loading content. `LoadingOverlay` fades supplied
   children after `ready`, unmounts them after `exitDelayMs` (default 560 ms), and
   resets when readiness becomes false. Its opacity transition lasts 500 ms.
-- `LoadingBadge`: a non-blocking pill (`label`, `visible`) for detail that streams in after
-  the scene is up. It fades in after 500 ms, so a quick load never shows it, and announces
-  `label` politely while visible.
+- `StatusBadge`: a quiet glass pill (`label`, `visible`, optional `icon`, `accent`, `delayed`)
+  that announces a state politely as it begins and keeps its place while hidden, so nothing
+  moves. `LoadingBadge` is one for detail that streams in after the scene is up: the house
+  mark's orbiting spark, fading in after 500 ms, so a quick load never shows it.
 - `useMediaQuery(query, serverValue = false)`: whether a media query (the environment
   module's `WIDE_QUERY`, `REDUCED_MOTION_QUERY`, …) matches, live; the server sees `serverValue`.
 - `ImmersiveScene`, `ImmersiveToggle`, `useImmersive`: one page-wide immersive

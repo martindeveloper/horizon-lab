@@ -276,3 +276,10 @@ export const RYDBERG_INFINITY = CONSTANTS.rydbergConstant.value; // m⁻¹
 export const VACUUM_PERMEABILITY = CONSTANTS.vacuumPermeability.value; // N A⁻²
 /** Radians in one degree (π/180): multiply degrees by it, divide radians by it. */
 export const RAD_PER_DEG = UNITS.deg.factor;
+/** Seconds in a day and in an hour (the SI day of 86,400 s). */
+export const DAY_SECONDS = UNITS.d.factor;
+export const HOUR_SECONDS = UNITS.h.factor;
+/** The kelvin temperature of 0 °C (exact, SI). */
+export const CELSIUS_ZERO_K = 273.15;
+/** Liquid water's density, kg m⁻³: the 1 g cm⁻³ a body's density is compared with. */
+export const WATER_DENSITY_KG_M3 = 1_000;

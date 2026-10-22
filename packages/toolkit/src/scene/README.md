@@ -23,13 +23,14 @@ are built with: the host's basics, the materials they share and a level of detai
 lod)` makes one. `LabelText` returns translated label text
 by key. `SceneMount` is what a page hands an engine: canvas, host element, label
 root, label text, the page's `locale` and `onError`. `SOLAR_GOLD` is the theme's
-gold for scene materials. `worldPerPixel(fov, distance, height)` is the world length
+gold for scene materials and `SPACE_BLACK` its space, the clear colour behind every scene;
+`cssHex(color)` writes either as `#rrggbb` for the helpers that read CSS hex. `worldPerPixel(fov, distance, height)` is the world length
 one CSS pixel covers at `distance` from a perspective camera on a stage `height` px
 tall; the scale bar and `createScreenScale` are built on it.
 
 ## Host
 
-`createSceneHost(scope, { canvas, host, onError })` makes the WebGL renderer, a 48°
+`createSceneHost(scope, { canvas, host, onError })` makes the WebGL renderer, a `SCENE_FOV` (48°)
 perspective camera, the viewport and the engine host (frame loop,
 resize, context loss). `tight` marks phones and low-memory devices; `basics` is
 `SceneBasics` plus `tight`, `dpr`, the buffer's pixels per CSS pixel as a live

@@ -27,6 +27,17 @@
     color: var(--color-space-fg);
   }
 
+  /* Over a bright scene (`data-scene-tone="bright"`) a name sits on a dark plate, not a halo. */
+  :where([data-scene-tone="bright"]) .scene-label {
+    color: var(--color-space-fg);
+    background: color-mix(in srgb, var(--color-space) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-space-fg) 16%, transparent);
+    border-radius: 4px;
+    padding: 3px 6px;
+    letter-spacing: 0.08em;
+    text-shadow: none;
+  }
+
   /* A ruler's length: a pill in the accent. */
   :where([data-scene-labels]) .scene-label[data-kind="distance"] {
     padding: 2px 7px;

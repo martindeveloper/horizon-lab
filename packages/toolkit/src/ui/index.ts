@@ -1,12 +1,12 @@
 export { Action, actionClass, type ActionProps, type ActionVariant } from "./action";
 export { Button } from "./button";
 export { IconButton, type IconButtonProps } from "./icon-button";
-export { Slider } from "./slider";
+export { SLIDER_THUMB_PX, Slider, sliderStopAt } from "./slider";
 export { Surface, type SurfaceProps } from "./surface";
 export { Toolbar, type ToolbarProps } from "./toolbar";
 export { Tooltip } from "./tooltip";
 export { ControlRow, type ControlRowProps } from "./control-row";
-export { LabelledRow, type LabelledRowProps } from "./labelled-row";
+export { ChipRow, LabelledRow, type LabelledRowProps } from "./labelled-row";
 export {
   SegmentedControl,
   type SegmentedControlProps,
@@ -77,7 +77,7 @@ export {
 
 export { Equation, Sub } from "./equation";
 export { LoadingScreen } from "./loading-screen";
-export { LoadingBadge } from "./loading-badge";
+export { LoadingBadge, StatusBadge } from "./loading-badge";
 export { TechnicalDetails, type TechnicalDocument } from "./technical-details";
 
 export { Dialog, type DialogHandle } from "./dialog";

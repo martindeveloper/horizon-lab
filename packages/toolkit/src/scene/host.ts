@@ -23,7 +23,7 @@ import type { LensSettings } from "../rendering/lens-pass";
 import type { SceneBasics, Viewport } from "./kit";
 
 /** Vertical field of view of the scenes, degrees. */
-const SCENE_FOV = 48;
+export const SCENE_FOV = 48;
 
 export type SceneHost = ReturnType<typeof createSceneHost>;
 

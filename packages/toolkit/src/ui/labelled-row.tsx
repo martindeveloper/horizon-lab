@@ -37,3 +37,28 @@ export function LabelledRow({
     </div>
   );
 }
+
+/**
+ * A labelled row of chips that scrolls sideways, its scrollbar hidden; with `wrap`, it wraps
+ * instead from `md` up, where there is room.
+ */
+export function ChipRow({
+  children,
+  wrap = false,
+  ...props
+}: LabelledRowProps & { wrap?: boolean }) {
+  return (
+    <LabelledRow {...props}>
+      {/* A scrolling row clips both ways: the room above and below keeps a chip's corner badge
+          and focus ring whole. */}
+      <div
+        className={cn(
+          "no-scrollbar -mx-1 -my-1.5 flex min-w-0 items-center gap-1 overflow-x-auto overscroll-x-contain px-1 py-1.5",
+          wrap && "md:flex-wrap md:overflow-visible",
+        )}
+      >
+        {children}
+      </div>
+    </LabelledRow>
+  );
+}

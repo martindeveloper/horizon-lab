@@ -141,3 +141,14 @@
   --action-glow: var(--action-shadow);
   --tile-frame: 0 0 0 0.5px rgba(18, 19, 24, 0.5), 0 28px 50px -26px rgba(18, 19, 24, 0.5);
 }
+
+/*
+ * A stage over a scene bright enough to wash out the glass (the Sun's photosphere close up),
+ * marked `data-scene-tone="bright"`: its panels, pills and HUD take the popover's denser glass,
+ * in either theme.
+ */
+:where([data-scene-tone="bright"]) {
+  --panel-bg: var(--popover-bg);
+  --pill-bg: var(--popover-bg);
+  --hud-bg: var(--popover-bg);
+}

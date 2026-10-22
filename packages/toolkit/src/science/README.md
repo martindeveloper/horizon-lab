@@ -22,7 +22,8 @@ not natural-abundance element weights, for hydrogen-burning mass defects.
 A page can print the table; code uses the named values whose names state their
 units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `SOLAR_TEFF_K`, `SOLAR_ABSOLUTE_MAGNITUDE_V`, `SOLAR_IRRADIANCE_W_M2`, `JUPITER_GM_SI`,
 `JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `SPEED_OF_LIGHT_KM_S`, `STANDARD_GRAVITY`
-(9.80665 m s⁻², CGPM 1901), `GRAVITATIONAL_CONSTANT` in SI,
+(9.80665 m s⁻², CGPM 1901), `DAY_SECONDS` and `HOUR_SECONDS`, `CELSIUS_ZERO_K` (273.15 K, exact),
+`WATER_DENSITY_KG_M3` (the 1 g cm⁻³ densities are compared with), `GRAVITATIONAL_CONSTANT` in SI,
 `PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`, `PROTON_MASS_KG`,
 `ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`, `RYDBERG_INFINITY` in m⁻¹, `VACUUM_PERMEABILITY`). `RAD_PER_DEG` (π/180) is
 the one degree-to-radian factor; do not retype it.
@@ -68,7 +69,8 @@ parameter 3√3 GM/c²; `PHOTON_SPHERE_PER_RS` and `SHADOW_PER_RS` in horizon ra
 of k times a planet's period), `hubbleLaw` (d = v / H₀, in Mpc), and for light `planckLaw`,
 `wienDisplacement`, `photonEnergy` (E = hc/λ, nm to eV) and `dopplerShift` (relativistic); for
 stars and planets `stefanBoltzmann` (L/L☉ from R/R☉ and T), `pressureScaleHeight`
-(H = kT / μ mᵤ g) and `meanDensity`; for
+(H = kT / μ mᵤ g), `surfaceGravity` (g = GM / R², with `logGravityCgs` for the log g model
+atmospheres are gridded on) and `meanDensity`; for
 a ship `lorentzFactor`, `timeDilation`, `relativisticDopplerLaw` and `rapidity` (below). A simulation's
 own formulas live in its feature (`lib/equations.ts`) and are built the same
 way. `Formula` is the print-only view documents use.

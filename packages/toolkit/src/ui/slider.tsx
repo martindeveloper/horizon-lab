@@ -1,7 +1,7 @@
 "use client";
 
 import * as SliderPrimitive from "@radix-ui/react-slider";
-import type { ComponentProps } from "react";
+import type { CSSProperties, ComponentProps } from "react";
 
 import { cn } from "./utils";
 
@@ -12,8 +12,16 @@ export type SliderProps = ComponentProps<typeof SliderPrimitive.Root> & {
   thumbLabels?: readonly string[];
   /** Styles the track, e.g. a scale painted under the thumb; and the filled range, e.g. hidden over a scale. */
   trackClassName?: string;
+  trackStyle?: CSSProperties;
   rangeClassName?: string;
 };
+
+/** The thumb's diameter, px (`size-3.5`): its centre travels this much less than the track is long. */
+export const SLIDER_THUMB_PX = 14;
+
+/** Where the thumb's centre stands at `share` (0–1) of its travel, as a CSS length along the track: for marks under its stops. */
+export const sliderStopAt = (share: number) =>
+  `calc(${SLIDER_THUMB_PX / 2}px + ${share} * (100% - ${SLIDER_THUMB_PX}px))`;
 
 export function Slider({
   className,
@@ -21,6 +29,7 @@ export function Slider({
   valueText,
   thumbLabels,
   trackClassName,
+  trackStyle,
   rangeClassName,
   ...props
 }: SliderProps) {
@@ -38,6 +47,7 @@ export function Slider({
           "relative h-px w-full grow cursor-pointer overflow-hidden rounded-full bg-fg/20",
           trackClassName,
         )}
+        style={trackStyle}
       >
         <SliderPrimitive.Range className={cn("absolute h-full bg-accent", rangeClassName)} />
       </SliderPrimitive.Track>
