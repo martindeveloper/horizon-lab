@@ -29,7 +29,6 @@ import {
 } from "../graphics/cosmos";
 import type { CosmosLooks } from "../graphics/looks";
 import {
-  CMB_MLY,
   FIRST_GALAXIES_MLY,
   anchorById,
   anchorToday,
@@ -85,7 +84,6 @@ function sample(detail: CosmosDetail) {
     laniakea: web.points,
     flows: web.flows,
     web: cosmicWeb(detail),
-    cmb: universe.cmb,
     fill: universe.fill,
     circle: universe.circle,
     field: deepField(detail),
@@ -132,11 +130,8 @@ export function createCosmosClouds(
   const laniakea = points((s) => s.laniakea, m.laniakea, root);
   const web = points((s) => s.web, m.web, root);
 
-  /* The observable universe: the microwave background and the galaxies beyond the web. Each is
-     scaled every frame. */
-  const cmbShell = points((s) => s.cmb, m.cmb, root);
+  /* Illustrative galaxies beyond the web, scaled every frame. CMB data has its own layer. */
   const deepFill = points((s) => s.fill, m.deep, root);
-  cmbShell.scale.setScalar(CMB_MLY);
   /* The galaxies beyond the web fill space out to the first galaxies; the dark ages lie between
      them and the microwave background. */
   deepFill.scale.setScalar(FIRST_GALAXIES_MLY);
@@ -183,16 +178,16 @@ export function createCosmosClouds(
   /* What the expansion moves (`setExpansion`): the clouds of the structures beyond the Local
      Group (sampled from its reach outward, so wholly unbound) stretch, and the clusters, bound
      themselves, recede at their size. The Local Group's galaxies and dwarfs keep their places. */
-  const stretching = [sheet, supercluster, laniakea, web, flows, cmbShell, deepFill].map(
-    (object) => ({ object, today: object.scale.x }),
-  );
+  const stretching = [sheet, supercluster, laniakea, web, flows, deepFill].map((object) => ({
+    object,
+    today: object.scale.x,
+  }));
   const receding = clusters.map(({ group }) => ({ object: group, today: group.position.clone() }));
 
   return {
     circle,
     laniakea,
     web,
-    cmbShell,
     deepFill,
     flows,
     field,

@@ -35,7 +35,9 @@ import {
 import type { CosmosDetail } from "../graphics/cosmos";
 import type { CosmosLooks } from "../graphics/looks";
 import { atlasVisibility } from "../model/atlas";
+import type { CmbStatus } from "../model/cmb";
 import { CMB_MLY } from "../model/cosmos";
+import { createCmbSky } from "./cmb-sky";
 import { createCosmosAtlas } from "./cosmos-atlas";
 import { DISC_MLY, createCosmosClouds } from "./cosmos-clouds";
 import { createCosmosMarks } from "./cosmos-marks";
@@ -50,7 +52,7 @@ const EXTENT_MLY = 48_000;
 const FIELD_MLY = 450;
 
 export function createCosmosLayer(
-  { scope, looks, camera, pxWorld, lod }: CosmosKit,
+  { scope, looks, camera, pxWorld, lod, invalidate }: CosmosKit,
   parent: Object3D,
   deps: {
     place: PlaceLabel;
@@ -59,6 +61,8 @@ export function createCosmosLayer(
     picks: LabelPicks;
     /** How densely to sample, from the render quality (the host's `cosmos` detail). */
     detail: CosmosDetail;
+    onCmbStatus?: (status: CmbStatus) => void;
+    cmbMaxTextureSize?: number;
   },
 ) {
   const { place, rulers, distanceText } = deps;
@@ -71,6 +75,7 @@ export function createCosmosLayer(
   parent.add(root);
 
   const clouds = createCosmosClouds(scope, looks, root, parent, deps.detail);
+  const cmb = createCmbSky(scope, root, invalidate, deps.onCmbStatus, deps.cmbMaxTextureSize);
   const atlas = createCosmosAtlas(scope, looks, root, deps.detail);
   const { field, clusters, milkyWay, andromeda, triangulum } = clouds;
   const rings = createLookbackRings(root, clouds.circle, looks.cosmosRing);
@@ -91,7 +96,6 @@ export function createCosmosLayer(
     far: m.far.opacity,
     laniakea: m.laniakea.opacity,
     web: m.web.opacity,
-    cmb: m.cmb.opacity,
     deep: m.deep.opacity,
     ring: looks.cosmosRing.opacity,
     galaxy: looks.cosmosGalaxy.opacity,
@@ -122,6 +126,8 @@ export function createCosmosLayer(
     .applyQuaternion(root.quaternion.clone().invert())
     .divideScalar(MLY);
 
+  cmb.setExpansion(1, sun);
+
   /** Size a sprite or target (in the root's Mly) to `px` pixels where it stands. */
   const toPx = (object: Object3D, local: Vector3, px: number) => {
     root.localToWorld(at.copy(local));
@@ -130,6 +136,7 @@ export function createCosmosLayer(
 
   return {
     pickables: marks.pickables,
+    retryCmb: cmb.retry,
     /** Samples every cloud afresh at a new quality's detail. */
     setDetail(detail: CosmosDetail) {
       clouds.setDetail(detail);
@@ -143,11 +150,16 @@ export function createCosmosLayer(
       if (a === expansion) return;
       expansion = a;
       clouds.setExpansion(a, sun);
+      cmb.setExpansion(a, sun);
       atlas.setExpansion(a, sun);
       marks.setExpansion(a, sun);
     },
     get visible() {
       return root.visible;
+    },
+    /** A CMB map the view draws is still loading. */
+    get cmbWaiting() {
+      return root.visible && cmb.waiting;
     },
     /** Camera distance to the far side of everything drawn, au: shared with the Galaxy pass. */
     reach() {
@@ -199,8 +211,10 @@ export function createCosmosLayer(
       fadeMaterial(m.far, base.far * shown * far * speck * sketch);
       fadeMaterial(m.laniakea, base.laniakea * shown * rising(ly, 120e6, 380e6) * speck);
       fadeMaterial(m.web, base.web * shown * rising(ly, 500e6, 1.4e9) * speck);
-      fadeMaterial(m.cmb, base.cmb * shown * rising(ly, 2e10, 6e10));
-      fadeMaterial(m.deep, base.deep * shown * rising(ly, 4e9, 2e10));
+      fadeMaterial(
+        m.deep,
+        layers.cosmicIllustrations ? base.deep * shown * rising(ly, 4e9, 2e10) : 0,
+      );
       const ringsOn = shown * rising(ly, 5e9, 2e10);
       fadeMaterial(looks.cosmosRing, base.ring * ringsOn);
       fadeMaterial(looks.cosmosFlow, base.flow * shown * rising(ly, 220e6, 600e6));
@@ -209,6 +223,7 @@ export function createCosmosLayer(
 
       /* The camera in the root's frame: the shells' outlines face it. */
       root.worldToLocal(eye.copy(camera.position));
+      cmb.update(shown * rising(ly, 2e10, 6e10), show.cmbDetail ?? false, eye);
       view.d = eye.length() || 1;
       view.toward.copy(eye).divideScalar(view.d);
       root.getWorldQuaternion(turn).invert();

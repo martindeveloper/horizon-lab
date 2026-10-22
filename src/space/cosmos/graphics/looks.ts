@@ -44,8 +44,7 @@ export function createCosmosLooks({ points, sprite, ghost }: Brush) {
     web: points(1.2, 0.5, true),
     observed: points(1.35, 0.62, true),
     classix: points(2.8, 0.9, true),
-    /* The microwave background and the galaxies beyond the web, seen from outside. */
-    cmb: points(1.5, 0.55, true),
+    /* Illustrative galaxies beyond the web, seen from outside. */
     deep: points(1.4, 0.6, true),
   };
   const line = (colour: string, opacity: number) =>

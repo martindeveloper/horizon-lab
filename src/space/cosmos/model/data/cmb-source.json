@@ -1,0 +1,151 @@
+{
+  "reviewed": "2026-10-23",
+  "planckRelease": "Planck 2018 PR3 · SMICA R3.00",
+  "actRelease": "ACT DR6.02 + Planck · NILC · tSZ deprojected",
+  "planckPage": "https://irsa.ipac.caltech.edu/data/Planck/release_3/all-sky-maps/matrix_cmb.html",
+  "actPage": "https://lambda.gsfc.nasa.gov/product/act/act_dr6.02/act_dr6.02_nilc_info.html",
+  "encoding": {
+    "unit": "microkelvin",
+    "scale": 0.1,
+    "offset": 32768,
+    "channels": "R*256+G; B=255 valid, B=0 masked; A=255; no colour space conversion"
+  },
+  "projection": "Galactic equirectangular: l=(x+0.5)*360/width; b=90-(y+0.5)*180/height; north in first row",
+  "resampling": "Planck: equal-area NESTED average NSIDE 2048 to 512. ACT: area-weighted 6x6 CAR bins. Both: four area-weighted subpixel samples per output cell; all contributing masks must pass. Display resolution is below native survey resolution.",
+  "planckMask": "I_STOKES (K_CMB converted to microkelvin); require TMASK=1 AND TMASKINP=1. Never use I_STOKES_INP.",
+  "actMask": "blackbody_T_deproj_SZ (microkelvin); footprint>=0.99 and physical ilc_inpaint_mask=0 (stored byte 128). Inpaint flag=1 is excluded. Masks have a +0.5 native-row WCS offset relative to the signal; both neighbouring mask rows must pass. Source subtraction and residual foregrounds/noise remain part of the released reconstruction.",
+  "inputs": {
+    "planck": {
+      "url": "https://irsa.ipac.caltech.edu/data/Planck/release_3/all-sky-maps/maps/component-maps/cmb/COM_CMB_IQU-smica_2048_R3.00_full.fits",
+      "bytes": 2013312960,
+      "sha256": "60952c645eb33d151905ddf5837477e15ca02a3261feca4ceca3c3feece4f9ac"
+    },
+    "act": {
+      "url": "https://lambda.gsfc.nasa.gov/data/act/nilc/published/act-planck_dr6.02_nilc_blackbody_T_deproj_SZ.fits",
+      "bytes": 1783298880,
+      "sha256": "ee0b2cb0235777824c7b88cc9ad6aa78ab109ef69076c2f891a6f1baa85f9699"
+    },
+    "act-footprint": {
+      "url": "https://lambda.gsfc.nasa.gov/data/act/nilc/published/ilc_footprint_mask.fits",
+      "bytes": 1783298880,
+      "sha256": "4045a7fc91c2bc7f83a808aad0ec770f79318b78f60be181e65b5eee30ff38ae"
+    },
+    "act-inpaint": {
+      "url": "https://lambda.gsfc.nasa.gov/data/act/nilc/published/ilc_inpaint_mask.fits",
+      "bytes": 445826880,
+      "sha256": "ed7395cba5a536693258292b62f9378d567f71e18cb8d4d4485e49799c357e10"
+    }
+  },
+  "products": {
+    "planck": {
+      "path": "/textures/cmb/v1/cmb-planck.png",
+      "width": 2048,
+      "height": 1024,
+      "sha256": "20abdba75c4196174d637873f7058ec42b1c4fa4e0de313f53c95852cf72b339",
+      "bytes": 3183023,
+      "validPixels": 1871351,
+      "validSkyFraction": 0.8372711206315241,
+      "minMicrokelvin": -472.6648254394531,
+      "maxMicrokelvin": 501.74078369140625,
+      "referencePixels": [
+        {
+          "x": 256,
+          "y": 256,
+          "valid": true,
+          "microkelvin": 162.2
+        },
+        {
+          "x": 682,
+          "y": 341,
+          "valid": true,
+          "microkelvin": -182.1
+        },
+        {
+          "x": 1024,
+          "y": 512,
+          "valid": false,
+          "microkelvin": 0.0
+        },
+        {
+          "x": 1792,
+          "y": 768,
+          "valid": true,
+          "microkelvin": -188.5
+        },
+        {
+          "x": 437,
+          "y": 186,
+          "valid": true,
+          "microkelvin": 100.9
+        },
+        {
+          "x": 1459,
+          "y": 491,
+          "valid": true,
+          "microkelvin": -130.9
+        },
+        {
+          "x": 1985,
+          "y": 840,
+          "valid": true,
+          "microkelvin": -230.8
+        }
+      ]
+    },
+    "act": {
+      "path": "/textures/cmb/v1/cmb-act.png",
+      "width": 4096,
+      "height": 2048,
+      "sha256": "0b5e719e2013015c3f8620b5ff9da16d446f139db9656e6a03fd2b012377731c",
+      "bytes": 5703792,
+      "validPixels": 3298814,
+      "validSkyFraction": 0.30614537796536334,
+      "minMicrokelvin": -531.7173461914062,
+      "maxMicrokelvin": 553.7146606445312,
+      "referencePixels": [
+        {
+          "x": 512,
+          "y": 512,
+          "valid": false,
+          "microkelvin": 0.0
+        },
+        {
+          "x": 1365,
+          "y": 682,
+          "valid": false,
+          "microkelvin": 0.0
+        },
+        {
+          "x": 2048,
+          "y": 1024,
+          "valid": false,
+          "microkelvin": 0.0
+        },
+        {
+          "x": 3584,
+          "y": 1536,
+          "valid": false,
+          "microkelvin": 0.0
+        },
+        {
+          "x": 2603,
+          "y": 667,
+          "valid": true,
+          "microkelvin": -112.0
+        },
+        {
+          "x": 1327,
+          "y": 1619,
+          "valid": true,
+          "microkelvin": 65.1
+        },
+        {
+          "x": 988,
+          "y": 1870,
+          "valid": true,
+          "microkelvin": -104.9
+        }
+      ]
+    }
+  }
+}

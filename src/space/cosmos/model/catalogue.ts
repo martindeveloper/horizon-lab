@@ -5,6 +5,7 @@ import { BLACK_HOLES } from "@/space/stellar";
 import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
 
 import { ATLAS_FACTS } from "./atlas-facts";
+import { CMB_FACTS } from "./cmb";
 import {
   ANDROMEDA_APPROACH_KMS,
   ANDROMEDA_MLY,
@@ -74,6 +75,7 @@ const greatAttractorDistance = anchorDistance("greatAttractor", "woudt2008", {
 });
 
 export const COSMOS = {
+  cmbDisplay: CMB_FACTS,
   ...ATLAS_FACTS,
   /** The model's cosmology. */
   universe: {

@@ -487,35 +487,10 @@ export function cosmicWeb(detail: CosmosDetail) {
   return w.geometry();
 }
 
-const CMB_COOL = new Color("#5f8fd0");
-const CMB_WARM = new Color("#f0a35e");
-
-/**
- * The observable universe, in units of its own radius (the layer scales each part every frame):
- * the microwave background as points on a unit sphere, mottled warm and cool by a seeded
- * pattern (a stand-in for the Planck map, not its data); galaxies beyond the web as a uniform
- * sample out to the first galaxies (the unit there is their distance), thinning toward it; and
- * a unit circle the layer turns into each lookback ring.
- */
+/** Illustrative distant galaxies and unit lookback rings. The CMB is loaded separately from data. */
 export function observableUniverse(detail: CosmosDetail) {
   const size = scaled(detail);
   const rnd = lcg(173);
-  const spots = Array.from({ length: 40 }, () => ({
-    at: onSphere(rnd, 1),
-    sign: rnd() < 0.5 ? -1 : 1,
-    width: 0.15 + rnd() * 0.35,
-  }));
-  const cmb = createPointWriter(size(9_000));
-  for (let i = 0; i < size(9_000); i += 1) {
-    const [x, y, z] = onSphere(rnd, 1);
-    let t = 0;
-    for (const spot of spots) {
-      const near = 1 - (x * spot.at[0] + y * spot.at[1] + z * spot.at[2]);
-      t += spot.sign * Math.exp(-near / spot.width);
-    }
-    mix.copy(CMB_COOL).lerp(CMB_WARM, Math.min(1, Math.max(0, 0.5 + t * 0.35)));
-    cmb.put(x, y, z, mix, 0.55 + rnd() * 0.25);
-  }
   const fill = createPointWriter(size(18_000));
   for (let i = 0; i < size(18_000); i += 1) {
     const r = Math.cbrt(rnd());
@@ -532,5 +507,5 @@ export function observableUniverse(detail: CosmosDetail) {
   }
   const circle = new BufferGeometry();
   circle.setAttribute("position", new BufferAttribute(ring, 3));
-  return { cmb: cmb.geometry(), fill: fill.geometry(), circle };
+  return { fill: fill.geometry(), circle };
 }
