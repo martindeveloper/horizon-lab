@@ -88,7 +88,7 @@ export function GiantsDock() {
             disabled={focus <= 0}
             onClick={() => api().step(-1)}
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="icon" />
           </IconButton>
         </Tooltip>
         <div className="flex min-w-0 flex-1 flex-col">
@@ -112,7 +112,7 @@ export function GiantsDock() {
             active={open}
             onClick={() => (overview ? api().goTo(id) : api().setCard(!open))}
           >
-            <Info className="size-4" />
+            <Info className="icon" />
           </IconButton>
         </Tooltip>
         <Tooltip label={t("hud.next")} align="end">
@@ -121,7 +121,7 @@ export function GiantsDock() {
             disabled={focus >= LAST}
             onClick={() => api().step(1)}
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="icon" />
           </IconButton>
         </Tooltip>
       </div>

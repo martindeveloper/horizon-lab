@@ -93,7 +93,7 @@ export function ThrottleLever() {
           />
         </SliderPrimitive.Root>
       </div>
-      <Gauge aria-hidden="true" className="size-3.5 text-fg-tertiary" />
+      <Gauge aria-hidden="true" className="icon size-icon-compact text-fg-tertiary" />
       {manual ? <BrakeButton /> : null}
     </div>
   );

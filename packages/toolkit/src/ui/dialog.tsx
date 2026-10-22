@@ -66,7 +66,7 @@ export function Dialog({
           {title}
         </h2>
         <IconButton autoFocus aria-label={closeLabel} onClick={() => modal.current?.close()}>
-          <X className="size-4" aria-hidden />
+          <X className="icon" aria-hidden />
         </IconButton>
       </header>
       {/* Only the body scrolls, so the bar starts under the header and stays

@@ -93,7 +93,7 @@ export function MusicToggle({ className }: { className?: string }) {
                 onClick={ambientMusic.previous}
                 className={skipClass}
               >
-                <SkipBack aria-hidden className="size-3.5" />
+                <SkipBack aria-hidden className="icon size-icon-compact" />
               </button>
             </Tooltip>
           ) : null}
@@ -120,7 +120,7 @@ export function MusicToggle({ className }: { className?: string }) {
                   playing ? "text-accent" : "text-fg-tertiary group-hover:text-fg-primary",
                 )}
               >
-                <Icon aria-hidden className="size-3.5" />
+                <Icon aria-hidden className="icon size-icon-compact" />
               </span>
             </button>
           </Tooltip>
@@ -132,7 +132,7 @@ export function MusicToggle({ className }: { className?: string }) {
                 onClick={ambientMusic.next}
                 className={skipClass}
               >
-                <SkipForward aria-hidden className="size-3.5" />
+                <SkipForward aria-hidden className="icon size-icon-compact" />
               </button>
             </Tooltip>
           ) : null}

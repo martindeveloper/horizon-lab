@@ -36,7 +36,7 @@ export function PlaceCard({ id }: { id: PlaceId }) {
               className="flex-1"
               onClick={() => useSun.getState().leaveCloseUp()}
             >
-              <ArrowLeft className="size-4" aria-hidden />
+              <ArrowLeft className="icon" aria-hidden />
               {t("hud.leaveCloseUp")}
             </Action>
             <SwitchChip on={ride} onToggle={() => useSun.getState().setRide(!ride)}>
@@ -50,9 +50,9 @@ export function PlaceCard({ id }: { id: PlaceId }) {
             >
               {expanded ? t("hud.hideDetails") : t("hud.details")}
               {expanded ? (
-                <ChevronDown className="size-4" aria-hidden />
+                <ChevronDown className="icon" aria-hidden />
               ) : (
-                <ChevronUp className="size-4" aria-hidden />
+                <ChevronUp className="icon" aria-hidden />
               )}
             </Action>
             <p className="w-full text-ui text-fg-secondary">
@@ -61,7 +61,7 @@ export function PlaceCard({ id }: { id: PlaceId }) {
           </>
         ) : offerCloseUp ? (
           <Action className="flex-1" onClick={() => useSun.getState().enterCloseUp()}>
-            <ZoomIn className="size-4" aria-hidden />
+            <ZoomIn className="icon" aria-hidden />
             {t("hud.closeUp")}
           </Action>
         ) : null

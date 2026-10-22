@@ -37,7 +37,7 @@ export function VisualizationExample() {
                 active={running}
                 onClick={() => setRunning(!running)}
               >
-                {running ? <Pause className="size-4" /> : <Play className="size-4" />}
+                {running ? <Pause className="icon" /> : <Play className="icon" />}
               </IconButton>
             </Tooltip>
           </Toolbar>

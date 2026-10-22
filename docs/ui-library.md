@@ -222,6 +222,33 @@ type, small scientific axes and projected scene labels. Their existing sizes,
 spacing and optical adjustments are intentional exceptions. Safe-area gutters,
 touch targets and computed simulation geometry also keep their own rules.
 
+### Icons
+
+Ordinary interface glyphs use named Lucide imports and the opt-in `icon` utility:
+16px, non-shrinking, with the standard stroke. Size roles are `size-icon-micro`
+(12px), `size-icon-compact` (14px), `size-icon-control` (16px), and
+`size-icon-feature` (24px). The catalogue retains its 28px larger feature size
+with `sm:size-icon-feature-large`. Sizes are rem-based, like interface typography.
+
+`icon-toolbar` shares the existing 16px phone / 14px desktop pattern, using the
+same wide-and-tall `md` breakpoint as the controls. `IconButton` supplies that
+default to its direct Lucide child; explicit glyph utilities override it. Button
+and touch-target dimensions stay independent of icon dimensions. `DataReadout`
+keeps its compact glyph slot. Use `icon size-icon-compact` for other dense UI.
+
+The default `stroke-icon-standard` is 2 SVG viewBox units. Opt into
+`stroke-icon-emphasis` (2.5) for stronger status marks and `stroke-icon-marker`
+(3) for tiny result stamps. Preserve proportional scaling; do not enable absolute
+or non-scaling strokes globally. Size and stroke utilities merge independently
+of color, fill, transforms and responsive variants through `cn`.
+
+Keep action glyphs consistent through shared controls (close, reset, playback,
+settings, help and viewing modes). Icon-only controls need a translated accessible
+name; decorative glyphs beside text remain hidden from assistive technology.
+Keep custom brand marks, cockpit and scientific SVG geometry, body/orb glyphs,
+font-relative editorial arrows, filled catalogue play symbols and authored icon
+animations in their existing styles. The utilities do not target all SVGs.
+
 ### Borders, radius and shadows
 
 Interface corners use semantic roles with the existing dimensions:

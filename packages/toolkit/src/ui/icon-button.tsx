@@ -9,7 +9,10 @@ export type IconButtonProps = ComponentProps<"button"> & {
   active?: boolean;
 };
 
-/** Compact HUD action: 36px on phones with a 44px touch target around it, 32px on desktop. */
+/**
+ * Compact HUD action: 36px on phones with a 44px touch target, 32px on desktop.
+ * Lucide children default to the toolbar icon role.
+ */
 export function IconButton({
   className,
   active = false,
@@ -20,7 +23,7 @@ export function IconButton({
     <button
       type={type}
       className={cn(
-        "relative flex size-9 items-center justify-center rounded-full transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-8",
+        "icon-button relative flex size-9 items-center justify-center rounded-full transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-8",
         active ? "bg-fg-primary/10 text-fg-primary" : "text-fg-primary/80 hover:text-fg-primary",
         className,
       )}

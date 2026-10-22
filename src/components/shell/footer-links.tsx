@@ -50,7 +50,7 @@ export function FooterLinks({
           className={menu ? "footer-link inline-flex gap-1" : "footer-link hidden sm:inline-flex"}
         >
           GitHub
-          {menu ? <ArrowUpRight className="size-3" aria-hidden /> : null}
+          {menu ? <ArrowUpRight className="icon size-icon-micro" aria-hidden /> : null}
           <span className="sr-only"> ({t("newTab")})</span>
         </a>
       </span>

@@ -53,7 +53,7 @@ export function TechnicalDetails({
           triggerClassName,
         )}
       >
-        <Sigma className="size-4 md:size-3.5" aria-hidden />
+        <Sigma className="icon-toolbar" aria-hidden />
       </button>
       <Dialog ref={dialog} title={document.title} closeLabel={labels.close}>
         <div className="space-y-8 px-panel-roomy py-section-roomy sm:px-panel-wide">

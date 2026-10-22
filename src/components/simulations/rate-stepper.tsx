@@ -61,11 +61,11 @@ export function RateStepper({
           disabled={toggleDisabled}
           onClick={onToggle}
         >
-          {running ? <Pause className="size-4" /> : <Play className="size-4" />}
+          {running ? <Pause className="icon" /> : <Play className="icon" />}
         </IconButton>
       </Tooltip>
       <IconButton aria-label={slowerLabel} disabled={slowerDisabled} onClick={onSlower}>
-        <Minus className="size-3.5" />
+        <Minus className="icon size-icon-compact" />
       </IconButton>
       <output
         aria-live="polite"
@@ -81,7 +81,7 @@ export function RateStepper({
         )}
       </output>
       <IconButton aria-label={fasterLabel} disabled={fasterDisabled} onClick={onFaster}>
-        <Plus className="size-3.5" />
+        <Plus className="icon size-icon-compact" />
       </IconButton>
     </div>
   );

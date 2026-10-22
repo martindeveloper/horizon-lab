@@ -30,7 +30,10 @@ export function DataReadout({ items, variant = "grid", className, ...props }: Da
             <dd>
               <Tooltip label={item.label} side="top">
                 <span className="flex items-center gap-1.5">
-                  <span aria-hidden className="flex shrink-0 text-fg-tertiary [&_svg]:size-3.5">
+                  <span
+                    aria-hidden
+                    className="flex shrink-0 text-fg-tertiary [&_svg]:size-icon-compact [&_svg.lucide]:stroke-icon-standard"
+                  >
                     {item.icon}
                   </span>
                   <span

@@ -34,7 +34,7 @@ export function Callout({ title, tone = "info", children, className, ...props }:
           tone === "warning" ? "text-accent" : "text-fg-primary",
         )}
       >
-        <Icon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+        <Icon className="mt-0.5 icon size-icon-compact" aria-hidden />
         {title}
       </p>
       <div className="mt-2 text-ui leading-relaxed text-fg-secondary">{children}</div>

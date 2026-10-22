@@ -66,14 +66,14 @@ export function SelectionCard() {
               className="flex-1"
               onClick={() => useDeepField.getState().leaveCloseUp()}
             >
-              <ArrowLeft className="size-4" aria-hidden />
+              <ArrowLeft className="icon" aria-hidden />
               {t("hud.leaveCloseUp")}
             </Action>
             <p className="w-full text-ui text-fg-secondary">{t("hud.closeUpNote")}</p>
           </>
         ) : offerCloseUp ? (
           <Action className="flex-1" onClick={() => useDeepField.getState().enterCloseUp()}>
-            <ZoomIn className="size-4" aria-hidden />
+            <ZoomIn className="icon" aria-hidden />
             {t("hud.closeUp")}
           </Action>
         ) : isSolarSelection(selection) ? (

@@ -33,8 +33,6 @@ type SimulationTool = {
   onSelect: () => void;
 };
 
-const iconClass = "size-4 md:size-3.5";
-
 function ToolButton({
   tool,
   ref,
@@ -63,7 +61,7 @@ function ToolButton({
         active={!!active}
         onClick={onSelect}
       >
-        <Icon className={iconClass} />
+        <Icon className="icon-toolbar" />
       </IconButton>
     </Tooltip>
   );

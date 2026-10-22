@@ -22,7 +22,7 @@ export function AtlasProvenance({ id }: { id: AtlasId }) {
                 rel="noreferrer"
               >
                 {t(`atlas.sources.${key}`)}
-                <ExternalLink className="mt-0.5 size-3 shrink-0" aria-hidden />
+                <ExternalLink className="mt-0.5 icon size-icon-micro" aria-hidden />
               </a>
               <p className="mt-1 text-fg-secondary">
                 {t(`atlas.publication.${source.publication}`)}

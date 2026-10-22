@@ -96,7 +96,7 @@ export function DesktopNotice() {
             : "anim-rise",
         )}
       >
-        <Monitor className="size-3.5 shrink-0 text-accent" aria-hidden />
+        <Monitor className="icon size-icon-compact text-accent" aria-hidden />
         <span>{t("desktopNotice")}</span>
         <IconButton
           aria-label={t("closeDesktopNotice")}
@@ -106,7 +106,7 @@ export function DesktopNotice() {
             setPhase("leaving");
           }}
         >
-          <X className="size-4" aria-hidden />
+          <X className="icon" aria-hidden />
         </IconButton>
       </Surface>
     </div>

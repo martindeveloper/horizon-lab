@@ -209,7 +209,7 @@ export function ObservatoryOverlay() {
                       }}
                       className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-ui tracking-label text-fg-primary uppercase"
                     >
-                      <GraduationCap className="size-3.5" />
+                      <GraduationCap className="icon size-icon-compact" />
                       {tGuide("start")}
                     </button>
                     <PresetNav stacked />

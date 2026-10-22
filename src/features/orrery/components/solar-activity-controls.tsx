@@ -48,9 +48,9 @@ export function SolarActivityControls() {
             onClick={() => useOrrery.getState().toggleSolarActivityPaused()}
           >
             {paused ? (
-              <Play className="size-3.5" aria-hidden />
+              <Play className="icon size-icon-compact" aria-hidden />
             ) : (
-              <Pause className="size-3.5" aria-hidden />
+              <Pause className="icon size-icon-compact" aria-hidden />
             )}
           </IconButton>
         ) : null}

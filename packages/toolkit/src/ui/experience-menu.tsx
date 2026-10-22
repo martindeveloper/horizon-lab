@@ -25,8 +25,6 @@ export type ExperienceMenuProps = {
   className?: string;
 };
 
-const icon = "size-4 md:size-3.5";
-
 /**
  * One toolbar button for a scene's experiences. With a drift it opens a short column of round
  * buttons below itself: immersive view, then the drift. Without one it enters immersive view
@@ -111,7 +109,7 @@ export function ExperienceMenu({
         >
           <Telescope
             className={cn(
-              icon,
+              "icon-toolbar",
               "transition-transform duration-control ease-standard",
               open && "-rotate-12",
             )}
@@ -132,12 +130,12 @@ export function ExperienceMenu({
               onClick={enter}
               className="experience-item"
             >
-              <Maximize2 className={icon} />
+              <Maximize2 className="icon-toolbar" />
             </IconButton>
           </Tooltip>
           <Tooltip label={labels.drift} align={align}>
             <IconButton aria-label={labels.drift} onClick={drift} className="experience-item">
-              <Orbit className={icon} />
+              <Orbit className="icon-toolbar" />
             </IconButton>
           </Tooltip>
         </div>

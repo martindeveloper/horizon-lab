@@ -18,7 +18,7 @@ export function CrossingContent({ title, hint }: { title: string; hint: string }
         <span>{title}</span>
         <span className="text-ui text-fg-secondary">{hint}</span>
       </span>
-      <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+      <ArrowUpRight className="mt-0.5 icon text-accent" aria-hidden />
     </>
   );
 }

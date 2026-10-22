@@ -44,6 +44,13 @@
   --tracking-label: 0.1em;
   --tracking-instrument: 0.14em;
 
+  /* Ordinary UI glyphs. Keep custom marks and scientific geometry on their own scale. */
+  --spacing-icon-micro: 0.75rem;
+  --spacing-icon-compact: 0.875rem;
+  --spacing-icon-control: 1rem;
+  --spacing-icon-feature: 1.5rem;
+  --spacing-icon-feature-large: 1.75rem;
+
   /* Panel insets: compact phone cards, ordinary rails, then roomy dialogs.
      Keep header/body/footer edges aligned; Surface itself still supplies only material. */
   --spacing-panel-compact: 0.875rem;
@@ -120,6 +127,11 @@
 }
 
 :root {
+  /* SVG viewBox units: strokes scale with glyph size, preserving Lucide's light feel. */
+  --icon-stroke-standard: 2;
+  --icon-stroke-emphasis: 2.5;
+  --icon-stroke-marker: 3;
+
   /* Decorative glass edges, control outlines, and keyboard focus have distinct weights. */
   --stroke-rim: 0.5px;
   --stroke-outline: 1px;

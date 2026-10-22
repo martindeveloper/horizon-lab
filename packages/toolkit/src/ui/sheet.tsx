@@ -105,7 +105,7 @@ export function Sheet({
             aria-label={dismissLabel}
             className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-fg-secondary opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
           >
-            <X className="size-4" aria-hidden />
+            <X className="icon" aria-hidden />
           </button>
         </div>
         {children}

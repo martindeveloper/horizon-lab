@@ -52,7 +52,7 @@ export function SelectionCard() {
                 className="flex-1"
                 onClick={() => useOrrery.getState().enterCloseUp()}
               >
-                <ZoomIn className="size-4" aria-hidden />
+                <ZoomIn className="icon" aria-hidden />
                 {t("hud.closeUp")}
               </Action>
             ) : null}
@@ -63,7 +63,7 @@ export function SelectionCard() {
                 className={offer ? "px-3" : "flex-1"}
                 onClick={() => useOrrery.getState().leaveCloseUp()}
               >
-                <ArrowLeft className="size-4" aria-hidden />
+                <ArrowLeft className="icon" aria-hidden />
                 {back}
               </Action>
             ) : !offer && deepTime ? (
@@ -73,7 +73,7 @@ export function SelectionCard() {
                 disabled
                 aria-describedby={deepTimeNote}
               >
-                <ZoomIn className="size-4" aria-hidden />
+                <ZoomIn className="icon" aria-hidden />
                 {t("hud.closeUp")}
               </Action>
             ) : null}
@@ -86,9 +86,9 @@ export function SelectionCard() {
               >
                 {expanded ? t("hud.hideDetails") : t("hud.details")}
                 {expanded ? (
-                  <ChevronDown className="size-4" aria-hidden />
+                  <ChevronDown className="icon" aria-hidden />
                 ) : (
-                  <ChevronUp className="size-4" aria-hidden />
+                  <ChevronUp className="icon" aria-hidden />
                 )}
               </Action>
             ) : null}

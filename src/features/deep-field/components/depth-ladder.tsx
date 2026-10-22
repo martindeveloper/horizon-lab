@@ -90,7 +90,7 @@ export function DepthLadder() {
           aria-label={t("hud.backInTime")}
           className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
         >
-          <History className="size-4" aria-hidden />
+          <History className="icon" aria-hidden />
         </HandoffLink>
       </Tooltip>
       <div className={cn("relative min-h-0 min-w-0 flex-1", wide ? "w-9" : "h-full")}>

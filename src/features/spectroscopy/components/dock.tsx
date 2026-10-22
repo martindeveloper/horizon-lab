@@ -149,10 +149,13 @@ function ElementTiles({
               </span>
             </span>
             {outcome === "found" ? (
-              <Check aria-hidden className="absolute top-1 right-1 size-3 text-accent" />
+              <Check
+                aria-hidden
+                className="absolute top-1 right-1 icon size-icon-micro text-accent"
+              />
             ) : null}
             {outcome === "unseen" ? (
-              <X aria-hidden className="absolute top-1 right-1 size-3" />
+              <X aria-hidden className="absolute top-1 right-1 icon size-icon-micro" />
             ) : null}
           </button>
         );
@@ -487,7 +490,7 @@ function CaseStrip() {
         ) : null}
         <Tooltip label={t("dock.newCases")} align="end">
           <IconButton aria-label={t("dock.newCases")} onClick={() => api().shuffleCases()}>
-            <Shuffle className="size-4 md:size-3.5" />
+            <Shuffle className="icon-toolbar" />
           </IconButton>
         </Tooltip>
       </div>

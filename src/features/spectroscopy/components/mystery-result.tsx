@@ -33,7 +33,14 @@ export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; smal
         outcome === "missed" && "bg-surface-secondary text-danger ring-outline ring-danger/60",
       )}
     >
-      <Icon className={small ? "size-2.5" : "size-3 md:size-4"} strokeWidth={small ? 3 : 2.5} />
+      <Icon
+        className={cn(
+          "icon",
+          small
+            ? "size-2.5 stroke-icon-marker"
+            : "size-icon-micro stroke-icon-emphasis md:size-icon-control",
+        )}
+      />
     </span>
   );
 }
@@ -63,9 +70,9 @@ function Score({ ok, children }: { ok: boolean; children: string }) {
   return (
     <li className="flex items-center gap-1.5">
       {ok ? (
-        <Check aria-hidden className="size-3.5 text-accent" strokeWidth={2.5} />
+        <Check aria-hidden className="icon size-icon-compact stroke-icon-emphasis text-accent" />
       ) : (
-        <X aria-hidden className="size-3.5 text-danger" strokeWidth={2.5} />
+        <X aria-hidden className="icon size-icon-compact stroke-icon-emphasis text-danger" />
       )}
       <span className={ok ? "text-fg-primary" : "text-fg-secondary"}>{children}</span>
     </li>
@@ -111,12 +118,12 @@ export function MysteryActions({
       {result.outcome === "solved" ? null : compact ? (
         <Tooltip label={t("dock.showAnswer")}>
           <IconButton aria-label={t("dock.showAnswer")} onClick={() => api().showAnswer()}>
-            <Eye aria-hidden className="size-4" />
+            <Eye aria-hidden className="icon" />
           </IconButton>
         </Tooltip>
       ) : (
         <Action variant="glass" className={size} onClick={() => api().showAnswer()}>
-          <Eye aria-hidden className="size-3.5" />
+          <Eye aria-hidden className="icon size-icon-compact" />
           {t("dock.showAnswer")}
         </Action>
       )}
@@ -124,13 +131,13 @@ export function MysteryActions({
         <Action variant="solar" className={size} onClick={onward}>
           {nextIndex < 0 ? (
             <>
-              <Shuffle aria-hidden className="size-3.5" />
+              <Shuffle aria-hidden className="icon size-icon-compact" />
               {t("dock.newCases")}
             </>
           ) : (
             <>
               {t("dock.nextCase")}
-              <ArrowRight aria-hidden className="size-3.5" />
+              <ArrowRight aria-hidden className="icon size-icon-compact" />
             </>
           )}
         </Action>

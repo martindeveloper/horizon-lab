@@ -72,7 +72,10 @@ export function ExternalLink({
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
       {children}
-      <ArrowUpRight className="ml-0.5 inline size-[0.8em] align-baseline text-accent" aria-hidden />
+      <ArrowUpRight
+        className="ml-0.5 inline icon size-[0.8em] align-baseline text-accent"
+        aria-hidden
+      />
       <span className="sr-only">({newTab})</span>
     </a>
   );

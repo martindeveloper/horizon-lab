@@ -121,6 +121,24 @@ helper recognizes these tokens, so consumer overrides remain predictable.
 scene geometry, editorial composition, cockpit lettering and plotted labels local
 to their existing contracts rather than forcing them onto the interface scale.
 
+## Icons
+
+Use named Lucide imports with `icon` (16px, non-shrinking, standard stroke).
+Override size with `size-icon-micro` (12px), `size-icon-compact` (14px),
+`size-icon-control` (16px), or `size-icon-feature` (24px); the catalogue's larger
+feature variant is `size-icon-feature-large` (28px). `icon-toolbar` shares the
+16px phone / 14px desktop pattern. `IconButton` supplies that default to a direct
+Lucide child in the component layer; explicit glyph utilities take precedence.
+Touch targets are separate and keep their existing dimensions.
+
+`stroke-icon-standard` (2), `stroke-icon-emphasis` (2.5) and `stroke-icon-marker`
+(3, tiny status stamps) use SVG viewBox units, scaling with the glyph. All tokens
+live in `theme.css`; helpers live in `styles.css`. `cn` understands the size and
+stroke roles. Colors, fill, optical offsets and animations stay independent.
+Custom brand marks, scientific/cockpit geometry, body orbs and font-relative
+editorial symbols retain their own dimensions. Keep icon-only controls labelled
+and decorative glyphs hidden from assistive technology.
+
 ## Borders, radius and shadows
 
 Use radius roles for interface geometry: `rounded-detail` (4px), `rounded-compact`

@@ -105,7 +105,7 @@ export function Picker({
         <ChevronDown
           aria-hidden
           className={cn(
-            "size-3.5 shrink-0 text-fg-tertiary transition-transform duration-control ease-standard",
+            "icon size-icon-compact text-fg-tertiary transition-transform duration-control ease-standard",
             open && "rotate-180",
           )}
         />

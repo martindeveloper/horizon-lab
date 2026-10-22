@@ -62,7 +62,7 @@ function LabPanel({ simulation, t }: TileProps) {
             className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-control motion-safe:ease-enter motion-safe:group-hover:translate-x-0.5"
           >
             {t(`${key}.open`)}
-            <ArrowUpRight className="size-4" aria-hidden />
+            <ArrowUpRight className="icon" aria-hidden />
           </Link>
           {simulation.entryPoints.length ? (
             <nav aria-label={`${t("startFrom")}: ${t(`${key}.title`)}`} className="min-w-0">
@@ -126,7 +126,10 @@ function ExperienceCopy({ simulation, t }: TileProps) {
           className="pointer-events-auto inline-flex shrink-0 items-center gap-4 rounded-full text-sm font-medium text-space-fg focus-visible:outline-hidden sm:flex-col sm:gap-3"
         >
           <span className="experience-play grid size-16 place-items-center rounded-full sm:size-20">
-            <Play className="size-6 translate-x-0.5 fill-current sm:size-7" aria-hidden />
+            <Play
+              className="icon size-icon-feature translate-x-0.5 fill-current sm:size-icon-feature-large"
+              aria-hidden
+            />
           </span>
           {t(`${key}.open`)}
         </Link>

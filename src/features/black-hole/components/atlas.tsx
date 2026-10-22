@@ -207,7 +207,7 @@ export function AtlasOverlay() {
           className="glass-hud relative flex h-8 shrink-0 items-center rounded-full px-3 text-xs tracking-widest text-fg-primary uppercase not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5"
           onClick={() => setMapOpen(false)}
         >
-          <X className="mr-1.5 size-3.5" />
+          <X className="mr-1.5 icon size-icon-compact" />
           {t("close")}
         </button>
       </header>

@@ -64,7 +64,7 @@ export function PhoneMenu({
         onClick={() => setOpenOn(open ? null : pathname)}
         className="flex size-11 items-center justify-center rounded-full text-fg-secondary transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg-primary"
       >
-        {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
+        {open ? <X className="icon" aria-hidden /> : <Menu className="icon" aria-hidden />}
       </button>
 
       {open ? (

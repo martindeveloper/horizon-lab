@@ -103,12 +103,12 @@ export function TimeDock() {
         <div className="flex shrink-0 items-center gap-2 md:gap-1">
           <Tooltip label={playLabel}>
             <IconButton aria-label={playLabel} active={playing} onClick={() => api().togglePlay()}>
-              {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+              {playing ? <Pause className="icon" /> : <Play className="icon" />}
             </IconButton>
           </Tooltip>
           <Tooltip label={t("hud.replay")}>
             <IconButton aria-label={t("hud.replay")} onClick={() => api().replay()}>
-              <RotateCcw className="size-4" />
+              <RotateCcw className="icon" />
             </IconButton>
           </Tooltip>
         </div>

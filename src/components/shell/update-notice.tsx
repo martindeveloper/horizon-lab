@@ -63,7 +63,7 @@ export function UpdateNotice() {
             className="shrink-0 text-fg-secondary"
             onClick={() => setState("dismissed")}
           >
-            <X className="size-4" aria-hidden />
+            <X className="icon" aria-hidden />
           </IconButton>
         </Surface>
       ) : null}

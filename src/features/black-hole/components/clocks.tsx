@@ -229,7 +229,7 @@ function ClockRun({
   const restart = (
     <Tooltip label={t("dropAgain")} align="end">
       <IconButton type="button" onClick={onRestart} aria-label={t("dropAgain")}>
-        <RotateCcw className="size-4 md:size-3.5" />
+        <RotateCcw className="icon-toolbar" />
       </IconButton>
     </Tooltip>
   );
@@ -323,7 +323,7 @@ function ClockRun({
           <details className="group mt-3 border-t border-border pt-1">
             <summary className="flex h-11 cursor-pointer list-none items-center justify-between font-mono text-xs tracking-widest text-fg-tertiary uppercase transition-colors duration-feedback ease-standard hover:text-fg-primary md:h-8 [&::-webkit-details-marker]:hidden">
               {t("clocksMore")}
-              <ChevronDown className="size-3.5 transition-transform duration-control ease-standard group-open:rotate-180" />
+              <ChevronDown className="icon size-icon-compact transition-transform duration-control ease-standard group-open:rotate-180" />
             </summary>
             <p className="mt-1 text-sm leading-relaxed text-fg-primary/80">{t("clocksP1")}</p>
             <Equation>

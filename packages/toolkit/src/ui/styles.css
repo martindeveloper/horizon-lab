@@ -113,6 +113,32 @@
   }
 }
 
+/* Opt in on UI glyphs only; custom SVGs keep their authored geometry and strokes. */
+@utility icon {
+  @apply size-icon-control shrink-0;
+  stroke-width: var(--icon-stroke-standard);
+}
+
+@utility icon-toolbar {
+  @apply icon;
+  @variant md {
+    @apply size-icon-compact;
+  }
+}
+
+@utility stroke-icon-standard {
+  stroke-width: var(--icon-stroke-standard);
+}
+
+@utility stroke-icon-emphasis {
+  stroke-width: var(--icon-stroke-emphasis);
+}
+
+/* Tiny result stamps need a heavier line to remain legible. */
+@utility stroke-icon-marker {
+  stroke-width: var(--icon-stroke-marker);
+}
+
 /* Ring widths are independent of their neutral/accent colors and inset placement. */
 @utility ring-outline {
   @apply ring-(length:--stroke-outline);
@@ -635,9 +661,13 @@
   }
 }
 
-/* The one filled call to action: solar in the dark, ink glass with solar text in light.
-   A component layer, so a consumer's shadow utility (the solar glow) still applies. */
 @layer components {
+  /* Utilities on the glyph can override this default; custom SVG children are untouched. */
+  .icon-button > :where(.lucide) {
+    @apply icon-toolbar;
+  }
+
+  /* The filled action: solar in dark, ink glass in light. Consumer shadow utilities still apply. */
   .action-fill {
     background: var(--action-sheen), var(--color-action);
     color: var(--color-action-fg);

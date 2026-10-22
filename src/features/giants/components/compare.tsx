@@ -100,7 +100,7 @@ export function Compare({ id }: { id: RungId }) {
           aria-pressed={sideBySide}
           onClick={() => api().setSideBySide(!sideBySide)}
         >
-          <Columns2 aria-hidden className="size-4" />
+          <Columns2 aria-hidden className="icon" />
           {t(sideBySide ? "compare.backToLadder" : "compare.sideBySide")}
         </Action>
       ) : null}

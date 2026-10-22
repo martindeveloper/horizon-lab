@@ -110,7 +110,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
                 aria-label={t("pauseStories")}
                 onClick={() => setHeld(true)}
               >
-                <Pause className="size-3.5" />
+                <Pause className="icon size-icon-compact" />
               </button>
             ) : null}
             <button
@@ -119,7 +119,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
               aria-label={t("previousStory")}
               onClick={() => show(index - 1)}
             >
-              <ChevronLeft className="size-3.5" />
+              <ChevronLeft className="icon size-icon-compact" />
             </button>
             <button
               type="button"
@@ -127,7 +127,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
               aria-label={t("nextStory")}
               onClick={() => show(index + 1)}
             >
-              <ChevronRight className="size-3.5" />
+              <ChevronRight className="icon size-icon-compact" />
             </button>
           </div>
         ) : null}

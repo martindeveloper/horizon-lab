@@ -393,7 +393,7 @@ export function SpectrumView({ className }: { className?: string }) {
           {/* The dock sits just below: these tips open upward. */}
           <Tooltip label={t("spectrum.zoomOut")} side="top">
             <IconButton aria-label={t("spectrum.zoomOut")} onClick={() => api().zoom(1 / 0.6)}>
-              <Minus className="size-3.5" />
+              <Minus className="icon size-icon-compact" />
             </IconButton>
           </Tooltip>
           <Tooltip label={t("spectrum.zoomIn")} side="top">
@@ -401,7 +401,7 @@ export function SpectrumView({ className }: { className?: string }) {
               aria-label={t("spectrum.zoomIn")}
               onClick={() => api().zoom(0.6, selectedCentre ?? undefined)}
             >
-              <Plus className="size-3.5" />
+              <Plus className="icon size-icon-compact" />
             </IconButton>
           </Tooltip>
           <Tooltip label={t("spectrum.reset")} align="end" side="top">
@@ -411,7 +411,7 @@ export function SpectrumView({ className }: { className?: string }) {
               onClick={() => api().setRange(FULL_RANGE)}
               className="aria-disabled:opacity-40"
             >
-              <ScanLine className="size-3.5" />
+              <ScanLine className="icon size-icon-compact" />
             </IconButton>
           </Tooltip>
         </div>

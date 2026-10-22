@@ -259,7 +259,7 @@ export function LineCard() {
           className="min-h-9 px-3 text-ui md:min-h-8"
           onClick={() => api().setRange([observed - 1.5, observed + 1.5])}
         >
-          <ZoomIn className="size-3.5" />
+          <ZoomIn className="icon size-icon-compact" />
           {t("card.zoom")}
         </Action>
         {view !== "mystery" ? (

@@ -142,7 +142,7 @@ export function GuideCard({
               });
             }}
           >
-            <ChevronDown className="size-4" />
+            <ChevronDown className="icon" />
           </button>
         </div>
         <GuideSegments {...progress} />
@@ -156,24 +156,24 @@ export function GuideCard({
               }}
               className="aria-disabled:opacity-40"
             >
-              <ChevronLeft className="size-4" />
+              <ChevronLeft className="icon" />
             </IconButton>
           ) : null}
           {play ? (
             <Tooltip label={play.label}>
               <IconButton aria-label={play.label} active={play.playing} onClick={play.onClick}>
-                {play.playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+                {play.playing ? <Pause className="icon" /> : <Play className="icon" />}
               </IconButton>
             </Tooltip>
           ) : null}
           {extra}
           <Action ref={nextRef} className="px-4" onClick={next.onClick}>
             {next.label}
-            {next.last ? null : <ChevronRight className="-mr-1 size-4" />}
+            {next.last ? null : <ChevronRight className="-mr-1 icon" />}
           </Action>
           <Tooltip label={exit.label}>
             <IconButton aria-label={exit.label} onClick={exit.onClick}>
-              <X className="size-4" />
+              <X className="icon" />
             </IconButton>
           </Tooltip>
         </div>

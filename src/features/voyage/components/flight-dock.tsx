@@ -141,11 +141,11 @@ function HelmButton({ status }: { status: Status }) {
     <Tooltip label={label} side="top" align="end">
       <IconButton aria-label={label} onClick={act}>
         {status === "flight" || status === "crash" ? (
-          <Hand className="size-4" />
+          <Hand className="icon" />
         ) : status === "free" ? (
-          <Orbit className="size-4" />
+          <Orbit className="icon" />
         ) : (
-          <Rocket className="size-4" />
+          <Rocket className="icon" />
         )}
       </IconButton>
     </Tooltip>
@@ -165,7 +165,7 @@ function CourseButton() {
         active={open}
         onClick={() => useVoyage.getState().setPanel(open ? "none" : "objects")}
       >
-        <Navigation className="size-4" />
+        <Navigation className="icon" />
       </IconButton>
     </Tooltip>
   );

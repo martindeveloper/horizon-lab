@@ -43,7 +43,7 @@ export function PanelHeader({
           onClick={onClose}
           aria-label={closeLabel}
         >
-          <X className="size-4" />
+          <X className="icon" />
         </Button>
       ) : null}
     </div>

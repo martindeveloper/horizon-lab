@@ -137,7 +137,7 @@ export function HeaderPreferences({
                   animate={{ rotate: active ? turn : 0, scale: active ? 1 : 0.86 }}
                   transition={controlSpring}
                 >
-                  <Icon className="size-3.5" aria-hidden />
+                  <Icon className="icon size-icon-compact" aria-hidden />
                 </m.span>
               );
             }}

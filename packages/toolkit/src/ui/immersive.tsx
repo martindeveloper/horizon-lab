@@ -92,7 +92,7 @@ export function ImmersiveToggle({
         onClick={() => setImmersive(true)}
         className={className}
       >
-        <Icon className="size-4 md:size-3.5" />
+        <Icon className="icon-toolbar" />
       </IconButton>
     </Tooltip>
   );
@@ -289,7 +289,7 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
             {canFullscreen && !fullscreen ? (
               <Tooltip label={labels.fullscreen}>
                 <IconButton aria-label={labels.fullscreen} onClick={requestFullscreen}>
-                  <Fullscreen className="size-4 md:size-3.5" />
+                  <Fullscreen className="icon-toolbar" />
                 </IconButton>
               </Tooltip>
             ) : null}
@@ -304,9 +304,9 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
                   onClick={drift.onToggle}
                 >
                   {drift.playing ? (
-                    <Pause className="size-4 md:size-3.5" />
+                    <Pause className="icon-toolbar" />
                   ) : (
-                    <Play className="size-4 md:size-3.5" />
+                    <Play className="icon-toolbar" />
                   )}
                 </IconButton>
               </Tooltip>
@@ -319,9 +319,9 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
                   onClick={drift.music.onToggle}
                 >
                   {drift.music.on ? (
-                    <Volume2 className="size-4 md:size-3.5" />
+                    <Volume2 className="icon-toolbar" />
                   ) : (
-                    <VolumeX className="size-4 md:size-3.5" />
+                    <VolumeX className="icon-toolbar" />
                   )}
                 </IconButton>
               </Tooltip>
@@ -332,7 +332,7 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
                 aria-keyshortcuts={`Escape ${IMMERSIVE_SHORTCUT}`}
                 onClick={() => leave(root.current, stage)}
               >
-                <Minimize2 className="size-4 md:size-3.5" />
+                <Minimize2 className="icon-toolbar" />
               </IconButton>
             </Tooltip>
           </Toolbar>

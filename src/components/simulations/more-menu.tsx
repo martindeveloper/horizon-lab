@@ -65,7 +65,7 @@ export function SceneMoreMenu({
           active={open || items.some((item) => item.active)}
           onClick={() => setOpen(!open)}
         >
-          <Ellipsis className="size-4 md:size-3.5" />
+          <Ellipsis className="icon-toolbar" />
         </IconButton>
       </Tooltip>
       {open ? (
@@ -86,9 +86,7 @@ export function SceneMoreMenu({
               }}
               className="justify-start"
             >
-              <Icon
-                className={cn("size-4 shrink-0", active ? "text-accent" : "text-fg-secondary")}
-              />
+              <Icon className={cn("icon", active ? "text-accent" : "text-fg-secondary")} />
               {name}
             </ListItem>
           ))}

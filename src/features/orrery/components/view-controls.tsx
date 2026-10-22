@@ -89,7 +89,7 @@ export function EdgeChip() {
         className="glass-hud pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full px-4 text-ui tracking-wide text-fg-primary transition-colors duration-feedback ease-standard hover:text-accent focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
       >
         {t("hud.keepGoing")}
-        <ArrowUpRight className="size-3.5 text-accent" aria-hidden />
+        <ArrowUpRight className="icon size-icon-compact text-accent" aria-hidden />
       </HandoffLink>
     </div>
   );

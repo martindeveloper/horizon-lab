@@ -269,7 +269,7 @@ function EruptionAction() {
             active={playing}
             onClick={() => api().toggleEruptionPlaying()}
           >
-            {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+            {playing ? <Pause className="icon" /> : <Play className="icon" />}
           </IconButton>
         </Tooltip>
       }

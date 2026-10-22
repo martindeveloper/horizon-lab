@@ -508,7 +508,7 @@ export function CoachMark({
             onClick={onClose}
             className="coach-quiet -mr-2.5 ml-auto size-11 md:size-8"
           >
-            <X className="size-3.5" />
+            <X className="icon size-icon-compact" />
           </button>
         </div>
         <div className="-mt-2 md:-mt-1" aria-live="polite" aria-atomic>
@@ -531,7 +531,7 @@ export function CoachMark({
             }}
             className="coach-quiet -ml-2.5 size-11 aria-disabled:opacity-30 md:size-8"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="icon" />
           </button>
           <span
             aria-hidden
@@ -546,7 +546,7 @@ export function CoachMark({
             className={cn("coach-next ml-auto md:ml-2", last && "pr-3.5")}
           >
             {last ? labels.finish : labels.next}
-            {last ? null : <ChevronRight className="-mr-1 size-3.5" />}
+            {last ? null : <ChevronRight className="-mr-1 icon size-icon-compact" />}
           </button>
         </div>
       </section>
