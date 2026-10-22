@@ -1,6 +1,8 @@
 import type { SimulationManifest } from "@/lib/simulation-types";
 
-import { experiencePath } from "../../lib/simulation-paths";
+import { experiencePath, slugPath } from "../../lib/simulation-paths";
+import { SIMULATION_ASSETS } from "../../lib/urls";
+import { DEFAULT_VIEW, type ViewId } from "./lib/model/view-ids";
 
 export const VOYAGE_PATH = experiencePath("voyage");
 export const voyageManifest = {
@@ -8,12 +10,12 @@ export const voyageManifest = {
   kind: "experience",
   feature: "voyage",
   href: VOYAGE_PATH,
-  artwork: "/simulations/voyage.svg",
+  artwork: SIMULATION_ASSETS.voyage.artwork,
   messageKey: "voyage",
   highlights: ["scale", "clocks", "horizon"],
   entryPoints: [
-    { id: "moon", href: `${VOYAGE_PATH}/moon` },
-    { id: "saturn", href: `${VOYAGE_PATH}/saturn` },
-    { id: "pluto", href: `${VOYAGE_PATH}/pluto` },
+    { id: "moon", href: slugPath(VOYAGE_PATH, DEFAULT_VIEW, "moon" satisfies ViewId) },
+    { id: "saturn", href: slugPath(VOYAGE_PATH, DEFAULT_VIEW, "saturn" satisfies ViewId) },
+    { id: "pluto", href: slugPath(VOYAGE_PATH, DEFAULT_VIEW, "pluto" satisfies ViewId) },
   ],
 } as const satisfies SimulationManifest;

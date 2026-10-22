@@ -1,4 +1,5 @@
 import { LOCALES } from "../i18n/locales";
+import { PAGE_URLS } from "./urls";
 
 /** Shared URL prefixes: the labs live under one, the experiences under the other. */
 export const SIMULATION_PREFIX = "/lab";
@@ -25,8 +26,11 @@ function segmentsAfter(base: string, pathname: string): string[] {
 }
 
 /** The path of a preset or view: the default at `base`, the rest at `base/<id>`. */
-export const slugPath = (base: string, defaultId: string, id: string) =>
-  id === defaultId ? base : `${base}/${id}`;
+export const slugPath = <const Base extends string, const Id extends string>(
+  base: Base,
+  defaultId: string,
+  id: Id,
+) => (id === defaultId ? base : (`${base}/${id}` as const));
 
 /**
  * URL slugs for a simulation's presets or views: the default lives at `base`,
@@ -60,7 +64,8 @@ export function slugRoutes<Id extends string>({
     pathFor,
     /** The id for a pathname (the current one in the browser), else the default. */
     fromPath: (pathname?: string): Id => {
-      const path = pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname);
+      const path =
+        pathname ?? (typeof window === "undefined" ? PAGE_URLS.home : window.location.pathname);
       return resolve(segmentsAfter(base, path)[0] ?? "") ?? defaultId;
     },
     /** Ids that need their own prerendered route. */

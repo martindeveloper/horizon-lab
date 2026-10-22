@@ -1,5 +1,6 @@
+import { PAGE_URLS } from "@/lib/urls";
 /** The prerendered file holding the live deployment's ID (`src/app/version.json/route.ts`). */
-export const VERSION_PATH = "/version.json";
+export const VERSION_PATH = PAGE_URLS.version;
 
 /** How often a visible tab looks for a newer deployment. */
 export const CHECK_EVERY = 15 * 60_000;

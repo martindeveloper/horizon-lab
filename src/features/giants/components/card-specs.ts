@@ -1,3 +1,4 @@
+import { pathForHole } from "@/features/black-hole/routing";
 /**
  * What each rung's card shows, as data: rows (a fact label, the message that words it and the
  * catalogue figures that fill its placeholders). Every rung shares one layout; which rows it
@@ -23,10 +24,10 @@ import { RUNGS, RUNG_IDS, type RungId } from "../lib/model/rungs";
  * to show it up close, its disk, lensing and jet ray-traced.
  */
 export const UP_CLOSE: Partial<Record<RungId, string>> = {
-  "cygnus-x1": "/lab/black-hole/stellar",
-  "sgr-a": "/lab/black-hole/sgr-a",
-  m87: "/lab/black-hole/m87",
-  "ton-618": "/lab/black-hole/ton-618",
+  "cygnus-x1": pathForHole("stellar"),
+  "sgr-a": pathForHole("sgr-a"),
+  m87: pathForHole("m87"),
+  "ton-618": pathForHole("ton-618"),
 };
 
 /** Light's lap in the unit that reads best: seconds up to two minutes, then minutes, hours, days. */

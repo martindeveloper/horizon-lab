@@ -5,7 +5,7 @@ import { CDN_URL } from "@/config";
  * map builds and tests. Each body has its own versioned folder (`MAPS` `version`):
  * never overwrite a published file, a rebuild bumps that body's version.
  */
-export const MAPS_KEY = "/textures/bodies";
+export { MAPS_KEY } from "./urls";
 
 /** Origin to preconnect to, anonymously: assets load with CORS. */
 export const assetOrigin = new URL(CDN_URL).origin;

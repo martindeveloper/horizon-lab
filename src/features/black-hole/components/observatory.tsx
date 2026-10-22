@@ -10,6 +10,7 @@ import { driftFor } from "@/features/black-hole/lib/drift";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { presetIdFromPath } from "@/features/black-hole/routing";
 import { usePathname } from "@/i18n/navigation";
+import { ANCHOR_IDS } from "@/lib/urls";
 import { VisualizationShell } from "@horizon/toolkit/ui";
 
 import { BLACK_HOLE_PATH } from "../manifest";
@@ -40,7 +41,7 @@ export function Observatory() {
 
   return (
     <SceneCameraProvider>
-      <VisualizationShell id="main-content" tabIndex={-1} className="h-full">
+      <VisualizationShell id={ANCHOR_IDS.mainContent} tabIndex={-1} className="h-full">
         <BlackHoleCanvas />
         <SimulationImmersive onEnter={closePanels} drift={drift}>
           <ObservatoryOverlay />

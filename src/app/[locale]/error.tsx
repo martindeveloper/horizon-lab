@@ -8,6 +8,7 @@ import {
   statusPrimaryActionClass,
 } from "@/components/status/status-page";
 import { Link } from "@/i18n/navigation";
+import { PAGE_URLS } from "@/lib/urls";
 
 export default function RouteError({
   reset,
@@ -21,7 +22,7 @@ export default function RouteError({
       <button type="button" onClick={reset} className={statusPrimaryActionClass}>
         {t("tryAgain")}
       </button>
-      <Link href="/" prefetch={false} className={statusActionClass}>
+      <Link href={PAGE_URLS.home} prefetch={false} className={statusActionClass}>
         {t("returnHome")}
       </Link>
     </StatusPage>

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { REPOSITORY_URL } from "@/config";
 import { Link } from "@/i18n/navigation";
+import { PAGE_URLS } from "@/lib/urls";
 
 import { SiderealClock } from "./sidereal-clock";
 
@@ -30,7 +31,7 @@ export function FooterLinks({
       <span className="inline-flex h-full items-center gap-2.5">
         {lead}
         <Link
-          href="/about"
+          href={PAGE_URLS.about}
           prefetch={false}
           onClick={onNavigate}
           className="footer-link inline-flex"
@@ -39,7 +40,7 @@ export function FooterLinks({
         </Link>
         <span className="footer-dot" aria-hidden />
         <Link
-          href="/credits"
+          href={PAGE_URLS.credits}
           prefetch={false}
           onClick={onNavigate}
           className="footer-link inline-flex"

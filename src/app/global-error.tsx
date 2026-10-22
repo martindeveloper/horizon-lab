@@ -11,6 +11,7 @@ import {
   statusPrimaryActionClass,
 } from "@/components/status/status-page";
 import { routing } from "@/i18n/routing";
+import { PAGE_URLS } from "@/lib/urls";
 
 import cs from "../messages/cs.json";
 import en from "../messages/en.json";
@@ -47,8 +48,7 @@ export default function GlobalError({
               {copy.tryAgain}
             </button>
             {/* A full load recovers from a crashed root layout; client navigation cannot. */}
-            {/* oxlint-disable-next-line next/no-html-link-for-pages */}
-            <a href="/" className={statusActionClass}>
+            <a href={PAGE_URLS.home} className={statusActionClass}>
               {copy.returnHome}
             </a>
           </StatusPage>

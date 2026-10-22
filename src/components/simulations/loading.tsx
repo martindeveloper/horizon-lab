@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { ANCHOR_IDS } from "@/lib/urls";
 import { LoadingScreen } from "@horizon/toolkit/ui";
 
 export function SimulationLoading({ title, className }: { title?: string; className?: string }) {
@@ -18,7 +19,7 @@ export function SimulationLoading({ title, className }: { title?: string; classN
 /** The page's main landmark while a simulation's client chunk loads. */
 export function SimulationLoadingPage({ title }: { title?: string }) {
   return (
-    <main id="main-content" className="h-full">
+    <main id={ANCHOR_IDS.mainContent} className="h-full">
       <SimulationLoading {...(title !== undefined ? { title } : {})} />
     </main>
   );

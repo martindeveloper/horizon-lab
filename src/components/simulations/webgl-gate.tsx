@@ -7,6 +7,7 @@ import { useState, useSyncExternalStore, type ComponentType, type ReactNode } fr
 import { StatusPage, statusPrimaryActionClass } from "@/components/status/status-page";
 import { Link } from "@/i18n/navigation";
 import { subscribeDebug, webglOverride } from "@/lib/debug";
+import { PAGE_URLS } from "@/lib/urls";
 import { probeWebGL, type WebGLSupport } from "@horizon/toolkit/rendering";
 import { PanelHeader, Surface, useImmersive } from "@horizon/toolkit/ui";
 
@@ -72,7 +73,7 @@ function WebGLUnavailable() {
       title={t("webgl.unavailableTitle")}
       description={t("webgl.unavailableBody")}
     >
-      <Link href="/" prefetch={false} className={statusPrimaryActionClass}>
+      <Link href={PAGE_URLS.home} prefetch={false} className={statusPrimaryActionClass}>
         {t("returnHome")}
       </Link>
     </StatusPage>

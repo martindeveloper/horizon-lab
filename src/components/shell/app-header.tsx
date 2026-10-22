@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { localeCookie, type Locale } from "@/i18n/routing";
 import { simulationForPath } from "@/lib/simulations";
+import { FRAGMENT_URLS, PAGE_URLS } from "@/lib/urls";
 
 import { Wordmark } from "./brand";
 import { HeaderPreferences } from "./header-preferences";
@@ -33,14 +34,14 @@ export function AppHeader() {
   return (
     <div className="app-bar flex h-full items-center gap-2.5 md:gap-3">
       <a
-        href="#main-content"
+        href={FRAGMENT_URLS.mainContent}
         className="action-fill sr-only rounded-full px-4 py-2 focus:not-sr-only focus:absolute focus:left-4 focus:z-[120]"
       >
         {t("shell.skip")}
       </a>
 
       <Link
-        href="/"
+        href={PAGE_URLS.home}
         className="inline-flex h-11 shrink-0 items-center rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
         aria-label={t("shell.home")}
       >
@@ -64,7 +65,7 @@ export function AppHeader() {
       {/* Phones find the way back in their menu. */}
       {simulation ? (
         <Link
-          href="/"
+          href={PAGE_URLS.home}
           prefetch={false}
           className="glass-pill relative hidden h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-fg/90 transition-colors after:absolute after:-inset-1.5 hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:inline-flex"
         >

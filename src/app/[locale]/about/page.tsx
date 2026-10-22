@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { DebugCrash } from "@/components/debug/debug-crash";
 import { AboutPage } from "@/components/pages/about-page";
 import { localeParam, pageMetadata } from "@/lib/metadata";
+import { PAGE_URLS, PUBLIC_ASSETS } from "@/lib/urls";
 
 export async function generateMetadata({
   params,
@@ -13,9 +14,9 @@ export async function generateMetadata({
   await localeParam(params);
   const t = await getTranslations({ locale: "en", namespace: "about" });
   return pageMetadata({
-    path: "/about",
+    path: PAGE_URLS.about,
     description: t("metadataDescription"),
-    image: "/social/horizon.png",
+    image: PUBLIC_ASSETS.social,
     imageAlt: "Horizon",
     title: `${t("kicker")} · Horizon`,
   });

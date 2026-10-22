@@ -15,6 +15,7 @@ import {
 } from "@/features/voyage/routing";
 
 import { simulations } from "./simulations";
+import { PAGE_URLS } from "./urls";
 
 type SimulationId = (typeof simulations)[number]["id"];
 
@@ -31,9 +32,9 @@ const subpages: Record<SimulationId, () => string[]> = {
 /** Canonical clean paths: no language prefix and no redirect sources. */
 export function sitePaths(): string[] {
   return [
-    "/",
-    "/about",
-    "/credits",
+    PAGE_URLS.home,
+    PAGE_URLS.about,
+    PAGE_URLS.credits,
     ...simulations.flatMap(({ id, href }) => [href, ...subpages[id]()]),
   ];
 }

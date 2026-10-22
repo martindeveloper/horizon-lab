@@ -12,6 +12,7 @@ import {
   triggerCrash,
   webglOverride,
 } from "@/lib/debug";
+import { PAGE_URLS } from "@/lib/urls";
 import {
   COARSE_POINTER_QUERY,
   PHONE_QUERY,
@@ -108,7 +109,7 @@ export function createDebug() {
       triggerCrash("root");
     }, ["", "Throw inside the shell → global error page"]),
     notFound: command(() => {
-      window.location.assign("/horizon-debug-not-found");
+      window.location.assign(PAGE_URLS.debugNotFound);
     }, ["", "Open a missing page → 404"]),
     webgl: command(
       (mode?: WebGLSupport) => {

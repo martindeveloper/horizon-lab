@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AppThemeProvider } from "@/components/providers";
 import { Localized, StatusLocaleHead } from "@/components/status/status-locale";
 import { StatusPage, statusPrimaryActionClass } from "@/components/status/status-page";
+import { PAGE_URLS } from "@/lib/urls";
 
 import cs from "../messages/cs.json";
 import en from "../messages/en.json";
@@ -31,7 +32,7 @@ export default function GlobalNotFound() {
             title={<Localized copy={{ en: en.notFoundTitle, cs: cs.notFoundTitle }} />}
             description={<Localized copy={{ en: en.notFoundBody, cs: cs.notFoundBody }} />}
           >
-            <Link prefetch={false} href="/" className={statusPrimaryActionClass}>
+            <Link prefetch={false} href={PAGE_URLS.home} className={statusPrimaryActionClass}>
               <Localized copy={{ en: en.returnHome, cs: cs.returnHome }} />
             </Link>
           </StatusPage>

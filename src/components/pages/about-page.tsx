@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { REPOSITORY_URL } from "@/config";
 import type { Locale } from "@/i18n/routing";
+import { ANCHOR_IDS } from "@/lib/urls";
 import { cn, kickerClass } from "@horizon/toolkit/ui";
 import { EXTERNAL_URLS } from "@horizon/toolkit/urls";
 
@@ -56,7 +57,7 @@ function Part({
 export async function AboutPage({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "about" });
   return (
-    <main id="main-content" tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
+    <main id={ANCHOR_IDS.mainContent} tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
       <article aria-labelledby="about-heading" className="app-container anim-rise">
         <div className="mx-auto max-w-[36rem] pt-16 text-[1.0625rem] leading-[1.8] text-pretty text-fg/85 sm:pt-24 sm:text-lg lg:max-w-[51rem] lg:pt-28 lg:text-[1.1875rem] lg:leading-[1.75]">
           <LetterHeader

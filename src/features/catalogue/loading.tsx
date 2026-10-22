@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { ANCHOR_IDS } from "@/lib/urls";
 import { cn } from "@horizon/toolkit/ui";
 
 import { TILE_FRAME, tileSpan } from "./tiles";
@@ -10,7 +11,7 @@ import { TILE_FRAME, tileSpan } from "./tiles";
 export function CatalogueLoading() {
   const t = useTranslations("loading");
   return (
-    <main id="main-content" tabIndex={-1} className="pb-10 outline-hidden">
+    <main id={ANCHOR_IDS.mainContent} tabIndex={-1} className="pb-10 outline-hidden">
       <p role="status" className="sr-only">
         {t("catalogue")}
       </p>

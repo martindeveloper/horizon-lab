@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { ANCHOR_IDS } from "@/lib/urls";
 import { actionClass, cn } from "@horizon/toolkit/ui";
 
 import { Wordmark } from "../shell/brand";
@@ -57,7 +58,7 @@ export function StatusPage({
 }) {
   return (
     <main
-      id="main-content"
+      id={ANCHOR_IDS.mainContent}
       tabIndex={-1}
       className={cn(
         "horizon-status relative isolate flex flex-col items-center justify-center px-6 py-16 text-center text-fg outline-hidden",

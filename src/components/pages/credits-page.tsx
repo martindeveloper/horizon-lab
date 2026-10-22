@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import creditDocuments from "@/data/credits.generated.json";
 import type { Locale } from "@/i18n/routing";
 import { CREDITS, LICENCE_URLS, type Credit, type CreditGroup, type Licence } from "@/lib/credits";
+import { ANCHOR_IDS, CREDIT_ANCHORS, creditFragment } from "@/lib/urls";
 import { MAP_BASE } from "@/space/solar-system/graphics/maps";
 import { MAPS, mapFile, type BodyId } from "@horizon/toolkit/bodies";
 import { keysOf } from "@horizon/toolkit/records";
@@ -225,7 +226,7 @@ function Items({ t, group }: { t: Translate; group: CreditGroup }) {
 export async function CreditsPage({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "credits" });
   return (
-    <main id="main-content" tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
+    <main id={ANCHOR_IDS.mainContent} tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
       <article aria-labelledby="credits-heading" className="app-container anim-rise">
         <div className="mx-auto max-w-[36rem] pt-16 text-pretty text-fg/85 sm:max-w-[42rem] sm:pt-24 lg:max-w-[60rem] lg:pt-28">
           <LetterHeader
@@ -241,7 +242,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 {CREDITS.map((group) => (
                   <li key={group.id} className="border-b border-border">
                     <a
-                      href={`#credits-${group.id}`}
+                      href={creditFragment(group.id)}
                       className="group flex flex-col gap-1 rounded-sm py-3 pr-3 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                     >
                       <span className="font-mono text-2xl leading-none text-fg tabular-nums transition-colors group-hover:text-accent">
@@ -260,12 +261,12 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
           {CREDITS.map((group) => (
             <section
               key={group.id}
-              id={`credits-${group.id}`}
-              aria-labelledby={`credits-${group.id}-title`}
+              id={CREDIT_ANCHORS[group.id]}
+              aria-labelledby={`${CREDIT_ANCHORS[group.id]}-title`}
               className={cn("mt-16 scroll-mt-24 text-[0.9375rem] sm:mt-20", letterGrid)}
             >
               <div className="flex items-baseline justify-between gap-4 lg:block lg:pt-1 lg:text-right">
-                <h2 id={`credits-${group.id}-title`} className={kickerClass}>
+                <h2 id={`${CREDIT_ANCHORS[group.id]}-title`} className={kickerClass}>
                   {t(`groups.${group.id}.label`)}
                 </h2>
                 <p
@@ -297,7 +298,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 <li>
                   {t.rich("notes.changes", {
                     link: (chunks) => (
-                      <a href="#credits-map-details" className={linkClass}>
+                      <a href={creditFragment("map-details")} className={linkClass}>
                         {chunks}
                       </a>
                     ),
@@ -306,7 +307,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 <li>
                   {t.rich("notes.softwareNotices", {
                     link: (chunks) => (
-                      <a href="#credits-licence-texts" className={linkClass}>
+                      <a href={creditFragment("licence-texts")} className={linkClass}>
                         {chunks}
                       </a>
                     ),
@@ -316,7 +317,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 <li>
                   {t.rich("notes.papers", {
                     link: (chunks) => (
-                      <a href="#credits-source-details" className={linkClass}>
+                      <a href={creditFragment("source-details")} className={linkClass}>
                         {chunks}
                       </a>
                     ),
@@ -335,11 +336,14 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
           ).map(([id, key]) => (
             <section
               key={id}
-              id={`credits-${id}`}
-              aria-labelledby={`credits-${id}-heading`}
+              id={CREDIT_ANCHORS[id]}
+              aria-labelledby={`${CREDIT_ANCHORS[id]}-heading`}
               className={cn("mt-16 scroll-mt-24 sm:mt-20", letterGrid)}
             >
-              <h2 id={`credits-${id}-heading`} className={cn(kickerClass, "lg:pt-5 lg:text-right")}>
+              <h2
+                id={`${CREDIT_ANCHORS[id]}-heading`}
+                className={cn(kickerClass, "lg:pt-5 lg:text-right")}
+              >
                 {t(`documents.${key}`)}
               </h2>
               <div className="mt-3 min-w-0 lg:mt-0">

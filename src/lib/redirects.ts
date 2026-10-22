@@ -4,6 +4,7 @@ import { ORRERY_PATH } from "../features/orrery/manifest";
 import { legacyViewRedirects } from "../features/orrery/routing";
 import { LOCALE_COOKIE, routing } from "../i18n/routing";
 import { SIMULATION_PREFIX } from "./simulation-paths";
+import { LEGACY_URLS, PAGE_URLS, creditUrl } from "./urls";
 
 // Native Next.js redirect rules; Vercel handles these before serving pages.
 // Old /en and /cs links keep their prefix here: those prerendered pages are served
@@ -13,9 +14,9 @@ export function siteRedirects(): Map<string, string> {
   const add = (source: string, target: string) => {
     if (source !== target) redirects.set(source, target);
   };
-  add("/textures/orrery/CREDITS.md", "/credits#credits-map-details");
-  add("/SCIENTIFIC-SOURCES.txt", "/credits#credits-source-details");
-  add("/THIRD-PARTY-NOTICES.txt", "/credits#credits-licence-texts");
+  add(LEGACY_URLS.mapCredits, creditUrl("map-details"));
+  add(LEGACY_URLS.scientificSources, creditUrl("source-details"));
+  add(LEGACY_URLS.thirdPartyNotices, creditUrl("licence-texts"));
   const features = [
     [BLACK_HOLE_PATH, legacyPresetRedirects()],
     [ORRERY_PATH, legacyViewRedirects()],
@@ -50,7 +51,7 @@ export function localeRewrites() {
   const rules = (locale: string) => [
     { source: "/index.rsc", destination: `/${locale}.rsc` },
     { source: "/index.segments/:segment*", destination: `/${locale}.segments/:segment*` },
-    { source: "/", destination: `/${locale}` },
+    { source: PAGE_URLS.home, destination: `/${locale}` },
     { source: page, destination: `/${locale}/:path` },
   ];
   const others = routing.locales.filter((locale) => locale !== routing.defaultLocale);

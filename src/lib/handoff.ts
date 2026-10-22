@@ -5,6 +5,7 @@ import { json, storageCell } from "@horizon/toolkit/storage";
 import type { SolarViewId } from "../space/solar-system/model/views";
 import { slugPath } from "./simulation-paths";
 import { simulations, type RegisteredSimulation } from "./simulations";
+import { PAGE_URLS } from "./urls";
 
 type SolarSimulation = Extract<RegisteredSimulation, { solarSystem: object }>;
 
@@ -22,7 +23,7 @@ export type HandoffSide = SolarSimulation["id"];
 /** A solar system view in one of them. */
 export function handoffPath(to: HandoffSide, view: SolarViewId) {
   const side = SIDES.get(to);
-  return side ? slugPath(side.href, side.solarSystem.defaultView, view) : "/";
+  return side ? slugPath(side.href, side.solarSystem.defaultView, view) : PAGE_URLS.home;
 }
 
 /** A crossing under way: who it is for, and the camera pose the other side left at. */

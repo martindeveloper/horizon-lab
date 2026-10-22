@@ -1,5 +1,5 @@
 import { slugRoutes } from "../../lib/simulation-paths";
-import { DEFAULT_PRESET_ID, HOLE_ALIASES, PRESET_IDS } from "./lib/holes/routes";
+import { DEFAULT_PRESET_ID, HOLE_ALIASES, PRESET_IDS, type PresetId } from "./lib/holes/routes";
 import { BLACK_HOLE_PATH } from "./manifest";
 
 const routes = slugRoutes({
@@ -10,7 +10,7 @@ const routes = slugRoutes({
 });
 
 export const resolveHole = routes.resolve;
-export const pathForHole = routes.pathFor;
+export const pathForHole: (id: PresetId) => string = routes.pathFor;
 /** The preset a pathname (the current one in the browser) names; the default otherwise. */
 export const presetIdFromPath = routes.fromPath;
 

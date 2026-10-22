@@ -6,6 +6,7 @@ import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
 import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
 import { formatAu } from "@/lib/facts";
+import { ANCHOR_IDS } from "@/lib/urls";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
@@ -56,7 +57,7 @@ export function DeepField() {
   useFreshVisit(reset);
 
   return (
-    <VisualizationShell id="main-content" tabIndex={-1} className="h-full">
+    <VisualizationShell id={ANCHOR_IDS.mainContent} tabIndex={-1} className="h-full">
       <h1 className="sr-only">
         {t("app")} · {t(`views.${view}`)}
       </h1>

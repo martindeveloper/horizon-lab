@@ -13,6 +13,7 @@ import { ANALYTICS, siteUrl } from "@/config";
 import { routing } from "@/i18n/routing";
 import { assetOrigin } from "@/lib/assets";
 import { localeParam } from "@/lib/metadata";
+import { PUBLIC_ASSETS } from "@/lib/urls";
 
 /* Fonts ship with the site (Fontsource, from npm): no request to a font CDN, and
    each subset file loads only when a page uses its characters. */
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     metadataBase: siteUrl(),
     title: t("app"),
     description: t("metadataDescription"),
-    icons: { icon: "/favicon.svg", apple: "/apple-touch-icon.png" },
+    icons: { icon: PUBLIC_ASSETS.favicon, apple: PUBLIC_ASSETS.appleIcon },
   };
 }
 export const viewport: Viewport = {

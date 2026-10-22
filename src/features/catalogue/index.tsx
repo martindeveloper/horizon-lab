@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import type { SimulationManifest } from "@/lib/simulation-types";
 import { experiences, labs } from "@/lib/simulations";
+import { ANCHOR_IDS } from "@/lib/urls";
 import { cn, kickerClass, Tilt } from "@horizon/toolkit/ui";
 
 import { HeroScene } from "./hero-sun";
@@ -277,7 +278,11 @@ function Shelf({
 export async function Catalogue({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "catalogue" });
   return (
-    <main id="main-content" tabIndex={-1} className="catalogue-intro pb-10 outline-hidden">
+    <main
+      id={ANCHOR_IDS.mainContent}
+      tabIndex={-1}
+      className="catalogue-intro pb-10 outline-hidden"
+    >
       <section aria-labelledby="catalogue-heading" className="catalogue-hero relative isolate">
         <HeroScene locale={locale} sunLabel={t("sun")} moonLabel={t("moon")} skyLabel={t("sky")}>
           <p className={cn("intro-kicker inline-flex items-center gap-3", kickerClass)}>

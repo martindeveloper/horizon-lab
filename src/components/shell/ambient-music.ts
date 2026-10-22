@@ -1,4 +1,5 @@
 import { assetUrl } from "@/lib/assets";
+import { AUDIO_ASSETS } from "@/lib/urls";
 import { MusicPlayer } from "@horizon/toolkit/audio";
 
 /** Playback levels: the everyday bed, and the lift a drift gives it (`useDriftMusic`). */
@@ -14,46 +15,49 @@ export const ambientMusic = new MusicPlayer(
       title: "Interstellar Drift",
       artist: "Horizon",
       sources: [
-        { src: assetUrl("/audio/interstellar-drift.webm"), type: 'audio/webm; codecs="opus"' },
-        { src: assetUrl("/audio/interstellar-drift.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+        { src: assetUrl(AUDIO_ASSETS.interstellarDrift.opus), type: 'audio/webm; codecs="opus"' },
+        {
+          src: assetUrl(AUDIO_ASSETS.interstellarDrift.aac),
+          type: 'audio/mp4; codecs="mp4a.40.2"',
+        },
       ],
-      map: assetUrl("/audio/interstellar-drift.map.json"),
+      map: assetUrl(AUDIO_ASSETS.interstellarDrift.map),
     },
     {
       title: "Aeolian Static",
       artist: "Horizon",
       sources: [
-        { src: assetUrl("/audio/aeolian-static.webm"), type: 'audio/webm; codecs="opus"' },
-        { src: assetUrl("/audio/aeolian-static.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+        { src: assetUrl(AUDIO_ASSETS.aeolianStatic.opus), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl(AUDIO_ASSETS.aeolianStatic.aac), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
-      map: assetUrl("/audio/aeolian-static.map.json"),
+      map: assetUrl(AUDIO_ASSETS.aeolianStatic.map),
     },
     {
       title: "Drifting Probe",
       artist: "Horizon",
       sources: [
-        { src: assetUrl("/audio/drifting-probe.webm"), type: 'audio/webm; codecs="opus"' },
-        { src: assetUrl("/audio/drifting-probe.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+        { src: assetUrl(AUDIO_ASSETS.driftingProbe.opus), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl(AUDIO_ASSETS.driftingProbe.aac), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
-      map: assetUrl("/audio/drifting-probe.map.json"),
+      map: assetUrl(AUDIO_ASSETS.driftingProbe.map),
     },
     {
       title: "Low Drone Rises",
       artist: "Horizon",
       sources: [
-        { src: assetUrl("/audio/low-drone-rises.webm"), type: 'audio/webm; codecs="opus"' },
-        { src: assetUrl("/audio/low-drone-rises.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+        { src: assetUrl(AUDIO_ASSETS.lowDroneRises.opus), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl(AUDIO_ASSETS.lowDroneRises.aac), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
-      map: assetUrl("/audio/low-drone-rises.map.json"),
+      map: assetUrl(AUDIO_ASSETS.lowDroneRises.map),
     },
     {
       title: "Vast Empty Space",
       artist: "Horizon",
       sources: [
-        { src: assetUrl("/audio/vast-empty-space.webm"), type: 'audio/webm; codecs="opus"' },
-        { src: assetUrl("/audio/vast-empty-space.m4a"), type: 'audio/mp4; codecs="mp4a.40.2"' },
+        { src: assetUrl(AUDIO_ASSETS.vastEmptySpace.opus), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl(AUDIO_ASSETS.vastEmptySpace.aac), type: 'audio/mp4; codecs="mp4a.40.2"' },
       ],
-      map: assetUrl("/audio/vast-empty-space.map.json"),
+      map: assetUrl(AUDIO_ASSETS.vastEmptySpace.map),
     },
   ],
   { storageKey: "music", level: MUSIC_LEVEL.ambient },

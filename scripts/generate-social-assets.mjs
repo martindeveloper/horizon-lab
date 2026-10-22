@@ -2,10 +2,12 @@ import { readFile, writeFile } from "node:fs/promises";
 
 import sharp from "sharp";
 
+import { PUBLIC_ASSETS, SIMULATION_ASSETS } from "../src/lib/urls.ts";
+
 // Shared composition: warm gold, ink background, serif titles, Horizon's sunrise mark.
 // The black-hole illustration is also used by the catalogue, keeping the two in sync.
-const artwork = async (slug) =>
-  readFile(new URL(`../public/simulations/${slug}.svg`, import.meta.url), "utf8");
+const publicFile = (path) => new URL(`../public${path}`, import.meta.url);
+const artwork = async (slug) => readFile(publicFile(SIMULATION_ASSETS[slug].artwork), "utf8");
 const blackHole = await artwork("black-hole");
 const orrery = await artwork("orrery");
 const deepField = await artwork("deep-field");
@@ -31,39 +33,39 @@ const messages = JSON.parse(
 );
 
 const cards = [
-  { path: "social/horizon", title: "Horizon", subtitle: copy.intro, art: null },
+  { path: PUBLIC_ASSETS.social, title: "Horizon", subtitle: copy.intro, art: null },
   {
-    path: "simulations/black-hole/og",
+    path: SIMULATION_ASSETS["black-hole"].social,
     title: messages.catalogue.blackHole.title,
     subtitle: copy.observatory,
     art: blackHole,
   },
   {
-    path: "simulations/orrery/og",
+    path: SIMULATION_ASSETS["orrery"].social,
     title: messages.catalogue.orrery.title,
     subtitle: copy.orrery,
     art: orrery,
   },
   {
-    path: "simulations/deep-field/og",
+    path: SIMULATION_ASSETS["deep-field"].social,
     title: messages.catalogue.deepField.title,
     subtitle: copy.deepField,
     art: deepField,
   },
   {
-    path: "simulations/spectroscopy/og",
+    path: SIMULATION_ASSETS["spectroscopy"].social,
     title: messages.catalogue.spectroscopy.title,
     subtitle: copy.spectroscopy,
     art: spectroscopy,
   },
   {
-    path: "simulations/giants/og",
+    path: SIMULATION_ASSETS["giants"].social,
     title: messages.catalogue.giants.title,
     subtitle: copy.giants,
     art: giants,
   },
   {
-    path: "simulations/voyage/og",
+    path: SIMULATION_ASSETS["voyage"].social,
     title: messages.catalogue.voyage.title,
     subtitle: copy.voyage,
     art: voyage,
@@ -88,28 +90,23 @@ ${art}
 <path d="M86 466h430" stroke="#ecece8" stroke-opacity=".15"/>
 <text x="86" y="508" fill="#9a9a96" font-family="Arial, sans-serif" font-size="14" letter-spacing="2">${escape(copy.category)}</text>
 </svg>`;
-  await writeFile(new URL(`../public/${path}.svg`, import.meta.url), svg);
-  await sharp(Buffer.from(svg))
-    .png()
-    .toFile(new URL(`../public/${path}.png`, import.meta.url).pathname);
+  await writeFile(publicFile(path.replace(/\.png$/, ".svg")), svg);
+  await sharp(Buffer.from(svg)).png().toFile(publicFile(path).pathname);
 }
 
 // App icons from the favicon mark. Rasters are full-bleed squares: platforms apply
 // their own mask, and the mark stays inside the maskable safe zone.
-const mark = (await readFile(new URL("../public/favicon.svg", import.meta.url), "utf8")).replace(
-  / rx="[^"]*"/,
-  "",
-);
+const mark = (await readFile(publicFile(PUBLIC_ASSETS.favicon), "utf8")).replace(/ rx="[^"]*"/, "");
 const icon = (size) =>
   sharp(Buffer.from(mark), { density: (72 * size) / 32 })
     .resize(size)
     .png();
 for (const [path, size] of [
-  ["icons/icon-192.png", 192],
-  ["icons/icon-512.png", 512],
-  ["apple-touch-icon.png", 180],
+  [PUBLIC_ASSETS.icon192, 192],
+  [PUBLIC_ASSETS.icon512, 512],
+  [PUBLIC_ASSETS.appleIcon, 180],
 ]) {
-  await icon(size).toFile(new URL(`../public/${path}`, import.meta.url).pathname);
+  await icon(size).toFile(publicFile(path).pathname);
 }
 // favicon.ico for clients that request it directly: PNG images in an ICO container.
 const images = await Promise.all([16, 32, 48].map((size) => icon(size).toBuffer()));
@@ -128,7 +125,4 @@ images.forEach((png, index) => {
   header.writeUInt32LE(offset, entry + 12);
   offset += png.length;
 });
-await writeFile(
-  new URL("../public/favicon.ico", import.meta.url),
-  Buffer.concat([header, ...images]),
-);
+await writeFile(publicFile(PUBLIC_ASSETS.faviconIco), Buffer.concat([header, ...images]));

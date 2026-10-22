@@ -5,6 +5,7 @@ import { SimulationImmersive } from "@/components/simulations/immersive";
 import { SimulationLoading } from "@/components/simulations/loading";
 import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
 import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
+import { ANCHOR_IDS } from "@/lib/urls";
 import type { SolarViewId } from "@/space/solar-system/model/views";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
@@ -54,7 +55,7 @@ export function Orrery() {
   useFreshVisit(reset);
 
   return (
-    <VisualizationShell id="main-content" tabIndex={-1} className="h-full">
+    <VisualizationShell id={ANCHOR_IDS.mainContent} tabIndex={-1} className="h-full">
       <h1 className="sr-only">
         {t("app")} · {t(`views.${view}`)}
       </h1>
