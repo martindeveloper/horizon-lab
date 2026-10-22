@@ -24,7 +24,6 @@ import {
   defaultVelocity,
   drawDeck,
   grade,
-  mysteryAnswer,
   mysteryVelocity,
   type Bench,
   type Mystery,
@@ -35,6 +34,7 @@ import {
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import type { CanvasAntialias } from "./quality";
+import { mysteryAnswerOf } from "./synthesis";
 
 type Panel = "none" | "elements" | "view";
 
@@ -107,8 +107,11 @@ type SpectroscopyStore = Settings &
     toggleGas: (element: ElementId) => void;
     /** Opens a case of the deck. */
     setCase: (index: number) => void;
-    /** Scores the open mystery as the visitor sees it (their resolving power and air). */
-    check: () => void;
+    /**
+     * Scores the open mystery as the visitor sees it (their resolving power and air), as it
+     * stood when asked, once its answer is worked out (`synthesis.ts`).
+     */
+    check: () => Promise<void>;
     /** Moves the markers onto the answer: the right elements at the right velocity. */
     showAnswer: () => void;
     /** Deals a new deck. */
@@ -264,16 +267,22 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
       const drafts = keepDraft(s);
       return { drafts, ...openCase({ ...s, drafts }, index) };
     }),
-  check: () =>
-    set((s) => {
-      if (s.view !== "mystery") return {};
-      const answer = mysteryAnswer(s.mystery, s.resolution, s.air ? 1 : 0);
-      const result = grade(s.mystery, answer, s.compare, s.velocity);
-      /* The guide's own case is scored but not kept with the deck's. */
-      return s.deck[s.caseIndex] === s.mystery
-        ? { result, results: replaced(s.results, s.caseIndex, result) }
-        : { result };
-    }),
+  check: async () => {
+    const s = get();
+    if (s.view !== "mystery") return;
+    const { mystery, caseIndex, compare, velocity } = s;
+    const answer = await mysteryAnswerOf(mystery, s.resolution, s.air ? 1 : 0);
+    /* A visitor who has moved on to another case meanwhile is not scored. */
+    const now = get();
+    if (now.view !== "mystery" || now.mystery !== mystery) return;
+    const result = grade(mystery, answer, compare, velocity);
+    /* The guide's own case is scored but not kept with the deck's. */
+    set(
+      now.deck[caseIndex] === mystery
+        ? { result, results: replaced(now.results, caseIndex, result) }
+        : { result },
+    );
+  },
   showAnswer: () =>
     set((s) => {
       if (!s.result) return {};

@@ -44,9 +44,9 @@ export function starMaterial(dpr: { value: number }) {
   });
 }
 
-/** The shared Milky Way, its grains drawn with the Orrery's star points. */
-export function createMilkyWay(dpr: { value: number }, grains: number) {
-  return createSharedMilkyWay(grains, { grain: () => starMaterial(dpr) });
+/** The shared Milky Way, its grains drawn with the Orrery's star points; `wake` asks for a frame. */
+export function createMilkyWay(dpr: { value: number }, grains: number, wake: () => void) {
+  return createSharedMilkyWay(grains, { grain: () => starMaterial(dpr), wake });
 }
 
 /**

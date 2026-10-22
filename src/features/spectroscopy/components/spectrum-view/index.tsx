@@ -2,7 +2,7 @@
 
 import { Minus, Plus, ScanLine } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useDeferredValue, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { dopplerWavelengthRatio } from "@horizon/toolkit/science";
 import { IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
@@ -35,10 +35,7 @@ export function SpectrumView({ className }: { className?: string }) {
   const settings = useSettings();
   /* The settings leave out a velocity that only moves the markers (a mystery's); read it here. */
   const rawVelocity = useSpectroscopy((s) => s.velocity);
-  /* A new star (a temperature dragged, a guide gliding) costs a fresh synthesis: the controls
-     answer first, and the spectrum follows as soon as it is ready. */
-  const obs = useDeferredValue(useObservation());
-  const formed = useFormedLines(obs);
+  const obs = useObservation();
   const range = useSpectroscopy((s) => s.range);
   const normalizedSetting = useSpectroscopy((s) => s.normalized);
   const letters = useSpectroscopy((s) => s.letters);
@@ -60,15 +57,21 @@ export function SpectrumView({ className }: { className?: string }) {
   /* While the guide moves, a spectrum per frame at one sample per CSS pixel keeps it smooth. */
   const moving = useSpectroscopy((s) => s.guideOpen && !s.guideLanded);
   const samples = Math.min(2400, Math.round(width * (moving ? 1 : scale)));
-  const spectrum = useSpectrum(obs, range, samples);
+  const shown = useSpectrum(obs, range, samples);
+  const spectrum = shown?.spectrum ?? null;
   useEffect(() => {
     if (spectrum && !api().ready) api().setReady();
   }, [spectrum, api]);
 
-  const [from, to] = range;
+  /* Everything over the plot follows the spectrum on screen: its window, its source and lines,
+     until the newer one the settings ask for arrives. */
+  const seen = shown?.obs ?? obs;
+  const formed = useFormedLines(seen);
+  const drawn = shown?.range ?? range;
+  const [from, to] = drawn;
   const span = to - from;
   const xOf = (nm: number) => (nm - from) / span;
-  const glowing = obs.kind === "slab" && obs.background === null;
+  const glowing = seen.kind === "slab" && seen.background === null;
   const normalized = normalizedSetting && !glowing;
   /** Lines may be named: everywhere but an unsolved mystery. */
   const identify = settings.view !== "mystery" || checked;
@@ -87,8 +90,8 @@ export function SpectrumView({ className }: { className?: string }) {
     visible,
     letters,
     view: settings.view,
-    velocity: settings.velocity,
-    air: settings.air,
+    velocity: seen.velocity,
+    air: seen.airmass > 0,
     identify,
     span,
     width,
@@ -111,12 +114,12 @@ export function SpectrumView({ className }: { className?: string }) {
   const selected = selection ? lineById(selection) : undefined;
   const selectedCentre = selected
     ? (visible.find((v) => v.line.id === selected.id)?.centre ??
-      selected.wavelength * dopplerWavelengthRatio(obs.velocity))
+      selected.wavelength * dopplerWavelengthRatio(seen.velocity))
     : null;
 
   const { hover, hovered, handlers } = useWindowGestures({
     surface,
-    range,
+    range: drawn,
     width,
     visible,
     identify,

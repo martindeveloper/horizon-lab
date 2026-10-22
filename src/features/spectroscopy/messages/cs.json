@@ -303,7 +303,7 @@
       },
       "motion": {
         "title": "Pohyb a přístroj",
-        "body": "Radiální rychlosti posouvají čáry relativistickým Dopplerovým faktorem. Spektrograf rozmazává Gaussovou funkcí s pološířkou (FWHM) λ/R a každý pixel průměruje přes svou šířku. Vlnové délky jsou ve standardním vzduchu (Morton 2000)."
+        "body": "Radiální rychlost natahuje celé světlo hvězdy (čáry i kontinuum) a posouvá čáry plynu na stole, vždy relativistickým Dopplerovým faktorem. Spektrograf rozmazává Gaussovou funkcí s pološířkou (FWHM) λ/R a každý pixel průměruje přes svou šířku. Vlnové délky jsou ve standardním vzduchu (Morton 2000)."
       },
       "earth": {
         "title": "Zemský vzduch",

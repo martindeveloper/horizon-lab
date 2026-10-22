@@ -303,7 +303,7 @@
       },
       "motion": {
         "title": "Motion and the instrument",
-        "body": "Radial velocities shift lines by the relativistic Doppler factor. The spectrograph blurs with a Gaussian of full width λ/R, and each pixel averages over its width. Wavelengths are in standard air (Morton 2000)."
+        "body": "A radial velocity stretches a star's whole light, lines and continuum, and moves the bench gas's lines, by the relativistic Doppler factor. The spectrograph blurs with a Gaussian of full width λ/R, and each pixel averages over its width. Wavelengths are in standard air (Morton 2000)."
       },
       "earth": {
         "title": "Earth's air",

@@ -58,7 +58,7 @@ function catalogueGeometry() {
 }
 
 export function createStarsLayer(
-  { scope, dpr }: VoyageKit,
+  { scope, dpr, invalidate }: VoyageKit,
   parent: Object3D,
   lut: DataTexture,
   motion: MotionUniforms,
@@ -87,6 +87,7 @@ export function createStarsLayer(
         lutSpec: LUT_SPEC,
         peak: SURFACE_PEAK,
       },
+      wake: invalidate,
     }),
   );
   milkyWay.group.scale.setScalar(SKY_RADIUS_KM);

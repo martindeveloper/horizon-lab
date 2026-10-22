@@ -52,7 +52,6 @@ import {
 import {
   drawDeck,
   grade,
-  mysteryAnswer,
   observationFor,
   spectralClass,
   verdict,
@@ -69,6 +68,7 @@ import {
 } from "../src/features/spectroscopy/lib/model/spectrum.ts";
 import { BAND_HEADS } from "../src/features/spectroscopy/lib/model/telluric.ts";
 import { voigt } from "../src/features/spectroscopy/lib/model/voigt.ts";
+import { mysteryAnswerOf } from "../src/features/spectroscopy/lib/synthesis.ts";
 import { SPECTROSCOPY_PATH } from "../src/features/spectroscopy/manifest.ts";
 import {
   pathForView,
@@ -268,6 +268,29 @@ test("a star's lines shift with its velocity; Earth's oxygen bands stay put", ()
   assert.ok(depthAt(space, BAND_HEADS.A + 0.4) < 0.05, "and gone above the air");
 });
 
+test("a velocity stretches a star's whole light, continuum too, and changes nothing else", () => {
+  const rest = star(starPhotosphere("sun"), { resolution: 20_000 });
+  const s = dopplerWavelengthRatio(120);
+  const still = synthesize(rest, 500, 520, 400);
+  const moving = synthesize({ ...rest, velocity: 120 }, 500 * s, 520 * s, 400);
+  for (let i = 0; i < 400; i++) {
+    near(moving.flux[i] / still.flux[i], 1, 1e-9, `flux ${i}`);
+    near(moving.continuum[i] / still.continuum[i], 1, 1e-9, `continuum ${i}`);
+  }
+});
+
+test("a wide window's coarser grid shows what a close look does, within its sampling", () => {
+  // Pixels 0.1 nm wide in both: the whole range on its coarsest step, 20 nm on the finest.
+  const sun = observationFor({ ...BENCH, view: "sun", air: true });
+  const whole = synthesize(sun, 380, 770, 3901);
+  const close = synthesize(sun, 500, 520, 201);
+  for (let i = 0; i < 201; i++) {
+    const j = 1200 + i;
+    near(whole.wavelengths[j], close.wavelengths[i], 1e-9);
+    near(whole.flux[j] / whole.continuum[j], close.flux[i] / close.continuum[i], 0.01, `${j}`);
+  }
+});
+
 test("the printed equations compute from the same physics as the spectra", () => {
   const T = 6000;
   const Pe = 10;
@@ -343,23 +366,27 @@ test("mystery decks are dealt at random: different kinds, one on the bench, star
   assert.equal(spectralClass(3500), "M");
 });
 
-test("a mystery's answer is what its spectrum shows, and grading weighs both halves", () => {
+test("a mystery's answer is what its spectrum shows, and grading weighs both halves", async () => {
   const flame = { kind: "flame", temperature: 2200, elements: ["Li", "Na", "K"] };
-  assert.deepEqual([...mysteryAnswer(flame, 20_000, 0).clear].sort(), ["K", "Li", "Na"]);
+  assert.deepEqual([...(await mysteryAnswerOf(flame, 20_000, 0)).clear].sort(), ["K", "Li", "Na"]);
   const cell = { kind: "cell", lamp: 6000, temperature: 1800, elements: ["Ca"] };
-  assert.deepEqual([...mysteryAnswer(cell, 20_000, 0).clear], ["Ca"]);
+  assert.deepEqual([...(await mysteryAnswerOf(cell, 20_000, 0)).clear], ["Ca"]);
   const hot = { kind: "dwarf", teff: 17_000, velocity: -25 };
-  assert.ok(mysteryAnswer(hot, 20_000, 1).clear.has("He"));
+  assert.ok((await mysteryAnswerOf(hot, 20_000, 1)).clear.has("He"));
   for (const m of [
     { kind: "dwarf", teff: 6750, velocity: 42 },
     { kind: "giant", star: "arcturus", velocity: -63 },
   ]) {
-    const { clear, faint } = mysteryAnswer(m, 20_000, 1);
+    const { clear, faint } = await mysteryAnswerOf(m, 20_000, 1);
     assert.ok(clear.size > 0 && !clear.has("He") && !faint.has("He"), m.kind);
   }
   // A blurred spectrum hides weak lines: what counts follows the visitor's resolving power.
   const dwarf = { kind: "dwarf", teff: 6750, velocity: 42 };
-  assert.ok(mysteryAnswer(dwarf, 500, 0).clear.size < mysteryAnswer(dwarf, 100_000, 0).clear.size);
+  const [blurred, sharp] = await Promise.all([
+    mysteryAnswerOf(dwarf, 500, 0),
+    mysteryAnswerOf(dwarf, 100_000, 0),
+  ]);
+  assert.ok(blurred.clear.size < sharp.clear.size);
   // Faint lines count when found, cost nothing when missed; absent ones are wrong when marked.
   const answer = { clear: new Set(["H", "Mg"]), faint: new Set(["K"]) };
   assert.equal(verdict(answer, "H", false), "missed");
@@ -387,7 +414,7 @@ test("mystery cases keep each answer while another is open, and a new deal start
   assert.deepEqual([api().compare, api().velocity], [[], 0]);
   api().setCase(0);
   assert.deepEqual([api().compare, api().velocity], [["H"], 30]);
-  api().check();
+  await api().check();
   assert.ok(api().results[0] && api().result === api().results[0]);
   api().showAnswer();
   const { clear } = api().result.answer;
@@ -442,6 +469,15 @@ test("fine structure stays resolved, energies come from vacuum wavelengths", () 
   const d2 = lineNear("Na I", 588.995);
   near(d2.vacuum, 589.158, 0.002);
   near(HC_EV_NM / d2.vacuum, d2.upper - d2.lower, 2e-4);
+});
+
+test("the bench's lamp shines by Planck's law, even cool and in the blue, where it curves most", () => {
+  const cool = bench({ lamp: 1500, gas: 1500 });
+  const s = synthesize(cool, 380, 770, 1201);
+  for (let i = 0; i < s.wavelengths.length; i++) {
+    const nm = s.wavelengths[i];
+    near(s.continuum[i] / planckRadiance(airToVacuum(nm), 1500), 1, 1e-5, `${nm} nm`);
+  }
 });
 
 test("a star returns surface flux: an isothermal atmosphere gives πB(T)", () => {
@@ -654,7 +690,7 @@ test("a star's caches change nothing: windows, velocities, the curve of growth a
     near(Math.log10(width), logWidth, 1e-9, `log N + ${exponent}`);
   }
   // Taking an element's opacity out matches removing the element.
-  const without = synthesizeWithout(obs, 585, 595, 600, ["Na"]).get("Na");
+  const without = new Map(synthesizeWithout(obs, 585, 595, 600, ["Na"])).get("Na");
   const removed = synthesize({ ...obs, abundances: { Na: -20 } }, 585, 595, 600);
   for (let i = 0; i < 600; i++)
     near(without.flux[i] / removed.flux[i], 1, 1e-5, `${removed.wavelengths[i]} nm`);

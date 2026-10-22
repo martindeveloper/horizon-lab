@@ -107,9 +107,9 @@ test("active loading failures are reported, but disabled requests stay silent", 
   lifecycle.dispose();
 });
 
-// Import the real renderer factory in Node using the application's GLSL loader.
+// Import the real renderer module in Node using the application's GLSL loader.
 // No canvas, WebGL context, browser, or server is created by these resource tests.
-async function rendererFactory() {
+async function rendererModule() {
   const bundle = await rolldown({
     input: fileURLToPath(
       new URL("../src/features/orrery/lib/scene/solar-activity.ts", import.meta.url),
@@ -136,19 +136,22 @@ async function rendererFactory() {
     const compiled = await import(
       `data:text/javascript;base64,${Buffer.from(output[0].code).toString("base64")}`
     );
-    return compiled.createSolarActivity;
+    return compiled;
   } finally {
     await bundle.close();
   }
 }
 
 test("repeated On/Off detaches the actual scene node and disposes all three GPU resources", async () => {
-  const createSolarActivity = await rendererFactory();
+  const { createSolarActivity, solarActivityDensity } = await rendererModule();
   const sun = new Group();
   const camera = new PerspectiveCamera();
   camera.position.set(0, 0, 3);
   const lifecycle = createSolarActivityLifecycle(
-    async () => () => createSolarActivity({ camera, tight: true }, sun, 20),
+    async () => {
+      const density = await solarActivityDensity(true);
+      return () => createSolarActivity({ camera }, sun, 20, density);
+    },
     () => {},
     assert.fail,
   );

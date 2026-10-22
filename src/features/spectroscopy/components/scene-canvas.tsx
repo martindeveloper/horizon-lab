@@ -11,7 +11,14 @@ import type { Observation } from "../lib/model/spectrum";
 import { canvasScale, context2d, SCENE_FPS } from "../lib/quality";
 import { createFlock } from "../lib/scene/flock";
 import { layout } from "../lib/scene/layout";
-import { drawScene, sameScene, type SceneInputs, type SceneLabels } from "../lib/scene/paint";
+import {
+  drawFan,
+  drawScene,
+  sameFan,
+  sameScene,
+  type SceneInputs,
+  type SceneLabels,
+} from "../lib/scene/paint";
 import { useSpectroscopy } from "../lib/store";
 import { useDrawingGamut } from "./use-gamut";
 
@@ -24,9 +31,10 @@ export type { SceneLabels };
  * wavelength are absorbed and sent off in other directions. Schematic, and still under reduced
  * motion or when switched off.
  *
- * Kind to batteries: the still scene is drawn into its own layer only when it changes; while
- * photons fly, a frame (as often as the quality allows) stamps that layer and draws them, and
- * nothing runs while the canvas is out of sight or the page hidden.
+ * Kind to batteries: the fan of the window's colours and the still scene are drawn into layers
+ * of their own only when they change (a pan or a zoom repaints only the fan); while photons
+ * fly, a frame (as often as the quality allows) stamps the layers and draws them, and nothing
+ * runs while the canvas is out of sight or the page hidden.
  */
 export function SceneCanvas({
   obs,
@@ -81,28 +89,43 @@ export function SceneCanvas({
   useEffect(() => {
     const el = canvas.current;
     const ctx = el ? context2d(el, gamut) : null;
-    const layer = document.createElement("canvas");
-    const back = context2d(layer, gamut);
-    if (!el || !ctx || !back) return;
+    const fanLayer = document.createElement("canvas");
+    const stillLayer = document.createElement("canvas");
+    const fan = context2d(fanLayer, gamut);
+    const still = context2d(stillLayer, gamut);
+    if (!el || !ctx || !fan || !still) return;
     let width = 0;
     let height = 0;
     let scale = 1;
     const font = getComputedStyle(el).getPropertyValue("--font-mono") || "monospace";
+    let fanDrawn: SceneInputs | null = null;
     let drawn: SceneInputs | null = null;
     let geometry = layout(latest.current.kind, 0, 0);
-    /** The still scene into its layer, when it or the canvas changed. */
+    /** Each layer that changed, or all of them when the canvas did; whether any was drawn. */
     const paint = (force = false) => {
-      if (!force && drawn && sameScene(drawn, latest.current)) return false;
-      drawn = latest.current;
-      back.setTransform(scale, 0, 0, scale, 0, 0);
-      geometry = drawScene(back, width, height, font, drawn);
-      return true;
+      const inputs = latest.current;
+      const newFan = force || !fanDrawn || !sameFan(fanDrawn, inputs);
+      const newScene = force || !drawn || !sameScene(drawn, inputs);
+      if (newFan) {
+        fanDrawn = inputs;
+        fan.setTransform(scale, 0, 0, scale, 0, 0);
+        drawFan(fan, width, height, inputs);
+      }
+      if (newScene) {
+        drawn = inputs;
+        still.setTransform(scale, 0, 0, scale, 0, 0);
+        geometry = drawScene(still, width, height, font, inputs);
+      }
+      return newFan || newScene;
     };
     const stamp = () => {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, el.width, el.height);
       /* A collapsed canvas (a phone held sideways) has nothing to stamp, and drawImage would throw. */
-      if (layer.width > 0 && layer.height > 0) ctx.drawImage(layer, 0, 0);
+      if (el.width > 0 && el.height > 0) {
+        ctx.drawImage(fanLayer, 0, 0);
+        ctx.drawImage(stillLayer, 0, 0);
+      }
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
     };
     const resize = () => {
@@ -110,8 +133,8 @@ export function SceneCanvas({
       scale = canvasScale(window.devicePixelRatio || 1, quality, antialias);
       width = el.clientWidth;
       height = el.clientHeight;
-      el.width = layer.width = Math.round(width * scale);
-      el.height = layer.height = Math.round(height * scale);
+      el.width = fanLayer.width = stillLayer.width = Math.round(width * scale);
+      el.height = fanLayer.height = stillLayer.height = Math.round(height * scale);
       paint(true);
       stamp();
     };

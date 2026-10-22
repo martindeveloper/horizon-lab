@@ -41,10 +41,13 @@ export function VelocityLens({ step }: { step: ReactNode }) {
     () => [lab * dopplerWavelengthRatio(-REACH), lab * dopplerWavelengthRatio(REACH)],
     [lab],
   );
-  const spectrum = useSpectrum(obs, range, line ? SAMPLES : 0);
+  const shown = useSpectrum(obs, range, line ? SAMPLES : 0);
   const [from, to] = range;
+  /* Only the measured line's own window is drawn: another line's would sit off the axis. */
+  const spectrum = shown?.range[0] === from && shown.range[1] === to ? shown.spectrum : null;
   const xOf = (nm: number) => ((nm - from) / (to - from)) * 100;
-  const glowing = obs.kind === "slab" && obs.background === null;
+  const seen = shown?.obs ?? obs;
+  const glowing = seen.kind === "slab" && seen.background === null;
 
   /* Flux against the continuum (the top is the continuum), or for a glowing gas against its
      brightest light anywhere (the bottom is dark): a window with no line stays flat. */

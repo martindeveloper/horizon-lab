@@ -37,7 +37,10 @@ export type SceneInputs = {
   halo: boolean;
 };
 
-/** Whether two inputs draw the same still scene (the photons' lines aside). */
+/**
+ * Whether two inputs draw the same still scene. The fan of colours is a layer of its own
+ * (`sameFan`), so a pan or a zoom repaints only it; the photons' lines are no part of either.
+ */
 export const sameScene = (a: SceneInputs, b: SceneInputs) =>
   a.kind === b.kind &&
   a.glowing === b.glowing &&
@@ -45,10 +48,13 @@ export const sameScene = (a: SceneInputs, b: SceneInputs) =>
   a.starColor === b.starColor &&
   a.teff === b.teff &&
   a.lampColor === b.lampColor &&
-  a.range === b.range &&
   a.labels === b.labels &&
   a.gamut === b.gamut &&
   a.halo === b.halo;
+
+/** Whether two inputs draw the same fan: the window's colours from the same grating. */
+export const sameFan = (a: SceneInputs, b: SceneInputs) =>
+  a.kind === b.kind && a.range === b.range && a.gamut === b.gamut;
 
 /** The scene stays dark in both themes, so it keeps the dark theme's gold and muted text. */
 const SCENE_GOLD = "rgb(226 192 122 / 0.9)";
@@ -235,21 +241,22 @@ function drawCell(
 const GRATING_TILT = 0.5;
 
 /**
- * The fan of colours from the grating to the ribbon, the window's wavelengths left to right.
- * Drawn first, then dimmed with distance from the grating (nothing else is on the layer yet),
- * so it reads as light spreading out rather than a wedge of paint. The grating reflects, so
- * the fan is kept to the side of its plane that faces the slit: nothing passes behind it.
+ * The fan of colours from the grating to the ribbon, the window's wavelengths left to right,
+ * on its own layer under the still scene. Drawn, then dimmed with distance from the grating
+ * (nothing else is on the layer), so it reads as light spreading out rather than a wedge of
+ * paint. The grating reflects, so the fan is kept to the side of its plane that faces the
+ * slit: nothing passes behind it.
  */
-function drawFan(
+export function drawFan(
   ctx: CanvasRenderingContext2D,
-  grating: Geometry["grating"],
   width: number,
   height: number,
-  range: readonly [number, number],
-  gamut: Gamut,
+  { kind, range, gamut }: Pick<SceneInputs, "kind" | "range" | "gamut">,
 ) {
+  const { grating } = layout(kind, width, height);
   const [from, to] = range;
   const slices = 72;
+  ctx.clearRect(0, 0, width, height);
   ctx.save();
   const reach = width + height;
   const along = { x: Math.sin(GRATING_TILT) * reach, y: Math.cos(GRATING_TILT) * reach };
@@ -458,9 +465,9 @@ function drawLabels(
 }
 
 /**
- * The still scene: source, beam, gas, Earth's air, spectrograph and the fan of colours toward
- * the ribbon, drawn once per change into its own layer (the running photons only stamp it).
- * Returns the geometry it was laid out on.
+ * The still scene: source, beam, gas, Earth's air and spectrograph, drawn once per change into
+ * its own layer over the fan's (the running photons only stamp them). Returns the geometry it
+ * was laid out on.
  */
 export function drawScene(
   ctx: CanvasRenderingContext2D,
@@ -469,11 +476,10 @@ export function drawScene(
   font: string,
   inputs: SceneInputs,
 ) {
-  const { kind, glowing, glow, starColor, teff, lampColor, range, labels, gamut, halo } = inputs;
+  const { kind, glowing, glow, starColor, teff, lampColor, labels, gamut, halo } = inputs;
   const g = layout(kind, width, height);
   const { midY, star, source, gas, airBand, slit, grating } = g;
   ctx.clearRect(0, 0, width, height);
-  drawFan(ctx, grating, width, height, range, gamut);
   if (kind === "star") drawBackgroundStars(ctx, width, height);
   if (labels.air !== null) drawAir(ctx, airBand, midY, height);
   const beamStart = kind === "slab" && glowing ? gas.x : source.x;

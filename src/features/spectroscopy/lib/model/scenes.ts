@@ -293,11 +293,14 @@ export const markerVelocity = (s: Pick<Settings, "view" | "velocity">) =>
  * How much each element shapes a mystery's spectrum, as the visitor sees it (their resolving
  * power, with or without Earth's air): the largest change, against the continuum (or the
  * brightest line, for a glowing gas), that removing the element makes across `FULL_RANGE`.
+ * It pauses after the spectrum with everything and after each element's without, so a worker
+ * can answer other requests in between; a star's first without brings the lattice too.
  */
-function mysteryChanges(m: Mystery, resolution: number, airmass: number) {
+function* mysteryChanges(m: Mystery, resolution: number, airmass: number) {
   const obs = mysteryObservation(m, resolution, airmass);
   const samples = 3000;
   const base = synthesize(obs, ...FULL_RANGE, samples);
+  yield;
   const elements = ELEMENT_IDS.filter((e) => obs.kind === "star" || obs.gas.columns[e]);
   const changes = new Map<ElementId, number>();
   for (const [element, other] of synthesizeWithout(obs, ...FULL_RANGE, samples, elements)) {
@@ -307,6 +310,7 @@ function mysteryChanges(m: Mystery, resolution: number, airmass: number) {
       change = Math.max(change, Math.abs(base.flux[i]! - other.flux[i]!) / scale);
     }
     changes.set(element, change);
+    yield;
   }
   return changes;
 }
@@ -319,24 +323,18 @@ const SHOWN = { clear: 0.1, faint: 0.03 } as const;
 
 export type MysteryAnswer = { clear: ReadonlySet<ElementId>; faint: ReadonlySet<ElementId> };
 
-/** Answers by case and by the settings they were seen under; they go with their deck. */
-const answers = new WeakMap<Mystery, Map<string, MysteryAnswer>>();
-
-/** The elements a mystery shows as the visitor sees it; computed once per case and settings. */
-export function mysteryAnswer(m: Mystery, resolution: number, airmass: number): MysteryAnswer {
-  let seen = answers.get(m);
-  if (!seen) answers.set(m, (seen = new Map()));
-  const key = `${resolution}|${airmass}`;
-  const known = seen.get(key);
-  if (known) return known;
+/** The elements a mystery shows as the visitor sees it, worked out a spectrum at a time. */
+export function* mysteryAnswerSteps(
+  m: Mystery,
+  resolution: number,
+  airmass: number,
+): Generator<void, MysteryAnswer> {
   const clear = new Set<ElementId>();
   const faint = new Set<ElementId>();
-  for (const [element, change] of mysteryChanges(m, resolution, airmass))
+  for (const [element, change] of yield* mysteryChanges(m, resolution, airmass))
     if (change > SHOWN.clear) clear.add(element);
     else if (change > SHOWN.faint) faint.add(element);
-  const answer = { clear, faint };
-  seen.set(key, answer);
-  return answer;
+  return { clear, faint };
 }
 
 /**

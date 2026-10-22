@@ -1,30 +1,25 @@
 import { lcg, smoothstep, valueNoise2, valueNoise3 } from "@horizon/toolkit/math";
 
-type DensityVolume = {
+export type DensityVolume = {
   readonly data: Uint8Array;
   readonly width: number;
   readonly height: number;
   readonly depth: number;
 };
 
-let fullCache: DensityVolume | null = null;
-let tightCache: DensityVolume | null = null;
-
 /** Where the hedgerow's pillars stand along the sheet, as fractions of the half-length. */
 const FEET = [-0.74, -0.3, 0.18, 0.64] as const;
 
 /**
- * A small, authored 3D density field baked once when enabled: one quiescent prominence in
- * its own frame (x along the polarity-inversion line, y up, z across the sheet). It is a
- * hedgerow: a thin sheet of near-vertical threads hanging in the field's dips, standing on
- * pillars at its feet with dark arches between them, its legs rooted at both ends, and barbs
- * leaning out and down to parasitic polarity on either side (Parenti 2014, LRSP 11, 1 §2;
- * Gibson 2018, LRSP 15, 7). Each region mirrors it along x and z for variety.
+ * A small, authored 3D density field baked once when enabled, off the main thread
+ * (`solarActivityDensity`): one quiescent prominence in its own frame (x along the
+ * polarity-inversion line, y up, z across the sheet). It is a hedgerow: a thin sheet of
+ * near-vertical threads hanging in the field's dips, standing on pillars at its feet with dark
+ * arches between them, its legs rooted at both ends, and barbs leaning out and down to parasitic
+ * polarity on either side (Parenti 2014, LRSP 11, 1 §2; Gibson 2018, LRSP 15, 7). Each region
+ * mirrors it along x and z for variety.
  */
 export function createSolarActivityDensity(tight: boolean): DensityVolume {
-  const cached = tight ? tightCache : fullCache;
-  if (cached) return cached;
-
   const width = tight ? 96 : 160;
   const height = tight ? 64 : 96;
   const depth = tight ? 32 : 48;
@@ -142,8 +137,5 @@ export function createSolarActivityDensity(tight: boolean): DensityVolume {
       }
     }
   }
-  const result = { data, width, height, depth };
-  if (tight) tightCache = result;
-  else fullCache = result;
-  return result;
+  return { data, width, height, depth };
 }

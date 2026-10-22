@@ -1,11 +1,12 @@
 "use client";
 
-import { useDeferredValue, useMemo } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { observationFor, type Settings } from "../lib/model/scenes";
-import { formedLines, synthesize, type Observation } from "../lib/model/spectrum";
+import { formedLines, type Observation, type Spectrum } from "../lib/model/spectrum";
 import { useSpectroscopy } from "../lib/store";
+import { spectrumChannel } from "../lib/synthesis";
 
 /** The settings a spectrum depends on, compared field by field. */
 export function useSettings(): Settings {
@@ -75,11 +76,44 @@ export function useFormedLines(current: Observation) {
   }, [obs]);
 }
 
-/** The spectrum in the window at `samples` pixels; null until there is room to draw it. */
-export function useSpectrum(obs: Observation, range: readonly [number, number], samples: number) {
+/** A spectrum, with the observation and the window it was worked out for. */
+export type ShownSpectrum = {
+  spectrum: Spectrum;
+  obs: Observation;
+  range: readonly [number, number];
+};
+
+/**
+ * The spectrum in the window at `samples` pixels, worked out off the main thread
+ * (`synthesis.ts`); null until the first arrives, or while there is no room to draw it. While a
+ * newer one is worked out the last stays up, with what it shows, so whatever is drawn over it
+ * (names, markers, readouts) can follow the spectrum on screen rather than the settings. A
+ * spectrum that cannot be worked out surfaces to the route's error boundary.
+ */
+export function useSpectrum(
+  obs: Observation,
+  range: readonly [number, number],
+  samples: number,
+): ShownSpectrum | null {
   const [from, to] = range;
-  return useMemo(
-    () => (samples >= 2 ? synthesize(obs, from, to, samples) : null),
-    [obs, from, to, samples],
-  );
+  const [shown, setShown] = useState<ShownSpectrum | null>(null);
+  const [failure, setFailure] = useState<Error | null>(null);
+  const channel = useRef<ReturnType<typeof spectrumChannel>>(null);
+  useEffect(() => {
+    const open = spectrumChannel(
+      (spectrum, request) =>
+        setShown({ spectrum, obs: request.obs, range: [request.from, request.to] }),
+      setFailure,
+    );
+    channel.current = open;
+    return () => {
+      open.close();
+      channel.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    if (samples >= 2) channel.current?.request({ obs, from, to, samples });
+  }, [obs, from, to, samples]);
+  if (failure) throw failure;
+  return samples >= 2 ? shown : null;
 }

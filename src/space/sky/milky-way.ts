@@ -10,6 +10,7 @@ import {
   AdditiveBlending,
   BackSide,
   BufferAttribute,
+  BufferGeometry,
   CanvasTexture,
   Color,
   Group,
@@ -20,19 +21,30 @@ import {
   ShaderMaterial,
   SphereGeometry,
   Vector3,
-  type BufferGeometry,
   type Texture,
 } from "three";
 
-import { lcg, onSphere, valueNoise2 } from "@horizon/toolkit/math";
+import { lcg, onSphere } from "@horizon/toolkit/math";
 import {
+  FAINTEST_OPACITY,
   GALACTIC_CENTRE,
   GALACTIC_EAST,
   GALACTIC_POLE,
   pointsGeometry,
 } from "@horizon/toolkit/scene";
+import { workerTask } from "@horizon/toolkit/worker";
 
 import { FAR_SKY_PC } from "../bright-stars";
+import {
+  BAND_HEIGHT,
+  BAND_WIDTH,
+  paintSky,
+  type BandMap,
+  type GalacticAxes,
+  type PaintedSky,
+  type SkyEras,
+  type SkyRequest,
+} from "./band";
 import BAND_FRAG from "./shaders/band.frag.glsl";
 import BAND_VERT from "./shaders/band.vert.glsl";
 
@@ -97,136 +109,58 @@ export function fieldStars(count: number, parallax = false) {
   return parallax ? paintedAttributes(geometry, col, count) : geometry;
 }
 
-/** Periodic in longitude so the map has no seam. */
-function fbm(l: number, b: number, scale: number) {
-  const a = l * Math.PI * 2;
-  const x = Math.cos(a) * scale + 7.3;
-  const y = Math.sin(a) * scale + 3.1;
-  const z = b * scale * 2;
-  return (
-    valueNoise2(x + z, y) * 0.5 +
-    valueNoise2(x * 2.1 + z * 2, y * 2.1 + 5) * 0.3 +
-    valueNoise2(x * 4.3, y * 4.3 + z * 4) * 0.2
-  );
+/** A map's texture: blank until its sky arrives, then painted (`paintTexture`). */
+function bandTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = BAND_WIDTH;
+  canvas.height = BAND_HEIGHT;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("2D canvas unavailable");
+  const texture = new CanvasTexture(canvas);
+  texture.wrapS = RepeatWrapping;
+  texture.minFilter = LinearFilter;
+  texture.magFilter = LinearFilter;
+  return { texture, context };
 }
 
-/**
- * Brightness of the band at galactic longitude u∈[0,1) (0 = centre) and latitude
- * v∈[0,1] (0.5 = plane). Today: a thin disk with the bulge toward the centre,
- * the Great Rift and the Coalsack as dust. Early: a thicker, smoother, bluer
- * disk without the dust lane, as the thick-disk era would have looked.
- */
-type BandMap = {
-  texture: CanvasTexture;
-  sample: (count: number, seed: number, sizeScale?: number, brightness?: number) => BufferGeometry;
+/** Writes a painted map into its texture, for the next upload. */
+function paintTexture({ texture, context }: ReturnType<typeof bandTexture>, map: BandMap) {
+  context.putImageData(new ImageData(map.rgba, BAND_WIDTH, BAND_HEIGHT), 0, 0);
+  texture.needsUpdate = true;
+}
+
+const axis = (v: Vector3) => [v.x, v.y, v.z] as const;
+const AXES: GalacticAxes = {
+  centre: axis(GALACTIC_CENTRE),
+  east: axis(GALACTIC_EAST),
+  pole: axis(GALACTIC_POLE),
 };
 
-function bandMap(mode: "today" | "early", parallax: boolean): BandMap {
-  const W = 512;
-  const H = 256;
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const g = canvas.getContext("2d");
-  if (!g) throw new Error("2D canvas unavailable");
-  const img = g.createImageData(W, H);
-  const data = img.data;
-  const density = new Float32Array(W * H);
-  for (let y = 0; y < H; y += 1) {
-    const b = (y / H - 0.5) * 180;
-    for (let x = 0; x < W; x += 1) {
-      const u = x / W;
-      const lDeg = u * 360;
-      const toCentre = Math.min(lDeg, 360 - lDeg);
-      const clumps = fbm(u, y / H, mode === "today" ? 14 : 4);
-      let value: number;
-      let r: number;
-      let gg: number;
-      let bb: number;
-      if (mode === "today") {
-        const sigma = 5.5 + 7 * Math.exp(-toCentre / 60);
-        const disk =
-          Math.exp(-(b * b) / (2 * sigma * sigma)) * (0.55 + 0.45 * Math.exp(-toCentre / 110));
-        const bulge =
-          Math.exp(-((toCentre / 14) ** 2 + ((b + 1) / 9) ** 2)) * 0.9 +
-          Math.exp(-((toCentre / 30) ** 2 + (b / 18) ** 2)) * 0.35;
-        const riftL = lDeg < 90 || lDeg > 300;
-        const riftCentre = lDeg < 90 ? 1.2 + lDeg * 0.02 : -1.5;
-        const rift = riftL
-          ? Math.exp(-(((b - riftCentre) / 2.2) ** 2)) *
-            (0.55 + 0.45 * fbm(u + 0.3, y / H, 14)) *
-            0.8
-          : 0;
-        const coalsack = Math.exp(-(((lDeg - 303) / 3.5) ** 2) - ((b + 1.2) / 3) ** 2) * 0.9;
-        value = (disk + bulge) * (0.3 + 1.0 * clumps) * (1 - 0.8 * Math.min(1, rift + coalsack));
-        const warm = Math.min(1, bulge * 1.4);
-        r = 0.86 + 0.1 * warm;
-        gg = 0.86;
-        bb = 0.92 - 0.16 * warm;
-      } else {
-        const sigma = 16 + 10 * Math.exp(-toCentre / 60);
-        const disk =
-          Math.exp(-(b * b) / (2 * sigma * sigma)) * (0.5 + 0.5 * Math.exp(-toCentre / 120));
-        const bulge = Math.exp(-((toCentre / 24) ** 2 + (b / 16) ** 2)) * 0.55;
-        value = (disk + bulge) * (0.72 + 0.5 * clumps) * 1.05;
-        r = 0.7 + 0.2 * bulge;
-        gg = 0.78;
-        bb = 0.95 - 0.15 * bulge;
-      }
-      const i = (y * W + x) * 4;
-      const a = Math.min(1, value);
-      density[y * W + x] = a * Math.cos((b * Math.PI) / 180);
-      data[i] = Math.round(r * 255);
-      data[i + 1] = Math.round(gg * 255);
-      data[i + 2] = Math.round(bb * 255);
-      data[i + 3] = Math.round(a * 255);
-    }
+/** Skies are painted on a worker (`band.worker.ts`); without one, in place. */
+const painter = workerTask<SkyRequest, PaintedSky>(
+  () => new Worker(new URL("./band.worker.ts", import.meta.url), { type: "module" }),
+  paintSky,
+);
+
+/**
+ * The last sky painted for each set of eras: a remount at the same quality draws it at once,
+ * and another quality keeps its maps and samples only the grains afresh.
+ */
+const painted = new Map<SkyEras, { grains: number; sky: PaintedSky }>();
+
+/** Hands `done` the sky of `eras` with `grains` grains, kept or newly painted; returns a cancel. */
+function paint(eras: SkyEras, grains: number, done: (sky: PaintedSky) => void) {
+  const kept = painted.get(eras);
+  if (kept?.grains === grains) {
+    done(kept.sky);
+    return () => {};
   }
-  g.putImageData(img, 0, 0);
-  const tex = new CanvasTexture(canvas);
-  tex.wrapS = RepeatWrapping;
-  tex.minFilter = LinearFilter;
-  tex.magFilter = LinearFilter;
-  let peak = 0;
-  for (const d of density) if (d > peak) peak = d;
-  /**
-   * Stars drawn from the map by rejection sampling, so the unresolved glow and
-   * the resolved grains follow the same bulge, rift and dust. Positions are in
-   * today's galactic frame; the group they sit in turns with the epoch.
-   */
-  const sample = (count: number, seed: number, sizeScale = 1, brightness = 1) => {
-    const rnd = lcg(seed);
-    const pos = new Float32Array(count * 3);
-    const col = new Float32Array(count * 3);
-    const size = new Float32Array(count);
-    const v = new Vector3();
-    let n = 0;
-    while (n < count) {
-      const x = Math.floor(rnd() * W);
-      const y = Math.floor(rnd() * H);
-      const d = density[y * W + x]!;
-      if (rnd() * peak > d) continue;
-      const l = ((x + rnd()) / W) * Math.PI * 2;
-      const b = ((y + rnd()) / H - 0.5) * Math.PI;
-      v.copy(GALACTIC_CENTRE)
-        .multiplyScalar(Math.cos(l) * Math.cos(b))
-        .addScaledVector(GALACTIC_EAST, Math.sin(l) * Math.cos(b))
-        .addScaledVector(GALACTIC_POLE, Math.sin(b));
-      pos[n * 3] = v.x;
-      pos[n * 3 + 1] = v.y;
-      pos[n * 3 + 2] = v.z;
-      const i = (y * W + x) * 4;
-      const bright = (0.5 + rnd() * rnd() * 1.2) * brightness;
-      col[n * 3] = (data[i]! / 255) * bright;
-      col[n * 3 + 1] = (data[i + 1]! / 255) * bright;
-      col[n * 3 + 2] = (data[i + 2]! / 255) * bright;
-      size[n] = (1.0 + rnd() * rnd() * 1.5) * sizeScale;
-      n += 1;
-    }
-    const geometry = pointsGeometry(pos, col, size);
-    return parallax ? paintedAttributes(geometry, col, count) : geometry;
-  };
-  return { texture: tex, sample };
+  const request: SkyRequest = { eras, grains, axes: AXES };
+  if (kept) request.maps = kept.sky.maps;
+  return painter.run(request, (sky) => {
+    painted.set(eras, { grains, sky });
+    done(sky);
+  });
 }
 
 /**
@@ -251,23 +185,28 @@ export type MilkyWayOptions = {
    */
   grain: () => ShaderMaterial;
   /** The eras drawn: today's disk alone, or both for a host that blends toward the early one. */
-  eras?: "today" | "both";
+  eras?: SkyEras;
   /** The grains carry the attributes of a sky flown through (see `fieldStars`). */
   parallax?: boolean;
   /** The band shifts with the ship's motion: aberration, Doppler colour and brightness. */
   motion?: BandMotion;
+  /** Asks the host for a frame: the sky is painted off the main thread and arrives later. */
+  wake: () => void;
 };
 
 /**
  * The Milky Way: a faint unresolved glow plus thousands of grains sampled from
  * the same map, for today's thin disk and for the early thick disk. Everything
- * sits in one group that turns about the galactic pole with the Sun's orbit.
+ * sits in one group that turns about the galactic pole with the Sun's orbit. The
+ * maps and grains are painted off the main thread; the band shows once they arrive
+ * (at once when they are kept from an earlier mount, or painted in place).
  */
 export function createMilkyWay(grains: number, options: MilkyWayOptions) {
   const parallax = options.parallax ?? false;
-  const both = (options.eras ?? "both") === "both";
-  const today = bandMap("today", parallax);
-  const early = both ? bandMap("early", parallax) : today;
+  const eras = options.eras ?? "both";
+  const both = eras === "both";
+  const today = bandTexture();
+  const early = both ? bandTexture() : today;
   const { motion } = options;
   const material = new ShaderMaterial({
     /* Today's disk alone samples one map; a moving host reads the motion. */
@@ -305,21 +244,14 @@ export function createMilkyWay(grains: number, options: MilkyWayOptions) {
   const band = new Mesh(geometry, material);
   band.renderOrder = -4;
   band.frustumCulled = false;
-  /* Resolved grains plus a clumpy unresolved haze of large soft points, both from the map. */
-  const sampled = (n: number) =>
-    both
-      ? [
-          today.sample(n, 17),
-          today.sample(Math.round(n * 0.35), 31, 7, 0.3),
-          early.sample(Math.round(n * 0.6), 23),
-          early.sample(Math.round(n * 0.24), 37, 9, 0.26),
-        ]
-      : [today.sample(n, 17), today.sample(Math.round(n * 0.35), 31, 7, 0.3)];
   const todayMaterial = options.grain();
   const earlyMaterial = both ? options.grain() : null;
-  const clouds = sampled(grains).map(
-    (geometry, i) => new Points(geometry, i < 2 ? todayMaterial : earlyMaterial!),
-  );
+  /* Today's grains and haze (`paintSky`), then the early disk's: empty until the sky arrives. */
+  const clouds = (
+    both
+      ? [todayMaterial, todayMaterial, earlyMaterial!, earlyMaterial!]
+      : [todayMaterial, todayMaterial]
+  ).map((cloudMaterial) => new Points(new BufferGeometry(), cloudMaterial));
   for (const p of clouds) {
     p.renderOrder = -3;
     p.frustumCulled = false;
@@ -332,6 +264,32 @@ export function createMilkyWay(grains: number, options: MilkyWayOptions) {
     const value = uniforms.tint?.value;
     if (value instanceof Color) value.copy(tint);
   };
+  /* What `set` shows, drawn once the sky has arrived. */
+  let arrived = false;
+  let bandOn = true;
+  let todayOn = true;
+  let earlyOn = true;
+  const show = () => {
+    band.visible = arrived && bandOn;
+    clouds.forEach((cloud, i) => (cloud.visible = arrived && (i < 2 ? todayOn : earlyOn)));
+  };
+  const receive = (sky: PaintedSky) => {
+    if (!arrived) {
+      paintTexture(today, sky.maps[0]!);
+      if (both) paintTexture(early, sky.maps[1]!);
+      arrived = true;
+    }
+    sky.clouds.forEach(({ position, color, size }, i) => {
+      const cloud = clouds[i]!;
+      cloud.geometry.dispose();
+      const next = pointsGeometry(position, color, size);
+      cloud.geometry = parallax ? paintedAttributes(next, color, size.length) : next;
+    });
+    show();
+    options.wake();
+  };
+  let cancel = paint(eras, grains, receive);
+  show();
   return {
     group,
     /**
@@ -345,26 +303,28 @@ export function createMilkyWay(grains: number, options: MilkyWayOptions) {
       material.uniforms.era!.value = era;
       material.uniforms.strength!.value = (0.16 + 0.08 * (1 - era)) * dim;
       setTint(material.uniforms);
-      todayMaterial.uniforms.fade!.value = era * dim;
+      /* Each era's grains fade by its share of `dim`; the band by `dim` itself. Under the
+         faintest opacity (`fadeMaterial`'s rule) a fade draws nothing, so nothing is drawn. */
+      const todayFade = era * dim;
+      const earlyFade = (1 - era) * dim;
+      todayMaterial.uniforms.fade!.value = todayFade;
       setTint(todayMaterial.uniforms);
-      band.visible = dim > 0.004;
-      const todayOn = era > 0.01 && dim > 0.004;
-      const earlyOn = era < 0.99 && dim > 0.004;
-      clouds.forEach((cloud, i) => (cloud.visible = i < 2 ? todayOn : earlyOn));
+      bandOn = dim > FAINTEST_OPACITY;
+      todayOn = todayFade > FAINTEST_OPACITY;
+      earlyOn = earlyFade > FAINTEST_OPACITY;
+      show();
       if (!earlyMaterial) return;
-      earlyMaterial.uniforms.fade!.value = (1 - era) * dim;
+      earlyMaterial.uniforms.fade!.value = earlyFade;
       setTint(earlyMaterial.uniforms);
     },
     tint,
     /** Samples `n` resolved grains (and their share of haze) afresh, for a new quality. */
     setGrains(n: number) {
-      sampled(n).forEach((next, i) => {
-        const cloud = clouds[i]!;
-        cloud.geometry.dispose();
-        cloud.geometry = next;
-      });
+      cancel();
+      cancel = paint(eras, n, receive);
     },
     dispose() {
+      cancel();
       today.texture.dispose();
       if (both) early.texture.dispose();
       material.dispose();

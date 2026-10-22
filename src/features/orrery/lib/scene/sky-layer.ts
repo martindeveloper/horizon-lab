@@ -22,14 +22,14 @@ import {
 import type { SkyCounts } from "../quality";
 
 export function createSkyLayer(
-  { scope, camera, dpr }: SolarKit,
+  { scope, camera, dpr, invalidate }: SolarKit,
   parent: Object3D,
   yearsAgo: number,
   counts: SkyCounts,
 ) {
   /* A band sphere, the real bright stars, a field. */
   const sky = new Group();
-  const milkyWay = scope.own(createMilkyWay(dpr, counts.milkyWay));
+  const milkyWay = scope.own(createMilkyWay(dpr, counts.milkyWay, invalidate));
   const fieldMaterial = scope.own(starMaterial(dpr));
   const field = new Points(fieldStars(counts.fieldStars), fieldMaterial);
   scope.defer(() => field.geometry.dispose());

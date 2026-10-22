@@ -34,7 +34,7 @@ export function createSolarActivityLifecycle(
       }
       session = startEngine(async (signal) => {
         const create = await load();
-        // A chunk already in flight can finish after Off/navigation. Never bake or attach it.
+        // A chunk or bake already in flight can finish after Off/navigation. Never attach it.
         if (signal.aborted) return;
         const effect = create();
         current = effect;

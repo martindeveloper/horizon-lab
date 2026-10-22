@@ -39,7 +39,8 @@ import { voigt } from "./voigt";
  * emergent flux is taken in the Eddington–Barbier approximation, F ≈ π I(μ = 2/3). It is
  * worked out at rest and kept (`starModel`): the star's velocity moves its whole spectrum, so
  * a slider or a dragged window costs no new radiative transfer. Its lines' widths are
- * measured at rest too.
+ * measured at rest too. The slab's optical depth is kept the same way (`slabModel`), so a pan,
+ * a zoom or a new lamp works out only the light.
  *
  * Both then cross Earth's air (`airmass`) and the spectrograph (`resolution`).
  */
@@ -110,14 +111,6 @@ export function slabIntensity(behind: number, source: number, tau: number) {
 
 type Grid = { lnStart: number; step: number; count: number };
 
-function gridFor(from: number, to: number, resolution: number, max: number): Grid {
-  const sigma = 1 / (resolution * FWHM_PER_SIGMA);
-  const lnStart = Math.log(from) - 5 * sigma;
-  const lnEnd = Math.log(to) + 5 * sigma;
-  const count = Math.min(max, Math.ceil((lnEnd - lnStart) / FINE_STEP));
-  return { lnStart, step: (lnEnd - lnStart) / count, count };
-}
-
 /** Calls `visit(i, nm)` at the grid's samples `first` through `last`, walking the log grid. */
 function forEachSample(
   grid: Grid,
@@ -156,29 +149,43 @@ function airTransmission(grid: Grid, airmass: number) {
       sweep({ ...p, peak: p.peak * airmass }, grid, (i, offset) => {
         tau[i]! += p.peak * airmass * shapeAt(p, offset / p.doppler);
       });
-  return tau.map((t) => Math.exp(-t));
+  /* Most of the window has no O₂ line: e^0 is 1, no exponential needed. */
+  return tau.map((t) => (t > 0 ? Math.exp(-t) : 1));
 }
 
 /** Box-averages `values` in groups of `k`, then convolves with a Gaussian of σ samples. */
 function smooth(values: Float64Array, k: number, sigma: number) {
   const n = Math.floor(values.length / k);
-  const binned = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    let sum = 0;
-    for (let j = 0; j < k; j++) sum += values[i * k + j]!;
-    binned[i] = sum / k;
+  let binned = values;
+  if (k > 1) {
+    binned = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      let sum = 0;
+      for (let j = 0; j < k; j++) sum += values[i * k + j]!;
+      binned[i] = sum / k;
+    }
   }
   if (sigma < 0.3) return binned;
+  /* One side of the kernel, which is symmetric, and its whole weight, which every sample away
+     from the ends receives. */
   const half = Math.ceil(4 * sigma);
-  const kernel = new Float64Array(2 * half + 1);
-  for (let j = -half; j <= half; j++) kernel[j + half] = Math.exp(-0.5 * (j / sigma) ** 2);
+  const kernel = new Float64Array(half + 1);
+  for (let j = 0; j <= half; j++) kernel[j] = Math.exp(-0.5 * (j / sigma) ** 2);
+  let whole = kernel[0]!;
+  for (let j = 1; j <= half; j++) whole += 2 * kernel[j]!;
   const out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
+    if (i >= half && i < n - half) {
+      let sum = binned[i]! * kernel[0]!;
+      for (let j = 1; j <= half; j++) sum += (binned[i - j]! + binned[i + j]!) * kernel[j]!;
+      out[i] = sum / whole;
+      continue;
+    }
     let sum = 0;
     let weight = 0;
     for (let j = Math.max(-half, -i); j <= Math.min(half, n - 1 - i); j++) {
-      sum += binned[i + j]! * kernel[j + half]!;
-      weight += kernel[j + half]!;
+      sum += binned[i + j]! * kernel[Math.abs(j)]!;
+      weight += kernel[Math.abs(j)]!;
     }
     out[i] = sum / weight;
   }
@@ -253,6 +260,69 @@ function render(
   return observe(fine, grid, obs.resolution, from, to, samples, continuumAt);
 }
 
+/* ─── Lattices: samples kept between windows ─── */
+
+/**
+ * A source's spectrum is worked out at rest, on a lattice in ln λ: samples at whole multiples
+ * of `FINE_STEP` · 2^level, the level the coarsest a window needs (`MAX_FINE`). A velocity only
+ * moves the lattice (ln λ_observed = ln λ_rest + ln(λ/λ₀)), and a window that slides or a
+ * velocity that changes reuses what was worked out: the lattice is kept in chunks of this many
+ * samples, each filled the first time a window reaches it.
+ */
+const CHUNK = 2048;
+/** Sources kept with their lattices: the one in view and the few a visit switches between. */
+const MODELS_KEPT = 4;
+
+/** A source's samples at rest, by level and then by chunk. */
+type Lattices = Map<number, Map<number, Float32Array | Float64Array>>;
+
+/** A source's fine grid for a window: on the lattice at rest, moved by the source's `shift`. */
+type LatticeGrid = Grid & { level: number; first: number };
+
+function latticeFor(
+  from: number,
+  to: number,
+  resolution: number,
+  shift: number,
+  max: number,
+): LatticeGrid {
+  const sigma = 1 / (resolution * FWHM_PER_SIGMA);
+  const lnShift = Math.log(shift);
+  const lo = Math.log(from) - 5 * sigma - lnShift;
+  const hi = Math.log(to) + 5 * sigma - lnShift;
+  for (let level = 0; ; level++) {
+    const step = FINE_STEP * 2 ** level;
+    const first = Math.floor(lo / step);
+    const count = Math.ceil(hi / step) - first + 1;
+    if (count <= max) return { lnStart: first * step + lnShift, step, count, level, first };
+  }
+}
+
+/** The lattice's own samples for a grid: the same ones, at rest. */
+const restGrid = (grid: LatticeGrid): Grid => ({ ...grid, lnStart: grid.first * grid.step });
+
+/** The grid's samples from `lattices`, each chunk made by `fill` (at rest) when first reached. */
+function latticeSamples(
+  lattices: Lattices,
+  { level, first, count, step }: LatticeGrid,
+  fill: (chunk: Grid) => Float32Array | Float64Array,
+) {
+  let chunks = lattices.get(level);
+  if (!chunks) lattices.set(level, (chunks = new Map()));
+  const out = new Float64Array(count);
+  for (let c = Math.floor(first / CHUNK); c * CHUNK < first + count; c++) {
+    let chunk = chunks.get(c);
+    if (!chunk) {
+      chunk = fill({ lnStart: c * CHUNK * step, step, count: CHUNK });
+      chunks.set(c, chunk);
+    }
+    const from = Math.max(first, c * CHUNK);
+    const to = Math.min(first + count, (c + 1) * CHUNK);
+    out.set(chunk.subarray(from - c * CHUNK, to - c * CHUNK), from - first);
+  }
+  return out;
+}
+
 /* ─── The lab: a uniform slab ─── */
 
 /** Every line the slab's gas absorbs, with its profile at the source's velocity. */
@@ -266,10 +336,21 @@ export function slabProfiles(obs: SlabObservation) {
   return out;
 }
 
-function synthesizeSlab(obs: SlabObservation, from: number, to: number, samples: number) {
-  const grid = gridFor(from, to, obs.resolution, MAX_FINE.slab);
+/** A slab's lines at rest and its optical depth on the lattice: they depend on the gas alone. */
+type SlabModel = { lines: { line: Line; profile: Profile }[]; lattices: Lattices };
+
+const slabModels = recentCache<string, SlabModel>(MODELS_KEPT);
+
+const slabModel = (obs: SlabObservation) =>
+  slabModels(JSON.stringify(obs.gas), () => ({
+    lines: slabProfiles({ ...obs, velocity: 0 }),
+    lattices: new Map(),
+  }));
+
+/** The optical depth of `lines` on a grid at rest. */
+function slabDepth(lines: SlabModel["lines"], grid: Grid) {
   const tau = new Float64Array(grid.count);
-  for (const { profile } of slabProfiles(obs))
+  for (const { profile } of lines)
     /* A dense bench gas can keep its wings dark across the whole window: no cut-off. */
     sweep(
       profile,
@@ -279,15 +360,86 @@ function synthesizeSlab(obs: SlabObservation, from: number, to: number, samples:
       },
       Infinity,
     );
-  const continuumAt = (nm: number) => (obs.background === null ? 0 : planck(nm, obs.background));
+  return tau;
+}
+
+/**
+ * The nodes' spacing for Planck's law on the bench, nm: linear between them it stays within
+ * 4 × 10⁻⁶ of itself even at 1,500 K and 380 nm, where it curves most.
+ */
+const PLANCK_STEP = 0.1;
+
+/**
+ * Planck's law for the lamp (0 when it is off) and for the gas, at nodes `PLANCK_STEP` apart,
+ * each worked out the first time a wavelength near it is asked for, and linear between them.
+ */
+function planckTable(lamp: number | null, gas: number) {
+  type Node = readonly [lamp: number, gas: number];
+  const nodes = new Map<number, Node>();
+  const node = (g: number): Node => {
+    let known = nodes.get(g);
+    if (!known) {
+      const nm = g * PLANCK_STEP;
+      known = [lamp === null ? 0 : planck(nm, lamp), planck(nm, gas)];
+      nodes.set(g, known);
+    }
+    return known;
+  };
+  const out = { lamp: 0, gas: 0 };
+  /* The nodes either side of the last wavelength: the first call always sets them. */
+  let at = Number.NaN;
+  let below: Node;
+  let above: Node;
+  return (nm: number) => {
+    const x = nm / PLANCK_STEP;
+    const g = Math.floor(x);
+    const t = x - g;
+    if (g !== at) {
+      at = g;
+      below = node(g);
+      above = node(g + 1);
+    }
+    out.lamp = below[0] + t * (above[0] - below[0]);
+    out.gas = below[1] + t * (above[1] - below[1]);
+    return out;
+  };
+}
+
+/** The slab's spectrum, or (`without`) the spectrum without one element's atoms. */
+function synthesizeSlab(
+  obs: SlabObservation,
+  from: number,
+  to: number,
+  samples: number,
+  without?: ElementId,
+) {
+  const model = slabModel(obs);
+  const grid = latticeFor(
+    from,
+    to,
+    obs.resolution,
+    dopplerWavelengthRatio(obs.velocity),
+    MAX_FINE.slab,
+  );
+  const tau =
+    without === undefined
+      ? latticeSamples(model.lattices, grid, (chunk) => slabDepth(model.lines, chunk))
+      : slabDepth(
+          model.lines.filter(({ line }) => line.element !== without),
+          restGrid(grid),
+        );
+  const light = planckTable(obs.background, obs.gas.temperature);
   return render(
     grid,
     obs,
     from,
     to,
     samples,
-    (i, nm) => slabIntensity(continuumAt(nm), planck(nm, obs.gas.temperature), tau[i]!),
-    continuumAt,
+    (i, nm) => {
+      const { lamp, gas } = light(nm);
+      return slabIntensity(lamp, gas, tau[i]!);
+    },
+    (nm) => light(nm).lamp,
   );
 }
 
@@ -584,24 +736,13 @@ function emergentFlux({ cells, columns }: Cells, lines: readonly StarLine[], gri
   return flux;
 }
 
-/**
- * A star's spectrum is worked out at rest, on a lattice in ln λ: samples at whole multiples of
- * `FINE_STEP` · 2^level, the level the coarsest a window needs (`MAX_FINE`). A velocity only
- * moves the lattice (ln λ_observed = ln λ_rest + ln(λ/λ₀)), and a window that slides or a
- * velocity that changes reuses what was worked out: the lattice is kept in chunks of this many
- * samples, each filled the first time a window reaches it.
- */
-const CHUNK = 2048;
-
 type StarModel = Cells & {
   /** Every line the star forms, at rest. */
   lines: StarLine[];
-  /** Surface flux at rest, display precision, by level and then by chunk. */
-  lattices: Map<number, Map<number, Float32Array>>;
+  /** Surface flux at rest, display precision. */
+  lattices: Lattices;
 };
 
-/** Star models kept with their lattices: the one in view and the few a visit switches between. */
-const MODELS_KEPT = 4;
 const starModels = recentCache<string, StarModel>(MODELS_KEPT);
 /** Photospheres are told apart by identity (`starPhotosphere` gives the same object each time). */
 const photosphereIds = new WeakMap<Photosphere, number>();
@@ -627,40 +768,9 @@ function starModel(obs: StarObservation): StarModel {
   });
 }
 
-/** A star's fine grid for a window: on the lattice at rest, moved by the source's `shift`. */
-type LatticeGrid = Grid & { level: number; first: number };
-
-function latticeFor(from: number, to: number, resolution: number, shift: number): LatticeGrid {
-  const sigma = 1 / (resolution * FWHM_PER_SIGMA);
-  const lnShift = Math.log(shift);
-  const lo = Math.log(from) - 5 * sigma - lnShift;
-  const hi = Math.log(to) + 5 * sigma - lnShift;
-  for (let level = 0; ; level++) {
-    const step = FINE_STEP * 2 ** level;
-    const first = Math.floor(lo / step);
-    const count = Math.ceil(hi / step) - first + 1;
-    if (count <= MAX_FINE.star)
-      return { lnStart: first * step + lnShift, step, count, level, first };
-  }
-}
-
 /** The surface flux at rest on the grid's samples, from the model's lattice. */
-function latticeFlux(model: StarModel, { level, first, count, step }: LatticeGrid) {
-  let chunks = model.lattices.get(level);
-  if (!chunks) model.lattices.set(level, (chunks = new Map()));
-  const flux = new Float32Array(count);
-  for (let c = Math.floor(first / CHUNK); c * CHUNK < first + count; c++) {
-    let chunk = chunks.get(c);
-    if (!chunk) {
-      chunk = emergentFlux(model, model.lines, { lnStart: c * CHUNK * step, step, count: CHUNK });
-      chunks.set(c, chunk);
-    }
-    const from = Math.max(first, c * CHUNK);
-    const to = Math.min(first + count, (c + 1) * CHUNK);
-    flux.set(chunk.subarray(from - c * CHUNK, to - c * CHUNK), from - first);
-  }
-  return flux;
-}
+const starFlux = (model: StarModel, grid: LatticeGrid) =>
+  latticeSamples(model.lattices, grid, (chunk) => emergentFlux(model, model.lines, chunk));
 
 /** The star's continuum flux at an observed wavelength. */
 const starContinuum = (model: StarModel, shift: number) => (nm: number) =>
@@ -669,33 +779,35 @@ const starContinuum = (model: StarModel, shift: number) => (nm: number) =>
 function synthesizeStar(obs: StarObservation, from: number, to: number, samples: number) {
   const model = starModel(obs);
   const shift = dopplerWavelengthRatio(obs.velocity);
-  const grid = latticeFor(from, to, obs.resolution, shift);
-  const flux = latticeFlux(model, grid);
+  const grid = latticeFor(from, to, obs.resolution, shift, MAX_FINE.star);
+  const flux = starFlux(model, grid);
   return render(grid, obs, from, to, samples, (i) => flux[i]!, starContinuum(model, shift));
 }
+
+/** One of `synthesizeWithout`'s spectra: the element taken out and what is left. */
+export type Without = readonly [element: ElementId, spectrum: Spectrum];
 
 /**
  * The star's spectrum without each element's lines, from the same lattice: opacities add, so
  * where an element's lines reach, their opacity is taken back out and the light worked out
- * again; everywhere else the spectrum is the same.
+ * again; everywhere else the spectrum is the same. The lattice and the lines' whole opacity
+ * come with the first element; after that each element is one spectrum's work.
  */
-function starWithout(
+function* starWithout(
   obs: StarObservation,
   from: number,
   to: number,
   samples: number,
   elements: readonly ElementId[],
-) {
+): Generator<Without> {
   const model = starModel(obs);
   const K = model.cells.length;
   const shift = dopplerWavelengthRatio(obs.velocity);
-  const grid = latticeFor(from, to, obs.resolution, shift);
-  const base = latticeFlux(model, grid);
-  /* The lines sit at rest on the lattice: the same samples, without the shift. */
-  const atRest: Grid = { ...grid, lnStart: grid.first * grid.step };
+  const grid = latticeFor(from, to, obs.resolution, shift, MAX_FINE.star);
+  const base = starFlux(model, grid);
+  const atRest = restGrid(grid);
   const all = lineOpacity(K, model.lines, atRest).opacity;
   const continuumAt = starContinuum(model, shift);
-  const out = new Map<ElementId, Spectrum>();
   const others = new Float32Array(K);
   const rows: Between = { below: new Float64Array(), above: new Float64Array(), t: 0 };
   for (const element of elements) {
@@ -711,12 +823,8 @@ function starWithout(
         others[k] = Math.max(0, all[i * K + k]! - own.opacity[i * K + k]!);
       flux[i] = emerge(model.columns.between(nm, rows), K, others, 0);
     });
-    out.set(
-      element,
-      render(grid, obs, from, to, samples, (i) => flux[i]!, continuumAt),
-    );
+    yield [element, render(grid, obs, from, to, samples, (i) => flux[i]!, continuumAt)];
   }
-  return out;
 }
 
 /** The spectrum between `from` and `to` nm in `samples` pixels. */
@@ -726,22 +834,21 @@ export function synthesize(obs: Observation, from: number, to: number, samples: 
     : synthesizeStar(obs, from, to, samples);
 }
 
-/** The spectrum as `synthesize` gives it with each of `elements` taken out, by element. */
-export function synthesizeWithout(
+/**
+ * The spectrum as `synthesize` gives it with each of `elements` taken out, in their order,
+ * worked out one element at a time as they are taken.
+ */
+export function* synthesizeWithout(
   obs: Observation,
   from: number,
   to: number,
   samples: number,
   elements: readonly ElementId[],
-): Map<ElementId, Spectrum> {
-  if (obs.kind === "star") return starWithout(obs, from, to, samples, elements);
-  return new Map(
-    elements.map((element) => {
-      const columns = { ...obs.gas.columns };
-      delete columns[element];
-      return [element, synthesizeSlab({ ...obs, gas: { ...obs.gas, columns } }, from, to, samples)];
-    }),
-  );
+): Generator<Without> {
+  if (obs.kind === "star") yield* starWithout(obs, from, to, samples, elements);
+  else
+    for (const element of elements)
+      yield [element, synthesizeSlab(obs, from, to, samples, element)];
 }
 
 /* ─── One line at a time ─── */

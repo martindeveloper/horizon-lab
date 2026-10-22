@@ -2,7 +2,7 @@
 
 import { ZoomIn } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { HC_EV_NM, dopplerWavelengthRatio, formatReadout } from "@horizon/toolkit/science";
@@ -40,6 +40,23 @@ function useCardFocus(root: RefObject<HTMLElement | null>, open: boolean) {
   }, [root, open]);
 }
 
+/** How long the observation must hold still before the curve of growth is worked out anew, ms. */
+const SETTLE_MS = 150;
+
+/**
+ * `value` once it has held still for `SETTLE_MS`, the first at once: while a slider or the
+ * guide carries it along, the last one that settled.
+ */
+function useSettled<T>(value: T) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    if (Object.is(settled, value)) return;
+    const timer = setTimeout(() => setSettled(value), SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [value, settled]);
+  return settled;
+}
+
 /**
  * The selected line: where it is and where it should be, the two levels it joins and the
  * photon between them, how strong it is and why (its place on the curve of growth), and for
@@ -64,7 +81,10 @@ export function LineCard() {
   /* A line's strength is measured at rest: dragging the velocity only moves where it sits. */
   const rest = useRestObservation();
   const report = useMemo(() => (line ? reportLine(line, rest) : null), [line, rest]);
-  const growth = useMemo(() => (line ? curveOfGrowth(line, rest) : []), [line, rest]);
+  /* Twenty-five widths of the line: worked out once the observation settles, not at every step
+     of a slider or the guide. */
+  const settled = useSettled(rest);
+  const growth = useMemo(() => (line ? curveOfGrowth(line, settled) : []), [line, settled]);
   const sequence = useMemo(
     () => (line && obs.kind === "star" && view !== "mystery" ? sequenceWidths(line) : []),
     [line, obs.kind, view],

@@ -2,7 +2,7 @@
 
 import { Check, Shuffle, X } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { HrDiagram } from "@/components/simulations/hr-diagram";
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
@@ -25,6 +25,7 @@ import { ELEMENT_IDS, ELEMENTS, type ElementId } from "../lib/model/atoms";
 import { BENCH_RANGE, SEQUENCE_RANGE, verdict, type Verdict } from "../lib/model/scenes";
 import { STAR_IDS, STARS } from "../lib/model/stars";
 import { useSpectroscopy } from "../lib/store";
+import { prefetchMysteryAnswer } from "../lib/synthesis";
 import { kelvin, signed } from "./format";
 import { MysteryActions, MysteryResultCard, OutcomeMark } from "./mystery-result";
 import { PanelTitle, Tray } from "./tray";
@@ -513,7 +514,19 @@ function MysteryControls() {
   const compare = useSpectroscopy((s) => s.compare);
   const velocity = useSpectroscopy((s) => s.velocity);
   const result = useSpectroscopy((s) => s.result);
+  const mystery = useSpectroscopy((s) => s.mystery);
+  const resolution = useSpectroscopy((s) => s.resolution);
+  const air = useSpectroscopy((s) => s.air);
   const api = useSpectroscopy.getState;
+  /* The answer is worked out while the visitor looks, so Check finds it ready. */
+  useEffect(
+    () => prefetchMysteryAnswer(mystery, resolution, air ? 1 : 0),
+    [mystery, resolution, air],
+  );
+  const [checking, setChecking] = useState(false);
+  /* An answer that cannot be worked out surfaces to the route's error boundary. */
+  const [failure, setFailure] = useState<Error | null>(null);
+  if (failure) throw failure;
   const answer = result?.answer;
   const verdicts = answer
     ? (element: ElementId) => verdict(answer, element, compare.includes(element))
@@ -522,7 +535,15 @@ function MysteryControls() {
     <Action
       variant="solar"
       className={cn("min-h-10 shrink-0 px-6 text-xs md:min-h-8", className)}
-      onClick={() => api().check()}
+      disabled={checking}
+      aria-busy={checking}
+      onClick={() => {
+        setChecking(true);
+        void api()
+          .check()
+          .catch(setFailure)
+          .finally(() => setChecking(false));
+      }}
     >
       {t("dock.check")}
     </Action>
