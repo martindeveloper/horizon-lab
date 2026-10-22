@@ -92,6 +92,28 @@ Processing and limits:
 - WebP tiers: 1024 × 512 for the map, 2048 × 1024 for lighter close-ups, and
   8192 × 4096 for full close-ups. Resampling does not add observational detail.
 
+Sun Lab close-ups retain this photograph's morphology. Rebuild their appearance
+stencil with `node --import tsx scripts/build-sun-spot-stencil.mjs` after pulling
+the CDN mirror; it writes a new `textures/bodies/sun/spots/v<version>/` folder to upload. The generator pins the exact published `sun/v1/sun-near.webp`
+SHA-256, rather than resynthesizing spots from NOAA group centres.
+
+- Hysteresis selects dark connected components, retaining their irregular outlines,
+  pores and light bridges. The thresholds (0.88 penumbral boundary, 0.8 seed and
+  0.45 umbral boundary relative to quiet display intensity) are visual segmentation
+  choices for this processed image, not physical classifications or thermometry.
+- A sparse atlas preserves the source sampling: R holds linear continuum, G/B
+  hold signed distances to the outer and umbral contours. Distances are in source
+  pixels, **not depth**. Fractional contour positions allow smooth interpolation.
+  A nearest-filtered page table and padded atlas tiles avoid seams and keep GPU
+  memory small. Both PNGs are linear data, without sRGB decoding or atlas mipmaps.
+- The distant image stays visible at every zoom. Close up, the atlas supplies the
+  same spots at the finest source resolution; contour gradients orient illustrative
+  filaments and umbral masks confine locally appearing and fading dots. Ordinary
+  granulation is suppressed inside the masks. These added details are synthetic;
+  neither higher-resolution observations, surface heights nor magnetic vectors
+  have been recovered from the photograph. Other passbands and the magnetic model
+  remain schematic. If the stencil is unavailable, the photograph remains visible.
+
 ## Observed moon maps (public domain)
 
 - **Moon**: [LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill](https://svs.gsfc.nasa.gov/4720/). Credit: NASA’s Scientific Visualization Studio; NASA/LRO/LROC, Arizona State University. [Original raster](https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_4k.tif).
@@ -193,3 +215,25 @@ constraints; generated maps also remain temporary load/error fallbacks:
   Umbriel's bright Wunda ring, Titania's Messina Chasmata and Gertrude, and
   Oberon's dark-floored Hamlet. Features stop where Voyager 2's coverage did:
   their northern hemispheres are plain fill.
+
+## Spacecraft models (public domain)
+
+NASA 3D Resources models by NASA's Visualization Technology Applications and Development
+group (<https://science.nasa.gov/3d-resources/>), built by
+`scripts/build-spacecraft-models.mjs`, which `SPACECRAFT` in
+`src/space/spacecraft/models.ts` also lists:
+
+- **Voyager 1 and 2**: [Voyager](https://science.nasa.gov/resource/voyager-3d-model/).
+- **Pioneer 10 and 11**: Pioneer 10, from the
+  [NASA 3D Resources archive](https://github.com/nasa/NASA-3D-Resources).
+- **New Horizons**: [New Horizons](https://science.nasa.gov/resource/new-horizons-3d-model/).
+- **Parker Solar Probe**: [Parker Solar Probe](https://science.nasa.gov/resource/parker-solar-probe-3d-model/).
+
+Changes: each model is scaled so its high-gain dish (Parker: its heat shield) spans the
+published width (`docs/science-sources.md`) and turned so that face looks along +z; the
+scenes turn it to Earth (Parker: to the Sun). An exporter's helper cube is dropped, meshes
+are welded, simplified and meshopt-compressed, and textures become WebP of at most
+1024 px. The models' own materials are replaced by one shader lit by the Sun; their colours,
+metalness and roughness are kept. Twin spacecraft share one model, and Pioneer 11 shows
+Pioneer 10's. These are visual models, not engineering drawings: small parts, antennas
+and booms are approximate.

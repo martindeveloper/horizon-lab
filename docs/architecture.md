@@ -81,7 +81,8 @@ src/
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
                                toolkit's scene host, orbit rig and controls, moves it along
                                the timeline and adds what is the Orrery's own: the sky,
-                               close-ups (close-up-controller.ts, close-up-flight.ts; the
+                               close-ups (close-up-controller.ts, close-up-flight.ts with the
+                               moon framing; the flight itself is src/space/close-up-flight.ts; the
                                atmosphere shell over a body with air, from
                                src/space/solar-system/graphics/air.ts),
                                streamed measured maps (measured-maps.ts: each body waits in
@@ -535,6 +536,11 @@ only its layers, its views and its store of its own:
   warm-up, anti-aliasing, bloom and lens: draw each frame through its `render`), `createOrbitRig` (pose, log zoom, flights that turn the angles; the feature
   adds limits, the aim's `home` and the frame's `orient`), `createViewMoves` (its views,
   as the pose framing each) and `createOrbitControls` (drag, wheel, pinch).
+  A craft a few metres across is drawn by `createSpacecraftPass` (`src/space/spacecraft`):
+  after the host's main pass, in a depth range of its own, placed from the camera by a point
+  the host holds exactly (an orbit's aim and the rig's `offset`, a ship); it costs nothing
+  until a craft nears a pixel. Deep Field's probes and the Sun lab's Parker fly in with the
+  Orrery's close-up flight (`src/space/close-up-flight.ts`); Voyage parks a few metres off.
   `createLabels`, `createTapPicking`, `createAnchoredRulers`, `createDistanceText` and the
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
@@ -786,6 +792,14 @@ folder mirrors the bucket's keys:
   which also prints each far tier's mean colour for that entry (the placeholder while it
   streams). `npm run cdn:pull` fetches the published set, which the map tests check;
   without it they skip.
+- `textures/bodies/sun/spots/v<version>/atlas.png`, `pages.png`: the Sun Lab's close-up spot
+  stencil, derived from the Sun's map by `scripts/build-sun-spot-stencil.mjs` (`VERSION`), its
+  keys in `spot-stencil.generated.json`.
+- `models/spacecraft/<id>/v<version>/<id>.glb`: the probes' and Parker Solar Probe's models
+  (`MODELS_KEY`, each versioned by its `SPACECRAFT` entry in `src/space/spacecraft/models.ts`),
+  written by `scripts/build-spacecraft-models.mjs`, which checks each against its entry. A page
+  fetches one only as a camera closes on its craft. The bench serves `cdn/` before the bucket,
+  so a model built but not yet uploaded renders there.
 - `textures/orrery/v1/`: retired, kept for older deployments. Never upload into it.
 
 A published key is never overwritten, so older deployments keep their assets: a rebuilt
@@ -835,13 +849,16 @@ Spectra has no camera, so its experiences button enters immersive view directly.
 - `src/features/<slug>/lib/drift.ts` is the simulation's programme: its music
   (`track` from the playlist, `level`), the camera settings (pace, variance, hold
   orbit and push, order) and the shots. Deep Field's and the Orrery's shots name a
-  view plus nudges; the observatory's are poses in M with roll. The Orrery's
-  programme also visits bodies: a `closeUp` shot is a handoff to the close-up
-  (the drift selects the body, the close-up flies in at `closeUp.pace` times its
-  usual flight time with `closeUp.lead` settling the dive onto the body, the director
-  circles it and drifts nearer for the hold, pulls out once to frame it with its
-  largest moon, then lets the selection go so the close-up flies out from there and
-  no marker stays: one dive and one pull away per body), and `clock` holds the
+  view plus nudges; the observatory's are poses in M with roll. The Orrery's and
+  Deep Field's programmes also visit bodies: a `closeUp` shot is a handoff to the
+  feature's close-up, run by the shared visits (`src/space/drift-visits.ts`: the drift
+  selects the body, the close-up flies in at `closeUp.pace` times its usual flight
+  time with `closeUp.lead` settling the dive onto the body, the visit circles it and
+  drifts nearer for the hold, then lets the selection go; before a framed shot the
+  close-up's flight out is released to that shot's flight, so the pull away flows on
+  and no marker stays: one dive and one pull away per body). The Orrery's hold ends
+  pulled out to frame the body with its largest moon; Deep Field visits Voyager 1 from
+  the heliosphere and pulls away on the flight to the Oort cloud. The Orrery's `clock` holds the
   Motion speed-up to a few hundredths of a year per second while the drift is on,
   so the inner planets and the belt glide rather than whirl; the rate shows under
   the drift's controls (`SimulationImmersive`'s `drift.caption`).
@@ -867,7 +884,7 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   hole's drift opens on plain stars and pans the warp in; the lit hole's opens on
   its push-in, so the two never feel alike). A director beside each rig engine
   (`lib/scene/drift-director.ts`) resolves the shots to the rig's framings and
-  adds what is the simulation's own (the Orrery's close-up visits); the
+  adds what is the simulation's own (the Orrery's and Deep Field's close-up visits); the
   observatory's engine runs the drift directly on its raymarched camera. The
   engine's `fly`, HUD view sync and auto-orbit stand aside meanwhile, and the
   camera comes back to the visitor where it stopped. The line art (orbits, the
