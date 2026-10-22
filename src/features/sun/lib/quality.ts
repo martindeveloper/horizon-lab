@@ -58,12 +58,12 @@ const STANDARD: Budget = {
   prominenceSteps: 40,
   fieldLines: 64,
   ribbonSegments: 48,
-  coronaSamples: 20,
+  coronaSamples: 32,
   spicules: true,
   sky: SKY_FULL,
 };
 /** A phone at Standard keeps the showcase's look with a lighter march. */
-const STANDARD_TIGHT: Budget = { ...STANDARD, prominenceSteps: 28, coronaSamples: 12 };
+const STANDARD_TIGHT: Budget = { ...STANDARD, prominenceSteps: 28, coronaSamples: 16 };
 const CINEMA: Budget = {
   fineSurface: true,
   cutPlumes: 6,

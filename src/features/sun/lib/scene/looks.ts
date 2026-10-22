@@ -5,6 +5,7 @@
  */
 import { Matrix3, Vector2, Vector3, Vector4 } from "three";
 
+import { dice } from "@/space/sun/model/dice";
 import { gamutMatrix } from "@horizon/toolkit/rendering";
 import { SOLAR_GOLD } from "@horizon/toolkit/scene";
 import { hexToLinear, wavelengthColor, type Gamut } from "@horizon/toolkit/science";
@@ -163,7 +164,10 @@ export function createSunLooks() {
           eruption && eruption.regionId === region.id && eruption.ribbonGap > 0
             ? eruption.ribbonGap / (2 * region.size)
             : RIBBON_GAP;
-        regionState[k]!.set(flare, region.facula, gap, region.id * 3.7);
+        // Observed region IDs exceed twenty million. Sending them straight to a
+        // float shader erases subpixel offsets and collapses noise into spokes.
+        // Hash on the CPU, keeping the stable noise coordinate small.
+        regionState[k]!.set(flare, region.facula, gap, 64 * dice(region.id, 173));
       }
       /* The prominences' channels, for the filaments they cast on the disc. */
       const prominences = Math.min(frame.prominences.length, PROMINENCE_MAX);

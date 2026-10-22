@@ -49,6 +49,8 @@ export function createAtmosphereLayer(
     uCoronaFE: { value: new Vector2() },
     uEruption: { value: new Vector4(0, 1, 0, 0) },
     uEruptionShape: { value: new Vector4() },
+    uCmePresence: { value: 0 },
+    uCurrentSheet: { value: new Vector3() },
     uSamples: { value: 20 },
     uSpicules: { value: 1 },
     uSunlight: { value: new Vector3(...tables.sunlight) },
@@ -71,7 +73,7 @@ export function createAtmosphereLayer(
   scene.add(mesh);
   scope.defer(() => mesh.removeFromParent());
   const axis: [number, number, number] = [0, 1, 0];
-  let shapedBy: Polyline[] | null = null;
+  let shapedBy = -1;
   /** The field's shape over the limb: a streamer per high closed apex, a hole per open foot. */
   const shape = (lines: Polyline[]) => {
     type Apex = { x: number; y: number; z: number; r: number };
@@ -122,8 +124,8 @@ export function createAtmosphereLayer(
       uniforms.uSpicules.value = quality.spicules ? 1 : 0;
     },
     update(frame: SunFrame, settings: SunSceneSettings) {
-      if (frame.fieldLines !== shapedBy) {
-        shapedBy = frame.fieldLines;
+      if (frame.fieldRevision !== shapedBy) {
+        shapedBy = frame.fieldRevision;
         shape(frame.fieldLines);
       }
       const { k, f, e } = settings.corona;
@@ -134,13 +136,23 @@ export function createAtmosphereLayer(
       if (eruption && region) {
         directionOf(region.lat, region.lon, axis);
         uniforms.uEruption.value.set(axis[0], axis[1], axis[2], eruption.cmeFront);
+        uniforms.uCmePresence.value = eruption.cmePresence;
         uniforms.uEruptionShape.value.set(
           eruption.cmeSpread,
           eruption.flareLight,
           eruption.ropeHeight,
           region.strength,
         );
-      } else uniforms.uEruption.value.w = 0;
+        uniforms.uCurrentSheet.value.set(
+          eruption.sheetBottom,
+          eruption.sheetTop,
+          eruption.reconnection,
+        );
+      } else {
+        uniforms.uEruption.value.w = 0;
+        uniforms.uCmePresence.value = 0;
+        uniforms.uCurrentSheet.value.set(0, 0, 0);
+      }
     },
   };
 }

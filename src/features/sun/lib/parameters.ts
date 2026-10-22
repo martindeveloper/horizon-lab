@@ -28,7 +28,7 @@ import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
 /** The globe's proxy sphere, a little past the photosphere; the atmosphere's, where the corona has faded. */
 export const PROXY_RADIUS = 1.02;
-export const ATMOSPHERE_RADIUS = 6;
+export const ATMOSPHERE_RADIUS = 8;
 /** The camera's reach from the centre, solar radii. */
 export const CAMERA_MIN_R = 1.03;
 export const CAMERA_MAX_R = 12;
@@ -85,8 +85,8 @@ export const PHOTOSPHERE_K = SOLAR_TEFF_K;
  * near tier loads inside this camera distance, radii, and a map arriving fades in over this
  * long, s. Its quiet level is the solar system's.
  */
-export const MAP_FADE_FROM_PX = 4;
-export const MAP_FADE_TO_PX = 8;
+export const MAP_FADE_FROM_PX = 1.25;
+export const MAP_FADE_TO_PX = 2.5;
 export const MAP_FADE_IN_S = 1.2;
 export { MAP_CENTRAL_MERIDIAN_RAD, SUN_MAP_QUIET_INTENSITY };
 /**
@@ -104,7 +104,7 @@ export const NETWORK_CONTRAST = 0.006;
 /** A spot's umbra (the model's spot temperature) and penumbra, K, and how much darker the penumbra's dark filaments run than its bright ones, as a share. */
 export const UMBRA_K = TEMPERATURES.spot;
 export const PENUMBRA_K = 5_000;
-export const PENUMBRA_FILAMENT = 0.3;
+export const PENUMBRA_FILAMENT = 0.16;
 /** A group's leading and following spots: their radii as shares of the group's size (times the root of its strength). */
 export const LEAD_SPOT = 0.42;
 export const FOLLOW_SPOT = 0.28;
@@ -113,7 +113,7 @@ export const FACULA_CONTRAST = 0.09;
 /** The Evershed flow's speed along the penumbra, km/s, and the ripple its filaments carry. */
 export const EVERSHED_KMS = 2;
 export const EVERSHED_RADII_PER_S = EVERSHED_KMS / SOLAR_RADIUS_KM;
-export const EVERSHED_RIPPLE = 0.12;
+export const EVERSHED_RIPPLE = 0.035;
 export const EVERSHED_WAVES = 36;
 /** Umbral dots: how many across a spot's radius, and how much they brighten the umbra. */
 export const UMBRAL_DOTS = 14;
@@ -126,7 +126,7 @@ export const RIBBON_GLARE = 1.2;
  * light is raised to, so the limb's fall and the spots' darkness read on a screen as they do to
  * the eye through a filter, not as the encoded curve flattens them.
  */
-export const SURFACE_EXPOSURE = 0.68;
+export const SURFACE_EXPOSURE = 0.56;
 export const SURFACE_CONTRAST = 2.2;
 /** Longitude turns slower towards the poles than at the equator: the law's sin² and sin⁴ terms over its equatorial rate (Snodgrass & Ulrich 1990), the model's figures. */
 export const ROTATION_SIN2 = -2.396 / 14.713;
@@ -245,7 +245,7 @@ export const RIBBON_SPREAD = 0.05;
 export const FILAMENT_WIDTH = 0.012;
 export const FILAMENT_DEPTH = 0.75;
 /** The chromosphere's fibrils: finer mottle on the network, this many times its frequency, and its share. */
-export const FIBRIL_SCALE = 5;
+export const FIBRIL_SCALE = 9;
 export const FIBRIL_SHARE = 0.4;
 export const BAND_QUIET = 0.12;
 /** The magnetogram's salt and pepper: the network's small bipoles, as a share of the saturation. */
@@ -267,10 +267,10 @@ export const SPICULE_HEIGHT = 0.014;
 export const SPICULE_COLUMNS = 1_200;
 export const SPICULE_LIFETIME_S = 600;
 /** The chromosphere's rim against the disc, and its spicules. */
-export const CHROMOSPHERE_GLOW = 1.2;
-export const SPICULE_GLOW = 0.8;
+export const CHROMOSPHERE_GLOW = 0.48;
+export const SPICULE_GLOW = 0.45;
 /** The rim is never thinner than this many buffer pixels. */
-export const RIM_MIN_PX = 2.5;
+export const RIM_MIN_PX = 0.85;
 /** The K-corona's gain against the disc (seen with the eye's compression, Baumbach's fall-off raised to `CORONA_CONTRAST`). */
 export const CORONA_GLOW = 0.3;
 export const CORONA_CONTRAST = 0.75;
@@ -327,6 +327,8 @@ export const FLASH_GLARE = 0.8;
 export const CME_THICKNESS = 0.1;
 export const CME_CAVITY = 0.85;
 export const CME_GLOW = 0.3;
+/** Display width of the hot current-sheet emission, R; not the microscopic resistive layer. */
+export const CURRENT_SHEET_WIDTH_R = 0.0015;
 /** Ray-march samples through the ejection at most. */
 export const CORONA_MAX_SAMPLES = 48;
 
@@ -391,8 +393,6 @@ export const MAGNETOGRAM_LINE = 0.3;
 export const RIBBON_MAX_POINTS = 96;
 /** Display seconds the eruption's scrub takes from 0 to 1 while it plays by itself. */
 export const ERUPTION_PLAY_S = 40;
-/** The X-point's cross: its arm, radii. */
-export const XPOINT_ARM = 0.02;
 /** Polarity colours (encoded sRGB): the theme's gold for positive, a cool blue for negative. */
 export const POSITIVE_HEX = "#e2c07a";
 export const NEGATIVE_HEX = "#6f8fff";
@@ -552,6 +552,7 @@ export const SHADER_DEFINES = glslDefines({
   CME_THICKNESS,
   CME_CAVITY,
   CME_GLOW,
+  CURRENT_SHEET_WIDTH_R,
   CORONA_MAX_SAMPLES: glslInt(CORONA_MAX_SAMPLES),
   RIBBON_WIDTH_PX,
   RIBBON_HALO_PX,

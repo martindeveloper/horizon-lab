@@ -15,6 +15,7 @@ precision highp float;
 #include "../../../../space/sun/graphics/shaders/spots.glsl"
 #include <horizon/temperature>
 #include <horizon/display>
+#include "./surface-detail.glsl"
 
 uniform highp sampler2D uProfile;      // R,V,B limb darkening by μ (the Sun's Claret law)
 uniform highp sampler2D uInterior;     // by radius: ln T, ln ρ
@@ -86,12 +87,7 @@ Face faceAt(vec3 s, float mu, float px) {
   float lanes = gradientNoise3(b * cells + vec3(0.0, uClock.y, 0.0));
   float network = 1.0 - smoothstep(0.0, 0.3, abs(lanes));
   /* The chromosphere's fibrils: mottle finer than the network and drawn out along it, where it resolves. */
-  float fibrilSeen = resolvedFeature(cells * FIBRIL_SCALE, px, mu);
-  if (fibrilSeen > 0.0) {
-    vec3 stretched = b * cells * FIBRIL_SCALE * vec3(1.0, 0.35, 1.0) + vec3(uClock.y * 3.0, 0.0, 0.0);
-    float fibrils = 1.0 - abs(gradientNoise3(stretched));
-    network = mix(network, network * (1.0 - FIBRIL_SHARE) + FIBRIL_SHARE * fibrils * fibrils, fibrilSeen);
-  }
+  if (uLightMode == LIGHT_BAND) network = chromosphericNetwork(b, cells, px, mu, uFine);
   /* The magnetogram's salt and pepper: small bipoles in the network's lanes. */
   float grain = gradientNoise3(b * cells * 2.7 + vec3(0.0, 0.0, uClock.y));
   float pepper = sign(grain) * smoothstep(0.25, 0.55, abs(grain)) * (0.4 + 0.6 * network);
@@ -122,8 +118,12 @@ Face faceAt(vec3 s, float mu, float px) {
     float followRadius = FOLLOW_SPOT * grown;
     vec2 leadAt = l - vec2(0.42, 0.0);
     vec2 followAt = l - vec2(-0.46, 0.07);
-    vec3 lead = spot(leadAt, leadRadius, seed, 2.0 * uFine, footprint * leadRadius);
-    vec3 follow = spot(followAt, followRadius, seed + 7.3, 2.0 * uFine, footprint * followRadius);
+    vec3 lead = uFine > 0.0
+      ? solarSpot(leadAt, leadRadius, seed, footprint * leadRadius)
+      : spot(leadAt, leadRadius, seed, 0.0, footprint * leadRadius);
+    vec3 follow = uFine > 0.0
+      ? solarSpot(followAt, followRadius, seed + 7.3, footprint * followRadius)
+      : spot(followAt, followRadius, seed + 7.3, 0.0, footprint * followRadius);
     vec2 porous = l - vec2(-0.25, -0.05);
     float pore = smoothstep(0.5, 0.72, gradientNoise2(l * 7.5 + seed * 1.9)) * exp(-dot(porous, porous) / 0.14) * grown;
     umbra = max(umbra, max(lead.x, follow.x) * marks);
@@ -132,10 +132,8 @@ Face faceAt(vec3 s, float mu, float px) {
     pores = max(pores, pore * marks);
     /* The Evershed flow: the penumbral filaments' grain streams outward from the umbra. */
     if (lead.y > 0.0 && uFine > 0.0) {
-      float along = length(leadAt) / max(leadRadius * dir.w, 1e-5);
-      float travelled = uEvershed / max(leadRadius * dir.w, 1e-5);
       float seen = resolvedFeature(EVERSHED_WAVES / (leadRadius * dir.w), px, mu);
-      ripple = max(ripple, seen * lead.y * sin((along - travelled) * EVERSHED_WAVES));
+      ripple += seen * lead.y * penumbralFlow(leadAt, leadRadius, dir.w, uEvershed, seed);
       /* Umbral dots: specks of convection breaking through the umbra. */
       float dotSeen = resolvedFeature(UMBRAL_DOTS / (leadRadius * dir.w), px, mu);
       dots = max(dots, dotSeen * lead.x * smoothstep(0.35, 0.6, gradientNoise2(leadAt / leadRadius * UMBRAL_DOTS + uClock.x * 0.2 + seed)));
@@ -171,7 +169,7 @@ Face faceAt(vec3 s, float mu, float px) {
   float quiet = mix(0.35, 1.0, mu) * (1.0 - f.spot);
   if (fine > 0.0) {
     vec3 granules = granuleField(b * GRANULES_PER_RADIUS, uClock.x, fine);
-    dT += GRANULE_CONTRAST * fine * quiet * granules.x;
+    dT += GRANULE_CONTRAST * fine * quiet * (granules.x - 0.45 * granules.y);
   }
   /* Where the granules are too small to see, the network's faint mottle shows instead. */
   dT += NETWORK_CONTRAST * netSeen * (1.0 - fine) * (network - 0.4) * quiet;
@@ -180,7 +178,7 @@ Face faceAt(vec3 s, float mu, float px) {
   f.kelvin = mix(f.kelvin, PENUMBRA_K * (1.0 + PENUMBRA_FILAMENT * (filaments - 0.5) + EVERSHED_RIPPLE * ripple), penOnly);
   f.kelvin = mix(f.kelvin, UMBRA_K * (1.0 + UMBRAL_DOT_CONTRAST * dots), umbra);
   f.kelvin = mix(f.kelvin, UMBRA_K, 0.7 * pores * (1.0 - penumbra));
-  f.network = network * netSeen;
+  f.network = mix(0.36, network, netSeen);
   return f;
 }
 
@@ -217,14 +215,15 @@ vec3 surfaceColour(Face f, vec3 s, float mu) {
   float photosphere = layerResponse(log(f.kelvin), LAYER_PHOTOSPHERE) * warm * warm * warm * warm * limb.g;
   float plage = BAND_PLAGE * f.plage;
   float chromosphere = layerResponse(log(CHROMOSPHERE_K), LAYER_CHROMOSPHERE)
-    * (BAND_QUIET + BAND_NETWORK * f.network + plage)
+    * (BAND_QUIET * (0.55 + f.network) + BAND_NETWORK * f.network * f.network + plage)
     * (0.7 + 0.3 * (1.0 - mu)) * (1.0 - 0.6 * f.spot) * (1.0 - FILAMENT_DEPTH * f.filament);
   float transition = layerResponse(log(TRANSITION_K), LAYER_TRANSITION)
     * (0.5 * BAND_QUIET + 0.5 * BAND_NETWORK * f.network + plage + BAND_RIBBON * f.ribbon);
   float open = openness(s, uDipole);
-  float quiet = layerResponse(log(CORONA_K), LAYER_CORONA) * BAND_QUIET * (1.0 - HOLE_DEPTH * open)
+  float quietTexture = 0.35 + 2.4 * f.network * f.network;
+  float quiet = layerResponse(log(CORONA_K), LAYER_CORONA) * BAND_QUIET * quietTexture * (1.0 - HOLE_DEPTH * open)
     + layerResponse(log(HOLE_K), LAYER_CORONA) * BAND_QUIET * HOLE_FLOOR * open;
-  float loops = layerResponse(log(ACTIVE_K), LAYER_CORONA) * (2.0 * plage + 0.5 * BAND_RIBBON * f.ribbon);
+  float loops = layerResponse(log(ACTIVE_K), LAYER_CORONA) * (2.0 * plage * (0.35 + 1.8 * f.network) + 0.5 * BAND_RIBBON * f.ribbon);
   float flare = layerResponse(log(FLARE_K), LAYER_FLARE) * f.ribbon;
   float intensity = dot(uWeights, vec4(photosphere, chromosphere, transition, quiet + loops)) + uFlareWeight * flare;
   return rampAt(uBandScale * intensity);

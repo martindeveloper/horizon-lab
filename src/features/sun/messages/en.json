@@ -3,14 +3,38 @@
   "metadataDescription": "One star, up close: cut it open, watch it in any light, fly over a sunspot and see a flare break loose.",
   "canvasLabel": "The Sun, cut open and watched in any light, with its magnetic field",
   "help": {
-    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
-    "views": { "title": "Views", "body": "Seven places to stand, from the core to the corona." },
-    "light": { "title": "Light", "body": "Each light shows gas at another temperature." },
-    "clock": { "title": "Clock", "body": "Speed the Sun's time up, or pause it." },
-    "places": { "title": "Places", "body": "Fly to a feature and open its card." },
-    "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
-    "guide": { "title": "Guide", "body": "A guided journey through the Sun." },
-    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+    "camera": {
+      "title": "Move the camera",
+      "body": "Drag to turn, scroll or pinch to zoom."
+    },
+    "views": {
+      "title": "Views",
+      "body": "Seven places to stand, from the core to the corona."
+    },
+    "light": {
+      "title": "Light",
+      "body": "Explore spectral bands with broad, sometimes multiple temperature responses. Colours are illustrative."
+    },
+    "clock": {
+      "title": "Clock",
+      "body": "Speed up or pause model time. The eruption demonstration has its own playback."
+    },
+    "places": {
+      "title": "Places",
+      "body": "Fly to a feature and open its card."
+    },
+    "settings": {
+      "title": "View",
+      "body": "Layers, the camera pad and render quality."
+    },
+    "guide": {
+      "title": "Guide",
+      "body": "Learn how the Sun works, step by step."
+    },
+    "experiences": {
+      "title": "Viewing modes",
+      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
+    }
   },
   "hud": {
     "places": "Places",
@@ -19,17 +43,18 @@
     "pause": "Pause the clock",
     "play": "Run the clock",
     "cut": "Cut",
-    "eruption": "Eruption",
+    "eruption": "Illustrative eruption",
     "eruptionPlay": "Let the flare go",
     "eruptionPause": "Hold the flare",
-    "cycle": "Cycle",
-    "flareClass": "Flare {value}",
+    "cycle": "Illustrative cycle",
+    "flareClass": "Example GOES {value}",
     "views": "Views",
     "paused": "Paused",
     "cutOpen": "Open the cut",
     "cutClose": "Close the cut",
     "cycleRun": "Run the years",
-    "cycleHold": "Hold the years"
+    "cycleHold": "Hold the years",
+    "modelYear": "Model year {value}"
   },
   "views": {
     "surface": "The surface",
@@ -46,34 +71,34 @@
     "sunspot": "Low over a spot group: the umbra, the penumbra's filaments, granules round them.",
     "chromosphere": "The limb in Hα: a forest of spicules, plage, filaments and a prominence.",
     "corona": "The disc hidden, as in an eclipse: streamers, plumes and the wind leaving.",
-    "eruption": "Field lines over an active region store energy, then break loose.",
-    "cycle": "Spots drift toward the equator and the poles swap over eleven years, year by year."
+    "eruption": "A prescribed eruption and a reduced magnetic cross-section illustrate reconnection.",
+    "cycle": "An idealized repeating cycle illustrates spot migration and polarity reversal; it is not a forecast."
   },
   "lights": {
     "white": "White light",
     "halpha": "Hα",
-    "he304": "He II 304 Å",
-    "fe171": "Fe IX 171 Å",
-    "fe193": "Fe XII 193 Å",
-    "fe211": "Fe XIV 211 Å",
-    "fe335": "Fe XVI 335 Å",
-    "fe94": "Fe XVIII 94 Å",
-    "fe131": "Fe XXI 131 Å",
+    "he304": "AIA 304 Å",
+    "fe171": "AIA 171 Å",
+    "fe193": "AIA 193 Å",
+    "fe211": "AIA 211 Å",
+    "fe335": "AIA 335 Å",
+    "fe94": "AIA 94 Å",
+    "fe131": "AIA 131 Å",
     "eclipse": "Eclipse",
-    "magnetogram": "Magnetogram"
+    "magnetogram": "Model magnetogram"
   },
   "lightNotes": {
-    "white": "Photosphere · SDO/HMI, May 2024",
-    "halpha": "Chromosphere · hydrogen 3→2",
-    "he304": "Upper chromosphere",
-    "fe171": "Quiet corona",
-    "fe193": "Corona",
-    "fe211": "Active regions",
-    "fe335": "Active regions",
-    "fe94": "Flaring regions",
-    "fe131": "Flare plasma",
-    "eclipse": "Outer corona",
-    "magnetogram": "Field at the surface"
+    "white": "HMI mosaic + synthetic detail",
+    "halpha": "Illustrative chromosphere",
+    "he304": "He II + coronal Si XI · synthetic",
+    "fe171": "Fe IX · synthetic",
+    "fe193": "Fe XII / XXIV · synthetic",
+    "fe211": "Fe XIV · synthetic",
+    "fe335": "Fe XVI · synthetic",
+    "fe94": "Fe XVIII / X · synthetic",
+    "fe131": "Fe VIII / XXI · synthetic",
+    "eclipse": "Illustrative white-light corona",
+    "magnetogram": "Synthetic line-of-sight field"
   },
   "lightShort": {
     "white": "White",
@@ -127,14 +152,14 @@
     "massLoss": "Mass to light, each second",
     "outerEdge": "Outer edge",
     "innerEdge": "Inner edge",
-    "walk": "A photon's walk out, model",
-    "walkLiterature": "A photon's walk out, literature",
+    "walk": "Radiative diffusion estimate, model",
+    "walkLiterature": "Radiative diffusion estimate, literature",
     "lightTime": "Then to Earth",
     "depth": "Depth",
     "thickness": "Thickness",
-    "interiorPeriod": "Interior turns in",
+    "interiorPeriod": "Chosen interior rotation period",
     "equatorPeriod": "Equator turns in",
-    "polePeriod": "Poles turn in",
+    "polePeriod": "Surface law extrapolated to pole",
     "convectionDepth": "Depth of the churn",
     "granuleSize": "Granule across",
     "granuleLifetime": "Granule lives",
@@ -159,10 +184,10 @@
     "greenLine": "Green line, Fe XIV",
     "greenLineTemperature": "Green line forms at",
     "kCoronaBase": "Brightness at the limb, of the disc",
-    "sourceSurface": "Field opens beyond",
+    "sourceSurface": "Model source surface",
     "windSlow": "Slow wind",
     "windFast": "Fast wind",
-    "cmeSpeed": "Front's speed, as drawn",
+    "cmeSpeed": "Mean front speed on chosen timeline",
     "cyclePeriod": "Cycle",
     "perihelion": "Closest approach, R☉",
     "probeSpeed": "Speed then, km/s"
@@ -174,38 +199,38 @@
     "star": {
       "title": "The Sun",
       "where": "The star",
-      "body": "A G2 V star of {starMassKg} kg shining {starLuminosityW} W. Its light is white by definition: sunlight is what the eye calls white, every colour of the rainbow in it. The sky is blue and the low Sun red because the air scatters blue light aside, not because the star is yellow.",
-      "caution": "Drawn as the eye adapted to sunlight sees it: the disc white at its centre, warmer only toward the limb, where cooler gas shows."
+      "body": "A G2 V star of {starMassKg} kg shining {starLuminosityW} W. Its broad visible spectrum appears approximately white to sunlight-adapted eyes. Earth’s atmosphere scatters blue light more strongly, making the sky blue and the low Sun look redder.",
+      "caution": "Colour and brightness are display choices; this is not a calibrated view of solar radiance."
     },
     "core": {
       "title": "Core",
       "where": "Centre",
-      "body": "Where hydrogen fuses into helium. Only the inner quarter of the radius makes light; the rest carries it.",
-      "caution": "Nothing inside the Sun is seen directly: the interior is a standard model fitted to helioseismology."
+      "body": "Hydrogen fuses into helium, mostly through the proton–proton chain. Nearly all the nuclear energy is generated deep in the core; the marked edge is a luminosity threshold, not a sharp physical boundary.",
+      "caution": "Interior values come from the historical Model S reference model, constrained by solar observations and helioseismology; they are not direct images or a new solar fit."
     },
     "radiativeZone": {
       "title": "Radiative zone",
       "where": "Inner shell",
-      "body": "Light carries the energy outward, scattered countless times on its way. A photon's walk to the surface takes far longer than its straight flight would.",
+      "body": "Radiation transports energy through this region by repeated interactions with matter, including absorption and re-emission. The diffusion estimate ends at the convection-zone base; it is not the age of an individual photon or the Sun’s thermal response time.",
       "caution": "A model's profile, not a picture."
     },
     "tachocline": {
       "title": "Tachocline",
       "where": "Boundary",
-      "body": "The thin shear layer where the rigidly turning interior meets the differentially turning envelope. The dynamo that winds the field is thought to live here.",
-      "caution": "Its depth is known from helioseismology; its thickness only roughly."
+      "body": "A shear layer near the base of the convection zone separates the nearly uniform rotation of much of the radiative interior from the differentially rotating envelope. It may contribute to the dynamo; the roles of deep, distributed and near-surface processes remain under investigation.",
+      "caution": "Helioseismology constrains this transition. Its thickness, internal field and role in the dynamo are less certain; core rotation is not directly established by this model."
     },
     "convectionZone": {
       "title": "Convection zone",
       "where": "Outer shell",
-      "body": "Hot gas rises, cools and sinks: the energy travels by motion, not light, and the top of the churn is the surface we see.",
+      "body": "Buoyant plasma rises, cools and sinks, carrying much of the energy through the outer envelope. Radiation still contributes and ultimately carries energy away from the photosphere.",
       "caution": "The plumes drawn are a surrogate for turbulent convection, not a simulation of it."
     },
     "photosphere": {
       "title": "Photosphere",
       "where": "Surface",
       "body": "The thin layer where the gas turns transparent and the light escapes. It is darker toward the limb, where sight lines reach only its cooler top.",
-      "caution": "Limb darkening follows a fitted atmosphere; fine detail is procedural."
+      "caution": "A processed May 2024 HMI mosaic supplies large-scale texture. Limb darkening, colour, close-up detail and subsequent evolution are modelled."
     },
     "granule": {
       "title": "Granule",
@@ -217,19 +242,19 @@
       "title": "Sunspot",
       "where": "Surface",
       "body": "Strong field holds the convection down, so the spot is cooler and looks dark. The umbra is darkest; the penumbra's filaments lean outward.",
-      "caution": "Spot groups start where SDO saw them in May 2024, then live and die by the activity model."
+      "caution": "Regions are initialized from NOAA reports associated with the May 2024 HMI mosaic. Their later evolution and fine structure are synthetic."
     },
     "facula": {
       "title": "Faculae",
       "where": "Surface",
-      "body": "Bright patches of concentrated field, best seen near the limb. Spots darken the Sun a little; faculae brighten it more, so an active Sun shines brighter.",
+      "body": "Bright magnetic structures, especially visible near the limb, compete with dark sunspots. Facular brightening generally wins in the average solar-cycle variation; individual spot passages can temporarily dim the Sun.",
       "caution": "Brightening is illustrative."
     },
     "chromosphere": {
       "title": "Chromosphere",
       "where": "Lower atmosphere",
-      "body": "A thin, transparent layer above the surface, hotter upward, warmed as magnetoacoustic waves break in it. In Hα, the light of hydrogen's electron falling from its third level to its second, it shows its network, plage and filaments; at the limb, a pink rim.",
-      "caution": "Drawn as the Hα line shows it, not in white light."
+      "body": "A dynamic, structured atmosphere above the photosphere. Shocks, waves and magnetic energy release contribute to heating; temperature does not simply rise at every location. Hα reveals plage, filaments and limb structures, but its brightness depends on radiative transfer and atomic populations as well as temperature.",
+      "caution": "An illustrative Hα view, without optically thick radiative transfer or non-equilibrium ionization."
     },
     "spicule": {
       "title": "Spicules",
@@ -246,44 +271,44 @@
     "flare": {
       "title": "Flare",
       "where": "Active region",
-      "body": "Stressed field lines over an active region reconnect, releasing their stored energy in minutes as heat, light across the spectrum and fast particles.",
-      "caution": "The eruption follows an analytic model of loss of equilibrium; its scale is schematic."
+      "body": "Magnetic reconnection can release free magnetic energy above a lower-energy reference field, heating plasma and accelerating particles. The potential background field shown elsewhere does not itself store that free energy.",
+      "caution": "The cross-section and flow are prescribed. The example GOES class is assigned, not calculated from soft X-ray emission; playback is independent of the main clock."
     },
     "loops": {
       "title": "Post-flare loops",
       "where": "Active region",
       "body": "After a flare the reconnected field fills with hot plasma, an arcade of loops that cools over hours as its gas rains back down.",
-      "caution": "Loop temperatures are representative values."
+      "caution": "Here the temperatures and emission are prescribed; cooling, evaporation and coronal rain are not simulated."
     },
     "corona": {
       "title": "Corona",
       "where": "Outer atmosphere",
-      "body": "Thin, far hotter than the surface, and only seen when the disc is hidden: its white light is sunlight scattered by electrons and dust, its own glow is in extreme ultraviolet.",
+      "body": "The tenuous corona is much hotter than the photosphere and emits strongly in extreme ultraviolet and X-rays. Its faint white-light component is sunlight scattered by electrons and dust, best seen when the bright disc is occulted.",
       "caution": "Brightness is stretched for the eye; no single exposure shows all of it."
     },
     "streamer": {
       "title": "Helmet streamer",
       "where": "Corona",
-      "body": "Closed field holding plasma in a bright arch, drawn out into a tail by the wind. Where the field is open, the corona is dark and the wind runs fast.",
+      "body": "Dense plasma on closed magnetic structures forms bright streamers, with extended stalks and surrounding open field. Coronal holes are often dark in coronal EUV bands and commonly feed fast wind; open field does not imply one wind speed.",
       "caution": "Streamers follow the model field, not an observed one."
     },
     "ejection": {
       "title": "Coronal mass ejection",
       "where": "Leaving",
-      "body": "A flux rope that broke loose, piling the corona up ahead of it as a bright front with a dark cavity behind. It reaches Earth in a day or more; there its field and plasma drive geomagnetic storms and the aurora.",
+      "body": "An expanding magnetic flux rope carries plasma outward, with a bright front and a darker cavity behind. Its legs can remain connected to the Sun. If it reaches Earth, its field and plasma can drive geomagnetic storms and auroras.",
       "caution": "Speed and shape are schematic."
     },
     "wind": {
       "title": "Solar wind",
       "where": "Beyond",
-      "body": "The corona is too hot to be held: it expands into a wind that fills the solar system, slow from the streamers, fast from the open poles.",
-      "caution": "The wind is not drawn as particles; its speeds are typical values."
+      "body": "The hot corona expands into the solar wind. Pressure gradients, waves and magnetic energy release help accelerate it. Fast streams commonly emerge from coronal holes at many latitudes; slow wind has several source regions, including boundaries between open and closed field.",
+      "caution": "No wind acceleration is solved here; the card gives representative speeds far from the Sun, near Earth’s orbit."
     },
     "parker": {
       "title": "Parker Solar Probe",
       "where": "Through the corona",
-      "body": "On 24 December 2024 the probe passed {parkerPerihelionR} solar radii from the Sun's centre at {parkerSpeed}, inside the corona: the first spacecraft through a star's atmosphere.",
-      "caution": "A mark at its closest approach; the orbit is not drawn and the probe is not to scale."
+      "body": "Parker first entered the solar corona in April 2021. On 24 December 2024 it reached its record orbit, about {parkerPerihelionR} solar radii from the Sun’s centre at about {parkerSpeed}; later passes repeated this close approach.",
+      "caution": "A marker for the December 2024 perihelion, not live telemetry. The orbit is not drawn and the probe is not to scale."
     }
   },
   "tour": {
@@ -294,11 +319,11 @@
       },
       "walk": {
         "title": "The long walk",
-        "body": "The light is not. Scattered at every step, it takes thousands of years to reach the surface by this model's count, then {lightTimeMin} minutes to reach us."
+        "body": "Radiation diffuses through the dense interior while interacting with matter; convection carries much of the energy through the outer envelope. The model’s diffusion estimate to the convection-zone base is {photonWalkKyr} thousand years. Escaping light then reaches Earth in {lightTimeMin} minutes."
       },
       "dynamo": {
         "title": "Two rotations",
-        "body": "The interior turns as one. The surface turns in {equatorDays} days at the equator and {poleDays} at the poles. Watch the shear at the boundary: this winds the field."
+        "body": "Much of the radiative interior rotates nearly uniformly. The chosen surface law gives {equatorDays} days at the equator and extrapolates to {poleDays} at the pole, relative to the stars. Shear helps build magnetic field, but the dynamo’s full mechanism and location remain debated."
       },
       "granules": {
         "title": "A boiling surface",
@@ -313,64 +338,71 @@
         "body": "In Hα, at {halphaNm} nm, the thin layer above the surface appears: jets at the limb, bright plage, a prominence standing in the field."
       },
       "eruption": {
-        "title": "The field breaks loose",
-        "body": "Shear stores energy in the field over the region. Loss of equilibrium lifts the rope; below it the field reconnects, flares, and lets the rope go."
+        "title": "Rise and reconnection",
+        "body": "In this reduced cross-section, incoming contours reconnect into rising upper contours and contracting lower loops with fixed footpoints. Dots trace one chosen illustrative plasma flow. Real eruptions are three-dimensional and can change their footpoint connections."
       },
       "corona": {
         "title": "Hotter above",
-        "body": "The corona is {coronaMK} million kelvin, far hotter than the surface, and nobody is sure why. Its shape is the field's: arches where it closes, plumes where it opens."
+        "body": "Typical coronal plasma reaches {coronaMK} million kelvin. Dissipation of waves and magnetic reconnection are supported heating processes; their relative contributions vary and remain under study. Arches and plumes trace some of the magnetic structure."
       },
       "cycle": {
         "title": "Eleven years",
-        "body": "Spots appear at mid latitudes and drift toward the equator over about {cycleYears} years; at maximum the poles swap. Then it starts again, as Schwabe first saw in 1843."
+        "body": "Spot emergence shifts toward the equator over roughly {cycleYears} years. Polar fields usually reverse near maximum, often at different times in the two hemispheres. This repeating model illustrates the pattern; it does not predict a future cycle."
       }
     }
   },
   "technicalDetails": {
     "title": "Inside the Sun lab",
-    "summary": "A standard interior model, a procedural surface, a potential magnetic field and an analytic eruption, lit through the response of each passband. Figures carry their sources; what is drawn is illustrative.",
+    "summary": "An educational model combines a historical solar interior, processed imagery and procedural structures. Spectral views, magnetic evolution and eruption dynamics are approximations with explicit limits, not calibrated observations or a predictive plasma simulation.",
     "features": {
       "views": "{views} views, from inside the core to the wind, each at its own pace.",
       "interior": "The interior from a standard solar model, cut open at any depth, with its profile under the probe.",
       "surface": "Granulation, spots, faculae and limb darkening, with the surface turning differentially.",
       "atmosphere": "Chromosphere, spicules and prominences in Hα; the corona's streamers and plumes in an eclipse.",
-      "field": "Field lines from a potential field, and an eruption that stores energy and lets go.",
-      "lights": "Every light, from white through the AIA passbands to a magnetogram, re-lights the same scene.",
+      "field": "A potential background field and a separate kinematic reconnection demonstration.",
+      "lights": "Approximate spectral views and a synthetic projected magnetogram re-light the scene.",
       "cycle": "The activity cycle: spots migrating, the dipole flipping, the record since the seventeenth century."
     },
     "sections": {
       "interior": {
         "title": "Interior",
-        "body": "The cut faces print a standard solar model (Model S): temperature, density, pressure, luminosity and hydrogen fraction against radius. Its centre is {coreTemperatureMK} million kelvin and {centralDensity} times water; the core that makes the light reaches {coreRadius} of the radius, the convection zone begins at {tachocline}. The photon's walk is a random-walk estimate over the model's opacity, {photonWalkKyr} thousand years against the literature's {photonWalkLiteratureKyr}; it is not a transport calculation."
+        "body": "The cut shows Model S (1996): temperature, density, pressure, luminosity and hydrogen fraction. Its centre is {coreTemperatureMK} million kelvin and {centralDensity} times water; nearly all luminosity is generated inside {coreRadius} of the radius. The convection zone begins at {tachocline}. A conventional shell random-walk estimate through the model opacity to that boundary gives {photonWalkKyr} thousand years; Mitalas & Sills report {photonWalkLiteratureKyr} using a different solar model. This is neither a thermal transport solution nor the lifetime of an individual photon. Fusion energy uses neutral hydrogen-1 and helium-4 isotope masses, including annihilation and neutrino energy; L/c² describes photon mass loss only."
       },
       "rotation": {
         "title": "Rotation",
-        "body": "The surface turns by the Doppler law by latitude, {equatorDays} days at the equator and {poleDays} at the poles; below the tachocline the interior turns as one body at the law's mean rate. The cut faces turn at their shell's rate, so the shear shows over model days."
+        "body": "The Snodgrass–Ulrich surface law gives sidereal periods of {equatorDays} days at the equator and {poleDays} when extrapolated to the pole. Below the tachocline this display chooses uniform rotation at the surface law’s spherical mean, not a measured core rotation rate. The shell motion makes shear visible. Recent deep and near-surface dynamo studies reach different conclusions; this drawing does not resolve that debate."
       },
       "surface": {
         "title": "Surface",
-        "body": "At disc scale the white-light Sun is the one observed: SDO/HMI's continuum at 617.3 nm, a mosaic of 1–22 May 2024 flattened at source, given the limb darkening of a fitted atmosphere and the photosphere's Planck colour through the eye. The model's active regions open where that mosaic's NOAA regions stood and evolve from there, so the other lights agree with the map. Close up, procedural granules about {granuleKm} km across and {granuleMin} minutes long take over, sized by the pressure scale height; spots and faculae come from the regions."
+        "body": "The large-scale white-light texture uses processed SDO/HMI continuum imagery near 617.3 nm, mosaicked from 1–22 May 2024; it is not a simultaneous full-sphere observation. Limb darkening and displayed colour are imposed. NOAA regions initialize the synthetic population, then model evolution takes over. Procedural granules, typically {granuleKm} km across and {granuleMin} minutes long, replace the texture close up. Other passbands are synthetic and are not co-temporal AIA observations."
       },
       "atmosphere": {
         "title": "Atmosphere",
-        "body": "The chromosphere is drawn {chromosphereKm} km deep in Hα at {halphaNm} nm. The white-light corona follows the Baumbach fall-off, shaped by where the model field is closed or open; its drawn temperature stands for a {coronaMK} million kelvin corona. Spicules, prominences and loops are authored forms placed by the model, lit by their temperature."
+        "body": "The schematic chromosphere is {chromosphereKm} km deep, viewed in Hα at {halphaNm} nm. A Baumbach profile guides the white-light corona’s radial fall-off; its morphology is authored. The assigned {coronaMK} million kelvin is a representative coronal range, not inferred from scattered-light brightness. Spicules, prominences and loops are prescribed forms. Heating, evaporation, cooling and wind acceleration are not solved."
       },
       "field": {
         "title": "Magnetic field",
-        "body": "Below a source surface the field is a potential field: a global dipole that follows the cycle, and a buried dipole for each active region. The quiet Sun carries {meanFieldMT} mT; a spot up to {spotFieldT} T. The eruption is the analytic loss-of-equilibrium model: a flux rope over a bipolar field, a current sheet beneath, reconnection once the rope lifts."
+        "body": "The potential background combines a global source-surface dipole with buried active-region dipoles. Only the global component satisfies the radial source-surface boundary; this is not an extrapolation of an observed magnetogram. Reference fields are {meanFieldMT} mT for quiet regions and up to {spotFieldT} T in spots. A separate evolving flux function defines the eruption in a dimensionless plane. Its contours transfer equal flux into both products; a chosen velocity and localized nonideal term satisfy induction in that reference plane. Momentum, energy and particle acceleration are not solved. The stretched, extruded display preserves illustrated connectivity, not a global three-dimensional resistive-MHD solution. The upper island does not establish that a real CME disconnects from the Sun. Field energy B²V/(2μ₀) is total uniform-field energy; only free energy above a suitable reference field is available for release. Curves and dots are visibility overlays, not measured emission or particle trajectories."
       },
       "lights": {
         "title": "Lights",
-        "body": "Every drawn component carries a temperature. A passband weighs it by its response, a log-normal about the band's peak, and prints it through the instrument's colour table; white light and Hα pick layers instead."
+        "body": "The AIA views use representative ion-response peaks and conventional false colours. Log-normal widths, relative peak weights and layer visibility are hand-chosen, not calibrated instrument responses. Several bands respond to both cool and hot plasma; a selected wavelength is not a thermometer. Density, line-of-sight emission measure, abundances and time-dependent calibration are omitted. Hα and He II 304 need optically thick, non-LTE transfer and can be out of ionization equilibrium. Their brightness here is illustrative. White-light coronal scattering is not a temperature measurement. The magnetogram is a synthetic radial field projected along the sight line, not HMI data. GOES labels are assigned examples of peak soft X-ray classes at Earth; no synthetic GOES flux is calculated."
       },
       "cycle": {
         "title": "Cycle",
-        "body": "Schwabe found the cycle in his spot counts in 1843, and Wolf's relative number of 1848, R = k(10g + s), still counts it. Regions emerge at latitudes that drift toward the equator through the {cycleYears}-year cycle, with the hemispheres' polarities set by Hale's law; the record of sunspot numbers is the observatory's yearly means, the Maunder minimum's {maunderYears} years among them."
+        "body": "Wolf’s relative number R = k(10g + s) weights groups and individual spots. The idealized {cycleYears}-year animation repeats a chosen latitude and polarity pattern; its calendar labels are model dates, not a hindcast or forecast. Real cycles differ in length, amplitude and hemispheric timing. The separate historical plots use SILSO yearly sunspot numbers since 1700 and a group-number reconstruction reaching into the seventeenth century. The {maunderYears}-year Maunder minimum belongs to that earlier reconstruction, whose sampling and calibration are less secure."
       },
       "limits": {
         "title": "Limits",
-        "body": "Nothing here is a magnetohydrodynamic solution. Shapes, paces and brightness are chosen so the physics reads at a glance; the figures on the cards are the measured ones."
+        "body": "The scene is an educational synthesis. Cards distinguish sourced observations, historical model values, derived estimates and teaching choices; not every number is measured. No global magnetohydrodynamic evolution, calibrated radiative transfer, event reconstruction or space-weather prediction is computed. Display scale, duration, emission and contrast are chosen for readability. The May 2024 imagery is historical, not a live Sun feed."
       }
     }
+  },
+  "lightReading": {
+    "response": "Response peaks ≈ {value}",
+    "effective": "Effective temperature {value}",
+    "lineTransfer": "Line transfer is not modelled",
+    "scattered": "Scattered sunlight",
+    "polarity": "Gold: toward observer · blue: away"
   }
 }

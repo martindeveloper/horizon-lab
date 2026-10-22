@@ -20,6 +20,8 @@ uniform vec2 uCoronaFE;                // the F and E coronae's weights
 uniform float uDipole;
 uniform vec4 uEruption;                // the eruption's axis; its front's radius (0: none)
 uniform vec4 uEruptionShape;           // its spread, rad; the flare's light; its rope's height; its strength
+uniform float uCmePresence;            // illustrative envelope visibility, independent of radius
+uniform vec3 uCurrentSheet;            // bottom and top heights, R; reconnection rate
 uniform int uSamples;                  // march samples through the ejection
 uniform float uSpicules;               // 1: spicules drawn
 uniform float uSpiculeClock;           // spicule lifetimes elapsed
@@ -47,18 +49,27 @@ float baumbach(float rho) {
 // at the flanks, strands of field draped over it and the erupted rope glowing at its heart.
 vec3 ejection(vec3 o, vec3 d, float tEnd) {
   float front = uEruption.w;
-  if (front <= 1.0) return vec3(0.0);
+  if (front <= 1.0 || uCmePresence <= 0.0) return vec3(0.0);
   float thick = CME_THICKNESS * front;
   float t0;
   float t1;
   if (!raySphere(o, d, front + thick, t0, t1)) return vec3(0.0);
   float begin = max(t0, 0.0);
   float end = min(t1, tEnd);
-  if (end <= begin) return vec3(0.0);
   vec3 axis = uEruption.xyz;
   float spread = uEruptionShape.x;
+  // Bound the one-sided ejection as well as its Sun-centred shell. Marching
+  // empty space behind it wastes samples and leaves grain across the front.
+  float outer = front + thick;
+  float halfSpan = outer * 0.5;
+  float width = outer * sin(min(spread * 1.15, PI * 0.5));
+  float bound = length(vec2(halfSpan, width));
+  if (!raySphere(o - axis * halfSpan, d, bound, t0, t1)) return vec3(0.0);
+  begin = max(begin, t0);
+  end = min(end, t1);
+  if (end <= begin) return vec3(0.0);
   float step = (end - begin) / float(uSamples);
-  float jitter = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
   float t = begin + step * jitter;
   float shell = 0.0;
   float core = 0.0;
@@ -76,14 +87,38 @@ vec3 ejection(vec3 o, vec3 d, float tEnd) {
     float profile = h > 0.0 ? exp(-8.0 * h * h) : mix(1.0 - CME_CAVITY, 1.0, exp(-2.5 * h * h));
     float strands = 0.5 + 0.5 * gradientNoise3(vec3(u.xy * 6.0 + uEruptionShape.w, (r - edge) * 4.0 / thick));
     shell += profile * flanks * mix(0.35, 1.5, strands);
-    float heart = 1.0 + 0.45 * (front - 1.0);
-    vec3 off = (x - axis * heart) / (0.04 + 0.1 * (front - 1.0));
+    float heart = 1.0 + uEruptionShape.z;
+    vec3 off = (x - axis * heart) / max(front - heart, 1e-4);
     core += exp(-dot(off, off));
     t += step;
   }
-  float scale = step * CME_GLOW * uEruptionShape.w / sqrt(front);
+  float scale = step * CME_GLOW * uEruptionShape.w * uCmePresence / sqrt(front);
   return lit(shell * scale, CORONA_K, LAYER_CORONA, uSunlight, uWeights.w)
     + lit(core * scale * 1.4, CHROMOSPHERE_K, LAYER_CHROMOSPHERE, uBalmer, uWeights.y);
+}
+
+// The hot plasma surrounding the current sheet, not a pair of broken magnetic lines.
+// Its visible spine lies between the model's sheet tips and dims with reconnection.
+vec3 currentSheet(vec3 o, vec3 d, float tEnd) {
+  float bottom = 1.0 + uCurrentSheet.x;
+  float top = 1.0 + uCurrentSheet.y;
+  float length = top - bottom;
+  if (length <= 1e-5 || uCurrentSheet.z <= 0.0) return vec3(0.0);
+  vec3 axis = uEruption.xyz;
+  float a = dot(o, axis);
+  float b = dot(d, axis);
+  float sin2 = max(1.0 - b * b, 1e-6);
+  float t = (b * a - dot(o, d)) / sin2;
+  float height = clamp(a + b * t, bottom, top);
+  t = dot(axis * height - o, d);
+  if (t <= 0.0 || t >= tEnd) return vec3(0.0);
+  vec3 off = o + t * d - axis * height;
+  float width = max(CURRENT_SHEET_WIDTH_R, uPixelWorld * t);
+  float tips = smoothstep(bottom, bottom + 0.1 * length, height)
+    * (1.0 - smoothstep(top - 0.1 * length, top, height));
+  float emission = exp(-dot(off, off) / (width * width)) * tips * uCurrentSheet.z
+    * uEruptionShape.w * min(4.0, inversesqrt(sin2));
+  return lit(emission, FLARE_K, LAYER_FLARE, uSunlight, uFlareWeight);
 }
 
 void main() {
@@ -112,10 +147,26 @@ void main() {
     float seen = resolvedFeature(SPICULE_COLUMNS / TWO_PI, px, 1.0);
     if (uSpicules > 0.0 && h < SPICULE_HEIGHT && seen > 0.0) {
       vec2 a = vec2(lon, lat) * (SPICULE_COLUMNS / TWO_PI);
-      vec3 dice = hash33(vec3(floor(a), 5.0));
-      float reach = SPICULE_HEIGHT * (0.3 + 0.7 * dice.x) * (0.6 + 0.4 * sin(uSpiculeClock * TWO_PI * (0.6 + 0.7 * dice.y) + TWO_PI * dice.z));
-      float thin = 1.0 - smoothstep(0.12, 0.42, length(fract(a) - 0.5));
-      jets = seen * thin * (1.0 - smoothstep(0.5 * reach, reach, h)) * (1.0 - 0.5 * h / SPICULE_HEIGHT);
+      float height = h / SPICULE_HEIGHT;
+      float filterWidth = max(length(fwidth(a)), 0.05);
+      // Jittered roots, tilted threads and independent lifetimes remove the
+      // dotted latitude grid. Neighbouring cells let a jet lean across its cell.
+      for (int ix = -1; ix <= 1; ix++) {
+        for (int iy = -1; iy <= 1; iy++) {
+          vec2 cell = floor(a) + vec2(float(ix), float(iy));
+          vec3 dice = hash33(vec3(cell, 5.0));
+          float life = 0.5 + 0.5 * sin(uSpiculeClock * TWO_PI * (0.6 + 0.7 * dice.y) + TWO_PI * dice.z);
+          float reach = (0.25 + 0.75 * dice.x) * (0.35 + 0.65 * life);
+          vec2 root = cell + 0.2 + 0.6 * dice.xy;
+          vec2 lean = (dice.yz - 0.5) * height * 0.8;
+          vec2 off = a - root - lean;
+          float width = 0.09 + 0.04 * dice.z;
+          float filtered = width * width + filterWidth * filterWidth;
+          float thread = exp(-dot(off, off) / filtered) * width * width / filtered;
+          jets += thread * (1.0 - smoothstep(reach * 0.55, reach, height)) * sqrt(life);
+        }
+      }
+      jets *= 3.0 * seen;
     }
     float chromo = CHROMOSPHERE_GLOW * rim + SPICULE_GLOW * jets;
     col += lit(chromo, CHROMOSPHERE_K, LAYER_CHROMOSPHERE, uBalmer, uWeights.y);
@@ -141,18 +192,29 @@ void main() {
       float apart = 1.0 - dot(qhat, side / edgeOn);
       float width = (STREAMER_STALK + STREAMER_WIDTH / (rho * rho)) / max(edgeOn * edgeOn, 0.15);
       float tail = 1.0 + STREAMER_TAIL * min(h, streamer.w - 1.0) / max(streamer.w - 1.0, 0.05);
-      streamers += STREAMER_GLOW * sqrt(edgeOn) * exp(-apart / width) * tail;
+      float skirt = exp(-apart / width);
+      float stalk = exp(-apart / (width * 0.18));
+      streamers += STREAMER_GLOW * sqrt(edgeOn) * (0.55 * skirt + 0.65 * stalk) * tail;
     }
-    float rays = 1.0 - RAY_SHARE * abs(gradientNoise2(vec2(lon, lat) * RAY_COUNT + uClock.y * 0.05))
-      - 0.5 * RAY_SHARE * abs(gradientNoise2(vec2(lon, lat) * RAY_COUNT * 3.0 + uClock.y * 0.08));
-    float plumes = pow(1.0 - abs(gradientNoise2(vec2(lon, lat) * PLUME_COUNT)), 3.0);
+    // The projected radial direction is constant along a ray on the image.
+    // qhat alone changes with impact radius for a nearby camera, turning
+    // radial striae into a mottled two-dimensional carpet at the limb.
+    vec3 skyRadial = normalize(qhat - axisOfView * dot(qhat, axisOfView));
+    vec3 rayCoordinate = skyRadial * RAY_COUNT + vec3(log(rho) * 0.7, uClock.y * 0.025, 0.0);
+    float rays = 1.0 - RAY_SHARE * abs(gradientNoise3(rayCoordinate));
+    float rayDetail = resolvedFeature(RAY_COUNT * 4.0, px / max(rho, 1.0), 1.0);
+    rays *= mix(1.0, 0.45 + 0.85 * pow(1.0 - abs(gradientNoise3(rayCoordinate * 4.0)), 3.0), rayDetail);
+    if (uLightMode == LIGHT_BAND) rays = mix(1.0, rays, 0.25);
+    float plumes = pow(1.0 - abs(gradientNoise3(skyRadial * PLUME_COUNT)), 3.0);
     float open = openness(qhat, uDipole);
-    float inner = INNER_CORONA_GLOW * exp(-h / INNER_CORONA_REACH);
+    float innerReach = uLightMode == LIGHT_BAND ? min(INNER_CORONA_REACH, EUV_SCALE_HEIGHT_R) : INNER_CORONA_REACH;
+    float inner = INNER_CORONA_GLOW * exp(-h / innerReach);
+    float coronaGain = CORONA_GLOW * (uLightMode == LIGHT_BAND ? 0.45 : 1.0);
     /* The closed corona at the quiet corona's temperature; the holes' thin plasma cooler and
        fainter, with the plumes; the streamers' cores over the regions hotter. */
-    float closed = CORONA_GLOW * (fall * (CORONA_FLOOR + inner) + inner) * rays * (1.0 - open * HOLE_DEPTH);
-    float hole = CORONA_GLOW * fall * (HOLE_FLOOR + PLUME_GLOW * plumes) * rays * open * HOLE_DEPTH;
-    float hot = CORONA_GLOW * fall * (streamers - CORONA_FLOOR) * rays * (1.0 - open * HOLE_DEPTH);
+    float closed = coronaGain * (fall * (CORONA_FLOOR + inner) + inner) * rays * (1.0 - open * HOLE_DEPTH);
+    float hole = coronaGain * fall * (HOLE_FLOOR + PLUME_GLOW * plumes) * rays * open * HOLE_DEPTH;
+    float hot = coronaGain * fall * (streamers - CORONA_FLOOR) * rays * (1.0 - open * HOLE_DEPTH);
     col += lit(closed, CORONA_K, LAYER_CORONA, uSunlight, uWeights.w);
     col += lit(hole, HOLE_K, LAYER_CORONA, uSunlight, uWeights.w);
     col += lit(hot, ACTIVE_K, LAYER_CORONA, uSunlight, uWeights.w);
@@ -194,6 +256,7 @@ void main() {
   }
 
   col += ejection(o, d, tEnd);
+  col += currentSheet(o, d, tEnd);
   if (max(col.r, max(col.g, col.b)) <= 0.0) discard;
   gl_FragColor = vec4(encodeSrgb(uGamut * col), 1.0);
 }

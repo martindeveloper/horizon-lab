@@ -78,6 +78,7 @@ import { createAtmosphereLayer } from "./atmosphere-layer";
 import { createDissolve } from "./dissolve";
 import { createFieldLayer } from "./field-layer";
 import { PLACE_IDS, directionOf, type PassbandId, type PlaceId, type SunFrame } from "./frame";
+import { frameInsets } from "./framing";
 import { GLOBE_PICK, createGlobeLayer } from "./globe-layer";
 import { createSunLooks } from "./looks";
 import { createProminenceLayer } from "./prominence-layer";
@@ -200,16 +201,15 @@ function sunPick(pick: unknown): SunPick | null {
 }
 
 /**
- * How much of the sky each kind of light shows. The eclipse shows it whole, as totality does;
- * the other lights keep it well in view so the Sun stands in its sky, a little held back in
- * white light, where a camera exposed for the photosphere would in truth see no star at all.
+ * The sky stays subordinate to the solar exposure; totality reveals a little more.
+ * This is illustrative: a camera exposed for the photosphere sees no stars at all.
  */
 const SKY_EXPOSURE: Readonly<Record<keyof typeof RIBBON_PRESENCE, number>> = {
-  white: 0.6,
-  halpha: 0.85,
-  band: 0.85,
-  eclipse: 1,
-  magnetogram: 0.85,
+  white: 0.025,
+  halpha: 0.035,
+  band: 0.025,
+  eclipse: 0.16,
+  magnetogram: 0.04,
 };
 
 /** What kind of light an id is, for how much of the field it shows. */
@@ -318,10 +318,21 @@ export function createSunEngine(
     /** The Sun's turn as the drift began. */
     let driftTurn = 0;
     const aboutFeature = () => framed !== null && framed !== "drift";
+    let aimSettling = false;
     /** Sets the orbit for what it is about, at this frame. */
-    const orbitFor = (f: SunFrame, target: ViewAim | null) => {
+    const orbitFor = (f: SunFrame, target: ViewAim | null, dt?: number) => {
+      aimSettling = false;
       if (target) {
+        const previousRadius = orbitOrigin.length();
         orbitOrigin.fromArray(target.point);
+        // A scrub can move the ejecta several solar radii in one input. Ease
+        // its aim along with the zoom, while tracking the body's rotation exactly.
+        if (framed === "eruption" && dt !== undefined && !reduceMotion.matches) {
+          const radius = orbitOrigin.length();
+          aimSettling = Math.abs(radius - previousRadius) > 1e-4;
+          if (aimSettling)
+            orbitOrigin.setLength(radius + (previousRadius - radius) * Math.exp(-dt / AIM_LAG_S));
+        }
         featureOrbitFrame(target.normal, orbitFrame);
         return;
       }
@@ -336,11 +347,22 @@ export function createSunEngine(
     }
     /** Where the camera looks off its aim and its tilt: the drift's while it flies, else easing off. */
     const attitude: RigAttitude = { look: { yaw: 0, pitch: 0 }, roll: 0 };
+    const stage = host.closest<HTMLElement>("[data-simulation]");
+    const fitViewport = () => ({
+      ...viewport,
+      fov: camera.fov,
+      // The dock already measures its translated, responsive height for labels.
+      bottomInset: parseFloat(stage?.style.getPropertyValue("--hud-clear") ?? "") || 0,
+    });
+    let autoFramed = true;
     const rig = createOrbitRig(camera, {
-      pose: viewPose(current.view, frame(), { azimuth: 0, inclination: 0.1 }),
+      pose: viewPose(current.view, frame(), { azimuth: 0, inclination: 0.1 }, fitViewport()),
       limits: () =>
         aboutFeature()
-          ? { min: FEATURE_MIN_R, max: FEATURE_MAX_R }
+          ? {
+              min: FEATURE_MIN_R,
+              max: current.view === "eruption" ? CAMERA_MAX_R * 3 : FEATURE_MAX_R,
+            }
           : { min: CAMERA_MIN_R, max: CAMERA_MAX_R },
       home: (aim) => aim.copy(orbitOrigin),
       orient: (_distance, orbit) => orbit.copy(orbitFrame),
@@ -380,12 +402,12 @@ export function createSunEngine(
     let pointerAim: { lat: number; lon: number } | null = null;
     const aimOf = (f: SunFrame) =>
       viewAim(view, f) ?? (pointerAim ? surfaceAim(pointerAim.lat, pointerAim.lon, f) : null);
-    const reframe = (f: SunFrame) => {
+    const reframe = (f: SunFrame, dt?: number) => {
       const playing = hooks.drift?.state() === "playing";
       const target = playing ? null : aimOf(f);
       const wanted = playing ? "drift" : target ? view : null;
       if (wanted === framed) {
-        orbitFor(f, target);
+        orbitFor(f, target, dt);
         return;
       }
       placeCamera();
@@ -424,7 +446,7 @@ export function createSunEngine(
     };
     const views = createViewMoves(
       rig,
-      (id: SunViewId) => viewPose(id, frame(), rig.pose),
+      (id: SunViewId) => viewPose(id, frame(), rig.pose, fitViewport()),
       viewTurns,
     );
     rig.applyPose();
@@ -482,7 +504,7 @@ export function createSunEngine(
       invalidate: () => loop.invalidate(),
       intercept: takeAim,
       /* The input's own bounds span both orbits; the rig clamps to the one it is in. */
-      distance: { min: FEATURE_MIN_R, max: CAMERA_MAX_R },
+      distance: { min: FEATURE_MIN_R, max: CAMERA_MAX_R * 3 },
       /* About the centre a drag turns the whole Sun, so near the surface it tightens with
          the camera's height over it, as at the disc view from there out; round a feature
          the turn is about the feature and stays as it is. */
@@ -491,7 +513,10 @@ export function createSunEngine(
         const centre = Math.min(1, Math.max(0, height / DRAG_FULL_HEIGHT));
         return aboutFeature() ? 1 : centre;
       },
-      onInput: () => hooks.onInput?.(),
+      onInput: () => {
+        autoFramed = false;
+        hooks.onInput?.();
+      },
     });
     /** The drift's run: made from its shots as it begins, dropped as it ends. */
     let drift: ReturnType<typeof createRigDrift> | null = null;
@@ -639,6 +664,7 @@ export function createSunEngine(
       }
       if (s.view !== view) {
         view = s.view;
+        autoFramed = true;
         pointerAim = null;
         reframe(frame());
         if (!(drift?.flying ?? false)) {
@@ -715,6 +741,7 @@ export function createSunEngine(
       (drift?.flying ?? false) ||
       facing ||
       settling ||
+      aimSettling ||
       cutting ||
       dissolve.active ||
       globe.busy ||
@@ -733,8 +760,30 @@ export function createSunEngine(
       if (scrub?.playing && scrub.s < 1)
         hooks.onEruption?.(Math.min(1, scrub.s + dt / ERUPTION_PLAY_S));
       const f = frame();
-      reframe(f);
+      reframe(f, dt);
       driftNow()?.step(hooks.drift!.state(), dt);
+      // Centre the subject in the space between the controls and dock. Keeping
+      // it at the canvas centre unnecessarily shrinks it on portrait screens.
+      const fittedViewport = fitViewport();
+      const offsetY = drift?.flying ? 0 : frameInsets(fittedViewport).offsetY;
+      if (
+        camera.view?.offsetY !== offsetY ||
+        camera.view?.width !== viewport.width ||
+        camera.view?.height !== viewport.height
+      )
+        camera.setViewOffset(
+          viewport.width,
+          viewport.height,
+          0,
+          offsetY,
+          viewport.width,
+          viewport.height,
+        );
+      if (drift?.flying) autoFramed = false;
+      if (autoFramed && !rig.flying && !(drift?.flying ?? false)) {
+        const fitted = viewPose(view, f, rig.pose, fittedViewport).distance;
+        if (Math.abs(Math.log(fitted / rig.target)) > 0.001) rig.zoomTo(fitted, false);
+      }
       rig.step(dt);
       releaseAim();
       keepOverHorizon();
@@ -805,8 +854,8 @@ export function createSunEngine(
             chromosphere: nearLimb,
             spicule: nearLimb && pxOf(SPICULE_HEIGHT) > 2,
             prominence: nearLimb,
-            flare: true,
-            loops: regionPx > NAME_FEATURE_PX,
+            flare: lightKind(light.id) === "band" && (f.eruption?.flareLight ?? 0) > 0.05,
+            loops: lightKind(light.id) === "band" && regionPx > NAME_FEATURE_PX,
             corona: nearLimb,
             streamer: nearLimb,
             ejection: true,
@@ -901,16 +950,37 @@ export function createSunEngine(
     loop.refresh();
 
     api.flyToView = (id) => {
+      autoFramed = true;
       views.flyToView(id);
       arriving = true;
       loop.invalidate();
     };
-    api.snapToView = (id) => views.snapToView(id);
+    api.snapToView = (id) => {
+      autoFramed = true;
+      views.snapToView(id);
+    };
     api.turn = (step) => {
+      autoFramed = false;
       rig.turnBy(step);
       loop.invalidate();
     };
-    api.camera = orbitCamera(rig, () => loop.invalidate());
+    /* A hand on the camera ends the view's own framing; the way back gives it back as it was. */
+    const orbit = orbitCamera(rig, () => loop.invalidate());
+    api.camera = {
+      mark: () => {
+        const back = orbit.mark();
+        const framed = autoFramed;
+        return () => {
+          back();
+          autoFramed = framed;
+        };
+      },
+      zoom: (factor) => {
+        autoFramed = false;
+        orbit.zoom(factor);
+      },
+      turn: api.turn,
+    };
     api.invalidate = () => loop.invalidate();
     api.driftFlying = () => drift?.flying ?? false;
     api.driftShot = () => drift?.shot ?? -1;

@@ -34,6 +34,35 @@ test("every view has one canonical path, the default at the lab's root", () => {
   for (const id of LIGHT_IDS) assert.ok(PASSBANDS[id], `${id} is a passband`);
 });
 
+test("observed regions retain fine spatial detail when their noise coordinates reach the GPU", async () => {
+  const { createSunModel, OBSERVED_REGIONS } = await import("../src/space/sun/frame.ts");
+  const { createSunLooks } = await import("../src/features/sun/lib/scene/looks.ts");
+  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const frame = model.frameAt({
+    time: 0,
+    cyclePhase: 25.4,
+    light: "white",
+    eruptionScrub: null,
+    fieldLineCount: 0,
+  });
+  const looks = createSunLooks();
+  looks.setFrame(frame);
+  const seeds = looks.uniforms.uRegionState.value.slice(0, frame.regions.length).map((v) => v.w);
+  const detail = 0.001;
+  for (const seed of seeds) {
+    const delta = Math.fround(seed + detail) - Math.fround(seed);
+    assert.ok(Math.abs(delta - detail) < detail * 0.01, "float32 preserves fine noise offsets");
+  }
+  const active = frame.regions.flatMap((r, i) => (r.strength > 0 ? [seeds[i]] : []));
+  assert.equal(new Set(active).size, active.length, "active regions have distinct textures");
+  looks.setFrame(frame);
+  assert.deepEqual(
+    looks.uniforms.uRegionState.value.slice(0, seeds.length).map((v) => v.w),
+    seeds,
+    "redrawing does not change the texture",
+  );
+});
+
 test("the tour, the places and the drift name views, lights, places and formulas that exist", () => {
   for (const step of TOUR) {
     assert.ok(VIEW_IDS.includes(step.view), step.id);
@@ -214,7 +243,6 @@ test("every card, caption, hint and note renders its figures in both languages",
   const { PLACE_CARDS } = await import("../src/features/sun/components/card-specs.ts");
   const { CLOCK_RATES } = await import("../src/features/sun/lib/model/clock.ts");
   const { lightLegend } = await import("../src/features/sun/components/format.ts");
-  const { createFormatter } = await import("next-intl");
   const clean = (text, where) => assert.doesNotMatch(text, /[{}]|NaN|undefined/, where);
   for (const locale of ["en", "cs"]) {
     const messages = featureMessages("sun", locale);
@@ -249,14 +277,14 @@ test("every card, caption, hint and note renders its figures in both languages",
       clean(t(`views.${id}`), `${locale}:${id}`);
       clean(t(`viewHints.${id}`, args), `${locale}:${id}`);
     }
-    const f = createFormatter({ locale });
     for (const id of LIGHT_IDS) {
       clean(t(`lights.${id}`), `${locale}:${id}`);
       clean(t(`lightNotes.${id}`), `${locale}:${id}`);
       if (id !== "eclipse" && id !== "magnetogram") clean(t(`lightShort.${id}`), `${locale}:${id}`);
-      const legend = lightLegend(t, f, distance, id);
+      const legend = lightLegend(t, distance, id);
       clean(legend, `${locale}:${id}`);
-      assert.match(legend, /\d/, `${locale}: ${id} quotes a figure`);
+      if (id !== "eclipse" && id !== "magnetogram")
+        assert.match(legend, /\d/, `${locale}: ${id} quotes a figure`);
     }
     for (const rate of CLOCK_RATES) clean(t(`clocks.${rate}`), `${locale}:${rate}`);
     for (const id of ERUPTION_STAGE_IDS) clean(t(`stages.eruption.${id}`), `${locale}:${id}`);

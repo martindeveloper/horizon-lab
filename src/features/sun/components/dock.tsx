@@ -116,14 +116,13 @@ function LightRuler() {
 /** The light shown, named, with what it shows and the figures it answers to. */
 function LightLegend() {
   const t = useTranslations("sun");
-  const f = useFormatter();
   const distance = useDistance();
   const light = useSun((s) => s.light);
   return (
-    <p className="min-w-0 flex-1 basis-48 truncate text-sm leading-tight tracking-tight">
+    <p className="min-w-0 flex-1 basis-48 text-sm leading-snug tracking-tight">
       <span className="text-fg">{t(`lights.${light}`)}</span>
       <span className={cn(kickerClass, "ml-2 tracking-normal normal-case")}>
-        {t(`lightNotes.${light}`)} · {lightLegend(t, f, distance, light)}
+        {t(`lightNotes.${light}`)} · {lightLegend(t, distance, light)}
       </span>
     </p>
   );
@@ -223,7 +222,7 @@ function useAction(kind: ViewAction) {
         act: () => (running ? api().togglePaused() : api().setClock("year")),
         value: phase,
         set: (next: number) => api().setCyclePhase(next),
-        text: `${f.number(Math.floor(year), { useGrouping: false })} · ${t(`stages.cycle.${cycleStageAt(phase)}`)}`,
+        text: `${t("hud.modelYear", { value: f.number(Math.floor(year), { useGrouping: false }) })} · ${t(`stages.cycle.${cycleStageAt(phase)}`)}`,
       };
     }
   }

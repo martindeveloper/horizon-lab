@@ -20,6 +20,7 @@ import {
 import type { Vec3 } from "@horizon/toolkit/math";
 
 import { directionOf, type SunFrame } from "./frame";
+import { eruptionEnvelope, framedDistance, type SunViewport } from "./framing";
 import type { SunViewId } from "./settings";
 
 /** The distance each view frames at: from the centre, or from the feature it orbits. */
@@ -45,11 +46,9 @@ const ORBITS_FEATURE: Readonly<Record<SunViewId, boolean>> = {
 };
 export const viewOrbitsFeature = (id: SunViewId) => ORBITS_FEATURE[id];
 
-/** The eruption view orbits this height over its region, radii from the centre: the arcade's middle. */
-const ERUPTION_AIM_R = 1.12;
 /** Elevation over the feature's horizon each feature view opens at, radians. */
 const SUNSPOT_ELEVATION = 1.35;
-const LIMB_ELEVATION = 0.2;
+const LIMB_ELEVATION = 0.06;
 const ERUPTION_ELEVATION = 0.35;
 
 /**
@@ -87,7 +86,10 @@ export function viewAim(id: SunViewId, frame: SunFrame): ViewAim | null {
     const region = featuredRegion(frame);
     if (!region) return null;
     const normal = worldDirection(region.lat, region.lon, frame);
-    return { point: scaled(normal, id === "eruption" ? ERUPTION_AIM_R : 1), normal };
+    return {
+      point: scaled(normal, id === "eruption" ? eruptionEnvelope(frame).centre : 1),
+      normal,
+    };
   }
   return null;
 }
@@ -195,23 +197,45 @@ export function viewPose(
   id: SunViewId,
   frame: SunFrame,
   angles: Pick<OrbitPose, "azimuth" | "inclination">,
+  viewport?: SunViewport,
 ): OrbitPose {
-  const distance = VIEW_DISTANCE[id];
+  const radius = viewSubjectRadius(id, frame);
+  const distance = viewport
+    ? Math.max(VIEW_DISTANCE[id], framedDistance(radius, viewport))
+    : VIEW_DISTANCE[id];
   switch (id) {
     case "sunspot":
       /* Straight over the group, from where the visitor stands round it. */
       return { distance, azimuth: angles.azimuth, inclination: SUNSPOT_ELEVATION };
-    case "eruption":
-      /* East of the region, low: the arcade's loops in profile, standing into dark sky. */
-      return { distance, azimuth: 0, inclination: ERUPTION_ELEVATION };
-    case "chromosphere":
-      /* Beside the prominence at its own height, so it stands against the sky over the limb. */
-      return { distance, azimuth: 0, inclination: LIMB_ELEVATION };
+    case "eruption": {
+      /* Along the neutral line, slightly oblique: the reconnection plane stays
+       * open to view while neighbouring arcade slices still show their depth. */
+      const region = featuredRegion(frame);
+      const azimuth = Math.PI / 2 - (region ? Math.sign(region.lat || 1) * region.tilt : 0) + 0.15;
+      return { distance, azimuth, inclination: ERUPTION_ELEVATION };
+    }
+    case "chromosphere": {
+      /* Across the sheet, so its arch and fine threads read against the sky. */
+      const p = featuredProminence(frame);
+      const azimuth = Math.PI / 2 - (p ? Math.sign(p.lat || 1) * p.tilt : 0);
+      return { distance, azimuth, inclination: LIMB_ELEVATION };
+    }
     case "cycle":
       return { distance, azimuth: angles.azimuth, inclination: 0.5 };
     default:
       return { distance, azimuth: angles.azimuth, inclination: angles.inclination };
   }
+}
+
+/** What the preset promises to show; a visitor may zoom closer after it arrives. */
+export function viewSubjectRadius(id: SunViewId, frame: SunFrame): number {
+  if (id === "eruption") return eruptionEnvelope(frame).radius;
+  if (id === "sunspot") return (featuredRegion(frame)?.size ?? 0.04) * 0.8;
+  if (id === "chromosphere") {
+    const p = featuredProminence(frame);
+    return p ? Math.hypot(p.length * 0.52, p.height * (1 + p.lift) * 0.55) : 0.1;
+  }
+  return id === "corona" ? 1.7 : 1.05;
 }
 
 /**

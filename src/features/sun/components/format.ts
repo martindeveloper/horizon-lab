@@ -2,7 +2,6 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { type DistanceSettings, type Fact, type Format, type Translate } from "@/lib/facts";
 import { SUN_CATALOGUE } from "@/space/sun/catalogue";
-import { PASSBANDS } from "@/space/sun/model/passbands";
 import { convert, formatFigure } from "@horizon/toolkit/science";
 
 import type { LightId } from "../lib/model/lights";
@@ -31,25 +30,8 @@ export function elapsedLabel(t: Translate, f: Format, seconds: number) {
   return t("elapsed.years", { value: f.number(convert(seconds, "s", "yr"), one) });
 }
 
-const { photosphere, chromosphere, corona } = SUN_CATALOGUE.layers;
-const { field } = SUN_CATALOGUE.activity;
+const { photosphere, chromosphere } = SUN_CATALOGUE.layers;
 const bands = SUN_CATALOGUE.passbands;
-
-/** What each light answers to, as the catalogue has it: the temperature of the gas it shows, or the field it reads. */
-const LIGHT_FACTS: Readonly<Record<LightId, Fact>> = {
-  white: photosphere.temperature,
-  halpha: chromosphere.temperature,
-  he304: bands.he304.temperature,
-  fe171: bands.fe171.temperature,
-  fe193: bands.fe193.temperature,
-  fe211: bands.fe211.temperature,
-  fe335: bands.fe335.temperature,
-  fe94: bands.fe94.temperature,
-  /* 131 Å stands at the ruler's hot end for its Fe XXI flare peak, so that is the figure it quotes. */
-  fe131: bands.fe131.secondaryTemperature ?? bands.fe131.temperature,
-  eclipse: corona.temperature,
-  magnetogram: field.polarField,
-};
 
 /** Temperatures from here up read in millions of kelvin ("1.2 million K"). */
 const MILLION_K = 1e6;
@@ -64,9 +46,22 @@ function lightFigure(t: Translate, locale: string, fact: Fact) {
   return `${text} ${t("names.million")} K`;
 }
 
-/** A light's legend: its wavelength where it has one, and the figure it answers to. */
-export function lightLegend(t: Translate, f: Format, d: DistanceSettings, id: LightId) {
-  const { nm } = PASSBANDS[id];
-  const text = lightFigure(t, d.locale, LIGHT_FACTS[id]);
-  return nm > 0 ? `${f.number(nm, { maximumFractionDigits: 1 })} nm · ${text}` : text;
+/** Spectral modes are not thermometers. Show both representative AIA peaks where present. */
+export function lightLegend(t: Translate, d: DistanceSettings, id: LightId) {
+  if (id === "magnetogram") return t("lightReading.polarity");
+  if (id === "eclipse") return t("lightReading.scattered");
+  if (id === "white")
+    return t("lightReading.effective", {
+      value: lightFigure(t, d.locale, photosphere.temperature),
+    });
+  if (id === "halpha")
+    return `${formatFigure(d.locale, chromosphere.halpha, { digits: 4, withUnit: true }).text} · ${t("lightReading.lineTransfer")}`;
+  const band = bands[id];
+  const peaks = [
+    band.temperature,
+    ...(band.secondaryTemperature ? [band.secondaryTemperature] : []),
+  ];
+  return t("lightReading.response", {
+    value: peaks.map((fact) => lightFigure(t, d.locale, fact)).join(" / "),
+  });
 }

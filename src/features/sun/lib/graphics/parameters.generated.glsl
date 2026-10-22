@@ -3,7 +3,7 @@
 #define HORIZON_SUN_PARAMETERS
 
 #define PROXY_RADIUS              1.02
-#define ATMOSPHERE_RADIUS         6.0
+#define ATMOSPHERE_RADIUS         8.0
 #define SURFACE_RESOLVE_PX        2.0
 #define GRID_STEP                 0.2617993878
 #define GRID_ALPHA                0.22
@@ -14,21 +14,21 @@
 #define NETWORK_CONTRAST          0.006
 #define UMBRA_K                   4000.0
 #define PENUMBRA_K                5000.0
-#define PENUMBRA_FILAMENT         0.3
+#define PENUMBRA_FILAMENT         0.16
 #define LEAD_SPOT                 0.42
 #define FOLLOW_SPOT               0.28
 #define FACULA_CONTRAST           0.09
-#define EVERSHED_RIPPLE           0.12
+#define EVERSHED_RIPPLE           0.035
 #define EVERSHED_WAVES            36.0
 #define UMBRAL_DOTS               14.0
 #define UMBRAL_DOT_CONTRAST       0.6
 #define WHITE_FLARE_K             9000.0
-#define MAP_FADE_FROM_PX          4.0
-#define MAP_FADE_TO_PX            8.0
+#define MAP_FADE_FROM_PX          1.25
+#define MAP_FADE_TO_PX            2.5
 #define MAP_CENTRAL_MERIDIAN_RAD  5.117381425
 #define SUN_MAP_QUIET_INTENSITY   0.8
 #define RIBBON_GLARE              1.2
-#define SURFACE_EXPOSURE          0.68
+#define SURFACE_EXPOSURE          0.56
 #define SURFACE_CONTRAST          2.2
 #define ROTATION_SIN2             -0.162849181
 #define ROTATION_SIN4             -0.1214572147
@@ -85,7 +85,7 @@
 #define RIBBON_SPREAD             0.05
 #define FILAMENT_WIDTH            0.012
 #define FILAMENT_DEPTH            0.75
-#define FIBRIL_SCALE              5.0
+#define FIBRIL_SCALE              9.0
 #define FIBRIL_SHARE              0.4
 #define BAND_QUIET                0.12
 #define RAMP_SAMPLES              64
@@ -99,9 +99,9 @@
 #define CHROMOSPHERE_HEIGHT       0.003
 #define SPICULE_HEIGHT            0.014
 #define SPICULE_COLUMNS           1200.0
-#define CHROMOSPHERE_GLOW         1.2
-#define SPICULE_GLOW              0.8
-#define RIM_MIN_PX                2.5
+#define CHROMOSPHERE_GLOW         0.48
+#define SPICULE_GLOW              0.45
+#define RIM_MIN_PX                0.85
 #define CORONA_GLOW               0.3
 #define CORONA_CONTRAST           0.75
 #define INNER_CORONA_REACH        0.12
@@ -131,6 +131,7 @@
 #define CME_THICKNESS             0.1
 #define CME_CAVITY                0.85
 #define CME_GLOW                  0.3
+#define CURRENT_SHEET_WIDTH_R     0.0015
 #define CORONA_MAX_SAMPLES        48
 #define RIBBON_WIDTH_PX           1.8
 #define RIBBON_HALO_PX            7.0

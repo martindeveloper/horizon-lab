@@ -5,22 +5,38 @@
     {
       "id": "interior",
       "equations": [
-        { "equation": "hydrostatic-equilibrium" },
-        { "equation": "pp-chain-energy" },
-        { "equation": "mass-loss-rate" },
-        { "equation": "photon-diffusion-time" }
+        {
+          "equation": "hydrostatic-equilibrium"
+        },
+        {
+          "equation": "pp-chain-energy"
+        },
+        {
+          "equation": "mass-loss-rate"
+        },
+        {
+          "equation": "photon-diffusion-time"
+        }
       ]
     },
     {
       "id": "rotation",
-      "equations": [{ "equation": "differential-rotation" }]
+      "equations": [
+        {
+          "equation": "differential-rotation"
+        }
+      ]
     },
     {
       "id": "surface",
       "equations": [
-        { "equation": "scale-height" },
+        {
+          "equation": "scale-height"
+        },
         "I(μ)/I(1) = 1 − Σₙ aₙ (1 − μⁿ⸍²)",
-        { "equation": "mean-density" }
+        {
+          "equation": "mean-density"
+        }
       ]
     },
     {
@@ -30,19 +46,31 @@
     {
       "id": "field",
       "equations": [
-        "∇ × B = 0,  B = −∇Φ  (r ≤ R_ss)",
-        { "equation": "alfven-speed" },
-        { "equation": "reconnection-energy" },
-        { "equation": "goes-class" }
+        "∇ × B_bg = 0,  B_bg = −∇Φ  (r ≤ R_ss)",
+        "B = (∂A/∂y, −∂A/∂x, 0),  ∇ · B = 0",
+        "E_z = −∂A/∂s,  ∂A/∂s + v · ∇A = −η J_z",
+        {
+          "equation": "alfven-speed"
+        },
+        {
+          "equation": "reconnection-energy"
+        },
+        {
+          "equation": "goes-class"
+        }
       ]
     },
     {
       "id": "lights",
-      "equations": ["R_band(T) ∝ exp(−(log T − log T_peak)² / 2σ²)"]
+      "equations": ["R_display(T) = Σᵢ wᵢ exp(−(log T − log Tᵢ)² / 2σᵢ²)"]
     },
     {
       "id": "cycle",
-      "equations": [{ "equation": "wolf-number" }]
+      "equations": [
+        {
+          "equation": "wolf-number"
+        }
+      ]
     },
     {
       "id": "limits",
@@ -63,8 +91,12 @@
       "url": "https://doi.org/10.1007/s11207-011-9776-8"
     },
     {
-      "title": "Lin & Forbes 2000, JGR 105, 2375 (the eruption's loss of equilibrium and reconnection)",
-      "url": "https://doi.org/10.1029/1999JA900477"
+      "title": "Pontin & Priest 2022, Living Reviews in Solar Physics 19, 1 (magnetic induction, flux transfer and reconnection)",
+      "url": "https://doi.org/10.1007/s41116-022-00032-9"
+    },
+    {
+      "title": "Aulanier & Dudík 2019, A&A 621, A72 (anchored flux ropes and flare-loop reconnection)",
+      "url": "https://doi.org/10.1051/0004-6361/201834221"
     },
     {
       "title": "Hathaway 2015, Living Reviews in Solar Physics 12, 4 (the solar cycle)",
@@ -81,6 +113,50 @@
     {
       "title": "WDC-SILSO, Royal Observatory of Belgium (sunspot numbers since 1700)",
       "url": "https://www.sidc.be/SILSO/"
+    },
+    {
+      "title": "NIST isotope tables (neutral hydrogen-1 and helium-4 atomic masses)",
+      "url": "https://physics.nist.gov/PhysRefData/Compositions/index.html"
+    },
+    {
+      "title": "Mitalas & Sills 1992, ApJ 401, 759 (shell diffusion estimate, equation 9; convection boundary)",
+      "url": "https://doi.org/10.1086/172103"
+    },
+    {
+      "title": "Boerner et al. 2013 (AIA thermal response and calibration)",
+      "url": "https://arxiv.org/abs/1307.8045"
+    },
+    {
+      "title": "Shestov et al. 2025, A&A 699, A7 (EUI/AIA cross-calibration and emission-measure analysis)",
+      "url": "https://doi.org/10.1051/0004-6361/202452444"
+    },
+    {
+      "title": "Golding et al. 2017, A&A 597, A102 (helium non-equilibrium ionization and optically thick transfer)",
+      "url": "https://doi.org/10.1051/0004-6361/201629462"
+    },
+    {
+      "title": "Vasil et al. 2024, Nature (a near-surface dynamo hypothesis)",
+      "url": "https://doi.org/10.1038/s41586-024-07315-1"
+    },
+    {
+      "title": "Mandal & Kosovichev 2026, Scientific Reports (helioseismic evidence for deep dynamo activity)",
+      "url": "https://doi.org/10.1038/s41598-025-34336-1"
+    },
+    {
+      "title": "Bale et al. 2023, Nature (Parker observations supporting interchange reconnection in fast-wind sources)",
+      "url": "https://doi.org/10.1038/s41586-023-05955-3"
+    },
+    {
+      "title": "Joshi et al. 2025, A&A 698, A301 (observed three-dimensional reconnection and changing CME footpoints)",
+      "url": "https://doi.org/10.1051/0004-6361/202554011"
+    },
+    {
+      "title": "NOAA SWPC glossary (GOES peak soft X-ray classification)",
+      "url": "https://www.spaceweather.gov/content/space-weather-glossary"
+    },
+    {
+      "title": "NASA Parker Solar Probe (mission history and closest approach)",
+      "url": "https://science.nasa.gov/mission/parker-solar-probe/"
     }
   ]
 }

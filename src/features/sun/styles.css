@@ -11,6 +11,20 @@
   --sun-light-fe335: #4f7ad9;
   --sun-light-fe94: #5fd36b;
   --sun-light-fe131: #39c6c9;
+  /* Bright photospheric close-ups need the toolkit's denser glass, in either theme. */
+  --panel-bg: var(--popover-bg);
+  --pill-bg: var(--popover-bg);
+  --hud-bg: var(--popover-bg);
+}
+
+:where([data-simulation="sun"]) .scene-label {
+  color: var(--color-space-fg);
+  background: color-mix(in srgb, var(--color-space) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-space-fg) 16%, transparent);
+  border-radius: 4px;
+  padding: 3px 6px;
+  letter-spacing: 0.08em;
+  text-shadow: none;
 }
 :where([data-simulation="sun"]) .sun-light-scale {
   background: linear-gradient(

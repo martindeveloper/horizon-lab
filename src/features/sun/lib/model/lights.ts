@@ -22,8 +22,8 @@ export const LIGHT_IDS = [
 export type LightId = (typeof LIGHT_IDS)[number];
 
 /**
- * The lights that show gas at a temperature, coolest first: the dock's ruler, from the
- * photosphere's thousands of kelvin to flare plasma at ten million.
+ * The dock's discrete spectral modes, arranged from photospheric to coronal views.
+ * This is not a temperature scale: several bands have multiple response peaks.
  */
 export const LIGHT_SCALE = [
   "white",

@@ -3,14 +3,38 @@
   "metadataDescription": "Jedna hvězda zblízka: rozřízněte ji, sledujte ji v každém světle, přeleťte sluneční skvrnu a dívejte se, jak se utrhne erupce.",
   "canvasLabel": "Slunce rozříznuté a pozorované v každém světle, i s jeho magnetickým polem",
   "help": {
-    "camera": { "title": "Pohyb kamery", "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete." },
-    "views": { "title": "Pohledy", "body": "Sedm míst, od jádra po korónu." },
-    "light": { "title": "Světlo", "body": "Každé světlo ukazuje plyn o jiné teplotě." },
-    "clock": { "title": "Hodiny", "body": "Zrychlete čas Slunce, nebo ho zastavte." },
-    "places": { "title": "Místa", "body": "Přeletí k útvaru a otevře jeho kartu." },
-    "settings": { "title": "Zobrazení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
-    "guide": { "title": "Průvodce", "body": "Provede vás Sluncem krok za krokem." },
-    "experiences": { "title": "Režimy prohlížení", "body": "Celá obrazovka, nebo nechte kameru plout." }
+    "camera": {
+      "title": "Pohyb kamery",
+      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
+    },
+    "views": {
+      "title": "Pohledy",
+      "body": "Sedm míst, od jádra po korónu."
+    },
+    "light": {
+      "title": "Světlo",
+      "body": "Prozkoumejte spektrální pásma se širokou, někdy vícenásobnou teplotní odezvou. Barvy jsou ilustrační."
+    },
+    "clock": {
+      "title": "Hodiny",
+      "body": "Zrychlete nebo zastavte modelový čas. Ukázka erupce má vlastní přehrávání."
+    },
+    "places": {
+      "title": "Místa",
+      "body": "Přeletí k útvaru a otevře jeho kartu."
+    },
+    "settings": {
+      "title": "Zobrazení",
+      "body": "Vrstvy, ovládání kamery a kvalita vykreslení."
+    },
+    "guide": {
+      "title": "Průvodce",
+      "body": "Naučte se, jak Slunce funguje, krok za krokem."
+    },
+    "experiences": {
+      "title": "Režimy prohlížení",
+      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
+    }
   },
   "hud": {
     "places": "Místa",
@@ -19,17 +43,18 @@
     "pause": "Zastavit hodiny",
     "play": "Spustit hodiny",
     "cut": "Řez",
-    "eruption": "Erupce",
+    "eruption": "Ilustrační erupce",
     "eruptionPlay": "Pustit erupci",
     "eruptionPause": "Zadržet erupci",
-    "cycle": "Cyklus",
-    "flareClass": "Erupce {value}",
+    "cycle": "Ilustrační cyklus",
+    "flareClass": "Příklad GOES {value}",
     "views": "Pohledy",
     "paused": "Zastaveno",
     "cutOpen": "Otevřít řez",
     "cutClose": "Zavřít řez",
     "cycleRun": "Pustit roky",
-    "cycleHold": "Zadržet roky"
+    "cycleHold": "Zadržet roky",
+    "modelYear": "Modelový rok {value}"
   },
   "views": {
     "surface": "Povrch",
@@ -46,34 +71,34 @@
     "sunspot": "Nízko nad skupinou skvrn: umbra, vlákna penumbry, kolem granule.",
     "chromosphere": "Okraj v Hα: les spikulí, flokule, filamenty a protuberance.",
     "corona": "Disk zakrytý jako při zatmění: přilby, chocholy a odcházející vítr.",
-    "eruption": "Siločáry nad aktivní oblastí střádají energii, pak se utrhnou.",
-    "cycle": "Skvrny se stěhují k rovníku a póly se vymění, rok po roce."
+    "eruption": "Předepsaný vývoj erupce a zjednodušený magnetický řez ukazují rekonexi.",
+    "cycle": "Idealizovaný opakující se cyklus ukazuje posun skvrn a přepólování; nejde o předpověď."
   },
   "lights": {
     "white": "Bílé světlo",
     "halpha": "Hα",
-    "he304": "He II 304 Å",
-    "fe171": "Fe IX 171 Å",
-    "fe193": "Fe XII 193 Å",
-    "fe211": "Fe XIV 211 Å",
-    "fe335": "Fe XVI 335 Å",
-    "fe94": "Fe XVIII 94 Å",
-    "fe131": "Fe XXI 131 Å",
+    "he304": "AIA 304 Å",
+    "fe171": "AIA 171 Å",
+    "fe193": "AIA 193 Å",
+    "fe211": "AIA 211 Å",
+    "fe335": "AIA 335 Å",
+    "fe94": "AIA 94 Å",
+    "fe131": "AIA 131 Å",
     "eclipse": "Zatmění",
-    "magnetogram": "Magnetogram"
+    "magnetogram": "Modelový magnetogram"
   },
   "lightNotes": {
-    "white": "Fotosféra · SDO/HMI, květen 2024",
-    "halpha": "Chromosféra · vodík 3→2",
-    "he304": "Horní chromosféra",
-    "fe171": "Klidná koróna",
-    "fe193": "Koróna",
-    "fe211": "Aktivní oblasti",
-    "fe335": "Aktivní oblasti",
-    "fe94": "Erupční oblasti",
-    "fe131": "Erupční plazma",
-    "eclipse": "Vnější koróna",
-    "magnetogram": "Pole na povrchu"
+    "white": "Mozaika HMI + syntetické detaily",
+    "halpha": "Ilustrační chromosféra",
+    "he304": "He II + koronální Si XI · syntetické",
+    "fe171": "Fe IX · syntetické",
+    "fe193": "Fe XII / XXIV · syntetické",
+    "fe211": "Fe XIV · syntetické",
+    "fe335": "Fe XVI · syntetické",
+    "fe94": "Fe XVIII / X · syntetické",
+    "fe131": "Fe VIII / XXI · syntetické",
+    "eclipse": "Ilustrační koróna v bílém světle",
+    "magnetogram": "Syntetické pole ve směru pohledu"
   },
   "lightShort": {
     "white": "Bílé",
@@ -127,14 +152,14 @@
     "massLoss": "Hmota na světlo, za sekundu",
     "outerEdge": "Vnější okraj",
     "innerEdge": "Vnitřní okraj",
-    "walk": "Bloudění fotonu ven, model",
-    "walkLiterature": "Bloudění fotonu ven, literatura",
+    "walk": "Odhad radiační difuze, model",
+    "walkLiterature": "Odhad radiační difuze, literatura",
     "lightTime": "Pak k Zemi",
     "depth": "Hloubka",
     "thickness": "Tloušťka",
-    "interiorPeriod": "Nitro se otočí za",
+    "interiorPeriod": "Zvolená perioda rotace nitra",
     "equatorPeriod": "Rovník se otočí za",
-    "polePeriod": "Póly se otočí za",
+    "polePeriod": "Povrchový zákon extrapolovaný k pólu",
     "convectionDepth": "Hloubka varu",
     "granuleSize": "Granule napříč",
     "granuleLifetime": "Granule žije",
@@ -159,10 +184,10 @@
     "greenLine": "Zelená čára, Fe XIV",
     "greenLineTemperature": "Zelená čára vzniká při",
     "kCoronaBase": "Jas u okraje, z disku",
-    "sourceSurface": "Pole se otvírá za",
+    "sourceSurface": "Zdrojová plocha modelu",
     "windSlow": "Pomalý vítr",
     "windFast": "Rychlý vítr",
-    "cmeSpeed": "Rychlost fronty, jak je kreslena",
+    "cmeSpeed": "Průměrná rychlost čela ve zvoleném čase",
     "cyclePeriod": "Cyklus",
     "perihelion": "Nejbližší přiblížení, R☉",
     "probeSpeed": "Rychlost při průletu, km/s"
@@ -174,38 +199,38 @@
     "star": {
       "title": "Slunce",
       "where": "Hvězda",
-      "body": "Hvězda G2 V o hmotnosti {starMassKg} kg a zářivém výkonu {starLuminosityW} W. Její světlo je z definice bílé: sluneční světlo je to, čemu oko říká bílá, a jsou v něm všechny barvy duhy. Obloha je modrá a nízké Slunce červené proto, že vzduch rozptyluje modré světlo stranou, ne proto, že by hvězda byla žlutá.",
-      "caution": "Kresleno tak, jak je vidí oko přizpůsobené slunečnímu světlu: disk uprostřed bílý, teplejší jen u okraje, kde se ukazuje chladnější plyn."
+      "body": "Hvězda třídy G2 V o hmotnosti {starMassKg} kg září výkonem {starLuminosityW} W. Její široké viditelné spektrum se oku přizpůsobenému slunečnímu světlu jeví přibližně bílé. Zemská atmosféra silněji rozptyluje modré světlo, takže obloha je modrá a nízké Slunce vypadá červenější.",
+      "caution": "Barva a jas jsou zvoleny pro zobrazení; nejde o kalibrovaný obraz slunečního záření."
     },
     "core": {
       "title": "Jádro",
       "where": "Střed",
-      "body": "Kde se vodík slučuje v helium. Světlo vzniká jen ve vnitřní čtvrtině poloměru; zbytek ho vynáší.",
-      "caution": "Do nitra Slunce nevidíme: vnitřek je standardní model napasovaný na helioseismologii."
+      "body": "Vodík se slučuje na helium, převážně proton–protonovým řetězcem. Téměř veškerá jaderná energie vzniká hluboko v jádru; vyznačený okraj odpovídá prahu svítivosti, nikoli ostré fyzikální hranici.",
+      "caution": "Hodnoty nitra pocházejí z historického referenčního modelu S, omezeného slunečními pozorováními a helioseismologií; nejde o přímé snímky ani nový model Slunce."
     },
     "radiativeZone": {
       "title": "Zářivá vrstva",
       "where": "Vnitřní slupka",
-      "body": "Energii vynáší světlo, cestou nesčetněkrát rozptýlené. Bloudění fotonu k povrchu trvá mnohem déle, než by trval přímý let.",
+      "body": "Záření přenáší energii opakovanými interakcemi s látkou, včetně absorpce a opětovného vyzáření. Odhad difuze končí u základny konvektivní zóny; není stářím jednotlivého fotonu ani dobou tepelné odezvy Slunce.",
       "caution": "Profil z modelu, ne snímek."
     },
     "tachocline": {
       "title": "Tachoklina",
       "where": "Rozhraní",
-      "body": "Tenká střižná vrstva, kde se tuhé otáčení nitra potkává s diferenciální rotací obalu. Dynamo, které navíjí pole, sídlí nejspíš tady.",
-      "caution": "Hloubka je z helioseismologie; tloušťka jen přibližně."
+      "body": "Střižná vrstva u základny konvektivní zóny odděluje téměř rovnoměrnou rotaci velké části radiačního nitra od diferenciálně rotujícího obalu. Může přispívat k dynamu; role hlubokých, rozložených a podpovrchových procesů se stále zkoumají.",
+      "caution": "Helioseismologie tento přechod omezuje. Jeho tloušťka, vnitřní pole a role v dynamu jsou méně jisté; rotace jádra není tímto modelem přímo určena."
     },
     "convectionZone": {
       "title": "Konvektivní vrstva",
       "where": "Vnější slupka",
-      "body": "Horký plyn stoupá, chladne a klesá: energie cestuje pohybem, ne světlem, a vršek toho varu je povrch, který vidíme.",
+      "body": "Vztlak vynáší plazma, které chladne a klesá, a přenáší tak velkou část energie vnějším obalem. Záření se na přenosu stále podílí a nakonec odvádí energii z fotosféry.",
       "caution": "Kreslené proudy jsou náhrada za turbulentní konvekci, ne její simulace."
     },
     "photosphere": {
       "title": "Fotosféra",
       "where": "Povrch",
       "body": "Tenká vrstva, kde plyn zprůhlední a světlo unikne. K okraji je tmavší, protože pohled tam dosáhne jen do jejího chladnějšího vršku.",
-      "caution": "Okrajové ztemnění je z napasované atmosféry; jemné detaily jsou procedurální."
+      "caution": "Velké struktury vycházejí ze zpracované mozaiky HMI z května 2024. Okrajové ztemnění, barva, jemné detaily a další vývoj jsou modelované."
     },
     "granule": {
       "title": "Granule",
@@ -217,19 +242,19 @@
       "title": "Sluneční skvrna",
       "where": "Povrch",
       "body": "Silné pole potlačí konvekci, skvrna je proto chladnější a vypadá tmavá. Umbra je nejtmavší; vlákna penumbry se sklánějí ven.",
-      "caution": "Skupiny skvrn začínají tam, kde je SDO vidělo v květnu 2024, dál žijí a zanikají podle modelu aktivity."
+      "caution": "Oblasti začínají podle hlášení NOAA souvisejících s mozaikou HMI z května 2024. Jejich další vývoj a jemná struktura jsou syntetické."
     },
     "facula": {
       "title": "Fakule",
       "where": "Povrch",
-      "body": "Světlé plochy zhuštěného pole, nejlépe vidět u okraje. Skvrny Slunce trochu ztmaví; fakule je rozjasní víc, takže aktivní Slunce svítí jasněji.",
+      "body": "Jasné magnetické struktury, viditelné zejména u okraje, soupeří s tmavými skvrnami. V průměrné změně během slunečního cyklu obvykle převáží zjasnění fakulemi; jednotlivé průchody skvrn mohou Slunce dočasně ztlumit.",
       "caution": "Zjasnění je ilustrační."
     },
     "chromosphere": {
       "title": "Chromosféra",
       "where": "Spodní atmosféra",
-      "body": "Tenká průhledná vrstva nad povrchem, vzhůru teplejší, ohřívaná rozpadem magnetozvukových vln. V Hα, světle vodíku při přeskoku elektronu ze třetí hladiny na druhou, ukáže síť, flokule a filamenty; na okraji růžový lem.",
-      "caution": "Kreslená tak, jak ji ukazuje čára Hα, ne v bílém světle."
+      "body": "Dynamická, strukturovaná atmosféra nad fotosférou. K ohřevu přispívají rázy, vlny a uvolňování magnetické energie; teplota neroste jednoduše v každém místě. Hα odhaluje plage, filamenty a struktury u okraje, její jas však závisí vedle teploty i na přenosu záření a obsazení atomových hladin.",
+      "caution": "Ilustrační pohled v Hα bez přenosu záření v opticky tlustém prostředí a bez nerovnovážné ionizace."
     },
     "spicule": {
       "title": "Spikule",
@@ -246,44 +271,44 @@
     "flare": {
       "title": "Erupce",
       "where": "Aktivní oblast",
-      "body": "Napjaté siločáry nad aktivní oblastí se přepojí a během minut uvolní uloženou energii jako teplo, světlo napříč spektrem a rychlé částice.",
-      "caution": "Erupce sleduje analytický model ztráty rovnováhy; měřítko je schematické."
+      "body": "Magnetická rekonexe může uvolnit volnou magnetickou energii nad energií vhodného referenčního pole, zahřívat plazma a urychlovat částice. Potenciálové pole pozadí zobrazované jinde samo tuto volnou energii neukládá.",
+      "caution": "Řez a tok jsou předepsané. Příklad třídy GOES je přiřazen, nikoli vypočítán z měkkého rentgenového záření; přehrávání je nezávislé na hlavních hodinách."
     },
     "loops": {
       "title": "Poerupční smyčky",
       "where": "Aktivní oblast",
       "body": "Po erupci se přepojené pole naplní horkým plazmatem: arkáda smyček, která hodiny chladne a její plyn prší zpátky dolů.",
-      "caution": "Teploty smyček jsou reprezentativní hodnoty."
+      "caution": "Teploty a emise jsou zde předepsané; chladnutí, vypařování a koronální déšť se nesimulují."
     },
     "corona": {
       "title": "Koróna",
       "where": "Vnější atmosféra",
-      "body": "Řídká, mnohem žhavější než povrch a vidět jen se zakrytým diskem: její bílé světlo je sluneční světlo rozptýlené na elektronech a prachu, vlastní záře je v extrémním ultrafialovém.",
+      "body": "Řídká koróna je mnohem teplejší než fotosféra a silně září v extrémním ultrafialovém a rentgenovém oboru. Její slabé bílé světlo je sluneční záření rozptýlené elektrony a prachem, nejlépe viditelné při zakrytí jasného disku.",
       "caution": "Jas je roztažený pro oko; žádný jediný snímek ji neukáže celou."
     },
     "streamer": {
       "title": "Přilbová paprsková struktura",
       "where": "Koróna",
-      "body": "Uzavřené pole drží plazma v jasném oblouku, který vítr vytáhne do ohonu. Kde je pole otevřené, je koróna tmavá a vítr rychlý.",
+      "body": "Husté plazma na uzavřených magnetických strukturách tvoří jasné paprsky s dlouhými výběžky a okolním otevřeným polem. Koronální díry bývají tmavé v koronálních EUV pásmech a často dodávají rychlý vítr; otevřené pole neznamená jedinou rychlost větru.",
       "caution": "Přilby sledují modelové pole, ne pozorované."
     },
     "ejection": {
       "title": "Výron koronální hmoty",
       "where": "Odchází",
-      "body": "Utržené magnetické lano, které před sebou hrne korónu jako jasnou frontu s tmavou dutinou za ní. K Zemi dorazí za den i víc; tam jeho pole a plazma vyvolají geomagnetickou bouři a polární záři.",
+      "body": "Rozpínající se magnetické lano unáší plazma ven, s jasnou frontou a tmavší dutinou za ní. Jeho konce mohou zůstat spojené se Sluncem. Pokud dorazí k Zemi, jeho pole a plazma mohou vyvolat geomagnetické bouře a polární záře.",
       "caution": "Rychlost a tvar jsou schematické."
     },
     "wind": {
       "title": "Sluneční vítr",
       "where": "Dál",
-      "body": "Koróna je příliš horká, než aby ji Slunce udrželo: rozpíná se ve vítr, který vyplní sluneční soustavu, pomalý z přileb, rychlý z otevřených pólů.",
-      "caution": "Vítr není kreslen jako částice; rychlosti jsou typické hodnoty."
+      "body": "Horká koróna expanduje do slunečního větru. Urychlují jej tlakové gradienty, vlny a uvolňování magnetické energie. Rychlé proudy často vycházejí z koronálních děr v různých šířkách; pomalý vítr má více zdrojů včetně hranic otevřeného a uzavřeného pole.",
+      "caution": "Urychlování větru se zde nepočítá; karta uvádí reprezentativní rychlosti daleko od Slunce, poblíž dráhy Země."
     },
     "parker": {
       "title": "Parker Solar Probe",
       "where": "Skrz korónu",
-      "body": "24. prosince 2024 proletěla sonda {parkerPerihelionR} {parkerPerihelionRPlural, select, one {sluneční poloměr} few {sluneční poloměry} many {slunečního poloměru} other {slunečních poloměrů}} od středu Slunce rychlostí {parkerSpeed}, uvnitř koróny: první kosmická loď v atmosféře hvězdy.",
-      "caution": "Značka v místě největšího přiblížení; dráha se nekreslí a sonda není v měřítku."
+      "body": "Parker poprvé vstoupil do sluneční koróny v dubnu 2021. Dne 24. prosince 2024 dosáhl rekordní dráhy, přibližně {parkerPerihelionR} slunečních poloměrů od středu při rychlosti asi {parkerSpeed}; další průlety toto přiblížení zopakovaly.",
+      "caution": "Značka perihelia z prosince 2024, nikoli živá telemetrie. Dráha není vykreslena a sonda není v měřítku."
     }
   },
   "tour": {
@@ -294,11 +319,11 @@
       },
       "walk": {
         "title": "Dlouhé bloudění",
-        "body": "Světlo ne. Rozptýlené na každém kroku putuje k povrchu podle tohoto modelu tisíce let, pak k nám {lightTimeMin} minut."
+        "body": "Záření difunduje hustým nitrem a interaguje s látkou; vnějším obalem přenáší velkou část energie konvekce. Modelový odhad difuze k základně konvektivní zóny činí {photonWalkKyr} tisíc let. Uniklé světlo pak dorazí k Zemi za {lightTimeMin} minuty."
       },
       "dynamo": {
         "title": "Dvě rotace",
-        "body": "Nitro se otáčí jako celek. Povrch se otočí za {equatorDays} dní na rovníku a za {poleDays} u pólů. Sledujte střih na rozhraní: ten navíjí pole."
+        "body": "Velká část radiačního nitra rotuje téměř rovnoměrně. Zvolený povrchový zákon dává {equatorDays} dne na rovníku a při extrapolaci {poleDays} dne na pólu, vůči hvězdám. Střih pomáhá vytvářet magnetické pole, úplný mechanismus a umístění dynama však zůstávají předmětem diskuse."
       },
       "granules": {
         "title": "Vroucí povrch",
@@ -313,64 +338,71 @@
         "body": "V Hα, na {halphaNm} nm, se objeví tenká vrstva nad povrchem: výtrysky na okraji, jasné flokule, protuberance stojící v poli."
       },
       "eruption": {
-        "title": "Pole se utrhne",
-        "body": "Střih střádá v poli nad oblastí energii. Ztráta rovnováhy zvedne lano; pod ním se pole přepojí, vzplane a lano pustí."
+        "title": "Vzestup a přepojování",
+        "body": "V tomto zjednodušeném řezu se přicházející kontury přepojují na stoupající horní kontury a smršťující se dolní smyčky s pevnými patami. Tečky sledují jeden zvolený ilustrační tok plazmatu. Skutečné erupce jsou trojrozměrné a mohou měnit spojení svých pat."
       },
       "corona": {
         "title": "Nahoře žhavěji",
-        "body": "Koróna má {coronaMK} milionu kelvinů, mnohem víc než povrch, a nikdo přesně neví proč. Její tvar je tvarem pole: oblouky, kde se zavírá, chocholy, kde se otvírá."
+        "body": "Typické koronální plazma dosahuje {coronaMK} milionů kelvinů. Disipace vln a magnetická rekonexe jsou podložené mechanismy ohřevu; jejich relativní příspěvky se mění a dále zkoumají. Oblouky a paprsky sledují část magnetické struktury."
       },
       "cycle": {
         "title": "Jedenáct let",
-        "body": "Skvrny se objevují ve středních šířkách a asi {cycleYears} let se stěhují k rovníku; v maximu se póly vymění. Pak znovu, jak to roku 1843 poprvé uviděl Schwabe."
+        "body": "Vznik skvrn se během přibližně {cycleYears} let posouvá k rovníku. Polární pole se obvykle obracejí poblíž maxima, často v každé polokouli jindy. Opakující se model tento vzorec ilustruje; budoucí cyklus nepředpovídá."
       }
     }
   },
   "technicalDetails": {
     "title": "Uvnitř laboratoře Slunce",
-    "summary": "Standardní model nitra, procedurální povrch, potenciálové magnetické pole a analytická erupce, osvětlené odezvou každého pásma. Čísla nesou své zdroje; kresba je ilustrační.",
+    "summary": "Výukový model spojuje historické sluneční nitro, zpracované snímky a procedurální struktury. Spektrální pohledy, magnetický vývoj a dynamika erupce jsou aproximace s výslovnými omezeními, nikoli kalibrovaná pozorování nebo prediktivní simulace plazmatu.",
     "features": {
       "views": "{views} pohledů, od nitra jádra po vítr, každý vlastním tempem.",
       "interior": "Nitro ze standardního slunečního modelu, rozříznuté do libovolné hloubky, s profilem pod sondou.",
       "surface": "Granulace, skvrny, fakule a okrajové ztemnění, s povrchem otáčejícím se diferenciálně.",
       "atmosphere": "Chromosféra, spikule a protuberance v Hα; přilby a chocholy koróny při zatmění.",
-      "field": "Siločáry z potenciálového pole a erupce, která energii nastřádá a pustí.",
-      "lights": "Každé světlo, od bílého přes pásma AIA po magnetogram, nasvítí tutéž scénu.",
+      "field": "Potenciálové pole pozadí a samostatná kinematická ukázka rekonexe.",
+      "lights": "Přibližné spektrální pohledy a syntetický projektovaný magnetogram mění zobrazení scény.",
       "cycle": "Cyklus aktivity: stěhování skvrn, překlopení dipólu, záznam od sedmnáctého století."
     },
     "sections": {
       "interior": {
         "title": "Nitro",
-        "body": "Plochy řezu vypisují standardní sluneční model (Model S): teplotu, hustotu, tlak, zářivý výkon a podíl vodíku podle poloměru. Ve středu má {coreTemperatureMK} milionů kelvinů a {centralDensity}krát hustotu vody; jádro, které tvoří světlo, sahá do {coreRadius} poloměru, konvektivní vrstva začíná na {tachocline}. Bloudění fotonu je odhad náhodné procházky přes opacitu modelu, {photonWalkKyr} tisíc let proti {photonWalkLiteratureKyr} v literatuře; není to výpočet přenosu."
+        "body": "Řez ukazuje model S (1996): teplotu, hustotu, tlak, svítivost a podíl vodíku. Ve středu má {coreTemperatureMK} milionu kelvinů a {centralDensity} hustot vody; téměř veškerá svítivost vzniká uvnitř {coreRadius} poloměru. Konvektivní zóna začíná v {tachocline}. Konvenční odhad náhodné procházky po slupkách přes modelovou opacitu k této hranici dává {photonWalkKyr} tisíc let; Mitalas a Sills uvádějí {photonWalkLiteratureKyr} pro jiný model Slunce. Nejde o řešení tepelného transportu ani o životnost jednotlivého fotonu. Energie fúze používá hmotnosti neutrálních izotopů vodíku-1 a helia-4, včetně anihilace a energie neutrin; L/c² vyjadřuje pouze ztrátu hmotnosti fotony."
       },
       "rotation": {
         "title": "Rotace",
-        "body": "Povrch se otáčí podle dopplerovského zákona po šířkách, za {equatorDays} dní na rovníku a {poleDays} u pólů; pod tachoklinou se nitro otáčí jako jedno těleso střední rychlostí zákona. Plochy řezu se otáčejí tempem své slupky, takže střih je za modelové dny vidět."
+        "body": "Povrchový zákon Snodgrasse a Ulricha dává siderické periody {equatorDays} dne na rovníku a {poleDays} dne při extrapolaci k pólu. Pod tachoklinou zobrazení volí rovnoměrnou rotaci se sférickým průměrem povrchového zákona, nikoli změřenou rotaci jádra. Pohyb slupek zviditelňuje střih. Nedávné studie hlubokého a podpovrchového dynama dospívají k různým závěrům; tato kresba spor neřeší."
       },
       "surface": {
         "title": "Povrch",
-        "body": "V měřítku disku je Slunce v bílém světle to pozorované: kontinuum SDO/HMI na 617,3 nm, mozaika z 1.–22. května 2024 zploštělá u zdroje, s okrajovým ztemněním napasované atmosféry a Planckovou barvou fotosféry přes odezvu oka. Aktivní oblasti modelu začínají tam, kde stály oblasti NOAA té mozaiky, a dál se vyvíjejí, takže ostatní světla souhlasí s mapou. Zblízka přebírají procedurální granule asi {granuleKm} km napříč a {granuleMin} minut života, škálované tlakovou výškou; skvrny a fakule pocházejí z oblastí."
+        "body": "Velká textura v bílém světle používá zpracované kontinuum SDO/HMI poblíž 617,3 nm, složené ze snímků z 1.–22. května 2024; nejde o současné pozorování celé koule. Okrajové ztemnění a zobrazená barva jsou přidané. Oblasti NOAA inicializují syntetickou populaci, dál pokračuje modelový vývoj. Zblízka texturu nahrazují procedurální granule, typicky {granuleKm} km široké a žijící {granuleMin} minut. Ostatní pásma jsou syntetická, nikoli souběžná pozorování AIA."
       },
       "atmosphere": {
         "title": "Atmosféra",
-        "body": "Chromosféra je kreslena {chromosphereKm} km hluboká v Hα na {halphaNm} nm. Koróna v bílém světle sleduje Baumbachův pokles, tvarovaný tím, kde je modelové pole uzavřené či otevřené; její kreslená teplota zastupuje korónu o {coronaMK} milionu kelvinů. Spikule, protuberance a smyčky jsou autorské tvary umístěné modelem a osvětlené svou teplotou."
+        "body": "Schematická chromosféra má hloubku {chromosphereKm} km a zobrazuje se v Hα na {halphaNm} nm. Radiální pokles bílé koróny vychází z Baumbachova profilu; tvar je autorský. Přiřazených {coronaMK} milionů kelvinů představuje typický koronální rozsah, nikoli teplotu odvozenou z jasu rozptýleného světla. Spikule, protuberance a smyčky mají předepsané tvary. Ohřev, vypařování, chladnutí a urychlování větru se nepočítají."
       },
       "field": {
         "title": "Magnetické pole",
-        "body": "Pod zdrojovou plochou je pole potenciálové: globální dipól sledující cyklus a zanořený dipól pro každou aktivní oblast. Klidné Slunce nese {meanFieldMT} mT; skvrna až {spotFieldT} T. Erupce je analytický model ztráty rovnováhy: magnetické lano nad bipolárním polem, proudová vrstva pod ním, přepojení, jakmile se lano zvedne."
+        "body": "Potenciálové pozadí kombinuje globální dipól se zdrojovou plochou a dipóly zanořené pod aktivními oblastmi. Radiální okrajovou podmínku na zdrojové ploše splňuje jen globální složka; nejde o extrapolaci pozorovaného magnetogramu. Referenční pole činí {meanFieldMT} mT v klidných oblastech a až {spotFieldT} T ve skvrnách. Samostatná proměnná toková funkce určuje erupci v bezrozměrné rovině. Její kontury přenášejí stejný tok do obou produktů; zvolená rychlost a lokalizovaný neideální člen splňují indukční rovnici v této referenční rovině. Hybnost, energie a urychlování částic se nepočítají. Roztažené prostorové zobrazení zachovává znázorněnou konektivitu, není globálním trojrozměrným řešením rezistivní MHD. Horní ostrov nedokládá odpojení skutečného CME od Slunce. B²V/(2μ₀) je celková energie rovnoměrného pole; uvolnit se může pouze volná energie nad vhodným referenčním polem. Křivky a tečky jsou ilustrační překryvy, nikoli změřená emise nebo trajektorie částic."
       },
       "lights": {
         "title": "Světla",
-        "body": "Každá kreslená složka nese teplotu. Pásmo ji váží svou odezvou, log-normální kolem vrcholu pásma, a vypíše přes barevnou tabulku přístroje; bílé světlo a Hα místo toho vybírají vrstvy."
+        "body": "Pohledy AIA používají reprezentativní vrcholy iontové odezvy a běžné nepravé barvy. Šířky logaritmických normálních křivek, relativní váhy vrcholů a viditelnost vrstev jsou zvolené, nikoli kalibrované odezvy přístroje. Některá pásma reagují na chladné i horké plazma; zvolená vlnová délka není teploměr. Hustota, emisní míra podél pohledu, zastoupení prvků a časově proměnná kalibrace chybějí. Hα a He II 304 vyžadují přenos v opticky tlustém prostředí mimo lokální termodynamickou rovnováhu a mohou být mimo ionizační rovnováhu. Jejich jas je zde ilustrační. Rozptyl v bílé koróně neměří teplotu. Magnetogram je projekcí syntetického radiálního pole do směru pohledu, nikoli daty HMI. Třídy GOES jsou přiřazené příklady špičkového měkkého rentgenového toku u Země; syntetický tok GOES se nepočítá."
       },
       "cycle": {
         "title": "Cyklus",
-        "body": "Cyklus objevil Schwabe v roce 1843 ze svých počtů skvrn a Wolfovo relativní číslo z roku 1848, R = k(10g + s), jej počítá dodnes. Oblasti vznikají v šířkách, které se během {cycleYears}letého cyklu stěhují k rovníku, s polaritami polokoulí podle Haleova zákona; záznam relativních čísel jsou roční průměry observatoře, mezi nimi {maunderYears} let Maunderova minima."
+        "body": "Wolfovo relativní číslo R = k(10g + s) váží skupiny a jednotlivé skvrny. Idealizovaná animace s periodou {cycleYears} let opakuje zvolený vzorec šířek a polarit; kalendářní údaje jsou modelová data, nikoli rekonstrukce nebo předpověď. Skutečné cykly se liší délkou, amplitudou i časováním polokoulí. Samostatné historické grafy používají roční počty skvrn SILSO od roku 1700 a rekonstrukci skupinových čísel sahající do sedmnáctého století. Maunderovo minimum trvající {maunderYears} let patří do této starší rekonstrukce s méně jistým vzorkováním a kalibrací."
       },
       "limits": {
         "title": "Meze",
-        "body": "Nic z toho není magnetohydrodynamické řešení. Tvary, tempa a jas jsou voleny tak, aby fyzika byla čitelná na první pohled; čísla na kartách jsou ta naměřená."
+        "body": "Scéna je výukovou syntézou. Karty rozlišují pozorování se zdrojem, historické modelové hodnoty, odvozené odhady a výukové volby; ne každé číslo je změřené. Nepočítá se globální magnetohydrodynamický vývoj, kalibrovaný přenos záření, rekonstrukce události ani předpověď kosmického počasí. Měřítko, trvání, emise a kontrast jsou zvoleny pro čitelnost. Snímky z května 2024 jsou historické, nikoli živý přenos Slunce."
       }
     }
+  },
+  "lightReading": {
+    "response": "Vrcholy odezvy ≈ {value}",
+    "effective": "Efektivní teplota {value}",
+    "lineTransfer": "Přenos záření v čáře není modelován",
+    "scattered": "Rozptýlené sluneční světlo",
+    "polarity": "Zlatá: k pozorovateli · modrá: od něj"
   }
 }

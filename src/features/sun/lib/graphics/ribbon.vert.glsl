@@ -12,6 +12,7 @@ attribute vec4 aLine;   // polarity; open; strength (0–1); kelvin
 attribute vec2 aAlong;  // progress along the line at the start and the end
 attribute float aFade;  // an arcade copy's fall-off, the background's step back (1 for a line of its own)
 attribute float aTube;  // the width against a field line's: 1, or an arcade's tubes
+attribute float aSeed;
 uniform float uHalfWidth;  // half the halo's width, world per unit distance (px × world per px)
 varying float vAcross;
 varying vec4 vLine;
@@ -21,6 +22,7 @@ varying float vAlong;
 varying vec3 vWorld;
 varying float vTaper;
 varying float vTube;
+varying float vSeed;
 
 vec2 perpendicular(vec2 v) {
   float len = length(v);
@@ -49,7 +51,8 @@ void main() {
   float taper = aLine.y > 0.5 ? mix(1.0, OPEN_TAPER, along) : 1.0;
   /* Weak lines draw thinner; an arcade's draw as tubes. */
   float weak = mix(RIBBON_WEAK_WIDTH, 1.0, aLine.z);
-  float halfWidth = uHalfWidth * max(-p.z, 1e-4) * scale * taper * weak * aTube;
+  float breathing = 0.85 + 0.15 * sin(along * 13.0 + aSeed);
+  float halfWidth = uHalfWidth * max(-p.z, 1e-4) * scale * taper * weak * aTube * breathing;
   vec2 offset = mitre * halfWidth * position.y;
   vAcross = position.y;
   vLine = aLine;
@@ -59,5 +62,6 @@ void main() {
   vWorld = (modelMatrix * vec4(here, 1.0)).xyz;
   vTaper = taper;
   vTube = aTube;
+  vSeed = aSeed;
   gl_Position = projectionMatrix * vec4(p.xy + offset, p.z, 1.0);
 }
