@@ -19,16 +19,16 @@ import {
   RINGS,
   SPINS,
   centuriesSinceJ2000,
-  createOrbitWriter,
   ephemerisSelfCheck,
   flattening,
   jplElements,
+  keplerPosition,
   meanLongitude,
   meanRates,
+  orbitShape,
   ringStrip,
   ringExposure,
   ringStripLevels,
-  writeOrbit,
 } from "@horizon/toolkit/bodies";
 import {
   GEOMETRIC_ALBEDO,
@@ -44,6 +44,7 @@ import {
 } from "@horizon/toolkit/scene";
 
 import { moonOffset, moonOrientation } from "../src/space/solar-system/graphics/moons.ts";
+import { moonOrbitShape } from "../src/space/solar-system/model/moon-orbits.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
   assert.ok(
@@ -500,25 +501,33 @@ test("the ephemeris passes its own consistency checks, here rather than on every
   assert.deepEqual(ephemerisSelfCheck(), []);
 });
 
-test("orbit buffers preserve periapsis/apoapsis and skip changes to mean anomaly alone", () => {
-  const el = { a: 20, e: 0.8, i: 63, omega: 120, node: 45, M: 0 };
-  const buffer = new Float32Array(97 * 3);
-  const update = createOrbitWriter(buffer);
-  assert.equal(update(el, true), true);
-  assert.ok(Math.abs(Math.hypot(...buffer.slice(0, 3)) - 4) < 1e-5);
-  assert.ok(Math.abs(Math.hypot(...buffer.slice(48 * 3, 49 * 3)) - 36) < 1e-5);
-  const initial = buffer.slice();
-  assert.equal(update({ ...el, M: 180 }, true), false);
-  assert.deepEqual(buffer, initial);
-  // A frame's secular drift (Ω moving by 1e-12°) cannot move a float32 vertex: no rewrite.
-  assert.equal(update({ ...el, node: el.node + 1e-12 }, true), false);
-  assert.equal(update(el, false), true);
-  for (let i = 0; i < buffer.length; i += 3)
-    assert.ok(Math.abs(Math.hypot(...buffer.slice(i, i + 3)) - 20) < 1e-5);
-  const changed = { ...el, node: 90 };
-  assert.equal(update(changed, true), true);
-  const expected = new Float32Array(buffer.length);
-  writeOrbit(expected, changed, true);
-  assert.deepEqual(buffer, expected);
-  assert.equal(update(changed, true), false);
+/** The point at eccentric anomaly E on a shape, as the orbit line's vertex stage builds it. */
+const onShape = ({ a, e, p, q }, E) =>
+  p.map((pk, k) => pk * a * (Math.cos(E) - e) + q[k] * a * Math.sqrt(1 - e * e) * Math.sin(E));
+
+test("an orbit's shape is the ellipse its body moves on, the body at its anomaly", () => {
+  const el = { a: 20, e: 0.8, i: 63, omega: 120, node: 45, M: 37 };
+  const shape = orbitShape(el, true);
+  const body = keplerPosition(el);
+  onShape(shape, shape.E).forEach((x, k) => assert.ok(Math.abs(x - body[k]) < 1e-9));
+  assert.ok(Math.abs(Math.hypot(...onShape(shape, 0)) - 4) < 1e-9);
+  assert.ok(Math.abs(Math.hypot(...onShape(shape, Math.PI)) - 36) < 1e-9);
+  /* Moving on along the orbit moves the body, not the ellipse. */
+  const later = orbitShape({ ...el, M: 180 }, true);
+  assert.deepEqual([later.a, later.e, later.p, later.q], [shape.a, shape.e, shape.p, shape.q]);
+  /* Not elliptical: a circle of radius a in the ecliptic (the scene's y is its pole). */
+  const circle = orbitShape(el, false);
+  assert.equal(circle.e, 0);
+  assert.ok(Math.abs(circle.p[1]) < 1e-12 && Math.abs(circle.q[1]) < 1e-12);
+  for (const E of [0, 1, 2, 4]) assert.ok(Math.abs(Math.hypot(...onShape(circle, E)) - 20) < 1e-9);
+});
+
+test("a moon's orbit shape carries the moon where its offset puts it", () => {
+  const date = new Date(Date.UTC(2026, 9, 22));
+  for (const moon of MOONS.filter((m) => m.id !== "moon")) {
+    const shape = moonOrbitShape(moon.id, date);
+    const offset = moonOffset(moon.id, date);
+    const at = onShape(shape, shape.E);
+    assert.ok(Math.hypot(at[0] - offset.x, at[1] - offset.y, at[2] - offset.z) < 1e-12, moon.id);
+  }
 });

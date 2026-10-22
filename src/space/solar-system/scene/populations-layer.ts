@@ -1,38 +1,67 @@
 /** Small-body populations: the planetesimal sample, the GPU belts, the disk and the Oort shells. */
 import {
-  Color,
-  InstancedBufferAttribute,
-  InstancedMesh,
+  Matrix4,
   Mesh,
-  Object3D,
+  Ray,
   RingGeometry,
   SphereGeometry,
   TorusGeometry,
+  Vector3,
+  type Intersection,
+  type Object3D,
 } from "three";
 
-import { keplerPosition, type Elements } from "@horizon/toolkit/bodies";
+import type { Elements, Vec3 } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
-import { BELOW, fade, SOLAR_GOLD, type PlaceLabel } from "@horizon/toolkit/scene";
+import {
+  BELOW,
+  fade,
+  FAINTEST_OPACITY,
+  SOLAR_GOLD,
+  TAP_REACH_PX,
+  type PlaceLabel,
+} from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
 import type { SwarmCounts } from "../../quality";
 import { createSwarm, kuiperBelt, mainBelt, oortCloud, trojans } from "../graphics/swarms";
+import { tracerGeometry } from "../graphics/tracers";
 import { planetElements } from "../model/elements";
 import { MODEL_START, OORT_SHELLS_AU, SUN_BIRTH } from "../model/parameters";
+import { positionOf } from "../model/position";
 import type { SolarSelection } from "../model/selection";
-import { TRACERS, binOf, tracerElements, tracerVisible, type Bin } from "../model/tracers";
+import { BINS, TRACERS, binOf, tracerElements, type Bin } from "../model/tracers";
 import { orbitOf } from "./geometry";
 import { type SolarFrame, type SolarKit } from "./kit";
 
-/** Population tints for the planetesimal lumps: icy grey in the disk, reddened in the belt, pale far out. */
-const BIN_COLOR: Record<Bin, Color> = {
-  disk: new Color("#a8a39b"),
-  kuiper: new Color("#c09a82"),
-  scattered: new Color("#a9b6c0"),
-  oort: new Color("#d6dee4"),
-  ejected: new Color("#c4705a"),
-};
-const BIN_CODE: Record<Bin, number> = { disk: 1, kuiper: 2, scattered: 3, oort: 4, ejected: 5 };
+const at: Vec3 = [0, 0, 0];
+const centre = new Vector3();
+
+/**
+ * The samples a ray passes within `reach(depth)` of, at their depth along it, where the model
+ * puts them at `moment`: those still in the system whose bin is shown, the one nearest the ray
+ * as seen first, each with the ray's closest point to it. A tap reads the same model the GPU
+ * draws from: its drift epoch holds the model's phases, so the two agree within a pixel.
+ */
+function tracersAlong(
+  ray: Ray,
+  moment: Pick<SolarFrame, "mig" | "driftYears" | "now">,
+  shown: Readonly<Record<Bin, boolean>>,
+  reach: (depth: number) => number,
+): { index: number; point: Vector3 }[] {
+  const hits: { index: number; point: Vector3; off: number }[] = [];
+  for (let index = 0; index < TRACERS.length; index += 1) {
+    if (!shown[binOf(TRACERS[index]!, moment.mig)]) continue;
+    if (!positionOf({ kind: "tracer", index }, moment, moment.now, at)) continue;
+    centre.set(at[0], at[1], at[2]);
+    const point = ray.closestPointToPoint(centre, new Vector3());
+    const depth = point.distanceTo(ray.origin);
+    const miss = point.distanceTo(centre);
+    if (depth <= 0 || miss > reach(depth)) continue;
+    hits.push({ index, point, off: miss / depth });
+  }
+  return hits.sort((a, b) => a.off - b.off);
+}
 
 /** Where each population reads (camera distance, au): soft bands instead of cut-offs. */
 const BELT = fade(0, 0, 110, 230);
@@ -50,19 +79,33 @@ export function createPopulationsLayer(
   counts: SwarmCounts,
   place: PlaceLabel,
 ) {
-  const rock = scope.own(new SphereGeometry(1, tight ? 16 : 24, tight ? 12 : 16));
-  const seeds = new Float32Array(TRACERS.length);
-  for (let i = 0; i < seeds.length; i += 1) seeds[i] = (i * 0.618034) % 1;
-  rock.setAttribute("seed", new InstancedBufferAttribute(seeds, 1));
-  const tracers = new InstancedMesh(rock, looks.tracers, TRACERS.length);
+  const sample = tracerGeometry(tight ? 16 : 24, tight ? 12 : 16);
+  const tracers = new Mesh(scope.own(sample.geometry), looks.tracers);
   tracers.frustumCulled = false;
   tracers.userData.pick = { kind: "tracer" };
-  for (let i = 0; i < TRACERS.length; i += 1) tracers.setColorAt(i, BIN_COLOR.kuiper);
   parent.add(tracers);
-  const tracerCodes = new Uint8Array(TRACERS.length);
-  /* What the tracer instances were last written for; NaN forces the next write. */
-  const tracerStamp = { yearsAgo: NaN, drift: NaN, mask: NaN };
-  const dummy = new Object3D();
+  const rocks = looks.tracers.uniforms;
+  const binShown: number[] = rocks.binShown!.value;
+  /** The moment and switches the sample was last drawn at, for taps. */
+  let lastDrawn: SolarFrame | null = null;
+  const toLocal = new Matrix4();
+  const local = new Ray();
+  /* A tap finds the sample where the GPU drew it, from the same model, within a fingertip as
+     planets are or the drawn rock where that is larger (the shader's `radius` is in the
+     layer's own units); of those, the one nearest the tap as seen. */
+  tracers.raycast = (raycaster, intersects: Intersection[]) => {
+    if (!lastDrawn) return;
+    local.copy(raycaster.ray).applyMatrix4(toLocal.copy(tracers.matrixWorld).invert());
+    const scale = tracers.matrixWorld.getMaxScaleOnAxis();
+    const reach = (depth: number) =>
+      Math.max(rocks.radius!.value, pxWorld(depth * scale, TAP_REACH_PX) / scale);
+    const [best] = tracersAlong(local, lastDrawn, lastDrawn.show, reach);
+    if (!best) return;
+    const point = best.point.applyMatrix4(tracers.matrixWorld);
+    const distance = raycaster.ray.origin.distanceTo(point);
+    if (distance < raycaster.near || distance > raycaster.far) return;
+    intersects.push({ distance, point, object: tracers, instanceId: best.index });
+  };
 
   const focusOrbit = orbitOf(scope, SOLAR_GOLD, 0.95);
   parent.add(focusOrbit.line);
@@ -108,72 +151,23 @@ export function createPopulationsLayer(
   const diskOn = lod.fader();
   const age = lod.fader();
 
-  const tmp: [number, number, number] = [0, 0, 0];
   const jupiterEl: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
 
-  /** Instance matrices and tints, rewritten only when the inputs that move them change. */
-  const updateTracers = ({ show, yearsAgo, mig, driftYears, dist }: SolarFrame, on: boolean) => {
+  /**
+   * The sample moves on the GPU: a frame writes only the moment, its switches and its size (and,
+   * now and then, the phases at a new drift epoch).
+   */
+  const updateTracers = (f: SolarFrame, on: boolean, pixel: number) => {
+    const { show, mig, driftYears, dist } = f;
     const presence = ROCKS(dist);
-    tracers.visible = on && presence > 0.004;
-    // Hidden buffers stay untouched. Invalidate so the first visible frame
-    // always uses current positions, sizes and population filters.
-    if (!tracers.visible) {
-      tracerStamp.yearsAgo = NaN;
-      return;
-    }
-    const mask =
-      (show.disk ? 1 : 0) |
-      (show.kuiper ? 2 : 0) |
-      (show.scattered ? 4 : 0) |
-      (show.oort ? 8 : 0) |
-      (show.ejected ? 16 : 0) |
-      (show.trueSize ? 32 : 0);
-    /* Size is a uniform, so the zoom alone never rewrites the instances. */
-    looks.tracers.uniforms.radius!.value = show.trueSize
-      ? 30 / AU_KM
-      : pxWorld(dist, 3.1) * presence;
-    const drift = Math.round(driftYears * 200);
-    if (
-      yearsAgo === tracerStamp.yearsAgo &&
-      drift === tracerStamp.drift &&
-      mask === tracerStamp.mask
-    )
-      return;
-    tracerStamp.yearsAgo = yearsAgo;
-    tracerStamp.drift = drift;
-    tracerStamp.mask = mask;
-    const allow: Record<Bin, boolean> = {
-      disk: show.disk,
-      kuiper: show.kuiper,
-      scattered: show.scattered,
-      oort: show.oort,
-      ejected: show.ejected,
-    };
-    let colorDirty = false;
-    for (let i = 0; i < TRACERS.length; i += 1) {
-      const tr = TRACERS[i]!;
-      const bin = binOf(tr, mig);
-      if (!(tracerVisible(tr, mig) && allow[bin])) {
-        dummy.position.set(0, 0, 0);
-        dummy.scale.setScalar(0);
-        dummy.updateMatrix();
-        tracers.setMatrixAt(i, dummy.matrix);
-        continue;
-      }
-      keplerPosition(tracerElements(tr, mig, driftYears), tmp);
-      dummy.position.set(tmp[0], tmp[1], tmp[2]);
-      dummy.scale.setScalar(1);
-      dummy.updateMatrix();
-      tracers.setMatrixAt(i, dummy.matrix);
-      const code = BIN_CODE[bin];
-      if (tracerCodes[i] !== code) {
-        tracerCodes[i] = code;
-        tracers.setColorAt(i, BIN_COLOR[bin]);
-        colorDirty = true;
-      }
-    }
-    tracers.instanceMatrix.needsUpdate = true;
-    if (colorDirty && tracers.instanceColor) tracers.instanceColor.needsUpdate = true;
+    /* The presence is the sample's size: shrunk under the faintest opacity, it draws nothing. */
+    tracers.visible = on && presence > FAINTEST_OPACITY;
+    lastDrawn = tracers.visible ? f : null;
+    if (!tracers.visible) return;
+    rocks.mig!.value = mig;
+    rocks.drift!.value = sample.drift.since(mig, driftYears, pixel);
+    rocks.radius!.value = show.trueSize ? 30 / AU_KM : pxWorld(dist, 3.1) * presence;
+    for (let i = 0; i < BINS.length; i += 1) binShown[i] = show[BINS[i]!] ? 1 : 0;
   };
 
   return {
@@ -189,7 +183,10 @@ export function createPopulationsLayer(
     update(f: SolarFrame) {
       const { show, sel, yearsAgo, mig, driftYears, dist, now } = f;
       const planetesimals = SUN_BIRTH - yearsAgo > 1e6;
-      updateTracers(f, planetesimals);
+      /* A pixel's world size at the aim: the drift epochs keep the GPU's float32 phases within a
+         fraction of it of the model's. */
+      const pixel = pxWorld(dist, 1);
+      updateTracers(f, planetesimals, pixel);
 
       let focus: Elements | null = null;
       if (sel?.kind === "tracer") {
@@ -205,14 +202,15 @@ export function createPopulationsLayer(
       const formed = age.to(planetesimals);
       const belts = BELT(dist) * formed;
       beltHit.visible = belts > 0.5 && dist < 28 && yearsAgo <= MODEL_START;
-      if (belt.fade(belts)) belt.set(mig, driftYears, pxWorld(dist, 40));
+      if (belt.fade(belts)) belt.set(mig, driftYears, pixel, pxWorld(dist, 40));
       if (trojanSwarm.fade(belts * smoothstep(0.45, 0.55, mig)))
-        trojanSwarm.set(mig, driftYears, pxWorld(dist, 40), jupiterLon);
+        trojanSwarm.set(mig, driftYears, pixel, pxWorld(dist, 40), jupiterLon);
       const kuiperShown = KUIPER(dist) * kuiperOn.to(show.kuiper) * formed;
-      if (kuiper.fade(kuiperShown)) kuiper.set(mig, driftYears, pxWorld(dist, 30));
+      if (kuiper.fade(kuiperShown)) kuiper.set(mig, driftYears, pixel, pxWorld(dist, 30));
       kuiperHit.visible = kuiperShown > 0.5 && dist < 400;
       const oortShown = oortOn.to(show.oort);
-      if (oort.fade(OORT(dist) * oortShown * formed)) oort.set(mig, driftYears, pxWorld(dist, 40));
+      if (oort.fade(OORT(dist) * oortShown * formed))
+        oort.set(mig, driftYears, pixel, pxWorld(dist, 40));
       const diskShown = DISK(dist) * diskOn.to(show.disk) * (1 - smoothstep(0.9, 0.98, mig));
       diskRing.visible = diskShown > 0.004;
       looks.disk.opacity = (1 - mig) * 0.85 * diskShown;

@@ -14,6 +14,7 @@ import {
   bodyOrientation,
   framed,
   SOLAR_GOLD,
+  TAP_REACH_PX,
   type AnchoredRulers,
   type PlaceLabel,
 } from "@horizon/toolkit/scene";
@@ -154,7 +155,11 @@ export function createPlanetsLayer(
       anchor.y = tmp[1];
       anchor.z = tmp[2];
       anchor.on = inFrame > 0.5;
-      const touch = Math.max(planet.id === "saturn" ? r * 2.45 : r, pxWorld(dist, 22), 0.05);
+      const touch = Math.max(
+        planet.id === "saturn" ? r * 2.45 : r,
+        pxWorld(dist, TAP_REACH_PX),
+        0.05,
+      );
       planet.hit.scale.setScalar(touch);
       const selected = sel?.kind === "planet" && sel.id === planet.id;
       const { orbit } = planet;

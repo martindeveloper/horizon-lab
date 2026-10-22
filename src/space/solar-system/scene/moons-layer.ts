@@ -3,6 +3,7 @@ import { Mesh, Vector3, type Object3D } from "three";
 
 import {
   MOONS,
+  orbitShapeOf,
   type BodyId,
   type Moon,
   type MoonHost,
@@ -10,10 +11,11 @@ import {
   type Vec3,
 } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
-import { type LineSlot, ownedLine, type PlaceLabel } from "@horizon/toolkit/scene";
+import { type OrbitLine, ownedOrbitLine, type PlaceLabel } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
-import { moonOffset, moonOrientation, writeMoonOrbit } from "../graphics/moons";
+import { moonOffset, moonOrientation } from "../graphics/moons";
+import { moonOrbitShape } from "../model/moon-orbits";
 import { hostOf, type SolarSelection } from "../model/selection";
 import type { Globes } from "./geometry";
 import {
@@ -54,8 +56,7 @@ type MoonSlot = {
   /** Touch target: raycast, never drawn. */
   hit: Mesh;
   offset: Vector3;
-  orbit: LineSlot;
-  orbitDay: number;
+  orbit: OrbitLine;
   dotPx: number;
   /** Its magnification relative to the innermost moon's, (inner / a)^(1 − squeeze). */
   lift: number;
@@ -82,11 +83,15 @@ export function createMoonsLayer(
       hit.userData.pick = { kind: "moon", id: moon.id } satisfies SolarSelection;
       hit.userData.globe = mesh;
       hit.visible = false;
-      const orbit = ownedLine(scope, id === "pluto" ? SMALL_ORBIT_COLOR : ORBIT_COLOR[id], 0.45);
+      const orbit = ownedOrbitLine(
+        scope,
+        id === "pluto" ? SMALL_ORBIT_COLOR : ORBIT_COLOR[id],
+        0.45,
+      );
       orbit.line.visible = false;
       parent.add(mesh, hit, orbit.line);
       const dotPx = Math.max(MOON_PX_MIN, MOON_PX * Math.sqrt(moon.radiusKm / 2631.2));
-      return { moon, mesh, hit, offset: new Vector3(), orbit, orbitDay: NaN, dotPx, lift: 1 };
+      return { moon, mesh, hit, offset: new Vector3(), orbit, dotPx, lift: 1 };
     });
     const apsides = moons.map((m) => m.moon.aKm / AU_KM);
     const host: Host = { position: new Vector3(), extent: 0, on: false };
@@ -105,6 +110,7 @@ export function createMoonsLayer(
   const systemOf = (id: BodyId) => systems.find((s) => s.id === id);
   const slots = new Map(systems.flatMap((s) => s.moons.map((slot) => [slot.moon.id, slot])));
   const drawn: Vec3 = [0, 0, 0];
+  const shape = orbitShapeOf();
 
   return {
     hosts,
@@ -139,7 +145,6 @@ export function createMoonsLayer(
        planet's distance from the Sun; a wide system's outer moons less (SPREAD).
        True size keeps every distance real. */
     update({ now, show, sel, present: today }: SolarFrame) {
-      const day = Math.floor(now.getTime() / 86_400_000);
       const era = present.to(today);
       const labelled = names.to(show.names);
       for (const system of systems) {
@@ -208,11 +213,7 @@ export function createMoonsLayer(
             orbit.line.position.copy(host.position);
             orbit.line.scale.setScalar(magnify);
             orbit.material.opacity = 0.45 * presence;
-            if (slot.orbitDay !== day) {
-              slot.orbitDay = day;
-              writeMoonOrbit(orbit.positions, moon.id, now);
-              orbit.geometry.getAttribute("position").needsUpdate = true;
-            }
+            orbit.set(moonOrbitShape(moon.id, now, shape));
           }
           place(
             moon.id,

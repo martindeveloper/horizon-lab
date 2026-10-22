@@ -1,6 +1,9 @@
 import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import { CLEAR_DONE, MODEL_START } from "@/space/solar-system/model/parameters";
+import type { SolarSelection } from "@/space/solar-system/model/selection";
+import type { SolarViewId } from "@/space/solar-system/model/views";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 import type { PlanetId } from "@horizon/toolkit/bodies";
@@ -10,9 +13,16 @@ import { DRIFT } from "./lib/drift";
 import { SUN_ACTIVITY_CYCLE_SECONDS } from "./lib/model/solar-activity";
 import { DEFAULT_VIEW } from "./lib/model/views";
 import { createOrreryEngine } from "./lib/scene/engine";
-import { useOrrery } from "./lib/store";
+import { useOrrery, type Show } from "./lib/store";
 
 type OrreryBenchScene = BenchScene & {
+  /** The view the scene opens on; the home view by default. */
+  view?: SolarViewId;
+  /** The moment on the timeline; today by default. */
+  yearsAgo?: number;
+  /** Switches changed from the defaults. */
+  show?: Partial<Show>;
+  selection?: SolarSelection;
   bloom: boolean;
   lens: boolean;
   /** A close-up of this body, landed: the flight is run before the first frame. */
@@ -59,6 +69,9 @@ const NIGHT_SIDE: BenchScene["script"] = {
   keyframes: [0, 0.2, 0.35, 0.5, 0.6, 0.99],
 };
 
+/** The moment `u` of the way through the giant-planet clearing, in time (0 its start, 1 its end). */
+const clearing = (u: number) => MODEL_START - u * (MODEL_START - CLEAR_DONE);
+
 /** The activity's dynamics advance at most a tenth of a second per frame (`advance`). */
 const ACTIVITY_FRAME_S = 0.1;
 
@@ -67,6 +80,8 @@ const ACTIVITY_FRAME_S = 0.1;
  * with the lens on, a close-up of the Earth (its atmosphere shell over the globe), Neptune's
  * from the sunlit side and swung round against the Sun (its dusty rings), and the
  * Sun's close-up: as landed, with its activity on, and the activity's cycle as a sequence.
+ * The other views show the orbit lines at each scale: the inner planets', Pluto's and Halley's
+ * ellipses whole, Sedna's out to its aphelion.
  */
 const SCENES: readonly OrreryBenchScene[] = [
   {
@@ -90,6 +105,14 @@ const SCENES: readonly OrreryBenchScene[] = [
     bloom: false,
     lens: true,
   },
+  ...(["inner", "kuiper", "scattered", "oort"] as const).map((view): OrreryBenchScene => ({
+    id: view,
+    description: `The ${view} view, standard quality: the orbits at that scale`,
+    tags: ["view"],
+    bloom: false,
+    lens: false,
+    view,
+  })),
   {
     id: "earth-close-up",
     description: "Close-up of the Earth, standard quality: the globe under its atmosphere shell",
@@ -213,6 +236,70 @@ const SCENES: readonly OrreryBenchScene[] = [
       keyframes: [0.5, 0.99],
     },
   },
+  /* The planetesimal sample through the clearing: its bins and switches held still (a still
+     frame's image waits on however many frames its timing took), and its motion in sequences. */
+  {
+    id: "tracers-early",
+    description:
+      "The giants a quarter of the way through the clearing: the sample still in the disk",
+    tags: ["tracers"],
+    bloom: false,
+    lens: false,
+    yearsAgo: clearing(0.25),
+    show: { drift: false },
+  },
+  {
+    id: "tracers-clearing",
+    description:
+      "The Kuiper belt halfway through the clearing, Motion on: the sample along its orbits",
+    tags: ["sequence", "tracers"],
+    bloom: false,
+    lens: false,
+    view: "kuiper",
+    yearsAgo: clearing(0.5),
+    script: { frames: 300, duration: 30, keyframes: [0, 0.25, 0.5, 0.75, 1] },
+  },
+  {
+    id: "tracers-filtered",
+    description:
+      "The Kuiper belt late in the clearing with the Kuiper and ejected bins switched off",
+    tags: ["tracers"],
+    bloom: false,
+    lens: false,
+    view: "kuiper",
+    yearsAgo: clearing(0.65),
+    show: { kuiper: false, ejected: false, drift: false },
+  },
+  {
+    id: "tracers-scattered",
+    description: "The scattered disk once the clearing ends, Motion on for a long run of drift",
+    tags: ["sequence", "tracers"],
+    bloom: false,
+    lens: false,
+    view: "scattered",
+    yearsAgo: CLEAR_DONE,
+    script: { frames: 600, duration: 60, keyframes: [0, 0.5, 1] },
+  },
+  {
+    id: "tracers-far",
+    description: "The Oort cloud today, Motion on: a million years and more of drift",
+    tags: ["sequence", "tracers"],
+    bloom: false,
+    lens: false,
+    view: "oort",
+    script: { frames: 600, duration: 60, keyframes: [0, 0.5, 1] },
+  },
+  {
+    id: "tracers-selected",
+    description:
+      "The Kuiper belt today, Motion on, one scattered planetesimal selected: the reticle on it",
+    tags: ["sequence", "tracers"],
+    bloom: false,
+    lens: false,
+    view: "kuiper",
+    selection: { kind: "tracer", index: 8 },
+    script: { frames: 100, duration: 10, keyframes: [0, 1] },
+  },
 ];
 
 /**
@@ -231,7 +318,10 @@ export const benchTarget: BenchTarget = {
     store.getState().select(null);
     store.getState().resetView();
     store.setState({
-      view: DEFAULT_VIEW,
+      view: scene.view ?? DEFAULT_VIEW,
+      yearsAgo: scene.yearsAgo ?? 0,
+      show: { ...store.getState().show, ...scene.show },
+      selection: scene.selection ?? null,
       quality: "standard",
       bloom: scene.bloom,
       lens: scene.lens,

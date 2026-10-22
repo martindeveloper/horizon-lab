@@ -15,8 +15,11 @@ import {
   SUN_LIMB_V,
   SUN_MAP_QUIET_INTENSITY,
   SWARM_KEPLER_STEPS,
+  TRACER_KEPLER_STEPS,
+  TRACER_PUMP,
   TROJAN_OFFSET_DEG,
 } from "../model/parameters";
+import { BINS } from "../model/tracers";
 
 /**
  * Preserve linear-sRGB luminance while softening narrow-band chromatic contrast.
@@ -35,6 +38,12 @@ function displayLimb([r, g, b]: readonly [number, number, number]) {
 export const SOLAR_SHADER_DEFINES = glslDefines({
   SWARM_TROJAN_OFFSET: (TROJAN_OFFSET_DEG * Math.PI) / 180,
   SWARM_KEPLER_STEPS: glslInt(SWARM_KEPLER_STEPS),
+  TRACER_KEPLER_STEPS: glslInt(TRACER_KEPLER_STEPS),
+  TRACER_BINS: glslInt(BINS.length),
+  TRACER_PUMP_PERIHELION: TRACER_PUMP.perihelionAu,
+  TRACER_PUMP_FLOOR: TRACER_PUMP.floorAu,
+  TRACER_PUMP_MAX_E: TRACER_PUMP.maxE,
+  TRACER_PUMP_PEAK: TRACER_PUMP.peakS,
   GAS_CAVITY_IN: DUST_CAVITY_IN_AU / GAS_DISK_RADIUS_AU,
   GAS_CAVITY_OUT: DUST_CAVITY_OUT_AU / GAS_DISK_RADIUS_AU,
   GAS_RIM_IN: GAS_RIM_FRACTION,

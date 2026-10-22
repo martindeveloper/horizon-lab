@@ -4,18 +4,27 @@ import test from "node:test";
 import { Group, PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
 import { createStore } from "zustand/vanilla";
 
-import { MOONS } from "@horizon/toolkit/bodies";
+import { MOONS, keplerPosition } from "@horizon/toolkit/bodies";
+import { TAU, wrapSigned } from "@horizon/toolkit/math";
 import { DisposalScope, startEngine } from "@horizon/toolkit/rendering";
-import { defaultSceneAntialias } from "@horizon/toolkit/scene";
-import { AU_KM } from "@horizon/toolkit/science";
+import { TAP_REACH_PX, defaultSceneAntialias } from "@horizon/toolkit/scene";
+import { AU_KM, RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
 import { bridgeRender, bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
+import { tracerGeometry } from "../src/space/solar-system/graphics/tracers.ts";
 import { framingView, viewOf } from "../src/space/solar-system/model/framing.ts";
-import { TODAY } from "../src/space/solar-system/model/moment.ts";
+import { TODAY, momentAt } from "../src/space/solar-system/model/moment.ts";
+import { CLEAR_DONE, MODEL_START } from "../src/space/solar-system/model/parameters.ts";
 import { positionOf } from "../src/space/solar-system/model/position.ts";
 import { hasSurface, hostOf, solarPick } from "../src/space/solar-system/model/selection.ts";
+import {
+  TRACERS,
+  binOf,
+  tracerElements,
+  tracerVisible,
+} from "../src/space/solar-system/model/tracers.ts";
 import { createSolarKit } from "../src/space/solar-system/scene/kit.ts";
 import {
   chooseSolarHit,
@@ -451,15 +460,19 @@ function withSolarScene(run) {
     });
     const now = new Date("2026-10-18T00:00:00Z");
     const show = { names: true, trueSize: false, elliptical: true, drift: false, kuiper: true };
-    /** Puts the camera at `position` looking at `aim` and settles the scene there. */
-    const view = (position, aim, sel) => {
+    /**
+     * Puts the camera at `position` looking at `aim` and settles the scene there, today or at
+     * another `moment`, with any `switches` changed.
+     */
+    const view = (position, aim, sel, moment = TODAY, switches = {}) => {
       camera.position.copy(position);
       camera.lookAt(aim);
       camera.updateMatrixWorld();
       const dist = position.distanceTo(aim);
+      const shown = { ...show, ...switches };
       for (let frame = 0; frame < 12; frame += 1) {
         kit.lod.begin(0.1, dist, dist);
-        solar.update({ ...TODAY, dt: 0.1, now, show, sel, playing: false, dist });
+        solar.update({ ...moment, dt: 0.1, now, show: shown, sel, playing: false, dist });
       }
       scene.updateMatrixWorld(true); // as a render would
     };
@@ -510,6 +523,83 @@ test("a tap on a selected planet's moon picks the moon, from any side", () => {
         }
     assert.ok(tapped > 100);
   });
+});
+
+test("a tap on a planetesimal finds it where the model has moved it, only while it is drawn", () => {
+  withSolarScene(({ camera, solar, now, view }) => {
+    const raycaster = new Raycaster();
+    const shown = (object) => !object || (object.visible && shown(object.parent));
+    const bins = { disk: true, kuiper: true, scattered: true, oort: true, ejected: true };
+    /**
+     * What a tap picks `px` CSS pixels above the middle of the view (1000 px tall), the camera
+     * 3 au from `at` looking at it.
+     */
+    const tapAt = (at, moment, switches, px = 0) => {
+      const aim = new Vector3(...at);
+      view(aim.clone().add(new Vector3(0, 1, 3)), aim, null, moment, switches);
+      raycaster.setFromCamera(new Vector2(0, (2 * px) / 1000), camera);
+      const hits = raycaster
+        .intersectObjects(solar.pickables, false)
+        .filter((c) => shown(c.object));
+      const hit = chooseSolarHit(hits, raycaster.ray);
+      return hit ? solarPick(hit.object.userData.pick, hit.instanceId) : null;
+    };
+    /* Halfway through the clearing, three centuries along the orbits. */
+    const moment = momentAt(MODEL_START - (MODEL_START - CLEAR_DONE) / 2, 321.5);
+    const index = TRACERS.findIndex((tr) => binOf(tr, moment.mig) === "scattered");
+    const sample = { kind: "tracer", index };
+    const at = positionOf(sample, moment, now);
+    assert.deepEqual(tapAt(at, moment, bins), sample);
+    /* A sample is drawn a few pixels across but taps like a planet, within a fingertip. */
+    assert.deepEqual(tapAt(at, moment, bins, TAP_REACH_PX - 4), sample, "a near miss");
+    assert.notDeepEqual(tapAt(at, moment, bins, TAP_REACH_PX + 4), sample, "past a fingertip");
+    const before = positionOf(sample, { ...moment, driftYears: 0 }, now);
+    assert.ok(Math.hypot(at[0] - before[0], at[1] - before[1], at[2] - before[2]) > 1);
+    assert.notDeepEqual(tapAt(before, moment, bins), sample, "not where it was");
+    assert.notDeepEqual(tapAt(at, moment, { ...bins, scattered: false }), sample, "bin hidden");
+    /* Once the clearing has flung it out of the system, nothing is there to tap. */
+    const gone = TRACERS.findIndex((tr) => !tracerVisible(tr, 1));
+    const last = keplerPosition(tracerElements(TRACERS[gone], 1, 0));
+    assert.equal(tapAt(last, TODAY, bins)?.kind === "tracer", false);
+  });
+});
+
+test("re-based in time, the GPU's single-precision phases keep to the model over ten million years", () => {
+  const { geometry, drift } = tracerGeometry(4, 3);
+  const phases = geometry.getAttribute("orbitC");
+  const f = Math.fround;
+  const pixel = 0.1; /* au: a pixel with the Kuiper belt framed */
+  /** The most astray along its orbit (au) any sample is drawn: rock.vert.glsl's float32 phase. */
+  const astray = (mig, years, phaseOf, since) => {
+    let worst = 0;
+    TRACERS.forEach((tr, i) => {
+      const { a, M } = tracerElements(tr, mig, years);
+      const n = f(TAU / f(f(a) ** 1.5));
+      const drawn = f(f(phaseOf(i)) + f(n * f(since)));
+      worst = Math.max(worst, a * Math.abs(wrapSigned(drawn - M * RAD_PER_DEG, TAU)));
+    });
+    return worst;
+  };
+  const epochPhase = (i) => phases.getX(i);
+  /* A hundred thousand frames of 100 years each, as the Motion switch runs the clock. */
+  const frames = 100_000;
+  const step = 100;
+  const uploads = phases.version;
+  let worst = 0;
+  for (let k = 1; k <= frames; k += 1) {
+    const since = drift.since(1, k * step, pixel);
+    if (k % 500 === 0) worst = Math.max(worst, astray(1, k * step, epochPhase, since));
+  }
+  assert.ok(worst < pixel, `astray by ${worst} au`);
+  assert.ok(phases.version - uploads < frames / 20, "phases upload now and then, not each frame");
+  /* Without the epoch, ten million years along, the float32 phase misplaces samples by more. */
+  const start = tracerGeometry(4, 3).geometry.getAttribute("orbitC");
+  assert.ok(astray(1, frames * step, (i) => start.getX(i), frames * step) > pixel);
+  /* Once the clearing moves the orbits, the phases follow at once. */
+  const mid = MODEL_START - (MODEL_START - CLEAR_DONE) / 2;
+  const mig = momentAt(mid).mig;
+  const since = drift.since(mig, frames * step, pixel);
+  assert.ok(astray(mig, frames * step, epochPhase, since) < pixel);
 });
 
 test("a planet's moons spread out as the camera nears it, selected or not", () => {

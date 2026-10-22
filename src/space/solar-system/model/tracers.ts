@@ -5,7 +5,7 @@ import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import { tracerSemiMajorAxis } from "./equations";
 import { migrationProgress } from "./moment";
-import { COLD_CLASSICAL_AU, DISK_AU } from "./parameters";
+import { COLD_CLASSICAL_AU, DISK_AU, TRACER_PUMP } from "./parameters";
 
 type Kind = "cold" | "hot" | "scattered" | "oort" | "ejected";
 export type Bin = "disk" | "kuiper" | "scattered" | "oort" | "ejected";
@@ -130,17 +130,64 @@ function createTracers(count: number, seed = 20261014): Tracer[] {
 
 export const TRACERS: readonly Tracer[] = createTracers(560);
 
-export function binOf(tr: Tracer, mig: number): Bin {
-  if (tr.kind === "cold") return "kuiper";
+/** The stage a sample is at: the bin it counts in, or gone, past the Sun's hold and no longer drawn. */
+export type Stage = Bin | "gone";
+
+/**
+ * How each kind passes through the clearing, by its own progress s (0..1, `scatterS`). It starts
+ * in the first of its `stages` and enters each next one at its step of s. Its semi-major axis
+ * reaches a₁ by `aBy` (the ejected are flung out early, then coast); its inclination leaves i₀
+ * from `iFrom` (the Oort cloud's orbits tilt only once far out); a `pumped` eccentricity first
+ * climbs with the perihelion held near Neptune (`TRACER_PUMP`), the rest move straight to e₁.
+ * The vertex shader (rock.vert.glsl) draws the sample from these, so each body's track is its
+ * instance attributes (graphics/tracers.ts).
+ */
+type Track = {
+  stages: readonly [Bin, ...Stage[]];
+  /** One for each stage after the first: the s at which it begins. */
+  steps: readonly number[];
+  aBy: number;
+  iFrom: number;
+  pumped: boolean;
+};
+const STRAIGHT = { aBy: 1, iFrom: 0, pumped: false };
+export const TRACKS: Readonly<Record<Kind, Track>> = {
+  cold: { stages: ["kuiper"], steps: [], ...STRAIGHT },
+  hot: { stages: ["disk", "kuiper"], steps: [0.28], ...STRAIGHT },
+  scattered: { stages: ["disk", "scattered"], steps: [0.22], ...STRAIGHT },
+  oort: {
+    stages: ["disk", "scattered", "oort"],
+    steps: [0.3, 0.62],
+    aBy: 1,
+    iFrom: 0.55,
+    pumped: true,
+  },
+  ejected: { stages: ["disk", "ejected", "gone"], steps: [0.28, 0.93], ...STRAIGHT, aBy: 0.9 },
+};
+
+/** How far along its track a sample is at a moment of the clearing: the index of its stage. */
+function stageIndex(tr: Tracer, mig: number) {
+  const { steps } = TRACKS[tr.kind];
   const s = scatterS(tr, mig);
-  if (tr.kind === "hot") return s < 0.28 ? "disk" : "kuiper";
-  if (tr.kind === "scattered") return s < 0.22 ? "disk" : "scattered";
-  if (tr.kind === "oort") return s < 0.3 ? "disk" : s < 0.62 ? "scattered" : "oort";
-  return s < 0.28 ? "disk" : "ejected";
+  let at = 0;
+  while (at < steps.length && s >= steps[at]!) at += 1;
+  return at;
+}
+
+/** The bin a sample counts in: the last one it entered, so one gone counts where it left from. */
+export function binOf(tr: Tracer, mig: number): Bin {
+  const { stages } = TRACKS[tr.kind];
+  const at = stageIndex(tr, mig);
+  let bin = stages[0];
+  for (let k = 1; k <= at; k += 1) {
+    const stage = stages[k]!;
+    if (stage !== "gone") bin = stage;
+  }
+  return bin;
 }
 
 export function tracerVisible(tr: Tracer, mig: number) {
-  return tr.kind !== "ejected" || scatterS(tr, mig) < 0.93;
+  return TRACKS[tr.kind].stages[stageIndex(tr, mig)] !== "gone";
 }
 
 type Tally = Record<Bin, number>;
@@ -151,33 +198,27 @@ export function tallyAt(yearsAgo: number): Tally {
   return tally;
 }
 
+/** A mean anomaly `M` (degrees) carried `years` on along an orbit of semi-major axis `a` (au). */
+export const alongOrbit = (M: number, a: number, years: number) =>
+  wrap(M + (years / periodYears(a)) * 360, 360);
+
 function withMotion(el: Elements, driftYears: number): Elements {
-  return { ...el, M: wrap(el.M + (driftYears / periodYears(el.a)) * 360, 360) };
+  return { ...el, M: alongOrbit(el.M, el.a, driftYears) };
 }
 
+/** A pumped eccentricity: up to its peak by `peakS`, holding the perihelion, then down to e₁. */
+function pumpedE(tr: Tracer, a: number, s: number) {
+  const { perihelionAu, floorAu, maxE, peakS } = TRACER_PUMP;
+  const peak = clamp(1 - perihelionAu / Math.max(a, floorAu), tr.e1, maxE);
+  return s < peakS ? lerp(tr.e0, peak, s / peakS) : lerp(peak, tr.e1, (s - peakS) / (1 - peakS));
+}
+
+/** A sample's elements at a moment of the clearing, `driftYears` along its orbit. */
 export function tracerElements(tr: Tracer, mig: number, driftYears: number): Elements {
-  if (tr.kind === "cold")
-    return withMotion(
-      { a: tr.a0, e: tr.e0, i: tr.i0, omega: tr.omega, node: tr.node, M: tr.M },
-      driftYears,
-    );
+  const { aBy, iFrom, pumped } = TRACKS[tr.kind];
   const s = scatterS(tr, mig);
-  let a: number;
-  let e: number;
-  let i: number;
-  if (tr.kind === "oort") {
-    a = logLerp(tr.a0, tr.a1, s);
-    const ePeak = clamp(1 - 40 / Math.max(a, 50), tr.e1, 0.96);
-    e = s < 0.5 ? lerp(tr.e0, ePeak, s / 0.5) : lerp(ePeak, tr.e1, (s - 0.5) / 0.5);
-    i = s < 0.55 ? tr.i0 : lerp(tr.i0, tr.i1, (s - 0.55) / 0.45);
-  } else if (tr.kind === "ejected") {
-    a = logLerp(tr.a0, tr.a1, Math.min(1, s / 0.9));
-    e = lerp(tr.e0, tr.e1, s);
-    i = lerp(tr.i0, tr.i1, s);
-  } else {
-    a = logLerp(tr.a0, tr.a1, s);
-    e = lerp(tr.e0, tr.e1, s);
-    i = lerp(tr.i0, tr.i1, s);
-  }
+  const a = logLerp(tr.a0, tr.a1, Math.min(1, s / aBy));
+  const e = pumped ? pumpedE(tr, a, s) : lerp(tr.e0, tr.e1, s);
+  const i = lerp(tr.i0, tr.i1, clamp((s - iFrom) / (1 - iFrom), 0, 1));
   return withMotion({ a, e, i, omega: tr.omega, node: tr.node, M: tr.M }, driftYears);
 }

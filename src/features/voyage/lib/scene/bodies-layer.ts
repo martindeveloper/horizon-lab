@@ -8,8 +8,6 @@
  * Reports each globe's size for the map budget.
  */
 import {
-  BufferAttribute,
-  BufferGeometry,
   Line,
   Mesh,
   RingGeometry,
@@ -21,15 +19,16 @@ import {
 
 import { moonOrientation } from "@/space/solar-system/graphics/moons";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
-import { writeMoonOrbit } from "@/space/solar-system/model/moon-orbits";
+import { moonOrbitShape } from "@/space/solar-system/model/moon-orbits";
 import { COMET_ORBIT_COLOR, ORBIT_COLOR, SMALL_ORBIT_COLOR } from "@/space/solar-system/scene/kit";
 import {
   FIGURES,
   MAPS,
   RINGS,
   SUN_RADIUS_KM,
-  createOrbitWriter,
   namedById,
+  orbitShape,
+  orbitShapeOf,
   type BodyId,
 } from "@horizon/toolkit/bodies";
 import { smoothstep } from "@horizon/toolkit/math";
@@ -37,8 +36,12 @@ import {
   SOLAR_GOLD,
   STRONG,
   bodyOrientation,
+  orbitGeometry,
+  orbitUniforms,
   placeRelative,
   vec3d,
+  writeOrbitUniforms,
+  type OrbitUniforms,
   type PlaceLabel,
   type Vec3d,
 } from "@horizon/toolkit/scene";
@@ -56,12 +59,10 @@ const ORBIT_SEGMENTS = 256;
 
 type Orbit = {
   line: Line;
-  positions: Float32Array;
-  geometry: BufferGeometry;
   material: ShaderMaterial;
+  /** The ellipse the GPU builds the line on, au about its focus. */
+  uniforms: OrbitUniforms;
   color: number;
-  /** The day the ellipse was last written for. */
-  day: number;
 };
 
 type Slot = {
@@ -116,6 +117,8 @@ export function createBodiesLayer(
   const { scope, looks, lod } = kit;
   const { place, globes, motion, at } = deps;
   looks.sunRadius.value = SUN_RADIUS_KM;
+  /* Every orbit line draws the same static samples; its uniforms make them its ellipse. */
+  const orbitSamples = orbitGeometry(scope, ORBIT_SEGMENTS);
 
   const slots: Slot[] = WORLD_BODIES.map((body) => {
     const material =
@@ -148,15 +151,13 @@ export function createBodiesLayer(
     let orbit: Orbit | null = null;
     if (body.kind !== "sun") {
       const color = orbitColor(body);
-      const positions = new Float32Array((ORBIT_SEGMENTS + 1) * 3);
-      const geometry = scope.own(new BufferGeometry());
-      geometry.setAttribute("position", new BufferAttribute(positions, 3));
-      const material = scope.own(orbitMaterial(motion, color, 0.35));
-      const line = new Line(geometry, material);
+      const uniforms = orbitUniforms();
+      const material = scope.own(orbitMaterial(motion, uniforms, color, 0.35));
+      const line = new Line(orbitSamples, material);
       line.frustumCulled = false;
       line.visible = false;
       parent.add(line);
-      orbit = { line, positions, geometry, material, color, day: NaN };
+      orbit = { line, material, uniforms, color };
     }
     return {
       body,
@@ -193,8 +194,7 @@ export function createBodiesLayer(
   const sunDir = vec3d();
   const names = lod.fader();
   const orbits = lod.fader();
-  /* Orbit writers in au, scaled to km by the line: the buffer's floats stay small. */
-  const writers = new Map<BodyId, ReturnType<typeof createOrbitWriter>>();
+  const shape = orbitShapeOf();
   const nearest = { id: "sun" as BodyId, gap: Infinity };
 
   /** Fills a body's eclipse slots with those of its shadowers that stand before the Sun. */
@@ -248,22 +248,17 @@ export function createBodiesLayer(
     if (!orbit.line.visible) return;
     orbit.material.uniforms.opacity!.value = (selected ? 0.8 : 0.35) * presence;
     orbit.material.uniforms.color!.value.set(selected ? SOLAR_GOLD : orbit.color);
-    const day = Math.floor(now.getTime() / 86_400_000);
-    if (orbit.day !== day) {
-      orbit.day = day;
-      if (body.kind === "moon") writeMoonOrbit(orbit.positions, body.id, now);
-      else if (body.kind !== "sun") {
-        let writer = writers.get(body.id);
-        if (!writer) writers.set(body.id, (writer = createOrbitWriter(orbit.positions)));
-        const el =
-          body.kind === "planet"
-            ? planetElements(body.id, 1, 0, now)
-            : namedElements(namedById(body.id), 1, 0, now);
-        writer(el, true);
-      }
-      orbit.geometry.getAttribute("position").needsUpdate = true;
+    if (body.kind === "moon") moonOrbitShape(body.id, now, shape);
+    else if (body.kind !== "sun") {
+      const el =
+        body.kind === "planet"
+          ? planetElements(body.id, 1, 0, now)
+          : namedElements(namedById(body.id), 1, 0, now);
+      orbitShape(el, true, shape);
     }
-    /* The ellipse is in au about its focus; the line scales it to km at the focus's place. */
+    writeOrbitUniforms(orbit.uniforms, shape);
+    /* The ellipse is in au about its focus, so its numbers stay small; the line scales it to
+       km at the focus's place, relative to the ship (the floating origin). */
     const focus = body.kind === "moon" ? byId.get(body.host)!.pos : ORIGIN;
     placeRelative(orbit.line, focus, ship);
     orbit.line.scale.setScalar(AU_KM);

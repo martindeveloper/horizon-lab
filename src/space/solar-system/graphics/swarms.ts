@@ -11,13 +11,17 @@ import { jplElements } from "@horizon/toolkit/bodies";
 import { gaussian, mulberry32 } from "@horizon/toolkit/math";
 import { RAD_PER_DEG as RAD, resonanceSemiMajorAxis } from "@horizon/toolkit/science";
 
+import { tracerSemiMajorAxis } from "../model/equations";
+import { alongOrbit } from "../model/tracers";
+import { createDriftEpoch } from "./drift-epoch";
 import FRAG from "./shaders/swarm.frag.glsl";
 /**
  * Swarms: thousands of small bodies on real orbit shapes, moved on the GPU.
  * Each point carries two sets of elements (start and end of the clearing
  * sketch) and the vertex shader solves Kepler's equation for the moment, so
  * the asteroid belt, the Trojans, the Kuiper belt and the Oort cloud orbit at
- * the same along-orbit speed-up as everything else, in one draw call each.
+ * the same along-orbit speed-up as everything else, in one draw call each, the drift re-based
+ * in time as it grows (drift-epoch.ts).
  */
 import VERT from "./shaders/swarm.vert.glsl";
 
@@ -44,6 +48,7 @@ type SwarmBody = {
   color: [number, number, number];
 };
 
+/** The bodies as points, and their drift epoch. */
 function swarmGeometry(bodies: SwarmBody[]) {
   const n = bodies.length;
   const position = new Float32Array(n * 3);
@@ -62,9 +67,15 @@ function swarmGeometry(bodies: SwarmBody[]) {
   geometry.setAttribute("position", new BufferAttribute(position, 3));
   geometry.setAttribute("orbitA", new BufferAttribute(orbitA, 4));
   geometry.setAttribute("orbitB", new BufferAttribute(orbitB, 4));
-  geometry.setAttribute("orbitC", new BufferAttribute(orbitC, 4));
+  const phases = new BufferAttribute(orbitC, 4);
+  geometry.setAttribute("orbitC", phases);
   geometry.setAttribute("color", new BufferAttribute(color, 3));
-  return geometry;
+  /* Semi-major axes move with the clearing in log space, as the shader moves them. */
+  const drift = createDriftEpoch(bodies, phases, (i, mig, years) => {
+    const { a0, a1, M } = bodies[i]!;
+    return alongOrbit(M, tracerSemiMajorAxis.compute({ a0, a1, s: mig }), years) * RAD;
+  });
+  return { geometry, drift };
 }
 
 /** `dpr` is the host's live pixel ratio, shared as the uniform so sizes follow the quality. */
@@ -94,7 +105,8 @@ type Swarm = {
   material: ShaderMaterial;
   /** Draws these bodies instead, as a new quality asks for more or fewer. */
   refill: (bodies: SwarmBody[]) => void;
-  set: (mig: number, drift: number, near: number, anchorLon?: number) => void;
+  /** The moment, `driftYears` along the orbits; `pixel` is a pixel's world size where it is seen. */
+  set: (mig: number, driftYears: number, pixel: number, near: number, anchorLon?: number) => void;
   /** Shows the swarm at `presence` (0..1) of its opacity; returns whether it draws at all. */
   fade: (presence: number) => boolean;
   dispose: () => void;
@@ -107,7 +119,7 @@ export function createSwarm(
   additive: boolean,
   dpr: { value: number },
 ): Swarm {
-  let geometry = swarmGeometry(bodies);
+  let { geometry, drift } = swarmGeometry(bodies);
   const material = swarmMaterial(size, opacity, additive, dpr);
   const points = new Points(geometry, material);
   points.frustumCulled = false;
@@ -116,13 +128,13 @@ export function createSwarm(
     material,
     refill(next) {
       const old = geometry;
-      geometry = swarmGeometry(next);
+      ({ geometry, drift } = swarmGeometry(next));
       points.geometry = geometry;
       old.dispose();
     },
-    set(mig, drift, near, anchorLon = 0) {
+    set(mig, driftYears, pixel, near, anchorLon = 0) {
       material.uniforms.mig!.value = mig;
-      material.uniforms.drift!.value = drift;
+      material.uniforms.drift!.value = drift.since(mig, driftYears, pixel);
       material.uniforms.near!.value = near;
       material.uniforms.anchorLon!.value = anchorLon;
     },

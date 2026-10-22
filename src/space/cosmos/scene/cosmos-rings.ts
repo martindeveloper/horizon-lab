@@ -52,7 +52,8 @@ export function createLookbackRings(root: Object3D, circle: BufferGeometry, mate
       for (const ring of rings) {
         const R = ring.mly * expansion;
         const outside = d > R * 1.001;
-        ring.line.visible = outside && material.opacity > 0.002;
+        /* Faded out, the material skips the draw (the layer fades it). */
+        ring.line.visible = outside;
         if (!outside) {
           place(ring.key, 0, 0, 0, false);
           continue;

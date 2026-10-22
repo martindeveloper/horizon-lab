@@ -46,11 +46,17 @@ export type SolarShow = {
 export type SolarKit = SceneKit<Looks, Lod>;
 
 /**
- * The kit for a host's scene: painted looks (lighter on tight devices) and a level of detail.
- * `streamed`: the host streams measured maps in, and bodies wait for them in their mean colour.
+ * Where the bodies' maps come from: `painted` at once; `streamed`, measured maps the host
+ * streams in, each body waiting in its map's mean colour; or `whenSeen`, painted once the body
+ * is drawn, a slice a frame (`looks.paint`), for a host that opens away from the planets.
  */
-export function createSolarKit(basics: SceneHostBasics, streamed = false): SolarKit {
-  const looks = basics.scope.own(createLooks(basics.tight, streamed));
+export type SolarMaps = "painted" | "streamed" | "whenSeen";
+
+/** The kit for a host's scene: painted looks (lighter on tight devices) and a level of detail. */
+export function createSolarKit(basics: SceneHostBasics, maps: SolarMaps = "painted"): SolarKit {
+  const looks = basics.scope.own(
+    createLooks(basics.tight, maps === "streamed", { paintWhenSeen: maps === "whenSeen" }),
+  );
   return sceneKit(basics, looks, createLod(basics.camera, basics.viewport));
 }
 

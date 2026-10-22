@@ -9,7 +9,7 @@ import {
   type Translate,
   type Value,
 } from "@/lib/facts";
-import { periodYears, type Elements, type MoonId } from "@horizon/toolkit/bodies";
+import { MAX_ECCENTRICITY, periodYears, type Elements, type MoonId } from "@horizon/toolkit/bodies";
 import { convert, formatDistanceRange } from "@horizon/toolkit/science";
 
 import { SOLAR_CATALOGUE } from "./model/catalogue";
@@ -26,7 +26,7 @@ function formatPeriod(t: Translate, f: Format, years: number) {
 /** Stretch, tilt, near–far and period rows for an orbit. */
 export function orbitFacts(t: Translate, f: Format, d: DistanceSettings, el: Elements): CardFact[] {
   const n = (v: number, digits: number) => f.number(v, { maximumFractionDigits: digits });
-  const e = Math.min(el.e, 0.995);
+  const e = Math.min(el.e, MAX_ECCENTRICITY);
   const tilt = t("facts.tiltValue", { value: n(Math.abs(el.i) < 0.05 ? 0 : el.i, 1) });
   return [
     { id: "stretch", label: t("facts.stretch"), value: n(e, 3) },

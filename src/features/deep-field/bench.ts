@@ -6,18 +6,28 @@ import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 
 import driftingProbeMap from "../../../bench/fixtures/audio-maps/drifting-probe.json";
 import { DRIFT } from "./lib/drift";
-import { DEFAULT_VIEW } from "./lib/model/view-ids";
+import { DEFAULT_VIEW, type ViewId } from "./lib/model/view-ids";
 import { createDeepFieldEngine } from "./lib/scene/engine";
 import { useDeepField } from "./lib/store";
 
-type DeepFieldBenchScene = BenchScene & { bloom: boolean; lens: boolean; drift?: boolean };
+type DeepFieldBenchScene = BenchScene & {
+  bloom: boolean;
+  lens: boolean;
+  drift?: boolean;
+  /** The view the scene opens on; the home view by default. */
+  view?: ViewId;
+};
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
 const DRIFT_MAP = parseAudioMap(driftingProbeMap);
 /** One loop of the drift timed to its map; the engine steps at most a tenth of a second a frame. */
 const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
 
-/** The Galaxy (home view) at standard quality, as a visitor first sees it, and the same with bloom on and with the lens on. */
+/**
+ * The Galaxy (home view) at standard quality, as a visitor first sees it, and the same with bloom
+ * on and with the lens on; the planets at their largest in Deep Field and the scattered view, with
+ * their orbits; the cosmic map's scales, where its populations fade in and out; and the drift.
+ */
 const SCENES: readonly DeepFieldBenchScene[] = [
   {
     id: "home",
@@ -40,6 +50,32 @@ const SCENES: readonly DeepFieldBenchScene[] = [
     bloom: false,
     lens: true,
   },
+  {
+    id: "inner",
+    description: "The inner planets, standard quality: the bodies at their largest in Deep Field",
+    tags: ["solar", "view"],
+    bloom: false,
+    lens: false,
+    view: "inner",
+  },
+  {
+    id: "scattered",
+    description: "The solar system's scattered view, standard quality: its orbits",
+    tags: ["view"],
+    bloom: false,
+    lens: false,
+    view: "scattered",
+  },
+  ...(["local-group", "virgo-supercluster", "cosmic-web", "observable-universe"] as const).map(
+    (view): DeepFieldBenchScene => ({
+      id: view,
+      description: `The ${view.replace(/-/g, " ")} view, standard quality`,
+      tags: ["cosmos"],
+      bloom: false,
+      lens: false,
+      view,
+    }),
+  ),
   {
     id: "drift",
     description: "One loop of the drift, timed to its track's map, from the home view",
@@ -68,7 +104,7 @@ export const benchTarget: BenchTarget = {
     const store = useDeepField;
     store.getState().resetView();
     store.setState({
-      view: DEFAULT_VIEW,
+      view: scene.view ?? DEFAULT_VIEW,
       quality: "standard",
       bloom: scene.bloom,
       lens: scene.lens,

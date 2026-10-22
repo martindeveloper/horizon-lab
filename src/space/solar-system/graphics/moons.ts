@@ -1,21 +1,13 @@
 /**
- * The major moons in three.js: planet-centred positions as vectors, orbit lines and
- * synchronous spin. The orbits themselves are model/moon-orbits.ts.
+ * The major moons in three.js: planet-centred positions as vectors and synchronous spin. The
+ * orbits themselves, and the shapes their lines draw, are model/moon-orbits.ts.
  */
 import { Matrix4, Quaternion, Vector3 } from "three";
 
 import { moonById, type MoonId, type Vec3 } from "@horizon/toolkit/bodies";
 import { RAD_PER_DEG as RAD } from "@horizon/toolkit/science";
 
-import {
-  P_AXIS,
-  Q_AXIS,
-  moonFrame,
-  moonOffset as offsetOf,
-  writeMoonOrbit,
-} from "../model/moon-orbits";
-
-export { writeMoonOrbit };
+import { P_AXIS, Q_AXIS, moonFrame, moonOffset as offsetOf } from "../model/moon-orbits";
 
 const at: Vec3 = [0, 0, 0];
 

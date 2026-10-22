@@ -20,6 +20,7 @@ import {
   ownedLine,
   SOLAR_GOLD,
   STRONG,
+  TAP_REACH_PX,
   type AnchoredRulers,
   type DistanceText,
   type PlaceLabel,
@@ -138,7 +139,7 @@ export function createGalaxyLayer(
       /* A steady few pixels at any zoom (its glow scales with it). */
       const toSun = camera.position.distanceTo(at);
       sun.scale.setScalar((pxWorld(toSun, 4.5) * shown) / LY / 420);
-      sunHit.scale.setScalar(pxWorld(toSun, 22) / LY);
+      sunHit.scale.setScalar(pxWorld(toSun, TAP_REACH_PX) / LY);
       looks.galaxySun.opacity = base.sun * shown;
       trail.line.visible = near > 0.004;
       trail.material.opacity = base.trail * near;

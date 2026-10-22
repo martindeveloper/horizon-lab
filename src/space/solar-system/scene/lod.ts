@@ -13,12 +13,12 @@
  */
 import type { PerspectiveCamera } from "three";
 
-import type { BodyId, Elements } from "@horizon/toolkit/bodies";
+import { MAX_ECCENTRICITY, type BodyId, type Elements } from "@horizon/toolkit/bodies";
 import { createFaders, createScreenScale, framed, type Viewport } from "@horizon/toolkit/scene";
 
 /** How much of an orbit to draw at camera distance `d`: the framing rule from peri- to apoapsis. */
 export function orbitShown(el: Elements, elliptical: boolean, d: number) {
-  const e = elliptical ? Math.min(0.995, el.e) : 0;
+  const e = elliptical ? Math.min(MAX_ECCENTRICITY, el.e) : 0;
   return framed(el.a * (1 - e), el.a * (1 + e), d);
 }
 

@@ -567,6 +567,14 @@ export function createGiantsEngine(
     const orbitEls = ORBIT_IDS.map((id) =>
       labels.querySelector<HTMLElement>(`[data-orbit="${id}"]`),
     );
+    /** Each label's last transform, so a settled frame writes no style (the DOM normalises what it reads back). */
+    const transforms = new WeakMap<HTMLElement, string>();
+    function moveLabel(el: HTMLElement, x: number, y: number, anchor: string) {
+      const transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) ${anchor}`;
+      if (transforms.get(el) === transform) return;
+      transforms.set(el, transform);
+      el.style.transform = transform;
+    }
     /**
      * Each orbit's name on its ring, like a contour's on a map: Mercury's, Earth's and Jupiter's
      * on top, the others' below, so neighbours stand twice as far apart. A ring too small to
@@ -584,7 +592,7 @@ export function createGiantsEngine(
           shown > 0 && r > ORBIT_LABEL_MIN_PX && r - named[side]! >= ORBIT_LABEL_GAP_PX && inside;
         if (on) {
           named[side] = r;
-          el.style.transform = `translate(${x.toFixed(1)}px, ${at.toFixed(1)}px) translate(-50%, -50%)`;
+          moveLabel(el, x, at, "translate(-50%, -50%)");
         }
         /* Each name comes and goes with its ring. */
         const opacity = on ? shown.toFixed(3) : "0";
@@ -605,8 +613,10 @@ export function createGiantsEngine(
         if (!visible) continue;
         named[body.index] = 1;
         const top = Math.max(56, body.y - body.polar - 10);
-        el.style.transform = `translate(${body.x.toFixed(1)}px, ${top.toFixed(1)}px) translate(-50%, -100%)`;
-        el.dataset.focus = body.index === focus ? "true" : "false";
+        moveLabel(el, body.x, top, "translate(-50%, -100%)");
+        const focused = body.index === focus;
+        if ((el.dataset.focus === "true") !== focused)
+          el.dataset.focus = focused ? "true" : "false";
       }
       labelEls.forEach((el, index) => {
         if (!el) return;

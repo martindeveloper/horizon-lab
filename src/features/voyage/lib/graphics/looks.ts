@@ -12,6 +12,7 @@ import {
   Vector3,
 } from "three";
 
+import type { OrbitUniforms } from "@horizon/toolkit/scene";
 import { blackbodyLut } from "@horizon/toolkit/science";
 
 import type { ShipMotion } from "../model/ship";
@@ -70,12 +71,19 @@ export function writeMotion(out: MotionUniforms, motion: ShipMotion) {
 }
 
 /**
- * An orbit line as the ship sees it: aberrated per vertex with the shared motion, in one
- * colour at an opacity, behind the globes. Each line has its own; the motion is shared.
+ * An orbit line as the ship sees it: built on the GPU from its ellipse (`orbit`, written with
+ * `writeOrbitUniforms`), aberrated per vertex with the shared motion, in one colour at an
+ * opacity, behind the globes. Each line has its own; the motion is shared.
  */
-export function orbitMaterial(motion: MotionUniforms, color: number, opacity: number) {
+export function orbitMaterial(
+  motion: MotionUniforms,
+  orbit: OrbitUniforms,
+  color: number,
+  opacity: number,
+) {
   return new ShaderMaterial({
     uniforms: {
+      ...orbit,
       color: { value: new Color(color) },
       opacity: { value: opacity },
       forward: { value: motion.forward },

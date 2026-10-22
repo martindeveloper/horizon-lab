@@ -81,7 +81,7 @@ export function createOrreryEngine({
     sceneHost.setBloom({ enabled: useOrrery.getState().bloom, ...quality.bloom });
     sceneHost.setLens({ enabled: useOrrery.getState().lens, ...quality.lens });
     /* Measured maps stream in by need (measured-maps.ts); bodies wait in their mean colour. */
-    const kit = createSolarKit(basics, true);
+    const kit = createSolarKit(basics, "streamed");
     const { looks, lod } = kit;
     looks.setAirSteps(quality.closeUp.airSteps);
     const scene = new Scene();
@@ -127,8 +127,9 @@ export function createOrreryEngine({
     const activity = scope.own(
       createSolarActivityLifecycle(
         async () => {
-          const { createSolarActivity } = await import("./solar-activity");
-          return () => createSolarActivity(kit, solar.sun, quality.activitySteps);
+          const { createSolarActivity, solarActivityDensity } = await import("./solar-activity");
+          const density = await solarActivityDensity(kit.tight);
+          return () => createSolarActivity(kit, solar.sun, quality.activitySteps, density);
         },
         () => engine.invalidate(),
         onError,

@@ -50,6 +50,15 @@ export const OORT_SHELLS_AU = [5_000, 100_000] as const;
 export const TROJAN_OFFSET_DEG = 60;
 /** Newton steps for Kepler's equation in the swarm vertex shader (e ≤ 0.3 converges). */
 export const SWARM_KEPLER_STEPS = 4;
+/** Newton steps for the planetesimal sample's, whose orbits reach e = 0.96 (`TRACER_PUMP.maxE`). */
+export const TRACER_KEPLER_STEPS = 6;
+/**
+ * A planetesimal bound for the Oort cloud is flung outward with its perihelion held near
+ * Neptune's reach: its eccentricity climbs to 1 − q / a (with a no less than `floorAu` and e no
+ * more than `maxE`) by `peakS` of its scattering, then eases to its final value as the Galaxy's
+ * tide lifts the perihelion (art direction).
+ */
+export const TRACER_PUMP = { perihelionAu: 40, floorAu: 50, maxE: 0.96, peakS: 0.5 } as const;
 /** The young gas disk's painted radius. */
 export const GAS_DISK_RADIUS_AU = 120;
 /** Dust sublimates inside roughly 0.1–0.4 au: the disk's inner cavity. */

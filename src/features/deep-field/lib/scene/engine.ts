@@ -111,8 +111,10 @@ export function createDeepFieldEngine({
     /* What a tap on a name opens: the solar system's first, then each layer's own. */
     const picks = createLabelPicks();
     picks.register(solarLabelPick);
-    /* The solar system today, on its own looks and level of detail. */
-    const solarKit = createSolarKit(basics);
+    /* The solar system today, on its own looks and level of detail. Deep Field opens on the
+       Galaxy: each body's map is painted once the body is drawn. */
+    const solarKit = createSolarKit(basics, "whenSeen");
+    let surfacesBusy = false;
     const solar = createSolarSystem(solarKit, scene, {
       place,
       hideAll,
@@ -170,7 +172,8 @@ export function createDeepFieldEngine({
       veil.busy ||
       controls.interacting ||
       lod.busy ||
-      solarKit.lod.busy;
+      solarKit.lod.busy ||
+      surfacesBusy;
 
     createPicking(kit, canvas, store, {
       pickables: [
@@ -296,6 +299,8 @@ export function createDeepFieldEngine({
         solarFrame.dist = dist;
         sky.update(frame);
         const at = solar.update(solarFrame);
+        const painting = solarKit.looks.paint(solarKit.lod.need);
+        surfacesBusy = solarKit.looks.step(dt) || painting;
         reach.update(frame);
         /* The neighbours fade themselves out past the nearest stars. */
         neighbours.update(frame, pose.azimuth);

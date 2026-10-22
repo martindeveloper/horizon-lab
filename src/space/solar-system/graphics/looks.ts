@@ -52,6 +52,7 @@ import {
 } from "@horizon/toolkit/scene";
 import { glslFloat } from "@horizon/toolkit/shaders/defines";
 
+import { BINS } from "../model/tracers";
 import { AIR, airUniforms, type Air } from "./air";
 import AIR_FRAG from "./shaders/air.frag.glsl";
 import AIR_VERT from "./shaders/air.vert.glsl";
@@ -72,6 +73,7 @@ import SUN_FRAG from "./shaders/sun.frag.glsl";
  * photo plates, no post-processing. Everything here is disposed with the engine.
  */
 import VERT from "./shaders/surface.vert.glsl";
+import { BIN_COLOR } from "./tracers";
 
 function paint(w: number, h: number, fn: TexelPainter) {
   const tex = paintedTexture(w, h, fn);
@@ -196,6 +198,10 @@ WHITE.needsUpdate = true;
 const NO_TINT = new Color(1, 1, 1);
 /** Seconds a newly arrived map takes to fade in over what showed before. */
 const FADE_S = 0.6;
+/** A frame's share of painting maps a slice at a time (`paint`): a quarter of a 60 fps frame, ms. */
+const PAINT_BUDGET_MS = 1000 / 60 / 4;
+/** Rows a slice paints before the budget is checked again. */
+const PAINT_ROWS = 2;
 
 /**
  * The Sun as the lit materials see it, shared by every one: where it is (world units; the
@@ -390,37 +396,52 @@ export type LooksOptions = {
   occluders?: number;
   /** Texels across a ring strip; 1024 by default, more for rings seen from close by. */
   ringTexels?: number;
+  /**
+   * Paint a body's map only once it is drawn (`paint`), a slice a frame, the body waiting in
+   * its map's mean colour until then; for a host that opens away from the planets.
+   */
+  paintWhenSeen?: boolean;
 };
 
 /**
  * `light` halves the largest maps for coarse-pointer or low-memory devices. `streamed`: the
  * host streams measured maps in (`setMeasured`), so a body with one shows its map's mean
  * colour until then and is painted only if its map fails (`setFailed`); otherwise every body
- * starts on its painted map. The Sun lights every surface from `sunPos` (the origin until a
- * host writes it) with `sunRadius` (0, a point, until written).
+ * starts on its painted map, at once or, with `paintWhenSeen`, once drawn. The Sun lights
+ * every surface from `sunPos` (the origin until a host writes it) with `sunRadius` (0, a
+ * point, until written).
  */
 export function createLooks(light = false, streamed = false, options: LooksOptions = {}) {
   const sunPos = new Vector3();
   const sunRadius = { value: 0 };
   const sun: SunLight = { sunPos, sunRadius, occluders: options.occluders ?? 0 };
   const ringTexels = options.ringTexels ?? RING_TEXELS;
+  const whenSeen = options.paintWhenSeen ?? false;
   /* A body with a measured map (`MAPS`) paints only a stand-in until that loads. */
   const size = (id: BodyId) => (MAPS[id] || light ? Math.min(256, MAP_SIZE[id]) : MAP_SIZE[id]);
   const texture = (id: BodyId) => mapTexture(id, size(id), size(id) / 2);
   /* Painted maps are made the first time a body needs one. */
   const painted: Partial<Record<BodyId, Texture>> = {};
   const paintedOf = (id: BodyId) => (painted[id] ??= texture(id));
+  /* Bodies waiting to be painted once seen, and the maps under way. */
+  const unpainted = new Set<BodyId>();
+  const jobs: Partial<Record<BodyId, SurfaceJob>> = {};
   /** Retained even when a moon material has not been created yet. */
   const measured: Partial<Record<BodyId, Texture>> = {};
   const failed = new Set<BodyId>();
   const placeholders = new Map<BodyId, Color>();
-  /** What a body shows now: its measured map, its placeholder while that streams, or its painted map. */
+  /**
+   * What a body shows now: its measured map, its placeholder while that streams or while its
+   * painting waits, or its painted map.
+   */
   const faceOf = (id: BodyId): Face => {
     const map = measured[id];
     if (map) return { texture: map, tint: NO_TINT };
     /* The Sun's shader takes no tint: it keeps its painted map, already a plain disc. */
     const mean = id === "sun" ? undefined : MAPS[id]?.mean;
-    if (streamed && mean && !failed.has(id)) {
+    const waits = streamed ? !failed.has(id) : whenSeen && !painted[id];
+    if (waits && mean) {
+      if (!streamed) unpainted.add(id);
       let tint = placeholders.get(id);
       if (!tint) placeholders.set(id, (tint = new Color(mean)));
       return { texture: WHITE, tint };
@@ -531,9 +552,16 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
     shellOuter: shell(0.28),
     sunGlow: sprite(sunHalo, "#ffffff", 1, true),
     halleyComa: sprite(glow, "#d5e2ea", 0.28, true),
-    /* `radius` sizes every planetesimal (world units), so zooming never rewrites the instances. */
+    /* The planetesimal sample moves on the GPU (graphics/tracers.ts): a frame writes the moment,
+       the switches and `radius`, which sizes every body (world units). */
     tracers: new ShaderMaterial({
-      uniforms: { radius: { value: 1 } },
+      uniforms: {
+        mig: { value: 1 },
+        drift: { value: 0 },
+        radius: { value: 1 },
+        binColor: { value: BINS.map((bin) => BIN_COLOR[bin]) },
+        binShown: { value: BINS.map(() => 1) },
+      },
       vertexShader: ROCK_VERT,
       fragmentShader: ROCK_FRAG,
     }),
@@ -671,6 +699,25 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
     release(id: BodyId) {
       held.delete(id);
       show(id, faceOf(id), true);
+    },
+    /**
+     * With `paintWhenSeen`: paints the maps of waiting bodies drawn this frame (`seen`, the level
+     * of detail's need) for up to `budget` ms, a few rows at a time, and fades each in once done.
+     * True while one drawn still waits.
+     */
+    paint(seen: ReadonlyMap<BodyId, number>, budget = PAINT_BUDGET_MS) {
+      if (unpainted.size === 0) return false;
+      const begin = performance.now();
+      for (const id of unpainted) {
+        if (!seen.has(id)) continue;
+        const job = (jobs[id] ??= surfaceJob(id, size(id), size(id) / 2));
+        while (!job.step(PAINT_ROWS)) if (performance.now() - begin >= budget) return true;
+        painted[id] = dataTexture(job, 2);
+        delete jobs[id];
+        unpainted.delete(id);
+        refresh(id);
+      }
+      return false;
     },
     /** Advances the fades; true while one is still running. */
     step(dt: number) {

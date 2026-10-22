@@ -2,16 +2,14 @@
 // on the GPU. Each point carries two sets of orbital elements (the start and
 // the end of the clearing sketch); the shader interpolates them by `mig`,
 // solves Kepler's equation for the moment and rotates the perifocal position
-// into the scene frame, exactly as the toolkit's keplerPosition does.
-//
-// Scene frame: X = ecliptic x, Y = ecliptic z (up), Z = −ecliptic y.
+// into the scene frame, exactly as the toolkit's keplerPosition does (kepler.glsl).
 
 attribute vec4 orbitA; // a0, a1 (AU), e0, e1
 attribute vec4 orbitB; // i0, i1, Ω (node), ω (argument of perihelion), radians
-attribute vec4 orbitC; // M0 (radians), appears-at mig, co-orbital sign, co-orbital offset (radians)
+attribute vec4 orbitC; // phase M at the drift epoch (radians), appears-at mig, co-orbital sign, co-orbital offset (radians)
 
 uniform float mig;       // clearing progress 0–1
-uniform float drift;     // model years of along-orbit motion
+uniform float drift;     // model years along the orbits since the drift epoch (drift-epoch.ts)
 uniform float anchorLon; // mean longitude of the body co-orbitals follow (radians)
 uniform float size;      // point size in pixels
 uniform float dpr;       // device pixel ratio
@@ -22,6 +20,7 @@ varying float vAlpha;
 
 #include <horizon/math>
 #include "./parameters.generated.glsl"
+#include "./kepler.glsl"
 
 void main() {
   // Elements at this moment. Semi-major axes interpolate in log space.
@@ -39,25 +38,7 @@ void main() {
     M = anchorLon + orbitC.z * SWARM_TROJAN_OFFSET + orbitC.w - node - omega;
   }
 
-  // Kepler's equation E − e sin E = M, a few Newton steps from E = M + e sin M.
-  float E = M + e * sin(M);
-  for (int k = 0; k < SWARM_KEPLER_STEPS; k++) {
-    E -= (E - e * sin(E) - M) / (1.0 - e * cos(E));
-  }
-
-  // Perifocal position, then the classical rotation (ω, i, Ω) into the ecliptic.
-  float xp = a * (cos(E) - e);
-  float yp = a * sqrt(1.0 - e * e) * sin(E);
-  float cw = cos(omega);
-  float sw = sin(omega);
-  float cn = cos(node);
-  float sn = sin(node);
-  float ci = cos(inc);
-  float si = sin(inc);
-  float x = (cw * cn - sw * sn * ci) * xp + (-sw * cn - cw * sn * ci) * yp;
-  float y = (cw * sn + sw * cn * ci) * xp + (-sw * sn + cw * cn * ci) * yp;
-  float z = sw * si * xp + cw * si * yp;
-  vec3 pos = vec3(x, z, -y);
+  vec3 pos = keplerPosition(a, e, inc, node, omega, M, SWARM_KEPLER_STEPS);
 
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
 

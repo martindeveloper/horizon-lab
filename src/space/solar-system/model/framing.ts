@@ -2,7 +2,7 @@
  * Which solar system view shows a selection, when a tap should fly there, and how much of a
  * body a camera frames on arrival.
  */
-import type { BodyId } from "@horizon/toolkit/bodies";
+import { MAX_ECCENTRICITY, type BodyId } from "@horizon/toolkit/bodies";
 
 import { planetElements } from "./elements";
 import { hostOf, solarPick, type SolarSelection } from "./selection";
@@ -33,7 +33,7 @@ export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
       const tr = TRACERS[sel.index];
       if (!tr) return "giants";
       const el = tracerElements(tr, mig, 0);
-      const apo = el.a * (1 + Math.min(0.995, el.e));
+      const apo = el.a * (1 + Math.min(MAX_ECCENTRICITY, el.e));
       return apo > 8_000 ? "oort" : apo > 350 ? "scattered" : apo > 45 ? "kuiper" : "giants";
     }
   }

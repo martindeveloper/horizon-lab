@@ -8,7 +8,14 @@ import { Mesh, SphereGeometry, Vector3, type Object3D } from "three";
 
 import type { WorldSelection as Selection } from "@/space/galaxy/show";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
-import { BELOW, STRONG, rising, type LabelStyle, type PlaceLabel } from "@horizon/toolkit/scene";
+import {
+  BELOW,
+  STRONG,
+  TAP_REACH_PX,
+  rising,
+  type LabelStyle,
+  type PlaceLabel,
+} from "@horizon/toolkit/scene";
 
 import type { CosmosLooks } from "../graphics/looks";
 import {
@@ -268,7 +275,7 @@ export function createCosmosMarks(
         if (!chosen) continue;
         mesh.userData.pick = chosen.pick;
         mesh.position.copy(chosen.at);
-        toPx(mesh, mesh.position, 22);
+        toPx(mesh, mesh.position, TAP_REACH_PX);
       }
     },
     /** Moves the marks that are no cluster's (the Great Wall's) with the universe at scale `a`. */

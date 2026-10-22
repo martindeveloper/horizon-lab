@@ -4,6 +4,12 @@
 
 #define SWARM_TROJAN_OFFSET     1.047197551
 #define SWARM_KEPLER_STEPS      4
+#define TRACER_KEPLER_STEPS     6
+#define TRACER_BINS             5
+#define TRACER_PUMP_PERIHELION  40.0
+#define TRACER_PUMP_FLOOR       50.0
+#define TRACER_PUMP_MAX_E       0.96
+#define TRACER_PUMP_PEAK        0.5
 #define GAS_CAVITY_IN           0.0008333333333
 #define GAS_CAVITY_OUT          0.0035
 #define GAS_RIM_IN              0.92

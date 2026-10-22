@@ -69,8 +69,9 @@ src/
         views.ts               The default view and the Motion speed-up by scale
         tour.ts                Guide steps and their flights
         catalogue/             The timeline's figures: value or span, unit, source, status
-        solar-activity*.ts     The Sun's illustrative Hα activity: one baked hedgerow
-                               prominence, each region's slow cycle of flows and eruption
+        solar-activity*.ts     The Sun's illustrative Hα activity: one hedgerow prominence,
+                               baked on a worker (solar-activity-density.worker.ts), each
+                               region's slow cycle of flows and eruption
         parameters.ts, equations.ts, model-check.ts
       lib/graphics/            The time-dependent sky (sky.ts, on the shared band in src/space/sky),
                                tour-sketch.ts, shader-defines.ts, shaders/ (the WebP map loader is
@@ -104,7 +105,8 @@ src/
                                figures the technical notes quote (PROSE_FIGURES)
       lib/graphics/looks.ts    The bright-star sky's points and the shared worlds' looks on one
                                brush (src/space/brush.ts)
-      lib/scene/               The engine: the shared solar system held at today, then the
+      lib/scene/               The engine: the shared solar system held at today (each body's
+                               map painted once the body is drawn), then the
                                reach, the nearest stars, the Galaxy and the cosmic map (the
                                shared layers) on the toolkit's scene pieces, with Deep Field's
                                own sky layer, picking and HUD; camera-rig.ts turns the orbit
@@ -132,12 +134,23 @@ src/
                                from scripts/fetch-line-broadening.mjs), Stark
         continuum.ts           The stars' continuous opacity: H⁻, hydrogen, scattering
         spectrum.ts            The bench's uniform slab, the stars' layered LTE transfer, the
-                               instrument and pixels; line reports and curves of growth
+                               instrument and pixels; line reports and curves of growth. Each
+                               source is worked out in its own frame on a grid in ln λ that all
+                               windows share, kept in chunks, so a pan, a zoom or a velocity
+                               reuses what it has met and only a new source starts afresh
         telluric.ts            Earth's O₂ A and B bands
         scenes.ts, stars.ts    What each view observes: bench, named stars, mysteries; the
                                settings' ranges and defaults
         glow.ts                A glowing gas's colour and brightness, for the scene
         equations.ts, tour.ts  The formulas the documents print; the guided journey
+      lib/synthesis.ts         Spectra and mysteries' answers off the main thread, on one
+                               toolkit worker task held while a view is open, freed after the
+                               lab is left (synthesis.worker.ts, model/jobs.ts): each
+                               view's latest request wins and its first is drawn in place, a
+                               mystery runs one spectrum per step (with everything, then
+                               without each element) with other spectra answered between
+                               them; with no Worker (Node's tests) the same pure function
+                               runs on the page
       lib/store.ts             Zustand store (spectroscopy namespace messages)
     giants/
       index.ts                 Public client entry: GiantsApp
@@ -252,7 +265,9 @@ src/
                                carried with the camera (`createBrightSky`, `carrySky`)
     sky/                       The Milky Way as the sky shows it: the painted band in galactic
                                coordinates, its grains and a faint field (`createMilkyWay`),
-                               drawn by the Orrery along its timeline and by Voyage from the ship
+                               drawn by the Orrery along its timeline and by Voyage from the ship;
+                               band.ts paints the maps and grains on a worker (band.worker.ts),
+                               the last sky per set of eras kept for the next mount
     bench.ts                   A scene engine on the bench: its frame loop driven frame by frame
     quality.ts                 What a render quality means for every space scene: tier,
                                resolution, swarms, the bloom chain, the lens's star
@@ -269,7 +284,9 @@ src/
                                heliopause they crossed, sunlight's light-time rings) and
                                probes-catalogue.ts (the Voyagers' crossings)
       graphics/                looks.ts (the Sun's place and the eclipse slots a host may
-                               write), swarms.ts, moons.ts, shader-defines.ts, shaders/,
+                               write), swarms.ts and tracers.ts (small bodies moved on the GPU;
+                               shaders/kepler.glsl places them, drift-epoch.ts re-bases their
+                               along-orbit drift in time), moons.ts, shader-defines.ts, shaders/,
                                maps.ts (MAP_BASE) and map-tiers.ts (tiers by on-screen size);
                                reach-looks.ts (the probes' glow and the wind bubble)
       scene/                   solar-system.ts composes the Sun, planets, moons, populations
@@ -317,6 +334,8 @@ packages/toolkit/
   src/shaders/                 Reusable GLSL snippets and assembly
   src/environment/             Shared media queries: reduced motion, pointer type, wide layout
   src/storage/                 Session and local cells: lifetime, decay, codecs
+  src/worker/                  Pure computations on a module worker, in place where none starts;
+                               errors per request, long ones in steps between newer requests
   src/bench/                   Benchmark contract, in-page runner, timing and image statistics
   src/bodies/                  Sun, planets, moons: JPL elements, IAU figures and spin, rings,
                                Sun/Moon almanac, measured-map credits; bodies/surfaces paints

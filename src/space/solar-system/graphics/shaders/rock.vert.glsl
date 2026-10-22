@@ -1,13 +1,27 @@
-// Planetesimals: instanced 3D small bodies lit by the Sun at the origin. Each
-// instance's `seed` attribute orientates its principal axes and shapes the unit
-// sphere into a smooth triaxial, lobed rubble-pile figure with single-pass
-// analytical surface normals; the instance colour carries the population tint.
-// Instance matrices place each body (scale 0 hides it, 1 shows it); `radius` sizes
-// them all, so a zoom changes one uniform instead of every instance.
+// Planetesimals: the sample of the disk's leftovers (model/tracers.ts), instanced 3D
+// small bodies lit by the Sun at the origin and moved on the GPU. Each instance
+// carries its elements before and after the clearing and its track through it
+// (graphics/tracers.ts); the shader follows the track to the moment exactly as
+// tracerElements does, places the body `drift` years on from its phase at the drift
+// epoch (drift-epoch.ts), and hides it once it is gone or while its bin is switched off. The bin's colour tints it.
+// Its `seed` orientates its principal axes and shapes the unit sphere into a smooth
+// triaxial, lobed rubble-pile figure with single-pass analytical surface normals;
+// `radius` sizes them all, so a zoom changes one uniform instead of every instance.
 
-attribute float seed;
+#include "./parameters.generated.glsl"
 
+attribute vec4 orbitA; // a0, a1 (AU), e0, e1
+attribute vec4 orbitB; // i0, i1, Ω (node), ω (argument of perihelion), radians
+attribute vec4 orbitC; // phase M at the drift epoch (radians), the clearing's progress p0 and p1 its scattering spans, seed
+attribute vec3 track;  // s by which a reaches a1, s from which i leaves i0, pumped e (1) or not (0)
+attribute vec3 stages; // its stages: a bin's index, or TRACER_BINS once gone
+attribute vec2 steps;  // the s at which the second and the third stage begin
+
+uniform float mig;    // clearing progress 0–1
+uniform float drift;  // model years along the orbits since the drift epoch
 uniform float radius; // world radius of a shown body
+uniform vec3 binColor[TRACER_BINS];
+uniform float binShown[TRACER_BINS]; // 1 while the bin's switch is on
 
 varying vec3 vNormal;
 varying vec3 vWorld;
@@ -18,6 +32,7 @@ varying float vDetail;
 
 #include <horizon/math>
 #include <horizon/seeded-hash>
+#include "./kepler.glsl"
 
 // Smooth C1 trilinear value noise with exact analytical gradient: vec4(grad.xyz, value).
 vec4 smoothValue3(vec3 p, float s) {
@@ -90,17 +105,13 @@ vec4 rockShape(vec3 u, vec3 ax, vec3 ay, vec3 az, float s) {
 }
 
 void main() {
-  mat4 model = modelMatrix;
-  #ifdef USE_INSTANCING
-    model = modelMatrix * instanceMatrix;
-  #endif
-  model[0].xyz *= radius;
-  model[1].xyz *= radius;
-  model[2].xyz *= radius;
+  // The body's own progress through the clearing (its spans are never empty), and the
+  // stage it has reached.
+  float s = smoothstep(orbitC.y, orbitC.z, mig);
+  int bin = int(s < steps.x ? stages.x : s < steps.y ? stages.y : stages.z);
 
-  // Cull hidden/filtered planetesimal instances (scale = 0) before any shape math.
-  float worldRadius = length(model[0].xyz);
-  if (worldRadius <= 0.0) {
+  // Cull gone and filtered planetesimals before any orbit or shape math.
+  if (bin >= TRACER_BINS || binShown[bin] < 0.5) {
     vNormal = vec3(0.0, 1.0, 0.0);
     vWorld = vec3(0.0);
     vBody = vec3(0.0, 1.0, 0.0);
@@ -111,7 +122,34 @@ void main() {
     return;
   }
 
-  vSeed = seed;
+  // Elements at this moment. Semi-major axes interpolate in log space; a pumped
+  // eccentricity climbs with the perihelion held, then eases to its final value.
+  float a = exp(mix(log(orbitA.x), log(orbitA.y), min(1.0, s / track.x)));
+  float e = mix(orbitA.z, orbitA.w, s);
+  if (track.z > 0.5) {
+    float peak = clamp(
+      1.0 - TRACER_PUMP_PERIHELION / max(a, TRACER_PUMP_FLOOR),
+      orbitA.w,
+      TRACER_PUMP_MAX_E
+    );
+    e = s < TRACER_PUMP_PEAK
+      ? mix(orbitA.z, peak, s / TRACER_PUMP_PEAK)
+      : mix(peak, orbitA.w, (s - TRACER_PUMP_PEAK) / (1.0 - TRACER_PUMP_PEAK));
+  }
+  float inc = mix(orbitB.x, orbitB.y, clamp((s - track.y) / (1.0 - track.y), 0.0, 1.0));
+  // Mean anomaly by Kepler's third law in years, as the swarms move.
+  float M = orbitC.x + TWO_PI / pow(a, 1.5) * drift;
+  vec3 pos = keplerPosition(a, e, inc, orbitB.z, orbitB.w, M, TRACER_KEPLER_STEPS);
+
+  mat4 model = modelMatrix * mat4(
+    vec4(radius, 0.0, 0.0, 0.0),
+    vec4(0.0, radius, 0.0, 0.0),
+    vec4(0.0, 0.0, radius, 0.0),
+    vec4(pos, 1.0)
+  );
+  float worldRadius = length(model[0].xyz);
+
+  vSeed = orbitC.w;
   vec3 u = normalize(position);
   vBody = u;
 
@@ -136,10 +174,7 @@ void main() {
   float angularSize = worldRadius / max(length(cameraPosition - world.xyz), 1e-6);
   vDetail = clamp((angularSize - 0.004) * 28.0, 0.0, 1.0);
 
-  vColor = vec3(1.0);
-  #ifdef USE_INSTANCING_COLOR
-    vColor = instanceColor;
-  #endif
+  vColor = binColor[bin];
 
   gl_Position = projectionMatrix * viewMatrix * world;
 }

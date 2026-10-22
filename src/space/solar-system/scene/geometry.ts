@@ -7,9 +7,9 @@ import {
   type Vector3,
 } from "three";
 
-import { createOrbitWriter, type Elements } from "@horizon/toolkit/bodies";
+import { orbitShape, orbitShapeOf, type Elements } from "@horizon/toolkit/bodies";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
-import { ownedLine, pickLevel } from "@horizon/toolkit/scene";
+import { ownedOrbitLine, pickLevel } from "@horizon/toolkit/scene";
 
 import type { SolarKit } from "./kit";
 
@@ -17,14 +17,14 @@ export const SEG = 96;
 /** Globe levels by on-screen radius (px): fine past the first, close-up past the second. */
 const SPHERE_PX = [36, 360] as const;
 
-/** Reuse orbit buffers until the orbital shape or plane changes. */
+/** An orbit line the GPU draws from the elements' ellipse: `update` each frame it is shown. */
 export function orbitOf(scope: DisposalScope, color: number, opacity: number) {
-  const slot = ownedLine(scope, color, opacity);
-  const write = createOrbitWriter(slot.positions);
+  const orbit = ownedOrbitLine(scope, color, opacity, SEG);
+  const shape = orbitShapeOf();
   return {
-    ...slot,
+    ...orbit,
     update(el: Elements, elliptical: boolean) {
-      if (write(el, elliptical)) slot.geometry.getAttribute("position").needsUpdate = true;
+      orbit.set(orbitShape(el, elliptical, shape));
     },
   };
 }

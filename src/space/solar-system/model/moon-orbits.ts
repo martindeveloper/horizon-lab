@@ -1,6 +1,6 @@
 /**
  * The major moons' orbits in the scene frame, from the toolkit's mean elements
- * (`@horizon/toolkit/bodies`): planet-centred positions and orbit samples, in plain arrays so
+ * (`@horizon/toolkit/bodies`): planet-centred positions and orbit shapes, in plain arrays so
  * cards and positions need no renderer. graphics/moons.ts draws and spins them in three.js.
  * The Moon alone is placed by the lunar theory (`lunarPositionJ2000`): its mean elements
  * wander by degrees, and it is the one moon seen from close enough to tell.
@@ -12,8 +12,10 @@ import {
   libration,
   lunarPositionJ2000,
   meanRates,
+  orbitShapeOf,
   type Moon,
   type MoonId,
+  type OrbitShape,
   type Vec3,
 } from "@horizon/toolkit/bodies";
 import { cross3, wrap } from "@horizon/toolkit/math";
@@ -106,20 +108,19 @@ export function moonOffset(id: MoonId, date: Date, out: Vec3 = [0, 0, 0], mean =
   return out;
 }
 
-/** Sample the orbit by true anomaly into a flat XYZ buffer (au, planet-centred). */
-export function writeMoonOrbit(out: Float32Array, id: MoonId, date: Date) {
+/**
+ * The moon's orbit at a date, au, about its planet, with the moon on it as `moonOffset` puts it
+ * (the Moon by its mean elements): the plane precesses, the size and shape hold.
+ */
+export function moonOrbitShape(id: MoonId, date: Date, out = orbitShapeOf()): OrbitShape {
   const track = TRACKS.get(id)!;
-  axesAt(track, daysOf(date));
-  const { aKm, e } = track.moon;
-  const p = (aKm / AU_KM) * (1 - e * e);
-  const segments = out.length / 3 - 1;
-  for (let s = 0; s <= segments; s += 1) {
-    const nu = (s / segments) * Math.PI * 2;
-    const r = p / (1 + e * Math.cos(nu));
-    const x = r * Math.cos(nu);
-    const y = r * Math.sin(nu);
-    out[s * 3] = P_AXIS[0] * x + Q_AXIS[0] * y;
-    out[s * 3 + 1] = P_AXIS[1] * x + Q_AXIS[1] * y;
-    out[s * 3 + 2] = P_AXIS[2] * x + Q_AXIS[2] * y;
+  const M = axesAt(track, daysOf(date));
+  out.a = track.moon.aKm / AU_KM;
+  out.e = track.moon.e;
+  out.E = eccentricAnomaly(M, out.e);
+  for (let k = 0; k < 3; k += 1) {
+    out.p[k] = P_AXIS[k]!;
+    out.q[k] = Q_AXIS[k]!;
   }
+  return out;
 }

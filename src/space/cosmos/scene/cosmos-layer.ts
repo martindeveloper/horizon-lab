@@ -23,6 +23,8 @@ import type { LabelPicks } from "@/space/galaxy/scene/label-picks";
 import type { Lod } from "@/space/galaxy/scene/lod";
 import type { WorldFrame as Frame } from "@/space/galaxy/show";
 import {
+  FAINTEST_OPACITY,
+  fadeMaterial,
   rising,
   type AnchoredRulers,
   type DistanceText,
@@ -160,41 +162,38 @@ export function createCosmosLayer(
       field.position.copy(camera.position);
       field.scale.setScalar(FIELD_MLY * MLY);
 
-      /* Each population reads at its own scale and gives way when it shrinks to a knot. */
+      /* Each population reads at its own scale and gives way when it shrinks to a knot; one
+         faded past what shows skips its draws. */
       const near = rising(ly, 8e6, 30e6);
       const far = rising(ly, 60e6, 200e6);
-      m.dwarfs.opacity = base.dwarfs * shown * (1 - rising(ly, 60e6, 160e6));
+      /* From the observable universe, everything nearer shrinks to a dim knot round us. */
+      const speck = 1 - 0.75 * rising(ly, 1.5e10, 5e10);
+      fadeMaterial(m.dwarfs, base.dwarfs * shown * (1 - rising(ly, 60e6, 160e6)));
       /* Out among the galaxies the field is all there is: fuller, larger, and doubled. */
-      m.field.opacity = base.field * shown * Math.max(1 - rising(ly, 60e6, 250e6), afield);
+      fadeMaterial(m.field, base.field * shown * Math.max(1 - rising(ly, 60e6, 250e6), afield));
       if (afield !== standing) {
         standing = afield;
         m.field.size = base.fieldSize * (1 + 1.5 * afield);
         m.field.color.setScalar(1 + 1.2 * afield);
-        clouds.fieldBeyond.visible = afield > 0.002;
       }
-      m.sheet.opacity = base.sheet * shown * rising(ly, 3e6, 9e6) * (1 - rising(ly, 300e6, 900e6));
-      m.near.opacity = base.near * shown * near;
-      m.supercluster.opacity = base.supercluster * shown * rising(ly, 25e6, 80e6);
-      m.far.opacity = base.far * shown * far;
-      m.laniakea.opacity = base.laniakea * shown * rising(ly, 120e6, 380e6);
-      /* From the observable universe, everything nearer shrinks to a dim knot round us. */
-      const speck = 1 - 0.75 * rising(ly, 1.5e10, 5e10);
-      m.web.opacity = base.web * shown * rising(ly, 500e6, 1.4e9) * speck;
-      m.laniakea.opacity *= speck;
-      m.far.opacity *= speck;
-      m.cmb.opacity = base.cmb * shown * rising(ly, 2e10, 6e10);
-      m.deep.opacity = base.deep * shown * rising(ly, 4e9, 2e10);
-      clouds.cmbShell.visible = m.cmb.opacity > 0.002;
-      clouds.deepFill.visible = m.deep.opacity > 0.002;
+      /* The second field, drawn with the first's material, shows as far as its own share does. */
+      clouds.fieldBeyond.visible = base.field * shown * afield > FAINTEST_OPACITY;
+      fadeMaterial(
+        m.sheet,
+        base.sheet * shown * rising(ly, 3e6, 9e6) * (1 - rising(ly, 300e6, 900e6)),
+      );
+      const nearDrawn = fadeMaterial(m.near, base.near * shown * near);
+      fadeMaterial(m.supercluster, base.supercluster * shown * rising(ly, 25e6, 80e6));
+      const farDrawn = fadeMaterial(m.far, base.far * shown * far * speck);
+      fadeMaterial(m.laniakea, base.laniakea * shown * rising(ly, 120e6, 380e6) * speck);
+      fadeMaterial(m.web, base.web * shown * rising(ly, 500e6, 1.4e9) * speck);
+      fadeMaterial(m.cmb, base.cmb * shown * rising(ly, 2e10, 6e10));
+      fadeMaterial(m.deep, base.deep * shown * rising(ly, 4e9, 2e10));
       const ringsOn = shown * rising(ly, 5e9, 2e10);
-      looks.cosmosRing.opacity = base.ring * ringsOn;
-      /* The two big clouds skip their draw while they are faded out. */
-      clouds.web.visible = m.web.opacity > 0.002;
-      clouds.laniakea.visible = m.laniakea.opacity > 0.002;
-      looks.cosmosFlow.opacity = base.flow * shown * rising(ly, 220e6, 600e6);
-      clouds.flows.visible = looks.cosmosFlow.opacity > 0.002;
-      looks.cosmosGalaxy.opacity = base.galaxy * shown * (1 - rising(ly, 40e6, 120e6));
-      looks.cosmosCluster.opacity = base.cluster * shown;
+      fadeMaterial(looks.cosmosRing, base.ring * ringsOn);
+      fadeMaterial(looks.cosmosFlow, base.flow * shown * rising(ly, 220e6, 600e6));
+      fadeMaterial(looks.cosmosGalaxy, base.galaxy * shown * (1 - rising(ly, 40e6, 120e6)));
+      fadeMaterial(looks.cosmosCluster, base.cluster * shown);
 
       /* The camera in the root's frame: the shells' outlines face it. */
       root.worldToLocal(eye.copy(camera.position));
@@ -217,8 +216,9 @@ export function createCosmosLayer(
         sprite.scale.setScalar(Math.max(sprite.scale.x, mly * 2.2));
       }
 
+      /* A cluster's glow shows while its cloud does. */
       for (const k of clusters) {
-        k.group.visible = (k.spec.far ? far : near) > 0.002;
+        k.group.visible = k.spec.far ? farDrawn : nearDrawn;
         toPx(k.glow, k.group.position, 16);
       }
 
