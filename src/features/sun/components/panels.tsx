@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { CameraPad } from "@/components/simulations/camera-pad";
-import { Rail, RailSection } from "@/components/simulations/rail";
+import { Rail, RailSection, SwitchGroup } from "@/components/simulations/rail";
 import {
   BloomSwitch,
   LensSwitch,
@@ -12,10 +12,34 @@ import {
   WideColourSwitch,
 } from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
+import { ListItem, kickerClass } from "@horizon/toolkit/ui";
 
+import { PLACE_LIST } from "../lib/model/places";
 import { useSun, type Show } from "../lib/store";
 
 const SWITCHES: (keyof Show)[] = ["fieldLines", "names", "grid"];
+
+/** Every place from the core out to the wind, each with the view it is seen in; a pick flies there and opens its card. */
+export function PlacesPanel({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("sun");
+  const selection = useSun((s) => s.selection);
+  return (
+    <Rail id="sun-places" title={t("hud.finder")} closeLabel={t("hud.close")} onClose={onClose}>
+      <SwitchGroup>
+        {PLACE_LIST.map((place) => (
+          <ListItem
+            key={place.id}
+            selected={selection === place.id}
+            onClick={() => useSun.getState().goTo(place.id)}
+          >
+            <span className="truncate">{t(`places.${place.id}.title`)}</span>
+            <span className={kickerClass}>{t(`views.${place.view}`)}</span>
+          </ListItem>
+        ))}
+      </SwitchGroup>
+    </Rail>
+  );
+}
 
 /** How the Sun is drawn: what the scene shows, buttons to turn the camera, then rendering. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {

@@ -1,20 +1,20 @@
+/**
+ * The Sun engine's contract with its host (`bridge.ts`): the hooks it reads the model and the
+ * store through, what it publishes a few times a second, and what it offers back.
+ */
 import type { SceneCamera } from "@/lib/scene-store";
 import type { DriftRunState, DriftSettings, DriftShot, OrbitTurn } from "@horizon/toolkit/camera";
-import type { Vec3 } from "@horizon/toolkit/math";
 import type { SimulationEngine } from "@horizon/toolkit/rendering";
 import type { SceneAntialias } from "@horizon/toolkit/scene";
 
 import type { InteriorProfile } from "../graphics/light-tables";
-import type { PlaceId } from "./frame";
 import type { SunPick } from "./picking";
 import type { SunViewId } from "./settings";
 
+export type { SunPick };
+
 /** What the engine publishes a few times a second. */
 export type SunReadouts = {
-  /** The camera's distance from the centre, solar radii. */
-  distance: number;
-  /** The view the distance is nearest, while nothing flies the camera. */
-  view: SunViewId;
   /** The camera's heading and tilt, whole degrees. */
   heading: number;
   tilt: number;
@@ -23,10 +23,10 @@ export type SunReadouts = {
 };
 
 export type SunEngineHooks = {
+  /** Runs one frame: the store writes the hooks make inside it are the scene's own (`bridgeStore`). */
+  frame?: (draw: () => void) => void;
   /** The interior's profile by radius (0 the centre, 1 the photosphere): the model's Model S. */
   interior: InteriorProfile;
-  /** Where each place stands in the body frame, solar radii (the model's `placeAnchor`); null: not now. */
-  anchors?: (id: PlaceId) => Vec3 | null;
   /** The clock: model seconds per display second, and whether it is held. */
   clock?: () => { rate: number; paused: boolean };
   /** Advances the model by this many model seconds (rate × dt while the clock runs), before the frame is read. */

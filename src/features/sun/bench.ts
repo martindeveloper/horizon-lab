@@ -4,6 +4,7 @@ import { mountSceneEngine } from "@/space/bench";
 import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import { MAP_EPOCH } from "@/space/sun/frame";
 import { prominenceDensity } from "@/space/sun/graphics/prominence/volume";
+import { DAY_S } from "@/space/sun/model/parameters";
 import { nextParkerPerihelion } from "@/space/sun/model/parker";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
@@ -51,7 +52,7 @@ const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
 const FRAME_S = 0.1;
 /** The Sun every scene shows: one seed, lived a month before the first frame so spots and a prominence stand. */
 const SEED = 7;
-const START_S = 30 * 86_400;
+const START_S = 30 * DAY_S;
 /** Parker's first perihelion after the map's epoch, model seconds: its plunge in view. */
 const PARKER_PERIHELION_S = (nextParkerPerihelion(MAP_EPOCH) - MAP_EPOCH) / 1000;
 

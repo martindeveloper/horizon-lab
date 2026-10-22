@@ -2,6 +2,7 @@
 // ramp), the wedge cut, the clocks, the surface's rotation law and the display's gamut.
 #include <horizon/math>
 #include "./parameters.generated.glsl"
+#include "../../../../space/sun/graphics/shaders/sampling.glsl"
 
 uniform int uLightMode;        // LIGHT_WHITE, LIGHT_BAND, LIGHT_ECLIPSE or LIGHT_MAGNETOGRAM
 uniform sampler2D uResponse;   // the model's response over log T, a row per layer (LAYER_*): the curve, then convolved with each layer's spread
@@ -20,25 +21,11 @@ uniform float uPixelWorld;     // world length of one buffer pixel, per unit dis
 uniform mat3 uGamut;           // linear sRGB to the canvas's primaries
 uniform vec3 uGold;            // the theme's gold, linear
 
-// A nearest-filtered float table interpolated by hand, so no float-linear extension is needed.
-vec4 sample1D(sampler2D table, float x, int size) {
-  float at = clamp(x, 0.0, 1.0) * float(size - 1);
-  float lo = floor(at);
-  vec4 a = texture2D(table, vec2((lo + 0.5) / float(size), 0.5));
-  vec4 b = texture2D(table, vec2((min(lo + 1.0, float(size - 1)) + 0.5) / float(size), 0.5));
-  return mix(a, b, at - lo);
-}
-
 // The band's response to a layer of plasma at ln K (`layer`: LAYER_POINT for one temperature,
 // else the layer whose spread the model's curve is convolved with), read from the table.
 float layerResponse(float lnK, int layer) {
   float x = (lnK / LN10 - RESPONSE_LOG_MIN) / (RESPONSE_LOG_MAX - RESPONSE_LOG_MIN);
-  float at = clamp(x, 0.0, 1.0) * float(RESPONSE_SAMPLES - 1);
-  float lo = floor(at);
-  float row = (float(layer) + 0.5) / float(RESPONSE_ROWS);
-  float a = texture2D(uResponse, vec2((lo + 0.5) / float(RESPONSE_SAMPLES), row)).r;
-  float b = texture2D(uResponse, vec2((min(lo + 1.0, float(RESPONSE_SAMPLES - 1)) + 0.5) / float(RESPONSE_SAMPLES), row)).r;
-  return mix(a, b, at - lo);
+  return tableAt(uResponse, x, RESPONSE_SAMPLES, layer, RESPONSE_ROWS).r;
 }
 
 // The band's response to one temperature.
@@ -60,14 +47,7 @@ float openness(vec3 u, float dipole) {
 
 // A band's intensity as its ramp colours it: 1 − e^(−gain · I) along the ramp.
 vec3 rampAt(float intensity) {
-  return sample1D(uRamp, 1.0 - exp(-BAND_GAIN * intensity), RAMP_SAMPLES).rgb;
-}
-
-// A point of the unit sphere turned `angle` about the pole.
-vec3 turned(vec3 p, float angle) {
-  float ca = cos(angle);
-  float sa = sin(angle);
-  return vec3(ca * p.x + sa * p.z, p.y, -sa * p.x + ca * p.z);
+  return tableAt(uRamp, 1.0 - exp(-BAND_GAIN * intensity), RAMP_SAMPLES, 0, 1).rgb;
 }
 
 // The surface's rotation at a latitude (its sine `y`) over the equator's: Ω(φ)/Ω₀.
@@ -156,7 +136,6 @@ bool traceSun(vec3 o, vec3 d, out vec3 p, out int face) {
 // A feature `perRadius` across the radius, seen at `mu` with a buffer pixel `px` wide there:
 // 0 below two pixels, 1 above four. Filtering changes visibility, never a feature's size.
 float resolvedFeature(float perRadius, float px, float mu) {
-  float pixels = max(mu, 0.02) / (max(perRadius, 1.0) * max(px, 1e-9));
-  return smoothstep(SURFACE_RESOLVE_PX, 2.0 * SURFACE_RESOLVE_PX, pixels);
+  return resolvedPixels(max(mu, 0.02) / (max(perRadius, 1.0) * max(px, 1e-9)));
 }
 

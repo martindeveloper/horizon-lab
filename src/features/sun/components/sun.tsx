@@ -52,7 +52,12 @@ export function Sun() {
   useFreshVisit(reset);
 
   return (
-    <VisualizationShell id={ANCHOR_IDS.mainContent} tabIndex={-1} className="h-full">
+    <VisualizationShell
+      id={ANCHOR_IDS.mainContent}
+      tabIndex={-1}
+      data-scene-tone="bright"
+      className="h-full"
+    >
       <h1 className="sr-only">
         {t("app")} · {t(`views.${view}`)}
       </h1>

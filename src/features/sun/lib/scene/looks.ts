@@ -6,8 +6,9 @@
 import { Matrix3, Vector2, Vector3, Vector4 } from "three";
 
 import { dice } from "@/space/sun/model/dice";
+import { GRANULE_LIFETIME_S, SUPERGRANULE_LIFETIME_S } from "@/space/sun/model/parameters";
 import { gamutMatrix } from "@horizon/toolkit/rendering";
-import { SOLAR_GOLD } from "@horizon/toolkit/scene";
+import { SOLAR_GOLD, cssHex } from "@horizon/toolkit/scene";
 import { hexToLinear, wavelengthColor, type Gamut } from "@horizon/toolkit/science";
 
 import {
@@ -17,15 +18,13 @@ import {
   STREAMER_MAX,
   E_CORONA_NM,
   EVERSHED_RADII_PER_S,
-  GRANULE_LIFETIME_S,
   LIGHT_MODES,
   NEGATIVE_HEX,
-  NETWORK_LIFETIME_S,
-  POSITIVE_HEX,
   PROMINENCE_MAX,
   RIBBON_GAP,
   REGION_MAX,
   SPICULE_LIFETIME_S,
+  type RIBBON_PRESENCE,
 } from "../parameters";
 import { bipoleAxis, directionOf, tiltedAxis, type PassbandId, type SunFrame } from "./frame";
 import type { SunLight } from "./settings";
@@ -33,10 +32,15 @@ import type { SunLight } from "./settings";
 /** A clock wraps here so its float stays precise; a wrap is a jump no one sees. */
 const CLOCK_WRAP = 1e5;
 
-/** How a light is drawn, by its id (`LIGHT_MODES`). */
+/** What kind of light an id is: true colour, Hα, a band of the EUV, the eclipse or the magnetogram. */
+export type LightKind = keyof typeof RIBBON_PRESENCE;
+export const lightKind = (id: PassbandId): LightKind =>
+  id === "white" || id === "halpha" || id === "eclipse" || id === "magnetogram" ? id : "band";
+
+/** How a light is drawn, by its id (`LIGHT_MODES`): Hα through its ramp, as a band is. */
 export function lightModeOf(id: PassbandId) {
-  const mode = id === "white" || id === "eclipse" || id === "magnetogram" ? id : "band";
-  return LIGHT_MODES.indexOf(mode);
+  const kind = lightKind(id);
+  return LIGHT_MODES.indexOf(kind === "halpha" ? "band" : kind);
 }
 
 /** The Balmer pink of an eclipse's chromosphere (encoded sRGB), as Giants draws it. */
@@ -89,11 +93,9 @@ export function createSunLooks() {
     uGamut: { value: new Matrix3() },
   };
   const colourUniforms = {
-    uGold: { value: new Vector3(...hexToLinear(`#${SOLAR_GOLD.toString(16).padStart(6, "0")}`)) },
-    uPositive: { value: linear(POSITIVE_HEX) },
+    uGold: { value: linear(cssHex(SOLAR_GOLD)) },
+    uPositive: { value: linear(cssHex(SOLAR_GOLD)) },
     uNegative: { value: linear(NEGATIVE_HEX) },
-    uMagPositive: { value: linear(POSITIVE_HEX) },
-    uMagNegative: { value: linear(NEGATIVE_HEX) },
     uBalmer: { value: linear(BALMER_HEX) },
     uGreen: { value: new Vector3(green[0], green[1], green[2]) },
   };
@@ -110,12 +112,6 @@ export function createSunLooks() {
   const centre = new Vector3();
   return {
     uniforms,
-    /**
-     * The light: its peaks for the shaders, and its exposure, 1 over the brightest layer's
-     * weighted response, so each band shows what answers to it at full scale and nothing where
-     * its response is zero. Returns how much a prominence (chromospheric, with a transition
-     * sheath) shows in it.
-     */
     /** The light's mode and layer weights; its exposure comes from the tables (`setResponse`). */
     setLight(light: SunLight, scale: number) {
       lightUniforms.uLightMode.value = lightModeOf(light.id);
@@ -133,7 +129,7 @@ export function createSunLooks() {
       const t = frame.time;
       motionUniforms.uClock.value.set(
         (t / GRANULE_LIFETIME_S) % CLOCK_WRAP,
-        (t / NETWORK_LIFETIME_S) % CLOCK_WRAP,
+        (t / SUPERGRANULE_LIFETIME_S) % CLOCK_WRAP,
       );
       CONVECTION_OCTAVES.forEach((o, k) => {
         motionUniforms.uCellOctave.value[k]!.z =

@@ -8,18 +8,21 @@
 import { Group, Points, type Object3D, type PerspectiveCamera } from "three";
 
 import { createBrightSky } from "@/space/bright-stars";
-import { createMilkyWay, fieldStars, starSize, type SkyCounts } from "@/space/sky/milky-way";
+import {
+  BRIGHT_STAR_LOOK,
+  createMilkyWay,
+  fieldStars,
+  type SkyCounts,
+} from "@/space/sky/milky-way";
 import { starMaterial } from "@/space/sky/stars";
 import { galacticAngle } from "@/space/solar-system/model/equations";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 
-import { CAMERA_MAX_R } from "../parameters";
+import { ORBIT_REACH_R } from "../parameters";
 import { skyOrientation } from "./sky-frame";
 
 /** The sky sphere's radius, radii: centred on the camera, inside the far plane everywhere. */
-const SKY_RADIUS_R = CAMERA_MAX_R * 3;
-/** The faintest and the full magnitude of the bright stars, as the Orrery draws them. */
-const BRIGHT_LOOK = { floor: 0.55, full: 1.4, size: starSize };
+const SKY_RADIUS_R = ORBIT_REACH_R;
 
 export function createSkyLayer(
   scope: DisposalScope,
@@ -40,7 +43,7 @@ export function createSkyLayer(
   field.frustumCulled = false;
   scope.defer(() => field.geometry.dispose());
   const brightMaterial = scope.own(starMaterial(dpr));
-  const bright = createBrightSky(scope, brightMaterial, BRIGHT_LOOK);
+  const bright = createBrightSky(scope, brightMaterial, BRIGHT_STAR_LOOK);
   sky.add(milkyWay.group, field, bright);
   parent.add(sky);
   /* Today's sky: the Sun's galactic orbital phase now, the thin disk, no reddening. */

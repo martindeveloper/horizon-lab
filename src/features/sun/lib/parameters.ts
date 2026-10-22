@@ -1,4 +1,3 @@
-import { SUN_MAP_QUIET_INTENSITY } from "@/space/solar-system/model/parameters";
 /**
  * The Sun lab's renderer numbers, once: the stage, the surface's scales and contrasts, the
  * cut's shells, the lights, the atmosphere, the eruption and the ribbons. The shaders receive
@@ -6,25 +5,35 @@ import { SUN_MAP_QUIET_INTENSITY } from "@/space/solar-system/model/parameters";
  * `graphics/parameters.generated.glsl`). Figures the model owns (the Sun's radius and
  * temperature, the rotation law) come from the shared catalogues, never retyped.
  */
-import { NETWORK_GRANULES, PROFILE_SAMPLES } from "@/space/sun/graphics/parameters";
+
+import { SUN_MAP_QUIET_INTENSITY } from "@/space/solar-system/model/parameters";
+import {
+  CHROMOSPHERE_HEIGHT,
+  FACULA_CONTRAST,
+  NETWORK_GRANULES,
+  PROFILE_SAMPLES,
+  SPICULE_HEIGHT,
+} from "@/space/sun/graphics/parameters";
 import { SUN_ACTIVITY_MAX_REGIONS } from "@/space/sun/graphics/prominence/parameters";
 import { MAP_CENTRAL_MERIDIAN_RAD } from "@/space/sun/model/observed";
 import {
   CORONAL_MEAN_MOLECULAR_WEIGHT,
   DAY_S,
+  E_CORONA_LINE_NM,
+  F_CORONA_POWER,
+  GRANULE_SIZE_KM,
   RADIUS_M,
   SURFACE_GRAVITY,
   TACHOCLINE_R,
   TACHOCLINE_THICKNESS_R,
   TEMPERATURES,
 } from "@/space/sun/model/parameters";
-import { convectiveSpeedAt, pressureScaleHeightAt, structureAt } from "@/space/sun/model/structure";
 import {
-  BOLTZMANN_CONSTANT,
-  PROTON_MASS_KG,
-  SOLAR_RADIUS_KM,
-  SOLAR_TEFF_K,
-} from "@horizon/toolkit/science";
+  INTERIOR_RATE_DEG_PER_DAY,
+  SURFACE_ROTATION_DEG_PER_DAY,
+} from "@/space/sun/model/rotation";
+import { convectiveSpeedAt, pressureScaleHeightAt, structureAt } from "@/space/sun/model/structure";
+import { SOLAR_RADIUS_KM, SOLAR_TEFF_K, pressureScaleHeight } from "@horizon/toolkit/science";
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
 import spotStencil from "./graphics/spot-stencil.generated.json";
@@ -37,6 +46,9 @@ export const ATMOSPHERE_RADIUS = 8;
 /** The camera's reach from the centre, solar radii. */
 export const CAMERA_MIN_R = 1.03;
 export const CAMERA_MAX_R = 12;
+/** The farthest any orbit zooms out (over the eruption's ejecta), and the camera's far plane past the sky's sphere there. */
+export const ORBIT_REACH_R = 3 * CAMERA_MAX_R;
+export const CAMERA_FAR_R = 4 * CAMERA_MAX_R;
 /**
  * Its reach from a feature it orbits (a spot group, a prominence, an active region), radii:
  * never so close that, straight over a feature on the surface, it would be inside the globe's
@@ -79,8 +91,6 @@ export const DISSOLVE_S = 0.5;
 /** Latitude grid lines every this many degrees, and their strength. */
 export const GRID_STEP_DEG = 15;
 export const GRID_ALPHA = 0.22;
-/** A feature resolves above this many drawing-buffer pixels. */
-export const SURFACE_RESOLVE_PX = 2;
 
 /* ---------------------------------------------------------------- surface */
 
@@ -96,14 +106,10 @@ export const MAP_DETAIL_TO_PX = 2.5;
 export const MAP_FADE_IN_S = 1.2;
 export { MAP_CENTRAL_MERIDIAN_RAD, SUN_MAP_QUIET_INTENSITY };
 /**
- * Display scales of the surface's features. A granule's size and lifetime, a supergranule's
- * lifetime and the spots' temperatures are the model's figures (the Sun's catalogue in
- * `src/space/sun`); integration reads them from there.
+ * Display scales of the surface's features. A granule's size, the cells' lifetimes and the
+ * spots' temperatures are the model's figures (`src/space/sun/model/parameters.ts`).
  */
-export const GRANULE_KM = 1_000;
-export const GRANULES_PER_RADIUS = SOLAR_RADIUS_KM / GRANULE_KM;
-export const GRANULE_LIFETIME_S = 480;
-export const NETWORK_LIFETIME_S = 86_400;
+export const GRANULES_PER_RADIUS = SOLAR_RADIUS_KM / GRANULE_SIZE_KM;
 /** Granules' temperature contrast as a share of the temperature; the supergranular network's. */
 export const GRANULE_CONTRAST = 0.04;
 export const NETWORK_CONTRAST = 0.006;
@@ -114,8 +120,6 @@ export const PENUMBRA_FILAMENT = 0.16;
 /** A group's leading and following spots: their radii as shares of the group's size (times the root of its strength). */
 export const LEAD_SPOT = 0.42;
 export const FOLLOW_SPOT = 0.28;
-/** Faculae round an active region: this much hotter where they show best, at the limb. */
-export const FACULA_CONTRAST = 0.09;
 /** The Evershed flow's speed along the penumbra, km/s, and the ripple its filaments carry. */
 export const EVERSHED_KMS = 2;
 export const EVERSHED_RADII_PER_S = EVERSHED_KMS / SOLAR_RADIUS_KM;
@@ -134,14 +138,12 @@ export const RIBBON_GLARE = 1.2;
  */
 export const SURFACE_EXPOSURE = 0.56;
 export const SURFACE_CONTRAST = 2.2;
-/** Longitude turns slower towards the poles than at the equator: the law's sin² and sin⁴ terms over its equatorial rate (Snodgrass & Ulrich 1990), the model's figures. */
-export const ROTATION_SIN2 = -2.396 / 14.713;
-export const ROTATION_SIN4 = -1.787 / 14.713;
-/** The interior turns rigidly at the rate the surface law gives at this latitude, degrees. */
-export const INTERIOR_LATITUDE_DEG = 30;
-const interiorSin = Math.sin((INTERIOR_LATITUDE_DEG * Math.PI) / 180);
-export const INTERIOR_TURN_RATIO =
-  1 + ROTATION_SIN2 * interiorSin ** 2 + ROTATION_SIN4 * interiorSin ** 4;
+/** Longitude turns slower towards the poles than at the equator: the model's law's sin² and sin⁴ terms over its equatorial rate. */
+const { A, B, C } = SURFACE_ROTATION_DEG_PER_DAY;
+export const ROTATION_SIN2 = B / A;
+export const ROTATION_SIN4 = C / A;
+/** The radiative interior turns rigidly at the model's rate, against the equator's. */
+export const INTERIOR_TURN_RATIO = INTERIOR_RATE_DEG_PER_DAY / A;
 
 /* ------------------------------------------------------------- the inside */
 
@@ -308,14 +310,12 @@ export const MAGNETOGRAM_SATURATION = 0.35;
 export const MAGNETOGRAM_DIPOLE = 1.2;
 /** A bipole's poles on the magnetogram: their spread in units of the region's size. */
 export const MAGNETOGRAM_POLE = 1;
-/** Regions the shader reads at most. */
+/** Regions the shader reads at most, and how far a region's marks reach from its centre in its radii (the shader's and a tap's). */
 export const REGION_MAX = 12;
+export const REGION_REACH = 2.2;
 
 /* -------------------------------------------------------------- atmosphere */
 
-/** The chromosphere's depth and the spicules' reach, radii (about 2,000 and 10,000 km), the model's figures. */
-export const CHROMOSPHERE_HEIGHT = 0.003;
-export const SPICULE_HEIGHT = 0.014;
 /** Spicule columns round the limb, and a spicule's life in model seconds. */
 export const SPICULE_COLUMNS = 1_200;
 export const SPICULE_LIFETIME_S = 600;
@@ -332,11 +332,14 @@ export const INNER_CORONA_REACH = 0.12;
 export const INNER_CORONA_GLOW = 0.6;
 /**
  * In the EUV the corona's own light falls as its density squared: the hydrostatic scale height
- * of the quiet corona, kT / (μ m_p g), halved for the square, in radii.
+ * of the quiet corona, kT / (μ mᵤ g), halved for the square, in radii.
  */
 export const EUV_SCALE_HEIGHT_R =
-  (BOLTZMANN_CONSTANT * CORONA_K) /
-  (CORONAL_MEAN_MOLECULAR_WEIGHT * PROTON_MASS_KG * SURFACE_GRAVITY) /
+  pressureScaleHeight.compute({
+    T: CORONA_K,
+    mu: CORONAL_MEAN_MOLECULAR_WEIGHT,
+    g: SURFACE_GRAVITY,
+  }) /
   RADIUS_M /
   2;
 /** The quiet corona's share between the streamers. */
@@ -365,11 +368,11 @@ export const PLUME_WIDTH = 0.12;
 /** The corona's fine rays: their share of its light, and their count round the limb. */
 export const RAY_SHARE = 0.25;
 export const RAY_COUNT = 40;
-/** The F-corona's fall-off (dust, flat) and the E-corona's reach above the limb, radii. */
-export const F_CORONA_FALLOFF = 2.5;
+/** The F-corona's fall-off (dust, flat: the model's power law) and the E-corona's reach above the limb, radii. */
+export const F_CORONA_FALLOFF = F_CORONA_POWER;
 export const E_CORONA_REACH = 0.3;
-/** Fe XIV's green line, nm: the E-corona's colour. */
-export const E_CORONA_NM = 530.3;
+/** Fe XIV's green line, nm: the E-corona's colour (the model's line). */
+export const E_CORONA_NM = E_CORONA_LINE_NM;
 /** The transition region's and coronal loops' glow over a region: its reach, radii, and strength. */
 export const LOOP_GLOW_REACH = 0.3;
 export const LOOP_GLOW = 0.35;
@@ -446,13 +449,10 @@ export const MAGNETOGRAM_LINE = 0.3;
 export const RIBBON_MAX_POINTS = 96;
 /** Display seconds the eruption's scrub takes from 0 to 1 while it plays by itself. */
 export const ERUPTION_PLAY_S = 40;
-/** Polarity colours (encoded sRGB): the theme's gold for positive, a cool blue for negative. */
-export const POSITIVE_HEX = "#e2c07a";
+/** The negative polarity's colour (encoded sRGB), a cool blue; the positive is the theme's gold. */
 export const NEGATIVE_HEX = "#6f8fff";
 /** The magnetogram's grey. */
 export const MAGNETOGRAM_GREY = 0.42;
-/** The space background, as the theme's `space` token (encoded sRGB). */
-export const SPACE_SRGB = [8 / 255, 8 / 255, 11 / 255] as const;
 
 /**
  * Bloom on the Sun: only the brightest light glows (a flare, the limb's rim, the ejection's
@@ -468,7 +468,6 @@ export const PROMINENCE_MAX = SUN_ACTIVITY_MAX_REGIONS;
  * this order (`LIGHT_*`).
  */
 export const LIGHT_MODES = ["white", "band", "eclipse", "magnetogram"] as const;
-export type LightMode = (typeof LIGHT_MODES)[number];
 
 /** Each of `names` as `PREFIX_NAME: index`, for a shader's codes. */
 function codes(prefix: string, names: readonly string[]) {
@@ -483,7 +482,6 @@ function codes(prefix: string, names: readonly string[]) {
 export const SHADER_DEFINES = glslDefines({
   PROXY_RADIUS,
   ATMOSPHERE_RADIUS,
-  SURFACE_RESOLVE_PX,
   GRID_STEP: (GRID_STEP_DEG * Math.PI) / 180,
   GRID_ALPHA,
   PHOTOSPHERE_K,
@@ -578,6 +576,7 @@ export const SHADER_DEFINES = glslDefines({
   MAGNETOGRAM_GREY,
   MAGNETOGRAM_LINE,
   REGION_MAX: glslInt(REGION_MAX),
+  REGION_REACH,
   CHROMOSPHERE_HEIGHT,
   SPICULE_HEIGHT,
   SPICULE_COLUMNS,

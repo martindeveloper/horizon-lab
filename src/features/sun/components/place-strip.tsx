@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Chip, LabelledRow } from "@horizon/toolkit/ui";
+import { Chip, ChipRow } from "@horizon/toolkit/ui";
 
 import { PLACE_LIST } from "../lib/model/places";
 import { useSun } from "../lib/store";
@@ -20,29 +20,28 @@ export function PlaceStrip({ className }: { className?: string }) {
   const places = PLACE_LIST.filter((place) => place.view === view);
   if (places.length === 0) return null;
   return (
-    <LabelledRow
+    <ChipRow
+      wrap
       data-coach="places"
       label={t("hud.places")}
       shown={<RowLabel>{t("hud.places")}</RowLabel>}
       className={className}
     >
-      <div className="-mx-1 flex min-w-0 gap-1 not-md:[scrollbar-width:none] not-md:overflow-x-auto not-md:overscroll-x-contain md:flex-wrap">
-        {places.map((place) => (
-          <Chip
-            key={place.id}
-            selected={selection === place.id}
-            aria-pressed={selection === place.id}
-            className="shrink-0 not-md:h-9"
-            onClick={() =>
-              selection === place.id
-                ? useSun.getState().select(null)
-                : useSun.getState().goTo(place.id)
-            }
-          >
-            {t(`places.${place.id}.title`)}
-          </Chip>
-        ))}
-      </div>
-    </LabelledRow>
+      {places.map((place) => (
+        <Chip
+          key={place.id}
+          selected={selection === place.id}
+          aria-pressed={selection === place.id}
+          className="shrink-0 not-md:h-9"
+          onClick={() =>
+            selection === place.id
+              ? useSun.getState().select(null)
+              : useSun.getState().goTo(place.id)
+          }
+        >
+          {t(`places.${place.id}.title`)}
+        </Chip>
+      ))}
+    </ChipRow>
   );
 }

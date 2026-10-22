@@ -21,6 +21,7 @@ import {
 import { PLANE_LINE_POINTS } from "@/space/sun/model/eruption";
 import { FLOW_PARTICLES } from "@/space/sun/model/eruption-flow";
 import { ARCADE_SLICES } from "@/space/sun/model/parameters";
+import { keysOf, recordFrom } from "@horizon/toolkit/records";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 
 import FLOW_FRAG from "../graphics/flow.frag.glsl";
@@ -38,45 +39,42 @@ import {
   RIBBON_STRENGTH_TOP,
   TUBE_WIDTH,
 } from "../parameters";
-
-/** A line's strength as drawn: a floor every line keeps, then a log scale up to the strongest. */
-const shown = (strength: number) =>
-  RIBBON_FLOOR +
-  (1 - RIBBON_FLOOR) *
-    Math.min(1, Math.log1p(Math.max(strength, 0)) / Math.log1p(RIBBON_STRENGTH_TOP));
 import type { SunQuality } from "../quality";
 import { type Polyline, type SunFrame } from "./frame";
 import type { SunLooks } from "./looks";
 
+/** A line's strength as drawn: a floor every line keeps, then a log scale up to the strongest. */
+const strengthShown = (strength: number) =>
+  RIBBON_FLOOR +
+  (1 - RIBBON_FLOOR) *
+    Math.min(1, Math.log1p(Math.max(strength, 0)) / Math.log1p(RIBBON_STRENGTH_TOP));
+
 /** The farthest any ribbon reaches, radii: the atmosphere's bound covers every open line drawn. */
 const REACH = 6;
 
-type Buffers = {
-  prev: Float32Array;
-  start: Float32Array;
-  end: Float32Array;
-  next: Float32Array;
-  line: Float32Array;
-  along: Float32Array;
-  fade: Float32Array;
-  tube: Float32Array;
-  seed: Float32Array;
-  capacity: number;
-};
+/** A segment's instanced attributes: each buffer's attribute name and its floats per segment. */
+const ATTRIBUTES = {
+  prev: ["aPrev", 3],
+  start: ["aStart", 3],
+  end: ["aEnd", 3],
+  next: ["aNext", 3],
+  line: ["aLine", 4],
+  along: ["aAlong", 2],
+  fade: ["aFade", 1],
+  tube: ["aTube", 1],
+  seed: ["aSeed", 1],
+} as const;
+type BufferName = keyof typeof ATTRIBUTES;
+const BUFFER_NAMES = keysOf(ATTRIBUTES);
+
+type Buffers = Record<BufferName, Float32Array> & { capacity: number };
 
 function buffers(capacity: number): Buffers {
-  return {
-    prev: new Float32Array(capacity * 3),
-    start: new Float32Array(capacity * 3),
-    end: new Float32Array(capacity * 3),
-    next: new Float32Array(capacity * 3),
-    line: new Float32Array(capacity * 4),
-    along: new Float32Array(capacity * 2),
-    fade: new Float32Array(capacity),
-    tube: new Float32Array(capacity),
-    seed: new Float32Array(capacity),
-    capacity,
-  };
+  const arrays = recordFrom(
+    BUFFER_NAMES,
+    (name) => new Float32Array(capacity * ATTRIBUTES[name][1]),
+  );
+  return { ...arrays, capacity };
 }
 
 export function createFieldLayer(
@@ -137,6 +135,8 @@ export function createFieldLayer(
   let geometry: InstancedBufferGeometry | null = null;
   let mesh: Mesh | null = null;
   let data: Buffers | null = null;
+  /** The instanced attributes with their floats per segment, as uploaded. */
+  let uploads: { attribute: InstancedBufferAttribute; size: number }[] = [];
   let maxLines = 0;
   let maxPoints = 0;
   scope.defer(() => {
@@ -164,15 +164,12 @@ export function createFieldLayer(
       attribute.setUsage(DynamicDrawUsage);
       return attribute;
     };
-    geometry.setAttribute("aPrev", instanced(data.prev, 3));
-    geometry.setAttribute("aStart", instanced(data.start, 3));
-    geometry.setAttribute("aEnd", instanced(data.end, 3));
-    geometry.setAttribute("aNext", instanced(data.next, 3));
-    geometry.setAttribute("aLine", instanced(data.line, 4));
-    geometry.setAttribute("aAlong", instanced(data.along, 2));
-    geometry.setAttribute("aFade", instanced(data.fade, 1));
-    geometry.setAttribute("aTube", instanced(data.tube, 1));
-    geometry.setAttribute("aSeed", instanced(data.seed, 1));
+    uploads = BUFFER_NAMES.map((name) => {
+      const [attribute, size] = ATTRIBUTES[name];
+      const instance = instanced(data![name], size);
+      geometry!.setAttribute(attribute, instance);
+      return { attribute: instance, size };
+    });
     geometry.boundingSphere = new Sphere(new Vector3(), REACH);
     geometry.instanceCount = 0;
     mesh = new Mesh(geometry, material);
@@ -186,7 +183,10 @@ export function createFieldLayer(
   let stale = true;
   let lastLines = -1;
   let lastEruption = -1;
+  let lastBackground = -1;
   let count = 0;
+  /** Segments the field's own lines fill, ahead of the eruption's. */
+  let fieldCount = 0;
   const offset: [number, number, number] = [0, 0, 0];
 
   /** One polyline's segments, resampled to at most `maxPoints` points, shifted by `offset`. */
@@ -206,11 +206,12 @@ export function createFieldLayer(
       put(data.start, count, at(i));
       put(data.end, count, at(i + 1));
       put(data.next, count, at(Math.min(i + 2, n - 1)));
-      data.line.set(
-        [line.polarity, line.open ? 1 : 0, shown(line.strength), line.kelvin],
-        count * 4,
-      );
-      data.along.set([i / (n - 1), (i + 1) / (n - 1)], count * 2);
+      data.line[count * 4] = line.polarity;
+      data.line[count * 4 + 1] = line.open ? 1 : 0;
+      data.line[count * 4 + 2] = strengthShown(line.strength);
+      data.line[count * 4 + 3] = line.kelvin;
+      data.along[count * 2] = i / (n - 1);
+      data.along[count * 2 + 1] = (i + 1) / (n - 1);
       data.fade[count] = fade;
       data.tube[count] = tube;
       data.seed[count] = seed;
@@ -223,30 +224,46 @@ export function createFieldLayer(
       allocate(quality);
       stale = true;
     },
+    /**
+     * Draws the frame's lines when shown in a light that shows the field; the field's own lines
+     * are rewritten when the field changes, the eruption's after them as it moves, and only the
+     * segments written are uploaded.
+     */
     update(frame: SunFrame, shown: boolean) {
       if (!geometry || !data || !mesh) return;
-      mesh.visible = shown && count > 0;
       const eruption = frame.eruption;
-      flowMesh.visible = shown && !!eruption && eruption.reconnection > 0;
-      const region = eruption ? frame.regions.find((r) => r.id === eruption.regionId) : undefined;
-      if (!stale && frame.fieldRevision === lastLines && frame.eruptionRevision === lastEruption)
-        return;
+      const drawn = shown && uniforms.uPresence.value > 0;
+      mesh.visible = drawn && count > 0;
+      flowMesh.visible = drawn && !!eruption && eruption.reconnection > 0;
+      if (!drawn) return;
+      /* Behind an arcade the rest of the field steps back. */
+      const background = eruption && eruption.lines.length > 0 ? ERUPTION_BACKGROUND : 1;
+      const fieldChanged =
+        stale || frame.fieldRevision !== lastLines || background !== lastBackground;
+      if (!fieldChanged && frame.eruptionRevision === lastEruption) return;
       stale = false;
       lastLines = frame.fieldRevision;
       lastEruption = frame.eruptionRevision;
-      count = 0;
+      lastBackground = background;
       if (eruption) {
         flowPosition.array.set(eruption.flow);
         flowPosition.needsUpdate = true;
         flowUniforms.uFlow.value = 0.15 * Math.sqrt(eruption.reconnection);
       }
       offset.fill(0);
-      /* Behind an arcade the rest of the field steps back. */
-      const background = eruption && eruption.lines.length > 0 ? ERUPTION_BACKGROUND : 1;
-      for (const line of frame.fieldLines.slice(0, maxLines)) writeLine(line, background);
+      const from = fieldChanged ? 0 : fieldCount;
+      if (fieldChanged) {
+        count = 0;
+        const lines = Math.min(frame.fieldLines.length, maxLines);
+        for (let i = 0; i < lines; i++) writeLine(frame.fieldLines[i]!, background);
+        fieldCount = count;
+      } else count = fieldCount;
+      const region = eruption ? frame.regions.find((r) => r.id === eruption.regionId) : undefined;
       if (eruption && region) {
         const middle = (ARCADE_SLICES - 1) / 2;
-        for (const line of eruption.lines.slice(0, ERUPTION_MAX_LINES)) {
+        const lines = Math.min(eruption.lines.length, ERUPTION_MAX_LINES);
+        for (let i = 0; i < lines; i++) {
+          const line = eruption.lines[i]!;
           const off = Math.abs(line.slice - middle);
           if (off > middle - ARCADE_TRIM) continue;
           // Keep paired upper and lower products equally sampled. A second uniform
@@ -255,19 +272,12 @@ export function createFieldLayer(
         }
       }
       geometry.instanceCount = count;
-      for (const name of [
-        "aPrev",
-        "aStart",
-        "aEnd",
-        "aNext",
-        "aLine",
-        "aAlong",
-        "aFade",
-        "aTube",
-        "aSeed",
-      ])
-        geometry.getAttribute(name).needsUpdate = true;
-      mesh.visible = shown && count > 0;
+      for (const { attribute, size } of uploads) {
+        attribute.clearUpdateRanges();
+        if (count > from) attribute.addUpdateRange(from * size, (count - from) * size);
+        attribute.needsUpdate = true;
+      }
+      mesh.visible = count > 0;
     },
     /** Half the halo's width, world per unit distance from the camera. */
     setHalfWidth(halfWidth: number) {

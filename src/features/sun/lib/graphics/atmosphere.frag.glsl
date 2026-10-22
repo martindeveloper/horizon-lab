@@ -49,7 +49,7 @@ float baumbach(float rho) {
 // at the flanks, strands of field draped over it and the erupted rope glowing at its heart.
 vec3 ejection(vec3 o, vec3 d, float tEnd) {
   float front = uEruption.w;
-  if (front <= 1.0 || uCmePresence <= 0.0) return vec3(0.0);
+  if (front <= 1.0 || uCmePresence <= 0.0 || uWeights.y + uWeights.w <= 0.0) return vec3(0.0);
   float thick = CME_THICKNESS * front;
   float t0;
   float t1;
@@ -137,7 +137,10 @@ void main() {
   float px = uPixelWorld * max(tc, 0.05);
   vec3 col = vec3(0.0);
 
-  if (!hits && rho >= 1.0) {
+  /* Each part only where the light shows its layer (uniform branches, taken alike by every pixel). */
+  bool chromosphere = uWeights.y + uWeights.z > 0.0;
+  bool corona = uWeights.w > 0.0;
+  if (!hits && rho >= 1.0 && chromosphere) {
     float h = rho - 1.0;
     /* The chromosphere's rim, and its spicules: a forest of jets, each on its own clock. */
     float lon = atan(qhat.z, qhat.x);
@@ -172,7 +175,10 @@ void main() {
     col += lit(chromo, CHROMOSPHERE_K, LAYER_CHROMOSPHERE, uBalmer, uWeights.y);
     /* The transition sheath on the chromosphere's top: what He II shows of the rim. */
     col += lit(PROMINENCE_SHEATH * chromo, TRANSITION_K, LAYER_TRANSITION, uBalmer, uWeights.z);
+  }
 
+  if (!hits && rho >= 1.0 && corona) {
+    float h = rho - 1.0;
     /* The K-corona, shaped by the field: a helmet streamer over each high closed loop, broad
        at its base and drawn out into a stalk, dark holes where the field is open with fine
        plumes inside them, the inner corona brightest just off the limb. */

@@ -8,15 +8,8 @@
  */
 import { audioMapNow } from "@/lib/audio-maps";
 import { driftRunState, timedDrift } from "@/lib/drift";
-import { lendCamera } from "@/lib/scene-bridge";
-import {
-  MAP_EPOCH,
-  OBSERVED_REGIONS,
-  PLACE_IDS,
-  createSunModel,
-  placeAnchor,
-  type PlaceId,
-} from "@/space/sun/frame";
+import { bridgeStore, lendCamera } from "@/lib/scene-bridge";
+import { MAP_EPOCH, OBSERVED_REGIONS, createSunModel } from "@/space/sun/frame";
 import { CORONA } from "@/space/sun/model/corona";
 import { cycleCountAt, cyclePhaseOf, yearOfCycleCount } from "@/space/sun/model/cycle";
 import { CYCLE_PERIOD_YR, RADIUS_M } from "@/space/sun/model/parameters";
@@ -29,26 +22,33 @@ import {
 } from "@/space/sun/model/structure";
 import type { DriftShot } from "@horizon/toolkit/camera";
 import { lcg } from "@horizon/toolkit/math";
-import type { SimulationEngine } from "@horizon/toolkit/rendering";
+import { recordFrom } from "@horizon/toolkit/records";
+import { DisposalScope, RENDER_QUALITIES, type SimulationEngine } from "@horizon/toolkit/rendering";
 import type { SceneMount } from "@horizon/toolkit/scene";
 import { convert } from "@horizon/toolkit/science";
 
 import { DRIFT, type SunDriftShot } from "../drift";
 import { SECONDS_PER_SECOND } from "../model/clock";
-import type { PlaceId as LabPlaceId } from "../model/places";
+import type { PlaceId } from "../model/places";
 import { sunQuality } from "../quality";
 import { useSun, type SunStore } from "../store";
-import { createSunEngine, type SunEngineHooks, type SunPick } from "./engine";
+import { createSunEngine } from "./engine";
 import type { SunSceneSettings } from "./settings";
-import { driftPose } from "./views";
+import type { SunEngineHooks, SunPick } from "./types";
+import { OPENING_ANGLES, driftPose } from "./views";
 
 const CYCLE_PERIOD_S = convert(CYCLE_PERIOD_YR, "yr", "s");
+/** The field lines the model traces at each quality, the same on every device. */
+const FIELD_LINES = recordFrom(
+  RENDER_QUALITIES,
+  (quality) => sunQuality(quality, false).fieldLines,
+);
 
 /** The places whose cards ask the model to run the eruption at the dock's moment. */
-const ERUPTION_PLACES: ReadonlySet<LabPlaceId> = new Set(["flare", "loops", "ejection"]);
+const ERUPTION_PLACES: ReadonlySet<PlaceId> = new Set(["flare", "loops", "ejection"]);
 
 /** The place a tap on the scene opens. */
-function placeOf(pick: SunPick): LabPlaceId {
+function placeOf(pick: SunPick): PlaceId {
   switch (pick.kind) {
     case "place":
       return pick.id;
@@ -63,7 +63,19 @@ function placeOf(pick: SunPick): LabPlaceId {
   }
 }
 
-/** The store's settings as the engine reads them each frame. */
+/** The store's settings as the engine reads them each frame: built again only when the store changed. */
+function createSettingsOf() {
+  let state: SunStore | null = null;
+  let settings: SunSceneSettings | null = null;
+  return (s: SunStore) => {
+    if (s !== state || !settings) {
+      state = s;
+      settings = settingsOf(s);
+    }
+    return settings;
+  };
+}
+
 function settingsOf(s: SunStore): SunSceneSettings {
   return {
     view: s.view,
@@ -124,7 +136,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
       cyclePhase: cycleCount(),
       light: s.light,
       eruptionScrub: scrubbed ? s.eruption : null,
-      fieldLineCount: sunQuality(s.quality, false).fieldLines,
+      fieldLineCount: FIELD_LINES[s.quality],
     });
   };
 
@@ -142,13 +154,12 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     return shots.map(
       ({ view, pose, look, roll, light: _light, cut: _cut, eruption: _e, ...shot }) => ({
         ...shot,
-        ...driftPose(view, f, { azimuth: 0, inclination: 0.1 }, { pose, look, roll }),
+        ...driftPose(view, f, OPENING_ANGLES, { pose, look, roll }),
       }),
     );
   };
   const followDrift = () => {
-    /* The engine reads its settings as it is built, before it exists here. */
-    const index = built ? engine.driftShot() : -1;
+    const index = engine.driftShot();
     if (index === landing) return;
     landing = index;
     const shot = shots[index];
@@ -164,7 +175,19 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     });
   };
 
+  /* The store's side of the scene (`bridgeStore`): what a frame writes is the scene's own. */
+  const scope = new DisposalScope();
+  let bridge: ReturnType<typeof bridgeStore<SunStore>> | null = null;
+
   const hooks: SunEngineHooks = {
+    /* Each frame first takes the drift's shot as the store's (its view, light, cut, eruption). */
+    frame: (draw) =>
+      bridge
+        ? bridge.frame(() => {
+            followDrift();
+            draw();
+          })
+        : draw(),
     interior: (r) => {
       structureAt(r, point);
       return {
@@ -174,7 +197,6 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
         generation: generationAt(r),
       };
     },
-    anchors: (id: PlaceId) => placeAnchor(model.frame, id),
     clock: () => {
       const s = store.getState();
       return { rate: SECONDS_PER_SECOND[s.clock], paused: s.paused };
@@ -187,11 +209,15 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
       return { s: s.eruption, playing: s.eruptionPlaying };
     },
     onEruption: (s) => store.setState({ eruption: s, eruptionPlaying: s < 1 }),
-    publish: (elapsed, flareClass, cyclePhase) => {
+    publish: (modelSeconds, flareClass, cyclePhase) => {
       publishedPhase = cyclePhase;
-      store
-        .getState()
-        .publish(elapsed - start, flareClass, cyclePhase, yearOfCycleCount(cycleCount()));
+      store.getState().publish({
+        elapsed: modelSeconds - start,
+        moment: MAP_EPOCH + modelSeconds * 1000,
+        flareClass,
+        cyclePhase,
+        cycleYear: yearOfCycleCount(cycleCount()),
+      });
     },
     landed: () => store.getState().landGuide(),
     onPick: (pick) => store.getState().select(pick ? placeOf(pick) : null),
@@ -215,44 +241,41 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     },
   };
 
-  let built = false;
-  const engine = createSunEngine(
-    mount,
-    () => {
-      followDrift();
-      return settingsOf(store.getState());
-    },
-    frame,
-    hooks,
-  );
-  built = true;
+  const settings = createSettingsOf();
+  const engine = createSunEngine(mount, () => settings(store.getState()), frame, hooks);
   const returnCamera = lendCamera(store, engine.camera);
 
   /* The store's asks the engine does not read from the settings: a flight to the view it is
-     already on (a link, the finder), a button step; and every change redraws a resting scene. */
-  const unsubscribe = store.subscribe((s, prev) => {
-    if (s.flight !== prev.flight && s.view === prev.view && !engine.driftFlying())
-      engine.flyToView(s.view);
-    if (s.turn !== prev.turn && s.turn) engine.turn(s.turn);
-    /* The visitor set the phase: shift the count to it, within the same cycle. */
-    if (s.cyclePhase !== prev.cyclePhase && s.cyclePhase !== publishedPhase) {
-      cycleShift += s.cyclePhase - cyclePhaseOf(cycleCount());
-      publishedPhase = s.cyclePhase;
-    }
-    if (s.drift === "off" && prev.drift !== "off") {
-      driftShot = null;
-      landing = -1;
-    }
-    engine.invalidate();
+     already on (a link, the finder), a button step; any change outside a frame redraws. */
+  let { view, drift } = store.getState();
+  bridge = bridgeStore(store, scope, {
+    invalidate: () => engine.invalidate(),
+    turn: (turn) => engine.turn(turn),
+    fly: (s) => {
+      if (s.view === view && !engine.driftFlying()) engine.flyToView(s.view);
+    },
+    before: (s) => {
+      /* The visitor set the phase: shift the count to it, within the same cycle. */
+      if (s.cyclePhase !== publishedPhase) {
+        cycleShift += s.cyclePhase - cyclePhaseOf(cycleCount());
+        publishedPhase = s.cyclePhase;
+      }
+      if (s.drift === "off" && drift !== "off") {
+        driftShot = null;
+        landing = -1;
+      }
+    },
+    after: (s) => {
+      view = s.view;
+      drift = s.drift;
+    },
   });
 
   return {
     dispose: () => {
-      unsubscribe();
+      scope.dispose();
       returnCamera();
       engine.dispose();
     },
   };
 }
-
-export { PLACE_IDS };

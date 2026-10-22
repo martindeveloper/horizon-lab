@@ -10,8 +10,6 @@ precision highp float;
 
 uniform vec3 uPositive;
 uniform vec3 uNegative;
-uniform vec3 uMagPositive;
-uniform vec3 uMagNegative;
 uniform float uPresence;   // how much the field shows in this light
 varying float vAcross;
 varying vec4 vLine;
@@ -69,6 +67,6 @@ void main() {
   float contour = vTube > 1.0 ? 0.18 * a : 0.0;
   vec3 col = uLightMode == LIGHT_BAND
     ? rampAt(uBandScale * lit * a * RIBBON_BAND_GAIN + contour)
-    : (uLightMode == LIGHT_MAGNETOGRAM ? (vLine.x > 0.0 ? uMagPositive : uMagNegative) : (vLine.x > 0.0 ? uPositive : uNegative)) * a;
+    : (vLine.x > 0.0 ? uPositive : uNegative) * a;
   gl_FragColor = vec4(encodeSrgb(uGamut * col), 1.0);
 }

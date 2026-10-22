@@ -1,3 +1,10 @@
+/**
+ * Parker Solar Probe in the Sun lab: on its record orbit at the model's moment
+ * (`@/space/sun/model/parker`), plunging to 9.86 R☉ and swinging out past 150 R☉ every 88 days;
+ * in the orbit view its ellipse and a marker riding it; and at its true size
+ * (`@/space/spacecraft`) once the camera closes on it, its heat shield turned to the Sun.
+ */
+
 import {
   BackSide,
   Mesh,
@@ -12,28 +19,25 @@ import {
 } from "three";
 
 import { createBrush } from "@/space/brush";
-/**
- * Parker Solar Probe in the Sun lab: on its record orbit at the model's moment
- * (`@/space/sun/model/parker`), plunging to 9.86 R☉ and swinging out past 150 R☉ every 88 days;
- * in the orbit view its ellipse and a marker riding it; and at its true size
- * (`@/space/spacecraft`) once the camera closes on it, its heat shield turned to the Sun.
- */
 import { CLOSE_UP_FILL, closeUpLimits } from "@/space/close-up-flight";
 import { spacecraftFrame } from "@/space/spacecraft/models";
 import { createSpacecraftPass, type Craft } from "@/space/spacecraft/scene/spacecraft-pass";
-import { PARKER_CORONA_EDGE_R, PARKER_ECCENTRICITY, RADIUS_M } from "@/space/sun/model/parameters";
-import { PARKER_SEMI_MAJOR_R } from "@/space/sun/model/parker";
+import { PARKER_CORONA_EDGE_R, RADIUS_M } from "@/space/sun/model/parameters";
+import { parkerElements } from "@/space/sun/model/parker";
+import { orbitShape, orbitShapeOf } from "@horizon/toolkit/bodies";
 import type { Vec3 } from "@horizon/toolkit/math";
 import {
   BELOW,
   SOLAR_GOLD,
+  cssHex,
   ownedLine,
+  ownedOrbitLine,
   worldPerPixel,
   type PlaceLabel,
   type SceneHostBasics,
 } from "@horizon/toolkit/scene";
 
-import { parkerOf, type SunFrame } from "./frame";
+import { parkerOf, parkerOrbitOf, type SunFrame } from "./frame";
 import type { ViewAim } from "./views";
 
 /** The ellipse: segments, even in eccentric anomaly so the plunge is as smooth as the rest. */
@@ -42,7 +46,7 @@ const ORBIT_OPACITY = 0.5;
 /** The marker riding it, CSS px across, and the smallest stage height it is sized for. */
 const MARKER_PX = 12;
 const MIN_STAGE_PX = 480;
-const MARKER_COLOR = `#${SOLAR_GOLD.toString(16).padStart(6, "0")}`;
+const MARKER_COLOR = cssHex(SOLAR_GOLD);
 /**
  * The corona's edge, a shell round the Sun, drawn as its outline from the camera: a fainter,
  * cooler line than the orbit.
@@ -81,16 +85,10 @@ export function createParkerLayer(
     invalidate: deps.invalidate,
   });
 
-  const orbit = ownedLine(scope, SOLAR_GOLD, ORBIT_OPACITY, ORBIT_SEGMENTS);
-  const minor = PARKER_SEMI_MAJOR_R * Math.sqrt(1 - PARKER_ECCENTRICITY ** 2);
-  for (let i = 0; i <= ORBIT_SEGMENTS; i++) {
-    const E = (i / ORBIT_SEGMENTS) * Math.PI * 2;
-    /* As `keplerPosition` places the probe: perihelion toward +x, prograde about the pole. */
-    orbit.positions.set(
-      [PARKER_SEMI_MAJOR_R * (Math.cos(E) - PARKER_ECCENTRICITY), 0, -minor * Math.sin(E)],
-      i * 3,
-    );
-  }
+  /* The ellipse `keplerPosition` moves the probe along, sampled finer near the probe. */
+  const orbit = ownedOrbitLine(scope, SOLAR_GOLD, ORBIT_OPACITY, ORBIT_SEGMENTS / 2);
+  const elements = parkerElements(0);
+  const shape = orbitShapeOf();
   /* A unit circle, turned to face the camera and sized to the shell's outline each frame. */
   const edge = ownedLine(scope, EDGE_COLOR, EDGE_OPACITY, ORBIT_SEGMENTS);
   for (let i = 0; i <= ORBIT_SEGMENTS; i++) {
@@ -166,6 +164,7 @@ export function createParkerLayer(
     ) {
       parkerOf(f, point);
       orbit.line.visible = marker.visible = show.orbit;
+      if (show.orbit) orbit.set(orbitShape(parkerOrbitOf(f, elements), true, shape));
       /* The corona's edge stays with the close-up too: riding in, its outline round the Sun
          grows and sweeps past as the probe crosses it. Seen from D away, a sphere's outline is
          the circle r²/D toward the camera, of radius r·√(1 − r²/D²); inside, there is none. */

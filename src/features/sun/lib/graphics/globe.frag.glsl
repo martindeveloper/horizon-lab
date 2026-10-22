@@ -39,8 +39,8 @@ uniform float uGrid;
 uniform sampler2D uMap;                // SDO/HMI's flattened continuum (linear on sampling)
 uniform float uMapShown;               // 0 until it arrives, 1 once faded in
 uniform vec3 uSunlight;                // the photosphere's continuum colour: the white the eye adapts to
-uniform vec3 uMagPositive;             // the magnetogram's poles, linear
-uniform vec3 uMagNegative;
+uniform vec3 uPositive;                // the magnetogram's poles, linear
+uniform vec3 uNegative;
 uniform mat4 uViewProjection;          // the camera's, for the hit's depth
 varying vec3 vWorld;
 
@@ -117,7 +117,7 @@ Face faceAt(vec3 s, float mu, float px) {
   for (int k = 0; k < REGION_MAX; k++) {
     if (k >= uRegionCount) break;
     vec4 dir = uRegionDir[k];
-    float reach = 2.2 * dir.w;
+    float reach = REGION_REACH * dir.w;
     if (1.0 - dot(s, dir.xyz) > 0.5 * reach * reach) continue;
     vec4 axis = uRegionAxis[k];
     vec4 side = uRegionSide[k];
@@ -205,15 +205,14 @@ Face faceAt(vec3 s, float mu, float px) {
 
 // The surface's colour in the current light.
 vec3 surfaceColour(Face f, vec3 s, float mu) {
-  vec3 limb = sample1D(uProfile, mu, PROFILE_SAMPLES).rgb;
+  vec3 limb = tableAt(uProfile, mu, PROFILE_SAMPLES, 0, 1).rgb;
   if (uLightMode == LIGHT_MAGNETOGRAM) {
     float field = (f.radial + uDipole * MAGNETOGRAM_DIPOLE * s.y) * mu;
     float g = tanh(field / MAGNETOGRAM_SATURATION);
     return g < 0.0
-      ? mix(vec3(MAGNETOGRAM_GREY), uMagNegative, -g)
-      : mix(vec3(MAGNETOGRAM_GREY), uMagPositive, g);
+      ? mix(vec3(MAGNETOGRAM_GREY), uNegative, -g)
+      : mix(vec3(MAGNETOGRAM_GREY), uPositive, g);
   }
-  if (uLightMode == LIGHT_ECLIPSE) return vec3(0.0);
   if (uLightMode == LIGHT_WHITE) {
     /* The disc as the eye adapted to sunlight sees it: the photosphere's continuum is white by
        definition and cooler gas warmer against it; the measured continuum under the Claret law
@@ -298,7 +297,7 @@ float interiorGrain(vec3 q, float px) {
 vec3 faceColour(vec3 p, float px, int face) {
   float r = length(p);
   vec3 dir = p / max(r, 1e-5);
-  vec4 profile = sample1D(uInterior, r / uLayers.z, INTERIOR_SAMPLES);
+  vec4 profile = tableAt(uInterior, r / uLayers.z, INTERIOR_SAMPLES, 0, 1);
   float lnT = profile.x;
   /* Rigid below the tachocline, the surface's law by latitude through the convection zone,
      the change across the tachocline's thickness: there the shells slide past each other. */
@@ -367,7 +366,8 @@ void main() {
   vec3 col;
   if (face == 0) {
     float mu = clamp(dot(p, -d), 0.0, 1.0);
-    col = surfaceColour(faceAt(p, mu, px), p, mu);
+    /* The occulted disc is black: none of the face is worked out under it. */
+    col = uLightMode == LIGHT_ECLIPSE ? vec3(0.0) : surfaceColour(faceAt(p, mu, px), p, mu);
     if (uGrid > 0.0) col = mix(col, uGold, GRID_ALPHA * uGrid * gridLine(p, mu, px));
   } else {
     col = uLightMode == LIGHT_ECLIPSE ? vec3(0.0) : faceColour(p, px, face);

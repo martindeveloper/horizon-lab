@@ -17,14 +17,7 @@ import {
 } from "three";
 
 import type { DisposalScope } from "@horizon/toolkit/rendering";
-
-const VERTEX = /* glsl */ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position.xy, 0.0, 1.0);
-}
-`;
+import { fullscreenVertex } from "@horizon/toolkit/shaders";
 
 /* The kept frame is already display-encoded: it is drawn back as it was, only fainter. */
 const FRAGMENT = /* glsl */ `
@@ -44,7 +37,7 @@ export function createDissolve(scope: DisposalScope, renderer: WebGLRenderer, se
   let left = 0;
   const uniforms = { uImage: { value: null as FramebufferTexture | null }, uAlpha: { value: 0 } };
   const material = new ShaderMaterial({
-    vertexShader: VERTEX,
+    vertexShader: fullscreenVertex,
     fragmentShader: FRAGMENT,
     uniforms,
     transparent: true,

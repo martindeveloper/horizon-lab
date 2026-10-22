@@ -2,7 +2,7 @@
  * The measured Sun: SDO/HMI's flattened continuum map (`MAPS.sun`), streamed from the CDN as
  * the Orrery streams its bodies' maps. The far tier loads after the first frame and the tier
  * the quality allows right behind it, so the disc sharpens as soon as it can; the finest
- * resident one is drawn. A failed load leaves the procedural surface. Nothing waits on them:
+ * that arrived is drawn and kept, a coarser one let go. A failed load leaves the procedural surface. Nothing waits on them:
  * `sharpening` says when the view is close enough to miss detail still on its way.
  */
 import {
@@ -36,7 +36,9 @@ export function createSunMap(
   },
 ) {
   const abort = new AbortController();
-  const loaded = new Map<MapTier, Texture>();
+  /* The tiers that arrived, and the finest of them, the one drawn; a coarser one is let go. */
+  const arrived = new Set<MapTier>();
+  let drawn: Texture | null = null;
   const failed = new Set<MapTier>();
   let loading: MapTier | null = null;
   let stencilLoading = false;
@@ -45,8 +47,8 @@ export function createSunMap(
   const stencilTextures: Texture[] = [];
   scope.defer(() => {
     abort.abort();
-    for (const texture of loaded.values()) texture.dispose();
-    loaded.clear();
+    drawn?.dispose();
+    drawn = null;
     for (const texture of stencilTextures) texture.dispose();
   });
   const widths = MAPS.sun?.widths;
@@ -106,7 +108,7 @@ export function createSunMap(
 
   const load = (tier: MapTier) => {
     const file = widths && tierFile(MAP_BASE, "sun", tier);
-    if (!file || loading || loaded.has(tier)) return;
+    if (!file || loading || arrived.has(tier)) return;
     loading = tier;
     loadMap(file, abort.signal).then(
       (texture) => {
@@ -115,12 +117,15 @@ export function createSunMap(
           texture.dispose();
           return;
         }
-        loaded.set(tier, texture);
-        /* The finest resident tier is the one drawn. */
+        arrived.add(tier);
+        /* The finest tier that arrived is the one drawn. */
         if (widths && (!shown || widths[tier] > widths[shown])) {
+          const previous = drawn;
           shown = tier;
+          drawn = texture;
           options.onLoad(texture, widths[tier]);
-        }
+          previous?.dispose();
+        } else texture.dispose();
         options.wake();
       },
       () => {
@@ -140,7 +145,7 @@ export function createSunMap(
         void loadStencil();
       }
       const near = options.tier();
-      if (near !== "far" && loaded.has("far")) load(near);
+      if (near !== "far" && arrived.has("far")) load(near);
     },
     /**
      * Whether detail is still on its way that the view would show: a texel of the drawn map
@@ -152,7 +157,7 @@ export function createSunMap(
       const awaited =
         stencilLoading ||
         loading !== null ||
-        (near !== "far" && loaded.has("far") && !loaded.has(near) && !failed.has(near));
+        (near !== "far" && arrived.has("far") && !arrived.has(near) && !failed.has(near));
       if (!awaited || !widths) return false;
       return TAU / (widths[shown ?? "far"] * px) > MAP_DETAIL_FROM_PX;
     },

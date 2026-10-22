@@ -1,5 +1,6 @@
 "use client";
 
+import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useHelp } from "@/components/simulations/help-tour";
@@ -14,7 +15,7 @@ import { useSun, type SunStore } from "../lib/store";
 import { PlaceCard } from "./card";
 import { SunDock } from "./dock";
 import { SunGuide } from "./guide";
-import { ViewPanel } from "./panels";
+import { PlacesPanel, ViewPanel } from "./panels";
 import { SunTechnicalDetails } from "./technical-details";
 import { SunViewPicker } from "./view-picker";
 
@@ -75,6 +76,14 @@ export function SunOverlay() {
                 detailsLabel={t("technicalDetails.open")}
                 guide={{ onSelect: () => api().startGuide() }}
                 guideRef={guideButton}
+                finder={{
+                  id: "finder",
+                  label: t("hud.finder"),
+                  icon: Crosshair,
+                  active: panel === "places",
+                  controls: "sun-places",
+                  onSelect: () => api().setPanel(panel === "places" ? "none" : "places"),
+                }}
                 settings={{
                   label: t("hud.view"),
                   active: panel === "view",
@@ -86,6 +95,7 @@ export function SunOverlay() {
             </div>
             <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
+          {panel === "places" ? <PlacesPanel onClose={() => api().setPanel("none")} /> : null}
           {panel === "view" ? <ViewPanel onClose={() => api().setPanel("none")} /> : null}
           {panel === "none" && selection ? <PlaceCard id={selection} /> : null}
           <SunDock />

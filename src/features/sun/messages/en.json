@@ -9,15 +9,15 @@
     },
     "views": {
       "title": "Views",
-      "body": "Seven places to stand, from the core to the corona."
+      "body": "Eight places to stand, from the core to Parker's orbit."
     },
     "light": {
       "title": "Light",
-      "body": "Explore spectral bands with broad, sometimes multiple temperature responses. Colours are illustrative."
+      "body": "White light to flare plasma. Colours are illustrative."
     },
     "clock": {
       "title": "Clock",
-      "body": "Speed up or pause model time. The eruption demonstration has its own playback."
+      "body": "Pause the Sun's time, or run it faster."
     },
     "places": {
       "title": "In view",
@@ -26,6 +26,10 @@
     "settings": {
       "title": "Settings",
       "body": "Layers, the camera pad and render quality."
+    },
+    "finder": {
+      "title": "Places",
+      "body": "Find a place and fly to it."
     },
     "guide": {
       "title": "Guide",
@@ -37,14 +41,10 @@
     }
   },
   "hud": {
-    "sharpening": "Loading detail",
-    "closeUp": "Close-up",
     "leaveCloseUp": "Back to the Sun",
     "closeUpNote": "True size, heat shield to the Sun.",
     "ride": "Ride along",
-    "faceProbe": "Face it",
     "rideNote": "Behind the heat shield, looking at the Sun.",
-    "rideParker": "Ride with Parker",
     "coronaEdge": "Corona's edge",
     "parkerDate": "Date and time, UTC",
     "parkerDistance": "Distance from the Sun's centre",
@@ -52,23 +52,23 @@
     "parkerSunlight": "Sunlight, times Earth's",
     "parkerInCorona": "Inside the corona",
     "places": "In view",
+    "finder": "Places",
     "light": "Light",
     "clock": "Clock",
-    "pause": "Pause the clock",
-    "play": "Run the clock",
+    "pause": "Pause time",
+    "slower": "Slower",
+    "faster": "Faster",
+    "play": "Play time",
     "cut": "Cut",
     "eruption": "Illustrative eruption",
     "eruptionPlay": "Let the flare go",
     "eruptionPause": "Hold the flare",
     "cycle": "Illustrative cycle",
     "flareClass": "Example GOES {value}",
-    "views": "Views",
-    "paused": "Paused",
-    "cutOpen": "Open the cut",
-    "cutClose": "Close the cut",
-    "cycleRun": "Run the years",
-    "cycleHold": "Hold the years",
-    "modelYear": "Model year {value}"
+    "modelYear": "Model year {value}",
+    "details": "Details",
+    "hideDetails": "Hide details",
+    "utc": "{date} UTC"
   },
   "views": {
     "surface": "The surface",

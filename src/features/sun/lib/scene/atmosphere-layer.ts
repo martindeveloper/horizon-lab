@@ -124,6 +124,10 @@ export function createAtmosphereLayer(
       uniforms.uSpicules.value = quality.spicules ? 1 : 0;
     },
     update(frame: SunFrame, settings: SunSceneSettings) {
+      /* Nothing of the atmosphere shows in a light that weighs none of its layers (white light, the magnetogram). */
+      const w = uniforms.uWeights.value;
+      mesh.visible = w.y > 0 || w.z > 0 || w.w > 0 || uniforms.uFlareWeight.value > 0;
+      if (!mesh.visible) return;
       if (frame.fieldRevision !== shapedBy) {
         shapedBy = frame.fieldRevision;
         shape(frame.fieldLines);

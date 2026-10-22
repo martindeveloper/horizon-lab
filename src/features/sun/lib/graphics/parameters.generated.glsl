@@ -4,7 +4,6 @@
 
 #define PROXY_RADIUS             1.02
 #define ATMOSPHERE_RADIUS        8.0
-#define SURFACE_RESOLVE_PX       2.0
 #define GRID_STEP                0.2617993878
 #define GRID_ALPHA               0.22
 #define PHOTOSPHERE_K            5772.0
@@ -25,7 +24,7 @@
 #define WHITE_FLARE_K            9000.0
 #define MAP_DETAIL_FROM_PX       1.25
 #define MAP_DETAIL_TO_PX         2.5
-#define MAP_CENTRAL_MERIDIAN_RAD 5.117381425
+#define MAP_CENTRAL_MERIDIAN_RAD 5.117380276
 #define SUN_MAP_QUIET_INTENSITY  0.8
 #define STENCIL_WIDTH            8192.0
 #define STENCIL_HEIGHT           4096.0
@@ -40,7 +39,7 @@
 #define SURFACE_CONTRAST         2.2
 #define ROTATION_SIN2            -0.162849181
 #define ROTATION_SIN4            -0.1214572147
-#define INTERIOR_TURN_RATIO      0.9516966288
+#define INTERIOR_TURN_RATIO      0.9214254967
 #define PLUME_GRANULE_DEPTH      0.02
 #define FACE_TOP_DISPLAY_K       1600.0
 #define FACE_TOP_LIGHT           0.5
@@ -104,8 +103,9 @@
 #define MAGNETOGRAM_GREY         0.42
 #define MAGNETOGRAM_LINE         0.3
 #define REGION_MAX               12
-#define CHROMOSPHERE_HEIGHT      0.003
-#define SPICULE_HEIGHT           0.014
+#define REGION_REACH             2.2
+#define CHROMOSPHERE_HEIGHT      0.002874802357
+#define SPICULE_HEIGHT           0.01437401179
 #define SPICULE_COLUMNS          1200.0
 #define CHROMOSPHERE_GLOW        0.48
 #define SPICULE_GLOW             0.45
@@ -115,7 +115,7 @@
 #define INNER_CORONA_REACH       0.12
 #define INNER_CORONA_GLOW        0.6
 #define CORONA_FLOOR             0.15
-#define EUV_SCALE_HEIGHT_R       0.0540886173
+#define EUV_SCALE_HEIGHT_R       0.05448219132
 #define STREAMER_MAX             16
 #define STREAMER_WIDTH           0.05
 #define STREAMER_STALK           0.006
@@ -130,7 +130,7 @@
 #define PLUME_WIDTH              0.12
 #define RAY_SHARE                0.25
 #define RAY_COUNT                40.0
-#define F_CORONA_FALLOFF         2.5
+#define F_CORONA_FALLOFF         2.3
 #define E_CORONA_REACH           0.3
 #define LOOP_GLOW_REACH          0.3
 #define LOOP_GLOW                0.35

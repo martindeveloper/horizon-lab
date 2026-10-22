@@ -2,25 +2,26 @@
 
 import { Pause, Play } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
+import { RateStepper } from "@/components/simulations/rate-stepper";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { asideOpen } from "@/lib/scene-store";
+import { rampColor } from "@/space/sun/model/passbands";
+import { cssColor, encodeSrgb } from "@horizon/toolkit/science";
 import {
-  Chip,
   Dock,
   IconButton,
   LabelledRow,
-  ListItem,
-  Picker,
   Slider,
+  SwitchChip,
   Tooltip,
   cn,
-  kickerClass,
+  sliderStopAt,
 } from "@horizon/toolkit/ui";
 
 import { CLOCK_RATES } from "../lib/model/clock";
-import { LIGHT_MODES, LIGHT_SCALE } from "../lib/model/lights";
+import { LIGHT_LOOKS, LIGHT_SCALE } from "../lib/model/lights";
 import { cycleStageAt, eruptionStageAt } from "../lib/model/stages";
 import { VIEW_ACTION, type ViewAction } from "../lib/model/views";
 import { CUT_HALF_ANGLE } from "../lib/parameters";
@@ -39,17 +40,26 @@ const reachesPanels: DockInTheWay = (dock, stage, rem) => dock.right + 22 * rem 
 /** The whole wedge the cut opens, degrees. */
 const CUT_DEGREES = (2 * CUT_HALF_ANGLE * 180) / Math.PI;
 
-/** The ruler's last stop, and where a stop's centre falls along it (the thumb's travel, `size-3.5`). */
+/** The ruler's last stop. */
 const LAST_STOP = LIGHT_SCALE.length - 1;
-const THUMB_PX = 14;
-const stopAt = (share: number) => `calc(${THUMB_PX / 2}px + ${share} * (100% - ${THUMB_PX}px))`;
+/** How bright along its ramp a light's colour is taken for the ruler's track. */
+const RULER_BRIGHTNESS = 0.75;
+/** The ruler's track: each light's own colour, from its ramp, under its stop. */
+const RULER_TRACK = {
+  background: `linear-gradient(90deg, ${LIGHT_SCALE.map((id, index) => {
+    const [r, g, b] = rampColor(id, RULER_BRIGHTNESS);
+    return `${cssColor([encodeSrgb(r), encodeSrgb(g), encodeSrgb(b)])} ${sliderStopAt(index / LAST_STOP)}`;
+  }).join(", ")})`,
+  opacity: 0.85,
+};
 
 /**
- * The light as a temperature ruler: one scale from the photosphere's white light up through
- * Hα and the EUV lines to flare plasma, the track painted in each light's colour, a stop and a
- * short name at each line, the thumb on the one shown. The two ways of looking that are not
- * temperatures, the eclipse and the magnetogram, stand at its end as switches; while one is on
- * the ruler rests, dimmed, where it last stood.
+ * The light as a ruler of spectral modes, from the photosphere's white light up through Hα and
+ * the EUV lines to flare plasma (not a temperature scale: several bands answer to more than one
+ * temperature), the track painted in each light's colour, a stop and a short name at each line,
+ * the thumb on the one shown. The two ways of looking that are not bands, the eclipse and the
+ * magnetogram, stand at its end as switches; while one is on the ruler rests, dimmed, where it
+ * last stood.
  */
 function LightRuler({ className }: { className?: string }) {
   const t = useTranslations("sun");
@@ -72,7 +82,7 @@ function LightRuler({ className }: { className?: string }) {
             <span
               key={id}
               aria-hidden
-              style={{ left: stopAt(index / LAST_STOP) }}
+              style={{ left: sliderStopAt(index / LAST_STOP) }}
               className="pointer-events-none absolute top-4 flex -translate-x-1/2 flex-col items-center"
             >
               <span className="block h-2 w-px -translate-y-1 bg-fg/35" />
@@ -88,7 +98,8 @@ function LightRuler({ className }: { className?: string }) {
           ))}
           <Slider
             aria-label={t("hud.light")}
-            trackClassName="sun-light-scale h-0.5"
+            trackClassName="h-0.5"
+            trackStyle={RULER_TRACK}
             rangeClassName="bg-transparent"
             min={0}
             max={LAST_STOP}
@@ -99,13 +110,12 @@ function LightRuler({ className }: { className?: string }) {
           />
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {LIGHT_MODES.map((id) => (
-            <Chip
+          {LIGHT_LOOKS.map((id) => (
+            <SwitchChip
               key={id}
-              selected={light === id}
-              aria-pressed={light === id}
+              on={light === id}
               className="not-md:h-9"
-              onClick={() => {
+              onToggle={() => {
                 if (light === id) {
                   api().setLight(LIGHT_SCALE[rested] ?? "white");
                   return;
@@ -115,7 +125,7 @@ function LightRuler({ className }: { className?: string }) {
               }}
             >
               {t(`lights.${id}`)}
-            </Chip>
+            </SwitchChip>
           ))}
         </div>
       </div>
@@ -129,127 +139,70 @@ function LightLegend() {
   const distance = useDistance();
   const light = useSun((s) => s.light);
   return (
-    <p className="min-w-0 flex-1 basis-48 text-sm leading-snug tracking-tight">
+    <p className="min-w-0 flex-1 basis-48 text-sm leading-snug tracking-tight short:hidden">
       <span className="text-fg">{t(`lights.${light}`)}</span>
-      <span className={cn(kickerClass, "ml-2 tracking-normal normal-case")}>
+      <span className="ml-2 text-xs text-muted">
         {t(`lightNotes.${light}`)} · {lightLegend(t, distance, light)}
       </span>
     </p>
   );
 }
 
-/** Room for the widest everyday reading ("399.9 d"), so a new digit or unit doesn't nudge the pill. */
-const ELAPSED_CLASS = "inline-block min-w-[9ch] text-right";
+/** Room for the widest everyday reading ("399.9 d"), so a new digit or unit doesn't nudge the row. */
+const ELAPSED_CLASS =
+  "inline-block min-w-[9ch] text-right font-mono text-xs text-muted tabular-nums";
 
-/** The clock: a pause, and a pill with the rate as the Orrery words it (1 s = 1 day), the time passed beside it. */
+/** The clock: play or pause, its rate a step slower or faster, and the Sun's time passed beside it. */
 function Clock() {
   const t = useTranslations("sun");
   const f = useFormatter();
   const clock = useSun((s) => s.clock);
   const paused = useSun((s) => s.paused);
   const elapsed = useSun((s) => s.elapsed);
-  const [open, setOpen] = useState(false);
   const api = useSun.getState;
-  const label = paused ? t("hud.play") : t("hud.pause");
+  const index = CLOCK_RATES.indexOf(clock);
   return (
     <div data-coach="clock" className="flex items-center gap-2">
-      <Tooltip label={label} side="top">
-        <IconButton aria-label={label} active={paused} onClick={() => api().togglePaused()}>
-          {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
-        </IconButton>
-      </Tooltip>
-      <Picker
-        aria-label={t("hud.clock")}
-        label={paused ? t("hud.paused") : t(`clocks.${clock}`)}
-        detail={<span className={ELAPSED_CLASS}>{elapsedLabel(t, f, elapsed)}</span>}
-        open={open}
-        onOpenChange={setOpen}
-        panelClassName="top-auto bottom-[calc(100%+0.5rem)] scroll-thin"
-      >
-        {CLOCK_RATES.map((rate) => (
-          <ListItem
-            key={rate}
-            selected={rate === clock && !paused}
-            onClick={() => {
-              api().setClock(rate);
-              setOpen(false);
-            }}
-          >
-            {t(`clocks.${rate}`)}
-          </ListItem>
-        ))}
-      </Picker>
+      <RateStepper
+        label={t("hud.clock")}
+        running={!paused}
+        toggleLabel={paused ? t("hud.play") : t("hud.pause")}
+        onToggle={() => api().togglePaused()}
+        slowerLabel={t("hud.slower")}
+        fasterLabel={t("hud.faster")}
+        slowerDisabled={index === 0}
+        fasterDisabled={index === CLOCK_RATES.length - 1}
+        onSlower={() => api().setClock(CLOCK_RATES[index - 1] ?? clock)}
+        onFaster={() => api().setClock(CLOCK_RATES[index + 1] ?? clock)}
+        readout={t(`clocks.${clock}`)}
+        readoutClassName={cn("min-w-20", paused ? "text-subtle" : "text-fg")}
+      />
+      <span className={ELAPSED_CLASS}>{elapsedLabel(t, f, elapsed)}</span>
     </div>
   );
 }
 
-/** What the action's button says and does, and what its slider holds. */
-function useAction(kind: ViewAction) {
-  const t = useTranslations("sun");
-  const f = useFormatter();
-  const cut = useSun((s) => s.cut);
-  const eruption = useSun((s) => s.eruption);
-  const playing = useSun((s) => s.eruptionPlaying);
-  const flareClass = useSun((s) => s.flareClass);
-  const phase = useSun((s) => s.cyclePhase);
-  const year = useSun((s) => s.cycleYear);
-  const clock = useSun((s) => s.clock);
-  const paused = useSun((s) => s.paused);
-  const api = useSun.getState;
-  switch (kind) {
-    case "cut": {
-      const open = cut > 0;
-      return {
-        on: open,
-        button: t(open ? "hud.cutClose" : "hud.cutOpen"),
-        act: () => api().setCut(open ? 0 : 1),
-        value: cut,
-        set: (next: number) => api().setCut(next),
-        text: f.number(cut * CUT_DEGREES, {
-          style: "unit",
-          unit: "degree",
-          unitDisplay: "narrow",
-          maximumFractionDigits: 0,
-        }),
-      };
-    }
-    case "eruption": {
-      const stage = t(`stages.eruption.${eruptionStageAt(eruption)}`);
-      return {
-        on: playing,
-        button: t(playing ? "hud.eruptionPause" : "hud.eruptionPlay"),
-        act: () => api().toggleEruptionPlaying(),
-        value: eruption,
-        set: (next: number) => api().setEruption(next),
-        text: flareClass ? `${stage} · ${t("hud.flareClass", { value: flareClass })}` : stage,
-      };
-    }
-    default: {
-      const running = clock === "year" && !paused;
-      return {
-        on: running,
-        button: t(running ? "hud.cycleHold" : "hud.cycleRun"),
-        act: () => (running ? api().togglePaused() : api().setClock("year")),
-        value: phase,
-        set: (next: number) => api().setCyclePhase(next),
-        text: `${t("hud.modelYear", { value: f.number(Math.floor(year), { useGrouping: false }) })} · ${t(`stages.cycle.${cycleStageAt(phase)}`)}`,
-      };
-    }
-  }
-}
-
 /**
- * The view's own action, worded as what it does: open the cut, let the flare go, run the
- * years; a slider scrubs it and a readout names where it stands.
+ * A view's own action: what starts or switches it, a slider that scrubs it and a readout that
+ * names where it stands.
  */
-function ViewActionRow({ kind }: { kind: ViewAction }) {
+function ActionRow({
+  kind,
+  control,
+  value,
+  onValue,
+  text,
+}: {
+  kind: ViewAction;
+  control?: ReactNode;
+  value: number;
+  onValue: (next: number) => void;
+  text: string;
+}) {
   const t = useTranslations("sun");
-  const { on, button, act, value, set, text } = useAction(kind);
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 md:flex-nowrap">
-      <Chip selected={on} aria-pressed={on} onClick={act} className="shrink-0 not-md:h-9">
-        {button}
-      </Chip>
+      {control}
       <Slider
         aria-label={t(`hud.${kind}`)}
         className="w-24 md:w-32"
@@ -258,7 +211,7 @@ function ViewActionRow({ kind }: { kind: ViewAction }) {
         step={0.005}
         value={[value]}
         valueText={() => text}
-        onValueChange={([next]) => set(next ?? 0)}
+        onValueChange={([next]) => onValue(next ?? 0)}
       />
       <span className="font-mono text-xs text-fg tabular-nums not-md:basis-full md:truncate">
         {text}
@@ -267,13 +220,96 @@ function ViewActionRow({ kind }: { kind: ViewAction }) {
   );
 }
 
+/** The cut: a switch to open it whole or close it, its wedge scrubbed, its width in degrees. */
+function CutAction() {
+  const t = useTranslations("sun");
+  const f = useFormatter();
+  const cut = useSun((s) => s.cut);
+  const api = useSun.getState;
+  return (
+    <ActionRow
+      kind="cut"
+      control={
+        <SwitchChip
+          on={cut > 0}
+          onToggle={() => api().setCut(cut > 0 ? 0 : 1)}
+          className="shrink-0 not-md:h-9"
+        >
+          {t("hud.cut")}
+        </SwitchChip>
+      }
+      value={cut}
+      onValue={(next) => api().setCut(next)}
+      text={f.number(cut * CUT_DEGREES, {
+        style: "unit",
+        unit: "degree",
+        unitDisplay: "narrow",
+        maximumFractionDigits: 0,
+      })}
+    />
+  );
+}
+
+/** The eruption: play or hold it, its moment scrubbed, its stage and the flare's class. */
+function EruptionAction() {
+  const t = useTranslations("sun");
+  const eruption = useSun((s) => s.eruption);
+  const playing = useSun((s) => s.eruptionPlaying);
+  const flareClass = useSun((s) => s.flareClass);
+  const api = useSun.getState;
+  const label = playing ? t("hud.eruptionPause") : t("hud.eruptionPlay");
+  const stage = t(`stages.eruption.${eruptionStageAt(eruption)}`);
+  return (
+    <ActionRow
+      kind="eruption"
+      control={
+        <Tooltip label={label} side="top">
+          <IconButton
+            aria-label={label}
+            active={playing}
+            onClick={() => api().toggleEruptionPlaying()}
+          >
+            {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+          </IconButton>
+        </Tooltip>
+      }
+      value={eruption}
+      onValue={(next) => api().setEruption(next)}
+      text={flareClass ? `${stage} · ${t("hud.flareClass", { value: flareClass })}` : stage}
+    />
+  );
+}
+
+/** The cycle: its phase scrubbed (the clock runs the years), the year and the cycle's stage. */
+function CycleAction() {
+  const t = useTranslations("sun");
+  const f = useFormatter();
+  const phase = useSun((s) => s.cyclePhase);
+  const year = useSun((s) => s.cycleYear);
+  return (
+    <ActionRow
+      kind="cycle"
+      value={phase}
+      onValue={(next) => useSun.getState().setCyclePhase(next)}
+      text={`${t("hud.modelYear", { value: f.number(Math.floor(year), { useGrouping: false }) })} · ${t(`stages.cycle.${cycleStageAt(phase)}`)}`}
+    />
+  );
+}
+
+const ACTIONS: Readonly<Record<ViewAction, () => ReactNode>> = {
+  cut: CutAction,
+  eruption: EruptionAction,
+  cycle: CycleAction,
+};
+
 export function SunDock() {
   const view = useSun((s) => s.view);
   /* Phones give an open sheet or card the bottom of the screen. */
   const aside = useSun(asideOpen);
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface, reachesPanels);
-  const action = VIEW_ACTION[view];
+  const kind = VIEW_ACTION[view];
+  const Action = kind ? ACTIONS[kind] : null;
   return (
     <Dock
       ref={surface}
@@ -281,13 +317,13 @@ export function SunDock() {
       className="anim-rise flex flex-col gap-2"
     >
       <div className={ROWS_CLASS}>
-        <PlaceStrip className={ROW_CLASS} />
+        <PlaceStrip className={cn(ROW_CLASS, "short:hidden")} />
         <LightRuler className={ROW_CLASS} />
       </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <LightLegend />
         <Clock />
-        {action ? <ViewActionRow kind={action} /> : null}
+        {Action ? <Action key={kind} /> : null}
         {view === "orbit" ? <ParkerReadout /> : null}
       </div>
     </Dock>

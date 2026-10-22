@@ -4,14 +4,22 @@
  * `facts.<id>`; its figure prints through `rows.<key>`, which words its unit, so no row is a
  * bare number.
  */
-import { factRef, row, styled, type Fact, type Row, type StaticCard } from "@/lib/facts";
+import {
+  factRef,
+  row,
+  styled,
+  type Badge,
+  type Fact,
+  type Row,
+  type StaticCard,
+} from "@/lib/facts";
 import { SUN_CATALOGUE } from "@/space/sun/catalogue";
 import { isLength } from "@horizon/toolkit/science";
 
 import type { PlaceId } from "../lib/model/places";
 
 /** What the place is drawn from: a measurement, a measurement with a model, or an inference. */
-type Badge = "measured" | "mixed" | "inferred";
+type SunBadge = Extract<Badge, "measured" | "mixed" | "inferred">;
 
 const { body, rotation } = SUN_CATALOGUE.star;
 const { interior, photosphere, chromosphere, corona } = SUN_CATALOGUE.layers;
@@ -54,12 +62,12 @@ function unitRow(id: string, fact: Fact): Row {
 const rows = (...entries: [id: string, fact: Fact][]): Row[] =>
   entries.map(([id, fact]) => unitRow(id, fact));
 
-const card = (badge: Badge, ...entries: [id: string, fact: Fact][]): StaticCard<Badge> => ({
+const card = (badge: SunBadge, ...entries: [id: string, fact: Fact][]): StaticCard<SunBadge> => ({
   badge,
   rows: rows(...entries),
 });
 
-export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<Badge>>> = {
+export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<SunBadge>>> = {
   star: {
     ...card(
       "measured",

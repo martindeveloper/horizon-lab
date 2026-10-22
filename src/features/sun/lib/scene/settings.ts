@@ -7,19 +7,11 @@
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 import type { SceneAntialias } from "@horizon/toolkit/scene";
 
+import type { ViewId } from "../model/views";
 import type { PassbandId } from "./frame";
 
-export const SUN_VIEW_IDS = [
-  "surface",
-  "inside",
-  "sunspot",
-  "chromosphere",
-  "corona",
-  "eruption",
-  "cycle",
-  "orbit",
-] as const;
-export type SunViewId = (typeof SUN_VIEW_IDS)[number];
+/** The views the scene frames: the lab's (`model/views.ts`). */
+export type SunViewId = ViewId;
 
 /** A light: its temperature response (a log-normal about `peakK`), its colour ramp and how much each layer shows in it. */
 export type SunLight = {

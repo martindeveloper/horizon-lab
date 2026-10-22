@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { driftSlice, type DriftSlice } from "@/lib/drift";
 import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
+  LAB_RENDER,
   RESET_SCENE_SETTINGS,
   guideSlice,
   sceneSlice,
@@ -12,6 +13,7 @@ import {
 import { MAP_EPOCH } from "@/space/sun/frame";
 import { cyclePhaseAt, decimalYear } from "@/space/sun/model/cycle";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import { clamp01 } from "@horizon/toolkit/math";
 
 import { viewFromPath } from "../routing";
 import { HELP } from "./help";
@@ -21,7 +23,7 @@ import { PLACES, type PlaceId } from "./model/places";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, VIEW_DEFAULTS, type ViewId } from "./model/views";
 
-type Panel = "none" | "view";
+type Panel = "none" | "places" | "view";
 
 /** What the View panel switches on the scene. */
 export type Show = {
@@ -88,8 +90,9 @@ export type SunStore = SceneSlice &
     leaveCloseUp: () => void;
     panel: Panel;
     /* Readouts the engine writes a few times a second. */
-    /** The Sun's time since the visit began, model seconds. */
+    /** The Sun's time since the visit began, model seconds, and the moment the scene shows, ms since 1970. */
     elapsed: number;
+    moment: number;
     /** The eruption's flare class while one is under way (an empty string otherwise). */
     flareClass: string;
     /** The decimal year the cycle's phase stands at, as the scene counts it. */
@@ -110,7 +113,9 @@ export type SunStore = SceneSlice &
     goTo: (id: PlaceId) => void;
     setPanel: (panel: Panel) => void;
     /** The scene's report. */
-    publish: (elapsed: number, flareClass: string, cyclePhase: number, cycleYear: number) => void;
+    publish: (
+      report: Pick<SunStore, "elapsed" | "moment" | "flareClass" | "cyclePhase" | "cycleYear">,
+    ) => void;
     /** The View panel's settings as a visit starts. */
     resetView: () => void;
     /** The guided journey moves on by itself once a step has been read; off under reduced motion. */
@@ -123,8 +128,6 @@ export type SunStore = SceneSlice &
     effectsBeforeDrift: DriftEffects | null;
   };
 
-const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
-
 /** Parker's card offers its close-up while neither the journey nor the drift holds the camera. */
 export const canCloseUp = (s: Pick<SunStore, "selection" | "guideOpen" | "drift">) =>
   s.selection === "parker" && !s.guideOpen && s.drift === "off";
@@ -134,12 +137,17 @@ export const canRide = (s: Pick<SunStore, "guideOpen" | "drift">) =>
   canCloseUp({ ...s, selection: "parker" });
 
 /** The View panel's settings as a visit starts; `resetView` puts them back. */
-const VIEW_SETTINGS = { show: DEFAULT_SHOW, wideColour: false, ...RESET_SCENE_SETTINGS } as const;
+const VIEW_SETTINGS = {
+  show: DEFAULT_SHOW,
+  wideColour: LAB_RENDER.wideColour,
+  ...RESET_SCENE_SETTINGS,
+} as const;
 
 const initialView: ViewId = typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath();
 
 export const useSun = create<SunStore>((set, get) => ({
-  ...sceneSlice(set, { scalePx: 120, scaleValue: 100_000, scaleUnit: "au" }),
+  /* The Sun draws no scale bar: its slice's reading stays empty. */
+  ...sceneSlice(set, { scalePx: 0, scaleValue: 0, scaleUnit: "au" }),
   view: initialView,
   light: VIEW_DEFAULTS[initialView].light,
   clock: VIEW_DEFAULTS[initialView].clock,
@@ -164,6 +172,7 @@ export const useSun = create<SunStore>((set, get) => ({
   leaveCloseUp: () => set({ closeUp: false }),
   panel: "none",
   elapsed: 0,
+  moment: MAP_EPOCH,
   flareClass: "",
   cycleYear: decimalYear(MAP_EPOCH),
   sharpening: false,
@@ -207,8 +216,7 @@ export const useSun = create<SunStore>((set, get) => ({
     }));
   },
   setPanel: (panel) => set({ panel }),
-  publish: (elapsed, flareClass, cyclePhase, cycleYear) =>
-    set({ elapsed, flareClass, cyclePhase, cycleYear }),
+  publish: (report) => set(report),
   resetView: () => set(VIEW_SETTINGS),
   ...guideSlice(set, get, {
     tour: TOUR,

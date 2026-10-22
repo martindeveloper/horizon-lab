@@ -6,7 +6,8 @@
 import { Mesh, ShaderMaterial, Vector3, type Camera, type Object3D } from "three";
 
 import {
-  createProminenceGeometry,
+  createProminenceSlots,
+  writeProminenceBounds,
   type ProminenceBound,
 } from "@/space/sun/graphics/prominence/geometry";
 import {
@@ -49,14 +50,18 @@ export function createProminenceLayer(
       depthWrite: false,
     }),
   );
-  let mesh: Mesh | null = null;
-  let key = "";
+  /* One draw with a slot per prominence the frame can hold, written in place as they move. */
+  const geometry = scope.own(createProminenceSlots());
+  const mesh = new Mesh(geometry, material);
+  mesh.name = "Prominences";
+  mesh.renderOrder = 2;
+  mesh.visible = false;
+  scene.add(mesh);
   let ready = false;
   let alive = true;
   scope.defer(() => {
     alive = false;
-    mesh?.geometry.dispose();
-    mesh?.removeFromParent();
+    mesh.removeFromParent();
   });
   prominenceDensity(options.tight)
     .then((volume) => {
@@ -78,47 +83,45 @@ export function createProminenceLayer(
       uniforms.activitySteps.value = Math.min(quality.prominenceSteps, SUN_ACTIVITY_MAX_STEPS);
     },
     update(frame: SunFrame, camera: Camera, lit: number) {
-      const shown = frame.prominences.slice(0, SUN_ACTIVITY_MAX_REGIONS);
-      const next = shown
-        .map((p) => [p.lat, p.lon, p.tilt, p.length, p.height].map((v) => v.toFixed(4)).join(","))
-        .join(";");
-      if (next !== key) {
-        key = next;
-        bounds.length = 0;
-        shown.forEach((p, i) =>
-          bounds.push({
-            lat: p.lat,
-            lon: p.lon,
-            tilt: p.tilt,
-            height: p.height,
-            halfLength: p.length / 2,
-            seed: (i + 1) * 0.173,
-          }),
-        );
-        mesh?.geometry.dispose();
-        mesh?.removeFromParent();
-        mesh = null;
-        if (bounds.length > 0) {
-          mesh = new Mesh(createProminenceGeometry(bounds), material);
-          mesh.name = "Prominences";
-          mesh.renderOrder = 2;
-          scene.add(mesh);
+      const count = Math.min(frame.prominences.length, SUN_ACTIVITY_MAX_REGIONS);
+      let moved = count !== bounds.length;
+      for (let i = 0; i < count; i++) {
+        const p = frame.prominences[i]!;
+        const seed = (i + 1) * 0.173;
+        const bound = (bounds[i] ??= { lat: 0, lon: 0, tilt: 0, height: 0, halfLength: 0, seed });
+        const halfLength = p.length / 2;
+        if (
+          bound.lat !== p.lat ||
+          bound.lon !== p.lon ||
+          bound.tilt !== p.tilt ||
+          bound.height !== p.height ||
+          bound.halfLength !== halfLength
+        ) {
+          moved = true;
+          bound.lat = p.lat;
+          bound.lon = p.lon;
+          bound.tilt = p.tilt;
+          bound.height = p.height;
+          bound.halfLength = halfLength;
         }
       }
-      if (!mesh) return;
-      mesh.visible = ready && lit > 0;
+      bounds.length = count;
+      if (moved) writeProminenceBounds(geometry, bounds);
       /* The threads drain at the flow's pace in model time, faster while erupting. */
       const step =
         lastTime === null ? 0 : Math.min(Math.max(frame.time - lastTime, 0), MAX_DRAIN_STEP_S);
       lastTime = frame.time;
       drained = (drained + step * SUN_ACTIVITY_DRAIN_RADII_PER_S) % SUN_ACTIVITY_FLOW_WRAP;
-      shown.forEach((p, k) => {
+      mesh.visible = ready && lit > 0 && count > 0;
+      if (!mesh.visible) return;
+      for (let k = 0; k < count; k++) {
+        const p = frame.prominences[k]!;
         /* The frame's lift counts heights risen above rest; the volume's counts the height itself. */
         motion[k * 4] = 1 + p.lift;
         motion[k * 4 + 1] = p.fade * lit;
         motion[k * 4 + 2] = 0;
         motion[k * 4 + 3] = drained * (1 + (SUN_ACTIVITY_ERUPTION_DRAIN - 1) * p.erupting);
-      });
+      }
       /* The bounds live in the body frame: the camera as seen from there. */
       scene.worldToLocal(uniforms.localCamera.value.copy(camera.position));
     },

@@ -11,8 +11,10 @@ import {
   stellarContinuum,
 } from "@/space/sun/graphics/atmosphere";
 import { PROFILE_SAMPLES, SPECTRUM_SAMPLES } from "@/space/sun/graphics/parameters";
+import { SURFACE_GRAVITY } from "@/space/sun/model/parameters";
 import { response } from "@/space/sun/model/passbands";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
+import { logGravityCgs } from "@horizon/toolkit/science";
 
 import {
   ACTIVE_K,
@@ -39,7 +41,7 @@ const responseAt = (kelvin: number) =>
   (Math.log10(Math.max(kelvin, 1)) - RESPONSE_LOG_MIN) / (RESPONSE_LOG_MAX - RESPONSE_LOG_MIN);
 
 /** The Sun's surface gravity, log₁₀ of cm/s²: which row of the limb grid is the Sun's. */
-const SOLAR_LOG_G = 4.44;
+const SOLAR_LOG_G = logGravityCgs(SURFACE_GRAVITY);
 
 function floatTable(data: Float32Array, width: number) {
   const texture = new DataTexture(data, width, 1, RGBAFormat, FloatType);

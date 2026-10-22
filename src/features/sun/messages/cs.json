@@ -9,15 +9,15 @@
     },
     "views": {
       "title": "Pohledy",
-      "body": "Sedm míst, od jádra po korónu."
+      "body": "Osm míst, od jádra po dráhu Parkerovy sondy."
     },
     "light": {
       "title": "Světlo",
-      "body": "Prozkoumejte spektrální pásma se širokou, někdy vícenásobnou teplotní odezvou. Barvy jsou ilustrační."
+      "body": "Od bílého světla po plazma erupce. Barvy jsou ilustrační."
     },
     "clock": {
       "title": "Hodiny",
-      "body": "Zrychlete nebo zastavte modelový čas. Ukázka erupce má vlastní přehrávání."
+      "body": "Zastavte čas Slunce, nebo ho zrychlete."
     },
     "places": {
       "title": "V záběru",
@@ -26,6 +26,10 @@
     "settings": {
       "title": "Nastavení",
       "body": "Vrstvy, ovládání kamery a kvalita vykreslení."
+    },
+    "finder": {
+      "title": "Místa",
+      "body": "Najděte místo a leťte k němu."
     },
     "guide": {
       "title": "Průvodce",
@@ -37,14 +41,10 @@
     }
   },
   "hud": {
-    "sharpening": "Načítám detail",
-    "closeUp": "Zblízka",
     "leaveCloseUp": "Zpět ke Slunci",
     "closeUpNote": "Skutečná velikost, tepelným štítem ke Slunci.",
     "ride": "Letět s ní",
-    "faceProbe": "Pohled na ni",
     "rideNote": "Za tepelným štítem, s výhledem na Slunce.",
-    "rideParker": "Letět s Parkerem",
     "coronaEdge": "Okraj koróny",
     "parkerDate": "Datum a čas, UTC",
     "parkerDistance": "Vzdálenost od středu Slunce",
@@ -52,23 +52,23 @@
     "parkerSunlight": "Sluneční světlo, násobek pozemského",
     "parkerInCorona": "Uvnitř koróny",
     "places": "V záběru",
+    "finder": "Místa",
     "light": "Světlo",
     "clock": "Hodiny",
-    "pause": "Zastavit hodiny",
-    "play": "Spustit hodiny",
+    "pause": "Zastavit čas",
+    "slower": "Pomaleji",
+    "faster": "Rychleji",
+    "play": "Spustit čas",
     "cut": "Řez",
     "eruption": "Ilustrační erupce",
     "eruptionPlay": "Pustit erupci",
     "eruptionPause": "Zadržet erupci",
     "cycle": "Ilustrační cyklus",
     "flareClass": "Příklad GOES {value}",
-    "views": "Pohledy",
-    "paused": "Zastaveno",
-    "cutOpen": "Otevřít řez",
-    "cutClose": "Zavřít řez",
-    "cycleRun": "Pustit roky",
-    "cycleHold": "Zadržet roky",
-    "modelYear": "Modelový rok {value}"
+    "modelYear": "Modelový rok {value}",
+    "details": "Podrobnosti",
+    "hideDetails": "Skrýt podrobnosti",
+    "utc": "{date} UTC"
   },
   "views": {
     "surface": "Povrch",

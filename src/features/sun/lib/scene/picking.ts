@@ -1,21 +1,28 @@
-import { Mesh, MeshBasicMaterial, SphereGeometry, Vector3, type Group, type Vector2 } from "three";
+/**
+ * Taps on the Sun: a name opens its place; a tap on the globe is traced as the shader traces
+ * the ray (`traceSun`), naming the shell on the cut's face it lands on, the region under it on
+ * the disc, or the photosphere; invisible targets stand at the prominences and the eruption's
+ * X-point, each in the body frame.
+ */
+import {
+  Mesh,
+  MeshBasicMaterial,
+  SphereGeometry,
+  Vector3,
+  type Object3D,
+  type Vector2,
+} from "three";
 
-import { wrapSigned } from "@horizon/toolkit/math";
-import { createTapPicking, type SceneBasics, type createLabels } from "@horizon/toolkit/scene";
+import { layerAt, type LayerId } from "@/space/sun/model/structure";
+import { wrapSigned, type Vec3 } from "@horizon/toolkit/math";
+import { createTapPicking, type LabelHit, type SceneBasics } from "@horizon/toolkit/scene";
 
-import { PLACE_IDS, directionOf, type PlaceId, type SunFrame } from "./frame";
+import { PLACE_IDS, type PlaceId } from "../model/places";
+import { PROMINENCE_MAX, REGION_REACH } from "../parameters";
+import { directionOf, type SunFrame } from "./frame";
 import { GLOBE_PICK } from "./globe-layer";
-import type { SunSceneSettings } from "./settings";
-
-/** The shells a tap on the cut face names. */
-export const LAYER_IDS = [
-  "core",
-  "radiativeZone",
-  "tachocline",
-  "convectionZone",
-  "photosphere",
-] as const;
-export type LayerId = (typeof LAYER_IDS)[number];
+import { isLayerId } from "./names";
+import { prominenceMiddleR } from "./views";
 
 /** What a tap landed on: a name (a place), or what the globe and its targets carry. */
 export type SunPick =
@@ -25,14 +32,12 @@ export type SunPick =
   | { kind: "prominence"; index: number }
   | { kind: "eruption" };
 
+/** The body's pole: what the surface turns about. */
 const POLE = new Vector3(0, 1, 0);
-/** The tachocline's own width on the cut, as a share of the radius, for a tap to land on. */
-const TACHOCLINE_REACH = 0.03;
-/** A pick target's radius, radii. */
+/** A target's radius, radii; a prominence takes taps once it has faded in this far. */
 const TARGET_RADIUS = 0.05;
+const TAPPABLE_FADE = 0.05;
 
-export const isLayerId = (key: unknown): key is LayerId =>
-  typeof key === "string" && (LAYER_IDS as readonly string[]).includes(key);
 const isPlaceId = (key: unknown): key is PlaceId =>
   typeof key === "string" && (PLACE_IDS as readonly string[]).includes(key);
 
@@ -51,46 +56,34 @@ function sunPick(pick: unknown): SunPick | null {
   return null;
 }
 
-/** The shell a radius lies in on the cut face. */
-export function layerAt(r: number, layers: SunSceneSettings["layers"]): LayerId {
-  if (r < layers.core) return "core";
-  if (Math.abs(r - layers.tachocline) < TACHOCLINE_REACH) return "tachocline";
-  if (r < layers.tachocline) return "radiativeZone";
-  return "convectionZone";
-}
+/** A name tapped opens its place. */
+const pickOf = (key: string): SunPick | undefined =>
+  isPlaceId(key) ? { kind: "place", id: key } : undefined;
 
-/** Tap targets and cut-face ray tracing, with the same body frame as the rendered Sun. */
 export function createSunPicking(
   basics: Pick<SceneBasics, "scope" | "camera">,
   canvas: HTMLCanvasElement,
-  {
-    body,
-    globe,
-    cut,
-    settings,
-    frame,
-    hits,
-    blocked,
-    onPick,
-  }: {
-    body: Group;
+  options: {
+    /** The globe's proxy sphere and the body frame the targets stand in. */
     globe: Mesh;
+    body: Object3D;
+    /** The wedge as the shader sees it: half-angle and bisector. */
     cut: Vector2;
-    settings: () => SunSceneSettings;
-    frame: () => SunFrame;
-    hits: ReturnType<typeof createLabels>["hits"];
+    /** The frame on screen. */
+    drawn: () => SunFrame;
     blocked: () => boolean;
+    /** Names readable enough to tap. */
+    hits: (accept: (key: string) => boolean) => LabelHit[];
     onPick: (pick: SunPick | null) => void;
   },
 ) {
   const { scope } = basics;
-  const dir: [number, number, number] = [0, 0, 0];
-  const eruptionAt = new Vector3();
-  const targetMaterial = scope.own(new MeshBasicMaterial({ visible: false }));
-  const targetGeometry = scope.own(new SphereGeometry(1, 8, 6));
+  const { globe, body, cut } = options;
+  const material = scope.own(new MeshBasicMaterial({ visible: false }));
+  const geometry = scope.own(new SphereGeometry(1, 8, 6));
   const targets: Mesh[] = [];
   const target = (pick: SunPick) => {
-    const mesh = new Mesh(targetGeometry, targetMaterial);
+    const mesh = new Mesh(geometry, material);
     mesh.scale.setScalar(TARGET_RADIUS);
     mesh.userData.pick = pick;
     mesh.visible = false;
@@ -98,7 +91,7 @@ export function createSunPicking(
     targets.push(mesh);
     return mesh;
   };
-  const prominenceTargets = Array.from({ length: 8 }, (_, index) =>
+  const prominenceTargets = Array.from({ length: PROMINENCE_MAX }, (_, index) =>
     target({ kind: "prominence", index }),
   );
   const eruptionTarget = target({ kind: "eruption" });
@@ -106,41 +99,54 @@ export function createSunPicking(
 
   const origin = new Vector3();
   const ray = new Vector3();
-  /** Where a tap's ray meets the Sun, as the shader traces it (`traceSun`); null past the gap. */
-  const traceTap = (o: Vector3, d: Vector3): { p: Vector3; face: boolean } | null => {
+  const entry = new Vector3();
+  const centre = new Vector3();
+  const normal = new Vector3();
+  const inWedge = (q: Vector3) =>
+    cut.x > 0 && Math.abs(wrapSigned(Math.atan2(q.z, q.x) - cut.y, Math.PI * 2)) < cut.x;
+  /** Where a tap's ray meets the Sun, as the shader traces it (`traceSun`), into `entry`; null past the gap. */
+  const traceTap = (o: Vector3, d: Vector3): { face: boolean } | null => {
     const b = o.dot(d);
-    const c = o.lengthSq() - 1;
-    const disc = b * b - c;
+    const disc = b * b - o.lengthSq() + 1;
     if (disc < 0) return null;
     const s = Math.sqrt(disc);
     const t0 = Math.max(-b - s, 0);
     const t1 = -b + s;
     if (t1 <= 0) return null;
-    const p = o.clone().addScaledVector(d, t0);
-    const inWedge = (q: Vector3) =>
-      cut.x > 0 && Math.abs(wrapSigned(Math.atan2(q.z, q.x) - cut.y, Math.PI * 2)) < cut.x;
-    if (!inWedge(p)) return { p, face: false };
+    entry.copy(o).addScaledVector(d, t0);
+    if (!inWedge(entry)) return { face: false };
     let best = t1;
     let hit = false;
     for (const sign of [-1, 1]) {
       const a = cut.y + sign * cut.x;
-      const n =
-        sign < 0
-          ? new Vector3(-Math.sin(a), 0, Math.cos(a))
-          : new Vector3(Math.sin(a), 0, -Math.cos(a));
-      const dn = d.dot(n);
+      normal.set(sign * Math.sin(a), 0, -sign * Math.cos(a));
+      const dn = d.dot(normal);
       if (dn >= 0) continue;
-      const t = -o.dot(n) / dn;
+      const t = -o.dot(normal) / dn;
       if (t > t0 && t < best) {
         best = t;
         hit = true;
       }
     }
-    return hit ? { p: o.clone().addScaledVector(d, best), face: true } : null;
+    if (!hit) return null;
+    entry.copy(o).addScaledVector(d, best);
+    return { face: true };
   };
-  /** A name tapped opens its place. */
-  const pickOf = (key: string): SunPick | undefined =>
-    isPlaceId(key) ? { kind: "place", id: key } : undefined;
+  const dir: Vec3 = [0, 0, 0];
+  /** The globe's pick at the traced point: the shell on the face, else the region under it, else the photosphere. */
+  const globePick = (face: boolean, f: SunFrame): SunPick => {
+    if (face) return { kind: "layer", layer: layerAt(entry.length()).id };
+    /* The regions are given in the body frame. */
+    entry.applyAxisAngle(POLE, -f.surfaceTurn);
+    for (const region of f.regions) {
+      directionOf(region.lat, region.lon, dir);
+      const reach = REGION_REACH * region.size;
+      if (1 - entry.dot(centre.fromArray(dir)) < 0.5 * reach * reach)
+        return { kind: "region", id: region.id };
+    }
+    return { kind: "layer", layer: "photosphere" };
+  };
+
   createTapPicking(basics, canvas, {
     pickables: [globe, ...targets],
     choose: (hitList, tapRay) => {
@@ -148,51 +154,37 @@ export function createSunPicking(
       if (!first || first.object !== globe) return first;
       const traced = traceTap(origin.copy(tapRay.origin), ray.copy(tapRay.direction).normalize());
       if (!traced) return undefined;
-      let pick: SunPick = { kind: "layer", layer: "photosphere" };
-      if (traced.face)
-        pick = { kind: "layer", layer: layerAt(traced.p.length(), settings().layers) };
-      else {
-        /* The regions are given in the body frame. */
-        traced.p.applyAxisAngle(POLE, -frame().surfaceTurn);
-        for (const region of frame().regions) {
-          directionOf(region.lat, region.lon, dir);
-          const reach = 2.2 * region.size;
-          if (1 - traced.p.dot(new Vector3(...dir)) < 0.5 * reach * reach) {
-            pick = { kind: "region", id: region.id };
-            break;
-          }
-        }
-      }
-      globe.userData.pick = pick;
+      globe.userData.pick = globePick(traced.face, options.drawn());
       return first;
     },
-    blocked,
-    labels: () => hits((key) => pickOf(key) !== undefined),
+    blocked: options.blocked,
+    labels: () => options.hits((key) => pickOf(key) !== undefined),
     labelPick: pickOf,
     onTap: (tapped) => {
-      onPick(tapped ? sunPick(tapped.pick) : null);
+      options.onPick(tapped ? sunPick(tapped.pick) : null);
       globe.userData.pick = GLOBE_PICK;
     },
   });
 
   return {
+    /** Each frame: the targets where the frame's prominences and the eruption's X-point stand. */
     update(f: SunFrame) {
-      f.prominences.slice(0, prominenceTargets.length).forEach((p, index) => {
+      prominenceTargets.forEach((mesh, index) => {
+        const p = f.prominences[index];
+        mesh.visible = p !== undefined && p.fade > TAPPABLE_FADE;
+        if (!p) return;
         directionOf(p.lat, p.lon, dir);
-        const r = 1 + p.height * p.lift * 0.5;
-        const mesh = prominenceTargets[index]!;
+        const r = prominenceMiddleR(p);
         mesh.position.set(dir[0] * r, dir[1] * r, dir[2] * r);
-        mesh.visible = p.fade > 0.05;
       });
-      prominenceTargets.slice(f.prominences.length).forEach((mesh) => (mesh.visible = false));
       const eruption = f.eruption;
       const region = eruption ? f.regions.find((r) => r.id === eruption.regionId) : undefined;
-      if (eruption && region && eruption.reconnection > 0) {
+      eruptionTarget.visible = !!eruption && !!region && eruption.reconnection > 0;
+      if (eruption && region && eruptionTarget.visible) {
         directionOf(region.lat, region.lon, dir);
-        eruptionAt.set(dir[0], dir[1], dir[2]).multiplyScalar(1 + eruption.sheetBottom);
-        eruptionTarget.position.copy(eruptionAt);
-        eruptionTarget.visible = true;
-      } else eruptionTarget.visible = false;
+        const r = 1 + eruption.sheetBottom;
+        eruptionTarget.position.set(dir[0] * r, dir[1] * r, dir[2] * r);
+      }
     },
   };
 }
