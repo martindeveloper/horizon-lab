@@ -406,14 +406,3 @@ export const DOWNLOAD_URLS = {
   webbModel:
     "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/James%20Webb%20Space%20Telescope%20(B)/James%20Webb%20Space%20Telescope%20(B).glb",
 } as const;
-
-export const EXTERNAL_URLS = {
-  astronomyCourse:
-    "https://www.planetum.cz/eshop/produkt/1115-astronomicky-kurz-2026-27-i-rocnik-prezencni",
-} as const;
-
-export const DEPLOYMENT_URLS = {
-  cdn: "https://cdn.horizonlab.observer",
-  repository: "https://github.com/martindeveloper/horizon-lab",
-  site: "https://horizon.martinpernica.xyz",
-} as const;

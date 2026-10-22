@@ -43,11 +43,12 @@ Directory READMEs describe the contracts:
 
 ## External URLs (`@horizon/toolkit/urls`)
 
-`src/urls.ts` centralizes external destinations used by executable code: scientific
-references, attribution and licence links, source downloads, and Horizon deployment
-defaults. Its named constant groups have no dependencies or environment reads, so
+`src/urls.ts` centralizes shared external destinations used by executable code: scientific
+references, attribution and licence links, and source downloads.
+Its named constant groups have no dependencies or environment reads, so
 Node scripts and browser code can share them without loading rendering modules.
-Consumers retain environment overrides and construct request paths and queries.
+Consumers construct request paths and queries. Horizon's app-specific links and deployment
+defaults live in the app's `src/lib/urls.ts`; `src/config.ts` applies environment overrides.
 Simulation `technical.ts` specifications import these constants for their references;
 the app and generated documentation use those same specifications.
 Documentation, generated datasets, third-party licence text, SVG namespaces and

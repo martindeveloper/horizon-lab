@@ -83,3 +83,15 @@ export const LEGACY_URLS = {
   scientificSources: "/SCIENTIFIC-SOURCES.txt",
   thirdPartyNotices: "/THIRD-PARTY-NOTICES.txt",
 } as const;
+
+export const EXTERNAL_URLS = {
+  astronomyCourse:
+    "https://www.planetum.cz/eshop/produkt/1115-astronomicky-kurz-2026-27-i-rocnik-prezencni",
+} as const;
+
+/** Production defaults; config.ts applies environment overrides. */
+export const DEPLOYMENT_URLS = {
+  cdn: "https://cdn.horizonlab.observer",
+  repository: "https://github.com/martindeveloper/horizon-lab",
+  site: "https://horizon.martinpernica.xyz",
+} as const;

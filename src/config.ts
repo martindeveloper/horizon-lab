@@ -1,4 +1,4 @@
-import { DEPLOYMENT_URLS } from "@horizon/toolkit/urls";
+import { DEPLOYMENT_URLS } from "./lib/urls.ts";
 /**
  * Deployment settings. Each reads an environment variable and falls back to the
  * production value when it is unset or blank; `.env.example` lists them.

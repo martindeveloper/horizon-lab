@@ -3,9 +3,8 @@ import type { ReactNode } from "react";
 
 import { REPOSITORY_URL } from "@/config";
 import type { Locale } from "@/i18n/routing";
-import { ANCHOR_IDS } from "@/lib/urls";
+import { ANCHOR_IDS, EXTERNAL_URLS } from "@/lib/urls";
 import { cn, kickerClass } from "@horizon/toolkit/ui";
-import { EXTERNAL_URLS } from "@horizon/toolkit/urls";
 
 import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
 
