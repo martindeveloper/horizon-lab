@@ -284,7 +284,12 @@ export async function Catalogue({ locale }: { locale: Locale }) {
       className="catalogue-intro pb-10 outline-hidden"
     >
       <section aria-labelledby="catalogue-heading" className="catalogue-hero relative isolate">
-        <HeroScene locale={locale} sunLabel={t("sun")} moonLabel={t("moon")} skyLabel={t("sky")}>
+        <HeroScene
+          locale={locale}
+          sunLabel={t("heroSun")}
+          moonLabel={t("moon")}
+          skyLabel={t("sky")}
+        >
           <p className={cn("intro-kicker inline-flex items-center gap-3", kickerClass)}>
             <span className="h-px w-8 bg-solar/70" aria-hidden />
             {t("available", { labs: labs.length, experiences: experiences.length })}

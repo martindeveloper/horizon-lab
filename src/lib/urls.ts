@@ -28,6 +28,7 @@ export const SIMULATION_ASSETS = {
   "deep-field": simulationAssets("deep-field"),
   spectroscopy: simulationAssets("spectroscopy"),
   giants: simulationAssets("giants"),
+  sun: simulationAssets("sun"),
   voyage: simulationAssets("voyage"),
 } as const;
 

@@ -4,6 +4,7 @@ import { deepFieldManifest } from "@/features/deep-field/manifest";
 import { giantsManifest } from "@/features/giants/manifest";
 import { orreryManifest } from "@/features/orrery/manifest";
 import { spectroscopyManifest } from "@/features/spectroscopy/manifest";
+import { sunManifest } from "@/features/sun/manifest";
 import { voyageManifest } from "@/features/voyage/manifest";
 
 import type { SimulationManifest } from "./simulation-types";
@@ -15,6 +16,7 @@ export const registered = [
   deepFieldManifest,
   spectroscopyManifest,
   giantsManifest,
+  sunManifest,
   voyageManifest,
 ] as const satisfies readonly SimulationManifest[];
 

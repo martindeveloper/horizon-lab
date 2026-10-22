@@ -53,7 +53,7 @@
     "experiencesNote": "Sit back and fly. Real physics, less to read.",
     "available": "{labs, plural, one {# lab} other {# labs}}{experiences, plural, =0 {} one { · # experience} other { · # experiences}}",
     "sky": "Approximate sky over Ondřejov",
-    "sun": "Sun",
+    "heroSun": "Sun",
     "moon": "Moon",
     "features": "What you can explore",
     "startFrom": "Start from",
@@ -159,6 +159,27 @@
         },
         "betelgeuse": {
           "title": "Betelgeuse"
+        }
+      }
+    },
+    "sun": {
+      "title": "The Sun",
+      "eyebrow": "The Sun · Deep dive",
+      "category": "Stars & plasma",
+      "description": "One star, up close: cut it open, watch it in any light, fly over a sunspot and see a flare break loose.",
+      "open": "Open the Sun",
+      "cut": "Cut it open",
+      "light": "Every wavelength",
+      "field": "A flare breaking loose",
+      "entryPoints": {
+        "surface": {
+          "title": "The surface"
+        },
+        "inside": {
+          "title": "Inside"
+        },
+        "eruption": {
+          "title": "A flare breaks loose"
         }
       }
     },

@@ -8,6 +8,7 @@ import { FEATURES } from "../../src/config.ts";
 
 /* A simulation behind a switch has routes only in a build with the switch on. */
 const voyageRoutes = (routes) => (FEATURES.voyage ? routes : []);
+const sunRoutes = (routes) => (FEATURES.sun ? routes : []);
 
 // Run after `npm run build`; inspect production artifacts without starting a server.
 const build = new URL("../../.next/", import.meta.url);
@@ -50,6 +51,7 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
       "lab/deep-field",
       "lab/spectroscopy",
       ...voyageRoutes(["experience/voyage"]),
+      ...sunRoutes(["lab/sun"]),
     ]) {
       const route = assets(`${locale}/${suffix}`, ".js");
       for (const path of heavy) assert.ok(!route.has(path), `${locale}/${suffix} loads ${path}`);
@@ -97,7 +99,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
     const shared = assets(locale, ".css");
     assert.doesNotMatch(
       contents(shared),
-      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit/,
+      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit|sun-light-dot/,
     );
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
@@ -106,6 +108,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       "deep-field": /deep-field-rung/,
       spectroscopy: /spectroscopy-ribbon/,
       voyage: /voyage-cockpit/,
+      sun: /sun-light-dot/,
     };
     for (const suffix of [
       "lab/black-hole",
@@ -117,6 +120,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       "lab/spectroscopy",
       "lab/spectroscopy/kirchhoff",
       ...voyageRoutes(["experience/voyage", "experience/voyage/saturn"]),
+      ...sunRoutes(["lab/sun", "lab/sun/inside"]),
     ]) {
       const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
         (path) => !shared.has(path),
@@ -124,7 +128,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
       assert.match(contents(feature), marker[suffix.split("/")[1]]);
       /* The zoomable scenes label their objects; the black hole and the spectra draw no labels. */
-      if (/^(?:lab\/(?:orrery|deep-field)|experience\/voyage)/.test(suffix))
+      if (/^(?:lab\/(?:orrery|deep-field|sun)|experience\/voyage)/.test(suffix))
         assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
       assert.doesNotMatch(
         contents(feature),

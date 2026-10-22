@@ -28,6 +28,7 @@ import { WEATHER_NEAR } from "../src/features/giants/lib/parameters.ts";
 import { useGiants } from "../src/features/giants/lib/store.ts";
 import { DRIFT as ORRERY } from "../src/features/orrery/lib/drift.ts";
 import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
+import { DRIFT as SUN } from "../src/features/sun/lib/drift.ts";
 import {
   DRIFT_LOADING,
   driftReady,
@@ -46,6 +47,7 @@ const PROGRAMMES = {
   "black-hole": BLACK_HOLE,
   "black-hole-dormant": BLACK_HOLE_DORMANT,
   giants: GIANTS,
+  sun: SUN,
 };
 
 test("every drift programme is one the camera and the music can play", () => {
@@ -123,7 +125,7 @@ test("every drift programme is one the camera and the music can play", () => {
      map (the fixture mirrors the published one), every cue a shot names exists and the cued
      shots meet them, the loop still the period; and the camera opens on the shot whose cue the
      music is nearest. */
-  for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT, DEEP_FIELD, ORRERY, GIANTS]) {
+  for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT, DEEP_FIELD, ORRERY, GIANTS, SUN]) {
     const slug = programme.music.track.toLowerCase().replaceAll(" ", "-");
     const loops = programme.music.loops ?? 1;
     const map = parseAudioMap(

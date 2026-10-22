@@ -53,7 +53,7 @@
     "experiencesNote": "Opřete se a leťte. Skutečná fyzika, méně čtení.",
     "available": "{labs, plural, one {# laboratoř} few {# laboratoře} other {# laboratoří}}{experiences, plural, =0 {} one { · # zážitek} few { · # zážitky} other { · # zážitků}}",
     "sky": "Přibližný pohled na oblohu nad Ondřejovem",
-    "sun": "Slunce",
+    "heroSun": "Slunce",
     "moon": "Měsíc",
     "features": "Co můžete prozkoumat",
     "startFrom": "Vybrat výchozí pohled",
@@ -159,6 +159,27 @@
         },
         "betelgeuse": {
           "title": "Betelgeuze"
+        }
+      }
+    },
+    "sun": {
+      "title": "Slunce",
+      "eyebrow": "Slunce · Ponor do hvězdy",
+      "category": "Hvězdy a plazma",
+      "description": "Jedna hvězda zblízka: rozřízněte ji, sledujte ji v každém světle, přeleťte sluneční skvrnu a dívejte se, jak se utrhne erupce.",
+      "open": "Otevřít Slunce",
+      "cut": "Rozříznout",
+      "light": "Každá vlnová délka",
+      "field": "Erupce, jak se utrhne",
+      "entryPoints": {
+        "surface": {
+          "title": "Povrch"
+        },
+        "inside": {
+          "title": "Nitro"
+        },
+        "eruption": {
+          "title": "Erupce se utrhne"
         }
       }
     },

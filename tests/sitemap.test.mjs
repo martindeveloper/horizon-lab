@@ -16,6 +16,8 @@ import { ORRERY_PATH } from "../src/features/orrery/manifest.ts";
 import { viewRouteParams } from "../src/features/orrery/routing.ts";
 import { SPECTROSCOPY_PATH } from "../src/features/spectroscopy/manifest.ts";
 import { viewRouteParams as spectroscopyViewParams } from "../src/features/spectroscopy/routing.ts";
+import { SUN_PATH } from "../src/features/sun/manifest.ts";
+import { viewRouteParams as sunViewParams } from "../src/features/sun/routing.ts";
 import { VOYAGE_PATH } from "../src/features/voyage/manifest.ts";
 import { viewRouteParams as voyageViewParams } from "../src/features/voyage/routing.ts";
 import { routing } from "../src/i18n/routing.ts";
@@ -39,10 +41,12 @@ test("sitemap lists the catalogue, the about and credits pages, every simulation
     ...spectroscopyViewParams().map(({ view }) => `${SPECTROSCOPY_PATH}/${view}`),
     ...(FEATURES.giants ? rungRouteParams().map(({ star }) => `${GIANTS_PATH}/${star}`) : []),
     ...(FEATURES.voyage ? voyageViewParams().map(({ view }) => `${VOYAGE_PATH}/${view}`) : []),
+    ...(FEATURES.sun ? sunViewParams().map(({ view }) => `${SUN_PATH}/${view}`) : []),
   ];
   /* A simulation behind a switch that is off is nowhere in the sitemap. */
   if (!FEATURES.voyage) assert.ok(!paths.some((path) => path.startsWith(VOYAGE_PATH)));
   if (!FEATURES.giants) assert.ok(!paths.some((path) => path.startsWith(GIANTS_PATH)));
+  if (!FEATURES.sun) assert.ok(!paths.some((path) => path.startsWith(SUN_PATH)));
   assert.deepEqual([...paths].sort(), [...new Set(expected)].sort());
   for (const { entryPoints } of simulations)
     for (const { href } of entryPoints) assert.ok(paths.includes(href), href);

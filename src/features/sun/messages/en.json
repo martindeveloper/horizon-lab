@@ -1,0 +1,341 @@
+{
+  "app": "The Sun",
+  "metadataDescription": "One star, up close: cut it open, watch it in any light, fly over a sunspot and see a flare break loose.",
+  "canvasLabel": "The Sun, cut open and watched in any light, with its magnetic field",
+  "hud": {
+    "places": "Places",
+    "light": "Light",
+    "clock": "Clock",
+    "pause": "Pause the clock",
+    "play": "Run the clock",
+    "cut": "Cut",
+    "eruption": "Eruption",
+    "eruptionPlay": "Let the flare go",
+    "eruptionPause": "Hold the flare",
+    "cycle": "Cycle",
+    "flareClass": "Flare {value}",
+    "views": "Views",
+    "paused": "Paused",
+    "cutOpen": "Open the cut",
+    "cutClose": "Close the cut",
+    "cycleRun": "Run the years",
+    "cycleHold": "Hold the years"
+  },
+  "views": {
+    "surface": "The surface",
+    "inside": "Inside",
+    "sunspot": "A sunspot",
+    "chromosphere": "Chromosphere",
+    "corona": "Corona",
+    "eruption": "Eruption",
+    "cycle": "The cycle"
+  },
+  "viewHints": {
+    "surface": "The photosphere in white light: dark at the limb, boiling with granules, spotted.",
+    "inside": "A quarter cut away: the core, the radiative zone, the tachocline, the convection zone.",
+    "sunspot": "Low over a spot group: the umbra, the penumbra's filaments, granules round them.",
+    "chromosphere": "The limb in Hα: a forest of spicules, plage, filaments and a prominence.",
+    "corona": "The disc hidden, as in an eclipse: streamers, plumes and the wind leaving.",
+    "eruption": "Field lines over an active region store energy, then break loose.",
+    "cycle": "Spots drift toward the equator and the poles swap over eleven years, year by year."
+  },
+  "lights": {
+    "white": "White light",
+    "halpha": "Hα",
+    "he304": "He II 304 Å",
+    "fe171": "Fe IX 171 Å",
+    "fe193": "Fe XII 193 Å",
+    "fe211": "Fe XIV 211 Å",
+    "fe335": "Fe XVI 335 Å",
+    "fe94": "Fe XVIII 94 Å",
+    "fe131": "Fe XXI 131 Å",
+    "eclipse": "Eclipse",
+    "magnetogram": "Magnetogram"
+  },
+  "lightNotes": {
+    "white": "Photosphere · SDO/HMI, May 2024",
+    "halpha": "Chromosphere",
+    "he304": "Upper chromosphere",
+    "fe171": "Quiet corona",
+    "fe193": "Corona",
+    "fe211": "Active regions",
+    "fe335": "Active regions",
+    "fe94": "Flaring regions",
+    "fe131": "Flare plasma",
+    "eclipse": "Outer corona",
+    "magnetogram": "Field at the surface"
+  },
+  "clocks": {
+    "real": "Real time",
+    "minute": "1 s = 1 min",
+    "hour": "1 s = 1 h",
+    "day": "1 s = 1 day",
+    "year": "1 s = 1 year"
+  },
+  "stages": {
+    "eruption": {
+      "storing": "Storing energy",
+      "rising": "Rope rising",
+      "xpoint": "X-point forms",
+      "reconnecting": "Reconnecting",
+      "loops": "Post-flare loops"
+    },
+    "cycle": {
+      "minimum": "minimum",
+      "rising": "rising",
+      "maximum": "maximum",
+      "declining": "declining"
+    }
+  },
+  "elapsed": {
+    "seconds": "{value} s",
+    "minutes": "{value} min",
+    "hours": "{value} h",
+    "days": "{value} d",
+    "years": "{value} yr"
+  },
+  "toggles": {
+    "fieldLines": "Field lines",
+    "grid": "Latitude grid"
+  },
+  "facts": {
+    "coreRadius": "Core radius",
+    "temperature": "Temperature",
+    "density": "Density, × water",
+    "hydrogen": "Hydrogen left",
+    "massLoss": "Mass to light, each second",
+    "outerEdge": "Outer edge",
+    "innerEdge": "Inner edge",
+    "walk": "A photon's walk out, model",
+    "walkLiterature": "A photon's walk out, literature",
+    "lightTime": "Then to Earth",
+    "depth": "Depth",
+    "thickness": "Thickness",
+    "interiorPeriod": "Interior turns in",
+    "equatorPeriod": "Equator turns in",
+    "polePeriod": "Poles turn in",
+    "convectionDepth": "Depth of the churn",
+    "granuleSize": "Granule across",
+    "granuleLifetime": "Granule lives",
+    "supergranuleSize": "Supergranule across",
+    "scaleHeight": "Pressure scale height",
+    "gravity": "Surface gravity",
+    "intensity": "Umbra's brightness",
+    "diameter": "Across",
+    "earthDiameter": "Earth across",
+    "field": "Field",
+    "meanField": "Quiet Sun's field",
+    "spotField": "Umbra's field",
+    "polarField": "Polar field at minimum",
+    "temperatureMinimum": "Coolest",
+    "halpha": "Hα",
+    "flareIndex": "Flare size law, index",
+    "flareLine": "Flare plasma, Fe XXI",
+    "hotLine": "Hot plasma, Fe XVIII",
+    "quietLine": "Quiet loops, Fe IX",
+    "warmLine": "Warm loops, Fe XII",
+    "coronaModel": "Corona as drawn",
+    "greenLine": "Green line, Fe XIV",
+    "greenLineTemperature": "Green line forms at",
+    "kCoronaBase": "Brightness at the limb, of the disc",
+    "sourceSurface": "Field opens beyond",
+    "windSlow": "Slow wind",
+    "windFast": "Fast wind",
+    "cmeSpeed": "Front's speed, as drawn",
+    "cyclePeriod": "Cycle"
+  },
+  "panel": {
+    "qualityNote": "Standard is the Sun as drawn for a desktop; Economy keeps a phone cool."
+  },
+  "places": {
+    "core": {
+      "title": "Core",
+      "where": "Centre",
+      "body": "Where hydrogen fuses into helium. Only the inner quarter of the radius makes light; the rest carries it.",
+      "caution": "Nothing inside the Sun is seen directly: the interior is a standard model fitted to helioseismology."
+    },
+    "radiativeZone": {
+      "title": "Radiative zone",
+      "where": "Inner shell",
+      "body": "Light carries the energy outward, scattered countless times on its way. A photon's walk to the surface takes far longer than its straight flight would.",
+      "caution": "A model's profile, not a picture."
+    },
+    "tachocline": {
+      "title": "Tachocline",
+      "where": "Boundary",
+      "body": "The thin shear layer where the rigidly turning interior meets the differentially turning envelope. The dynamo that winds the field is thought to live here.",
+      "caution": "Its depth is known from helioseismology; its thickness only roughly."
+    },
+    "convectionZone": {
+      "title": "Convection zone",
+      "where": "Outer shell",
+      "body": "Hot gas rises, cools and sinks: the energy travels by motion, not light, and the top of the churn is the surface we see.",
+      "caution": "The plumes drawn are a surrogate for turbulent convection, not a simulation of it."
+    },
+    "photosphere": {
+      "title": "Photosphere",
+      "where": "Surface",
+      "body": "The thin layer where the gas turns transparent and the light escapes. It is darker toward the limb, where sight lines reach only its cooler top.",
+      "caution": "Limb darkening follows a fitted atmosphere; fine detail is procedural."
+    },
+    "granule": {
+      "title": "Granule",
+      "where": "Surface",
+      "body": "The bright top of a rising cell, rimmed by dark lanes where cooled gas sinks. Each lives minutes, and the pattern never stops.",
+      "caution": "Sizes and lifetimes follow observation; the cells themselves are drawn, not computed."
+    },
+    "sunspot": {
+      "title": "Sunspot",
+      "where": "Surface",
+      "body": "Strong field holds the convection down, so the spot is cooler and looks dark. The umbra is darkest; the penumbra's filaments lean outward.",
+      "caution": "Spot groups start where SDO saw them in May 2024, then live and die by the activity model."
+    },
+    "facula": {
+      "title": "Faculae",
+      "where": "Surface",
+      "body": "Bright patches of concentrated field, best seen near the limb. Spots darken the Sun a little; faculae brighten it more, so an active Sun shines brighter.",
+      "caution": "Brightening is illustrative."
+    },
+    "chromosphere": {
+      "title": "Chromosphere",
+      "where": "Lower atmosphere",
+      "body": "A thin, transparent layer above the surface, hotter upward. In Hα it shows its network, plage and filaments; at the limb, a pink rim.",
+      "caution": "Drawn as the Hα line shows it, not in white light."
+    },
+    "spicule": {
+      "title": "Spicules",
+      "where": "Limb",
+      "body": "Jets of gas shot up from the chromosphere, each lasting minutes, a forest of them all round the limb.",
+      "caution": "Placed procedurally."
+    },
+    "prominence": {
+      "title": "Prominence",
+      "where": "Above the limb",
+      "body": "Cool, dense gas held up in the dips of the magnetic field, glowing in Hα above the limb; seen against the disc it is a dark filament.",
+      "caution": "A hedgerow prominence authored from observation, not a field solution."
+    },
+    "flare": {
+      "title": "Flare",
+      "where": "Active region",
+      "body": "Stressed field lines over an active region reconnect, releasing their stored energy in minutes as heat, light across the spectrum and fast particles.",
+      "caution": "The eruption follows an analytic model of loss of equilibrium; its scale is schematic."
+    },
+    "loops": {
+      "title": "Post-flare loops",
+      "where": "Active region",
+      "body": "After a flare the reconnected field fills with hot plasma, an arcade of loops that cools over hours as its gas rains back down.",
+      "caution": "Loop temperatures are representative values."
+    },
+    "corona": {
+      "title": "Corona",
+      "where": "Outer atmosphere",
+      "body": "Thin, far hotter than the surface, and only seen when the disc is hidden: its white light is sunlight scattered by electrons and dust, its own glow is in extreme ultraviolet.",
+      "caution": "Brightness is stretched for the eye; no single exposure shows all of it."
+    },
+    "streamer": {
+      "title": "Helmet streamer",
+      "where": "Corona",
+      "body": "Closed field holding plasma in a bright arch, drawn out into a tail by the wind. Where the field is open, the corona is dark and the wind runs fast.",
+      "caution": "Streamers follow the model field, not an observed one."
+    },
+    "ejection": {
+      "title": "Coronal mass ejection",
+      "where": "Leaving",
+      "body": "A flux rope that broke loose, piling the corona up ahead of it as a bright front with a dark cavity behind. It reaches Earth in a day or more.",
+      "caution": "Speed and shape are schematic."
+    },
+    "wind": {
+      "title": "Solar wind",
+      "where": "Beyond",
+      "body": "The corona is too hot to be held: it expands into a wind that fills the solar system, slow from the streamers, fast from the open poles.",
+      "caution": "The wind is not drawn as particles; its speeds are typical values."
+    }
+  },
+  "tour": {
+    "steps": {
+      "core": {
+        "title": "Where the light is made",
+        "body": "Hydrogen fuses in the core, at {coreTemperatureMK} million kelvin and {centralDensity} times the density of water. The energy leaves as light and neutrinos; the neutrinos are out in seconds."
+      },
+      "walk": {
+        "title": "The long walk",
+        "body": "The light is not. Scattered at every step, it takes thousands of years to reach the surface by this model's count, then {lightTimeMin} minutes to reach us."
+      },
+      "dynamo": {
+        "title": "Two rotations",
+        "body": "The interior turns as one. The surface turns in {equatorDays} days at the equator and {poleDays} at the poles. Watch the shear at the boundary: this winds the field."
+      },
+      "granules": {
+        "title": "A boiling surface",
+        "body": "Rising cells about {granuleKm} km across bring the heat up and sink in the dark lanes between them. Each lives about {granuleMin} minutes."
+      },
+      "spot": {
+        "title": "Where the field comes through",
+        "body": "A spot is where a field of up to {spotFieldT} tesla holds the convection down. Cooler by a thousand kelvin, so darker; it only looks black beside the surface."
+      },
+      "chromosphere": {
+        "title": "In the light of hydrogen",
+        "body": "In Hα, at {halphaNm} nm, the thin layer above the surface appears: jets at the limb, bright plage, a prominence standing in the field."
+      },
+      "eruption": {
+        "title": "The field breaks loose",
+        "body": "Shear stores energy in the field over the region. Loss of equilibrium lifts the rope; below it the field reconnects, flares, and lets the rope go."
+      },
+      "corona": {
+        "title": "Hotter above",
+        "body": "The corona is {coronaMK} million kelvin, far hotter than the surface, and nobody is sure why. Its shape is the field's: arches where it closes, plumes where it opens."
+      },
+      "cycle": {
+        "title": "Eleven years",
+        "body": "Spots appear at mid latitudes and drift toward the equator over about {cycleYears} years; at maximum the poles swap. Then it starts again."
+      }
+    }
+  },
+  "technicalDetails": {
+    "title": "Inside the Sun lab",
+    "summary": "A standard interior model, a procedural surface, a potential magnetic field and an analytic eruption, lit through the response of each passband. Figures carry their sources; what is drawn is illustrative.",
+    "features": {
+      "views": "{views} views, from inside the core to the wind, each at its own pace.",
+      "interior": "The interior from a standard solar model, cut open at any depth, with its profile under the probe.",
+      "surface": "Granulation, spots, faculae and limb darkening, with the surface turning differentially.",
+      "atmosphere": "Chromosphere, spicules and prominences in Hα; the corona's streamers and plumes in an eclipse.",
+      "field": "Field lines from a potential field, and an eruption that stores energy and lets go.",
+      "lights": "Every light, from white through the AIA passbands to a magnetogram, re-lights the same scene.",
+      "cycle": "The activity cycle: spots migrating, the dipole flipping, the record since the seventeenth century."
+    },
+    "sections": {
+      "interior": {
+        "title": "Interior",
+        "body": "The cut faces print a standard solar model (Model S): temperature, density, pressure, luminosity and hydrogen fraction against radius. Its centre is {coreTemperatureMK} million kelvin and {centralDensity} times water; the core that makes the light reaches {coreRadius} of the radius, the convection zone begins at {tachocline}. The photon's walk is a random-walk estimate over the model's opacity, {photonWalkKyr} thousand years against the literature's {photonWalkLiteratureKyr}; it is not a transport calculation."
+      },
+      "rotation": {
+        "title": "Rotation",
+        "body": "The surface turns by the Doppler law by latitude, {equatorDays} days at the equator and {poleDays} at the poles; below the tachocline the interior turns as one body at the law's mean rate. The cut faces turn at their shell's rate, so the shear shows over model days."
+      },
+      "surface": {
+        "title": "Surface",
+        "body": "At disc scale the white-light Sun is the one observed: SDO/HMI's continuum at 617.3 nm, a mosaic of 1–22 May 2024 flattened at source, given the limb darkening of a fitted atmosphere and the photosphere's Planck colour through the eye. The model's active regions open where that mosaic's NOAA regions stood and evolve from there, so the other lights agree with the map. Close up, procedural granules about {granuleKm} km across and {granuleMin} minutes long take over, sized by the pressure scale height; spots and faculae come from the regions."
+      },
+      "atmosphere": {
+        "title": "Atmosphere",
+        "body": "The chromosphere is drawn {chromosphereKm} km deep in Hα at {halphaNm} nm. The white-light corona follows the Baumbach fall-off, shaped by where the model field is closed or open; its drawn temperature stands for a {coronaMK} million kelvin corona. Spicules, prominences and loops are authored forms placed by the model, lit by their temperature."
+      },
+      "field": {
+        "title": "Magnetic field",
+        "body": "Below a source surface the field is a potential field: a global dipole that follows the cycle, and a buried dipole for each active region. The quiet Sun carries {meanFieldMT} mT; a spot up to {spotFieldT} T. The eruption is the analytic loss-of-equilibrium model: a flux rope over a bipolar field, a current sheet beneath, reconnection once the rope lifts."
+      },
+      "lights": {
+        "title": "Lights",
+        "body": "Every drawn component carries a temperature. A passband weighs it by its response, a log-normal about the band's peak, and prints it through the instrument's colour table; white light and Hα pick layers instead."
+      },
+      "cycle": {
+        "title": "Cycle",
+        "body": "Regions emerge at latitudes that drift toward the equator through the {cycleYears}-year cycle, with the hemispheres' polarities set by Hale's law; the record of sunspot numbers is the observatory's yearly means, the Maunder minimum's {maunderYears} years among them."
+      },
+      "limits": {
+        "title": "Limits",
+        "body": "Nothing here is a magnetohydrodynamic solution. Shapes, paces and brightness are chosen so the physics reads at a glance; the figures on the cards are the measured ones."
+      }
+    }
+  }
+}

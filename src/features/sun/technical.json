@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "features": ["views", "interior", "surface", "atmosphere", "field", "lights", "cycle"],
+  "sections": [
+    {
+      "id": "interior",
+      "equations": [
+        { "equation": "hydrostatic-equilibrium" },
+        { "equation": "pp-chain-energy" },
+        { "equation": "mass-loss-rate" },
+        { "equation": "photon-diffusion-time" }
+      ]
+    },
+    {
+      "id": "rotation",
+      "equations": [{ "equation": "differential-rotation" }]
+    },
+    {
+      "id": "surface",
+      "equations": [
+        { "equation": "scale-height" },
+        "I(μ)/I(1) = 1 − Σₙ aₙ (1 − μⁿ⸍²)",
+        { "equation": "mean-density" }
+      ]
+    },
+    {
+      "id": "atmosphere",
+      "equations": ["K(ρ) ∝ 0.0532 ρ^−2.5 + 1.425 ρ^−7 + 2.565 ρ^−17"]
+    },
+    {
+      "id": "field",
+      "equations": [
+        "∇ × B = 0,  B = −∇Φ  (r ≤ R_ss)",
+        { "equation": "alfven-speed" },
+        { "equation": "reconnection-energy" },
+        { "equation": "goes-class" }
+      ]
+    },
+    {
+      "id": "lights",
+      "equations": ["R_band(T) ∝ exp(−(log T − log T_peak)² / 2σ²)"]
+    },
+    {
+      "id": "cycle",
+      "equations": [{ "equation": "wolf-number" }]
+    },
+    {
+      "id": "limits",
+      "equations": []
+    }
+  ],
+  "references": [
+    {
+      "title": "Christensen-Dalsgaard et al. 1996, Science 272, 1286 (Model S: the Sun's interior)",
+      "url": "https://doi.org/10.1126/science.272.5266.1286"
+    },
+    {
+      "title": "Snodgrass & Ulrich 1990, ApJ 351, 309 (the Sun's rotation by latitude)",
+      "url": "https://doi.org/10.1086/168467"
+    },
+    {
+      "title": "Lemen et al. 2012, Solar Physics 275, 17 (the AIA passbands)",
+      "url": "https://doi.org/10.1007/s11207-011-9776-8"
+    },
+    {
+      "title": "Lin & Forbes 2000, JGR 105, 2375 (the eruption's loss of equilibrium and reconnection)",
+      "url": "https://doi.org/10.1029/1999JA900477"
+    },
+    {
+      "title": "Hathaway 2015, Living Reviews in Solar Physics 12, 4 (the solar cycle)",
+      "url": "https://doi.org/10.1007/lrsp-2015-4"
+    },
+    {
+      "title": "Solanki 2003, A&ARv 11, 153 (sunspots)",
+      "url": "https://doi.org/10.1007/s00159-003-0018-4"
+    },
+    {
+      "title": "Nordlund, Stein & Asplund 2009, Living Reviews in Solar Physics 6, 2 (granulation)",
+      "url": "https://doi.org/10.12942/lrsp-2009-2"
+    },
+    {
+      "title": "WDC-SILSO, Royal Observatory of Belgium (sunspot numbers since 1700)",
+      "url": "https://www.sidc.be/SILSO/"
+    }
+  ]
+}

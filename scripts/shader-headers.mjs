@@ -2,8 +2,9 @@ import { glslHeader } from "@horizon/toolkit/shaders/defines";
 
 import { SHADER_DEFINES } from "../src/features/black-hole/lib/parameters.ts";
 import { SHADER_DEFINES as GIANTS_SHADER_DEFINES } from "../src/features/giants/lib/parameters.ts";
-import { ORRERY_SHADER_DEFINES } from "../src/features/orrery/lib/graphics/shader-defines.ts";
+import { SHADER_DEFINES as SUN_SHADER_DEFINES } from "../src/features/sun/lib/parameters.ts";
 import { SOLAR_SHADER_DEFINES } from "../src/space/solar-system/graphics/shader-defines.ts";
+import { SUN_SHARED_SHADER_DEFINES } from "../src/space/sun/graphics/shader-defines.ts";
 
 const command = "npm run shaders:generate";
 
@@ -26,12 +27,12 @@ export const SHADER_HEADERS = [
     source: "src/features/giants/lib/parameters.ts",
   },
   {
-    lab: "orrery",
-    path: "src/features/orrery/lib/graphics/shaders/parameters.generated.glsl",
-    shaders: "src/features/orrery/lib/graphics/shaders/",
-    defines: ORRERY_SHADER_DEFINES,
-    guard: "HORIZON_ORRERY_PARAMETERS",
-    source: "src/features/orrery/lib/graphics/shader-defines.ts",
+    lab: "sun",
+    path: "src/features/sun/lib/graphics/parameters.generated.glsl",
+    shaders: "src/features/sun/lib/graphics/",
+    defines: SUN_SHADER_DEFINES,
+    guard: "HORIZON_SUN_PARAMETERS",
+    source: "src/features/sun/lib/parameters.ts",
   },
   {
     lab: "solar-system",
@@ -40,6 +41,14 @@ export const SHADER_HEADERS = [
     defines: SOLAR_SHADER_DEFINES,
     guard: "HORIZON_SOLAR_SYSTEM_PARAMETERS",
     source: "src/space/solar-system/graphics/shader-defines.ts",
+  },
+  {
+    lab: "sun-shared",
+    path: "src/space/sun/graphics/shaders/parameters.generated.glsl",
+    shaders: "src/space/sun/graphics/",
+    defines: SUN_SHARED_SHADER_DEFINES,
+    guard: "HORIZON_SUN_SHARED_PARAMETERS",
+    source: "src/space/sun/graphics/shader-defines.ts",
   },
 ].map((header) => ({
   ...header,

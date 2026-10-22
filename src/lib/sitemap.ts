@@ -10,6 +10,10 @@ import {
   viewRouteParams as spectroscopyRouteParams,
 } from "@/features/spectroscopy/routing";
 import {
+  pathForView as pathForSunView,
+  viewRouteParams as sunViewRouteParams,
+} from "@/features/sun/routing";
+import {
   pathForView as pathForVoyageView,
   viewRouteParams as voyageRouteParams,
 } from "@/features/voyage/routing";
@@ -26,6 +30,7 @@ const subpages: Record<SimulationId, () => string[]> = {
   "deep-field": () => deepViewRouteParams().map(({ view }) => pathForDeepView(view)),
   spectroscopy: () => spectroscopyRouteParams().map(({ view }) => pathForSpectroscopyView(view)),
   giants: () => rungRouteParams().map(({ star }) => pathForRung(star)),
+  sun: () => sunViewRouteParams().map(({ view }) => pathForSunView(view)),
   voyage: () => voyageRouteParams().map(({ view }) => pathForVoyageView(view)),
 };
 

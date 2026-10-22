@@ -1,0 +1,55 @@
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
+
+/* Each light's colour on the dock's strip: the SDO/AIA tables' hues, Hα's red; the chosen one lit and ringed. */
+:where([data-simulation="sun"]) .sun-light-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--sun-light, var(--color-space-fg));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--sun-light, transparent) 70%, transparent);
+  transition:
+    transform 200ms ease-out,
+    box-shadow 200ms ease-out;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-on] {
+  transform: scale(1.5);
+  box-shadow:
+    0 0 0 1.5px var(--color-bg),
+    0 0 0 2.5px var(--color-fg),
+    0 0 10px var(--sun-light, transparent);
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="white"] {
+  --sun-light: #fff2d6;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="halpha"] {
+  --sun-light: #ff4a2e;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="he304"] {
+  --sun-light: #ff7a1f;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="fe171"] {
+  --sun-light: #f2c04a;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="fe193"] {
+  --sun-light: #d58f3e;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="fe211"] {
+  --sun-light: #c56fd6;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="fe335"] {
+  --sun-light: #4f7ad9;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="fe94"] {
+  --sun-light: #5fd36b;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="fe131"] {
+  --sun-light: #39c6c9;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="eclipse"] {
+  --sun-light: #e6e6f2;
+}
+:where([data-simulation="sun"]) .sun-light-dot[data-light="magnetogram"] {
+  --sun-light: #9a9a9a;
+}

@@ -76,6 +76,7 @@ const LABS = {
   giants: "Giants",
   spectroscopy: "Stellar Spectra",
   voyage: "Voyage",
+  sun: "The Sun",
 };
 for (const [slug, title] of Object.entries(LABS)) {
   const { references } = JSON.parse(read(`src/features/${slug}/technical.json`));

@@ -14,6 +14,7 @@ const deepField = await artwork("deep-field");
 const spectroscopy = await artwork("spectroscopy");
 const giants = await artwork("giants");
 const voyage = await artwork("voyage");
+const sun = await artwork("sun");
 /** The card's ink, which every artwork's sky must end in. */
 const INK = "#08080b";
 const escape = (text) =>
@@ -27,6 +28,7 @@ const copy = {
   spectroscopy: "Fingerprints in starlight",
   giants: "How big stars get",
   voyage: "At true scale, on two clocks",
+  sun: "Cut it open, watch it in any light",
 };
 const messages = JSON.parse(
   await readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
@@ -69,6 +71,12 @@ const cards = [
     title: messages.catalogue.voyage.title,
     subtitle: copy.voyage,
     art: voyage,
+  },
+  {
+    path: SIMULATION_ASSETS["sun"].social,
+    title: messages.catalogue.sun.title,
+    subtitle: copy.sun,
+    art: sun,
   },
 ];
 for (const card of cards) {

@@ -294,6 +294,7 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   const { useSpectroscopy } = await import("../src/features/spectroscopy/lib/store.ts");
   const { useVoyage } = await import("../src/features/voyage/lib/store.ts");
   const { useGiants } = await import("../src/features/giants/lib/store.ts");
+  const { useSun } = await import("../src/features/sun/lib/store.ts");
 
   useDeepField.getState().patchShow({ halo: true });
   useDeepField.getState().startGuide();
@@ -305,6 +306,9 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
   useVoyage.getState().startGuide();
   useGiants.getState().setOrbits(true);
   useGiants.getState().startGuide();
+  useSun.getState().setLight("halpha");
+  useSun.getState().goTo("flare");
+  useSun.getState().startGuide();
   for (const store of [
     useDeepField,
     useOrrery,
@@ -312,6 +316,7 @@ test("leaving a simulation starts the next visit fresh: guides, selections and p
     useSpectroscopy,
     useVoyage,
     useGiants,
+    useSun,
   ]) {
     assert.equal(store.getState().guideOpen, true);
     freshVisit(store)();
