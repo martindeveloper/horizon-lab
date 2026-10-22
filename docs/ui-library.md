@@ -133,7 +133,7 @@ palette, thin borders, frosted glass, tight sans headings, and mono data.
 
 Shared CSS helpers: `pad-safe`, `pad-sheet`, `pad-hud-top`, `pad-hud-bottom`
 (side padding from `--hud-gutter`, 1rem unless the host sets it; the bottom inset is 0.75rem on phones),
-`no-scrollbar`, `scroll-thin` (quiet thin bar for scrolled panels), `hud-top`, `hud-bottom`, `hud-title`, and `anim-fade`, `anim-rise`,
+`no-scrollbar`, `scroll-thin` (quiet thin bar for scrolled panels), `hud-top` (a short scrim under the HUD row; no bottom padding needed), `hud-bottom`, `hud-title`, and `anim-fade`, `anim-rise`,
 `anim-sheet`, `anim-rail`. Language helpers: `horizon-sky` (fixed page backdrop;
 add `data-scope="local"` inside an isolated stage; the shell layers `sky-layer`,
 `sky-twinkle`, and `sky-meteor` on top), `hairline-solar` (a gold

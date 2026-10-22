@@ -71,7 +71,7 @@ export function OrreryOverlay() {
 
       {guideOpen ? null : (
         <>
-          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">
+          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
             {/* The view's name gives way to the tools down to its minimum; phones under 360px
                 take the tools a row lower. */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">

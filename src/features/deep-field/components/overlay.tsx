@@ -67,7 +67,7 @@ export function DeepFieldOverlay() {
         <DeepFieldGuide />
       ) : (
         <>
-          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">
+          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
             <div className="flex items-start gap-3">
               {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption it. */}
               {t.has(`viewHints.${view}`) ? (

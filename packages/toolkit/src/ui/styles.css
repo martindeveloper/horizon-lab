@@ -44,12 +44,26 @@
     max-height: 70dvh;
   }
 
+  /* A short eased scrim under the HUD row: it reaches only a little past the row,
+     so the glass header above is not followed by a dark band. Titles keep their
+     own shadow, and the buttons their glass, for contrast. */
   .hud-top {
+    isolation: isolate;
+  }
+  .hud-top::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -1.25rem;
+    z-index: -1;
+    pointer-events: none;
     background: linear-gradient(
       to bottom,
-      rgba(8, 8, 11, 0.82) 0%,
-      rgba(8, 8, 11, 0.42) 55%,
-      rgba(8, 8, 11, 0)
+      rgb(8 8 11 / 0.5),
+      rgb(8 8 11 / 0.36) 20%,
+      rgb(8 8 11 / 0.22) 40%,
+      rgb(8 8 11 / 0.11) 60%,
+      rgb(8 8 11 / 0.035) 80%,
+      rgb(8 8 11 / 0)
     );
   }
 

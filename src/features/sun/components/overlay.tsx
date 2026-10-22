@@ -64,7 +64,7 @@ export function SunOverlay() {
         <SunGuide />
       ) : (
         <>
-          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">
+          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
             {/* The view's pill gives way to the tools, as in every lab; the rest is the dock's. */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <SunViewPicker />

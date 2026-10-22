@@ -152,7 +152,7 @@ export function ObservatoryOverlay() {
 
       {!guideOpen && !mapOpen ? (
         <>
-          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-8 md:pb-14">
+          <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
             <div className="flex items-center gap-3">
               {/* The picker (desktop) and the dock kicker (phones) show the name. */}
               <h1 className="sr-only">{holeName}</h1>
