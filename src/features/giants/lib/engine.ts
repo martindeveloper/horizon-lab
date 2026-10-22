@@ -16,6 +16,7 @@ import { ambientMusic } from "@/components/shell/ambient-music";
 import { assetUrl, MAPS_KEY } from "@/lib/assets";
 import { audioMapNow } from "@/lib/audio-maps";
 import { openingFor, timedDrift, type DriftState } from "@/lib/drift";
+import { lendCamera } from "@/lib/scene-bridge";
 import type { AudioMap } from "@horizon/toolkit/audio";
 import { MAPS, jplElements, mapFile } from "@horizon/toolkit/bodies";
 import { TAP_SLOP_PX, wheelPixels } from "@horizon/toolkit/camera";
@@ -53,7 +54,7 @@ import {
 } from "./model/drift-path";
 import { fadeFocusBlur, focusBlurRadius, needsFocusBlur } from "./model/focus-blur";
 import { glideAt, glideFrom, glideRests, glideSeconds, glideTowards } from "./model/glide";
-import { letGo, poseRests, restPose, settlePose, turnBy } from "./model/grab";
+import { letGo, nudge, poseRests, restPose, settlePose, turnBy } from "./model/grab";
 import { NOBODY, handOver, handOverAtOnce, type HandOver } from "./model/hand-over";
 import { inspectCamera } from "./model/inspection";
 import {
@@ -64,6 +65,7 @@ import {
   horizonOf,
   nearestRung,
   pickPlaced,
+  placeAtScale,
   placeBodiesInto,
   placeBody,
   type Camera,
@@ -361,8 +363,8 @@ export function createGiantsEngine(
     let lastPublish = 0;
 
     const settled = () => glideRests(glide, target);
-    const fly = (to: number) => {
-      if (useGiants.getState().surfaceZoom !== 1) useGiants.getState().setSurfaceZoom(1);
+    /** Heads the camera for a place on the ladder, or there at once. */
+    const head = (to: number) => {
       target = clampRung(ladder, to);
       seconds = glideSeconds(target - place);
       if (reduce) {
@@ -370,6 +372,11 @@ export function createGiantsEngine(
         glide = glideAt(place);
       }
       engine.invalidate();
+    };
+    /** A flight leaves the surface close-up. */
+    const fly = (to: number) => {
+      if (useGiants.getState().surfaceZoom !== 1) useGiants.getState().setSurfaceZoom(1);
+      head(to);
     };
     /** Moves the pair's camera towards `to` on its rail (held to it), or there at once. */
     function pairTo(to: number, now = false) {
@@ -437,6 +444,31 @@ export function createGiantsEngine(
       holdHere();
       rejoinFrom(GLIDE_SECONDS);
     };
+    /**
+     * The camera as the store borrows it for the `?` tour (`lendCamera`): its place to head back
+     * to, which gives the surface close-up back once landed; a zoom along the ladder to the place
+     * of that scale, as the wheel flies; and a turn of the globe in focus, as a flick.
+     */
+    resources.defer(
+      lendCamera(useGiants, {
+        mark: () => {
+          const at = target;
+          return () => {
+            takeCamera();
+            head(at);
+          };
+        },
+        zoom: (factor) => {
+          takeCamera();
+          fly(placeAtScale(ladder, cameraAt(ladder, target, stage).scale * factor, stage));
+        },
+        turn: (step) => {
+          const index = nearestRung(ladder, place);
+          nudge(poses[index]!, step, LOOKS[index]!.tilt, reduce);
+          engine.invalidate();
+        },
+      }),
+    );
     /** How far the handover under way has come, 0–1 (1: none). */
     function stepRejoin(dt: number) {
       if (!rejoin) return 1;

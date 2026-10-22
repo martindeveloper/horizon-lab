@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   EXPERIENCE_SCENE_SETTINGS,
   guideSlice,
@@ -11,6 +12,7 @@ import { CMB_KELVIN } from "@/space/cosmos/model/cosmos";
 import type { WorldSelection } from "@/space/galaxy/show";
 
 import { viewFromPath } from "../routing";
+import { HELP } from "./help";
 import { selectionOfAnchor, type AnchorId } from "./model/anchors";
 import type { FlightPhase } from "./model/autopilot";
 import { DEFAULT_COMPRESSION, DEFAULT_DRIVE, type DriveId } from "./model/parameters";
@@ -40,6 +42,17 @@ export type Show = {
 };
 
 type Panel = "none" | "objects" | "view";
+
+/** What the `?` tour gives back: the drive, the clocks, the lever, the helm and the View panel's switches. */
+type HelpSaved = {
+  drive: DriveId;
+  compression: number;
+  heldCompression: number;
+  throttle: number;
+  mode: ShipMode;
+  flown: boolean;
+  show: Show;
+};
 
 const DEFAULT_SHOW: Show = {
   canopy: true,
@@ -97,6 +110,7 @@ export type Fix = {
 
 export type VoyageStore = SceneSlice &
   GuideSlice<Show> &
+  HelpSlice<HelpSaved> &
   Readouts & {
     fix: Fix;
     view: ViewId;
@@ -242,6 +256,19 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
       show: s.savedBeforeGuide ?? DEFAULT_SHOW,
     }),
     close: () => ({ guideLanded: false }),
+  }),
+  ...helpSlice(set, get, {
+    steps: HELP,
+    save: (s) => ({
+      drive: s.drive,
+      compression: s.compression,
+      heldCompression: s.heldCompression,
+      throttle: s.throttle,
+      mode: s.mode,
+      flown: s.flown,
+      show: s.show,
+    }),
+    restore: (saved) => saved,
   }),
   guidePlaying: false,
   guideLanded: false,

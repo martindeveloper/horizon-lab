@@ -102,6 +102,7 @@ export function Sightline() {
     >
       <section
         ref={surface}
+        data-coach="sightline"
         aria-label={t("hud.eyepiece")}
         className="deep-field-sightline mx-auto flex max-w-xl flex-col items-center text-center"
       >

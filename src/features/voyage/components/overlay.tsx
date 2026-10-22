@@ -1,12 +1,14 @@
 import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
 import { useVoyage, type VoyageStore } from "../lib/store";
 import { CrashCard } from "./crash-card";
 import { FlightDock } from "./flight-dock";
@@ -45,6 +47,8 @@ const guideKeys = {
   },
 };
 
+const helpStore = { getState: useVoyage.getState, subscribe: useVoyage.subscribe };
+
 export function VoyageOverlay() {
   const t = useTranslations("voyage");
   const ready = useVoyage((s) => s.ready);
@@ -56,6 +60,7 @@ export function VoyageOverlay() {
   const drive = useVoyage((s) => s.drive);
   const crashed = useVoyage((s) => s.crash !== null);
   const guideButton = useGuideFocusReturn(guideOpen);
+  const help = useHelp(helpStore, HELP, "voyage");
 
   useSceneEscape(escapeSteps);
   useGuideKeys(useVoyage.getState, guideKeys);
@@ -81,6 +86,7 @@ export function VoyageOverlay() {
               </div>
               <SimulationToolbar
                 label={t("hud.controls")}
+                help={help}
                 details={(access) => <VoyageTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
                 guide={{ onSelect: () => useVoyage.getState().startGuide() }}

@@ -145,7 +145,7 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
   const epoch = epochOf(yearsAgo);
   const api = useOrrery.getState;
   return (
-    <div className="relative mt-1.5 md:mt-0 md:py-4">
+    <div data-coach="time" className="relative mt-1.5 md:mt-0 md:py-4">
       {/* Painted before the slider, so the thumb passes over the station poles. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         {STATIONS.map((s) => (

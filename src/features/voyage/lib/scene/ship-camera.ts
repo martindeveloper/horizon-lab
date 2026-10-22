@@ -891,6 +891,54 @@ export function createShipCamera(
       stepping.inclination = to.inclination - inclination;
       stepping.on = true;
     },
+    /** Zooms a parked ship by a factor of its distance (below 1 nearer), easing as the wheel does. */
+    zoomBy(factor: number) {
+      if (flight || mode !== "orbit") return;
+      const clamped = zoom.zoomTo(zoom.target * factor, false);
+      if (reduceMotion.matches) {
+        pose.distance = clamped;
+        zoom.settle(clamped);
+      }
+    },
+    /**
+     * Where the ship stands now, as a way back there: parked, the pose glides back while it is
+     * parked at the same body (a cut with reduced motion); flown by hand, the nose turns back.
+     * Flown on meanwhile, on a flight or wrecked, the ship stays where it is.
+     */
+    mark() {
+      const was = {
+        mode,
+        aim,
+        attitude,
+        azimuth: pose.azimuth + (stepping.on ? stepping.azimuth : 0),
+        inclination: pose.inclination + (stepping.on ? stepping.inclination : 0),
+        distance: zoom.target,
+      };
+      const away = flight !== null || crashed;
+      return () => {
+        if (away || flight || crashed || mode !== was.mode) return;
+        if (mode === "free") {
+          settle = reduceMotion.matches ? null : { q0: camera.quaternion.clone(), t: 0 };
+          attitude = was.attitude;
+          return;
+        }
+        if (aim !== was.aim) return;
+        if (reduceMotion.matches) {
+          Object.assign(pose, {
+            azimuth: was.azimuth,
+            inclination: was.inclination,
+            distance: was.distance,
+          });
+          zoom.settle(was.distance);
+          stepping.on = false;
+          return;
+        }
+        stepping.azimuth = wrapSigned(was.azimuth - pose.azimuth, Math.PI * 2);
+        stepping.inclination = was.inclination - pose.inclination;
+        stepping.on = true;
+        zoom.fly(pose.distance, was.distance);
+      };
+    },
     /**
      * Advances the flight, the free flight, or the parked ship's zoom and steps, runs the
      * clocks at `compression` ship seconds per real second (a parked ship rides with its body,

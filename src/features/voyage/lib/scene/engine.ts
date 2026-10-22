@@ -11,6 +11,7 @@ import {
   bridgeRender,
   bridgeStore,
   invalidateOnMotionChange,
+  lendCamera,
   stageClearance,
 } from "@/lib/scene-bridge";
 import { createLooks } from "@/space/solar-system/graphics/looks";
@@ -247,6 +248,26 @@ export function createVoyageEngine(
         if (isBodyAnchor(s.destination)) budget.prefetch(s.destination, quality.maps.allow);
       },
     });
+    /* The ship as the `?` tour moves it while the scene lives: turned, zoomed and taken back. */
+    scope.defer(
+      lendCamera(store, {
+        mark: () => {
+          const back = ship.mark();
+          return () => {
+            back();
+            engine.invalidate();
+          };
+        },
+        zoom: (factor) => {
+          ship.zoomBy(factor);
+          engine.invalidate();
+        },
+        turn: (step) => {
+          ship.turnBy(step);
+          engine.invalidate();
+        },
+      }),
+    );
     bridgeRender(store, scope, sceneHost, (level) => {
       const next = voyageQuality(level, tight);
       sceneHost.setResolution(next.resolution);

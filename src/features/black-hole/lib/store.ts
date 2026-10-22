@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { driftSlice, type DriftSlice } from "@/lib/drift";
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   guideSlice,
   LAB_RENDER,
@@ -8,12 +9,14 @@ import {
   type GuideSlice,
   type RenderFields,
   type RenderSlice,
+  type SceneCamera,
 } from "@/lib/scene-store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { TAU, wrap } from "@horizon/toolkit/math";
 import type { PassAntialias } from "@horizon/toolkit/rendering";
 
 import { presetIdFromPath } from "../routing";
+import { HELP } from "./help";
 import {
   DEFAULT_PRESET,
   holeById,
@@ -37,12 +40,24 @@ const RENDER: Render = { ...LAB_RENDER, antialias: "off" };
 /** What the guide gives back when it ends: whether the camera was orbiting. */
 type Saved = { autoRotate: boolean };
 
-type BlackHoleStore = BlackHoleParams &
+/** What the `?` tour gives back when it ends: the hole's scene, gravity, the panels and a pin. */
+type HelpSaved = BlackHoleParams & {
+  gravity: boolean;
+  settingsOpen: boolean;
+  clocksOpen: boolean;
+  activePin: PinId | null;
+  orbitBeforePin: boolean | null;
+};
+
+export type BlackHoleStore = BlackHoleParams &
   DriftSlice &
   RenderSlice<Render> &
-  GuideSlice<Saved> & {
+  GuideSlice<Saved> &
+  HelpSlice<HelpSaved> & {
     /** Camera heading in radians, wrapped to [0, 2π); kept across presets. */
     azimuth: number;
+    /** The engine's camera while it is up (`lendCamera`), for the `?` tour. */
+    camera: SceneCamera | null;
     setAzimuth: (v: number) => void;
     animationPaused: boolean;
     setAnimationPaused: (v: boolean) => void;
@@ -110,12 +125,34 @@ export const useBlackHole = create<BlackHoleStore>((set, get) => {
     ),
     ...renderSlice<Render>(set, RENDER),
     azimuth: 0.55,
+    camera: null,
     setAzimuth: (azimuth) => set({ azimuth: wrap(azimuth, TAU) }),
     animationPaused: false,
     setAnimationPaused: (animationPaused) => set({ animationPaused }),
     gravity: true,
     setGravity: (gravity) => set({ gravity }),
     ...guide,
+    ...helpSlice(set, get, {
+      steps: HELP,
+      save: (s) => ({
+        presetId: s.presetId,
+        massSolar: s.massSolar,
+        spin: s.spin,
+        inclination: s.inclination,
+        distance: s.distance,
+        exposure: s.exposure,
+        diskBrightness: s.diskBrightness,
+        starIntensity: s.starIntensity,
+        tempScale: s.tempScale,
+        autoRotate: s.autoRotate,
+        gravity: s.gravity,
+        settingsOpen: s.settingsOpen,
+        clocksOpen: s.clocksOpen,
+        activePin: s.activePin,
+        orbitBeforePin: s.orbitBeforePin,
+      }),
+      restore: (saved) => saved,
+    }),
     guideArrived: false,
     settingsOpen: false,
     mapOpen: false,

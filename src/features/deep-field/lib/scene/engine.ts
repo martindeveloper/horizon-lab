@@ -17,6 +17,8 @@ import {
   bridgeRender,
   bridgeStore,
   invalidateOnMotionChange,
+  lendCamera,
+  orbitCamera,
   stageClearance,
 } from "@/lib/scene-bridge";
 import { createCosmosLayer } from "@/space/cosmos/scene/cosmos-layer";
@@ -206,6 +208,13 @@ export function createDeepFieldEngine({
         controls.cancel();
       },
     });
+    /* The camera as the store borrows it: the same pose across every scale, so home is one flight. */
+    scope.defer(
+      lendCamera(
+        store,
+        orbitCamera(rig, () => engine.invalidate()),
+      ),
+    );
     bridgeRender(store, scope, sceneHost, (level) => {
       const next = deepFieldQuality(level, tight);
       sceneHost.setResolution(next.resolution);

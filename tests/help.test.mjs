@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { createStore } from "zustand/vanilla";
 
-import { placeCard, playCues } from "@horizon/toolkit/ui";
+import { coachLeader, placeCoach, playCues } from "@horizon/toolkit/ui";
 
 import { helpSlice } from "../src/lib/help.ts";
 import { registered } from "../src/lib/simulations.ts";
@@ -48,17 +48,47 @@ test("a step's cues play in time order, and stopping the step drops the ones sti
   assert.deepEqual(seen, ["now", "half", "one"]);
 });
 
-test("the card sits beside its target, on the side with room, and inside the stage", () => {
+test("the callout stands beside its target, clear of the HUD and never over the target", () => {
   const stage = { width: 1200, height: 800 };
-  const card = { width: 320, height: 160 };
-  const high = placeCard({ left: 1100, top: 20, width: 32, height: 32 }, card, stage, 12);
+  const card = { width: 300, height: 140 };
+  const gap = 12;
+  const overlaps = (a, b) =>
+    a.left < b.left + b.width &&
+    b.left < a.left + card.width &&
+    a.top < b.top + b.height &&
+    b.top < a.top + card.height;
+  /* A toolbar button at the top right: below it, held inside the stage. */
+  const button = { left: 1100, top: 20, width: 32, height: 32 };
+  const high = placeCoach({ target: button, card, stage, obstacles: [], gap });
   assert.equal(high.side, "below");
-  assert.equal(high.top, 20 + 32 + 12);
-  assert.equal(high.left, 1200 - 12 - 320, "held off the right edge");
-  const low = placeCard({ left: 400, top: 700, width: 200, height: 60 }, card, stage, 12);
-  assert.equal(low.side, "above");
-  assert.equal(low.top, 700 - 12 - 160);
-  assert.equal(low.left, 400 + 100 - 160, "centred on the target");
+  assert.equal(high.left + card.width, 1200 - gap, "held off the right edge");
+  /* A dock control with a panel open above it: the callout goes beside, not over the panel. */
+  const control = { left: 450, top: 700, width: 120, height: 40 };
+  const panel = { left: 200, top: 300, width: 360, height: 390 };
+  const low = placeCoach({ target: control, card, stage, obstacles: [panel], gap });
+  assert.ok(!overlaps(low, panel), `clear of the panel (${low.side})`);
+  assert.ok(!overlaps(low, control), "clear of its target");
+  /* Nothing to point at: over the open scene, away from the dock. */
+  const dock = { left: 0, top: 560, width: 1200, height: 240 };
+  const free = placeCoach({ target: null, card, stage, obstacles: [dock], gap });
+  assert.equal(free.side, "free");
+  assert.ok(!overlaps(free, dock), "clear of the dock");
+});
+
+test("the leader runs from the callout's edge to the target's", () => {
+  const leader = coachLeader(
+    { left: 100, top: 200, width: 300, height: 100 },
+    { left: 230, top: 100, width: 40, height: 40 },
+  );
+  assert.deepEqual(leader, { from: { x: 250, y: 200 }, to: { x: 250, y: 140 } });
+  assert.equal(
+    coachLeader(
+      { left: 0, top: 0, width: 10, height: 10 },
+      { left: 10, top: 0, width: 5, height: 5 },
+    ),
+    null,
+    "none when they touch",
+  );
 });
 
 /** A store with a scene field, a panel, a selection, a guide and a camera that logs its moves. */
@@ -163,13 +193,9 @@ function countingCamera() {
 /** The store's own values, without its actions, the camera, its machine's fields and the flight counter. */
 function sceneOf(state) {
   const skip = new Set(["camera", "flight", "turn", "helpOpen", "helpStep", "savedBeforeHelp"]);
-  return JSON.parse(
-    JSON.stringify(
-      Object.fromEntries(
-        Object.entries(state).filter(
-          ([key, value]) => typeof value !== "function" && !skip.has(key),
-        ),
-      ),
+  return structuredClone(
+    Object.fromEntries(
+      Object.entries(state).filter(([key, value]) => typeof value !== "function" && !skip.has(key)),
     ),
   );
 }
@@ -177,8 +203,8 @@ function sceneOf(state) {
 /** Every simulation's store module exports one store with a tour; this finds it. */
 async function tourOf(slug) {
   const { HELP } = await import(`../src/features/${slug}/lib/help.ts`);
-  const module = await import(`../src/features/${slug}/lib/store.ts`);
-  const store = Object.values(module).find(
+  const exports = await import(`../src/features/${slug}/lib/store.ts`);
+  const store = Object.values(exports).find(
     (value) => typeof value?.getState === "function" && "startHelp" in value.getState(),
   );
   return { steps: HELP, store };

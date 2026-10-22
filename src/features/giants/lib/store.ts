@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { driftSlice, type DriftSlice } from "@/lib/drift";
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   LAB_RENDER,
   guideSlice,
@@ -8,10 +9,12 @@ import {
   type GuideSlice,
   type RenderFields,
   type RenderSlice,
+  type SceneCamera,
 } from "@/lib/scene-store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { rungFromPath } from "../routing";
+import { HELP } from "./help";
 import { referenceBody, type Reference } from "./model/compare";
 import type { SurfaceZoom } from "./model/inspection";
 import type { Ruler } from "./model/ruler";
@@ -24,6 +27,19 @@ type Panel = "none" | "stars" | "view";
 /** What the guide gives back when it ends: where the visitor stood and their orbits switch. */
 type Saved = { goal: number; orbits: boolean };
 
+/**
+ * What the `?` tour gives back when it ends: the rung the last flight asked for, the modes a
+ * flight leaves, the orbits and the ruler. The camera flies itself home.
+ */
+type HelpSaved = {
+  goal: number;
+  overview: boolean;
+  sideBySide: boolean;
+  surfaceZoom: SurfaceZoom;
+  orbits: boolean;
+  ruler: Ruler;
+};
+
 /** The render settings the View panel offers (`RenderSection`); bloom and wide colour are nothing while off. */
 type GiantsRender = Pick<
   RenderFields<GiantsAntialias>,
@@ -34,6 +50,7 @@ type GiantsRender = Pick<
 type DriftEffects = { focusBlur: boolean; bloom: boolean };
 
 export type GiantsStore = GuideSlice<Saved> &
+  HelpSlice<HelpSaved> &
   RenderSlice<GiantsRender> &
   DriftSlice & {
     /** The rung the address names; reaching the page or a link flies there. */
@@ -41,6 +58,8 @@ export type GiantsStore = GuideSlice<Saved> &
     /** The rung the camera heads for, and a count that changes with every flight asked for. */
     goal: number;
     flight: number;
+    /** The engine's camera while it is up (`lendCamera`), for the `?` tour. */
+    camera: SceneCamera | null;
     /** The camera's place on the ladder and the rung nearest it, as the engine last published them. */
     place: number;
     focus: number;
@@ -149,6 +168,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   view: initialView,
   goal: initialIndex,
   flight: 0,
+  camera: null,
   place: initialIndex,
   focus: initialIndex,
   scale: 0,
@@ -208,6 +228,18 @@ export const useGiants = create<GiantsStore>((set, get) => ({
       guideLanded: false,
     }),
     close: () => ({ guideLanded: false }),
+  }),
+  ...helpSlice(set, get, {
+    steps: HELP,
+    save: (s) => ({
+      goal: s.goal,
+      overview: s.overview,
+      sideBySide: s.sideBySide,
+      surfaceZoom: s.surfaceZoom,
+      orbits: s.orbits,
+      ruler: s.ruler,
+    }),
+    restore: (saved) => saved,
   }),
   landGuide: () => {
     if (get().guideOpen && !get().guideLanded) set({ guideLanded: true });

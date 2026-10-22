@@ -7,6 +7,8 @@
  */
 import { Group, Mesh, MeshBasicMaterial, Quaternion, Scene, SphereGeometry, Vector3 } from "three";
 
+import { orbitCamera } from "@/lib/scene-bridge";
+import type { SceneCamera } from "@/lib/scene-store";
 import { CARRINGTON_SIDEREAL_RATE } from "@/space/sun/model/rotation";
 import {
   nearestView,
@@ -159,6 +161,8 @@ export type SunEngine = SimulationEngine & {
   snapToView: (id: SunViewId) => void;
   /** A button step of the camera. */
   turn: (step: OrbitTurn) => void;
+  /** The camera as the store borrows it (`lendCamera`). */
+  camera: SceneCamera;
   invalidate: () => void;
   /** The drift has the camera now. */
   driftFlying: () => boolean;
@@ -230,6 +234,7 @@ export function createSunEngine(
     flyToView: (_: SunViewId) => {},
     snapToView: (_: SunViewId) => {},
     turn: (_: OrbitTurn) => {},
+    camera: { mark: () => () => {}, zoom: (_: number) => {}, turn: (_: OrbitTurn) => {} },
     invalidate: () => {},
     driftFlying: () => false,
     driftShot: () => -1,
@@ -905,6 +910,7 @@ export function createSunEngine(
       rig.turnBy(step);
       loop.invalidate();
     };
+    api.camera = orbitCamera(rig, () => loop.invalidate());
     api.invalidate = () => loop.invalidate();
     api.driftFlying = () => drift?.flying ?? false;
     api.driftShot = () => drift?.shot ?? -1;

@@ -100,6 +100,7 @@ export function HolePicker() {
 
   return (
     <Picker
+      data-coach="views"
       className="hidden md:block"
       label={name}
       detail={kind}

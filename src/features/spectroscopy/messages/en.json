@@ -1,6 +1,19 @@
 {
   "app": "Stellar Spectra",
   "metadataDescription": "Split starlight and read its dark lines: Kirchhoff's bench, Fraunhofer's Sun, the spectral sequence and mystery spectra, computed from NIST atomic data and real model atmospheres.",
+  "help": {
+    "spectrum": { "title": "Spectrum", "body": "Drag to pan, scroll or pinch to zoom." },
+    "views": { "title": "Views", "body": "Four views, from Kirchhoff's bench to mystery spectra." },
+    "elements": { "title": "Elements", "body": "Mark an element, or open one of its lines." },
+    "line": { "title": "Lines", "body": "Tap a line to see the atom behind it." },
+    "star": { "title": "Star", "body": "Pick a star and set how fast it moves." },
+    "settings": { "title": "View", "body": "The plot, the spectrograph and render quality." },
+    "guide": { "title": "Guide", "body": "From a rainbow to a mystery star, step by step." },
+    "experiences": {
+      "title": "Immersive view",
+      "body": "The spectrum alone, without the controls."
+    }
+  },
   "views": {
     "kirchhoff": {
       "title": "Kirchhoff's bench",

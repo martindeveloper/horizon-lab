@@ -2,6 +2,16 @@
   "app": "The Sun",
   "metadataDescription": "One star, up close: cut it open, watch it in any light, fly over a sunspot and see a flare break loose.",
   "canvasLabel": "The Sun, cut open and watched in any light, with its magnetic field",
+  "help": {
+    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
+    "views": { "title": "Views", "body": "Seven places to stand, from the core to the corona." },
+    "light": { "title": "Light", "body": "Each light shows gas at another temperature." },
+    "clock": { "title": "Clock", "body": "Speed the Sun's time up, or pause it." },
+    "places": { "title": "Places", "body": "Fly to a feature and open its card." },
+    "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
+    "guide": { "title": "Guide", "body": "A guided journey through the Sun." },
+    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+  },
   "hud": {
     "places": "Places",
     "light": "Light",

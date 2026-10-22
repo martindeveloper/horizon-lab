@@ -15,6 +15,8 @@ import {
   bridgeRender,
   bridgeStore,
   invalidateOnMotionChange,
+  lendCamera,
+  orbitCamera,
   stageClearance,
 } from "@/lib/scene-bridge";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
@@ -337,6 +339,27 @@ export function createOrreryEngine({
       },
     });
     activity.setEnabled(store.getState().solarActivity);
+    /* The camera as the store borrows it. The way back flies home within the close-up it was
+       marked in, or out of one entered since; a close-up the store gives back lands on its own. */
+    const orbit = orbitCamera(rig, () => engine.invalidate());
+    scope.defer(
+      lendCamera(store, {
+        ...orbit,
+        mark: () => {
+          const marked = closeUp.current;
+          const home = rig.inputPose();
+          const back = orbit.mark();
+          return () => {
+            const now = closeUp.current;
+            if (now === marked) back();
+            else if (!marked && now?.phase === "out") {
+              closeUp.leaveTo(home);
+              engine.invalidate();
+            }
+          };
+        },
+      }),
+    );
     bridgeRender(store, scope, sceneHost, (level) => {
       quality = orreryQuality(level, tight);
       sceneHost.setResolution(quality.resolution);

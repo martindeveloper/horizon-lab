@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { driftSlice, type DriftSlice } from "@/lib/drift";
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   RESET_SCENE_SETTINGS,
   guideSlice,
@@ -12,6 +13,7 @@ import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
+import { HELP } from "./help";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import { viewById } from "./model/views";
@@ -43,8 +45,12 @@ type Panel = "none" | "objects" | "view";
 
 const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
 
+/** What the `?` tour's steps change and give back: the view, a ladder drag, the switches. */
+type HelpSaved = { view: ViewId; viewLy: number; seek: { ly: number } | null; show: Show };
+
 export type DeepFieldStore = SceneSlice &
   GuideSlice<Show> &
+  HelpSlice<HelpSaved> &
   DriftSlice & {
     view: ViewId;
     /** A depth the visitor dragged the ladder to (camera distance, ly), or null. */
@@ -104,6 +110,11 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
       show: { ...(s.savedBeforeGuide ?? DEFAULT_SHOW), ...step.show },
     }),
     close: () => ({ guideLanded: false }),
+  }),
+  ...helpSlice(set, get, {
+    steps: HELP,
+    save: (s) => ({ view: s.view, viewLy: s.viewLy, seek: s.seek, show: s.show }),
+    restore: (saved) => saved,
   }),
   guidePlaying: false,
   guideLanded: false,

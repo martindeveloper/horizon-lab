@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   guideSlice,
   LAB_RENDER,
@@ -12,6 +13,7 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { clamp } from "@horizon/toolkit/math";
 
 import { viewFromPath } from "../routing";
+import { HELP } from "./help";
 import { ELEMENT_IDS, lineById, type ElementId } from "./model/atoms";
 import { poseOf, type GuidePose } from "./model/guide-motion";
 import {
@@ -46,6 +48,13 @@ type Saved = Pick<Settings, "view" | "star" | "velocity" | "air" | "bench" | "my
   range: readonly [number, number];
 };
 
+/** What the `?` tour gives back: the view, the star and its motion, the window and the plot. */
+type HelpSaved = Pick<Settings, "view" | "star" | "velocity"> & {
+  drafts: readonly (Draft | undefined)[];
+  range: readonly [number, number];
+  normalized: boolean;
+};
+
 /** A case's answer so far: the elements marked and the shift given the markers. */
 type Draft = { marked: readonly ElementId[]; velocity: number };
 
@@ -66,8 +75,9 @@ const RENDER_DEFAULTS: Pick<
 /** The narrowest window the spectrum zooms to, nm. */
 export const MIN_SPAN = 0.4;
 
-type SpectroscopyStore = Settings &
+export type SpectroscopyStore = Settings &
   GuideSlice<Saved> &
+  HelpSlice<HelpSaved> &
   RenderSlice<typeof RENDER_DEFAULTS> & {
     /** The first spectrum is drawn. */
     ready: boolean;
@@ -377,6 +387,18 @@ export const useSpectroscopy = create<SpectroscopyStore>((set, get) => ({
       };
     },
     close: () => ({ guideLanded: false, guideTarget: null }),
+  }),
+  ...helpSlice(set, get, {
+    steps: HELP,
+    save: (s) => ({
+      view: s.view,
+      drafts: s.drafts,
+      star: s.star,
+      velocity: s.velocity,
+      range: s.range,
+      normalized: s.normalized,
+    }),
+    restore: (saved) => saved,
   }),
   guidePlaying: false,
   guideLanded: false,

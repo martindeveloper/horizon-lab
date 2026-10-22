@@ -2,6 +2,7 @@ import { Crosshair, GraduationCap, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
@@ -12,6 +13,7 @@ import { GuideOverlay } from "@/features/black-hole/components/guide";
 import { Hotspots } from "@/features/black-hole/components/hotspots";
 import { StoryLine } from "@/features/black-hole/components/learn";
 import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
+import { HELP } from "@/features/black-hole/lib/help";
 import { PRESETS } from "@/features/black-hole/lib/holes";
 import {
   horizonOverM,
@@ -107,6 +109,8 @@ const escapeSteps = (): EscapeStep[] => {
   ];
 };
 
+const helpStore = { getState: useBlackHole.getState, subscribe: useBlackHole.subscribe };
+
 export function ObservatoryOverlay() {
   const { formatMassShort } = usePhysicsFormat();
   const t = useTranslations("blackHole");
@@ -127,6 +131,7 @@ export function ObservatoryOverlay() {
   const massSolar = useBlackHole((s) => s.massSolar);
   const setActivePin = useBlackHole((s) => s.setActivePin);
   const holeName = t.has(`presets.${presetId}`) ? t(`presets.${presetId}`) : t("custom");
+  const help = useHelp(helpStore, HELP, "blackHole");
 
   useSceneEscape(escapeSteps);
 
@@ -154,6 +159,7 @@ export function ObservatoryOverlay() {
               <HolePicker />
               <SimulationToolbar
                 label={t("controls")}
+                help={help}
                 details={(access) => <BlackHoleTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
                 guide={{ onSelect: startGuide }}
@@ -245,8 +251,12 @@ export function ObservatoryOverlay() {
             </Dock>
           ) : null}
 
+          {/* On phones a pin's card takes the gauge's place, for a tour too. */}
           {activePin ? (
-            <div className="pad-sheet pointer-events-auto absolute inset-x-0 bottom-0 z-50 md:hidden">
+            <div
+              data-coach="gauge"
+              className="pad-sheet pointer-events-auto absolute inset-x-0 bottom-0 z-50 md:hidden"
+            >
               <MobilePinCard>
                 <PinLesson id={activePin} spin={spin} onClose={() => setActivePin(null)} />
               </MobilePinCard>

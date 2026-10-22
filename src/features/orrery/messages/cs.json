@@ -2,6 +2,22 @@
   "app": "Orrery",
   "metadataDescription": "Poctivé planetárium: planety tam, kde dnes skutečně jsou, a vyčištění rané sluneční soustavy jako označený model, až po Oortův oblak.",
   "canvasLabel": "Interaktivní model sluneční soustavy",
+  "help": {
+    "camera": {
+      "title": "Pohyb kamery",
+      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
+    },
+    "views": { "title": "Pohledy", "body": "Přeskakujte mezi měřítky až k Oortovu oblaku." },
+    "objects": { "title": "Objekty", "body": "Najděte těleso a otevřete jeho kartu." },
+    "closeUp": { "title": "Zblízka", "body": "Přeletí k tělesu v jeho skutečné velikosti." },
+    "time": { "title": "Čas", "body": "Projděte historii, nebo přehrajte odklízení těles." },
+    "settings": { "title": "Zobrazení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
+    "guide": { "title": "Průvodce", "body": "Provede vás sluneční soustavou krok za krokem." },
+    "experiences": {
+      "title": "Režimy prohlížení",
+      "body": "Celá obrazovka, nebo nechte kameru plout."
+    }
+  },
   "viewHints": {
     "inner": "Merkur, Venuše, Země a Mars. Jupiter leží u okraje záběru.",
     "giants": "Jupiter až Neptun a raný disk planetesimál. V tomto pohledu nejlépe uvidíte odklízení zbylých těles.",

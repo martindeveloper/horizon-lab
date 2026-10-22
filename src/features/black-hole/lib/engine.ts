@@ -4,6 +4,7 @@ import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
 import { freeCameraOn, onFreeCamera, onRide, rideOverride } from "@/lib/debug";
 import { driftRunState, openingFor, timedDrift, type TimedDrift } from "@/lib/drift";
+import { lendCamera } from "@/lib/scene-bridge";
 import type { AudioMap } from "@horizon/toolkit/audio";
 import {
   createDriftRun,
@@ -11,14 +12,19 @@ import {
   type DriftRun,
   createOrbitInput,
   orbitFromFree,
+  sampleOrbitFlight,
   stepFreeFly,
+  stepOrbit,
   turnFree,
   writeCameraSnapshotFromMatrix,
   type CameraSnapshot,
   type FreePose,
+  type OrbitFlight,
+  type OrbitPose,
   type Vec3,
 } from "@horizon/toolkit/camera";
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from "@horizon/toolkit/environment";
+import { TAU, wrapSigned } from "@horizon/toolkit/math";
 import {
   createEngineHost,
   createFullscreenPass,
@@ -75,6 +81,8 @@ const LOOK_DECAY = 1.6;
 const FREE_LOOK = 0.0035;
 const FREE_ROLL = 0.9;
 const FREE_SPEED = 0.25;
+/** A tour's move of the camera (`SceneCamera`) lands in this many seconds. */
+const GLIDE_SECONDS = 1.2;
 
 /**
  * The first frames trace few steps at low resolution so something shows at once;
@@ -247,6 +255,69 @@ export function createBlackHoleEngine(
       state.setInclination(camera.inclination);
       state.setDistance(camera.distance);
     }
+    const storedPose = (): OrbitPose => {
+      const { azimuth, inclination, distance } = useBlackHole.getState();
+      return { azimuth, inclination, distance };
+    };
+
+    /**
+     * The camera as the store borrows it for the `?` tour (`lendCamera`): each move is a short
+     * flight from where the camera is (a cut with reduced motion), written to the store as the
+     * visitor's own pose. Any other change of that pose (a hand, a slider, a hole) takes the
+     * camera back, as do the guide, the drift and the free camera.
+     */
+    let glide: { from: OrbitPose; to: OrbitFlight; t: number; wrote: OrbitPose } | null = null;
+    /** Where the camera is headed: the glide's landing, or where it stands. */
+    const aim = (): OrbitPose =>
+      glide
+        ? sampleOrbitFlight(1, glide.from, glide.to)
+        : { azimuth: camera.azimuth, inclination: camera.inclination, distance: camera.distance };
+    function glideTo(pose: OrbitPose) {
+      const { azimuth, inclination, distance } = camera;
+      glide = {
+        from: { azimuth, inclination, distance },
+        to: {
+          yaw: wrapSigned(pose.azimuth - azimuth, TAU),
+          inclination: pose.inclination,
+          distance: clampDistance(pose.distance, useBlackHole.getState().spin),
+        },
+        t: reduce ? 1 : 0,
+        wrote: storedPose(),
+      };
+      engine.markDirty();
+    }
+    /** One frame of the glide; it ends where it lands, or where anything else takes the camera. */
+    function stepGlide(state: State, dt: number) {
+      if (!glide) return;
+      const pose = storedPose();
+      const kept =
+        pose.azimuth === glide.wrote.azimuth &&
+        pose.inclination === glide.wrote.inclination &&
+        pose.distance === glide.wrote.distance;
+      if (!kept || state.guideOpen || state.drift !== "off" || free || input.active) {
+        glide = null;
+        return;
+      }
+      glide.t = Math.min(1, glide.t + dt / GLIDE_SECONDS);
+      moveCamera({ ...camera, ...sampleOrbitFlight(glide.t, glide.from, glide.to) }, state.spin);
+      storeCamera();
+      glide.wrote = storedPose();
+      if (glide.t >= 1) glide = null;
+      engine.markDirty();
+    }
+    resources.defer(
+      lendCamera(useBlackHole, {
+        mark: () => {
+          const { azimuth, inclination, distance } = camera;
+          return () => glideTo({ azimuth, inclination, distance });
+        },
+        zoom: (factor) => {
+          const pose = aim();
+          glideTo({ ...pose, distance: pose.distance * factor });
+        },
+        turn: (step) => glideTo(stepOrbit(aim(), step)),
+      }),
+    );
 
     const input = resources.own(
       createOrbitInput(canvas, {
@@ -385,7 +456,8 @@ export function createBlackHoleEngine(
     const busy = (state: State) =>
       (state.guideOpen && (!state.guideArrived || tour.flying())) ||
       state.drift === "playing" ||
-      flyingFree;
+      flyingFree ||
+      glide !== null;
     /** The frame-rate cap now: higher while the camera moves. */
     const frameCap = (state: State) =>
       renderBudget(state.quality, constrained, input.active || busy(state)).fps;
@@ -433,11 +505,13 @@ export function createBlackHoleEngine(
           engine.markDirty();
         }
       }
+      stepGlide(state, stepDt);
       if (
         !state.animationPaused &&
         state.autoRotate &&
         !input.active &&
         !free &&
+        !glide &&
         !state.guideOpen &&
         state.drift === "off"
       ) {

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { driftSlice, type DriftSlice } from "@/lib/drift";
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   RESET_SCENE_SETTINGS,
   guideSlice,
@@ -23,6 +24,7 @@ import type { SolarShow } from "@/space/solar-system/scene/kit";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
+import { HELP } from "./help";
 import { OLDEST } from "./model/timeline";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW } from "./model/views";
@@ -47,8 +49,21 @@ const DEFAULT_SHOW: Show = {
   drift: true,
 };
 
+/** What the `?` tour's steps change and give back: the view, the clock, a close-up, the switches. */
+type HelpSaved = {
+  view: SolarViewId;
+  viewDist: number;
+  yearsAgo: number;
+  playing: boolean;
+  closeUp: SurfaceSelection | null;
+  solarActivity: boolean;
+  solarActivityPaused: boolean;
+  show: Show;
+};
+
 export type OrreryStore = SceneSlice &
   GuideSlice<Show> &
+  HelpSlice<HelpSaved> &
   DriftSlice & {
     yearsAgo: number;
     playing: boolean;
@@ -123,6 +138,20 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
       selection: step.focus ?? null,
     }),
     close: () => ({ playing: false }),
+  }),
+  ...helpSlice(set, get, {
+    steps: HELP,
+    save: (s) => ({
+      view: s.view,
+      viewDist: s.viewDist,
+      yearsAgo: s.yearsAgo,
+      playing: s.playing,
+      closeUp: s.closeUp,
+      solarActivity: s.solarActivity,
+      solarActivityPaused: s.solarActivityPaused,
+      show: s.show,
+    }),
+    restore: (saved) => saved,
   }),
   yearsAgo: 0,
   playing: false,

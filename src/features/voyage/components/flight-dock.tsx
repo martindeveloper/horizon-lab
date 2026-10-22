@@ -185,7 +185,12 @@ function TimeWarp({ className }: { className?: string }) {
   const rate = CLOCK_RATES[index]!.id;
   const go = (next: number) => useVoyage.getState().setCompression(CLOCK_RATES[next]!.value);
   return (
-    <div role="group" aria-label={t("hud.rate")} className={cn("flex items-center", className)}>
+    <div
+      role="group"
+      aria-label={t("hud.rate")}
+      data-coach="rate"
+      className={cn("flex items-center", className)}
+    >
       <Tooltip label={holdLabel} side="top" align="start">
         <IconButton
           aria-label={holdLabel}
@@ -230,13 +235,15 @@ export function DriveControl({ className = "" }: { className?: string }) {
   const t = useTranslations("voyage");
   const drive = useVoyage((s) => s.drive);
   return (
-    <SegmentedControl
-      aria-label={t("hud.drive")}
-      options={DRIVE_IDS.map((id) => ({ value: id, label: t(`drives.${id}`) }))}
-      value={drive}
-      onValueChange={(next) => useVoyage.getState().setDrive(next)}
-      className={className}
-    />
+    /* The control passes no attributes on: its box carries the tour's anchor. */
+    <div data-coach="drive" className={className}>
+      <SegmentedControl
+        aria-label={t("hud.drive")}
+        options={DRIVE_IDS.map((id) => ({ value: id, label: t(`drives.${id}`) }))}
+        value={drive}
+        onValueChange={(next) => useVoyage.getState().setDrive(next)}
+      />
+    </div>
   );
 }
 

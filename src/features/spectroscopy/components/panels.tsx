@@ -12,7 +12,7 @@ import {
 import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
-import { FULL_RANGE, RESOLUTION_RANGE } from "../lib/model/scenes";
+import { RESOLUTION_RANGE, WINDOWS } from "../lib/model/scenes";
 import { canvasShowsP3, type CanvasAntialias } from "../lib/quality";
 import { useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
@@ -89,17 +89,6 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
     </Rail>
   );
 }
-
-/** Wavelength windows worth a look, nm. */
-const WINDOWS = [
-  { id: "full", range: FULL_RANGE },
-  { id: "hk", range: [388, 400] },
-  { id: "balmer", range: [380, 500] },
-  { id: "mgb", range: [514, 521] },
-  { id: "nad", range: [585, 593] },
-  { id: "halpha", range: [650, 662] },
-  { id: "oxygen", range: [684, 770] },
-] as const;
 
 /** How the spectrum is drawn: the spectrograph's resolution, the plot and the scene. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {

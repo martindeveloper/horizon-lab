@@ -2,6 +2,21 @@
   "app": "Deep Field",
   "metadataDescription": "Od planet po okraj pozorovatelného vesmíru v jednom zoomu, ve kterém vzdálenost udává i to, jak dlouho k nám světlo letělo.",
   "canvasLabel": "Interaktivní mapa od planet po pozorovatelný vesmír",
+  "help": {
+    "camera": {
+      "title": "Pohyb kamery",
+      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
+    },
+    "depth": { "title": "Hloubka", "body": "Tažením nebo klepnutím na příčku změníte měřítko." },
+    "sightline": { "title": "Zorná přímka", "body": "Jak daleko to je a kdy to světlo vyrazilo." },
+    "objects": { "title": "Objekty", "body": "Najděte cokoli a přeleťte na jeho měřítko." },
+    "settings": { "title": "Zobrazení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
+    "guide": { "title": "Průvodce", "body": "Provede vás až k okraji pozorovatelného vesmíru." },
+    "experiences": {
+      "title": "Režimy prohlížení",
+      "body": "Celá obrazovka, nebo nechte kameru plout."
+    }
+  },
   "views": {
     "heliosphere": "Heliosféra",
     "stars": "Nejbližší hvězda",

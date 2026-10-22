@@ -1,4 +1,20 @@
 {
+  "help": {
+    "camera": {
+      "title": "Pohyb kamery",
+      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
+    },
+    "views": { "title": "Černé díry", "body": "Díry na obloze podle hmotnosti, pak teorie." },
+    "gauge": { "title": "Vzdálenost", "body": "Kde stojíte; klepnutím na poloměr se dozvíte víc." },
+    "atlas": { "title": "Atlas", "body": "Kde na obloze která díra leží." },
+    "clocks": { "title": "Hodiny", "body": "Pusťte dovnitř hodiny a sledujte, jak čas zpomaluje." },
+    "settings": { "title": "Zobrazení", "body": "Spin, gravitace, kamera a optika." },
+    "guide": { "title": "Průvodce", "body": "Provede vás touto dírou krok za krokem." },
+    "experiences": {
+      "title": "Režimy prohlížení",
+      "body": "Celá obrazovka, nebo nechte kameru plout."
+    }
+  },
   "app": "Horizont událostí",
   "clocks": "Hodiny",
   "controls": "Ovládání",

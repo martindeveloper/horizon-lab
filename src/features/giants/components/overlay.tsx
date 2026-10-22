@@ -2,11 +2,13 @@
 
 import { Crosshair, ZoomOut } from "lucide-react";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
 import { useGiants } from "../lib/store";
 import { RungCard } from "./card";
 import { GiantsDock } from "./dock";
@@ -30,6 +32,8 @@ const escapeSteps = (): EscapeStep[] => {
   ];
 };
 
+const helpStore = { getState: useGiants.getState, subscribe: useGiants.subscribe };
+
 export function GiantsOverlay() {
   const { t } = useGiantsT();
   const ready = useGiants((s) => s.ready);
@@ -39,6 +43,7 @@ export function GiantsOverlay() {
   const overview = useGiants((s) => s.overview);
   const guideOpen = useGiants((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
+  const help = useHelp(helpStore, HELP, "giants");
   const api = useGiants.getState;
   useSceneEscape(escapeSteps);
 
@@ -52,6 +57,7 @@ export function GiantsOverlay() {
           <div className="flex items-start gap-3">
             <SimulationToolbar
               label={t("hud.controls")}
+              help={help}
               details={(access) => <GiantsTechnicalDetails {...access} />}
               detailsLabel={t("technicalDetails.open")}
               guide={{ onSelect: () => api().startGuide() }}

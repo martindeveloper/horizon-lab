@@ -5,6 +5,8 @@
  * coasts to a stop; left alone for a while it eases home to the pose it had, the short way
  * round. Without three.js, so the engine and the tests share it.
  */
+import { ORBIT_STEP, type OrbitTurn } from "@horizon/toolkit/camera";
+
 import { GRAB_COAST_S, GRAB_HOLD_S, GRAB_RETURN_S } from "../parameters";
 
 const TAU = 2 * Math.PI;
@@ -66,6 +68,26 @@ export function turnBy(
     pose.twistRate = 0.7 * pose.twistRate + 0.3 * (twist / dt);
     pose.pitchRate = 0.7 * pose.pitchRate + 0.3 * (pitch / dt);
   }
+}
+
+/**
+ * A button's turn (`OrbitTurn`, steps of `ORBIT_STEP` as the camera pad's): a flick that coasts
+ * that far, directions as a drag's, then holds and goes home as a hand's turn does. Under reduced
+ * motion it is there at once.
+ */
+export function nudge(pose: Pose, turn: OrbitTurn, tilt: number, reduce: boolean) {
+  const twist = turn.azimuth * ORBIT_STEP;
+  const pitch = clampPitch(pose.pitch + turn.inclination * ORBIT_STEP, tilt) - pose.pitch;
+  pose.held = false;
+  pose.idle = 0;
+  if (reduce) {
+    pose.twist += twist;
+    pose.pitch += pitch;
+    return;
+  }
+  /* A coast's speed falls by e every `GRAB_COAST_S`, so it carries the globe speed × that far. */
+  pose.twistRate += twist / GRAB_COAST_S;
+  pose.pitchRate += pitch / GRAB_COAST_S;
 }
 
 /** The hand lets go: still moving, the globe coasts on; at rest it stays where it was left. */

@@ -649,6 +649,96 @@
   }
 }
 
+/* The coach's callout: dark ink over the scene in either theme, so it never reads as one of
+   the HUD's glass panels; it glides between steps. Its top edge is the tour's horizon. */
+.coach-card {
+  color: var(--color-space-fg);
+  background: linear-gradient(180deg, rgb(18 18 22 / 0.96), rgb(8 8 11 / 0.97));
+  border: 1px solid rgb(255 255 255 / 0.07);
+  box-shadow:
+    0 20px 48px -16px rgb(0 0 0 / 0.75),
+    0 0 0 1px rgb(0 0 0 / 0.45),
+    0 0 40px -8px rgb(var(--solar) / 0.14);
+  transition-property: left, top;
+  transition-duration: 420ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.coach-horizon {
+  position: absolute;
+  inset-inline: 0.75rem;
+  top: -1px;
+  height: 1px;
+  background: rgb(255 255 255 / 0.12);
+}
+/* Gold up to the step reached, and the sun standing at its head. */
+.coach-horizon-fill,
+.coach-horizon-sun {
+  position: absolute;
+  transition: 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-property: width, left;
+}
+.coach-horizon-fill {
+  inset-block: 0;
+  left: 0;
+  background: linear-gradient(90deg, rgb(var(--solar) / 0.25), rgb(var(--solar)));
+}
+.coach-horizon-sun {
+  top: -2.5px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 9999px;
+  background: rgb(var(--solar));
+  box-shadow: 0 0 10px 2px rgb(var(--solar) / 0.55);
+}
+/* The leader from the callout to the ring, drawn in once both have arrived. */
+.coach-leader {
+  stroke: rgb(var(--solar) / 0.6);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  animation: anim-fade 0.3s ease-out 0.42s both;
+}
+.coach-leader-end {
+  fill: rgb(var(--solar));
+  animation: anim-fade 0.3s ease-out 0.42s both;
+}
+.coach-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: var(--color-space-muted);
+  transition: color 160ms;
+}
+.coach-quiet:hover:not([aria-disabled="true"]) {
+  color: var(--color-space-fg);
+}
+.coach-next {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgb(var(--solar) / 0.45);
+  border-radius: 9999px;
+  padding-inline: 0.875rem 0.625rem;
+  color: rgb(var(--solar));
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color 160ms;
+}
+.coach-next:hover {
+  background: rgb(var(--solar) / 0.12);
+}
+:is(.coach-quiet, .coach-next):focus-visible {
+  outline: 2px solid rgb(var(--solar));
+  outline-offset: 2px;
+}
+@media (min-width: 48rem) and (min-height: 30rem) {
+  .coach-next {
+    min-height: 2rem;
+  }
+}
+
 .horizon-loading-orbit {
   transform-origin: 24px 24px;
   animation: horizon-orbit 4s linear infinite;

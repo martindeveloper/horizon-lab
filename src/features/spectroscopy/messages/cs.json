@@ -1,6 +1,22 @@
 {
   "app": "Spektra hvězd",
   "metadataDescription": "Rozložte světlo hvězd a čtěte jeho tmavé čáry: Kirchhoffův stůl, Fraunhoferovo Slunce, spektrální posloupnost a záhadná spektra, spočítané z atomových dat NIST a skutečných modelů atmosfér.",
+  "help": {
+    "spectrum": {
+      "title": "Spektrum",
+      "body": "Tažením posouváte, kolečkem nebo sevřením prstů přibližujete."
+    },
+    "views": {
+      "title": "Pohledy",
+      "body": "Čtyři pohledy, od Kirchhoffova stolu po záhadná spektra."
+    },
+    "elements": { "title": "Prvky", "body": "Označte prvek, nebo otevřete některou z jeho čar." },
+    "line": { "title": "Čáry", "body": "Klepněte na čáru a uvidíte atom, který ji tvoří." },
+    "star": { "title": "Hvězda", "body": "Vyberte hvězdu a nastavte, jak rychle se pohybuje." },
+    "settings": { "title": "Zobrazení", "body": "Graf, spektrograf a kvalita vykreslení." },
+    "guide": { "title": "Průvodce", "body": "Od duhy k záhadné hvězdě, krok za krokem." },
+    "experiences": { "title": "Nerušené prohlížení", "body": "Jen spektrum, bez ovládání." }
+  },
   "views": {
     "kirchhoff": {
       "title": "Kirchhoffův stůl",

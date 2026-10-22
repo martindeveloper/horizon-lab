@@ -1,4 +1,23 @@
 {
+  "help": {
+    "camera": {
+      "title": "Pohyb kamery",
+      "body": "Tažením nebo kolečkem šplháte; tažením hvězdy ji otočíte."
+    },
+    "stars": {
+      "title": "Tělesa",
+      "body": "Všechna tělesa od nejmenšího; vyberte a přeletíte k němu."
+    },
+    "overview": { "title": "Přehled", "body": "Všechna tělesa naráz, v logaritmickém měřítku." },
+    "ladder": { "title": "Žebřík", "body": "Projděte všechna tělesa od nejmenšího po největší." },
+    "ruler": { "title": "Měřítko", "body": "Délka při tomto přiblížení, v jednotce dle volby." },
+    "settings": { "title": "Zobrazení", "body": "Dráhy planet, měřítko a kvalita vykreslení." },
+    "guide": { "title": "Průvodce", "body": "Provede vás žebříkem krok za krokem." },
+    "experiences": {
+      "title": "Režimy prohlížení",
+      "body": "Celá obrazovka, nebo nechte kameru plout."
+    }
+  },
   "app": "Obři",
   "metadataDescription": "Vyšplhejte od neutronové hvězdy velké jako město přes největší hvězdy až k horizontům černých děr, vše ve skutečném měřítku.",
   "canvasLabel": "Hvězdy, planety a horizonty černých děr vedle sebe na jednom obzoru, ve skutečném měřítku",

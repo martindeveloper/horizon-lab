@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import type { StoreApi } from "zustand";
 
 import type { HelpSlice, HelpStep } from "@/lib/help";
-import { CoachMark, playCues, useImmersive } from "@horizon/toolkit/ui";
+import { COACH_AVOID, CoachMark, playCues, useImmersive } from "@horizon/toolkit/ui";
 
 /** What the toolbar's `?` needs of a simulation's tour: its state, its steps and their cues. */
 export type HelpAccess = {
@@ -65,6 +65,9 @@ export function useHelp<S extends HelpSlice<unknown>>(
   );
 }
 
+/** The callout keeps clear of the HUD's glass and of the shell's bars over the stage. */
+const AVOID = `${COACH_AVOID}, .app-header, .app-footer`;
+
 /**
  * The tour on the stage: the toolkit's coach mark worded by the shared `help` copy and the
  * feature's steps, each step's cues played as it shows and stopped as it goes. Immersive view
@@ -99,6 +102,7 @@ export function HelpTour({
       targets={current.targets}
       press={current.press}
       scope="[data-simulation]"
+      avoid={AVOID}
       labels={{
         previous: tHelp("previous"),
         next: tHelp("next"),

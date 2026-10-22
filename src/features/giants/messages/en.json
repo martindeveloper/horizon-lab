@@ -1,4 +1,17 @@
 {
+  "help": {
+    "camera": {
+      "title": "Move the camera",
+      "body": "Drag or scroll to climb; drag a star to turn it."
+    },
+    "stars": { "title": "Bodies", "body": "Every body, smallest first; pick one to fly there." },
+    "overview": { "title": "Overview", "body": "Every body at once, on a log scale." },
+    "ladder": { "title": "The ladder", "body": "Slide through every body, smallest to largest." },
+    "ruler": { "title": "Scale bar", "body": "Length at this zoom, in the unit you pick." },
+    "settings": { "title": "View", "body": "Planets' orbits, the ruler and render quality." },
+    "guide": { "title": "Guide", "body": "A guided climb up the ladder." },
+    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+  },
   "app": "Giants",
   "metadataDescription": "Climb from a city-sized neutron star past the largest stars to black-hole horizons, all at true scale.",
   "canvasLabel": "Stars, planets and black-hole horizons side by side on one horizon, at true scale",

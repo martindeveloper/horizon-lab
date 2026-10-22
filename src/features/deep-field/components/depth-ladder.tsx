@@ -74,6 +74,7 @@ export function DepthLadder() {
     /* On wide screens it starts below the header row: the 2.5rem toolbar, taller than the caption's
        two clamped hint lines, and a 1.5rem gap. */
     <nav
+      data-coach="depth"
       aria-label={t("hud.depth")}
       className={cn(
         "pointer-events-auto absolute z-30 flex items-center gap-2",

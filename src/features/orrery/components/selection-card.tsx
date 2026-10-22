@@ -49,13 +49,18 @@ export function SelectionCard() {
         closeUp || offerCloseUp || deepTime ? (
           <>
             {offer ? (
-              <Action className="flex-1" onClick={() => useOrrery.getState().enterCloseUp()}>
+              <Action
+                data-coach="closeUp"
+                className="flex-1"
+                onClick={() => useOrrery.getState().enterCloseUp()}
+              >
                 <ZoomIn className="size-4" aria-hidden />
                 {t("hud.closeUp")}
               </Action>
             ) : null}
             {closeUp ? (
               <Action
+                data-coach="closeUp"
                 variant={offer ? "ghost" : "glass"}
                 className={offer ? "px-3" : "flex-1"}
                 onClick={() => useOrrery.getState().leaveCloseUp()}
@@ -64,7 +69,12 @@ export function SelectionCard() {
                 {back}
               </Action>
             ) : !offer && deepTime ? (
-              <Action className="flex-1" disabled aria-describedby={deepTimeNote}>
+              <Action
+                data-coach="closeUp"
+                className="flex-1"
+                disabled
+                aria-describedby={deepTimeNote}
+              >
                 <ZoomIn className="size-4" aria-hidden />
                 {t("hud.closeUp")}
               </Action>

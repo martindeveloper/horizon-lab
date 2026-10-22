@@ -100,7 +100,7 @@ export function GiantsDock() {
             </span>
           </span>
         </div>
-        <div className="w-28 shrink-0 not-sm:hidden">
+        <div data-coach="ruler" className="w-28 shrink-0 not-sm:hidden">
           <Ruler />
         </div>
         <Tooltip label={t(open ? "hud.hideCard" : "hud.showCard")}>

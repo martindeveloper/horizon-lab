@@ -58,6 +58,7 @@ export function ThrottleLever() {
   const percent = Math.round(throttle * 100);
   return (
     <div
+      data-coach="throttle"
       className={cn(
         "voyage-holo pointer-events-auto absolute top-1/2 left-(--hud-gutter) z-30 flex -translate-y-1/2 flex-col items-center gap-2 px-1 py-3",
         aside && "not-md:hidden",

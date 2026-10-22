@@ -2,6 +2,15 @@
   "app": "Deep Field",
   "metadataDescription": "From the planets to the edge of the observable universe in one zoom, where distance is also how long the light has been on its way.",
   "canvasLabel": "Interactive map from the planets to the observable universe",
+  "help": {
+    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
+    "depth": { "title": "Depth", "body": "Drag or tap a rung to change scale." },
+    "sightline": { "title": "Sightline", "body": "How far out, and when that light left." },
+    "objects": { "title": "Objects", "body": "Find anything and fly to its scale." },
+    "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
+    "guide": { "title": "Guide", "body": "A guided journey to the edge of what we see." },
+    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+  },
   "views": {
     "heliosphere": "Heliosphere",
     "stars": "Nearest star",

@@ -1,30 +1,19 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-import { WIDE_LAYOUT_QUERY } from "../environment";
-import { Action } from "./action";
-import { placeCard, type CoachRect } from "./coach-model";
-import { IconButton } from "./icon-button";
+import { coachLeader, placeCoach, type CoachRect } from "./coach-model";
 import { isSceneShortcut } from "./keyboard";
-import { useMediaQuery } from "./media-query";
-import { Tooltip } from "./tooltip";
 import { cn } from "./utils";
 
 /** A control the coach may point at carries `data-coach="<id>"`. */
 export const COACH_TARGET = "data-coach";
 /** The button that opens the coach: a press on it is not a press outside. */
 export const COACH_OPENER = "data-coach-opener";
+/** What the card keeps clear of by default: the HUD's glass surfaces. */
+export const COACH_AVOID = '[class*="glass"], .lesson-card';
 
 /** Room between the card, its target and the stage's edges, px. */
 const GAP = 12;
@@ -47,6 +36,8 @@ export type CoachMarkProps = {
   press?: boolean | undefined;
   /** Where the targets are looked for and the card is drawn: the nearest ancestor matching this selector. */
   scope: string;
+  /** What the card keeps clear of, anywhere on the page: `COACH_AVOID` and whatever else covers the stage. */
+  avoid?: string | undefined;
   labels: { previous: string; next: string; finish: string; close: string };
   onPrevious: () => void;
   onNext: () => void;
@@ -56,10 +47,10 @@ export type CoachMarkProps = {
 };
 
 type Found = { element: HTMLElement; rect: CoachRect; radius: string };
-/** A target as found for a step: a step never acts on the one before's. */
-type FoundFor = Found & { step: number };
 
-const visible = (rect: DOMRect) => rect.width > 0 && rect.height > 0;
+/** On screen: a box, and not hidden by `visibility` (which keeps the box). */
+const visible = (box: DOMRect, style: CSSStyleDeclaration) =>
+  box.width > 0 && box.height > 0 && style.visibility !== "hidden";
 
 /** The first of `ids` on screen in `root`, and its box relative to the root's. */
 function findTarget(root: HTMLElement, ids: readonly string[]): Found | null {
@@ -67,7 +58,8 @@ function findTarget(root: HTMLElement, ids: readonly string[]): Found | null {
   for (const id of ids) {
     for (const element of root.querySelectorAll<HTMLElement>(`[${COACH_TARGET}="${id}"]`)) {
       const box = element.getBoundingClientRect();
-      if (!visible(box)) continue;
+      const style = getComputedStyle(element);
+      if (!visible(box, style)) continue;
       return {
         element,
         rect: {
@@ -76,7 +68,7 @@ function findTarget(root: HTMLElement, ids: readonly string[]): Found | null {
           width: box.width,
           height: box.height,
         },
-        radius: getComputedStyle(element).borderRadius,
+        radius: style.borderRadius,
       };
     }
   }
@@ -94,47 +86,82 @@ function within(target: HTMLElement, node: Element) {
   );
 }
 
-const sameRect = (a: CoachRect | undefined, b: CoachRect | undefined) =>
-  a === b ||
-  (a !== undefined &&
-    b !== undefined &&
-    Math.abs(a.left - b.left) < 0.5 &&
-    Math.abs(a.top - b.top) < 0.5 &&
-    Math.abs(a.width - b.width) < 0.5 &&
-    Math.abs(a.height - b.height) < 0.5);
+/** A box's place in the root, rounded, as a key that changes only when the layout does. */
+const keyOf = (rects: readonly CoachRect[]) =>
+  rects
+    .map(
+      (r) =>
+        `${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.width)},${Math.round(r.height)}`,
+    )
+    .join(" ");
+
+/** What the coach reads of the page each frame: the target, the surfaces to keep clear of, the stage. */
+type Layout = {
+  found: (Found & { step: number }) | null;
+  obstacles: readonly CoachRect[];
+  stage: { width: number; height: number };
+};
 
 /**
- * Follows the step's target while the coach is open, a frame at a time (panels slide in, docks
- * wrap): only a change re-renders. Nothing runs once the coach closes.
+ * Follows the step's target and the HUD's surfaces while the coach is open, a frame at a time
+ * (panels slide in, docks wrap): only a change re-renders. Nothing runs once the coach closes.
  */
-function useTarget(root: HTMLElement | null, ids: readonly string[], step: number) {
-  const [found, setFound] = useState<FoundFor | null>(null);
+function useLayout(
+  root: HTMLElement | null,
+  card: { current: HTMLElement | null },
+  ids: readonly string[],
+  avoid: string,
+  step: number,
+) {
+  const [layout, setLayout] = useState<Layout>({
+    found: null,
+    obstacles: [],
+    stage: { width: 0, height: 0 },
+  });
   const key = ids.join(" ");
   useEffect(() => {
     if (!root) return;
     let frame = 0;
-    let last: Found | null = null;
+    let last = "";
+    let lastTarget: HTMLElement | null = null;
     const look = () => {
-      const next = key ? findTarget(root, key.split(" ")) : null;
-      if (next?.element !== last?.element || !sameRect(next?.rect, last?.rect)) {
-        last = next;
-        setFound(next && { ...next, step });
+      const found = key ? findTarget(root, key.split(" ")) : null;
+      const origin = root.getBoundingClientRect();
+      const obstacles: CoachRect[] = [];
+      for (const element of document.querySelectorAll(avoid)) {
+        if (card.current?.contains(element) || element.contains(root)) continue;
+        const box = element.getBoundingClientRect();
+        if (!visible(box, getComputedStyle(element))) continue;
+        obstacles.push({
+          left: box.left - origin.left,
+          top: box.top - origin.top,
+          width: box.width,
+          height: box.height,
+        });
+      }
+      const stage = { width: origin.width, height: origin.height };
+      const now = `${keyOf(found ? [found.rect] : [])}|${keyOf(obstacles)}|${stage.width}x${stage.height}`;
+      if (now !== last || (found?.element ?? null) !== lastTarget) {
+        last = now;
+        lastTarget = found?.element ?? null;
+        setLayout({ found: found && { ...found, step }, obstacles, stage });
       }
       frame = requestAnimationFrame(look);
     };
     look();
     return () => cancelAnimationFrame(frame);
-  }, [root, key, step]);
-  return found?.step === step ? found : null;
+  }, [root, card, key, avoid, step]);
+  return { ...layout, found: layout.found?.step === step ? layout.found : null };
 }
 
 /**
- * A guided tour's coach mark: no veil over the scene, only a gold ring that moves onto the
- * control the step is about and a small glass card beside it with the words, the steps and
- * Back, Next and close. Drawn in the `scope` ancestor (the stage); on the touch layout, and
- * with nothing to point at, the card rests at the top or the foot of the stage, away from the
- * target. Escape, the close button and a press outside the card, the target and what the
- * target has open close it; the arrow keys step. Next takes focus as it opens; each step is announced politely.
+ * A guided tour's coach mark, a layer of its own over the scene: no veil, a gold ring on the
+ * control the step is about, a thin gold leader from it to a small ink callout (never one of
+ * the HUD's glass panels) that stands where it covers least of the HUD (`avoid`) and never its
+ * target. The callout's top edge is the tour's horizon: gold fills along it, step by step, a
+ * sun at its head. Drawn in the `scope` ancestor. Escape, the close button and a press outside
+ * the callout, the target and what the target has open close it; the arrow keys step. Next
+ * takes focus as it opens; each step is announced politely.
  */
 export function CoachMark({
   label,
@@ -146,6 +173,7 @@ export function CoachMark({
   targets = [],
   press = false,
   scope,
+  avoid = COACH_AVOID,
   labels,
   onPrevious,
   onNext,
@@ -157,26 +185,22 @@ export function CoachMark({
   const next = useRef<HTMLButtonElement>(null);
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
-  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
-  const wide = useMediaQuery(WIDE_LAYOUT_QUERY);
   const bodyId = useId();
-  const found = useTarget(root, targets, step);
+  const { found, obstacles, stage } = useLayout(root, card, targets, avoid, step);
   const last = step >= total - 1;
 
   useLayoutEffect(() => {
     setRoot(home.current?.parentElement?.closest<HTMLElement>(scope) ?? document.body);
   }, [scope]);
 
-  /* The card's and the stage's sizes, for placing the card beside its target. */
+  /* The card's size, for placing it. */
   useEffect(() => {
     const el = card.current;
-    if (!el || !root) return;
-    const observer = new ResizeObserver(() => {
-      setCardSize({ width: el.offsetWidth, height: el.offsetHeight });
-      setStageSize({ width: root.clientWidth, height: root.clientHeight });
-    });
+    if (!el) return;
+    const observer = new ResizeObserver(() =>
+      setCardSize({ width: el.offsetWidth, height: el.offsetHeight }),
+    );
     observer.observe(el);
-    observer.observe(root);
     return () => observer.disconnect();
   }, [root]);
 
@@ -201,7 +225,6 @@ export function CoachMark({
     [step],
   );
 
-  /* Escape closes from anywhere, the arrows step from the scene or the card; a press outside the card, its target and the opener closes. */
   const handlers = useRef({ onPrevious, onNext, onClose, target, returnFocus });
   useEffect(() => {
     handlers.current = { onPrevious, onNext, onClose, target, returnFocus };
@@ -218,6 +241,8 @@ export function CoachMark({
       handlers.current.returnFocus?.()?.focus({ preventScroll: true });
     };
   }, [root]);
+
+  /* Escape closes from anywhere, the arrows step from the scene or the card; a press outside the card, its target and the opener closes. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!isSceneShortcut(e, { controls: true })) return;
@@ -251,32 +276,45 @@ export function CoachMark({
     };
   }, []);
 
-  const rect = found?.rect;
-  const radius = found?.radius ?? "0px";
-  /* Beside the target on the desktop; else away from it, at the stage's top or foot. */
-  const placed =
-    rect && wide && cardSize.width > 0 ? placeCard(rect, cardSize, stageSize, GAP) : null;
-  const atTop = !placed && !!rect && rect.top + rect.height / 2 > stageSize.height / 2;
-  const cardStyle: CSSProperties = placed
-    ? { left: placed.left, top: placed.top }
-    : atTop
-      ? { top: `calc(var(--app-header-height, 0px) + ${GAP}px)` }
-      : { bottom: "var(--hud-clear, 6rem)" };
+  const rect = found?.rect ?? null;
+  const ring = rect && {
+    left: rect.left - RING_PAD,
+    top: rect.top - RING_PAD,
+    width: rect.width + 2 * RING_PAD,
+    height: rect.height + 2 * RING_PAD,
+  };
+  const measured = cardSize.width > 0 && stage.width > 0;
+  const place = measured
+    ? placeCoach({ target: ring, card: cardSize, stage, obstacles, gap: GAP })
+    : null;
+  const leader = place && ring ? coachLeader({ ...place, ...cardSize }, ring) : null;
+  /** How far along the horizon the tour has come. */
+  const reached = `${((step + 1) / total) * 100}%`;
 
   const layer = (
     <>
-      {rect ? (
+      {ring ? (
         <div
           aria-hidden
           className="coach-ring pointer-events-none absolute z-[80]"
-          style={{
-            left: rect.left - RING_PAD,
-            top: rect.top - RING_PAD,
-            width: rect.width + 2 * RING_PAD,
-            height: rect.height + 2 * RING_PAD,
-            borderRadius: `calc(${radius} + ${RING_PAD}px)`,
-          }}
+          style={{ ...ring, borderRadius: `calc(${found?.radius ?? "0px"} + ${RING_PAD}px)` }}
         />
+      ) : null}
+      {leader ? (
+        <svg
+          key={step}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[80] size-full"
+        >
+          <line
+            className="coach-leader"
+            x1={leader.from.x}
+            y1={leader.from.y}
+            x2={leader.to.x}
+            y2={leader.to.y}
+          />
+          <circle className="coach-leader-end" cx={leader.from.x} cy={leader.from.y} r={2.5} />
+        </svg>
       ) : null}
       <section
         ref={card}
@@ -284,56 +322,66 @@ export function CoachMark({
         aria-modal="false"
         aria-label={label}
         aria-describedby={bodyId}
-        style={cardStyle}
-        className={cn(
-          "coach-card glass glass-edge pointer-events-auto absolute z-[81] flex flex-col rounded-xl px-4 pt-3 pb-2.5",
-          placed
-            ? "w-80"
-            : "inset-x-(--hud-gutter,1rem) mx-auto max-w-sm md:inset-x-0 md:w-80 md:max-w-none",
-        )}
+        data-side={place?.side}
+        style={place ? { left: place.left, top: place.top } : { visibility: "hidden" }}
+        className="coach-card pointer-events-auto absolute z-[81] w-[min(19rem,calc(100%-1.5rem))] rounded-lg px-4 pt-3 pb-1.5 md:pb-2"
       >
-        <p className="font-mono text-[10px] tracking-[0.14em] text-subtle uppercase tabular-nums">
-          {kicker}
-        </p>
-        <div className="mt-1" aria-live="polite" aria-atomic>
+        {/* The horizon: gold fills along the top edge as the tour goes on, a sun at its head. */}
+        <span aria-hidden className="coach-horizon">
+          <span className="coach-horizon-fill" style={{ width: reached }} />
+          <span className="coach-horizon-sun" style={{ left: reached }} />
+        </span>
+        <div className="flex items-center gap-2">
+          <p className="font-mono text-[10px] tracking-[0.14em] text-solar uppercase tabular-nums">
+            {kicker}
+          </p>
+          <button
+            type="button"
+            aria-label={labels.close}
+            title={labels.close}
+            onClick={onClose}
+            className="coach-quiet -mr-2.5 ml-auto size-11 md:size-8"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+        <div className="-mt-2 md:-mt-1" aria-live="polite" aria-atomic>
           <div key={step} className="anim-fade">
-            <h2 className="font-display text-base leading-tight tracking-tight text-fg">{title}</h2>
-            <p id={bodyId} className="mt-1 text-sm leading-snug text-muted">
+            <h2 className="font-display text-[15px] leading-tight tracking-tight text-space-fg">
+              {title}
+            </h2>
+            <p id={bodyId} className="mt-1 text-[13px] leading-snug text-space-muted">
               {body}
             </p>
           </div>
         </div>
-        <div aria-hidden className="mt-3 flex gap-1">
-          {Array.from({ length: total }, (_, i) => (
-            <span
-              key={i}
-              className={cn(
-                "h-0.5 flex-1 rounded-full",
-                i === step ? "bg-solar" : i < step ? "bg-solar/50" : "bg-fg/15",
-              )}
-            />
-          ))}
-        </div>
-        <div className="mt-2.5 flex items-center gap-2">
-          <IconButton
+        <div className="mt-2 flex items-center gap-1">
+          <button
+            type="button"
             aria-label={labels.previous}
             aria-disabled={step === 0}
-            className="aria-disabled:opacity-40"
             onClick={() => {
               if (step > 0) onPrevious();
             }}
+            className="coach-quiet -ml-2.5 size-11 aria-disabled:opacity-30 md:size-8"
           >
             <ChevronLeft className="size-4" />
-          </IconButton>
-          <Action ref={next} className="ml-auto px-4" onClick={onNext}>
+          </button>
+          <span
+            aria-hidden
+            className="ml-auto hidden font-mono text-[10px] text-space-muted md:inline"
+          >
+            ← →
+          </span>
+          <button
+            ref={next}
+            type="button"
+            onClick={onNext}
+            className={cn("coach-next ml-auto md:ml-2", last && "pr-3.5")}
+          >
             {last ? labels.finish : labels.next}
-            {last ? null : <ChevronRight className="-mr-1 size-4" />}
-          </Action>
-          <Tooltip label={labels.close} align="end">
-            <IconButton aria-label={labels.close} onClick={onClose}>
-              <X className="size-4" />
-            </IconButton>
-          </Tooltip>
+            {last ? null : <ChevronRight className="-mr-1 size-3.5" />}
+          </button>
         </div>
       </section>
     </>

@@ -113,6 +113,7 @@ export function LadderStrip() {
 
   return (
     <div
+      data-coach="ladder"
       className="relative h-11 w-full"
       onPointerMove={point}
       onPointerLeave={() => setHover((h) => ({ ...h, shown: false }))}

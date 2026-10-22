@@ -1,4 +1,14 @@
 {
+  "help": {
+    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
+    "views": { "title": "Black holes", "body": "Holes in the sky by mass, then theory." },
+    "gauge": { "title": "Distance", "body": "Where you stand; tap a radius to learn it." },
+    "atlas": { "title": "Atlas", "body": "Where each hole lies in the sky." },
+    "clocks": { "title": "Clocks", "body": "Drop clocks in and watch time slow." },
+    "settings": { "title": "View", "body": "Spin, gravity, the camera and optics." },
+    "guide": { "title": "Guide", "body": "A guided journey round this hole." },
+    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+  },
   "app": "Event Horizon",
   "clocks": "Clocks",
   "controls": "Controls",

@@ -1,12 +1,14 @@
 import { BookOpen, Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
 import { sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
 import { useOrrery, type OrreryStore } from "../lib/store";
 import { OrreryGuide } from "./guide";
@@ -42,6 +44,8 @@ const guideKeys = {
   },
 };
 
+const helpStore = { getState: useOrrery.getState, subscribe: useOrrery.subscribe };
+
 export function OrreryOverlay() {
   const t = useTranslations("orrery");
   const ready = useOrrery((s) => s.ready);
@@ -52,6 +56,7 @@ export function OrreryOverlay() {
   const drift = useOrrery((s) => s.drift);
   const guideOpen = useOrrery((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
+  const help = useHelp(helpStore, HELP, "orrery");
 
   useSceneEscape(escapeSteps);
   useGuideKeys(useOrrery.getState, guideKeys);
@@ -72,6 +77,7 @@ export function OrreryOverlay() {
               <ViewPicker />
               <SimulationToolbar
                 label={t("hud.controls")}
+                help={help}
                 details={(access) => <OrreryTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
                 guide={{ onSelect: () => useOrrery.getState().startGuide() }}

@@ -6,6 +6,7 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { cn } from "@horizon/toolkit/ui";
 
 type TrayPanel = {
+  /** Also its `data-coach`, so the `?` tour can ring it. */
   id: string;
   /** The panel's name on its phone tab. */
   label: string;
@@ -84,6 +85,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
         {panels.map((panel) => (
           <section
             key={panel.id}
+            data-coach={panel.id}
             aria-label={panel.label}
             className={cn(
               "flex w-full min-w-0 shrink-0 snap-start flex-col gap-2 px-3.5 py-1",

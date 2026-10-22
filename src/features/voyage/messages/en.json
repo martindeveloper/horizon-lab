@@ -2,6 +2,16 @@
   "app": "Voyage",
   "metadataDescription": "Fly a spacecraft at true scale from the Moon to the far planets. Real drives, two clocks, the light as it falls there.",
   "canvasLabel": "The solar system at true scale, seen from a spacecraft",
+  "help": {
+    "camera": { "title": "Move the camera", "body": "Drag to orbit, scroll or pinch to zoom." },
+    "objects": { "title": "Objects", "body": "Pick a destination and the autopilot flies there." },
+    "drive": { "title": "Drive", "body": "Each drive takes its own time to get there." },
+    "rate": { "title": "Time warp", "body": "Hold the clocks, or run them faster." },
+    "throttle": { "title": "Throttle", "body": "Push it to fly the ship by hand." },
+    "settings": { "title": "View", "body": "Cockpit, layers, the camera pad and render quality." },
+    "guide": { "title": "Guide", "body": "A journey from the Moon out to the edge." },
+    "experiences": { "title": "Immersive view", "body": "The flight alone, without the controls." }
+  },
   "views": {
     "earth": "Earth",
     "moon": "The Moon",

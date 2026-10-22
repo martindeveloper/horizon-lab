@@ -1,6 +1,7 @@
 import { Crosshair } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { MapScale } from "@/components/simulations/map-readouts";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
@@ -10,6 +11,7 @@ import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { useDeepField, type DeepFieldStore } from "../lib/store";
 import { DepthLadder } from "./depth-ladder";
@@ -33,6 +35,8 @@ const escapeSteps = (): EscapeStep[] => {
 /* During the journey, Space pauses and the arrows step, when no control wants them. */
 const guideKeys = { onSpace: (api: DeepFieldStore) => api.toggleGuidePlaying() };
 
+const helpStore = { getState: useDeepField.getState, subscribe: useDeepField.subscribe };
+
 export function DeepFieldOverlay() {
   const t = useTranslations("deepField");
   const locale = useLocale();
@@ -47,6 +51,7 @@ export function DeepFieldOverlay() {
   const scaleUnit = useDeepField((s) => s.scaleUnit);
   const aside = asideOpen({ panel, selection });
   const guideButton = useGuideFocusReturn(guideOpen);
+  const help = useHelp(helpStore, HELP, "deepField");
 
   useSceneEscape(escapeSteps);
   useGuideKeys(useDeepField.getState, guideKeys);
@@ -70,6 +75,7 @@ export function DeepFieldOverlay() {
               ) : null}
               <SimulationToolbar
                 label={t("hud.controls")}
+                help={help}
                 details={(access) => <DeepFieldTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
                 guide={{ onSelect: () => useDeepField.getState().startGuide() }}

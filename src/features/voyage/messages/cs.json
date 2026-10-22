@@ -2,6 +2,22 @@
   "app": "Výprava",
   "metadataDescription": "Leťte lodí ve skutečném měřítku od Měsíce k vnějším planetám. Skutečné pohony, dvoje hodiny, světlo takové, jaké tam dopadá.",
   "canvasLabel": "Sluneční soustava ve skutečném měřítku z paluby lodi",
+  "help": {
+    "camera": {
+      "title": "Pohyb kamery",
+      "body": "Tažením obíháte, kolečkem nebo sevřením prstů přibližujete."
+    },
+    "objects": { "title": "Objekty", "body": "Vyberte cíl a autopilot vás tam doveze." },
+    "drive": { "title": "Pohon", "body": "S každým pohonem trvá cesta jinak dlouho." },
+    "rate": { "title": "Zrychlení času", "body": "Zastavte hodiny, nebo je zrychlete." },
+    "throttle": { "title": "Tah", "body": "Posuňte páku a řiďte loď sami." },
+    "settings": {
+      "title": "Zobrazení",
+      "body": "Kabina, vrstvy, ovládání kamery a kvalita vykreslení."
+    },
+    "guide": { "title": "Průvodce", "body": "Cesta od Měsíce až na okraj." },
+    "experiences": { "title": "Nerušené prohlížení", "body": "Jen let, bez ovládání." }
+  },
   "views": {
     "earth": "Země",
     "moon": "Měsíc",

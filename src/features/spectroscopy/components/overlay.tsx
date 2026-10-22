@@ -3,6 +3,7 @@
 import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
@@ -10,6 +11,7 @@ import { ViewPicker } from "@/components/simulations/view-picker";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
 import { PROSE_TYPES } from "../lib/model/catalogue";
 import { VIEW_IDS, type ViewId } from "../lib/model/view-ids";
 import { useSpectroscopy } from "../lib/store";
@@ -29,6 +31,8 @@ const escapeSteps = (): EscapeStep[] => {
     [api.selection !== null, () => api.select(null)],
   ];
 };
+
+const helpStore = { getState: useSpectroscopy.getState, subscribe: useSpectroscopy.subscribe };
 
 /** The four views, as a pill that opens a list; a pick navigates, and the view follows the address. */
 function SpectroscopyViews() {
@@ -62,6 +66,7 @@ export function SpectroscopyOverlay() {
   const selection = useSpectroscopy((s) => s.selection);
   const guideOpen = useSpectroscopy((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
+  const help = useHelp(helpStore, HELP, "spectroscopy");
   const api = useSpectroscopy.getState;
   useSceneEscape(escapeSteps);
 
@@ -76,6 +81,7 @@ export function SpectroscopyOverlay() {
             <SpectroscopyViews />
             <SimulationToolbar
               label={t("hud.controls")}
+              help={help}
               details={(access) => <SpectroscopyTechnicalDetails {...access} />}
               detailsLabel={t("technicalDetails.open")}
               guide={{ onSelect: () => api().startGuide() }}

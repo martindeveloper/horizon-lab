@@ -16,6 +16,16 @@ import type { ViewId } from "./view-ids";
 
 /** The visible range the spectrograph covers, nm: every window lies inside it. */
 export const FULL_RANGE = [380, 770] as const;
+/** Wavelength windows worth a look, nm. */
+export const WINDOWS = [
+  { id: "full", range: FULL_RANGE },
+  { id: "hk", range: [388, 400] },
+  { id: "balmer", range: [380, 500] },
+  { id: "mgb", range: [514, 521] },
+  { id: "nad", range: [585, 593] },
+  { id: "halpha", range: [650, 662] },
+  { id: "oxygen", range: [684, 770] },
+] as const;
 /** Resolving powers λ / Δλ the spectrograph offers, and the one a visit starts at. */
 export const RESOLUTION_RANGE = [300, 100_000] as const;
 export const DEFAULT_RESOLUTION = 20_000;
