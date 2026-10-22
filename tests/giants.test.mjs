@@ -37,6 +37,7 @@ import {
   blendPlaced,
   namesEnd,
   overviewBaseline,
+  overviewRowAt,
   placeOverview,
   scaleLines,
 } from "../src/features/giants/lib/model/overview.ts";
@@ -128,6 +129,12 @@ test("the overview shows every body at once, in order of size, between the names
       "the axis's values clear the dock",
     );
     const dots = RUNG_IDS.map((_, i) => placeOverview(ladder, OVERVIEW_AXIS, stage, baseline, i));
+    assert.equal(overviewRowAt(ladder, baseline, baseline + 1), null, "nothing below the axis");
+    assert.equal(
+      overviewRowAt(ladder, baseline, OVERVIEW_TOP_PX - 1),
+      null,
+      "nothing under the toolbar",
+    );
     dots.forEach((dot, i) => {
       assert.ok(
         dot.x - dot.radius > namesEnd(stage) && dot.x + dot.radius < stage.width,
@@ -137,6 +144,12 @@ test("the overview shows every body at once, in order of size, between the names
         dot.y - dot.polar >= OVERVIEW_TOP_PX && dot.y + dot.polar <= baseline,
         `${RUNG_IDS[i]} below the toolbar, above the baseline`,
       );
+      for (const y of [dot.y - dot.polar, dot.y, dot.y + dot.polar])
+        assert.equal(
+          overviewRowAt(ladder, baseline, y),
+          i,
+          `${RUNG_IDS[i]}'s row answers over its dot`,
+        );
       const before = dots[i - 1];
       if (!before) return;
       assert.ok(dot.x > before.x && dot.y < before.y, `${RUNG_IDS[i]} climbs right and up`);

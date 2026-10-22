@@ -60,6 +60,16 @@ export const axisX = (stage: Pick<Stage, "width">, share: number) =>
 export const overviewBaseline = (stage: Stage, foot: number) =>
   Math.max(OVERVIEW_TOP_PX, stage.height - foot - OVERVIEW_FOOT_PX);
 
+/** A row's height over `baseline`, CSS px: the stage between the toolbar and the baseline, shared. */
+const rowOf = (ladder: Ladder, baseline: number) =>
+  Math.max(0, baseline - OVERVIEW_TOP_PX) / ladder.sizes.length;
+
+/** The body whose row a stage point's height falls in, if any: a whole row answers a pointer. */
+export function overviewRowAt(ladder: Ladder, baseline: number, y: number) {
+  const index = Math.floor((baseline - y) / rowOf(ladder, baseline));
+  return index >= 0 && index < ladder.sizes.length ? index : null;
+}
+
 /** One body as the overview shows it above `baseline` (`overviewBaseline`), written into `out`. */
 export function placeOverview(
   ladder: Ladder,
@@ -71,7 +81,7 @@ export function placeOverview(
 ): Placed {
   const size = ladder.sizes[index]!;
   const share = axisShare(axis, size.radius);
-  const row = Math.max(0, baseline - OVERVIEW_TOP_PX) / ladder.sizes.length;
+  const row = rowOf(ladder, baseline);
   const radius = Math.max(
     MIN_DISC_PX,
     Math.min(OVERVIEW_ROW_FILL * row, lerp(OVERVIEW_DOT_PX[0], OVERVIEW_DOT_PX[1], share)),
@@ -120,10 +130,20 @@ export function blendPlaced(
 }
 
 /** How far the glide into the overview (1) or back to the ladder (0) has come after `dt` more seconds. */
-export function stepOverview(level: number, on: boolean, dt: number, reduce: boolean) {
+export const stepOverview = (level: number, on: boolean, dt: number, reduce: boolean) =>
+  stepToward(level, on, dt, OVERVIEW_SECONDS, reduce);
+
+/** A level from 0 to 1 moved `dt` more seconds towards 1 (`on`) or 0, over `seconds` all the way. */
+export function stepToward(
+  level: number,
+  on: boolean,
+  dt: number,
+  seconds: number,
+  reduce: boolean,
+) {
   const goal = on ? 1 : 0;
   if (reduce) return goal;
-  const step = dt / OVERVIEW_SECONDS;
+  const step = dt / seconds;
   return on ? Math.min(goal, level + step) : Math.max(goal, level - step);
 }
 

@@ -81,6 +81,19 @@
   padding: 0.125rem 0.25rem;
   letter-spacing: 0.06em;
 }
+/* The row a mouse is over (`data-hover`, the engine's): its name and leader in the accent, and
+   the stage says the row takes a click. */
+:where([data-simulation="giants"]) .giants-stage[data-overview="true"] .giants-label[data-hover] {
+  color: var(--color-solar);
+}
+:where([data-simulation="giants"])
+  .giants-stage[data-overview="true"]
+  .giants-label[data-hover]::after {
+  border-top-color: color-mix(in srgb, var(--color-solar) 70%, transparent);
+}
+:where([data-simulation="giants"]) .giants-stage[data-overview="true"][data-row] {
+  cursor: pointer;
+}
 /* On a narrow stage (under `OVERVIEW_NARROW_PX`) the names are set smaller, to fit its narrower column. */
 @container (width < 640px) {
   :where([data-simulation="giants"]) .giants-stage[data-overview="true"] .giants-label {
@@ -100,6 +113,7 @@
   left: 100%;
   width: var(--leader, 0);
   border-top: 1px dotted color-mix(in srgb, var(--color-space-muted) 45%, transparent);
+  transition: border-color 0.15s ease;
 }
 
 /* The overview's radius axis (`overview-scale.tsx`): faint gold gridlines up from the horizon,

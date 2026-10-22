@@ -76,8 +76,10 @@ import {
   namesEnd,
   overviewAt,
   overviewBaseline,
+  overviewRowAt,
   placeOverview,
   stepOverview,
+  stepToward,
 } from "./model/overview";
 import { RUNG_IDS } from "./model/rungs";
 import { surfaceDetail } from "./model/surface-detail";
@@ -98,6 +100,8 @@ import {
   ORBIT_IDS,
   ORBIT_LABEL_GAP_PX,
   ORBIT_LABEL_MIN_PX,
+  OVERVIEW_HOVER_PX,
+  OVERVIEW_HOVER_SECONDS,
   OVERVIEW_LABEL_GAP_PX,
   SHADER_DEFINES,
   SNAP_DELAY_MS,
@@ -444,11 +448,15 @@ export function createGiantsEngine(
       globe: number | null;
     } | null = null;
     const grabbed = blankPlaced();
-    /** The body under a stage point as the last frame drew it: among the dots while they show. */
+    /**
+     * The body under a stage point as the last frame drew it: the settled overview's whole row,
+     * among the dots while they glide, else on the ladder.
+     */
     const bodyUnder = (clientX: number, clientY: number) => {
       const box = host.getBoundingClientRect();
       const x = clientX - box.left;
       const y = clientY - box.top;
+      if (overviewLevel >= 1) return overviewRowAt(ladder, dotsBaseline, y);
       if (overviewLevel > 0) return pickPlaced(dotsShown, dotsShown.length, x, y);
       return bodyAt(ladder, place, stage, x, y, 10, camera);
     };
@@ -543,6 +551,36 @@ export function createGiantsEngine(
       host.removeEventListener("pointermove", onMove);
       host.removeEventListener("pointerup", onUp);
       host.removeEventListener("pointercancel", onUp);
+    });
+
+    /* A mouse over a row of the settled overview lights its name and leader and grows its dot. */
+    /** The row a mouse is over (null: none), and each dot's growth towards it, 0–1. */
+    let hovered: number | null = null;
+    const hoverLevels = new Float32Array(RUNG_IDS.length);
+    const hoverBusy = () =>
+      hoverLevels.some((level, index) => level !== (index === hovered ? 1 : 0));
+    function hover(index: number | null) {
+      if (index === hovered) return;
+      const was = hovered;
+      hovered = index;
+      if (was !== null) labelEls[was]?.removeAttribute("data-hover");
+      if (index !== null) labelEls[index]?.setAttribute("data-hover", "");
+      if (index === null) delete host.dataset.row;
+      else host.dataset.row = RUNG_IDS[index];
+      engine.invalidate();
+    }
+    const onHover = (event: PointerEvent) =>
+      hover(
+        event.pointerType === "mouse" && !drag && surveying() && overviewLevel >= 1
+          ? bodyUnder(event.clientX, event.clientY)
+          : null,
+      );
+    const onLeave = () => hover(null);
+    host.addEventListener("pointermove", onHover);
+    host.addEventListener("pointerleave", onLeave);
+    resources.defer(() => {
+      host.removeEventListener("pointermove", onHover);
+      host.removeEventListener("pointerleave", onLeave);
     });
 
     const STEPS: Record<string, number | "first" | "last"> = {
@@ -688,7 +726,8 @@ export function createGiantsEngine(
     const dotTarget = blankPlaced();
     /** How much of the stage's foot the dock covers, CSS px, as the dock publishes it (`--hud-clear`). */
     const dockFoot = () => parseFloat(getComputedStyle(host).getPropertyValue("--hud-clear")) || 0;
-    /** The overview's baseline, CSS px from the stage's top, as last published to the stage's scale lines. */
+    /** The overview's baseline, CSS px from the stage's top, as the dots last stood on it and as last published to the stage's scale lines. */
+    let dotsBaseline = 0;
     let baselinePublished = -1;
     /**
      * Every body's dot on its way from the ladder as `camera` sees it, `blend` of the way, over
@@ -697,6 +736,7 @@ export function createGiantsEngine(
      */
     function placeDots(blend: number) {
       const baseline = overviewBaseline(stage, dockFoot());
+      dotsBaseline = baseline;
       if (Math.round(baseline) !== baselinePublished) {
         baselinePublished = Math.round(baseline);
         host.style.setProperty("--overview-baseline", `${baselinePublished}px`);
@@ -705,6 +745,11 @@ export function createGiantsEngine(
         placeBody(ladder, camera, stage, index, dot);
         const to = placeOverview(ladder, OVERVIEW_AXIS, stage, baseline, index, dotTarget);
         blendPlaced(dot, to, blend, stage, dot);
+        const grow = OVERVIEW_HOVER_PX * smoothstep(0, 1, hoverLevels[index]!);
+        if (grow > 0) {
+          dot.polar *= (dot.radius + grow) / dot.radius;
+          dot.radius += grow;
+        }
         dotTable.place(dot);
       });
       return baseline;
@@ -743,6 +788,16 @@ export function createGiantsEngine(
         state.landGuide();
       if (!reduce) time += dt;
       overviewLevel = stepOverview(overviewLevel, state.overview, dt, reduce);
+      if (overviewLevel < 1) hover(null);
+      hoverLevels.forEach((level, index) => {
+        hoverLevels[index] = stepToward(
+          level,
+          index === hovered,
+          dt,
+          OVERVIEW_HOVER_SECONDS,
+          reduce,
+        );
+      });
       const overview = overviewAt(overviewLevel);
       /* The full surfaces' share of the light: none once the dots have taken over. */
       const full = 1 - overview.dots;
@@ -912,6 +967,7 @@ export function createGiantsEngine(
     const moving = () =>
       !settled() ||
       overviewLevel !== (surveying() ? 1 : 0) ||
+      hoverBusy() ||
       drag !== null ||
       !posesRest() ||
       flyingDrift() ||

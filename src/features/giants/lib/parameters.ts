@@ -96,6 +96,9 @@ export const OVERVIEW_RING_PX = 3.5;
  */
 export const OVERVIEW_SECONDS = 1.4;
 export const OVERVIEW_SWAP = 0.35;
+/** A row a mouse is over: how much its dot grows, CSS px, and how long it takes, s. */
+export const OVERVIEW_HOVER_PX = 3;
+export const OVERVIEW_HOVER_SECONDS = 0.15;
 /** A dot's limb darkening, every star's: a linear law with the Sun's visible coefficient, a sketch rather than a surface. */
 export const OVERVIEW_LIMB = 0.6;
 /**
