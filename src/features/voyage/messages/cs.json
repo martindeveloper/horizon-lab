@@ -15,7 +15,10 @@
       "title": "Zobrazení",
       "body": "Kabina, vrstvy, ovládání kamery a kvalita vykreslení."
     },
-    "guide": { "title": "Průvodce", "body": "Cesta od Měsíce až na okraj." },
+    "guide": {
+      "title": "Průvodce",
+      "body": "Naučte se, co obnáší cesta ke hvězdám, krok za krokem."
+    },
     "experiences": { "title": "Nerušené prohlížení", "body": "Jen let, bez ovládání." }
   },
   "views": {

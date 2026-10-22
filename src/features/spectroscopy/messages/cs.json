@@ -14,7 +14,7 @@
     "line": { "title": "Čáry", "body": "Klepněte na čáru a uvidíte atom, který ji tvoří." },
     "star": { "title": "Hvězda", "body": "Vyberte hvězdu a nastavte, jak rychle se pohybuje." },
     "settings": { "title": "Zobrazení", "body": "Graf, spektrograf a kvalita vykreslení." },
-    "guide": { "title": "Průvodce", "body": "Od duhy k záhadné hvězdě, krok za krokem." },
+    "guide": { "title": "Průvodce", "body": "Naučte se číst světlo hvězd, krok za krokem." },
     "experiences": { "title": "Nerušené prohlížení", "body": "Jen spektrum, bez ovládání." }
   },
   "views": {

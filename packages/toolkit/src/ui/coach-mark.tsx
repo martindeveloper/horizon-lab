@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-import { coachLeader, placeCoach, type CoachRect } from "./coach-model";
+import { REDUCED_MOTION_QUERY } from "../environment";
+import { coachLeader, placeCoach, type CoachPlacement, type CoachRect } from "./coach-model";
 import { isSceneShortcut } from "./keyboard";
 import { cn } from "./utils";
 
@@ -75,15 +76,101 @@ function findTarget(root: HTMLElement, ids: readonly string[]): Found | null {
   return null;
 }
 
-/** Whether `node` is in the target or in what it has open (a picker's list, a panel: `aria-controls`). */
-function within(target: HTMLElement, node: Element) {
-  if (target.contains(node)) return true;
+/** The target and what it has open (a picker's list, a panel: `aria-controls`). */
+function litBy(target: HTMLElement) {
   const owners = [target, ...target.querySelectorAll("[aria-controls]")];
-  return owners.some((owner) =>
+  const opened = owners.flatMap((owner) =>
     (owner.getAttribute("aria-controls") ?? "")
       .split(" ")
-      .some((id) => id !== "" && !!document.getElementById(id)?.contains(node)),
+      .map((id) => (id === "" ? null : document.getElementById(id)))
+      .filter((el): el is HTMLElement => el !== null),
   );
+  return [target, ...opened];
+}
+
+/** Whether `node` is in the target or in what it has open. */
+const within = (target: HTMLElement, node: Element) =>
+  litBy(target).some((lit) => lit.contains(node));
+
+/** How far the HUD around a step quiets down, and how quickly. */
+const QUIET = { opacity: 0.35, ms: 320 };
+
+/**
+ * The HUD's surfaces in `root` (`avoid`) that a step is not about: every outermost one, except
+ * that a surface holding something `lit` keeps that bright and quiets only its other parts (a
+ * toolbar's other buttons), looking through `display: contents` wrappers, and what is inside
+ * the lit stays as it is.
+ */
+function quietAround(root: HTMLElement, avoid: string, lit: readonly Element[]) {
+  const isLit = (el: Element) => lit.some((on) => on.contains(el));
+  const holdsLit = (el: Element) => lit.some((on) => el.contains(on));
+  const surfaces = [...root.querySelectorAll(avoid)];
+  const quiet = new Set<Element>();
+  const visit = (el: Element) => {
+    for (const child of el.children) {
+      if (isLit(child)) continue;
+      if (holdsLit(child) || getComputedStyle(child).display === "contents") visit(child);
+      else quiet.add(child);
+    }
+  };
+  for (const surface of surfaces) {
+    if (isLit(surface) || surfaces.some((outer) => outer !== surface && outer.contains(surface)))
+      continue;
+    if (holdsLit(surface)) visit(surface);
+    else quiet.add(surface);
+  }
+  return quiet;
+}
+
+/**
+ * Quiets the HUD round the step while the coach is open: the ringed control, what it has open,
+ * whatever surface the step brought up (a card, a panel) and the scene stay as they are; the
+ * rest of the HUD fades back. A web animation over each surface's own styles, so no class or
+ * animation of the page's is touched; the fade eases both ways (at once under reduced motion)
+ * and every surface comes back as the coach closes. `layout` changes when the page does.
+ */
+function useQuietHud(
+  root: HTMLElement | null,
+  avoid: string,
+  target: HTMLElement | null,
+  step: number,
+  layout: unknown,
+) {
+  const faded = useRef(new Map<Element, Animation>());
+  /* The surfaces up as the step begins, before its cues run (the tour plays them after the coach's effects). */
+  const before = useRef(new Set<Element>());
+  useEffect(() => {
+    if (root) before.current = new Set(root.querySelectorAll(avoid));
+  }, [root, avoid, step]);
+  useEffect(() => {
+    if (!root) return;
+    const ms = window.matchMedia(REDUCED_MOTION_QUERY).matches ? 0 : QUIET.ms;
+    const brought = [...root.querySelectorAll(avoid)].filter((el) => !before.current.has(el));
+    const now = quietAround(root, avoid, [...(target ? litBy(target) : []), ...brought]);
+    const fade = (el: Element) =>
+      el.animate([{ opacity: 1 }, { opacity: QUIET.opacity }], {
+        duration: ms,
+        easing: "ease-out",
+        fill: "forwards",
+      });
+    for (const [el, animation] of faded.current) {
+      if (now.has(el)) continue;
+      animation.reverse();
+      animation.finished.then(
+        () => animation.cancel(),
+        () => {},
+      );
+      faded.current.delete(el);
+    }
+    for (const el of now) if (!faded.current.has(el)) faded.current.set(el, fade(el));
+  }, [root, avoid, target, step, layout]);
+  useEffect(() => {
+    const all = faded.current;
+    return () => {
+      for (const animation of all.values()) animation.cancel();
+      all.clear();
+    };
+  }, []);
 }
 
 /** A box's place in the root, rounded, as a key that changes only when the layout does. */
@@ -187,6 +274,7 @@ export function CoachMark({
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
   const bodyId = useId();
   const { found, obstacles, stage } = useLayout(root, card, targets, avoid, step);
+  useQuietHud(root, avoid, found?.element ?? null, step, obstacles);
   const last = step >= total - 1;
 
   useLayoutEffect(() => {
@@ -242,6 +330,13 @@ export function CoachMark({
     };
   }, [root]);
 
+  /*
+   * The card holds still under a press: what the press does on its way down (a picker it
+   * leaves closes, the HUD moves) must not carry the button away before the click lands.
+   */
+  const [held, setHeld] = useState<CoachPlacement | null>(null);
+  const shown = useRef<CoachPlacement | null>(null);
+
   /* Escape closes from anywhere, the arrows step from the scene or the card; a press outside the card, its target and the opener closes. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -264,15 +359,30 @@ export function CoachMark({
     const onPointer = (e: PointerEvent) => {
       const node = e.target instanceof Element ? e.target : null;
       if (!node) return;
-      if (card.current?.contains(node) || node.closest(`[${COACH_OPENER}]`)) return;
+      if (card.current?.contains(node)) {
+        setHeld(shown.current);
+        return;
+      }
+      if (node.closest(`[${COACH_OPENER}]`)) return;
       if (handlers.current.target && within(handlers.current.target, node)) return;
       handlers.current.onClose();
     };
+    /* Let go after the click, which follows the release within the same frame. */
+    let release = 0;
+    const onRelease = () => {
+      cancelAnimationFrame(release);
+      release = requestAnimationFrame(() => setHeld(null));
+    };
     window.addEventListener("keydown", onKey, true);
     window.addEventListener("pointerdown", onPointer, true);
+    window.addEventListener("pointerup", onRelease, true);
+    window.addEventListener("pointercancel", onRelease, true);
     return () => {
+      cancelAnimationFrame(release);
       window.removeEventListener("keydown", onKey, true);
       window.removeEventListener("pointerdown", onPointer, true);
+      window.removeEventListener("pointerup", onRelease, true);
+      window.removeEventListener("pointercancel", onRelease, true);
     };
   }, []);
 
@@ -284,9 +394,12 @@ export function CoachMark({
     height: rect.height + 2 * RING_PAD,
   };
   const measured = cardSize.width > 0 && stage.width > 0;
-  const place = measured
-    ? placeCoach({ target: ring, card: cardSize, stage, obstacles, gap: GAP })
-    : null;
+  const place =
+    held ??
+    (measured ? placeCoach({ target: ring, card: cardSize, stage, obstacles, gap: GAP }) : null);
+  useEffect(() => {
+    shown.current = place;
+  });
   const leader = place && ring ? coachLeader({ ...place, ...cardSize }, ring) : null;
   /** How far along the horizon the tour has come. */
   const reached = `${((step + 1) / total) * 100}%`;

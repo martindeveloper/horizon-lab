@@ -12,10 +12,10 @@
     "ladder": { "title": "Žebřík", "body": "Projděte všechna tělesa od nejmenšího po největší." },
     "ruler": { "title": "Měřítko", "body": "Délka při tomto přiblížení, v jednotce dle volby." },
     "settings": { "title": "Zobrazení", "body": "Dráhy planet, měřítko a kvalita vykreslení." },
-    "guide": { "title": "Průvodce", "body": "Provede vás žebříkem krok za krokem." },
+    "guide": { "title": "Průvodce", "body": "Naučte se, jak velké hvězdy bývají, krok za krokem." },
     "experiences": {
       "title": "Režimy prohlížení",
-      "body": "Celá obrazovka, nebo nechte kameru plout."
+      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
     }
   },
   "app": "Obři",

@@ -622,8 +622,9 @@ the camera's pose so it opens where this one left off; neither feature imports t
 
 ## Help
 
-Every simulation's toolbar opens with `?`: a short tour of its controls that does what each
-one does instead of dimming the page and pointing. A step rings a control (the toolkit's
+Every simulation's toolbar ends with `?`: a short tour of its controls that does what each
+one does instead of dimming the page and pointing; only the HUD around the step quiets, never
+the scene. A step rings a control (the toolkit's
 `CoachMark`; controls carry `data-coach="<id>"`, the toolbar's tools by their ids, the view
 picker as `views`, More as `more` for what phones fold away) and plays its cues on the store:
 the camera turns and zooms, a picker opens and a view changes, the clock speeds up, a panel

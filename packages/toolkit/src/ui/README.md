@@ -59,7 +59,9 @@ catalogue and `examples/visualization-example.tsx` for composition.
   in both themes so it never reads as one of the HUD's panels. The callout's top edge is the
   tour's horizon, gold up to the step reached with a sun at its head. It stands where it covers
   least of `avoid` (`COACH_AVOID`: the glass materials; add what else covers the stage) and never
-  its target. `press` presses the target (or its first button) once found and again as the step
+  its target. While a step shows, the rest of the HUD in the scope (the `avoid` surfaces) quiets
+  to a third: the ringed control, what it has open and any surface the step brought up stay as they
+  are, and so does the scene (a web animation over each surface, eased both ways). `press` presses the target (or its first button) once found and again as the step
   ends if it is still `aria-expanded`. Escape, the close button and a press outside the callout,
   the target, what the target has open (`aria-controls`) and any `data-coach-opener`
   (`COACH_OPENER`) call `onClose`; the arrows step from the scene or the callout. Next takes

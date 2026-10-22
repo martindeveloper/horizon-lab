@@ -9,8 +9,11 @@
     "closeUp": { "title": "Close-up", "body": "Fly in to a body at its true size." },
     "time": { "title": "Time", "body": "Scrub through history, or replay the clearing." },
     "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
-    "guide": { "title": "Guide", "body": "A guided journey through the solar system." },
-    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+    "guide": { "title": "Guide", "body": "Learn how the solar system took shape, step by step." },
+    "experiences": {
+      "title": "Viewing modes",
+      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
+    }
   },
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",

@@ -6,8 +6,14 @@
     "atlas": { "title": "Atlas", "body": "Where each hole lies in the sky." },
     "clocks": { "title": "Clocks", "body": "Drop clocks in and watch time slow." },
     "settings": { "title": "View", "body": "Spin, gravity, the camera and optics." },
-    "guide": { "title": "Guide", "body": "A guided journey round this hole." },
-    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+    "guide": {
+      "title": "Guide",
+      "body": "Learn how a black hole bends light and time, step by step."
+    },
+    "experiences": {
+      "title": "Viewing modes",
+      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
+    }
   },
   "app": "Event Horizon",
   "clocks": "Clocks",

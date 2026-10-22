@@ -8,8 +8,11 @@
     "sightline": { "title": "Sightline", "body": "How far out, and when that light left." },
     "objects": { "title": "Objects", "body": "Find anything and fly to its scale." },
     "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
-    "guide": { "title": "Guide", "body": "A guided journey to the edge of what we see." },
-    "experiences": { "title": "Viewing modes", "body": "Full screen, or let the camera drift." }
+    "guide": { "title": "Guide", "body": "Learn how far the universe reaches, step by step." },
+    "experiences": {
+      "title": "Viewing modes",
+      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
+    }
   },
   "views": {
     "heliosphere": "Heliosphere",

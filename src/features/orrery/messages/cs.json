@@ -12,10 +12,13 @@
     "closeUp": { "title": "Zblízka", "body": "Přeletí k tělesu v jeho skutečné velikosti." },
     "time": { "title": "Čas", "body": "Projděte historii, nebo přehrajte odklízení těles." },
     "settings": { "title": "Zobrazení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
-    "guide": { "title": "Průvodce", "body": "Provede vás sluneční soustavou krok za krokem." },
+    "guide": {
+      "title": "Průvodce",
+      "body": "Naučte se, jak vznikla sluneční soustava, krok za krokem."
+    },
     "experiences": {
       "title": "Režimy prohlížení",
-      "body": "Celá obrazovka, nebo nechte kameru plout."
+      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
     }
   },
   "viewHints": {

@@ -9,10 +9,13 @@
     "atlas": { "title": "Atlas", "body": "Kde na obloze která díra leží." },
     "clocks": { "title": "Hodiny", "body": "Pusťte dovnitř hodiny a sledujte, jak čas zpomaluje." },
     "settings": { "title": "Zobrazení", "body": "Spin, gravitace, kamera a optika." },
-    "guide": { "title": "Průvodce", "body": "Provede vás touto dírou krok za krokem." },
+    "guide": {
+      "title": "Průvodce",
+      "body": "Naučte se, jak černá díra ohýbá světlo a čas, krok za krokem."
+    },
     "experiences": {
       "title": "Režimy prohlížení",
-      "body": "Celá obrazovka, nebo nechte kameru plout."
+      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
     }
   },
   "app": "Horizont událostí",

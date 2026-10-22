@@ -8,10 +8,10 @@
     "line": { "title": "Lines", "body": "Tap a line to see the atom behind it." },
     "star": { "title": "Star", "body": "Pick a star and set how fast it moves." },
     "settings": { "title": "View", "body": "The plot, the spectrograph and render quality." },
-    "guide": { "title": "Guide", "body": "From a rainbow to a mystery star, step by step." },
+    "guide": { "title": "Guide", "body": "Learn to read the light of stars, step by step." },
     "experiences": {
       "title": "Immersive view",
-      "body": "The spectrum alone, without the controls."
+      "body": "Just the spectrum, no controls."
     }
   },
   "views": {
