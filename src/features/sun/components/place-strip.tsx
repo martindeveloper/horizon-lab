@@ -19,6 +19,7 @@ export function PlaceStrip() {
   if (places.length === 0) return null;
   return (
     <div
+      data-coach="places"
       role="group"
       aria-label={t("hud.places")}
       className="-mx-1 flex gap-1 not-md:[scrollbar-width:none] not-md:overflow-x-auto not-md:overscroll-x-contain md:flex-wrap"

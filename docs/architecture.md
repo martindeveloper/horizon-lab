@@ -41,7 +41,8 @@ src/
                                Orrery–Deep Field link (handoff-link.tsx); the guide card every
                                simulation's tour shows (guide-card.tsx), the journey caption
                                with its dwell and tour controls (guide-caption.tsx) and the
-                               guide's keys (use-guide-keys.ts)
+                               guide's keys (use-guide-keys.ts); the `?` tour of the controls
+                               (help-tour.tsx: `useHelp`, `HelpTour` on the toolkit's `CoachMark`)
     pages/                     About and credits page bodies
     status/                    Brand-specific error-page composition and its locale
   features/
@@ -258,11 +259,14 @@ src/
                                (`renderSlice`), what a zoomable scene's store shares
                                (`sceneSlice`), the guide machine of every stepped guide
                                (`guideSlice`) and `asideOpen`
+    help.ts                    The `?` tour's machine every store carries (`helpSlice`): steps of
+                               `data-coach` targets and cues, the snapshot it gives back
     scene-bridge.ts            An engine's side of that store: turns, flights, ready, the HUD
                                readouts it publishes (`createSceneHud`), what the HUD publishes
                                on the stage (`stageClearance`), redraws on a motion-preference
                                change and the camera's side of the Orrery–Deep Field crossing
-                               (`bridgeHandoff`)
+                               (`bridgeHandoff`); the camera an engine lends the store
+                               (`lendCamera`, `orbitCamera`: `SceneCamera`)
     handoff.ts                 One-shot note that a visitor crossed between two simulations
                                that show the solar system (manifest `solarSystem`) at a view,
                                with the camera's pose, so the other side opens where this one
@@ -491,7 +495,7 @@ helpers from `@/i18n/navigation`.
    Wrap the overlay in `SimulationImmersive` and give its header `SimulationToolbar`
    (`src/components/simulations/simulation-toolbar.tsx`), which keeps every
    simulation's tools in one order and holds the immersive toggle (see
-   [Immersive view](#immersive-view)).
+   [Immersive view](#immersive-view)) and the `?` tour (see [Help](#help)).
    Give it a lifecycle: its store is a module and outlives the page, so the root
    component the layout keeps mounted calls `useFreshVisit(freshVisit(store))`
    (`src/components/simulations/use-fresh-visit.ts`). Leaving the simulation puts the store
@@ -615,6 +619,24 @@ The Orrery and Deep Field name the solar system's views alike, and their manifes
 (`solarSystem: { defaultView }`). `HandoffLink` opens the same view in the other, and
 `src/lib/handoff.ts`, which finds the sides through the registry rather than by name, carries
 the camera's pose so it opens where this one left off; neither feature imports the other.
+
+## Help
+
+Every simulation's toolbar opens with `?`: a short tour of its controls that does what each
+one does instead of dimming the page and pointing. A step rings a control (the toolkit's
+`CoachMark`; controls carry `data-coach="<id>"`, the toolbar's tools by their ids, the view
+picker as `views`, More as `more` for what phones fold away) and plays its cues on the store:
+the camera turns and zooms, a picker opens and a view changes, the clock speeds up, a panel
+opens with a layer on. `src/features/<slug>/lib/help.ts` lists the steps (`HelpStep`: `id`,
+`targets`, `press`, `cues`), their words are `help.<id>.title` and `.body` in the feature's
+messages, and the store composes `helpSlice` (`src/lib/help.ts`) with `save` and `restore` of
+the fields its cues touch. The slice keeps the panel, the selection and the camera's place
+(`SceneCamera.mark`, lent by the engine through `lendCamera`) itself. Starting ends a guided
+journey; ending, at any step and however (close, Escape, a press outside, Finish, immersive
+view), gives everything back and flies the camera home last. Cues set states outright, so Back
+replays a step. Nothing is mounted or listening while the tour is closed.
+`tests/help.test.mjs` runs every simulation's tour through its store and checks it moves the
+scene and gives it all back.
 
 ## Technical documentation
 

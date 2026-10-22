@@ -2,12 +2,14 @@
 
 import { useTranslations } from "next-intl";
 
+import { useHelp } from "@/components/simulations/help-tour";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
 import { useSun, type SunStore } from "../lib/store";
 import { PlaceCard } from "./card";
 import { SunDock } from "./dock";
@@ -36,6 +38,8 @@ const guideKeys = {
   },
 };
 
+const helpStore = { getState: useSun.getState, subscribe: useSun.subscribe };
+
 export function SunOverlay() {
   const t = useTranslations("sun");
   const ready = useSun((s) => s.ready);
@@ -43,6 +47,7 @@ export function SunOverlay() {
   const selection = useSun((s) => s.selection);
   const guideOpen = useSun((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
+  const help = useHelp(helpStore, HELP, "sun");
   const api = useSun.getState;
 
   useSceneEscape(escapeSteps);
@@ -63,6 +68,7 @@ export function SunOverlay() {
               <SunViewPicker />
               <SimulationToolbar
                 label={t("hud.controls")}
+                help={help}
                 details={(access) => <SunTechnicalDetails {...access} />}
                 detailsLabel={t("technicalDetails.open")}
                 guide={{ onSelect: () => api().startGuide() }}

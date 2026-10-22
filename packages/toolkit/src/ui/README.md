@@ -52,6 +52,17 @@ catalogue and `examples/visualization-example.tsx` for composition.
 - `OrbitPad`: step buttons for a camera without dragging, round a glass dial with
   optional `centre` content. Labels come in props; pair it with `stepOrbit` (or an orbit
   rig's eased `turnBy`) and `ORBIT_STEP` from `@horizon/toolkit/camera`.
+- `CoachMark`: a guided tour's step over a live scene, never a veil. A gold ring moves onto the
+  first of the step's `targets` on screen (elements marked `data-coach="<id>"`, `COACH_TARGET`,
+  looked up inside the `scope` ancestor, where the ring and the card are drawn) and a glass card
+  stands beside it on the desktop, or at the stage's top or foot on the touch layout and with no
+  target. `press` presses the target (or its first button) once found and again as the step ends
+  if it is still `aria-expanded`. Escape, the close button and a press outside the card, the
+  target and any `data-coach-opener` (`COACH_OPENER`) call `onClose`; the arrows step from the
+  scene or the card. Next takes focus as it opens and `returnFocus` gets it back. It follows its
+  target a frame at a time only while mounted. `coach-model.ts` holds the arithmetic: `playCues`
+  runs a step's cues (`{ at, run }`, seconds) on a clock and returns their stop; `placeCard` puts
+  the card beside a target.
 - `TextReveal` lives at `@horizon/toolkit/ui/motion` to keep Motion optional.
   Reduced motion and `instant` render full text immediately.
 

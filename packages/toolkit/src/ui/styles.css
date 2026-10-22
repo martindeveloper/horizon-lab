@@ -629,6 +629,26 @@
     0 0 40px rgb(var(--solar) / 0.12);
 }
 
+/* The coach's ring: a gold line round the control a tour step is about, gliding from one to
+   the next and breathing while it waits (reduced motion: still, and it jumps). */
+.coach-ring {
+  border: 1.5px solid rgb(var(--solar) / 0.9);
+  box-shadow:
+    0 0 0 4px rgb(var(--solar) / 0.12),
+    0 0 28px rgb(var(--solar) / 0.3);
+  transition-property: left, top, width, height, border-radius;
+  transition-duration: 420ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation: coach-breathe 2.4s ease-in-out infinite alternate;
+}
+@keyframes coach-breathe {
+  to {
+    box-shadow:
+      0 0 0 6px rgb(var(--solar) / 0.06),
+      0 0 36px rgb(var(--solar) / 0.4);
+  }
+}
+
 .horizon-loading-orbit {
   transform-origin: 24px 24px;
   animation: horizon-orbit 4s linear infinite;

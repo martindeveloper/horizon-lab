@@ -8,6 +8,7 @@
  */
 import { audioMapNow } from "@/lib/audio-maps";
 import { driftRunState, timedDrift } from "@/lib/drift";
+import { lendCamera } from "@/lib/scene-bridge";
 import {
   MAP_EPOCH,
   OBSERVED_REGIONS,
@@ -212,6 +213,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     hooks,
   );
   built = true;
+  const returnCamera = lendCamera(store, engine.camera);
 
   /* The store's asks the engine does not read from the settings: a flight to the view it is
      already on (a link, the finder), a button step; and every change redraws a resting scene. */
@@ -234,6 +236,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
   return {
     dispose: () => {
       unsubscribe();
+      returnCamera();
       engine.dispose();
     },
   };

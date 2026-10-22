@@ -414,6 +414,16 @@
     "fullscreen": "Full screen",
     "experiences": "Viewing modes"
   },
+  "help": {
+    "title": "Help",
+    "label": "How to use it",
+    "start": "Show how to use it",
+    "close": "Close help",
+    "progress": "{step} / {total}",
+    "previous": "Back",
+    "next": "Next",
+    "finish": "Done"
+  },
   "guide": {
     "title": "Guide",
     "label": "Guided tour",

@@ -414,6 +414,16 @@
     "fullscreen": "Celá obrazovka",
     "experiences": "Režimy prohlížení"
   },
+  "help": {
+    "title": "Nápověda",
+    "label": "Jak to ovládat",
+    "start": "Ukázat, jak to ovládat",
+    "close": "Zavřít nápovědu",
+    "progress": "{step} / {total}",
+    "previous": "Zpět",
+    "next": "Další",
+    "finish": "Hotovo"
+  },
   "guide": {
     "title": "Průvodce",
     "label": "Průvodce",

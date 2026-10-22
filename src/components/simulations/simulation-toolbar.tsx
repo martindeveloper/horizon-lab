@@ -1,18 +1,25 @@
 "use client";
 
-import { GraduationCap, Info, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import {
+  CircleQuestionMark,
+  GraduationCap,
+  Info,
+  SlidersHorizontal,
+  type LucideIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, type ReactNode, type Ref } from "react";
 
-import { IconButton, Toolbar, Tooltip, type DialogHandle } from "@horizon/toolkit/ui";
+import { COACH_OPENER, IconButton, Toolbar, Tooltip, type DialogHandle } from "@horizon/toolkit/ui";
 
+import { HelpTour, type HelpAccess } from "./help-tour";
 import { SimulationExperience } from "./immersive";
 import { SceneMoreMenu, type MoreItem } from "./more-menu";
 import type { TechnicalDetailsAccess } from "./technical-details";
 
 /** A toolbar button that opens something: a panel (`controls` names it), an overlay, a dialog. */
 type SimulationTool = {
-  /** Also `data-return`, so what it opens can hand focus back. */
+  /** Also `data-return`, so what it opens can hand focus back, and `data-coach`, so a tour can ring it. */
   id: string;
   label: string;
   /** The accessible name, when it says more than the tooltip. */
@@ -31,9 +38,12 @@ const iconClass = "size-4 md:size-3.5";
 function ToolButton({
   tool,
   ref,
+  opener = false,
 }: {
   tool: SimulationTool;
   ref?: Ref<HTMLButtonElement> | undefined;
+  /** It opens the tour, so a press on it is not a press outside the tour. */
+  opener?: boolean;
 }) {
   const { id, label, ariaLabel, icon: Icon, active, controls, onSelect } = tool;
   return (
@@ -41,6 +51,8 @@ function ToolButton({
       <IconButton
         ref={ref}
         data-return={id}
+        data-coach={id}
+        {...(opener ? { [COACH_OPENER]: "" } : {})}
         aria-label={ariaLabel ?? label}
         {...(controls !== undefined
           ? { "aria-expanded": !!active, "aria-controls": active ? controls : undefined }
@@ -55,13 +67,15 @@ function ToolButton({
 }
 
 /**
- * Every simulation's header tools, in one order so hands learn it once: technical details,
- * the guide, the finder (what to look at), the simulation's other tools, its settings panel,
- * then the experiences (immersive view and, with `drift`, the drift). Phones keep the guide,
- * the finder, the settings and the experiences, and fold the rest into More, in the same order.
+ * Every simulation's header tools, in one order so hands learn it once: help (the `?` tour of
+ * these controls), technical details, the guide, the finder (what to look at), the simulation's
+ * other tools, its settings panel, then the experiences (immersive view and, with `drift`, the
+ * drift). Phones keep help, the guide, the finder, the settings and the experiences, and fold
+ * the rest into More, in the same order. The experiences and More carry `data-coach` too.
  */
 export function SimulationToolbar({
   label,
+  help,
   details,
   detailsLabel,
   guide,
@@ -72,6 +86,8 @@ export function SimulationToolbar({
   drift,
 }: {
   label: string;
+  /** The simulation's `?` tour (`useHelp`); its wording is the shared `help` copy. */
+  help: HelpAccess;
   /** The feature's technical details, given the handle and trigger class the toolbar needs. */
   details: (access: TechnicalDetailsAccess) => ReactNode;
   /** Its name in the phone's More menu. */
@@ -87,7 +103,9 @@ export function SimulationToolbar({
   drift?: () => void;
 }) {
   const dialog = useRef<DialogHandle>(null);
+  const helpButton = useRef<HTMLButtonElement>(null);
   const tGuide = useTranslations("guide");
+  const tHelp = useTranslations("help");
   const more: MoreItem[] = [
     {
       id: "details",
@@ -105,6 +123,19 @@ export function SimulationToolbar({
   ];
   return (
     <Toolbar aria-label={label} className="ml-auto shrink-0">
+      <ToolButton
+        ref={helpButton}
+        opener
+        tool={{
+          id: "help",
+          icon: CircleQuestionMark,
+          label: tHelp("title"),
+          ariaLabel: help.open ? tHelp("close") : tHelp("start"),
+          active: help.open,
+          onSelect: help.open ? help.end : help.start,
+        }}
+      />
+      {help.open ? <HelpTour help={help} returnFocus={() => helpButton.current} /> : null}
       {details({ ref: dialog, triggerClassName: "not-md:hidden" })}
       <ToolButton
         ref={guideRef}
@@ -123,8 +154,12 @@ export function SimulationToolbar({
         ))}
       </div>
       <ToolButton tool={{ ...settings, id: "settings", icon: SlidersHorizontal }} />
-      <SimulationExperience onDrift={drift} />
-      <SceneMoreMenu className="md:hidden" items={more} />
+      <span data-coach="experiences" className="inline-flex">
+        <SimulationExperience onDrift={drift} />
+      </span>
+      <span data-coach="more" className="inline-flex md:hidden">
+        <SceneMoreMenu items={more} />
+      </span>
     </Toolbar>
   );
 }

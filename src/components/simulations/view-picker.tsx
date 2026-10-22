@@ -63,7 +63,7 @@ export function ViewList<Id extends string>({
   );
 }
 
-/** The current view as a pill that opens the list; picking one closes it. */
+/** The current view as a pill that opens the list; picking one closes it. A tour rings it as `views`. */
 export function ViewPicker<Id extends string>({
   ariaLabel,
   label,
@@ -82,6 +82,7 @@ export function ViewPicker<Id extends string>({
   const [open, setOpen] = useState(false);
   return (
     <Picker
+      data-coach="views"
       aria-label={ariaLabel}
       label={label}
       open={open}

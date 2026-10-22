@@ -19,6 +19,9 @@ export type PickerProps = {
   className?: string;
   triggerClassName?: string;
   panelClassName?: string;
+} & {
+  /** Data attributes mark the pill itself (a tour's `data-coach`). */
+  [data: `data-${string}`]: string | undefined;
 };
 
 /**
@@ -37,6 +40,7 @@ export function Picker({
   className,
   triggerClassName,
   panelClassName,
+  ...data
 }: PickerProps) {
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -84,6 +88,7 @@ export function Picker({
   return (
     <div ref={root} className={cn("pointer-events-auto relative min-w-0", className)}>
       <button
+        {...data}
         ref={trigger}
         type="button"
         onClick={() => onOpenChange(!open)}

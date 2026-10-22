@@ -56,7 +56,7 @@ function LightRuler() {
   const [rested, setRested] = useState(Math.max(0, onScale));
   const shown = onScale >= 0 ? onScale : rested;
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+    <div data-coach="light" className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <div className={cn("relative min-w-0 flex-1 basis-56 pb-3", onScale < 0 && "opacity-40")}>
         {/* A stop and its name at each line, under the thumb; the names only where there is room. */}
         {LIGHT_SCALE.map((id, index) => (
@@ -143,7 +143,7 @@ function Clock() {
   const api = useSun.getState;
   const label = paused ? t("hud.play") : t("hud.pause");
   return (
-    <div className="flex items-center gap-2">
+    <div data-coach="clock" className="flex items-center gap-2">
       <Tooltip label={label} side="top">
         <IconButton aria-label={label} active={paused} onClick={() => api().togglePaused()}>
           {paused ? <Play className="size-4" /> : <Pause className="size-4" />}

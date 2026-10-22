@@ -67,6 +67,19 @@ export type SceneStoreState = {
   setReady: (ready: boolean) => void;
 };
 
+/**
+ * The camera as its engine lends it to the store while the scene is up (`lendCamera` in
+ * `scene-bridge.ts`): a way back to where it stands, and the moves a tour makes. Null before.
+ */
+export type SceneCamera = {
+  /** Where the camera stands now, as a flight back there (a cut with reduced motion). */
+  mark: () => () => void;
+  /** Zooms by a factor of the distance (below 1 nearer), easing as the wheel does. */
+  zoom: (factor: number) => void;
+  /** Turns by button steps, as the camera pad does. */
+  turn: (step: OrbitTurn) => void;
+};
+
 /** The camera's angles round its aim, whole degrees: heading 0–359, tilt the elevation above the map's plane. */
 export type CameraAngles = { heading: number; tilt: number };
 
@@ -85,6 +98,7 @@ export type SceneSlice = Omit<SceneStoreState, "view"> &
   RenderSlice<SceneRender> & {
     /** Written by the HUD with the scale bar, for the camera pad's readout. */
     cameraAngles: CameraAngles;
+    camera: SceneCamera | null;
     /** The visitor's readout unit; `auto` picks au or ly by each distance's size. */
     distanceUnit: DistanceChoice;
     rotate: (turn: OrbitTurn) => void;
@@ -125,6 +139,7 @@ export function sceneSlice(
     distanceUnit,
     ...renderSlice<SceneRender>(set, render),
     cameraAngles: { heading: 0, tilt: 0 },
+    camera: null,
     ...scale,
     rotate: (turn) => set({ turn: { ...turn } }),
     setDistanceUnit: (unit) => set({ distanceUnit: unit }),

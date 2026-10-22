@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { driftSlice, type DriftSlice } from "@/lib/drift";
+import { helpSlice, type HelpSlice } from "@/lib/help";
 import {
   RESET_SCENE_SETTINGS,
   guideSlice,
@@ -13,6 +14,7 @@ import { cyclePhaseAt, decimalYear } from "@/space/sun/model/cycle";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
+import { HELP } from "./help";
 import type { ClockRate } from "./model/clock";
 import type { LightId } from "./model/lights";
 import { PLACES, type PlaceId } from "./model/places";
@@ -40,6 +42,9 @@ type Saved = {
   show: Show;
 };
 
+/** What the `?` tour gives back besides the guide's: the clock's pause and the eruption's play. */
+type HelpSaved = Saved & { paused: boolean; eruptionPlaying: boolean };
+
 /** What a drift sets for its show, as the visitor had it before it began: bloom, and the clock. */
 type DriftEffects = { bloom: boolean; clock: ClockRate };
 
@@ -53,6 +58,7 @@ const DEFAULT_SHOW: Show = { fieldLines: true, names: true, grid: false };
 
 export type SunStore = SceneSlice &
   GuideSlice<Saved> &
+  HelpSlice<HelpSaved> &
   DriftSlice & {
     view: ViewId;
     light: LightId;
@@ -196,6 +202,20 @@ export const useSun = create<SunStore>((set, get) => ({
       selection: step.place ?? null,
     }),
     close: () => ({ guideLanded: false }),
+  }),
+  ...helpSlice(set, get, {
+    steps: HELP,
+    save: (s) => ({
+      view: s.view,
+      light: s.light,
+      clock: s.clock,
+      paused: s.paused,
+      cut: s.cut,
+      eruption: s.eruption,
+      eruptionPlaying: s.eruptionPlaying,
+      show: s.show,
+    }),
+    restore: (saved) => saved,
   }),
   guidePlaying: false,
   guideLanded: false,

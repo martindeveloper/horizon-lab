@@ -49,6 +49,8 @@ export { cn } from "./utils";
 export { isSceneShortcut } from "./keyboard";
 export { useFocusHandoff } from "./focus";
 export { useMediaQuery } from "./media-query";
+export { COACH_OPENER, COACH_TARGET, CoachMark, type CoachMarkProps } from "./coach-mark";
+export { placeCard, playCues, type CoachRect, type CueClock, type TourCue } from "./coach-model";
 
 export { Equation, Sub } from "./equation";
 export { LoadingScreen } from "./loading-screen";

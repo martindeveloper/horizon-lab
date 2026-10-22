@@ -7,13 +7,14 @@ import {
   defaultSceneAntialias,
   scaleChanged,
   scaleReadout,
+  type OrbitRig,
   type SceneHost,
   type Viewport,
 } from "@horizon/toolkit/scene";
 import type { DistanceUnit } from "@horizon/toolkit/science";
 
 import { carryPose, takeHandoff, type Crossing, type HandoffSide } from "./handoff";
-import type { SceneSlice, SceneStoreState } from "./scene-store";
+import type { SceneCamera, SceneSlice, SceneStoreState } from "./scene-store";
 
 /**
  * Reads what the HUD publishes on the stage (`[data-simulation]`) under a custom property, CSS
@@ -124,6 +125,42 @@ export function bridgeStore<S extends SceneStoreState>(
       if (s.ready) return false;
       s.setReady(true);
       return true;
+    },
+  };
+}
+
+/** Lends the engine's camera to the store (`SceneCamera`); returns the release, for the engine's disposal. */
+export function lendCamera(
+  store: Pick<StoreApi<{ camera: SceneCamera | null }>, "setState">,
+  camera: SceneCamera,
+) {
+  store.setState({ camera });
+  return () => store.setState({ camera: null });
+}
+
+/**
+ * An orbit rig as a `SceneCamera`: its pose to fly back to, the wheel's zoom and the pad's
+ * turn, each asking the engine for a frame (`invalidate`).
+ */
+export function orbitCamera(
+  rig: Pick<OrbitRig, "inputPose" | "flyTo" | "zoomTo" | "turnBy" | "target">,
+  invalidate: () => void,
+): SceneCamera {
+  return {
+    mark: () => {
+      const { azimuth, inclination, distance } = rig.inputPose();
+      return () => {
+        rig.flyTo(distance, { azimuth, inclination });
+        invalidate();
+      };
+    },
+    zoom: (factor) => {
+      rig.zoomTo(rig.target * factor, false);
+      invalidate();
+    },
+    turn: (step) => {
+      rig.turnBy(step);
+      invalidate();
     },
   };
 }
