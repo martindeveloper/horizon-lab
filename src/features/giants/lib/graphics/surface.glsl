@@ -2,6 +2,8 @@
 // pulsar's caps, a brown dwarf's clouds). A spectral lookup supplies continuum radiance;
 // tabulated atmosphere profiles supply limb darkening, with a grey fallback for remnants.
 
+#include "./granulation.glsl"
+
 // A point of the body's frame as the view sees it: turned back by the spin, its pole tipped
 // towards us (`hitSpheroid` and `turned`, inverted).
 vec3 toView(vec3 b, float turn, float tilt) {
@@ -136,13 +138,12 @@ vec3 starSurface(vec3 s, float mu, int style, vec4 body, vec4 surface, vec4 glob
     vec3 p = s * across + seed * 17.0;
     float fine = min(detail, 1.0) * resolvedFeature(across, radiusPx, mu);
     if (fine > 0.0 && giant < 0.5) {
-      /* Dwarf granules have cool intergranular lanes. Red supergiants use the continuous
-         multiscale field below: a tiled Voronoi network makes them look like cracked clay. */
-      vec3 advected = p + 0.3 * sin(p.yzx * 0.83 + vec3(1.7, 4.1, 2.3) + uTime * 0.02);
-      vec3 cells = convectionCells(advected, uTime * (giant > 0.5 ? 0.12 : 1.0));
-      float lane = 1.0 - smoothstep(0.0, 0.1, cells.y - cells.x);
-      float cell = mix((0.35 + 0.65 * cells.z) * (1.0 - 0.75 * clamp(cells.x, 0.0, 1.0)) * 1.5 - 0.15, -1.0, lane);
-      dT += contrast * fine * quiet * cell;
+      /* Dwarfs and ordinary cool giants retain granular upflows and downflows. Blended
+         interiors and flowing lanes replace rigid polygon outlines on resolved surfaces. */
+      float interiorDetail = min(detail, 1.0) * resolvedFeature(across * 2.7, radiusPx, mu);
+      vec3 cells = granuleField(p, uTime, interiorDetail);
+      float lane = cells.y;
+      dT += contrast * fine * quiet * cells.x;
       // Sparse magnetic bright points in intergranular lanes; never on a hot/radiative star.
       if (weather && giant < 0.5 && detail > 1.0) {
         float tiny = resolvedFeature(across * 5.0, radiusPx, mu);

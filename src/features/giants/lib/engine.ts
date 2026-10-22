@@ -24,6 +24,7 @@ import { convert, decodeSrgb, hexToLinear } from "@horizon/toolkit/science";
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
+import focusBlurShader from "./graphics/focus-blur.frag.glsl";
 import fragmentShader from "./graphics/giants.frag.glsl";
 import { stellarTables } from "./graphics/stellar-tables";
 import { discTints } from "./graphics/tints";
@@ -31,6 +32,7 @@ import { vectors } from "./graphics/vectors";
 import { weatherUniforms } from "./graphics/weather-uniforms";
 import { createForecast, turnAt } from "./model/activity";
 import { radiusMetres } from "./model/catalogue";
+import { fadeFocusBlur, focusBlurRadius } from "./model/focus-blur";
 import { glideAt, glideFrom, glideRests, glideSeconds, glideTowards } from "./model/glide";
 import { letGo, poseRests, restPose, settlePose, turnBy } from "./model/grab";
 import { NOBODY, handOver, handOverAtOnce, type HandOver } from "./model/hand-over";
@@ -169,6 +171,7 @@ export function createGiantsEngine(
       uEarthMean: { value: linearRgb(MAPS.earth?.mean ?? "#808080") },
       uJupiterMean: { value: linearRgb(MAPS.jupiter?.mean ?? "#808080") },
     };
+    const blurRadii = new Float32Array(MAX_DISCS);
     const pass = resources.own(
       createFullscreenPass({
         canvas,
@@ -176,6 +179,19 @@ export function createGiantsEngine(
         fragmentShader,
         uniforms,
         defines: SHADER_DEFINES,
+        filter: {
+          fragmentShader: focusBlurShader,
+          uniforms: {
+            uResolution: uniforms.uResolution,
+            uPixelRatio: uniforms.uPixelRatio,
+            uCount: uniforms.uCount,
+            uShape: uniforms.uShape,
+            uBlurRadius: { value: blurRadii },
+            uBaseline: uniforms.uBaseline,
+            uOrbitCentre: uniforms.uOrbitCentre,
+            uOrbits: uniforms.uOrbits,
+          },
+        },
       }),
     );
 
@@ -211,6 +227,7 @@ export function createGiantsEngine(
 
     const reduce = prefersReducedMotion();
     const opening = useGiants.getState();
+    let blurLevel = opening.focusBlur ? 1 : 0;
     /** The camera's place on the ladder, where it heads, its glide there, and the stage in CSS pixels. */
     let place = clampRung(ladder, opening.goal);
     let target = place;
@@ -486,6 +503,7 @@ export function createGiantsEngine(
 
     function frame(dt: number) {
       const state = useGiants.getState();
+      blurLevel = fadeFocusBlur(blurLevel, state.focusBlur, dt, reduce);
       if (state.flight !== lastFlight) {
         lastFlight = state.flight;
         fly(state.goal);
@@ -558,6 +576,7 @@ export function createGiantsEngine(
         }
         const edge = Math.min(MAX_EDGE, (body.high - body.low) / (2 * body.radius));
         discs.shape[i]!.set(body.x, body.y, body.radius, body.polar);
+        blurRadii[i] = blurLevel * focusBlurRadius(body.index, place, body.radius);
         discs.body[i]!.set(STYLES.indexOf(look.style), look.equatorK, look.poleK, look.seed);
         discs.surface[i]!.set(look.cells, look.haze, Number.isFinite(edge) ? edge : 0, look.rough);
         discs.globe[i]!.set(turnAt(globe, time), globe.tilt, flattening[body.index]!, look.pulse);
@@ -625,6 +644,7 @@ export function createGiantsEngine(
         antialias: state.antialias,
         bloom: state.bloom ? bloomSettings(state.quality) : null,
         gamut: state.wideColour ? "p3" : "srgb",
+        filter: blurLevel > 0,
       });
 
       const now = performance.now();
@@ -658,6 +678,7 @@ export function createGiantsEngine(
           state.flight !== previous.flight ||
           state.orbits !== previous.orbits ||
           state.bloom !== previous.bloom ||
+          state.focusBlur !== previous.focusBlur ||
           state.wideColour !== previous.wideColour ||
           state.antialias !== previous.antialias ||
           state.quality !== previous.quality ||

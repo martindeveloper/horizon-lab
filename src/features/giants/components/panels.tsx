@@ -59,6 +59,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const quality = useGiants((s) => s.quality);
   const antialias = useGiants((s) => s.antialias);
   const bloom = useGiants((s) => s.bloom);
+  const focusBlur = useGiants((s) => s.focusBlur);
   const wideColour = useGiants((s) => s.wideColour);
   const api = useGiants.getState;
   return (
@@ -98,8 +99,12 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         modes={ANTIALIAS_MODES}
         onAntialias={(mode) => api().setAntialias(mode)}
         onReset={() => api().resetView()}
+        note={<p className="text-xs text-muted">{t("panel.focusBlurNote")}</p>}
       >
         <BloomSwitch on={bloom} onToggle={() => api().setBloom(!bloom)} />
+        <SwitchRow on={focusBlur} onToggle={() => api().setFocusBlur(!focusBlur)}>
+          {t("panel.focusBlur")}
+        </SwitchRow>
         <WideColourSwitch webgl on={wideColour} onToggle={() => api().setWideColour(!wideColour)} />
       </RenderSection>
     </Rail>

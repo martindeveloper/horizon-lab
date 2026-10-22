@@ -56,6 +56,9 @@ type GiantsStore = GuideSlice<Saved> &
     ruler: Ruler;
     surfaceZoom: SurfaceZoom;
     setSurfaceZoom: (zoom: SurfaceZoom) => void;
+    /** Optional presentation blur of neighbouring bodies; no physical depth implied. */
+    focusBlur: boolean;
+    setFocusBlur: (enabled: boolean) => void;
     /** The first frame is drawn. */
     ready: boolean;
     /** The guide moves on by itself once a step has been read; off under reduced motion. */
@@ -105,6 +108,7 @@ const VIEW_DEFAULTS = {
   orbits: false,
   ruler: "auto",
   surfaceZoom: 1,
+  focusBlur: false,
   ...RENDER_DEFAULTS,
 } as const satisfies Partial<GiantsStore>;
 
@@ -125,6 +129,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   orbits: VIEW_DEFAULTS.orbits,
   ruler: VIEW_DEFAULTS.ruler,
   surfaceZoom: VIEW_DEFAULTS.surfaceZoom,
+  focusBlur: VIEW_DEFAULTS.focusBlur,
   ...renderSlice(set, RENDER_DEFAULTS),
   ready: false,
   guidePlaying: false,
@@ -144,6 +149,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   setOrbits: (orbits) => set({ orbits }),
   setRuler: (ruler) => set({ ruler }),
   setSurfaceZoom: (surfaceZoom) => set({ surfaceZoom }),
+  setFocusBlur: (focusBlur) => set({ focusBlur }),
   resetView: () => set(VIEW_DEFAULTS),
   ...guideSlice(set, get, {
     tour: TOUR,

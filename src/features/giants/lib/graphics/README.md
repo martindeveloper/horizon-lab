@@ -7,6 +7,15 @@ they skip the costly fine-cell search, spot filaments and detailed clouds. Magne
 weather retains its separate focus fade. The Display panel's inspection zoom magnifies
 the scene about the focused body while retaining physical sizes, picking and ruler units.
 
+The optional **Focus blur** switch is off by default. It is a presentation aid, unrelated
+to real line-of-sight distances. One final byte-frame filter softens neighbouring bodies
+with a nine-tap binomial kernel (offset capped at 2 CSS pixels, reduced for tiny bodies),
+averaging decoded light. The nearest body remains sharp throughout navigation, with a
+continuous handover, conservative limb protection, and unfiltered measurement lines and
+DOM labels. Background sky outside the bodies is copied. Fine surface work remains limited
+to the focus owner; the filter never re-evaluates the stellar shader. Turning it off fades
+to the original path with no extra pass; reduced motion switches immediately.
+
 ## Continuum and limb darkening
 
 `atmosphere.ts` integrates Planck radiance over 380–780 nm in 5 nm steps using the toolkit's
@@ -54,13 +63,19 @@ The hand can turn the globe away from this viewing angle.
 
 Fine granules follow the pressure-scale-height estimate. Their projected width, including
 foreshortening and actual drawing-buffer resolution, controls visibility; zoom never
-inflates their physical size. Dark lanes and sparse bright points are illustrative.
+inflates their physical size. Ordinary cool stars, including K giants, use smoothly blended
+upflows with continuous internal temperature gradients and irregular, finite-width cool
+lanes. Domain advection breaks straight cell boundaries; smaller interior structure has
+its own resolution filter. This replaces hard Voronoi borders without changing the input
+cell scale. Red-giant granulation is supported by photometry and convection simulations
+([Mathur et al. 2011](https://doi.org/10.1088/0004-637X/741/2/119)); the procedural patterns,
+contrasts, dark lanes and sparse bright points are illustrative, not a fit to any star.
 Supergiant heat, relief and silhouette use one rotating, smoothly evolving low-frequency
 field, informed by the broad behaviour of convection simulations
 ([Chiavassa et al. 2011](https://doi.org/10.1051/0004-6361/201015768)). It is a procedural
 surrogate, not a hydrodynamic solution. Rotation, convection and activity use display time.
 Red supergiants deliberately use continuous, warped noise at several scales instead of
-the dwarfs' Voronoi cell lanes. Broad patches dominate; intermediate structures and faint
+the ordinary stars' granular upflows and lanes. Broad patches dominate; intermediate structures and faint
 fine turbulence appear only in focus. The apparent edge varies by at most 2% of the radius,
 an illustrative bound rather than an interferometric fit. Optical and infrared intensity
 patterns differ; the continuum rendering cannot reproduce molecular-band images exactly.
@@ -95,3 +110,16 @@ use solar-inspired fractions of each star's radius, not measurements of every ob
 
 Both formerly reversed `smoothstep` calls use ascending edges and an explicit complement.
 Offline shader tests parse the expanded GLSL; they do not validate GPU output or frame time.
+
+The opt-in granulation regression tests execute the production GLSL in WebGL 2. They check
+resolved contrast, smooth spatial and temporal variation, and stable cell positions when
+fine interior detail fades. Run them only when browser checks are requested; they use an
+installed browser without starting a server:
+
+```sh
+HORIZON_TEST_BROWSER=/path/to/chromium node --import tsx \
+  --import ./tests/glsl-register.mjs --test tests/browser/giants-granulation.test.mjs
+```
+
+Omit `HORIZON_TEST_BROWSER` to use installed Chrome. These checks bound visual artefacts;
+they do not validate hydrodynamics, a star's observed appearance, or native GPU frame time.
