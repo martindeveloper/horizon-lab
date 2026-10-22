@@ -61,9 +61,9 @@ export function featureFlag(
  * a build or a preview; `process.env` is read by its full name so the value is inlined.
  */
 export const FEATURES: Readonly<Record<FeatureId, boolean>> = {
-  voyage: featureFlag(process.env.NEXT_PUBLIC_FEATURE_VOYAGE, ENVIRONMENT, DEBUG),
+  voyage: featureFlag(process.env.NEXT_PUBLIC_FEATURE_VOYAGE, ENVIRONMENT, DEBUG, true),
   giants: featureFlag(process.env.NEXT_PUBLIC_FEATURE_GIANTS, ENVIRONMENT, DEBUG, true),
-  sun: featureFlag(process.env.NEXT_PUBLIC_FEATURE_SUN, ENVIRONMENT, DEBUG),
+  sun: featureFlag(process.env.NEXT_PUBLIC_FEATURE_SUN, ENVIRONMENT, DEBUG, true),
 };
 
 /**
