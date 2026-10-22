@@ -27,16 +27,12 @@ precision highp float;
 #include <horizon/noise>
 #include <horizon/convection>
 #include <horizon/temperature>
-#include <horizon/tonemap>
-#include <horizon/display-peak>
-#include <horizon/display>
+#include "./display.glsl"
+#include <horizon/pass-output>
 
-uniform vec2 uResolution;               // drawing buffer, pixels
-uniform float uPixelRatio;              // buffer pixels per CSS pixel
 uniform float uBaseline;                // the line the bodies stand on, CSS pixels from the top
 uniform float uTime;                    // seconds, drives everything that moves
 uniform float uDetail;                  // 0: the main layers; 1: their finer companions too
-uniform float uLines;                   // the line art's presence (baseline, orbits): 0 while a drift veils it
 uniform vec2 uFocus;                    // one detailed surface's slot, and its faded quality budget
 uniform highp sampler2D uProfiles;      // each disc: R,V,B limb laws; latitude temperature
 uniform int uCount;                     // bodies in use
@@ -64,9 +60,6 @@ uniform vec3 uEjectionDirection[EJECTIONS]; // projected direction and angular c
 uniform vec3 uFlareColour;             // the existing spectrum table sampled once at FLARE_K
 uniform vec4 uFlash[ARCADES];           // each flare lit: its site x, y, z; its light
 uniform highp sampler2D uOutflows;      // clouds: centre/width, gas/dust/temperature/seed, emission
-uniform vec3 uOrbitCentre;              // centre x, y; 1 while any ring shows (0: none)
-uniform vec2 uOrbits[ORBIT_COUNT];      // each ring's radius, CSS pixels, and how much of it shows
-uniform vec3 uAccent;                   // the house gold, linear
 uniform vec3 uBalmer;                   // the Balmer lines' pink, linear
 uniform vec3 uAlkali;                   // what a brown dwarf's sodium and potassium leave of its light
 uniform vec3 uSky;                      // the space background, linear
@@ -360,24 +353,5 @@ void main() {
     colour = mix(colour, dots, uOverview);
   }
 
-  /* Hue kept through the tone curve, so a red star stays red and keeps its limb darkening; the
-     curve ends at the canvas's peak (<horizon/display-peak>). */
-  vec3 shown = fromPeak(tonemapHue(toPeak(colour), EXPOSURE, SHOULDER, SATURATION, HIGHLIGHT_WHITE));
-
-  /* The orbits over everything, after the tone curve so their gold is the theme's: a dark
-     casing either side of each line keeps it legible across a bright face as on the sky. */
-  if (uOrbitCentre.z > 0.0 && uLines > 0.0) {
-    float r = length(p - uOrbitCentre.xy);
-    float line = 0.0;
-    float casing = 0.0;
-    for (int k = 0; k < ORBIT_COUNT; k++) {
-      vec2 ring = uOrbits[k];
-      float d = abs(r - ring.x);
-      line = max(line, ring.y * (1.0 - smoothstep(0.35, 1.25, d)));
-      casing = max(casing, ring.y * (1.0 - smoothstep(1.25, ORBIT_CASE_PX, d)));
-    }
-    shown *= 1.0 - ORBIT_CASE_DEPTH * casing * uLines;
-    shown = mix(shown, uGamut * uAccent, ORBIT_LINE_ALPHA * line * uLines);
-  }
-  gl_FragColor = vec4(displayEncode(shown), 1.0);
+  gl_FragColor = vec4(passOutput(colour, gl_FragCoord.xy), 1.0);
 }

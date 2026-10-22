@@ -83,6 +83,34 @@ const SCENES: readonly GiantsBenchScene[] = [
   still("sun", "The Sun: spots, faculae, prominences and corona"),
   { ...still("sun", "The Sun with bloom on"), id: "sun-bloom", tags: ["effects"], bloom: true },
   {
+    ...still("rigel", "Rigel with bloom on: a hot face"),
+    id: "rigel-bloom",
+    tags: ["effects"],
+    bloom: true,
+  },
+  {
+    ...still("sirius-b", "Sirius B with bloom on: a small, intense light"),
+    id: "sirius-b-bloom",
+    tags: ["effects"],
+    bloom: true,
+  },
+  {
+    ...still("ton-618", "TON 618 with bloom on: the quasar's blinding ring"),
+    id: "ton-618-bloom",
+    tags: ["effects"],
+    bloom: true,
+  },
+  {
+    ...still(
+      "betelgeuse",
+      "Betelgeuse with its orbits and bloom on: the lines stay crisp over the glow",
+    ),
+    id: "betelgeuse-orbits-bloom",
+    tags: ["effects"],
+    orbits: true,
+    bloom: true,
+  },
+  {
     ...still("betelgeuse", "Betelgeuse with the planets' orbits, as the guide shows it"),
     id: "betelgeuse-orbits",
     orbits: true,

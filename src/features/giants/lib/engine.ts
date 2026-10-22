@@ -35,6 +35,7 @@ import { isSceneShortcut } from "@horizon/toolkit/ui";
 import { DRIFT } from "./drift";
 import { overviewDots } from "./graphics/dots";
 import focusBlurShader from "./graphics/focus-blur.frag.glsl";
+import resolveShader from "./graphics/giants-resolve.frag.glsl";
 import fragmentShader from "./graphics/giants.frag.glsl";
 import { stellarTables } from "./graphics/stellar-tables";
 import { discTints } from "./graphics/tints";
@@ -272,6 +273,17 @@ export function createGiantsEngine(
             uBaseline: frameUniforms.uBaseline,
             uOrbitCentre: orbitUniforms.uOrbitCentre,
             uOrbits: orbitUniforms.uOrbits,
+          },
+        },
+        /* Bloom on radiance, finished by the same display step (graphics/display.glsl). */
+        hdr: {
+          fragmentShader: resolveShader,
+          uniforms: {
+            uResolution: frameUniforms.uResolution,
+            uPixelRatio: frameUniforms.uPixelRatio,
+            uLines: frameUniforms.uLines,
+            uAccent: lightUniforms.uAccent,
+            ...orbitUniforms,
           },
         },
       }),
@@ -1120,7 +1132,7 @@ export function createGiantsEngine(
       }
       pass.render({
         antialias: state.antialias,
-        bloom: state.bloom ? bloomSettings(state.quality) : null,
+        bloom: state.bloom ? bloomSettings(state.quality, pass.hdr) : null,
         gamut: state.wideColour ? "p3" : "srgb",
         filter:
           blurLevel > 0 && needsFocusBlur(discs.shape, blurRadii, count, stage.width, stage.height),
