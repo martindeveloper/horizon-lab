@@ -113,6 +113,12 @@
   }
 }
 
+/* Shared slider interaction; each thumb keeps its own size, fill, border and glow.
+   As a utility, these defaults can be overridden by a control's transition/easing utilities. */
+@utility slider-thumb {
+  @apply block rounded-full outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95;
+}
+
 @utility anim-rise {
   --enter-from: translateY(12px);
   animation: anim-enter var(--transition-duration-reveal) var(--ease-enter) both;

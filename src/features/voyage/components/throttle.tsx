@@ -89,7 +89,7 @@ export function ThrottleLever() {
           <SliderPrimitive.Thumb
             aria-label={t("hud.throttle")}
             aria-valuetext={t("hud.throttleValue", { value: percent })}
-            className="block h-2.5 w-7 rounded-full bg-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95"
+            className="slider-thumb h-2.5 w-7 bg-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)]"
           />
         </SliderPrimitive.Root>
       </div>

@@ -1,15 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from "react";
 
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { Action, IconButton, Tooltip, cn, uiMotion } from "@horizon/toolkit/ui";
@@ -28,15 +20,6 @@ export type GuideControls = {
   /** Beside Next: a way on, such as the Orrery's to Deep Field at its last step. */
   extra?: ReactNode;
 };
-
-/**
- * Lighter than panel glass, so the scene reads through it: the panel's tint at 60 % under the
- * same blur, in either theme. Set as the material's variable, so browsers without backdrop
- * blur still get the opaque fallback.
- */
-const VEIL = {
-  "--glass-bg": "color-mix(in srgb, var(--panel-bg) 60%, transparent)",
-} as CSSProperties;
 
 /** Where the guide is: the step (from 0), the steps in all and, on a journey, the step's hold. */
 export type GuideProgress = {
@@ -127,8 +110,7 @@ export function GuideCard({
       <section
         ref={cardRef}
         aria-label={label}
-        style={VEIL}
-        className="glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-4 pt-3.5 pb-3 text-center md:px-6 md:pt-5 md:pb-4 short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
+        className="guide-card glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-4 pt-3.5 pb-3 text-center md:px-6 md:pt-5 md:pb-4 short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
       >
         <p className="font-mono text-[10px] tracking-[0.14em] text-fg-tertiary uppercase tabular-nums">
           {kicker}
@@ -253,11 +235,8 @@ function GuideSegments({ step, total, hold }: GuideProgress) {
               key={step}
               className="guide-fill block h-full bg-solar"
               data-state={hold?.state ?? "running"}
-              style={
-                hold
-                  ? { animationDuration: `${hold.seconds}s`, animationTimingFunction: "linear" }
-                  : undefined
-              }
+              data-timed={hold ? true : undefined}
+              style={hold ? { animationDuration: `${hold.seconds}s` } : undefined}
             />
           ) : null}
         </span>

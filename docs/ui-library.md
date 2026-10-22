@@ -107,6 +107,16 @@ The root app imports `src/styles.css` once. It includes:
    and contain no Tailwind utilities of their own: the root stylesheet compiles
    utilities for every feature once, so the cascade order holds on every page.
 
+Use Tailwind classes for ordinary layout and named CSS classes for materials,
+effects and shared visual behavior. Inline styles supply calculated values such
+as positions, dimensions, scientific colors and simulation durations; pass CSS
+variables when the stylesheet composes those values into an effect.
+
+`slider-thumb` shares the thumb's rounded shape, focus ring, feedback transition
+and pressed scale across the standard Slider and custom Radix sliders. Keep each
+control's dimensions, fill, border, glow and cursor in its own classes. Transition
+and easing utilities can override the defaults when a control needs them.
+
 A stage over a scene bright enough to wash out the glass (the Sun's photosphere close up) marks
 itself `data-scene-tone="bright"`: its panels, pills and HUD take the popover's denser glass in
 either theme, and scene names sit on a dark plate instead of their halo.

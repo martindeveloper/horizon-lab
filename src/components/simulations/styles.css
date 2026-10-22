@@ -1,3 +1,9 @@
+/* Lighter than panel glass, so the scene reads through the guide in either theme.
+   Override the material's tint so the opaque fallback still works without backdrop blur. */
+.guide-card {
+  --glass-bg: color-mix(in srgb, var(--panel-bg) 60%, transparent);
+}
+
 /* Every guide's step (guide-card.tsx): its lines rise in together, a beat apart. The step
    clips them, so a line still below its place never overflows the scroller into a scrollbar. */
 .guide-step {
@@ -58,6 +64,9 @@
   animation-duration: var(--transition-duration-reveal);
   animation-timing-function: var(--ease-enter);
   animation-fill-mode: both;
+}
+.guide-fill[data-timed] {
+  animation-timing-function: linear;
 }
 .guide-fill[data-state="waiting"] {
   transform: scaleX(0);

@@ -157,7 +157,6 @@ export function SpectrumView({ className }: { className?: string }) {
           ref={ribbon}
           aria-hidden
           className="spectroscopy-ribbon block h-[clamp(1.5rem,5dvh,3rem)] w-full rounded-[3px]"
-          style={{ imageRendering: "pixelated" }}
         />
         {/* The focused element's lines, named; the lines themselves run through everything. */}
         <div aria-hidden className="relative mt-0.5 h-3.5 font-mono text-[10px] leading-3.5">

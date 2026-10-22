@@ -20,6 +20,7 @@
 
 /* The ribbon sits on the scene like a slit image: a hairline frame, never a card. */
 :where([data-simulation="spectroscopy"]) .spectroscopy-ribbon {
+  image-rendering: pixelated;
   box-shadow:
     0 0 0 0.5px color-mix(in srgb, var(--color-space-fg) 12%, transparent),
     0 0 24px rgb(var(--solar) / 0.06);

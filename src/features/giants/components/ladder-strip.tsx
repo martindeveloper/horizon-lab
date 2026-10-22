@@ -161,7 +161,7 @@ export function LadderStrip() {
         <SliderPrimitive.Thumb
           aria-label={t("hud.ladder")}
           aria-valuetext={t(rungNameKey(RUNG_IDS[focus]!))}
-          className="relative z-[2] block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95"
+          className="relative z-[2] slider-thumb size-3.5 border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)]"
         />
       </SliderPrimitive.Root>
     </div>

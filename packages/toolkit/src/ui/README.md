@@ -5,6 +5,11 @@ translated strings and domain values in props. No component reads application
 state or routing. See the repository's `docs/ui-library.md` for the full component
 catalogue and `examples/visualization-example.tsx` for composition.
 
+- `Slider`: standard Radix slider with translated labels and optional scientific
+  track styling supplied by the caller. Its `slider-thumb` CSS utility also serves
+  custom Radix sliders: shared focus ring, feedback transition, rounded shape and
+  pressed scale, with dimensions, fill, border, glow and cursor left to the control.
+  Transition and easing utilities can override its defaults.
 - `Dialog`: `ref` exposes `open()` / `close()`. Native `<dialog>` handles modality,
   focus containment, Escape and focus restoration. Supply title and close label.
   Backdrop clicks dismiss; key events do not reach background simulation shortcuts.

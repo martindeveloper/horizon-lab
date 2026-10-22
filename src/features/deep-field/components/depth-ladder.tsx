@@ -123,7 +123,7 @@ export function DepthLadder() {
           <SliderPrimitive.Thumb
             aria-label={t("hud.depth")}
             aria-valuetext={valueText}
-            className="block size-3.5 rounded-full bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95"
+            className="slider-thumb size-3.5 bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)]"
           />
         </SliderPrimitive.Root>
         {/* Rungs beside the track: a tick each, named when current or pointed at. Phones name the
