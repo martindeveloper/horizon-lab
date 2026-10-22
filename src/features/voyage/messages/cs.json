@@ -4,8 +4,8 @@
   "canvasLabel": "Sluneční soustava ve skutečném měřítku z paluby lodi",
   "help": {
     "camera": {
-      "title": "Pohyb kamery",
-      "body": "Tažením obíháte, kolečkem nebo sevřením prstů přibližujete."
+      "title": "Výhled z kabiny",
+      "body": "Na orbitě loď drží výhled. Převezměte řízení a leťte; při ručním letu tažením měníte směr."
     },
     "objects": { "title": "Objekty", "body": "Vyberte cíl a autopilot vás tam doveze." },
     "drive": { "title": "Pohon", "body": "S každým pohonem trvá cesta jinak dlouho." },
@@ -13,7 +13,7 @@
     "throttle": { "title": "Tah", "body": "Posuňte páku a řiďte loď sami." },
     "settings": {
       "title": "Nastavení",
-      "body": "Kabina, vrstvy, ovládání kamery a kvalita vykreslení."
+      "body": "Kabina, vrstvy a kvalita vykreslení. Při ručním letu ovládání kamery mění směr lodi."
     },
     "guide": {
       "title": "Průvodce",
@@ -34,7 +34,7 @@
     "edge": "Okraj"
   },
   "viewHints": {
-    "earth": "Domov z několika poloměrů. Tažením obíhejte, kolečkem se vzdalte.",
+    "earth": "Domov z několika poloměrů. Převezměte řízení a vydejte se na průzkum.",
     "moon": "Třicet průměrů Země daleko. Země je odsud malý modrý kotouč.",
     "mars": "Slunce tu svítí méně než poloviční silou.",
     "jupiter": "Jeho měsíce vrhají na oblaka skutečné stíny.",
@@ -85,8 +85,8 @@
     "throttleValue": "{value} %",
     "brake": "Brzda",
     "brakeHold": "Držením brzdit",
-    "invite": "Leťte klávesou W nebo pákou · tažením obíhejte",
-    "inviteTouch": "Leťte pákou · tažením obíhejte",
+    "invite": "Leťte klávesou W nebo pákou",
+    "inviteTouch": "Leťte pákou",
     "keys": "W S tah · A D · R F · Q E náklon · Shift zrychlení · X brzda · mezerník orbita · tažením rozhled",
     "slower": "Pomaleji",
     "faster": "Rychleji",

@@ -3,14 +3,17 @@
   "metadataDescription": "Fly a spacecraft at true scale from the Moon to the far planets. Real drives, two clocks, the light as it falls there.",
   "canvasLabel": "The solar system at true scale, seen from a spacecraft",
   "help": {
-    "camera": { "title": "Move the camera", "body": "Drag to orbit, scroll or pinch to zoom." },
+    "camera": {
+      "title": "Cockpit view",
+      "body": "In orbit, the ship holds its view. Take the helm to fly; drag to steer during manual flight."
+    },
     "objects": { "title": "Objects", "body": "Pick a destination and the autopilot flies there." },
     "drive": { "title": "Drive", "body": "Each drive takes its own time to get there." },
     "rate": { "title": "Time warp", "body": "Hold the clocks, or run them faster." },
     "throttle": { "title": "Throttle", "body": "Push it to fly the ship by hand." },
     "settings": {
       "title": "Settings",
-      "body": "Cockpit, layers, the camera pad and render quality."
+      "body": "Cockpit, layers and render quality. The camera pad steers during manual flight."
     },
     "guide": { "title": "Guide", "body": "Learn what a trip to the stars takes, step by step." },
     "experiences": { "title": "Immersive view", "body": "Just the flight, no controls." }
@@ -28,7 +31,7 @@
     "edge": "The edge"
   },
   "viewHints": {
-    "earth": "Home, from a few radii out. Drag to orbit, scroll to back off.",
+    "earth": "Home, from a few radii out. Take the helm to explore.",
     "moon": "Thirty Earth diameters away. Earth is a small blue disc from here.",
     "mars": "Sunlight is less than half as strong as on Earth.",
     "jupiter": "Its moons cast real shadows on the clouds.",
@@ -79,8 +82,8 @@
     "throttleValue": "{value} %",
     "brake": "Brake",
     "brakeHold": "Hold to brake",
-    "invite": "Fly with W or the lever · drag to orbit",
-    "inviteTouch": "Fly with the lever · drag to orbit",
+    "invite": "Fly with W or the lever",
+    "inviteTouch": "Fly with the lever",
     "keys": "W S thrust · A D · R F · Q E roll · Shift boost · X brake · Space orbit · drag to look",
     "slower": "Slower",
     "faster": "Faster",
@@ -226,7 +229,7 @@
       },
       "saturn": {
         "title": "Saturn",
-        "body": "Orbit into their plane: ten metres thick, the rings all but vanish."
+        "body": "Fly into their plane: ten metres thick, the rings all but vanish."
       },
       "pluto": {
         "title": "Pluto",

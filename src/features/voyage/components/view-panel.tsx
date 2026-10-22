@@ -28,6 +28,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
   const show = useVoyage((s) => s.show);
   const unit = useVoyage((s) => s.distanceUnit);
   const angles = useVoyage((s) => s.cameraAngles);
+  const steering = useVoyage((s) => s.mode === "free" && !s.flying && s.crash === null);
   const antialias = useVoyage((s) => s.antialias);
   const quality = useVoyage((s) => s.quality);
   const bloom = useVoyage((s) => s.bloom);
@@ -50,13 +51,15 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onChange={(next) => useVoyage.getState().setDistanceUnit(next)}
         />
       </RailSection>
-      <RailSection title={t("hud.camera")}>
-        <CameraPad
-          namespace="voyage"
-          angles={angles}
-          onRotate={(turn) => useVoyage.getState().rotate(turn)}
-        />
-      </RailSection>
+      {steering ? (
+        <RailSection title={t("hud.camera")}>
+          <CameraPad
+            namespace="voyage"
+            angles={angles}
+            onRotate={(turn) => useVoyage.getState().rotate(turn)}
+          />
+        </RailSection>
+      ) : null}
       <RenderSection
         quality={quality}
         onQuality={(level) => useVoyage.getState().setQuality(level)}

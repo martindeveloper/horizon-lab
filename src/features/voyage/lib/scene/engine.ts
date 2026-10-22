@@ -263,7 +263,7 @@ export function createVoyageEngine(
         if (isBodyAnchor(s.destination)) budget.prefetch(s.destination, quality.maps.allow);
       },
     });
-    /* The ship as the `?` tour moves it while the scene lives: turned, zoomed and taken back. */
+    /* The help tour may restore a manual heading; the cockpit never zooms. */
     scope.defer(
       lendCamera(store, {
         mark: () => {
@@ -273,10 +273,7 @@ export function createVoyageEngine(
             engine.invalidate();
           };
         },
-        zoom: (factor) => {
-          ship.zoomBy(factor);
-          engine.invalidate();
-        },
+        zoom: () => undefined,
         turn: (step) => {
           ship.turnBy(step);
           engine.invalidate();

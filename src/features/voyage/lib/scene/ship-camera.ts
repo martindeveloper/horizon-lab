@@ -2,8 +2,8 @@
  * The ship's camera. The ship sits at the scene's origin; its heliocentric position (km,
  * doubles) is what everything is placed against.
  *
- * - In orbit it holds station about a body on an orbit pose that drag, wheel, pinch and the
- *   camera pad move.
+ * - In orbit it holds station about a body with a fixed cockpit view. Changing the view
+ *   requires taking the helm and flying the ship.
  * - By hand it has an attitude of its own: a drag looks, the keys, a gamepad and the throttle
  *   lever thrust with one-g thrusters, the clocks run at the flight assist's warp
  *   (model/assist.ts), and the ship falls in the Sun's, its body's and that body's partner's
@@ -18,23 +18,15 @@ import {
   ORBIT_STEP,
   createFlightAxes,
   createFlightInput,
-  createOrbitInput,
-  stepOrbit,
   turnFree,
   type FlightAxes,
   type OrbitPose,
   type OrbitTurn,
   type Quat,
 } from "@horizon/toolkit/camera";
-import { clamp, smootherstep, wrapSigned } from "@horizon/toolkit/math";
+import { clamp, smootherstep } from "@horizon/toolkit/math";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
-import {
-  ORBIT_INCLINATION,
-  createLogZoom,
-  distanceVec3d,
-  vec3d,
-  type Vec3d,
-} from "@horizon/toolkit/scene";
+import { distanceVec3d, vec3d, type Vec3d } from "@horizon/toolkit/scene";
 import { properVelocity } from "@horizon/toolkit/science";
 
 import { anchorRadius, isFlyable, type AnchorId } from "../model/anchors";
@@ -47,14 +39,7 @@ import {
   transitSeconds,
   type FlightPhase,
 } from "../model/autopilot";
-import {
-  COSMIC_FAR_KM,
-  CRASH_KM_S,
-  C_KM_S,
-  DRIVES,
-  NEAR_PLANE_KM,
-  type Drive,
-} from "../model/parameters";
+import { CRASH_KM_S, C_KM_S, DRIVES, type Drive } from "../model/parameters";
 import {
   speedOfProper,
   tripProgress,
@@ -73,10 +58,6 @@ import {
 import { createShipEnvironment } from "./ship-environment";
 import { createShipFraming, ARRIVE_INCLINATION, floorOf, offsetOf } from "./ship-framing";
 
-/** The farthest a parked ship may back off, in the body's radii. */
-const FARTHEST_RADII = 20_000;
-/** A button step eases out over about a third of a second: the time constant, seconds. */
-const STEP_EASE = 0.08;
 /** How long after the last input the scene still counts as handled, ms. */
 const RELEASE_MS = 700;
 /** Radians of look per CSS pixel of drag in free flight. */
@@ -162,13 +143,6 @@ export function createShipCamera(
   const pose: OrbitPose = { azimuth: 0.6, inclination: ARRIVE_INCLINATION, distance: 1 };
   /** The attitude in free flight, camera to world (three's convention). */
   let attitude: Quat = [0, 0, 0, 1];
-  /** An orbit entered farther out than the usual reach keeps its distance: no jump inwards. */
-  let farthest = 0;
-  const limits = () => ({
-    min: floorOf(aim),
-    max: Math.max(anchorRadius(aim) * FARTHEST_RADII, farthest),
-  });
-  const zoom = createLogZoom(pose.distance, { limits });
   let flight: Flight | null = null;
   /** The throttle lever, 0…1: thrust ahead wherever the keys give none. */
   let cruise = 0;
@@ -176,8 +150,6 @@ export function createShipCamera(
   let brakeHeld = false;
   /** Entering or leaving orbit: the attitude it turned from and the seconds since. */
   let settle: { q0: Quaternion; t: number } | null = null;
-  /** A camera-pad step still to ease in, radians. */
-  const stepping = { azimuth: 0, inclination: 0, on: false };
   /** Wrecked on a surface: nothing moves until the pilot takes the ship back to orbit. */
   let crashed = false;
   /** The ship's feel is on; seconds since it came into orbit with weight, while it sinks (else −1). */
@@ -249,29 +221,6 @@ export function createShipCamera(
     options.onMode?.(next);
   };
 
-  const orbitInput = scope.own(
-    createOrbitInput(canvas, {
-      getPose: () => ({ ...pose, distance: zoom.target }),
-      enabled: () => mode === "orbit" && flight === null,
-      onChange: (next) => {
-        pose.azimuth = next.azimuth;
-        pose.inclination = next.inclination;
-        if (next.distance !== zoom.target) {
-          const clamped = zoom.zoomTo(next.distance, orbitInput.active);
-          if (reduceMotion.matches) {
-            pose.distance = clamped;
-            zoom.settle(clamped);
-          }
-        }
-        touched();
-      },
-      /* The input keeps to the world's whole envelope; the zoom clamps to the aim's own. */
-      distance: { min: NEAR_PLANE_KM, max: COSMIC_FAR_KM },
-      inclination: ORBIT_INCLINATION,
-      dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
-      wheelSensitivity: () => 0.0012,
-    }),
-  );
   const flightInput = scope.own(
     createFlightInput(canvas, {
       onLook: (dx, dy) => {
@@ -305,13 +254,11 @@ export function createShipCamera(
   /** Parks at a leg's pose; an arrival (`weighted`) settles into it. */
   const land = (to: Leg, weighted = false) => {
     aim = to.aim;
-    farthest = 0;
     settle = null;
     sink = weighted ? weighty() : -1;
     pose.azimuth = to.pose.azimuth;
     pose.inclination = to.pose.inclination;
     pose.distance = to.pose.distance;
-    zoom.settle(pose.distance);
     haltShip(ship);
     flight = null;
     setMode("orbit");
@@ -340,7 +287,6 @@ export function createShipCamera(
     ship.u[0] = velocity[0];
     ship.u[1] = velocity[1];
     ship.u[2] = velocity[2];
-    orbitInput.cancel();
     setMode("free");
     /* The keys fly from here: the canvas holds focus, wherever the switch was pressed. */
     if (focus) focusCanvas();
@@ -352,14 +298,11 @@ export function createShipCamera(
     if (mode === "orbit") return;
     aim = options.nearest(ship.x);
     const about = poseAbout(aim);
-    farthest = about.distance;
     settle = reduceMotion.matches ? null : { q0: camera.quaternion.clone(), t: 0 };
     sink = weighty();
-    const bounds = limits();
     pose.azimuth = about.azimuth;
     pose.inclination = about.inclination;
-    pose.distance = clamp(about.distance, bounds.min, bounds.max);
-    zoom.settle(pose.distance);
+    pose.distance = Math.max(about.distance, floorOf(aim));
     haltShip(ship);
     flightInput.cancel();
     setMode("orbit");
@@ -557,18 +500,15 @@ export function createShipCamera(
     },
     /** Reads the pull on the ship, km/s², and the body pulling hardest (a reused object). */
     readGravity,
-    /** A flight, a zoom still gliding, a button step, a gesture settling, or the keys held. */
+    /** A flight, an arrival settling, a gesture, or the keys held. */
     get moving() {
       return (
         flight !== null ||
         settle !== null ||
         ((cruise > 0 || brakeHeld) && mode === "free") ||
-        zoom.moving ||
-        stepping.on ||
         sink >= 0 ||
         interacting ||
-        flightInput.active ||
-        orbitInput.active
+        flightInput.active
       );
     },
     /** The ship's speed relative to the Sun, km/s: the drive's on a flight, the body's parked. */
@@ -676,11 +616,9 @@ export function createShipCamera(
         flipAt: -1,
       };
       haltShip(ship);
-      orbitInput.cancel();
       flightInput.cancel();
       cruise = 0;
       settle = null;
-      stepping.on = false;
     },
     /** After a crash: the ship back in orbit about the body it struck, framed as an arrival. */
     recover() {
@@ -695,82 +633,32 @@ export function createShipCamera(
       attitude = camera.quaternion.toArray();
       aim = options.nearest(ship.x);
       flight = null;
-      farthest = 0;
       setMode("free");
       options.invalidate();
     },
-    /** A camera-pad step: eases in; steps pressed in a row add up; reduced motion snaps. */
+    /** The camera pad steers only while the pilot has the helm. */
     turnBy(step: OrbitTurn) {
-      if (flight) return;
-      if (mode === "free") {
-        attitude = turnFree(attitude, -step.azimuth * ORBIT_STEP, step.inclination * ORBIT_STEP);
-        return;
-      }
-      const { azimuth, inclination } = pose;
-      if (reduceMotion.matches) {
-        Object.assign(pose, stepOrbit(pose, step, { inclination: ORBIT_INCLINATION }));
-        return;
-      }
-      const ahead = stepping.on;
-      const from = {
-        azimuth: azimuth + (ahead ? stepping.azimuth : 0),
-        inclination: inclination + (ahead ? stepping.inclination : 0),
-      };
-      const to = stepOrbit({ ...pose, ...from }, step, { inclination: ORBIT_INCLINATION });
-      stepping.azimuth = to.azimuth - azimuth;
-      stepping.inclination = to.inclination - inclination;
-      stepping.on = true;
-    },
-    /** Zooms a parked ship by a factor of its distance (below 1 nearer), easing as the wheel does. */
-    zoomBy(factor: number) {
-      if (flight || mode !== "orbit") return;
-      const clamped = zoom.zoomTo(zoom.target * factor, false);
-      if (reduceMotion.matches) {
-        pose.distance = clamped;
-        zoom.settle(clamped);
-      }
+      if (flight || crashed || mode !== "free") return;
+      attitude = turnFree(attitude, -step.azimuth * ORBIT_STEP, step.inclination * ORBIT_STEP);
     },
     /**
-     * Where the ship stands now, as a way back there: parked, the pose glides back while it is
-     * parked at the same body (a cut with reduced motion); flown by hand, the nose turns back.
-     * Flown on meanwhile, on a flight or wrecked, the ship stays where it is.
+     * Remembers the manual heading for the help tour. Restoring it turns the nose back only
+     * while still flown by hand; a parked ship keeps its fixed cockpit view.
      */
     mark() {
       const was = {
         mode,
-        aim,
         attitude,
-        azimuth: pose.azimuth + (stepping.on ? stepping.azimuth : 0),
-        inclination: pose.inclination + (stepping.on ? stepping.inclination : 0),
-        distance: zoom.target,
       };
       const away = flight !== null || crashed;
       return () => {
-        if (away || flight || crashed || mode !== was.mode) return;
-        if (mode === "free") {
-          settle = reduceMotion.matches ? null : { q0: camera.quaternion.clone(), t: 0 };
-          attitude = was.attitude;
-          return;
-        }
-        if (aim !== was.aim) return;
-        if (reduceMotion.matches) {
-          Object.assign(pose, {
-            azimuth: was.azimuth,
-            inclination: was.inclination,
-            distance: was.distance,
-          });
-          zoom.settle(was.distance);
-          stepping.on = false;
-          return;
-        }
-        stepping.azimuth = wrapSigned(was.azimuth - pose.azimuth, Math.PI * 2);
-        stepping.inclination = was.inclination - pose.inclination;
-        stepping.on = true;
-        zoom.fly(pose.distance, was.distance);
+        if (away || flight || crashed || mode !== "free" || was.mode !== "free") return;
+        settle = reduceMotion.matches ? null : { q0: camera.quaternion.clone(), t: 0 };
+        attitude = was.attitude;
       };
     },
     /**
-     * Advances the flight, the free flight, or the parked ship's zoom and steps, runs the
+     * Advances the flight, the free flight, or the parked ship riding its body, runs the
      * clocks at `compression` ship seconds per real second (a parked ship rides with its body,
      * so Earth's clock keeps pace), then places the ship and the camera.
      */
@@ -830,18 +718,6 @@ export function createShipCamera(
           ship.t += compression * dt;
         }
         const now = options.clock(ship.t);
-        if (stepping.on) {
-          const k = 1 - Math.exp(-dt / STEP_EASE);
-          const done = Math.abs(stepping.azimuth) < 1e-4 && Math.abs(stepping.inclination) < 1e-4;
-          const da = done ? stepping.azimuth : stepping.azimuth * k;
-          const di = done ? stepping.inclination : stepping.inclination * k;
-          pose.azimuth += da;
-          pose.inclination += di;
-          stepping.azimuth -= da;
-          stepping.inclination -= di;
-          stepping.on = !done;
-        }
-        pose.distance = zoom.step(dt, pose.distance).distance;
         bodyAt(aim, now, aimPos);
         offsetOf(pose, offset);
         if (sink >= 0) {
