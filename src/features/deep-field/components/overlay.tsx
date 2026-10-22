@@ -62,14 +62,12 @@ export function DeepFieldOverlay() {
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] pb-6 md:pb-10">
             <div className="flex items-start gap-3">
-              <div className="min-w-0 pt-1">
-                <p className="hud-title truncate text-sm font-medium text-fg">
-                  {t(`views.${view}`)}
-                </p>
-                <p className="mt-0.5 line-clamp-2 max-w-md text-xs text-muted not-md:hidden">
+              {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption it. */}
+              {t.has(`viewHints.${view}`) ? (
+                <p className="line-clamp-2 max-w-md min-w-0 pt-1 text-xs text-muted not-md:hidden">
                   {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
                 </p>
-              </div>
+              ) : null}
               <SimulationToolbar
                 label={t("hud.controls")}
                 details={(access) => <DeepFieldTechnicalDetails {...access} />}

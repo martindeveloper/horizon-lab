@@ -15,20 +15,9 @@
     "observable-universe": "Pozorovatelný vesmír"
   },
   "viewHints": {
-    "inner": "Merkur až Mars, tam, kde jsou dnes.",
-    "giants": "Jupiter až Neptun, dnes.",
-    "kuiper": "Neptun a ledový pás za ním, asi {kuiperAu} au.",
     "heliosphere": "Pět sond na cestě ven a okraj slunečního větru, který překročily.",
-    "scattered": "Tělesa na protáhlých elipsách, stovky au daleko.",
-    "oort": "Oblak komet odvozený z dlouhoperiodických komet, až do vzdálenosti {oortLy} světelného roku.",
     "stars": "Proxima, Alfa Centauri a Barnardova hvězda ve skutečných směrech na obloze. Prstenec vyznačuje vzdálenost Proximy; hvězdy v pozadí jsou rozmístěné podle skutečné oblohy.",
     "galaxy": "Naše Galaxie, napříč asi {galaxyLy} světelných let. Zlatá čára je dráha Slunce.",
-    "local-group": "Mléčná dráha, Andromeda a jejich trpaslíci, asi {localGroupMly} {localGroupMlyPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} světelných let napříč.",
-    "local-sheet": "Plochá stěna blízkých skupin, ve které žijeme, asi {localSheetMly} {localSheetMlyPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} světelných let napříč.",
-    "virgo-cluster": "Asi {virgoGalaxies} galaxií zhruba {virgoMly} {virgoMlyPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} světelných let od nás. My stojíme mimo ni.",
-    "virgo-supercluster": "Skupiny a oblaka rozložená kolem Panny, asi {superclusterMly} {superclusterMlyPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} světelných let napříč.",
-    "laniakea": "Naše domovská nadkupa: po odečtení rozpínání se její galaxie sunou k Velkému atraktoru.",
-    "cosmic-web": "Laniakea mezi sousedy: vlákna galaxií kolem téměř prázdných oblastí až po Velkou zeď Sloan.",
     "observable-universe": "Vše, odkud k nám světlo stihlo doletět. Reliktní záření je nejvzdálenější světlo, které můžeme spatřit."
   },
   "toggles": {

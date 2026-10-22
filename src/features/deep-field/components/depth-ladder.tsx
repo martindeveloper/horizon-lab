@@ -71,13 +71,14 @@ export function DepthLadder() {
   })}. ${t(`methods.${METHOD_OF[view]}`)}`;
 
   return (
-    /* On wide screens it starts below the caption at its tallest (title + two clamped hint lines). */
+    /* On wide screens it starts below the header row: the 2.5rem toolbar, taller than the caption's
+       two clamped hint lines, and a 1.5rem gap. */
     <nav
       aria-label={t("hud.depth")}
       className={cn(
         "pointer-events-auto absolute z-30 flex items-center gap-2",
         wide
-          ? "top-[calc(max(0.75rem,env(safe-area-inset-top))_+_5rem)] bottom-(--hud-clear,7rem) left-(--hud-gutter) w-36 flex-col items-start"
+          ? "top-[calc(max(0.75rem,env(safe-area-inset-top))_+_4rem)] bottom-(--hud-clear,7rem) left-(--hud-gutter) w-36 flex-col items-start"
           : "inset-x-(--hud-gutter) bottom-[calc(var(--hud-clear,5.5rem)+0.5rem)] h-12",
       )}
     >

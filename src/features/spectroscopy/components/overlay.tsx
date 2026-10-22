@@ -58,7 +58,6 @@ function SpectroscopyViews() {
 export function SpectroscopyOverlay() {
   const t = useTranslations("spectroscopy");
   const ready = useSpectroscopy((s) => s.ready);
-  const view = useSpectroscopy((s) => s.view);
   const panel = useSpectroscopy((s) => s.panel);
   const selection = useSpectroscopy((s) => s.selection);
   const guideOpen = useSpectroscopy((s) => s.guideOpen);
@@ -74,12 +73,7 @@ export function SpectroscopyOverlay() {
       {guideOpen ? null : (
         <header className="hud-top pad-hud-top anim-fade absolute inset-x-0 top-0 z-[60]">
           <div className="flex items-start gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <SpectroscopyViews />
-              <p className="line-clamp-2 max-w-md text-xs text-muted not-lg:hidden">
-                {t(`views.${view}.hint`)}
-              </p>
-            </div>
+            <SpectroscopyViews />
             <SimulationToolbar
               label={t("hud.controls")}
               details={(access) => <SpectroscopyTechnicalDetails {...access} />}
