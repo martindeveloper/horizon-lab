@@ -13,8 +13,8 @@ import {
 import { routing } from "@/i18n/routing";
 import { PAGE_URLS } from "@/lib/urls";
 
-import cs from "../messages/cs.json";
-import en from "../messages/en.json";
+import cs from "../messages/status/cs.json";
+import en from "../messages/status/en.json";
 
 import "../styles.css";
 

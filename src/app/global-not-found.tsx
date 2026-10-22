@@ -6,8 +6,8 @@ import { Localized, StatusLocaleHead } from "@/components/status/status-locale";
 import { StatusPage, statusPrimaryActionClass } from "@/components/status/status-page";
 import { PAGE_URLS } from "@/lib/urls";
 
-import cs from "../messages/cs.json";
-import en from "../messages/en.json";
+import cs from "../messages/status/cs.json";
+import en from "../messages/status/en.json";
 
 import "../styles.css";
 

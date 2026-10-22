@@ -29,4 +29,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default createNextIntlPlugin("./src/i18n/request.ts")(nextConfig);
+export default createNextIntlPlugin({
+  requestConfig: "./src/i18n/request.ts",
+  experimental: {
+    // ICU messages compile at build time, so the client ships no message parser. The runtime
+    // formats only compiled messages: every catalog must sit in a `messages` folder.
+    messages: { path: "./src/**/messages", format: "json", locales: "infer", precompile: true },
+  },
+})(nextConfig);

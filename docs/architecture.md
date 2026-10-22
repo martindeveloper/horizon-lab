@@ -377,7 +377,8 @@ src/
       scene/                   cosmos-layer.ts fades what cosmos-clouds.ts draws,
                                cosmos-rings.ts and cosmos-marks.ts, in the Galaxy's pass
   i18n/                        Shared request/routing/navigation configuration
-  messages/                    Shared catalogue, shell, and error copy
+  messages/                    Shared catalogue and shell copy; status/ the error and
+                               404 copy, merged in, that the root pages bundle alone
 bench/                         Headless rendering benchmark: CLI, bundling, reports
 public/simulations/            Static catalogue artwork
 packages/toolkit/

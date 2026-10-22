@@ -4,12 +4,6 @@
   "themeLight": "Light",
   "themeDark": "Dark",
   "themeSystem": "System",
-  "errorTitle": "Something went wrong",
-  "errorBody": "Try again, or go back to all simulations.",
-  "tryAgain": "Try again",
-  "notFoundTitle": "Nothing on this horizon",
-  "notFoundBody": "The page you are looking for does not exist.",
-  "returnHome": "Back to all simulations",
   "metadataDescription": "Interactive simulations of space, light and gravity.",
   "shell": {
     "home": "Horizon home",

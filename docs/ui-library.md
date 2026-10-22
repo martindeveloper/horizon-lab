@@ -217,7 +217,8 @@ The theme is class-based; Tailwind's `dark:` variant follows the same class.
 Use `useTranslations` in visualization components and pass strings into the UI
 library. Store shared messages in `src/messages/en.json` and `src/messages/cs.json`, and feature
 messages under `src/features/<slug>/messages/`; use ICU
-arguments instead of manually replacing placeholders. Route navigation must use
+arguments instead of manually replacing placeholders. Catalogs compile at build time
+(next-intl `precompile`), so `t.raw` returns compiled messages, not ICU text. Route navigation must use
 `@/i18n/navigation`; URLs never carry the language. Browser-only scenes still
 need a client boundary, but language comes from the provider (set by the locale
 cookie) rather than browser storage. The example remains intentionally language-neutral sample

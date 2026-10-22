@@ -19,7 +19,7 @@ export const featureMessages = (feature, locale) => {
  * simulation's layout its own messages beside them in its namespace.
  */
 export function layoutMessages(feature, locale) {
-  const shared = read(`messages/${locale}.json`);
+  const shared = { ...read(`messages/${locale}.json`), ...read(`messages/status/${locale}.json`) };
   if (!feature) return shared;
   /* Every registered simulation's copy is checked, whether or not its switch is on. */
   const { messageKey } = registered.find((simulation) => simulation.id === feature);

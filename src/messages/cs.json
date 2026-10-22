@@ -4,12 +4,6 @@
   "themeLight": "Světlý",
   "themeDark": "Tmavý",
   "themeSystem": "Podle systému",
-  "errorTitle": "Něco se pokazilo",
-  "errorBody": "Zkuste to znovu, nebo se vraťte na přehled simulací.",
-  "tryAgain": "Zkusit znovu",
-  "notFoundTitle": "Na tomto horizontu nic není",
-  "notFoundBody": "Hledaná stránka neexistuje.",
-  "returnHome": "Zpět na všechny simulace",
   "metadataDescription": "Interaktivní simulace vesmíru, světla a gravitace.",
   "shell": {
     "home": "Horizon – úvod",
