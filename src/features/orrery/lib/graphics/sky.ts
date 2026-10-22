@@ -5,43 +5,23 @@
  * whose centre direction slides along the band as the Sun orbits the Galaxy,
  * and whose shape changes from the thick-disk era to today's thin disk.
  */
-import { AdditiveBlending, Color, PointsMaterial, ShaderMaterial } from "three";
+import { AdditiveBlending, Color, PointsMaterial } from "three";
 
 import { THIN_DISK_ERA } from "@/space/galaxy/model/parameters";
 import { createMilkyWay as createSharedMilkyWay } from "@/space/sky/milky-way";
+import { starMaterial } from "@/space/sky/stars";
 import { galacticAngle } from "@/space/solar-system/model/equations";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { clamp01, gaussian, lcg } from "@horizon/toolkit/math";
 import { pointsGeometry, softCircle } from "@horizon/toolkit/scene";
 
 import { NAMED_STARS_FADE } from "../model/parameters";
-import STAR_FRAG from "./shaders/star.frag.glsl";
-import STAR_VERT from "./shaders/star.vert.glsl";
-
 export { fieldStars, starSize } from "@/space/sky/milky-way";
+export { starMaterial } from "@/space/sky/stars";
 
 /** The Sun's galactic orbital phase for a moment, radians; frozen before the Sun existed. */
 export function galacticPhase(yearsAgo: number) {
   return galacticAngle.compute({ t: Math.min(yearsAgo, SUN_BIRTH) });
-}
-
-/** `fade` is presence (real stars fade in the deep past), `tint` the extinction colour. */
-export function starMaterial(dpr: { value: number }) {
-  return new ShaderMaterial({
-    uniforms: {
-      dpr,
-      fade: { value: 1 },
-      tint: { value: new Color("#ffffff") },
-    },
-    vertexShader: STAR_VERT,
-    fragmentShader: STAR_FRAG,
-    vertexColors: true,
-    transparent: false,
-    depthWrite: false,
-    depthTest: false,
-    blending: AdditiveBlending,
-    toneMapped: false,
-  });
 }
 
 /** The shared Milky Way, its grains drawn with the Orrery's star points; `wake` asks for a frame. */

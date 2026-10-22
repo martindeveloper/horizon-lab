@@ -74,7 +74,7 @@ src/
                                prominence (src/space/sun/graphics/prominence) stands, each
                                region's slow cycle of flows and eruption
         parameters.ts, equations.ts, model-check.ts
-      lib/graphics/            The time-dependent sky (sky.ts, on the shared band in src/space/sky),
+      lib/graphics/            The time-dependent sky (sky.ts, on the shared band and star points in src/space/sky),
                                tour-sketch.ts, shaders/ (the WebP map loader is
                                @horizon/toolkit/scene; MAP_BASE is src/space/solar-system/graphics/maps.ts)
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
@@ -701,7 +701,7 @@ catch-all dynamic route or backend is introduced.
 
 The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-music.ts`),
 one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
-`interstellar-drift`, `aeolian-static`, `drifting-probe`, `low-drone-rises` and `vast-empty-space`, each as
+`interstellar-drift`, `aeolian-static`, `drifting-probe`, `low-drone-rises`, `vast-empty-space` and `the-star-rings`, each as
 `.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
 the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The bed
