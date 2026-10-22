@@ -113,10 +113,31 @@
   }
 }
 
+/* Ring widths are independent of their neutral/accent colors and inset placement. */
+@utility ring-outline {
+  @apply ring-(length:--stroke-outline);
+}
+
+@utility ring-focus {
+  @apply ring-(length:--stroke-focus);
+}
+
+/* Add a halo to the current material without replacing its edge or elevation. */
+@property --surface-halo {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 transparent;
+}
+
+@utility surface-halo {
+  --surface-halo:
+    0 0 0 var(--stroke-outline) rgb(var(--solar) / 0.28), 0 0 40px rgb(var(--solar) / 0.12);
+}
+
 /* Shared slider interaction; each thumb keeps its own size, fill, border and glow.
    As a utility, these defaults can be overridden by a control's transition/easing utilities. */
 @utility slider-thumb {
-  @apply block rounded-full outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95;
+  @apply block rounded-full outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95;
 }
 
 @utility anim-rise {
@@ -142,10 +163,22 @@
 
 .glass,
 .glass-pill,
+.glass-panel,
+.glass-hud,
+.glass-popover,
+.lesson-card {
+  /* Tailwind rings stay visible over material shadows, including keyboard focus. */
+  box-shadow:
+    var(--tw-ring-offset-shadow, 0 0 transparent), var(--tw-ring-shadow, 0 0 transparent),
+    var(--surface-shadow), var(--surface-halo, 0 0 transparent);
+}
+
+.glass,
+.glass-pill,
 .glass-panel {
+  --surface-shadow: var(--glass-shadow);
   background: var(--glass-sheen), var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow);
 }
 
 .glass-panel {
@@ -153,21 +186,21 @@
 }
 
 .glass-pill {
+  --surface-shadow: var(--pill-shadow);
   background: var(--glass-sheen), var(--pill-bg);
-  box-shadow: var(--pill-shadow);
 }
 
 .glass-hud {
+  --surface-shadow: var(--hud-shadow);
   background: var(--glass-sheen), var(--hud-bg);
   backdrop-filter: var(--glass-blur);
-  box-shadow: var(--hud-shadow);
 }
 
 /* Menus and popovers sit over text, not a scene: dense enough to read through nothing. */
 .glass-popover {
+  --surface-shadow: var(--popover-shadow);
   background: var(--glass-sheen), var(--popover-bg);
   backdrop-filter: var(--glass-blur);
-  box-shadow: var(--popover-shadow);
 }
 
 .hud-title {
@@ -246,7 +279,7 @@
   width: max-content;
   max-width: min(16rem, calc(100vw - 2rem));
   white-space: normal;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-compact);
   padding: 0.45rem 0.65rem;
   font-family: var(--font-sans);
   font-size: var(--text-ui);
@@ -263,9 +296,9 @@
 }
 
 .lesson-card {
+  --surface-shadow: var(--lesson-shadow);
   background: var(--glass-sheen), var(--lesson-bg);
   backdrop-filter: blur(32px) saturate(1.15);
-  box-shadow: var(--lesson-shadow);
 }
 
 .lesson-card p {
@@ -610,6 +643,144 @@
     color: var(--color-action-fg);
     box-shadow: var(--action-shadow);
   }
+}
+
+/* A body's mark (Orb): `--orb` is its colour. A faint rim in the text colour keeps pale bodies
+   on pearl glass and dark ones on smoked glass. */
+.orb {
+  --orb-colour: var(--orb, var(--color-fg-tertiary));
+  --orb-rim: 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 18%, transparent);
+  display: block;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 34% 30%,
+    color-mix(in srgb, var(--orb-colour) 55%, white),
+    var(--orb-colour) 42%,
+    color-mix(in srgb, var(--orb-colour) 28%, black)
+  );
+  box-shadow: var(--orb-rim);
+}
+
+.orb[data-look="glow"] {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--orb-colour) 30%, white),
+    var(--orb-colour) 62%
+  );
+  box-shadow:
+    var(--orb-rim),
+    0 0 6px 1px color-mix(in srgb, var(--orb-colour) 55%, transparent);
+}
+
+.orb[data-look="hole"] {
+  background: black;
+  box-shadow:
+    0 0 0 1px rgb(var(--solar) / 0.8),
+    0 0 6px rgb(var(--solar) / 0.35);
+}
+
+.orb[data-look="swarm"] {
+  background: none;
+  border: 1.5px dotted var(--orb-colour);
+  box-shadow: none;
+}
+
+.orb[data-look="haze"] {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--orb-colour) 45%, white),
+    color-mix(in srgb, var(--orb-colour) 55%, transparent) 40%,
+    transparent
+  );
+  box-shadow: none;
+  transform: rotate(-28deg) scaleY(0.5);
+}
+
+/* A row's leading mark (ListItem `icon`), in a column of its own; it lifts a little on hover. */
+.list-glyph {
+  position: relative;
+  display: flex;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.list-glyph > * {
+  transition: scale var(--transition-duration-feedback) var(--ease-standard);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  button:hover > .list-glyph > * {
+    scale: 1.2;
+  }
+}
+
+/* A route (ListTrack): hairline segments join the marks, stopping short of each, clipped by
+   their rows; gold up to the current row, whose mark is ringed. Labels carry the line through. */
+.list-track {
+  --track: color-mix(in srgb, var(--color-fg-primary) 16%, transparent);
+  --track-x: 1.375rem;
+}
+
+.list-track > button {
+  overflow: clip;
+}
+
+.list-track .list-glyph::before,
+.list-track .list-glyph::after,
+.list-track-label::before {
+  content: "";
+  position: absolute;
+  width: 1px;
+  pointer-events: none;
+  background: var(--track);
+}
+
+.list-track .list-glyph::before,
+.list-track .list-glyph::after {
+  left: calc(50% - 0.5px);
+  height: 2rem;
+}
+
+.list-track .list-glyph::before {
+  bottom: calc(100% + 3px);
+}
+
+.list-track .list-glyph::after {
+  top: calc(100% + 3px);
+}
+
+.list-track > :first-child .list-glyph::before,
+.list-track > .list-track-label:first-child + * .list-glyph::before,
+.list-track > :last-child .list-glyph::after,
+.list-track > .list-track-label:first-child::before {
+  display: none;
+}
+
+.list-track-label {
+  position: relative;
+  padding: 0.75rem 0.75rem 0.25rem 2.75rem;
+}
+
+.list-track-label::before {
+  inset: 0 auto;
+  left: calc(var(--track-x) - 0.5px);
+}
+
+.list-track > :has(~ [aria-current]) {
+  --track: rgb(var(--solar) / 0.5);
+}
+
+.list-track > [aria-current] .list-glyph::before {
+  background: rgb(var(--solar) / 0.5);
+}
+
+.list-track > [aria-current] .list-glyph > * {
+  outline: 1px solid rgb(var(--solar) / 0.85);
+  outline-offset: 2px;
 }
 
 .solar-ring {

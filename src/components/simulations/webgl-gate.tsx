@@ -90,7 +90,7 @@ function SoftwareNotice() {
     <Surface
       role="note"
       aria-label={t("softwareTitle")}
-      className="absolute inset-x-4 top-16 z-[70] mx-auto max-w-sm anim-rise rounded-lg p-4"
+      className="absolute inset-x-4 top-16 z-[70] mx-auto max-w-sm anim-rise rounded-panel p-4"
     >
       <PanelHeader
         title={t("softwareTitle")}

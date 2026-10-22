@@ -90,7 +90,7 @@ export function Sheet({
         ref={panel}
         tabIndex={-1}
         className={cn(
-          "glass-panel pad-sheet pointer-events-auto absolute inset-x-0 bottom-0 flex anim-sheet flex-col overflow-hidden rounded-t-xl outline-hidden",
+          "glass-panel pad-sheet pointer-events-auto absolute inset-x-0 bottom-0 flex anim-sheet flex-col overflow-hidden rounded-t-card outline-hidden",
           panelClassName,
         )}
         role="dialog"
@@ -103,7 +103,7 @@ export function Sheet({
             type="button"
             onClick={() => dismiss.current()}
             aria-label={dismissLabel}
-            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-fg-secondary opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-fg-secondary opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <X className="size-4" aria-hidden />
           </button>

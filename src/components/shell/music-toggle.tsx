@@ -33,7 +33,7 @@ const TRACKS = ambientMusic.tracks.length;
 const slot = "relative flex h-7 w-[30px] items-center justify-center rounded-full";
 const skipClass = cn(
   slot,
-  "text-fg-tertiary transition-colors duration-feedback ease-standard after:absolute after:-inset-y-2 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+  "text-fg-tertiary transition-colors duration-feedback ease-standard after:absolute after:-inset-y-2 hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden",
 );
 
 /**
@@ -105,7 +105,7 @@ export function MusicToggle({ className }: { className?: string }) {
               onClick={ambientMusic.toggle}
               onPointerEnter={ambientMusic.preload}
               onFocus={ambientMusic.preload}
-              className="group relative flex rounded-full after:absolute after:-inset-y-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+              className="group relative flex rounded-full after:absolute after:-inset-y-2 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
             >
               <span
                 aria-hidden

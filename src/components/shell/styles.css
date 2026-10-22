@@ -75,13 +75,13 @@
 .header-lens {
   background: rgb(var(--solar) / 0.14);
   box-shadow:
-    inset 0 0 0 0.5px rgb(var(--solar) / 0.45),
+    inset 0 0 0 var(--stroke-rim) rgb(var(--solar) / 0.45),
     0 0 14px rgb(var(--solar) / 0.16);
 }
 /* Light glass washes the lens out; a full rim keeps the choice visible (≥3:1). */
 :root.light .header-lens {
   background: rgb(var(--solar) / 0.22);
-  box-shadow: inset 0 0 0 1px rgb(var(--solar) / 0.9);
+  box-shadow: inset 0 0 0 var(--stroke-outline) rgb(var(--solar) / 0.9);
 }
 
 /* Keyboard focus never hides under the sticky header. */
@@ -159,7 +159,7 @@ html {
 }
 .footer-link:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-ring);
+  box-shadow: 0 0 0 var(--stroke-focus) var(--color-ring);
 }
 
 .simulation-stage {

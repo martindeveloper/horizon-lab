@@ -59,7 +59,7 @@ export function Dialog({
     <dialog
       ref={modal}
       aria-labelledby={titleId}
-      className="m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-surface-primary p-0 pb-1.5 text-fg-primary shadow-2xl backdrop:bg-space/75 backdrop:backdrop-blur-sm open:flex"
+      className="m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl flex-col overflow-hidden rounded-overlay border border-border bg-surface-primary p-0 pb-1.5 text-fg-primary shadow-overlay backdrop:bg-space/75 backdrop:backdrop-blur-sm open:flex"
     >
       <header className="flex shrink-0 items-center justify-between gap-section border-b border-border px-panel-roomy py-panel sm:px-panel-wide">
         <h2 id={titleId} className="font-display text-feature">
@@ -76,7 +76,7 @@ export function Dialog({
         aria-labelledby={titleId}
         // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard users scroll the body once focus leaves the close button.
         tabIndex={0}
-        className="scroll-thin min-h-0 flex-1 overflow-y-auto overscroll-contain focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset"
+        className="scroll-thin min-h-0 flex-1 overflow-y-auto overscroll-contain focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset"
       >
         {children}
       </div>

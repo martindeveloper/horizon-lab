@@ -61,7 +61,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
                   aria-pressed={i === active}
                   onClick={() => go(i)}
                   className={cn(
-                    "relative h-9 rounded-full px-3.5 text-ui transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+                    "relative h-9 rounded-full px-3.5 text-ui transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden",
                     "after:absolute after:inset-x-0 after:-inset-y-1",
                     i === active
                       ? "bg-fg-primary/10 font-medium text-fg-primary"
@@ -91,7 +91,7 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
             aria-label={panel.label}
             className={cn(
               "flex w-full min-w-0 shrink-0 snap-start flex-col gap-2 px-3.5 py-1",
-              "md:rounded-md md:bg-fg-primary/[0.03] md:p-3 md:ring-1 md:ring-border md:ring-inset",
+              "md:rounded-control md:bg-fg-primary/[0.03] md:p-3 md:ring-outline md:ring-border md:ring-inset",
               panel.className,
             )}
           >

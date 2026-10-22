@@ -95,7 +95,7 @@ export function Picker({
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         className={cn(
-          "glass-hud flex h-11 max-w-[min(22rem,100%)] items-center gap-2 rounded-full px-3 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8",
+          "glass-hud flex h-11 max-w-[min(22rem,100%)] items-center gap-2 rounded-full px-3 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:h-8",
           triggerClassName,
         )}
       >
@@ -116,7 +116,7 @@ export function Picker({
           role="group"
           aria-label={ariaLabel}
           className={cn(
-            "glass-popover absolute top-[calc(100%+0.5rem)] left-0 z-[70] max-h-[calc(100dvh-10rem)] w-[20rem] max-w-[calc(100vw-2rem)] anim-fade overflow-y-auto overscroll-contain rounded-lg p-3",
+            "glass-popover absolute top-[calc(100%+0.5rem)] left-0 z-[70] max-h-[calc(100dvh-10rem)] w-[20rem] max-w-[calc(100vw-2rem)] anim-fade overflow-y-auto overscroll-contain rounded-panel p-3",
             panelClassName,
           )}
         >

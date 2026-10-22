@@ -30,3 +30,31 @@ test("kicker tracking can be overridden without changing its family or casing", 
   );
   assert.equal(cn("tracking-instrument", "tracking-[0.18em]"), "tracking-[0.18em]");
 });
+
+test("surface radius overrides respect individual corners and responsive layouts", () => {
+  assert.equal(cn("rounded-panel", "rounded-none"), "rounded-none");
+  assert.equal(cn("rounded-lg", "rounded-control"), "rounded-control");
+  assert.equal(
+    cn("rounded-t-card md:rounded-panel", "md:rounded-overlay"),
+    "rounded-t-card md:rounded-overlay",
+  );
+  assert.equal(cn("rounded-t-card", "rounded-panel"), "rounded-panel");
+  assert.equal(cn("rounded-panel", "rounded-t-none"), "rounded-panel rounded-t-none");
+});
+
+test("elevation and ring width overrides retain their independent colors", () => {
+  assert.equal(cn("shadow-overlay shadow-black/30", "shadow-low"), "shadow-black/30 shadow-low");
+  assert.equal(cn("shadow-panel", "shadow-none"), "shadow-none");
+  assert.equal(
+    cn("ring-outline ring-border-strong ring-inset", "ring-2"),
+    "ring-border-strong ring-inset ring-2",
+  );
+  assert.equal(
+    cn("focus-visible:ring-2 focus-visible:ring-ring", "focus-visible:ring-focus"),
+    "focus-visible:ring-ring focus-visible:ring-focus",
+  );
+  assert.equal(
+    cn("ring-outline focus-visible:ring-focus", "focus-visible:ring-4"),
+    "ring-outline focus-visible:ring-4",
+  );
+});

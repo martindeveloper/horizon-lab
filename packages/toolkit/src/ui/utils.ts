@@ -7,6 +7,8 @@ const twMerge = extendTailwindMerge({
       ease: ["standard", "enter", "exit"],
       text: ["micro", "caption", "ui", "detail", "body", "panel", "section", "feature"],
       tracking: ["label", "instrument"],
+      radius: ["detail", "compact", "control", "panel", "card", "overlay"],
+      shadow: ["low", "panel", "overlay"],
       spacing: [
         "panel-compact",
         "panel",
@@ -18,6 +20,7 @@ const twMerge = extendTailwindMerge({
       ],
     },
     classGroups: {
+      "ring-w": ["ring-outline", "ring-focus"],
       duration: [{ duration: ["feedback", "control", "reveal", "scene"] }],
       animate: ["anim-rise", "anim-sheet", "anim-rail", "anim-fade"],
     },

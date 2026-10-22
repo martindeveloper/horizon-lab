@@ -5,10 +5,10 @@ import { cn } from "./utils";
 export type ActionVariant = "glass" | "solar" | "ghost";
 
 const base =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-body/5 font-medium whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-control ease-standard focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40 md:min-h-10";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-body/5 font-medium whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-control ease-standard focus-visible:outline-hidden focus-visible:ring-focus focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40 md:min-h-10";
 
 const variants: Record<ActionVariant, string> = {
-  glass: "glass-hud text-fg-primary hover:text-accent hover:solar-ring",
+  glass: "glass-hud text-fg-primary hover:text-accent hover:surface-halo",
   solar: "action-fill shadow-(--action-glow) hover:brightness-110",
   ghost: "text-fg-secondary hover:text-fg-primary",
 };

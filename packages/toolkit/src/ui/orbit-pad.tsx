@@ -37,7 +37,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
     <div
       role="group"
       className={cn(
-        "relative grid w-fit shrink-0 grid-cols-3 grid-rows-3 place-items-center rounded-full bg-fg-primary/[0.04] p-1 ring-1 ring-border ring-inset not-md:gap-2",
+        "relative grid w-fit shrink-0 grid-cols-3 grid-rows-3 place-items-center rounded-full bg-fg-primary/[0.04] p-1 ring-outline ring-border ring-inset not-md:gap-2",
         className,
       )}
       {...props}

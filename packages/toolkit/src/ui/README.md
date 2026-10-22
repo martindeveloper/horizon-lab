@@ -9,6 +9,10 @@ catalogue and `examples/visualization-example.tsx` for composition.
   `kickerClass` remains available for labels on other elements.
 - `PanelHeader`: standard panel title; `titleSize="section"` gives a selected
   object's name the larger heading and kicker separation without a nested styled span.
+- `Callout`: a bordered static note with a required translated `title` and body in
+  `children`. `tone="info"` is neutral; `tone="warning"` uses an amber tint and a
+  warning icon. Its labelled `note` role does not interrupt screen readers.
+  The host chooses the tone and owns any scientific or publication-status logic.
 - `Slider`: standard Radix slider with translated labels and optional scientific
   track styling supplied by the caller. Its `slider-thumb` CSS utility also serves
   custom Radix sliders: shared focus ring, feedback transition, rounded shape and
@@ -116,6 +120,35 @@ helper recognizes these tokens, so consumer overrides remain predictable.
 `Surface` stays material-only. Keep safe-area gutters, touch targets, calculated
 scene geometry, editorial composition, cockpit lettering and plotted labels local
 to their existing contracts rather than forcing them onto the interface scale.
+
+## Borders, radius and shadows
+
+Use radius roles for interface geometry: `rounded-detail` (4px), `rounded-compact`
+(8px), `rounded-control` (12px), `rounded-panel` (16px), `rounded-card` (24px), and
+`rounded-overlay` (28px). Sheets use `rounded-t-card`; dialogs and large menus use
+the overlay role. `rounded-full` stays appropriate for pills and circles. The old
+size names remain aliases; the catalogue's legacy `rounded-3xl` explicitly stays
+24px. Scientific frames and cockpit geometry retain their own dimensions.
+
+Ordinary separators keep `border-border` / `divide-border` with a 1px border;
+control outlines use `ring-outline ring-border-strong`, with `ring-border-hover`
+for their hover color. `ring-outline` is 1px, `ring-focus` is 2px; use the latter as
+`focus-visible:ring-focus focus-visible:ring-ring`. Colors, widths, inset placement
+and focus offsets stay independently overridable. Glass uses the separate 0.5px
+`--stroke-rim`; native CSS can also use `--stroke-outline` and `--stroke-focus`.
+
+`--edge-control`, `--edge-panel` and `--edge-overlay` describe the lit edges of glass.
+`--elevation-low`, `--elevation-panel` and `--elevation-overlay` describe its cast
+shadow, with dark/light recipes. Existing glass materials compose those layers;
+pills and lesson cards retain their specialized rims. Use `shadow-low`,
+`shadow-panel` or `shadow-overlay` for an ordinary solid surface, such as a dialog.
+Choose a glass material for glass rather than layering an elevation utility over it.
+
+`hover:surface-halo` adds the gold UI halo to the current glass material's shadow.
+Its halo is local to that element, and material shadows compose with Tailwind's
+outline/focus rings. Keep authored catalogue lighting and tilt shadows, coach-tour
+effects, cockpit glows and scientific markers in their existing styles. `Surface`
+continues to supply material only; consumers own its radius and layout.
 
 ## Colors
 

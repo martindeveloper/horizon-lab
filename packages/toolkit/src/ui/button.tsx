@@ -13,7 +13,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex size-11 items-center justify-center rounded-md text-fg-primary transition-colors duration-feedback ease-standard hover:bg-fg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-9",
+        "inline-flex size-11 items-center justify-center rounded-control text-fg-primary transition-colors duration-feedback ease-standard hover:bg-fg-primary/10 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-9",
         className,
       )}
       {...props}

@@ -88,7 +88,7 @@ export function DepthLadder() {
           to="orrery"
           view={isSolarView(view) ? view : "oort"}
           aria-label={t("hud.backInTime")}
-          className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
         >
           <History className="size-4" aria-hidden />
         </HandoffLink>

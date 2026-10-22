@@ -249,7 +249,7 @@ function ClockRun({
         <div
           ref={panel}
           tabIndex={-1}
-          className="lesson-card no-scrollbar max-h-[38dvh] overflow-x-hidden overflow-y-auto rounded-lg p-3.5 outline-hidden md:max-h-[min(32rem,calc(100dvh-6rem))] md:p-4"
+          className="lesson-card no-scrollbar max-h-[38dvh] overflow-x-hidden overflow-y-auto rounded-panel p-3.5 outline-hidden md:max-h-[min(32rem,calc(100dvh-6rem))] md:p-4"
         >
           <PanelHeader
             kicker={t("rainObservers")}

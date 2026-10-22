@@ -110,7 +110,7 @@ export function GuideCard({
       <section
         ref={cardRef}
         aria-label={label}
-        className="guide-card glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-panel pt-panel-compact pb-panel-row text-center md:px-section-roomy md:pt-panel-roomy md:pb-panel short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
+        className="guide-card glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-card px-panel pt-panel-compact pb-panel-row text-center md:px-section-roomy md:pt-panel-roomy md:pb-panel short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
       >
         <Kicker size="compact" className="tabular-nums">
           {kicker}

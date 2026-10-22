@@ -279,7 +279,7 @@ function MobilePinCard({ children }: { children: ReactNode }) {
     <div
       ref={card}
       tabIndex={-1}
-      className="pin-card-mobile lesson-card no-scrollbar anim-sheet overflow-x-hidden overflow-y-auto rounded-t-xl p-panel-compact outline-hidden"
+      className="pin-card-mobile lesson-card no-scrollbar anim-sheet overflow-x-hidden overflow-y-auto rounded-t-card p-panel-compact outline-hidden"
     >
       {children}
     </div>

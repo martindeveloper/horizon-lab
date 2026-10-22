@@ -490,7 +490,7 @@ export function CoachMark({
         aria-describedby={bodyId}
         data-side={place?.side}
         style={place ? { left: place.left, top: place.top } : { visibility: "hidden" }}
-        className="coach-card pointer-events-auto absolute z-[81] w-[min(19rem,calc(100%-1.5rem))] rounded-lg px-panel pt-panel-row pb-1.5 md:pb-2"
+        className="coach-card pointer-events-auto absolute z-[81] w-[min(19rem,calc(100%-1.5rem))] rounded-panel px-panel pt-panel-row pb-1.5 md:pb-2"
       >
         {/* The horizon: gold fills along the top edge as the tour goes on, a sun at its head. */}
         <span aria-hidden className="coach-horizon">

@@ -72,7 +72,7 @@ function Rail<T extends string>({
               onClick={() => onChange(option.value)}
               style={{ width }}
               className={cn(
-                "relative flex h-7 items-center justify-center rounded-full transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:opacity-40",
+                "relative flex h-7 items-center justify-center rounded-full transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden disabled:opacity-40",
                 active ? "text-accent" : "text-fg-tertiary hover:text-fg-primary",
               )}
             >

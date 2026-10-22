@@ -82,12 +82,15 @@
   --color-ring: var(--color-accent);
   --color-danger: var(--color-space-danger);
 
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-2xl: 28px;
+  /* Geometry roles. Named sizes below remain compatible with existing consumers. */
+  --radius-detail: 4px;
+  --radius-compact: 8px;
+  --radius-control: 12px;
+  --radius-panel: 16px;
+  --radius-card: 24px;
+  --radius-overlay: 28px;
+  /* Catalogue artwork deliberately keeps its existing 24px corners. */
+  --radius-3xl: 1.5rem;
 
   --shadow-border: 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 9.411765%, transparent);
   --shadow-border-hover: 0 0 0 0.5px
@@ -97,6 +100,17 @@
 /* Existing toolkit consumers can keep the old utility names. New UI uses the hierarchy above.
    Inline aliases resolve at the consuming element, including a feature's scoped palette. */
 @theme inline {
+  --radius-xs: var(--radius-detail);
+  --radius-sm: var(--radius-compact);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-panel);
+  --radius-xl: var(--radius-card);
+  --radius-2xl: var(--radius-overlay);
+  --shadow-low: var(--elevation-low);
+  --shadow-panel: var(--elevation-panel);
+  --shadow-overlay: var(--elevation-overlay);
+  --color-border-hover: color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
+
   --color-fg: var(--color-fg-primary);
   --color-muted: var(--color-fg-secondary);
   --color-subtle: var(--color-fg-tertiary);
@@ -106,6 +120,11 @@
 }
 
 :root {
+  /* Decorative glass edges, control outlines, and keyboard focus have distinct weights. */
+  --stroke-rim: 0.5px;
+  --stroke-outline: 1px;
+  --stroke-focus: 2px;
+
   /* The scene gold is fixed; decorative UI gold adapts to the light material. */
   --scene-solar: 226 192 122;
   --motion-stagger: 60ms;
@@ -140,24 +159,30 @@
     color-mix(in srgb, var(--color-highlight) 0%, transparent) 45%
   );
   --glass-blur: blur(40px) saturate(1.8);
-  --glass-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 12%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 10%, transparent),
-    0 20px 50px color-mix(in srgb, var(--color-shadow) 30%, transparent);
-  --hud-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 14%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 12%, transparent);
-  --popover-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 10%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 14%, transparent),
-    0 24px 60px color-mix(in srgb, var(--color-shadow) 50%, transparent);
+  --edge-panel:
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 12%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-highlight) 10%, transparent);
+  --edge-control:
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 14%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-highlight) 12%, transparent);
+  --edge-overlay:
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 10%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-highlight) 14%, transparent);
+  --elevation-low: 0 0 0 0 transparent;
+  --elevation-panel: 0 20px 50px color-mix(in srgb, var(--color-shadow) 30%, transparent);
+  --elevation-overlay: 0 24px 60px color-mix(in srgb, var(--color-shadow) 50%, transparent);
+  --glass-shadow: var(--edge-panel), var(--elevation-panel);
+  --hud-shadow: var(--edge-control), var(--elevation-low);
+  --popover-shadow: var(--edge-overlay), var(--elevation-overlay);
+  /* Pills keep a quieter rim; lessons keep the fine top edge of their dark reading material. */
   --lesson-shadow:
-    inset 0 0.5px 0 color-mix(in srgb, var(--color-highlight) 12%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 10%, transparent),
-    0 24px 48px color-mix(in srgb, var(--color-shadow) 55%, transparent);
+    inset 0 var(--stroke-rim) 0 color-mix(in srgb, var(--color-highlight) 12%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-highlight) 10%, transparent),
+    var(--elevation-overlay);
   --pill-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 10%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 8%, transparent);
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 10%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-highlight) 8%, transparent),
+    var(--elevation-low);
   --action-sheen: none;
   --action-shadow: none;
   /* The standalone solar action's halo. */
@@ -208,27 +233,32 @@
   --lesson-fg: #2e3138;
   --glass-fallback: #f8f8f6;
   --glass-blur: blur(28px) saturate(1.8) brightness(1.08);
-  --glass-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 95%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--color-fg-primary) 5%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 12%, transparent),
-    0 18px 40px -16px color-mix(in srgb, var(--color-fg-primary) 28%, transparent);
-  --hud-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 95%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 14%, transparent),
-    0 10px 28px -12px color-mix(in srgb, var(--color-space) 45%, transparent);
-  --popover-shadow:
-    inset 0 1px 0 var(--color-highlight),
-    0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 16%, transparent),
-    0 28px 60px -18px color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
+  --edge-panel:
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 95%, transparent),
+    inset 0 calc(-1 * var(--stroke-outline)) 0
+      color-mix(in srgb, var(--color-fg-primary) 5%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-fg-primary) 12%, transparent);
+  --edge-control:
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 95%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-fg-primary) 14%, transparent);
+  --edge-overlay:
+    inset 0 var(--stroke-outline) 0 var(--color-highlight),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-fg-primary) 16%, transparent);
+  --elevation-low: 0 10px 28px -12px color-mix(in srgb, var(--color-space) 45%, transparent);
+  --elevation-panel: 0 18px 40px -16px color-mix(in srgb, var(--color-fg-primary) 28%, transparent);
+  --elevation-overlay: 0 28px 60px -18px
+    color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
+  --glass-shadow: var(--edge-panel), var(--elevation-panel);
+  --hud-shadow: var(--edge-control), var(--elevation-low);
+  --popover-shadow: var(--edge-overlay), var(--elevation-overlay);
   --lesson-shadow:
-    inset 0 1px 0 var(--color-highlight),
-    0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 14%, transparent),
-    0 24px 48px -16px color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
+    inset 0 var(--stroke-outline) 0 var(--color-highlight),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-fg-primary) 14%, transparent),
+    var(--elevation-overlay);
   --pill-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 95%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 10%, transparent),
-    0 2px 8px -2px color-mix(in srgb, var(--color-fg-primary) 10%, transparent);
+    inset 0 var(--stroke-outline) 0 color-mix(in srgb, var(--color-highlight) 95%, transparent),
+    0 0 0 var(--stroke-rim) color-mix(in srgb, var(--color-fg-primary) 10%, transparent),
+    var(--elevation-low);
   --action-sheen: linear-gradient(
     180deg,
     color-mix(in srgb, var(--color-highlight) 16%, transparent),

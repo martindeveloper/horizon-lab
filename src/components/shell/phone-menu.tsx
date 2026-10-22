@@ -62,7 +62,7 @@ export function PhoneMenu({
         aria-expanded={open}
         aria-controls={open ? id : undefined}
         onClick={() => setOpenOn(open ? null : pathname)}
-        className="flex size-11 items-center justify-center rounded-full text-fg-secondary transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg-primary"
+        className="flex size-11 items-center justify-center rounded-full text-fg-secondary transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg-primary"
       >
         {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
       </button>
@@ -77,7 +77,7 @@ export function PhoneMenu({
           <nav
             id={id}
             aria-label={t("shell.menu")}
-            className="phone-menu hairline-solar absolute inset-x-0 top-full max-h-[calc(100dvh-var(--app-header-height))] overflow-y-auto overscroll-contain rounded-b-2xl px-(--app-gutter) pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            className="phone-menu hairline-solar absolute inset-x-0 top-full max-h-[calc(100dvh-var(--app-header-height))] overflow-y-auto overscroll-contain rounded-b-overlay px-(--app-gutter) pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
           >
             <div className="grid sm:grid-cols-2 sm:gap-x-10">
               <div className="grid content-start gap-3">
@@ -97,7 +97,7 @@ export function PhoneMenu({
                                 prefetch={false}
                                 aria-current={here ? "page" : undefined}
                                 onClick={close}
-                                className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                                className="flex min-h-12 items-center justify-between gap-4 rounded-card px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
                               >
                                 <span className="min-w-0">
                                   <span className="block text-panel font-medium tracking-tight text-fg-primary">

@@ -29,8 +29,8 @@ export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; smal
           ? "absolute -top-0.5 -right-0.5 size-3.5 md:-top-1 md:-right-1"
           : "size-6 md:size-9 short:hidden",
         outcome === "solved" && "bg-accent text-accent-fg shadow-[0_0_18px_rgb(var(--solar)/0.45)]",
-        outcome === "close" && "bg-surface-secondary text-accent ring-1 ring-accent/70",
-        outcome === "missed" && "bg-surface-secondary text-danger ring-1 ring-danger/60",
+        outcome === "close" && "bg-surface-secondary text-accent ring-outline ring-accent/70",
+        outcome === "missed" && "bg-surface-secondary text-danger ring-outline ring-danger/60",
       )}
     >
       <Icon className={small ? "size-2.5" : "size-3 md:size-4"} strokeWidth={small ? 3 : 2.5} />
@@ -156,7 +156,7 @@ export function MysteryResultCard({ result }: { result: MysteryResult }) {
       role="status"
       key={`${index}-${outcome}`}
       className={cn(
-        "flex anim-rise items-start gap-x-2.5 rounded-md px-3 py-2 ring-1 ring-inset md:items-center md:gap-x-3 md:py-2.5",
+        "flex anim-rise items-start gap-x-2.5 rounded-control px-3 py-2 ring-outline ring-inset md:items-center md:gap-x-3 md:py-2.5",
         outcome === "solved"
           ? "bg-accent/10 ring-accent/40"
           : outcome === "close"

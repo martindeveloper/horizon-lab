@@ -13,7 +13,7 @@ import { Surface, cn, kickerClass } from "@horizon/toolkit/ui";
 import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
 
 const linkClass =
-  "rounded-sm text-fg-primary underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
+  "rounded-compact text-fg-primary underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-focus focus-visible:ring-ring";
 const licenceClass = "font-mono text-[0.68rem] tracking-[0.14em] whitespace-nowrap uppercase";
 
 /** The worlds a map credit covers, in the order the toolkit lists them: one for most, four for OPAL. */
@@ -47,7 +47,7 @@ function LicenceTag({ t, licence }: { t: Translate; licence: Licence }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-sm transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="rounded-compact transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
         >
           {name}
           <span className="sr-only"> ({t("newTab")})</span>
@@ -72,7 +72,7 @@ function Card({
 }) {
   return (
     <li className="flex">
-      <Surface className="flex w-full flex-col rounded-lg p-5">
+      <Surface className="flex w-full flex-col rounded-panel p-5">
         <div className="flex items-start justify-between gap-4">
           {visual}
           <LicenceTag t={t} licence={item.licence} />
@@ -229,7 +229,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                   <li key={group.id} className="border-b border-border">
                     <a
                       href={creditFragment(group.id)}
-                      className="group flex flex-col gap-1 rounded-sm py-3 pr-3 transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                      className="group flex flex-col gap-1 rounded-compact py-3 pr-3 transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
                     >
                       <span className="font-mono text-2xl leading-none text-fg-primary tabular-nums transition-colors duration-feedback ease-standard group-hover:text-accent">
                         {count(group.items.length)}
@@ -284,7 +284,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
             <h2 id="credits-notes" className={cn(kickerClass, "lg:pt-5 lg:text-right")}>
               {t("notes.label")}
             </h2>
-            <Surface className="mt-3 rounded-lg p-5 sm:p-6 lg:mt-0">
+            <Surface className="mt-3 rounded-panel p-5 sm:p-6 lg:mt-0">
               <ul className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
                 <li>{t("notes.acknowledgement")}</li>
                 <li>{t("notes.gaia")}</li>
@@ -344,10 +344,10 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 <p className="mb-5 text-sm leading-relaxed text-fg-secondary">
                   {t(`documents.${key}Intro`)}
                 </p>
-                <Surface className="divide-y divide-border rounded-lg">
+                <Surface className="divide-y divide-border rounded-panel">
                   {creditDocuments[key].map(({ title, text }, index) => (
                     <details key={`${title}-${index}`} className="group p-5">
-                      <summary className="cursor-pointer rounded-sm text-sm font-medium text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden">
+                      <summary className="cursor-pointer rounded-compact text-sm font-medium text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden">
                         {title}
                       </summary>
                       <pre className="mt-4 font-sans text-xs leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap text-fg-secondary">

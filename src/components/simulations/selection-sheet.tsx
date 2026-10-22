@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 
 import type { Card } from "@/lib/facts";
-import { PanelHeader, cn, useFocusHandoff } from "@horizon/toolkit/ui";
+import { Callout, PanelHeader, cn, useFocusHandoff, type CalloutProps } from "@horizon/toolkit/ui";
 
 /**
  * A selection's card: a bottom sheet on phones, a rail beside the scene on wide screens,
@@ -18,6 +18,7 @@ export function SelectionSheet({
   onClose,
   folded = false,
   takeFocus = true,
+  cautionCallout,
   details,
   footer,
 }: {
@@ -26,6 +27,8 @@ export function SelectionSheet({
   onClose: () => void;
   folded?: boolean;
   takeFocus?: boolean;
+  /** Optional labelled treatment for the card's existing scientific caveat. */
+  cautionCallout?: Pick<CalloutProps, "title" | "tone">;
   details?: ReactNode;
   footer?: ReactNode;
 }) {
@@ -39,7 +42,7 @@ export function SelectionSheet({
     <article
       ref={root}
       tabIndex={-1}
-      className="glass-panel pointer-events-auto absolute inset-x-0 bottom-0 z-40 flex max-h-[min(24rem,46dvh)] anim-sheet flex-col overflow-hidden rounded-t-xl outline-hidden md:inset-x-auto md:top-14 md:right-(--hud-gutter) md:bottom-auto md:max-h-[calc(100%-3.5rem-var(--hud-clear,5.5rem))] md:w-80 md:anim-rail md:rounded-lg"
+      className="glass-panel pointer-events-auto absolute inset-x-0 bottom-0 z-40 flex max-h-[min(24rem,46dvh)] anim-sheet flex-col overflow-hidden rounded-t-card outline-hidden md:inset-x-auto md:top-14 md:right-(--hud-gutter) md:bottom-auto md:max-h-[calc(100%-3.5rem-var(--hud-clear,5.5rem))] md:w-80 md:anim-rail md:rounded-panel"
       aria-label={card.title}
     >
       <PanelHeader
@@ -99,10 +102,16 @@ export function SelectionSheet({
         ) : null}
         {card.body ? <p className="text-body text-fg-primary/80">{card.body}</p> : null}
         {card.caution ? (
-          <p className="flex gap-2 text-ui leading-relaxed text-fg-secondary">
-            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-            {card.caution}
-          </p>
+          cautionCallout ? (
+            <Callout {...cautionCallout}>
+              <p>{card.caution}</p>
+            </Callout>
+          ) : (
+            <p className="flex gap-2 text-ui leading-relaxed text-fg-secondary">
+              <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+              {card.caution}
+            </p>
+          )
         ) : null}
         {details}
       </div>

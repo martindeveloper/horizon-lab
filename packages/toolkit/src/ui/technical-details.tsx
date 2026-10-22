@@ -49,7 +49,7 @@ export function TechnicalDetails({
         title={labels.open}
         onClick={() => dialog.current?.open()}
         className={cn(
-          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-ui text-fg-secondary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
+          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-ui text-fg-secondary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
           triggerClassName,
         )}
       >
@@ -90,7 +90,7 @@ export function TechnicalDetails({
               <h3 className="mb-3 font-display text-section">{section.title}</h3>
               <p className="text-body text-fg-secondary">{section.body}</p>
               {section.equations.length > 0 ? (
-                <div className="mt-4 space-y-2 rounded-lg border border-border bg-surface-secondary p-panel">
+                <div className="mt-4 space-y-2 rounded-panel border border-border bg-surface-secondary p-panel">
                   {section.equations.map((equation) => (
                     <p
                       key={equation}

@@ -46,7 +46,7 @@ export function VisualizationExample() {
           aria-label="Simulation controls"
           className="pad-hud-bottom absolute inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:w-80"
         >
-          <Surface className="pointer-events-auto space-y-section rounded-lg p-panel">
+          <Surface className="pointer-events-auto space-y-section rounded-panel p-panel">
             <ControlRow label="Speed" value={`${speed.toFixed(1)}×`}>
               <Slider
                 aria-label="Simulation speed"

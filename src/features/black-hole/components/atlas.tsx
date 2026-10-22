@@ -213,7 +213,7 @@ export function AtlasOverlay() {
       </header>
 
       <div className="grid min-h-0 flex-1 gap-3 overflow-y-auto overscroll-contain md:grid-cols-[minmax(0,1.4fr)_20rem] md:gap-4 md:px-6 md:pb-6">
-        <section className="glass-panel [container-type:size] relative min-h-[min(calc(100vw-2rem),52dvh)] overflow-hidden rounded-lg md:h-full md:min-h-0">
+        <section className="glass-panel [container-type:size] relative min-h-[min(calc(100vw-2rem),52dvh)] overflow-hidden rounded-panel md:h-full md:min-h-0">
           <Kicker className="absolute top-3 left-3 z-20">{t("milkyWayMap")}</Kicker>
           {/* One square frame for the map, markers and scale, so they share coordinates. */}
           <div className="absolute top-1/2 left-1/2 size-[min(100cqw,100cqh)] -translate-x-1/2 -translate-y-1/2">
@@ -322,7 +322,7 @@ export function AtlasOverlay() {
         </section>
 
         <div className="flex flex-col gap-3 md:gap-4">
-          <section className="glass-panel rounded-lg p-3.5 md:p-4">
+          <section className="glass-panel rounded-panel p-3.5 md:p-4">
             <div className="min-h-[13.5rem]" aria-live="polite">
               <Fact site={selected} />
             </div>
@@ -339,7 +339,7 @@ export function AtlasOverlay() {
             )}
           </section>
 
-          <section className="glass-panel rounded-lg p-3.5 md:p-4">
+          <section className="glass-panel rounded-panel p-3.5 md:p-4">
             <h3 className={kickerClass}>{t("localGroup")}</h3>
             <p className="mt-1 text-xs leading-relaxed text-fg-secondary">
               {t("localGroupBody", figureArgs(locale))}
@@ -355,7 +355,7 @@ export function AtlasOverlay() {
                     aria-pressed={inspect === s.id}
                     onClick={() => show(s)}
                     className={cn(
-                      "glass-hud flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-left md:min-h-0",
+                      "glass-hud flex min-h-11 items-center justify-between rounded-control px-3 py-2 text-left md:min-h-0",
                       fly ? "cursor-pointer text-fg-primary" : "cursor-default text-fg-secondary",
                       inspect === s.id && "text-fg-primary",
                     )}
@@ -368,7 +368,7 @@ export function AtlasOverlay() {
             </div>
           </section>
 
-          <section className="glass-panel rounded-lg p-3.5 md:p-4">
+          <section className="glass-panel rounded-panel p-3.5 md:p-4">
             <h3 className={kickerClass}>{t("theorySolutions")}</h3>
             <p className="mt-1 mb-3 text-xs text-fg-secondary">{t("theoryBody")}</p>
             <div className="flex flex-col gap-1.5">
@@ -379,7 +379,7 @@ export function AtlasOverlay() {
                   aria-pressed={inspect === site.id}
                   onClick={() => show(site)}
                   className={cn(
-                    "glass-hud min-h-11 rounded-md px-3 py-2 text-left text-sm md:min-h-0",
+                    "glass-hud min-h-11 rounded-control px-3 py-2 text-left text-sm md:min-h-0",
                     inspect === site.id || presetId === site.preset
                       ? "text-fg-primary"
                       : "text-fg-secondary hover:text-fg-primary",

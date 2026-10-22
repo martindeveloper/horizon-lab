@@ -17,7 +17,7 @@ export function SolarActivityNotice() {
   return (
     <Surface
       variant="hud"
-      className="pointer-events-none absolute top-14 left-(--hud-gutter) z-[70] max-w-[calc(100%-2*var(--hud-gutter))] rounded-lg px-3 py-2 text-ui text-fg-primary"
+      className="pointer-events-none absolute top-14 left-(--hud-gutter) z-[70] max-w-[calc(100%-2*var(--hud-gutter))] rounded-panel px-3 py-2 text-ui text-fg-primary"
     >
       {t("toggle")} · {t("model")}
     </Surface>

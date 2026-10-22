@@ -104,20 +104,20 @@ function ElementTiles({
             /* A cell of the periodic table: atomic number in the corner, the symbol large, the
                name and atomic weight beneath. */
             className={cn(
-              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-md transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-control transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden",
               "md:aspect-square md:h-auto md:max-h-24 md:gap-1 md:px-1.5 md:pt-3.5 md:pb-1.5",
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */
               !outcome &&
                 (on
-                  ? "bg-accent/10 text-fg-primary ring-1 ring-accent/60 ring-inset"
+                  ? "bg-accent/10 text-fg-primary ring-outline ring-accent/60 ring-inset"
                   : outlineClass),
               outcome && "spectroscopy-verdict",
               outcome === "found" &&
-                "bg-accent/15 text-fg-primary ring-1 ring-accent/70 ring-inset",
+                "bg-accent/15 text-fg-primary ring-outline ring-accent/70 ring-inset",
               outcome === "missed" &&
                 "text-accent outline-1 -outline-offset-1 outline-accent/80 outline-dashed",
-              outcome === "unseen" && "text-danger ring-1 ring-danger/60 ring-inset",
+              outcome === "unseen" && "text-danger ring-outline ring-danger/60 ring-inset",
               outcome === null && result && !on && "text-fg-tertiary",
             )}
           >
@@ -435,7 +435,7 @@ function StepLabel({ step, children }: { step: number; children: ReactNode }) {
     <span className="inline-flex items-center gap-1.5">
       <span
         aria-hidden
-        className="grid size-4 place-items-center rounded-full font-mono text-micro text-fg-primary ring-1 ring-border-strong"
+        className="grid size-4 place-items-center rounded-full font-mono text-micro text-fg-primary ring-outline ring-border-strong"
       >
         {step}
       </span>

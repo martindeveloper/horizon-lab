@@ -54,7 +54,7 @@ export function UpdateNotice() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="relative h-9 shrink-0 rounded-full px-2 font-medium text-accent underline-offset-2 not-md:after:absolute not-md:after:-inset-1 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
+            className="relative h-9 shrink-0 rounded-full px-2 font-medium text-accent underline-offset-2 not-md:after:absolute not-md:after:-inset-1 hover:underline focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
           >
             {t("updateAction")}
           </button>

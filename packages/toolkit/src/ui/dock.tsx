@@ -17,7 +17,7 @@ export function Dock({ className, footerClassName, ...props }: DockProps) {
     <footer className={cn("pad-hud-bottom absolute inset-x-0 bottom-0 z-30", footerClassName)}>
       <Surface
         className={cn(
-          "pointer-events-auto mx-auto w-full max-w-4xl rounded-lg px-panel py-panel-row not-md:px-panel-compact not-md:py-2.5",
+          "pointer-events-auto mx-auto w-full max-w-4xl rounded-panel px-panel py-panel-row not-md:px-panel-compact not-md:py-2.5",
           className,
         )}
         {...props}
