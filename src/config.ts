@@ -1,3 +1,4 @@
+import { DEPLOYMENT_URLS } from "@horizon/toolkit/urls";
 /**
  * Deployment settings. Each reads an environment variable and falls back to the
  * production value when it is unset or blank; `.env.example` lists them.
@@ -69,14 +70,12 @@ export const FEATURES: Readonly<Record<FeatureId, boolean>> = {
 export const DEPLOYMENT_ID = process.env.NEXT_PUBLIC_DEPLOYMENT_ID?.trim() ?? "";
 
 /** Large static assets (music, maps): the `horizon-cdn` R2 bucket. */
-export const CDN_URL = withoutSlash(
-  env(process.env.NEXT_PUBLIC_CDN_URL, "https://cdn.horizonlab.observer"),
-);
+export const CDN_URL = withoutSlash(env(process.env.NEXT_PUBLIC_CDN_URL, DEPLOYMENT_URLS.cdn));
 
 /** The source code, linked from the footer and the about page. */
 export const REPOSITORY_URL = env(
   process.env.NEXT_PUBLIC_REPOSITORY_URL,
-  "https://github.com/martindeveloper/horizon-lab",
+  DEPLOYMENT_URLS.repository,
 );
 
 /** Page-view and performance analytics (server only, decided at build). */
@@ -88,7 +87,5 @@ export const ANALYTICS = flag(process.env.ANALYTICS, true);
  */
 export function siteUrl(): URL {
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  return new URL(
-    env(process.env.SITE_URL, vercel ? `https://${vercel}` : "https://horizon.martinpernica.xyz"),
-  );
+  return new URL(env(process.env.SITE_URL, vercel ? `https://${vercel}` : DEPLOYMENT_URLS.site));
 }

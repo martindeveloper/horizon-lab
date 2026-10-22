@@ -9,6 +9,7 @@ import {
   SUN_RADIUS_KM,
 } from "@horizon/toolkit/bodies";
 import { AU_KM } from "@horizon/toolkit/science";
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
 
 export const HMI_SOURCES = [
   ["01", "73a6cd0d0aad6873468872e3e1d34e8d09465731d6e393b15598ff49c3379e82"],
@@ -17,7 +18,7 @@ export const HMI_SOURCES = [
   ["22", "3d277f25a64063ce8511b70ae612849908cde7b29a446416c7dd570a275be18e"],
 ].map(([day, sha256]) => ({
   date: `2024-05-${day}T00:00:00Z`,
-  url: `https://sdo.gsfc.nasa.gov/assets/img/browse/2024/05/${day}/202405${day}_000000_4096_HMIIF.jpg`,
+  url: `${DOWNLOAD_URLS.hmiBrowse}/2024/05/${day}/202405${day}_000000_4096_HMIIF.jpg`,
   sha256,
 }));
 

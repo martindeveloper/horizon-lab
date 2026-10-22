@@ -4,11 +4,11 @@ import type { ReactNode } from "react";
 import { REPOSITORY_URL } from "@/config";
 import type { Locale } from "@/i18n/routing";
 import { cn, kickerClass } from "@horizon/toolkit/ui";
+import { EXTERNAL_URLS } from "@horizon/toolkit/urls";
 
 import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
 
-const COURSE_URL =
-  "https://www.planetum.cz/eshop/produkt/1115-astronomicky-kurz-2026-27-i-rocnik-prezencni";
+const COURSE_URL = EXTERNAL_URLS.astronomyCourse;
 
 const thanks = [
   { name: "Planetum", role: "organiser" },

@@ -13,10 +13,12 @@
  */
 import { writeFile } from "node:fs/promises";
 
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
+
 import { fetchText } from "./lib/net.mjs";
 
 const OUT = new URL("../src/features/spectroscopy/lib/model/atomic-data.json", import.meta.url);
-const ASD = "https://physics.nist.gov/cgi-bin/ASD";
+const ASD = DOWNLOAD_URLS.nistAsd;
 const RANGE = [380, 770];
 /** Temperatures the partition functions are tabulated at, K. */
 const GRID = [

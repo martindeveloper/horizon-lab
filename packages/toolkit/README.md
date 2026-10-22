@@ -40,6 +40,16 @@ Directory READMEs describe the contracts:
 [environment](src/environment/README.md), [storage](src/storage/README.md),
 [bodies](src/bodies/README.md).
 
+## External URLs (`@horizon/toolkit/urls`)
+
+`src/urls.ts` centralizes external destinations used by executable code: scientific
+references, attribution and licence links, source downloads, and Horizon deployment
+defaults. Its named constant groups have no dependencies or environment reads, so
+Node scripts and browser code can share them without loading rendering modules.
+Consumers retain environment overrides and construct request paths and queries.
+Documentation, generated datasets, third-party licence text, SVG namespaces and
+the benchmark’s local intercepted origin are not external link configuration.
+
 ## Using it in this repository
 
 This is an npm workspace. `npm ci` links it automatically. App code imports the

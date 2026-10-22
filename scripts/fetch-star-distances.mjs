@@ -11,10 +11,12 @@
  */
 import { writeFile } from "node:fs/promises";
 
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
+
 import { STARS } from "../src/space/star-catalogue.ts";
 import { fetchText } from "./lib/net.mjs";
 
-const TAP = "https://simbad.cds.unistra.fr/simbad/sim-tap/sync";
+const TAP = DOWNLOAD_URLS.simbadTap;
 const OUT = new URL("../src/space/star-distances.json", import.meta.url);
 /** Search radius, degrees (3′: the catalogue is good to about an arcminute). */
 const RADIUS = 0.05;

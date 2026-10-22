@@ -13,7 +13,9 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { gunzipSync } from "node:zlib";
 
-const URL_TABLE = "https://cdsarc.cds.unistra.fr/ftp/J/A+AS/142/467/table1.dat.gz";
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
+
+const URL_TABLE = DOWNLOAD_URLS.lineBroadening;
 const LINES = new URL("../src/features/spectroscopy/lib/model/atomic-data.json", import.meta.url);
 const OUT = new URL("../src/features/spectroscopy/lib/model/broadening.json", import.meta.url);
 const ATOMIC_NUMBER = { He: 2, Li: 3, Na: 11, Mg: 12, K: 19, Ca: 20, Fe: 26 };

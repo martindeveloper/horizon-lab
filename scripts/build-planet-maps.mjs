@@ -29,6 +29,7 @@ import sharp from "sharp";
 
 import { FIGURES, MAPS, mapFile } from "@horizon/toolkit/bodies";
 import { GEOMETRIC_ALBEDO, surfaceMap } from "@horizon/toolkit/bodies/surfaces";
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
 
 import { MAPS_KEY } from "../src/lib/assets.ts";
 import { buildSunMap } from "./build-sun-map.mjs";
@@ -42,7 +43,7 @@ const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-pl
 const fetchCached = (url) => download(url, cache);
 const outDir = new URL(`cdn${MAPS_KEY}/`, root);
 
-const OPAL = "https://archive.stsci.edu/missions/hlsp/opal";
+const OPAL = DOWNLOAD_URLS.opal;
 const opalFile = (cycle, planet, rotation, filter) =>
   `${OPAL}/cycle${cycle}/${planet}/hlsp_opal_hst_wfc3-uvis_${planet}-${rotation}_${filter}_v1_globalmap.fits`;
 /**
@@ -73,11 +74,10 @@ const OPAL_SETS = {
     erode: 18,
   },
 };
-const USGS = "https://planetarymaps.usgs.gov/mosaic";
+const USGS = DOWNLOAD_URLS.usgsMosaics;
 const SOURCES = {
-  earth:
-    "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography-bathymetry/october/world.topo.bathy.200410.3x21600x10800.jpg",
-  clouds: "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_8192.tif",
+  earth: DOWNLOAD_URLS.earthTopography,
+  clouds: DOWNLOAD_URLS.earthClouds,
   mars: `${USGS}/Mars_Viking_ClrMosaic_global_925m.tif`,
   mercury: `${USGS}/Mercury_MESSENGER_MDIS_Basemap_MD3Color_Mosaic_Global_665m.tif`,
   pluto: `${USGS}/Pluto_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif`,

@@ -41,7 +41,8 @@
     "./glsl/*": "./src/shaders/*.glsl",
     "./ui/motion": "./src/ui/text-reveal.tsx",
     "./base.css": "./src/ui/base.css",
-    "./shaders/loader": "./src/shaders/loader.cjs"
+    "./shaders/loader": "./src/shaders/loader.cjs",
+    "./urls": "./src/urls.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit"

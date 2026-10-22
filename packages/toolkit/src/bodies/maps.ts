@@ -1,3 +1,4 @@
+import { CREDIT_URLS, MAP_SOURCE_URLS } from "../urls";
 /**
  * Measured surface maps: what each body's texture is built from, who made the
  * data and under which licence. The app owns where the WebP tiers are served
@@ -41,7 +42,7 @@ export function mapFile(base: string, id: BodyId, tier: MapTier) {
 }
 
 const OPAL_CREDIT = "NASA, ESA, A.A. Simon, M.H. Wong (OPAL, Hubble programme GO13937)";
-const OPAL_URL = "https://archive.stsci.edu/hlsp/opal";
+const OPAL_URL = CREDIT_URLS.opal;
 
 export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
   moon: {
@@ -51,7 +52,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "LRO/LROC CGI Moon Kit (2025), laser-albedo polar fill",
     credit: "NASA’s Scientific Visualization Studio; NASA/LRO/LROC, Arizona State University",
     licence: "Public domain",
-    url: "https://svs.gsfc.nasa.gov/4720/",
+    url: MAP_SOURCE_URLS.moon,
   },
   io: {
     version: 1,
@@ -60,7 +61,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Galileo SSI / Voyager merged mosaic, muted enhanced colour; interpolated poles",
     credit: "NASA/JPL; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km",
+    url: MAP_SOURCE_URLS.io,
   },
   europa: {
     version: 1,
@@ -69,7 +70,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Voyager / Galileo SSI mosaic, monochrome; plain south-polar fill",
     credit: "NASA/JPL; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m",
+    url: MAP_SOURCE_URLS.europa,
   },
   ganymede: {
     version: 1,
@@ -78,7 +79,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Voyager / Galileo SSI mosaic, muted multispectral colour; monochrome poles",
     credit: "NASA/JPL; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/ganymede_voyager_galileo_ssi_color_global_mosaic_1_4km",
+    url: MAP_SOURCE_URLS.ganymede,
   },
   callisto: {
     version: 1,
@@ -87,7 +88,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Voyager / Galileo SSI mosaic, monochrome",
     credit: "NASA/JPL; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/callisto_galileo_voyager_global_mosaic_1km",
+    url: MAP_SOURCE_URLS.callisto,
   },
   triton: {
     version: 1,
@@ -96,7 +97,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Voyager 2 mosaic, muted synthetic colour; plain unobserved-area fill",
     credit: "NASA/JPL; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/triton_voyager_2_global_color_mosaic_600m",
+    url: MAP_SOURCE_URLS.triton,
   },
   /* Never more than a few pixels across: one small tier. */
   phobos: {
@@ -106,7 +107,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Viking Orbiter mosaic with Mars Express, MGS and MRO images (DLR control), monochrome",
     credit: "NASA/JPL; Philip Stooke, University of Western Ontario; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m",
+    url: MAP_SOURCE_URLS.phobos,
   },
   deimos: {
     version: 1,
@@ -116,7 +117,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     credit:
       "NASA/JPL; Philip Stooke, University of Western Ontario (with C. Jongkind, M. Arntz); P. Thomas, Cornell; PDS Small Bodies Node",
     licence: "Public domain",
-    url: "https://sbn.psi.edu/pds/resource/stookemaps.html",
+    url: MAP_SOURCE_URLS.deimos,
   },
   mimas: {
     version: 1,
@@ -125,7 +126,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Cassini ISS final atlas mosaic (DLR, 2017), monochrome",
     credit: "NASA/JPL/Space Science Institute; DLR (T. Roatsch et al. 2018); USGS Astrogeology",
     licence: "Public domain",
-    url: "https://www.usgs.gov/publications/final-mimas-and-enceladus-atlases-derived-cassini-iss-images",
+    url: MAP_SOURCE_URLS.mimas,
   },
   enceladus: {
     version: 1,
@@ -134,7 +135,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Cassini ISS global mosaic, monochrome",
     credit: "NASA/JPL/Space Science Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/enceladus_cassini_global_mosaic_110m",
+    url: MAP_SOURCE_URLS.enceladus,
   },
   tethys: {
     version: 1,
@@ -143,7 +144,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Cassini ISS global mosaic, monochrome",
     credit: "NASA/JPL/Space Science Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/tethys_cassini_global_mosaic_293m",
+    url: MAP_SOURCE_URLS.tethys,
   },
   dione: {
     version: 1,
@@ -152,7 +153,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Cassini ISS and Voyager global mosaic, monochrome",
     credit: "NASA/JPL/Space Science Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/dione_cassini_voyager_global_mosaic_154m",
+    url: MAP_SOURCE_URLS.dione,
   },
   rhea: {
     version: 1,
@@ -161,7 +162,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Cassini ISS and Voyager global mosaic, monochrome",
     credit: "NASA/JPL/Space Science Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/rhea_cassini_voyager_global_mosaic_417m",
+    url: MAP_SOURCE_URLS.rhea,
   },
   iapetus: {
     version: 1,
@@ -171,7 +172,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
       "Cassini ISS and Voyager global mosaic, monochrome; Cassini Regio's albedo contrast restored",
     credit: "NASA/JPL/Space Science Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/iapetus_cassini_voyager_global_mosaic_803m",
+    url: MAP_SOURCE_URLS.iapetus,
   },
   charon: {
     version: 1,
@@ -180,7 +181,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "New Horizons LORRI / MVIC mosaic, monochrome; plain unobserved-area fill",
     credit: "NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/charon_new_horizons_lorri_mvic_global_mosaic_300m",
+    url: MAP_SOURCE_URLS.charon,
   },
   sun: {
     version: 1,
@@ -190,7 +191,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
       "SDO/HMI flattened continuum intensity, 1–22 May 2024; representative rotation mosaic, quiet polar fill",
     credit: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
     licence: "Public domain",
-    url: "https://sdo.gsfc.nasa.gov/data/",
+    url: CREDIT_URLS.sdoHmi,
   },
   mercury: {
     version: 1,
@@ -199,7 +200,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "MESSENGER MDIS 3-colour global mosaic (2011–2015), brightness only",
     credit: "NASA, JHU APL, Carnegie Institution of Washington; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_basemap_md3_color_global_mosaic_665m",
+    url: CREDIT_URLS.messenger,
   },
   earth: {
     version: 1,
@@ -208,7 +209,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Blue Marble Next Generation, October, with the Blue Marble cloud layer",
     credit: "NASA Earth Observatory (Reto Stöckli)",
     licence: "Public domain",
-    url: "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/",
+    url: CREDIT_URLS.blueMarble,
   },
   mars: {
     version: 1,
@@ -217,7 +218,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     source: "Viking Orbiter global colour mosaic, 925 m per pixel",
     credit: "NASA, USGS Astrogeology Science Center",
     licence: "Public domain",
-    url: "https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m",
+    url: CREDIT_URLS.viking,
   },
   jupiter: {
     version: 1,
@@ -263,7 +264,7 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
       "New Horizons LORRI and MVIC global mosaic (2015), brightness only; unimaged areas painted",
     credit: "NASA, JHU APL, SwRI, Lunar and Planetary Institute; USGS Astrogeology",
     licence: "Public domain",
-    url: "https://www.usgs.gov/media/images/pluto-global-mosaic-new-horizons-july-2017",
+    url: CREDIT_URLS.newHorizons,
   },
 };
 

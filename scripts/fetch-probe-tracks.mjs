@@ -8,7 +8,9 @@
  */
 import { writeFile } from "node:fs/promises";
 
-const API = "https://ssd.jpl.nasa.gov/api/horizons.api";
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
+
+const API = DOWNLOAD_URLS.horizons;
 const OUT = new URL("../src/space/solar-system/model/probe-tracks.json", import.meta.url);
 const END = "2040-01-01";
 

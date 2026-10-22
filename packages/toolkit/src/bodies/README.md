@@ -88,6 +88,9 @@ mean distance 385 000.56 km) stay in their functions.
 
 ## Measured maps (`maps.ts`)
 
+Source link destinations are shared with the app and asset scripts through
+`@horizon/toolkit/urls`; map metadata keeps the same resolved URL strings.
+
 `MAPS` lists the bodies with a measured map: folder version, tier widths, the far tier's mean
 colour (a placeholder while the map streams in), source, credit, licence and link. The host decides where the files live and passes that base:
 

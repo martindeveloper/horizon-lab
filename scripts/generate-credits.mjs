@@ -2,6 +2,8 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { CREDIT_URLS } from "@horizon/toolkit/urls";
+
 import { syncGenerated } from "./lib/generated.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -31,7 +33,7 @@ function findNotices(directory, relative = "") {
 }
 
 const noticesSections = [
-  `Tanner Helland — blackbody temperature-to-RGB approximation\nSource: https://tannerhelland.com/code.html\nAdapted to GLSL in packages/toolkit/src/shaders/temperature.glsl\n\n${read("scripts/licenses/tanner-helland-LICENSE.txt")}`,
+  `Tanner Helland — blackbody temperature-to-RGB approximation\nSource: ${CREDIT_URLS.tannerHellandCode}\nAdapted to GLSL in packages/toolkit/src/shaders/temperature.glsl\n\n${read("scripts/licenses/tanner-helland-LICENSE.txt")}`,
 ];
 for (const [path, meta] of Object.entries(lock.packages).sort(([a], [b]) =>
   a.localeCompare(b, "en"),
