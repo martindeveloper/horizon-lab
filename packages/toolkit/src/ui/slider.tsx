@@ -44,7 +44,7 @@ export function Slider({
     >
       <SliderPrimitive.Track
         className={cn(
-          "relative h-px w-full grow cursor-pointer overflow-hidden rounded-full bg-fg/20",
+          "relative h-px w-full grow cursor-pointer overflow-hidden rounded-full bg-fg-primary/20",
           trackClassName,
         )}
         style={trackStyle}
@@ -54,7 +54,7 @@ export function Slider({
       {values.map((value, index) => (
         <SliderPrimitive.Thumb
           key={index}
-          className="block size-3.5 cursor-grab rounded-full bg-accent outline-hidden transition-[box-shadow,transform] duration-feedback ease-enter focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95 active:cursor-grabbing"
+          className="block size-3.5 cursor-grab rounded-full bg-accent outline-hidden transition-[box-shadow,transform] duration-feedback ease-enter focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95 active:cursor-grabbing"
           aria-label={thumbLabels?.[index] ?? label}
           aria-valuetext={valueText?.(value, index)}
         />

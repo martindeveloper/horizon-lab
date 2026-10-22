@@ -39,7 +39,7 @@ export function ViewList<Id extends string>({
             {hintOf ? (
               <span className="min-w-0">
                 <span className="block truncate">{labelOf(id)}</span>
-                <span className="block truncate text-xs text-muted">{hintOf(id)}</span>
+                <span className="block truncate text-xs text-fg-secondary">{hintOf(id)}</span>
               </span>
             ) : (
               <span>{labelOf(id)}</span>
@@ -54,7 +54,7 @@ export function ViewList<Id extends string>({
             className="flex-col items-start justify-start gap-0"
           >
             <span>{labelOf(id)}</span>
-            {hintOf ? <span className="text-xs text-muted">{hintOf(id)}</span> : null}
+            {hintOf ? <span className="text-xs text-fg-secondary">{hintOf(id)}</span> : null}
           </ListItem>
         ),
       )}

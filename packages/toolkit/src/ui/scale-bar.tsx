@@ -20,7 +20,7 @@ export function ScaleBar({ text, px, label, onScene = false, className }: ScaleB
       <span
         className={cn(
           "flex flex-col items-start gap-1 font-mono text-[11px] leading-none tracking-wide tabular-nums",
-          onScene ? "text-space-muted" : "text-subtle",
+          onScene ? "text-space-muted" : "text-fg-tertiary",
         )}
       >
         <span aria-hidden className="whitespace-nowrap">
@@ -30,7 +30,7 @@ export function ScaleBar({ text, px, label, onScene = false, className }: ScaleB
           aria-hidden
           className={cn(
             "h-1.5 border-x border-b transition-[width] duration-control ease-standard",
-            onScene ? "border-space-fg/50" : "border-fg/50",
+            onScene ? "border-space-fg/50" : "border-fg-primary/50",
           )}
           style={{ width: px }}
         />

@@ -130,7 +130,7 @@ export function GuideCard({
         style={VEIL}
         className="glass glass-edge pointer-events-auto relative mx-auto flex max-w-xl anim-rise flex-col items-center rounded-xl px-4 pt-3.5 pb-3 text-center md:px-6 md:pt-5 md:pb-4 short:mx-0 short:max-w-xs short:items-start short:px-3 short:pt-2.5 short:pb-2 short:text-left"
       >
-        <p className="font-mono text-[10px] tracking-[0.14em] text-subtle uppercase tabular-nums">
+        <p className="font-mono text-[10px] tracking-[0.14em] text-fg-tertiary uppercase tabular-nums">
           {kicker}
         </p>
         <div className="relative mt-1.5 w-full short:mt-1">
@@ -151,7 +151,7 @@ export function GuideCard({
             tabIndex={-1}
             aria-hidden
             data-shown={more || undefined}
-            className="guide-more absolute inset-x-0 -bottom-1 mx-auto flex size-6 items-center justify-center text-fg"
+            className="guide-more absolute inset-x-0 -bottom-1 mx-auto flex size-6 items-center justify-center text-fg-primary"
             onClick={() => {
               const el = words.current;
               el?.scrollBy({
@@ -246,7 +246,7 @@ function GuideSegments({ step, total, hold }: GuideProgress) {
   return (
     <div aria-hidden className="mt-3 flex w-full max-w-48 gap-1 short:mt-1.5">
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-fg/15">
+        <span key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-fg-primary/15">
           {i < step ? <span className="block h-full bg-solar/60" /> : null}
           {i === step ? (
             <span
@@ -278,7 +278,7 @@ export function GuideTitle({
     <h2
       ref={ref}
       tabIndex={-1}
-      className="font-display text-xl font-medium tracking-tight text-balance text-fg outline-hidden md:text-2xl short:text-base"
+      className="font-display text-xl font-medium tracking-tight text-balance text-fg-primary outline-hidden md:text-2xl short:text-base"
     >
       {children}
     </h2>
@@ -287,7 +287,7 @@ export function GuideTitle({
 
 export function GuideBody({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-1.5 text-sm leading-relaxed text-pretty text-muted short:mt-0.5 short:text-xs">
+    <p className="mt-1.5 text-sm leading-relaxed text-pretty text-fg-secondary short:mt-0.5 short:text-xs">
       {children}
     </p>
   );
@@ -296,7 +296,7 @@ export function GuideBody({ children }: { children: ReactNode }) {
 /** A formula under the body, in the mono face, scrolling sideways when it is long. */
 export function GuideEquation({ children }: { children: ReactNode }) {
   return (
-    <p className="scroll-thin mt-2 overflow-x-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-fg tabular-nums md:text-sm">
+    <p className="scroll-thin mt-2 overflow-x-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-fg-primary tabular-nums md:text-sm">
       {children}
     </p>
   );

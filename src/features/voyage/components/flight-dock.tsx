@@ -61,20 +61,20 @@ function Instrument({
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <dt className="font-mono text-[10px] tracking-[0.18em] text-subtle uppercase">{label}</dt>
+      <dt className="font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">{label}</dt>
       <dd
         className={cn(
           "mt-0.5 truncate tabular-nums",
           lead
-            ? "font-display text-lg font-medium tracking-tight text-fg lg:text-xl"
-            : "font-mono text-xs text-fg",
+            ? "font-display text-lg font-medium tracking-tight text-fg-primary lg:text-xl"
+            : "font-mono text-xs text-fg-primary",
         )}
       >
         {value}
         {extra ? <span className="ml-1.5 text-accent">{extra}</span> : null}
       </dd>
       {sub ? (
-        <dd className="mt-0.5 truncate font-mono text-[10px] text-muted tabular-nums">{sub}</dd>
+        <dd className="mt-0.5 truncate font-mono text-[10px] text-fg-secondary tabular-nums">{sub}</dd>
       ) : null}
     </div>
   );
@@ -108,7 +108,7 @@ function StatusMark({
         )}
       />
       {doing && compact ? doing : t(`hud.state.${status}`)}
-      {doing && !compact ? <span className="text-muted">· {doing}</span> : null}
+      {doing && !compact ? <span className="text-fg-secondary">· {doing}</span> : null}
     </p>
   );
 }
@@ -202,7 +202,7 @@ function TimeWarp({ className }: { className?: string }) {
       onFaster={() => go(index + 1)}
       readout={auto ? formatWarp(t, f, warp) : t(`ratesShort.${rate}`)}
       spoken={auto ? t("hud.warpAuto", { value: formatWarp(t, f, warp) }) : t(`rates.${rate}`)}
-      readoutClassName={auto ? "text-accent" : held ? "text-subtle" : "text-fg"}
+      readoutClassName={auto ? "text-accent" : held ? "text-fg-tertiary" : "text-fg-primary"}
     />
   );
 }
@@ -300,11 +300,11 @@ export function FlightDock() {
           by hand shows its keys for a few seconds. Phones fly by the lever.
         */}
         {status === "free" ? (
-          <p className="voyage-keys voyage-holo absolute bottom-full left-1/2 mb-3 -translate-x-1/2 px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-muted uppercase not-md:hidden">
+          <p className="voyage-keys voyage-holo absolute bottom-full left-1/2 mb-3 -translate-x-1/2 px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-fg-secondary uppercase not-md:hidden">
             {t("hud.keys")}
           </p>
         ) : invite ? (
-          <p className="voyage-holo absolute bottom-full left-1/2 mb-3 -translate-x-1/2 px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-fg uppercase">
+          <p className="voyage-holo absolute bottom-full left-1/2 mb-3 -translate-x-1/2 px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-fg-primary uppercase">
             <span className="not-md:hidden">{t("hud.invite")}</span>
             <span className="md:hidden">{t("hud.inviteTouch")}</span>
           </p>
@@ -338,7 +338,7 @@ export function FlightDock() {
               />
             </dl>
             <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-2">
-              <span className="hidden font-mono text-[10px] tracking-[0.18em] text-subtle uppercase lg:inline">
+              <span className="hidden font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase lg:inline">
                 {t("hud.rate")}
               </span>
               <TimeWarp />
@@ -350,7 +350,7 @@ export function FlightDock() {
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <Kicker className="text-[10px] tracking-[0.18em]">{t("hud.target")}</Kicker>
-                <p className="mt-0.5 truncate font-display text-base font-medium tracking-tight text-fg">
+                <p className="mt-0.5 truncate font-display text-base font-medium tracking-tight text-fg-primary">
                   {aimName}
                 </p>
               </div>
@@ -385,8 +385,8 @@ export function FlightDock() {
         <div className={cn(panelClass, "md:hidden")}>
           <div className="flex items-center gap-2.5">
             <StatusMark status={status} phase={phase} regime={regime} compact />
-            <p className="min-w-0 flex-1 truncate text-sm font-medium text-fg">{aimName}</p>
-            <span className="shrink-0 font-mono text-xs text-fg tabular-nums">{rangeText}</span>
+            <p className="min-w-0 flex-1 truncate text-sm font-medium text-fg-primary">{aimName}</p>
+            <span className="shrink-0 font-mono text-xs text-fg-primary tabular-nums">{rangeText}</span>
             <CourseButton />
             <HelmButton status={status} />
           </div>

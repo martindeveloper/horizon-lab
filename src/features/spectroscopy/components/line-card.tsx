@@ -170,14 +170,14 @@ export function LineCard() {
       />
       <div className="scroll-thin flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3.5 pt-3 pb-4 md:px-4">
         <div>
-          <p className="text-xs text-muted">
+          <p className="text-xs text-fg-secondary">
             {shifted ? t("card.observed") : t("card.wavelength")}
           </p>
-          <p className="mt-0.5 font-mono text-2xl tracking-tight text-fg tabular-nums">
+          <p className="mt-0.5 font-mono text-2xl tracking-tight text-fg-primary tabular-nums">
             {wavelength(f, observed, 3)} nm
           </p>
           {shifted ? (
-            <p className="font-mono text-xs text-muted tabular-nums">
+            <p className="font-mono text-xs text-fg-secondary tabular-nums">
               {t("card.rest", {
                 rest: wavelength(f, line.wavelength, 3),
                 shift: f.number(observed - line.wavelength, {
@@ -205,8 +205,8 @@ export function LineCard() {
         <dl className="divide-y divide-border border-y border-border">
           {facts.map((fact) => (
             <div key={fact.id} className="flex items-baseline justify-between gap-4 py-1.5">
-              <dt className="shrink-0 text-xs text-muted">{fact.label}</dt>
-              <dd className="text-right font-mono text-[12px] text-fg tabular-nums">
+              <dt className="shrink-0 text-xs text-fg-secondary">{fact.label}</dt>
+              <dd className="text-right font-mono text-[12px] text-fg-primary tabular-nums">
                 {fact.value}
               </dd>
             </div>
@@ -214,9 +214,9 @@ export function LineCard() {
         </dl>
 
         <section>
-          <h3 className="text-xs text-muted">
+          <h3 className="text-xs text-fg-secondary">
             {t("card.growthTitle")} ·{" "}
-            <span className="text-fg">{t(`regime.${report.regime}`)}</span>
+            <span className="text-fg-primary">{t(`regime.${report.regime}`)}</span>
           </h3>
           <GrowthChart
             points={growth}
@@ -229,7 +229,7 @@ export function LineCard() {
               damped: t("regime.damped"),
             }}
           />
-          <p className="text-xs leading-relaxed text-muted">
+          <p className="text-xs leading-relaxed text-fg-secondary">
             {/* Hydrogen's Holtsmark wings fall as Δλ^(−5/2), so its damped lines grow as N^(2/5). */}
             {t(
               report.regime === "damped" && line.species === "H I"
@@ -241,7 +241,7 @@ export function LineCard() {
 
         {sequence.length ? (
           <section>
-            <h3 className="text-xs text-muted">{t("card.sequenceTitle")}</h3>
+            <h3 className="text-xs text-fg-secondary">{t("card.sequenceTitle")}</h3>
             <SequenceChart
               points={sequence}
               marker={marker}
@@ -251,7 +251,7 @@ export function LineCard() {
         ) : null}
 
         {named ? (
-          <p className="text-sm leading-relaxed text-fg/80">{t(`notes.${named.note}`)}</p>
+          <p className="text-sm leading-relaxed text-fg-primary/80">{t(`notes.${named.note}`)}</p>
         ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-border px-3.5 py-3 md:px-4">

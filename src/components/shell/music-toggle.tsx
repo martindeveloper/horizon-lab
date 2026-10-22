@@ -33,7 +33,7 @@ const TRACKS = ambientMusic.tracks.length;
 const slot = "relative flex h-7 w-[30px] items-center justify-center rounded-full";
 const skipClass = cn(
   slot,
-  "text-subtle transition-colors duration-feedback ease-standard after:absolute after:-inset-y-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
+  "text-fg-tertiary transition-colors duration-feedback ease-standard after:absolute after:-inset-y-2 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
 );
 
 /**
@@ -117,7 +117,7 @@ export function MusicToggle({ className }: { className?: string }) {
                 className={cn(
                   slot,
                   "transition-colors duration-feedback ease-standard",
-                  playing ? "text-accent" : "text-subtle group-hover:text-fg",
+                  playing ? "text-accent" : "text-fg-tertiary group-hover:text-fg-primary",
                 )}
               >
                 <Icon aria-hidden className="size-3.5" />

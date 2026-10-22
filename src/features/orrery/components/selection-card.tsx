@@ -93,12 +93,12 @@ export function SelectionCard() {
               </Action>
             ) : null}
             {here ? (
-              <p className="w-full text-xs text-muted">
+              <p className="w-full text-xs text-fg-secondary">
                 {t(selection.kind === "observatory" ? "hud.craftNote" : "hud.closeUpNote")}
               </p>
             ) : null}
             {deepTime ? (
-              <p id={deepTimeNote} className="w-full text-xs text-muted">
+              <p id={deepTimeNote} className="w-full text-xs text-fg-secondary">
                 {t("hud.closeUpPresentOnly")}
               </p>
             ) : null}

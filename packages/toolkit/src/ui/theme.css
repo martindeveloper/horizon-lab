@@ -25,24 +25,31 @@
 
   --color-space: #08080b;
   --color-space-fg: #ecece8;
+  --color-space-title: #f4f4f0;
   --color-space-muted: #b2b2ae;
-  --color-solar: #e2c07a;
-  --color-bg: #08080b;
-  --color-surface: #111114;
-  --color-surface-2: #1a1a1f;
-  --color-fg: #ecece8;
-  --color-muted: #9a9a96;
+  --color-solar: rgb(var(--scene-solar));
+  --color-on-solar: #15110a;
+  --color-space-danger: #c45b4a;
+  /* Invariant material pigments: highlights, cast shadows and tinted glass rims. */
+  --color-highlight: #ffffff;
+  --color-shadow: #000000;
+  --color-glass-ink: #1c1d22;
+  --color-surface-primary: var(--color-space);
+  --color-surface-secondary: #111114;
+  --color-surface-tertiary: #1a1a1f;
+  --color-fg-primary: var(--color-space-fg);
+  --color-fg-secondary: #9a9a96;
   /* Quietest text that still reads at 12px: ≥4.5:1 on every dark glass. */
-  --color-subtle: #8a8a86;
-  --color-accent: #e2c07a;
-  --color-accent-fg: #15110a;
+  --color-fg-tertiary: #8a8a86;
+  --color-accent: var(--color-solar);
+  --color-accent-fg: var(--color-on-solar);
   /* Filled calls to action. Dark: the accent itself; light: ink glass with solar text. */
-  --color-action: #e2c07a;
-  --color-action-fg: #15110a;
-  --color-border: #ecece814;
-  --color-border-strong: #ecece828;
-  --color-ring: #e2c07a;
-  --color-danger: #c45b4a;
+  --color-action: var(--color-accent);
+  --color-action-fg: var(--color-accent-fg);
+  --color-border: color-mix(in srgb, var(--color-fg-primary) 7.843137%, transparent);
+  --color-border-strong: color-mix(in srgb, var(--color-fg-primary) 15.686275%, transparent);
+  --color-ring: var(--color-accent);
+  --color-danger: var(--color-space-danger);
 
   --radius-xs: 4px;
   --radius-sm: 8px;
@@ -51,11 +58,24 @@
   --radius-xl: 24px;
   --radius-2xl: 28px;
 
-  --shadow-border: 0 0 0 0.5px #ffffff18;
-  --shadow-border-hover: 0 0 0 0.5px #ffffff28;
+  --shadow-border: 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 9.411765%, transparent);
+  --shadow-border-hover: 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 15.686275%, transparent);
+}
+
+/* Existing toolkit consumers can keep the old utility names. New UI uses the hierarchy above.
+   Inline aliases resolve at the consuming element, including a feature's scoped palette. */
+@theme inline {
+  --color-fg: var(--color-fg-primary);
+  --color-muted: var(--color-fg-secondary);
+  --color-subtle: var(--color-fg-tertiary);
+  --color-bg: var(--color-surface-primary);
+  --color-surface: var(--color-surface-secondary);
+  --color-surface-2: var(--color-surface-tertiary);
 }
 
 :root {
+  /* The scene gold is fixed; decorative UI gold adapts to the light material. */
+  --scene-solar: 226 192 122;
   --motion-stagger: 60ms;
   /* Waiting before showing information is separate from the transition itself. */
   --tooltip-wait: 280ms;
@@ -66,33 +86,35 @@
   --immersive-step: var(--motion-stagger);
   --immersive-controls-delay: var(--transition-duration-feedback);
   /* Solar accent as an RGB triple for gradients, glows, and hairlines. */
-  --solar: 226 192 122;
+  --solar: var(--scene-solar);
+  --menu-scrim-bg: rgb(4 4 8 / 0.5);
   --sky-glow: 0;
   --sky-wash: none;
   /* Frosted dark glass: a white tint lifts panels off the field instead of darkening it. */
-  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg: color-mix(in srgb, var(--color-highlight) 6%, transparent);
   --panel-bg: rgba(30, 30, 36, 0.5);
-  --pill-bg: rgba(255, 255, 255, 0.08);
+  --pill-bg: color-mix(in srgb, var(--color-highlight) 8%, transparent);
   --hud-bg: rgba(22, 22, 28, 0.62);
   --popover-bg: rgba(20, 20, 26, 0.92);
-  --tip-bg: rgba(14, 14, 18, 0.9);
+  --space-tip-bg: rgba(14, 14, 18, 0.9);
+  --tip-bg: var(--space-tip-bg);
   --lesson-bg: rgba(10, 10, 14, 0.92);
   --lesson-fg: #d8d8d4;
   --glass-fallback: rgba(16, 16, 20, 0.97);
   /* Top-lit sheen laid over every glass fill; light glass reads as glass by it. */
-  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 45%);
+  --glass-sheen: linear-gradient(180deg, color-mix(in srgb, var(--color-highlight) 3.5%, transparent), color-mix(in srgb, var(--color-highlight) 0%, transparent) 45%);
   --glass-blur: blur(40px) saturate(1.8);
   --glass-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 0 0.5px rgba(255, 255, 255, 0.1),
-    0 20px 50px rgba(0, 0, 0, 0.3);
-  --hud-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 12%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 10%, transparent),
+    0 20px 50px color-mix(in srgb, var(--color-shadow) 30%, transparent);
+  --hud-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 14%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 12%, transparent);
   --popover-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(255, 255, 255, 0.14),
-    0 24px 60px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 10%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 14%, transparent),
+    0 24px 60px color-mix(in srgb, var(--color-shadow) 50%, transparent);
   --lesson-shadow:
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 0 0 0.5px rgba(255, 255, 255, 0.1),
-    0 24px 48px rgba(0, 0, 0, 0.55);
-  --pill-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+    inset 0 0.5px 0 color-mix(in srgb, var(--color-highlight) 12%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 10%, transparent),
+    0 24px 48px color-mix(in srgb, var(--color-shadow) 55%, transparent);
+  --pill-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 10%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-highlight) 8%, transparent);
   --action-sheen: none;
   --action-shadow: none;
   /* The standalone solar action's halo. */
@@ -104,33 +126,34 @@
 /* Light changes the interface materials, never the astronomical scene. */
 :root.light {
   /* Stone paper and ink: the night's own black thinned to text, gold kept to lines. */
-  --color-bg: #f2f2ef;
-  --color-surface: #ffffff;
-  --color-surface-2: #e9e9e6;
-  --color-fg: #121318;
-  --color-muted: #474a52;
-  --color-subtle: #53565e;
+  --color-surface-primary: #f2f2ef;
+  --color-surface-secondary: var(--color-highlight);
+  --color-surface-tertiary: #e9e9e6;
+  --color-fg-primary: #121318;
+  --color-fg-secondary: #474a52;
+  --color-fg-tertiary: #53565e;
   --color-accent: #704e12;
   --color-accent-fg: #fbf7ee;
   --color-action: #16171c;
   --color-action-fg: #f0d9a4;
-  --color-border: #12131814;
-  --color-border-strong: #12131826;
+  --color-border: color-mix(in srgb, var(--color-fg-primary) 7.843137%, transparent);
+  --color-border-strong: color-mix(in srgb, var(--color-fg-primary) 14.901961%, transparent);
   --color-ring: #9a7020;
   --color-danger: #a23629;
   --solar: 186 132 48;
   /* Glass needs something to refract: dawn under the horizon, a cool sky above. */
+  --menu-scrim-bg: color-mix(in srgb, var(--color-glass-ink) 22%, transparent);
   --sky-glow: 0.2;
   --sky-wash: radial-gradient(70% 55% at 0% 0%, rgb(118 128 160 / 0.13), transparent 70%);
-  --shadow-border: 0 0 0 0.5px #12131824;
-  --shadow-border-hover: 0 0 0 0.5px #12131840;
+  --shadow-border: 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 14.117647%, transparent);
+  --shadow-border-hover: 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 25.098039%, transparent);
   /* Pearl glass: translucent enough for the scene to glow through, dense enough for
      ink text (≥4.5:1 composited over --color-space even before the sheen lifts it). */
-  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 55%);
-  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-sheen: linear-gradient(180deg, color-mix(in srgb, var(--color-highlight) 60%, transparent), color-mix(in srgb, var(--color-highlight) 0%, transparent) 55%);
+  --glass-bg: color-mix(in srgb, var(--color-highlight) 55%, transparent);
   --panel-bg: rgba(248, 248, 245, 0.82);
-  --pill-bg: rgba(255, 255, 255, 0.62);
-  --hud-bg: rgba(248, 248, 245, 0.82);
+  --pill-bg: color-mix(in srgb, var(--color-highlight) 62%, transparent);
+  --hud-bg: var(--panel-bg);
   --popover-bg: rgba(250, 250, 248, 0.9);
   --tip-bg: rgba(252, 252, 250, 0.92);
   --lesson-bg: rgba(250, 250, 248, 0.94);
@@ -138,26 +161,26 @@
   --glass-fallback: #f8f8f6;
   --glass-blur: blur(28px) saturate(1.8) brightness(1.08);
   --glass-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(18, 19, 24, 0.05),
-    0 0 0 0.5px rgba(18, 19, 24, 0.12), 0 18px 40px -16px rgba(18, 19, 24, 0.28);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 95%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--color-fg-primary) 5%, transparent),
+    0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 12%, transparent), 0 18px 40px -16px color-mix(in srgb, var(--color-fg-primary) 28%, transparent);
   --hud-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 0.5px rgba(18, 19, 24, 0.14),
-    0 10px 28px -12px rgba(8, 8, 11, 0.45);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 95%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 14%, transparent),
+    0 10px 28px -12px color-mix(in srgb, var(--color-space) 45%, transparent);
   --popover-shadow:
-    inset 0 1px 0 #ffffff, 0 0 0 0.5px rgba(18, 19, 24, 0.16),
-    0 28px 60px -18px rgba(18, 19, 24, 0.4);
+    inset 0 1px 0 var(--color-highlight), 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 16%, transparent),
+    0 28px 60px -18px color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
   --lesson-shadow:
-    inset 0 1px 0 #ffffff, 0 0 0 0.5px rgba(18, 19, 24, 0.14),
-    0 24px 48px -16px rgba(18, 19, 24, 0.4);
+    inset 0 1px 0 var(--color-highlight), 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 14%, transparent),
+    0 24px 48px -16px color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
   --pill-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 0.5px rgba(18, 19, 24, 0.1),
-    0 2px 8px -2px rgba(18, 19, 24, 0.1);
-  --action-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 60%);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 95%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 10%, transparent),
+    0 2px 8px -2px color-mix(in srgb, var(--color-fg-primary) 10%, transparent);
+  --action-sheen: linear-gradient(180deg, color-mix(in srgb, var(--color-highlight) 16%, transparent), color-mix(in srgb, var(--color-highlight) 0%, transparent) 60%);
   --action-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 0 0.5px rgba(18, 19, 24, 0.7),
-    0 8px 18px -8px rgba(18, 19, 24, 0.55);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 18%, transparent), 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 70%, transparent),
+    0 8px 18px -8px color-mix(in srgb, var(--color-fg-primary) 55%, transparent);
   --action-glow: var(--action-shadow);
-  --tile-frame: 0 0 0 0.5px rgba(18, 19, 24, 0.5), 0 28px 50px -26px rgba(18, 19, 24, 0.5);
+  --tile-frame: 0 0 0 0.5px color-mix(in srgb, var(--color-fg-primary) 50%, transparent), 0 28px 50px -26px color-mix(in srgb, var(--color-fg-primary) 50%, transparent);
 }
 
 /*

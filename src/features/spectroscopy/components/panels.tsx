@@ -48,7 +48,7 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
       closeLabel={t("hud.close")}
       onClose={onClose}
     >
-      <p className="text-xs leading-relaxed text-muted">{t("panel.elementsNote")}</p>
+      <p className="text-xs leading-relaxed text-fg-secondary">{t("panel.elementsNote")}</p>
       {ELEMENT_IDS.map((element) => {
         const lines = identify
           ? formed.filter((l) => l.line.element === element).slice(0, PER_ELEMENT)
@@ -74,13 +74,13 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
                   }}
                 >
                   <span className="truncate">{lineName(line, f)}</span>
-                  <span className="font-mono text-xs text-muted tabular-nums">
+                  <span className="font-mono text-xs text-fg-secondary tabular-nums">
                     {wavelength(f, centre, 2)} nm
                   </span>
                 </ListItem>
               ))}
               {identify && lines.length === 0 ? (
-                <p className="px-3 py-1 text-xs text-subtle">{t("panel.none")}</p>
+                <p className="px-3 py-1 text-xs text-fg-tertiary">{t("panel.none")}</p>
               ) : null}
             </SwitchGroup>
           </RailSection>
@@ -163,7 +163,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         </SwitchGroup>
       </RailSection>
       {view !== "kirchhoff" ? null : (
-        <p className="text-xs leading-relaxed text-muted">{t("panel.benchNote")}</p>
+        <p className="text-xs leading-relaxed text-fg-secondary">{t("panel.benchNote")}</p>
       )}
       <RenderSection<CanvasAntialias>
         quality={quality}

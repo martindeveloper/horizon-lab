@@ -51,7 +51,7 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
     return (
       <ListItem key={id} {...(here ? { selected: true } : {})} onClick={() => go(id)}>
         <span className="min-w-0 truncate">{t(anchorNameKey(id))}</span>
-        <span className="shrink-0 font-mono text-[11px] text-muted tabular-nums">
+        <span className="shrink-0 font-mono text-[11px] text-fg-secondary tabular-nums">
           {here ? NONE : formatTrip(t, f, tripTo(drive, id, fix.km, moment).tau, locale)}
         </span>
       </ListItem>

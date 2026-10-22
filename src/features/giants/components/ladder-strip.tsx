@@ -85,8 +85,8 @@ function HoverLabel({ index, shown }: { index: number; shown: boolean }) {
         shown ? "opacity-100" : "opacity-0",
       )}
     >
-      <span className="text-xs text-fg">{t(rungNameKey(id))}</span>
-      <span className="font-mono text-[11px] text-muted tabular-nums">
+      <span className="text-xs text-fg-primary">{t(rungNameKey(id))}</span>
+      <span className="font-mono text-[11px] text-fg-secondary tabular-nums">
         {keyFigures(t, distance, id)[0]?.value}
       </span>
     </span>
@@ -124,8 +124,8 @@ export function LadderStrip() {
           aria-hidden
           style={{ left: at(index / LAST), width: dot.px, height: dot.px, background: dot.colour }}
           className={cn(
-            "pointer-events-none absolute top-4 z-[1] block -translate-1/2 rounded-full ring-1 ring-fg/25 transition-transform duration-control ease-enter",
-            dot.kind === "planet" && "bg-muted",
+            "pointer-events-none absolute top-4 z-[1] block -translate-1/2 rounded-full ring-1 ring-fg-primary/25 transition-transform duration-control ease-enter",
+            dot.kind === "planet" && "bg-fg-secondary",
             dot.kind === "horizon" && "bg-black ring-solar/80",
             hover.shown && hover.index === index && "scale-150",
           )}
@@ -141,7 +141,7 @@ export function LadderStrip() {
       >
         <span aria-hidden className="block h-1.5 w-px bg-solar/80" />
         <Tooltip label={t("hud.swallowsEarthHint")} side="top" prose>
-          <span className="cursor-help font-mono text-[9px] tracking-[0.12em] whitespace-nowrap text-muted uppercase">
+          <span className="cursor-help font-mono text-[9px] tracking-[0.12em] whitespace-nowrap text-fg-secondary uppercase">
             {t("hud.swallowsEarth")}
           </span>
           <span className="sr-only">{t("hud.swallowsEarthHint")}</span>
@@ -155,13 +155,13 @@ export function LadderStrip() {
         onValueChange={([value = 0]) => useGiants.getState().go(value)}
         className="relative flex h-8 w-full touch-none items-center select-none"
       >
-        <SliderPrimitive.Track className="relative h-px grow rounded-full bg-fg/20">
+        <SliderPrimitive.Track className="relative h-px grow rounded-full bg-fg-primary/20">
           <SliderPrimitive.Range className="absolute h-full bg-accent/50" />
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           aria-label={t("hud.ladder")}
           aria-valuetext={t(rungNameKey(RUNG_IDS[focus]!))}
-          className="relative z-[2] block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+          className="relative z-[2] block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95"
         />
       </SliderPrimitive.Root>
     </div>

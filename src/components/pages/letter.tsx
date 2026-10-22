@@ -9,7 +9,7 @@ import { HorizonMark } from "../shell/brand";
 export const letterGrid = "lg:grid lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-x-14";
 
 /** The title's quieter half: `<em>` in the message, muted on the page. */
-export const letterEmphasis = (chunks: ReactNode) => <span className="text-muted">{chunks}</span>;
+export const letterEmphasis = (chunks: ReactNode) => <span className="text-fg-secondary">{chunks}</span>;
 
 export function LetterHeader({
   id,
@@ -31,19 +31,19 @@ export function LetterHeader({
   return (
     <header className={cn(letterGrid, className)}>
       <p className="flex items-center gap-2.5 lg:justify-end lg:self-start lg:pt-[1.15rem]">
-        <HorizonMark className="size-4 text-muted" />
+        <HorizonMark className="size-4 text-fg-secondary" />
         <span className={kickerClass}>{kicker}</span>
       </p>
       <div>
         <h1
           id={id}
-          className="mt-8 font-display text-[2.5rem] leading-[1.05] font-medium tracking-[-0.035em] text-balance text-fg sm:text-5xl lg:mt-0 lg:text-[3.5rem]"
+          className="mt-8 font-display text-[2.5rem] leading-[1.05] font-medium tracking-[-0.035em] text-balance text-fg-primary sm:text-5xl lg:mt-0 lg:text-[3.5rem]"
         >
           {title}
         </h1>
         <p
           className={cn(
-            "mt-7 text-xl leading-normal text-balance text-muted sm:text-[1.375rem]",
+            "mt-7 text-xl leading-normal text-balance text-fg-secondary sm:text-[1.375rem]",
             leadClassName,
           )}
         >

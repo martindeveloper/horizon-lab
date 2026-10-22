@@ -56,7 +56,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   preconnect(assetOrigin, { crossOrigin: "anonymous" });
   return (
     <html lang={locale} className="antialiased" suppressHydrationWarning>
-      <body className="bg-bg text-fg">
+      <body className="bg-surface-primary text-fg-primary">
         <AppThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
             <LocaleUrl />

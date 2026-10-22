@@ -98,6 +98,7 @@ function ClockRun({
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!layer || !canvas || !ctx) return;
+    const sceneText = getComputedStyle(canvas).getPropertyValue("--color-space-fg").trim();
     let youPhase = 0;
     const shown = drops.current.map(() => ({ label: "", rate: "", gone: false }));
     const reduce = prefersReducedMotion();
@@ -209,7 +210,7 @@ function ClockRun({
         if (hoverRef.current === i) {
           ctx.beginPath();
           ctx.arc(s.x, s.y, 15, 0, Math.PI * 2);
-          ctx.strokeStyle = "rgba(236, 236, 232, 0.6)";
+          ctx.strokeStyle = `color-mix(in srgb, ${sceneText} 60%, transparent)`;
           ctx.stroke();
         }
       });
@@ -256,7 +257,7 @@ function ClockRun({
             onClose={() => setOpen(false)}
             closeLabel={t("ariaCloseClocks")}
           />
-          <p className="mt-2 text-sm leading-relaxed text-fg/80">
+          <p className="mt-2 text-sm leading-relaxed text-fg-primary/80">
             {t("clocksLead", { floor: RAIN_FLOOR })}
           </p>
 
@@ -320,18 +321,18 @@ function ClockRun({
           </div>
 
           <details className="group mt-3 border-t border-border pt-1">
-            <summary className="flex h-11 cursor-pointer list-none items-center justify-between font-mono text-xs tracking-widest text-subtle uppercase transition-colors duration-feedback ease-standard hover:text-fg md:h-8 [&::-webkit-details-marker]:hidden">
+            <summary className="flex h-11 cursor-pointer list-none items-center justify-between font-mono text-xs tracking-widest text-fg-tertiary uppercase transition-colors duration-feedback ease-standard hover:text-fg-primary md:h-8 [&::-webkit-details-marker]:hidden">
               {t("clocksMore")}
               <ChevronDown className="size-3.5 transition-transform duration-control ease-standard group-open:rotate-180" />
             </summary>
-            <p className="mt-1 text-sm leading-relaxed text-fg/80">{t("clocksP1")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-fg-primary/80">{t("clocksP1")}</p>
             <Equation>
               (dτ/dt)<Sub>{t("rainSymbol")}</Sub> = 1 − 2M/r
             </Equation>
             <Equation>
               (dτ/dt)<Sub>{t("hoverSymbol")}</Sub> = √(1 − 2M/r)
             </Equation>
-            <p className="text-sm leading-relaxed text-fg/80">{t("clocksP2")}</p>
+            <p className="text-sm leading-relaxed text-fg-primary/80">{t("clocksP2")}</p>
           </details>
         </div>
       </aside>

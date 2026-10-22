@@ -65,13 +65,13 @@ function Marker({
             <span
               className={cn(
                 "absolute size-3 rounded-full border",
-                active ? "border-fg" : "border-accent/80",
+                active ? "border-fg-primary" : "border-accent/80",
               )}
             />
-            <span className={cn("size-1.5 rounded-full", active ? "bg-fg" : "bg-accent")} />
+            <span className={cn("size-1.5 rounded-full", active ? "bg-fg-primary" : "bg-accent")} />
           </>
         ) : (
-          <span className={cn("size-1 rounded-full", dim || active ? "bg-fg" : "bg-muted")} />
+          <span className={cn("size-1 rounded-full", dim || active ? "bg-fg-primary" : "bg-fg-secondary")} />
         )}
       </span>
       {showLabel ? (
@@ -79,7 +79,7 @@ function Marker({
           className={cn(
             "mt-0.5 rounded-full px-1.5 py-0.5 font-mono text-xs tracking-widest uppercase",
             hole ? "glass-hud" : "",
-            active || dim ? "text-fg" : "text-muted",
+            active || dim ? "text-fg-primary" : "text-fg-secondary",
           )}
         >
           {siteName(site, t)}
@@ -123,26 +123,26 @@ function Fact({ site }: { site: AtlasSite }) {
         {kindBit}
         {copy.found}
       </Kicker>
-      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-fg">{copy.name}</h3>
-      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 font-mono text-xs text-muted">
+      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-fg-primary">{copy.name}</h3>
+      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 font-mono text-xs text-fg-secondary">
         {site.ra !== "-" ? (
           <>
-            <dt className="text-subtle">RA</dt>
-            <dd className="text-fg">{site.ra}</dd>
-            <dt className="text-subtle">Dec</dt>
-            <dd className="text-fg">{site.dec}</dd>
+            <dt className="text-fg-tertiary">RA</dt>
+            <dd className="text-fg-primary">{site.ra}</dd>
+            <dt className="text-fg-tertiary">Dec</dt>
+            <dd className="text-fg-primary">{site.dec}</dd>
           </>
         ) : null}
-        <dt className="text-subtle">{t("gal")}</dt>
-        <dd className="text-fg">
+        <dt className="text-fg-tertiary">{t("gal")}</dt>
+        <dd className="text-fg-primary">
           {site.lon} · {site.lat}
         </dd>
-        <dt className="text-subtle">D</dt>
-        <dd className="text-fg">{copy.distance}</dd>
-        <dt className="text-subtle">M</dt>
-        <dd className="text-fg">{copy.mass}</dd>
+        <dt className="text-fg-tertiary">D</dt>
+        <dd className="text-fg-primary">{copy.distance}</dd>
+        <dt className="text-fg-tertiary">M</dt>
+        <dd className="text-fg-primary">{copy.mass}</dd>
       </dl>
-      <p className="mt-3 text-xs leading-relaxed text-subtle">{copy.source}</p>
+      <p className="mt-3 text-xs leading-relaxed text-fg-tertiary">{copy.source}</p>
     </div>
   );
 }
@@ -183,21 +183,21 @@ export function AtlasOverlay() {
       aria-modal="true"
       aria-labelledby="atlas-title"
       tabIndex={-1}
-      className="pad-safe pointer-events-auto absolute inset-0 z-[80] flex anim-fade flex-col bg-bg/80 outline-hidden"
+      className="pad-safe pointer-events-auto absolute inset-0 z-[80] flex anim-fade flex-col bg-surface-primary/80 outline-hidden"
     >
       <header className="flex items-center justify-between gap-3 pb-3 md:px-6 md:py-3">
         <div>
           <Kicker>{t("atlasKicker")}</Kicker>
           <h2
             id="atlas-title"
-            className="font-display text-lg font-medium tracking-tight text-fg md:text-xl"
+            className="font-display text-lg font-medium tracking-tight text-fg-primary md:text-xl"
           >
             {t("atlasTitle")}
           </h2>
         </div>
         <button
           type="button"
-          className="glass-hud relative flex h-8 shrink-0 items-center rounded-full px-3 text-xs tracking-widest text-fg uppercase not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5"
+          className="glass-hud relative flex h-8 shrink-0 items-center rounded-full px-3 text-xs tracking-widest text-fg-primary uppercase not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5"
           onClick={() => setMapOpen(false)}
         >
           <X className="mr-1.5 size-3.5" />
@@ -212,7 +212,7 @@ export function AtlasOverlay() {
           <div className="absolute top-1/2 left-1/2 size-[min(100cqw,100cqh)] -translate-x-1/2 -translate-y-1/2">
             <svg
               viewBox={`${-MAP_HALF_KPC} ${-MAP_HALF_KPC} ${MAP_HALF_KPC * 2} ${MAP_HALF_KPC * 2}`}
-              className="absolute inset-0 size-full text-muted"
+              className="absolute inset-0 size-full text-fg-secondary"
               aria-hidden
             >
               <g transform="scale(1 -1)">
@@ -283,11 +283,11 @@ export function AtlasOverlay() {
             </svg>
 
             <span
-              className="absolute z-[1] size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fg"
+              className="absolute z-[1] size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fg-primary"
               style={{ left: `${sun.left}%`, top: `${sun.top}%` }}
             />
             <span
-              className="absolute z-[1] -translate-x-1/2 font-mono text-xs tracking-widest text-subtle uppercase"
+              className="absolute z-[1] -translate-x-1/2 font-mono text-xs tracking-widest text-fg-tertiary uppercase"
               style={{ left: `${sun.left}%`, top: `calc(${sun.top}% + 8px)` }}
             >
               {t("sun")}
@@ -304,7 +304,7 @@ export function AtlasOverlay() {
               />
             ))}
 
-            <p className="absolute right-3 bottom-3 flex items-center gap-2 font-mono text-xs text-subtle">
+            <p className="absolute right-3 bottom-3 flex items-center gap-2 font-mono text-xs text-fg-tertiary">
               <span
                 className="inline-block h-px bg-border-strong"
                 style={{ width: `${(SCALE_KPC / (2 * MAP_HALF_KPC)) * 100}cqmin` }}
@@ -322,7 +322,7 @@ export function AtlasOverlay() {
             {selected.preset ? (
               <button
                 type="button"
-                className="glass-hud mt-4 h-11 rounded-full px-3 font-mono text-xs tracking-widest text-fg uppercase md:h-8"
+                className="glass-hud mt-4 h-11 rounded-full px-3 font-mono text-xs tracking-widest text-fg-primary uppercase md:h-8"
                 onClick={() => pick(selected)}
               >
                 {t("open")} {siteName(selected, t)}
@@ -334,7 +334,7 @@ export function AtlasOverlay() {
 
           <section className="glass-panel rounded-lg p-3.5 md:p-4">
             <h3 className={kickerClass}>{t("localGroup")}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-muted">
+            <p className="mt-1 text-xs leading-relaxed text-fg-secondary">
               {t("localGroupBody", figureArgs(locale))}
             </p>
             <div className="mt-3 flex flex-col gap-1.5">
@@ -349,12 +349,12 @@ export function AtlasOverlay() {
                     onClick={() => show(s)}
                     className={cn(
                       "glass-hud flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-left md:min-h-0",
-                      fly ? "cursor-pointer text-fg" : "cursor-default text-muted",
-                      inspect === s.id && "text-fg",
+                      fly ? "cursor-pointer text-fg-primary" : "cursor-default text-fg-secondary",
+                      inspect === s.id && "text-fg-primary",
                     )}
                   >
                     <span>{siteName(s, t)}</span>
-                    <span className="font-mono text-xs text-subtle">{row.k}</span>
+                    <span className="font-mono text-xs text-fg-tertiary">{row.k}</span>
                   </button>
                 );
               })}
@@ -363,7 +363,7 @@ export function AtlasOverlay() {
 
           <section className="glass-panel rounded-lg p-3.5 md:p-4">
             <h3 className={kickerClass}>{t("theorySolutions")}</h3>
-            <p className="mt-1 mb-3 text-xs text-muted">{t("theoryBody")}</p>
+            <p className="mt-1 mb-3 text-xs text-fg-secondary">{t("theoryBody")}</p>
             <div className="flex flex-col gap-1.5">
               {ATLAS.filter((s) => s.kind === "lab").map((site) => (
                 <button
@@ -374,12 +374,12 @@ export function AtlasOverlay() {
                   className={cn(
                     "glass-hud min-h-11 rounded-md px-3 py-2 text-left text-sm md:min-h-0",
                     inspect === site.id || presetId === site.preset
-                      ? "text-fg"
-                      : "text-muted hover:text-fg",
+                      ? "text-fg-primary"
+                      : "text-fg-secondary hover:text-fg-primary",
                   )}
                 >
                   {siteName(site, t)}
-                  <span className="ml-2 font-mono text-xs text-subtle">{site.lon}</span>
+                  <span className="ml-2 font-mono text-xs text-fg-tertiary">{site.lon}</span>
                 </button>
               ))}
             </div>

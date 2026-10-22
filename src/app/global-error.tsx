@@ -41,7 +41,7 @@ export default function GlobalError({
         <title>500 · Horizon</title>
         <meta name="robots" content="noindex" />
       </head>
-      <body className="bg-bg text-fg">
+      <body className="bg-surface-primary text-fg-primary">
         <AppThemeProvider>
           <StatusPage fullPage code="500" title={copy.errorTitle} description={copy.errorBody}>
             <button type="button" onClick={reset} className={statusPrimaryActionClass}>

@@ -29,8 +29,8 @@ export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; smal
           ? "absolute -top-0.5 -right-0.5 size-3.5 md:-top-1 md:-right-1"
           : "size-6 md:size-9 short:hidden",
         outcome === "solved" && "bg-accent text-accent-fg shadow-[0_0_18px_rgb(var(--solar)/0.45)]",
-        outcome === "close" && "bg-surface text-accent ring-1 ring-accent/70",
-        outcome === "missed" && "bg-surface text-danger ring-1 ring-danger/60",
+        outcome === "close" && "bg-surface-secondary text-accent ring-1 ring-accent/70",
+        outcome === "missed" && "bg-surface-secondary text-danger ring-1 ring-danger/60",
       )}
     >
       <Icon className={small ? "size-2.5" : "size-3 md:size-4"} strokeWidth={small ? 3 : 2.5} />
@@ -67,7 +67,7 @@ function Score({ ok, children }: { ok: boolean; children: string }) {
       ) : (
         <X aria-hidden className="size-3.5 text-danger" strokeWidth={2.5} />
       )}
-      <span className={ok ? "text-fg" : "text-muted"}>{children}</span>
+      <span className={ok ? "text-fg-primary" : "text-fg-secondary"}>{children}</span>
     </li>
   );
 }
@@ -160,16 +160,16 @@ export function MysteryResultCard({ result }: { result: MysteryResult }) {
         outcome === "solved"
           ? "bg-accent/10 ring-accent/40"
           : outcome === "close"
-            ? "bg-fg/5 ring-accent/25"
+            ? "bg-fg-primary/5 ring-accent/25"
             : "bg-danger/5 ring-danger/30",
       )}
     >
       <OutcomeMark outcome={outcome} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm leading-6 font-medium text-fg md:leading-5">
+        <p className="text-sm leading-6 font-medium text-fg-primary md:leading-5">
           {t(`dock.outcome.${outcome}`)}
         </p>
-        <p className="line-clamp-2 text-xs text-pretty text-muted">{reveal}</p>
+        <p className="line-clamp-2 text-xs text-pretty text-fg-secondary">{reveal}</p>
         <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs">
           <Score ok={result.found === result.total && result.unseen === 0}>
             {t("dock.elementsScore", {

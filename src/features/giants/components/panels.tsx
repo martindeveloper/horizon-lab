@@ -71,7 +71,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
             {t("panel.orbits")}
           </SwitchRow>
         </SwitchGroup>
-        <p className="mt-1 text-xs text-muted">{t("panel.orbitsNote")}</p>
+        <p className="mt-1 text-xs text-fg-secondary">{t("panel.orbitsNote")}</p>
       </RailSection>
       <RailSection title={t("panel.ruler")}>
         <SegmentedControl
@@ -91,7 +91,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
             api().setSurfaceZoom(SURFACE_ZOOMS.find((zoom) => String(zoom) === value) ?? 1)
           }
         />
-        <p className="mt-1 text-xs text-muted">{t("panel.surfaceZoomNote")}</p>
+        <p className="mt-1 text-xs text-fg-secondary">{t("panel.surfaceZoomNote")}</p>
       </RailSection>
       <RenderSection<GiantsAntialias>
         quality={quality}
@@ -100,7 +100,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         modes={ANTIALIAS_MODES}
         onAntialias={(mode) => api().setAntialias(mode)}
         onReset={() => api().resetView()}
-        note={<p className="text-xs text-muted">{t("panel.focusBlurNote")}</p>}
+        note={<p className="text-xs text-fg-secondary">{t("panel.focusBlurNote")}</p>}
       >
         <BloomSwitch on={bloom} onToggle={() => api().setBloom(!bloom)} />
         <SwitchRow on={focusBlur} onToggle={() => api().setFocusBlur(!focusBlur)}>

@@ -16,12 +16,12 @@ export function ListItem({ selected, className, type = "button", ...props }: Lis
       type={type}
       aria-current={selected ? "true" : undefined}
       className={cn(
-        "flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm tracking-wide transition-colors duration-feedback ease-standard hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-9",
+        "flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm tracking-wide transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:min-h-9",
         selected
-          ? "bg-fg/[0.07] text-fg"
+          ? "bg-fg-primary/[0.07] text-fg-primary"
           : selected === false
-            ? "text-muted hover:text-fg"
-            : "text-fg",
+            ? "text-fg-secondary hover:text-fg-primary"
+            : "text-fg-primary",
         className,
       )}
       {...props}

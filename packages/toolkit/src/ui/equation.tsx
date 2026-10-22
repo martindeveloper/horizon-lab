@@ -6,7 +6,7 @@ export function Equation({ className, children }: { className?: string; children
   return (
     <p
       className={cn(
-        "py-1.5 text-center font-mono text-xs leading-relaxed text-fg md:text-sm",
+        "py-1.5 text-center font-mono text-xs leading-relaxed text-fg-primary md:text-sm",
         className,
       )}
     >

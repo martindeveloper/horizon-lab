@@ -62,12 +62,12 @@ export function SelectionSheet({
       >
         {lead ? (
           <div>
-            <p className="text-xs text-muted">{lead.label}</p>
-            <p className="mt-0.5 font-mono text-2xl tracking-tight text-fg tabular-nums">
+            <p className="text-xs text-fg-secondary">{lead.label}</p>
+            <p className="mt-0.5 font-mono text-2xl tracking-tight text-fg-primary tabular-nums">
               {lead.main}
             </p>
             {lead.note ? (
-              <p className="font-mono text-xs text-muted tabular-nums">{lead.note}</p>
+              <p className="font-mono text-xs text-fg-secondary tabular-nums">{lead.note}</p>
             ) : null}
           </div>
         ) : null}
@@ -76,29 +76,29 @@ export function SelectionSheet({
             {rows.map((fact) =>
               inline(fact) ? (
                 <div key={fact.id} className="flex items-baseline justify-between gap-4 py-2">
-                  <dt className="shrink-0 text-xs text-muted">{fact.label}</dt>
-                  <dd className="text-right font-mono text-[13px] text-fg tabular-nums">
+                  <dt className="shrink-0 text-xs text-fg-secondary">{fact.label}</dt>
+                  <dd className="text-right font-mono text-[13px] text-fg-primary tabular-nums">
                     {fact.main}
                     {fact.note ? (
-                      <span className="block text-xs text-muted">{fact.note}</span>
+                      <span className="block text-xs text-fg-secondary">{fact.note}</span>
                     ) : null}
                   </dd>
                 </div>
               ) : (
                 <div key={fact.id} className="py-2">
-                  <dt className="text-xs text-muted">{fact.label}</dt>
-                  <dd className="mt-0.5 text-[13px] leading-snug text-fg">
+                  <dt className="text-xs text-fg-secondary">{fact.label}</dt>
+                  <dd className="mt-0.5 text-[13px] leading-snug text-fg-primary">
                     {fact.main}
-                    {fact.note ? <span className="text-muted"> · {fact.note}</span> : null}
+                    {fact.note ? <span className="text-fg-secondary"> · {fact.note}</span> : null}
                   </dd>
                 </div>
               ),
             )}
           </dl>
         ) : null}
-        {card.body ? <p className="text-sm leading-relaxed text-fg/80">{card.body}</p> : null}
+        {card.body ? <p className="text-sm leading-relaxed text-fg-primary/80">{card.body}</p> : null}
         {card.caution ? (
-          <p className="flex gap-2 text-xs leading-relaxed text-muted">
+          <p className="flex gap-2 text-xs leading-relaxed text-fg-secondary">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
             {card.caution}
           </p>

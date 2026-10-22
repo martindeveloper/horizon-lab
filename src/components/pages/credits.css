@@ -13,9 +13,9 @@
     background-repeat: repeat-x;
     background-size: 6.5rem 3.25rem;
     box-shadow:
-      inset -0.7rem -0.35rem 1rem rgb(8 8 11 / 0.72),
-      inset 0.15rem 0.1rem 0.35rem rgb(255 255 255 / 0.1),
-      0 0 0 1px rgb(8 8 11 / 0.6);
+      inset -0.7rem -0.35rem 1rem color-mix(in srgb, var(--color-space) 72%, transparent),
+      inset 0.15rem 0.1rem 0.35rem color-mix(in srgb, var(--color-highlight) 10%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-space) 60%, transparent);
     animation: credit-globe-turn 120s linear infinite;
   }
 

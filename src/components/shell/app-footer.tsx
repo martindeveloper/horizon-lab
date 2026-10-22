@@ -8,13 +8,13 @@ import { FooterLinks } from "./footer-links";
 export async function AppFooter({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "shell" });
   return (
-    <footer className="app-footer mt-auto shrink-0 font-mono text-[10px] tracking-[0.18em] text-subtle uppercase">
+    <footer className="app-footer mt-auto shrink-0 font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">
       <div className="app-bar flex h-full items-center justify-between gap-4">
         <FooterLinks
           t={t}
           lead={
             <>
-              <span className="inline-flex items-center gap-2 text-muted">
+              <span className="inline-flex items-center gap-2 text-fg-secondary">
                 <HorizonMark className="size-3.5" />
                 {/* The narrowest phones keep the mark, About, Credits and the clock on one line. */}
                 <span className="max-[23rem]:sr-only">Horizon</span>

@@ -19,14 +19,14 @@ export function SwitchMark({ on, size = "md" }: { on: boolean; size?: "sm" | "md
       className={cn(
         "relative shrink-0 rounded-full transition-colors duration-control ease-standard",
         small ? "h-3 w-5" : "h-4 w-7",
-        on ? "bg-action" : "bg-fg/15",
+        on ? "bg-action" : "bg-fg-primary/15",
       )}
     >
       <span
         className={cn(
           "absolute top-0.5 left-0.5 rounded-full transition-[translate,background-color] duration-control ease-standard",
           small ? "size-2" : "size-3",
-          on ? cn("bg-action-fg", small ? "translate-x-2" : "translate-x-3") : "bg-fg/60",
+          on ? cn("bg-action-fg", small ? "translate-x-2" : "translate-x-3") : "bg-fg-primary/60",
         )}
       />
     </span>
@@ -49,7 +49,7 @@ export function SwitchRow({
       role="switch"
       aria-checked={on}
       onClick={onToggle}
-      className={cn(!on && "text-muted", className)}
+      className={cn(!on && "text-fg-secondary", className)}
     >
       <span className="min-w-0 truncate">{children}</span>
       <SwitchMark on={on} />

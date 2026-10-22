@@ -49,7 +49,7 @@ function colours(el: Element) {
   const style = getComputedStyle(el);
   const get = (name: string) => style.getPropertyValue(name).trim();
   return {
-    bar: get("--color-subtle"),
+    bar: get("--color-fg-tertiary"),
     late: get("--color-accent"),
     missed: get("--color-danger"),
     line: get("--color-border-strong"),
@@ -150,7 +150,7 @@ export function FrameStats({
   return (
     <div
       className={cn(
-        "glass-pill font-mono text-[11px] text-fg tabular-nums",
+        "glass-pill font-mono text-[11px] text-fg-primary tabular-nums",
         detailed ? "flex flex-col gap-1 rounded-lg px-2.5 py-1.5" : "rounded-full px-2.5 py-1",
         className,
       )}
@@ -168,12 +168,12 @@ export function FrameStats({
         />
       ) : null}
       {vsync && hz > 0 ? (
-        <span className="text-subtle">
+        <span className="text-fg-tertiary">
           {hz} Hz{fps > 0 && windows > 0 ? ` · ${windows}×` : null}
         </span>
       ) : null}
       {memory && heap !== null ? (
-        <span className="text-subtle">
+        <span className="text-fg-tertiary">
           {labels.heap ? `${labels.heap} ` : null}
           {heap.toFixed(0)} MB
         </span>

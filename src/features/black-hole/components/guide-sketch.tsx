@@ -75,8 +75,9 @@ export function GuideSketch() {
     if (!layer || !canvas || !ctx) return;
     const reduce = prefersReducedMotion();
     const root = getComputedStyle(document.documentElement);
-    const accent = root.getPropertyValue("--color-solar").trim() || "#e2c07a";
-    const quiet = root.getPropertyValue("--color-space-fg").trim() || "#ecece8";
+    const accent = root.getPropertyValue("--color-solar").trim();
+    const quiet = root.getPropertyValue("--color-space-fg").trim();
+    const shadow = root.getPropertyValue("--color-shadow").trim();
     const family = getComputedStyle(canvas).fontFamily || "monospace";
     let shown: Shown | null = null;
     let drawn = false;
@@ -242,7 +243,7 @@ export function GuideSketch() {
         }
 
         ctx.font = `500 ${small ? 10 : 11}px ${family}`;
-        ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+        ctx.shadowColor = `color-mix(in srgb, ${shadow} 85%, transparent)`;
         ctx.shadowBlur = 6;
         for (const label of labels) {
           const a = Math.min(1, Math.max(0, (context.elapsed - label.delay) / LABEL_FADE)) * fade;

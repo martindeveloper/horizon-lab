@@ -7,7 +7,7 @@ import { cardSources } from "./card-specs";
 /** Keep provenance in the card's existing scroll area, within an optional disclosure. */
 export function CardSources({ id, t }: { id: RungId; t: Translate }) {
   return (
-    <details className="text-xs leading-relaxed text-muted">
+    <details className="text-xs leading-relaxed text-fg-secondary">
       <summary className="min-h-11 cursor-pointer rounded-sm py-3 outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
         {t("card.sources")}
       </summary>
@@ -16,7 +16,7 @@ export function CardSources({ id, t }: { id: RungId; t: Translate }) {
       <dl className="mt-3 space-y-3">
         {cardSources(id).map((row) => (
           <div key={row.id}>
-            <dt className="text-fg">
+            <dt className="text-fg-primary">
               {t(`facts.${row.id}`)} · {t(`card.status.${row.status}`)}
             </dt>
             {row.sources.map((key) => {
@@ -24,7 +24,7 @@ export function CardSources({ id, t }: { id: RungId; t: Translate }) {
               return (
                 <dd key={key}>
                   {source.link ? (
-                    <a className="underline underline-offset-2 hover:text-fg" href={source.link}>
+                    <a className="underline underline-offset-2 hover:text-fg-primary" href={source.link}>
                       {source.cite}
                     </a>
                   ) : (

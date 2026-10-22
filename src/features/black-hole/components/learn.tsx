@@ -95,14 +95,14 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
               >
                 <span
                   aria-hidden
-                  className={cn("size-1.5 rounded-full", i === index ? "bg-fg" : "bg-fg/50")}
+                  className={cn("size-1.5 rounded-full", i === index ? "bg-fg-primary" : "bg-fg-primary/50")}
                 />
               </button>
             ))}
             {rotating ? (
               <button
                 type="button"
-                className="relative flex h-8 w-11 items-center justify-center text-subtle transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg md:size-8"
+                className="relative flex h-8 w-11 items-center justify-center text-fg-tertiary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg-primary md:size-8"
                 aria-label={t("pauseStories")}
                 onClick={() => setHeld(true)}
               >
@@ -111,7 +111,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
             ) : null}
             <button
               type="button"
-              className="relative flex h-8 w-11 items-center justify-center text-subtle transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg md:size-8"
+              className="relative flex h-8 w-11 items-center justify-center text-fg-tertiary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg-primary md:size-8"
               aria-label={t("previousStory")}
               onClick={() => show(index - 1)}
             >
@@ -119,7 +119,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
             </button>
             <button
               type="button"
-              className="relative flex h-8 w-11 items-center justify-center text-subtle transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg md:size-8"
+              className="relative flex h-8 w-11 items-center justify-center text-fg-tertiary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg-primary md:size-8"
               aria-label={t("nextStory")}
               onClick={() => show(index + 1)}
             >
@@ -131,13 +131,13 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
       {/* Announced only when the reader changed the story, not on auto-rotation. */}
       <div aria-live={held ? "polite" : "off"}>
         <div key={`${presetId}-${story.title}`} className="anim-fade">
-          <h2 className="font-display text-sm font-medium tracking-tight text-fg md:text-base">
+          <h2 className="font-display text-sm font-medium tracking-tight text-fg-primary md:text-base">
             {story.title}
           </h2>
           <p
             id={bodyId}
             className={cn(
-              "mt-1 text-sm leading-relaxed text-muted not-md:text-[13px] not-md:leading-normal short:hidden",
+              "mt-1 text-sm leading-relaxed text-fg-secondary not-md:text-[13px] not-md:leading-normal short:hidden",
               !full && "line-clamp-2",
               open &&
                 !alwaysOpen &&
@@ -151,7 +151,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
       {alwaysOpen ? null : (
         <button
           type="button"
-          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-xs tracking-widest text-subtle uppercase transition-colors duration-feedback ease-standard after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden short:hidden"
+          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-xs tracking-widest text-fg-tertiary uppercase transition-colors duration-feedback ease-standard after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden short:hidden"
           onClick={() => {
             setHeld(true);
             setOpen((v) => !v);

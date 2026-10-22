@@ -109,20 +109,20 @@ function ElementTiles({
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */
               !outcome &&
-                (on ? "bg-accent/10 text-fg ring-1 ring-accent/60 ring-inset" : outlineClass),
+                (on ? "bg-accent/10 text-fg-primary ring-1 ring-accent/60 ring-inset" : outlineClass),
               outcome && "spectroscopy-verdict",
-              outcome === "found" && "bg-accent/15 text-fg ring-1 ring-accent/70 ring-inset",
+              outcome === "found" && "bg-accent/15 text-fg-primary ring-1 ring-accent/70 ring-inset",
               outcome === "missed" &&
                 "text-accent outline-1 -outline-offset-1 outline-accent/80 outline-dashed",
               outcome === "unseen" && "text-danger ring-1 ring-danger/60 ring-inset",
-              outcome === null && result && !on && "text-subtle",
+              outcome === null && result && !on && "text-fg-tertiary",
             )}
           >
             <span
               aria-hidden
               className={cn(
                 "absolute top-1 left-1.5 font-mono text-[10px] leading-none tabular-nums md:top-1.5 md:left-2",
-                on || outcome === "found" ? "text-accent" : "text-subtle",
+                on || outcome === "found" ? "text-accent" : "text-fg-tertiary",
               )}
             >
               {ELEMENTS[element].number}
@@ -137,8 +137,8 @@ function ElementTiles({
             </span>
             {/* Name and weight only where the tile has room for them whole. */}
             <span aria-hidden className="hidden w-full text-center leading-tight @min-[4rem]:block">
-              <span className="block truncate text-[10px] text-muted">{name}</span>
-              <span className="block font-mono text-[10px] text-subtle tabular-nums">
+              <span className="block truncate text-[10px] text-fg-secondary">{name}</span>
+              <span className="block font-mono text-[10px] text-fg-tertiary tabular-nums">
                 {f.number(ELEMENTS[element].atomicWeight, { maximumFractionDigits: 3 })}
               </span>
             </span>
@@ -219,7 +219,7 @@ function SkyControls() {
                       className="shrink-0"
                     >
                       {t(`names.${id}`)}
-                      <span className="font-mono text-[10px] text-subtle">
+                      <span className="font-mono text-[10px] text-fg-tertiary">
                         {STARS[id].type.split(" ")[0]}
                       </span>
                     </Chip>
@@ -280,7 +280,7 @@ function SkyControls() {
                 chosen={compare}
                 onToggle={(e) => api().toggleCompare(e)}
               />
-              <p className="hidden text-xs text-pretty text-subtle md:block">
+              <p className="hidden text-xs text-pretty text-fg-tertiary md:block">
                 {t("dock.compareHint")}
               </p>
             </>
@@ -415,8 +415,8 @@ function BenchControls() {
           },
         ]}
       />
-      <p aria-live="polite" className="text-xs text-pretty text-muted short:hidden">
-        <span className="text-fg">{t(`kirchhoff.${law}.title`)}</span> ·{" "}
+      <p aria-live="polite" className="text-xs text-pretty text-fg-secondary short:hidden">
+        <span className="text-fg-primary">{t(`kirchhoff.${law}.title`)}</span> ·{" "}
         {t(`kirchhoff.${law}.body`)}
       </p>
     </>
@@ -429,7 +429,7 @@ function StepLabel({ step, children }: { step: number; children: ReactNode }) {
     <span className="inline-flex items-center gap-1.5">
       <span
         aria-hidden
-        className="grid size-4 place-items-center rounded-full font-mono text-[10px] text-fg ring-1 ring-border-strong"
+        className="grid size-4 place-items-center rounded-full font-mono text-[10px] text-fg-primary ring-1 ring-border-strong"
       >
         {step}
       </span>
@@ -475,7 +475,7 @@ function CaseStrip() {
       </ChipRow>
       <div className="flex shrink-0 items-center gap-2">
         {results.some(Boolean) ? (
-          <span className="font-mono text-xs text-muted tabular-nums not-md:hidden">
+          <span className="font-mono text-xs text-fg-secondary tabular-nums not-md:hidden">
             {t("dock.solved", { solved, total: deck.length })}
           </span>
         ) : null}
@@ -559,7 +559,7 @@ function MysteryControls() {
                   onToggle={(e) => api().toggleCompare(e)}
                   {...(verdicts ? { result: verdicts } : {})}
                 />
-                <p className="hidden text-xs text-pretty text-subtle md:block">
+                <p className="hidden text-xs text-pretty text-fg-tertiary md:block">
                   {t("dock.answerHint")}
                 </p>
               </>
@@ -576,9 +576,9 @@ function MysteryControls() {
       {result ? null : (
         /* The answer as it stands, and the one action that scores it (a phone has Check above). */
         <div className="hidden items-center justify-between gap-3 md:flex">
-          <p className="flex min-w-0 items-center gap-2 text-xs text-muted">
+          <p className="flex min-w-0 items-center gap-2 text-xs text-fg-secondary">
             <StepLabel step={3}>{t("dock.yourAnswer")}</StepLabel>
-            <span className="truncate font-mono text-fg tabular-nums">
+            <span className="truncate font-mono text-fg-primary tabular-nums">
               {compare.length
                 ? `${compare.join(" · ")} — ${t("dock.kms", { value: signed(f, velocity) })}`
                 : "—"}

@@ -41,7 +41,7 @@ export function SegmentedControl<T extends string>({
             "relative min-h-8 px-1 text-xs tracking-wide underline-offset-[6px] transition-colors duration-feedback ease-standard not-md:min-w-10 not-md:after:absolute not-md:after:-inset-x-1 not-md:after:-inset-y-1.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:min-h-6",
             value === option.value
               ? "text-accent underline decoration-accent decoration-2"
-              : "text-subtle hover:text-fg",
+              : "text-fg-tertiary hover:text-fg-primary",
           )}
         >
           {option.label}

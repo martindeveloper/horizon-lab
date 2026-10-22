@@ -13,7 +13,7 @@ import { FooterLinks } from "./footer-links";
 import { ThemeSwitch, useThemeLabels } from "./theme-switch";
 import { useDismissOnEscape } from "./use-dismiss-on-escape";
 
-const kicker = "font-mono text-[10px] tracking-[0.22em] text-subtle uppercase";
+const kicker = "font-mono text-[10px] tracking-[0.22em] text-fg-tertiary uppercase";
 const shelves = [
   { id: "labs", shelf: labs },
   { id: "experiences", shelf: experiences },
@@ -62,7 +62,7 @@ export function PhoneMenu({
         aria-expanded={open}
         aria-controls={open ? id : undefined}
         onClick={() => setOpenOn(open ? null : pathname)}
-        className="flex size-11 items-center justify-center rounded-full text-muted transition-colors duration-feedback ease-standard hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg"
+        className="flex size-11 items-center justify-center rounded-full text-fg-secondary transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg-primary"
       >
         {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
       </button>
@@ -97,13 +97,13 @@ export function PhoneMenu({
                                 prefetch={false}
                                 aria-current={here ? "page" : undefined}
                                 onClick={close}
-                                className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                                className="flex min-h-12 items-center justify-between gap-4 rounded-xl px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                               >
                                 <span className="min-w-0">
-                                  <span className="block text-[15px] font-medium tracking-tight text-fg">
+                                  <span className="block text-[15px] font-medium tracking-tight text-fg-primary">
                                     {t(`catalogue.${simulation.messageKey}.title`)}
                                   </span>
-                                  <span className="block text-xs text-muted">
+                                  <span className="block text-xs text-fg-secondary">
                                     {t(`catalogue.${simulation.messageKey}.category`)}
                                   </span>
                                 </span>
@@ -147,7 +147,7 @@ export function PhoneMenu({
               </div>
             </div>
 
-            <div className="mt-4 flex h-10 items-center justify-between gap-4 border-t border-border pt-1 font-mono text-[10px] tracking-[0.18em] text-subtle uppercase">
+            <div className="mt-4 flex h-10 items-center justify-between gap-4 border-t border-border pt-1 font-mono text-[10px] tracking-[0.18em] text-fg-tertiary uppercase">
               <FooterLinks t={shell} menu onNavigate={close} />
             </div>
           </nav>

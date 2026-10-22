@@ -512,10 +512,10 @@ export function CoachMark({
         </div>
         <div className="-mt-2 md:-mt-1" aria-live="polite" aria-atomic>
           <div key={step} className="anim-fade">
-            <h2 className="font-display text-[15px] leading-tight tracking-tight text-fg">
+            <h2 className="font-display text-[15px] leading-tight tracking-tight text-fg-primary">
               {title}
             </h2>
-            <p id={bodyId} className="mt-1 text-[13px] leading-snug text-muted">
+            <p id={bodyId} className="mt-1 text-[13px] leading-snug text-fg-secondary">
               {body}
             </p>
           </div>
@@ -532,7 +532,7 @@ export function CoachMark({
           >
             <ChevronLeft className="size-4" />
           </button>
-          <span aria-hidden className="ml-auto hidden font-mono text-[10px] text-muted md:inline">
+          <span aria-hidden className="ml-auto hidden font-mono text-[10px] text-fg-secondary md:inline">
             ← →
           </span>
           <button

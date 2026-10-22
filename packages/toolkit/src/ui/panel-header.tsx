@@ -25,7 +25,7 @@ export function PanelHeader({
     <div className={cn("flex items-start justify-between gap-3", className)} {...props}>
       <div className="min-w-0">
         {kicker ? <Kicker>{kicker}</Kicker> : null}
-        <h2 className="font-display text-base font-medium tracking-tight text-fg">{title}</h2>
+        <h2 className="font-display text-base font-medium tracking-tight text-fg-primary">{title}</h2>
       </div>
       {onClose ? (
         <Button

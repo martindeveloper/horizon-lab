@@ -37,20 +37,20 @@ export function ClockRow({
       />
       <span
         ref={labelRef}
-        className={cn("w-14 shrink-0 tracking-wide", you ? "text-accent uppercase" : "text-muted")}
+        className={cn("w-14 shrink-0 tracking-wide", you ? "text-accent uppercase" : "text-fg-secondary")}
       >
         {label}
       </span>
-      <span aria-hidden className="relative h-px min-w-0 flex-1 bg-fg/10">
+      <span aria-hidden className="relative h-px min-w-0 flex-1 bg-fg-primary/10">
         <span
           ref={barRef}
           className={cn(
             "absolute inset-0 origin-left transition-transform duration-control ease-standard",
-            you ? "bg-accent/70" : "bg-fg/45",
+            you ? "bg-accent/70" : "bg-fg-primary/45",
           )}
         />
       </span>
-      <span ref={rateRef} className="w-11 shrink-0 text-right text-fg">
+      <span ref={rateRef} className="w-11 shrink-0 text-right text-fg-primary">
         1.00×
       </span>
     </li>

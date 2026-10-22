@@ -31,7 +31,7 @@ function StatusGlyph({ code }: { code: Code }) {
             strokeWidth="3"
             strokeDasharray="4 3"
           />
-          <circle cx="48" cy="48" r="14" className="fill-bg stroke-accent" strokeWidth="1.5" />
+          <circle cx="48" cy="48" r="14" className="fill-surface-primary stroke-accent" strokeWidth="1.5" />
           <line x1="8" y1="48" x2="30" y2="48" className="stroke-accent" />
           <line x1="66" y1="48" x2="88" y2="48" className="stroke-accent" />
         </>
@@ -61,11 +61,11 @@ export function StatusPage({
       id={ANCHOR_IDS.mainContent}
       tabIndex={-1}
       className={cn(
-        "horizon-status relative isolate flex flex-col items-center justify-center px-6 py-16 text-center text-fg outline-hidden",
+        "horizon-status relative isolate flex flex-col items-center justify-center px-6 py-16 text-center text-fg-primary outline-hidden",
         fullPage
           ? "min-h-dvh"
           : stage
-            ? "absolute inset-0 justify-center-safe overflow-y-auto bg-bg"
+            ? "absolute inset-0 justify-center-safe overflow-y-auto bg-surface-primary"
             : "min-h-[calc(100dvh-var(--app-header-height,0px))]",
       )}
     >
@@ -84,7 +84,7 @@ export function StatusPage({
       <h1 className="max-w-xl font-headline text-3xl font-medium tracking-[-0.015em] text-balance sm:text-4xl">
         {title}
       </h1>
-      <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted">{description}</p>
+      <p className="mt-3 max-w-md text-[15px] leading-relaxed text-fg-secondary">{description}</p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">{children}</div>
     </main>
   );

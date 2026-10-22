@@ -42,7 +42,7 @@ export function SelectionCard() {
               <ArrowLeft className="size-4" aria-hidden />
               {t("hud.leaveCloseUp")}
             </Action>
-            <p className="w-full text-xs text-muted">{t("hud.closeUpNote")}</p>
+            <p className="w-full text-xs text-fg-secondary">{t("hud.closeUpNote")}</p>
           </>
         ) : offerCloseUp ? (
           <Action className="flex-1" onClick={() => useDeepField.getState().enterCloseUp()}>

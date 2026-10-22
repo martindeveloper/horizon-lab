@@ -73,7 +73,7 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
         modes={SCENE_ANTIALIAS}
         onAntialias={(mode) => api().setAntialias(mode)}
         onReset={() => api().resetView()}
-        note={<p className="text-xs text-muted">{t("panel.qualityNote")}</p>}
+        note={<p className="text-xs text-fg-secondary">{t("panel.qualityNote")}</p>}
       >
         <BloomSwitch on={bloom} onToggle={() => api().setBloom(!bloom)} />
         <LensSwitch on={lens} onToggle={() => api().setLens(!lens)} />

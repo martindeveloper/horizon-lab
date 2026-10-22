@@ -36,7 +36,7 @@ export function SiderealClock({ label }: { label: string }) {
       <abbr title={label} className="no-underline">
         LST
       </abbr>
-      <span className="text-muted">{value}</span>
+      <span className="text-fg-secondary">{value}</span>
     </span>
   );
 }

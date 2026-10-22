@@ -25,7 +25,7 @@ export function VisualizationExample() {
   return (
     <VisualizationShell aria-label="Visualization example">
       {/* Replace this layer with your canvas, SVG, or scene component. */}
-      <div className="absolute inset-0 bg-bg" />
+      <div className="absolute inset-0 bg-surface-primary" />
       <VisualizationOverlay>
         <header className="hud-top pad-hud-top absolute inset-x-0 top-0 flex items-center gap-3">
           <h1 className="hud-title font-display text-xl">New visualization</h1>

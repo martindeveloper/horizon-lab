@@ -37,7 +37,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
     <div
       role="group"
       className={cn(
-        "relative grid w-fit shrink-0 grid-cols-3 grid-rows-3 place-items-center rounded-full bg-fg/[0.04] p-1 ring-1 ring-border ring-inset not-md:gap-2",
+        "relative grid w-fit shrink-0 grid-cols-3 grid-rows-3 place-items-center rounded-full bg-fg-primary/[0.04] p-1 ring-1 ring-border ring-inset not-md:gap-2",
         className,
       )}
       {...props}
@@ -45,7 +45,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
       {/* The orbit the steps move along. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-[22%] rounded-full border border-dashed border-fg/15"
+        className="pointer-events-none absolute inset-[22%] rounded-full border border-dashed border-fg-primary/15"
       />
       {keysOf(TURNS).map((direction) => {
         const { Icon, cell, ...turn } = TURNS[direction];
@@ -54,7 +54,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
             <IconButton
               aria-label={labels[direction]}
               onClick={() => onRotate(turn)}
-              className="transition-[color,background-color,scale] duration-feedback ease-standard hover:bg-fg/[0.06] hover:text-accent active:scale-90"
+              className="transition-[color,background-color,scale] duration-feedback ease-standard hover:bg-fg-primary/[0.06] hover:text-accent active:scale-90"
             >
               <Icon className="size-4" />
             </IconButton>
@@ -63,7 +63,7 @@ export function OrbitPad({ labels, onRotate, centre, className, ...props }: Orbi
       })}
       <span
         aria-hidden
-        className="col-start-2 row-start-2 font-mono text-[10px] tracking-wide text-subtle tabular-nums"
+        className="col-start-2 row-start-2 font-mono text-[10px] tracking-wide text-fg-tertiary tabular-nums"
       >
         {centre}
       </span>

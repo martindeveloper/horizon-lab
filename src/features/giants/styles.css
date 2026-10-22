@@ -30,9 +30,9 @@
   white-space: nowrap;
   /* The scene labels' halo: legible over a star's face as over the sky. */
   text-shadow:
-    0 0 2px rgb(8 8 11),
-    0 0 6px rgb(8 8 11 / 0.9),
-    0 1px 8px rgb(8 8 11 / 0.9);
+    0 0 2px var(--color-space),
+    0 0 6px color-mix(in srgb, var(--color-space) 90%, transparent),
+    0 1px 8px color-mix(in srgb, var(--color-space) 90%, transparent);
   pointer-events: auto;
   transition:
     opacity var(--transition-duration-control) var(--ease-standard),
@@ -59,7 +59,7 @@
   padding: 1px 6px;
   border: 1px solid color-mix(in srgb, var(--color-solar) 45%, transparent);
   border-radius: 999px;
-  background: rgb(8 8 11 / 0.72);
+  background: color-mix(in srgb, var(--color-space) 72%, transparent);
   color: var(--color-solar);
   font-family: var(--font-mono);
   font-size: 9px;
@@ -143,7 +143,7 @@
   font-size: 9px;
   letter-spacing: 0.12em;
   white-space: nowrap;
-  text-shadow: 0 0 4px rgb(8 8 11);
+  text-shadow: 0 0 4px var(--color-space);
 }
 :where([data-simulation="giants"]) .giants-scale-value {
   top: calc(100% + 6px);

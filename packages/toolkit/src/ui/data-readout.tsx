@@ -29,12 +29,12 @@ export function DataReadout({ items, variant = "grid", className, ...props }: Da
             <dd>
               <Tooltip label={item.label} side="top">
                 <span className="flex items-center gap-1.5">
-                  <span aria-hidden className="flex shrink-0 text-subtle [&_svg]:size-3.5">
+                  <span aria-hidden className="flex shrink-0 text-fg-tertiary [&_svg]:size-3.5">
                     {item.icon}
                   </span>
                   <span
                     className={cn(
-                      "font-mono text-xs whitespace-nowrap text-fg tabular-nums",
+                      "font-mono text-xs whitespace-nowrap text-fg-primary tabular-nums",
                       item.valueClassName,
                     )}
                   >
@@ -51,8 +51,8 @@ export function DataReadout({ items, variant = "grid", className, ...props }: Da
     <dl className={cn("grid grid-cols-3 gap-x-4 gap-y-3", className)} {...props}>
       {items.map((item) => (
         <div key={item.id} className={cn("min-w-0", item.className)}>
-          <dt className="font-mono text-xs tracking-widest text-subtle uppercase">{item.label}</dt>
-          <dd className={cn("mt-0.5 font-mono text-xs text-fg tabular-nums", item.valueClassName)}>
+          <dt className="font-mono text-xs tracking-widest text-fg-tertiary uppercase">{item.label}</dt>
+          <dd className={cn("mt-0.5 font-mono text-xs text-fg-primary tabular-nums", item.valueClassName)}>
             {item.value}
           </dd>
         </div>

@@ -20,7 +20,7 @@ const thanks = [
 const caveats = ["simplified", "approximate", "performance"] as const;
 
 const linkClass =
-  "font-medium text-fg underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden";
+  "font-medium text-fg-primary underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden";
 
 /** One part of the letter: its label hangs in the margin on wide screens. */
 function Part({
@@ -55,7 +55,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
   return (
     <main id={ANCHOR_IDS.mainContent} tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
       <article aria-labelledby="about-heading" className="app-container anim-rise">
-        <div className="mx-auto max-w-[36rem] pt-16 text-[1.0625rem] leading-[1.8] text-pretty text-fg/85 sm:pt-24 sm:text-lg lg:max-w-[51rem] lg:pt-28 lg:text-[1.1875rem] lg:leading-[1.75]">
+        <div className="mx-auto max-w-[36rem] pt-16 text-[1.0625rem] leading-[1.8] text-pretty text-fg-primary/85 sm:pt-24 sm:text-lg lg:max-w-[51rem] lg:pt-28 lg:text-[1.1875rem] lg:leading-[1.75]">
           <LetterHeader
             id="about-heading"
             kicker={t("kicker")}
@@ -64,10 +64,10 @@ export async function AboutPage({ locale }: { locale: Locale }) {
           >
             <span className="mt-10 block h-px w-12 bg-accent/60" aria-hidden />
             <figure className="mt-10 max-w-[25rem] sm:ml-auto">
-              <blockquote className="text-[0.95em] leading-relaxed text-muted italic">
+              <blockquote className="text-[0.95em] leading-relaxed text-fg-secondary italic">
                 {locale === "cs" ? `„${t("quote.text")}“` : `“${t("quote.text")}”`}
               </blockquote>
-              <figcaption className="mt-3 text-[0.8em] text-subtle">
+              <figcaption className="mt-3 text-[0.8em] text-fg-tertiary">
                 — {t("quote.source")}
               </figcaption>
             </figure>
@@ -91,14 +91,14 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             <dl className="grid gap-y-3 border-y border-border py-5 text-[0.9em] leading-relaxed sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-8">
               {caveats.map((key) => (
                 <div key={key} className="contents">
-                  <dt className="font-medium whitespace-nowrap text-fg">
+                  <dt className="font-medium whitespace-nowrap text-fg-primary">
                     {t(`disclaimer.${key}`)}
                   </dt>
-                  <dd className="-mt-2 text-muted sm:mt-0">{t(`disclaimer.${key}Body`)}</dd>
+                  <dd className="-mt-2 text-fg-secondary sm:mt-0">{t(`disclaimer.${key}Body`)}</dd>
                 </div>
               ))}
             </dl>
-            <p className="text-fg">{t("disclaimer.sources")}</p>
+            <p className="text-fg-primary">{t("disclaimer.sources")}</p>
           </Part>
 
           <Part id="source" label={t("source.label")}>
@@ -121,8 +121,8 @@ export async function AboutPage({ locale }: { locale: Locale }) {
                 [t("thanks.team"), t("thanks.teamRole")] as const,
               ].map(([name, role]) => (
                 <li key={name}>
-                  <span className="text-fg">{name}</span>
-                  <span className="text-subtle">, {role.toLocaleLowerCase(locale)}</span>
+                  <span className="text-fg-primary">{name}</span>
+                  <span className="text-fg-tertiary">, {role.toLocaleLowerCase(locale)}</span>
                 </li>
               ))}
             </ul>
@@ -134,17 +134,17 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             </h2>
             <div className="lg:col-start-2">
               <p>{t("signoff")}</p>
-              <p className="mt-4 font-headline text-[2.25rem] leading-none text-fg italic">
+              <p className="mt-4 font-headline text-[2.25rem] leading-none text-fg-primary italic">
                 Martin Pernica
               </p>
-              <p className="mt-3 text-[0.9em] text-muted">{t("author.role")}</p>
+              <p className="mt-3 text-[0.9em] text-fg-secondary">{t("author.role")}</p>
             </div>
           </section>
 
           <Part
             id="ai"
             label={t("author.aiLabel")}
-            className="border-t border-border pt-8 text-[0.85em] leading-relaxed text-muted"
+            className="border-t border-border pt-8 text-[0.85em] leading-relaxed text-fg-secondary"
           >
             <p>{t("author.ai")}</p>
           </Part>

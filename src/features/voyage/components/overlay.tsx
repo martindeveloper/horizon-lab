@@ -75,10 +75,10 @@ export function VoyageOverlay() {
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
             <div className="flex items-start gap-3">
               <div className="min-w-0 pt-1">
-                <p className="hud-title truncate text-sm font-medium text-fg">
+                <p className="hud-title truncate text-sm font-medium text-fg-primary">
                   {t(`views.${view}`)}
                 </p>
-                <p className="mt-0.5 line-clamp-2 max-w-md text-xs text-muted not-md:hidden">
+                <p className="mt-0.5 line-clamp-2 max-w-md text-xs text-fg-secondary not-md:hidden">
                   {t(`viewHints.${view}`)}
                 </p>
               </div>

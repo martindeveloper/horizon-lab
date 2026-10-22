@@ -90,7 +90,7 @@ export function DesktopNotice() {
           focused.current = false;
         }}
         className={cn(
-          "pointer-events-auto flex items-center gap-2.5 rounded-full py-0.5 pr-0.5 pl-4 text-xs text-fg",
+          "pointer-events-auto flex items-center gap-2.5 rounded-full py-0.5 pr-0.5 pl-4 text-xs text-fg-primary",
           phase === "leaving"
             ? "opacity-0 transition-opacity duration-control ease-exit"
             : "anim-rise",
@@ -100,7 +100,7 @@ export function DesktopNotice() {
         <span>{t("desktopNotice")}</span>
         <IconButton
           aria-label={t("closeDesktopNotice")}
-          className="text-muted"
+          className="text-fg-secondary"
           onClick={() => {
             dismissNotice();
             setPhase("leaving");

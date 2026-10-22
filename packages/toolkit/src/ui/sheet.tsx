@@ -98,12 +98,12 @@ export function Sheet({
         aria-label={ariaLabel}
       >
         <div className="relative flex shrink-0 justify-center">
-          <div className="mt-2 h-1 w-10 rounded-full bg-fg/25" aria-hidden />
+          <div className="mt-2 h-1 w-10 rounded-full bg-fg-primary/25" aria-hidden />
           <button
             type="button"
             onClick={() => dismiss.current()}
             aria-label={dismissLabel}
-            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-muted opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-fg-secondary opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <X className="size-4" aria-hidden />
           </button>

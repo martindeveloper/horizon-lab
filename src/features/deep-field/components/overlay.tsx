@@ -68,7 +68,7 @@ export function DeepFieldOverlay() {
             <div className="flex items-start gap-3">
               {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption it. */}
               {t.has(`viewHints.${view}`) ? (
-                <p className="line-clamp-2 max-w-md min-w-0 pt-1 text-xs text-muted not-md:hidden">
+                <p className="line-clamp-2 max-w-md min-w-0 pt-1 text-xs text-fg-secondary not-md:hidden">
                   {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
                 </p>
               ) : null}

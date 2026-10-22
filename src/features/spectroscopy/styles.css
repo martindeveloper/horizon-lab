@@ -3,7 +3,7 @@
 @layer base {
   /* Names and readouts over the dark spectrum read like the scene's labels. */
   :where([data-simulation="spectroscopy"]) .spectroscopy-spectrum {
-    text-shadow: 0 0 6px rgb(8 8 11 / 0.9);
+    text-shadow: 0 0 6px color-mix(in srgb, var(--color-space) 90%, transparent);
   }
 }
 
@@ -21,7 +21,7 @@
 /* The ribbon sits on the scene like a slit image: a hairline frame, never a card. */
 :where([data-simulation="spectroscopy"]) .spectroscopy-ribbon {
   box-shadow:
-    0 0 0 0.5px rgb(236 236 232 / 0.12),
+    0 0 0 0.5px color-mix(in srgb, var(--color-space-fg) 12%, transparent),
     0 0 24px rgb(var(--solar) / 0.06);
 }
 

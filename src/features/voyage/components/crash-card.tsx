@@ -45,7 +45,7 @@ export function CrashCard() {
       </p>
       <p
         id="voyage-crash-body"
-        className="font-mono text-xs tracking-[0.14em] text-fg uppercase tabular-nums"
+        className="font-mono text-xs tracking-[0.14em] text-fg-primary uppercase tabular-nums"
       >
         {t("hud.crash.body", {
           body: t(anchorNameKey(crash.body)),

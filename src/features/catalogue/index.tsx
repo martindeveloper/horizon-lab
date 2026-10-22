@@ -40,12 +40,12 @@ function LabPanel({ simulation, t }: TileProps) {
         >
           {t(`${key}.title`)}
         </h3>
-        <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-pretty text-muted">
+        <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-pretty text-fg-secondary">
           {t(`${key}.description`)}
         </p>
         {/* Each highlight carries its own marker, so a wrapped line starts like the first. */}
         <ul
-          className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 font-mono text-[11px] tracking-wide text-subtle"
+          className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 font-mono text-[11px] tracking-wide text-fg-tertiary"
           aria-label={t("features")}
         >
           {simulation.highlights.map((highlight) => (
@@ -59,7 +59,7 @@ function LabPanel({ simulation, t }: TileProps) {
           <Link
             href={simulation.href}
             prefetch={false}
-            className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-control motion-safe:ease-enter motion-safe:group-hover:translate-x-0.5"
+            className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-control motion-safe:ease-enter motion-safe:group-hover:translate-x-0.5"
           >
             {t(`${key}.open`)}
             <ArrowUpRight className="size-4" aria-hidden />
@@ -72,7 +72,7 @@ function LabPanel({ simulation, t }: TileProps) {
                     <Link
                       href={entry.href}
                       prefetch={false}
-                      className="inline-flex min-h-11 items-baseline gap-2 rounded-sm py-3 text-sm text-muted transition-colors duration-feedback ease-standard hover:text-fg focus-visible:text-fg focus-visible:underline focus-visible:decoration-accent focus-visible:decoration-2 focus-visible:underline-offset-4 focus-visible:outline-hidden"
+                      className="inline-flex min-h-11 items-baseline gap-2 rounded-sm py-3 text-sm text-fg-secondary transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:text-fg-primary focus-visible:underline focus-visible:decoration-accent focus-visible:decoration-2 focus-visible:underline-offset-4 focus-visible:outline-hidden"
                     >
                       <span className="font-mono text-[10px] text-accent tabular-nums" aria-hidden>
                         {String(entryIndex + 1).padStart(2, "0")}
@@ -276,7 +276,7 @@ function Shelf({
           <span className="h-px w-8 bg-solar/70" aria-hidden />
           {title}
         </h2>
-        {note ? <p className="text-sm text-muted">{note}</p> : null}
+        {note ? <p className="text-sm text-fg-secondary">{note}</p> : null}
       </div>
       <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
         {shelf.map((simulation, index) => (

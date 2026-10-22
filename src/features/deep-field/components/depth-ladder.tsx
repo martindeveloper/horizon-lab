@@ -88,7 +88,7 @@ export function DepthLadder() {
           to="orrery"
           view={isSolarView(view) ? view : "oort"}
           aria-label={t("hud.backInTime")}
-          className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors duration-feedback ease-standard hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="glass-hud flex size-9 shrink-0 items-center justify-center rounded-full text-accent transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           <History className="size-4" aria-hidden />
         </HandoffLink>
@@ -123,7 +123,7 @@ export function DepthLadder() {
           <SliderPrimitive.Thumb
             aria-label={t("hud.depth")}
             aria-valuetext={valueText}
-            className="block size-3.5 rounded-full bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+            className="block size-3.5 rounded-full bg-accent shadow-[0_0_14px_rgb(var(--solar)/0.5)] outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95"
           />
         </SliderPrimitive.Root>
         {/* Rungs beside the track: a tick each, named when current or pointed at. Phones name the

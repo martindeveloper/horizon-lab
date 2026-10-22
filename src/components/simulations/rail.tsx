@@ -16,7 +16,7 @@ export function RailSection({
   return (
     <section>
       <h3 className={kickerClass}>{title}</h3>
-      {note ? <p className="mt-1 text-xs text-muted">{note}</p> : null}
+      {note ? <p className="mt-1 text-xs text-fg-secondary">{note}</p> : null}
       <div className="mt-2">{children}</div>
     </section>
   );

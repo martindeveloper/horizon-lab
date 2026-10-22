@@ -100,12 +100,12 @@ export function Picker({
         )}
       >
         <span className="sr-only">{ariaLabel}: </span>
-        <span className="truncate text-sm tracking-tight text-fg">{label}</span>
+        <span className="truncate text-sm tracking-tight text-fg-primary">{label}</span>
         {detail ? <span className={cn("hidden lg:inline", kickerClass)}>{detail}</span> : null}
         <ChevronDown
           aria-hidden
           className={cn(
-            "size-3.5 shrink-0 text-subtle transition-transform duration-control ease-standard",
+            "size-3.5 shrink-0 text-fg-tertiary transition-transform duration-control ease-standard",
             open && "rotate-180",
           )}
         />

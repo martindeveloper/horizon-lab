@@ -12,8 +12,8 @@ export function ControlRow({ label, value, children, className, ...props }: Cont
   return (
     <div className={cn(className)} {...props}>
       <div className="mb-0.5 flex items-baseline justify-between gap-3">
-        <span className="text-xs text-muted">{label}</span>
-        <span className="font-mono text-xs text-fg tabular-nums">{value}</span>
+        <span className="text-xs text-fg-secondary">{label}</span>
+        <span className="font-mono text-xs text-fg-primary tabular-nums">{value}</span>
       </div>
       {children}
     </div>

@@ -41,14 +41,14 @@ export function UpdateNotice() {
       {state === "shown" && !immersive ? (
         <Surface
           variant="pill"
-          className="update-notice-pill pointer-events-auto relative flex max-w-full min-w-0 anim-rise items-center gap-1.5 rounded-full py-0.5 pr-0.5 pl-3.5 text-xs text-fg"
+          className="update-notice-pill pointer-events-auto relative flex max-w-full min-w-0 anim-rise items-center gap-1.5 rounded-full py-0.5 pr-0.5 pl-3.5 text-xs text-fg-primary"
         >
           <span
             className="update-notice-dot size-1.5 shrink-0 rounded-full bg-accent"
             aria-hidden
           />
           <span className="min-w-0 truncate">{t("updateNotice")}</span>
-          <span className="text-subtle" aria-hidden>
+          <span className="text-fg-tertiary" aria-hidden>
             ·
           </span>
           <button
@@ -60,7 +60,7 @@ export function UpdateNotice() {
           </button>
           <IconButton
             aria-label={t("closeUpdateNotice")}
-            className="shrink-0 text-muted"
+            className="shrink-0 text-fg-secondary"
             onClick={() => setState("dismissed")}
           >
             <X className="size-4" aria-hidden />

@@ -103,10 +103,10 @@ export function HrDiagram({
   const focused = points.find((point) => point.id === focus);
   return (
     <figure className="flex flex-col gap-1.5">
-      {compact ? null : <figcaption className="text-xs text-muted">{t("hr.title")}</figcaption>}
+      {compact ? null : <figcaption className="text-xs text-fg-secondary">{t("hr.title")}</figcaption>}
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="w-full text-muted"
+        className="w-full text-fg-secondary"
         role="img"
         aria-label={focused ? t("hr.label", { name: nameOf(focused.id) }) : t("hr.labelAll")}
       >
@@ -201,7 +201,7 @@ export function HrDiagram({
             {t(`hr.groups.${group}`)}
           </text>
         ))}
-        <g className="text-fg">
+        <g className="text-fg-primary">
           {points.map((point) => (
             <circle
               key={point.id}
@@ -230,11 +230,11 @@ export function HrDiagram({
           ) : null}
         </g>
       </svg>
-      <p className="flex justify-between pl-7 text-[11px] text-muted" aria-hidden>
+      <p className="flex justify-between pl-7 text-[11px] text-fg-secondary" aria-hidden>
         <span>{t("hr.hotter")}</span>
         <span>{t("hr.cooler")}</span>
       </p>
-      {compact ? null : <p className="text-xs leading-relaxed text-muted">{t("hr.lesson")}</p>}
+      {compact ? null : <p className="text-xs leading-relaxed text-fg-secondary">{t("hr.lesson")}</p>}
     </figure>
   );
 }

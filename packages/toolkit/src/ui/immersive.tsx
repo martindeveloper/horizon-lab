@@ -337,7 +337,7 @@ export function ImmersiveScene({ stage, labels, onEnter, drift, children }: Imme
             </Tooltip>
           </Toolbar>
           {drifting && drift?.caption !== undefined ? (
-            <p className={cn(kickerClass, "mt-2 text-right text-subtle opacity-70")}>
+            <p className={cn(kickerClass, "mt-2 text-right text-fg-tertiary opacity-70")}>
               {drift.caption}
             </p>
           ) : null}

@@ -79,19 +79,19 @@ export function VelocityLens({ step }: { step: ReactNode }) {
       className="flex min-w-0 flex-col gap-1.5 md:gap-2"
     >
       <div className="flex h-5 items-center justify-between gap-3 text-xs">
-        <span className="text-muted">{step}</span>
-        <span className="font-mono text-fg tabular-nums">{line ? kms(velocity) : null}</span>
+        <span className="text-fg-secondary">{step}</span>
+        <span className="font-mono text-fg-primary tabular-nums">{line ? kms(velocity) : null}</span>
       </div>
       {/* One shape whether or not there is a line to measure yet, so marking the first element
           never changes the dock's height. */}
       <div>
-        <div className="rounded-md bg-fg/[0.03] ring-1 ring-border ring-inset">
+        <div className="rounded-md bg-fg-primary/[0.03] ring-1 ring-border ring-inset">
           {/* The line measured, and the marked elements to measure on instead. */}
           <div className="flex h-9 items-center justify-between gap-2 px-2.5 pt-1.5 md:h-7">
             <span
               className={cn(
                 "truncate text-[11px] tabular-nums",
-                line ? "font-mono text-muted" : "text-subtle",
+                line ? "font-mono text-fg-secondary" : "text-fg-tertiary",
               )}
             >
               {line ? `${line.species} ${wavelength(f, lab)} nm` : t("dock.markFirst")}
@@ -131,7 +131,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
                   x2={xOf(lab * dopplerWavelengthRatio(v))}
                   y1={0}
                   y2={100}
-                  className={v === 0 ? "stroke-fg/45" : "stroke-fg/8"}
+                  className={v === 0 ? "stroke-fg-primary/45" : "stroke-fg-primary/8"}
                   strokeDasharray={v === 0 ? "3 3" : undefined}
                   vectorEffect="non-scaling-stroke"
                 />
@@ -144,7 +144,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
               <path
                 d={line ? path : ""}
                 fill="none"
-                className="stroke-fg/85"
+                className="stroke-fg-primary/85"
                 strokeWidth={1.25}
                 vectorEffect="non-scaling-stroke"
               />
@@ -169,14 +169,14 @@ export function VelocityLens({ step }: { step: ReactNode }) {
                 x2={xOf(observed)}
                 y1={0}
                 y2={100}
-                className={line ? "stroke-accent" : "stroke-fg/15"}
+                className={line ? "stroke-accent" : "stroke-fg-primary/15"}
                 strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
               />
             </svg>
           </div>
           {/* Velocity along the axis; zero is the laboratory wavelength. */}
-          <div aria-hidden className="relative mx-[7px] h-5 font-mono text-[10px] text-subtle">
+          <div aria-hidden className="relative mx-[7px] h-5 font-mono text-[10px] text-fg-tertiary">
             {TICKS.map((v) => (
               <span
                 key={v}
@@ -199,7 +199,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
           className="data-disabled:opacity-40"
           onValueChange={([v]) => api().setVelocity(v ?? 0)}
         />
-        <p className="font-mono text-[11px] text-subtle tabular-nums not-md:hidden">
+        <p className="font-mono text-[11px] text-fg-tertiary tabular-nums not-md:hidden">
           {line
             ? t("dock.reading", {
                 shift: signed(f, observed - lab, 2),
@@ -209,7 +209,7 @@ export function VelocityLens({ step }: { step: ReactNode }) {
         </p>
         {/* The method, in a line: a desktop has the room; a phone's dock keeps the slider in view. */}
         {line ? (
-          <p className="text-[11px] text-pretty text-subtle not-md:hidden short:hidden">
+          <p className="text-[11px] text-pretty text-fg-tertiary not-md:hidden short:hidden">
             {t("dock.mirror")}
           </p>
         ) : null}

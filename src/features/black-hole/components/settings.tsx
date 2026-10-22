@@ -140,7 +140,7 @@ export function SettingsBody() {
               {t("gravity")}
             </SwitchRow>
           </SwitchGroup>
-          {gravity ? null : <p className="text-xs text-muted">{t("gravityOff")}</p>}
+          {gravity ? null : <p className="text-xs text-fg-secondary">{t("gravityOff")}</p>}
         </div>
       </RailSection>
       <RailSection title={t("camera")}>
@@ -227,7 +227,7 @@ export function SettingsBody() {
         antialias={antialias}
         modes={ANTIALIAS_MODES}
         onAntialias={setAntialias}
-        note={<p className="text-xs text-muted">{t("modelNotice")}</p>}
+        note={<p className="text-xs text-fg-secondary">{t("modelNotice")}</p>}
         onReset={() => {
           resetRender();
           if (presetId === "custom") selectHole(DEFAULT_PRESET_ID);

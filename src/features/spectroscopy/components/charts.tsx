@@ -44,32 +44,32 @@ export function LevelDiagram({
         x2={W - 4}
         y1={y(limit)}
         y2={y(limit)}
-        className="stroke-muted/60"
+        className="stroke-fg-secondary/60"
         strokeDasharray="3 3"
       />
       <text
         x={W - 4}
         y={y(limit) - 4}
         textAnchor="end"
-        className="fill-subtle font-mono text-[9px]"
+        className="fill-fg-tertiary font-mono text-[9px]"
       >
         {labels.limit} · {ev(limit)}
       </text>
       {showGround ? (
         <>
-          <line x1={70} x2={190} y1={y(0)} y2={y(0)} className="stroke-muted/60" />
-          <text x={194} y={y(0) + 3} className="fill-subtle font-mono text-[9px]">
+          <line x1={70} x2={190} y1={y(0)} y2={y(0)} className="stroke-fg-secondary/60" />
+          <text x={194} y={y(0) + 3} className="fill-fg-tertiary font-mono text-[9px]">
             {labels.ground}
           </text>
         </>
       ) : null}
-      <line x1={70} x2={190} y1={lower} y2={lower} className="stroke-fg" strokeWidth={1.4} />
-      <line x1={70} x2={190} y1={upper} y2={upper} className="stroke-fg" strokeWidth={1.4} />
+      <line x1={70} x2={190} y1={lower} y2={lower} className="stroke-fg-primary" strokeWidth={1.4} />
+      <line x1={70} x2={190} y1={upper} y2={upper} className="stroke-fg-primary" strokeWidth={1.4} />
       <text
         x={64}
         y={lower + 3}
         textAnchor="end"
-        className="fill-muted font-mono text-[9px] tabular-nums"
+        className="fill-fg-secondary font-mono text-[9px] tabular-nums"
       >
         {ev(line.lower)}
       </text>
@@ -77,14 +77,14 @@ export function LevelDiagram({
         x={64}
         y={upper + 3}
         textAnchor="end"
-        className="fill-muted font-mono text-[9px] tabular-nums"
+        className="fill-fg-secondary font-mono text-[9px] tabular-nums"
       >
         {ev(line.upper)}
       </text>
-      <text x={194} y={lower + 3} className="fill-fg font-mono text-[9px]">
+      <text x={194} y={lower + 3} className="fill-fg-primary font-mono text-[9px]">
         {levelName(line, line.lowerLevel)}
       </text>
-      <text x={194} y={upper + 3} className="fill-fg font-mono text-[9px]">
+      <text x={194} y={upper + 3} className="fill-fg-primary font-mono text-[9px]">
         {levelName(line, line.upperLevel)}
       </text>
       <line
@@ -151,26 +151,26 @@ export function GrowthChart({
       <title>{labels.title}</title>
       <line x1={24} x2={W - 8} y1={H - 18} y2={H - 18} className="stroke-border-strong" />
       <line x1={24} x2={24} y1={8} y2={H - 18} className="stroke-border-strong" />
-      <text x={W - 8} y={H - 5} textAnchor="end" className="fill-subtle font-mono text-[9px]">
+      <text x={W - 8} y={H - 5} textAnchor="end" className="fill-fg-tertiary font-mono text-[9px]">
         {labels.x}
       </text>
-      <text x={4} y={12} className="fill-subtle font-mono text-[9px]">
+      <text x={4} y={12} className="fill-fg-tertiary font-mono text-[9px]">
         {labels.y}
       </text>
-      <text x={px(x0 + (x1 - x0) * 0.12)} y={H - 24} className="fill-subtle text-[9px]">
+      <text x={px(x0 + (x1 - x0) * 0.12)} y={H - 24} className="fill-fg-tertiary text-[9px]">
         {labels.weak}
       </text>
       <text
         x={px(x0 + (x1 - x0) * 0.5)}
         y={py(y0 + (y1 - y0) * 0.55) + 14}
-        className="fill-subtle text-[9px]"
+        className="fill-fg-tertiary text-[9px]"
       >
         {labels.saturated}
       </text>
-      <text x={W - 10} y={22} textAnchor="end" className="fill-subtle text-[9px]">
+      <text x={W - 10} y={22} textAnchor="end" className="fill-fg-tertiary text-[9px]">
         {labels.damped}
       </text>
-      <path d={path} fill="none" className="stroke-fg" strokeWidth={1.3} />
+      <path d={path} fill="none" className="stroke-fg-primary" strokeWidth={1.3} />
       <circle cx={px(here[0])} cy={py(here[1])} r={3.5} className="fill-solar" />
     </svg>
   );
@@ -205,11 +205,11 @@ export function SequenceChart({
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
       <title>{labels.title}</title>
-      <text x={8} y={10} className="fill-subtle font-mono text-[9px]">
+      <text x={8} y={10} className="fill-fg-tertiary font-mono text-[9px]">
         {labels.y}
       </text>
-      <path d={fill} className="fill-fg/8" />
-      <path d={path} fill="none" className="stroke-fg" strokeWidth={1.3} />
+      <path d={fill} className="fill-fg-primary/8" />
+      <path d={path} fill="none" className="stroke-fg-primary" strokeWidth={1.3} />
       <line x1={8} x2={W - 8} y1={H - 22} y2={H - 22} className="stroke-border-strong" />
       {SPECTRAL_CLASSES.map(([name, bound], i) => {
         const upper = i === 0 ? Math.exp(hi) : SPECTRAL_CLASSES[i - 1]![1];
@@ -231,7 +231,7 @@ export function SequenceChart({
               x={px(mid)}
               y={H - 6}
               textAnchor="middle"
-              className="fill-subtle font-mono text-[10px]"
+              className="fill-fg-tertiary font-mono text-[10px]"
             >
               {name}
             </text>

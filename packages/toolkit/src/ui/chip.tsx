@@ -9,7 +9,7 @@ import { cn } from "./utils";
  * it brightens, with a faint fill, under the pointer. Shared by chips and tile buttons.
  */
 export const outlineClass =
-  "text-muted ring-1 ring-border-strong ring-inset hover:bg-fg/5 hover:text-fg hover:ring-fg/40";
+  "text-fg-secondary ring-1 ring-border-strong ring-inset hover:bg-fg-primary/5 hover:text-fg-primary hover:ring-fg-primary/40";
 
 export type ChipProps = ComponentProps<"button"> & { selected?: boolean };
 
@@ -24,7 +24,7 @@ export function Chip({ selected = false, className, type = "button", ...props }:
       type={type}
       className={cn(
         "inline-flex h-11 items-center justify-center gap-2 rounded-full px-3 text-xs tracking-wide transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:h-8",
-        selected ? "glass-hud font-medium text-fg" : outlineClass,
+        selected ? "glass-hud font-medium text-fg-primary" : outlineClass,
         className,
       )}
       {...props}

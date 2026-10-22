@@ -440,7 +440,7 @@ export function HeroScene({
         </div>
       </div>
       <div className="catalogue-ground">
-        <p className="intro-ground app-container flex min-h-14 items-center justify-end gap-2 py-2 text-right font-mono text-xs leading-relaxed tracking-wide text-subtle lg:min-h-20">
+        <p className="intro-ground app-container flex min-h-14 items-center justify-end gap-2 py-2 text-right font-mono text-xs leading-relaxed tracking-wide text-fg-tertiary lg:min-h-20">
           <span className="size-1 shrink-0 rounded-full bg-solar" aria-hidden />
           <span className="whitespace-nowrap">
             <span ref={readout} className="peer" />

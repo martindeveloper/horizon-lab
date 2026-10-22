@@ -73,7 +73,7 @@ function Rail<T extends string>({
               style={{ width }}
               className={cn(
                 "relative flex h-7 items-center justify-center rounded-full transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:opacity-40",
-                active ? "text-accent" : "text-subtle hover:text-fg",
+                active ? "text-accent" : "text-fg-tertiary hover:text-fg-primary",
               )}
             >
               {render(option.value, active)}

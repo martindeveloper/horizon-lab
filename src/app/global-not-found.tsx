@@ -24,7 +24,7 @@ export default function GlobalNotFound() {
       <head>
         <StatusLocaleHead />
       </head>
-      <body className="bg-bg text-fg">
+      <body className="bg-surface-primary text-fg-primary">
         <AppThemeProvider>
           <StatusPage
             fullPage

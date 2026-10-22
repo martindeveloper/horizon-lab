@@ -13,7 +13,7 @@ import { Surface, cn, kickerClass } from "@horizon/toolkit/ui";
 import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
 
 const linkClass =
-  "rounded-sm text-fg underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
+  "rounded-sm text-fg-primary underline decoration-accent/50 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring";
 const licenceClass = "font-mono text-[0.68rem] tracking-[0.14em] whitespace-nowrap uppercase";
 
 /** The worlds a map credit covers, in the order the toolkit lists them: one for most, four for OPAL. */
@@ -41,13 +41,13 @@ function LicenceTag({ t, licence }: { t: Translate; licence: Licence }) {
         ? t("licences.cited")
         : licence;
   return (
-    <span className={cn(licenceClass, "text-subtle")}>
+    <span className={cn(licenceClass, "text-fg-tertiary")}>
       {url ? (
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-sm transition-colors duration-feedback ease-standard hover:text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="rounded-sm transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           {name}
           <span className="sr-only"> ({t("newTab")})</span>
@@ -81,8 +81,8 @@ function Card({
         <h3 className={cn("leading-snug font-medium text-balance", lead ? "mt-1.5" : "mt-5")}>
           <Name t={t} item={item} />
         </h3>
-        <p className="mt-2 leading-relaxed text-muted">{t(`items.${item.id}`)}</p>
-        <p className="mt-auto pt-4 text-[0.8125rem] leading-relaxed text-subtle">{item.by}</p>
+        <p className="mt-2 leading-relaxed text-fg-secondary">{t(`items.${item.id}`)}</p>
+        <p className="mt-auto pt-4 text-[0.8125rem] leading-relaxed text-fg-tertiary">{item.by}</p>
       </Surface>
     </li>
   );
@@ -120,7 +120,7 @@ const SPECIMENS: Record<string, ReactNode> = {
   plex: (
     <span className="flex items-baseline gap-3 leading-none">
       <span className="font-sans text-5xl">Aa</span>
-      <span className="font-mono text-4xl text-muted">01</span>
+      <span className="font-mono text-4xl text-fg-secondary">01</span>
     </span>
   ),
 };
@@ -131,7 +131,7 @@ function FontCard({ t, item }: { t: Translate; item: Credit }) {
       t={t}
       item={item}
       visual={
-        <span className="text-fg" aria-hidden>
+        <span className="text-fg-primary" aria-hidden>
           {SPECIMENS[item.id]}
         </span>
       }
@@ -148,8 +148,8 @@ function Row({ t, item }: { t: Translate; item: Credit }) {
         </p>
         <LicenceTag t={t} licence={item.licence} />
       </div>
-      <p className="mt-1 text-[0.875rem] leading-relaxed text-muted">
-        {t(`items.${item.id}`)} <span className="text-subtle">· {item.by}</span>
+      <p className="mt-1 text-[0.875rem] leading-relaxed text-fg-secondary">
+        {t(`items.${item.id}`)} <span className="text-fg-tertiary">· {item.by}</span>
       </p>
     </li>
   );
@@ -164,7 +164,7 @@ function Tile({ t, item }: { t: Translate; item: Credit }) {
         </span>
         <LicenceTag t={t} licence={item.licence} />
       </p>
-      <p className="mt-0.5 text-[0.8125rem] leading-snug text-subtle">
+      <p className="mt-0.5 text-[0.8125rem] leading-snug text-fg-tertiary">
         {t(`items.${item.id}`)} · {item.by}
       </p>
     </li>
@@ -214,7 +214,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
   return (
     <main id={ANCHOR_IDS.mainContent} tabIndex={-1} className="pb-20 outline-hidden sm:pb-28">
       <article aria-labelledby="credits-heading" className="app-container anim-rise">
-        <div className="mx-auto max-w-[36rem] pt-16 text-pretty text-fg/85 sm:max-w-[42rem] sm:pt-24 lg:max-w-[60rem] lg:pt-28">
+        <div className="mx-auto max-w-[36rem] pt-16 text-pretty text-fg-primary/85 sm:max-w-[42rem] sm:pt-24 lg:max-w-[60rem] lg:pt-28">
           <LetterHeader
             id="credits-heading"
             className="text-[1.0625rem] leading-[1.8] sm:text-lg"
@@ -231,13 +231,13 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                       href={creditFragment(group.id)}
                       className="group flex flex-col gap-1 rounded-sm py-3 pr-3 transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                     >
-                      <span className="font-mono text-2xl leading-none text-fg tabular-nums transition-colors duration-feedback ease-standard group-hover:text-accent">
+                      <span className="font-mono text-2xl leading-none text-fg-primary tabular-nums transition-colors duration-feedback ease-standard group-hover:text-accent">
                         {count(group.items.length)}
                       </span>
                       <span
                         className={cn(
                           kickerClass,
-                          "transition-colors duration-feedback ease-standard group-hover:text-fg",
+                          "transition-colors duration-feedback ease-standard group-hover:text-fg-primary",
                         )}
                       >
                         {t(`groups.${group.id}.label`)}
@@ -261,14 +261,14 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                   {t(`groups.${group.id}.label`)}
                 </h2>
                 <p
-                  className="font-mono text-[0.75rem] text-subtle tabular-nums lg:mt-1.5"
+                  className="font-mono text-[0.75rem] text-fg-tertiary tabular-nums lg:mt-1.5"
                   aria-hidden
                 >
                   {count(group.items.length)}
                 </p>
               </div>
               <div className="mt-3 lg:mt-0">
-                <p className="text-muted">{t(`groups.${group.id}.intro`)}</p>
+                <p className="text-fg-secondary">{t(`groups.${group.id}.intro`)}</p>
                 <Items t={t} group={group} />
               </div>
             </section>
@@ -276,7 +276,7 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
 
           <section
             aria-labelledby="credits-notes"
-            className={cn("mt-16 text-[0.8125rem] leading-relaxed text-muted sm:mt-20", letterGrid)}
+            className={cn("mt-16 text-[0.8125rem] leading-relaxed text-fg-secondary sm:mt-20", letterGrid)}
           >
             <h2 id="credits-notes" className={cn(kickerClass, "lg:pt-5 lg:text-right")}>
               {t("notes.label")}
@@ -338,16 +338,16 @@ export async function CreditsPage({ locale }: { locale: Locale }) {
                 {t(`documents.${key}`)}
               </h2>
               <div className="mt-3 min-w-0 lg:mt-0">
-                <p className="mb-5 text-sm leading-relaxed text-muted">
+                <p className="mb-5 text-sm leading-relaxed text-fg-secondary">
                   {t(`documents.${key}Intro`)}
                 </p>
                 <Surface className="divide-y divide-border rounded-lg">
                   {creditDocuments[key].map(({ title, text }, index) => (
                     <details key={`${title}-${index}`} className="group p-5">
-                      <summary className="cursor-pointer rounded-sm text-sm font-medium text-fg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden">
+                      <summary className="cursor-pointer rounded-sm text-sm font-medium text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden">
                         {title}
                       </summary>
-                      <pre className="mt-4 font-sans text-xs leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap text-muted">
+                      <pre className="mt-4 font-sans text-xs leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap text-fg-secondary">
                         {text}
                       </pre>
                     </details>

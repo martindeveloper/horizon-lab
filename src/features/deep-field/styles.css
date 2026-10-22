@@ -3,7 +3,7 @@
 @layer base {
   /* Rung names and the sightline read over the scene like the labels do. */
   :where([data-simulation="deep-field"]) :is(.deep-field-rung, .deep-field-sightline) {
-    text-shadow: 0 0 6px rgb(8 8 11 / 0.9);
+    text-shadow: 0 0 6px color-mix(in srgb, var(--color-space) 90%, transparent);
   }
 }
 

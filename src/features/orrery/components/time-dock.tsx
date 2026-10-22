@@ -113,17 +113,17 @@ export function TimeDock() {
           </Tooltip>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-sm font-medium tracking-tight text-fg tabular-nums md:text-base">
+          <p className="truncate font-display text-sm font-medium tracking-tight text-fg-primary tabular-nums md:text-base">
             {formatYearsAgo(t, f, yearsAgo)}
           </p>
           {/* Phones wrap into reserved lines, so scrubbing never makes the dock jump. */}
-          <p className="text-xs text-muted tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate short:min-h-0 short:truncate">
+          <p className="text-xs text-fg-secondary tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate short:min-h-0 short:truncate">
             {subline}
           </p>
         </div>
       </div>
       {/* A phone held sideways keeps the clock and the track; the scene needs the height. */}
-      <p className="mt-2 text-xs text-pretty text-muted not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5 short:hidden">
+      <p className="mt-2 text-xs text-pretty text-fg-secondary not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5 short:hidden">
         {t(`notes.${noteOf(yearsAgo)}`, proseArgs(PROSE_FIGURES, locale))}
       </p>
       <Timeline yearsAgo={yearsAgo} />
@@ -155,7 +155,7 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
             className={cn(
               "absolute top-[calc(50%-0.25rem)] h-2 w-px transition-colors duration-feedback ease-standard md:h-[1.875rem]",
               s.below ? "md:top-1/2" : "md:top-0.5",
-              s.id === epoch ? "bg-accent" : "bg-fg/30",
+              s.id === epoch ? "bg-accent" : "bg-fg-primary/30",
             )}
           />
         ))}
@@ -183,7 +183,7 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
                 "absolute h-4 rounded-sm text-[11px] leading-4 tracking-wide whitespace-nowrap transition-colors duration-feedback ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden",
                 s.below ? "bottom-0" : "top-0",
                 end ? "-translate-x-full pr-2" : "pl-2",
-                s.id === epoch ? "font-medium text-accent" : "text-subtle hover:text-fg",
+                s.id === epoch ? "font-medium text-accent" : "text-fg-tertiary hover:text-fg-primary",
               )}
             >
               {t(`epochs.${s.id}`, figures)}

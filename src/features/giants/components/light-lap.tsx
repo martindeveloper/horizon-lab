@@ -9,7 +9,7 @@ import { useReducedMotion } from "motion/react";
 export function LightLap({ seconds, label }: { seconds: number; label: string }) {
   const still = useReducedMotion() || !(seconds > 0.25);
   return (
-    <span className="flex min-w-0 items-center gap-2 text-xs text-muted">
+    <span className="flex min-w-0 items-center gap-2 text-xs text-fg-secondary">
       <svg viewBox="0 0 28 28" className="size-7 shrink-0" aria-hidden>
         <circle cx="14" cy="14" r="10" fill="none" stroke="currentColor" strokeOpacity="0.35" />
         <g

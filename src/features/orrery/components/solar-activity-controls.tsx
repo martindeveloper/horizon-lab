@@ -17,7 +17,7 @@ export function SolarActivityNotice() {
   return (
     <Surface
       variant="hud"
-      className="pointer-events-none absolute top-14 left-(--hud-gutter) z-[70] max-w-[calc(100%-2*var(--hud-gutter))] rounded-lg px-3 py-2 text-xs text-fg"
+      className="pointer-events-none absolute top-14 left-(--hud-gutter) z-[70] max-w-[calc(100%-2*var(--hud-gutter))] rounded-lg px-3 py-2 text-xs text-fg-primary"
     >
       {t("toggle")} · {t("model")}
     </Surface>
@@ -55,12 +55,12 @@ export function SolarActivityControls() {
           </IconButton>
         ) : null}
       </div>
-      <p id={description} className="mt-1 text-xs leading-relaxed text-muted">
-        <span className="text-fg">{t("model")}</span>
+      <p id={description} className="mt-1 text-xs leading-relaxed text-fg-secondary">
+        <span className="text-fg-primary">{t("model")}</span>
         {enabled ? <> · {t("description")}</> : null}
       </p>
       {enabled && (reduced || paused) ? (
-        <p className="mt-1 text-xs text-muted">{reduced ? t("reducedMotion") : t("paused")}</p>
+        <p className="mt-1 text-xs text-fg-secondary">{reduced ? t("reducedMotion") : t("paused")}</p>
       ) : null}
     </div>
   );

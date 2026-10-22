@@ -31,7 +31,7 @@ export function PresetNav({ stacked = false, onPick }: { stacked?: boolean; onPi
         onClick={() => choose(p.id)}
         className={cn(
           "h-11 shrink-0 rounded-full px-3 text-xs tracking-wide whitespace-nowrap transition-colors duration-feedback ease-standard md:h-8 md:px-2.5",
-          presetId === p.id ? "text-fg" : "text-muted hover:text-fg",
+          presetId === p.id ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
         )}
       >
         <span>{nameOf(p.id)}</span>

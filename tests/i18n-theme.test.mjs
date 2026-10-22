@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createTranslator } from "next-intl";
+import { parse } from "postcss";
 
 import { MAPS } from "@horizon/toolkit/bodies";
 import { keysOf } from "@horizon/toolkit/records";
@@ -136,8 +137,38 @@ test("clean URLs rewrite to the cookie's locale, falling back to English", () =>
     assert.doesNotMatch(path, page, `${path} must not be rewritten`);
 });
 
-function rgb(hex) {
-  return hex.match(/\w\w/g).map((part) => parseInt(part, 16) / 255);
+/** Read the actual palette, including aliases, so contrast checks follow the rendered colors. */
+function themePalettes() {
+  const css = parse(readFileSync(
+    new URL("../packages/toolkit/src/ui/theme.css", import.meta.url),
+    "utf8",
+  ));
+  const dark = {};
+  const light = {};
+  const collect = (node, into) => node.walkDecls((decl) => { into[decl.prop] = decl.value; });
+  css.walkAtRules("theme", (rule) => collect(rule, dark));
+  css.walkRules((rule) => {
+    if (rule.selector === ":root") collect(rule, dark);
+    if (rule.selector === ":root.light") collect(rule, light);
+  });
+  return { dark, light: { ...dark, ...light } };
+}
+function paletteColor(tokens, name) {
+  const resolve = (key, path = []) => {
+    assert.ok(tokens[key], `Missing color token ${key}`);
+    assert.ok(!path.includes(key), `Circular color token ${[...path, key].join(" → ")}`);
+    return tokens[key].replace(/var\((--[\w-]+)\)/g, (_, next) => resolve(next, [...path, key]));
+  };
+  const value = resolve(`--${name}`).trim();
+  if (/^#[\da-f]{6}$/i.test(value))
+    return [...value.slice(1).match(/\w\w/g).map((part) => parseInt(part, 16) / 255), 1];
+  const rgb = value.match(/^rgba?\(([^)]+)\)$/);
+  assert.ok(rgb, `Unsupported color in contrast check: ${name} = ${value}`);
+  const [r, g, b, a = 1] = rgb[1].trim().split(/[\s,/]+/).map(Number);
+  return [r / 255, g / 255, b / 255, a];
+}
+function composite([r, g, b, alpha], backdrop) {
+  return [r, g, b].map((channel, i) => channel * alpha + backdrop[i] * (1 - alpha));
 }
 function luminance(rgb) {
   return rgb
@@ -148,33 +179,33 @@ function contrast(a, b) {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 }
-test("text tokens stay readable on every glass composited over the dark scene, in both themes", () => {
-  const css = readFileSync(
-    new URL("../packages/toolkit/src/ui/theme.css", import.meta.url),
-    "utf8",
-  );
-  const [dark, light] = css.split(":root.light {");
-  assert.ok(!light.includes("--color-space:"), "Scene background must not change with UI theme");
-  const scene = rgb(css.match(/--color-space:\s*#([\da-f]{6})/)[1]);
-  for (const [theme, block] of [
-    ["dark", dark],
-    ["light", light],
-  ]) {
-    for (const glass of ["panel-bg", "hud-bg"]) {
-      const layer = block.match(
-        new RegExp(`--${glass}:\\s*rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*([\\d.]+)\\)`),
-      );
-      const alpha = Number(layer[4]);
-      const backdrop = [1, 2, 3].map(
-        (i) => (Number(layer[i]) / 255) * alpha + scene[i - 1] * (1 - alpha),
-      );
-      for (const role of ["fg", "muted", "subtle", "accent"]) {
-        const text = rgb(block.match(new RegExp(`--color-${role}:\\s*#([\\da-f]{6})`))[1]);
-        const ratio = contrast(backdrop, text);
-        assert.ok(ratio >= 4.5, `${theme} ${role} on ${glass}: ${ratio.toFixed(2)} is below 4.5:1`);
-      }
-    }
+test("text tokens stay readable on surfaces and glass over the scene in both themes", () => {
+  for (const [theme, tokens] of Object.entries(themePalettes())) {
+    const color = (name) => paletteColor(tokens, name);
+    const scene = color("color-space");
+    const readable = (foreground, background) => {
+      const backdrop = composite(color(background), scene);
+      const ratio = contrast(backdrop, composite(color(foreground), backdrop));
+      assert.ok(ratio >= 4.5, `${theme} ${foreground} on ${background}: ${ratio.toFixed(2)} is below 4.5:1`);
+    };
+    for (const surface of ["surface-primary", "surface-secondary", "surface-tertiary"])
+      for (const role of ["fg-primary", "fg-secondary", "fg-tertiary", "accent"])
+        readable(`color-${role}`, `color-${surface}`);
+    for (const glass of ["panel-bg", "hud-bg", "popover-bg", "tip-bg", "glass-fallback"])
+      for (const role of ["fg-primary", "fg-secondary", "fg-tertiary", "accent"])
+        readable(`color-${role}`, glass);
+    readable("lesson-fg", "lesson-bg");
+    readable("color-action-fg", "color-action");
+    readable("color-accent-fg", "color-accent");
+    for (const role of ["space-fg", "space-muted", "space-title", "solar"])
+      readable(`color-${role}`, "color-space");
   }
+});
+
+test("changing the UI theme preserves the astronomical palette", () => {
+  const { dark, light } = themePalettes();
+  for (const role of ["space", "space-fg", "space-muted", "space-title", "solar", "on-solar", "space-danger"])
+    assert.deepEqual(paletteColor(light, `color-${role}`), paletteColor(dark, `color-${role}`), role);
 });
 
 test("localized preset links, aliases, and initial scene state agree", () => {
