@@ -140,6 +140,9 @@ export function isAtlasLandmark(id: string): id is AtlasLandmarkId {
   return Object.hasOwn(ATLAS_LANDMARKS, id);
 }
 
+export const ATLAS_MODES = ["data", "illustration", "both"] as const;
+export type AtlasMode = (typeof ATLAS_MODES)[number];
+
 /** Deep Field opts into the atlas; a host without these switches keeps its original drawing. */
 export const ATLAS_DEFAULT_SHOW = {
   cosmicMeasured: true,
@@ -149,17 +152,28 @@ export const ATLAS_DEFAULT_SHOW = {
   // Physical-scale error bars and size circles overwhelm the overview. A selected
   // landmark reveals its own guide; the full diagnostic overlay is explicitly opt-in.
   cosmicGuides: false,
-  cosmicIllustrations: false,
+  cosmicIllustrations: true,
 } as const;
 export type AtlasShow = { [K in keyof typeof ATLAS_DEFAULT_SHOW]: boolean };
-export const atlasVisibility = (show: Partial<AtlasShow>): AtlasShow =>
-  show.cosmicMeasured === undefined
-    ? {
-        cosmicMeasured: false,
-        cosmicBasins: false,
-        cosmicVoids: false,
-        cosmicKnots: false,
-        cosmicGuides: false,
-        cosmicIllustrations: true,
-      }
-    : { ...ATLAS_DEFAULT_SHOW, ...show };
+/** Resolve the display mode without overwriting the visitor's individual layer preferences. */
+export function atlasVisibility(show: Partial<AtlasShow> & { cosmicMode?: AtlasMode }): AtlasShow {
+  if (show.cosmicMeasured === undefined)
+    return {
+      cosmicMeasured: false,
+      cosmicBasins: false,
+      cosmicVoids: false,
+      cosmicKnots: false,
+      cosmicGuides: false,
+      cosmicIllustrations: true,
+    };
+  const { cosmicMode, ...flags } = show;
+  const layers = { ...ATLAS_DEFAULT_SHOW, ...flags };
+  if (cosmicMode === "data") layers.cosmicIllustrations = false;
+  if (cosmicMode === "both") layers.cosmicIllustrations = true;
+  if (cosmicMode === "illustration") {
+    layers.cosmicMeasured = layers.cosmicBasins = layers.cosmicVoids = layers.cosmicKnots = false;
+    layers.cosmicGuides = false;
+    layers.cosmicIllustrations = true;
+  }
+  return layers;
+}

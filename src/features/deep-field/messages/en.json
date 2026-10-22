@@ -479,7 +479,7 @@
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Crosses show {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} and coordinate spreads. Vela uses the accepted 2026 v2 reconstruction; the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths are a separate optional illustration. Local galaxy populations and the far background remain illustrations. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
+        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Hollow markers locate {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} with coordinate-spread crosses available on inspection. Vela uses the accepted 2026 v2 reconstruction; the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths remain a separate illustration. Data, Illustration and Both modes control the overlay; Both preserves the familiar Laniakea shape alongside the catalogues. Local galaxy populations and the far background remain illustrations. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
       },
       "depth": {
         "title": "Distance and light",
@@ -541,15 +541,26 @@
     "reconstruction": "Reconstruction limits"
   },
   "atlas": {
+    "modeTitle": "Cosmic map display",
+    "modes": {
+      "data": "Data",
+      "illustration": "Illustration",
+      "both": "Both"
+    },
+    "modeHints": {
+      "data": "Large-scale catalogue points and labelled reconstructions. No illustrated web or flow paths. Your data-layer filters are remembered when you switch modes.",
+      "illustration": "The illustrated cosmic web and familiar Laniakea flow shape. These paths convey structure; they are not imported galaxy velocities or measured boundaries.",
+      "both": "Catalogue data and reconstructed centres alongside the illustrated web and Laniakea flow paths. Filled points, hollow markers and illustrated paths retain their separate meanings."
+    },
+    "experienceModes": "Drift uses Illustration; Guide uses Both. Both hide the full uncertainty overlay and restore your manual settings when they end.",
+    "guideMode": "Both: measured points, reconstructed centres and illustrated flows.",
     "layersTitle": "Cosmic data layers",
     "finderTitle": "New cosmic atlas",
     "legendTitle": "Cosmic map evidence",
-    "measured": "Measured positions + redshift",
-    "reconstructed": "Hollow markers · reconstructed centres",
-    "preprint": "Void & knot centres · preprint",
-    "guidesEnabled": "All reconstruction guides shown",
-    "illustration": "Illustration enabled",
-    "shortCoverage": "Select a structure to inspect its uncertainty or size guide · survey coverage is incomplete",
+    "measured": "Measured",
+    "reconstructed": "Reconstructed",
+    "preprint": "Preprint",
+    "illustration": "Illustrated",
     "coverage": "Measured angles and redshifts give model-dependent distances. The surveys overlap and leave gaps; a blank patch is not a detected void. Lower render quality subsamples the measured records.",
     "glyphs": "Small hollow rings mark reconstructed centres; flat diamonds mark inferred knots. Selecting a structure reveals its positional uncertainty bars or dashed size circles. These guides describe uncertainty or equivalent volume, not physical boundaries. Enable all guides to compare them across the map. Voids, knots and the newer Sloan interpretation are labelled preprints.",
     "sourcesTitle": "Sources and publication status",
@@ -565,8 +576,7 @@
       "cosmicBasins": "Reconstructed basins & peaks",
       "cosmicVoids": "Void centres · preprint",
       "cosmicKnots": "Knot centres · preprint",
-      "cosmicGuides": "All uncertainty & size guides",
-      "cosmicIllustrations": "Illustrated web & flow lines"
+      "cosmicGuides": "All uncertainty & size guides"
     },
     "sources": {
       "cf4": "Cosmicflows-4 · Tully et al. (2023)",

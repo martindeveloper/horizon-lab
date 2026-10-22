@@ -66,13 +66,15 @@ export function DeepFieldOverlay() {
       ) : (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
-            <div className="flex items-start gap-3">
-              {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption it. */}
+            <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+              {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption it;
+                  the atlas's depths, between them, take its key there instead. */}
               {t.has(`viewHints.${view}`) ? (
                 <p className="line-clamp-2 max-w-md min-w-0 pt-1 text-ui text-fg-secondary not-md:hidden">
                   {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
                 </p>
               ) : null}
+              <AtlasLegend />
               <SimulationToolbar
                 label={t("hud.controls")}
                 help={help}
@@ -97,8 +99,11 @@ export function DeepFieldOverlay() {
                 drift={() => useDeepField.getState().startDrift()}
               />
             </div>
-            <AtlasLegend />
-            <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
+            {/* Match the ladder's width-only breakpoint, including landscape phones: the status
+                stays clear of its track and rung labels. */}
+            <div className="min-[48rem]:pl-48">
+              <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
+            </div>
           </header>
           {/* The map's scale sits under the ladder, where wide screens keep the depth instruments. */}
           <div className="pad-hud-bottom pointer-events-none absolute bottom-0 left-0 z-30 not-lg:hidden">

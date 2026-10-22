@@ -1,45 +1,57 @@
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+
+import { atlasVisibility } from "@/space/cosmos/model/atlas";
 
 import { useDeepField } from "../lib/store";
 
-/** Quiet, shape-coded legend in the existing HUD, with details in the View rail. */
+/** The map's marks as the scene draws them, in its muted ink. */
+const DOT = <span className="size-1.5 rounded-full bg-space-fg" />;
+const RING = <span className="size-2 rounded-full border border-space-muted" />;
+const DIAMOND = <span className="size-1.5 rotate-45 border border-space-muted" />;
+const LINE = <span className="w-3 border-t border-space-muted" />;
+
+function Key({ marks, children }: { marks: ReactNode; children: ReactNode }) {
+  return (
+    <li className="inline-flex items-center gap-2">
+      <span aria-hidden className="inline-flex items-center gap-1">
+        {marks}
+      </span>
+      {children}
+    </li>
+  );
+}
+
+/**
+ * The cosmic map's key, in the header's top-left slot while the atlas is in view (the views
+ * captioned there lie nearer or farther): one short word per kind of mark, only for the layers
+ * shown. What each means, the display mode and the coverage live in the Settings panel.
+ */
 export function AtlasLegend() {
   const t = useTranslations("deepField");
   const ly = useDeepField((s) => s.viewLy);
-  const show = useDeepField((s) => s.show);
-  const panel = useDeepField((s) => s.panel);
-  if (ly < 240e6 || ly > 8e9 || panel !== "none") return null;
+  const show = atlasVisibility(useDeepField((s) => s.show));
+  if (ly < 240e6 || ly > 8e9) return null;
   return (
-    <section
-      className="mt-2 flex max-w-xl flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-space-muted md:text-[11px]"
+    <ul
       aria-label={t("atlas.legendTitle")}
+      className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-ui text-space-muted not-md:order-last not-md:basis-full md:flex-1 md:pt-2.5"
     >
-      {show.cosmicMeasured ? (
-        <span className="inline-flex items-center gap-1.5">
-          <span className="size-1 rounded-full bg-space-fg" aria-hidden />
-          {t("atlas.measured")}
-        </span>
-      ) : null}
-      {show.cosmicBasins ? (
-        <span className="inline-flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full border border-space-muted" aria-hidden />
-          {t("atlas.reconstructed")}
-        </span>
-      ) : null}
+      {show.cosmicMeasured ? <Key marks={DOT}>{t("atlas.measured")}</Key> : null}
+      {show.cosmicBasins ? <Key marks={RING}>{t("atlas.reconstructed")}</Key> : null}
       {show.cosmicVoids || show.cosmicKnots ? (
-        <span className="inline-flex items-center gap-1.5">
-          {show.cosmicVoids ? (
-            <span className="size-1.5 rounded-full border border-space-muted" aria-hidden />
-          ) : null}
-          {show.cosmicKnots ? (
-            <span className="size-1.5 rotate-45 border border-space-muted" aria-hidden />
-          ) : null}
+        <Key
+          marks={
+            <>
+              {show.cosmicVoids ? RING : null}
+              {show.cosmicKnots ? DIAMOND : null}
+            </>
+          }
+        >
           {t("atlas.preprint")}
-        </span>
+        </Key>
       ) : null}
-      {show.cosmicGuides ? <span>{t("atlas.guidesEnabled")}</span> : null}
-      {show.cosmicIllustrations ? <span>{t("atlas.illustration")}</span> : null}
-      <p className="basis-full text-space-muted/90 not-md:hidden">{t("atlas.shortCoverage")}</p>
-    </section>
+      {show.cosmicIllustrations ? <Key marks={LINE}>{t("atlas.illustration")}</Key> : null}
+    </ul>
   );
 }

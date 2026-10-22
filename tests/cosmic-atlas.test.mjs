@@ -130,6 +130,48 @@ function looks() {
   };
 }
 
+test("Data, Illustration and Both mask rendered layers without changing the saved filters", () => {
+  const preferences = Object.freeze({
+    ...ATLAS_DEFAULT_SHOW,
+    cosmicVoids: false,
+    cosmicGuides: true,
+  });
+  const scope = new DisposalScope();
+  const materials = looks();
+  const atlas = createCosmosAtlas(scope, materials, new Group(), { share: 0.1 });
+  for (const mode of ["data", "illustration", "both"]) {
+    const layers = atlasVisibility({ ...preferences, cosmicMode: mode });
+    atlas.update(2.8e9, 1, layers, new Quaternion(), "localVoid");
+    const points = atlas.root.children.filter((object) => object.isPoints);
+    assert.equal(
+      points.find((p) => p.material === materials.cosmos.observed).visible,
+      mode !== "illustration",
+    );
+    assert.equal(
+      points.find((p) => p.material === materials.atlasCentre).visible,
+      mode !== "illustration",
+    );
+    assert.equal(
+      points.find((p) => p.material === materials.atlasVoidCentre).visible,
+      false,
+      "mode changes retain the void filter",
+    );
+    assert.equal(
+      layers.cosmicIllustrations,
+      mode !== "data",
+      "Laniakea flows return in Both and Illustration",
+    );
+    assert.equal(layers.cosmicGuides, mode !== "illustration");
+    if (mode === "illustration")
+      atlas.root.traverseVisible((object) =>
+        assert.ok(!object.isLineSegments, "no data guides leak into Illustration"),
+      );
+  }
+  assert.equal(preferences.cosmicVoids, false);
+  assert.equal(preferences.cosmicGuides, true);
+  scope.dispose();
+});
+
 test("atlas switches, expansion and disposal affect the intended rendered data", () => {
   const scope = new DisposalScope(),
     materials = looks(),

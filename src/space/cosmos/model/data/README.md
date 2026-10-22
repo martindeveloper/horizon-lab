@@ -70,9 +70,18 @@ from the historical Sloan Great Wall galaxy landmark.
 - The void paper's summary Table 1 declinations disagree with its appendix/Cartesian
   columns. We use appendix **SGX, SGY, SGZ**, retaining their published signs, and do
   not mix sky positions from the summary. The grid resolution limits precision.
-- Original seeded web/flow geometry remains a separately switched **illustration**.
-  It never enters the measured layer. Nearby sketch populations fade away before
-  the cosmic atlas dominates; original named cluster anchors retain their glows.
+- Original seeded web/flow geometry remains a separate **illustration**. The map's
+  **Data / Illustration / Both** control defaults to Both, preserving the familiar
+  Laniakea/Great Attractor flow shape beside the new catalogues. Data mode hides the
+  illustrated web/flows and fades the nearby sketch populations before the atlas
+  dominates; original named cluster anchors retain their glows. Illustration mode
+  hides the atlas points, reconstruction markers and their guides. Layer preferences
+  are retained while the mode changes; `atlasVisibility` resolves what actually draws.
+  Illustration points never enter the measured catalogue or acquire measured status.
+- Automatic display policy lives in Deep Field's `lib/model/atlas-mode.ts`: Drift
+  temporarily uses Illustration, Guide uses Both, and both suppress full-map guides.
+  Their captions identify the presentation. The store restores the original manual
+  mode and filters on exit, including a handoff from one experience to the other.
 
 ## Updating safely
 

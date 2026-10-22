@@ -479,7 +479,7 @@
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Křížky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}} a rozptyl souřadnic. Plachty používají přijatou rekonstrukci v2 z roku 2026; Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice jsou samostatnou volitelnou ilustrací. Místní populace galaxií a vzdálené pozadí zůstávají ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
+        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Prázdné značky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}}; křížky rozptylu souřadnic se zobrazují při prohlížení vybrané struktury. Plachty používají přijatou rekonstrukci v2 z roku 2026; Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice zůstávají samostatnou ilustrací. Jejich překrytí řídí režimy Data, Ilustrace a Obojí; Obojí zachovává známý tvar Laniakey spolu s katalogy. Místní populace galaxií a vzdálené pozadí zůstávají ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
       },
       "depth": {
         "title": "Vzdálenost a světlo",
@@ -541,15 +541,26 @@
     "reconstruction": "Omezení rekonstrukce"
   },
   "atlas": {
+    "modeTitle": "Zobrazení kosmické mapy",
+    "modes": {
+      "data": "Data",
+      "illustration": "Ilustrace",
+      "both": "Obojí"
+    },
+    "modeHints": {
+      "data": "Katalogové body ve velkých měřítkách a označené rekonstrukce. Bez ilustračních vláken a proudnic. Při přepínání režimů se uchovává vaše nastavení datových vrstev.",
+      "illustration": "Ilustrační kosmická pavučina a známý tvar proudění v Laniakee. Dráhy přibližují strukturu; nejsou importovanými rychlostmi galaxií ani změřenými hranicemi.",
+      "both": "Katalogová data a rekonstruované středy spolu s ilustrační pavučinou a proudnicemi Laniakey. Plné body, prázdné značky a ilustrační dráhy si zachovávají odlišný význam."
+    },
+    "experienceModes": "Drift používá Ilustraci, Průvodce Obojí. Oba skryjí celkovou vrstvu nejistot a po skončení obnoví vaše ruční nastavení.",
+    "guideMode": "Obojí: změřené body, rekonstruované středy a ilustrační proudnice.",
     "layersTitle": "Vrstvy kosmických dat",
     "finderTitle": "Nový kosmický atlas",
     "legendTitle": "Původ dat kosmické mapy",
-    "measured": "Změřené směry + rudý posuv",
-    "reconstructed": "Prázdné značky · rekonstruované středy",
-    "preprint": "Středy prázdnot a uzlů · preprint",
-    "guidesEnabled": "Zobrazeny všechny pomocné značky rekonstrukce",
-    "illustration": "Ilustrace zapnutá",
-    "shortCoverage": "Vyberte strukturu pro zobrazení nejistoty nebo velikosti · pokrytí přehlídek je neúplné",
+    "measured": "Změřeno",
+    "reconstructed": "Rekonstruováno",
+    "preprint": "Preprint",
+    "illustration": "Ilustrace",
     "coverage": "Ze změřených směrů a rudých posuvů vycházejí vzdálenosti závislé na modelu. Přehlídky se překrývají a mají mezery; prázdné místo není objevenou prázdnotou. Nižší kvalita vykreslení používá řidší výběr změřených záznamů.",
     "glyphs": "Malé prázdné kroužky označují rekonstruované středy; ploché kosočtverce odvozené uzly. Výběr struktury zobrazí úsečky nejistoty její polohy nebo čárkované kružnice velikosti. Tyto značky popisují nejistotu nebo ekvivalentní objem, nikoli fyzické hranice. Pro srovnání napříč mapou lze zapnout všechny pomocné značky. Prázdnoty, uzly i novější interpretace pánve Sloan jsou označené jako preprinty.",
     "sourcesTitle": "Zdroje a stav publikace",
@@ -565,8 +576,7 @@
       "cosmicBasins": "Rekonstruované pánve a maxima",
       "cosmicVoids": "Středy prázdnot · preprint",
       "cosmicKnots": "Středy uzlů · preprint",
-      "cosmicGuides": "Všechny značky nejistoty a velikosti",
-      "cosmicIllustrations": "Ilustrační vlákna a proudnice"
+      "cosmicGuides": "Všechny značky nejistoty a velikosti"
     },
     "sources": {
       "cf4": "Cosmicflows-4 · Tully et al. (2023)",

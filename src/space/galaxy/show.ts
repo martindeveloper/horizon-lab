@@ -1,4 +1,4 @@
-import type { AtlasId, AtlasShow } from "@/space/cosmos/model/atlas";
+import type { AtlasId, AtlasMode, AtlasShow } from "@/space/cosmos/model/atlas";
 /**
  * What the shared worlds beyond the solar system draw with: the switches their layers read, the
  * selections their names and targets open, and the frame an engine hands every layer. A host
@@ -17,6 +17,8 @@ export type Realm = "solar" | "stars" | "galaxy" | "cosmos";
 
 /** The switches the Galaxy, the nearest stars, the reach and the cosmic map read. */
 export type GalaxyShow = Partial<AtlasShow> & {
+  /** Cosmic atlas display; omitted by hosts that keep their original illustration. */
+  cosmicMode?: AtlasMode;
   /** The dark-matter halo's sphere. */
   halo: boolean;
   names: boolean;

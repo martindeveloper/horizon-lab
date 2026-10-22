@@ -373,6 +373,9 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   assert.deepEqual(api().selection, TOUR[0].focus);
   assert.equal(api().show.distances, true);
   assert.equal(api().show.halo, true, "the visitor's own switches stay on");
+  assert.equal(api().show.cosmicMode, "both");
+  assert.equal(api().show.cosmicGuides, false);
+  assert.equal(api().show.cosmicVoids, true, "Guide temporarily uses the complete atlas");
   api().goGuide(2);
   assert.equal(api().view, TOUR[2].view);
   assert.equal(api().show.distances, false);
@@ -381,6 +384,73 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   assert.equal(api().guideOpen, false, "past the last step the journey ends");
   assert.equal(api().selection, null);
   assert.deepEqual(api().show, savedShow, "the journey restores the visitor's atlas layers too");
+});
+
+test("Drift uses Illustration through loading, play and pause, then restores manual choices", () => {
+  const api = useDeepField.getState;
+  const initial = api();
+  try {
+    api().resetView();
+    assert.equal(
+      api().show.cosmicMode,
+      "both",
+      "manual browsing preserves the familiar illustrated shape",
+    );
+    api().patchShow({ cosmicMode: "data", cosmicVoids: false, cosmicGuides: true });
+    const manual = { ...api().show };
+    api().startDrift();
+    assert.equal(api().show.cosmicMode, "illustration");
+    assert.equal(api().show.cosmicGuides, false);
+    api().startDrift();
+    api().readyDrift();
+    api().pauseDrift();
+    assert.equal(api().show.cosmicMode, "illustration", "pausing preserves the display policy");
+    api().resumeDrift();
+    api().stopDrift();
+    assert.deepEqual(
+      api().show,
+      manual,
+      "repeated start and pause do not overwrite the saved choices",
+    );
+    assert.equal(api().savedBeforeDrift, null);
+    api().startDrift();
+    api().stopDrift();
+    assert.deepEqual(api().show, manual, "cancelling during loading also restores preferences");
+    api().patchShow({ cosmicMode: "illustration" });
+    api().select({ kind: "cosmos", id: "localVoid" });
+    assert.equal(api().show.cosmicMode, "both", "finding a data object reveals the data overlay");
+  } finally {
+    useDeepField.setState(initial);
+  }
+});
+
+test("Guide and Drift handoffs restore the original manual mode rather than each other's temporary settings", () => {
+  const api = useDeepField.getState;
+  const initial = api();
+  try {
+    for (const mode of ["data", "illustration", "both"]) {
+      api().patchShow({ cosmicMode: mode, cosmicBasins: false, cosmicGuides: true });
+      const manual = { ...api().show };
+      api().startGuide();
+      api().goGuide(8);
+      assert.equal(api().show.cosmicMode, "both");
+      api().startDrift();
+      assert.equal(api().guideOpen, false);
+      assert.equal(api().show.cosmicMode, "illustration");
+      api().stopDrift();
+      assert.deepEqual(api().show, manual, `${mode}: Guide → Drift → manual`);
+      api().startDrift();
+      api().startGuide();
+      assert.equal(api().drift, "off");
+      assert.equal(api().show.cosmicMode, "both");
+      api().endGuide();
+      assert.deepEqual(api().show, manual, `${mode}: Drift → Guide → manual`);
+      assert.equal(api().savedBeforeDrift, null);
+      assert.equal(api().savedBeforeGuide, null);
+    }
+  } finally {
+    useDeepField.setState(initial);
+  }
 });
 
 test("the Sun's drawn path runs back two laps and ends at today's place", () => {

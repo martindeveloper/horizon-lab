@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { GuideCaption } from "@/components/simulations/guide-caption";
 import type { DockInTheWay } from "@/components/simulations/use-dock-clearance";
 
@@ -18,6 +20,7 @@ const clearance = { inTheWay: acrossTheMiddle, property: "--caption-clear" };
  * two lines on what to notice, and the hold before the journey moves on.
  */
 export function DeepFieldGuide() {
+  const t = useTranslations("deepField");
   const index = useDeepField((s) => s.guideStep);
   const playing = useDeepField((s) => s.guidePlaying);
   const landed = useDeepField((s) => s.guideLanded);
@@ -32,6 +35,11 @@ export function DeepFieldGuide() {
       landed={landed}
       className="bottom-(--hud-clear,6rem) pb-2"
       clearance={clearance}
+      extra={(step) =>
+        step.id === "laniakea" || step.id === "web" ? (
+          <p className="mt-2 text-ui text-fg-secondary">{t("atlas.guideMode")}</p>
+        ) : null
+      }
     />
   );
 }

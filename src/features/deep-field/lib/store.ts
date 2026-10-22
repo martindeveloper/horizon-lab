@@ -9,19 +9,26 @@ import {
   type GuideSlice,
   type SceneSlice,
 } from "@/lib/scene-store";
-import { ATLAS_DEFAULT_SHOW, isAtlasLandmark, type AtlasShow } from "@/space/cosmos/model/atlas";
+import {
+  ATLAS_DEFAULT_SHOW,
+  isAtlasId,
+  isAtlasLandmark,
+  type AtlasMode,
+  type AtlasShow,
+} from "@/space/cosmos/model/atlas";
 import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
 import { isReachSelection, type ProbeId } from "@/space/solar-system/model/probes";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
 import { HELP } from "./help";
+import { ATLAS_EXPERIENCE_MODE } from "./model/atlas-mode";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import { viewById } from "./model/views";
 
 /** Deep Field's switches are the shared worlds' (`@/space/galaxy/show`). */
-export type Show = GalaxyShow & AtlasShow;
+export type Show = GalaxyShow & AtlasShow & { cosmicMode: AtlasMode };
 
 export type { CosmosId } from "@/space/galaxy/show";
 
@@ -62,6 +69,7 @@ const DEFAULT_SHOW: Show = {
   distances: false,
   lightTime: true,
   ...ATLAS_DEFAULT_SHOW,
+  cosmicMode: ATLAS_EXPERIENCE_MODE.manual,
 };
 
 /** What the `?` tour's steps change and give back: the view, a ladder drag, the switches. */
@@ -81,6 +89,8 @@ export type DeepFieldStore = SceneSlice &
     sharpening: boolean;
     panel: Panel;
     show: Show;
+    /** Manual layer choices, restored when Drift ends or hands over to Guide. */
+    savedBeforeDrift: Show | null;
     /* HUD readouts written by the engine a few times per second, besides the scale bar. */
     /** Camera distance from its aim, ly. */
     viewLy: number;
@@ -114,6 +124,7 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   sharpening: false,
   panel: "none",
   show: DEFAULT_SHOW,
+  savedBeforeDrift: null,
   viewLy: viewById(DEFAULT_VIEW).ly,
   reachLy: viewById(DEFAULT_VIEW).ly,
   setView: (view) => {
@@ -131,7 +142,17 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   seekTo: (ly) => set({ seek: { ly }, closeUp: null }),
   /* Another selection lets go of a close-up. */
   select: (selection) =>
-    set((s) => ({ selection, closeUp: probeOf(selection) === s.closeUp ? s.closeUp : null })),
+    set((s) => ({
+      selection,
+      closeUp: probeOf(selection) === s.closeUp ? s.closeUp : null,
+      // Finding a catalogue object must reveal it even from Illustration mode.
+      show:
+        selection?.kind === "cosmos" &&
+        isAtlasId(selection.id) &&
+        s.show.cosmicMode === "illustration"
+          ? { ...s.show, cosmicMode: "both" }
+          : s.show,
+    })),
   enterCloseUp: () => {
     const s = get();
     if (canCloseUp(s)) set({ closeUp: probeOf(s.selection), panel: "none", seek: null });
@@ -143,14 +164,25 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   ...guideSlice(set, get, {
     tour: TOUR,
     /* The visitor's switches, given back when the journey ends. */
-    save: (s) => s.show,
+    save: (s) => s.savedBeforeDrift ?? s.show,
     restore: (show) => ({ show }),
-    open: () => ({ guidePlaying: !prefersReducedMotion(), seek: null, closeUp: null }),
+    open: () => ({
+      guidePlaying: !prefersReducedMotion(),
+      seek: null,
+      closeUp: null,
+      drift: "off" as const,
+      savedBeforeDrift: null,
+    }),
     apply: (step, s) => ({
       guideLanded: false,
       view: step.view,
       selection: step.focus ?? null,
-      show: { ...(s.savedBeforeGuide ?? DEFAULT_SHOW), ...step.show },
+      show: {
+        ...(s.savedBeforeGuide ?? DEFAULT_SHOW),
+        ...ATLAS_DEFAULT_SHOW,
+        cosmicMode: ATLAS_EXPERIENCE_MODE.guide,
+        ...step.show,
+      },
     }),
     close: () => ({ guideLanded: false }),
   }),
@@ -166,7 +198,17 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   ...driftSlice(set, get, {
     open: (s) => {
       if (s.guideOpen) s.endGuide();
-      return { panel: "none" as const, selection: null, seek: null, closeUp: null };
+      // Ending Guide restores the manual preferences; read the fresh state before saving.
+      const show = get().show;
+      return {
+        panel: "none" as const,
+        selection: null,
+        seek: null,
+        closeUp: null,
+        savedBeforeDrift: show,
+        show: { ...show, ...ATLAS_DEFAULT_SHOW, cosmicMode: ATLAS_EXPERIENCE_MODE.drift },
+      };
     },
+    close: (s) => ({ show: s.savedBeforeDrift ?? s.show, savedBeforeDrift: null }),
   }),
 }));

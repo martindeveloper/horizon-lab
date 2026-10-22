@@ -33,9 +33,11 @@ function DriftDistance() {
   const locale = useLocale();
   const ly = useDeepField((s) => s.viewLy);
   const unit = useDeepField((s) => s.distanceUnit);
+  const mode = useDeepField((s) => s.show.cosmicMode);
   return (
     <>
       {t("hud.distance")} · {formatAu(t, { unit, locale }, ly * LIGHT_YEAR_AU)}
+      {ly >= 240e6 && ly <= 8e9 ? <> · {t(`atlas.modes.${mode}`)}</> : null}
     </>
   );
 }
