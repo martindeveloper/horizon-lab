@@ -8,7 +8,7 @@
     "overview": { "title": "Overview", "body": "Every body at once, on a log scale." },
     "ladder": { "title": "The ladder", "body": "Slide through every body, smallest to largest." },
     "ruler": { "title": "Scale bar", "body": "Length at this zoom, in the unit you pick." },
-    "settings": { "title": "View", "body": "Planets' orbits, the ruler and render quality." },
+    "settings": { "title": "Settings", "body": "Planets' orbits, the ruler and render quality." },
     "guide": { "title": "Guide", "body": "Learn how big stars can grow, step by step." },
     "experiences": {
       "title": "Viewing modes",

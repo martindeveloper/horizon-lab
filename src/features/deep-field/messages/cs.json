@@ -10,7 +10,7 @@
     "depth": { "title": "Hloubka", "body": "Tažením nebo klepnutím na příčku změníte měřítko." },
     "sightline": { "title": "Zorná přímka", "body": "Jak daleko to je a kdy to světlo vyrazilo." },
     "objects": { "title": "Objekty", "body": "Najděte cokoli a přeleťte na jeho měřítko." },
-    "settings": { "title": "Zobrazení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
+    "settings": { "title": "Nastavení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
     "guide": { "title": "Průvodce", "body": "Naučte se, kam až vesmír sahá, krok za krokem." },
     "experiences": {
       "title": "Režimy prohlížení",

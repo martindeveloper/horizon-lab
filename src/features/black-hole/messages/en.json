@@ -5,7 +5,7 @@
     "gauge": { "title": "Distance", "body": "Where you stand; tap a radius to learn it." },
     "atlas": { "title": "Atlas", "body": "Where each hole lies in the sky." },
     "clocks": { "title": "Clocks", "body": "Drop clocks in and watch time slow." },
-    "settings": { "title": "View", "body": "Spin, gravity, the camera and optics." },
+    "settings": { "title": "Settings", "body": "Spin, gravity, the camera and optics." },
     "guide": {
       "title": "Guide",
       "body": "Learn how a black hole bends light and time, step by step."
@@ -772,7 +772,7 @@
   },
   "canvasLabel": "Black hole visualization",
   "metadataDescription": "Explore black holes, gravitational lensing, and spacetime in an interactive observatory.",
-  "view": "View",
+  "view": "Settings",
   "previousStory": "Previous story",
   "nextStory": "Next story",
   "storyNumber": "Story {number}",

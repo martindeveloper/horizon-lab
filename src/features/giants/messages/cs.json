@@ -11,7 +11,7 @@
     "overview": { "title": "Přehled", "body": "Všechna tělesa naráz, v logaritmickém měřítku." },
     "ladder": { "title": "Žebřík", "body": "Projděte všechna tělesa od nejmenšího po největší." },
     "ruler": { "title": "Měřítko", "body": "Délka při tomto přiblížení, v jednotce dle volby." },
-    "settings": { "title": "Zobrazení", "body": "Dráhy planet, měřítko a kvalita vykreslení." },
+    "settings": { "title": "Nastavení", "body": "Dráhy planet, měřítko a kvalita vykreslení." },
     "guide": { "title": "Průvodce", "body": "Naučte se, jak velké hvězdy bývají, krok za krokem." },
     "experiences": {
       "title": "Režimy prohlížení",

@@ -12,7 +12,7 @@
     "rate": { "title": "Zrychlení času", "body": "Zastavte hodiny, nebo je zrychlete." },
     "throttle": { "title": "Tah", "body": "Posuňte páku a řiďte loď sami." },
     "settings": {
-      "title": "Zobrazení",
+      "title": "Nastavení",
       "body": "Kabina, vrstvy, ovládání kamery a kvalita vykreslení."
     },
     "guide": {

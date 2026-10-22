@@ -7,7 +7,7 @@
     "depth": { "title": "Depth", "body": "Drag or tap a rung to change scale." },
     "sightline": { "title": "Sightline", "body": "How far out, and when that light left." },
     "objects": { "title": "Objects", "body": "Find anything and fly to its scale." },
-    "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
+    "settings": { "title": "Settings", "body": "Layers, the camera pad and render quality." },
     "guide": { "title": "Guide", "body": "Learn how far the universe reaches, step by step." },
     "experiences": {
       "title": "Viewing modes",

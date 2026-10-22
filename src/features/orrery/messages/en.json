@@ -8,7 +8,7 @@
     "objects": { "title": "Objects", "body": "Find a body and open its card." },
     "closeUp": { "title": "Close-up", "body": "Fly in to a body at its true size." },
     "time": { "title": "Time", "body": "Scrub through history, or replay the clearing." },
-    "settings": { "title": "View", "body": "Layers, the camera pad and render quality." },
+    "settings": { "title": "Settings", "body": "Layers, the camera pad and render quality." },
     "guide": { "title": "Guide", "body": "Learn how the solar system took shape, step by step." },
     "experiences": {
       "title": "Viewing modes",

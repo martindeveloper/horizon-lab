@@ -93,7 +93,7 @@ src/
       manifest.ts, routing.ts, server.ts, technical.json
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
       components/              Overlay, depth ladder, sightline, guide caption, the Objects
-                               and View panels, cards, canvas host
+                               and Settings panels, cards, canvas host
       lib/model/               Deep Field's own, without three.js scenes; the worlds it draws
                                are the shared ones (src/space/galaxy, cosmos, the solar system
                                and its reach):
@@ -198,7 +198,7 @@ src/
       manifest.ts, routing.ts, server.ts, technical.json
       components/              Canvas (the scene's names), overlay, dock (the light, the clock, the
                                view's own slider: the cut, the eruption, the cycle), Places and
-                               View panels, the place card, guide
+                               Settings panels, the place card, guide
       lib/model/               The lab's own, without WebGL: views.ts (the seven views and what
                                each opens with), lights.ts (the dial's ids), clock.ts (the rates),
                                places.ts (what the finder lists), tour.ts (the guided journey);
@@ -215,7 +215,7 @@ src/
       index.ts                 Public client entry: VoyageApp
       manifest.ts, routing.ts, server.ts, technical.json
       components/              Overlay, the flight dock (clocks, hold, rate, drive), the Objects
-                               and View panels, cards, guide caption, canvas host
+                               and Settings panels, cards, guide caption, canvas host
       lib/model/               The ship and its world:
         parameters.ts          Drives (Voyager, light sail, one-g torch), clock rates, floors
         relativity.ts, ship.ts Trip times on both clocks; the ship's state and its integrator
@@ -476,7 +476,9 @@ helpers from `@/i18n/navigation`.
    and messages. Export the entry component separately from server helpers.
 2. Add a serializable `manifest.ts` satisfying `SimulationManifest`, with a
    stable ID, URL from `simulationPath(slug)`, static artwork, message key, highlight keys, and optional
-   entry points (an empty list is fine). Never import the renderer into a manifest.
+   entry points (an empty list is fine). For parallax on the catalogue tile, wrap the artwork's
+   depth bands in `<g class="layer" id="layer-<id>">` groups (contiguous, in paint order, plus the
+   SVG's `:target` style) and list them with their depths in `artworkLayers`. Never import the renderer into a manifest.
 3. Register the manifest in `src/lib/simulations.ts`. A simulation not ready for
    production names a `feature` switch (`FEATURES` in `src/config.ts`, on only in
    development with the debug tools on, or by `NEXT_PUBLIC_FEATURE_<ID>`): off, it
@@ -566,7 +568,7 @@ only its layers, its views and its store of its own:
   sections), `SelectionSheet` for cards, both
   ending above the dock, which publishes its height as `--hud-clear` on the stage
   (`useDockClearance`). Each zoomable simulation keeps two panels apart: **Objects**
-  (things to find; `SolarObjectPicks` lists the solar system's) and **View** (how the map
+  (things to find; `SolarObjectPicks` lists the solar system's) and **Settings** (how the map
   is drawn: layers, switches, the distance unit, the `CameraPad`, then render quality), built from
   `SwitchChips` (the toolkit's switch rows in a panel, its switch chips in a dock),
   `DistanceUnitControl`, `RenderSection` and `MapScale`. Its frame-rate switch is one for every

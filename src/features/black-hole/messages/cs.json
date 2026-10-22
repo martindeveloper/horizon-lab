@@ -8,7 +8,7 @@
     "gauge": { "title": "Vzdálenost", "body": "Kde stojíte; klepnutím na poloměr se dozvíte víc." },
     "atlas": { "title": "Atlas", "body": "Kde na obloze která díra leží." },
     "clocks": { "title": "Hodiny", "body": "Pusťte dovnitř hodiny a sledujte, jak čas zpomaluje." },
-    "settings": { "title": "Zobrazení", "body": "Spin, gravitace, kamera a optika." },
+    "settings": { "title": "Nastavení", "body": "Spin, gravitace, kamera a optika." },
     "guide": {
       "title": "Průvodce",
       "body": "Naučte se, jak černá díra ohýbá světlo a čas, krok za krokem."
@@ -775,7 +775,7 @@
   },
   "canvasLabel": "Vizualizace černé díry",
   "metadataDescription": "Prozkoumejte černé díry, gravitační čočkování a prostoročas v interaktivní observatoři.",
-  "view": "Zobrazení",
+  "view": "Nastavení",
   "previousStory": "Předchozí příběh",
   "nextStory": "Další příběh",
   "storyNumber": "Příběh {number}",
