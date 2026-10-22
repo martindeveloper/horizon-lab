@@ -1,15 +1,17 @@
 import { LAYER_ZONES, type LayerId } from "@/space/sun/model/structure";
 
 import type { PlaceId } from "../lib/model/places";
+import type { ViewId } from "../lib/model/views";
 
 /**
- * Where a place is on the Sun, drawn small beside its name: a layer as its band of the cut
- * (`LAYER_ZONES`, to scale), the whole star, a feature on its face, an arch over its limb, a
- * shell of its atmosphere, streams leaving it, or the probe out in the corona. Atmospheric
- * shells stand at schematic heights: to scale they would sit on the limb.
+ * Where a place or a view is on the Sun, drawn small beside its name: a layer as its band of the
+ * cut (`LAYER_ZONES`, to scale), the whole star, a feature on its face, spots in both hemispheres
+ * (the cycle's belts), an arch over its limb, a shell of its atmosphere, streams leaving it, or
+ * the probe out in the corona. Atmospheric shells stand at schematic heights: to scale they
+ * would sit on the limb.
  */
 type Mark =
-  | { kind: "star" | "face" | "arch" | "streams" | "probe" }
+  | { kind: "star" | "face" | "belts" | "arch" | "streams" | "probe" }
   | { kind: "layer"; id: LayerId }
   | { kind: "shell"; at: number };
 
@@ -39,6 +41,18 @@ const MARKS: Readonly<Record<PlaceId, Mark>> = {
   parker: { kind: "probe" },
 };
 
+/** Each view by what it shows most: the cut by the core, the eruption by its arch. */
+const VIEW_MARKS: Readonly<Record<ViewId, Mark>> = {
+  surface: MARKS.star,
+  inside: MARKS.core,
+  sunspot: MARKS.sunspot,
+  chromosphere: MARKS.chromosphere,
+  corona: MARKS.corona,
+  eruption: MARKS.flare,
+  cycle: { kind: "belts" },
+  orbit: MARKS.parker,
+};
+
 /** The disc's radius in the glyph's 20-unit box, and the thinnest line drawn. */
 const R = 5;
 const HAIR = 0.9;
@@ -64,6 +78,16 @@ function markOf(mark: Mark) {
     }
     case "face":
       return <circle cx={1.6} cy={-1.4} r={1.3} fill="currentColor" />;
+    case "belts":
+      return (
+        <path
+          d="M -2.2 -1.8 h 4.4 M -2.2 1.8 h 4.4"
+          stroke="currentColor"
+          strokeWidth={1.3}
+          strokeLinecap="round"
+          strokeDasharray="0.1 2"
+        />
+      );
     case "arch":
       return (
         <path
@@ -92,7 +116,7 @@ function markOf(mark: Mark) {
   }
 }
 
-export function PlaceGlyph({ id }: { id: PlaceId }) {
+function SunGlyph({ mark }: { mark: Mark }) {
   return (
     <svg aria-hidden viewBox="-10 -10 20 20" className="size-5 rounded-full text-accent">
       <circle
@@ -103,7 +127,11 @@ export function PlaceGlyph({ id }: { id: PlaceId }) {
         strokeOpacity={0.45}
         strokeWidth={0.75}
       />
-      {markOf(MARKS[id])}
+      {markOf(mark)}
     </svg>
   );
 }
+
+export const PlaceGlyph = ({ id }: { id: PlaceId }) => <SunGlyph mark={MARKS[id]} />;
+
+export const ViewGlyph = ({ id }: { id: ViewId }) => <SunGlyph mark={VIEW_MARKS[id]} />;

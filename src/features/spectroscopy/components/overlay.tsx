@@ -7,7 +7,7 @@ import { useHelp } from "@/components/simulations/help-tour";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import { ViewPicker } from "@/components/simulations/view-picker";
+import { HeaderRow, ViewPicker } from "@/components/simulations/view-picker";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
@@ -21,6 +21,7 @@ import { SpectroscopyGuide } from "./guide";
 import { LineCard } from "./line-card";
 import { ElementsPanel, ViewPanel } from "./panels";
 import { SpectroscopyTechnicalDetails } from "./technical-details";
+import { ViewGlyph } from "./view-glyph";
 
 /** Escape ends the guide, else closes the panel, else lets go of the line. */
 const escapeSteps = (): EscapeStep[] => {
@@ -34,7 +35,7 @@ const escapeSteps = (): EscapeStep[] => {
 
 const helpStore = { getState: useSpectroscopy.getState, subscribe: useSpectroscopy.subscribe };
 
-/** The four views, as a pill that opens a list; a pick navigates, and the view follows the address. */
+/** The four views as a course, in the shared pill; a pick navigates, and the view follows the address. */
 function SpectroscopyViews() {
   const t = useTranslations("spectroscopy");
   const view = useSpectroscopy((s) => s.view);
@@ -48,12 +49,15 @@ function SpectroscopyViews() {
     <ViewPicker
       ariaLabel={t("hud.views")}
       label={t(`views.${view}.title`)}
+      icon={<ViewGlyph id={view} />}
       detail={t(`views.${view}.kicker`, PROSE_TYPES)}
       ids={VIEW_IDS}
+      route
       selected={(id) => id === view}
       labelOf={(id) => t(`views.${id}.title`)}
       hintOf={(id) => t(`views.${id}.hint`)}
-      kickerOf={(id) => t(`views.${id}.kicker`, PROSE_TYPES)}
+      iconOf={(id) => <ViewGlyph id={id} />}
+      detailOf={(id) => t(`views.${id}.kicker`, PROSE_TYPES)}
       onPick={go}
     />
   );
@@ -74,7 +78,7 @@ export function SpectroscopyOverlay() {
     <VisualizationOverlay ready={ready}>
       {guideOpen ? null : (
         <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60] anim-fade">
-          <div className="flex items-start gap-3">
+          <HeaderRow>
             <SpectroscopyViews />
             <SimulationToolbar
               label={t("hud.controls")}
@@ -98,7 +102,7 @@ export function SpectroscopyOverlay() {
                 onSelect: () => api().setPanel(panel === "view" ? "none" : "view"),
               }}
             />
-          </div>
+          </HeaderRow>
         </header>
       )}
       {!guideOpen && panel === "elements" ? (

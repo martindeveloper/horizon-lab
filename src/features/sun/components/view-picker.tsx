@@ -2,24 +2,25 @@
 
 import { useTranslations } from "next-intl";
 
-import { ViewPicker as SharedViewPicker } from "@/components/simulations/view-picker";
+import { ViewPicker } from "@/components/simulations/view-picker";
 
 import { VIEW_IDS } from "../lib/model/views";
 import { useSun } from "../lib/store";
+import { ViewGlyph } from "./sun-glyph";
 
 export function SunViewPicker() {
   const t = useTranslations("sun");
   const view = useSun((s) => s.view);
   return (
-    <SharedViewPicker
+    <ViewPicker
       ariaLabel={t("hud.views")}
       label={t(`views.${view}`)}
-      className="min-w-36 flex-1"
-      triggerClassName="relative max-w-[min(16rem,100%)] not-md:h-10 not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-0.5"
+      icon={<ViewGlyph id={view} />}
       ids={VIEW_IDS}
       selected={(id) => id === view}
       labelOf={(id) => t(`views.${id}`)}
       hintOf={(id) => t(`viewHints.${id}`)}
+      iconOf={(id) => <ViewGlyph id={id} />}
       onPick={(id) => {
         if (id !== view) useSun.getState().setView(id);
       }}

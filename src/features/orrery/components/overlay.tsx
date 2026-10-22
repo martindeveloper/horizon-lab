@@ -6,6 +6,7 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
+import { HeaderRow } from "@/components/simulations/view-picker";
 import { LoadingBadge, VisualizationOverlay } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
@@ -69,9 +70,7 @@ export function OrreryOverlay() {
       {guideOpen ? null : (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
-            {/* The view's name gives way to the tools down to its minimum; phones under 360px
-                take the tools a row lower. */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <HeaderRow>
               <ViewPicker />
               <SimulationToolbar
                 label={t("hud.controls")}
@@ -106,7 +105,7 @@ export function OrreryOverlay() {
                 }}
                 drift={() => useOrrery.getState().startDrift()}
               />
-            </div>
+            </HeaderRow>
             <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
 

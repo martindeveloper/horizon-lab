@@ -11,6 +11,7 @@ import { atViewScale } from "@horizon/toolkit/camera";
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { ORRERY_EDGE } from "../lib/scene/kit";
 import { useOrrery, type Show } from "../lib/store";
+import { ScaleGlyph } from "./scale-glyph";
 
 export const DISPLAY: (keyof Show)[] = [
   "elliptical",
@@ -35,12 +36,13 @@ export function ViewPicker() {
     <SharedViewPicker
       ariaLabel={t("hud.views")}
       label={t(`views.${view}`)}
-      className="min-w-36 flex-1"
-      triggerClassName="relative max-w-[min(16rem,100%)] not-md:h-10 not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-0.5"
+      icon={<ScaleGlyph id={view} />}
       ids={VIEW_IDS}
+      route
       selected={(id) => !closeUp && view === id && atViewScale(viewDist, solarViewById(id).dist)}
       labelOf={(id) => t(`views.${id}`)}
       hintOf={(id) => t(`viewHints.${id}`, figures)}
+      iconOf={(id) => <ScaleGlyph id={id} />}
       onPick={setView}
     >
       <DeepFieldLink className="mt-1 border-t border-border pt-3" />
@@ -86,7 +88,7 @@ export function EdgeChip() {
       <HandoffLink
         to="deep-field"
         view="oort"
-        className="glass-hud pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full px-4 text-ui tracking-wide text-fg-primary transition-colors duration-feedback ease-standard hover:text-accent focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:h-8"
+        className="glass-hud pointer-events-auto inline-flex h-11 items-center gap-2 rounded-full px-4 text-ui tracking-wide text-fg-primary ui-focus transition-colors duration-feedback ease-standard md:h-8 enabled-hover:text-accent"
       >
         {t("hud.keepGoing")}
         <ArrowUpRight className="icon size-icon-compact text-accent" aria-hidden />

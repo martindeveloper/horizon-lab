@@ -1,96 +1,55 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ViewList } from "@/components/simulations/view-picker";
+import { ViewList, ViewPickerShell } from "@/components/simulations/view-picker";
+import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
 import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
-import { PRESETS } from "@/features/black-hole/lib/holes";
+import { PRESETS, type HoleKind, type HoleSpec } from "@/features/black-hole/lib/holes";
 import { useBlackHole } from "@/features/black-hole/lib/store";
-import { Kicker, Picker, cn } from "@horizon/toolkit/ui";
+import { Orb } from "@horizon/toolkit/ui";
 
-/** Preset links: a row in the header strip, or grouped lists when stacked. */
-export function PresetNav({ stacked = false, onPick }: { stacked?: boolean; onPick?: () => void }) {
-  const t = useTranslations("blackHole");
-  const presetId = useBlackHole((s) => s.presetId);
-  const selectHole = useSelectHole();
-  const catalog = PRESETS.filter((p) => p.kind === "catalog");
-  const theory = PRESETS.filter((p) => p.kind === "theory");
-  const kind = (k: "catalog" | "theory") => (k === "catalog" ? t("kindCatalog") : t("kindTheory"));
-  const nameOf = (id: string) => t(`presets.${id}`);
+const KINDS: readonly HoleKind[] = ["catalog", "theory"];
 
-  function choose(id: string) {
-    selectHole(id);
-    onPick?.();
-  }
+const LOG_MASS = PRESETS.map((p) => Math.log10(p.massSolar));
+const LOG_LOW = Math.min(...LOG_MASS);
+const LOG_HIGH = Math.max(...LOG_MASS);
+/** A mark's diameter, px, from the lightest preset's to the heaviest's. */
+const HOLE_PX = [5, 16] as const;
 
-  function row(list: typeof PRESETS) {
-    return list.map((p) => (
-      <button
-        key={p.id}
-        type="button"
-        aria-current={presetId === p.id ? "true" : undefined}
-        onClick={() => choose(p.id)}
-        className={cn(
-          "h-11 shrink-0 rounded-full px-3 text-ui tracking-wide whitespace-nowrap transition-colors duration-feedback ease-standard md:h-8 md:px-2.5",
-          presetId === p.id ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
-        )}
-      >
-        <span>{nameOf(p.id)}</span>
-        {p.kind === "catalog" ? (
-          <span
-            className="ml-1.5 inline-block size-1 translate-y-[-1px] rounded-full bg-accent"
-            aria-hidden
-          />
-        ) : null}
-      </button>
-    ));
-  }
-
-  /** One kind's presets as a list, each with its kind beside it. */
-  function group(k: "catalog" | "theory") {
-    return (
-      <div>
-        <Kicker className="mb-1.5">{kind(k)}</Kicker>
-        <ViewList
-          ids={(k === "catalog" ? catalog : theory).map((p) => p.id)}
-          selected={(id) => presetId === id}
-          labelOf={nameOf}
-          kickerOf={() => kind(k)}
-          onPick={choose}
-        />
-      </div>
-    );
-  }
-
-  if (stacked) {
-    return (
-      <nav aria-label={t("holes")} className="flex flex-col gap-4">
-        {group("catalog")}
-        {group("theory")}
-      </nav>
-    );
-  }
-
-  return (
-    <nav
-      aria-label={t("holes")}
-      className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto"
-    >
-      {row(catalog)}
-      <span className="mx-1.5 h-3 w-px shrink-0 bg-border-strong" aria-hidden />
-      {row(theory)}
-    </nav>
-  );
+/** A hole's mark: a horizon as large as its mass, on a log scale across the presets. */
+function HoleOrb({ massSolar }: { massSolar: number }) {
+  const share = (Math.log10(massSolar) - LOG_LOW) / (LOG_HIGH - LOG_LOW);
+  const clamped = Math.min(1, Math.max(0, share));
+  return <Orb look="hole" size={HOLE_PX[0] + clamped * (HOLE_PX[1] - HOLE_PX[0])} />;
 }
 
-/** Desktop picker naming the current hole; closes when the settings panel opens. */
+type Measure = Pick<HoleSpec, "kind" | "massSolar" | "spin" | "massLowerLimit">;
+
+/** What sets a hole apart in the list: a catalogued one's mass, a theory's spin. */
+function useMeasure() {
+  const { formatMassShort, formatSpin } = usePhysicsFormat();
+  return ({ kind, massSolar, spin, massLowerLimit }: Measure) =>
+    kind === "theory"
+      ? `a = ${formatSpin(spin)}`
+      : `${massLowerLimit ? "≥ " : ""}${formatMassShort(massSolar)}`;
+}
+
+/**
+ * The holes by kind, in the shared view pill: catalogued holes, then theory, each marked by its
+ * mass and measured by what sets it apart. Closes when the settings panel opens.
+ */
 export function HolePicker() {
   const t = useTranslations("blackHole");
   const presetId = useBlackHole((s) => s.presetId);
+  const massSolar = useBlackHole((s) => s.massSolar);
+  const spin = useBlackHole((s) => s.spin);
   const settingsOpen = useBlackHole((s) => s.settingsOpen);
+  const selectHole = useSelectHole();
+  const measure = useMeasure();
   const [open, setOpen] = useState(false);
   const active = PRESETS.find((p) => p.id === presetId);
   const name = t.has(`presets.${presetId}`) ? t(`presets.${presetId}`) : t("custom");
-  const kind = active?.kind === "theory" ? t("kindTheory") : t("kindCatalog");
+  const byId = (id: string) => PRESETS.find((p) => p.id === id)!;
 
   const [previousSettingsOpen, setPreviousSettingsOpen] = useState(settingsOpen);
   if (previousSettingsOpen !== settingsOpen) {
@@ -99,16 +58,36 @@ export function HolePicker() {
   }
 
   return (
-    <Picker
-      data-coach="views"
-      className="hidden md:block"
+    <ViewPickerShell
+      ariaLabel={t("holes")}
       label={name}
-      detail={kind}
-      aria-label={t("holes")}
+      icon={<HoleOrb massSolar={massSolar} />}
+      detail={measure({
+        kind: active?.kind ?? "catalog",
+        massSolar,
+        spin,
+        ...(active?.massLowerLimit ? { massLowerLimit: true } : {}),
+      })}
       open={open}
       onOpenChange={setOpen}
     >
-      <PresetNav stacked onPick={() => setOpen(false)} />
-    </Picker>
+      <nav aria-label={t("holes")} className="flex flex-col gap-2">
+        {KINDS.map((kind) => (
+          <ViewList
+            key={kind}
+            title={kind === "catalog" ? t("kindCatalog") : t("kindTheory")}
+            ids={PRESETS.filter((p) => p.kind === kind).map((p) => p.id)}
+            selected={(id) => presetId === id}
+            labelOf={(id) => t(`presets.${id}`)}
+            iconOf={(id) => <HoleOrb massSolar={byId(id).massSolar} />}
+            detailOf={(id) => measure(byId(id))}
+            onPick={(id) => {
+              setOpen(false);
+              selectHole(id);
+            }}
+          />
+        ))}
+      </nav>
+    </ViewPickerShell>
   );
 }

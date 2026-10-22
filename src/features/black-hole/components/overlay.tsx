@@ -1,4 +1,4 @@
-import { Crosshair, GraduationCap, Timer } from "lucide-react";
+import { Crosshair, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 
@@ -7,6 +7,7 @@ import { Rail, RailSection } from "@/components/simulations/rail";
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
+import { HeaderRow } from "@/components/simulations/view-picker";
 import { AtlasOverlay } from "@/features/black-hole/components/atlas";
 import { ClockDrops } from "@/features/black-hole/components/clocks";
 import { GuideOverlay } from "@/features/black-hole/components/guide";
@@ -33,7 +34,7 @@ import {
 } from "@horizon/toolkit/ui";
 
 import { PinLesson } from "./pin-lessons";
-import { HolePicker, PresetNav } from "./preset-nav";
+import { HolePicker } from "./preset-nav";
 import { SETTINGS_PANEL_ID, SettingsBody } from "./settings";
 import { BlackHoleTechnicalDetails } from "./technical-details";
 
@@ -116,7 +117,6 @@ const helpStore = { getState: useBlackHole.getState, subscribe: useBlackHole.sub
 export function ObservatoryOverlay() {
   const { formatMassShort } = usePhysicsFormat();
   const t = useTranslations("blackHole");
-  const tGuide = useTranslations("guide");
   const presetId = useBlackHole((s) => s.presetId);
   const settingsOpen = useBlackHole((s) => s.settingsOpen);
   const setSettingsOpen = useBlackHole((s) => s.setSettingsOpen);
@@ -152,8 +152,8 @@ export function ObservatoryOverlay() {
       {!guideOpen && !mapOpen ? (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
-            <div className="flex items-center gap-3">
-              {/* The picker (desktop) and the dock kicker (phones) show the name. */}
+            <HeaderRow>
+              {/* The picker shows the name. */}
               <h1 className="sr-only">{holeName}</h1>
               <HolePicker />
               <SimulationToolbar
@@ -188,7 +188,7 @@ export function ObservatoryOverlay() {
                 }}
                 drift={() => useBlackHole.getState().startDrift()}
               />
-            </div>
+            </HeaderRow>
           </header>
 
           {settingsOpen ? (
@@ -199,21 +199,7 @@ export function ObservatoryOverlay() {
               onClose={() => setSettingsOpen(false)}
               sheetLead={
                 <>
-                  {/* Phones pick the hole and read its story here; wide screens have the header and dock. */}
-                  <RailSection title={t("holes")}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSettingsOpen(false);
-                        startGuide();
-                      }}
-                      className="glass-hud mb-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-ui tracking-label text-fg-primary uppercase"
-                    >
-                      <GraduationCap className="icon size-icon-compact" />
-                      {tGuide("start")}
-                    </button>
-                    <PresetNav stacked />
-                  </RailSection>
+                  {/* Phones read the hole's story here; wide screens have it in the dock. */}
                   <RailSection title={t("story")}>
                     <StoryLine alwaysOpen />
                   </RailSection>

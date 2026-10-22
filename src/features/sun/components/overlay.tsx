@@ -8,6 +8,7 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
+import { HeaderRow } from "@/components/simulations/view-picker";
 import { LoadingBadge, VisualizationOverlay } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
@@ -63,8 +64,7 @@ export function SunOverlay() {
       ) : (
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
-            {/* The view's pill gives way to the tools, as in every lab; the rest is the dock's. */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <HeaderRow>
               <SunViewPicker />
               <SimulationToolbar
                 label={t("hud.controls")}
@@ -89,7 +89,7 @@ export function SunOverlay() {
                 }}
                 drift={() => api().startDrift()}
               />
-            </div>
+            </HeaderRow>
             <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
           {panel === "places" ? <PlacesPanel onClose={() => api().setPanel("none")} /> : null}

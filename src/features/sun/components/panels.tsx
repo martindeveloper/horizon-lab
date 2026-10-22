@@ -16,7 +16,7 @@ import { ListItem, ListTrack, ListTrackLabel } from "@horizon/toolkit/ui";
 
 import { PLACE_LIST } from "../lib/model/places";
 import { useSun, type Show } from "../lib/store";
-import { PlaceGlyph } from "./place-glyph";
+import { PlaceGlyph } from "./sun-glyph";
 
 const SWITCHES: (keyof Show)[] = ["fieldLines", "names", "grid"];
 
