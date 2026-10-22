@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { createTranslator, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 
-import { FEATURES, type FeatureId } from "@/config";
 import { routing, type Locale } from "@/i18n/routing";
+
+import { simulationOn } from "./simulation-access";
+import { slugRoutes, type RouteDefinition } from "./simulation-paths";
+import type { SimulationManifest } from "./simulation-types";
 
 /** Browser chrome needs a serialized color, matching the invariant --color-space. */
 export const BROWSER_THEME_COLOR = "#08080b";
@@ -55,29 +58,13 @@ export async function localeParam<Params extends { locale: string }>(params: Pro
 type SimulationMessages = Record<string, unknown> & { app: string; metadataDescription: string };
 
 type SimulationMetadataSpec<Messages extends SimulationMessages, Id extends string> = {
-  /** The feature switch the simulation is behind: off, the route's metadata is not found too. */
-  feature?: FeatureId;
+  /** Supplies the switch, routes and social image for this simulation. */
+  manifest: Omit<SimulationManifest, "routes"> & { routes: RouteDefinition<Id> };
   /** Server-only loader of the feature's copy. */
   messages: (locale: Locale) => Promise<Messages>;
-  /** The simulation's social card under `public/`. */
-  image: string;
-} & (
-  | {
-      /** Canonical path of the default view. */
-      path: string;
-      view?: undefined;
-    }
-  | {
-      path?: undefined;
-      /** A `[slug]` route: its param, how the slug resolves, and the view's title. */
-      view: {
-        param: string;
-        resolve: (slug: string | undefined) => Id | null;
-        pathFor: (id: Id) => string;
-        title: (t: ReturnType<typeof createTranslator<Messages>>, id: Id) => string;
-      };
-    }
-);
+  /** Present for a preset page; omitted for the default page's app title. */
+  viewTitle?: (t: ReturnType<typeof createTranslator<Messages>>, id: Id) => string;
+};
 
 /**
  * `generateMetadata` for a simulation's default view or one of its `[slug]` views:
@@ -87,29 +74,34 @@ type SimulationMetadataSpec<Messages extends SimulationMessages, Id extends stri
 export function simulationMetadata<Messages extends SimulationMessages, Id extends string>(
   spec: SimulationMetadataSpec<Messages, Id>,
 ) {
+  const routes = slugRoutes(spec.manifest.routes);
   return async function generateMetadata({
     params,
   }: {
     params: Promise<{ locale: string } & Record<string, string>>;
   }): Promise<Metadata> {
-    if (spec.feature && !FEATURES[spec.feature]) notFound();
+    if (!simulationOn(spec.manifest)) notFound();
     const resolved = await localeParam(params);
     const messages = await spec.messages("en");
     const card = {
       description: messages.metadataDescription,
-      image: spec.image,
+      image: spec.manifest.social,
       imageAlt: `Horizon · ${messages.app}`,
     };
-    if (!spec.view) {
-      return pageMetadata({ ...card, path: spec.path, title: `${messages.app} · Horizon` });
+    if (!spec.viewTitle) {
+      return pageMetadata({
+        ...card,
+        path: spec.manifest.routes.base,
+        title: `${messages.app} · Horizon`,
+      });
     }
-    // Only canonical ids are prerendered (dynamicParams is false), so the slug always resolves.
-    const id = spec.view.resolve(resolved[spec.view.param])!;
+    const id = routes.resolve(resolved[spec.manifest.routes.param]);
+    if (id === null) notFound();
     const t = createTranslator({ locale: "en", messages });
     return pageMetadata({
       ...card,
-      path: spec.view.pathFor(id),
-      title: `${spec.view.title(t, id)} · ${messages.app} · Horizon`,
+      path: routes.pathFor(id),
+      title: `${spec.viewTitle(t, id)} · ${messages.app} · Horizon`,
     });
   };
 }

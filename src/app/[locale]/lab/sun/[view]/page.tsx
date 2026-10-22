@@ -1,22 +1,15 @@
-import { FEATURES } from "@/config";
 import { sunManifest } from "@/features/sun/manifest";
-import { pathForView, resolveView, viewRouteParams } from "@/features/sun/routing";
 import { getSunMessages } from "@/features/sun/server";
 import { simulationMetadata } from "@/lib/metadata";
+import { simulationStaticParams } from "@/lib/simulation-access";
 
 export const dynamicParams = false;
 /* With the feature off no view is prerendered: every view answers not found, as the layout does. */
-export const generateStaticParams = () => (FEATURES.sun ? viewRouteParams() : []);
+export const generateStaticParams = simulationStaticParams(sunManifest);
 export const generateMetadata = simulationMetadata({
-  feature: "sun",
+  manifest: sunManifest,
   messages: getSunMessages,
-  image: sunManifest.social,
-  view: {
-    param: sunManifest.routes.param,
-    resolve: resolveView,
-    pathFor: pathForView,
-    title: (t, id) => t(`views.${id}`),
-  },
+  viewTitle: (t, id) => t(`views.${id}`),
 });
 
 export default function SunViewPage() {

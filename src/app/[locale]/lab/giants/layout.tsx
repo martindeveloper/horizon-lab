@@ -1,13 +1,12 @@
 import { simulationLayout } from "@/components/simulations/simulation-layout";
 import { GiantsApp } from "@/features/giants";
+import { giantsManifest } from "@/features/giants/manifest";
 import { getGiantsMessages } from "@/features/giants/server";
 
 import "@/features/giants/styles.css";
 
 export default simulationLayout({
-  slug: "giants",
-  feature: "giants",
-  namespace: "giants",
+  manifest: giantsManifest,
   App: GiantsApp,
   messages: getGiantsMessages,
 });

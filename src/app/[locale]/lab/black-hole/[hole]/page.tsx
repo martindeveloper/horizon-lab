@@ -1,19 +1,14 @@
 import { blackHoleManifest } from "@/features/black-hole/manifest";
-import { pathForHole, resolveHole, presetRouteParams } from "@/features/black-hole/routing";
 import { getBlackHoleMessages } from "@/features/black-hole/server";
 import { simulationMetadata } from "@/lib/metadata";
+import { simulationStaticParams } from "@/lib/simulation-access";
 
 export const dynamicParams = false;
-export const generateStaticParams = presetRouteParams;
+export const generateStaticParams = simulationStaticParams(blackHoleManifest);
 export const generateMetadata = simulationMetadata({
+  manifest: blackHoleManifest,
   messages: getBlackHoleMessages,
-  image: blackHoleManifest.social,
-  view: {
-    param: blackHoleManifest.routes.param,
-    resolve: resolveHole,
-    pathFor: pathForHole,
-    title: (t, id) => t(`presets.${id}`),
-  },
+  viewTitle: (t, id) => t(`presets.${id}`),
 });
 
 export default function HolePage() {

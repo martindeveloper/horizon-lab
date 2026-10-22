@@ -5,17 +5,14 @@ import { notFound } from "next/navigation";
 import { Suspense, type ComponentType, type ReactNode } from "react";
 
 import { DebugCrash } from "@/components/debug/debug-crash";
-import { FEATURES, type FeatureId } from "@/config";
 import type { Locale } from "@/i18n/routing";
 import { localeParam } from "@/lib/metadata";
+import { simulationOn } from "@/lib/simulation-access";
+import type { SimulationManifest } from "@/lib/simulation-types";
 
 type SimulationLayoutSpec = {
-  /** The `data-simulation` root the feature's stylesheet scopes to. */
-  slug: string;
-  /** The feature switch the simulation is behind: off, its routes are not found. */
-  feature?: FeatureId;
-  /** The namespace the feature's components translate from. */
-  namespace: string;
+  /** Supplies the feature switch, stylesheet scope and translation namespace. */
+  manifest: SimulationManifest;
   /** The client entry, kept mounted across the simulation's routes so the canvas survives view navigation. */
   App: ComponentType;
   /** Server-only loader of the feature's copy. */
@@ -26,13 +23,7 @@ type SimulationLayoutSpec = {
  * The layout every simulation route shares: shared and feature copy for the client,
  * the stage and the persistent scene. The route file imports the feature's stylesheet.
  */
-export function simulationLayout({
-  slug,
-  feature,
-  namespace,
-  App,
-  messages,
-}: SimulationLayoutSpec) {
+export function simulationLayout({ manifest, App, messages }: SimulationLayoutSpec) {
   return async function SimulationLayout({
     children,
     params,
@@ -40,12 +31,12 @@ export function simulationLayout({
     children: ReactNode;
     params: Promise<{ locale: string }>;
   }) {
-    if (feature && !FEATURES[feature]) notFound();
+    if (!simulationOn(manifest)) notFound();
     const { locale } = await localeParam(params);
     const [shared, own] = await Promise.all([getMessages({ locale }), messages(locale)]);
     return (
-      <NextIntlClientProvider locale={locale} messages={{ ...shared, [namespace]: own }}>
-        <div className="simulation-stage" data-simulation={slug}>
+      <NextIntlClientProvider locale={locale} messages={{ ...shared, [manifest.messageKey]: own }}>
+        <div className="simulation-stage" data-simulation={manifest.id}>
           <Suspense>
             <App />
           </Suspense>

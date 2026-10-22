@@ -3,6 +3,11 @@ import type { SimulationManifest } from "./simulation-types";
 import { simulationAssets } from "./urls";
 
 type Details = Omit<SimulationManifest, "href" | "routes" | "artwork" | "social" | "entryPoints">;
+type DefinedSimulation<Info extends Details, Routes extends RouteDefinition> = Omit<
+  Info,
+  "href" | "routes" | "artwork" | "social" | "entryPoints"
+> &
+  Pick<SimulationManifest, "href" | "artwork" | "social" | "entryPoints"> & { routes: Routes };
 
 /** Derive public addresses and assets once; entry points only name a declared view. */
 export function defineSimulation<const Routes extends RouteDefinition, const Info extends Details>(
@@ -10,7 +15,7 @@ export function defineSimulation<const Routes extends RouteDefinition, const Inf
     routes: Routes;
     entryPoints: readonly { id: string; view: NoInfer<Routes["entries"][number]["id"]> }[];
   },
-) {
+): DefinedSimulation<Info, Routes> {
   const routes = slugRoutes(definition.routes);
   return {
     ...definition,

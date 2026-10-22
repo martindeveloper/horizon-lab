@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
+import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match.js";
+
 import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
 import { presetIdFromPath, presetRouteParams } from "../src/features/black-hole/routing.ts";
 import {
@@ -240,6 +242,41 @@ test("Unicode route IDs and historical aliases survive browser URL encoding", ()
   assert.equal(routes.redirects().get("hvězda"), routes.pathFor("véga"));
   for (const malformed of ["%", "%E0%A4%A", "%252e%252e"])
     assert.equal(routes.fromPath(`/lab/example/${malformed}`), "home");
+});
+
+test("native redirects match encoded Unicode aliases without redirecting a canonical URL to itself", () => {
+  const published = siteRedirects();
+  for (const prefix of ["", "/en", "/cs"])
+    for (const base of ["", "/black-hole", "/lab/black-hole"]) {
+      const pathname = new URL(`${prefix}${base}/pōwehi`, "https://example.test").pathname;
+      assert.equal(published.get(pathname), `${prefix}/lab/black-hole/m87`);
+      assert.ok(getPathMatch(pathname)(pathname), "Next matches the encoded request pathname");
+    }
+
+  const manifest = {
+    ...registered[0],
+    routes: defineRoutes({
+      base: "/lab/example",
+      param: "star",
+      defaultId: "home",
+      entries: [{ id: "home" }, { id: "véga", aliases: ["hvězda"] }],
+      legacy: { bases: ["/old-example"] },
+    }),
+  };
+  const redirects = siteRedirects([manifest]);
+  for (const prefix of ["", "/en", "/cs"]) {
+    const target = `${prefix}/lab/example/v%C3%A9ga`;
+    assert.equal(redirects.has(target), false, "an encoded canonical ID is not a redirect");
+    for (const path of ["/lab/example/hvězda", "/old-example/hvězda", "/old-example/véga"]) {
+      const pathname = new URL(`${prefix}${path}`, "https://example.test").pathname;
+      const matches = [...redirects].filter(([source]) => getPathMatch(source)(pathname));
+      assert.deepEqual(
+        matches,
+        [[pathname, target]],
+        "exactly one native rule reaches the canonical URL",
+      );
+    }
+  }
 });
 
 test("manifests derive entry points and assets from their route and feature identities", async () => {

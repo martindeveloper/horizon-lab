@@ -1,19 +1,14 @@
 import { orreryManifest } from "@/features/orrery/manifest";
-import { pathForView, resolveView, viewRouteParams } from "@/features/orrery/routing";
 import { getOrreryMessages } from "@/features/orrery/server";
 import { simulationMetadata } from "@/lib/metadata";
+import { simulationStaticParams } from "@/lib/simulation-access";
 
 export const dynamicParams = false;
-export const generateStaticParams = viewRouteParams;
+export const generateStaticParams = simulationStaticParams(orreryManifest);
 export const generateMetadata = simulationMetadata({
+  manifest: orreryManifest,
   messages: getOrreryMessages,
-  image: orreryManifest.social,
-  view: {
-    param: orreryManifest.routes.param,
-    resolve: resolveView,
-    pathFor: pathForView,
-    title: (t, id) => t(`views.${id}`),
-  },
+  viewTitle: (t, id) => t(`views.${id}`),
 });
 
 export default function ViewPage() {

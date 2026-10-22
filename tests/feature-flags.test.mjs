@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { test } from "node:test";
 
 import { FEATURES, featureFlag } from "../src/config.ts";
@@ -26,3 +27,17 @@ test("the catalogue holds a switched simulation only while its switch is on", ()
   for (const manifest of registered)
     if (!("feature" in manifest)) assert.ok(simulations.includes(manifest), manifest.id);
 });
+
+for (const flag of ["on", "off"])
+  test(`manifest gates agree across the catalogue, static routes and metadata with switches ${flag}`, () => {
+    execFileSync(process.execPath, ["--import", "tsx", "tests/fixtures/simulation-gating.mjs"], {
+      cwd: new URL("../", import.meta.url),
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_FEATURE_GIANTS: flag,
+        NEXT_PUBLIC_FEATURE_SUN: flag,
+        NEXT_PUBLIC_FEATURE_VOYAGE: flag,
+      },
+      stdio: "pipe",
+    });
+  });

@@ -1,19 +1,14 @@
 import { spectroscopyManifest } from "@/features/spectroscopy/manifest";
-import { pathForView, resolveView, viewRouteParams } from "@/features/spectroscopy/routing";
 import { getSpectroscopyMessages } from "@/features/spectroscopy/server";
 import { simulationMetadata } from "@/lib/metadata";
+import { simulationStaticParams } from "@/lib/simulation-access";
 
 export const dynamicParams = false;
-export const generateStaticParams = viewRouteParams;
+export const generateStaticParams = simulationStaticParams(spectroscopyManifest);
 export const generateMetadata = simulationMetadata({
+  manifest: spectroscopyManifest,
   messages: getSpectroscopyMessages,
-  image: spectroscopyManifest.social,
-  view: {
-    param: spectroscopyManifest.routes.param,
-    resolve: resolveView,
-    pathFor: pathForView,
-    title: (t, id) => t(`views.${id}.title`),
-  },
+  viewTitle: (t, id) => t(`views.${id}.title`),
 });
 
 export default function ViewPage() {

@@ -87,7 +87,10 @@ test("Next.js redirects preserve legacy URLs on language-free paths", () => {
   for (const preset of PRESETS) assert.equal(redirects.has(pathForHole(preset.id)), false);
   for (const [alias, id] of Object.entries(HOLE_ALIASES)) {
     if (!resolveHole(alias)) continue;
-    assert.equal(redirects.get(`/${alias}`), pathForHole(id));
+    assert.equal(
+      redirects.get(new URL(`/${alias}`, "https://horizon.test").pathname),
+      pathForHole(id),
+    );
   }
   for (const target of redirects.values()) {
     assert.equal(redirects.has(target), false, `Redirect chain: ${target}`);

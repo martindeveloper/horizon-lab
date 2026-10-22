@@ -1,12 +1,15 @@
 import { LOCALE_COOKIE, routing } from "../i18n/routing";
 import { slugRoutes } from "./simulation-paths";
+import type { SimulationManifest } from "./simulation-types";
 import { registered } from "./simulations";
 import { LEGACY_URLS, PAGE_URLS, creditUrl } from "./urls";
 
 // Native Next.js redirect rules; Vercel handles these before serving pages.
 // Old /en and /cs links keep their prefix here: those prerendered pages are served
 // directly, and LocaleUrl then stores the language and drops the prefix.
-export function siteRedirects(): Map<string, string> {
+export function siteRedirects(
+  available: readonly SimulationManifest[] = registered,
+): Map<string, string> {
   const redirects = new Map<string, string>();
   const add = (source: string, target: string) => {
     if (source === target) return;
@@ -19,14 +22,16 @@ export function siteRedirects(): Map<string, string> {
   add(LEGACY_URLS.scientificSources, creditUrl("source-details"));
   add(LEGACY_URLS.thirdPartyNotices, creditUrl("licence-texts"));
   for (const prefix of ["", ...routing.locales.map((locale) => `/${locale}`)]) {
-    for (const { routes: definition } of registered) {
+    for (const { routes: definition } of available) {
       const slugs = slugRoutes(definition).redirects();
-      const legacy = "legacy" in definition ? definition.legacy : undefined;
-      if (legacy && "rootAliases" in legacy && legacy.rootAliases)
-        for (const [slug, path] of slugs) add(`${prefix}/${slug}`, `${prefix}${path}`);
+      const legacy = definition.legacy;
+      // Native Next matchers see the encoded request pathname, including historical aliases.
+      const sources = [...slugs].map(([slug, path]) => [encodeURIComponent(slug), path] as const);
+      if (legacy?.rootAliases)
+        for (const [slug, path] of sources) add(`${prefix}/${slug}`, `${prefix}${path}`);
       for (const old of legacy?.bases ?? []) {
         add(`${prefix}${old}`, `${prefix}${definition.base}`);
-        for (const [slug, path] of slugs) add(`${prefix}${old}/${slug}`, `${prefix}${path}`);
+        for (const [slug, path] of sources) add(`${prefix}${old}/${slug}`, `${prefix}${path}`);
       }
       // Keep the published compatibility policy: aliases/default slugs redirect only where
       // the feature declares compatibility addresses or explicit aliases.
@@ -35,7 +40,7 @@ export function siteRedirects(): Map<string, string> {
         "aliases" in definition ||
         definition.entries.some((entry) => "aliases" in entry)
       )
-        for (const [slug, path] of slugs)
+        for (const [slug, path] of sources)
           add(`${prefix}${definition.base}/${slug}`, `${prefix}${path}`);
     }
   }

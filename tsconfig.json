@@ -37,7 +37,8 @@
     ".next/dev/types/**/*.ts",
     "packages/**/*.ts",
     "packages/**/*.tsx",
-    "bench/**/*.ts"
+    "bench/**/*.ts",
+    "tests/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
