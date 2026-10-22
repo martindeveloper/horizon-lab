@@ -46,6 +46,7 @@ export const AUDIO_ASSETS = {
   driftingProbe: audioAssets("drifting-probe"),
   lowDroneRises: audioAssets("low-drone-rises"),
   vastEmptySpace: audioAssets("vast-empty-space"),
+  theStarRings: audioAssets("the-star-rings"),
 } as const;
 
 export const ANCHOR_IDS = { mainContent: "main-content" } as const;

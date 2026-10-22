@@ -59,6 +59,15 @@ export const ambientMusic = new MusicPlayer(
       ],
       map: assetUrl(AUDIO_ASSETS.vastEmptySpace.map),
     },
+    {
+      title: "The Star Rings",
+      artist: "Horizon",
+      sources: [
+        { src: assetUrl(AUDIO_ASSETS.theStarRings.opus), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl(AUDIO_ASSETS.theStarRings.aac), type: 'audio/mp4; codecs="mp4a.40.2"' },
+      ],
+      map: assetUrl(AUDIO_ASSETS.theStarRings.map),
+    },
   ],
   { storageKey: "music", level: MUSIC_LEVEL.ambient },
 );
