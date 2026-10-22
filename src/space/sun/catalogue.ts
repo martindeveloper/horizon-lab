@@ -65,10 +65,12 @@ import {
   TEMPERATURES,
   PARKER_PERIHELION_R,
   PARKER_PERIHELION_SPEED_KM_S,
+  PARKER_PERIOD_D,
   WATER_DENSITY,
   WIND_FAST_KM_S,
   WIND_SLOW_KM_S,
 } from "./model/parameters";
+import { PARKER_APHELION_R } from "./model/parker";
 import { AIA_NM, AIA_PEAKS_K, HALPHA_NM, type Peak } from "./model/passbands";
 import { CARRINGTON_SIDEREAL_RATE, INTERIOR_RATE, surfacePeriod } from "./model/rotation";
 import { CORE_EDGE_R, photonDiffusionTime, structureAt } from "./model/structure";
@@ -585,6 +587,22 @@ const PROBES = {
       source: "nasaParker",
       status: "flag",
       note: "approximate speed at the December 2024 perihelion",
+    },
+    aphelion: {
+      value: PARKER_APHELION_R,
+      unit: "Rsun",
+      digits: 3,
+      source: "horizonsParker",
+      status: "derived",
+      note: "from Horizons' perihelion and eccentricity: about 0.73 au, inside Venus's orbit",
+    },
+    period: {
+      value: PARKER_PERIOD_D,
+      unit: "d",
+      digits: 3,
+      source: "horizonsParker",
+      status: "flag",
+      note: "osculating period, 1 June 2025",
     },
   },
 } as const;

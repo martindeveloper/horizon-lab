@@ -19,9 +19,14 @@ import {
 } from "@/space/sun/frame";
 import { CORONA } from "@/space/sun/model/corona";
 import { cycleCountAt, cyclePhaseOf, yearOfCycleCount } from "@/space/sun/model/cycle";
-import { CYCLE_PERIOD_YR } from "@/space/sun/model/parameters";
+import { CYCLE_PERIOD_YR, RADIUS_M } from "@/space/sun/model/parameters";
 import { PASSBANDS } from "@/space/sun/model/passbands";
-import { LAYERS, structureAt } from "@/space/sun/model/structure";
+import {
+  LAYERS,
+  generationAt,
+  pressureScaleHeightAt,
+  structureAt,
+} from "@/space/sun/model/structure";
 import type { DriftShot } from "@horizon/toolkit/camera";
 import { lcg } from "@horizon/toolkit/math";
 import type { SimulationEngine } from "@horizon/toolkit/rendering";
@@ -62,6 +67,7 @@ function placeOf(pick: SunPick): LabPlaceId {
 function settingsOf(s: SunStore): SunSceneSettings {
   return {
     view: s.view,
+    closeUp: s.closeUp,
     cut: s.cut,
     fieldLines: s.show.fieldLines,
     names: s.show.names,
@@ -160,7 +166,12 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
   const hooks: SunEngineHooks = {
     interior: (r) => {
       structureAt(r, point);
-      return { kelvin: point.T, density: point.rho };
+      return {
+        kelvin: point.T,
+        density: point.rho,
+        scaleHeight: r > 0 ? pressureScaleHeightAt(r) / RADIUS_M : 0,
+        generation: generationAt(r),
+      };
     },
     anchors: (id: PlaceId) => placeAnchor(model.frame, id),
     clock: () => {
@@ -191,6 +202,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
       });
     },
     onReady: () => store.getState().setReady(true),
+    onSharpening: (sharpening) => store.setState({ sharpening }),
     onInput: () => {
       const s = store.getState();
       if (s.drift === "playing") s.pauseDrift();

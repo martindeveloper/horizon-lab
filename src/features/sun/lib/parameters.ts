@@ -14,8 +14,11 @@ import {
   DAY_S,
   RADIUS_M,
   SURFACE_GRAVITY,
+  TACHOCLINE_R,
+  TACHOCLINE_THICKNESS_R,
   TEMPERATURES,
 } from "@/space/sun/model/parameters";
+import { convectiveSpeedAt, pressureScaleHeightAt, structureAt } from "@/space/sun/model/structure";
 import {
   BOLTZMANN_CONSTANT,
   PROTON_MASS_KG,
@@ -23,6 +26,8 @@ import {
   SOLAR_TEFF_K,
 } from "@horizon/toolkit/science";
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
+
+import spotStencil from "./graphics/spot-stencil.generated.json";
 
 /* ------------------------------------------------------------------ stage */
 
@@ -58,8 +63,10 @@ export const AIM_LAG_S = 0.8;
 export const DRAG_FULL_HEIGHT = 2 / 3;
 /** The wedge's half-angle when the cut is fully open: a quarter of the Sun. */
 export const CUT_HALF_ANGLE = Math.PI / 4;
-/** The wedge's bisector follows the camera, and the wedge opens and closes, with this time constant, s. */
+/** The wedge's bisector follows the camera with this time constant, s. */
 export const CUT_LAG_S = 0.6;
+/** Seconds the wedge takes to open or close all the way; a shorter change takes its share. */
+export const CUT_TRAVEL_S = 1;
 /**
  * Above this clock rate (model seconds per second) the camera rides with the Carrington frame:
  * when a second carries more than ten days the spin would only strobe, and what the clock is
@@ -80,13 +87,12 @@ export const SURFACE_RESOLVE_PX = 2;
 /** The photosphere's effective temperature (the shared catalogue's). */
 export const PHOTOSPHERE_K = SOLAR_TEFF_K;
 /**
- * The measured Sun (SDO/HMI's flattened continuum, `MAPS.sun`): the map yields to the
- * procedural surface as one of its texels grows from this many buffer pixels to this many, the
- * near tier loads inside this camera distance, radii, and a map arriving fades in over this
- * long, s. Its quiet level is the solar system's.
+ * The measured Sun retains its spot morphology at every zoom. Fine procedural contrast
+ * fades in as a map texel grows across these buffer-pixel sizes. A newly loaded map fades
+ * in over MAP_FADE_IN_S seconds. Its quiet level is the solar system's.
  */
-export const MAP_FADE_FROM_PX = 1.25;
-export const MAP_FADE_TO_PX = 2.5;
+export const MAP_DETAIL_FROM_PX = 1.25;
+export const MAP_DETAIL_TO_PX = 2.5;
 export const MAP_FADE_IN_S = 1.2;
 export { MAP_CENTRAL_MERIDIAN_RAD, SUN_MAP_QUIET_INTENSITY };
 /**
@@ -139,39 +145,86 @@ export const INTERIOR_TURN_RATIO =
 
 /* ------------------------------------------------------------- the inside */
 
-/** The core's shimmer: its cells across the radius, their flicker's period in model seconds, and its depth. */
-export const CORE_CELLS = 12;
-export const CORE_SHIMMER_S = 6 * 3_600;
-export const CORE_SHIMMER = 0.25;
-/** The radiative zone's slow diffusion shimmer: cells across the radius, a drift period, its depth. */
-export const RADIATIVE_CELLS = 5;
-export const RADIATIVE_DRIFT_S = 10 * 86_400;
-export const RADIATIVE_SHIMMER = 0.12;
-/** Convective plumes: columns across the radius, their radial grain and rise, km/s (a display pace), and their contrast. */
-export const PLUME_COLUMNS = 16;
-export const PLUME_GRAIN = 40;
-export const PLUME_RISE_KMS = 0.5;
-export const PLUME_RISE_RADII_PER_S = PLUME_RISE_KMS / SOLAR_RADIUS_KM;
-export const PLUME_CONTRAST = 1;
+/**
+ * The cut face in white light is a diagram's heat, not true colour (every shell is bluer than
+ * white): Model S's temperature mapped onto display blackbody temperatures and light as power
+ * laws, anchored at the photosphere and the centre, so colour and brightness change smoothly
+ * with depth wherever the model's temperature does and no shell boundary is a colour step.
+ */
+export const FACE_TOP_DISPLAY_K = 1_600;
+export const CORE_DISPLAY_K = 7_500;
+export const FACE_TOP_LIGHT = 0.5;
+export const CORE_LIGHT = 0.75;
+const faceTop = structureAt(1);
+const faceCentre = structureAt(0);
+export const FACE_TOP_LN_T = Math.log(faceTop.T);
+const faceLnRange = Math.log(faceCentre.T) - FACE_TOP_LN_T;
+export const FACE_K_SLOPE = Math.log(CORE_DISPLAY_K / FACE_TOP_DISPLAY_K) / faceLnRange;
+export const FACE_LIGHT_SLOPE = Math.log(CORE_LIGHT / FACE_TOP_LIGHT) / faceLnRange;
+/** Where the light is made, the face glows this much more at the generation's peak (Model S's dL/dr). */
+export const CORE_GLOW = 0.3;
+/**
+ * The core and radiative zone carry their light by diffusion, with no flow to draw: a fine
+ * still grain, cells across the radius and its contrast, turning rigidly with them.
+ */
+export const INTERIOR_GRAIN_CELLS = 30;
+export const INTERIOR_GRAIN = 0.1;
+/**
+ * The tachocline, Model S's shear layer under the convection zone: the rotation changes across
+ * its thickness from the interior's rigid rate to the surface's law by latitude, drawn as thin
+ * laminae parallel to the shell (it is stably stratified) that slide past one another as the
+ * clock runs. Streaks per radian along the shell, laminae across its thickness, contrast.
+ */
+export const TACHOCLINE_THICKNESS = TACHOCLINE_THICKNESS_R;
+export const TACHOCLINE_STREAKS = 7;
+export const TACHOCLINE_LAMINAE = 5;
+export const TACHOCLINE_CONTRAST = 0.5;
+/**
+ * The convection zone's cells span the mixing length, about two pressure scale heights (the
+ * solar-calibrated α), so they widen with depth from granules at the top to giant cells at the
+ * base. Each octave of cell size is a fixed field in the body, cross-faded by the depth's own
+ * octave, so the cells grow without shearing the pattern. Downflow plumes run deeper than they
+ * are wide (PLUME_STRETCH), and each octave's cells live one convective turnover, H_p / v with
+ * v from the flux the shell carries.
+ */
+export const CELL_SCALE_HP = 2;
+export const PLUME_STRETCH = 2.2;
+export const CONVECTION_CONTRAST = 0.4;
 /** Granules at the top of the convection zone show within this depth, radii. */
 export const PLUME_GRANULE_DEPTH = 0.02;
 /** The shells' gold rims: their width, radii, and strength. */
 export const SHELL_RIM = 0.003;
 export const SHELL_RIM_GOLD = 0.7;
+/** The coarsest cell, R across: the mixing length at the convection zone's base. */
+export const CONVECTION_BASE_CELL =
+  (CELL_SCALE_HP * pressureScaleHeightAt(TACHOCLINE_R)) / RADIUS_M;
+/** Octaves of cell size from the base's cells down to a granule's. */
+export const CONVECTION_OCTAVE_COUNT =
+  Math.ceil(Math.log2(CONVECTION_BASE_CELL * GRANULES_PER_RADIUS)) + 1;
+/** How deep a pressure scale height (in R) lies in cell octaves: 0 at the base's cell size, 1 a size smaller. */
+export const cellOctaveOf = (scaleHeight: number) =>
+  Math.log2(CONVECTION_BASE_CELL / (CELL_SCALE_HP * scaleHeight));
+const cellOctaveAt = (x: number) => cellOctaveOf(pressureScaleHeightAt(x) / RADIUS_M);
 /**
- * The cut face in white light is a diagram's heat, not true colour (every shell is bluer than
- * white): each shell's display colour as a blackbody temperature, K, and its light. The core
- * white-blue, the radiative zone a golden gradient from its inner to its outer edge, the
- * convection zone orange.
+ * Each octave: cells per radius, the radius where cells are that size, and their turnover, s.
+ * A cell's swell in `giantCells` runs about CELL_SWELL_PER_LIFE of its clock per life.
  */
-export const CORE_DISPLAY_K = 11_000;
-export const RADIATIVE_INNER_DISPLAY_K = 5_200;
-export const RADIATIVE_OUTER_DISPLAY_K = 3_800;
-export const CONVECTION_DISPLAY_K = 2_600;
-export const CORE_LIGHT = 1.1;
-export const RADIATIVE_INNER_LIGHT = 0.9;
-export const RADIATIVE_OUTER_LIGHT = 0.5;
-export const CONVECTION_LIGHT = 0.7;
+export const CELL_SWELL_PER_LIFE = 8;
+export const CONVECTION_OCTAVES = Array.from({ length: CONVECTION_OCTAVE_COUNT }, (_, k) => {
+  let lo = TACHOCLINE_R;
+  let hi = 1;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (cellOctaveAt(mid) < k) lo = mid;
+    else hi = mid;
+  }
+  const radius = (lo + hi) / 2;
+  return {
+    cellsPerRadius: 2 ** k / CONVECTION_BASE_CELL,
+    radius,
+    turnoverS: pressureScaleHeightAt(radius) / convectiveSpeedAt(radius),
+  };
+});
 /**
  * The faces' lighting, so the wedge has volume: a key light from the open side, yawed off the
  * wedge's bisector and raised, against an ambient floor; and an occlusion darkening into the
@@ -179,9 +232,9 @@ export const CONVECTION_LIGHT = 0.7;
  */
 export const KEY_YAW = 0.55;
 export const KEY_RISE = 0.35;
-export const KEY_AMBIENT = 0.42;
+export const KEY_AMBIENT = 0.55;
 export const APEX_REACH = 0.35;
-export const APEX_DEPTH = 0.55;
+export const APEX_DEPTH = 0.35;
 /** The tachocline's rim catches the key light this much more than the others. */
 export const RIM_KEY = 0.5;
 /** The hot shells' brightness through a band, against the surface's. */
@@ -449,34 +502,42 @@ export const SHADER_DEFINES = glslDefines({
   UMBRAL_DOTS,
   UMBRAL_DOT_CONTRAST,
   WHITE_FLARE_K,
-  MAP_FADE_FROM_PX,
-  MAP_FADE_TO_PX,
+  MAP_DETAIL_FROM_PX,
+  MAP_DETAIL_TO_PX,
   MAP_CENTRAL_MERIDIAN_RAD,
   SUN_MAP_QUIET_INTENSITY,
+  STENCIL_WIDTH: spotStencil.width,
+  STENCIL_HEIGHT: spotStencil.height,
+  STENCIL_TILE: spotStencil.tile,
+  STENCIL_GUTTER: spotStencil.gutter,
+  STENCIL_ATLAS_WIDTH: spotStencil.atlasWidth,
+  STENCIL_ATLAS_HEIGHT: spotStencil.atlasHeight,
+  STENCIL_PENUMBRA_RANGE: spotStencil.penumbraRange,
+  STENCIL_UMBRA_RANGE: spotStencil.umbraRange,
   RIBBON_GLARE,
   SURFACE_EXPOSURE,
   SURFACE_CONTRAST,
   ROTATION_SIN2,
   ROTATION_SIN4,
   INTERIOR_TURN_RATIO,
-  CORE_CELLS,
-  CORE_SHIMMER,
-  RADIATIVE_CELLS,
-  RADIATIVE_SHIMMER,
-  PLUME_COLUMNS,
-  PLUME_GRAIN,
-  PLUME_CONTRAST,
   PLUME_GRANULE_DEPTH,
+  FACE_TOP_DISPLAY_K,
+  FACE_TOP_LIGHT,
+  FACE_TOP_LN_T,
+  FACE_K_SLOPE,
+  FACE_LIGHT_SLOPE,
+  CORE_GLOW,
+  INTERIOR_GRAIN_CELLS,
+  INTERIOR_GRAIN,
+  TACHOCLINE_THICKNESS,
+  TACHOCLINE_STREAKS,
+  TACHOCLINE_LAMINAE,
+  TACHOCLINE_CONTRAST,
+  PLUME_STRETCH,
+  CONVECTION_CONTRAST,
+  CONVECTION_OCTAVE_COUNT: glslInt(CONVECTION_OCTAVE_COUNT),
   SHELL_RIM,
   SHELL_RIM_GOLD,
-  CORE_DISPLAY_K,
-  RADIATIVE_INNER_DISPLAY_K,
-  RADIATIVE_OUTER_DISPLAY_K,
-  CONVECTION_DISPLAY_K,
-  CORE_LIGHT,
-  RADIATIVE_INNER_LIGHT,
-  RADIATIVE_OUTER_LIGHT,
-  CONVECTION_LIGHT,
   KEY_YAW,
   KEY_RISE,
   KEY_AMBIENT,

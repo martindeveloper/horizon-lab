@@ -1,6 +1,6 @@
 /**
- * The places the finder lists, from the core out to the wind: picking one flies to its view,
- * sets its light and clock and opens its card. Each place's name and card copy live under
+ * The places the finder lists, from the core out to the wind: picking one switches to its view
+ * (the camera flies only when the view changes), sets its light and clock and opens its card. Each place's name and card copy live under
  * `places.<id>`; its figures come from the Sun's catalogue (`@/space/sun`).
  */
 import type { ClockRate } from "./clock";
@@ -62,7 +62,7 @@ export const PLACES: Readonly<Record<PlaceId, Place>> = {
   streamer: { id: "streamer", view: "corona" },
   ejection: { id: "ejection", view: "corona", eruption: 0.7, clock: "hour" },
   wind: { id: "wind", view: "corona", clock: "hour" },
-  parker: { id: "parker", view: "corona", light: "eclipse", clock: "hour" },
+  parker: { id: "parker", view: "orbit" },
 };
 
 /** The places in order, as the finder lists them. */

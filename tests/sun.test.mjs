@@ -131,7 +131,11 @@ test("every view's framing stands outside the Sun, the feature views orbiting th
   for (const id of VIEW_IDS) {
     const aim = viewAim(id, frame);
     assert.equal(aim !== null, viewOrbitsFeature(id), `${id} orbits what it should`);
-    if (aim) {
+    /* Parker's orbit is seen about its own centre, out past the corona, the pole up. */
+    if (id === "orbit") {
+      assert.ok(Math.hypot(...aim.point) > 10, "the orbit's centre stands off the Sun");
+      assert.deepEqual(aim.normal, [0, 1, 0]);
+    } else if (aim) {
       const r = Math.hypot(...aim.point);
       assert.ok(r >= 1 && r < 1.5, `${id} aims at or just over the surface`);
       const n = Math.hypot(...aim.normal);
@@ -261,6 +265,8 @@ test("every card, caption, hint and note renders its figures in both languages",
       for (const fact of card.facts) {
         clean(fact.label, `${locale}:${id}:${fact.id}`);
         clean(fact.value, `${locale}:${id}:${fact.id}`);
+        /* Every figure says what it is in: a unit, a word or a symbol, never a bare number. */
+        assert.match(fact.value, /\p{L}|[%×☉²]/u, `${locale}:${id}:${fact.id} has a unit`);
       }
       clean(t(`places.${id}.where`), `${locale}:${id}`);
     }
@@ -294,4 +300,19 @@ test("every card, caption, hint and note renders its figures in both languages",
     for (const key of Object.keys(messages.technicalDetails.features))
       clean(t(`technicalDetails.features.${key}`, args), `${locale}:${key}`);
   }
+});
+
+test("Parker plunges to 9.86 R☉ at its record perihelia and swings out past 150 R☉ between", async () => {
+  const { parkerAt, PARKER_APHELION_R } = await import("../src/space/sun/model/parker.ts");
+  const { PARKER_PERIHELION_R, PARKER_PERIOD_D } =
+    await import("../src/space/sun/model/parameters.ts");
+  const r = (iso) => Math.hypot(...parkerAt(Date.parse(iso)));
+  /* Horizons' perihelia of the record orbit, to a minute. */
+  for (const at of ["2024-12-24T11:53Z", "2025-03-22T22:42Z", "2025-06-19T09:08Z"])
+    assert.ok(Math.abs(r(at) - PARKER_PERIHELION_R) < 0.05, `${at}: ${r(at)} R☉`);
+  const half = Date.parse("2025-06-19T09:08Z") + (PARKER_PERIOD_D / 2) * 86_400_000;
+  assert.ok(Math.abs(Math.hypot(...parkerAt(half)) - PARKER_APHELION_R) < 1e-6);
+  assert.ok(PARKER_APHELION_R > 150 && PARKER_APHELION_R < 160, `${PARKER_APHELION_R} R☉`);
+  /* Two days after perihelion it is already more than twice as far out. */
+  assert.ok(r("2025-06-21T09:08Z") > 2 * PARKER_PERIHELION_R);
 });

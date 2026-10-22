@@ -1,14 +1,16 @@
 /**
- * The seven framings, each the pose that frames it (solar radii, radians). Four orbit the
- * Sun's centre: the whole disc, the cut open, the corona with the disc occulted, the pole
- * tipped for the cycle. Three orbit a feature (`viewAim`): a spot group from just above it,
- * a prominence at the limb, an active region seen obliquely; there the pose's distance is from
- * the feature, its inclination the elevation over the feature's horizon and its azimuth the
- * bearing round it, zero standing east. The views that look at a feature take their angles
+ * The framings, each the pose that frames it (solar radii, radians). Four orbit the Sun's
+ * centre: the whole disc, the cut open, the corona with the disc occulted, the pole tipped for
+ * the cycle. Four orbit a feature (`viewAim`): a spot group from just above it, a prominence at
+ * the limb, an active region seen obliquely, and Parker Solar Probe's orbit from above the
+ * pole; there the pose's distance is from the feature, its inclination the elevation over the
+ * feature's horizon and its azimuth the bearing round it, zero standing east. The views that look at a feature take their angles
  * from the frame; the rest keep the visitor's.
  */
 import { Matrix4, Quaternion, Vector3 } from "three";
 
+import { PARKER_ECCENTRICITY } from "@/space/sun/model/parameters";
+import { PARKER_SEMI_MAJOR_R } from "@/space/sun/model/parker";
 import {
   freeFromOrbit,
   orbitFromFree,
@@ -19,6 +21,7 @@ import {
 } from "@horizon/toolkit/camera";
 import type { Vec3 } from "@horizon/toolkit/math";
 
+import { CAMERA_MAX_R, FEATURE_MAX_R, FEATURE_MIN_R } from "../parameters";
 import { directionOf, type SunFrame } from "./frame";
 import { eruptionEnvelope, framedDistance, type SunViewport } from "./framing";
 import type { SunViewId } from "./settings";
@@ -32,6 +35,8 @@ export const VIEW_DISTANCE: Readonly<Record<SunViewId, number>> = {
   corona: 6,
   eruption: 0.9,
   cycle: 3,
+  /* The whole ellipse in a square frame: its semi-major axis on a 48° view. */
+  orbit: PARKER_SEMI_MAJOR_R / Math.sin((24 * Math.PI) / 180),
 };
 
 /** The views that orbit a feature rather than the centre. */
@@ -43,11 +48,14 @@ const ORBITS_FEATURE: Readonly<Record<SunViewId, boolean>> = {
   corona: false,
   eruption: true,
   cycle: false,
+  orbit: true,
 };
 export const viewOrbitsFeature = (id: SunViewId) => ORBITS_FEATURE[id];
 
 /** Elevation over the feature's horizon each feature view opens at, radians. */
 const SUNSPOT_ELEVATION = 1.35;
+/** Over Parker's orbit: nearly down the pole, tipped enough to read the plane. */
+const ORBIT_ELEVATION = 1.3;
 const LIMB_ELEVATION = 0.06;
 const ERUPTION_ELEVATION = 0.35;
 
@@ -74,7 +82,14 @@ export function surfaceAim(lat: number, lon: number, frame: SunFrame): ViewAim {
 }
 
 /** Where a feature view orbits this frame; null for the views about the centre or with nothing to show. */
+/** Parker's orbit seen whole: its centre, the semi-major axis back from the focus, the pole up. */
+const ORBIT_AIM: ViewAim = {
+  point: [-PARKER_SEMI_MAJOR_R * PARKER_ECCENTRICITY, 0, 0],
+  normal: [0, 1, 0],
+};
+
 export function viewAim(id: SunViewId, frame: SunFrame): ViewAim | null {
+  if (id === "orbit") return ORBIT_AIM;
   if (id === "chromosphere") {
     const prominence = featuredProminence(frame);
     if (!prominence) return null;
@@ -167,6 +182,7 @@ const TURNS: Readonly<Record<SunViewId, boolean>> = {
   corona: false,
   eruption: true,
   cycle: true,
+  orbit: true,
 };
 
 export const viewTurns = (id: SunViewId) => TURNS[id];
@@ -222,9 +238,22 @@ export function viewPose(
     }
     case "cycle":
       return { distance, azimuth: angles.azimuth, inclination: 0.5 };
+    case "orbit":
+      /* The long axis across the view, the plunge to the right. */
+      return { distance, azimuth: 0, inclination: ORBIT_ELEVATION };
     default:
       return { distance, azimuth: angles.azimuth, inclination: angles.inclination };
   }
+}
+
+/**
+ * How near and far the camera may zoom about a feature view's aim, radii: close over the
+ * surface features, out over the eruption's ejecta, and round Parker's orbit from a third of
+ * the way in to well past where it is framed whole.
+ */
+export function featureLimits(id: SunViewId) {
+  if (id === "orbit") return { min: PARKER_SEMI_MAJOR_R / 3, max: VIEW_DISTANCE.orbit * 2 };
+  return { min: FEATURE_MIN_R, max: id === "eruption" ? CAMERA_MAX_R * 3 : FEATURE_MAX_R };
 }
 
 /** What the preset promises to show; a visitor may zoom closer after it arrives. */
@@ -235,6 +264,7 @@ export function viewSubjectRadius(id: SunViewId, frame: SunFrame): number {
     const p = featuredProminence(frame);
     return p ? Math.hypot(p.length * 0.52, p.height * (1 + p.lift) * 0.55) : 0.1;
   }
+  if (id === "orbit") return PARKER_SEMI_MAJOR_R;
   return id === "corona" ? 1.7 : 1.05;
 }
 

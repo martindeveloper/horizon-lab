@@ -17,6 +17,7 @@ import type { DisposalScope } from "@horizon/toolkit/rendering";
 import {
   ACTIVE_K,
   CHROMOSPHERE_K,
+  cellOctaveOf,
   CORONA_K,
   FLARE_K,
   INTERIOR_SAMPLES,
@@ -47,20 +48,35 @@ function floatTable(data: Float32Array, width: number) {
   return texture;
 }
 
-/** An interior profile by radius: temperature and density at `r` (0 the centre, 1 the photosphere). */
-export type InteriorProfile = (r: number) => { kelvin: number; density: number };
+/**
+ * An interior profile by radius (0 the centre, 1 the photosphere): temperature, density, the
+ * pressure scale height in radii and the share of the luminosity made per radius (dL/dr).
+ */
+export type InteriorProfile = (r: number) => {
+  kelvin: number;
+  density: number;
+  scaleHeight: number;
+  generation: number;
+};
 
 export function createLightTables(scope: DisposalScope, interior: InteriorProfile) {
   const spectrum = scope.own(floatTable(continuumTable(), SPECTRUM_SAMPLES));
   const profile = scope.own(
     floatTable(atmosphereProfile(PHOTOSPHERE_K, SOLAR_LOG_G), PROFILE_SAMPLES),
   );
+  /* By radius: ln T, ln ρ, the convection cells' octave (0 at the base's size) and the light
+     made there over its peak. */
   const interiorData = new Float32Array(INTERIOR_SAMPLES * 4);
+  let peak = 0;
   for (let i = 0; i < INTERIOR_SAMPLES; i++) {
-    const { kelvin, density } = interior(i / (INTERIOR_SAMPLES - 1));
+    const { kelvin, density, scaleHeight, generation } = interior(i / (INTERIOR_SAMPLES - 1));
     interiorData[i * 4] = Math.log(Math.max(kelvin, 1));
     interiorData[i * 4 + 1] = Math.log(Math.max(density, 1e-30));
+    interiorData[i * 4 + 2] = scaleHeight > 0 ? Math.max(0, cellOctaveOf(scaleHeight)) : 0;
+    interiorData[i * 4 + 3] = generation;
+    peak = Math.max(peak, generation);
   }
+  for (let i = 0; i < INTERIOR_SAMPLES; i++) interiorData[i * 4 + 3]! /= peak || 1;
   const interiorTable = scope.own(floatTable(interiorData, INTERIOR_SAMPLES));
   const responseData = new Float32Array(RESPONSE_SAMPLES * RESPONSE_LAYERS.length * 4);
   const responseTable = scope.own(

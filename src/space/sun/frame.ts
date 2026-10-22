@@ -28,11 +28,12 @@ import {
   CHROMOSPHERE_THICKNESS_KM,
   EQUATORIAL_DIPOLE,
   ERUPTION_LINES,
+  MAP_EPOCH,
   MAX_FIELD_LINES,
-  PARKER_PERIHELION_R,
   RADIUS_M,
   SOURCE_SURFACE_R,
 } from "./model/parameters";
+import { parkerAt } from "./model/parker";
 import { surfaceRate } from "./model/rotation";
 import { LAYERS } from "./model/structure";
 
@@ -227,8 +228,12 @@ export const PLACE_IDS = [
 ] as const;
 export type PlaceId = (typeof PLACE_IDS)[number];
 
-/** Interior anchors lie on the +z meridian (lon = π/2 in the body frame), where the cut's face stands when it faces the camera. */
-const CUT_LAT = 0.35;
+/**
+ * Interior anchors lie on the +z meridian (lon = π/2 in the body frame), where the cut opens when
+ * it faces the camera; a renderer turns each onto a face of the cut. Their latitude sets the
+ * layers' names apart up the face, enough that neighbours clear each other on a phone.
+ */
+const CUT_LAT = 0.6;
 const CUT_LON = Math.PI / 2;
 /** The quiet-surface anchors sit just off the disc's centre. */
 const SURFACE_LAT = 0.12;
@@ -239,6 +244,10 @@ const CHROMOSPHERE_TOP_R = 1 + (CHROMOSPHERE_THICKNESS_KM * 1e3) / RADIUS_M;
 const SPICULE_TOP_R = 1 + (5 * CHROMOSPHERE_THICKNESS_KM * 1e3) / RADIUS_M;
 const CORONA_ANCHOR_R = 1.6;
 
+/** Parker Solar Probe at a frame's moment (its model seconds past `MAP_EPOCH`): world axes, solar radii. */
+export const parkerOf = (frame: SunFrame, out: Vec3): Vec3 =>
+  parkerAt(MAP_EPOCH + frame.time * 1000, out);
+const parkerWorld: Vec3 = [0, 0, 0];
 const at = (lat: number, lon: number, radius: number): Vec3 => {
   const p = surfacePoint(lat, lon);
   return [p[0] * radius, p[1] * radius, p[2] * radius];
@@ -279,9 +288,13 @@ export function placeAnchor(frame: SunFrame, place: PlaceId): Vec3 | null {
     /* The star as a whole has no one point to name. */
     case "star":
       return null;
-    /* The probe's perihelion stands still in the world (+x) as the body turns under it. */
-    case "parker":
-      return at(0, -frame.surfaceTurn, PARKER_PERIHELION_R);
+    /* The probe on its orbit at the model's moment, in the world; the body turns under it. */
+    case "parker": {
+      const [x, y, z] = parkerOf(frame, parkerWorld);
+      const c = Math.cos(frame.surfaceTurn);
+      const s = Math.sin(frame.surfaceTurn);
+      return [x * c - z * s, y, x * s + z * c];
+    }
     case "core":
       return at(CUT_LAT, CUT_LON, LAYERS.core / 2);
     case "radiativeZone":

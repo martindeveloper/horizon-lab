@@ -157,6 +157,31 @@ export function gravityAt(x: number) {
   return (GRAVITATIONAL_CONSTANT * massAt(x)) / (r * r);
 }
 
+/** The pressure scale height at radius `x`, m: P / (ρ g), the depth over which pressure falls by e. */
+export function pressureScaleHeightAt(x: number) {
+  const point = structureAt(x);
+  return point.P / (point.rho * gravityAt(x));
+}
+
+/**
+ * The convective speed at radius `x`, m/s, from the flux it carries: F ≈ ρ v³ (mixing-length
+ * theory's order of magnitude), with F the model's luminosity through the shell. Meaningful
+ * only in the convection zone, where convection carries nearly all of it.
+ */
+export function convectiveSpeedAt(x: number) {
+  const point = structureAt(x);
+  const r = x * RADIUS_M;
+  const flux = (point.L * DATA.model.luminosityW) / (4 * Math.PI * r * r);
+  return Math.cbrt(flux / point.rho);
+}
+
+/** The share of the luminosity made per unit radius at `x` (dL/dx, in L per R), by central difference. */
+export function generationAt(x: number, step = 1 / (ROWS.length - 1)) {
+  const lo = Math.max(0, x - step);
+  const hi = Math.min(1, x + step);
+  return (structureAt(hi).L - structureAt(lo).L) / (hi - lo);
+}
+
 /** Hydrostatic equilibrium: the pressure gradient a layer of density `rho` in gravity `g` needs, Pa/m. */
 export const hydrostaticGradient = (rho: number, g: number) => -rho * g;
 

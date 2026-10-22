@@ -10,6 +10,7 @@ import {
   Chip,
   Dock,
   IconButton,
+  LabelledRow,
   ListItem,
   Picker,
   Slider,
@@ -24,6 +25,7 @@ import { cycleStageAt, eruptionStageAt } from "../lib/model/stages";
 import { VIEW_ACTION, type ViewAction } from "../lib/model/views";
 import { CUT_HALF_ANGLE } from "../lib/parameters";
 import { useSun } from "../lib/store";
+import { ROW_CLASS, ROWS_CLASS, RowLabel } from "./dock-rows";
 import { elapsedLabel, lightLegend, useDistance } from "./format";
 import { PlaceStrip } from "./place-strip";
 
@@ -48,7 +50,7 @@ const stopAt = (share: number) => `calc(${THUMB_PX / 2}px + ${share} * (100% - $
  * temperatures, the eclipse and the magnetogram, stand at its end as switches; while one is on
  * the ruler rests, dimmed, where it last stood.
  */
-function LightRuler() {
+function LightRuler({ className }: { className?: string }) {
   const t = useTranslations("sun");
   const light = useSun((s) => s.light);
   const api = useSun.getState;
@@ -56,60 +58,67 @@ function LightRuler() {
   const [rested, setRested] = useState(Math.max(0, onScale));
   const shown = onScale >= 0 ? onScale : rested;
   return (
-    <div data-coach="light" className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <div className={cn("relative min-w-0 flex-1 basis-56 pb-3", onScale < 0 && "opacity-40")}>
-        {/* A stop and its name at each line, under the thumb; the names only where there is room. */}
-        {LIGHT_SCALE.map((id, index) => (
-          <span
-            key={id}
-            aria-hidden
-            style={{ left: stopAt(index / LAST_STOP) }}
-            className="pointer-events-none absolute top-4 flex -translate-x-1/2 flex-col items-center"
-          >
-            <span className="block h-2 w-px -translate-y-1 bg-fg/35" />
+    <LabelledRow
+      data-coach="light"
+      label={t("hud.light")}
+      shown={<RowLabel>{t("hud.light")}</RowLabel>}
+      className={className}
+    >
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2">
+        <div className={cn("relative min-w-0 flex-1 basis-56 pb-3", onScale < 0 && "opacity-40")}>
+          {/* A stop and its name at each line, under the thumb; the names only where there is room. */}
+          {LIGHT_SCALE.map((id, index) => (
             <span
-              className={cn(
-                "mt-1 font-mono text-[10px] leading-none tabular-nums not-md:hidden",
-                index === shown && onScale >= 0 ? "text-fg" : "text-subtle",
-              )}
+              key={id}
+              aria-hidden
+              style={{ left: stopAt(index / LAST_STOP) }}
+              className="pointer-events-none absolute top-4 flex -translate-x-1/2 flex-col items-center"
             >
-              {t(`lightShort.${id}`)}
+              <span className="block h-2 w-px -translate-y-1 bg-fg/35" />
+              <span
+                className={cn(
+                  "mt-1 font-mono text-[10px] leading-none tabular-nums not-md:hidden",
+                  index === shown && onScale >= 0 ? "text-fg" : "text-subtle",
+                )}
+              >
+                {t(`lightShort.${id}`)}
+              </span>
             </span>
-          </span>
-        ))}
-        <Slider
-          aria-label={t("hud.light")}
-          trackClassName="sun-light-scale h-0.5"
-          rangeClassName="bg-transparent"
-          min={0}
-          max={LAST_STOP}
-          step={1}
-          value={[shown]}
-          valueText={(index) => t(`lights.${LIGHT_SCALE[index] ?? light}`)}
-          onValueChange={([index]) => api().setLight(LIGHT_SCALE[index ?? 0] ?? "white")}
-        />
+          ))}
+          <Slider
+            aria-label={t("hud.light")}
+            trackClassName="sun-light-scale h-0.5"
+            rangeClassName="bg-transparent"
+            min={0}
+            max={LAST_STOP}
+            step={1}
+            value={[shown]}
+            valueText={(index) => t(`lights.${LIGHT_SCALE[index] ?? light}`)}
+            onValueChange={([index]) => api().setLight(LIGHT_SCALE[index ?? 0] ?? "white")}
+          />
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {LIGHT_MODES.map((id) => (
+            <Chip
+              key={id}
+              selected={light === id}
+              aria-pressed={light === id}
+              className="not-md:h-9"
+              onClick={() => {
+                if (light === id) {
+                  api().setLight(LIGHT_SCALE[rested] ?? "white");
+                  return;
+                }
+                if (onScale >= 0) setRested(onScale);
+                api().setLight(id);
+              }}
+            >
+              {t(`lights.${id}`)}
+            </Chip>
+          ))}
+        </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1">
-        {LIGHT_MODES.map((id) => (
-          <Chip
-            key={id}
-            selected={light === id}
-            aria-pressed={light === id}
-            className="not-md:h-9"
-            onClick={() => {
-              if (light === id) {
-                api().setLight(LIGHT_SCALE[rested] ?? "white");
-                return;
-              }
-              if (onScale >= 0) setRested(onScale);
-              api().setLight(id);
-            }}
-          >
-            {t(`lights.${id}`)}
-          </Chip>
-        ))}
-      </div>
-    </div>
+    </LabelledRow>
   );
 }
 
@@ -270,8 +279,10 @@ export function SunDock() {
       footerClassName={cn(aside && "not-md:hidden")}
       className="anim-rise flex flex-col gap-2"
     >
-      <PlaceStrip />
-      <LightRuler />
+      <div className={ROWS_CLASS}>
+        <PlaceStrip className={ROW_CLASS} />
+        <LightRuler className={ROW_CLASS} />
+      </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <LightLegend />
         <Clock />

@@ -1,5 +1,5 @@
 /**
- * The seven views, each a URL: where the camera stands, and the light and clock it opens
+ * The views, each a URL: where the camera stands, and the light and clock it opens
  * with. The framings themselves are the scene's (`lib/scene/views.ts`).
  */
 import type { ClockRate } from "./clock";
@@ -13,6 +13,7 @@ export const VIEW_IDS = [
   "corona",
   "eruption",
   "cycle",
+  "orbit",
 ] as const;
 
 export type ViewId = (typeof VIEW_IDS)[number];
@@ -30,6 +31,8 @@ export const VIEW_DEFAULTS: Readonly<Record<ViewId, ViewDefaults>> = {
   corona: { light: "eclipse", clock: "minute" },
   eruption: { light: "fe171", clock: "minute" },
   cycle: { light: "magnetogram", clock: "year" },
+  /* An 88-day orbit at a day a second: a lap in a minute and a half. */
+  orbit: { light: "white", clock: "day" },
 };
 
 /** The views whose dock carries an action of their own: the cut, the eruption, the cycle. */

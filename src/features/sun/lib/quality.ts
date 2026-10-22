@@ -16,8 +16,6 @@ export type SunQuality = {
   resolution: SceneResolution;
   /** Granules, penumbral filaments, umbral dots and spicule threads at their own scale. */
   fineSurface: boolean;
-  /** Noise octaves of the convection zone's plumes on the cut face. */
-  cutPlumes: number;
   /** Ray-march steps through a prominence's bound. */
   prominenceSteps: number;
   /** Field lines drawn at most. */
@@ -44,7 +42,6 @@ const SKY_MAX: SkyCounts = { milkyWay: 45_000, fieldStars: 2_400 };
 
 const ECONOMY: Budget = {
   fineSurface: false,
-  cutPlumes: 2,
   prominenceSteps: 20,
   fieldLines: 24,
   ribbonSegments: 24,
@@ -54,7 +51,6 @@ const ECONOMY: Budget = {
 };
 const STANDARD: Budget = {
   fineSurface: true,
-  cutPlumes: 4,
   prominenceSteps: 40,
   fieldLines: 64,
   ribbonSegments: 48,
@@ -66,7 +62,6 @@ const STANDARD: Budget = {
 const STANDARD_TIGHT: Budget = { ...STANDARD, prominenceSteps: 28, coronaSamples: 16 };
 const CINEMA: Budget = {
   fineSurface: true,
-  cutPlumes: 6,
   prominenceSteps: 48,
   fieldLines: 128,
   ribbonSegments: 64,
@@ -76,7 +71,6 @@ const CINEMA: Budget = {
 };
 const MAX: Budget = {
   fineSurface: true,
-  cutPlumes: 8,
   prominenceSteps: SUN_ACTIVITY_MAX_STEPS,
   fieldLines: 256,
   ribbonSegments: 96,

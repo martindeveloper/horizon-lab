@@ -40,6 +40,14 @@ export const MAP_EPOCH = Date.UTC(2024, 4, 11, 12);
 /** Parker Solar Probe at its closest, 24 December 2024: radii from the centre, and its speed then, km/s (NASA). */
 export const PARKER_PERIHELION_R = 9.86;
 export const PARKER_PERIHELION_SPEED_KM_S = 191;
+/**
+ * Its record orbit since then (JPL Horizons osculating elements, 1 June 2025): the eccentricity,
+ * the period in days and a perihelion's moment (19 June 2025, 09:08 UTC). The perihelion
+ * distance is `PARKER_PERIHELION_R` (Horizons: 6.862 million km, 9.86 R☉).
+ */
+export const PARKER_ECCENTRICITY = 0.8819;
+export const PARKER_PERIOD_D = 88.44;
+export const PARKER_PERIHELION_EPOCH = Date.UTC(2025, 5, 19, 9, 8);
 export const MAP_WINDOW_D = 21;
 /** The Carrington rotation as seen from Earth, days (Carrington 1863; the synodic period). */
 export const CARRINGTON_SYNODIC_PERIOD_D = 27.2753;

@@ -32,7 +32,9 @@ function cameraFor(id, frame, viewport) {
   const aim = viewAim(id, frame);
   const local = freeFromOrbit(pose);
   const free = aim ? freeInWorld(local, aim.point, featureOrbitFrame(aim.normal)) : local;
-  const camera = new PerspectiveCamera(viewport.fov, viewport.width / viewport.height, 0.001, 100);
+  /* The far plane reaches past the subject, as the engine's does (Parker's orbit is far out). */
+  const far = Math.max(100, 2 * pose.distance);
+  const camera = new PerspectiveCamera(viewport.fov, viewport.width / viewport.height, 0.001, far);
   camera.setViewOffset(
     viewport.width,
     viewport.height,
@@ -65,6 +67,7 @@ test("presets keep their subjects inside portrait, desktop and landscape-phone f
       "sunspot",
       "chromosphere",
       "eruption",
+      "orbit",
     ]) {
       const { camera, aim } = cameraFor(id, frame, viewport);
       const centre = new Vector3(...(aim?.point ?? [0, 0, 0]));

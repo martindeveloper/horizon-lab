@@ -1,7 +1,10 @@
 import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
+import { MAP_EPOCH } from "@/space/sun/frame";
 import { prominenceDensity } from "@/space/sun/graphics/prominence/volume";
+import { nextParkerPerihelion } from "@/space/sun/model/parker";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
@@ -10,6 +13,7 @@ import lowDroneRisesMap from "../../../bench/fixtures/audio-maps/low-drone-rises
 import { DRIFT } from "./lib/drift";
 import type { ClockRate } from "./lib/model/clock";
 import type { LightId } from "./lib/model/lights";
+import type { PlaceId } from "./lib/model/places";
 import type { ViewId } from "./lib/model/views";
 import { createSunScene } from "./lib/scene/bridge";
 import { useSun } from "./lib/store";
@@ -29,6 +33,11 @@ type SunBenchScene = BenchScene & {
   clock?: ClockRate;
   /** Bloom on; off by default, as in the lab. */
   bloom?: boolean;
+  /** A place gone to as the finder goes (its view, light and clock), and its close-up entered. */
+  place?: PlaceId;
+  closeUp?: boolean;
+  /** Model seconds past the map's epoch at the first frame; a month by default. */
+  start?: number;
 };
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
@@ -41,6 +50,8 @@ const FRAME_S = 0.1;
 /** The Sun every scene shows: one seed, lived a month before the first frame so spots and a prominence stand. */
 const SEED = 7;
 const START_S = 30 * 86_400;
+/** Parker's first perihelion after the map's epoch, model seconds: its plunge in view. */
+const PARKER_PERIHELION_S = (nextParkerPerihelion(MAP_EPOCH) - MAP_EPOCH) / 1000;
 
 const still = (
   view: ViewId,
@@ -95,6 +106,7 @@ const SCENES: readonly SunBenchScene[] = [
     "magnetogram",
     "The magnetogram with the pole tipped: the regions' bipoles and the dipole",
   ),
+  still("orbit", "white", "Parker Solar Probe's orbit from above the pole, the probe on it"),
   {
     ...still(
       "surface",
@@ -119,6 +131,18 @@ const SCENES: readonly SunBenchScene[] = [
     tags: ["sequence", "rotation"],
     clock: "day",
     script: { frames: 10, duration: 1, keyframes: Array.from({ length: 9 }, (_, i) => i / 8) },
+  },
+  {
+    ...still(
+      "inside",
+      "white",
+      "Three model days in the open cut: the convection cells turn over, the tachocline's laminae slide",
+      { cut: 1 },
+    ),
+    id: "inside-day",
+    tags: ["sequence", "rotation"],
+    clock: "day",
+    script: { frames: 30, duration: 3, keyframes: [0, 0.5, 1] },
   },
   {
     ...still("surface", "white", "The whole disc at economy quality"),
@@ -150,6 +174,26 @@ const SCENES: readonly SunBenchScene[] = [
       keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
     },
   },
+  {
+    id: "parker-close-up",
+    description:
+      "Parker Solar Probe's place, then its close-up: the dive to the probe at its true size, a zoom out and back in",
+    tags: ["sequence", "camera"],
+    view: "corona",
+    light: "eclipse",
+    place: "parker",
+    closeUp: true,
+    start: PARKER_PERIHELION_S,
+    script: {
+      frames: 600,
+      duration: 10,
+      input: [
+        { kind: "wheel", at: 0.7, deltaY: 400 },
+        { kind: "wheel", at: 0.82, deltaY: -800 },
+      ],
+      keyframes: [0, 0.3, 0.68, 0.8, 1],
+    },
+  },
 ];
 
 /**
@@ -165,6 +209,8 @@ export const benchTarget: BenchTarget = {
     if (!scene) throw new Error(`Unknown sun scene: ${sceneId}`);
     /* The prominence volume is baked before the first frame, so every still shows it. */
     await Promise.all([prominenceDensity(false), prominenceDensity(true)]);
+    /* A bench sequence draws its frames in one go: Parker's model is fetched first. */
+    if (scene.closeUp) await fetchSpacecraft("parker");
     const store = useSun;
     /* The store outlives a mounted engine: leave an earlier scene's guide, card and drift. */
     store.getState().endGuide();
@@ -172,6 +218,8 @@ export const benchTarget: BenchTarget = {
     store.getState().select(null);
     store.getState().resetView();
     store.getState().setView(scene.view);
+    /* A place's own light and clock first; the scene's settings have the last word. */
+    if (scene.place) store.getState().goTo(scene.place);
     store.setState({
       light: scene.light,
       ...(scene.clock ? { clock: scene.clock } : {}),
@@ -189,9 +237,10 @@ export const benchTarget: BenchTarget = {
     }
     const instance = mountSceneEngine(
       surface,
-      (mount) => createSunScene(mount, { seed: SEED, start: START_S }),
+      (mount) => createSunScene(mount, { seed: SEED, start: scene.start ?? START_S }),
       () => store.setState({}),
     );
+    if (scene.closeUp) store.getState().enterCloseUp();
     /* The engine steps at most a tenth of a second a frame: live up to the scene's moment. */
     const lived = Math.round((scene.at ?? 0) / FRAME_S);
     for (let index = 0; index < lived; index++)

@@ -9,6 +9,8 @@ import { Group, Mesh, MeshBasicMaterial, Quaternion, Scene, SphereGeometry, Vect
 
 import { orbitCamera } from "@/lib/scene-bridge";
 import type { SceneCamera } from "@/lib/scene-store";
+import { sunwardCloseUpPose } from "@/space/close-up-flight";
+import { PARKER_APHELION_R } from "@/space/sun/model/parker";
 import { CARRINGTON_SIDEREAL_RATE } from "@/space/sun/model/rotation";
 import {
   nearestView,
@@ -21,7 +23,7 @@ import {
   type OrbitPose,
 } from "@horizon/toolkit/camera";
 import { REDUCED_MOTION_QUERY } from "@horizon/toolkit/environment";
-import { wrapSigned, type Vec3 } from "@horizon/toolkit/math";
+import { lerp, smootherstep, wrapSigned, type Vec3 } from "@horizon/toolkit/math";
 import {
   setDrawingBufferGamut,
   withScope,
@@ -55,8 +57,8 @@ import {
   COROTATE_ABOVE_RATE,
   CUT_HALF_ANGLE,
   CUT_LAG_S,
+  CUT_TRAVEL_S,
   FEATURE_ELEVATION_MIN,
-  FEATURE_MAX_R,
   FEATURE_MIN_R,
   DISSOLVE_S,
   DRAG_FULL_HEIGHT,
@@ -81,6 +83,7 @@ import { PLACE_IDS, directionOf, type PassbandId, type PlaceId, type SunFrame } 
 import { frameInsets } from "./framing";
 import { GLOBE_PICK, createGlobeLayer } from "./globe-layer";
 import { createSunLooks } from "./looks";
+import { createParkerLayer } from "./parker-layer";
 import { createProminenceLayer } from "./prominence-layer";
 import { SUN_VIEW_IDS, type SunLight, type SunSceneSettings, type SunViewId } from "./settings";
 import { createSkyLayer } from "./sky-layer";
@@ -92,6 +95,7 @@ import {
   viewAim,
   viewPose,
   viewReach,
+  featureLimits,
   viewTurns,
   type ViewAim,
 } from "./views";
@@ -147,6 +151,8 @@ export type SunEngineHooks = {
   onReadout?: (readouts: SunReadouts) => void;
   /** The first frame is up. */
   onReady?: () => void;
+  /** Map detail the view would show is still loading, or no longer. */
+  onSharpening?: (sharpening: boolean) => void;
   /** The visitor took the camera (a drag, a wheel, a pinch). */
   onInput?: () => void;
   /** A drift: its shots (read as it begins, so they may be timed to the music), settings and the state it runs in. */
@@ -258,6 +264,11 @@ export function createSunEngine(
 
     /* ------------------------------------------------------------ layers */
     const looks = createSunLooks();
+    /* Parker Solar Probe on its orbit, and at its true size after the scene. */
+    const parker = createParkerLayer(basics, scene, {
+      gamut: looks.uniforms.uGamut.value,
+      invalidate: () => loop.invalidate(),
+    });
     const tables = createLightTables(scope, hooks.interior);
     const globe = createGlobeLayer(scope, scene, looks, tables);
     const field = createFieldLayer(scope, body, looks, tables);
@@ -270,9 +281,14 @@ export function createSunEngine(
     const sky = createSkyLayer(scope, scene, basics.dpr, quality.sky, () => loop.invalidate());
     const sunMap = createSunMap(scope, {
       tier: () => quality.mapTier,
-      onLoad: (texture, width) => {
+      onLoad: (texture) => {
         renderer.initTexture(texture);
-        globe.setMap(texture, width);
+        globe.setMap(texture);
+      },
+      onStencil: (atlas, pages) => {
+        renderer.initTexture(atlas);
+        renderer.initTexture(pages);
+        globe.setStencil(atlas, pages);
       },
       wake: () => loop.invalidate(),
     });
@@ -313,8 +329,8 @@ export function createSunEngine(
     /** The orbit's centre and its turn, as the rig reads them. */
     const orbitOrigin = new Vector3();
     const orbitFrame = new Quaternion();
-    /** What the orbit is about: a feature view's feature, the drift's turning frame, or the Sun's centre (null). */
-    let framed: SunViewId | "drift" | null = null;
+    /** What the orbit is about: a feature view's feature, Parker in its close-up, the drift's turning frame, or the Sun's centre (null). */
+    let framed: SunViewId | "parker" | "drift" | null = null;
     /** The Sun's turn as the drift began. */
     let driftTurn = 0;
     const aboutFeature = () => framed !== null && framed !== "drift";
@@ -358,17 +374,17 @@ export function createSunEngine(
     const rig = createOrbitRig(camera, {
       pose: viewPose(current.view, frame(), { azimuth: 0, inclination: 0.1 }, fitViewport()),
       limits: () =>
-        aboutFeature()
-          ? {
-              min: FEATURE_MIN_R,
-              max: current.view === "eruption" ? CAMERA_MAX_R * 3 : FEATURE_MAX_R,
-            }
-          : { min: CAMERA_MIN_R, max: CAMERA_MAX_R },
+        framed === "parker"
+          ? parker.limits
+          : aboutFeature()
+            ? featureLimits(current.view)
+            : { min: CAMERA_MIN_R, max: CAMERA_MAX_R },
       home: (aim) => aim.copy(orbitOrigin),
       orient: (_distance, orbit) => orbit.copy(orbitFrame),
       reduceMotion,
       nearFloor: 0.002,
-      far: () => CAMERA_MAX_R * 4,
+      /* Past anything the camera can see: across Parker's orbit, from wherever it stands. */
+      far: (distance) => Math.max(CAMERA_MAX_R * 4, distance + 2 * PARKER_APHELION_R),
     });
     const step = new Quaternion();
     /** Turns the camera by its attitude once the rig has it facing its aim (as `freeFromOrbit` does). */
@@ -401,11 +417,13 @@ export function createSunEngine(
      */
     let pointerAim: { lat: number; lon: number } | null = null;
     const aimOf = (f: SunFrame) =>
-      viewAim(view, f) ?? (pointerAim ? surfaceAim(pointerAim.lat, pointerAim.lon, f) : null);
+      (current.closeUp ? parker.aim(f) : null) ??
+      viewAim(view, f) ??
+      (pointerAim ? surfaceAim(pointerAim.lat, pointerAim.lon, f) : null);
     const reframe = (f: SunFrame, dt?: number) => {
       const playing = hooks.drift?.state() === "playing";
       const target = playing ? null : aimOf(f);
-      const wanted = playing ? "drift" : target ? view : null;
+      const wanted = playing ? "drift" : target ? (current.closeUp ? "parker" : view) : null;
       if (wanted === framed) {
         orbitFor(f, target, dt);
         return;
@@ -633,6 +651,11 @@ export function createSunEngine(
     let light = current.light;
     let view = current.view;
     let level = current.quality;
+    let closeUp = false;
+    const halfTan = () => {
+      const tall = Math.tan((camera.fov * Math.PI) / 360);
+      return Math.min(tall, tall * camera.aspect);
+    };
     const applySettings = (s: SunSceneSettings) => {
       current = s;
       if (s.quality !== level) {
@@ -661,6 +684,17 @@ export function createSunEngine(
       if (s.light !== light) {
         light = s.light;
         relightPending = true;
+      }
+      if (s.closeUp !== closeUp) {
+        /* Into Parker's orbit where the camera stands, then the dive; out, back to the view. */
+        closeUp = s.closeUp;
+        autoFramed = !closeUp;
+        pointerAim = null;
+        reframe(frame());
+        if (closeUp) {
+          const pose = sunwardCloseUpPose(parker.frame, halfTan());
+          rig.flyTo(pose.distance, pose);
+        } else if (s.view === view) views.flyToView(view);
       }
       if (s.view !== view) {
         view = s.view;
@@ -711,15 +745,25 @@ export function createSunEngine(
       cut.y += gap * k;
       facing = Math.abs(gap) > 1e-3 && cutShown > 0;
     };
-    /** The wedge as drawn: it eases open and closed toward the setting; true while it moves. */
+    /**
+     * The wedge as drawn: a timed ease from where it stood to the setting, so it lands rather
+     * than crawls the last degrees; a new setting starts over from where it is. True while it moves.
+     */
     let cutShown = current.cut;
+    let cutFrom = cutShown;
+    let cutTo = cutShown;
+    let cutT = 1;
     let cutting = false;
     const openCut = (dt: number) => {
-      const gap = current.cut - cutShown;
-      const k = reduceMotion.matches ? 1 : 1 - Math.exp(-dt / CUT_LAG_S);
-      cutShown += gap * k;
-      cutting = Math.abs(gap) > 1e-3;
-      if (!cutting) cutShown = current.cut;
+      if (current.cut !== cutTo) {
+        cutFrom = cutShown;
+        cutTo = current.cut;
+        cutT = 0;
+      }
+      const span = Math.abs(cutTo - cutFrom) * CUT_TRAVEL_S;
+      cutT = reduceMotion.matches || span <= 0 ? 1 : Math.min(1, cutT + dt / span);
+      cutShown = lerp(cutFrom, cutTo, smootherstep(cutT));
+      cutting = cutT < 1;
       cut.x = cutShown * CUT_HALF_ANGLE;
     };
     /** The camera rides with the Carrington frame; a flight or the drift, which hold the camera, do not, and a feature orbit turns with its feature already. */
@@ -791,6 +835,7 @@ export function createSunEngine(
       placeCamera();
       faceCamera(dt);
       openCut(dt);
+      parker.update(dt, f, camera, { orbit: view === "orbit" && !closeUp, closeUp });
 
       /* A buffer pixel's world size per unit distance, and the ribbons' half-width in CSS px. */
       const cssPixel = worldPerPixel(camera.fov, 1, viewport.height);
@@ -800,6 +845,15 @@ export function createSunEngine(
       body.rotation.y = f.surfaceTurn;
       body.updateMatrixWorld();
       sunMap.update();
+      /* The photosphere is the unit sphere: its nearest point is a radius in from the camera.
+         Parker's model on its way counts as detail too. */
+      const sharpening =
+        sunMap.sharpening(looks.uniforms.uPixelWorld.value * (camera.position.length() - 1)) ||
+        parker.waiting;
+      if (sharpening !== lastSharpening) {
+        lastSharpening = sharpening;
+        hooks.onSharpening?.(sharpening);
+      }
       globe.step(dt);
       globe.update(current, camera);
       field.update(f, current.fieldLines);
@@ -818,6 +872,7 @@ export function createSunEngine(
       const worldPx = worldPerPixel(camera.fov, 1, viewport.height);
       const featured = featuredRegion(f);
       const limbPx = Math.asin(Math.min(1, 1 / distance)) / (worldPx / distance);
+      let layersNamed = 0;
       for (const id of PLACE_IDS) {
         const anchor = hooks.anchors?.(id) ?? null;
         if (!anchor || flying) {
@@ -825,15 +880,19 @@ export function createSunEngine(
           continue;
         }
         anchorAt.set(anchor[0], anchor[1], anchor[2]).applyAxisAngle(POLE, f.surfaceTurn);
-        const inside = anchorAt.length() < 1 - 1e-3;
-        /* A place inside the Sun is named in the cut's gap, at its own depth and latitude. */
-        if (inside) {
+        /* With the cut open, its shells (`LAYER_IDS`) are named on its faces, each on its own
+           band at the anchor's depth and latitude; they alternate faces outward from the core
+           (the order `PLACE_IDS` lists them in), so neighbouring bands never crowd one face.
+           Closed, the Sun hides the ones inside and the photosphere names the disc. */
+        const onCut = isLayerId(id) && cutShown > NAMED_INSIDE_CUT;
+        if (onCut) {
           const span = Math.hypot(anchorAt.x, anchorAt.z);
-          anchorAt.x = span * Math.cos(cut.y);
-          anchorAt.z = span * Math.sin(cut.y);
+          const face = cut.y + (layersNamed++ % 2 === 0 ? cut.x : -cut.x);
+          anchorAt.x = span * Math.cos(face);
+          anchorAt.z = span * Math.sin(face);
         }
-        let shown = inside ? cutShown > NAMED_INSIDE_CUT : !behindSun(anchorAt);
-        if (shown && !inside) {
+        let shown = onCut || !behindSun(anchorAt);
+        if (shown && !onCut) {
           /* On screen, and near its feature: how big it is, or how close to the limb. */
           projected.copy(anchorAt).project(camera);
           const onScreen =
@@ -924,7 +983,10 @@ export function createSunEngine(
         }
       }
 
-      sceneHost.render(() => renderer.render(scene, camera));
+      sceneHost.render(() => {
+        renderer.render(scene, camera);
+        parker.render(renderer);
+      });
       /* The new light takes over from the frame just drawn in the old one, which fades over it. */
       if (relightPending) {
         relightPending = false;
@@ -941,6 +1003,7 @@ export function createSunEngine(
       }
     };
     let ready = false;
+    let lastSharpening = false;
 
     loop.start({
       render: tick,

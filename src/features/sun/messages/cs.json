@@ -20,8 +20,8 @@
       "body": "Zrychlete nebo zastavte modelový čas. Ukázka erupce má vlastní přehrávání."
     },
     "places": {
-      "title": "Místa",
-      "body": "Přeletí k útvaru a otevře jeho kartu."
+      "title": "V záběru",
+      "body": "Co tento pohled ukazuje. Výběrem otevřete kartu."
     },
     "settings": {
       "title": "Nastavení",
@@ -37,7 +37,11 @@
     }
   },
   "hud": {
-    "places": "Místa",
+    "sharpening": "Načítám detail",
+    "closeUp": "Zblízka",
+    "leaveCloseUp": "Zpět ke Slunci",
+    "closeUpNote": "Skutečná velikost, tepelným štítem ke Slunci.",
+    "places": "V záběru",
     "light": "Světlo",
     "clock": "Hodiny",
     "pause": "Zastavit hodiny",
@@ -63,7 +67,8 @@
     "chromosphere": "Chromosféra",
     "corona": "Koróna",
     "eruption": "Erupce",
-    "cycle": "Cyklus"
+    "cycle": "Cyklus",
+    "orbit": "Dráha Parkeru"
   },
   "viewHints": {
     "surface": "Fotosféra v bílém světle: u okraje tmavší, vroucí granulemi, se skvrnami.",
@@ -72,7 +77,8 @@
     "chromosphere": "Okraj v Hα: les spikulí, flokule, filamenty a protuberance.",
     "corona": "Disk zakrytý jako při zatmění: přilby, chocholy a odcházející vítr.",
     "eruption": "Předepsaný vývoj erupce a zjednodušený magnetický řez ukazují rekonexi.",
-    "cycle": "Idealizovaný opakující se cyklus ukazuje posun skvrn a přepólování; nejde o předpověď."
+    "cycle": "Idealizovaný opakující se cyklus ukazuje posun skvrn a přepólování; nejde o předpověď.",
+    "orbit": "Dráha sondy Parker Solar Probe shora nad pólem: průlet korónou, pak dlouhý oblouk ven, kde chladne."
   },
   "lights": {
     "white": "Bílé světlo",
@@ -147,15 +153,15 @@
   "facts": {
     "coreRadius": "Poloměr jádra",
     "temperature": "Teplota",
-    "density": "Hustota, × voda",
-    "hydrogen": "Zbývající vodík",
-    "massLoss": "Hmota na světlo, za sekundu",
+    "density": "Hustota",
+    "hydrogen": "Vodík, hmotnostně",
+    "massLoss": "Hmota přeměněná na světlo, za sekundu",
     "outerEdge": "Vnější okraj",
     "innerEdge": "Vnitřní okraj",
     "walk": "Odhad radiační difuze, model",
     "walkLiterature": "Odhad radiační difuze, literatura",
     "lightTime": "Pak k Zemi",
-    "depth": "Hloubka",
+    "depth": "Od středu",
     "thickness": "Tloušťka",
     "interiorPeriod": "Zvolená perioda rotace nitra",
     "equatorPeriod": "Rovník se otočí za",
@@ -175,7 +181,7 @@
     "polarField": "Polární pole v minimu",
     "temperatureMinimum": "Nejchladněji",
     "halpha": "Hα",
-    "flareIndex": "Zákon velikosti erupcí, index",
+    "flareIndex": "Zákon velikosti erupcí",
     "flareLine": "Erupční plazma, Fe XXI",
     "hotLine": "Horké plazma, Fe XVIII",
     "quietLine": "Klidné smyčky, Fe IX",
@@ -183,14 +189,36 @@
     "coronaModel": "Koróna, jak je kreslena",
     "greenLine": "Zelená čára, Fe XIV",
     "greenLineTemperature": "Zelená čára vzniká při",
-    "kCoronaBase": "Jas u okraje, z disku",
+    "kCoronaBase": "Jas u okraje",
     "sourceSurface": "Zdrojová plocha modelu",
     "windSlow": "Pomalý vítr",
     "windFast": "Rychlý vítr",
     "cmeSpeed": "Průměrná rychlost čela ve zvoleném čase",
     "cyclePeriod": "Cyklus",
-    "perihelion": "Nejbližší přiblížení, R☉",
-    "probeSpeed": "Rychlost při průletu, km/s"
+    "perihelion": "Nejbližší přiblížení",
+    "probeSpeed": "Rychlost při průletu",
+    "aphelion": "Nejdál",
+    "orbitPeriod": "Oběh"
+  },
+  "rows": {
+    "plain": "{value}",
+    "kelvin": "{value} K",
+    "percent": "{value} %",
+    "solarRadii": "{value} R☉",
+    "kg": "{value} kg",
+    "km": "{value} km",
+    "acceleration": "{value} m/s²",
+    "speed": "{value} km/s",
+    "nm": "{value} nm",
+    "tesla": "{value} T",
+    "millitesla": "{value} mT",
+    "minutes": "{value} min",
+    "days": "{value} {valuePlural, select, one {den} few {dny} many {dne} other {dní}}",
+    "years": "{value} {valuePlural, select, one {rok} few {roky} many {roku} other {let}}",
+    "kyr": "{value} {valuePlural, select, one {tisíc let} few {tisíce let} many {tisíce let} other {tisíc let}}",
+    "timesWater": "{value} × voda",
+    "ofDisc": "{value} × střed disku",
+    "slope": "sklon {value}"
   },
   "panel": {
     "qualityNote": "Standard je Slunce, jak je kresleno pro počítač; Úsporná šetří telefon."
@@ -224,7 +252,7 @@
       "title": "Konvektivní vrstva",
       "where": "Vnější slupka",
       "body": "Vztlak vynáší plazma, které chladne a klesá, a přenáší tak velkou část energie vnějším obalem. Záření se na přenosu stále podílí a nakonec odvádí energii z fotosféry.",
-      "caution": "Kreslené proudy jsou náhrada za turbulentní konvekci, ne její simulace."
+      "caution": "Velikosti a životnosti buněk vycházejí z modelu S (dvě tlakové výškové škály, jeden obrat); buňky samy jsou kreslené, ne simulované."
     },
     "photosphere": {
       "title": "Fotosféra",
@@ -308,7 +336,7 @@
       "title": "Parker Solar Probe",
       "where": "Skrz korónu",
       "body": "Parker poprvé vstoupil do sluneční koróny v dubnu 2021. Dne 24. prosince 2024 dosáhl rekordní dráhy, přibližně {parkerPerihelionR} slunečních poloměrů od středu při rychlosti asi {parkerSpeed}; další průlety toto přiblížení zopakovaly.",
-      "caution": "Značka perihelia z prosince 2024, nikoli živá telemetrie. Dráha není vykreslena a sonda není v měřítku."
+      "caution": "Umístěna na rekordní dráze podle hodin laboratoře z prvků JPL Horizons, nikoli živá telemetrie; sklon dráhy a směr nejbližšího bodu jsou zvoleny pro pohled."
     }
   },
   "tour": {
@@ -374,7 +402,7 @@
       },
       "surface": {
         "title": "Povrch",
-        "body": "Velká textura v bílém světle používá zpracované kontinuum SDO/HMI poblíž 617,3 nm, složené ze snímků z 1.–22. května 2024; nejde o současné pozorování celé koule. Okrajové ztemnění a zobrazená barva jsou přidané. Oblasti NOAA inicializují syntetickou populaci, dál pokračuje modelový vývoj. Zblízka texturu nahrazují procedurální granule, typicky {granuleKm} km široké a žijící {granuleMin} minut. Ostatní pásma jsou syntetická, nikoli souběžná pozorování AIA."
+        "body": "Velká textura v bílém světle používá zpracované kontinuum SDO/HMI poblíž 617,3 nm, složené ze snímků z 1.–22. května 2024; nejde o současné pozorování celé koule. Okrajové ztemnění a zobrazená barva jsou přidané. Oblasti NOAA inicializují syntetickou populaci, dál pokračuje modelový vývoj. Masky předem odvozené z této fotografie zachovávají při přiblížení její obrysy skvrn. Jemná vlákna a umbrální tečky jsou ilustrativní; nejde o získaná měření ani hloubku. Procedurální granule jsou typicky {granuleKm} km široké a žijí {granuleMin} minut. Ostatní pásma jsou syntetická, nikoli souběžná pozorování AIA."
       },
       "atmosphere": {
         "title": "Atmosféra",

@@ -1,10 +1,12 @@
 /**
  * Each place's card: its badge and the figures it prints, all from the Sun's catalogue
  * (`@/space/sun/catalogue`), with the words under `places.<id>` the lab's own. A row's label is
- * `facts.<id>`; its figure prints with its unit, as the catalogue shows it.
+ * `facts.<id>`; its figure prints through `rows.<key>`, which words its unit, so no row is a
+ * bare number.
  */
-import { factRef, figureRow, styled, type Fact, type Row, type StaticCard } from "@/lib/facts";
+import { factRef, row, styled, type Fact, type Row, type StaticCard } from "@/lib/facts";
 import { SUN_CATALOGUE } from "@/space/sun/catalogue";
+import { isLength } from "@horizon/toolkit/science";
 
 import type { PlaceId } from "../lib/model/places";
 
@@ -17,8 +19,40 @@ const { sunspot, field, cycle, eruption } = SUN_CATALOGUE.activity;
 const bands = SUN_CATALOGUE.passbands;
 const { parker } = SUN_CATALOGUE.probes;
 
+/** The message each unit a card shows is worded in (`rows.<key>`). */
+const UNIT_ROWS: Readonly<Record<string, string>> = {
+  K: "kelvin",
+  percent: "percent",
+  Rsun: "solarRadii",
+  kg: "kg",
+  km: "km",
+  "m/s2": "acceleration",
+  "km/s": "speed",
+  nm: "nm",
+  T: "tesla",
+  mT: "millitesla",
+  min: "minutes",
+  d: "days",
+  yr: "years",
+  kyr: "kyr",
+};
+/** A ratio names what it compares, in its own row's message. */
+const RATIO_ROWS: Readonly<Record<string, string>> = {
+  density: "timesWater",
+  kCoronaBase: "ofDisc",
+  flareIndex: "slope",
+};
+
+/** A figure's row, its unit worded: a distance carries its own symbol. */
+function unitRow(id: string, fact: Fact): Row {
+  const unit = fact.show ?? fact.unit;
+  const key = isLength(unit) ? "plain" : (RATIO_ROWS[id] ?? UNIT_ROWS[unit]);
+  if (!key) throw new Error(`The Sun's card row ${id} has no message for ${unit}`);
+  return row(id, `rows.${key}`, { value: factRef(fact) });
+}
+
 const rows = (...entries: [id: string, fact: Fact][]): Row[] =>
-  entries.map(([id, fact]) => figureRow(id, factRef(fact)));
+  entries.map(([id, fact]) => unitRow(id, fact));
 
 const card = (badge: Badge, ...entries: [id: string, fact: Fact][]): StaticCard<Badge> => ({
   badge,
@@ -161,6 +195,8 @@ export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<Badge>>> = {
       "measured",
       ["perihelion", parker.perihelion],
       ["probeSpeed", parker.speed],
+      ["aphelion", parker.aphelion],
+      ["orbitPeriod", parker.period],
       ["temperature", corona.temperature],
       ["windFast", corona.windFast],
     ),

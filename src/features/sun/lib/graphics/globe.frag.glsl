@@ -3,9 +3,10 @@
 // ripple, pores and umbral dots, faculae towards the limb, flare ribbons, the filaments where
 // prominences stand), in its Planck colour under Claret limb darkening in white light, or each
 // component's temperature through the band's response and ramp, or its radial field as a
-// magnetogram; and where the wedge is cut, the faces: the shells from the core to the
-// convection zone, each with its own light and motion, turning at its own rate so the
-// tachocline's shear shows, shaded by depth so the wedge has volume. The hit's depth is
+// magnetogram; and where the wedge is cut, the faces: Model S's temperature as a diagram's heat
+// from the core to the convection zone, the light glowing where it is made, the diffusive
+// interior's still grain, the tachocline's sliding laminae and convection cells that widen with
+// depth, each shell turning at its own rate, shaded so the wedge has volume. The hit's depth is
 // written, so ribbons and volumes test against it.
 precision highp float;
 
@@ -18,14 +19,13 @@ precision highp float;
 #include "./surface-detail.glsl"
 
 uniform highp sampler2D uProfile;      // R,V,B limb darkening by μ (the Sun's Claret law)
-uniform highp sampler2D uInterior;     // by radius: ln T, ln ρ
+uniform highp sampler2D uInterior;     // by radius: ln T, ln ρ, the cells' octave, the light made (over its peak)
 uniform float uCoreLnT;                // ln T at the centre
 uniform vec3 uLayers;                  // the core's, the tachocline's and the photosphere's radii
 uniform float uFaceLogY;               // the face's reference log radiance (the continuum at PHOTOSPHERE_K)
 uniform float uFine;                   // 1: granules, filaments, dots and threads at their own scale
-uniform int uPlumeOctaves;
+uniform vec4 uCellOctave[CONVECTION_OCTAVE_COUNT]; // cells per radius; the radius they are centred on; their clock
 uniform float uEvershed;               // radii the Evershed flow has travelled
-uniform float uPlumeRise;              // radii the plumes have risen
 uniform int uRegionCount;
 uniform vec4 uRegionDir[REGION_MAX];   // centre (body frame); angular radius
 uniform vec4 uRegionAxis[REGION_MAX];  // leader→follower axis; polarity
@@ -38,12 +38,13 @@ uniform float uDipole;
 uniform float uGrid;
 uniform sampler2D uMap;                // SDO/HMI's flattened continuum (linear on sampling)
 uniform float uMapShown;               // 0 until it arrives, 1 once faded in
-uniform float uMapTexels;              // its texels per radian
 uniform vec3 uSunlight;                // the photosphere's continuum colour: the white the eye adapts to
 uniform vec3 uMagPositive;             // the magnetogram's poles, linear
 uniform vec3 uMagNegative;
 uniform mat4 uViewProjection;          // the camera's, for the hit's depth
 varying vec3 vWorld;
+
+#include "./spot-stencil.glsl"
 
 // What a point of the face is: its temperature, how much of it a spot covers, its plage, the
 // chromosphere's network there, a filament's shadow, its flare ribbons' light and its radial field.
@@ -52,6 +53,8 @@ struct Face {
   /** The measured continuum here, against the quiet Sun, and how much of the face it paints. */
   float measured;
   float mapShare;
+  float mapDetail;
+  float detailKelvin;
   float spot;
   float plage;
   float network;
@@ -61,24 +64,37 @@ struct Face {
 };
 
 Face faceAt(vec3 s, float mu, float px) {
-  Face f = Face(PHOTOSPHERE_K, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+  Face f = Face(PHOTOSPHERE_K, 1.0, 0.0, 0.0, PHOTOSPHERE_K, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   float dT = 0.0;
   /* The pattern's frame: in the body frame the equator stands still and each latitude lags
      behind it by what the law takes off its rate. */
   vec3 b = turned(s, uTurn * (1.0 - surfaceTurnRatio(s.y)));
   float fine = uFine * resolvedFeature(GRANULES_PER_RADIUS, px, mu);
-  /* The measured Sun paints the face until its texels show; then the procedural surface takes
-     over. The map is an observation at its epoch, in Carrington longitude (u, east increasing):
+  /* Keep the measured morphology at every zoom: the generated bipoles cannot replace every
+     spot in the photograph. Zoom adds fine detail instead of fading out the whole map.
+     The map is an observation at its epoch, in Carrington longitude (u, east increasing):
      the body's longitude zero is the epoch's central meridian, MAP_CENTRAL_MERIDIAN_RAD along
      it (the model's `mapUv`), and it turns rigidly with the equator, so its spots and the
-     model's regions read off them stay together. In white light nothing invented sits on it:
-     the model's spot and facula marks fade out where the map paints. */
-  float texelPx = max(mu, 0.02) / (uMapTexels * max(px, 1e-9));
-  f.mapShare = uMapShown * (1.0 - smoothstep(MAP_FADE_FROM_PX, MAP_FADE_TO_PX, texelPx));
+     model's regions read off them stay together. Synthetic spot outlines remain a fallback
+     for an unavailable map and for the other spectral modes. */
+  // One physical zoom threshold for all image tiers; changing quality cannot
+  // change the morphology or make close-up detail jump in and out.
+  float texelPx = max(mu, 0.02) / ((STENCIL_WIDTH / TWO_PI) * max(px, 1e-9));
+  f.mapShare = uLightMode == LIGHT_WHITE ? uMapShown : 0.0;
+  f.mapDetail = uFine * smoothstep(MAP_DETAIL_FROM_PX, MAP_DETAIL_TO_PX, texelPx);
+  float mappedSpot = 0.0;
   if (f.mapShare > 0.0) {
     /* The body's longitude of s (west positive: −z), then Carrington's. */
     vec2 uv = vec2(fract((atan(-s.z, s.x) + MAP_CENTRAL_MERIDIAN_RAD) / TWO_PI), 0.5 + asin(clamp(s.y, -1.0, 1.0)) / PI);
     f.measured = texture2D(uMap, uv).r / SUN_MAP_QUIET_INTENSITY;
+    mappedSpot = 1.0 - smoothstep(0.6, 0.9, f.measured);
+    if (f.mapDetail * uStencilShown > 0.0) {
+      vec4 stencil = photographedSpot(uv, s, px, mu);
+      float blend = f.mapDetail * uStencilShown;
+      f.measured = mix(f.measured, stencil.z, blend * stencil.w);
+      mappedSpot = mix(mappedSpot, stencil.x, blend * stencil.w);
+    }
+    mappedSpot *= f.mapShare;
   }
   float marks = uLightMode == LIGHT_WHITE ? 1.0 - f.mapShare : 1.0;
   float cells = GRANULES_PER_RADIUS / NETWORK_GRANULES;
@@ -167,14 +183,17 @@ Face faceAt(vec3 s, float mu, float px) {
     float inside = (1.0 - smoothstep(0.5 * FILAMENT_WIDTH, FILAMENT_WIDTH, abs(v - wander))) * (1.0 - smoothstep(0.8 * at.w, at.w, abs(u)));
     f.filament = max(f.filament, inside * along.w);
   }
-  f.spot = max(penumbra, pores);
+  f.spot = max(max(penumbra, pores), mappedSpot);
   float quiet = mix(0.35, 1.0, mu) * (1.0 - f.spot);
+  float detail = 0.0;
   if (fine > 0.0) {
     vec3 granules = granuleField(b * GRANULES_PER_RADIUS, uClock.x, fine);
-    dT += GRANULE_CONTRAST * fine * quiet * (granules.x - 0.45 * granules.y);
+    detail = GRANULE_CONTRAST * fine * quiet * (granules.x - 0.45 * granules.y);
   }
   /* Where the granules are too small to see, the network's faint mottle shows instead. */
-  dT += NETWORK_CONTRAST * netSeen * (1.0 - fine) * (network - 0.4) * quiet;
+  detail += NETWORK_CONTRAST * netSeen * (1.0 - fine) * (network - 0.4) * quiet;
+  dT += detail;
+  f.detailKelvin = PHOTOSPHERE_K * (1.0 + detail);
   f.kelvin = PHOTOSPHERE_K * (1.0 + dT);
   float penOnly = max(penumbra - umbra, 0.0);
   f.kelvin = mix(f.kelvin, PENUMBRA_K * (1.0 + PENUMBRA_FILAMENT * (filaments - 0.5) + EVERSHED_RIPPLE * ripple), penOnly);
@@ -198,10 +217,11 @@ vec3 surfaceColour(Face f, vec3 s, float mu) {
   if (uLightMode == LIGHT_WHITE) {
     /* The disc as the eye adapted to sunlight sees it: the photosphere's continuum is white by
        definition and cooler gas warmer against it; the measured continuum under the Claret law
-       where the map resolves, the procedural face where it does not; relative light raised to
+       at every zoom, with fine procedural contrast added close up; relative light raised to
        the display contrast, then exposed below white at the centre. */
     vec3 procedural = glowAt(f.kelvin, uFaceLogY) / uSunlight;
-    vec3 measured = vec3(f.measured);
+    vec3 detail = glowAt(f.detailKelvin, uFaceLogY) / uSunlight;
+    vec3 measured = vec3(f.measured) * mix(vec3(1.0), detail, f.mapDetail);
     vec3 relative = mix(procedural, measured, f.mapShare) * limb;
     vec3 light = pow(max(relative, 0.0), vec3(SURFACE_CONTRAST)) * SURFACE_EXPOSURE;
     /* A white-light flare is rare and faint: only as much as the light's flare weight allows (none). */
@@ -241,54 +261,70 @@ float gridLine(vec3 s, float mu, float px) {
   return max(1.0 - smoothstep(0.0, width, dLat), 1.0 - smoothstep(0.0, width, dLon));
 }
 
-// A cut face at `p`: the shell there, with its own light, colour and motion; shaded by depth;
-// gold rims on the shells' bounds.
+// The convection zone's cells at radius `r` (`q` in the shell's own turning frame), `octave` deep
+// in cell sizes: each octave a fixed field in the body, its cells the octave's angular size at
+// its own radius and PLUME_STRETCH deeper than wide, cross-faded by depth so the cells widen
+// downward without shearing; an octave below two pixels fades out. About −1 in a cool downflow
+// to 1 in a hot upflow's heart.
+float deepCells(vec3 q, float r, float octave, float px) {
+  vec3 dir = q / r;
+  float value = 0.0;
+  for (int k = 0; k < CONVECTION_OCTAVE_COUNT; k++) {
+    float weight = 1.0 - abs(octave - float(k));
+    if (weight <= 0.0) continue;
+    vec4 o = uCellOctave[k];
+    vec3 c = dir * (o.y + (r - o.y) / PLUME_STRETCH) * o.x + float(k) * 17.3;
+    value += weight * resolvedFeature(o.x, px, 1.0) * giantCells(c, o.z);
+  }
+  return value;
+}
+
+// The diffusive interior's still grain: a few octaves of noise at a fixed scale, each fading
+// out below two pixels; about −1 to 1.
+float interiorGrain(vec3 q, float px) {
+  float grain = 0.0;
+  float cells = INTERIOR_GRAIN_CELLS;
+  float amplitude = 1.0;
+  for (int o = 0; o < 3; o++) {
+    grain += amplitude * resolvedFeature(cells, px, 1.0) * gradientNoise3(q * cells + float(o) * 7.1);
+    cells *= 2.3;
+    amplitude *= 0.6;
+  }
+  return grain;
+}
+
+// A cut face at `p`: Model S's temperature there as a diagram's heat, the light made there,
+// and the shell's texture, turning at its own rate; shaded by depth; gold rims on the bounds.
 vec3 faceColour(vec3 p, float px, int face) {
   float r = length(p);
   vec3 dir = p / max(r, 1e-5);
-  float lnT = sample1D(uInterior, r / uLayers.z, INTERIOR_SAMPLES).x;
-  float shimmer = 1.0;
-  float displayK;
-  float light;
-  if (r < uLayers.x) {
-    /* The core: fusion's flicker. */
-    shimmer += CORE_SHIMMER * gradientNoise3(p * CORE_CELLS + vec3(uClock.z, 0.37 * uClock.z, 0.0));
-    displayK = CORE_DISPLAY_K;
-    light = CORE_LIGHT;
-  } else if (r < uLayers.y) {
-    /* The radiative zone: a smooth golden gradient, turning rigidly, its diffusion a slow shimmer. */
-    vec3 q = turned(p, uTurn * (1.0 - INTERIOR_TURN_RATIO));
-    shimmer += RADIATIVE_SHIMMER * gradientNoise3(q * RADIATIVE_CELLS + vec3(0.0, uClock.w, 0.0));
-    float out1 = smoothstep(uLayers.x, uLayers.y, r);
-    displayK = exp(mix(log(RADIATIVE_INNER_DISPLAY_K), log(RADIATIVE_OUTER_DISPLAY_K), out1));
-    light = mix(RADIATIVE_INNER_LIGHT, RADIATIVE_OUTER_LIGHT, out1);
+  vec4 profile = sample1D(uInterior, r / uLayers.z, INTERIOR_SAMPLES);
+  float lnT = profile.x;
+  /* Rigid below the tachocline, the surface's law by latitude through the convection zone,
+     the change across the tachocline's thickness: there the shells slide past each other. */
+  float tachoclineBase = uLayers.y - TACHOCLINE_THICKNESS;
+  float across = clamp((r - tachoclineBase) / TACHOCLINE_THICKNESS, 0.0, 1.0);
+  float rate = mix(INTERIOR_TURN_RATIO, surfaceTurnRatio(dir.y), smoothstep(0.0, 1.0, across));
+  vec3 q = turned(p, uTurn * (1.0 - rate));
+  float pattern = 0.0;
+  if (r < uLayers.y) {
+    /* The diffusive interior's grain, giving way to the tachocline's laminae: thin layers
+       along the shell, each streaked and carried at its own rate. */
+    float laminae = gradientNoise3(q / r * TACHOCLINE_STREAKS + vec3(0.0, across * TACHOCLINE_LAMINAE, 0.0));
+    float band = smoothstep(0.0, 0.25, across);
+    pattern = mix(INTERIOR_GRAIN * interiorGrain(q, px), TACHOCLINE_CONTRAST * laminae, band);
   } else {
-    /* The convection zone: columns turning at the shell's own rate (rigid at the tachocline,
-       the surface's law at the top, so the shear shows), with rising grain. */
-    float rate = mix(INTERIOR_TURN_RATIO, surfaceTurnRatio(dir.y), smoothstep(uLayers.y, uLayers.z, r));
-    vec3 q = turned(p, uTurn * (1.0 - rate));
-    vec3 column = q / r;
-    float lateral = 0.0;
-    float amplitude = 1.0;
-    float norm = 0.0;
-    vec3 c = column * PLUME_COLUMNS;
-    for (int o = 0; o < 8; o++) {
-      if (o >= uPlumeOctaves) break;
-      lateral += amplitude * gradientNoise3(c);
-      norm += amplitude;
-      c = c * 2.03 + 11.7;
-      amplitude *= 0.5;
-    }
-    lateral /= max(norm, 1e-3);
-    float rise = gradientNoise3(q * PLUME_GRAIN - column * uPlumeRise * PLUME_GRAIN);
-    shimmer += PLUME_CONTRAST * (lateral + 0.6 * rise * (0.6 + lateral));
+    /* Hot broad upflows and cool downflow lanes, a mixing length across at every depth. */
+    pattern = CONVECTION_CONTRAST * deepCells(q, r, min(profile.z, float(CONVECTION_OCTAVE_COUNT - 1)), px);
     /* Granules at the top, where they are resolved. */
     float top = 1.0 - smoothstep(0.0, PLUME_GRANULE_DEPTH, uLayers.z - r);
     float fine = uFine * top * resolvedFeature(GRANULES_PER_RADIUS, px, 1.0);
-    if (fine > 0.0) shimmer += 3.0 * GRANULE_CONTRAST * fine * granuleField(q * GRANULES_PER_RADIUS, uClock.x, 1.0).x;
-    displayK = CONVECTION_DISPLAY_K;
-    light = CONVECTION_LIGHT;
+    if (fine > 0.0) pattern += 3.0 * GRANULE_CONTRAST * fine * granuleField(q * GRANULES_PER_RADIUS, uClock.x, 1.0).x;
   }
+  float heat = lnT - FACE_TOP_LN_T;
+  float displayK = FACE_TOP_DISPLAY_K * exp(FACE_K_SLOPE * heat);
+  float light = FACE_TOP_LIGHT * exp(FACE_LIGHT_SLOPE * heat) * (1.0 + CORE_GLOW * profile.w);
+  float shimmer = 1.0 + pattern;
   /* Volume: the face's normal against a key light from the open side (yawed off the wedge's
      bisector and raised, so the two faces differ), over an ambient floor; and an occlusion
      darkening into the apex the faces meet at. */
@@ -309,7 +345,8 @@ vec3 faceColour(vec3 p, float px, int face) {
   } else if (uLightMode == LIGHT_MAGNETOGRAM) {
     col = vec3(MAGNETOGRAM_GREY) * bright * 0.5;
   } else {
-    col = blackbodyLinear(displayK) * bright;
+    /* The continuum's own Planck colour (Y = 1): smooth in temperature, with no fitted kinks. */
+    col = spectrumAt(displayK).rgb * bright;
   }
   float width = SHELL_RIM + px;
   float rim = 1.0 - smoothstep(0.0, width, abs(r - uLayers.x));

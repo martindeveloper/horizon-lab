@@ -14,7 +14,7 @@ uniform int uHoleCount;
 uniform vec4 uHole[HOLE_MAX];         // a coronal hole's direction (an open line's foot); its strength
 uniform sampler2D uRamp;       // the light's colour ramp, linear, dark to bright
 uniform vec2 uCut;             // the wedge's half-angle (0: closed) and its bisector's azimuth
-uniform vec4 uClock;           // granule lifetimes, network lifetimes, core shimmers and radiative drifts elapsed
+uniform vec2 uClock;           // granule lifetimes and network lifetimes elapsed
 uniform float uTurn;           // the equator's rotation, radians
 uniform float uPixelWorld;     // world length of one buffer pixel, per unit distance from the camera
 uniform mat3 uGamut;           // linear sRGB to the canvas's primaries

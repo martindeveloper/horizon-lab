@@ -44,11 +44,12 @@ export function createGlobeLayer(
     uFaceLogY: { value: tables.faceLogY },
     uSunlight: { value: new Vector3(...tables.sunlight) },
     uFine: { value: 1 },
-    uPlumeOctaves: { value: 4 },
     uGrid: { value: 0 },
     uMap: { value: null as Texture | null },
     uMapShown: { value: 0 },
-    uMapTexels: { value: 1 },
+    uSpotAtlas: { value: null as Texture | null },
+    uSpotPages: { value: null as Texture | null },
+    uStencilShown: { value: 0 },
     uViewProjection: { value: new Matrix4() },
   };
   const material = scope.own(
@@ -70,25 +71,35 @@ export function createGlobeLayer(
   let fading = 0;
   return {
     mesh,
-    /** The measured map arrived: drawn from now on, faded in; `width` its pixels round the equator. */
-    setMap(texture: Texture, width: number) {
+    /** The measured map arrived: drawn from now on, faded in. */
+    setMap(texture: Texture) {
       uniforms.uMap.value = texture;
-      uniforms.uMapTexels.value = width / (2 * Math.PI);
       fadeFrom = uniforms.uMapShown.value;
       fading = 0;
     },
+    setStencil(atlas: Texture, pages: Texture) {
+      uniforms.uSpotAtlas.value = atlas;
+      uniforms.uSpotPages.value = pages;
+    },
     /** The map still fading in. */
     get busy() {
-      return uniforms.uMap.value !== null && uniforms.uMapShown.value < 1;
+      return (
+        (uniforms.uMap.value !== null && uniforms.uMapShown.value < 1) ||
+        (uniforms.uSpotAtlas.value !== null && uniforms.uStencilShown.value < 1)
+      );
     },
     step(dt: number) {
+      if (uniforms.uSpotAtlas.value)
+        uniforms.uStencilShown.value = Math.min(
+          1,
+          uniforms.uStencilShown.value + dt / MAP_FADE_IN_S,
+        );
       if (!uniforms.uMap.value || uniforms.uMapShown.value >= 1) return;
       fading = Math.min(1, fading + dt / MAP_FADE_IN_S);
       uniforms.uMapShown.value = fadeFrom + (1 - fadeFrom) * fading;
     },
     setQuality(quality: SunQuality) {
       uniforms.uFine.value = quality.fineSurface ? 1 : 0;
-      uniforms.uPlumeOctaves.value = quality.cutPlumes;
     },
     update(settings: SunSceneSettings, camera: Camera) {
       const { core, tachocline, photosphere } = settings.layers;

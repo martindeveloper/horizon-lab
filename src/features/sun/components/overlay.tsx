@@ -7,7 +7,7 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
+import { LoadingBadge, VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
 import { useSun, type SunStore } from "../lib/store";
@@ -18,12 +18,13 @@ import { ViewPanel } from "./panels";
 import { SunTechnicalDetails } from "./technical-details";
 import { SunViewPicker } from "./view-picker";
 
-/** Escape ends the guide, else closes the panel, else lets go of the selection. */
+/** Escape ends the guide, else closes the panel, leaves the close-up or lets go, in that order. */
 const escapeSteps = (): EscapeStep[] => {
   const api = useSun.getState();
   return [
     [api.guideOpen, api.endGuide],
     [api.panel !== "none", () => api.setPanel("none")],
+    [api.closeUp, api.leaveCloseUp],
     [api.selection !== null, () => api.select(null)],
   ];
 };
@@ -45,6 +46,7 @@ export function SunOverlay() {
   const ready = useSun((s) => s.ready);
   const panel = useSun((s) => s.panel);
   const selection = useSun((s) => s.selection);
+  const sharpening = useSun((s) => s.sharpening);
   const guideOpen = useSun((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
   const help = useHelp(helpStore, HELP, "sun");
@@ -82,6 +84,7 @@ export function SunOverlay() {
                 drift={() => api().startDrift()}
               />
             </div>
+            <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
           {panel === "view" ? <ViewPanel onClose={() => api().setPanel("none")} /> : null}
           {panel === "none" && selection ? <PlaceCard id={selection} /> : null}

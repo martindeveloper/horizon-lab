@@ -77,6 +77,10 @@ export type SunStore = SceneSlice &
     wideColour: boolean;
     setWideColour: (wideColour: boolean) => void;
     selection: PlaceId | null;
+    /** Parker Solar Probe at its true size (`canCloseUp`). */
+    closeUp: boolean;
+    enterCloseUp: () => void;
+    leaveCloseUp: () => void;
     panel: Panel;
     /* Readouts the engine writes a few times a second. */
     /** The Sun's time since the visit began, model seconds. */
@@ -85,6 +89,8 @@ export type SunStore = SceneSlice &
     flareClass: string;
     /** The decimal year the cycle's phase stands at, as the scene counts it. */
     cycleYear: number;
+    /** Detail the view would show (the map's, Parker's model) is still on its way. */
+    sharpening: boolean;
     setView: (view: ViewId) => void;
     setLight: (light: LightId) => void;
     setClock: (clock: ClockRate) => void;
@@ -95,7 +101,7 @@ export type SunStore = SceneSlice &
     setCyclePhase: (phase: number) => void;
     patchShow: (patch: Partial<Show>) => void;
     select: (selection: PlaceId | null) => void;
-    /** Flies to a place, sets its light and clock and opens its card. */
+    /** Shows a place: its view (the camera flies only when that changes), its light and clock, and its card. */
     goTo: (id: PlaceId) => void;
     setPanel: (panel: Panel) => void;
     /** The scene's report. */
@@ -113,6 +119,10 @@ export type SunStore = SceneSlice &
   };
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+/** Parker's card offers its close-up while neither the journey nor the drift holds the camera. */
+export const canCloseUp = (s: Pick<SunStore, "selection" | "guideOpen" | "drift">) =>
+  s.selection === "parker" && !s.guideOpen && s.drift === "off";
 
 /** The View panel's settings as a visit starts; `resetView` puts them back. */
 const VIEW_SETTINGS = { show: DEFAULT_SHOW, wideColour: false, ...RESET_SCENE_SETTINGS } as const;
@@ -133,15 +143,22 @@ export const useSun = create<SunStore>((set, get) => ({
   wideColour: VIEW_SETTINGS.wideColour,
   setWideColour: (wideColour) => set({ wideColour }),
   selection: null,
+  closeUp: false,
+  enterCloseUp: () => {
+    if (canCloseUp(get())) set({ closeUp: true, panel: "none" });
+  },
+  leaveCloseUp: () => set({ closeUp: false }),
   panel: "none",
   elapsed: 0,
   flareClass: "",
   cycleYear: decimalYear(MAP_EPOCH),
+  sharpening: false,
   /* A view opens with its own light and clock; the cut opens inside and closes elsewhere. */
   setView: (view) =>
     set((s) => ({
       view,
       flight: s.flight + 1,
+      closeUp: false,
       ...VIEW_DEFAULTS[view],
       cut: view === "inside" ? 1 : 0,
       eruptionPlaying: view === "eruption",
@@ -159,13 +176,15 @@ export const useSun = create<SunStore>((set, get) => ({
     })),
   setCyclePhase: (phase) => set({ cyclePhase: clamp01(phase) }),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
-  select: (selection) => set({ selection }),
+  /* Another selection lets go of the close-up. */
+  select: (selection) => set((s) => ({ selection, closeUp: s.closeUp && selection === "parker" })),
   goTo: (id) => {
     const place = PLACES[id];
     const s = get();
     if (place.view !== s.view) s.setView(place.view);
     set((now) => ({
       selection: id,
+      closeUp: now.closeUp && id === "parker",
       panel: "none",
       light: place.light ?? now.light,
       clock: place.clock ?? now.clock,
@@ -188,7 +207,7 @@ export const useSun = create<SunStore>((set, get) => ({
       show: s.show,
     }),
     restore: (saved) => ({ ...saved, flight: get().flight + 1, eruptionPlaying: false }),
-    open: () => ({ guidePlaying: !prefersReducedMotion(), paused: false }),
+    open: () => ({ guidePlaying: !prefersReducedMotion(), paused: false, closeUp: false }),
     apply: (step, s) => ({
       guideLanded: false,
       view: step.view,
@@ -232,6 +251,7 @@ export const useSun = create<SunStore>((set, get) => ({
       return {
         panel: "none" as const,
         selection: null,
+        closeUp: false,
         paused: false,
         effectsBeforeDrift: { bloom: s.bloom, clock: s.clock },
         bloom: true,

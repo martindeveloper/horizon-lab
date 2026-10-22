@@ -17,6 +17,7 @@ export const SUN_VIEW_IDS = [
   "corona",
   "eruption",
   "cycle",
+  "orbit",
 ] as const;
 export type SunViewId = (typeof SUN_VIEW_IDS)[number];
 
@@ -41,6 +42,8 @@ export type SunLight = {
 
 export type SunSceneSettings = {
   view: SunViewId;
+  /** Parker Solar Probe at its true size, the camera a few metres off. */
+  closeUp: boolean;
   /** 0 closed … 1 a quarter wedge. */
   cut: number;
   fieldLines: boolean;

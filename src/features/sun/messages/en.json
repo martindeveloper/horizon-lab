@@ -20,8 +20,8 @@
       "body": "Speed up or pause model time. The eruption demonstration has its own playback."
     },
     "places": {
-      "title": "Places",
-      "body": "Fly to a feature and open its card."
+      "title": "In view",
+      "body": "What this view shows. Pick one to open its card."
     },
     "settings": {
       "title": "Settings",
@@ -37,7 +37,11 @@
     }
   },
   "hud": {
-    "places": "Places",
+    "sharpening": "Loading detail",
+    "closeUp": "Close-up",
+    "leaveCloseUp": "Back to the Sun",
+    "closeUpNote": "True size, heat shield to the Sun.",
+    "places": "In view",
     "light": "Light",
     "clock": "Clock",
     "pause": "Pause the clock",
@@ -63,7 +67,8 @@
     "chromosphere": "Chromosphere",
     "corona": "Corona",
     "eruption": "Eruption",
-    "cycle": "The cycle"
+    "cycle": "The cycle",
+    "orbit": "Parker's orbit"
   },
   "viewHints": {
     "surface": "The photosphere in white light: dark at the limb, boiling with granules, spotted.",
@@ -72,7 +77,8 @@
     "chromosphere": "The limb in Hα: a forest of spicules, plage, filaments and a prominence.",
     "corona": "The disc hidden, as in an eclipse: streamers, plumes and the wind leaving.",
     "eruption": "A prescribed eruption and a reduced magnetic cross-section illustrate reconnection.",
-    "cycle": "An idealized repeating cycle illustrates spot migration and polarity reversal; it is not a forecast."
+    "cycle": "An idealized repeating cycle illustrates spot migration and polarity reversal; it is not a forecast.",
+    "orbit": "Parker Solar Probe's orbit from above the pole: a plunge through the corona, then a long swing out to cool."
   },
   "lights": {
     "white": "White light",
@@ -147,15 +153,15 @@
   "facts": {
     "coreRadius": "Core radius",
     "temperature": "Temperature",
-    "density": "Density, × water",
-    "hydrogen": "Hydrogen left",
-    "massLoss": "Mass to light, each second",
+    "density": "Density",
+    "hydrogen": "Hydrogen by mass",
+    "massLoss": "Mass turned to light, per second",
     "outerEdge": "Outer edge",
     "innerEdge": "Inner edge",
     "walk": "Radiative diffusion estimate, model",
     "walkLiterature": "Radiative diffusion estimate, literature",
     "lightTime": "Then to Earth",
-    "depth": "Depth",
+    "depth": "From the centre",
     "thickness": "Thickness",
     "interiorPeriod": "Chosen interior rotation period",
     "equatorPeriod": "Equator turns in",
@@ -175,7 +181,7 @@
     "polarField": "Polar field at minimum",
     "temperatureMinimum": "Coolest",
     "halpha": "Hα",
-    "flareIndex": "Flare size law, index",
+    "flareIndex": "Flare size law",
     "flareLine": "Flare plasma, Fe XXI",
     "hotLine": "Hot plasma, Fe XVIII",
     "quietLine": "Quiet loops, Fe IX",
@@ -183,14 +189,36 @@
     "coronaModel": "Corona as drawn",
     "greenLine": "Green line, Fe XIV",
     "greenLineTemperature": "Green line forms at",
-    "kCoronaBase": "Brightness at the limb, of the disc",
+    "kCoronaBase": "Brightness at the limb",
     "sourceSurface": "Model source surface",
     "windSlow": "Slow wind",
     "windFast": "Fast wind",
     "cmeSpeed": "Mean front speed on chosen timeline",
     "cyclePeriod": "Cycle",
-    "perihelion": "Closest approach, R☉",
-    "probeSpeed": "Speed then, km/s"
+    "perihelion": "Closest approach",
+    "probeSpeed": "Speed then",
+    "aphelion": "Farthest",
+    "orbitPeriod": "Orbit"
+  },
+  "rows": {
+    "plain": "{value}",
+    "kelvin": "{value} K",
+    "percent": "{value} %",
+    "solarRadii": "{value} R☉",
+    "kg": "{value} kg",
+    "km": "{value} km",
+    "acceleration": "{value} m/s²",
+    "speed": "{value} km/s",
+    "nm": "{value} nm",
+    "tesla": "{value} T",
+    "millitesla": "{value} mT",
+    "minutes": "{value} min",
+    "days": "{value} {valuePlural, select, one {day} other {days}}",
+    "years": "{value} {valuePlural, select, one {year} other {years}}",
+    "kyr": "{value} thousand years",
+    "timesWater": "{value} × water",
+    "ofDisc": "{value} × the disc's centre",
+    "slope": "slope {value}"
   },
   "panel": {
     "qualityNote": "Standard is the Sun as drawn for a desktop; Economy keeps a phone cool."
@@ -224,7 +252,7 @@
       "title": "Convection zone",
       "where": "Outer shell",
       "body": "Buoyant plasma rises, cools and sinks, carrying much of the energy through the outer envelope. Radiation still contributes and ultimately carries energy away from the photosphere.",
-      "caution": "The plumes drawn are a surrogate for turbulent convection, not a simulation of it."
+      "caution": "Cell sizes and lifetimes follow Model S (two pressure scale heights across, one turnover each); the cells themselves are drawn, not simulated."
     },
     "photosphere": {
       "title": "Photosphere",
@@ -308,7 +336,7 @@
       "title": "Parker Solar Probe",
       "where": "Through the corona",
       "body": "Parker first entered the solar corona in April 2021. On 24 December 2024 it reached its record orbit, about {parkerPerihelionR} solar radii from the Sun’s centre at about {parkerSpeed}; later passes repeated this close approach.",
-      "caution": "A marker for the December 2024 perihelion, not live telemetry. The orbit is not drawn and the probe is not to scale."
+      "caution": "Placed on its record orbit by the lab’s clock from JPL Horizons’ elements, not live telemetry; the orbit’s tilt and the direction of its closest point are the view’s."
     }
   },
   "tour": {
@@ -374,7 +402,7 @@
       },
       "surface": {
         "title": "Surface",
-        "body": "The large-scale white-light texture uses processed SDO/HMI continuum imagery near 617.3 nm, mosaicked from 1–22 May 2024; it is not a simultaneous full-sphere observation. Limb darkening and displayed colour are imposed. NOAA regions initialize the synthetic population, then model evolution takes over. Procedural granules, typically {granuleKm} km across and {granuleMin} minutes long, replace the texture close up. Other passbands are synthetic and are not co-temporal AIA observations."
+        "body": "The large-scale white-light texture uses processed SDO/HMI continuum imagery near 617.3 nm, mosaicked from 1–22 May 2024; it is not a simultaneous full-sphere observation. Limb darkening and displayed colour are imposed. NOAA regions initialize the synthetic population, then model evolution takes over. Masks extracted offline from that photograph preserve its sunspot outlines when zooming. Close-up filaments and umbral dots are illustrative, not recovered measurements or depth. Procedural granules are typically {granuleKm} km across and {granuleMin} minutes long. Other passbands are synthetic and are not co-temporal AIA observations."
       },
       "atmosphere": {
         "title": "Atmosphere",

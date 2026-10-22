@@ -11,7 +11,8 @@ import { SOLAR_GOLD } from "@horizon/toolkit/scene";
 import { hexToLinear, wavelengthColor, type Gamut } from "@horizon/toolkit/science";
 
 import {
-  CORE_SHIMMER_S,
+  CELL_SWELL_PER_LIFE,
+  CONVECTION_OCTAVES,
   HOLE_MAX,
   STREAMER_MAX,
   E_CORONA_NM,
@@ -20,10 +21,8 @@ import {
   LIGHT_MODES,
   NEGATIVE_HEX,
   NETWORK_LIFETIME_S,
-  PLUME_RISE_RADII_PER_S,
   POSITIVE_HEX,
   PROMINENCE_MAX,
-  RADIATIVE_DRIFT_S,
   RIBBON_GAP,
   REGION_MAX,
   SPICULE_LIFETIME_S,
@@ -75,10 +74,13 @@ export function createSunLooks() {
     uDipole: { value: 0 },
   };
   const motionUniforms = {
-    uClock: { value: new Vector4() },
+    uClock: { value: new Vector2() },
+    /** Each convection octave: cells per radius, the radius it is centred on, its cells' clock. */
+    uCellOctave: {
+      value: CONVECTION_OCTAVES.map((o) => new Vector4(o.cellsPerRadius, o.radius, 0, 0)),
+    },
     uTurn: { value: 0 },
     uEvershed: { value: 0 },
-    uPlumeRise: { value: 0 },
     uSpiculeClock: { value: 0 },
   };
   const viewUniforms = {
@@ -132,12 +134,13 @@ export function createSunLooks() {
       motionUniforms.uClock.value.set(
         (t / GRANULE_LIFETIME_S) % CLOCK_WRAP,
         (t / NETWORK_LIFETIME_S) % CLOCK_WRAP,
-        (t / CORE_SHIMMER_S) % CLOCK_WRAP,
-        (t / RADIATIVE_DRIFT_S) % CLOCK_WRAP,
       );
+      CONVECTION_OCTAVES.forEach((o, k) => {
+        motionUniforms.uCellOctave.value[k]!.z =
+          ((t / o.turnoverS) * CELL_SWELL_PER_LIFE) % CLOCK_WRAP;
+      });
       motionUniforms.uTurn.value = frame.surfaceTurn;
       motionUniforms.uEvershed.value = (t * EVERSHED_RADII_PER_S) % CLOCK_WRAP;
-      motionUniforms.uPlumeRise.value = (t * PLUME_RISE_RADII_PER_S) % CLOCK_WRAP;
       motionUniforms.uSpiculeClock.value = (t / SPICULE_LIFETIME_S) % CLOCK_WRAP;
       activityUniforms.uDipole.value = frame.dipole;
       const count = Math.min(frame.regions.length, REGION_MAX);

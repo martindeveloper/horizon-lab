@@ -1,0 +1,20 @@
+{
+  "sourceFile": "/textures/bodies/sun/v1/sun-near.webp",
+  "sourceSha256": "51a3fd1763a7c9f080bcf9945537bdae3c08d1793509e155c28fadffaca4bc00",
+  "mapVersion": 1,
+  "width": 8192,
+  "height": 4096,
+  "atlasWidth": 952,
+  "atlasHeight": 952,
+  "tiles": 184,
+  "components": 202,
+  "tile": 64,
+  "gutter": 2,
+  "penumbraThreshold": 0.88,
+  "seedThreshold": 0.8,
+  "umbraThreshold": 0.45,
+  "penumbraRange": 8,
+  "umbraRange": 32,
+  "atlasFile": "/textures/bodies/sun/spots/v1/atlas.png",
+  "pagesFile": "/textures/bodies/sun/spots/v1/pages.png"
+}
