@@ -12,6 +12,8 @@ test("a feature switch is on only in development with the debug tools, unless ov
   assert.equal(featureFlag("on", "production", false), true);
   assert.equal(featureFlag("off", "development", true), false);
   assert.equal(featureFlag("maybe", "development", true), true);
+  assert.equal(featureFlag(undefined, "production", false, true), true, "a released switch is on");
+  assert.equal(featureFlag("off", "production", false, true), false, "and can still be turned off");
 });
 
 test("the catalogue holds a switched simulation only while its switch is on", () => {

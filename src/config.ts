@@ -42,15 +42,17 @@ export const DEBUG = flag(process.env.NEXT_PUBLIC_DEBUG, ENVIRONMENT !== "produc
 export type FeatureId = "voyage" | "giants";
 
 /**
- * A feature switch's value: on in development while the debug tools are on, off in
- * previews and production; `override` (`on`/`off`) decides either way.
+ * A feature switch's value: on everywhere once `released`; before that, on in development
+ * while the debug tools are on, off in previews and production. `override` (`on`/`off`)
+ * decides either way.
  */
 export function featureFlag(
   override: string | undefined,
   environment: typeof ENVIRONMENT,
   debug: boolean,
+  released = false,
 ) {
-  return flag(override, environment === "development" && debug);
+  return flag(override, released || (environment === "development" && debug));
 }
 
 /**
@@ -60,7 +62,7 @@ export function featureFlag(
  */
 export const FEATURES: Readonly<Record<FeatureId, boolean>> = {
   voyage: featureFlag(process.env.NEXT_PUBLIC_FEATURE_VOYAGE, ENVIRONMENT, DEBUG),
-  giants: featureFlag(process.env.NEXT_PUBLIC_FEATURE_GIANTS, ENVIRONMENT, DEBUG),
+  giants: featureFlag(process.env.NEXT_PUBLIC_FEATURE_GIANTS, ENVIRONMENT, DEBUG, true),
 };
 
 /**

@@ -358,7 +358,7 @@ page scrolling.
 | `/lab/deep-field/laniakea`  | Deep Field view (heliosphere, stars, local-group, local-sheet, virgo-cluster, virgo-supercluster, laniakea, cosmic-web, observable-universe) |
 | `/lab/spectroscopy`         | Stellar Spectra, default view (the Sun)                                                                                                      |
 | `/lab/spectroscopy/stars`   | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
-| `/lab/giants`               | Giants, the Sun in focus (behind the `giants` feature switch)                                                                                |
+| `/lab/giants`               | Giants, the Sun in focus (behind the `giants` feature switch, released: on)                                                                  |
 | `/lab/giants/betelgeuse`    | Giants with that body in focus (every rung in `rungs.ts`)                                                                                    |
 | `/experience/voyage`        | Voyage, default place (Earth)                                                                                                                |
 | `/experience/voyage/saturn` | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
