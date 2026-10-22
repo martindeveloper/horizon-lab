@@ -133,6 +133,38 @@ test("orbit input handles drag, pinch handoff, wheel, cancellation and cleanup",
   }
 });
 
+test("a drag's turn follows the scale a scene gives it for the pose", () => {
+  const original = globalThis.window;
+  globalThis.window = new EventTarget();
+  const canvas = new FakeCanvas();
+  let pose = { azimuth: 0, inclination: 0, distance: 10 };
+  const input = createOrbitInput(canvas, {
+    getPose: () => pose,
+    onChange: (next) => {
+      pose = next;
+    },
+    distance: { min: 1, max: 20 },
+    dragScale: (at) => at.distance / 10,
+  });
+  try {
+    const down = { pointerId: 1, clientX: 0, clientY: 0, pointerType: "mouse", button: 0 };
+    event(canvas, "pointerdown", down);
+    event(canvas, "pointermove", { pointerId: 1, clientX: 10, clientY: 10 });
+    close(pose.azimuth, -0.05);
+    close(pose.inclination, 0.04);
+    event(canvas, "pointerup", { pointerId: 1 });
+    pose = { azimuth: 0, inclination: 0, distance: 2 };
+    event(canvas, "pointerdown", down);
+    event(canvas, "pointermove", { pointerId: 1, clientX: 10, clientY: 10 });
+    const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} != ${b}`);
+    near(pose.azimuth, -0.01); // A fifth of the turn at a fifth of the distance.
+    near(pose.inclination, 0.008);
+  } finally {
+    input.dispose();
+    globalThis.window = original;
+  }
+});
+
 test("close-start pinch recovers and wheel units have equivalent zoom", () => {
   const original = globalThis.window;
   globalThis.window = new EventTarget();

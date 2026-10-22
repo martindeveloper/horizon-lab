@@ -28,8 +28,8 @@ label padding is 48 CSS pixels, and viewports smaller than 8 pixels are hidden.
 
 `createOrbitInput(canvas, options)` owns pointer capture, drag, wheel, pinch,
 cancellation and listener cleanup. Get/commit poses through callbacks. Distances
-and inclination bounds, drag sensitivity, wheel sensitivity and enabled state
-are configurable. Wheel deltas are normalized to pixels (16 pixels per line,
+and inclination bounds, drag sensitivity (and `dragScale`, a factor on it for the
+pose a drag starts from), wheel sensitivity and enabled state are configurable. Wheel deltas are normalized to pixels (16 pixels per line,
 canvas height per page, `wheelPixels`) before applying sensitivity. A press that moves
 farther than `TAP_SLOP_PX` (6) is a drag, not a tap; the scene's tap picking uses the same. Call `cancel()` when a scripted tour takes control and
 `dispose()` on unmount. A pinch does not jump into drag when one finger lifts.

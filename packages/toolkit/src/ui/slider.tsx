@@ -10,6 +10,9 @@ export type SliderProps = ComponentProps<typeof SliderPrimitive.Root> & {
   valueText?: (value: number, index: number) => string;
   /** Names for each thumb of a multi-thumb slider; defaults to `aria-label`. */
   thumbLabels?: readonly string[];
+  /** Styles the track, e.g. a scale painted under the thumb; and the filled range, e.g. hidden over a scale. */
+  trackClassName?: string;
+  rangeClassName?: string;
 };
 
 export function Slider({
@@ -17,6 +20,8 @@ export function Slider({
   "aria-label": label,
   valueText,
   thumbLabels,
+  trackClassName,
+  rangeClassName,
   ...props
 }: SliderProps) {
   const values = props.value ?? props.defaultValue ?? [props.min ?? 0];
@@ -28,8 +33,13 @@ export function Slider({
       )}
       {...props}
     >
-      <SliderPrimitive.Track className="relative h-px w-full grow overflow-hidden rounded-full bg-fg/20">
-        <SliderPrimitive.Range className="absolute h-full bg-accent" />
+      <SliderPrimitive.Track
+        className={cn(
+          "relative h-px w-full grow overflow-hidden rounded-full bg-fg/20",
+          trackClassName,
+        )}
+      >
+        <SliderPrimitive.Range className={cn("absolute h-full bg-accent", rangeClassName)} />
       </SliderPrimitive.Track>
       {values.map((value, index) => (
         <SliderPrimitive.Thumb

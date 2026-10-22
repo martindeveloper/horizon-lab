@@ -96,9 +96,10 @@ says the view wants its own; with reduced motion it lands framed as the view is.
 `nearestView` and `atViewScale` (in `@horizon/toolkit/camera`) tell which view a
 distance is nearest and whether it is still at one.
 
-`createOrbitControls(scope, canvas, rig, { invalidate, distance, intercept,
-onInput })` drives the rig from drag, wheel and pinch. `intercept` sees each input
-first and may take it; `interacting` stays true for a moment after the last one.
+`createOrbitControls(scope, canvas, rig, { invalidate, distance, dragScale, intercept,
+onInput })` drives the rig from drag, wheel and pinch. `dragScale` scales a drag's turn
+for the pose it starts from; `intercept` sees each input first and may take it;
+`interacting` stays true for a moment after the last one.
 
 ## Tour camera
 

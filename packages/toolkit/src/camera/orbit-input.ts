@@ -9,6 +9,8 @@ export type OrbitInputOptions = {
   distance: { min: number; max: number };
   inclination?: { min: number; max: number };
   dragSensitivity?: { azimuth: number; inclination: number };
+  /** Scales a drag's turn for the pose it starts from (1 by default): a scene tightens the drag where the orbit's centre is far behind what the camera is near. */
+  dragScale?: (pose: OrbitPose) => number;
   wheelSensitivity?: (distance: number, trackpadPinch: boolean) => number;
 };
 
@@ -91,10 +93,15 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
       dy = event.clientY - lastY;
     lastX = event.clientX;
     lastY = event.clientY;
+    const scale = options.dragScale?.(pose) ?? 1;
     options.onChange({
       ...pose,
-      azimuth: pose.azimuth - dx * sensitivity.azimuth,
-      inclination: clamp(pose.inclination + dy * sensitivity.inclination, bounds.min, bounds.max),
+      azimuth: pose.azimuth - dx * sensitivity.azimuth * scale,
+      inclination: clamp(
+        pose.inclination + dy * sensitivity.inclination * scale,
+        bounds.min,
+        bounds.max,
+      ),
     });
   }
   function up(event: PointerEvent) {

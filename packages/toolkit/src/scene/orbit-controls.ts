@@ -19,6 +19,8 @@ export function createOrbitControls(
     invalidate: () => void;
     /** Bounds the input itself keeps to; the rig clamps to its own limits as it moves. */
     distance: { min: number; max: number };
+    /** Scales a drag's turn for the pose it starts from (see `createOrbitInput`). */
+    dragScale?: (pose: OrbitPose) => number;
     /** Runs first; true when it took the input itself (another owner of the camera). */
     intercept?: (next: OrbitPose) => boolean;
     /** After the pose follows an input. */
@@ -49,6 +51,7 @@ export function createOrbitControls(
       distance: options.distance,
       inclination: ORBIT_INCLINATION,
       dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
+      ...(options.dragScale ? { dragScale: options.dragScale } : {}),
       wheelSensitivity: () => 0.0012,
     }),
   );
