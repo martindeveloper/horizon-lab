@@ -1,4 +1,11 @@
-import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Sphere, Vector3 } from "three";
+import {
+  BoxGeometry,
+  BufferAttribute,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Sphere,
+  Vector3,
+} from "three";
 
 import { surfacePoint, tiltedAxis } from "../../model/surface";
 import {
@@ -23,49 +30,93 @@ export type ProminenceBound = {
   seed: number;
 };
 
-/** The unit vector at a latitude and longitude, and the sheet's direction along the surface there. */
-export function prominenceFrame(lat: number, lon: number, tilt: number) {
-  const anchor = new Vector3().fromArray(surfacePoint(lat, lon));
-  const along = new Vector3().fromArray(tiltedAxis(lat, lon, tilt));
-  return { anchor, along };
-}
-
-/** Small volume bounds, one per body, merged into one draw: 12 triangles each, on every device. */
-export function createProminenceGeometry(bounds: readonly ProminenceBound[]) {
-  if (bounds.length > SUN_ACTIVITY_MAX_REGIONS)
-    throw new RangeError(`at most ${SUN_ACTIVITY_MAX_REGIONS} prominences in one draw`);
+/** A bound's box, two units across and one tall, standing on its anchor: its corners, non-indexed. */
+function boxCorners() {
   const indexed = new BoxGeometry(2, 1, 2);
   const box = indexed.toNonIndexed();
   indexed.dispose();
   box.translate(0, 0.5, 0);
-  const p = box.getAttribute("position");
-  const positions: number[] = [];
-  const anchors: number[] = [];
-  const alongs: number[] = [];
-  const shapes: number[] = [];
-  const mirrors: number[] = [];
-  bounds.forEach(({ lat, lon, tilt, height, halfLength, seed }, region) => {
-    const { anchor, along } = prominenceFrame(lat, lon, tilt);
+  const corners = Float32Array.from(box.getAttribute("position").array);
+  box.dispose();
+  return corners;
+}
+const BOX_CORNERS = boxCorners();
+const PER_BOUND = BOX_CORNERS.length / 3;
+
+/**
+ * Room for `capacity` volume bounds in one draw, 12 triangles each, on every device; the bounds
+ * are written in place (`writeProminenceBounds`), so a prominence that moves costs an upload,
+ * never a new geometry.
+ */
+export function createProminenceSlots(capacity = SUN_ACTIVITY_MAX_REGIONS) {
+  if (capacity > SUN_ACTIVITY_MAX_REGIONS)
+    throw new RangeError(`at most ${SUN_ACTIVITY_MAX_REGIONS} prominences in one draw`);
+  const vertices = capacity * PER_BOUND;
+  const positions = new Float32Array(vertices * 3);
+  const mirrors = new Float32Array(vertices * 2);
+  for (let region = 0; region < capacity; region++) {
+    positions.set(BOX_CORNERS, region * BOX_CORNERS.length);
     // The one baked body reads differently mirrored along and across the sheet.
     const mirrorX = region % 2 === 0 ? 1 : -1;
     const mirrorZ = region % 4 < 2 ? 1 : -1;
-    for (let i = 0; i < p.count; i++) {
-      positions.push(p.getX(i), p.getY(i), p.getZ(i));
-      anchors.push(anchor.x, anchor.y, anchor.z);
-      alongs.push(along.x, along.y, along.z);
-      shapes.push(height, halfLength, seed, region);
-      mirrors.push(mirrorX, mirrorZ);
+    for (let i = region * PER_BOUND; i < (region + 1) * PER_BOUND; i++) {
+      mirrors[i * 2] = mirrorX;
+      mirrors[i * 2 + 1] = mirrorZ;
     }
-  });
-  box.dispose();
+  }
   const geometry = new BufferGeometry();
   geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("aAnchor", new Float32BufferAttribute(anchors, 3));
-  geometry.setAttribute("aAlong", new Float32BufferAttribute(alongs, 3));
-  geometry.setAttribute("aShape", new Float32BufferAttribute(shapes, 4));
+  geometry.setAttribute("aAnchor", new Float32BufferAttribute(new Float32Array(vertices * 3), 3));
+  geometry.setAttribute("aAlong", new Float32BufferAttribute(new Float32Array(vertices * 3), 3));
+  geometry.setAttribute("aShape", new Float32BufferAttribute(new Float32Array(vertices * 4), 4));
   geometry.setAttribute("aMirror", new Float32BufferAttribute(mirrors, 2));
+  geometry.boundingSphere = new Sphere(new Vector3(), 1);
+  geometry.setDrawRange(0, 0);
+  return geometry;
+}
+
+/** One of the slots' own attributes (`createProminenceSlots`). */
+function slot(geometry: BufferGeometry, name: string) {
+  const attribute = geometry.getAttribute(name);
+  if (!(attribute instanceof BufferAttribute))
+    throw new TypeError(`${name} is not a slot attribute`);
+  return attribute;
+}
+
+const anchorAt = new Vector3();
+const alongAt = new Vector3();
+
+/** Writes the bounds into the slots and draws only those; the bounding sphere follows them. */
+export function writeProminenceBounds(
+  geometry: BufferGeometry,
+  bounds: readonly ProminenceBound[],
+) {
+  const anchors = slot(geometry, "aAnchor");
+  const alongs = slot(geometry, "aAlong");
+  const shapes = slot(geometry, "aShape");
+  if (bounds.length * PER_BOUND > anchors.count)
+    throw new RangeError(`room for ${anchors.count / PER_BOUND} prominences, not ${bounds.length}`);
+  bounds.forEach(({ lat, lon, tilt, height, halfLength, seed }, region) => {
+    anchorAt.fromArray(surfacePoint(lat, lon));
+    alongAt.fromArray(tiltedAxis(lat, lon, tilt));
+    for (let i = region * PER_BOUND; i < (region + 1) * PER_BOUND; i++) {
+      anchors.setXYZ(i, anchorAt.x, anchorAt.y, anchorAt.z);
+      alongs.setXYZ(i, alongAt.x, alongAt.y, alongAt.z);
+      shapes.setXYZW(i, height, halfLength, seed, region);
+    }
+  });
+  anchors.needsUpdate = true;
+  alongs.needsUpdate = true;
+  shapes.needsUpdate = true;
+  geometry.setDrawRange(0, bounds.length * PER_BOUND);
   // The shader moves the boxes onto the sphere. Bound their outer corners, not the proxy positions.
-  geometry.boundingSphere = new Sphere(new Vector3(), prominenceReach(bounds));
+  geometry.boundingSphere!.radius = prominenceReach(bounds);
+}
+
+/** The bounds as one draw of their own. */
+export function createProminenceGeometry(bounds: readonly ProminenceBound[]) {
+  const geometry = createProminenceSlots(bounds.length);
+  writeProminenceBounds(geometry, bounds);
   return geometry;
 }
 

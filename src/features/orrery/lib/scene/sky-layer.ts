@@ -4,6 +4,7 @@
 import { Color, Group, Points, type Object3D } from "three";
 
 import { carrySky, createBrightSky } from "@/space/bright-stars";
+import { BRIGHT_STAR_LOOK, type SkyCounts } from "@/space/sky/milky-way";
 import { sunExists } from "@/space/solar-system/model/moment";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import type { SolarFrame, SolarKit } from "@/space/solar-system/scene/kit";
@@ -17,9 +18,7 @@ import {
   molecularCloud,
   skyEpoch,
   starMaterial,
-  starSize,
 } from "../graphics/sky";
-import type { SkyCounts } from "../quality";
 
 export function createSkyLayer(
   { scope, camera, dpr, invalidate }: SolarKit,
@@ -37,7 +36,7 @@ export function createSkyLayer(
   field.renderOrder = -3;
   field.frustumCulled = false;
   const brightMaterial = scope.own(starMaterial(dpr));
-  const bright = createBrightSky(scope, brightMaterial, { floor: 0.55, full: 1.4, size: starSize });
+  const bright = createBrightSky(scope, brightMaterial, BRIGHT_STAR_LOOK);
   sky.add(milkyWay.group, field, bright);
   parent.add(sky);
 

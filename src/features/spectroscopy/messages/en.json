@@ -37,7 +37,6 @@
     }
   },
   "hud": {
-    "views": "Views",
     "elements": "Elements"
   },
   "spectrum": {

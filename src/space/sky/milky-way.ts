@@ -34,7 +34,7 @@ import {
 } from "@horizon/toolkit/scene";
 import { workerTask } from "@horizon/toolkit/worker";
 
-import { FAR_SKY_PC } from "../bright-stars";
+import { FAR_SKY_PC, type BrightSkyLook } from "../bright-stars";
 import {
   BAND_HEIGHT,
   BAND_WIDTH,
@@ -55,6 +55,13 @@ export type SkyCounts = { milkyWay: number; fieldStars: number };
 export function starSize(mag: number) {
   return Math.max(1.1, 4.6 - (mag + 1.46) * 0.66);
 }
+
+/** The bright stars as every sky draws them: the faintest drawn at `floor`, full from magnitude `full`, sized by `starSize`. */
+export const BRIGHT_STAR_LOOK = {
+  floor: 0.55,
+  full: 1.4,
+  size: starSize,
+} as const satisfies BrightSkyLook;
 
 /* A painted point's temperature by its tint, for the Doppler shift of a sky flown through. */
 const WARM_K = 4500;

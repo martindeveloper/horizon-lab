@@ -3,6 +3,7 @@ import { DataTexture, FloatType, RGBAFormat } from "three";
 
 import { atmosphereProfile, continuumTable } from "@/space/sun/graphics/atmosphere";
 import { PROFILE_SAMPLES, SPECTRUM_SAMPLES } from "@/space/sun/graphics/parameters";
+import { logGravityCgs } from "@horizon/toolkit/science";
 
 import { RUNG_FACTS, drawn } from "../model/catalogue";
 import type { Look } from "../model/looks";
@@ -18,7 +19,7 @@ export function stellarTables(looks: readonly Look[]) {
     // Atmosphere grid excludes compact objects. Missing giant masses use the low-gravity
     // boundary as an explicit display assumption, not a claimed surface-gravity measurement.
     const stellar = look.style === "convective" || look.style === "radiative";
-    const logg = stellar ? (facts.gravity ? Math.log10(drawn(facts.gravity) * 100) : 0) : null;
+    const logg = stellar ? (facts.gravity ? logGravityCgs(drawn(facts.gravity)) : 0) : null;
     return atmosphereProfile((look.equatorK + look.poleK) / 2, logg, look.temperatures);
   });
   const data = new Float32Array(PROFILE_SAMPLES * 4 * MAX_DISCS);

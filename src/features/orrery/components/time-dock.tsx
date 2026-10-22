@@ -8,7 +8,7 @@ import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { convert } from "@horizon/toolkit/science";
-import { Dock, IconButton, Slider, Tooltip, cn } from "@horizon/toolkit/ui";
+import { Dock, IconButton, Slider, Tooltip, cn, sliderStopAt } from "@horizon/toolkit/ui";
 
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import {
@@ -25,13 +25,13 @@ import { formatYearsAgo } from "./format";
 import { DISPLAY, Switches } from "./view-controls";
 
 /* Epochs sit at their true places on the track, alternating above and below it so
-   neighbouring labels never meet. The 7px inset follows the thumb's in-bounds travel. */
+   neighbouring labels never meet, each where the thumb's centre stops for it. */
 const STATIONS = EPOCHS.map((epoch, i) => ({
   ...epoch,
   at: yearsAgoToSlider(epoch.yearsAgo),
   below: i % 2 === 1,
 }));
-const trackX = (at: number) => `calc(7px + ${at} * (100% - 14px))`;
+const trackX = sliderStopAt;
 
 /**
  * The dock never moves for a side panel. Only where its centred width reaches the panel

@@ -1,11 +1,20 @@
 import { SOLAR_MEAN_MOLECULAR_WEIGHT } from "@/space/solar-composition";
-import { NETWORK_GRANULES, PROFILE_SAMPLES } from "@/space/sun/graphics/parameters";
+import {
+  CHROMOSPHERE_HEIGHT,
+  FACULA_CONTRAST,
+  NETWORK_GRANULES,
+  PROFILE_SAMPLES,
+  SPICULE_HEIGHT,
+} from "@/space/sun/graphics/parameters";
+import { JOY_SLOPE } from "@/space/sun/model/parameters";
+import { SURFACE_ROTATION_DEG_PER_DAY } from "@/space/sun/model/rotation";
 import type { PlanetId } from "@horizon/toolkit/bodies";
 import {
   BOLTZMANN_CONSTANT,
   PLANCK_CONSTANT,
   SHADOW_PER_RS,
   SPEED_OF_LIGHT,
+  WATER_DENSITY_KG_M3,
 } from "@horizon/toolkit/science";
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
@@ -28,8 +37,8 @@ export const MEAN_MOLECULAR_WEIGHT = SOLAR_MEAN_MOLECULAR_WEIGHT;
 export const GRANULE_SCALE_HEIGHTS = 8;
 /** A teaspoon, m³. */
 export const TEASPOON_M3 = 5e-6;
-/** Water and sea-level air (20 °C), kg/m³: what a card compares a star's mean density with. */
-export const WATER_DENSITY = 1_000;
+/** Water (the kit's) and sea-level air (20 °C), kg/m³: what a card compares a star's mean density with. */
+export const WATER_DENSITY = WATER_DENSITY_KG_M3;
 export const AIR_DENSITY = 1.204;
 
 /** The planets whose orbits are drawn around a star in the Sun's place, at their mean distances. */
@@ -173,8 +182,6 @@ export const CELL_CONTRAST_GIANT = 0.065;
 /** Red-supergiant broad temperature variations dominate the much fainter fine turbulence. */
 export const GIANT_CONTRAST = 0.09;
 export const GIANT_FINE_CONTRAST = 0.012;
-/** Resolve cells only above 2–4 drawing-buffer pixels, including foreshortening. */
-export const SURFACE_RESOLVE_PX = 2;
 /** Spicule columns around a circumference (~0.002 radians apart), independent of zoom/DPR. */
 export const SPICULE_COLUMNS = 3_142;
 /**
@@ -183,8 +190,6 @@ export const SPICULE_COLUMNS = 3_142;
  */
 export const UMBRA_DEPTH = 0.31;
 export const PENUMBRA_DEPTH = 0.1;
-/** Faculae round an active region: this much hotter where they show best, at the limb. */
-export const FACULA_CONTRAST = 0.09;
 /**
  * The supergranules' network's contrast as a share of the temperature (its scale is the shared
  * `NETWORK_GRANULES`), a teaching exaggeration of white light's faint network so the scale shows.
@@ -301,11 +306,12 @@ export const BIG_FLARE_EVERY = 3;
 export const LOOP_DELAY_S = 2.5;
 /**
  * How much slower a surface turns at its poles than at its equator: Ω(φ) = Ω₀ (1 − k sin² φ),
- * the Sun's k (Snodgrass & Ulrich 1990), for every convective star.
+ * the Sun's k (its law's sin² term over its equatorial rate), for every convective star.
  */
-export const DIFFERENTIAL_ROTATION = 0.19;
-/** A spot group's tilt towards the equator per radian of latitude (Joy's law, about ½). */
-export const JOY_TILT = 0.5;
+export const DIFFERENTIAL_ROTATION =
+  -SURFACE_ROTATION_DEG_PER_DAY.B / SURFACE_ROTATION_DEG_PER_DAY.A;
+/** A spot group's tilt towards the equator per radian of latitude: the Sun's Joy's law. */
+export const JOY_TILT = JOY_SLOPE;
 /**
  * An ejection: a flare at least this share of its star's peak, within this far of the limb
  * (|z| of its region), lifts its prominence away; the front leaves at this many radii a
@@ -336,12 +342,6 @@ export const EJECTION_GLOW = 0.16;
 export const FLASH_GLARE = 0.35;
 /** A flare's white light is a hot continuum, about this warm, K. */
 export const FLARE_K = 9_000;
-/**
- * Solar-inspired chromosphere depth and spicule reach, in stellar radii. On the Sun these
- * correspond to about 2,000 km and 10,000 km; other stars use this illustrative scaling.
- */
-export const CHROMOSPHERE_HEIGHT = 0.003;
-export const SPICULE_HEIGHT = 0.014;
 /**
  * Prominences and the chromosphere glow in the Balmer lines, Hα with Hβ and Hγ: the pink of an
  * eclipse (encoded sRGB).
@@ -421,7 +421,6 @@ export const SHADER_DEFINES = glslDefines({
   ORBIT_CASE_DEPTH,
   PLANCK_KELVIN,
   PROFILE_SAMPLES: glslInt(PROFILE_SAMPLES),
-  SURFACE_RESOLVE_PX,
   SPICULE_COLUMNS: glslInt(SPICULE_COLUMNS),
   REGIONS: glslInt(REGIONS),
   SHEETS: glslInt(SHEETS),
@@ -489,9 +488,6 @@ export const SHADER_DEFINES = glslDefines({
   ...codes("TINT", TINTS),
 });
 
-/** The stage's colours, as the theme's `space` and `solar` tokens (encoded sRGB). */
-export const SPACE_SRGB = [8 / 255, 8 / 255, 11 / 255] as const;
-export const ACCENT_SRGB = [226 / 255, 192 / 255, 122 / 255] as const;
 /** Frames a second while the camera rests and only the stars move. */
 export const IDLE_FPS = 30;
 /**

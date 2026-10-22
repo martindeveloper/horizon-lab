@@ -107,13 +107,6 @@ vec3 hitSpheroid(vec2 v, float tilt, float flattening, out vec3 normal) {
   return unit;
 }
 
-// A point of the unit sphere turned `angle` about the pole.
-vec3 turned(vec3 p, float angle) {
-  float ca = cos(angle);
-  float sa = sin(angle);
-  return vec3(ca * p.x + sa * p.z, p.y, -sa * p.x + ca * p.z);
-}
-
 #include "./stellar-light.glsl"
 #include "./surface.glsl"
 #include "./weather.glsl"

@@ -10,7 +10,7 @@ import { formatAu } from "@/lib/facts";
 import { isSolarView } from "@/space/solar-system/model/views";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
 import { LIGHT_YEAR_AU } from "@horizon/toolkit/science";
-import { Tooltip, cn, useMediaQuery } from "@horizon/toolkit/ui";
+import { Tooltip, cn, sliderStopAt, useMediaQuery } from "@horizon/toolkit/ui";
 
 import { RUNGS, depthOf, lyAtDepth } from "../lib/model/depth";
 import { METHOD_OF } from "../lib/model/views";
@@ -64,7 +64,7 @@ export function DepthLadder() {
     const behind = RUNGS.filter((rung) => rung.depth < depth - 1e-3).length - 1;
     go(step > 0 ? (ahead < 0 ? RUNGS.length - 1 : ahead) : Math.max(0, behind));
   };
-  const at = (d: number) => `calc(7px + ${d} * (100% - 14px))`;
+  const at = sliderStopAt;
   const valueText = `${t("hud.atDepth", {
     view: t(`views.${view}`),
     distance: formatAu(t, { unit, locale }, lyAtDepth(depth) * LIGHT_YEAR_AU),

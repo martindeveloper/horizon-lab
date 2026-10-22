@@ -4,7 +4,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 import { useState, type PointerEvent } from "react";
 
 import { convert, cssColor, encodeSrgb, hellandBlackbodyLinear } from "@horizon/toolkit/science";
-import { Tooltip, cn } from "@horizon/toolkit/ui";
+import { SLIDER_THUMB_PX, Tooltip, cn, sliderStopAt } from "@horizon/toolkit/ui";
 
 import { radiusMetres } from "../lib/model/catalogue";
 import { LOOKS, type Look } from "../lib/model/looks";
@@ -15,9 +15,8 @@ import { useGiants } from "../lib/store";
 import { keyFigures, useDistance, useGiantsT } from "./format";
 
 const LAST = RUNG_IDS.length - 1;
-/** The thumb's diameter (`size-3.5`), px: dots sit where the thumb's centre stops for them. */
-const THUMB_PX = 14;
-const at = (share: number) => `calc(${THUMB_PX / 2}px + ${share} * (100% - ${THUMB_PX}px))`;
+/** Dots sit where the thumb's centre stops for them. */
+const at = sliderStopAt;
 /** A dot's diameter, px, from the smallest body's to the largest's, by the log of the radius. */
 const DOT_PX = [3, 11] as const;
 
@@ -63,7 +62,7 @@ const EARTH_ORBIT = (() => {
 /** The body nearest a pointer over the strip, as the thumb's travel maps it. */
 function bodyUnder(event: PointerEvent<HTMLElement>) {
   const box = event.currentTarget.getBoundingClientRect();
-  const share = (event.clientX - box.left - THUMB_PX / 2) / (box.width - THUMB_PX);
+  const share = (event.clientX - box.left - SLIDER_THUMB_PX / 2) / (box.width - SLIDER_THUMB_PX);
   return Math.min(LAST, Math.max(0, Math.round(share * LAST)));
 }
 

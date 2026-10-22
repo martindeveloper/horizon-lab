@@ -13,7 +13,13 @@ import { BufferAttribute, Points, Vector3, type DataTexture, type Object3D } fro
 
 import { brightStarGeometry } from "@/space/bright-stars";
 import { LY } from "@/space/galaxy/scene/frames";
-import { createMilkyWay, fieldStars, starSize, type SkyCounts } from "@/space/sky/milky-way";
+import {
+  BRIGHT_STAR_LOOK,
+  createMilkyWay,
+  fieldStars,
+  starSize,
+  type SkyCounts,
+} from "@/space/sky/milky-way";
 import { STARS } from "@/space/star-catalogue";
 import { starDistance } from "@/space/star-distances";
 import { pointsGeometry, rising, type Vec3d } from "@horizon/toolkit/scene";
@@ -44,12 +50,7 @@ function sunGeometry() {
 
 /** The catalogue's stars, with α Centauri's point marked as the one another layer takes over. */
 function catalogueGeometry() {
-  const geometry = brightStarGeometry({
-    floor: 0.55,
-    full: 1.4,
-    size: starSize,
-    distanceOf: starDistance,
-  });
+  const geometry = brightStarGeometry({ ...BRIGHT_STAR_LOOK, distanceOf: starDistance });
   const handover = new Float32Array(
     STARS.map(([name]) => +(name === ALPHA_CENTAURI_CATALOGUE_NAME)),
   );

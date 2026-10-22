@@ -1,7 +1,8 @@
-import { Hand, Minus, Navigation, Orbit, Pause, Play, Plus, Rocket } from "lucide-react";
+import { Hand, Navigation, Orbit, Rocket } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 
+import { RateStepper } from "@/components/simulations/rate-stepper";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { asideOpen } from "@/lib/scene-store";
 import { IconButton, Kicker, SegmentedControl, Tooltip, cn } from "@horizon/toolkit/ui";
@@ -185,49 +186,24 @@ function TimeWarp({ className }: { className?: string }) {
   const rate = CLOCK_RATES[index]!.id;
   const go = (next: number) => useVoyage.getState().setCompression(CLOCK_RATES[next]!.value);
   return (
-    <div
-      role="group"
-      aria-label={t("hud.rate")}
-      data-coach="rate"
-      className={cn("flex items-center", className)}
-    >
-      <Tooltip label={holdLabel} side="top" align="start">
-        <IconButton
-          aria-label={holdLabel}
-          active={!held}
-          disabled={flying}
-          onClick={() => useVoyage.getState().toggleHold()}
-        >
-          {held ? <Play className="size-4" /> : <Pause className="size-4" />}
-        </IconButton>
-      </Tooltip>
-      <IconButton
-        aria-label={t("hud.slower")}
-        disabled={fixed || index === 0}
-        onClick={() => go(index - 1)}
-      >
-        <Minus className="size-3.5" />
-      </IconButton>
-      <output
-        aria-live="polite"
-        className={cn(
-          "min-w-16 text-center font-mono text-[11px] tabular-nums",
-          auto ? "text-accent" : held ? "text-subtle" : "text-fg",
-        )}
-      >
-        <span aria-hidden="true">{auto ? formatWarp(t, f, warp) : t(`ratesShort.${rate}`)}</span>
-        <span className="sr-only">
-          {auto ? t("hud.warpAuto", { value: formatWarp(t, f, warp) }) : t(`rates.${rate}`)}
-        </span>
-      </output>
-      <IconButton
-        aria-label={t("hud.faster")}
-        disabled={fixed || index === last}
-        onClick={() => go(index + 1)}
-      >
-        <Plus className="size-3.5" />
-      </IconButton>
-    </div>
+    <RateStepper
+      label={t("hud.rate")}
+      coach="rate"
+      className={className}
+      running={!held}
+      toggleLabel={holdLabel}
+      toggleDisabled={flying}
+      onToggle={() => useVoyage.getState().toggleHold()}
+      slowerLabel={t("hud.slower")}
+      fasterLabel={t("hud.faster")}
+      slowerDisabled={fixed || index === 0}
+      fasterDisabled={fixed || index === last}
+      onSlower={() => go(index - 1)}
+      onFaster={() => go(index + 1)}
+      readout={auto ? formatWarp(t, f, warp) : t(`ratesShort.${rate}`)}
+      spoken={auto ? t("hud.warpAuto", { value: formatWarp(t, f, warp) }) : t(`rates.${rate}`)}
+      readoutClassName={auto ? "text-accent" : held ? "text-subtle" : "text-fg"}
+    />
   );
 }
 

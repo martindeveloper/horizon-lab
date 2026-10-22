@@ -139,7 +139,10 @@
     "show": "Show",
     "units": "Distances in",
     "smallWorlds": "Dwarf planets and comets",
-    "belts": "Belts and clouds"
+    "belts": "Belts and clouds",
+    "views": "Views",
+    "sharpening": "Loading detail",
+    "closeUp": "Close-up"
   },
   "badges": {
     "measured": "Measured",

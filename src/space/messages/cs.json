@@ -139,7 +139,10 @@
     "show": "Zobrazit",
     "units": "Vzdálenosti v",
     "smallWorlds": "Trpasličí planety a komety",
-    "belts": "Pásy a oblaky"
+    "belts": "Pásy a oblaky",
+    "views": "Pohledy",
+    "sharpening": "Načítám detail",
+    "closeUp": "Zblízka"
   },
   "badges": {
     "measured": "Z měření",

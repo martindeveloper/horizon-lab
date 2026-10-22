@@ -10,6 +10,7 @@ import type { Vec3 } from "@horizon/toolkit/bodies";
 import { length3 } from "@horizon/toolkit/math";
 import {
   AU_LIGHT_SECONDS,
+  DAY_SECONDS,
   JULIAN_YEAR_SECONDS,
   julianEpoch,
   julianEpochMs,
@@ -146,9 +147,9 @@ export function probeSpeed(id: ProbeId, date: Date) {
   return Math.hypot(later[0] - there[0], later[1] - there[1], later[2] - there[2]) / (2 * h);
 }
 
-const DAY_MS = 86_400_000;
+const DAY_MS = DAY_SECONDS * 1000;
 /** A light-day, au: about 173. */
-export const LIGHT_DAY_AU = 86_400 / AU_LIGHT_SECONDS;
+export const LIGHT_DAY_AU = DAY_SECONDS / AU_LIGHT_SECONDS;
 const lightDays = new Map<ProbeId, Date | null>();
 
 /**

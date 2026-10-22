@@ -14,7 +14,6 @@ import { wrap } from "@horizon/toolkit/math";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import {
-  CARRINGTON_SYNODIC_PERIOD_D,
   DAY_S,
   MAP_EPOCH,
   MSH_PER_RAD2,
@@ -22,6 +21,7 @@ import {
   REGION_SIZE_MAX_RAD,
 } from "./parameters";
 import DATA from "./regions-2024-05.json";
+import { CARRINGTON_SYNODIC_PERIOD_D } from "./rotation";
 
 export type ObservedRegion = {
   /** The full NOAA number (13664). */

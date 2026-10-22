@@ -84,9 +84,9 @@ test("layer bounds follow from the table: a quarter-radius core, the tachocline 
       `${LAYER_ZONES[i].id} starts where ${LAYER_ZONES[i - 1].id} ends`,
     );
   assert.equal(layerAt(0.1).id, "core");
-  assert.equal(layerAt(0.5).id, "radiative");
+  assert.equal(layerAt(0.5).id, "radiativeZone");
   assert.equal(layerAt(0.7).id, "tachocline");
-  assert.equal(layerAt(0.9).id, "convection");
+  assert.equal(layerAt(0.9).id, "convectionZone");
   assert.equal(layerAt(1).id, "photosphere");
 });
 

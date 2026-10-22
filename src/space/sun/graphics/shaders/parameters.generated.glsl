@@ -5,6 +5,7 @@
 #define SPECTRUM_MIN_K             500.0
 #define SPECTRUM_MAX_K             100000.0
 #define SPECTRUM_SAMPLES           384
+#define SURFACE_RESOLVE_PX         2.0
 #define SUN_ACTIVITY_DEPTH_RATIO   0.24
 #define SUN_ACTIVITY_SINK          0.55
 #define SUN_ACTIVITY_LIFT_WIDENING 0.6

@@ -49,7 +49,7 @@ test("every Sun fact has a known source, a unit of the kit, a status and a finit
   }
 });
 
-test("the lecture's figures are catalogued within their known ranges", () => {
+test("the model's derived figures land within the literature's ranges", () => {
   const { layers, activity, star } = SUN_CATALOGUE;
   const within = (fact, low, high) => {
     const value = fact.value ?? Math.sqrt(fact.range[0] * fact.range[1]);
@@ -61,16 +61,9 @@ test("the lecture's figures are catalogued within their known ranges", () => {
   within(layers.interior.photonWalk, 3e12, 1e13);
   within(layers.photosphere.thickness, 300, 500);
   within(layers.photosphere.density, 1e-7, 4e-7);
-  within(layers.photosphere.granuleSize, 500, 2_000);
-  within(layers.photosphere.granuleLifetime, 5, 20);
-  within(layers.photosphere.supergranuleSize, 20_000, 50_000);
-  within(activity.sunspot.umbraIntensity, 5, 30);
-  within(activity.sunspot.umbraTemperature, 3_700, 4_500);
   within(activity.sunspot.field, 0.2, 0.35);
   within(layers.chromosphere.thickness, 1_000, 3_000);
-  within(layers.chromosphere.temperature, 4_500, 20_000);
   within(layers.chromosphere.halpha, 656.2, 656.4);
-  within(layers.corona.temperature, 1e6, 3e6);
   within(activity.field.meanField, 1e-4, 1e-3);
   within(activity.cycle.period, 10, 12);
   within(activity.cycle.maunderLength, 69, 71);

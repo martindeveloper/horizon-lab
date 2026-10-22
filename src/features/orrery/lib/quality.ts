@@ -8,9 +8,6 @@ import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import { SUN_ACTIVITY_MAX_STEPS } from "./model/solar-activity";
 
-/** The sky's point counts: the Milky Way's resolved grains and the faint field stars. */
-export type SkyCounts = { milkyWay: number; fieldStars: number };
-
 /** Far measured maps: bytes kept resident, and texture filtering at grazing angles. */
 export type MapQuality = { budget: number; anisotropy: number };
 
@@ -18,17 +15,10 @@ export type MapQuality = { budget: number; anisotropy: number };
 export type CloseUpQuality = { light: boolean; anisotropy: number; airSteps: number };
 
 type OrreryQuality = SpaceQuality & {
-  sky: SkyCounts;
   maps: MapQuality;
   closeUp: CloseUpQuality;
   /** Ray-march steps through the Sun's prominences. */
   activitySteps: number;
-};
-
-const SKY: ByTier<SkyCounts> = {
-  light: { milkyWay: 12_000, fieldStars: 900 },
-  full: { milkyWay: 30_000, fieldStars: 1_600 },
-  max: { milkyWay: 45_000, fieldStars: 2_400 },
 };
 
 const MAPS: ByTier<MapQuality> = {
@@ -59,7 +49,6 @@ export function orreryQuality(quality: RenderQuality, tight: boolean): OrreryQua
   const { tier } = space;
   return {
     ...space,
-    sky: SKY[tier],
     maps: tier === "max" && tight ? TIGHT_MAX_MAPS : MAPS[tier],
     closeUp: CLOSE_UP[tier],
     activitySteps: ACTIVITY_STEPS[tier],

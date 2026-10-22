@@ -13,6 +13,7 @@
 import { literatureFact, factsOf, type Fact, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
 import { STARS as NEIGHBOURS } from "@/space/galaxy/model/catalogue/stars";
+import { surfacePeriod } from "@/space/sun/model/rotation";
 
 /** What is measured of a star, a remnant or a hole; any may be missing. */
 export type StellarFigures = {
@@ -143,10 +144,15 @@ export const NAMED_STARS = {
     distance: NEIGHBOURS.alphaCen.distance,
   },
   sun: {
-    rotation: literatureFact(24.47, "d", "snodgrass1990", "flag", {
+    rotation: {
+      value: surfacePeriod(0),
+      unit: "s",
+      show: "d",
       digits: 3,
-      note: "sidereal, at the equator, from the 14.713°/day Doppler rate; higher latitudes turn more slowly",
-    }),
+      source: "snodgrass1990",
+      status: "derived",
+      note: "sidereal, at the equator, from the Doppler surface law; higher latitudes turn more slowly",
+    },
     radius: literatureFact(1, "Rsun", "iau2015b3", "verified", {
       digits: 4,
       note: "695,700 km, nominal",

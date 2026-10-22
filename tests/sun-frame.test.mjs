@@ -1,15 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { PLACE_IDS, createSunModel, dipoleAt, placeAnchor } from "../src/space/sun/frame.ts";
+import { createSunModel, dipoleAt } from "../src/space/sun/frame.ts";
 import {
   DAY_S,
   MAX_FIELD_LINES,
   PROMINENCE_SLOTS,
   REGION_SLOTS,
-  SOURCE_SURFACE_R,
 } from "../src/space/sun/model/parameters.ts";
-import { LAYERS } from "../src/space/sun/model/structure.ts";
 
 const input = (over = {}) => ({
   time: 120 * DAY_S,
@@ -19,7 +17,6 @@ const input = (over = {}) => ({
   fieldLineCount: 80,
   ...over,
 });
-const radius = (p) => Math.hypot(...p);
 
 test("the surface frame turns prograde with west, where longitude grows, on the right seen from Earth", async () => {
   const { surfacePoint, westAt, northAt, tiltedAxis } =
@@ -121,50 +118,4 @@ test("geometry revisions track reused buffers, without changing for a light-only
   model.frameAt(input({ eruptionScrub: 0.75, fieldLineCount: 24 }));
   assert.equal(frame.fieldLines, field);
   assert.ok(frame.fieldRevision > fieldRevision, "the corona must reshape with the field");
-});
-
-test("every place has an anchor in the body frame, or none when the Sun lacks it", () => {
-  const model = createSunModel(5);
-  const frame = model.frameAt(input({ eruptionScrub: 0.7 }));
-  for (const place of PLACE_IDS) {
-    const anchor = placeAnchor(frame, place);
-    if (anchor === null) continue;
-    assert.equal(anchor.length, 3, place);
-    assert.ok(anchor.every(Number.isFinite), place);
-  }
-  assert.ok(Math.abs(radius(placeAnchor(frame, "core")) - LAYERS.core / 2) < 1e-9);
-  assert.ok(Math.abs(radius(placeAnchor(frame, "tachocline")) - LAYERS.tachocline) < 1e-9);
-  assert.ok(Math.abs(radius(placeAnchor(frame, "photosphere")) - 1) < 1e-9);
-  assert.ok(Math.abs(radius(placeAnchor(frame, "granule")) - 1) < 1e-9);
-  assert.ok(
-    radius(placeAnchor(frame, "chromosphere")) > 1 &&
-      radius(placeAnchor(frame, "chromosphere")) < 1.01,
-  );
-  assert.ok(radius(placeAnchor(frame, "spicule")) > radius(placeAnchor(frame, "chromosphere")));
-  assert.ok(radius(placeAnchor(frame, "corona")) > 1.2);
-  const sunspot = placeAnchor(frame, "sunspot");
-  assert.ok(sunspot && Math.abs(radius(sunspot) - 1) < 1e-9, "on the strongest region");
-  const flare = placeAnchor(frame, "flare");
-  const ejection = placeAnchor(frame, "ejection");
-  assert.ok(flare && radius(flare) > 1, "over the erupting region");
-  assert.ok(
-    ejection && Math.abs(radius(ejection) - frame.eruption.cmeFront) < 1e-9,
-    "at the ejection's front",
-  );
-  const streamer = placeAnchor(frame, "streamer");
-  assert.ok(
-    streamer && radius(streamer) > 1.05 && radius(streamer) < SOURCE_SURFACE_R,
-    "a closed line's apex",
-  );
-  const wind = placeAnchor(frame, "wind");
-  assert.ok(wind && Math.abs(radius(wind) - SOURCE_SURFACE_R) < 1e-3, "where an open line leaves");
-  model.frameAt(input({ eruptionScrub: 0.5 }));
-  assert.ok(frame.eruption.cmeFront > 1, "the geometric front already exists before visibility");
-  assert.equal(frame.eruption.cmePresence, 0);
-  assert.equal(placeAnchor(frame, "ejection"), null, "do not label a hidden CME envelope");
-  /* A quiet Sun with no eruption has no flare or ejection to name. */
-  const quiet = createSunModel(5).frameAt(input({ cyclePhase: 25.0, fieldLineCount: 0 }));
-  assert.equal(placeAnchor(quiet, "ejection"), null);
-  assert.equal(placeAnchor(quiet, "streamer"), null);
-  assert.ok(placeAnchor(quiet, "wind"), "the pole's open field stands in");
 });

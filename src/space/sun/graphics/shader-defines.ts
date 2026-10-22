@@ -1,6 +1,6 @@
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
-import { SPECTRUM_MAX_K, SPECTRUM_MIN_K, SPECTRUM_SAMPLES } from "./parameters";
+import { SPECTRUM_MAX_K, SPECTRUM_MIN_K, SPECTRUM_SAMPLES, SURFACE_RESOLVE_PX } from "./parameters";
 import {
   SUN_ACTIVITY_DEPTH_RATIO,
   SUN_ACTIVITY_EXTINCTION,
@@ -23,6 +23,7 @@ export const SUN_SHARED_SHADER_DEFINES = glslDefines({
   SPECTRUM_MIN_K,
   SPECTRUM_MAX_K,
   SPECTRUM_SAMPLES: glslInt(SPECTRUM_SAMPLES),
+  SURFACE_RESOLVE_PX,
   SUN_ACTIVITY_DEPTH_RATIO,
   SUN_ACTIVITY_SINK,
   SUN_ACTIVITY_LIFT_WIDENING,

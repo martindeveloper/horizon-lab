@@ -7,7 +7,6 @@
  */
 import type { CosmosDetail } from "@/space/cosmos/graphics/cosmos";
 import { spaceQuality, type ByTier, type SpaceQuality } from "@/space/quality";
-import type { SkyCounts } from "@/space/sky/milky-way";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 
 import type { MapBudgetQuality } from "./scene/map-budget";
@@ -24,8 +23,6 @@ type VoyageQuality = SpaceQuality & {
   ringTexels: number;
   /** The cosmic map's sampling. */
   cosmos: CosmosDetail;
-  /** The painted sky's points: the Milky Way's grains and the faint field. */
-  sky: SkyCounts;
   /** Motes of dust streaming past a moving ship. */
   streaks: number;
 };
@@ -53,13 +50,6 @@ const COSMOS: ByTier<CosmosDetail> = {
   max: { share: 1.5, filaments: 38, knots: 110, strand: 3, bridgeStrand: 0.9 },
 };
 const RING_TEXELS: ByTier<number> = { light: 1024, full: 4096, max: 4096 };
-/** The painted sky's counts, as the Orrery's. */
-const SKY: ByTier<SkyCounts> = {
-  light: { milkyWay: 12_000, fieldStars: 900 },
-  full: { milkyWay: 30_000, fieldStars: 1_600 },
-  max: { milkyWay: 45_000, fieldStars: 2_400 },
-};
-
 const STREAKS: ByTier<number> = { light: 260, full: 480, max: 720 };
 
 export function voyageQuality(quality: RenderQuality, tight: boolean): VoyageQuality {
@@ -72,7 +62,6 @@ export function voyageQuality(quality: RenderQuality, tight: boolean): VoyageQua
     occluders: OCCLUDERS[tier],
     ringTexels: RING_TEXELS[tier],
     cosmos: COSMOS[tier],
-    sky: SKY[tier],
     streaks: STREAKS[tier],
   };
 }

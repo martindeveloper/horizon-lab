@@ -6,12 +6,12 @@
  */
 import { TAU } from "@horizon/toolkit/math";
 import {
-  GRAVITATIONAL_CONSTANT,
   SOLAR_MASS_KG,
   SOLAR_RADIUS_KM,
   SOLAR_TEFF_K,
   lightTravelTime,
   pressureScaleHeight,
+  surfaceGravity,
 } from "@horizon/toolkit/science";
 
 import { GRANULE_SCALE_HEIGHTS, MEAN_MOLECULAR_WEIGHT, TEASPOON_M3 } from "../parameters";
@@ -22,16 +22,12 @@ const SOLAR_RADIUS_M = SOLAR_RADIUS_KM * 1e3;
 export const radiusOf = (luminositySuns: number, kelvin: number) =>
   Math.sqrt(luminositySuns) / (kelvin / SOLAR_TEFF_K) ** 2;
 
-/** Surface gravity, m/s², from mass (kg) and radius (m). */
-export const surfaceGravity = (massKg: number, radiusM: number) =>
-  (GRAVITATIONAL_CONSTANT * massKg) / radiusM ** 2;
-
 /**
  * Convection cells across a star's radius: its radius over a cell of `GRANULE_SCALE_HEIGHTS`
  * pressure scale heights of its photosphere. The Sun has hundreds; a red supergiant a handful.
  */
 export function granulesAcross(massSuns: number, radiusSuns: number, kelvin: number) {
-  const g = surfaceGravity(massSuns * SOLAR_MASS_KG, radiusSuns * SOLAR_RADIUS_M);
+  const g = surfaceGravity.compute({ M: massSuns * SOLAR_MASS_KG, R: radiusSuns * SOLAR_RADIUS_M });
   const H = pressureScaleHeight.compute({ T: kelvin, mu: MEAN_MOLECULAR_WEIGHT, g });
   return (radiusSuns * SOLAR_RADIUS_M) / (GRANULE_SCALE_HEIGHTS * H);
 }

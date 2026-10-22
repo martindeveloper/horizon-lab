@@ -5,27 +5,39 @@
  * in full. Lengths are in solar radii (R), angles in radians, times in model seconds.
  */
 import {
-  GRAVITATIONAL_CONSTANT,
+  DAY_SECONDS,
+  HOUR_SECONDS,
   JULIAN_YEAR_SECONDS,
   RAD_PER_DEG,
   SOLAR_MASS_KG,
   SOLAR_RADIUS_KM,
   SOLAR_TEFF_K,
+  WATER_DENSITY_KG_M3,
+  surfaceGravity,
 } from "@horizon/toolkit/science";
 
 /* ------------------------------------------------------------------- time */
 
-export const DAY_S = 86_400;
+export const DAY_S = DAY_SECONDS;
 export const YEAR_S = JULIAN_YEAR_SECONDS;
-export const HOUR_S = 3_600;
+export const HOUR_S = HOUR_SECONDS;
 
 /* ---------------------------------------------------------------- the body */
 
 /** Radius and surface gravity, from the IAU 2015 nominal values and CODATA's G. */
 export const RADIUS_M = SOLAR_RADIUS_KM * 1e3;
-export const SURFACE_GRAVITY = (GRAVITATIONAL_CONSTANT * SOLAR_MASS_KG) / RADIUS_M ** 2;
+export const SURFACE_GRAVITY = surfaceGravity.compute({ M: SOLAR_MASS_KG, R: RADIUS_M });
 /** Mean mass per particle of a fully ionised solar plasma, atomic mass units (Priest 2014, §2.3). */
 export const CORONAL_MEAN_MOLECULAR_WEIGHT = 0.6;
+
+/* ------------------------------------------------------------ the surface */
+
+/** A granule: about 1,000 km across, living about ten minutes (Nordlund, Stein & Asplund 2009). */
+export const GRANULE_SIZE_KM = 1_000;
+export const GRANULE_LIFETIME_S = 10 * 60;
+/** A supergranule: about 30,000 km across, living about a day (Rieutord & Rincon 2010). */
+export const SUPERGRANULE_SIZE_KM = 30_000;
+export const SUPERGRANULE_LIFETIME_S = DAY_S;
 
 /* ----------------------------------------------------------------- the map */
 
@@ -53,8 +65,6 @@ export const PARKER_SHIELD_PERIHELION_C = ((2500 - 32) * 5) / 9;
 /** Where it first flew below the Alfvén surface, the corona's outer edge, 28 April 2021: radii from the centre (Kasper et al. 2021). */
 export const PARKER_CORONA_EDGE_R = 18.8;
 export const MAP_WINDOW_D = 21;
-/** The Carrington rotation as seen from Earth, days (Carrington 1863; the synodic period). */
-export const CARRINGTON_SYNODIC_PERIOD_D = 27.2753;
 /** Reported regions smaller than this, millionths of a hemisphere, are not seeded. */
 export const OBSERVED_MIN_AREA_MSH = 10;
 
@@ -298,11 +308,13 @@ export const WIND_BLEND_RAD = 10 * RAD_PER_DEG;
 /** Base of the convection zone, R (Charbonneau et al. 1999, after Basu & Antia 1997), and the tachocline's thickness under it (0.039 ± 0.013 R). */
 export const TACHOCLINE_R = 0.713;
 export const TACHOCLINE_THICKNESS_R = 0.039;
-/** Water's density, kg/m³: what the Sun's densities are compared with (as Giants' `WATER_DENSITY`). */
-export const WATER_DENSITY = 1_000;
+/** Water's density, kg/m³: what the Sun's densities are compared with (the kit's). */
+export const WATER_DENSITY = WATER_DENSITY_KG_M3;
 /** The core's edge: where the model's luminosity reaches this share of the total. */
 export const CORE_LUMINOSITY_SHARE = 0.99;
 /** The photosphere's thickness, km (the visible layer, ~300–500 km; Nordlund, Stein & Asplund 2009). */
 export const PHOTOSPHERE_THICKNESS_KM = 400;
 /** The chromosphere's thickness, km (Priest 2014, §1.3). */
 export const CHROMOSPHERE_THICKNESS_KM = 2_000;
+/** How high the drawn spicules reach: five chromosphere thicknesses, some 10,000 km (illustrative). */
+export const SPICULE_REACH_KM = 5 * CHROMOSPHERE_THICKNESS_KM;

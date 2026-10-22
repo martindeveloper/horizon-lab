@@ -3,19 +3,17 @@ import { Vector2, Vector3, Vector4, type Texture } from "three";
 import { assetUrl, MAPS_KEY } from "@/lib/assets";
 import { MAPS, jplElements, mapFile } from "@horizon/toolkit/bodies";
 import { createFullscreenPass, type DisposalScope } from "@horizon/toolkit/rendering";
-import { loadMap } from "@horizon/toolkit/scene";
+import { SOLAR_GOLD, SPACE_BLACK, cssHex, loadMap } from "@horizon/toolkit/scene";
 import { convert, decodeSrgb, hexToLinear } from "@horizon/toolkit/science";
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 
 import { LOOKS } from "../model/looks";
 import {
-  ACCENT_SRGB,
   BALMER_SRGB,
   BROWN_DWARF_ALKALI,
   MAX_DISCS,
   ORBIT_IDS,
   SHADER_DEFINES,
-  SPACE_SRGB,
   LENSES,
 } from "../parameters";
 import { overviewDots } from "./dots";
@@ -86,10 +84,10 @@ export function createGiantsRenderer(
   };
   const lightUniforms = {
     ...stellar.uniforms,
-    uAccent: { value: linearRgb(ACCENT_SRGB) },
+    uAccent: { value: linearRgb(cssHex(SOLAR_GOLD)) },
     uBalmer: { value: linearRgb(BALMER_SRGB) },
     uAlkali: { value: new Vector3(...BROWN_DWARF_ALKALI) },
-    uSky: { value: linearRgb(SPACE_SRGB) },
+    uSky: { value: linearRgb(cssHex(SPACE_BLACK)) },
   };
   const activityUniforms = {
     uWeather: { value: new Vector4(-1, 0, 0, 0) },

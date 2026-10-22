@@ -6,7 +6,7 @@
  * centre; brightness in millionths of the mean disc.
  */
 import { smoothstep } from "@horizon/toolkit/math";
-import { ATOMIC_MASS_KG, BOLTZMANN_CONSTANT } from "@horizon/toolkit/science";
+import { pressureScaleHeight } from "@horizon/toolkit/science";
 
 import {
   BAUMBACH_TERMS,
@@ -48,9 +48,11 @@ export const BAUMBACH_POWERS: readonly [number, number, number] = [
 
 /** The hydrostatic scale height of 2 MK gas in the Sun's surface gravity, in R. */
 export const E_CORONA_SCALE_HEIGHT_R =
-  (BOLTZMANN_CONSTANT * E_CORONA_KELVIN) /
-  (CORONAL_MEAN_MOLECULAR_WEIGHT * ATOMIC_MASS_KG * SURFACE_GRAVITY) /
-  RADIUS_M;
+  pressureScaleHeight.compute({
+    T: E_CORONA_KELVIN,
+    mu: CORONAL_MEAN_MOLECULAR_WEIGHT,
+    g: SURFACE_GRAVITY,
+  }) / RADIUS_M;
 export const CORONA: { k: readonly [number, number, number]; f: number; e: number } = {
   k: [BAUMBACH_TERMS[0].coefficient, BAUMBACH_TERMS[1].coefficient, BAUMBACH_TERMS[2].coefficient],
   f: F_SCALE,

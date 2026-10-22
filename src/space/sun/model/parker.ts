@@ -1,5 +1,5 @@
-import { keplerPosition, type Vec3 } from "@horizon/toolkit/bodies";
-import { AU_KM, SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
+import { keplerPosition, type Elements, type Vec3 } from "@horizon/toolkit/bodies";
+import { AU_KM, CELSIUS_ZERO_K, DAY_SECONDS, SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
 
 import {
   PARKER_ECCENTRICITY,
@@ -19,7 +19,7 @@ import {
  * phase still falls near its real passes then.
  */
 
-const DAY_MS = 86_400_000;
+const DAY_MS = DAY_SECONDS * 1000;
 
 /** The ellipse's semi-major axis and its far point, solar radii. */
 export const PARKER_SEMI_MAJOR_R = PARKER_PERIHELION_R / (1 - PARKER_ECCENTRICITY);
@@ -37,22 +37,24 @@ export function nextParkerPerihelion(ms: number) {
   return PARKER_PERIHELION_EPOCH + Math.ceil((ms - PARKER_PERIHELION_EPOCH) / period) * period;
 }
 
+/** The probe's orbit at a moment (solar radii, degrees): the view's plane, perihelion toward +x. */
+export function parkerElements(
+  ms: number,
+  out: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 },
+) {
+  out.a = PARKER_SEMI_MAJOR_R;
+  out.e = PARKER_ECCENTRICITY;
+  out.i = out.omega = out.node = 0;
+  out.M = parkerMeanAnomaly(ms);
+  return out;
+}
+
+const elements = parkerElements(0);
+
 /** Where the probe is at a moment, the Sun's centre the origin, world axes, solar radii. */
 export const parkerAt = (ms: number, out: Vec3 = [0, 0, 0]): Vec3 =>
-  keplerPosition(
-    {
-      a: PARKER_SEMI_MAJOR_R,
-      e: PARKER_ECCENTRICITY,
-      i: 0,
-      omega: 0,
-      node: 0,
-      M: parkerMeanAnomaly(ms),
-    },
-    out,
-  );
+  keplerPosition(parkerElements(ms, elements), out);
 
-/** Celsius to kelvin. */
-const ZERO_C_K = 273.15;
 /** One astronomical unit in solar radii: where sunlight has its Earth strength. */
 const AU_R = AU_KM / SOLAR_RADIUS_KM;
 
@@ -64,4 +66,5 @@ export const parkerSunlight = (r: number) => (AU_R / r) ** 2;
  * as the fourth root of the light it takes, so as r^−½, from NASA's figure at perihelion.
  */
 export const parkerShieldC = (r: number) =>
-  (PARKER_SHIELD_PERIHELION_C + ZERO_C_K) * Math.sqrt(PARKER_PERIHELION_R / r) - ZERO_C_K;
+  (PARKER_SHIELD_PERIHELION_C + CELSIUS_ZERO_K) * Math.sqrt(PARKER_PERIHELION_R / r) -
+  CELSIUS_ZERO_K;

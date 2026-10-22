@@ -19,8 +19,10 @@ import { NAMED_STARS } from "@/space/stellar";
 import { PLANET_RADIUS_KM } from "@horizon/toolkit/bodies";
 import { keysOf, recordFrom } from "@horizon/toolkit/records";
 import {
+  CELSIUS_ZERO_K,
   RAD_PER_DEG,
   SOLAR_MASS_KG,
+  convert,
   meanDensity,
   pressureScaleHeight,
   schwarzschildRadius,
@@ -48,6 +50,8 @@ import {
   E_CORONA_KELVIN,
   E_CORONA_LINE_NM,
   FLARE_POWER_INDEX,
+  GRANULE_LIFETIME_S,
+  GRANULE_SIZE_KM,
   JOY_SLOPE,
   LOOP_KELVIN_RANGE,
   MAP_WINDOW_D,
@@ -58,6 +62,7 @@ import {
   SOURCE_SURFACE_R,
   SPORER_END_RAD,
   SPORER_START_RAD,
+  SUPERGRANULE_SIZE_KM,
   SPOT_FIELD_T,
   SURFACE_GRAVITY,
   TACHOCLINE_R,
@@ -74,7 +79,12 @@ import {
 } from "./model/parameters";
 import { PARKER_APHELION_R } from "./model/parker";
 import { AIA_NM, AIA_PEAKS_K, HALPHA_NM, type Peak } from "./model/passbands";
-import { CARRINGTON_SIDEREAL_RATE, INTERIOR_RATE, surfacePeriod } from "./model/rotation";
+import {
+  CARRINGTON_SIDEREAL_DEG_PER_DAY,
+  CARRINGTON_SIDEREAL_RATE,
+  INTERIOR_RATE,
+  surfacePeriod,
+} from "./model/rotation";
 import { CORE_EDGE_R, photonDiffusionTime, structureAt } from "./model/structure";
 
 const SUN = NAMED_STARS.sun;
@@ -242,9 +252,19 @@ const PHOTOSPHERE = {
     status: "derived",
     note: "kT / (μ mᵤ g) for the neutral photospheric gas",
   },
-  granuleSize: literatureFact(1_000, "km", "nordlund2009", "flag", { range: [500, 2_000] }),
-  granuleLifetime: literatureFact(10, "min", "nordlund2009", "flag", { range: [5, 20] }),
-  supergranuleSize: literatureFact(30_000, "km", "rieutordRincon2010", "flag", {
+  granuleSize: literatureFact(GRANULE_SIZE_KM, "km", "nordlund2009", "flag", {
+    range: [500, 2_000],
+  }),
+  granuleLifetime: literatureFact(
+    convert(GRANULE_LIFETIME_S, "s", "min"),
+    "min",
+    "nordlund2009",
+    "flag",
+    {
+      range: [5, 20],
+    },
+  ),
+  supergranuleSize: literatureFact(SUPERGRANULE_SIZE_KM, "km", "rieutordRincon2010", "flag", {
     range: [20_000, 50_000],
   }),
 } satisfies Facts;
@@ -389,7 +409,7 @@ const ROTATION = {
     digits: 4,
     source: "snodgrass1990",
     status: "derived",
-    note: "conventional Carrington frame, 360° / 14.1844° per day (sidereal)",
+    note: `conventional Carrington frame, 360° / ${CARRINGTON_SIDEREAL_DEG_PER_DAY}° per day (sidereal)`,
   },
   interiorPeriod: {
     value: (2 * Math.PI) / INTERIOR_RATE,
@@ -599,7 +619,7 @@ const PROBES = {
       note: "from Horizons' perihelion and eccentricity: about 0.73 au, inside Venus's orbit",
     },
     shield: {
-      value: PARKER_SHIELD_PERIHELION_C + 273.15,
+      value: PARKER_SHIELD_PERIHELION_C + CELSIUS_ZERO_K,
       unit: "K",
       digits: 2,
       source: "nasaParkerShield",

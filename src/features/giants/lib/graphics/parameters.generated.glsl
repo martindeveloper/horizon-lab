@@ -12,7 +12,6 @@
 #define ORBIT_CASE_DEPTH    0.55
 #define PLANCK_KELVIN       26159.57959
 #define PROFILE_SAMPLES     129
-#define SURFACE_RESOLVE_PX  2.0
 #define SPICULE_COLUMNS     3142
 #define REGIONS             4
 #define SHEETS              3
@@ -56,8 +55,8 @@
 #define EJECTION_REACH      6.0
 #define FLASH_GLARE         0.35
 #define FLARE_K             9000.0
-#define CHROMOSPHERE_HEIGHT 0.003
-#define SPICULE_HEIGHT      0.014
+#define CHROMOSPHERE_HEIGHT 0.002874802357
+#define SPICULE_HEIGHT      0.01437401179
 #define WIND_GLOW           0.16
 #define ENVELOPE_GLOW       0.4
 #define PULSAR_TILT         0.55

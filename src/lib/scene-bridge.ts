@@ -222,7 +222,7 @@ type OwnReadouts<S> = { moved: boolean; values: Partial<S> };
  * `own` adds the simulation's own readouts. Only news reaches the store.
  */
 /** Orbit angles (radians) as the readout shows them: whole degrees, the heading in 0–359. */
-function anglesOf({ azimuth, inclination }: { azimuth: number; inclination: number }) {
+export function anglesOf({ azimuth, inclination }: { azimuth: number; inclination: number }) {
   const heading = Math.round((azimuth * 180) / Math.PI) % 360;
   return {
     heading: heading < 0 ? heading + 360 : heading,

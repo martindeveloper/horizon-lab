@@ -24,13 +24,14 @@ import {
   convertFigure,
   schwarzschildRadius,
   stefanBoltzmann,
+  surfaceGravity,
   type Range,
   type UnitId,
 } from "@horizon/toolkit/science";
 
 import { AIR_DENSITY, WATER_DENSITY } from "../parameters";
 import { lightLap, oblateDensity } from "./equations";
-import { radiusOf, surfaceGravity, teaspoonKg } from "./physics";
+import { radiusOf, teaspoonKg } from "./physics";
 import { RUNG_IDS, RUNGS, type RungId } from "./rungs";
 
 type Unit = Value["unit"];
@@ -283,7 +284,8 @@ function figuresOf(id: RungId): RungFacts {
     });
   }
   if (mass && kind !== "horizon") {
-    const g = (M: number, R: number) => surfaceGravity(kilograms(mass)(M), toM(R));
+    const g = (M: number, R: number) =>
+      surfaceGravity.compute({ M: kilograms(mass)(M), R: toM(R) });
     const note = "GM/R² at the equatorial radius, without the spin's outward pull";
     facts.gravity = derive([mass, radius], g, {
       unit: "m/s2",

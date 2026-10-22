@@ -67,7 +67,6 @@
     "count": "{label} · {count}"
   },
   "hud": {
-    "views": "Pohledy",
     "play": "Spustit čas",
     "pause": "Zastavit čas",
     "replay": "Přehrát odklízení těles",
@@ -78,7 +77,6 @@
     "driftPaused": "Pohyb zastaven",
     "legend": "Skrytí vrstvy nemění počet těles v přehledu.",
     "playRestart": "Přehrát od začátku",
-    "closeUp": "Zblízka",
     "leaveCloseUp": "Zpět na mapu",
     "backTo": "Zpět: {name}",
     "details": "Podrobnosti",
@@ -86,7 +84,6 @@
     "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",
     "craftNote": "Skutečná velikost, natočení ke Slunci jako za letu.",
     "observatories": "Observatoře",
-    "sharpening": "Načítám detail",
     "closeUpPresentOnly": "Pohled zblízka ukazuje dnešní povrchy. Pro přiblížení se vraťte do současnosti.",
     "epochs": "Přejít na období",
     "deepField": "Dál · Deep Field",

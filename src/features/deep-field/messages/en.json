@@ -37,7 +37,6 @@
     "lightTime": "Light-time rings"
   },
   "hud": {
-    "sharpening": "Loading detail",
     "galaxyItems": "Milky Way map",
     "cosmosItems": "Beyond the Milky Way",
     "neighbours": "Nearby stars",
@@ -55,7 +54,6 @@
     "backInTimeHint": "This place through the solar system's history",
     "lightLeftAgo": "Light left {ago}",
     "outToValue": "out to {distance}",
-    "closeUp": "Close-up",
     "leaveCloseUp": "Back to the map",
     "closeUpNote": "True size, dish turned to Earth."
   },

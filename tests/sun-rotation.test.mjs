@@ -3,7 +3,6 @@ import test from "node:test";
 
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
-import { NAMED_STARS } from "../src/space/stellar.ts";
 import { TACHOCLINE_R, TACHOCLINE_THICKNESS_R } from "../src/space/sun/model/parameters.ts";
 import {
   INTERIOR_RATE,
@@ -19,10 +18,6 @@ const DAY_S = 86_400;
 test("the equator turns in 24.5 days sidereal, Carrington's latitude in 25.4, the poles in a month or more", () => {
   const equator = surfacePeriod(0) / DAY_S;
   assert.ok(Math.abs(equator - 24.47) < 0.02, `${equator} d`);
-  assert.ok(
-    Math.abs(equator - NAMED_STARS.sun.rotation.value) < 0.01,
-    "the shared catalogue's figure",
-  );
   const carrington = surfacePeriod(26 * RAD_PER_DEG) / DAY_S;
   assert.ok(Math.abs(carrington - 25.38) < 0.05, `${carrington} d at 26°`);
   const pole = surfacePeriod(90 * RAD_PER_DEG) / DAY_S;

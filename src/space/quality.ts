@@ -1,11 +1,13 @@
 /**
  * The space scenes' side of the shared render quality: what a level (and the device class)
- * means for the scene host and for the shared solar system any space scene draws. Each
+ * means for the scene host and for the shared solar system and sky any space scene draws. Each
  * simulation's own `lib/quality.ts` extends this with its layers' budgets; engines pass the
  * result down, so no layer reads the level or the device class itself.
  */
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 import { defaultSceneResolution, type SceneResolution } from "@horizon/toolkit/scene";
+
+import type { SkyCounts } from "./sky/milky-way";
 
 /**
  * How much a space scene builds: what phones always drew (`light`), what desktops drew
@@ -71,11 +73,19 @@ const SWARMS: ByTier<SwarmCounts> = {
   max: { belt: 3900, trojans: 960, kuiper: 4500, oort: 5700 },
 };
 
+/** The painted sky's points: the Milky Way's resolved grains and the faint field stars. */
+const SKY: ByTier<SkyCounts> = {
+  light: { milkyWay: 12_000, fieldStars: 900 },
+  full: { milkyWay: 30_000, fieldStars: 1_600 },
+  max: { milkyWay: 45_000, fieldStars: 2_400 },
+};
+
 /** What every space scene draws at a quality. */
 export type SpaceQuality = {
   tier: SceneTier;
   resolution: SceneResolution;
   swarms: SwarmCounts;
+  sky: SkyCounts;
   bloom: BloomChain;
   lens: LensChain;
 };
@@ -86,6 +96,7 @@ export function spaceQuality(quality: RenderQuality, tight: boolean): SpaceQuali
     tier,
     resolution: sceneResolution(quality, tight),
     swarms: SWARMS[tier],
+    sky: SKY[tier],
     bloom: BLOOM[tier],
     lens: LENS[tier],
   };

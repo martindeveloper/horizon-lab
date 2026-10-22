@@ -40,7 +40,6 @@
     "lightTime": "Kruhy světelného času"
   },
   "hud": {
-    "sharpening": "Načítám detail",
     "galaxyItems": "Mapa Mléčné dráhy",
     "cosmosItems": "Za Mléčnou dráhou",
     "neighbours": "Blízké hvězdy",
@@ -58,7 +57,6 @@
     "backInTimeHint": "Toto místo napříč dějinami sluneční soustavy",
     "lightLeftAgo": "Světlo vyšlo {ago}",
     "outToValue": "až do {distance}",
-    "closeUp": "Zblízka",
     "leaveCloseUp": "Zpět na mapu",
     "closeUpNote": "Skutečná velikost, anténa míří k Zemi."
   },

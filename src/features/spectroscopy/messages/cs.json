@@ -40,7 +40,6 @@
     }
   },
   "hud": {
-    "views": "Pohledy",
     "elements": "Prvky"
   },
   "spectrum": {

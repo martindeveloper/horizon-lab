@@ -87,7 +87,14 @@ function radiusOfLuminosity(share: number) {
 export const CORE_EDGE_R = radiusOfLuminosity(CORE_LUMINOSITY_SHARE);
 export const PHOTOSPHERE_THICKNESS_R = (PHOTOSPHERE_THICKNESS_KM * 1e3) / RADIUS_M;
 
-export type LayerId = "core" | "radiative" | "tachocline" | "convection" | "photosphere";
+export const LAYER_IDS = [
+  "core",
+  "radiativeZone",
+  "tachocline",
+  "convectionZone",
+  "photosphere",
+] as const;
+export type LayerId = (typeof LAYER_IDS)[number];
 export type Layer = { id: LayerId; inner: number; outer: number };
 /**
  * The layers a cut shows, inside out, in R: the core to where its light is made, the radiative
@@ -96,9 +103,9 @@ export type Layer = { id: LayerId; inner: number; outer: number };
  */
 export const LAYER_ZONES: readonly Layer[] = [
   { id: "core", inner: 0, outer: CORE_EDGE_R },
-  { id: "radiative", inner: CORE_EDGE_R, outer: TACHOCLINE_R - TACHOCLINE_THICKNESS_R },
+  { id: "radiativeZone", inner: CORE_EDGE_R, outer: TACHOCLINE_R - TACHOCLINE_THICKNESS_R },
   { id: "tachocline", inner: TACHOCLINE_R - TACHOCLINE_THICKNESS_R, outer: TACHOCLINE_R },
-  { id: "convection", inner: TACHOCLINE_R, outer: 1 },
+  { id: "convectionZone", inner: TACHOCLINE_R, outer: 1 },
   { id: "photosphere", inner: 1 - PHOTOSPHERE_THICKNESS_R, outer: 1 },
 ];
 /** The named bounds, R: the core's edge, the tachocline (the convection zone's base), the surface. */

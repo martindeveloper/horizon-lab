@@ -11,6 +11,7 @@ import {
   SUN_ACTIVITY_DRAIN_RADII_PER_S,
   SUN_ACTIVITY_MAX_HEIGHT,
 } from "@/space/sun/graphics/prominence/parameters";
+import { AR_13664 } from "@/space/sun/model/observed";
 import { SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
 
 /** The nominal solar radius, Mm. */
@@ -52,12 +53,13 @@ export const SUN_ACTIVITY_DRAIN_SPEED = SUN_ACTIVITY_DRAIN_RADII_PER_S * SUN_ACT
 
 /**
  * Latitude, longitude, Joy's-law tilt, height, length, cycle offset (radians, solar radii).
- * Anchored along the magnetic polarity-inversion channels of the May 2024 SDO/HMI active
- * regions (including AR 13664 at −19°) and higher-latitude quiescent filament channels:
- * active-region filaments are short and low, quiescent ones long and tall.
+ * Authored along polarity-inversion channels like those of the May 2024 SDO/HMI active regions
+ * (the first at AR 13664's latitude, from the Sun's observed regions) and higher-latitude
+ * quiescent filament channels: active-region filaments are short and low, quiescent ones long
+ * and tall.
  */
 export const PROMINENCE_REGIONS = [
-  [-0.33, 3.35, 0.46, 0.075, 0.24, 0.08],
+  [AR_13664.lat, 3.35, 0.46, 0.075, 0.24, 0.08],
   [0.44, 4.08, -0.52, 0.105, 0.32, 0.24],
   [-0.25, 0.52, 0.42, 0.08, 0.26, 0.41],
   [0.34, 5.02, -0.38, 0.095, 0.3, 0.58],

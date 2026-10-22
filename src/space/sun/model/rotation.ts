@@ -6,7 +6,7 @@
 import { smoothstep } from "@horizon/toolkit/math";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
-import { DAY_S, TACHOCLINE_R, TACHOCLINE_THICKNESS_R } from "./parameters";
+import { DAY_S, TACHOCLINE_R, TACHOCLINE_THICKNESS_R, YEAR_S } from "./parameters";
 
 /** Ω(φ) = A + B sin²φ + C sin⁴φ, degrees per day, sidereal (Snodgrass & Ulrich 1990, Table 1, Doppler). */
 export const SURFACE_ROTATION_DEG_PER_DAY = { A: 14.713, B: -2.396, C: -1.787 } as const;
@@ -28,6 +28,9 @@ export const surfaceRate = (lat: number) => (surfaceRateDegPerDay(lat) * RAD_PER
  */
 export const CARRINGTON_SIDEREAL_DEG_PER_DAY = 14.1844;
 export const CARRINGTON_SIDEREAL_RATE = (CARRINGTON_SIDEREAL_DEG_PER_DAY * RAD_PER_DEG) / DAY_S;
+/** The Carrington rotation as seen from Earth, days: the sidereal turn less Earth's along its orbit in a Julian year (27.2753 d). */
+export const CARRINGTON_SYNODIC_PERIOD_D =
+  360 / (CARRINGTON_SIDEREAL_DEG_PER_DAY - 360 / (YEAR_S / DAY_S));
 
 /**
  * The rigid interior's rate: the surface law averaged over the sphere (∫ Ω cos φ dφ / 2 =

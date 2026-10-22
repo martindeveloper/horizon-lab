@@ -1,18 +1,12 @@
 // `spectrumAt` and `glowAt` are the shared continuum's (src/space/sun/graphics/shaders/continuum.glsl).
 vec4 profileAt(int i, float x) {
-  float at = clamp(x, 0.0, 1.0) * float(PROFILE_SAMPLES - 1);
-  float lo = floor(at);
-  float row = (float(i) + 0.5) / float(MAX_DISCS);
-  vec4 a = texture2D(uProfiles, vec2((lo + 0.5) / float(PROFILE_SAMPLES), row));
-  vec4 b = texture2D(uProfiles, vec2((min(lo + 1.0, float(PROFILE_SAMPLES - 1)) + 0.5) / float(PROFILE_SAMPLES), row));
-  return mix(a, b, at - lo);
+  return tableAt(uProfiles, x, PROFILE_SAMPLES, i, MAX_DISCS);
 }
 
 // The narrowest projected cell dimension in actual drawing-buffer pixels. Filtering
 // changes visibility, never a feature's physical size, seed, latitude or lifetime.
 float resolvedFeature(float perRadius, float radiusPx, float mu) {
-  float pixels = radiusPx * uPixelRatio * max(mu, 0.02) / max(perRadius, 1.0);
-  return smoothstep(SURFACE_RESOLVE_PX, 2.0 * SURFACE_RESOLVE_PX, pixels);
+  return resolvedPixels(radiusPx * uPixelRatio * max(mu, 0.02) / max(perRadius, 1.0));
 }
 
 // Broad, evolving supergiant cells, shared by heat, relief and the silhouette. The two
