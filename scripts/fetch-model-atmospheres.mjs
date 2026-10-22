@@ -12,25 +12,26 @@
  */
 import { writeFile } from "node:fs/promises";
 
-import { STARS as NAMED } from "../src/features/spectroscopy/lib/model/stars.ts";
+import { DOWNLOAD_URLS } from "@horizon/toolkit/urls";
 
-const URL_GRID = "http://kurucz.harvard.edu/grids/gridp00odfnew/ap00k2odfnew.dat";
+import { STAR_IDS, STARS as NAMED } from "../src/features/spectroscopy/lib/model/stars.ts";
+import { logSurfaceGravity } from "../src/space/hr-diagram.ts";
+
+const URL_GRID = DOWNLOAD_URLS.modelAtmospheres;
 const OUT = new URL("../src/features/spectroscopy/lib/model/atmospheres.json", import.meta.url);
 /** log₁₀ τ_Ross the layers are read at. */
 const DEPTHS = Array.from({ length: 23 }, (_, i) => -4 + i * 0.25);
 const BOLTZMANN_CGS = 1.380649e-16;
-/** The named stars' surface gravity (log g, cgs); their temperatures are the lab's (stars.ts). */
-const LOG_G = {
-  alnitak: 3.25,
-  rigel: 1.75,
-  vega: 3.95,
-  procyon: 4.0,
-  sun: 4.44,
-  arcturus: 1.66,
-  aldebaran: 1.1,
-};
+/**
+ * The named stars' temperatures are the lab's (stars.ts); their surface gravities follow from the
+ * shared catalogue's masses and radii (`logSurfaceGravity`), so every lab gives a star one g.
+ */
 const STARS = Object.fromEntries(
-  Object.entries(LOG_G).map(([id, logg]) => [id, [NAMED[id].teff.kelvin, logg]]),
+  STAR_IDS.map((id) => {
+    const logg = logSurfaceGravity(id);
+    if (logg === null) throw new Error(`The shared catalogue has no mass and radius for ${id}`);
+    return [id, [NAMED[id].teff.kelvin, logg]];
+  }),
 );
 
 const res = await fetch(URL_GRID);

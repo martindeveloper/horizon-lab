@@ -109,6 +109,17 @@ export const PROSE_FIGURES = {
   gwMassRound: { ...GW.mass, digits: 2 },
   gwHorizonKm: derived(horizonKm(GW.mass.value), "km", 2, GW.mass),
   gwGpc: GW.distance,
+  gwSpin: GW.spin,
+  /* The outer horizon r₊ = (1 + √(1 − a²)) GM/c² at the measured spin. */
+  gwKerrHorizonKm: derived(
+    (1 + Math.sqrt(1 - GW.spin.value ** 2)) * gravitationalKm(GW.mass.value),
+    "km",
+    2,
+    GW.mass,
+    GW.spin,
+  ),
+  andromedaKpc: { ...ANDROMEDA, show: "kpc", digits: 3 },
+  andromedaMly: { ...ANDROMEDA, digits: 2 },
   lmcKpc: LMC,
   lmcLy: { ...LMC, show: "ly", digits: 3 },
 } satisfies Record<string, Fact>;

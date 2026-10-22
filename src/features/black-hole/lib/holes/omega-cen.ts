@@ -28,7 +28,7 @@ export const omegaCen: HoleSpec = {
   massSolar: OMEGA_CEN.mass.value,
   massLowerLimit: true,
   massNote: "bound",
-  spin: 0,
+  spin: OMEGA_CEN.spin.value,
   inclination: 0.7,
   distance: 30,
   exposure: 1.05,

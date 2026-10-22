@@ -32,7 +32,7 @@ export const ton618: HoleSpec = {
   name: "TON 618",
   kind: "catalog",
   massSolar: TON_618.mass.value,
-  spin: 0.6,
+  spin: TON_618.spin.value,
   inclination: 1.0,
   distance: 30,
   exposure: 0.95,

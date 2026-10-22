@@ -45,7 +45,7 @@
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Milky Way  ·  face-on  ·  galactocentric",
   "localGroup": "Beyond the Milky Way",
-  "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about 760 kpc from us; M87* is about {m87Mpc} Mpc away. That is roughly {m87FartherThanAndromeda} times farther than Andromeda and {m87FartherThanSgr} times farther than Sagittarius A*. TON 618’s light travelled about 10.8 billion years; the waves from GW231123 travelled roughly 2 to 6 billion.",
+  "localGroupBody": "The map covers a region of the Galactic disk 28 kpc across. Andromeda is about {andromedaKpc} kpc from us; M87* is about {m87Mpc} Mpc away. That is roughly {m87FartherThanAndromeda} times farther than Andromeda and {m87FartherThanSgr} times farther than Sagittarius A*. TON 618’s light travelled about 10.8 billion years; the waves from GW231123 travelled roughly 2 to 6 billion.",
   "theorySolutions": "Theory  ·  GR solutions",
   "theoryBody": "These are not specific objects in the sky. Lensed disk illustrates gravitational lensing. The Schwarzschild and Kerr metrics are exact vacuum solutions of Einstein’s equations; light here follows Kerr paths, while the glowing gas is illustrative.",
   "landmark": "Landmark  ·  not an explorable black hole",
@@ -322,7 +322,7 @@
       "3": {
         "kicker": "About 500 km",
         "title": "Horizon size",
-        "body": "A non-spinning black hole of {gwMass} solar masses would have a Schwarzschild radius of about {gwHorizonKm} kilometres. At the measured spin of about 0.84, the outer horizon’s coordinate radius is smaller, about 500 km."
+        "body": "A non-spinning black hole of {gwMass} solar masses would have a Schwarzschild radius of about {gwHorizonKm} kilometres. At the measured spin of about {gwSpin}, the outer horizon’s coordinate radius is smaller, about {gwKerrHorizonKm} km."
       }
     }
   },
@@ -708,7 +708,7 @@
       "name": "Andromeda Galaxy",
       "found": "Nearest large spiral galaxy",
       "source": "A Local Group galaxy with its own supermassive black hole. Shown here as a landmark, not an explorable destination.",
-      "distance": "760 kpc  ·  2.5 Mly",
+      "distance": "{andromedaKpc} kpc  ·  {andromedaMly} Mly",
       "mass": "M31*  ·  ≈1.4 × 10⁸ M☉"
     },
     "lmc": {
@@ -751,7 +751,7 @@
       "found": "2023  ·  gravitational waves (LIGO)",
       "source": "Merger of black holes of about 137 and 101 M☉ (LIGO–Virgo–KAGRA, 2025). Two-detector event, so the sky position spans about 1,700 square degrees.",
       "distance": "z ≈ 0.40  ·  D_L ≈ {gwGpc} Gpc",
-      "mass": "≈{gwMass} M☉ remnant  ·  χ ≈ 0.84"
+      "mass": "≈{gwMass} M☉ remnant  ·  χ ≈ {gwSpin}"
     }
   },
   "canvasLabel": "Black hole visualization",

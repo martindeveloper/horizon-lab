@@ -31,7 +31,7 @@ export const stellar: HoleSpec = {
   name: "Cygnus X-1",
   kind: "catalog",
   massSolar: CYGNUS_X1.mass.value,
-  spin: 0.95,
+  spin: CYGNUS_X1.spin.value,
   inclination: 1.09,
   distance: 26,
   exposure: 1.05,

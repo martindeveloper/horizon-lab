@@ -34,7 +34,7 @@ export const sgrA: HoleSpec = {
   kind: "catalog",
   massSolar: SGR_A.mass.value,
   illustrativeFlow: true,
-  spin: 0.94,
+  spin: SGR_A.spin.value,
   inclination: 1.05,
   distance: 28,
   exposure: 1,

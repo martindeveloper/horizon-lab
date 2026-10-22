@@ -125,7 +125,8 @@ src/
         atoms.ts               Elements, NIST lines and partition functions (atomic-data.json
                                from scripts/fetch-atomic-data.mjs)
         atmospheres.ts         ATLAS9 photospheres (atmospheres.json from
-                               scripts/fetch-model-atmospheres.mjs)
+                               scripts/fetch-model-atmospheres.mjs, which picks each star's
+                               model by the shared catalogue's gravity, `logSurfaceGravity`)
         populations.ts         Saha and Boltzmann
         profile.ts, voigt.ts   Line shapes: Doppler, Voigt, hydrogen collisions (broadening.json
                                from scripts/fetch-line-broadening.mjs), Stark

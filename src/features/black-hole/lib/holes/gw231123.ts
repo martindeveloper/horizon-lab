@@ -16,7 +16,7 @@
  */
 import { BLACK_HOLES } from "@/space/stellar";
 
-import { quote } from "../quote";
+import { quote, quoteSpin } from "../quote";
 import type { HoleSpec } from "./types";
 
 const GW231123 = BLACK_HOLES.gw231123;
@@ -26,7 +26,7 @@ export const gw231123: HoleSpec = {
   name: "GW231123",
   kind: "catalog",
   massSolar: GW231123.mass.value,
-  spin: 0.84,
+  spin: GW231123.spin.value,
   inclination: 0.6,
   distance: 28,
   exposure: 1.1,
@@ -67,7 +67,7 @@ export const gw231123: HoleSpec = {
       lead: -0.3,
       roll: -0.03,
       sketch: [{ kind: "shadow" }, { kind: "rings", rings: ["horizon"] }],
-      eq: "χ_f = 0.84 (+0.08 / −0.16)",
+      eq: `χ_f = ${quoteSpin(GW231123.spin)}`,
     },
     {
       phase: "hold",

@@ -177,7 +177,8 @@ test("named places land where catalogues put them, in the supergalactic plane", 
   near(dot(y, z), 0, 1e-12, "y ⟂ z");
   const virgo = anchorById("virgoCluster");
   near(supergalacticLatitude(anchorToday(virgo)), -2.35, 0.2, "Virgo SGB");
-  near(length(anchorToday(virgo)), 53.8, 0.1, "Virgo distance");
+  /* M87's 16.8 Mpc (EHT 2019), the shared catalogue's. */
+  near(length(anchorToday(virgo)), 54.8, 0.1, "Virgo distance");
   for (const a of ANCHORS) assert.ok(a.mly > 0 && Math.abs(a.b) <= 90, a.id);
   near(anchorById("sloanGreatWall").mly, 1_060, 40, "Sloan Great Wall");
   /* The timing argument through today's separation turned around ~1 Mpc out. */

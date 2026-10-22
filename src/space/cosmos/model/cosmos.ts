@@ -9,6 +9,7 @@
  * from their redshifts, in flat ΛCDM); the rest is a sketch shaped like each structure.
  */
 import { SUN_GALACTIC_RADIUS_LY, SUN_HEIGHT_LY } from "@/space/galaxy/model/parameters";
+import { BLACK_HOLES, NAMED_STARS } from "@/space/stellar";
 import type { Vec3 } from "@horizon/toolkit/bodies";
 import { cross3, logFraction, smootherstep } from "@horizon/toolkit/math";
 import {
@@ -16,6 +17,7 @@ import {
   RAD_PER_DEG as RAD,
   comovingDistanceMpc,
   convert,
+  convertFigure,
   cosmicAgeAtRedshiftGyr,
   defineEquation,
   equatorialToGalactic,
@@ -25,6 +27,15 @@ import {
   particleHorizonMpc,
   redshiftAtLookback,
 } from "@horizon/toolkit/science";
+
+/** The Virgo Cluster's distance, Mpc: its central galaxy M87's in the shared catalogue (EHT 2019). */
+const VIRGO_MPC = convertFigure(
+  BLACK_HOLES.m87.distance.value,
+  BLACK_HOLES.m87.distance.unit,
+  "Mpc",
+);
+/** The LMC's distance: R136a1's in the shared catalogue, which is the LMC's own. */
+const LMC_DISTANCE = NAMED_STARS.r136a1.distance;
 
 /** Numbers inside printed formulas. */
 const n = (value: number) => formatNumber(value, "en", 4);
@@ -93,8 +104,8 @@ export const lookbackMly = (gyr: number) => comovingMly(redshiftAtLookback(gyr, 
  * t₀ fix A, B and η, and with them when the pair turned around.
  * ------------------------------------------------------------------------------------- */
 
-/** M31's distance from the Milky Way today, Mly (765 kpc; Li et al. 2021, McConnachie 2012). */
-export const ANDROMEDA_MLY = 2.5;
+/** M31's distance from the Milky Way today, Mly: 765 kpc (Li et al. 2021, McConnachie 2012). */
+export const ANDROMEDA_MLY = convert(765, "kpc", "Mly");
 /**
  * M31's radial velocity toward the Milky Way's centre, km/s (van der Marel et al. 2012,
  * −109 ± 4): the measured heliocentric −300 km/s less the Sun's own galactic motion.
@@ -324,13 +335,24 @@ export const ANCHORS: readonly Anchor[] = [
   { id: "andromeda", l: 121.17, b: -21.57, mly: ANDROMEDA_MLY },
   /* M33, 840 ± 11 kpc from HST Cepheids (Breuval et al. 2023). */
   { id: "triangulum", l: 133.61, b: -31.33, mly: convert(0.84, "Mpc", "Mly") },
-  { id: "lmc", l: 280.47, b: -32.89, mly: 0.163 },
+  /* The LMC at its eclipsing-binary distance, the shared catalogue's (Pietrzyński et al. 2019). */
+  {
+    id: "lmc",
+    l: 280.47,
+    b: -32.89,
+    mly: convertFigure(LMC_DISTANCE.value, LMC_DISTANCE.unit, "Mly"),
+  },
   { id: "smc", l: 302.81, b: -44.33, mly: 0.203 },
   { id: "m81", l: 142.09, b: 40.9, mly: 11.7 },
   { id: "centaurusA", l: 309.52, b: 19.42, mly: 12.4 },
   { id: "sculptor", l: 97.37, b: -87.96, mly: 11.4 },
-  /* The Virgo Cluster's centre, M87: 16.5 Mpc (Mei et al. 2007). */
-  { id: "virgoCluster", l: 283.78, b: 74.49, mly: convert(16.5, "Mpc", "Mly") },
+  /* The Virgo Cluster's centre, M87, at the shared catalogue's distance (EHT 2019). */
+  {
+    id: "virgoCluster",
+    l: 283.78,
+    b: 74.49,
+    mly: convert(VIRGO_MPC, "Mpc", "Mly"),
+  },
   /* NGC 1399, 20.0 Mpc (Blakeslee et al. 2009). */
   { id: "fornaxCluster", l: 236.72, b: -53.64, mly: convert(20, "Mpc", "Mly") },
   /* Abell 3526 and Abell 1060 (cz 3,683, Christlein & Zabludoff 2003): Hubble-flow distances
@@ -387,10 +409,10 @@ export const STRUCTURES = {
    */
   localSheet: { width: convert(2 * 7, "Mpc", "Mly"), thickness: convert(2 * 1.5, "Mpc", "Mly") },
   /**
-   * r₂₀₀ = 1.55 Mpc at 15 Mpc (McLaughlin 1999, ApJ 512, L9), scaled to the model's 16.5 Mpc:
+   * r₂₀₀ = 1.55 Mpc at 15 Mpc (McLaughlin 1999, ApJ 512, L9), scaled to the model's distance:
    * twice that across.
    */
-  virgo: { width: convert((2 * 1.55 * 16.5) / 15, "Mpc", "Mly") },
+  virgo: { width: convert((2 * 1.55 * VIRGO_MPC) / 15, "Mpc", "Mly") },
   /** De Vaucouleurs' Local Supercluster, ~33 Mpc across. */
   supercluster: { width: convert(33, "Mpc", "Mly") },
   /**

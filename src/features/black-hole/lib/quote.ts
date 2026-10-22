@@ -59,3 +59,13 @@ export function quoteSpan(fact: Value, locale = "en") {
   const span = `${end(low)}–${end(high)}`;
   return `${scientific ? `${span} × ${powerOfTen(exponent)}` : span} ${symbolOf(fact.unit)}`;
 }
+
+/** A spin with its asymmetric published span: "0.84 (+0.08 / −0.16)"; the figure alone without one. */
+export function quoteSpin(fact: Value, locale = "en") {
+  const digits = fact.digits ?? DEFAULT_DIGITS;
+  const text = number(fact.value, digits, locale);
+  if (!fact.range) return text;
+  const decimals = decimalsOf(fact.value, digits);
+  const format = (v: number) => numberFormat(locale, decimals, true).format(v);
+  return `${text} (+${format(fact.range[1] - fact.value)} / −${format(fact.value - fact.range[0])})`;
+}

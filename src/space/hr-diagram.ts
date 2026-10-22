@@ -5,6 +5,7 @@
  */
 import type { Fact } from "@/lib/facts";
 import {
+  GRAVITATIONAL_CONSTANT,
   SOLAR_TEFF_K,
   convertFigure,
   stefanBoltzmann,
@@ -66,6 +67,20 @@ const central = (fact: Fact) => fact.value ?? Math.sqrt(fact.range[0] * fact.ran
 export const isStarId = (id: string): id is StarId => Object.hasOwn(NAMED_STARS, id);
 
 const inUnit = (fact: Fact, to: UnitId) => convertFigure(central(fact), fact.unit, to);
+
+/** Centimetres in a metre: model atmospheres grid gravity in cgs. */
+const CM_PER_M = 100;
+
+/**
+ * A star's surface gravity log₁₀ g (g in cm s⁻², as model atmospheres are gridded), from its
+ * catalogued mass and equatorial radius; null without both.
+ */
+export function logSurfaceGravity(id: StarId) {
+  const { mass, radius }: StellarFigures = NAMED_STARS[id];
+  if (!mass || !radius) return null;
+  const g = (GRAVITATIONAL_CONSTANT * inUnit(mass, "kg")) / inUnit(radius, "m") ** 2;
+  return Math.log10(g * CM_PER_M);
+}
 
 /**
  * A star's place, where its temperature and either its light or its radius are catalogued:

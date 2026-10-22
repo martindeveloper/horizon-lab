@@ -172,7 +172,7 @@ export const COSMOS = {
       digits: 2,
       source: "m31Width",
       status: "derived",
-      note: "D25 = 190.5′ at the model's 2.5 Mly, to twice the ~40 kpc outer-disk radius",
+      note: "D25 = 190.5′ at the model's 765 kpc, to twice the ~40 kpc outer-disk radius",
     },
     firstPass: {
       range: [4, 6],
@@ -194,7 +194,7 @@ export const COSMOS = {
     width: { value: 60_000, unit: "ly", source: "nasaM33", status: "verified" },
   },
   virgo: {
-    distance: anchorDistance("virgoCluster", "mei2007", { note: "16.5 Mpc" }),
+    distance: anchorDistance("virgoCluster", "eht2019", { note: "M87's 16.8 Mpc" }),
     members: {
       value: 1_500,
       unit: "count",
@@ -208,7 +208,7 @@ export const COSMOS = {
       digits: 1,
       source: "mclaughlin1999",
       status: "derived",
-      note: "2 r₂₀₀; McLaughlin's 1.55 Mpc at 15 Mpc, scaled to 16.5 Mpc",
+      note: "2 r₂₀₀; McLaughlin's 1.55 Mpc at 15 Mpc, scaled to M87's 16.8 Mpc",
     },
     blackHole: BLACK_HOLES.m87.mass,
   },

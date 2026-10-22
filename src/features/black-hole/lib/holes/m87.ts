@@ -29,7 +29,7 @@ export const m87: HoleSpec = {
   kind: "catalog",
   massSolar: BLACK_HOLES.m87.mass.value,
   illustrativeFlow: true,
-  spin: 0.9,
+  spin: BLACK_HOLES.m87.spin.value,
   inclination: HOME_INCLINATION,
   distance: 32,
   exposure: 0.95,

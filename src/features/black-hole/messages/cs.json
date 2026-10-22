@@ -45,7 +45,7 @@
   "atlasKicker": "Atlas  ·  J2000",
   "milkyWayMap": "Mléčná dráha  ·  pohled shora  ·  střed v jádře Galaxie",
   "localGroup": "Za hranicemi Mléčné dráhy",
-  "localGroupBody": "Mapa zobrazuje oblast galaktického disku o průměru 28 kpc. Galaxie v Andromedě je od nás vzdálena asi 760 kpc, M87* přibližně {m87Mpc} Mpc. To je zhruba {m87FartherThanAndromeda}krát dál než Andromeda a {m87FartherThanSgr}krát dál než Sagittarius A*. Světlo kvasaru TON 618 cestovalo asi 10,8 miliardy let, vlny z GW231123 zhruba 2 až 6 miliard let.",
+  "localGroupBody": "Mapa zobrazuje oblast galaktického disku o průměru 28 kpc. Galaxie v Andromedě je od nás vzdálena asi {andromedaKpc} kpc, M87* přibližně {m87Mpc} Mpc. To je zhruba {m87FartherThanAndromeda}krát dál než Andromeda a {m87FartherThanSgr}krát dál než Sagittarius A*. Světlo kvasaru TON 618 cestovalo asi 10,8 miliardy let, vlny z GW231123 zhruba 2 až 6 miliard let.",
   "theorySolutions": "Teorie  ·  řešení obecné relativity",
   "theoryBody": "Nejde o konkrétní objekty na obloze. Scéna „Disk v gravitační čočce“ ukazuje, jak gravitace mění obraz akrečního disku. Schwarzschildova a Kerrova metrika jsou přesná vakuová řešení Einsteinových rovnic; světlo zde sleduje Kerrovy dráhy, zářící plyn je ilustrativní.",
   "landmark": "Orientační bod  ·  nelze k němu přiletět",
@@ -322,7 +322,7 @@
       "3": {
         "kicker": "Asi 500 km",
         "title": "Velikost horizontu",
-        "body": "Nerotující černá díra o hmotnosti {gwMass} Sluncí by měla Schwarzschildův poloměr asi {gwHorizonKm} kilometrů. Při změřeném spinu kolem 0,84 je souřadnicový poloměr vnějšího horizontu menší, asi 500 km."
+        "body": "Nerotující černá díra o hmotnosti {gwMass} Sluncí by měla Schwarzschildův poloměr asi {gwHorizonKm} kilometrů. Při změřeném spinu kolem {gwSpin} je souřadnicový poloměr vnějšího horizontu menší, asi {gwKerrHorizonKm} km."
       }
     }
   },
@@ -708,7 +708,7 @@
       "name": "Galaxie v Andromedě",
       "found": "Nejbližší velká spirální galaxie",
       "source": "Člen Místní skupiny galaxií s vlastní supermasivní černou dírou. V atlasu slouží jen jako orientační bod; nelze k ní přiletět.",
-      "distance": "760 kpc  ·  2,5 mil. sv. r.",
+      "distance": "{andromedaKpc} kpc  ·  {andromedaMly} mil. sv. r.",
       "mass": "M31*  ·  ≈1,4 × 10⁸ M☉"
     },
     "lmc": {
@@ -751,7 +751,7 @@
       "found": "2023  ·  gravitační vlny (LIGO)",
       "source": "Splynutí černých děr o hmotnostech asi 137 a 101 M☉ (LIGO–Virgo–KAGRA, 2025). Zachytily jej jen dva detektory, takže oblast nejistoty polohy na obloze zabírá asi 1 700 čtverečních stupňů.",
       "distance": "z ≈ 0,40  ·  D_L ≈ {gwGpc} Gpc",
-      "mass": "≈{gwMass} M☉ pozůstatek  ·  χ ≈ 0,84"
+      "mass": "≈{gwMass} M☉ pozůstatek  ·  χ ≈ {gwSpin}"
     }
   },
   "canvasLabel": "Vizualizace černé díry",

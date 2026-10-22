@@ -1,5 +1,6 @@
 /** Sky catalog for the atlas. Epoch J2000. Positions as of 2026. */
 import type { Value } from "@/lib/facts";
+import { COSMOS } from "@/space/cosmos/model/catalogue";
 import { ARM_START_KPC, BAR_ANGLE_DEG, REID_R0_KPC } from "@/space/galaxy/model/parameters";
 import { BLACK_HOLES, NAMED_STARS } from "@/space/stellar";
 import { keysOf } from "@horizon/toolkit/records";
@@ -31,6 +32,7 @@ export const R0_KPC = BLACK_HOLES["sgr-a"].distance.value;
 export const BAR = { halfKpc: ARM_START_KPC, angleDeg: BAR_ANGLE_DEG } as const;
 const kpcOf = (fact: Value) => convertFigure(fact.value, fact.unit, "kpc");
 export const MAP_HALF_KPC = 14;
+const ANDROMEDA = COSMOS.andromeda.distance;
 
 /**
  * Face-on map seen from the north Galactic pole, Y up: the Sun sits at +R0 on X,
@@ -295,13 +297,20 @@ export const ATLAS: AtlasSite[] = [
 
 /**
  * The distance ladder beside the map, from the shared catalogues: Sgr A*, the LMC (Pietrzyński
- * et al. 2019, as for R136a1 in it) and M87*; Andromeda as its card quotes Li et al. 2021 (the
- * cosmic map rounds it to 2.5 Mly); the two farthest by redshift.
+ * et al. 2019, as for R136a1 in it), Andromeda and M87*; the two farthest by redshift.
  */
 export const DISTANCE_ROWS: readonly { id: string; k: string }[] = [
   { id: "sgr-a", k: quote({ ...BLACK_HOLES["sgr-a"].distance, digits: 2 }) },
   { id: "lmc", k: quote(NAMED_STARS.r136a1.distance) },
-  { id: "m31", k: "760 kpc" },
+  {
+    id: "m31",
+    k: quote({
+      ...ANDROMEDA,
+      value: convertFigure(ANDROMEDA.value, ANDROMEDA.unit, "kpc"),
+      unit: "kpc",
+      digits: 3,
+    }),
+  },
   { id: "m87", k: quote(BLACK_HOLES.m87.distance) },
   { id: "gw231123", k: "z ≈ 0.4" },
   { id: "ton618", k: "z = 2.22" },

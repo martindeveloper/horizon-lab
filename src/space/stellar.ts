@@ -38,6 +38,8 @@ export type StellarFigures = {
   discTeff?: Fact;
   /** Heliocentric radial velocity, positive receding. */
   radialVelocity?: Fact;
+  /** A black hole's dimensionless spin a/M: measured, or the value a lab assumes where it is not. */
+  spin?: Fact;
 };
 
 /** Stars and remnants: a pulsar, white and brown dwarfs, main-sequence stars, giants and supergiants. */
@@ -154,6 +156,7 @@ export const NAMED_STARS = {
       range: [2.018, 2.044],
       digits: 4,
     }),
+    mass: literatureFact(1.478, "Msun", "bond2015", "flag", { range: [1.466, 1.49], digits: 4 }),
     teff: literatureFact(6_530, "K", "kervella2004", "flag", { range: [6_480, 6_580], digits: 3 }),
     radialVelocity: literatureFact(-4.5, "km/s", "simbad", "flag", { digits: 3 }),
   },
@@ -461,6 +464,11 @@ export const BLACK_HOLES = {
       digits: 3,
     }),
     distance: literatureFact(2.22, "kpc", "millerJones2021", "verified", { digits: 3 }),
+    spin: literatureFact(0.95, "ratio", "zhao2021", "teaching-choice", {
+      sources: ["steiner2024"],
+      digits: 2,
+      note: "assumed: disputed, > 0.9985 by continuum fitting, ≳ 0.96 by IXPE, low by Comptonised reflection",
+    }),
   },
   "gaia-bh3": {
     mass: literatureFact(32.7, "Msun", "panuzzo2024", "verified", {
@@ -470,6 +478,9 @@ export const BLACK_HOLES = {
     distance: literatureFact(590.6, "pc", "panuzzo2024", "verified", {
       range: [584.8, 596.4],
       digits: 4,
+    }),
+    spin: literatureFact(0, "ratio", "panuzzo2024", "teaching-choice", {
+      note: "not measured: with nothing falling in, no X-ray method applies",
     }),
   },
   gw231123: {
@@ -483,6 +494,11 @@ export const BLACK_HOLES = {
       digits: 2,
       note: "luminosity distance, z ≈ 0.40",
     }),
+    spin: literatureFact(0.84, "ratio", "lvk2025", "verified", {
+      range: [0.68, 0.92],
+      digits: 2,
+      note: "the remnant's χ_f, waveform-model dependent",
+    }),
   },
   "omega-cen": {
     mass: literatureFact(8_200, "Msun", "haberle2024", "verified", {
@@ -490,6 +506,7 @@ export const BLACK_HOLES = {
       note: "a lower limit from seven fast central stars; N-body comparisons favour 39,000–47,000",
     }),
     distance: literatureFact(5.43, "kpc", "baumgardt2021", "verified", { digits: 3 }),
+    spin: literatureFact(0, "ratio", "haberle2024", "teaching-choice", { note: "not measured" }),
   },
   "sgr-a": {
     mass: literatureFact(4.297e6, "Msun", "gravity2022", "verified", {
@@ -497,6 +514,10 @@ export const BLACK_HOLES = {
       digits: 4,
     }),
     distance: literatureFact(8.277, "kpc", "gravity2022", "verified", { digits: 4 }),
+    spin: literatureFact(0.94, "ratio", "eht2022", "teaching-choice", {
+      digits: 2,
+      note: "assumed: the only EHT model passing every test; later work is split",
+    }),
   },
   m87: {
     mass: literatureFact(6.5e9, "Msun", "eht2019", "verified", {
@@ -504,6 +525,10 @@ export const BLACK_HOLES = {
       digits: 2,
     }),
     distance: literatureFact(16.8, "Mpc", "eht2019", "verified", { range: [16, 17.6], digits: 3 }),
+    spin: literatureFact(0.9, "ratio", "ehtM87Spin2026", "teaching-choice", {
+      digits: 1,
+      note: "assumed: the ring disfavours |a| ≲ 0.2, and a Blandford–Znajek jet needs spin",
+    }),
   },
   "ton-618": {
     mass: literatureFact(4.07e10, "Msun", "ge2019", "verified", {
@@ -511,6 +536,10 @@ export const BLACK_HOLES = {
       range: [4.07e10, 6.6e10],
       digits: 3,
       note: "single-epoch virial estimates: Ge et al. 2019 to Shemmer et al. 2004",
+    }),
+    spin: literatureFact(0.6, "ratio", "king2016", "teaching-choice", {
+      digits: 1,
+      note: "assumed: a thin disk this massive needs a ≳ 0.6",
     }),
   },
 } as const satisfies Readonly<Record<string, StellarFigures>>;

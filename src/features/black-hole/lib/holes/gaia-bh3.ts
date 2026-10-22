@@ -26,7 +26,7 @@ export const gaiaBh3: HoleSpec = {
   name: "Gaia BH3",
   kind: "catalog",
   massSolar: GAIA_BH3.mass.value,
-  spin: 0,
+  spin: GAIA_BH3.spin.value,
   inclination: 0.5,
   distance: 30,
   exposure: 1.1,
