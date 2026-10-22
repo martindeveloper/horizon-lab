@@ -201,15 +201,15 @@ function sunPick(pick: unknown): SunPick | null {
 }
 
 /**
- * The sky stays subordinate to the solar exposure; totality reveals a little more.
- * This is illustrative: a camera exposed for the photosphere sees no stars at all.
+ * Keep the Milky Way visible but subordinate to the Sun, with more sky during totality.
+ * This is an illustrative backdrop, not a camera exposure of the Sun and stars together.
  */
 const SKY_EXPOSURE: Readonly<Record<keyof typeof RIBBON_PRESENCE, number>> = {
-  white: 0.025,
-  halpha: 0.035,
-  band: 0.025,
-  eclipse: 0.16,
-  magnetogram: 0.04,
+  white: 0.4,
+  halpha: 0.3,
+  band: 0.3,
+  eclipse: 0.5,
+  magnetogram: 0.3,
 };
 
 /** What kind of light an id is, for how much of the field it shows. */

@@ -1,9 +1,9 @@
 /**
  * The sky behind the Sun: the bright stars of the shared catalogue at their real directions
  * and the painted Milky Way band with its grains and a faint field, the same sky the Orrery
- * carries, turned into the lab's frame (`sky-frame.ts`) and centred on the camera. How much of
- * it shows is the light's: a camera exposed for the photosphere sees none of it, the eclipse
- * shows it whole. At nothing the layer is hidden and costs no draw.
+ * carries, turned into the lab's frame (`sky-frame.ts`) and centred on the camera. Its subdued
+ * presence is illustrative rather than a physical camera exposure; the eclipse reveals a
+ * little more. At zero the layer is hidden and costs no draw.
  */
 import { Group, Points, type Object3D, type PerspectiveCamera } from "three";
 
