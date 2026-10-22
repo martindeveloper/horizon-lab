@@ -6,7 +6,7 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
-import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
+import { LoadingBadge, VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
 import { sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
@@ -55,6 +55,7 @@ export function OrreryOverlay() {
   const closeUp = useOrrery((s) => s.closeUp);
   const drift = useOrrery((s) => s.drift);
   const guideOpen = useOrrery((s) => s.guideOpen);
+  const sharpening = useOrrery((s) => s.sharpening);
   const guideButton = useGuideFocusReturn(guideOpen);
   const help = useHelp(helpStore, HELP, "orrery");
 
@@ -109,6 +110,7 @@ export function OrreryOverlay() {
                 drift={() => useOrrery.getState().startDrift()}
               />
             </div>
+            <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
 
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}

@@ -15,18 +15,20 @@ import { SOURCES } from "../../src/lib/sources.ts";
 import { cosmosCatalogueFacts } from "../../src/space/cosmos/model/catalogue.ts";
 import { galaxyCatalogueFacts } from "../../src/space/galaxy/model/catalogue/index.ts";
 import { solarCatalogueFacts } from "../../src/space/solar-system/model/catalogue.ts";
+import { observatoryCatalogueFacts } from "../../src/space/solar-system/model/observatories-catalogue.ts";
 import { probeCatalogueFacts } from "../../src/space/solar-system/model/probes-catalogue.ts";
 import { ENGINES, stellarCatalogueFacts } from "../../src/space/stellar.ts";
 import { sunFacts } from "../../src/space/sun/catalogue.ts";
 
 /**
- * Every catalogue's facts, each path under its owner: the shared worlds (the solar system and
- * its reach, the Galaxy and the nearest stars, named stars and black holes, the cosmic map, the
- * Sun), then each simulation's own.
+ * Every catalogue's facts, each path under its owner: the shared worlds (the solar system, its
+ * reach and the observatories near Earth, the Galaxy and the nearest stars, named stars and
+ * black holes, the cosmic map, the Sun), then each simulation's own.
  */
 const catalogueFacts = () => [
   ...solarCatalogueFacts().map((entry) => ({ ...entry, path: `solar-system/${entry.path}` })),
   ...probeCatalogueFacts().map((entry) => ({ ...entry, path: `solar-system/${entry.path}` })),
+  ...observatoryCatalogueFacts().map((entry) => ({ ...entry, path: `solar-system/${entry.path}` })),
   ...galaxyCatalogueFacts().map((entry) => ({ ...entry, path: `galaxy/${entry.path}` })),
   ...stellarCatalogueFacts().map((entry) => ({ ...entry, path: `stellar/${entry.path}` })),
   ...cosmosCatalogueFacts().map((entry) => ({ ...entry, path: `cosmos/${entry.path}` })),

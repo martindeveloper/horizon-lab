@@ -84,6 +84,9 @@
     "details": "Podrobnosti",
     "hideDetails": "Skrýt podrobnosti",
     "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",
+    "craftNote": "Skutečná velikost, natočení ke Slunci jako za letu.",
+    "observatories": "Observatoře",
+    "sharpening": "Načítám detail",
     "closeUpPresentOnly": "Pohled zblízka ukazuje dnešní povrchy. Pro přiblížení se vraťte do současnosti.",
     "epochs": "Přejít na období",
     "deepField": "Dál · Deep Field",
@@ -114,7 +117,16 @@
     "outerEdge": "Vnější okraj",
     "shells": "Orientační kulové plochy",
     "endState": "Konečný stav",
-    "share": "V tomto vzorku"
+    "share": "V tomto vzorku",
+    "height": "Výška",
+    "kmSpan": "{near}–{far} km",
+    "minutes": "{value} min",
+    "hours": "{value} h",
+    "tiltEquator": "{value}° k zemskému rovníku",
+    "fromEarth": "Od Země",
+    "l2": "L2 za Zemí",
+    "halo": "Jeden oběh kolem L2",
+    "launched": "Start"
   },
   "cards": {
     "sun": {
@@ -204,6 +216,13 @@
       "oort": "Těleso v modelu míří do Oortova oblaku a jeho dráha se postupně vyklání z původní roviny.",
       "other": "Těleso v modelu skončí v Kuiperově pásu ovlivněném migrací Neptunu nebo v rozptýleném disku.",
       "caution": "Těchto {count} bodů zastupuje mnohem větší populaci. Každý bod je modelové těleso, nikoli konkrétní pozorovaný objekt."
+    },
+    "observatories": {
+      "hubble": "Nad vzduchem, který rozmazává obraz každého pozemního dalekohledu, pozoruje Hubble od roku 1990, hlavně ve viditelném a ultrafialovém světle.",
+      "chandra": "Rentgenové záření k zemi neprojde. Chandra po dlouhé dráze většinu každého oběhu prolétá nad radiačními pásy Země.",
+      "webb": "Webb pozoruje v infračerveném světle daleko za Měsícem a jeho sluneční štít drží Slunce, Zemi i Měsíc na jedné straně. Bod L2 obíhá, nestojí v něm.",
+      "elements": "Poloha podle dráhy změřené {date}. Dráha platí, ale místo na ní se od skutečného během dnů rozchází.",
+      "halo": "Smyčka kolem L2 je zakreslená tak, jak vypadá v soustavě otáčející se se Zemí kolem Slunce."
     }
   },
   "guide": {
@@ -302,6 +321,10 @@
       "globes": {
         "title": "Modely těles a prstence",
         "body": "Poloměry, zploštění a směry rotačních os vycházejí z hodnot IAU, rychlosti rotace z IAU nebo novějších měření (Venuše, Saturn, Uran), takže modely zachycují tvar těles a jejich orientaci k aktuálnímu datu: Uran leží na boku, Venuše rotuje retrográdně. Povrchy vycházejí z map sestavených z pozorování: Hubbleových map obrů z roku 2025, Blue Marble pro Zemi, snímků sond Viking pro Mars, MESSENGER pro Merkur a New Horizons pro Pluto. Průměrná barva vychází ze snímků ve skutečných barvách a jas z albeda, tedy odrazivosti povrchu. Slunce používá ilustrační mozaiku fotosféry ze snímků SDO/HMI z 1.–22. května 2024, převedenou na kulový povrch během jedné rotace a doplněnou klidnými polárními oblastmi. Skvrny neukazují aktuální stav ani datum na časové ose. Prstence používají naměřené poloměry a optické hloubky; zobrazují se osvětlené zepředu i v protisvětle, se stínem planety. Jupiterovy prstence jsou pro zobrazení příliš slabé. Měsíc používá snímky LRO/LROC; Io, Europa, Ganymed, Callisto a Triton mozaiky Voyageru a Galilea, Charon snímky New Horizons, Phobos a Deimos mozaiky ze snímků Vikingů a středně velké měsíce Saturnu mozaiky ze snímků Cassini. Některé mapy měsíců jsou monochromatické nebo používají tlumené multispektrální barvy, nikoli kalibrované přirozené barvy. Nepozorovaný terén měsíců má jednolitou výplň; interpolace pólů ve zdrojích je popsána na stránce zdrojů. Venuše a Titan si ponechávají ilustrační oblačnost a zákal; Sedna, Halleyova kometa a měsíce Uranu ilustrační povrchy."
+      },
+      "observatories": {
+        "title": "Observatoře u Země",
+        "body": "Hubble a Chandra se pohybují podle nejnovějších sad dráhových elementů z CelesTraku: keplerovská elipsa kolem Země, její velikost ze středního pohybu a rovina i perigeum stáčené zploštěním Země (J2). Dráha tak platí měsíce; místo na ní se během dnů rozchází, protože odpor atmosféry ani přitažlivost Měsíce a Slunce model nezahrnuje. Webb letí po své trajektorii z JPL Horizons, nejprve uskutečněné a pak předpovězené, uložené v soustavě, která se otáčí se Zemí kolem Slunce a v níž jeho smyčka kolem L2 stojí na místě, a vykreslené kolem Země, kterou scéna právě ukazuje. Samotný bod L2 vyplývá z hmotností Slunce, Země a Měsíce. Observatoře se ukazují jen u Země a jen v současnosti, ve skutečných vzdálenostech, a zblízka ve skutečné velikosti: modely NASA zmenšené podle publikovaných rozměrů, se slunečními panely (u Webbu se slunečním štítem) natočenými ke Slunci."
       },
       "rendering": {
         "title": "Nároky na vykreslování",

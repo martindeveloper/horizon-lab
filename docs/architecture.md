@@ -84,7 +84,8 @@ src/
                                close-ups (close-up-controller.ts, close-up-flight.ts with the
                                moon framing; the flight itself is src/space/close-up-flight.ts; the
                                atmosphere shell over a body with air, from
-                               src/space/solar-system/graphics/air.ts),
+                               src/space/solar-system/graphics/air.ts; an observatory at its
+                               true size, Earth below it in a depth pass of its own),
                                streamed measured maps (measured-maps.ts: each body waits in
                                its map's mean colour, then fades it in), the guide, solar
                                activity, picking and the HUD
@@ -317,7 +318,12 @@ src/
                                probes.ts (five probes on their JPL Horizons tracks,
                                probe-tracks.json from scripts/fetch-probe-tracks.mjs, the
                                heliopause they crossed, sunlight's light-time rings) and
-                               probes-catalogue.ts (the Voyagers' crossings)
+                               probes-catalogue.ts (the Voyagers' crossings); near Earth:
+                               observatories.ts (Hubble and Chandra on CelesTrak elements
+                               turned by J2, Webb on its Horizons track about L2,
+                               observatory-orbits.json from
+                               scripts/fetch-observatory-orbits.mjs) and
+                               observatories-catalogue.ts
       graphics/                looks.ts (the Sun's place and the eclipse slots a host may
                                write), swarms.ts and tracers.ts (small bodies moved on the GPU;
                                shaders/kepler.glsl places them, drift-epoch.ts re-bases their
@@ -327,7 +333,9 @@ src/
       scene/                   solar-system.ts composes the Sun, planets, moons, populations
                                and the reticle (*-layer.ts, focus-ring.ts) on a kit (kit.ts)
                                with its own level of detail (lod.ts); reach-layer.ts draws the
-                               reach on a host's kit
+                               reach on a host's kit; observatories-layer.ts draws Earth's
+                               observatories (markers, orbits, models) where Earth's system
+                               is at its true scale
       format.ts                Names and orbit rows both simulations print
       cards.ts                 The figures the population cards quote (`POPULATION_FIGURES`)
     galaxy/                    The Galaxy and the nearest stars, today, for any host engine:
@@ -539,8 +547,9 @@ only its layers, its views and its store of its own:
   A craft a few metres across is drawn by `createSpacecraftPass` (`src/space/spacecraft`):
   after the host's main pass, in a depth range of its own, placed from the camera by a point
   the host holds exactly (an orbit's aim and the rig's `offset`, a ship); it costs nothing
-  until a craft nears a pixel. Deep Field's probes and the Sun lab's Parker fly in with the
-  Orrery's close-up flight (`src/space/close-up-flight.ts`); Voyage parks a few metres off.
+  until a craft nears a pixel. Deep Field's probes, the Sun lab's Parker and the Orrery's
+  observatories fly in with the shared close-up flight (`src/space/close-up-flight.ts`);
+  Voyage parks a few metres off.
   `createLabels`, `createTapPicking`, `createAnchoredRulers`, `createDistanceText` and the
   presence helpers serve the layers; `createSceneHud` (`src/lib/scene-bridge.ts`) publishes the scale bar and the nearest
   view a few times a second, plus the feature's own readouts.
@@ -795,7 +804,8 @@ folder mirrors the bucket's keys:
 - `textures/bodies/sun/spots/v<version>/atlas.png`, `pages.png`: the Sun Lab's close-up spot
   stencil, derived from the Sun's map by `scripts/build-sun-spot-stencil.mjs` (`VERSION`), its
   keys in `spot-stencil.generated.json`.
-- `models/spacecraft/<id>/v<version>/<id>.glb`: the probes' and Parker Solar Probe's models
+- `models/spacecraft/<id>/v<version>/<id>.glb`: the probes', Parker Solar Probe's and the
+  observatories' models
   (`MODELS_KEY`, each versioned by its `SPACECRAFT` entry in `src/space/spacecraft/models.ts`),
   written by `scripts/build-spacecraft-models.mjs`, which checks each against its entry. A page
   fetches one only as a camera closes on its craft. The bench serves `cdn/` before the bucket,

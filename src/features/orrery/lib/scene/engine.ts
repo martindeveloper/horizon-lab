@@ -6,7 +6,7 @@
  *
  * Each layer builds its objects once and draws one `Frame`; this file wires them
  * to the store, the camera, input and the level of detail (lod.ts): one world in au, the
- * solar map, then a close-up body.
+ * solar map, then a close-up body, then Earth's observatories at their true size.
  */
 import { Scene, type Object3D, type Vector3 } from "three";
 
@@ -21,10 +21,11 @@ import {
 } from "@/lib/scene-bridge";
 import { TAP_STYLE } from "@/space/close-up-flight";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
+import { observatoryPosition } from "@/space/solar-system/model/observatories";
 import { positionOf } from "@/space/solar-system/model/position";
-import { hostOf } from "@/space/solar-system/model/selection";
 import { solarViewById, solarViewPose } from "@/space/solar-system/model/views";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
+import { createObservatoriesLayer } from "@/space/solar-system/scene/observatories-layer";
 import {
   SOLAR_RULER_KEYS,
   createSolarSystem,
@@ -48,6 +49,7 @@ import {
 } from "@horizon/toolkit/scene";
 
 import { DRIFT } from "../drift";
+import { EARTH, solarPart, upFrom } from "../model/selection";
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay } from "../model/timeline";
 import { driftYearsPerSecond } from "../model/views";
@@ -108,6 +110,9 @@ export function createOrreryEngine({
     });
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     const shownFor = (id: BodyId) => closeUp.shownFor(id);
+    /* One moment a frame for everything that moves on the clock: the close-up's aim and the
+       scene alike, so a craft a few metres across sits exactly where the camera looks. */
+    let now = new Date();
 
     const sky = createSkyLayer(kit, scene, store.getState().yearsAgo, quality.sky);
     /* Rulers from the selection (or the Sun) to every planet and named body on screen. */
@@ -123,10 +128,18 @@ export function createOrreryEngine({
       setBodies,
       rulers,
       shownFor,
-      closeId: () => closeUp.current?.id ?? null,
+      closeId: () => closeUp.current?.globe ?? null,
       swarms: quality.swarms,
     });
     const { planets, moons } = solar;
+    /* Earth's observatories, with the solar system: in its depth passes about Earth, and at
+       their true size after them. */
+    const observatories = createObservatoriesLayer(kit, solar.root, {
+      place,
+      shownFor: (id) => closeUp.shownFor(id),
+      invalidate: () => engine.invalidate(),
+    });
+    const labelPick = (key: string) => solarLabelPick(key) ?? observatories.labelPick(key);
     const activity = scope.own(
       createSolarActivityLifecycle(
         async () => {
@@ -158,13 +171,21 @@ export function createOrreryEngine({
     /** Where the body is now: today's clock plus the Motion offset, as the scene draws it. */
     const located: Vec3 = [0, 0, 0];
     const locate = (sel: BodySelection, out: Vector3) => {
-      /* A moon where its system draws it (magnified about its planet until the camera is near). */
-      const drawn = sel.kind === "moon" ? moons.drawnAt(sel.id) : null;
       const moment = momentAt(store.getState().yearsAgo, driftYears);
-      const at = drawn ?? positionOf(sel, moment, new Date(), located) ?? located;
+      /* An observatory beyond the Earth the scene draws, as the observatories layer places it;
+         a moon where its system draws it (magnified about its planet until the camera is near). */
+      const at =
+        sel.kind === "observatory"
+          ? observatoryPosition(sel.id, moment, now, located)
+          : ((sel.kind === "moon" ? moons.drawnAt(sel.id) : null) ??
+            positionOf(sel, moment, now, located) ??
+            located);
       return out.set(at[0], at[1], at[2]);
     };
-    const bodyObjects = (sel: BodySelection): Object3D[] => {
+    /** Earth's observatories join Earth wherever it has a depth pass of its own. */
+    const withEarth = (id: BodyId, objects: Object3D[]) =>
+      id === EARTH.id ? [...objects, ...observatories.objects] : objects;
+    const bodyObjects = (sel: Exclude<BodySelection, { kind: "observatory" }>): Object3D[] => {
       switch (sel.kind) {
         case "sun":
           return [solar.sun];
@@ -181,12 +202,18 @@ export function createOrreryEngine({
       reduceMotion,
       invalidate: () => engine.invalidate(),
       locate,
-      objectsOf: (sel) => [
-        ...bodyObjects(sel),
-        ...moons.objectsOf(sel.kind === "sun" ? "sun" : sel.id),
-      ],
-      hostOf: (sel) => (sel.kind === "moon" ? bodyObjects(hostOf(sel.id)) : []),
-      reachOf: (id) => moons.reachOf(id),
+      /* A craft is drawn by the observatories' own pass; Earth below it is its host. */
+      objectsOf: (sel) => {
+        if (sel.kind === "observatory") return [];
+        const id = sel.kind === "sun" ? "sun" : sel.id;
+        return withEarth(id, [...bodyObjects(sel), ...moons.objectsOf(id)]);
+      },
+      hostOf: (sel) => {
+        const host = upFrom(sel);
+        return host ? withEarth(host.id, bodyObjects(host)) : [];
+      },
+      hostReach: (sel) => (upFrom(sel)?.id === EARTH.id ? observatories.reach : 0),
+      reachOf: (id) => Math.max(moons.reachOf(id), id === EARTH.id ? observatories.reach : 0),
       onTakeCamera: () => {
         guide.cancelFlight();
         controls.cancel();
@@ -285,15 +312,15 @@ export function createOrreryEngine({
 
     /* Names open what they name; the snow line and rulers have nothing to open. */
     createPicking(kit, canvas, store, {
-      pickables: solar.pickables,
+      pickables: [...solar.pickables, ...observatories.pickables],
       blocked: () => {
         const s = store.getState();
         const flying = closeUp.current !== null && closeUp.current.phase !== "on";
         return s.guideOpen || s.drift !== "off" || flying;
       },
       distance: () => pose.distance,
-      labels: () => hits((key) => solarLabelPick(key) !== undefined),
-      labelPick: solarLabelPick,
+      labels: () => hits((key) => labelPick(key) !== undefined),
+      labelPick,
     });
 
     /* What the bridge last acted on besides the view, flight and turn. */
@@ -399,19 +426,23 @@ export function createOrreryEngine({
       return playHead;
     };
 
-    /** The solar map, then a close-up body over it. */
+    /** The solar map, then a close-up body over it, then the observatories near enough to see. */
     const draw = () => {
       veil.cover(scene);
       renderer.render(scene, camera);
       closeUp.renderBody(renderer, scene);
+      observatories.render(renderer);
       veil.uncover();
     };
+    /* The camera as the rig holds it: its aim and its exact offset from there. */
+    const aimAt: Vec3 = [0, 0, 0];
+    const cameraOffset: Vec3 = [0, 0, 0];
 
     const tick = (dt: number, invalidated: boolean) =>
       bridge.frame(() => {
         const state = store.getState();
         const show = state.show;
-        const now = new Date();
+        now = new Date();
 
         /* The clock first, so the camera steps on where the bodies are this frame: a close-up
            tracking a moving body would otherwise trail it by a frame. A close-up holds the clock:
@@ -441,18 +472,34 @@ export function createOrreryEngine({
         const dist = pose.distance;
         lod.begin(dt, dist, rig.target);
 
+        const selection = store.getState().selection;
         const frame: SolarFrame = {
           ...momentAt(yearsAgo, driftYears),
           dt,
           now,
           show,
-          sel: store.getState().selection,
+          sel: solarPart(selection),
           playing: state.playing,
           dist,
         };
         guide.stepSketch(state, frame);
         sky.update(frame);
         const at = solar.update(frame, closeUp.current !== null);
+        const craft = closeUp.current?.sel;
+        observatories.update({
+          dt,
+          now,
+          present: frame.present,
+          names: show.names,
+          sel: selection,
+          hosts: moons.hosts,
+          magnified: moons.magnifiedOf(EARTH.id),
+          base: rig.aim.toArray(aimAt),
+          offset: rig.offset.toArray(cameraOffset),
+          approach: craft?.kind === "observatory" ? craft.id : null,
+        });
+        if (observatories.waiting !== state.sharpening)
+          store.setState({ sharpening: observatories.waiting });
         const solarOn = sunExists(yearsAgo);
         /* Rulers carry their readouts: the drift leaves them out with the rest of the line art. */
         if (show.distances && solarOn && state.drift === "off")
@@ -478,7 +525,7 @@ export function createOrreryEngine({
           maps.start();
           warmUp(scene);
         }
-        maps.update(dt, lod.need, closeUp.current?.id ?? null);
+        maps.update(dt, lod.need, closeUp.current?.globe ?? null);
       });
 
     engine.start({

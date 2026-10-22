@@ -78,6 +78,9 @@
     "details": "Details",
     "hideDetails": "Hide details",
     "closeUpNote": "True size, turned as it is now.",
+    "craftNote": "True size, turned to the Sun as it flies.",
+    "observatories": "Observatories",
+    "sharpening": "Loading detail",
     "closeUpPresentOnly": "Close-ups show today's surfaces. Return to the present to zoom in.",
     "epochs": "Jump to an epoch",
     "deepField": "Further out · Deep Field",
@@ -108,7 +111,16 @@
     "outerEdge": "Outer edge",
     "shells": "Guide shells",
     "endState": "End state",
-    "share": "In this sample"
+    "share": "In this sample",
+    "height": "Height",
+    "kmSpan": "{near}–{far} km",
+    "minutes": "{value} min",
+    "hours": "{value} h",
+    "tiltEquator": "{value}° to Earth's equator",
+    "fromEarth": "From Earth",
+    "l2": "L2, beyond Earth",
+    "halo": "Once round L2",
+    "launched": "Launched"
   },
   "cards": {
     "sun": {
@@ -198,6 +210,13 @@
       "oort": "Bound for the Oort cloud in the model, then lifted off the plane.",
       "other": "Ends in the stirred Kuiper belt or the scattered disk.",
       "caution": "Do not count dots: {count} stand-ins are not {count} real worlds."
+    },
+    "observatories": {
+      "hubble": "Above the air that blurs every telescope on the ground, Hubble has looked out since 1990, mostly in visible and ultraviolet light.",
+      "chandra": "X-rays never reach the ground. Chandra's long orbit keeps it above Earth's radiation belts for most of each pass.",
+      "webb": "Webb looks in the infrared from beyond the Moon, its sunshield keeping the Sun, Earth and Moon on one side. It circles L2 rather than sitting on it.",
+      "elements": "Placed by its orbit as tracked on {date}. The orbit holds; the place along it drifts from the real one within days.",
+      "halo": "Its loop round L2 is drawn as it looks turning with Earth round the Sun."
     }
   },
   "guide": {
@@ -296,6 +315,10 @@
       "globes": {
         "title": "Globes and rings",
         "body": "Radii, flattening and poles are IAU values and spin rates IAU or newer measurements (Venus, Saturn, Uranus), so every globe has its real shape and turns to today's angle: Uranus lies on its side, Venus spins backwards. Surfaces are measured maps: Hubble's 2025 maps of the giants, Blue Marble Earth, Viking Mars, MESSENGER Mercury and New Horizons Pluto, with mean colour and brightness set by true-colour data and albedo. The Sun uses a representative SDO/HMI photosphere mosaic from 1–22 May 2024, reprojected across one rotation with quiet polar fill; its sunspots are not live or tied to the timeline date. Rings use measured radii and optical depths, lit from the front or seen against the light, with the planet's shadow across them. Jupiter's are too faint to show. The Moon uses LRO/LROC imagery; Io, Europa, Ganymede, Callisto and Triton use Voyager/Galileo mosaics, Charon uses New Horizons, Phobos and Deimos use Viking-based mosaics, and Saturn's mid-size moons use Cassini mosaics. Some moon maps are monochrome or use muted multispectral colour, not calibrated natural colour. Unobserved moon terrain uses plain fill; source polar interpolation is documented in the credits. Venus and Titan retain illustrative clouds and haze; Sedna, Halley and Uranus's moons retain illustrative surfaces."
+      },
+      "observatories": {
+        "title": "Observatories near Earth",
+        "body": "Hubble and Chandra move on their latest CelesTrak element sets: Kepler's ellipse about Earth, its size from the mean motion and its plane and perigee turned by Earth's equatorial bulge (J2). That keeps each orbit right for months; the place along it drifts within days, since drag and the Moon's and Sun's pulls are left out. Webb flies its JPL Horizons trajectory, as flown and then as predicted, kept in the frame that turns with Earth round the Sun, where its loop round L2 holds still, and drawn about the Earth the scene shows. L2 itself follows from the Sun's, Earth's and the Moon's masses. They show only near Earth and only today, at their true distances, and fly in at their true size: NASA's models, scaled by published widths, their solar arrays (Webb: its sunshield) turned to the Sun."
       },
       "rendering": {
         "title": "Rendering budget",

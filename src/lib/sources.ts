@@ -118,6 +118,10 @@ export const SOURCES = {
   castelli1994: {
     cite: "Castelli & Kurucz 1994, A&A 281, 817 (a model-atmosphere fit to Vega's disc-integrated light)",
   },
+  celestrakGp: {
+    cite: "CelesTrak, GP element sets of Hubble (NORAD 20580) and Chandra (25867): SGP4 mean elements, their epochs in observatory-orbits.json",
+    link: SOURCE_URLS.celestrakGp,
+  },
   chabrier2000: {
     cite: "Chabrier & Baraffe 2000, ARA&A 38, 337 (low-mass stars and brown dwarfs: fully convective below about 0.4 M☉; brown dwarfs too light to burn hydrogen)",
     link: SOURCE_URLS.chabrier2000,
@@ -147,6 +151,10 @@ export const SOURCES = {
   },
   crowther2010: {
     cite: "Crowther et al. 2010, MNRAS 408, 731 (R136's WN5h stars, hydrogen-rich and very massive)",
+  },
+  cxcSpecs: {
+    cite: "Chandra X-ray Center, Chandra Specifications (13.8 m by 19.5 m with its solar arrays deployed)",
+    link: SOURCE_URLS.cxcSpecs,
   },
   davies2007: { cite: "Davies et al. 2007, ApJ 671, 781 (the red supergiants of Stephenson 2)" },
   deRosa2012: {
@@ -271,6 +279,10 @@ export const SOURCES = {
     cite: "JPL Horizons trajectories of Pioneer 10–11, Voyager 1–2 and New Horizons (heliocentric, ecliptic J2000)",
     link: SOURCE_URLS.horizonsProbes,
   },
+  horizonsWebb: {
+    cite: "JPL Horizons, James Webb Space Telescope (-170): Goddard FDF reconstructed trajectory to October 2026, then predicted to October 2031 (geocentric, ecliptic J2000)",
+    link: SOURCE_URLS.horizonsWebb,
+  },
   hubbleFlow: {
     cite: "NED (cz 3,418 km/s) and Christlein & Zabludoff 2003 (cz 3,683 km/s), at the model's H₀",
   },
@@ -279,6 +291,9 @@ export const SOURCES = {
   },
   iau2012b2: { cite: "IAU 2012 Resolution B2 (the astronomical unit)" },
   iau2015b3: { cite: "IAU 2015 Resolution B3 (nominal solar and planetary values)" },
+  iers2010: {
+    cite: "Petit & Luzum (eds.) 2010, IERS Conventions (2010), IERS Technical Note 36, Table 1.1 (Earth's J2)",
+  },
   iodice2019: {
     cite: "Iodice et al. 2019, A&A 623, A1 (§1: after Virgo, the most massive concentration within 20 Mpc)",
     link: SOURCE_URLS.iodice2019,
@@ -308,6 +323,10 @@ export const SOURCES = {
   kaibVolk2022: {
     cite: "Kaib & Volk 2022, Dynamical population of comet reservoirs, in Comets III (Univ. of Arizona Press, 2024; after Heisler & Tremaine 1986)",
     link: SOURCE_URLS.kaibVolk2022,
+  },
+  kasper2021: {
+    cite: "Kasper et al. 2021, PRL 127, 255101 (Parker below the Alfvén critical surface at 18.8 R☉, 28 April 2021)",
+    link: SOURCE_URLS.kasper2021,
   },
   kamland2011: {
     cite: "KamLAND Collaboration 2011, Nat. Geosci. 4, 647 (geoneutrinos: radioactive decay supplies about half of Earth's heat)",
@@ -440,6 +459,10 @@ export const SOURCES = {
     cite: "Minor Planet Center, list of trans-Neptunian objects",
     link: SOURCE_URLS.mpcTno,
   },
+  nasaHubbleFacts: {
+    cite: "NASA Goddard, A NASA Refresher on Hubble Facts (2015: 13.3 m long, 4.2 m maximum diameter)",
+    link: SOURCE_URLS.nasaHubbleFacts,
+  },
   nasaKuiper: {
     cite: "NASA Kuiper Belt facts; Pitjeva & Pitjev 2018",
     link: SOURCE_URLS.nasaKuiper,
@@ -465,6 +488,10 @@ export const SOURCES = {
   nasaVoyager: {
     cite: "NASA Science, Voyager: the spacecraft (the 3.7 m high-gain antenna)",
     link: SOURCE_URLS.nasaVoyager,
+  },
+  nasaWebbFacts: {
+    cite: "NASA Science, Webb fact sheet (sunshield 21.197 m by 14.162 m; orbits L2, 1.5 million km from Earth)",
+    link: SOURCE_URLS.nasaWebbFacts,
   },
   nssdc: { cite: "NSSDC planetary fact sheets" },
   nssdcPioneer10: {

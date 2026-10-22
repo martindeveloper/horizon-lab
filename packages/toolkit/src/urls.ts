@@ -54,7 +54,9 @@ export const SOURCE_URLS = {
     "https://github.com/SNEWS2/candidate_list/blob/main/RSG_and_close_stars_catalog_4_11_24.csv",
   heiter2015: "https://doi.org/10.1051/0004-6361/201526319",
   horizonsProbes: "https://ssd.jpl.nasa.gov/horizons/",
+  horizonsWebb: "https://ssd.jpl.nasa.gov/horizons/app.html#/",
   horizonsParker: "https://ssd.jpl.nasa.gov/horizons/app.html#/",
+  kasper2021: "https://doi.org/10.1103/PhysRevLett.127.255101",
   iodice2019: "https://arxiv.org/abs/1812.01050",
   joyce2020: "https://doi.org/10.3847/1538-4357/abb8db",
   jplElements: "https://ssd.jpl.nasa.gov/planets/approx_pos.html",
@@ -115,6 +117,11 @@ export const SOURCE_URLS = {
   nasaParkerShield:
     "https://www.nasa.gov/feature/goddard/2018/traveling-to-the-sun-why-wont-parker-solar-probe-melt/",
   nasaVoyager: "https://science.nasa.gov/mission/voyager/spacecraft/",
+  nasaHubbleFacts:
+    "https://science.nasa.gov/centers-and-facilities/goddard/a-nasa-refresher-on-hubble-facts-for-the-25th-anniversary/",
+  nasaWebbFacts: "https://science.nasa.gov/mission/webb/fact-sheet/",
+  cxcSpecs: "https://chandra.harvard.edu/about/specs.html",
+  celestrakGp: "https://celestrak.org/NORAD/elements/",
   nssdcPioneer10: "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1972-012A",
   fountain2008: "https://arxiv.org/abs/0709.4288",
   swpcSrs:
@@ -257,6 +264,8 @@ export const DOWNLOAD_URLS = {
   lineBroadening: "https://cdsarc.cds.unistra.fr/ftp/J/A+AS/142/467/table1.dat.gz",
   modelAtmospheres: "http://kurucz.harvard.edu/grids/gridp00odfnew/ap00k2odfnew.dat",
   horizons: "https://ssd.jpl.nasa.gov/api/horizons.api",
+  /** CelesTrak's general perturbations element sets, by catalogue number (`CATNR`). */
+  celestrakGp: "https://celestrak.org/NORAD/elements/gp.php",
   simbadTap: "https://simbad.cds.unistra.fr/simbad/sim-tap/sync",
   hmiBrowse: "https://sdo.gsfc.nasa.gov/assets/img/browse",
   /** Model S (Christensen-Dalsgaard et al. 1996) in FGONG format, and the Internet Archive's copy of it. */
@@ -269,7 +278,7 @@ export const DOWNLOAD_URLS = {
   swpcRegionSummaries:
     "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries",
   silsoGroupBackbone: "https://www.sidc.be/SILSO/DATA/GroupNumber/GNbb2_y.txt",
-  /** NASA 3D Resources spacecraft (glTF): science.nasa.gov, and the GitHub archive for Pioneer. */
+  /** NASA 3D Resources spacecraft (glTF): science.nasa.gov, and the GitHub archive for Pioneer, Chandra and Webb. */
   voyagerModel:
     "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/v/Voyager.glb",
   pioneerModel:
@@ -277,6 +286,11 @@ export const DOWNLOAD_URLS = {
   newHorizonsModel:
     "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/n/New_Horizons.glb",
   parkerModel: "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/p/s/PSP.glb",
+  hubbleModel: "https://assets.science.nasa.gov/content/dam/science/psd/solar/2023/09/h/Hubble.glb",
+  chandraModel:
+    "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Chandra%20X-ray%20Observatory/Chandra%20X-ray%20Observatory.glb",
+  webbModel:
+    "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/James%20Webb%20Space%20Telescope%20(B)/James%20Webb%20Space%20Telescope%20(B).glb",
 } as const;
 
 export const EXTERNAL_URLS = {

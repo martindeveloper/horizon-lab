@@ -14,14 +14,15 @@ import { SPACECRAFT, SPACECRAFT_IDS, spacecraftFrame } from "../src/space/spacec
 
 const M_PER_AU = 149_597_870_700;
 
-test("every probe flies a model, each scaled by a sourced width it frames and fits", () => {
+test("every probe flies a model, each scaled by a sourced width that fits within it", () => {
   for (const probe of PROBES) assert.ok(SPACECRAFT[PROBE_SPACECRAFT[probe.id]], probe.id);
   for (const id of SPACECRAFT_IDS) {
     const { face, radius } = SPACECRAFT[id];
     assert.equal(face.across.unit, "m");
     assert.ok(SOURCES[face.across.source], `${id}: ${face.across.source}`);
-    /* A craft is a few metres across, and reaches past its own face. */
-    assert.ok(face.across.value > 1 && face.across.value < 5, id);
+    /* A craft is metres across (an observatory's sunshield or arrays a few tens), and reaches
+       past its own face. */
+    assert.ok(face.across.value > 1 && face.across.value < 25, id);
     assert.ok(radius > face.across.value / 2, id);
   }
 });

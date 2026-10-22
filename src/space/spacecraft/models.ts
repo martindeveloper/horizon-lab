@@ -6,15 +6,34 @@ import { CREDIT_URLS, DOWNLOAD_URLS } from "@horizon/toolkit/urls";
 /**
  * Spacecraft drawn at their true size: the NASA 3D Resources models, rebuilt by
  * scripts/build-spacecraft-models.mjs into metres about the centre of the face (the high-gain
- * dish, or Parker's heat shield), which looks down +z. No three.js: cards, tests and the build read this.
- * Published files are never overwritten; a rebuild bumps the model's `version`.
+ * dish, Parker's heat shield, an observatory's solar arrays or sunshield), which looks down +z.
+ * No three.js: cards, tests and the build read this. Published files are never overwritten; a
+ * rebuild bumps the model's `version`.
  */
-export type SpacecraftId = "voyager" | "pioneer" | "newHorizons" | "parker";
+export type SpacecraftId =
+  | "voyager"
+  | "pioneer"
+  | "newHorizons"
+  | "parker"
+  | "hubble"
+  | "chandra"
+  | "webb";
 
 export type SpacecraftModel = {
   version: number;
-  /** The part the build scales the model by: its width across, sourced, and what it faces in flight. */
+  /**
+   * The width the build scales the model by, sourced (the face's own, or Hubble's tube), and
+   * what the face turns to in flight: a probe's dish to Earth; Parker's heat shield, an
+   * observatory's solar arrays and Webb's sunshield to the Sun, its telescope then looking
+   * across the Sun's line.
+   */
   face: { across: Value; toward: "earth" | "sun" };
+  /**
+   * The radius a host frames the craft by, in `face.across`: a dish or shield takes in the bus
+   * behind it (1), Hubble's tube is three diameters long (1.5), and solar arrays or a sunshield
+   * span the craft that stands within them (0.5).
+   */
+  frame: number;
   /** The built model's bounding radius about its origin, m (measured by the build, which checks it). */
   radius: number;
   /** What the model was made from, and where its source file is. */
@@ -42,6 +61,7 @@ export const SPACECRAFT: Record<SpacecraftId, SpacecraftModel> = {
       across: metres(3.7, "nasaVoyager", "high-gain antenna; JPL gives the reflector as 3.66 m"),
       toward: "earth",
     },
+    frame: 1,
     radius: 14.3,
     source: "Voyager 3D model (NASA 3D Resources)",
     download: DOWNLOAD_URLS.voyagerModel,
@@ -52,6 +72,7 @@ export const SPACECRAFT: Record<SpacecraftId, SpacecraftModel> = {
   pioneer: {
     version: 1,
     face: { across: metres(2.74, "nssdcPioneer10", "parabolic dish, 46 cm deep"), toward: "earth" },
+    frame: 1,
     radius: 6.9,
     source: "Pioneer 10 3D model (NASA 3D Resources)",
     download: DOWNLOAD_URLS.pioneerModel,
@@ -62,6 +83,7 @@ export const SPACECRAFT: Record<SpacecraftId, SpacecraftModel> = {
   newHorizons: {
     version: 1,
     face: { across: metres(2.1, "fountain2008", "high-gain antenna reflector"), toward: "earth" },
+    frame: 1,
     radius: 2.5,
     source: "New Horizons 3D model (NASA 3D Resources)",
     download: DOWNLOAD_URLS.newHorizonsModel,
@@ -75,9 +97,62 @@ export const SPACECRAFT: Record<SpacecraftId, SpacecraftModel> = {
       across: metres(2.4, "nasaParkerShield", "Thermal Protection System, 115 mm thick"),
       toward: "sun",
     },
+    frame: 1,
     radius: 7.2,
     source: "Parker Solar Probe 3D model (NASA 3D Resources)",
     download: DOWNLOAD_URLS.parkerModel,
+    credit: NASA_3D,
+    licence: "Public domain",
+    url: CREDIT_URLS.nasa3d,
+  },
+  hubble: {
+    version: 1,
+    face: {
+      across: {
+        ...metres(4.2, "nasaHubbleFacts", "maximum diameter, the aft shroud; 13.3 m long"),
+        status: "verified",
+      },
+      toward: "sun",
+    },
+    frame: 1.5,
+    radius: 10.1,
+    source: "Hubble Space Telescope 3D model (NASA 3D Resources)",
+    download: DOWNLOAD_URLS.hubbleModel,
+    credit: NASA_3D,
+    licence: "Public domain",
+    url: CREDIT_URLS.nasa3d,
+  },
+  chandra: {
+    version: 1,
+    face: {
+      across: {
+        ...metres(19.5, "cxcSpecs", "across the deployed solar arrays; 13.8 m long"),
+        status: "verified",
+      },
+      toward: "sun",
+    },
+    frame: 0.5,
+    radius: 10.8,
+    source: "Chandra X-ray Observatory 3D model (NASA 3D Resources)",
+    download: DOWNLOAD_URLS.chandraModel,
+    credit: NASA_3D,
+    licence: "Public domain",
+    url: CREDIT_URLS.nasa3d,
+  },
+  webb: {
+    version: 1,
+    face: {
+      across: {
+        ...metres(21.197, "nasaWebbFacts", "sunshield, 21.197 m by 14.162 m"),
+        digits: 5,
+        status: "verified",
+      },
+      toward: "sun",
+    },
+    frame: 0.5,
+    radius: 12.1,
+    source: "James Webb Space Telescope (B) 3D model (NASA 3D Resources)",
+    download: DOWNLOAD_URLS.webbModel,
     credit: NASA_3D,
     licence: "Public domain",
     url: CREDIT_URLS.nasa3d,
@@ -86,8 +161,9 @@ export const SPACECRAFT: Record<SpacecraftId, SpacecraftModel> = {
 
 export const SPACECRAFT_IDS = keysOf(SPACECRAFT);
 
-/** The radius a host frames a craft by, m: its face's width, which takes in the bus behind it. */
-export const spacecraftFrame = (id: SpacecraftId) => SPACECRAFT[id].face.across.value;
+/** The radius a host frames a craft by, m (`frame`). */
+export const spacecraftFrame = (id: SpacecraftId) =>
+  SPACECRAFT[id].face.across.value * SPACECRAFT[id].frame;
 
 /** Bucket folder of the built models: `<key>/<id>/v<version>/<id>.glb`. */
 export const MODELS_KEY = "/models/spacecraft";

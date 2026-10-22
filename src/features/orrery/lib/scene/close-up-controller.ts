@@ -29,14 +29,13 @@ import { FRAME_RADII } from "@/space/solar-system/model/framing";
 /**
  * The close-up: a flight to a body at true size, its detailed map (measured or
  * painted a few rows per frame), the atmosphere shell over a body with air (its own and its
- * moons', drawn in place of the surface shader's haze rim) and a depth pass of its own.
+ * moons', drawn in place of the surface shader's haze rim) and a depth pass of its own; or a
+ * flight to one of Earth's observatories at its true size, which its own pass draws, Earth
+ * below it holding its detailed map in a depth pass of its own.
  */
-import {
-  hasSurface,
-  type SolarSelection,
-  type SurfaceSelection,
-} from "@/space/solar-system/model/selection";
+import { observatoryById, type ObservatoryId } from "@/space/solar-system/model/observatories";
 import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
+import { spacecraftFrame } from "@/space/spacecraft/models";
 import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horizon/toolkit/bodies";
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
@@ -45,6 +44,7 @@ import { lerp, logFraction } from "@horizon/toolkit/math";
 import { decodeMap, fetchMap, rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
+import { EARTH, canFlyTo, type CloseUpSelection, type OrrerySelection } from "../model/selection";
 import type { CloseUpQuality } from "../quality";
 import type { CameraRig } from "./camera-rig";
 import { closeUpMapWidth, moonFraming } from "./close-up-flight";
@@ -66,11 +66,14 @@ const LARGEST_MOON = new Map<BodyId, MoonId>();
 for (const moon of [...MOONS].sort((a, b) => a.radiusKm - b.radiusKm))
   LARGEST_MOON.set(moon.host, moon.id);
 
-export type BodySelection = SurfaceSelection;
+export type BodySelection = CloseUpSelection;
 
 type CloseUp = {
   sel: BodySelection;
-  id: BodyId;
+  /** What the close-up frames: a body, or an observatory. */
+  id: BodyId | ObservatoryId;
+  /** The globe whose detailed map it holds: the body, or Earth below an observatory. */
+  globe: BodyId;
   phase: "in" | "on" | "out";
   /** Progress through the current flight, 0..1. */
   t: number;
@@ -81,12 +84,15 @@ type CloseUp = {
   /** Where the flight out lands: the pose and aim before the close-up, or a new view. */
   home: OrbitPose;
   homeAim: Vector3;
-  /** True equatorial radius and the radius to frame (rings included), scene units. */
+  /** True equatorial radius and the radius to frame (rings included), scene units; a craft's frame for both. */
   radius: number;
   frame: number;
-  /** The body's meshes, drawn in their own depth pass on layer 1. */
+  /** The body's meshes, drawn in their own depth pass on layer 1; none for a craft. */
   objects: Object3D[];
-  /** A moon's planet (globe and rings), drawn in a depth pass of its own before the moon's. */
+  /**
+   * A moon's planet (globe and rings), or the Earth below an observatory, drawn in a depth pass
+   * of its own before the subject's.
+   */
   host: Object3D[];
   /** The detailed map, painted a few rows per frame, then swapped in. */
   job: SurfaceJob | null;
@@ -137,7 +143,22 @@ type Shell = {
   sun: Vector3;
 };
 
-const bodyKey = (sel: BodySelection): BodyId => (sel.kind === "sun" ? "sun" : sel.id);
+const subjectOf = (sel: BodySelection) => (sel.kind === "sun" ? "sun" : sel.id);
+/** The globe a close-up holds the detailed map of: its body's, or Earth's below an observatory. */
+const globeOf = (sel: BodySelection): BodyId =>
+  sel.kind === "observatory" ? EARTH.id : sel.kind === "sun" ? "sun" : sel.id;
+const M_PER_AU = AU_KM * 1e3;
+
+/** The true radius and the radius to frame, scene units: a globe's (rings included), or a craft's. */
+function sizeOf(sel: BodySelection) {
+  if (sel.kind === "observatory") {
+    const frame = spacecraftFrame(observatoryById(sel.id).model) / M_PER_AU;
+    return { radius: frame, frame };
+  }
+  const id = globeOf(sel);
+  const radius = id === "sun" ? SUN_R : FIGURES[id].equatorialKm / AU_KM;
+  return { radius, frame: radius * (FRAME_RADII[id] ?? 1) };
+}
 
 const setLayer = (objects: Object3D[], layer: number) => {
   for (const object of objects) object.traverse((child) => child.layers.set(layer));
@@ -153,8 +174,10 @@ export function createCloseUpController(
     locate: (sel: BodySelection, out: Vector3) => Vector3;
     /** The body's own meshes and its moons'. */
     objectsOf: (sel: BodySelection) => Object3D[];
-    /** For a moon, its planet's globe (rings included); none for the rest. */
+    /** For a moon, its planet's globe (rings included); for an observatory, Earth's; none for the rest. */
     hostOf: (sel: BodySelection) => Object3D[];
+    /** How far past its globe the host's pass reaches (Earth's observatories), scene units. */
+    hostReach?: (sel: BodySelection) => number;
     /** How far the body's drawn moons reach. */
     reachOf: (id: BodyId) => number;
     /** The close-up takes the camera from flights, the guide and input. */
@@ -294,7 +317,7 @@ export function createCloseUpController(
     setLayer(close.objects, 0);
     setLayer(close.host, 0);
     close.loading?.abort();
-    looks.release(close.id);
+    looks.release(close.globe);
     close.detail?.dispose();
     if (landHome) Object.assign(pose, close.home);
     close = null;
@@ -322,9 +345,9 @@ export function createCloseUpController(
     const flightStyle = style();
     end(false);
     room = carded() ? 1 : 0;
-    const id = bodyKey(sel);
-    const radius = id === "sun" ? SUN_R : FIGURES[id].equatorialKm / AU_KM;
-    const frame = radius * (FRAME_RADII[id] ?? 1);
+    const id = subjectOf(sel);
+    const globe = globeOf(sel);
+    const { radius, frame } = sizeOf(sel);
     locate(sel, target);
     const to = closeUpPose([target.x, target.y, target.z], frame, freeHalfTan(), pose.azimuth);
     /* The planet's moons and their orbits share its depth pass: the Moon sits inside the
@@ -338,6 +361,7 @@ export function createCloseUpController(
     close = {
       sel,
       id,
+      globe,
       phase: "in",
       t: 0,
       from: { ...pose },
@@ -350,7 +374,7 @@ export function createCloseUpController(
       objects,
       host,
       /* Measured bodies fetch a detailed map; painted ones paint one during the flight. */
-      job: MAPS[id] ? null : detailJob(id),
+      job: MAPS[globe] ? null : detailJob(globe),
       loading: null,
       detail: null,
       blend: fromBlend,
@@ -363,7 +387,7 @@ export function createCloseUpController(
       shells: [],
     };
     shellGlobes(close);
-    const near = nearFile(id);
+    const near = nearFile(globe);
     if (near) {
       const mine = close;
       const abort = new AbortController();
@@ -382,14 +406,14 @@ export function createCloseUpController(
             mine.loading = null;
             mine.detail = texture;
             upload(texture);
-            looks.hold(id, texture);
+            looks.hold(globe, texture);
             invalidate();
           },
           () => {
             /* Offline or missing: paint the detailed map instead. */
             if (close !== mine || abort.signal.aborted) return;
             mine.loading = null;
-            mine.job = detailJob(id);
+            mine.job = detailJob(globe);
             invalidate();
           },
         );
@@ -443,7 +467,7 @@ export function createCloseUpController(
     if (!done) return;
     close.detail = looks.detailTexture(close.job);
     upload(close.detail);
-    looks.hold(close.id, close.detail);
+    looks.hold(close.globe, close.detail);
     close.job = null;
     invalidate();
   };
@@ -505,21 +529,21 @@ export function createCloseUpController(
     },
     /** The pose `base` swings to so the body's largest moon shares the view; null without one. */
     moonPose(base: OrbitPose): OrbitPose | null {
-      const moon = close && LARGEST_MOON.get(close.id);
+      const moon = close && close.sel.kind !== "observatory" && LARGEST_MOON.get(close.globe);
       if (!moon) return null;
       const { x, y, z } = moonOffset(moon, new Date(), moonAt);
       return moonFraming([x, y, z], base, freeHalfTan());
     },
-    /** The focused body's own label, orbit and marker fade as it comes to fill the view. */
-    shownFor(id: BodyId) {
+    /** The focused body's (or observatory's) own label, orbit and marker fade as it comes to fill the view. */
+    shownFor(id: BodyId | ObservatoryId) {
       return close !== null && close.id === id
         ? rising(pose.distance, close.frame * 250, close.frame * 600)
         : 1;
     },
     /** A body was selected: fetch its close-up map's bytes while the card is read. */
-    prefetch(sel: SolarSelection | null) {
-      if (!hasSurface(sel)) return;
-      const near = nearFile(bodyKey(sel));
+    prefetch(sel: OrrerySelection | null) {
+      if (!canFlyTo(sel)) return;
+      const near = nearFile(globeOf(sel));
       if (near) void bytesOf(near).catch(() => undefined);
     },
     /** Flies in or out, keeps the aim on the body and the globe clear of the card. */
@@ -628,10 +652,20 @@ export function createCloseUpController(
         renderer.render(scene, camera);
       };
       const planet = close.host[0];
-      if (planet) pass(HOST_LAYER, planet.getWorldPosition(hostAt), planet.scale.x * 3);
+      if (planet) {
+        const beyond = deps.hostReach?.(close.sel) ?? 0;
+        pass(
+          HOST_LAYER,
+          planet.getWorldPosition(hostAt),
+          Math.max(planet.scale.x * 3, beyond * 1.02),
+        );
+      }
       aimShells(close);
-      const moons = deps.reachOf(close.id);
-      pass(BODY_LAYER, target, Math.max(close.objects[0]!.scale.x * 3, moons * 1.02));
+      const globe = close.objects[0];
+      if (globe) {
+        const moons = deps.reachOf(close.globe);
+        pass(BODY_LAYER, target, Math.max(globe.scale.x * 3, moons * 1.02));
+      }
       renderer.autoClear = autoClear;
       camera.layers.set(0);
       camera.near = keepNear;

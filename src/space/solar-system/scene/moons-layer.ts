@@ -31,8 +31,11 @@ const MOON_PX = 4.5;
 const MOON_PX_MIN = 2.2;
 /** A selected planet's innermost moon clears its marker (and rings) by this many pixels. */
 const MOON_CLEAR_PX = 12;
-/** A moon shows once it clears its planet's marker by this many pixels (eased over the span). */
-const SEPARATE_PX = [6, 10] as const;
+/**
+ * A moon shows once it clears its planet's marker by this many pixels (eased over the span), as
+ * does anything else in orbit about a planet (Earth's observatories).
+ */
+export const SEPARATE_PX = [6, 10] as const;
 const SELECTED_PX = [3, 6] as const;
 /**
  * A system spreads as if selected while the camera is this near its planet, as fractions of
@@ -101,8 +104,21 @@ export function createMoonsLayer(
     const squeeze = Math.min(1, Math.log(SPREAD) / Math.log(outer / inner));
     for (const slot of moons) slot.lift = (inner / (slot.moon.aKm / AU_KM)) ** (1 - squeeze);
     const outerLift = (inner / outer) ** (1 - squeeze);
-    /** How far the drawn system reaches from the planet, for the close-up depth pass. */
-    return { id, host, moons, inner, outer, outerLift, reach: 0, focus: lod.fader(0.7) };
+    /**
+     * How far the drawn system reaches from the planet, for the close-up depth pass, and how
+     * many times its innermost moon's distance it is drawn at (1: true scale).
+     */
+    return {
+      id,
+      host,
+      moons,
+      inner,
+      outer,
+      outerLift,
+      reach: 0,
+      magnified: 1,
+      focus: lod.fader(0.7),
+    };
   });
   const present = lod.fader();
   const names = lod.fader();
@@ -138,6 +154,10 @@ export function createMoonsLayer(
     },
     reachOf(id: BodyId) {
       return systemOf(id)?.reach ?? 0;
+    },
+    /** How many times its true distance a planet's innermost moon is drawn at now; 1 unmagnified. */
+    magnifiedOf(id: MoonHost) {
+      return systemOf(id)?.magnified ?? 1;
     },
     /* Moons sit at today's positions (the clock, not the Motion speed-up, which
        would whirl them). A selected or nearby planet's system is magnified about the
@@ -177,6 +197,7 @@ export function createMoonsLayer(
         const hidden = host.extent + (show.trueSize ? 0 : pxWorld(range, 3));
         const [from, to] = focus > 0.5 ? SELECTED_PX : SEPARATE_PX;
         system.reach = 0;
+        system.magnified = 1 + (Math.max(1, spread) - 1) * focus;
         for (const slot of system.moons) {
           const { moon, mesh, hit, offset, orbit } = slot;
           const magnify = 1 + (Math.max(1, spread * slot.lift) - 1) * focus;

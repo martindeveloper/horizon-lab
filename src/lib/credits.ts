@@ -119,7 +119,7 @@ const { voyager } = SPACECRAFT;
 const MODEL_CREDITS: readonly Credit[] = [
   {
     id: "spacecraftModels",
-    name: "NASA 3D Resources: Voyager, Pioneer 10, New Horizons, Parker Solar Probe",
+    name: "NASA 3D Resources: Voyager, Pioneer 10, New Horizons, Parker Solar Probe, Hubble, Chandra, Webb",
     by: voyager.credit,
     licence: voyager.licence,
     url: voyager.url,

@@ -72,6 +72,23 @@
       ]
     },
     {
+      "id": "observatories",
+      "equations": [
+        {
+          "equation": "mean-motion-axis"
+        },
+        {
+          "equation": "j2-nodal-regression"
+        },
+        {
+          "equation": "j2-apsidal-precession"
+        },
+        {
+          "equation": "second-lagrange-point"
+        }
+      ]
+    },
+    {
       "id": "rendering",
       "equations": []
     }
@@ -192,6 +209,26 @@
     {
       "title": "USGS, Pluto global mosaic from New Horizons, July 2017 (NASA, JHU APL, SwRI, LPI)",
       "url": "https://www.usgs.gov/media/images/pluto-global-mosaic-new-horizons-july-2017"
+    },
+    {
+      "title": "CelesTrak, GP element sets: Hubble Space Telescope (NORAD 20580) and Chandra X-ray Observatory (25867)",
+      "url": "https://celestrak.org/NORAD/elements/"
+    },
+    {
+      "title": "JPL Horizons: James Webb Space Telescope (-170), Goddard FDF reconstructed and predicted trajectory",
+      "url": "https://ssd.jpl.nasa.gov/horizons/app.html#/"
+    },
+    {
+      "title": "NASA Science: Webb fact sheet",
+      "url": "https://science.nasa.gov/mission/webb/fact-sheet/"
+    },
+    {
+      "title": "Chandra X-ray Center: Chandra specifications",
+      "url": "https://chandra.harvard.edu/about/specs.html"
+    },
+    {
+      "title": "NASA 3D Resources: Hubble, Chandra and James Webb Space Telescope models (NASA VTAD)",
+      "url": "https://science.nasa.gov/3d-resources/"
     }
   ]
 }

@@ -1,12 +1,19 @@
 import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import {
+  OBSERVATORY_IDS,
+  observatoryById,
+  type ObservatoryId,
+} from "@/space/solar-system/model/observatories";
 import { CLEAR_DONE, MODEL_START } from "@/space/solar-system/model/parameters";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
+import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
-import type { PlanetId } from "@horizon/toolkit/bodies";
+import { PLANET_IDS, type PlanetId } from "@horizon/toolkit/bodies";
+import { includesId } from "@horizon/toolkit/records";
 
 import interstellarDriftMap from "../../../bench/fixtures/audio-maps/interstellar-drift.json";
 import { DRIFT } from "./lib/drift";
@@ -25,8 +32,8 @@ type OrreryBenchScene = BenchScene & {
   selection?: SolarSelection;
   bloom: boolean;
   lens: boolean;
-  /** A close-up of this body, landed: the flight is run before the first frame. */
-  closeUp?: PlanetId | "sun";
+  /** A close-up of this body or observatory, landed: the flight is run before the first frame. */
+  closeUp?: PlanetId | "sun" | ObservatoryId;
   /** The Sun's close-up with its optional activity switched on and loaded. */
   solarActivity?: boolean;
   /** Faint ring systems in a long exposure. */
@@ -120,6 +127,24 @@ const SCENES: readonly OrreryBenchScene[] = [
     bloom: false,
     lens: false,
     closeUp: "earth",
+  },
+  {
+    id: "hubble-close-up",
+    description:
+      "Close-up of Hubble, standard quality: true size, three-quarter lit, its arrays to the Sun, Earth below",
+    tags: ["close-up"],
+    bloom: false,
+    lens: false,
+    closeUp: "hubble",
+  },
+  {
+    id: "webb-close-up",
+    description:
+      "Close-up of Webb, standard quality: true size, three-quarter lit, its sunshield to the Sun",
+    tags: ["close-up"],
+    bloom: false,
+    lens: false,
+    closeUp: "webb",
   },
   {
     id: "neptune-close-up",
@@ -312,6 +337,10 @@ export const benchTarget: BenchTarget = {
   async mount(sceneId, surface) {
     const scene = SCENES.find((s) => s.id === sceneId);
     if (!scene) throw new Error(`Unknown orrery scene: ${sceneId}`);
+    /* A bench sequence draws its frames in one go: an observatory's model is fetched first. */
+    const target = scene.closeUp;
+    const craft = target && includesId(OBSERVATORY_IDS, target) ? target : null;
+    if (craft) await fetchSpacecraft(observatoryById(craft).model);
     const store = useOrrery;
     /* The store outlives a mounted engine: leave an earlier scene's close-up and selection. */
     store.getState().leaveCloseUp(true);
@@ -340,11 +369,17 @@ export const benchTarget: BenchTarget = {
       for (let index = 0; index < count; index += 1)
         instance.render({ index, count, progress: 0, time: index / 60, dt: 1 / 60 });
     };
-    if (scene.closeUp) {
+    if (target) {
       /* Select the body and fly in, frame by frame, so the timed frames show the landed close-up. */
       store
         .getState()
-        .select(scene.closeUp === "sun" ? { kind: "sun" } : { kind: "planet", id: scene.closeUp });
+        .select(
+          target === "sun"
+            ? { kind: "sun" }
+            : includesId(PLANET_IDS, target)
+              ? { kind: "planet", id: target }
+              : { kind: "observatory", id: target },
+        );
       store.getState().enterCloseUp();
       preroll(CLOSE_UP_PREROLL);
     }

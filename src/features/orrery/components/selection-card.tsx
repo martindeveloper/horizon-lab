@@ -4,17 +4,17 @@ import { useId, useState } from "react";
 
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
 import { solarNameKey } from "@/space/solar-system/format";
-import { hostOf, selectionKey } from "@/space/solar-system/model/selection";
 import { Action } from "@horizon/toolkit/ui";
 
+import { orreryKey, upFrom } from "../lib/model/selection";
 import { canCloseUp, closeUpAwaitsPresent, useOrrery } from "../lib/store";
 import { cardFor } from "./cards";
 import { SolarActivityControls } from "./solar-activity-controls";
 
 /**
  * Facts and notes for the selected object, with the close-up entry. In a close-up the card may
- * show another body of its system, offering to fly on to it; Back goes up a level, from a moon
- * to its planet and from a planet to the map.
+ * show another of its system, offering to fly on to it; Back goes up a level, from a moon or an
+ * observatory to its planet and from a planet to the map.
  */
 export function SelectionCard() {
   const t = useTranslations("orrery");
@@ -33,12 +33,10 @@ export function SelectionCard() {
   const [expanded, setExpanded] = useState(false);
   const now = useNow({ updateInterval: 60_000 });
   if (!selection) return null;
-  const here = closeUp !== null && selectionKey(closeUp) === selectionKey(selection);
+  const here = closeUp !== null && orreryKey(closeUp) === orreryKey(selection);
   const offer = offerCloseUp && !here;
-  const back =
-    closeUp?.kind === "moon"
-      ? t("hud.backTo", { name: t(solarNameKey(hostOf(closeUp.id))) })
-      : t("hud.leaveCloseUp");
+  const up = closeUp && upFrom(closeUp);
+  const back = up ? t("hud.backTo", { name: t(solarNameKey(up)) }) : t("hud.leaveCloseUp");
   return (
     <SelectionSheet
       card={cardFor(t, f, selection, yearsAgo, elliptical, now, { unit, locale })}
@@ -94,7 +92,11 @@ export function SelectionCard() {
                 )}
               </Action>
             ) : null}
-            {here ? <p className="w-full text-xs text-muted">{t("hud.closeUpNote")}</p> : null}
+            {here ? (
+              <p className="w-full text-xs text-muted">
+                {t(selection.kind === "observatory" ? "hud.craftNote" : "hud.closeUpNote")}
+              </p>
+            ) : null}
             {deepTime ? (
               <p id={deepTimeNote} className="w-full text-xs text-muted">
                 {t("hud.closeUpPresentOnly")}

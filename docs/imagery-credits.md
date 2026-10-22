@@ -228,10 +228,15 @@ group (<https://science.nasa.gov/3d-resources/>), built by
   [NASA 3D Resources archive](https://github.com/nasa/NASA-3D-Resources).
 - **New Horizons**: [New Horizons](https://science.nasa.gov/resource/new-horizons-3d-model/).
 - **Parker Solar Probe**: [Parker Solar Probe](https://science.nasa.gov/resource/parker-solar-probe-3d-model/).
+- **Hubble Space Telescope**: [Hubble](https://science.nasa.gov/resource/hubble-space-telescope-3d-model/).
+- **Chandra X-ray Observatory** and **James Webb Space Telescope** (the archive's lighter
+  "B" model): from the [NASA 3D Resources archive](https://github.com/nasa/NASA-3D-Resources).
 
-Changes: each model is scaled so its high-gain dish (Parker: its heat shield) spans the
-published width (`docs/science-sources.md`) and turned so that face looks along +z; the
-scenes turn it to Earth (Parker: to the Sun). An exporter's helper cube is dropped, meshes
+Changes: each model is scaled so its high-gain dish (Parker: its heat shield; Hubble: its
+aft shroud; Chandra: its solar arrays; Webb: its sunshield's sun-facing layer) spans the
+published width (`docs/science-sources.md`) and turned so its face looks along +z; the
+scenes turn the probes' dishes to Earth, and Parker's shield, the observatories' solar
+arrays and Webb's sunshield to the Sun. An exporter's helper cube is dropped, meshes
 are welded, simplified and meshopt-compressed, and textures become WebP of at most
 1024 px. The models' own materials are replaced by one shader lit by the Sun; their colours,
 metalness and roughness are kept. Twin spacecraft share one model, and Pioneer 11 shows

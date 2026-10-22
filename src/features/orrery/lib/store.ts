@@ -10,21 +10,26 @@ import {
   type SceneSlice,
 } from "@/lib/scene-store";
 import { isPresentEra } from "@/space/solar-system/model/moment";
-import { MODEL_START } from "@/space/solar-system/model/parameters";
 import {
-  hasSurface,
-  hostOf,
-  sameSystem,
-  selectionKey,
-  type SolarSelection,
-  type SurfaceSelection,
-} from "@/space/solar-system/model/selection";
+  isObservatorySelection,
+  type ObservatoryId,
+} from "@/space/solar-system/model/observatories";
+import { MODEL_START } from "@/space/solar-system/model/parameters";
 import { solarViewById, type SolarViewId } from "@/space/solar-system/model/views";
 import type { SolarShow } from "@/space/solar-system/scene/kit";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
 import { HELP } from "./help";
+import {
+  EARTH,
+  canFlyTo,
+  orreryKey,
+  sameSystem,
+  upFrom,
+  type CloseUpSelection,
+  type OrrerySelection,
+} from "./model/selection";
 import { OLDEST } from "./model/timeline";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW } from "./model/views";
@@ -55,7 +60,7 @@ type HelpSaved = {
   viewDist: number;
   yearsAgo: number;
   playing: boolean;
-  closeUp: SurfaceSelection | null;
+  closeUp: CloseUpSelection | null;
   solarActivity: boolean;
   solarActivityPaused: boolean;
   show: Show;
@@ -68,12 +73,13 @@ export type OrreryStore = SceneSlice &
     yearsAgo: number;
     playing: boolean;
     view: SolarViewId;
-    selection: SolarSelection | null;
+    selection: OrrerySelection | null;
     /**
-     * The body filling the view at its true size, or null on the map; the engine flies in and
-     * out. The card may show another body of its system (the Moon from the Earth's).
+     * The body (or observatory) filling the view at its true size, or null on the map; the
+     * engine flies in and out. The card may show another of its system (the Moon from the
+     * Earth's).
      */
-    closeUp: SurfaceSelection | null;
+    closeUp: CloseUpSelection | null;
     /** Explicitly enabled illustrative prominences; reset on leaving the close-up. */
     solarActivity: boolean;
     solarActivityPaused: boolean;
@@ -82,6 +88,8 @@ export type OrreryStore = SceneSlice &
     /* HUD readouts written by the engine a few times per second, besides the scale bar. */
     viewDist: number;
     driftRate: number;
+    /** An observatory is near enough to show at its true size and its model is on its way. */
+    sharpening: boolean;
     /** Years the Motion switch has advanced the real clock, published by the engine. */
     driftYears: number;
     setYearsAgo: (yearsAgo: number) => void;
@@ -89,11 +97,16 @@ export type OrreryStore = SceneSlice &
     togglePlay: () => void;
     replay: () => void;
     setView: (view: SolarViewId) => void;
-    select: (selection: SolarSelection | null) => void;
-    /** Flies to the selected body when it has a surface to look at. */
+    select: (selection: OrrerySelection | null) => void;
+    /** Flies to the selected body when it has a surface to look at, or to an observatory. */
     enterCloseUp: () => void;
-    /** Back up a level: from a moon to its planet's close-up, from a planet to the map; `toMap` all the way. */
+    /**
+     * Back up a level: from a moon or an observatory to its planet's close-up, from a planet to
+     * the map; `toMap` all the way.
+     */
     leaveCloseUp: (toMap?: boolean) => void;
+    /** An observatory's card, from Earth's close-up, where its orbit shows; today, as they exist only now. */
+    findObservatory: (id: ObservatoryId) => void;
     toggleSolarActivity: () => void;
     toggleSolarActivityPaused: () => void;
     patchShow: (patch: Partial<Show>) => void;
@@ -102,23 +115,36 @@ export type OrreryStore = SceneSlice &
     setPanel: (panel: Panel) => void;
   };
 
-/** Close-ups show today's surfaces, outside the guide. */
+/** Close-ups show today's surfaces and observatories, outside the guide. */
 export function canCloseUp(s: Pick<OrreryStore, "selection" | "guideOpen" | "yearsAgo">) {
-  return hasSurface(s.selection) && !s.guideOpen && isPresentEra(s.yearsAgo);
+  return canFlyTo(s.selection) && !s.guideOpen && isPresentEra(s.yearsAgo);
 }
 
 /** A close-up that only deep time rules out: the card shows it disabled, with why. */
 export function closeUpAwaitsPresent(s: Pick<OrreryStore, "selection" | "guideOpen" | "yearsAgo">) {
-  return hasSurface(s.selection) && !s.guideOpen && !isPresentEra(s.yearsAgo);
+  return canFlyTo(s.selection) && !s.guideOpen && !isPresentEra(s.yearsAgo);
 }
 
-function sameSelection(a: SolarSelection | null, b: SolarSelection | null) {
-  return !!a && !!b && selectionKey(a) === selectionKey(b);
+function sameSelection(a: OrrerySelection | null, b: OrrerySelection | null) {
+  return !!a && !!b && orreryKey(a) === orreryKey(b);
 }
 
 const SUN_ACTIVITY_OFF = { solarActivity: false, solarActivityPaused: false };
-const closeUpState = (closeUp: SurfaceSelection | null) =>
+const closeUpState = (closeUp: CloseUpSelection | null) =>
   closeUp ? { closeUp } : { closeUp, ...SUN_ACTIVITY_OFF };
+
+/**
+ * The clock at `yearsAgo`: close-ups show today's surfaces and the observatories exist only
+ * now, so leaving the present ends a close-up and lets an observatory go.
+ */
+const atTime = (s: Pick<OrreryStore, "selection" | "closeUp">, yearsAgo: number) => {
+  const today = isPresentEra(yearsAgo);
+  return {
+    yearsAgo,
+    ...closeUpState(today ? s.closeUp : null),
+    ...(today || !isObservatorySelection(s.selection) ? {} : { selection: null }),
+  };
+};
 
 export const useOrrery = create<OrreryStore>((set, get) => ({
   ...sceneSlice(set, { scalePx: 120, scaleValue: 10, scaleUnit: "au" }),
@@ -163,34 +189,27 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   show: DEFAULT_SHOW,
   viewDist: 72,
   driftRate: 2.5,
+  sharpening: false,
   driftYears: 0,
-  /* Close-up maps show today's surfaces, so leaving the present ends a close-up. */
-  setYearsAgo: (yearsAgo) =>
-    set((s) => ({
-      yearsAgo,
-      playing: false,
-      ...closeUpState(isPresentEra(yearsAgo) ? s.closeUp : null),
-    })),
-  setYearsFromPlay: (yearsAgo) =>
-    set((s) => ({ yearsAgo, ...closeUpState(isPresentEra(yearsAgo) ? s.closeUp : null) })),
+  setYearsAgo: (yearsAgo) => set((s) => ({ ...atTime(s, yearsAgo), playing: false })),
+  setYearsFromPlay: (yearsAgo) => set((s) => atTime(s, yearsAgo)),
   /** Pauses while playing; otherwise plays on, or from the start once the track has ended. */
   togglePlay: () =>
     set((s) =>
       s.playing
         ? { playing: false }
         : s.yearsAgo <= 0
-          ? { yearsAgo: OLDEST, playing: true, ...closeUpState(null) }
+          ? { ...atTime(s, OLDEST), playing: true }
           : { playing: true },
     ),
   replay: () =>
     set((s) => ({
-      yearsAgo: MODEL_START,
+      ...atTime(s, MODEL_START),
       playing: true,
       view: "giants",
       viewDist: solarViewById("giants").dist,
       flight: s.flight + 1,
       panel: "none",
-      ...closeUpState(null),
     })),
   setView: (view) => {
     const v = solarViewById(view);
@@ -213,14 +232,21 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   enterCloseUp: () => {
     const s = get();
     const body = s.selection;
-    if (hasSurface(body) && canCloseUp(s) && !sameSelection(s.closeUp, body))
+    if (canFlyTo(body) && canCloseUp(s) && !sameSelection(s.closeUp, body))
       set({ closeUp: body, panel: "none", playing: false });
   },
   leaveCloseUp: (toMap = false) =>
     set((s) => {
-      const up = !toMap && s.closeUp?.kind === "moon" ? hostOf(s.closeUp.id) : null;
+      const up = !toMap && s.closeUp ? upFrom(s.closeUp) : null;
       return up ? { selection: up, closeUp: up } : closeUpState(null);
     }),
+  findObservatory: (id) => {
+    const api = get();
+    if (!isPresentEra(api.yearsAgo)) api.setYearsAgo(0);
+    api.select(EARTH);
+    api.enterCloseUp();
+    api.select({ kind: "observatory", id });
+  },
   toggleSolarActivity: () =>
     set((s) =>
       s.closeUp?.kind === "sun" && canCloseUp(s)

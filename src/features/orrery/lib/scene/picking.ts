@@ -3,17 +3,13 @@ import type { Object3D } from "three";
 
 import { selectTapped } from "@/space/solar-system/model/framing";
 import { migrationProgress } from "@/space/solar-system/model/moment";
-import {
-  hasSurface,
-  sameSystem,
-  selectionKey,
-  solarPick,
-  type SolarSelection,
-} from "@/space/solar-system/model/selection";
+import { observatoryPick } from "@/space/solar-system/model/observatories";
+import { solarPick } from "@/space/solar-system/model/selection";
 import type { SolarKit } from "@/space/solar-system/scene/kit";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
+import { canFlyTo, orreryKey, sameSystem, type OrrerySelection } from "../model/selection";
 import type { useOrrery } from "../store";
 import { CLOSE_UP_LAYERS } from "./close-up-controller";
 
@@ -31,15 +27,16 @@ export function createPicking(
     distance: () => number;
     /** Names readable enough to tap, and what each opens. */
     labels: () => LabelHit[];
-    labelPick: (key: string) => SolarSelection | undefined;
+    labelPick: (key: string) => OrrerySelection | undefined;
   },
 ) {
   let lastTapKey = "";
   let lastTapAt = 0;
 
   /* In a close-up, taps never pull the camera away; Back, Escape or zooming out do. Its own
-     system still answers: a tap on the Moon from the Earth's shows the Moon's card, and a
-     second tap flies on to it, as on the map. */
+     system still answers: a tap on the Moon or Hubble from the Earth's shows its card, and a
+     second tap flies on to it, as on the map. An observatory is only seen near Earth, so its
+     tap opens its card where the camera is. */
   createTapPicking(kit, canvas, {
     pickables: options.pickables,
     choose: chooseSolarHit,
@@ -49,22 +46,26 @@ export function createPicking(
     labelPick: options.labelPick,
     onTap: (target) => {
       const api = store.getState();
-      let pick;
+      const craft = target && observatoryPick(target.pick);
+      let pick: OrrerySelection | null;
       if (api.closeUp) {
-        pick = target && solarPick(target.pick, target.instance);
+        pick = craft ?? (target && solarPick(target.pick, target.instance));
         if (!pick || !sameSystem(pick, api.closeUp)) return;
         api.select(pick);
       } else if (!target) {
         api.select(null);
         return;
+      } else if (craft) {
+        pick = craft;
+        api.select(pick);
       } else pick = selectTapped(api, target, migrationProgress(api.yearsAgo), options.distance());
       if (!pick || pick.kind === "tracer") return;
-      const key = selectionKey(pick);
+      const key = orreryKey(pick);
       const at = performance.now();
       const twice = key === lastTapKey && at - lastTapAt < DOUBLE_TAP_MS;
       lastTapKey = twice ? "" : key;
       lastTapAt = at;
-      if (twice && hasSurface(pick)) api.enterCloseUp();
+      if (twice && canFlyTo(pick)) api.enterCloseUp();
     },
   });
 }

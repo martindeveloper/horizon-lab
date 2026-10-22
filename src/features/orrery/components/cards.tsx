@@ -21,12 +21,15 @@ import {
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import { namedElements, planetElements, rewinds } from "@/space/solar-system/model/elements";
 import { migrationProgress } from "@/space/solar-system/model/moment";
+import { isObservatorySelection } from "@/space/solar-system/model/observatories";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import { TRACERS, binOf, tracerElements } from "@/space/solar-system/model/tracers";
 import { namedById, type PlanetId } from "@horizon/toolkit/bodies";
 
+import type { OrrerySelection } from "../lib/model/selection";
 import { NAMED_NOTES, PLANET_NOTES, POPULATION_CARDS, SUN_CARD, TRACER_NOTES } from "./card-specs";
 import { formatYearsAgo } from "./format";
+import { observatoryCard } from "./observatory-cards";
 
 type Moment = {
   t: Translate;
@@ -130,12 +133,13 @@ function tracerCard(sel: Of<SolarSelection, "tracer">, m: Moment): Card {
 export function cardFor(
   t: Translate,
   f: Format,
-  sel: SolarSelection,
+  sel: OrrerySelection,
   yearsAgo: number,
   elliptical: boolean,
   date: Date,
   d: DistanceSettings,
 ): Card {
+  if (isObservatorySelection(sel)) return observatoryCard(t, f, d, sel.id, date);
   const m: Moment = { t, f, d, yearsAgo, mig: migrationProgress(yearsAgo), elliptical, date };
   switch (sel.kind) {
     case "sun":

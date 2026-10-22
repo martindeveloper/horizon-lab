@@ -9,6 +9,7 @@ import { cardFor } from "../src/features/orrery/components/cards.tsx";
 import { formatYearsAgo } from "../src/features/orrery/components/format.ts";
 import { PROSE_FIGURES } from "../src/features/orrery/lib/model/catalogue/index.ts";
 import { proseArgs } from "../src/lib/facts.ts";
+import { OBSERVATORY_IDS } from "../src/space/solar-system/model/observatories.ts";
 import { featureMessages, leaves } from "./messages-helper.mjs";
 
 const LOCALES = ["en", "cs"];
@@ -26,6 +27,7 @@ const SELECTIONS = [
     id,
   })),
   { kind: "tracer", index: 3 },
+  ...OBSERVATORY_IDS.map((id) => ({ kind: "observatory", id })),
 ];
 
 /** Every card in both languages and all three distance units, at a few moments. */

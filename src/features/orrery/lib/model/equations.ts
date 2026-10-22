@@ -1,4 +1,5 @@
 import { SOLAR_EQUATIONS } from "@/space/solar-system/model/equations";
+import { OBSERVATORY_EQUATIONS } from "@/space/solar-system/model/observatories";
 import { ORBIT_EQUATIONS } from "@horizon/toolkit/bodies";
 import { keplerThirdLaw, lightTravelTime, type Formula } from "@horizon/toolkit/science";
 
@@ -8,8 +9,11 @@ import { keplerThirdLaw, lightTravelTime, type Formula } from "@horizon/toolkit/
  * text in `technical.json`.
  */
 export const ORRERY_EQUATIONS = Object.fromEntries<Formula>(
-  [keplerThirdLaw, lightTravelTime, ...ORBIT_EQUATIONS, ...SOLAR_EQUATIONS].map((equation) => [
-    equation.id,
-    equation,
-  ]),
+  [
+    keplerThirdLaw,
+    lightTravelTime,
+    ...ORBIT_EQUATIONS,
+    ...SOLAR_EQUATIONS,
+    ...OBSERVATORY_EQUATIONS,
+  ].map((equation) => [equation.id, equation]),
 );
