@@ -2,20 +2,33 @@
 
 import { useRef, type ReactNode } from "react";
 
-import { PanelHeader, Sheet, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
+import { PanelHeader, Sheet, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
 
+/** A titled block of a rail; a list gives its `count`, set after a hairline like an atlas index. */
 export function RailSection({
   title,
   note,
+  count,
   children,
 }: {
   title: string;
   note?: string;
+  count?: number;
   children: ReactNode;
 }) {
   return (
     <section>
-      <h3 className={kickerClass}>{title}</h3>
+      <h3 className={cn(kickerClass, "flex items-center gap-3")}>
+        {title}
+        {count === undefined ? null : (
+          <>
+            <span aria-hidden className="h-px flex-1 bg-border-strong" />
+            <span aria-hidden className="tabular-nums">
+              {count}
+            </span>
+          </>
+        )}
+      </h3>
       {note ? <p className="mt-1 text-ui text-fg-secondary">{note}</p> : null}
       <div className="mt-2">{children}</div>
     </section>
@@ -56,7 +69,7 @@ export function Rail({
         ref={rail}
         id={id}
         tabIndex={-1}
-        className="glass-panel pointer-events-auto absolute top-14 right-(--hud-gutter) z-40 hidden max-h-[min(32rem,calc(100dvh-var(--app-header-height)-var(--app-footer-height)-6rem),calc(100%-3.5rem-var(--hud-clear,1rem)))] w-80 anim-rail flex-col overflow-hidden rounded-lg outline-hidden md:flex"
+        className="glass-panel pointer-events-auto absolute top-14 right-(--hud-gutter) z-40 hidden max-h-[min(32rem,calc(100dvh-var(--app-header-height)-var(--app-footer-height)-6rem),calc(100%-3.5rem-var(--hud-clear,1rem)))] w-80 anim-rail flex-col overflow-hidden rounded-panel outline-hidden md:flex"
         aria-label={title}
       >
         <PanelHeader

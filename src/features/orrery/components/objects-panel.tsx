@@ -1,5 +1,7 @@
+import { Satellite } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { GLYPH_ICON } from "@/components/simulations/body-orb";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { SolarObjectPicks } from "@/components/simulations/solar-picks";
 import { viewOf } from "@/space/solar-system/model/framing";
@@ -31,11 +33,12 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
       onClose={onClose}
     >
       <SolarObjectPicks namespace="orrery" belts={["asteroids", ...BINS]} onPick={pick} />
-      <RailSection title={t("hud.observatories")}>
-        <div className="grid grid-cols-2 gap-1">
+      <RailSection title={t("hud.observatories")} count={OBSERVATORY_IDS.length}>
+        <div className="-mx-3 grid grid-cols-2 gap-0.5">
           {OBSERVATORY_IDS.map((id) => (
             <ListItem
               key={id}
+              icon={<Satellite aria-hidden className={GLYPH_ICON} />}
               onClick={() => {
                 const api = useOrrery.getState();
                 api.findObservatory(id);

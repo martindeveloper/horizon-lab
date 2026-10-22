@@ -1,13 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 import { solarNameKey } from "@/space/solar-system/format";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { Bin } from "@/space/solar-system/model/tracers";
 import { NAMED, PLANET_IDS } from "@horizon/toolkit/bodies";
-import { ListItem } from "@horizon/toolkit/ui";
+import { ListItem, Orb } from "@horizon/toolkit/ui";
 
+import { BodyOrb } from "./body-orb";
 import { RailSection } from "./rail";
 
 /**
@@ -25,28 +27,28 @@ export function SolarObjectPicks({
   onPick: (sel: SolarSelection) => void;
 }) {
   const t = useTranslations(namespace);
-  const item = (sel: SolarSelection, key: string) => (
-    <ListItem key={key} onClick={() => onPick(sel)}>
+  const item = (sel: SolarSelection, key: string, icon: ReactNode) => (
+    <ListItem key={key} icon={icon} onClick={() => onPick(sel)}>
       {t(solarNameKey(sel))}
     </ListItem>
   );
   return (
     <>
-      <RailSection title={t("hud.bodies")}>
-        <div className="grid grid-cols-2 gap-1">
-          {item({ kind: "sun" }, "sun")}
-          {PLANET_IDS.map((id) => item({ kind: "planet", id }, id))}
+      <RailSection title={t("hud.bodies")} count={PLANET_IDS.length + 1}>
+        <div className="-mx-3 grid grid-cols-2 gap-0.5">
+          {item({ kind: "sun" }, "sun", <BodyOrb id="sun" />)}
+          {PLANET_IDS.map((id) => item({ kind: "planet", id }, id, <BodyOrb id={id} />))}
         </div>
       </RailSection>
-      <RailSection title={t("hud.smallWorlds")}>
-        <div className="grid grid-cols-2 gap-1">
-          {NAMED.map(({ id }) => item({ kind: "named", id }, id))}
+      <RailSection title={t("hud.smallWorlds")} count={NAMED.length}>
+        <div className="-mx-3 grid grid-cols-2 gap-0.5">
+          {NAMED.map(({ id }) => item({ kind: "named", id }, id, <BodyOrb id={id} />))}
         </div>
       </RailSection>
       {belts.length > 0 ? (
-        <RailSection title={t("hud.belts")}>
-          <div className="grid gap-1">
-            {belts.map((id) => item({ kind: "population", id }, id))}
+        <RailSection title={t("hud.belts")} count={belts.length}>
+          <div className="-mx-3 grid gap-0.5">
+            {belts.map((id) => item({ kind: "population", id }, id, <Orb look="swarm" />))}
           </div>
         </RailSection>
       ) : null}

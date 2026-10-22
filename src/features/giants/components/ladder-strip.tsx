@@ -3,16 +3,14 @@
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { useState, type PointerEvent } from "react";
 
-import { convert, cssColor, encodeSrgb, hellandBlackbodyLinear } from "@horizon/toolkit/science";
+import { convert } from "@horizon/toolkit/science";
 import { SLIDER_THUMB_PX, Tooltip, cn, sliderStopAt } from "@horizon/toolkit/ui";
 
-import { radiusMetres } from "../lib/model/catalogue";
-import { LOOKS, type Look } from "../lib/model/looks";
 import { rungNameKey } from "../lib/model/names";
-import { RUNGS, RUNG_IDS } from "../lib/model/rungs";
-import { BROWN_DWARF_ALKALI } from "../lib/parameters";
+import { RUNG_IDS } from "../lib/model/rungs";
 import { useGiants } from "../lib/store";
 import { keyFigures, useDistance, useGiantsT } from "./format";
+import { LADDER_DOTS, LOG_RADII, dotPx } from "./ladder-dots";
 
 const LAST = RUNG_IDS.length - 1;
 /** Dots sit where the thumb's centre stops for them. */
@@ -20,33 +18,8 @@ const at = sliderStopAt;
 /** A dot's diameter, px, from the smallest body's to the largest's, by the log of the radius. */
 const DOT_PX = [3, 11] as const;
 
-const LOG_RADII = RUNG_IDS.map((id) => Math.log10(radiusMetres(id).radius));
-const LOG_LOW = Math.min(...LOG_RADII);
-const LOG_HIGH = Math.max(...LOG_RADII);
-
-/**
- * The colour of a body's own light as the stage paints it: a blackbody (`hellandBlackbody`, the
- * shader's `blackbody`) at the temperature its face is drawn at, the display one where none is
- * catalogued (a pulsar's, a brown dwarf's, through its alkali lines); none for a planet or a
- * horizon, which shine by no light of their own.
- */
-function lightOf(look: Look) {
-  if (look.style === "earth" || look.style === "jupiter" || look.style === "horizon") return;
-  const [r, g, b] = hellandBlackbodyLinear((look.equatorK + look.poleK) / 2);
-  const [tr, tg, tb] = look.style === "brownDwarf" ? BROWN_DWARF_ALKALI : [1, 1, 1];
-  return cssColor([encodeSrgb(r * tr), encodeSrgb(g * tg), encodeSrgb(b * tb)]);
-}
-
 /** Each body as a dot: as large as its size on a log scale, in the colour of its light. */
-const DOTS = RUNGS.map((rung, index) => {
-  const share = (LOG_RADII[index]! - LOG_LOW) / (LOG_HIGH - LOG_LOW);
-  return {
-    id: rung.id,
-    kind: rung.kind,
-    px: DOT_PX[0] + share * (DOT_PX[1] - DOT_PX[0]),
-    colour: lightOf(LOOKS[index]!),
-  };
-});
+const DOTS = LADDER_DOTS.map((dot) => ({ ...dot, px: dotPx(dot.share, DOT_PX) }));
 
 /**
  * Where Earth's orbit (1 au) falls on the ladder, as a fractional rung: bodies past it, set in

@@ -1,15 +1,21 @@
+import { Satellite } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 
+import { BodyOrb, GLYPH_ICON } from "@/components/simulations/body-orb";
 import { Rail, RailSection } from "@/components/simulations/rail";
+import { neighbour } from "@/space/galaxy/model/neighbours";
 import { solarNameKey } from "@/space/solar-system/format";
 import { MOONS, PLANET_IDS } from "@horizon/toolkit/bodies";
-import { ListItem } from "@horizon/toolkit/ui";
+import { includesId } from "@horizon/toolkit/records";
+import { ListItem, Orb } from "@horizon/toolkit/ui";
 
 import {
   GALAXY_ANCHOR_IDS,
   PROBE_ANCHOR_IDS,
   STAR_ANCHOR_IDS,
   anchorNameKey,
+  isBodyAnchor,
+  isProbeAnchor,
   selectionOfAnchor,
   type AnchorId,
 } from "../lib/model/anchors";
@@ -25,6 +31,19 @@ const PLANETS: readonly AnchorId[] = [...PLANET_IDS, "pluto"];
 const SYSTEMS = [...PLANET_IDS, "pluto" as const]
   .map((host) => ({ host, moons: MOONS.filter((m) => m.host === host) }))
   .filter(({ moons }) => moons.length > 0);
+
+/**
+ * A destination's mark: a body lit in its colour, a probe, a star in its light, the Galaxy's
+ * centre a horizon, a galaxy or cluster a haze, the edge a dotted bound.
+ */
+function AnchorGlyph({ id }: { id: AnchorId }) {
+  if (isBodyAnchor(id)) return <BodyOrb id={id} />;
+  if (isProbeAnchor(id)) return <Satellite aria-hidden className={GLYPH_ICON} />;
+  if (includesId(STAR_ANCHOR_IDS, id)) return <Orb look="glow" color={neighbour(id).color} />;
+  if (id === "galacticCentre") return <Orb look="hole" size={8} />;
+  if (id === "edge") return <Orb look="swarm" />;
+  return <Orb look="haze" size={16} />;
+}
 
 /**
  * Where the autopilot can take the ship, near to far: home, the planets, our probes, the
@@ -49,17 +68,20 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
   const row = (id: AnchorId) => {
     const here = id === course;
     return (
-      <ListItem key={id} {...(here ? { selected: true } : {})} onClick={() => go(id)}>
-        <span className="min-w-0 truncate">{t(anchorNameKey(id))}</span>
-        <span className="shrink-0 font-mono text-caption text-fg-secondary tabular-nums">
-          {here ? NONE : formatTrip(t, f, tripTo(drive, id, fix.km, moment).tau, locale)}
-        </span>
+      <ListItem
+        key={id}
+        {...(here ? { selected: true } : {})}
+        icon={<AnchorGlyph id={id} />}
+        detail={here ? NONE : formatTrip(t, f, tripTo(drive, id, fix.km, moment).tau, locale)}
+        onClick={() => go(id)}
+      >
+        {t(anchorNameKey(id))}
       </ListItem>
     );
   };
   const section = (title: string, ids: readonly AnchorId[]) => (
-    <RailSection title={title}>
-      <div className="flex flex-col gap-0.5">{ids.map(row)}</div>
+    <RailSection title={title} count={ids.length}>
+      <div className="-mx-3 grid gap-0.5">{ids.map(row)}</div>
     </RailSection>
   );
   return (
@@ -87,12 +109,14 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
               ),
             ),
           })}
+          count={moons.length}
         >
-          <div className="grid grid-cols-2 gap-1">
+          <div className="-mx-3 grid grid-cols-2 gap-0.5">
             {moons.map(({ id }) => (
               <ListItem
                 key={id}
                 {...(id === course ? { selected: true } : {})}
+                icon={<BodyOrb id={id} />}
                 onClick={() => go(id)}
               >
                 {t(solarNameKey({ kind: "moon", id }))}

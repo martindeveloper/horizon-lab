@@ -1,5 +1,6 @@
 "use client";
 
+import { BodyOrb } from "@/components/simulations/body-orb";
 import { Rail, RailSection, SwitchGroup } from "@/components/simulations/rail";
 import {
   BloomSwitch,
@@ -8,45 +9,57 @@ import {
   type AntialiasMode,
 } from "@/components/simulations/render-settings";
 import { buildCard } from "@/lib/facts";
-import { ListItem, SegmentedControl, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
+import { PLANET_IDS } from "@horizon/toolkit/bodies";
+import { includesId } from "@horizon/toolkit/records";
+import { ListItem, ListTrack, Orb, SegmentedControl, SwitchRow } from "@horizon/toolkit/ui";
 
 import { SURFACE_ZOOMS } from "../lib/model/inspection";
 import { rungNameKey } from "../lib/model/names";
 import { RULERS } from "../lib/model/ruler";
-import { RUNGS, rungIndex } from "../lib/model/rungs";
 import type { GiantsAntialias } from "../lib/quality";
 import { useGiants } from "../lib/store";
 import { RUNG_CARDS } from "./card-specs";
 import { useDistance, useGiantsT } from "./format";
+import { LADDER_DOTS, dotPx } from "./ladder-dots";
 
 const ANTIALIAS_MODES: readonly AntialiasMode<GiantsAntialias>[] = [
   { value: "off", name: "off" },
   { value: "fxaa", name: "fxaa" },
 ];
 
-/** Every body on the ladder, smallest first, with its size; a pick flies there. */
+/** A list dot's diameter, px, from the smallest body's to the largest's. */
+const DOT_PX = [4, 16] as const;
+
+/** A rung's mark: a star in its light, a planet in its map's colour, a horizon black. */
+function RungOrb({ dot }: { dot: (typeof LADDER_DOTS)[number] }) {
+  const size = dotPx(dot.share, DOT_PX);
+  if (dot.kind === "horizon") return <Orb look="hole" size={size} />;
+  if (includesId(PLANET_IDS, dot.id)) return <BodyOrb id={dot.id} size={size} />;
+  return <Orb look="glow" color={dot.colour} size={size} />;
+}
+
+/** Every body on the ladder as a route, smallest first, each to scale with its size; a pick flies there. */
 export function StarsPanel({ onClose }: { onClose: () => void }) {
   const { t } = useGiantsT();
   const distance = useDistance();
   const focus = useGiants((s) => s.focus);
   return (
     <Rail id="giants-stars" title={t("hud.stars")} closeLabel={t("hud.close")} onClose={onClose}>
-      <SwitchGroup>
-        {RUNGS.map((rung) => {
-          const size = buildCard(t, distance, { rows: RUNG_CARDS[rung.id].rows.slice(0, 1) })
-            .facts[0]?.value;
-          return (
-            <ListItem
-              key={rung.id}
-              selected={rungIndex(rung.id) === focus}
-              onClick={() => useGiants.getState().go(rungIndex(rung.id))}
-            >
-              <span className="truncate">{t(rungNameKey(rung.id))}</span>
-              <span className={kickerClass}>{size}</span>
-            </ListItem>
-          );
-        })}
-      </SwitchGroup>
+      <ListTrack className="-mx-3">
+        {LADDER_DOTS.map((dot, index) => (
+          <ListItem
+            key={dot.id}
+            icon={<RungOrb dot={dot} />}
+            detail={
+              buildCard(t, distance, { rows: RUNG_CARDS[dot.id].rows.slice(0, 1) }).facts[0]?.value
+            }
+            selected={index === focus}
+            onClick={() => useGiants.getState().go(index)}
+          >
+            {t(rungNameKey(dot.id))}
+          </ListItem>
+        ))}
+      </ListTrack>
     </Rail>
   );
 }

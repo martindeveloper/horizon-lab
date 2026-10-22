@@ -9,13 +9,15 @@ import {
   WideColourSwitch,
   type AntialiasMode,
 } from "@/components/simulations/render-settings";
-import { ControlRow, ListItem, Slider, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
+import { cssColor, wavelengthColor, type Gamut } from "@horizon/toolkit/science";
+import { ControlRow, ListItem, Slider, SwitchRow, cn } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS } from "../lib/model/atoms";
 import { RESOLUTION_RANGE, WINDOWS } from "../lib/model/scenes";
 import { canvasShowsP3, type CanvasAntialias } from "../lib/quality";
 import { useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
+import { useDrawingGamut } from "./use-gamut";
 import { useFormedLines, useObservation } from "./use-spectrum";
 
 const PER_ELEMENT = 6;
@@ -26,6 +28,26 @@ const ANTIALIAS_MODES: readonly AntialiasMode<CanvasAntialias>[] = [
   { value: "supersample", name: "supersample" },
 ];
 
+/** A line's mark: a short bar in the colour of its light, a quiet one past what the eye sees. */
+function LineTick({ nm, gamut }: { nm: number; gamut: Gamut }) {
+  const rgb = wavelengthColor(nm, gamut);
+  const seen = rgb.some((c) => c > 0);
+  return (
+    <span
+      aria-hidden
+      className={cn("block h-3.5 w-[3px] rounded-full", !seen && "bg-fg-tertiary/60")}
+      style={
+        seen
+          ? {
+              background: cssColor(rgb, 1, gamut),
+              boxShadow: `0 0 6px ${cssColor(rgb, 0.6, gamut)}`,
+            }
+          : undefined
+      }
+    />
+  );
+}
+
 /**
  * Every element: its laboratory pattern to compare, and its strongest lines in view, each a
  * way to select it from the keyboard. An unsolved mystery lists no names.
@@ -35,6 +57,7 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
   const f = useFormatter();
   const obs = useObservation();
   const formed = useFormedLines(obs);
+  const gamut = useDrawingGamut();
   const compare = useSpectroscopy((s) => s.compare);
   const selection = useSpectroscopy((s) => s.selection);
   const view = useSpectroscopy((s) => s.view);
@@ -65,6 +88,8 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
               {lines.map(({ line, centre }) => (
                 <ListItem
                   key={line.id}
+                  icon={<LineTick nm={line.wavelength} gamut={gamut} />}
+                  detail={`${wavelength(f, centre, 2)} nm`}
                   selected={selection === line.id}
                   onClick={() => {
                     api().select(line.id);
@@ -73,10 +98,7 @@ export function ElementsPanel({ onClose }: { onClose: () => void }) {
                     if (centre < from || centre > to) api().setRange([centre - 5, centre + 5]);
                   }}
                 >
-                  <span className="truncate">{lineName(line, f)}</span>
-                  <span className="font-mono text-ui text-fg-secondary tabular-nums">
-                    {wavelength(f, centre, 2)} nm
-                  </span>
+                  {lineName(line, f)}
                 </ListItem>
               ))}
               {identify && lines.length === 0 ? (
@@ -151,13 +173,11 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           {WINDOWS.map((w) => (
             <ListItem
               key={w.id}
+              detail={`${f.number(w.range[0])}–${f.number(w.range[1])}`}
               selected={range[0] === w.range[0] && range[1] === w.range[1]}
               onClick={() => api().setRange(w.range)}
             >
-              <span className="truncate">{t(`windows.${w.id}`)}</span>
-              <span className={kickerClass}>
-                {f.number(w.range[0])}–{f.number(w.range[1])}
-              </span>
+              {t(`windows.${w.id}`)}
             </ListItem>
           ))}
         </SwitchGroup>
