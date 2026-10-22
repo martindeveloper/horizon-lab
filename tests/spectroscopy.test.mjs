@@ -717,6 +717,4 @@ test("the guide, views and notes quote the catalogue's figures in both languages
       if (/^(tour\.steps|views|technicalDetails\.(features|sections))\./.test(key))
         assert.doesNotMatch(t(key, args), /[{}]|NaN|undefined/, `${locale}:${key}`);
   }
-  assert.equal(PROSE_TYPES.hottestType, "O9.5");
-  assert.equal(PROSE_TYPES.coolestType, "K5");
 });

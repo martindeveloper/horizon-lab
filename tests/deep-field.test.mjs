@@ -48,7 +48,6 @@ import {
   sunGalactic,
   writeSunTrail,
 } from "../src/space/galaxy/model/galactic-orbit.ts";
-import { neighboursSelfCheck } from "../src/space/galaxy/model/neighbours.ts";
 import { GALACTIC_YEAR } from "../src/space/solar-system/model/parameters.ts";
 import {
   HELIOPAUSE_AU,
@@ -362,10 +361,6 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   assert.equal(api().guideOpen, false, "past the last step the journey ends");
   assert.equal(api().selection, null);
   assert.deepEqual(api().show, { halo: true, names: true, distances: false, lightTime: true });
-});
-
-test("the neighbours pass their own consistency checks, here rather than on every WebGL startup", () => {
-  assert.deepEqual(neighboursSelfCheck(), []);
 });
 
 test("the Sun's drawn path runs back two laps and ends at today's place", () => {

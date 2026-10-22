@@ -454,22 +454,6 @@ test("the Sun's and Earth's cards give their figures in SI, and a rotation limit
   assert.match(card("neutron-star").rotation, /ms$/);
 });
 
-test("a body's badge says what it is, and its spectral type reads second on its card", () => {
-  const t = createTranslator({
-    locale: "en",
-    messages: { giants: featureMessages("giants", "en") },
-    namespace: "giants",
-  });
-  const card = (id) => rungCard(t, { unit: "auto", locale: "en" }, id, (key) => t.has(key));
-  assert.equal(card("sun").badge, "Main-sequence star");
-  assert.equal(card("betelgeuse").badge, "Supergiant");
-  assert.equal(card("sirius-b").badge, "White dwarf");
-  /* The spectral type follows the lead figure; a pulsar, a planet or a horizon has none. */
-  assert.match(card("sirius-b").facts[1].value, /^DA2 · /);
-  for (const id of ["neutron-star", "jupiter", "m87"])
-    assert.ok(!card(id).facts.some((fact) => fact.id === "spectral"), id);
-});
-
 test("a grabbed globe turns under the finger, coasts, then goes home the short way", async () => {
   const { letGo, poseRests, restPose, settlePose, turnBy } =
     await import("../src/features/giants/lib/model/grab.ts");

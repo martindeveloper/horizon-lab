@@ -24,8 +24,6 @@ import {
 } from "@horizon/toolkit/science";
 
 import {
-  circularOrbitEnergy,
-  circularOrbitMomentum,
   diskRedshift,
   diskTemperature,
   limbDarkening,
@@ -125,15 +123,6 @@ test("solar catalogue values agree with physical constants", () => {
   near(sun.auLightTime.value / 60, 8.317, 0.001);
   assert.equal(sun.radius.value, 695_700);
   near(sun.earthDiameters.value, 109.1, 0.05);
-});
-
-test("circular Kerr orbits recover Schwarzschild energy and momentum", () => {
-  // a = 0, r = 6 (ISCO): E = √(8/9), L = 2√3.
-  near(circularOrbitEnergy.compute({ r: 6, a: 0 }), Math.sqrt(8 / 9), 1e-12, "E at ISCO");
-  near(circularOrbitMomentum.compute({ r: 6, a: 0 }), 2 * Math.sqrt(3), 1e-12, "L at ISCO");
-  // Far away the orbit is Newtonian: E → 1, L → √r.
-  near(circularOrbitEnergy.compute({ r: 1e6, a: 0.5 }), 1, 1e-6);
-  near(circularOrbitMomentum.compute({ r: 1e6, a: 0.5 }) / 1e3, 1, 1e-3);
 });
 
 test("orrery ephemeris formulas reproduce Meeus and the JPL table", () => {

@@ -303,7 +303,7 @@ test("a drift never stands still: the orbit and sway carry through every landing
   assert.ok(slowest > DRIFT_DEFAULTS.drift * 0.6, `slowest ${slowest} rad/s`);
 });
 
-test("a drift's variance stays within its spread, keeps inclination in bounds and shuffles without repeats", () => {
+test("a drift's variance stays within its spread, keeps inclination in bounds and shuffles through every shot", () => {
   /* A generator that always answers 1 pushes every spread to its limit. */
   const edge = createDriftCamera(
     [{ azimuth: 0, inclination: 1.4, distance: 10, flight: { duration: 1 }, hold: 1 }],
@@ -340,7 +340,6 @@ test("a drift's variance stays within its spread, keeps inclination in bounds an
   for (let i = 0; i < 60 * 20; i++) {
     shuffle.step(1 / 60);
     if (shuffle.index !== last) {
-      assert.notEqual(shuffle.index, last, "never the same shot twice running");
       last = shuffle.index;
       seen.add(last);
     }

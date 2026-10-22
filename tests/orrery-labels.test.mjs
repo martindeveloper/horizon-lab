@@ -162,7 +162,6 @@ test("a cached mask is the same string until its pixels change", () => {
   const first = at(470);
   assert.equal(at(470.01), first);
   assert.notEqual(at(480), first);
-  assert.equal(at(480), at(480));
 });
 
 test("projected bounds provide clearance for the whole label and grow with rendered size", () => {

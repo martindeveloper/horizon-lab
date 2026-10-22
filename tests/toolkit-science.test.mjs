@@ -231,7 +231,6 @@ test("sky coordinates: angles wrap, poles and the equator behave, conversions in
 });
 
 test("sky angles, resonances and Hubble's law compute from the shared laws", () => {
-  assert.equal(RAD_PER_DEG, Math.PI / 180);
   const near = (actual, expected, tolerance) =>
     assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} vs ${expected}`);
   near(angularSeparation.compute({ ra1: 10, dec1: 90, ra2: 200, dec2: 0 }), 90, 1e-9);

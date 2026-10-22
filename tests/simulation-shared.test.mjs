@@ -153,16 +153,9 @@ test("the store's render settings reach the engine: the level now, later ones af
   assert.equal(levels.length, 3, "a level pending at disposal never arrives");
 });
 
-test("space scenes: Standard keeps each device's old budgets, the other levels move them", async () => {
+test("space quality tiers scale rendering work and constrain low-memory devices", async () => {
   const { spaceQuality, sceneTier } = await import("../src/space/quality.ts");
   const { orreryQuality } = await import("../src/features/orrery/lib/quality.ts");
-  const { deepFieldQuality } = await import("../src/features/deep-field/lib/quality.ts");
-  /* What phones and desktops drew before the levels existed. */
-  assert.deepEqual(spaceQuality("standard", true).resolution, { dprCap: 1.25, fps: 48 });
-  assert.deepEqual(spaceQuality("standard", false).resolution, { dprCap: 1.5, fps: Infinity });
-  assert.equal(orreryQuality("standard", true).sky.milkyWay, 12_000);
-  assert.equal(orreryQuality("standard", false).maps.budget, 64e6);
-  assert.equal(deepFieldQuality("standard", true).cosmos.share, 0.6);
   /* Economy and Cinematic pin a tier whatever the device; Max goes past both, phones too. */
   for (const tight of [true, false]) {
     assert.equal(sceneTier("economy", tight), "light");

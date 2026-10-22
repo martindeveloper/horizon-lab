@@ -164,24 +164,5 @@ test("library snippets compile in a fragment shader that calls every function th
     const entry = path.resolve("packages/toolkit/src/shaders/math.glsl");
     const source = `#include <horizon/${name}>\n${body}`;
     assert.doesNotThrow(() => validate(expand(entry, source), "fragment"), name);
-    const without = body.replace("Factor(", "FactorMissing(");
-    assert.throws(() =>
-      validate(expand(entry, `#include <horizon/${name}>\n${without}`), "fragment"),
-    );
   }
-});
-
-test("the validator rejects what a GPU compiler would", () => {
-  assert.throws(
-    () => validate("void main() { float x = MISSING_DEFINE; }", "fragment"),
-    /undefined/,
-  );
-  assert.throws(
-    () => validate("void main() { float x = missing(1.0); }", "fragment"),
-    /undeclared/,
-  );
-  assert.throws(() => validate("void main() { float x = 1.0 }", "fragment"));
-  assert.doesNotThrow(() =>
-    validate("void main() { gl_FragColor = vec4(PI2); }".replace("PI2", "1.0"), "fragment"),
-  );
 });

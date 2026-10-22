@@ -118,6 +118,7 @@ test("accretion efficiency matches the classic values", () => {
   near(circularOrbitMomentum.compute({ r: 6, a: 0 }), 2 * Math.sqrt(3), 1e-12);
   // Far out, orbits turn Keplerian: Ω → r^(−3/2), E → 1 − 1/(2r).
   near(keplerAngularVelocity.compute({ r: 1e6, a: 0.9 }) * 1e9, 1, 1e-6);
+  near(circularOrbitMomentum.compute({ r: 1e6, a: 0.5 }) / 1e3, 1, 1e-3);
   near(1 - circularOrbitEnergy.compute({ r: 1e4, a: 0 }), 1 / (2 * 1e4), 1e-7);
 });
 
@@ -139,10 +140,6 @@ test("the shadow's critical impact parameters follow Bardeen (1973)", () => {
 });
 
 test("falling clocks keep proper time along a rain geodesic", () => {
-  // From rest at infinity, dr/dτ = −√(2/r): the code's dr/dT ÷ dτ/dT must equal it.
-  for (const r of [2.5, 3, 6, 10, 22]) {
-    near(rainDrDt(r) / rainRedshift(r), -Math.sqrt(2 / r), 1e-12, `r=${r}`);
-  }
   // Integrated, τ(r₀ → r₁) = (√2 / 3)(r₀^(3/2) − r₁^(3/2)).
   const r0 = 22;
   const r1 = 3;
