@@ -14,7 +14,7 @@ Real data, honest models, every number sourced.
 
 </div>
 
-## Simulations
+## Labs
 
 <table>
   <tr>
@@ -49,6 +49,39 @@ Real data, honest models, every number sourced.
       <p><a href="src/features/spectroscopy/lib/model">Model →</a></p>
     </td>
   </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="public/simulations/giants/og.png" alt="Giants" />
+      <h3>Giants</h3>
+      <p>Climb from a city-sized neutron star past the largest stars to black-hole horizons, at true scale.</p>
+      <p>25 bodies on one ladder · side-by-side comparison · every size with its uncertainty</p>
+      <p><a href="docs/science-sources.md">Sources →</a></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="public/simulations/sun/og.png" alt="The Sun" />
+      <h3>The Sun</h3>
+      <p>One star up close: cut it open, watch it in any light, fly over a sunspot and see a flare break loose.</p>
+      <p>Eight views · every wavelength · the solar cycle · ride along with Parker</p>
+      <p><a href="docs/science-sources.md">Sources →</a></p>
+    </td>
+  </tr>
+</table>
+
+## Experiences
+
+Sit back and fly. Real physics, less to read.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="public/simulations/voyage/og.png" alt="Voyage" />
+      <h3>Voyage</h3>
+      <p>Fly a spacecraft from the Moon to the edge of the reachable universe, at true scale.</p>
+      <p>Ten stops · autopilot or the helm · ship clock and Earth clock</p>
+      <p><a href="docs/science-sources.md#voyage-the-ship-and-its-drives">Sources →</a></p>
+    </td>
+    <td width="50%" valign="top"></td>
+  </tr>
 </table>
 
 ## Highlights
@@ -56,6 +89,7 @@ Real data, honest models, every number sourced.
 - **Grounded in data.** JPL orbital elements, IAU figures and spin, Gaia DR3 neighbours, measured planet maps. Every figure shown is checked in the [science source ledger](docs/science-sources.md).
 - **Honest about models.** Approximations and teaching sketches are labelled as such, in the app and in the docs.
 - **Explains itself.** Equations, technical notes and guided tours in every simulation.
+- **Or just watch.** Drift flies the camera to the music; Immersive hides every control.
 - **For everyone.** English and Czech, dark and light, phone to desktop, reduced motion respected.
 - **Static.** Prerendered at build time. No backend, database or API keys.
 
@@ -68,8 +102,9 @@ npm ci
 npm run dev
 ```
 
-Open <http://localhost:3000>. Simulations live under `/lab`, for example `/lab/black-hole`,
-`/lab/orrery`, `/lab/deep-field` and `/lab/spectroscopy`. URLs carry no language; a cookie picks it, English by default.
+Open <http://localhost:3000>. Labs live under `/lab`, for example `/lab/black-hole`,
+`/lab/giants` and `/lab/sun`; experiences under `/experience`, such as `/experience/voyage`.
+URLs carry no language; a cookie picks it, English by default.
 
 ## Scripts
 

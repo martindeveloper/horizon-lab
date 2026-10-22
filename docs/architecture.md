@@ -203,21 +203,30 @@ src/
     sun/
       index.ts                 Public client entry: SunApp
       manifest.ts, routing.ts, server.ts, technical.json
-      components/              Canvas (the scene's names), overlay, dock (the light, the clock, the
-                               view's own slider: the cut, the eruption, the cycle), Places and
-                               Settings panels, the place card, guide
-      lib/model/               The lab's own, without WebGL: views.ts (the seven views and what
+      components/              Canvas (the scene's names), overlay, dock (the places in view, the
+                               light, the clock, the view's own slider: the cut, the eruption, the
+                               cycle; Parker's readout), the Places finder and Settings panels, the
+                               place card, guide
+      lib/model/               The lab's own, without WebGL: views.ts (the eight views and what
                                each opens with), lights.ts (the dial's ids), clock.ts (the rates),
-                               places.ts (what the finder lists), tour.ts (the guided journey);
+                               places.ts (what the finder lists), tour.ts (the guided journey),
+                               stages.ts (the eruption's and the cycle's stages);
                                the Sun's physics is the shared src/space/sun
-      lib/scene/               The engine on the toolkit's scene host: the globe ray-traced on a
-                               proxy sphere with its cut (globe-layer.ts), the atmosphere beyond
-                               the limb (atmosphere-layer.ts), the field's ribbons (field-layer.ts),
-                               the shared prominence volume placed (prominence-layer.ts), the seven
-                               framings (views.ts); picking.ts the targets and cut-face taps,
-                               labels.ts the visible feature and interior names, types.ts the
-                               engine's hooks and readouts; lib/graphics/ its GLSL and light
-                               tables; lib/quality.ts its budgets by render level
+      lib/scene/               The engine on the toolkit's scene host (engine.ts) and the store's
+                               side of it (bridge.ts, settings.ts): the globe ray-traced on a
+                               proxy sphere with its cut (globe-layer.ts, the measured map
+                               sun-map.ts), the atmosphere beyond the limb (atmosphere-layer.ts),
+                               the field's ribbons (field-layer.ts), the shared prominence volume
+                               placed (prominence-layer.ts), Parker on its orbit and at its true
+                               size (parker-layer.ts), the sky turned into the Sun's frame
+                               (sky-layer.ts, sky-frame.ts), the uniforms they share (looks.ts),
+                               a light's dissolve (dissolve.ts); the camera (camera-rig.ts) on the
+                               eight framings (views.ts, framing.ts), the names at their anchors
+                               (names.ts, anchors.ts), the taps (picking.ts), the wedge's motion
+                               (cut-motion.ts), the engine's hooks and readouts (types.ts);
+                               lib/graphics/ its GLSL and light tables;
+                               lib/parameters.ts its numbers and shader header;
+                               lib/quality.ts its budgets by render level
       lib/store.ts             Zustand store (sun namespace messages); lib/drift.ts the drift
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)
     voyage/
@@ -308,13 +317,14 @@ src/
     sun/graphics/              The Sun as any host draws it: the CIE/Planck continuum and Claret
                                limb tables (atmosphere.ts, limb-grid.json, spectrum-sample.ts),
                                the GLSL Giants and the Sun lab share (shaders/: continuum,
-                               granulation, spots) with its own header (shader-defines.ts), and
+                               sampling, granulation, spots) with its own header (shader-defines.ts)
+                               and the numbers both draw the surface with (parameters.ts), and
                                the hedgerow prominence volume (prominence/: the bake on a worker,
                                its bounds' geometry, the two shaders) the Orrery and the Sun lab
                                both place
     bench.ts                   A scene engine on the bench: its frame loop driven frame by frame
     quality.ts                 What a render quality means for every space scene: tier,
-                               resolution, swarms, the bloom chain, the lens's star
+                               resolution, swarms, the sky's points, the bloom chain, the lens's star
     brush.ts                   What the worlds' looks paint with, once per engine: a soft glow,
                                a soft point, the touch targets' invisible material
     solar-system/              The solar system at any moment, for any host engine:
