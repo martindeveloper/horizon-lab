@@ -201,6 +201,21 @@ rings and the lensed crescent's rim then join up because more rays hit them. Tho
 rays cannot use screen derivatives, so their star footprint is one pixel. Both modes leave
 the pixel and frame-rate budgets unchanged; edge rays cost about four rays per edge pixel.
 
+Since 22 October 2026 a frame that only turns or animates replays the march instead of
+repeating it (`lib/trace-cache.ts`). Rays are marched with the camera turned to azimuth zero
+about the spin axis; the hole, disk, glow and jet are symmetric about it, so the camera's
+azimuth only turns what the rays meet. Once the march's inputs hold for a frame, a trace pass
+records each pixel's glow and jet light, starlight weight, sky direction and footprint, and its
+first two lit crossings of the disk plane (ρ, azimuth, g), as raw float bits in four RGBA32UI
+targets, 64 bytes a pixel. A record covers at most what Cinematic draws on the device (2.4
+million pixels, about 150 MB, or 0.8 million on touch or battery); Max, which lifts the device
+caps, marches every frame beyond that. The shading pass then
+evaluates only the gas, hot spot, plunging glow and sky. Rays that cross the plane more often,
+under 0.03% of pixels, march again; edge rays still trace their extra rays every frame. A
+camera moving in distance or height marches in one pass as before. Against the same code
+marching every frame, every bench scene differs in at most 0.06% of pixels, by one 8-bit
+step; orbits at 2560×1440 on an Apple M5 Max fell from 3.6–5.2 ms to 0.6–1.1 ms a frame.
+
 `tests/black-hole-physics.test.mjs` covers formulas, flux convergence, budgets and the
 rendered ray model: capture boundaries across spin, inclination and distance, conserved
 quantities, step convergence of disk images, and finite-observer frequency shifts.

@@ -15,7 +15,8 @@ import {
   type FreeLook,
   type FreePose,
 } from "@horizon/toolkit/camera";
-import { clamp, cross3, length3, smoothstep, type Vec3 } from "@horizon/toolkit/math";
+import { clamp, cross3, length3, smoothstep, wrapSigned, type Vec3 } from "@horizon/toolkit/math";
+import { keysOf } from "@horizon/toolkit/records";
 import { blackbodyLut } from "@horizon/toolkit/science";
 
 import resolveShader from "./black-hole-resolve.frag.glsl";
@@ -44,14 +45,19 @@ import { toneExposure } from "./tone";
  * Shader inputs for one frame, shared by the live engine and the headless
  * benchmark so both draw exactly the same scene from the same state.
  */
-type Uniforms = {
+export type Uniforms = {
   uDiskProfile: { value: DataTexture };
   /** Black-body colours; sampled as linear light, since the texels are sRGB-encoded. */
   uBlackbody: { value: DataTexture };
   uResolution: { value: InstanceType<typeof Vector2> };
-  /** Camera to world, column-major: right, up, back (−forward) and the position in M. */
+  /**
+   * Camera to the traced frame, column-major: right, up, back (−forward) and the position in M.
+   * The traced frame is the scene turned about the spin axis by −uAzimuth (see `writeCamera`).
+   */
   uCamera: { value: InstanceType<typeof Matrix4> };
-  /** The camera's velocity through the hovering observer's frame, units of c; zero hovers. */
+  /** The camera's azimuth about the spin axis, radians within ±π: the traced frame to the scene. */
+  uAzimuth: { value: number };
+  /** The camera's velocity through the hovering observer's frame, traced frame, units of c; zero hovers. */
   uCamVelocity: { value: InstanceType<typeof Vector3> };
   uTime: { value: number };
   uSpin: { value: number };
@@ -165,6 +171,7 @@ export function createUniforms(): Uniforms {
     uBlackbody: { value: blackbodyTexture() },
     uResolution: { value: new Vector2(1, 1) },
     uCamera: { value: new Matrix4().makeTranslation(0, 0, 24) },
+    uAzimuth: { value: 0 },
     uCamVelocity: { value: new Vector3() },
     uTime: { value: 0 },
     uSpin: { value: 0.82 },
@@ -245,6 +252,42 @@ export function clampPosition(position: FreePose["position"], spin: number) {
   position[2] *= scale;
 }
 
+/**
+ * The uniforms the shading reads without re-tracing (trace-cache.ts): the clock, the camera's
+ * azimuth about the spin axis, the disk profile (fixed by the spin), the black-body colours, and
+ * the star, temperature and display scales. Every other uniform steers the march.
+ */
+const SHADING_ONLY: ReadonlySet<keyof Uniforms> = new Set<keyof Uniforms>([
+  "uTime",
+  "uAzimuth",
+  "uDiskProfile",
+  "uBlackbody",
+  "uStars",
+  "uTemp",
+  "uExposure",
+  "uVignette",
+]);
+
+/**
+ * Writes the march's inputs as numbers, in a fixed order, into `out`: frames whose keys are equal
+ * trace the same rays, so one may replay the other's march.
+ */
+export function traceKeyWriter(uniforms: Uniforms) {
+  const inputs = keysOf(uniforms).filter((name) => !SHADING_ONLY.has(name));
+  return (out: number[]) => {
+    out.length = 0;
+    for (const name of inputs) {
+      const value: unknown = uniforms[name].value;
+      if (typeof value === "number") out.push(value);
+      else if (value instanceof Matrix4) out.push(...value.elements);
+      else if (value instanceof Vector3) out.push(value.x, value.y, value.z);
+      else if (value instanceof Vector2) out.push(value.x, value.y);
+      else throw new TypeError(`Trace input ${name} has no key`);
+    }
+    return out;
+  };
+}
+
 /** The camera's distance from the hole, M. */
 export function cameraDistance(uniforms: Uniforms) {
   const m = uniforms.uCamera.value.elements;
@@ -253,11 +296,19 @@ export function cameraDistance(uniforms: Uniforms) {
 
 /**
  * Free camera: the matrix, its motion (`ride` of the way to moving with the disk gas), the lens
- * vignette for its distance and the framed field of view.
+ * vignette for its distance and the framed field of view. `pose` is in the traced frame, which
+ * `azimuth` turns about the spin axis into the scene; a free pose is its own (azimuth 0).
  */
-export function writeCamera(uniforms: Uniforms, pose: FreePose, spin: number, ride = 0) {
+export function writeCamera(
+  uniforms: Uniforms,
+  pose: FreePose,
+  spin: number,
+  ride = 0,
+  azimuth = 0,
+) {
   const m = uniforms.uCamera.value.elements;
   writeCameraMatrix(m, pose);
+  uniforms.uAzimuth.value = wrapSigned(azimuth, 2 * Math.PI);
   const flow = ride > 0 ? diskFlowVelocity(pose.position, spin) : null;
   if (flow) uniforms.uCamVelocity.value.set(...flow).multiplyScalar(Math.min(ride, 1));
   else uniforms.uCamVelocity.value.set(0, 0, 0);
@@ -272,4 +323,23 @@ export function writeCamera(uniforms: Uniforms, pose: FreePose, spin: number, ri
     ((50 + far * 18 + near * 34) * Math.PI) / 180,
     uniforms.uResolution.value.x / uniforms.uResolution.value.y,
   );
+}
+
+/**
+ * Orbit camera: traced at azimuth zero, its azimuth turned in afterwards. A Kerr hole and its
+ * disk are symmetric about the spin axis, so the rays of an orbit that only turns are the same
+ * in the traced frame from frame to frame, to the bit, and their march can be replayed.
+ */
+export function writeOrbitCamera(
+  uniforms: Uniforms,
+  pose: CameraPose,
+  spin: number,
+  ride = pose.ride ?? 0,
+) {
+  writeCamera(uniforms, cameraOf({ ...pose, azimuth: 0 }, spin), spin, ride, pose.azimuth);
+}
+
+/** Camera to world, column-major, into `out`: the traced camera turned by its azimuth. */
+export function sceneCamera(uniforms: Uniforms, out: InstanceType<typeof Matrix4>) {
+  return out.makeRotationY(uniforms.uAzimuth.value).multiply(uniforms.uCamera.value);
 }

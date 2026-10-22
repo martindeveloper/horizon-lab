@@ -78,6 +78,13 @@ const GAS_RATE = 2.8;
 export function gasTurnRate(r: number, spin: number) {
   return GAS_RATE / (Math.max(r, 1) ** 1.5 + spin);
 }
+/**
+ * The cached march (trace-cache.ts) writes four RGBA32UI targets per pixel, the draw buffers
+ * every WebGL 2 device has: nine words of glow, starlight weight, sky direction and footprint,
+ * then three per disk-plane crossing (ρ, azimuth, g), so two crossings fit.
+ */
+export const TRACE_TARGETS = 4;
+const TRACE_CROSSINGS = Math.floor((TRACE_TARGETS * 4 - 9) / 3);
 /** The highest quality's step budget bounds the shader loop. */
 const MAX_STEPS = Math.max(...Object.values(BLACK_HOLE_QUALITY).map((level) => level.steps));
 /** Rays traced on the CPU (the guide's drawings, the tests) get the cinematic budget. */
@@ -114,6 +121,7 @@ export const SHADER_DEFINES = glslDefines({
   GLOW_CONE,
   GLOW_OUTER,
   DISPLAY_CONTRAST,
+  TRACE_CROSSINGS: glslInt(TRACE_CROSSINGS),
   // The sky each preset looks out on, as `uWeather` names it.
   ...Object.fromEntries(
     Object.entries(SKY_CODE).map(([sky, code]) => [`SKY_${sky.toUpperCase()}`, code]),

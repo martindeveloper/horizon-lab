@@ -138,6 +138,16 @@ export function renderBudget(quality: Quality, constrained: boolean, active: boo
 }
 
 /**
+ * The most pixels a recorded march (trace-cache.ts, 64 bytes each) may cover: what Cinematic
+ * draws on this device, the highest level held to its means. That is 2.4 million pixels (about
+ * 150 MB), or 0.8 million (about 50 MB) on touch or battery. Max lifts the device caps, so a
+ * larger frame marches every frame instead of holding a record the device may not afford.
+ */
+export function recordPixels(constrained: boolean) {
+  return renderBudget("cinema", constrained, false).pixels;
+}
+
+/**
  * The observatory's bloom, in radiance before the tone map's exposure is applied: light it would
  * show brighter than about two thirds of white glows in full, eased in from about a fifth, a
  * pixel counting at most eight times the threshold, and the glow returns at half strength.

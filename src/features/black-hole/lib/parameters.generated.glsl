@@ -31,6 +31,7 @@
 #define GLOW_CONE          0.26
 #define GLOW_OUTER         1.5
 #define DISPLAY_CONTRAST   1.4
+#define TRACE_CROSSINGS    2
 #define SKY_LENSED         0.0
 #define SKY_SGR            1.0
 #define SKY_M87            2.0

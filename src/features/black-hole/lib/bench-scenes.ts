@@ -2,6 +2,7 @@ import { timedDrift, type DriftProgramme } from "@/lib/drift";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene } from "@horizon/toolkit/bench";
 import { lerp } from "@horizon/toolkit/math";
+import type { PassAntialias } from "@horizon/toolkit/rendering";
 
 import aeolianMap from "../../../../bench/fixtures/audio-maps/aeolian-static.json";
 import lowDroneMap from "../../../../bench/fixtures/audio-maps/low-drone-rises.json";
@@ -35,6 +36,13 @@ type BlackHoleBenchScene = BenchScene & {
   lens?: boolean;
   /** Wide colour on: the canvas shows Display P3, the display step converting the radiance. */
   wideColour?: boolean;
+  /** Anti-aliasing: edge rays trace four more rays where the first frame has an edge. */
+  antialias?: PassAntialias;
+  /**
+   * Marches every frame, as while the camera moves in distance or height, so the scene times the
+   * march rather than its replay (trace-cache.ts).
+   */
+  retrace?: boolean;
   motion?: BlackHoleMotion;
 };
 
@@ -62,7 +70,9 @@ export const driftSeconds = (presetId: string) => {
  * draws the same frame.) The close camera marches every pixel; the distant
  * one is mostly analytic sky. Sequences move the camera along scripted paths,
  * re-integrate the disk profile every frame (spin), replay a guided tour, and
- * drive the real orbit input with a drag and wheel zooms.
+ * drive the real orbit input with a drag and wheel zooms. A still camera replays its recorded
+ * march, so the sweep, the stress views and the dolly march every frame (`retrace`) to keep timing
+ * it, without compiling the trace pass right before their frames.
  */
 export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
   ...PRESETS.map((hole): BlackHoleBenchScene => ({
@@ -79,6 +89,7 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     presetId: "schwarzschild",
     quality,
     pose: { inclination: 0.03 },
+    retrace: true,
   })),
   {
     id: "kerr-close",
@@ -87,6 +98,7 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     presetId: "kerr",
     quality: "cinema",
     pose: { distance: 6 },
+    retrace: true,
   },
   {
     id: "kerr-glide",
@@ -145,6 +157,7 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     presetId: "lensed",
     quality: "standard",
     pose: { distance: 480 },
+    retrace: true,
   },
   {
     id: "lensed-bloom",
@@ -163,6 +176,14 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     lens: true,
   },
   {
+    id: "lensed-edge-rays",
+    description: "Lensed disk, home view, standard quality, edge rays on",
+    tags: ["effects"],
+    presetId: "lensed",
+    quality: "standard",
+    antialias: "supersample",
+  },
+  {
     id: "lensed-wide",
     description: "Lensed disk, home view, standard quality, wide colour on",
     tags: ["effects"],
@@ -170,15 +191,20 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     quality: "standard",
     wideColour: true,
   },
-  {
-    id: "orbit",
-    description: "One full orbit around the lensed disk",
-    tags: ["sequence", "camera"],
-    presetId: "lensed",
-    quality: "standard",
-    motion: { kind: "orbit", turns: 1 },
-    script: { frames: 120, duration: 8, keyframes: [0, 0.25, 0.5, 0.75] },
-  },
+  /* Turning alone replays the recorded march (trace-cache.ts): the lensed disk, spins from 0.9
+     to 0.998, a jet, and the Galactic Centre's sky and disk weather. The captures start past the
+     opening frames, which march before the record replays. */
+  ...(["lensed", "stellar", "sgr-a", "m87", "kerr"] as const).map(
+    (presetId): BlackHoleBenchScene => ({
+      id: presetId === "lensed" ? "orbit" : `orbit-${presetId}`,
+      description: `One full orbit around ${holeById(presetId).name}`,
+      tags: ["sequence", "camera", "orbit"],
+      presetId,
+      quality: "standard",
+      motion: { kind: "orbit", turns: 1 },
+      script: { frames: 60, duration: 8, keyframes: [0.1, 0.4, 0.7, 1] },
+    }),
+  ),
   {
     id: "dolly-in",
     description: "Push in from 480 M to 3 M: cost per pixel rises as rays bend",
@@ -186,6 +212,7 @@ export const BENCH_SCENES: readonly BlackHoleBenchScene[] = [
     presetId: "lensed",
     quality: "standard",
     motion: { kind: "dolly", from: 480, to: 3 },
+    retrace: true,
     script: { frames: 120, duration: 6, keyframes: [0, 0.5, 0.8, 1] },
   },
   {

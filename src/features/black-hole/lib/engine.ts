@@ -1,3 +1,5 @@
+import { Matrix4 } from "three";
+
 import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
 import { freeCameraOn, onFreeCamera, onRide, rideOverride } from "@/lib/debug";
@@ -36,9 +38,11 @@ import {
   createUniforms,
   orbitWheelSensitivity,
   passOptions,
+  sceneCamera,
   sceneWriter,
   uniformTextures,
   writeCamera,
+  writeOrbitCamera,
   type CameraPose,
 } from "./frame";
 import type { Quality } from "./holes";
@@ -48,6 +52,7 @@ import {
   BLACK_HOLE_QUALITY,
   bloomSettings,
   lensSettings,
+  recordPixels,
   renderBudget,
   renderScale,
 } from "./quality";
@@ -55,6 +60,7 @@ import { useBlackHole } from "./store";
 import { toneExposure } from "./tone";
 import { holdPose, tourEnd, tourPose } from "./tour-flight";
 import { tourFor } from "./tours";
+import { createTraceCache } from "./trace-cache";
 
 type BlackHoleEngine = { dispose: () => void };
 type State = ReturnType<typeof useBlackHole.getState>;
@@ -166,16 +172,22 @@ export function createBlackHoleEngine(
     const uniforms = createUniforms();
     const textures = uniformTextures(uniforms).map((texture) => resources.own(texture));
     const writeScene = sceneWriter(uniforms);
+    const traces = createTraceCache(uniforms, { parallel: true });
     const pass = resources.own(
       createFullscreenPass({
         canvas,
         vertexShader: fullscreenVertex,
         fragmentShader,
-        uniforms,
+        uniforms: { ...uniforms, ...traces.uniforms },
+        defines: traces.defines,
         ...passOptions(uniforms),
         supersample: true,
       }),
     );
+    /* Owned after the pass, so its record is let go while the renderer still holds it. */
+    resources.own(traces);
+    /** The camera in the scene, for the labels' snapshot; the uniforms hold the traced frame. */
+    const world = new Matrix4();
     const reduce = prefersReducedMotion();
     const warmup = createWarmup();
     const tour = createTourDirector(reduce);
@@ -359,11 +371,11 @@ export function createBlackHoleEngine(
           camera.distance = state.distance;
         }
         camera.distance = clampDistance(camera.distance, state.spin);
-        writeCamera(uniforms, cameraOf(camera, state.spin), state.spin, ride ?? camera.ride ?? 0);
+        writeOrbitCamera(uniforms, camera, state.spin, ride ?? camera.ride ?? 0);
       }
       writeCameraSnapshotFromMatrix(
         snapshot,
-        uniforms.uCamera.value.elements,
+        sceneCamera(uniforms, world).elements,
         cameraDistance(uniforms),
         uniforms.uFov.value,
       );
@@ -440,6 +452,7 @@ export function createBlackHoleEngine(
       writeScene(state, time, stepCount(state.quality));
       applyCamera();
       const exposure = toneExposure(state.exposure);
+      traces.prepare(pass.renderer, recordPixels(constrained));
       pass.render({
         antialias: state.antialias,
         bloom: state.bloom ? bloomSettings(state.quality, constrained, exposure) : null,
@@ -456,6 +469,7 @@ export function createBlackHoleEngine(
       render: tick,
       onRestored: () => {
         for (const texture of textures) texture.needsUpdate = true;
+        traces.invalidate();
       },
       paused: () => {
         const state = useBlackHole.getState();

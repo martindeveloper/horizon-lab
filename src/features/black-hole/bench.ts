@@ -9,20 +9,20 @@ import fragmentShader from "./lib/black-hole.frag.glsl";
 import { driftFor } from "./lib/drift";
 import {
   cameraDistance,
-  cameraOf,
   createUniforms,
   orbitWheelSensitivity,
   passOptions,
   sceneWriter,
   uniformTextures,
-  writeCamera,
+  writeOrbitCamera,
   type CameraPose,
 } from "./lib/frame";
 import { holeById, paramsFromPreset } from "./lib/holes";
 import { gasTurnRate } from "./lib/parameters";
 import { MAX_DIST, MIN_DIST } from "./lib/physics";
-import { BLACK_HOLE_QUALITY, bloomSettings, lensSettings } from "./lib/quality";
+import { BLACK_HOLE_QUALITY, bloomSettings, lensSettings, recordPixels } from "./lib/quality";
 import { toneExposure } from "./lib/tone";
+import { createTraceCache } from "./lib/trace-cache";
 
 /**
  * Headless benchmark target: the observatory's shader, uniforms, camera and
@@ -37,12 +37,15 @@ export const benchTarget: BenchTarget = {
     const scene = BENCH_SCENES.find((s) => s.id === sceneId);
     if (!scene) throw new Error(`Unknown black-hole scene: ${sceneId}`);
     const uniforms = createUniforms();
+    const traces = createTraceCache(uniforms, { parallel: false });
     const pass = createFullscreenPass({
       canvas,
       vertexShader: fullscreenVertex,
       fragmentShader,
-      uniforms,
+      uniforms: { ...uniforms, ...traces.uniforms },
+      defines: traces.defines,
       ...passOptions(uniforms),
+      supersample: true,
     });
     pass.resize(width, height);
     uniforms.uResolution.value.set(width, height);
@@ -85,6 +88,9 @@ export const benchTarget: BenchTarget = {
     const bloom = scene.bloom ? bloomSettings(scene.quality, false, exposure) : null;
     const lens = scene.lens ? lensSettings(scene.quality, false, exposure) : null;
     const gamut = scene.wideColour ? "p3" : "srgb";
+    const antialias = scene.antialias ?? "off";
+    /* A desktop's record cap, or none where the scene times the march itself. */
+    const maxRecord = scene.retrace ? 0 : recordPixels(false);
 
     const gl = canvas.getContext("webgl2");
     if (!gl) throw new Error("WebGL 2 is unavailable");
@@ -99,9 +105,10 @@ export const benchTarget: BenchTarget = {
           pose = motion.pose;
           spin = motion.spin;
         }
-        writeCamera(uniforms, cameraOf(pose, spin), spin, pose.ride ?? 0);
+        writeOrbitCamera(uniforms, pose, spin);
         writeScene({ ...settings, spin, gravity: true }, frame.time, steps);
-        pass.render({ bloom, lens, gamut });
+        traces.prepare(pass.renderer, maxRecord);
+        pass.render({ antialias, bloom, lens, gamut });
       },
       describe: () => ({
         azimuth: pose.azimuth,
@@ -113,9 +120,11 @@ export const benchTarget: BenchTarget = {
         bloom: bloom !== null,
         lens: lens !== null,
         wideColour: gamut === "p3",
+        antialias,
       }),
       dispose() {
         input?.dispose();
+        traces.dispose();
         pass.dispose();
         for (const texture of uniformTextures(uniforms)) texture.dispose();
       },

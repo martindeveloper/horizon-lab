@@ -15,7 +15,8 @@
 //   3. Accretion disk and plunging-region emission
 //   4. Ray geometry: Kerr geodesics in Mino time
 //   5. shade(): march, composite → radiance; display() (display.glsl) tone maps it;
-//      main() comes from <horizon/supersample>
+//      main() comes from <horizon/supersample>, or with KERR_TRACE writes the march's
+//      record for a frame that only turns or animates to replay (lib/trace-cache.ts)
 
 precision highp float;
 
@@ -24,8 +25,9 @@ precision highp float;
 uniform vec2 uResolution;      // framebuffer size in pixels
 uniform sampler2D uDiskProfile; // 512×1 Page–Thorne flux, preintegrated on the CPU
 uniform sampler2D uBlackbody;  // black-body colours, log-spaced in kelvin, read as linear light
-uniform mat4 uCamera;          // camera to world: columns right, up, back (−forward), position in M
-uniform vec3 uCamVelocity;     // camera velocity through the hovering observer's frame, units of c (0: hovering)
+uniform mat4 uCamera;          // camera to traced frame: columns right, up, back (−forward), position in M
+uniform float uAzimuth;        // the camera's azimuth about the spin axis, turned out of the traced frame (section 5)
+uniform vec3 uCamVelocity;     // camera velocity through the hovering observer's frame, traced frame, units of c (0: hovering)
 uniform float uTime;           // seconds, drives the disk animation
 uniform float uSpin;           // dimensionless spin a/M, within ±MAX_SPIN; negative: the disk orbits retrograde
 uniform float uInner;          // disk inner radius / M (max of DISK_INNER_FACTOR r₊ and r_ISCO)
@@ -205,6 +207,7 @@ float gC;      // a(aE − L)
 float gSphere; // Q + L²
 float gA2E2;   // a²E²
 float gA2;     // a²
+float gHorizon; // r₊
 vec3 gRay;     // the straight ray's direction, with gravity off
 float gCam;    // ν_camera / ν_hovering along this pixel: 1 for a hovering camera
 float gCam4;   // gCam⁴, which brightens light at rest in the hovering frame
@@ -222,13 +225,12 @@ float diskG(float r) {
 
 // Gravity off: gas circling at the same Ω in flat space, seen along the
 // straight ray, has only the special-relativistic Doppler factor
-// g = 1 / (γ(1 + v·d)) and rest-frame emission cosine μ = g |d_y|.
-vec2 flatShift(vec3 hit, float rho) {
+// g = 1 / (γ(1 + v·d)); its rest-frame emission cosine is μ = g |d_y|.
+float flatShift(vec3 hit, float rho) {
   float om = 1.0 / (rho * sqrt(rho) + gA);
   vec3 v = om * vec3(-hit.z, 0.0, hit.x);
   float v2 = min(dot(v, v), 0.98);
-  float g = sqrt(1.0 - v2) / max(1.0 + dot(v, gRay), 1e-4);
-  return vec2(g, clamp(g * abs(gRay.y), 0.0, 1.0));
+  return sqrt(1.0 - v2) / max(1.0 + dot(v, gRay), 1e-4);
 }
 
 // Gas inside the ISCO plunges on a geodesic that keeps the ISCO's energy and
@@ -326,17 +328,23 @@ float diskCoverage(float rho) {
   return 1.0 - smoothstep(uOuter * outerCut, uOuter, rho);
 }
 
-// Radiance where a ray crosses the disk at Boyer–Lindquist radius rho; `hit`
-// is the crossing point in the scene, for the azimuth.
-vec3 diskColor(vec3 hit, float rho) {
-  float phi = atan(hit.z, hit.x);
+// A crossing of the disk plane that lights a ray is (Boyer–Lindquist radius ρ, its azimuth in
+// the traced frame, the gas's frequency factor g before the camera's own shift): diskG,
+// flatShift or plungeG, taken where the march met it. Everything below that moves with the
+// clock or the camera's azimuth is evaluated from it.
+
+// Radiance where a ray crosses the disk.
+vec3 diskColor(vec3 crossing) {
+  float rho = crossing.x;
+  float phi = crossing.y - uAzimuth;
   float rlog = log(max(rho, 0.3));
 
   // Physical shape: Page–Thorne flux, the frequency factor g, and the emission
-  // angle in the gas's rest frame, μ = g √Q / r on the equator.
-  vec2 shift = uGravity > 0.5 ? vec2(diskG(rho), 0.0) : flatShift(hit, rho);
-  float g = shift.x;
-  float mu = uGravity > 0.5 ? clamp(g * sqrt(max(gQ, 0.0)) / rho, 0.0, 1.0) : shift.y;
+  // angle in the gas's rest frame, μ = g √Q / r on the equator, g |d_y| in flat space.
+  float g = crossing.z;
+  float mu = uGravity > 0.5
+    ? clamp(g * sqrt(max(gQ, 0.0)) / rho, 0.0, 1.0)
+    : clamp(g * abs(gRay.y), 0.0, 1.0);
   // The emission angle is the gas's own; its colour and brightness reach a moving camera shifted again.
   g *= gCam;
   float rin = max(uInner, 1.2);
@@ -391,9 +399,11 @@ vec3 diskColor(vec3 hit, float rho) {
 // horizon r₊; its frequency shift g follows the plunging geodesic. A zero-torque
 // disk's flux vanishes at the ISCO, so this glow stays well below the disk's peak.
 // It fades with the share of the fall from the disk's inner edge to the horizon.
-vec3 plungeColor(vec3 hit, float rho, float g, float horizon) {
-  float phi = atan(hit.z, hit.x);
-  float fall = clamp((uInner - rho) / (uInner - horizon), 0.0, 1.0);
+vec3 plungeColor(vec3 crossing) {
+  float rho = crossing.x;
+  float phi = crossing.y - uAzimuth;
+  float g = crossing.z * gCam;
+  float fall = clamp((uInner - rho) / (uInner - gHorizon), 0.0, 1.0);
   float spiral = 0.75 + 0.25 * sin(3.0 * phi + 2.2 * log(max(rho, 0.5)) - uTime * 1.6);
   vec3 color = blackbodyLight(clamp(3200.0 * g * uTemp, 1200.0, 8000.0));
   float fade = 1.0 - fall * 0.7;
@@ -465,12 +475,63 @@ vec3 lensTail(vec3 p, vec3 d) {
 
 // MAX_STEPS, STEP_*, ESCAPE_R, FAR_FIELD_R, MARCH_B and MARCH_CAM_R: parameters.generated.glsl.
 
+// The march sees the camera turned to azimuth zero about the spin axis (uCamera, frame.ts).
+// The hole, its disk, glow and jet are all symmetric about that axis, so the camera's azimuth
+// only turns what the rays meet: uAzimuth turns each crossing's azimuth (diskColor,
+// plungeColor) and each sky direction (sceneSky) into the scene. A frame that only turns or
+// animates can replay the march instead of repeating it (KERR_TRACE, KERR_REPLAY below).
+
+// A traced sky direction in the scene: turned by uAzimuth about the spin axis.
+vec3 sceneSky(vec3 d) {
+  float c = cos(uAzimuth);
+  float s = sin(uAzimuth);
+  return vec3(c * d.x + s * d.z, d.y, c * d.z - s * d.x);
+}
+
+// Starlight's weight where a ray never reaches the sky, and a recorded march's where the ray
+// lit more crossings than the record keeps (the replay marches it again).
+#define SKY_HIDDEN -1.0
+#define TRACE_OVERFLOW -2.0
+
+// What one ray meets, in the traced frame.
+struct Ray {
+  vec3 glow;   // glow and jet light picked up along the way: the same at every azimuth and time
+  vec3 light;  // disk and plunging-gas light, in the order met (not with KERR_TRACE, which records the crossings)
+  vec3 skyDir; // where it leaves for the sky
+  float sky;   // starlight's weight there, transmission × (g_sky g_cam)⁴, or SKY_HIDDEN
+};
+
+#ifdef KERR_TRACE
+// The first TRACE_CROSSINGS lit crossings, in order (ρ = 0: none), and how many there were.
+vec3 gCrossing0;
+vec3 gCrossing1;
+int gCrossings;
+#if TRACE_CROSSINGS != 2
+#error "The trace records two crossings: update gCrossing0/1, meet() and the replay"
+#endif
+#endif
+
+// Light from one crossing, in front of everything beyond it; the disk also hides what lies
+// behind it as far as its coverage reaches. The trace pass records the crossing instead.
+void meet(vec3 crossing, inout vec3 light, inout float transmission) {
+  bool onDisk = crossing.x > uInner && crossing.x < uOuter;
+#ifdef KERR_TRACE
+  if (gCrossings == 0) gCrossing0 = crossing;
+  else if (gCrossings == 1) gCrossing1 = crossing;
+  gCrossings++;
+#else
+  if (onDisk) light += transmission * diskColor(crossing);
+  else light += transmission * plungeColor(crossing);
+#endif
+  if (onDisk) transmission *= 1.0 - diskCoverage(crossing.x);
+}
+
 // Glow, jet and disk light on one step of the march, from prev to pos. With
 // gravity, du/dλ and u at both ends locate the equatorial crossing; without,
 // its radius comes from the crossing point. Returns true once the disk is opaque.
 bool collect(
-  vec3 prev, vec3 pos, vec2 uStep, vec2 udStep, float horizon,
-  inout vec3 fore, inout vec3 disk, inout float transmission
+  vec3 prev, vec3 pos, vec2 uStep, vec2 udStep,
+  inout vec3 glow, inout vec3 light, inout float transmission
 ) {
   float cyl = length(pos.xz);
   float ay = abs(pos.y);
@@ -487,8 +548,8 @@ bool collect(
     float dens = wall * radial * exp(-ay * 0.1);
     dens *= (uWeather == SKY_SGR) ? 0.2 : 0.8;
     float stepLen = length(pos - prev);
-    vec3 glow = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
-    fore += transmission * glow * dens * min(stepLen, 0.16) * 0.075 * uDiskBright * gCam4;
+    vec3 tint = mix(vec3(1.0, 0.52, 0.26), vec3(1.0, 0.8, 0.55), clamp(cyl / 14.0, 0.0, 1.0));
+    glow += transmission * tint * dens * min(stepLen, 0.16) * 0.075 * uDiskBright * gCam4;
   }
 
   // Jet along the spin axis.
@@ -498,22 +559,23 @@ bool collect(
     float stepLen = length(pos - prev);
     // The traced ray runs backward: light reaching the camera moves along prev − pos.
     float lobe = 0.4 + 0.6 * clamp((prev.y - pos.y) * sign(pos.y) / max(stepLen, 1e-6), 0.0, 1.0);
-    fore += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35 * gCam4;
+    glow += transmission * vec3(0.5, 0.68, 1.12) * core * fade * lobe * uJet * min(stepLen, 0.2) * 0.35 * gCam4;
   }
 
   // Crossing the equatorial plane: the disk, or the plunging region inside it.
-  if (prev.y * pos.y <= 0.0 && abs(prev.y) + abs(pos.y) > 1e-6) {
+  // A dormant hole (no disk brightness) has no gas to light or to block the sky behind it.
+  if (uDiskBright > 0.0 && prev.y * pos.y <= 0.0 && abs(prev.y) + abs(pos.y) > 1e-6) {
     float t = clamp(prev.y / (prev.y - pos.y), 0.0, 1.0);
     vec3 hitp = mix(prev, pos, t);
     // Without gravity, the Boyer–Lindquist radius of the same equatorial point.
     float rho = uGravity > 0.5
       ? 1.0 / mix(uStep.x, uStep.y, t)
       : sqrt(max(dot(hitp.xz, hitp.xz) - gA2, 0.0));
+    float phi = atan(hitp.z, hitp.x);
 
-    // A dormant hole (no disk brightness) has no gas to block the sky behind it.
-    if (uDiskBright > 0.0 && rho > uInner && rho < uOuter) {
-      disk += transmission * diskColor(hitp, rho);
-      transmission *= 1.0 - diskCoverage(rho);
+    if (rho > uInner && rho < uOuter) {
+      float g = uGravity > 0.5 ? diskG(rho) : flatShift(hitp, rho);
+      meet(vec3(rho, phi, g), light, transmission);
       if (transmission < 0.001) return true;
       // Otherwise keep marching through the display taper so the
       // background matches neighbouring rays outside the disk window.
@@ -521,18 +583,29 @@ bool collect(
     // The plunging gas is thin and lies in front of whatever the ray meets
     // next, so it shows whether the ray then escapes, is captured or hits the disk.
     // Without gravity it is drawn unshifted.
-    if (rho > horizon * DISK_INNER_FACTOR && rho < uInner) {
+    if (rho > gHorizon * DISK_INNER_FACTOR && rho < uInner) {
       float g = uGravity > 0.5 ? plungeG(rho, mix(udStep.x, udStep.y, t)) : 1.0;
-      fore += transmission * plungeColor(hitp, rho, g * gCam, horizon);
+      meet(vec3(rho, phi, g), light, transmission);
     }
   }
   return false;
 }
 
-// One ray through fragCoord (pixels), tone-mapped and ready to display. The
-// supersample include below supplies main(); extra rays it traces near edges
-// pass derivatives = false, since screen derivatives are undefined there.
-vec3 shade(vec2 fragCoord, bool derivatives) {
+// Where a ray starts: the camera and the ray's direction in the traced frame, and with gravity
+// the Mino-time state (u = 1/r, du/dλ, the direction s on the unit sphere, ds/dλ).
+struct RayStart {
+  vec3 cam;
+  vec3 rd;
+  float rc;
+  float u;
+  float ud;
+  vec3 s;
+  vec3 sd;
+};
+
+// The ray through fragCoord (pixels) and its constants: gA…, gCam, and gE, gL, gQ… with gravity
+// or gRay without. False where the camera has no static frame.
+bool launch(vec2 fragCoord, out RayStart start) {
   /* Camera ray */
   vec2 uv = (fragCoord - 0.5 * uResolution) / uResolution.y;
   float tanFov = tan(uFov * 0.5);
@@ -552,29 +625,69 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
 
   float a = clamp(uSpin, -SPIN_LIMIT, SPIN_LIMIT);
   float a2 = a * a;
-  float horizon = 1.0 + sqrt(max(1.0 - a2, 0.0));
   gA = a;
   gA2 = a2;
+  start.cam = uCamera[3].xyz;
+  start.rd = rd;
+  gHorizon = 1.0 + sqrt(max(1.0 - a2, 0.0));
+  gRay = rd;
 
   /* The camera is a zero-angular-momentum observer at Boyer–Lindquist (r, θ, φ). */
-  vec3 cam = uCamera[3].xyz;
+  vec3 cam = start.cam;
   float camR2 = dot(cam, cam) - a2;
   float rc = sqrt(0.5 * (camR2 + sqrt(camR2 * camR2 + 4.0 * a2 * cam.y * cam.y)));
   float delC = rc * rc - 2.0 * rc + a2;
-  if (delC <= 0.0) {
-    return vec3(0.0); // no static frame exists there
-  }
+  start.rc = rc;
+  if (delC <= 0.0) return false; // no static frame exists there
+  if (uGravity < 0.5) return true;
 
-  /* March state */
-  vec3 fore = vec3(0.0);        // glow, jet and plunging gas picked up along the way
-  vec3 disk = vec3(0.0);        // disk radiance, attenuated by transmission
+  float muC = clamp(cam.y / rc, -1.0, 1.0);
+  float sinC = sqrt(max(1.0 - muC * muC, 1e-8));
+  vec2 az = cam.xz / max(length(cam.xz), 1e-6);
+  vec3 s = vec3(sinC * az.x, muC, sinC * az.y);
+  vec3 eTheta = vec3(muC * az.x, -sinC, muC * az.y);
+  vec3 ePhi = vec3(-az.y, 0.0, az.x);
+
+  float sigC = rc * rc + a2 * muC * muC;
+  float bigA = (rc * rc + a2) * (rc * rc + a2) - a2 * delC * sinC * sinC;
+  float lapse = sqrt(sigC * delC / bigA);
+  float frame = 2.0 * a * rc / bigA;
+  float lift = sqrt(bigA / sigC); // √g_φφ / sinθ
+
+  // Photon arriving along −rd with unit energy in the camera's frame.
+  float nR = dot(rd, s);
+  float nTheta = dot(rd, eTheta);
+  float nPhi = dot(rd, ePhi);
+  gL = lift * sinC * nPhi;
+  gE = frame * gL - lapse;
+  float pTheta = sqrt(sigC) * nTheta;
+  gQ = pTheta * pTheta + muC * muC * (lift * lift * nPhi * nPhi - a2 * gE * gE);
+  gK = gQ + (gL - a * gE) * (gL - a * gE);
+  gC = a * (a * gE - gL);
+  gSphere = gQ + gL * gL;
+  gA2E2 = a2 * gE * gE;
+
+  start.u = 1.0 / rc;
+  start.ud = -sqrt(sigC * delC) * nR / (rc * rc);
+  start.s = s;
+  start.sd = pTheta * eTheta + lift * nPhi * ePhi;
+  return true;
+}
+
+// The march from a launched ray: the light it meets until it is captured, hits the opaque
+// disk, escapes to the sky or runs out of steps.
+Ray march(RayStart start) {
+  vec3 glow = vec3(0.0);        // glow and jet picked up along the way
+  vec3 light = vec3(0.0);       // disk and plunging gas, attenuated by transmission
   float transmission = 1.0;     // how much of what lies beyond still shows
   bool hitDisk = false;
   bool captured = false;
   bool escaped = false;
-  bool march = true;
-  vec3 skyDir = rd;
+  bool stepped = true;
+  vec3 skyDir = start.rd;
   float gSky = 1.0;             // frequency shift of starlight at the camera
+  vec3 cam = start.cam;
+  vec3 rd = start.rd;
 
   // Past the glow cone's far corner, or the jet when one is drawn, an
   // outbound ray collects nothing more.
@@ -587,10 +700,9 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
     /* Flat space: a straight ray from a static camera, marched with the same
        step lengths so the glow and jet collect alike, until it meets the
        ball of radius r₊ or leaves the exit sphere moving outward. */
-    gRay = rd;
     float b = dot(cam, rd);
     float c = dot(cam, cam);
-    float ballDisc = b * b - c + horizon * horizon;
+    float ballDisc = b * b - c + gHorizon * gHorizon;
     float tBall = ballDisc > 0.0 && b < 0.0 ? -b - sqrt(ballDisc) : 1e9;
     // Nothing lies outside the exit sphere: march only the chord inside it.
     float exitDisc = max(b * b - c + exitR * exitR, 0.0);
@@ -605,7 +717,7 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
       t = min(t + frac * r, min(tBall, tExit));
       vec3 prev = pos;
       pos = cam + t * rd;
-      if (collect(prev, pos, vec2(0.0), vec2(0.0), horizon, fore, disk, transmission)) {
+      if (collect(prev, pos, vec2(0.0), vec2(0.0), glow, light, transmission)) {
         hitDisk = true;
         break;
       }
@@ -614,39 +726,15 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
       if (captured) break;
     }
   } else {
+    float a = gA;
     // Inside this radius an ingoing ray cannot turn back: halfway from the
     // horizon to the prograde equatorial photon orbit.
-    float rCapture = 0.5 * (horizon + 2.0 * (1.0 + cos(acos(-abs(a)) * 2.0 / 3.0)));
-
-    float muC = clamp(cam.y / rc, -1.0, 1.0);
-    float sinC = sqrt(max(1.0 - muC * muC, 1e-8));
-    vec2 az = cam.xz / max(length(cam.xz), 1e-6);
-    vec3 s = vec3(sinC * az.x, muC, sinC * az.y);
-    vec3 eTheta = vec3(muC * az.x, -sinC, muC * az.y);
-    vec3 ePhi = vec3(-az.y, 0.0, az.x);
-
-    float sigC = rc * rc + a2 * muC * muC;
-    float bigA = (rc * rc + a2) * (rc * rc + a2) - a2 * delC * sinC * sinC;
-    float lapse = sqrt(sigC * delC / bigA);
-    float frame = 2.0 * a * rc / bigA;
-    float lift = sqrt(bigA / sigC); // √g_φφ / sinθ
-
-    // Photon arriving along −rd with unit energy in the camera's frame.
-    float nR = dot(rd, s);
-    float nTheta = dot(rd, eTheta);
-    float nPhi = dot(rd, ePhi);
-    gL = lift * sinC * nPhi;
-    gE = frame * gL - lapse;
-    float pTheta = sqrt(sigC) * nTheta;
-    gQ = pTheta * pTheta + muC * muC * (lift * lift * nPhi * nPhi - a2 * gE * gE);
-    gK = gQ + (gL - a * gE) * (gL - a * gE);
-    gC = a * (a * gE - gL);
-    gSphere = gQ + gL * gL;
-    gA2E2 = a2 * gE * gE;
-
-    float u = 1.0 / rc;
-    float ud = -sqrt(sigC * delC) * nR / (rc * rc);
-    vec3 sd = pTheta * eTheta + lift * nPhi * ePhi;
+    float rCapture = 0.5 * (gHorizon + 2.0 * (1.0 + cos(acos(-abs(a)) * 2.0 / 3.0)));
+    float rc = start.rc;
+    float u = start.u;
+    float ud = start.ud;
+    vec3 s = start.s;
+    vec3 sd = start.sd;
     vec3 pos = cam;
     vec3 dir = rayDir(u, ud, s, sd);
 
@@ -655,11 +743,11 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
 
     // Rays that pass far from the hole bend weakly: lensTail() bends them unmarched.
     float bImp = sqrt(max(gSphere, 0.0)) / max(-gE, 1e-3);
-    march = bImp < MARCH_B || rc < MARCH_CAM_R;
+    stepped = bImp < MARCH_B || rc < MARCH_CAM_R;
 
-    if (march) {
+    if (stepped) {
       float uCapture = 1.0 / rCapture;
-      float uHorizon = 1.0 / (horizon * 1.001);
+      float uHorizon = 1.0 / (gHorizon * 1.001);
       float kU = radialU(u).y;
       vec3 kS = accS(s);
       float drag = dragRate(u);
@@ -724,7 +812,7 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
         // Nothing to sample out here: glow, jet and disk all lie closer in.
         if (farField) continue;
 
-        if (collect(prev, pos, uStep, udStep, horizon, fore, disk, transmission)) {
+        if (collect(prev, pos, uStep, udStep, glow, light, transmission)) {
           hitDisk = true;
           break;
         }
@@ -737,18 +825,120 @@ vec3 shade(vec2 fragCoord, bool derivatives) {
     skyDir = lensTail(pos, dir);
   }
 
-  // In the main pass every pixel computes skyDir, so its screen derivatives,
-  // and with them skyFootprint(), are defined; extra edge rays use one pixel.
-  vec2 pixel = derivatives ? skyFootprint(skyDir) : vec2(skyPixel());
+  Ray ray;
+  ray.glow = glow;
+  ray.light = light;
+  ray.skyDir = skyDir;
+  ray.sky = !hitDisk && !captured && (!stepped || escaped)
+    ? transmission * pow(gSky * gCam, 4.0)
+    : SKY_HIDDEN;
+  return ray;
+}
 
-  /* Composite */
-  vec3 col = fore + disk;
-  if (!hitDisk && !captured && (!march || escaped)) {
-    col += transmission * starfield(skyDir, pixel) * pow(gSky * gCam, 4.0);
-  }
+// A ray from a camera with no static frame: dark.
+Ray darkRay(vec3 rd) {
+  Ray ray;
+  ray.glow = vec3(0.0);
+  ray.light = vec3(0.0);
+  ray.skyDir = rd;
+  ray.sky = SKY_HIDDEN;
+  return ray;
+}
 
+/* Composite: what the ray met, then the sky it reaches, turned into the scene. */
+vec3 composite(Ray ray, vec2 pixel) {
+  vec3 col = ray.glow + ray.light;
+  if (ray.sky >= 0.0) col += ray.sky * starfield(sceneSky(ray.skyDir), pixel);
   return col;
 }
+
+#ifdef KERR_TRACE
+
+// The trace pass (lib/trace-cache.ts): one ray per pixel marched, its record written as raw
+// float bits into four RGBA32UI targets, exact to the bit:
+//   0: glow (rgb), starlight weight (SKY_HIDDEN, or TRACE_OVERFLOW where the ray lit more
+//      crossings than the record keeps)
+//   1: sky direction (xyz), pixel footprint x      2: footprint y, first crossing
+//   3: second crossing, unused
+// The footprint is skyFootprint()'s, whose screen derivatives exist only here, where every
+// pixel marches.
+
+layout(location = 0) out highp uvec4 oTrace0;
+layout(location = 1) out highp uvec4 oTrace1;
+layout(location = 2) out highp uvec4 oTrace2;
+layout(location = 3) out highp uvec4 oTrace3;
+
+void main() {
+  gCrossing0 = vec3(0.0);
+  gCrossing1 = vec3(0.0);
+  gCrossings = 0;
+  RayStart start;
+  Ray ray;
+  if (launch(gl_FragCoord.xy, start)) ray = march(start);
+  else ray = darkRay(start.rd);
+  vec2 pixel = skyFootprint(ray.skyDir);
+  float sky = gCrossings > TRACE_CROSSINGS ? TRACE_OVERFLOW : ray.sky;
+  oTrace0 = floatBitsToUint(vec4(ray.glow, sky));
+  oTrace1 = floatBitsToUint(vec4(ray.skyDir, pixel.x));
+  oTrace2 = floatBitsToUint(vec4(pixel.y, gCrossing0));
+  oTrace3 = floatBitsToUint(vec4(gCrossing1, 0.0));
+}
+
+// That is this pass's main(): the supersample include below adds none.
+#define HORIZON_CUSTOM_MAIN
+
+#else
+
+#ifdef KERR_REPLAY
+uniform float uReplay;            // 1: this frame shades the march recorded by the trace pass
+uniform highp usampler2D uTrace0; // the record, as the KERR_TRACE main() above writes it
+uniform highp usampler2D uTrace1;
+uniform highp usampler2D uTrace2;
+uniform highp usampler2D uTrace3;
+#endif
+
+// One ray through fragCoord (pixels), as radiance. The supersample include
+// below supplies main(); extra rays it traces near edges pass derivatives = false,
+// since screen derivatives are undefined there. With a recorded march to replay, the
+// main ray re-evaluates only what moves with the clock and the azimuth, and marches again
+// only where the record overflowed (with the recorded footprint).
+vec3 shade(vec2 fragCoord, bool derivatives) {
+  RayStart start;
+  bool launched = launch(fragCoord, start);
+  Ray ray;
+  bool marching = true;
+  bool recorded = false;
+  vec2 pixel = vec2(skyPixel());
+#ifdef KERR_REPLAY
+  recorded = derivatives && uReplay > 0.5;
+  if (recorded) {
+    ivec2 texel = ivec2(fragCoord);
+    vec4 head = uintBitsToFloat(texelFetch(uTrace0, texel, 0));
+    vec4 sky = uintBitsToFloat(texelFetch(uTrace1, texel, 0));
+    vec4 first = uintBitsToFloat(texelFetch(uTrace2, texel, 0));
+    vec4 second = uintBitsToFloat(texelFetch(uTrace3, texel, 0));
+    pixel = vec2(sky.w, first.x);
+    marching = head.w == TRACE_OVERFLOW;
+    if (!marching) {
+      ray.glow = head.rgb;
+      ray.skyDir = sky.xyz;
+      ray.sky = head.w;
+      ray.light = vec3(0.0);
+      float transmission = 1.0;
+      if (first.y > 0.0) meet(first.yzw, ray.light, transmission);
+      if (second.x > 0.0) meet(second.xyz, ray.light, transmission);
+    }
+  }
+#endif
+  if (marching && launched) ray = march(start);
+  else if (marching) ray = darkRay(start.rd);
+  // In the main pass every pixel computes skyDir, so its screen derivatives,
+  // and with them skyFootprint(), are defined; extra edge rays use one pixel.
+  if (derivatives && !recorded) pixel = skyFootprint(ray.skyDir);
+  return composite(ray, pixel);
+}
+
+#endif
 
 // display() turns that radiance into the pixel's colour; supersample supplies main(), which
 // draws either, as createFullscreenPass asks (a bloomed frame keeps the radiance).

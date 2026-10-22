@@ -109,6 +109,10 @@ test("shader variants parse with the defines their passes compile them with", ()
     ],
     [post("bloom-down.frag.glsl"), "#define HORIZON_BLOOM_PREFILTER 1"],
     [post("black-hole-resolve.frag.glsl"), "#define HORIZON_LENS 1"],
+    // The black hole's trace pass, and its shading passes replaying the recorded march.
+    [post("black-hole.frag.glsl"), "#define KERR_TRACE 1"],
+    [post("black-hole.frag.glsl"), "#define KERR_REPLAY 1"],
+    [post("black-hole.frag.glsl"), "#define KERR_REPLAY 1\n#define HORIZON_PASS 1"],
   );
   /* Logarithmic depth: three.js defines it for every program of such a renderer. */
   const LOG_DEPTH = "#define USE_LOGARITHMIC_DEPTH_BUFFER 1";
