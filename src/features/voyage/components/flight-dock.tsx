@@ -284,6 +284,7 @@ export function FlightDock() {
   const gravity = useVoyage((s) => s.gravity);
   const unit = useVoyage((s) => s.distanceUnit);
   const aside = useVoyage(asideOpen);
+  const invite = useVoyage((s) => !s.flown && !s.guideOpen);
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface, reachesPanels);
   const status: Status = crashed ? "crash" : flying ? "flight" : mode === "free" ? "free" : "orbit";
@@ -328,10 +329,18 @@ export function FlightDock() {
       )}
     >
       <div ref={surface} className="voyage-console relative mx-auto w-full max-w-6xl">
-        {/* A ship taken by hand shows its keys for a few seconds; phones fly by the lever. */}
+        {/*
+          Until the ship first leaves orbit, the console invites the pilot to fly; a ship taken
+          by hand shows its keys for a few seconds. Phones fly by the lever.
+        */}
         {status === "free" ? (
           <p className="voyage-keys voyage-holo absolute bottom-full left-1/2 mb-3 -translate-x-1/2 px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-muted uppercase not-md:hidden">
             {t("hud.keys")}
+          </p>
+        ) : invite ? (
+          <p className="voyage-holo absolute bottom-full left-1/2 mb-3 -translate-x-1/2 px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap text-fg uppercase">
+            <span className="not-md:hidden">{t("hud.invite")}</span>
+            <span className="md:hidden">{t("hud.inviteTouch")}</span>
           </p>
         ) : null}
 

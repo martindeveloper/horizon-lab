@@ -104,6 +104,8 @@ export type VoyageStore = SceneSlice &
     destination: AnchorId;
     /** In orbit about a body, or flown by hand. The scene writes it when the keys take the ship. */
     mode: ShipMode;
+    /** The ship has left its first orbit this visit, by hand, autopilot or journey: the dock stops inviting. */
+    flown: boolean;
     selection: WorldSelection | null;
     panel: Panel;
     show: Show;
@@ -180,6 +182,7 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
   view: INITIAL_VIEW,
   destination: PLACE_BODY[INITIAL_VIEW],
   mode: "orbit",
+  flown: false,
   selection: null,
   panel: "none",
   show: DEFAULT_SHOW,
@@ -196,6 +199,7 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
       destination: body,
       view: placeFor(body) ?? s.view,
       flight: s.flight + 1,
+      flown: true,
       panel: "none",
       throttle: 0,
     })),
@@ -204,7 +208,8 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
   resetView: () => set({ show: DEFAULT_SHOW, ...EXPERIENCE_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
   setDrive: (drive) => set({ drive }),
-  setMode: (mode) => set({ mode, panel: "none", ...(mode === "orbit" ? { throttle: 0 } : {}) }),
+  setMode: (mode) =>
+    set({ mode, panel: "none", ...(mode === "orbit" ? { throttle: 0 } : { flown: true }) }),
   setCompression: (compression) =>
     set((s) => ({
       compression,
@@ -221,7 +226,7 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
     tour: TOUR,
     save: (s) => s.show,
     restore: (show) => ({ show }),
-    open: () => ({ guidePlaying: true }),
+    open: () => ({ guidePlaying: true, flown: true }),
     apply: (step, s) => ({
       guideLanded: false,
       destination: step.body,

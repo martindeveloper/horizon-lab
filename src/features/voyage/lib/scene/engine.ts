@@ -169,7 +169,7 @@ export function createVoyageEngine(
         lastMode = mode;
         const s = store.getState();
         if (s.mode !== mode || (mode === "orbit" && s.throttle > 0))
-          store.setState(mode === "orbit" ? { mode, throttle: 0 } : { mode });
+          store.setState(mode === "orbit" ? { mode, throttle: 0 } : { mode, flown: true });
       },
     });
     ship.setDrive(DRIVES[store.getState().drive]);

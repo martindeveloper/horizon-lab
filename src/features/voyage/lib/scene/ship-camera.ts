@@ -113,8 +113,10 @@ const ROLL_AXIS = new Vector3(0, 0, 1);
 const BOOST = 10;
 /** Seconds the velocity of the body the ship rides is measured over. */
 const VELOCITY_S = 60;
-/** Seconds entering orbit takes to turn the nose from where it pointed onto the body. */
+/** Seconds entering or leaving orbit takes to turn the nose from where it pointed onto its new heading. */
 const SETTLE_S = 1.4;
+/** Leaving orbit, the nose comes up until its line passes the body this many radii from its centre. */
+const CLEAR_RADII = 1.5;
 /**
  * With the ship's feel on, coming into orbit the ship sinks this share of its distance inside
  * the orbit and rises back, deepest this many seconds in: weight, without a second bounce.
@@ -199,7 +201,7 @@ export function createShipCamera(
   let flight: Flight | null = null;
   /** The throttle lever, 0…1: thrust ahead wherever the keys give none. */
   let cruise = 0;
-  /** Entering orbit: the attitude it left from and the seconds since. */
+  /** Entering or leaving orbit: the attitude it turned from and the seconds since. */
   let settle: { q0: Quaternion; t: number } | null = null;
   /** A camera-pad step still to ease in, radians. */
   const stepping = { azimuth: 0, inclination: 0, on: false };
@@ -479,14 +481,17 @@ export function createShipCamera(
     t < ALIGN_S ? 0 : tripProperVelocity(engine, s, trip);
 
   /**
-   * Leaves the orbit at rest beside the body, riding its motion, looking where the camera
-   * looked: the keys then move the ship the way they say, and gravity pulls only gently. A
-   * switch hands the keys the canvas's focus; the lever keeps its own, so its arrows keep working.
+   * Leaves the orbit at rest beside the body, riding its motion, its nose turned from the body
+   * towards the horizon just enough to pass it (the body sinks below the line, still in view):
+   * thrust ahead then flies past rather than into it, and gravity pulls only gently. A switch
+   * hands the keys the canvas's focus; the lever keeps its own, so its arrows keep working.
    */
   const enterFree = (focus = true) => {
     if (mode === "free") return;
-    settle = null;
-    attitude = camera.quaternion.toArray();
+    settle = reduceMotion.matches ? null : { q0: camera.quaternion.clone(), t: 0 };
+    const clear = Math.asin(Math.min(1, (CLEAR_RADII * anchorRadius(aim)) / pose.distance));
+    fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
+    attitude = turnFree(camera.quaternion.toArray(), 0, fwd.y > 0 ? -clear : clear);
     bodyVelocity(aim, velocity);
     ship.u[0] = velocity[0];
     ship.u[1] = velocity[1];
@@ -655,6 +660,15 @@ export function createShipCamera(
       }
     }
     return keepAboveGround();
+  };
+
+  /** Entering or leaving orbit: the nose turns from where it pointed onto its new heading. */
+  const easeSettle = (dt: number) => {
+    if (!settle) return;
+    settle.t += dt;
+    const k = smootherstep(clamp(settle.t / SETTLE_S, 0, 1));
+    if (k < 1) camera.quaternion.slerpQuaternions(settle.q0, toward.copy(camera.quaternion), k);
+    else settle = null;
   };
 
   /** Looks from the origin back along `from` at the aim. */
@@ -917,6 +931,7 @@ export function createShipCamera(
         options.clock(ship.t);
         if (near) aim = near;
         camera.quaternion.fromArray(attitude);
+        easeSettle(dt);
       } else {
         warpNow = compression;
         if (compression > 0) {
@@ -948,14 +963,7 @@ export function createShipCamera(
         ship.x[1] = aimPos[1] + offset.y;
         ship.x[2] = aimPos[2] + offset.z;
         lookAt(offset);
-        /* Entering orbit: the nose turns from where it pointed onto the body. */
-        if (settle) {
-          settle.t += dt;
-          const k = smootherstep(clamp(settle.t / SETTLE_S, 0, 1));
-          if (k < 1)
-            camera.quaternion.slerpQuaternions(settle.q0, toward.copy(camera.quaternion), k);
-          else settle = null;
-        }
+        easeSettle(dt);
       }
       camera.position.set(0, 0, 0);
       camera.updateMatrixWorld();

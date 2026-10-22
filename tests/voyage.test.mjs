@@ -237,6 +237,21 @@ test("the store: the throttle stays on its travel and closes for orbit and the a
   useVoyage.setState(useVoyage.getInitialState(), true);
 });
 
+test("the store: a visit invites the pilot until the ship first leaves orbit", () => {
+  const fresh = useVoyage.getInitialState();
+  for (const fly of [(s) => s.setMode("free"), (s) => s.goTo("mars"), (s) => s.startGuide()]) {
+    useVoyage.setState(fresh, true);
+    assert.equal(useVoyage.getState().flown, false);
+    useVoyage.getState().setMode("orbit");
+    assert.equal(useVoyage.getState().flown, false, "parking is not flying");
+    fly(useVoyage.getState());
+    useVoyage.getState().endGuide();
+    useVoyage.getState().setMode("orbit");
+    assert.equal(useVoyage.getState().flown, true, "back in orbit, the invitation stays gone");
+  }
+  useVoyage.setState(fresh, true);
+});
+
 test("readouts carry into the larger unit, tell a speed from c, and print nothing for no value", () => {
   const messages = layoutMessages("voyage", "en");
   const t = createTranslator({ locale: "en", messages, namespace: "voyage" });
