@@ -3,18 +3,21 @@ import test from "node:test";
 
 import { orreryQuality } from "../src/features/orrery/lib/quality.ts";
 import {
+  closeUpMapWidth,
+  MOON_FILL,
+  moonFraming,
+  moonSwing,
+} from "../src/features/orrery/lib/scene/close-up-flight.ts";
+import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
+import {
   CLOSE_UP_FILL,
   CLOSE_UP_SWING,
   aimAt,
   closeUpLimits,
-  closeUpMapWidth,
   closeUpPose,
-  MOON_FILL,
-  moonFraming,
-  moonSwing,
   sampleCloseUp,
-} from "../src/features/orrery/lib/scene/close-up-flight.ts";
-import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
+  sunwardCloseUpPose,
+} from "../src/space/close-up-flight.ts";
 import { AIR, AIR_BODIES, airUniforms } from "../src/space/solar-system/graphics/air.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
@@ -263,4 +266,20 @@ test("store: close-ups need a globe, today and the solar map; leaving is automat
   api().enterCloseUp();
   api().setView("oort");
   assert.equal(api().closeUp, null, "a view change ends it");
+});
+
+test("a close-up that follows a body round the Sun keeps the same three-quarter light", () => {
+  /* In the world frame, the camera's angle off the Sun as seen from the body. */
+  const body = [10, 0, 0];
+  const pose = closeUpPose(body, 1, 0.4, 0);
+  const dir = [
+    Math.cos(pose.inclination) * Math.sin(pose.azimuth),
+    Math.sin(pose.inclination),
+    Math.cos(pose.inclination) * Math.cos(pose.azimuth),
+  ];
+  const fromSun = Math.acos(-dir[0]);
+  /* Up toward the Sun: the elevation is the complement of that angle, the framing the same. */
+  const sunward = sunwardCloseUpPose(1, 0.4);
+  near(Math.PI / 2 - sunward.inclination, fromSun, 1e-12);
+  near(sunward.distance, pose.distance, 1e-12);
 });

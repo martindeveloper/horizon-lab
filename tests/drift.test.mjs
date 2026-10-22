@@ -18,7 +18,7 @@ import { useBlackHole } from "../src/features/black-hole/lib/store.ts";
 import { DRIFT as DEEP_FIELD } from "../src/features/deep-field/lib/drift.ts";
 import { VIEW_IDS } from "../src/features/deep-field/lib/model/view-ids.ts";
 import { viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
-import { useDeepField } from "../src/features/deep-field/lib/store.ts";
+import { canCloseUp as canVisitProbe, useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { DRIFT as GIANTS } from "../src/features/giants/lib/drift.ts";
 import { radiusMetres } from "../src/features/giants/lib/model/catalogue.ts";
 import { createDriftPath, zoomPath } from "../src/features/giants/lib/model/drift-path.ts";
@@ -67,6 +67,11 @@ test("every drift programme is one the camera and the music can play", () => {
     }
   }
   for (const shot of DEEP_FIELD.shots) {
+    if ("closeUp" in shot) {
+      const selection = { kind: "reach", id: shot.closeUp };
+      assert.ok(canVisitProbe({ selection, guideOpen: false }), `deep field visit ${shot.closeUp}`);
+      continue;
+    }
     assert.ok(VIEW_IDS.includes(shot.view), `deep field view ${shot.view}`);
     /* Just outside the heliopause its bubble fills the frame: no hold may land or creep there,
        at any spread of the distance (±0.3 e-folds at full variance). */
@@ -88,16 +93,19 @@ test("every drift programme is one the camera and the music can play", () => {
       );
     } else assert.ok(isSolarView(shot.view), `orrery view ${shot.view}`);
   }
-  assert.ok(
-    ORRERY.shots.some((shot) => "closeUp" in shot),
-    "the Orrery's drift visits bodies",
-  );
+  for (const programme of [ORRERY, DEEP_FIELD]) {
+    assert.ok(
+      programme.shots.some((shot) => "closeUp" in shot),
+      "the drift visits bodies",
+    );
+    const { dive, hold, pace } = programme.closeUp;
+    assert.ok(dive > 0 && dive <= 1 && hold > 0);
+    assert.ok(pace > 1, "a drift's close-up flights are slower than a tap's");
+  }
   assert.ok(
     ORRERY.clock > 0 && ORRERY.clock < 0.35,
     "the drift's clock runs below Motion's slowest rate",
   );
-  assert.ok(ORRERY.closeUp.dive > 0 && ORRERY.closeUp.dive <= 1 && ORRERY.closeUp.hold > 0);
-  assert.ok(ORRERY.closeUp.pace > 1, "a drift's close-up flights are slower than a tap's");
   for (const programme of [BLACK_HOLE, BLACK_HOLE_DORMANT]) {
     const spread = Math.exp(0.3 * (programme.camera.variance ?? DRIFT_DEFAULTS.variance));
     for (const shot of programme.shots) {

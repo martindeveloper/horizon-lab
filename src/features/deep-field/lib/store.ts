@@ -10,6 +10,7 @@ import {
   type SceneSlice,
 } from "@/lib/scene-store";
 import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
+import { isReachSelection, type ProbeId } from "@/space/solar-system/model/probes";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
@@ -43,6 +44,17 @@ export const dropsSelection = (sel: Selection, realm: Realm, flyingTo: Realm | n
 
 type Panel = "none" | "objects" | "view";
 
+/** The probe the selection names, if it is one. */
+const probeOf = (sel: Selection | null): ProbeId | null =>
+  sel && isReachSelection(sel) && sel.id !== "heliopause" ? sel.id : null;
+
+/**
+ * A probe can be flown to at its true size while the journey does not hold the camera; the
+ * drift visits one itself (its card hidden meanwhile).
+ */
+export const canCloseUp = (s: Pick<DeepFieldStore, "selection" | "guideOpen">) =>
+  probeOf(s.selection) !== null && !s.guideOpen;
+
 const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
 
 /** What the `?` tour's steps change and give back: the view, a ladder drag, the switches. */
@@ -56,6 +68,10 @@ export type DeepFieldStore = SceneSlice &
     /** A depth the visitor dragged the ladder to (camera distance, ly), or null. */
     seek: { ly: number } | null;
     selection: Selection | null;
+    /** The probe the camera has flown to at its true size, or null. */
+    closeUp: ProbeId | null;
+    /** A probe's model the view would show is still on its way (written by the scene). */
+    sharpening: boolean;
     panel: Panel;
     show: Show;
     /* HUD readouts written by the engine a few times per second, besides the scale bar. */
@@ -67,6 +83,9 @@ export type DeepFieldStore = SceneSlice &
     /** Glides the zoom to a camera distance (ly), as the ladder's thumb asks. */
     seekTo: (ly: number) => void;
     select: (selection: Selection | null) => void;
+    /** Flies to the selected probe at its true size. */
+    enterCloseUp: () => void;
+    leaveCloseUp: () => void;
     patchShow: (patch: Partial<Show>) => void;
     /** The View panel's settings as a visit starts: switches, distance unit, render quality. */
     resetView: () => void;
@@ -84,16 +103,25 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   view: typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath(),
   seek: null,
   selection: null,
+  closeUp: null,
+  sharpening: false,
   panel: "none",
   show: DEFAULT_SHOW,
   viewLy: viewById(DEFAULT_VIEW).ly,
   reachLy: viewById(DEFAULT_VIEW).ly,
   setView: (view) => {
     const v = viewById(view);
-    set((s) => ({ view, viewLy: v.ly, flight: s.flight + 1, seek: null }));
+    set((s) => ({ view, viewLy: v.ly, flight: s.flight + 1, seek: null, closeUp: null }));
   },
-  seekTo: (ly) => set({ seek: { ly } }),
-  select: (selection) => set({ selection }),
+  seekTo: (ly) => set({ seek: { ly }, closeUp: null }),
+  /* Another selection lets go of a close-up. */
+  select: (selection) =>
+    set((s) => ({ selection, closeUp: probeOf(selection) === s.closeUp ? s.closeUp : null })),
+  enterCloseUp: () => {
+    const s = get();
+    if (canCloseUp(s)) set({ closeUp: probeOf(s.selection), panel: "none", seek: null });
+  },
+  leaveCloseUp: () => set({ closeUp: null }),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
   resetView: () => set({ show: DEFAULT_SHOW, ...RESET_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
@@ -102,7 +130,7 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
     /* The visitor's switches, given back when the journey ends. */
     save: (s) => s.show,
     restore: (show) => ({ show }),
-    open: () => ({ guidePlaying: !prefersReducedMotion(), seek: null }),
+    open: () => ({ guidePlaying: !prefersReducedMotion(), seek: null, closeUp: null }),
     apply: (step, s) => ({
       guideLanded: false,
       view: step.view,
@@ -123,7 +151,7 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   ...driftSlice(set, get, {
     open: (s) => {
       if (s.guideOpen) s.endGuide();
-      return { panel: "none" as const, selection: null, seek: null };
+      return { panel: "none" as const, selection: null, seek: null, closeUp: null };
     },
   }),
 }));

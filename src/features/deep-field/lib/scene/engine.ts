@@ -21,6 +21,7 @@ import {
   orbitCamera,
   stageClearance,
 } from "@/lib/scene-bridge";
+import { TAP_STYLE } from "@/space/close-up-flight";
 import { createCosmosLayer } from "@/space/cosmos/scene/cosmos-layer";
 import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
 import { GALAXY_LAYER, LY, galaxyMix } from "@/space/galaxy/scene/frames";
@@ -29,16 +30,19 @@ import { createLabelPicks } from "@/space/galaxy/scene/label-picks";
 import { createLod } from "@/space/galaxy/scene/lod";
 import { createNeighboursLayer } from "@/space/galaxy/scene/neighbours-layer";
 import { TODAY } from "@/space/solar-system/model/moment";
-import { PROBES } from "@/space/solar-system/model/probes";
+import { positionOf } from "@/space/solar-system/model/position";
+import { PROBES, probePosition, yearOf, type ProbeId } from "@/space/solar-system/model/probes";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { createSolarKit, type SolarFrame, type SolarShow } from "@/space/solar-system/scene/kit";
-import { createReachLayer } from "@/space/solar-system/scene/reach-layer";
+import { createProbeCrafts } from "@/space/solar-system/scene/probe-crafts";
+import { createReachLayer, type ReachFrame } from "@/space/solar-system/scene/reach-layer";
 import {
   SOLAR_RULER_KEYS,
   createSolarSystem,
   rulerOrigin,
   solarLabelPick,
 } from "@/space/solar-system/scene/solar-system";
+import type { Vec3 } from "@horizon/toolkit/bodies";
 import { REDUCED_MOTION_QUERY, WIDE_QUERY } from "@horizon/toolkit/environment";
 import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
 import {
@@ -52,6 +56,7 @@ import {
   sceneKit,
   type SceneMount,
 } from "@horizon/toolkit/scene";
+import { AU_KM } from "@horizon/toolkit/science";
 
 import { createLooks } from "../graphics/looks";
 import { LADDER_LY } from "../model/depth";
@@ -64,6 +69,7 @@ import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
 import { SOLAR_SHOW, labelInsets, type Frame, type SceneKit } from "./kit";
 import { createPicking } from "./picking";
+import { createProbeCloseUp } from "./probe-close-up";
 import { createSkyLayer } from "./sky-layer";
 
 export function createDeepFieldEngine({
@@ -125,6 +131,11 @@ export function createDeepFieldEngine({
       swarms: quality.swarms,
     });
     const reach = createReachLayer(kit, scene, { place, rulers, picks });
+    /* The probes at their true size, after the scene in a depth range of their own. */
+    const probes = createProbeCrafts(basics, {
+      unitM: AU_KM * 1e3,
+      invalidate: () => engine.invalidate(),
+    });
     const neighbours = createNeighboursLayer(kit, scene, {
       place,
       rulers,
@@ -153,9 +164,24 @@ export function createDeepFieldEngine({
     rig.home();
     rig.applyPose();
 
+    /* The probes and the Earth their dishes face, on the clock's date (`probeYear`). */
+    let probeYear = yearOf(new Date());
+    const probeAt = (id: ProbeId, out: Vec3) => probePosition(id, probeYear, out);
+    const earth: Vec3 = [0, 0, 0];
+    /* The camera as the rig holds it: its aim and its exact offset from there. */
+    const aimAt: Vec3 = [0, 0, 0];
+    const cameraOffset: Vec3 = [0, 0, 0];
+    const closeUp = createProbeCloseUp(rig, camera, {
+      probeAt,
+      reduceMotion,
+      /* The drift's visits are its own (`visitStyle`), and wait while it is paused. */
+      style: () => (store.getState().drift === "off" ? TAP_STYLE : drift.visitStyle()),
+      paused: () => store.getState().drift === "paused",
+    });
+
     /* The guided journey and the drift fly their own shots; a drag or a zoom takes the camera back. */
     const guide = createGuideDirector(rig, store, reduceMotion);
-    const drift = createDriftDirector(rig, store, reduceMotion);
+    const drift = createDriftDirector(rig, store, { reduceMotion, closeUp });
     /* The drift veils the line art: orbits, rings, trails and rulers fade, the sky stays. */
     const veil = createLineVeil();
     const controls = createOrbitControls(scope, canvas, rig, {
@@ -169,6 +195,7 @@ export function createDeepFieldEngine({
     });
     const continuous = () =>
       rig.moving ||
+      closeUp.busy ||
       guide.busy ||
       drift.busy ||
       veil.busy ||
@@ -252,6 +279,7 @@ export function createDeepFieldEngine({
         renderer.clearDepth();
       }
       renderer.render(scene, camera);
+      probes.render(renderer);
       renderer.autoClear = true;
       veil.uncover();
     };
@@ -264,6 +292,14 @@ export function createDeepFieldEngine({
     /* Rewritten each frame (the clock's date afresh, since a layer may keep it); the layers read
        them only while they update. */
     const solarShow: SolarShow = { ...SOLAR_SHOW };
+    const reachFrame: ReachFrame = {
+      show: store.getState().show,
+      sel: null,
+      dist: 0,
+      lines: 1,
+      year: probeYear,
+      approach: null,
+    };
     const solarFrame: SolarFrame = {
       ...TODAY,
       dt: 0,
@@ -279,6 +315,14 @@ export function createDeepFieldEngine({
         guide.step(dt);
         drift.step(dt);
         veil.step(dt, state.drift === "off");
+        /* One date a frame, for the close-up's aim and the probes alike. */
+        solarFrame.now = new Date();
+        probeYear = yearOf(solarFrame.now);
+        /* The drift may have just opened or let go of a visit's close-up. Under its loading
+           curtain a close-up ends at once: the drift cuts to its opening shot. */
+        const { closeUp: want, drift: drifting } = store.getState();
+        if (drifting === "loading" && closeUp.current) closeUp.end();
+        closeUp.step(dt, want);
         rig.step(dt);
         rig.home();
         rig.applyPose();
@@ -303,14 +347,28 @@ export function createDeepFieldEngine({
         };
         solarShow.names = state.show.names;
         solarFrame.dt = dt;
-        solarFrame.now = new Date();
         solarFrame.sel = frame.sel && isSolarSelection(frame.sel) ? frame.sel : null;
         solarFrame.dist = dist;
         sky.update(frame);
         const at = solar.update(solarFrame);
         const painting = solarKit.looks.paint(solarKit.lod.need);
         surfacesBusy = solarKit.looks.step(dt) || painting;
-        reach.update(frame);
+        positionOf({ kind: "planet", id: "earth" }, TODAY, solarFrame.now, earth);
+        reachFrame.approach = probes.update({
+          dt,
+          probeAt,
+          earth,
+          base: rig.aim.toArray(aimAt),
+          offset: rig.offset.toArray(cameraOffset),
+          approach: closeUp.approach,
+        });
+        if (probes.waiting !== state.sharpening) store.setState({ sharpening: probes.waiting });
+        reachFrame.show = frame.show;
+        reachFrame.sel = frame.sel;
+        reachFrame.dist = dist;
+        reachFrame.lines = frame.lines;
+        reachFrame.year = probeYear;
+        reach.update(reachFrame);
         /* The neighbours fade themselves out past the nearest stars. */
         neighbours.update(frame, pose.azimuth);
         /* Rulers carry their readouts: the drift leaves them out with the rest of the line art. */

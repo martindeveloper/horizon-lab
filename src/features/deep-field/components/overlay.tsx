@@ -9,7 +9,7 @@ import { useGuideKeys } from "@/components/simulations/use-guide-keys";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
-import { VisualizationOverlay, cn } from "@horizon/toolkit/ui";
+import { LoadingBadge, VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 
 import { HELP } from "../lib/help";
 import { PROSE_FIGURES } from "../lib/model/catalogue";
@@ -22,12 +22,13 @@ import { Sightline } from "./sightline";
 import { DeepFieldTechnicalDetails } from "./technical-details";
 import { ViewPanel } from "./view-panel";
 
-/** Escape ends the journey, else closes the panel, else lets go of the selection. */
+/** Escape ends the journey, else closes the panel, leaves a close-up or lets go, in that order. */
 const escapeSteps = (): EscapeStep[] => {
   const api = useDeepField.getState();
   return [
     [api.guideOpen, api.endGuide],
     [api.panel !== "none", () => api.setPanel("none")],
+    [api.closeUp !== null, api.leaveCloseUp],
     [api.selection !== null, () => api.select(null)],
   ];
 };
@@ -46,6 +47,7 @@ export function DeepFieldOverlay() {
   const setPanel = useDeepField((s) => s.setPanel);
   const selection = useDeepField((s) => s.selection);
   const guideOpen = useDeepField((s) => s.guideOpen);
+  const sharpening = useDeepField((s) => s.sharpening);
   const scalePx = useDeepField((s) => s.scalePx);
   const scaleValue = useDeepField((s) => s.scaleValue);
   const scaleUnit = useDeepField((s) => s.scaleUnit);
@@ -97,6 +99,7 @@ export function DeepFieldOverlay() {
                 drift={() => useDeepField.getState().startDrift()}
               />
             </div>
+            <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
           {/* The map's scale sits under the ladder, where wide screens keep the depth instruments. */}
           <div className="pad-hud-bottom pointer-events-none absolute bottom-0 left-0 z-30 not-lg:hidden">

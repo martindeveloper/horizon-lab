@@ -19,6 +19,7 @@ import {
   orbitCamera,
   stageClearance,
 } from "@/lib/scene-bridge";
+import { TAP_STYLE } from "@/space/close-up-flight";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { positionOf } from "@/space/solar-system/model/position";
 import { hostOf } from "@/space/solar-system/model/selection";
@@ -53,7 +54,7 @@ import { driftYearsPerSecond } from "../model/views";
 import { orreryQuality } from "../quality";
 import { useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
-import { TAP_STYLE, createCloseUpController, type BodySelection } from "./close-up-controller";
+import { createCloseUpController, type BodySelection } from "./close-up-controller";
 import { createDriftDirector } from "./drift-director";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";

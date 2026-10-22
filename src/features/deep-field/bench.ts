@@ -1,6 +1,8 @@
 import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import { PROBE_SPACECRAFT, type ProbeId } from "@/space/solar-system/model/probes";
+import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 
@@ -16,6 +18,8 @@ type DeepFieldBenchScene = BenchScene & {
   drift?: boolean;
   /** The view the scene opens on; the home view by default. */
   view?: ViewId;
+  /** A probe selected and flown to at its true size from the view. */
+  closeUp?: ProbeId;
 };
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
@@ -77,6 +81,25 @@ const SCENES: readonly DeepFieldBenchScene[] = [
     }),
   ),
   {
+    id: "probe-close-up",
+    description:
+      "From the heliosphere to Pioneer 10 at its true size: the flight, the model, a zoom out and back in",
+    tags: ["sequence", "camera", "solar"],
+    bloom: false,
+    lens: false,
+    view: "heliosphere",
+    closeUp: "pioneer10",
+    script: {
+      frames: 480,
+      duration: 8,
+      input: [
+        { kind: "wheel", at: 0.6, deltaY: 400 },
+        { kind: "wheel", at: 0.78, deltaY: -800 },
+      ],
+      keyframes: [0, 0.3, 0.58, 0.75, 1],
+    },
+  },
+  {
     id: "drift",
     description: "One loop of the drift, timed to its track's map, from the home view",
     tags: ["sequence", "camera", "drift"],
@@ -98,9 +121,11 @@ const SCENES: readonly DeepFieldBenchScene[] = [
 export const benchTarget: BenchTarget = {
   id: "deep-field",
   scenes: SCENES,
-  mount(sceneId, surface) {
+  async mount(sceneId, surface) {
     const scene = SCENES.find((s) => s.id === sceneId);
     if (!scene) throw new Error(`Unknown deep-field scene: ${sceneId}`);
+    /* A bench sequence draws its frames in one go: the probe's model is fetched first. */
+    if (scene.closeUp) await fetchSpacecraft(PROBE_SPACECRAFT[scene.closeUp]);
     const store = useDeepField;
     store.getState().resetView();
     store.setState({
@@ -108,6 +133,8 @@ export const benchTarget: BenchTarget = {
       quality: "standard",
       bloom: scene.bloom,
       lens: scene.lens,
+      selection: scene.closeUp ? { kind: "reach", id: scene.closeUp } : null,
+      closeUp: null,
     });
     /* A drift scene plays the drift as the page would once its map has loaded and its loader lifted. */
     if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
@@ -117,6 +144,7 @@ export const benchTarget: BenchTarget = {
       store.getState().readyDrift();
     }
     const instance = mountSceneEngine(surface, createDeepFieldEngine, () => store.setState({}));
+    if (scene.closeUp) store.getState().enterCloseUp();
     return {
       ...instance,
       describe: () => {

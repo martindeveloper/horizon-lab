@@ -1,3 +1,4 @@
+import { ArrowLeft, ZoomIn } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 
 import { HandoffRow } from "@/components/simulations/handoff-link";
@@ -6,12 +7,13 @@ import { viewOf } from "@/space/solar-system/model/framing";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { Action } from "@horizon/toolkit/ui";
 
-import { useDeepField } from "../lib/store";
+import { canCloseUp, useDeepField } from "../lib/store";
 import { cardFor } from "./cards";
 
 /**
  * Facts and notes for the selected object. A solar system body leads back in time, to the
- * Orrery; the Sun on the Galaxy map flies back down to the planets.
+ * Orrery; the Sun on the Galaxy map flies back down to the planets; a probe offers its
+ * close-up, at its true size.
  */
 export function SelectionCard() {
   const t = useTranslations("deepField");
@@ -20,6 +22,8 @@ export function SelectionCard() {
   const unit = useDeepField((s) => s.distanceUnit);
   const locale = useLocale();
   const select = useDeepField((s) => s.select);
+  const closeUp = useDeepField((s) => s.closeUp);
+  const offerCloseUp = useDeepField(canCloseUp);
   const now = useNow({ updateInterval: 60_000 });
   if (!selection) return null;
   return (
@@ -28,7 +32,24 @@ export function SelectionCard() {
       closeLabel={t("hud.close")}
       onClose={() => select(null)}
       footer={
-        isSolarSelection(selection) ? (
+        closeUp ? (
+          <>
+            <Action
+              variant="glass"
+              className="flex-1"
+              onClick={() => useDeepField.getState().leaveCloseUp()}
+            >
+              <ArrowLeft className="size-4" aria-hidden />
+              {t("hud.leaveCloseUp")}
+            </Action>
+            <p className="w-full text-xs text-muted">{t("hud.closeUpNote")}</p>
+          </>
+        ) : offerCloseUp ? (
+          <Action className="flex-1" onClick={() => useDeepField.getState().enterCloseUp()}>
+            <ZoomIn className="size-4" aria-hidden />
+            {t("hud.closeUp")}
+          </Action>
+        ) : isSolarSelection(selection) ? (
           <HandoffRow
             to="orrery"
             view={viewOf(selection)}

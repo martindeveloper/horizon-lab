@@ -10,6 +10,18 @@ import {
   type WebGLRenderer,
 } from "three";
 
+import {
+  STILL,
+  TAP_STYLE,
+  aimAt,
+  closeUpPose,
+  flightSeconds,
+  sampleCloseUp,
+  settingOff,
+  type CloseUpStyle,
+  type FlightMotion,
+  type Vec,
+} from "@/space/close-up-flight";
 import { AIR, AIR_BODIES } from "@/space/solar-system/graphics/air";
 import { MAP_BASE } from "@/space/solar-system/graphics/maps";
 import { moonOffset } from "@/space/solar-system/graphics/moons";
@@ -35,18 +47,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 
 import type { CloseUpQuality } from "../quality";
 import type { CameraRig } from "./camera-rig";
-import {
-  CLOSE_UP_IN_S,
-  CLOSE_UP_OUT_S,
-  STILL,
-  aimAt,
-  closeUpMapWidth,
-  closeUpPose,
-  moonFraming,
-  sampleCloseUp,
-  type FlightMotion,
-  type Vec,
-} from "./close-up-flight";
+import { closeUpMapWidth, moonFraming } from "./close-up-flight";
 
 /** The layer of a moon's planet in a moon's close-up: its own depth pass, behind the moon's. */
 const HOST_LAYER = 2;
@@ -66,25 +67,6 @@ for (const moon of [...MOONS].sort((a, b) => a.radiusKm - b.radiusKm))
   LARGEST_MOON.set(moon.host, moon.id);
 
 export type BodySelection = SurfaceSelection;
-
-/** How a close-up's flights go, read as each one starts. */
-export type CloseUpStyle = {
-  /** How many times the usual flight time a flight takes. */
-  pace: number;
-  /** The zoom's lead on it (`sampleCloseUp`); 0 paces it evenly. */
-  lead: number;
-  /**
-   * A scripted visit (a drift's), or null for the visitor's own. A scripted visit never stops
-   * anything dead: the clock eases out and back in with its flights (`clockShare`) rather than
-   * holding at once, the arrival follows the body's light while the clock still runs, the flight
-   * in carries on `motion` (rad/s, how the camera was already turning), and a pause holds the
-   * flights where they are.
-   */
-  scripted: { motion: Omit<OrbitPose, "distance"> } | null;
-};
-
-/** A visitor's close-up: flights at their own pace, the clock held at once. */
-export const TAP_STYLE: CloseUpStyle = { pace: 1, lead: 0, scripted: null };
 
 type CloseUp = {
   sel: BodySelection;
@@ -157,27 +139,6 @@ type Shell = {
 
 const bodyKey = (sel: BodySelection): BodyId => (sel.kind === "sun" ? "sun" : sel.id);
 
-/** Seconds a flight takes, in or out, at its style's pace. */
-const flightSeconds = (entering: boolean, { pace }: CloseUpStyle) =>
-  (entering ? CLOSE_UP_IN_S : CLOSE_UP_OUT_S) * pace;
-
-/**
- * The motion a flight sets off with, per whole flight of `seconds`: a scripted visit's flight
- * in turns as its drift was turning; any other flight carries on what the flight it interrupts
- * was doing (`velocity`, per second).
- */
-function settingOff(velocity: FlightMotion, entering: boolean, style: CloseUpStyle): FlightMotion {
-  const seconds = flightSeconds(entering, style);
-  const { azimuth, inclination, distance, look } =
-    entering && style.scripted ? { ...STILL, ...style.scripted.motion } : velocity;
-  return {
-    azimuth: azimuth * seconds,
-    inclination: inclination * seconds,
-    distance: distance * seconds,
-    look: [look[0] * seconds, look[1] * seconds, look[2] * seconds],
-  };
-}
-
 const setLayer = (objects: Object3D[], layer: number) => {
   for (const object of objects) object.traverse((child) => child.layers.set(layer));
 };
@@ -203,7 +164,11 @@ export function createCloseUpController(
     upload: (texture: Texture) => void;
     /** The current quality's close-up maps, read as each close-up starts. */
     quality: () => CloseUpQuality;
-    /** How each flight goes, read as it starts; a visitor's (`TAP_STYLE`) by default. */
+    /**
+     * How each flight goes, read as it starts; a visitor's (`TAP_STYLE`) by default. A scripted
+     * visit also eases the clock out and back in with its flights (`clockShare`) rather than
+     * holding it at once, and its arrival follows the body's light while the clock still runs.
+     */
     style?: () => CloseUpStyle;
     /** A scripted visit's flights wait while this holds (its drift is paused). */
     paused?: () => boolean;

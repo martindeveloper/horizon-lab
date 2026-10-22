@@ -4,6 +4,7 @@
  */
 import type { PerspectiveCamera } from "three";
 
+import { closeUpLimits } from "@/space/close-up-flight";
 import {
   SOLAR_FRAMING,
   solarViewById,
@@ -12,7 +13,6 @@ import {
 } from "@/space/solar-system/model/views";
 import { createOrbitRig, createViewMoves } from "@horizon/toolkit/scene";
 
-import { closeUpLimits } from "./close-up-flight";
 import { ORRERY_EDGE, SOLAR_EDGE } from "./kit";
 
 /** What the rig needs to know about a close-up in progress. */

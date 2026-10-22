@@ -40,6 +40,7 @@
     "lightTime": "Kruhy světelného času"
   },
   "hud": {
+    "sharpening": "Načítám detail",
     "galaxyItems": "Mapa Mléčné dráhy",
     "cosmosItems": "Za Mléčnou dráhou",
     "neighbours": "Blízké hvězdy",
@@ -56,7 +57,10 @@
     "backInTime": "Zpět v čase · Orrery",
     "backInTimeHint": "Toto místo napříč dějinami sluneční soustavy",
     "lightLeftAgo": "Světlo vyšlo {ago}",
-    "outToValue": "až do {distance}"
+    "outToValue": "až do {distance}",
+    "closeUp": "Zblízka",
+    "leaveCloseUp": "Zpět na mapu",
+    "closeUpNote": "Skutečná velikost, anténa míří k Zemi."
   },
   "time": {
     "years": "před {value} {valuePlural, select, one {rokem} few {lety} many {roku} other {lety}}",
