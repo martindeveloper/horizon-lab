@@ -28,7 +28,6 @@ import {
   rising,
   type AnchoredRulers,
   type DistanceText,
-  type LabelText,
   type PlaceLabel,
   type SceneKit,
 } from "@horizon/toolkit/scene";
@@ -54,14 +53,13 @@ export function createCosmosLayer(
   deps: {
     place: PlaceLabel;
     rulers: AnchoredRulers;
-    labels: LabelText;
     distanceText: DistanceText;
     picks: LabelPicks;
     /** How densely to sample, from the render quality (the host's `cosmos` detail). */
     detail: CosmosDetail;
   },
 ) {
-  const { place, rulers, labels, distanceText } = deps;
+  const { place, rulers, distanceText } = deps;
   const m = looks.cosmos;
   const root = new Group();
   root.quaternion.copy(GALAXY_FRAME);
@@ -203,7 +201,7 @@ export function createCosmosLayer(
       view.up.setFromMatrixColumn(camera.matrixWorld, 1).applyQuaternion(turn);
       view.up.addScaledVector(view.toward, -view.up.dot(view.toward)).normalize();
       view.facing.setFromUnitVectors(Z, view.toward);
-      rings.update(view, expansion, labelled * ringsOn * lines, labels().lookbackRing, place);
+      rings.update(view, expansion, labelled * ringsOn * lines, place);
       const edge = shellOutline(CMB_MLY * expansion, view.d);
       edgeMark.copy(view.toward).multiplyScalar(edge.offset).addScaledVector(view.up, -edge.radius);
       /* At their real size once that is larger than a dozen pixels. */

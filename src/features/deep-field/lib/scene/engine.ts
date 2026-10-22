@@ -147,7 +147,6 @@ export function createDeepFieldEngine({
     const cosmos = createCosmosLayer(kit, scene, {
       place,
       rulers,
-      labels,
       distanceText,
       picks,
       detail: quality.cosmos,

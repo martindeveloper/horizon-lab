@@ -15,7 +15,7 @@ import {
 
 import type { PlaceLabel } from "@horizon/toolkit/scene";
 
-import { LOOKBACK_RINGS_GYR, lookbackMly } from "../model/cosmos";
+import { LOOKBACK_RINGS_GYR, lookbackMly, lookbackRingKey } from "../model/cosmos";
 
 /** The camera in the root's frame: its distance from the centre (Mly), its direction, up, and the turn facing it. */
 export type RootView = { d: number; toward: Vector3; up: Vector3; facing: Quaternion };
@@ -32,7 +32,7 @@ export function createLookbackRings(root: Object3D, circle: BufferGeometry, mate
     const line = new LineLoop(circle, material);
     line.frustumCulled = false;
     root.add(line);
-    return { gyr, mly: lookbackMly(gyr), line, key: `lookback${gyr}` };
+    return { mly: lookbackMly(gyr), line, key: lookbackRingKey(gyr) };
   });
   const at = new Vector3();
   return {
@@ -40,14 +40,8 @@ export function createLookbackRings(root: Object3D, circle: BufferGeometry, mate
     hide(place: PlaceLabel) {
       for (const ring of rings) place(ring.key, 0, 0, 0, false);
     },
-    /** This frame's outlines; `shown` is the names' presence, `text` the template for a ring's age. */
-    update(
-      view: RootView,
-      expansion: number,
-      shown: number,
-      text: string | undefined,
-      place: PlaceLabel,
-    ) {
+    /** This frame's outlines; `shown` is the names' presence. */
+    update(view: RootView, expansion: number, shown: number, place: PlaceLabel) {
       const { d, toward, up, facing } = view;
       for (const ring of rings) {
         const R = ring.mly * expansion;
@@ -63,9 +57,7 @@ export function createLookbackRings(root: Object3D, circle: BufferGeometry, mate
         ring.line.quaternion.copy(facing);
         ring.line.scale.setScalar(radius);
         root.localToWorld(at.copy(ring.line.position).addScaledVector(up, radius));
-        place(ring.key, at.x, at.y, at.z, shown, {
-          text: (text ?? "{value}").replace("{value}", String(ring.gyr)),
-        });
+        place(ring.key, at.x, at.y, at.z, shown);
       }
     },
   };

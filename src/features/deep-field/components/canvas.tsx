@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { SceneCanvas } from "@/components/simulations/scene-canvas";
 import { useSceneLabels } from "@/components/simulations/use-scene-labels";
-import { COSMOS_LABELS } from "@/space/cosmos/model/cosmos";
+import { COSMOS_LABELS, lookbackRingLabels } from "@/space/cosmos/model/cosmos";
 import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
 import { LIGHT_RINGS, PROBES } from "@/space/solar-system/model/probes";
 import { SOLAR_LABEL_KEYS } from "@/space/solar-system/scene/solar-system";
@@ -25,10 +25,9 @@ const LABEL_KEYS = [
 
 const resetReady = () => useDeepField.getState().setReady(false);
 
-/* A template the scene fills with each ring's age. */
-const lookbackRing = (t: ReturnType<typeof useTranslations>) => ({
-  lookbackRing: String(t.raw("names.lookbackRing")),
-});
+/* Each lookback ring named with its age. */
+const lookbackRing = (t: ReturnType<typeof useTranslations>) =>
+  lookbackRingLabels((gyr) => t("names.lookbackRing", { value: gyr }));
 
 export function DeepFieldCanvas() {
   const t = useTranslations("deepField");

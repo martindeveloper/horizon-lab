@@ -138,7 +138,6 @@ export function createVoyageEngine(
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     const worlds = createWorldsLayer(basics, scene, {
       place,
-      labels,
       distanceText,
       detail: quality.cosmos,
     });

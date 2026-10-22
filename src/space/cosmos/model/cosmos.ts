@@ -97,6 +97,11 @@ export const CMB_KELVIN = 2.7255;
 export const LOOKBACK_RINGS_GYR = [1, 5, 10] as const;
 /** Where light that set out `gyr` billion years ago started, today's distance in Mly. */
 export const lookbackMly = (gyr: number) => comovingMly(redshiftAtLookback(gyr, PLANCK_2018));
+/** The label key the scene places a ring under. */
+export const lookbackRingKey = (gyr: number) => `lookback${gyr}`;
+/** Every ring's label text by its key, from a name for its age. */
+export const lookbackRingLabels = (name: (gyr: number) => string) =>
+  Object.fromEntries(LOOKBACK_RINGS_GYR.map((gyr) => [lookbackRingKey(gyr), name(gyr)]));
 
 /* ---------------------------------------------------------------------------------------
  * The Milky Way and Andromeda: a radial Kepler orbit from the Big Bang (Kahn & Woltjer

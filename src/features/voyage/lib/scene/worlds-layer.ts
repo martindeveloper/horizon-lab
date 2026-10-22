@@ -30,7 +30,6 @@ import {
   rising,
   sceneKit,
   type DistanceText,
-  type LabelText,
   type PlaceLabel,
   type SceneHostBasics,
   type Vec3d,
@@ -51,13 +50,12 @@ export function createWorldsLayer(
   deps: {
     /** Places a label at km about the ship. */
     place: PlaceLabel;
-    labels: LabelText;
     distanceText: DistanceText;
     detail: CosmosDetail;
   },
 ) {
   const { scope, camera, viewport } = basics;
-  const { labels, distanceText } = deps;
+  const { distanceText } = deps;
   /* The layers size what they draw by the camera's distance in their own au world: a shadow
      camera stands where the ship is, in au, looking the same way. */
   const worldCamera = new PerspectiveCamera(camera.fov, camera.aspect, 1e-6, 1e14);
@@ -119,7 +117,6 @@ export function createWorldsLayer(
   const cosmos = createCosmosLayer(cosmosKit, bound, {
     place: placeCosmic,
     rulers,
-    labels,
     distanceText,
     picks,
     detail: deps.detail,
