@@ -22,14 +22,11 @@ export const registered = [
 
 export type RegisteredSimulation = (typeof registered)[number];
 
-/** Whether a registered simulation's feature switch, if it has one, is on. */
 export const simulationOn = (manifest: RegisteredSimulation) =>
   !("feature" in manifest) || FEATURES[manifest.feature];
 
-/** The catalogue: every registered simulation whose feature switch is on. */
 export const simulations: readonly RegisteredSimulation[] = registered.filter(simulationOn);
 
-/** Its two shelves: the labs first, then the experiences. */
 export const labs = simulations.filter((simulation) => simulation.kind === "lab");
 export const experiences = simulations.filter((simulation) => simulation.kind === "experience");
 

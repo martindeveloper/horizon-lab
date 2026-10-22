@@ -8,7 +8,6 @@ import { SUN_EQUATIONS } from "@/space/sun/equations";
 import { TOUR, TOUR_DWELL, type TourStep } from "../lib/model/tour";
 import { useSun } from "../lib/store";
 
-/** The formula behind a step, under its words. */
 function StepEquation({ step }: { step: TourStep }) {
   const equation = step.equation ? SUN_EQUATIONS[step.equation] : undefined;
   return equation ? <GuideEquation>{equation.toString()}</GuideEquation> : null;

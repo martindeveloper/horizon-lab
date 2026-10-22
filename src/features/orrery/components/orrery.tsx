@@ -17,9 +17,7 @@ import { OrreryOverlay } from "./overlay";
 import { SolarActivityNotice } from "./solar-activity-controls";
 import { motionRateLabel } from "./time-dock";
 
-/** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useOrrery);
-/** The store as the address sees it, and as the drift's controls do. */
 const views: ViewStore<SolarViewId> = useOrrery;
 const driftStore: DriftStore<OrreryStore> = useOrrery;
 

@@ -37,7 +37,6 @@ export const factSources = (fact: Fact): SourceId[] => [
 ];
 
 export type Fact = Value | Span;
-/** One object's figures, by fact id. */
 export type Facts = Readonly<Record<string, Fact>>;
 
 /** A catalogue: groups of objects, each object's facts by id. */
@@ -130,13 +129,11 @@ export type CardSpec = {
 /** A card wholly described by its spec, with its kicker (`badges.<badge>`). */
 export type StaticCard<Badge extends string = string> = CardSpec & { badge: Badge };
 
-/** The member of a selection union with this `kind`. */
 export type Of<S extends { kind: string }, K extends S["kind"]> = Extract<S, { kind: K }>;
 
 /** What a card's kicker says about how far its figures can be trusted (`badges.<id>`); a simulation adds its own. */
 export type Badge = "measured" | "mixed" | "inferred" | "sketch" | "schematic";
 
-/** A card as the selection sheet shows it. */
 export type Card = {
   badge: string;
   title: string;
@@ -146,13 +143,11 @@ export type Card = {
 };
 export type CardFact = { id: string; label: string; value: string };
 
-/** The page's number and date formatter (next-intl's `useFormatter`). */
 export type Format = ReturnType<typeof useFormatter>;
 
 /** A simulation's translator, scoped to its namespace. */
 export type Translate = (key: string, values?: Record<string, string | number>) => string;
 
-/** The visitor's distance unit and language, for every distance readout. */
 export type DistanceSettings = { unit: DistanceChoice; locale: string };
 
 /** Distances in the visitor's unit, worded by the simulation's `units.*` and `names.*`. */
@@ -194,7 +189,6 @@ export function span(t: Translate, d: DistanceSettings, fact: (Value | Span) & {
   return printFactSpan(fact, distanceFormat(t, d));
 }
 
-/** A referenced figure, printed. */
 export function print(t: Translate, d: DistanceSettings, ref: Ref) {
   return ref.kind === "value" ? figure(t, d, ref.fact) : span(t, d, ref.fact);
 }

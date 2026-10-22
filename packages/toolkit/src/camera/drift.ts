@@ -376,7 +376,6 @@ export function createDriftCamera(
     get index() {
       return index;
     },
-    /** A flight is under way. */
     get flying() {
       return index >= 0 && t < 1;
     },
@@ -460,7 +459,6 @@ export function createDriftRun(shots: readonly DriftShot[], settings: Partial<Dr
   const camera = createDriftCamera(shots, settings);
   /** The drift was on at the last step. */
   let active = false;
-  /** The camera is flying the drift now. */
   let flying = false;
   /** The next start is a fresh one, from off (it may cut); after a pause it flies. */
   let fresh = true;

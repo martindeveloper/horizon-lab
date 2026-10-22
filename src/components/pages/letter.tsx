@@ -11,10 +11,6 @@ export const letterGrid = "lg:grid lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-x-1
 /** The title's quieter half: `<em>` in the message, muted on the page. */
 export const letterEmphasis = (chunks: ReactNode) => <span className="text-muted">{chunks}</span>;
 
-/**
- * A letter's opening: the mark and a kicker in the margin, the display title, a lead, then
- * whatever the page adds under them.
- */
 export function LetterHeader({
   id,
   kicker,

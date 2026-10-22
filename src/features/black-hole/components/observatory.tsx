@@ -16,9 +16,7 @@ import { VisualizationShell } from "@horizon/toolkit/ui";
 import { BLACK_HOLE_PATH } from "../manifest";
 import { SceneCameraProvider } from "./scene-camera";
 
-/** Leaving the observatory starts the next visit fresh. */
 const reset = freshVisit(useBlackHole);
-/** The store as the drift's controls reach it. */
 const driftStore: DriftStore<ReturnType<typeof useBlackHole.getState>> = useBlackHole;
 
 export function Observatory() {

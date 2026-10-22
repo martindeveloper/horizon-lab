@@ -18,7 +18,6 @@ import { useSpectroscopy } from "../lib/store";
 import { lineName, wavelength } from "./format";
 import { useFormedLines, useObservation } from "./use-spectrum";
 
-/** How many of an element's lines the panel lists. */
 const PER_ELEMENT = 6;
 
 /** A 2D canvas is always smoothed; SSAA draws the scene at twice the pixels as well. */

@@ -24,7 +24,6 @@ export const EXTRA: (keyof Show)[] = ["plane"];
 
 const VIEW_IDS = SOLAR_VIEWS.map((v) => v.id);
 
-/** The views as a pill that opens a list, with the way on into Deep Field under them. */
 export function ViewPicker() {
   const t = useTranslations("orrery");
   const view = useOrrery((s) => s.view);
@@ -78,7 +77,6 @@ function DeepFieldLink({ className }: { className?: string }) {
   );
 }
 
-/** Pulled out against the Orrery's edge: one quiet way on into Deep Field. */
 export function EdgeChip() {
   const t = useTranslations("orrery");
   const atEdge = useOrrery((s) => !s.closeUp && s.viewDist >= ORRERY_EDGE * 0.8);

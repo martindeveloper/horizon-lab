@@ -13,9 +13,7 @@ import { viewFromPath } from "../routing";
 import { VoyageCanvas } from "./canvas";
 import { VoyageOverlay } from "./overlay";
 
-/** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useVoyage);
-/** The store as the address sees it. */
 const views: ViewStore<ViewId> = useVoyage;
 
 /** The guide flies the ship; immersive view ends it. */

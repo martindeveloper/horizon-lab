@@ -16,7 +16,6 @@ import { rungFromPath } from "../routing";
 import { GiantsCanvas } from "./canvas";
 import { GiantsOverlay } from "./overlay";
 
-/** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useGiants);
 /** The store as the address sees it: a link to a rung flies there; climbing leaves the address be. */
 const views: ViewStore<RungId> = useGiants;

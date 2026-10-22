@@ -18,7 +18,6 @@ import {
   lookbackYears,
   scaleFactorAt,
 } from "../src/features/voyage/lib/model/comoving.ts";
-/** Voyage's far places and the expansion its clocks run through, against published figures. */
 import { EVENT_HORIZON_LY } from "../src/space/cosmos/model/cosmos.ts";
 
 const YEAR_S = 365.25 * 86_400;

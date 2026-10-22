@@ -22,7 +22,6 @@ export function useThemeMode() {
   return { mounted, value, setTheme: (mode: ThemeMode) => setTheme(mode) };
 }
 
-/** The three modes as the visitor reads them, from the root message namespace. */
 export function useThemeLabels(): Record<ThemeMode, string> {
   const t = useTranslations();
   return { dark: t("themeDark"), light: t("themeLight"), system: t("themeSystem") };

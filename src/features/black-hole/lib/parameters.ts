@@ -19,7 +19,6 @@ import { DISPLAY_CONTRAST } from "./tone";
 export const SPIN_LIMIT = 0.999;
 /** Radial samples of the Page–Thorne flux texture. */
 export const DISK_PROFILE_SIZE = 512;
-/** The disk's outer radius. */
 export const DISK_OUTER_RADIUS = 15.6;
 /** The disk's inner edge sits at max(1.08 r₊, r_ISCO). */
 export const DISK_INNER_HORIZON_FACTOR = 1.08;

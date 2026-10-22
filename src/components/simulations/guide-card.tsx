@@ -14,7 +14,6 @@ import {
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { Action, IconButton, Tooltip, cn } from "@horizon/toolkit/ui";
 
-/** The guide's buttons, in one row: back, play, on (with `extra` beside it), and out. */
 export type GuideControls = {
   /** Back a step; `disabled` on the first keeps focus where it is (aria-disabled). */
   previous?: { label: string; disabled: boolean; onClick: () => void } | undefined;
@@ -243,7 +242,6 @@ function leaveBehind(node: HTMLElement) {
   });
 }
 
-/** One hairline per step: those behind lit, the current one filling, those ahead dim. */
 function GuideSegments({ step, total, hold }: GuideProgress) {
   return (
     <div aria-hidden className="mt-3 flex w-full max-w-48 gap-1 short:mt-1.5">

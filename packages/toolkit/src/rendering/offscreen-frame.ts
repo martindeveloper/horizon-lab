@@ -76,7 +76,6 @@ export function createOffscreenFrame(
   let disposed = false;
 
   return {
-    /** The offscreen frame. */
     target,
     /**
      * Runs `paint` with the offscreen frame bound, so every render it makes lands there, then

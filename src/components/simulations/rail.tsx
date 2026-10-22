@@ -4,7 +4,6 @@ import { useRef, type ReactNode } from "react";
 
 import { PanelHeader, Sheet, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
 
-/** A titled group inside a rail. */
 export function RailSection({
   title,
   note,

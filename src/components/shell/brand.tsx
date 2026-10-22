@@ -1,6 +1,5 @@
 import { cn } from "@horizon/toolkit/ui";
 
-/** The Horizon mark: a sun rising over a horizon line, inside one ring. */
 export function HorizonMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={cn("size-5", className)} fill="none" aria-hidden="true">

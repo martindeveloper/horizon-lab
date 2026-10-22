@@ -1,10 +1,6 @@
 /**
- * The camera's glide along the ladder, without the DOM: three smoothing stages in a row, each
- * easing towards the one before it, the first towards where the camera heads. A step in where
- * it heads becomes a move that starts gently, gathers speed and settles gently (its speed a
- * bell: Erlang's curve of order three), the same in either direction, so leaving a body for a
- * smaller one does not fling the body away in the first frame. A new heading mid-move bends the
- * move without a jolt.
+ * Three cascaded smoothing stages produce an Erlang-shaped velocity curve.
+ * Retargeting mid-move preserves continuity, including when moving to a smaller body.
  */
 import { GLIDE_SECONDS, GLIDE_SECONDS_PER_DOUBLING } from "../parameters";
 
@@ -22,7 +18,6 @@ export function glideSeconds(span: number) {
   return GLIDE_SECONDS + GLIDE_SECONDS_PER_DOUBLING * Math.log2(Math.max(1, Math.abs(span)));
 }
 
-/** A glide at rest at `place`. */
 export const glideAt = (place: number): Glide => [place, place, place];
 
 /**
@@ -50,6 +45,5 @@ export function glideTowards(glide: Glide, target: number, dt: number, seconds: 
   ];
 }
 
-/** Whether the glide has come to rest at `target`. */
 export const glideRests = (glide: Glide, target: number) =>
   glide.every((stage) => Math.abs(stage - target) < 1e-4);

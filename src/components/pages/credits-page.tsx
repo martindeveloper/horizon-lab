@@ -24,7 +24,6 @@ type Translate = Awaited<ReturnType<typeof getTranslations<"credits">>>;
 
 const count = (n: number) => String(n).padStart(2, "0");
 
-/** A source's name, linked to where it lives. */
 function Name({ t, item }: { t: Translate; item: Credit }) {
   return (
     <ExternalLink href={item.url} newTab={t("newTab")} className={linkClass}>
@@ -60,11 +59,6 @@ function LicenceTag({ t, licence }: { t: Translate; licence: Licence }) {
   );
 }
 
-/**
- * A card: its visual and the licence on top, an optional line over the title, then the
- * source's name, what it gave and who made it. The title follows a lead line closely and
- * stands further off a visual alone.
- */
 function Card({
   t,
   item,
@@ -121,7 +115,6 @@ function WorldCard({ t, item }: { t: Translate; item: Credit }) {
   );
 }
 
-/** The typefaces set in themselves. */
 const SPECIMENS: Record<string, ReactNode> = {
   bodoni: <span className="font-headline text-6xl leading-none">Aa</span>,
   plex: (
@@ -146,7 +139,6 @@ function FontCard({ t, item }: { t: Translate; item: Credit }) {
   );
 }
 
-/** A source in the ledger: its name and licence, then what it gave and who made it. */
 function Row({ t, item }: { t: Translate; item: Credit }) {
   return (
     <li className="border-b border-border py-3.5">
@@ -163,7 +155,6 @@ function Row({ t, item }: { t: Translate; item: Credit }) {
   );
 }
 
-/** A package: its name and licence on one line, a line on what it does under it. */
 function Tile({ t, item }: { t: Translate; item: Credit }) {
   return (
     <li className="min-w-0 border-b border-border py-3">
@@ -218,11 +209,6 @@ function Items({ t, group }: { t: Translate; group: CreditGroup }) {
   }
 }
 
-/**
- * Credits and licences for everything Horizon is built on: an index, then each group laid out
- * as what it is (the worlds turning on their maps, the typefaces set in themselves, the data
- * as a ledger, the code as tiles), the notes, and the full records.
- */
 export async function CreditsPage({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "credits" });
   return (

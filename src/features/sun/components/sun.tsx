@@ -15,9 +15,7 @@ import { viewFromPath } from "../routing";
 import { SunCanvas } from "./canvas";
 import { SunOverlay } from "./overlay";
 
-/** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useSun);
-/** The store as the address sees it, and as the drift's controls do. */
 const views: ViewStore<ViewId> = useSun;
 const driftStore: DriftStore<SunStore> = useSun;
 

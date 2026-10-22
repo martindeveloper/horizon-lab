@@ -28,7 +28,6 @@ import { namedById, type PlanetId } from "@horizon/toolkit/bodies";
 import { NAMED_NOTES, PLANET_NOTES, POPULATION_CARDS, SUN_CARD, TRACER_NOTES } from "./card-specs";
 import { formatYearsAgo } from "./format";
 
-/** Everything a card reads besides its selection. */
 type Moment = {
   t: Translate;
   f: Format;

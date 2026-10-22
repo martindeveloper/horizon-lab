@@ -18,7 +18,6 @@ import { kelvin, signed } from "./format";
 
 const ICONS = { solved: Check, close: Target, missed: X } as const;
 
-/** An outcome's glyph: gold for solved, a gold ring for close, red for missed. */
 export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; small?: boolean }) {
   const Icon = ICONS[outcome];
   return (
@@ -39,7 +38,6 @@ export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; smal
   );
 }
 
-/** The source, named: what it was, how hot, and how it moves. */
 function useReveal(m: Mystery) {
   const t = useTranslations("spectroscopy");
   const f = useFormatter();
@@ -61,7 +59,6 @@ function useReveal(m: Mystery) {
       : source;
 }
 
-/** One half of the score: a tick or a cross, then what it was. */
 function Score({ ok, children }: { ok: boolean; children: string }) {
   return (
     <li className="flex items-center gap-1.5">

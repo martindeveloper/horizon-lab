@@ -88,7 +88,6 @@ export const NEIGHBOURS: readonly Neighbour[] = [
   },
 ];
 
-/** A neighbour by id. */
 export const neighbour = (id: NeighbourId) => NEIGHBOURS.find((star) => star.id === id)!;
 
 /**

@@ -41,7 +41,6 @@ const stepOf = (rate: number) => {
   return best;
 };
 
-/** One instrument: a small label over its reading, the leads in the display face. */
 function Instrument({
   label,
   value,
@@ -80,11 +79,6 @@ function Instrument({
   );
 }
 
-/**
- * The ship's state as the console's lead: a lit mark, steady in orbit, and the word; on the
- * autopilot what it is doing too, by hand the regime once past normal space, or (`compact`)
- * that alone.
- */
 function StatusMark({
   status,
   phase,
@@ -172,10 +166,7 @@ function CourseButton() {
   );
 }
 
-/**
- * The time warp: holds the clocks, and steps how many ship seconds pass per real second. Kept
- * small: a visitor reaches for it now and then, to watch moons move or to hurry a flight.
- */
+/** Ship seconds per real second; zero pauses both clocks. */
 function TimeWarp({ className }: { className?: string }) {
   const t = useTranslations("voyage");
   const f = useFormatter();
@@ -235,7 +226,6 @@ function TimeWarp({ className }: { className?: string }) {
   );
 }
 
-/** The drive the ship flies with: the console's, and the destinations' own. */
 export function DriveControl({ className = "" }: { className?: string }) {
   const t = useTranslations("voyage");
   const drive = useVoyage((s) => s.drive);
@@ -252,13 +242,6 @@ export function DriveControl({ className = "" }: { className?: string }) {
 
 const panelClass = "voyage-holo pointer-events-auto relative flex flex-col gap-2 px-4 py-2.5";
 
-/**
- * The console. On wide screens two displays of one height projected above the slim dash,
- * light rather than glass, tilted back and angled in towards the pilot: the ship's on the
- * left (its state and the helm, speed, the two clocks, the time warp) and the target's on the
- * right (its name, range and closing speed, the light there, the drive that gets the ship
- * there), the scanner alone between them. Phones keep one flat display of the essentials.
- */
 export function FlightDock() {
   const t = useTranslations("voyage");
   const f = useFormatter();

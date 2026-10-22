@@ -33,7 +33,6 @@ export const pairOf = (a: number, b: number): Pair =>
 export const samePair = (a: Pair | null, b: Pair | null) =>
   a === b || (a !== null && b !== null && a.small === b.small && a.large === b.large);
 
-/** The pair's own ladder: its two bodies' sizes, in order. */
 export const pairLadder = (ladder: Ladder, pair: Pair) =>
   createLadder([ladder.sizes[pair.small]!, ladder.sizes[pair.large]!]);
 
@@ -107,7 +106,6 @@ export function restageInto(
   return written;
 }
 
-/** What a body does as the stage changes: stays on it, leaves it, comes onto it. */
 export type Role = "stays" | "leaves" | "comes";
 
 /** A rung's role in a change from the bodies `from` to the first `count` of `to`; `null` if in neither. */

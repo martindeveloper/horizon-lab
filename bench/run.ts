@@ -49,7 +49,6 @@ function selectScenes(scenes: readonly BenchScene[], filters: string[]) {
   );
 }
 
-/** The options a measurement needs: everything the CLI resolved past `help`. */
 type Config = Exclude<ReturnType<typeof parseCli>, { help: true }>;
 
 const firstLine = (error: unknown) =>
@@ -225,7 +224,6 @@ function scalingOf(runs: Run[], sizes: number) {
   return scaling;
 }
 
-/** The report in every form: the data, the compact numbers, the Markdown and the page. */
 function writeOutputs(outDir: string, report: Report, grabDraws: Map<string, GrabDraw[]>) {
   writeFileSync(path.join(outDir, "report.json"), `${JSON.stringify(report, null, 1)}\n`);
   writeFileSync(

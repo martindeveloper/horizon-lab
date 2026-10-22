@@ -59,5 +59,4 @@ export const PROSE_FIGURES = {
   },
 } satisfies Record<string, ProseFigure>;
 
-/** Every figure, for tests. */
 export const catalogueFacts = () => factsOf({ voyage: { prose: proseFacts(PROSE_FIGURES) } });

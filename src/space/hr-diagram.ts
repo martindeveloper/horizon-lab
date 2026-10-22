@@ -69,7 +69,6 @@ export type HrPoint = {
 /** A figure's central value, or its span's geometric middle where it has none. */
 const central = (fact: Fact) => fact.value ?? Math.sqrt(fact.range[0] * fact.range[1]);
 
-/** Whether an id names a star of the shared catalogue. */
 export const isStarId = (id: string): id is StarId => Object.hasOwn(NAMED_STARS, id);
 
 const inUnit = (fact: Fact, to: UnitId) => convertFigure(central(fact), fact.unit, to);

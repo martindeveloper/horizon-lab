@@ -20,7 +20,6 @@ const reset = () => {
   restore();
   useSpectroscopy.getState().shuffleCases();
 };
-/** The store as the address sees it. */
 const views: ViewStore<ViewId> = useSpectroscopy;
 
 /** The immersive view hides the guide's caption, so it ends the guide; nothing else. */

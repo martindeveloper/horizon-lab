@@ -22,7 +22,6 @@ export function addVec3d(out: Vec3d, a: ArrayLike<number>, b: ArrayLike<number>,
   return out;
 }
 
-/** `out = a − b`. */
 export function subVec3d(out: Vec3d, a: ArrayLike<number>, b: ArrayLike<number>) {
   out[0] = a[0]! - b[0]!;
   out[1] = a[1]! - b[1]!;

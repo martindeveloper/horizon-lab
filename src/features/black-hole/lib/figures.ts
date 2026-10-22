@@ -295,5 +295,4 @@ export const figureArgs = (locale: string) => proseArgs(PROSE_FIGURES, locale);
 export const inLine = (fact: Fact, as: FigureOptions = {}) =>
   formatFigure("en", fact, { style: "scientific", withUnit: true, ...as }).text;
 
-/** Every figure, for tests. */
 export const catalogueFacts = () => factsOf({ blackHole: { prose: proseFacts(PROSE_FIGURES) } });

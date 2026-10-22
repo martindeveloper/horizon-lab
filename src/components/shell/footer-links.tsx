@@ -9,12 +9,7 @@ import { SiderealClock } from "./sidereal-clock";
 
 type FooterKey = "about" | "credits" | "newTab" | "sidereal";
 
-/**
- * About · Credits · GitHub, then the observatory clock: the footer's line, and the same line
- * at the foot of the phone menu. `lead` goes before About; `onNavigate` closes a menu as a
- * link is taken. In the menu GitHub shows on every width, with its arrow; the footer keeps it
- * for wide screens, so phones reach the repository from About and the line stays one line.
- */
+/** In the phone menu, GitHub stays visible at every width and `onNavigate` closes the menu. */
 export function FooterLinks({
   t,
   lead,

@@ -5,7 +5,6 @@ import { stubStorage } from "./toolkit-helpers.mjs";
 
 const { flag, json, numbers, oneOf, storageCell, text } = await import("@horizon/toolkit/storage");
 
-/** A fresh storage area that counts its reads. */
 function install(area = "session") {
   let reads = 0;
   const { saved, store } = stubStorage([], { area, onRead: () => (reads += 1) });

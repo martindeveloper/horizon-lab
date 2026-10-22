@@ -23,7 +23,6 @@ const SWITCHES: (keyof Show)[] = [
   "faintRings",
 ];
 
-/** How the scene is drawn: what it shows, the distance unit, buttons to turn the ship, rendering. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("voyage");
   const show = useVoyage((s) => s.show);

@@ -4,10 +4,6 @@ import { SwitchChip, SwitchRow } from "@horizon/toolkit/ui";
 
 import { SwitchGroup } from "./rail";
 
-/**
- * A scene's display switches: a wrapping row of switch chips where space is short (a dock),
- * or a list of switch rows in a panel.
- */
 export function SwitchChips<Key extends string>({
   keys,
   values,

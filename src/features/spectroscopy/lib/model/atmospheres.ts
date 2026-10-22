@@ -10,7 +10,6 @@ import { recentCache } from "./recent";
  * model rather than a guess.
  */
 
-/** One depth in a model. */
 export type Layer = {
   /** log₁₀ τ_Ross: the model's depth scale, its optical depth in the Rosseland mean. */
   logTau: number;

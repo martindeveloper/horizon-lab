@@ -30,7 +30,6 @@ const DATA_DIR = new URL("../bench/fixtures/audio-maps/", import.meta.url).pathn
 /** Seconds per sample. */
 const STEP = 1;
 
-/** The slug of a track's AAC source: the file name without its extension. */
 function slugOf(track) {
   const src = track.sources.find((s) => s.src.endsWith(".m4a")) ?? track.sources[0];
   return { slug: path.basename(new URL(src.src).pathname, path.extname(src.src)), url: src.src };

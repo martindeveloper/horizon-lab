@@ -7,7 +7,6 @@ import { ViewPicker as SharedViewPicker } from "@/components/simulations/view-pi
 import { VIEW_IDS } from "../lib/model/views";
 import { useSun } from "../lib/store";
 
-/** The seven views as the header's pill, as every lab has it: a list with what each shows; a pick flies there. */
 export function SunViewPicker() {
   const t = useTranslations("sun");
   const view = useSun((s) => s.view);

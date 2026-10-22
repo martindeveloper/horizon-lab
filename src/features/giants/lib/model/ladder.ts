@@ -120,7 +120,6 @@ export function placeAtScale(ladder: Ladder, scale: number, stage: Stage) {
   return 0;
 }
 
-/** A placed body to fill in. */
 export const blankPlaced = (): Placed => ({
   index: 0,
   x: 0,

@@ -26,17 +26,14 @@ export type RenderSetters<T> = {
   [K in keyof T & string as `set${Capitalize<K>}`]: (value: T[K]) => void;
 };
 
-/** Those settings as a visit starts and their setters, as a store composes them. */
 export type RenderSlice<T> = T & RenderSetters<T>;
 
-/** A lab's: standard quality, its effects off until turned on. */
 export const LAB_RENDER = {
   quality: "standard",
   bloom: false,
   lens: false,
   wideColour: false,
 } as const;
-/** An experience's: it shows off, so its effects start on (still nothing while turned off). */
 export const EXPERIENCE_RENDER = { ...LAB_RENDER, bloom: true, lens: true } as const;
 
 /**
@@ -105,7 +102,6 @@ export const RESET_SCENE_SETTINGS: SceneSettings = {
   lens: LAB_RENDER.lens,
 };
 
-/** An experience's. */
 export const EXPERIENCE_SCENE_SETTINGS: SceneSettings = {
   ...RESET_SCENE_SETTINGS,
   bloom: EXPERIENCE_RENDER.bloom,

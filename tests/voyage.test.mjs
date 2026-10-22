@@ -3,10 +3,6 @@ import test from "node:test";
 
 import { createTranslator } from "next-intl";
 
-/**
- * Voyage's model against independent arithmetic: the ship's relativity, where the bodies are,
- * its places and routes, and that every card and readout prints in both languages.
- */
 import { AU_KM, JULIAN_YEAR_SECONDS, LIGHT_YEAR_KM } from "@horizon/toolkit/science";
 
 import { cardFor } from "../src/features/voyage/components/cards.ts";

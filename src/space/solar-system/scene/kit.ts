@@ -23,7 +23,6 @@ export const ORBIT_COLOR: Record<PlanetId, number> = {
 export const SMALL_ORBIT_COLOR = 0x9ebccc;
 export const COMET_ORBIT_COLOR = 0xc4705a;
 
-/** The scene's switches. */
 export type SolarShow = {
   disk: boolean;
   kuiper: boolean;

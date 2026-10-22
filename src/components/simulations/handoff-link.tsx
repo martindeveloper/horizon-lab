@@ -39,11 +39,6 @@ export function HandoffLink({
   );
 }
 
-/**
- * The crossing as a quiet row in a list or a card's footer: a title, one muted line on what
- * the other side adds, and a gold arrow. "Further out · Deep Field" mirrors "Back in time ·
- * Orrery".
- */
 export function HandoffRow({
   title,
   hint,

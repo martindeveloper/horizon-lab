@@ -13,7 +13,6 @@ import { defaultSceneResolution, type SceneResolution } from "@horizon/toolkit/s
  */
 export type SceneTier = "light" | "full" | "max";
 
-/** A value for each tier. */
 export type ByTier<T> = Readonly<Record<SceneTier, T>>;
 
 /** Standard keeps each device's tier; Economy and Cinematic pin one; Max goes past both. */

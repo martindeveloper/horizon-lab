@@ -30,7 +30,6 @@ const ANTIALIAS_MODES: readonly AntialiasMode<PassAntialias>[] = [
   { value: "supersample", name: "edges" },
 ];
 
-/** A labelled slider with its value read out, as every observatory control is laid out. */
 function SliderRow({
   label,
   text,
@@ -73,7 +72,6 @@ const FAR_DISTANCE = 80;
 /** The View rail's id, for its toggle and for pin cards that keep clear of it. */
 export const SETTINGS_PANEL_ID = "black-hole-view";
 
-/** The View rail's sections: spin, camera, optics and rendering. */
 export function SettingsBody() {
   const t = useTranslations("blackHole");
   const { formatNumber, formatSpin } = usePhysicsFormat();

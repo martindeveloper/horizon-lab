@@ -8,7 +8,6 @@ import { SPECTROSCOPY_EQUATIONS } from "../lib/model/equations";
 import { GUIDE_DWELL, TOUR, type TourStep } from "../lib/model/tour";
 import { useSpectroscopy } from "../lib/store";
 
-/** The formula behind a step, under its words. */
 const equationOf = (step: TourStep) => {
   const equation = step.equation ? SPECTROSCOPY_EQUATIONS[step.equation] : undefined;
   return equation ? <GuideEquation>{equation.toString()}</GuideEquation> : null;

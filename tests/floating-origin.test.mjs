@@ -3,7 +3,6 @@ import test from "node:test";
 
 import { Object3D } from "three";
 
-/** The floating origin: placement subtracted in doubles. */
 import { addVec3d, distanceVec3d, placeRelative, subVec3d, vec3d } from "@horizon/toolkit/scene";
 
 test("placing relative to the viewer keeps what float32 world positions lose", () => {

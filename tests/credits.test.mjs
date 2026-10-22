@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
-/**
- * Attribution integrity: measured map sources, dependency coverage, and
- * distributed licence texts stay in sync with their sources.
- */
 import test from "node:test";
 
 import { MAPS } from "@horizon/toolkit/bodies";

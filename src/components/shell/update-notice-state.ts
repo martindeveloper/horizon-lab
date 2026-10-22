@@ -2,10 +2,8 @@ import { PAGE_URLS } from "@/lib/urls";
 /** The prerendered file holding the live deployment's ID (`src/app/version.json/route.ts`). */
 export const VERSION_PATH = PAGE_URLS.version;
 
-/** How often a visible tab looks for a newer deployment. */
 export const CHECK_EVERY = 15 * 60_000;
 
-/** A newer deployment: this build has an ID and the server names a different one. */
 export function isNewVersion(current: string, seen: unknown): boolean {
   return current !== "" && typeof seen === "string" && seen !== "" && seen !== current;
 }

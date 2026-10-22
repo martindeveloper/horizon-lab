@@ -8,7 +8,6 @@ import { cn } from "@horizon/toolkit/ui";
 
 import { useVoyage } from "../lib/store";
 
-/** Lets the brake button go. */
 const release = () => useVoyage.getState().setBraking(false);
 
 /**

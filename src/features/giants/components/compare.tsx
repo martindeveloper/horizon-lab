@@ -13,7 +13,6 @@ import { RUNG_IDS, type RungId } from "../lib/model/rungs";
 import { useGiants } from "../lib/store";
 import { useGiantsT } from "./format";
 
-/** The figures compared, each with the words for more and for less. */
 const MEASURES = ["width", "volume", "mass", "light"] as const satisfies (keyof Comparison)[];
 
 /**

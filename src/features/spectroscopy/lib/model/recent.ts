@@ -1,8 +1,4 @@
-/**
- * A cache of the `size` values used most recently, by key: the model's stars and spectra are
- * asked for again and again while the visitor drags a slider or the window, and a few are all
- * a visit returns to. `make` builds a value the cache does not hold.
- */
+/** Cache up to `size` entries in least-recently-used order; `make` supplies missing values. */
 export function recentCache<K, V>(size: number) {
   const kept = new Map<K, V>();
   return (key: K, make: (key: K) => V): V => {

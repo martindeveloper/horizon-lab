@@ -15,7 +15,6 @@ import { fetchText } from "./lib/net.mjs";
 
 const OUT = new URL("../src/space/sun/model/sunspots.json", import.meta.url);
 
-/** Whitespace-separated numbers per line; blank lines dropped. */
 const rowsOf = (text) =>
   text
     .split(/\r?\n/)

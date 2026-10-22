@@ -14,17 +14,11 @@ import { ThemeSwitch, useThemeLabels } from "./theme-switch";
 import { useDismissOnEscape } from "./use-dismiss-on-escape";
 
 const kicker = "font-mono text-[10px] tracking-[0.22em] text-subtle uppercase";
-/** The menu's two shelves, as the catalogue's: the labs, then the experiences. */
 const shelves = [
   { id: "labs", shelf: labs },
   { id: "experiences", shelf: experiences },
 ] as const;
 
-/**
- * Phones fold the header's way back, its preferences and the footer's links into one menu
- * that drops from the bar: the labs and the experiences, language and appearance, then About, Credits,
- * GitHub and the sidereal clock. Over a simulation the footer gives its line to the scene.
- */
 export function PhoneMenu({
   className,
   locale,
@@ -51,7 +45,6 @@ export function PhoneMenu({
 
   useEffect(() => {
     if (!open) return;
-    /* The page under the dimmed scrim holds still. */
     const root = document.documentElement;
     const overflow = root.style.overflow;
     root.style.overflow = "hidden";
@@ -76,7 +69,6 @@ export function PhoneMenu({
 
       {open ? (
         <>
-          {/* The scene stays in view, dimmed; a tap on it closes the menu. */}
           <div
             aria-hidden
             className="phone-menu-scrim anim-fade absolute inset-x-0 top-full h-dvh"
@@ -87,7 +79,6 @@ export function PhoneMenu({
             aria-label={t("shell.menu")}
             className="phone-menu hairline-solar absolute inset-x-0 top-full max-h-[calc(100dvh-var(--app-header-height))] overflow-y-auto overscroll-contain rounded-b-2xl px-(--app-gutter) pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
           >
-            {/* Held sideways, the simulations and the preferences sit side by side. */}
             <div className="grid sm:grid-cols-2 sm:gap-x-10">
               <div className="grid content-start gap-3">
                 {shelves.map(({ id, shelf }) =>

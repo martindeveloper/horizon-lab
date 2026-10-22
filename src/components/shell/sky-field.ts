@@ -55,13 +55,11 @@ export function starDot(p: PlacedHorizontal, dim: boolean) {
   return { radius, alpha, colour, glow };
 }
 
-/** The `count` brightest of the placed stars. */
 export const brightest = <T extends { star: Horizontal["star"] }>(
   stars: readonly T[],
   count: number,
 ) => [...stars].sort((a, b) => a.star[3] - b.star[3]).slice(0, count);
 
-/** A meteor every 9 to 24 seconds. */
 export const meteorDelay = (random: () => number = Math.random) => 9000 + random() * 15000;
 
 /** Where a meteor starts (vw, vh) and which way it falls (degrees). */
@@ -203,7 +201,6 @@ export function createSky(
     canvas.style.height = `${h}px`;
   };
 
-  // Draw the sky for "now" plus any scroll lapse.
   const draw = () => {
     const now = new Date(skyNow() + lapse);
     const w = window.innerWidth;

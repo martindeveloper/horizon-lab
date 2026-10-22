@@ -87,7 +87,6 @@ export function LevelDiagram({
       <text x={194} y={upper + 3} className="fill-fg font-mono text-[9px]">
         {levelName(line, line.upperLevel)}
       </text>
-      {/* The electron's jump */}
       <line
         x1={x}
         x2={x}
@@ -104,7 +103,6 @@ export function LevelDiagram({
         }
         fill={colour}
       />
-      {/* The photon, a wave arriving from the left or leaving to the right */}
       <path
         d={wave(emitting ? x + 8 : 80, (lower + upper) / 2, emitting ? 44 : 44)}
         fill="none"

@@ -20,7 +20,6 @@ const themeIcons: Record<ThemeMode, { icon: typeof Sun; turn: number }> = {
   system: { icon: Monitor, turn: 0 },
 };
 
-/** A glass pill of equal-width choices; a gold lens slides to the current one. */
 function Rail<T extends string>({
   label,
   value,
@@ -87,7 +86,6 @@ function Rail<T extends string>({
   );
 }
 
-/** Desktop header preferences: language and theme as inline rails. */
 export function HeaderPreferences({
   locale,
   languageLabels,

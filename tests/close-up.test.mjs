@@ -1,8 +1,4 @@
 import assert from "node:assert/strict";
-/**
- * Close-ups: the arrival framing and lighting, the cinematic flight's shape,
- * and the store rules that start and end one.
- */
 import test from "node:test";
 
 import { orreryQuality } from "../src/features/orrery/lib/quality.ts";

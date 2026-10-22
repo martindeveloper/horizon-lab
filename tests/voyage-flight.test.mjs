@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-/** Voyage's flights: gravity and its stepping, and the autopilot's schedule against the drive's trip. */
 import {
   ALIGN_S,
   driveLit,

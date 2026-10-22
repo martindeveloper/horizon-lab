@@ -17,9 +17,7 @@ import { viewFromPath } from "../routing";
 import { DeepFieldCanvas } from "./canvas";
 import { DeepFieldOverlay } from "./overlay";
 
-/** Leaving the simulation starts the next visit fresh. */
 const reset = freshVisit(useDeepField);
-/** The store as the address sees it, and as the drift's controls do. */
 const views: ViewStore<ViewId> = useDeepField;
 const driftStore: DriftStore<DeepFieldStore> = useDeepField;
 

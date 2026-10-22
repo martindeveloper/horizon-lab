@@ -22,9 +22,7 @@ export function SceneCanvas({
 }: {
   /** The simulation's slug, marked on the canvas (`data-simulation-canvas`, as every simulation marks its stage). */
   id: string;
-  /** The canvas's accessible name. */
   label: string;
-  /** Label text by key, translated. */
   labels: Record<string, string>;
   /** Builds the engine; module-level, so it never changes. */
   create: (mount: SceneMount) => SimulationEngine;

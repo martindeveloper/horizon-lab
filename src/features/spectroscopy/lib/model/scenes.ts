@@ -30,7 +30,6 @@ export type Bench = {
   gas: number;
   /** log₁₀ of the atoms of each chosen element in a column through the gas, m⁻². */
   column: number;
-  /** The elements in the gas. */
   elements: readonly ElementId[];
 };
 
@@ -86,7 +85,6 @@ type DrawKind = keyof typeof DRAWS;
 const DRAW_KINDS: readonly DrawKind[] = ["flame", "cell", "B", "A", "F", "G", "K", "giant"];
 const BENCH_KINDS: readonly DrawKind[] = ["flame", "cell"];
 
-/** Cases in one deck. */
 const DECK_SIZE = 5;
 
 type Random = () => number;
@@ -231,7 +229,6 @@ export function defaultVelocity(view: ViewId, choice: StarChoice) {
   return view === "stars" && choice !== "sequence" ? STARS[choice].velocity : 0;
 }
 
-/** The observation a view shows. */
 export function observationFor(s: Settings): Observation {
   const airmass = s.air ? 1 : 0;
   switch (s.view) {

@@ -59,7 +59,6 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
     aim: new Vector3(),
     /** The orbit's frame this frame (see `orient`). */
     frame: new Quaternion(),
-    /** A flight is under way. */
     get flying() {
       return zoom.flying;
     },

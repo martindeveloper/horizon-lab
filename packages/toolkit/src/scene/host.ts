@@ -231,7 +231,6 @@ export function createSceneHost(
       resolution = next;
       engine.refresh();
     },
-    /** The anti-aliasing frames are drawn with. */
     get antialias() {
       return antialias;
     },
@@ -241,7 +240,6 @@ export function createSceneHost(
       antialias = mode;
       rebuild();
     },
-    /** Whether frames bloom. */
     get bloom() {
       return bloomOn;
     },

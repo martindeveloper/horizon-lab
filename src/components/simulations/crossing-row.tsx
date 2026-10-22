@@ -23,10 +23,6 @@ export function CrossingContent({ title, hint }: { title: string; hint: string }
   );
 }
 
-/**
- * A link to another simulation as a quiet row in a list or a card's footer, e.g. a body's card
- * opening the lab that shows it up close.
- */
 export function CrossingRow({
   title,
   hint,

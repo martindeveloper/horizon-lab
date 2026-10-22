@@ -50,10 +50,6 @@ function Part({
   );
 }
 
-/**
- * A letter rather than a page of panels: a standfirst, one comfortable measure
- * with labels in the margin, and a signed close.
- */
 export async function AboutPage({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "about" });
   return (

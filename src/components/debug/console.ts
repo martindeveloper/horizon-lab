@@ -36,7 +36,6 @@ function isLoseContext(value: unknown): value is LoseContext {
   );
 }
 
-/** One way to call a command: its arguments as typed in the console, and what it does. */
 type Usage = readonly [args: string, help: string];
 
 /**

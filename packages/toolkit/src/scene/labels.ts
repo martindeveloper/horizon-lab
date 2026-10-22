@@ -413,7 +413,6 @@ export function createLabels(
           out.push({ key, rect, clear: rect.clear });
       return out;
     },
-    /** Hides every label in `keys`. */
     hideAll: (keys: readonly string[]) => {
       for (const key of keys) place(key, 0, 0, 0, false);
     },

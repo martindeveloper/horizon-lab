@@ -17,7 +17,6 @@ export function createReadoutClock(seconds = 0.25) {
   };
 }
 
-/** The scale bar as a store keeps it. */
 export type ScaleReadout = { scalePx: number; scaleValue: number; scaleUnit: DistanceUnit };
 
 /** The scale bar for a camera `dist` world units (`world`) from its aim. */

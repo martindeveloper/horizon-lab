@@ -40,5 +40,4 @@ export const PROSE_TYPES = {
   coolestType: classOf(byTemperature.at(-1)!),
 };
 
-/** Every figure, for tests. */
 export const catalogueFacts = () => factsOf({ spectroscopy: { prose: proseFacts(PROSE_FIGURES) } });

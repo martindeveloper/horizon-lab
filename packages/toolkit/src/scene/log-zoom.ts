@@ -45,7 +45,6 @@ export function createLogZoom(
     get target() {
       return Math.exp(target);
     },
-    /** A flight is under way. */
     get flying() {
       return flight !== null;
     },

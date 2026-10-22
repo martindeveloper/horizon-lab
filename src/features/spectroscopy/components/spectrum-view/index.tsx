@@ -137,7 +137,6 @@ export function SpectrumView({ className }: { className?: string }) {
     >
       {/* The plot takes whatever height the stage has to spare, and gives it up first when short. */}
       <div ref={box} className="relative flex min-h-0 flex-1 flex-col [&>*]:shrink-0">
-        {/* Names over the lines */}
         <div aria-hidden className="relative h-5 text-[11px] leading-5 short:hidden">
           {labels.map((l, i) => (
             <span
@@ -176,7 +175,6 @@ export function SpectrumView({ className }: { className?: string }) {
             </span>
           ))}
         </div>
-        {/* The plot: flux on a labelled scale over faint gridlines. */}
         <div
           aria-hidden
           className="relative mt-1.5 min-h-12 shrink! grow! basis-[clamp(3rem,17dvh,9rem)]"
@@ -312,7 +310,6 @@ export function SpectrumView({ className }: { className?: string }) {
             ))}
           </div>
         ) : null}
-        {/* The selected line, through ribbon and plot */}
         {selectedCentre !== null && xOf(selectedCentre) >= 0 && xOf(selectedCentre) <= 1 ? (
           <span
             aria-hidden
@@ -320,7 +317,6 @@ export function SpectrumView({ className }: { className?: string }) {
             className="pointer-events-none absolute top-5 bottom-5 w-px bg-solar shadow-[0_0_6px_rgb(var(--solar)/0.6)]"
           />
         ) : null}
-        {/* A new pick rings at the top of the ribbon */}
         {selection &&
         selectedCentre !== null &&
         xOf(selectedCentre) >= 0 &&
@@ -351,7 +347,6 @@ export function SpectrumView({ className }: { className?: string }) {
           </span>
         ) : null}
 
-        {/* Hover, tap, drag, pinch and wheel all land here */}
         <div
           ref={surface}
           role="slider"

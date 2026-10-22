@@ -11,7 +11,6 @@ export function pointsGeometry(pos: Float32Array, col: Float32Array, size?: Floa
 }
 
 export type PointWriter = {
-  /** Points written so far. */
   readonly count: number;
   /** Adds a point coloured `color` × `brightness`. */
   put(x: number, y: number, z: number, color: Color, brightness: number): void;

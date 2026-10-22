@@ -256,10 +256,6 @@ function ViewActionRow({ kind }: { kind: ViewAction }) {
   );
 }
 
-/**
- * The dock in rows: the view's places, the light's ruler with its two switches, then the
- * light's legend with the clock and the view's action.
- */
 export function SunDock() {
   const view = useSun((s) => s.view);
   /* Phones give an open sheet or card the bottom of the screen. */

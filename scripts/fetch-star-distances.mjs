@@ -20,7 +20,6 @@ const TAP = DOWNLOAD_URLS.simbadTap;
 const OUT = new URL("../src/space/star-distances.json", import.meta.url);
 /** Search radius, degrees (3′: the catalogue is good to about an arcminute). */
 const RADIUS = 0.05;
-/** How many stars are queried at once. */
 const CONCURRENCY = 4;
 
 async function query(adql) {

@@ -9,11 +9,6 @@ import { DataReadout, OrbitPad } from "@horizon/toolkit/ui";
 /** One button step, whole degrees. */
 const STEP_DEG = Math.round((ORBIT_STEP * 180) / Math.PI);
 
-/**
- * Button steps for a scene's orbit camera, worded by the shared space copy in `namespace`:
- * the dial with the size of one step in its middle, and where the camera points now (its
- * heading round the aim and its elevation above the map's plane), which each step moves on.
- */
 export function CameraPad({
   namespace,
   angles,

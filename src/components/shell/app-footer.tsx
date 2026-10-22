@@ -5,7 +5,6 @@ import type { Locale } from "@/i18n/routing";
 import { HorizonMark } from "./brand";
 import { FooterLinks } from "./footer-links";
 
-/** One quiet line under every page: the mark, the name, About, Credits, GitHub, and the observatory clock. */
 export async function AppFooter({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "shell" });
   return (

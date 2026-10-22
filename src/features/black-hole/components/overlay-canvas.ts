@@ -141,7 +141,6 @@ export function drawOverHole(ctx: CanvasRenderingContext2D, fit: OverlayFit) {
   );
 }
 
-/** Clears the whole canvas. */
 export function clearOverlay(ctx: CanvasRenderingContext2D) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
