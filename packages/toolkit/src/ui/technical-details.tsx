@@ -1,6 +1,6 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Sigma } from "lucide-react";
 import { useImperativeHandle, useRef, type Ref } from "react";
 
 import { Dialog, type DialogHandle } from "./dialog";
@@ -53,8 +53,7 @@ export function TechnicalDetails({
           triggerClassName,
         )}
       >
-        <Info className="size-4 md:size-3.5" aria-hidden />
-        <span className="hidden xl:inline">{labels.open}</span>
+        <Sigma className="size-4 md:size-3.5" aria-hidden />
       </button>
       <Dialog ref={dialog} title={document.title} closeLabel={labels.close}>
         <div className="space-y-8 px-5 py-6 sm:px-7">

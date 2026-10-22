@@ -10,8 +10,8 @@ const LEFT = { azimuth: -3, inclination: 0 };
 const SHOWN = ["m87", DEFAULT_PRESET_ID] as const;
 
 /**
- * The `?` tour: the camera, the holes, the gauge, the atlas, the clocks, the View panel, the
- * guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the holes, the gauge, the atlas, the clocks, the guide, the View
+ * panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<BlackHoleStore>[] = [
   {
@@ -48,6 +48,11 @@ export const HELP: readonly HelpStep<BlackHoleStore>[] = [
     cues: [{ at: 0.4, run: (s) => s.setClocksOpen(true) }],
   },
   {
+    id: "guide",
+    targets: ["guide"],
+    cues: [{ run: (s) => s.setClocksOpen(false) }],
+  },
+  {
     id: "settings",
     targets: ["settings"],
     cues: [
@@ -61,9 +66,8 @@ export const HELP: readonly HelpStep<BlackHoleStore>[] = [
     ],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setSettingsOpen(false) }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

@@ -11,8 +11,8 @@ const DAY = CLOCK_RATES.find(({ id }) => id === "day")?.value ?? DEFAULT_COMPRES
 const BURN = 0.6;
 
 /**
- * The `?` tour: the camera, the destinations and the drives, the clocks, the lever, the View
- * panel, the guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the destinations and the drives, the clocks, the lever, the
+ * guide, the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<VoyageStore>[] = [
   {
@@ -54,6 +54,7 @@ export const HELP: readonly HelpStep<VoyageStore>[] = [
       { at: 2, run: (s) => s.setThrottle(0) },
     ],
   },
+  { id: "guide", targets: ["guide"] },
   {
     id: "settings",
     targets: ["settings"],
@@ -63,9 +64,8 @@ export const HELP: readonly HelpStep<VoyageStore>[] = [
     ],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setPanel("none") }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

@@ -7,7 +7,8 @@ import { cn } from "./utils";
 /**
  * Supplemental visual label. The trigger still needs text or aria-label.
  * Shown on hover and keyboard focus, hoverable, and dismissed with Escape
- * until the pointer or focus leaves (WCAG 1.4.13). `align="start"` and `"end"`
+ * until the pointer or focus leaves (WCAG 1.4.13); hidden too while its control has
+ * something open (`aria-expanded`), which the tip would only cover. `align="start"` and `"end"`
  * anchor the tip to the trigger's left or right edge, for controls at that side
  * of the viewport. `side="top"` opens it above, for controls with a dock or panel
  * just below them. `prose` sets a sentence rather than a label: sentence case,

@@ -14,8 +14,8 @@ const COOL_STAR = "arcturus";
 const RECEDING = 150;
 
 /**
- * The `?` tour: the spectrum's window, the views, the elements, a line's card, the star and its
- * motion, the View panel, the guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the spectrum's window, the views, the elements, a line's card, the star and
+ * its motion, the guide, the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<SpectroscopyStore>[] = [
   {
@@ -59,15 +59,15 @@ export const HELP: readonly HelpStep<SpectroscopyStore>[] = [
       { at: 1.6, run: (s) => s.setVelocity(RECEDING) },
     ],
   },
+  { id: "guide", targets: ["guide"] },
   {
     id: "settings",
     targets: ["settings"],
     cues: [{ run: (s) => s.setPanel("view") }, { at: 1, run: (s) => s.setNormalized(true) }],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setPanel("none") }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

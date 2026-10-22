@@ -250,7 +250,9 @@
   text-transform: none;
   text-wrap: pretty;
 }
-.hud-tip[data-dismissed] > [data-tip] {
+.hud-tip[data-dismissed] > [data-tip],
+/* What the control opened (a menu, a panel) is there now: the tip would only cover it. */
+.hud-tip:has(> [aria-expanded="true"]) > [data-tip] {
   opacity: 0 !important;
   visibility: hidden !important;
 }

@@ -11,8 +11,8 @@ const LEFT = { azimuth: -1, inclination: 0 };
 const JUPITER: SolarSelection = { kind: "planet", id: "jupiter" };
 
 /**
- * The `?` tour: the camera, the views, the objects, a close-up, the time dock, the View panel,
- * the guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the views, the objects, a close-up, the time dock, the guide, the
+ * View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<OrreryStore>[] = [
   {
@@ -67,6 +67,7 @@ export const HELP: readonly HelpStep<OrreryStore>[] = [
     targets: ["time"],
     cues: [{ run: (s) => s.select(null) }, { at: 0.6, run: (s) => s.replay() }],
   },
+  { id: "guide", targets: ["guide"] },
   {
     id: "settings",
     targets: ["settings"],
@@ -76,9 +77,8 @@ export const HELP: readonly HelpStep<OrreryStore>[] = [
     ],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setPanel("none") }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

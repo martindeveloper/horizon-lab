@@ -3,7 +3,7 @@
 import {
   CircleQuestionMark,
   GraduationCap,
-  Info,
+  Sigma,
   SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
@@ -39,15 +39,18 @@ function ToolButton({
   tool,
   ref,
   opener = false,
+  align,
 }: {
   tool: SimulationTool;
   ref?: Ref<HTMLButtonElement> | undefined;
   /** It opens the tour, so a press on it is not a press outside the tour. */
   opener?: boolean;
+  /** `end` for the toolbar's last button, so its tip stays on screen. */
+  align?: "end";
 }) {
   const { id, label, ariaLabel, icon: Icon, active, controls, onSelect } = tool;
   return (
-    <Tooltip label={label}>
+    <Tooltip label={label} {...(align ? { align } : {})}>
       <IconButton
         ref={ref}
         data-return={id}
@@ -67,11 +70,12 @@ function ToolButton({
 }
 
 /**
- * Every simulation's header tools, in one order so hands learn it once: help (the `?` tour of
- * these controls), technical details, the guide, the finder (what to look at), the simulation's
- * other tools, its settings panel, then the experiences (immersive view and, with `drift`, the
- * drift). Phones keep help, the guide, the finder, the settings and the experiences, and fold
- * the rest into More, in the same order. The experiences and More carry `data-coach` too.
+ * Every simulation's header tools, in one order so hands learn it once, from what is most the
+ * simulation's own to what every scene shares: its own tools, the finder (what to look at), the
+ * guide, its settings panel, technical details, the experiences (immersive view and, with
+ * `drift`, the drift), then help (the `?` tour of these controls). Phones keep the finder, the
+ * guide, the settings, the experiences and help, and fold the rest into More, in the same order.
+ * Every button carries `data-coach` with its id; the experiences and More do too.
  */
 export function SimulationToolbar({
   label,
@@ -106,13 +110,13 @@ export function SimulationToolbar({
   const helpButton = useRef<HTMLButtonElement>(null);
   const tGuide = useTranslations("guide");
   const tHelp = useTranslations("help");
+  const detailsTool: SimulationTool = {
+    id: "details",
+    label: detailsLabel,
+    icon: Sigma,
+    onSelect: () => dialog.current?.open(),
+  };
   const more: MoreItem[] = [
-    {
-      id: "details",
-      label: detailsLabel,
-      icon: Info,
-      onSelect: () => dialog.current?.open(),
-    },
     ...tools.map(({ id, label: name, menuLabel, icon, active, onSelect }) => ({
       id,
       label: menuLabel ?? name,
@@ -120,23 +124,18 @@ export function SimulationToolbar({
       onSelect,
       ...(active !== undefined ? { active } : {}),
     })),
+    detailsTool,
   ];
   return (
     <Toolbar aria-label={label} className="ml-auto shrink-0">
-      <ToolButton
-        ref={helpButton}
-        opener
-        tool={{
-          id: "help",
-          icon: CircleQuestionMark,
-          label: tHelp("title"),
-          ariaLabel: help.open ? tHelp("close") : tHelp("start"),
-          active: help.open,
-          onSelect: help.open ? help.end : help.start,
-        }}
-      />
-      {help.open ? <HelpTour help={help} returnFocus={() => helpButton.current} /> : null}
-      {details({ ref: dialog, triggerClassName: "not-md:hidden" })}
+      {/* The dialog only; the toolbar draws its button with the others. */}
+      {details({ ref: dialog, triggerClassName: "hidden" })}
+      <div className="not-md:hidden md:contents">
+        {tools.map((tool) => (
+          <ToolButton key={tool.id} tool={tool} />
+        ))}
+      </div>
+      {finder ? <ToolButton tool={finder} /> : null}
       <ToolButton
         ref={guideRef}
         tool={{
@@ -147,16 +146,27 @@ export function SimulationToolbar({
           ariaLabel: tGuide("start"),
         }}
       />
-      {finder ? <ToolButton tool={finder} /> : null}
-      <div className="not-md:hidden md:contents">
-        {tools.map((tool) => (
-          <ToolButton key={tool.id} tool={tool} />
-        ))}
-      </div>
       <ToolButton tool={{ ...settings, id: "settings", icon: SlidersHorizontal }} />
+      <div className="not-md:hidden md:contents">
+        <ToolButton tool={detailsTool} />
+      </div>
       <span data-coach="experiences" className="inline-flex">
         <SimulationExperience onDrift={drift} />
       </span>
+      <ToolButton
+        ref={helpButton}
+        opener
+        align="end"
+        tool={{
+          id: "help",
+          icon: CircleQuestionMark,
+          label: tHelp("title"),
+          ariaLabel: help.open ? tHelp("close") : tHelp("start"),
+          active: help.open,
+          onSelect: help.open ? help.end : help.start,
+        }}
+      />
+      {help.open ? <HelpTour help={help} returnFocus={() => helpButton.current} /> : null}
       <span data-coach="more" className="inline-flex md:hidden">
         <SceneMoreMenu items={more} />
       </span>

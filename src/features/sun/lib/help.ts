@@ -7,8 +7,8 @@ import type { SunStore } from "./store";
 const LEFT = { azimuth: -1, inclination: 0 };
 
 /**
- * The `?` tour: the camera, the views, the light, the clock, the places, the View panel, the
- * guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the views, the light, the clock, the places, the guide, the View
+ * panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<SunStore>[] = [
   {
@@ -53,15 +53,15 @@ export const HELP: readonly HelpStep<SunStore>[] = [
       },
     ],
   },
+  { id: "guide", targets: ["guide"] },
   {
     id: "settings",
     targets: ["settings"],
     cues: [{ run: (s) => s.setPanel("view") }, { at: 1, run: (s) => s.patchShow({ grid: true }) }],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setPanel("none") }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

@@ -9,8 +9,8 @@ const LEFT = { azimuth: -1, inclination: 0 };
 const ANDROMEDA: Selection = { kind: "cosmos", id: "andromeda" };
 
 /**
- * The `?` tour: the camera, the depth ladder, the sightline, the objects, the View panel, the
- * guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the depth ladder, the sightline, the objects, the guide, the View
+ * panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<DeepFieldStore>[] = [
   {
@@ -57,6 +57,7 @@ export const HELP: readonly HelpStep<DeepFieldStore>[] = [
       },
     ],
   },
+  { id: "guide", targets: ["guide"] },
   {
     id: "settings",
     targets: ["settings"],
@@ -66,9 +67,8 @@ export const HELP: readonly HelpStep<DeepFieldStore>[] = [
     ],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setPanel("none") }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

@@ -12,8 +12,8 @@ const PICKED = rungIndex("betelgeuse");
 const HOME = rungIndex(DEFAULT_RUNG);
 
 /**
- * The `?` tour: the camera, the bodies, the overview, the ladder, the scale bar, the View
- * panel, the guide and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the bodies, the overview, the ladder, the scale bar, the guide,
+ * the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<GiantsStore>[] = [
   {
@@ -47,15 +47,15 @@ export const HELP: readonly HelpStep<GiantsStore>[] = [
     targets: ["ruler"],
     cues: [{ at: 0.4, run: (s) => s.setRuler("earth") }],
   },
+  { id: "guide", targets: ["guide"] },
   {
     id: "settings",
     targets: ["settings"],
     cues: [{ run: (s) => s.setPanel("view") }, { at: 1, run: (s) => s.setOrbits(true) }],
   },
   {
-    id: "guide",
-    targets: ["guide"],
+    id: "experiences",
+    targets: ["experiences"],
     cues: [{ run: (s) => s.setPanel("none") }],
   },
-  { id: "experiences", targets: ["experiences"] },
 ];

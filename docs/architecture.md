@@ -804,7 +804,7 @@ and `drift.*` in the root catalogs) and the `[data-simulation]` stage:
     onEnter={closeMyTour}
     drift={{ state, music: DRIFT.music, onToggle, onStop }} // with a drift (below)
   >
-    <MyOverlay /> {/* its SimulationToolbar ends with the experiences button */}
+    <MyOverlay /> {/* its SimulationToolbar ends with the experiences and help */}
   </SimulationImmersive>
 </VisualizationShell>
 ```
