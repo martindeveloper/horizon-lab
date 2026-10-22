@@ -37,6 +37,16 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
 - Read `docs/architecture.md` before adding a simulation. Keep each sub-app under
   `src/features/<slug>`; expose only its entry component, manifest, routing, and
   server helpers. Shared code must not import feature stores or renderers.
+- Body data has one home: generic bodies and constants in `@horizon/toolkit/bodies` and
+  `/science`, named stars, holes and the shared worlds in `src/space/`, a lab's own
+  literature figures in its feature catalogue. Never retype a value a catalogue holds;
+  derive what follows from it with the kit's laws. Every figure names a source and status.
+- Catalogue a number when more than one lab uses it, code computes with it, it is a
+  revisable measurement, or it derives from other figures. A one-off literature number
+  used once may stay in the copy; do not catalogue formulas, years or vague phrases.
+- Copy quotes catalogued figures as placeholders (`proseArgs`), never typed digits, and
+  names of catalogued bodies come from the shared `names.<id>`. Check Czech grammar
+  around each placeholder.
 - The catalogue must not mount WebGL or load simulation-specific message packs.
 - Keep catalogue pages scrollable; size simulation stages beneath the common header.
 
