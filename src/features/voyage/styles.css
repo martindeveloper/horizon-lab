@@ -9,7 +9,7 @@
 
 /* The console (components/flight-dock.tsx): two projected displays tilted back over the
    dash and angled in towards the pilot, the scanner's place between them. Phones keep one
-   flat glass panel. */
+   flat display. */
 @media (width >= 48rem) and (height >= 30rem) {
   /* On the displays' own parent: perspective reaches only an element's children, and the
      displays tilted without it would neither foreshorten nor take clicks in their receded

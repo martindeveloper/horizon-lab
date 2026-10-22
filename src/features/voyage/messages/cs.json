@@ -64,6 +64,8 @@
     "enterOrbit": "Na oběžnou dráhu",
     "throttle": "Tah",
     "throttleValue": "{value} %",
+    "brake": "Brzda",
+    "brakeHold": "Držením brzdit",
     "invite": "Leťte klávesou W nebo pákou · tažením obíhejte",
     "inviteTouch": "Leťte pákou · tažením obíhejte",
     "keys": "W S tah · A D · R F · Q E náklon · Shift zrychlení · X brzda · mezerník orbita · tažením rozhled",

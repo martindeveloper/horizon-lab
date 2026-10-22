@@ -21,20 +21,22 @@ import { rungNameKey } from "../lib/model/names";
 import { rulerFor } from "../lib/model/ruler";
 import { RUNGS, RUNG_IDS } from "../lib/model/rungs";
 import { useGiants } from "../lib/store";
-import { badgeOf, keyFigures, useDistance, useGiantsT } from "./format";
+import { badgeOf, keyFigures, lengthText, useDistance, useGiantsT } from "./format";
 import { LadderStrip } from "./ladder-strip";
 
 const LAST = RUNG_IDS.length - 1;
 
-/** The ruler at the camera's scale, in the unit the View panel holds. */
+/** The ruler at the camera's scale, in the unit the View panel holds; none over the overview. */
 function Ruler() {
   const { t } = useGiantsT();
   const f = useFormatter();
   const scale = useGiants((s) => s.scale);
   const choice = useGiants((s) => s.ruler);
+  /* The overview has no one scale: its lines take the bar's place. */
+  const overview = useGiants((s) => s.overview);
   const bar = rulerFor(choice, scale);
-  if (!bar) return null;
-  const text = `${f.number(bar.value, { maximumSignificantDigits: 3 })} ${t(`units.${bar.unit}`)}`;
+  if (!bar || overview) return null;
+  const text = lengthText(t, f, bar.value, bar.unit);
   return <ScaleBar text={text} px={bar.px} label={t("hud.ruler", { value: text })} />;
 }
 
@@ -49,9 +51,11 @@ export function GiantsDock() {
   /* The desktop layout, where the card stands beside the stage rather than over the dock. */
   const wide = useMediaQuery(WIDE_LAYOUT_QUERY, true);
   const focus = useGiants((s) => s.focus);
-  const open = useGiants((s) => (wide ? s.card : s.sheet));
+  /* The overview hides the card: there the button shows it by going back down to the body. */
+  const overview = useGiants((s) => s.overview);
+  const open = useGiants((s) => !s.overview && (wide ? s.card : s.sheet));
   /* On phones the card's sheet or a panel takes the foot of the stage, and the dock steps aside. */
-  const aside = useGiants((s) => s.sheet || s.panel !== "none");
+  const aside = useGiants((s) => (!s.overview && s.sheet) || s.panel !== "none");
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface);
   const api = useGiants.getState;
@@ -95,7 +99,7 @@ export function GiantsDock() {
             aria-label={t(open ? "hud.hideCard" : "hud.showCard")}
             aria-expanded={open}
             active={open}
-            onClick={() => api().setCard(!open)}
+            onClick={() => (overview ? api().goTo(id) : api().setCard(!open))}
           >
             <Info className="size-4" />
           </IconButton>

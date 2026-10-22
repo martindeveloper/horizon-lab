@@ -107,13 +107,14 @@ export function LadderStrip() {
       onPointerMove={point}
       onPointerLeave={() => setHover((h) => ({ ...h, shown: false }))}
     >
+      {/* The dots stand over the slider's track, the thumb over them. */}
       {DOTS.map((dot, index) => (
         <span
           key={dot.id}
           aria-hidden
           style={{ left: at(index / LAST), width: dot.px, height: dot.px, background: dot.colour }}
           className={cn(
-            "pointer-events-none absolute top-4 block -translate-1/2 rounded-full ring-1 ring-fg/25 transition-transform duration-200 ease-out",
+            "pointer-events-none absolute top-4 z-[1] block -translate-1/2 rounded-full ring-1 ring-fg/25 transition-transform duration-200 ease-out",
             dot.kind === "planet" && "bg-muted",
             dot.kind === "horizon" && "bg-black ring-solar/80",
             hover.shown && hover.index === index && "scale-150",
@@ -150,7 +151,7 @@ export function LadderStrip() {
         <SliderPrimitive.Thumb
           aria-label={t("hud.ladder")}
           aria-valuetext={t(rungNameKey(RUNG_IDS[focus]!))}
-          className="block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
+          className="relative z-[2] block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
         />
       </SliderPrimitive.Root>
     </div>

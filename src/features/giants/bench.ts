@@ -22,6 +22,10 @@ type GiantsBenchScene = BenchScene & {
   at?: number;
   /** The drift plays, as the page would once its map has loaded and its loader lifted. */
   drift?: boolean;
+  /** Every body at once, on the overview's log scale. */
+  overview?: boolean;
+  /** The overview is asked for as the first frame starts: the glide there from the rung. */
+  intoOverview?: boolean;
 };
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
@@ -88,6 +92,25 @@ const SCENES: readonly GiantsBenchScene[] = [
   still("sgr-a", "Sagittarius A*: a faint, flickering ring"),
   still("m87", "M87*: its ring, brightest in the south"),
   still("ton-618", "TON 618: a quasar's blinding ring"),
+  {
+    ...still("sun", "The overview: every body as a flat dot on one log scale of radius"),
+    id: "overview",
+    tags: ["overview"],
+    overview: true,
+  },
+  {
+    id: "into-overview",
+    description:
+      "From the Sun into the overview: the surfaces hand over to dots, which glide to their rows",
+    tags: ["sequence", "camera", "overview"],
+    rung: "sun",
+    intoOverview: true,
+    script: {
+      frames: Math.round(2 * IDLE_FPS),
+      duration: 2,
+      keyframes: Array.from({ length: 12 }, (_, i) => i / 11),
+    },
+  },
   watch("sun", "The Sun live: flares, prominences and an eruption"),
   watch("proxima", "Proxima Centauri live: its flares"),
   watch("betelgeuse", "Betelgeuse live: its boiling cells and plumes"),
@@ -175,6 +198,7 @@ export const benchTarget: BenchTarget = {
       bloom: scene.bloom ?? false,
       wideColour: scene.wideColour ?? false,
       orbits: scene.orbits ?? false,
+      overview: scene.overview ?? false,
     });
     if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
     store.getState().stopDrift();
@@ -201,10 +225,13 @@ export const benchTarget: BenchTarget = {
     return {
       ...instance,
       /* A landed camera draws at the idle pace: each still frame is one of those, so none is skipped. */
-      render: (frame) => instance.render(frame.dt > 0 ? frame : { ...frame, dt: 1 / IDLE_FPS }),
+      render: (frame) => {
+        if (scene.intoOverview && frame.index === 0) store.getState().setOverview(true);
+        instance.render(frame.dt > 0 ? frame : { ...frame, dt: 1 / IDLE_FPS });
+      },
       describe: () => {
-        const { goal, place, quality, bloom, wideColour, drift } = store.getState();
-        return { rung: scene.rung, goal, place, quality, bloom, wideColour, drift };
+        const { goal, place, quality, bloom, wideColour, drift, overview } = store.getState();
+        return { rung: scene.rung, goal, place, quality, bloom, wideColour, drift, overview };
       },
     };
   },

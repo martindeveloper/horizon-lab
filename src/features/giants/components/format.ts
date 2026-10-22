@@ -1,4 +1,4 @@
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations, type useFormatter } from "next-intl";
 
 import {
   buildCard,
@@ -22,9 +22,18 @@ import {
 } from "../lib/model/catalogue";
 import { groupOf } from "../lib/model/compare";
 import { rungNameKey } from "../lib/model/names";
+import type { RulerUnit } from "../lib/model/ruler";
 import { RUNGS, type Rung, type RungId } from "../lib/model/rungs";
 import type { TourStep } from "../lib/model/tour";
 import { RUNG_CARDS } from "./card-specs";
+
+/** A ruler's round length in its unit, as the scale bar and the overview's lines print it. */
+export const lengthText = (
+  t: Translate,
+  f: Pick<ReturnType<typeof useFormatter>, "number">,
+  value: number,
+  unit: RulerUnit,
+) => `${f.number(value, { maximumSignificantDigits: 3 })} ${t(`units.${unit}`)}`;
 
 /** A guided-tour readout retains the same intervals as its card, with explicit length units. */
 export function tourFigure(step: TourStep, t: Translate, distance: DistanceSettings) {

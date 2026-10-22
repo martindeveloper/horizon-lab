@@ -47,6 +47,12 @@ export type GiantsStore = GuideSlice<Saved> &
     /** Metres per CSS pixel at the camera's place, for the ruler. */
     scale: number;
     /**
+     * Every body at once on a log scale (`overview.ts`), the camera kept where it was beneath;
+     * any flight, the guide or the drift leaves it.
+     */
+    overview: boolean;
+    setOverview: (on: boolean) => void;
+    /**
      * The card of the body in focus, which follows it up and down the ladder: beside the stage
      * on wide screens, where it is open as a visit starts; a sheet over the dock on phones, where
      * the dock shows the key figures and the sheet opens on demand.
@@ -80,7 +86,7 @@ export type GiantsStore = GuideSlice<Saved> &
     publish: (place: number, focus: number, scale: number) => void;
     /** Opens or closes the card: both its places, so a phone and a wide screen agree. */
     setCard: (open: boolean) => void;
-    /** Flies to a body and opens its card: a body's name or dot was picked. */
+    /** Flies to a body and opens its card: a body's name or dot was picked (from the overview, back down to it). */
     goTo: (id: RungId) => void;
     setReference: (reference: Reference) => void;
     setPanel: (panel: Panel) => void;
@@ -129,6 +135,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   place: initialIndex,
   focus: initialIndex,
   scale: 0,
+  overview: false,
   card: true,
   sheet: false,
   reference: "sun",
@@ -142,14 +149,21 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   guidePlaying: false,
   guideLanded: false,
   setReady: (ready) => set({ ready }),
-  setView: (view) => set({ view, goal: rungIndex(view), flight: nextFlight(), surfaceZoom: 1 }),
-  go: (index) => set({ goal: clampIndex(index), flight: nextFlight(), surfaceZoom: 1 }),
+  setView: (view) =>
+    set({ view, goal: rungIndex(view), flight: nextFlight(), surfaceZoom: 1, overview: false }),
+  go: (index) =>
+    set({ goal: clampIndex(index), flight: nextFlight(), surfaceZoom: 1, overview: false }),
   step: (by) => get().go(get().focus + by),
   publish: (place, focus, scale) => set({ place, focus, scale }),
+  setOverview: (overview) => {
+    if (overview && get().guideOpen) get().endGuide();
+    if (overview) get().stopDrift();
+    set({ overview, surfaceZoom: 1 });
+  },
   setCard: (open) => set({ card: open, sheet: open }),
   goTo: (id) => {
     get().setCard(true);
-    if (rungIndex(id) !== get().focus) get().go(rungIndex(id));
+    if (rungIndex(id) !== get().focus || get().overview) get().go(rungIndex(id));
   },
   setReference: (reference) => set({ reference }),
   setPanel: (panel) => set({ panel }),
@@ -162,7 +176,11 @@ export const useGiants = create<GiantsStore>((set, get) => ({
     tour: TOUR,
     save: (s) => ({ goal: s.focus, orbits: s.orbits }),
     restore: (saved) => ({ goal: saved.goal, orbits: saved.orbits, flight: nextFlight() }),
-    open: () => ({ guidePlaying: !prefersReducedMotion(), surfaceZoom: 1 as const }),
+    open: () => ({
+      guidePlaying: !prefersReducedMotion(),
+      surfaceZoom: 1 as const,
+      overview: false,
+    }),
     apply: (step) => ({
       goal: rungIndex(step.rung),
       flight: nextFlight(),
@@ -176,7 +194,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   },
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
   effectsBeforeDrift: null,
-  /* The drift ends the guide, closes the panel and the card and flies the camera itself; as a
+  /* The drift ends the guide and the overview, closes the panel and the card and flies the camera itself; as a
      show piece it turns the focus blur and bloom on, and gives the visitor's back as it ends. */
   ...driftSlice(set, get, {
     open: (s) => {
@@ -186,6 +204,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
         card: false,
         sheet: false,
         surfaceZoom: 1 as const,
+        overview: false,
         effectsBeforeDrift: { focusBlur: s.focusBlur, bloom: s.bloom },
         focusBlur: true,
         bloom: true,

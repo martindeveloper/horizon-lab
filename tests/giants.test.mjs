@@ -32,8 +32,16 @@ import {
   placeBodies,
 } from "../src/features/giants/lib/model/ladder.ts";
 import { LOOKS } from "../src/features/giants/lib/model/looks.ts";
+import {
+  OVERVIEW_AXIS,
+  blendPlaced,
+  namesEnd,
+  overviewBaseline,
+  placeOverview,
+  scaleLines,
+} from "../src/features/giants/lib/model/overview.ts";
 import { granulesAcross } from "../src/features/giants/lib/model/physics.ts";
-import { RULERS, rulerFor } from "../src/features/giants/lib/model/ruler.ts";
+import { METRES, RULERS, rulerFor } from "../src/features/giants/lib/model/ruler.ts";
 import { RUNG_IDS, RUNGS, rungIndex } from "../src/features/giants/lib/model/rungs.ts";
 import { TOUR } from "../src/features/giants/lib/model/tour.ts";
 import {
@@ -41,7 +49,11 @@ import {
   fadeWeather,
   weatherShown,
 } from "../src/features/giants/lib/model/weather-fade.ts";
-import { LENSES } from "../src/features/giants/lib/parameters.ts";
+import {
+  LENSES,
+  OVERVIEW_FOOT_PX,
+  OVERVIEW_TOP_PX,
+} from "../src/features/giants/lib/parameters.ts";
 import { useGiants } from "../src/features/giants/lib/store.ts";
 import { pathForRung, resolveRung, rungFromPath } from "../src/features/giants/routing.ts";
 import { featureMessages } from "./messages-helper.mjs";
@@ -102,6 +114,69 @@ test("a tap picks the body under it, and nothing on the empty sky", () => {
   const body = placeBodies(ladder, sun, desktop).find((entry) => entry.index === sun);
   assert.equal(bodyAt(ladder, sun, desktop, body.x, body.y), sun);
   assert.equal(bodyAt(ladder, sun, desktop, body.x, 4), null);
+});
+
+test("the overview shows every body at once, in order of size, between the names, the toolbar and the dock", () => {
+  /* The dock's cover of the stage's foot, CSS px: a phone's taller dock, a wide screen's. */
+  for (const [stage, foot] of [
+    [phone, 150],
+    [desktop, 130],
+  ]) {
+    const baseline = overviewBaseline(stage, foot);
+    assert.ok(
+      baseline + OVERVIEW_FOOT_PX <= stage.height - foot,
+      "the axis's values clear the dock",
+    );
+    const dots = RUNG_IDS.map((_, i) => placeOverview(ladder, OVERVIEW_AXIS, stage, baseline, i));
+    dots.forEach((dot, i) => {
+      assert.ok(
+        dot.x - dot.radius > namesEnd(stage) && dot.x + dot.radius < stage.width,
+        `${RUNG_IDS[i]} right of the names, clear of the stage's edge`,
+      );
+      assert.ok(
+        dot.y - dot.polar >= OVERVIEW_TOP_PX && dot.y + dot.polar <= baseline,
+        `${RUNG_IDS[i]} below the toolbar, above the baseline`,
+      );
+      const before = dots[i - 1];
+      if (!before) return;
+      assert.ok(dot.x > before.x && dot.y < before.y, `${RUNG_IDS[i]} climbs right and up`);
+      assert.ok(dot.radius >= before.radius, `${RUNG_IDS[i]} is no smaller a dot`);
+      for (const other of dots.slice(0, i))
+        assert.ok(
+          Math.hypot(dot.x - other.x, dot.y - other.y) > dot.radius + other.radius,
+          `${RUNG_IDS[i]} clear of ${RUNG_IDS[other.index]}`,
+        );
+    });
+    /* The glide's ends are the ladder's place and the dot's; a body far off stage starts at its edge. */
+    const sun = placeBodies(ladder, rungIndex("sun"), stage).find(
+      (b) => b.index === rungIndex("sun"),
+    );
+    const near = (a, b) => Object.keys(b).every((key) => Math.abs(a[key] - b[key]) < 1e-9);
+    assert.ok(near(blendPlaced(sun, dots[sun.index], 0, stage), sun));
+    assert.ok(near(blendPlaced(sun, dots[sun.index], 1, stage), dots[sun.index]));
+    const far = { ...dots[0], x: 1e9, y: stage.height / 2, radius: 1e7, polar: 1e7 };
+    const start = blendPlaced(far, dots[0], 0, stage);
+    assert.ok(start.x <= stage.width + start.radius + 1e-6 && start.radius <= stage.height + 1e-6);
+  }
+});
+
+test("the overview's scale lines mark round radii in the ruler's units, left to right", () => {
+  for (const ruler of RULERS) {
+    const lines = scaleLines(ruler, OVERVIEW_AXIS);
+    assert.ok(lines.length >= 6, `${ruler}: lines across the ladder`);
+    lines.forEach((line, i) => {
+      assert.ok(line.share >= 0 && line.share <= 1, `${ruler}: on the axis`);
+      assert.ok(i === 0 || line.share > lines[i - 1].share, `${ruler}: in order`);
+      const power = Math.log10(line.value);
+      assert.ok(Math.abs(power - Math.round(power)) < 1e-9, `${ruler}: a power of ten`);
+      const metres = line.value * METRES[line.unit];
+      assert.ok(metres >= OVERVIEW_AXIS.min && metres <= OVERVIEW_AXIS.max * (1 + 1e-9));
+    });
+  }
+  assert.deepEqual(
+    [...new Set(scaleLines("auto", OVERVIEW_AXIS).map((line) => line.unit))],
+    ["km", "sun", "au"],
+  );
 });
 
 test("catalogued radius, temperature and light agree with Stefan–Boltzmann", () => {
@@ -210,6 +285,15 @@ test("flights stay on the ladder and the guide gives the visitor's place back", 
   api.endGuide();
   assert.equal(useGiants.getState().goal, rungIndex("arcturus"));
   assert.equal(useGiants.getState().orbits, false);
+  api.startGuide();
+  api.setOverview(true);
+  assert.ok(
+    useGiants.getState().overview && !useGiants.getState().guideOpen,
+    "the overview ends the guide",
+  );
+  api.goTo("sun");
+  assert.ok(!useGiants.getState().overview, "a body picked in the overview is flown back down to");
+  assert.equal(useGiants.getState().goal, rungIndex("sun"));
 });
 
 const globeOf = (id) => {

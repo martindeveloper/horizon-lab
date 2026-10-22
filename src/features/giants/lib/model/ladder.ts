@@ -186,6 +186,24 @@ export function placeBodies(ladder: Ladder, t: number, stage: Stage, margin = 0.
   return out;
 }
 
+/** The body under a stage point among `count` placed ones, if any; the smallest wins where they overlap. */
+export function pickPlaced(
+  placed: readonly Placed[],
+  count: number,
+  x: number,
+  y: number,
+  slop = 10,
+) {
+  let best: Placed | null = null;
+  for (let i = 0; i < count; i++) {
+    const body = placed[i]!;
+    const dx = (x - body.x) / (body.radius + slop);
+    const dy = (y - body.y) / (body.polar + slop);
+    if (dx * dx + dy * dy <= 1 && (!best || body.radius < best.radius)) best = body;
+  }
+  return best?.index ?? null;
+}
+
 /** The rung whose body is under a stage point, if any (the smallest wins where bodies overlap). */
 export function bodyAt(
   ladder: Ladder,
@@ -196,13 +214,7 @@ export function bodyAt(
   slop = 10,
   camera?: Camera,
 ) {
-  let best: Placed | null = null;
   const placed: Placed[] = [];
-  placeBodiesInto(placed, ladder, camera ?? cameraAt(ladder, t, stage), stage, 0);
-  for (const body of placed) {
-    const dx = (x - body.x) / (body.radius + slop);
-    const dy = (y - body.y) / (body.polar + slop);
-    if (dx * dx + dy * dy <= 1 && (!best || body.radius < best.radius)) best = body;
-  }
-  return best?.index ?? null;
+  const count = placeBodiesInto(placed, ladder, camera ?? cameraAt(ladder, t, stage), stage, 0);
+  return pickPlaced(placed, count, x, y, slop);
 }

@@ -64,6 +64,8 @@
     "enterOrbit": "Enter orbit",
     "throttle": "Throttle",
     "throttleValue": "{value} %",
+    "brake": "Brake",
+    "brakeHold": "Hold to brake",
     "invite": "Fly with W or the lever · drag to orbit",
     "inviteTouch": "Fly with the lever · drag to orbit",
     "keys": "W S thrust · A D · R F · Q E roll · Shift boost · X brake · Space orbit · drag to look",

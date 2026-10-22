@@ -8,11 +8,16 @@
     "previous": "Menší",
     "next": "Větší",
     "ladder": "Žebřík",
+    "overview": "Přehled",
+    "overviewHint": "Klepnutím na těleso k němu přeletíte. Kolečkem se vrátíte.",
     "ruler": "Měřítko: {value}",
     "showCard": "Zobrazit kartu",
     "hideCard": "Skrýt kartu",
     "swallowsEarth": "Pohltila by Zemi →",
     "swallowsEarthHint": "Tato značka je 1 au, poloměr dráhy Země. Kdyby kterékoli těleso vpravo od ní stálo na místě Slunce, Země by byla uvnitř něj."
+  },
+  "overview": {
+    "radius": "Poloměr · logaritmická škála"
   },
   "rungs": {
     "neutron-star": {

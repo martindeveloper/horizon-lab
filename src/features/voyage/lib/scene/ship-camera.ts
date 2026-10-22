@@ -201,6 +201,8 @@ export function createShipCamera(
   let flight: Flight | null = null;
   /** The throttle lever, 0…1: thrust ahead wherever the keys give none. */
   let cruise = 0;
+  /** The brake button held: a full brake, as X gives. */
+  let brakeHeld = false;
   /** Entering or leaving orbit: the attitude it turned from and the seconds since. */
   let settle: { q0: Quaternion; t: number } | null = null;
   /** A camera-pad step still to ease in, radians. */
@@ -390,12 +392,17 @@ export function createShipCamera(
   const moving = (axes: FlightAxes) =>
     axes.thrust !== 0 || axes.strafe !== 0 || axes.lift !== 0 || axes.roll !== 0;
 
-  /** The pilot's hands: the keys', the lever's thrust where they give none; the brake lets it go. */
+  /**
+   * The pilot's hands: the keys', the brake button's full brake, and the lever's thrust where
+   * the keys give none; any brake lets the lever go.
+   */
   const handsNow = (): FlightAxes => {
     const axes = flightInput.axes;
-    if (cruise === 0 || axes.thrust !== 0 || axes.brake > 0) return axes;
+    const brake = brakeHeld ? 1 : axes.brake;
+    if (brake === axes.brake && (cruise === 0 || axes.thrust !== 0 || brake > 0)) return axes;
     Object.assign(hands, axes);
-    hands.thrust = cruise;
+    hands.brake = brake;
+    if (brake === 0 && axes.thrust === 0) hands.thrust = cruise;
     return hands;
   };
 
@@ -725,7 +732,7 @@ export function createShipCamera(
       return (
         flight !== null ||
         settle !== null ||
-        (cruise > 0 && mode === "free") ||
+        ((cruise > 0 || brakeHeld) && mode === "free") ||
         zoom.moving ||
         stepping.on ||
         sink >= 0 ||
@@ -762,6 +769,12 @@ export function createShipCamera(
       if (next === cruise || crashed) return;
       cruise = next;
       if (cruise > 0 && flight === null && mode === "orbit") enterFree(false);
+      options.invalidate();
+    },
+    /** The brake button, held or let go. */
+    setBrake(held: boolean) {
+      if (held === brakeHeld) return;
+      brakeHeld = held;
       options.invalidate();
     },
     /** The helm button: manual flight, or orbit about the nearest body. */

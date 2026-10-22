@@ -11,7 +11,7 @@ export const RULERS = ["auto", "km", "earth", "sun", "au", "light"] as const;
 export type Ruler = (typeof RULERS)[number];
 
 /** The units a ruler can read in, in metres. */
-const METRES = {
+export const METRES = {
   km: 1e3,
   earth: FIGURES.earth.equatorialKm * 1e3,
   sun: convert(1, "Rsun", "m"),
@@ -25,7 +25,15 @@ export type RulerUnit = keyof typeof METRES;
 /** The bar's length aimed at, CSS pixels. */
 const AIM_PX = 96;
 
-function unitFor(ruler: Ruler, metres: number): RulerUnit {
+/** The units a ruler reads in, smallest first: `unitFor` picks one of them by length. */
+export function rulerUnits(ruler: Ruler): readonly RulerUnit[] {
+  if (ruler === "light") return ["ls", "lmin", "lh"];
+  if (ruler === "auto") return ["km", "sun", "au"];
+  return [ruler];
+}
+
+/** The unit a ruler reads a length of `metres` in. */
+export function unitFor(ruler: Ruler, metres: number): RulerUnit {
   if (ruler === "light") return metres < METRES.lmin ? "ls" : metres < METRES.lh ? "lmin" : "lh";
   if (ruler !== "auto") return ruler;
   if (metres < 2e8) return "km";

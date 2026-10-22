@@ -220,6 +220,7 @@ export function createVoyageEngine(
       before: (s) => {
         ship.setDrive(DRIVES[s.drive]);
         ship.setThrottle(s.throttle);
+        ship.setBrake(s.braking);
         ship.setFeel(s.show.feel);
         if (!s.show.feel) feel.reset();
         if (s.abort !== lastAbort) {

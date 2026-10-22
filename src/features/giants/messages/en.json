@@ -8,11 +8,16 @@
     "previous": "Smaller",
     "next": "Larger",
     "ladder": "The ladder",
+    "overview": "Overview",
+    "overviewHint": "Tap a body to fly to it. Scroll to go back.",
     "ruler": "Scale bar: {value}",
     "showCard": "Show the card",
     "hideCard": "Hide the card",
     "swallowsEarth": "Would swallow Earth →",
     "swallowsEarthHint": "This mark is 1 au, the radius of Earth's orbit. Put any body to its right where the Sun is, and Earth would be inside it."
+  },
+  "overview": {
+    "radius": "Radius · log scale"
   },
   "rungs": {
     "neutron-star": {

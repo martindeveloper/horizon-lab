@@ -39,7 +39,7 @@ function tintsOf(look: Pick<Look, "equatorK" | "poleK">): Float32Array {
 
 /**
  * The discs' tints: `uniform` for the shader, and `assign` to give disc `slot` rung `rung`'s
- * tints, which uploads the table only when a disc changes hands.
+ * tints, which uploads the table only when a disc changes hands; `face` a rung's face tint.
  */
 export function discTints(looks: readonly Look[]) {
   const rows = looks.map(tintsOf);
@@ -54,5 +54,10 @@ export function discTints(looks: readonly Look[]) {
     data.set(rows[rung]!, slot * width);
     texture.needsUpdate = true;
   }
-  return { uniform: { value: texture }, assign, dispose: () => texture.dispose() };
+  /** A rung's face, linear light against its own visible radiance: what the overview's dot shows. */
+  const face = (rung: number): [number, number, number] => {
+    const row = rows[rung]!;
+    return [row[0]!, row[1]!, row[2]!];
+  };
+  return { uniform: { value: texture }, assign, face, dispose: () => texture.dispose() };
 }

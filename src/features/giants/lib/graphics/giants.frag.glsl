@@ -13,6 +13,9 @@
 // their loops and ejections, as the activity model places them. Earth and Jupiter are lit from
 // the upper left from their measured maps. A horizon is drawn at its own radius, black.
 //
+// The overview shows every body at once, each a flat dot (`dotAt`): cheap enough to draw them
+// all, it hands over from the full surfaces early in the glide there and back.
+//
 // A flattened body (Vega, Achernar, Jupiter, Earth) is a spheroid with its pole tipped towards
 // us: its silhouette is the ellipse that tilt projects, and each pixel's ray meets the spheroid
 // itself, so its shading and its surface's turn follow the true shape.
@@ -71,10 +74,15 @@ uniform sampler2D uJupiter;
 uniform vec2 uMaps;                     // 1 once Earth's, Jupiter's map has arrived
 uniform vec3 uEarthMean;                // their mean colours meanwhile, linear
 uniform vec3 uJupiterMean;
+uniform highp sampler2D uDots;          // the overview's dots, a column each: centre x, y, radii; linear light, style (`dots.ts`)
+uniform float uOverview;                // the dots' share of the light, 0–1 (0: none drawn)
+uniform float uDotFocus;                // the body in focus's dot, ringed in gold
 uniform mat3 uGamut;                    // linear sRGB to the canvas's primaries (the pass's)
 
 const float PI = 3.14159265;
 const float TAU = 6.2831853;
+// Earth and Jupiter are lit from the upper left.
+const vec3 PLANET_LIGHT = normalize(vec3(-0.62, 0.38, 0.69));
 
 // Disc `i`'s tint `tint` (`TINT_*`): linear RGB, log reference visible radiance in alpha.
 vec4 tintOf(int i, int tint) {
@@ -128,8 +136,7 @@ vec2 globeUv(vec3 s) {
 }
 
 vec3 planetSurface(vec3 n, vec3 s, float mu, int style) {
-  vec3 light = normalize(vec3(-0.62, 0.38, 0.69));
-  float lit = max(dot(n, light), 0.0);
+  float lit = max(dot(n, PLANET_LIGHT), 0.0);
   vec2 uv = globeUv(s);
   if (style == STYLE_EARTH) {
     vec3 albedo = uMaps.x > 0.5 ? texture2D(uEarth, uv).rgb : uEarthMean;
@@ -234,6 +241,39 @@ vec4 shade(vec2 p, int i, int style, out float frontDepth) {
   return vec4(light * covered + outside * (1.0 - covered) + front, covered);
 }
 
+// An overview dot at a pixel, `shape` its place and `look` its light (`dots.ts`), premultiplied
+// as `shade` gives a body: a flat disc in its light's colour. A
+// star darkens towards its limb by a linear law and glows softly round it; Earth and Jupiter, in
+// their maps' mean colours, are lit as their globes are; a horizon is black in its gold rim.
+vec4 dotFace(vec2 p, vec4 shape, vec4 look) {
+  int style = int(look.a + 0.5);
+  vec2 o = vec2(p.x - shape.x, shape.y - p.y) / shape.z;
+  if (style == STYLE_HORIZON) return horizon(o, shape.z);
+  vec2 q = vec2(o.x, o.y * shape.z / shape.w);
+  float d = length(q);
+  float aa = 1.0 / shape.z;
+  float covered = 1.0 - smoothstep(1.0 - aa, 1.0 + aa, d);
+  float mu = sqrt(max(1.0 - d * d, 0.0));
+  if (style == STYLE_EARTH || style == STYLE_JUPITER)
+    return vec4(look.rgb * (0.015 + 1.5 * max(dot(vec3(q, mu), PLANET_LIGHT), 0.0)) * covered, covered);
+  vec3 face = look.rgb * (1.0 - OVERVIEW_LIMB * (1.0 - mu));
+  vec3 glow = look.rgb * GLOW * exp(-max(length(o) - 1.0, 0.0) * GLOW_FALLOFF);
+  return vec4(face * covered + glow * (1.0 - covered), covered);
+}
+
+// Overview body `i` at a pixel: its dot, and round the body in focus a thin gold ring.
+vec4 dotAt(vec2 p, int i) {
+  float column = (float(i) + 0.5) / float(DOTS);
+  vec4 shape = texture2D(uDots, vec2(column, 0.25));
+  float ring = float(i) == uDotFocus ? shape.z + OVERVIEW_RING_PX : 0.0;
+  vec2 offset = abs(p - shape.xy);
+  float reach = max(shape.z * GLOW_REACH, ring) + 2.0;
+  if (offset.x > reach || offset.y > reach) return vec4(0.0);
+  vec4 body = dotFace(p, shape, texture2D(uDots, vec2(column, 0.75)));
+  if (ring > 0.0) body.rgb += uAccent * (1.0 - smoothstep(0.4, 1.2, abs(length(p - shape.xy) - ring)));
+  return body;
+}
+
 /* -------------------------------------------------------------------- sky */
 
 // Where a pixel's starlight comes from: bent round every black hole near it as by a point
@@ -289,7 +329,8 @@ vec3 sky(vec2 p) {
 
 void main() {
   vec2 p = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uPixelRatio;
-  vec3 colour = sky(p);
+  vec3 behind = sky(p);
+  vec3 colour = behind;
 
   /* Largest first, so each smaller body is drawn over the one behind it. */
   for (int i = 0; i < MAX_DISCS; i++) {
@@ -307,6 +348,16 @@ void main() {
       OutflowLight cloud = outflowLight(o, frontDepth);
       colour = colour * cloud.transmission + cloud.emission;
     }
+  }
+
+  /* The overview's dots, largest first, over the same sky; the full bodies fade out under them. */
+  if (uOverview > 0.0) {
+    vec3 dots = behind;
+    for (int k = DOTS - 1; k >= 0; k--) {
+      vec4 body = dotAt(p, k);
+      dots = dots * (1.0 - body.a) + body.rgb;
+    }
+    colour = mix(colour, dots, uOverview);
   }
 
   /* Hue kept through the tone curve, so a red star stays red and keeps its limb darkening. */

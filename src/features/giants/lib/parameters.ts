@@ -9,6 +9,7 @@ import {
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
 import { OUTFLOW_SLOTS } from "./model/mass-loss";
+import { RUNG_IDS } from "./model/rungs";
 
 /**
  * Giants' model numbers, once. The physics computes with them, the shader receives the visual
@@ -65,6 +66,38 @@ export const RUNG_GAP = 0.38;
 export const MAX_DISCS = 16;
 /** Smallest radius drawn, CSS pixels: anything smaller shows as a point this size. */
 export const MIN_DISC_PX = 0.6;
+/**
+ * The overview (`overview.ts`): every body at once, a dot plot of radius on a log axis, a row
+ * each, the bodies' names in a column down the left. Where that column ends, CSS px from the
+ * stage's left, wide enough for the longest name in either language: on a stage narrower than
+ * `OVERVIEW_NARROW_PX` the names are set smaller (`styles.css`) and the column narrows. The
+ * axis's inset from the column and its margin from the stage's right, room for the largest dot
+ * and the last value, CSS px; the top row's clearance from the stage's top, past the site's
+ * header and the lab's toolbar, and the room under the axis for its values and title, above the
+ * dock, CSS px; a dot's radius from the smallest body's to the largest's, CSS px, by the log of
+ * the radius, and at most this share of a row; the gap a name's leader leaves before its dot,
+ * CSS px (the name's own padding leaves the other); the selected body's ring, CSS px out from
+ * its dot.
+ */
+export const OVERVIEW_NAMES_PX = 148;
+export const OVERVIEW_NAMES_NARROW_PX = 116;
+export const OVERVIEW_NARROW_PX = 640;
+export const OVERVIEW_AXIS_INSET_PX = 16;
+export const OVERVIEW_MARGIN_PX = 48;
+export const OVERVIEW_TOP_PX = 104;
+export const OVERVIEW_FOOT_PX = 44;
+export const OVERVIEW_DOT_PX = [2.5, 9] as const;
+export const OVERVIEW_ROW_FILL = 0.42;
+export const OVERVIEW_LABEL_GAP_PX = 4;
+export const OVERVIEW_RING_PX = 3.5;
+/**
+ * The glide into the overview and back, s, and the share of it over which the bodies' full
+ * surfaces hand over to the overview's flat dots (`giants.frag.glsl`).
+ */
+export const OVERVIEW_SECONDS = 1.4;
+export const OVERVIEW_SWAP = 0.35;
+/** A dot's limb darkening, every star's: a linear law with the Sun's visible coefficient, a sketch rather than a surface. */
+export const OVERVIEW_LIMB = 0.6;
 /**
  * The camera's glide from one rung to the next, s, and how much longer a flight takes for each
  * doubling of the rungs it crosses (`glide.ts`).
@@ -369,6 +402,9 @@ const codes = (prefix: string, names: readonly string[]) =>
 
 export const SHADER_DEFINES = glslDefines({
   MAX_DISCS: glslInt(MAX_DISCS),
+  DOTS: glslInt(RUNG_IDS.length),
+  OVERVIEW_LIMB,
+  OVERVIEW_RING_PX,
   ORBIT_COUNT: glslInt(ORBIT_IDS.length),
   ORBIT_LINE_ALPHA,
   ORBIT_CASE_PX,

@@ -3,6 +3,9 @@
 #define HORIZON_GIANTS_PARAMETERS
 
 #define MAX_DISCS           16
+#define DOTS                25
+#define OVERVIEW_LIMB       0.6
+#define OVERVIEW_RING_PX    3.5
 #define ORBIT_COUNT         6
 #define ORBIT_LINE_ALPHA    0.9
 #define ORBIT_CASE_PX       2.6

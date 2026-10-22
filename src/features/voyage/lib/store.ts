@@ -116,6 +116,8 @@ export type VoyageStore = SceneSlice &
     heldCompression: number;
     /** The throttle lever, 0…1: thrust ahead in manual flight. Opening it in orbit takes the helm. */
     throttle: number;
+    /** The brake button held: a burn against the motion relative to the body, as X gives. */
+    braking: boolean;
     /** Bumped to hand a flight to the pilot where it is. */
     abort: number;
     /** The ship lies wrecked on a body, struck at this speed (km/s); null while it flies. */
@@ -134,6 +136,7 @@ export type VoyageStore = SceneSlice &
     setMode: (mode: ShipMode) => void;
     setCompression: (compression: number) => void;
     setThrottle: (throttle: number) => void;
+    setBraking: (braking: boolean) => void;
     /** Takes the ship off the autopilot: it flies on by hand at the speed it had. */
     disengage: () => void;
     /** After a crash: back to orbit about the body struck. */
@@ -190,6 +193,7 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
   compression: DEFAULT_COMPRESSION,
   heldCompression: DEFAULT_COMPRESSION,
   throttle: 0,
+  braking: false,
   abort: 0,
   crash: null,
   recoveries: 0,
@@ -216,6 +220,7 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
       heldCompression: compression > 0 ? compression : s.heldCompression,
     })),
   setThrottle: (throttle) => set({ throttle: Math.min(1, Math.max(0, throttle)) }),
+  setBraking: (braking) => set({ braking }),
   disengage: () => set((s) => (s.flying ? { abort: s.abort + 1, panel: "none" } : {})),
   recover: () =>
     set((s) =>

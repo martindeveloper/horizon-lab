@@ -169,6 +169,9 @@ src/
         ladder.ts              Bodies side by side on one horizon; the camera's place `t`, its
                                scale and the zoom about the smaller body between two rungs
         ruler.ts, tour.ts      The ruler's round length and unit; the guided climb
+        overview.ts            Every body at once: each at its radius on a log axis, one row
+                               apiece; the glide there from the ladder; the scale lines in the
+                               ruler's units
         looks.ts               Each body's surface: style, pole and equator temperatures,
                                convection cells, haze, pulsation, weather kind, display spin
         activity.ts            A star's weather as a function of its seed and the time: active
@@ -183,7 +186,8 @@ src/
                                noise, convection, Planck, tone curve and display encode are
                                toolkit snippets; tints.ts each body's glow colours, worked out
                                once per rung into a small texture; weather-uniforms.ts and
-                               vectors.ts what the frame writes to the pass
+                               vectors.ts what the frame writes to the pass; dots.ts the
+                               overview's flat dots, every body in one small texture
       lib/engine.ts            The pass, the hands (wheel, drag, tap, keys) and the snap to a
                                rung; lib/store.ts the Zustand store (giants namespace messages)
       bench.ts                 Headless benchmark target: the engine on its store (src/space/bench.ts)

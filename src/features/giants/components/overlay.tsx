@@ -1,6 +1,6 @@
 "use client";
 
-import { Crosshair } from "lucide-react";
+import { Crosshair, ZoomOut } from "lucide-react";
 
 import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useGuideFocusReturn } from "@/components/simulations/use-guide-focus-return";
@@ -15,12 +15,13 @@ import { GiantsGuide } from "./guide";
 import { StarsPanel, ViewPanel } from "./panels";
 import { GiantsTechnicalDetails } from "./technical-details";
 
-/** Escape ends the guide, else closes the panel, else closes the card. */
+/** Escape ends the guide, else closes the panel, else leaves the overview, else closes the card. */
 const escapeSteps = (): EscapeStep[] => {
   const api = useGiants.getState();
   return [
     [api.guideOpen, api.endGuide],
     [api.panel !== "none", () => api.setPanel("none")],
+    [api.overview, () => api.setOverview(false)],
     [api.card || api.sheet, () => api.setCard(false)],
   ];
 };
@@ -31,6 +32,7 @@ export function GiantsOverlay() {
   const panel = useGiants((s) => s.panel);
   const card = useGiants((s) => s.card);
   const sheet = useGiants((s) => s.sheet);
+  const overview = useGiants((s) => s.overview);
   const guideOpen = useGiants((s) => s.guideOpen);
   const guideButton = useGuideFocusReturn(guideOpen);
   const api = useGiants.getState;
@@ -45,7 +47,7 @@ export function GiantsOverlay() {
         <header className="hud-top pad-hud-top anim-fade absolute inset-x-0 top-0 z-[60]">
           <div className="flex items-start gap-3">
             <p className="line-clamp-2 max-w-sm text-xs text-muted not-md:hidden">
-              {t("hud.hint")}
+              {t(overview ? "hud.overviewHint" : "hud.hint")}
             </p>
             <SimulationToolbar
               label={t("hud.controls")}
@@ -62,6 +64,15 @@ export function GiantsOverlay() {
                 controls: "giants-stars",
                 onSelect: () => api().setPanel(panel === "stars" ? "none" : "stars"),
               }}
+              tools={[
+                {
+                  id: "overview",
+                  label: t("hud.overview"),
+                  icon: ZoomOut,
+                  active: overview,
+                  onSelect: () => api().setOverview(!overview),
+                },
+              ]}
               settings={{
                 label: t("hud.view"),
                 active: panel === "view",
@@ -76,8 +87,9 @@ export function GiantsOverlay() {
         <StarsPanel onClose={() => api().setPanel("none")} />
       ) : null}
       {!guideOpen && panel === "view" ? <ViewPanel onClose={() => api().setPanel("none")} /> : null}
-      {/* The card of the body in focus: beside the stage while open, over the dock on phones. */}
-      {panel === "none" && (card || sheet) ? (
+      {/* The card of the body in focus: beside the stage while open, over the dock on phones;
+          the overview needs the whole stage, so it waits there until the visitor goes back down. */}
+      {panel === "none" && !overview && (card || sheet) ? (
         <div className={cn(!card && "md:hidden", (!sheet || guideOpen) && "not-md:hidden")}>
           <RungCard />
         </div>

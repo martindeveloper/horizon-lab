@@ -1,13 +1,19 @@
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
 
-/* The stage takes every drag and wheel: the page never scrolls or zooms under the ladder. */
+/* The stage takes every drag and wheel: the page never scrolls or zooms under the ladder. Its
+   width sets the overview's names (`OVERVIEW_NARROW_PX`). */
 :where([data-simulation="giants"]) .giants-stage {
+  container-type: inline-size;
   touch-action: none;
   overscroll-behavior: contain;
   cursor: grab;
 }
 :where([data-simulation="giants"]) .giants-stage:active {
   cursor: grabbing;
+}
+/* The overview only takes taps. */
+:where([data-simulation="giants"]) .giants-stage[data-overview="true"] {
+  cursor: default;
 }
 
 /* A body's name, moved over it by the engine; only the focused body's and the large ones show. */
@@ -66,6 +72,76 @@
 }
 :where([data-simulation="giants"]) .giants-orbit[data-shown="false"] {
   opacity: 0;
+}
+
+/* The overview's names (the engine moves them into a column down the left): tighter, so the
+   longest fits the column in either language, each with a dotted leader along its row to its
+   dot, as long as the engine sets `--leader`. */
+:where([data-simulation="giants"]) .giants-stage[data-overview="true"] .giants-label {
+  padding: 0.125rem 0.25rem;
+  letter-spacing: 0.06em;
+}
+/* On a narrow stage (under `OVERVIEW_NARROW_PX`) the names are set smaller, to fit its narrower column. */
+@container (width < 640px) {
+  :where([data-simulation="giants"]) .giants-stage[data-overview="true"] .giants-label {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+  :where([data-simulation="giants"])
+    .giants-stage[data-overview="true"]
+    .giants-label[data-focus="true"] {
+    font-size: 10px;
+  }
+}
+:where([data-simulation="giants"]) .giants-stage[data-overview="true"] .giants-label::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: var(--leader, 0);
+  border-top: 1px dotted color-mix(in srgb, var(--color-space-muted) 45%, transparent);
+}
+
+/* The overview's radius axis (`overview-scale.tsx`): faint gold gridlines up from the horizon,
+   each round radius beneath its line and the axis's title under those. They fade with the
+   overview. */
+:where([data-simulation="giants"]) .giants-scale {
+  position: absolute;
+  inset-inline: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+:where([data-simulation="giants"]) .giants-scale[data-shown="false"] {
+  opacity: 0;
+}
+:where([data-simulation="giants"]) .giants-scale-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: color-mix(in srgb, var(--color-solar) 16%, transparent);
+}
+:where([data-simulation="giants"]) .giants-scale-value,
+:where([data-simulation="giants"]) .giants-scale-title {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgb(8 8 11);
+}
+:where([data-simulation="giants"]) .giants-scale-value {
+  top: calc(100% + 6px);
+  left: 0;
+  transform: translateX(-50%);
+  color: var(--color-solar);
+}
+:where([data-simulation="giants"]) .giants-scale-title {
+  top: calc(100% + 24px);
+  color: var(--color-space-muted);
+  text-align: center;
+  text-transform: uppercase;
 }
 
 /* Light going round the card's ring at its true pace. */

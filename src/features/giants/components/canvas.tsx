@@ -10,6 +10,7 @@ import { rungNameKey } from "../lib/model/names";
 import { RUNG_IDS, type RungId } from "../lib/model/rungs";
 import { ORBIT_IDS } from "../lib/parameters";
 import { useGiants } from "../lib/store";
+import { OverviewScale } from "./overview-scale";
 
 const resetReady = () => useGiants.getState().setReady(false);
 
@@ -18,7 +19,8 @@ const open = (id: RungId) => useGiants.getState().goTo(id);
 
 /**
  * The stage: the ladder's canvas, and over it each body's name, which the engine moves onto its
- * body every frame and shows only for the body in focus and those large enough to name.
+ * body every frame and shows only for the body in focus and those large enough to name (in the
+ * overview, every body's, beside its dot, over the scale lines).
  */
 export function GiantsCanvas() {
   const t = useTranslations("giants");
@@ -26,6 +28,7 @@ export function GiantsCanvas() {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const labelsRef = useRef<HTMLDivElement>(null);
+  const overview = useGiants((state) => state.overview);
   const create = useCallback<StartEngine>((_signal, onError) => {
     const host = hostRef.current;
     const canvas = canvasRef.current;
@@ -36,7 +39,11 @@ export function GiantsCanvas() {
   useSimulationEngine(create, resetReady);
 
   return (
-    <div ref={hostRef} className="giants-stage absolute inset-0 z-0 bg-space">
+    <div
+      ref={hostRef}
+      data-overview={overview}
+      className="giants-stage absolute inset-0 z-0 bg-space"
+    >
       <canvas
         data-simulation-canvas="giants"
         ref={canvasRef}
@@ -63,6 +70,7 @@ export function GiantsCanvas() {
             {t(`orbits.${id}`)}
           </span>
         ))}
+        <OverviewScale />
       </div>
     </div>
   );

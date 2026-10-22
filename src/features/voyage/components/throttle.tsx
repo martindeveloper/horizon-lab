@@ -1,22 +1,60 @@
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Gauge } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 import { asideOpen } from "@/lib/scene-store";
 import { cn } from "@horizon/toolkit/ui";
 
 import { useVoyage } from "../lib/store";
 
+/** Lets the brake button go. */
+const release = () => useVoyage.getState().setBraking(false);
+
+/**
+ * The brake under the lever, for touch (the keys have X): held, it burns against the motion
+ * relative to the body until the ship is at rest there. Letting go, or the button leaving with
+ * the manual flight, lets it off.
+ */
+function BrakeButton() {
+  const t = useTranslations("voyage");
+  const braking = useVoyage((s) => s.braking);
+  useEffect(() => release, []);
+  return (
+    <button
+      type="button"
+      aria-label={t("hud.brakeHold")}
+      aria-pressed={braking}
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        useVoyage.getState().setBraking(true);
+      }}
+      onPointerUp={release}
+      onPointerCancel={release}
+      onLostPointerCapture={release}
+      onContextMenu={(event) => event.preventDefault()}
+      className={cn(
+        "-mx-1 hidden h-11 w-12 touch-none rounded-sm border border-border font-mono text-[10px] tracking-[0.14em] uppercase transition-colors duration-150 select-none pointer-coarse:block",
+        braking ? "bg-accent text-accent-fg" : "text-fg",
+      )}
+    >
+      {t("hud.brake")}
+    </button>
+  );
+}
+
 /**
  * The throttle lever down the left, where a pilot's left hand rests: thrust ahead, kept where
  * it is set. Opening it in orbit takes the helm; entering orbit closes it. Beside its track a
  * gauge shows what the drive gives now, keys and stick included (`--voyage-push`, written by
  * the cockpit). It waits while the autopilot flies, and steps aside for a phone's panels.
+ * Flown by hand on a touch screen, the brake sits under it.
  */
 export function ThrottleLever() {
   const t = useTranslations("voyage");
   const throttle = useVoyage((s) => s.throttle);
   const flying = useVoyage((s) => s.flying);
+  const manual = useVoyage((s) => s.mode === "free" && !s.flying && s.crash === null);
   const aside = useVoyage(asideOpen);
   const percent = Math.round(throttle * 100);
   return (
@@ -56,6 +94,7 @@ export function ThrottleLever() {
         </SliderPrimitive.Root>
       </div>
       <Gauge aria-hidden="true" className="size-3.5 text-subtle" />
+      {manual ? <BrakeButton /> : null}
     </div>
   );
 }

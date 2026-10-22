@@ -4,7 +4,7 @@ import { useRef, type ReactNode } from "react";
 
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { asideOpen } from "@/lib/scene-store";
-import { IconButton, Kicker, SegmentedControl, Surface, Tooltip, cn } from "@horizon/toolkit/ui";
+import { IconButton, Kicker, SegmentedControl, Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { anchorNameKey } from "../lib/model/anchors";
 import type { FlightPhase } from "../lib/model/autopilot";
@@ -257,7 +257,7 @@ const panelClass = "voyage-holo pointer-events-auto relative flex flex-col gap-2
  * light rather than glass, tilted back and angled in towards the pilot: the ship's on the
  * left (its state and the helm, speed, the two clocks, the time warp) and the target's on the
  * right (its name, range and closing speed, the light there, the drive that gets the ship
- * there), the scanner alone between them. Phones keep one flat panel of the essentials.
+ * there), the scanner alone between them. Phones keep one flat display of the essentials.
  */
 export function FlightDock() {
   const t = useTranslations("voyage");
@@ -416,7 +416,7 @@ export function FlightDock() {
           </section>
         </div>
 
-        <Surface className="pointer-events-auto flex flex-col gap-2 rounded-lg px-3.5 py-2.5 md:hidden">
+        <div className={cn(panelClass, "md:hidden")}>
           <div className="flex items-center gap-2.5">
             <StatusMark status={status} phase={phase} regime={regime} compact />
             <p className="min-w-0 flex-1 truncate text-sm font-medium text-fg">{aimName}</p>
@@ -433,7 +433,7 @@ export function FlightDock() {
             <TimeWarp className="-ml-1.5" />
             <DriveControl className="short:hidden" />
           </div>
-        </Surface>
+        </div>
       </div>
     </footer>
   );
