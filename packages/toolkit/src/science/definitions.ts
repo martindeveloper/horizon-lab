@@ -27,6 +27,8 @@ export const BOLTZMANN_CONSTANT_SI = 1.380649e-23;
 export const ELEMENTARY_CHARGE_SI = 1.602176634e-19;
 /** Electron mass, kg (CODATA 2022). */
 export const ELECTRON_MASS_SI = 9.1093837139e-31;
+/** Proton mass, kg (CODATA 2022). */
+export const PROTON_MASS_SI = 1.67262192595e-27;
 /** Atomic mass constant, one twelfth of a ¹²C atom, kg (CODATA 2022). */
 export const ATOMIC_MASS_CONSTANT_SI = 1.66053906892e-27;
 /** Classical electron radius e² / (4πε₀ mₑ c²), m (CODATA 2022). */

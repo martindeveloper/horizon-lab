@@ -118,6 +118,10 @@ export const SPINS: Record<SpinningId, Spin> = {
   halley: { pole: fixed(270, 66.56), meridian: turning(0, perHours(52.8)) },
 };
 
+/** Sidereal rotation period in hours, from the prime meridian's rate (negative: retrograde). */
+export const siderealHours = (id: SpinningId) =>
+  (360 * 24) / (SPINS[id].meridian(1) - SPINS[id].meridian(0));
+
 /** Polar over equatorial radius, for the oblate giants. */
 export const flattening = (id: BodyId) => 1 - FIGURES[id].polarKm / FIGURES[id].equatorialKm;
 

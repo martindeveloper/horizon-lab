@@ -15,19 +15,19 @@ whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConst
 `solarMass`, `solarRadius`, `solarEffectiveTemperature` and `jupiterGravitationalParameter`
 (IAU 2015 B3 nominal), and for atoms and light
 `planckConstant`, `boltzmannConstant`, `elementaryCharge` (exact, SI 2019),
-`electronMass`, `atomicMassConstant`, `classicalElectronRadius` and `rydbergConstant`
+`electronMass`, `protonMass`, `atomicMassConstant`, `classicalElectronRadius` and `rydbergConstant`
 (CODATA 2022).
 A page can print the table; code uses the named values whose names state their
-units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `SOLAR_TEFF_K`, `SOLAR_IRRADIANCE_W_M2`, `JUPITER_GM_SI`,
+units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `SOLAR_TEFF_K`, `SOLAR_ABSOLUTE_MAGNITUDE_V`, `SOLAR_IRRADIANCE_W_M2`, `JUPITER_GM_SI`,
 `JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `SPEED_OF_LIGHT_KM_S`, `STANDARD_GRAVITY`
 (9.80665 m s⁻², CGPM 1901), `GRAVITATIONAL_CONSTANT` in SI,
-`PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`,
+`PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`, `PROTON_MASS_KG`,
 `ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`, `RYDBERG_INFINITY` in m⁻¹). `RAD_PER_DEG` (π/180) is
 the one degree-to-radian factor; do not retype it.
 
 ## Units and measures (`units.ts`, `measure.ts`)
 
-`UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc), times (ms … Gyr,
+`UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc, Gpc), times (ms … Gyr,
 Julian century), angles (rad, °, ′, ″, mas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
 c), accelerations (m/s²), K, energies (J, eV) and powers (W, L☉), each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
@@ -206,7 +206,8 @@ A fact is one figure a card prints, once: a `value` (with an optional published
 (`verified`, `derived`, `teaching-choice`, `flag`). `digits` fixes its
 significant figures; `show` names the unit its message words (years as "Gyr").
 
-`printFact(fact, value, format)` prints a figure through `formatDistance` for
+`convertFigure(value, unit, to)` converts a figure (refusing a plain count, percent or ratio;
+`isUnitId` tells them apart). `printFact(fact, value, format)` prints a figure through `formatDistance` for
 lengths, in the visitor's unit, at least two significant figures. Other units
 print as plain numbers in the `show` unit, with "million" and "billion" as words
 from `format` and scientific notation from 10¹². `live` values print at the

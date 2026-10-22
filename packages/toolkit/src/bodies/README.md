@@ -70,12 +70,17 @@ that draws the sky (Horizon's header) does not load the orrery's catalogue. The
 Meeus-specific coefficients (the series, the Almanac obliquity, the Moon's
 mean distance 385 000.56 km) stay in their functions.
 
-## Figures, spin and rings (`figures.ts`, `rings.ts`)
+## Figures, masses, spin and rings (`figures.ts`, `masses.ts`, `rings.ts`)
 
 - `FIGURES`: mean, equatorial and polar radii (IAU WGCCRE 2015); `flattening(id)`.
+- `GM_KM3_S2` (`masses.ts`): gravitational parameters, km³ s⁻², for every body but Sedna and
+  Halley (`MassiveId`): the IAU 2015 nominal Sun, Earth and Jupiter, DE440 and the JPL
+  satellite ephemerides for the rest, each planet without its moons.
 - `SPINS`: pole α₀, δ₀ at T and prime meridian W at d days. `poleVector(id, T)`
   is the pole in the scene frame; `bodyOrientation(id, date)` orients a unit
   sphere whose texture longitude 0 starts at local −X and whose +Y is north.
+  `siderealHours(id)` is the rotation period the spin model turns a body by (negative:
+  retrograde).
 - `RINGS`: Saturn, Uranus and Neptune as radial zones of optical depth, colour
   and dust fraction; `ringStrip(system, texels)` bakes them into a float strip
   (opacity, opacity-weighted colour and dust), and `ringStripLevels` adds its

@@ -32,6 +32,12 @@ toolkit's `.glsl` loader (see the package README).
   pass defines while the lens is on (its spikes and fringe then act on radiance). Otherwise
   bloom and the lens work on the display frame through the composite below. Post resources
   are created on first use.
+  An optional `filter: { fragmentShader, uniforms, defines? }` at creation supplies a final
+  display-frame filter. Enable it per frame with `render({ filter: true })`; the default
+  bypasses it with no extra draw or allocation. It reads encoded canvas bytes as `uImage`
+  and buffer-pixel size as `uTexel`, after any FXAA, bloom or lens. Its byte target has no
+  depth attachment, resizes with the drawing buffer, and is reused until disposal. The
+  consumer owns its uniforms and any masking or colour decoding the effect needs.
 - `createCompositePass(renderer, { antialias, bloom, lens })`: the resolve stage of a scene.
   `paint(draw)` runs any number of renders (passes over one depth buffer) into an offscreen
   frame of the drawing buffer's size, then writes it onto the canvas in one full-screen pass

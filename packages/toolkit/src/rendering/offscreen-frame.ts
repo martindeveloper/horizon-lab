@@ -31,6 +31,8 @@ export function createOffscreenFrame(
     fragmentShader: string;
     defines?: Record<string, string>;
     samples?: number;
+    /** Full-screen image filters need no depth attachment. Scene composites default to one. */
+    depthBuffer?: boolean;
     uniforms?: Record<string, IUniform>;
     before?: (target: WebGLRenderTarget, size: Vector2) => void;
   },
@@ -41,7 +43,7 @@ export function createOffscreenFrame(
     type: UnsignedByteType,
     minFilter: LinearFilter,
     magFilter: LinearFilter,
-    depthBuffer: true,
+    depthBuffer: options.depthBuffer ?? true,
     stencilBuffer: false,
     samples: options.samples ?? 0,
   });

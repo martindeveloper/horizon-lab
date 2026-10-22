@@ -6,6 +6,7 @@ import {
   ELEMENTARY_CHARGE_SI,
   GRAVITATIONAL_CONSTANT_SI,
   PLANCK_CONSTANT_SI,
+  PROTON_MASS_SI,
   RYDBERG_CONSTANT_SI,
   SOLAR_GM_SI,
   SPEED_OF_LIGHT_SI,
@@ -176,6 +177,15 @@ export const CONSTANTS = {
     exact: false,
     source: "CODATA 2022",
   },
+  protonMass: {
+    symbol: "mₚ",
+    latex: "m_p",
+    value: PROTON_MASS_SI,
+    unit: "kg",
+    unitLatex: "\\mathrm{kg}",
+    exact: false,
+    source: "CODATA 2022",
+  },
   atomicMassConstant: {
     symbol: "mᵤ",
     latex: "m_u",
@@ -217,6 +227,8 @@ export const STANDARD_GRAVITY = 9.80665;
 export const SOLAR_MASS_KG = CONSTANTS.solarMass.value;
 export const SOLAR_RADIUS_KM = CONSTANTS.solarRadius.value / 1e3;
 export const SOLAR_TEFF_K = CONSTANTS.solarEffectiveTemperature.value;
+/** The Sun's absolute visual magnitude M_V (Allen's Astrophysical Quantities, 4th ed., 2000). */
+export const SOLAR_ABSOLUTE_MAGNITUDE_V = 4.83;
 /** Sunlight's power per square metre at 1 au, W m⁻² (the total solar irradiance). */
 export const SOLAR_IRRADIANCE_W_M2 = CONSTANTS.solarIrradiance.value;
 export const JUPITER_GM_SI = CONSTANTS.jupiterGravitationalParameter.value; // m³ s⁻²
@@ -228,6 +240,7 @@ export const BOLTZMANN_CONSTANT = CONSTANTS.boltzmannConstant.value; // J K⁻¹
 /** Joules in one electronvolt (the elementary charge's value). */
 export const ELECTRON_VOLT_J = CONSTANTS.elementaryCharge.value;
 export const ELECTRON_MASS_KG = CONSTANTS.electronMass.value;
+export const PROTON_MASS_KG = CONSTANTS.protonMass.value;
 export const ATOMIC_MASS_KG = CONSTANTS.atomicMassConstant.value;
 export const CLASSICAL_ELECTRON_RADIUS_M = CONSTANTS.classicalElectronRadius.value;
 export const RYDBERG_INFINITY = CONSTANTS.rydbergConstant.value; // m⁻¹

@@ -69,6 +69,7 @@ export const UNITS = {
   pc: unit("length", "pc", PC),
   kpc: unit("length", "kpc", 1e3 * PC),
   Mpc: unit("length", "Mpc", 1e6 * PC),
+  Gpc: unit("length", "Gpc", 1e9 * PC),
   // Time
   ms: unit("time", "ms", 1e-3),
   s: unit("time", "s", 1),

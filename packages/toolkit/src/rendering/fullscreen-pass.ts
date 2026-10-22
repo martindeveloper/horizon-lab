@@ -26,6 +26,7 @@ import {
 } from "./bloom-pass";
 import { createCompositePass, type CompositePass } from "./composite-pass";
 import { createLensPass, type LensPass, type LensSettings } from "./lens-pass";
+import { createOffscreenFrame, type OffscreenFrame } from "./offscreen-frame";
 import { gamutMatrix, setDrawingBufferGamut } from "./wide-colour";
 
 /**
@@ -43,6 +44,8 @@ export type PassFrame = {
   bloom?: BloomSettings | null;
   lens?: LensSettings | null;
   gamut?: Gamut;
+  /** Apply the optional display-frame filter supplied at creation; bypassed by default. */
+  filter?: boolean;
 };
 
 /** A single shader pass. Call only on the client; importing this module creates no GPU resources. */
@@ -63,6 +66,16 @@ export function createFullscreenPass(options: {
    * `render({ antialias: "supersample" })`.
    */
   supersample?: boolean;
+  /**
+   * Optional final display-frame filter, after bloom/lens/FXAA. Reads encoded canvas bytes
+   * from `uImage`, with buffer-pixel size `uTexel`. Resources are allocated only when
+   * `render({ filter: true })` is first requested. The caller owns the filter's uniforms.
+   */
+  filter?: {
+    fragmentShader: string;
+    uniforms: Record<string, IUniform>;
+    defines?: Record<string, string>;
+  };
   /**
    * How a frame with bloom or a lens is finished when the GPU renders into half-float
    * textures: the shader's radiance (`uHdrOutput` 1, before `display`) is drawn into an
@@ -234,8 +247,9 @@ export function createFullscreenPass(options: {
     return radiance;
   }
 
+  let filtered: OffscreenFrame | null = null;
   let disposed = false;
-  return {
+  const pass = {
     /** Whether bloom and the lens here work on radiance (an RGBA16F frame) rather than on the display frame. */
     hdr: hdr !== null,
     resize(width: number, height: number) {
@@ -254,8 +268,13 @@ export function createFullscreenPass(options: {
      * default off), in the gamut it asks (sRGB by default): for P3 the canvas is switched and
      * `uGamut` holds the conversion for the shader's display step.
      */
-    render(frame?: PassFrame) {
+    render(frame?: PassFrame): void {
       if (disposed) return;
+      if (frame?.filter && options.filter) {
+        filtered ??= createOffscreenFrame(renderer, { ...options.filter, depthBuffer: false });
+        filtered.render(() => pass.render({ ...frame, filter: false }));
+        return;
+      }
       const mode = frame?.antialias ?? "off";
       const wanted = frame?.gamut ?? "srgb";
       if (wanted !== gamutAsked) {
@@ -297,9 +316,10 @@ export function createFullscreenPass(options: {
         return;
       }
       const hdrFrame = radianceFrame(lens !== null)!;
+      const previous = renderer.getRenderTarget();
       renderer.setRenderTarget(hdrFrame.target);
       drawRays(mode, true);
-      renderer.setRenderTarget(null);
+      renderer.setRenderTarget(previous);
       chain ??= createBloomPass(renderer);
       const source = hdrFrame.target.texture;
       if (bloom) {
@@ -327,6 +347,7 @@ export function createFullscreenPass(options: {
     dispose() {
       if (disposed) return;
       disposed = true;
+      filtered?.dispose();
       fxaa?.dispose();
       ldr?.pass.dispose();
       chain?.dispose();
@@ -342,4 +363,5 @@ export function createFullscreenPass(options: {
       renderer.dispose();
     },
   };
+  return pass;
 }

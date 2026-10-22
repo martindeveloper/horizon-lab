@@ -10,10 +10,28 @@ import { convert, type UnitId } from "./units";
 /** A unit of the kit (`UNITS`), so a figure converts with `convert`; or a plain number. */
 export type Unit = UnitId | "count" | "percent" | "ratio";
 /** Lengths a card shows in the visitor's distance unit (au, ly or pc) with its symbol. */
-export type LengthUnit = "au" | "ly" | "Mly" | "pc" | "kpc" | "Mpc";
+export type LengthUnit = "au" | "ly" | "Mly" | "pc" | "kpc" | "Mpc" | "Gpc";
 
-const LENGTHS: ReadonlySet<Unit> = new Set<LengthUnit>(["au", "ly", "Mly", "pc", "kpc", "Mpc"]);
+const LENGTHS: ReadonlySet<Unit> = new Set<LengthUnit>([
+  "au",
+  "ly",
+  "Mly",
+  "pc",
+  "kpc",
+  "Mpc",
+  "Gpc",
+]);
 export const isLength = (unit: Unit): unit is LengthUnit => LENGTHS.has(unit);
+
+const PLAIN: ReadonlySet<Unit> = new Set<Unit>(["count", "percent", "ratio"]);
+/** Whether a figure's unit is one of the kit's, so it converts; a plain number's is not. */
+export const isUnitId = (unit: Unit): unit is UnitId => !PLAIN.has(unit);
+
+/** A figure's number in another unit of its dimension; a plain number has none to convert to. */
+export function convertFigure(value: number, unit: Unit, to: UnitId) {
+  if (!isUnitId(unit)) throw new TypeError(`A plain ${unit} has no ${to}`);
+  return convert(value, unit, to);
+}
 
 /**
  * How a figure was checked: opened in the source, computed from checked inputs, a deliberate
