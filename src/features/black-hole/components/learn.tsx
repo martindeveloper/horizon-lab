@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Pause } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale, useMessages, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { figureArgs } from "@/features/black-hole/lib/figures";
@@ -15,10 +15,11 @@ export function StoryLine({ alwaysOpen = false }: { alwaysOpen?: boolean }) {
 
 function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
   const t = useTranslations("blackHole");
+  const messages = useMessages();
   const presetId = useBlackHole((s) => s.presetId);
   const storyKey = t.has(`stories.${presetId}`) ? presetId : "custom";
   const figures = figureArgs(useLocale());
-  const stories = Object.keys(t.raw(`stories.${storyKey}`)).map((index) => ({
+  const stories = Object.keys(messages.blackHole.stories[storyKey]).map((index) => ({
     kicker: t(`stories.${storyKey}.${index}.kicker`, figures),
     title: t(`stories.${storyKey}.${index}.title`, figures),
     body: t(`stories.${storyKey}.${index}.body`, figures),
@@ -90,7 +91,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
                 type="button"
                 aria-label={t("storyNumber", { number: i + 1 })}
                 aria-current={i === index ? "step" : undefined}
-                className="hidden size-6 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:flex"
+                className="hidden size-6 items-center justify-center rounded-full focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:flex"
                 onClick={() => show(i)}
               >
                 <span
@@ -154,7 +155,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
       {alwaysOpen ? null : (
         <button
           type="button"
-          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-ui tracking-label text-fg-tertiary uppercase transition-colors duration-feedback ease-standard after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden short:hidden"
+          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-ui tracking-label text-fg-tertiary uppercase transition-colors duration-feedback ease-standard after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden short:hidden"
           onClick={() => {
             setHeld(true);
             setOpen((v) => !v);
