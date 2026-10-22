@@ -10,6 +10,7 @@ import {
   RYDBERG_CONSTANT_SI,
   SOLAR_GM_SI,
   SPEED_OF_LIGHT_SI,
+  VACUUM_PERMEABILITY_SI,
 } from "./definitions";
 import { UNITS } from "./units";
 
@@ -213,6 +214,15 @@ export const CONSTANTS = {
     exact: false,
     source: "CODATA 2022",
   },
+  vacuumPermeability: {
+    symbol: "μ₀",
+    latex: "\\mu_0",
+    value: VACUUM_PERMEABILITY_SI,
+    unit: "N A⁻²",
+    unitLatex: "\\mathrm{N\\,A^{-2}}",
+    exact: false,
+    source: "CODATA 2022",
+  },
 } as const satisfies Record<string, Constant>;
 
 export type ConstantId = keyof typeof CONSTANTS;
@@ -244,5 +254,6 @@ export const PROTON_MASS_KG = CONSTANTS.protonMass.value;
 export const ATOMIC_MASS_KG = CONSTANTS.atomicMassConstant.value;
 export const CLASSICAL_ELECTRON_RADIUS_M = CONSTANTS.classicalElectronRadius.value;
 export const RYDBERG_INFINITY = CONSTANTS.rydbergConstant.value; // m⁻¹
+export const VACUUM_PERMEABILITY = CONSTANTS.vacuumPermeability.value; // N A⁻²
 /** Radians in one degree (π/180): multiply degrees by it, divide radians by it. */
 export const RAD_PER_DEG = UNITS.deg.factor;

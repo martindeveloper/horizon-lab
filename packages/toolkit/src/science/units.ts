@@ -1,5 +1,5 @@
 /**
- * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, m/s², K, J, W).
+ * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, m/s², K, J, W, T).
  * Symbols follow the SI and the IAU (au, ly, pc, M☉); hosts may translate them
  * for display. Astronomical definitions are exact where the IAU fixed them.
  */
@@ -27,7 +27,8 @@ export type Dimension =
   | "rate"
   | "temperature"
   | "energy"
-  | "power";
+  | "power"
+  | "magneticField";
 
 export type UnitDefinition = {
   dimension: Dimension;
@@ -119,6 +120,11 @@ export const UNITS = {
   W: unit("power", "W", 1),
   /** Nominal solar luminosity (IAU 2015 Resolution B3). */
   Lsun: unit("power", "L☉", SOLAR_LUMINOSITY_SI, "L_\\odot"),
+  // Magnetic field
+  T: unit("magneticField", "T", 1),
+  mT: unit("magneticField", "mT", 1e-3),
+  /** Gauss, the cgs unit solar physics still quotes: 10⁻⁴ T. */
+  G: unit("magneticField", "G", 1e-4),
 } as const satisfies Record<string, UnitDefinition>;
 
 export type UnitId = keyof typeof UNITS;

@@ -15,21 +15,21 @@ whether it is exact, and its source: `speedOfLight` (exact), `gravitationalConst
 `solarMass`, `solarRadius`, `solarEffectiveTemperature` and `jupiterGravitationalParameter`
 (IAU 2015 B3 nominal), and for atoms and light
 `planckConstant`, `boltzmannConstant`, `elementaryCharge` (exact, SI 2019),
-`electronMass`, `protonMass`, `atomicMassConstant`, `classicalElectronRadius` and `rydbergConstant`
-(CODATA 2022).
+`electronMass`, `protonMass`, `atomicMassConstant`, `classicalElectronRadius`, `rydbergConstant`
+and `vacuumPermeability` (CODATA 2022).
 A page can print the table; code uses the named values whose names state their
 units (`AU_KM`, `LIGHT_YEAR_KM`, `SOLAR_MASS_KG`, `SOLAR_RADIUS_KM`, `SOLAR_TEFF_K`, `SOLAR_ABSOLUTE_MAGNITUDE_V`, `SOLAR_IRRADIANCE_W_M2`, `JUPITER_GM_SI`,
 `JULIAN_YEAR_SECONDS`, `SPEED_OF_LIGHT` in m s⁻¹, `SPEED_OF_LIGHT_KM_S`, `STANDARD_GRAVITY`
 (9.80665 m s⁻², CGPM 1901), `GRAVITATIONAL_CONSTANT` in SI,
 `PLANCK_CONSTANT`, `BOLTZMANN_CONSTANT`, `ELECTRON_VOLT_J`, `ELECTRON_MASS_KG`, `PROTON_MASS_KG`,
-`ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`, `RYDBERG_INFINITY` in m⁻¹). `RAD_PER_DEG` (π/180) is
+`ATOMIC_MASS_KG`, `CLASSICAL_ELECTRON_RADIUS_M`, `RYDBERG_INFINITY` in m⁻¹, `VACUUM_PERMEABILITY`). `RAD_PER_DEG` (π/180) is
 the one degree-to-radian factor; do not retype it.
 
 ## Units and measures (`units.ts`, `measure.ts`)
 
 `UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc, Gpc), times (ms … Gyr,
 Julian century), angles (rad, °, ′, ″, mas, μas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
-c), accelerations (m/s²), K, energies (J, eV) and powers (W, L☉), each as a factor to its SI base. `convert(value, from, to)` refuses to
+c), accelerations (m/s²), K, energies (J, eV), powers (W, L☉) and magnetic fields (T, mT, G), each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 
 ```ts

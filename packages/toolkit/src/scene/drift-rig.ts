@@ -28,6 +28,10 @@ export function createRigDrift(
     get landing() {
       return run.flying ? run.camera.landing : null;
     },
+    /** The shot the drift is flying to or holding, −1 before its first. */
+    get shot() {
+      return run.camera.index;
+    },
     /** How the drift was turning the camera at its last step, rad/s; through a handoff, as the host took it. */
     get motion() {
       return run.camera.motion;
