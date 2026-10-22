@@ -32,6 +32,19 @@ export const ATMOSPHERE_RADIUS = 6;
 /** The camera's reach from the centre, solar radii. */
 export const CAMERA_MIN_R = 1.03;
 export const CAMERA_MAX_R = 12;
+/** Its reach from a feature it orbits (a spot group, a prominence, an active region), radii. */
+export const FEATURE_MIN_R = 0.015;
+export const FEATURE_MAX_R = 4;
+/** Round a feature the camera keeps at least this elevation over the feature's horizon, radians: never under the surface. */
+export const FEATURE_ELEVATION_MIN = 0.04;
+/** The orbit's centre moves between the Sun's centre and a feature with this time constant, s. */
+export const AIM_LAG_S = 0.8;
+/**
+ * About the centre a drag has its full turn from where the camera's height over the surface
+ * is this share of its distance (the disc view, three radii out) and tightens in proportion
+ * nearer, so the surface under the camera never flies past a pointer.
+ */
+export const DRAG_FULL_HEIGHT = 2 / 3;
 /** The wedge's half-angle when the cut is fully open: a quarter of the Sun. */
 export const CUT_HALF_ANGLE = Math.PI / 4;
 /** The wedge's bisector follows the camera, and the wedge opens and closes, with this time constant, s. */

@@ -65,6 +65,17 @@
     "eclipse": "Outer corona",
     "magnetogram": "Field at the surface"
   },
+  "lightShort": {
+    "white": "White",
+    "halpha": "Hα",
+    "he304": "304",
+    "fe171": "171",
+    "fe193": "193",
+    "fe211": "211",
+    "fe335": "335",
+    "fe94": "94",
+    "fe131": "131"
+  },
   "clocks": {
     "real": "Real time",
     "minute": "1 s = 1 min",

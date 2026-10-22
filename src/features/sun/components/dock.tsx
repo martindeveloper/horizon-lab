@@ -19,7 +19,7 @@ import {
 } from "@horizon/toolkit/ui";
 
 import { CLOCK_RATES } from "../lib/model/clock";
-import { LIGHT_IDS } from "../lib/model/lights";
+import { LIGHT_MODES, LIGHT_SCALE } from "../lib/model/lights";
 import { cycleStageAt, eruptionStageAt } from "../lib/model/stages";
 import { VIEW_ACTION, type ViewAction } from "../lib/model/views";
 import { CUT_HALF_ANGLE } from "../lib/parameters";
@@ -36,51 +36,101 @@ const reachesPanels: DockInTheWay = (dock, stage, rem) => dock.right + 22 * rem 
 /** The whole wedge the cut opens, degrees. */
 const CUT_DEGREES = (2 * CUT_HALF_ANGLE * 180) / Math.PI;
 
+/** The ruler's last stop, and where a stop's centre falls along it (the thumb's travel, `size-3.5`). */
+const LAST_STOP = LIGHT_SCALE.length - 1;
+const THUMB_PX = 14;
+const stopAt = (share: number) => `calc(${THUMB_PX / 2}px + ${share} * (100% - ${THUMB_PX}px))`;
+
 /**
- * The lights as a strip of dots in the dial's order, from the photosphere out to the hottest
- * plasma, then the eclipse and the magnetogram; the chosen one is lit and named beside it.
+ * The light as a temperature ruler: one scale from the photosphere's white light up through
+ * Hα and the EUV lines to flare plasma, the track painted in each light's colour, a stop and a
+ * short name at each line, the thumb on the one shown. The two ways of looking that are not
+ * temperatures, the eclipse and the magnetogram, stand at its end as switches; while one is on
+ * the ruler rests, dimmed, where it last stood.
  */
-function LightStrip() {
+function LightRuler() {
+  const t = useTranslations("sun");
+  const light = useSun((s) => s.light);
+  const api = useSun.getState;
+  const onScale = (LIGHT_SCALE as readonly string[]).indexOf(light);
+  const [rested, setRested] = useState(Math.max(0, onScale));
+  const shown = onScale >= 0 ? onScale : rested;
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className={cn("relative min-w-0 flex-1 basis-56 pb-3", onScale < 0 && "opacity-40")}>
+        {/* A stop and its name at each line, under the thumb; the names only where there is room. */}
+        {LIGHT_SCALE.map((id, index) => (
+          <span
+            key={id}
+            aria-hidden
+            style={{ left: stopAt(index / LAST_STOP) }}
+            className="pointer-events-none absolute top-4 flex -translate-x-1/2 flex-col items-center"
+          >
+            <span className="block h-2 w-px -translate-y-1 bg-fg/35" />
+            <span
+              className={cn(
+                "mt-1 font-mono text-[10px] leading-none tabular-nums not-md:hidden",
+                index === shown && onScale >= 0 ? "text-fg" : "text-subtle",
+              )}
+            >
+              {t(`lightShort.${id}`)}
+            </span>
+          </span>
+        ))}
+        <Slider
+          aria-label={t("hud.light")}
+          trackClassName="sun-light-scale h-0.5"
+          rangeClassName="bg-transparent"
+          min={0}
+          max={LAST_STOP}
+          step={1}
+          value={[shown]}
+          valueText={(index) => t(`lights.${LIGHT_SCALE[index] ?? light}`)}
+          onValueChange={([index]) => api().setLight(LIGHT_SCALE[index ?? 0] ?? "white")}
+        />
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        {LIGHT_MODES.map((id) => (
+          <Chip
+            key={id}
+            selected={light === id}
+            aria-pressed={light === id}
+            className="not-md:h-9"
+            onClick={() => {
+              if (light === id) {
+                api().setLight(LIGHT_SCALE[rested] ?? "white");
+                return;
+              }
+              if (onScale >= 0) setRested(onScale);
+              api().setLight(id);
+            }}
+          >
+            {t(`lights.${id}`)}
+          </Chip>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** The light shown, named, with what it shows and the figures it answers to. */
+function LightLegend() {
   const t = useTranslations("sun");
   const f = useFormatter();
   const distance = useDistance();
   const light = useSun((s) => s.light);
   return (
-    <div className="flex min-w-0 items-center gap-2">
-      <div
-        role="radiogroup"
-        aria-label={t("hud.light")}
-        className="relative flex items-center before:absolute before:inset-x-3 before:top-1/2 before:h-px before:bg-fg/15 before:content-['']"
-      >
-        {LIGHT_IDS.map((id) => (
-          <Tooltip key={id} label={t(`lights.${id}`)} side="top">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={id === light}
-              aria-label={t(`lights.${id}`)}
-              className="relative flex size-7 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden md:size-6"
-              onClick={() => useSun.getState().setLight(id)}
-            >
-              <span
-                className="sun-light-dot"
-                data-light={id}
-                data-on={id === light ? "" : undefined}
-                aria-hidden
-              />
-            </button>
-          </Tooltip>
-        ))}
-      </div>
-      <span className="flex min-w-0 flex-col leading-tight">
-        <span className="truncate text-sm tracking-tight text-fg">{t(`lights.${light}`)}</span>
-        <span className={cn(kickerClass, "hidden truncate tracking-normal normal-case lg:inline")}>
-          {t(`lightNotes.${light}`)} · {lightLegend(t, f, distance, light)}
-        </span>
+    <p className="min-w-0 flex-1 basis-48 truncate text-sm leading-tight tracking-tight">
+      <span className="text-fg">{t(`lights.${light}`)}</span>
+      <span className={cn(kickerClass, "ml-2 tracking-normal normal-case")}>
+        {t(`lightNotes.${light}`)} · {lightLegend(t, f, distance, light)}
       </span>
-    </div>
+    </p>
   );
 }
+
+/** Room for the widest everyday reading ("399.9 d"), so a new digit or unit doesn't nudge the pill. */
+const ELAPSED_CLASS = "inline-block min-w-[9ch] text-right";
 
 /** The clock: a pause, and a pill with the rate as the Orrery words it (1 s = 1 day), the time passed beside it. */
 function Clock() {
@@ -102,7 +152,7 @@ function Clock() {
       <Picker
         aria-label={t("hud.clock")}
         label={paused ? t("hud.paused") : t(`clocks.${clock}`)}
-        detail={elapsedLabel(t, f, elapsed)}
+        detail={<span className={ELAPSED_CLASS}>{elapsedLabel(t, f, elapsed)}</span>}
         open={open}
         onOpenChange={setOpen}
         panelClassName="top-auto bottom-[calc(100%+0.5rem)] scroll-thin"
@@ -206,7 +256,10 @@ function ViewActionRow({ kind }: { kind: ViewAction }) {
   );
 }
 
-/** The dock: the view's places as a strip, then one row of the light strip, the clock and the view's action. */
+/**
+ * The dock in rows: the view's places, the light's ruler with its two switches, then the
+ * light's legend with the clock and the view's action.
+ */
 export function SunDock() {
   const view = useSun((s) => s.view);
   /* Phones give an open sheet or card the bottom of the screen. */
@@ -221,8 +274,9 @@ export function SunDock() {
       className="anim-rise flex flex-col gap-2"
     >
       <PlaceStrip />
+      <LightRuler />
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <LightStrip />
+        <LightLegend />
         <Clock />
         {action ? <ViewActionRow kind={action} /> : null}
       </div>

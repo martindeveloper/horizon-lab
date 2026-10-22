@@ -44,7 +44,7 @@ const shown = (strength: number) =>
   (1 - RIBBON_FLOOR) *
     Math.min(1, Math.log1p(Math.max(strength, 0)) / Math.log1p(RIBBON_STRENGTH_TOP));
 import type { SunQuality } from "../quality";
-import { directionOf, type Polyline, type SunFrame } from "./frame";
+import { bipoleAxis, directionOf, type Polyline, type SunFrame } from "./frame";
 import type { SunLooks } from "./looks";
 
 /** The farthest any ribbon reaches, radii: the atmosphere's bound covers every open line drawn. */
@@ -200,8 +200,6 @@ export function createFieldLayer(
   }
 
   const centre = new Vector3();
-  const east = new Vector3();
-  const north = new Vector3();
   const axis = new Vector3();
   const dir: [number, number, number] = [0, 0, 0];
 
@@ -250,12 +248,8 @@ export function createFieldLayer(
         if (xPoint) {
           directionOf(region.lat, region.lon, dir);
           centre.set(dir[0], dir[1], dir[2]);
-          east.set(-Math.sin(region.lon), 0, Math.cos(region.lon));
-          north.crossVectors(east, centre);
-          axis
-            .copy(east)
-            .multiplyScalar(Math.cos(region.tilt))
-            .addScaledVector(north, Math.sin(region.tilt));
+          bipoleAxis(region, dir);
+          axis.set(dir[0], dir[1], dir[2]);
           writeCross(
             centre.clone().multiplyScalar(1 + eruption.sheetBottom),
             axis,

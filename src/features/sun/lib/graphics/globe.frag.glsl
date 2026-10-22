@@ -74,7 +74,8 @@ Face faceAt(vec3 s, float mu, float px) {
   float texelPx = max(mu, 0.02) / (uMapTexels * max(px, 1e-9));
   f.mapShare = uMapShown * (1.0 - smoothstep(MAP_FADE_FROM_PX, MAP_FADE_TO_PX, texelPx));
   if (f.mapShare > 0.0) {
-    vec2 uv = vec2(fract((atan(s.z, s.x) + MAP_CENTRAL_MERIDIAN_RAD) / TWO_PI), 0.5 + asin(clamp(s.y, -1.0, 1.0)) / PI);
+    /* The body's longitude of s (west positive: −z), then Carrington's. */
+    vec2 uv = vec2(fract((atan(-s.z, s.x) + MAP_CENTRAL_MERIDIAN_RAD) / TWO_PI), 0.5 + asin(clamp(s.y, -1.0, 1.0)) / PI);
     f.measured = texture2D(uMap, uv).r / SUN_MAP_QUIET_INTENSITY;
   }
   float marks = uLightMode == LIGHT_WHITE ? 1.0 - f.mapShare : 1.0;

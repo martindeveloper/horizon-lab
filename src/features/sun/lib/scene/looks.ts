@@ -27,7 +27,7 @@ import {
   REGION_MAX,
   SPICULE_LIFETIME_S,
 } from "../parameters";
-import { directionOf, type PassbandId, type SunFrame } from "./frame";
+import { bipoleAxis, directionOf, tiltedAxis, type PassbandId, type SunFrame } from "./frame";
 import type { SunLight } from "./settings";
 
 /** A clock wraps here so its float stays precise; a wrap is a jump no one sees. */
@@ -87,8 +87,6 @@ export function createSunLooks() {
     uGreen: { value: new Vector3(green[0], green[1], green[2]) },
   };
   const dir: [number, number, number] = [0, 0, 0];
-  const east = new Vector3();
-  const north = new Vector3();
   const axis = new Vector3();
   const side = new Vector3();
   const centre = new Vector3();
@@ -137,13 +135,9 @@ export function createSunLooks() {
             : region.flare;
         directionOf(region.lat, region.lon, dir);
         centre.set(dir[0], dir[1], dir[2]);
-        east.set(-Math.sin(region.lon), 0, Math.cos(region.lon));
-        north.crossVectors(east, centre);
-        /* The leader–follower axis runs east, tipped by Joy's tilt; the neutral line crosses it. */
-        axis
-          .copy(east)
-          .multiplyScalar(Math.cos(region.tilt))
-          .addScaledVector(north, Math.sin(region.tilt));
+        /* The follower-to-leader axis, west and tipped equatorward by Joy's tilt (the model's); the neutral line crosses it. */
+        bipoleAxis(region, dir);
+        axis.set(dir[0], dir[1], dir[2]);
         side.crossVectors(centre, axis);
         regionDir[k]!.set(centre.x, centre.y, centre.z, region.size);
         regionAxis[k]!.set(axis.x, axis.y, axis.z, region.polarity);
@@ -162,9 +156,8 @@ export function createSunLooks() {
         const p = frame.prominences[k]!;
         directionOf(p.lat, p.lon, dir);
         centre.set(dir[0], dir[1], dir[2]);
-        east.set(-Math.sin(p.lon), 0, Math.cos(p.lon));
-        north.crossVectors(east, centre);
-        axis.copy(east).multiplyScalar(Math.cos(p.tilt)).addScaledVector(north, Math.sin(p.tilt));
+        tiltedAxis(p.lat, p.lon, p.tilt, dir);
+        axis.set(dir[0], dir[1], dir[2]);
         prominenceAt[k]!.set(centre.x, centre.y, centre.z, p.length / 2);
         prominenceAlong[k]!.set(axis.x, axis.y, axis.z, p.fade * (1 - p.erupting));
       }

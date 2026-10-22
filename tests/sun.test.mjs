@@ -53,6 +53,50 @@ test("the tour, the places and the drift name views, lights, places and formulas
   }
 });
 
+test("every view's framing stands outside the Sun, the feature views orbiting their feature", async () => {
+  const { createSunModel, OBSERVED_REGIONS } = await import("../src/space/sun/frame.ts");
+  const { viewAim, viewPose, viewReach, viewOrbitsFeature } =
+    await import("../src/features/sun/lib/scene/views.ts");
+  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const frame = model.frameAt({
+    time: 0,
+    cyclePhase: 25.4,
+    light: "fe171",
+    eruptionScrub: 0.5,
+    fieldLineCount: 8,
+  });
+  for (const id of VIEW_IDS) {
+    const aim = viewAim(id, frame);
+    assert.equal(aim !== null, viewOrbitsFeature(id), `${id} orbits what it should`);
+    if (aim) {
+      const r = Math.hypot(...aim.point);
+      assert.ok(r >= 1 && r < 1.5, `${id} aims at or just over the surface`);
+      const n = Math.hypot(...aim.normal);
+      assert.ok(Math.abs(n - 1) < 1e-9, `${id}'s normal is a direction`);
+      const along = aim.point.map((v, i) => v / r - aim.normal[i]);
+      assert.ok(Math.hypot(...along) < 1e-9, `${id}'s aim stands on its normal`);
+      assert.ok(viewPose(id, frame, { azimuth: 0, inclination: 0 }).inclination > 0, id);
+    }
+    assert.ok(viewReach(id, frame) > 1.02, `${id} stands outside the Sun`);
+  }
+});
+
+test("the sky's frame puts Earth's direction on the equator at +x and the Sun's pole up at the epoch", async () => {
+  const { Vector3 } = await import("three");
+  const { skyOrientation, solarPole, earthDirection } =
+    await import("../src/features/sun/lib/scene/sky-frame.ts");
+  const { MAP_EPOCH } = await import("../src/space/sun/frame.ts");
+  const epoch = new Date(MAP_EPOCH);
+  const q = skyOrientation(undefined, epoch);
+  const pole = solarPole(epoch).applyQuaternion(q);
+  const earth = earthDirection(epoch).applyQuaternion(q);
+  assert.ok(pole.distanceTo(new Vector3(0, 1, 0)) < 1e-9, "the pole is up");
+  assert.ok(Math.abs(earth.z) < 1e-9 && earth.x > 0.99, "Earth stands at +x on the equator");
+  /* Earth's heliographic latitude in May is a few degrees south (B₀ ≈ −3°). */
+  const b0 = Math.asin(earth.y);
+  assert.ok(b0 < -0.02 && b0 > -0.13, `B0 ${b0}`);
+});
+
 test("the dock's stages follow the model's boundaries, and a cycle count maps back to its year", () => {
   const order = [];
   for (let s = 0; s <= 1; s += 0.01) {
@@ -171,6 +215,7 @@ test("every card, caption, hint and note renders its figures in both languages",
     for (const id of LIGHT_IDS) {
       clean(t(`lights.${id}`), `${locale}:${id}`);
       clean(t(`lightNotes.${id}`), `${locale}:${id}`);
+      if (id !== "eclipse" && id !== "magnetogram") clean(t(`lightShort.${id}`), `${locale}:${id}`);
       const legend = lightLegend(t, f, distance, id);
       clean(legend, `${locale}:${id}`);
       assert.match(legend, /\d/, `${locale}: ${id} quotes a figure`);

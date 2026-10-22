@@ -65,6 +65,17 @@
     "eclipse": "Vnější koróna",
     "magnetogram": "Pole na povrchu"
   },
+  "lightShort": {
+    "white": "Bílé",
+    "halpha": "Hα",
+    "he304": "304",
+    "fe171": "171",
+    "fe193": "193",
+    "fe211": "211",
+    "fe335": "335",
+    "fe94": "94",
+    "fe131": "131"
+  },
   "clocks": {
     "real": "Reálný čas",
     "minute": "1 s = 1 min",

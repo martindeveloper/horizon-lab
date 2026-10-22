@@ -5,7 +5,16 @@
  * camera (orbit rig, controls, the seven framings, a drift), the names, the taps and the
  * readouts; it only interpolates (the wedge's facing) and never advances the model itself.
  */
-import { Group, Mesh, MeshBasicMaterial, Scene, SphereGeometry, Vector3 } from "three";
+import {
+  Group,
+  Matrix4,
+  Mesh,
+  MeshBasicMaterial,
+  Quaternion,
+  Scene,
+  SphereGeometry,
+  Vector3,
+} from "three";
 
 import { CARRINGTON_SIDEREAL_RATE } from "@/space/sun/model/rotation";
 import {
@@ -43,12 +52,17 @@ import type { Gamut } from "@horizon/toolkit/science";
 import { createLightTables, type InteriorProfile } from "../graphics/light-tables";
 import {
   BLOOM,
+  AIM_LAG_S,
   CAMERA_MAX_R,
   CAMERA_MIN_R,
   COROTATE_ABOVE_RATE,
   CUT_HALF_ANGLE,
   CUT_LAG_S,
+  FEATURE_ELEVATION_MIN,
+  FEATURE_MAX_R,
+  FEATURE_MIN_R,
   DISSOLVE_S,
+  DRAG_FULL_HEIGHT,
   ERUPTION_PLAY_S,
   GRANULES_PER_RADIUS,
   NAME_DISC_R,
@@ -69,8 +83,9 @@ import { GLOBE_PICK, createGlobeLayer } from "./globe-layer";
 import { createSunLooks } from "./looks";
 import { createProminenceLayer } from "./prominence-layer";
 import { SUN_VIEW_IDS, type SunLight, type SunSceneSettings, type SunViewId } from "./settings";
+import { createSkyLayer } from "./sky-layer";
 import { createSunMap } from "./sun-map";
-import { VIEW_DISTANCE, featuredRegion, viewLookAt, viewPose, viewTurns } from "./views";
+import { featuredRegion, viewAim, viewPose, viewReach, viewTurns } from "./views";
 
 /** The shells a tap on the cut face names. */
 export const LAYER_IDS = [
@@ -174,6 +189,19 @@ function sunPick(pick: unknown): SunPick | null {
   return null;
 }
 
+/**
+ * How much of the sky each kind of light shows. The eclipse shows it whole, as totality does;
+ * the other lights keep it well in view so the Sun stands in its sky, a little held back in
+ * white light, where a camera exposed for the photosphere would in truth see no star at all.
+ */
+const SKY_EXPOSURE: Readonly<Record<keyof typeof RIBBON_PRESENCE, number>> = {
+  white: 0.6,
+  halpha: 0.85,
+  band: 0.85,
+  eclipse: 1,
+  magnetogram: 0.85,
+};
+
 /** What kind of light an id is, for how much of the field it shows. */
 const lightKind = (id: PassbandId): keyof typeof RIBBON_PRESENCE =>
   id === "white" || id === "halpha" || id === "eclipse" || id === "magnetogram" ? id : "band";
@@ -228,6 +256,7 @@ export function createSunEngine(
       onError,
     });
     const atmosphere = createAtmosphereLayer(scope, scene, looks, tables);
+    const sky = createSkyLayer(scope, scene, basics.dpr, quality.sky, () => loop.invalidate());
     const sunMap = createSunMap(scope, {
       tier: () => quality.mapTier,
       onLoad: (texture, width) => {
@@ -241,6 +270,7 @@ export function createSunEngine(
       field.setQuality(quality);
       prominences.setQuality(quality);
       atmosphere.setQuality(quality);
+      sky.setCounts(quality.sky);
       sceneHost.setResolution(quality.resolution);
       sceneHost.setBloom({ enabled: current.bloom, ...quality.bloom, ...BLOOM });
       sceneHost.setLens({ enabled: current.lens, ...quality.lens });
@@ -260,9 +290,48 @@ export function createSunEngine(
     const dissolve = createDissolve(scope, renderer, DISSOLVE_S);
 
     /* ------------------------------------------------------------ camera */
+    /* The orbit's centre: the Sun's, or a feature's (`viewAim`), with the orbit's up the
+       surface normal there and azimuth zero standing east; `closeness` eases between the two
+       as the view changes, so a flight to a feature swings the orbit onto it. */
+    const aimPoint = new Vector3();
+    const featureFrame = new Quaternion();
+    const CENTRE_FRAME = new Quaternion();
+    const basis = new Matrix4();
+    const up = new Vector3();
+    const east = new Vector3();
+    const south = new Vector3();
+    let closeness = viewAim(current.view, frame()) ? 1 : 0;
+    /** The orbit's centre is on its way between the Sun's centre and a feature. */
+    let aiming = false;
+    const orbitsFeature = () => closeness >= 0.5;
+    const aimAt = (dt: number, f: SunFrame, id: SunViewId) => {
+      const target = viewAim(id, f);
+      if (target) {
+        aimPoint.set(target.point[0], target.point[1], target.point[2]);
+        up.set(target.normal[0], target.normal[1], target.normal[2]);
+        east.set(-up.z, 0, up.x);
+        if (east.lengthSq() < 1e-8) east.set(0, 0, 1);
+        east.normalize();
+        south.crossVectors(up, east);
+        featureFrame.setFromRotationMatrix(basis.makeBasis(south, up, east));
+      }
+      const wanted = target ? 1 : 0;
+      const k = reduceMotion.matches ? 1 : 1 - Math.exp(-dt / AIM_LAG_S);
+      const gap = wanted - closeness;
+      closeness += gap * k;
+      aiming = Math.abs(gap) > 1e-3;
+      if (!aiming) closeness = wanted;
+    };
     const rig = createOrbitRig(camera, {
       pose: viewPose(current.view, frame(), { azimuth: 0, inclination: 0.1 }),
-      limits: () => ({ min: CAMERA_MIN_R, max: CAMERA_MAX_R }),
+      limits: () =>
+        orbitsFeature()
+          ? { min: FEATURE_MIN_R, max: FEATURE_MAX_R }
+          : { min: CAMERA_MIN_R, max: CAMERA_MAX_R },
+      /* While the orbit's centre moves, limits that change with it never snatch the distance. */
+      follow: () => ({ held: false, clamp: !aiming }),
+      home: (aim) => aim.copy(aimPoint).multiplyScalar(closeness),
+      orient: (_distance, orbit) => orbit.slerpQuaternions(CENTRE_FRAME, featureFrame, closeness),
       reduceMotion,
       nearFloor: 0.002,
       far: () => CAMERA_MAX_R * 4,
@@ -275,7 +344,16 @@ export function createSunEngine(
     rig.applyPose();
     const controls = createOrbitControls(scope, canvas, rig, {
       invalidate: () => loop.invalidate(),
-      distance: { min: CAMERA_MIN_R, max: CAMERA_MAX_R },
+      /* The input's own bounds span both orbits; the rig clamps to the one it is in. */
+      distance: { min: FEATURE_MIN_R, max: CAMERA_MAX_R },
+      /* About the centre a drag turns the whole Sun, so near the surface it tightens with
+         the camera's height over it, as at the disc view from there out; round a feature
+         the turn is about the feature and stays as it is. */
+      dragScale: (pose) => {
+        const height = (pose.distance - 1) / pose.distance;
+        const centre = Math.min(1, Math.max(0, height / DRAG_FULL_HEIGHT));
+        return closeness + (1 - closeness) * centre;
+      },
       onInput: () => hooks.onInput?.(),
     });
     /** The drift's run: made from its shots as it begins, dropped as it ends. */
@@ -449,24 +527,11 @@ export function createSunEngine(
       return disc >= 0 && -b - Math.sqrt(disc) < dist - 1e-4;
     };
     let lastReadouts: SunReadouts | null = null;
-    /** Where the camera looks besides the centre (the limb and eruption views), eased; true while it moves. */
-    const lookAt = new Vector3();
-    const lookGoal = new Vector3();
-    let lookShare = viewLookAt(current.view, frame()) ? 1 : 0;
-    let looking = false;
-    const lookAside = (dt: number, f: SunFrame) => {
-      const target = viewLookAt(view, f);
-      if (target) lookGoal.set(target[0], target[1], target[2]);
-      const wanted = target ? 1 : 0;
-      const k = reduceMotion.matches ? 1 : 1 - Math.exp(-dt / CUT_LAG_S);
-      const gap = wanted - lookShare;
-      lookShare += gap * k;
-      looking = Math.abs(gap) > 1e-3;
-      if (lookShare <= 1e-4) return;
-      lookAt.copy(lookGoal).multiplyScalar(lookShare);
-      camera.lookAt(lookAt);
-      camera.updateMatrixWorld();
-      camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+    /** Round a feature the camera stays over its horizon, whatever a drag asks. */
+    const keepOverHorizon = () => {
+      if (closeness < 1 || rig.flying || (drift?.flying ?? false)) return;
+      if (rig.pose.inclination < FEATURE_ELEVATION_MIN)
+        rig.pose.inclination = FEATURE_ELEVATION_MIN;
     };
     /** The wedge's bisector eases toward the camera's azimuth; true while it moves. */
     let facing = false;
@@ -488,9 +553,9 @@ export function createSunEngine(
       if (!cutting) cutShown = current.cut;
       cut.x = cutShown * CUT_HALF_ANGLE;
     };
-    /** The camera rides with the Carrington frame; a flight or the drift, which hold the camera, do not. */
+    /** The camera rides with the Carrington frame; a flight or the drift, which hold the camera, do not, and a feature orbit turns with its feature already. */
     const corotate = (modelSeconds: number) => {
-      if (rig.flying || (drift?.flying ?? false)) return;
+      if (rig.flying || (drift?.flying ?? false) || orbitsFeature()) return;
       const turned = rig.pose.azimuth + CARRINGTON_SIDEREAL_RATE * modelSeconds;
       rig.pose.azimuth = wrapSigned(turned, Math.PI * 2);
     };
@@ -506,7 +571,7 @@ export function createSunEngine(
       controls.interacting ||
       (drift?.flying ?? false) ||
       facing ||
-      looking ||
+      aiming ||
       cutting ||
       dissolve.active ||
       globe.busy ||
@@ -526,10 +591,11 @@ export function createSunEngine(
         hooks.onEruption?.(Math.min(1, scrub.s + dt / ERUPTION_PLAY_S));
       const f = frame();
       driftNow()?.step(hooks.drift!.state(), dt);
+      aimAt(dt, f, view);
       rig.step(dt);
+      keepOverHorizon();
       rig.home();
       rig.applyPose();
-      lookAside(dt, f);
       faceCamera(dt);
       openCut(dt);
 
@@ -546,6 +612,7 @@ export function createSunEngine(
       field.update(f, current.fieldLines);
       prominences.update(f, camera, prominenceLit);
       atmosphere.update(f, current);
+      sky.update(camera, SKY_EXPOSURE[lightKind(light.id)]);
 
       /* Names: each place at its anchor, unless the Sun hides it; the places inside show once
          the cut is open. The tap targets stand at the prominences and the X-point. */
@@ -554,7 +621,7 @@ export function createSunEngine(
          features once they span `NAME_FEATURE_PX`, limb features within `NAME_LIMB_PX` of the
          limb and in view, the places inside with the cut open; each set a little outward. */
       const flying = rig.flying || (drift?.flying ?? false);
-      const distance = rig.pose.distance;
+      const distance = camera.position.length();
       const worldPx = worldPerPixel(camera.fov, 1, viewport.height);
       const featured = featuredRegion(f);
       const limbPx = Math.asin(Math.min(1, 1 / distance)) / (worldPx / distance);
@@ -638,13 +705,13 @@ export function createSunEngine(
       const due = readoutDue(dt, invalidated);
       if (due) hooks.publish?.(f.time, f.eruption?.goesClass ?? "", f.cyclePhase);
       if (hooks.onReadout && due) {
-        const distance = rig.pose.distance;
+        const distance = camera.position.length();
         const readouts: SunReadouts = {
           distance,
           view:
             rig.flying || (drift?.flying ?? false)
               ? view
-              : nearestView(SUN_VIEW_IDS, (id) => VIEW_DISTANCE[id], distance),
+              : nearestView(SUN_VIEW_IDS, (id) => viewReach(id, f), distance),
           heading: ((Math.round((rig.pose.azimuth * 180) / Math.PI) % 360) + 360) % 360,
           tilt: Math.round((rig.pose.inclination * 180) / Math.PI),
           antialias: antialias ?? defaultSceneAntialias(tight),

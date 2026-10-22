@@ -21,6 +21,35 @@ const input = (over = {}) => ({
 });
 const radius = (p) => Math.hypot(...p);
 
+test("the surface frame turns prograde with west, where longitude grows, on the right seen from Earth", async () => {
+  const { surfacePoint, westAt, northAt, tiltedAxis } =
+    await import("../src/space/sun/model/surface.ts");
+  const { Vector3 } = await import("three");
+  const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-12, `${a} != ${b}`);
+  /* Seen from +x with +y up, the viewer's right is −z: a larger longitude lies to the right. */
+  const ahead = surfacePoint(0, 0.1);
+  assert.ok(ahead[2] < 0, "west is to the right");
+  /* A prograde turn (+y, right-hand) carries +x toward −z: toward larger longitudes. */
+  const carried = new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 1, 0), 0.1);
+  near(carried.z, ahead[2]);
+  near(carried.x, ahead[0]);
+  /* West is the derivative along longitude; north the derivative along latitude; both unit and tangent. */
+  const p = surfacePoint(0.4, 1.1);
+  const w = westAt(0.4, 1.1);
+  const n = northAt(0.4, 1.1);
+  const dp = surfacePoint(0.4, 1.1 + 1e-6).map((v, i) => (v - p[i]) / 1e-6 / Math.cos(0.4));
+  for (let i = 0; i < 3; i++) assert.ok(Math.abs(dp[i] - w[i]) < 1e-5, "west is +lon");
+  near(w[0] * p[0] + w[1] * p[1] + w[2] * p[2], 0);
+  near(n[0] * p[0] + n[1] * p[1] + n[2] * p[2], 0);
+  assert.ok(n[1] > 0, "north climbs");
+  /* Joy: the leading end of a tilted axis is nearer the equator in both hemispheres. */
+  for (const lat of [0.4, -0.4]) {
+    const axis = tiltedAxis(lat, 0, 0.2);
+    assert.ok(Math.sign(axis[1]) === -Math.sign(lat), `equatorward at ${lat}`);
+    assert.ok(axis[0] * westAt(lat, 0)[0] + axis[2] * westAt(lat, 0)[2] > 0.9, "mostly west");
+  }
+});
+
 test("a model fills one frame and its arrays each call, reading the contract's fields", () => {
   const model = createSunModel(5);
   const first = model.frameAt(input());

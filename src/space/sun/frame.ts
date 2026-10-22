@@ -58,6 +58,7 @@ export {
   type ObservedRegion,
 } from "./model/observed";
 export { MAP_EPOCH } from "./model/parameters";
+export { bipoleAxis, northAt, surfacePoint, tiltedAxis, westAt } from "./model/field";
 export type {
   Eruption,
   PassbandId,

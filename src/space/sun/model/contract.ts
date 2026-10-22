@@ -1,8 +1,9 @@
 /**
  * What a renderer reads of the Sun each frame: the contract `frame.ts` exports. Positions are
  * in the body frame, y the pole, radii in R☉ (`SOLAR_RADIUS_KM`); angles in radians; a point on
- * the surface at (lat, lon) is (cos lat cos lon, sin lat, cos lat sin lon). Longitude increases
- * in the direction of rotation (heliographic west: Stonyhurst W is positive), and the white-light
+ * the surface at (lat, lon) is (cos lat cos lon, sin lat, −cos lat sin lon) (`model/surface.ts`).
+ * Longitude increases in the direction of rotation (heliographic west: Stonyhurst W is
+ * positive; the frame turns prograde about +y, so west is on the right seen from +x), and the white-light
  * map's central meridian at `MAP_EPOCH` is longitude zero, so a feature's model longitude is its
  * Carrington longitude minus the central meridian's then (`MAP_CENTRAL_MERIDIAN_DEG`). The frame
  * turns with the equator (`surfaceTurn`); a feature's `lon` already holds its lag behind the

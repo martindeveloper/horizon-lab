@@ -1,5 +1,6 @@
 import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Sphere, Vector3 } from "three";
 
+import { surfacePoint, tiltedAxis } from "../../model/surface";
 import {
   SUN_ACTIVITY_DEPTH_RATIO,
   SUN_ACTIVITY_LIFT_WIDENING,
@@ -10,7 +11,7 @@ import {
 
 /**
  * Where a prominence stands: latitude and longitude of its middle (radians, body frame, y the
- * pole), the tilt of its sheet from east (radians), its height and half-length in solar radii,
+ * pole), the tilt of its sheet from west (radians, the model's `tiltedAxis`), its height and half-length in solar radii,
  * and a seed its threads are salted with.
  */
 export type ProminenceBound = {
@@ -22,16 +23,10 @@ export type ProminenceBound = {
   seed: number;
 };
 
-/** The unit vector at a latitude and longitude, and east there. */
+/** The unit vector at a latitude and longitude, and the sheet's direction along the surface there. */
 export function prominenceFrame(lat: number, lon: number, tilt: number) {
-  const anchor = new Vector3(
-    Math.cos(lat) * Math.cos(lon),
-    Math.sin(lat),
-    Math.cos(lat) * Math.sin(lon),
-  );
-  const east = new Vector3(-Math.sin(lon), 0, Math.cos(lon));
-  const north = new Vector3().crossVectors(east, anchor);
-  const along = east.multiplyScalar(Math.cos(tilt)).addScaledVector(north, Math.sin(tilt));
+  const anchor = new Vector3().fromArray(surfacePoint(lat, lon));
+  const along = new Vector3().fromArray(tiltedAxis(lat, lon, tilt));
   return { anchor, along };
 }
 

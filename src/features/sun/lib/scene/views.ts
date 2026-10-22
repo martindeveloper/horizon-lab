@@ -1,8 +1,11 @@
 /**
- * The seven framings, each the pose that frames it (solar radii, radians): the whole disc, the
- * cut open, a spot group from just above it, the limb, the corona with the disc occulted, an
- * active region obliquely and the pole tipped for the cycle. The views that look at a feature
- * take their angles from the frame; the rest keep the visitor's.
+ * The seven framings, each the pose that frames it (solar radii, radians). Four orbit the
+ * Sun's centre: the whole disc, the cut open, the corona with the disc occulted, the pole
+ * tipped for the cycle. Three orbit a feature (`viewAim`): a spot group from just above it,
+ * a prominence at the limb, an active region seen obliquely; there the pose's distance is from
+ * the feature, its inclination the elevation over the feature's horizon and its azimuth the
+ * bearing round it, zero standing east. The views that look at a feature take their angles
+ * from the frame; the rest keep the visitor's.
  */
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import type { Vec3 } from "@horizon/toolkit/math";
@@ -10,53 +13,66 @@ import type { Vec3 } from "@horizon/toolkit/math";
 import { directionOf, type SunFrame } from "./frame";
 import type { SunViewId } from "./settings";
 
-/** The distance each view frames at. */
+/** The distance each view frames at: from the centre, or from the feature it orbits. */
 export const VIEW_DISTANCE: Readonly<Record<SunViewId, number>> = {
   surface: 3,
   inside: 3,
-  sunspot: 1.08,
-  chromosphere: 1.5,
+  sunspot: 0.08,
+  chromosphere: 0.35,
   corona: 6,
-  eruption: 2.4,
+  eruption: 0.9,
   cycle: 3,
 };
 
-/** The eruption view looks at this height over its region, radii from the centre. */
-const ERUPTION_LOOK_R = 1.4;
-/** The eruption view keeps its region this far inside the limb, radians, and the camera this far below its latitude. */
-const ERUPTION_INSIDE_LIMB = 0.12;
-const ERUPTION_BELOW = 0.15;
+/** The views that orbit a feature rather than the centre. */
+const ORBITS_FEATURE: Readonly<Record<SunViewId, boolean>> = {
+  surface: false,
+  inside: false,
+  sunspot: true,
+  chromosphere: true,
+  corona: false,
+  eruption: true,
+  cycle: false,
+};
+export const viewOrbitsFeature = (id: SunViewId) => ORBITS_FEATURE[id];
+
+/** The eruption view orbits this height over its region, radii from the centre: the arcade's middle. */
+const ERUPTION_AIM_R = 1.12;
+/** Elevation over the feature's horizon each feature view opens at, radians. */
+const SUNSPOT_ELEVATION = 1.35;
+const LIMB_ELEVATION = 0.2;
+const ERUPTION_ELEVATION = 0.35;
 
 /**
- * The rig's azimuth that puts a body longitude under the camera: the rig stands at
- * (sin az, ·, cos az), and the body has turned by `surfaceTurn` (a world azimuth is a body
- * longitude less the turn).
+ * The rig's azimuth that puts a body longitude under the camera, about the centre: the rig
+ * stands at (sin az, ·, cos az), a body longitude lies at the world angle −lon, and the body
+ * has turned prograde by `surfaceTurn`, carrying it on by as much.
  */
-export const azimuthOf = (lon: number, frame: SunFrame) => Math.PI / 2 - (lon - frame.surfaceTurn);
+export const azimuthOf = (lon: number, frame: SunFrame) => Math.PI / 2 + lon + frame.surfaceTurn;
 
-/** A body-frame direction in the world: the body turned by `surfaceTurn`. */
+/** A body-frame direction in the world: the body turned prograde by `surfaceTurn`. */
 const worldDirection = (lat: number, lon: number, frame: SunFrame) =>
-  directionOf(lat, lon - frame.surfaceTurn);
+  directionOf(lat, lon + frame.surfaceTurn);
 
-/**
- * Where a view looks, when not at the centre: the limb view at its prominence's foot, the
- * eruption view at its region, a little above the surface. The orbit still turns about the
- * centre; the camera is turned onto the point after its pose is set.
- */
-export function viewLookAt(id: SunViewId, frame: SunFrame): Vec3 | null {
+/** What a feature view orbits: the point, and the surface normal under it (its orbit's up). */
+export type ViewAim = { point: Vec3; normal: Vec3 };
+
+const scaled = (d: Vec3, r: number): Vec3 => [d[0] * r, d[1] * r, d[2] * r];
+
+/** Where a feature view orbits this frame; null for the views about the centre or with nothing to show. */
+export function viewAim(id: SunViewId, frame: SunFrame): ViewAim | null {
   if (id === "chromosphere") {
     const prominence = featuredProminence(frame);
     if (!prominence) return null;
-    const top = 1 + prominence.height * (1 + prominence.lift) * 0.5;
-    const d = worldDirection(prominence.lat, prominence.lon, frame);
-    return [d[0] * top, d[1] * top, d[2] * top];
+    const normal = worldDirection(prominence.lat, prominence.lon, frame);
+    /* The prominence's middle, so it stands against the sky with the limb beneath. */
+    return { point: scaled(normal, 1 + prominence.height * (1 + prominence.lift) * 0.5), normal };
   }
-  if (id === "eruption") {
-    /* Above the region, so it sits low in the frame with the arcade standing into the sky. */
+  if (id === "eruption" || id === "sunspot") {
     const region = featuredRegion(frame);
     if (!region) return null;
-    const d = worldDirection(region.lat, region.lon, frame);
-    return [d[0] * ERUPTION_LOOK_R, d[1] * ERUPTION_LOOK_R, d[2] * ERUPTION_LOOK_R];
+    const normal = worldDirection(region.lat, region.lon, frame);
+    return { point: scaled(normal, id === "eruption" ? ERUPTION_AIM_R : 1), normal };
   }
   return null;
 }
@@ -102,42 +118,31 @@ export function viewPose(
   angles: Pick<OrbitPose, "azimuth" | "inclination">,
 ): OrbitPose {
   const distance = VIEW_DISTANCE[id];
-  const region = featuredRegion(frame);
   switch (id) {
     case "sunspot":
-      return {
-        distance,
-        azimuth: region ? azimuthOf(region.lon, frame) : angles.azimuth,
-        inclination: region?.lat ?? 0,
-      };
+      /* Straight over the group, from where the visitor stands round it. */
+      return { distance, azimuth: angles.azimuth, inclination: SUNSPOT_ELEVATION };
     case "eruption":
-      /* The region just inside the limb to the camera's side and a little below the camera,
-         so the arcade stands up against dark sky with the limb to one side. */
-      return {
-        distance,
-        azimuth:
-          (region ? azimuthOf(region.lon, frame) : angles.azimuth) +
-          Math.acos(1 / distance) -
-          ERUPTION_INSIDE_LIMB,
-        inclination: (region?.lat ?? 0) - ERUPTION_BELOW,
-      };
-    case "chromosphere": {
-      /* The prominence on the left limb, the camera at its latitude: the limb seen from this
-         distance stands acos(1/d) from the camera's axis, which along a parallel at latitude φ
-         is a longitude step of acos((1/d − sin²φ) / cos²φ). */
-      const prominence = featuredProminence(frame);
-      if (!prominence) return { distance, azimuth: angles.azimuth, inclination: 0 };
-      const sin2 = Math.sin(prominence.lat) ** 2;
-      const step = Math.acos(Math.max(-1, Math.min(1, (1 / distance - sin2) / (1 - sin2))));
-      return {
-        distance,
-        azimuth: azimuthOf(prominence.lon, frame) + step,
-        inclination: prominence.lat,
-      };
-    }
+      /* East of the region, low: the arcade's loops in profile, standing into dark sky. */
+      return { distance, azimuth: 0, inclination: ERUPTION_ELEVATION };
+    case "chromosphere":
+      /* Beside the prominence at its own height, so it stands against the sky over the limb. */
+      return { distance, azimuth: 0, inclination: LIMB_ELEVATION };
     case "cycle":
       return { distance, azimuth: angles.azimuth, inclination: 0.5 };
     default:
       return { distance, azimuth: angles.azimuth, inclination: angles.inclination };
   }
+}
+
+/**
+ * How far from the centre a view's framing stands, radii: the pose's distance about the
+ * centre, or, about a feature, the camera's reach from the feature's radius at its elevation.
+ */
+export function viewReach(id: SunViewId, frame: SunFrame) {
+  const aim = viewAim(id, frame);
+  if (!aim) return VIEW_DISTANCE[id];
+  const { distance, inclination } = viewPose(id, frame, { azimuth: 0, inclination: 0 });
+  const radius = Math.hypot(aim.point[0], aim.point[1], aim.point[2]);
+  return Math.hypot(radius + distance * Math.sin(inclination), distance * Math.cos(inclination));
 }

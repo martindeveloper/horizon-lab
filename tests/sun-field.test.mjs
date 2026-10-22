@@ -89,7 +89,7 @@ test("the magnetogram's sign and strength: the polar field at the poles, reverse
   const leading = poleOf(region, "leading");
   const following = poleOf(region, "following");
   const latOf = (p) => Math.asin(p[1]);
-  const lonOf = (p) => Math.atan2(p[2], p[0]);
+  const lonOf = (p) => Math.atan2(-p[2], p[0]);
   const atLeading = radialFieldAt(latOf(leading), lonOf(leading));
   const atFollowing = radialFieldAt(latOf(following), lonOf(following));
   assert.ok(atLeading > 0.2 * SPOT_FIELD_T, `leading pole ${atLeading} T`);

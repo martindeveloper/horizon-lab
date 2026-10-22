@@ -63,47 +63,20 @@ const centres = new Float64Array(3 * REGION_SLOTS);
 const moments = new Float64Array(3 * REGION_SLOTS);
 const regionRefs: Region[] = [];
 
-/** The surface point of a latitude and longitude, unit radius: (cos lat cos lon, sin lat, cos lat sin lon). */
-export function surfacePoint(lat: number, lon: number, out: Vec3 = [0, 0, 0]): Vec3 {
-  const c = Math.cos(lat);
-  out[0] = c * Math.cos(lon);
-  out[1] = Math.sin(lat);
-  out[2] = c * Math.sin(lon);
-  return out;
-}
-/** East (the direction of rotation) and north at a surface point. */
-export function eastAt(lat: number, lon: number, out: Vec3 = [0, 0, 0]): Vec3 {
-  out[0] = -Math.sin(lon);
-  out[1] = 0;
-  out[2] = Math.cos(lon);
-  return out;
-}
-export function northAt(lat: number, lon: number, out: Vec3 = [0, 0, 0]): Vec3 {
-  const s = Math.sin(lat);
-  out[0] = -s * Math.cos(lon);
-  out[1] = Math.cos(lat);
-  out[2] = -s * Math.sin(lon);
-  return out;
-}
+import { northAt, surfacePoint, tiltedAxis, westAt } from "./surface";
 
-const east: Vec3 = [0, 0, 0];
+export { northAt, surfacePoint, tiltedAxis, westAt };
+
+const west: Vec3 = [0, 0, 0];
 const north: Vec3 = [0, 0, 0];
 const centre: Vec3 = [0, 0, 0];
 
 /**
- * The bipole's axis from the following pole to the leading one: ahead in rotation and, by Joy's
- * tilt, equatorward of it.
+ * The bipole's axis from the following pole to the leading one: ahead in rotation (west) and,
+ * by Joy's tilt, equatorward of it (`tiltedAxis`).
  */
 export function bipoleAxis(region: Region, out: Vec3 = [0, 0, 0]): Vec3 {
-  eastAt(region.lat, region.lon, east);
-  northAt(region.lat, region.lon, north);
-  const poleward = region.lat >= 0 ? 1 : -1;
-  const c = Math.cos(region.tilt);
-  const s = Math.sin(region.tilt) * poleward;
-  out[0] = east[0] * c - north[0] * s;
-  out[1] = east[1] * c - north[1] * s;
-  out[2] = east[2] * c - north[2] * s;
-  return out;
+  return tiltedAxis(region.lat, region.lon, region.tilt, out);
 }
 
 /** A region's leading (+axis) or following pole on the surface, unit radius. */
@@ -130,8 +103,9 @@ const axis: Vec3 = [0, 0, 0];
 /** Prepares the frame's sources: the global dipole's amplitude and each live region's buried dipole. */
 export function setSources(sources: FieldSources) {
   const eq = sources.equatorial;
-  const mx = eq ? eq.strength * Math.cos(eq.lon) : 0;
-  const mz = eq ? eq.strength * Math.sin(eq.lon) : 0;
+  if (eq) surfacePoint(0, eq.lon, centre);
+  const mx = eq ? eq.strength * centre[0] : 0;
+  const mz = eq ? eq.strength * centre[2] : 0;
   const m = Math.hypot(mx, sources.dipole, mz);
   amplitude = DIPOLE_AMPLITUDE * m;
   if (m > 0) {
@@ -441,7 +415,7 @@ export function fieldLines(seed: number, count: number, lines: Polyline[]) {
           : Math.round((regionLines * region.strength) / weight);
       given += share;
       poleOf(region, "leading", pole);
-      eastAt(region.lat, region.lon, east);
+      westAt(region.lat, region.lon, west);
       northAt(region.lat, region.lon, north);
       for (let j = 0; j < share && used < total; j++) {
         const angle = TAU * dice(seed, SALT.loopAngle, index, j);
@@ -449,9 +423,9 @@ export function fieldLines(seed: number, count: number, lines: Polyline[]) {
           region.size *
           (LOOP_SEED_SPREAD[0] +
             (LOOP_SEED_SPREAD[1] - LOOP_SEED_SPREAD[0]) * dice(seed, SALT.loopSpread, index, j));
-        point[0] = pole[0] + spread * (Math.cos(angle) * east[0] + Math.sin(angle) * north[0]);
-        point[1] = pole[1] + spread * (Math.cos(angle) * east[1] + Math.sin(angle) * north[1]);
-        point[2] = pole[2] + spread * (Math.cos(angle) * east[2] + Math.sin(angle) * north[2]);
+        point[0] = pole[0] + spread * (Math.cos(angle) * west[0] + Math.sin(angle) * north[0]);
+        point[1] = pole[1] + spread * (Math.cos(angle) * west[1] + Math.sin(angle) * north[1]);
+        point[2] = pole[2] + spread * (Math.cos(angle) * west[2] + Math.sin(angle) * north[2]);
         const n = Math.hypot(point[0], point[1], point[2]);
         point[0] /= n;
         point[1] /= n;

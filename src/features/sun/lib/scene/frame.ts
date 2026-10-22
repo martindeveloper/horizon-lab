@@ -5,7 +5,7 @@
  */
 import { surfacePoint } from "@/space/sun/model/field";
 
-export { PLACE_IDS, type PlaceId } from "@/space/sun/frame";
+export { PLACE_IDS, bipoleAxis, tiltedAxis, type PlaceId } from "@/space/sun/frame";
 export type {
   Eruption,
   PassbandId,
