@@ -1,7 +1,7 @@
 # Cosmic atlas snapshot
 
-Reviewed **2026-10-22**. Refresh with `python3 scripts/fetch-cosmic-data.py` from the
-repository root. Python's standard library is sufficient. Builds read the committed
+Reviewed **2026-10-22**. Refresh with `node scripts/fetch-cosmic-data.mjs` from the
+repository root. Node's standard library is sufficient. Builds read the committed
 snapshot and never query an archive. `sources.json` pins every URL, arXiv version,
 publication state, review date and SHA-256. Do not change a preprint label just because
 a newer manuscript exists: verify the journal record and revise the manifest.
@@ -86,7 +86,7 @@ from the historical Sloan Great Wall galaxy landmark.
 ## Updating safely
 
 1. Review the journal and archive records. Update the versioned URL, publication
-   state and `REVIEWED` in `scripts/fetch-cosmic-data.py`; do not use a floating
+   state and `REVIEWED` in `scripts/fetch-cosmic-data.mjs`; do not use a floating
    arXiv URL. If an unversioned archive file changed, use a fresh `--cache` directory.
 2. Run the importer. It checks expected table lengths/schema, validates HTTP ranges,
    caches downloads and retries transient failures. If a table changed, inspect it
