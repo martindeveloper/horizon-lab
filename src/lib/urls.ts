@@ -20,20 +20,10 @@ export const PUBLIC_ASSETS = {
   social: "/social/horizon.png",
 } as const;
 
-const simulationAssets = <const Id extends string>(id: Id) => ({
+export const simulationAssets = <const Id extends string>(id: Id) => ({
   artwork: `/simulations/${id}.svg` as const,
   social: `/simulations/${id}/og.png` as const,
 });
-
-export const SIMULATION_ASSETS = {
-  "black-hole": simulationAssets("black-hole"),
-  orrery: simulationAssets("orrery"),
-  "deep-field": simulationAssets("deep-field"),
-  spectroscopy: simulationAssets("spectroscopy"),
-  giants: simulationAssets("giants"),
-  sun: simulationAssets("sun"),
-  voyage: simulationAssets("voyage"),
-} as const;
 
 export const MAPS_KEY = "/textures/bodies";
 

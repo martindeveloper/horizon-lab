@@ -1,7 +1,7 @@
 /** The solar system's framed scales, inner planets to the Oort cloud. Light: routes read it. */
 import type { OrbitPose } from "@horizon/toolkit/camera";
 
-export type SolarViewId = "inner" | "giants" | "kuiper" | "scattered" | "oort";
+export type SolarViewId = (typeof SOLAR_VIEWS)[number]["id"];
 type SolarView = {
   id: SolarViewId;
   /** Camera distance from the Sun, au. */
@@ -26,13 +26,13 @@ export function solarViewPose(view: SolarView): OrbitPose {
   };
 }
 
-export const SOLAR_VIEWS: readonly SolarView[] = [
-  { id: "inner", dist: 6 },
-  { id: "giants", dist: 72 },
-  { id: "kuiper", dist: 150 },
-  { id: "scattered", dist: 1_800 },
-  { id: "oort", dist: 170_000 },
-];
+export const SOLAR_VIEWS = [
+  { id: "inner", dist: 6, method: "radar" },
+  { id: "giants", dist: 72, method: "radar" },
+  { id: "kuiper", dist: 150, method: "orbits" },
+  { id: "scattered", dist: 1_800, method: "orbits" },
+  { id: "oort", dist: 170_000, method: "comets" },
+] as const;
 
 const ids = new Set<string>(SOLAR_VIEWS.map((v) => v.id));
 export const isSolarView = (id: string): id is SolarViewId => ids.has(id);

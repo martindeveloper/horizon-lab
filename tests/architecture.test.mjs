@@ -13,7 +13,12 @@ import { resolveView, viewFromPath, viewRouteParams } from "../src/features/orre
 import { getPathname } from "../src/i18n/navigation.ts";
 import { routing } from "../src/i18n/routing.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
-import { EXPERIENCE_PREFIX, SIMULATION_PREFIX, slugRoutes } from "../src/lib/simulation-paths.ts";
+import {
+  EXPERIENCE_PREFIX,
+  SIMULATION_PREFIX,
+  defineRoutes,
+  slugRoutes,
+} from "../src/lib/simulation-paths.ts";
 import { registered, simulations, simulationForPath } from "../src/lib/simulations.ts";
 
 const root = new URL("../", import.meta.url);
@@ -126,12 +131,15 @@ test("pre-prefix simulation URLs redirect permanently to the prefixed routes", (
 });
 
 test("slug routes resolve aliases, fall back to the default and list redirects", () => {
-  const routes = slugRoutes({
-    base: "/lab/demo",
-    ids: ["home", "far", "near"],
-    defaultId: "home",
-    aliases: { distant: "far", gone: "missing" },
-  });
+  const routes = slugRoutes(
+    defineRoutes({
+      base: "/lab/demo",
+      param: "view",
+      entries: [{ id: "home" }, { id: "far" }, { id: "near" }],
+      defaultId: "home",
+      aliases: { distant: "far" },
+    }),
+  );
   assert.equal(routes.resolve(undefined), "home");
   assert.equal(routes.resolve(" Distant "), "far");
   assert.equal(routes.resolve("gone"), null);
@@ -160,4 +168,156 @@ test("lookup tables do not mistake Object prototype names for simulation IDs", (
     assert.equal(resolveDeepView(name), null);
   }
   assert.equal(resolveView("oort-cloud"), "oort");
+});
+
+test("route definitions reject ambiguous addresses, missing defaults and unresolved aliases", () => {
+  const base = {
+    base: "/lab/example",
+    param: "object",
+    defaultId: "home",
+    entries: [{ id: "home" }, { id: "far", aliases: ["distant"] }],
+  };
+  const routes = slugRoutes(defineRoutes(base));
+  assert.deepEqual(routes.params(), [{ object: "far" }]);
+  assert.deepEqual(routes.paths(), ["/lab/example", "/lab/example/far"]);
+  assert.equal(routes.resolve("distant"), "far");
+  assert.throws(() => defineRoutes({ ...base, defaultId: "missing" }), /Unknown default route/);
+  assert.throws(
+    () => defineRoutes({ ...base, entries: [{ id: "home" }, { id: "home" }] }),
+    /Duplicate route id/,
+  );
+  assert.throws(
+    () => defineRoutes({ ...base, entries: [{ id: "home" }, { id: "far", aliases: ["home"] }] }),
+    /Conflicting route alias/,
+  );
+  assert.throws(
+    () => defineRoutes({ ...base, aliases: { distant: "home" } }),
+    /Conflicting route alias/,
+  );
+  assert.throws(
+    () => defineRoutes({ ...base, aliases: { distant: "missing" } }),
+    /Unknown alias target/,
+  );
+  for (const slug of [
+    ".",
+    "..",
+    "%2e%2e",
+    "far away",
+    "far/away",
+    "far\\away",
+    "far?away",
+    "far#away",
+    "far:away",
+    "far*",
+    " far",
+    "Far",
+    "ve\u0301ga",
+  ])
+    for (const entries of [[{ id: "home" }, { id: slug }], [{ id: "home", aliases: [slug] }]])
+      assert.throws(() => defineRoutes({ ...base, entries }), /Invalid route slug/, slug);
+  assert.throws(
+    () => defineRoutes({ ...base, entries: [{ id: "home", closeUp: true }] }),
+    /needs a body/,
+  );
+});
+
+test("Unicode route IDs and historical aliases survive browser URL encoding", () => {
+  const routes = slugRoutes(
+    defineRoutes({
+      base: "/lab/example",
+      param: "star",
+      defaultId: "home",
+      entries: [{ id: "home" }, { id: "véga", aliases: ["hvězda"] }],
+    }),
+  );
+  assert.equal(routes.pathFor("véga"), "/lab/example/v%C3%A9ga");
+  assert.deepEqual(routes.params(), [{ star: "véga" }]);
+  for (const locale of ["", "/en", "/cs"])
+    for (const href of [routes.pathFor("véga"), "/lab/example/hvězda"]) {
+      const pathname = new URL(`${locale}${href}`, "https://example.test").pathname;
+      assert.equal(routes.fromPath(pathname), "véga");
+    }
+  assert.equal(routes.redirects().get("hvězda"), routes.pathFor("véga"));
+  for (const malformed of ["%", "%E0%A4%A", "%252e%252e"])
+    assert.equal(routes.fromPath(`/lab/example/${malformed}`), "home");
+});
+
+test("manifests derive entry points and assets from their route and feature identities", async () => {
+  const { defineSimulation } = await import("../src/lib/simulation-manifest.ts");
+  const define = (defaultId) =>
+    defineSimulation({
+      id: "example",
+      kind: "lab",
+      messageKey: "example",
+      socialSubtitle: "Example",
+      highlights: [],
+      routes: defineRoutes({
+        base: "/lab/example",
+        param: "view",
+        defaultId,
+        entries: [{ id: "home" }, { id: "far" }],
+      }),
+      entryPoints: [
+        { id: "start", view: "home" },
+        { id: "distant", view: "far" },
+      ],
+    });
+  const manifest = define("home");
+  assert.equal(manifest.href, "/lab/example");
+  assert.equal(manifest.artwork, "/simulations/example.svg");
+  assert.equal(manifest.social, "/simulations/example/og.png");
+  assert.deepEqual(manifest.entryPoints, [
+    { id: "start", href: "/lab/example" },
+    { id: "distant", href: "/lab/example/far" },
+  ]);
+  assert.deepEqual(define("far").entryPoints, [
+    { id: "start", href: "/lab/example/home" },
+    { id: "distant", href: "/lab/example" },
+  ]);
+  assert.throws(
+    () =>
+      defineSimulation({
+        ...manifest,
+        entryPoints: [{ id: "bad", view: "missing" }],
+      }),
+    /Unknown entry point view/,
+  );
+});
+
+test("a new declared route reaches the sitemap and body links without another registry entry", async () => {
+  const { bodyDestinations } = await import("../src/lib/body-destinations.ts");
+  const { sitePaths } = await import("../src/lib/sitemap.ts");
+  const body = { catalogue: "stars", id: "vega" };
+  const example = {
+    ...registered[0],
+    id: "example",
+    href: "/lab/example",
+    routes: defineRoutes({
+      base: "/lab/example",
+      param: "star",
+      defaultId: "home",
+      entries: [{ id: "home" }, { id: "vega", body, closeUp: true }],
+    }),
+  };
+  assert.deepEqual(sitePaths([example]), [
+    "/",
+    "/about",
+    "/credits",
+    "/lab/example",
+    "/lab/example/vega",
+  ]);
+  assert.deepEqual(bodyDestinations(body, [example]), [
+    { simulationId: "example", href: "/lab/example/vega" },
+  ]);
+  assert.deepEqual(bodyDestinations(body, []), [], "disabled labs cannot be destinations");
+  assert.deepEqual(bodyDestinations({ catalogue: "stars", id: "sun" }, [example]), []);
+  const defaultView = {
+    ...example,
+    routes: defineRoutes({ ...example.routes, defaultId: "vega" }),
+  };
+  assert.equal(
+    bodyDestinations(body, [defaultView])[0].href,
+    "/lab/example",
+    "a default destination uses the base URL",
+  );
 });

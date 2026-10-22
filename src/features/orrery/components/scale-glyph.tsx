@@ -2,7 +2,7 @@ import { SOLAR_VIEWS, solarViewById, type SolarViewId } from "@/space/solar-syst
 import { recordFrom } from "@horizon/toolkit/records";
 
 /** Each view's ring in the glyph's 20-unit box: by the log of its distance, the inner view's smallest. */
-const LOW = Math.log(SOLAR_VIEWS[0]!.dist);
+const LOW = Math.log(SOLAR_VIEWS[0].dist);
 const HIGH = Math.log(SOLAR_VIEWS[SOLAR_VIEWS.length - 1]!.dist);
 const RING = recordFrom(
   SOLAR_VIEWS.map((v) => v.id),

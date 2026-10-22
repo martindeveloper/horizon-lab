@@ -1,6 +1,6 @@
 import type { FeatureId } from "@/config";
 
-import type { SimulationPath } from "./simulation-paths";
+import type { RouteDefinition, SimulationPath } from "./simulation-paths";
 
 /** Serializable catalogue contract. No runtime/renderer imports belong here. */
 export type SimulationManifest = {
@@ -13,7 +13,12 @@ export type SimulationManifest = {
   /** The feature switch (`FEATURES` in `src/config.ts`) the simulation is behind, if any. */
   feature?: FeatureId;
   href: SimulationPath;
+  /** Addresses and exposed bodies; no store, measurements or scene imports. */
+  routes: RouteDefinition;
   artwork: string;
+  social: string;
+  /** English subtitle for the generated share image. */
+  socialSubtitle: string;
   /**
    * The artwork's parallax layers in paint order: each names a `<g class="layer" id="layer-<id>">`
    * of the SVG and how deep it sits when the tile tilts, from −1 (the far sky, which drifts most)
@@ -25,9 +30,8 @@ export type SimulationManifest = {
   entryPoints: readonly { id: string; href: SimulationPath }[];
   /**
    * Set when the simulation shows the shared solar system's views (`src/space/solar-system`),
-   * each at `href/<view>`: a visitor may cross to the same view in another that does, which
-   * opens at the same camera pose (`src/lib/handoff.ts`). `defaultView` is its own default,
-   * which lives at `href`.
+   * a visitor may cross to the same view in another that does, which opens at the same
+   * camera pose (`src/lib/handoff.ts`). The routes descriptor supplies its address.
    */
-  solarSystem?: { defaultView: string };
+  solarSystem?: true;
 };

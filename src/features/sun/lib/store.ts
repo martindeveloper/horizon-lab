@@ -21,7 +21,7 @@ import type { ClockRate } from "./model/clock";
 import type { LightId } from "./model/lights";
 import { PLACES, type PlaceId } from "./model/places";
 import { TOUR } from "./model/tour";
-import { DEFAULT_VIEW, VIEW_DEFAULTS, type ViewId } from "./model/views";
+import { DEFAULT_VIEW, VIEW_DEFAULTS, initialViewState, type ViewId } from "./model/views";
 
 type Panel = "none" | "places" | "view";
 
@@ -149,12 +149,9 @@ export const useSun = create<SunStore>((set, get) => ({
   /* The Sun draws no scale bar: its slice's reading stays empty. */
   ...sceneSlice(set, { scalePx: 0, scaleValue: 0, scaleUnit: "au" }),
   view: initialView,
-  light: VIEW_DEFAULTS[initialView].light,
-  clock: VIEW_DEFAULTS[initialView].clock,
+  ...initialViewState(initialView),
   paused: false,
-  cut: initialView === "inside" ? 1 : 0,
   eruption: 0,
-  eruptionPlaying: initialView === "eruption",
   cyclePhase: cyclePhaseAt(MAP_EPOCH),
   show: DEFAULT_SHOW,
   wideColour: VIEW_SETTINGS.wideColour,
@@ -182,9 +179,7 @@ export const useSun = create<SunStore>((set, get) => ({
       view,
       flight: s.flight + 1,
       closeUp: false,
-      ...VIEW_DEFAULTS[view],
-      cut: view === "inside" ? 1 : 0,
-      eruptionPlaying: view === "eruption",
+      ...initialViewState(view),
     })),
   setLight: (light) => set({ light }),
   setClock: (clock) => set({ clock, paused: false }),

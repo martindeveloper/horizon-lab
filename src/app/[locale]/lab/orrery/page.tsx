@@ -1,12 +1,11 @@
-import { ORRERY_PATH } from "@/features/orrery/manifest";
+import { ORRERY_PATH, orreryManifest } from "@/features/orrery/manifest";
 import { getOrreryMessages } from "@/features/orrery/server";
 import { simulationMetadata } from "@/lib/metadata";
-import { SIMULATION_ASSETS } from "@/lib/urls";
 
 export const generateMetadata = simulationMetadata({
   path: ORRERY_PATH,
   messages: getOrreryMessages,
-  image: SIMULATION_ASSETS.orrery.social,
+  image: orreryManifest.social,
 });
 
 export default function OrreryPage() {

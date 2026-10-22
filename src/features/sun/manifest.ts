@@ -1,16 +1,19 @@
-import type { SimulationManifest } from "@/lib/simulation-types";
-
-import { simulationPath, slugPath } from "../../lib/simulation-paths";
-import { SIMULATION_ASSETS } from "../../lib/urls";
-import { DEFAULT_VIEW, type ViewId } from "./lib/model/views";
+import { defineSimulation } from "../../lib/simulation-manifest";
+import { defineRoutes, simulationPath } from "../../lib/simulation-paths";
+import { DEFAULT_VIEW, VIEW_DEFINITIONS } from "./lib/model/views";
 
 export const SUN_PATH = simulationPath("sun");
-export const sunManifest = {
+export const sunManifest = defineSimulation({
   id: "sun",
   kind: "lab",
   feature: "sun",
-  href: SUN_PATH,
-  artwork: SIMULATION_ASSETS.sun.artwork,
+  routes: defineRoutes({
+    base: SUN_PATH,
+    param: "view",
+    defaultId: DEFAULT_VIEW,
+    entries: VIEW_DEFINITIONS,
+  }),
+  socialSubtitle: "Cut it open, watch it in any light",
   artworkLayers: [
     { id: "sky", depth: -1 },
     { id: "corona", depth: -0.55 },
@@ -19,8 +22,8 @@ export const sunManifest = {
   messageKey: "sun",
   highlights: ["cut", "light", "field"],
   entryPoints: [
-    { id: "surface", href: SUN_PATH },
-    { id: "inside", href: slugPath(SUN_PATH, DEFAULT_VIEW, "inside" satisfies ViewId) },
-    { id: "eruption", href: slugPath(SUN_PATH, DEFAULT_VIEW, "eruption" satisfies ViewId) },
+    { id: "surface", view: DEFAULT_VIEW },
+    { id: "inside", view: "inside" },
+    { id: "eruption", view: "eruption" },
   ],
-} as const satisfies SimulationManifest;
+});

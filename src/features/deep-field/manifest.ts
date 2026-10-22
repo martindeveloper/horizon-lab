@@ -1,17 +1,18 @@
-import type { SimulationManifest } from "@/lib/simulation-types";
-
-import { simulationPath, slugPath } from "../../lib/simulation-paths";
-import { SIMULATION_ASSETS } from "../../lib/urls";
-import type { ViewId } from "./lib/model/view-ids";
-
-const DEFAULT_VIEW = "galaxy" satisfies ViewId;
+import { defineSimulation } from "../../lib/simulation-manifest";
+import { defineRoutes, simulationPath } from "../../lib/simulation-paths";
+import { DEFAULT_VIEW, VIEW_DEFINITIONS } from "./lib/model/view-definitions";
 
 export const DEEP_FIELD_PATH = simulationPath("deep-field");
-export const deepFieldManifest = {
+export const deepFieldManifest = defineSimulation({
   id: "deep-field",
   kind: "lab",
-  href: DEEP_FIELD_PATH,
-  artwork: SIMULATION_ASSETS["deep-field"].artwork,
+  routes: defineRoutes({
+    base: DEEP_FIELD_PATH,
+    param: "view",
+    defaultId: DEFAULT_VIEW,
+    entries: VIEW_DEFINITIONS,
+  }),
+  socialSubtitle: "As far out as we can see",
   artworkLayers: [
     { id: "dome", depth: 0 },
     { id: "stars", depth: -0.6 },
@@ -20,12 +21,9 @@ export const deepFieldManifest = {
   messageKey: "deepField",
   highlights: ["depth", "lookback", "edge"],
   entryPoints: [
-    { id: "galaxy", href: DEEP_FIELD_PATH },
-    { id: "laniakea", href: slugPath(DEEP_FIELD_PATH, DEFAULT_VIEW, "laniakea" satisfies ViewId) },
-    {
-      id: "universe",
-      href: slugPath(DEEP_FIELD_PATH, DEFAULT_VIEW, "observable-universe" satisfies ViewId),
-    },
+    { id: "galaxy", view: DEFAULT_VIEW },
+    { id: "laniakea", view: "laniakea" },
+    { id: "universe", view: "observable-universe" },
   ],
-  solarSystem: { defaultView: DEFAULT_VIEW },
-} as const satisfies SimulationManifest;
+  solarSystem: true,
+});

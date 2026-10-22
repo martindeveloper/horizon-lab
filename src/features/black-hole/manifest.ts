@@ -1,15 +1,19 @@
-import type { SimulationManifest } from "@/lib/simulation-types";
-
-import { simulationPath, slugPath } from "../../lib/simulation-paths";
-import { SIMULATION_ASSETS } from "../../lib/urls";
-import { DEFAULT_PRESET_ID, type PresetId } from "./lib/holes/routes";
+import { defineSimulation } from "../../lib/simulation-manifest";
+import { defineRoutes, simulationPath } from "../../lib/simulation-paths";
+import { DEFAULT_PRESET_ID, HOLE_ROUTES } from "./lib/holes/routes";
 
 export const BLACK_HOLE_PATH = simulationPath("black-hole");
-export const blackHoleManifest = {
+export const blackHoleManifest = defineSimulation({
   id: "black-hole",
   kind: "lab",
-  href: BLACK_HOLE_PATH,
-  artwork: SIMULATION_ASSETS["black-hole"].artwork,
+  routes: defineRoutes({
+    base: BLACK_HOLE_PATH,
+    param: "hole",
+    defaultId: DEFAULT_PRESET_ID,
+    entries: HOLE_ROUTES,
+    legacy: { bases: ["/black-hole"], rootAliases: true },
+  }),
+  socialSubtitle: "Relativistic observatory",
   artworkLayers: [
     { id: "sky", depth: -1 },
     { id: "halo", depth: -0.6 },
@@ -19,8 +23,8 @@ export const blackHoleManifest = {
   messageKey: "blackHole",
   highlights: ["lensing", "orbits", "guides"],
   entryPoints: [
-    { id: "light", href: BLACK_HOLE_PATH },
-    { id: "home", href: slugPath(BLACK_HOLE_PATH, DEFAULT_PRESET_ID, "sgr-a" satisfies PresetId) },
-    { id: "giant", href: slugPath(BLACK_HOLE_PATH, DEFAULT_PRESET_ID, "m87" satisfies PresetId) },
+    { id: "light", view: DEFAULT_PRESET_ID },
+    { id: "home", view: "sgr-a" },
+    { id: "giant", view: "m87" },
   ],
-} as const satisfies SimulationManifest;
+});

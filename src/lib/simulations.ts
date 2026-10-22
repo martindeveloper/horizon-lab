@@ -1,12 +1,11 @@
-import { FEATURES } from "@/config";
-import { blackHoleManifest } from "@/features/black-hole/manifest";
-import { deepFieldManifest } from "@/features/deep-field/manifest";
-import { giantsManifest } from "@/features/giants/manifest";
-import { orreryManifest } from "@/features/orrery/manifest";
-import { spectroscopyManifest } from "@/features/spectroscopy/manifest";
-import { sunManifest } from "@/features/sun/manifest";
-import { voyageManifest } from "@/features/voyage/manifest";
-
+import { FEATURES } from "../config";
+import { blackHoleManifest } from "../features/black-hole/manifest";
+import { deepFieldManifest } from "../features/deep-field/manifest";
+import { giantsManifest } from "../features/giants/manifest";
+import { orreryManifest } from "../features/orrery/manifest";
+import { spectroscopyManifest } from "../features/spectroscopy/manifest";
+import { sunManifest } from "../features/sun/manifest";
+import { voyageManifest } from "../features/voyage/manifest";
 import type { SimulationManifest } from "./simulation-types";
 
 /** Lightweight catalogue registry: never import renderers or stores here. */

@@ -3,7 +3,7 @@
 import type { SolarViewId } from "../../../../space/solar-system/model/views";
 import { orreryManifest } from "../../manifest";
 
-export const DEFAULT_VIEW: SolarViewId = orreryManifest.solarSystem.defaultView;
+export const DEFAULT_VIEW: SolarViewId = orreryManifest.routes.defaultId;
 
 /** Along-orbit speed-up steps: up to each camera distance (au), model years per real second. */
 const DRIFT_STEPS: readonly (readonly [number, number])[] = [

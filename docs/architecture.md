@@ -453,8 +453,8 @@ A simulation is a lab or an experience (the manifest's `kind`). Labs, the
 catalogue's primary shelf, live under `SIMULATION_PREFIX` (`/lab`); experiences,
 its quieter second shelf (less to learn, more to sit back in), under
 `EXPERIENCE_PREFIX` (`/experience`), both in `src/lib/simulation-paths.ts`. Build
-manifest paths with `simulationPath(slug)` or `experiencePath(slug)`; the manifest
-type rejects any other `href`. `labs` and `experiences` (`src/lib/simulations.ts`)
+manifest paths with `simulationPath(slug)` or `experiencePath(slug)`; the route
+type rejects other prefixes. `labs` and `experiences` (`src/lib/simulations.ts`)
 are the catalogue's and the phone menu's two shelves. Redirects go straight to the
 canonical page, never through a chain.
 
@@ -466,7 +466,26 @@ serve their prerendered page. `LocaleUrl` in the locale layout then sets or clea
 the cookie and replaces the address with the clean path. Next.js does not send
 config headers with redirect responses, so a redirect could not set the cookie.
 
-`src/lib/redirects.ts` consumes the feature's public compatibility map. Next.js
+Each manifest has a serializable `routes` descriptor, constructed with `defineRoutes`
+(`src/lib/simulation-paths.ts`): base path, App Router parameter name, default ID,
+ordered entries, aliases and any historical base paths. The entries come from the
+feature's lightweight definitions. `routing.ts` passes that descriptor to `slugRoutes`
+to expose resolution, canonical paths and static parameters. The sitemap iterates the
+enabled manifests; it has no second list of simulations. Definition-time validation
+rejects duplicate IDs, ambiguous aliases, missing defaults and unknown alias targets.
+Slugs are normalized lowercase letters and numbers with hyphens or underscores; dot
+segments, spaces, URL escapes and route-pattern syntax are rejected. Canonical paths
+encode Unicode IDs, and browser path resolution decodes them once. Static parameters
+keep the original IDs, as Next.js expects.
+
+`defineSimulation` (`src/lib/simulation-manifest.ts`) constructs the manifest from its
+descriptor and catalogue details. It derives `href` from `routes.base`, artwork and social
+image paths from the feature ID, and entry-point URLs from their declared `view` IDs.
+The English `socialSubtitle` belongs to the manifest; `scripts/generate-social-assets.mjs`
+iterates the registry to generate every feature's image, including disabled features.
+There is no separate asset registry or hand-maintained list in the image generator.
+
+`src/lib/redirects.ts` consumes these descriptors and their declared compatibility paths. Next.js
 serves these redirects before rendering, preserving query strings automatically.
 The home page is the catalogue and must never redirect into a simulation.
 Unknown paths are 404s. Known locale/preset pages are prerendered; there is no
@@ -502,9 +521,13 @@ helpers from `@/i18n/navigation`.
 
 1. Create `src/features/<slug>/` with its private components, state, data, styles,
    and messages. Export the entry component separately from server helpers.
-2. Add a serializable `manifest.ts` satisfying `SimulationManifest`, with a
-   stable ID, URL from `simulationPath(slug)`, static artwork, message key, highlight keys, and optional
-   entry points (an empty list is fine). For parallax on the catalogue tile, wrap the artwork's
+2. Add a serializable `manifest.ts` using `defineSimulation`, with a stable ID,
+   kind, message key, English social-image subtitle, highlight keys, and entry points
+   (`{ id, view }`, an empty list is fine). Include a `routes: defineRoutes(...)` descriptor
+   using the feature's ordered definitions; its `base` comes from `simulationPath(slug)`
+   or `experiencePath(slug)`, and `param` names the App Router segment. Put the artwork
+   at `public/simulations/<id>.svg`; the generator writes its share image to
+   `public/simulations/<id>/og.png`. For parallax on the catalogue tile, wrap the artwork's
    depth bands in `<g class="layer" id="layer-<id>">` groups (contiguous, in paint order, plus the
    SVG's `:target` style) and list them with their depths in `artworkLayers`. Never import the renderer into a manifest.
 3. Register the manifest in `src/lib/simulations.ts`. A simulation not ready for
@@ -536,9 +559,10 @@ helpers from `@/i18n/navigation`.
    the page; a `[slug]/page.tsx` passes `view` (its param, `resolve`, `pathFor` and the
    view's title) instead of `path`, sets `dynamicParams = false` and exports the
    feature's static params. Build the feature's `routing.ts` on
-   `slugRoutes({ base, ids, defaultId, aliases })` so slugs, aliases, static params and
-   redirects behave like the other simulations.
-   Add compatibility redirects only when replacing existing URLs.
+   `slugRoutes(manifest.routes)` and export its `params` for static generation, so
+   slugs, aliases, static params and redirects follow the same definition.
+   Declare `legacy.bases` only when replacing existing URLs; `legacy.rootAliases`
+   preserves the black-hole presets' original root addresses.
 6. Extend tests for the new feature's entry points and copy coverage. Run
    `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`.
 7. Optionally add `bench.ts` exporting a `benchTarget` so `npm run bench` can time
@@ -547,6 +571,29 @@ helpers from `@/i18n/navigation`.
 
 Automated checks cover catalogue entries, translation parity, routing, namespace
 separation, and import boundaries; they do not replace visual and interaction testing.
+
+### Object and view definitions
+
+Giants' `lib/model/rungs.ts` is its ordered membership list. Each entry names a
+`BodyRef` (`src/space/body-reference.ts`), its kind, any editorial name or fate, and
+illustrative presentation overrides. IDs, scientific inputs, spectral types, energy
+sources and names follow that entry. `bodyRecord` (`src/space/body-catalogue.ts`) resolves
+the reference against the existing stellar or planetary catalogues inside the model;
+it never copies measurements into route metadata. Generic teaching examples may keep
+their own feature name while referring to a measured body's figures.
+
+The Sun's view definitions own opening light, clock and action. Deep Field's
+`view-definitions.ts` owns order, distance evidence and references to solar or cosmic
+framings; `views.ts` resolves those references inside the simulation. Voyage's `PLACES`
+owns both route IDs and arrival anchors. Camera functions, shaders and store actions
+remain in their runtime modules. Keep definition imports lightweight, including when
+read through `next.config.ts`: no renderers, measurements, feature messages or stores.
+
+A destination route may declare `body` and `closeUp: true`. `bodyDestinations`
+(`src/lib/body-destinations.ts`) discovers matching addresses among enabled manifests.
+Giants' cards use their entries' body references to discover these links; the card owns
+its translated hint, with a general hint for a newly exposed lab. This keeps scientific
+identity shared while navigation and translated copy stay in the app.
 
 ## Zoomable scenes
 
@@ -652,7 +699,8 @@ under each simulation's namespace by its `server.ts` (`withSpaceMessages`); a ke
 error.
 
 The Orrery and Deep Field name the solar system's views alike, and their manifests say so
-(`solarSystem: { defaultView }`). `HandoffLink` opens the same view in the other, and
+(`solarSystem: true`). `HandoffLink` resolves the same view through the other manifest's
+route descriptor, including its default, and
 `src/lib/handoff.ts`, which finds the sides through the registry rather than by name, carries
 the camera's pose so it opens where this one left off; neither feature imports the other.
 

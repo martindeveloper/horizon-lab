@@ -1,18 +1,29 @@
-import type { SimulationManifest } from "@/lib/simulation-types";
-
-import { simulationPath, slugPath } from "../../lib/simulation-paths";
-import { SIMULATION_ASSETS } from "../../lib/urls";
-import type { SolarViewId } from "../../space/solar-system/model/views";
+import { defineSimulation } from "../../lib/simulation-manifest";
+import { defineRoutes, simulationPath } from "../../lib/simulation-paths";
+import { SOLAR_VIEWS, type SolarViewId } from "../../space/solar-system/model/views";
 
 const DEFAULT_VIEW = "giants" satisfies SolarViewId;
 
 export const ORRERY_PATH = simulationPath("orrery");
 
-export const orreryManifest = {
+export const orreryManifest = defineSimulation({
   id: "orrery",
   kind: "lab",
-  href: ORRERY_PATH,
-  artwork: SIMULATION_ASSETS.orrery.artwork,
+  routes: defineRoutes({
+    base: ORRERY_PATH,
+    param: "view",
+    defaultId: DEFAULT_VIEW,
+    entries: SOLAR_VIEWS,
+    aliases: {
+      "inner-worlds": "inner",
+      planets: "giants",
+      "kuiper-belt": "kuiper",
+      "scattered-disk": "scattered",
+      "oort-cloud": "oort",
+    },
+    legacy: { bases: ["/orrery"] },
+  }),
+  socialSubtitle: "In motion, from its birth to tonight",
   artworkLayers: [
     { id: "sky", depth: -1 },
     { id: "system", depth: 0 },
@@ -20,9 +31,9 @@ export const orreryManifest = {
   messageKey: "orrery",
   highlights: ["live", "timeline", "oort"],
   entryPoints: [
-    { id: "giants", href: ORRERY_PATH },
-    { id: "inner", href: slugPath(ORRERY_PATH, DEFAULT_VIEW, "inner" satisfies SolarViewId) },
-    { id: "oort", href: slugPath(ORRERY_PATH, DEFAULT_VIEW, "oort" satisfies SolarViewId) },
+    { id: "giants", view: DEFAULT_VIEW },
+    { id: "inner", view: "inner" },
+    { id: "oort", view: "oort" },
   ],
-  solarSystem: { defaultView: DEFAULT_VIEW },
-} as const satisfies SimulationManifest;
+  solarSystem: true,
+});

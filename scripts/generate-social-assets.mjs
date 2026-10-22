@@ -1,20 +1,13 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 import sharp from "sharp";
 
-import { PUBLIC_ASSETS, SIMULATION_ASSETS } from "../src/lib/urls.ts";
+import { registered } from "../src/lib/simulations.ts";
+import { PUBLIC_ASSETS } from "../src/lib/urls.ts";
 
 // Shared composition: warm gold, ink background, serif titles, Horizon's sunrise mark.
 // The black-hole illustration is also used by the catalogue, keeping the two in sync.
 const publicFile = (path) => new URL(`../public${path}`, import.meta.url);
-const artwork = async (slug) => readFile(publicFile(SIMULATION_ASSETS[slug].artwork), "utf8");
-const blackHole = await artwork("black-hole");
-const orrery = await artwork("orrery");
-const deepField = await artwork("deep-field");
-const spectroscopy = await artwork("spectroscopy");
-const giants = await artwork("giants");
-const voyage = await artwork("voyage");
-const sun = await artwork("sun");
 /** The card's ink, which every artwork's sky must end in. */
 const INK = "#08080b";
 const escape = (text) =>
@@ -22,13 +15,6 @@ const escape = (text) =>
 const copy = {
   intro: "Explore the universe.",
   category: "INTERACTIVE SPACE SIMULATIONS",
-  observatory: "Relativistic observatory",
-  orrery: "In motion, from its birth to tonight",
-  deepField: "As far out as we can see",
-  spectroscopy: "Fingerprints in starlight",
-  giants: "How big stars get",
-  voyage: "At true scale, on two clocks",
-  sun: "Cut it open, watch it in any light",
 };
 const messages = JSON.parse(
   await readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
@@ -36,48 +22,14 @@ const messages = JSON.parse(
 
 const cards = [
   { path: PUBLIC_ASSETS.social, title: "Horizon", subtitle: copy.intro, art: null },
-  {
-    path: SIMULATION_ASSETS["black-hole"].social,
-    title: messages.catalogue.blackHole.title,
-    subtitle: copy.observatory,
-    art: blackHole,
-  },
-  {
-    path: SIMULATION_ASSETS["orrery"].social,
-    title: messages.catalogue.orrery.title,
-    subtitle: copy.orrery,
-    art: orrery,
-  },
-  {
-    path: SIMULATION_ASSETS["deep-field"].social,
-    title: messages.catalogue.deepField.title,
-    subtitle: copy.deepField,
-    art: deepField,
-  },
-  {
-    path: SIMULATION_ASSETS["spectroscopy"].social,
-    title: messages.catalogue.spectroscopy.title,
-    subtitle: copy.spectroscopy,
-    art: spectroscopy,
-  },
-  {
-    path: SIMULATION_ASSETS["giants"].social,
-    title: messages.catalogue.giants.title,
-    subtitle: copy.giants,
-    art: giants,
-  },
-  {
-    path: SIMULATION_ASSETS["voyage"].social,
-    title: messages.catalogue.voyage.title,
-    subtitle: copy.voyage,
-    art: voyage,
-  },
-  {
-    path: SIMULATION_ASSETS["sun"].social,
-    title: messages.catalogue.sun.title,
-    subtitle: copy.sun,
-    art: sun,
-  },
+  ...(await Promise.all(
+    registered.map(async ({ artwork, social, socialSubtitle, messageKey }) => ({
+      path: social,
+      title: messages.catalogue[messageKey].title,
+      subtitle: socialSubtitle,
+      art: await readFile(publicFile(artwork), "utf8"),
+    })),
+  )),
 ];
 for (const card of cards) {
   const feature = card.art !== null;
@@ -98,6 +50,7 @@ ${art}
 <path d="M86 466h430" stroke="#ecece8" stroke-opacity=".15"/>
 <text x="86" y="508" fill="#9a9a96" font-family="Arial, sans-serif" font-size="14" letter-spacing="2">${escape(copy.category)}</text>
 </svg>`;
+  await mkdir(new URL(".", publicFile(path)), { recursive: true });
   await writeFile(publicFile(path.replace(/\.png$/, ".svg")), svg);
   await sharp(Buffer.from(svg)).png().toFile(publicFile(path).pathname);
 }

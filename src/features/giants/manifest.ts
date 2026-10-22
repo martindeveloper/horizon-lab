@@ -1,16 +1,19 @@
-import type { SimulationManifest } from "@/lib/simulation-types";
-
-import { simulationPath, slugPath } from "../../lib/simulation-paths";
-import { SIMULATION_ASSETS } from "../../lib/urls";
-import { DEFAULT_RUNG, type RungId } from "./lib/model/rungs";
+import { defineSimulation } from "../../lib/simulation-manifest";
+import { defineRoutes, simulationPath } from "../../lib/simulation-paths";
+import { DEFAULT_RUNG, RUNGS } from "./lib/model/rungs";
 
 export const GIANTS_PATH = simulationPath("giants");
-export const giantsManifest = {
+export const giantsManifest = defineSimulation({
   id: "giants",
   kind: "lab",
   feature: "giants",
-  href: GIANTS_PATH,
-  artwork: SIMULATION_ASSETS.giants.artwork,
+  routes: defineRoutes({
+    base: GIANTS_PATH,
+    param: "star",
+    defaultId: DEFAULT_RUNG,
+    entries: RUNGS,
+  }),
+  socialSubtitle: "How big stars get",
   artworkLayers: [
     { id: "sky", depth: -1 },
     { id: "surface", depth: -0.7 },
@@ -21,8 +24,8 @@ export const giantsManifest = {
   messageKey: "giants",
   highlights: ["ladder", "physics", "uncertainty"],
   entryPoints: [
-    { id: "sun", href: GIANTS_PATH },
-    { id: "pulsar", href: slugPath(GIANTS_PATH, DEFAULT_RUNG, "neutron-star" satisfies RungId) },
-    { id: "betelgeuse", href: slugPath(GIANTS_PATH, DEFAULT_RUNG, "betelgeuse" satisfies RungId) },
+    { id: "sun", view: DEFAULT_RUNG },
+    { id: "pulsar", view: "neutron-star" },
+    { id: "betelgeuse", view: "betelgeuse" },
   ],
-} as const satisfies SimulationManifest;
+});

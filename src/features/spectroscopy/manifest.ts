@@ -1,16 +1,19 @@
-import type { SimulationManifest } from "@/lib/simulation-types";
-
-import { simulationPath, slugPath } from "../../lib/simulation-paths";
-import { SIMULATION_ASSETS } from "../../lib/urls";
-import { DEFAULT_VIEW, type ViewId } from "./lib/model/view-ids";
+import { defineSimulation } from "../../lib/simulation-manifest";
+import { defineRoutes, simulationPath } from "../../lib/simulation-paths";
+import { DEFAULT_VIEW, VIEW_IDS } from "./lib/model/view-ids";
 
 export const SPECTROSCOPY_PATH = simulationPath("spectroscopy");
 
-export const spectroscopyManifest = {
+export const spectroscopyManifest = defineSimulation({
   id: "spectroscopy",
   kind: "lab",
-  href: SPECTROSCOPY_PATH,
-  artwork: SIMULATION_ASSETS.spectroscopy.artwork,
+  routes: defineRoutes({
+    base: SPECTROSCOPY_PATH,
+    param: "view",
+    defaultId: DEFAULT_VIEW,
+    entries: VIEW_IDS.map((id) => ({ id })),
+  }),
+  socialSubtitle: "Fingerprints in starlight",
   artworkLayers: [
     { id: "sky", depth: -1 },
     { id: "pool", depth: -0.7 },
@@ -20,11 +23,8 @@ export const spectroscopyManifest = {
   messageKey: "spectroscopy",
   highlights: ["fingerprints", "kirchhoff", "sequence"],
   entryPoints: [
-    { id: "sun", href: SPECTROSCOPY_PATH },
-    {
-      id: "kirchhoff",
-      href: slugPath(SPECTROSCOPY_PATH, DEFAULT_VIEW, "kirchhoff" satisfies ViewId),
-    },
-    { id: "mystery", href: slugPath(SPECTROSCOPY_PATH, DEFAULT_VIEW, "mystery" satisfies ViewId) },
+    { id: "sun", view: DEFAULT_VIEW },
+    { id: "kirchhoff", view: "kirchhoff" },
+    { id: "mystery", view: "mystery" },
   ],
-} as const satisfies SimulationManifest;
+});
