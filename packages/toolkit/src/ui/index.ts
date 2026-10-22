@@ -27,6 +27,7 @@ export {
   type ListHeadingProps,
   type ListItemProps,
 } from "./list-item";
+export { Disclosure, type DisclosureProps } from "./disclosure";
 export { Orb, type OrbLook, type OrbProps } from "./orb";
 export { SwitchChip, SwitchMark, SwitchRow } from "./switch";
 export { Picker, type PickerProps } from "./picker";

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { Group, Mesh, PerspectiveCamera, Ray, Sphere, Vector3 } from "three";
 
+import { DisposalScope } from "../packages/toolkit/src/rendering/disposal.ts";
 import {
   bodyLabelBounds,
   bodyVisible,
@@ -12,6 +13,7 @@ import {
   labelOccluders,
   overlapsBody,
 } from "../packages/toolkit/src/scene/label-geometry.ts";
+import { createLabels } from "../packages/toolkit/src/scene/labels.ts";
 
 const cameraAt = () => {
   const camera = new PerspectiveCamera(48, 1, 0.01, 1000);
@@ -20,6 +22,82 @@ const cameraAt = () => {
   camera.updateMatrixWorld();
   return camera;
 };
+
+test("occluded and edge-clipped labels stay hidden without repeated layout writes and return when clear", () => {
+  const original = globalThis.document;
+  const elements = [];
+  const writes = [];
+  let reads = 0;
+  globalThis.document = {
+    createElement() {
+      const element = {
+        dataset: {},
+        style: new Proxy(
+          { setProperty() {} },
+          {
+            set(style, key, value) {
+              writes.push([key, value]);
+              style[key] = value;
+              return true;
+            },
+          },
+        ),
+        get offsetWidth() {
+          reads++;
+          return this.style.display === "none" ? 0 : this.textContent.length * 8;
+        },
+        get offsetHeight() {
+          reads++;
+          return this.style.display === "none" ? 0 : 16;
+        },
+        remove() {},
+      };
+      elements.push(element);
+      return element;
+    },
+  };
+  const scope = new DisposalScope();
+  try {
+    const words = { first: "First name", second: "Second name", edge: "Edge name" };
+    const labels = createLabels(
+      { scope, camera: cameraAt(), viewport: { width: 800, height: 800 } },
+      { appendChild() {} },
+      () => words,
+    );
+    const draw = (secondX = 0, edgeX = 4.3) => {
+      labels.place("first", 0, 0, 0, true, { strong: true });
+      labels.place("second", secondX, 0, 0, true);
+      labels.place("edge", edgeX, 0, 0, true);
+      labels.flush();
+    };
+    const visible = () => labels.hits(() => true).map(({ key }) => key);
+    draw();
+    assert.deepEqual(visible(), ["first"]);
+    assert.equal(elements[1].style.display, "none");
+    assert.equal(elements[2].style.display, "none");
+    writes.length = 0;
+    reads = 0;
+    for (let frame = 0; frame < 120; frame++) draw();
+    assert.equal(writes.length, 0, "unchanged hidden candidates must not dirty DOM styles");
+    assert.equal(reads, 0, "unchanged names keep their measured size");
+    draw(2, -2);
+    assert.deepEqual(visible(), ["first", "second", "edge"]);
+    assert.equal(elements[1].style.display, "block");
+    assert.equal(elements[2].style.display, "block");
+    draw();
+    words.second = "A translated name";
+    draw();
+    assert.deepEqual(visible(), ["first"]);
+    draw(2, -2);
+    assert.equal(
+      labels.hits(() => true)[1].rect.right - labels.hits(() => true)[1].rect.left,
+      words.second.length * 8,
+    );
+  } finally {
+    scope.dispose();
+    globalThis.document = original;
+  }
+});
 
 test("depth masks cover only intersecting text pixels and retain foreground labels", () => {
   const camera = cameraAt();

@@ -206,7 +206,9 @@ export function createLabels(
     const sy = (-projected.y * 0.5 + 0.5) * height;
     if (sx < inset.left || sy < inset.top || sx > width - inset.right || sy > height - inset.bottom)
       return hidden(entry);
-    if (entry.display !== "block") {
+    // A measured label can stay hidden until bounds and overlap checks accept it.
+    // Showing every candidate here would undo decluttering on every frame.
+    if (!entry.measured && entry.display !== "block") {
       el.style.display = "block";
       entry.display = "block";
     }
@@ -358,6 +360,10 @@ export function createLabels(
       else {
         placed.push(rect);
         entry.kept = true;
+        if (entry.el && entry.display !== "block") {
+          entry.el.style.display = "block";
+          entry.display = "block";
+        }
       }
     }
   };
