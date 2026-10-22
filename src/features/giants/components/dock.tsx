@@ -17,6 +17,7 @@ import {
 } from "@horizon/toolkit/ui";
 
 import { spectralOf } from "../lib/model/catalogue";
+import { rungNameKey } from "../lib/model/names";
 import { rulerFor } from "../lib/model/ruler";
 import { RUNGS, RUNG_IDS } from "../lib/model/rungs";
 import { useGiants } from "../lib/store";
@@ -57,7 +58,7 @@ export function GiantsDock() {
   const id = RUNG_IDS[focus]!;
   const rung = RUNGS[focus]!;
   const spectral = spectralOf(rung.id);
-  const name = t(`rungs.${id}.name`);
+  const name = t(rungNameKey(id));
   const figures = keyFigures(t, distance, id);
   return (
     <Dock

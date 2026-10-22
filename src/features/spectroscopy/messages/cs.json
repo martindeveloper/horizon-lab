@@ -49,15 +49,6 @@
     "air": "Zemský vzduch",
     "spectrograph": "Spektrograf"
   },
-  "stars": {
-    "alnitak": "Alnitak",
-    "rigel": "Rigel",
-    "vega": "Vega",
-    "procyon": "Procyon",
-    "sun": "Slunce",
-    "arcturus": "Arcturus",
-    "aldebaran": "Aldebaran"
-  },
   "elements": {
     "H": "Vodík",
     "He": "Helium",

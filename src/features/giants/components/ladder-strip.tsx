@@ -8,6 +8,7 @@ import { Tooltip, cn } from "@horizon/toolkit/ui";
 
 import { radiusMetres } from "../lib/model/catalogue";
 import { kelvinOf } from "../lib/model/compare";
+import { rungNameKey } from "../lib/model/names";
 import { RUNGS, RUNG_IDS } from "../lib/model/rungs";
 import { useGiants } from "../lib/store";
 import { keyFigures, useDistance, useGiantsT } from "./format";
@@ -75,7 +76,7 @@ function HoverLabel({ index, shown }: { index: number; shown: boolean }) {
         shown ? "opacity-100" : "opacity-0",
       )}
     >
-      <span className="text-xs text-fg">{t(`rungs.${id}.name`)}</span>
+      <span className="text-xs text-fg">{t(rungNameKey(id))}</span>
       <span className="font-mono text-[11px] text-muted tabular-nums">
         {keyFigures(t, distance, id)[0]?.value}
       </span>
@@ -148,7 +149,7 @@ export function LadderStrip() {
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           aria-label={t("hud.ladder")}
-          aria-valuetext={t(`rungs.${RUNG_IDS[focus]!}.name`)}
+          aria-valuetext={t(rungNameKey(RUNG_IDS[focus]!))}
           className="block size-3.5 rounded-full border-2 border-accent shadow-[0_0_12px_rgb(var(--solar)/0.45)] outline-hidden transition-transform duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg active:scale-95"
         />
       </SliderPrimitive.Root>

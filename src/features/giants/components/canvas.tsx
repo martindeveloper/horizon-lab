@@ -6,6 +6,7 @@ import type { StartEngine } from "@horizon/toolkit/rendering";
 import { useImmersive } from "@horizon/toolkit/ui";
 
 import { createGiantsEngine } from "../lib/engine";
+import { rungNameKey } from "../lib/model/names";
 import { RUNG_IDS, type RungId } from "../lib/model/rungs";
 import { ORBIT_IDS } from "../lib/parameters";
 import { useGiants } from "../lib/store";
@@ -54,7 +55,7 @@ export function GiantsCanvas() {
             tabIndex={-1}
             onClick={() => open(id)}
           >
-            {t(`rungs.${id}.name`)}
+            {t(rungNameKey(id))}
           </button>
         ))}
         {ORBIT_IDS.map((id) => (

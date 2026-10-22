@@ -49,15 +49,6 @@
     "air": "Earth's air",
     "spectrograph": "Spectrograph"
   },
-  "stars": {
-    "alnitak": "Alnitak",
-    "rigel": "Rigel",
-    "vega": "Vega",
-    "procyon": "Procyon",
-    "sun": "Sun",
-    "arcturus": "Arcturus",
-    "aldebaran": "Aldebaran"
-  },
   "elements": {
     "H": "Hydrogen",
     "He": "Helium",

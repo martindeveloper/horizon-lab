@@ -35,7 +35,7 @@ export function Stage() {
               ? t("scene.sun")
               : star === "sequence"
                 ? t("scene.dwarf")
-                : t(`stars.${star}`),
+                : t(`names.${star}`),
       gas: obs.kind === "slab" ? t("scene.gas") : t("scene.atmosphere"),
       air: obs.kind === "star" && air ? t("scene.air") : null,
       spectrograph: t("scene.spectrograph"),

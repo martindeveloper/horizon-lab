@@ -48,7 +48,7 @@ export function RungCard() {
             <HrDiagram
               namespace="giants"
               points={LADDER_STARS}
-              nameOf={(star) => t(`rungs.${star}.name`)}
+              nameOf={(star) => t(`names.${star}`)}
               focus={id}
               onPick={(star) => {
                 const rung = rungOf(star);

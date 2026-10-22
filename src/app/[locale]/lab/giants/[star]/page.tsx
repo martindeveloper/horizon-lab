@@ -1,6 +1,6 @@
 import { FEATURES } from "@/config";
 import { pathForRung, resolveRung, rungRouteParams } from "@/features/giants/routing";
-import { getGiantsMessages } from "@/features/giants/server";
+import { getGiantsMessages, rungNameKey } from "@/features/giants/server";
 import { simulationMetadata } from "@/lib/metadata";
 import { SIMULATION_ASSETS } from "@/lib/urls";
 
@@ -15,7 +15,7 @@ export const generateMetadata = simulationMetadata({
     param: "star",
     resolve: resolveRung,
     pathFor: pathForRung,
-    title: (t, id) => t(`rungs.${id}.name`),
+    title: (t, id) => t(rungNameKey(id)),
   },
 });
 

@@ -231,7 +231,7 @@ function SkyControls() {
                       onClick={() => api().setStar(id)}
                       className="shrink-0"
                     >
-                      {t(`stars.${id}`)}
+                      {t(`names.${id}`)}
                       <span className="font-mono text-[10px] text-subtle">
                         {STARS[id].type.split(" ")[0]}
                       </span>
@@ -314,7 +314,7 @@ function SkyControls() {
                       points={HR_STARS}
                       nameOf={(id) => {
                         const own = labStar(id);
-                        return own ? t(`stars.${own}`) : id;
+                        return own ? t(`names.${own}`) : id;
                       }}
                       focus={star === "sequence" ? null : star}
                       {...(star === "sequence" ? { temperature: sequenceTemperature } : {})}

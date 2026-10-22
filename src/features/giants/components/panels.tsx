@@ -11,6 +11,7 @@ import { buildCard } from "@/lib/facts";
 import { ListItem, SegmentedControl, SwitchRow, kickerClass } from "@horizon/toolkit/ui";
 
 import { SURFACE_ZOOMS } from "../lib/model/inspection";
+import { rungNameKey } from "../lib/model/names";
 import { RULERS } from "../lib/model/ruler";
 import { RUNGS, rungIndex } from "../lib/model/rungs";
 import type { GiantsAntialias } from "../lib/quality";
@@ -40,7 +41,7 @@ export function StarsPanel({ onClose }: { onClose: () => void }) {
               selected={rungIndex(rung.id) === focus}
               onClick={() => useGiants.getState().go(rungIndex(rung.id))}
             >
-              <span className="truncate">{t(`rungs.${rung.id}.name`)}</span>
+              <span className="truncate">{t(rungNameKey(rung.id))}</span>
               <span className={kickerClass}>{size}</span>
             </ListItem>
           );

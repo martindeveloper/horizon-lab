@@ -51,7 +51,7 @@ function useReveal(m: Mystery) {
         ? t("mysteries.cell", { temperature, lamp: kelvin(f, m.lamp) })
         : m.kind === "dwarf"
           ? t("mysteries.dwarf", { type: spectralClass(m.teff), temperature })
-          : t("mysteries.giant", { star: t(`stars.${m.star}`), temperature });
+          : t("mysteries.giant", { star: t(`names.${m.star}`), temperature });
   const v = mysteryVelocity(m);
   const speed = f.number(Math.abs(v));
   return v > 0

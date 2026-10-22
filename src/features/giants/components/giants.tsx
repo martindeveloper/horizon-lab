@@ -9,6 +9,7 @@ import { ANCHOR_IDS } from "@/lib/urls";
 import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
 
 import { DRIFT } from "../lib/drift";
+import { rungNameKey } from "../lib/model/names";
 import { RUNG_IDS, type RungId } from "../lib/model/rungs";
 import { useGiants, type GiantsStore } from "../lib/store";
 import { rungFromPath } from "../routing";
@@ -31,7 +32,7 @@ function leaveGuide() {
 function DriftBody() {
   const t = useTranslations("giants");
   const focus = useGiants((s) => s.focus);
-  return <>{t(`rungs.${RUNG_IDS[focus] ?? RUNG_IDS[0]}.name`)}</>;
+  return <>{t(rungNameKey(RUNG_IDS[focus] ?? RUNG_IDS[0]))}</>;
 }
 
 export function Giants() {
