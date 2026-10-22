@@ -6,7 +6,16 @@
  * tests/simulation-shared.test.mjs checks that each message's placeholders match the arguments
  * given here, in both languages.
  */
-import { figureRow, r, row, v, type CardSpec, type StaticCard, type Badge } from "@/lib/facts";
+import {
+  figureRow,
+  r,
+  row,
+  v,
+  styled,
+  type CardSpec,
+  type StaticCard,
+  type Badge,
+} from "@/lib/facts";
 import type { NeighbourId } from "@/space/galaxy/model/neighbours";
 
 import { CATALOGUE } from "../lib/model/catalogue";
@@ -56,8 +65,12 @@ export const GALAXY_CARDS: Record<"milkyway" | "sun" | "bulge" | "halo", StaticC
     badge: "inferred",
     rows: [
       row("width", "cards.galaxy.halo.width", { value: v(G.halo.width) }),
-      row("mass", "cards.galaxy.halo.mass"),
+      row("mass", "cards.galaxy.halo.mass", {
+        value: styled(G.halo.enclosedMass, { style: "error", withUnit: true }),
+        radius: v(G.halo.constraintRadius),
+      }),
     ],
+    caution: { radius: v(G.halo.constraintRadius), overdensity: v(G.halo.overdensity) },
   },
   milkyway: {
     badge: "sketch",

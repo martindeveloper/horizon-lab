@@ -1,0 +1,15 @@
+{
+  "reviewed": "2026-10-22",
+  "publication": "published",
+  "referenceUrl": "https://doi.org/10.1038/s41550-025-02763-9",
+  "dataUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41550-025-02763-9/MediaObjects/41550_2025_2763_MOESM4_ESM.fits",
+  "sha256": "b7a54fcc2b4d9375fa50a2927b170770e0af6fda74bb6a77ee59a072c0d481d7",
+  "snapshotSha256": "2b8451294a82464418058802185d543ac5dd7e59f26b8e31f999b501a612778e",
+  "width": 328,
+  "height": 318,
+  "validPixels": 31099,
+  "min": -0.023979,
+  "max": 0.109664,
+  "quantity": "JWST E-mode convergence kappa; projected total mass, not dark matter alone",
+  "processing": "Original grid; zero exterior masked; quantized to 1e-6; no WCS supplied"
+}

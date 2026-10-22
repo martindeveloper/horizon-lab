@@ -2,9 +2,12 @@ import { useTranslations } from "next-intl";
 
 import { GuideCaption } from "@/components/simulations/guide-caption";
 import type { DockInTheWay } from "@/components/simulations/use-dock-clearance";
+import { Callout } from "@horizon/toolkit/ui";
 
 import { TOUR, TOUR_DWELL } from "../lib/model/tour";
 import { useDeepField } from "../lib/store";
+import { CmbEvidence } from "./cmb";
+import { ExpansionView, LensingView } from "./dark-universe";
 
 /** A caption beside the scene (a phone held sideways) leaves the names below it alone. */
 const acrossTheMiddle: DockInTheWay = (caption, stage) => {
@@ -35,11 +38,25 @@ export function DeepFieldGuide() {
       landed={landed}
       className="bottom-(--hud-clear,6rem) pb-2"
       clearance={clearance}
-      extra={(step) =>
-        step.id === "laniakea" || step.id === "web" ? (
-          <p className="mt-2 text-ui text-fg-secondary">{t("atlas.guideMode")}</p>
-        ) : null
-      }
+      extra={(step) => (
+        <div className="mt-3">
+          {step.id === "laniakea" || step.id === "web" ? (
+            <p className="mb-3 text-ui text-fg-secondary">{t("atlas.guideMode")}</p>
+          ) : null}
+          {step.dark === "halo" ? (
+            <Callout title={t("dark.inferred")}>
+              <p>{t("dark.halo.inferred")}</p>
+            </Callout>
+          ) : step.dark === "lensing" ? (
+            <LensingView compact />
+          ) : step.dark === "expansion" ? (
+            <div className="grid gap-3">
+              <CmbEvidence compact />
+              <ExpansionView compact />
+            </div>
+          ) : null}
+        </div>
+      )}
     />
   );
 }

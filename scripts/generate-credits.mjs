@@ -34,6 +34,7 @@ function findNotices(directory, relative = "") {
 
 const noticesSections = [
   `Tanner Helland — blackbody temperature-to-RGB approximation\nSource: ${CREDIT_URLS.tannerHellandCode}\nAdapted to GLSL in packages/toolkit/src/shaders/temperature.glsl\n\n${read("scripts/licenses/tanner-helland-LICENSE.txt")}`,
+  `Astrometry.net — HEALPix pixel coordinates\nSource: https://github.com/astropy/astropy-healpix/blob/main/cextern/astrometry.net/healpix.c\nAdapted for the offline Node CMB importer in scripts/lib/cmb-data.mjs\n\n${read("scripts/licenses/astrometry-net-LICENSE.txt")}`,
 ];
 for (const [path, meta] of Object.entries(lock.packages).sort(([a], [b]) =>
   a.localeCompare(b, "en"),

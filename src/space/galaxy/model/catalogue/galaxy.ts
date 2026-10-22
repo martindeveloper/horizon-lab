@@ -4,11 +4,11 @@ import { GALACTIC_YEAR, SUN_BIRTH } from "@/space/solar-system/model/parameters"
 import { BLACK_HOLES } from "@/space/stellar";
 import { convert } from "@horizon/toolkit/science";
 
+import { HALO_FACTS } from "../dark-halo";
 import {
   ARM_PITCH_DEG,
   ARM_START_KPC,
   BAR_ANGLE_DEG,
-  HALO_R200_KPC,
   RADIAL_AMPLITUDE_LY,
   RADIAL_PERIOD,
   SUN_GALACTIC_RADIUS_LY,
@@ -139,24 +139,7 @@ export const GALAXY = {
     },
     blackHole: BLACK_HOLES["sgr-a"].mass,
   },
-  halo: {
-    r200: {
-      value: HALO_R200_KPC,
-      unit: "kpc",
-      show: "kpc",
-      source: "blandHawthorn2016",
-      status: "derived",
-      note: "M₂₀₀ 1.1 × 10¹² M☉ → 213 kpc",
-    },
-    width: {
-      value: 1,
-      unit: "Mly",
-      digits: 1,
-      source: "blandHawthorn2016",
-      status: "derived",
-      note: "R₂₀₀ ≈ 200 kpc: 1.3–1.8 Mly across",
-    },
-  },
+  halo: HALO_FACTS,
   milkyway: {
     diskWidth: {
       value: 100_000,

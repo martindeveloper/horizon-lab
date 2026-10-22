@@ -23,7 +23,7 @@ function Key({ marks, children }: { marks: ReactNode; children: ReactNode }) {
 }
 
 /**
- * The cosmic map's key, in the header's top-left slot while the atlas is in view (the views
+ * The cosmic map's key, in the header's caption slot (`CaptionSlot`) while the atlas is in view (the views
  * captioned there lie nearer or farther): one short word per kind of mark, only for the layers
  * shown. What each means, the display mode and the coverage live in the Settings panel.
  */
@@ -35,7 +35,7 @@ export function AtlasLegend() {
   return (
     <ul
       aria-label={t("atlas.legendTitle")}
-      className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-ui text-space-muted not-md:order-last not-md:basis-full md:flex-1 md:pt-2.5"
+      className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1"
     >
       {show.cosmicMeasured ? <Key marks={DOT}>{t("atlas.measured")}</Key> : null}
       {show.cosmicBasins ? <Key marks={RING}>{t("atlas.reconstructed")}</Key> : null}

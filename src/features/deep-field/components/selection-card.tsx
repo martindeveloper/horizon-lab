@@ -12,6 +12,8 @@ import { canCloseUp, useDeepField } from "../lib/store";
 import { AtlasProvenance } from "./atlas-provenance";
 import { COSMOS_CARDS } from "./card-specs";
 import { cardFor } from "./cards";
+import { CmbEvidence } from "./cmb";
+import { HaloEvidence } from "./dark-universe";
 
 /**
  * Facts and notes for the selected object. A solar system body leads back in time, to the
@@ -45,7 +47,9 @@ export function SelectionCard() {
           ? "detailNotes.measurements"
           : evidence === "reconstruction"
             ? "detailNotes.reconstruction"
-            : "detailNotes.general",
+            : selection.kind === "galaxy" && selection.id === "halo"
+              ? "dark.inferred"
+              : "detailNotes.general",
       );
   return (
     <SelectionSheet
@@ -56,6 +60,10 @@ export function SelectionCard() {
       details={
         selection.kind === "cosmos" && isAtlasId(selection.id) ? (
           <AtlasProvenance id={selection.id} />
+        ) : selection.kind === "cosmos" && selection.id === "observableUniverse" ? (
+          <CmbEvidence />
+        ) : selection.kind === "galaxy" && selection.id === "halo" ? (
+          <HaloEvidence />
         ) : undefined
       }
       footer={
@@ -87,6 +95,14 @@ export function SelectionCard() {
         ) : selection.kind === "galaxy" && selection.id === "sun" ? (
           <Action className="w-full" onClick={() => useDeepField.getState().setView("giants")}>
             {t("hud.home")}
+          </Action>
+        ) : selection.kind === "galaxy" && selection.id === "halo" ? (
+          <Action
+            variant="glass"
+            className="w-full"
+            onClick={() => useDeepField.getState().openDarkView("halo")}
+          >
+            {t("dark.open")}
           </Action>
         ) : null
       }

@@ -1,8 +1,9 @@
+import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { CameraPad } from "@/components/simulations/camera-pad";
 import { DistanceUnitControl } from "@/components/simulations/map-readouts";
-import { Rail, RailSection } from "@/components/simulations/rail";
+import { Rail, RailSection, SwitchGroup } from "@/components/simulations/rail";
 import {
   BloomSwitch,
   LensSwitch,
@@ -10,11 +11,14 @@ import {
   SCENE_ANTIALIAS,
 } from "@/components/simulations/render-settings";
 import { SwitchChips } from "@/components/simulations/switch-chips";
+import { Disclosure, ListItem } from "@horizon/toolkit/ui";
 
 import { useDeepField } from "../lib/store";
 import { AtlasModeControl } from "./atlas-mode-control";
+import { CmbControl } from "./cmb";
+import { HaloSwitches } from "./dark-universe";
 
-const SWITCHES = ["names", "distances", "lightTime", "halo"] as const;
+const SWITCHES = ["names", "distances", "lightTime"] as const;
 const ATLAS_SWITCHES = [
   "cosmicMeasured",
   "cosmicBasins",
@@ -23,10 +27,15 @@ const ATLAS_SWITCHES = [
   "cosmicGuides",
 ] as const;
 
-/** How the map is drawn: what it shows, the distance unit, and buttons to turn the camera. */
+/**
+ * How the map is drawn, controls only: what it shows, the dark matter overlay (its story is the
+ * Dark universe panel's), the cosmic map's display and layers (how to read them folded under),
+ * the distance unit, buttons to turn the camera, then rendering.
+ */
 export function ViewPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("deepField");
   const show = useDeepField((s) => s.show);
+  const mode = show.cosmicMode;
   const unit = useDeepField((s) => s.distanceUnit);
   const angles = useDeepField((s) => s.cameraAngles);
   const antialias = useDeepField((s) => s.antialias);
@@ -44,28 +53,45 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           onToggle={(key) => useDeepField.getState().patchShow({ [key]: !show[key] })}
         />
       </RailSection>
+      <RailSection title={t("dark.title")}>
+        <HaloSwitches />
+        <SwitchGroup>
+          <ListItem
+            detail={<ChevronRight aria-hidden className="icon size-icon-compact" />}
+            onClick={() => useDeepField.getState().openDarkView("halo")}
+          >
+            {t("dark.open")}
+          </ListItem>
+        </SwitchGroup>
+      </RailSection>
       <RailSection title={t("atlas.modeTitle")}>
         <AtlasModeControl />
-        <p className="mt-3 text-ui leading-relaxed text-fg-secondary">
-          {t(`atlas.modeHints.${show.cosmicMode}`)}
-        </p>
-        <p className="mt-2 text-ui leading-relaxed text-fg-secondary">
-          {t("atlas.experienceModes")}
-        </p>
+        {mode === "illustration" ? null : (
+          <div className="mt-2">
+            <SwitchChips
+              list
+              keys={ATLAS_SWITCHES}
+              values={show}
+              label={(key) => t(`atlas.layers.${key}`)}
+              onToggle={(key) => useDeepField.getState().patchShow({ [key]: !show[key] })}
+            />
+          </div>
+        )}
+        <Disclosure className="mt-2" summary={t("atlas.howToRead")}>
+          <p>{t(`atlas.modeHints.${mode}`)}</p>
+          {mode === "illustration" ? null : (
+            <>
+              <p>{t("atlas.glyphs")}</p>
+              <p>{t("atlas.coverage")}</p>
+            </>
+          )}
+          <p>{t("atlas.experienceModes")}</p>
+        </Disclosure>
       </RailSection>
-      {show.cosmicMode !== "illustration" ? (
-        <RailSection title={t("atlas.layersTitle")}>
-          <SwitchChips
-            list
-            keys={ATLAS_SWITCHES}
-            values={show}
-            label={(key) => t(`atlas.layers.${key}`)}
-            onToggle={(key) => useDeepField.getState().patchShow({ [key]: !show[key] })}
-          />
-          <p className="mt-3 text-xs leading-relaxed text-fg-secondary">{t("atlas.coverage")}</p>
-          <p className="mt-2 text-xs leading-relaxed text-fg-secondary">{t("atlas.glyphs")}</p>
-        </RailSection>
-      ) : null}
+      <RailSection title={t("cmb.title")}>
+        <CmbControl />
+        <p className="mt-2 text-ui text-fg-secondary">{t("cmb.modeNote")}</p>
+      </RailSection>
       <RailSection title={t("hud.units")}>
         <DistanceUnitControl
           namespace="deepField"

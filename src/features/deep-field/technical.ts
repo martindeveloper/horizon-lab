@@ -1,4 +1,5 @@
 import { ATLAS_SOURCES } from "@/space/cosmos/model/atlas";
+import { CMB_SOURCE } from "@/space/cosmos/model/cmb";
 import { CREDIT_URLS, SOURCE_URLS } from "@horizon/toolkit/urls";
 
 const specification = {
@@ -69,6 +70,8 @@ const specification = {
     },
   ],
   references: [
+    { title: CMB_SOURCE.planckRelease, url: CMB_SOURCE.planckPage },
+    { title: CMB_SOURCE.actRelease, url: CMB_SOURCE.actPage },
     ...Object.values(ATLAS_SOURCES).map((source) => ({
       title: `${source.version} · ${source.publication}`,
       url: source.referenceUrl,

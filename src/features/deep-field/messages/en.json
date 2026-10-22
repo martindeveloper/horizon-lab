@@ -52,7 +52,8 @@
   },
   "toggles": {
     "halo": "Dark-matter halo",
-    "lightTime": "Light-time rings"
+    "lightTime": "Light-time rings",
+    "haloBoundary": "Halo density-radius guide"
   },
   "hud": {
     "galaxyItems": "Milky Way map",
@@ -198,10 +199,10 @@
       },
       "halo": {
         "title": "Dark-matter halo",
-        "width": "On the order of {value}",
-        "mass": "Most of the Galaxy's mass",
-        "body": "Stars orbit too fast for the visible matter alone to hold them; the extra gravity is attributed to dark matter. The faint ball is a reminder of that halo, off by default so it is not mistaken for a cloud of stars.",
-        "caution": "Dark matter has not been seen directly. Do not treat the sphere as a photo or a sharp edge."
+        "width": "Model density diameter · {value}",
+        "mass": "{value} of dark matter within {radius}",
+        "body": "The pale overlay projects an inferred NFW density profile constrained by the 2026 Gaia Cepheid analysis. It becomes denser toward the centre and fades outward. The optional circle marks a density convention; the model continues beyond it.",
+        "caution": "The profile beyond {radius} is extrapolated. The quoted diameter is twice R₂₀₀ of the dark component alone, where its mean density is {overdensity} times critical density; it excludes baryons and is not a measured edge. Colour, central smoothing and the outer fade are illustration choices."
       },
       "milkyway": {
         "title": "Milky Way",
@@ -361,7 +362,7 @@
         "temperature": "{value} K above absolute zero",
         "age": "{value} billion years of light on its way",
         "body": "Everything we could ever have seen. Light has had {age} billion years to reach us, but space kept stretching while it travelled, so its sources now lie much farther away. Its farthest visible light is the cosmic microwave background, from when the universe first turned transparent: a limit on what light can show, not an edge. We sit at the centre only because every observer sits at the centre of their own.",
-        "caution": "The rings mark where light set out {near}, {mid} and {far} billion years ago, at today’s distances. The glow’s spots stand in for the Planck map, and the galaxies beyond the web are a uniform sample, not a catalogue. They stop at the farthest galaxies known; the dark band before the glow is what we have not seen yet: cosmic dawn, when the first stars lit up, and before it the dark ages."
+        "caution": "The rings mark where light set out {near}, {mid} and {far} billion years ago, at today’s model-derived distances. The CMB uses foreground-cleaned Planck and optional ACT data; its spherical placement is illustrative. Generated galaxies beyond the web appear only in Illustration and Both modes. Dark or empty areas do not imply a measured absence of radiation or matter."
       },
       "quipu": {
         "body": "The bright points are the observed CLASSIX member clusters, with sky positions and spectroscopic redshifts. Their collective structure was identified by a friends-of-friends analysis. The label sits at their unweighted spatial centroid; the total mass is inferred.",
@@ -475,11 +476,11 @@
       },
       "galaxy": {
         "title": "The Sun's galactic orbit",
-        "body": "The Sun circles {sunRadiusKpc} kpc from the centre (GRAVITY) with a {galacticYearMyr}-million-year period, clockwise from the north galactic pole. Today it sits near the inner end of a ~{radialSwingKpc} kpc radial swing (period ~{radialMyr} Myr) and {heightPc} pc north of the plane, climbing through ±{verticalPc} pc (period ~{verticalMyr} Myr). The gold line runs those oscillations back over two laps; the true phase that long ago is unknown. The disk follows measured structure: exponential thin ({thinLengthKpc} kpc, {thinHeightPc} pc) and thick ({thickLengthKpc} kpc, {thickHeightPc} pc) disks, a boxy bulge inside a {barHalfKpc} kpc half-length bar at {barDeg}°, four logarithmic arms at a {pitchDeg}° pitch anchored to maser parallaxes near the Sun, the Local Arm, dust on the arms' inner edges and the Cepheid-traced warp beyond {warpStartKpc} kpc. The halo sphere marks R₂₀₀ ≈ {haloKpc} kpc. The far side of the disk is extrapolated."
+        "body": "The Sun circles {sunRadiusKpc} kpc from the centre (GRAVITY) with a {galacticYearMyr}-million-year period, clockwise from the north galactic pole. Today it sits near the inner end of a ~{radialSwingKpc} kpc radial swing (period ~{radialMyr} Myr) and {heightPc} pc north of the plane, climbing through ±{verticalPc} pc (period ~{verticalMyr} Myr). The gold line runs those oscillations back over two laps; the true phase that long ago is unknown. The disk follows measured structure: exponential thin ({thinLengthKpc} kpc, {thinHeightPc} pc) and thick ({thickLengthKpc} kpc, {thickHeightPc} pc) disks, a boxy bulge inside a {barHalfKpc} kpc half-length bar at {barDeg}°, four logarithmic arms at a {pitchDeg}° pitch anchored to maser parallaxes near the Sun, the Local Arm, dust on the arms' inner edges and the Cepheid-traced warp beyond {warpStartKpc} kpc. The halo projects a spherical NFW model derived from Feng et al. (2026). Its optional density guide marks R₂₀₀ ≈ {haloKpc} kpc for the dark component alone; the outer profile is extrapolated. The far side of the disk is extrapolated."
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Hollow markers locate {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} with coordinate-spread crosses available on inspection. Vela uses the accepted 2026 v2 reconstruction; the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths remain a separate illustration. Data, Illustration and Both modes control the overlay; Both preserves the familiar Laniakea shape alongside the catalogues. Local galaxy populations and the far background remain illustrations. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
+        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Hollow markers locate {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} with coordinate-spread crosses available on inspection. Vela uses the accepted 2026 v2 reconstruction; the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths remain a separate illustration. Data, Illustration and Both modes control the overlay; Both preserves the familiar Laniakea shape alongside the catalogues. Local galaxy populations remain illustrations. Generated galaxies beyond the web are hidden in Data mode. The CMB uses masked Planck 2018 SMICA temperatures with optional ACT DR6.02 NILC detail inside its trusted footprint; neither data gaps nor load failures are filled with synthetic CMB. Foreground-cleaned temperatures are reconstructions; sphere placement, colour and opacity are illustrative. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
       },
       "depth": {
         "title": "Distance and light",
@@ -527,11 +528,15 @@
       },
       "web": {
         "title": "The cosmic web",
-        "body": "On the largest scales, galaxies line walls and filaments around vast, nearly empty voids."
+        "body": "On the largest scales, galaxies line walls and filaments around vast, nearly empty voids. The inset shows a separate observed survey field: mass reconstructed from Webb galaxy shapes, not the local web’s three-dimensional density."
       },
       "firstLight": {
         "title": "The oldest light",
-        "body": "Farther means earlier. Beyond the farthest galaxies seen lie cosmic dawn and the dark ages, and behind them glows the oldest light we see, set free soon after the Big Bang."
+        "body": "Farther means earlier. Beyond the farthest galaxies seen lie cosmic dawn and the dark ages, and behind them glows the oldest light we see, set free soon after the Big Bang. Explore how the assumed cosmology changes separations below; the diagram is a model, not a movie of these galaxies."
+      },
+      "darkHalo": {
+        "title": "The mass we infer",
+        "body": "Stellar motions reveal more gravity than ordinary matter supplies. This pale overlay is one inferred dark-matter density model. Its outer regions are extrapolated; there is no sharp shell."
       }
     }
   },
@@ -541,7 +546,7 @@
     "reconstruction": "Reconstruction limits"
   },
   "atlas": {
-    "modeTitle": "Cosmic map display",
+    "modeTitle": "Cosmic map",
     "modes": {
       "data": "Data",
       "illustration": "Illustration",
@@ -552,9 +557,9 @@
       "illustration": "The illustrated cosmic web and familiar Laniakea flow shape. These paths convey structure; they are not imported galaxy velocities or measured boundaries.",
       "both": "Catalogue data and reconstructed centres alongside the illustrated web and Laniakea flow paths. Filled points, hollow markers and illustrated paths retain their separate meanings."
     },
-    "experienceModes": "Drift uses Illustration; Guide uses Both. Both hide the full uncertainty overlay and restore your manual settings when they end.",
+    "howToRead": "How to read the map",
+    "experienceModes": "Drift uses Illustration; Guide uses Both. Both hide the full uncertainty overlay and restore your manual settings when they end. The CMB uses observational maps in every mode.",
     "guideMode": "Both: measured points, reconstructed centres and illustrated flows.",
-    "layersTitle": "Cosmic data layers",
     "finderTitle": "New cosmic atlas",
     "legendTitle": "Cosmic map evidence",
     "measured": "Measured",
@@ -587,6 +592,91 @@
       "voids": "V-web · Hollinger & Courtois (2026), v1",
       "sloan": "Sloan · Pomarède et al. (2026), v1",
       "south": "Cosmicflows-3 · Pomarède et al. (2020), v1"
+    }
+  },
+  "dark": {
+    "title": "Dark universe",
+    "open": "Explore dark matter & energy",
+    "tabs": {
+      "halo": "Halo",
+      "lensing": "Lensing",
+      "expansion": "Expansion"
+    },
+    "inferred": "Inferred model · illustrative projection",
+    "reconstructed": "Reconstructed from lensing",
+    "model": "Assumed cosmology · calculated evolution",
+    "evidence": "Evidence & limits",
+    "loading": "Loading the published mass map…",
+    "retry": "Map unavailable · retry",
+    "sources": {
+      "feng2026": "Feng et al. · 2026 · Gaia Cepheids",
+      "brooks2026": "Brooks et al. · 2026 · outer halo & LMC",
+      "dado2026": "Dado et al. · 2026 · model limitations",
+      "cosmosWeb2026": "COSMOS-Web · 2026 · published mass map",
+      "planck2018": "Planck 2018 + BAO · baseline cosmology",
+      "desiExpansion2026": "DESI DR2 IV · 2026 · expansion constraints"
+    },
+    "halo": {
+      "body": "A pale density overlay shows one spherical dark-matter model around the Milky Way. Its colour and opacity make invisible mass legible; they do not represent light.",
+      "boundary": "Density-radius guide · {radius}",
+      "measured": "Gaia measures stellar positions, proper motions and radial velocities. Cepheid distances and a rotation curve constrain the gravitational field; dark-matter density is inferred after accounting for ordinary matter.",
+      "inferred": "This NFW illustration matches the rounded mean density and enclosed dark mass in Feng et al. (2026), choosing the extended scale-radius solution. It is not a unique fit or a measured shape. The outer halo is extrapolated; baryonic assumptions and the LMC affect mass estimates. No full uncertainty band is claimed.",
+      "alt": "Dark-matter density of the halo model against distance from the Galaxy's centre, both logarithmic: solid where stellar motions constrain it, dashed where it is extrapolated, with the Sun and the density radius marked.",
+      "axes": "Distance from the centre · density, both logarithmic. Dashed: extrapolated.",
+      "radiusLabel": "Density radius",
+      "massWithin": "Dark mass within {radius}"
+    },
+    "lensing": {
+      "alt": "COSMOS-Web projected E-mode convergence map reconstructed from galaxy shape distortions, with the unsurveyed exterior masked.",
+      "legend": "Blue: negative κ · gold: positive κ. Nonlinear contrast. Blank exterior: no map coverage.",
+      "note": "The published COSMOS-Web map reconstructs projected total mass, including ordinary matter, from weak lensing. It has no assigned three-dimensional depth. Negative convergence means a relative mass deficit, not negative mass. Edge structure and small features are affected by noise and reconstruction.",
+      "measured": "Webb measures images of background galaxies. Their small shape distortions are combined statistically to infer the lensing field. These coloured pixels are a mass reconstruction, not a photograph of dark matter."
+    },
+    "expansion": {
+      "alt": "Calculated cosmic scale factor versus cosmic age in the Planck flat Lambda-CDM model, with a movable epoch marker.",
+      "past": "Earlier",
+      "today": "Today",
+      "axes": "Horizontal: cosmic age · vertical: relative separation a(t)",
+      "epoch": "Cosmic epoch",
+      "redshift": "Redshift z = {z}",
+      "separation": "Separation / today",
+      "hubble": "Expansion rate H",
+      "fraction": "Dark-energy fraction",
+      "acceleration": "Expansion",
+      "accelerating": "Accelerating",
+      "decelerating": "Decelerating",
+      "note": "This curve uses the same flat ΛCDM model as the atlas. Dark energy has constant density; its fraction grows as matter dilutes. Separations refer to the homogeneous cosmic background. Bound galaxies do not expand with this diagram, and the camera’s lookback view is unchanged.",
+      "measured": "DESI measures spectra and redshifts. Its correlation analysis infers transverse and radial distances relative to the sound horizon r_d. The latest checked anchor is shown below; it does not independently measure dark energy or replace the baseline curve.",
+      "anchor": "At z = {z}: D_H/r_d = {radial}; D_M/r_d = {transverse}.",
+      "provisional": "DESI DR2 IV (August 2026 version) is a preprint at our review. Its combinations of data still favour evolving dark energy to different degrees; this is not an established discovery. The quoted errors are correlated marginal uncertainties."
+    }
+  },
+  "cmb": {
+    "title": "Cosmic microwave background",
+    "control": "CMB map source",
+    "planck": "Planck",
+    "combined": "Planck + ACT",
+    "open": "Open CMB data sources, colour scale and reconstruction limits",
+    "reconstructed": "CMB · reconstructed from observations",
+    "measured": "Planck and ACT measured microwave sky brightness. The colours show temperature differences in the CMB signal, not galaxies or visible light.",
+    "processing": "Foreground removal reconstructs that signal from several frequencies. ACT detail uses the released ACT–Planck combination with thermal SZ deprojected; residual foregrounds and noise remain.",
+    "colours": "Temperature difference: blue −{limit} µK · grey zero · amber +{limit} µK. Values beyond the ends saturate. Dark patches are masked, not colder.",
+    "limits": "Sources, masks & display choices",
+    "geometry": "The sky directions are Galactic coordinates centred on our observer. Wrapping them on a sphere at the model’s last-scattering distance is an illustration, not a measured three-dimensional surface or an edge of space. Only the facing hemisphere is drawn.",
+    "masks": "Planck confidence and inpainting masks exclude unreliable or filled-in pixels. ACT detail is restricted to its trusted footprint and excludes inpainted sources. Elsewhere, valid Planck data is used; where neither is valid the map stays masked.",
+    "resolution": "Both maps are downsampled for display: longitude spacing is {planck} for Planck and {act} for ACT. This is not native telescope resolution. The colour scale and opacity are display choices.",
+    "releases": "The all-sky baseline is the released Planck 2018 SMICA product, not the newer PR4 frequency maps. ACT detail uses DR6.02. These are pinned products, not a live feed.",
+    "modeNote": "All modes use the same observational CMB reconstruction. Data mode hides the generated distant galaxies. ACT detail applies only within its valid footprint.",
+    "retry": "Retry CMB maps",
+    "status": {
+      "idle": "Loads at observable-universe scale",
+      "loading": "Loading Planck temperatures…",
+      "planck": "Planck SMICA · masks retained",
+      "combined": "Planck SMICA + ACT DR6.02 detail",
+      "detailLoading": "Planck shown · loading ACT detail…",
+      "fallback": "ACT unavailable · Planck shown",
+      "actOnly": "Planck unavailable · ACT footprint only",
+      "unavailable": "Planck unavailable · no all-sky CMB map"
     }
   }
 }

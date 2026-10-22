@@ -1,5 +1,13 @@
 SCIENTIFIC DATA ACKNOWLEDGEMENTS
 
+COSMOS-Web gravitational lensing
+Scognamiglio et al. (2026), Nature Astronomy, An ultra-high-resolution map of
+(dark) matter; Supplementary Data 3, JWST E-mode convergence FITS grid.
+https://doi.org/10.1038/s41550-025-02763-9
+Horizon retains the native numerical grid, quantizes convergence to 1e-6,
+masks exterior padding and applies an explicitly labelled false-colour stretch.
+Source URL, processing and checksums: src/space/cosmos/model/data/cosmos-web-source.json.
+
 GWOSC
 Source: https://gwosc.org/acknowledgement/ (retrieved 2026-10-18)
 Data licence: https://creativecommons.org/licenses/by/4.0/
@@ -48,3 +56,20 @@ RGB; an approximate display mapping, not a calibrated spectrum.
 https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
 https://tannerhelland.com/code.html
 The BSD-2-Clause notice is reproduced in /credits#credits-licence-texts.
+
+CMB temperature reconstructions
+Planck Collaboration: Planck 2018 PR3 SMICA R3.00 full-mission component map,
+served by NASA/IPAC IRSA. Planck is an ESA science mission with instruments
+and contributions directly funded by ESA Member States, NASA, and Canada.
+https://irsa.ipac.caltech.edu/data/Planck/release_3/all-sky-maps/matrix_cmb.html
+Atacama Cosmology Telescope Collaboration: ACT DR6.02 + Planck NILC
+blackbody-temperature map with thermal SZ deprojected, and published footprint
+and inpainting masks. Method: Coulton et al., Phys. Rev. D 109, 063530 (2024).
+We acknowledge the use of the Legacy Archive for Microwave Background Data
+Analysis (LAMBDA), part of the High Energy Astrophysics Science Archive Center
+(HEASARC). HEASARC/LAMBDA is a service of the Astrophysics Science Division at
+the NASA Goddard Space Flight Center.
+https://lambda.gsfc.nasa.gov/product/act/act_dr6.02/act_dr6.02_nilc_info.html
+Horizon redisplays downsampled, masked numerical temperatures with an illustrative
+colour scale and spherical projection; it does not claim native survey resolution.
+Full provenance and rebuild instructions: docs/deep-field-cmb.md.

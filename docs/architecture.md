@@ -481,12 +481,16 @@ keep the original IDs, as Next.js expects.
 `defineSimulation` (`src/lib/simulation-manifest.ts`) constructs the manifest from its
 descriptor and catalogue details. It derives `href` from `routes.base`, artwork and social
 image paths from the feature ID, and entry-point URLs from their declared `view` IDs.
+Returned entry points expose only `id` and `href`; their input-only `view` is not part of
+the public type. Compiler-checked contracts in `tests/types/` protect this transformation.
 The English `socialSubtitle` belongs to the manifest; `scripts/generate-social-assets.mjs`
 iterates the registry to generate every feature's image, including disabled features.
 There is no separate asset registry or hand-maintained list in the image generator.
 
 `src/lib/redirects.ts` consumes these descriptors and their declared compatibility paths. Next.js
-serves these redirects before rendering, preserving query strings automatically.
+serves these redirects before rendering, preserving query strings automatically. Redirect
+source slugs are encoded like browser request paths, including historical Unicode aliases;
+encoded canonical paths are excluded so they cannot redirect to themselves.
 The home page is the catalogue and must never redirect into a simulation.
 Unknown paths are 404s. Known locale/preset pages are prerendered; there is no
 request-time locale proxy or dynamic fallback route.
@@ -533,16 +537,20 @@ helpers from `@/i18n/navigation`.
 3. Register the manifest in `src/lib/simulations.ts`. A simulation not ready for
    production names a `feature` switch (`FEATURES` in `src/config.ts`, on only in
    development with the debug tools on, or by `NEXT_PUBLIC_FEATURE_<ID>`): off, it
-   is out of the catalogue and the sitemap and its routes are not found. Add its catalogue copy to
+   is out of the catalogue and the sitemap and its routes are not found. Declare the switch
+   only in the manifest. `simulationOn` and `simulationStaticParams`
+   (`src/lib/simulation-access.ts`) apply it to discovery and static generation; the shared
+   layout and metadata adapters check it before loading feature messages. Add its catalogue copy to
    both shared locale files under `catalogue.<messageKey>`: `title`, `eyebrow`,
    `category`, a one-sentence `description`, `open`, one short label per
    highlight key, and `entryPoints.<id>.title` for each entry point. The
    catalogue tile and header then pick it up automatically; keep the copy short.
 4. Add `[locale]/lab/<slug>/layout.tsx` and `page.tsx` (`[locale]/experience/<slug>/`
    for an experience). The layout imports the
-   feature's stylesheets and exports `simulationLayout({ slug, feature?, namespace, App, messages })`
+   feature's stylesheets and exports `simulationLayout({ manifest, App, messages })`
    (`src/components/simulations/simulation-layout.tsx`), which loads only that feature's
-   translations beside the shared ones and keeps the scene mounted across its routes.
+   translations beside the shared ones and keeps the scene mounted across its routes. The
+   manifest supplies the feature switch, stylesheet scope (`id`) and namespace (`messageKey`).
    Use the shared stage/shell components and keep browser-dependent scenes behind a
    client-only boundary.
    Wrap the overlay in `SimulationImmersive` and give its header `SimulationToolbar`
@@ -555,12 +563,12 @@ helpers from `@/i18n/navigation`.
    back as it was first made: no guide still running, no selection, panel or switch
    carried into the next visit. Keep any remembered state in the store, not in module
    variables, so the reset reaches it too.
-5. Export `simulationMetadata({ path, messages, image })` (`src/lib/metadata.ts`) from
-   the page; a `[slug]/page.tsx` passes `view` (its param, `resolve`, `pathFor` and the
-   view's title) instead of `path`, sets `dynamicParams = false` and exports the
-   feature's static params. Build the feature's `routing.ts` on
-   `slugRoutes(manifest.routes)` and export its `params` for static generation, so
-   slugs, aliases, static params and redirects follow the same definition.
+5. Export `simulationMetadata({ manifest, messages })` (`src/lib/metadata.ts`) from
+   the page; a `[slug]/page.tsx` also supplies `viewTitle(t, id)`, sets
+   `dynamicParams = false`, and exports `generateStaticParams = simulationStaticParams(manifest)`.
+   The metadata adapter takes the route parameter, resolution, canonical URL and social
+   image from the manifest. Build the feature's client `routing.ts` on
+   `slugRoutes(manifest.routes)` so navigation and server adapters share the same definitions.
    Declare `legacy.bases` only when replacing existing URLs; `legacy.rootAliases`
    preserves the black-hole presets' original root addresses.
 6. Extend tests for the new feature's entry points and copy coverage. Run
@@ -873,6 +881,10 @@ folder mirrors the bucket's keys:
 - `textures/bodies/sun/spots/v<version>/atlas.png`, `pages.png`: the Sun Lab's close-up spot
   stencil, derived from the Sun's map by `scripts/build-sun-spot-stencil.mjs` (`VERSION`), its
   keys in `spot-stencil.generated.json`.
+- `textures/cmb/v<version>/cmb-planck.png`, `cmb-act.png`: the Deep Field's numerical CMB
+  maps (keys in `src/space/cosmos/model/data/cmb-source.json`), written by
+  `scripts/fetch-cmb-data.mjs` (`VERSION`); see `docs/deep-field-cmb.md`. They load only at
+  the observable-universe scale, behind the lab's loading badge.
 - `models/spacecraft/<id>/v<version>/<id>.glb`: the probes', Parker Solar Probe's and the
   observatories' models
   (`MODELS_KEY`, each versioned by its `SPACECRAFT` entry in `src/space/spacecraft/models.ts`),

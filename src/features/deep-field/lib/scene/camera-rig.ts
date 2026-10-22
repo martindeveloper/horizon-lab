@@ -42,7 +42,7 @@ export type CameraFocus = { at: Vector3; limits: ZoomLimits; flying: boolean };
 const AZIMUTH = SOLAR_FRAMING.azimuth;
 const inclinationOf = (realm: Realm) =>
   realm === "solar" || realm === "stars" ? SOLAR_FRAMING.inclination : 0.58;
-/** Seconds for the bulge card to take the aim to the centre or give it back. */
+/** Seconds for a bulge/halo card to take the aim to the centre or give it back. */
 const HOLD_S = 0.8;
 
 export function createCameraRig(
@@ -58,7 +58,7 @@ export function createCameraRig(
   const centre = galaxyToWorld(0, 0, 0, new Vector3());
   const beyond = new Vector3();
   const heart: Vec3 = [0, 0, 0];
-  /** 0..1 of the way the bulge card has taken the aim to the centre. */
+  /** 0..1 of the way a Galactic component has taken the aim to the centre. */
   let hold = 0;
   let atlasHold = 0;
   const atlasAim = new Vector3();
@@ -70,6 +70,10 @@ export function createCameraRig(
   const bulgeHeld = () => {
     const sel = state().selection;
     return sel?.kind === "galaxy" && sel.id === "bulge";
+  };
+  const haloHeld = () => {
+    const sel = state().selection;
+    return sel?.kind === "galaxy" && sel.id === "halo";
   };
 
   const rig = createOrbitRig(camera, {
@@ -90,7 +94,10 @@ export function createCameraRig(
     follow: () => ({ held: focus?.flying ?? false, clamp: true }),
     nearFloor: SOLAR_FRAMING.nearFloor,
     onStep: (dt) => {
-      hold = bulgeHeld() ? Math.min(1, hold + dt / HOLD_S) : Math.max(0, hold - dt / HOLD_S);
+      hold =
+        bulgeHeld() || haloHeld()
+          ? Math.min(1, hold + dt / HOLD_S)
+          : Math.max(0, hold - dt / HOLD_S);
       const landmark = atlasHeld();
       if (landmark) {
         cosmicToWorld(landmark.at, atlasTarget);
@@ -123,7 +130,7 @@ export function createCameraRig(
           beyond
             .set(heart[0], heart[1], heart[2])
             .applyQuaternion(GALAXY_FRAME)
-            .multiplyScalar(MLY),
+            .multiplyScalar(MLY * (1 - smootherstep(hold))),
         );
       /* The expanded atlas reaches either side of the old web framing. Selecting
          a landmark brings it into view on a narrow phone without relocating data. */

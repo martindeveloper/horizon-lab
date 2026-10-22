@@ -15,11 +15,14 @@ import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
 import { STARS } from "@/space/galaxy/model/catalogue/stars";
 import { PROBE_CATALOGUE as PROBES } from "@/space/solar-system/model/probes-catalogue";
 
+import { EXPANSION_FACTS } from "../dark-universe";
+
 export const CATALOGUE = {
   stars: STARS,
   galaxy: GALAXY,
   cosmos: COSMOS,
   probes: PROBES,
+  cosmology: { expansion: EXPANSION_FACTS },
 } as const;
 
 /**
@@ -62,3 +65,5 @@ export const PROSE_FIGURES = {
 
 /** Every fact with its path ("cosmos.virgo.members"), for tests and the ledger. */
 export const catalogueFacts = () => factsOf(CATALOGUE);
+/** Only this lab's figures, so the ledger does not repeat the shared-world catalogues. */
+export const ownCatalogueFacts = () => factsOf({ cosmology: CATALOGUE.cosmology });

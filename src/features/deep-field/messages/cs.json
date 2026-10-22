@@ -52,7 +52,8 @@
   },
   "toggles": {
     "halo": "Halo temné hmoty",
-    "lightTime": "Kruhy světelného času"
+    "lightTime": "Kruhy světelného času",
+    "haloBoundary": "Vodítko poloměru hustoty hala"
   },
   "hud": {
     "galaxyItems": "Mapa Mléčné dráhy",
@@ -198,10 +199,10 @@
       },
       "halo": {
         "title": "Halo temné hmoty",
-        "width": "Řádově {value}",
-        "mass": "Většina hmotnosti Galaxie",
-        "body": "Pozorované rychlosti oběhu hvězd nelze vysvětlit gravitací samotné viditelné hmoty. Dodatečné gravitační působení připisujeme temné hmotě rozložené v rozsáhlém halu. Průsvitná koule toto halo pouze znázorňuje. Ve výchozím nastavení je skrytá, aby nepůsobila jako oblak hvězd.",
-        "caution": "Temnou hmotu známe z jejích gravitačních účinků; přímo pozorována nebyla. Zobrazená koule není fotografií ani nevyznačuje ostrou hranici hala."
+        "width": "Průměr hustoty modelu · {value}",
+        "mass": "{value} temné hmoty uvnitř {radius}",
+        "body": "Jemná vrstva promítá odvozený profil hustoty NFW omezený analýzou cefeid Gaia z roku 2026. Směrem ke středu houstne a vně slábne. Volitelná kružnice označuje konvenci hustoty; model pokračuje i za ní.",
+        "caution": "Profil za {radius} je extrapolace. Uvedený průměr je dvojnásobkem R₂₀₀ samotné temné složky, kde její střední hustota dosahuje {overdensity}násobku kritické hustoty. Nezahrnuje baryony a nejde o změřený okraj. Barva, vyhlazení středu a vnější útlum jsou ilustrační volby."
       },
       "milkyway": {
         "title": "Mléčná dráha",
@@ -361,7 +362,7 @@
         "temperature": "{value} K nad absolutní nulou",
         "age": "{value} mld. let světla na cestě",
         "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Nejvzdálenějším viditelným světlem je reliktní záření z doby, kdy vesmír poprvé zprůhledněl: mez toho, co světlo ukáže, ne okraj. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",
-        "caution": "Kruhy značí, odkud vyšlo světlo před {near}, {mid} a {far} mld. let, v dnešních vzdálenostech. Skvrny v záření zastupují mapu z Plancku a galaxie za pavučinou jsou rovnoměrný vzorek, ne katalog. Končí u nejvzdálenějších známých galaxií; tmavý pás před zářením je to, co jsme ještě neviděli: kosmický úsvit, kdy se rozsvítily první hvězdy, a před ním temný věk."
+        "caution": "Kruhy značí, odkud vyšlo světlo před {near}, {mid} a {far} mld. let, v dnešních vzdálenostech odvozených modelem. Reliktní záření používá data Plancku a volitelně ACT s odstraněným popředím; promítnutí na kouli je ilustrační. Generované galaxie za pavučinou se zobrazují jen v režimech Ilustrace a Obojí. Tmavé či prázdné oblasti neznamenají změřenou nepřítomnost záření nebo hmoty."
       },
       "quipu": {
         "body": "Jasné body jsou pozorované členské kupy z katalogu CLASSIX se změřenými polohami na obloze a spektroskopickými rudými posuvy. Společnou strukturu vymezila analýza propojující blízké sousedy. Popisek leží v neváženém prostorovém těžišti kup; celková hmotnost je odvozená.",
@@ -475,11 +476,11 @@
       },
       "galaxy": {
         "title": "Galaktická dráha Slunce",
-        "body": "Slunce obíhá ve vzdálenosti přibližně {sunRadiusKpc} kpc od středu Galaxie (podle měření GRAVITY). V modelu má oběžnou dobu {galacticYearMyr} {galacticYearMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let a při pohledu od severního galaktického pólu se pohybuje po směru hodinových ručiček. Nyní je poblíž bodu svého radiálního kmitu nejbližšího ke středu. Rozdíl mezi nejmenší a největší vzdáleností od středu je asi {radialSwingKpc} kpc a perioda kmitání asi {radialMyr} {radialMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let. Slunce zároveň kmitá kolmo k rovině disku s amplitudou {verticalPc} pc a periodou asi {verticalMyr} {verticalMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let. Nyní leží {heightPc} pc severně od roviny Galaxie a dále se od ní vzdaluje. Zlatá čára vede tyto kmity zpět přes dva oběhy; skutečnou fázi v tak dávné minulosti neznáme. Model stavby Galaxie vychází z měření: zahrnuje exponenciální tenký disk s délkovou škálou {thinLengthKpc} kpc a výškovou škálou {thinHeightPc} pc a tlustý disk s odpovídajícími škálami {thickLengthKpc} kpc a {thickHeightPc} pc. Hranatá výduť leží uvnitř příčky, která sahá {barHalfKpc} kpc od středu a svírá se spojnicí Slunce se středem Galaxie úhel {barDeg}°. Čtyři logaritmická ramena s úhlem vinutí {pitchDeg}° jsou v okolí Slunce umístěna podle paralax maserů. Model obsahuje také Místní rameno, prach na vnitřních okrajích ramen a zvlnění disku za vzdáleností {warpStartKpc} kpc podle pozorování cefeid. Koule hala vyznačuje poloměr R₂₀₀ ≈ {haloKpc} kpc. Podoba odvrácené strany disku je odhadnuta extrapolací."
+        "body": "Slunce obíhá ve vzdálenosti přibližně {sunRadiusKpc} kpc od středu Galaxie (podle měření GRAVITY). V modelu má oběžnou dobu {galacticYearMyr} {galacticYearMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let a při pohledu od severního galaktického pólu se pohybuje po směru hodinových ručiček. Nyní je poblíž bodu svého radiálního kmitu nejbližšího ke středu. Rozdíl mezi nejmenší a největší vzdáleností od středu je asi {radialSwingKpc} kpc a perioda kmitání asi {radialMyr} {radialMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let. Slunce zároveň kmitá kolmo k rovině disku s amplitudou {verticalPc} pc a periodou asi {verticalMyr} {verticalMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let. Nyní leží {heightPc} pc severně od roviny Galaxie a dále se od ní vzdaluje. Zlatá čára vede tyto kmity zpět přes dva oběhy; skutečnou fázi v tak dávné minulosti neznáme. Model stavby Galaxie vychází z měření: zahrnuje exponenciální tenký disk s délkovou škálou {thinLengthKpc} kpc a výškovou škálou {thinHeightPc} pc a tlustý disk s odpovídajícími škálami {thickLengthKpc} kpc a {thickHeightPc} pc. Hranatá výduť leží uvnitř příčky, která sahá {barHalfKpc} kpc od středu a svírá se spojnicí Slunce se středem Galaxie úhel {barDeg}°. Čtyři logaritmická ramena s úhlem vinutí {pitchDeg}° jsou v okolí Slunce umístěna podle paralax maserů. Model obsahuje také Místní rameno, prach na vnitřních okrajích ramen a zvlnění disku za vzdáleností {warpStartKpc} kpc podle pozorování cefeid. Halo promítá sférický model NFW odvozený ze studie Feng a kol. (2026). Volitelné vodítko označuje R₂₀₀ ≈ {haloKpc} kpc samotné temné složky; vnější profil je extrapolace. Podoba odvrácené strany disku je odhadnuta extrapolací."
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Prázdné značky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}}; křížky rozptylu souřadnic se zobrazují při prohlížení vybrané struktury. Plachty používají přijatou rekonstrukci v2 z roku 2026; Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice zůstávají samostatnou ilustrací. Jejich překrytí řídí režimy Data, Ilustrace a Obojí; Obojí zachovává známý tvar Laniakey spolu s katalogy. Místní populace galaxií a vzdálené pozadí zůstávají ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
+        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Prázdné značky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}}; křížky rozptylu souřadnic se zobrazují při prohlížení vybrané struktury. Plachty používají přijatou rekonstrukci v2 z roku 2026; Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice zůstávají samostatnou ilustrací. Jejich překrytí řídí režimy Data, Ilustrace a Obojí; Obojí zachovává známý tvar Laniakey spolu s katalogy. Místní populace galaxií zůstávají ilustrační. Generované galaxie za pavučinou se v režimu Data skryjí. Reliktní záření používá maskované teploty Planck 2018 SMICA s volitelným detailem ACT DR6.02 NILC v ověřené oblasti; mezery ani chyby načítání se nedoplňují umělým zářením. Teploty po odstranění popředí jsou rekonstrukcí; umístění na kouli, barva a průhlednost jsou ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
       },
       "depth": {
         "title": "Vzdálenost a světlo",
@@ -527,11 +528,15 @@
       },
       "web": {
         "title": "Kosmická pavučina",
-        "body": "V největších měřítkách lemují galaxie stěny a vlákna kolem obrovských, téměř prázdných dutin."
+        "body": "V největších měřítkách lemují galaxie stěny a vlákna kolem obrovských, téměř prázdných dutin. Výřez ukazuje samostatné pole přehlídky: hmotu rekonstruovanou z tvarů galaxií na snímcích Webbu, nikoli trojrozměrnou hustotu místní sítě."
       },
       "firstLight": {
         "title": "Nejstarší světlo",
-        "body": "Dál znamená dřív. Za nejvzdálenějšími pozorovanými galaxiemi leží kosmický úsvit a temný věk a za nimi září nejstarší světlo, jaké vidíme, uvolněné brzy po velkém třesku."
+        "body": "Dál znamená dřív. Za nejvzdálenějšími pozorovanými galaxiemi leží kosmický úsvit a temný věk a za nimi září nejstarší světlo, jaké vidíme, uvolněné brzy po velkém třesku. Níže prozkoumejte vývoj vzdáleností ve zvolené kosmologii; diagram je model, nikoli záznam pohybu těchto galaxií."
+      },
+      "darkHalo": {
+        "title": "Hmota, kterou odvozujeme",
+        "body": "Pohyby hvězd odhalují více gravitace, než poskytuje běžná hmota. Jemná vrstva ukazuje jeden odvozený model hustoty temné hmoty. Vnější oblasti jsou extrapolací; žádná ostrá slupka neexistuje."
       }
     }
   },
@@ -541,7 +546,7 @@
     "reconstruction": "Omezení rekonstrukce"
   },
   "atlas": {
-    "modeTitle": "Zobrazení kosmické mapy",
+    "modeTitle": "Kosmická mapa",
     "modes": {
       "data": "Data",
       "illustration": "Ilustrace",
@@ -552,9 +557,9 @@
       "illustration": "Ilustrační kosmická pavučina a známý tvar proudění v Laniakee. Dráhy přibližují strukturu; nejsou importovanými rychlostmi galaxií ani změřenými hranicemi.",
       "both": "Katalogová data a rekonstruované středy spolu s ilustrační pavučinou a proudnicemi Laniakey. Plné body, prázdné značky a ilustrační dráhy si zachovávají odlišný význam."
     },
-    "experienceModes": "Drift používá Ilustraci, Průvodce Obojí. Oba skryjí celkovou vrstvu nejistot a po skončení obnoví vaše ruční nastavení.",
+    "howToRead": "Jak číst mapu",
+    "experienceModes": "Drift používá Ilustraci, Průvodce Obojí. Oba skryjí celkovou vrstvu nejistot a po skončení obnoví vaše ruční nastavení. Reliktní záření používá mapy z pozorování v každém režimu.",
     "guideMode": "Obojí: změřené body, rekonstruované středy a ilustrační proudnice.",
-    "layersTitle": "Vrstvy kosmických dat",
     "finderTitle": "Nový kosmický atlas",
     "legendTitle": "Původ dat kosmické mapy",
     "measured": "Změřeno",
@@ -587,6 +592,91 @@
       "voids": "V-web · Hollinger & Courtois (2026), v1",
       "sloan": "Sloan · Pomarède et al. (2026), v1",
       "south": "Cosmicflows-3 · Pomarède et al. (2020), v1"
+    }
+  },
+  "dark": {
+    "title": "Temný vesmír",
+    "open": "Prozkoumat temnou hmotu a energii",
+    "tabs": {
+      "halo": "Halo",
+      "lensing": "Čočkování",
+      "expansion": "Rozpínání"
+    },
+    "inferred": "Odvozený model · ilustrační projekce",
+    "reconstructed": "Rekonstrukce z čočkování",
+    "model": "Zvolená kosmologie · vypočtený vývoj",
+    "evidence": "Důkazy a omezení",
+    "loading": "Načítání publikované mapy hmoty…",
+    "retry": "Mapa není dostupná · zkusit znovu",
+    "sources": {
+      "feng2026": "Feng a kol. · 2026 · cefeidy Gaia",
+      "brooks2026": "Brooks a kol. · 2026 · vnější halo a LMC",
+      "dado2026": "Dado a kol. · 2026 · omezení modelů",
+      "cosmosWeb2026": "COSMOS-Web · 2026 · publikovaná mapa hmoty",
+      "planck2018": "Planck 2018 + BAO · výchozí kosmologie",
+      "desiExpansion2026": "DESI DR2 IV · 2026 · omezení rozpínání"
+    },
+    "halo": {
+      "body": "Jemná vrstva hustoty ukazuje jeden sférický model temné hmoty kolem Mléčné dráhy. Barva a průhlednost zviditelňují neviditelnou hmotu; nepředstavují světlo.",
+      "boundary": "Vodítko poloměru hustoty · {radius}",
+      "measured": "Gaia měří polohy hvězd, vlastní pohyby a radiální rychlosti. Vzdálenosti cefeid a rotační křivka omezují gravitační pole; hustota temné hmoty se odvozuje po započtení běžné hmoty.",
+      "inferred": "Tato ilustrace NFW odpovídá zaokrouhleným průměrným hodnotám hustoty a uzavřené temné hmotnosti ze studie Feng a kol. (2026). Volí řešení s větším škálovým poloměrem. Nejde o jednoznačný fit ani změřený tvar. Vnější halo je extrapolace; odhady hmotnosti závisí na běžné hmotě i LMC. Úplné pásmo nejistoty není znázorněno.",
+      "alt": "Hustota temné hmoty v modelu hala podle vzdálenosti od středu Galaxie, obojí logaritmicky: plně tam, kde ji omezují pohyby hvězd, čárkovaně tam, kde je extrapolovaná, se Sluncem a poloměrem hustoty.",
+      "axes": "Vzdálenost od středu · hustota, obojí logaritmicky. Čárkovaně: extrapolace.",
+      "radiusLabel": "Poloměr hustoty",
+      "massWithin": "Temná hmota do {radius}"
+    },
+    "lensing": {
+      "alt": "Projekční mapa konvergence E z COSMOS-Web rekonstruovaná z deformací tvarů galaxií, s maskovaným vnějškem bez pokrytí.",
+      "legend": "Modrá: záporné κ · zlatá: kladné κ. Nelineární kontrast. Prázdný vnějšek: bez pokrytí mapou.",
+      "note": "Publikovaná mapa COSMOS-Web rekonstruuje projekci celkové hmoty včetně běžné hmoty ze slabého gravitačního čočkování. Nemá přiřazenou trojrozměrnou hloubku. Záporná konvergence značí relativní nedostatek hmoty, nikoli zápornou hmotnost. Okraje a malé útvary ovlivňuje šum a rekonstrukce.",
+      "measured": "Webb měří obrazy vzdálených galaxií. Jejich drobné deformace se statisticky skládají do odhadu čočkujícího pole. Barevné pixely jsou rekonstrukcí hmoty, nikoli fotografií temné hmoty."
+    },
+    "expansion": {
+      "alt": "Vypočtený faktor rozpínání vůči stáří vesmíru v plochém modelu Lambda-CDM s parametry Planck a posuvnou značkou epochy.",
+      "past": "Dříve",
+      "today": "Dnes",
+      "axes": "Vodorovně: stáří vesmíru · svisle: relativní vzdálenost a(t)",
+      "epoch": "Kosmická epocha",
+      "redshift": "Rudý posuv z = {z}",
+      "separation": "Vzdálenost / dnešek",
+      "hubble": "Rychlost rozpínání H",
+      "fraction": "Podíl temné energie",
+      "acceleration": "Rozpínání",
+      "accelerating": "Zrychluje",
+      "decelerating": "Zpomaluje",
+      "note": "Křivka používá stejný plochý model ΛCDM jako atlas. Temná energie má stálou hustotu; její podíl roste s řídnutím hmoty. Vzdálenosti se vztahují k homogennímu kosmickému pozadí. Vázané galaxie se podle diagramu nezvětšují a pohled kamery do minulosti se nemění.",
+      "measured": "DESI měří spektra a rudé posuvy. Korelační analýza odvozuje příčné a radiální vzdálenosti vzhledem ke zvukovému horizontu r_d. Níže je nejnovější ověřený referenční bod; sám neměří temnou energii a nenahrazuje výchozí křivku.",
+      "anchor": "Při z = {z}: D_H/r_d = {radial}; D_M/r_d = {transverse}.",
+      "provisional": "DESI DR2 IV (verze ze srpna 2026) je při naší kontrole preprint. Kombinace dat stále v různé míře upřednostňují proměnnou temnou energii; nejde o potvrzený objev. Uvedené chyby jsou korelované marginální nejistoty."
+    }
+  },
+  "cmb": {
+    "title": "Reliktní záření",
+    "control": "Zdroj mapy reliktního záření",
+    "planck": "Planck",
+    "combined": "Planck + ACT",
+    "open": "Otevřít zdroje dat reliktního záření, barevnou stupnici a meze rekonstrukce",
+    "reconstructed": "Reliktní záření · rekonstrukce z pozorování",
+    "measured": "Planck a ACT měřily jas mikrovlnné oblohy. Barvy ukazují teplotní odchylky reliktního záření, nikoli galaxie nebo viditelné světlo.",
+    "processing": "Odstranění záření popředí rekonstruuje tento signál z několika frekvencí. Detail ACT používá vydanou kombinaci ACT–Planck s potlačeným tepelným SZ signálem; zbytkové popředí a šum přetrvávají.",
+    "colours": "Teplotní odchylka: modrá −{limit} µK · šedá nula · jantarová +{limit} µK. Za krajními hodnotami se barva nemění. Tmavé oblasti jsou maskované, nikoli chladnější.",
+    "limits": "Zdroje, masky a volby zobrazení",
+    "geometry": "Směry na obloze jsou v galaktických souřadnicích se středem u pozorovatele. Jejich promítnutí na kouli v modelové vzdálenosti posledního rozptylu je ilustrace, nikoli změřený prostorový povrch nebo okraj vesmíru. Kreslí se pouze přivrácená polokoule.",
+    "masks": "Masky spolehlivosti a doplněných míst Plancku vyřazují nespolehlivé či dopočítané pixely. Detail ACT je omezen na ověřenou oblast přehlídky a vynechává doplněná místa zdrojů. Jinde se používají platná data Plancku; kde neplatí ani jedna mapa, zůstává maska.",
+    "resolution": "Obě mapy mají pro zobrazení snížené rozlišení: krok v galaktické délce je {planck} pro Planck a {act} pro ACT. Nejde o původní rozlišení dalekohledů. Barevná stupnice a průhlednost jsou volby zobrazení.",
+    "releases": "Základem celé oblohy je vydaná mapa Planck 2018 SMICA, nikoli novější frekvenční mapy PR4. Detail ACT používá DR6.02. Jde o pevně určená vydání, nikoli živá data.",
+    "modeNote": "Všechny režimy používají tutéž rekonstrukci reliktního záření z pozorování. Režim Data skryje generované vzdálené galaxie. Detail ACT platí pouze uvnitř jeho ověřeného pokrytí.",
+    "retry": "Znovu načíst mapy reliktního záření",
+    "status": {
+      "idle": "Načte se v měřítku pozorovatelného vesmíru",
+      "loading": "Načítají se teploty z Plancku…",
+      "planck": "Planck SMICA · se zachovanými maskami",
+      "combined": "Planck SMICA + detail ACT DR6.02",
+      "detailLoading": "Zobrazuje se Planck · načítá se detail ACT…",
+      "fallback": "ACT není dostupné · zobrazuje se Planck",
+      "actOnly": "Planck není dostupný · pouze oblast ACT",
+      "unavailable": "Planck není dostupný · bez celkové mapy reliktního záření"
     }
   }
 }

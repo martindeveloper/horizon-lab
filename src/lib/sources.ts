@@ -6,6 +6,30 @@ import { SOURCE_URLS } from "@horizon/toolkit/urls";
 export type Source = { cite: string; link?: string };
 
 export const SOURCES = {
+  feng2026: {
+    cite: "Feng et al. 2026, MNRAS 546, stag011, Table 2 Mean (Gaia DR3 Cepheid rotation curve; inferred local density and dark mass inside 18 kpc)",
+    link: "https://doi.org/10.1093/mnras/stag011",
+  },
+  brooks2026: {
+    cite: "Brooks et al. 2026, MNRAS, stag926 (outer halo kinematics including the LMC; enclosed Milky Way mass)",
+    link: "https://arxiv.org/abs/2603.08788v2",
+  },
+  dado2026: {
+    cite: "Dado et al. 2026, MNRAS 552, stag1865 (baryonic contraction and biases in extrapolated halo mass)",
+    link: "https://doi.org/10.1093/mnras/stag1865",
+  },
+  navarro1997: {
+    cite: "Navarro, Frenk & White 1997, ApJ 490, 493 (NFW density profile)",
+    link: "https://doi.org/10.1086/304888",
+  },
+  cosmosWeb2026: {
+    cite: "Scognamiglio et al. 2026, Nature Astronomy, An ultra-high-resolution map of (dark) matter; Supplementary Data 3, JWST E-mode convergence",
+    link: "https://doi.org/10.1038/s41550-025-02763-9",
+  },
+  desiExpansion2026: {
+    cite: "DESI Collaboration 2026, arXiv:2607.27410v3, PREPRINT (DR2 IV; Ly-alpha AP + BAO distance ratios, z_eff = 2.33)",
+    link: "https://arxiv.org/abs/2607.27410v3",
+  },
   cosmicflows4: {
     cite: "Tully et al. 2023, ApJ 944, 94, Cosmicflows-4 (CDS table 3: 38,053 groups; measured angles and CMB-frame redshifts)",
     link: "https://cdsarc.cds.unistra.fr/ftp/J/ApJ/944/94/ReadMe",

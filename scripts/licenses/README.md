@@ -32,3 +32,9 @@ the licence linked by <https://tannerhelland.com/code.html>. It is included even
 though this code is not an npm dependency.
 
 `scientific-acknowledgements.txt` preserves the GWOSC acknowledgement and data terms.
+
+The offline CMB importer adapts the HEALPix coordinate algorithm used by
+Astropy from Astrometry.net. `astrometry-net-LICENSE.txt` was copied verbatim on
+2026-10-23 from
+<https://raw.githubusercontent.com/astropy/astropy-healpix/main/cextern/astrometry.net/LICENSE>.
+The notice is included in generated credits; the importer needs no Python packages.

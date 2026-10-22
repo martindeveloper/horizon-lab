@@ -352,7 +352,7 @@ test("the journey progresses outward and focuses selectable targets", () => {
   let last = -1;
   for (const step of TOUR) {
     const at = order.indexOf(step.view);
-    assert.ok(at > last, `${step.id} lies farther out than the step before`);
+    assert.ok(at >= last, `${step.id} does not return to an earlier scale`);
     last = at;
     if (step.focus)
       assert.ok(
@@ -372,7 +372,7 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   assert.equal(api().view, "inner");
   assert.deepEqual(api().selection, TOUR[0].focus);
   assert.equal(api().show.distances, true);
-  assert.equal(api().show.halo, true, "the visitor's own switches stay on");
+  assert.equal(api().show.halo, false, "Guide introduces the halo only when it explains it");
   assert.equal(api().show.cosmicMode, "both");
   assert.equal(api().show.cosmicGuides, false);
   assert.equal(api().show.cosmicVoids, true, "Guide temporarily uses the complete atlas");

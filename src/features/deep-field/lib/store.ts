@@ -16,6 +16,7 @@ import {
   type AtlasMode,
   type AtlasShow,
 } from "@/space/cosmos/model/atlas";
+import { CMB_INITIAL_STATUS, type CmbStatus } from "@/space/cosmos/model/cmb";
 import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
 import { isReachSelection, type ProbeId } from "@/space/solar-system/model/probes";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
@@ -23,12 +24,14 @@ import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { viewFromPath } from "../routing";
 import { HELP } from "./help";
 import { ATLAS_EXPERIENCE_MODE } from "./model/atlas-mode";
+import type { DarkView } from "./model/dark-universe";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import { viewById } from "./model/views";
 
 /** Deep Field's switches are the shared worlds' (`@/space/galaxy/show`). */
-export type Show = GalaxyShow & AtlasShow & { cosmicMode: AtlasMode };
+export type Show = GalaxyShow &
+  AtlasShow & { cosmicMode: AtlasMode; haloBoundary: boolean; cmbDetail: boolean };
 
 export type { CosmosId } from "@/space/galaxy/show";
 
@@ -47,10 +50,17 @@ const realmOfSelection = (sel: Selection): Realm =>
  * Whether entering `realm` lets go of `sel`: it belongs to another scale, and no view flight
  * is carrying the camera to its scale (a flight may cross a scale on the way).
  */
-export const dropsSelection = (sel: Selection, realm: Realm, flyingTo: Realm | null) =>
-  realmOfSelection(sel) !== realm && realmOfSelection(sel) !== flyingTo;
+export const dropsSelection = (
+  sel: Selection,
+  realm: Realm,
+  flyingTo: Realm | null,
+  haloVisible = false,
+) =>
+  !(sel.kind === "galaxy" && sel.id === "halo" && haloVisible) &&
+  realmOfSelection(sel) !== realm &&
+  realmOfSelection(sel) !== flyingTo;
 
-type Panel = "none" | "objects" | "view";
+type Panel = "none" | "objects" | "view" | "dark";
 
 /** The probe the selection names, if it is one. */
 const probeOf = (sel: Selection | null): ProbeId | null =>
@@ -65,6 +75,8 @@ export const canCloseUp = (s: Pick<DeepFieldStore, "selection" | "guideOpen">) =
 
 const DEFAULT_SHOW: Show = {
   halo: false,
+  haloBoundary: false,
+  cmbDetail: true,
   names: true,
   distances: false,
   lightTime: true,
@@ -87,7 +99,12 @@ export type DeepFieldStore = SceneSlice &
     closeUp: ProbeId | null;
     /** A probe's model the view would show is still on its way (written by the scene). */
     sharpening: boolean;
+    cmbStatus: CmbStatus;
+    cmbRetry: number;
+    retryCmb: () => void;
     panel: Panel;
+    darkView: DarkView;
+    openDarkView: (view: DarkView) => void;
     show: Show;
     /** Manual layer choices, restored when Drift ends or hands over to Guide. */
     savedBeforeDrift: Show | null;
@@ -122,7 +139,12 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   selection: null,
   closeUp: null,
   sharpening: false,
+  cmbStatus: { ...CMB_INITIAL_STATUS },
+  cmbRetry: 0,
+  retryCmb: () => set((s) => ({ cmbRetry: s.cmbRetry + 1 })),
   panel: "none",
+  darkView: "halo",
+  openDarkView: (darkView) => set({ panel: "dark", darkView }),
   show: DEFAULT_SHOW,
   savedBeforeDrift: null,
   viewLy: viewById(DEFAULT_VIEW).ly,
@@ -181,6 +203,9 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
         ...(s.savedBeforeGuide ?? DEFAULT_SHOW),
         ...ATLAS_DEFAULT_SHOW,
         cosmicMode: ATLAS_EXPERIENCE_MODE.guide,
+        // Scientific overlays appear only where the Guide explains them.
+        halo: false,
+        haloBoundary: false,
         ...step.show,
       },
     }),
@@ -206,7 +231,13 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
         seek: null,
         closeUp: null,
         savedBeforeDrift: show,
-        show: { ...show, ...ATLAS_DEFAULT_SHOW, cosmicMode: ATLAS_EXPERIENCE_MODE.drift },
+        show: {
+          ...show,
+          ...ATLAS_DEFAULT_SHOW,
+          cosmicMode: ATLAS_EXPERIENCE_MODE.drift,
+          halo: false,
+          haloBoundary: false,
+        },
       };
     },
     close: (s) => ({ show: s.savedBeforeDrift ?? s.show, savedBeforeDrift: null }),

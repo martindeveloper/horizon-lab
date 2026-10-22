@@ -41,8 +41,8 @@ export const ARM_CROSSINGS_KPC = [5.4, 6.9, 10.1, 12.4] as const;
 /** Exponential thin and thick disks: scale length and height (Bland-Hawthorn & Gerhard 2016). */
 export const THIN_DISK_KPC = { length: 2.6, height: 0.3 } as const;
 export const THICK_DISK_KPC = { length: 2, height: 0.9 } as const;
-/** The dark-matter halo sphere's radius, R₂₀₀ ≈ 200 kpc (Bland-Hawthorn & Gerhard 2016). */
-export const HALO_R200_KPC = 200;
+/** Derived density radius; kept as a public alias for existing hosts. */
+export { HALO_R200_KPC } from "./dark-halo";
 /**
  * Warp onset, amplitude, power and line of nodes: Chen et al. 2019's linear fit to all
  * Cepheids. The amplitude carries kpc^(1 − power): for the linear fit it is a pure slope.

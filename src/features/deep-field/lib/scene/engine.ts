@@ -23,6 +23,7 @@ import {
 } from "@/lib/scene-bridge";
 import { TAP_STYLE } from "@/space/close-up-flight";
 import { createCosmosLayer } from "@/space/cosmos/scene/cosmos-layer";
+import { haloVisibility } from "@/space/galaxy/model/dark-halo";
 import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
 import { GALAXY_LAYER, LY, galaxyMix } from "@/space/galaxy/scene/frames";
 import { createGalaxyLayer } from "@/space/galaxy/scene/galaxy-layer";
@@ -150,7 +151,10 @@ export function createDeepFieldEngine({
       distanceText,
       picks,
       detail: quality.cosmos,
+      onCmbStatus: (cmbStatus) => store.setState({ cmbStatus }),
+      cmbMaxTextureSize: renderer.capabilities.maxTextureSize,
     });
+    let cmbRetry = store.getState().cmbRetry;
     const hud = createHud(store, camera, viewport);
 
     const { view } = store.getState();
@@ -221,6 +225,10 @@ export function createDeepFieldEngine({
     const bridge = bridgeStore(store, scope, {
       invalidate: () => engine.invalidate(),
       before: (s) => {
+        if (s.cmbRetry !== cmbRetry) {
+          cmbRetry = s.cmbRetry;
+          cosmos.retryCmb();
+        }
         if (s.seek !== lastSeek) {
           lastSeek = s.seek;
           if (s.seek) rig.zoomTo(worldDistance(s.seek.ly), true);
@@ -331,11 +339,14 @@ export function createDeepFieldEngine({
         const realm = lod.realm;
         /* Zooming across a scale lets go of a selection from another one, unless a view
            flight is carrying the camera to that scale. The journey picks its own. */
-        if (realm !== lastRealm && !state.guideOpen) {
+        const isHalo = state.selection?.kind === "galaxy" && state.selection.id === "halo";
+        if ((realm !== lastRealm || isHalo) && !state.guideOpen) {
           lastRealm = realm;
           const sel = state.selection;
           const flyingTo = rig.flying ? viewById(state.view).realm : null;
-          if (sel && dropsSelection(sel, realm, flyingTo)) store.getState().select(null);
+          const haloVisible = state.show.halo && haloVisibility(dist / LY) > 0.004;
+          if (sel && dropsSelection(sel, realm, flyingTo, haloVisible))
+            store.getState().select(null);
         }
 
         const frame: Frame = {
@@ -361,7 +372,6 @@ export function createDeepFieldEngine({
           offset: rig.offset.toArray(cameraOffset),
           approach: closeUp.approach,
         });
-        if (probes.waiting !== state.sharpening) store.setState({ sharpening: probes.waiting });
         reachFrame.show = frame.show;
         reachFrame.sel = frame.sel;
         reachFrame.dist = dist;
@@ -383,6 +393,9 @@ export function createDeepFieldEngine({
           rulers.drawFrom(frame.sel?.kind === "star" ? frame.sel.id : null, dist);
         galaxy.update(frame);
         cosmos.update(frame);
+        /* A probe's model or a CMB map the view needs is still streaming in. */
+        const sharpening = probes.waiting || cosmos.cmbWaiting;
+        if (sharpening !== state.sharpening) store.setState({ sharpening });
         rulers.finish();
         flush();
 

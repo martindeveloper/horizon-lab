@@ -9,6 +9,7 @@ import {
   Group,
   Mesh,
   Points,
+  Quaternion,
   RingGeometry,
   SphereGeometry,
   Sprite,
@@ -27,16 +28,17 @@ import {
 } from "@horizon/toolkit/scene";
 import { LIGHT_YEAR_AU, convert } from "@horizon/toolkit/science";
 
+import { darkHaloProjection } from "../graphics/dark-halo";
 import { modernGalaxy } from "../graphics/galaxy";
+import { HALO_DRAW_RADIUS_KPC, HALO_R200_KPC, haloVisibility } from "../model/dark-halo";
 import { writeSunTrail } from "../model/galactic-orbit";
-import { HALO_R200_KPC } from "../model/parameters";
 import type { WorldFrame as Frame, WorldSelection as Selection } from "../show";
 import { GALAXY_FRAME, GALAXY_LAYER, LY, SUN_ANCHOR, galaxyToWorld } from "./frames";
 import type { GalaxyKit } from "./kit";
 import type { LabelPicks } from "./label-picks";
 
 /** Farthest the drawn Galaxy reaches from its centre (ly), halo included. */
-const EXTENT_LY = 660_000;
+const EXTENT_LY = convert(HALO_DRAW_RADIUS_KPC, "kpc", "ly");
 
 export function createGalaxyLayer(
   { scope, looks, camera, pxWorld, lod }: GalaxyKit,
@@ -77,17 +79,32 @@ export function createGalaxyLayer(
   sunHit.userData.pick = { kind: "galaxy", id: "sun" } satisfies Selection;
   const bulgeHit = new Mesh(scope.own(new SphereGeometry(3_200, 16, 12)), looks.ghost);
   bulgeHit.userData.pick = { kind: "galaxy", id: "bulge" } satisfies Selection;
-  /** Dark-matter halo out to R₂₀₀ (~200 kpc, Bland-Hawthorn & Gerhard 2016). */
-  /* The halo is a boundary drawn as a surface: annotation, which the drift's veil fades with the lines. */
-  const halo = new Mesh(
-    scope.own(new SphereGeometry(convert(HALO_R200_KPC, "kpc", "ly"), 24, 14)),
-    looks.halo,
+  // False-colour density projection; R200 is an opt-in size guide, not a hard surface.
+  const halo = darkHaloProjection(scope, looks.halo);
+  halo.scale.setScalar(EXTENT_LY);
+  const haloRadiusLy = convert(HALO_R200_KPC, "kpc", "ly");
+  const haloBoundary = new Mesh(
+    scope.own(new RingGeometry(haloRadiusLy * 0.998, haloRadiusLy, 128)),
+    looks.haloBoundary,
   );
-  halo.userData.annotation = true;
+  const galaxyRotation = new Quaternion();
+  const cameraRotation = new Quaternion();
   const diskHit = new Mesh(scope.own(new RingGeometry(48_000, 52_000, 64)), looks.ghost);
   diskHit.rotation.x = Math.PI / 2;
   diskHit.userData.pick = { kind: "galaxy", id: "milkyway" } satisfies Selection;
-  galaxy.add(today, dust, core, heart, trail.line, sun, sunHit, bulgeHit, halo, diskHit);
+  galaxy.add(
+    today,
+    dust,
+    core,
+    heart,
+    trail.line,
+    sun,
+    sunHit,
+    bulgeHit,
+    halo,
+    haloBoundary,
+    diskHit,
+  );
   /* The Sun stands at today's place in the model: the scene's origin. */
   sun.position.set(SUN_ANCHOR[0], SUN_ANCHOR[1], SUN_ANCHOR[2]);
   sunHit.position.copy(sun.position);
@@ -123,7 +140,11 @@ export function createGalaxyLayer(
       /* The Sun's path, its marker's name and rulers belong to the Galaxy's scale. */
       const near = lod.galaxy * shown;
       const labelled = names.to(show.names);
-      galaxy.visible = shown > 0.001;
+      const haloShown = haloOn.to(show.halo);
+      // No wash over the solar sky. Keep the optional halo legible beyond the disc's
+      // handoff long enough to frame its density radius, then fade into the cosmic map.
+      const haloStrength = haloShown * haloVisibility(dist / LY) * galaxyPresence;
+      galaxy.visible = Math.max(shown, haloStrength) > 0.001;
       if (!galaxy.visible) {
         place("galaxySun", 0, 0, 0, false);
         return;
@@ -132,9 +153,15 @@ export function createGalaxyLayer(
       looks.galaxyDust.opacity = base.dust * shown;
       looks.galaxyCore.opacity = 0.62 * shown;
       looks.galaxyHeart.opacity = base.heart * shown;
-      const haloShown = haloOn.to(show.halo);
-      halo.visible = haloShown > 0.004;
-      looks.halo.opacity = base.halo * shown * haloShown;
+      halo.visible = haloStrength > 0.004;
+      looks.halo.uniforms.opacity!.value = base.halo * haloStrength;
+      haloBoundary.visible = halo.visible && !!show.haloBoundary;
+      if (haloBoundary.visible) {
+        haloBoundary.quaternion
+          .copy(galaxy.getWorldQuaternion(galaxyRotation).invert())
+          .multiply(camera.getWorldQuaternion(cameraRotation));
+        looks.haloBoundary.opacity = 0.18 * haloStrength;
+      }
 
       /* A steady few pixels at any zoom (its glow scales with it). */
       const toSun = camera.position.distanceTo(at);

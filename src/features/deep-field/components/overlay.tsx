@@ -15,8 +15,11 @@ import { HELP } from "../lib/help";
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { useDeepField, type DeepFieldStore } from "../lib/store";
 import { AtlasLegend } from "./atlas-legend";
+import { CmbLegend } from "./cmb";
+import { DarkUniversePanel, HaloLegend } from "./dark-universe";
 import { DepthLadder } from "./depth-ladder";
 import { DeepFieldGuide } from "./guide";
+import { CaptionSlot } from "./header-caption";
 import { ObjectsPanel } from "./objects-panel";
 import { SelectionCard } from "./selection-card";
 import { Sightline } from "./sightline";
@@ -67,14 +70,18 @@ export function DeepFieldOverlay() {
         <>
           <header className="hud-top pad-hud-top absolute inset-x-0 top-0 z-[60]">
             <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
-              {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption it;
-                  the atlas's depths, between them, take its key there instead. */}
-              {t.has(`viewHints.${view}`) ? (
-                <p className="line-clamp-2 max-w-md min-w-0 pt-1 text-ui text-fg-secondary not-md:hidden">
-                  {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
-                </p>
-              ) : null}
-              <AtlasLegend />
+              <CaptionSlot>
+                {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption
+                    it; the keys follow for what is drawn at the depth. */}
+                {t.has(`viewHints.${view}`) ? (
+                  <p className="line-clamp-2 max-w-md min-w-0 text-fg-secondary not-md:hidden">
+                    {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
+                  </p>
+                ) : null}
+                <AtlasLegend />
+                <HaloLegend />
+                <CmbLegend />
+              </CaptionSlot>
               <SimulationToolbar
                 label={t("hud.controls")}
                 help={help}
@@ -118,6 +125,7 @@ export function DeepFieldOverlay() {
           </div>
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}
           {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}
+          {panel === "dark" ? <DarkUniversePanel onClose={() => setPanel("none")} /> : null}
           {panel === "none" && selection ? <SelectionCard /> : null}
         </>
       )}

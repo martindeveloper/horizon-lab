@@ -7,6 +7,8 @@ import { MeshBasicMaterial } from "three";
 
 import type { Brush } from "@/space/brush";
 
+import { darkHaloMaterial } from "./dark-halo";
+
 export type GalaxyLooks = ReturnType<typeof createGalaxyLooks>;
 
 export function createGalaxyLooks({ points, sprite, ghost }: Brush) {
@@ -23,11 +25,11 @@ export function createGalaxyLooks({ points, sprite, ghost }: Brush) {
       opacity: 0.28,
       depthWrite: false,
     }),
-    halo: new MeshBasicMaterial({
+    halo: darkHaloMaterial(),
+    haloBoundary: new MeshBasicMaterial({
       color: "#9ebccc",
-      wireframe: true,
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.18,
       depthWrite: false,
     }),
   };

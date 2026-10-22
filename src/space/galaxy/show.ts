@@ -19,8 +19,12 @@ export type Realm = "solar" | "stars" | "galaxy" | "cosmos";
 export type GalaxyShow = Partial<AtlasShow> & {
   /** Cosmic atlas display; omitted by hosts that keep their original illustration. */
   cosmicMode?: AtlasMode;
-  /** The dark-matter halo's sphere. */
+  /** Use the ACT–Planck reconstruction inside its trusted footprint, over Planck alone. */
+  cmbDetail?: boolean;
+  /** False-colour projection of the inferred spherical dark-matter model. */
   halo: boolean;
+  /** Opt-in density-radius guide; not a halo edge. */
+  haloBoundary?: boolean;
   names: boolean;
   /** Dashed rulers with distances from the selection (or home) to what is in view. */
   distances: boolean;
