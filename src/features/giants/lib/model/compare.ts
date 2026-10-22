@@ -9,14 +9,25 @@ import { stefanBoltzmann } from "@horizon/toolkit/science";
 import { RUNG_FACTS, drawn, inUnit, radiusMetres, spectralOf } from "./catalogue";
 import { RUNGS, RUNG_IDS, rungIndex, type RungId } from "./rungs";
 
-/** What a body is measured against: the Sun, Earth, or the next smaller body on the ladder. */
-export const REFERENCES = ["sun", "earth", "previous"] as const;
+/**
+ * What a body is measured against: the Sun, Earth, the next smaller body on the ladder, or any
+ * other body the visitor picks.
+ */
+export const REFERENCES = ["sun", "earth", "previous", "other"] as const;
 export type Reference = (typeof REFERENCES)[number];
 
-/** The body a reference names for this one; none where it is the body itself or has none below. */
-export function referenceBody(reference: Reference, id: RungId): RungId | null {
-  const other = reference === "previous" ? (RUNG_IDS[rungIndex(id) - 1] ?? null) : reference;
-  return other === id ? null : other;
+/**
+ * The body a reference names for this one, `other` the body picked for "other"; none where it
+ * is the body itself or has none below.
+ */
+export function referenceBody(reference: Reference, id: RungId, other: RungId): RungId | null {
+  const body =
+    reference === "previous"
+      ? (RUNG_IDS[rungIndex(id) - 1] ?? null)
+      : reference === "other"
+        ? other
+        : reference;
+  return body === id ? null : body;
 }
 
 const kindOf = (id: RungId) => RUNGS.find((rung) => rung.id === id)!.kind;

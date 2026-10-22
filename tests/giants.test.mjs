@@ -41,6 +41,16 @@ import {
   placeOverview,
   scaleLines,
 } from "../src/features/giants/lib/model/overview.ts";
+import {
+  offstage,
+  pairCamera,
+  pairLadder,
+  pairOf,
+  placePairInto,
+  restageInto,
+  restageLens,
+  restageLight,
+} from "../src/features/giants/lib/model/pair.ts";
 import { granulesAcross } from "../src/features/giants/lib/model/physics.ts";
 import { METRES, RULERS, rulerFor } from "../src/features/giants/lib/model/ruler.ts";
 import { RUNG_IDS, RUNGS, rungIndex } from "../src/features/giants/lib/model/rungs.ts";
@@ -55,7 +65,7 @@ import {
   OVERVIEW_FOOT_PX,
   OVERVIEW_TOP_PX,
 } from "../src/features/giants/lib/parameters.ts";
-import { useGiants } from "../src/features/giants/lib/store.ts";
+import { comparedWith, useGiants } from "../src/features/giants/lib/store.ts";
 import { pathForRung, resolveRung, rungFromPath } from "../src/features/giants/routing.ts";
 import { featureMessages } from "./messages-helper.mjs";
 
@@ -171,6 +181,107 @@ test("the overview shows every body at once, in order of size, between the names
     const start = blendPlaced(far, dots[0], 0, stage);
     assert.ok(start.x <= stage.width + start.radius + 1e-6 && start.radius <= stage.height + 1e-6);
   }
+});
+
+test("side by side, each of a pair stands framed at its end as on the ladder, the smaller always in sight", () => {
+  const earth = rungIndex("earth");
+  const betelgeuse = rungIndex("betelgeuse");
+  const pair = pairOf(betelgeuse, earth);
+  assert.deepEqual(pair, { small: earth, large: betelgeuse });
+  const own = pairLadder(ladder, pair);
+  for (const stage of [phone, desktop]) {
+    const at = (t) => {
+      const placed = [];
+      placed.length = placePairInto(
+        placed,
+        own,
+        pair,
+        pairCamera(own, t, stage, { scale: 0, centre: 0 }),
+        stage,
+      );
+      return placed;
+    };
+    for (const [t, index] of [
+      [0, earth],
+      [1, betelgeuse],
+    ]) {
+      const onLadder = placeBodies(ladder, index, stage).find((b) => b.index === index);
+      const framed = at(t).find((b) => b.index === index);
+      assert.ok(
+        Math.abs(framed.x - onLadder.x) < 1e-6,
+        `${RUNG_IDS[index]} centred as on the ladder`,
+      );
+      assert.ok(
+        Math.abs(framed.radius - onLadder.radius) < 1e-6,
+        `${RUNG_IDS[index]} framed as on the ladder`,
+      );
+    }
+    for (let t = 0; t <= 1; t += 0.125) {
+      const small = at(t).find((b) => b.index === earth);
+      assert.ok(small && small.x >= 0 && small.x <= stage.width, `Earth in sight at ${t}`);
+    }
+  }
+});
+
+test("when the stage changes, bodies glide from exactly where they were and leave or come past their light's reach", () => {
+  const stage = desktop;
+  const body = (index, x, radius) => ({
+    index,
+    x,
+    y: 400,
+    radius,
+    polar: radius,
+    low: radius,
+    high: radius,
+  });
+  /* A black hole far larger than the stage, mostly off it, its ring reaching 3.3 radii. */
+  const reachOf = (index) => (index === 4 ? 3.3 : 1.4);
+  const from = [body(1, 300, 40), body(2, 900, 60), body(4, stage.width + 2_000, 2_500)];
+  const to = [body(2, 700, 30), body(3, 1200, 80)];
+  const at = (k) => {
+    const out = [];
+    out.length = restageInto(out, from, to, to.length, k, stage, reachOf);
+    return Object.fromEntries(out.map((b) => [b.index, b]));
+  };
+  const start = at(0);
+  const end = at(1);
+  for (const before of from)
+    for (const key of ["x", "y", "radius", "polar"])
+      assert.ok(
+        Math.abs(start[before.index][key] - before[key]) < 1e-9,
+        `body ${before.index} starts exactly as drawn (${key})`,
+      );
+  assert.equal(end[2].x, 700, "a staying body ends where it now stands");
+  assert.equal(
+    start[3].x,
+    offstage(to[1], reachOf(3), stage).x,
+    "an arriving body starts off stage",
+  );
+  assert.ok(
+    start[3].x - start[3].radius * reachOf(3) >= stage.width,
+    "with all its light past the edge",
+  );
+  assert.equal(end[3].x, 1200);
+  for (const index of [1, 4]) {
+    const gone = end[index];
+    const reach = gone.radius * reachOf(index);
+    assert.ok(
+      gone.x + reach <= 0 || gone.x - reach >= stage.width,
+      `body ${index} leaves with all its light`,
+    );
+  }
+});
+
+test("a black hole's ring and lensing leave before it moves and come once it has arrived", () => {
+  /* A ring or a lens that surrounds the view fades where it is rather than sweeping across it. */
+  assert.equal(restageLight("leaves", 0), 1, "whole as the change starts");
+  assert.equal(restageLight("leaves", 0.3), 0, "gone while the glide has barely begun");
+  assert.equal(restageLight("comes", 0.7), 0, "none until the glide has nearly ended");
+  assert.equal(restageLight("comes", 1), 1, "whole as the change ends");
+  for (let k = 0; k <= 1; k += 0.1)
+    assert.equal(restageLight("stays", k), 1, "one that stays keeps it");
+  assert.equal(restageLens("stays", 1, 1, 0.5), 1, "a hole that stays keeps bending the stars");
+  assert.equal(restageLens(null, 1, 0, 0.5), 0, "one off both stages has let go by mid-change");
 });
 
 test("the overview's scale lines mark round radii in the ruler's units, left to right", () => {
@@ -307,6 +418,23 @@ test("flights stay on the ladder and the guide gives the visitor's place back", 
   api.goTo("sun");
   assert.ok(!useGiants.getState().overview, "a body picked in the overview is flown back down to");
   assert.equal(useGiants.getState().goal, rungIndex("sun"));
+  api.publish(rungIndex("sun"), rungIndex("sun"), 1);
+  api.setReference("sun");
+  api.setSideBySide(true);
+  assert.ok(
+    !useGiants.getState().sideBySide,
+    "nothing to stand beside the Sun measured against itself",
+  );
+  api.setOtherBody("betelgeuse");
+  assert.equal(comparedWith(useGiants.getState()), "betelgeuse");
+  api.setSideBySide(true);
+  assert.ok(useGiants.getState().sideBySide, "the Sun beside Betelgeuse");
+  api.setOverview(true);
+  assert.ok(!useGiants.getState().sideBySide, "the overview leaves side by side");
+  api.setOverview(false);
+  api.setSideBySide(true);
+  api.go(rungIndex("vega"));
+  assert.ok(!useGiants.getState().sideBySide, "a flight leaves side by side");
 });
 
 const globeOf = (id) => {
@@ -398,7 +526,7 @@ test("every black hole's card opens it in the Black holes lab", () => {
   const holes = RUNGS.filter((rung) => rung.kind === "horizon");
   assert.ok(holes.length >= 4);
   for (const { id } of holes) {
-    const path = UP_CLOSE[id];
+    const path = UP_CLOSE[id]?.href;
     assert.ok(path, `${id} links up close`);
     const preset = resolveHole(path.split("/").pop());
     assert.ok(preset, `${path} is one of the lab's holes`);

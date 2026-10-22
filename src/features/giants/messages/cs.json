@@ -3,13 +3,11 @@
   "metadataDescription": "Vyšplhejte od neutronové hvězdy velké jako město přes největší hvězdy až k horizontům černých děr, vše ve skutečném měřítku.",
   "canvasLabel": "Hvězdy, planety a horizonty černých děr vedle sebe na jednom obzoru, ve skutečném měřítku",
   "hud": {
-    "hint": "Šplhejte kolečkem nebo tažením oblohy. Tažením hvězdy ji otočíte.",
     "stars": "Tělesa",
     "previous": "Menší",
     "next": "Větší",
     "ladder": "Žebřík",
     "overview": "Přehled",
-    "overviewHint": "Klepnutím na těleso k němu přeletíte. Kolečkem se vrátíte.",
     "ruler": "Měřítko: {value}",
     "showCard": "Zobrazit kartu",
     "hideCard": "Skrýt kartu",
@@ -181,6 +179,7 @@
     "light": "Měřítko: obvod ÷ c",
     "upClose": "Zblízka",
     "upCloseHint": "Disk, ohyb světla a výtrysk trasované v Černých dírách",
+    "upCloseSunHint": "Jeho nitro, každá vlnová délka a erupce v laboratoři Slunce",
     "sources": "Zdroje a nejistoty",
     "ranges": "Rozmezí zachovávají intervaly převzaté z literatury. Odvozená rozmezí zahrnují všechny kombinace vstupních mezí; nejsou společnými intervaly spolehlivosti a nezahrnují neznámé systematické chyby. Údaj bez rozmezí není přesný. Teplotní rozmezí Vegy popisuje rovník až pól; rozmezí hmotnosti TON 618 zahrnuje odhady z různých prací.",
     "comparison": "Obvod ÷ c porovnává velikost pomocí rychlosti světla ve vakuu. Značka používá poloměr zvolený pro kresbu, případně geometrický střed rozmezí bez centrální hodnoty. Nejde o oběžnou dráhu fotonu a výpočet nezahrnuje gravitační zpoždění. Velmi krátké periody se zobrazují bez pohybu.",
@@ -310,8 +309,10 @@
     "references": {
       "sun": "Slunce",
       "earth": "Země",
-      "previous": "Menší"
+      "previous": "Menší",
+      "other": "Jiné"
     },
+    "pick": "Porovnat s",
     "width": {
       "label": "Šířka",
       "more": "{value}× širší",
@@ -335,9 +336,12 @@
     "itself": {
       "sun": "Tohle je Slunce, samo měřítko.",
       "earth": "Tohle je Země, samo měřítko.",
-      "previous": "Nic menšího na žebříku není."
+      "previous": "Nic menšího na žebříku není.",
+      "other": "Vyberte jiné těleso k porovnání."
     },
-    "note": "Poměry používají převzaté hodnoty; je-li uvedeno pouze rozmezí, používá se jeho geometrický střed. Šířka je rovníková; objem vychází z modelu elipsoidu a u černých děr se neuvádí. Výkon znamená celkovou zářivost, nikoli zdánlivou jasnost ze Země."
+    "note": "Poměry používají převzaté hodnoty; je-li uvedeno pouze rozmezí, používá se jeho geometrický střed. Šířka je rovníková; objem vychází z modelu elipsoidu a u černých děr se neuvádí. Výkon znamená celkovou zářivost, nikoli zdánlivou jasnost ze Země.",
+    "sideBySide": "Vedle sebe",
+    "backToLadder": "Zpět na žebřík"
   },
   "hr": {
     "title": "Mezi hvězdami",

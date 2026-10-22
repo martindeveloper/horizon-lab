@@ -22,8 +22,8 @@ const rungOf = (star: string) => RUNG_IDS.find((id) => id === star);
 /**
  * The card of the body in focus, following it as the camera climbs: its figures, how it
  * measures against a yardstick, where it sits among the stars, provenance, a geometric
- * light-speed size comparison and, for a black hole, the way to see it up close in the Black
- * holes lab. It takes focus only when the visitor opens it.
+ * light-speed size comparison and, for a black hole or the Sun, the way to see it up close in
+ * the lab that shows it. It takes focus only when the visitor opens it.
  */
 export function RungCard() {
   const { t, has } = useGiantsT();
@@ -63,7 +63,11 @@ export function RungCard() {
         <>
           <LightLap seconds={drawn(lap)} label={t("card.light")} />
           {upClose ? (
-            <CrossingRow href={upClose} title={t("card.upClose")} hint={t("card.upCloseHint")} />
+            <CrossingRow
+              href={upClose.href}
+              title={t("card.upClose")}
+              hint={t(`card.${upClose.hint}`)}
+            />
           ) : null}
         </>
       }

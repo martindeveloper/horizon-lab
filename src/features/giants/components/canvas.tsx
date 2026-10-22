@@ -71,6 +71,7 @@ export function GiantsCanvas() {
           </span>
         ))}
         <OverviewScale />
+        <span data-pair-marker data-shown="false" className="giants-marker" aria-hidden />
       </div>
     </div>
   );

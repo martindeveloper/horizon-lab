@@ -97,6 +97,19 @@ export const OVERVIEW_RING_PX = 3.5;
  */
 export const OVERVIEW_SECONDS = 1.4;
 export const OVERVIEW_SWAP = 0.35;
+/**
+ * Side by side (`pair.ts`): how long the stage takes to change, the bodies that stay gliding to
+ * their new places while the others slide off or on, s; and the radius, CSS px, below which the
+ * smaller body is marked by a ring so it is never lost beside the larger.
+ */
+export const RESTAGE_SECONDS = 0.8;
+/**
+ * The share of a stage change over which a body that leaves gives up its far-reaching light (a
+ * black hole's ring and lensing, which can surround the whole view) before it has moved much,
+ * and one that comes takes it up once it has nearly arrived; one that stays keeps it.
+ */
+export const RESTAGE_LIGHT_SHARE = 0.3;
+export const PAIR_MARKER_PX = 6;
 /** A row a mouse is over: how much its dot grows, CSS px, and how long it takes, s. */
 export const OVERVIEW_HOVER_PX = 3;
 export const OVERVIEW_HOVER_SECONDS = 0.15;

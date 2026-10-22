@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";
-import { useFormatter } from "next-intl";
+import { useFormatter, useLocale } from "next-intl";
 import { useRef } from "react";
 
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
@@ -20,7 +20,8 @@ import { spectralOf } from "../lib/model/catalogue";
 import { rungNameKey } from "../lib/model/names";
 import { rulerFor } from "../lib/model/ruler";
 import { RUNGS, RUNG_IDS } from "../lib/model/rungs";
-import { useGiants } from "../lib/store";
+import { comparedWith, useGiants } from "../lib/store";
+import { comparisonLines } from "./compare";
 import { badgeOf, keyFigures, lengthText, useDistance, useGiantsT } from "./format";
 import { LadderStrip } from "./ladder-strip";
 
@@ -56,14 +57,24 @@ export function GiantsDock() {
   const open = useGiants((s) => !s.overview && (wide ? s.card : s.sheet));
   /* On phones the card's sheet or a panel takes the foot of the stage, and the dock steps aside. */
   const aside = useGiants((s) => (!s.overview && s.sheet) || s.panel !== "none");
+  /* Side by side, the dock names both bodies and reads how the one in focus measures against the other. */
+  const other = useGiants((s) => (s.sideBySide ? comparedWith(s) : null));
+  const locale = useLocale();
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface);
   const api = useGiants.getState;
   const id = RUNG_IDS[focus]!;
   const rung = RUNGS[focus]!;
   const spectral = spectralOf(rung.id);
-  const name = t(rungNameKey(id));
-  const figures = keyFigures(t, distance, id);
+  const name = other ? `${t(rungNameKey(id))} · ${t(rungNameKey(other))}` : t(rungNameKey(id));
+  const figures = other
+    ? comparisonLines(t, locale, id, other).map((line) => line.text)
+    : keyFigures(t, distance, id).map((fact) => fact.value);
+  const kicker = other
+    ? t("compare.sideBySide")
+    : spectral
+      ? `${badgeOf(t, rung)} · ${spectral}`
+      : badgeOf(t, rung);
   return (
     <Dock
       ref={surface}
@@ -81,13 +92,11 @@ export function GiantsDock() {
           </IconButton>
         </Tooltip>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className={cn(kickerClass, "truncate")}>
-            {spectral ? `${badgeOf(t, rung)} · ${spectral}` : badgeOf(t, rung)}
-          </span>
+          <span className={cn(kickerClass, "truncate")}>{kicker}</span>
           <span className="flex min-w-0 items-baseline gap-x-3 not-md:flex-col">
             <span className="truncate font-display text-base leading-tight text-fg">{name}</span>
             <span className="truncate font-mono text-xs text-muted tabular-nums short:hidden">
-              {figures.map((fact) => fact.value).join("  ·  ")}
+              {figures.join("  ·  ")}
             </span>
           </span>
         </div>

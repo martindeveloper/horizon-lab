@@ -3,13 +3,11 @@
   "metadataDescription": "Climb from a city-sized neutron star past the largest stars to black-hole horizons, all at true scale.",
   "canvasLabel": "Stars, planets and black-hole horizons side by side on one horizon, at true scale",
   "hud": {
-    "hint": "Scroll or drag the sky to climb. Drag a star to turn it.",
     "stars": "Bodies",
     "previous": "Smaller",
     "next": "Larger",
     "ladder": "The ladder",
     "overview": "Overview",
-    "overviewHint": "Tap a body to fly to it. Scroll to go back.",
     "ruler": "Scale bar: {value}",
     "showCard": "Show the card",
     "hideCard": "Hide the card",
@@ -181,6 +179,7 @@
     "light": "Size scale: circumference ÷ c",
     "upClose": "See it up close",
     "upCloseHint": "Its disk, lensing and jet, ray-traced in Black holes",
+    "upCloseSunHint": "Its interior, every wavelength and its flares, in the Sun lab",
     "sources": "Sources and uncertainty",
     "ranges": "Ranges retain the adopted literature intervals. Derived ranges enclose all combinations of input bounds; they are not joint confidence intervals and omit unknown systematic errors. A value without a range is not exact. Vega’s temperature range describes equator to pole; TON 618’s mass range spans literature estimates.",
     "comparison": "Circumference ÷ c compares size using the speed of light in vacuum. The marker uses the adopted drawing radius, or the geometric middle of a range without a central value. It is not a photon orbit and includes no gravitational time delay. Very short periods are shown still.",
@@ -310,8 +309,10 @@
     "references": {
       "sun": "Sun",
       "earth": "Earth",
-      "previous": "Smaller"
+      "previous": "Smaller",
+      "other": "Other"
     },
+    "pick": "Compare with",
     "width": {
       "label": "Width",
       "more": "{value} × wider",
@@ -335,9 +336,12 @@
     "itself": {
       "sun": "This is the Sun, the yardstick itself.",
       "earth": "This is Earth, the yardstick itself.",
-      "previous": "Nothing on the ladder is smaller."
+      "previous": "Nothing on the ladder is smaller.",
+      "other": "Pick another body to compare with."
     },
-    "note": "Ratios use adopted values; where only a range is given, its geometric middle is used. Width is equatorial; volume uses the spheroid model and is omitted for black holes. Power is total luminosity, not apparent brightness from Earth."
+    "note": "Ratios use adopted values; where only a range is given, its geometric middle is used. Width is equatorial; volume uses the spheroid model and is omitted for black holes. Power is total luminosity, not apparent brightness from Earth.",
+    "sideBySide": "Side by side",
+    "backToLadder": "Back to the ladder"
   },
   "hr": {
     "title": "Among the stars",

@@ -6,7 +6,9 @@
  * bodies (`ladder.ts`), fills the shader's discs, moves the names over them and tells the
  * store where the camera is. The overview glides every body from its place on the ladder to its
  * dot on a log scale (`overview.ts`), the full surfaces handing over to flat dots on the way, and
- * once there the stage stands still and draws nothing until something changes.
+ * once there the stage stands still and draws nothing until something changes. Side by side
+ * (`pair.ts`) stands two bodies from anywhere on the ladder next to each other, the camera on a
+ * rail of their own; the others slide off the stage as they come on.
  */
 import { Vector2, Vector3, Vector4, type Texture } from "three";
 
@@ -18,7 +20,7 @@ import type { AudioMap } from "@horizon/toolkit/audio";
 import { MAPS, jplElements, mapFile } from "@horizon/toolkit/bodies";
 import { TAP_SLOP_PX, wheelPixels } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { lerp, smootherstep, smoothstep } from "@horizon/toolkit/math";
+import { clamp, lerp, smootherstep, smoothstep } from "@horizon/toolkit/math";
 import {
   DisposalScope,
   createEngineHost,
@@ -55,7 +57,6 @@ import { NOBODY, handOver, handOverAtOnce, type HandOver } from "./model/hand-ov
 import { inspectCamera } from "./model/inspection";
 import {
   blankPlaced,
-  bodyAt,
   cameraAt,
   clampRung,
   createLadder,
@@ -65,6 +66,7 @@ import {
   placeBodiesInto,
   placeBody,
   type Camera,
+  type Ladder,
   type Placed,
   type Stage,
 } from "./model/ladder";
@@ -81,7 +83,22 @@ import {
   stepOverview,
   stepToward,
 } from "./model/overview";
-import { RUNG_IDS } from "./model/rungs";
+import {
+  pairCamera,
+  pairLadder,
+  pairLanded,
+  pairOf,
+  pairStart,
+  placePairInto,
+  restageInto,
+  restageLens,
+  restageLight,
+  roleIn,
+  samePair,
+  stepRestage,
+  type Pair,
+} from "./model/pair";
+import { RUNG_IDS, rungIndex } from "./model/rungs";
 import { surfaceDetail } from "./model/surface-detail";
 import { NO_WEATHER, fadeWeather, weatherShown } from "./model/weather-fade";
 import {
@@ -103,6 +120,8 @@ import {
   OVERVIEW_HOVER_PX,
   OVERVIEW_HOVER_SECONDS,
   OVERVIEW_LABEL_GAP_PX,
+  PAIR_MARKER_PX,
+  RESTAGE_SECONDS,
   SHADER_DEFINES,
   SNAP_DELAY_MS,
   SPACE_SRGB,
@@ -114,7 +133,7 @@ import {
   WHEEL_RUNGS,
 } from "./parameters";
 import { GIANTS_QUALITY, bloomSettings } from "./quality";
-import { useGiants } from "./store";
+import { comparedWith, useGiants, type GiantsStore } from "./store";
 
 /** An encoded sRGB colour (0–1 a channel, or a hex string) as linear light for the shader. */
 const linearRgb = (colour: readonly [number, number, number] | string) => {
@@ -285,6 +304,25 @@ export function createGiantsEngine(
     let surfaceZoom: number = opening.surfaceZoom;
     /** How far the glide into the overview has come, 0 (the ladder) to 1 (`stepOverview`). */
     let overviewLevel = opening.overview ? 1 : 0;
+    /**
+     * Side by side (`pair.ts`): the pair the stage shows and its own ladder (null: the ladder's
+     * bodies); the camera's rail along the pair (0 the smaller framed, 1 the larger), its target
+     * and glide; and how far a change of what stands on the stage has come, with the bodies as
+     * drawn when it began.
+     */
+    let side: { pair: Pair; own: Ladder } | null = null;
+    const pairRail = { target: 1, glide: glideAt(1), seconds: glideSeconds(1) };
+    const pairPlace = () => pairRail.glide[2];
+    const pairRests = () => glideRests(pairRail.glide, pairRail.target);
+    let restageLevel = 1;
+    const restageFrom: Placed[] = [];
+    /**
+     * Each hole's lens as last drawn (centre x, y; horizon radius; bending before the overview's
+     * share), and as the stage change began: its bending eases from there into what the new stage
+     * gives it, and a hole not on the stage keeps its lens where it was meanwhile.
+     */
+    const lensNow = vectors(LENSES);
+    const lensFrom = vectors(LENSES);
     let announced = false;
     let published = { place: Number.NaN, focus: -1, scale: 0 };
     let lastPublish = 0;
@@ -300,6 +338,13 @@ export function createGiantsEngine(
       }
       engine.invalidate();
     };
+    /** Moves the pair's camera towards `to` on its rail (held to it), or there at once. */
+    function pairTo(to: number, now = false) {
+      pairRail.target = clamp(to, 0, 1);
+      pairRail.seconds = glideSeconds(pairRail.target - pairPlace());
+      if (now || reduce) pairRail.glide = glideAt(pairRail.target);
+      engine.invalidate();
+    }
     const inputAllowed = () => !useGiants.getState().guideOpen;
     /** The overview shows: a hand only taps a body there, and a wheel goes back to the ladder. */
     const surveying = () => useGiants.getState().overview;
@@ -401,7 +446,8 @@ export function createGiantsEngine(
         camera.scale = driftFrame.scale;
         camera.centre = driftFrame.centre;
         delete camera.horizon;
-      } else cameraAt(ladder, place, stage, camera);
+      } else if (side) pairCamera(side.own, pairPlace(), stage, camera);
+      else cameraAt(ladder, place, stage, camera);
       if (rejoin) {
         const framing = zoomPath(rejoin.from, framingOf(camera, stage)).at(blend);
         camera.scale = framing.width / stage.width;
@@ -425,10 +471,13 @@ export function createGiantsEngine(
       event.preventDefault();
       /* A wheel over the overview goes back to the ladder, where the camera was. */
       if (surveying()) return useGiants.getState().setOverview(false);
-      takeCamera();
       const pixels = wheelPixels(event.deltaY, event.deltaMode, host.clientHeight);
       const across = wheelPixels(event.deltaX, event.deltaMode, host.clientWidth);
-      fly(target + ((pixels + across) / 100) * WHEEL_RUNGS);
+      const by = ((pixels + across) / 100) * WHEEL_RUNGS;
+      /* Side by side, the wheel zooms between the two and rests wherever it leaves them. */
+      if (side) return pairTo(pairRail.target + by);
+      takeCamera();
+      fly(target + by);
       snapSoon();
     };
     host.addEventListener("wheel", onWheel, { passive: false });
@@ -447,10 +496,9 @@ export function createGiantsEngine(
       velocity: number;
       globe: number | null;
     } | null = null;
-    const grabbed = blankPlaced();
     /**
      * The body under a stage point as the last frame drew it: the settled overview's whole row,
-     * among the dots while they glide, else on the ladder.
+     * among the dots while they glide, else among the bodies on the stage.
      */
     const bodyUnder = (clientX: number, clientY: number) => {
       const box = host.getBoundingClientRect();
@@ -458,11 +506,10 @@ export function createGiantsEngine(
       const y = clientY - box.top;
       if (overviewLevel >= 1) return overviewRowAt(ladder, dotsBaseline, y);
       if (overviewLevel > 0) return pickPlaced(dotsShown, dotsShown.length, x, y);
-      return bodyAt(ladder, place, stage, x, y, 10, camera);
+      return pickPlaced(placed, placedCount, x, y);
     };
     /** A globe's radius on screen now, CSS px (the camera as the last frame placed it). */
-    const radiusOnScreen = (index: number) =>
-      placeBody(ladder, camera, stage, index, grabbed).radius;
+    const radiusOnScreen = (index: number) => placedOf(index).radius;
     /** The globe under a point, if it has a surface to turn and is large enough to take hold of. */
     const globeAt = (clientX: number, clientY: number) => {
       const index = bodyUnder(clientX, clientY);
@@ -478,7 +525,8 @@ export function createGiantsEngine(
          where it is, and a glide or a pending snap stops here. Over the overview it only taps. */
       const tapOnly = surveying();
       const globe = tapOnly ? null : globeAt(event.clientX, event.clientY);
-      if (globe === null && !tapOnly) {
+      if (globe === null && !tapOnly && side) pairTo(pairPlace(), true);
+      else if (globe === null && !tapOnly) {
         takeCamera();
         window.clearTimeout(snapTimer);
         target = place;
@@ -514,7 +562,8 @@ export function createGiantsEngine(
       if (surveying()) return;
       const climb = climbOf(dx, dy);
       drag.velocity = 0.7 * drag.velocity + 0.3 * (climb / dt);
-      if (drag.moved > TAP_SLOP_PX) {
+      if (drag.moved > TAP_SLOP_PX && side) pairTo(pairRail.target + climb, true);
+      else if (drag.moved > TAP_SLOP_PX) {
         window.clearTimeout(snapTimer);
         target = clampRung(ladder, target + climb);
         place = target;
@@ -537,8 +586,10 @@ export function createGiantsEngine(
       const moving = event.timeStamp - ended.last < 80;
       /* A turned globe coasts if flicked, and later goes home by itself (`grab.ts`). */
       if (ended.globe !== null) return letGo(poses[ended.globe]!, moving);
-      /* A flick carries on a little, then settles on a rung, the glide taking over the hand's speed. */
+      /* A flick carries on a little, then settles on a rung, the glide taking over the hand's
+         speed; side by side it settles wherever it comes to rest on the pair's rail. */
       const coast = moving ? ended.velocity * 0.18 : 0;
+      if (side) return pairTo(pairRail.target + coast);
       fly(Math.round(clampRung(ladder, target + coast)));
       if (!reduce && moving) glide = glideFrom(place, ended.velocity, seconds);
     };
@@ -631,6 +682,7 @@ export function createGiantsEngine(
     const labelOf = (index: number) =>
       labels.querySelector<HTMLElement>(`[data-rung="${RUNG_IDS[index]}"]`);
     const labelEls = RUNG_IDS.map((_, index) => labelOf(index));
+    const marker = labels.querySelector<HTMLElement>("[data-pair-marker]");
     const orbitEls = ORBIT_IDS.map((id) =>
       labels.querySelector<HTMLElement>(`[data-orbit="${id}"]`),
     );
@@ -686,7 +738,7 @@ export function createGiantsEngine(
       else if (overviewLevel <= 0)
         for (let i = 0; i < placedCount; i++) {
           const body = placed[i]!;
-          if (body.index !== focus && body.radius < 9) continue;
+          if (body.index !== focus && body.radius < 9 && !onStage(body.index)) continue;
           const top = Math.max(56, body.y - body.polar - 10);
           nameAt(body, focus, body.x, top, "translate(-50%, -100%)");
         }
@@ -695,6 +747,16 @@ export function createGiantsEngine(
         const on = named[index] === 1;
         if ((el.dataset.shown === "true") !== on) el.dataset.shown = on ? "true" : "false";
       });
+      markSmaller();
+    }
+    /** Side by side, the smaller body keeps a ring round it while it is too small to see. */
+    function markSmaller() {
+      if (!marker) return;
+      const small =
+        side && restageLevel >= 1 && overviewLevel <= 0 ? placedOf(side.pair.small) : null;
+      const on = small !== null && small.radius < PAIR_MARKER_PX;
+      if (small && on) moveLabel(marker, small.x, small.y, "translate(-50%, -50%)");
+      if ((marker.dataset.shown === "true") !== on) marker.dataset.shown = on ? "true" : "false";
     }
     /** Each name's leader to its dot, CSS px, as last written. */
     const leaders = new WeakMap<HTMLElement, number>();
@@ -717,7 +779,7 @@ export function createGiantsEngine(
 
     /**
      * The frame's scratch: the camera, the bodies in view (largest first), every body's overview
-     * dot as drawn (while the overview shows) and a hole placed for its lens.
+     * dot as drawn (while the overview shows).
      */
     const camera: Camera = { scale: 0, centre: 0 };
     const placed: Placed[] = [];
@@ -754,13 +816,83 @@ export function createGiantsEngine(
       });
       return baseline;
     }
-    const lensBody = blankPlaced();
-    const ownerBody = blankPlaced();
-    /** A body as this frame placed it (posed by a hand, if it was), or placed afresh if out of view. */
-    function placedOf(index: number) {
-      for (let i = 0; i < placedCount; i++) if (placed[i]!.index === index) return placed[i]!;
-      return placeBody(ladder, camera, stage, index, ownerBody);
+
+    /** How far a rung's light reaches from its centre, radii: its ring, beams, corona or glow. */
+    const reachOf = (index: number) => ladder.sizes[index]!.reach ?? 1;
+    /** One of the bodies side by side, while they are. */
+    const onStage = (index: number) =>
+      side !== null && (index === side.pair.small || index === side.pair.large);
+    /** The pair the store asks for: the body in focus beside the one it is measured against. */
+    function pairWanted(state: GiantsStore, focus: number): Pair | null {
+      const other = state.sideBySide ? comparedWith({ ...state, focus }) : null;
+      return other ? pairOf(focus, rungIndex(other)) : null;
     }
+    /**
+     * Side by side's step: a new pair (or none) changes what stands on the stage, starting from
+     * the bodies as last drawn, its camera on whichever of the two the stage framed before, then
+     * gliding out to the larger; the camera glides along the pair's rail.
+     */
+    function stepPair(state: GiantsStore, focus: number, dt: number) {
+      const wanted = pairWanted(state, focus);
+      if (!samePair(wanted, side?.pair ?? null)) {
+        const framed = side ? pairLanded(side.pair, pairPlace()) : focus;
+        restageFrom.length = 0;
+        for (let i = 0; i < placedCount; i++) restageFrom.push({ ...placed[i]! });
+        lensFrom.forEach((lens, k) => lens.copy(lensNow[k]!));
+        restageLevel = announced && restageFrom.length > 0 ? 0 : 1;
+        side = wanted && { pair: wanted, own: pairLadder(ladder, wanted) };
+        if (wanted) {
+          pairRail.glide = glideAt(pairStart(wanted, framed));
+          pairTo(1, !announced);
+        }
+      }
+      restageLevel = stepRestage(restageLevel, dt, RESTAGE_SECONDS, reduce);
+      if (!side || drag || pairRests()) return;
+      pairRail.glide = glideTowards(pairRail.glide, pairRail.target, dt, pairRail.seconds);
+      if (pairRests()) pairRail.glide = glideAt(pairRail.target);
+    }
+    /**
+     * The bodies on the stage this frame, as `camera` sees them: the ladder's or the pair's, and
+     * while the stage changes, blended from those drawn when it began (`restageInto`).
+     */
+    const staged: Placed[] = [];
+    let stagedCount = 0;
+    function placeStage() {
+      stagedCount = side
+        ? placePairInto(staged, side.own, side.pair, camera, stage)
+        : placeBodiesInto(staged, ladder, camera, stage);
+      if (restageLevel < 1) {
+        placedCount = restageInto(
+          placed,
+          restageFrom,
+          staged,
+          stagedCount,
+          restageLevel,
+          stage,
+          reachOf,
+        );
+        return;
+      }
+      for (let i = 0; i < stagedCount; i++) Object.assign((placed[i] ??= blankPlaced()), staged[i]);
+      placedCount = stagedCount;
+    }
+    /** A rung's part in the stage change under way (`roleIn`), or null with none. */
+    const roleNow = (index: number) =>
+      restageLevel < 1 ? roleIn(restageFrom, staged, stagedCount, index) : null;
+    /** How much of a body's far-reaching light shows now (`restageLight`). */
+    const lightNow = (index: number) => {
+      const role = roleNow(index);
+      return role ? restageLight(role, restageLevel) : 1;
+    };
+    const ownerBody = blankPlaced();
+    /** A body as this frame drew it (posed by a hand, if it was), if it is on the stage. */
+    function drawnOf(index: number) {
+      for (let i = 0; i < placedCount; i++) if (placed[i]!.index === index) return placed[i]!;
+      return null;
+    }
+    /** A body as this frame placed it, or placed afresh on the ladder if out of view. */
+    const placedOf = (index: number) =>
+      drawnOf(index) ?? placeBody(ladder, camera, stage, index, ownerBody);
 
     function frame(dt: number) {
       const state = useGiants.getState();
@@ -787,6 +919,8 @@ export function createGiantsEngine(
       if (state.guideOpen && !state.guideLanded && Math.abs(place - state.goal) < 0.02)
         state.landGuide();
       if (!reduce) time += dt;
+      const focus = nearestRung(ladder, place);
+      stepPair(state, focus, dt);
       overviewLevel = stepOverview(overviewLevel, state.overview, dt, reduce);
       if (overviewLevel < 1) hover(null);
       hoverLevels.forEach((level, index) => {
@@ -819,35 +953,40 @@ export function createGiantsEngine(
             );
         if (Math.abs(surfaceZoom - zoomTarget) < 0.001) surfaceZoom = zoomTarget;
       }
-      inspectCamera(camera, ladder, nearestRung(ladder, place), stage, surfaceZoom);
-      placedCount = placeBodiesInto(placed, ladder, camera, stage);
+      if (!side) inspectCamera(camera, ladder, focus, stage, surfaceZoom);
+      placeStage();
       const count = full > 0 ? Math.min(placedCount, MAX_DISCS) : 0;
       /* The line the bodies stand on: the ladder's horizon, easing down to the overview's baseline. */
       const horizon = camera.horizon ?? horizonOf(stage);
       const baseline =
         overview.dots > 0 ? lerp(horizon, placeDots(overview.blend), overview.blend) : horizon;
-      const focus = nearestRung(ladder, place);
-      /* Landed on the ladder: surface detail, weather and orbits belong to the body in focus. */
+      /* Landed: surface detail, weather and orbits belong to the body the camera rests on, the
+         one in focus on the ladder, the nearer framed of a pair side by side. */
+      const landed = side ? pairLanded(side.pair, pairPlace()) : focus;
       const resting =
         overviewLevel === 0 &&
         !state.overview &&
-        nearestRung(ladder, target) === focus &&
-        Math.abs(place - focus) < WEATHER_NEAR;
+        restageLevel >= 1 &&
+        (side
+          ? pairRests()
+          : nearestRung(ladder, target) === focus && Math.abs(place - focus) < WEATHER_NEAR);
       const surfaceWanted =
-        resting && !["earth", "jupiter", "horizon"].includes(LOOKS[focus]!.style) ? focus : -1;
+        resting && !["earth", "jupiter", "horizon"].includes(LOOKS[landed]!.style) ? landed : -1;
       detailFade = reduce
         ? { star: surfaceWanted, level: surfaceWanted < 0 ? 0 : 1 }
         : fadeWeather(detailFade, surfaceWanted, dt);
       uniforms.uFocus.value.set(-1, 0);
       /* The star the camera lands on comes alive; one it passes through stays quiet. */
-      const landing = resting && LOOKS[focus]!.activity !== "none";
-      const wanted = landing ? focus : -1;
+      const landing = resting && LOOKS[landed]!.activity !== "none";
+      const wanted = landing ? landed : -1;
       weatherFade = reduce
         ? { star: wanted, level: wanted < 0 ? 0 : 1 }
         : fadeWeather(weatherFade, wanted, dt);
       const star = weatherFade.star;
 
-      /* Each body drawn into its slot; the slots of the holes and of the star with weather. */
+      /* Each body drawn into its slot; the slots of the holes and of the star with weather. Side by
+         side, both bodies stay sharp. */
+      const blurShare = side ? 0 : full;
       let holesInView = 0;
       let slot = -1;
       for (let i = 0; i < count; i++) {
@@ -864,12 +1003,18 @@ export function createGiantsEngine(
         if (overview.dots > 0) Object.assign(body, dotsShown[body.index]!);
         const edge = Math.min(MAX_EDGE, (body.high - body.low) / (2 * body.radius));
         discs.shape[i]!.set(body.x, body.y, body.radius, body.polar);
-        blurRadii[i] = full * blurLevel * focusBlurRadius(body.index, place, body.radius);
+        blurRadii[i] = blurShare * blurLevel * focusBlurRadius(body.index, place, body.radius);
         discs.body[i]!.set(STYLES.indexOf(look.style), look.equatorK, look.poleK, look.seed);
         discs.surface[i]!.set(look.cells, look.haze, Number.isFinite(edge) ? edge : 0, look.rough);
         discs.globe[i]!.set(turnAt(globe, time), globe.tilt, flattening[body.index]!, look.pulse);
         const ring = look.ring;
-        if (ring) discs.ring[i]!.set(ring.glow, ring.kelvin, ring.flicker, ring.brightest);
+        if (ring)
+          discs.ring[i]!.set(
+            ring.glow * lightNow(body.index),
+            ring.kelvin,
+            ring.flicker,
+            ring.brightest,
+          );
         else discs.ring[i]!.set(0, 0, 0, 0);
         tints.assign(i, body.index);
         stellar.assign(i, body.index);
@@ -883,13 +1028,25 @@ export function createGiantsEngine(
       discs.lens.forEach((lens, k) => {
         const hole = holes[k];
         if (hole === undefined) return void lens.setW(0);
-        const body = placeBody(ladder, camera, stage, hole, lensBody);
-        lens.set(
-          body.x,
-          body.y,
-          body.radius,
-          full * smoothstep(LENS_GONE, LENS_FULL, Math.abs(place - hole)),
-        );
+        /* A hole bends the stars round its stretch of the ladder, side by side while it stands
+           there, at the place it is drawn. While the stage changes, its bending eases across if it
+           stays, else goes early and comes late with its ring (`restageLens`). One not drawn bends
+           from its place on the ladder; side by side, where it has none, its lens stays put. */
+        const now = side
+          ? Number(onStage(hole))
+          : smoothstep(LENS_GONE, LENS_FULL, Math.abs(place - hole));
+        const changing = restageLevel < 1;
+        const drawnHole = drawnOf(hole);
+        const before = lensFrom[k]!;
+        const at = lensNow[k]!;
+        if (drawnHole) at.set(drawnHole.x, drawnHole.y, drawnHole.radius, 0);
+        else if (side) at.set(before.x, before.y, before.z, 0);
+        else {
+          const body = placeBody(ladder, camera, stage, hole, ownerBody);
+          at.set(body.x, body.y, body.radius, 0);
+        }
+        at.w = changing ? restageLens(roleNow(hole), before.w, now, restageLevel) : now;
+        lens.set(at.x, at.y, at.z, full * at.w);
       });
       const presence = weatherShown(weatherFade.level);
       const live = slot >= 0 && presence > 0;
@@ -915,7 +1072,7 @@ export function createGiantsEngine(
       const { scale } = camera;
       /* The orbits ripple out round the body the camera lands on, as if it stood where the Sun
          does, and fade round it as the camera leaves, before coming in round the next. */
-      const orbitsWanted = state.orbits && resting ? focus : -1;
+      const orbitsWanted = state.orbits && resting ? landed : -1;
       orbitFade = reduce
         ? handOverAtOnce(orbitsWanted)
         : handOver(orbitFade, orbitsWanted, dt, ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S);
@@ -967,6 +1124,8 @@ export function createGiantsEngine(
     const moving = () =>
       !settled() ||
       overviewLevel !== (surveying() ? 1 : 0) ||
+      (side !== null && !pairRests()) ||
+      restageLevel < 1 ||
       hoverBusy() ||
       drag !== null ||
       !posesRest() ||
@@ -988,6 +1147,9 @@ export function createGiantsEngine(
           state.drift !== previous.drift ||
           state.orbits !== previous.orbits ||
           state.overview !== previous.overview ||
+          state.sideBySide !== previous.sideBySide ||
+          state.reference !== previous.reference ||
+          state.otherBody !== previous.otherBody ||
           state.bloom !== previous.bloom ||
           state.focusBlur !== previous.focusBlur ||
           state.wideColour !== previous.wideColour ||

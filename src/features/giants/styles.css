@@ -158,6 +158,23 @@
   text-transform: uppercase;
 }
 
+/* Side by side, a ring round the smaller body while it is too small to see (the engine moves it). */
+:where([data-simulation="giants"]) .giants-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-solar);
+  border-radius: 999px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+:where([data-simulation="giants"]) .giants-marker[data-shown="false"] {
+  opacity: 0;
+}
+
 /* Light going round the card's ring at its true pace. */
 @keyframes giants-lap {
   to {

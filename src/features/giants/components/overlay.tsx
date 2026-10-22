@@ -15,13 +15,17 @@ import { GiantsGuide } from "./guide";
 import { StarsPanel, ViewPanel } from "./panels";
 import { GiantsTechnicalDetails } from "./technical-details";
 
-/** Escape ends the guide, else closes the panel, else leaves the overview, else closes the card. */
+/**
+ * Escape ends the guide, else closes the panel, else leaves the overview or side by side, else
+ * closes the card.
+ */
 const escapeSteps = (): EscapeStep[] => {
   const api = useGiants.getState();
   return [
     [api.guideOpen, api.endGuide],
     [api.panel !== "none", () => api.setPanel("none")],
     [api.overview, () => api.setOverview(false)],
+    [api.sideBySide, () => api.setSideBySide(false)],
     [api.card || api.sheet, () => api.setCard(false)],
   ];
 };
@@ -46,9 +50,6 @@ export function GiantsOverlay() {
       {guideOpen ? null : (
         <header className="hud-top pad-hud-top anim-fade absolute inset-x-0 top-0 z-[60]">
           <div className="flex items-start gap-3">
-            <p className="line-clamp-2 max-w-sm text-xs text-muted not-md:hidden">
-              {t(overview ? "hud.overviewHint" : "hud.hint")}
-            </p>
             <SimulationToolbar
               label={t("hud.controls")}
               details={(access) => <GiantsTechnicalDetails {...access} />}

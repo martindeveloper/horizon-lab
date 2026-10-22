@@ -1,4 +1,6 @@
+import { FEATURES } from "@/config";
 import { pathForHole } from "@/features/black-hole/routing";
+import { SUN_PATH } from "@/features/sun/manifest";
 /**
  * What each rung's card shows, as data: rows (a fact label, the message that words it and the
  * catalogue figures that fill its placeholders). Every rung shares one layout; which rows it
@@ -19,15 +21,22 @@ import { recordFrom } from "@horizon/toolkit/records";
 import { RUNG_ENGINES, RUNG_FACTS, inUnit } from "../lib/model/catalogue";
 import { RUNGS, RUNG_IDS, type RungId } from "../lib/model/rungs";
 
+/** A card's way to the lab that shows its body up close: the lab's address, and its hint's words. */
+export type UpClose = { href: string; hint: "upCloseHint" | "upCloseSunHint" };
+
+const hole = (href: string): UpClose => ({ href, hint: "upCloseHint" });
+
 /**
- * The black holes the Black holes lab traces, by its public address: a hole's card links there
- * to show it up close, its disk, lensing and jet ray-traced.
+ * The bodies another lab shows up close, by its public address: a black hole's card links to
+ * the Black holes lab (its disk, lensing and jet ray-traced), the Sun's to the Sun lab while
+ * that lab's feature switch is on.
  */
-export const UP_CLOSE: Partial<Record<RungId, string>> = {
-  "cygnus-x1": pathForHole("stellar"),
-  "sgr-a": pathForHole("sgr-a"),
-  m87: pathForHole("m87"),
-  "ton-618": pathForHole("ton-618"),
+export const UP_CLOSE: Partial<Record<RungId, UpClose>> = {
+  "cygnus-x1": hole(pathForHole("stellar")),
+  "sgr-a": hole(pathForHole("sgr-a")),
+  m87: hole(pathForHole("m87")),
+  "ton-618": hole(pathForHole("ton-618")),
+  ...(FEATURES.sun ? { sun: { href: SUN_PATH, hint: "upCloseSunHint" as const } } : {}),
 };
 
 /** Light's lap in the unit that reads best: seconds up to two minutes, then minutes, hours, days. */

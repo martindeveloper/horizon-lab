@@ -97,10 +97,33 @@ export function placeOverview(
 }
 
 /**
+ * A body `k` of the way (0–1) from one place to another, written into `out` (which may be
+ * `from`): radii ease in log, as the ladder's zoom does; places linearly. At 0 it is exactly
+ * where it was, so a glide never jumps as it starts.
+ */
+export function glidePlaced(from: Placed, to: Placed, k: number, out: Placed = blankPlaced()) {
+  /* Everything read from `from` first: `out` may be `from` itself. */
+  const radius = Math.exp(lerp(Math.log(from.radius), Math.log(to.radius), k));
+  const shape0 = from.polar / from.radius;
+  const low0 = (from.low / from.radius) * radius;
+  const high0 = (from.high / from.radius) * radius;
+  out.index = from.index;
+  out.x = lerp(from.x, to.x, k);
+  out.y = lerp(from.y, to.y, k);
+  out.radius = radius;
+  out.polar = radius * lerp(shape0, to.polar / to.radius, k);
+  out.low = lerp(low0, to.low, k);
+  out.high = lerp(high0, to.high, k);
+  return out;
+}
+
+const held = blankPlaced();
+
+/**
  * A body on its way between the ladder (`k` 0) and the overview (1), written into `out`. A body
  * the ladder holds far off the stage starts from just past its edge, and one larger than the
  * stage from the stage's height, so it slides and shrinks into view rather than streaking in
- * from a size no screen shows. Radii ease in log, as the ladder's zoom does; places linearly.
+ * from a size no screen shows (the full surfaces have handed over to dots by the time it shows).
  */
 export function blendPlaced(
   from: Placed,
@@ -109,24 +132,17 @@ export function blendPlaced(
   stage: Stage,
   out: Placed = blankPlaced(),
 ): Placed {
-  /* Everything read from `from` first: `out` may be `from` itself. */
-  const radius0 = clamp(from.radius, MIN_DISC_PX, stage.height);
-  const shape0 = from.polar / from.radius;
-  /* Held to the stage, the body still stands on the line it stood on. */
-  const y0 = from.y + from.polar - radius0 * shape0;
-  const x0 = clamp(from.x, -radius0, stage.width + radius0);
-  const radius = Math.exp(lerp(Math.log(radius0), Math.log(to.radius), k));
+  const radius = clamp(from.radius, MIN_DISC_PX, stage.height);
   const shrink = radius / from.radius;
-  const low0 = from.low * shrink;
-  const high0 = from.high * shrink;
-  out.index = from.index;
-  out.x = lerp(x0, to.x, k);
-  out.y = lerp(y0, to.y, k);
-  out.radius = radius;
-  out.polar = radius * lerp(shape0, to.polar / to.radius, k);
-  out.low = lerp(low0, to.low, k);
-  out.high = lerp(high0, to.high, k);
-  return out;
+  held.index = from.index;
+  held.radius = radius;
+  held.polar = from.polar * shrink;
+  /* Held to the stage, the body still stands on the line it stood on. */
+  held.y = from.y + from.polar - held.polar;
+  held.x = clamp(from.x, -radius, stage.width + radius);
+  held.low = from.low * shrink;
+  held.high = from.high * shrink;
+  return glidePlaced(held, to, k, out);
 }
 
 /** How far the glide into the overview (1) or back to the ladder (0) has come after `dt` more seconds. */

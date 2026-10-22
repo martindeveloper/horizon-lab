@@ -12,7 +12,7 @@ import {
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { rungFromPath } from "../routing";
-import type { Reference } from "./model/compare";
+import { referenceBody, type Reference } from "./model/compare";
 import type { SurfaceZoom } from "./model/inspection";
 import type { Ruler } from "./model/ruler";
 import { DEFAULT_RUNG, RUNG_IDS, rungIndex, type RungId } from "./model/rungs";
@@ -59,8 +59,16 @@ export type GiantsStore = GuideSlice<Saved> &
      */
     card: boolean;
     sheet: boolean;
-    /** What the card measures the body in focus against. */
+    /** What the card measures the body in focus against, and the body picked for "other". */
     reference: Reference;
+    otherBody: RungId;
+    /**
+     * The body in focus and the one it is measured against side by side at true scale
+     * (`pair.ts`), the ladder kept beneath; any flight, the guide, the drift or the overview
+     * leaves it.
+     */
+    sideBySide: boolean;
+    setSideBySide: (on: boolean) => void;
     panel: Panel;
     /** The planets' orbits round the body in focus, as if it stood in the Sun's place. */
     orbits: boolean;
@@ -89,6 +97,8 @@ export type GiantsStore = GuideSlice<Saved> &
     /** Flies to a body and opens its card: a body's name or dot was picked (from the overview, back down to it). */
     goTo: (id: RungId) => void;
     setReference: (reference: Reference) => void;
+    /** Picks the body "other" names, and measures against it. */
+    setOtherBody: (id: RungId) => void;
     setPanel: (panel: Panel) => void;
     setOrbits: (orbits: boolean) => void;
     setRuler: (ruler: Ruler) => void;
@@ -125,6 +135,13 @@ const VIEW_DEFAULTS = {
   ...RENDER_DEFAULTS,
 } as const satisfies Partial<GiantsStore>;
 
+/** What a flight, the guide and the drift leave: the surface close-up, the overview, side by side. */
+const LEAVE_MODES = { surfaceZoom: 1, overview: false, sideBySide: false } as const;
+
+/** The body the one in focus is measured against (and stands beside, side by side), if any. */
+export const comparedWith = (s: Pick<GiantsStore, "reference" | "focus" | "otherBody">) =>
+  referenceBody(s.reference, RUNG_IDS[s.focus]!, s.otherBody);
+
 const initialView: RungId = typeof window === "undefined" ? DEFAULT_RUNG : rungFromPath();
 const initialIndex = rungIndex(initialView);
 
@@ -139,6 +156,8 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   card: true,
   sheet: false,
   reference: "sun",
+  otherBody: "betelgeuse",
+  sideBySide: false,
   panel: "none",
   orbits: VIEW_DEFAULTS.orbits,
   ruler: VIEW_DEFAULTS.ruler,
@@ -149,16 +168,20 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   guidePlaying: false,
   guideLanded: false,
   setReady: (ready) => set({ ready }),
-  setView: (view) =>
-    set({ view, goal: rungIndex(view), flight: nextFlight(), surfaceZoom: 1, overview: false }),
-  go: (index) =>
-    set({ goal: clampIndex(index), flight: nextFlight(), surfaceZoom: 1, overview: false }),
+  setView: (view) => set({ view, goal: rungIndex(view), flight: nextFlight(), ...LEAVE_MODES }),
+  go: (index) => set({ goal: clampIndex(index), flight: nextFlight(), ...LEAVE_MODES }),
   step: (by) => get().go(get().focus + by),
   publish: (place, focus, scale) => set({ place, focus, scale }),
   setOverview: (overview) => {
     if (overview && get().guideOpen) get().endGuide();
     if (overview) get().stopDrift();
-    set({ overview, surfaceZoom: 1 });
+    set({ overview, sideBySide: false, surfaceZoom: 1 });
+  },
+  setSideBySide: (sideBySide) => {
+    if (sideBySide && !comparedWith(get())) return;
+    if (sideBySide && get().guideOpen) get().endGuide();
+    if (sideBySide) get().stopDrift();
+    set({ sideBySide, overview: false, surfaceZoom: 1 });
   },
   setCard: (open) => set({ card: open, sheet: open }),
   goTo: (id) => {
@@ -166,6 +189,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
     if (rungIndex(id) !== get().focus || get().overview) get().go(rungIndex(id));
   },
   setReference: (reference) => set({ reference }),
+  setOtherBody: (otherBody) => set({ otherBody, reference: "other" }),
   setPanel: (panel) => set({ panel }),
   setOrbits: (orbits) => set({ orbits }),
   setRuler: (ruler) => set({ ruler }),
@@ -176,11 +200,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
     tour: TOUR,
     save: (s) => ({ goal: s.focus, orbits: s.orbits }),
     restore: (saved) => ({ goal: saved.goal, orbits: saved.orbits, flight: nextFlight() }),
-    open: () => ({
-      guidePlaying: !prefersReducedMotion(),
-      surfaceZoom: 1 as const,
-      overview: false,
-    }),
+    open: () => ({ guidePlaying: !prefersReducedMotion(), ...LEAVE_MODES }),
     apply: (step) => ({
       goal: rungIndex(step.rung),
       flight: nextFlight(),
@@ -194,7 +214,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
   },
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
   effectsBeforeDrift: null,
-  /* The drift ends the guide and the overview, closes the panel and the card and flies the camera itself; as a
+  /* The drift ends the guide, the overview and side by side, closes the panel and the card and flies the camera itself; as a
      show piece it turns the focus blur and bloom on, and gives the visitor's back as it ends. */
   ...driftSlice(set, get, {
     open: (s) => {
@@ -203,8 +223,7 @@ export const useGiants = create<GiantsStore>((set, get) => ({
         panel: "none" as const,
         card: false,
         sheet: false,
-        surfaceZoom: 1 as const,
-        overview: false,
+        ...LEAVE_MODES,
         effectsBeforeDrift: { focusBlur: s.focusBlur, bloom: s.bloom },
         focusBlur: true,
         bloom: true,

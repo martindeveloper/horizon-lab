@@ -24,9 +24,23 @@ type GiantsBenchScene = BenchScene & {
   drift?: boolean;
   /** Every body at once, on the overview's log scale. */
   overview?: boolean;
-  /** The overview is asked for as the first frame starts: the glide there from the rung. */
-  intoOverview?: boolean;
+  /** The body the rung stands beside, side by side at true scale. */
+  beside?: RungId;
+  /**
+   * What the visitor asks for once the first frame is drawn, so the sequence watches the
+   * change: the overview, the rung side by side with a body, or back to the ladder.
+   */
+  asks?: { overview: true } | { beside: RungId } | { ladder: true };
 };
+
+/** Asks the store for what a sequence watches the stage change into. */
+function ask(asks: NonNullable<GiantsBenchScene["asks"]>) {
+  const state = useGiants.getState();
+  if ("overview" in asks) return state.setOverview(true);
+  if ("ladder" in asks) return state.setSideBySide(false);
+  state.setOtherBody(asks.beside);
+  state.setSideBySide(true);
+}
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
 const DRIFT_MAP = parseAudioMap(vastEmptySpaceMap);
@@ -99,16 +113,61 @@ const SCENES: readonly GiantsBenchScene[] = [
     overview: true,
   },
   {
+    ...still(
+      "betelgeuse",
+      "Betelgeuse beside Earth at true scale: Earth a ringed point at its limb",
+    ),
+    id: "betelgeuse-beside-earth",
+    tags: ["side-by-side"],
+    beside: "earth",
+  },
+  {
+    ...still(
+      "sun",
+      "The Sun beside Betelgeuse at true scale: the pair's own zoom, the larger framed",
+    ),
+    id: "sun-beside-betelgeuse",
+    tags: ["side-by-side"],
+    beside: "betelgeuse",
+  },
+  {
     id: "into-overview",
     description:
       "From the Sun into the overview: the surfaces hand over to dots, which glide to their rows",
     tags: ["sequence", "camera", "overview"],
     rung: "sun",
-    intoOverview: true,
+    asks: { overview: true },
     script: {
       frames: Math.round(2 * IDLE_FPS),
       duration: 2,
       keyframes: Array.from({ length: 12 }, (_, i) => i / 11),
+    },
+  },
+  {
+    id: "stephenson-beside-earth",
+    description:
+      "From Stephenson 2-18 into side by side with Earth: M87*'s ring and the neighbours slide off past their light, Earth slides on",
+    tags: ["sequence", "camera", "side-by-side"],
+    rung: "stephenson-2-18",
+    asks: { beside: "earth" },
+    script: {
+      frames: Math.round(3 * IDLE_FPS),
+      duration: 3,
+      keyframes: Array.from({ length: 31 }, (_, i) => i / 30),
+    },
+  },
+  {
+    id: "stephenson-back-from-earth",
+    description:
+      "From Stephenson 2-18 beside Earth back to the ladder: the neighbours and M87*'s lensing come back",
+    tags: ["sequence", "camera", "side-by-side"],
+    rung: "stephenson-2-18",
+    beside: "earth",
+    asks: { ladder: true },
+    script: {
+      frames: Math.round(3 * IDLE_FPS),
+      duration: 3,
+      keyframes: Array.from({ length: 31 }, (_, i) => i / 30),
     },
   },
   watch("sun", "The Sun live: flares, prominences and an eruption"),
@@ -199,6 +258,8 @@ export const benchTarget: BenchTarget = {
       wideColour: scene.wideColour ?? false,
       orbits: scene.orbits ?? false,
       overview: scene.overview ?? false,
+      sideBySide: scene.beside !== undefined,
+      ...(scene.beside ? { reference: "other" as const, otherBody: scene.beside } : {}),
     });
     if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
     store.getState().stopDrift();
@@ -226,7 +287,7 @@ export const benchTarget: BenchTarget = {
       ...instance,
       /* A landed camera draws at the idle pace: each still frame is one of those, so none is skipped. */
       render: (frame) => {
-        if (scene.intoOverview && frame.index === 0) store.getState().setOverview(true);
+        if (scene.asks && frame.index === 1) ask(scene.asks);
         instance.render(frame.dt > 0 ? frame : { ...frame, dt: 1 / IDLE_FPS });
       },
       describe: () => {
