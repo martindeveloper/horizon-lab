@@ -11,7 +11,7 @@ import { cn, kickerClass, Tilt } from "@horizon/toolkit/ui";
 
 import { HeroScene } from "./hero-sun";
 import { TileLink } from "./tile-link";
-import { EXPERIENCE_FRAME, TILE_FRAME, tileSpan } from "./tiles";
+import { artBleed, artLayers, EXPERIENCE_FRAME, TILE_DEPTH, TILE_FRAME, tileSpan } from "./tiles";
 
 type Translate = Awaited<ReturnType<typeof getTranslations<"catalogue">>>;
 
@@ -24,7 +24,10 @@ type TileProps = { simulation: SimulationManifest; t: Translate };
 function LabPanel({ simulation, t }: TileProps) {
   const key = simulation.messageKey;
   return (
-    <div className="tilt-front pointer-events-none relative z-20 p-3 sm:p-4">
+    <div
+      data-tilt-depth={TILE_DEPTH.panel}
+      className="pointer-events-none relative z-20 p-3 sm:p-4"
+    >
       <div className="cover-panel pointer-events-auto relative rounded-2xl p-5 sm:p-6">
         <TileLink href={simulation.href} className="absolute inset-0 rounded-2xl" />
         <p className="font-mono text-[10px] tracking-[0.22em] text-accent uppercase">
@@ -32,6 +35,7 @@ function LabPanel({ simulation, t }: TileProps) {
         </p>
         <h3
           id={`tile-${simulation.id}`}
+          data-tilt-depth={TILE_DEPTH.title}
           className="mt-2 font-headline text-3xl leading-[1.05] font-medium tracking-[-0.015em] text-balance sm:text-4xl xl:text-5xl"
         >
           {t(`${key}.title`)}
@@ -96,7 +100,10 @@ function ExperienceCopy({ simulation, t }: TileProps) {
   const key = simulation.messageKey;
   const title = t(`${key}.title`);
   return (
-    <div className="tilt-front pointer-events-none relative z-20 p-5 sm:p-8 lg:p-10">
+    <div
+      data-tilt-depth={TILE_DEPTH.copy}
+      className="pointer-events-none relative z-20 p-5 sm:p-8 lg:p-10"
+    >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
         <div className="max-w-2xl">
           <p className="font-mono text-[10px] tracking-[0.22em] text-solar uppercase">
@@ -115,6 +122,7 @@ function ExperienceCopy({ simulation, t }: TileProps) {
         <Link
           href={simulation.href}
           prefetch={false}
+          data-tilt-depth={TILE_DEPTH.play}
           className="pointer-events-auto inline-flex shrink-0 items-center gap-4 rounded-full text-sm font-medium text-space-fg focus-visible:outline-hidden sm:flex-col sm:gap-3"
         >
           <span className="experience-play grid size-16 place-items-center rounded-full sm:size-20">
@@ -149,7 +157,8 @@ function ExperienceCopy({ simulation, t }: TileProps) {
  * A tile is one world: the artwork fills it and the category sits on the scene with a
  * rule. Labs and experiences share the frame, the glass rim, the tilt and the solar halo,
  * and differ in how the copy meets the art (see LabPanel and ExperienceCopy). With a
- * mouse the tile tilts toward the pointer: the art drifts behind, the copy floats in front.
+ * mouse the tile tilts toward the pointer: the art's layers part behind, the far sky drifting
+ * most, and the copy floats in front.
  */
 function SimulationTile({
   simulation,
@@ -164,6 +173,7 @@ function SimulationTile({
   order: number;
 }) {
   const experience = simulation.kind === "experience";
+  const layers = artLayers(simulation);
   return (
     <Tilt
       style={{ "--i": order }}
@@ -180,27 +190,36 @@ function SimulationTile({
           experience && "hairline-solar",
         )}
       >
-        <div className="catalogue-art tilt-back absolute -inset-3">
-          <Image
-            src={simulation.artwork}
-            alt=""
-            fill
-            sizes="(min-width: 1280px) 58vw, (min-width: 1024px) 50vw, 100vw"
-            className="object-cover"
-            priority={index === 0}
-          />
+        <div style={{ inset: -artBleed(layers) }} className="catalogue-art absolute">
+          {layers.map((layer) => (
+            <div key={layer.src} data-tilt-depth={layer.depth} className="absolute inset-0">
+              {/* An SVG under a fragment: served as is, since the optimizer only passes `.svg` through. */}
+              <Image
+                src={layer.src}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+                priority={index === 0}
+              />
+            </div>
+          ))}
         </div>
 
         {/* The whole tile opens the simulation; the visible link in the copy is the one that takes focus. */}
         <TileLink href={simulation.href} className="absolute inset-0 z-10 rounded-3xl" />
 
-        <div className="tilt-front pointer-events-none relative z-20 flex items-start justify-between gap-6 p-5 sm:p-6">
-          <span className="mt-2 inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.24em] text-space-muted uppercase">
+        <div className="pointer-events-none relative z-20 flex items-start justify-between gap-6 p-5 sm:p-6">
+          <span
+            data-tilt-depth={TILE_DEPTH.category}
+            className="mt-2 inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.24em] text-space-muted uppercase"
+          >
             <span className="h-px w-8 bg-solar/70" aria-hidden />
             {t(`${simulation.messageKey}.category`)}
           </span>
           {experience ? null : (
             <span
+              data-tilt-depth={TILE_DEPTH.plate}
               className="font-mono text-3xl font-light text-solar/80 tabular-nums sm:text-4xl"
               aria-hidden
             >

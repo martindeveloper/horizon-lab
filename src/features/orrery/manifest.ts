@@ -13,6 +13,10 @@ export const orreryManifest = {
   kind: "lab",
   href: ORRERY_PATH,
   artwork: SIMULATION_ASSETS.orrery.artwork,
+  artworkLayers: [
+    { id: "sky", depth: -1 },
+    { id: "system", depth: 0 },
+  ],
   messageKey: "orrery",
   highlights: ["live", "timeline", "oort"],
   entryPoints: [

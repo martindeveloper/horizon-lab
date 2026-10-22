@@ -1,3 +1,39 @@
+import type { SimulationManifest } from "@/lib/simulation-types";
+import { TILT_TRAVEL } from "@horizon/toolkit/ui";
+
+/**
+ * The copy's parallax layers for `Tilt`, in front of the art's own (`artLayers`), up to the play
+ * disc nearest the eye. Nested layers add up: the title rides its panel, the play disc its copy.
+ */
+export const TILE_DEPTH = {
+  category: 0.4,
+  plate: 1,
+  panel: 0.5,
+  title: 0.4,
+  copy: 0.5,
+  play: 0.8,
+} as const;
+
+/** The far plane, where a flat artwork sits whole. */
+const FAR = -1;
+
+/**
+ * A tile's art as `Tilt` layers in paint order. Each layer is the same SVG under its fragment,
+ * which shows only that layer, so the stack rebuilds the picture at rest.
+ */
+export function artLayers({ artwork, artworkLayers }: SimulationManifest) {
+  return (
+    artworkLayers?.map(({ id, depth }) => ({ src: `${artwork}#layer-${id}`, depth })) ?? [
+      { src: artwork, depth: FAR },
+    ]
+  );
+}
+
+/** The art overhangs the tile by more than its deepest layer travels, so no edge shows. */
+export function artBleed(layers: readonly { depth: number }[]) {
+  return Math.max(...layers.map(({ depth }) => Math.abs(depth))) * TILT_TRAVEL + 4;
+}
+
 /**
  * The catalogue's bento tiles, shared by the page and its loading skeleton so both keep one
  * geometry: a tall rounded frame, and pairs of tiles that alternate 7/5 and 5/7 on wide screens

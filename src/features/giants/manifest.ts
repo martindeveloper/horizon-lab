@@ -11,6 +11,13 @@ export const giantsManifest = {
   feature: "giants",
   href: GIANTS_PATH,
   artwork: SIMULATION_ASSETS.giants.artwork,
+  artworkLayers: [
+    { id: "sky", depth: -1 },
+    { id: "surface", depth: -0.7 },
+    { id: "dwarfs", depth: -0.45 },
+    { id: "giants", depth: -0.25 },
+    { id: "supergiant", depth: 0 },
+  ],
   messageKey: "giants",
   highlights: ["ladder", "physics", "uncertainty"],
   entryPoints: [

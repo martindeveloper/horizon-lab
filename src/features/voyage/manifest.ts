@@ -11,6 +11,12 @@ export const voyageManifest = {
   feature: "voyage",
   href: VOYAGE_PATH,
   artwork: SIMULATION_ASSETS.voyage.artwork,
+  artworkLayers: [
+    { id: "sky", depth: -1 },
+    { id: "earth", depth: 0 },
+    { id: "bodies", depth: -0.55 },
+    { id: "flight", depth: -0.25 },
+  ],
   messageKey: "voyage",
   highlights: ["scale", "clocks", "horizon"],
   entryPoints: [

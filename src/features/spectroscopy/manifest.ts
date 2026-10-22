@@ -11,6 +11,12 @@ export const spectroscopyManifest = {
   kind: "lab",
   href: SPECTROSCOPY_PATH,
   artwork: SIMULATION_ASSETS.spectroscopy.artwork,
+  artworkLayers: [
+    { id: "sky", depth: -1 },
+    { id: "pool", depth: -0.7 },
+    { id: "star", depth: -0.4 },
+    { id: "instrument", depth: 0 },
+  ],
   messageKey: "spectroscopy",
   highlights: ["fingerprints", "kirchhoff", "sequence"],
   entryPoints: [

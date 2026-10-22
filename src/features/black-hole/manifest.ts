@@ -10,6 +10,12 @@ export const blackHoleManifest = {
   kind: "lab",
   href: BLACK_HOLE_PATH,
   artwork: SIMULATION_ASSETS["black-hole"].artwork,
+  artworkLayers: [
+    { id: "sky", depth: -1 },
+    { id: "halo", depth: -0.6 },
+    { id: "disk", depth: -0.3 },
+    { id: "front", depth: 0 },
+  ],
   messageKey: "blackHole",
   highlights: ["lensing", "orbits", "guides"],
   entryPoints: [

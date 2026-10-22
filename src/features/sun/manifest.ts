@@ -11,6 +11,11 @@ export const sunManifest = {
   feature: "sun",
   href: SUN_PATH,
   artwork: SIMULATION_ASSETS.sun.artwork,
+  artworkLayers: [
+    { id: "sky", depth: -1 },
+    { id: "corona", depth: -0.55 },
+    { id: "sun", depth: 0 },
+  ],
   messageKey: "sun",
   highlights: ["cut", "light", "field"],
   entryPoints: [

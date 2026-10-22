@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 import { custom, holeById } from "../src/features/black-hole/lib/holes/index.ts";
@@ -14,7 +14,7 @@ import { getPathname } from "../src/i18n/navigation.ts";
 import { routing } from "../src/i18n/routing.ts";
 import { siteRedirects } from "../src/lib/redirects.ts";
 import { EXPERIENCE_PREFIX, SIMULATION_PREFIX, slugRoutes } from "../src/lib/simulation-paths.ts";
-import { simulations, simulationForPath } from "../src/lib/simulations.ts";
+import { registered, simulations, simulationForPath } from "../src/lib/simulations.ts";
 
 const root = new URL("../", import.meta.url);
 
@@ -34,6 +34,22 @@ test("catalogue routes resolve by path segment and entry points stay within thei
     }
   }
   assert.equal(simulationForPath("/"), undefined);
+});
+
+// The tile stacks the SVG once per listed layer, each showing only its group: a group left out
+// never shows, and a listed id without a group shows the whole picture again.
+test("artwork layers name every layer group of their SVG, in paint order", () => {
+  for (const simulation of registered) {
+    if (!simulation.artworkLayers) continue;
+    const svg = readFileSync(new URL(`public${simulation.artwork}`, root), "utf8");
+    const groups = [...svg.matchAll(/<g class="layer" id="layer-([\w-]+)">/g)].map((m) => m[1]);
+    assert.deepEqual(
+      simulation.artworkLayers.map(({ id }) => id),
+      groups,
+      simulation.id,
+    );
+    assert.ok(svg.includes(".layer:not(:target){display:none}"), simulation.id);
+  }
 });
 
 test("legacy redirects reach the new app without loops or catalogue collisions", () => {

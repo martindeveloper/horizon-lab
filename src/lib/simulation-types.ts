@@ -14,6 +14,12 @@ export type SimulationManifest = {
   feature?: FeatureId;
   href: SimulationPath;
   artwork: string;
+  /**
+   * The artwork's parallax layers in paint order: each names a `<g class="layer" id="layer-<id>">`
+   * of the SVG and how deep it sits when the tile tilts, from −1 (the far sky, which drifts most)
+   * to 0 (at the frame). Without them the picture moves as one far layer.
+   */
+  artworkLayers?: readonly { id: string; depth: number }[];
   messageKey: string;
   highlights: readonly string[];
   entryPoints: readonly { id: string; href: SimulationPath }[];

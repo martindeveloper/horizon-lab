@@ -12,6 +12,11 @@ export const deepFieldManifest = {
   kind: "lab",
   href: DEEP_FIELD_PATH,
   artwork: SIMULATION_ASSETS["deep-field"].artwork,
+  artworkLayers: [
+    { id: "dome", depth: 0 },
+    { id: "stars", depth: -0.6 },
+    { id: "sun", depth: 0 },
+  ],
   messageKey: "deepField",
   highlights: ["depth", "lookback", "edge"],
   entryPoints: [
