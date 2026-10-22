@@ -769,14 +769,18 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   so the inner planets and the belt glide rather than whirl; the rate shows under
   the drift's controls (`SimulationImmersive`'s `drift.caption`).
 - Giants' camera is a place on the ladder, not an orbit, so its drift is a path of its own
-  (`lib/model/drift-path.ts`): one climb that never turns back, a monotone cubic through each
-  shot's hold, which creeps up through its body (close enough that its star stays alive), and
-  the surface zoom as its one push-in. A climb cannot fly home, so the programme's `fade`
-  takes the loop through black on its seam (`seamLight`, the canvas's opacity over the
-  stage's black) and the first shot comes out of it at its body. The engine runs the path on
-  its own clock; a hand on the camera pauses it, and a resume carries the camera back onto
-  the path. As a show piece the drift turns the focus blur and bloom on and gives the
-  visitor's back as it ends.
+  (`lib/model/drift-path.ts`): one climb that never turns back. Each shot's hold creeps up
+  through its body (close enough that its star stays alive); between holds the camera does
+  not step by rungs, whose bodies differ in size by anything up to ninety times, but flies
+  the smooth zoom and pan between the holds' framings (van Wijk and Nuij), at an even pace as
+  the eye sees it. The surface zoom is its one push-in. A climb cannot fly home, so the
+  programme's `fade` takes the loop through black on its seam (`seamLight`, the canvas's
+  opacity over the stage's black) and the first shot comes out of it at its body. The engine
+  runs the path on its own clock; a hand on the camera pauses it, and a pause, a hand or a
+  resume eases between the drift's framing and the ladder's along the same smooth zoom. The
+  baseline and the orbits fade with the line veil's presence, as the other drifts' lines do.
+  As a show piece the drift turns the focus blur and bloom on and gives the visitor's back
+  as it ends.
 - The toolkit runs the camera: `createDriftRun` from the store's `drift` state,
   and `createRigDrift` on an orbit rig, both with `cut`: a fresh start lands the
   camera on the opening shot behind the loader's curtain (`DriftVeil`, opaque), so

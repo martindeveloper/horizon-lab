@@ -157,6 +157,10 @@ export const SOURCES = {
     cite: "Gott et al. 2005, ApJ 624, 463 (the Sloan Great Wall)",
     link: SOURCE_URLS.gott2005,
   },
+  gravity2020: {
+    cite: "GRAVITY Collaboration 2020, A&A 636, L5 (S2's orbit: P = 16.0455 yr, pericentre ~120 au)",
+    link: "https://doi.org/10.1051/0004-6361/202037813",
+  },
   gravity2021: { cite: "GRAVITY Collaboration 2021, A&A 647, A59; GRAVITY Collaboration 2022" },
   gravity2022: {
     cite: "GRAVITY Collaboration 2022, A&A 657, L12 (Sgr A*: 4.297 × 10⁶ M☉, R₀ = 8,277 pc)",
@@ -350,6 +354,10 @@ export const SOURCES = {
   przybilla2010: {
     cite: "Przybilla et al. 2010, A&A 517, A38 (Rigel's evolutionary mass, Table 1)",
     link: SOURCE_URLS.przybilla2010,
+  },
+  ramachandran2025: {
+    cite: "Ramachandran et al. 2025, A&A 698, A37 (Cygnus X-1 from wind models: 12.7–17.8 M☉)",
+    link: "https://arxiv.org/abs/2504.05885",
   },
   ramirez2011: { cite: "Ramírez & Allende Prieto 2011, ApJ 743, 135 (Arcturus)" },
   reid2019: { cite: "Reid et al. 2019, ApJ 885, 131" },

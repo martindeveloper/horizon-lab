@@ -40,6 +40,16 @@ export type StellarFigures = {
   radialVelocity?: Fact;
   /** A black hole's dimensionless spin a/M: measured, or the value a lab assumes where it is not. */
   spin?: Fact;
+  /** A mass other models give, where the literature splits. */
+  massOtherModels?: Fact;
+  /** The two holes a merger's remnant formed from. */
+  primaryMass?: Fact;
+  secondaryMass?: Fact;
+  /** The star that weighs a hole: its orbital period and closest approach. */
+  companionPeriod?: Fact;
+  companionPericentre?: Fact;
+  /** Redshift, for a source too far for a distance of its own. */
+  redshift?: Fact;
 };
 
 /** Stars and remnants: a pulsar, white and brown dwarfs, main-sequence stars, giants and supergiants. */
@@ -469,6 +479,11 @@ export const BLACK_HOLES = {
       digits: 2,
       note: "assumed: disputed, > 0.9985 by continuum fitting, ≳ 0.96 by IXPE, low by Comptonised reflection",
     }),
+    massOtherModels: literatureFact(null, "Msun", "ramachandran2025", "verified", {
+      range: [12.7, 17.8],
+      digits: 2,
+      note: "wind models with other estimates for the companion",
+    }),
   },
   "gaia-bh3": {
     mass: literatureFact(32.7, "Msun", "panuzzo2024", "verified", {
@@ -481,6 +496,12 @@ export const BLACK_HOLES = {
     }),
     spin: literatureFact(0, "ratio", "panuzzo2024", "teaching-choice", {
       note: "not measured: with nothing falling in, no X-ray method applies",
+    }),
+    companionPeriod: literatureFact(4_253, "d", "panuzzo2024", "verified", {
+      range: [4_154, 4_352],
+      show: "yr",
+      digits: 3,
+      note: "the metal-poor giant's orbit, e = 0.73",
     }),
   },
   gw231123: {
@@ -499,6 +520,8 @@ export const BLACK_HOLES = {
       digits: 2,
       note: "the remnant's χ_f, waveform-model dependent",
     }),
+    primaryMass: literatureFact(137, "Msun", "lvk2025", "verified", { range: [119, 160], digits: 3 }),
+    secondaryMass: literatureFact(101, "Msun", "lvk2025", "verified", { range: [51, 123], digits: 3 }),
   },
   "omega-cen": {
     mass: literatureFact(8_200, "Msun", "haberle2024", "verified", {
@@ -517,6 +540,14 @@ export const BLACK_HOLES = {
     spin: literatureFact(0.94, "ratio", "eht2022", "teaching-choice", {
       digits: 2,
       note: "assumed: the only EHT model passing every test; later work is split",
+    }),
+    companionPeriod: literatureFact(16.0455, "yr", "gravity2020", "verified", {
+      digits: 4,
+      note: "S2, the star that weighs it",
+    }),
+    companionPericentre: literatureFact(120, "au", "gravity2020", "verified", {
+      digits: 2,
+      note: "S2's closest approach",
     }),
   },
   m87: {
@@ -541,6 +572,7 @@ export const BLACK_HOLES = {
       digits: 1,
       note: "assumed: a thin disk this massive needs a ≳ 0.6",
     }),
+    redshift: literatureFact(2.219, "ratio", "shemmer2004", "verified", { digits: 4 }),
   },
 } as const satisfies Readonly<Record<string, StellarFigures>>;
 
