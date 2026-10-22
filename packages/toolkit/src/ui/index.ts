@@ -23,6 +23,7 @@ export { Picker, type PickerProps } from "./picker";
 export { Sheet, type SheetProps } from "./sheet";
 export { Dock, type DockProps } from "./dock";
 export { Tilt, type TiltProps } from "./tilt";
+export { TILT_TRAVEL } from "./tilt-depth";
 export { OrbitPad, type OrbitPadDirection, type OrbitPadProps } from "./orbit-pad";
 export { VisualizationShell, VisualizationOverlay } from "./visualization-shell";
 export {
@@ -57,11 +58,18 @@ export {
   type CoachMarkProps,
 } from "./coach-mark";
 export {
+  COVER,
   coachLeader,
+  keptOf,
   placeCoach,
+  placeHolds,
   playCues,
+  settleCoach,
+  type CoachObstacle,
+  type CoverKind,
   type CoachPlacement,
   type CoachRect,
+  type CoachSettled,
   type CueClock,
   type TourCue,
 } from "./coach-model";

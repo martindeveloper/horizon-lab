@@ -54,21 +54,26 @@ catalogue and `examples/visualization-example.tsx` for composition.
   rig's eased `turnBy`) and `ORBIT_STEP` from `@horizon/toolkit/camera`.
 - `CoachMark`: a guided tour's step over a live scene, never a veil. A gold ring moves onto the
   first of the step's `targets` on screen (elements marked `data-coach="<id>"`, `COACH_TARGET`,
-  looked up inside the `scope` ancestor, where the ring and the callout are drawn; a box hidden
-  by `visibility` does not count) and a dotted gold leader joins it to a small ink callout, dark
-  in both themes so it never reads as one of the HUD's panels. The callout's top edge is the
-  tour's horizon, gold up to the step reached with a sun at its head. It stands where it covers
-  least of `avoid` (`COACH_AVOID`: the glass materials; add what else covers the stage) and never
-  its target. While a step shows, the rest of the HUD in the scope (the `avoid` surfaces) quiets
-  to a third: the ringed control, what it has open and any surface the step brought up stay as they
-  are, and so does the scene (a web animation over each surface, eased both ways). `press` presses the target (or its first button) once found and again as the step
-  ends if it is still `aria-expanded`. Escape, the close button and a press outside the callout,
-  the target, what the target has open (`aria-controls`) and any `data-coach-opener`
-  (`COACH_OPENER`) call `onClose`; the arrows step from the scene or the callout. Next takes
-  focus as it opens and `returnFocus` gets it back. It reads the page a frame at a time only while
-  mounted. `coach-model.ts` holds the arithmetic: `playCues` runs a step's cues (`{ at, run }`,
-  seconds) on a clock and returns their stop; `placeCoach` picks the callout's place and
-  `coachLeader` the leader's ends.
+  looked up inside the `scope` ancestor, where the ring and the callout are drawn; a box hidden by
+  `visibility` does not count) and a dotted gold leader in right angles (left out where it would
+  cross what the step opened) joins it to a small solid callout, the page's colour warmed with
+  gold behind a gold edge whose glow breathes with the ring, so it never reads as one of the HUD's
+  glass panels. The callout's top edge is the tour's horizon, gold up to the step reached with a
+  sun at its head. It stands beside its target, or beside what the step opened, where it covers
+  least: never the target or what the step is about (what the target has open, what the step
+  brought up), the HUD the step quiets before the page's bars (`avoid`, weighed by `COVER`). A new
+  step waits until its page is read, then takes its place and keeps it, for that step and that
+  target, until something the step is about comes under it or it no longer fits (`settleCoach`,
+  `placeHolds`). While a step shows, the rest of the HUD in the scope (the `avoid` surfaces)
+  quiets to a third: the ringed control, what it has open and any surface the step brought up stay
+  as they are, and so does the scene (a web animation over each surface, eased both ways). `press`
+  presses the target (or its first button) once found and again as the step ends if it is still
+  `aria-expanded`. Escape, the close button and a press outside the callout, the target, what the
+  target has open (`aria-controls`) and any `data-coach-opener` (`COACH_OPENER`) call `onClose`;
+  the arrows step from the scene or the callout. Next takes focus as it opens and `returnFocus`
+  gets it back. It reads the page a frame at a time only while mounted. `coach-model.ts` holds the
+  arithmetic: `playCues` runs a step's cues (`{ at, run }`, seconds) on a clock and returns their
+  stop; `placeCoach` picks the callout's place and `coachLeader` the leader's ends.
 - `TextReveal` lives at `@horizon/toolkit/ui/motion` to keep Motion optional.
   Reduced motion and `instant` render full text immediately.
 

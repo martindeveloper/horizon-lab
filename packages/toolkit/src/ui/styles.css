@@ -554,8 +554,7 @@
    would make them backdrop roots, so glass inside them, like a cover panel's
    backdrop-filter, would stop seeing the artwork behind and lose its blur
    for as long as the card tilts. Only glare and shadow fade. */
-.tilt[data-tilting] .tilt-back,
-.tilt[data-tilting] .tilt-front {
+.tilt[data-tilting] [data-tilt-depth] {
   will-change: translate;
 }
 .tilt[data-tilting] .tilt-glare,
@@ -604,8 +603,7 @@
   .tilt {
     transform: none !important;
   }
-  .tilt .tilt-back,
-  .tilt .tilt-front {
+  .tilt [data-tilt-depth] {
     translate: none !important;
   }
   .tilt-glare-clip,
@@ -651,26 +649,44 @@
   }
 }
 
-/* The coach's callout: dark ink over the scene in either theme, so it never reads as one of
-   the HUD's glass panels; it glides between steps. Its top edge is the tour's horizon. */
+/* The coach's callout: solid, the page's colour warmed with gold (ink in the dark, paper in the
+   light), so it never reads as one of the HUD's glass panels; a gold edge and a glow that
+   breathes with the ring. It glides between steps. Its top edge is the tour's horizon. */
 .coach-card {
-  color: var(--color-space-fg);
-  background: linear-gradient(180deg, rgb(18 18 22 / 0.96), rgb(8 8 11 / 0.97));
-  border: 1px solid rgb(255 255 255 / 0.07);
+  --coach-drop: rgb(0 0 0 / 0.7);
+  color: var(--color-fg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, rgb(var(--solar)) 11%, var(--color-bg)),
+    color-mix(in srgb, rgb(var(--solar)) 4%, var(--color-bg))
+  );
+  border: 1px solid rgb(var(--solar) / 0.5);
   box-shadow:
-    0 20px 48px -16px rgb(0 0 0 / 0.75),
-    0 0 0 1px rgb(0 0 0 / 0.45),
-    0 0 40px -8px rgb(var(--solar) / 0.14);
+    0 20px 48px -16px var(--coach-drop),
+    0 0 0 3px rgb(var(--solar) / 0.08),
+    0 0 26px -6px rgb(var(--solar) / 0.3);
   transition-property: left, top;
   transition-duration: 420ms;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation: coach-card-breathe 2.4s ease-in-out infinite alternate;
+}
+:root.light .coach-card {
+  --coach-drop: rgb(60 40 10 / 0.22);
+}
+@keyframes coach-card-breathe {
+  to {
+    box-shadow:
+      0 20px 48px -16px var(--coach-drop),
+      0 0 0 4px rgb(var(--solar) / 0.12),
+      0 0 38px -4px rgb(var(--solar) / 0.45);
+  }
 }
 .coach-horizon {
   position: absolute;
   inset-inline: 0.75rem;
   top: -1px;
   height: 1px;
-  background: rgb(255 255 255 / 0.12);
+  background: color-mix(in srgb, var(--color-fg) 14%, transparent);
 }
 /* Gold up to the step reached, and the sun standing at its head. */
 .coach-horizon-fill,
@@ -695,6 +711,7 @@
 }
 /* The leader from the callout to the ring, drawn in once both have arrived. */
 .coach-leader {
+  fill: none;
   stroke: rgb(var(--solar) / 0.6);
   stroke-width: 1;
   stroke-dasharray: 2 3;
@@ -709,27 +726,28 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  color: var(--color-space-muted);
+  color: var(--color-muted);
   transition: color 160ms;
 }
 .coach-quiet:hover:not([aria-disabled="true"]) {
-  color: var(--color-space-fg);
+  color: var(--color-fg);
 }
 .coach-next {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
   gap: 0.25rem;
-  border: 1px solid rgb(var(--solar) / 0.45);
+  border: 1px solid rgb(var(--solar) / 0.6);
   border-radius: 9999px;
   padding-inline: 0.875rem 0.625rem;
-  color: rgb(var(--solar));
+  background: rgb(var(--solar) / 0.08);
+  color: var(--color-accent);
   font-size: 0.8125rem;
   font-weight: 500;
   transition: background-color 160ms;
 }
 .coach-next:hover {
-  background: rgb(var(--solar) / 0.12);
+  background: rgb(var(--solar) / 0.18);
 }
 :is(.coach-quiet, .coach-next):focus-visible {
   outline: 2px solid rgb(var(--solar));

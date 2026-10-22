@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { createStore } from "zustand/vanilla";
 
-import { coachLeader, placeCoach, playCues } from "@horizon/toolkit/ui";
+import { coachLeader, placeCoach, placeHolds, playCues, settleCoach } from "@horizon/toolkit/ui";
 
 import { helpSlice } from "../src/lib/help.ts";
 import { registered } from "../src/lib/simulations.ts";
@@ -75,17 +75,151 @@ test("the callout stands beside its target, clear of the HUD and never over the 
   assert.ok(!overlaps(free, dock), "clear of the dock");
 });
 
-test("the leader runs from the callout's edge to the target's", () => {
-  const leader = coachLeader(
-    { left: 100, top: 200, width: 300, height: 100 },
-    { left: 230, top: 100, width: 40, height: 40 },
+test("with no room to spare, the callout covers the quieted HUD, not what the step opened", () => {
+  /* The view pill at the top left with its list open below it, the toolbar at the right, the
+     page's header above: nothing beside the pill is clear of the list. */
+  const stage = { width: 1000, height: 600 };
+  const card = { width: 304, height: 130 };
+  const pill = { left: 12, top: 24, width: 130, height: 40 };
+  const list = { left: 12, top: 72, width: 320, height: 500, kind: "kept" };
+  const toolbar = { left: 600, top: 24, width: 390, height: 40, kind: "quiet" };
+  const header = { left: 0, top: 0, width: 1000, height: 14, kind: "over" };
+  const place = placeCoach({
+    target: pill,
+    card,
+    stage,
+    obstacles: [list, toolbar, header],
+    gap: 12,
+  });
+  const covers = (box) =>
+    place.left < box.left + box.width &&
+    box.left < place.left + card.width &&
+    place.top < box.top + box.height &&
+    box.top < place.top + card.height;
+  assert.ok(!covers(list), `clear of the open list (${place.side} at ${place.left},${place.top})`);
+  assert.ok(!covers(pill), "clear of its target");
+});
+
+test("the callout never sinks under the page's footer", () => {
+  const stage = { width: 1200, height: 800 };
+  const card = { width: 300, height: 150 };
+  /* A control in the dock, just above the footer bar that lies over the stage's foot. */
+  const control = { left: 300, top: 700, width: 220, height: 40 };
+  const dock = { left: 150, top: 640, width: 900, height: 125, kind: "quiet" };
+  const footer = { left: 0, top: 772, width: 1200, height: 28, kind: "over" };
+  const place = placeCoach({ target: control, card, stage, obstacles: [dock, footer], gap: 12 });
+  assert.ok(place.top + card.height <= footer.top, `above the footer (${place.side})`);
+  /* Settled beside the control, then grown taller with its words: it no longer holds there. */
+  const beside = { left: 532, top: 640, side: "right" };
+  const taller = { width: 300, height: 150 };
+  assert.ok(
+    !placeHolds({ place: beside, card: taller, stage, target: control, obstacles: [dock, footer] }),
   );
-  assert.deepEqual(leader, { from: { x: 250, y: 200 }, to: { x: 250, y: 140 } });
+});
+
+test("the page's bars keep the callout off them, not away from its target", () => {
+  /* The guide button at the top right, the Settings panel open below it, the header above. */
+  const stage = { width: 1800, height: 590 };
+  const card = { width: 300, height: 150 };
+  const button = { left: 1640, top: 44, width: 36, height: 36 };
+  const obstacles = [
+    { left: 0, top: 0, width: 1800, height: 28, kind: "over" },
+    { left: 1605, top: 40, width: 190, height: 40, kind: "quiet" },
+    { left: 1485, top: 85, width: 310, height: 500, kind: "quiet" },
+  ];
+  const place = placeCoach({ target: button, card, stage, obstacles, gap: 12 });
+  assert.ok(place.left > stage.width / 2, `beside its target (${place.side} at ${place.left})`);
+  assert.ok(place.top >= 28, "below the header");
+});
+
+test("within a step the callout stays put until what the step is about comes under it", () => {
+  const stage = { width: 1200, height: 800 };
+  const card = { width: 300, height: 140 };
+  const target = { left: 900, top: 20, width: 32, height: 32 };
+  const place = { left: 640, top: 64, side: "below" };
+  const holds = (obstacles, size = stage) =>
+    placeHolds({ place, card, stage: size, target, obstacles });
+  assert.ok(holds([]), "nothing in the way");
+  /* A panel closing and quieted HUD sliding in do not move it. */
+  assert.ok(holds([{ left: 600, top: 100, width: 300, height: 400, kind: "quiet" }]));
+  /* The card the step opens comes up under it: it moves. */
+  assert.ok(!holds([{ left: 880, top: 70, width: 300, height: 300, kind: "kept" }]));
+  /* The stage shrinks under it: it moves. */
+  assert.ok(!holds([], { width: 900, height: 800 }));
+});
+
+test("a new step waits for its page, then stands by its target, not where the last step left it", () => {
+  const stage = { width: 1200, height: 800 };
+  const card = { width: 300, height: 140 };
+  const base = { card, stage, obstacles: [], gap: 12 };
+  /* Step 0 has nothing to point at: the callout stands over the open scene. */
+  const first = settleCoach({
+    ...base,
+    settled: null,
+    step: 0,
+    read: true,
+    targetId: null,
+    target: null,
+  });
+  assert.equal(first.place.side, "free");
+  const settled = first.settle;
+  /* Step 1 begins before its page is read: the callout holds still, settling on nothing. */
+  const waiting = settleCoach({
+    ...base,
+    settled,
+    step: 1,
+    read: false,
+    targetId: null,
+    target: null,
+  });
+  assert.equal(waiting.place, settled.place);
+  assert.equal(waiting.settle, null);
+  /* Read, with its target in the toolbar: it goes there, though the old place would still fit. */
+  const button = { left: 1100, top: 20, width: 32, height: 32 };
+  const there = settleCoach({
+    ...base,
+    settled,
+    step: 1,
+    read: true,
+    targetId: "help",
+    target: button,
+  });
+  assert.equal(there.place.side, "below");
+  /* And keeps it from then on. */
+  const kept = settleCoach({
+    ...base,
+    settled: there.settle,
+    step: 1,
+    read: true,
+    targetId: "help",
+    target: button,
+  });
+  assert.equal(kept.place, there.settle.place);
+  assert.equal(kept.settle, null);
+});
+
+test("the leader runs in right angles, and not through what the step opened", () => {
+  const card = { left: 100, top: 200, width: 300, height: 100 };
+  /* Sharing a column: straight up through the middle of what they share. */
+  const pill = { left: 230, top: 100, width: 40, height: 40 };
+  assert.deepEqual(coachLeader(card, pill), [
+    { x: 250, y: 200 },
+    { x: 250, y: 140 },
+  ]);
+  /* Neither column nor row: out of the card's side, one turn onto the target. */
+  const button = { left: 600, top: 40, width: 40, height: 40 };
+  assert.deepEqual(coachLeader(card, button), [
+    { x: 400, y: 250 },
+    { x: 620, y: 250 },
+    { x: 620, y: 80 },
+  ]);
+  /* An open list between them: no leader. One that holds the target does not block. */
+  const list = { left: 120, top: 150, width: 300, height: 40 };
+  assert.equal(coachLeader(card, pill, [list]), null);
+  const panel = { left: 200, top: 90, width: 100, height: 60 };
+  assert.ok(coachLeader(card, pill, [panel]));
   assert.equal(
-    coachLeader(
-      { left: 0, top: 0, width: 10, height: 10 },
-      { left: 10, top: 0, width: 5, height: 5 },
-    ),
+    coachLeader(card, { left: 400, top: 200, width: 20, height: 20 }),
     null,
     "none when they touch",
   );

@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ComponentProps } from "react";
 
 import { FINE_POINTER_QUERY, REDUCED_MOTION_QUERY } from "../environment";
+import { TILT_TRAVEL } from "./tilt-depth";
 import { cn } from "./utils";
 
 export type TiltProps = ComponentProps<"div"> & {
@@ -10,14 +11,16 @@ export type TiltProps = ComponentProps<"div"> & {
   max?: number;
 };
 
-/** Easing time constants (ms): the turn follows the pointer, the lift settles a touch slower. */
-const TURN = 70;
-const LIFT = 110;
+/** Easing time constants (ms): the turn glides after the pointer, the lift settles a touch slower. */
+const TURN = 120;
+const LIFT = 170;
 
 /**
  * Apple TV–style hover tilt. The card turns toward a mouse or pen, lifts a
- * little, and a small glare follows the pointer; descendants marked
- * `tilt-back` and `tilt-front` shift against each other for depth.
+ * little, and a small glare follows the pointer. Descendants marked
+ * `data-tilt-depth` are parallax layers: each shifts by its depth times
+ * `TILT_TRAVEL` at the edge, negative ones against the pointer (behind the
+ * card's plane), positive ones with it (in front). Nested layers add up.
  *
  * Compositor-only: each frame writes `transform`, `translate` and `opacity`
  * on a handful of elements (no inherited custom properties, no box-shadow or
@@ -37,8 +40,7 @@ export function Tilt({ max = 5, className, children, ...props }: TiltProps) {
     const enabled = () => fine.matches && !reduce.matches;
     const glare = el.querySelector<HTMLElement>(":scope > .tilt-glare-clip > .tilt-glare");
     const shadow = el.querySelector<HTMLElement>(":scope > .tilt-shadow");
-    let back: HTMLElement[] = [];
-    let front: HTMLElement[] = [];
+    let layers: { layer: HTMLElement; travel: number }[] = [];
 
     let rect: DOMRect | null = null;
     const target = { x: 0, y: 0, z: 0 };
@@ -49,10 +51,9 @@ export function Tilt({ max = 5, className, children, ...props }: TiltProps) {
     const paint = () => {
       const { x, y, z } = now;
       el.style.transform = `perspective(1600px) rotateX(${(-y * max).toFixed(3)}deg) rotateY(${(x * max).toFixed(3)}deg) scale(${(1 + z * 0.015).toFixed(4)})`;
-      const b = `${(-x * 10).toFixed(2)}px ${(-y * 10).toFixed(2)}px`;
-      const f = `${(x * 6).toFixed(2)}px ${(y * 6).toFixed(2)}px`;
-      for (const layer of back) layer.style.translate = b;
-      for (const layer of front) layer.style.translate = f;
+      for (const { layer, travel } of layers) {
+        layer.style.translate = `${(x * travel).toFixed(2)}px ${(y * travel).toFixed(2)}px`;
+      }
       if (glare && rect) {
         glare.style.translate = `${((x * rect.width) / 2).toFixed(1)}px ${((y * rect.height) / 2).toFixed(1)}px`;
         glare.style.opacity = z.toFixed(3);
@@ -71,7 +72,7 @@ export function Tilt({ max = 5, className, children, ...props }: TiltProps) {
       Object.assign(target, { x: 0, y: 0, z: 0 });
       Object.assign(now, { x: 0, y: 0, z: 0 });
       el.style.transform = "";
-      for (const layer of [...back, ...front, glare, shadow]) {
+      for (const layer of [...layers.map(({ layer }) => layer), glare, shadow]) {
         layer?.style.removeProperty("translate");
         layer?.style.removeProperty("opacity");
       }
@@ -101,8 +102,10 @@ export function Tilt({ max = 5, className, children, ...props }: TiltProps) {
     };
     const measure = () => {
       rect = el.getBoundingClientRect();
-      back = Array.from(el.querySelectorAll<HTMLElement>(".tilt-back"));
-      front = Array.from(el.querySelectorAll<HTMLElement>(".tilt-front"));
+      layers = Array.from(el.querySelectorAll<HTMLElement>("[data-tilt-depth]"), (layer) => ({
+        layer,
+        travel: (Number(layer.dataset.tiltDepth) || 0) * TILT_TRAVEL,
+      }));
     };
 
     const onEnter = (e: PointerEvent) => {

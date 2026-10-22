@@ -5,7 +5,15 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } f
 import { createPortal } from "react-dom";
 
 import { REDUCED_MOTION_QUERY } from "../environment";
-import { coachLeader, placeCoach, type CoachPlacement, type CoachRect } from "./coach-model";
+import {
+  coachLeader,
+  keptOf,
+  settleCoach,
+  type CoachObstacle,
+  type CoachSettled,
+  type CoachPlacement,
+  type CoachRect,
+} from "./coach-model";
 import { isSceneShortcut } from "./keyboard";
 import { cn } from "./utils";
 
@@ -92,6 +100,29 @@ function litBy(target: HTMLElement) {
 const within = (target: HTMLElement, node: Element) =>
   litBy(target).some((lit) => lit.contains(node));
 
+/**
+ * The surfaces up as a step begins, before its cues run: the tour plays them after the coach's
+ * own effects, so what is new since was brought up by the step.
+ */
+function useStepStart(root: HTMLElement | null, avoid: string, step: number) {
+  const before = useRef<ReadonlySet<Element>>(new Set());
+  useEffect(() => {
+    if (root) before.current = new Set(root.querySelectorAll(avoid));
+  }, [root, avoid, step]);
+  return before;
+}
+
+/** What the step is about: the target, what it has open, and the surfaces the step brought up. */
+function keptBy(
+  root: HTMLElement,
+  avoid: string,
+  before: ReadonlySet<Element>,
+  target: HTMLElement | null,
+) {
+  const brought = [...root.querySelectorAll(avoid)].filter((el) => !before.has(el));
+  return [...(target ? litBy(target) : []), ...brought];
+}
+
 /** How far the HUD around a step quiets down, and how quickly. */
 const QUIET = { opacity: 0.35, ms: 320 };
 
@@ -133,20 +164,14 @@ function useQuietHud(
   root: HTMLElement | null,
   avoid: string,
   target: HTMLElement | null,
-  step: number,
+  before: { current: ReadonlySet<Element> },
   layout: unknown,
 ) {
   const faded = useRef(new Map<Element, Animation>());
-  /* The surfaces up as the step begins, before its cues run (the tour plays them after the coach's effects). */
-  const before = useRef(new Set<Element>());
-  useEffect(() => {
-    if (root) before.current = new Set(root.querySelectorAll(avoid));
-  }, [root, avoid, step]);
   useEffect(() => {
     if (!root) return;
     const ms = window.matchMedia(REDUCED_MOTION_QUERY).matches ? 0 : QUIET.ms;
-    const brought = [...root.querySelectorAll(avoid)].filter((el) => !before.current.has(el));
-    const now = quietAround(root, avoid, [...(target ? litBy(target) : []), ...brought]);
+    const now = quietAround(root, avoid, keptBy(root, avoid, before.current, target));
     const fade = (el: Element) =>
       el.animate([{ opacity: 1 }, { opacity: QUIET.opacity }], {
         duration: ms,
@@ -163,7 +188,7 @@ function useQuietHud(
       faded.current.delete(el);
     }
     for (const el of now) if (!faded.current.has(el)) faded.current.set(el, fade(el));
-  }, [root, avoid, target, step, layout]);
+  }, [root, avoid, target, before, layout]);
   useEffect(() => {
     const all = faded.current;
     return () => {
@@ -174,24 +199,28 @@ function useQuietHud(
 }
 
 /** A box's place in the root, rounded, as a key that changes only when the layout does. */
-const keyOf = (rects: readonly CoachRect[]) =>
+const keyOf = (rects: readonly CoachObstacle[]) =>
   rects
     .map(
       (r) =>
-        `${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.width)},${Math.round(r.height)}`,
+        `${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.width)},${Math.round(r.height)},${r.kind ?? ""}`,
     )
     .join(" ");
 
 /** What the coach reads of the page each frame: the target, the surfaces to keep clear of, the stage. */
 type Layout = {
+  /** The step it was read for: until the new step's is read, the last step's stands. */
+  step: number;
   found: (Found & { step: number }) | null;
-  obstacles: readonly CoachRect[];
+  obstacles: readonly CoachObstacle[];
   stage: { width: number; height: number };
 };
 
 /**
- * Follows the step's target and the HUD's surfaces while the coach is open, a frame at a time
- * (panels slide in, docks wrap): only a change re-renders. Nothing runs once the coach closes.
+ * Follows the step's target and the surfaces to keep clear of while the coach is open, a frame
+ * at a time (panels slide in, docks wrap): only a change re-renders. Each surface is weighed by
+ * what covering it costs (`COVER`): what the step is about and the page's bars over the stage
+ * most, the HUD the step quiets little. Nothing runs once the coach closes.
  */
 function useLayout(
   root: HTMLElement | null,
@@ -199,8 +228,10 @@ function useLayout(
   ids: readonly string[],
   avoid: string,
   step: number,
+  before: { current: ReadonlySet<Element> },
 ) {
   const [layout, setLayout] = useState<Layout>({
+    step: -1,
     found: null,
     obstacles: [],
     stage: { width: 0, height: 0 },
@@ -214,7 +245,8 @@ function useLayout(
     const look = () => {
       const found = key ? findTarget(root, key.split(" ")) : null;
       const origin = root.getBoundingClientRect();
-      const obstacles: CoachRect[] = [];
+      const kept = keptBy(root, avoid, before.current, found?.element ?? null);
+      const obstacles: CoachObstacle[] = [];
       for (const element of document.querySelectorAll(avoid)) {
         if (card.current?.contains(element) || element.contains(root)) continue;
         const box = element.getBoundingClientRect();
@@ -224,6 +256,13 @@ function useLayout(
           top: box.top - origin.top,
           width: box.width,
           height: box.height,
+          /* What the step is about, and the page's bars over the stage (which would hide the
+             callout), are never covered; the HUD the step quiets may be. */
+          kind: !root.contains(element)
+            ? "over"
+            : kept.some((on) => on.contains(element))
+              ? "kept"
+              : "quiet",
         });
       }
       const stage = { width: origin.width, height: origin.height };
@@ -231,24 +270,26 @@ function useLayout(
       if (now !== last || (found?.element ?? null) !== lastTarget) {
         last = now;
         lastTarget = found?.element ?? null;
-        setLayout({ found: found && { ...found, step }, obstacles, stage });
+        setLayout({ step, found: found && { ...found, step }, obstacles, stage });
       }
       frame = requestAnimationFrame(look);
     };
     look();
     return () => cancelAnimationFrame(frame);
-  }, [root, card, key, avoid, step]);
-  return { ...layout, found: layout.found?.step === step ? layout.found : null };
+  }, [root, card, key, avoid, step, before]);
+  const read = layout.step === step;
+  return { ...layout, read, found: read ? layout.found : null };
 }
 
 /**
  * A guided tour's coach mark, a layer of its own over the scene: no veil, a gold ring on the
- * control the step is about, a thin gold leader from it to a small ink callout (never one of
- * the HUD's glass panels) that stands where it covers least of the HUD (`avoid`) and never its
- * target. The callout's top edge is the tour's horizon: gold fills along it, step by step, a
- * sun at its head. Drawn in the `scope` ancestor. Escape, the close button and a press outside
- * the callout, the target and what the target has open close it; the arrow keys step. Next
- * takes focus as it opens; each step is announced politely.
+ * control the step is about, a thin gold leader from it to a small gold-edged callout (never one
+ * of the HUD's glass panels: solid, the page's colour warmed with gold, in either theme) that
+ * stands where it covers least: never its target or what the step is about, the HUD the step
+ * quiets before the page's bars (`avoid`, `COVER`). The callout's top edge is the tour's horizon:
+ * gold fills along it, step by step, a sun at its head. Drawn in the `scope` ancestor. Escape,
+ * the close button and a press outside the callout, the target and what the target has open close
+ * it; the arrow keys step. Next takes focus as it opens; each step is announced politely.
  */
 export function CoachMark({
   label,
@@ -273,8 +314,9 @@ export function CoachMark({
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
   const bodyId = useId();
-  const { found, obstacles, stage } = useLayout(root, card, targets, avoid, step);
-  useQuietHud(root, avoid, found?.element ?? null, step, obstacles);
+  const before = useStepStart(root, avoid, step);
+  const { read, found, obstacles, stage } = useLayout(root, card, targets, avoid, step, before);
+  useQuietHud(root, avoid, found?.element ?? null, before, obstacles);
   const last = step >= total - 1;
 
   useLayoutEffect(() => {
@@ -393,14 +435,29 @@ export function CoachMark({
     width: rect.width + 2 * RING_PAD,
     height: rect.height + 2 * RING_PAD,
   };
-  const measured = cardSize.width > 0 && stage.width > 0;
-  const place =
-    held ??
-    (measured ? placeCoach({ target: ring, card: cardSize, stage, obstacles, gap: GAP }) : null);
+  /*
+   * The callout finds its place once the step's page is read (until then it stays where the
+   * last step left it), then keeps it while that still holds; a new step or target finds its own.
+   */
+  const [settled, setSettled] = useState<CoachSettled<HTMLElement> | null>(null);
+  const settling = settleCoach({
+    settled,
+    step,
+    read,
+    targetId: target,
+    target: ring,
+    card: cardSize,
+    stage,
+    obstacles,
+    gap: GAP,
+  });
+  if (settling.settle) setSettled(settling.settle);
+  const place = held ?? settling.place;
   useEffect(() => {
     shown.current = place;
   });
-  const leader = place && ring ? coachLeader({ ...place, ...cardSize }, ring) : null;
+  const leader =
+    place && ring ? coachLeader({ ...place, ...cardSize }, ring, keptOf(obstacles)) : null;
   /** How far along the horizon the tour has come. */
   const reached = `${((step + 1) / total) * 100}%`;
 
@@ -419,14 +476,11 @@ export function CoachMark({
           aria-hidden
           className="pointer-events-none absolute inset-0 z-[80] size-full"
         >
-          <line
+          <polyline
             className="coach-leader"
-            x1={leader.from.x}
-            y1={leader.from.y}
-            x2={leader.to.x}
-            y2={leader.to.y}
+            points={leader.map(({ x, y }) => `${x},${y}`).join(" ")}
           />
-          <circle className="coach-leader-end" cx={leader.from.x} cy={leader.from.y} r={2.5} />
+          <circle className="coach-leader-end" cx={leader[0]!.x} cy={leader[0]!.y} r={2.5} />
         </svg>
       ) : null}
       <section
@@ -445,7 +499,7 @@ export function CoachMark({
           <span className="coach-horizon-sun" style={{ left: reached }} />
         </span>
         <div className="flex items-center gap-2">
-          <p className="font-mono text-[10px] tracking-[0.14em] text-solar uppercase tabular-nums">
+          <p className="font-mono text-[10px] tracking-[0.14em] text-accent uppercase tabular-nums">
             {kicker}
           </p>
           <button
@@ -460,10 +514,10 @@ export function CoachMark({
         </div>
         <div className="-mt-2 md:-mt-1" aria-live="polite" aria-atomic>
           <div key={step} className="anim-fade">
-            <h2 className="font-display text-[15px] leading-tight tracking-tight text-space-fg">
+            <h2 className="font-display text-[15px] leading-tight tracking-tight text-fg">
               {title}
             </h2>
-            <p id={bodyId} className="mt-1 text-[13px] leading-snug text-space-muted">
+            <p id={bodyId} className="mt-1 text-[13px] leading-snug text-muted">
               {body}
             </p>
           </div>
@@ -480,10 +534,7 @@ export function CoachMark({
           >
             <ChevronLeft className="size-4" />
           </button>
-          <span
-            aria-hidden
-            className="ml-auto hidden font-mono text-[10px] text-space-muted md:inline"
-          >
+          <span aria-hidden className="ml-auto hidden font-mono text-[10px] text-muted md:inline">
             ← →
           </span>
           <button
