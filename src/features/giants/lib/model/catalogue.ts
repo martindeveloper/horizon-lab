@@ -8,15 +8,8 @@
  */
 import { factsOf, factSources, type Fact, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
-import { PLANETS } from "@/space/solar-system/model/catalogue";
-import {
-  BLACK_HOLES,
-  ENGINES,
-  NAMED_STARS,
-  SPECTRAL_TYPES,
-  type Engine,
-  type StellarFigures,
-} from "@/space/stellar";
+import { bodyRecord } from "@/space/body-catalogue";
+import { NAMED_STARS, type Engine, type StellarFigures } from "@/space/stellar";
 import { recordFrom } from "@horizon/toolkit/records";
 import {
   STANDARD_GRAVITY,
@@ -32,7 +25,7 @@ import {
 import { AIR_DENSITY, WATER_DENSITY } from "../parameters";
 import { lightLap, oblateDensity } from "./equations";
 import { radiusOf, teaspoonKg } from "./physics";
-import { RUNG_IDS, RUNGS, type RungId } from "./rungs";
+import { RUNG_IDS, rungById, type RungId } from "./rungs";
 
 type Unit = Value["unit"];
 type Show = NonNullable<Value["show"]>;
@@ -40,114 +33,18 @@ type Show = NonNullable<Value["show"]>;
 /** The figures a rung's card may print, measured or catalogued; derived ones are added below. */
 type Measured = StellarFigures;
 
-/** A planet's figures as a rung reads them: the shared planet catalogue's radii, mass and spin. */
-const planetFigures = (id: "earth" | "jupiter"): Measured => {
-  const { equatorialRadius, polarRadius, mass, rotation } = PLANETS[id];
-  return { radius: equatorialRadius, polar: polarRadius, mass, rotation };
-};
-
-/** Each rung's measured figures: the shared catalogue's for stars and holes, the IAU's figures for the planets. */
-const MEASURED: Record<RungId, Measured> = {
-  "neutron-star": NAMED_STARS["psr-j0030"],
-  "cygnus-x1": BLACK_HOLES["cygnus-x1"],
-  "sirius-b": NAMED_STARS["sirius-b"],
-  earth: planetFigures("earth"),
-  "brown-dwarf": NAMED_STARS["lhs-6343-c"],
-  jupiter: planetFigures("jupiter"),
-  "trappist-1": NAMED_STARS["trappist-1"],
-  proxima: NAMED_STARS.proxima,
-  sun: NAMED_STARS.sun,
-  sirius: NAMED_STARS.sirius,
-  vega: NAMED_STARS.vega,
-  achernar: NAMED_STARS.achernar,
-  "sgr-a": BLACK_HOLES["sgr-a"],
-  arcturus: NAMED_STARS.arcturus,
-  r136a1: NAMED_STARS.r136a1,
-  aldebaran: NAMED_STARS.aldebaran,
-  rigel: NAMED_STARS.rigel,
-  deneb: NAMED_STARS.deneb,
-  antares: NAMED_STARS.antares,
-  betelgeuse: NAMED_STARS.betelgeuse,
-  "uy-scuti": NAMED_STARS["uy-scuti"],
-  "vy-cma": NAMED_STARS["vy-cma"],
-  "stephenson-2-18": NAMED_STARS["stephenson-2-18"],
-  m87: BLACK_HOLES.m87,
-  "ton-618": BLACK_HOLES["ton-618"],
-};
-
-/** The shared catalogue's star behind each rung that has a spectral type of its own. */
-const CATALOGUE_STAR: Partial<Record<RungId, keyof typeof SPECTRAL_TYPES>> = {
-  "sirius-b": "sirius-b",
-  "brown-dwarf": "lhs-6343-c",
-  "trappist-1": "trappist-1",
-  proxima: "proxima",
-  sun: "sun",
-  sirius: "sirius",
-  vega: "vega",
-  achernar: "achernar",
-  arcturus: "arcturus",
-  r136a1: "r136a1",
-  aldebaran: "aldebaran",
-  rigel: "rigel",
-  deneb: "deneb",
-  antares: "antares",
-  betelgeuse: "betelgeuse",
-  "uy-scuti": "uy-scuti",
-  "vy-cma": "vy-cma",
-  "stephenson-2-18": "stephenson-2-18",
-};
-
-/**
- * A rung's spectral type, the shared catalogue's (not translated): MK class and luminosity
- * class for a star, DA… for a white dwarf, T… for a brown dwarf; none for a pulsar, a planet
- * or a horizon.
- */
-export function spectralOf(id: RungId): string | undefined {
-  const star = CATALOGUE_STAR[id];
-  return star ? SPECTRAL_TYPES[star] : undefined;
-}
-
-/**
- * What powers each rung: the shared catalogue's engines for stars, remnants and holes, and the
- * planets' here, beside their figures.
- */
-export const RUNG_ENGINES: Readonly<Record<RungId, Engine>> = {
-  "neutron-star": ENGINES["psr-j0030"],
-  "cygnus-x1": ENGINES["cygnus-x1"],
-  "sirius-b": ENGINES["sirius-b"],
-  earth: {
-    process: "radioactivity",
-    sources: ["kamland2011"],
-    status: "verified",
-    note: "no fusion: radioactive decay supplies about half its heat, the rest is left from its formation",
-  },
-  "brown-dwarf": ENGINES["lhs-6343-c"],
-  jupiter: {
-    process: "contraction",
-    sources: ["li2018"],
-    status: "derived",
-    note: "no fusion: it radiates more heat than it absorbs, left from its formation and released as it slowly contracts and cools",
-  },
-  "trappist-1": ENGINES["trappist-1"],
-  proxima: ENGINES.proxima,
-  sun: ENGINES.sun,
-  sirius: ENGINES.sirius,
-  vega: ENGINES.vega,
-  achernar: ENGINES.achernar,
-  "sgr-a": ENGINES["sgr-a"],
-  arcturus: ENGINES.arcturus,
-  r136a1: ENGINES.r136a1,
-  aldebaran: ENGINES.aldebaran,
-  rigel: ENGINES.rigel,
-  deneb: ENGINES.deneb,
-  antares: ENGINES.antares,
-  betelgeuse: ENGINES.betelgeuse,
-  "uy-scuti": ENGINES["uy-scuti"],
-  "vy-cma": ENGINES["vy-cma"],
-  "stephenson-2-18": ENGINES["stephenson-2-18"],
-  m87: ENGINES.m87,
-  "ton-618": ENGINES["ton-618"],
-};
+/** Each feature entry resolves its catalogue identity once for every consumer. */
+const BODIES = recordFrom(RUNG_IDS, (id) => bodyRecord(rungById(id).body));
+const MEASURED: Readonly<Record<RungId, Measured>> = recordFrom(
+  RUNG_IDS,
+  (id) => BODIES[id].figures,
+);
+export const spectralOf = (id: RungId) => BODIES[id].spectralType;
+export const RUNG_ENGINES: Readonly<Record<RungId, Engine>> = recordFrom(RUNG_IDS, (id) => {
+  const engine = BODIES[id].engine;
+  if (!engine) throw new Error(`No catalogued energy source for ${id}`);
+  return engine;
+});
 
 /* ------------------------------------------------------------------ derived */
 
@@ -222,7 +119,7 @@ export type RungFacts = Required<Pick<Measured, "radius">> &
 
 function figuresOf(id: RungId): RungFacts {
   const measured = MEASURED[id];
-  const kind = RUNGS.find((rung) => rung.id === id)!.kind;
+  const kind = rungById(id).kind;
   let radius = measured.radius;
   const { mass, teff } = measured;
   let luminosity = measured.luminosity;

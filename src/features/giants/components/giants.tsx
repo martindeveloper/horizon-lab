@@ -31,7 +31,7 @@ function leaveGuide() {
 function DriftBody() {
   const t = useTranslations("giants");
   const focus = useGiants((s) => s.focus);
-  return <>{t(rungNameKey(RUNG_IDS[focus] ?? RUNG_IDS[0]))}</>;
+  return <>{t(rungNameKey(RUNG_IDS[focus] ?? RUNG_IDS[0]!))}</>;
 }
 
 export function Giants() {

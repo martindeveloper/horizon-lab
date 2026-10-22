@@ -7,7 +7,7 @@ import { groupOfType, type HrGroup } from "@/space/hr-diagram";
 import { stefanBoltzmann } from "@horizon/toolkit/science";
 
 import { RUNG_FACTS, drawn, inUnit, radiusMetres, spectralOf } from "./catalogue";
-import { RUNGS, RUNG_IDS, rungIndex, type RungId } from "./rungs";
+import { rungById, RUNG_IDS, rungIndex, type RungId } from "./rungs";
 
 /**
  * What a body is measured against: the Sun, Earth, the next smaller body on the ladder, or any
@@ -30,7 +30,7 @@ export function referenceBody(reference: Reference, id: RungId, other: RungId): 
   return body === id ? null : body;
 }
 
-const kindOf = (id: RungId) => RUNGS.find((rung) => rung.id === id)!.kind;
+const kindOf = (id: RungId) => rungById(id).kind;
 
 const massKg = (id: RungId) => {
   const { mass } = RUNG_FACTS[id];

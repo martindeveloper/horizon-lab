@@ -196,6 +196,7 @@
     "upClose": "See it up close",
     "upCloseHint": "Its disk, lensing and jet, ray-traced in Black holes",
     "upCloseSunHint": "Its interior, every wavelength and its flares, in the Sun lab",
+    "upCloseOtherHint": "Explore this body in another lab",
     "sources": "Sources and uncertainty",
     "ranges": "Ranges retain the adopted literature intervals. Derived ranges enclose all combinations of input bounds; they are not joint confidence intervals and omit unknown systematic errors. A value without a range is not exact. Vega’s temperature range describes equator to pole; TON 618’s mass range spans literature estimates.",
     "comparison": "Circumference ÷ c compares size using the speed of light in vacuum. The marker uses the adopted drawing radius, or the geometric middle of a range without a central value. It is not a photon orbit and includes no gravitational time delay. Very short periods are shown still.",

@@ -1,25 +1,14 @@
 import type { Fact } from "@/lib/facts";
 import { SPECTRAL_CLASSES, spectralClass } from "@/space/hr-diagram";
-import { NAMED_STARS, SPECTRAL_TYPES } from "@/space/stellar";
+import {
+  NAMED_STARS,
+  SPECTRAL_TYPES,
+  type NamedStarId,
+  type StellarFigures,
+} from "@/space/stellar";
+import { recordBy } from "@horizon/toolkit/records";
 
 import { mainSequencePhotosphere, SEQUENCE_RANGE } from "./atmospheres";
-
-/**
- * Bright stars down the spectral sequence. Each is drawn with the ATLAS9 model nearest its
- * measured effective temperature and gravity, the Sun's composition, and its measured radial
- * velocity. M stars are left out: molecules (TiO above all), which the lab does not model,
- * dominate their spectra.
- */
-export const STAR_IDS = [
-  "alnitak",
-  "rigel",
-  "vega",
-  "procyon",
-  "sun",
-  "arcturus",
-  "aldebaran",
-] as const;
-export type StarId = (typeof STAR_IDS)[number];
 
 /**
  * A star's effective temperature, K: the shared catalogue's figure (`NAMED_STARS`, sourced and
@@ -59,64 +48,55 @@ function catalogued(fact: Fact): Temperature {
   return { kelvin: fact.value, catalogue: fact };
 }
 
-export const STARS: Record<StarId, Star> = {
-  alnitak: {
-    id: "alnitak",
-    type: typeOf("alnitak"),
-    teff: catalogued(NAMED_STARS.alnitak.teff),
-    velocity: NAMED_STARS.alnitak.radialVelocity.value,
-    microturbulence: 2,
-  },
-  rigel: {
-    id: "rigel",
-    type: typeOf("rigel"),
-    teff: catalogued(NAMED_STARS.rigel.teff),
-    velocity: NAMED_STARS.rigel.radialVelocity.value,
-    microturbulence: 2,
-  },
-  vega: {
+/** The selected bodies in spectral order; only departures from catalogue defaults are written. */
+type Definition = {
+  id: NamedStarId;
+  teff?: Temperature;
+  velocity?: number;
+  microturbulence?: number;
+};
+/**
+ * Bright stars down the spectral sequence, using the nearest ATLAS9 atmosphere and measured
+ * radial velocity. M stars are left out: molecules, which this lab does not model, dominate.
+ */
+const ENTRIES = [
+  { id: "alnitak" },
+  { id: "rigel" },
+  {
     id: "vega",
-    type: typeOf("vega"),
-    /* Vega is a rapid rotator seen pole-on: the catalogue's span runs from its equator to its
-       pole. A spectrum integrates the whole disc, which one plane-parallel model fits best at
-       this temperature. */
+    /* Vega is a rapid rotator seen pole-on. Its integrated spectrum uses the catalogue's
+       disc temperature, while the reported measurement keeps the equator-to-pole span. */
     teff: {
       kelvin: NAMED_STARS.vega.discTeff.value,
       catalogue: NAMED_STARS.vega.teff,
       source: "the shared catalogue's disc temperature (Castelli & Kurucz 1994)",
     },
-    velocity: NAMED_STARS.vega.radialVelocity.value,
-    microturbulence: 2,
   },
-  procyon: {
-    id: "procyon",
-    type: typeOf("procyon"),
-    teff: catalogued(NAMED_STARS.procyon.teff),
-    velocity: NAMED_STARS.procyon.radialVelocity.value,
-    microturbulence: 2,
-  },
-  sun: {
-    id: "sun",
-    type: typeOf("sun"),
-    teff: catalogued(NAMED_STARS.sun.teff),
-    velocity: 0,
-    microturbulence: 1,
-  },
-  arcturus: {
-    id: "arcturus",
-    type: typeOf("arcturus"),
-    teff: catalogued(NAMED_STARS.arcturus.teff),
-    velocity: NAMED_STARS.arcturus.radialVelocity.value,
-    microturbulence: 2,
-  },
-  aldebaran: {
-    id: "aldebaran",
-    type: typeOf("aldebaran"),
-    teff: catalogued(NAMED_STARS.aldebaran.teff),
-    velocity: NAMED_STARS.aldebaran.radialVelocity.value,
-    microturbulence: 2,
-  },
-};
+  { id: "procyon" },
+  /* The Sun's own frame and measured microturbulence. */
+  { id: "sun", velocity: 0, microturbulence: 1 },
+  { id: "arcturus" },
+  { id: "aldebaran" },
+] as const satisfies readonly Definition[];
+export type StarId = (typeof ENTRIES)[number]["id"];
+export const STAR_IDS = ENTRIES.map(({ id }) => id);
+
+function starOf({ id, teff, velocity, microturbulence }: Definition & { id: StarId }): Star {
+  const measured: StellarFigures = NAMED_STARS[id];
+  const temperature = teff ?? (measured.teff ? catalogued(measured.teff) : undefined);
+  const radialVelocity = velocity ?? measured.radialVelocity?.value;
+  if (!temperature || radialVelocity === undefined)
+    throw new Error(`Missing spectral measurements for ${id}`);
+  return {
+    id,
+    type: typeOf(id),
+    teff: temperature,
+    velocity: radialVelocity,
+    microturbulence: microturbulence ?? 2,
+  };
+}
+
+export const STARS = recordBy(ENTRIES, ({ id }) => id, starOf);
 
 /** Main-sequence effective temperatures the line-strength curves are drawn at, K. */
 export const SEQUENCE_TEMPERATURES = Array.from({ length: 30 }, (_, i) =>

@@ -23,7 +23,7 @@ import {
 import { groupOf } from "../lib/model/compare";
 import { rungNameKey } from "../lib/model/names";
 import type { RulerUnit } from "../lib/model/ruler";
-import { RUNGS, type Rung, type RungId } from "../lib/model/rungs";
+import { rungById, type Rung, type RungId } from "../lib/model/rungs";
 import type { TourStep } from "../lib/model/tour";
 import { RUNG_CARDS } from "./card-specs";
 
@@ -94,7 +94,7 @@ export function rungCard(
   id: RungId,
   has: (key: string) => boolean,
 ): Card {
-  const rung = RUNGS.find((entry) => entry.id === id)!;
+  const rung = rungById(id);
   const built = buildCard(t, d, RUNG_CARDS[id]);
   const engine = RUNG_ENGINES[id];
   const process = t(`engines.${engine.process}`);

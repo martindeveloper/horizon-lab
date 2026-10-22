@@ -53,7 +53,7 @@ import {
 } from "../src/features/giants/lib/model/pair.ts";
 import { granulesAcross } from "../src/features/giants/lib/model/physics.ts";
 import { METRES, RULERS, rulerFor } from "../src/features/giants/lib/model/ruler.ts";
-import { RUNG_IDS, RUNGS, rungIndex } from "../src/features/giants/lib/model/rungs.ts";
+import { RUNG_IDS, RUNGS, rungIndex, rungForBody } from "../src/features/giants/lib/model/rungs.ts";
 import { TOUR } from "../src/features/giants/lib/model/tour.ts";
 import {
   NO_WEATHER,
@@ -346,6 +346,9 @@ test("every rung's card prints in both languages, a figure in every row", () => 
       locale,
       messages: { giants: featureMessages("giants", locale) },
       namespace: "giants",
+      onError(error) {
+        throw error;
+      },
     });
     for (const id of RUNG_IDS) {
       const card = rungCard(t, { unit: "auto", locale }, id, (key) => t.has(key));
@@ -799,4 +802,11 @@ test("every rung and every Stellar Spectra star is named by the shared copy, in 
       if (RUNG_IDS.includes(id)) assert.equal(giants(rungNameKey(id)), name, `${locale}:${id}`);
     }
   }
+});
+
+test("a catalogue body returns to its rung even when the URL uses a teaching name", () => {
+  assert.equal(rungForBody({ catalogue: "stars", id: "lhs-6343-c" }).id, "brown-dwarf");
+  assert.equal(rungForBody({ catalogue: "stars", id: "psr-j0030" }).id, "neutron-star");
+  assert.equal(rungForBody({ catalogue: "stars", id: "sun" }).id, "sun");
+  assert.equal(rungForBody({ catalogue: "stars", id: "alpha-cen-a" }), undefined);
 });

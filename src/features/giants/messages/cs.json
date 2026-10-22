@@ -199,6 +199,7 @@
     "upClose": "Zblízka",
     "upCloseHint": "Disk, ohyb světla a výtrysk trasované v Černých dírách",
     "upCloseSunHint": "Jeho nitro, každá vlnová délka a erupce v laboratoři Slunce",
+    "upCloseOtherHint": "Prozkoumejte toto těleso v další laboratoři",
     "sources": "Zdroje a nejistoty",
     "ranges": "Rozmezí zachovávají intervaly převzaté z literatury. Odvozená rozmezí zahrnují všechny kombinace vstupních mezí; nejsou společnými intervaly spolehlivosti a nezahrnují neznámé systematické chyby. Údaj bez rozmezí není přesný. Teplotní rozmezí Vegy popisuje rovník až pól; rozmezí hmotnosti TON 618 zahrnuje odhady z různých prací.",
     "comparison": "Obvod ÷ c porovnává velikost pomocí rychlosti světla ve vakuu. Značka používá poloměr zvolený pro kresbu, případně geometrický střed rozmezí bez centrální hodnoty. Nejde o oběžnou dráhu fotonu a výpočet nezahrnuje gravitační zpoždění. Velmi krátké periody se zobrazují bez pohybu.",

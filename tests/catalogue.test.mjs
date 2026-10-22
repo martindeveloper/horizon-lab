@@ -98,3 +98,38 @@ test("the HR diagram places every star it can, each light true to its radius and
     [...STAR_IDS],
   );
 });
+
+test("declared body references resolve across labs and reject missing catalogue records", async () => {
+  const { registered } = await import("../src/lib/simulations.ts");
+  const { bodyRecord } = await import("../src/space/body-catalogue.ts");
+  for (const { routes } of registered)
+    for (const entry of routes.entries) {
+      if (!entry.body) continue;
+      const record = bodyRecord(entry.body);
+      assert.ok(
+        record.figures.mass || record.figures.radius || record.figures.luminosity,
+        `${routes.base}/${entry.id}`,
+      );
+      assert.ok(record.engine, `${entry.id} has a catalogued energy source`);
+    }
+  for (const catalogue of ["stars", "holes", "planets"])
+    for (const id of ["missing", "constructor", "__proto__"])
+      assert.throws(() => bodyRecord({ catalogue, id }), /Unknown body/);
+});
+
+test("spectral stars use measured temperatures and velocities with explicit disc and solar frames", async () => {
+  const { STARS } = await import("../src/features/spectroscopy/lib/model/stars.ts");
+  for (const [id, star] of Object.entries(STARS)) {
+    const measured = NAMED_STARS[id];
+    assert.equal(star.teff.catalogue, measured.teff, `${id} retains its reported measurement`);
+    assert.equal(star.teff.kelvin, (measured.discTeff ?? measured.teff).value, id);
+    if (measured.radialVelocity) assert.equal(star.velocity, measured.radialVelocity.value, id);
+  }
+  assert.equal(STARS.sun.velocity, 0, "the Sun is observed in its own frame");
+  assert.equal(
+    STARS.sun.microturbulence,
+    1,
+    "the solar atmosphere retains its measured broadening",
+  );
+  assert.ok(STARS.vega.teff.catalogue.range, "Vega still reports its equator-to-pole span");
+});

@@ -197,8 +197,11 @@ test("a view opens with its own light and clock; a place sets what shows it; the
   assert.equal(api().light, "halpha");
   assert.equal(api().clock, "minute");
   assert.equal(api().cut, 0);
+  api().setView("eruption");
+  assert.equal(api().eruptionPlaying, true, "entering the eruption starts its clock");
   api().setView("inside");
   assert.equal(api().cut, 1, "the cut opens inside");
+  assert.equal(api().eruptionPlaying, false, "leaving the eruption stops it");
   api().setLight("fe171");
   const flights = api().flight;
   api().goTo("flare");

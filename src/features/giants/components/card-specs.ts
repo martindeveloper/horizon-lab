@@ -1,6 +1,4 @@
-import { FEATURES } from "@/config";
-import { pathForHole } from "@/features/black-hole/routing";
-import { SUN_PATH } from "@/features/sun/manifest";
+import { bodyDestinations } from "@/lib/body-destinations";
 /**
  * What each rung's card shows, as data: rows (a fact label, the message that words it and the
  * catalogue figures that fill its placeholders). Every rung shares one layout; which rows it
@@ -19,25 +17,35 @@ import {
 import { recordFrom } from "@horizon/toolkit/records";
 
 import { RUNG_ENGINES, RUNG_FACTS, inUnit } from "../lib/model/catalogue";
-import { RUNGS, RUNG_IDS, type RungId } from "../lib/model/rungs";
+import { RUNG_IDS, rungById, type RungId } from "../lib/model/rungs";
 
 /** A card's way to the lab that shows its body up close: the lab's address, and its hint's words. */
-export type UpClose = { href: string; hint: "upCloseHint" | "upCloseSunHint" };
+export type UpClose = { href: string; hint: "upCloseHint" | "upCloseSunHint" | "upCloseOtherHint" };
 
-const hole = (href: string): UpClose => ({ href, hint: "upCloseHint" });
-
-/**
- * The bodies another lab shows up close, by its public address: a black hole's card links to
- * the Black holes lab (its disk, lensing and jet ray-traced), the Sun's to the Sun lab while
- * that lab's feature switch is on.
- */
-export const UP_CLOSE: Partial<Record<RungId, UpClose>> = {
-  "cygnus-x1": hole(pathForHole("stellar")),
-  "sgr-a": hole(pathForHole("sgr-a")),
-  m87: hole(pathForHole("m87")),
-  "ton-618": hole(pathForHole("ton-618")),
-  ...(FEATURES.sun ? { sun: { href: SUN_PATH, hint: "upCloseSunHint" as const } } : {}),
+/** Destination-specific wording stays here; a newly exposed lab gets a general hint. */
+const DESTINATION_HINTS: Readonly<Record<string, UpClose["hint"]>> = {
+  "black-hole": "upCloseHint",
+  sun: "upCloseSunHint",
 };
+
+/** The destination lab declares its body; this feature owns the wording of its link. */
+export const UP_CLOSE: Partial<Record<RungId, UpClose>> = Object.fromEntries(
+  RUNG_IDS.flatMap((id) => {
+    const body = rungById(id).body;
+    const destination = bodyDestinations(body)[0];
+    return destination
+      ? [
+          [
+            id,
+            {
+              href: destination.href,
+              hint: DESTINATION_HINTS[destination.simulationId] ?? "upCloseOtherHint",
+            } satisfies UpClose,
+          ],
+        ]
+      : [];
+  }),
+);
 
 /** Light's lap in the unit that reads best: seconds up to two minutes, then minutes, hours, days. */
 function lapRow(lap: Fact): Row {
@@ -67,7 +75,7 @@ const YARDSTICKS: ReadonlySet<RungId> = new Set(["sun", "earth"]);
 
 function specOf(id: RungId): CardSpec {
   const facts = RUNG_FACTS[id];
-  const kind = RUNGS.find((rung) => rung.id === id)!.kind;
+  const kind = rungById(id).kind;
   const { radius, mass, teff, luminosity, distance, lap, density, thinness, teaspoon, bulge } =
     facts;
   const { gravity, gravityEarths, gravityWeaker, rotation, rotationLimit } = facts;
