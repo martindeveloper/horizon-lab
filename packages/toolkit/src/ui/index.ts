@@ -6,6 +6,7 @@ export { Surface, type SurfaceProps } from "./surface";
 export { Toolbar, type ToolbarProps } from "./toolbar";
 export { Tooltip } from "./tooltip";
 export { ControlRow, type ControlRowProps } from "./control-row";
+export { LabelledRow, type LabelledRowProps } from "./labelled-row";
 export {
   SegmentedControl,
   type SegmentedControlProps,
@@ -16,7 +17,7 @@ export { FrameStats, type FrameSource, type FrameStatsProps } from "./frame-stat
 export { ScaleBar, type ScaleBarProps } from "./scale-bar";
 export { Kicker, kickerClass } from "./kicker";
 export { PanelHeader, type PanelHeaderProps } from "./panel-header";
-export { Chip, type ChipProps } from "./chip";
+export { Chip, outlineClass, type ChipProps } from "./chip";
 export { ListItem, type ListItemProps } from "./list-item";
 export { SwitchChip, SwitchMark, SwitchRow } from "./switch";
 export { Picker, type PickerProps } from "./picker";
@@ -76,6 +77,7 @@ export {
 
 export { Equation, Sub } from "./equation";
 export { LoadingScreen } from "./loading-screen";
+export { LoadingBadge } from "./loading-badge";
 export { TechnicalDetails, type TechnicalDocument } from "./technical-details";
 
 export { Dialog, type DialogHandle } from "./dialog";

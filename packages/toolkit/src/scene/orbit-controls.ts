@@ -17,7 +17,10 @@ export function createOrbitControls(
   options: {
     /** Asks the frame loop for a frame. */
     invalidate: () => void;
-    /** Bounds the input itself keeps to; the rig clamps to its own limits as it moves. */
+    /**
+     * Bounds the input itself keeps to; the rig clamps to its own limits as it moves. Where the
+     * rig's limits reach past them (a close-up's), the input follows the rig's.
+     */
     distance: { min: number; max: number };
     /** Scales a drag's turn for the pose it starts from (see `createOrbitInput`). */
     dragScale?: (pose: OrbitPose) => number;
@@ -29,6 +32,14 @@ export function createOrbitControls(
 ) {
   let interacting = false;
   let releaseTimer = 0;
+  const bounds = {
+    get min() {
+      return Math.min(options.distance.min, rig.limits().min);
+    },
+    get max() {
+      return Math.max(options.distance.max, rig.limits().max);
+    },
+  };
   const input = scope.own(
     createOrbitInput(canvas, {
       getPose: () => rig.inputPose(),
@@ -48,7 +59,7 @@ export function createOrbitControls(
         }, RELEASE_MS);
         options.invalidate();
       },
-      distance: options.distance,
+      distance: bounds,
       inclination: ORBIT_INCLINATION,
       dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
       ...(options.dragScale ? { dragScale: options.dragScale } : {}),

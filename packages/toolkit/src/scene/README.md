@@ -85,7 +85,8 @@ about an aim and moves the distance on the log zoom. `zoomTo` is for input,
 `snap` sets the pose outright, `turnBy` takes a button step (it eases in over about a
 third of a second and steps add up; it snaps with reduced motion, and during a turning
 flight it carries on to the landing), `cancel` lets a flight glide to rest. Each frame call
-`step(dt)`, `home()` and `applyPose()`. Options: the starting `pose`, `limits`,
+`step(dt)`, `home()` and `applyPose()`; `offset` is then the camera's exact offset from
+`aim`, for placing what stands near a camera whose aim lies far from the origin. Options: the starting `pose`, `limits`,
 `reduceMotion` (zooms and flights land at once), `nearFloor`, `far`; hooks `follow`
 (another owner holds the distance), `onStep`, `busy`, `home` (where the aim sits) and
 `orient` (the orbit's frame for a distance).
@@ -97,7 +98,8 @@ says the view wants its own; with reduced motion it lands framed as the view is.
 distance is nearest and whether it is still at one.
 
 `createOrbitControls(scope, canvas, rig, { invalidate, distance, dragScale, intercept,
-onInput })` drives the rig from drag, wheel and pinch. `dragScale` scales a drag's turn
+onInput })` drives the rig from drag, wheel and pinch. Input keeps to `distance`, widened to
+the rig's limits wherever they reach further (a close-up's). `dragScale` scales a drag's turn
 for the pose it starts from; `intercept` sees each input first, with its source, and may take it;
 `interacting` stays true for a moment after the last one.
 

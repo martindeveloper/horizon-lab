@@ -4,7 +4,7 @@
  * a flight may turn the angles along the way. A simulation adds where the aim sits (`home`),
  * how the orbit's frame is oriented (`orient`), its limits and its own views on top.
  */
-import { Quaternion, Vector3, type PerspectiveCamera } from "three";
+import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from "three";
 
 import { stepOrbit, type OrbitPose, type OrbitTurn } from "../camera";
 import { smootherstep, wrapSigned } from "../math";
@@ -49,6 +49,8 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
   const { limits, reduceMotion, nearFloor = 0, far = (d: number) => d * 40 } = options;
   const zoom = createLogZoom(options.pose.distance, { limits });
   const offset = new Vector3();
+  const facing = new Matrix4();
+  const origin = new Vector3();
   /** A flight's turn: where the angles started and how far they go. */
   let turn: { from: OrbitAngles; by: OrbitAngles } | null = null;
   /** What is left of button steps still easing in. */
@@ -57,6 +59,11 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
   const rig = {
     pose: { ...options.pose },
     aim: new Vector3(),
+    /**
+     * The camera's offset from the aim this frame (`applyPose`), exact: what stands near the
+     * camera is placed from the aim and this, since `camera.position` rounds at the aim's scale.
+     */
+    offset: offset as Readonly<Vector3>,
     /** The orbit's frame this frame (see `orient`). */
     frame: new Quaternion(),
     get flying() {
@@ -188,7 +195,8 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
         .applyQuaternion(frame);
       camera.position.copy(aim).add(offset);
       camera.up.set(0, 1, 0).applyQuaternion(frame);
-      camera.lookAt(aim);
+      /* Turned by the offset itself: `position` rounds at the aim's scale, the offset does not. */
+      camera.quaternion.setFromRotationMatrix(facing.lookAt(offset, origin, camera.up));
       camera.near = Math.max(nearFloor, distance / 5000);
       camera.far = far(distance, aim);
       camera.updateProjectionMatrix();

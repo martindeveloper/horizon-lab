@@ -14,11 +14,13 @@ import {
   ControlRow,
   Dock,
   IconButton,
+  LabelledRow,
   Slider,
   SwitchChip,
   Tooltip,
   cn,
-  kickerClass,
+  outlineClass,
+  type LabelledRowProps,
 } from "@horizon/toolkit/ui";
 
 import { ELEMENT_IDS, ELEMENTS, type ElementId } from "../lib/model/atoms";
@@ -32,29 +34,15 @@ import { PanelTitle, Tray } from "./tray";
 import { VelocityLens } from "./velocity-lens";
 
 /** A labelled row of chips that scrolls sideways. */
-function ChipRow({
-  label,
-  shown = label,
-  children,
-}: {
-  label: string;
-  /** The visible label, when it differs from the spoken one; null shows none. */
-  shown?: ReactNode;
-  children: ReactNode;
-}) {
+function ChipRow({ children, ...props }: LabelledRowProps) {
   return (
-    <div role="group" aria-label={label} className="flex min-w-0 items-center gap-2">
-      {shown === null ? null : (
-        <span className={cn(kickerClass, "flex shrink-0 items-center gap-1.5 not-md:hidden")}>
-          {shown}
-        </span>
-      )}
+    <LabelledRow {...props}>
       {/* A scrolling row clips both ways: the room above and below keeps a chip's corner badge
           and focus ring whole. */}
       <div className="no-scrollbar -mx-1 -my-1.5 flex min-w-0 items-center gap-1 overflow-x-auto px-1 py-1.5">
         {children}
       </div>
-    </div>
+    </LabelledRow>
   );
 }
 
@@ -121,9 +109,7 @@ function ElementTiles({
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */
               !outcome &&
-                (on
-                  ? "bg-accent/10 text-fg ring-1 ring-accent/60 ring-inset"
-                  : "text-muted ring-1 ring-border-strong ring-inset hover:bg-fg/5 hover:text-fg hover:ring-fg/40"),
+                (on ? "bg-accent/10 text-fg ring-1 ring-accent/60 ring-inset" : outlineClass),
               outcome && "spectroscopy-verdict",
               outcome === "found" && "bg-accent/15 text-fg ring-1 ring-accent/70 ring-inset",
               outcome === "missed" &&

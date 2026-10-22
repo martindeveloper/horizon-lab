@@ -201,6 +201,10 @@ test("orbit rigs take hooks for the aim, the frame and other owners, and honour 
   frame(1 / 60);
   assert.ok(rig.pose.distance > 10, "released, the zoom moves on");
   assert.equal(rig.aim.x, 5);
+  assert.ok(
+    camera.position.clone().sub(rig.aim).distanceTo(rig.offset) < 1e-9,
+    "the offset places the camera from the aim",
+  );
   assert.ok(Math.abs(camera.up.x + 1) < 1e-9, "the frame turns the camera's up");
   assert.equal(camera.near, 0.5);
   rig.turnBy({ azimuth: 1, inclination: 0 });
