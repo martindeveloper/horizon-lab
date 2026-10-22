@@ -658,6 +658,7 @@
     "combined": "Planck + ACT",
     "open": "Otevřít zdroje dat reliktního záření, barevnou stupnici a meze rekonstrukce",
     "reconstructed": "Reliktní záření · rekonstrukce z pozorování",
+    "maskLegend": "Tmavé oblasti jsou maskované, nikoli chladnější",
     "measured": "Planck a ACT měřily jas mikrovlnné oblohy. Barvy ukazují teplotní odchylky reliktního záření, nikoli galaxie nebo viditelné světlo.",
     "processing": "Odstranění záření popředí rekonstruuje tento signál z několika frekvencí. Detail ACT používá vydanou kombinaci ACT–Planck s potlačeným tepelným SZ signálem; zbytkové popředí a šum přetrvávají.",
     "colours": "Teplotní odchylka: modrá −{limit} µK · šedá nula · jantarová +{limit} µK. Za krajními hodnotami se barva nemění. Tmavé oblasti jsou maskované, nikoli chladnější.",

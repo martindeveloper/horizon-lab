@@ -74,7 +74,7 @@ export function DeepFieldOverlay() {
                 {/* Only views that draw a mark the eye can't name (a ring, a path, a shell) caption
                     it; the keys follow for what is drawn at the depth. */}
                 {t.has(`viewHints.${view}`) ? (
-                  <p className="line-clamp-2 max-w-md min-w-0 text-fg-secondary not-md:hidden">
+                  <p className="line-clamp-2 max-w-md min-w-0 text-space-muted not-md:hidden">
                     {t(`viewHints.${view}`, proseArgs(PROSE_FIGURES, locale))}
                   </p>
                 ) : null}

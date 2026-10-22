@@ -123,6 +123,9 @@ export function CmbLegend() {
       <span>
         {t("cmb.reconstructed")}
         <span className="block text-xs">{t(`cmb.status.${cmbStatusKey(status, detail)}`)}</span>
+        {status.planck === "ready" || (detail && status.act === "ready") ? (
+          <span className="block text-xs">{t("cmb.maskLegend")}</span>
+        ) : null}
       </span>
     </CaptionKey>
   );

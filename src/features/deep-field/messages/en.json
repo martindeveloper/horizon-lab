@@ -658,6 +658,7 @@
     "combined": "Planck + ACT",
     "open": "Open CMB data sources, colour scale and reconstruction limits",
     "reconstructed": "CMB · reconstructed from observations",
+    "maskLegend": "Dark patches are masked, not colder",
     "measured": "Planck and ACT measured microwave sky brightness. The colours show temperature differences in the CMB signal, not galaxies or visible light.",
     "processing": "Foreground removal reconstructs that signal from several frequencies. ACT detail uses the released ACT–Planck combination with thermal SZ deprojected; residual foregrounds and noise remain.",
     "colours": "Temperature difference: blue −{limit} µK · grey zero · amber +{limit} µK. Values beyond the ends saturate. Dark patches are masked, not colder.",

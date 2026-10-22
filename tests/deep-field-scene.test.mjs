@@ -9,7 +9,7 @@ import { VIEWS, viewById, worldDistance } from "../src/features/deep-field/lib/m
 import { createCameraRig } from "../src/features/deep-field/lib/scene/camera-rig.ts";
 import { labelInsets } from "../src/features/deep-field/lib/scene/kit.ts";
 import { ATLAS_LANDMARKS } from "../src/space/cosmos/model/atlas.ts";
-import { anchorById, anchorToday } from "../src/space/cosmos/model/cosmos.ts";
+import { CMB_LY, anchorById, anchorToday } from "../src/space/cosmos/model/cosmos.ts";
 import { modernGalaxy } from "../src/space/galaxy/graphics/galaxy.ts";
 import {
   COSMIC_HANDOFF,
@@ -96,6 +96,48 @@ function rigWith({ reduced = false } = {}) {
   };
   return { rig, camera, frame };
 }
+
+test("the CMB shell fits portrait and desktop views without changing the depth or orbit", () => {
+  const { rig, camera, frame } = rigWith();
+  rig.snapToView("observable-universe");
+  frame(0);
+  const position = camera.position.clone();
+  const distance = rig.pose.distance;
+  const originalFov = camera.fov;
+  const R = CMB_LY * LY;
+  for (const [width, height] of [
+    [1440, 920],
+    [390, 780],
+    [554, 1024],
+    [920, 390],
+  ]) {
+    camera.aspect = width / height;
+    frame(0);
+    assert.equal(rig.pose.distance, distance, "resizing does not change scientific depth");
+    assert.equal(camera.position.distanceTo(position), 0, "resizing does not move the observer");
+    const d = camera.position.length();
+    const centre = camera.position.clone().multiplyScalar((R * R) / (d * d));
+    const radius = R * Math.sqrt(1 - (R / d) ** 2);
+    for (const axis of [new Vector3(1, 0, 0), new Vector3(0, 1, 0)]) {
+      axis.applyQuaternion(camera.quaternion);
+      for (const sign of [-1, 1]) {
+        const edge = centre
+          .clone()
+          .addScaledVector(axis, sign * radius)
+          .project(camera);
+        assert(
+          Math.abs(edge.x) < 0.85 && Math.abs(edge.y) < 0.85,
+          `CMB clipped at ${width}×${height}`,
+        );
+      }
+    }
+    if (width >= height) assert.equal(camera.fov, originalFov, "desktop framing is preserved");
+  }
+  camera.aspect = 0.5;
+  rig.snapToView("cosmic-web");
+  frame(0);
+  assert.equal(camera.fov, originalFov, "nearer views retain their existing framing");
+});
 
 test("a flight from Laniakea to the Galaxy is one smooth zoom, its aim gliding home", () => {
   const { rig, camera, frame } = rigWith();

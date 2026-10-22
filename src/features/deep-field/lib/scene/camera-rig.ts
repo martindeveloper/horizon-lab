@@ -53,6 +53,7 @@ export function createCameraRig(
   },
 ) {
   const { state, reduceMotion } = options;
+  const baseFov = camera.fov;
   /** A close-up holding the camera (`holdFocus`), or null. */
   let focus: CameraFocus | null = null;
   const centre = galaxyToWorld(0, 0, 0, new Vector3());
@@ -164,7 +165,22 @@ export function createCameraRig(
     (id) => viewById(id).realm !== realmOf(rig.pose.distance),
   );
 
+  const applyPose = rig.applyPose.bind(rig);
   return Object.assign(rig, moves, {
+    applyPose() {
+      // At the universe scale, frame the sky in the shorter viewport dimension.
+      // Widen the vertical field smoothly as the lookback rings appear, keeping
+      // the same distance, depth controls and desktop framing. Changing the actual
+      // FOV also keeps projected labels, sprite sizes and the scale bar consistent.
+      const portrait = camera.aspect > 0 && camera.aspect < 1;
+      const blend = portrait ? smootherstep(toLogFraction(rig.pose.distance / LY, 5e9, 2e10)) : 0;
+      camera.fov =
+        blend > 0
+          ? (360 / Math.PI) *
+            Math.atan(Math.tan((baseFov * Math.PI) / 360) * (1 + (1 / camera.aspect - 1) * blend))
+          : baseFov;
+      applyPose();
+    },
     /** A close-up takes the aim and the zoom's bounds, or (null) gives them back. */
     holdFocus(next: CameraFocus | null) {
       focus = next;
