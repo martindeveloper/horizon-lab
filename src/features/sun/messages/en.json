@@ -54,7 +54,7 @@
   },
   "lightNotes": {
     "white": "Photosphere · SDO/HMI, May 2024",
-    "halpha": "Chromosphere",
+    "halpha": "Chromosphere · hydrogen 3→2",
     "he304": "Upper chromosphere",
     "fe171": "Quiet corona",
     "fe193": "Corona",
@@ -153,12 +153,20 @@
     "windSlow": "Slow wind",
     "windFast": "Fast wind",
     "cmeSpeed": "Front's speed, as drawn",
-    "cyclePeriod": "Cycle"
+    "cyclePeriod": "Cycle",
+    "perihelion": "Closest approach, R☉",
+    "probeSpeed": "Speed then, km/s"
   },
   "panel": {
     "qualityNote": "Standard is the Sun as drawn for a desktop; Economy keeps a phone cool."
   },
   "places": {
+    "star": {
+      "title": "The Sun",
+      "where": "The star",
+      "body": "A G2 V star of {starMassKg} kg shining {starLuminosityW} W. Its light is white by definition: sunlight is what the eye calls white, every colour of the rainbow in it. The sky is blue and the low Sun red because the air scatters blue light aside, not because the star is yellow.",
+      "caution": "Drawn as the eye adapted to sunlight sees it: the disc white at its centre, warmer only toward the limb, where cooler gas shows."
+    },
     "core": {
       "title": "Core",
       "where": "Centre",
@@ -210,7 +218,7 @@
     "chromosphere": {
       "title": "Chromosphere",
       "where": "Lower atmosphere",
-      "body": "A thin, transparent layer above the surface, hotter upward. In Hα it shows its network, plage and filaments; at the limb, a pink rim.",
+      "body": "A thin, transparent layer above the surface, hotter upward, warmed as magnetoacoustic waves break in it. In Hα, the light of hydrogen's electron falling from its third level to its second, it shows its network, plage and filaments; at the limb, a pink rim.",
       "caution": "Drawn as the Hα line shows it, not in white light."
     },
     "spicule": {
@@ -252,7 +260,7 @@
     "ejection": {
       "title": "Coronal mass ejection",
       "where": "Leaving",
-      "body": "A flux rope that broke loose, piling the corona up ahead of it as a bright front with a dark cavity behind. It reaches Earth in a day or more.",
+      "body": "A flux rope that broke loose, piling the corona up ahead of it as a bright front with a dark cavity behind. It reaches Earth in a day or more; there its field and plasma drive geomagnetic storms and the aurora.",
       "caution": "Speed and shape are schematic."
     },
     "wind": {
@@ -260,6 +268,12 @@
       "where": "Beyond",
       "body": "The corona is too hot to be held: it expands into a wind that fills the solar system, slow from the streamers, fast from the open poles.",
       "caution": "The wind is not drawn as particles; its speeds are typical values."
+    },
+    "parker": {
+      "title": "Parker Solar Probe",
+      "where": "Through the corona",
+      "body": "On 24 December 2024 the probe passed {parkerPerihelionR} solar radii from the Sun's centre at {parkerSpeed}, inside the corona: the first spacecraft through a star's atmosphere.",
+      "caution": "A mark at its closest approach; the orbit is not drawn and the probe is not to scale."
     }
   },
   "tour": {
@@ -298,7 +312,7 @@
       },
       "cycle": {
         "title": "Eleven years",
-        "body": "Spots appear at mid latitudes and drift toward the equator over about {cycleYears} years; at maximum the poles swap. Then it starts again."
+        "body": "Spots appear at mid latitudes and drift toward the equator over about {cycleYears} years; at maximum the poles swap. Then it starts again, as Schwabe first saw in 1843."
       }
     }
   },
@@ -341,7 +355,7 @@
       },
       "cycle": {
         "title": "Cycle",
-        "body": "Regions emerge at latitudes that drift toward the equator through the {cycleYears}-year cycle, with the hemispheres' polarities set by Hale's law; the record of sunspot numbers is the observatory's yearly means, the Maunder minimum's {maunderYears} years among them."
+        "body": "Schwabe found the cycle in his spot counts in 1843, and Wolf's relative number of 1848, R = k(10g + s), still counts it. Regions emerge at latitudes that drift toward the equator through the {cycleYears}-year cycle, with the hemispheres' polarities set by Hale's law; the record of sunspot numbers is the observatory's yearly means, the Maunder minimum's {maunderYears} years among them."
       },
       "limits": {
         "title": "Limits",

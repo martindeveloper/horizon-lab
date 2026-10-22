@@ -20,6 +20,7 @@ export type Place = {
 };
 
 export const PLACE_IDS = [
+  "star",
   "core",
   "radiativeZone",
   "tachocline",
@@ -37,11 +38,13 @@ export const PLACE_IDS = [
   "streamer",
   "ejection",
   "wind",
+  "parker",
 ] as const;
 
 export type PlaceId = (typeof PLACE_IDS)[number];
 
 export const PLACES: Readonly<Record<PlaceId, Place>> = {
+  star: { id: "star", view: "surface" },
   core: { id: "core", view: "inside", cut: 1 },
   radiativeZone: { id: "radiativeZone", view: "inside", cut: 1 },
   tachocline: { id: "tachocline", view: "inside", cut: 1, clock: "day" },
@@ -59,6 +62,7 @@ export const PLACES: Readonly<Record<PlaceId, Place>> = {
   streamer: { id: "streamer", view: "corona" },
   ejection: { id: "ejection", view: "corona", eruption: 0.7, clock: "hour" },
   wind: { id: "wind", view: "corona", clock: "hour" },
+  parker: { id: "parker", view: "corona", light: "eclipse", clock: "hour" },
 };
 
 /** The places in order, as the finder lists them. */

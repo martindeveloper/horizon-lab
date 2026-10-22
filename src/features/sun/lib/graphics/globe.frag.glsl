@@ -38,6 +38,7 @@ uniform float uGrid;
 uniform sampler2D uMap;                // SDO/HMI's flattened continuum (linear on sampling)
 uniform float uMapShown;               // 0 until it arrives, 1 once faded in
 uniform float uMapTexels;              // its texels per radian
+uniform vec3 uSunlight;                // the photosphere's continuum colour: the white the eye adapts to
 uniform vec3 uMagPositive;             // the magnetogram's poles, linear
 uniform vec3 uMagNegative;
 uniform mat4 uViewProjection;          // the camera's, for the hit's depth
@@ -195,15 +196,16 @@ vec3 surfaceColour(Face f, vec3 s, float mu) {
   }
   if (uLightMode == LIGHT_ECLIPSE) return vec3(0.0);
   if (uLightMode == LIGHT_WHITE) {
-    /* The disc as a camera balanced warm shows it: the measured continuum under the Claret law
+    /* The disc as the eye adapted to sunlight sees it: the photosphere's continuum is white by
+       definition and cooler gas warmer against it; the measured continuum under the Claret law
        where the map resolves, the procedural face where it does not; relative light raised to
        the display contrast, then exposed below white at the centre. */
-    vec3 procedural = glowAt(f.kelvin * WHITE_BALANCE, uFaceLogY);
-    vec3 measured = glowAt(PHOTOSPHERE_K * WHITE_BALANCE, uFaceLogY) * f.measured;
+    vec3 procedural = glowAt(f.kelvin, uFaceLogY) / uSunlight;
+    vec3 measured = vec3(f.measured);
     vec3 relative = mix(procedural, measured, f.mapShare) * limb;
     vec3 light = pow(max(relative, 0.0), vec3(SURFACE_CONTRAST)) * SURFACE_EXPOSURE;
     /* A white-light flare is rare and faint: only as much as the light's flare weight allows (none). */
-    return light + glowAt(WHITE_FLARE_K * WHITE_BALANCE, uFaceLogY) * RIBBON_GLARE * f.ribbon * uFlareWeight;
+    return light + glowAt(WHITE_FLARE_K, uFaceLogY) / uSunlight * RIBBON_GLARE * f.ribbon * uFlareWeight;
   }
   /* A band: each layer's pattern on the disc, through the band's response to the layer's
      temperatures and the layer's weight, exposed to the band's scale. The photosphere is its

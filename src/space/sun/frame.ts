@@ -43,6 +43,7 @@ import {
   ERUPTION_LINES,
   ERUPTION_SCALE_R,
   MAX_FIELD_LINES,
+  PARKER_PERIHELION_R,
   RADIUS_M,
   SOURCE_SURFACE_R,
   TEMPERATURES,
@@ -257,6 +258,7 @@ export type SunModel = ReturnType<typeof createSunModel>;
 
 /** The places the lab names; each is anchored on what the frame shows of it. */
 export const PLACE_IDS = [
+  "star",
   "core",
   "radiativeZone",
   "tachocline",
@@ -274,6 +276,7 @@ export const PLACE_IDS = [
   "streamer",
   "ejection",
   "wind",
+  "parker",
 ] as const;
 export type PlaceId = (typeof PLACE_IDS)[number];
 
@@ -326,6 +329,12 @@ const apexOf = (line: Polyline): Vec3 => {
  */
 export function placeAnchor(frame: SunFrame, place: PlaceId): Vec3 | null {
   switch (place) {
+    /* The star as a whole has no one point to name. */
+    case "star":
+      return null;
+    /* The probe's perihelion stands still in the world (+x) as the body turns under it. */
+    case "parker":
+      return at(0, -frame.surfaceTurn, PARKER_PERIHELION_R);
     case "core":
       return at(CUT_LAT, CUT_LON, LAYERS.core / 2);
     case "radiativeZone":

@@ -35,6 +35,11 @@ export const CORONAL_MEAN_MOLECULAR_WEIGHT = 0.6;
  * longitude zero (`MAP_CENTRAL_MERIDIAN_DEG` in `observed.ts`).
  */
 export const MAP_EPOCH = Date.UTC(2024, 4, 11, 12);
+
+/* ------------------------------------------------------------------ probes */
+/** Parker Solar Probe at its closest, 24 December 2024: radii from the centre, and its speed then, km/s (NASA). */
+export const PARKER_PERIHELION_R = 9.86;
+export const PARKER_PERIHELION_SPEED_KM_S = 191;
 export const MAP_WINDOW_D = 21;
 /** The Carrington rotation as seen from Earth, days (Carrington 1863; the synodic period). */
 export const CARRINGTON_SYNODIC_PERIOD_D = 27.2753;

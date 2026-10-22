@@ -434,6 +434,10 @@ export const SOURCES = {
   },
   nasaM33: { cite: "NASA/HST, Triangulum Galaxy (M33): 18.7 kpc optical diameter" },
   nasaMilkyWay: { cite: "NASA Science, Beyond Our Solar System: the Milky Way" },
+  nasaParker: {
+    cite: "NASA Science, Parker Solar Probe (the 24 December 2024 perihelion: its distance and speed)",
+    link: SOURCE_URLS.nasaParker,
+  },
   navarete2022: {
     cite: "Navarete et al. 2022; Negueruela et al. 2022, A&A 664, A146 (Westerlund 1's distance: 4.0–4.3 kpc)",
     link: SOURCE_URLS.navarete2022,

@@ -23,7 +23,6 @@
 #define UMBRAL_DOTS               14.0
 #define UMBRAL_DOT_CONTRAST       0.6
 #define WHITE_FLARE_K             9000.0
-#define WHITE_BALANCE             0.9009009009
 #define MAP_FADE_FROM_PX          4.0
 #define MAP_FADE_TO_PX            8.0
 #define MAP_CENTRAL_MERIDIAN_RAD  5.117381425

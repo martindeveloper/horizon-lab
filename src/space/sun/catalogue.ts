@@ -63,6 +63,8 @@ import {
   TACHOCLINE_R,
   TACHOCLINE_THICKNESS_R,
   TEMPERATURES,
+  PARKER_PERIHELION_R,
+  PARKER_PERIHELION_SPEED_KM_S,
   WATER_DENSITY,
   WIND_FAST_KM_S,
   WIND_SLOW_KM_S,
@@ -87,6 +89,15 @@ const peak = (record: readonly YearlyCount[]) =>
 /** The measured Sun, and what follows from it by the kit's laws. */
 const BODY = {
   radius: SUN.radius,
+  diameter: {
+    value: 2 * RADIUS_M,
+    unit: "m",
+    show: "km",
+    digits: 4,
+    source: "iau2015b3",
+    status: "derived",
+    note: "2 R☉, nominal",
+  },
   mass: SUN.mass,
   teff: SUN.teff,
   luminosity: SUN.luminosity,
@@ -547,6 +558,28 @@ const PASSBANDS = recordFrom(keysOf(AIA_PEAKS_K), (id) => {
   return facts;
 });
 
+/** A spacecraft inside the corona: Parker Solar Probe at its closest approach. */
+const PROBES = {
+  parker: {
+    perihelion: {
+      value: PARKER_PERIHELION_R,
+      unit: "Rsun",
+      digits: 3,
+      source: "nasaParker",
+      status: "flag",
+      note: "24 December 2024, 6.1 million km above the photosphere",
+    },
+    speed: {
+      value: PARKER_PERIHELION_SPEED_KM_S,
+      unit: "km/s",
+      digits: 3,
+      source: "nasaParker",
+      status: "flag",
+      note: "at that perihelion, 692,000 km/h",
+    },
+  },
+} as const;
+
 export const SUN_CATALOGUE = {
   /** The star as a body. */
   star: { body: BODY, rotation: ROTATION },
@@ -561,6 +594,7 @@ export const SUN_CATALOGUE = {
   activity: { sunspot: SUNSPOT, field: FIELD, cycle: CYCLE, eruption: ERUPTION },
   observed: OBSERVED,
   passbands: PASSBANDS,
+  probes: PROBES,
 } as const;
 
 /** Every fact with its path ("layers.interior.centralTemperature"), for tests and the ledger. */

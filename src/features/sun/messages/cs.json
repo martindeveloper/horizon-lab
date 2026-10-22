@@ -54,7 +54,7 @@
   },
   "lightNotes": {
     "white": "Fotosféra · SDO/HMI, květen 2024",
-    "halpha": "Chromosféra",
+    "halpha": "Chromosféra · vodík 3→2",
     "he304": "Horní chromosféra",
     "fe171": "Klidná koróna",
     "fe193": "Koróna",
@@ -153,12 +153,20 @@
     "windSlow": "Pomalý vítr",
     "windFast": "Rychlý vítr",
     "cmeSpeed": "Rychlost fronty, jak je kreslena",
-    "cyclePeriod": "Cyklus"
+    "cyclePeriod": "Cyklus",
+    "perihelion": "Nejbližší přiblížení, R☉",
+    "probeSpeed": "Rychlost při průletu, km/s"
   },
   "panel": {
     "qualityNote": "Standard je Slunce, jak je kresleno pro počítač; Úsporná šetří telefon."
   },
   "places": {
+    "star": {
+      "title": "Slunce",
+      "where": "Hvězda",
+      "body": "Hvězda G2 V o hmotnosti {starMassKg} kg a zářivém výkonu {starLuminosityW} W. Její světlo je z definice bílé: sluneční světlo je to, čemu oko říká bílá, a jsou v něm všechny barvy duhy. Obloha je modrá a nízké Slunce červené proto, že vzduch rozptyluje modré světlo stranou, ne proto, že by hvězda byla žlutá.",
+      "caution": "Kresleno tak, jak je vidí oko přizpůsobené slunečnímu světlu: disk uprostřed bílý, teplejší jen u okraje, kde se ukazuje chladnější plyn."
+    },
     "core": {
       "title": "Jádro",
       "where": "Střed",
@@ -210,7 +218,7 @@
     "chromosphere": {
       "title": "Chromosféra",
       "where": "Spodní atmosféra",
-      "body": "Tenká průhledná vrstva nad povrchem, vzhůru teplejší. V Hα ukáže síť, flokule a filamenty; na okraji růžový lem.",
+      "body": "Tenká průhledná vrstva nad povrchem, vzhůru teplejší, ohřívaná rozpadem magnetozvukových vln. V Hα, světle vodíku při přeskoku elektronu ze třetí hladiny na druhou, ukáže síť, flokule a filamenty; na okraji růžový lem.",
       "caution": "Kreslená tak, jak ji ukazuje čára Hα, ne v bílém světle."
     },
     "spicule": {
@@ -252,7 +260,7 @@
     "ejection": {
       "title": "Výron koronální hmoty",
       "where": "Odchází",
-      "body": "Utržené magnetické lano, které před sebou hrne korónu jako jasnou frontu s tmavou dutinou za ní. K Zemi dorazí za den i víc.",
+      "body": "Utržené magnetické lano, které před sebou hrne korónu jako jasnou frontu s tmavou dutinou za ní. K Zemi dorazí za den i víc; tam jeho pole a plazma vyvolají geomagnetickou bouři a polární záři.",
       "caution": "Rychlost a tvar jsou schematické."
     },
     "wind": {
@@ -260,6 +268,12 @@
       "where": "Dál",
       "body": "Koróna je příliš horká, než aby ji Slunce udrželo: rozpíná se ve vítr, který vyplní sluneční soustavu, pomalý z přileb, rychlý z otevřených pólů.",
       "caution": "Vítr není kreslen jako částice; rychlosti jsou typické hodnoty."
+    },
+    "parker": {
+      "title": "Parker Solar Probe",
+      "where": "Skrz korónu",
+      "body": "24. prosince 2024 proletěla sonda {parkerPerihelionR} {parkerPerihelionRPlural, select, one {sluneční poloměr} few {sluneční poloměry} many {slunečního poloměru} other {slunečních poloměrů}} od středu Slunce rychlostí {parkerSpeed}, uvnitř koróny: první kosmická loď v atmosféře hvězdy.",
+      "caution": "Značka v místě největšího přiblížení; dráha se nekreslí a sonda není v měřítku."
     }
   },
   "tour": {
@@ -298,7 +312,7 @@
       },
       "cycle": {
         "title": "Jedenáct let",
-        "body": "Skvrny se objevují ve středních šířkách a asi {cycleYears} let se stěhují k rovníku; v maximu se póly vymění. Pak znovu."
+        "body": "Skvrny se objevují ve středních šířkách a asi {cycleYears} let se stěhují k rovníku; v maximu se póly vymění. Pak znovu, jak to roku 1843 poprvé uviděl Schwabe."
       }
     }
   },
@@ -341,7 +355,7 @@
       },
       "cycle": {
         "title": "Cyklus",
-        "body": "Oblasti vznikají v šířkách, které se během {cycleYears}letého cyklu stěhují k rovníku, s polaritami polokoulí podle Haleova zákona; záznam relativních čísel jsou roční průměry observatoře, mezi nimi {maunderYears} let Maunderova minima."
+        "body": "Cyklus objevil Schwabe v roce 1843 ze svých počtů skvrn a Wolfovo relativní číslo z roku 1848, R = k(10g + s), jej počítá dodnes. Oblasti vznikají v šířkách, které se během {cycleYears}letého cyklu stěhují k rovníku, s polaritami polokoulí podle Haleova zákona; záznam relativních čísel jsou roční průměry observatoře, mezi nimi {maunderYears} let Maunderova minima."
       },
       "limits": {
         "title": "Meze",

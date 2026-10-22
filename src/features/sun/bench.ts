@@ -27,6 +27,8 @@ type SunBenchScene = BenchScene & {
   drift?: boolean;
   /** The clock the scene runs at; the view's own by default. */
   clock?: ClockRate;
+  /** Bloom on; off by default, as in the lab. */
+  bloom?: boolean;
 };
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
@@ -56,6 +58,20 @@ const still = (
 
 const SCENES: readonly SunBenchScene[] = [
   still("surface", "white", "The whole disc in white light: limb darkening, spot groups, faculae"),
+  {
+    ...still("surface", "white", "The whole disc in white light with bloom on", {
+      bloom: true,
+    }),
+    id: "surface-bloom",
+    tags: ["view", "effects"],
+  },
+  {
+    ...still("sunspot", "white", "The spot group with bloom on: the bright granules glow", {
+      bloom: true,
+    }),
+    id: "sunspot-bloom",
+    tags: ["view", "effects"],
+  },
   still("inside", "white", "The cut open: core, radiative zone, tachocline, convection zone", {
     cut: 1,
   }),
@@ -163,6 +179,7 @@ export const benchTarget: BenchTarget = {
       cut: scene.cut ?? (scene.view === "inside" ? 1 : 0),
       eruption: scene.eruption ?? 0,
       eruptionPlaying: false,
+      bloom: scene.bloom ?? false,
       paused: false,
     });
     if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);

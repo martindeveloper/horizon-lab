@@ -34,7 +34,7 @@ import { sunQuality } from "../quality";
 import { useSun, type SunStore } from "../store";
 import { createSunEngine, type SunEngineHooks, type SunPick } from "./engine";
 import type { SunSceneSettings } from "./settings";
-import { viewPose } from "./views";
+import { driftPose } from "./views";
 
 const CYCLE_PERIOD_S = convert(CYCLE_PERIOD_YR, "yr", "s");
 
@@ -130,11 +130,13 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     landing = -1;
     driftShot = null;
     const f = frame();
-    return shots.map(({ view, pose, light: _light, cut: _cut, eruption: _e, ...shot }) => ({
-      ...viewPose(view, f, { azimuth: 0, inclination: 0.1 }),
-      ...pose,
-      ...shot,
-    }));
+    /* Every shot as a pose about the Sun's centre, a feature framed by where it looks. */
+    return shots.map(
+      ({ view, pose, look, roll, light: _light, cut: _cut, eruption: _e, ...shot }) => ({
+        ...shot,
+        ...driftPose(view, f, { azimuth: 0, inclination: 0.1 }, { pose, look, roll }),
+      }),
+    );
   };
   const followDrift = () => {
     /* The engine reads its settings as it is built, before it exists here. */

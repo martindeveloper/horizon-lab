@@ -29,7 +29,6 @@ import {
   RESPONSE_LOG_MIN,
   RESPONSE_SAMPLES,
   TRANSITION_K,
-  WHITE_BALANCE_K,
   type ResponseLayer,
 } from "../parameters";
 import type { SunLight } from "../scene/settings";
@@ -81,9 +80,9 @@ export function createLightTables(scope: DisposalScope, interior: InteriorProfil
   const rampData = new Float32Array(RAMP_SAMPLES * 4);
   const ramp = scope.own(floatTable(rampData, RAMP_SAMPLES));
   let rampFor: SunLight["ramp"] | null = null;
-  /** The face's reference radiance: log Y of the continuum at the balanced temperature the disc is shown at. */
-  const faceLogY = stellarContinuum(WHITE_BALANCE_K)[3];
-  /** The photosphere's continuum colour, normalized to Y = 1. */
+  /** The face's reference radiance: log Y of the photosphere's continuum, the white the disc is shown against. */
+  const faceLogY = stellarContinuum(PHOTOSPHERE_K)[3];
+  /** The photosphere's continuum colour, normalized to Y = 1: what the eye adapted to sunlight calls white. */
   const [sunR, sunG, sunB] = stellarContinuum(PHOTOSPHERE_K);
   const sunlight: [number, number, number] = [sunR, sunG, sunB];
   return {

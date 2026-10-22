@@ -109,6 +109,7 @@ export const SOURCE_URLS = {
   stone2013: "https://doi.org/10.1126/science.1236408",
   stone2019: "https://doi.org/10.1038/s41550-019-0928-3",
   svalgaardSchatten2016: "https://doi.org/10.1007/s11207-015-0815-8",
+  nasaParker: "https://science.nasa.gov/mission/parker-solar-probe/",
   swpcSrs:
     "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_region_summaries/2024/05/",
   tully1982: "https://adsabs.harvard.edu/pdf/1982ApJ...257..389T",

@@ -32,11 +32,22 @@ export const ATMOSPHERE_RADIUS = 6;
 /** The camera's reach from the centre, solar radii. */
 export const CAMERA_MIN_R = 1.03;
 export const CAMERA_MAX_R = 12;
-/** Its reach from a feature it orbits (a spot group, a prominence, an active region), radii. */
-export const FEATURE_MIN_R = 0.015;
+/**
+ * Its reach from a feature it orbits (a spot group, a prominence, an active region), radii:
+ * never so close that, straight over a feature on the surface, it would be inside the globe's
+ * shell at CAMERA_MIN_R; nearer the surface the orbit's horizon floor keeps it out.
+ */
+export const FEATURE_MIN_R = CAMERA_MIN_R - 1 + 0.01;
 export const FEATURE_MAX_R = 4;
 /** Round a feature the camera keeps at least this elevation over the feature's horizon, radians: never under the surface. */
 export const FEATURE_ELEVATION_MIN = 0.04;
+/**
+ * Zooming in over the disc, nearer than this to the centre, takes the surface point under the
+ * pointer as the orbit's centre, so the wheel closes on what is looked at; zooming back out
+ * past the second distance from that point lets it go.
+ */
+export const POINTER_AIM_R = 2.2;
+export const POINTER_RELEASE_R = 1.4;
 /** The orbit's centre moves between the Sun's centre and a feature with this time constant, s. */
 export const AIM_LAG_S = 0.8;
 /**
@@ -68,12 +79,6 @@ export const SURFACE_RESOLVE_PX = 2;
 
 /** The photosphere's effective temperature (the shared catalogue's). */
 export const PHOTOSPHERE_K = SOLAR_TEFF_K;
-/**
- * White light's white balance: the disc is shown as a camera balanced to this temperature would
- * show it, a little warmer than the Sun's own near-white, so the limb's fall reads in colour.
- */
-export const WHITE_BALANCE_K = 5_200;
-export const WHITE_BALANCE = WHITE_BALANCE_K / PHOTOSPHERE_K;
 /**
  * The measured Sun (SDO/HMI's flattened continuum, `MAPS.sun`): the map yields to the
  * procedural surface as one of its texels grows from this many buffer pixels to this many, the
@@ -444,7 +449,6 @@ export const SHADER_DEFINES = glslDefines({
   UMBRAL_DOTS,
   UMBRAL_DOT_CONTRAST,
   WHITE_FLARE_K,
-  WHITE_BALANCE,
   MAP_FADE_FROM_PX,
   MAP_FADE_TO_PX,
   MAP_CENTRAL_MERIDIAN_RAD,

@@ -53,6 +53,40 @@ test("the tour, the places and the drift name views, lights, places and formulas
   }
 });
 
+test("the drift flies about the Sun's centre, outside it, every subject in frame where its look sets it", async () => {
+  const { createSunModel, OBSERVED_REGIONS } = await import("../src/space/sun/frame.ts");
+  const { driftPose, viewAim } = await import("../src/features/sun/lib/scene/views.ts");
+  const { freeFromOrbit, freeBasis } = await import("@horizon/toolkit/camera");
+  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const frame = model.frameAt({
+    time: 0,
+    cyclePhase: 25.4,
+    light: "fe171",
+    eruptionScrub: 0.5,
+    fieldLineCount: 8,
+  });
+  for (const shot of DRIFT.shots) {
+    const pose = driftPose(shot.view, frame, { azimuth: 0, inclination: 0.1 }, shot);
+    assert.ok(pose.distance > 1.05, `${shot.view} stands outside the Sun (${pose.distance})`);
+    /* The subject (the feature, or the Sun's centre) lies off the line of sight by the shot's look. */
+    const camera = freeFromOrbit(pose);
+    const aim = viewAim(shot.view, frame);
+    const subject = aim ? aim.point : [0, 0, 0];
+    const toward = subject.map((v, i) => v - camera.position[i]);
+    const length = Math.hypot(...toward);
+    const { fwd } = freeBasis(camera.orientation);
+    const off = Math.acos(
+      Math.min(
+        1,
+        toward.reduce((sum, v, i) => sum + (v / length) * fwd[i], 0),
+      ),
+    );
+    const look = Math.hypot(shot.look?.yaw ?? 0, shot.look?.pitch ?? 0);
+    assert.ok(Math.abs(off - look) < 0.02, `${shot.view}: subject ${off} rad off, look ${look}`);
+    assert.ok(off < 0.4, `${shot.view} keeps its subject well inside the frame`);
+  }
+});
+
 test("every view's framing stands outside the Sun, the feature views orbiting their feature", async () => {
   const { createSunModel, OBSERVED_REGIONS } = await import("../src/space/sun/frame.ts");
   const { viewAim, viewPose, viewReach, viewOrbitsFeature } =
@@ -202,7 +236,11 @@ test("every card, caption, hint and note renders its figures in both languages",
       }
       clean(t(`places.${id}.where`), `${locale}:${id}`);
     }
-    const args = { ...proseArgs(PROSE_FIGURES, locale), views: VIEW_IDS.length, places: 17 };
+    const args = {
+      ...proseArgs(PROSE_FIGURES, locale),
+      views: VIEW_IDS.length,
+      places: PLACE_IDS.length,
+    };
     for (const step of TOUR) {
       clean(t(`tour.steps.${step.id}.title`, args), `${locale}:${step.id}`);
       clean(t(`tour.steps.${step.id}.body`, args), `${locale}:${step.id}`);

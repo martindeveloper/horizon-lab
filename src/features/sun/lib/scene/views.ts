@@ -7,7 +7,16 @@
  * bearing round it, zero standing east. The views that look at a feature take their angles
  * from the frame; the rest keep the visitor's.
  */
-import type { OrbitPose } from "@horizon/toolkit/camera";
+import { Matrix4, Quaternion, Vector3 } from "three";
+
+import {
+  freeFromOrbit,
+  orbitFromFree,
+  type AimedPose,
+  type FreeLook,
+  type FreePose,
+  type OrbitPose,
+} from "@horizon/toolkit/camera";
 import type { Vec3 } from "@horizon/toolkit/math";
 
 import { directionOf, type SunFrame } from "./frame";
@@ -59,6 +68,12 @@ export type ViewAim = { point: Vec3; normal: Vec3 };
 
 const scaled = (d: Vec3, r: number): Vec3 => [d[0] * r, d[1] * r, d[2] * r];
 
+/** A point on the surface as something to orbit: the point and its normal, in the world this frame. */
+export function surfaceAim(lat: number, lon: number, frame: SunFrame): ViewAim {
+  const normal = worldDirection(lat, lon, frame);
+  return { point: normal, normal };
+}
+
 /** Where a feature view orbits this frame; null for the views about the centre or with nothing to show. */
 export function viewAim(id: SunViewId, frame: SunFrame): ViewAim | null {
   if (id === "chromosphere") {
@@ -75,6 +90,70 @@ export function viewAim(id: SunViewId, frame: SunFrame): ViewAim | null {
     return { point: scaled(normal, id === "eruption" ? ERUPTION_AIM_R : 1), normal };
   }
   return null;
+}
+
+const up = new Vector3();
+const east = new Vector3();
+const south = new Vector3();
+const basis = new Matrix4();
+
+/**
+ * The orbit's frame about a feature: its up the surface normal there, its azimuth zero
+ * standing east (the horizontal tangent away from the direction of rotation).
+ */
+export function featureOrbitFrame(normal: Vec3, out = new Quaternion()) {
+  up.set(normal[0], normal[1], normal[2]);
+  east.set(-up.z, 0, up.x);
+  if (east.lengthSq() < 1e-8) east.set(0, 0, 1);
+  east.normalize();
+  south.crossVectors(up, east);
+  return out.setFromRotationMatrix(basis.makeBasis(south, up, east));
+}
+
+const frameTurn = new Quaternion();
+const turned = new Quaternion();
+const placed = new Vector3();
+
+/**
+ * A free pose written in an orbit's frame (centred on `origin`, turned by `orbit`) as the
+ * world sees it.
+ */
+export function freeInWorld(pose: FreePose, origin: Vec3, orbit: Quaternion): FreePose {
+  placed.fromArray(pose.position).applyQuaternion(orbit);
+  turned.copy(orbit).multiply(frameTurn.fromArray(pose.orientation));
+  return {
+    position: [placed.x + origin[0], placed.y + origin[1], placed.z + origin[2]],
+    orientation: [turned.x, turned.y, turned.z, turned.w],
+  };
+}
+
+/** What a drift shot adds to its view's framing: nudges to the pose, where it looks and its tilt. */
+export type ShotFraming = {
+  pose?: Partial<OrbitPose> | undefined;
+  look?: FreeLook | undefined;
+  roll?: number | undefined;
+};
+
+/**
+ * A view's framing for the drift, as a pose about the Sun's centre with the look that frames
+ * it: the drift flies about the centre throughout, so its flights never change orbit. A view
+ * about the centre keeps its pose and the shot's look; a view about a feature is placed as the
+ * view places it (with the shot's nudges, look and tilt in the feature's frame), then written
+ * about the centre, its look turned onto the feature.
+ */
+export function driftPose(
+  id: SunViewId,
+  frame: SunFrame,
+  angles: Pick<OrbitPose, "azimuth" | "inclination">,
+  shot: ShotFraming = {},
+): Required<Omit<AimedPose, "ride">> {
+  const framed = { ...viewPose(id, frame, angles), ...shot.pose };
+  const look = shot.look ?? { yaw: 0, pitch: 0 };
+  const roll = shot.roll ?? 0;
+  const aim = viewAim(id, frame);
+  if (!aim) return { ...framed, look, roll };
+  const local = freeFromOrbit({ ...framed, look, roll });
+  return orbitFromFree(freeInWorld(local, aim.point, featureOrbitFrame(aim.normal)));
 }
 
 /** The views that turn the camera to their own angles on a flight. */

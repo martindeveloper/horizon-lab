@@ -90,15 +90,23 @@ export function factsOf(catalogue: Catalogue): { path: string; fact: Fact }[] {
   );
 }
 
-/** How a figure fills a placeholder: a value, or a published span. */
+/** How a figure fills a placeholder: a value, a published span, or a figure printed as `as` says (`quoteAs` for a card's words). */
 export type Ref =
   | { kind: "value"; fact: Value }
-  | { kind: "span"; fact: (Value | Span) & { range: Range } };
+  | { kind: "span"; fact: (Value | Span) & { range: Range } }
+  | { kind: "styled"; fact: Fact; as: FigureOptions };
 
 export const v = (fact: Value): Extract<Ref, { kind: "value" }> => ({ kind: "value", fact });
 export const r = (fact: (Value | Span) & { range: Range }): Extract<Ref, { kind: "span" }> => ({
   kind: "span",
   fact,
+});
+
+/** A figure printed as its sentence names it: in this unit, these digits, this style. */
+export const styled = (fact: Fact, as: FigureOptions): Extract<Ref, { kind: "styled" }> => ({
+  kind: "styled",
+  fact,
+  as,
 });
 
 /** Prefer the supplied interval; keep a central value only when there is no interval. */
@@ -190,6 +198,7 @@ export function span(t: Translate, d: DistanceSettings, fact: (Value | Span) & {
 }
 
 export function print(t: Translate, d: DistanceSettings, ref: Ref) {
+  if (ref.kind === "styled") return formatFigure(d.locale, ref.fact, ref.as).text;
   return ref.kind === "value" ? figure(t, d, ref.fact) : span(t, d, ref.fact);
 }
 

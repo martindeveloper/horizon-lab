@@ -42,6 +42,7 @@ export function createGlobeLayer(
     uCoreLnT: { value: tables.coreLnT },
     uLayers: { value: new Vector3(0.25, 0.7, 1) },
     uFaceLogY: { value: tables.faceLogY },
+    uSunlight: { value: new Vector3(...tables.sunlight) },
     uFine: { value: 1 },
     uPlumeOctaves: { value: 4 },
     uGrid: { value: 0 },

@@ -3,7 +3,7 @@
  * (`@/space/sun/catalogue`), with the words under `places.<id>` the lab's own. A row's label is
  * `facts.<id>`; its figure prints with its unit, as the catalogue shows it.
  */
-import { factRef, figureRow, type Fact, type Row, type StaticCard } from "@/lib/facts";
+import { factRef, figureRow, styled, type Fact, type Row, type StaticCard } from "@/lib/facts";
 import { SUN_CATALOGUE } from "@/space/sun/catalogue";
 
 import type { PlaceId } from "../lib/model/places";
@@ -15,6 +15,7 @@ const { body, rotation } = SUN_CATALOGUE.star;
 const { interior, photosphere, chromosphere, corona } = SUN_CATALOGUE.layers;
 const { sunspot, field, cycle, eruption } = SUN_CATALOGUE.activity;
 const bands = SUN_CATALOGUE.passbands;
+const { parker } = SUN_CATALOGUE.probes;
 
 const rows = (...entries: [id: string, fact: Fact][]): Row[] =>
   entries.map(([id, fact]) => figureRow(id, factRef(fact)));
@@ -25,6 +26,23 @@ const card = (badge: Badge, ...entries: [id: string, fact: Fact][]): StaticCard<
 });
 
 export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<Badge>>> = {
+  star: {
+    ...card(
+      "measured",
+      ["diameter", body.diameter],
+      ["temperature", body.teff],
+      ["density", body.meanDensity],
+      ["gravity", body.surfaceGravity],
+      ["equatorPeriod", rotation.equatorPeriod],
+      ["polePeriod", rotation.polePeriod],
+      ["meanField", field.meanField],
+      ["spotField", field.spotField],
+    ),
+    body: {
+      starMassKg: styled(body.mass, { in: "kg", style: "scientific", digits: 3 }),
+      starLuminosityW: styled(body.luminosity, { in: "W", style: "scientific", digits: 3 }),
+    },
+  },
   core: card(
     "inferred",
     ["coreRadius", interior.coreRadius],
@@ -138,4 +156,17 @@ export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<Badge>>> = {
     ["massLoss", body.massLoss],
     ["cyclePeriod", cycle.period],
   ),
+  parker: {
+    ...card(
+      "measured",
+      ["perihelion", parker.perihelion],
+      ["probeSpeed", parker.speed],
+      ["temperature", corona.temperature],
+      ["windFast", corona.windFast],
+    ),
+    body: {
+      parkerPerihelionR: styled(parker.perihelion, { digits: 3 }),
+      parkerSpeed: styled(parker.speed, { withUnit: true, digits: 3 }),
+    },
+  },
 };

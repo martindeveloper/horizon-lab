@@ -40,8 +40,14 @@ type Saved = {
   show: Show;
 };
 
-/** The effects a drift shows off, as the visitor had them before it began. */
-type DriftEffects = { bloom: boolean };
+/** What a drift sets for its show, as the visitor had it before it began: bloom, and the clock. */
+type DriftEffects = { bloom: boolean; clock: ClockRate };
+
+/**
+ * The drift's clock: a minute of the Sun each second, so granules boil, spicules flick and
+ * loops drain while the features its shots frame stay where they were framed.
+ */
+const DRIFT_CLOCK: ClockRate = "minute";
 
 const DEFAULT_SHOW: Show = { fieldLines: true, names: true, grid: false };
 
@@ -199,7 +205,7 @@ export const useSun = create<SunStore>((set, get) => ({
   },
   effectsBeforeDrift: null,
   /* The drift ends the guide, closes the panel and the card and flies the camera itself; as a
-     show piece it turns bloom on, and gives the visitor's back as it ends. */
+     show piece it turns bloom on and runs its own clock, and gives the visitor's back as it ends. */
   ...driftSlice(set, get, {
     open: (s) => {
       if (s.guideOpen) s.endGuide();
@@ -207,8 +213,9 @@ export const useSun = create<SunStore>((set, get) => ({
         panel: "none" as const,
         selection: null,
         paused: false,
-        effectsBeforeDrift: { bloom: s.bloom },
+        effectsBeforeDrift: { bloom: s.bloom, clock: s.clock },
         bloom: true,
+        clock: DRIFT_CLOCK,
       };
     },
     close: (s) => ({ ...s.effectsBeforeDrift, effectsBeforeDrift: null }),

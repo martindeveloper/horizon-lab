@@ -170,13 +170,17 @@ void main() {
     if (k >= uRegionCount || uLightMode != LIGHT_BAND) break;
     vec4 dir = uRegionDir[k];
     vec3 at = dir.xyz * (1.0 + 0.35 * LOOP_GLOW_REACH);
-    if (dot(normalize(o - at), dir.xyz) < -0.05) continue;
+    /* The glow fades as the region turns away from us, never switching off at a step. */
+    float facing = smoothstep(-0.2, 0.05, dot(normalize(o - at), dir.xyz));
+    if (facing <= 0.0) continue;
+    /* A soft ball about the region, read at the nearest point of the ray's visible run (from
+       the camera to the disc, if it hits): a ray stopped short of the ball by the disc still
+       takes the ball's tail, and the glow varies smoothly with where the disc cuts it. */
     vec3 toward = at - o;
-    float along = dot(toward, d);
-    if (along <= 0.0 || along > tEnd + LOOP_GLOW_REACH) continue;
+    float along = clamp(dot(toward, d), 0.0, tEnd);
     float miss = length(toward - d * along);
     float reach = LOOP_GLOW_REACH * (0.5 + dir.w / LOOP_GLOW_REACH);
-    float glow = exp(-miss * miss / (reach * reach)) * uRegionSide[k].w;
+    float glow = facing * exp(-miss * miss / (reach * reach)) * uRegionSide[k].w;
     col += lit(LOOP_GLOW * glow, TRANSITION_K, LAYER_TRANSITION, uBalmer, uWeights.z);
     col += lit(LOOP_GLOW * glow, ACTIVE_K, LAYER_CORONA, uSunlight, uWeights.w);
     float flare = 1.0 - exp(-uRegionState[k].x);
