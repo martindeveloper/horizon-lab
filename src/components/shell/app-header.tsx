@@ -42,7 +42,7 @@ export function AppHeader() {
 
       <Link
         href={PAGE_URLS.home}
-        className="inline-flex h-11 shrink-0 items-center rounded-full focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
+        className="inline-flex h-11 shrink-0 items-center rounded-full ui-focus"
         aria-label={t("shell.home")}
       >
         <Wordmark />
@@ -67,7 +67,7 @@ export function AppHeader() {
         <Link
           href={PAGE_URLS.home}
           prefetch={false}
-          className="glass-pill relative hidden h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-ui font-medium text-fg-primary/90 transition-colors duration-feedback ease-standard after:absolute after:-inset-1.5 hover:text-accent focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:inline-flex"
+          className="glass-pill relative hidden h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-ui font-medium text-fg-primary/90 ui-focus transition-colors duration-feedback ease-standard after:absolute after:-inset-1.5 md:inline-flex enabled-hover:text-accent"
         >
           <ArrowLeft className="icon size-icon-compact" aria-hidden />
           {t("shell.catalogue")}

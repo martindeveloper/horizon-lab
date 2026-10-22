@@ -191,6 +191,28 @@ The old `fg`/`muted`/`subtle` and `bg`/`surface`/`surface-2` utilities remain as
 inline compatibility aliases. New components and scoped theme overrides use the
 explicit hierarchy. Theme choice and providers remain the host's responsibility.
 
+## Interaction states
+
+`ui-focus` shares the theme-aware 2px keyboard ring and forced-colour outline;
+retain any focus inset/offset locally. `ui-disabled` shares dimming (40%) and a
+neutral cursor for native, ARIA and Radix disabled states, without changing hit
+areas or focusability. Native `disabled` supplies browser behavior. `IconButton`
+additionally blocks activation for `aria-disabled="true"`; other ARIA-disabled
+controls must guard their handler.
+
+`enabled-hover:` and `enabled-active:` exclude all disabled forms; hover requires
+a hover-capable pointer. Compose `ui-quiet` (label brightening), `ui-press` (held
+fill), `ui-row` (hover and held fill), `ui-selected` (persistent fill with stronger
+hover), and `ui-outline` (the brightening outline). `ui-glass` preserves the accent
+halo; `ui-filled` supplies filled-action brightness feedback. Material actions
+transition `filter` along with their colors/shadows. The `state-*` color roles and
+brightness/disabled tokens live in `theme.css`.
+
+Selection and pressed state stay separate. Keep the existing semantic attributes,
+selection marks, native disabled behavior and touch targets. Sliders dim once at
+the root; thumb/track cursors also reflect the disabled state. Catalogue effects,
+editorial links, coach styling, cockpit behavior and scientific marks stay local.
+
 ## Motion
 
 `theme.css` owns the four UI durations: `feedback` (150 ms), `control` (300 ms),

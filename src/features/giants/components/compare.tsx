@@ -68,7 +68,7 @@ export function Compare({ id }: { id: RungId }) {
               const picked = RUNG_IDS.find((rung) => rung === event.target.value);
               if (picked) api().setOtherBody(picked);
             }}
-            className="min-w-0 rounded-control border border-border bg-surface-secondary px-2 py-1 text-body/5 text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
+            className="min-w-0 rounded-control border border-border bg-surface-secondary px-2 py-1 text-body/5 text-fg-primary ui-focus"
           >
             {RUNG_IDS.map((rung) => (
               <option key={rung} value={rung}>

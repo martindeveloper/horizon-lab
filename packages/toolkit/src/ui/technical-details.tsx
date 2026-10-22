@@ -49,7 +49,7 @@ export function TechnicalDetails({
         title={labels.open}
         onClick={() => dialog.current?.open()}
         className={cn(
-          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2 text-ui text-fg-secondary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:min-h-8 md:min-w-8",
+          "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full ui-press px-2 text-ui text-fg-secondary ui-quiet ui-focus transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 md:min-h-8 md:min-w-8",
           triggerClassName,
         )}
       >
@@ -73,7 +73,7 @@ export function TechnicalDetails({
                 {document.references.map((reference) => (
                   <li key={reference.url}>
                     <a
-                      className="underline decoration-border-strong underline-offset-4 hover:text-fg-primary"
+                      className="rounded-compact ui-quiet underline decoration-border-strong underline-offset-4 ui-focus transition-colors duration-feedback ease-standard"
                       href={reference.url}
                       target="_blank"
                       rel="noopener noreferrer"

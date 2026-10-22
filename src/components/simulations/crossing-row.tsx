@@ -8,7 +8,7 @@ import { cn } from "@horizon/toolkit/ui";
 
 /** A crossing's look: a quiet row with a title, one muted line and a gold arrow. */
 export const crossingRowClass =
-  "flex min-h-11 w-full items-start justify-between gap-3 rounded-control px-3 py-2 text-left text-body/5 tracking-wide text-fg-primary transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:min-h-9";
+  "ui-focus flex min-h-11 w-full items-start justify-between gap-3 rounded-control px-3 py-2 text-left text-body/5 tracking-wide text-fg-primary transition-colors duration-feedback ease-standard ui-row md:min-h-9";
 
 /** What a crossing row says: where it goes and what the other side adds. */
 export function CrossingContent({ title, hint }: { title: string; hint: string }) {

@@ -11,6 +11,8 @@ export type PickerProps = {
   label: ReactNode;
   /** Optional mono detail beside the label from the `lg` breakpoint. */
   detail?: ReactNode;
+  /** Optional mark before the label: the current choice's own, as its row shows it. */
+  icon?: ReactNode;
   /** Names the choice ("Views"); read before the current label and on the list. */
   "aria-label": string;
   open: boolean;
@@ -33,6 +35,7 @@ export type PickerProps = {
 export function Picker({
   label,
   detail,
+  icon,
   "aria-label": ariaLabel,
   open,
   onOpenChange,
@@ -95,10 +98,15 @@ export function Picker({
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         className={cn(
-          "glass-hud flex h-11 max-w-[min(22rem,100%)] items-center gap-2 rounded-full px-3 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:h-8",
+          "glass-hud flex h-11 max-w-[min(22rem,100%)] ui-disabled items-center gap-2 rounded-full px-3 ui-focus transition-[filter,box-shadow] duration-feedback ease-standard md:h-8 enabled-active:brightness-(--control-press-brightness)",
           triggerClassName,
         )}
       >
+        {icon ? (
+          <span aria-hidden className="flex size-5 shrink-0 items-center justify-center">
+            {icon}
+          </span>
+        ) : null}
         <span className="sr-only">{ariaLabel}: </span>
         <span className="truncate text-body/5 tracking-tight text-fg-primary">{label}</span>
         {detail ? <span className={cn("hidden lg:inline", kickerClass)}>{detail}</span> : null}

@@ -529,7 +529,7 @@ export function CoachMark({
             onClick={() => {
               if (step > 0) onPrevious();
             }}
-            className="coach-quiet -ml-2.5 size-11 aria-disabled:opacity-30 md:size-8"
+            className="coach-quiet -ml-2.5 size-11 ui-disabled [--control-disabled-opacity:0.3] md:size-8"
           >
             <ChevronLeft className="icon" />
           </button>

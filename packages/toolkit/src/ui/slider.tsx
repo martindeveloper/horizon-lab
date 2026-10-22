@@ -37,14 +37,14 @@ export function Slider({
   return (
     <SliderPrimitive.Root
       className={cn(
-        "relative flex h-8 w-full touch-none items-center select-none not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5",
+        "relative flex h-8 w-full ui-disabled touch-none items-center select-none not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5",
         className,
       )}
       {...props}
     >
       <SliderPrimitive.Track
         className={cn(
-          "relative h-px w-full grow cursor-pointer overflow-hidden rounded-full bg-fg-primary/20",
+          "relative h-px w-full grow cursor-pointer overflow-hidden rounded-full bg-fg-primary/20 data-disabled:cursor-default",
           trackClassName,
         )}
         style={trackStyle}
@@ -54,7 +54,7 @@ export function Slider({
       {values.map((value, index) => (
         <SliderPrimitive.Thumb
           key={index}
-          className="slider-thumb size-3.5 cursor-grab bg-accent transition-[box-shadow,transform] ease-enter active:cursor-grabbing"
+          className="slider-thumb size-3.5 cursor-grab bg-accent transition-[box-shadow,transform] ease-enter data-disabled:cursor-default enabled-active:cursor-grabbing"
           aria-label={thumbLabels?.[index] ?? label}
           aria-valuetext={valueText?.(value, index)}
         />

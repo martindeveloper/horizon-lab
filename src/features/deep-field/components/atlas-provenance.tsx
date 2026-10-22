@@ -16,7 +16,7 @@ export function AtlasProvenance({ id }: { id: AtlasId }) {
           return (
             <li key={key}>
               <a
-                className="inline-flex items-start gap-1 text-fg-primary underline decoration-border underline-offset-4 hover:decoration-current"
+                className="inline-flex items-start gap-1 rounded-compact text-fg-primary underline decoration-border underline-offset-4 ui-focus transition-colors duration-feedback ease-standard hover:decoration-current"
                 href={source.referenceUrl}
                 target="_blank"
                 rel="noreferrer"

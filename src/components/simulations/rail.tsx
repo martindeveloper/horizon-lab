@@ -2,7 +2,7 @@
 
 import { useRef, type ReactNode } from "react";
 
-import { PanelHeader, Sheet, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
+import { ListHeading, PanelHeader, Sheet, useFocusHandoff } from "@horizon/toolkit/ui";
 
 /** A titled block of a rail; a list gives its `count`, set after a hairline like an atlas index. */
 export function RailSection({
@@ -18,17 +18,7 @@ export function RailSection({
 }) {
   return (
     <section>
-      <h3 className={cn(kickerClass, "flex items-center gap-3")}>
-        {title}
-        {count === undefined ? null : (
-          <>
-            <span aria-hidden className="h-px flex-1 bg-border-strong" />
-            <span aria-hidden className="tabular-nums">
-              {count}
-            </span>
-          </>
-        )}
-      </h3>
+      <ListHeading count={count}>{title}</ListHeading>
       {note ? <p className="mt-1 text-ui text-fg-secondary">{note}</p> : null}
       <div className="mt-2">{children}</div>
     </section>

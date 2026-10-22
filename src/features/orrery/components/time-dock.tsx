@@ -180,12 +180,10 @@ function Timeline({ yearsAgo }: { yearsAgo: number }) {
               onClick={() => api().setYearsAgo(s.yearsAgo)}
               style={{ left: trackX(s.at) }}
               className={cn(
-                "absolute h-4 rounded-compact text-caption leading-4 tracking-wide whitespace-nowrap transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden",
+                "absolute h-4 rounded-compact text-caption leading-4 tracking-wide whitespace-nowrap ui-focus transition-colors duration-feedback ease-standard",
                 s.below ? "bottom-0" : "top-0",
                 end ? "-translate-x-full pr-2" : "pl-2",
-                s.id === epoch
-                  ? "font-medium text-accent"
-                  : "text-fg-tertiary hover:text-fg-primary",
+                s.id === epoch ? "font-medium text-accent" : "text-fg-tertiary ui-quiet",
               )}
             >
               {t(`epochs.${s.id}`, figures)}

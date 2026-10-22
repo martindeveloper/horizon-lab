@@ -375,7 +375,7 @@ export function SpectrumView({ className }: { className?: string }) {
           onPointerLeave={handlers.onPointerLeave}
           onDoubleClick={() => api().setRange(FULL_RANGE)}
           onKeyDown={handlers.onKeyDown}
-          className="absolute inset-x-0 top-5 bottom-5 cursor-crosshair touch-none rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute inset-x-0 top-5 bottom-5 cursor-crosshair touch-none rounded-sm ui-focus outline-hidden"
         />
         <p id="spectroscopy-spectrum-keys" className="sr-only">
           {t("spectrum.keys")}
@@ -409,7 +409,6 @@ export function SpectrumView({ className }: { className?: string }) {
               aria-label={t("spectrum.reset")}
               aria-disabled={from === FULL_RANGE[0] && to === FULL_RANGE[1]}
               onClick={() => api().setRange(FULL_RANGE)}
-              className="aria-disabled:opacity-40"
             >
               <ScanLine className="icon size-icon-compact" />
             </IconButton>

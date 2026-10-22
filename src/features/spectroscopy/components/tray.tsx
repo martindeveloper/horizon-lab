@@ -61,11 +61,11 @@ export function Tray({ panels, action }: { panels: readonly TrayPanel[]; action?
                   aria-pressed={i === active}
                   onClick={() => go(i)}
                   className={cn(
-                    "relative h-9 rounded-full px-3.5 text-ui transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden",
+                    "relative h-9 rounded-full ui-press px-3.5 text-ui ui-focus transition-colors duration-feedback ease-standard",
                     "after:absolute after:inset-x-0 after:-inset-y-1",
                     i === active
-                      ? "bg-fg-primary/10 font-medium text-fg-primary"
-                      : "text-fg-secondary",
+                      ? "bg-state-pressed font-medium text-fg-primary"
+                      : "text-fg-secondary ui-quiet",
                   )}
                 >
                   {panel.label}

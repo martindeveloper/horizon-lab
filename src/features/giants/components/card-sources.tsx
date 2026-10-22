@@ -8,7 +8,7 @@ import { cardSources } from "./card-specs";
 export function CardSources({ id, t }: { id: RungId; t: Translate }) {
   return (
     <details className="text-ui leading-relaxed text-fg-secondary">
-      <summary className="min-h-11 cursor-pointer rounded-compact py-3 outline-hidden focus-visible:ring-focus focus-visible:ring-ring">
+      <summary className="min-h-11 cursor-pointer rounded-compact ui-press py-3 ui-focus transition-colors duration-feedback ease-standard">
         {t("card.sources")}
       </summary>
       <p className="mt-1">{t("card.ranges")}</p>
@@ -25,7 +25,7 @@ export function CardSources({ id, t }: { id: RungId; t: Translate }) {
                 <dd key={key}>
                   {source.link ? (
                     <a
-                      className="underline underline-offset-2 hover:text-fg-primary"
+                      className="rounded-compact ui-quiet underline underline-offset-2 ui-focus transition-colors duration-feedback ease-standard"
                       href={source.link}
                     >
                       {source.cite}

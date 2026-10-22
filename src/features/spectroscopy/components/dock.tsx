@@ -104,7 +104,7 @@ function ElementTiles({
             /* A cell of the periodic table: atomic number in the corner, the symbol large, the
                name and atomic weight beneath. */
             className={cn(
-              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-control transition-colors duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden",
+              "@container relative flex h-12 min-w-0 flex-col items-center justify-center rounded-control ui-focus transition-colors duration-feedback ease-standard",
               "md:aspect-square md:h-auto md:max-h-24 md:gap-1 md:px-1.5 md:pt-3.5 md:pb-1.5",
               /* An unmarked element reads as a button: a hairline ring that brightens on hover.
                  A marked one takes the gold of its lines on the spectrum. */

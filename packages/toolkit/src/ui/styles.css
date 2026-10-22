@@ -160,10 +160,64 @@
     0 0 0 var(--stroke-outline) rgb(var(--solar) / 0.28), 0 0 40px rgb(var(--solar) / 0.12);
 }
 
+/* Shared states are opt-in; bespoke scene, catalogue and cockpit effects stay local. */
+@utility ui-focus {
+  @apply focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden;
+}
+
+@utility ui-disabled {
+  &:where(:disabled, [aria-disabled="true"], [data-disabled]) {
+    opacity: var(--control-disabled-opacity);
+    cursor: default;
+  }
+}
+
+/* Quiet controls brighten their label; the temporary press changes only their material. */
+@utility ui-quiet {
+  @apply enabled-hover:text-fg-primary;
+}
+
+@utility ui-press {
+  @apply enabled-active:bg-state-pressed;
+}
+
+@utility ui-row {
+  @variant enabled-hover {
+    @apply bg-state-hover;
+  }
+  @variant enabled-active {
+    @apply bg-state-pressed;
+  }
+}
+
+@utility ui-selected {
+  @apply bg-state-selected enabled-hover:bg-state-pressed;
+}
+
+@utility ui-outline {
+  @apply ring-outline ring-border-strong ring-inset enabled-hover:ring-border-hover;
+}
+
+@utility ui-glass {
+  @apply enabled-hover:text-accent enabled-hover:surface-halo;
+  @variant enabled-active {
+    @apply brightness-(--control-press-brightness);
+  }
+}
+
+@utility ui-filled {
+  @variant enabled-hover {
+    @apply brightness-(--control-hover-brightness);
+  }
+  @variant enabled-active {
+    @apply brightness-(--control-press-brightness);
+  }
+}
+
 /* Shared slider interaction; each thumb keeps its own size, fill, border and glow.
    As a utility, these defaults can be overridden by a control's transition/easing utilities. */
 @utility slider-thumb {
-  @apply block rounded-full outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-focus focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary active:scale-95;
+  @apply block rounded-full ui-focus outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary enabled-active:scale-95;
 }
 
 @utility anim-rise {
@@ -743,7 +797,7 @@
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  button:hover > .list-glyph > * {
+  button:hover:not(:disabled, [aria-disabled="true"], [data-disabled]) > .list-glyph > * {
     scale: 1.2;
   }
 }

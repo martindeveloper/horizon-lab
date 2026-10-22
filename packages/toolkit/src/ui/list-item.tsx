@@ -33,12 +33,12 @@ export function ListItem({
       type={type}
       aria-current={selected ? "true" : undefined}
       className={cn(
-        "relative flex min-h-11 w-full items-center justify-between gap-3 rounded-control px-3 py-2 text-left text-body/5 tracking-wide transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:min-h-9",
+        "relative flex min-h-11 w-full ui-disabled items-center justify-between gap-3 rounded-control ui-press px-3 py-2 text-left text-body/5 tracking-wide ui-focus transition-colors duration-feedback ease-standard md:min-h-9",
         selected
-          ? "bg-fg-primary/[0.07] text-fg-primary before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent"
+          ? "ui-selected text-fg-primary before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent"
           : selected === false
-            ? "text-fg-secondary hover:text-fg-primary"
-            : "text-fg-primary",
+            ? "ui-row text-fg-secondary ui-quiet"
+            : "ui-row text-fg-primary",
         className,
       )}
       {...props}
@@ -66,4 +66,23 @@ export function ListTrack({ className, ...props }: ComponentProps<"div">) {
 /** A stage name between a track's rows, over the names' column; the route runs on past it. */
 export function ListTrackLabel({ className, ...props }: ComponentProps<"p">) {
   return <p className={cn("list-track-label", kickerClass, className)} {...props} />;
+}
+
+export type ListHeadingProps = ComponentProps<"h3"> & { count?: number | undefined };
+
+/** A list's title, with its `count` set after a hairline like an atlas index. */
+export function ListHeading({ count, className, children, ...props }: ListHeadingProps) {
+  return (
+    <h3 className={cn(kickerClass, "flex items-center gap-3", className)} {...props}>
+      {children}
+      {count === undefined ? null : (
+        <>
+          <span aria-hidden className="h-px flex-1 bg-border-strong" />
+          <span aria-hidden className="tabular-nums">
+            {count}
+          </span>
+        </>
+      )}
+    </h3>
+  );
 }

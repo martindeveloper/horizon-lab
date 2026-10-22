@@ -198,7 +198,6 @@ export function VelocityLens({ step }: { step: ReactNode }) {
           value={[velocity]}
           valueText={kms}
           disabled={!line}
-          className="data-disabled:opacity-40"
           onValueChange={([v]) => api().setVelocity(v ?? 0)}
         />
         <p className="font-mono text-[11px] text-fg-tertiary tabular-nums not-md:hidden">

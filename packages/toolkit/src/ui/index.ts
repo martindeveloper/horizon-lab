@@ -19,7 +19,14 @@ export { ScaleBar, type ScaleBarProps } from "./scale-bar";
 export { Kicker, kickerClass, type KickerProps } from "./kicker";
 export { PanelHeader, type PanelHeaderProps } from "./panel-header";
 export { Chip, outlineClass, type ChipProps } from "./chip";
-export { ListItem, ListTrack, ListTrackLabel, type ListItemProps } from "./list-item";
+export {
+  ListHeading,
+  ListItem,
+  ListTrack,
+  ListTrackLabel,
+  type ListHeadingProps,
+  type ListItemProps,
+} from "./list-item";
 export { Orb, type OrbLook, type OrbProps } from "./orb";
 export { SwitchChip, SwitchMark, SwitchRow } from "./switch";
 export { Picker, type PickerProps } from "./picker";

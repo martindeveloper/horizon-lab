@@ -91,7 +91,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
                 type="button"
                 aria-label={t("storyNumber", { number: i + 1 })}
                 aria-current={i === index ? "step" : undefined}
-                className="hidden size-6 items-center justify-center rounded-full focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden md:flex"
+                className="hidden size-6 items-center justify-center rounded-full ui-focus md:flex"
                 onClick={() => show(i)}
               >
                 <span
@@ -106,7 +106,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
             {rotating ? (
               <button
                 type="button"
-                className="relative flex h-8 w-11 items-center justify-center text-fg-tertiary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg-primary md:size-8"
+                className="relative flex h-8 w-11 items-center justify-center rounded-full ui-press text-fg-tertiary ui-quiet ui-focus transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 md:size-8"
                 aria-label={t("pauseStories")}
                 onClick={() => setHeld(true)}
               >
@@ -115,7 +115,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
             ) : null}
             <button
               type="button"
-              className="relative flex h-8 w-11 items-center justify-center text-fg-tertiary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg-primary md:size-8"
+              className="relative flex h-8 w-11 items-center justify-center rounded-full ui-press text-fg-tertiary ui-quiet ui-focus transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 md:size-8"
               aria-label={t("previousStory")}
               onClick={() => show(index - 1)}
             >
@@ -123,7 +123,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
             </button>
             <button
               type="button"
-              className="relative flex h-8 w-11 items-center justify-center text-fg-tertiary transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 hover:text-fg-primary md:size-8"
+              className="relative flex h-8 w-11 items-center justify-center rounded-full ui-press text-fg-tertiary ui-quiet ui-focus transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 md:size-8"
               aria-label={t("nextStory")}
               onClick={() => show(index + 1)}
             >
@@ -155,7 +155,7 @@ function StoryContent({ alwaysOpen }: { alwaysOpen: boolean }) {
       {alwaysOpen ? null : (
         <button
           type="button"
-          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-ui tracking-label text-fg-tertiary uppercase transition-colors duration-feedback ease-standard after:absolute after:-inset-x-2 after:-inset-y-2.5 hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden short:hidden"
+          className="relative mt-1.5 inline-flex min-h-6 items-center font-mono text-ui tracking-label text-fg-tertiary ui-quiet uppercase ui-focus transition-colors duration-feedback ease-standard after:absolute after:-inset-x-2 after:-inset-y-2.5 short:hidden"
           onClick={() => {
             setHeld(true);
             setOpen((v) => !v);

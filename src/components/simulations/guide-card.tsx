@@ -154,7 +154,6 @@ export function GuideCard({
               onClick={() => {
                 if (!previous.disabled) previous.onClick();
               }}
-              className="aria-disabled:opacity-40"
             >
               <ChevronLeft className="icon" />
             </IconButton>

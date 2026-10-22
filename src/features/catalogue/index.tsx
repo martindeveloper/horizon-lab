@@ -59,7 +59,7 @@ function LabPanel({ simulation, t }: TileProps) {
           <Link
             href={simulation.href}
             prefetch={false}
-            className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-control motion-safe:ease-enter motion-safe:group-hover:translate-x-0.5"
+            className="action-fill inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-4 pl-5 text-sm font-medium ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary motion-safe:transition-transform motion-safe:duration-control motion-safe:ease-enter motion-safe:group-hover:translate-x-0.5"
           >
             {t(`${key}.open`)}
             <ArrowUpRight className="icon" aria-hidden />

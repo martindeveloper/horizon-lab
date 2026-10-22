@@ -103,7 +103,7 @@ export function Sheet({
             type="button"
             onClick={() => dismiss.current()}
             aria-label={dismissLabel}
-            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-fg-secondary opacity-0 transition-opacity duration-feedback ease-standard focus-visible:opacity-100 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
+            className="absolute top-1 right-0 flex size-9 items-center justify-center rounded-full text-fg-secondary opacity-0 ui-focus transition-opacity duration-feedback ease-standard focus-visible:opacity-100"
           >
             <X className="icon" aria-hidden />
           </button>

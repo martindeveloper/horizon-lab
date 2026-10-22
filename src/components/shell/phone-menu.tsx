@@ -62,7 +62,7 @@ export function PhoneMenu({
         aria-expanded={open}
         aria-controls={open ? id : undefined}
         onClick={() => setOpenOn(open ? null : pathname)}
-        className="flex size-11 items-center justify-center rounded-full text-fg-secondary transition-colors duration-feedback ease-standard hover:text-fg-primary focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden aria-expanded:text-fg-primary"
+        className="flex size-11 items-center justify-center rounded-full ui-press text-fg-secondary ui-quiet ui-focus transition-colors duration-feedback ease-standard aria-expanded:text-fg-primary"
       >
         {open ? <X className="icon" aria-hidden /> : <Menu className="icon" aria-hidden />}
       </button>
@@ -97,7 +97,7 @@ export function PhoneMenu({
                                 prefetch={false}
                                 aria-current={here ? "page" : undefined}
                                 onClick={close}
-                                className="flex min-h-12 items-center justify-between gap-4 rounded-card px-3 py-2 transition-colors duration-feedback ease-standard hover:bg-fg-primary/5 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden"
+                                className="flex min-h-12 items-center justify-between gap-4 rounded-card ui-row px-3 py-2 ui-focus transition-colors duration-feedback ease-standard"
                               >
                                 <span className="min-w-0">
                                   <span className="block text-panel font-medium tracking-tight text-fg-primary">

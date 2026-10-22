@@ -76,7 +76,7 @@ export function Dialog({
         aria-labelledby={titleId}
         // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard users scroll the body once focus leaves the close button.
         tabIndex={0}
-        className="scroll-thin min-h-0 flex-1 overflow-y-auto overscroll-contain focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset"
+        className="scroll-thin min-h-0 flex-1 overflow-y-auto overscroll-contain ui-focus focus-visible:ring-inset"
       >
         {children}
       </div>

@@ -204,7 +204,7 @@ export function AtlasOverlay() {
         </div>
         <button
           type="button"
-          className="glass-hud relative flex h-8 shrink-0 items-center rounded-full px-3 text-xs tracking-widest text-fg-primary uppercase not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5"
+          className="glass-hud relative flex h-8 shrink-0 items-center rounded-full px-3 text-xs tracking-widest text-fg-primary uppercase ui-focus transition-[filter] duration-feedback ease-standard not-md:after:absolute not-md:after:inset-x-0 not-md:after:-inset-y-1.5 enabled-active:brightness-(--control-press-brightness)"
           onClick={() => setMapOpen(false)}
         >
           <X className="mr-1.5 icon size-icon-compact" />
@@ -379,10 +379,10 @@ export function AtlasOverlay() {
                   aria-pressed={inspect === site.id}
                   onClick={() => show(site)}
                   className={cn(
-                    "glass-hud min-h-11 rounded-control px-3 py-2 text-left text-sm md:min-h-0",
+                    "glass-hud min-h-11 rounded-control px-3 py-2 text-left text-sm ui-focus transition-[color,filter] duration-feedback ease-standard md:min-h-0 enabled-active:brightness-(--control-press-brightness)",
                     inspect === site.id || presetId === site.preset
                       ? "text-fg-primary"
-                      : "text-fg-secondary hover:text-fg-primary",
+                      : "text-fg-secondary ui-quiet",
                   )}
                 >
                   {siteName(site, t)}

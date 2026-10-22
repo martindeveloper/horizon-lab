@@ -321,7 +321,7 @@ function ClockRun({
           </div>
 
           <details className="group mt-3 border-t border-border pt-1">
-            <summary className="flex h-11 cursor-pointer list-none items-center justify-between font-mono text-xs tracking-widest text-fg-tertiary uppercase transition-colors duration-feedback ease-standard hover:text-fg-primary md:h-8 [&::-webkit-details-marker]:hidden">
+            <summary className="flex h-11 cursor-pointer list-none items-center justify-between rounded-compact ui-press font-mono text-xs tracking-widest text-fg-tertiary ui-quiet uppercase ui-focus transition-colors duration-feedback ease-standard md:h-8 [&::-webkit-details-marker]:hidden">
               {t("clocksMore")}
               <ChevronDown className="icon size-icon-compact transition-transform duration-control ease-standard group-open:rotate-180" />
             </summary>

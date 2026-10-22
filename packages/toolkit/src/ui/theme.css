@@ -5,6 +5,16 @@
 /* Too short for the full HUD (a phone held sideways): docks and captions keep their essentials. */
 @custom-variant short (@media (height < 30rem));
 
+/* Native, focusable ARIA-disabled, and Radix controls share interaction eligibility. */
+@custom-variant enabled-hover {
+  @media (hover: hover) {
+    &:hover:where(:not(:disabled, [aria-disabled="true"], [data-disabled])) {
+      @slot;
+    }
+  }
+}
+@custom-variant enabled-active (&:active:where(:not(:disabled, [aria-disabled="true"], [data-disabled])));
+
 /* Shared tokens also support utilities compiled by individual simulations. */
 @theme static {
   /* Ordinary UI motion. Cinematic timelines and simulation clocks keep their own timing. */
@@ -116,6 +126,10 @@
   --shadow-low: var(--elevation-low);
   --shadow-panel: var(--elevation-panel);
   --shadow-overlay: var(--elevation-overlay);
+  /* Resolve against the current theme or a cockpit's scoped foreground. */
+  --color-state-hover: color-mix(in srgb, var(--color-fg-primary) 5%, transparent);
+  --color-state-pressed: color-mix(in srgb, var(--color-fg-primary) 10%, transparent);
+  --color-state-selected: color-mix(in srgb, var(--color-fg-primary) 7%, transparent);
   --color-border-hover: color-mix(in srgb, var(--color-fg-primary) 40%, transparent);
 
   --color-fg: var(--color-fg-primary);
@@ -127,6 +141,10 @@
 }
 
 :root {
+  --control-disabled-opacity: 0.4;
+  --control-hover-brightness: 1.1;
+  --control-press-brightness: 0.95;
+
   /* SVG viewBox units: strokes scale with glyph size, preserving Lucide's light feel. */
   --icon-stroke-standard: 2;
   --icon-stroke-emphasis: 2.5;

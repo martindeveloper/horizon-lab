@@ -16,6 +16,7 @@ export type IconButtonProps = ComponentProps<"button"> & {
 export function IconButton({
   className,
   active = false,
+  onClick,
   type = "button",
   ...props
 }: IconButtonProps) {
@@ -23,11 +24,22 @@ export function IconButton({
     <button
       type={type}
       className={cn(
-        "icon-button relative flex size-9 items-center justify-center rounded-full transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 focus-visible:ring-focus focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-40 md:size-8",
-        active ? "bg-fg-primary/10 text-fg-primary" : "text-fg-primary/80 hover:text-fg-primary",
+        "icon-button relative flex size-9 ui-disabled items-center justify-center rounded-full ui-press ui-focus transition-[color,background-color,filter] duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 md:size-8",
+        active
+          ? "bg-state-pressed text-fg-primary enabled-active:brightness-(--control-press-brightness)"
+          : "text-fg-primary/80 ui-quiet",
         className,
       )}
       {...props}
+      onClick={(event) => {
+        // ARIA-disabled controls stay focusable, but neither pointer nor keyboard clicks act.
+        if (props["aria-disabled"] === true || props["aria-disabled"] === "true") {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        onClick?.(event);
+      }}
     />
   );
 }
