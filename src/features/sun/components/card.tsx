@@ -17,6 +17,7 @@ export function PlaceCard({ id }: { id: PlaceId }) {
   const t = useSunT();
   const distance = useDistance();
   const closeUp = useSun((s) => s.closeUp);
+  const ride = useSun((s) => s.ride);
   const offerCloseUp = useSun(canCloseUp);
   return (
     <SelectionSheet
@@ -34,7 +35,17 @@ export function PlaceCard({ id }: { id: PlaceId }) {
               <ArrowLeft className="size-4" aria-hidden />
               {t("hud.leaveCloseUp")}
             </Action>
-            <p className="w-full text-xs text-muted">{t("hud.closeUpNote")}</p>
+            <Action
+              variant="ghost"
+              className="px-3"
+              aria-pressed={ride}
+              onClick={() => useSun.getState().setRide(!ride)}
+            >
+              {t(ride ? "hud.faceProbe" : "hud.ride")}
+            </Action>
+            <p className="w-full text-xs text-muted">
+              {t(ride ? "hud.rideNote" : "hud.closeUpNote")}
+            </p>
           </>
         ) : offerCloseUp ? (
           <Action className="flex-1" onClick={() => useSun.getState().enterCloseUp()}>

@@ -27,6 +27,7 @@ import { CUT_HALF_ANGLE } from "../lib/parameters";
 import { useSun } from "../lib/store";
 import { ROW_CLASS, ROWS_CLASS, RowLabel } from "./dock-rows";
 import { elapsedLabel, lightLegend, useDistance } from "./format";
+import { ParkerReadout } from "./parker-readout";
 import { PlaceStrip } from "./place-strip";
 
 /**
@@ -287,6 +288,7 @@ export function SunDock() {
         <LightLegend />
         <Clock />
         {action ? <ViewActionRow kind={action} /> : null}
+        {view === "orbit" ? <ParkerReadout /> : null}
       </div>
     </Dock>
   );

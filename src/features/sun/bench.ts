@@ -36,6 +36,8 @@ type SunBenchScene = BenchScene & {
   /** A place gone to as the finder goes (its view, light and clock), and its close-up entered. */
   place?: PlaceId;
   closeUp?: boolean;
+  /** Parker's close-up as the ride, behind its shield toward the Sun. */
+  ride?: boolean;
   /** Model seconds past the map's epoch at the first frame; a month by default. */
   start?: number;
 };
@@ -145,6 +147,26 @@ const SCENES: readonly SunBenchScene[] = [
     script: { frames: 30, duration: 3, keyframes: [0, 0.5, 1] },
   },
   {
+    ...still(
+      "surface",
+      "white",
+      "Wheel zoom onto the disc and back out: the orbit takes the point under the pointer and lets it go without turning the picture",
+    ),
+    id: "surface-zoom-south",
+    tags: ["sequence", "camera"],
+    script: {
+      frames: 120,
+      duration: 4,
+      input: [0.1, 0.13, 0.16, 0.19, 0.6, 0.63, 0.66, 0.69].map((at) => ({
+        kind: "wheel" as const,
+        at,
+        deltaY: at < 0.5 ? -400 : 400,
+        point: [0.58, 0.56] as const,
+      })),
+      keyframes: [0.08, 0.2, 0.35, 0.55, 0.72, 1],
+    },
+  },
+  {
     ...still("surface", "white", "The whole disc at economy quality"),
     id: "surface-economy",
     tags: ["quality"],
@@ -173,6 +195,30 @@ const SCENES: readonly SunBenchScene[] = [
       duration: DRIFT_LOOP,
       keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
     },
+  },
+  {
+    id: "parker-ride",
+    description:
+      "Riding with Parker into its closest pass at an hour a second: the Sun swells beyond the heat shield",
+    tags: ["sequence", "camera"],
+    view: "orbit",
+    light: "white",
+    clock: "hour",
+    ride: true,
+    start: PARKER_PERIHELION_S - 5 * 3600,
+    script: { frames: 600, duration: 10, keyframes: [0.3, 0.55, 0.8, 1] },
+  },
+  {
+    id: "parker-ride-corona",
+    description:
+      "Riding with Parker across the corona's edge, a day before its closest pass, at an hour a second",
+    tags: ["sequence", "camera"],
+    view: "orbit",
+    light: "white",
+    clock: "hour",
+    ride: true,
+    start: PARKER_PERIHELION_S - 30 * 3600,
+    script: { frames: 480, duration: 8, keyframes: [0.4, 0.5, 0.6, 1] },
   },
   {
     id: "parker-close-up",
@@ -210,7 +256,7 @@ export const benchTarget: BenchTarget = {
     /* The prominence volume is baked before the first frame, so every still shows it. */
     await Promise.all([prominenceDensity(false), prominenceDensity(true)]);
     /* A bench sequence draws its frames in one go: Parker's model is fetched first. */
-    if (scene.closeUp) await fetchSpacecraft("parker");
+    if (scene.closeUp || scene.ride) await fetchSpacecraft("parker");
     const store = useSun;
     /* The store outlives a mounted engine: leave an earlier scene's guide, card and drift. */
     store.getState().endGuide();
@@ -241,6 +287,7 @@ export const benchTarget: BenchTarget = {
       () => store.setState({}),
     );
     if (scene.closeUp) store.getState().enterCloseUp();
+    if (scene.ride) store.getState().rideParker();
     /* The engine steps at most a tenth of a second a frame: live up to the scene's moment. */
     const lived = Math.round((scene.at ?? 0) / FRAME_S);
     for (let index = 0; index < lived; index++)

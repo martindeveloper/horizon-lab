@@ -11,8 +11,10 @@ const resetReady = () => useSun.getState().setReady(false);
 
 /** The names the scene places: the Sun's, and each place's, by its id. */
 const NAME_KEYS = ["sun"];
-const placeNames = (t: ReturnType<typeof useTranslations>) =>
-  Object.fromEntries(PLACE_IDS.map((id) => [id, t(`places.${id}.title`)]));
+const placeNames = (t: ReturnType<typeof useTranslations>) => ({
+  ...Object.fromEntries(PLACE_IDS.map((id) => [id, t(`places.${id}.title`)])),
+  coronaEdge: t("hud.coronaEdge"),
+});
 
 export function SunCanvas() {
   const t = useTranslations("sun");

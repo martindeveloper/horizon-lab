@@ -41,6 +41,16 @@
     "closeUp": "Close-up",
     "leaveCloseUp": "Back to the Sun",
     "closeUpNote": "True size, heat shield to the Sun.",
+    "ride": "Ride along",
+    "faceProbe": "Face it",
+    "rideNote": "Behind the heat shield, looking at the Sun.",
+    "rideParker": "Ride with Parker",
+    "coronaEdge": "Corona's edge",
+    "parkerDate": "Date and time, UTC",
+    "parkerDistance": "Distance from the Sun's centre",
+    "parkerShield": "Heat shield's sunward face",
+    "parkerSunlight": "Sunlight, times Earth's",
+    "parkerInCorona": "Inside the corona",
     "places": "In view",
     "light": "Light",
     "clock": "Clock",
@@ -198,7 +208,9 @@
     "perihelion": "Closest approach",
     "probeSpeed": "Speed then",
     "aphelion": "Farthest",
-    "orbitPeriod": "Orbit"
+    "orbitPeriod": "Orbit",
+    "shieldTemperature": "Heat shield at closest",
+    "coronaEdge": "Corona's edge"
   },
   "rows": {
     "plain": "{value}",

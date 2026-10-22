@@ -44,6 +44,8 @@ export type SunSceneSettings = {
   view: SunViewId;
   /** Parker Solar Probe at its true size, the camera a few metres off. */
   closeUp: boolean;
+  /** In the close-up, behind the heat shield looking at the Sun. */
+  ride: boolean;
   /** 0 closed … 1 a quarter wedge. */
   cut: number;
   fieldLines: boolean;

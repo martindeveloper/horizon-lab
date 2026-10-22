@@ -316,3 +316,38 @@ test("Parker plunges to 9.86 R☉ at its record perihelia and swings out past 15
   /* Two days after perihelion it is already more than twice as far out. */
   assert.ok(r("2025-06-21T09:08Z") > 2 * PARKER_PERIHELION_R);
 });
+
+test("Parker's heat shield runs hottest at perihelion and cools as r^−½ on the way out", async () => {
+  const { parkerShieldC, parkerSunlight, PARKER_APHELION_R } =
+    await import("../src/space/sun/model/parker.ts");
+  const { PARKER_PERIHELION_R, PARKER_SHIELD_PERIHELION_C } =
+    await import("../src/space/sun/model/parameters.ts");
+  const { AU_KM, SOLAR_RADIUS_KM } = await import("@horizon/toolkit/science");
+  assert.ok(Math.abs(parkerShieldC(PARKER_PERIHELION_R) - PARKER_SHIELD_PERIHELION_C) < 1e-9);
+  /* Four times as far, half the absolute temperature. */
+  const K = (c) => c + 273.15;
+  const ratio = K(parkerShieldC(4 * PARKER_PERIHELION_R)) / K(PARKER_SHIELD_PERIHELION_C);
+  assert.ok(Math.abs(ratio - 0.5) < 1e-9, `${ratio}`);
+  assert.ok(parkerShieldC(PARKER_APHELION_R) < 200, "out near Venus it cools to a few hundred °C");
+  /* Earth's sunlight at one astronomical unit; hundreds of times it at perihelion. */
+  assert.ok(Math.abs(parkerSunlight(AU_KM / SOLAR_RADIUS_KM) - 1) < 1e-12);
+  assert.ok(parkerSunlight(PARKER_PERIHELION_R) > 400);
+});
+
+test("Parker's ride opens from anywhere unless the journey or the drift holds the camera", async () => {
+  const { useSun } = await import("../src/features/sun/lib/store.ts");
+  const api = useSun.getState;
+  api().select(null);
+  api().rideParker();
+  assert.equal(api().closeUp, true);
+  assert.equal(api().ride, true);
+  assert.equal(api().selection, "parker");
+  api().setRide(false);
+  assert.equal(api().ride, false, "the close-up turns to face the probe");
+  api().leaveCloseUp();
+  api().startGuide();
+  api().rideParker();
+  assert.equal(api().closeUp, false, "the journey keeps the camera");
+  api().endGuide();
+  api().select(null);
+});

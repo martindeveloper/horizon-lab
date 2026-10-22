@@ -32,6 +32,7 @@ import {
 import {
   DEFAULT_INSETS,
   createLabels,
+  type PlaceLabel,
   createOrbitControls,
   createOrbitRig,
   createReadoutClock,
@@ -268,6 +269,8 @@ export function createSunEngine(
     const parker = createParkerLayer(basics, scene, {
       gamut: looks.uniforms.uGamut.value,
       invalidate: () => loop.invalidate(),
+      /* The labels are made with the camera's machinery below; the layer names only while drawing. */
+      place: (...args: Parameters<PlaceLabel>) => place(...args),
     });
     const tables = createLightTables(scope, hooks.interior);
     const globe = createGlobeLayer(scope, scene, looks, tables);
@@ -329,8 +332,8 @@ export function createSunEngine(
     /** The orbit's centre and its turn, as the rig reads them. */
     const orbitOrigin = new Vector3();
     const orbitFrame = new Quaternion();
-    /** What the orbit is about: a feature view's feature, Parker in its close-up, the drift's turning frame, or the Sun's centre (null). */
-    let framed: SunViewId | "parker" | "drift" | null = null;
+    /** What the orbit is about: a feature view's feature, Parker in its close-up, the surface point zoomed toward, the drift's turning frame, or the Sun's centre (null). */
+    let framed: SunViewId | "parker" | "pointer" | "drift" | null = null;
     /** The Sun's turn as the drift began. */
     let driftTurn = 0;
     const aboutFeature = () => framed !== null && framed !== "drift";
@@ -423,7 +426,15 @@ export function createSunEngine(
     const reframe = (f: SunFrame, dt?: number) => {
       const playing = hooks.drift?.state() === "playing";
       const target = playing ? null : aimOf(f);
-      const wanted = playing ? "drift" : target ? (current.closeUp ? "parker" : view) : null;
+      const wanted = playing
+        ? "drift"
+        : !target
+          ? null
+          : current.closeUp
+            ? "parker"
+            : viewAim(view, f)
+              ? view
+              : "pointer";
       if (wanted === framed) {
         orbitFor(f, target, dt);
         return;
@@ -456,11 +467,16 @@ export function createSunEngine(
         return;
       }
       const { look } = attitude;
-      settling = Math.max(Math.abs(look.yaw), Math.abs(look.pitch), Math.abs(attitude.roll)) > 1e-4;
+      /* A point the visitor zoomed toward keeps the picture upright as it was: over a point
+         seen from nearly overhead the orbit's own up is any way round, so only the look eases
+         onto the point, never the roll. */
+      const keepsRoll = framed === "pointer";
+      const roll = keepsRoll ? 0 : attitude.roll;
+      settling = Math.max(Math.abs(look.yaw), Math.abs(look.pitch), Math.abs(roll)) > 1e-4;
       const k = !settling || reduceMotion.matches ? 1 : 1 - Math.exp(-dt / AIM_LAG_S);
       look.yaw -= look.yaw * k;
       look.pitch -= look.pitch * k;
-      attitude.roll -= attitude.roll * k;
+      attitude.roll -= roll * k;
     };
     const views = createViewMoves(
       rig,
@@ -652,6 +668,7 @@ export function createSunEngine(
     let view = current.view;
     let level = current.quality;
     let closeUp = false;
+    let ride = false;
     const halfTan = () => {
       const tall = Math.tan((camera.fov * Math.PI) / 360);
       return Math.min(tall, tall * camera.aspect);
@@ -688,13 +705,23 @@ export function createSunEngine(
       if (s.closeUp !== closeUp) {
         /* Into Parker's orbit where the camera stands, then the dive; out, back to the view. */
         closeUp = s.closeUp;
+        ride = s.ride;
         autoFramed = !closeUp;
         pointerAim = null;
         reframe(frame());
         if (closeUp) {
-          const pose = sunwardCloseUpPose(parker.frame, halfTan());
+          const pose = ride
+            ? parker.ridePose(halfTan())
+            : sunwardCloseUpPose(parker.frame, halfTan());
           rig.flyTo(pose.distance, pose);
         } else if (s.view === view) views.flyToView(view);
+      } else if (closeUp && s.ride !== ride) {
+        /* Round the probe: behind its shield toward the Sun, or back in front of it. */
+        ride = s.ride;
+        const pose = ride
+          ? parker.ridePose(halfTan())
+          : sunwardCloseUpPose(parker.frame, halfTan());
+        rig.flyTo(pose.distance, pose);
       }
       if (s.view !== view) {
         view = s.view;
@@ -728,7 +755,8 @@ export function createSunEngine(
     let lastReadouts: SunReadouts | null = null;
     /** Round a feature the camera stays over its horizon, whatever a drag asks. */
     const keepOverHorizon = () => {
-      if (!aboutFeature() || rig.flying || (drift?.flying ?? false)) return;
+      /* Parker stands off the Sun: its close-up circles it freely, even from behind. */
+      if (!aboutFeature() || framed === "parker" || rig.flying || (drift?.flying ?? false)) return;
       /* Over the feature's horizon, and outside the globe's shell: the camera's radius is at
          least the feature's plus its height over the feature, d·sin(elevation), so the elevation
          that keeps it CAMERA_MIN_R from the centre is the floor. */

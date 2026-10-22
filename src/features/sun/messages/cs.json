@@ -41,6 +41,16 @@
     "closeUp": "Zblízka",
     "leaveCloseUp": "Zpět ke Slunci",
     "closeUpNote": "Skutečná velikost, tepelným štítem ke Slunci.",
+    "ride": "Letět s ní",
+    "faceProbe": "Pohled na ni",
+    "rideNote": "Za tepelným štítem, s výhledem na Slunce.",
+    "rideParker": "Letět s Parkerem",
+    "coronaEdge": "Okraj koróny",
+    "parkerDate": "Datum a čas, UTC",
+    "parkerDistance": "Vzdálenost od středu Slunce",
+    "parkerShield": "Přivrácená strana tepelného štítu",
+    "parkerSunlight": "Sluneční světlo, násobek pozemského",
+    "parkerInCorona": "Uvnitř koróny",
     "places": "V záběru",
     "light": "Světlo",
     "clock": "Hodiny",
@@ -198,7 +208,9 @@
     "perihelion": "Nejbližší přiblížení",
     "probeSpeed": "Rychlost při průletu",
     "aphelion": "Nejdál",
-    "orbitPeriod": "Oběh"
+    "orbitPeriod": "Oběh",
+    "shieldTemperature": "Tepelný štít v perihéliu",
+    "coronaEdge": "Okraj koróny"
   },
   "rows": {
     "plain": "{value}",

@@ -79,7 +79,12 @@ export type SunStore = SceneSlice &
     selection: PlaceId | null;
     /** Parker Solar Probe at its true size (`canCloseUp`). */
     closeUp: boolean;
+    /** In the close-up, riding behind the heat shield toward the Sun rather than facing it. */
+    ride: boolean;
     enterCloseUp: () => void;
+    /** Parker's close-up straight into the ride, from anywhere it may begin. */
+    rideParker: () => void;
+    setRide: (ride: boolean) => void;
     leaveCloseUp: () => void;
     panel: Panel;
     /* Readouts the engine writes a few times a second. */
@@ -124,6 +129,10 @@ const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 export const canCloseUp = (s: Pick<SunStore, "selection" | "guideOpen" | "drift">) =>
   s.selection === "parker" && !s.guideOpen && s.drift === "off";
 
+/** Parker can be ridden whenever its card could offer the close-up. */
+export const canRide = (s: Pick<SunStore, "guideOpen" | "drift">) =>
+  canCloseUp({ ...s, selection: "parker" });
+
 /** The View panel's settings as a visit starts; `resetView` puts them back. */
 const VIEW_SETTINGS = { show: DEFAULT_SHOW, wideColour: false, ...RESET_SCENE_SETTINGS } as const;
 
@@ -144,9 +153,14 @@ export const useSun = create<SunStore>((set, get) => ({
   setWideColour: (wideColour) => set({ wideColour }),
   selection: null,
   closeUp: false,
+  ride: false,
   enterCloseUp: () => {
-    if (canCloseUp(get())) set({ closeUp: true, panel: "none" });
+    if (canCloseUp(get())) set({ closeUp: true, ride: false, panel: "none" });
   },
+  rideParker: () => {
+    if (canRide(get())) set({ selection: "parker", closeUp: true, ride: true, panel: "none" });
+  },
+  setRide: (ride) => set({ ride }),
   leaveCloseUp: () => set({ closeUp: false }),
   panel: "none",
   elapsed: 0,

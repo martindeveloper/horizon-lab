@@ -48,6 +48,10 @@ export const PARKER_PERIHELION_SPEED_KM_S = 191;
 export const PARKER_ECCENTRICITY = 0.8819;
 export const PARKER_PERIOD_D = 88.44;
 export const PARKER_PERIHELION_EPOCH = Date.UTC(2025, 5, 19, 9, 8);
+/** Its heat shield's sunward face at the closest passes, °C: NASA's 2,500 °F. */
+export const PARKER_SHIELD_PERIHELION_C = ((2500 - 32) * 5) / 9;
+/** Where it first flew below the Alfvén surface, the corona's outer edge, 28 April 2021: radii from the centre (Kasper et al. 2021). */
+export const PARKER_CORONA_EDGE_R = 18.8;
 export const MAP_WINDOW_D = 21;
 /** The Carrington rotation as seen from Earth, days (Carrington 1863; the synodic period). */
 export const CARRINGTON_SYNODIC_PERIOD_D = 27.2753;

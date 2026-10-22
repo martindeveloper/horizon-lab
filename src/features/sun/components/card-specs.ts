@@ -197,6 +197,8 @@ export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<Badge>>> = {
       ["probeSpeed", parker.speed],
       ["aphelion", parker.aphelion],
       ["orbitPeriod", parker.period],
+      ["shieldTemperature", parker.shield],
+      ["coronaEdge", parker.coronaEdge],
       ["temperature", corona.temperature],
       ["windFast", corona.windFast],
     ),

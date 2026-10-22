@@ -1,10 +1,12 @@
 import { keplerPosition, type Vec3 } from "@horizon/toolkit/bodies";
+import { AU_KM, SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
 
 import {
   PARKER_ECCENTRICITY,
   PARKER_PERIHELION_EPOCH,
   PARKER_PERIHELION_R,
   PARKER_PERIOD_D,
+  PARKER_SHIELD_PERIHELION_C,
 } from "./parameters";
 
 /**
@@ -48,3 +50,18 @@ export const parkerAt = (ms: number, out: Vec3 = [0, 0, 0]): Vec3 =>
     },
     out,
   );
+
+/** Celsius to kelvin. */
+const ZERO_C_K = 273.15;
+/** One astronomical unit in solar radii: where sunlight has its Earth strength. */
+const AU_R = AU_KM / SOLAR_RADIUS_KM;
+
+/** How much stronger the sunlight is than at Earth's mean distance, at `r` solar radii. */
+export const parkerSunlight = (r: number) => (AU_R / r) ** 2;
+
+/**
+ * The heat shield's sunward face at `r` solar radii, °C: a surface in radiative balance warms
+ * as the fourth root of the light it takes, so as r^−½, from NASA's figure at perihelion.
+ */
+export const parkerShieldC = (r: number) =>
+  (PARKER_SHIELD_PERIHELION_C + ZERO_C_K) * Math.sqrt(PARKER_PERIHELION_R / r) - ZERO_C_K;

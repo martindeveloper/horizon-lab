@@ -68,6 +68,7 @@ function settingsOf(s: SunStore): SunSceneSettings {
   return {
     view: s.view,
     closeUp: s.closeUp,
+    ride: s.ride,
     cut: s.cut,
     fieldLines: s.show.fieldLines,
     names: s.show.names,
