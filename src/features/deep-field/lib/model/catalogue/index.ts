@@ -28,6 +28,14 @@ export const CATALOGUE = {
  * "{sunRadiusKpc} kpc".
  */
 export const PROSE_FIGURES = {
+  cf4Groups: COSMOS.cosmicSurveys.groups,
+  classixClusters: COSMOS.cosmicSurveys.clusters,
+  desiGalaxies: COSMOS.cosmicSurveys.galaxies,
+  basinCount: COSMOS.cosmicBasins.count,
+  voidCount: COSMOS.cosmicVoids.count,
+  knotCount: COSMOS.cosmicKnots.count,
+  atlasH: COSMOS.cosmicBasins.h,
+  voidSupport: COSMOS.cosmicVoids.support,
   galacticYearMyr: GALAXY.sun.lap,
   sunRadiusKpc: GALAXY.sun.centre,
   radialSwingKpc: GALAXY.sun.radialSwing,

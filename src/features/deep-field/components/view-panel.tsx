@@ -14,6 +14,14 @@ import { SwitchChips } from "@/components/simulations/switch-chips";
 import { useDeepField, type Show } from "../lib/store";
 
 const SWITCHES: (keyof Show)[] = ["names", "distances", "lightTime", "halo"];
+const ATLAS_SWITCHES = [
+  "cosmicMeasured",
+  "cosmicBasins",
+  "cosmicVoids",
+  "cosmicKnots",
+  "cosmicGuides",
+  "cosmicIllustrations",
+] as const;
 
 /** How the map is drawn: what it shows, the distance unit, and buttons to turn the camera. */
 export function ViewPanel({ onClose }: { onClose: () => void }) {
@@ -35,6 +43,17 @@ export function ViewPanel({ onClose }: { onClose: () => void }) {
           label={(key) => t(`toggles.${key}`)}
           onToggle={(key) => useDeepField.getState().patchShow({ [key]: !show[key] })}
         />
+      </RailSection>
+      <RailSection title={t("atlas.layersTitle")}>
+        <SwitchChips
+          list
+          keys={ATLAS_SWITCHES}
+          values={show}
+          label={(key) => t(`atlas.layers.${key}`)}
+          onToggle={(key) => useDeepField.getState().patchShow({ [key]: !show[key] })}
+        />
+        <p className="mt-3 text-xs leading-relaxed text-fg-secondary">{t("atlas.coverage")}</p>
+        <p className="mt-2 text-xs leading-relaxed text-fg-secondary">{t("atlas.glyphs")}</p>
       </RailSection>
       <RailSection title={t("hud.units")}>
         <DistanceUnitControl

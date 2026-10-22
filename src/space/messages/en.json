@@ -119,7 +119,20 @@
     "cygnus-x1": "Cygnus X-1",
     "sgr-a": "Sagittarius A*",
     "m87": "M87*",
-    "ton-618": "TON 618"
+    "ton-618": "TON 618",
+    "quipu": "Quipu",
+    "vela": "Vela Supercluster",
+    "southPoleWall": "South Pole Wall",
+    "shapleyBasin": "Shapley basin",
+    "sloanBasin": "Sloan basin",
+    "ophiuchusBasin": "Ophiuchus basin",
+    "localVoid": "Local Void",
+    "northernLocalVoid": "Northern Local Void",
+    "sculptorVoid": "Sculptor Void",
+    "cosmicSurveys": "Observed survey catalogues",
+    "cosmicBasins": "Flow basins",
+    "cosmicVoids": "Reconstructed voids",
+    "cosmicKnots": "Reconstructed knots"
   },
   "hud": {
     "controls": "Controls",

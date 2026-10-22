@@ -1,3 +1,4 @@
+import type { AtlasId, AtlasShow } from "@/space/cosmos/model/atlas";
 /**
  * What the shared worlds beyond the solar system draw with: the switches their layers read, the
  * selections their names and targets open, and the frame an engine hands every layer. A host
@@ -15,7 +16,7 @@ import type { NeighbourId } from "./model/neighbours";
 export type Realm = "solar" | "stars" | "galaxy" | "cosmos";
 
 /** The switches the Galaxy, the nearest stars, the reach and the cosmic map read. */
-export type GalaxyShow = {
+export type GalaxyShow = Partial<AtlasShow> & {
   /** The dark-matter halo's sphere. */
   halo: boolean;
   names: boolean;
@@ -30,6 +31,7 @@ export type GalaxyId = "milkyway" | "sun" | "bulge" | "halo";
 
 /** Structures beyond the Galaxy with a card. */
 export type CosmosId =
+  | AtlasId
   | "localGroup"
   | "localSheet"
   | "andromeda"

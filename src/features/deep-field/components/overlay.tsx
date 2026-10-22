@@ -14,6 +14,7 @@ import { LoadingBadge, VisualizationOverlay, cn } from "@horizon/toolkit/ui";
 import { HELP } from "../lib/help";
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { useDeepField, type DeepFieldStore } from "../lib/store";
+import { AtlasLegend } from "./atlas-legend";
 import { DepthLadder } from "./depth-ladder";
 import { DeepFieldGuide } from "./guide";
 import { ObjectsPanel } from "./objects-panel";
@@ -96,6 +97,7 @@ export function DeepFieldOverlay() {
                 drift={() => useDeepField.getState().startDrift()}
               />
             </div>
+            <AtlasLegend />
             <LoadingBadge label={t("hud.sharpening")} visible={sharpening} className="mt-2" />
           </header>
           {/* The map's scale sits under the ladder, where wide screens keep the depth instruments. */}

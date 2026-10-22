@@ -19,15 +19,23 @@ import {
 
 import type { CosmosLooks } from "../graphics/looks";
 import {
+  ATLAS_LABELS,
+  ATLAS_LANDMARKS,
+  atlasVisibility,
+  type AtlasLandmarkId,
+  type AtlasLayer,
+  type AtlasShow,
+} from "../model/atlas";
+import {
   COSMIC_VIEW_LY,
-  COSMOS_LABELS,
+  type COSMOS_LABELS,
   LOCAL_GROUP_CENTRE,
   anchorById,
   anchorToday,
 } from "../model/cosmos";
 import { expandAbout, type CosmosClouds } from "./cosmos-clouds";
 
-type LabelKey = (typeof COSMOS_LABELS)[number];
+type LabelKey = (typeof COSMOS_LABELS)[number] | AtlasLandmarkId;
 type Mark = {
   key: LabelKey;
   pick: Selection;
@@ -40,6 +48,7 @@ type Mark = {
   frame: number;
   /** 0..1 presence by camera distance (ly). */
   range: (ly: number) => number;
+  layer?: AtlasLayer;
 };
 
 const samePick = (a: Selection, b: Selection) =>
@@ -62,12 +71,27 @@ export function createCosmosMarks(
   const lgCentre = new Vector3(...LOCAL_GROUP_CENTRE);
   const wallToday = new Vector3(...anchorToday(anchorById("sloanGreatWall")));
   const wallCentre = wallToday.clone();
+  const atlasMarks = ATLAS_LABELS.map((id) => ({
+    id,
+    today: new Vector3(...ATLAS_LANDMARKS[id].at),
+    at: new Vector3(...ATLAS_LANDMARKS[id].at),
+  }));
   /* Laniakea's inner landmarks give way once the web is in frame. */
   const insideWeb = (ly: number) => 1 - rising(ly, 1.3e9, 2.2e9);
   /* The web's names give way to the observable universe. */
   const insideUniverse = (ly: number) => 1 - rising(ly, 8e9, 2e10);
 
   const marks: Mark[] = [
+    ...atlasMarks.map(({ id, at }): Mark => ({
+      key: id,
+      pick: { kind: "cosmos", id },
+      style: BELOW,
+      at,
+      spot: id,
+      layer: ATLAS_LANDMARKS[id].layer,
+      frame: COSMIC_VIEW_LY.web,
+      range: (ly) => rising(ly, 450e6, 1e9) * insideUniverse(ly),
+    })),
     {
       key: "milkyway",
       pick: { kind: "galaxy", id: "milkyway" },
@@ -242,7 +266,8 @@ export function createCosmosMarks(
     /** What a tap on each label opens. */
     picks: new Map<string, Selection>(marks.map((mark) => [mark.key, mark.pick])),
     hide(place: PlaceLabel) {
-      for (const key of COSMOS_LABELS) place(key, 0, 0, 0, false);
+      for (const mark of marks) place(mark.key, 0, 0, 0, false);
+      for (const mesh of spots.values()) mesh.visible = false;
     },
     /**
      * Places every label at `labelled` times its presence, and moves each place's target to the
@@ -254,10 +279,11 @@ export function createCosmosMarks(
       shown: number,
       place: PlaceLabel,
       toPx: (object: Object3D, local: Vector3, px: number) => void,
+      layers: AtlasShow = atlasVisibility({}),
     ) {
       for (const record of best.values()) record.mark = null;
       for (const mark of marks) {
-        const alpha = mark.range(ly);
+        const alpha = mark.layer && !layers[mark.layer] ? 0 : mark.range(ly);
         root.localToWorld(at.copy(mark.at));
         place(mark.key, at.x, at.y, at.z, labelled * alpha, mark.style);
         if (alpha * shown < 0.3) continue;
@@ -281,6 +307,7 @@ export function createCosmosMarks(
     /** Moves the marks that are no cluster's (the Great Wall's) with the universe at scale `a`. */
     setExpansion(a: number, sun: Vector3) {
       expandAbout(wallCentre, wallToday, sun, a);
+      for (const mark of atlasMarks) expandAbout(mark.at, mark.today, sun, a);
     },
     /** Where the distance ruler ends (root-local): the selected structure, or what the scale frames. */
     rulerEnd(sel: Selection | null, ly: number): Vector3 {

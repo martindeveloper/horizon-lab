@@ -1,10 +1,15 @@
+import { Satellite } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
+import { BodyOrb, GLYPH_ICON } from "@/components/simulations/body-orb";
 import { Rail, RailSection } from "@/components/simulations/rail";
 import { SolarObjectPicks } from "@/components/simulations/solar-picks";
+import { ATLAS_LANDMARKS, isAtlasLandmark, type AtlasId } from "@/space/cosmos/model/atlas";
+import { neighbour } from "@/space/galaxy/model/neighbours";
 import { viewOf } from "@/space/solar-system/model/framing";
 import { PROBES } from "@/space/solar-system/model/probes";
-import { ListItem } from "@horizon/toolkit/ui";
+import { ListItem, Orb, type OrbLook } from "@horizon/toolkit/ui";
 
 import type { ViewId } from "../lib/model/view-ids";
 import { useDeepField, type CosmosId, type Selection } from "../lib/store";
@@ -25,11 +30,34 @@ const BEYOND: readonly { id: CosmosId; label: string; view: ViewId }[] = [
   { id: "observableUniverse", label: "names.observableUniverse", view: "observable-universe" },
 ];
 
-const MILKY_WAY: readonly { id: "milkyway" | "sun" | "bulge" | "halo"; label: string }[] = [
-  { id: "milkyway", label: "names.milkyway" },
-  { id: "sun", label: "cards.galaxy.sun.title" },
-  { id: "bulge", label: "names.bulge" },
-  { id: "halo", label: "names.halo" },
+/** The Galaxy's parts, each marked by its shape: a disc's haze, the bulge's glow, the halo's bound. */
+const MILKY_WAY: readonly {
+  id: "milkyway" | "sun" | "bulge" | "halo";
+  label: string;
+  look: OrbLook;
+}[] = [
+  { id: "milkyway", label: "names.milkyway", look: "haze" },
+  { id: "sun", label: "cards.galaxy.sun.title", look: "glow" },
+  { id: "bulge", label: "names.bulge", look: "glow" },
+  { id: "halo", label: "names.halo", look: "swarm" },
+];
+
+/** A spread mark (a galaxy's haze) is drawn wider than a body. */
+const LOOK_PX: Readonly<Partial<Record<OrbLook, number>>> = { haze: 16 };
+const ATLAS_OBJECTS: readonly AtlasId[] = [
+  "quipu",
+  "vela",
+  "southPoleWall",
+  "shapleyBasin",
+  "sloanBasin",
+  "ophiuchusBasin",
+  "localVoid",
+  "northernLocalVoid",
+  "sculptorVoid",
+  "cosmicSurveys",
+  "cosmicBasins",
+  "cosmicVoids",
+  "cosmicKnots",
 ];
 
 /** Everything to find, near to far: picking one flies to the view that frames it. */
@@ -38,17 +66,28 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
   const pick = (sel: Selection, view: ViewId) => {
     const api = useDeepField.getState();
     api.setView(view);
+    if (sel.kind === "cosmos") {
+      if (isAtlasLandmark(sel.id)) api.patchShow({ [ATLAS_LANDMARKS[sel.id].layer]: true });
+      else if (sel.id === "cosmicSurveys") api.patchShow({ cosmicMeasured: true });
+      else if (sel.id === "cosmicBasins" || sel.id === "cosmicVoids" || sel.id === "cosmicKnots")
+        api.patchShow({ [sel.id]: true });
+    }
     api.select(sel);
     api.setPanel("none");
   };
-  const list = (items: readonly { key: string; label: string; onClick: () => void }[]) => (
-    <div className="grid gap-1">
-      {items.map(({ key, label, onClick }) => (
-        <ListItem key={key} onClick={onClick}>
-          {t(label)}
-        </ListItem>
-      ))}
-    </div>
+  const section = (
+    title: string,
+    items: readonly { key: string; label: string; icon: ReactNode; onClick: () => void }[],
+  ) => (
+    <RailSection title={title} count={items.length}>
+      <div className="-mx-3 grid gap-0.5">
+        {items.map(({ key, label, icon, onClick }) => (
+          <ListItem key={key} icon={icon} onClick={onClick}>
+            {t(label)}
+          </ListItem>
+        ))}
+      </div>
+    </RailSection>
   );
   return (
     <Rail
@@ -62,47 +101,59 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
         belts={["asteroids", "kuiper", "scattered", "oort"]}
         onPick={(sel) => pick(sel, viewOf(sel))}
       />
-      <RailSection title={t("hud.reach")}>
-        {list([
-          ...PROBES.map(({ id }) => ({
-            key: id,
-            label: `names.${id}`,
-            onClick: () => pick({ kind: "reach", id }, "heliosphere"),
-          })),
-          {
-            key: "heliopause",
-            label: "names.heliopause",
-            onClick: () => pick({ kind: "reach", id: "heliopause" }, "heliosphere"),
-          },
-        ])}
-      </RailSection>
-      <RailSection title={t("hud.neighbours")}>
-        {list(
-          NEIGHBOUR_IDS.map((id) => ({
-            key: id,
-            label: `names.${id}`,
-            onClick: () => pick({ kind: "star", id }, "stars"),
-          })),
-        )}
-      </RailSection>
-      <RailSection title={t("hud.galaxyItems")}>
-        {list(
-          MILKY_WAY.map(({ id, label }) => ({
+      {section(t("hud.reach"), [
+        ...PROBES.map(({ id }) => ({
+          key: id,
+          label: `names.${id}`,
+          icon: <Satellite aria-hidden className={GLYPH_ICON} />,
+          onClick: () => pick({ kind: "reach", id }, "heliosphere"),
+        })),
+        {
+          key: "heliopause",
+          label: "names.heliopause",
+          icon: <Orb look="swarm" />,
+          onClick: () => pick({ kind: "reach", id: "heliopause" }, "heliosphere"),
+        },
+      ])}
+      {section(
+        t("hud.neighbours"),
+        NEIGHBOUR_IDS.map((id) => ({
+          key: id,
+          label: `names.${id}`,
+          icon: <Orb look="glow" color={neighbour(id).color} />,
+          onClick: () => pick({ kind: "star", id }, "stars"),
+        })),
+      )}
+      {section(
+        t("hud.galaxyItems"),
+        MILKY_WAY.map(({ id, label, look }) => ({
+          key: id,
+          label,
+          icon: id === "sun" ? <BodyOrb id="sun" /> : <Orb look={look} size={LOOK_PX[look]} />,
+          onClick: () => pick({ kind: "galaxy", id }, "galaxy"),
+        })),
+      )}
+      {section(
+        t("hud.cosmosItems"),
+        BEYOND.map(({ id, label, view }) => {
+          const look = id === "observableUniverse" ? "swarm" : "haze";
+          return {
             key: id,
             label,
-            onClick: () => pick({ kind: "galaxy", id }, "galaxy"),
-          })),
-        )}
-      </RailSection>
-      <RailSection title={t("hud.cosmosItems")}>
-        {list(
-          BEYOND.map(({ id, label, view }) => ({
-            key: id,
-            label,
+            icon: <Orb look={look} size={LOOK_PX[look]} />,
             onClick: () => pick({ kind: "cosmos", id }, view),
-          })),
-        )}
-      </RailSection>
+          };
+        }),
+      )}
+      {section(
+        t("atlas.finderTitle"),
+        ATLAS_OBJECTS.map((id) => ({
+          key: id,
+          label: `names.${id}`,
+          icon: <Orb look="haze" size={LOOK_PX.haze} />,
+          onClick: () => pick({ kind: "cosmos", id }, "cosmic-web"),
+        })),
+      )}
     </Rail>
   );
 }

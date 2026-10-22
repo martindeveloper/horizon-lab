@@ -10,6 +10,7 @@ import {
   type Of,
   type Translate,
 } from "@/lib/facts";
+import { ATLAS_CARD_SOURCES, ATLAS_SOURCES, isAtlasId } from "@/space/cosmos/model/atlas";
 import {
   NEIGHBOURS,
   closestApproach,
@@ -68,8 +69,24 @@ export function cardFor(
       return starCard(t, d, sel);
     case "galaxy":
       return staticCard(t, d, `cards.galaxy.${sel.id}`, GALAXY_CARDS[sel.id]);
-    case "cosmos":
-      return staticCard(t, d, `cards.cosmos.${sel.id}`, COSMOS_CARDS[sel.id]);
+    case "cosmos": {
+      const key = `cards.cosmos.${sel.id}`;
+      const spec = COSMOS_CARDS[sel.id];
+      // Publication badges follow the pinned source manifest when a preprint is
+      // accepted or published. The paper's accompanying prose still needs review.
+      const publication = isAtlasId(sel.id)
+        ? ATLAS_SOURCES[ATLAS_CARD_SOURCES[sel.id][0]!].publication
+        : "published";
+      const badge =
+        spec.badge !== "reconstruction" || publication === "published"
+          ? spec.badge
+          : publication === "accepted"
+            ? "acceptedReconstruction"
+            : "preprintReconstruction";
+      const translate: Translate = (message, values) =>
+        t(isAtlasId(sel.id) && message === `${key}.title` ? `names.${sel.id}` : message, values);
+      return staticCard(translate, d, key, { ...spec, badge });
+    }
     case "reach":
       return reachCard(t, f, d, sel.id, now);
     default:

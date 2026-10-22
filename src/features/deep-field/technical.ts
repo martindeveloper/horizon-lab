@@ -1,3 +1,4 @@
+import { ATLAS_SOURCES } from "@/space/cosmos/model/atlas";
 import { CREDIT_URLS, SOURCE_URLS } from "@horizon/toolkit/urls";
 
 const specification = {
@@ -68,6 +69,10 @@ const specification = {
     },
   ],
   references: [
+    ...Object.values(ATLAS_SOURCES).map((source) => ({
+      title: `${source.version} · ${source.publication}`,
+      url: source.referenceUrl,
+    })),
     {
       title:
         "GRAVITY Collaboration (2021), Improved GRAVITY astrometric accuracy from modeling optical aberrations, A&A 647, A59",

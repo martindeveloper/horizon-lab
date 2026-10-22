@@ -2,12 +2,14 @@ import { useTranslations } from "next-intl";
 
 import { SceneCanvas } from "@/components/simulations/scene-canvas";
 import { useSceneLabels } from "@/components/simulations/use-scene-labels";
-import { COSMOS_LABELS, lookbackRingLabels } from "@/space/cosmos/model/cosmos";
+import { ATLAS_LABELS } from "@/space/cosmos/model/atlas";
+import { COSMOS_LABELS } from "@/space/cosmos/model/cosmos";
 import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
 import { LIGHT_RINGS, PROBES } from "@/space/solar-system/model/probes";
 import { SOLAR_LABEL_KEYS } from "@/space/solar-system/scene/solar-system";
 import { DISTANCE_WORDS } from "@horizon/toolkit/scene";
 
+import { extraSceneLabels } from "../lib/model/labels";
 import { createDeepFieldEngine } from "../lib/scene/engine";
 import { useDeepField } from "../lib/store";
 
@@ -20,18 +22,15 @@ const LABEL_KEYS = [
   ...NEIGHBOURS.map((n) => n.id),
   "galaxySun",
   ...COSMOS_LABELS,
+  ...ATLAS_LABELS,
   ...DISTANCE_WORDS,
 ];
 
 const resetReady = () => useDeepField.getState().setReady(false);
 
-/* Each lookback ring named with its age. */
-const lookbackRing = (t: ReturnType<typeof useTranslations>) =>
-  lookbackRingLabels((gyr) => t("names.lookbackRing", { value: gyr }));
-
 export function DeepFieldCanvas() {
   const t = useTranslations("deepField");
-  const translated = useSceneLabels(t, LABEL_KEYS, lookbackRing);
+  const translated = useSceneLabels(t, LABEL_KEYS, extraSceneLabels);
   return (
     <SceneCanvas
       id="deep-field"

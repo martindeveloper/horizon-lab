@@ -1,0 +1,72 @@
+{
+  "cf4": {
+    "url": "https://cdsarc.cds.unistra.fr/ftp/J/ApJ/944/94/table3.dat.gz",
+    "publication": "published",
+    "version": "Tully et al. 2023; CDS table 3",
+    "reviewed": "2026-10-22",
+    "sha256": "1c02e2b3829b0b323524a5f3671a5f530cbdccae3c10b432db0c2e2fe09672fe",
+    "referenceUrl": "https://cdsarc.cds.unistra.fr/ftp/J/ApJ/944/94/ReadMe",
+    "rows": 38053
+  },
+  "classix": {
+    "url": "https://cdsarc.cds.unistra.fr/ftp/J/A+A/695/A59/clusters.dat",
+    "publication": "published",
+    "version": "Böhringer et al. 2025; CDS clusters.dat",
+    "reviewed": "2026-10-22",
+    "sha256": "b002f77575155e5067125299763c1cb7ec23a8adfce3ac607949b9ee0e8f6f4e",
+    "referenceUrl": "https://cdsarc.cds.unistra.fr/ftp/J/A+A/695/A59/ReadMe",
+    "rows": 185
+  },
+  "basins": {
+    "url": "https://arxiv.org/html/2409.17261v1",
+    "publication": "published",
+    "version": "Valade et al. 2024; Table 1",
+    "reviewed": "2026-10-22",
+    "sha256": "4c31a0d3485db7f27f7124a43b2705805f496aa1b4e316a6e779dc8a7f485454",
+    "referenceUrl": "https://arxiv.org/abs/2409.17261v1"
+  },
+  "vela": {
+    "url": "https://arxiv.org/html/2603.09339v2",
+    "publication": "accepted",
+    "version": "Hollinger et al. 2026; accepted by A&A 2026-06-22; Table 2",
+    "reviewed": "2026-10-22",
+    "sha256": "91d47d04c9d085e2d27f500765eddd226e666c7b613317dda344cb0c8840eafe",
+    "referenceUrl": "https://arxiv.org/abs/2603.09339v2"
+  },
+  "voids": {
+    "url": "https://arxiv.org/html/2606.13538v1",
+    "publication": "preprint",
+    "version": "Hollinger & Courtois 2026; Tables A.1 and A.2",
+    "reviewed": "2026-10-22",
+    "sha256": "9fbf7a94ef793ff2bd604d9c8dc07f6d7856e3a58b5438d8d012eada2187539a",
+    "referenceUrl": "https://arxiv.org/abs/2606.13538v1"
+  },
+  "sloan": {
+    "url": "https://arxiv.org/html/2606.04578v1",
+    "publication": "preprint",
+    "version": "Pomarède et al. 2026; interpretation of the Valade et al. reconstruction",
+    "reviewed": "2026-10-22",
+    "sha256": "b6764f28dcb5ffa088fd3efd8b66542d228ae6625027b1309ea13f3e0dcc83aa",
+    "referenceUrl": "https://arxiv.org/abs/2606.04578v1"
+  },
+  "south": {
+    "url": "https://arxiv.org/html/2007.04414v1",
+    "publication": "published",
+    "version": "Pomarède et al. 2020; South Pole peak, section III",
+    "reviewed": "2026-10-22",
+    "sha256": "843592c295c9f866284d6eda74463a0e41e5b4f9f77be7b5f0a7547c5cc98233",
+    "referenceUrl": "https://arxiv.org/abs/2007.04414v1"
+  },
+  "desi": {
+    "url": "https://data.desi.lbl.gov/public/dr1/spectro/redux/iron/zcatalog/v1/zpix-main-bright.fits",
+    "publication": "published",
+    "version": "DESI DR1, iron zcatalog v1 (2026-07-10)",
+    "reviewed": "2026-10-22",
+    "sha256": "1d32b5b26c527f7e724652167c17523739ff89e6e5e1ddd57afa0f50090be56a",
+    "referenceUrl": "https://data.desi.lbl.gov/doc/releases/dr1/",
+    "selection": "128 uniformly spaced 256-row blocks; unique primary GALAXY; ZWARN=0; COADD_FIBERSTATUS=0; DELTACHI2>=40; 0.1<z<=0.4",
+    "rowsExamined": 32768,
+    "catalogueRows": 11020470,
+    "sampleRows": 14367
+  }
+}

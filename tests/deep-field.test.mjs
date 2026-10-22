@@ -19,11 +19,13 @@ import {
   sightline,
   thenOf,
 } from "../src/features/deep-field/lib/model/depth.ts";
+import { extraSceneLabels } from "../src/features/deep-field/lib/model/labels.ts";
 import { TOUR } from "../src/features/deep-field/lib/model/tour.ts";
 import { VIEWS } from "../src/features/deep-field/lib/model/views.ts";
 import { dropsSelection, useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { pathForView, resolveView, viewFromPath } from "../src/features/deep-field/routing.ts";
 import { proseArgs } from "../src/lib/facts.ts";
+import { ATLAS_LABELS, ATLAS_LANDMARKS, ATLAS_SOURCES } from "../src/space/cosmos/model/atlas.ts";
 import {
   ANCHORS,
   CMB_LY,
@@ -245,6 +247,23 @@ test("Deep Field's cards render every figure in both languages and all distance 
   }
 });
 
+test("canvas templates resolve with strict translations, including named preprints in both languages", () => {
+  for (const locale of LOCALES) {
+    const t = translator(locale);
+    const labels = extraSceneLabels(t);
+    for (const [key, text] of Object.entries(labels)) {
+      assert.ok(text.length > 0, `${locale}/${key}`);
+      assert.doesNotMatch(text, /[{}]|deepField\.|NaN|undefined/, `${locale}/${key}`);
+    }
+    for (const id of ATLAS_LABELS)
+      if (ATLAS_SOURCES[ATLAS_LANDMARKS[id].source].publication === "preprint")
+        assert.ok(
+          labels[id].includes(t(`names.${id}`)),
+          `${locale}/${id} retains the object's name`,
+        );
+  }
+});
+
 test("solar cards calculate light-time from Earth and across orbital ranges", () => {
   const t = translator("en");
   const f = createFormatter({ locale: "en" });
@@ -347,7 +366,8 @@ test("the journey progresses outward and focuses selectable targets", () => {
 
 test("the journey sets each step's view, focus and switches, and gives the visitor's back", () => {
   const api = useDeepField.getState;
-  api().patchShow({ halo: true, distances: false });
+  api().patchShow({ halo: true, distances: false, cosmicVoids: false, cosmicIllustrations: true });
+  const savedShow = { ...api().show };
   api().startGuide();
   assert.equal(api().view, "inner");
   assert.deepEqual(api().selection, TOUR[0].focus);
@@ -360,7 +380,7 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   api().goGuide(TOUR.length);
   assert.equal(api().guideOpen, false, "past the last step the journey ends");
   assert.equal(api().selection, null);
-  assert.deepEqual(api().show, { halo: true, names: true, distances: false, lightTime: true });
+  assert.deepEqual(api().show, savedShow, "the journey restores the visitor's atlas layers too");
 });
 
 test("the Sun's drawn path runs back two laps and ends at today's place", () => {

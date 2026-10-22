@@ -3,11 +3,14 @@ import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 
 import { HandoffRow } from "@/components/simulations/handoff-link";
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
+import { ATLAS_CARD_SOURCES, ATLAS_SOURCES, isAtlasId } from "@/space/cosmos/model/atlas";
 import { viewOf } from "@/space/solar-system/model/framing";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { Action } from "@horizon/toolkit/ui";
 
 import { canCloseUp, useDeepField } from "../lib/store";
+import { AtlasProvenance } from "./atlas-provenance";
+import { COSMOS_CARDS } from "./card-specs";
 import { cardFor } from "./cards";
 
 /**
@@ -26,11 +29,35 @@ export function SelectionCard() {
   const offerCloseUp = useDeepField(canCloseUp);
   const now = useNow({ updateInterval: 60_000 });
   if (!selection) return null;
+  // Keep the warning tied to the source manifest, including mixed-source cards.
+  // When a preprint is published, update that manifest and review the caveat prose.
+  const preprint =
+    selection.kind === "cosmos" &&
+    isAtlasId(selection.id) &&
+    ATLAS_CARD_SOURCES[selection.id].some(
+      (source) => ATLAS_SOURCES[source].publication === "preprint",
+    );
+  const evidence = selection.kind === "cosmos" ? COSMOS_CARDS[selection.id].badge : undefined;
+  const noteTitle = preprint
+    ? t("atlas.publication.preprint")
+    : t(
+        evidence === "observations"
+          ? "detailNotes.measurements"
+          : evidence === "reconstruction"
+            ? "detailNotes.reconstruction"
+            : "detailNotes.general",
+      );
   return (
     <SelectionSheet
       card={cardFor(t, f, selection, { unit, locale }, now)}
       closeLabel={t("hud.close")}
       onClose={() => select(null)}
+      cautionCallout={{ title: noteTitle, tone: preprint ? "warning" : "info" }}
+      details={
+        selection.kind === "cosmos" && isAtlasId(selection.id) ? (
+          <AtlasProvenance id={selection.id} />
+        ) : undefined
+      }
       footer={
         closeUp ? (
           <>

@@ -6,6 +6,38 @@ import { SOURCE_URLS } from "@horizon/toolkit/urls";
 export type Source = { cite: string; link?: string };
 
 export const SOURCES = {
+  cosmicflows4: {
+    cite: "Tully et al. 2023, ApJ 944, 94, Cosmicflows-4 (CDS table 3: 38,053 groups; measured angles and CMB-frame redshifts)",
+    link: "https://cdsarc.cds.unistra.fr/ftp/J/ApJ/944/94/ReadMe",
+  },
+  classix2025: {
+    cite: "Böhringer et al. 2025, A&A 695, A59 (CLASSIX: Quipu and four other superstructures; Table 1 and CDS cluster catalogue; H₀ = 70)",
+    link: "https://cdsarc.cds.unistra.fr/ftp/J/A+A/695/A59/ReadMe",
+  },
+  cosmicBasins2024: {
+    cite: "Valade et al. 2024, Nature Astronomy, Identification of basins of attraction in the local Universe (CF4 posterior; Tables 1 and 2)",
+    link: "https://arxiv.org/abs/2409.17261v1",
+  },
+  vela2026: {
+    cite: "Hollinger et al. 2026, arXiv:2603.09339v2, accepted by A&A 22 June 2026 (CF4++ZOA; Vela, Table 2; masses at H₀ = 74.6)",
+    link: "https://arxiv.org/abs/2603.09339v2",
+  },
+  cosmicVoids2026: {
+    cite: "Hollinger & Courtois 2026, arXiv:2606.13538v1, PREPRINT (CF4++ZOA V-web, λth = 0; 37 voids and 42 knots, Tables A.1/A.2)",
+    link: "https://arxiv.org/abs/2606.13538v1",
+  },
+  sloanBasin2026: {
+    cite: "Pomarède et al. 2026, arXiv:2606.04578v1, PREPRINT (Sloan basin interpretation of the Valade et al. 2024 CF4 reconstruction)",
+    link: "https://arxiv.org/abs/2606.04578v1",
+  },
+  southPole2020: {
+    cite: "Pomarède et al. 2020, ApJ 897, 133, Cosmicflows-3: The South Pole Wall (approximate Chamaeleon+11.8 peak; §III)",
+    link: "https://arxiv.org/abs/2007.04414v1",
+  },
+  desiDr1: {
+    cite: "DESI DR1, iron zcatalog v1, 10 July 2026 (deterministic sparse sample of zpix-main-bright; selection in data/sources.json)",
+    link: "https://data.desi.lbl.gov/doc/releases/dr1/",
+  },
   nistIsotopeMasses: {
     cite: "NIST, Atomic Weights and Isotopic Compositions (neutral ¹H and ⁴He isotope masses, not natural-abundance atomic weights)",
     link: SOURCE_URLS.nistIsotopeMasses,

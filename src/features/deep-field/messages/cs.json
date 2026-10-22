@@ -7,11 +7,26 @@
       "title": "Pohyb kamery",
       "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
     },
-    "depth": { "title": "Hloubka", "body": "Tažením nebo klepnutím na příčku změníte měřítko." },
-    "sightline": { "title": "Zorná přímka", "body": "Jak daleko to je a kdy to světlo vyrazilo." },
-    "objects": { "title": "Objekty", "body": "Najděte cokoli a přeleťte na jeho měřítko." },
-    "settings": { "title": "Nastavení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
-    "guide": { "title": "Průvodce", "body": "Naučte se, kam až vesmír sahá, krok za krokem." },
+    "depth": {
+      "title": "Hloubka",
+      "body": "Tažením nebo klepnutím na příčku změníte měřítko."
+    },
+    "sightline": {
+      "title": "Zorná přímka",
+      "body": "Jak daleko to je a kdy to světlo vyrazilo."
+    },
+    "objects": {
+      "title": "Objekty",
+      "body": "Najděte cokoli a přeleťte na jeho měřítko."
+    },
+    "settings": {
+      "title": "Nastavení",
+      "body": "Vrstvy, ovládání kamery a kvalita vykreslení."
+    },
+    "guide": {
+      "title": "Průvodce",
+      "body": "Naučte se, kam až vesmír sahá, krok za krokem."
+    },
     "experiences": {
       "title": "Režimy prohlížení",
       "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
@@ -58,7 +73,8 @@
     "lightLeftAgo": "Světlo vyšlo {ago}",
     "outToValue": "až do {distance}",
     "leaveCloseUp": "Zpět na mapu",
-    "closeUpNote": "Skutečná velikost, anténa míří k Zemi."
+    "closeUpNote": "Skutečná velikost, anténa míří k Zemi.",
+    "modelRedshiftValue": "modelové z = {value}"
   },
   "time": {
     "years": "před {value} {valuePlural, select, one {rokem} few {lety} many {roku} other {lety}}",
@@ -100,7 +116,11 @@
   },
   "badges": {
     "sketch": "Náčrt",
-    "schematic": "Měřená vzdálenost · schematická dráha"
+    "schematic": "Měřená vzdálenost · schematická dráha",
+    "observations": "Změřené vstupy · odvozené vzdálenosti",
+    "reconstruction": "Rekonstrukce · publikováno",
+    "acceptedReconstruction": "Rekonstrukce · přijatý rukopis",
+    "preprintReconstruction": "Rekonstrukce · preprint"
   },
   "facts": {
     "centre": "Vzdálenost Slunce od středu",
@@ -140,7 +160,22 @@
     "leftHeliosphere": "Opustil heliosféru",
     "lightDay": "Světelný den od Země",
     "lastSignal": "Poslední signál",
-    "shock": "Terminační rázová vlna"
+    "shock": "Terminační rázová vlna",
+    "centreDistance": "Modelová vzdálenost středu",
+    "peakDistance": "Modelová vzdálenost maxima",
+    "publishedExtent": "Publikovaný rozsah",
+    "inferredMass": "Odvozená celková hmotnost",
+    "effectiveRadius": "Efektivní poloměr",
+    "robustRadius": "Poloměr stabilnějšího objemu",
+    "peakRedshift": "Rudý posuv maxima · cz",
+    "basinProbability": "Existence pánve",
+    "membership": "Příslušnost Mléčné dráhy",
+    "cf4Groups": "Záznamy skupin CF4",
+    "classixClusters": "Kupy CLASSIX",
+    "desiSample": "Vzorek galaxií DESI",
+    "catalogueRegions": "Oblasti v katalogu",
+    "spatialResolution": "Rozlišení modelu",
+    "posteriorSupport": "Práh stálosti"
   },
   "cards": {
     "galaxy": {
@@ -240,8 +275,8 @@
         "members": "Asi {value} velkých galaxií",
         "mass": "Asi {value} Sluncí",
         "heart": "Velký atraktor, ~{value} směrem k Pravítku a Kentauru",
-        "body": "Naše domovská nadkupa, pojmenovaná v roce 2014 z havajského „nezměrné nebe“. Její okraj je rozvodí, ne zeď: uvnitř, když odečteme rozpínání, galaxie proudí k Velkému atraktoru. Čáry ty proudy sledují.",
-        "caution": "Vlákna a proudnice jsou náčrt v duchu map Cosmicflows, ne jejich data. Povodí sleduje rekonstrukci z roku 2014; novější data Cosmicflows-4 mírně nahrávají tomu, že Laniakea je součástí většího povodí kolem Shapleyho nadkupy."
+        "body": "Laniakea byla v roce 2014 vymezena jako pánev proudění galaxií k Velkému atraktoru po odečtení rozpínání vesmíru. Historická značka zůstává v mapě. Nový atlas zobrazuje také větší pravděpodobnostní pánve CF4.",
+        "caution": "CF4 řadí Mléčnou dráhu do Shapleyho pánve v {shapley} realizací a do pánve v Hadonoši v {ophiuchus}. Záleží na rekonstrukci i vyhlazení. Volitelné proudnice jsou ilustrace, nikoli importovaná rychlostní data."
       },
       "triangulum": {
         "title": "Galaxie v Trojúhelníku",
@@ -294,7 +329,7 @@
         "length": "Hlavní hřbet nejméně {value}",
         "where": "Směrem k Perseovi a Rybám, hned vedle Laniakey",
         "body": "Dlouhý řetěz galaxií a kup, jedno z nejzřetelnějších vláken na blízké obloze. Je to samostatná pánev vedle Laniakey: galaxie na její straně rozvodí proudí k ní, ne k Velkému atraktoru.",
-        "caution": "Řetěz je nakreslený přes několik změřených kup; kde protíná rovinu naší Galaxie, zakrývá ho Mléčná dráha. Vzdálenost vychází z rudého posuvu."
+        "caution": "Vrstva měření používá katalogové body. Volitelný ilustrační řetěz prochází několika změřenými kupami; část oblasti zakrývá Mléčná dráha. Vzdálenosti z rudých posuvů stále zkreslují vlastní pohyby galaxií."
       },
       "coma": {
         "title": "Kupa galaxií ve Vlasu Bereniky",
@@ -310,7 +345,7 @@
         "mass": "Asi {value} Sluncí",
         "where": "Daleko za kupou v Kentauru, ve stejné části oblohy",
         "body": "Jedno z největších soustředění hmoty v blízkém vesmíru. Spolu s Velkým atraktorem táhne Místní skupinu, i když kolik z našeho pohybu vysvětluje, se stále vede spor.",
-        "caution": "Její hmotnost je odhad pro prozkoumanou oblast a mezi studiemi se liší; kupy kolem jádra jsou umístěné přibližně."
+        "caution": "Hmotnost závisí na vybrané oblasti a rekonstrukci. Pozorovaní členové CLASSIX, historická značka nadkupy a větší Shapleyho pánev proudění mají odlišný význam."
       },
       "sloanGreatWall": {
         "title": "Velká zeď Sloan",
@@ -318,7 +353,7 @@
         "lookback": "Asi před {value} mld. let",
         "where": "Podél nebeského rovníku, od Hydry přes Sextant a Lva k Panně",
         "body": "Stěna kup galaxií vzdálená asi {distance}, objevená v roce 2003 v mapě přehlídky Sloan Digital Sky Survey. Vidíme ji, jaká byla, když z ní vyšlo světlo; mapa ji kreslí tam, kde je teď, roztaženou rozpínáním od té doby.",
-        "caution": "Zda jde o jednu stavbu, nebo několik nadkup za sebou, je sporné; kresba sleduje její obrys v přehlídce, ne její galaxie."
+        "caution": "Stěna galaxií a její větší pánev proudění jsou odlišné struktury. Starší ilustrační obrys je volitelný; interpretace pánve Sloan z roku 2026 má vlastní kartu preprintu."
       },
       "observableUniverse": {
         "title": "Pozorovatelný vesmír",
@@ -327,6 +362,58 @@
         "age": "{value} mld. let světla na cestě",
         "body": "Vše, co jsme kdy mohli spatřit. Světlo k nám mělo {age} mld. let, ale prostor se během jeho cesty dál roztahoval, takže jeho zdroje jsou dnes mnohem dál. Nejvzdálenějším viditelným světlem je reliktní záření z doby, kdy vesmír poprvé zprůhledněl: mez toho, co světlo ukáže, ne okraj. Ve středu sedíme jen proto, že každý pozorovatel sedí ve středu toho svého.",
         "caution": "Kruhy značí, odkud vyšlo světlo před {near}, {mid} a {far} mld. let, v dnešních vzdálenostech. Skvrny v záření zastupují mapu z Plancku a galaxie za pavučinou jsou rovnoměrný vzorek, ne katalog. Končí u nejvzdálenějších známých galaxií; tmavý pás před zářením je to, co jsme ještě neviděli: kosmický úsvit, kdy se rozsvítily první hvězdy, a před ním temný věk."
+      },
+      "quipu": {
+        "body": "Jasné body jsou pozorované členské kupy z katalogu CLASSIX se změřenými polohami na obloze a spektroskopickými rudými posuvy. Společnou strukturu vymezila analýza propojující blízké sousedy. Popisek leží v neváženém prostorovém těžišti kup; celková hmotnost je odvozená.",
+        "caution": "Publikovaný rozsah používá H₀ = {hubble}. Mapa převádí rudé posuvy s kosmologií Planck. Členství neznamená, že je celá struktura gravitačně vázaná."
+      },
+      "vela": {
+        "body": "Nová rekonstrukce CF4++ZOA zahrnuje i galaxie zakryté Mléčnou dráhou. Kosočtverec označuje rekonstruované maximum hustoty. Čárkovaná kružnice ukazuje poloměr koule se stejným objemem jako celá oblast nadprůměrné hustoty.",
+        "caution": "Přijato do A&A; hodnoty z verze rukopisu v2. Kružnice je měřítko velikosti, nikoli tvar struktury. Publikovaná hmotnost používá H₀ = {hubble} a jinou oblast než katalog smršťujících se uzlů."
+      },
+      "southPoleWall": {
+        "body": "Zeď odvozená z pohybů galaxií v Cosmicflows-3. Kosočtverec označuje přibližné maximum hustoty u jižního nebeského pólu, v článku nazvané Chamaeleon+11.8.",
+        "caution": "Značka určuje polohu publikované rekonstrukce. Nekreslí povrch zdi a mezery v pozorování nespojuje umělým vláknem. Novější katalog pánví popisuje jinou oblast, vymezenou prouděním."
+      },
+      "shapleyBasin": {
+        "body": "Cosmicflows-4 rekonstruuje rozsáhlou pánev proudění galaxií kolem Shapleyho nadkupy. Ramena křížku vyznačují publikovaný rozptyl polohy podél supergalaktických os. Pozorované soustředění nadkupy a její větší pánev proudění jsou různé objekty.",
+        "caution": "Podíl příslušnosti Mléčné dráhy počítá realizace rekonstrukce, v nichž proudění od nás končí v této pánvi. Liší se od pravděpodobnosti existence pánve a neurčuje gravitačně vázaný okraj."
+      },
+      "sloanBasin": {
+        "body": "Preprint z roku 2026 popisuje větší oblast proudění kolem Velké zdi Sloan. Zdejší střed a pravděpodobnost existence pocházejí z publikovaného katalogu pánví CF4 z roku 2024.",
+        "caution": "Interpretace v preprintu. Jižní rozsah omezuje pokrytí přehlídky a zůstává otevřený. Efektivní poloměr shrnuje katalogový objem; uzavřenou hranici pánve nekreslíme."
+      },
+      "ophiuchusBasin": {
+        "body": "Tato pánev proudění CF4 je jedním z možných domovů Mléčné dráhy, poblíž oblasti tradičně zvané Laniakea. Jiné realizace rekonstrukce řadí naše proudění do větší Shapleyho pánve.",
+        "caution": "Pánve proudění závisí na datech, měřítku vyhlazení i modelu. Příslušnost Mléčné dráhy a existence pánve jsou odlišné pravděpodobnosti; žádná není změřenou hranicí."
+      },
+      "localVoid": {
+        "body": "Místní prázdnota v katalogu V-web CF4++ZOA z roku 2026. Čárkované kružnice porovnávají efektivní poloměry celé rekonstruované oblasti a její stabilnější části.",
+        "caution": "Preprint. Vnitřní kružnice odpovídá objemu klasifikovanému jako prázdnota alespoň v {support} realizací. Kružnice ukazují velikost, nikoli fyzické povrchy nebo chybu poloměru."
+      },
+      "northernLocalVoid": {
+        "body": "Severní místní prázdnota v katalogu V-web CF4++ZOA z roku 2026. Střed přebírá publikované supergalaktické kartézské souřadnice.",
+        "caution": "Preprint. Vnitřní kružnice odpovídá objemu klasifikovanému jako prázdnota alespoň v {support} realizací. Kružnice ukazují velikost, nikoli fyzické povrchy nebo chybu poloměru."
+      },
+      "sculptorVoid": {
+        "body": "Prázdnota v Sochaři v katalogu V-web CF4++ZOA z roku 2026. Rekonstruovaná oblast nízké hustoty není totéž co prázdné místo v neúplné přehlídce galaxií.",
+        "caution": "Preprint. Vnitřní kružnice odpovídá objemu klasifikovanému jako prázdnota alespoň v {support} realizací. Kružnice ukazují velikost, nikoli fyzické povrchy nebo chybu poloměru."
+      },
+      "cosmicSurveys": {
+        "body": "Body používají změřené souřadnice na obloze a rudé posuvy skupin Cosmicflows-4, kup CLASSIX a řídkého vzorku galaxií DESI DR1. Radiální polohy odvozuje kosmologie Planck použitá v mapě. Nižší kvalita vykreslení ubírá záznamy, ale neposouvá je.",
+        "caution": "Přehlídky se překrývají, jsou neúplné a mají odlišná výběrová kritéria. Jas bodů je ilustrační. Chybějící body nedokazují prázdnotu. Blízké záporné rudé posuvy nedávají vzdálenost z rozpínání, a proto je tato vrstva vynechává; tuto oblast pokrývají místní mapy."
+      },
+      "cosmicBasins": {
+        "body": "Všechny položky publikovaného katalogu pánví CF4 jsou zobrazené jako křížky v odvozených středech. Každé rameno vyznačuje jednu směrodatnou odchylku podél supergalaktické osy. Nadkupa v Plachtách a Zeď jižního pólu mají vlastní značky maxim.",
+        "caution": "Jde o souhrny rekonstrukcí, nikoli změřené vektory rychlosti nebo úplné povrchy pánví. Některé kandidátní pánve se objevují jen v menšině realizací. Interpretace pánve Sloan má samostatnou kartu s označením preprint."
+      },
+      "cosmicVoids": {
+        "body": "Úplná tabulka prázdnot z preprintu V-web CF4++ZOA z roku 2026. Vnější čárkované kružnice představují efektivní poloměry, vnitřní stabilnější části objemu. Pojmenované prázdnoty lze otevřít jednotlivě v seznamu objektů.",
+        "caution": "Preprint s nulovým prahem vlastních čísel podle autorů. Změna prahu mění katalog. Kružnice vyjadřuje stejný objem jako oblast, ale nereprodukuje její tvar; vnitřní kružnice není intervalem spolehlivosti poloměru."
+      },
+      "cosmicKnots": {
+        "body": "Úplná tabulka uzlů z preprintu V-web CF4++ZOA z roku 2026. Malé drátové kosočtverce označují oblasti, kde se rekonstruované rychlostní pole smršťuje podél všech hlavních os.",
+        "caution": "Preprint. Velikosti kosočtverců jsou značky, nikoli změřené poloměry kup. Tyto dynamické oblasti se liší od kup galaxií, celých nadkup i pánví proudění; jejich hmotnosti a hranice proto nelze zaměňovat."
       }
     },
     "solar": {
@@ -392,7 +479,7 @@
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované galaxie a kupy stojí ve změřených směrech a vzdálenostech: Andromeda ({andromedaMly} {andromedaMlyPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} světelných let, blíží se rychlostí {andromedaKms} km/s), Trojúhelník, Magellanova mračna, blízké skupiny, kupy v Panně, Peci, Kentauru a Hydře a Velký atraktor směrem k Pravítku. Zbytek je náčrt s pevným semínkem: trpaslíci kolem obou obrů, Místní list, výběžky rozložené od Panny a vlákna Laniakey sbíhající se k Velkému atraktoru. Za Laniakeou leží hřbet Perseus–Ryby, kupa ve Vlasu Bereniky, Shapleyho koncentrace a Velká zeď Sloan v souběžných vzdálenostech z rudého posuvu, propojené nakreslenou sítí vláken kolem prázdnot. Dál je pozorovatelný vesmír kreslený v měřítku: jeho okraj (částicový horizont) a reliktní záření z poslední srážky plynou z integrace plochého ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, včetně záření; stáří {universeGyr} {universeGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let). Daleko venku kamera obíhá v supergalaktické rovině."
+        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Křížky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}} a rozptyl souřadnic. Plachty používají přijatou rekonstrukci v2 z roku 2026; Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice jsou samostatnou volitelnou ilustrací. Místní populace galaxií a vzdálené pozadí zůstávají ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
       },
       "depth": {
         "title": "Vzdálenost a světlo",
@@ -446,6 +533,50 @@
         "title": "Nejstarší světlo",
         "body": "Dál znamená dřív. Za nejvzdálenějšími pozorovanými galaxiemi leží kosmický úsvit a temný věk a za nimi září nejstarší světlo, jaké vidíme, uvolněné brzy po velkém třesku."
       }
+    }
+  },
+  "detailNotes": {
+    "general": "K tomuto zobrazení",
+    "measurements": "Omezení měření",
+    "reconstruction": "Omezení rekonstrukce"
+  },
+  "atlas": {
+    "layersTitle": "Vrstvy kosmických dat",
+    "finderTitle": "Nový kosmický atlas",
+    "legendTitle": "Původ dat kosmické mapy",
+    "measured": "Změřené směry + rudý posuv",
+    "reconstructed": "Prázdné značky · rekonstruované středy",
+    "preprint": "Středy prázdnot a uzlů · preprint",
+    "guidesEnabled": "Zobrazeny všechny pomocné značky rekonstrukce",
+    "illustration": "Ilustrace zapnutá",
+    "shortCoverage": "Vyberte strukturu pro zobrazení nejistoty nebo velikosti · pokrytí přehlídek je neúplné",
+    "coverage": "Ze změřených směrů a rudých posuvů vycházejí vzdálenosti závislé na modelu. Přehlídky se překrývají a mají mezery; prázdné místo není objevenou prázdnotou. Nižší kvalita vykreslení používá řidší výběr změřených záznamů.",
+    "glyphs": "Malé prázdné kroužky označují rekonstruované středy; ploché kosočtverce odvozené uzly. Výběr struktury zobrazí úsečky nejistoty její polohy nebo čárkované kružnice velikosti. Tyto značky popisují nejistotu nebo ekvivalentní objem, nikoli fyzické hranice. Pro srovnání napříč mapou lze zapnout všechny pomocné značky. Prázdnoty, uzly i novější interpretace pánve Sloan jsou označené jako preprinty.",
+    "sourcesTitle": "Zdroje a stav publikace",
+    "reviewed": "Data ověřena {date}",
+    "canvasPreprint": "{name} · preprint",
+    "publication": {
+      "published": "Publikováno",
+      "accepted": "Přijato do A&A · rukopis v2",
+      "preprint": "Preprint · bez recenzního řízení"
+    },
+    "layers": {
+      "cosmicMeasured": "Body změřených katalogů",
+      "cosmicBasins": "Rekonstruované pánve a maxima",
+      "cosmicVoids": "Středy prázdnot · preprint",
+      "cosmicKnots": "Středy uzlů · preprint",
+      "cosmicGuides": "Všechny značky nejistoty a velikosti",
+      "cosmicIllustrations": "Ilustrační vlákna a proudnice"
+    },
+    "sources": {
+      "cf4": "Cosmicflows-4 · Tully et al. (2023)",
+      "classix": "CLASSIX · Böhringer et al. (2025)",
+      "desi": "DESI DR1 · iron zcatalog v1 (2026-07-10)",
+      "basins": "CF4 · Valade et al. (2024), v1",
+      "vela": "CF4++ZOA · Hollinger et al. (2026), v2",
+      "voids": "V-web · Hollinger & Courtois (2026), v1",
+      "sloan": "Sloan · Pomarède et al. (2026), v1",
+      "south": "Cosmicflows-3 · Pomarède et al. (2020), v1"
     }
   }
 }

@@ -3,12 +3,30 @@
   "metadataDescription": "From the planets to the edge of the observable universe in one zoom, where distance is also how long the light has been on its way.",
   "canvasLabel": "Interactive map from the planets to the observable universe",
   "help": {
-    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
-    "depth": { "title": "Depth", "body": "Drag or tap a rung to change scale." },
-    "sightline": { "title": "Sightline", "body": "How far out, and when that light left." },
-    "objects": { "title": "Objects", "body": "Find anything and fly to its scale." },
-    "settings": { "title": "Settings", "body": "Layers, the camera pad and render quality." },
-    "guide": { "title": "Guide", "body": "Learn how far the universe reaches, step by step." },
+    "camera": {
+      "title": "Move the camera",
+      "body": "Drag to turn, scroll or pinch to zoom."
+    },
+    "depth": {
+      "title": "Depth",
+      "body": "Drag or tap a rung to change scale."
+    },
+    "sightline": {
+      "title": "Sightline",
+      "body": "How far out, and when that light left."
+    },
+    "objects": {
+      "title": "Objects",
+      "body": "Find anything and fly to its scale."
+    },
+    "settings": {
+      "title": "Settings",
+      "body": "Layers, the camera pad and render quality."
+    },
+    "guide": {
+      "title": "Guide",
+      "body": "Learn how far the universe reaches, step by step."
+    },
     "experiences": {
       "title": "Viewing modes",
       "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
@@ -55,7 +73,8 @@
     "lightLeftAgo": "Light left {ago}",
     "outToValue": "out to {distance}",
     "leaveCloseUp": "Back to the map",
-    "closeUpNote": "True size, dish turned to Earth."
+    "closeUpNote": "True size, dish turned to Earth.",
+    "modelRedshiftValue": "model z = {value}"
   },
   "time": {
     "years": "{value} {valuePlural, select, one {year} other {years}} ago",
@@ -97,7 +116,11 @@
   },
   "badges": {
     "sketch": "Sketch",
-    "schematic": "Measured distance · schematic path"
+    "schematic": "Measured distance · schematic path",
+    "observations": "Measured inputs · derived distances",
+    "reconstruction": "Reconstructed · published",
+    "acceptedReconstruction": "Reconstructed · accepted manuscript",
+    "preprintReconstruction": "Reconstructed · preprint"
   },
   "facts": {
     "centre": "Sun–centre distance",
@@ -137,7 +160,22 @@
     "leftHeliosphere": "Left the heliosphere",
     "lightDay": "A light-day from Earth",
     "lastSignal": "Last signal",
-    "shock": "Termination shock"
+    "shock": "Termination shock",
+    "centreDistance": "Model centre distance",
+    "peakDistance": "Model peak distance",
+    "publishedExtent": "Published extent",
+    "inferredMass": "Inferred total mass",
+    "effectiveRadius": "Effective radius",
+    "robustRadius": "Persistent-volume radius",
+    "peakRedshift": "Peak redshift · cz",
+    "basinProbability": "Basin existence",
+    "membership": "Milky Way membership",
+    "cf4Groups": "CF4 group records",
+    "classixClusters": "CLASSIX clusters",
+    "desiSample": "DESI sampled galaxies",
+    "catalogueRegions": "Catalogue regions",
+    "spatialResolution": "Model resolution",
+    "posteriorSupport": "Persistence threshold"
   },
   "cards": {
     "galaxy": {
@@ -237,8 +275,8 @@
         "members": "About {value} large galaxies",
         "mass": "About {value} Suns",
         "heart": "The Great Attractor, ~{value} away toward Norma and Centaurus",
-        "body": "Our home supercluster, named in 2014 from the Hawaiian for \"immeasurable heaven\". Its edge is a watershed, not a wall: inside it, once the expansion is taken out, galaxies flow toward the Great Attractor. The lines trace those flows.",
-        "caution": "The filaments and flow lines are a sketch in the spirit of the Cosmicflows maps, not their data. The basin follows the 2014 reconstruction; newer Cosmicflows-4 flows slightly favour Laniakea being part of a larger basin around Shapley."
+        "body": "Laniakea was defined in 2014 as a basin of galaxy flows toward the Great Attractor, after subtracting cosmic expansion. Its historical marker remains here. The updated atlas also shows larger, probabilistic CF4 basins.",
+        "caution": "CF4 places the Milky Way in the Shapley basin in {shapley} of realizations and Ophiuchus in {ophiuchus}. This depends on reconstruction and smoothing. The optional flow lines are an illustration, not imported velocity data."
       },
       "triangulum": {
         "title": "Triangulum Galaxy",
@@ -291,7 +329,7 @@
         "length": "At least {value} along its main ridge",
         "where": "Toward Perseus and Pisces, next door to Laniakea",
         "body": "A long chain of galaxies and clusters, one of the clearest filaments in the nearby sky. It is a basin of its own beside Laniakea: galaxies on its side of the watershed flow toward it, not toward the Great Attractor.",
-        "caution": "The chain is drawn through a few measured clusters; the Milky Way hides where it crosses our galaxy’s plane. Its distance comes from its redshift."
+        "caution": "The measured layer uses catalogue points. The optional illustrated chain follows a few measured cluster anchors; the Milky Way hides part of the region. Redshift distances retain peculiar-velocity distortions."
       },
       "coma": {
         "title": "Coma Cluster",
@@ -307,7 +345,7 @@
         "mass": "About {value} Suns",
         "where": "Far beyond the Centaurus Cluster, in the same part of the sky",
         "body": "One of the largest concentrations of matter in the nearby universe. With the Great Attractor it pulls on the Local Group, though how much of our motion it explains is still debated.",
-        "caution": "Its mass is an estimate for the surveyed region and differs between studies; the clusters around its core are placed approximately."
+        "caution": "Mass depends on the region and reconstruction. The observed CLASSIX members, the supercluster’s historical marker and the larger Shapley flow basin have separate meanings."
       },
       "sloanGreatWall": {
         "title": "Sloan Great Wall",
@@ -315,7 +353,7 @@
         "lookback": "About {value} billion years ago",
         "where": "Along the celestial equator, from Hydra through Sextans and Leo to Virgo",
         "body": "A wall of galaxy clusters about {distance} away, found in 2003 in the Sloan Digital Sky Survey’s map. We see it as it was when its light left; the map places it where it is now, stretched with the expansion since.",
-        "caution": "Whether it is one structure or several superclusters in a row is debated; the drawing follows its outline in the survey, not its galaxies."
+        "caution": "A galaxy wall and its larger flow basin are different structures. The old illustrated outline is optional; the 2026 Sloan-basin interpretation has its own preprint card."
       },
       "observableUniverse": {
         "title": "Observable universe",
@@ -324,6 +362,58 @@
         "age": "{value} billion years of light on its way",
         "body": "Everything we could ever have seen. Light has had {age} billion years to reach us, but space kept stretching while it travelled, so its sources now lie much farther away. Its farthest visible light is the cosmic microwave background, from when the universe first turned transparent: a limit on what light can show, not an edge. We sit at the centre only because every observer sits at the centre of their own.",
         "caution": "The rings mark where light set out {near}, {mid} and {far} billion years ago, at today’s distances. The glow’s spots stand in for the Planck map, and the galaxies beyond the web are a uniform sample, not a catalogue. They stop at the farthest galaxies known; the dark band before the glow is what we have not seen yet: cosmic dawn, when the first stars lit up, and before it the dark ages."
+      },
+      "quipu": {
+        "body": "The bright points are the observed CLASSIX member clusters, with sky positions and spectroscopic redshifts. Their collective structure was identified by a friends-of-friends analysis. The label sits at their unweighted spatial centroid; the total mass is inferred.",
+        "caution": "The published extent uses H₀ = {hubble}. The map converts redshifts using its Planck cosmology. Membership does not establish that the whole structure is gravitationally bound."
+      },
+      "vela": {
+        "body": "The updated CF4++ZOA reconstruction includes galaxies obscured by the Milky Way. The diamond marks the reconstructed density peak. The dashed circle gives the radius of a sphere with the same total overdense volume.",
+        "caution": "Accepted by A&A; values from manuscript v2. The circle is a size guide, not the structure’s shape. The published mass uses H₀ = {hubble} and a different region from the collapsing knots catalogue."
+      },
+      "southPoleWall": {
+        "body": "A wall inferred from galaxy motions in Cosmicflows-3. The diamond marks its approximate density peak at the celestial south pole, named Chamaeleon+11.8 in the paper.",
+        "caution": "This marker locates a published reconstruction. It does not trace the wall’s surface; no artificial bridge joins gaps in the observations. The newer basin catalogue describes a different, flow-defined region."
+      },
+      "shapleyBasin": {
+        "body": "Cosmicflows-4 reconstructs a large basin of galaxy flows around Shapley. The cross spans the published positional spread along the supergalactic axes. The supercluster’s observed concentration and its larger flow basin are separate objects.",
+        "caution": "The Milky Way membership fraction counts reconstruction realizations whose flow ends in this basin. It is distinct from the probability that the basin exists, and does not define a bound edge."
+      },
+      "sloanBasin": {
+        "body": "The 2026 Sloan-basin preprint interprets the larger flow domain around the Sloan Great Wall. Its centre and existence probability here come from the published 2024 CF4 basin catalogue.",
+        "caution": "Preprint interpretation. The southern extent is limited by survey coverage and remains open. The effective radius summarizes a catalogue volume; no closed basin boundary is drawn."
+      },
+      "ophiuchusBasin": {
+        "body": "This CF4 flow basin is one possible home for the Milky Way, near the region traditionally called Laniakea. Other reconstruction realizations place our flow in the larger Shapley basin.",
+        "caution": "Flow basins depend on the data, smoothing scale and model. The displayed membership and basin-existence probabilities answer different questions; neither is a measured border."
+      },
+      "localVoid": {
+        "body": "The Local Void entry in the 2026 CF4++ZOA V-web catalogue. The dashed circles compare effective radii of the full reconstructed region and its more persistent subvolume.",
+        "caution": "Preprint. The inner guide represents volume classified as void in at least {support} of realizations. The circles are size guides, not physical surfaces or radial error bars."
+      },
+      "northernLocalVoid": {
+        "body": "The Northern Local Void entry in the 2026 CF4++ZOA V-web catalogue. Its centre is taken from the published supergalactic Cartesian coordinates.",
+        "caution": "Preprint. The inner guide represents volume classified as void in at least {support} of realizations. The circles are size guides, not physical surfaces or radial error bars."
+      },
+      "sculptorVoid": {
+        "body": "The Sculptor Void entry in the 2026 CF4++ZOA V-web catalogue. A reconstructed underdensity is different from a blank patch in an incomplete galaxy survey.",
+        "caution": "Preprint. The inner guide represents volume classified as void in at least {support} of realizations. The circles are size guides, not physical surfaces or radial error bars."
+      },
+      "cosmicSurveys": {
+        "body": "Points use measured sky coordinates and redshifts from Cosmicflows-4 groups, CLASSIX clusters and a sparse sample of DESI DR1 galaxies. Radial positions are derived with the map’s Planck cosmology. The smaller render-quality settings draw fewer records without moving them.",
+        "caution": "These are overlapping, incomplete surveys with different selection functions. Point brightness is illustrative. Missing points are not evidence of a void. Nearby negative redshifts cannot give a Hubble-flow distance and are omitted from this layer; the local maps cover that regime."
+      },
+      "cosmicBasins": {
+        "body": "All entries from the published CF4 basin catalogue are drawn as crosses at their inferred centres. Each arm spans one standard deviation along a supergalactic coordinate axis. Vela and the South Pole Wall have separate peak markers.",
+        "caution": "These are summaries of reconstructions, not measured velocity arrows or complete basin surfaces. Some candidate basins appear in only a minority of posterior realizations. The Sloan interpretation has a separately labelled preprint card."
+      },
+      "cosmicVoids": {
+        "body": "The complete void table from the 2026 CF4++ZOA V-web preprint. Dashed outer circles represent effective radii; inner circles represent the more persistent subvolumes. The named voids can be opened individually in the finder.",
+        "caution": "Preprint, using the authors’ zero eigenvalue threshold. Changing that threshold changes the catalogue. A circle carries the same volume as the region, but does not reproduce its shape; the inner guide is not a confidence interval on radius."
+      },
+      "cosmicKnots": {
+        "body": "The complete knot table from the 2026 CF4++ZOA V-web preprint. Small wire diamonds mark regions where the reconstructed velocity field contracts along every principal axis.",
+        "caution": "Preprint. Diamond sizes are symbols, not measured cluster radii. These dynamical regions differ from galaxy clusters, full overdense superclusters, and flow basins, so their masses and boundaries must not be interchanged."
       }
     },
     "solar": {
@@ -389,7 +479,7 @@
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named galaxies and clusters sit at measured directions and distances: Andromeda ({andromedaMly} million light-years, closing at {andromedaKms} km/s), Triangulum, the Magellanic Clouds, the nearby groups, the Virgo, Fornax, Centaurus and Hydra clusters, and the Great Attractor toward Norma. The rest is a seeded sketch: dwarfs round the two giants, the Local Sheet, spurs fanning out from Virgo, and Laniakea's filaments converging on the Great Attractor. Beyond Laniakea the Perseus–Pisces ridge, the Coma Cluster, the Shapley concentration and the Sloan Great Wall sit at comoving distances from their redshifts, tied into a seeded web of filaments around voids. Farther out the observable universe is drawn to scale: its edge (the particle horizon) and the microwave background at last scattering come from integrating flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}, with radiation; age {universeGyr} billion years). Far out the camera orbits in the supergalactic plane."
+        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Crosses show {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} and coordinate spreads. Vela uses the accepted 2026 v2 reconstruction; the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths are a separate optional illustration. Local galaxy populations and the far background remain illustrations. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
       },
       "depth": {
         "title": "Distance and light",
@@ -443,6 +533,50 @@
         "title": "The oldest light",
         "body": "Farther means earlier. Beyond the farthest galaxies seen lie cosmic dawn and the dark ages, and behind them glows the oldest light we see, set free soon after the Big Bang."
       }
+    }
+  },
+  "detailNotes": {
+    "general": "About this view",
+    "measurements": "Measurement limits",
+    "reconstruction": "Reconstruction limits"
+  },
+  "atlas": {
+    "layersTitle": "Cosmic data layers",
+    "finderTitle": "New cosmic atlas",
+    "legendTitle": "Cosmic map evidence",
+    "measured": "Measured positions + redshift",
+    "reconstructed": "Hollow markers · reconstructed centres",
+    "preprint": "Void & knot centres · preprint",
+    "guidesEnabled": "All reconstruction guides shown",
+    "illustration": "Illustration enabled",
+    "shortCoverage": "Select a structure to inspect its uncertainty or size guide · survey coverage is incomplete",
+    "coverage": "Measured angles and redshifts give model-dependent distances. The surveys overlap and leave gaps; a blank patch is not a detected void. Lower render quality subsamples the measured records.",
+    "glyphs": "Small hollow rings mark reconstructed centres; flat diamonds mark inferred knots. Selecting a structure reveals its positional uncertainty bars or dashed size circles. These guides describe uncertainty or equivalent volume, not physical boundaries. Enable all guides to compare them across the map. Voids, knots and the newer Sloan interpretation are labelled preprints.",
+    "sourcesTitle": "Sources and publication status",
+    "reviewed": "Data reviewed {date}",
+    "canvasPreprint": "{name} · preprint",
+    "publication": {
+      "published": "Published",
+      "accepted": "Accepted by A&A · manuscript v2",
+      "preprint": "Preprint · not peer reviewed"
+    },
+    "layers": {
+      "cosmicMeasured": "Measured catalogue points",
+      "cosmicBasins": "Reconstructed basins & peaks",
+      "cosmicVoids": "Void centres · preprint",
+      "cosmicKnots": "Knot centres · preprint",
+      "cosmicGuides": "All uncertainty & size guides",
+      "cosmicIllustrations": "Illustrated web & flow lines"
+    },
+    "sources": {
+      "cf4": "Cosmicflows-4 · Tully et al. (2023)",
+      "classix": "CLASSIX · Böhringer et al. (2025)",
+      "desi": "DESI DR1 · iron zcatalog v1 (2026-07-10)",
+      "basins": "CF4 · Valade et al. (2024), v1",
+      "vela": "CF4++ZOA · Hollinger et al. (2026), v2",
+      "voids": "V-web · Hollinger & Courtois (2026), v1",
+      "sloan": "Sloan · Pomarède et al. (2026), v1",
+      "south": "Cosmicflows-3 · Pomarède et al. (2020), v1"
     }
   }
 }

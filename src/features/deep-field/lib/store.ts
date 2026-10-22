@@ -9,6 +9,7 @@ import {
   type GuideSlice,
   type SceneSlice,
 } from "@/lib/scene-store";
+import { ATLAS_DEFAULT_SHOW, isAtlasLandmark, type AtlasShow } from "@/space/cosmos/model/atlas";
 import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
 import { isReachSelection, type ProbeId } from "@/space/solar-system/model/probes";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
@@ -20,7 +21,7 @@ import { DEFAULT_VIEW, type ViewId } from "./model/view-ids";
 import { viewById } from "./model/views";
 
 /** Deep Field's switches are the shared worlds' (`@/space/galaxy/show`). */
-export type Show = GalaxyShow;
+export type Show = GalaxyShow & AtlasShow;
 
 export type { CosmosId } from "@/space/galaxy/show";
 
@@ -55,7 +56,13 @@ const probeOf = (sel: Selection | null): ProbeId | null =>
 export const canCloseUp = (s: Pick<DeepFieldStore, "selection" | "guideOpen">) =>
   probeOf(s.selection) !== null && !s.guideOpen;
 
-const DEFAULT_SHOW: Show = { halo: false, names: true, distances: false, lightTime: true };
+const DEFAULT_SHOW: Show = {
+  halo: false,
+  names: true,
+  distances: false,
+  lightTime: true,
+  ...ATLAS_DEFAULT_SHOW,
+};
 
 /** What the `?` tour's steps change and give back: the view, a ladder drag, the switches. */
 type HelpSaved = { view: ViewId; viewLy: number; seek: { ly: number } | null; show: Show };
@@ -111,7 +118,15 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   reachLy: viewById(DEFAULT_VIEW).ly,
   setView: (view) => {
     const v = viewById(view);
-    set((s) => ({ view, viewLy: v.ly, flight: s.flight + 1, seek: null, closeUp: null }));
+    set((s) => ({
+      view,
+      viewLy: v.ly,
+      flight: s.flight + 1,
+      seek: null,
+      closeUp: null,
+      selection:
+        s.selection?.kind === "cosmos" && isAtlasLandmark(s.selection.id) ? null : s.selection,
+    }));
   },
   seekTo: (ly) => set({ seek: { ly }, closeUp: null }),
   /* Another selection lets go of a close-up. */

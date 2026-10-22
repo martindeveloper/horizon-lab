@@ -4,6 +4,7 @@ import { BLACK_HOLES } from "@/space/stellar";
 /** Beyond the Milky Way: figures from the cosmos model and the literature. */
 import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
 
+import { ATLAS_FACTS } from "./atlas-facts";
 import {
   ANDROMEDA_APPROACH_KMS,
   ANDROMEDA_MLY,
@@ -73,6 +74,7 @@ const greatAttractorDistance = anchorDistance("greatAttractor", "woudt2008", {
 });
 
 export const COSMOS = {
+  ...ATLAS_FACTS,
   /** The model's cosmology. */
   universe: {
     hubble: {

@@ -34,7 +34,9 @@ import {
 
 import type { CosmosDetail } from "../graphics/cosmos";
 import type { CosmosLooks } from "../graphics/looks";
+import { atlasVisibility } from "../model/atlas";
 import { CMB_MLY } from "../model/cosmos";
+import { createCosmosAtlas } from "./cosmos-atlas";
 import { DISC_MLY, createCosmosClouds } from "./cosmos-clouds";
 import { createCosmosMarks } from "./cosmos-marks";
 import { createLookbackRings, shellOutline, type RootView } from "./cosmos-rings";
@@ -69,6 +71,7 @@ export function createCosmosLayer(
   parent.add(root);
 
   const clouds = createCosmosClouds(scope, looks, root, parent, deps.detail);
+  const atlas = createCosmosAtlas(scope, looks, root, deps.detail);
   const { field, clusters, milkyWay, andromeda, triangulum } = clouds;
   const rings = createLookbackRings(root, clouds.circle, looks.cosmosRing);
   /* Under the microwave background's outline: where the edge is named. */
@@ -109,6 +112,7 @@ export function createCosmosLayer(
     facing: new Quaternion(),
   };
   const turn = new Quaternion();
+  const atlasFacing = new Quaternion();
   const Z = new Vector3(0, 0, 1);
   /** The universe's scale factor the map is drawn at (`setExpansion`); 1 is today. */
   let expansion = 1;
@@ -127,7 +131,10 @@ export function createCosmosLayer(
   return {
     pickables: marks.pickables,
     /** Samples every cloud afresh at a new quality's detail. */
-    setDetail: (detail: CosmosDetail) => clouds.setDetail(detail),
+    setDetail(detail: CosmosDetail) {
+      clouds.setDetail(detail);
+      atlas.setDetail(detail);
+    },
     /**
      * Draws the universe at scale `a` (1, today, unless a host runs a clock through cosmic
      * time): what lies beyond the Local Group recedes by the shared rule (`expansionFactor`).
@@ -136,6 +143,7 @@ export function createCosmosLayer(
       if (a === expansion) return;
       expansion = a;
       clouds.setExpansion(a, sun);
+      atlas.setExpansion(a, sun);
       marks.setExpansion(a, sun);
     },
     get visible() {
@@ -146,6 +154,7 @@ export function createCosmosLayer(
       return camera.position.distanceTo(centre) + EXTENT_MLY * expansion * MLY;
     },
     update({ show, sel, lines, afield = 0 }: Frame) {
+      const layers = atlasVisibility(show);
       const shown = lod.cosmos;
       root.visible = field.visible = shown > 0.001;
       const labelled = names.to(show.names) * shown;
@@ -155,6 +164,10 @@ export function createCosmosLayer(
         return;
       }
       const ly = lod.dist / LY;
+      clouds.laniakea.visible =
+        clouds.web.visible =
+        clouds.flows.visible =
+          layers.cosmicIllustrations;
       /* This frame's placement, before anything below asks for world positions. */
       root.updateMatrixWorld();
       field.position.copy(camera.position);
@@ -166,6 +179,7 @@ export function createCosmosLayer(
       const far = rising(ly, 60e6, 200e6);
       /* From the observable universe, everything nearer shrinks to a dim knot round us. */
       const speck = 1 - 0.75 * rising(ly, 1.5e10, 5e10);
+      const sketch = layers.cosmicIllustrations ? 1 : 1 - rising(ly, 80e6, 240e6);
       fadeMaterial(m.dwarfs, base.dwarfs * shown * (1 - rising(ly, 60e6, 160e6)));
       /* Out among the galaxies the field is all there is: fuller, larger, and doubled. */
       fadeMaterial(m.field, base.field * shown * Math.max(1 - rising(ly, 60e6, 250e6), afield));
@@ -178,11 +192,11 @@ export function createCosmosLayer(
       clouds.fieldBeyond.visible = base.field * shown * afield > FAINTEST_OPACITY;
       fadeMaterial(
         m.sheet,
-        base.sheet * shown * rising(ly, 3e6, 9e6) * (1 - rising(ly, 300e6, 900e6)),
+        base.sheet * shown * rising(ly, 3e6, 9e6) * (1 - rising(ly, 300e6, 900e6)) * sketch,
       );
-      const nearDrawn = fadeMaterial(m.near, base.near * shown * near);
-      fadeMaterial(m.supercluster, base.supercluster * shown * rising(ly, 25e6, 80e6));
-      const farDrawn = fadeMaterial(m.far, base.far * shown * far * speck);
+      fadeMaterial(m.near, base.near * shown * near * sketch);
+      fadeMaterial(m.supercluster, base.supercluster * shown * rising(ly, 25e6, 80e6) * sketch);
+      fadeMaterial(m.far, base.far * shown * far * speck * sketch);
       fadeMaterial(m.laniakea, base.laniakea * shown * rising(ly, 120e6, 380e6) * speck);
       fadeMaterial(m.web, base.web * shown * rising(ly, 500e6, 1.4e9) * speck);
       fadeMaterial(m.cmb, base.cmb * shown * rising(ly, 2e10, 6e10));
@@ -201,6 +215,10 @@ export function createCosmosLayer(
       view.up.setFromMatrixColumn(camera.matrixWorld, 1).applyQuaternion(turn);
       view.up.addScaledVector(view.toward, -view.up.dot(view.toward)).normalize();
       view.facing.setFromUnitVectors(Z, view.toward);
+      // Off-centre size guides face the camera's actual orientation, including
+      // when inspection pans away from the Milky Way at the origin.
+      camera.getWorldQuaternion(atlasFacing).premultiply(turn);
+      atlas.update(ly, shown, layers, atlasFacing, sel?.kind === "cosmos" ? sel.id : null);
       rings.update(view, expansion, labelled * ringsOn * lines, place);
       const edge = shellOutline(CMB_MLY * expansion, view.d);
       edgeMark.copy(view.toward).multiplyScalar(edge.offset).addScaledVector(view.up, -edge.radius);
@@ -216,11 +234,11 @@ export function createCosmosLayer(
 
       /* A cluster's glow shows while its cloud does. */
       for (const k of clusters) {
-        k.group.visible = k.spec.far ? farDrawn : nearDrawn;
+        k.group.visible = shown * (k.spec.far ? far : near) > FAINTEST_OPACITY;
         toPx(k.glow, k.group.position, 16);
       }
 
-      marks.update(ly, labelled, shown, place, toPx);
+      marks.update(ly, labelled, shown, place, toPx, layers);
 
       /* Distances: from the Milky Way to the selected structure, or to what the scale frames. */
       if (show.distances && lod.realm === "cosmos") {

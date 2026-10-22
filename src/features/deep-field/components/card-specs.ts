@@ -123,7 +123,111 @@ export const STAR_CARDS: Record<NeighbourId, CardSpec> = {
 };
 
 /** Structures beyond the Galaxy, as they are today. */
-export const COSMOS_CARDS: Record<CosmosId, StaticCard<Badge>> = {
+export const COSMOS_CARDS: Record<
+  CosmosId,
+  StaticCard<Badge | "observations" | "reconstruction">
+> = {
+  quipu: {
+    badge: "observations",
+    rows: [
+      figureRow("members", v(C.quipu.members)),
+      figureRow("centreDistance", v(C.quipu.distance)),
+      figureRow("publishedExtent", v(C.quipu.length)),
+      figureRow("inferredMass", v(C.quipu.mass)),
+    ],
+    caution: { hubble: v(C.quipu.sourceHubble) },
+  },
+  vela: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("peakDistance", v(C.vela.distance)),
+      figureRow("inferredMass", v(C.vela.mass)),
+      figureRow("effectiveRadius", v(C.vela.radius)),
+    ],
+    caution: { hubble: v(C.vela.sourceHubble) },
+  },
+  southPoleWall: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("peakDistance", v(C.southPoleWall.distance)),
+      figureRow("peakRedshift", v(C.southPoleWall.velocity)),
+    ],
+  },
+  shapleyBasin: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("centreDistance", v(C.shapleyBasin.distance)),
+      figureRow("basinProbability", v(C.shapleyBasin.probability)),
+      figureRow("membership", v(C.shapleyBasin.membership)),
+    ],
+  },
+  sloanBasin: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("centreDistance", v(C.sloanBasin.distance)),
+      figureRow("basinProbability", v(C.sloanBasin.probability)),
+      figureRow("effectiveRadius", v(C.sloanBasin.radius)),
+    ],
+  },
+  ophiuchusBasin: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("centreDistance", v(C.ophiuchusBasin.distance)),
+      figureRow("basinProbability", v(C.ophiuchusBasin.probability)),
+      figureRow("membership", v(C.ophiuchusBasin.membership)),
+    ],
+  },
+  localVoid: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("centreDistance", v(C.localVoid.distance)),
+      figureRow("effectiveRadius", v(C.localVoid.radius)),
+      figureRow("robustRadius", v(C.localVoid.robustRadius)),
+    ],
+    caution: { support: v(C.cosmicVoids.support) },
+  },
+  northernLocalVoid: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("centreDistance", v(C.northernLocalVoid.distance)),
+      figureRow("effectiveRadius", v(C.northernLocalVoid.radius)),
+      figureRow("robustRadius", v(C.northernLocalVoid.robustRadius)),
+    ],
+    caution: { support: v(C.cosmicVoids.support) },
+  },
+  sculptorVoid: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("centreDistance", v(C.sculptorVoid.distance)),
+      figureRow("effectiveRadius", v(C.sculptorVoid.radius)),
+      figureRow("robustRadius", v(C.sculptorVoid.robustRadius)),
+    ],
+    caution: { support: v(C.cosmicVoids.support) },
+  },
+  cosmicSurveys: {
+    badge: "observations",
+    rows: [
+      figureRow("cf4Groups", v(C.cosmicSurveys.groups)),
+      figureRow("classixClusters", v(C.cosmicSurveys.clusters)),
+      figureRow("desiSample", v(C.cosmicSurveys.galaxies)),
+    ],
+  },
+  cosmicBasins: {
+    badge: "reconstruction",
+    rows: [figureRow("catalogueRegions", v(C.cosmicBasins.count))],
+  },
+  cosmicVoids: {
+    badge: "reconstruction",
+    rows: [
+      figureRow("catalogueRegions", v(C.cosmicVoids.count)),
+      figureRow("spatialResolution", v(C.cosmicVoids.resolution)),
+      figureRow("posteriorSupport", v(C.cosmicVoids.support)),
+    ],
+  },
+  cosmicKnots: {
+    badge: "reconstruction",
+    rows: [figureRow("catalogueRegions", v(C.cosmicKnots.count))],
+  },
   localGroup: {
     badge: "mixed",
     rows: [
@@ -233,7 +337,8 @@ export const COSMOS_CARDS: Record<CosmosId, StaticCard<Badge>> = {
     body: { distance: v(C.greatAttractor.distance) },
   },
   laniakea: {
-    badge: "sketch",
+    badge: "reconstruction",
+    caution: { shapley: v(C.shapleyBasin.membership), ophiuchus: v(C.ophiuchusBasin.membership) },
     rows: [
       row("width", "cards.cosmos.laniakea.width", { value: v(C.laniakea.width) }),
       row("members", "cards.cosmos.laniakea.members", { value: v(C.laniakea.members) }),

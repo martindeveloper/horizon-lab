@@ -8,6 +8,7 @@ import { GALACTIC_CENTRE, GALACTIC_EAST, GALACTIC_POLE } from "@horizon/toolkit/
 import { VIEWS, viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { createCameraRig } from "../src/features/deep-field/lib/scene/camera-rig.ts";
 import { labelInsets } from "../src/features/deep-field/lib/scene/kit.ts";
+import { ATLAS_LANDMARKS } from "../src/space/cosmos/model/atlas.ts";
 import { anchorById, anchorToday } from "../src/space/cosmos/model/cosmos.ts";
 import { modernGalaxy } from "../src/space/galaxy/graphics/galaxy.ts";
 import {
@@ -170,6 +171,31 @@ test("names keep above the sightline, the phone's ladder and the guide's caption
   assert.equal(labelInsets(false, 120).bottom, 192, "phones: the ladder sits on the sightline");
   assert.equal(labelInsets(false, 120, 340).bottom, 340, "a caption above both wins");
   assert.equal(labelInsets(true, 120, 60).bottom, 120, "a caption below the dock changes nothing");
+});
+
+test("selecting any new atlas landmark brings its actual position into a phone's field", () => {
+  const camera = new PerspectiveCamera(48, 390 / 844, 0.05, 2e6);
+  const state = { selection: null };
+  const rig = createCameraRig(camera, { state: () => state, reduceMotion: { matches: true } });
+  rig.snapToView("cosmic-web");
+  for (const [id, landmark] of Object.entries(ATLAS_LANDMARKS)) {
+    state.selection = { kind: "cosmos", id };
+    rig.step(0);
+    rig.home();
+    rig.applyPose();
+    camera.updateMatrixWorld();
+    const p = cosmicToWorld(landmark.at, new Vector3()).project(camera);
+    near(p.x, 0, 1e-8, `${id} centred horizontally`);
+    near(p.y, 0, 1e-8, `${id} centred vertically`);
+  }
+  state.selection = null;
+  rig.step(0);
+  rig.home();
+  rig.applyPose();
+  assert.ok(
+    rig.aim.distanceTo(cosmicToWorld(ATLAS_LANDMARKS.sculptorVoid.at, new Vector3())) > LY,
+    "closing the card returns the overview",
+  );
 });
 
 test("the modern Milky Way is a thin, finite disk with dust and a populated centre", () => {

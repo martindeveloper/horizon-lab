@@ -1,5 +1,6 @@
 import { Vector3, type PerspectiveCamera } from "three";
 
+import { ATLAS_LANDMARKS, isAtlasLandmark } from "@/space/cosmos/model/atlas";
 import { cosmicAim } from "@/space/cosmos/model/cosmos";
 import {
   GALAXY_FRAME,
@@ -9,6 +10,7 @@ import {
   galaxyMix,
   galaxyToWorld,
   realmOf,
+  cosmicToWorld,
 } from "@/space/galaxy/scene/frames";
 import { SOLAR_FRAMING } from "@/space/solar-system/model/views";
 /**
@@ -58,6 +60,13 @@ export function createCameraRig(
   const heart: Vec3 = [0, 0, 0];
   /** 0..1 of the way the bulge card has taken the aim to the centre. */
   let hold = 0;
+  let atlasHold = 0;
+  const atlasAim = new Vector3();
+  const atlasTarget = new Vector3();
+  const atlasHeld = () => {
+    const sel = state().selection;
+    return sel?.kind === "cosmos" && isAtlasLandmark(sel.id) ? ATLAS_LANDMARKS[sel.id] : null;
+  };
   const bulgeHeld = () => {
     const sel = state().selection;
     return sel?.kind === "galaxy" && sel.id === "bulge";
@@ -82,9 +91,25 @@ export function createCameraRig(
     nearFloor: SOLAR_FRAMING.nearFloor,
     onStep: (dt) => {
       hold = bulgeHeld() ? Math.min(1, hold + dt / HOLD_S) : Math.max(0, hold - dt / HOLD_S);
+      const landmark = atlasHeld();
+      if (landmark) {
+        cosmicToWorld(landmark.at, atlasTarget);
+        if (atlasHold === 0 || reduceMotion.matches) atlasAim.copy(atlasTarget);
+        else atlasAim.lerp(atlasTarget, 1 - Math.exp(-dt / 0.18));
+      }
+      atlasHold = reduceMotion.matches
+        ? landmark
+          ? 1
+          : 0
+        : landmark
+          ? Math.min(1, atlasHold + dt / HOLD_S)
+          : Math.max(0, atlasHold - dt / HOLD_S);
     },
     /* The aim on its way to or from the centre. */
-    busy: () => hold > 0 && hold < 1,
+    busy: () =>
+      (hold > 0 && hold < 1) ||
+      (atlasHold > 0 && atlasHold < 1) ||
+      (atlasHold > 0 && atlasAim.distanceTo(atlasTarget) > LY),
     /* Close in, the camera turns about the Sun; farther, about the galactic centre; past the
        halo, about the heart of the structure in view. */
     home: (aim, pose) => {
@@ -100,6 +125,12 @@ export function createCameraRig(
             .applyQuaternion(GALAXY_FRAME)
             .multiplyScalar(MLY),
         );
+      /* The expanded atlas reaches either side of the old web framing. Selecting
+         a landmark brings it into view on a narrow phone without relocating data. */
+      aim.lerp(
+        atlasAim,
+        smootherstep(atlasHold) * smootherstep(toLogFraction(pose.distance / LY, 80e6, 450e6)),
+      );
       if (focus) aim.copy(focus.at);
     },
     /* The orbit frame turns from the ecliptic to the galactic plane past the nearest stars,

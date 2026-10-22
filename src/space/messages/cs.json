@@ -119,7 +119,20 @@
     "cygnus-x1": "Cygnus X-1",
     "sgr-a": "Sagittarius A*",
     "m87": "M87*",
-    "ton-618": "TON 618"
+    "ton-618": "TON 618",
+    "quipu": "Quipu",
+    "vela": "Nadkupa v Plachtách",
+    "southPoleWall": "Zeď jižního pólu",
+    "shapleyBasin": "Shapleyho pánev",
+    "sloanBasin": "Pánev Sloan",
+    "ophiuchusBasin": "Pánev v Hadonoši",
+    "localVoid": "Místní prázdnota",
+    "northernLocalVoid": "Severní místní prázdnota",
+    "sculptorVoid": "Prázdnota v Sochaři",
+    "cosmicSurveys": "Pozorované katalogy přehlídek",
+    "cosmicBasins": "Pánve přitažlivosti",
+    "cosmicVoids": "Rekonstruované prázdnoty",
+    "cosmicKnots": "Rekonstruované uzly"
   },
   "hud": {
     "controls": "Ovládání",

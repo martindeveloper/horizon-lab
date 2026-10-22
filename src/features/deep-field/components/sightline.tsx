@@ -6,6 +6,7 @@ import { useMemo, useRef } from "react";
 import { useDockClearance } from "@/components/simulations/use-dock-clearance";
 import { formatAu, type Facts } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
+import { isAtlasId } from "@/space/cosmos/model/atlas";
 import { COSMOS } from "@/space/cosmos/model/catalogue";
 import { CMB_LY } from "@/space/cosmos/model/cosmos";
 import { neighbour, neighbourDistanceLy } from "@/space/galaxy/model/neighbours";
@@ -51,6 +52,7 @@ function distanceOf(sel: Selection, now: Date): number | null {
 /** The selection's name as its card titles it. */
 function nameOf(sel: Selection) {
   if (isSolarSelection(sel)) return solarNameKey(sel);
+  if (sel.kind === "cosmos" && isAtlasId(sel.id)) return `names.${sel.id}`;
   return sel.kind === "star" || sel.kind === "reach"
     ? `names.${sel.id}`
     : `cards.${sel.kind}.${sel.id}.title`;
@@ -86,9 +88,14 @@ export function Sightline() {
     selected === null ? t("hud.outToValue", { distance }) : distance,
     ...(line.z >= 1e-3
       ? [
-          t("hud.redshiftValue", {
-            value: f.number(line.z, { maximumSignificantDigits: line.z < 10 ? 2 : 4 }),
-          }),
+          t(
+            selection?.kind === "cosmos" && isAtlasId(selection.id)
+              ? "hud.modelRedshiftValue"
+              : "hud.redshiftValue",
+            {
+              value: f.number(line.z, { maximumSignificantDigits: line.z < 10 ? 2 : 4 }),
+            },
+          ),
         ]
       : []),
   ].join(" · ");
