@@ -16,14 +16,14 @@ import type { AudioMap } from "@horizon/toolkit/audio";
 import { MAPS, jplElements, mapFile } from "@horizon/toolkit/bodies";
 import { TAP_SLOP_PX, wheelPixels } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import { lerp, smoothstep } from "@horizon/toolkit/math";
+import { lerp, smootherstep, smoothstep } from "@horizon/toolkit/math";
 import {
   DisposalScope,
   createEngineHost,
   createFullscreenPass,
   type SimulationEngine,
 } from "@horizon/toolkit/rendering";
-import { loadMap } from "@horizon/toolkit/scene";
+import { createLineVeil, loadMap } from "@horizon/toolkit/scene";
 import { convert, decodeSrgb, hexToLinear } from "@horizon/toolkit/science";
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
@@ -37,7 +37,14 @@ import { vectors } from "./graphics/vectors";
 import { weatherUniforms } from "./graphics/weather-uniforms";
 import { createForecast, turnAt } from "./model/activity";
 import { radiusMetres } from "./model/catalogue";
-import { blankDriftFrame, createDriftPath, type DriftPath } from "./model/drift-path";
+import {
+  blankDriftFrame,
+  createDriftPath,
+  framingOf,
+  zoomPath,
+  type DriftPath,
+  type Framing,
+} from "./model/drift-path";
 import { fadeFocusBlur, focusBlurRadius } from "./model/focus-blur";
 import { glideAt, glideFrom, glideRests, glideSeconds, glideTowards } from "./model/glide";
 import { letGo, poseRests, restPose, settlePose, turnBy } from "./model/grab";
@@ -68,6 +75,7 @@ import {
   BROWN_DWARF_ALKALI,
   DRAG_RUNGS,
   DRIFT_RESUME_S,
+  GLIDE_SECONDS,
   GRAB_MIN_PX,
   IDLE_FPS,
   MAX_DISCS,
@@ -152,6 +160,7 @@ export function createGiantsEngine(
       uBaseline: { value: 0 },
       uTime: { value: 0 },
       uDetail: { value: 1 },
+      uLines: { value: 1 },
       uFocus: { value: new Vector2(-1, 0) },
       ...stellar.uniforms,
       uCount: { value: 0 },
@@ -276,7 +285,7 @@ export function createGiantsEngine(
       const map = audioMapNow(DRIFT.music?.track);
       if (drift?.map !== map) {
         const timed = timedDrift(DRIFT, map);
-        const path = createDriftPath(timed);
+        const path = createDriftPath(timed, ladder);
         drift = {
           map,
           path,
@@ -289,10 +298,22 @@ export function createGiantsEngine(
     const driftFrame = blankDriftFrame();
     let driftClock = 0;
     let driftWas: DriftState = "off";
-    /** Where a resumed drift takes the camera from, and how long since. */
-    let driftResume: { place: number; zoom: number; elapsed: number } | null = null;
     /** The canvas's light as the drift last set it (`seamLight`). */
     let driftLight = 1;
+    /* The drift veils the line art: the baseline and the orbits fade, the bodies and the sky stay. */
+    const lineVeil = createLineVeil();
+    /** The framing last drawn, before the surface zoom. */
+    let drawn: Framing = { centre: 0, width: 1 };
+    /**
+     * A handover between the drift's camera and the ladder's: the framing drawn and the surface
+     * zoom when it began, how long it takes and how long since. The drift flies off the ladder's
+     * own framings, so a pause, a hand or a resume eases from there onto the camera now in
+     * charge along the smooth zoom rather than jumping.
+     */
+    let rejoin: { from: Framing; zoom: number; seconds: number; elapsed: number } | null = null;
+    const rejoinFrom = (seconds: number) => {
+      rejoin = { from: drawn, zoom: surfaceZoom, seconds, elapsed: 0 };
+    };
     const flyingDrift = () => useGiants.getState().drift === "playing";
     /** The camera stays where the drift left it. */
     const holdHere = () => {
@@ -306,39 +327,58 @@ export function createGiantsEngine(
       state.pauseDrift();
       driftWas = "paused";
       holdHere();
+      rejoinFrom(GLIDE_SECONDS);
     };
+    /** How far the handover under way has come, 0–1 (1: none). */
+    function stepRejoin(dt: number) {
+      if (!rejoin) return 1;
+      rejoin.elapsed += dt;
+      return reduce ? 1 : smoothstep(0, rejoin.seconds, rejoin.elapsed);
+    }
     /** The drift's step: its state's changes, then the camera where its clock has it. */
-    function stepDrift(state: DriftState, dt: number) {
+    function stepDrift(state: DriftState, dt: number, blend: number) {
       const was = driftWas;
       driftWas = state;
       if (state !== "playing") {
-        if (was === "playing") holdHere();
+        if (was === "playing") {
+          holdHere();
+          rejoinFrom(state === "off" ? GLIDE_SECONDS : DRIFT_RESUME_S);
+        }
         /* The drift ends: the camera settles on the body nearest where it heads, as a hand letting go does. */
         if (state === "off" && was !== "off" && was !== "loading") fly(Math.round(target));
         return false;
       }
       if (was !== "playing") {
-        if (was === "paused") driftResume = { place, zoom: surfaceZoom, elapsed: 0 };
+        if (was === "paused") rejoinFrom(DRIFT_RESUME_S);
         else {
-          driftResume = null;
+          rejoin = null;
           driftClock = driftPath().opening();
         }
       } else driftClock += dt;
-      const frame = driftPath().path.at(driftClock, reduce, driftFrame);
-      let blend = 1;
-      if (driftResume) {
-        driftResume.elapsed += dt;
-        blend = smoothstep(0, DRIFT_RESUME_S, driftResume.elapsed);
-        if (blend >= 1) driftResume = null;
-      }
-      place = driftResume ? lerp(driftResume.place, frame.place, blend) : frame.place;
-      surfaceZoom = driftResume
-        ? Math.exp(lerp(Math.log(driftResume.zoom), Math.log(frame.zoom), blend))
+      const frame = driftPath().path.at(driftClock, stage, reduce, driftFrame);
+      place = frame.place;
+      surfaceZoom = rejoin
+        ? Math.exp(lerp(Math.log(rejoin.zoom), Math.log(frame.zoom), blend))
         : frame.zoom;
       glide = glideAt(place);
       /* The rung it heads for is the one whose star comes alive; those flown past stay quiet. */
       target = frame.heading;
       return true;
+    }
+    /** The ladder's framing for this frame: the drift's or the place's, eased from a handover's start. */
+    function frameCamera(drifting: boolean, blend: number) {
+      if (drifting) {
+        camera.scale = driftFrame.scale;
+        camera.centre = driftFrame.centre;
+        delete camera.horizon;
+      } else cameraAt(ladder, place, stage, camera);
+      if (rejoin) {
+        const framing = zoomPath(rejoin.from, framingOf(camera, stage)).at(blend);
+        camera.scale = framing.width / stage.width;
+        camera.centre = framing.centre;
+        if (blend >= 1) rejoin = null;
+      }
+      drawn = framingOf(camera, stage);
     }
 
     /* ---------------------------------------------------------------- input */
@@ -595,7 +635,9 @@ export function createGiantsEngine(
         takeCamera();
         fly(state.goal);
       }
-      const drifting = stepDrift(state.drift, dt);
+      const blend = stepRejoin(dt);
+      const drifting = stepDrift(state.drift, dt, blend);
+      lineVeil.step(dt, state.drift === "off");
       if (!drifting && !drag) {
         if (reduce) place = target;
         else {
@@ -617,7 +659,7 @@ export function createGiantsEngine(
         globes[index]!.tilt = tilt + pose.pitch;
       });
 
-      cameraAt(ladder, place, stage, camera);
+      frameCamera(drifting, blend);
       if (!drifting) {
         const zoomTarget = settled() ? state.surfaceZoom : 1;
         surfaceZoom = reduce
@@ -707,12 +749,12 @@ export function createGiantsEngine(
       uniforms.uBaseline.value = camera.horizon ?? horizonOf(stage);
       uniforms.uTime.value = time;
       uniforms.uDetail.value = GIANTS_QUALITY[state.quality].detail ? 1 : 0;
+      uniforms.uLines.value = smootherstep(lineVeil.presence);
 
       const { scale } = camera;
       /* The orbits ripple out round the body the camera lands on, as if it stood where the Sun
          does, and fade round it as the camera leaves, before coming in round the next. */
-      const orbitsOn = drifting ? driftFrame.orbits : state.orbits;
-      const orbitsWanted = orbitsOn && resting ? focus : -1;
+      const orbitsWanted = state.orbits && resting ? focus : -1;
       orbitFade = reduce
         ? handOverAtOnce(orbitsWanted)
         : handOver(orbitFade, orbitsWanted, dt, ORBIT_FADE_IN_S, ORBIT_FADE_OUT_S);
@@ -759,14 +801,19 @@ export function createGiantsEngine(
         state.setReady(true);
       }
     }
+    /** Something on the stage moves by itself: the camera, a globe, the drift or the line art's veil. */
+    const moving = () =>
+      !settled() ||
+      drag !== null ||
+      !posesRest() ||
+      flyingDrift() ||
+      rejoin !== null ||
+      lineVeil.busy;
     pass.compile();
     engine.start({
       render: frame,
-      paused: () => reduce && settled() && !engine.dirty && !drag && posesRest() && !flyingDrift(),
-      fps: () =>
-        settled() && !drag && posesRest() && !flyingDrift()
-          ? IDLE_FPS
-          : GIANTS_QUALITY[useGiants.getState().quality].fps,
+      paused: () => reduce && !engine.dirty && !moving(),
+      fps: () => (moving() ? GIANTS_QUALITY[useGiants.getState().quality].fps : IDLE_FPS),
     });
     resources.defer(
       useGiants.subscribe((state, previous) => {

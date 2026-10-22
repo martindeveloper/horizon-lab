@@ -31,6 +31,7 @@ uniform float uPixelRatio;              // buffer pixels per CSS pixel
 uniform float uBaseline;                // the line the bodies stand on, CSS pixels from the top
 uniform float uTime;                    // seconds, drives everything that moves
 uniform float uDetail;                  // 0: the main layers; 1: their finer companions too
+uniform float uLines;                   // the line art's presence (baseline, orbits): 0 while a drift veils it
 uniform vec2 uFocus;                    // one detailed surface's slot, and its faded quality budget
 uniform highp sampler2D uSpectrum;      // CIE continuum: normalized RGB, log Y
 uniform highp sampler2D uProfiles;      // each disc: R,V,B limb laws; latitude temperature
@@ -279,7 +280,7 @@ vec3 sky(vec2 p) {
     colour += photonRing(o, shape.z, uRing[i], uBody[i].w);
   }
   float baseline = 1.0 - smoothstep(0.0, 1.0 / uPixelRatio + 0.4, abs(line.y - uBaseline));
-  return colour + uAccent * BASELINE_ALPHA * baseline;
+  return colour + uAccent * BASELINE_ALPHA * baseline * uLines;
 }
 
 void main() {
@@ -309,7 +310,7 @@ void main() {
 
   /* The orbits over everything, after the tone curve so their gold is the theme's: a dark
      casing either side of each line keeps it legible across a bright face as on the sky. */
-  if (uOrbitCentre.z > 0.0) {
+  if (uOrbitCentre.z > 0.0 && uLines > 0.0) {
     float r = length(p - uOrbitCentre.xy);
     float line = 0.0;
     float casing = 0.0;
@@ -319,8 +320,8 @@ void main() {
       line = max(line, ring.y * (1.0 - smoothstep(0.35, 1.25, d)));
       casing = max(casing, ring.y * (1.0 - smoothstep(1.25, ORBIT_CASE_PX, d)));
     }
-    shown *= 1.0 - ORBIT_CASE_DEPTH * casing;
-    shown = mix(shown, uGamut * uAccent, ORBIT_LINE_ALPHA * line);
+    shown *= 1.0 - ORBIT_CASE_DEPTH * casing * uLines;
+    shown = mix(shown, uGamut * uAccent, ORBIT_LINE_ALPHA * line * uLines);
   }
   gl_FragColor = vec4(displayEncode(shown), 1.0);
 }

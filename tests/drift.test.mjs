@@ -20,7 +20,9 @@ import { VIEW_IDS } from "../src/features/deep-field/lib/model/view-ids.ts";
 import { viewById, worldDistance } from "../src/features/deep-field/lib/model/views.ts";
 import { useDeepField } from "../src/features/deep-field/lib/store.ts";
 import { DRIFT as GIANTS } from "../src/features/giants/lib/drift.ts";
-import { createDriftPath } from "../src/features/giants/lib/model/drift-path.ts";
+import { radiusMetres } from "../src/features/giants/lib/model/catalogue.ts";
+import { createDriftPath, zoomPath } from "../src/features/giants/lib/model/drift-path.ts";
+import { cameraAt, createLadder } from "../src/features/giants/lib/model/ladder.ts";
 import { RUNG_IDS } from "../src/features/giants/lib/model/rungs.ts";
 import { WEATHER_NEAR } from "../src/features/giants/lib/parameters.ts";
 import { useGiants } from "../src/features/giants/lib/store.ts";
@@ -238,6 +240,49 @@ test("a loop that fades through black is dark on its seam and fully lit away fro
   assert.equal(seamLight(0, 100, undefined), 1, "a loop without a fade flies on lit");
 });
 
+test("the smooth zoom lands on both framings and never zooms back in, however wide the pan", () => {
+  for (const [from, to] of [
+    [
+      { centre: 0, width: 10 },
+      { centre: 4, width: 80 },
+    ],
+    [
+      { centre: 0, width: 10 },
+      { centre: 400, width: 12 },
+    ],
+    [
+      { centre: 0, width: 10 },
+      { centre: 0, width: 50 },
+    ],
+    [
+      { centre: 5, width: 10 },
+      { centre: 5, width: 10 },
+    ],
+  ]) {
+    const path = zoomPath(from, to);
+    const start = path.at(0);
+    const end = path.at(1);
+    assert.ok(
+      Math.abs(start.centre - from.centre) < 1e-9 && Math.abs(start.width / from.width - 1) < 1e-9,
+    );
+    assert.ok(Math.abs(end.centre - to.centre) < 1e-6 * to.width, `lands on ${to.centre}`);
+    assert.ok(Math.abs(end.width / to.width - 1) < 1e-6, `lands at width ${to.width}`);
+    let previous = start;
+    for (let f = 0.01; f <= 1; f += 0.01) {
+      const framing = path.at(f);
+      assert.ok(framing.width >= previous.width * (1 - 1e-9), "never zooms back in");
+      assert.ok(framing.width <= to.width * (1 + 1e-9), "never past the wider framing");
+      assert.ok((framing.centre - previous.centre) * Math.sign(to.centre - from.centre) >= -1e-9);
+      previous = framing;
+    }
+  }
+  assert.ok(
+    zoomPath({ centre: 0, width: 10 }, { centre: 400, width: 12 }).length >
+      zoomPath({ centre: 0, width: 10 }, { centre: 4, width: 12 }).length,
+    "a wider pan is a longer flight",
+  );
+});
+
 test("Giants' drift climbs without turning back, keeps each held star alive and zooms about one body", () => {
   const slug = GIANTS.music.track.toLowerCase().replaceAll(" ", "-");
   const map = parseAudioMap(
@@ -245,38 +290,57 @@ test("Giants' drift climbs without turning back, keeps each held star alive and 
       readFileSync(new URL(`../bench/fixtures/audio-maps/${slug}.json`, import.meta.url), "utf8"),
     ),
   );
-  for (const timed of [timedDrift(GIANTS, map), timedDrift(GIANTS, null)]) {
-    const path = createDriftPath(timed);
-    const last = RUNG_IDS.length - 1;
-    let previous = -Infinity;
-    for (let t = 0; t < path.loop; t += 0.05) {
-      const frame = path.at(t);
-      assert.ok(frame.place >= previous - 1e-9, `the camera climbs at ${t.toFixed(2)} s`);
-      assert.ok(frame.place >= 0 && frame.place <= last, `on the ladder at ${t.toFixed(2)} s`);
-      previous = frame.place;
-      /* The surface zoom magnifies about the body nearest the camera: it may only be on while
-         that body is the one the shot is at, or the view would jump where the nearest changes. */
-      if (frame.zoom > 1.001)
-        assert.equal(Math.round(frame.place), frame.heading, `zoomed about its body at ${t} s`);
+  const ladder = createLadder(RUNG_IDS.map((id) => radiusMetres(id)));
+  const last = RUNG_IDS.length - 1;
+  for (const stage of [
+    { width: 1280, height: 720 },
+    { width: 375, height: 700 },
+  ])
+    for (const timed of [timedDrift(GIANTS, map), timedDrift(GIANTS, null)]) {
+      const path = createDriftPath(timed, ladder);
+      let previous = null;
+      for (let t = 0; t < path.loop; t += 0.05) {
+        const frame = path.at(t, stage);
+        const at = `at ${t.toFixed(2)} s on ${stage.width} px`;
+        assert.ok(frame.place >= 0 && frame.place <= last, `on the ladder ${at}`);
+        if (previous) {
+          assert.ok(frame.place >= previous.place - 1e-9, `the camera climbs ${at}`);
+          assert.ok(
+            frame.centre >= previous.centre - 1e-6 * frame.scale,
+            `the view never swings back ${at}`,
+          );
+        }
+        previous = { ...frame };
+        /* The surface zoom magnifies about the body nearest the camera: it may only be on while
+           that body is the one the shot is at, or the view would jump where the nearest changes. */
+        if (frame.zoom > 1.001)
+          assert.equal(Math.round(frame.place), frame.heading, `zoomed about its body ${at}`);
+      }
+      timed.shots.forEach((shot, i) => {
+        const [from, to] = shot.creep;
+        assert.ok(from <= to, `shot ${i} creeps up the ladder`);
+        assert.ok(Math.max(-from, to) < WEATHER_NEAR, `shot ${i}'s hold keeps its star alive`);
+        /* Each hold is framed where it was written, as the ladder frames it, from start to end. */
+        const start = path.opening(i);
+        const end = start + shot.hold + (i === 0 ? shot.flight.duration : 0);
+        const rung = RUNG_IDS.indexOf(shot.rung);
+        for (const [when, place] of [
+          [start, rung + from],
+          [end - 1e-6, rung + to],
+        ]) {
+          const frame = path.at(when, stage);
+          const ladderCamera = cameraAt(ladder, place, stage);
+          assert.ok(Math.abs(frame.place - place) < 1e-4, `shot ${i}'s hold at ${when}`);
+          assert.ok(Math.abs(frame.centre - ladderCamera.centre) < 1e-3 * ladderCamera.scale);
+        }
+        assert.equal(path.at(start + 0.01, stage).heading, rung);
+      });
+      assert.equal(path.at(0, stage).light, 0, "the loop starts out of black");
+      assert.equal(path.at(path.loop / 2, stage).light, 1);
+      /* Reduced motion: each flight cuts to its shot, each hold stands at its start. */
+      const still = path.at(path.opening(1) + 1, stage, true);
+      assert.equal(still.place, RUNG_IDS.indexOf(timed.shots[1].rung) + timed.shots[1].creep[0]);
     }
-    timed.shots.forEach((shot, i) => {
-      const [from, to] = shot.creep;
-      assert.ok(from <= to, `shot ${i} creeps up the ladder`);
-      assert.ok(Math.max(-from, to) < WEATHER_NEAR, `shot ${i}'s hold keeps its star alive`);
-      /* Each hold sits where it was written, from its start to its end. */
-      const start = path.opening(i);
-      const end = start + shot.hold + (i === 0 ? shot.flight.duration : 0);
-      const rung = RUNG_IDS.indexOf(shot.rung);
-      assert.ok(Math.abs(path.at(start).place - (rung + from)) < 1e-9, `shot ${i} begins its hold`);
-      assert.ok(Math.abs(path.at(end - 1e-6).place - (rung + to)) < 1e-4, `shot ${i} ends it`);
-      assert.equal(path.at(start + 0.01).heading, rung);
-    });
-    assert.equal(path.at(0).light, 0, "the loop starts out of black");
-    assert.equal(path.at(path.loop / 2).light, 1);
-    /* Reduced motion: each flight cuts to its shot, each hold stands at its start. */
-    const still = path.at(path.opening(1) + 1, true);
-    assert.equal(still.place, RUNG_IDS.indexOf(timed.shots[1].rung) + timed.shots[1].creep[0]);
-  }
 });
 
 test("a cut lands the camera on the opening shot behind the curtain; a resume flies", () => {
