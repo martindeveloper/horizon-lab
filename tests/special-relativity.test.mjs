@@ -137,3 +137,23 @@ test("the black-body lookup is log-spaced: 5800 K near white, 3000 K red, 20000 
   near(blackbodyLutCoordinate(Math.sqrt(1000 * 40_000), 1000, 40_000), 0.5);
   assert.throws(() => blackbodyLut(1, 1000, 40_000), RangeError);
 });
+
+test("short torch trips and burns approach Newtonian motion without cancellation", () => {
+  for (const metres of [1e-6, 1, 1e3]) {
+    const trip = torchTrip(metres / 1000, STANDARD_GRAVITY);
+    const seconds = 2 * Math.sqrt(metres / STANDARD_GRAVITY);
+    near(trip.t / seconds, 1, 1e-10);
+    near(trip.tau / seconds, 1, 1e-10);
+    const half = torchOneWay(trip.tau / 2, STANDARD_GRAVITY);
+    near((half.distance * 2000) / metres, 1, 1e-10);
+  }
+  for (const seconds of [1e-6, 0.001, 1]) {
+    const burn = torchOneWay(seconds, STANDARD_GRAVITY);
+    near((burn.distance * 1000) / (0.5 * STANDARD_GRAVITY * seconds ** 2), 1, 1e-12);
+    near(burn.t / seconds, 1, 1e-12);
+    near((burn.u * 1000) / (STANDARD_GRAVITY * seconds), 1, 1e-12);
+  }
+  assert.deepEqual(torchTrip(0, STANDARD_GRAVITY), { t: 0, tau: 0, gammaMax: 1 });
+  assert.deepEqual(torchOneWay(0, STANDARD_GRAVITY), { distance: 0, t: 0, u: 0 });
+  assert.deepEqual(torchOneWay(10, 0), { distance: 0, t: 10, u: 0 });
+});

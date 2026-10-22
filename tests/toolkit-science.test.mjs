@@ -580,3 +580,39 @@ test("a figure prints as its sentence asks and gives the plural category it prin
     "21",
   );
 });
+
+test("matter-only cosmology agrees with the analytic Einstein–de Sitter limits", async () => {
+  const { eventHorizonMpc } = await import("@horizon/toolkit/science");
+  const model = { H0: 70, omegaM: 1 };
+  const hubbleTime = hubbleTimeGyr(model.H0);
+  // a(t) ∝ t^(2/3), so H(t) = 2/(3t); integrating c dt/a gives 2c/H0 today.
+  // https://www.damtp.cam.ac.uk/user/tong/cosmo/cosmohtml/S3.html
+  for (const a of [0, 1e-6, 0.25, 1, 4]) {
+    const expected = (2 / 3) * hubbleTime * a ** 1.5;
+    near(cosmicAgeGyr(a, model), expected, 1e-10);
+    near(scaleFactorAtAge(expected, model), a, 1e-12);
+    if (a > 0) near(cosmicAgeAtRedshiftGyr(1 / a - 1, model), expected, 1e-9);
+  }
+  const horizon = (2 * 299792.458) / 70;
+  near(particleHorizonMpc(model), horizon, 1e-9);
+  for (const z of [0, 0.1, 1, 1000])
+    near(comovingDistanceMpc(z, model), horizon * (1 - 1 / Math.sqrt(1 + z)), 1e-9);
+  assert.equal(eventHorizonMpc(model), Infinity);
+  near(cosmicAgeGyr(1, { H0: 70, omegaM: 1 - 1e-12 }), (2 / 3) * hubbleTime, 1e-10);
+});
+
+test("cosmology inverses bracket early sources without silently capping redshift", () => {
+  for (const model of [PLANCK_2018, { H0: 70, omegaM: 1 }]) {
+    for (const z of [1e5, 2e6, 1e7]) {
+      const distance = comovingDistanceMpc(z, model);
+      near(redshiftAtComovingDistance(distance, model) / z, 1, 1e-6);
+    }
+    const z = 2e6;
+    const lookback = lookbackTimeGyr(z, model);
+    // Subtracting two cosmic ages limits the precision of a very early lookback time.
+    near(redshiftAtLookback(lookback, model) / z, 1, 1e-3);
+    assert.equal(redshiftAtLookback(0, model), 0);
+    assert.equal(redshiftAtLookback(cosmicAgeAtRedshiftGyr(0, model), model), Infinity);
+    assert.equal(cosmicAgeAtRedshiftGyr(Infinity, model), 0);
+  }
+});

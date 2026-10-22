@@ -3,8 +3,8 @@
  * Doppler shift and the clocks of coasting and torch-ship trips.
  *
  * The state is the proper velocity u = γβc in km/s (momentum per unit mass): it is
- * unbounded, so |β| < 1 is guaranteed by construction, and it adds plainly under
- * acceleration (du/dτ = a). Distances are km, times s, accelerations m s⁻² so the
+ * unbounded; β approaches 1 (and can round to 1 at extreme speeds). Under collinear
+ * proper acceleration, du/dt = a and d(rapidity)/dτ = a/c. Distances are km, times s, accelerations m s⁻² so the
  * standard gravity can be passed as it is published.
  */
 import { SPEED_OF_LIGHT, SPEED_OF_LIGHT_KM_S } from "./constants";
@@ -93,9 +93,11 @@ export function torchTrip(
 ): TripClocks & { gammaMax: number } {
   const c = SPEED_OF_LIGHT;
   const a = acceleration;
-  const gammaMax = 1 + (a * distanceKm * 1e3) / (2 * c * c);
-  const tau = (2 * c * Math.acosh(gammaMax)) / a;
-  const t = (2 * c * Math.sinh((a * tau) / (2 * c))) / a;
+  const gain = (a * distanceKm * 1e3) / (2 * c * c);
+  const gammaMax = 1 + gain;
+  // acosh(1 + x) = 2 asinh(sqrt(x/2)), without rounding a short trip's 1 + x to 1.
+  const tau = (4 * c * Math.asinh(Math.sqrt(gain / 2))) / a;
+  const t = (2 * c * Math.sqrt(gain) * Math.sqrt(gain + 2)) / a;
   return { t, tau, gammaMax };
 }
 
@@ -105,11 +107,13 @@ export function torchTrip(
  * x = (c²/a)(cosh(aτ/c) − 1), t = (c/a) sinh(aτ/c) and u = c sinh(aτ/c).
  */
 export function torchOneWay(tau: number, acceleration: number) {
+  if (acceleration === 0) return { distance: 0, t: tau, u: 0 };
   const c = SPEED_OF_LIGHT;
   const phi = (acceleration * tau) / c;
   const sinh = Math.sinh(phi);
   return {
-    distance: ((c * c) / acceleration) * (Math.cosh(phi) - 1) * 1e-3,
+    // cosh(phi) - 1 = 2 sinh(phi/2)² retains the Newtonian limit of a short burn.
+    distance: ((2 * c * c) / acceleration) * Math.sinh(phi / 2) ** 2 * 1e-3,
     t: (c / acceleration) * sinh,
     u: SPEED_OF_LIGHT_KM_S * sinh,
   };

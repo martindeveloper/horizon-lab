@@ -101,3 +101,49 @@ test("gaussian deviates are standard normal and onSphere directions are uniform 
   assert.deepEqual(Array.from({ length: 16 }, a), Array.from({ length: 16 }, b));
   assert.ok(Array.from({ length: 256 }, a).every((v) => v > 0 && v < 1));
 });
+
+test("log controls retain finite endpoints and midpoints across extreme and narrow ranges", () => {
+  for (const [min, max] of [[1e-300, 1e300], [1, 1 + Number.EPSILON]]) {
+    assert.equal(fromLogFraction(0, min, max), min);
+    assert.equal(fromLogFraction(1, min, max), max);
+    assert.equal(toLogFraction(min, min, max), 0);
+    assert.equal(toLogFraction(max, min, max), 1);
+  }
+  close(toLogFraction(1, 1e-300, 1e300), 0.5);
+  close(fromLogFraction(0.5, 1e-300, 1e300), 1);
+  for (const [min, max] of [[NaN, 2], [1, Infinity], [-1, 2], [1, 1]]) {
+    assert.throws(() => fromLogFraction(0.5, min, max), RangeError);
+    assert.throws(() => toLogFraction(1, min, max), RangeError);
+  }
+});
+
+test("vector operations preserve inputs, support aliasing and normalize finite extreme scales", async () => {
+  const { add3, cross3, dot3, length3, normalize3, scale3 } = await import("@horizon/toolkit/math");
+  const a = [2, -3, 4];
+  const b = [-5, 6, 7];
+  const cross = cross3(a, b);
+  assert.deepEqual(cross, [-45, -34, -3]);
+  assert.equal(dot3(cross, a), 0);
+  assert.equal(dot3(cross, b), 0);
+  for (const input of [0, 1]) {
+    const left = [...a];
+    const right = [...b];
+    const out = input === 0 ? left : right;
+    assert.equal(cross3(left, right, out), out);
+    assert.deepEqual(out, cross);
+  }
+  const out = [...a];
+  assert.equal(add3(out, b, out), out);
+  assert.deepEqual(out, [-3, 3, 11]);
+  assert.equal(scale3(out, -2, out), out);
+  assert.deepEqual(out, [6, -6, -22]);
+  assert.deepEqual(a, [2, -3, 4]);
+  assert.deepEqual(b, [-5, 6, 7]);
+  assert.deepEqual(normalize3([0, 0, 0]), [0, 0, 0]);
+  for (const scale of [1e-320, 1, 1e308]) {
+    const v = [scale, -scale, scale];
+    assert.equal(normalize3(v, v), v);
+    close(length3(v), 1);
+    v.forEach((value, i) => close(value, (i === 1 ? -1 : 1) / Math.sqrt(3)));
+  }
+});

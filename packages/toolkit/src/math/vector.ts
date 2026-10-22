@@ -4,7 +4,6 @@
  * hot loop can reuse a scratch tuple; `out` may alias an input.
  */
 
-/** A vector or point: x, y, z. */
 export type Vec3 = [x: number, y: number, z: number];
 
 export const dot3 = (a: Readonly<Vec3>, b: Readonly<Vec3>) =>
@@ -38,5 +37,14 @@ export function cross3(a: Readonly<Vec3>, b: Readonly<Vec3>, out: Vec3 = [0, 0, 
 
 /** The unit vector along `v`; a zero vector stays zero. */
 export function normalize3(v: Readonly<Vec3>, out: Vec3 = [0, 0, 0]): Vec3 {
-  return scale3(v, 1 / (length3(v) || 1), out);
+  // Scale before taking the norm: finite components can have an overflowing norm or reciprocal.
+  const scale = Math.max(Math.abs(v[0]), Math.abs(v[1]), Math.abs(v[2])) || 1;
+  const x = v[0] / scale;
+  const y = v[1] / scale;
+  const z = v[2] / scale;
+  const length = Math.hypot(x, y, z) || 1;
+  out[0] = x / length;
+  out[1] = y / length;
+  out[2] = z / length;
+  return out;
 }

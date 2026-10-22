@@ -5,7 +5,6 @@ export const TAU = Math.PI * 2;
 export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
-/** Clamp to [0, 1]. */
 export function clamp01(value: number) {
   return value < 0 ? 0 : value > 1 ? 1 : value;
 }
@@ -34,9 +33,15 @@ function checkLogRange(min: number, max: number) {
   if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max <= min)
     throw new RangeError("Logarithmic bounds must be finite and 0 < min < max");
 }
+function logRatio(value: number, base: number) {
+  const ratio = value / base;
+  return ratio > 0 && Number.isFinite(ratio)
+    ? Math.log(ratio)
+    : Math.log(value) - Math.log(base);
+}
 export function toLogFraction(value: number, min: number, max: number) {
   checkLogRange(min, max);
-  return Math.log(clamp(value, min, max) / min) / Math.log(max / min);
+  return logRatio(clamp(value, min, max), min) / logRatio(max, min);
 }
 /**
  * Where `x` sits between `from` and `to` in log space, clamped to 0..1, either way round (a
@@ -44,11 +49,16 @@ export function toLogFraction(value: number, min: number, max: number) {
  * a control's bounds go through `toLogFraction`.
  */
 export function logFraction(x: number, from: number, to: number) {
-  return clamp01(Math.log(x / from) / Math.log(to / from));
+  return clamp01(logRatio(x, from) / logRatio(to, from));
 }
 export function fromLogFraction(t: number, min: number, max: number) {
   checkLogRange(min, max);
-  return min * (max / min) ** clamp(t, 0, 1);
+  if (t <= 0) return min;
+  if (t >= 1) return max;
+  const ratio = max / min;
+  return Number.isFinite(ratio)
+    ? min * ratio ** t
+    : Math.exp((1 - t) * Math.log(min) + t * Math.log(max));
 }
 
 export { gaussian, lcg, minstd, mulberry32, onSphere } from "./random";

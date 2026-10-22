@@ -35,12 +35,14 @@ function shape({ H0, omegaM }: FlatLcdm) {
  * form without radiation (see `cosmicAgeAtRedshiftGyr` for the age with it).
  */
 export function cosmicAgeGyr(a: number, model: FlatLcdm = PLANCK_2018) {
+  if (model.omegaM === 1) return (2 / 3) * hubbleTimeGyr(model.H0) * a ** 1.5;
   const { factor, ratio } = shape(model);
   return factor * Math.asinh(ratio * a ** 1.5);
 }
 
 /** Scale factor a of a flat ΛCDM universe at an age in Gyr: the inverse of `cosmicAgeGyr`. */
 export function scaleFactorAtAge(ageGyr: number, model: FlatLcdm = PLANCK_2018) {
+  if (model.omegaM === 1) return ((1.5 * ageGyr) / hubbleTimeGyr(model.H0)) ** (2 / 3);
   const { factor, ratio } = shape(model);
   return (Math.sinh(ageGyr / factor) / ratio) ** (2 / 3);
 }
@@ -105,11 +107,21 @@ export function eventHorizonMpc(model: FlatLcdm = PLANCK_2018) {
 export function redshiftAtComovingDistance(mpc: number, model: FlatLcdm = PLANCK_2018) {
   if (!(mpc > 0)) return 0;
   if (mpc >= particleHorizonMpc(model)) return Number.POSITIVE_INFINITY;
+  return invertRedshift(mpc, (z) => comovingDistanceMpc(z, model));
+}
+
+function invertRedshift(target: number, valueAt: (z: number) => number) {
   let lo = 0;
   let hi = Math.log(1e6);
+  const limit = Math.log(Number.MAX_VALUE);
+  // Expand the bracket for early sources instead of silently returning the initial ceiling.
+  while (hi < limit && valueAt(Math.expm1(hi)) < target) {
+    lo = hi;
+    hi = Math.min(2 * hi, limit);
+  }
   for (let i = 0; i < 64; i += 1) {
     const mid = (lo + hi) / 2;
-    if (comovingDistanceMpc(Math.expm1(mid), model) < mpc) lo = mid;
+    if (valueAt(Math.expm1(mid)) < target) lo = mid;
     else hi = mid;
   }
   return Math.expm1((lo + hi) / 2);
@@ -122,14 +134,7 @@ export function redshiftAtComovingDistance(mpc: number, model: FlatLcdm = PLANCK
 export function redshiftAtLookback(gyr: number, model: FlatLcdm = PLANCK_2018) {
   if (!(gyr > 0)) return 0;
   if (gyr >= cosmicAgeAtRedshiftGyr(0, model)) return Number.POSITIVE_INFINITY;
-  let lo = 0;
-  let hi = Math.log(1e6);
-  for (let i = 0; i < 64; i += 1) {
-    const mid = (lo + hi) / 2;
-    if (lookbackTimeGyr(Math.expm1(mid), model) < gyr) lo = mid;
-    else hi = mid;
-  }
-  return Math.expm1((lo + hi) / 2);
+  return invertRedshift(gyr, (z) => lookbackTimeGyr(z, model));
 }
 
 /** How long ago (Gyr) light now arriving from redshift z set out, with radiation. */
