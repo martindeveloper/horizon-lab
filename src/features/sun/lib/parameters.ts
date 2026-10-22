@@ -80,10 +80,9 @@ export const CUT_LAG_S = 0.6;
 /** Seconds the wedge takes to open or close all the way; a shorter change takes its share. */
 export const CUT_TRAVEL_S = 1;
 /**
- * Above this clock rate (model seconds per second) the camera rides with the Carrington frame:
- * when a second carries more than ten days the spin would only strobe, and what the clock is
- * for, the cycle's drift in latitude and the field's reversal, shows in the frame synoptic
- * maps use.
+ * Above this clock rate (model seconds per second) the camera rides with the body: when a
+ * second carries more than ten days the spin would only strobe, and what the clock is for, the
+ * cycle's drift in latitude and the field's reversal, shows on a globe that holds still.
  */
 export const COROTATE_ABOVE_RATE = 10 * DAY_S;
 /** How long one light gives way to the next, s. */

@@ -14,7 +14,7 @@ import { orbitCamera, stageClearance } from "@/lib/scene-bridge";
 import type { SceneCamera } from "@/lib/scene-store";
 import { sunwardCloseUpPose } from "@/space/close-up-flight";
 import { PARKER_APHELION_R } from "@/space/sun/model/parker";
-import { CARRINGTON_SIDEREAL_RATE } from "@/space/sun/model/rotation";
+import { surfaceRate } from "@/space/sun/model/rotation";
 import {
   easeToward,
   orbitFromFree,
@@ -25,7 +25,7 @@ import {
   type OrbitPose,
   type OrbitTurn,
 } from "@horizon/toolkit/camera";
-import { clamp01, wrapSigned } from "@horizon/toolkit/math";
+import { clamp01 } from "@horizon/toolkit/math";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 import {
   createOrbitControls,
@@ -92,6 +92,8 @@ const AXIS_Y = new Vector3(0, 1, 0);
 const AXIS_Z = new Vector3(0, 0, 1);
 /** The body's pole: what the surface turns about. */
 const POLE = AXIS_Y;
+/** The body's turn, the equator's rate, as the frame turns the surface (`surfaceTurn`). */
+const BODY_RATE = surfaceRate(0);
 
 export type SunCameraDeps = {
   camera: PerspectiveCamera;
@@ -441,11 +443,10 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
       const pose = closeUpPose(ride);
       rig.flyTo(pose.distance, pose);
     },
-    /** The camera rides with the Carrington frame; a flight, the drift or an orbit about a point, which turns with it already, do not. */
+    /** The camera rides with the body, a flight into a view too; the drift and an orbit about a point turn with it already. */
     corotate(modelSeconds: number) {
-      if (rig.flying || driftFlying() || framing().aboutPoint) return;
-      const turned = rig.pose.azimuth + CARRINGTON_SIDEREAL_RATE * modelSeconds;
-      rig.pose.azimuth = wrapSigned(turned, Math.PI * 2);
+      if (driftFlying() || framing().aboutPoint) return;
+      rig.spin(BODY_RATE * modelSeconds);
     },
     /** Each frame, before drawing: the orbit, the drift, the framing in the stage's free space, and the camera placed. */
     step(f: SunFrame, dt: number) {

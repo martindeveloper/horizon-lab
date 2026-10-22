@@ -129,6 +129,14 @@ export function createOrbitRig(camera: PerspectiveCamera, options: OrbitRigOptio
         : null;
     },
     /**
+     * Turns the azimuth outright, a flight's turn with it, so it lands as far round: for an
+     * orbit that rides something turning beneath it.
+     */
+    spin(azimuth: number) {
+      rig.pose.azimuth = wrapSigned(rig.pose.azimuth + azimuth, Math.PI * 2);
+      if (turn) turn.from.azimuth += azimuth;
+    },
+    /**
      * A button step. It eases in over a moment, and steps pressed in a row add up; with
      * reduced motion it snaps. During a turning flight the step carries on to where the
      * flight lands.

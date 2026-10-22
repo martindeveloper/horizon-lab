@@ -85,7 +85,8 @@ about an aim and moves the distance on the log zoom. `zoomTo` is for input,
 `flyTo(distance, angles?)` flies and turns the angles the short way round,
 `snap` sets the pose outright, `turnBy` takes a button step (it eases in over about a
 third of a second and steps add up; it snaps with reduced motion, and during a turning
-flight it carries on to the landing), `cancel` lets a flight glide to rest. Each frame call
+flight it carries on to the landing), `spin(azimuth)` turns the azimuth outright and a
+flight's turn with it (an orbit riding a turning body), `cancel` lets a flight glide to rest. Each frame call
 `step(dt)`, `home()` and `applyPose()`; `offset` is then the camera's exact offset from
 `aim`, for placing what stands near a camera whose aim lies far from the origin. Options: the starting `pose`, `limits`,
 `reduceMotion` (zooms and flights land at once), `nearFloor`, `far`; hooks `follow`
