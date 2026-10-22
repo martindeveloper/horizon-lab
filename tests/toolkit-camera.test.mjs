@@ -95,10 +95,12 @@ test("orbit input handles drag, pinch handoff, wheel, cancellation and cleanup",
   globalThis.window = new EventTarget();
   const canvas = new FakeCanvas();
   let pose = { azimuth: 0, inclination: 0, distance: 10 };
+  let source = null;
   const input = createOrbitInput(canvas, {
     getPose: () => pose,
-    onChange: (next) => {
+    onChange: (next, from) => {
       pose = next;
+      source = from;
     },
     distance: { min: 1, max: 20 },
   });
@@ -113,6 +115,7 @@ test("orbit input handles drag, pinch handoff, wheel, cancellation and cleanup",
     event(canvas, "pointermove", { pointerId: 1, clientX: 10, clientY: 10 });
     close(pose.azimuth, -0.05);
     close(pose.inclination, 0.04);
+    assert.deepEqual(source, { kind: "drag", x: 10, y: 10 }, "a drag says where the pointer is");
     event(canvas, "pointerdown", { pointerId: 2, clientX: 110, clientY: 10, pointerType: "touch" });
     event(canvas, "pointermove", { pointerId: 2, clientX: 210, clientY: 10 });
     close(pose.distance, 5);
@@ -121,8 +124,9 @@ test("orbit input handles drag, pinch handoff, wheel, cancellation and cleanup",
     close(pose.azimuth, -0.05); // Do not jump from a pinch into one-finger orbit.
     event(canvas, "pointerup", { pointerId: 1 });
     assert.equal(input.active, false);
-    event(canvas, "wheel", { deltaY: 1e5, ctrlKey: false });
+    event(canvas, "wheel", { deltaY: 1e5, ctrlKey: false, clientX: 3, clientY: 4 });
     assert.equal(pose.distance, 20);
+    assert.deepEqual(source, { kind: "wheel", x: 3, y: 4 }, "a wheel says where the pointer is");
     input.dispose();
     assert.equal(canvas.style.touchAction, "auto");
     event(canvas, "wheel", { deltaY: -1e5 });

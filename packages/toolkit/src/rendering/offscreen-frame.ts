@@ -1,4 +1,5 @@
 import {
+  HalfFloatType,
   LinearFilter,
   Mesh,
   OrthographicCamera,
@@ -17,10 +18,12 @@ import fullscreenVertex from "../shaders/fullscreen.vert.glsl";
 /**
  * A frame drawn offscreen at the drawing buffer's size, holding exactly the bytes the canvas
  * would: materials encode for the renderer's output colour space into it and blend there, as on
- * the canvas, so a scene looks the same through it. 8-bit RGBA, like the canvas: no float
- * buffers needed. A full-screen `fragmentShader` then reads it as `uImage` (one pixel is
- * `uTexel`), with any `uniforms` of its own, and writes its display-ready result straight to
- * the canvas. `samples` above 0 multisamples the frame; three.js resolves it after each render
+ * the canvas, so a scene looks the same through it. 8-bit RGBA, like the canvas, unless
+ * `floating`: then half-float, holding the same encoding but keeping light past white, which
+ * the canvas would clip, for the full-screen shader to finish (the GPU must render into
+ * half-float textures, `halfFloatRenderable`). A full-screen `fragmentShader` then reads it
+ * as `uImage` (one pixel is `uTexel`), with any `uniforms` of its own, and writes its
+ * display-ready result straight to the canvas. `samples` above 0 multisamples the frame; three.js resolves it after each render
  * into it, as the canvas's own MSAA would. `before(target, size)` runs once the frame is drawn
  * and resolved, before the full-screen shader reads it: a place to derive other textures from
  * it. Allocates no GPU memory until the first `render`.
@@ -31,6 +34,8 @@ export function createOffscreenFrame(
     fragmentShader: string;
     defines?: Record<string, string>;
     samples?: number;
+    /** Half-float storage that keeps light past white; 8-bit by default. */
+    floating?: boolean;
     /** Full-screen image filters need no depth attachment. Scene composites default to one. */
     depthBuffer?: boolean;
     uniforms?: Record<string, IUniform>;
@@ -40,7 +45,7 @@ export function createOffscreenFrame(
   const size = new Vector2(1, 1);
   const texel = new Vector2(1, 1);
   const target = new WebGLRenderTarget(1, 1, {
-    type: UnsignedByteType,
+    type: options.floating ? HalfFloatType : UnsignedByteType,
     minFilter: LinearFilter,
     magFilter: LinearFilter,
     depthBuffer: options.depthBuffer ?? true,
@@ -48,9 +53,9 @@ export function createOffscreenFrame(
     samples: options.samples ?? 0,
   });
   target.texture.colorSpace = renderer.outputColorSpace;
-  /* Plain bytes, never the GPU's sRGB storage: encoded values are stored, blended and sampled
-     as they are, with no decode on read. */
-  target.texture.internalFormat = "RGBA8";
+  /* Never the GPU's sRGB storage: encoded values are stored, blended and sampled as they are,
+     with no decode on read. */
+  target.texture.internalFormat = options.floating ? "RGBA16F" : "RGBA8";
   /* three.js encodes and tone-maps for the canvas and for an XR target's own colour space, and
      writes linear light into any other target; marked so, this frame gets the canvas's
      programs and output. */

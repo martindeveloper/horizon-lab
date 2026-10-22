@@ -17,14 +17,16 @@
 // run in non-uniform control flow, so they receive derivatives = false and must
 // not rely on dFdx, dFdy or fwidth.
 //
-// uHdrOutput (set by createFullscreenPass) chooses what the frame holds: 0 writes display
-// colours straight to the canvas; 1 writes radiance into a floating-point frame for a
-// bloom chain and a resolve shader to finish. Edges are judged on display luma either
-// way, so the same pixels get extra rays.
+// What each ray writes is the pass's choice (<horizon/pass-output>): display colours straight
+// to the canvas, or radiance into a floating-point frame for a bloom chain and a resolve
+// shader to finish. Edges are judged on display luma either way, so the same pixels get
+// extra rays.
 //
 // A pass of the consumer's own that writes main() itself (a ray shader recording its march
 // into targets of its own) defines HORIZON_CUSTOM_MAIN before this include, which then adds
 // nothing.
+
+#include <horizon/pass-output>
 
 #ifndef HORIZON_CUSTOM_MAIN
 
@@ -35,12 +37,6 @@
 #ifndef SUPERSAMPLE_EDGE
 #define SUPERSAMPLE_EDGE 0.04
 #endif
-
-uniform float uHdrOutput;
-
-vec3 supersampleOutput(vec3 radiance, vec2 fragCoord) {
-  return uHdrOutput > 0.5 ? radiance : display(radiance, fragCoord);
-}
 
 #if HORIZON_PASS == 1
 
@@ -83,7 +79,7 @@ void main() {
   vec3 sum = first;
   for (int i = 0; i < 4; i++) {
     vec2 at = gl_FragCoord.xy + supersampleOffset(i);
-    sum += supersampleOutput(shade(at, false), at);
+    sum += passOutput(shade(at, false), at);
   }
   gl_FragColor = vec4(sum / 5.0, 1.0);
 }
@@ -91,7 +87,7 @@ void main() {
 #else
 
 void main() {
-  gl_FragColor = vec4(supersampleOutput(shade(gl_FragCoord.xy, true), gl_FragCoord.xy), 1.0);
+  gl_FragColor = vec4(passOutput(shade(gl_FragCoord.xy, true), gl_FragCoord.xy), 1.0);
 }
 
 #endif

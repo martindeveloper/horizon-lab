@@ -8,6 +8,9 @@ import { createOffscreenFrame } from "./offscreen-frame";
 /** How a composite smooths edges: not at all, 4× hardware multisampling, or FXAA. */
 export type CompositeAntialias = "off" | "msaa" | "fxaa";
 
+/** The samples a composite's frame takes for `msaa`. */
+export const MSAA_SAMPLES = 4;
+
 /**
  * The resolve stage of a scene: `paint` draws into an offscreen frame of the drawing buffer's
  * size, holding the bytes the canvas would, which one full-screen pass then writes onto the
@@ -17,8 +20,10 @@ export type CompositeAntialias = "off" | "msaa" | "fxaa";
  * added back (`createBloomPass`), either effect dithered. `bloom` and `lens` are read on every
  * frame, so their numbers may change in place; turning either on or off, or changing
  * `antialias`, takes a new pass. With bloom off, the lens finds its lights in the mask levels
- * it needs alone. Create the renderer with `antialias: false`. Call only on the client; no GPU
- * memory is allocated until the first `paint`.
+ * it needs alone. `floating` keeps the frame in half-float, light past white included, so
+ * bloom and the lens see how far past white it is; the canvas still clips the result. Create
+ * the renderer with `antialias: false`. Call only on the client; no GPU memory is allocated
+ * until the first `paint`.
  */
 export function createCompositePass(
   renderer: WebGLRenderer,
@@ -28,6 +33,8 @@ export function createCompositePass(
     depthBuffer?: boolean;
     bloom?: BloomSettings | null;
     lens?: LensSettings | null;
+    /** A half-float frame (`createOffscreenFrame`'s `floating`); 8-bit by default. */
+    floating?: boolean;
   },
 ) {
   const { antialias, bloom = null, lens = null } = options;
@@ -62,7 +69,8 @@ export function createCompositePass(
       ...(bloom ? { HORIZON_BLOOM: "1" } : {}),
       ...(lens ? { HORIZON_LENS: "1" } : {}),
     },
-    samples: antialias === "msaa" ? 4 : 0,
+    samples: antialias === "msaa" ? MSAA_SAMPLES : 0,
+    floating: options.floating ?? false,
     depthBuffer: options.depthBuffer ?? true,
     uniforms,
     ...(bloom || lens ? { before } : {}),

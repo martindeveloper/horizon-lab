@@ -117,8 +117,10 @@ noise, and the report says so.
 
 Static scenes render at least `--frames` frames and for at least `--min-time` ms
 (default 500), so the measurement outlasts GPU clock ramps. Same-code runs then agree
-within about 1% at 1280×720. Static scenes and sequences without input render back to
-back inside the page. The
+within about 1% at 1280×720. A static scene's image is captured after the warm-up,
+before the timed frames, so a target whose clock moves on with each frame (a scene
+engine's loop) shows the same moment in every run. Static scenes and sequences without
+input render back to back inside the page. The
 bench first loads the GPU for `--settle` milliseconds (default 2000), so clocks are up
 before the first scene. Sequences with input return to Node between frames, so they are
 noisier. `--rounds` interleaves everything and pools the frames; use it before trusting

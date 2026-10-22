@@ -27,7 +27,9 @@ label padding is 48 CSS pixels, and viewports smaller than 8 pixels are hidden.
 ## Orbit and tours
 
 `createOrbitInput(canvas, options)` owns pointer capture, drag, wheel, pinch,
-cancellation and listener cleanup. Get/commit poses through callbacks. Distances
+cancellation and listener cleanup. Get/commit poses through callbacks; `onChange`
+also receives the input's source (drag, wheel or pinch, with the pointer's client
+position), for a scene that zooms toward what is under the pointer. Distances
 and inclination bounds, drag sensitivity (and `dragScale`, a factor on it for the
 pose a drag starts from), wheel sensitivity and enabled state are configurable. Wheel deltas are normalized to pixels (16 pixels per line,
 canvas height per page, `wheelPixels`) before applying sensitivity. A press that moves

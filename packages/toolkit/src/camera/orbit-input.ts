@@ -2,9 +2,13 @@ import { clamp } from "../math/index";
 import type { OrbitPose } from "./flight";
 import { wheelPixels } from "./flight-input";
 
+/** What made an input: the gesture and the pointer's place (a pinch's midpoint), client px. */
+export type OrbitInputSource = { kind: "drag" | "wheel" | "pinch"; x: number; y: number };
+
 export type OrbitInputOptions = {
   getPose: () => OrbitPose;
-  onChange: (pose: OrbitPose) => void;
+  /** The pose the input asks for, and what asked for it. */
+  onChange: (pose: OrbitPose, source: OrbitInputSource) => void;
   enabled?: () => boolean;
   distance: { min: number; max: number };
   inclination?: { min: number; max: number };
@@ -84,7 +88,13 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
           // keeping the current zoom as its baseline rather than locking forever.
           pinch0 = currentGap;
           dist0 = pose.distance;
-        } else options.onChange({ ...pose, distance: distance((dist0 * pinch0) / currentGap) });
+        } else {
+          const [a, b] = [...pointers.values()];
+          options.onChange(
+            { ...pose, distance: distance((dist0 * pinch0) / currentGap) },
+            { kind: "pinch", x: (a!.x + b!.x) / 2, y: (a!.y + b!.y) / 2 },
+          );
+        }
       }
       return;
     }
@@ -94,15 +104,18 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     lastX = event.clientX;
     lastY = event.clientY;
     const scale = options.dragScale?.(pose) ?? 1;
-    options.onChange({
-      ...pose,
-      azimuth: pose.azimuth - dx * sensitivity.azimuth * scale,
-      inclination: clamp(
-        pose.inclination + dy * sensitivity.inclination * scale,
-        bounds.min,
-        bounds.max,
-      ),
-    });
+    options.onChange(
+      {
+        ...pose,
+        azimuth: pose.azimuth - dx * sensitivity.azimuth * scale,
+        inclination: clamp(
+          pose.inclination + dy * sensitivity.inclination * scale,
+          bounds.min,
+          bounds.max,
+        ),
+      },
+      { kind: "drag", x: event.clientX, y: event.clientY },
+    );
   }
   function up(event: PointerEvent) {
     if (!pointers.delete(event.pointerId)) return;
@@ -122,10 +135,10 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     const pose = options.getPose();
     const sensitivity = options.wheelSensitivity?.(pose.distance, event.ctrlKey) ?? 0.001;
     const pixels = wheelPixels(event.deltaY, event.deltaMode, canvas.clientHeight);
-    options.onChange({
-      ...pose,
-      distance: distance(pose.distance * Math.exp(pixels * sensitivity)),
-    });
+    options.onChange(
+      { ...pose, distance: distance(pose.distance * Math.exp(pixels * sensitivity)) },
+      { kind: "wheel", x: event.clientX, y: event.clientY },
+    );
   }
   canvas.style.touchAction = "none";
   canvas.addEventListener("pointerdown", down);

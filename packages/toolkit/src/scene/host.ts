@@ -15,8 +15,8 @@ import {
 } from "three";
 
 import { COARSE_POINTER_QUERY } from "../environment";
-import type { BloomSettings } from "../rendering/bloom-pass";
-import { createCompositePass, type CompositePass } from "../rendering/composite-pass";
+import { halfFloatRenderable, halfFloatSamples, type BloomSettings } from "../rendering/bloom-pass";
+import { createCompositePass, MSAA_SAMPLES, type CompositePass } from "../rendering/composite-pass";
 import type { DisposalScope } from "../rendering/disposal";
 import { createEngineHost } from "../rendering/engine-host";
 import type { LensSettings } from "../rendering/lens-pass";
@@ -37,8 +37,9 @@ export function defaultSceneAntialias(tight: boolean): SceneAntialias {
 
 /**
  * A scene's bloom: whether its bright light glows, and any of the chain's settings to change
- * (`BloomSettings`, in display units: the frame holds the canvas's bytes). What a switch
- * leaves out keeps its value.
+ * (`BloomSettings`, in display units: the frame holds the canvas's encoding). A `clamp` above
+ * 1 lets light brighter than white glow more: the frame then keeps light past white, in
+ * half-float where the GPU renders into it. What a switch leaves out keeps its value.
  */
 export type SceneBloom = Partial<BloomSettings> & { enabled: boolean };
 
@@ -66,9 +67,10 @@ export type SceneLens = Partial<Omit<LensSettings, "mask">> & { enabled: boolean
  * What a scene's lens does until told otherwise: a four-point star on each compact light the
  * bloom's mask holds, found in cells a thirty-second of the frame wide (level 4 of a half-size
  * chain), its spikes drawn until they fade below 0.015, at most a quarter of the frame's
- * height, and a fringe of 1.5 pixels at the corners. The frame is clipped at white, so its
- * lights carry their spikes at ten times their clipped energy, in full from 150 frame pixels of
- * it (the Sun's disc) and far less below, so a white speck gets no star.
+ * height, and a fringe of 1.5 pixels at the corners. The mask caps each pixel at white (the
+ * default bloom's `clamp`), so its lights carry their spikes at ten times their clipped energy,
+ * in full from 150 frame pixels of it (the Sun's disc) and far less below, so a white speck
+ * gets no star.
  */
 export const DEFAULT_SCENE_LENS: Readonly<Omit<LensSettings, "mask">> = {
   level: 4,
@@ -182,7 +184,14 @@ export function createSceneHost(
   let lensOn = false;
   /* The lens's spikes come from the bloom's mask, on or off. */
   const lens: LensSettings = { ...DEFAULT_SCENE_LENS, mask: bloom };
-  /* The composite is built for the current anti-aliasing and switches; all off draws
+  /* What the GPU allows a half-float frame: rendering into it, and multisampling it. */
+  const halfFloat = halfFloatRenderable(renderer);
+  const halfFloatMsaa = halfFloatSamples(renderer) >= MSAA_SAMPLES;
+  /* Light past white is kept only while bloom or the lens can use it (its mask counts a pixel
+     beyond white), in half-float where the GPU renders into it at the frame's sampling. */
+  const floating = () =>
+    (bloomOn || lensOn) && bloom.clamp > 1 && (antialias === "msaa" ? halfFloatMsaa : halfFloat);
+  /* The composite is built for the current anti-aliasing, switches and frame; all off draws
      straight to the canvas. */
   let pass: CompositePass | null = null;
   const passFor = () =>
@@ -192,6 +201,7 @@ export function createSceneHost(
           antialias,
           bloom: bloomOn ? bloom : null,
           lens: lensOn ? lens : null,
+          floating: floating(),
         });
   const rebuild = () => {
     pass?.dispose();
@@ -248,6 +258,7 @@ export function createSceneHost(
      * quality level's resolution and mip count, a look's strength); off frees its buffers.
      */
     setBloom({ enabled, strength, threshold, knee, clamp, mips, scale }: SceneBloom) {
+      const kept = floating();
       bloom.strength = strength ?? bloom.strength;
       bloom.threshold = threshold ?? bloom.threshold;
       bloom.knee = knee ?? bloom.knee;
@@ -256,6 +267,9 @@ export function createSceneHost(
       bloom.scale = scale ?? bloom.scale;
       if (enabled !== bloomOn) {
         bloomOn = enabled;
+        rebuild();
+      } else if (floating() !== kept) {
+        /* A clamp crossing white changes the frame the composite needs. */
         rebuild();
       } else if (bloomOn || lensOn) engine.invalidate();
     },

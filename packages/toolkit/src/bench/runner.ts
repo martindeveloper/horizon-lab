@@ -151,11 +151,11 @@ export class BenchSession {
     };
   }
 
-  /** An untimed frame captured as a PNG data URL. */
+  /** An untimed frame captured as a PNG data URL, with the target's facts at that frame. */
   capture(frame: BenchFrame) {
     this.instance.render(frame);
     // Read in the same task as the draw: the drawing buffer is not preserved.
-    return this.canvas.toDataURL("image/png");
+    return { image: this.canvas.toDataURL("image/png"), facts: this.instance.describe?.() };
   }
 
   /** Records one more frame call by call. Untimed: recording inflates its cost. */
@@ -204,8 +204,10 @@ export class BenchSession {
 const MAX_STATIC_FRAMES = 5000;
 
 /**
- * Static scene: the same frame at least `options.frames` times and for at
- * least `options.minMs`, then captured once, untimed.
+ * Static scene: captured once, untimed, after the warm-up, then the same frame at least
+ * `options.frames` times and for at least `options.minMs`. A target whose own clock moves on
+ * with every frame (a scene engine's loop) is thus captured at the same moment in every run,
+ * however many frames the minimum time takes; the facts reported are those of that frame.
  */
 export async function runBenchScene(
   target: BenchTarget,
@@ -217,10 +219,16 @@ export async function runBenchScene(
   const frames: { submitMs: number; wallMs: number }[] = [];
   const facts: Facts[] = [];
   const images: Record<string, string> = {};
+  let shown: Facts | undefined;
   let firstFrameMs = 0;
   try {
     firstFrameMs = session.warm(frame);
     for (let i = 0; i < options.warmup; i++) session.warm(frame);
+    if (options.capture) {
+      const captured = session.capture(frame);
+      images["1"] = captured.image;
+      shown = captured.facts;
+    }
     const start = performance.now();
     for (
       let i = 0;
@@ -231,7 +239,6 @@ export async function runBenchScene(
       frames.push({ submitMs: result.submitMs, wallMs: result.wallMs });
       if (result.facts) facts.push(result.facts);
     }
-    if (options.capture) images["1"] = session.capture(frame);
   } catch (error) {
     await session.close();
     throw error;
@@ -246,7 +253,8 @@ export async function runBenchScene(
     mountMs: session.mountMs,
     firstFrameMs,
     frames: frames.map((f, i) => ({ ...f, gpuMs: closed.gpuMs[i] ?? null })),
-    ...(facts.length > 0 ? { facts } : {}),
+    /* The image's own facts where one was captured: the report shows them beside it. */
+    ...(shown ? { facts: [shown] } : facts.length > 0 ? { facts } : {}),
     images,
   };
 }

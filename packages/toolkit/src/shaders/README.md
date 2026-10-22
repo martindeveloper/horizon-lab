@@ -104,12 +104,16 @@ engines import already expanded shader strings and do not invoke it at runtime.
   `supersample: true`) reads that frame through its own `uFirstPass` and
   `uFirstTexel` uniforms and adds four rotated-grid rays where a 3 × 3
   neighbourhood's display luma spans at least `SUPERSAMPLE_EDGE` (default 0.04). Those
-  rays get `derivatives = false` and must not use screen derivatives. The pass's
-  `uHdrOutput` uniform (0 by default) chooses what a frame holds: display colours, or 1 for
-  radiance, which a bloom chain and a resolve shader finish. Include it last, after `shade`
-  and `display`. A pass of the consumer's own compiled from the same source with its own
-  `main()` (the black hole's trace into its record) defines `HORIZON_CUSTOM_MAIN` first, and
-  the include adds nothing.
+  rays get `derivatives = false` and must not use screen derivatives. Each ray writes
+  `passOutput` (`<horizon/pass-output>`). Include it last, after `shade` and `display`. A
+  pass of the consumer's own compiled from the same source with its own `main()` (the black
+  hole's trace into its record) defines `HORIZON_CUSTOM_MAIN` first, and the include adds
+  nothing.
+- `#include <horizon/pass-output>` provides `passOutput(radiance, fragCoord)`, what a
+  `createFullscreenPass` shader writes for a pixel's radiance: the radiance itself while the
+  pass's `uHdrOutput` uniform is 1 (bloom or the lens finish a half-float frame), otherwise
+  `display(radiance, fragCoord)`, which the including shader defines first. A shader that
+  writes its own `main()` ends with it; `<horizon/supersample>` uses it for every ray.
 - `#include <horizon/fresnel>` provides
   `fresnelRim(vec3 normal, vec3 viewDir, float power)`: the shared one-sided rim
   power curve. Both vectors must be normalized. This artistic factor is not

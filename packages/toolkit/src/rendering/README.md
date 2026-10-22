@@ -29,9 +29,9 @@ toolkit's `.glsl` loader (see the package README).
   (`createBloomPass`) and resolves both onto the canvas. With the `hdr` option (a resolve
   fragment shader and its uniforms) and a GPU that renders into half-float textures
   (`halfFloatRenderable`), that frame is RGBA16F radiance: the shader's `uHdrOutput`
-  uniform is 1, `display` is skipped, the chain thresholds radiance and the resolve shader
-  (reading `uImage`, `uTexel`, `uBloom`, `uBloomStrength` and its own uniforms) applies
-  `display` to the sum; `hdr` reports which path a pass has. The lens takes the same path:
+  uniform is 1, so `passOutput` (`<horizon/pass-output>`) skips `display`, the chain
+  thresholds radiance and the resolve shader (reading `uImage`, `uTexel`, `uBloom`,
+  `uBloomStrength` and its own uniforms) applies `display` to the sum; `hdr` reports which path a pass has. The lens takes the same path:
   the resolve shader includes `<horizon/lens>` and applies it under `HORIZON_LENS`, which the
   pass defines while the lens is on (its spikes and fringe then act on radiance). Otherwise
   bloom and the lens work on the display frame through the composite below. Post resources

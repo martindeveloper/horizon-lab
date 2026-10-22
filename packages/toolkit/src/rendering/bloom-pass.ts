@@ -45,6 +45,15 @@ export function halfFloatRenderable(renderer: WebGLRenderer) {
   );
 }
 
+/** The most samples a half-float (RGBA16F) render target may have here: 0 where none renders. */
+export function halfFloatSamples(renderer: WebGLRenderer) {
+  if (!halfFloatRenderable(renderer)) return 0;
+  const gl = renderer.getContext();
+  if (!("getInternalformatParameter" in gl)) return 0;
+  const samples: unknown = gl.getInternalformatParameter(gl.RENDERBUFFER, gl.RGBA16F, gl.SAMPLES);
+  return samples instanceof Int32Array ? (samples[0] ?? 0) : 0;
+}
+
 /** One level of the chain: the frame's light above the threshold, blurred that many steps. */
 export type BloomLevel = { texture: Texture; width: number; height: number };
 

@@ -3,7 +3,7 @@
  * distance glides (or follows a pinch closely). `interacting` stays true for a moment after
  * the last input, so the frame loop keeps going while a gesture settles.
  */
-import { createOrbitInput, type OrbitPose } from "../camera";
+import { createOrbitInput, type OrbitInputSource, type OrbitPose } from "../camera";
 import type { DisposalScope } from "../rendering/disposal";
 import { ORBIT_INCLINATION, type OrbitRig } from "./orbit-rig";
 
@@ -21,8 +21,8 @@ export function createOrbitControls(
     distance: { min: number; max: number };
     /** Scales a drag's turn for the pose it starts from (see `createOrbitInput`). */
     dragScale?: (pose: OrbitPose) => number;
-    /** Runs first; true when it took the input itself (another owner of the camera). */
-    intercept?: (next: OrbitPose) => boolean;
+    /** Runs first, with what made the input; true when it took the input itself (another owner of the camera). */
+    intercept?: (next: OrbitPose, source: OrbitInputSource) => boolean;
     /** After the pose follows an input. */
     onInput?: () => void;
   },
@@ -32,8 +32,8 @@ export function createOrbitControls(
   const input = scope.own(
     createOrbitInput(canvas, {
       getPose: () => rig.inputPose(),
-      onChange: (next) => {
-        if (options.intercept?.(next)) return;
+      onChange: (next, source) => {
+        if (options.intercept?.(next, source)) return;
         rig.pose.azimuth = next.azimuth;
         rig.pose.inclination = next.inclination;
         /* A drag leaves the distance alone: a flight under way glides to rest instead. */
