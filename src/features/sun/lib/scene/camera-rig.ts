@@ -183,7 +183,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
       orbit === "parker"
         ? parker.limits
         : framing().aboutPoint
-          ? featureLimits(deps.settings().view)
+          ? featureLimits(deps.settings().view, deps.drawn(), fitted)
           : CENTRE_LIMITS,
     home: (aim) => aim.copy(orbitOrigin),
     orient: (_distance, frame) => frame.copy(orbitFrame),

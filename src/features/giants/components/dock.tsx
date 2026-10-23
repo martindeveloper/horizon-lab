@@ -93,12 +93,17 @@ export function GiantsDock() {
         </Tooltip>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className={cn(kickerClass, "truncate")}>{kicker}</span>
-          <span className="flex min-w-0 items-baseline gap-x-3 not-md:flex-col">
+          <span className="flex min-w-0 items-baseline gap-x-3 not-md:flex-col not-md:items-stretch">
             <span className="truncate font-display text-panel leading-tight text-fg-primary">
               {name}
             </span>
+            {/* Phones read the first figure only; the card holds the rest. */}
             <span className="truncate font-mono text-ui text-fg-secondary tabular-nums short:hidden">
-              {figures.join("  ·  ")}
+              {figures.map((figure, index) => (
+                <span key={figure} className={cn(index > 0 && "not-md:hidden")}>
+                  {index > 0 ? `  ·  ${figure}` : figure}
+                </span>
+              ))}
             </span>
           </span>
         </div>

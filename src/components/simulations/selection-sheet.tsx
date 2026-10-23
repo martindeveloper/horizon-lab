@@ -6,11 +6,15 @@ import { useRef, type ReactNode } from "react";
 import type { Card } from "@/lib/facts";
 import { Callout, PanelHeader, cn, useFocusHandoff, type CalloutProps } from "@horizon/toolkit/ui";
 
+import { useDockClearance, type DockInTheWay } from "./use-dock-clearance";
+
 /**
  * A selection's card: a bottom sheet on phones, a rail beside the scene on wide screens,
  * ending above the dock (`--hud-clear`). The first short figure leads; `footer` holds the
  * simulation's actions. `folded` keeps only the header and footer on phones. A card that is
  * open as the scene starts passes `takeFocus={false}`, so it does not take focus from the page.
+ * As a sheet it publishes how much of the stage's foot it covers as `--sheet-clear`, so a scene
+ * can stand its subject above it.
  */
 export function SelectionSheet({
   card,
@@ -34,6 +38,7 @@ export function SelectionSheet({
 }) {
   const root = useRef<HTMLElement>(null);
   useFocusHandoff(takeFocus ? root : NO_ELEMENT);
+  useDockClearance(root, coversFoot, "--sheet-clear");
   const facts = card.facts.map((fact) => ({ ...fact, ...splitValue(fact.value) }));
   /* A short first figure leads the card; prose-length values stay in the list. */
   const lead = facts[0] && facts[0].main.length <= 16 ? facts[0] : null;
@@ -123,6 +128,9 @@ export function SelectionSheet({
     </article>
   );
 }
+
+/** The phones' sheet stands on the stage's foot; the wide screens' rail ends above the dock. */
+const coversFoot: DockInTheWay = (sheet, stage) => sheet.bottom >= stage.bottom - 1;
 
 /** The ref a card that leaves focus be hands the focus hook. */
 const NO_ELEMENT = { current: null };

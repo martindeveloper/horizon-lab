@@ -14,7 +14,7 @@
 import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
 import { openingFor, timedDrift, type DriftState } from "@/lib/drift";
-import { lendCamera } from "@/lib/scene-bridge";
+import { lendCamera, stageClearance } from "@/lib/scene-bridge";
 import type { AudioMap } from "@horizon/toolkit/audio";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { clamp, lerp, smootherstep, smoothstep } from "@horizon/toolkit/math";
@@ -46,6 +46,7 @@ import {
   cameraAt,
   clampRung,
   createLadder,
+  horizonLift,
   horizonOf,
   nearestRung,
   pickPlaced,
@@ -91,6 +92,7 @@ import {
   DRIFT_RESUME_S,
   GLIDE_SECONDS,
   GRAB_MIN_PX,
+  HORIZON_LIFT_RATE,
   IDLE_FPS,
   MAX_DISCS,
   MIN_DISC_PX,
@@ -501,6 +503,10 @@ export function createGiantsEngine(
     const dotTarget = blankPlaced();
     /** How much of the stage's foot the dock covers, CSS px, as the dock publishes it (`--hud-clear`). */
     const dockFoot = () => parseFloat(getComputedStyle(host).getPropertyValue("--hud-clear")) || 0;
+    /** How much of the stage's foot a card's sheet covers, CSS px (`--sheet-clear`), and the horizon's rise above it. */
+    const sheetFoot = stageClearance(host, "--sheet-clear");
+    const liftWanted = () => horizonLift(stage, sheetFoot());
+    let lift = 0;
     /** The overview's baseline, CSS px from the stage's top, as the dots last stood on it and as last published to the stage's scale lines. */
     let dotsBaseline = 0;
     let baselinePublished = -1;
@@ -667,6 +673,13 @@ export function createGiantsEngine(
         if (Math.abs(surfaceZoom - zoomTarget) < 0.001) surfaceZoom = zoomTarget;
       }
       if (!side) inspectCamera(camera, ladder, focus, stage, surfaceZoom);
+      /* A sheet over the stage's foot lifts the horizon, so the body stands above it. */
+      const liftTo = liftWanted();
+      lift =
+        reduce || Math.abs(liftTo - lift) < 0.5
+          ? liftTo
+          : lift + (liftTo - lift) * (1 - Math.exp(-dt * HORIZON_LIFT_RATE));
+      if (lift > 0) camera.horizon = (camera.horizon ?? horizonOf(stage)) - lift;
       placeStage();
       const count = full > 0 ? Math.min(placedCount, MAX_DISCS) : 0;
       /* The line the bodies stand on: the ladder's horizon, easing down to the overview's baseline. */
@@ -853,6 +866,7 @@ export function createGiantsEngine(
       !posesRest() ||
       flyingDrift() ||
       rejoin !== null ||
+      lift !== liftWanted() ||
       lineVeil.busy;
     pass.compile();
     engine.start({
@@ -877,7 +891,8 @@ export function createGiantsEngine(
           state.wideColour !== previous.wideColour ||
           state.antialias !== previous.antialias ||
           state.quality !== previous.quality ||
-          state.surfaceZoom !== previous.surfaceZoom
+          state.surfaceZoom !== previous.surfaceZoom ||
+          state.sheet !== previous.sheet
         )
           engine.invalidate();
         if (state.guideOpen && !previous.guideOpen) input.cancel();

@@ -5,7 +5,11 @@
  */
 import { Matrix4, Quaternion, Vector3 } from "three";
 
-import { PARKER_ECCENTRICITY, REGION_SIZE_MEDIAN_RAD } from "@/space/sun/model/parameters";
+import {
+  PARKER_CORONA_EDGE_R,
+  PARKER_ECCENTRICITY,
+  REGION_SIZE_MEDIAN_RAD,
+} from "@/space/sun/model/parameters";
 import { PARKER_SEMI_MAJOR_R } from "@/space/sun/model/parker";
 import {
   freeFromOrbit,
@@ -54,6 +58,15 @@ const ORBIT_AIM: ViewAim = {
   point: [-PARKER_SEMI_MAJOR_R * PARKER_ECCENTRICITY, 0, 0],
   normal: [0, 1, 0],
 };
+
+/**
+ * What the orbit view promises to show about its centre, radii: the ellipse, and the corona's
+ * edge round the Sun at its focus, which reaches past the perihelion.
+ */
+const ORBIT_SUBJECT_R = Math.max(
+  PARKER_SEMI_MAJOR_R,
+  PARKER_SEMI_MAJOR_R * PARKER_ECCENTRICITY + PARKER_CORONA_EDGE_R,
+);
 
 /** Across a sheet or a neutral line seen from the north: its tilt from west, mirrored south. */
 const across = (lat: number, tilt: number) => Math.PI / 2 - Math.sign(lat || 1) * tilt;
@@ -184,7 +197,7 @@ const VIEWS: Readonly<Record<SunViewId, ViewFraming>> = {
     aim: () => ORBIT_AIM,
     angles: () => ({ azimuth: 0, inclination: 1.3 }),
     turns: true,
-    subject: () => PARKER_SEMI_MAJOR_R,
+    subject: () => ORBIT_SUBJECT_R,
     limits: {
       min: PARKER_SEMI_MAJOR_R / 3,
       max: (2 * PARKER_SEMI_MAJOR_R) / Math.sin((SCENE_FOV / 2) * RAD_PER_DEG),
@@ -206,8 +219,14 @@ export const viewTurns = (id: SunViewId) => VIEWS[id].turns;
 /** Whether a view's aim eases when it jumps. */
 export const viewEasesAim = (id: SunViewId) => VIEWS[id].easesAim;
 
-/** How near and far the camera may zoom about a view's aim, radii. */
-export const featureLimits = (id: SunViewId) => VIEWS[id].limits;
+/**
+ * How near and far the camera may zoom about a view's aim, radii: out at least as far as its
+ * own framing, which a narrow portrait screen sets beyond the view's usual reach.
+ */
+export function featureLimits(id: SunViewId, frame: SunFrame, viewport: SunViewport) {
+  const { min, max } = VIEWS[id].limits;
+  return { min, max: Math.max(max, framedDistance(VIEWS[id].subject(frame), viewport)) };
+}
 
 /** What the preset promises to show; a visitor may zoom closer after it arrives. */
 export const viewSubjectRadius = (id: SunViewId, frame: SunFrame) => VIEWS[id].subject(frame);

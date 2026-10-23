@@ -28,8 +28,11 @@ import {
   cameraAt,
   createLadder,
   framedRadius,
+  horizonLift,
+  horizonOf,
   nearestRung,
   placeBodies,
+  placeBody,
 } from "../src/features/giants/lib/model/ladder.ts";
 import { LOOKS } from "../src/features/giants/lib/model/looks.ts";
 import {
@@ -98,6 +101,21 @@ test("at a whole rung its body stands framed in the middle of the stage, on the 
         "rests on the horizon",
       );
     }
+});
+
+test("a card's sheet over a phone's foot lifts each body above it, still on the stage", () => {
+  /* The sheet at its tallest, 46 % of the stage, and the gap above it. */
+  const foot = 0.46 * phone.height + 12;
+  const lift = horizonLift(phone, foot);
+  for (let i = 0; i <= ladder.last; i++) {
+    const camera = cameraAt(ladder, i, phone);
+    camera.horizon = horizonOf(phone) - lift;
+    const body = placeBody(ladder, camera, phone, i);
+    assert.ok(body.y + body.polar <= phone.height - foot + 1e-6, `rung ${i} stands above the sheet`);
+    assert.ok(body.y - body.polar >= 0, `rung ${i} stays below the stage's top`);
+  }
+  assert.equal(horizonLift(phone, 0), 0, "no sheet, no lift");
+  assert.equal(horizonLift(phone, 0.2 * phone.height), 0, "a sheet below the horizon leaves it");
 });
 
 test("between two rungs the view only widens, and keeps the smaller body in sight", () => {

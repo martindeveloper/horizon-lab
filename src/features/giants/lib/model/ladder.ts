@@ -61,6 +61,13 @@ export function createLadder(sizes: readonly BodySize[]): Ladder {
 /** The horizon's height on the stage, CSS pixels from the top. */
 export const horizonOf = (stage: Stage) => stage.height * HORIZON_Y;
 
+/**
+ * How far the horizon rises, CSS pixels, so the bodies stand above a sheet covering `foot` px
+ * of the stage's foot; none while the sheet stays below it.
+ */
+export const horizonLift = (stage: Stage, foot: number) =>
+  Math.max(0, horizonOf(stage) - (stage.height - foot));
+
 /** The radius a focused body is drawn at, CSS pixels. */
 export const framedRadius = (stage: Stage) =>
   Math.max(1, Math.min(FRAME_FILL * stage.height, FRAME_FILL_WIDTH * stage.width) / 2);

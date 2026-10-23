@@ -109,7 +109,7 @@ function LightRuler({ className }: { className?: string }) {
             onValueChange={([index]) => api().setLight(LIGHT_SCALE[index ?? 0] ?? "white")}
           />
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-1">
           {LIGHT_LOOKS.map((id) => (
             <SwitchChip
               key={id}

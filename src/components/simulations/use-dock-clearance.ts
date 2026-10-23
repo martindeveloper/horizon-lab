@@ -9,9 +9,9 @@ export type DockInTheWay = (dock: DOMRect, stage: DOMRect, rem: number) => boole
  * Publishes how much of the stage's foot the dock covers, plus a 0.75 rem gap, as
  * `--hud-clear` on the stage (`[data-simulation]`): rails, cards, labels and controls end
  * above it. Where `inTheWay` says the dock clears them, nothing is published and they keep
- * their full height. Rewritten whenever the dock or the stage resizes; pass a stable
- * `inTheWay`. Something else over the stage's foot, such as a caption, publishes under its
- * own `property`.
+ * their full height. Rewritten whenever the dock or the stage resizes, and once its entrance
+ * animation has carried it into place; pass a stable `inTheWay`. Something else over the
+ * stage's foot, such as a caption or a card's sheet, publishes under its own `property`.
  */
 export function useDockClearance(
   dock: RefObject<HTMLElement | null>,
@@ -33,8 +33,10 @@ export function useDockClearance(
     const observer = new ResizeObserver(write);
     observer.observe(el);
     observer.observe(stage);
+    el.addEventListener("animationend", write);
     return () => {
       observer.disconnect();
+      el.removeEventListener("animationend", write);
       stage.style.removeProperty(property);
     };
   }, [dock, inTheWay, property]);

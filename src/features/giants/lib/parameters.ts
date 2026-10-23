@@ -70,6 +70,8 @@ export const FRAME_FILL = 0.44;
 export const FRAME_FILL_WIDTH = 0.62;
 /** The horizon line, as a share of the stage's height from its top. */
 export const HORIZON_Y = 0.7;
+/** How fast the horizon eases above a sheet over the stage's foot and back, per second. */
+export const HORIZON_LIFT_RATE = 6;
 /** The gap before a body, as a share of its radius: its smaller neighbour stands just left of it. */
 export const RUNG_GAP = 0.38;
 /** Discs the shader draws at most; the engine sends the largest in view, the focused one always. */
