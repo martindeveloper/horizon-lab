@@ -40,6 +40,7 @@ import {
   JOY_SCATTER_RAD,
   JOY_SLOPE,
   MSH_PER_RAD2,
+  OBSERVED_MIN_AREA_MSH,
   OBSERVED_START_SHARE,
   POLAR_CROWN_SPREAD_RAD,
   PROMINENCE_FADE_SHARE,
@@ -319,6 +320,30 @@ function placeObserved(
 /** When an observed region dies, model seconds: its slot then returns to the statistical weather. */
 const observedDeath = (observed: ObservedRegion) =>
   regionLife(observed.size) * (1 - OBSERVED_START_SHARE);
+
+/** An observed region's strength at the map's epoch: what the photographed spots show. */
+const PHOTOGRAPHED_STRENGTH = regionStrength(OBSERVED_START_SHARE);
+
+/**
+ * How much of its photographed spots a region keeps, 0–1: an observed region's strength over
+ * its strength at the map's epoch, so its spots in the photograph fade as it decays; 0 for a
+ * statistical region, which the photograph never showed.
+ */
+export const photographedShare = (region: Region) =>
+  region.id > OBSERVED_ID_BASE ? clamp01(region.strength / PHOTOGRAPHED_STRENGTH) : 0;
+
+/** The life of the smallest reported group, seconds: how long spots no seeded region claims last. */
+const LONE_SPOT_LIFE = regionLife(Math.sqrt(OBSERVED_MIN_AREA_MSH / MSH_PER_RAD2));
+
+/**
+ * How much the photograph keeps of the spots no seeded region claims (the groups too small to
+ * seed), `time` model seconds after the map's epoch: they decay as the smallest reported group.
+ */
+export const lonePhotographedShare = (time: number) =>
+  clamp01(
+    regionStrength(OBSERVED_START_SHARE + Math.max(0, time) / LONE_SPOT_LIFE) /
+      PHOTOGRAPHED_STRENGTH,
+  );
 
 /** A stand-in region for the eruption timeline when the Sun is quiet: large, in its prime, at Spörer's latitude. */
 function demoRegion(seed: number, phase: number, cycleNumber: number, out: Region) {

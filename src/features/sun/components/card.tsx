@@ -9,11 +9,13 @@ import type { PlaceId } from "../lib/model/places";
 import { canCloseUp, useSun } from "../lib/store";
 import { PLACE_CARDS } from "./card-specs";
 import { useDistance, useSunT } from "./format";
+import { ParkerReadout } from "./parker-readout";
 
 /**
  * The selected place's card: its figures with their sources, one remark and any caution.
  * Parker's offers its close-up, at the probe's true size; there, on phones, the card folds to
- * a bar so the probe has the screen, as every close-up's does.
+ * a bar so the probe has the screen, as every close-up's does, and the bar carries the probe's
+ * live readings, which the dock under the sheet would give on wider screens.
  */
 export function PlaceCard({ id }: { id: PlaceId }) {
   const t = useSunT();
@@ -31,6 +33,9 @@ export function PlaceCard({ id }: { id: PlaceId }) {
       footer={
         closeUp ? (
           <>
+            <div className="w-full md:hidden">
+              <ParkerReadout />
+            </div>
             <Action
               variant="glass"
               className="flex-1"

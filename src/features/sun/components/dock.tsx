@@ -28,7 +28,7 @@ import { CUT_HALF_ANGLE } from "../lib/parameters";
 import { useSun } from "../lib/store";
 import { ROW_CLASS, ROWS_CLASS, RowLabel } from "./dock-rows";
 import { elapsedLabel, lightLegend, useDistance } from "./format";
-import { ParkerReadout } from "./parker-readout";
+import { ParkerReadout, ParkerRide } from "./parker-readout";
 import { PlaceStrip } from "./place-strip";
 
 /**
@@ -75,7 +75,9 @@ function LightRuler({ className }: { className?: string }) {
       shown={<RowLabel>{t("hud.light")}</RowLabel>}
       className={className}
     >
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2">
+      {/* Phones lay the ruler beside the label and the switches on a row of their own from the
+          dock's edge; wider screens wrap both beside the label. */}
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2 not-md:contents">
         <div className={cn("relative min-w-0 flex-1 basis-56 pb-3", onScale < 0 && "opacity-40")}>
           {/* A stop and its name at each line, under the thumb; the names only where there is room. */}
           {LIGHT_SCALE.map((id, index) => (
@@ -109,7 +111,7 @@ function LightRuler({ className }: { className?: string }) {
             onValueChange={([index]) => api().setLight(LIGHT_SCALE[index ?? 0] ?? "white")}
           />
         </div>
-        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-1">
+        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-1 not-md:col-span-2">
           {LIGHT_LOOKS.map((id) => (
             <SwitchChip
               key={id}
@@ -139,10 +141,12 @@ function LightLegend() {
   const distance = useDistance();
   const light = useSun((s) => s.light);
   return (
-    <p className="min-w-0 flex-1 basis-48 text-body leading-snug tracking-tight short:hidden">
+    <p className="min-w-0 flex-1 basis-48 text-body leading-snug tracking-tight not-md:basis-full short:hidden">
       <span className="text-fg-primary">{t(`lights.${light}`)}</span>
       <span className="ml-2 text-ui text-fg-secondary">
-        {t(`lightNotes.${light}`)} · {lightLegend(t, distance, light)}
+        {/* Phones keep to the light and its figure; the note waits for room. */}
+        <span className="not-md:hidden">{t(`lightNotes.${light}`)} · </span>
+        {lightLegend(t, distance, light)}
       </span>
     </p>
   );
@@ -152,8 +156,11 @@ function LightLegend() {
 const ELAPSED_CLASS =
   "inline-block min-w-[9ch] text-right font-mono text-ui text-fg-secondary tabular-nums";
 
-/** The clock: play or pause, its rate a step slower or faster, and the Sun's time passed beside it. */
-function Clock() {
+/**
+ * The clock: play or pause, its rate a step slower or faster, and the Sun's time passed beside
+ * it, unless `elapsed` is off where a date names the time already.
+ */
+function Clock({ elapsed: showElapsed = true }: { elapsed?: boolean }) {
   const t = useTranslations("sun");
   const f = useFormatter();
   const clock = useSun((s) => s.clock);
@@ -177,7 +184,7 @@ function Clock() {
         readout={t(`clocks.${clock}`)}
         readoutClassName={cn("min-w-20", paused ? "text-fg-tertiary" : "text-fg-primary")}
       />
-      <span className={ELAPSED_CLASS}>{elapsedLabel(t, f, elapsed)}</span>
+      {showElapsed ? <span className={ELAPSED_CLASS}>{elapsedLabel(t, f, elapsed)}</span> : null}
     </div>
   );
 }
@@ -314,16 +321,18 @@ export function SunDock() {
     <Dock
       ref={surface}
       footerClassName={cn(aside && "not-md:hidden")}
-      className="flex anim-rise flex-col gap-2"
+      className="relative flex anim-rise flex-col gap-2"
     >
       <div className={ROWS_CLASS}>
         <PlaceStrip className={cn(ROW_CLASS, "short:hidden")} />
         <LightRuler className={ROW_CLASS} />
       </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 not-md:gap-x-3">
         <LightLegend />
-        <Clock />
+        {/* Parker's orbit reads the date beside the probe; the ride is its action. */}
+        <Clock elapsed={view !== "orbit"} />
         {Action ? <Action key={kind} /> : null}
+        {view === "orbit" ? <ParkerRide /> : null}
         {view === "orbit" ? <ParkerReadout /> : null}
       </div>
     </Dock>

@@ -5,7 +5,15 @@
  */
 import { surfacePoint } from "@/space/sun/model/field";
 
-export { bipoleAxis, parkerOf, parkerOrbitOf, poleOf, tiltedAxis } from "@/space/sun/frame";
+export {
+  bipoleAxis,
+  lonePhotographedShare,
+  parkerOf,
+  parkerOrbitOf,
+  photographedShare,
+  poleOf,
+  tiltedAxis,
+} from "@/space/sun/frame";
 export type {
   Eruption,
   PassbandId,

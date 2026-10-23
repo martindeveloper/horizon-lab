@@ -34,6 +34,7 @@ export {
   centralMeridianAt,
   type ObservedRegion,
 } from "./model/observed";
+export { lonePhotographedShare, photographedShare } from "./model/activity";
 export { MAP_EPOCH } from "./model/parameters";
 export { bipoleAxis, northAt, poleOf, surfacePoint, tiltedAxis, westAt } from "./model/field";
 export type {
