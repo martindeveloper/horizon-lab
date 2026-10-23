@@ -34,6 +34,7 @@ import {
   ringStripLevels,
   type BodyId,
   type MoonId,
+  NAMED_IDS,
   type NamedId,
   type PlanetId,
   type RingStrip,
@@ -289,7 +290,11 @@ const SURFACES: Record<PlanetId | NamedId | MoonId, Surface> = {
   saturn: { atmos: ["#f0e4c8", 0.08], minnaert: 0.95 },
   uranus: { atmos: ["#d4f2f0", 0.2], minnaert: 0.8 },
   neptune: { atmos: ["#bcd8f0", 0.2], minnaert: 0.8 },
+  ceres: { minnaert: 0.58 },
   pluto: { atmos: ["#a8c8f0", 0.05], minnaert: 0.6 },
+  haumea: { minnaert: 0.6 },
+  makemake: { minnaert: 0.6 },
+  eris: { minnaert: 0.6 },
   sedna: { minnaert: 0.6 },
   halley: { atmos: ["#d5e2ea", 0.1], minnaert: 0.6, ambient: 0.05 },
   moon: { minnaert: 0.55 },
@@ -327,7 +332,11 @@ const MAP_SIZE: Record<BodyId, number> = {
   saturn: 384,
   uranus: 128,
   neptune: 128,
+  ceres: 128,
   pluto: 256,
+  haumea: 128,
+  makemake: 128,
+  eris: 128,
   sedna: 128,
   halley: 128,
   moon: 256,
@@ -487,11 +496,9 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
     }),
   );
   let exposed = false;
-  const named: Record<NamedId, ShaderMaterial> = {
-    pluto: lit(faceOf("pluto"), SURFACES.pluto, sun),
-    sedna: lit(faceOf("sedna"), SURFACES.sedna, sun),
-    halley: lit(faceOf("halley"), SURFACES.halley, sun),
-  };
+  const named: Record<NamedId, ShaderMaterial> = recordFrom(NAMED_IDS, (id) =>
+    lit(faceOf(id), SURFACES[id], sun),
+  );
   /* Moon materials are created the first time their planet shows them. */
   const moons: Partial<Record<MoonId, ShaderMaterial>> = {};
   const moon = (id: MoonId) => (moons[id] ??= lit(faceOf(id), SURFACES[id], sun));
@@ -599,7 +606,7 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
   const surfaceOf = (id: BodyId): ShaderMaterial | undefined => {
     if (id === "sun") return sunSurface;
     if (includesId(PLANET_IDS, id)) return planets[id];
-    if (id === "pluto" || id === "sedna" || id === "halley") return named[id];
+    if (includesId(NAMED_IDS, id)) return named[id];
     if (includesId(MOON_IDS, id)) return moons[id];
     return undefined;
   };

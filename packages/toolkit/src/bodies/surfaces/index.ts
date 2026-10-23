@@ -33,7 +33,19 @@ import {
   triton,
   umbriel,
 } from "./moons";
-import { halley, mars, mercury, pluto, sedna, sun, venus } from "./planets";
+import {
+  ceres,
+  eris,
+  halley,
+  haumea,
+  makemake,
+  mars,
+  mercury,
+  pluto,
+  sedna,
+  sun,
+  venus,
+} from "./planets";
 import { raster, rasterJob, type Painter } from "./raster";
 
 export { GREAT_RED_SPOT, SATURN_HEXAGON } from "./giants";
@@ -51,7 +63,9 @@ export {
 
 /**
  * Geometric albedo (V), NASA planetary and satellite fact sheets; Pluto and
- * Charon from New Horizons (Buratti et al. 2017), Sedna from Pál et al. 2012.
+ * Charon from New Horizons (Buratti et al. 2017), Sedna from Pál et al. 2012, Ceres from
+ * Li et al. 2006, Haumea from Ortiz et al. 2017, Makemake from Ortiz et al. 2012 and Eris
+ * from Sicardy et al. 2011.
  */
 export const GEOMETRIC_ALBEDO: Partial<Record<BodyId, number>> = {
   mercury: 0.142,
@@ -62,7 +76,11 @@ export const GEOMETRIC_ALBEDO: Partial<Record<BodyId, number>> = {
   saturn: 0.499,
   uranus: 0.488,
   neptune: 0.442,
+  ceres: 0.09,
   pluto: 0.52,
+  haumea: 0.51,
+  makemake: 0.77,
+  eris: 0.96,
   sedna: 0.32,
   halley: 0.04,
   moon: 0.12,
@@ -98,7 +116,11 @@ const PAINTERS: Partial<Record<BodyId, Painter>> = {
   saturn,
   uranus,
   neptune,
+  ceres,
   pluto,
+  haumea,
+  makemake,
+  eris,
   sedna,
   halley,
   moon,

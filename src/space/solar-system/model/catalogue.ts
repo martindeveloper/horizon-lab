@@ -45,6 +45,33 @@ const resonance = (planet: PlanetId, k: number) =>
 /** A named body's present elements; their a and e do not depend on the date. */
 const named = (id: NamedId) => NAMED.find((body) => body.id === id)!.elementsAt(new Date(0), 0);
 
+/** The main belt's mass in Earth masses (Pitjeva & Pitjev 2018): 4.008 × 10⁻⁴ M⊕. */
+const BELT_MASS_EARTHS = 4.008e-4;
+
+/** A small world's closest and farthest reach, from the orbit the toolkit draws. */
+function reachFacts(id: NamedId, source: SourceId, note: string, digits = 3) {
+  const { a, e } = named(id);
+  return {
+    perihelion: {
+      value: a * (1 - e),
+      unit: "au",
+      digits,
+      source,
+      status: "derived",
+      note: `a(1 − e), ${note}`,
+    },
+    aphelion: {
+      value: a * (1 + e),
+      unit: "au",
+      digits,
+      source,
+      status: "derived",
+      note: "a(1 + e)",
+    },
+  } satisfies Facts;
+}
+const sbdb = (id: NamedId) => reachFacts(id, "jplSbdb", "heliocentric osculating, epoch 2026 June");
+
 const diskMass: Value = {
   value: 35,
   unit: "Mearth",
@@ -287,24 +314,41 @@ export const PLANETS = {
 } satisfies Record<PlanetId, Facts>;
 
 const NAMED_BODIES = {
-  sedna: {
-    perihelion: {
-      value: named("sedna").a * (1 - named("sedna").e),
-      unit: "au",
+  ceres: {
+    ...sbdb("ceres"),
+    beltShare: {
+      value: (100 * GM_KM3_S2.ceres) / (BELT_MASS_EARTHS * GM_KM3_S2.earth),
+      unit: "percent",
       digits: 2,
-      source: "jplHorizons",
+      source: "park2016",
       status: "derived",
-      note: "a(1 − e), barycentric",
-    },
-    aphelion: {
-      value: named("sedna").a * (1 + named("sedna").e),
-      unit: "au",
-      digits: 2,
-      source: "jplHorizons",
-      status: "derived",
-      note: "a(1 + e)",
+      note: "Dawn's GM over the belt's mass (Pitjeva & Pitjev 2018)",
     },
   },
+  haumea: {
+    ...sbdb("haumea"),
+    spin: {
+      value: siderealHours("haumea"),
+      unit: "h",
+      digits: 3,
+      source: "lellouch2010",
+      status: "verified",
+      note: "3.915341 h light-curve period",
+    },
+  },
+  makemake: sbdb("makemake"),
+  eris: {
+    ...sbdb("eris"),
+    plutoMasses: {
+      value: GM_KM3_S2.eris / GM_KM3_S2.pluto,
+      unit: "ratio",
+      digits: 3,
+      source: "holler2021",
+      status: "derived",
+      note: "Eris–Dysnomia system GM over Pluto's (DE440)",
+    },
+  },
+  sedna: reachFacts("sedna", "jplHorizons", "barycentric", 2),
   halley: {
     semiMajorAxis: {
       value: named("halley").a,
@@ -327,12 +371,12 @@ export const POPULATIONS = {
       note: "between Jupiter's 4:1 and 2:1 resonances, by Kepler's third law",
     },
     mass: {
-      value: 3.3,
+      value: (100 * BELT_MASS_EARTHS * GM_KM3_S2.earth) / GM_KM3_S2.moon,
       unit: "percent",
-      digits: 1,
+      digits: 2,
       source: "pitjeva2018",
-      status: "verified",
-      note: "4.008 × 10⁻⁴ M⊕ = 3.3 % of the Moon's mass",
+      status: "derived",
+      note: "4.008 × 10⁻⁴ M⊕ over the Moon's mass: 3.3 %",
     },
   },
   disk: {

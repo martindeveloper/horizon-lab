@@ -71,7 +71,17 @@ export const FIGURES: Record<BodyId, Figure> = {
   saturn: { meanKm: PLANET_RADIUS_KM.saturn, equatorialKm: 60_268, polarKm: 54_364 },
   uranus: { meanKm: PLANET_RADIUS_KM.uranus, equatorialKm: 25_559, polarKm: 24_973 },
   neptune: { meanKm: PLANET_RADIUS_KM.neptune, equatorialKm: 24_764, polarKm: 24_341 },
+  /** Dawn's shape model (Park et al. 2016, Nature 537, 515). */
+  ceres: { meanKm: namedById("ceres").radiusKm, equatorialKm: 482.1, polarKm: 445.9 },
   pluto: sphere(namedById("pluto").radiusKm),
+  /**
+   * Haumea is a triaxial ellipsoid, 1,161 × 852 × 513 km (Ortiz et al. 2017): drawn as the
+   * spheroid of the same volume and polar axis, its equator the geometric mean of the long axes.
+   */
+  haumea: { meanKm: namedById("haumea").radiusKm, equatorialKm: 994.5, polarKm: 513 },
+  /** The occultation's projected ellipse, 1,502 × 1,430 km (Ortiz et al. 2012). */
+  makemake: { meanKm: namedById("makemake").radiusKm, equatorialKm: 751, polarKm: 715 },
+  eris: sphere(namedById("eris").radiusKm),
   sedna: sphere(namedById("sedna").radiusKm),
   halley: sphere(namedById("halley").radiusKm),
   ...recordBy(
@@ -111,7 +121,15 @@ export const SPINS: Record<SpinningId, Spin> = {
     pole: (T) => [299.36 + 0.7 * Math.sin(neptuneN(T)), 43.46 - 0.51 * Math.cos(neptuneN(T))],
     meridian: (d) => 249.978 + 541.1397757 * d - 0.48 * Math.sin(neptuneN(d / 36525)),
   },
+  /** Dawn (Park et al. 2016; IAU 2015): 9.074170 h. */
+  ceres: { pole: fixed(291.418, 66.764), meridian: turning(170.65, 952.1532) },
   pluto: { pole: fixed(132.993, -6.163), meridian: turning(302.695, 56.3625225) },
+  /** Pole from its ring's (Ortiz et al. 2017, Nature 550, 219); period 3.915341 h (Lellouch et al. 2010, A&A 518, L147). */
+  haumea: { pole: fixed(285.1, -10.6), meridian: turning(0, perHours(3.915341)) },
+  /** Pole unknown; light curve period 22.8266 h (Hromakina et al. 2019, A&A 625, A46). */
+  makemake: { pole: fixed(270, 66.56), meridian: turning(0, perHours(22.8266)) },
+  /** Pole unknown; turns once per Dysnomia's 15.786-day orbit, to which it is locked (Szakáts et al. 2023, A&A 669, L3). */
+  eris: { pole: fixed(270, 66.56), meridian: turning(0, perHours(15.786 * 24)) },
   /** Pole unknown; light curve period 10.27 h (Gaudi et al. 2005, ApJ 629, L49). */
   sedna: { pole: fixed(270, 66.56), meridian: turning(0, perHours(10.27)) },
   /** Complex, non-principal-axis rotation (Belton et al. 1991); drawn turning once per 2.2 d, a teaching choice. */

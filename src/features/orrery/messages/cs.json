@@ -147,9 +147,25 @@
     "planetCautionEllipse": "Dráha vychází z měřených elementů; u obřích planet se v období migrace upravuje podle výukového modelu. Přepínač Pohyb zrychluje oběh planety.",
     "planetCautionCircle": "Při vypnutých Elipsách se dráha zobrazuje jako kružnice o poloměru rovném velké poloose. Údaj o výstřednosti v kartě se tím nemění.",
     "named": {
+      "ceres": {
+        "summary": "Největší těleso pásu planetek a jediná trpasličí planeta uvnitř dráhy Neptunu: asi {share} % hmotnosti celého pásu v jednom světě. Sonda Dawn kolem ní obíhala v letech 2015 až 2018 a na tmavém povrchu bohatém na uhlík našla jasné solné usazeniny.",
+        "caution": "Dráha je změřená a posuvník s ní nehýbe: náčrt nechává pás planetek tam, kde je dnes."
+      },
       "pluto": {
         "summary": "Trpasličí planeta v Kuiperově pásu, v dráhové rezonanci 3:2 s Neptunem: Neptun oběhne Slunce třikrát, zatímco Pluto dvakrát. Rezonance brání jejich srážce, přestože se rozsahy jejich vzdáleností od Slunce překrývají.",
         "caution": "Současná dráha vychází z tabulky JPL. Počáteční dráha i okamžik zachycení do rezonance jsou zvoleny pro názorný model migrace Neptunu. Nejde o rekonstrukci skutečné minulosti Pluta."
+      },
+      "haumea": {
+        "summary": "Trpasličí planeta, která se otočí jednou za {spin}: tak rychle, že je protažená do elipsoidu dvakrát delšího, než je tlustý. Povrch tvoří krystalický vodní led a roku 2017 byl kolem ní objeven tenký prstenec, který zde zakreslen není.",
+        "caution": "Těleso je vykresleno jako zploštělý sféroid; skutečné je trojosý elipsoid. Dráha je změřená a posuvník s ní nehýbe."
+      },
+      "makemake": {
+        "summary": "Jasná načervenalá trpasličí planeta v klasickém Kuiperově pásu, objevená roku 2005: metanové jíní na povrchu ze zčervenalých organických látek. Má jeden malý tmavý měsíc, objevený roku 2016.",
+        "caution": "Dráha je změřená a posuvník s ní nehýbe. Velikost známe ze zákrytu hvězdy roku 2011, hmotnost je dosud známa jen hrubě."
+      },
+      "eris": {
+        "summary": "Nejhmotnější trpasličí planeta, objevená roku 2005: má {plutoMasses}krát větší hmotnost než Pluto v o něco menším tělese a po strmě skloněné dráze se dostává z Plutonovy vzdálenosti až více než dvakrát dál. Právě její objev vedl roku 2006 k zavedení třídy trpasličích planet.",
+        "caution": "Dráha je změřená; perihelem projde až roku 2257. Jak se Eris na tak skloněnou dráhu dostala, je příběh rozptýleného disku, který posuvník nepřehrává."
       },
       "sedna": {
         "summary": "Vzdálené těleso, které patří mezi kandidáty na trpasličí planetu. Nejbližší bod jeho dráhy leží asi {near} od Slunce, daleko za dráhou Neptunu, a nejvzdálenější asi {far} od Slunce. Jeho dráha je oddělená od oblasti přímého gravitačního rozptylu planetami. Perihelem projde v roce 2076.",

@@ -2,12 +2,26 @@
  * Which solar system view shows a selection, when a tap should fly there, and how much of a
  * body a camera frames on arrival.
  */
-import { MAX_ECCENTRICITY, type BodyId } from "@horizon/toolkit/bodies";
+import { MAX_ECCENTRICITY, namedById, type BodyId, type Elements } from "@horizon/toolkit/bodies";
 
-import { planetElements } from "./elements";
+import { namedElements, planetElements } from "./elements";
 import { hostOf, solarPick, type SolarSelection } from "./selection";
 import { TRACERS, tracerElements } from "./tracers";
 import type { SolarViewId } from "./views";
+
+/** The view an orbit is best seen in, by how far it reaches: the belt it lives among. */
+function viewOfOrbit(el: Elements): SolarViewId {
+  const apo = el.a * (1 + Math.min(MAX_ECCENTRICITY, el.e));
+  return apo > 8_000
+    ? "oort"
+    : apo > 350
+      ? "scattered"
+      : apo > 45
+        ? "kuiper"
+        : apo > 4
+          ? "giants"
+          : "inner";
+}
 
 /** The view a selection is best seen in: its own scale. */
 export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
@@ -20,7 +34,7 @@ export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
       return a < 2 ? "inner" : a < 25 ? "giants" : "kuiper";
     }
     case "named":
-      return sel.id === "sedna" ? "scattered" : sel.id === "pluto" ? "kuiper" : "giants";
+      return viewOfOrbit(namedElements(namedById(sel.id), 1, 0, new Date()));
     case "moon":
       return viewOf(hostOf(sel.id), mig);
     case "population":
@@ -31,10 +45,7 @@ export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
           : sel.id;
     case "tracer": {
       const tr = TRACERS[sel.index];
-      if (!tr) return "giants";
-      const el = tracerElements(tr, mig, 0);
-      const apo = el.a * (1 + Math.min(MAX_ECCENTRICITY, el.e));
-      return apo > 8_000 ? "oort" : apo > 350 ? "scattered" : apo > 45 ? "kuiper" : "giants";
+      return tr ? viewOfOrbit(tracerElements(tr, mig, 0)) : "giants";
     }
   }
 }

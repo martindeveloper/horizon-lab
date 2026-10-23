@@ -21,9 +21,10 @@ multiply.
 
 ## IDs
 
-`PlanetId`, `NamedId` (`pluto`, `sedna`, `halley`), `MoonId` and `BodyId`
-(all of them plus `sun`). `SpinningId` is every body with an IAU spin model;
-moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
+`PlanetId`, `NamedId` (`ceres`, `pluto`, `haumea`, `makemake`, `eris`, `sedna`,
+`halley`), `MoonId` and `BodyId` (all of them plus `sun`). `SpinningId` is every body
+with an IAU spin model; moons turn synchronously instead. `PLANET_IDS`, `NAMED_IDS`,
+`MOON_IDS`, `GIANTS`.
 
 ## Orbits (`kepler.ts`, `ephemeris.ts`, `moons.ts`)
 
@@ -37,8 +38,9 @@ moons turn synchronously instead. `PLANET_IDS`, `MOON_IDS`, `GIANTS`.
   orbit (its mean longitude only), so a sped-up clock never runs the secular
   rates outside their fit. `out` takes the result without allocating, for a
   scene that asks every frame.
-- `NAMED`: Pluto, Sedna and Halley with `elementsAt(date, extraYears)`, which
-  likewise only advance each body along its orbit.
+- `NAMED`: the five dwarf planets, Sedna and Halley with `elementsAt(date, extraYears)`,
+  which likewise only advance each body along its orbit; Pluto's row is the JPL table's,
+  the rest are fixed orbits timed by a perihelion passage.
 - `keplerPosition(elements)` gives a heliocentric position in au;
   `orbitShape(elements, elliptical, out?)` the ellipse it moves along (`OrbitShape`:
   `a`, `e`, the perifocal axes `p` and `q` in the scene frame, and the body's eccentric

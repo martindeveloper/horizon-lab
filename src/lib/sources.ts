@@ -368,6 +368,22 @@ export const SOURCES = {
     link: SOURCE_URLS.jplElements,
   },
   jplHorizons: { cite: "JPL Horizons (Sedna barycentric; Halley 1994 osculating elements)" },
+  jplSbdb: {
+    cite: "JPL Small-Body Database (Ceres, Haumea, Makemake and Eris: heliocentric osculating elements at epoch JD 2461200.5)",
+    link: "https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html",
+  },
+  park2016: {
+    cite: "Park et al. 2016, Nature 537, 515 (Dawn at Ceres: GM 62.6284 km³ s⁻², shape, spin)",
+    link: "https://doi.org/10.1038/nature18955",
+  },
+  holler2021: {
+    cite: "Holler et al. 2021, Icarus 355, 114130 (Eris–Dysnomia orbit: system mass 1.6466 × 10²² kg)",
+    link: "https://doi.org/10.1016/j.icarus.2020.114130",
+  },
+  lellouch2010: {
+    cite: "Lellouch et al. 2010, A&A 518, L147 (Haumea's thermal light curve; 3.915341 h rotation)",
+    link: "https://doi.org/10.1051/0004-6361/201014648",
+  },
   jplRadii: {
     cite: "JPL planetary physical parameters (IAU 2015 mean radii)",
     link: SOURCE_URLS.jplRadii,

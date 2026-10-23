@@ -141,9 +141,25 @@
     "planetCautionEllipse": "The orbit uses measured elements; during migration, the giant planets’ orbits are adjusted by a teaching model. Motion speeds up the planet’s orbit.",
     "planetCautionCircle": "With Ellipses off, the path is a circle whose radius equals the semi-major axis. The eccentricity shown in the card is unchanged.",
     "named": {
+      "ceres": {
+        "summary": "The largest body in the asteroid belt and the only dwarf planet inside Neptune's orbit: about {share} % of the belt's mass in one world. Dawn orbited it from 2015 to 2018 and found bright salt deposits on a dark, carbon-rich surface.",
+        "caution": "The orbit is measured and does not move on the slider: the sketch leaves the belt where it is today."
+      },
       "pluto": {
         "summary": "A dwarf planet in the Kuiper belt, locked in a 3:2 rhythm with Neptune: Neptune orbits three times while Pluto orbits twice. That is why their paths cross in distance without colliding.",
         "caution": "Today's orbit is from the JPL table. The starting orbit in the sketch, and when it was captured into resonance, are a model of 'moved during Neptune's migration', not a recovered path."
+      },
+      "haumea": {
+        "summary": "A dwarf planet that turns once every {spin}, so fast that it is stretched into an ellipsoid twice as long as it is thick. Its surface is crystalline water ice, and a thin ring, not drawn here, was found around it in 2017.",
+        "caution": "The body is drawn as a flattened spheroid; the real one is a triaxial ellipsoid. The orbit is measured and does not move on the slider."
+      },
+      "makemake": {
+        "summary": "A bright, reddish dwarf planet in the classical Kuiper belt, found in 2005: methane frost over a surface of reddened organics. It has one small, dark moon, found in 2016.",
+        "caution": "The orbit is measured and does not move on the slider. Its size comes from a stellar occultation in 2011; its mass is still poorly known."
+      },
+      "eris": {
+        "summary": "The most massive dwarf planet, found in 2005: {plutoMasses} times Pluto's mass in a slightly smaller body, on a steeply tilted orbit that swings from Pluto's distance out past twice as far. Its discovery led to the dwarf-planet class in 2006.",
+        "caution": "The orbit is measured; perihelion comes only in 2257. How Eris got onto so tilted a path is the scattered disk's history, which the slider does not replay."
       },
       "sedna": {
         "summary": "A distant dwarf-planet candidate. Its closest point is about {near}, far beyond Neptune, and its far point about {far}. It is detached from the planets and reaches perihelion in 2076.",

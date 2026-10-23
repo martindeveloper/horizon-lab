@@ -1,4 +1,4 @@
-/** The Sun, the terrestrial planets and the named small bodies. */
+/** The Sun, the terrestrial planets, the dwarf planets and the named small bodies. */
 import { smoothstep as smooth } from "../../math/index";
 import { RAD, dLon, fbm, fbmAt, mix, ridge, scale, spot, type Painter } from "./raster";
 
@@ -153,6 +153,65 @@ export const sedna: Painter = (p) => {
   rgb = mix(rgb, [196, 106, 70], rim * 0.45);
   rgb = mix(rgb, [246, 188, 148], frost * 0.75);
   return scale(rgb, 0.96 + (mottle - 0.5) * 0.14);
+};
+
+/**
+ * Ceres (Dawn FC; Nathues et al. 2015, Nature 528, 237): dark carbonaceous regolith (albedo
+ * 0.09) with the bright carbonate faculae on Occator's floor (19.8° N, 239.3° E), young
+ * rayed Haulani (5.8° N, 10.8° E) and the lone bright cone of Ahuna Mons (10.5° S, 316° E).
+ */
+export const ceres: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 60);
+  const craters = smooth(0.62, 0.72, fbm(p, 16, 16, 2, 61));
+  let rgb = scale([100, 94, 88], 0.94 + (n - 0.5) * 0.28);
+  rgb = mix(rgb, [132, 126, 120], craters * 0.5);
+  const occator = spot(p, 239.3, 19.8, 5.6, 5.6);
+  rgb = mix(rgb, [88, 84, 80], smooth(1.1, 0.7, occator) * 0.4);
+  const cerealia = smooth(2.2, 0.3, spot(p, 239.3, 19.8, 0.7, 0.7));
+  const vinalia = smooth(1.8, 0.4, spot(p, 241.6, 19.9, 0.6, 0.5)) * 0.7;
+  rgb = mix(rgb, [238, 236, 232], Math.max(cerealia, vinalia));
+  rgb = mix(rgb, [160, 154, 148], smooth(2.4, 0.5, spot(p, 10.8, 5.8, 2, 2)) * 0.6);
+  return mix(rgb, [176, 170, 164], smooth(1.6, 0.3, spot(p, 316, -10.5, 1, 1)) * 0.7);
+};
+
+/**
+ * Haumea (Pinilla-Alonso et al. 2009; Lacerda, Jewitt & Peixinho 2008, AJ 135, 1749):
+ * crystalline water ice over the whole surface, neutral and bright (albedo 0.51), with
+ * the Dark Red Spot, a redder, darker province on one side that drives its light curve.
+ */
+export const haumea: Painter = (p) => {
+  const n = fbm(p, 6, 6, 4, 62);
+  const grain = fbm(p, 14, 14, 3, 63);
+  let rgb = scale([206, 209, 214], 0.97 + (n - 0.5) * 0.12);
+  const red = smooth(1.3, 0.5, spot(p, 180, 0, 50, 36) + (n - 0.5) * 0.5);
+  rgb = mix(rgb, [172, 154, 142], red * 0.8);
+  return scale(rgb, 0.98 + (grain - 0.5) * 0.06);
+};
+
+/**
+ * Makemake (Brown et al. 2007, AJ 133, 284; Ortiz et al. 2012): methane frost over reddened
+ * organics, bright (albedo 0.77) but red, mottled by a darker terrain the occultation and
+ * thermal data ask for.
+ */
+export const makemake: Painter = (p) => {
+  const n = fbm(p, 7, 7, 4, 64);
+  const mottle = fbm(p, 12, 12, 3, 65);
+  const dark = smooth(0.42, 0.7, n * 0.6 + mottle * 0.4);
+  let rgb = mix([248, 224, 194], [226, 190, 152], dark * 0.5);
+  rgb = mix(rgb, [250, 230, 204], smooth(0.62, 0.78, mottle) * 0.35);
+  return scale(rgb, 0.97 + (n - 0.5) * 0.1);
+};
+
+/**
+ * Eris (Sicardy et al. 2011; Alvarez-Candal et al. 2011, A&A 532, A130): a near-perfect
+ * mirror of fresh methane and nitrogen frost (albedo 0.96), almost featureless, with a light
+ * curve under a hundredth of a magnitude.
+ */
+export const eris: Painter = (p) => {
+  const n = fbm(p, 6, 6, 3, 66);
+  const grain = fbm(p, 16, 16, 2, 67);
+  const rgb = mix([247, 246, 243], [238, 236, 232], smooth(0.4, 0.7, n) * 0.5);
+  return scale(rgb, 0.99 + (grain - 0.5) * 0.03);
 };
 
 /**

@@ -142,7 +142,7 @@ export function jplElements(
   return out;
 }
 
-export type NamedId = "pluto" | "sedna" | "halley";
+export type NamedId = "ceres" | "pluto" | "haumea" | "makemake" | "eris" | "sedna" | "halley";
 
 export type NamedBody = {
   id: NamedId;
@@ -162,18 +162,68 @@ function fixedOrbit(orbit: Omit<Elements, "M">, M: number, out?: Elements): Elem
   return Object.assign(out ?? { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 }, orbit, { M });
 }
 
+/** Perihelion passage as a decimal year, from its Julian day. */
+const yearOf = (jd: number) => 2000 + (jd - J2000_JD) / DAYS_PER_JULIAN_YEAR;
+
 /**
+ * The dwarf planets Ceres, Haumea, Makemake and Eris: JPL Small-Body Database osculating
+ * heliocentric elements at epoch JD 2461200.5 (2026 June), timed by their perihelion passages.
  * Sedna: JPL Horizons barycentric elements (q ≈ 76.2 AU, perihelion February 2076).
  * Halley: Horizons osculating elements of 1994 Feb 17, after the 1986 perihelion,
  * timed by the 1986 and 2061 perihelia (9 February 1986, 28 July 2061).
+ * Sun-ward first, the comet last: a list prints them in this order.
  */
 export const NAMED: readonly NamedBody[] = [
+  {
+    id: "ceres",
+    /* Dawn: 482.1 × 482.1 × 445.9 km, mean 469.7 km (Park et al. 2016, Nature 537, 515). */
+    radiusKm: 469.7,
+    elementsAt: (date, extraYears, out) =>
+      fixedOrbit(
+        { a: 2.76555, e: 0.07969, i: 10.588, omega: 73.294, node: 80.249 },
+        meanAnomalyFromPerihelion(date, extraYears, yearOf(2461599.84), periodYears(2.76555)),
+        out,
+      ),
+  },
   {
     id: "pluto",
     /* New Horizons, 1188.3 ± 1.6 km (Nimmo et al. 2017, Icarus 287, 12). */
     radiusKm: 1188.3,
     elementsAt: (date, extraYears, out) =>
       jplElements("pluto", centuriesSinceJ2000(date), extraYears, out),
+  },
+  {
+    id: "haumea",
+    /* Occultation ellipsoid 1,161 × 852 × 513 km, volume-equivalent 798 km (Ortiz et al. 2017, Nature 550, 219). */
+    radiusKm: 798,
+    elementsAt: (date, extraYears, out) =>
+      fixedOrbit(
+        { a: 43.0603, e: 0.19444, i: 28.208, omega: 240.691, node: 121.786 },
+        meanAnomalyFromPerihelion(date, extraYears, yearOf(2500416.6), periodYears(43.0603)),
+        out,
+      ),
+  },
+  {
+    id: "makemake",
+    /* Occultation 1,430 × 1,502 km (Ortiz et al. 2012, Nature 491, 566): 715 km mean. */
+    radiusKm: 715,
+    elementsAt: (date, extraYears, out) =>
+      fixedOrbit(
+        { a: 45.5709, e: 0.15889, i: 29.028, omega: 297.092, node: 79.295 },
+        meanAnomalyFromPerihelion(date, extraYears, yearOf(2408158.69), periodYears(45.5709)),
+        out,
+      ),
+  },
+  {
+    id: "eris",
+    /* Occultation of 6 November 2010, 1,163 ± 6 km (Sicardy et al. 2011, Nature 478, 493). */
+    radiusKm: 1163,
+    elementsAt: (date, extraYears, out) =>
+      fixedOrbit(
+        { a: 67.9339, e: 0.43824, i: 43.926, omega: 150.795, node: 36.005 },
+        meanAnomalyFromPerihelion(date, extraYears, yearOf(2545407.72), periodYears(67.9339)),
+        out,
+      ),
   },
   {
     id: "sedna",
@@ -198,6 +248,8 @@ export const NAMED: readonly NamedBody[] = [
       ),
   },
 ];
+
+export const NAMED_IDS: readonly NamedId[] = NAMED.map((body) => body.id);
 
 export function namedById(id: NamedId) {
   const found = NAMED.find((body) => body.id === id);

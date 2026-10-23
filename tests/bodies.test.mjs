@@ -475,6 +475,19 @@ test("illustrative maps follow measured physical constraints for Venus, Titan, S
   assert.ok(ventArea / totalArea > 0.02 && ventArea / totalArea < 0.15, "Discrete active vents");
 });
 
+test("the dwarf planets' maps carry their measured colours", () => {
+  // Methane-tholin Makemake is red; Haumea's crystalline ice and Eris's frost are near neutral.
+  const makemake = mean("makemake");
+  assert.ok(makemake.r > makemake.b * 1.25, "Makemake is red");
+  const haumea = mean("haumea");
+  assert.ok(Math.abs(haumea.r - haumea.b) < haumea.r * 0.12, "Haumea is neutral");
+  const eris = mean("eris");
+  assert.ok(Math.abs(eris.r - eris.b) < eris.r * 0.1, "Eris is neutral");
+  // Ceres's carbonaceous regolith is a dark, faintly warm grey, with the faculae too small to lift it.
+  const ceres = mean("ceres");
+  assert.ok(ceres.r > ceres.b && ceres.r < ceres.b * 1.35, "Ceres is a warm grey");
+});
+
 test("Motion's sped-up clock moves the planets along today's orbits without ageing them", () => {
   const now = jplElements("saturn", T2026);
   /* A million years of drift is far outside the 1800–2050 fit: only the planet moves on. */

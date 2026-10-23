@@ -19,7 +19,7 @@ import {
 import { POPULATION_FIGURES } from "@/space/solar-system/cards";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import type { Bin } from "@/space/solar-system/model/tracers";
-import type { PlanetId } from "@horizon/toolkit/bodies";
+import type { NamedId, PlanetId } from "@horizon/toolkit/bodies";
 
 /** The shared badges, and the Orrery's own for figures the timeline moves or models (`badges.<id>`). */
 export type Badge =
@@ -61,7 +61,10 @@ export const PLANET_NOTES: Partial<Record<PlanetId, Args>> = {
   neptune: { end: v(SOLAR_CATALOGUE.planets.neptune.end) },
 };
 
-export const NAMED_NOTES: Partial<Record<"pluto" | "sedna" | "halley", CardSpec>> = {
+export const NAMED_NOTES: Partial<Record<NamedId, CardSpec>> = {
+  ceres: { rows: [], body: { share: v(SOLAR_CATALOGUE.named.ceres.beltShare) } },
+  haumea: { rows: [], body: { spin: v(SOLAR_CATALOGUE.named.haumea.spin) } },
+  eris: { rows: [], body: { plutoMasses: v(SOLAR_CATALOGUE.named.eris.plutoMasses) } },
   sedna: {
     rows: [],
     body: {

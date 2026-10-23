@@ -259,7 +259,16 @@ test("each body has the view that frames it, and a tap flies there only when out
   ]);
   assert.deepEqual(["jupiter", "saturn", "uranus"].map(planet), ["giants", "giants", "giants"]);
   assert.equal(planet("neptune"), "kuiper");
-  assert.equal(viewOf({ kind: "named", id: "sedna" }), "scattered");
+  const named = (id) => viewOf({ kind: "named", id });
+  assert.equal(named("ceres"), "inner");
+  assert.equal(named("halley"), "giants");
+  assert.deepEqual(["pluto", "haumea", "makemake", "eris"].map(named), [
+    "kuiper",
+    "kuiper",
+    "kuiper",
+    "kuiper",
+  ]);
+  assert.equal(named("sedna"), "scattered");
   assert.equal(viewOf({ kind: "population", id: "oort" }), "oort");
   /* Jupiter framed (the camera within 0.4–8 of its orbit): stay; from close by Earth: fly out. */
   assert.equal(framingView({ kind: "planet", id: "jupiter" }, 1, 30), null);

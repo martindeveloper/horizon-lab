@@ -21,9 +21,11 @@ import {
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { namedElements, planetElements, rewinds } from "../model/elements";
+import { viewOf } from "../model/framing";
 import { planetGrowth } from "../model/moment";
 import { SUN_BIRTH } from "../model/parameters";
 import type { SolarSelection } from "../model/selection";
+import type { SolarViewId } from "../model/views";
 import { orbitOf, type Globes } from "./geometry";
 import {
   COMET_ORBIT_COLOR,
@@ -36,6 +38,14 @@ import {
 } from "./kit";
 import { orbitShown } from "./lod";
 import type { MoonHosts } from "./moons-layer";
+
+/** Whether the layer a small world lives in is switched on: the belt it is best seen among. */
+const layerShown = (show: SolarShow, view: SolarViewId) =>
+  view === "kuiper"
+    ? show.kuiper
+    : view === "scattered" || view === "oort"
+      ? show.scattered || show.oort
+      : true;
 
 /** Equatorial and polar radius over the mean radius: the giants' oblate figures. */
 const shapeOf = (id: BodyId) =>
@@ -99,7 +109,7 @@ export function createPlanetsLayer(
     parent.add(mesh);
     const orbit = orbitOf(scope, body.id === "halley" ? COMET_ORBIT_COLOR : SMALL_ORBIT_COLOR, 0.7);
     /* Layer switches and eras grow the marker in and out rather than popping it. */
-    return { body, mesh, orbit, on: lod.fader() };
+    return { body, mesh, orbit, on: lod.fader(), view: viewOf({ kind: "named", id: body.id }) };
   });
   for (const slot of [...planets, ...named]) parent.add(slot.orbit.line);
 
@@ -185,15 +195,14 @@ export function createPlanetsLayer(
     present,
   }: SolarFrame) => {
     const labelled = names.value;
-    for (const { body, mesh, orbit, on } of named) {
+    for (const { body, mesh, orbit, on, view } of named) {
       namedElements(body, mig, driftYears, now, el);
       keplerPosition(el, tmp);
       mesh.position.set(tmp[0], tmp[1], tmp[2]);
       const selected = sel?.kind === "named" && sel.id === body.id;
       const eraOk = (rewinds(body.id) && SUN_BIRTH - yearsAgo > 1e6) || present;
       const halleyOk = body.id !== "halley" || show.elliptical || selected;
-      const layerOk =
-        body.id === "pluto" ? show.kuiper : body.id === "halley" || show.scattered || show.oort;
+      const layerOk = layerShown(show, view);
       /* A close-up keeps its body on whatever the layers say. */
       const grow = on.to((eraOk && halleyOk && layerOk) || closeId() === body.id);
       mesh.visible = grow > 0.001;
