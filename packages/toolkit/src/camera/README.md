@@ -31,7 +31,9 @@ cancellation and listener cleanup. Get/commit poses through callbacks; `onChange
 also receives the input's source (drag, wheel or pinch, with the pointer's client
 position), for a scene that zooms toward what is under the pointer. Distances
 and inclination bounds, drag sensitivity (and `dragScale`, a factor on it for the
-pose a drag starts from), wheel sensitivity and enabled state are configurable. Wheel deltas are normalized to pixels (16 pixels per line,
+pose a drag starts from), `zoomFloor` (the distance wheel and pinch scale toward, 0 by
+default: a body's radius makes the zoom close on its surface at one pace from any height),
+wheel sensitivity and enabled state are configurable. Wheel deltas are normalized to pixels (16 pixels per line,
 canvas height per page, `wheelPixels`) before applying sensitivity. A press that moves
 farther than `TAP_SLOP_PX` (6) is a drag, not a tap; the scene's tap picking uses the same. Call `cancel()` when a scripted tour takes control and
 `dispose()` on unmount. A pinch does not jump into drag when one finger lifts.

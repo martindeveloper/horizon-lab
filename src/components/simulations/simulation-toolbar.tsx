@@ -40,7 +40,8 @@ type SimulationTool = {
   active?: boolean;
   /** The id of the panel it discloses while open. */
   controls?: string;
-  onSelect: () => void;
+  /** `from` is the button pressed, for what opens to grow out of it. */
+  onSelect: (from?: HTMLElement) => void;
 };
 
 function ToolButton({
@@ -69,7 +70,7 @@ function ToolButton({
           ? { "aria-expanded": !!active, "aria-controls": active ? controls : undefined }
           : {})}
         active={!!active}
-        onClick={onSelect}
+        onClick={(event) => onSelect(event.currentTarget)}
       >
         <Icon className="icon-toolbar" />
       </IconButton>
@@ -160,7 +161,7 @@ export function SimulationToolbar({
     id: "details",
     label: detailsLabel,
     icon: Sigma,
-    onSelect: () => dialog.current?.open(),
+    onSelect: (from) => dialog.current?.open(from),
   };
   const helpTool: SimulationTool = {
     id: "help",

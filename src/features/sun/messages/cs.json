@@ -106,8 +106,8 @@
   },
   "lightNotes": {
     "white": "Mozaika HMI z května 2024 + syntetické detaily",
-    "whiteGrown": "Vyvinuto z mozaiky HMI z května 2024, o {elapsed} později",
-    "whiteCycle": "Modelový cyklus, skupiny vykreslené podle mozaiky HMI z května 2024",
+    "whiteGrown": "HMI, květen 2024 + {elapsed}",
+    "whiteCycle": "Modelový cyklus · skupiny HMI, květen 2024",
     "halpha": "Ilustrační chromosféra",
     "he304": "He II + koronální Si XI · syntetické",
     "fe171": "Fe IX · syntetické",
@@ -356,6 +356,22 @@
       "caution": "Umístěna podle hodin laboratoře na dráhu, po které tehdy letěla, z prvků JPL Horizons: do posledního průletu kolem Venuše 6. listopadu 2024 nejblíže asi {parkerEarlierR} slunečních poloměrů, potom na rekordní dráze; po červnu 2025, datu nejnovějších prvků, je jeho poloha předpovědí. Nejde o živou telemetrii; sklon drah a směr jejich nejbližšího bodu jsou zvoleny pro pohled."
     }
   },
+  "record": {
+    "title": "Záznam",
+    "sunspots": "Skvrny od roku {first}",
+    "sunspotNumber": "Číslo slunečních skvrn",
+    "groups": "Skupiny × {factor}",
+    "maunder": "Maunder",
+    "dalton": "Dalton",
+    "recordLabel": "Roční čísla slunečních skvrn do roku {last}, počty skupin od roku {first}, s Maunderovým a Daltonovým minimem",
+    "recordSource": "WDC-SILSO, Královská observatoř Belgie · Svalgaard & Schatten 2016",
+    "butterfly": "Kde skvrny vznikají",
+    "model": "Model",
+    "butterflyLabel": "Kde v modelu vznikají skvrny podle šířky, cykly {from} až {to}",
+    "butterflySource": "Spörerův zákon, Hathaway 2015 · oblasti modelu",
+    "degrees": "{value}°",
+    "cycle": "Cyklus {number}"
+  },
   "tour": {
     "steps": {
       "core": {
@@ -445,7 +461,7 @@
   },
   "lightReading": {
     "response": "Vrcholy odezvy ≈ {value}",
-    "effective": "Efektivní teplota {value}",
+    "effective": "Povrch {value}",
     "lineTransfer": "Přenos záření v čáře není modelován",
     "scattered": "Rozptýlené sluneční světlo · zelená Fe XIV, zvýrazněná · růžová chromosféra",
     "polarity": "Zlatá: k pozorovateli · modrá: od něj"

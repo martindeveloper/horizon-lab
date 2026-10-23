@@ -177,11 +177,14 @@ export const MAGNETOGRAM_NEGATIVE: Rgb = hexToLinear("#6f8fff");
 export const MAGNETOGRAM_GREY = 0.42;
 /**
  * The magnetogram's display, tesla: it saturates softly near ±100 G, as SDO/HMI's are usually
- * shown, so spots saturate while the polar field (1 mT) and the quiet network show as faint
- * tints; the network's mixed flux at this resolution (a teaching choice, tens of gauss).
+ * shown, so spots and the network's stronger elements saturate. The quiet network's mean
+ * unsigned field, about 10 G at a few arcseconds (a teaching choice of the observed order): its
+ * elements reach a few hundred gauss; those of the large-scale field's sign strengthen by its
+ * share of that mean and the others weaken, so the polar field shows as unipolar network, as in
+ * HMI's.
  */
 export const MAGNETOGRAM_SATURATION_T = 0.01;
-export const MAGNETOGRAM_NETWORK_T = 0.003;
+export const MAGNETOGRAM_NETWORK_T = 1e-3;
 
 const none: LayerWeights = { photosphere: 0, chromosphere: 0, transition: 0, corona: 0, flare: 0 };
 const layers = (weights: Partial<LayerWeights>): LayerWeights => ({ ...none, ...weights });

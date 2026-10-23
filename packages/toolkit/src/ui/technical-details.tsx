@@ -37,7 +37,7 @@ export function TechnicalDetails({
   const dialog = useRef<DialogHandle>(null);
   useImperativeHandle(
     ref,
-    () => ({ open: () => dialog.current?.open(), close: () => dialog.current?.close() }),
+    () => ({ open: (from) => dialog.current?.open(from), close: () => dialog.current?.close() }),
     [],
   );
   return (
@@ -47,7 +47,7 @@ export function TechnicalDetails({
         aria-haspopup="dialog"
         aria-label={labels.open}
         title={labels.open}
-        onClick={() => dialog.current?.open()}
+        onClick={(event) => dialog.current?.open(event.currentTarget)}
         className={cn(
           "relative inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-full ui-press px-2 text-ui text-fg-secondary ui-quiet ui-focus transition-colors duration-feedback ease-standard not-md:after:absolute not-md:after:-inset-1 md:min-h-8 md:min-w-8",
           triggerClassName,

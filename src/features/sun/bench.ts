@@ -176,7 +176,7 @@ const SCENES: readonly SunBenchScene[] = [
     ...still(
       "surface",
       "white",
-      "Wheel zoom onto the disc and back out: the orbit takes the point under the pointer and lets it go without turning the picture",
+      "Wheel zoom onto the disc and back out: the point under the pointer stays under it, the Sun turning beneath, never a jump",
     ),
     id: "surface-zoom-south",
     tags: ["sequence", "camera"],

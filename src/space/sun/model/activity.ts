@@ -10,7 +10,7 @@
 import { TAU, clamp01, smoothstep } from "@horizon/toolkit/math";
 
 import type { Prominence, Region } from "./contract";
-import { activityAt, cycleNumberOf, cyclePhaseOf, wolfNumber } from "./cycle";
+import { activityAt, cycleNumberOf, cyclePhaseOf, cycleShape, wolfNumber } from "./cycle";
 import { between, dice, gaussDice } from "./dice";
 import {
   ACTIVE_PROMINENCE_HEIGHT_R,
@@ -143,6 +143,7 @@ const SALT = {
   length: 15,
   height: 16,
   demo: 17,
+  cycle: 18,
 } as const;
 
 /* ------------------------------------------------------------------- flares */
@@ -188,6 +189,31 @@ export function flareCurve(t: number, flux: number) {
 /** Spörer's law: the mean spot latitude drifts from near 30° to near 8° over a cycle. */
 export const sporerLatitude = (phase: number) =>
   SPORER_START_RAD + (SPORER_END_RAD - SPORER_START_RAD) * clamp01(phase);
+
+/**
+ * The share of regions emerging at a phase that belong to the cycle before: its tail, in
+ * proportion to the two cycles' curves. Its spots stand low, where Spörer's drift left them, so
+ * near minimum the old cycle's low-latitude wings overlap the new cycle's high ones.
+ */
+export function oldCycleShare(phase: number) {
+  const activity = activityAt(phase);
+  return activity > 0 ? cycleShape(phase + 1) / activity : 0;
+}
+
+/**
+ * How many regions emerge at a phase and |latitude|, relative: each cycle's curve over the
+ * spread about its Spörer latitude, none nearer the equator than the regions' floor. The
+ * butterfly diagram the regions draw, by the rule `placeRegion` throws them with.
+ */
+export function emergenceDensity(phase: number, latitude: number) {
+  if (Math.abs(latitude) < REGION_LATITUDE_MIN_RAD) return 0;
+  let density = 0;
+  for (const own of [phase, phase + 1]) {
+    const z = (Math.abs(latitude) - sporerLatitude(own)) / SPORER_SPREAD_RAD;
+    density += cycleShape(own) * Math.exp(-0.5 * z * z);
+  }
+  return density;
+}
 
 /**
  * The leading pole's polarity in the northern hemisphere: Hale's law, flipping each cycle. It
@@ -246,15 +272,16 @@ function placeRegion(
   out: Region,
 ) {
   const hemisphere = dice(seed, SALT.hemisphere, slot, who.id) < 0.5 ? 1 : -1;
+  const old = dice(seed, SALT.cycle, slot, who.id) < oldCycleShare(phase) ? 1 : 0;
   const latitude = Math.max(
     REGION_LATITUDE_MIN_RAD,
-    sporerLatitude(phase) + SPORER_SPREAD_RAD * gaussDice(seed, SALT.latitude, slot, who.id),
+    sporerLatitude(phase + old) + SPORER_SPREAD_RAD * gaussDice(seed, SALT.latitude, slot, who.id),
   );
   out.id = who.id;
   out.lat = hemisphere * latitude;
   out.lon = TAU * dice(seed, SALT.longitude, slot, who.id) + lagBehindEquator(out.lat, out.age);
   out.size = who.size;
-  const leadingNorth = haleLeadingNorth(cycleNumber);
+  const leadingNorth = haleLeadingNorth(cycleNumber - old);
   out.polarity = hemisphere === 1 ? leadingNorth : leadingNorth === 1 ? -1 : 1;
   out.tilt = JOY_SLOPE * latitude + JOY_SCATTER_RAD * gaussDice(seed, SALT.tilt, slot, who.id);
 }

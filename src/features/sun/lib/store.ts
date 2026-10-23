@@ -24,7 +24,7 @@ import { PLACES, type PlaceId } from "./model/places";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW, VIEW_DEFAULTS, initialViewState, type ViewId } from "./model/views";
 
-type Panel = "none" | "places" | "view";
+type Panel = "none" | "places" | "view" | "record";
 
 /** What the View panel switches on the scene. */
 export type Show = {
@@ -180,12 +180,14 @@ export const useSun = create<SunStore>((set, get) => ({
   cycleYear: decimalYear(MAP_EPOCH),
   photographed: true,
   sharpening: false,
-  /* A view opens with its own light and clock; the cut opens inside and closes elsewhere. */
+  /* A view opens with its own light and clock; the cut opens inside and closes elsewhere, as
+     the record does outside the cycle. */
   setView: (view) =>
     set((s) => ({
       view,
       flight: s.flight + 1,
       closeUp: false,
+      panel: s.panel === "record" && view !== "cycle" ? "none" : s.panel,
       ...initialViewState(view),
     })),
   setLight: (light) => set({ light }),

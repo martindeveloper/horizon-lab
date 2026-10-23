@@ -101,6 +101,14 @@ struct Face {
   float radial;
 };
 
+// One generation of the quiet network at a point in cells: its lanes (1 on a lane), and its
+// salt and pepper, small bipoles of either sign, stronger in the lanes.
+vec2 quietNetwork(vec3 q) {
+  float lanes = 1.0 - smoothstep(0.0, 0.3, abs(gradientNoise3(q)));
+  float grain = gradientNoise3(q * 2.7);
+  return vec2(lanes, sign(grain) * smoothstep(0.25, 0.55, abs(grain)) * (0.4 + 0.6 * lanes));
+}
+
 Face faceAt(vec3 s, float mu, float px) {
   Face f = Face(PHOTOSPHERE_K, 1.0, 0.0, 0.0, PHOTOSPHERE_K, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   float dT = 0.0;
@@ -140,14 +148,31 @@ Face faceAt(vec3 s, float mu, float px) {
   float cells = GRANULES_PER_RADIUS / NETWORK_GRANULES;
   float netSeen = resolvedFeature(cells, px, mu);
   /* The supergranular network: its lanes bright, the cells' middles quiet. */
-  float lanes = gradientNoise3(b * cells + vec3(0.0, uClock.y, 0.0));
-  float network = 1.0 - smoothstep(0.0, 0.3, abs(lanes));
+  /* The quiet network, supergranules and their small bipoles: each generation is carried by
+     the differential rotation through its life, then renewed; two generations half a life apart
+     crossfade, so the pattern never shears out along the latitudes. */
+  vec2 renewed = vec2(0.0);
+  float lag = (1.0 - surfaceTurnRatio(s.y)) * NETWORK_TURN_PER_LIFE;
+  for (int k = 0; k < 2; k++) {
+    float age = uClock.y + 0.5 * float(k);
+    float generation = floor(age);
+    float lived = age - generation;
+    vec3 q = turned(s, lag * lived) * cells + NETWORK_GENERATION_SHIFT * mod(generation, NETWORK_GENERATIONS);
+    renewed += (1.0 - abs(2.0 * lived - 1.0)) * quietNetwork(q);
+  }
+  float network = renewed.x;
   /* The chromosphere's fibrils: mottle finer than the network and drawn out along it, where it resolves. */
   if (uLightMode == LIGHT_BAND) network = chromosphericNetwork(b, cells, px, mu, uFine);
-  /* The magnetogram's salt and pepper: small bipoles in the network's lanes. */
-  float grain = gradientNoise3(b * cells * 2.7 + vec3(0.0, 0.0, uClock.y));
-  float pepper = sign(grain) * smoothstep(0.25, 0.55, abs(grain)) * (0.4 + 0.6 * network);
-  f.radial += MAGNETOGRAM_NETWORK_T * pepper * netSeen;
+  /* The magnetogram's salt and pepper, of the quiet network's mean unsigned field. The global
+     dipole's radial field (polar and equatorial parts) lives in it: elements of its sign
+     strengthen and the others weaken by its share of that mean, so their mean is the dipole's
+     field and the caps turn unipolar; any excess, and all of it where the network does not
+     resolve, spreads evenly. */
+  float pepper = renewed.y / MAGNETOGRAM_PEPPER_MEAN;
+  float dipole = POLAR_FIELD_T * dot(s, uDipoleMoment);
+  float unipolar = clamp(dipole / MAGNETOGRAM_NETWORK_T, -1.0, 1.0);
+  float elements = MAGNETOGRAM_NETWORK_T * (pepper + unipolar * abs(pepper));
+  f.radial += mix(dipole, elements + dipole - MAGNETOGRAM_NETWORK_T * unipolar, netSeen);
   float umbra = 0.0;
   float penumbra = 0.0;
   float filaments = 0.0;
@@ -237,8 +262,10 @@ Face faceAt(vec3 s, float mu, float px) {
       float knots = max(0.0, 0.45 + 0.75 * gradientNoise2(vec2(l.y * 9.0, seed + uClock.x * 0.3)));
       f.ribbon += flaring * ((exp(-a * a) + exp(-c * c)) * extent * knots + 1.2 * exp(-dot(l, l) / 0.03));
     }
-    /* The radial field: the leader's and follower's opposite poles. */
-    f.radial += SPOT_FIELD_T * axis.w * side.w * (exp(-dot(leadAt, leadAt) / MAGNETOGRAM_POLE) - exp(-dot(followAt, followAt) / (0.8 * MAGNETOGRAM_POLE)));
+    /* The radial field: the leader's and follower's opposite poles, of equal flux, the
+       follower's spread wider. */
+    float followSpread = MAGNETOGRAM_FOLLOW_SPREAD * MAGNETOGRAM_POLE;
+    f.radial += SPOT_FIELD_T * axis.w * side.w * (exp(-dot(leadAt, leadAt) / MAGNETOGRAM_POLE) - exp(-dot(followAt, followAt) / followSpread) / MAGNETOGRAM_FOLLOW_SPREAD);
   }
   /* Filaments: the prominences seen against the disc, dark ribbons along their channels. */
   for (int k = 0; k < PROMINENCE_MAX; k++) {
@@ -281,9 +308,9 @@ Face faceAt(vec3 s, float mu, float px) {
 vec3 surfaceColour(Face f, vec3 s, float mu) {
   vec3 limb = tableAt(uProfile, mu, PROFILE_SAMPLES, 0, 1).rgb;
   if (uLightMode == LIGHT_MAGNETOGRAM) {
-    /* Tesla along the line of sight: the regions' poles, the network, and the global dipole's
-       radial field (polar and equatorial parts), displayed saturating softly as HMI's are. */
-    float field = (f.radial + POLAR_FIELD_T * dot(s, uDipoleMoment)) * mu;
+    /* Tesla along the line of sight: the radial field (the regions' poles, the network and the
+       global dipole in it) projected, displayed saturating softly as HMI's are. */
+    float field = f.radial * mu;
     float g = tanh(field / MAGNETOGRAM_SATURATION_T);
     return g < 0.0
       ? mix(vec3(MAGNETOGRAM_GREY), uNegative, -g)

@@ -15,7 +15,7 @@ type Shown = (typeof PASSBANDS)[LightId];
 
 /** The disc is drawn as a surface: not occulted, not read as a field. */
 const surface = (p: Shown) => !p.occultDisc && !p.magnetogram;
-/** The chromosphere's rim, its spicules and the prominences: what Hα and the transition region show. */
+/** The chromosphere's rim and its spicules: what Hα and the transition region show. */
 const rim = (p: Shown) => p.weights.chromosphere + p.weights.transition > 0;
 const corona = (p: Shown) => p.weights.corona > 0;
 /** The field's lines, the eruption's arcade among them. */
@@ -37,7 +37,8 @@ const DRAWN: Readonly<Record<PlaceId, (p: Shown) => boolean>> = {
     surface(p) && p.weights.photosphere + p.weights.chromosphere + p.weights.transition > 0,
   chromosphere: rim,
   spicule: rim,
-  prominence: rim,
+  /* Glowing where the light sees cool gas, dark against the corona where it only absorbs. */
+  prominence: (p) => rim(p) || corona(p),
   /* A flare's ribbons and kernel on the disc, in the bands and in Hα. */
   flare: (p) =>
     surface(p) &&

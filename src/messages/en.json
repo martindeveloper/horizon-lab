@@ -472,6 +472,15 @@
     "heap": "JS",
     "reset": "Reset"
   },
+  "figure": {
+    "enlarge": "Enlarge",
+    "close": "Close",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "reset": "Whole figure",
+    "fill": "Fill screen",
+    "restore": "Original size"
+  },
   "webgl": {
     "unavailableTitle": "This browser can't draw the scene",
     "unavailableBody": "It needs WebGL 2. Turn on hardware acceleration or use a current browser.",

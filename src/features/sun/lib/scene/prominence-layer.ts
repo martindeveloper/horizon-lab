@@ -28,7 +28,7 @@ import type { SunQuality } from "../quality";
 import type { SunFrame } from "./frame";
 import type { SunLight } from "./settings";
 
-/** Where along a band's ramp a prominence's colour is taken: the cool sheet's moderate brightness. */
+/** Where along a light's ramp a prominence's threads take their colour: the cool sheet's moderate brightness. */
 const PROMINENCE_RAMP_AT = 0.6;
 
 /** Model seconds a frame may advance the drain by at most: a jump of the clock is not a flow. */
@@ -82,6 +82,8 @@ export function createProminenceLayer(
   const bounds: ProminenceBound[] = [];
   let lastTime: number | null = null;
   let drained = 0;
+  /** How much of the body the light shows: all of it where it absorbs, its glow alone where it only emits. */
+  let shown = 0;
   return {
     /** The bounds' anchors, for picking and names. */
     get bounds(): readonly ProminenceBound[] {
@@ -90,13 +92,26 @@ export function createProminenceLayer(
     setQuality(quality: SunQuality) {
       uniforms.activitySteps.value = Math.min(quality.prominenceSteps, SUN_ACTIVITY_MAX_STEPS);
     },
-    /** The light it is seen in: a band shows it in the band's own colour, Hα and the eclipse in its red. */
-    setLight(light: SunLight) {
-      if (lightKind(light.id) !== "band") return void uniforms.emissionHue.value.set(0, 0, 0, 0);
-      const [r, g, b] = rampColor(light.id, PROMINENCE_RAMP_AT);
-      uniforms.emissionHue.value.set(r, g, b, 1);
+    /**
+     * The light it is seen in, and how much of its cool gas that light sees glow (`lit`, from
+     * the response tables). Hα and every EUV band are narrow lines its hydrogen and helium
+     * absorb (the EUV bands lie shortward of the Lyman and He I edges): the sheet stands in them
+     * whatever it emits, its threads in the light's own colour at its glow, so a coronal band
+     * shows it dark against the corona and the disc. The eclipse's broadband light shows its
+     * pink glow alone; white light and the magnetogram, nothing.
+     */
+    setLight(light: SunLight, lit: number) {
+      const kind = lightKind(light.id);
+      if (kind === "halpha" || kind === "band") {
+        const [r, g, b] = rampColor(light.id, PROMINENCE_RAMP_AT);
+        uniforms.emissionHue.value.set(r * lit, g * lit, b * lit, 1);
+        shown = 1;
+      } else {
+        uniforms.emissionHue.value.set(0, 0, 0, 0);
+        shown = kind === "eclipse" ? lit : 0;
+      }
     },
-    update(frame: SunFrame, camera: Camera, lit: number) {
+    update(frame: SunFrame, camera: Camera) {
       const count = Math.min(frame.prominences.length, SUN_ACTIVITY_MAX_REGIONS);
       let moved = count !== bounds.length;
       for (let i = 0; i < count; i++) {
@@ -126,13 +141,13 @@ export function createProminenceLayer(
         lastTime === null ? 0 : Math.min(Math.max(frame.time - lastTime, 0), MAX_DRAIN_STEP_S);
       lastTime = frame.time;
       drained = (drained + step * SUN_ACTIVITY_DRAIN_RADII_PER_S) % SUN_ACTIVITY_FLOW_WRAP;
-      mesh.visible = ready && lit > 0 && count > 0;
+      mesh.visible = ready && shown > 0 && count > 0;
       if (!mesh.visible) return;
       for (let k = 0; k < count; k++) {
         const p = frame.prominences[k]!;
         /* The frame's lift counts heights risen above rest; the volume's counts the height itself. */
         motion[k * 4] = 1 + p.lift;
-        motion[k * 4 + 1] = p.fade * lit;
+        motion[k * 4 + 1] = p.fade * shown;
         motion[k * 4 + 2] = 0;
         motion[k * 4 + 3] = drained * (1 + (SUN_ACTIVITY_ERUPTION_DRAIN - 1) * p.erupting);
       }

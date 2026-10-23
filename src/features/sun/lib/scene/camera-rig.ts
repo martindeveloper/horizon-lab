@@ -1,12 +1,13 @@
 /**
  * The Sun lab's camera: the orbit rig, its controls and the drift, about what the view orbits.
  * The orbit is about the Sun's centre, a feature's (`viewAim`) with its up the surface normal
- * there (`featureOrbitFrame`), Parker in its close-up, or a surface point the visitor zoomed
- * toward; while the drift plays it is about the centre in a frame that turns with the Sun from
+ * there (`featureOrbitFrame`), or Parker in its close-up; while the drift plays it is about the centre in a frame that turns with the Sun from
  * the moment it began, so the features its shots frame (`driftPose`) stay framed loop after loop.
  * When the orbit changes the camera is written into the new one as it stands, with the look that
  * keeps its view (`reframe`); outside the drift that look then eases off. What each orbit
  * allows (its limits, a full drag, the horizon floor, the roll) is read from one framing.
+ * About the centre a wheel or pinch zooms toward the point under the pointer: the Sun turns as
+ * the camera closes, so that point stays under the pointer (`holdAnchor`), at every distance.
  */
 import { Quaternion, Vector3, type PerspectiveCamera } from "three";
 
@@ -32,6 +33,8 @@ import {
   createOrbitRig,
   createRigDrift,
   createViewMoves,
+  ORBIT_DRAG_SENSITIVITY,
+  ORBIT_INCLINATION,
   type RigAttitude,
   type Viewport,
 } from "@horizon/toolkit/scene";
@@ -41,12 +44,10 @@ import {
   CAMERA_FAR_R,
   CAMERA_MAX_R,
   CAMERA_MIN_R,
-  DRAG_FULL_HEIGHT,
+  DRAG_FULL_HEIGHT_R,
   FEATURE_ELEVATION_MIN,
   FEATURE_MIN_R,
   ORBIT_REACH_R,
-  POINTER_AIM_R,
-  POINTER_RELEASE_R,
 } from "../parameters";
 import type { SunFrame } from "./frame";
 import { frameInsets, type SunViewport } from "./framing";
@@ -56,7 +57,6 @@ import {
   OPENING_ANGLES,
   featureLimits,
   featureOrbitFrame,
-  surfaceAim,
   viewAim,
   viewEasesAim,
   viewPose,
@@ -65,7 +65,7 @@ import {
 } from "./views";
 
 /** What the orbit is about. */
-type Orbit = "centre" | "drift" | "feature" | "parker" | "pointer";
+type Orbit = "centre" | "drift" | "feature" | "parker";
 
 /** What each orbit allows. */
 type Framing = {
@@ -83,7 +83,6 @@ const FRAMINGS: Readonly<Record<Orbit, Framing>> = {
   feature: { aboutPoint: true, overHorizon: true, easesRoll: true },
   /* Parker stands off the Sun: its close-up circles it freely, even from behind. */
   parker: { aboutPoint: true, overHorizon: false, easesRoll: true },
-  pointer: { aboutPoint: true, overHorizon: true, easesRoll: false },
 };
 
 const CENTRE_LIMITS = { min: CAMERA_MIN_R, max: CAMERA_MAX_R } as const;
@@ -94,6 +93,12 @@ const AXIS_Z = new Vector3(0, 0, 1);
 const POLE = AXIS_Y;
 /** The body's turn, the equator's rate, as the frame turns the surface (`surfaceTurn`). */
 const BODY_RATE = surfaceRate(0);
+/** The angles' nudge that measures how the anchored point moves on screen, radians. */
+const ANCHOR_PROBE = 1e-4;
+/** Newton steps a frame takes to put the anchored point back under the pointer. */
+const ANCHOR_STEPS = 2;
+/** Off by more than this (image-plane units) after its steps, the point has left the disc's face. */
+const ANCHOR_SLIP = 1e-3;
 
 export type SunCameraDeps = {
   camera: PerspectiveCamera;
@@ -134,8 +139,11 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
   let settling = false;
   /** The view frames itself as the frame changes, until the visitor takes the camera. */
   let autoFramed = true;
-  /** A surface point the visitor zoomed toward in a view about the centre (body frame); see `takeAim`. */
-  let pointerAim: { lat: number; lon: number } | null = null;
+  /**
+   * The surface point a zoom about the centre closes on (body frame, on the unit sphere) and
+   * the pointer's ray in the camera's frame, which the point is kept on; see `holdAnchor`.
+   */
+  let anchor: { point: Vector3; ray: Vector3 } | null = null;
 
   /** Sets the orbit for what it is about, at this frame. */
   const orbitFor = (f: SunFrame, target: ViewAim | null, dt?: number) => {
@@ -223,8 +231,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
 
   /**
    * Keeps the orbit the camera should turn in this frame: the drift's turning one while the
-   * drift plays, else Parker in its close-up, else the view's feature, else a point zoomed
-   * toward, else the Sun's centre. On a change the camera is written into the new orbit exactly
+   * drift plays, else Parker in its close-up, else the view's feature, else the Sun's centre. On a change the camera is written into the new orbit exactly
    * where it stands, its look turned to keep the view; on none the orbit follows the Sun.
    */
   const toOrbit = new Quaternion();
@@ -232,21 +239,8 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
   const reframe = (f: SunFrame, dt?: number) => {
     const { view, closeUp } = deps.settings();
     const playing = deps.drift?.state() === "playing";
-    const featureAim = playing || closeUp ? null : viewAim(view, f);
-    const target = playing
-      ? null
-      : ((closeUp ? parker.aim(f) : null) ??
-        featureAim ??
-        (pointerAim ? surfaceAim(pointerAim.lat, pointerAim.lon, f) : null));
-    const wanted: Orbit = playing
-      ? "drift"
-      : !target
-        ? "centre"
-        : closeUp
-          ? "parker"
-          : featureAim
-            ? "feature"
-            : "pointer";
+    const target = playing ? null : closeUp ? parker.aim(f) : viewAim(view, f);
+    const wanted: Orbit = playing ? "drift" : !target ? "centre" : closeUp ? "parker" : "feature";
     const follows = wanted === "feature" ? view : null;
     if (wanted === orbit && follows === following) {
       orbitFor(f, target, dt);
@@ -296,16 +290,24 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
   );
   rig.applyPose();
 
-  /* The surface point under a client position, in the body frame; null off the disc. */
+  /* The pointer's ray in the camera's frame, and the surface point it meets in the body frame. */
+  const toCamera = new Quaternion();
   const pointerRay = new Vector3();
   const hit = new Vector3();
-  const surfaceUnder = (clientX: number, clientY: number) => {
+  /**
+   * A wheel or pinch zooming about the centre anchors the surface point under the pointer, so
+   * the zoom closes on what is looked at; off the disc nothing is anchored and the zoom keeps
+   * the Sun where it is. The input itself is not taken.
+   */
+  const anchorUnder = (_next: OrbitPose, source: OrbitInputSource) => {
+    anchor = null;
+    if (source.kind === "drag" || orbit !== "centre" || rig.flying) return false;
     const box = deps.canvas.getBoundingClientRect();
-    if (box.width <= 0 || box.height <= 0) return null;
+    if (box.width <= 0 || box.height <= 0) return false;
     pointerRay
       .set(
-        ((clientX - box.left) / box.width) * 2 - 1,
-        1 - ((clientY - box.top) / box.height) * 2,
+        ((source.x - box.left) / box.width) * 2 - 1,
+        1 - ((source.y - box.top) / box.height) * 2,
         0.5,
       )
       .unproject(camera)
@@ -313,43 +315,97 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
       .normalize();
     const b = camera.position.dot(pointerRay);
     const disc = b * b - camera.position.lengthSq() + 1;
-    if (disc < 0) return null;
+    if (disc < 0) return false;
     const t = -b - Math.sqrt(disc);
-    if (t <= 0) return null;
+    if (t <= 0) return false;
     hit
       .copy(camera.position)
       .addScaledVector(pointerRay, t)
       .applyAxisAngle(POLE, -deps.drawn().surfaceTurn);
-    return { lat: Math.asin(Math.max(-1, Math.min(1, hit.y))), lon: Math.atan2(-hit.z, hit.x) };
-  };
-  /**
-   * A wheel or pinch zooming in over the disc, in a view about the centre and already near
-   * it, takes the surface point under the pointer as the orbit's centre: the next frame's
-   * reframe writes the camera into that orbit where it stands, and the zoom then closes on
-   * the point. The input itself is not taken.
-   */
-  const takeAim = (next: OrbitPose, source: OrbitInputSource) => {
-    if (source.kind === "drag" || next.distance >= rig.pose.distance) return false;
-    if (orbit !== "centre" || pointerAim || rig.pose.distance > POINTER_AIM_R) return false;
-    const under = surfaceUnder(source.x, source.y);
-    if (under) pointerAim = under;
+    toCamera.copy(camera.quaternion).invert();
+    anchor = { point: hit.clone(), ray: pointerRay.clone().applyQuaternion(toCamera) };
     return false;
   };
-  /** Zoomed back away from the point, the orbit returns to the centre. */
-  const releaseAim = () => {
-    if (pointerAim && framing().aboutPoint && !rig.flying && rig.pose.distance > POINTER_RELEASE_R)
-      pointerAim = null;
+
+  /**
+   * Where the anchored point stands in the image plane, less where the pointer's ray does, with
+   * the camera placed on the pose; false once the point is round the limb from the camera.
+   */
+  const world = new Vector3();
+  const seen = new Vector3();
+  const slip = (out: { x: number; y: number }) => {
+    placeCamera();
+    const { point, ray } = anchor!;
+    world.copy(point).applyAxisAngle(POLE, deps.drawn().surfaceTurn);
+    seen.copy(world).applyMatrix4(camera.matrixWorldInverse);
+    out.x = seen.x / -seen.z - ray.x / -ray.z;
+    out.y = seen.y / -seen.z - ray.y / -ray.z;
+    return seen.z < 0 && world.dot(camera.position) > 1;
+  };
+  const at = { x: 0, y: 0 };
+  const byAzimuth = { x: 0, y: 0 };
+  const byInclination = { x: 0, y: 0 };
+  /**
+   * Turns the orbit's angles so the anchored point sits on the pointer's ray again at the
+   * distance the zoom reached (Newton's method on the two angles). Once the zoom rests, or
+   * the point would have to leave the disc's face, the anchor is let go where it stands.
+   */
+  const holdAnchor = () => {
+    if (!anchor) return;
+    if (orbit !== "centre" || rig.flying || !(rig.moving || controls.interacting)) {
+      anchor = null;
+      return;
+    }
+    const { pose } = rig;
+    const start = { azimuth: pose.azimuth, inclination: pose.inclination };
+    for (let i = 0; i < ANCHOR_STEPS; i++) {
+      if (!slip(at)) break;
+      pose.azimuth += ANCHOR_PROBE;
+      slip(byAzimuth);
+      pose.azimuth -= ANCHOR_PROBE;
+      pose.inclination += ANCHOR_PROBE;
+      slip(byInclination);
+      pose.inclination -= ANCHOR_PROBE;
+      const ax = (byAzimuth.x - at.x) / ANCHOR_PROBE;
+      const ay = (byAzimuth.y - at.y) / ANCHOR_PROBE;
+      const ix = (byInclination.x - at.x) / ANCHOR_PROBE;
+      const iy = (byInclination.y - at.y) / ANCHOR_PROBE;
+      const det = ax * iy - ix * ay;
+      if (Math.abs(det) < 1e-9) break;
+      pose.azimuth -= (iy * at.x - ix * at.y) / det;
+      pose.inclination -= (ax * at.y - ay * at.x) / det;
+      pose.inclination = Math.min(
+        ORBIT_INCLINATION.max,
+        Math.max(ORBIT_INCLINATION.min, pose.inclination),
+      );
+    }
+    if (!slip(at) || Math.hypot(at.x, at.y) > ANCHOR_SLIP) {
+      pose.azimuth = start.azimuth;
+      pose.inclination = start.inclination;
+      anchor = null;
+    }
+  };
+  /**
+   * A drag's share of its full turn about the centre at a distance: the full turn from
+   * DRAG_FULL_HEIGHT_R out; near the surface the turn that keeps the ground under the pointer
+   * (the height over the focal length in pixels), blended between by the height.
+   */
+  const groundDrag = (distance: number) => {
+    const height = clamp01((distance - 1) / DRAG_FULL_HEIGHT_R);
+    const focalPx = deps.canvas.clientHeight / 2 / Math.tan((camera.fov * Math.PI) / 360);
+    const grab = clamp01(DRAG_FULL_HEIGHT_R / (focalPx * ORBIT_DRAG_SENSITIVITY.azimuth));
+    return height * (grab + (1 - grab) * height);
   };
   const controls = createOrbitControls(scope, deps.canvas, rig, {
     invalidate: deps.invalidate,
-    intercept: takeAim,
+    intercept: anchorUnder,
     /* The input's own bounds span every orbit; the rig clamps to the one it is in. */
     distance: { min: FEATURE_MIN_R, max: ORBIT_REACH_R },
-    /* About the centre a drag turns the whole Sun, so near the surface it tightens with
-       the camera's height over it, as at the disc view from there out; round a point the
-       turn is about the point and stays as it is. */
-    dragScale: (pose) =>
-      framing().aboutPoint ? 1 : clamp01((pose.distance - 1) / pose.distance / DRAG_FULL_HEIGHT),
+    /* About the centre a drag turns the whole Sun, so near the surface it tightens with the
+       camera's height over it, and a wheel or pinch scales that height; round a point the turn
+       is about the point and the zoom its distance from it. */
+    dragScale: (pose) => (framing().aboutPoint ? 1 : groundDrag(pose.distance)),
+    zoomFloor: () => (framing().aboutPoint ? 0 : 1),
     onInput: () => {
       autoFramed = false;
       deps.onInput?.();
@@ -378,6 +434,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
   const sceneOrbit = orbitCamera(rig, deps.invalidate);
   const turn = (by: OrbitTurn) => {
     autoFramed = false;
+    anchor = null;
     rig.turnBy(by);
     deps.invalidate();
   };
@@ -392,6 +449,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
     },
     zoom: (factor) => {
       autoFramed = false;
+      anchor = null;
       sceneOrbit.zoom(factor);
     },
     turn,
@@ -422,7 +480,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
     /** Another view: its own framing, the camera flown there unless the drift has it; true when it flies. */
     viewChanged(view: SunViewId) {
       autoFramed = true;
-      pointerAim = null;
+      anchor = null;
       reframe(deps.drawn());
       if (driftFlying()) return false;
       views.flyToView(view);
@@ -431,7 +489,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
     /** Into Parker's close-up where the camera stands, then the dive; out, back to the view. */
     closeUpChanged(closeUp: boolean, ride: boolean, view: SunViewId, sameView: boolean) {
       autoFramed = !closeUp;
-      pointerAim = null;
+      anchor = null;
       reframe(deps.drawn());
       if (closeUp) {
         const pose = closeUpPose(ride);
@@ -475,9 +533,9 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
         if (Math.abs(Math.log(fit / rig.target)) > 0.001) rig.zoomTo(fit, false);
       }
       rig.step(dt);
-      releaseAim();
       keepOverHorizon();
       settleAttitude(dt);
+      holdAnchor();
       placeCamera();
     },
   };

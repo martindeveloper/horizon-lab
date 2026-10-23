@@ -35,7 +35,7 @@ import {
   haloMass,
 } from "../src/space/galaxy/model/dark-halo.ts";
 import { galaxyToWorld, LY } from "../src/space/galaxy/scene/frames.ts";
-import { featureMessages, leaves } from "./messages-helper.mjs";
+import { featureMessages, layoutMessages, leaves } from "./messages-helper.mjs";
 import { close } from "./toolkit-helpers.mjs";
 
 test("halo normalization and density radius agree with their physical definitions", () => {
@@ -159,7 +159,12 @@ test("dark-universe figures and accessible details render strictly in both local
       const html = renderToStaticMarkup(
         createElement(
           NextIntlClientProvider,
-          { locale, messages: { deepField: messages }, timeZone: "UTC", onError: fail },
+          {
+            locale,
+            messages: layoutMessages("deep-field", locale),
+            timeZone: "UTC",
+            onError: fail,
+          },
           createElement(Component),
         ),
       );

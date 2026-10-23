@@ -169,6 +169,40 @@ test("a drag's turn follows the scale a scene gives it for the pose", () => {
   }
 });
 
+test("wheel and pinch scale the height over a zoom floor, never through it", () => {
+  const original = globalThis.window;
+  globalThis.window = new EventTarget();
+  const canvas = new FakeCanvas();
+  canvas.clientHeight = 800;
+  let pose = { azimuth: 0, inclination: 0, distance: 3 };
+  const input = createOrbitInput(canvas, {
+    getPose: () => pose,
+    onChange: (next) => {
+      pose = next;
+    },
+    distance: { min: 1.001, max: 100 },
+    zoomFloor: () => 1,
+  });
+  try {
+    const notch = Math.exp(-0.16);
+    event(canvas, "wheel", { deltaY: -160, ctrlKey: false });
+    close(pose.distance, 1 + 2 * notch);
+    pose = { ...pose, distance: 1.02 };
+    event(canvas, "wheel", { deltaY: -160, ctrlKey: false });
+    close(pose.distance, 1 + 0.02 * notch); // The same notch, the same share of the height.
+    pose = { ...pose, distance: 1.5 };
+    event(canvas, "pointerdown", { pointerId: 1, clientX: 0, clientY: 0, pointerType: "touch" });
+    event(canvas, "pointerdown", { pointerId: 2, clientX: 50, clientY: 0, pointerType: "touch" });
+    event(canvas, "pointermove", { pointerId: 2, clientX: 100, clientY: 0 });
+    close(pose.distance, 1.25); // Fingers twice as far apart: half the height.
+    event(canvas, "pointermove", { pointerId: 2, clientX: 1e6, clientY: 0 });
+    assert.equal(pose.distance, 1.001);
+  } finally {
+    input.dispose();
+    globalThis.window = original;
+  }
+});
+
 test("close-start pinch recovers and wheel units have equivalent zoom", () => {
   const original = globalThis.window;
   globalThis.window = new EventTarget();

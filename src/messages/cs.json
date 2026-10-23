@@ -472,6 +472,15 @@
     "heap": "JS",
     "reset": "Obnovit nastavení"
   },
+  "figure": {
+    "enlarge": "Zvětšit",
+    "close": "Zavřít",
+    "zoomIn": "Přiblížit",
+    "zoomOut": "Oddálit",
+    "reset": "Celý obrázek",
+    "fill": "Na celou obrazovku",
+    "restore": "Původní velikost"
+  },
   "webgl": {
     "unavailableTitle": "Tento prohlížeč scénu nevykreslí",
     "unavailableBody": "Potřebuje WebGL 2. Zapněte hardwarovou akceleraci nebo použijte aktuální prohlížeč.",

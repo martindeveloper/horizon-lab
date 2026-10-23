@@ -147,11 +147,10 @@ export function createSunEngine(
     const relight = (light: SunLight) => {
       const { scale, prominence } = tables.setResponse(light);
       looks.setLight(light, scale);
-      prominences.setLight(light);
+      prominences.setLight(light, prominence);
       tables.setRamp(light.ramp);
-      return prominence;
     };
-    let prominenceLit = relight(current.light);
+    relight(current.light);
     field.setPresence(RIBBON_PRESENCE[lightKind(current.light.id)]);
     /** Another light is asked for: it is applied once the frame in the old one is kept to dissolve from. */
     let relightPending = false;
@@ -305,7 +304,7 @@ export function createSunEngine(
       globe.step(dt);
       globe.update(current, camera);
       field.update(f, current.fieldLines);
-      prominences.update(f, camera, prominenceLit);
+      prominences.update(f, camera);
       atmosphere.update(f, current);
       sky.update(camera, SKY_EXPOSURE[kind]);
       names.update(f, {
@@ -356,7 +355,7 @@ export function createSunEngine(
       if (relightPending) {
         relightPending = false;
         if (ready && !reduceMotion.matches) dissolve.capture();
-        prominenceLit = relight(light);
+        relight(light);
         field.setPresence(RIBBON_PRESENCE[lightKind(light.id)]);
         loop.invalidate();
       }

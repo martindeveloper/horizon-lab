@@ -236,6 +236,66 @@
   animation: anim-fade var(--transition-duration-control) var(--ease-standard) both;
 }
 
+/* A dialog grows out of what opened it (`--dialog-origin`, set by Dialog) over a fading
+   backdrop and shrinks back into it on closing; display and the top layer wait for the exit.
+   A size the visitor picks (fill, own size) eases; a drag follows the hand. */
+.ui-dialog,
+.ui-dialog::backdrop {
+  transition-property: opacity, scale, display, overlay;
+  transition-duration: var(--transition-duration-control);
+  transition-timing-function: var(--ease-exit);
+  transition-behavior: allow-discrete;
+}
+.ui-dialog[open]:not([data-resizing]) {
+  transition-property: opacity, scale, display, overlay, width, height;
+}
+.ui-dialog {
+  opacity: 0;
+  scale: 0.5;
+  transform-origin: var(--dialog-origin, center);
+}
+.ui-dialog::backdrop {
+  opacity: 0;
+}
+.ui-dialog[open],
+.ui-dialog[open]::backdrop {
+  opacity: 1;
+  transition-duration: var(--transition-duration-reveal);
+  transition-timing-function: var(--ease-enter);
+}
+.ui-dialog[open]:not([data-resizing]) {
+  transition-duration:
+    var(--transition-duration-reveal), var(--transition-duration-reveal),
+    var(--transition-duration-reveal), var(--transition-duration-reveal),
+    var(--transition-duration-control), var(--transition-duration-control);
+}
+.ui-dialog[open] {
+  scale: 1;
+}
+@starting-style {
+  .ui-dialog[open],
+  .ui-dialog[open]::backdrop {
+    opacity: 0;
+  }
+  .ui-dialog[open] {
+    scale: 0.5;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-dialog,
+  .ui-dialog[open] {
+    scale: 1;
+  }
+  .ui-dialog[open]:not([data-resizing]) {
+    transition-property: opacity, scale, display, overlay;
+  }
+  @starting-style {
+    .ui-dialog[open] {
+      scale: 1;
+    }
+  }
+}
+
 /* Text keeps its reading cadence; each letter uses the same reveal as a small control. */
 .text-reveal-letter {
   animation: anim-fade var(--transition-duration-control) var(--ease-enter) both;

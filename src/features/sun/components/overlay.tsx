@@ -1,6 +1,6 @@
 "use client";
 
-import { Crosshair } from "lucide-react";
+import { ChartSpline, Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useHelp } from "@/components/simulations/help-tour";
@@ -17,6 +17,7 @@ import { PlaceCard } from "./card";
 import { SunDock } from "./dock";
 import { SunGuide } from "./guide";
 import { PlacesPanel, ViewPanel } from "./panels";
+import { RecordPanel } from "./record-panel";
 import { SunTechnicalDetails } from "./technical-details";
 import { SunViewPicker } from "./view-picker";
 
@@ -47,6 +48,7 @@ export function SunOverlay() {
   const t = useTranslations("sun");
   const ready = useSun((s) => s.ready);
   const panel = useSun((s) => s.panel);
+  const view = useSun((s) => s.view);
   const selection = useSun((s) => s.selection);
   const sharpening = useSun((s) => s.sharpening);
   const guideOpen = useSun((s) => s.guideOpen);
@@ -81,6 +83,20 @@ export function SunOverlay() {
                   controls: "sun-places",
                   onSelect: () => api().setPanel(panel === "places" ? "none" : "places"),
                 }}
+                tools={
+                  view === "cycle"
+                    ? [
+                        {
+                          id: "record",
+                          label: t("record.title"),
+                          icon: ChartSpline,
+                          active: panel === "record",
+                          controls: "sun-record",
+                          onSelect: () => api().setPanel(panel === "record" ? "none" : "record"),
+                        },
+                      ]
+                    : []
+                }
                 settings={{
                   label: t("hud.view"),
                   active: panel === "view",
@@ -94,6 +110,7 @@ export function SunOverlay() {
           </header>
           {panel === "places" ? <PlacesPanel onClose={() => api().setPanel("none")} /> : null}
           {panel === "view" ? <ViewPanel onClose={() => api().setPanel("none")} /> : null}
+          {panel === "record" ? <RecordPanel onClose={() => api().setPanel("none")} /> : null}
           {panel === "none" && selection ? <PlaceCard id={selection} /> : null}
           <SunDock />
         </>

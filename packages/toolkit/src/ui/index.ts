@@ -28,6 +28,7 @@ export {
   type ListItemProps,
 } from "./list-item";
 export { Disclosure, type DisclosureProps } from "./disclosure";
+export { FigureZoom, type FigureZoomLabels, type FigureZoomProps } from "./figure-zoom";
 export { Orb, type OrbLook, type OrbProps } from "./orb";
 export { SwitchChip, SwitchMark, SwitchRow } from "./switch";
 export { Picker, type PickerProps } from "./picker";

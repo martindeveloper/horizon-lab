@@ -13,6 +13,8 @@ import {
 } from "@horizon/toolkit/science";
 import { cn } from "@horizon/toolkit/ui";
 
+import { ZoomFigure } from "./zoom-figure";
+
 /** The plot's box in SVG units, and the margins its axis labels take. */
 const W = 280;
 const H = 176;
@@ -103,139 +105,145 @@ export function HrDiagram({
   const focused = points.find((point) => point.id === focus);
   return (
     <figure className="flex flex-col gap-1.5">
-      {compact ? null : (
-        <figcaption className="text-xs text-fg-secondary">{t("hr.title")}</figcaption>
-      )}
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="w-full text-fg-secondary"
-        role="img"
-        aria-label={focused ? t("hr.label", { name: nameOf(focused.id) }) : t("hr.labelAll")}
+      <ZoomFigure
+        title={t("hr.title")}
+        label={compact ? null : <p className="text-xs text-fg-secondary">{t("hr.title")}</p>}
       >
-        <defs>
-          <clipPath id={clip}>
-            <rect x={LEFT} y={TOP} width={W - LEFT - RIGHT} height={H - TOP - BOTTOM} />
-          </clipPath>
-        </defs>
-        <rect
-          x={LEFT}
-          y={TOP}
-          width={W - LEFT - RIGHT}
-          height={H - TOP - BOTTOM}
-          fill="none"
-          stroke="currentColor"
-          strokeOpacity={0.25}
-        />
-        {KELVIN_TICKS.map((kelvin) => (
-          <text
-            key={kelvin}
-            x={xOf(kelvin)}
-            y={H - 5}
-            textAnchor="middle"
-            className="fill-current font-mono text-[8px]"
-          >
-            {`${formatSignificant(kelvin, locale, 2)} K`}
-          </text>
-        ))}
-        <text
-          transform={`translate(7 ${(TOP + H - BOTTOM) / 2}) rotate(-90)`}
-          textAnchor="middle"
-          className="fill-current text-[8px]"
-        >
-          {t("hr.light")}
-        </text>
-        {LIGHT_TICKS.map((light) => (
-          <text
-            key={light}
-            x={LEFT - 4}
-            y={yOf(light) + 3}
-            textAnchor="end"
-            className="fill-current font-mono text-[8px]"
-          >
-            {light === 1 ? "1" : powerOfTen(Math.log10(light))}
-          </text>
-        ))}
-        <g clipPath={`url(#${clip})`}>
-          {RADII.map((radius) => {
-            const line = radiusLine(radius);
-            return (
-              <g key={radius}>
-                <line
-                  x1={line.hot.x}
-                  y1={line.hot.y}
-                  x2={line.end.x}
-                  y2={line.end.y}
-                  stroke="currentColor"
-                  strokeOpacity={0.3}
-                  strokeDasharray="2 3"
-                />
-                <text
-                  x={line.end.x - 3}
-                  y={line.end.y - 4}
-                  textAnchor="end"
-                  className="fill-current font-mono text-[7px]"
-                >
-                  {t("hr.radius", { value: formatSignificant(radius, locale, 1) })}
-                </text>
-              </g>
-            );
-          })}
-          {temperature === undefined ? null : (
-            <line
-              x1={xOf(temperature)}
-              x2={xOf(temperature)}
-              y1={TOP}
-              y2={H - BOTTOM}
-              className="stroke-solar"
-              strokeOpacity={0.8}
-              strokeDasharray="3 2"
-            />
-          )}
-        </g>
-        {bandsOf(points).map(({ group, x, y, angle, lift }) => (
-          <text
-            key={group}
-            transform={`translate(${x} ${y}) rotate(${angle}) translate(0 ${lift})`}
-            textAnchor="middle"
-            fontSize={LABEL_SIZE}
-            className="fill-current italic"
-          >
-            {t(`hr.groups.${group}`)}
-          </text>
-        ))}
-        <g className="text-fg-primary">
-          {points.map((point) => (
-            <circle
-              key={point.id}
-              cx={xOf(point.kelvin)}
-              cy={yOf(point.light)}
-              r={point.id === focus ? 4 : 2.5}
-              fill={cssColor(blackbodyColor(point.kelvin))}
-              stroke="currentColor"
-              strokeOpacity={point.id === focus ? 0 : 0.35}
-              strokeWidth={0.6}
-              className={cn(onPick && "cursor-pointer")}
-              onClick={onPick ? () => onPick(point.id) : undefined}
+        {(zoomed) => (
+          <>
+            <svg
+              viewBox={`0 0 ${W} ${H}`}
+              className="w-full text-fg-secondary"
+              role="img"
+              aria-label={focused ? t("hr.label", { name: nameOf(focused.id) }) : t("hr.labelAll")}
             >
-              <title>{nameOf(point.id)}</title>
-            </circle>
-          ))}
-          {focused ? (
-            <circle
-              cx={xOf(focused.kelvin)}
-              cy={yOf(focused.light)}
-              r={7}
-              fill="none"
-              className="stroke-solar"
-              strokeWidth={1}
-            />
-          ) : null}
-        </g>
-      </svg>
-      <p className="flex justify-between pl-7 text-[11px] text-fg-secondary" aria-hidden>
-        <span>{t("hr.hotter")}</span>
-        <span>{t("hr.cooler")}</span>
-      </p>
+              <defs>
+                <clipPath id={`${clip}${zoomed ? "z" : ""}`}>
+                  <rect x={LEFT} y={TOP} width={W - LEFT - RIGHT} height={H - TOP - BOTTOM} />
+                </clipPath>
+              </defs>
+              <rect
+                x={LEFT}
+                y={TOP}
+                width={W - LEFT - RIGHT}
+                height={H - TOP - BOTTOM}
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity={0.25}
+              />
+              {KELVIN_TICKS.map((kelvin) => (
+                <text
+                  key={kelvin}
+                  x={xOf(kelvin)}
+                  y={H - 5}
+                  textAnchor="middle"
+                  className="fill-current font-mono text-[8px]"
+                >
+                  {`${formatSignificant(kelvin, locale, 2)} K`}
+                </text>
+              ))}
+              <text
+                transform={`translate(7 ${(TOP + H - BOTTOM) / 2}) rotate(-90)`}
+                textAnchor="middle"
+                className="fill-current text-[8px]"
+              >
+                {t("hr.light")}
+              </text>
+              {LIGHT_TICKS.map((light) => (
+                <text
+                  key={light}
+                  x={LEFT - 4}
+                  y={yOf(light) + 3}
+                  textAnchor="end"
+                  className="fill-current font-mono text-[8px]"
+                >
+                  {light === 1 ? "1" : powerOfTen(Math.log10(light))}
+                </text>
+              ))}
+              <g clipPath={`url(#${clip}${zoomed ? "z" : ""})`}>
+                {RADII.map((radius) => {
+                  const line = radiusLine(radius);
+                  return (
+                    <g key={radius}>
+                      <line
+                        x1={line.hot.x}
+                        y1={line.hot.y}
+                        x2={line.end.x}
+                        y2={line.end.y}
+                        stroke="currentColor"
+                        strokeOpacity={0.3}
+                        strokeDasharray="2 3"
+                      />
+                      <text
+                        x={line.end.x - 3}
+                        y={line.end.y - 4}
+                        textAnchor="end"
+                        className="fill-current font-mono text-[7px]"
+                      >
+                        {t("hr.radius", { value: formatSignificant(radius, locale, 1) })}
+                      </text>
+                    </g>
+                  );
+                })}
+                {temperature === undefined ? null : (
+                  <line
+                    x1={xOf(temperature)}
+                    x2={xOf(temperature)}
+                    y1={TOP}
+                    y2={H - BOTTOM}
+                    className="stroke-solar"
+                    strokeOpacity={0.8}
+                    strokeDasharray="3 2"
+                  />
+                )}
+              </g>
+              {bandsOf(points).map(({ group, x, y, angle, lift }) => (
+                <text
+                  key={group}
+                  transform={`translate(${x} ${y}) rotate(${angle}) translate(0 ${lift})`}
+                  textAnchor="middle"
+                  fontSize={LABEL_SIZE}
+                  className="fill-current italic"
+                >
+                  {t(`hr.groups.${group}`)}
+                </text>
+              ))}
+              <g className="text-fg-primary">
+                {points.map((point) => (
+                  <circle
+                    key={point.id}
+                    cx={xOf(point.kelvin)}
+                    cy={yOf(point.light)}
+                    r={point.id === focus ? 4 : 2.5}
+                    fill={cssColor(blackbodyColor(point.kelvin))}
+                    stroke="currentColor"
+                    strokeOpacity={point.id === focus ? 0 : 0.35}
+                    strokeWidth={0.6}
+                    className={cn(onPick && "cursor-pointer")}
+                    onClick={onPick ? () => onPick(point.id) : undefined}
+                  >
+                    <title>{nameOf(point.id)}</title>
+                  </circle>
+                ))}
+                {focused ? (
+                  <circle
+                    cx={xOf(focused.kelvin)}
+                    cy={yOf(focused.light)}
+                    r={7}
+                    fill="none"
+                    className="stroke-solar"
+                    strokeWidth={1}
+                  />
+                ) : null}
+              </g>
+            </svg>
+            <p className="flex justify-between pl-7 text-[11px] text-fg-secondary" aria-hidden>
+              <span>{t("hr.hotter")}</span>
+              <span>{t("hr.cooler")}</span>
+            </p>
+          </>
+        )}
+      </ZoomFigure>
       {compact ? null : (
         <p className="text-xs leading-relaxed text-fg-secondary">{t("hr.lesson")}</p>
       )}

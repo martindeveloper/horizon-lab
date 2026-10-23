@@ -106,8 +106,8 @@
   },
   "lightNotes": {
     "white": "HMI mosaic of May 2024 + synthetic detail",
-    "whiteGrown": "Grown from the HMI mosaic of May 2024, {elapsed} on",
-    "whiteCycle": "A model cycle, its groups drawn from the HMI mosaic of May 2024",
+    "whiteGrown": "HMI, May 2024 + {elapsed}",
+    "whiteCycle": "Model cycle · HMI groups, May 2024",
     "halpha": "Illustrative chromosphere",
     "he304": "He II + coronal Si XI · synthetic",
     "fe171": "Fe IX · synthetic",
@@ -356,6 +356,22 @@
       "caution": "Placed by the lab’s clock on the orbit it flew then, from JPL Horizons’ elements: down to about {parkerEarlierR} solar radii until its last Venus flyby on 6 November 2024, its record orbit after; past June 2025, its latest elements’ date, where it stands is predicted. Not live telemetry; the orbits’ tilt and the direction of their closest point are the view’s."
     }
   },
+  "record": {
+    "title": "Record",
+    "sunspots": "Sunspots since {first}",
+    "sunspotNumber": "Sunspot number",
+    "groups": "Groups × {factor}",
+    "maunder": "Maunder",
+    "dalton": "Dalton",
+    "recordLabel": "Yearly sunspot numbers to {last}, group numbers from {first}, with the Maunder and Dalton minima",
+    "recordSource": "WDC-SILSO, Royal Observatory of Belgium · Svalgaard & Schatten 2016",
+    "butterfly": "Where spots emerge",
+    "model": "Model",
+    "butterflyLabel": "Where the model’s spots emerge by latitude, cycles {from} to {to}",
+    "butterflySource": "Spörer’s law, Hathaway 2015 · the model’s regions",
+    "degrees": "{value}°",
+    "cycle": "Cycle {number}"
+  },
   "tour": {
     "steps": {
       "core": {
@@ -445,7 +461,7 @@
   },
   "lightReading": {
     "response": "Response peaks ≈ {value}",
-    "effective": "Effective temperature {value}",
+    "effective": "Surface {value}",
     "lineTransfer": "Line transfer is not modelled",
     "scattered": "Scattered sunlight · Fe XIV green, emphasized · pink chromosphere",
     "polarity": "Gold: toward observer · blue: away"

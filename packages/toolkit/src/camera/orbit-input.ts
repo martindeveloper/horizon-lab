@@ -15,6 +15,11 @@ export type OrbitInputOptions = {
   dragSensitivity?: { azimuth: number; inclination: number };
   /** Scales a drag's turn for the pose it starts from (1 by default): a scene tightens the drag where the orbit's centre is far behind what the camera is near. */
   dragScale?: (pose: OrbitPose) => number;
+  /**
+   * The distance a wheel or pinch scales toward (0 by default): a scene orbiting a body's
+   * centre passes its radius, so the zoom closes on the surface at the same pace from any height.
+   */
+  zoomFloor?: (pose: OrbitPose) => number;
   wheelSensitivity?: (distance: number, trackpadPinch: boolean) => number;
 };
 
@@ -44,6 +49,11 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     dist0 = 0;
   const enabled = () => options.enabled?.() ?? true;
   const distance = (value: number) => clamp(value, options.distance.min, options.distance.max);
+  /** A distance scaled by a zoom factor about the floor, where the floor is nearer than it. */
+  const zoomed = (pose: OrbitPose, from: number, factor: number) => {
+    const floor = Math.min(options.zoomFloor?.(pose) ?? 0, from);
+    return distance(floor + (from - floor) * factor);
+  };
   function gap() {
     const [a, b] = [...pointers.values()];
     return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
@@ -91,7 +101,7 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
         } else {
           const [a, b] = [...pointers.values()];
           options.onChange(
-            { ...pose, distance: distance((dist0 * pinch0) / currentGap) },
+            { ...pose, distance: zoomed(pose, dist0, pinch0 / currentGap) },
             { kind: "pinch", x: (a!.x + b!.x) / 2, y: (a!.y + b!.y) / 2 },
           );
         }
@@ -136,7 +146,7 @@ export function createOrbitInput(canvas: HTMLCanvasElement, options: OrbitInputO
     const sensitivity = options.wheelSensitivity?.(pose.distance, event.ctrlKey) ?? 0.001;
     const pixels = wheelPixels(event.deltaY, event.deltaMode, canvas.clientHeight);
     options.onChange(
-      { ...pose, distance: distance(pose.distance * Math.exp(pixels * sensitivity)) },
+      { ...pose, distance: zoomed(pose, pose.distance, Math.exp(pixels * sensitivity)) },
       { kind: "wheel", x: event.clientX, y: event.clientY },
     );
   }

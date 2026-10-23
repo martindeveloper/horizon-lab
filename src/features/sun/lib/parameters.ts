@@ -25,6 +25,7 @@ import {
   POLAR_FIELD_T,
   RADIUS_M,
   SPOT_FIELD_T,
+  SUPERGRANULE_LIFETIME_S,
   SURFACE_GRAVITY,
   TACHOCLINE_R,
   TACHOCLINE_THICKNESS_R,
@@ -40,7 +41,12 @@ import {
   SURFACE_ROTATION_DEG_PER_DAY,
 } from "@/space/sun/model/rotation";
 import { convectiveSpeedAt, pressureScaleHeightAt, structureAt } from "@/space/sun/model/structure";
-import { SOLAR_RADIUS_KM, SOLAR_TEFF_K, pressureScaleHeight } from "@horizon/toolkit/science";
+import {
+  RAD_PER_DEG,
+  SOLAR_RADIUS_KM,
+  SOLAR_TEFF_K,
+  pressureScaleHeight,
+} from "@horizon/toolkit/science";
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
 import spotStencil from "./graphics/spot-stencil.generated.json";
@@ -65,21 +71,14 @@ export const FEATURE_MIN_R = CAMERA_MIN_R - 1 + 0.01;
 export const FEATURE_MAX_R = 4;
 /** Round a feature the camera keeps at least this elevation over the feature's horizon, radians: never under the surface. */
 export const FEATURE_ELEVATION_MIN = 0.04;
-/**
- * Zooming in over the disc, nearer than this to the centre, takes the surface point under the
- * pointer as the orbit's centre, so the wheel closes on what is looked at; zooming back out
- * past the second distance from that point lets it go.
- */
-export const POINTER_AIM_R = 2.2;
-export const POINTER_RELEASE_R = 1.4;
 /** The orbit's centre moves between the Sun's centre and a feature with this time constant, s. */
 export const AIM_LAG_S = 0.8;
 /**
- * About the centre a drag has its full turn from where the camera's height over the surface
- * is this share of its distance (the disc view, three radii out) and tightens in proportion
- * nearer, so the surface under the camera never flies past a pointer.
+ * About the centre a drag has its full turn from this height over the surface, radii (the disc
+ * view, three radii out), and tightens nearer until, close over the surface, the ground stays
+ * under the pointer.
  */
-export const DRAG_FULL_HEIGHT = 2 / 3;
+export const DRAG_FULL_HEIGHT_R = 2;
 /** The wedge's half-angle when the cut is fully open: a quarter of the Sun. */
 export const CUT_HALF_ANGLE = Math.PI / 4;
 /** The wedge's bisector follows the camera with this time constant, s. */
@@ -172,6 +171,11 @@ export const SURFACE_CONTRAST = 2.2;
 const { A, B, C } = SURFACE_ROTATION_DEG_PER_DAY;
 export const ROTATION_SIN2 = B / A;
 export const ROTATION_SIN4 = C / A;
+/** The equator's turn over a supergranule's life, radians: how far one generation of the network is carried before it is renewed. */
+export const NETWORK_TURN_PER_LIFE = A * RAD_PER_DEG * (SUPERGRANULE_LIFETIME_S / DAY_S);
+/** The network's generations before their patterns repeat, and the step between their patterns in noise cells. */
+export const NETWORK_GENERATIONS = 32;
+export const NETWORK_GENERATION_SHIFT = [7.13, 3.71, 5.37] as const;
 /** The radiative interior turns rigidly at the model's rate, against the equator's. */
 export const INTERIOR_TURN_RATIO = INTERIOR_RATE_DEG_PER_DAY / A;
 
@@ -335,6 +339,13 @@ export const FIBRIL_SHARE = 0.4;
 export const BAND_QUIET = 0.12;
 /** A bipole's poles on the magnetogram: their spread in units of the region's size. */
 export const MAGNETOGRAM_POLE = 1;
+/** The following pole against the leading one: as much flux, spread wider at a lower peak (a teaching choice). */
+export const MAGNETOGRAM_FOLLOW_SPREAD = 1.25;
+/**
+ * The network's salt-and-pepper pattern's mean |value|, sampled from the shader's noise (4×10⁵
+ * points): the shader divides by it so the network's mean unsigned field is `MAGNETOGRAM_NETWORK_T`.
+ */
+export const MAGNETOGRAM_PEPPER_MEAN = 0.034;
 /** Regions the shader reads at most, and how far a region's marks reach from its centre in its radii (the shader's and a tap's). */
 export const REGION_MAX = 12;
 export const REGION_REACH = 2.2;
@@ -344,6 +355,19 @@ export const REGION_REACH = 2.2;
 /** Spicule columns round the limb, and a spicule's life in model seconds. */
 export const SPICULE_COLUMNS = 1_200;
 export const SPICULE_LIFETIME_S = 600;
+/**
+ * The columns a ray grazing the limb crosses inside the spicules' reach, both sides of the plane
+ * of the sky: the cells its ground track runs through, and the march's bound.
+ */
+const SPICULE_TRACK_CELLS =
+  (2 * Math.acos(1 / (1 + SPICULE_HEIGHT))) / ((2 * Math.PI) / SPICULE_COLUMNS);
+export const SPICULE_TRACK_STEPS = Math.ceil(SPICULE_TRACK_CELLS);
+/**
+ * The fringe's light per jet a ray meets. A grazing ray meets about eight at the base (its track's
+ * cells, a jet's mean crossing of √π × 0.11 of a cell, its mean life): the forest there glows as
+ * one jet did alone (a display choice).
+ */
+export const SPICULE_FOREST = 0.13;
 /** The chromosphere's rim against the disc, and its spicules. */
 export const CHROMOSPHERE_GLOW = 0.48;
 export const SPICULE_GLOW = 0.45;
@@ -547,6 +571,9 @@ export const SHADER_DEFINES = glslDefines({
   SURFACE_CONTRAST,
   ROTATION_SIN2,
   ROTATION_SIN4,
+  NETWORK_TURN_PER_LIFE,
+  NETWORK_GENERATIONS,
+  NETWORK_GENERATION_SHIFT,
   INTERIOR_TURN_RATIO,
   PLUME_GRANULE_DEPTH,
   FACE_TOP_DISPLAY_K,
@@ -604,6 +631,8 @@ export const SHADER_DEFINES = glslDefines({
   SPOT_FIELD_T,
   POLAR_FIELD_T,
   MAGNETOGRAM_POLE,
+  MAGNETOGRAM_FOLLOW_SPREAD,
+  MAGNETOGRAM_PEPPER_MEAN,
   MAGNETOGRAM_GREY,
   MAGNETOGRAM_LINE,
   REGION_MAX: glslInt(REGION_MAX),
@@ -611,6 +640,8 @@ export const SHADER_DEFINES = glslDefines({
   CHROMOSPHERE_HEIGHT,
   SPICULE_HEIGHT,
   SPICULE_COLUMNS,
+  SPICULE_TRACK_STEPS: glslInt(SPICULE_TRACK_STEPS),
+  SPICULE_FOREST,
   CHROMOSPHERE_GLOW,
   SPICULE_GLOW,
   RIM_MIN_PX,

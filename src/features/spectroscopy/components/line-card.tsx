@@ -215,11 +215,13 @@ export function LineCard() {
         </dl>
 
         <section>
-          <h3 className="text-ui text-fg-secondary">
-            {t("card.growthTitle")} ·{" "}
-            <span className="text-fg-primary">{t(`regime.${report.regime}`)}</span>
-          </h3>
           <GrowthChart
+            heading={
+              <h3 className="text-ui text-fg-secondary">
+                {t("card.growthTitle")} ·{" "}
+                <span className="text-fg-primary">{t(`regime.${report.regime}`)}</span>
+              </h3>
+            }
             points={growth}
             labels={{
               title: t("card.growthTitle"),
@@ -242,8 +244,8 @@ export function LineCard() {
 
         {sequence.length ? (
           <section>
-            <h3 className="text-ui text-fg-secondary">{t("card.sequenceTitle")}</h3>
             <SequenceChart
+              heading={<h3 className="text-ui text-fg-secondary">{t("card.sequenceTitle")}</h3>}
               points={sequence}
               marker={marker}
               labels={{ title: t("card.sequenceTitle"), y: t("card.sequenceY") }}

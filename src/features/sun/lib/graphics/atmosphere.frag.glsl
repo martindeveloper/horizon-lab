@@ -149,27 +149,35 @@ void main() {
     float jets = 0.0;
     float seen = resolvedFeature(SPICULE_COLUMNS / TWO_PI, px, 1.0);
     if (uSpicules > 0.0 && h < SPICULE_HEIGHT && seen > 0.0) {
-      vec2 a = vec2(lon, lat) * (SPICULE_COLUMNS / TWO_PI);
-      float height = h / SPICULE_HEIGHT;
-      float filterWidth = max(length(fwidth(a)), 0.05);
-      // Jittered roots, tilted threads and independent lifetimes remove the
-      // dotted latitude grid. Neighbouring cells let a jet lean across its cell.
-      for (int ix = -1; ix <= 1; ix++) {
-        for (int iy = -1; iy <= 1; iy++) {
-          vec2 cell = floor(a) + vec2(float(ix), float(iy));
-          vec3 dice = hash33(vec3(cell, 5.0));
-          float life = 0.5 + 0.5 * sin(uSpiculeClock * TWO_PI * (0.6 + 0.7 * dice.y) + TWO_PI * dice.z);
-          float reach = (0.25 + 0.75 * dice.x) * (0.35 + 0.65 * life);
-          vec2 root = cell + 0.2 + 0.6 * dice.xy;
-          vec2 lean = (dice.yz - 0.5) * height * 0.8;
-          vec2 off = a - root - lean;
-          float width = 0.09 + 0.04 * dice.z;
-          float filtered = width * width + filterWidth * filterWidth;
-          float thread = exp(-dot(off, off) / filtered) * width * width / filtered;
-          jets += thread * (1.0 - smoothstep(reach * 0.55, reach, height)) * sqrt(life);
-        }
+      /* A ray past the limb runs through the forest on both sides of the plane of the sky: its
+         ground track (the sphere under it, from the closest point along the ray) crosses a
+         column of jets per cell, each seen where the ray stands above its root. So the limb
+         shows every jet a ray meets, in front and behind, as the eye does: a dense fringe. */
+      float cell = TWO_PI / SPICULE_COLUMNS;
+      vec3 across = normalize(cross(qhat, d));
+      float reach = acos(clamp(rho / (1.0 + SPICULE_HEIGHT), -1.0, 1.0));
+      float from = max(-reach, atan(-tc, rho));
+      float filterWidth = px / cell;
+      for (int i = 0; i < SPICULE_TRACK_STEPS; i++) {
+        float u = from + (float(i) + 0.5) * cell;
+        if (u > reach) break;
+        vec3 g = cos(u) * qhat + sin(u) * d;
+        float height = (rho / cos(u) - 1.0) / SPICULE_HEIGHT;
+        vec2 at = floor(vec2(atan(g.z, g.x), asin(clamp(g.y, -1.0, 1.0))) / cell);
+        vec3 dice = hash33(vec3(at, 5.0));
+        float life = 0.5 + 0.5 * sin(uSpiculeClock * TWO_PI * (0.6 + 0.7 * dice.y) + TWO_PI * dice.z);
+        float tall = (0.25 + 0.75 * dice.x) * (0.35 + 0.65 * life);
+        if (height >= tall) continue;
+        vec2 root = (at + 0.2 + 0.6 * dice.xy) * cell;
+        vec3 rooted = vec3(cos(root.y) * cos(root.x), sin(root.y), cos(root.y) * sin(root.x));
+        /* Across the track, in cells: the root's offset, less the jet's lean at this height. */
+        float off = dot(rooted, across) / cell - (dice.y - 0.5) * height * 0.8;
+        float width = 0.09 + 0.04 * dice.z;
+        float filtered = width * width + filterWidth * filterWidth;
+        float thread = exp(-off * off / filtered) * width * inversesqrt(filtered);
+        jets += thread * (1.0 - smoothstep(tall * 0.55, tall, height)) * sqrt(life);
       }
-      jets *= 3.0 * seen;
+      jets *= SPICULE_FOREST * seen;
     }
     float chromo = CHROMOSPHERE_GLOW * rim + SPICULE_GLOW * jets;
     col += lit(chromo, CHROMOSPHERE_K, LAYER_CHROMOSPHERE, uBalmer, uWeights.y);

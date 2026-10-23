@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { Rail, SwitchGroup } from "@/components/simulations/rail";
+import { ZoomFigure } from "@/components/simulations/zoom-figure";
 import { SOURCES, type SourceId } from "@/lib/sources";
 import lensingSource from "@/space/cosmos/model/data/cosmos-web-source.json";
 import {
@@ -177,46 +178,47 @@ function HaloView() {
   const r200 = HALO_FACTS.r200.value;
   return (
     <div className="grid gap-4">
-      <Status>{t("dark.inferred")}</Status>
       <figure>
-        <svg
-          viewBox="0 0 280 135"
-          role="img"
-          aria-label={t("dark.halo.alt")}
-          className="w-full text-accent"
-        >
-          <path
-            d={`M${FIG.left} 12V${FIG.bottom}H${FIG.right}`}
-            fill="none"
-            className="stroke-fg-secondary/40"
-          />
-          <path d={CONSTRAINED} fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path
-            d={EXTRAPOLATED}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeDasharray="4 4"
-          />
-          <path
-            d={`M${haloX(r200)} ${FIG.bottom}V${haloY(r200)}`}
-            stroke="currentColor"
-            opacity="0.4"
-            strokeDasharray="3 4"
-          />
-          <circle cx={haloX(sun)} cy={haloY(sun)} r="3" fill="currentColor" />
-          <text x={haloX(sun) + 6} y={haloY(sun) - 6} className="fill-fg-secondary text-[10px]">
-            {t("names.sun")}
-          </text>
-          <text
-            x={haloX(r200)}
-            y="130"
-            textAnchor="middle"
-            className="fill-fg-secondary text-[10px]"
+        <ZoomFigure title={t("dark.tabs.halo")} label={<Status>{t("dark.inferred")}</Status>}>
+          <svg
+            viewBox="0 0 280 135"
+            role="img"
+            aria-label={t("dark.halo.alt")}
+            className="w-full text-accent"
           >
-            {radius}
-          </text>
-        </svg>
+            <path
+              d={`M${FIG.left} 12V${FIG.bottom}H${FIG.right}`}
+              fill="none"
+              className="stroke-fg-secondary/40"
+            />
+            <path d={CONSTRAINED} fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path
+              d={EXTRAPOLATED}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+            />
+            <path
+              d={`M${haloX(r200)} ${FIG.bottom}V${haloY(r200)}`}
+              stroke="currentColor"
+              opacity="0.4"
+              strokeDasharray="3 4"
+            />
+            <circle cx={haloX(sun)} cy={haloY(sun)} r="3" fill="currentColor" />
+            <text x={haloX(sun) + 6} y={haloY(sun) - 6} className="fill-fg-secondary text-[10px]">
+              {t("names.sun")}
+            </text>
+            <text
+              x={haloX(r200)}
+              y="130"
+              textAnchor="middle"
+              className="fill-fg-secondary text-[10px]"
+            >
+              {radius}
+            </text>
+          </svg>
+        </ZoomFigure>
         <figcaption className="text-ui text-fg-secondary">{t("dark.halo.axes")}</figcaption>
       </figure>
       <p className="text-ui leading-relaxed text-fg-secondary">{t("dark.halo.body")}</p>
@@ -275,38 +277,67 @@ function readLensingMap() {
     }));
 }
 
+/** The convergence map as pixels: signed κ in two hues, the unsurveyed exterior transparent. */
+function lensingPixels(map: LensingMap) {
+  const pixels = new ImageData(map.width, map.height);
+  for (let y = 0; y < map.height; y++)
+    for (let x = 0; x < map.width; x++) {
+      const value = map.values[y * map.width + x];
+      if (value == null) continue;
+      // FITS rows run bottom-to-top. Preserve signed convergence; exterior stays transparent.
+      const at = ((map.height - 1 - y) * map.width + x) * 4;
+      const kappa = value * map.scale;
+      const amount = Math.sqrt(
+        Math.min(
+          1,
+          Math.abs(kappa) / (kappa < 0 ? Math.abs(lensingSource.min) : lensingSource.max),
+        ),
+      );
+      const colour = kappa < 0 ? [118, 160, 184] : [231, 196, 138];
+      for (let c = 0; c < 3; c++) pixels.data[at + c] = colour[c]!;
+      pixels.data[at + 3] = Math.round(20 + amount * 235);
+    }
+  return pixels;
+}
+
+/** A canvas the map is painted on, once its pixels are in; the card and its enlargement each have one. */
+function LensingCanvas({
+  pixels,
+  label,
+  className,
+}: {
+  pixels: ImageData | null;
+  label: string;
+  className: string;
+}) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (pixels) canvas.current?.getContext("2d")?.putImageData(pixels, 0, 0);
+  }, [pixels]);
+  return (
+    <canvas
+      ref={canvas}
+      width={lensingSource.width}
+      height={lensingSource.height}
+      role="img"
+      aria-label={label}
+      className={className}
+    />
+  );
+}
+
 /** Native grid in a separate sky projection: never extruded into a fictitious 3D surface. */
 export function LensingView({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("deepField");
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const [pixels, setPixels] = useState<ImageData | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [attempt, retry] = useState(0);
   useEffect(() => {
     let active = true;
     readLensingMap()
       .then((map) => {
-        if (!active || !canvas.current) return;
-        const context = canvas.current.getContext("2d");
-        if (!context) throw new Error("Canvas unavailable");
-        const pixels = context.createImageData(map.width, map.height);
-        for (let y = 0; y < map.height; y++)
-          for (let x = 0; x < map.width; x++) {
-            const value = map.values[y * map.width + x];
-            if (value == null) continue;
-            // FITS rows run bottom-to-top. Preserve signed convergence; exterior stays transparent.
-            const at = ((map.height - 1 - y) * map.width + x) * 4;
-            const kappa = value * map.scale;
-            const amount = Math.sqrt(
-              Math.min(
-                1,
-                Math.abs(kappa) / (kappa < 0 ? Math.abs(lensingSource.min) : lensingSource.max),
-              ),
-            );
-            const colour = kappa < 0 ? [118, 160, 184] : [231, 196, 138];
-            for (let c = 0; c < 3; c++) pixels.data[at + c] = colour[c]!;
-            pixels.data[at + 3] = Math.round(20 + amount * 235);
-          }
-        context.putImageData(pixels, 0, 0);
+        if (!active) return;
+        setPixels(lensingPixels(map));
         setStatus("ready");
       })
       .catch(() => {
@@ -318,16 +349,19 @@ export function LensingView({ compact = false }: { compact?: boolean }) {
   }, [attempt]);
   return (
     <div className="grid gap-4">
-      <Status>{t("dark.reconstructed")}</Status>
       <figure>
-        <canvas
-          ref={canvas}
-          width={lensingSource.width}
-          height={lensingSource.height}
-          role="img"
-          aria-label={t("dark.lensing.alt")}
-          className={`mx-auto w-full rounded-control bg-space ${compact ? "max-h-36 object-contain" : ""}`}
-        />
+        <ZoomFigure
+          title={t("dark.tabs.lensing")}
+          label={<Status>{t("dark.reconstructed")}</Status>}
+        >
+          {(zoomed) => (
+            <LensingCanvas
+              pixels={pixels}
+              label={t("dark.lensing.alt")}
+              className={`mx-auto w-full rounded-control bg-space ${compact && !zoomed ? "max-h-36 object-contain" : ""}`}
+            />
+          )}
+        </ZoomFigure>
         <figcaption className="mt-2 text-ui leading-relaxed text-fg-secondary">
           {t("dark.lensing.legend")}
         </figcaption>
@@ -381,30 +415,33 @@ export function ExpansionView({ compact = false }: { compact?: boolean }) {
   const path = EXPANSION_CURVE.map((p, i) => `${i ? "L" : "M"}${x(p.age)},${y(p.a)}`).join(" ");
   return (
     <div className="grid gap-4">
-      <Status>{t("dark.model")}</Status>
       <figure>
-        <svg
-          viewBox="0 0 280 135"
-          role="img"
-          aria-label={t("dark.expansion.alt")}
-          className={`w-full text-accent ${compact ? "max-h-28" : ""}`}
-        >
-          <path d="M22 12V112H266" fill="none" className="stroke-fg-secondary/40" />
-          <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path
-            d={`M${x(current.age)} 112V${y(a)}`}
-            stroke="currentColor"
-            opacity="0.4"
-            strokeDasharray="3 4"
-          />
-          <circle cx={x(current.age)} cy={y(a)} r="3" fill="currentColor" />
-          <text x="22" y="130" className="fill-fg-secondary text-[10px]">
-            {t("dark.expansion.past")}
-          </text>
-          <text x="258" y="130" textAnchor="end" className="fill-fg-secondary text-[10px]">
-            {t("dark.expansion.today")}
-          </text>
-        </svg>
+        <ZoomFigure title={t("dark.tabs.expansion")} label={<Status>{t("dark.model")}</Status>}>
+          {(zoomed) => (
+            <svg
+              viewBox="0 0 280 135"
+              role="img"
+              aria-label={t("dark.expansion.alt")}
+              className={`w-full text-accent ${compact && !zoomed ? "max-h-28" : ""}`}
+            >
+              <path d="M22 12V112H266" fill="none" className="stroke-fg-secondary/40" />
+              <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d={`M${x(current.age)} 112V${y(a)}`}
+                stroke="currentColor"
+                opacity="0.4"
+                strokeDasharray="3 4"
+              />
+              <circle cx={x(current.age)} cy={y(a)} r="3" fill="currentColor" />
+              <text x="22" y="130" className="fill-fg-secondary text-[10px]">
+                {t("dark.expansion.past")}
+              </text>
+              <text x="258" y="130" textAnchor="end" className="fill-fg-secondary text-[10px]">
+                {t("dark.expansion.today")}
+              </text>
+            </svg>
+          )}
+        </ZoomFigure>
         <figcaption className="text-ui text-fg-secondary">{t("dark.expansion.axes")}</figcaption>
       </figure>
       <ControlRow

@@ -11,8 +11,14 @@ import { driftRunState, timedDrift } from "@/lib/drift";
 import { bridgeStore, lendCamera } from "@/lib/scene-bridge";
 import { MAP_EPOCH, SEEDED_GROUPS, createSunModel } from "@/space/sun/frame";
 import { CORONA } from "@/space/sun/model/corona";
-import { cycleCountAt, cyclePhaseOf, yearOfCycleCount } from "@/space/sun/model/cycle";
-import { CYCLE_PERIOD_YR, RADIUS_M } from "@/space/sun/model/parameters";
+import {
+  CYCLE_PERIOD_S,
+  countAtPhase,
+  cycleCountAt,
+  cyclePhaseOf,
+  yearOfCycleCount,
+} from "@/space/sun/model/cycle";
+import { RADIUS_M } from "@/space/sun/model/parameters";
 import { PASSBANDS } from "@/space/sun/model/passbands";
 import {
   LAYERS,
@@ -25,7 +31,6 @@ import { lcg } from "@horizon/toolkit/math";
 import { recordFrom } from "@horizon/toolkit/records";
 import { DisposalScope, RENDER_QUALITIES, type SimulationEngine } from "@horizon/toolkit/rendering";
 import type { SceneMount } from "@horizon/toolkit/scene";
-import { convert } from "@horizon/toolkit/science";
 
 import { DRIFT, type SunDriftShot } from "../drift";
 import { SECONDS_PER_SECOND } from "../model/clock";
@@ -38,7 +43,6 @@ import type { SunSceneSettings } from "./settings";
 import type { SunEngineHooks } from "./types";
 import { OPENING_ANGLES, driftPose } from "./views";
 
-const CYCLE_PERIOD_S = convert(CYCLE_PERIOD_YR, "yr", "s");
 /** The field lines the model traces at each quality, the same on every device. */
 const FIELD_LINES = recordFrom(
   RENDER_QUALITIES,
@@ -256,7 +260,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     before: (s) => {
       /* The visitor set the phase: shift the count to it, within the same cycle. */
       if (s.cyclePhase !== publishedPhase) {
-        cycleShift += s.cyclePhase - cyclePhaseOf(cycleCount());
+        cycleShift += countAtPhase(cycleCount(), s.cyclePhase) - cycleCount();
         publishedPhase = s.cyclePhase;
       }
       if (s.drift === "off" && drift !== "off") {

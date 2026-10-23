@@ -3,11 +3,13 @@ import test from "node:test";
 
 import {
   createForecast,
+  emergenceDensity,
   flareCurve,
   flareFlux,
   goesClassOf,
   goesFlux,
   haleLeadingNorth,
+  oldCycleShare,
   regionLife,
   regionStrength,
   sporerLatitude,
@@ -15,6 +17,7 @@ import {
 } from "../src/space/sun/model/activity.ts";
 import {
   activityAt,
+  countAtPhase,
   cycleCountAt,
   cyclePhaseAt,
   cyclePhaseOf,
@@ -125,6 +128,35 @@ test("Hale's law: leading polarities flip across the equator and from one cycle 
       }
     }
   }
+});
+
+test("setting a cycle's end stays in that cycle, however often it is set", () => {
+  const end = countAtPhase(25.4, 1);
+  assert.ok(end < 26 && cyclePhaseOf(end) > 0.999, `${end}`);
+  assert.equal(countAtPhase(end, 1), end, "the end set again moves nothing");
+  assert.equal(countAtPhase(end, 0.25), 25.25);
+});
+
+test("near minimum the old cycle's last spots stand low with its polarity as the new cycle's emerge high", () => {
+  const deg = Math.PI / 180;
+  /* The butterfly's two wings at minimum, one band at maximum. */
+  assert.ok(oldCycleShare(0.02) > 0.5 && oldCycleShare(0.5) < 1e-3);
+  assert.ok(emergenceDensity(0.02, 8 * deg) > 3 * emergenceDensity(0.02, 20 * deg), "old wing low");
+  assert.ok(emergenceDensity(0.1, 28 * deg) > 10 * emergenceDensity(0.1, 8 * deg), "new wing high");
+  assert.equal(emergenceDensity(0.02, 1 * deg), 0, "none on the equator");
+  /* The regions the globe draws follow it: the old cycle's, low and with its leading polarity. */
+  const old = [];
+  const fresh = [];
+  for (let k = 0; k < 80; k++)
+    for (const region of live(weatherAt(SEED + k, (k * 37 + 5) * DAY_S, 25.03))) {
+      const hemisphere = region.lat > 0 ? 1 : -1;
+      (region.polarity === haleLeadingNorth(24) * hemisphere ? old : fresh).push(
+        Math.abs(region.lat),
+      );
+    }
+  const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
+  assert.ok(old.length > 5 && fresh.length > 5, `${old.length} old, ${fresh.length} new`);
+  assert.ok(mean(fresh) - mean(old) > 10 * deg, `${mean(old)} rad old, ${mean(fresh)} rad new`);
 });
 
 test("a region grows fast, decays slowly and lives longer the larger it is", () => {

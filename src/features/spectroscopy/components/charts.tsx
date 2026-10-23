@@ -1,7 +1,9 @@
 "use client";
 
 import { useFormatter } from "next-intl";
+import type { ReactNode } from "react";
 
+import { ZoomFigure } from "@/components/simulations/zoom-figure";
 import { cssColor, wavelengthColor } from "@horizon/toolkit/science";
 
 import { ionizationEnergy, type Line } from "../lib/model/atoms";
@@ -37,93 +39,98 @@ export function LevelDiagram({
     `${f.number(v, { maximumFractionDigits: 2, minimumFractionDigits: 2 })} eV`;
   const showGround = line.lower > limit * 0.06;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
-      <title>{labels.title}</title>
-      <line
-        x1={70}
-        x2={W - 4}
-        y1={y(limit)}
-        y2={y(limit)}
-        className="stroke-fg-secondary/60"
-        strokeDasharray="3 3"
-      />
-      <text
-        x={W - 4}
-        y={y(limit) - 4}
-        textAnchor="end"
-        className="fill-fg-tertiary font-mono text-[9px]"
-      >
-        {labels.limit} · {ev(limit)}
-      </text>
-      {showGround ? (
-        <>
-          <line x1={70} x2={190} y1={y(0)} y2={y(0)} className="stroke-fg-secondary/60" />
-          <text x={194} y={y(0) + 3} className="fill-fg-tertiary font-mono text-[9px]">
-            {labels.ground}
-          </text>
-        </>
-      ) : null}
-      <line
-        x1={70}
-        x2={190}
-        y1={lower}
-        y2={lower}
-        className="stroke-fg-primary"
-        strokeWidth={1.4}
-      />
-      <line
-        x1={70}
-        x2={190}
-        y1={upper}
-        y2={upper}
-        className="stroke-fg-primary"
-        strokeWidth={1.4}
-      />
-      <text
-        x={64}
-        y={lower + 3}
-        textAnchor="end"
-        className="fill-fg-secondary font-mono text-[9px] tabular-nums"
-      >
-        {ev(line.lower)}
-      </text>
-      <text
-        x={64}
-        y={upper + 3}
-        textAnchor="end"
-        className="fill-fg-secondary font-mono text-[9px] tabular-nums"
-      >
-        {ev(line.upper)}
-      </text>
-      <text x={194} y={lower + 3} className="fill-fg-primary font-mono text-[9px]">
-        {levelName(line, line.lowerLevel)}
-      </text>
-      <text x={194} y={upper + 3} className="fill-fg-primary font-mono text-[9px]">
-        {levelName(line, line.upperLevel)}
-      </text>
-      <line
-        x1={x}
-        x2={x}
-        y1={emitting ? upper + 2 : lower - 2}
-        y2={emitting ? lower - 6 : upper + 6}
-        stroke={colour}
-        strokeWidth={2}
-      />
-      <path
-        d={
-          emitting
-            ? `M${x - 4} ${lower - 7} L${x} ${lower - 1} L${x + 4} ${lower - 7} Z`
-            : `M${x - 4} ${upper + 7} L${x} ${upper + 1} L${x + 4} ${upper + 7} Z`
-        }
-        fill={colour}
-      />
-      <path
-        d={wave(emitting ? x + 8 : 80, (lower + upper) / 2, emitting ? 44 : 44)}
-        fill="none"
-        stroke={colour}
-        strokeWidth={1.4}
-      />
-    </svg>
+    <ZoomFigure
+      title={labels.title}
+      label={<p className="text-ui text-fg-secondary">{labels.title}</p>}
+    >
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
+        <title>{labels.title}</title>
+        <line
+          x1={70}
+          x2={W - 4}
+          y1={y(limit)}
+          y2={y(limit)}
+          className="stroke-fg-secondary/60"
+          strokeDasharray="3 3"
+        />
+        <text
+          x={W - 4}
+          y={y(limit) - 4}
+          textAnchor="end"
+          className="fill-fg-tertiary font-mono text-[9px]"
+        >
+          {labels.limit} · {ev(limit)}
+        </text>
+        {showGround ? (
+          <>
+            <line x1={70} x2={190} y1={y(0)} y2={y(0)} className="stroke-fg-secondary/60" />
+            <text x={194} y={y(0) + 3} className="fill-fg-tertiary font-mono text-[9px]">
+              {labels.ground}
+            </text>
+          </>
+        ) : null}
+        <line
+          x1={70}
+          x2={190}
+          y1={lower}
+          y2={lower}
+          className="stroke-fg-primary"
+          strokeWidth={1.4}
+        />
+        <line
+          x1={70}
+          x2={190}
+          y1={upper}
+          y2={upper}
+          className="stroke-fg-primary"
+          strokeWidth={1.4}
+        />
+        <text
+          x={64}
+          y={lower + 3}
+          textAnchor="end"
+          className="fill-fg-secondary font-mono text-[9px] tabular-nums"
+        >
+          {ev(line.lower)}
+        </text>
+        <text
+          x={64}
+          y={upper + 3}
+          textAnchor="end"
+          className="fill-fg-secondary font-mono text-[9px] tabular-nums"
+        >
+          {ev(line.upper)}
+        </text>
+        <text x={194} y={lower + 3} className="fill-fg-primary font-mono text-[9px]">
+          {levelName(line, line.lowerLevel)}
+        </text>
+        <text x={194} y={upper + 3} className="fill-fg-primary font-mono text-[9px]">
+          {levelName(line, line.upperLevel)}
+        </text>
+        <line
+          x1={x}
+          x2={x}
+          y1={emitting ? upper + 2 : lower - 2}
+          y2={emitting ? lower - 6 : upper + 6}
+          stroke={colour}
+          strokeWidth={2}
+        />
+        <path
+          d={
+            emitting
+              ? `M${x - 4} ${lower - 7} L${x} ${lower - 1} L${x + 4} ${lower - 7} Z`
+              : `M${x - 4} ${upper + 7} L${x} ${upper + 1} L${x + 4} ${upper + 7} Z`
+          }
+          fill={colour}
+        />
+        <path
+          d={wave(emitting ? x + 8 : 80, (lower + upper) / 2, emitting ? 44 : 44)}
+          fill="none"
+          stroke={colour}
+          strokeWidth={1.4}
+        />
+      </svg>
+    </ZoomFigure>
   );
 }
 
@@ -144,9 +151,12 @@ function wave(x0: number, y0: number, length: number) {
 export function GrowthChart({
   points,
   labels,
+  heading,
 }: {
   points: readonly [number, number][];
   labels: { title: string; x: string; y: string; weak: string; saturated: string; damped: string };
+  /** What heads the chart beside its enlarge button. */
+  heading?: ReactNode;
 }) {
   if (points.length < 3) return null;
   const H = 104;
@@ -161,32 +171,39 @@ export function GrowthChart({
     .map((p, i) => `${i ? "L" : "M"}${px(p[0]).toFixed(1)} ${py(p[1]).toFixed(1)}`)
     .join(" ");
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
-      <title>{labels.title}</title>
-      <line x1={24} x2={W - 8} y1={H - 18} y2={H - 18} className="stroke-border-strong" />
-      <line x1={24} x2={24} y1={8} y2={H - 18} className="stroke-border-strong" />
-      <text x={W - 8} y={H - 5} textAnchor="end" className="fill-fg-tertiary font-mono text-[9px]">
-        {labels.x}
-      </text>
-      <text x={4} y={12} className="fill-fg-tertiary font-mono text-[9px]">
-        {labels.y}
-      </text>
-      <text x={px(x0 + (x1 - x0) * 0.12)} y={H - 24} className="fill-fg-tertiary text-[9px]">
-        {labels.weak}
-      </text>
-      <text
-        x={px(x0 + (x1 - x0) * 0.5)}
-        y={py(y0 + (y1 - y0) * 0.55) + 14}
-        className="fill-fg-tertiary text-[9px]"
-      >
-        {labels.saturated}
-      </text>
-      <text x={W - 10} y={22} textAnchor="end" className="fill-fg-tertiary text-[9px]">
-        {labels.damped}
-      </text>
-      <path d={path} fill="none" className="stroke-fg-primary" strokeWidth={1.3} />
-      <circle cx={px(here[0])} cy={py(here[1])} r={3.5} className="fill-solar" />
-    </svg>
+    <ZoomFigure title={labels.title} label={heading}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
+        <title>{labels.title}</title>
+        <line x1={24} x2={W - 8} y1={H - 18} y2={H - 18} className="stroke-border-strong" />
+        <line x1={24} x2={24} y1={8} y2={H - 18} className="stroke-border-strong" />
+        <text
+          x={W - 8}
+          y={H - 5}
+          textAnchor="end"
+          className="fill-fg-tertiary font-mono text-[9px]"
+        >
+          {labels.x}
+        </text>
+        <text x={4} y={12} className="fill-fg-tertiary font-mono text-[9px]">
+          {labels.y}
+        </text>
+        <text x={px(x0 + (x1 - x0) * 0.12)} y={H - 24} className="fill-fg-tertiary text-[9px]">
+          {labels.weak}
+        </text>
+        <text
+          x={px(x0 + (x1 - x0) * 0.5)}
+          y={py(y0 + (y1 - y0) * 0.55) + 14}
+          className="fill-fg-tertiary text-[9px]"
+        >
+          {labels.saturated}
+        </text>
+        <text x={W - 10} y={22} textAnchor="end" className="fill-fg-tertiary text-[9px]">
+          {labels.damped}
+        </text>
+        <path d={path} fill="none" className="stroke-fg-primary" strokeWidth={1.3} />
+        <circle cx={px(here[0])} cy={py(here[1])} r={3.5} className="fill-solar" />
+      </svg>
+    </ZoomFigure>
   );
 }
 
@@ -199,10 +216,13 @@ export function SequenceChart({
   points,
   marker,
   labels,
+  heading,
 }: {
   points: readonly [number, number][];
   marker: number | null;
   labels: { title: string; y: string };
+  /** What heads the chart beside its enlarge button. */
+  heading?: ReactNode;
 }) {
   if (points.length < 3) return null;
   const H = 96;
@@ -217,45 +237,47 @@ export function SequenceChart({
   const fill = `${path} L${px(points.at(-1)![0]).toFixed(1)} ${H - 22} L${px(points[0]![0]).toFixed(1)} ${H - 22} Z`;
   const at = marker === null ? null : interpolate(points, marker);
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
-      <title>{labels.title}</title>
-      <text x={8} y={10} className="fill-fg-tertiary font-mono text-[9px]">
-        {labels.y}
-      </text>
-      <path d={fill} className="fill-fg-primary/8" />
-      <path d={path} fill="none" className="stroke-fg-primary" strokeWidth={1.3} />
-      <line x1={8} x2={W - 8} y1={H - 22} y2={H - 22} className="stroke-border-strong" />
-      {SPECTRAL_CLASSES.map(([name, bound], i) => {
-        const upper = i === 0 ? Math.exp(hi) : SPECTRAL_CLASSES[i - 1]![1];
-        const lower = Math.max(bound, Math.exp(lo));
-        if (upper <= Math.exp(lo) || lower >= Math.exp(hi)) return null;
-        const mid = Math.sqrt(Math.min(upper, Math.exp(hi)) * lower);
-        return (
-          <g key={name}>
-            {i > 0 && bound > Math.exp(lo) && SPECTRAL_CLASSES[i - 1]![1] < Math.exp(hi) ? (
-              <line
-                x1={px(SPECTRAL_CLASSES[i - 1]![1])}
-                x2={px(SPECTRAL_CLASSES[i - 1]![1])}
-                y1={H - 22}
-                y2={H - 17}
-                className="stroke-border-strong"
-              />
-            ) : null}
-            <text
-              x={px(mid)}
-              y={H - 6}
-              textAnchor="middle"
-              className="fill-fg-tertiary font-mono text-[10px]"
-            >
-              {name}
-            </text>
-          </g>
-        );
-      })}
-      {at !== null && marker !== null ? (
-        <circle cx={px(marker)} cy={py(at)} r={3.5} className="fill-solar" />
-      ) : null}
-    </svg>
+    <ZoomFigure title={labels.title} label={heading}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={labels.title} className="w-full">
+        <title>{labels.title}</title>
+        <text x={8} y={10} className="fill-fg-tertiary font-mono text-[9px]">
+          {labels.y}
+        </text>
+        <path d={fill} className="fill-fg-primary/8" />
+        <path d={path} fill="none" className="stroke-fg-primary" strokeWidth={1.3} />
+        <line x1={8} x2={W - 8} y1={H - 22} y2={H - 22} className="stroke-border-strong" />
+        {SPECTRAL_CLASSES.map(([name, bound], i) => {
+          const upper = i === 0 ? Math.exp(hi) : SPECTRAL_CLASSES[i - 1]![1];
+          const lower = Math.max(bound, Math.exp(lo));
+          if (upper <= Math.exp(lo) || lower >= Math.exp(hi)) return null;
+          const mid = Math.sqrt(Math.min(upper, Math.exp(hi)) * lower);
+          return (
+            <g key={name}>
+              {i > 0 && bound > Math.exp(lo) && SPECTRAL_CLASSES[i - 1]![1] < Math.exp(hi) ? (
+                <line
+                  x1={px(SPECTRAL_CLASSES[i - 1]![1])}
+                  x2={px(SPECTRAL_CLASSES[i - 1]![1])}
+                  y1={H - 22}
+                  y2={H - 17}
+                  className="stroke-border-strong"
+                />
+              ) : null}
+              <text
+                x={px(mid)}
+                y={H - 6}
+                textAnchor="middle"
+                className="fill-fg-tertiary font-mono text-[10px]"
+              >
+                {name}
+              </text>
+            </g>
+          );
+        })}
+        {at !== null && marker !== null ? (
+          <circle cx={px(marker)} cy={py(at)} r={3.5} className="fill-solar" />
+        ) : null}
+      </svg>
+    </ZoomFigure>
   );
 }
 

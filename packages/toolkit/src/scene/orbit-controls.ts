@@ -9,6 +9,8 @@ import { ORBIT_INCLINATION, type OrbitRig } from "./orbit-rig";
 
 /** How long after the last input the scene still counts as handled. */
 const RELEASE_MS = 700;
+/** A drag's turn per CSS pixel, radians, before a scene's `dragScale`. */
+export const ORBIT_DRAG_SENSITIVITY = { azimuth: 0.0055, inclination: 0.0045 } as const;
 
 export function createOrbitControls(
   scope: DisposalScope,
@@ -24,6 +26,8 @@ export function createOrbitControls(
     distance: { min: number; max: number };
     /** Scales a drag's turn for the pose it starts from (see `createOrbitInput`). */
     dragScale?: (pose: OrbitPose) => number;
+    /** The distance wheel and pinch scale toward (see `createOrbitInput`). */
+    zoomFloor?: (pose: OrbitPose) => number;
     /** Runs first, with what made the input; true when it took the input itself (another owner of the camera). */
     intercept?: (next: OrbitPose, source: OrbitInputSource) => boolean;
     /** After the pose follows an input. */
@@ -61,8 +65,9 @@ export function createOrbitControls(
       },
       distance: bounds,
       inclination: ORBIT_INCLINATION,
-      dragSensitivity: { azimuth: 0.0055, inclination: 0.0045 },
+      dragSensitivity: ORBIT_DRAG_SENSITIVITY,
       ...(options.dragScale ? { dragScale: options.dragScale } : {}),
+      ...(options.zoomFloor ? { zoomFloor: options.zoomFloor } : {}),
       wheelSensitivity: () => 0.0012,
     }),
   );

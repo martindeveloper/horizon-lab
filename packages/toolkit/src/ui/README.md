@@ -21,6 +21,17 @@ catalogue and `examples/visualization-example.tsx` for composition.
 - `Dialog`: `ref` exposes `open()` / `close()`. Native `<dialog>` handles modality,
   focus containment, Escape and focus restoration. Supply title and close label.
   Backdrop clicks dismiss; key events do not reach background simulation shortcuts.
+  `size="wide"` widens it for figures. It grows out of the control that opened it
+  (`open(from)`, else the focused control) and shrinks back on closing (`ui-dialog`; a fade
+  alone under reduced motion). `resize` (two labels) lets its edges and corners drag it larger
+  or smaller about its centre and adds header buttons that fill the screen less a 16–40 px
+  margin or ease it back to its own size (`dialog-size.ts`); `data-sized` marks a visitor's size.
+- `FigureZoom`: a figure headed by its `label` and an enlarge button, opening it in a wide
+  Dialog where it zooms up to 8× (wheel, pinch, double tap, + / − / 0, the buttons) and pans by
+  drag or the arrows, always covering its frame (`zoom-pan.ts`). The dialog draws `children`
+  again from its first opening; pass a function of `zoomed` to draw the two differently.
+  Its dialog is resizable, and the figure takes all the room it is given.
+  `labels` names the open, close, zoom in, zoom out, whole-figure, fill and own-size controls.
 - `TechnicalDetails`: composes Dialog with a plain `TechnicalDocument`. The app
   owns JSON loading, schema validation and translations. Optional `references`
   (`{title, url}[]`) render cited reading links, headed by `labels.references`.

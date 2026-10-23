@@ -7,8 +7,9 @@ precision highp sampler3D;
 uniform sampler3D densityMap;
 uniform vec3 localCamera;
 uniform int activitySteps;
-// A band's own colour for the emission (rgb, at its brightness) and how much it replaces Hα's
-// red; zero, as an unset uniform is, keeps the red.
+// A narrow light's colour for the threads (rgb, at their glow in it: black where it sees none,
+// leaving the sheet's absorption) and how much it replaces the broadband colours an eclipse
+// sees; zero, as an unset uniform is, keeps them.
 uniform vec4 emissionHue;
 varying vec3 vLocal;
 varying vec3 vBox;
@@ -41,9 +42,8 @@ void main() {
   if (discriminant >= 0.0) end = min(end, -b - sqrt(discriminant));
   if (end <= begin) discard;
 
-  // Against the disc a prominence is a dark Hα filament; past the grazing limb it emits.
-  float muDisc = sqrt(max(0.0, 1.0 - impact * impact));
-  float discMask = onDisc * smoothstep(0.1, 0.3, muDisc);
+  // Against the disc a prominence is a dark filament, to the limb; past it, it emits.
+  float discMask = onDisc;
 
   float span = end - begin;
   int steps = clamp(int(float(activitySteps) * clamp(span * 6.0, 0.4, 1.0)), 16, activitySteps);
@@ -91,7 +91,7 @@ void main() {
           float knot = smoothstep(0.3, 0.85, density);
           vec3 emission = mix(SUN_ACTIVITY_THREAD_RGB, SUN_ACTIVITY_KNOT_RGB, knot) * shine;
           vec3 luma = vec3(0.2126, 0.7152, 0.0722);
-          emission = mix(emission, emissionHue.rgb * dot(emission, luma) / max(dot(emissionHue.rgb, luma), 1e-3), emissionHue.a);
+          emission = mix(emission, emissionHue.rgb * dot(emission, luma) / dot(SUN_ACTIVITY_THREAD_RGB, luma), emissionHue.a);
           // Against the disc the thin sheet reads as a soft dark ribbon, its barbs fainter.
           float ribbon = smoothstep(0.06, 0.45, density);
           emission = mix(emission, SUN_ACTIVITY_FILAMENT_RGB, discMask);

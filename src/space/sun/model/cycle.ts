@@ -7,6 +7,8 @@
  * its fraction the phase, 0 at minimum. Odd and even cycles differ in polarity (Hale), so the
  * count, not the phase alone, says which way the field points.
  */
+import { convert } from "@horizon/toolkit/science";
+
 import {
   CYCLE_25_MINIMUM_YEAR,
   CYCLE_25_NUMBER,
@@ -64,7 +66,11 @@ export function decimalYear(date: Date | number) {
 
 /** The cycle count at a date: cycle number plus phase, counted from cycle 25's minimum at the mean period. */
 export function cycleCountAt(date: Date | number) {
-  return CYCLE_25_NUMBER + (decimalYear(date) - CYCLE_25_MINIMUM_YEAR) / CYCLE_PERIOD_YR;
+  return cycleCountOfYear(decimalYear(date));
+}
+/** The cycle count at a decimal year. */
+export function cycleCountOfYear(year: number) {
+  return CYCLE_25_NUMBER + (year - CYCLE_25_MINIMUM_YEAR) / CYCLE_PERIOD_YR;
 }
 /** The decimal year at a cycle count: the inverse of `cycleCountAt`. */
 export function yearOfCycleCount(count: number) {
@@ -88,6 +94,16 @@ export function reversalOf(count: number) {
       : 0.5 + (0.5 * (phase - CYCLE_PEAK_PHASE)) / (1 - CYCLE_PEAK_PHASE))
   );
 }
+
+/** The cycle's length in seconds. */
+export const CYCLE_PERIOD_S = convert(CYCLE_PERIOD_YR, "yr", "s");
+
+/**
+ * The count at a phase of the cycle a count is in: a phase of 1 is that cycle's last second,
+ * not the next cycle's start, so setting the end of a cycle stays in it.
+ */
+export const countAtPhase = (count: number, phase: number) =>
+  Math.floor(count) + Math.min(phase, 1 - 1 / CYCLE_PERIOD_S);
 
 /** The phase alone, 0–1, 0 at minimum. */
 export const cyclePhaseOf = (count: number) => count - Math.floor(count);
