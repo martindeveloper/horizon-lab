@@ -22,12 +22,19 @@ import {
   E_CORONA_LINE_NM,
   F_CORONA_POWER,
   GRANULE_SIZE_KM,
+  POLAR_FIELD_T,
   RADIUS_M,
+  SPOT_FIELD_T,
   SURFACE_GRAVITY,
   TACHOCLINE_R,
   TACHOCLINE_THICKNESS_R,
   TEMPERATURES,
 } from "@/space/sun/model/parameters";
+import {
+  MAGNETOGRAM_GREY,
+  MAGNETOGRAM_NETWORK_T,
+  MAGNETOGRAM_SATURATION_T,
+} from "@/space/sun/model/passbands";
 import {
   INTERIOR_RATE_DEG_PER_DAY,
   SURFACE_ROTATION_DEG_PER_DAY,
@@ -326,11 +333,6 @@ export const FILAMENT_DEPTH = 0.75;
 export const FIBRIL_SCALE = 9;
 export const FIBRIL_SHARE = 0.4;
 export const BAND_QUIET = 0.12;
-/** The magnetogram's salt and pepper: the network's small bipoles, as a share of the saturation. */
-export const MAGNETOGRAM_PEPPER = 0.6;
-/** The magnetogram: the field at which its grey saturates (in the frame's strength units), and the dipole's share. */
-export const MAGNETOGRAM_SATURATION = 0.35;
-export const MAGNETOGRAM_DIPOLE = 1.2;
 /** A bipole's poles on the magnetogram: their spread in units of the region's size. */
 export const MAGNETOGRAM_POLE = 1;
 /** Regions the shader reads at most, and how far a region's marks reach from its centre in its radii (the shader's and a tap's). */
@@ -391,9 +393,13 @@ export const PLUME_WIDTH = 0.12;
 /** The corona's fine rays: their share of its light, and their count round the limb. */
 export const RAY_SHARE = 0.25;
 export const RAY_COUNT = 40;
-/** The F-corona's fall-off (dust, flat: the model's power law) and the E-corona's reach above the limb, radii. */
+/** The F-corona's fall-off (dust, flat: the model's power law). */
 export const F_CORONA_FALLOFF = F_CORONA_POWER;
-export const E_CORONA_REACH = 0.3;
+/**
+ * Fe XIV's green line against the K-corona's gain at the limb: drawn so it can be seen (in
+ * broadband, as the eye takes an eclipse, it is far fainter), a teaching choice the legend states.
+ */
+export const E_CORONA_GLOW = 0.14;
 /** Fe XIV's green line, nm: the E-corona's colour (the model's line). */
 export const E_CORONA_NM = E_CORONA_LINE_NM;
 /** The transition region's and coronal loops' glow over a region: its reach, radii, and strength. */
@@ -472,10 +478,6 @@ export const MAGNETOGRAM_LINE = 0.3;
 export const RIBBON_MAX_POINTS = 96;
 /** Display seconds the eruption's scrub takes from 0 to 1 while it plays by itself. */
 export const ERUPTION_PLAY_S = 40;
-/** The negative polarity's colour (encoded sRGB), a cool blue; the positive is the theme's gold. */
-export const NEGATIVE_HEX = "#6f8fff";
-/** The magnetogram's grey. */
-export const MAGNETOGRAM_GREY = 0.42;
 
 /**
  * Bloom on the Sun: only the brightest light glows (a flare, the limb's rim, the ejection's
@@ -597,9 +599,10 @@ export const SHADER_DEFINES = glslDefines({
   FIBRIL_SHARE,
   BAND_QUIET,
   RAMP_SAMPLES: glslInt(RAMP_SAMPLES),
-  MAGNETOGRAM_PEPPER,
-  MAGNETOGRAM_SATURATION,
-  MAGNETOGRAM_DIPOLE,
+  MAGNETOGRAM_SATURATION_T,
+  MAGNETOGRAM_NETWORK_T,
+  SPOT_FIELD_T,
+  POLAR_FIELD_T,
   MAGNETOGRAM_POLE,
   MAGNETOGRAM_GREY,
   MAGNETOGRAM_LINE,
@@ -632,7 +635,7 @@ export const SHADER_DEFINES = glslDefines({
   RAY_SHARE,
   RAY_COUNT,
   F_CORONA_FALLOFF,
-  E_CORONA_REACH,
+  E_CORONA_GLOW,
   LOOP_GLOW_REACH,
   LOOP_GLOW,
   FLASH_REACH,

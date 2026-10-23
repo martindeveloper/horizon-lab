@@ -132,9 +132,9 @@ export function createAtmosphereLayer(
         shapedBy = frame.fieldRevision;
         shape(frame.fieldLines);
       }
-      const { k, f, e } = settings.corona;
+      const { k, f, eScaleHeight } = settings.corona;
       uniforms.uCorona.value.set(k[0], k[1], k[2]);
-      uniforms.uCoronaFE.value.set(f, e);
+      uniforms.uCoronaFE.value.set(f, eScaleHeight);
       const eruption = frame.eruption;
       const region = eruption ? frame.regions.find((r) => r.id === eruption.regionId) : undefined;
       if (eruption && region) {

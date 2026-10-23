@@ -33,8 +33,9 @@ import type { PlaceId } from "../model/places";
 import { sunQuality } from "../quality";
 import { useSun, type SunStore } from "../store";
 import { createSunEngine } from "./engine";
+import { placeOfPick } from "./picking";
 import type { SunSceneSettings } from "./settings";
-import type { SunEngineHooks, SunPick } from "./types";
+import type { SunEngineHooks } from "./types";
 import { OPENING_ANGLES, driftPose } from "./views";
 
 const CYCLE_PERIOD_S = convert(CYCLE_PERIOD_YR, "yr", "s");
@@ -44,24 +45,8 @@ const FIELD_LINES = recordFrom(
   (quality) => sunQuality(quality, false).fieldLines,
 );
 
-/** The places whose cards ask the model to run the eruption at the dock's moment. */
+/** The places whose cards, picked from the finder, ask the model to run the eruption at the dock's moment; a tap on one leaves the weather's own. */
 const ERUPTION_PLACES: ReadonlySet<PlaceId> = new Set(["flare", "loops", "ejection"]);
-
-/** The place a tap on the scene opens. */
-function placeOf(pick: SunPick): PlaceId {
-  switch (pick.kind) {
-    case "place":
-      return pick.id;
-    case "layer":
-      return pick.layer;
-    case "region":
-      return "sunspot";
-    case "prominence":
-      return "prominence";
-    default:
-      return "flare";
-  }
-}
 
 /** The store's settings as the engine reads them each frame: built again only when the store changed. */
 function createSettingsOf() {
@@ -127,13 +112,17 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
   /** The phase the scene last wrote to the store; any other value there is the visitor's ask. */
   let publishedPhase = store.getState().cyclePhase;
   const point = { T: 0, rho: 0, P: 0, L: 0, X: 0, kappa: 0 };
+  /** The place last opened by a tap: it shows what is there, where the finder's pick stages its eruption. */
+  let tapped: PlaceId | null = null;
 
   /** The frame at the model's moment, as the store wants it seen. */
   const frame = () => {
     const s = store.getState();
+    /* A selection made since the tap is the finder's (or none). */
+    if (s.selection !== tapped) tapped = null;
     const scrubbed =
       s.view === "eruption" ||
-      (s.selection !== null && ERUPTION_PLACES.has(s.selection)) ||
+      (s.selection !== null && tapped === null && ERUPTION_PLACES.has(s.selection)) ||
       driftShot?.eruption !== undefined;
     return model.frameAt({
       time,
@@ -226,7 +215,10 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
       });
     },
     landed: () => store.getState().landGuide(),
-    onPick: (pick) => store.getState().select(pick ? placeOf(pick) : null),
+    onPick: (pick) => {
+      tapped = pick ? placeOfPick(pick) : null;
+      store.getState().select(tapped);
+    },
     onReadout: ({ heading, tilt, antialias }) => {
       const s = store.getState();
       store.setState({

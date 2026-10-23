@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { SOLAR_TEFF_K } from "@horizon/toolkit/science";
+import { SOLAR_GOLD, cssHex } from "@horizon/toolkit/scene";
+import { SOLAR_TEFF_K, hexToLinear } from "@horizon/toolkit/science";
 
 import {
   BAUMBACH_POWERS,
@@ -17,6 +18,7 @@ import {
   AIA_NM,
   AIA_PEAKS_K,
   HALPHA_NM,
+  MAGNETOGRAM_POSITIVE,
   MAGNETOGRAM_SATURATION_T,
   PASSBANDS,
   PASSBAND_IDS,
@@ -233,6 +235,9 @@ test("colours come off the AIA tables and the magnetogram runs grey to gold and 
   );
   assert.ok(mid("fe335")[2] > mid("fe335")[0], "335 is blue");
   assert.ok(mid("fe193")[0] > mid("fe193")[2], "193 is bronze");
+  /* The lab's gold for field out of the Sun, as the theme has it. */
+  const gold = hexToLinear(cssHex(SOLAR_GOLD));
+  MAGNETOGRAM_POSITIVE.forEach((c, i) => assert.ok(Math.abs(c - gold[i]) < 1e-9, "the lab's gold"));
   const positive = magnetogramColor(MAGNETOGRAM_SATURATION_T);
   const negative = magnetogramColor(-MAGNETOGRAM_SATURATION_T);
   const none = magnetogramColor(0);
@@ -242,7 +247,10 @@ test("colours come off the AIA tables and the magnetogram runs grey to gold and 
     Math.abs(none[0] - none[1]) < 1e-9 && Math.abs(none[1] - none[2]) < 1e-9,
     "grey at zero",
   );
-  assert.deepEqual(magnetogramColor(10), positive, "saturates");
+  /* It saturates softly: past a few times its scale, the pole's full colour. */
+  const full = magnetogramColor(10);
+  full.forEach((c, i) => assert.ok(Math.abs(c - MAGNETOGRAM_POSITIVE[i]) < 1e-9, "saturates"));
+  assert.ok(positive[0] < full[0], "not yet full at its scale");
 });
 
 test("the corona's light falls off as Baumbach's fit and the wind is slow over the belt, fast from the holes", () => {
@@ -250,7 +258,10 @@ test("the corona's light falls off as Baumbach's fit and the wind is slow over t
   assert.deepEqual(CORONA.k, [0.0532, 1.425, 2.565]);
   assert.deepEqual(BAUMBACH_POWERS, [2.5, 7, 17]);
   assert.ok(Math.abs(CORONA.f * 2.5 ** -2.3 - fCorona(2.5)) < 1e-12);
-  assert.ok(CORONA.e > 0.1 && CORONA.e < 0.2, `scale height ${CORONA.e} R`);
+  assert.ok(
+    CORONA.eScaleHeight > 0.1 && CORONA.eScaleHeight < 0.2,
+    `scale height ${CORONA.eScaleHeight} R`,
+  );
   for (const r of [1.2, 1.5, 2, 3, 5]) assert.ok(kCorona(r) < kCorona(r - 0.1), `K falls at ${r}`);
   assert.ok(Math.abs(fCorona(2.5) - kCorona(2.5)) < 1e-9, "F equals K at the crossover");
   assert.ok(fCorona(5) > kCorona(5), "and takes over beyond it");

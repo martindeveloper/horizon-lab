@@ -1,8 +1,10 @@
 /**
  * The places' names in the scene: each at its anchor (`anchors.ts`), unless the Sun hides it,
- * and only near its feature at the scale drawn: a disc feature once it spans `NAME_FEATURE_PX`,
- * a limb feature within `NAME_LIMB_PX` of the limb and in view, the shells inside on the cut's
- * faces once it is open; never during a flight. Each is set a little outward from its anchor.
+ * only where the light draws it (`lightDraws`) and the moment does (its quality, its toggles,
+ * its eruption), and only near its feature at the scale drawn: a disc feature once it spans
+ * `NAME_FEATURE_PX`, a limb feature within `NAME_LIMB_PX` of the limb and in view, the corona's
+ * off the disc, the shells inside on the cut's faces once it is open; never during a flight.
+ * Each is set a little outward from its anchor.
  */
 import { Vector3, type PerspectiveCamera, type Vector2 } from "three";
 
@@ -12,9 +14,13 @@ import { TAU, type Vec3 } from "@horizon/toolkit/math";
 import { recordFrom } from "@horizon/toolkit/records";
 import { worldPerPixel, type PlaceLabel } from "@horizon/toolkit/scene";
 
+import spotStencil from "../graphics/spot-stencil.generated.json";
+import { lightDraws } from "../model/drawn";
+import { lightKind, type LightId } from "../model/lights";
 import { PLACE_IDS, type PlaceId } from "../model/places";
 import {
   GRANULES_PER_RADIUS,
+  MAP_DETAIL_TO_PX,
   SPICULE_COLUMNS,
   NAME_DISC_R,
   NAME_FEATURE_PX,
@@ -23,18 +29,20 @@ import {
 } from "../parameters";
 import { createPlaceAnchors } from "./anchors";
 import type { SunFrame } from "./frame";
-import type { LightKind } from "./looks";
-import type { SunLight } from "./settings";
 import { featuredRegion } from "./views";
 
 /** The body's pole: what the surface turns about. */
 const POLE = new Vector3(0, 1, 0);
 /** The cut must be this far open before the places inside the Sun are named. */
 const NAMED_INSIDE_CUT = 0.3;
-/** Spicules are named once their jets stand this far apart, CSS px: where the renderer draws all of them. */
-const SPICULE_NAME_PX = 2 * SURFACE_RESOLVE_PX;
-/** A flare is named while its light is above this share. */
-const FLARE_NAMED_LIGHT = 0.05;
+/** A fine feature (granules, spicule jets) is named once it spans this many CSS px: where the renderer draws all of it. */
+const RESOLVED_PX = 2 * SURFACE_RESOLVE_PX;
+/** A map texel across, radians round the equator: the photograph's finest pixel. */
+const MAP_TEXEL = TAU / spotStencil.width;
+/** A flare is named while its light is above this share; a scene's taps answer to the same. */
+export const FLARE_NAMED_LIGHT = 0.05;
+/** A streamer stands against the sky at least this far from the line of sight (the shader fades it as it turns toward us). */
+const STREAMER_NAMED_EDGE = 0.5;
 
 export const isLayerId = (key: unknown): key is LayerId =>
   typeof key === "string" && (LAYER_IDS as readonly string[]).includes(key);
@@ -47,38 +55,44 @@ type NameScene = {
   px: (size: number) => number;
   /** The featured region's size in CSS px. */
   regionPx: number;
-  /** The anchor stands within `NAME_LIMB_PX` of the limb on screen. */
+  /** The anchor stands within `NAME_LIMB_PX` of the limb on screen; outside the disc there. */
   nearLimb: boolean;
-  light: LightKind;
-  /** What the light shows of each layer, 0–1: a layer it does not show has no names. */
-  weights: SunLight["weights"];
-  /** The quality draws spicules; how much a prominence shows in the light. */
+  offDisc: boolean;
+  /** How far the anchor stands from the line of sight, 0 (along it) to 1 (across it). */
+  edgeOn: number;
+  /** The light in use, the quality's spicules and fine surface, the field lines shown, the photograph drawn. */
+  light: LightId;
   spicules: boolean;
-  prominence: number;
+  fineSurface: boolean;
+  fieldLines: boolean;
+  mapShown: boolean;
+  /** The eruption's flare light and how far its reconnection has gone, 0 with none. */
   flareLight: number;
+  reconnection: number;
 };
 
-/** The light shows the chromosphere's rim (or the transition region's sheath on it), as the atmosphere draws it. */
-const rimShown = (s: NameScene) => s.weights.chromosphere + s.weights.transition > 0;
-
-/** When each place's name shows, once its anchor is in view outside the Sun. */
+/** When each place's name shows, once the light draws it and its anchor is in view outside the Sun. */
 const NAME_SHOWN: Readonly<Record<PlaceId, (s: NameScene) => boolean>> = {
   star: () => false,
   parker: () => true,
-  granule: (s) => s.weights.photosphere > 0 && s.px(1 / GRANULES_PER_RADIUS) > 1,
-  sunspot: (s) => s.weights.photosphere > 0 && s.regionPx > NAME_FEATURE_PX,
-  facula: (s) => s.weights.photosphere + s.weights.chromosphere > 0 && s.regionPx > NAME_FEATURE_PX,
-  photosphere: (s) => s.weights.photosphere > 0 && s.distance < NAME_DISC_R,
-  chromosphere: (s) => s.nearLimb && rimShown(s),
-  spicule: (s) =>
-    s.nearLimb && rimShown(s) && s.spicules && s.px(TAU / SPICULE_COLUMNS) >= SPICULE_NAME_PX,
-  prominence: (s) => s.nearLimb && s.prominence > 0,
-  flare: (s) => s.light === "band" && s.flareLight > FLARE_NAMED_LIGHT,
-  loops: (s) => s.light === "band" && s.regionPx > NAME_FEATURE_PX,
-  corona: (s) => s.nearLimb && s.weights.corona > 0,
-  streamer: (s) => s.nearLimb && s.weights.corona > 0,
-  ejection: (s) => s.weights.chromosphere + s.weights.corona > 0,
-  wind: (s) => s.nearLimb && s.weights.corona > 0,
+  /* Granules at the quality that draws them, resolved; over the photograph, once its own detail gives way to them. */
+  granule: (s) =>
+    s.fineSurface &&
+    s.px(1 / GRANULES_PER_RADIUS) >= RESOLVED_PX &&
+    (!s.mapShown || lightKind(s.light) !== "white" || s.px(MAP_TEXEL) >= MAP_DETAIL_TO_PX),
+  sunspot: (s) => s.regionPx > NAME_FEATURE_PX,
+  facula: (s) => s.regionPx > NAME_FEATURE_PX,
+  photosphere: (s) => s.distance < NAME_DISC_R,
+  chromosphere: (s) => s.nearLimb,
+  spicule: (s) => s.nearLimb && s.spicules && s.px(TAU / SPICULE_COLUMNS) >= RESOLVED_PX,
+  prominence: (s) => s.nearLimb,
+  flare: (s) => s.flareLight > FLARE_NAMED_LIGHT,
+  /* Post-flare loops: an eruption's arcade, once reconnection builds it, with the field drawn. */
+  loops: (s) => s.fieldLines && s.reconnection > 0 && s.regionPx > NAME_FEATURE_PX,
+  corona: (s) => s.nearLimb && s.offDisc,
+  streamer: (s) => s.nearLimb && s.offDisc && s.edgeOn >= STREAMER_NAMED_EDGE,
+  ejection: () => true,
+  wind: (s) => s.nearLimb && s.offDisc,
   core: () => true,
   radiativeZone: () => true,
   tachocline: () => true,
@@ -95,11 +109,12 @@ export type NameView = {
   /** The wedge as the shader sees it (half-angle, bisector) and how far open it is drawn, 0–1. */
   cut: Vector2;
   cutShown: number;
-  light: LightKind;
-  /** The light's layer weights, whether the quality draws spicules, how much a prominence shows. */
-  weights: SunLight["weights"];
+  /** The light in use; the quality's spicules and fine surface; the View panel's field lines; the photograph drawn. */
+  light: LightId;
   spicules: boolean;
-  prominence: number;
+  fineSurface: boolean;
+  fieldLines: boolean;
+  mapShown: boolean;
 };
 
 export function createPlaceNames(place: PlaceLabel) {
@@ -110,17 +125,22 @@ export function createPlaceNames(place: PlaceLabel) {
   const projected = new Vector3();
   const sunCentre = new Vector3();
   const radial = new Vector3();
+  const viewAxis = new Vector3();
   const lastAt = recordFrom(PLACE_IDS, () => new Vector3());
   const scene: NameScene = {
     distance: 0,
     px: () => 0,
     regionPx: 0,
     nearLimb: false,
+    offDisc: false,
+    edgeOn: 1,
     light: "white",
-    weights: { photosphere: 1, chromosphere: 0, transition: 0, corona: 0, flare: 0 },
     spicules: false,
-    prominence: 0,
+    fineSurface: false,
+    fieldLines: false,
+    mapShown: false,
     flareLight: 0,
+    reconnection: 0,
   };
   let worldPx = 0;
   let away = 1;
@@ -148,13 +168,16 @@ export function createPlaceNames(place: PlaceLabel) {
       const featured = featuredRegion(f);
       scene.distance = distance;
       scene.light = view.light;
-      scene.weights = view.weights;
       scene.spicules = view.spicules;
-      scene.prominence = view.prominence;
+      scene.fineSurface = view.fineSurface;
+      scene.fieldLines = view.fieldLines;
+      scene.mapShown = view.mapShown;
       scene.flareLight = f.eruption?.flareLight ?? 0;
+      scene.reconnection = f.eruption?.reconnection ?? 0;
+      viewAxis.copy(camera.position).normalize();
       let layersNamed = 0;
       for (const id of PLACE_IDS) {
-        const found = anchorOf(f, id, anchor);
+        const found = anchorOf(f, id, anchor, lightKind(view.light));
         /* A name with nothing to name fades where it last stood. */
         const last = lastAt[id];
         if (!found) {
@@ -173,7 +196,7 @@ export function createPlaceNames(place: PlaceLabel) {
           at.x = span * Math.cos(face);
           at.z = span * Math.sin(face);
         }
-        let shown = view.shown && (onCut || !behindSun(at, camera));
+        let shown = view.shown && lightDraws(id, view.light) && (onCut || !behindSun(at, camera));
         if (shown && !onCut) {
           projected.copy(at).project(camera);
           const onScreen =
@@ -185,6 +208,9 @@ export function createPlaceNames(place: PlaceLabel) {
               (projected.y - sunCentre.y) * viewport.height,
             ) / 2;
           scene.nearLimb = Math.abs(centrePx - limbPx) < NAME_LIMB_PX;
+          scene.offDisc = centrePx > limbPx;
+          radial.copy(at).normalize();
+          scene.edgeOn = Math.sqrt(Math.max(0, 1 - radial.dot(viewAxis) ** 2));
           scene.regionPx = featured ? scene.px(featured.size) : 0;
           shown = onScreen && NAME_SHOWN[id](scene);
           /* Set off its anchor outward, which on screen is away from the disc's centre. */

@@ -60,6 +60,8 @@ export const PARKER_PERIHELION_SPEED_KM_S = 191;
 export const PARKER_ECCENTRICITY = 0.8819;
 export const PARKER_PERIOD_D = 88.44;
 export const PARKER_PERIHELION_EPOCH = Date.UTC(2025, 5, 19, 9, 8);
+/** The latest elements' own date: past it, where the probe stands is the orbit carried forward, a prediction. */
+export const PARKER_ELEMENTS_EPOCH = Date.UTC(2025, 5, 1);
 /**
  * Its orbit before then, from its sixth Venus flyby to its seventh (JPL Horizons osculating
  * elements, 1 June 2024; the same on 1 October): the perihelion from the centre, R☉ (7.956

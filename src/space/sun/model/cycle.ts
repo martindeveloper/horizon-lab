@@ -70,6 +70,25 @@ export function cycleCountAt(date: Date | number) {
 export function yearOfCycleCount(count: number) {
   return CYCLE_25_MINIMUM_YEAR + (count - CYCLE_25_NUMBER) * CYCLE_PERIOD_YR;
 }
+/** The phase the cycle peaks at: its rise over its period. */
+export const CYCLE_PEAK_PHASE = CYCLE_RISE_YR / CYCLE_PERIOD_YR;
+
+/**
+ * Where in its reversal the global field stands at a cycle count: the count with its phase
+ * stretched so the half-turn ends at the cycle's peak (`CYCLE_PEAK_PHASE`), as the polar
+ * fields reverse near maximum, and the other half by the next minimum.
+ */
+export function reversalOf(count: number) {
+  const n = Math.floor(count);
+  const phase = count - n;
+  return (
+    n +
+    (phase < CYCLE_PEAK_PHASE
+      ? (0.5 * phase) / CYCLE_PEAK_PHASE
+      : 0.5 + (0.5 * (phase - CYCLE_PEAK_PHASE)) / (1 - CYCLE_PEAK_PHASE))
+  );
+}
+
 /** The phase alone, 0–1, 0 at minimum. */
 export const cyclePhaseOf = (count: number) => count - Math.floor(count);
 /** The cycle's phase at a date, 0–1. */

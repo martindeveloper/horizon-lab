@@ -3,13 +3,8 @@
  * its phase. Both follow the model's own boundaries (`@/space/sun/model`), so the words change
  * where the physics does.
  */
-import { activityAt } from "@/space/sun/model/cycle";
-import {
-  CYCLE_PERIOD_YR,
-  CYCLE_RISE_YR,
-  ERUPTION_STAGES,
-  X_POINT_S,
-} from "@/space/sun/model/parameters";
+import { CYCLE_PEAK_PHASE, activityAt } from "@/space/sun/model/cycle";
+import { ERUPTION_STAGES, X_POINT_S } from "@/space/sun/model/parameters";
 
 export const ERUPTION_STAGE_IDS = ["storing", "rising", "xpoint", "reconnecting", "loops"] as const;
 export type EruptionStage = (typeof ERUPTION_STAGE_IDS)[number];
@@ -33,8 +28,7 @@ export type CycleStage = (typeof CYCLE_STAGE_IDS)[number];
 /** Activity below this share of the peak is a minimum; above the upper one, a maximum. */
 const QUIET = 0.1;
 const PEAK = 0.8;
-/** The phase the cycle peaks at: its rise over its period. */
-export const CYCLE_PEAK_PHASE = CYCLE_RISE_YR / CYCLE_PERIOD_YR;
+export { CYCLE_PEAK_PHASE };
 
 /** The cycle's stage at a phase (0–1 from minimum to minimum), by the activity curve's height. */
 export function cycleStageAt(phase: number): CycleStage {

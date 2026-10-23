@@ -26,6 +26,7 @@ import {
   RYDBERG_INFINITY,
   decodeSrgb,
   hellandBlackbodyLinear,
+  hexToLinear,
   planckRadiance,
   vacuumToAir,
 } from "@horizon/toolkit/science";
@@ -166,13 +167,21 @@ const planck = hellandBlackbodyLinear(TEMPERATURES.photosphere);
 const PHOTOSPHERE_RGB: Rgb = [planck[0], planck[1], planck[2]];
 /** Balmer red, the Hα line's colour. */
 const BALMER_RED: Rgb = [decodeSrgb(0.9), decodeSrgb(0.15), decodeSrgb(0.12)];
-/** The magnetogram's poles: gold for field out of the Sun, blue for field into it. */
-export const MAGNETOGRAM_POSITIVE: Rgb = [decodeSrgb(0.89), decodeSrgb(0.75), decodeSrgb(0.48)];
-export const MAGNETOGRAM_NEGATIVE: Rgb = [decodeSrgb(0.42), decodeSrgb(0.6), decodeSrgb(0.95)];
-/** Grey at zero field. */
-export const MAGNETOGRAM_GREY = decodeSrgb(0.5);
-/** The magnetogram saturates at this field, tesla. */
-export const MAGNETOGRAM_SATURATION_T = 0.1;
+/**
+ * The magnetogram's poles in linear light: the lab's gold (the toolkit's `SOLAR_GOLD`; the
+ * scene module, with its shaders, stays out of the model) for field out of the Sun, a cool blue
+ * for field into it; grey at zero.
+ */
+export const MAGNETOGRAM_POSITIVE: Rgb = hexToLinear("#e2c07a");
+export const MAGNETOGRAM_NEGATIVE: Rgb = hexToLinear("#6f8fff");
+export const MAGNETOGRAM_GREY = 0.42;
+/**
+ * The magnetogram's display, tesla: it saturates softly near ±100 G, as SDO/HMI's are usually
+ * shown, so spots saturate while the polar field (1 mT) and the quiet network show as faint
+ * tints; the network's mixed flux at this resolution (a teaching choice, tens of gauss).
+ */
+export const MAGNETOGRAM_SATURATION_T = 0.01;
+export const MAGNETOGRAM_NETWORK_T = 0.003;
 
 const none: LayerWeights = { photosphere: 0, chromosphere: 0, transition: 0, corona: 0, flare: 0 };
 const layers = (weights: Partial<LayerWeights>): LayerWeights => ({ ...none, ...weights });
@@ -285,9 +294,9 @@ export function rampColor(
   return out;
 }
 
-/** The magnetogram's colour for a radial field, tesla: grey through gold (out) or blue (in). */
+/** The magnetogram's colour for a line-of-sight field, tesla: grey through gold (out) or blue (in), saturating softly as the renderer does. */
 export function magnetogramColor(fieldT: number, out: [number, number, number] = [0, 0, 0]) {
-  const t = clamp01(Math.abs(fieldT) / MAGNETOGRAM_SATURATION_T);
+  const t = Math.tanh(Math.abs(fieldT) / MAGNETOGRAM_SATURATION_T);
   const pole = fieldT >= 0 ? MAGNETOGRAM_POSITIVE : MAGNETOGRAM_NEGATIVE;
   out[0] = MAGNETOGRAM_GREY + (pole[0] - MAGNETOGRAM_GREY) * t;
   out[1] = MAGNETOGRAM_GREY + (pole[1] - MAGNETOGRAM_GREY) * t;

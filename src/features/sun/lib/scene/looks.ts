@@ -11,10 +11,12 @@ import {
   JOY_SLOPE,
   SUPERGRANULE_LIFETIME_S,
 } from "@/space/sun/model/parameters";
+import { MAGNETOGRAM_NEGATIVE, MAGNETOGRAM_POSITIVE } from "@/space/sun/model/passbands";
 import { gamutMatrix } from "@horizon/toolkit/rendering";
 import { SOLAR_GOLD, cssHex } from "@horizon/toolkit/scene";
 import { hexToLinear, wavelengthColor, type Gamut } from "@horizon/toolkit/science";
 
+import { lightKind } from "../model/lights";
 import {
   CELL_SWELL_PER_LIFE,
   CONVECTION_OCTAVES,
@@ -23,12 +25,10 @@ import {
   E_CORONA_NM,
   EVERSHED_RADII_PER_S,
   LIGHT_MODES,
-  NEGATIVE_HEX,
   PROMINENCE_MAX,
   RIBBON_GAP,
   REGION_MAX,
   SPICULE_LIFETIME_S,
-  type RIBBON_PRESENCE,
 } from "../parameters";
 import {
   SEEDED_GROUPS,
@@ -46,10 +46,7 @@ import type { SunLight } from "./settings";
 /** A clock wraps here so its float stays precise; a wrap is a jump no one sees. */
 const CLOCK_WRAP = 1e5;
 
-/** What kind of light an id is: true colour, Hα, a band of the EUV, the eclipse or the magnetogram. */
-export type LightKind = keyof typeof RIBBON_PRESENCE;
-export const lightKind = (id: PassbandId): LightKind =>
-  id === "white" || id === "halpha" || id === "eclipse" || id === "magnetogram" ? id : "band";
+export { lightKind, type LightKind } from "../model/lights";
 
 /** How a light is drawn, by its id (`LIGHT_MODES`): Hα through its ramp, as a band is. */
 export function lightModeOf(id: PassbandId) {
@@ -113,6 +110,8 @@ export function createSunLooks() {
     uSeeded: { value: seeded },
     uMapUnclaimed: { value: 1 },
     uDipole: { value: 0 },
+    /** The global dipole's moment, body frame: the magnetogram's polar and equatorial field. */
+    uDipoleMoment: { value: new Vector3(0, 1, 0) },
   };
   const motionUniforms = {
     uClock: { value: new Vector2() },
@@ -131,8 +130,8 @@ export function createSunLooks() {
   };
   const colourUniforms = {
     uGold: { value: linear(cssHex(SOLAR_GOLD)) },
-    uPositive: { value: linear(cssHex(SOLAR_GOLD)) },
-    uNegative: { value: linear(NEGATIVE_HEX) },
+    uPositive: { value: new Vector3(...MAGNETOGRAM_POSITIVE) },
+    uNegative: { value: new Vector3(...MAGNETOGRAM_NEGATIVE) },
     uBalmer: { value: linear(BALMER_HEX) },
     uGreen: { value: new Vector3(green[0], green[1], green[2]) },
   };
@@ -179,6 +178,7 @@ export function createSunLooks() {
       motionUniforms.uEvershed.value = (t * EVERSHED_RADII_PER_S) % CLOCK_WRAP;
       motionUniforms.uSpiculeClock.value = (t / SPICULE_LIFETIME_S) % CLOCK_WRAP;
       activityUniforms.uDipole.value = frame.dipole;
+      activityUniforms.uDipoleMoment.value.fromArray(frame.dipoleMoment);
       const count = Math.min(frame.regions.length, REGION_MAX);
       activityUniforms.uRegionCount.value = count;
       const eruption = frame.eruption;

@@ -117,6 +117,8 @@ export type SunFrame = {
   cyclePhase: number;
   /** Signed global dipole strength, −1..1. */
   dipole: number;
+  /** The global dipole's moment in the body frame: the axial part on y, the equatorial one about the equator (−1..1 each). */
+  dipoleMoment: [number, number, number];
   light: PassbandId;
   regions: Region[];
   prominences: Prominence[];

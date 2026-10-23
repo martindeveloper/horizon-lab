@@ -46,8 +46,8 @@ export type SunSceneSettings = {
   light: SunLight;
   /** Radii in R☉. */
   layers: { core: number; tachocline: number; photosphere: number };
-  /** Baumbach's K-corona coefficients, and the F and E coronae's weights. */
-  corona: { k: readonly [number, number, number]; f: number; e: number };
+  /** Baumbach's K-corona coefficients, the F-corona's in the same units, the E-corona's scale height (R). */
+  corona: { k: readonly [number, number, number]; f: number; eScaleHeight: number };
   quality: RenderQuality;
   antialias: SceneAntialias | null;
   bloom: boolean;

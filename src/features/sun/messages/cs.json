@@ -51,6 +51,7 @@
     "parkerShield": "Přivrácená strana tepelného štítu",
     "parkerSunlight": "Sluneční světlo, násobek pozemského",
     "parkerInCorona": "Uvnitř koróny",
+    "parkerPredicted": "Předpověď",
     "places": "V záběru",
     "finder": "Místa",
     "light": "Světlo",
@@ -352,7 +353,7 @@
       "title": "Parker Solar Probe",
       "where": "Skrz korónu",
       "body": "Parker poprvé vstoupil do sluneční koróny v dubnu 2021. Dne 24. prosince 2024 dosáhl rekordní dráhy, přibližně {parkerPerihelionR} slunečních poloměrů od středu při rychlosti asi {parkerSpeed}; další průlety toto přiblížení zopakovaly.",
-      "caution": "Umístěna podle hodin laboratoře na dráhu, po které tehdy letěla, z prvků JPL Horizons: do posledního průletu kolem Venuše 6. listopadu 2024 nejblíže asi {parkerEarlierR} slunečních poloměrů, potom na rekordní dráze. Nejde o živou telemetrii; sklon drah a směr jejich nejbližšího bodu jsou zvoleny pro pohled."
+      "caution": "Umístěna podle hodin laboratoře na dráhu, po které tehdy letěla, z prvků JPL Horizons: do posledního průletu kolem Venuše 6. listopadu 2024 nejblíže asi {parkerEarlierR} slunečních poloměrů, potom na rekordní dráze; po červnu 2025, datu nejnovějších prvků, je jeho poloha předpovědí. Nejde o živou telemetrii; sklon drah a směr jejich nejbližšího bodu jsou zvoleny pro pohled."
     }
   },
   "tour": {
@@ -375,7 +376,7 @@
       },
       "spot": {
         "title": "Kde pole prochází ven",
-        "body": "Skvrna je místo, kde pole až {spotFieldT} tesla potlačí konvekci. O tisíc kelvinů chladnější, tedy tmavší; černá je jen vedle povrchu."
+        "body": "Skvrna je místo, kde pole až {spotFieldT} tesla potlačí konvekci. Její umbra má {umbraKelvin} K proti {surfaceKelvin} K povrchu, proto je tmavší; černá je jen vedle povrchu."
       },
       "chromosphere": {
         "title": "Ve světle vodíku",
@@ -418,7 +419,7 @@
       },
       "surface": {
         "title": "Povrch",
-        "body": "Velká textura v bílém světle používá zpracované kontinuum SDO/HMI poblíž 617,3 nm, složené ze snímků z 1.–22. května 2024; nejde o současné pozorování celé koule. Okrajové ztemnění a zobrazená barva jsou přidané. Oblasti NOAA inicializují syntetickou populaci, dál pokračuje modelový vývoj. Masky předem odvozené z této fotografie zachovávají při přiblížení její obrysy skvrn. Jemná vlákna a umbrální tečky jsou ilustrativní; nejde o získaná měření ani hloubku. Procedurální granule jsou typicky {granuleKm} km široké a žijí {granuleMin} minut. Ostatní pásma jsou syntetická, nikoli souběžná pozorování AIA."
+        "body": "Velká textura v bílém světle používá zpracované kontinuum SDO/HMI poblíž 617,3 nm, složené ze snímků z 1.–22. května 2024; nejde o současné pozorování celé koule. Okrajové ztemnění a zobrazená barva jsou přidané. Skupiny skvrn začínají tam, kde je ukazuje tato fotografie; jejich vývoj i skupiny vzniklé později (vykreslené jejími vyfotografovanými skupinami) jsou modelové. Masky předem odvozené z této fotografie zachovávají při přiblížení její obrysy skvrn. Jemná vlákna a umbrální tečky jsou ilustrativní; nejde o získaná měření ani hloubku. Procedurální granule jsou typicky {granuleKm} km široké a žijí {granuleMin} minut. Ostatní pásma jsou syntetická, nikoli souběžná pozorování AIA."
       },
       "atmosphere": {
         "title": "Atmosféra",
@@ -446,7 +447,7 @@
     "response": "Vrcholy odezvy ≈ {value}",
     "effective": "Efektivní teplota {value}",
     "lineTransfer": "Přenos záření v čáře není modelován",
-    "scattered": "Rozptýlené sluneční světlo",
+    "scattered": "Rozptýlené sluneční světlo · zelená Fe XIV, zvýrazněná · růžová chromosféra",
     "polarity": "Zlatá: k pozorovateli · modrá: od něj"
   }
 }

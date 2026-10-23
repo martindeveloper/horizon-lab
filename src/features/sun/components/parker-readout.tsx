@@ -4,8 +4,8 @@ import { CalendarClock, MoveHorizontal, Sun, Thermometer } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { PARKER_CORONA_EDGE_R } from "@/space/sun/model/parameters";
-import { parkerAt, parkerShieldC, parkerSunlight } from "@/space/sun/model/parker";
-import { DataReadout, StatusBadge, SwitchChip } from "@horizon/toolkit/ui";
+import { parkerAt, parkerPredicted, parkerShieldC, parkerSunlight } from "@/space/sun/model/parker";
+import { DataReadout, StatusBadge, SwitchChip, kickerClass } from "@horizon/toolkit/ui";
 
 import { canRide, useSun } from "../lib/store";
 
@@ -90,6 +90,10 @@ export function ParkerReadout() {
           },
         ]}
       />
+      {/* Past its latest elements, where it stands is the orbit carried forward. */}
+      {parkerPredicted(moment) ? (
+        <span className={kickerClass}>{t("hud.parkerPredicted")}</span>
+      ) : null}
       <StatusBadge
         label={t("hud.parkerInCorona")}
         visible={r < PARKER_CORONA_EDGE_R}

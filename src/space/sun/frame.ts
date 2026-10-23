@@ -10,12 +10,12 @@ import { TAU, wrap, type Vec3 } from "@horizon/toolkit/math";
 
 import { createForecast, goesClassOf } from "./model/activity";
 import type { Eruption, Region, SunFrame, SunFrameInput } from "./model/contract";
-import { cyclePhaseOf } from "./model/cycle";
+import { cyclePhaseOf, reversalOf } from "./model/cycle";
 import { dice } from "./model/dice";
 import { blankEruptionState, blankPlaneLine, contours, eruptionAt } from "./model/eruption";
 import { eruptionFlow, FLOW_PARTICLES } from "./model/eruption-flow";
 import { blankEruptionLine, eruptionLines } from "./model/eruption-lines";
-import { blankPolyline, fieldLines, setSources } from "./model/field";
+import { blankPolyline, fieldLines, setSources, surfacePoint } from "./model/field";
 import {
   ARCADE_SLICES,
   EQUATORIAL_DIPOLE,
@@ -54,14 +54,14 @@ export type {
 } from "./model/contract";
 
 /**
- * The axial dipole's signed strength at a cycle count: full at minimum, zero at maximum, reversed
- * after; its sign at a minimum is the north pole's, which `haleLeadingNorth` makes the cycle's
- * northern leading polarity (positive for cycle 25).
+ * The axial dipole's signed strength at a cycle count: full at minimum, zero at the cycle's peak
+ * (`reversalOf`), reversed after; its sign at a minimum is the north pole's, which
+ * `haleLeadingNorth` makes the cycle's northern leading polarity (positive for cycle 25).
  */
-export const dipoleAt = (cycleCount: number) => -Math.cos(Math.PI * cycleCount);
+export const dipoleAt = (cycleCount: number) => -Math.cos(Math.PI * reversalOf(cycleCount));
 /** The equatorial dipole's signed strength: none at minimum, `EQUATORIAL_DIPOLE` of the polar field at maximum. */
 export const equatorialDipoleAt = (cycleCount: number) =>
-  EQUATORIAL_DIPOLE * Math.sin(Math.PI * cycleCount);
+  EQUATORIAL_DIPOLE * Math.sin(Math.PI * reversalOf(cycleCount));
 /** Where the equatorial dipole points, body frame: fixed for a seed. */
 const EQUATORIAL_LON_SALT = 30;
 
@@ -151,6 +151,7 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     time: 0,
     cyclePhase: 0,
     dipole: 1,
+    dipoleMoment: [0, 1, 0],
     light: "white",
     regions: weather.regions,
     prominences: weather.prominences,
@@ -178,6 +179,10 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     frame.surfaceTurn = wrap(surfaceRate(0) * input.time, TAU);
 
     const equatorial = equatorialDipoleAt(input.cyclePhase);
+    surfacePoint(0, equatorialLon, frame.dipoleMoment);
+    frame.dipoleMoment[0] *= equatorial;
+    frame.dipoleMoment[1] = frame.dipole;
+    frame.dipoleMoment[2] *= equatorial;
     setSources({
       dipole: frame.dipole,
       regions: weather.regions,

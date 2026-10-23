@@ -6,11 +6,12 @@
  * of the field's lines is searched once per field.
  */
 import { CHROMOSPHERE_HEIGHT, SPICULE_HEIGHT } from "@/space/sun/graphics/parameters";
-import { SOURCE_SURFACE_R } from "@/space/sun/model/parameters";
 import { LAYERS } from "@/space/sun/model/structure";
 import type { Vec3 } from "@horizon/toolkit/math";
 
+import type { LightKind } from "../model/lights";
 import type { PlaceId } from "../model/places";
+import { EUV_SCALE_HEIGHT_R, OPEN_FADE_FROM, STREAMER_MIN_APEX } from "../parameters";
 import { directionOf, parkerOf, poleOf, type Polyline, type SunFrame } from "./frame";
 import { featuredProminence, featuredRegion } from "./views";
 
@@ -29,6 +30,10 @@ const LIMB_LON = 0;
 const CHROMOSPHERE_TOP_R = 1 + CHROMOSPHERE_HEIGHT;
 const SPICULE_TOP_R = 1 + SPICULE_HEIGHT;
 const CORONA_ANCHOR_R = 1.6;
+/** In a band the corona's own light falls on its scale height: its name stands two scale heights up, where it still glows. */
+const CORONA_BAND_ANCHOR_R = 1 + 2 * EUV_SCALE_HEIGHT_R;
+/** An open line's ribbon fades past this share of its length (and from `OPEN_FADE_FROM` out): the wind is named inside both. */
+const OPEN_DRAWN_ALONG = 0.8;
 
 const at = (lat: number, lon: number, radius: number, out: Vec3): Vec3 => {
   directionOf(lat, lon, out);
@@ -66,7 +71,7 @@ function apexOf(line: Polyline) {
 export function createPlaceAnchors() {
   let searched: SunFrame | null = null;
   let revision = -1;
-  /* The highest closed apex (a streamer) and where the first open line leaves (the wind). */
+  /* The highest closed apex high enough to raise a streamer, and the farthest drawn point of the first open line (the wind). */
   const streamer: Vec3 = [0, 0, 0];
   const wind: Vec3 = [0, 0, 0];
   let hasStreamer = false;
@@ -81,15 +86,21 @@ export function createPlaceAnchors() {
     for (const line of frame.fieldLines) {
       if (line.open) {
         if (hasWind) continue;
-        const last = 3 * (line.count - 1);
-        wind[0] = line.points[last]!;
-        wind[1] = line.points[last + 1]!;
-        wind[2] = line.points[last + 2]!;
-        hasWind = true;
+        const along = Math.floor(OPEN_DRAWN_ALONG * (line.count - 1));
+        for (let i = 0; i <= along; i++) {
+          const x = line.points[3 * i]!;
+          const y = line.points[3 * i + 1]!;
+          const z = line.points[3 * i + 2]!;
+          if (Math.hypot(x, y, z) > OPEN_FADE_FROM) break;
+          wind[0] = x;
+          wind[1] = y;
+          wind[2] = z;
+          hasWind = true;
+        }
         continue;
       }
       const apex = apexOf(line);
-      if (apex.radius > height) {
+      if (apex.radius > STREAMER_MIN_APEX && apex.radius > height) {
         height = apex.radius;
         streamer[0] = line.points[3 * apex.index]!;
         streamer[1] = line.points[3 * apex.index + 1]!;
@@ -99,8 +110,11 @@ export function createPlaceAnchors() {
     }
   };
 
-  /** Where a place is in this frame, into `out`; null when the frame has none of it (no spot, no eruption under way). */
-  return (frame: SunFrame, place: PlaceId, out: Vec3): Vec3 | null => {
+  /**
+   * Where a place is in this frame, into `out`, as the light draws it (the corona's light falls
+   * faster in a band); null when the frame has none of it (no spot, no eruption under way).
+   */
+  return (frame: SunFrame, place: PlaceId, out: Vec3, light: LightKind = "white"): Vec3 | null => {
     switch (place) {
       /* The star as a whole has no one point to name. */
       case "star":
@@ -157,7 +171,7 @@ export function createPlaceAnchors() {
         return at(region.lat, region.lon, 1 + lift, out);
       }
       case "corona":
-        return at(0, LIMB_LON, CORONA_ANCHOR_R, out);
+        return at(0, LIMB_LON, light === "band" ? CORONA_BAND_ANCHOR_R : CORONA_ANCHOR_R, out);
       case "streamer":
         search(frame);
         return hasStreamer ? copy(streamer, out) : null;
@@ -168,7 +182,7 @@ export function createPlaceAnchors() {
       }
       case "wind":
         search(frame);
-        return hasWind ? copy(wind, out) : at(Math.PI / 2, 0, SOURCE_SURFACE_R, out);
+        return hasWind ? copy(wind, out) : at(Math.PI / 2, 0, OPEN_FADE_FROM, out);
     }
   };
 }

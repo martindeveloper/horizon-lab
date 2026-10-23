@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createSunModel, dipoleAt, SEEDED_GROUPS } from "../src/space/sun/frame.ts";
+import { CYCLE_PEAK_PHASE, reversalOf } from "../src/space/sun/model/cycle.ts";
 import {
   DAY_S,
   MAX_FIELD_LINES,
@@ -56,7 +57,7 @@ test("a model fills one frame and its arrays each call, reading the contract's f
   assert.equal(first.fieldLines.length, 80);
   assert.equal(first.light, "fe171");
   assert.ok(Math.abs(first.cyclePhase - 0.4) < 1e-9);
-  assert.ok(Math.abs(first.dipole + Math.cos(Math.PI * 25.4)) < 1e-12);
+  assert.ok(Math.abs(first.dipole + Math.cos(Math.PI * reversalOf(25.4))) < 1e-12);
   assert.ok(first.surfaceTurn >= 0 && first.surfaceTurn < 2 * Math.PI);
   assert.ok(first.wolfNumber >= 0);
   const lines = first.fieldLines.slice();
@@ -70,7 +71,11 @@ test("a model fills one frame and its arrays each call, reading the contract's f
   assert.equal(first.fieldLines.length, MAX_FIELD_LINES, "capped");
   assert.equal(dipoleAt(25), 1, "the north pole was positive at the 2019 minimum");
   assert.equal(dipoleAt(26), -1);
-  assert.ok(Math.abs(dipoleAt(25.5)) < 1e-12, "zero at maximum");
+  assert.ok(Math.abs(dipoleAt(25 + CYCLE_PEAK_PHASE)) < 1e-12, "zero at the cycle's peak");
+  assert.ok(
+    dipoleAt(25 + CYCLE_PEAK_PHASE / 2) > 0 && dipoleAt(25.5) < 0,
+    "reversed after the peak",
+  );
 });
 
 test("a scrubbed eruption carries its arcade over its region, in solar radii", () => {

@@ -16,7 +16,7 @@ uniform vec4 uRegionDir[REGION_MAX];   // centre (body frame); angular radius
 uniform vec4 uRegionSide[REGION_MAX];  // across the axis; strength
 uniform vec4 uRegionState[REGION_MAX]; // flare; facula; age; seed
 uniform vec3 uCorona;                  // Baumbach's three coefficients
-uniform vec2 uCoronaFE;                // the F and E coronae's weights
+uniform vec2 uCoronaFE;                // the F-corona's coefficient (Baumbach's units); the E-corona's scale height, R
 uniform float uDipole;
 uniform vec4 uEruption;                // the eruption's axis; its front's radius (0: none)
 uniform vec4 uEruptionShape;           // its spread, rad; the flare's light; its rope's height; its strength
@@ -224,11 +224,15 @@ void main() {
     col += lit(closed, CORONA_K, LAYER_CORONA, uSunlight, uWeights.w);
     col += lit(hole, HOLE_K, LAYER_CORONA, uSunlight, uWeights.w);
     col += lit(hot, ACTIVE_K, LAYER_CORONA, uSunlight, uWeights.w);
-    /* Visible light only: the F-corona, sunlight on dust, flat and unstructured; the E-corona,
-       Fe XIV's green line, low and near the regions. */
+    /* Visible light only: the F-corona, sunlight on dust, flat and unstructured, added to the
+       K-corona's light before the eye's compression, so the two match where the model says;
+       the E-corona, Fe XIV's green line, its emission the square of a hydrostatic density
+       (the model's `eCorona`), low and near the regions, emphasized (`E_CORONA_GLOW`). */
     if (uLightMode != LIGHT_BAND) {
-      col += uWeights.w * uSunlight * uCoronaFE.x * CORONA_GLOW * pow(rho, -F_CORONA_FALLOFF);
-      col += uWeights.w * uGreen * uCoronaFE.y * CORONA_GLOW * exp(-h / E_CORONA_REACH) * (0.3 + streamers);
+      float electrons = baumbach(rho);
+      float dust = uCoronaFE.x * pow(rho, -F_CORONA_FALLOFF) / max(dot(uCorona, vec3(1.0)), 1e-6);
+      col += uWeights.w * uSunlight * CORONA_GLOW * (pow(electrons + dust, CORONA_CONTRAST) - pow(electrons, CORONA_CONTRAST));
+      col += uWeights.w * uGreen * E_CORONA_GLOW * CORONA_GLOW * exp(-2.0 * h / uCoronaFE.y) * (0.3 + streamers);
     }
   }
 

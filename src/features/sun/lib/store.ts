@@ -18,6 +18,7 @@ import { clamp01 } from "@horizon/toolkit/math";
 import { viewFromPath } from "../routing";
 import { HELP } from "./help";
 import type { ClockRate } from "./model/clock";
+import { lightDraws } from "./model/drawn";
 import type { LightId } from "./model/lights";
 import { PLACES, type PlaceId } from "./model/places";
 import { TOUR } from "./model/tour";
@@ -210,7 +211,8 @@ export const useSun = create<SunStore>((set, get) => ({
       selection: id,
       closeUp: now.closeUp && id === "parker",
       panel: "none",
-      light: place.light ?? now.light,
+      /* The light in use, unless it does not draw the place. */
+      light: place.light && !lightDraws(id, now.light) ? place.light : now.light,
       clock: place.clock ?? now.clock,
       cut: place.cut ?? now.cut,
       ...(place.eruption === undefined ? {} : { eruption: place.eruption, eruptionPlaying: false }),

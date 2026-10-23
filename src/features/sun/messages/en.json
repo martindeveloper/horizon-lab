@@ -51,6 +51,7 @@
     "parkerShield": "Heat shield's sunward face",
     "parkerSunlight": "Sunlight, times Earth's",
     "parkerInCorona": "Inside the corona",
+    "parkerPredicted": "Predicted",
     "places": "In view",
     "finder": "Places",
     "light": "Light",
@@ -352,7 +353,7 @@
       "title": "Parker Solar Probe",
       "where": "Through the corona",
       "body": "Parker first entered the solar corona in April 2021. On 24 December 2024 it reached its record orbit, about {parkerPerihelionR} solar radii from the Sun’s centre at about {parkerSpeed}; later passes repeated this close approach.",
-      "caution": "Placed by the lab’s clock on the orbit it flew then, from JPL Horizons’ elements: down to about {parkerEarlierR} solar radii until its last Venus flyby on 6 November 2024, its record orbit after. Not live telemetry; the orbits’ tilt and the direction of their closest point are the view’s."
+      "caution": "Placed by the lab’s clock on the orbit it flew then, from JPL Horizons’ elements: down to about {parkerEarlierR} solar radii until its last Venus flyby on 6 November 2024, its record orbit after; past June 2025, its latest elements’ date, where it stands is predicted. Not live telemetry; the orbits’ tilt and the direction of their closest point are the view’s."
     }
   },
   "tour": {
@@ -375,7 +376,7 @@
       },
       "spot": {
         "title": "Where the field comes through",
-        "body": "A spot is where a field of up to {spotFieldT} tesla holds the convection down. Cooler by a thousand kelvin, so darker; it only looks black beside the surface."
+        "body": "A spot is where a field of up to {spotFieldT} tesla holds the convection down. Its umbra is {umbraKelvin} K against the surface’s {surfaceKelvin} K, so darker; it only looks black beside the surface."
       },
       "chromosphere": {
         "title": "In the light of hydrogen",
@@ -418,7 +419,7 @@
       },
       "surface": {
         "title": "Surface",
-        "body": "The large-scale white-light texture uses processed SDO/HMI continuum imagery near 617.3 nm, mosaicked from 1–22 May 2024; it is not a simultaneous full-sphere observation. Limb darkening and displayed colour are imposed. NOAA regions initialize the synthetic population, then model evolution takes over. Masks extracted offline from that photograph preserve its sunspot outlines when zooming. Close-up filaments and umbral dots are illustrative, not recovered measurements or depth. Procedural granules are typically {granuleKm} km across and {granuleMin} minutes long. Other passbands are synthetic and are not co-temporal AIA observations."
+        "body": "The large-scale white-light texture uses processed SDO/HMI continuum imagery near 617.3 nm, mosaicked from 1–22 May 2024; it is not a simultaneous full-sphere observation. Limb darkening and displayed colour are imposed. The spot groups start where that photograph shows them; their evolution, and the groups that form later (drawn from its photographed groups), are modelled. Masks extracted offline from that photograph preserve its sunspot outlines when zooming. Close-up filaments and umbral dots are illustrative, not recovered measurements or depth. Procedural granules are typically {granuleKm} km across and {granuleMin} minutes long. Other passbands are synthetic and are not co-temporal AIA observations."
       },
       "atmosphere": {
         "title": "Atmosphere",
@@ -446,7 +447,7 @@
     "response": "Response peaks ≈ {value}",
     "effective": "Effective temperature {value}",
     "lineTransfer": "Line transfer is not modelled",
-    "scattered": "Scattered sunlight",
+    "scattered": "Scattered sunlight · Fe XIV green, emphasized · pink chromosphere",
     "polarity": "Gold: toward observer · blue: away"
   }
 }

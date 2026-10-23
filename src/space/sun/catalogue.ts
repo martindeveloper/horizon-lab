@@ -715,6 +715,7 @@ export const PROSE_FIGURES = {
   supergranuleKm: PHOTOSPHERE.supergranuleSize,
   umbraPercent: SUNSPOT.umbraIntensity,
   umbraKelvin: SUNSPOT.umbraTemperature,
+  surfaceKelvin: BODY.teff,
   spotFieldT: SUNSPOT.field,
   chromosphereKm: CHROMOSPHERE.thickness,
   halphaNm: quoteAs(CHROMOSPHERE.halpha, { digits: 4 }),

@@ -37,8 +37,9 @@ export const fCorona = (r: number) => F_SCALE * r ** -F_CORONA_POWER;
 
 /**
  * The corona's constants as a shader reads them: Baumbach's three coefficients (powers
- * `BAUMBACH_POWERS`), the F-corona's coefficient (F = f r^−`F_CORONA_POWER`) and the E-corona's
- * scale height in R (`E_CORONA_SCALE_HEIGHT_R`, below).
+ * `BAUMBACH_POWERS`), the F-corona's coefficient in the same units (F = f r^−`F_CORONA_POWER`)
+ * and the E-corona's scale height in R (`E_CORONA_SCALE_HEIGHT_R`, below; its glow falls as
+ * `eCorona`).
  */
 export const BAUMBACH_POWERS: readonly [number, number, number] = [
   BAUMBACH_TERMS[0].power,
@@ -53,10 +54,14 @@ export const E_CORONA_SCALE_HEIGHT_R =
     mu: CORONAL_MEAN_MOLECULAR_WEIGHT,
     g: SURFACE_GRAVITY,
   }) / RADIUS_M;
-export const CORONA: { k: readonly [number, number, number]; f: number; e: number } = {
+export const CORONA: {
+  k: readonly [number, number, number];
+  f: number;
+  eScaleHeight: number;
+} = {
   k: [BAUMBACH_TERMS[0].coefficient, BAUMBACH_TERMS[1].coefficient, BAUMBACH_TERMS[2].coefficient],
   f: F_SCALE,
-  e: E_CORONA_SCALE_HEIGHT_R,
+  eScaleHeight: E_CORONA_SCALE_HEIGHT_R,
 };
 
 /** The E-corona's emission, relative to its base, for gas at its temperature: the square of a hydrostatic density. */

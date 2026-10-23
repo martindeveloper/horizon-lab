@@ -3,7 +3,8 @@
  * the HMI discs the mosaic is built from (1–22 May 2024; `regions-2024-05.json`, written by
  * `scripts/fetch-solar-regions.mjs`), each from the disc on which it stood nearest the central
  * meridian. Their Carrington coordinates are turned into the model's body frame at the map's
- * epoch, so a visit starts with loops over the spots the map has.
+ * epoch. They are the catalogue's record of the reports; a visit starts from the groups the
+ * photograph itself shows (`spot-groups.ts`), numbered from these where one matches.
  *
  * Frame: `lon` increases in the direction of rotation (heliographic west, Stonyhurst W positive);
  * the map's central meridian at `MAP_EPOCH` is longitude zero. A region's model longitude is its

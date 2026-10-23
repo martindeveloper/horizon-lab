@@ -2,7 +2,8 @@
  * Taps on the Sun: a name opens its place; a tap on the globe is traced as the shader traces
  * the ray (`traceSun`), naming the shell on the cut's face it lands on, the region under it on
  * the disc, or the photosphere; invisible targets stand at the prominences and the eruption's
- * X-point, each in the body frame.
+ * X-point, each in the body frame. A tap answers only to what is drawn where it lands: a place
+ * the light draws (`draws`), the nearest along the ray, never one the Sun stands in front of.
  */
 import {
   Mesh,
@@ -56,6 +57,22 @@ function sunPick(pick: unknown): SunPick | null {
   return null;
 }
 
+/** The place a pick opens. */
+export function placeOfPick(pick: SunPick): PlaceId {
+  switch (pick.kind) {
+    case "place":
+      return pick.id;
+    case "layer":
+      return pick.layer;
+    case "region":
+      return "sunspot";
+    case "prominence":
+      return "prominence";
+    default:
+      return "flare";
+  }
+}
+
 /** A name tapped opens its place. */
 const pickOf = (key: string): SunPick | undefined =>
   isPlaceId(key) ? { kind: "place", id: key } : undefined;
@@ -74,6 +91,8 @@ export function createSunPicking(
     blocked: () => boolean;
     /** Names readable enough to tap. */
     hits: (accept: (key: string) => boolean) => LabelHit[];
+    /** The scene draws a place now: its light, and the moment for a flare. */
+    draws: (place: PlaceId) => boolean;
     onPick: (pick: SunPick | null) => void;
   },
 ) {
@@ -104,6 +123,14 @@ export function createSunPicking(
   const normal = new Vector3();
   const inWedge = (q: Vector3) =>
     cut.x > 0 && Math.abs(wrapSigned(Math.atan2(q.z, q.x) - cut.y, Math.PI * 2)) < cut.x;
+  /** How far along a ray (unit direction) it meets the photosphere; infinite when it passes by. */
+  const photosphereAt = (o: Vector3, d: Vector3) => {
+    const b = o.dot(d);
+    const disc = b * b - o.lengthSq() + 1;
+    if (disc < 0) return Infinity;
+    const t1 = -b + Math.sqrt(disc);
+    return t1 <= 0 ? Infinity : Math.max(-b - Math.sqrt(disc), 0);
+  };
   /** Where a tap's ray meets the Sun, as the shader traces it (`traceSun`), into `entry`; null past the gap. */
   const traceTap = (o: Vector3, d: Vector3): { face: boolean } | null => {
     const b = o.dot(d);
@@ -150,11 +177,19 @@ export function createSunPicking(
   createTapPicking(basics, canvas, {
     pickables: [globe, ...targets],
     choose: (hitList, tapRay) => {
-      const first = hitList.find((hit) => hit.object !== globe) ?? hitList[0];
-      if (!first || first.object !== globe) return first;
-      const traced = traceTap(origin.copy(tapRay.origin), ray.copy(tapRay.direction).normalize());
+      origin.copy(tapRay.origin);
+      ray.copy(tapRay.direction).normalize();
+      /* A target counts in front of the photosphere only; the Sun hides one behind it. */
+      const surface = photosphereAt(origin, ray);
+      const target = hitList.find((hit) => hit.object !== globe && hit.distance < surface);
+      if (target) return target;
+      const first = hitList.find((hit) => hit.object === globe);
+      if (!first) return undefined;
+      const traced = traceTap(origin, ray);
       if (!traced) return undefined;
-      globe.userData.pick = globePick(traced.face, options.drawn());
+      const pick = globePick(traced.face, options.drawn());
+      if (!options.draws(placeOfPick(pick))) return undefined;
+      globe.userData.pick = pick;
       return first;
     },
     blocked: options.blocked,
@@ -171,7 +206,7 @@ export function createSunPicking(
     update(f: SunFrame) {
       prominenceTargets.forEach((mesh, index) => {
         const p = f.prominences[index];
-        mesh.visible = p !== undefined && p.fade > TAPPABLE_FADE;
+        mesh.visible = p !== undefined && p.fade > TAPPABLE_FADE && options.draws("prominence");
         if (!p) return;
         directionOf(p.lat, p.lon, dir);
         const r = prominenceMiddleR(p);
@@ -179,7 +214,7 @@ export function createSunPicking(
       });
       const eruption = f.eruption;
       const region = eruption ? f.regions.find((r) => r.id === eruption.regionId) : undefined;
-      eruptionTarget.visible = !!eruption && !!region && eruption.reconnection > 0;
+      eruptionTarget.visible = !!eruption && !!region && options.draws("flare");
       if (eruption && region && eruptionTarget.visible) {
         directionOf(region.lat, region.lon, dir);
         const r = 1 + eruption.sheetBottom;

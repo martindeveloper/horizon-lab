@@ -4,11 +4,11 @@ import test from "node:test";
 import { PerspectiveCamera, Vector2, Vector3 } from "three";
 
 import { PLACE_IDS } from "../src/features/sun/lib/model/places.ts";
+import { OPEN_FADE_FROM, STREAMER_MIN_APEX } from "../src/features/sun/lib/parameters.ts";
 import { createPlaceAnchors } from "../src/features/sun/lib/scene/anchors.ts";
 import { createPlaceNames } from "../src/features/sun/lib/scene/names.ts";
 import { createSunModel } from "../src/space/sun/frame.ts";
 import { DAY_S, SOURCE_SURFACE_R } from "../src/space/sun/model/parameters.ts";
-import { PASSBANDS } from "../src/space/sun/model/passbands.ts";
 import { LAYERS } from "../src/space/sun/model/structure.ts";
 
 const input = (over = {}) => ({
@@ -50,11 +50,12 @@ test("every place has an anchor in the body frame, or none when the Sun lacks it
   );
   const streamer = anchor("streamer");
   assert.ok(
-    streamer && radius(streamer) > 1.05 && radius(streamer) < SOURCE_SURFACE_R,
-    "a closed line's apex",
+    streamer && radius(streamer) > STREAMER_MIN_APEX && radius(streamer) < SOURCE_SURFACE_R,
+    "a closed line's apex, high enough to raise a streamer",
   );
+  /* The wind on its open line, as far out as the line is drawn. */
   const wind = anchor("wind");
-  assert.ok(wind && Math.abs(radius(wind) - SOURCE_SURFACE_R) < 1e-3, "where an open line leaves");
+  assert.ok(wind && radius(wind) > 1.2 && radius(wind) <= OPEN_FADE_FROM, "on the drawn open line");
   model.frameAt(input({ eruptionScrub: 0.5 }));
   assert.ok(frame.eruption.cmeFront > 1, "the geometric front already exists before visibility");
   assert.equal(frame.eruption.cmePresence, 0);
@@ -86,10 +87,11 @@ test("a limb feature is named where it stands on the limb, not over the disc's c
       shown: true,
       cut: new Vector2(0, 0),
       cutShown: 0,
-      light: light === "white" ? "white" : "band",
-      weights: PASSBANDS[light].weights,
+      light,
       spicules,
-      prominence: 1,
+      fineSurface: true,
+      fieldLines: true,
+      mapShown: false,
     });
     return shown;
   };
@@ -135,10 +137,11 @@ test("a place is named only where the light draws it: no chromosphere or spicule
       shown: true,
       cut: new Vector2(0, 0),
       cutShown: 0,
-      light: light === "white" ? "white" : "band",
-      weights: PASSBANDS[light].weights,
+      light,
       spicules,
-      prominence: 1,
+      fineSurface: true,
+      fieldLines: true,
+      mapShown: false,
     });
     return shown.get(place);
   };

@@ -3,7 +3,7 @@
  * where the frame says, lifted, thinned and drained as it says. The volume is baked off the
  * main thread once (`prominenceDensity`); until it arrives nothing is drawn.
  */
-import { Mesh, ShaderMaterial, Vector3, type Camera, type Object3D } from "three";
+import { Mesh, ShaderMaterial, Vector3, Vector4, type Camera, type Object3D } from "three";
 
 import {
   createProminenceSlots,
@@ -20,10 +20,16 @@ import {
 import FRAG from "@/space/sun/graphics/prominence/prominence.frag.glsl";
 import VERT from "@/space/sun/graphics/prominence/prominence.vert.glsl";
 import { prominenceDensity, prominenceTexture } from "@/space/sun/graphics/prominence/volume";
+import { rampColor } from "@/space/sun/model/passbands";
 import type { DisposalScope } from "@horizon/toolkit/rendering";
 
+import { lightKind } from "../model/lights";
 import type { SunQuality } from "../quality";
 import type { SunFrame } from "./frame";
+import type { SunLight } from "./settings";
+
+/** Where along a band's ramp a prominence's colour is taken: the cool sheet's moderate brightness. */
+const PROMINENCE_RAMP_AT = 0.6;
 
 /** Model seconds a frame may advance the drain by at most: a jump of the clock is not a flow. */
 const MAX_DRAIN_STEP_S = 600;
@@ -39,6 +45,8 @@ export function createProminenceLayer(
     localCamera: { value: new Vector3() },
     activitySteps: { value: 40 },
     densityMap: { value: null as ReturnType<typeof prominenceTexture> | null },
+    /** A band's own colour for the emission and its share: none in Hα and the eclipse, which see its red. */
+    emissionHue: { value: new Vector4() },
   };
   const material = scope.own(
     new ShaderMaterial({
@@ -81,6 +89,12 @@ export function createProminenceLayer(
     },
     setQuality(quality: SunQuality) {
       uniforms.activitySteps.value = Math.min(quality.prominenceSteps, SUN_ACTIVITY_MAX_STEPS);
+    },
+    /** The light it is seen in: a band shows it in the band's own colour, Hα and the eclipse in its red. */
+    setLight(light: SunLight) {
+      if (lightKind(light.id) !== "band") return void uniforms.emissionHue.value.set(0, 0, 0, 0);
+      const [r, g, b] = rampColor(light.id, PROMINENCE_RAMP_AT);
+      uniforms.emissionHue.value.set(r, g, b, 1);
     },
     update(frame: SunFrame, camera: Camera, lit: number) {
       const count = Math.min(frame.prominences.length, SUN_ACTIVITY_MAX_REGIONS);

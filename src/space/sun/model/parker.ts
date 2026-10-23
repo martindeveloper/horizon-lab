@@ -8,6 +8,7 @@ import {
   PARKER_EARLIER_PERIOD_D,
   PARKER_EARLIER_TURN_DEG,
   PARKER_ECCENTRICITY,
+  PARKER_ELEMENTS_EPOCH,
   PARKER_LAST_FLYBY,
   PARKER_PERIHELION_EPOCH,
   PARKER_PERIHELION_R,
@@ -52,6 +53,9 @@ export const PARKER_RECORD_ORBIT: ParkerOrbit = {
   perihelionAt: PARKER_PERIHELION_EPOCH,
   turnDeg: 0,
 };
+
+/** Where the probe stands at a moment is predicted, not flown: past its latest elements' date. */
+export const parkerPredicted = (ms: number) => ms > PARKER_ELEMENTS_EPOCH;
 
 /** The orbit Parker flew at a moment (ms since 1970). */
 export const parkerOrbitAt = (ms: number) =>

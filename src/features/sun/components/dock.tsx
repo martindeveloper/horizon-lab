@@ -61,7 +61,7 @@ const RULER_TRACK = {
  * temperature), the track painted in each light's colour, a stop and a short name at each line,
  * the thumb on the one shown. The two ways of looking that are not bands, the eclipse and the
  * magnetogram, stand at its end as switches; while one is on the ruler rests, dimmed, where it
- * last stood.
+ * last stood, however the light left it (a switch, a view or a tour step).
  */
 function LightRuler({ className }: { className?: string }) {
   const t = useTranslations("sun");
@@ -69,6 +69,7 @@ function LightRuler({ className }: { className?: string }) {
   const api = useSun.getState;
   const onScale = (LIGHT_SCALE as readonly string[]).indexOf(light);
   const [rested, setRested] = useState(Math.max(0, onScale));
+  if (onScale >= 0 && onScale !== rested) setRested(onScale);
   const shown = onScale >= 0 ? onScale : rested;
   return (
     <LabelledRow
@@ -124,7 +125,6 @@ function LightRuler({ className }: { className?: string }) {
                   api().setLight(LIGHT_SCALE[rested] ?? "white");
                   return;
                 }
-                if (onScale >= 0) setRested(onScale);
                 api().setLight(id);
               }}
             >

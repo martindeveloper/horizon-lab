@@ -161,7 +161,7 @@ export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<SunBadge>>> = {
   flare: card(
     "mixed",
     ["flareIndex", eruption.flareIndex],
-    ["flareLine", bands.fe131.temperature],
+    ["flareLine", bands.fe131.secondaryTemperature!],
     ["hotLine", bands.fe94.temperature],
     ["spotField", field.spotField],
   ),

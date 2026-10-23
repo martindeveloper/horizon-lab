@@ -27,6 +27,7 @@ import {
 import type { Gamut } from "@horizon/toolkit/science";
 
 import { createLightTables } from "../graphics/light-tables";
+import { lightDraws } from "../model/drawn";
 import {
   BLOOM,
   COROTATE_ABOVE_RATE,
@@ -44,7 +45,7 @@ import { createFieldLayer } from "./field-layer";
 import type { SunFrame } from "./frame";
 import { createGlobeLayer } from "./globe-layer";
 import { createSunLooks, lightKind, type LightKind } from "./looks";
-import { createPlaceNames } from "./names";
+import { FLARE_NAMED_LIGHT, createPlaceNames } from "./names";
 import { createParkerLayer } from "./parker-layer";
 import { createSunPicking } from "./picking";
 import { createProminenceLayer } from "./prominence-layer";
@@ -146,6 +147,7 @@ export function createSunEngine(
     const relight = (light: SunLight) => {
       const { scale, prominence } = tables.setResponse(light);
       looks.setLight(light, scale);
+      prominences.setLight(light);
       tables.setRamp(light.ramp);
       return prominence;
     };
@@ -186,6 +188,10 @@ export function createSunEngine(
       drawn: () => drawn,
       blocked: () => cam.driftFlying(),
       hits,
+      /* What a tap may open: a place the light draws; a flare once it shines. */
+      draws: (place) =>
+        lightDraws(place, light.id) &&
+        (place !== "flare" || (drawn.eruption?.flareLight ?? 0) > FLARE_NAMED_LIGHT),
       onPick: (pick) => hooks.onPick?.(pick),
     });
 
@@ -308,10 +314,11 @@ export function createSunEngine(
         shown: current.names && !cam.flying,
         cut,
         cutShown: cutMotion.shown,
-        light: kind,
-        weights: current.light.weights,
+        light: light.id,
         spicules: quality.spicules,
-        prominence: prominenceLit,
+        fineSurface: quality.fineSurface,
+        fieldLines: current.fieldLines,
+        mapShown: globe.mapShown,
       });
       picking.update(f);
       flush();
@@ -322,7 +329,9 @@ export function createSunEngine(
 
       /* Readouts, a few times a second, when they change; the clock and the flare's class with them. */
       const due = readoutDue(dt, invalidated);
-      if (due) hooks.publish?.(f.time, f.eruption?.goesClass ?? "", f.cyclePhase);
+      /* The flare's class once it shines; none while the eruption only stores and lifts. */
+      const flaring = (f.eruption?.flareLight ?? 0) > FLARE_NAMED_LIGHT;
+      if (due) hooks.publish?.(f.time, flaring ? f.eruption!.goesClass : "", f.cyclePhase);
       if (hooks.onReadout && due) {
         const readouts: SunReadouts = {
           ...anglesOf(cam.rig.pose),

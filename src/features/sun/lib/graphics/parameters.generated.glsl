@@ -101,9 +101,10 @@
 #define FIBRIL_SHARE             0.4
 #define BAND_QUIET               0.12
 #define RAMP_SAMPLES             64
-#define MAGNETOGRAM_PEPPER       0.6
-#define MAGNETOGRAM_SATURATION   0.35
-#define MAGNETOGRAM_DIPOLE       1.2
+#define MAGNETOGRAM_SATURATION_T 0.01
+#define MAGNETOGRAM_NETWORK_T    0.003
+#define SPOT_FIELD_T             0.3
+#define POLAR_FIELD_T            0.001
 #define MAGNETOGRAM_POLE         1.0
 #define MAGNETOGRAM_GREY         0.42
 #define MAGNETOGRAM_LINE         0.3
@@ -136,7 +137,7 @@
 #define RAY_SHARE                0.25
 #define RAY_COUNT                40.0
 #define F_CORONA_FALLOFF         2.3
-#define E_CORONA_REACH           0.3
+#define E_CORONA_GLOW            0.14
 #define LOOP_GLOW_REACH          0.3
 #define LOOP_GLOW                0.35
 #define FLASH_REACH              0.25

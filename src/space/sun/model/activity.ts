@@ -20,6 +20,7 @@ import {
   ERUPTING_FLUX,
   ERUPTION_SECONDS,
   ERUPTION_STAGES,
+  X_POINT_S,
   FACULA_AT_PRIME,
   FACULA_FADE_SHARE,
   FLARE_CHANCE_PER_WINDOW,
@@ -277,15 +278,16 @@ function flaresOf(seed: number, who: Birth, age: number, out: FlareSum) {
     const flux = flareFlux(dice(seed, SALT.flux, who.id, w));
     const onset = start + dice(seed, SALT.onset, who.id, w) * FLARE_WINDOW_S;
     out.light += (flux / FLARE_UNIT_FLUX) * flareCurve(age - onset, flux);
-    if (flux >= ERUPTING_FLUX && onset <= age && onset > out.eruptingOnset) {
+    /* An erupting flare's eruption starts its lead before the flare does: storage, the rope's rise. */
+    if (flux >= ERUPTING_FLUX && onset - ERUPTION_LEAD_S <= age && onset > out.eruptingOnset) {
       out.eruptingOnset = onset;
       out.eruptingFlux = flux;
     }
   }
 }
 
-/** The flare's onset sits at the X-point of the eruption's timeline. */
-const ERUPTION_LEAD_S = ERUPTION_STAGES.rise * ERUPTION_SECONDS;
+/** The flare's onset sits at the X-point of the eruption's timeline: the eruption runs this long before it. */
+const ERUPTION_LEAD_S = X_POINT_S * ERUPTION_SECONDS;
 
 /**
  * A photographed group in its slot at `time` (model seconds from the visit's start, the map's
@@ -452,7 +454,9 @@ export function createForecast(weather = blankWeather(), seeded: readonly SpotGr
       }
     });
 
-    if (scrub !== null) {
+    /* A scrub runs the eruption under way at its moment, else one over the strongest region. */
+    if (scrub !== null && outbreak.slot >= 0) outbreak.s = clamp01(scrub);
+    else if (scrub !== null) {
       let slot = -1;
       let best = 0;
       weather.regions.forEach((region, k) => {

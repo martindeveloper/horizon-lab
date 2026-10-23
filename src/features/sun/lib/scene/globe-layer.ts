@@ -81,6 +81,10 @@ export function createGlobeLayer(
       uniforms.uSpotAtlas.value = atlas;
       uniforms.uSpotPages.value = pages;
     },
+    /** The measured map is drawn (faded in at least partly). */
+    get mapShown() {
+      return uniforms.uMap.value !== null && uniforms.uMapShown.value > 0;
+    },
     /** The map still fading in. */
     get busy() {
       return (

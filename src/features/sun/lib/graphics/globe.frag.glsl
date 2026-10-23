@@ -40,6 +40,7 @@ uniform int uProminenceCount;
 uniform vec4 uProminence[PROMINENCE_MAX];      // the channel's middle (body frame); half-length, radii
 uniform vec4 uProminenceAlong[PROMINENCE_MAX]; // along the channel; visibility
 uniform float uDipole;
+uniform vec3 uDipoleMoment;            // the global dipole's moment, body frame: polar and equatorial
 uniform float uGrid;
 uniform sampler2D uMap;                // SDO/HMI's flattened continuum (linear on sampling)
 uniform float uMapShown;               // 0 until it arrives, 1 once faded in
@@ -146,7 +147,7 @@ Face faceAt(vec3 s, float mu, float px) {
   /* The magnetogram's salt and pepper: small bipoles in the network's lanes. */
   float grain = gradientNoise3(b * cells * 2.7 + vec3(0.0, 0.0, uClock.y));
   float pepper = sign(grain) * smoothstep(0.25, 0.55, abs(grain)) * (0.4 + 0.6 * network);
-  f.radial += MAGNETOGRAM_PEPPER * MAGNETOGRAM_SATURATION * pepper * netSeen;
+  f.radial += MAGNETOGRAM_NETWORK_T * pepper * netSeen;
   float umbra = 0.0;
   float penumbra = 0.0;
   float filaments = 0.0;
@@ -237,7 +238,7 @@ Face faceAt(vec3 s, float mu, float px) {
       f.ribbon += flaring * ((exp(-a * a) + exp(-c * c)) * extent * knots + 1.2 * exp(-dot(l, l) / 0.03));
     }
     /* The radial field: the leader's and follower's opposite poles. */
-    f.radial += 2.0 * axis.w * side.w * (exp(-dot(leadAt, leadAt) / MAGNETOGRAM_POLE) - exp(-dot(followAt, followAt) / (0.8 * MAGNETOGRAM_POLE)));
+    f.radial += SPOT_FIELD_T * axis.w * side.w * (exp(-dot(leadAt, leadAt) / MAGNETOGRAM_POLE) - exp(-dot(followAt, followAt) / (0.8 * MAGNETOGRAM_POLE)));
   }
   /* Filaments: the prominences seen against the disc, dark ribbons along their channels. */
   for (int k = 0; k < PROMINENCE_MAX; k++) {
@@ -280,8 +281,10 @@ Face faceAt(vec3 s, float mu, float px) {
 vec3 surfaceColour(Face f, vec3 s, float mu) {
   vec3 limb = tableAt(uProfile, mu, PROFILE_SAMPLES, 0, 1).rgb;
   if (uLightMode == LIGHT_MAGNETOGRAM) {
-    float field = (f.radial + uDipole * MAGNETOGRAM_DIPOLE * s.y) * mu;
-    float g = tanh(field / MAGNETOGRAM_SATURATION);
+    /* Tesla along the line of sight: the regions' poles, the network, and the global dipole's
+       radial field (polar and equatorial parts), displayed saturating softly as HMI's are. */
+    float field = (f.radial + POLAR_FIELD_T * dot(s, uDipoleMoment)) * mu;
+    float g = tanh(field / MAGNETOGRAM_SATURATION_T);
     return g < 0.0
       ? mix(vec3(MAGNETOGRAM_GREY), uNegative, -g)
       : mix(vec3(MAGNETOGRAM_GREY), uPositive, g);
@@ -308,15 +311,19 @@ vec3 surfaceColour(Face f, vec3 s, float mu) {
   float warm = f.kelvin / PHOTOSPHERE_K;
   float photosphere = layerResponse(log(f.kelvin), LAYER_PHOTOSPHERE) * warm * warm * warm * warm * limb.g;
   float plage = BAND_PLAGE * f.plage;
+  /* A filament's cool sheet absorbs what lies behind it: dark in the chromosphere's light, and in
+     the transition region's and the corona's, as the EUV shows filament channels. A flare's
+     ribbons brighten the chromosphere too: Hα's two-ribbon flare. */
+  float filamentShade = 1.0 - FILAMENT_DEPTH * f.filament;
   float chromosphere = layerResponse(log(CHROMOSPHERE_K), LAYER_CHROMOSPHERE)
-    * (BAND_QUIET * (0.55 + f.network) + BAND_NETWORK * f.network * f.network + plage)
-    * (0.7 + 0.3 * (1.0 - mu)) * (1.0 - 0.6 * f.spot) * (1.0 - FILAMENT_DEPTH * f.filament);
+    * ((BAND_QUIET * (0.55 + f.network) + BAND_NETWORK * f.network * f.network + plage)
+      * (0.7 + 0.3 * (1.0 - mu)) * (1.0 - 0.6 * f.spot) * filamentShade + BAND_RIBBON * f.ribbon);
   float transition = layerResponse(log(TRANSITION_K), LAYER_TRANSITION)
-    * (0.5 * BAND_QUIET + 0.5 * BAND_NETWORK * f.network + plage + BAND_RIBBON * f.ribbon);
+    * ((0.5 * BAND_QUIET + 0.5 * BAND_NETWORK * f.network + plage) * filamentShade + BAND_RIBBON * f.ribbon);
   float open = openness(s, uDipole);
   float quietTexture = 0.35 + 2.4 * f.network * f.network;
-  float quiet = layerResponse(log(CORONA_K), LAYER_CORONA) * BAND_QUIET * quietTexture * (1.0 - HOLE_DEPTH * open)
-    + layerResponse(log(HOLE_K), LAYER_CORONA) * BAND_QUIET * HOLE_FLOOR * open;
+  float quiet = (layerResponse(log(CORONA_K), LAYER_CORONA) * BAND_QUIET * quietTexture * (1.0 - HOLE_DEPTH * open)
+    + layerResponse(log(HOLE_K), LAYER_CORONA) * BAND_QUIET * HOLE_FLOOR * open) * filamentShade;
   float loops = layerResponse(log(ACTIVE_K), LAYER_CORONA) * (2.0 * plage * (0.35 + 1.8 * f.network) + 0.5 * BAND_RIBBON * f.ribbon);
   float flare = layerResponse(log(FLARE_K), LAYER_FLARE) * f.ribbon;
   float intensity = dot(uWeights, vec4(photosphere, chromosphere, transition, quiet + loops)) + uFlareWeight * flare;

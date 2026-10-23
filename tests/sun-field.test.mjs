@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { createSunModel, equatorialDipoleAt } from "../src/space/sun/frame.ts";
 import { weatherAt } from "../src/space/sun/model/activity.ts";
+import { CYCLE_PEAK_PHASE } from "../src/space/sun/model/cycle.ts";
 import {
   bipoleAxis,
   blankPolyline,
@@ -239,7 +240,7 @@ test("coronal holes follow the cycle: polar caps at minimum, low latitudes at ma
       .map((line) => Math.abs(Math.asin(line.points[1])));
   };
   const atMinimum = latitudesOfOpen(25.0);
-  const atMaximum = latitudesOfOpen(25.5);
+  const atMaximum = latitudesOfOpen(25 + CYCLE_PEAK_PHASE);
   /* A region beside the cap's edge may open a few lines of its own; the holes stay polar. */
   const polarShare = atMinimum.filter((lat) => lat > 0.9).length / atMinimum.length;
   assert.ok(atMinimum.length > 20 && polarShare > 0.8, `polar holes at minimum: ${polarShare}`);
@@ -249,6 +250,7 @@ test("coronal holes follow the cycle: polar caps at minimum, low latitudes at ma
   );
   assert.ok(atMaximum.filter((lat) => lat < 0.7).length > 10, "low-latitude holes at maximum");
   assert.ok(
-    Math.abs(equatorialDipoleAt(25.5)) === EQUATORIAL_DIPOLE && equatorialDipoleAt(25) < 1e-12,
+    Math.abs(Math.abs(equatorialDipoleAt(25 + CYCLE_PEAK_PHASE)) - EQUATORIAL_DIPOLE) < 1e-12 &&
+      equatorialDipoleAt(25) < 1e-12,
   );
 });

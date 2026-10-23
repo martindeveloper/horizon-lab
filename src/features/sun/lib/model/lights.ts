@@ -5,6 +5,8 @@
  */
 import type { PassbandId } from "@/space/sun/frame";
 
+import type { RIBBON_PRESENCE } from "../parameters";
+
 export const LIGHT_IDS = [
   "white",
   "halpha",
@@ -39,3 +41,8 @@ export const LIGHT_SCALE = [
 
 /** The lights that are ways of looking rather than spectral bands: the disc hidden, the field read. */
 export const LIGHT_LOOKS = ["eclipse", "magnetogram"] as const satisfies readonly LightId[];
+
+/** What kind of light an id is: true colour, Hα, a band of the EUV, the eclipse or the magnetogram. */
+export type LightKind = keyof typeof RIBBON_PRESENCE;
+export const lightKind = (id: PassbandId): LightKind =>
+  id === "white" || id === "halpha" || id === "eclipse" || id === "magnetogram" ? id : "band";
