@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createSunModel, dipoleAt, OBSERVED_REGIONS } from "../src/space/sun/frame.ts";
+import { createSunModel, dipoleAt, SEEDED_GROUPS } from "../src/space/sun/frame.ts";
 import {
   DAY_S,
   MAX_FIELD_LINES,
@@ -121,7 +121,7 @@ test("geometry revisions track reused buffers, without changing for a light-only
 });
 
 test("a held eruption follows its ageing region and stays exact after scrubbing and re-entry", () => {
-  const options = { observed: OBSERVED_REGIONS };
+  const options = { seeded: SEEDED_GROUPS };
   const model = createSunModel(7, options);
   let previous = null;
   for (const [time, eruptionScrub] of [

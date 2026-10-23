@@ -103,6 +103,30 @@ export const PHOTOSPHERE_K = SOLAR_TEFF_K;
 export const MAP_DETAIL_FROM_PX = 1.25;
 export const MAP_DETAIL_TO_PX = 2.5;
 export const MAP_FADE_IN_S = 1.2;
+/**
+ * A photographed patch's spots reach `reach` from its centre; past it the patch blends into the
+ * quiet disc, and the photograph around a seeded group back in, out to this multiple of it.
+ */
+export const PHOTO_EDGE = 1.15;
+/**
+ * The quiet disc in the photograph, its continuum against the quiet Sun: the 5th to 95th
+ * percentile of the mosaic's spot belts. A spot, a facula or their rims stand outside it; they
+ * fade into it, or are carried elsewhere as their departure from it, while the quiet texture stays.
+ */
+/**
+ * White light reads as measured this close to the photograph's epoch, model seconds: no group has
+ * changed by more than about a percent of its life; after it, the disc is a model grown from it.
+ */
+export const PHOTO_MEASURED_S = 3600;
+export const PHOTO_QUIET_LOW = 0.999;
+export const PHOTO_QUIET_HIGH = 1.019;
+/**
+ * A photographed spot's depth runs from the quiet disc's lower edge (0) down this far below it
+ * (1, an umbra). A group decays from the shallow end, its pores and penumbral rims first, and grows
+ * from the deep end; the eroding edge is this soft, in depth.
+ */
+export const PHOTO_DEPTH_RANGE = 0.6;
+export const PHOTO_ERODE_SOFT = 0.15;
 export { MAP_CENTRAL_MERIDIAN_RAD, SUN_MAP_QUIET_INTENSITY };
 /**
  * Display scales of the surface's features. A granule's size, the cells' lifetimes and the
@@ -501,6 +525,11 @@ export const SHADER_DEFINES = glslDefines({
   WHITE_FLARE_K,
   MAP_DETAIL_FROM_PX,
   MAP_DETAIL_TO_PX,
+  PHOTO_EDGE,
+  PHOTO_QUIET_LOW,
+  PHOTO_QUIET_HIGH,
+  PHOTO_DEPTH_RANGE,
+  PHOTO_ERODE_SOFT,
   MAP_CENTRAL_MERIDIAN_RAD,
   SUN_MAP_QUIET_INTENSITY,
   STENCIL_WIDTH: spotStencil.width,

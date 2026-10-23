@@ -24,6 +24,11 @@
 #define WHITE_FLARE_K            9000.0
 #define MAP_DETAIL_FROM_PX       1.25
 #define MAP_DETAIL_TO_PX         2.5
+#define PHOTO_EDGE               1.15
+#define PHOTO_QUIET_LOW          0.999
+#define PHOTO_QUIET_HIGH         1.019
+#define PHOTO_DEPTH_RANGE        0.6
+#define PHOTO_ERODE_SOFT         0.15
 #define MAP_CENTRAL_MERIDIAN_RAD 5.117380276
 #define SUN_MAP_QUIET_INTENSITY  0.8
 #define STENCIL_WIDTH            8192.0

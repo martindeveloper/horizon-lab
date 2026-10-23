@@ -214,5 +214,8 @@ export const PLACE_CARDS: Readonly<Record<PlaceId, StaticCard<SunBadge>>> = {
       parkerPerihelionR: styled(parker.perihelion, { digits: 3 }),
       parkerSpeed: styled(parker.speed, { withUnit: true, digits: 3 }),
     },
+    caution: {
+      parkerEarlierR: styled(parker.earlierPerihelion, { digits: 3 }),
+    },
   },
 };

@@ -119,9 +119,10 @@ export function createSunEngine(
     const sky = createSkyLayer(scope, scene, basics.dpr, quality.sky, () => loop.invalidate());
     const sunMap = createSunMap(scope, {
       tier: () => quality.mapTier,
-      onLoad: (texture) => {
+      onLoad: (texture, _width, finest) => {
         renderer.initTexture(texture);
         globe.setMap(texture);
+        hooks.onMap?.(finest);
       },
       onStencil: (atlas, pages) => {
         renderer.initTexture(atlas);

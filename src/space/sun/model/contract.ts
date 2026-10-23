@@ -129,6 +129,8 @@ export type SunFrame = {
   wolfNumber: number;
   /** The equator's rotation angle, rad. */
   surfaceTurn: number;
+  /** The photograph's groups belong to this frame: its cycle is the Sun's own at its moment. */
+  photographed: boolean;
 };
 
 export type SunFrameInput = {
@@ -142,4 +144,9 @@ export type SunFrameInput = {
   /** Scrub the eruption to this point of its timeline over the strongest region; null lets the weather run. */
   eruptionScrub: number | null;
   fieldLineCount: number;
+  /**
+   * The cycle is the Sun's own at this moment, as the clock's date has it (absent: it is). Once a
+   * visitor has moved it, the photograph's groups have no place on the disc.
+   */
+  ownCycle?: boolean;
 };

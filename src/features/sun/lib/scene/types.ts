@@ -44,6 +44,8 @@ export type SunEngineHooks = {
   onReady?: () => void;
   /** Map detail the view would show is still loading, or no longer. */
   onSharpening?: (sharpening: boolean) => void;
+  /** A tier of the photograph has arrived (`finest`: the quality's own); it fades in over the next frames. */
+  onMap?: (finest: boolean) => void;
   /** The visitor took the camera (a drag, a wheel, a pinch). */
   onInput?: () => void;
   /** A drift: its shots (read as it begins, so they may be timed to the music), settings and the state it runs in. */

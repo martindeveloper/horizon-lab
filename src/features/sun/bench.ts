@@ -16,6 +16,7 @@ import type { ClockRate } from "./lib/model/clock";
 import type { LightId } from "./lib/model/lights";
 import type { PlaceId } from "./lib/model/places";
 import type { ViewId } from "./lib/model/views";
+import { MAP_FADE_IN_S } from "./lib/parameters";
 import { createSunScene } from "./lib/scene/bridge";
 import { useSun } from "./lib/store";
 
@@ -41,6 +42,8 @@ type SunBenchScene = BenchScene & {
   ride?: boolean;
   /** Model seconds past the map's epoch at the first frame; a month by default. */
   start?: number;
+  /** The photograph is waited for and faded in before the first frame. */
+  photo?: boolean;
 };
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
@@ -48,6 +51,9 @@ const DRIFT_MAP = parseAudioMap(lowDroneRisesMap);
 /** One loop of the drift timed to its map. */
 const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
 
+/** How long a photograph's scene waits for its finest tier, and how often it looks, ms. */
+const MAP_WAIT_MS = 30_000;
+const MAP_POLL_MS = 50;
 /** The engine's frames step a tenth of a second at most. */
 const FRAME_S = 0.1;
 /** The Sun every scene shows: one seed, lived a month before the first frame so spots and a prominence stand. */
@@ -72,6 +78,25 @@ const still = (
 
 const SCENES: readonly SunBenchScene[] = [
   still("surface", "white", "The whole disc in white light: limb darkening, spot groups, faculae"),
+  /* The photograph as time carries it on: its own spots at the epoch, then the model's groups
+     drawn from photographed patches as the seeded ones decay and others grow. */
+  ...[
+    { id: "surface-epoch", days: 0, what: "the photograph as taken, its groups seeded" },
+    { id: "surface-month", days: 30, what: "a month on: the seeded groups decaying in place" },
+    { id: "surface-season", days: 90, what: "a season on: seeded groups gone, grown ones" },
+    {
+      id: "surface-year",
+      days: 365,
+      what: "a year on: only grown groups, drawn from the photograph",
+    },
+  ].map(({ id, days, what }) => ({
+    ...still("surface", "white", `The whole disc in white light, ${what}`),
+    id,
+    tags: ["view", "photo"],
+    start: days * DAY_S,
+    photo: true,
+    clock: "real" as const,
+  })),
   {
     ...still("surface", "white", "The whole disc in white light with bloom on", {
       bloom: true,
@@ -282,11 +307,32 @@ export const benchTarget: BenchTarget = {
       store.getState().startDrift();
       store.getState().readyDrift();
     }
+    /* Written by the map's arrival, between the frames the wait below renders. */
+    const map = { finest: false };
     const instance = mountSceneEngine(
       surface,
-      (mount) => createSunScene(mount, { seed: SEED, start: scene.start ?? START_S }),
+      (mount) =>
+        createSunScene(mount, {
+          seed: SEED,
+          start: scene.start ?? START_S,
+          onMap: (finest) => (map.finest ||= finest),
+        }),
       () => store.setState({}),
     );
+    /* The photograph's scenes: its tiers load one after another from the first frame on, the
+       time standing still meanwhile; then the finest fades in over frames. */
+    if (scene.photo) {
+      const waitUntil = performance.now() + MAP_WAIT_MS;
+      while (!map.finest) {
+        if (performance.now() > waitUntil)
+          throw new Error(`${scene.id}: the photograph never arrived`);
+        instance.render({ index: 0, count: 1, progress: 0, time: 0, dt: 0 });
+        await new Promise((resolve) => setTimeout(resolve, MAP_POLL_MS));
+      }
+      const fade = Math.ceil(MAP_FADE_IN_S / FRAME_S) + 1;
+      for (let index = 0; index < fade; index++)
+        instance.render({ index, count: fade, progress: 0, time: 0, dt: FRAME_S });
+    }
     if (scene.closeUp) store.getState().enterCloseUp();
     if (scene.ride) store.getState().rideParker();
     /* The engine steps at most a tenth of a second a frame: live up to the scene's moment. */

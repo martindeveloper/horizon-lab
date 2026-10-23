@@ -1,0 +1,250 @@
+{
+  "source": "The Sun Lab's photograph (SDO/HMI flattened continuum intensity, 1–22 May 2024; representative rotation mosaic, quiet polar fill), near tier, sha256 51a3fd1763a7c9f080bcf9945537bdae3c08d1793509e155c28fadffaca4bc00",
+  "method": "the close-up stencil's spot mask (penumbra and umbra), spots joined into groups while their edges stand within 1.5°; each SWPC report matched to the nearest group centre within 8°",
+  "sourceFile": "/textures/bodies/sun/v1/sun-near.webp",
+  "groups": [
+    {
+      "number": 13664,
+      "lat": -19.799,
+      "carringtonLon": 348.276,
+      "reachDeg": 12.582,
+      "areaMsh": 2148.8,
+      "spots": 58,
+      "reportOffsetDeg": 0.71
+    },
+    {
+      "number": 13679,
+      "lat": -9.033,
+      "carringtonLon": 199.951,
+      "reachDeg": 6.183,
+      "areaMsh": 548.3,
+      "spots": 9,
+      "reportOffsetDeg": 2.02
+    },
+    {
+      "number": 13685,
+      "lat": -14.048,
+      "carringtonLon": 147.792,
+      "reachDeg": 4.677,
+      "areaMsh": 350.8,
+      "spots": 7,
+      "reportOffsetDeg": 3.74
+    },
+    {
+      "number": 13667,
+      "lat": 26.568,
+      "carringtonLon": 306.69,
+      "reachDeg": 1.58,
+      "areaMsh": 286.3,
+      "spots": 1,
+      "reportOffsetDeg": 0.63
+    },
+    {
+      "number": null,
+      "lat": -13.182,
+      "carringtonLon": 154.697,
+      "reachDeg": 3.785,
+      "areaMsh": 275.6,
+      "spots": 9,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": 13686,
+      "lat": -7.472,
+      "carringtonLon": 142.531,
+      "reachDeg": 3.759,
+      "areaMsh": 225.7,
+      "spots": 10,
+      "reportOffsetDeg": 0.71
+    },
+    {
+      "number": 13670,
+      "lat": 20.217,
+      "carringtonLon": 280.701,
+      "reachDeg": 3.73,
+      "areaMsh": 170.9,
+      "spots": 13,
+      "reportOffsetDeg": 4.23
+    },
+    {
+      "number": null,
+      "lat": -5.575,
+      "carringtonLon": 177.351,
+      "reachDeg": 4.121,
+      "areaMsh": 165.1,
+      "spots": 7,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": 13674,
+      "lat": -13.615,
+      "carringtonLon": 222.702,
+      "reachDeg": 2.426,
+      "areaMsh": 160.2,
+      "spots": 2,
+      "reportOffsetDeg": 1.64
+    },
+    {
+      "number": 13676,
+      "lat": -19.64,
+      "carringtonLon": 268.028,
+      "reachDeg": 1.374,
+      "areaMsh": 142.4,
+      "spots": 2,
+      "reportOffsetDeg": 2.55
+    },
+    {
+      "number": 13666,
+      "lat": 7.206,
+      "carringtonLon": 19.074,
+      "reachDeg": 1.213,
+      "areaMsh": 136.7,
+      "spots": 1,
+      "reportOffsetDeg": 0.94
+    },
+    {
+      "number": 13672,
+      "lat": 19.578,
+      "carringtonLon": 253.24,
+      "reachDeg": 2.879,
+      "areaMsh": 70.7,
+      "spots": 3,
+      "reportOffsetDeg": 5.47
+    },
+    {
+      "number": 13662,
+      "lat": 29.748,
+      "carringtonLon": 61.517,
+      "reachDeg": 3.532,
+      "areaMsh": 62.3,
+      "spots": 14,
+      "reportOffsetDeg": 1.31
+    },
+    {
+      "number": 13684,
+      "lat": -5.892,
+      "carringtonLon": 170.558,
+      "reachDeg": 1.349,
+      "areaMsh": 29.6,
+      "spots": 5,
+      "reportOffsetDeg": 2.43
+    },
+    {
+      "number": 13673,
+      "lat": -9.202,
+      "carringtonLon": 231.801,
+      "reachDeg": 0.591,
+      "areaMsh": 29.4,
+      "spots": 1,
+      "reportOffsetDeg": 3.17
+    },
+    {
+      "number": null,
+      "lat": 27.718,
+      "carringtonLon": 34.165,
+      "reachDeg": 1.73,
+      "areaMsh": 25.5,
+      "spots": 4,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": null,
+      "lat": -12.486,
+      "carringtonLon": 216.599,
+      "reachDeg": 1.919,
+      "areaMsh": 25,
+      "spots": 8,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": 13663,
+      "lat": 25.177,
+      "carringtonLon": 35.934,
+      "reachDeg": 2.025,
+      "areaMsh": 20.3,
+      "spots": 4,
+      "reportOffsetDeg": 1.88
+    },
+    {
+      "number": null,
+      "lat": -23.452,
+      "carringtonLon": 242.362,
+      "reachDeg": 0.977,
+      "areaMsh": 17.6,
+      "spots": 3,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": 13661,
+      "lat": 23.645,
+      "carringtonLon": 21.43,
+      "reachDeg": 0.824,
+      "areaMsh": 11.8,
+      "spots": 2,
+      "reportOffsetDeg": 1.69
+    },
+    {
+      "number": 13671,
+      "lat": 23.277,
+      "carringtonLon": 285.887,
+      "reachDeg": 0.846,
+      "areaMsh": 9,
+      "spots": 2,
+      "reportOffsetDeg": 0.3
+    },
+    {
+      "number": null,
+      "lat": -24.344,
+      "carringtonLon": 261.869,
+      "reachDeg": 0.403,
+      "areaMsh": 8.1,
+      "spots": 1,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": null,
+      "lat": -23.673,
+      "carringtonLon": 238.751,
+      "reachDeg": 1.11,
+      "areaMsh": 7.3,
+      "spots": 3,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": 13688,
+      "lat": -13.541,
+      "carringtonLon": 124.983,
+      "reachDeg": 0.468,
+      "areaMsh": 5.8,
+      "spots": 2,
+      "reportOffsetDeg": 1.83
+    },
+    {
+      "number": 13654,
+      "lat": -11.138,
+      "carringtonLon": 128.19,
+      "reachDeg": 0.257,
+      "areaMsh": 5,
+      "spots": 1,
+      "reportOffsetDeg": 7.07
+    },
+    {
+      "number": null,
+      "lat": -10.614,
+      "carringtonLon": 145.744,
+      "reachDeg": 0.358,
+      "areaMsh": 4.8,
+      "spots": 2,
+      "reportOffsetDeg": null
+    },
+    {
+      "number": 13682,
+      "lat": 13.947,
+      "carringtonLon": 190.718,
+      "reachDeg": 1.213,
+      "areaMsh": 3.6,
+      "spots": 3,
+      "reportOffsetDeg": 0.99
+    }
+  ]
+}

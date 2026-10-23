@@ -331,6 +331,10 @@ export const SOURCES = {
     cite: "JPL Horizons, Parker Solar Probe (-96): heliocentric osculating elements, 1 June 2025 (e = 0.882, q = 6.862 million km, period 88.4 d)",
     link: SOURCE_URLS.horizonsParker,
   },
+  horizonsParker2024: {
+    cite: "JPL Horizons, Parker Solar Probe (-96): heliocentric osculating elements, 1 June and 1 October 2024 (e = 0.867, q = 7.956 million km, period 92.1 d), and its closest approach to Venus, 6 November 2024 18:44 UTC (6,433 km from Venus's centre)",
+    link: SOURCE_URLS.horizonsParker,
+  },
   horizonsProbes: {
     cite: "JPL Horizons trajectories of Pioneer 10–11, Voyager 1–2 and New Horizons (heliocentric, ecliptic J2000)",
     link: SOURCE_URLS.horizonsProbes,
@@ -680,6 +684,9 @@ export const SOURCES = {
   },
   struble1999: {
     cite: "Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)",
+  },
+  sunSpotGroups: {
+    cite: "Spot groups located in the Sun Lab's SDO/HMI mosaic of 1–22 May 2024: the close-up stencil's spot mask, joined into groups and matched to the SWPC reports (scripts/locate-sun-spot-groups.mjs)",
   },
   swpcSrs: {
     cite: "NOAA/SWPC Joint USAF/NOAA Solar Region Summary, 1–22 May 2024 (NCEI archive: the regions with sunspots on the HMI discs the Sun's map is built from)",

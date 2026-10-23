@@ -12,7 +12,6 @@ import { TAU, clamp01, smoothstep } from "@horizon/toolkit/math";
 import type { Prominence, Region } from "./contract";
 import { activityAt, cycleNumberOf, cyclePhaseOf, wolfNumber } from "./cycle";
 import { between, dice, gaussDice } from "./dice";
-import type { ObservedRegion } from "./observed";
 import {
   ACTIVE_PROMINENCE_HEIGHT_R,
   ACTIVE_PROMINENCE_LENGTH,
@@ -40,7 +39,6 @@ import {
   JOY_SCATTER_RAD,
   JOY_SLOPE,
   MSH_PER_RAD2,
-  OBSERVED_MIN_AREA_MSH,
   OBSERVED_START_SHARE,
   POLAR_CROWN_SPREAD_RAD,
   PROMINENCE_FADE_SHARE,
@@ -69,6 +67,7 @@ import {
   SPOTS_PER_REGION,
 } from "./parameters";
 import { lagBehindEquator } from "./rotation";
+import { SEEDED_ID_BASE, type SpotGroup } from "./spot-groups";
 
 /** The eruption under way: its region's slot and id, where it is on its timeline, its flare's peak flux (W/m²). Slot −1: none. */
 export type Outbreak = { slot: number; regionId: number; s: number; flux: number };
@@ -288,62 +287,30 @@ function flaresOf(seed: number, who: Birth, age: number, out: FlareSum) {
 /** The flare's onset sits at the X-point of the eruption's timeline. */
 const ERUPTION_LEAD_S = ERUPTION_STAGES.rise * ERUPTION_SECONDS;
 
-/** Observed regions carry their NOAA number above every statistical id. */
-const OBSERVED_ID_BASE = 20_000_000;
-
 /**
- * An observed region in its slot at `time` (model seconds from the visit's start, the map's
+ * A photographed group in its slot at `time` (model seconds from the visit's start, the map's
  * epoch): in its prime at the start, then decaying by the usual rule; false once it has died.
  */
-function placeObserved(
-  observed: ObservedRegion,
-  time: number,
-  cycleNumber: number,
-  out: Region,
-): boolean {
-  const life = regionLife(observed.size);
+function placeSeeded(group: SpotGroup, time: number, cycleNumber: number, out: Region): boolean {
+  const life = regionLife(group.size);
   const age = time + OBSERVED_START_SHARE * life;
   if (age < 0 || age > life) return false;
-  const hemisphere = observed.lat >= 0 ? 1 : -1;
+  const hemisphere = group.lat >= 0 ? 1 : -1;
   const leadingNorth = haleLeadingNorth(cycleNumber);
-  out.id = OBSERVED_ID_BASE + observed.number;
+  out.id = SEEDED_ID_BASE + group.key;
   out.age = age;
-  out.lat = observed.lat;
-  out.lon = observed.lon + lagBehindEquator(observed.lat, time);
-  out.size = observed.size;
+  out.lat = group.lat;
+  out.lon = group.lon + lagBehindEquator(group.lat, time);
+  out.size = group.size;
   out.polarity = hemisphere === 1 ? leadingNorth : leadingNorth === 1 ? -1 : 1;
-  out.tilt = JOY_SLOPE * Math.abs(observed.lat);
+  out.tilt = JOY_SLOPE * Math.abs(group.lat);
   out.strength = regionStrength(age / life);
   return true;
 }
 
-/** When an observed region dies, model seconds: its slot then returns to the statistical weather. */
-const observedDeath = (observed: ObservedRegion) =>
-  regionLife(observed.size) * (1 - OBSERVED_START_SHARE);
-
-/** An observed region's strength at the map's epoch: what the photographed spots show. */
-const PHOTOGRAPHED_STRENGTH = regionStrength(OBSERVED_START_SHARE);
-
-/**
- * How much of its photographed spots a region keeps, 0–1: an observed region's strength over
- * its strength at the map's epoch, so its spots in the photograph fade as it decays; 0 for a
- * statistical region, which the photograph never showed.
- */
-export const photographedShare = (region: Region) =>
-  region.id > OBSERVED_ID_BASE ? clamp01(region.strength / PHOTOGRAPHED_STRENGTH) : 0;
-
-/** The life of the smallest reported group, seconds: how long spots no seeded region claims last. */
-const LONE_SPOT_LIFE = regionLife(Math.sqrt(OBSERVED_MIN_AREA_MSH / MSH_PER_RAD2));
-
-/**
- * How much the photograph keeps of the spots no seeded region claims (the groups too small to
- * seed), `time` model seconds after the map's epoch: they decay as the smallest reported group.
- */
-export const lonePhotographedShare = (time: number) =>
-  clamp01(
-    regionStrength(OBSERVED_START_SHARE + Math.max(0, time) / LONE_SPOT_LIFE) /
-      PHOTOGRAPHED_STRENGTH,
-  );
+/** When a seeded group dies, model seconds: its slot then returns to the statistical weather. */
+export const seededDeath = (group: SpotGroup) =>
+  regionLife(group.size) * (1 - OBSERVED_START_SHARE);
 
 /** A stand-in region for the eruption timeline when the Sun is quiet: large, in its prime, at Spörer's latitude. */
 function demoRegion(seed: number, phase: number, cycleNumber: number, out: Region) {
@@ -419,8 +386,15 @@ function activeProminence(region: Region, outbreak: Outbreak, slot: number, out:
  * given, puts the eruption at that point of its timeline over the strongest region (or a
  * stand-in in the first slot when the Sun is quiet).
  */
-export function createForecast(weather = blankWeather(), observed: readonly ObservedRegion[] = []) {
-  function at(seed: number, time: number, cycleCount: number, scrub: number | null = null) {
+export function createForecast(weather = blankWeather(), seeded: readonly SpotGroup[] = []) {
+  function at(
+    seed: number,
+    time: number,
+    cycleCount: number,
+    scrub: number | null = null,
+    /** The seeded groups belong to this moment's cycle; false leaves the weather statistical. */
+    seededShown = true,
+  ) {
     const phase = cyclePhaseOf(cycleCount);
     const cycleNumber = cycleNumberOf(cycleCount);
     const activity = activityAt(phase);
@@ -434,16 +408,16 @@ export function createForecast(weather = blankWeather(), observed: readonly Obse
     let spots = 0;
 
     weather.regions.forEach((region, slot) => {
-      const seen = observed[slot];
+      const seen = seededShown ? seeded[slot] : undefined;
       let who: Birth | null = null;
-      if (seen && placeObserved(seen, time, cycleNumber, region)) {
+      if (seen && placeSeeded(seen, time, cycleNumber, region)) {
         /* Its flares and faculae follow the same rules as a statistical region's. */
         const life = regionLife(seen.size);
         who = { id: region.id, birth: time - region.age, life, size: seen.size, windowStart: 0 };
       } else {
         who = birthOf(seed, slot, time, activity);
-        /* A slot an observed region held opens to the statistical weather once it has died. */
-        if (who && seen && who.birth < observedDeath(seen)) who = null;
+        /* A slot a seeded group held opens to the statistical weather once it has died. */
+        if (who && seen && who.birth < seededDeath(seen)) who = null;
         const age = who ? time - who.birth : -1;
         if (!who || age < 0 || age > who.life) return clearRegion(region);
         region.age = age;

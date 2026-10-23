@@ -7,6 +7,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { RateStepper } from "@/components/simulations/rate-stepper";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { asideOpen } from "@/lib/scene-store";
+import { MAP_EPOCH } from "@/space/sun/frame";
 import { rampColor } from "@/space/sun/model/passbands";
 import { cssColor, encodeSrgb } from "@horizon/toolkit/science";
 import {
@@ -17,6 +18,7 @@ import {
   SwitchChip,
   Tooltip,
   cn,
+  kickerClass,
   sliderStopAt,
 } from "@horizon/toolkit/ui";
 
@@ -24,7 +26,7 @@ import { CLOCK_RATES } from "../lib/model/clock";
 import { LIGHT_LOOKS, LIGHT_SCALE } from "../lib/model/lights";
 import { cycleStageAt, eruptionStageAt } from "../lib/model/stages";
 import { VIEW_ACTION, type ViewAction } from "../lib/model/views";
-import { CUT_HALF_ANGLE } from "../lib/parameters";
+import { CUT_HALF_ANGLE, PHOTO_MEASURED_S } from "../lib/parameters";
 import { useSun } from "../lib/store";
 import { ROW_CLASS, ROWS_CLASS, RowLabel } from "./dock-rows";
 import { elapsedLabel, lightLegend, useDistance } from "./format";
@@ -138,14 +140,31 @@ function LightRuler({ className }: { className?: string }) {
 /** The light shown, named, with what it shows and the figures it answers to. */
 function LightLegend() {
   const t = useTranslations("sun");
+  const f = useFormatter();
   const distance = useDistance();
   const light = useSun((s) => s.light);
+  /* White light is the photograph only at its epoch on the Sun's own cycle; after it, a model
+     grown from it; on a cycle the visitor moved, a model drawn with its photographed groups. */
+  const sinceEpoch = useSun((s) => (s.moment - MAP_EPOCH) / 1000);
+  const photographed = useSun((s) => s.photographed);
+  const measured = photographed && sinceEpoch < PHOTO_MEASURED_S;
+  const grown = light === "white" && !measured;
+  const note = !grown
+    ? t(`lightNotes.${light}`)
+    : photographed
+      ? t("lightNotes.whiteGrown", { elapsed: elapsedLabel(t, f, sinceEpoch) })
+      : t("lightNotes.whiteCycle");
   return (
     <p className="min-w-0 flex-1 basis-48 text-body leading-snug tracking-tight not-md:basis-full short:hidden">
       <span className="text-fg-primary">{t(`lights.${light}`)}</span>
+      {light === "white" ? (
+        <span className={cn(kickerClass, "ml-2")}>
+          {t(grown ? "badges.mixed" : "badges.measured")}
+        </span>
+      ) : null}
       <span className="ml-2 text-ui text-fg-secondary">
         {/* Phones keep to the light and its figure; the note waits for room. */}
-        <span className="not-md:hidden">{t(`lightNotes.${light}`)} · </span>
+        <span className="not-md:hidden">{note} · </span>
         {lightLegend(t, distance, light)}
       </span>
     </p>

@@ -9,7 +9,7 @@ import { sunQuality } from "../src/features/sun/lib/quality.ts";
 import { createAtmosphereLayer } from "../src/features/sun/lib/scene/atmosphere-layer.ts";
 import { createFieldLayer } from "../src/features/sun/lib/scene/field-layer.ts";
 import { createSunLooks } from "../src/features/sun/lib/scene/looks.ts";
-import { createSunModel, OBSERVED_REGIONS } from "../src/space/sun/frame.ts";
+import { createSunModel, SEEDED_GROUPS } from "../src/space/sun/frame.ts";
 
 test("CME rendering fades independently of its position and clears after the eruption", () => {
   const scope = new DisposalScope();
@@ -19,7 +19,7 @@ test("CME rendering fades independently of its position and clears after the eru
     response: scope.own(new Texture()),
     sunlight: [1, 1, 1],
   });
-  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const model = createSunModel(7, { seeded: SEEDED_GROUPS });
   const input = { time: 0, cyclePhase: 25.4, light: "fe171", fieldLineCount: 0 };
   const settings = { corona: { k: [1, 1, 1], f: 1, e: 1 } };
   try {
@@ -53,7 +53,7 @@ test("ribbons redraw reused model geometry and apply lower quality without a clo
     ramp: scope.own(new Texture()),
     response: scope.own(new Texture()),
   });
-  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const model = createSunModel(7, { seeded: SEEDED_GROUPS });
   const input = {
     time: 0,
     cyclePhase: 25.4,

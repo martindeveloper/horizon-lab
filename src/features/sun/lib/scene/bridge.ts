@@ -9,7 +9,7 @@
 import { audioMapNow } from "@/lib/audio-maps";
 import { driftRunState, timedDrift } from "@/lib/drift";
 import { bridgeStore, lendCamera } from "@/lib/scene-bridge";
-import { MAP_EPOCH, OBSERVED_REGIONS, createSunModel } from "@/space/sun/frame";
+import { MAP_EPOCH, SEEDED_GROUPS, createSunModel } from "@/space/sun/frame";
 import { CORONA } from "@/space/sun/model/corona";
 import { cycleCountAt, cyclePhaseOf, yearOfCycleCount } from "@/space/sun/model/cycle";
 import { CYCLE_PERIOD_YR, RADIUS_M } from "@/space/sun/model/parameters";
@@ -100,26 +100,30 @@ export type SunSceneOptions = {
   /** The model's seed and the model seconds lived past the map's epoch before the first frame (a bench replays them). */
   seed?: number;
   start?: number;
+  /** A tier of the photograph has arrived, `finest` the quality's own (a bench waits for it). */
+  onMap?: (finest: boolean) => void;
 };
 
 /**
  * A visit opens on the Sun as the map observed it (`MAP_EPOCH`, its regions the observed
  * ones), the statistical weather filling the other slots from a seed of the visit's own.
  */
-const visitOptions = (): Required<SunSceneOptions> => ({
+const visitOptions = (): Required<Omit<SunSceneOptions, "onMap">> => ({
   seed: Math.floor(lcg(Date.now())() * 1e6),
   start: 0,
 });
 
 export function createSunScene(mount: SceneMount, options: SunSceneOptions = {}): SimulationEngine {
   const { seed, start } = { ...visitOptions(), ...options };
-  const model = createSunModel(seed, { observed: OBSERVED_REGIONS });
+  const model = createSunModel(seed, { seeded: SEEDED_GROUPS });
   const store = useSun;
   /* Model seconds past the map's epoch: zero is the Sun as observed. */
   let time = start;
   /* The cycle count at the model's moment: the map's, shifted by what the visitor set. */
   let cycleShift = store.getState().cyclePhase - cyclePhaseOf(cycleCountAt(MAP_EPOCH));
   const cycleCount = () => cycleCountAt(MAP_EPOCH) + cycleShift + time / CYCLE_PERIOD_S;
+  /** The cycle is still the Sun's own: the visitor has not moved it, so the photograph's groups stand. */
+  const ownCycle = () => cycleShift === 0;
   /** The phase the scene last wrote to the store; any other value there is the visitor's ask. */
   let publishedPhase = store.getState().cyclePhase;
   const point = { T: 0, rho: 0, P: 0, L: 0, X: 0, kappa: 0 };
@@ -137,6 +141,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
       light: s.light,
       eruptionScrub: scrubbed ? s.eruption : null,
       fieldLineCount: FIELD_LINES[s.quality],
+      ownCycle: ownCycle(),
     });
   };
 
@@ -217,6 +222,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
         flareClass,
         cyclePhase,
         cycleYear: yearOfCycleCount(cycleCount()),
+        photographed: ownCycle(),
       });
     },
     landed: () => store.getState().landGuide(),
@@ -230,6 +236,7 @@ export function createSunScene(mount: SceneMount, options: SunSceneOptions = {})
     },
     onReady: () => store.getState().setReady(true),
     onSharpening: (sharpening) => store.setState({ sharpening }),
+    ...(options.onMap ? { onMap: options.onMap } : {}),
     onInput: () => {
       const s = store.getState();
       if (s.drift === "playing") s.pauseDrift();

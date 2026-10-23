@@ -6,8 +6,11 @@
 import { Matrix3, Vector2, Vector3, Vector4 } from "three";
 
 import { dice } from "@/space/sun/model/dice";
-import { GRANULE_LIFETIME_S, SUPERGRANULE_LIFETIME_S } from "@/space/sun/model/parameters";
-import { surfaceRate } from "@/space/sun/model/rotation";
+import {
+  GRANULE_LIFETIME_S,
+  JOY_SLOPE,
+  SUPERGRANULE_LIFETIME_S,
+} from "@/space/sun/model/parameters";
 import { gamutMatrix } from "@horizon/toolkit/rendering";
 import { SOLAR_GOLD, cssHex } from "@horizon/toolkit/scene";
 import { hexToLinear, wavelengthColor, type Gamut } from "@horizon/toolkit/science";
@@ -28,11 +31,13 @@ import {
   type RIBBON_PRESENCE,
 } from "../parameters";
 import {
+  SEEDED_GROUPS,
   bipoleAxis,
+  blankPhotoDraw,
   directionOf,
-  lonePhotographedShare,
-  photographedShare,
+  photoDrawOf,
   tiltedAxis,
+  unclaimedSpotShare,
   type PassbandId,
   type SunFrame,
 } from "./frame";
@@ -62,7 +67,17 @@ export function createSunLooks() {
   const regionAxis = Array.from({ length: REGION_MAX }, () => new Vector4());
   const regionSide = Array.from({ length: REGION_MAX }, () => new Vector4());
   const regionState = Array.from({ length: REGION_MAX }, () => new Vector4());
-  const regionPhotographed = Array.from({ length: REGION_MAX }, () => 0);
+  const regionDonor = Array.from({ length: REGION_MAX }, () => new Vector4());
+  const regionDonorAxis = Array.from({ length: REGION_MAX }, () => new Vector4());
+  const regionPhoto = Array.from({ length: REGION_MAX }, () => 0);
+  /* The seeded groups where the photograph has them at the epoch: fixed for the visit. */
+  const seeded = Array.from({ length: REGION_MAX }, (_, k) => {
+    const group = SEEDED_GROUPS[k];
+    if (!group) return new Vector4();
+    const [x, y, z] = directionOf(group.lat, group.lon);
+    return new Vector4(x, y, z, group.reach);
+  });
+  const draw = blankPhotoDraw();
   const prominenceAt = Array.from({ length: PROMINENCE_MAX }, () => new Vector4());
   const prominenceAlong = Array.from({ length: PROMINENCE_MAX }, () => new Vector4());
   const green = wavelengthColor(E_CORONA_NM);
@@ -85,9 +100,18 @@ export function createSunLooks() {
     uRegionAxis: { value: regionAxis },
     uRegionSide: { value: regionSide },
     uRegionState: { value: regionState },
-    /** How much of its photographed spots each region keeps (`photographedShare`), and the unclaimed spots' share. */
-    uRegionPhotographed: { value: regionPhotographed },
-    uMapLone: { value: 1 },
+    /**
+     * Each region drawn from the photograph (`photoDrawOf`): its donor's centre at the epoch and
+     * reach; its donor's axis and the patch's radians per the region's; its spot area's share. The
+     * seeded groups' centres at the epoch and reach, whose spots the regions draw, and how much
+     * of the photograph's unclaimed spots shows.
+     */
+    uRegionDonor: { value: regionDonor },
+    uRegionDonorAxis: { value: regionDonorAxis },
+    uRegionPhoto: { value: regionPhoto },
+    uSeededCount: { value: Math.min(SEEDED_GROUPS.length, REGION_MAX) },
+    uSeeded: { value: seeded },
+    uMapUnclaimed: { value: 1 },
     uDipole: { value: 0 },
   };
   const motionUniforms = {
@@ -97,8 +121,6 @@ export function createSunLooks() {
       value: CONVECTION_OCTAVES.map((o) => new Vector4(o.cellsPerRadius, o.radius, 0, 0)),
     },
     uTurn: { value: 0 },
-    /** The equator's turn since the map's epoch, unwrapped, radians: each latitude carries the photograph by its share of it. */
-    uMapTurn: { value: 0 },
     uEvershed: { value: 0 },
     uSpiculeClock: { value: 0 },
   };
@@ -125,6 +147,7 @@ export function createSunLooks() {
   const axis = new Vector3();
   const side = new Vector3();
   const centre = new Vector3();
+  const donorCentre = new Vector3();
   return {
     uniforms,
     /** The light's mode and layer weights; its exposure comes from the tables (`setResponse`). */
@@ -151,8 +174,8 @@ export function createSunLooks() {
           ((t / o.turnoverS) * CELL_SWELL_PER_LIFE) % CLOCK_WRAP;
       });
       motionUniforms.uTurn.value = frame.surfaceTurn;
-      motionUniforms.uMapTurn.value = surfaceRate(0) * t;
-      activityUniforms.uMapLone.value = lonePhotographedShare(t);
+      /* The photograph's own spots belong only to the Sun's own cycle. */
+      activityUniforms.uMapUnclaimed.value = frame.photographed ? unclaimedSpotShare(t) : 0;
       motionUniforms.uEvershed.value = (t * EVERSHED_RADII_PER_S) % CLOCK_WRAP;
       motionUniforms.uSpiculeClock.value = (t / SPICULE_LIFETIME_S) % CLOCK_WRAP;
       activityUniforms.uDipole.value = frame.dipole;
@@ -184,7 +207,19 @@ export function createSunLooks() {
         // float shader erases subpixel offsets and collapses noise into spokes.
         // Hash on the CPU, keeping the stable noise coordinate small.
         regionState[k]!.set(flare, region.facula, gap, 64 * dice(region.id, 173));
-        regionPhotographed[k] = photographedShare(region);
+        photoDrawOf(region, t, draw);
+        const donor = draw.donor;
+        directionOf(donor.lat, donor.lon, dir);
+        donorCentre.set(dir[0], dir[1], dir[2]);
+        regionDonor[k]!.set(dir[0], dir[1], dir[2], donor.reach);
+        /* The donor's axis as its region's is drawn, at the epoch (Joy's tilt of a seeded
+           group), turned about its centre by the patch's turn. */
+        tiltedAxis(donor.lat, donor.lon, JOY_SLOPE * Math.abs(donor.lat), dir);
+        axis.set(dir[0], dir[1], dir[2]);
+        side.crossVectors(donorCentre, axis);
+        axis.multiplyScalar(Math.cos(draw.turn)).addScaledVector(side, Math.sin(draw.turn));
+        regionDonorAxis[k]!.set(axis.x, axis.y, axis.z, draw.scale);
+        regionPhoto[k] = draw.growth;
       }
       /* The prominences' channels, for the filaments they cast on the disc. */
       const prominences = Math.min(frame.prominences.length, PROMINENCE_MAX);

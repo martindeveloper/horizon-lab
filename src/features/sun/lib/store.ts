@@ -97,6 +97,8 @@ export type SunStore = SceneSlice &
     flareClass: string;
     /** The decimal year the cycle's phase stands at, as the scene counts it. */
     cycleYear: number;
+    /** The cycle is the Sun's own, so the photograph's groups are on the disc; false once the visitor has moved it. */
+    photographed: boolean;
     /** Detail the view would show (the map's, Parker's model) is still on its way. */
     sharpening: boolean;
     setView: (view: ViewId) => void;
@@ -114,7 +116,10 @@ export type SunStore = SceneSlice &
     setPanel: (panel: Panel) => void;
     /** The scene's report. */
     publish: (
-      report: Pick<SunStore, "elapsed" | "moment" | "flareClass" | "cyclePhase" | "cycleYear">,
+      report: Pick<
+        SunStore,
+        "elapsed" | "moment" | "flareClass" | "cyclePhase" | "cycleYear" | "photographed"
+      >,
     ) => void;
     /** The View panel's settings as a visit starts. */
     resetView: () => void;
@@ -172,6 +177,7 @@ export const useSun = create<SunStore>((set, get) => ({
   moment: MAP_EPOCH,
   flareClass: "",
   cycleYear: decimalYear(MAP_EPOCH),
+  photographed: true,
   sharpening: false,
   /* A view opens with its own light and clock; the cut opens inside and closes elsewhere. */
   setView: (view) =>

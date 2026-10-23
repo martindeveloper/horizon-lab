@@ -275,7 +275,7 @@
       }
     },
     "items": {
-      "sdoHmi": "Sun: a representative mosaic of SDO/HMI observations from 1–22 May 2024. Reprojected and blended across one rotation; poorly observed poles fade to a quiet surface. The intensity map is displayed near white with limb darkening, not as a colour photograph. This is not live imagery or a single-date map.",
+      "sdoHmi": "Sun: a representative mosaic of SDO/HMI observations from 1–22 May 2024. Reprojected and blended across one rotation; poorly observed poles fade to a quiet surface. The intensity map is displayed near white with limb darkening, not as a colour photograph. This is not live imagery or a single-date map. In the Sun lab it is the disc only at that epoch: as its clock runs, the spot groups are a model grown from it, drawn with the mosaic's own photographed groups.",
       "opal": "Jupiter, Saturn, Uranus and Neptune: Hubble maps from 2025, in true colour.",
       "spacecraftModels": "Voyager 1 and 2, Pioneer 10 and 11, New Horizons and Parker Solar Probe at their true size. Simplified and compressed, scaled to each dish's or heat shield's published width, and lit by the Sun in the scene.",
       "blueMarble": "Earth: October land and sea under a cloud layer.",

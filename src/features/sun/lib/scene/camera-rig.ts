@@ -13,7 +13,7 @@ import { Quaternion, Vector3, type PerspectiveCamera } from "three";
 import { orbitCamera, stageClearance } from "@/lib/scene-bridge";
 import type { SceneCamera } from "@/lib/scene-store";
 import { sunwardCloseUpPose } from "@/space/close-up-flight";
-import { PARKER_APHELION_R } from "@/space/sun/model/parker";
+import { PARKER_FARTHEST_R } from "@/space/sun/model/parker";
 import { surfaceRate } from "@/space/sun/model/rotation";
 import {
   easeToward,
@@ -190,7 +190,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
     reduceMotion,
     nearFloor: 0.002,
     /* Past anything the camera can see: across Parker's orbit, from wherever it stands. */
-    far: (distance) => Math.max(CAMERA_FAR_R, distance + 2 * PARKER_APHELION_R),
+    far: (distance) => Math.max(CAMERA_FAR_R, distance + 2 * PARKER_FARTHEST_R),
   });
   const step = new Quaternion();
   /** Turns the camera by its attitude once the rig has it facing its aim (as `freeFromOrbit` does). */

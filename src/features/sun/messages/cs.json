@@ -104,7 +104,9 @@
     "magnetogram": "Modelový magnetogram"
   },
   "lightNotes": {
-    "white": "Mozaika HMI + syntetické detaily",
+    "white": "Mozaika HMI z května 2024 + syntetické detaily",
+    "whiteGrown": "Vyvinuto z mozaiky HMI z května 2024, o {elapsed} později",
+    "whiteCycle": "Modelový cyklus, skupiny vykreslené podle mozaiky HMI z května 2024",
     "halpha": "Ilustrační chromosféra",
     "he304": "He II + koronální Si XI · syntetické",
     "fe171": "Fe IX · syntetické",
@@ -284,7 +286,7 @@
       "title": "Sluneční skvrna",
       "where": "Povrch",
       "body": "Silné pole potlačí konvekci, skvrna je proto chladnější a vypadá tmavá. Umbra je nejtmavší; vlákna penumbry se sklánějí ven.",
-      "caution": "Oblasti začínají podle hlášení NOAA souvisejících s mozaikou HMI z května 2024. Jejich další vývoj a jemná struktura jsou syntetické."
+      "caution": "Skupiny začínají tam, kde je ukazuje mozaika HMI z května 2024, očíslované podle blízkých hlášení NOAA. Jejich další vývoj i skupiny, které vzniknou později, jsou modelované a vykreslené vyfotografovanými skupinami z mozaiky."
     },
     "facula": {
       "title": "Fakule",
@@ -350,7 +352,7 @@
       "title": "Parker Solar Probe",
       "where": "Skrz korónu",
       "body": "Parker poprvé vstoupil do sluneční koróny v dubnu 2021. Dne 24. prosince 2024 dosáhl rekordní dráhy, přibližně {parkerPerihelionR} slunečních poloměrů od středu při rychlosti asi {parkerSpeed}; další průlety toto přiblížení zopakovaly.",
-      "caution": "Umístěna na rekordní dráze podle hodin laboratoře z prvků JPL Horizons, nikoli živá telemetrie; sklon dráhy a směr nejbližšího bodu jsou zvoleny pro pohled."
+      "caution": "Umístěna podle hodin laboratoře na dráhu, po které tehdy letěla, z prvků JPL Horizons: do posledního průletu kolem Venuše 6. listopadu 2024 nejblíže asi {parkerEarlierR} slunečních poloměrů, potom na rekordní dráze. Nejde o živou telemetrii; sklon drah a směr jejich nejbližšího bodu jsou zvoleny pro pohled."
     }
   },
   "tour": {

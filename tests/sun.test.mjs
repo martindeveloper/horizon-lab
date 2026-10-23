@@ -320,6 +320,27 @@ test("Parker plunges to 9.86 R☉ at its record perihelia and swings out past 15
   assert.ok(r("2025-06-21T09:08Z") > 2 * PARKER_PERIHELION_R);
 });
 
+test("before its last Venus flyby Parker flies its earlier orbit, then passes onto the record one where it is", async () => {
+  const { parkerAt, nextParkerPerihelion } = await import("../src/space/sun/model/parker.ts");
+  const { PARKER_EARLIER_PERIHELION_R, PARKER_LAST_FLYBY, PARKER_PERIHELION_R, MAP_EPOCH } =
+    await import("../src/space/sun/model/parameters.ts");
+  const r = (iso) => Math.hypot(...parkerAt(Date.parse(iso)));
+  /* Horizons' perihelia of 2024 on the earlier orbit: wider than the record, 92 days apart. */
+  for (const at of ["2024-06-30T03:47Z", "2024-09-30T05:13Z"])
+    assert.ok(Math.abs(r(at) - PARKER_EARLIER_PERIHELION_R) < 0.05, `${at}: ${r(at)} R☉`);
+  assert.ok(PARKER_EARLIER_PERIHELION_R > PARKER_PERIHELION_R + 1, "closer only after the flyby");
+  /* The lab's first perihelion is June 2024's, at the earlier orbit's distance. */
+  assert.equal(new Date(nextParkerPerihelion(MAP_EPOCH)).toISOString().slice(0, 10), "2024-06-30");
+  /* The flyby's perihelion comes on the record orbit, on 24 December 2024. */
+  const after = nextParkerPerihelion(Date.parse("2024-10-15T00:00Z"));
+  assert.equal(new Date(after).toISOString().slice(0, 10), "2024-12-24");
+  /* Across the flyby the probe stays where it flew, out near Venus's orbit. */
+  const [x0, y0, z0] = parkerAt(PARKER_LAST_FLYBY - 1);
+  const [x1, y1, z1] = parkerAt(PARKER_LAST_FLYBY);
+  assert.ok(Math.hypot(x1 - x0, y1 - y0, z1 - z0) < 0.5, "no jump at the flyby");
+  assert.ok(Math.hypot(x1, y1, z1) > 150, "the flyby is out at Venus's distance");
+});
+
 test("Parker's heat shield runs hottest at perihelion and cools as r^−½ on the way out", async () => {
   const { parkerShieldC, parkerSunlight, PARKER_APHELION_R } =
     await import("../src/space/sun/model/parker.ts");

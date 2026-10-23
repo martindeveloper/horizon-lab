@@ -6,13 +6,16 @@
 import { surfacePoint } from "@/space/sun/model/field";
 
 export {
+  SEEDED_GROUPS,
   bipoleAxis,
-  lonePhotographedShare,
+  blankPhotoDraw,
   parkerOf,
   parkerOrbitOf,
-  photographedShare,
+  photoDrawOf,
   poleOf,
   tiltedAxis,
+  unclaimedSpotShare,
+  type PhotoDraw,
 } from "@/space/sun/frame";
 export type {
   Eruption,

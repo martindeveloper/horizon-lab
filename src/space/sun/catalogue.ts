@@ -58,6 +58,8 @@ import {
   MAP_WINDOW_D,
   OBSERVED_MIN_AREA_MSH,
   PARKER_CORONA_EDGE_R,
+  PARKER_EARLIER_PERIHELION_R,
+  PARKER_EARLIER_PERIOD_D,
   PARKER_PERIHELION_R,
   PARKER_PERIHELION_SPEED_KM_S,
   PARKER_PERIOD_D,
@@ -86,6 +88,7 @@ import {
   INTERIOR_RATE,
   surfacePeriod,
 } from "./model/rotation";
+import { SEEDED_GROUPS, SPOT_GROUPS } from "./model/spot-groups";
 import { CORE_EDGE_R, photonDiffusionTime, structureAt } from "./model/structure";
 
 const SUN = NAMED_STARS.sun;
@@ -523,6 +526,13 @@ const OBSERVED = {
       status: "verified",
       note: `regions with spots of ${OBSERVED_MIN_AREA_MSH} millionths of a hemisphere or more on the four discs`,
     },
+    photographedGroups: {
+      value: SPOT_GROUPS.length,
+      unit: "count",
+      source: "sunSpotGroups",
+      status: "derived",
+      note: `spot groups in the mosaic; the ${SEEDED_GROUPS.length} largest start a visit where the photograph has them, and every group grown later is drawn from one of them`,
+    },
     mapWindow: literatureFact(MAP_WINDOW_D, "d", "swpcSrs", "verified", {
       note: "the HMI discs of 1, 8, 15 and 22 May 2024 the mosaic is built from",
     }),
@@ -645,6 +655,22 @@ const PROBES = {
       source: "horizonsParker",
       status: "flag",
       note: "osculating period, 1 June 2025",
+    },
+    earlierPerihelion: {
+      value: PARKER_EARLIER_PERIHELION_R,
+      unit: "Rsun",
+      digits: 3,
+      source: "horizonsParker2024",
+      status: "flag",
+      note: "the orbit before its last Venus flyby, 6 November 2024; radius from solar centre",
+    },
+    earlierPeriod: {
+      value: PARKER_EARLIER_PERIOD_D,
+      unit: "d",
+      digits: 3,
+      source: "horizonsParker2024",
+      status: "flag",
+      note: "osculating period, 1 June 2024",
     },
   },
 } as const;

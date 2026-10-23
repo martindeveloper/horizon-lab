@@ -17,6 +17,7 @@ import {
 import { MAPS_KEY } from "../src/lib/assets.ts";
 import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
 import { OBSERVED_REGIONS, mapUv } from "../src/space/sun/model/observed.ts";
+import { SEEDED_GROUPS } from "../src/space/sun/model/spot-groups.ts";
 
 const near = (a, b, tolerance = 1e-10) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
 
@@ -131,5 +132,32 @@ test(
       found.length >= large.length - 2,
       `${found.length} of ${large.length} large groups have spots under them`,
     );
+  },
+);
+
+test(
+  "every seeded group stands on its photographed spots, so a name on it names a spot",
+  { skip },
+  async () => {
+    const { data, info } = await sharp(shippedSun.pathname)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width: w, height: h, channels: c } = info;
+    const at = (u, v) =>
+      data[
+        (Math.min(h - 1, Math.floor((1 - v) * h)) * w + Math.floor((((u % 1) + 1) % 1) * w)) * c
+      ];
+    const umbral = 255 * SUN_MAP_QUIET_INTENSITY * 0.7;
+    for (const group of SEEDED_GROUPS) {
+      let darkest = 255;
+      const reach = group.reach;
+      for (let dlat = -reach; dlat <= reach; dlat += reach / 16)
+        for (let dlon = -reach; dlon <= reach; dlon += reach / 16) {
+          if (Math.hypot(dlat, dlon * Math.cos(group.lat)) > reach) continue;
+          darkest = Math.min(darkest, at(...mapUv(group.lat + dlat, group.lon + dlon)));
+        }
+      assert.ok(darkest < umbral, `group ${group.key} has a spot within its reach`);
+    }
   },
 );

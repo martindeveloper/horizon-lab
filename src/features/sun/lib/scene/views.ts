@@ -5,12 +5,9 @@
  */
 import { Matrix4, Quaternion, Vector3 } from "three";
 
-import {
-  PARKER_CORONA_EDGE_R,
-  PARKER_ECCENTRICITY,
-  REGION_SIZE_MEDIAN_RAD,
-} from "@/space/sun/model/parameters";
+import { PARKER_CORONA_EDGE_R, REGION_SIZE_MEDIAN_RAD } from "@/space/sun/model/parameters";
 import { PARKER_SEMI_MAJOR_R } from "@/space/sun/model/parker";
+import { keplerPosition, type Elements } from "@horizon/toolkit/bodies";
 import {
   freeFromOrbit,
   orbitFromFree,
@@ -24,7 +21,7 @@ import { SCENE_FOV } from "@horizon/toolkit/scene";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
 import { FEATURE_MAX_R, FEATURE_MIN_R, ORBIT_REACH_R } from "../parameters";
-import { directionOf, type SunFrame } from "./frame";
+import { directionOf, parkerOrbitOf, type SunFrame } from "./frame";
 import { eruptionEnvelope, framedDistance, type SunViewport } from "./framing";
 import type { SunViewId } from "./settings";
 
@@ -53,20 +50,30 @@ export function surfaceAim(lat: number, lon: number, frame: SunFrame): ViewAim {
 export const prominenceMiddleR = (p: SunFrame["prominences"][number]) =>
   1 + p.height * (1 + p.lift) * 0.5;
 
-/** Parker's orbit seen whole: its centre, the semi-major axis back from the focus, the pole up. */
-const ORBIT_AIM: ViewAim = {
-  point: [-PARKER_SEMI_MAJOR_R * PARKER_ECCENTRICITY, 0, 0],
-  normal: [0, 1, 0],
-};
+const orbitElements: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
+const orbitPerihelion: Vec3 = [0, 0, 0];
+const ORBIT_AIM: ViewAim = { point: [0, 0, 0], normal: [0, 1, 0] };
+
+/** Parker's orbit at the frame's moment seen whole: its centre, the semi-major axis back from the focus along its perihelion, the pole up. */
+function orbitAim(frame: SunFrame) {
+  parkerOrbitOf(frame, orbitElements);
+  orbitElements.M = 0;
+  keplerPosition(orbitElements, orbitPerihelion);
+  const back = -orbitElements.e / (1 - orbitElements.e);
+  ORBIT_AIM.point[0] = orbitPerihelion[0] * back;
+  ORBIT_AIM.point[1] = orbitPerihelion[1] * back;
+  ORBIT_AIM.point[2] = orbitPerihelion[2] * back;
+  return ORBIT_AIM;
+}
 
 /**
- * What the orbit view promises to show about its centre, radii: the ellipse, and the corona's
- * edge round the Sun at its focus, which reaches past the perihelion.
+ * What the orbit view promises to show about its centre at the frame's moment, radii: the
+ * ellipse, and the corona's edge round the Sun at its focus, which reaches past the perihelion.
  */
-const ORBIT_SUBJECT_R = Math.max(
-  PARKER_SEMI_MAJOR_R,
-  PARKER_SEMI_MAJOR_R * PARKER_ECCENTRICITY + PARKER_CORONA_EDGE_R,
-);
+function orbitSubject(frame: SunFrame) {
+  const { a, e } = parkerOrbitOf(frame, orbitElements);
+  return Math.max(a, a * e + PARKER_CORONA_EDGE_R);
+}
 
 /** Across a sheet or a neutral line seen from the north: its tilt from west, mirrored south. */
 const across = (lat: number, tilt: number) => Math.PI / 2 - Math.sign(lat || 1) * tilt;
@@ -194,10 +201,10 @@ const VIEWS: Readonly<Record<SunViewId, ViewFraming>> = {
      scene's view, zoomed from a third of the way in to well past that. */
   orbit: {
     distance: PARKER_SEMI_MAJOR_R / Math.sin((SCENE_FOV / 2) * RAD_PER_DEG),
-    aim: () => ORBIT_AIM,
+    aim: orbitAim,
     angles: () => ({ azimuth: 0, inclination: 1.3 }),
     turns: true,
-    subject: () => ORBIT_SUBJECT_R,
+    subject: orbitSubject,
     limits: {
       min: PARKER_SEMI_MAJOR_R / 3,
       max: (2 * PARKER_SEMI_MAJOR_R) / Math.sin((SCENE_FOV / 2) * RAD_PER_DEG),

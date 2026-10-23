@@ -13,6 +13,7 @@ One-off data builds, run by hand when a source changes, and the docs that descri
 | `build-spacecraft-models.mjs`  | `cdn/models/spacecraft/<id>/<version>/` (probes, Parker, observatories)                    | `docs/imagery-credits.md`               |
 | `build-sun-map.mjs`            | the Sun's map alone                                                                        | `docs/imagery-credits.md`               |
 | `build-sun-spot-stencil.mjs`   | `cdn/textures/bodies/sun/spots/<version>/` (Sun Lab spot atlas)                            | `docs/imagery-credits.md`               |
+| `locate-sun-spot-groups.mjs`   | `src/space/sun/model/spot-groups-2024-05.json` (the photograph's spot groups)              | `docs/science-sources.md`               |
 | `fetch-dark-universe.mjs`      | `public/data/deep-field/cosmos-web.json` and its provenance                                | `docs/deep-field-dark-universe.md`      |
 | `fetch-cmb-data.mjs`           | `cdn/textures/cmb/<version>/` (Planck and ACT CMB maps)                                    | `docs/deep-field-cmb.md`                |
 | `fetch-elements.mjs`           | `packages/toolkit/src/science/elements.ts` (CIAAW weights)                                 | `docs/science-sources.md`               |

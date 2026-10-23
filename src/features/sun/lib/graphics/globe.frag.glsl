@@ -31,6 +31,11 @@ uniform vec4 uRegionDir[REGION_MAX];   // centre (body frame); angular radius
 uniform vec4 uRegionAxis[REGION_MAX];  // leader→follower axis; polarity
 uniform vec4 uRegionSide[REGION_MAX];  // across the axis (along the neutral line); strength
 uniform vec4 uRegionState[REGION_MAX]; // flare; facula; the ribbons' half-separation; seed
+uniform vec4 uRegionDonor[REGION_MAX];     // the photographed group it is drawn from: centre at the epoch (body frame); its spots' reach
+uniform vec4 uRegionDonorAxis[REGION_MAX]; // that group's axis at the epoch; the patch's radians per the region's
+uniform float uRegionPhoto[REGION_MAX];    // its spot area against its patch's, 0–1
+uniform int uSeededCount;
+uniform vec4 uSeeded[REGION_MAX];          // a seeded group where the photograph has it (body frame at the epoch); its spots' reach
 uniform int uProminenceCount;
 uniform vec4 uProminence[PROMINENCE_MAX];      // the channel's middle (body frame); half-length, radii
 uniform vec4 uProminenceAlong[PROMINENCE_MAX]; // along the channel; visibility
@@ -38,6 +43,7 @@ uniform float uDipole;
 uniform float uGrid;
 uniform sampler2D uMap;                // SDO/HMI's flattened continuum (linear on sampling)
 uniform float uMapShown;               // 0 until it arrives, 1 once faded in
+uniform float uMapUnclaimed;           // how much of the photograph's spots no region draws still shows
 uniform vec3 uSunlight;                // the photosphere's continuum colour: the white the eye adapts to
 uniform vec3 uPositive;                // the magnetogram's poles, linear
 uniform vec3 uNegative;
@@ -45,6 +51,37 @@ uniform mat4 uViewProjection;          // the camera's, for the hit's depth
 varying vec3 vWorld;
 
 #include "./spot-stencil.glsl"
+
+// A body-frame direction on the map: Carrington longitude over a turn (east increasing) and
+// latitude from the south pole, as the model's `mapUv`.
+vec2 mapUvOf(vec3 p) {
+  return vec2(fract((atan(-p.z, p.x) + MAP_CENTRAL_MERIDIAN_RAD) / TWO_PI), 0.5 + asin(clamp(p.y, -1.0, 1.0)) / PI);
+}
+
+// The photograph's continuum held within the quiet disc's range: its spots, faculae and their
+// rims gone, its quiet texture kept.
+float photoQuiet(float measured) {
+  return clamp(measured, PHOTO_QUIET_LOW, PHOTO_QUIET_HIGH);
+}
+
+// How deep into a spot the photograph is here: 0 at the quiet disc's lower edge, 1 in an umbra.
+float photoDepth(float measured) {
+  return clamp((PHOTO_QUIET_LOW - measured) / PHOTO_DEPTH_RANGE, 0.0, 1.0);
+}
+
+// The photograph at a point of the map: its continuum against the quiet Sun and how much a spot
+// covers there, the close-up stencil blended in by `detail`.
+vec2 photographAt(vec3 p, float px, float mu, float detail) {
+  vec2 uv = mapUvOf(p);
+  float measured = texture2D(uMap, uv).r / SUN_MAP_QUIET_INTENSITY;
+  float spot = 1.0 - smoothstep(0.6, 0.9, measured);
+  if (detail > 0.0) {
+    vec4 stencil = photographedSpot(uv, p, px, mu);
+    measured = mix(measured, stencil.z, detail * stencil.w);
+    spot = mix(spot, stencil.x, detail * stencil.w);
+  }
+  return vec2(measured, spot);
+}
 
 // What a point of the face is: its temperature, how much of it a spot covers, its plage, the
 // chromosphere's network there, a filament's shadow, its flare ribbons' light and its radial field.
@@ -70,31 +107,33 @@ Face faceAt(vec3 s, float mu, float px) {
      behind it by what the law takes off its rate. */
   vec3 b = turned(s, uTurn * (1.0 - surfaceTurnRatio(s.y)));
   float fine = uFine * resolvedFeature(GRANULES_PER_RADIUS, px, mu);
-  /* Keep the measured morphology at every zoom: the generated bipoles cannot replace every
-     spot in the photograph. Zoom adds fine detail instead of fading out the whole map.
-     The map is an observation at its epoch, in Carrington longitude (u, east increasing):
-     the body's longitude zero is the epoch's central meridian, MAP_CENTRAL_MERIDIAN_RAD along
-     it (the model's `mapUv`), and it turns rigidly with the equator, so its spots and the
-     model's regions read off them stay together. Synthetic spot outlines remain a fallback
-     for an unavailable map and for the other spectral modes. */
+  /* The photograph is the disc at its epoch: SDO/HMI's continuum in Carrington longitude (u,
+     east increasing), the body's longitude zero the epoch's central meridian
+     (MAP_CENTRAL_MERIDIAN_RAD along it, the model's `mapUv`). Time carries it on as the model's
+     weather goes: its quiet disc turns with the equator; every region draws its spots and faculae
+     from a photographed patch (its own if it is a seeded group, its donor's otherwise), turning
+     with its latitude at its size and strength; and the active features no region draws decay as
+     the model says. Zoom adds fine detail; synthetic spot outlines remain the fallback for an
+     unavailable map and the other spectral modes. */
   // One physical zoom threshold for all image tiers; changing quality cannot
   // change the morphology or make close-up detail jump in and out.
   float texelPx = max(mu, 0.02) / ((STENCIL_WIDTH / TWO_PI) * max(px, 1e-9));
   f.mapShare = uLightMode == LIGHT_WHITE ? uMapShown : 0.0;
   f.mapDetail = uFine * smoothstep(MAP_DETAIL_FROM_PX, MAP_DETAIL_TO_PX, texelPx);
-  float mappedSpot = 0.0;
+  /* The photograph here, its active features kept only where no region draws them, and the
+     regions' patches over it, multiplied in. */
+  vec2 photo = vec2(1.0, 0.0);
+  float unclaimed = 0.0;
+  float patches = 1.0;
+  float patchSpot = 0.0;
   if (f.mapShare > 0.0) {
-    /* The body's longitude of s (west positive: −z), then Carrington's. */
-    vec2 uv = vec2(fract((atan(-s.z, s.x) + MAP_CENTRAL_MERIDIAN_RAD) / TWO_PI), 0.5 + asin(clamp(s.y, -1.0, 1.0)) / PI);
-    f.measured = texture2D(uMap, uv).r / SUN_MAP_QUIET_INTENSITY;
-    mappedSpot = 1.0 - smoothstep(0.6, 0.9, f.measured);
-    if (f.mapDetail * uStencilShown > 0.0) {
-      vec4 stencil = photographedSpot(uv, s, px, mu);
-      float blend = f.mapDetail * uStencilShown;
-      f.measured = mix(f.measured, stencil.z, blend * stencil.w);
-      mappedSpot = mix(mappedSpot, stencil.x, blend * stencil.w);
+    photo = photographAt(s, px, mu, f.mapDetail * uStencilShown);
+    unclaimed = uMapUnclaimed;
+    for (int k = 0; k < REGION_MAX; k++) {
+      if (k >= uSeededCount) break;
+      vec4 group = uSeeded[k];
+      unclaimed *= smoothstep(group.w, PHOTO_EDGE * group.w, length(s - group.xyz));
     }
-    mappedSpot *= f.mapShare;
   }
   float marks = uLightMode == LIGHT_WHITE ? 1.0 - f.mapShare : 1.0;
   float cells = GRANULES_PER_RADIUS / NETWORK_GRANULES;
@@ -117,12 +156,42 @@ Face faceAt(vec3 s, float mu, float px) {
   for (int k = 0; k < REGION_MAX; k++) {
     if (k >= uRegionCount) break;
     vec4 dir = uRegionDir[k];
-    float reach = REGION_REACH * dir.w;
+    vec4 donor = uRegionDonor[k];
+    vec4 donorAxis = uRegionDonorAxis[k];
+    /* Its own reach, and its patch's: the donor's spots at the patch's scale. */
+    float reach = max(REGION_REACH * dir.w, f.mapShare > 0.0 ? PHOTO_EDGE * donor.w / donorAxis.w : 0.0);
     if (1.0 - dot(s, dir.xyz) > 0.5 * reach * reach) continue;
     vec4 axis = uRegionAxis[k];
     vec4 side = uRegionSide[k];
     vec4 state = uRegionState[k];
     vec2 l = vec2(dot(s, axis.xyz), dot(s, side.xyz)) / dir.w;
+    float growth = uRegionPhoto[k];
+    if (f.mapShare > 0.0 && growth > 0.0) {
+      /* Where this point stands from the region's centre, along its axis and across it, radians
+         on the sphere, then as far from the donor's centre at the patch's scale. */
+      vec2 across = l * dir.w;
+      float sine = length(across);
+      vec2 d = across * (atan(sine, dot(s, dir.xyz)) / max(sine, 1e-9)) * donorAxis.w;
+      float far = length(d);
+      float within = 1.0 - smoothstep(donor.w, PHOTO_EDGE * donor.w, far);
+      if (within > 0.0) {
+        vec3 toward = d.x * donorAxis.xyz + d.y * cross(donor.xyz, donorAxis.xyz);
+        vec3 p = cos(far) * donor.xyz + (far > 0.0 ? sin(far) / far : 1.0) * toward;
+        float detail = uFine * smoothstep(MAP_DETAIL_FROM_PX, MAP_DETAIL_TO_PX, texelPx / donorAxis.w) * uStencilShown;
+        vec2 sampled = photographAt(p, px * donorAxis.w, mu, detail);
+        /* The patch keeps its place and size; the region's spot area keeps only what lies deeper
+           than its cut: a decaying group loses its pores and penumbral rims first and its spots
+           retreat into their umbrae, a growing one comes from its darkest cores out. Its faculae
+           outlast its spots. The whole patch shows at full growth: at the epoch, the photograph. */
+        float ratio = sampled.x / photoQuiet(sampled.x);
+        float cut = (1.0 - growth) * (1.0 + PHOTO_ERODE_SOFT) - PHOTO_ERODE_SOFT;
+        float kept = ratio < 1.0
+          ? smoothstep(cut, cut + PHOTO_ERODE_SOFT, photoDepth(sampled.x))
+          : sqrt(growth);
+        patches *= mix(1.0, ratio, within * kept);
+        patchSpot = max(patchSpot, sampled.y * within * kept);
+      }
+    }
     float seed = state.w;
     float grown = sqrt(side.w);
     float p = plage(l, seed) * state.y * side.w;
@@ -183,6 +252,10 @@ Face faceAt(vec3 s, float mu, float px) {
     float inside = (1.0 - smoothstep(0.5 * FILAMENT_WIDTH, FILAMENT_WIDTH, abs(v - wander))) * (1.0 - smoothstep(0.8 * at.w, at.w, abs(u)));
     f.filament = max(f.filament, inside * along.w);
   }
+  /* The photograph with the active features no region draws faded into its quiet disc as they
+     decay, and the regions' carried onto it: at the epoch, exactly the photograph. */
+  f.measured = mix(photoQuiet(photo.x), photo.x, unclaimed) * patches;
+  float mappedSpot = max(photo.y * unclaimed, patchSpot) * f.mapShare;
   f.spot = max(max(penumbra, pores), mappedSpot);
   float quiet = mix(0.35, 1.0, mu) * (1.0 - f.spot);
   float detail = 0.0;

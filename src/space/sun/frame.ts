@@ -16,7 +16,6 @@ import { blankEruptionState, blankPlaneLine, contours, eruptionAt } from "./mode
 import { eruptionFlow, FLOW_PARTICLES } from "./model/eruption-flow";
 import { blankEruptionLine, eruptionLines } from "./model/eruption-lines";
 import { blankPolyline, fieldLines, setSources } from "./model/field";
-import type { ObservedRegion } from "./model/observed";
 import {
   ARCADE_SLICES,
   EQUATORIAL_DIPOLE,
@@ -26,6 +25,7 @@ import {
 } from "./model/parameters";
 import { parkerAt, parkerElements } from "./model/parker";
 import { surfaceRate } from "./model/rotation";
+import type { SpotGroup } from "./model/spot-groups";
 
 export {
   AR_13664,
@@ -34,7 +34,13 @@ export {
   centralMeridianAt,
   type ObservedRegion,
 } from "./model/observed";
-export { lonePhotographedShare, photographedShare } from "./model/activity";
+export {
+  blankPhotoDraw,
+  photoDrawOf,
+  unclaimedSpotShare,
+  type PhotoDraw,
+} from "./model/photo-draw";
+export { SEEDED_GROUPS, SPOT_GROUPS, type SpotGroup } from "./model/spot-groups";
 export { MAP_EPOCH } from "./model/parameters";
 export { bipoleAxis, northAt, poleOf, surfacePoint, tiltedAxis, westAt } from "./model/field";
 export type {
@@ -110,13 +116,13 @@ function signField(
 }
 
 export type SunModelOptions = {
-  /** Regions to start the visit with, in the first slots (`OBSERVED_REGIONS`: the map's); the weather takes over as they decay. */
-  observed?: readonly ObservedRegion[];
+  /** Groups to start the visit with, in the first slots (`SEEDED_GROUPS`: the photograph's); the weather takes over as they decay. */
+  seeded?: readonly SpotGroup[];
 };
 
 /** The Sun model for one seed: `frameAt` fills and returns the same frame each call. */
 export function createSunModel(seed: number, options: SunModelOptions = {}) {
-  const forecast = createForecast(undefined, options.observed ?? []);
+  const forecast = createForecast(undefined, options.seeded ?? []);
   const { weather } = forecast;
   const lines = Array.from({ length: MAX_FIELD_LINES }, blankPolyline);
   const planeLines = Array.from({ length: ERUPTION_LINES }, blankPlaneLine);
@@ -154,13 +160,16 @@ export function createSunModel(seed: number, options: SunModelOptions = {}) {
     eruption: null,
     wolfNumber: 0,
     surfaceTurn: 0,
+    photographed: true,
   };
   const fieldShape = createSignature();
   const eruptionShape = createSignature();
   const equatorialLon = TAU * dice(seed, EQUATORIAL_LON_SALT);
 
   function frameAt(input: SunFrameInput): SunFrame {
-    forecast.at(seed, input.time, input.cyclePhase, input.eruptionScrub);
+    const photographed = input.ownCycle ?? true;
+    forecast.at(seed, input.time, input.cyclePhase, input.eruptionScrub, photographed);
+    frame.photographed = photographed;
     frame.time = input.time;
     frame.cyclePhase = cyclePhaseOf(input.cyclePhase);
     frame.dipole = dipoleAt(input.cyclePhase);

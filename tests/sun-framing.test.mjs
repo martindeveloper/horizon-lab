@@ -13,12 +13,7 @@ import {
   viewPose,
   viewSubjectRadius,
 } from "../src/features/sun/lib/scene/views.ts";
-import {
-  bipoleAxis,
-  createSunModel,
-  OBSERVED_REGIONS,
-  surfacePoint,
-} from "../src/space/sun/frame.ts";
+import { bipoleAxis, createSunModel, SEEDED_GROUPS, surfacePoint } from "../src/space/sun/frame.ts";
 
 const viewports = [
   { width: 390, height: 844, fov: 48 },
@@ -50,7 +45,7 @@ function cameraFor(id, frame, viewport) {
 }
 
 test("presets keep their subjects inside portrait, desktop and landscape-phone frames", () => {
-  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const model = createSunModel(7, { seeded: SEEDED_GROUPS });
   const frame = model.frameAt({
     time: 0,
     cyclePhase: 25.4,
@@ -97,7 +92,7 @@ test("presets keep their subjects inside portrait, desktop and landscape-phone f
 });
 
 test("eruption framing follows every stage, including reused geometry and the escaping CME", () => {
-  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const model = createSunModel(7, { seeded: SEEDED_GROUPS });
   let initialRadius = 0;
   for (const s of [0, 0.25, 0.5, 0.75, 1]) {
     const frame = model.frameAt({
@@ -134,7 +129,7 @@ test("eruption framing follows every stage, including reused geometry and the es
 });
 
 test("the eruption camera presents the reconnection plane across region tilts and hemispheres", () => {
-  const model = createSunModel(7, { observed: OBSERVED_REGIONS });
+  const model = createSunModel(7, { seeded: SEEDED_GROUPS });
   const frame = model.frameAt({
     time: 0,
     cyclePhase: 25.4,

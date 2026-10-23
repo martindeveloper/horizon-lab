@@ -104,7 +104,9 @@
     "magnetogram": "Model magnetogram"
   },
   "lightNotes": {
-    "white": "HMI mosaic + synthetic detail",
+    "white": "HMI mosaic of May 2024 + synthetic detail",
+    "whiteGrown": "Grown from the HMI mosaic of May 2024, {elapsed} on",
+    "whiteCycle": "A model cycle, its groups drawn from the HMI mosaic of May 2024",
     "halpha": "Illustrative chromosphere",
     "he304": "He II + coronal Si XI · synthetic",
     "fe171": "Fe IX · synthetic",
@@ -284,7 +286,7 @@
       "title": "Sunspot",
       "where": "Surface",
       "body": "Strong field holds the convection down, so the spot is cooler and looks dark. The umbra is darkest; the penumbra's filaments lean outward.",
-      "caution": "Regions are initialized from NOAA reports associated with the May 2024 HMI mosaic. Their later evolution and fine structure are synthetic."
+      "caution": "Groups start where the May 2024 HMI mosaic shows them, numbered from nearby NOAA reports. Their later evolution, and the groups that form later, are modelled, drawn from the mosaic's own photographed groups."
     },
     "facula": {
       "title": "Faculae",
@@ -350,7 +352,7 @@
       "title": "Parker Solar Probe",
       "where": "Through the corona",
       "body": "Parker first entered the solar corona in April 2021. On 24 December 2024 it reached its record orbit, about {parkerPerihelionR} solar radii from the Sun’s centre at about {parkerSpeed}; later passes repeated this close approach.",
-      "caution": "Placed on its record orbit by the lab’s clock from JPL Horizons’ elements, not live telemetry; the orbit’s tilt and the direction of its closest point are the view’s."
+      "caution": "Placed by the lab’s clock on the orbit it flew then, from JPL Horizons’ elements: down to about {parkerEarlierR} solar radii until its last Venus flyby on 6 November 2024, its record orbit after. Not live telemetry; the orbits’ tilt and the direction of their closest point are the view’s."
     }
   },
   "tour": {

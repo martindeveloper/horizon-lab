@@ -28,8 +28,8 @@ export function createSunMap(
   options: {
     /** The tier the quality allows besides `far`. */
     tier: () => MapTier;
-    /** A map arrived: upload it; `width` is its pixels round the equator. */
-    onLoad: (texture: Texture, width: number) => void;
+    /** A map arrived: upload it; `width` is its pixels round the equator, `finest` whether it is the quality's tier. */
+    onLoad: (texture: Texture, width: number, finest: boolean) => void;
     /** Both linear-data textures arrived; neither may be used on its own. */
     onStencil: (atlas: Texture, pages: Texture) => void;
     wake: () => void;
@@ -123,7 +123,7 @@ export function createSunMap(
           const previous = drawn;
           shown = tier;
           drawn = texture;
-          options.onLoad(texture, widths[tier]);
+          options.onLoad(texture, widths[tier], tier === options.tier());
           previous?.dispose();
         } else texture.dispose();
         options.wake();

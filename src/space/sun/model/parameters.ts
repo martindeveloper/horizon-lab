@@ -60,13 +60,29 @@ export const PARKER_PERIHELION_SPEED_KM_S = 191;
 export const PARKER_ECCENTRICITY = 0.8819;
 export const PARKER_PERIOD_D = 88.44;
 export const PARKER_PERIHELION_EPOCH = Date.UTC(2025, 5, 19, 9, 8);
+/**
+ * Its orbit before then, from its sixth Venus flyby to its seventh (JPL Horizons osculating
+ * elements, 1 June 2024; the same on 1 October): the perihelion from the centre, R☉ (7.956
+ * million km), the eccentricity, the period in days, a perihelion's moment (30 June 2024, 03:47
+ * UTC) and how far its perihelion stood along the motion from the record orbit's, degrees (the
+ * argument of perihelion, 71.38° then and 68.46° after; node and tilt unchanged).
+ */
+export const PARKER_EARLIER_PERIHELION_R = 11.435;
+export const PARKER_EARLIER_ECCENTRICITY = 0.8667;
+export const PARKER_EARLIER_PERIOD_D = 92.06;
+export const PARKER_EARLIER_PERIHELION_EPOCH = Date.UTC(2024, 5, 30, 3, 47);
+export const PARKER_EARLIER_TURN_DEG = 2.92;
+/** Its seventh and last Venus flyby, at closest approach (Horizons: 6,433 km from Venus's centre): the earlier orbit becomes the record one. */
+export const PARKER_LAST_FLYBY = Date.UTC(2024, 10, 6, 18, 44);
 /** Its heat shield's sunward face at the closest passes, °C: NASA's 2,500 °F. */
 export const PARKER_SHIELD_PERIHELION_C = ((2500 - 32) * 5) / 9;
 /** Where it first flew below the Alfvén surface, the corona's outer edge, 28 April 2021: radii from the centre (Kasper et al. 2021). */
 export const PARKER_CORONA_EDGE_R = 18.8;
 export const MAP_WINDOW_D = 21;
-/** Reported regions smaller than this, millionths of a hemisphere, are not seeded. */
+/** Reported regions smaller than this, millionths of a hemisphere, are not listed. */
 export const OBSERVED_MIN_AREA_MSH = 10;
+/** A grown group borrows the patch of a photographed group at least this share of its size, so a patch is not blown up past its pixels. */
+export const PHOTO_DONOR_MIN_SIZE_SHARE = 0.7;
 
 /* --------------------------------------------------------------- the cycle */
 
@@ -117,7 +133,7 @@ export const MSH_PER_RAD2 = 1e6 / 2;
 export const REGION_LIFE_MIN_D = 3;
 /** A region reaches full strength this far into its life, then its area decays linearly (Hathaway 2015, §4.5). */
 export const REGION_EMERGENCE_SHARE = 0.15;
-/** An observed region starts a visit at its prime: this far into its life. */
+/** A seeded group starts a visit at its prime: this far into its life. */
 export const OBSERVED_START_SHARE = REGION_EMERGENCE_SHARE;
 /** Spots per group at a median region's prime, for the Wolf number (Hathaway 2015: ~10 spots per group at maximum). */
 export const SPOTS_PER_REGION = 8;
