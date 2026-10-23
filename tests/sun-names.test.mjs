@@ -8,6 +8,7 @@ import { createPlaceAnchors } from "../src/features/sun/lib/scene/anchors.ts";
 import { createPlaceNames } from "../src/features/sun/lib/scene/names.ts";
 import { createSunModel } from "../src/space/sun/frame.ts";
 import { DAY_S, SOURCE_SURFACE_R } from "../src/space/sun/model/parameters.ts";
+import { PASSBANDS } from "../src/space/sun/model/passbands.ts";
 import { LAYERS } from "../src/space/sun/model/structure.ts";
 
 const input = (over = {}) => ({
@@ -73,7 +74,7 @@ test("a limb feature is named where it stands on the limb, not over the disc's c
   const limb = new Vector3(
     ...createPlaceAnchors()(frame, "chromosphere", [0, 0, 0]),
   ).applyAxisAngle(new Vector3(0, 1, 0), frame.surfaceTurn);
-  const shownFrom = (position) => {
+  const namesFrom = (position, light = "halpha", spicules = true) => {
     camera.position.copy(position);
     camera.lookAt(0, 0, 0);
     camera.updateMatrixWorld();
@@ -85,10 +86,14 @@ test("a limb feature is named where it stands on the limb, not over the disc's c
       shown: true,
       cut: new Vector2(0, 0),
       cutShown: 0,
-      light: "band",
+      light: light === "white" ? "white" : "band",
+      weights: PASSBANDS[light].weights,
+      spicules,
+      prominence: 1,
     });
-    return shown.get("chromosphere");
+    return shown;
   };
+  const shownFrom = (position) => namesFrom(position).get("chromosphere");
   /* Three radii out, the limb lies acos(1/3) off the axis: from there the anchor stands on it. */
   const over = limb.clone().normalize();
   const side = new Vector3().crossVectors(over, new Vector3(0, 1, 0)).normalize();
@@ -100,4 +105,52 @@ test("a limb feature is named where it stands on the limb, not over the disc's c
   assert.equal(shownFrom(onLimb.multiplyScalar(3)), true, "on the limb");
   /* Straight over it: the anchor is at the disc's centre, far from the limb. */
   assert.equal(shownFrom(over.clone().multiplyScalar(3)), false, "not over the disc's centre");
+});
+
+test("a place is named only where the light draws it: no chromosphere or spicules in white light", () => {
+  const frame = createSunModel(5).frameAt(input());
+  const camera = new PerspectiveCamera(40, 1, 0.001, 100);
+  const anchorOf = createPlaceAnchors();
+  /* From three radii out, looking at the centre with the place's anchor on the limb, on a stage
+     `size` px square: a larger stage stands for a closer look, its jets more pixels apart. */
+  const namesAt = (place, light, { size = 1200, spicules = true } = {}) => {
+    const at = new Vector3(...anchorOf(frame, place, [0, 0, 0])).applyAxisAngle(
+      new Vector3(0, 1, 0),
+      frame.surfaceTurn,
+    );
+    const over = at.clone().normalize();
+    const side = new Vector3().crossVectors(over, new Vector3(0, 1, 0)).normalize();
+    const offAxis = Math.acos(1 / 3) - 0.02;
+    camera.position
+      .copy(over)
+      .multiplyScalar(Math.cos(offAxis))
+      .addScaledVector(side, Math.sin(offAxis))
+      .multiplyScalar(3);
+    camera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld();
+    const shown = new Map();
+    createPlaceNames((key, _x, _y, _z, on) => shown.set(key, on)).update(frame, {
+      camera,
+      viewport: { width: size, height: size },
+      shown: true,
+      cut: new Vector2(0, 0),
+      cutShown: 0,
+      light: light === "white" ? "white" : "band",
+      weights: PASSBANDS[light].weights,
+      spicules,
+      prominence: 1,
+    });
+    return shown.get(place);
+  };
+  /* White light draws no chromosphere or corona at the limb: nothing there to name. */
+  assert.equal(namesAt("chromosphere", "white"), false);
+  assert.equal(namesAt("spicule", "white", { size: 6000 }), false);
+  assert.equal(namesAt("corona", "white"), false);
+  /* Hα draws the rim; the spicules only once their jets are resolved, and only where drawn. */
+  assert.equal(namesAt("chromosphere", "halpha"), true);
+  assert.equal(namesAt("spicule", "halpha"), false, "the whole disc: jets too fine to see");
+  assert.equal(namesAt("spicule", "halpha", { size: 6000 }), true, "a closer look: jets apart");
+  assert.equal(namesAt("spicule", "halpha", { size: 6000, spicules: false }), false);
+  /* 193 Å shows the corona alone: no rim of the chromosphere to name there. */
+  assert.equal(namesAt("chromosphere", "fe193"), false);
 });

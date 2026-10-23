@@ -6,15 +6,16 @@
  */
 import { Vector3, type PerspectiveCamera, type Vector2 } from "three";
 
-import { SPICULE_HEIGHT } from "@/space/sun/graphics/parameters";
+import { SURFACE_RESOLVE_PX } from "@/space/sun/graphics/parameters";
 import { LAYER_IDS, type LayerId } from "@/space/sun/model/structure";
-import type { Vec3 } from "@horizon/toolkit/math";
+import { TAU, type Vec3 } from "@horizon/toolkit/math";
 import { recordFrom } from "@horizon/toolkit/records";
 import { worldPerPixel, type PlaceLabel } from "@horizon/toolkit/scene";
 
 import { PLACE_IDS, type PlaceId } from "../model/places";
 import {
   GRANULES_PER_RADIUS,
+  SPICULE_COLUMNS,
   NAME_DISC_R,
   NAME_FEATURE_PX,
   NAME_LIMB_PX,
@@ -23,14 +24,15 @@ import {
 import { createPlaceAnchors } from "./anchors";
 import type { SunFrame } from "./frame";
 import type { LightKind } from "./looks";
+import type { SunLight } from "./settings";
 import { featuredRegion } from "./views";
 
 /** The body's pole: what the surface turns about. */
 const POLE = new Vector3(0, 1, 0);
 /** The cut must be this far open before the places inside the Sun are named. */
 const NAMED_INSIDE_CUT = 0.3;
-/** A feature smaller than this many CSS px is not named. */
-const SPICULE_NAME_PX = 2;
+/** Spicules are named once their jets stand this far apart, CSS px: where the renderer draws all of them. */
+const SPICULE_NAME_PX = 2 * SURFACE_RESOLVE_PX;
 /** A flare is named while its light is above this share. */
 const FLARE_NAMED_LIGHT = 0.05;
 
@@ -48,26 +50,35 @@ type NameScene = {
   /** The anchor stands within `NAME_LIMB_PX` of the limb on screen. */
   nearLimb: boolean;
   light: LightKind;
+  /** What the light shows of each layer, 0–1: a layer it does not show has no names. */
+  weights: SunLight["weights"];
+  /** The quality draws spicules; how much a prominence shows in the light. */
+  spicules: boolean;
+  prominence: number;
   flareLight: number;
 };
+
+/** The light shows the chromosphere's rim (or the transition region's sheath on it), as the atmosphere draws it. */
+const rimShown = (s: NameScene) => s.weights.chromosphere + s.weights.transition > 0;
 
 /** When each place's name shows, once its anchor is in view outside the Sun. */
 const NAME_SHOWN: Readonly<Record<PlaceId, (s: NameScene) => boolean>> = {
   star: () => false,
   parker: () => true,
-  granule: (s) => s.px(1 / GRANULES_PER_RADIUS) > 1,
-  sunspot: (s) => s.regionPx > NAME_FEATURE_PX,
-  facula: (s) => s.regionPx > NAME_FEATURE_PX,
-  photosphere: (s) => s.distance < NAME_DISC_R,
-  chromosphere: (s) => s.nearLimb,
-  spicule: (s) => s.nearLimb && s.px(SPICULE_HEIGHT) > SPICULE_NAME_PX,
-  prominence: (s) => s.nearLimb,
+  granule: (s) => s.weights.photosphere > 0 && s.px(1 / GRANULES_PER_RADIUS) > 1,
+  sunspot: (s) => s.weights.photosphere > 0 && s.regionPx > NAME_FEATURE_PX,
+  facula: (s) => s.weights.photosphere + s.weights.chromosphere > 0 && s.regionPx > NAME_FEATURE_PX,
+  photosphere: (s) => s.weights.photosphere > 0 && s.distance < NAME_DISC_R,
+  chromosphere: (s) => s.nearLimb && rimShown(s),
+  spicule: (s) =>
+    s.nearLimb && rimShown(s) && s.spicules && s.px(TAU / SPICULE_COLUMNS) >= SPICULE_NAME_PX,
+  prominence: (s) => s.nearLimb && s.prominence > 0,
   flare: (s) => s.light === "band" && s.flareLight > FLARE_NAMED_LIGHT,
   loops: (s) => s.light === "band" && s.regionPx > NAME_FEATURE_PX,
-  corona: (s) => s.nearLimb,
-  streamer: (s) => s.nearLimb,
-  ejection: () => true,
-  wind: (s) => s.nearLimb,
+  corona: (s) => s.nearLimb && s.weights.corona > 0,
+  streamer: (s) => s.nearLimb && s.weights.corona > 0,
+  ejection: (s) => s.weights.chromosphere + s.weights.corona > 0,
+  wind: (s) => s.nearLimb && s.weights.corona > 0,
   core: () => true,
   radiativeZone: () => true,
   tachocline: () => true,
@@ -85,6 +96,10 @@ export type NameView = {
   cut: Vector2;
   cutShown: number;
   light: LightKind;
+  /** The light's layer weights, whether the quality draws spicules, how much a prominence shows. */
+  weights: SunLight["weights"];
+  spicules: boolean;
+  prominence: number;
 };
 
 export function createPlaceNames(place: PlaceLabel) {
@@ -102,6 +117,9 @@ export function createPlaceNames(place: PlaceLabel) {
     regionPx: 0,
     nearLimb: false,
     light: "white",
+    weights: { photosphere: 1, chromosphere: 0, transition: 0, corona: 0, flare: 0 },
+    spicules: false,
+    prominence: 0,
     flareLight: 0,
   };
   let worldPx = 0;
@@ -130,6 +148,9 @@ export function createPlaceNames(place: PlaceLabel) {
       const featured = featuredRegion(f);
       scene.distance = distance;
       scene.light = view.light;
+      scene.weights = view.weights;
+      scene.spicules = view.spicules;
+      scene.prominence = view.prominence;
       scene.flareLight = f.eruption?.flareLight ?? 0;
       let layersNamed = 0;
       for (const id of PLACE_IDS) {

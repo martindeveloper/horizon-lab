@@ -309,6 +309,9 @@ export function createSunEngine(
         cut,
         cutShown: cutMotion.shown,
         light: kind,
+        weights: current.light.weights,
+        spicules: quality.spicules,
+        prominence: prominenceLit,
       });
       picking.update(f);
       flush();
