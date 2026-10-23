@@ -21,7 +21,11 @@ import {
   CENTRAL_MERIDIANS,
   modelLongitude,
 } from "../src/space/sun/model/observed.ts";
-import { DAY_S, OBSERVED_START_SHARE } from "../src/space/sun/model/parameters.ts";
+import {
+  DAY_S,
+  OBSERVED_START_SHARE,
+  PHOTO_DONOR_MIN_SIZE_SHARE,
+} from "../src/space/sun/model/parameters.ts";
 import { lagBehindEquator } from "../src/space/sun/model/rotation.ts";
 import { SEEDED_ID_BASE } from "../src/space/sun/model/spot-groups.ts";
 
@@ -196,17 +200,49 @@ test("each region draws a photographed patch in place: its own as seeded, a rest
     const seat = SEEDED_GROUPS.indexOf(draw.donor);
     if (seat >= 0)
       assert.fail(`region ${id} borrows seeded group ${draw.donor.key}, still on the disc`);
-    assert.ok(draw.donor.size >= 0.7 * 0.02 || draw.donor === SPOT_GROUPS[SEEDED_GROUPS.length]);
     assert.ok(draw.turn >= 0 && draw.turn < 2 * Math.PI);
-    assert.equal(draw.growth, 0.64);
+    assert.equal(draw.growth, draw.donor ? 0.64 : 0, "no patch, nothing of it kept");
     assert.deepEqual(photoDrawOf(grown(id, 10), born), draw, "the same for the same region");
   }
   /* A year on every photographed group may lend again. */
   const lenders = new Set(
-    Array.from({ length: 80 }, (_, id) => photoDrawOf(grown(id + 1, 365), 365 * DAY_S).donor.key),
+    Array.from({ length: 80 }, (_, id) => photoDrawOf(grown(id + 1, 365), 365 * DAY_S).donor?.key),
   );
   assert.ok([...lenders].some((key) => SEEDED_GROUPS.some((g) => g.key === key)));
   assert.ok(lenders.size > 5, "grown regions borrow from many groups");
+});
+
+/** A group the weather grows, born ten days after the epoch, at strength 0.64. */
+const grownRegion = (id) => ({
+  id,
+  lat: AR_13664.lat,
+  lon: 0,
+  tilt: 0,
+  size: 0.02,
+  polarity: 1,
+  age: 0,
+  strength: 0.64,
+  flare: 0,
+  facula: 0,
+});
+
+test("no patch is blown up past its pixels: a group with no photographed one near its size has none", () => {
+  /* While the large seeded groups are on the disc they lend nothing; a large grown group then
+     finds no free group near its size and the model draws it, never a small group magnified. */
+  for (const size of [0.01, 0.02, 0.04, 0.075, 0.12])
+    for (let id = 1; id <= 40; id++) {
+      const region = { ...grownRegion(id), size };
+      const draw = photoDrawOf(region, 10 * DAY_S);
+      if (draw.donor)
+        assert.ok(
+          draw.scale >= PHOTO_DONOR_MIN_SIZE_SHARE,
+          `${id} at ${size}: patch magnified ${(1 / draw.scale).toFixed(1)}×`,
+        );
+      else assert.equal(draw.growth, 0, `${id} at ${size}: no patch, the model draws it`);
+    }
+  /* Some large group finds none early on, and so is drawn by the model. */
+  const large = { ...grownRegion(1), size: 0.12 };
+  assert.equal(photoDrawOf(large, 10 * DAY_S).donor, null);
 });
 
 test("the photograph's unclaimed spots decay from the epoch as the largest of them would", () => {

@@ -19,6 +19,7 @@ precision highp float;
 #include "./surface-detail.glsl"
 
 uniform highp sampler2D uProfile;      // R,V,B limb darkening by μ (the Sun's Claret law)
+uniform highp sampler2D uLuminanceTint; // by brightness against the quiet Sun: the colour of the continuum that bright
 uniform highp sampler2D uInterior;     // by radius: ln T, ln ρ, the cells' octave, the light made (over its peak)
 uniform float uCoreLnT;                // ln T at the centre
 uniform vec3 uLayers;                  // the core's, the tachocline's and the photosphere's radii
@@ -108,8 +109,11 @@ struct Face {
   /** The measured continuum here, against the quiet Sun, and how much of the face it paints. */
   float measured;
   float mapShare;
-  /** The granulation's temperature here: the detail laid over the photograph, which holds none. */
-  float granuleKelvin;
+  /**
+   * What the model draws over the photograph here, as a temperature: granulation, which the
+   * photograph does not hold, and the spots and faculae of the regions it has no patch for.
+   */
+  float drawnKelvin;
   float spot;
   float plage;
   float network;
@@ -124,6 +128,20 @@ vec2 quietNetwork(vec3 q) {
   float lanes = 1.0 - smoothstep(0.0, 0.3, abs(gradientNoise3(q)));
   float grain = gradientNoise3(q * 2.7);
   return vec2(lanes, sign(grain) * smoothstep(0.25, 0.55, abs(grain)) * (0.4 + 0.6 * lanes));
+}
+
+// The photograph's brightness against the quiet Sun's, read as the continuum that is that bright:
+// its colour against the photosphere's, 1 at the quiet Sun (`luminanceTintTable`).
+vec3 tintOf(float ratio) {
+  float x = log(max(ratio, PHOTO_TINT_MIN) / PHOTO_TINT_MIN) / log(PHOTO_TINT_MAX / PHOTO_TINT_MIN);
+  return tableAt(uLuminanceTint, x, PHOTO_TINT_SAMPLES, 0, 1).rgb;
+}
+
+// A temperature with the spots' penumbra, umbra and pores laid in.
+float spotted(float kelvin, float penOnly, float penumbraK, float umbra, float umbraK, float pore) {
+  kelvin = mix(kelvin, penumbraK, penOnly);
+  kelvin = mix(kelvin, umbraK, umbra);
+  return mix(kelvin, UMBRA_K, pore);
 }
 
 Face faceAt(vec3 s, vec3 dsdx, vec3 dsdy, float mu, float px) {
@@ -162,7 +180,8 @@ Face faceAt(vec3 s, vec3 dsdx, vec3 dsdy, float mu, float px) {
       unclaimed *= smoothstep(group.w, PHOTO_EDGE * group.w, length(s - group.xyz));
     }
   }
-  float marks = uLightMode == LIGHT_WHITE ? 1.0 - f.mapShare : 1.0;
+  /* A region the photograph draws shows its patch in white light, not the model's marks. */
+  float photoMarks = uLightMode == LIGHT_WHITE ? 1.0 - f.mapShare : 1.0;
   float cells = GRANULES_PER_RADIUS / NETWORK_GRANULES;
   float netSeen = resolvedFeature(cells, px, mu);
   /* The supergranular network: its lanes bright, the cells' middles quiet. */
@@ -210,6 +229,8 @@ Face faceAt(vec3 s, vec3 dsdx, vec3 dsdy, float mu, float px) {
     vec4 state = uRegionState[k];
     vec2 l = vec2(dot(s, axis.xyz), dot(s, side.xyz)) / dir.w;
     float growth = uRegionPhoto[k];
+    /* One with no patch (none of the photograph's groups is near its size): the model's. */
+    float marks = growth > 0.0 ? photoMarks : 1.0;
     if (f.mapShare > 0.0 && growth > 0.0) {
       /* Where this point stands from the region's centre, along its axis and across it, radians
          on the sphere, then as far from the donor's centre at the patch's scale. */
@@ -318,13 +339,14 @@ Face faceAt(vec3 s, vec3 dsdx, vec3 dsdy, float mu, float px) {
   }
   /* Where the granules are too small to see, the network's faint mottle shows instead. */
   float mottle = NETWORK_CONTRAST * netSeen * (1.0 - fine) * (network - 0.4) * quiet;
-  dT += granulation + mottle;
-  f.granuleKelvin = PHOTOSPHERE_K * (1.0 + granulation);
-  f.kelvin = PHOTOSPHERE_K * (1.0 + dT);
+  dT += granulation;
   float penOnly = max(penumbra - umbra, 0.0);
-  f.kelvin = mix(f.kelvin, PENUMBRA_K * (1.0 + PENUMBRA_FILAMENT * (filaments - 0.5) + EVERSHED_RIPPLE * ripple), penOnly);
-  f.kelvin = mix(f.kelvin, UMBRA_K * (1.0 + UMBRAL_DOT_CONTRAST * dots), umbra);
-  f.kelvin = mix(f.kelvin, UMBRA_K, 0.7 * pores * (1.0 - penumbra));
+  float penumbraK = PENUMBRA_K * (1.0 + PENUMBRA_FILAMENT * (filaments - 0.5) + EVERSHED_RIPPLE * ripple);
+  float umbraK = UMBRA_K * (1.0 + UMBRAL_DOT_CONTRAST * dots);
+  float pore = 0.7 * pores * (1.0 - penumbra);
+  /* Over the photograph, all but the network's mottle: the photograph holds its own. */
+  f.drawnKelvin = spotted(PHOTOSPHERE_K * (1.0 + dT), penOnly, penumbraK, umbra, umbraK, pore);
+  f.kelvin = spotted(PHOTOSPHERE_K * (1.0 + dT + mottle), penOnly, penumbraK, umbra, umbraK, pore);
   f.network = mix(0.36, network, netSeen);
   return f;
 }
@@ -346,12 +368,15 @@ vec3 surfaceColour(Face f, vec3 s, float mu) {
        definition and cooler gas warmer against it; the measured continuum under the Claret law
        at every zoom; relative light raised to the display contrast, then exposed below white
        at the centre. The photograph (8-bit browse discs from days apart) holds no granulation,
-       only what it resolves: spots, faculae, the network, the limb. Granules are laid over it
-       wherever they resolve, as on the procedural disc, the same with the map or without;
-       the network's mottle is not, the photograph has its own. */
+       only what it resolves: spots, faculae, the network, the limb. Over it the model draws
+       granules wherever they resolve, as on the procedural disc, the same with the map or
+       without, and the regions no patch of it may draw; not the network's mottle, which the
+       photograph has its own of. The photograph is display contrast, not calibrated radiance,
+       but its brightness is drawn as the eye's: each value takes the colour of the continuum
+       that bright, so a photographed spot is coloured as a modelled one as dark is. */
     vec3 procedural = glowAt(f.kelvin, uFaceLogY) / uSunlight;
-    vec3 granulation = glowAt(f.granuleKelvin, uFaceLogY) / uSunlight;
-    vec3 measured = vec3(f.measured) * granulation;
+    vec3 drawn = glowAt(f.drawnKelvin, uFaceLogY) / uSunlight;
+    vec3 measured = f.measured * tintOf(f.measured) * drawn;
     vec3 relative = mix(procedural, measured, f.mapShare) * limb;
     vec3 light = pow(max(relative, 0.0), vec3(SURFACE_CONTRAST)) * SURFACE_EXPOSURE;
     /* A white-light flare is rare and faint: only as much as the light's flare weight allows (none). */

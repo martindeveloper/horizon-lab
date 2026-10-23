@@ -99,7 +99,8 @@ export function createSunLooks() {
     uRegionState: { value: regionState },
     /**
      * Each region drawn from the photograph (`photoDrawOf`): its donor's centre at the epoch and
-     * reach; its donor's axis and the patch's radians per the region's; its spot area's share. The
+     * reach; its donor's axis and the patch's radians per the region's; its spot area's share (0:
+     * no patch, the model draws its spots). The
      * seeded groups' centres at the epoch and reach, whose spots the regions draw, and how much
      * of the photograph's unclaimed spots shows.
      */
@@ -209,6 +210,13 @@ export function createSunLooks() {
         regionState[k]!.set(flare, region.facula, gap, 64 * dice(region.id, 173));
         photoDrawOf(region, t, draw);
         const donor = draw.donor;
+        /* No patch: nothing of the photograph to reach for (its growth is 0, the model draws it). */
+        if (!donor) {
+          regionDonor[k]!.set(0, 0, 0, 0);
+          regionDonorAxis[k]!.set(0, 0, 0, 1);
+          regionPhoto[k] = 0;
+          continue;
+        }
         directionOf(donor.lat, donor.lon, dir);
         donorCentre.set(dir[0], dir[1], dir[2]);
         regionDonor[k]!.set(dir[0], dir[1], dir[2], donor.reach);

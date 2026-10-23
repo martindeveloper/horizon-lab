@@ -129,6 +129,20 @@ const SCENES: readonly SunBenchScene[] = [
     }),
     id: "sunspot-granule",
   },
+  {
+    ...still(
+      "sunspot",
+      "white",
+      "The photographed group up close: its measured shapes in the eye's colours",
+      {
+        start: 0,
+        photo: true,
+        at: 3,
+      },
+    ),
+    id: "sunspot-photo",
+    tags: ["view", "photo"],
+  },
   still("chromosphere", "halpha", "The limb in Hα: the chromosphere's rim, spicules, a prominence"),
   still("corona", "eclipse", "The disc occulted: streamers, plumes, the F and E coronae"),
   still(

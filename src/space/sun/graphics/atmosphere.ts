@@ -51,6 +51,35 @@ export function continuumTable() {
   return data;
 }
 
+/**
+ * A brightness read as a temperature: for each ratio to a reference surface's photopic radiance,
+ * log-spaced from `min` to `max`, the continuum that is exactly that bright, as its colour against
+ * the reference's (rgb, 1 at the reference) and its temperature (alpha). Inverted from
+ * `continuumTable`'s samples as the shader interpolates them; clamped to the table's range.
+ */
+export function luminanceTintTable(referenceK: number, samples: number, min: number, max: number) {
+  const table = continuumTable();
+  const reference = stellarContinuum(referenceK);
+  const kelvinAt = (j: number) =>
+    SPECTRUM_MIN_K * (SPECTRUM_MAX_K / SPECTRUM_MIN_K) ** (j / (SPECTRUM_SAMPLES - 1));
+  const data = new Float32Array(samples * 4);
+  let j = 0;
+  for (let i = 0; i < samples; i++) {
+    const logY = reference[3] + Math.log(min * (max / min) ** (i / (samples - 1)));
+    /* Radiance rises with temperature: walk to the samples either side of the wanted one. */
+    while (j < SPECTRUM_SAMPLES - 2 && table[(j + 1) * 4 + 3]! < logY) j++;
+    const lo = table[j * 4 + 3]!;
+    const hi = table[(j + 1) * 4 + 3]!;
+    const t = Math.min(1, Math.max(0, (logY - lo) / (hi - lo)));
+    for (let c = 0; c < 3; c++) {
+      const value = table[j * 4 + c]! + (table[(j + 1) * 4 + c]! - table[j * 4 + c]!) * t;
+      data[i * 4 + c] = value / reference[c]!;
+    }
+    data[i * 4 + 3] = kelvinAt(j) * (kelvinAt(j + 1) / kelvinAt(j)) ** t;
+  }
+  return data;
+}
+
 /** Four-coefficient Claret law: I(mu)/I(1), bounded only against fit overshoot. */
 export function limbIntensity(coefficients: Coefficients, mu: number) {
   const m = Math.max(0, Math.min(1, mu));

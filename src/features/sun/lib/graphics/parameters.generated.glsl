@@ -24,6 +24,9 @@
 #define WHITE_FLARE_K             9000.0
 #define MAP_DETAIL_FROM_PX        1.25
 #define MAP_DETAIL_TO_PX          2.5
+#define PHOTO_TINT_SAMPLES        64
+#define PHOTO_TINT_MIN            0.02
+#define PHOTO_TINT_MAX            1.5
 #define PHOTO_EDGE                1.15
 #define PHOTO_QUIET_LOW           0.999
 #define PHOTO_QUIET_HIGH          1.019

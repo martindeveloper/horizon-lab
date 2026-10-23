@@ -113,6 +113,13 @@ export const PHOTOSPHERE_K = SOLAR_TEFF_K;
  * in over MAP_FADE_IN_S seconds. Its quiet level is the solar system's.
  */
 export const MAP_DETAIL_FROM_PX = 1.25;
+/**
+ * The photograph's brightness against the quiet Sun's, read as a temperature for its colour
+ * (`luminanceTintTable`): this many samples, log-spaced over this range of ratios.
+ */
+export const PHOTO_TINT_SAMPLES = 64;
+export const PHOTO_TINT_MIN = 0.02;
+export const PHOTO_TINT_MAX = 1.5;
 export const MAP_DETAIL_TO_PX = 2.5;
 export const MAP_FADE_IN_S = 1.2;
 /**
@@ -571,6 +578,9 @@ export const SHADER_DEFINES = glslDefines({
   WHITE_FLARE_K,
   MAP_DETAIL_FROM_PX,
   MAP_DETAIL_TO_PX,
+  PHOTO_TINT_SAMPLES: glslInt(PHOTO_TINT_SAMPLES),
+  PHOTO_TINT_MIN,
+  PHOTO_TINT_MAX,
   PHOTO_EDGE,
   PHOTO_QUIET_LOW,
   PHOTO_QUIET_HIGH,

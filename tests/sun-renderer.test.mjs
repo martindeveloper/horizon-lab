@@ -10,6 +10,7 @@ import { createAtmosphereLayer } from "../src/features/sun/lib/scene/atmosphere-
 import { createFieldLayer } from "../src/features/sun/lib/scene/field-layer.ts";
 import { createSunLooks } from "../src/features/sun/lib/scene/looks.ts";
 import { createSunModel, SEEDED_GROUPS } from "../src/space/sun/frame.ts";
+import { luminanceTintTable, stellarContinuum } from "../src/space/sun/graphics/atmosphere.ts";
 
 test("CME rendering fades independently of its position and clears after the eruption", () => {
   const scope = new DisposalScope();
@@ -94,4 +95,25 @@ test("ribbons redraw reused model geometry and apply lower quality without a clo
     scope.dispose();
   }
   assert.equal(scene.children.length, 0, "disposing releases the layer");
+});
+
+test("a photographed brightness takes the colour of the continuum exactly that bright", () => {
+  const reference = 5772;
+  const [min, max, samples] = [0.02, 1.5, 33];
+  const table = luminanceTintTable(reference, samples, min, max);
+  const logY = (kelvin) => stellarContinuum(kelvin)[3];
+  let warmth = Infinity;
+  for (let i = 0; i < samples; i++) {
+    const ratio = min * (max / min) ** (i / (samples - 1));
+    const kelvin = table[i * 4 + 3];
+    /* The temperature found is as bright as the ratio says, against the photosphere. */
+    assert.ok(Math.abs(Math.exp(logY(kelvin) - logY(reference)) / ratio - 1) < 0.01, `${ratio}`);
+    /* Darker reads cooler, so redder against blue, all the way up. */
+    const redOverBlue = table[i * 4] / table[i * 4 + 2];
+    assert.ok(redOverBlue < warmth, `${ratio}: not warmer than a brighter one`);
+    warmth = redOverBlue;
+  }
+  /* The quiet Sun itself keeps its own colour: white. */
+  const quiet = luminanceTintTable(reference, 2, 1, 1.5);
+  for (let c = 0; c < 3; c++) assert.ok(Math.abs(quiet[c] - 1) < 0.01);
 });

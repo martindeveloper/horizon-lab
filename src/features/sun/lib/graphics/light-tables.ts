@@ -1,6 +1,6 @@
 /**
- * The small tables the Sun's shaders sample: the continuum (the shared CIE/Planck table), the
- * Sun's limb darkening (its Claret law), the interior's profile by radius and the current
+ * The small tables the Sun's shaders sample: the continuum (the shared CIE/Planck table) and its
+ * inverse by brightness (the photograph's colour), the Sun's limb darkening (its Claret law), the interior's profile by radius and the current
  * light's colour ramp. Float textures, nearest-filtered and interpolated by hand in the shader.
  */
 import { DataTexture, FloatType, NearestFilter, RGBAFormat, type Texture } from "three";
@@ -8,6 +8,7 @@ import { DataTexture, FloatType, NearestFilter, RGBAFormat, type Texture } from 
 import {
   atmosphereProfile,
   continuumTable,
+  luminanceTintTable,
   stellarContinuum,
 } from "@/space/sun/graphics/atmosphere";
 import { PROFILE_SAMPLES, SPECTRUM_SAMPLES } from "@/space/sun/graphics/parameters";
@@ -25,6 +26,9 @@ import {
   INTERIOR_SAMPLES,
   LAYER_WIDTH_DEX,
   PHOTOSPHERE_K,
+  PHOTO_TINT_MAX,
+  PHOTO_TINT_MIN,
+  PHOTO_TINT_SAMPLES,
   PROMINENCE_SHEATH,
   RAMP_SAMPLES,
   RESPONSE_LAYERS,
@@ -66,6 +70,13 @@ export function createLightTables(scope: DisposalScope, interior: InteriorProfil
   const profile = scope.own(
     floatTable(atmosphereProfile(PHOTOSPHERE_K, SOLAR_LOG_G), PROFILE_SAMPLES),
   );
+  /* By the photograph's brightness against the quiet Sun's: the colour of the continuum that bright. */
+  const luminanceTint = scope.own(
+    floatTable(
+      luminanceTintTable(PHOTOSPHERE_K, PHOTO_TINT_SAMPLES, PHOTO_TINT_MIN, PHOTO_TINT_MAX),
+      PHOTO_TINT_SAMPLES,
+    ),
+  );
   /* By radius: ln T, ln ρ, the convection cells' octave (0 at the base's size) and the light
      made there over its peak. */
   const interiorData = new Float32Array(INTERIOR_SAMPLES * 4);
@@ -106,6 +117,7 @@ export function createLightTables(scope: DisposalScope, interior: InteriorProfil
   return {
     spectrum: spectrum as Texture,
     profile: profile as Texture,
+    luminanceTint: luminanceTint as Texture,
     interior: interiorTable as Texture,
     ramp: ramp as Texture,
     response: responseTable as Texture,

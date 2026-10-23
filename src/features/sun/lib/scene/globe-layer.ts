@@ -36,6 +36,7 @@ export function createGlobeLayer(
     ...looks.uniforms,
     uSpectrum: { value: tables.spectrum },
     uProfile: { value: tables.profile },
+    uLuminanceTint: { value: tables.luminanceTint },
     uInterior: { value: tables.interior },
     uRamp: { value: tables.ramp },
     uResponse: { value: tables.response },

@@ -2,7 +2,9 @@
  * How each region is drawn from the photograph, so the white-light disc keeps its measured look
  * as the model's weather moves on: a seeded group from its own photographed patch, carried with
  * it; a group the weather grows later from the patch of a photographed group (its donor), scaled
- * to its size and turned. A patch stays where its region is, at its size: as the region's spot
+ * to its size and turned. A patch is never blown up past its pixels: a grown group with no free
+ * photographed group near its size has none, and the model draws its spots. A patch stays where
+ * its region is, at its size: as the region's spot
  * area grows or decays, the renderer keeps only the photograph's spots deeper than its share
  * allows, so a group decays from its pores and penumbral rims inward and grows from its darkest
  * cores out. The photograph's spots no slot holds decay as the largest of them would.
@@ -28,11 +30,11 @@ const DONOR_REST_S = CARRINGTON_SYNODIC_PERIOD_D * DAY_S;
 const DONOR_SALT = 911;
 
 export type PhotoDraw = {
-  /** The photographed group whose patch is drawn: the region's own when it is seeded. */
-  donor: SpotGroup;
+  /** The photographed group whose patch is drawn: the region's own when it is seeded; none when no free group is near its size. */
+  donor: SpotGroup | null;
   /** Radians of the patch per radian of the region. */
   scale: number;
-  /** The region's spot area against its patch's, 0–1: how deep into the photograph's spots it keeps. */
+  /** The region's spot area against its patch's, 0–1: how deep into the photograph's spots it keeps; 0 with no patch. */
   growth: number;
   /** How far the patch is turned about its centre, radians: none for a seeded group. */
   turn: number;
@@ -51,24 +53,21 @@ const lends = (index: number, birth: number) =>
 
 /**
  * The photographed group a grown region borrows, by its id and birth (model seconds): one free
- * to lend and at least nearly its size, else the largest free one.
+ * to lend and at least nearly its size (`PHOTO_DONOR_MIN_SIZE_SHARE`); none when no free one is.
  */
-function donorFor(region: Region, birth: number) {
+function donorFor(region: Region, birth: number): SpotGroup | null {
   let fitting = 0;
-  let free = -1;
-  for (let i = 0; i < SPOT_GROUPS.length; i++) {
-    if (!lends(i, birth)) continue;
-    if (free < 0) free = i;
-    if (SPOT_GROUPS[i]!.size >= PHOTO_DONOR_MIN_SIZE_SHARE * region.size) fitting++;
-  }
-  if (fitting === 0) return SPOT_GROUPS[Math.max(0, free)]!;
+  for (let i = 0; i < SPOT_GROUPS.length; i++)
+    if (lends(i, birth) && SPOT_GROUPS[i]!.size >= PHOTO_DONOR_MIN_SIZE_SHARE * region.size)
+      fitting++;
+  if (fitting === 0) return null;
   let pick = Math.floor(dice(region.id, DONOR_SALT) * fitting);
   for (let i = 0; i < SPOT_GROUPS.length; i++) {
     const group = SPOT_GROUPS[i]!;
     if (!lends(i, birth) || group.size < PHOTO_DONOR_MIN_SIZE_SHARE * region.size) continue;
     if (pick-- === 0) return group;
   }
-  return SPOT_GROUPS[free]!;
+  return null;
 }
 
 /** How a region is drawn from the photograph at `time` (model seconds from the epoch), into `out`. */
@@ -78,10 +77,11 @@ export function photoDrawOf(
   out: PhotoDraw = blankPhotoDraw(),
 ): PhotoDraw {
   const own = seededGroupOf(region.id);
-  out.donor = own ?? donorFor(region, time - region.age);
-  out.scale = out.donor.size / region.size;
-  out.growth = clamp01(region.strength / (own ? SEEDED_STRENGTH : 1));
-  out.turn = own ? 0 : TAU * dice(region.id, DONOR_SALT, 1);
+  const donor = own ?? donorFor(region, time - region.age);
+  out.donor = donor;
+  out.scale = donor ? donor.size / region.size : 1;
+  out.growth = donor ? clamp01(region.strength / (own ? SEEDED_STRENGTH : 1)) : 0;
+  out.turn = own || !donor ? 0 : TAU * dice(region.id, DONOR_SALT, 1);
   return out;
 }
 
