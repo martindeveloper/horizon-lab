@@ -32,6 +32,22 @@ function scatterS(tr: Tracer, mig: number) {
   return smoothstep(tr.p0, Math.max(tr.p0 + 1e-6, tr.p1), mig);
 }
 
+function kindOf(roll: number): Kind {
+  if (roll < 0.08) {
+    return "cold";
+  }
+  if (roll < 0.18) {
+    return "hot";
+  }
+  if (roll < 0.32) {
+    return "scattered";
+  }
+  if (roll < 0.46) {
+    return "oort";
+  }
+  return "ejected";
+}
+
 /**
  * A seeded sample of planetesimals. The primordial disk spans about 16–34 AU
  * (Nice model); cold classicals form near 42–48 AU and stay. Shares are
@@ -42,17 +58,7 @@ function createTracers(count: number, seed = 20261014): Tracer[] {
   const rng = mulberry32(seed);
   const out: Tracer[] = [];
   for (let n = 0; n < count; n += 1) {
-    const roll = rng();
-    const kind: Kind =
-      roll < 0.08
-        ? "cold"
-        : roll < 0.18
-          ? "hot"
-          : roll < 0.32
-            ? "scattered"
-            : roll < 0.46
-              ? "oort"
-              : "ejected";
+    const kind = kindOf(rng());
     const angles = { omega: rng() * 360, node: rng() * 360, M: rng() * 360 };
     const p0 = rng() * 0.22;
     const p1 = 0.55 + rng() * 0.42;
@@ -66,63 +72,70 @@ function createTracers(count: number, seed = 20261014): Tracer[] {
     const a0 = DISK_AU[0] + rng() * (DISK_AU[1] - DISK_AU[0]);
     const e0 = 0.01 + rng() * 0.03;
     const i0 = rng() * 2;
-    if (kind === "hot") {
-      out.push({
-        kind,
-        a0,
-        a1: 36 + rng() * 12,
-        e0,
-        e1: 0.08 + rng() * 0.18,
-        i0,
-        i1: 6 + rng() * 18,
-        ...angles,
-        p0,
-        p1,
-      });
-    } else if (kind === "scattered") {
-      const a1 = 70 + rng() * 520;
-      const q = 30 + rng() * 10;
-      out.push({
-        kind,
-        a0,
-        a1,
-        e0,
-        e1: clamp(1 - q / a1, 0.25, 0.94),
-        i0,
-        i1: 8 + rng() * 24,
-        ...angles,
-        p0,
-        p1,
-      });
-    } else if (kind === "oort") {
-      const a1 = logLerp(3_000, 100_000, rng());
-      const q1 = 400 + rng() * Math.min(6_000, a1 * 0.35);
-      out.push({
-        kind,
-        a0,
-        a1,
-        e0,
-        e1: clamp(1 - q1 / a1, 0.15, 0.9),
-        i0,
-        /* Isotropic: cos i uniform, so polar orbits are no likelier than on a sphere. */
-        i1: Math.acos(1 - 2 * rng()) / RAD_PER_DEG,
-        ...angles,
-        p0,
-        p1,
-      });
-    } else {
-      out.push({
-        kind,
-        a0,
-        a1: 120_000,
-        e0,
-        e1: 0.88,
-        i0,
-        i1: rng() * 35,
-        ...angles,
-        p0,
-        p1,
-      });
+    switch (kind) {
+      case "hot":
+        out.push({
+          kind,
+          a0,
+          a1: 36 + rng() * 12,
+          e0,
+          e1: 0.08 + rng() * 0.18,
+          i0,
+          i1: 6 + rng() * 18,
+          ...angles,
+          p0,
+          p1,
+        });
+        break;
+      case "scattered": {
+        const a1 = 70 + rng() * 520;
+        const q = 30 + rng() * 10;
+        out.push({
+          kind,
+          a0,
+          a1,
+          e0,
+          e1: clamp(1 - q / a1, 0.25, 0.94),
+          i0,
+          i1: 8 + rng() * 24,
+          ...angles,
+          p0,
+          p1,
+        });
+        break;
+      }
+      case "oort": {
+        const a1 = logLerp(3_000, 100_000, rng());
+        const q1 = 400 + rng() * Math.min(6_000, a1 * 0.35);
+        out.push({
+          kind,
+          a0,
+          a1,
+          e0,
+          e1: clamp(1 - q1 / a1, 0.15, 0.9),
+          i0,
+          /* Isotropic: cos i uniform, so polar orbits are no likelier than on a sphere. */
+          i1: Math.acos(1 - 2 * rng()) / RAD_PER_DEG,
+          ...angles,
+          p0,
+          p1,
+        });
+        break;
+      }
+      case "ejected":
+        out.push({
+          kind,
+          a0,
+          a1: 120_000,
+          e0,
+          e1: 0.88,
+          i0,
+          i1: rng() * 35,
+          ...angles,
+          p0,
+          p1,
+        });
+        break;
     }
   }
   return out;

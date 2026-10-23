@@ -6,6 +6,12 @@ export const SRGB_TO_LINEAR = Float32Array.from({ length: 256 }, (_, i) => {
 
 /** Linear light to an 8-bit sRGB display value, clamped to the range. */
 export const encodeSrgb = (v) => {
-  const c = v <= 0 ? 0 : v >= 1 ? 1 : v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
+  if (v <= 0) {
+    return 0;
+  }
+  if (v >= 1) {
+    return 255;
+  }
+  const c = v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
   return Math.round(c * 255);
 };

@@ -43,18 +43,18 @@ export function DeepFieldGuide() {
           {step.id === "laniakea" || step.id === "web" ? (
             <p className="mb-3 text-ui text-fg-secondary">{t("atlas.guideMode")}</p>
           ) : null}
-          {step.dark === "halo" ? (
+          {step.dark === "halo" && (
             <Callout title={t("dark.inferred")}>
               <p>{t("dark.halo.inferred")}</p>
             </Callout>
-          ) : step.dark === "lensing" ? (
-            <LensingView compact />
-          ) : step.dark === "expansion" ? (
+          )}
+          {step.dark === "lensing" && <LensingView compact />}
+          {step.dark === "expansion" && (
             <div className="grid gap-3">
               <CmbEvidence compact />
               <ExpansionView compact />
             </div>
-          ) : null}
+          )}
         </div>
       )}
     />

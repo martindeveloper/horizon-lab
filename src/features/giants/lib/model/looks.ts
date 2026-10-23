@@ -65,6 +65,22 @@ function styleOf(rung: Rung, kelvin: number): Style {
   return rung.presentation?.profile ?? (kelvin < CONVECTIVE_BELOW_K ? "convective" : "radiative");
 }
 
+function lightReach(style: Style, activity: ActivityKind, haze: number) {
+  switch (style) {
+    case "horizon":
+      return HOLE_REACH;
+    case "pulsar":
+      return BEAM_REACH;
+  }
+  if (activity !== "none") {
+    return Math.max(CORONA_REACH, EJECTION_REACH);
+  }
+  if (haze > 0) {
+    return ENVELOPE_REACH;
+  }
+  return GLOW_REACH;
+}
+
 function lookOf(rung: Rung, index: number): Look {
   const { teff, mass, radius, polar, luminosity, inclination } = RUNG_FACTS[rung.id];
   const kelvin = teff
@@ -93,16 +109,6 @@ function lookOf(rung: Rung, index: number): Look {
   const fast = equatorK !== poleK;
   const activity = rung.presentation?.activity ?? "none";
   const haze = rung.presentation?.haze ?? 0;
-  const reach =
-    style === "horizon"
-      ? HOLE_REACH
-      : style === "pulsar"
-        ? BEAM_REACH
-        : activity !== "none"
-          ? Math.max(CORONA_REACH, EJECTION_REACH)
-          : haze > 0
-            ? ENVELOPE_REACH
-            : GLOW_REACH;
   return {
     style,
     equatorK,
@@ -114,7 +120,7 @@ function lookOf(rung: Rung, index: number): Look {
     pulse: rung.presentation?.pulse ?? 0,
     activity,
     ring: rung.presentation?.ring ?? null,
-    reach,
+    reach: lightReach(style, activity, haze),
     spin: SPIN_SECONDS[style] * (fast ? 0.35 : 1),
     tilt:
       rung.presentation?.measuredTilt && inclination

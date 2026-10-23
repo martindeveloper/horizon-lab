@@ -312,17 +312,22 @@ export function createCosmosMarks(
     /** Where the distance ruler ends (root-local): the selected structure, or what the scale frames. */
     rulerEnd(sel: Selection | null, ly: number): Vector3 {
       const chosen = sel?.kind === "cosmos" ? marks.find((k) => samePick(k.pick, sel)) : undefined;
-      return chosen && chosen.key !== "localGroup"
-        ? chosen.at
-        : ly < 25e6
-          ? andromeda.position
-          : ly > 2e10
-            ? edgeMark
-            : ly > 1.5e9
-              ? wallCentre
-              : ly > 220e6
-                ? heart.group.position
-                : virgo.group.position;
+      if (chosen && chosen.key !== "localGroup") {
+        return chosen.at;
+      }
+      if (ly < 25e6) {
+        return andromeda.position;
+      }
+      if (ly > 2e10) {
+        return edgeMark;
+      }
+      if (ly > 1.5e9) {
+        return wallCentre;
+      }
+      if (ly > 220e6) {
+        return heart.group.position;
+      }
+      return virgo.group.position;
     },
   };
 }

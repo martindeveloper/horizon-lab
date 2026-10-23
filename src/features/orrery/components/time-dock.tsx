@@ -73,30 +73,43 @@ export function TimeDock() {
   const atEnd = yearsAgo <= 0;
   const api = useOrrery.getState;
   const driftLabel = motionRateLabel(t, f, drift ? driftRate : 0);
-  const offset =
-    driftYears < 1
-      ? t("time.offsetDays", { value: Math.max(1, Math.round(convert(driftYears, "yr", "d"))) })
-      : Math.round(driftYears) < 1000
-        ? t("time.offsetYears", { value: Math.round(driftYears) })
-        : t("time.offsetThousand", {
-            value: f.number(Math.max(1, Math.round(driftYears / 1000)), {
-              maximumFractionDigits: 0,
-            }),
-          });
-  const subline =
-    yearsAgo > SUN_BIRTH
-      ? t("time.noSun")
-      : isToday(yearsAgo)
-        ? drift && driftYears > 0.002
-          ? t("time.clockDrift", { offset, rate: driftLabel })
-          : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) })
-        : t("time.laps", {
-            laps: f.number(galacticLaps(yearsAgo), {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            }),
-          });
-  const playLabel = playing ? t("hud.pause") : atEnd ? t("hud.playRestart") : t("hud.play");
+  let offset: string;
+  if (driftYears < 1) {
+    offset = t("time.offsetDays", {
+      value: Math.max(1, Math.round(convert(driftYears, "yr", "d"))),
+    });
+  } else if (Math.round(driftYears) < 1000) {
+    offset = t("time.offsetYears", { value: Math.round(driftYears) });
+  } else {
+    offset = t("time.offsetThousand", {
+      value: f.number(Math.max(1, Math.round(driftYears / 1000)), {
+        maximumFractionDigits: 0,
+      }),
+    });
+  }
+  let subline: string;
+  if (yearsAgo > SUN_BIRTH) {
+    subline = t("time.noSun");
+  } else if (isToday(yearsAgo)) {
+    subline =
+      drift && driftYears > 0.002
+        ? t("time.clockDrift", { offset, rate: driftLabel })
+        : t("time.clock", { date: f.dateTime(now, { dateStyle: "long" }) });
+  } else {
+    subline = t("time.laps", {
+      laps: f.number(galacticLaps(yearsAgo), {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }),
+    });
+  }
+  let playKey = "hud.play";
+  if (playing) {
+    playKey = "hud.pause";
+  } else if (atEnd) {
+    playKey = "hud.playRestart";
+  }
+  const playLabel = t(playKey);
   return (
     <Dock ref={surface} footerClassName={cn(aside && "not-md:hidden")} className="flex flex-col">
       <div className="flex items-center gap-3">

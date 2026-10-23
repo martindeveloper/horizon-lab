@@ -1,5 +1,6 @@
 import { ArrowLeft, ZoomIn } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 import { HandoffRow } from "@/components/simulations/handoff-link";
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
@@ -40,72 +41,84 @@ export function SelectionCard() {
       (source) => ATLAS_SOURCES[source].publication === "preprint",
     );
   const evidence = selection.kind === "cosmos" ? COSMOS_CARDS[selection.id].badge : undefined;
-  const noteTitle = preprint
-    ? t("atlas.publication.preprint")
-    : t(
-        evidence === "observations"
-          ? "detailNotes.measurements"
-          : evidence === "reconstruction"
-            ? "detailNotes.reconstruction"
-            : selection.kind === "galaxy" && selection.id === "halo"
-              ? "dark.inferred"
-              : "detailNotes.general",
-      );
+  const halo = selection.kind === "galaxy" && selection.id === "halo";
+  let noteKey = "detailNotes.general";
+  if (preprint) {
+    noteKey = "atlas.publication.preprint";
+  } else if (evidence === "observations") {
+    noteKey = "detailNotes.measurements";
+  } else if (evidence === "reconstruction") {
+    noteKey = "detailNotes.reconstruction";
+  } else if (halo) {
+    noteKey = "dark.inferred";
+  }
+
+  let details: ReactNode;
+  if (selection.kind === "cosmos" && isAtlasId(selection.id)) {
+    details = <AtlasProvenance id={selection.id} />;
+  } else if (selection.kind === "cosmos" && selection.id === "observableUniverse") {
+    details = <CmbEvidence />;
+  } else if (halo) {
+    details = <HaloEvidence />;
+  }
+
+  let footer: ReactNode = null;
+  if (closeUp) {
+    footer = (
+      <>
+        <Action
+          variant="glass"
+          className="flex-1"
+          onClick={() => useDeepField.getState().leaveCloseUp()}
+        >
+          <ArrowLeft className="icon" aria-hidden />
+          {t("hud.leaveCloseUp")}
+        </Action>
+        <p className="w-full text-ui text-fg-secondary">{t("hud.closeUpNote")}</p>
+      </>
+    );
+  } else if (offerCloseUp) {
+    footer = (
+      <Action className="flex-1" onClick={() => useDeepField.getState().enterCloseUp()}>
+        <ZoomIn className="icon" aria-hidden />
+        {t("hud.closeUp")}
+      </Action>
+    );
+  } else if (isSolarSelection(selection)) {
+    footer = (
+      <HandoffRow
+        to="orrery"
+        view={viewOf(selection)}
+        title={t("hud.backInTime")}
+        hint={t("hud.backInTimeHint")}
+        className="-mx-2 flex-1 px-2"
+      />
+    );
+  } else if (selection.kind === "galaxy" && selection.id === "sun") {
+    footer = (
+      <Action className="w-full" onClick={() => useDeepField.getState().setView("giants")}>
+        {t("hud.home")}
+      </Action>
+    );
+  } else if (halo) {
+    footer = (
+      <Action
+        variant="glass"
+        className="w-full"
+        onClick={() => useDeepField.getState().openDarkView("halo")}
+      >
+        {t("dark.open")}
+      </Action>
+    );
+  }
   return (
     <SelectionSheet
       card={cardFor(t, f, selection, { unit, locale }, now)}
       closeLabel={t("hud.close")}
       onClose={() => select(null)}
-      cautionCallout={{ title: noteTitle, tone: preprint ? "warning" : "info" }}
-      details={
-        selection.kind === "cosmos" && isAtlasId(selection.id) ? (
-          <AtlasProvenance id={selection.id} />
-        ) : selection.kind === "cosmos" && selection.id === "observableUniverse" ? (
-          <CmbEvidence />
-        ) : selection.kind === "galaxy" && selection.id === "halo" ? (
-          <HaloEvidence />
-        ) : undefined
-      }
-      footer={
-        closeUp ? (
-          <>
-            <Action
-              variant="glass"
-              className="flex-1"
-              onClick={() => useDeepField.getState().leaveCloseUp()}
-            >
-              <ArrowLeft className="icon" aria-hidden />
-              {t("hud.leaveCloseUp")}
-            </Action>
-            <p className="w-full text-ui text-fg-secondary">{t("hud.closeUpNote")}</p>
-          </>
-        ) : offerCloseUp ? (
-          <Action className="flex-1" onClick={() => useDeepField.getState().enterCloseUp()}>
-            <ZoomIn className="icon" aria-hidden />
-            {t("hud.closeUp")}
-          </Action>
-        ) : isSolarSelection(selection) ? (
-          <HandoffRow
-            to="orrery"
-            view={viewOf(selection)}
-            title={t("hud.backInTime")}
-            hint={t("hud.backInTimeHint")}
-            className="-mx-2 flex-1 px-2"
-          />
-        ) : selection.kind === "galaxy" && selection.id === "sun" ? (
-          <Action className="w-full" onClick={() => useDeepField.getState().setView("giants")}>
-            {t("hud.home")}
-          </Action>
-        ) : selection.kind === "galaxy" && selection.id === "halo" ? (
-          <Action
-            variant="glass"
-            className="w-full"
-            onClick={() => useDeepField.getState().openDarkView("halo")}
-          >
-            {t("dark.open")}
-          </Action>
-        ) : null
-      }
+      cautionCallout={{ title: t(noteKey), tone: preprint ? "warning" : "info" }}
+      details={details}
+      footer={footer}
     />
   );
 }

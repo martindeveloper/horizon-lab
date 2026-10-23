@@ -348,16 +348,16 @@ function BenchControls() {
   const lampText = (K: number) => (K > 0 ? `${kelvin(f, K)} K` : t("dock.off"));
   const columnText = (c: number) =>
     t("dock.columnValue", { value: f.number(c, { maximumFractionDigits: 1 }) });
-  const law =
-    bench.elements.length === 0
-      ? "continuum"
-      : bench.lamp <= 0
-        ? "emission"
-        : bench.lamp > bench.gas
-          ? "absorption"
-          : bench.lamp < bench.gas
-            ? "reversed"
-            : "vanish";
+  let law = "vanish";
+  if (bench.elements.length === 0) {
+    law = "continuum";
+  } else if (bench.lamp <= 0) {
+    law = "emission";
+  } else if (bench.lamp > bench.gas) {
+    law = "absorption";
+  } else if (bench.lamp < bench.gas) {
+    law = "reversed";
+  }
   return (
     <>
       <Tray

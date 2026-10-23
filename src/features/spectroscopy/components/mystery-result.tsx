@@ -49,21 +49,30 @@ function useReveal(m: Mystery) {
   const t = useTranslations("spectroscopy");
   const f = useFormatter();
   const temperature = kelvin(f, mysteryTemperature(m));
-  const source =
-    m.kind === "flame"
-      ? t("mysteries.flame", { temperature })
-      : m.kind === "cell"
-        ? t("mysteries.cell", { temperature, lamp: kelvin(f, m.lamp) })
-        : m.kind === "dwarf"
-          ? t("mysteries.dwarf", { type: spectralClass(m.teff), temperature })
-          : t("mysteries.giant", { star: t(`names.${m.star}`), temperature });
+  let source: string;
+  switch (m.kind) {
+    case "flame":
+      source = t("mysteries.flame", { temperature });
+      break;
+    case "cell":
+      source = t("mysteries.cell", { temperature, lamp: kelvin(f, m.lamp) });
+      break;
+    case "dwarf":
+      source = t("mysteries.dwarf", { type: spectralClass(m.teff), temperature });
+      break;
+    case "giant":
+      source = t("mysteries.giant", { star: t(`names.${m.star}`), temperature });
+      break;
+  }
   const v = mysteryVelocity(m);
   const speed = f.number(Math.abs(v));
-  return v > 0
-    ? `${source} · ${t("mysteries.receding", { value: speed })}`
-    : v < 0
-      ? `${source} · ${t("mysteries.approaching", { value: speed })}`
-      : source;
+  if (v > 0) {
+    return `${source} · ${t("mysteries.receding", { value: speed })}`;
+  }
+  if (v < 0) {
+    return `${source} · ${t("mysteries.approaching", { value: speed })}`;
+  }
+  return source;
 }
 
 function Score({ ok, children }: { ok: boolean; children: string }) {

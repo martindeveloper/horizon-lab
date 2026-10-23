@@ -13,6 +13,13 @@ import type { PinId } from "@/features/black-hole/lib/pins";
 import { useBlackHole } from "@/features/black-hole/lib/store";
 import { Equation, PanelHeader, Sub } from "@horizon/toolkit/ui";
 
+const PIN_LABELS = {
+  horizon: { kicker: "pinHorizonK", title: "pinHorizonT" },
+  photon: { kicker: "pinPhotonK", title: "pinPhotonT" },
+  isco: { kicker: "pinIscoK", title: "pinIscoT" },
+  doppler: { kicker: "pinDopplerK", title: "pinDopplerT" },
+} satisfies Record<PinId, { kicker: string; title: string }>;
+
 /** Lesson card body for one gauge pin, shared by the desktop card and the phone sheet. */
 export function PinLesson({ id, spin, onClose }: { id: PinId; spin: number; onClose: () => void }) {
   const t = useTranslations("blackHole");
@@ -22,26 +29,16 @@ export function PinLesson({ id, spin, onClose }: { id: PinId; spin: number; onCl
   const rp = photonOverM(spin);
   const ri = iscoOverM(spin);
   const period = iscoPeriodSeconds(massSolar, spin);
-  const kicker =
-    id === "horizon"
-      ? t("pinHorizonK")
-      : id === "photon"
-        ? t("pinPhotonK")
-        : id === "isco"
-          ? t("pinIscoK")
-          : t("pinDopplerK");
-  const title =
-    id === "horizon"
-      ? t("pinHorizonT")
-      : id === "photon"
-        ? t("pinPhotonT")
-        : id === "isco"
-          ? t("pinIscoT")
-          : t("pinDopplerT");
+  const { kicker, title } = PIN_LABELS[id];
 
   return (
     <div>
-      <PanelHeader kicker={kicker} title={title} onClose={onClose} closeLabel={t("ariaClose")} />
+      <PanelHeader
+        kicker={t(kicker)}
+        title={t(title)}
+        onClose={onClose}
+        closeLabel={t("ariaClose")}
+      />
       <div className="mt-2 flex flex-col gap-2">
         {id === "horizon" ? (
           <HorizonLesson massSolar={massSolar} rs={rs} rh={rh} spin={spin} />

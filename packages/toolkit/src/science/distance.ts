@@ -91,14 +91,14 @@ function scaled(au: number, magnitudeAu: number, options: DistanceFormat) {
   const raw = Math.abs(convertDistance(magnitudeAu, "au", unit));
   const magnitude =
     Number(raw.toPrecision(Math.min(21, Math.max(1, options.significant ?? 3)))) * (1 + 1e-12);
-  const scale =
-    !options.millionWord || unit === "au"
-      ? 1
-      : options.billionWord && magnitude >= 1e9
-        ? 1e9
-        : magnitude >= 1e6
-          ? 1e6
-          : 1;
+  let scale = 1;
+  if (options.millionWord && unit !== "au") {
+    if (options.billionWord && magnitude >= 1e9) {
+      scale = 1e9;
+    } else if (magnitude >= 1e6) {
+      scale = 1e6;
+    }
+  }
   /* A value that reaches the scale only by rounding prints as 1, not "1.000" in a fixed readout. */
   const shown = value / scale;
   const roundedUp = scale > 1 && Math.abs(shown) < 1 && Math.abs(value) === raw;

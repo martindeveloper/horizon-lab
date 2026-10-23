@@ -172,9 +172,16 @@ export function createGiantsInput(
     event.preventDefault();
     navigation.take();
     const state = useGiants.getState();
-    if (step === "first") state.go(0);
-    else if (step === "last") state.go(lastRung);
-    else state.go(navigation.nearest() + step);
+    switch (step) {
+      case "first":
+        state.go(0);
+        break;
+      case "last":
+        state.go(lastRung);
+        break;
+      default:
+        state.go(navigation.nearest() + step);
+    }
   };
   window.addEventListener("keydown", onKey);
   resources.defer(() => window.removeEventListener("keydown", onKey));

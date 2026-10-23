@@ -71,19 +71,21 @@ const MAX: Budget = {
   spicules: true,
 };
 
+const BUDGETS: Record<RenderQuality, Budget> = {
+  economy: ECONOMY,
+  standard: STANDARD,
+  cinema: CINEMA,
+  max: MAX,
+};
+
 export function sunQuality(quality: RenderQuality, tight: boolean): SunQuality {
   const { bloom, lens, resolution, sky } = spaceQuality(quality, tight);
-  const budget =
-    quality === "economy"
-      ? ECONOMY
-      : quality === "standard"
-        ? tight
-          ? STANDARD_TIGHT
-          : STANDARD
-        : quality === "cinema"
-          ? CINEMA
-          : MAX;
-  const mapTier: MapTier =
-    quality === "economy" ? "far" : tight && quality !== "max" ? "nearLight" : "near";
+  const budget = quality === "standard" && tight ? STANDARD_TIGHT : BUDGETS[quality];
+  let mapTier: MapTier = "near";
+  if (quality === "economy") {
+    mapTier = "far";
+  } else if (tight && quality !== "max") {
+    mapTier = "nearLight";
+  }
   return { ...budget, resolution, sky, bloom, lens, mapTier };
 }

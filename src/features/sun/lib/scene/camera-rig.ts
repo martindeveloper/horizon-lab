@@ -246,8 +246,16 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
     const { view, selection, closeUp } = deps.settings();
     const playing = deps.drift?.state() === "playing";
     const focus = playing || closeUp ? null : viewFocus(view, selection);
-    const target = playing ? null : closeUp ? parker.aim(f) : viewAim(view, f, focus);
-    const wanted: Orbit = playing ? "drift" : !target ? "centre" : closeUp ? "parker" : "feature";
+    let target: ViewAim | null = null;
+    if (!playing) {
+      target = closeUp ? parker.aim(f) : viewAim(view, f, focus);
+    }
+    let wanted: Orbit = "centre";
+    if (playing) {
+      wanted = "drift";
+    } else if (target) {
+      wanted = closeUp ? "parker" : "feature";
+    }
     const follows = wanted === "feature" ? view : null;
     if (wanted === orbit && follows === following && focus === focused) {
       orbitFor(f, target, dt);

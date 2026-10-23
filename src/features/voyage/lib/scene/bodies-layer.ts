@@ -121,14 +121,21 @@ export function createBodiesLayer(
   const orbitSamples = orbitGeometry(scope, ORBIT_SEGMENTS);
 
   const slots: Slot[] = WORLD_BODIES.map((body) => {
-    const material =
-      body.kind === "sun"
-        ? looks.sun
-        : body.kind === "planet"
-          ? looks.planets[body.id]
-          : body.kind === "named"
-            ? looks.named[body.id]
-            : looks.moon(body.id);
+    let material: ShaderMaterial;
+    switch (body.kind) {
+      case "sun":
+        material = looks.sun;
+        break;
+      case "planet":
+        material = looks.planets[body.id];
+        break;
+      case "named":
+        material = looks.named[body.id];
+        break;
+      case "moon":
+        material = looks.moon(body.id);
+        break;
+    }
     const mesh = new Mesh(globes.coarse, material);
     mesh.userData.pick = selectionOfBody(body);
     mesh.userData.globe = mesh;

@@ -24,24 +24,24 @@ export function Stage() {
   const photons = useSpectroscopy((s) => s.photons);
   const { view, star, air } = settings;
   const teff = temperatureInView(settings, obs);
-  const labels = useMemo(
-    () => ({
-      source:
-        view === "mystery"
-          ? t("scene.unknown")
-          : obs.kind === "slab"
-            ? t("scene.lamp")
-            : view === "sun"
-              ? t("scene.sun")
-              : star === "sequence"
-                ? t("scene.dwarf")
-                : t(`names.${star}`),
+  const labels = useMemo(() => {
+    let sourceKey = `names.${star}`;
+    if (view === "mystery") {
+      sourceKey = "scene.unknown";
+    } else if (obs.kind === "slab") {
+      sourceKey = "scene.lamp";
+    } else if (view === "sun") {
+      sourceKey = "scene.sun";
+    } else if (star === "sequence") {
+      sourceKey = "scene.dwarf";
+    }
+    return {
+      source: t(sourceKey),
       gas: obs.kind === "slab" ? t("scene.gas") : t("scene.atmosphere"),
       air: obs.kind === "star" && air ? t("scene.air") : null,
       spectrograph: t("scene.spectrograph"),
-    }),
-    [t, view, obs.kind, star, air],
-  );
+    };
+  }, [t, view, obs.kind, star, air]);
 
   return (
     /* A new view fades in rather than cutting. */

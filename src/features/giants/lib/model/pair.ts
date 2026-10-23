@@ -118,7 +118,16 @@ export function roleIn(
   const was = from.some((body) => body.index === index);
   let is = false;
   for (let i = 0; i < count && !is; i++) is = to[i]!.index === index;
-  return was && is ? "stays" : was ? "leaves" : is ? "comes" : null;
+  if (was && is) {
+    return "stays";
+  }
+  if (was) {
+    return "leaves";
+  }
+  if (is) {
+    return "comes";
+  }
+  return null;
 }
 
 /**

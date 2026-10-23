@@ -80,10 +80,20 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
       api.seekTo(HALO_FRAME_LY);
     }
     if (sel.kind === "cosmos") {
-      if (isAtlasLandmark(sel.id)) api.patchShow({ [ATLAS_LANDMARKS[sel.id].layer]: true });
-      else if (sel.id === "cosmicSurveys") api.patchShow({ cosmicMeasured: true });
-      else if (sel.id === "cosmicBasins" || sel.id === "cosmicVoids" || sel.id === "cosmicKnots")
-        api.patchShow({ [sel.id]: true });
+      if (isAtlasLandmark(sel.id)) {
+        api.patchShow({ [ATLAS_LANDMARKS[sel.id].layer]: true });
+      } else {
+        switch (sel.id) {
+          case "cosmicSurveys":
+            api.patchShow({ cosmicMeasured: true });
+            break;
+          case "cosmicBasins":
+          case "cosmicVoids":
+          case "cosmicKnots":
+            api.patchShow({ [sel.id]: true });
+            break;
+        }
+      }
     }
     api.select(sel);
     api.setPanel("none");

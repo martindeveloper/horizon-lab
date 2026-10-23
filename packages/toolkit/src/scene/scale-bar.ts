@@ -12,7 +12,15 @@ export function niceNumber(x: number) {
   if (!(x > 0)) return 1;
   const exp = Math.floor(Math.log10(x));
   const f = x / 10 ** exp;
-  return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * 10 ** exp;
+  let rounded = 10;
+  if (f < 1.5) {
+    rounded = 1;
+  } else if (f < 3.5) {
+    rounded = 2;
+  } else if (f < 7.5) {
+    rounded = 5;
+  }
+  return rounded * 10 ** exp;
 }
 
 /**

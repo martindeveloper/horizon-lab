@@ -109,14 +109,20 @@ function tracerCard(sel: Of<SolarSelection, "tracer">, m: Moment): Card {
     };
   const el = tracerElements(tr, mig, 0);
   const bin = binOf(tr, mig);
-  const note =
-    tr.kind === "cold"
-      ? t("cards.tracer.cold", printAll(t, d, TRACER_NOTES.cold))
-      : tr.kind === "ejected"
-        ? t("cards.tracer.ejected")
-        : tr.kind === "oort"
-          ? t("cards.tracer.oort")
-          : t("cards.tracer.other");
+  let note: string;
+  switch (tr.kind) {
+    case "cold":
+      note = t("cards.tracer.cold", printAll(t, d, TRACER_NOTES.cold));
+      break;
+    case "ejected":
+      note = t("cards.tracer.ejected");
+      break;
+    case "oort":
+      note = t("cards.tracer.oort");
+      break;
+    default:
+      note = t("cards.tracer.other");
+  }
   return {
     badge: t("badges.sample"),
     title: t("cards.tracer.title", { bin: t(`layers.${bin}`) }),

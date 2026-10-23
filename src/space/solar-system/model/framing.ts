@@ -12,15 +12,19 @@ import type { SolarViewId } from "./views";
 /** The view an orbit is best seen in, by how far it reaches: the belt it lives among. */
 function viewOfOrbit(el: Elements): SolarViewId {
   const apo = el.a * (1 + Math.min(MAX_ECCENTRICITY, el.e));
-  return apo > 8_000
-    ? "oort"
-    : apo > 350
-      ? "scattered"
-      : apo > 45
-        ? "kuiper"
-        : apo > 4
-          ? "giants"
-          : "inner";
+  if (apo > 8_000) {
+    return "oort";
+  }
+  if (apo > 350) {
+    return "scattered";
+  }
+  if (apo > 45) {
+    return "kuiper";
+  }
+  if (apo > 4) {
+    return "giants";
+  }
+  return "inner";
 }
 
 /** The view a selection is best seen in: its own scale. */
@@ -31,18 +35,28 @@ export function viewOf(sel: SolarSelection, mig = 1): SolarViewId {
     case "planet": {
       const a = planetElements(sel.id, 1, 0, new Date()).a;
       /* Uranus fits the giants' frame; Neptune leads out to the Kuiper belt. */
-      return a < 2 ? "inner" : a < 25 ? "giants" : "kuiper";
+      if (a < 2) {
+        return "inner";
+      }
+      if (a < 25) {
+        return "giants";
+      }
+      return "kuiper";
     }
     case "named":
       return viewOfOrbit(namedElements(namedById(sel.id), 1, 0, new Date()));
     case "moon":
       return viewOf(hostOf(sel.id), mig);
     case "population":
-      return sel.id === "asteroids"
-        ? "inner"
-        : sel.id === "disk" || sel.id === "ejected"
-          ? "giants"
-          : sel.id;
+      switch (sel.id) {
+        case "asteroids":
+          return "inner";
+        case "disk":
+        case "ejected":
+          return "giants";
+        default:
+          return sel.id;
+      }
     case "tracer": {
       const tr = TRACERS[sel.index];
       return tr ? viewOfOrbit(tracerElements(tr, mig, 0)) : "giants";

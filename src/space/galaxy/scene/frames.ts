@@ -79,11 +79,15 @@ export function cosmosMix(dist: number) {
 const STARS_FROM = 300_000;
 
 /** The scale that dominates at a camera distance (au): what readouts and cards follow. */
-export const realmOf = (dist: number): Realm =>
-  cosmosMix(dist) >= 0.5
-    ? "cosmos"
-    : galaxyMix(dist) >= 0.5
-      ? "galaxy"
-      : dist < STARS_FROM
-        ? "solar"
-        : "stars";
+export function realmOf(dist: number): Realm {
+  if (cosmosMix(dist) >= 0.5) {
+    return "cosmos";
+  }
+  if (galaxyMix(dist) >= 0.5) {
+    return "galaxy";
+  }
+  if (dist < STARS_FROM) {
+    return "solar";
+  }
+  return "stars";
+}

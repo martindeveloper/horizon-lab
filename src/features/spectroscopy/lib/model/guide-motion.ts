@@ -34,8 +34,18 @@ export const poseOf = (s: PoseSource): GuidePose => ({
 });
 
 /** Ease in and out (cubic): the motion starts and lands gently. */
-export const ease = (t: number) =>
-  t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+export function ease(t: number) {
+  if (t <= 0) {
+    return 0;
+  }
+  if (t >= 1) {
+    return 1;
+  }
+  if (t < 0.5) {
+    return 4 * t ** 3;
+  }
+  return 1 - (-2 * t + 2) ** 3 / 2;
+}
 
 const linear = (a: number, b: number, t: number) => a + (b - a) * t;
 const geometric = (a: number, b: number, t: number) => a * (b / a) ** t;

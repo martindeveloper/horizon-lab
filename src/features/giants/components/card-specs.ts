@@ -50,14 +50,28 @@ export const UP_CLOSE: Partial<Record<RungId, UpClose>> = Object.fromEntries(
 /** Light's lap in the unit that reads best: seconds up to two minutes, then minutes, hours, days. */
 function lapRow(lap: Fact): Row {
   const seconds = lap.range?.[1] ?? lap.value!;
-  const unit = seconds < 120 ? "s" : seconds < 7_200 ? "min" : seconds < 172_800 ? "h" : "d";
+  let unit: "s" | "min" | "h" | "d" = "d";
+  if (seconds < 120) {
+    unit = "s";
+  } else if (seconds < 7_200) {
+    unit = "min";
+  } else if (seconds < 172_800) {
+    unit = "h";
+  }
   return row("lap", `rows.lap.${unit}`, { value: factRef({ ...lap, show: unit }) });
 }
 
 /** A turn in the unit that reads best: milliseconds under a second, then hours, days, years. */
 function periodRow(period: Fact, upTo: boolean): Row {
   const seconds = inUnit(period, "s")(period.range?.[1] ?? period.value!);
-  const unit = seconds < 1 ? "ms" : seconds < 172_800 ? "h" : seconds < 63_115_200 ? "d" : "yr";
+  let unit: "ms" | "h" | "d" | "yr" = "yr";
+  if (seconds < 1) {
+    unit = "ms";
+  } else if (seconds < 172_800) {
+    unit = "h";
+  } else if (seconds < 63_115_200) {
+    unit = "d";
+  }
   const text = `rows.${upTo ? "periodUpTo" : "period"}.${unit}`;
   /* A limit reads as one figure ("up to 36 years"); its spread stays in the sources. */
   const value =

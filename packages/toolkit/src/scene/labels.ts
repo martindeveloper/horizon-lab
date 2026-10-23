@@ -224,28 +224,23 @@ export function createLabels(
     let sy = entry.sy;
     const ownIndex = indexOf.get(key);
     const own = ownIndex === undefined ? undefined : bounds[ownIndex];
-    if (own && !kind) sy = style?.below ? own.bottom + 6 : own.top - 6;
-    const dy =
-      own && !kind
-        ? style?.below
-          ? "0%"
-          : "-100%"
-        : kind
-          ? "-50%"
-          : style?.below
-            ? "40%"
-            : "-140%";
-    const top =
-      sy +
-      (dy === "-100%"
-        ? -h
-        : dy === "-50%"
-          ? -h / 2
-          : dy === "40%"
-            ? h * 0.4
-            : dy === "-140%"
-              ? -h * 1.4
-              : 0);
+    let dy: string;
+    let offset: number;
+    if (kind) {
+      dy = "-50%";
+      offset = -h / 2;
+    } else if (own) {
+      sy = style?.below ? own.bottom + 6 : own.top - 6;
+      dy = style?.below ? "0%" : "-100%";
+      offset = style?.below ? 0 : -h;
+    } else if (style?.below) {
+      dy = "40%";
+      offset = h * 0.4;
+    } else {
+      dy = "-140%";
+      offset = -h * 1.4;
+    }
+    const top = sy + offset;
     rect.left = sx - w / 2;
     rect.right = sx + w / 2;
     rect.top = top;

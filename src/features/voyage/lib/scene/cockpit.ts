@@ -504,14 +504,14 @@ export function createCockpit(
          flip, the ship turning end over end): the gauge and the glow read it. */
       const { phase } = frame;
       const braking = phase === "brake";
-      const thrust =
-        mode === "free"
-          ? Math.min(1, Math.hypot(axes.thrust, axes.strafe, axes.lift)) || axes.brake
-          : driveLit(phase)
-            ? 1
-            : phase === "align"
-              ? frame.spool
-              : 0;
+      let thrust = 0;
+      if (mode === "free") {
+        thrust = Math.min(1, Math.hypot(axes.thrust, axes.strafe, axes.lift)) || axes.brake;
+      } else if (driveLit(phase)) {
+        thrust = 1;
+      } else if (phase === "align") {
+        thrust = frame.spool;
+      }
       /* With the ship's feel on, the drive builds rather than snapping on; it always cuts at once. */
       pushShown =
         show.feel && thrust > pushShown && frame.dt > 0
@@ -549,7 +549,14 @@ export function createCockpit(
         const yaw = Math.max(-3, Math.min(3, turn.y * k));
         const pitch = Math.max(-3, Math.min(3, turn.x * k));
         const flown = mode === "free";
-        const ahead = flown ? axes.thrust : phase === "burn" ? 1 : braking ? -1 : 0;
+        let ahead = 0;
+        if (flown) {
+          ahead = axes.thrust;
+        } else if (phase === "burn") {
+          ahead = 1;
+        } else if (braking) {
+          ahead = -1;
+        }
         const across = flown ? axes.strafe : 0;
         const up = flown ? axes.lift : 0;
         const reach = (v: number) => Math.max(-REACH_PX, Math.min(REACH_PX, v));

@@ -30,6 +30,13 @@ const reachesPanels: DockInTheWay = (dock, stage, rem) => dock.right + 22 * rem 
 /** In orbit about a body, flown by hand, on autopilot to a destination, or wrecked on a surface. */
 type Status = "orbit" | "free" | "flight" | "crash";
 
+const HELM = {
+  orbit: { label: "hud.takeHelm", icon: Rocket },
+  free: { label: "hud.enterOrbit", icon: Orbit },
+  flight: { label: "hud.disengage", icon: Hand },
+  crash: { label: "hud.crash.retry", icon: Hand },
+} satisfies Record<Status, { label: string; icon: typeof Hand }>;
+
 /** The nearest clock rate to a rate, as the slider's index. */
 const stepOf = (rate: number) => {
   let best = 0;
@@ -123,30 +130,29 @@ function StatusMark({
  */
 function HelmButton({ status }: { status: Status }) {
   const t = useTranslations("voyage");
-  const label =
-    status === "crash"
-      ? t("hud.crash.retry")
-      : status === "flight"
-        ? t("hud.disengage")
-        : status === "free"
-          ? t("hud.enterOrbit")
-          : t("hud.takeHelm");
+  const { label: labelKey, icon: Icon } = HELM[status];
+  const label = t(labelKey);
   const act = () => {
     const api = useVoyage.getState();
-    if (status === "crash") api.recover();
-    else if (status === "flight") api.disengage();
-    else api.setMode(status === "free" ? "orbit" : "free");
+    switch (status) {
+      case "crash":
+        api.recover();
+        break;
+      case "flight":
+        api.disengage();
+        break;
+      case "free":
+        api.setMode("orbit");
+        break;
+      case "orbit":
+        api.setMode("free");
+        break;
+    }
   };
   return (
     <Tooltip label={label} side="top" align="end">
       <IconButton aria-label={label} onClick={act}>
-        {status === "flight" || status === "crash" ? (
-          <Hand className="icon" />
-        ) : status === "free" ? (
-          <Orbit className="icon" />
-        ) : (
-          <Rocket className="icon" />
-        )}
+        <Icon className="icon" />
       </IconButton>
     </Tooltip>
   );
@@ -257,7 +263,14 @@ export function FlightDock() {
   const invite = useVoyage((s) => !s.flown && !s.guideOpen);
   const surface = useRef<HTMLDivElement>(null);
   useDockClearance(surface, reachesPanels);
-  const status: Status = crashed ? "crash" : flying ? "flight" : mode === "free" ? "free" : "orbit";
+  let status: Status = "orbit";
+  if (crashed) {
+    status = "crash";
+  } else if (flying) {
+    status = "flight";
+  } else if (mode === "free") {
+    status = "free";
+  }
   const aimName = t(anchorNameKey(aim));
   const calendar = formatCalendar(f, epochMs, earthSeconds);
   /* The clocks part only at speed; the gap is the lesson, so it reads once it is a second. */

@@ -24,7 +24,15 @@ export function readout(value: number): Readout {
     }
     return { mantissa, exponent, digits: 2 };
   }
-  return { mantissa: value, exponent: 0, digits: abs < 1 ? 3 : abs < 10 ? 2 : abs < 100 ? 1 : 0 };
+  let digits = 0;
+  if (abs < 1) {
+    digits = 3;
+  } else if (abs < 10) {
+    digits = 2;
+  } else if (abs < 100) {
+    digits = 1;
+  }
+  return { mantissa: value, exponent: 0, digits };
 }
 
 const SUPERSCRIPT = "⁰¹²³⁴⁵⁶⁷⁸⁹";
