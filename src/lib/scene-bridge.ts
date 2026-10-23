@@ -198,16 +198,29 @@ export function bridgeRender<
   let bloom: boolean | null = null;
   let lens: boolean | null = null;
   const apply = (s: S) => {
-    if (s.bloom !== bloom) host.setBloom({ enabled: (bloom = s.bloom) });
-    if (s.lens !== lens) host.setLens({ enabled: (lens = s.lens) });
-    if (s.quality !== level && cancel === null)
+    if (s.bloom !== bloom) {
+      bloom = s.bloom;
+      host.setBloom({ enabled: bloom });
+    }
+    if (s.lens !== lens) {
+      lens = s.lens;
+      host.setLens({ enabled: lens });
+    }
+    if (s.quality !== level && cancel === null) {
       cancel = afterPaint(() => {
         cancel = null;
         const next = store.getState().quality;
-        if (next !== level) quality((level = next));
+        if (next !== level) {
+          level = next;
+          quality(level);
+        }
       });
-    if (s.antialias === null) s.setAntialias(defaultSceneAntialias(host.tight));
-    else host.setAntialias(s.antialias);
+    }
+    if (s.antialias === null) {
+      s.setAntialias(defaultSceneAntialias(host.tight));
+    } else {
+      host.setAntialias(s.antialias);
+    }
   };
   apply(store.getState());
   scope.defer(store.subscribe(apply));

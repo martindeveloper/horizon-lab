@@ -122,22 +122,24 @@ export function ObjectsPanel({ onClose }: { onClose: () => void }) {
       <SolarObjectPicks
         namespace="deepField"
         belts={["asteroids", "kuiper", "scattered", "oort"]}
+        edges={[
+          {
+            key: "heliopause",
+            name: "names.heliopause",
+            onPick: () => pick({ kind: "reach", id: "heliopause" }, "heliosphere"),
+          },
+        ]}
         onPick={(sel) => pick(sel, viewOf(sel))}
       />
-      {section(t("hud.reach"), [
-        ...PROBES.map(({ id }) => ({
+      {section(
+        t("hud.reach"),
+        PROBES.map(({ id }) => ({
           key: id,
           label: `names.${id}`,
           icon: <Satellite aria-hidden className={GLYPH_ICON} />,
           onClick: () => pick({ kind: "reach", id }, "heliosphere"),
         })),
-        {
-          key: "heliopause",
-          label: "names.heliopause",
-          icon: <Orb look="swarm" />,
-          onClick: () => pick({ kind: "reach", id: "heliopause" }, "heliosphere"),
-        },
-      ])}
+      )}
       {section(
         t("hud.neighbours"),
         NEIGHBOUR_IDS.map((id) => ({

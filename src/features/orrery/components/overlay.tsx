@@ -13,6 +13,7 @@ import { HELP } from "../lib/help";
 import { sliderToYearsAgo, yearsAgoToSlider } from "../lib/model/timeline";
 import { useOrrery, type OrreryStore } from "../lib/store";
 import { OrreryGuide } from "./guide";
+import { MomentsPanel } from "./moments-panel";
 import { ObjectsPanel } from "./objects-panel";
 import { ReadingPanel } from "./reading-panel";
 import { SelectionCard } from "./selection-card";
@@ -112,6 +113,7 @@ export function OrreryOverlay() {
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}
           {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}
           {panel === "reading" ? <ReadingPanel onClose={() => setPanel("none")} /> : null}
+          {panel === "moments" ? <MomentsPanel onClose={() => setPanel("none")} /> : null}
           {/* Remounts on entering or leaving a close-up, so the card starts folded or whole. */}
           {panel === "none" && selection && drift === "off" ? (
             <SelectionCard key={closeUp ? "close-up" : "card"} />

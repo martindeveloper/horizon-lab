@@ -114,13 +114,17 @@ export function createCmbSky(
     update(opacity: number, detail: boolean, eye: Vector3) {
       if (opacity > 0.001) {
         resources.request("planck");
-        if (detail) resources.request("act");
+        if (detail) {
+          resources.request("act");
+        }
       }
       const { planck, act } = resources.resources;
       const { status } = resources;
       waiting =
         opacity > 0.001 && (status.planck === "loading" || (detail && status.act === "loading"));
-      mesh.visible = opacity > 0.001 && cmbPixelSource(!!planck, !!act, detail) !== null;
+      mesh.visible =
+        opacity > 0.001 &&
+        cmbPixelSource({ planckValid: !!planck, actValid: !!act, detail }) !== null;
       material.uniforms.planckMap!.value = planck ?? empty;
       material.uniforms.actMap!.value = act ?? empty;
       material.uniforms.planckReady!.value = !!planck;

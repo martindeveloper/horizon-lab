@@ -54,6 +54,23 @@ function floatTable(data: Float32Array, width: number) {
   return texture;
 }
 
+/** A log-normal of the layer's width, on the table's grid, over ±3σ. */
+function layerResponse(curve: readonly number[], index: number, width: number, step: number) {
+  if (!(width > 0)) {
+    return curve[index]!;
+  }
+  const reach = Math.ceil((3 * width) / step);
+  let sum = 0;
+  let norm = 0;
+  for (let k = -reach; k <= reach; k++) {
+    const j = Math.min(RESPONSE_SAMPLES - 1, Math.max(0, index + k));
+    const w = Math.exp(-0.5 * ((k * step) / width) ** 2);
+    sum += w * curve[j]!;
+    norm += w;
+  }
+  return sum / norm;
+}
+
 /**
  * An interior profile by radius (0 the centre, 1 the photosphere): temperature, density, the
  * pressure scale height in radii and the share of the luminosity made per radius (dL/dr).
@@ -140,21 +157,7 @@ export function createLightTables(scope: DisposalScope, interior: InteriorProfil
         RESPONSE_LAYERS.forEach((layer, row) => {
           const width = layer === "point" ? 0 : LAYER_WIDTH_DEX[layer];
           for (let i = 0; i < RESPONSE_SAMPLES; i++) {
-            let value = curve[i]!;
-            if (width > 0) {
-              /* A log-normal of the layer's width, on the table's grid, over ±3σ. */
-              const reach = Math.ceil((3 * width) / step);
-              let sum = 0;
-              let norm = 0;
-              for (let k = -reach; k <= reach; k++) {
-                const j = Math.min(RESPONSE_SAMPLES - 1, Math.max(0, i + k));
-                const w = Math.exp(-0.5 * ((k * step) / width) ** 2);
-                sum += w * curve[j]!;
-                norm += w;
-              }
-              value = sum / norm;
-            }
-            responseData[(row * RESPONSE_SAMPLES + i) * 4] = value;
+            responseData[(row * RESPONSE_SAMPLES + i) * 4] = layerResponse(curve, i, width, step);
           }
         });
         responseTable.needsUpdate = true;

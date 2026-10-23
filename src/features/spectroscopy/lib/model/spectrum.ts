@@ -186,7 +186,10 @@ const cellsByModel = new WeakMap<Photosphere, Map<number, Cells>>();
 /** The star's cells, worked out once per model and microturbulence. */
 function cellsFor(photosphere: Photosphere, microturbulence: number): Cells {
   let byTurbulence = cellsByModel.get(photosphere);
-  if (!byTurbulence) cellsByModel.set(photosphere, (byTurbulence = new Map()));
+  if (!byTurbulence) {
+    byTurbulence = new Map();
+    cellsByModel.set(photosphere, byTurbulence);
+  }
   let known = byTurbulence.get(microturbulence);
   if (!known) {
     const cells = cellsOf(photosphere, microturbulence);
@@ -376,7 +379,11 @@ let photospheresSeen = 0;
 /** The star's model: its cells, lines and lattices, by everything they depend on. */
 function starModel(obs: StarObservation): StarModel {
   let id = photosphereIds.get(obs.photosphere);
-  if (id === undefined) photosphereIds.set(obs.photosphere, (id = photospheresSeen++));
+  if (id === undefined) {
+    id = photospheresSeen;
+    photospheresSeen += 1;
+    photosphereIds.set(obs.photosphere, id);
+  }
   const abundances = ELEMENT_IDS.map((element) => obs.abundances?.[element] ?? 0).join();
   return starModels(`${id}|${obs.microturbulence}|${abundances}`, () => {
     const cells = cellsFor(obs.photosphere, obs.microturbulence);

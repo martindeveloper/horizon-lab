@@ -13,11 +13,17 @@ import { clamp, lerp } from "@horizon/toolkit/math";
 
 import {
   BELT_STIRRED_AFTER,
+  CHICXULUB,
+  EARTH_CRUST,
   EMBRYOS_AFTER,
   LHB_CLASSIC,
+  MARS_DRY,
+  MARS_DYNAMO_LAST,
   MOON_IMPACT_AFTER,
-  PLANETESIMALS_AFTER,
   OLDEST,
+  PLANETESIMALS_AFTER,
+  SATURN_RINGS_AGE,
+  VREDEFORT,
 } from "./parameters";
 
 export { OLDEST };
@@ -77,8 +83,34 @@ const TODAY_SPAN = 5e4;
 export const isToday = (yearsAgo: number) => yearsAgo <= TODAY_SPAN;
 
 type Epoch = "sketch" | "birth" | "disk" | "clearing" | "today";
+
+/** The dated milestones since the clearing: stations on the slider's last stretch. */
+export type Moment =
+  | "earthCrust"
+  | "bombardment"
+  | "marsDynamo"
+  | "marsDry"
+  | "vredefort"
+  | "saturnRings"
+  | "chicxulub";
+/** Each station, where it sits and how far either side of it its note holds (years). */
+export const MOMENTS: readonly { id: Moment; yearsAgo: number; span: number }[] = [
+  { id: "earthCrust", yearsAgo: EARTH_CRUST, span: 4e7 },
+  { id: "bombardment", yearsAgo: LHB_CLASSIC, span: 1.5e8 },
+  { id: "marsDynamo", yearsAgo: MARS_DYNAMO_LAST, span: 6e7 },
+  { id: "marsDry", yearsAgo: MARS_DRY, span: 1e8 },
+  { id: "vredefort", yearsAgo: VREDEFORT, span: 6e7 },
+  {
+    id: "saturnRings",
+    yearsAgo: (SATURN_RINGS_AGE[0] + SATURN_RINGS_AGE[1]) / 2,
+    span: (SATURN_RINGS_AGE[1] - SATURN_RINGS_AGE[0]) / 2,
+  },
+  { id: "chicxulub", yearsAgo: CHICXULUB, span: 1.5e7 },
+];
+
 /** Finer, dated notes for the dock. Each one is a measured or well-established milestone. */
 type Note =
+  | Moment
   | "merger"
   | "thinDisk"
   | "ingredients"
@@ -91,7 +123,6 @@ type Note =
   | "moon"
   | "disk"
   | "clearing"
-  | "bombardment"
   | "today";
 export function noteOf(yearsAgo: number): Note {
   if (yearsAgo > 9.3e9) return "merger";
@@ -109,6 +140,8 @@ export function noteOf(yearsAgo: number): Note {
   if (yearsAgo >= CLEAR_DONE) return "clearing";
   /* The lunar basins' classic date, kept as its own stop on the way to today. */
   if (yearsAgo > LHB_CLASSIC - 1.5e8 && yearsAgo < LHB_CLASSIC + 2e8) return "bombardment";
+  for (const moment of MOMENTS)
+    if (Math.abs(yearsAgo - moment.yearsAgo) <= moment.span) return moment.id;
   return "today";
 }
 export const EPOCHS: readonly { id: Epoch; yearsAgo: number }[] = [

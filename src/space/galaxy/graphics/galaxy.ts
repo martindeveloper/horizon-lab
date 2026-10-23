@@ -160,8 +160,17 @@ export function modernGalaxy(count: number) {
   };
   for (let i = budget(0.08); i > 0; i -= 1) {
     let u = rnd();
-    const arm = ARMS.find((a) => (u -= a.old) < 0) ?? ARMS[0];
-    if (arm === undefined) continue;
+    let arm = ARMS[0];
+    for (const candidate of ARMS) {
+      u -= candidate.old;
+      if (u < 0) {
+        arm = candidate;
+        break;
+      }
+    }
+    if (arm === undefined) {
+      continue;
+    }
     const R = arm.inner + exponentialR(3 * KPC, 0, ARM_END - arm.inner);
     const width = (0.25 + 0.04 * (R / KPC)) * KPC;
     disk(

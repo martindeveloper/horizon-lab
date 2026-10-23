@@ -67,6 +67,12 @@ export const HELP: readonly HelpStep<OrreryStore>[] = [
     targets: ["time"],
     cues: [{ run: (s) => s.select(null) }, { at: 0.6, run: (s) => s.replay() }],
   },
+  {
+    /* The clock's moments, by the clock. */
+    id: "moments",
+    targets: ["moments"],
+    cues: [{ run: (s) => s.setPanel("moments") }],
+  },
   { id: "guide", targets: ["guide"] },
   {
     id: "settings",

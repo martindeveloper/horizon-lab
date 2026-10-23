@@ -68,7 +68,8 @@ src/
       components/overlay.tsx   Overlay composition; panels, cards and the time dock beside it
       lib/model/               The solar system through time, on the shared model (src/space):
         timeline.ts            Slider segments, epochs, dated notes, playback
-        views.ts               The default view and the Motion speed-up by scale
+        events.ts              Dated moments the clock can be set to, found as roots on the orbits
+        views.ts               The default view and the playing clock's speed-up by scale
         tour.ts                Guide steps and their flights
         catalogue/             The timeline's figures: value or span, unit, source, status
         solar-activity*.ts     The Sun's illustrative Hα activity: where the shared hedgerow
@@ -953,7 +954,7 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   and no marker stays: one dive and one pull away per body). The Orrery's hold ends
   pulled out to frame the body with its largest moon; Deep Field visits Voyager 1 from
   the heliosphere and pulls away on the flight to the Oort cloud. The Orrery's `clock` holds the
-  Motion speed-up to a few hundredths of a year per second while the drift is on,
+  playing clock's speed-up to a few hundredths of a year per second while the drift is on,
   so the inner planets and the belt glide rather than whirl; the rate shows under
   the drift's controls (`SimulationImmersive`'s `drift.caption`).
 - Giants' camera is a place on the ladder, not an orbit, so its drift is a path of its own

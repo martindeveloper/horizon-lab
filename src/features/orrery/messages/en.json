@@ -8,6 +8,10 @@
     "objects": { "title": "Objects", "body": "Find a body and open its card." },
     "closeUp": { "title": "Close-up", "body": "Fly in to a body at its true size." },
     "time": { "title": "Time", "body": "Scrub through history, or replay the clearing." },
+    "moments": {
+      "title": "Moments",
+      "body": "Set the clock to an opposition or a conjunction, or the slider to a milestone of deep time."
+    },
     "settings": { "title": "Settings", "body": "Layers, the camera pad and render quality." },
     "guide": { "title": "Guide", "body": "Learn how the solar system took shape, step by step." },
     "experiences": {
@@ -21,6 +25,22 @@
     "kuiper": "Neptune's orbit through the classical belt, about {kuiperAu} au.",
     "scattered": "Bodies Neptune tossed onto long ellipses, hundreds of au out.",
     "oort": "Guide shells at {oortInnerShellAu} and {oortShellAu} au; the dots thin out as r⁻³·⁵. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets."
+  },
+  "events": {
+    "opposition": "{name} at opposition",
+    "conjunction": "{name} meets {other}",
+    "perihelion": "{name} nearest the Sun",
+    "aphelion": "{name} farthest from the Sun",
+    "transit": "{name} crosses the Sun"
+  },
+  "moments": {
+    "earthCrust": "Earth's crust and first oceans",
+    "bombardment": "Late Heavy Bombardment",
+    "marsDynamo": "Mars's magnetic field fades",
+    "marsDry": "Mars dries out",
+    "vredefort": "Vredefort impact; the Moon's last lavas",
+    "saturnRings": "Saturn's rings form",
+    "chicxulub": "Chicxulub impact"
   },
   "epochs": {
     "sketch": "{timelineGyr} Gyr sketch",
@@ -38,13 +58,14 @@
     "offsetDays": "{value, plural, one {# day} other {# days}}",
     "offsetYears": "{value, plural, one {# year} other {# years}}",
     "offsetThousand": "{value} thousand years",
-    "clockDrift": "Today + {offset} · {rate}"
+    "clockNext": "Planets drawn for {date} · next: {event}",
+    "clockDrift": "Today + {offset} · {rate}",
+    "clockBack": "Today − {offset} · {rate}"
   },
   "toggles": {
     "elliptical": "Ellipses",
     "trueSize": "True size",
     "faintRings": "Faint rings",
-    "drift": "Motion",
     "plane": "Ecliptic grid"
   },
   "solarActivity": {
@@ -68,9 +89,9 @@
     "driftDays": "1 s ≈ {value} days",
     "driftYears": "1 s ≈ {value} years",
     "driftThousand": "1 s ≈ {value} thousand years",
-    "driftPaused": "Motion paused",
+    "clockPaused": "paused",
+    "clockRate": "Time",
     "legend": "Switches hide a layer; they do not change the tally.",
-    "playRestart": "Play from the start",
     "leaveCloseUp": "Back to the map",
     "backTo": "Back to {name}",
     "details": "Details",
@@ -78,6 +99,10 @@
     "closeUpNote": "True size, turned as it is now.",
     "craftNote": "True size, turned to the Sun as it flies.",
     "observatories": "Observatories",
+    "moments": "Moments",
+    "momentsClock": "Set the clock to",
+    "momentsDeep": "Back in time",
+    "momentsNote": "Found on the JPL orbits; past 2050 the orbits are carried on as they are today.",
     "closeUpPresentOnly": "Close-ups show today's surfaces. Return to the present to zoom in.",
     "epochs": "Jump to an epoch",
     "deepField": "Further out · Deep Field",
@@ -138,7 +163,7 @@
       "uranus": "An ice giant. In the model it moves outward with Neptune as the disk is stirred. Uranus and Neptune may even have swapped places.",
       "neptune": "Ends near {end} at the inner edge of today's Kuiper belt. Its outward move is what scatters the disk in this sketch. Dynamical friction with the disk can then round its orbit again."
     },
-    "planetCautionEllipse": "The orbit uses measured elements; during migration, the giant planets’ orbits are adjusted by a teaching model. Motion speeds up the planet’s orbit.",
+    "planetCautionEllipse": "The orbit uses measured elements; during migration, the giant planets’ orbits are adjusted by a teaching model. Playing time speeds up the planet’s orbit.",
     "planetCautionCircle": "With Ellipses off, the path is a circle whose radius equals the semi-major axis. The eccentricity shown in the card is unchanged.",
     "named": {
       "ceres": {
@@ -245,7 +270,7 @@
       },
       "today": {
         "title": "Today is computed",
-        "body": "Planet positions come from the JPL approximate Keplerian elements with their secular rates, computed for the current date. The Motion switch moves each planet on along today's orbit faster than real time; the orbits themselves stay as measured, since the fitted rates hold only for 1800–2050."
+        "body": "Planet positions come from the JPL approximate Keplerian elements with their secular rates, computed for the current date. Playing time moves each planet on along today's orbit faster than real time; the orbits themselves stay as measured, since the fitted rates hold only for 1800–2050."
       },
       "past": {
         "title": "The past slider is a model",
@@ -266,7 +291,7 @@
     "steps": {
       "today": {
         "title": "Where the planets are today",
-        "body": "Positions computed for today's date from JPL orbital elements. Motion moves them along these orbits faster."
+        "body": "Positions computed for today's date from JPL orbital elements. Playing time moves them along these orbits faster."
       },
       "periods": {
         "title": "Farther out, slower",
@@ -321,6 +346,10 @@
         "title": "The sky behind it",
         "body": "Bright stars are the shared J2000 catalogue placed by right ascension and declination and rotated into the planets' ecliptic frame. The Milky Way is sampled from a painted map in galactic coordinates (bulge toward Sagittarius, the Great Rift, the Coalsack): tens of thousands of grains and a soft haze drawn from the same map, so it looks granular like the real band rather than a smooth glow. The whole band turns about the galactic pole once per galactic year as the Sun orbits; before about {thinDiskGyr} billion years ago the thin disk and dust lane give way to a thicker, bluer disk; inside the natal cloud the view dims and reddens. Named stars fade beyond about {namedStarsYears} years, when proper motions have scrambled the constellations."
       },
+      "events": {
+        "title": "Moments on the clock",
+        "body": "Each moment in the Objects panel is found on the same orbits the scene draws, not typed in: a scan from today brackets the next (or last) date where its condition crosses zero, a bisection narrows the bracket to the hour. A planet is at opposition when its heliocentric longitude meets Earth's; two planets are in conjunction when their longitudes seen from Earth meet; perihelion is where the distance's rate of change turns upward; a transit is an inferior conjunction with Mercury inside the Sun's disc. The JPL elements are fitted for 1800–2050; a later date carries them on as they are, and the panel says so. Picking a moment sets the clock to its date; playing time runs on from there, and Today brings it back."
+      },
       "swarms": {
         "title": "Belts and clouds on the GPU",
         "body": "The asteroid belt, Jupiter's Trojans, the Kuiper belt and the Oort cloud are point swarms whose vertex shader solves Kepler's equation each frame, so thousands of bodies orbit at the same speed-up as the planets in one draw call each. The belt has Kirkwood gaps; the Trojans librate about L4 and L5 and appear during the clearing; the Kuiper belt holds cold classicals formed in place, hot classicals, plutinos at {plutinosAu} au and twotinos at {twotinosAu} au swept into resonance by Neptune, and nothing beyond the cliff; the Oort cloud thins as r⁻³·⁵ from an inner, flatter cloud to an isotropic shell at {oortShellAu} au."
@@ -352,7 +381,13 @@
     "moon": "In the leading model a Mars-size body strikes Earth and the Moon forms from the debris. Estimates span about {moonImpactGyr} billion years ago; the younger ages may record later remelting.",
     "disk": "Disk intact: giants packed in, a heavy icy disk outside them. Starting orbits are a teaching sketch.",
     "clearing": "Clearing, as a model: Jupiter and Saturn cross a resonance, the giants scatter each other and Neptune scatters the disk.",
+    "earthCrust": "Zircons from Jack Hills date Earth's crust to {earthCrustGyr} billion years ago, cool enough for liquid water soon after: the first oceans.",
     "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that may be debris from one basin, Imbrium. A spike or a long tail? Debated.",
-    "today": "Measured orbits. Planet positions are computed for today's date."
+    "marsDynamo": "Mars's dynamo still magnetises lavas {marsDynamoGyr} billion years ago. After that its global field is gone, and the solar wind strips the air away.",
+    "marsDry": "Around {marsDryGyr} billion years ago Mars's Hesperian ends: the rivers and lakes are mostly over, the cold desert begins.",
+    "vredefort": "{vredefortGyr} billion years ago an asteroid digs Vredefort, the largest confirmed impact on Earth. On the Moon the last lavas flow, {moonLavaGyr} billion years ago by Chang'e 5's basalts.",
+    "saturnRings": "Saturn's rings are young: Cassini's dust count gives them {ringsMyr} million years. Nothing in the model forms them; their origin is open.",
+    "chicxulub": "{chicxulubMyr} million years ago an asteroid strikes Chicxulub, Yucatán: the Cretaceous ends.",
+    "today": "Measured orbits. Planet positions are computed for the date on the clock."
   }
 }

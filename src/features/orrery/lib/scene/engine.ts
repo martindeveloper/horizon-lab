@@ -94,8 +94,8 @@ export function createOrreryEngine({
     const reduceMotion = window.matchMedia(REDUCED_MOTION_QUERY);
     const reducedMotion = prefersReducedMotion();
     let driftYears = 0;
-    /** Ramp position of the Motion toggle, 0 (held) to 1 (full rate); eased so orbits glide to a stop and back. */
-    let motionRamp = store.getState().show.drift ? 1 : 0;
+    /** Ramp position of the clock, 0 (paused) to 1 (full rate); eased so orbits glide to a stop and back. */
+    let motionRamp = store.getState().playing ? 1 : 0;
 
     const rig = createCameraRig(camera, {
       reduceMotion,
@@ -249,9 +249,8 @@ export function createOrreryEngine({
     const continuous = () => {
       const s = store.getState();
       return (
-        s.playing ||
-        (s.show.drift && !closeUp.current) ||
-        motionRamp !== (s.show.drift ? 1 : 0) ||
+        (s.playing && (s.yearsAgo > 0 || !closeUp.current)) ||
+        motionRamp !== (s.playing ? 1 : 0) ||
         rig.moving ||
         guide.busy() ||
         drift.busy ||
@@ -318,10 +317,16 @@ export function createOrreryEngine({
     /* What the bridge last acted on besides the view, flight and turn. */
     let lastCloseUp = store.getState().closeUp;
     let lastSelection = store.getState().selection;
+    let lastClock = store.getState().clock;
     const bridge = bridgeStore(store, scope, {
       invalidate: () => engine.invalidate(),
       before: (s) => {
         activity.setEnabled(s.solarActivity);
+        /* The clock set to a moment: the Motion offset jumps there and runs on from it. */
+        if (s.clock !== lastClock) {
+          lastClock = s.clock;
+          if (s.clock) driftYears = s.clock.years;
+        }
         /* The guide takes the camera; a turn is ignored while it does. */
         if (s.guideOpen && closeUp.current) closeUp.end(false);
       },
@@ -394,25 +399,30 @@ export function createOrreryEngine({
       engine.invalidate();
     });
     invalidateOnMotionChange(scope, engine, reduceMotion);
-    if (reducedMotion) store.getState().patchShow({ drift: false });
+    if (reducedMotion) store.setState({ playing: false });
 
-    /* The store is written a few times a second; between commits the playback head lives here.
-       A slider move while playing shows up as a store value we did not commit. */
+    /* Playing runs history on to today and stays playing there, where the present runs on
+       along today's orbits (the tick). The store is written a few times a second; between
+       commits the playback head lives here. A seek while playing shows up as a store value we
+       did not commit. */
     let playHead: number | null = null;
     let playCommitted = -1;
     let playClock = 0;
     const advanceClock = (state: OrreryStore, dt: number) => {
-      if (!state.playing) {
+      if (!state.playing || state.yearsAgo <= 0) {
+        /* A pause holds the clock where the last frame drew it, not at the last commit. */
+        const held =
+          playHead !== null && state.yearsAgo === playCommitted ? playHead : state.yearsAgo;
+        if (held !== state.yearsAgo) store.getState().setYearsAgo(held);
         playHead = null;
-        return state.yearsAgo;
+        return held;
       }
       if (playHead === null || state.yearsAgo !== playCommitted) playHead = state.yearsAgo;
       playHead = advancePlay(playHead, dt);
       playClock += dt;
       if (playHead <= 0 || playClock > 0.08) {
-        store.getState().setYearsFromPlay(playHead);
+        store.getState().setYearsAgo(playHead);
         playCommitted = playHead;
-        if (playHead <= 0) store.setState({ playing: false });
         playClock = 0;
       }
       return playHead;
@@ -443,7 +453,7 @@ export function createOrreryEngine({
            drift holds the rate down, so the inner planets glide through its wide framings. */
         const yearsAgo = advanceClock(state, dt);
         const step = reduceMotion.matches ? 1 : dt / MOTION_RAMP;
-        motionRamp = clamp01(motionRamp + (show.drift ? step : -step));
+        motionRamp = clamp01(motionRamp + (state.playing ? step : -step));
         const driftRate =
           motionRamp > 0
             ? Math.min(
@@ -507,7 +517,7 @@ export function createOrreryEngine({
 
         hud.update(dt, invalidated || engine.dirty, {
           dist,
-          driftRate: show.drift ? driftRate : 0,
+          driftRate: state.playing ? driftRate : 0,
           driftYears,
           syncView: !rig.flying && !closeUp.current && !state.guideOpen,
           angles: pose,

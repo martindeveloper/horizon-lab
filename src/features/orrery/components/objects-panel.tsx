@@ -15,7 +15,8 @@ import { useOrrery } from "../lib/store";
 
 /**
  * Everything to find: picking one flies to the scale it is best seen at and opens its card; an
- * observatory, to Earth's close-up, where its orbit shows.
+ * observatory, to Earth's close-up, where its orbit shows. The clock's moments are the dock's
+ * (moments-panel.tsx).
  */
 export function ObjectsPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("orrery");

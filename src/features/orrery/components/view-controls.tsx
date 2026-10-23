@@ -17,7 +17,6 @@ export const DISPLAY: (keyof Show)[] = [
   "elliptical",
   "trueSize",
   "faintRings",
-  "drift",
   "names",
   "distances",
 ];

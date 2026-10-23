@@ -268,6 +268,23 @@ test("store: close-ups need a globe, today and the solar map; leaving is automat
   assert.equal(api().closeUp, null, "a view change ends it");
 });
 
+test("store: one clock; play only toggles, and a seek or a close-up keeps it", () => {
+  const api = useOrrery.getState;
+  useOrrery.setState({ yearsAgo: 0, playing: false, guideOpen: false, closeUp: null, clock: null });
+  api().togglePlay();
+  assert.deepEqual([api().playing, api().yearsAgo], [true, 0], "playing at today stays today");
+  api().setYearsAgo(4e9);
+  assert.equal(api().playing, true, "a seek keeps time running");
+  api().togglePlay();
+  api().setYearsAgo(0);
+  assert.equal(api().playing, false, "and keeps it paused");
+  api().togglePlay();
+  api().select({ kind: "planet", id: "mars" });
+  api().enterCloseUp();
+  assert.equal(api().playing, true, "a close-up holds the clock without pausing it");
+  api().leaveCloseUp(true);
+});
+
 test("a close-up that follows a body round the Sun keeps the same three-quarter light", () => {
   /* In the world frame, the camera's angle off the Sun as seen from the body. */
   const body = [10, 0, 0];

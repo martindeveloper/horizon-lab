@@ -18,7 +18,6 @@ export const SOLAR_SHOW: SolarShow = {
   trueSize: false,
   faintRings: false,
   elliptical: true,
-  drift: false,
 };
 
 /** Closest approach to the galactic centre while the bulge card holds the aim there (ly). */

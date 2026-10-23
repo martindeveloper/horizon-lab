@@ -35,7 +35,6 @@ export type SolarShow = {
   /** Faint ring systems in a long exposure, each as bright as Saturn's. */
   faintRings: boolean;
   elliptical: boolean;
-  drift: boolean;
 };
 
 /**
@@ -65,6 +64,7 @@ export type SolarFrame = SolarMoment & {
   now: Date;
   show: SolarShow;
   sel: SolarSelection | null;
+  /** Time runs: history on toward today, then the present on along today's orbits. */
   playing: boolean;
   /** Camera distance from its aim, au. */
   dist: number;

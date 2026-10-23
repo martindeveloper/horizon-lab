@@ -179,6 +179,12 @@ test("orrery timeline gives each formation stage room, a note and a play stop", 
     [SUN_BIRTH - 6e7, "moon"],
     [4.47e9, "clearing"],
     [3.9e9, "bombardment"],
+    [4.4e9, "earthCrust"],
+    [3.7e9, "marsDynamo"],
+    [3.1e9, "marsDry"],
+    [2.02e9, "vredefort"],
+    [2.5e8, "saturnRings"],
+    [6.6e7, "chicxulub"],
     [1e9, "today"],
   ];
   for (const [yearsAgo, note] of stages) assert.equal(noteOf(yearsAgo), note, `${yearsAgo}`);

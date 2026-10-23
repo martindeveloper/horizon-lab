@@ -505,7 +505,8 @@ test("each simulation's drift clears what stands in its way and leaves the rest 
   df.stopDrift();
   assert.equal(useDeepField.getState().drift, "off");
 
-  /* The Orrery: the tour ends, a close-up is left, and the clock keeps its playback. */
+  /* The Orrery: the tour ends, a close-up is left, and the visitor's clock comes back. */
+  useOrrery.setState({ playing: false });
   useOrrery.getState().startGuide();
   useOrrery.setState({ closeUp: { kind: "sun" }, panel: "objects", playing: true });
   useOrrery.getState().startDrift();
@@ -514,7 +515,7 @@ test("each simulation's drift clears what stands in its way and leaves the rest 
   assert.equal(or.guideOpen, false);
   assert.equal(or.closeUp, null);
   assert.equal(or.panel, "none");
-  assert.equal(or.playing, false, "the tour's end stopped the playback it owned");
+  assert.equal(or.playing, false, "the tour's end gave the visitor's paused clock back");
   or.stopDrift();
 
   /* The observatory: panels, pins and the guide go, gravity comes back on, the preset stays. */
@@ -565,7 +566,7 @@ test("the Orrery's drift clock reads in both languages at every rate the engine 
       },
     });
     const f = createFormatter({ locale });
-    const motion = t("toggles.drift");
+    const motion = t("hud.clockRate");
     assert.ok(motion.length, `${locale}: the clock's label`);
     for (const rate of [0, ORRERY.clock, 0.35, 2.5, 12, 30_000]) {
       const text = motionRateLabel(t, f, rate);

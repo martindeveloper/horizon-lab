@@ -58,6 +58,15 @@ const specification = {
       ],
     },
     {
+      id: "events",
+      equations: [
+        "λ_Earth − λ_planet = 0  (opposition; heliocentric longitudes)",
+        "λ_Jupiter − λ_Saturn = 0  (conjunction; geocentric longitudes)",
+        "dr/dt = 0  (perihelion as the sign turns upward)",
+        "λ_Sun − λ_Mercury = 0, |β_Mercury| < 0.267°  (transit)",
+      ],
+    },
+    {
       id: "swarms",
       equations: [
         "E − e sin E = M, four Newton steps in the vertex shader",

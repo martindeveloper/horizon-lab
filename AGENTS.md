@@ -36,6 +36,8 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
 
 - Use Oxlint (`npm run lint`) and Oxfmt (`npm run format` / `npm run format:check`).
 - Keep React Hooks and compiler correctness checks enabled; do not add ESLint or Prettier.
+- Avoid deeply nested ternaries. Always use braces for control-flow bodies.
+- Prefer `switch` over long `if`/`else if` chains when comparing one value against discrete cases.
 
 - Read `docs/architecture.md` before adding a simulation. Keep each sub-app under
   `src/features/<slug>`; expose only its entry component, manifest, routing, and

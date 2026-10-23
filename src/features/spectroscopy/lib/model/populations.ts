@@ -95,7 +95,10 @@ const fractionsByGas = new WeakMap<SahaGas, Partial<Record<ElementId, readonly n
  */
 export function ionizationIn(gas: SahaGas, element: ElementId): readonly number[] {
   let known = fractionsByGas.get(gas);
-  if (!known) fractionsByGas.set(gas, (known = {}));
+  if (!known) {
+    known = {};
+    fractionsByGas.set(gas, known);
+  }
   return (known[element] ??= ionizationFractions(element, gas.temperature, gas.electronPressure));
 }
 

@@ -452,7 +452,10 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
     if (waits && mean) {
       if (!streamed) unpainted.add(id);
       let tint = placeholders.get(id);
-      if (!tint) placeholders.set(id, (tint = new Color(mean)));
+      if (!tint) {
+        tint = new Color(mean);
+        placeholders.set(id, tint);
+      }
       return { texture: WHITE, tint };
     }
     return { texture: paintedOf(id), tint: NO_TINT };

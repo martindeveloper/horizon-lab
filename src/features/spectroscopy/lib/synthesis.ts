@@ -119,7 +119,10 @@ function pump() {
 
 function answerOf(m: Mystery, resolution: number, airmass: number, wanted: boolean) {
   let seen = answers.get(m);
-  if (!seen) answers.set(m, (seen = new Map()));
+  if (!seen) {
+    seen = new Map();
+    answers.set(m, seen);
+  }
   const key = `${resolution}|${airmass}`;
   const known = seen.get(key);
   if (known) {

@@ -50,12 +50,22 @@ export function cmbMapUv([x, y, z]: readonly number[]): [number, number] {
 }
 
 /** ACT only replaces valid pixels; no coverage or load failure falls back to valid Planck, then a mask. */
-export function cmbPixelSource(
-  planckValid: boolean,
-  actValid: boolean,
-  detail: boolean,
-): CmbProduct | null {
-  return detail && actValid ? "act" : planckValid ? "planck" : null;
+export function cmbPixelSource({
+  planckValid,
+  actValid,
+  detail,
+}: {
+  planckValid: boolean;
+  actValid: boolean;
+  detail: boolean;
+}): CmbProduct | null {
+  if (detail && actValid) {
+    return "act";
+  }
+  if (planckValid) {
+    return "planck";
+  }
+  return null;
 }
 
 /** Resource state shared by the renderer and UI. A failed load is retried only on request. */

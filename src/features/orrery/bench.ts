@@ -29,6 +29,8 @@ type OrreryBenchScene = BenchScene & {
   yearsAgo?: number;
   /** Switches changed from the defaults. */
   show?: Partial<Show>;
+  /** Time runs, as the page opens (history on to today, then the present); false holds it. */
+  playing?: boolean;
   selection?: SolarSelection;
   bloom: boolean;
   lens: boolean;
@@ -287,7 +289,8 @@ const SCENES: readonly OrreryBenchScene[] = [
     },
   },
   /* The planetesimal sample through the clearing: its bins and switches held still (a still
-     frame's image waits on however many frames its timing took), and its motion in sequences. */
+     frame's image waits on however many frames its timing took), and its motion in sequences,
+     which play on from their moment. */
   {
     id: "tracers-early",
     description:
@@ -296,12 +299,12 @@ const SCENES: readonly OrreryBenchScene[] = [
     bloom: false,
     lens: false,
     yearsAgo: clearing(0.25),
-    show: { drift: false },
+    playing: false,
   },
   {
     id: "tracers-clearing",
     description:
-      "The Kuiper belt halfway through the clearing, Motion on: the sample along its orbits",
+      "The Kuiper belt halfway through the clearing, playing on: the sample along its orbits",
     tags: ["sequence", "tracers"],
     bloom: false,
     lens: false,
@@ -318,11 +321,12 @@ const SCENES: readonly OrreryBenchScene[] = [
     lens: false,
     view: "kuiper",
     yearsAgo: clearing(0.65),
-    show: { kuiper: false, ejected: false, drift: false },
+    show: { kuiper: false, ejected: false },
+    playing: false,
   },
   {
     id: "tracers-scattered",
-    description: "The scattered disk once the clearing ends, Motion on for a long run of drift",
+    description: "The scattered disk once the clearing ends, playing on to today and past it",
     tags: ["sequence", "tracers"],
     bloom: false,
     lens: false,
@@ -332,7 +336,7 @@ const SCENES: readonly OrreryBenchScene[] = [
   },
   {
     id: "tracers-far",
-    description: "The Oort cloud today, Motion on: a million years and more of drift",
+    description: "The Oort cloud today: a million years and more of drift",
     tags: ["sequence", "tracers"],
     bloom: false,
     lens: false,
@@ -341,8 +345,7 @@ const SCENES: readonly OrreryBenchScene[] = [
   },
   {
     id: "tracers-selected",
-    description:
-      "The Kuiper belt today, Motion on, one scattered planetesimal selected: the reticle on it",
+    description: "The Kuiper belt today, one scattered planetesimal selected: the reticle on it",
     tags: ["sequence", "tracers"],
     bloom: false,
     lens: false,
@@ -383,7 +386,7 @@ export const benchTarget: BenchTarget = {
       quality: "standard",
       bloom: scene.bloom,
       lens: scene.lens,
-      playing: false,
+      playing: scene.playing ?? true,
     });
     store.getState().patchShow({ faintRings: scene.faintRings ?? false });
     /* A drift scene plays the drift as the page would once its map has loaded and its loader lifted. */

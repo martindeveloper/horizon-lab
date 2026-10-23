@@ -49,7 +49,10 @@ type Slot = {
 const KEYS = new Map<BodyId, Map<MapTier, string>>();
 const key = (id: BodyId, tier: MapTier) => {
   let keys = KEYS.get(id);
-  if (!keys) KEYS.set(id, (keys = new Map(TIERS.map((t) => [t, `${id}:${t}`]))));
+  if (!keys) {
+    keys = new Map(TIERS.map((t) => [t, `${id}:${t}`]));
+    KEYS.set(id, keys);
+  }
   return keys.get(tier)!;
 };
 

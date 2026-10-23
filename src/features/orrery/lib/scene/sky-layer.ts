@@ -20,6 +20,10 @@ import {
   starMaterial,
 } from "../graphics/sky";
 
+/** The sky's turn toward the true galactic phase, rad/s: while time runs, and to a set clock. */
+const SKY_FOLLOW = 0.08;
+const SKY_SETTLE = 6;
+
 export function createSkyLayer(
   { scope, camera, dpr, invalidate }: SolarKit,
   parent: Object3D,
@@ -50,6 +54,9 @@ export function createSkyLayer(
   let skyPhase = galacticPhase(yearsAgo);
   /** True while the Milky Way is still easing toward the true orbital phase. */
   let easing = false;
+  /** The clock the sky last saw, and whether a set clock is still turning it there quickly. */
+  let seenYears = yearsAgo;
+  let settling = false;
 
   return {
     /** Resamples the Milky Way's grains and the field stars at a new quality's counts. */
@@ -71,17 +78,26 @@ export function createSkyLayer(
       carrySky(sky, camera, f.dist);
       const epoch = skyEpoch(f.yearsAgo);
       /* Playback turns the Sun's galactic phase about once a second, which would spin the
-         whole sky into a strobe. Follow it slowly while playing; otherwise ease to the true
-         phase quickly. The phase is unwrapped, so the sky always turns the way time moves,
-         never more than one lap: taking the shorter way round flips direction every half
-         lap whenever the true phase outruns the follow rate. */
+         whole sky into a strobe, so the sky turns only as time does: it follows the true phase
+         slowly while time runs and holds while paused, lagging or not. A clock set while
+         paused (a seek, a tour step) is a jump the sky turns to quickly. The phase is
+         unwrapped, so the sky always turns the way time moves, never more than one lap:
+         taking the shorter way round flips direction every half lap whenever the true phase
+         outruns the follow rate. */
+      if (f.playing) settling = false;
+      else if (f.yearsAgo !== seenYears) settling = true;
+      seenYears = f.yearsAgo;
       const target = galacticPhase(f.yearsAgo);
       const ahead = target - skyPhase;
       const gap = Math.sign(ahead) * (Math.abs(ahead) % TAU);
       if (gap !== ahead) skyPhase = target - gap;
-      const step = (f.playing ? 0.08 : 6) * f.dt;
+      let rate = 0;
+      if (settling) rate = SKY_SETTLE;
+      else if (f.playing) rate = SKY_FOLLOW;
+      const step = rate * f.dt;
       skyPhase += Math.abs(gap) <= step ? gap : Math.sign(gap) * step;
-      easing = Math.abs(gap) > step;
+      easing = rate > 0 && Math.abs(gap) > step;
+      settling &&= easing;
       const { dim } = epoch;
       milkyWay.set(skyPhase, epoch.era, dim, epoch.cloud);
       brightMaterial.uniforms.fade!.value = epoch.real * dim;
@@ -91,7 +107,7 @@ export function createSkyLayer(
       const fieldTint = fieldMaterial.uniforms.tint?.value;
       if (fieldTint instanceof Color) fieldTint.copy(milkyWay.tint);
       if (cloud.visible) {
-        if (f.show.drift) cloudSpin += f.dt * 0.02;
+        if (f.playing) cloudSpin += f.dt * 0.02;
         cloud.rotation.y = cloudSpin;
         cloud.scale.setScalar(Math.max(8, f.dist * 2.6));
         cloudLook.size = f.dist * 0.3;

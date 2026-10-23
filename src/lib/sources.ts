@@ -457,6 +457,34 @@ export const SOURCES = {
     link: SOURCE_URLS.lemen2012,
   },
   lhb: { cite: "Zellner 2017, OLEB 47, 261; Boehnke & Harrison 2016, PNAS 113, 10802" },
+  valley2014: {
+    cite: "Valley et al. 2014, Nature Geoscience 7, 219 (Jack Hills zircon: Hadean crust at 4.4 Gyr)",
+    link: "https://doi.org/10.1038/ngeo2075",
+  },
+  mittelholz2020: {
+    cite: "Mittelholz et al. 2020, Science Advances 6, eaba0513 (Mars's dynamo active at 4.5 and 3.7 Gyr)",
+    link: "https://doi.org/10.1126/sciadv.aba0513",
+  },
+  hartmannNeukum2001: {
+    cite: "Hartmann & Neukum 2001, Space Science Reviews 96, 165 (Mars cratering chronology; Hesperian–Amazonian boundary 2.9–3.3 Gyr)",
+    link: "https://doi.org/10.1023/A:1011945222010",
+  },
+  kamo1996: {
+    cite: "Kamo, Reimold, Krogh & Colliston 1996, EPSL 144, 369 (Vredefort: 2023 ± 4 Myr)",
+    link: "https://doi.org/10.1016/S0012-821X(96)00180-X",
+  },
+  li2021moon: {
+    cite: "Li et al. 2021, Nature 600, 54 (Chang'e 5 basalts: lunar volcanism at 2030 ± 4 Myr)",
+    link: "https://doi.org/10.1038/s41586-021-04100-2",
+  },
+  kempf2023: {
+    cite: "Kempf et al. 2023, Science Advances 9, eadf8537 (Saturn's rings: exposure age ≲100–400 Myr)",
+    link: "https://doi.org/10.1126/sciadv.adf8537",
+  },
+  renne2013: {
+    cite: "Renne et al. 2013, Science 339, 684 (Chicxulub impact: 66.038 ± 0.011 Myr)",
+    link: "https://doi.org/10.1126/science.1230492",
+  },
   li2018: {
     cite: "Li et al. 2018, Nat. Commun. 9, 3709 (Jupiter's internal heat, from Cassini)",
     link: SOURCE_URLS.li2018,

@@ -11,6 +11,10 @@
     "objects": { "title": "Objekty", "body": "Najděte těleso a otevřete jeho kartu." },
     "closeUp": { "title": "Zblízka", "body": "Přeletí k tělesu v jeho skutečné velikosti." },
     "time": { "title": "Čas", "body": "Projděte historii, nebo přehrajte odklízení těles." },
+    "moments": {
+      "title": "Okamžiky",
+      "body": "Nastavte hodiny na opozici či konjunkci, nebo posuvník na milník hlubokého času."
+    },
     "settings": { "title": "Nastavení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
     "guide": {
       "title": "Průvodce",
@@ -28,6 +32,22 @@
     "scattered": "Tělesa, která Neptun rozptýlil na protáhlé eliptické dráhy sahající stovky au od Slunce.",
     "oort": "Kulové plochy vyznačují vzdálenosti {oortInnerShellAu} a {oortShellAu} au; hustota bodů klesá jako r⁻³·⁵. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet."
   },
+  "events": {
+    "opposition": "{name} v opozici",
+    "conjunction": "{name} potkává {other}",
+    "perihelion": "{name} nejblíže Slunci",
+    "aphelion": "{name} nejdále od Slunce",
+    "transit": "{name} přechází přes Slunce"
+  },
+  "moments": {
+    "earthCrust": "Zemská kůra a první oceány",
+    "bombardment": "Pozdní těžké bombardování",
+    "marsDynamo": "Magnetické pole Marsu slábne",
+    "marsDry": "Mars vysychá",
+    "vredefort": "Dopad Vredefort; poslední lávy Měsíce",
+    "saturnRings": "Vznik Saturnových prstenců",
+    "chicxulub": "Dopad Chicxulub"
+  },
   "epochs": {
     "sketch": "Před {timelineGyr} {timelineGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let",
     "birth": "Vznik Slunce",
@@ -44,13 +64,14 @@
     "offsetDays": "{value, plural, one {# den} few {# dny} other {# dní}}",
     "offsetYears": "{value, plural, one {# rok} few {# roky} other {# let}}",
     "offsetThousand": "{value} tis. let",
-    "clockDrift": "Dnes + {offset} · {rate}"
+    "clockNext": "Polohy planet k datu {date} · příště: {event}",
+    "clockDrift": "Dnes + {offset} · {rate}",
+    "clockBack": "Dnes − {offset} · {rate}"
   },
   "toggles": {
     "elliptical": "Elipsy",
     "trueSize": "Skutečná velikost",
     "faintRings": "Slabé prstence",
-    "drift": "Pohyb",
     "plane": "Mřížka ekliptiky"
   },
   "solarActivity": {
@@ -74,9 +95,9 @@
     "driftDays": "1 s ≈ {value, plural, one {# den} few {# dny} other {# dní}}",
     "driftYears": "1 s ≈ {value, plural, one {# rok} few {# roky} other {# let}}",
     "driftThousand": "1 s ≈ {value} tis. let",
-    "driftPaused": "Pohyb zastaven",
+    "clockPaused": "pozastaveno",
+    "clockRate": "Čas",
     "legend": "Skrytí vrstvy nemění počet těles v přehledu.",
-    "playRestart": "Přehrát od začátku",
     "leaveCloseUp": "Zpět na mapu",
     "backTo": "Zpět: {name}",
     "details": "Podrobnosti",
@@ -84,6 +105,10 @@
     "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",
     "craftNote": "Skutečná velikost, natočení ke Slunci jako za letu.",
     "observatories": "Observatoře",
+    "moments": "Okamžiky",
+    "momentsClock": "Nastavit hodiny na",
+    "momentsDeep": "Zpět v čase",
+    "momentsNote": "Nalezeno na drahách JPL; po roce 2050 dráhy pokračují tak, jak jsou dnes.",
     "closeUpPresentOnly": "Pohled zblízka ukazuje dnešní povrchy. Pro přiblížení se vraťte do současnosti.",
     "epochs": "Přejít na období",
     "deepField": "Dál · Deep Field",
@@ -144,7 +169,7 @@
       "uranus": "Ledový obr, který se v modelu spolu s Neptunem vzdaluje od Slunce a přitom mění dráhy těles v okolním disku. Uran a Neptun si v minulosti možná vyměnily pořadí.",
       "neptune": "Neptun v modelu doputuje do vzdálenosti přibližně {end}, k vnitřnímu okraji dnešního Kuiperova pásu. Při migraci směrem od Slunce gravitačně rozptyluje tělesa disku. Interakce s diskem prostřednictvím dynamického tření může následně snížit výstřednost jeho dráhy."
     },
-    "planetCautionEllipse": "Dráha vychází z měřených elementů; u obřích planet se v období migrace upravuje podle výukového modelu. Přepínač Pohyb zrychluje oběh planety.",
+    "planetCautionEllipse": "Dráha vychází z měřených elementů; u obřích planet se v období migrace upravuje podle výukového modelu. Spuštěný čas zrychluje oběh planety.",
     "planetCautionCircle": "Při vypnutých Elipsách se dráha zobrazuje jako kružnice o poloměru rovném velké poloose. Údaj o výstřednosti v kartě se tím nemění.",
     "named": {
       "ceres": {
@@ -251,7 +276,7 @@
       },
       "today": {
         "title": "Současné polohy jsou vypočtené",
-        "body": "Polohy planet počítáme pro aktuální datum z přibližných keplerovských dráhových elementů JPL a jejich sekulárních změn. Přepínač Pohyb posouvá planety po dnešních drahách rychleji než reálný čas; samotné dráhy zůstávají změřené, protože sekulární změny platí jen pro roky 1800–2050."
+        "body": "Polohy planet počítáme pro aktuální datum z přibližných keplerovských dráhových elementů JPL a jejich sekulárních změn. Spuštěný čas posouvá planety po dnešních drahách rychleji než reálný čas; samotné dráhy zůstávají změřené, protože sekulární změny platí jen pro roky 1800–2050."
       },
       "past": {
         "title": "Dávná minulost je modelová",
@@ -272,7 +297,7 @@
     "steps": {
       "today": {
         "title": "Kde jsou planety dnes",
-        "body": "Polohy spočtené pro dnešní datum z dráhových elementů JPL. Přepínač Pohyb je po těchto drahách posouvá rychleji."
+        "body": "Polohy spočtené pro dnešní datum z dráhových elementů JPL. Spuštěný čas je po těchto drahách posouvá rychleji."
       },
       "periods": {
         "title": "Čím dál, tím pomaleji",
@@ -327,6 +352,10 @@
         "title": "Obloha v pozadí",
         "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně {namedStarsYears} {namedStarsYearsPlural, select, one {rok} few {roky} many {roku} other {let}} od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí."
       },
+      "events": {
+        "title": "Okamžiky na hodinách",
+        "body": "Každý okamžik v panelu Objekty je nalezen na týchž drahách, které scéna kreslí, ne opsán: hledání od dneška ohraničí příští (nebo poslední) datum, kde jeho podmínka prochází nulou, a půlení intervalu je zpřesní na hodinu. Planeta je v opozici, když se její heliocentrická délka setká se zemskou; dvě planety jsou v konjunkci, když se setkají jejich délky viděné ze Země; perihel je tam, kde se změna vzdálenosti obrací vzhůru; přechod je dolní konjunkce s Merkurem uvnitř slunečního kotouče. Elementy JPL jsou fitovány pro léta 1800–2050; pozdější datum je nechává, jak jsou, a panel to říká. Volba okamžiku nastaví hodiny na jeho datum; spuštěný čas z něj běží dál a Dnes je vrátí."
+      },
       "swarms": {
         "title": "Pásy a oblaky na GPU",
         "body": "Pás planetek, Jupiterovi trojáni, Kuiperův pás a Oortův oblak jsou soubory bodů, pro něž vrcholový shader v každém snímku řeší Keplerovu rovnici. Tisíce těles tak obíhají při stejném zrychlení času jako planety a každý soubor vyžaduje jediný vykreslovací příkaz. Pás planetek obsahuje Kirkwoodovy mezery; trojáni librují kolem bodů L4 a L5 a objevují se během odklízení těles. Kuiperův pás zahrnuje dynamicky chladnou klasickou populaci vzniklou na místě, dynamicky horkou klasickou populaci, plutina u {plutinosAu} au a twotina u {twotinosAu} au zachycená Neptunem do rezonancí. Za Kuiperovým útesem tento soubor bodů končí. Hustota Oortova oblaku klesá jako r⁻³·⁵ od vnitřní, plošší části po izotropní kulový obal ve vzdálenosti {oortShellAu} au."
@@ -358,7 +387,13 @@
     "moon": "Podle převládajícího modelu srážka Země s tělesem velikosti Marsu vyvrhne materiál, z něhož vznikne Měsíc. Odhady doby této události se pohybují přibližně v rozmezí {moonImpactGyr} {moonImpactGyrPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} let před současností; mladší stáří mohou zachycovat pozdější přetavení.",
     "disk": "Výchozí stav modelu: obří planety na těsně sousedících drahách, za nimi hmotný disk ledových těles. Počáteční dráhy jsou zvoleny pro výukový model.",
     "clearing": "Model odklízení těles: Jupiter a Saturn projdou rezonancí, obři si navzájem rozhodí dráhy a Neptun rozptýlí tělesa disku.",
+    "earthCrust": "Zirkony z Jack Hills datují zemskou kůru do doby před {earthCrustGyr} mld. let, dost chladnou pro tekutou vodu brzy poté: první oceány.",
     "bombardment": "Mnoho impaktních tavenin přivezených misemi Apollo má stáří asi {lhbGyr} {lhbGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let. To vedlo k představě pozdního těžkého bombardování. Vzorky ale mohou z velké části pocházet z jediné pánve, Imbria. Zda nastalo krátké období zvýšeného počtu dopadů, nebo jejich četnost dlouhodobě klesala, zůstává sporné.",
-    "today": "Měřené dráhy. Polohy planet jsou spočteny pro dnešní datum."
+    "marsDynamo": "Dynamo Marsu ještě před {marsDynamoGyr} mld. let magnetizuje lávy. Poté jeho globální pole mizí a sluneční vítr odnáší atmosféru.",
+    "marsDry": "Zhruba před {marsDryGyr} mld. let končí na Marsu hesperian: řeky a jezera z větší části mizí, začíná studená poušť.",
+    "vredefort": "Před {vredefortGyr} mld. let vyhloubí planetka Vredefort, největší potvrzený dopad na Zemi. Na Měsíci tečou poslední lávy, před {moonLavaGyr} mld. let podle bazaltů Chang'e 5.",
+    "saturnRings": "Saturnovy prstence jsou mladé: podle prachu, který Cassini napočítala, mají {ringsMyr} mil. let. Model je nevytváří; jejich původ je otevřený.",
+    "chicxulub": "Před {chicxulubMyr} mil. let dopadá planetka u Chicxulubu na Yucatánu: končí křída.",
+    "today": "Měřené dráhy. Polohy planet jsou spočteny pro datum na hodinách."
   }
 }

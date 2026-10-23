@@ -213,7 +213,10 @@ export function latticeSamples(
   fill: (chunk: Grid) => Float32Array | Float64Array,
 ) {
   let chunks = lattices.get(level);
-  if (!chunks) lattices.set(level, (chunks = new Map()));
+  if (!chunks) {
+    chunks = new Map();
+    lattices.set(level, chunks);
+  }
   const out = new Float64Array(count);
   for (let c = Math.floor(first / CHUNK); c * CHUNK < first + count; c++) {
     let chunk = chunks.get(c);

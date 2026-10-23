@@ -124,7 +124,7 @@ export function LevelDiagram({
           fill={colour}
         />
         <path
-          d={wave(emitting ? x + 8 : 80, (lower + upper) / 2, emitting ? 44 : 44)}
+          d={wave(emitting ? x + 8 : 80, (lower + upper) / 2, 44)}
           fill="none"
           stroke={colour}
           strokeWidth={1.4}

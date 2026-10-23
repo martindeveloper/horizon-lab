@@ -267,7 +267,10 @@ const proseCache = new WeakMap<object, Map<string, Record<string, string>>>();
  */
 export function proseArgs(figures: Readonly<Record<string, ProseFigure>>, locale: string) {
   let byLocale = proseCache.get(figures);
-  if (!byLocale) proseCache.set(figures, (byLocale = new Map()));
+  if (!byLocale) {
+    byLocale = new Map();
+    proseCache.set(figures, byLocale);
+  }
   let args = byLocale.get(locale);
   if (!args) {
     args = Object.fromEntries(

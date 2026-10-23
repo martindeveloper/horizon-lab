@@ -289,7 +289,10 @@ export function createCosmosMarks(
         if (alpha * shown < 0.3) continue;
         const fit = Math.abs(Math.log(ly / mark.frame));
         let record = best.get(mark.spot);
-        if (!record) best.set(mark.spot, (record = { mark: null, fit: 0 }));
+        if (!record) {
+          record = { mark: null, fit: 0 };
+          best.set(mark.spot, record);
+        }
         if (!record.mark || fit < record.fit) {
           record.mark = mark;
           record.fit = fit;

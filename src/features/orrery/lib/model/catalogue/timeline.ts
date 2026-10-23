@@ -10,13 +10,19 @@ import {
 } from "@/space/solar-system/model/parameters";
 
 import {
+  CHICXULUB,
+  EARTH_CRUST,
   EMBRYOS_AFTER,
   LHB_CLASSIC,
+  MARS_DYNAMO_LAST,
   MOON_IMPACT_AFTER,
   MOON_IMPACT_LATEST,
+  MOON_LAST_LAVA,
   NAMED_STARS_FADE,
   OLDEST,
   PLANETESIMALS_AFTER,
+  SATURN_RINGS_AGE,
+  VREDEFORT,
 } from "../parameters";
 
 export const TIMELINE = {
@@ -107,6 +113,70 @@ export const TIMELINE = {
       source: "avdellidou2024",
       status: "teaching-choice",
       note: "the drawn clearing runs 67–117 Myr after the CAIs, steepest at 92 Myr, inside the dated 60–100 Myr window",
+    },
+  },
+  /** Milestones since the clearing: the slider's stations and the notes they carry. */
+  history: {
+    earthCrust: {
+      value: EARTH_CRUST,
+      unit: "yr",
+      show: "Gyr",
+      digits: 2,
+      source: "valley2014",
+      status: "verified",
+      note: "the Jack Hills zircon, 4.374 ± 0.006 Gyr",
+    },
+    marsDynamo: {
+      value: MARS_DYNAMO_LAST,
+      unit: "yr",
+      show: "Gyr",
+      digits: 2,
+      source: "mittelholz2020",
+      status: "verified",
+      note: "the Lucus Planum lavas, the youngest magnetised; the field's end is undated",
+    },
+    marsDry: {
+      range: [2.9e9, 3.3e9],
+      unit: "yr",
+      show: "Gyr",
+      source: "hartmannNeukum2001",
+      status: "verified",
+      note: "the Hesperian–Amazonian boundary; the station sits mid-window",
+    },
+    vredefort: {
+      value: VREDEFORT,
+      unit: "yr",
+      show: "Gyr",
+      digits: 3,
+      source: "kamo1996",
+      status: "verified",
+      note: "2023 ± 4 Myr",
+    },
+    moonLava: {
+      value: MOON_LAST_LAVA,
+      unit: "yr",
+      show: "Gyr",
+      digits: 3,
+      source: "li2021moon",
+      status: "verified",
+      note: "Chang'e 5 basalts, 2030 ± 4 Myr",
+    },
+    saturnRings: {
+      range: SATURN_RINGS_AGE,
+      unit: "yr",
+      show: "Myr",
+      source: "kempf2023",
+      status: "verified",
+      note: "exposure age from Cassini's micrometeoroid flux",
+    },
+    chicxulub: {
+      value: CHICXULUB,
+      unit: "yr",
+      show: "Myr",
+      digits: 4,
+      source: "renne2013",
+      status: "verified",
+      note: "66.038 ± 0.011 Myr",
     },
   },
   clocks: {

@@ -16,10 +16,26 @@ import {
 import { useSpectroscopy } from "../lib/store";
 import { kelvin, signed } from "./format";
 
-const ICONS = { solved: Check, close: Target, missed: X } as const;
+const OUTCOMES = {
+  solved: {
+    icon: Check,
+    markClass: "bg-accent text-accent-fg shadow-[0_0_18px_rgb(var(--solar)/0.45)]",
+    cardClass: "bg-accent/10 ring-accent/40",
+  },
+  close: {
+    icon: Target,
+    markClass: "bg-surface-secondary text-accent ring-outline ring-accent/70",
+    cardClass: "bg-fg-primary/5 ring-accent/25",
+  },
+  missed: {
+    icon: X,
+    markClass: "bg-surface-secondary text-danger ring-outline ring-danger/60",
+    cardClass: "bg-danger/5 ring-danger/30",
+  },
+} as const;
 
 export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; small?: boolean }) {
-  const Icon = ICONS[outcome];
+  const { icon: Icon, markClass } = OUTCOMES[outcome];
   return (
     <span
       aria-hidden
@@ -28,9 +44,7 @@ export function OutcomeMark({ outcome, small = false }: { outcome: Outcome; smal
         small
           ? "absolute -top-0.5 -right-0.5 size-3.5 md:-top-1 md:-right-1"
           : "size-6 md:size-9 short:hidden",
-        outcome === "solved" && "bg-accent text-accent-fg shadow-[0_0_18px_rgb(var(--solar)/0.45)]",
-        outcome === "close" && "bg-surface-secondary text-accent ring-outline ring-accent/70",
-        outcome === "missed" && "bg-surface-secondary text-danger ring-outline ring-danger/60",
+        markClass,
       )}
     >
       <Icon
@@ -173,11 +187,7 @@ export function MysteryResultCard({ result }: { result: MysteryResult }) {
       key={`${index}-${outcome}`}
       className={cn(
         "flex anim-rise items-start gap-x-2.5 rounded-control px-3 py-2 ring-outline ring-inset md:items-center md:gap-x-3 md:py-2.5",
-        outcome === "solved"
-          ? "bg-accent/10 ring-accent/40"
-          : outcome === "close"
-            ? "bg-fg-primary/5 ring-accent/25"
-            : "bg-danger/5 ring-danger/30",
+        OUTCOMES[outcome].cardClass,
       )}
     >
       <OutcomeMark outcome={outcome} />

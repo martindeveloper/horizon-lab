@@ -169,7 +169,10 @@ export function createAnchorCache(scaleNow: () => number) {
   const today = (id: AnchorId, date: Date): Readonly<Vec3d> => {
     const t = date.getTime();
     let memo = memos.get(id);
-    if (!memo) memos.set(id, (memo = { t: [NaN, NaN], pos: [vec3d(), vec3d()], next: 0 }));
+    if (!memo) {
+      memo = { t: [NaN, NaN], pos: [vec3d(), vec3d()], next: 0 };
+      memos.set(id, memo);
+    }
     if (memo.t[0] === t) return memo.pos[0];
     if (memo.t[1] === t) return memo.pos[1];
     const i = memo.next;

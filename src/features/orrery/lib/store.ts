@@ -30,14 +30,13 @@ import {
   type CloseUpSelection,
   type OrrerySelection,
 } from "./model/selection";
-import { OLDEST } from "./model/timeline";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW } from "./model/views";
 
 /** The solar system scene's switches, and rulers from the selection to the other bodies. */
 export type Show = SolarShow & { distances: boolean };
 
-export type Panel = "none" | "objects" | "view" | "reading";
+export type Panel = "none" | "objects" | "view" | "reading" | "moments";
 
 const DEFAULT_SHOW: Show = {
   disk: true,
@@ -51,8 +50,10 @@ const DEFAULT_SHOW: Show = {
   trueSize: false,
   faintRings: false,
   elliptical: true,
-  drift: true,
 };
+
+/** What the guide gives back as it ends: the visitor's switches and whether time ran. */
+type GuideSaved = { show: Show; playing: boolean };
 
 /** What the `?` tour's steps change and give back: the view, the clock, a close-up, the switches. */
 type HelpSaved = {
@@ -67,10 +68,14 @@ type HelpSaved = {
 };
 
 export type OrreryStore = SceneSlice &
-  GuideSlice<Show> &
+  GuideSlice<GuideSaved> &
   HelpSlice<HelpSaved> &
   DriftSlice & {
     yearsAgo: number;
+    /**
+     * Time runs: history on to today, then the present on along today's orbits, faster than
+     * real time. Paused, everything holds. The one clock control; a seek keeps it as it is.
+     */
     playing: boolean;
     view: SolarViewId;
     selection: OrrerySelection | null;
@@ -90,10 +95,13 @@ export type OrreryStore = SceneSlice &
     driftRate: number;
     /** An observatory is near enough to show at its true size and its model is on its way. */
     sharpening: boolean;
-    /** Years the Motion switch has advanced the real clock, published by the engine. */
+    /** Years playing has run the clock on from (or back to before) now, published by the engine. */
     driftYears: number;
+    /** The clock set to a moment: years from now, negative for one gone by; stamped so the same offset can be asked again. */
+    clock: { years: number; stamp: number } | null;
     setYearsAgo: (yearsAgo: number) => void;
-    setYearsFromPlay: (yearsAgo: number) => void;
+    /** Sets the clock `years` from now (0: back to now), in the present era. */
+    setClock: (years: number) => void;
     togglePlay: () => void;
     replay: () => void;
     setView: (view: SolarViewId) => void;
@@ -150,20 +158,18 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   ...sceneSlice(set, { scalePx: 120, scaleValue: 10, scaleUnit: "au" }),
   ...guideSlice(set, get, {
     tour: TOUR,
-    /* The visitor's switches, given back when the tour ends. */
-    save: (s) => s.show,
-    restore: (show) => ({ show }),
+    save: (s) => ({ show: s.show, playing: s.playing }),
+    restore: (saved) => saved,
     open: () => closeUpState(null),
-    apply: (step, s) => ({
+    apply: (step) => ({
       view: step.view,
       viewDist: solarViewById(step.view).dist,
       yearsAgo: step.yearsAgo,
       playing: Boolean(step.playing) && !prefersReducedMotion(),
-      /* Each step starts from the default layers; Motion keeps the visitor's choice. */
-      show: { ...DEFAULT_SHOW, drift: (s.savedBeforeGuide ?? s.show).drift, ...step.show },
+      /* Each step starts from the default layers. */
+      show: { ...DEFAULT_SHOW, ...step.show },
       selection: step.focus ?? null,
     }),
-    close: () => ({ playing: false }),
   }),
   ...helpSlice(set, get, {
     steps: HELP,
@@ -180,7 +186,8 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     restore: (saved) => saved,
   }),
   yearsAgo: 0,
-  playing: false,
+  /* Time runs from the start; the engine holds it under reduced motion. */
+  playing: true,
   view: typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath(),
   selection: null,
   closeUp: null,
@@ -191,17 +198,14 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   driftRate: 2.5,
   sharpening: false,
   driftYears: 0,
-  setYearsAgo: (yearsAgo) => set((s) => ({ ...atTime(s, yearsAgo), playing: false })),
-  setYearsFromPlay: (yearsAgo) => set((s) => atTime(s, yearsAgo)),
-  /** Pauses while playing; otherwise plays on, or from the start once the track has ended. */
-  togglePlay: () =>
-    set((s) =>
-      s.playing
-        ? { playing: false }
-        : s.yearsAgo <= 0
-          ? { ...atTime(s, OLDEST), playing: true }
-          : { playing: true },
-    ),
+  clock: null,
+  setYearsAgo: (yearsAgo) => set((s) => atTime(s, yearsAgo)),
+  setClock: (years) =>
+    set((s) => ({
+      ...atTime(s, 0),
+      clock: { years, stamp: (s.clock?.stamp ?? 0) + 1 },
+    })),
+  togglePlay: () => set((s) => ({ playing: !s.playing })),
   replay: () =>
     set((s) => ({
       ...atTime(s, MODEL_START),
@@ -233,7 +237,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
     const s = get();
     const body = s.selection;
     if (canFlyTo(body) && canCloseUp(s) && !sameSelection(s.closeUp, body))
-      set({ closeUp: body, panel: "none", playing: false });
+      set({ closeUp: body, panel: "none" });
   },
   leaveCloseUp: (toMap = false) =>
     set((s) => {
@@ -256,9 +260,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   toggleSolarActivityPaused: () =>
     set((s) => (s.solarActivity ? { solarActivityPaused: !s.solarActivityPaused } : {})),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
-  /* Motion starts off under reduced motion (the engine), so a reset keeps it off there. */
-  resetView: () =>
-    set({ show: { ...DEFAULT_SHOW, drift: !prefersReducedMotion() }, ...RESET_SCENE_SETTINGS }),
+  resetView: () => set({ show: DEFAULT_SHOW, ...RESET_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
   /* The drift (lib/drift.ts) leaves a close-up and the panel and ends the tour; the clock runs on. */
   ...driftSlice(set, get, {

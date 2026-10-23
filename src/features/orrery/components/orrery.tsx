@@ -33,7 +33,7 @@ function DriftClock() {
   const rate = useOrrery((s) => s.driftRate);
   return (
     <>
-      {t("toggles.drift")} · {motionRateLabel(t, f, rate)}
+      {t("hud.clockRate")} · {motionRateLabel(t, f, rate)}
     </>
   );
 }

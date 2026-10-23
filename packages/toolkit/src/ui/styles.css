@@ -311,35 +311,50 @@
   box-shadow:
     var(--tw-ring-offset-shadow, 0 0 transparent), var(--tw-ring-shadow, 0 0 transparent),
     var(--surface-shadow), var(--surface-halo, 0 0 transparent);
+  /* While the HUD fades (`--hud-fade` below 1), its layer's opacity cuts the glass off from the
+     scene (a backdrop root): the blur has nothing to blur and the glass looks thin until the
+     fade ends. Meanwhile the tint lies over the space colour, which is how it looks over the
+     blurred dark scene, so the material holds its density through the fade. */
+  --surface-backing-stop: calc(clamp(0, (1 - var(--hud-fade)) * 1000, 1) * 100%);
+  --surface-backing: linear-gradient(
+    var(--color-space) var(--surface-backing-stop),
+    transparent var(--surface-backing-stop)
+  );
 }
 
 .glass,
 .glass-pill,
 .glass-panel {
   --surface-shadow: var(--glass-shadow);
-  background: var(--glass-sheen), var(--glass-bg);
+  background:
+    var(--glass-sheen), linear-gradient(var(--glass-bg), var(--glass-bg)), var(--surface-backing);
   backdrop-filter: var(--glass-blur);
 }
 
 .glass-panel {
-  background: var(--glass-sheen), var(--panel-bg);
+  background:
+    var(--glass-sheen), linear-gradient(var(--panel-bg), var(--panel-bg)), var(--surface-backing);
 }
 
 .glass-pill {
   --surface-shadow: var(--pill-shadow);
-  background: var(--glass-sheen), var(--pill-bg);
+  background:
+    var(--glass-sheen), linear-gradient(var(--pill-bg), var(--pill-bg)), var(--surface-backing);
 }
 
 .glass-hud {
   --surface-shadow: var(--hud-shadow);
-  background: var(--glass-sheen), var(--hud-bg);
+  background:
+    var(--glass-sheen), linear-gradient(var(--hud-bg), var(--hud-bg)), var(--surface-backing);
   backdrop-filter: var(--glass-blur);
 }
 
 /* Menus and popovers sit over text, not a scene: dense enough to read through nothing. */
 .glass-popover {
   --surface-shadow: var(--popover-shadow);
-  background: var(--glass-sheen), var(--popover-bg);
+  background:
+    var(--glass-sheen), linear-gradient(var(--popover-bg), var(--popover-bg)),
+    var(--surface-backing);
   backdrop-filter: var(--glass-blur);
 }
 
@@ -437,7 +452,8 @@
 
 .lesson-card {
   --surface-shadow: var(--lesson-shadow);
-  background: var(--glass-sheen), var(--lesson-bg);
+  background:
+    var(--glass-sheen), linear-gradient(var(--lesson-bg), var(--lesson-bg)), var(--surface-backing);
   backdrop-filter: blur(32px) saturate(1.15);
 }
 
@@ -1108,16 +1124,23 @@
 }
 
 /* Cinematic chrome choreography. Animate only composited UI layers: never the
-   canvas or its host dimensions, which would clear the WebGL drawing buffer. */
+   canvas or its host dimensions, which would clear the WebGL drawing buffer.
+   The HUD's opacity is `--hud-fade`, inherited so the glass inside knows a fade is on. */
+@property --hud-fade {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
 .immersive-overlays {
   position: absolute;
   inset: 0;
   z-index: 10;
   pointer-events: none;
-  opacity: 1;
+  --hud-fade: 1;
+  opacity: var(--hud-fade);
   visibility: visible;
   transition:
-    opacity var(--immersive-enter) var(--ease-enter) var(--immersive-step),
+    --hud-fade var(--immersive-enter) var(--ease-enter) var(--immersive-step),
     visibility 0s;
 }
 .immersive-overlays :is(.hud-top, .hud-bottom) {
@@ -1125,10 +1148,10 @@
   transition: translate var(--immersive-enter) var(--ease-enter);
 }
 .immersive-overlays[data-hidden="true"] {
-  opacity: 0;
+  --hud-fade: 0;
   visibility: hidden;
   transition:
-    opacity var(--immersive-exit) var(--ease-exit),
+    --hud-fade var(--immersive-exit) var(--ease-exit),
     visibility 0s var(--immersive-exit);
 }
 .immersive-overlays[data-hidden="true"] .hud-top {
@@ -1157,7 +1180,7 @@
 }
 @starting-style {
   .immersive-overlays {
-    opacity: 0;
+    --hud-fade: 0;
   }
   .immersive-overlays .hud-top {
     translate: 0 -14px;
