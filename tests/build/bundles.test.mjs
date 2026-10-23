@@ -118,16 +118,16 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
     const shared = assets(locale, ".css");
     assert.doesNotMatch(
       contents(shared),
-      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit|sun-light-dot/,
+      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit/,
     );
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
-      /* The Orrery has no rules of its own: its scene labels are its marker. */
+      /* The Orrery and the Sun have no rules of their own: their scene labels are their marker. */
       orrery: /scene-label/,
       "deep-field": /deep-field-rung/,
       spectroscopy: /spectroscopy-ribbon/,
       voyage: /voyage-cockpit/,
-      sun: /sun-light-dot/,
+      sun: /scene-label/,
     };
     for (const suffix of [
       "lab/black-hole",
