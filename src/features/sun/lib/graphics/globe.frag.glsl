@@ -59,6 +59,17 @@ vec2 mapUvOf(vec3 p) {
   return vec2(fract((atan(-p.z, p.x) + MAP_CENTRAL_MERIDIAN_RAD) / TWO_PI), 0.5 + asin(clamp(p.y, -1.0, 1.0)) / PI);
 }
 
+// The map's gradients over a pixel, from the surface point's (`dpdx`, `dpdy`), for the filter's
+// level and anisotropy: worked out here, not from the map coordinates themselves, so the seam
+// is no jump (no `fract`) and the longitudes' stretch, unbounded where they converge, stops
+// counting at the latitude the photograph is flat from, where there is nothing finer to average.
+vec4 mapGradientOf(vec3 p, vec3 dpdx, vec3 dpdy) {
+  float rho = max(length(p.xz), 1e-5);
+  vec3 east = vec3(p.z, 0.0, -p.x) / (TWO_PI * rho * max(rho, MAP_FLAT_LATITUDE_COS));
+  float north = 1.0 / (PI * rho);
+  return vec4(dot(east, dpdx), north * dpdx.y, dot(east, dpdy), north * dpdy.y);
+}
+
 // The photograph's continuum held within the quiet disc's range: its spots, faculae and their
 // rims gone, its quiet texture kept.
 float photoQuiet(float measured) {
@@ -70,11 +81,17 @@ float photoDepth(float measured) {
   return clamp((PHOTO_QUIET_LOW - measured) / PHOTO_DEPTH_RANGE, 0.0, 1.0);
 }
 
+// A step on the sphere about a region's centre carried onto its donor's patch: its parts along
+// and across the region's axis become the same along and across the donor's, at the patch's scale.
+vec3 carriedStep(vec3 step, vec3 axis, vec3 side, vec3 donorAxis, vec3 donorSide, float scale) {
+  return scale * (dot(step, axis) * donorAxis + dot(step, side) * donorSide);
+}
+
 // The photograph at a point of the map: its continuum against the quiet Sun and how much a spot
-// covers there, the close-up stencil blended in by `detail`.
-vec2 photographAt(vec3 p, float px, float mu, float detail) {
+// covers there, the close-up stencil blended in by `detail`; `grad` is the map's gradient here.
+vec2 photographAt(vec3 p, vec4 grad, float px, float mu, float detail) {
   vec2 uv = mapUvOf(p);
-  float measured = texture2D(uMap, uv).r / SUN_MAP_QUIET_INTENSITY;
+  float measured = texture2DGradEXT(uMap, uv, grad.xy, grad.zw).r / SUN_MAP_QUIET_INTENSITY;
   float spot = 1.0 - smoothstep(0.6, 0.9, measured);
   if (detail > 0.0) {
     vec4 stencil = photographedSpot(uv, p, px, mu);
@@ -91,8 +108,8 @@ struct Face {
   /** The measured continuum here, against the quiet Sun, and how much of the face it paints. */
   float measured;
   float mapShare;
-  float mapDetail;
-  float detailKelvin;
+  /** The granulation's temperature here: the detail laid over the photograph, which holds none. */
+  float granuleKelvin;
   float spot;
   float plage;
   float network;
@@ -109,8 +126,8 @@ vec2 quietNetwork(vec3 q) {
   return vec2(lanes, sign(grain) * smoothstep(0.25, 0.55, abs(grain)) * (0.4 + 0.6 * lanes));
 }
 
-Face faceAt(vec3 s, float mu, float px) {
-  Face f = Face(PHOTOSPHERE_K, 1.0, 0.0, 0.0, PHOTOSPHERE_K, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+Face faceAt(vec3 s, vec3 dsdx, vec3 dsdy, float mu, float px) {
+  Face f = Face(PHOTOSPHERE_K, 1.0, 0.0, PHOTOSPHERE_K, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   float dT = 0.0;
   /* The pattern's frame: in the body frame the equator stands still and each latitude lags
      behind it by what the law takes off its rate. */
@@ -128,7 +145,8 @@ Face faceAt(vec3 s, float mu, float px) {
   // change the morphology or make close-up detail jump in and out.
   float texelPx = max(mu, 0.02) / ((STENCIL_WIDTH / TWO_PI) * max(px, 1e-9));
   f.mapShare = uLightMode == LIGHT_WHITE ? uMapShown : 0.0;
-  f.mapDetail = uFine * smoothstep(MAP_DETAIL_FROM_PX, MAP_DETAIL_TO_PX, texelPx);
+  /* The close-up stencil sharpens the photograph's spots once its texels are magnified. */
+  float mapDetail = uFine * smoothstep(MAP_DETAIL_FROM_PX, MAP_DETAIL_TO_PX, texelPx);
   /* The photograph here, its active features kept only where no region draws them, and the
      regions' patches over it, multiplied in. */
   vec2 photo = vec2(1.0, 0.0);
@@ -136,7 +154,7 @@ Face faceAt(vec3 s, float mu, float px) {
   float patches = 1.0;
   float patchSpot = 0.0;
   if (f.mapShare > 0.0) {
-    photo = photographAt(s, px, mu, f.mapDetail * uStencilShown);
+    photo = photographAt(s, mapGradientOf(s, dsdx, dsdy), px, mu, mapDetail * uStencilShown);
     unclaimed = uMapUnclaimed;
     for (int k = 0; k < REGION_MAX; k++) {
       if (k >= uSeededCount) break;
@@ -201,10 +219,17 @@ Face faceAt(vec3 s, float mu, float px) {
       float far = length(d);
       float within = 1.0 - smoothstep(donor.w, PHOTO_EDGE * donor.w, far);
       if (within > 0.0) {
-        vec3 toward = d.x * donorAxis.xyz + d.y * cross(donor.xyz, donorAxis.xyz);
+        vec3 donorSide = cross(donor.xyz, donorAxis.xyz);
+        vec3 toward = d.x * donorAxis.xyz + d.y * donorSide;
         vec3 p = cos(far) * donor.xyz + (far > 0.0 ? sin(far) / far : 1.0) * toward;
         float detail = uFine * smoothstep(MAP_DETAIL_FROM_PX, MAP_DETAIL_TO_PX, texelPx / donorAxis.w) * uStencilShown;
-        vec2 sampled = photographAt(p, px * donorAxis.w, mu, detail);
+        /* The pixel's footprint on the patch, as its steps: the map's gradient there. */
+        vec4 grad = mapGradientOf(
+          p,
+          carriedStep(dsdx, axis.xyz, side.xyz, donorAxis.xyz, donorSide, donorAxis.w),
+          carriedStep(dsdy, axis.xyz, side.xyz, donorAxis.xyz, donorSide, donorAxis.w)
+        );
+        vec2 sampled = photographAt(p, grad, px * donorAxis.w, mu, detail);
         /* The patch keeps its place and size; the region's spot area keeps only what lies deeper
            than its cut: a decaying group loses its pores and penumbral rims first and its spots
            retreat into their umbrae, a growing one comes from its darkest cores out. Its faculae
@@ -286,15 +311,15 @@ Face faceAt(vec3 s, float mu, float px) {
   float mappedSpot = max(photo.y * unclaimed, patchSpot) * f.mapShare;
   f.spot = max(max(penumbra, pores), mappedSpot);
   float quiet = mix(0.35, 1.0, mu) * (1.0 - f.spot);
-  float detail = 0.0;
+  float granulation = 0.0;
   if (fine > 0.0) {
     vec3 granules = granuleField(b * GRANULES_PER_RADIUS, uClock.x, fine);
-    detail = GRANULE_CONTRAST * fine * quiet * (granules.x - 0.45 * granules.y);
+    granulation = GRANULE_CONTRAST * fine * quiet * (granules.x - 0.45 * granules.y);
   }
   /* Where the granules are too small to see, the network's faint mottle shows instead. */
-  detail += NETWORK_CONTRAST * netSeen * (1.0 - fine) * (network - 0.4) * quiet;
-  dT += detail;
-  f.detailKelvin = PHOTOSPHERE_K * (1.0 + detail);
+  float mottle = NETWORK_CONTRAST * netSeen * (1.0 - fine) * (network - 0.4) * quiet;
+  dT += granulation + mottle;
+  f.granuleKelvin = PHOTOSPHERE_K * (1.0 + granulation);
   f.kelvin = PHOTOSPHERE_K * (1.0 + dT);
   float penOnly = max(penumbra - umbra, 0.0);
   f.kelvin = mix(f.kelvin, PENUMBRA_K * (1.0 + PENUMBRA_FILAMENT * (filaments - 0.5) + EVERSHED_RIPPLE * ripple), penOnly);
@@ -319,11 +344,14 @@ vec3 surfaceColour(Face f, vec3 s, float mu) {
   if (uLightMode == LIGHT_WHITE) {
     /* The disc as the eye adapted to sunlight sees it: the photosphere's continuum is white by
        definition and cooler gas warmer against it; the measured continuum under the Claret law
-       at every zoom, with fine procedural contrast added close up; relative light raised to
-       the display contrast, then exposed below white at the centre. */
+       at every zoom; relative light raised to the display contrast, then exposed below white
+       at the centre. The photograph (8-bit browse discs from days apart) holds no granulation,
+       only what it resolves: spots, faculae, the network, the limb. Granules are laid over it
+       wherever they resolve, as on the procedural disc, the same with the map or without;
+       the network's mottle is not, the photograph has its own. */
     vec3 procedural = glowAt(f.kelvin, uFaceLogY) / uSunlight;
-    vec3 detail = glowAt(f.detailKelvin, uFaceLogY) / uSunlight;
-    vec3 measured = vec3(f.measured) * mix(vec3(1.0), detail, f.mapDetail);
+    vec3 granulation = glowAt(f.granuleKelvin, uFaceLogY) / uSunlight;
+    vec3 measured = vec3(f.measured) * granulation;
     vec3 relative = mix(procedural, measured, f.mapShare) * limb;
     vec3 light = pow(max(relative, 0.0), vec3(SURFACE_CONTRAST)) * SURFACE_EXPOSURE;
     /* A white-light flare is rare and faint: only as much as the light's flare weight allows (none). */
@@ -470,11 +498,16 @@ void main() {
   int face;
   if (!traceSun(o, d, p, face)) discard;
   float px = uPixelWorld * distance(o, p);
+  /* The hit's change over a pixel, taken before the faces part so every pixel of a quad has it. */
+  vec3 dpdx = dFdx(p);
+  vec3 dpdy = dFdy(p);
   vec3 col;
   if (face == 0) {
     float mu = clamp(dot(p, -d), 0.0, 1.0);
     /* The occulted disc is black: none of the face is worked out under it. */
-    col = uLightMode == LIGHT_ECLIPSE ? vec3(0.0) : surfaceColour(faceAt(p, mu, px), p, mu);
+    col = uLightMode == LIGHT_ECLIPSE
+      ? vec3(0.0)
+      : surfaceColour(faceAt(p, dpdx, dpdy, mu, px), p, mu);
     if (uGrid > 0.0) col = mix(col, uGold, GRID_ALPHA * uGrid * gridLine(p, mu, px));
   } else {
     col = uLightMode == LIGHT_ECLIPSE ? vec3(0.0) : faceColour(p, px, face);

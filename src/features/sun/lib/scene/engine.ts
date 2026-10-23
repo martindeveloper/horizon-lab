@@ -3,7 +3,8 @@
  * faces, ray-traced), the field's ribbons, the prominences' volume and the atmosphere, drawn
  * from a frame the model hands over and the settings the store keeps. The camera
  * (`camera-rig.ts`), the names (`names.ts`), the taps (`picking.ts`) and the wedge's motion
- * (`cut-motion.ts`) are its parts; it only interpolates and never advances the model itself.
+ * (`cut-motion.ts`) and the chosen place's outline (`outline.ts`) are its parts; it only
+ * interpolates and never advances the model itself.
  */
 import { Group, Scene } from "three";
 
@@ -28,6 +29,7 @@ import type { Gamut } from "@horizon/toolkit/science";
 
 import { createLightTables } from "../graphics/light-tables";
 import { lightDraws } from "../model/drawn";
+import type { PlaceId } from "../model/places";
 import {
   BLOOM,
   COROTATE_ABOVE_RATE,
@@ -46,6 +48,7 @@ import type { SunFrame } from "./frame";
 import { createGlobeLayer } from "./globe-layer";
 import { createSunLooks, lightKind, type LightKind } from "./looks";
 import { FLARE_NAMED_LIGHT, createPlaceNames } from "./names";
+import { createPlaceOutline } from "./outline";
 import { createParkerLayer } from "./parker-layer";
 import { createSunPicking } from "./picking";
 import { createProminenceLayer } from "./prominence-layer";
@@ -177,9 +180,14 @@ export function createSunEngine(
     const insets: LabelInsets = { ...DEFAULT_INSETS };
     const { place, flush, hits } = createLabels(basics, labelRoot, labels, { insets });
     const names = createPlaceNames(place);
+    const outline = createPlaceOutline(scope, labelRoot);
     /** The wedge as the shader sees it: half-angle and bisector, eased as the setting and the camera move. */
     const cut = looks.uniforms.uCut.value;
     const cutMotion = createCutMotion(cut, current.cut, camera.position, reduceMotion);
+    /** What a tap may open and the outline may show: a place the light draws; a flare once it shines. */
+    const drawsNow = (place: PlaceId) =>
+      lightDraws(place, light.id) &&
+      (place !== "flare" || (drawn.eruption?.flareLight ?? 0) > FLARE_NAMED_LIGHT);
     const picking = createSunPicking(basics, canvas, {
       globe: globe.mesh,
       body,
@@ -187,10 +195,7 @@ export function createSunEngine(
       drawn: () => drawn,
       blocked: () => cam.driftFlying(),
       hits,
-      /* What a tap may open: a place the light draws; a flare once it shines. */
-      draws: (place) =>
-        lightDraws(place, light.id) &&
-        (place !== "flare" || (drawn.eruption?.flareLight ?? 0) > FLARE_NAMED_LIGHT),
+      draws: drawsNow,
       onPick: (pick) => hooks.onPick?.(pick),
     });
 
@@ -262,6 +267,7 @@ export function createSunEngine(
       cam.moving ||
       cutMotion.moving ||
       dissolve.active ||
+      outline.moving ||
       globe.busy ||
       clockRuns() ||
       (hooks.eruption?.().playing ?? false);
@@ -317,8 +323,22 @@ export function createSunEngine(
         spicules: quality.spicules,
         fineSurface: quality.fineSurface,
         fieldLines: current.fieldLines,
-        mapShown: globe.mapShown,
+        selected: current.selection,
       });
+      outline.update(
+        f,
+        {
+          camera,
+          viewport,
+          place: closeUp ? null : current.selection,
+          shown: drawsNow,
+          light: kind,
+          cut,
+          cutShown: cutMotion.shown,
+          reduceMotion: reduceMotion.matches,
+        },
+        dt,
+      );
       picking.update(f);
       flush();
       if (arriving && !cam.rig.flying) {

@@ -1,2 +1,76 @@
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. The
    Sun's denser glass and its names' dark plates are the toolkit's bright scene tone. */
+
+/* The chosen place's outline (`lib/scene/outline.ts`): one path stroked four times, all plain
+   strokes. A wide faint halo that breathes slowly (as the coach's ring does), a dark under-stroke
+   so it reads on the bright disc, a fine line catching the light at its upper left, and once it
+   is whole, a short warm gleam travelling round it once in 14 s. Reduced motion: still, no
+   gleam. The script draws it in and fades it. */
+.sun-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+.sun-outline-glow {
+  stroke: rgb(var(--scene-solar) / 0.22);
+  stroke-width: 7px;
+}
+.sun-outline-shade {
+  stroke: color-mix(in srgb, var(--color-space) 45%, transparent);
+  stroke-width: 3.5px;
+}
+.sun-outline-line {
+  stroke: url(#sun-outline-sheen);
+  stroke-width: 1.25px;
+}
+.sun-outline-bright {
+  stop-color: color-mix(in srgb, rgb(var(--scene-solar)) 40%, var(--color-space-title));
+}
+.sun-outline-gold {
+  stop-color: rgb(var(--scene-solar));
+}
+.sun-outline-dim {
+  stop-color: rgb(var(--scene-solar));
+  stop-opacity: 0.6;
+}
+.sun-outline-ticks {
+  stroke: rgb(var(--scene-solar) / 0.75);
+  stroke-width: 1.25px;
+  stroke-dasharray: none;
+}
+.sun-outline-gleam {
+  stroke: color-mix(in srgb, rgb(var(--scene-solar)) 30%, var(--color-space-title));
+  stroke-width: 1.75px;
+  stroke-dasharray: 0.05 0.95;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sun-outline-glow {
+    animation: sun-outline-breathe 3.2s ease-in-out infinite alternate;
+  }
+  .sun-outline[data-settled] .sun-outline-gleam {
+    opacity: 0.85;
+    transition: opacity 1.2s ease-out;
+    animation: sun-outline-gleam 14s linear infinite;
+  }
+}
+@keyframes sun-outline-breathe {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sun-outline-gleam {
+  to {
+    stroke-dashoffset: -1;
+  }
+}

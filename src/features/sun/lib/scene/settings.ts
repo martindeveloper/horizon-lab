@@ -7,6 +7,7 @@
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 import type { SceneAntialias } from "@horizon/toolkit/scene";
 
+import type { PlaceId } from "../model/places";
 import type { ViewId } from "../model/views";
 import type { PassbandId } from "./frame";
 
@@ -43,6 +44,8 @@ export type SunSceneSettings = {
   fieldLines: boolean;
   names: boolean;
   grid: boolean;
+  /** The place whose card is open: outlined and named in the scene. */
+  selection: PlaceId | null;
   light: SunLight;
   /** Radii in R☉. */
   layers: { core: number; tachocline: number; photosphere: number };

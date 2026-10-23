@@ -48,6 +48,8 @@ const FRAGMENT_PREFIX = [
   "out highp vec4 pc_fragColor;",
   "#define gl_FragColor pc_fragColor",
   "#define texture2D texture",
+  "#define texture2DLodEXT textureLod",
+  "#define texture2DGradEXT textureGrad",
   // three.js declares the output colour-space encoder for every non-raw ShaderMaterial.
   "vec4 linearToOutputTexel( vec4 value ) { return value; }",
   "",

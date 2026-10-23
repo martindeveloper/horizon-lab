@@ -94,7 +94,7 @@ Processing and limits:
 
 Sun Lab close-ups retain this photograph's morphology. Rebuild their appearance
 stencil with `node --import tsx scripts/build-sun-spot-stencil.mjs` after pulling
-the CDN mirror; it writes a new `textures/bodies/sun/spots/v<version>/` folder to upload. The generator pins the exact published `sun/v1/sun-near.webp`
+the CDN mirror; it writes a new `textures/bodies/sun/spots/v<version>/` folder to upload. The generator pins the exact published `sun/v2/sun-near.webp`
 SHA-256, rather than resynthesizing spots from NOAA group centres.
 
 - Hysteresis selects dark connected components, retaining their irregular outlines,

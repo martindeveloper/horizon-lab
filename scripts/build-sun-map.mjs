@@ -14,7 +14,10 @@ import sharp from "sharp";
 import { MAPS, mapFile } from "@horizon/toolkit/bodies";
 
 import { MAPS_KEY } from "../src/lib/assets.ts";
-import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
+import {
+  SUN_MAP_POLAR_FADE_DEG,
+  SUN_MAP_QUIET_INTENSITY,
+} from "../src/space/solar-system/model/parameters.ts";
 import { encodeSrgb as encode } from "./lib/colour.mjs";
 import { fetchCached } from "./lib/net.mjs";
 import {
@@ -27,6 +30,12 @@ import {
 } from "./lib/sun-map.mjs";
 
 const cache = path.resolve(process.argv[2] ?? path.join(os.tmpdir(), "horizon-sun-maps"));
+/**
+ * How face-on a frame sees a point, cos of the angle off its disc's centre: a frame says
+ * nothing of a point past `cut`, its say rises to its full by `seen`, and the photograph
+ * itself fades out as the best view of a point grazes, so no frame's limb leaves an edge.
+ */
+const LIMB_MU = { cut: 0.25, seen: 0.6 };
 const sha256 = async (file) =>
   createHash("sha256")
     .update(await readFile(file))
@@ -108,11 +117,13 @@ export async function buildSunMap(width) {
       const lon = ((x + 0.5) / width) * Math.PI * 2;
       const point = solarSurface(lon, lat);
       let sum = 0,
-        weight = 0;
+        weight = 0,
+        best = 0;
       for (const source of sources) {
         const p = projectSolarPoint(point, source.observer);
         // Suppress foreshortened limb detail; never sample a hidden hemisphere.
-        if (!p || p.mu < 0.25) continue;
+        if (!p || p.mu < LIMB_MU.cut) continue;
+        best = Math.max(best, p.mu);
         const r = Math.hypot(p.x, p.y);
         const sample = sampleBilinear(
           source.gray,
@@ -121,12 +132,20 @@ export async function buildSunMap(width) {
           source.cy - p.y * source.radius,
         );
         const quiet = source.profile[Math.min(124, Math.floor(r * 128))];
-        const k = p.mu ** 8 * smooth(0.25, 0.5, p.mu);
+        const k = p.mu ** 8 * smooth(LIMB_MU.cut, LIMB_MU.seen, p.mu);
         sum += (sample / quiet) * k;
         weight += k;
       }
-      // Unreliable polar coverage fades to quiet photosphere, with no invented spots.
-      const coverage = 1 - smooth(65, 82, (Math.abs(lat) * 180) / Math.PI);
+      // The photograph fades to the quiet photosphere as its best view grazes, and poleward
+      // of the catalogued latitudes, which no frame sees well: no edge, no invented spots.
+      const coverage =
+        smooth(LIMB_MU.cut, LIMB_MU.seen, best) *
+        (1 -
+          smooth(
+            SUN_MAP_POLAR_FADE_DEG.from,
+            SUN_MAP_POLAR_FADE_DEG.flat,
+            (Math.abs(lat) * 180) / Math.PI,
+          ));
       const relative = weight > 1e-12 ? 1 + (sum / weight - 1) * coverage : 1;
       const value = Math.max(0, Math.min(1, SUN_MAP_QUIET_INTENSITY * relative));
       const i = (y * width + x) * 3;

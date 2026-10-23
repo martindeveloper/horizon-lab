@@ -76,6 +76,10 @@ const still = (
   ...patch,
 });
 
+/** Twelve wheel steps onto the pole, and where it stands with the rig tilted to its limit. */
+const POLE_ZOOM_STEPS = Array.from({ length: 12 }, (_, i) => 0.5 + 0.025 * i);
+const POLE_POINT = [0.5, 0.467] as const;
+
 const SCENES: readonly SunBenchScene[] = [
   still("surface", "white", "The whole disc in white light: limb darkening, spot groups, faculae"),
   /* The photograph as time carries it on: its own spots at the epoch, then the model's groups
@@ -119,6 +123,12 @@ const SCENES: readonly SunBenchScene[] = [
     "white",
     "A spot group from just above it: umbra, penumbral filaments, granules",
   ),
+  {
+    ...still("sunspot", "white", "A granule chosen: the quiet surface beside the group, centred", {
+      place: "granule",
+    }),
+    id: "sunspot-granule",
+  },
   still("chromosphere", "halpha", "The limb in Hα: the chromosphere's rim, spicules, a prominence"),
   still("corona", "eclipse", "The disc occulted: streamers, plumes, the F and E coronae"),
   still(
@@ -190,6 +200,33 @@ const SCENES: readonly SunBenchScene[] = [
         point: [0.58, 0.56] as const,
       })),
       keyframes: [0.08, 0.2, 0.35, 0.55, 0.72, 1],
+    },
+  },
+  {
+    ...still(
+      "surface",
+      "white",
+      "The north pole dragged to the middle and zoomed onto: the photograph fading into its quiet cap with no frame's edge, no seam",
+    ),
+    id: "surface-pole",
+    tags: ["sequence", "camera", "photo"],
+    photo: true,
+    clock: "real",
+    script: {
+      frames: 120,
+      duration: 4,
+      /* The rig tilts to its limit, 7° short of the pole, so the pole stands just above the
+         middle; every wheel step zooms on it and a keyframe follows each. */
+      input: [
+        { kind: "drag", from: [0.5, 0.1], to: [0.5, 0.9], start: 0.05, end: 0.4 },
+        ...POLE_ZOOM_STEPS.map((at) => ({
+          kind: "wheel" as const,
+          at,
+          deltaY: -200,
+          point: POLE_POINT,
+        })),
+      ],
+      keyframes: [0.45, ...POLE_ZOOM_STEPS.map((at) => at + 0.0125)],
     },
   },
   {

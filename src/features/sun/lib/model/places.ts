@@ -1,6 +1,6 @@
 /**
  * The places the finder lists, from the core out to the wind: picking one switches to its view
- * (the camera flies only when the view changes), keeps the light unless it does not draw the
+ * (the camera flies only when the view changes, and turns to a place the view centres on), keeps the light unless it does not draw the
  * place (`lightDraws`), when it takes the place's own, sets its clock and opens its card. Each place's name and card copy live under
  * `places.<id>`; its figures come from the Sun's catalogue (`@/space/sun`).
  */

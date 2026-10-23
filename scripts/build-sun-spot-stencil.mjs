@@ -15,13 +15,13 @@ import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/paramet
 import { SRGB_TO_LINEAR } from "./lib/colour.mjs";
 import { buildSpotAtlas, STENCIL } from "./lib/sun-spot-stencil.mjs";
 
-const VERSION = 1;
+const VERSION = 2;
 const key = `${MAPS_KEY}/sun/spots/v${VERSION}`;
 const sourceFile = mapFile(MAPS_KEY, "sun", "near");
 const source = await readFile(new URL(`../cdn${sourceFile}`, import.meta.url));
 const sourceSha256 = createHash("sha256").update(source).digest("hex");
 // Deliberate source changes must update this pin and regenerate the versioned stencil.
-if (sourceSha256 !== "51a3fd1763a7c9f080bcf9945537bdae3c08d1793509e155c28fadffaca4bc00")
+if (sourceSha256 !== "407772081dd901b124a8091ace9b6842e8125e6bda49461187a0ee3401553a69")
   throw new Error(
     "The published Sun photograph changed; review the stencil source before rebuilding",
   );

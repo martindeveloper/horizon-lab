@@ -74,6 +74,7 @@ function settingsOf(s: SunStore): SunSceneSettings {
     fieldLines: s.show.fieldLines,
     names: s.show.names,
     grid: s.show.grid,
+    selection: s.selection,
     light: PASSBANDS[s.light],
     layers: LAYERS,
     corona: CORONA,

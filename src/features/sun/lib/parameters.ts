@@ -6,7 +6,10 @@
  * temperature, the rotation law) come from the shared catalogues, never retyped.
  */
 
-import { SUN_MAP_QUIET_INTENSITY } from "@/space/solar-system/model/parameters";
+import {
+  SUN_MAP_POLAR_FADE_DEG,
+  SUN_MAP_QUIET_INTENSITY,
+} from "@/space/solar-system/model/parameters";
 import {
   CHROMOSPHERE_HEIGHT,
   FACULA_CONTRAST,
@@ -69,6 +72,8 @@ export const CAMERA_FAR_R = 4 * CAMERA_MAX_R;
  */
 export const FEATURE_MIN_R = CAMERA_MIN_R - 1 + 0.01;
 export const FEATURE_MAX_R = 4;
+/** A granule's view frames this many granules out from its centre: quiet surface, each granule plainly resolved. */
+export const GRANULE_FIELD = 24;
 /** Round a feature the camera keeps at least this elevation over the feature's horizon, radians: never under the surface. */
 export const FEATURE_ELEVATION_MIN = 0.04;
 /** The orbit's centre moves between the Sun's centre and a feature with this time constant, s. */
@@ -102,8 +107,9 @@ export const GRID_ALPHA = 0.22;
 /** The photosphere's effective temperature (the shared catalogue's). */
 export const PHOTOSPHERE_K = SOLAR_TEFF_K;
 /**
- * The measured Sun retains its spot morphology at every zoom. Fine procedural contrast
- * fades in as a map texel grows across these buffer-pixel sizes. A newly loaded map fades
+ * The measured Sun retains its spot morphology at every zoom. The close-up spot stencil
+ * fades in as a map texel grows across these buffer-pixel sizes; granulation, which the
+ * photograph does not hold, shows wherever granules resolve. A newly loaded map fades
  * in over MAP_FADE_IN_S seconds. Its quiet level is the solar system's.
  */
 export const MAP_DETAIL_FROM_PX = 1.25;
@@ -454,6 +460,20 @@ export const NAME_DISC_R = 4;
 export const NAME_LIMB_PX = 300;
 export const NAME_OFFSET_PX = 14;
 
+/**
+ * The chosen place's outline (`scene/outline.ts`): it draws itself in over this many seconds
+ * as it settles from this share wider onto the place, a ring round a feature stands this share
+ * outside it and is never under this many CSS px across, each circle in this many segments,
+ * with a tick this long this far out at each quarter, CSS px.
+ */
+export const OUTLINE_FADE_S = 0.9;
+export const OUTLINE_SETTLE = 0.12;
+export const OUTLINE_MARGIN = 1.3;
+export const OUTLINE_MIN_PX = 28;
+export const OUTLINE_SEGMENTS = 96;
+export const OUTLINE_TICK_PX = 5;
+export const OUTLINE_TICK_GAP_PX = 4;
+
 /* ---------------------------------------------------------------- ribbons */
 
 /**
@@ -558,6 +578,7 @@ export const SHADER_DEFINES = glslDefines({
   PHOTO_ERODE_SOFT,
   MAP_CENTRAL_MERIDIAN_RAD,
   SUN_MAP_QUIET_INTENSITY,
+  MAP_FLAT_LATITUDE_COS: Math.cos((SUN_MAP_POLAR_FADE_DEG.flat * Math.PI) / 180),
   STENCIL_WIDTH: spotStencil.width,
   STENCIL_HEIGHT: spotStencil.height,
   STENCIL_TILE: spotStencil.tile,

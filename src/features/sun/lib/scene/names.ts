@@ -4,7 +4,8 @@
  * its eruption), and only near its feature at the scale drawn: a disc feature once it spans
  * `NAME_FEATURE_PX`, a limb feature within `NAME_LIMB_PX` of the limb and in view, the corona's
  * off the disc, the shells inside on the cut's faces once it is open; never during a flight.
- * Each is set a little outward from its anchor.
+ * Each is set a little outward from its anchor. The place whose card is open is named in bold at
+ * any scale, beside its outline (`outline.ts`).
  */
 import { Vector3, type PerspectiveCamera, type Vector2 } from "three";
 
@@ -12,15 +13,13 @@ import { SURFACE_RESOLVE_PX } from "@/space/sun/graphics/parameters";
 import { LAYER_IDS, type LayerId } from "@/space/sun/model/structure";
 import { TAU, type Vec3 } from "@horizon/toolkit/math";
 import { recordFrom } from "@horizon/toolkit/records";
-import { worldPerPixel, type PlaceLabel } from "@horizon/toolkit/scene";
+import { STRONG, worldPerPixel, type PlaceLabel } from "@horizon/toolkit/scene";
 
-import spotStencil from "../graphics/spot-stencil.generated.json";
 import { lightDraws } from "../model/drawn";
 import { lightKind, type LightId } from "../model/lights";
 import { PLACE_IDS, type PlaceId } from "../model/places";
 import {
   GRANULES_PER_RADIUS,
-  MAP_DETAIL_TO_PX,
   SPICULE_COLUMNS,
   NAME_DISC_R,
   NAME_FEATURE_PX,
@@ -33,12 +32,10 @@ import { featuredRegion } from "./views";
 
 /** The body's pole: what the surface turns about. */
 const POLE = new Vector3(0, 1, 0);
-/** The cut must be this far open before the places inside the Sun are named. */
-const NAMED_INSIDE_CUT = 0.3;
+/** The cut must be this far open before the places inside the Sun are named (and outlined). */
+export const NAMED_INSIDE_CUT = 0.3;
 /** A fine feature (granules, spicule jets) is named once it spans this many CSS px: where the renderer draws all of it. */
 const RESOLVED_PX = 2 * SURFACE_RESOLVE_PX;
-/** A map texel across, radians round the equator: the photograph's finest pixel. */
-const MAP_TEXEL = TAU / spotStencil.width;
 /** A flare is named while its light is above this share; a scene's taps answer to the same. */
 export const FLARE_NAMED_LIGHT = 0.05;
 /** A streamer stands against the sky at least this far from the line of sight (the shader fades it as it turns toward us). */
@@ -46,6 +43,17 @@ const STREAMER_NAMED_EDGE = 0.5;
 
 export const isLayerId = (key: unknown): key is LayerId =>
   typeof key === "string" && (LAYER_IDS as readonly string[]).includes(key);
+
+const toPoint = new Vector3();
+/** A point hidden behind the Sun (or inside it) from the camera. */
+export function behindSun(p: Vector3, camera: PerspectiveCamera) {
+  toPoint.subVectors(p, camera.position);
+  const dist = toPoint.length();
+  toPoint.divideScalar(Math.max(dist, 1e-9));
+  const b = camera.position.dot(toPoint);
+  const disc = b * b - camera.position.lengthSq() + 1;
+  return disc >= 0 && -b - Math.sqrt(disc) < dist - 1e-4;
+}
 
 /** What a name's rule reads about its place this frame. */
 type NameScene = {
@@ -60,12 +68,11 @@ type NameScene = {
   offDisc: boolean;
   /** How far the anchor stands from the line of sight, 0 (along it) to 1 (across it). */
   edgeOn: number;
-  /** The light in use, the quality's spicules and fine surface, the field lines shown, the photograph drawn. */
+  /** The light in use, the quality's spicules and fine surface, the field lines shown. */
   light: LightId;
   spicules: boolean;
   fineSurface: boolean;
   fieldLines: boolean;
-  mapShown: boolean;
   /** The eruption's flare light and how far its reconnection has gone, 0 with none. */
   flareLight: number;
   reconnection: number;
@@ -75,11 +82,8 @@ type NameScene = {
 const NAME_SHOWN: Readonly<Record<PlaceId, (s: NameScene) => boolean>> = {
   star: () => false,
   parker: () => true,
-  /* Granules at the quality that draws them, resolved; over the photograph, once its own detail gives way to them. */
-  granule: (s) =>
-    s.fineSurface &&
-    s.px(1 / GRANULES_PER_RADIUS) >= RESOLVED_PX &&
-    (!s.mapShown || lightKind(s.light) !== "white" || s.px(MAP_TEXEL) >= MAP_DETAIL_TO_PX),
+  /* Granules at the quality that draws them, resolved: over the photograph too, which holds none. */
+  granule: (s) => s.fineSurface && s.px(1 / GRANULES_PER_RADIUS) >= RESOLVED_PX,
   sunspot: (s) => s.regionPx > NAME_FEATURE_PX,
   facula: (s) => s.regionPx > NAME_FEATURE_PX,
   photosphere: (s) => s.distance < NAME_DISC_R,
@@ -109,19 +113,19 @@ export type NameView = {
   /** The wedge as the shader sees it (half-angle, bisector) and how far open it is drawn, 0–1. */
   cut: Vector2;
   cutShown: number;
-  /** The light in use; the quality's spicules and fine surface; the View panel's field lines; the photograph drawn. */
+  /** The light in use; the quality's spicules and fine surface; the View panel's field lines. */
   light: LightId;
   spicules: boolean;
   fineSurface: boolean;
   fieldLines: boolean;
-  mapShown: boolean;
+  /** The place whose card is open: named in full wherever its anchor is in view, at any scale. */
+  selected: PlaceId | null;
 };
 
 export function createPlaceNames(place: PlaceLabel) {
   const anchorOf = createPlaceAnchors();
   const anchor: Vec3 = [0, 0, 0];
   const at = new Vector3();
-  const toAnchor = new Vector3();
   const projected = new Vector3();
   const sunCentre = new Vector3();
   const radial = new Vector3();
@@ -138,23 +142,12 @@ export function createPlaceNames(place: PlaceLabel) {
     spicules: false,
     fineSurface: false,
     fieldLines: false,
-    mapShown: false,
     flareLight: 0,
     reconnection: 0,
   };
   let worldPx = 0;
   let away = 1;
   scene.px = (size) => size / (worldPx * away);
-
-  /** A point hidden behind the Sun from the camera. */
-  const behindSun = (p: Vector3, camera: PerspectiveCamera) => {
-    toAnchor.subVectors(p, camera.position);
-    const dist = toAnchor.length();
-    toAnchor.divideScalar(Math.max(dist, 1e-9));
-    const b = camera.position.dot(toAnchor);
-    const disc = b * b - camera.position.lengthSq() + 1;
-    return disc >= 0 && -b - Math.sqrt(disc) < dist - 1e-4;
-  };
 
   return {
     update(f: SunFrame, view: NameView) {
@@ -171,7 +164,6 @@ export function createPlaceNames(place: PlaceLabel) {
       scene.spicules = view.spicules;
       scene.fineSurface = view.fineSurface;
       scene.fieldLines = view.fieldLines;
-      scene.mapShown = view.mapShown;
       scene.flareLight = f.eruption?.flareLight ?? 0;
       scene.reconnection = f.eruption?.reconnection ?? 0;
       viewAxis.copy(camera.position).normalize();
@@ -212,12 +204,12 @@ export function createPlaceNames(place: PlaceLabel) {
           radial.copy(at).normalize();
           scene.edgeOn = Math.sqrt(Math.max(0, 1 - radial.dot(viewAxis) ** 2));
           scene.regionPx = featured ? scene.px(featured.size) : 0;
-          shown = onScreen && NAME_SHOWN[id](scene);
+          shown = onScreen && (id === view.selected || NAME_SHOWN[id](scene));
           /* Set off its anchor outward, which on screen is away from the disc's centre. */
           at.addScaledVector(radial.copy(at).normalize(), NAME_OFFSET_PX * worldPx * away);
         }
         last.copy(at);
-        place(id, at.x, at.y, at.z, shown);
+        place(id, at.x, at.y, at.z, shown, id === view.selected ? STRONG : undefined);
       }
     },
   };

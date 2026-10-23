@@ -31,6 +31,7 @@
 #define PHOTO_ERODE_SOFT          0.15
 #define MAP_CENTRAL_MERIDIAN_RAD  5.117380276
 #define SUN_MAP_QUIET_INTENSITY   0.8
+#define MAP_FLAT_LATITUDE_COS     0.139173101
 #define STENCIL_WIDTH             8192.0
 #define STENCIL_HEIGHT            4096.0
 #define STENCIL_TILE              64.0

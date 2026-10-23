@@ -15,7 +15,10 @@ import {
   solarSurface,
 } from "../scripts/lib/sun-map.mjs";
 import { MAPS_KEY } from "../src/lib/assets.ts";
-import { SUN_MAP_QUIET_INTENSITY } from "../src/space/solar-system/model/parameters.ts";
+import {
+  SUN_MAP_POLAR_FADE_DEG,
+  SUN_MAP_QUIET_INTENSITY,
+} from "../src/space/solar-system/model/parameters.ts";
 import { OBSERVED_REGIONS, mapUv } from "../src/space/sun/model/observed.ts";
 import { SEEDED_GROUPS } from "../src/space/sun/model/spot-groups.ts";
 
@@ -89,8 +92,18 @@ test(
     assert.ok(bright > w * h * 0.9, "quiet photosphere dominates");
     near(mean / (w * h), SUN_MAP_QUIET_INTENSITY, 0.03);
     assert.ok(seam / h < 3, "no hard longitude seam");
-    const polarRow = Array.from({ length: w }, (_, x) => data[x * c]);
-    assert.ok(Math.max(...polarRow) - Math.min(...polarRow) < 3, "no invented polar features");
+    /* Poleward of the catalogued latitude the map is flat, which is what lets the globe stop
+       counting the longitudes' stretch there; the equator's row carries the disc's texture. */
+    const range = (y) => {
+      const row = Array.from({ length: w }, (_, x) => data[(y * w + x) * c]);
+      return Math.max(...row) - Math.min(...row);
+    };
+    const flatRows = Math.floor(((90 - SUN_MAP_POLAR_FADE_DEG.flat) / 180) * h);
+    for (let y = 0; y < flatRows; y += 1) {
+      assert.ok(range(y) < 3, `no invented polar features at row ${y}`);
+      assert.ok(range(h - 1 - y) < 3, `no invented polar features at row ${h - 1 - y}`);
+    }
+    assert.ok(range(Math.floor(h / 2)) >= 3, "the equator keeps the disc's texture");
   },
 );
 

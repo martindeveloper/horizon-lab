@@ -6,7 +6,14 @@ import { PerspectiveCamera, Vector2, Vector3 } from "three";
 import { PLACE_IDS } from "../src/features/sun/lib/model/places.ts";
 import { OPEN_FADE_FROM, STREAMER_MIN_APEX } from "../src/features/sun/lib/parameters.ts";
 import { createPlaceAnchors } from "../src/features/sun/lib/scene/anchors.ts";
+import { directionOf } from "../src/features/sun/lib/scene/frame.ts";
 import { createPlaceNames } from "../src/features/sun/lib/scene/names.ts";
+import {
+  featuredRegion,
+  viewAim,
+  viewFocus,
+  viewSubjectRadius,
+} from "../src/features/sun/lib/scene/views.ts";
 import { createSunModel } from "../src/space/sun/frame.ts";
 import { DAY_S, SOURCE_SURFACE_R } from "../src/space/sun/model/parameters.ts";
 import { LAYERS } from "../src/space/sun/model/structure.ts";
@@ -156,4 +163,29 @@ test("a place is named only where the light draws it: no chromosphere or spicule
   assert.equal(namesAt("spicule", "halpha", { size: 6000, spicules: false }), false);
   /* 193 Å shows the corona alone: no rim of the chromosphere to name there. */
   assert.equal(namesAt("chromosphere", "fe193"), false);
+});
+
+test("a view's places stand where the view looks, however far the Sun has turned", () => {
+  const model = createSunModel(5);
+  const anchorOf = createPlaceAnchors();
+  const pole = new Vector3(0, 1, 0);
+  const world = (frame, place) =>
+    new Vector3(...anchorOf(frame, place, [0, 0, 0])).applyAxisAngle(pole, frame.surfaceTurn);
+  for (const days of [0, 2.5, 9]) {
+    const frame = model.frameAt(input({ time: (120 + days) * DAY_S }));
+    /* The granule: on quiet surface clear of the spot group, and the spot view centres on it. */
+    const region = featuredRegion(frame);
+    const granule = world(frame, "granule");
+    const group = new Vector3(...directionOf(region.lat, region.lon + frame.surfaceTurn));
+    assert.ok(granule.angleTo(group) > region.size, `${days} d: clear of the group`);
+    const focus = viewFocus("sunspot", "granule");
+    assert.equal(focus, "granule");
+    const aim = new Vector3(...viewAim("sunspot", frame, focus).point);
+    assert.ok(aim.distanceTo(granule) < 1e-9, `${days} d: the spot view centres on it`);
+    /* Spicules and the chromosphere: inside the limb view's framing of its prominence. */
+    const limb = new Vector3(...viewAim("chromosphere", frame).point);
+    const reach = viewSubjectRadius("chromosphere", frame);
+    for (const place of ["spicule", "chromosphere"])
+      assert.ok(world(frame, place).distanceTo(limb) < reach, `${days} d: ${place} in view`);
+  }
 });

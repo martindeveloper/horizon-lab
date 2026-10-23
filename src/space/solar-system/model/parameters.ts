@@ -71,6 +71,11 @@ export const SUN_CENTRE_RGB = [1, 1, 1] as const;
 /** Linear texture intensity of the quiet photosphere; reserves headroom for faculae. */
 export const SUN_MAP_QUIET_INTENSITY = 0.8;
 /**
+ * HMI's polar coverage is unreliable: the map's contrast fades from `from` to none at `flat`,
+ * degrees of latitude, poleward of which it is the quiet photosphere alone.
+ */
+export const SUN_MAP_POLAR_FADE_DEG = { from: 65, flat: 82 } as const;
+/**
  * Solar limb darkening I(μ)/I(1) = 1 − u(1 − μ) − v(1 − μ²) for red, green and
  * blue (0.65, 0.55, 0.45 µm), from the SolarSoft darklimb_u/v fits to Allen's
  * Astrophysical Quantities: the limb keeps ~40 % of the centre's red light but

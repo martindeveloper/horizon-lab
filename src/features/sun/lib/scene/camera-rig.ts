@@ -1,6 +1,7 @@
 /**
  * The Sun lab's camera: the orbit rig, its controls and the drift, about what the view orbits.
- * The orbit is about the Sun's centre, a feature's (`viewAim`) with its up the surface normal
+ * The orbit is about the Sun's centre, a feature's or the chosen place the view centres on
+ * (`viewAim`, `viewFocus`) with its up the surface normal
  * there (`featureOrbitFrame`), or Parker in its close-up; while the drift plays it is about the centre in a frame that turns with the Sun from
  * the moment it began, so the features its shots frame (`driftPose`) stay framed loop after loop.
  * When the orbit changes the camera is written into the new one as it stands, with the look that
@@ -39,6 +40,7 @@ import {
   type Viewport,
 } from "@horizon/toolkit/scene";
 
+import type { PlaceId } from "../model/places";
 import {
   AIM_LAG_S,
   CAMERA_FAR_R,
@@ -59,6 +61,7 @@ import {
   featureOrbitFrame,
   viewAim,
   viewEasesAim,
+  viewFocus,
   viewPose,
   viewTurns,
   type ViewAim,
@@ -108,8 +111,8 @@ export type SunCameraDeps = {
   reduceMotion: MediaQueryList;
   invalidate: () => void;
   parker: ReturnType<typeof createParkerLayer>;
-  /** The view and whether Parker's close-up has the camera, as the settings stand. */
-  settings: () => { view: SunViewId; closeUp: boolean };
+  /** The view, the chosen place and whether Parker's close-up has the camera, as the settings stand. */
+  settings: () => { view: SunViewId; selection: PlaceId | null; closeUp: boolean };
   /** The frame on screen. */
   drawn: () => SunFrame;
   /** The visitor took the camera. */
@@ -128,9 +131,10 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
   /** The orbit's centre and its turn, as the rig reads them. */
   const orbitOrigin = new Vector3();
   const orbitFrame = new Quaternion();
-  /** What the orbit is about, and the feature view it follows (to notice another one). */
+  /** What the orbit is about, the feature view it follows and that view's focus (to notice another one). */
   let orbit: Orbit = "centre";
   let following: SunViewId | null = null;
+  let focused: PlaceId | null = null;
   const framing = () => FRAMINGS[orbit];
   /** The Sun's turn as the drift began. */
   let driftTurn = 0;
@@ -177,21 +181,23 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
 
   const opening = deps.settings().view;
   const first = deps.drawn();
-  const openingAim = viewAim(opening, first);
+  const openingFocus = viewFocus(opening, deps.settings().selection);
+  const openingAim = viewAim(opening, first, openingFocus);
   if (openingAim) {
     orbit = "feature";
     following = opening;
+    focused = openingFocus;
     orbitFor(first, openingAim);
   }
   /** Where the camera looks off its aim and its tilt: the drift's while it flies, else easing off. */
   const attitude: RigAttitude = { look: { yaw: 0, pitch: 0 }, roll: 0 };
   const rig = createOrbitRig(camera, {
-    pose: viewPose(opening, first, OPENING_ANGLES, fitViewport()),
+    pose: viewPose(opening, first, OPENING_ANGLES, fitViewport(), openingFocus),
     limits: () =>
       orbit === "parker"
         ? parker.limits
         : framing().aboutPoint
-          ? featureLimits(deps.settings().view, deps.drawn(), fitted)
+          ? featureLimits(deps.settings().view, deps.drawn(), fitted, focused)
           : CENTRE_LIMITS,
     home: (aim) => aim.copy(orbitOrigin),
     orient: (_distance, frame) => frame.copy(orbitFrame),
@@ -231,24 +237,26 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
 
   /**
    * Keeps the orbit the camera should turn in this frame: the drift's turning one while the
-   * drift plays, else Parker in its close-up, else the view's feature, else the Sun's centre. On a change the camera is written into the new orbit exactly
+   * drift plays, else Parker in its close-up, else the view's focus or feature, else the Sun's centre. On a change the camera is written into the new orbit exactly
    * where it stands, its look turned to keep the view; on none the orbit follows the Sun.
    */
   const toOrbit = new Quaternion();
   const local = new Vector3();
   const reframe = (f: SunFrame, dt?: number) => {
-    const { view, closeUp } = deps.settings();
+    const { view, selection, closeUp } = deps.settings();
     const playing = deps.drift?.state() === "playing";
-    const target = playing ? null : closeUp ? parker.aim(f) : viewAim(view, f);
+    const focus = playing || closeUp ? null : viewFocus(view, selection);
+    const target = playing ? null : closeUp ? parker.aim(f) : viewAim(view, f, focus);
     const wanted: Orbit = playing ? "drift" : !target ? "centre" : closeUp ? "parker" : "feature";
     const follows = wanted === "feature" ? view : null;
-    if (wanted === orbit && follows === following) {
+    if (wanted === orbit && follows === following && focus === focused) {
       orbitFor(f, target, dt);
       return;
     }
     placeCamera();
     orbit = wanted;
     following = follows;
+    focused = focus;
     if (orbit === "drift") driftTurn = f.surfaceTurn;
     orbitFor(f, target);
     toOrbit.copy(orbitFrame).invert();
@@ -285,7 +293,8 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
 
   const views = createViewMoves(
     rig,
-    (id: SunViewId) => viewPose(id, deps.drawn(), rig.pose, fitViewport()),
+    (id: SunViewId) =>
+      viewPose(id, deps.drawn(), rig.pose, fitViewport(), viewFocus(id, deps.settings().selection)),
     viewTurns,
   );
   rig.applyPose();
@@ -529,7 +538,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
         );
       if (driftFlying()) autoFramed = false;
       if (autoFramed && !rig.flying && !driftFlying()) {
-        const fit = viewPose(deps.settings().view, f, rig.pose, fittedViewport).distance;
+        const fit = viewPose(deps.settings().view, f, rig.pose, fittedViewport, focused).distance;
         if (Math.abs(Math.log(fit / rig.target)) > 0.001) rig.zoomTo(fit, false);
       }
       rig.step(dt);

@@ -10,7 +10,8 @@ import { RowLabel } from "./dock-rows";
 
 /**
  * What this view shows, as a labelled strip of chips across the dock: a pick opens its card
- * (the camera stays: each place listed belongs to this view), a second pick lets go. Wraps
+ * (the camera stays: each place listed belongs to this view; it only turns to one the view
+ * centres on, `viewFocus`), a second pick lets go. Wraps
  * on wide screens, scrolls sideways on phones.
  */
 export function PlaceStrip({ className }: { className?: string }) {

@@ -1,7 +1,8 @@
 /**
- * Where the lab names each place in a frame (body frame, R☉): the interior's shells on the cut's
- * meridian at the middle of their layer, the surface's on the featured region, the limb's on
- * the +x limb, the live prominence, loop, line or ejection where the frame has one. A renderer
+ * Where the lab names each place in a frame (body frame, R☉): where the place's view looks.
+ * The interior's shells on the cut's meridian at the middle of their layer, the surface's on
+ * the featured region or the quiet surface beside it, the limb's beside the featured
+ * prominence, the live prominence, loop, line or ejection where the frame has one. A renderer
  * reads them every frame, so they are written into the caller's vector, and what needs a search
  * of the field's lines is searched once per field.
  */
@@ -12,8 +13,16 @@ import type { Vec3 } from "@horizon/toolkit/math";
 import type { LightKind } from "../model/lights";
 import type { PlaceId } from "../model/places";
 import { EUV_SCALE_HEIGHT_R, OPEN_FADE_FROM, STREAMER_MIN_APEX } from "../parameters";
-import { directionOf, parkerOf, poleOf, type Polyline, type SunFrame } from "./frame";
-import { featuredProminence, featuredRegion } from "./views";
+import {
+  directionOf,
+  parkerOf,
+  poleOf,
+  tiltedAxis,
+  type Polyline,
+  type Prominence,
+  type SunFrame,
+} from "./frame";
+import { SPOTLESS_QUIET, featuredProminence, featuredRegion, quietSurface } from "./views";
 
 /**
  * Interior anchors lie on the +z meridian (lon = π/2 in the body frame), where the cut opens when
@@ -22,11 +31,14 @@ import { featuredProminence, featuredRegion } from "./views";
  */
 const CUT_LAT = 0.6;
 const CUT_LON = Math.PI / 2;
-/** The quiet-surface anchors sit just off the disc's centre. */
-const SURFACE_LAT = 0.12;
-const SURFACE_LON = 0.2;
-/** The limb anchors, on the +x limb (lon = 0) as seen down −z. */
+/** With no prominence to stand beside, the limb's anchors are on the epoch's +x limb (lon = 0) as seen down −z. */
 const LIMB_LON = 0;
+/**
+ * The limb's anchors stand on either side of the featured prominence, this share of its length
+ * along its channel from its middle: the spicules west of it, the chromosphere east, both
+ * inside the limb view's framing of it.
+ */
+const BESIDE_PROMINENCE = 0.4;
 const CHROMOSPHERE_TOP_R = 1 + CHROMOSPHERE_HEIGHT;
 const SPICULE_TOP_R = 1 + SPICULE_HEIGHT;
 const CORONA_ANCHOR_R = 1.6;
@@ -40,6 +52,21 @@ const at = (lat: number, lon: number, radius: number, out: Vec3): Vec3 => {
   out[0] *= radius;
   out[1] *= radius;
   out[2] *= radius;
+  return out;
+};
+
+/** Beside a prominence along its channel by `along` of its length (signed), at `radius`. */
+const besideProminence = (p: Prominence, along: number, radius: number, out: Vec3): Vec3 => {
+  directionOf(p.lat, p.lon, out);
+  const [x, y, z] = tiltedAxis(p.lat, p.lon, p.tilt);
+  const step = along * p.length;
+  out[0] += x * step;
+  out[1] += y * step;
+  out[2] += z * step;
+  const scale = radius / Math.hypot(out[0], out[1], out[2]);
+  out[0] *= scale;
+  out[1] *= scale;
+  out[2] *= scale;
   return out;
 };
 
@@ -139,8 +166,10 @@ export function createPlaceAnchors() {
         return at(CUT_LAT, CUT_LON, (LAYERS.tachocline + LAYERS.photosphere) / 2, out);
       case "photosphere":
         return at(CUT_LAT, CUT_LON, LAYERS.photosphere, out);
-      case "granule":
-        return at(SURFACE_LAT, SURFACE_LON, 1, out);
+      case "granule": {
+        const { lat, lon } = quietSurface(frame);
+        return at(lat, lon, 1, out);
+      }
       case "sunspot": {
         const region = featuredRegion(frame);
         return region ? at(region.lat, region.lon, 1, out) : null;
@@ -149,10 +178,18 @@ export function createPlaceAnchors() {
         const region = featuredRegion(frame);
         return region ? poleOf(region, "following", out) : null;
       }
-      case "chromosphere":
-        return at(0, LIMB_LON, CHROMOSPHERE_TOP_R, out);
-      case "spicule":
-        return at(SURFACE_LAT, LIMB_LON, SPICULE_TOP_R, out);
+      case "chromosphere": {
+        const p = featuredProminence(frame);
+        return p
+          ? besideProminence(p, -BESIDE_PROMINENCE, CHROMOSPHERE_TOP_R, out)
+          : at(0, LIMB_LON, CHROMOSPHERE_TOP_R, out);
+      }
+      case "spicule": {
+        const p = featuredProminence(frame);
+        return p
+          ? besideProminence(p, BESIDE_PROMINENCE, SPICULE_TOP_R, out)
+          : at(SPOTLESS_QUIET.lat, LIMB_LON, SPICULE_TOP_R, out);
+      }
       case "prominence": {
         const p = featuredProminence(frame);
         return p ? at(p.lat, p.lon, 1 + p.height * (1 + p.lift), out) : null;

@@ -33,7 +33,7 @@ const sourceFile = mapFile(MAPS_KEY, "sun", "near");
 const source = await readFile(new URL(`../cdn${sourceFile}`, import.meta.url));
 const sourceSha256 = createHash("sha256").update(source).digest("hex");
 // The stencil's pin: the groups and the close-up stencil come from the same photograph.
-if (sourceSha256 !== "51a3fd1763a7c9f080bcf9945537bdae3c08d1793509e155c28fadffaca4bc00")
+if (sourceSha256 !== "407772081dd901b124a8091ace9b6842e8125e6bda49461187a0ee3401553a69")
   throw new Error("The published Sun photograph changed; review the groups before relocating");
 const { data, info } = await sharp(source)
   .removeAlpha()

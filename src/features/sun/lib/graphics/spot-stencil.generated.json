@@ -1,13 +1,13 @@
 {
-  "sourceFile": "/textures/bodies/sun/v1/sun-near.webp",
-  "sourceSha256": "51a3fd1763a7c9f080bcf9945537bdae3c08d1793509e155c28fadffaca4bc00",
-  "mapVersion": 1,
+  "sourceFile": "/textures/bodies/sun/v2/sun-near.webp",
+  "sourceSha256": "407772081dd901b124a8091ace9b6842e8125e6bda49461187a0ee3401553a69",
+  "mapVersion": 2,
   "width": 8192,
   "height": 4096,
   "atlasWidth": 952,
   "atlasHeight": 952,
-  "tiles": 184,
-  "components": 202,
+  "tiles": 194,
+  "components": 233,
   "tile": 64,
   "gutter": 2,
   "penumbraThreshold": 0.88,
@@ -15,6 +15,6 @@
   "umbraThreshold": 0.45,
   "penumbraRange": 8,
   "umbraRange": 32,
-  "atlasFile": "/textures/bodies/sun/spots/v1/atlas.png",
-  "pagesFile": "/textures/bodies/sun/spots/v1/pages.png"
+  "atlasFile": "/textures/bodies/sun/spots/v2/atlas.png",
+  "pagesFile": "/textures/bodies/sun/spots/v2/pages.png"
 }

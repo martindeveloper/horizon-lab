@@ -184,11 +184,11 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     url: MAP_SOURCE_URLS.charon,
   },
   sun: {
-    version: 1,
+    version: 2,
     widths: { far: 1024, near: 8192, nearLight: 2048 },
     mean: "#e8e8e8",
     source:
-      "SDO/HMI flattened continuum intensity, 1–22 May 2024; representative rotation mosaic, quiet polar fill",
+      "SDO/HMI flattened continuum intensity, 1–22 May 2024; representative rotation mosaic, each frame fading out towards its limb, quiet polar fill",
     credit: "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
     licence: "Public domain",
     url: CREDIT_URLS.sdoHmi,

@@ -20,7 +20,15 @@ import type { Vec3 } from "@horizon/toolkit/math";
 import { SCENE_FOV } from "@horizon/toolkit/scene";
 import { RAD_PER_DEG } from "@horizon/toolkit/science";
 
-import { FEATURE_MAX_R, FEATURE_MIN_R, ORBIT_REACH_R } from "../parameters";
+import type { PlaceId } from "../model/places";
+import {
+  FEATURE_MAX_R,
+  FEATURE_MIN_R,
+  GRANULES_PER_RADIUS,
+  GRANULE_FIELD,
+  ORBIT_REACH_R,
+  REGION_REACH,
+} from "../parameters";
 import { directionOf, parkerOrbitOf, type SunFrame } from "./frame";
 import { eruptionEnvelope, framedDistance, type SunViewport } from "./framing";
 import type { SunViewId } from "./settings";
@@ -44,6 +52,23 @@ const scaled = (d: Vec3, r: number): Vec3 => [d[0] * r, d[1] * r, d[2] * r];
 export function surfaceAim(lat: number, lon: number, frame: SunFrame): ViewAim {
   const normal = worldDirection(lat, lon, frame);
   return { point: normal, normal };
+}
+
+/** On a spotless Sun, quiet surface stands here (body frame, radians): just off the disc's centre at the map's epoch. */
+export const SPOTLESS_QUIET = { lat: 0.12, lon: 0.2 } as const;
+
+/**
+ * Where the lab shows quiet surface (its granulation) in the frame: the nearest the featured
+ * group leaves quiet, equatorward of it where its marks end (`REGION_REACH` of its radius: no
+ * plage, pores or photographed patch); on a spotless Sun, `SPOTLESS_QUIET`.
+ */
+export function quietSurface(frame: SunFrame): { lat: number; lon: number } {
+  const region = featuredRegion(frame);
+  if (!region) return SPOTLESS_QUIET;
+  return {
+    lat: region.lat - Math.sign(region.lat || 1) * REGION_REACH * region.size,
+    lon: region.lon,
+  };
 }
 
 /** A prominence's middle, radii from the centre: half its height, risen by its lift. */
@@ -108,6 +133,14 @@ type ViewFraming = {
   limits: { min: number; max: number };
   /** Its aim eases when it jumps: the eruption's ejecta move radii in one scrub. */
   easesAim: boolean;
+  /**
+   * The places it orbits instead of its feature while chosen, with what each promises to show:
+   * places of the view that stand elsewhere on the Sun. The camera turns to one where it stands
+   * (`camera-rig.ts`).
+   */
+  focus?: Partial<
+    Record<PlaceId, Pick<ViewFraming, "subject"> & { aim: (frame: SunFrame) => ViewAim }>
+  >;
 };
 
 const keep: ViewFraming["angles"] = (_frame, angles) => angles;
@@ -149,6 +182,16 @@ const VIEWS: Readonly<Record<SunViewId, ViewFraming>> = {
     subject: (frame) => (featuredRegion(frame)?.size ?? REGION_SIZE_MEDIAN_RAD) * SPOT_SUBJECT,
     limits: FEATURE_LIMITS,
     easesAim: false,
+    /* Granules on quiet surface, not in the group's plage, near enough to see each one. */
+    focus: {
+      granule: {
+        aim: (frame) => {
+          const { lat, lon } = quietSurface(frame);
+          return surfaceAim(lat, lon, frame);
+        },
+        subject: () => GRANULE_FIELD / GRANULES_PER_RADIUS,
+      },
+    },
   },
   /* Across the sheet at its middle, so its arch and fine threads read against the sky with the limb beneath. */
   chromosphere: {
@@ -216,9 +259,24 @@ const VIEWS: Readonly<Record<SunViewId, ViewFraming>> = {
 /** The views that orbit a feature rather than the centre. */
 export const viewOrbitsFeature = (id: SunViewId) => VIEWS[id].aim !== undefined;
 
-/** Where a feature view orbits this frame; null for the views about the centre or with nothing to show. */
-export const viewAim = (id: SunViewId, frame: SunFrame): ViewAim | null =>
-  VIEWS[id].aim?.(frame) ?? null;
+/** The chosen place a view orbits instead of its feature (`ViewFraming.focus`); null for its feature. */
+export const viewFocus = (id: SunViewId, place: PlaceId | null): PlaceId | null =>
+  place && VIEWS[id].focus?.[place] ? place : null;
+
+/**
+ * Where a feature view orbits this frame: its focus on the chosen place (`viewFocus`), else its
+ * feature; null for the views about the centre or with nothing to show.
+ */
+export const viewAim = (
+  id: SunViewId,
+  frame: SunFrame,
+  focus: PlaceId | null = null,
+): ViewAim | null =>
+  (focus && VIEWS[id].focus?.[focus]?.aim(frame)) || (VIEWS[id].aim?.(frame) ?? null);
+
+/** What a view promises to show, radii: its focus's, else its own. */
+const subjectOf = (id: SunViewId, frame: SunFrame, focus: PlaceId | null) =>
+  (focus && VIEWS[id].focus?.[focus]?.subject(frame)) || VIEWS[id].subject(frame);
 
 /** The views that turn the camera to their own angles on a flight. */
 export const viewTurns = (id: SunViewId) => VIEWS[id].turns;
@@ -230,13 +288,19 @@ export const viewEasesAim = (id: SunViewId) => VIEWS[id].easesAim;
  * How near and far the camera may zoom about a view's aim, radii: out at least as far as its
  * own framing, which a narrow portrait screen sets beyond the view's usual reach.
  */
-export function featureLimits(id: SunViewId, frame: SunFrame, viewport: SunViewport) {
+export function featureLimits(
+  id: SunViewId,
+  frame: SunFrame,
+  viewport: SunViewport,
+  focus: PlaceId | null = null,
+) {
   const { min, max } = VIEWS[id].limits;
-  return { min, max: Math.max(max, framedDistance(VIEWS[id].subject(frame), viewport)) };
+  return { min, max: Math.max(max, framedDistance(subjectOf(id, frame, focus), viewport)) };
 }
 
 /** What the preset promises to show; a visitor may zoom closer after it arrives. */
-export const viewSubjectRadius = (id: SunViewId, frame: SunFrame) => VIEWS[id].subject(frame);
+export const viewSubjectRadius = (id: SunViewId, frame: SunFrame, focus: PlaceId | null = null) =>
+  subjectOf(id, frame, focus);
 
 /** The pose that frames a view, given the frame's features and the camera's present angles. */
 export function viewPose(
@@ -244,12 +308,15 @@ export function viewPose(
   frame: SunFrame,
   angles: Pick<OrbitPose, "azimuth" | "inclination">,
   viewport?: SunViewport,
+  focus: PlaceId | null = null,
 ): OrbitPose {
   const view = VIEWS[id];
   const distance = viewport
-    ? Math.max(view.distance, framedDistance(view.subject(frame), viewport))
+    ? Math.max(view.distance, framedDistance(subjectOf(id, frame, focus), viewport))
     : view.distance;
-  return { distance, ...view.angles(frame, angles) };
+  /* Only the angles: a camera's whole pose passed in must not carry its distance over the view's. */
+  const { azimuth, inclination } = view.angles(frame, angles);
+  return { distance, azimuth, inclination };
 }
 
 /**
