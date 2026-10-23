@@ -47,6 +47,8 @@ export function createGiantsRenderer(
     globe: vectors(MAX_DISCS),
     ring: vectors(MAX_DISCS),
     lens: vectors(LENSES),
+    /** Each hole in view as it stands on the ladder: where its ring is drawn (`uHoleShape`). */
+    stand: vectors(LENSES),
   };
   /** The black holes' rungs: they bend the stars whether or not they are in view. */
   const holes = LOOKS.flatMap((look, index) => (look.style === "horizon" ? [index] : [])).slice(
@@ -80,6 +82,7 @@ export function createGiantsRenderer(
     uLens: { value: discs.lens },
     uTints: tints.uniform,
     uHoles: { value: Array.from({ length: LENSES }, () => 0) },
+    uHoleShape: { value: discs.stand },
     uHoleCount: { value: 0 },
   };
   const lightUniforms = {

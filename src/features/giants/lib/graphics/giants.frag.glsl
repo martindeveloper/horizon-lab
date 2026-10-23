@@ -44,6 +44,7 @@ uniform vec4 uLens[LENSES];             // each black hole, in view or not: cent
 uniform vec4 uRing[MAX_DISCS];          // a hole's photon ring: glow; its light's temperature, K; flicker; angle it is brightest at
 uniform highp sampler2D uTints;         // each disc's tints: linear light; log reference radiance (`tints.ts`)
 uniform int uHoles[LENSES];             // the discs that are black holes in view, the first `uHoleCount`
+uniform vec4 uHoleShape[LENSES];        // each one's shape as it stands on the ladder, where its ring is drawn (its disc may be gliding to its dot)
 uniform int uHoleCount;
 uniform vec4 uWeather;                  // the star in focus's disc (−1: none); its weather's presence, 0–1; corona; chromosphere
 uniform vec4 uRegion[REGIONS];          // active region's centre (body frame); angular radius
@@ -298,11 +299,13 @@ vec3 sky(vec2 p) {
     float bright = (h - 0.985) / 0.015;
     colour += blackbodyLinear(mix(3500.0, 12000.0, hash21(cell + 1.9))) * point * 0.5 * bright * bright * seen.z;
   }
-  /* Black holes' photon rings glow in the sky, behind every body. */
+  /* Black holes' photon rings glow in the sky, behind every body, where the holes stand on the
+     ladder: on the way to the overview a ring fades there while its disc glides to its dot, since
+     moved with it, its inner glow would sweep across the stage. */
   for (int k = 0; k < LENSES; k++) {
     if (k >= uHoleCount) break;
     int i = uHoles[k];
-    vec4 shape = uShape[i];
+    vec4 shape = uHoleShape[k];
     vec2 offset = abs(line - shape.xy);
     float reach = shape.z * HOLE_REACH + 2.0;
     if (offset.x > reach || offset.y > reach) continue;

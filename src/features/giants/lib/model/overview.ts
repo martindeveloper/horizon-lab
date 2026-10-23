@@ -13,6 +13,7 @@ import {
   OVERVIEW_AXIS_INSET_PX,
   OVERVIEW_DOT_PX,
   OVERVIEW_FOOT_PX,
+  OVERVIEW_LIGHT_SHARE,
   OVERVIEW_MARGIN_PX,
   OVERVIEW_NAMES_NARROW_PX,
   OVERVIEW_NAMES_PX,
@@ -120,10 +121,12 @@ export function glidePlaced(from: Placed, to: Placed, k: number, out: Placed = b
 const held = blankPlaced();
 
 /**
- * A body on its way between the ladder (`k` 0) and the overview (1), written into `out`. A body
- * the ladder holds far off the stage starts from just past its edge, and one larger than the
- * stage from the stage's height, so it slides and shrinks into view rather than streaking in
+ * A body's dot on its way between the ladder (`k` 0) and the overview (1), written into `out`.
+ * A body the ladder holds far off the stage starts from just past its edge, and one larger than
+ * the stage from the stage's height, so it slides and shrinks into view rather than streaking in
  * from a size no screen shows (the full surfaces have handed over to dots by the time it shows).
+ * The full surface itself glides from its true place (`glidePlaced`): started from the edge, a
+ * hole's ring would span the stage.
  */
 export function blendPlaced(
   from: Placed,
@@ -165,11 +168,17 @@ export function stepToward(
 
 /**
  * The overview at a level of its glide: how far each body has gone from its place on the ladder
- * to its dot (`blend`, eased at both ends), and the dots' share of the light (`dots`), which
- * takes over from the full surfaces early on the way out and gives back late on the way in.
+ * to its dot (`blend`, eased at both ends); the dots' share of the light (`dots`), which takes
+ * over from the full surfaces early on the way out and gives back late on the way in; and how
+ * much of the bodies' far-reaching light shows (`light`): a hole's ring and lensing go first,
+ * where the hole stands on the ladder, and come back last, so they never sweep across the stage.
  */
 export function overviewAt(level: number) {
-  return { blend: smootherstep(level), dots: smoothstep(0, OVERVIEW_SWAP, level) };
+  return {
+    blend: smootherstep(level),
+    dots: smoothstep(0, OVERVIEW_SWAP, level),
+    light: 1 - smoothstep(0, OVERVIEW_LIGHT_SHARE, level),
+  };
 }
 
 /** A scale line: its share of the axis, and the round radius it marks in its unit. */

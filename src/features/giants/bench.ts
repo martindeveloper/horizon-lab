@@ -37,7 +37,8 @@ type GiantsBenchScene = BenchScene & {
 function ask(asks: NonNullable<GiantsBenchScene["asks"]>) {
   const state = useGiants.getState();
   if ("overview" in asks) return state.setOverview(true);
-  if ("ladder" in asks) return state.setSideBySide(false);
+  if ("ladder" in asks)
+    return state.overview ? state.setOverview(false) : state.setSideBySide(false);
   state.setOtherBody(asks.beside);
   state.setSideBySide(true);
 }
@@ -165,6 +166,33 @@ const SCENES: readonly GiantsBenchScene[] = [
     tags: ["sequence", "camera", "overview"],
     rung: "sun",
     asks: { overview: true },
+    script: {
+      frames: Math.round(2 * IDLE_FPS),
+      duration: 2,
+      keyframes: Array.from({ length: 12 }, (_, i) => i / 11),
+    },
+  },
+  {
+    id: "vega-into-overview",
+    description:
+      "From Vega into the overview: Sagittarius A*'s ring fades where it is, and the holes far off the stage stay off it",
+    tags: ["sequence", "camera", "overview"],
+    rung: "vega",
+    asks: { overview: true },
+    script: {
+      frames: Math.round(2 * IDLE_FPS),
+      duration: 2,
+      keyframes: Array.from({ length: 12 }, (_, i) => i / 11),
+    },
+  },
+  {
+    id: "vega-back-from-overview",
+    description:
+      "From the overview back down to Vega: the surfaces return before Sagittarius A*'s ring, in place",
+    tags: ["sequence", "camera", "overview"],
+    rung: "vega",
+    overview: true,
+    asks: { ladder: true },
     script: {
       frames: Math.round(2 * IDLE_FPS),
       duration: 2,

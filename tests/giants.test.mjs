@@ -39,6 +39,7 @@ import {
   OVERVIEW_AXIS,
   blendPlaced,
   namesEnd,
+  overviewAt,
   overviewBaseline,
   overviewRowAt,
   placeOverview,
@@ -66,6 +67,7 @@ import {
 import {
   LENSES,
   OVERVIEW_FOOT_PX,
+  OVERVIEW_LIGHT_SHARE,
   OVERVIEW_TOP_PX,
 } from "../src/features/giants/lib/parameters.ts";
 import { comparedWith, useGiants } from "../src/features/giants/lib/store.ts";
@@ -303,6 +305,21 @@ test("a black hole's ring and lensing leave before it moves and come once it has
     assert.equal(restageLight("stays", k), 1, "one that stays keeps it");
   assert.equal(restageLens("stays", 1, 1, 0.5), 1, "a hole that stays keeps bending the stars");
   assert.equal(restageLens(null, 1, 0, 0.5), 0, "one off both stages has let go by mid-change");
+});
+
+test("into the overview, a hole's ring and lensing fade where they are, before the dots take over", () => {
+  /* From Vega, the holes stand far off the stage: a ring that moved with its dot would sweep across it. */
+  assert.equal(overviewAt(0).light, 1, "whole on the ladder");
+  assert.equal(overviewAt(OVERVIEW_LIGHT_SHARE).light, 0, "gone before the surfaces hand over");
+  assert.ok(overviewAt(OVERVIEW_LIGHT_SHARE).blend < 0.1, "while the bodies have barely moved");
+  assert.equal(overviewAt(1).light, 0, "none in the overview");
+  for (let level = 0; level <= 1; level += 0.05) {
+    const { light, dots } = overviewAt(level);
+    assert.ok(
+      light <= 1 - dots + 1e-12,
+      `at ${level} the light shows no more than the surfaces do`,
+    );
+  }
 });
 
 test("the overview's scale lines mark round radii in the ruler's units, left to right", () => {

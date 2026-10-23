@@ -109,6 +109,14 @@ export const OVERVIEW_RING_PX = 3.5;
 export const OVERVIEW_SECONDS = 1.4;
 export const OVERVIEW_SWAP = 0.35;
 /**
+ * The share of the glide into the overview over which a body's far-reaching light (a black
+ * hole's ring and lensing, which can surround the whole view) fades where it is, before the
+ * bodies have moved much, and over which it comes back on the way out of the overview; within
+ * `OVERVIEW_SWAP`, so it is gone before the dots take over (as `RESTAGE_LIGHT_SHARE` does for a
+ * stage change).
+ */
+export const OVERVIEW_LIGHT_SHARE = 0.2;
+/**
  * Side by side (`pair.ts`): how long the stage takes to change, the bodies that stay gliding to
  * their new places while the others slide off or on, s; and the radius, CSS px, below which the
  * smaller body is marked by a ring so it is never lost beside the larger.

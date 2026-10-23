@@ -63,6 +63,7 @@ import { ringRadius, ringShown } from "./model/orbit-rings";
 import {
   OVERVIEW_AXIS,
   blendPlaced,
+  glidePlaced,
   overviewAt,
   overviewBaseline,
   overviewRowAt,
@@ -499,8 +500,15 @@ export function createGiantsEngine(
     const camera: Camera = { scale: 0, centre: 0 };
     const placed: Placed[] = [];
     let placedCount = 0;
+    /**
+     * The bodies drawn this frame as they stand on the ladder, before the overview's glide moves
+     * them towards their dots: a hole's ring and lensing stay with these while they fade, so
+     * neither sweeps across the stage (`overviewAt`).
+     */
+    const stood: Placed[] = [];
     const dotsShown = RUNG_IDS.map(() => blankPlaced());
-    const dotTarget = blankPlaced();
+    /** Every body's dot in the overview, where its glide ends. */
+    const dotTargets = RUNG_IDS.map(() => blankPlaced());
     /** How much of the stage's foot the dock covers, CSS px, as the dock publishes it (`--hud-clear`). */
     const dockFoot = () => parseFloat(getComputedStyle(host).getPropertyValue("--hud-clear")) || 0;
     /** How much of the stage's foot a card's sheet covers, CSS px (`--sheet-clear`), and the horizon's rise above it. */
@@ -524,7 +532,7 @@ export function createGiantsEngine(
       }
       dotsShown.forEach((dot, index) => {
         placeBody(ladder, camera, stage, index, dot);
-        const to = placeOverview(ladder, OVERVIEW_AXIS, stage, baseline, index, dotTarget);
+        const to = placeOverview(ladder, OVERVIEW_AXIS, stage, baseline, index, dotTargets[index]);
         blendPlaced(dot, to, blend, stage, dot);
         const grow = OVERVIEW_HOVER_PX * smoothstep(0, 1, hoverLevels[index]!);
         if (grow > 0) {
@@ -607,6 +615,11 @@ export function createGiantsEngine(
     /** A body as this frame drew it (posed by a hand, if it was), if it is on the stage. */
     function drawnOf(index: number) {
       for (let i = 0; i < placedCount; i++) if (placed[i]!.index === index) return placed[i]!;
+      return null;
+    }
+    /** A body as it stands on the ladder this frame (`stood`), if it is among the `count` drawn. */
+    function stoodOf(index: number, count: number) {
+      for (let i = 0; i < count; i++) if (stood[i]!.index === index) return stood[i]!;
       return null;
     }
     /** A body as this frame placed it, or placed afresh on the ladder if out of view. */
@@ -725,8 +738,13 @@ export function createGiantsEngine(
           body.polar = Math.max(MIN_DISC_PX, body.radius * apparentPolar(shape, globe.tilt));
           body.y = (camera.horizon ?? horizonOf(stage)) - body.polar;
         }
-        /* On the way to or from the overview, each full body travels with its dot. */
-        if (overview.dots > 0) Object.assign(body, dotsShown[body.index]!);
+        const stand = Object.assign((stood[i] ??= blankPlaced()), body);
+        /* On the way to or from the overview, each full body glides with its dot, from where it
+           truly stands rather than the dot's start at the stage's edge (`blendPlaced`), so a body
+           far off the stage stays off it. A hole's ring and lensing keep its stand: even this
+           glide's first moments shrink a far hole by a tenth, and a ring moved with it would
+           sweep its glow across the stage faster than it fades. */
+        if (overview.dots > 0) glidePlaced(body, dotTargets[body.index]!, overview.blend, body);
         const edge = Math.min(MAX_EDGE, (body.high - body.low) / (2 * body.radius));
         discs.shape[i]!.set(body.x, body.y, body.radius, body.polar);
         blurRadii[i] = blurShare * blurLevel * focusBlurRadius(body.index, place, body.radius);
@@ -736,7 +754,7 @@ export function createGiantsEngine(
         const ring = look.ring;
         if (ring)
           discs.ring[i]!.set(
-            ring.glow * lightNow(body.index),
+            ring.glow * lightNow(body.index) * overview.light,
             ring.kelvin,
             ring.flicker,
             ring.brightest,
@@ -746,8 +764,10 @@ export function createGiantsEngine(
         stellar.assign(i, body.index);
         const detail = surfaceDetail(body.index, detailFade, state.quality);
         if (detail > 0) frameUniforms.uFocus.value.set(i, detail);
-        if (look.style === "horizon" && holesInView < LENSES)
+        if (look.style === "horizon" && holesInView < LENSES) {
+          discs.stand[holesInView]!.set(stand.x, stand.y, stand.radius, stand.polar);
           bodyUniforms.uHoles.value[holesInView++] = i;
+        }
         if (body.index === star) slot = i;
       }
       bodyUniforms.uHoleCount.value = holesInView;
@@ -755,14 +775,15 @@ export function createGiantsEngine(
         const hole = holes[k];
         if (hole === undefined) return void lens.setW(0);
         /* A hole bends the stars round its stretch of the ladder, side by side while it stands
-           there, at the place it is drawn. While the stage changes, its bending eases across if it
-           stays, else goes early and comes late with its ring (`restageLens`). One not drawn bends
-           from its place on the ladder; side by side, where it has none, its lens stays put. */
+           there, at the place it stands (not where its disc glides on the way to the overview).
+           While the stage changes, its bending eases across if it stays, else goes early and comes
+           late with its ring (`restageLens`). One not drawn bends from its place on the ladder;
+           side by side, where it has none, its lens stays put. */
         const now = side
           ? Number(onStage(hole))
           : smoothstep(LENS_GONE, LENS_FULL, Math.abs(place - hole));
         const changing = restageLevel < 1;
-        const drawnHole = drawnOf(hole);
+        const drawnHole = stoodOf(hole, count);
         const before = lensFrom[k]!;
         const at = lensNow[k]!;
         if (drawnHole) at.set(drawnHole.x, drawnHole.y, drawnHole.radius, 0);
@@ -772,7 +793,7 @@ export function createGiantsEngine(
           at.set(body.x, body.y, body.radius, 0);
         }
         at.w = changing ? restageLens(roleNow(hole), before.w, now, restageLevel) : now;
-        lens.set(at.x, at.y, at.z, full * at.w);
+        lens.set(at.x, at.y, at.z, overview.light * at.w);
       });
       const presence = weatherShown(weatherFade.level);
       const live = slot >= 0 && presence > 0;
