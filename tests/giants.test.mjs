@@ -111,7 +111,10 @@ test("a card's sheet over a phone's foot lifts each body above it, still on the 
     const camera = cameraAt(ladder, i, phone);
     camera.horizon = horizonOf(phone) - lift;
     const body = placeBody(ladder, camera, phone, i);
-    assert.ok(body.y + body.polar <= phone.height - foot + 1e-6, `rung ${i} stands above the sheet`);
+    assert.ok(
+      body.y + body.polar <= phone.height - foot + 1e-6,
+      `rung ${i} stands above the sheet`,
+    );
     assert.ok(body.y - body.polar >= 0, `rung ${i} stays below the stage's top`);
   }
   assert.equal(horizonLift(phone, 0), 0, "no sheet, no lift");

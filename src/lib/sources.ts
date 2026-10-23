@@ -721,6 +721,9 @@ export const SOURCES = {
     cite: "Woudt et al. 2008, MNRAS 383, 445 (the Norma cluster: 4,871 ± 54 km/s)",
     link: SOURCE_URLS.woudt2008,
   },
+  zhang2001: {
+    cite: "Zhang, Dere, Howard, Kundu & White 2001, ApJ 559, 452 (the three phases of a CME's kinematics: initiation below ~80 km/s, impulsive acceleration through the flare's rise, propagation)",
+  },
   zhao2021: {
     cite: "Zhao et al. 2021, arXiv:2102.09093 (Cygnus X-1's spin > 0.9985 by continuum fitting)",
   },

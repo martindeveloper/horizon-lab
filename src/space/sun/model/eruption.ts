@@ -10,10 +10,12 @@ import {
   CME_SPREAD_RAD,
   ERUPTION_LINES,
   ERUPTION_SCALE_R,
+  ERUPTION_SECONDS,
   ERUPTION_STAGES,
   FLARE_LIGHT_DECAY_S01,
+  RADIUS_M,
   RECONNECTION,
-  ROPE_HEIGHT_AT_BREAKAWAY,
+  SLOW_RISE_KM_S,
   STORAGE_LAMBDA,
   X_POINT_S,
 } from "./parameters";
@@ -102,9 +104,6 @@ export function referenceHeight(height: number, g: Geometry) {
   return (lo + hi) / 2;
 }
 
-/* Prescribed rise, not an acceleration calculated from the momentum equation. */
-const U_BREAKAWAY =
-  (ERUPTION_STAGES.rise - ERUPTION_STAGES.storage) / (1 - ERUPTION_STAGES.storage);
 const ARCADE_BASE = 1 / (2 * STORAGE_LAMBDA[1]);
 
 /*
@@ -156,7 +155,6 @@ function finalBody(share: number) {
     else hi = g.widen;
   }
   return {
-    rise,
     widen: g.widen / g.body,
     angle: Math.max(...OUTLINE.map(([y, x]) => arc(y, x))),
   };
@@ -172,22 +170,15 @@ const BODY_SHARE = (() => {
   }
   return (lo + hi) / 2;
 })();
-const { rise: FINAL_RISE, widen: BODY_WIDEN } = finalBody(BODY_SHARE);
-const FINAL_HEIGHT = 2 * ARCADE_BASE + FINAL_RISE;
-const RISE_B =
-  Math.log(((FINAL_HEIGHT - 1) / (ROPE_HEIGHT_AT_BREAKAWAY - 1)) * U_BREAKAWAY ** 2) /
-  (1 - U_BREAKAWAY);
-const RISE_A = (FINAL_HEIGHT - 1) * Math.exp(-RISE_B);
+const { widen: BODY_WIDEN } = finalBody(BODY_SHARE);
 const storageLambdaAt = (s: number) =>
   STORAGE_LAMBDA[0] +
   (STORAGE_LAMBDA[1] - STORAGE_LAMBDA[0]) * smoothstep(0, ERUPTION_STAGES.storage, s);
 
+/** The rope's centre in the reference plane's unit: under 1 while stored, 1 + its rise after. */
 export function ropeHeight(s: number) {
-  const t = clamp01(s);
-  const { storage } = ERUPTION_STAGES;
-  if (t < storage) return 1 / storageLambdaAt(t);
-  const u = (t - storage) / (1 - storage);
-  return 1 + RISE_A * u * u * Math.exp(RISE_B * u);
+  const g = geometryAt(s);
+  return 2 * g.base + g.sheet + g.body * ramp(2, g.foot);
 }
 
 export function geometryAt(
@@ -209,19 +200,23 @@ export function geometryAt(
   const t = clamp01(s);
   out.s = t;
   out.lambda = storageLambdaAt(t);
-  const height = ropeHeight(t);
-  // Storage and rise both have zero velocity at their join. Freezing the base here
-  // keeps the whole display map C1 in time, including when reconnection starts.
-  out.base = Math.min(height, 1) / 2;
-  const rise = height - 2 * out.base;
+  // Storage ends at rest and the slow rise starts from it. Freezing the base here keeps the
+  // whole display map C1 in time, including when reconnection starts.
+  out.base = 1 / (2 * out.lambda);
   out.foot = sheetFootAt(t);
+  const top = contourY(-transferredFluxAt(t), t, 2, 4);
+  // The rise the front's kinematics ask of the map: raw(top) = base·top + rise·k.
+  const k = 1 + BODY_SHARE * (ramp(top, out.foot) - ramp(2, out.foot));
+  const rise =
+    t <= ERUPTION_STAGES.storage
+      ? 0
+      : Math.max(0, (unliftHeight((frontAt(t) - 1) / ERUPTION_SCALE_R) - out.base * top) / k);
   out.body = BODY_SHARE * rise;
   out.sheet = rise - out.body * ramp(2, out.foot);
   out.widen = BODY_WIDEN * out.body;
   out.h = displayHeight(2, out);
   out.p = t > X_POINT_S ? displayHeight(1 - RECONNECTION.diffusionHeight, out) : 0;
   out.q = t > X_POINT_S ? displayHeight(out.foot, out) : 0;
-  const top = contourY(-transferredFluxAt(t), t, 2, 4);
   out.rope = displayHeight(top, out) - out.h;
   return out;
 }
@@ -250,6 +245,58 @@ export function planeFieldAt(
 
 const PEAK_RATE = fluxTransferRateAt(X_POINT_S + (1 - X_POINT_S) / 4);
 export const reconnectionAt = (s: number) => fluxTransferRateAt(s) / PEAK_RATE;
+
+/*
+ * The front's prescribed kinematics follow the three observed phases of flare-associated CMEs
+ * (Zhang et al. 2001, ApJ 559, 452; Bein et al. 2012, ApJ 755, 44): a slow rise before the
+ * flare, then an acceleration proportional to the reconnection rate, the flare's hard X-rays
+ * (Temmer et al. 2008, ApJ 673, L95), so it peaks with the energy release and ends as the soft
+ * X-rays fade, then coasting. Its scale puts the front at CME_FINAL_HEIGHT_R at the end. The
+ * force is prescribed, not solved from the momentum equation.
+ */
+const TOP_AT_REST = contourY(0, 0, 2, 4);
+/** The stored arcade's separatrix top, R from the centre, at a storage height scale. */
+const storedFront = (base: number) => 1 + ERUPTION_SCALE_R * liftHeight(base * TOP_AT_REST);
+const STORED_FRONT = storedFront(ARCADE_BASE);
+/** The slow rise in radii per unit of the timeline, and the stretch it has to itself. */
+const SLOW_RISE = (SLOW_RISE_KM_S * 1e3 * ERUPTION_SECONDS) / RADIUS_M;
+const SLOW_SPAN = X_POINT_S - ERUPTION_STAGES.storage;
+function slowRiseAt(s: number) {
+  if (s >= X_POINT_S) return SLOW_RISE * (SLOW_SPAN / 2 + s - X_POINT_S);
+  const t = clamp01((s - ERUPTION_STAGES.storage) / SLOW_SPAN);
+  // The integral of smoothstep: the speed eases in from the storage's rest.
+  return SLOW_RISE * SLOW_SPAN * t * t * t * (1 - t / 2);
+}
+/** The speed and displacement a unit acceleration ∝ the reconnection rate drives, tabulated. */
+const DRIVEN_SAMPLES = 600;
+const DRIVEN_STEP = (1 - X_POINT_S) / DRIVEN_SAMPLES;
+const DRIVEN_SPEED = new Float64Array(DRIVEN_SAMPLES + 1);
+const DRIVEN_RISE = new Float64Array(DRIVEN_SAMPLES + 1);
+for (let i = 1; i <= DRIVEN_SAMPLES; i++) {
+  const before = reconnectionAt(X_POINT_S + (i - 1) * DRIVEN_STEP);
+  const after = reconnectionAt(X_POINT_S + i * DRIVEN_STEP);
+  DRIVEN_SPEED[i] = DRIVEN_SPEED[i - 1]! + ((before + after) / 2) * DRIVEN_STEP;
+  DRIVEN_RISE[i] =
+    DRIVEN_RISE[i - 1]! + ((DRIVEN_SPEED[i - 1]! + DRIVEN_SPEED[i]!) / 2) * DRIVEN_STEP;
+}
+/** Quadratic within a sample, so the speed stays continuous across it. */
+function drivenRiseAt(s: number) {
+  const u = clamp01((s - X_POINT_S) / (1 - X_POINT_S)) * DRIVEN_SAMPLES;
+  const i = Math.min(DRIVEN_SAMPLES - 1, Math.floor(u));
+  const tau = (u - i) * DRIVEN_STEP;
+  const speed = DRIVEN_SPEED[i]!;
+  const gain = DRIVEN_SPEED[i + 1]! - speed;
+  return DRIVEN_RISE[i]! + speed * tau + (gain * tau * tau) / (2 * DRIVEN_STEP);
+}
+const DRIVEN_SCALE =
+  (CME_FINAL_HEIGHT_R - STORED_FRONT - slowRiseAt(1)) / DRIVEN_RISE[DRIVEN_SAMPLES]!;
+
+/** The ejection's front, R from the centre, on the timeline. */
+export function frontAt(s: number) {
+  const t = clamp01(s);
+  if (t < ERUPTION_STAGES.storage) return storedFront(1 / (2 * storageLambdaAt(t)));
+  return STORED_FRONT + slowRiseAt(t) + DRIVEN_SCALE * drivenRiseAt(t);
+}
 /* A delayed emission proxy driven by the SAME flux-transfer rate; not an energy solution. */
 const SAMPLES = 400;
 const LIGHT = new Float64Array(SAMPLES + 1);

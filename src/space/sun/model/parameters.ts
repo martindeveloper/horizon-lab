@@ -246,9 +246,10 @@ export const ERUPTION_STAGES = { storage: 0.3, rise: 0.5, breakaway: 0.7 } as co
 export const X_POINT_S = 0.4;
 /** Source half-separation λ/λ₀ as shearing starts and at the critical point. */
 export const STORAGE_LAMBDA = [2, 1] as const;
-/** The rope's height at breakaway (λ₀) and the ejection's front at the sequence's end (R from the centre). */
-export const ROPE_HEIGHT_AT_BREAKAWAY = 3;
+/** The ejection's front at the sequence's end, R from the centre. */
 export const CME_FINAL_HEIGHT_R = 5;
+/** The front's slow rise before the flare, km/s: under the ~80 km/s of the initiation phase (Zhang et al. 2001). */
+export const SLOW_RISE_KM_S = 40;
 /** The flare's light decays over this share of the timeline after each release of energy. */
 export const FLARE_LIGHT_DECAY_S01 = 0.12;
 /** An ejection's angular half-width, radians (CME widths ~ 60°, Yashiro et al. 2004). */
