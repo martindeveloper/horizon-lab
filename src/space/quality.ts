@@ -80,6 +80,16 @@ const SKY: ByTier<SkyCounts> = {
   max: { milkyWay: 45_000, fieldStars: 2_400 },
 };
 
+/** Close-ups: the lighter near map tier and painted detail, their filtering, and the atmosphere shell's samples. */
+export type CloseUpQuality = { light: boolean; anisotropy: number; airSteps: number };
+
+/** The atmosphere shell marches 6, 12 or 20 samples along each view ray; it draws at every level. */
+const CLOSE_UP: ByTier<CloseUpQuality> = {
+  light: { light: true, anisotropy: 4, airSteps: 6 },
+  full: { light: false, anisotropy: 4, airSteps: 12 },
+  max: { light: false, anisotropy: 16, airSteps: 20 },
+};
+
 /** What every space scene draws at a quality. */
 export type SpaceQuality = {
   tier: SceneTier;
@@ -88,6 +98,7 @@ export type SpaceQuality = {
   sky: SkyCounts;
   bloom: BloomChain;
   lens: LensChain;
+  closeUp: CloseUpQuality;
 };
 
 export function spaceQuality(quality: RenderQuality, tight: boolean): SpaceQuality {
@@ -99,5 +110,6 @@ export function spaceQuality(quality: RenderQuality, tight: boolean): SpaceQuali
     sky: SKY[tier],
     bloom: BLOOM[tier],
     lens: LENS[tier],
+    closeUp: CLOSE_UP[tier],
   };
 }

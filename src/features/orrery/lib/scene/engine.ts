@@ -8,7 +8,7 @@
  * to the store, the camera, input and the level of detail (lod.ts): one world in au, the
  * solar map, then a close-up body, then Earth's observatories at their true size.
  */
-import { Scene, type Object3D, type Vector3 } from "three";
+import { Scene, type Object3D } from "three";
 
 import {
   bridgeHandoff,
@@ -22,8 +22,8 @@ import {
 import { TAP_STYLE } from "@/space/close-up-flight";
 import { isPresentEra, momentAt, sunExists } from "@/space/solar-system/model/moment";
 import { observatoryPosition } from "@/space/solar-system/model/observatories";
-import { positionOf } from "@/space/solar-system/model/position";
 import { solarViewById, solarViewPose } from "@/space/solar-system/model/views";
+import { createCloseUp, solarCloseUpTargets } from "@/space/solar-system/scene/close-up";
 import { createSolarKit, type SolarFrame } from "@/space/solar-system/scene/kit";
 import { createObservatoriesLayer } from "@/space/solar-system/scene/observatories-layer";
 import {
@@ -56,7 +56,6 @@ import { driftYearsPerSecond } from "../model/views";
 import { orreryQuality } from "../quality";
 import { useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
-import { createCloseUpController, type BodySelection } from "./close-up-controller";
 import { createDriftDirector } from "./drift-director";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
@@ -131,7 +130,7 @@ export function createOrreryEngine({
       closeId: () => closeUp.current?.globe ?? null,
       swarms: quality.swarms,
     });
-    const { planets, moons } = solar;
+    const { moons } = solar;
     /* Earth's observatories, with the solar system: in its depth passes about Earth, and at
        their true size after them. */
     const observatories = createObservatoriesLayer(kit, solar.root, {
@@ -168,55 +167,48 @@ export function createOrreryEngine({
     const veil = createLineVeil();
     const hud = createHud(store, camera, viewport);
 
-    /** Where the body is now: today's clock plus the Motion offset, as the scene draws it. */
-    const located: Vec3 = [0, 0, 0];
-    const locate = (sel: BodySelection, out: Vector3) => {
-      const moment = momentAt(store.getState().yearsAgo, driftYears);
-      /* An observatory beyond the Earth the scene draws, as the observatories layer places it;
-         a moon where its system draws it (magnified about its planet until the camera is near). */
-      const at =
-        sel.kind === "observatory"
-          ? observatoryPosition(sel.id, moment, now, located)
-          : ((sel.kind === "moon" ? moons.drawnAt(sel.id) : null) ??
-            positionOf(sel, moment, now, located) ??
-            located);
-      return out.set(at[0], at[1], at[2]);
-    };
+    /* The bodies as the shared scene draws them, on today's clock plus the Motion offset. */
+    const targets = solarCloseUpTargets(
+      solar,
+      () => momentAt(store.getState().yearsAgo, driftYears),
+      () => now,
+    );
+    /** Where an observatory is this frame, reused: the close-up asks every step. */
+    const craftAt: Vec3 = [0, 0, 0];
     /** Earth's observatories join Earth wherever it has a depth pass of its own. */
     const withEarth = (id: BodyId, objects: Object3D[]) =>
       id === EARTH.id ? [...objects, ...observatories.objects] : objects;
-    const bodyObjects = (sel: Exclude<BodySelection, { kind: "observatory" }>): Object3D[] => {
-      switch (sel.kind) {
-        case "sun":
-          return [solar.sun];
-        case "planet":
-          return [planets.planets.find((p) => p.id === sel.id)!.body];
-        case "named":
-          return [planets.named.find((n) => n.body.id === sel.id)!.mesh];
-        case "moon":
-          return [moons.meshOf(sel.id)];
-      }
-    };
-    const closeUp = createCloseUpController(kit, {
+    const closeUp = createCloseUp(kit, {
       rig,
       reduceMotion,
       invalidate: () => engine.invalidate(),
-      locate,
+      /* An observatory beyond the Earth the scene draws, as the observatories layer places it. */
+      locate: (sel, out) =>
+        sel.kind === "observatory"
+          ? out.fromArray(
+              observatoryPosition(
+                sel.id,
+                momentAt(store.getState().yearsAgo, driftYears),
+                now,
+                craftAt,
+              ),
+            )
+          : targets.locate(sel, out),
       /* A craft is drawn by the observatories' own pass; Earth below it is its host. */
-      objectsOf: (sel) => {
-        if (sel.kind === "observatory") return [];
-        const id = sel.kind === "sun" ? "sun" : sel.id;
-        return withEarth(id, [...bodyObjects(sel), ...moons.objectsOf(id)]);
-      },
+      objectsOf: (sel) =>
+        sel.kind === "observatory"
+          ? []
+          : withEarth(sel.kind === "sun" ? "sun" : sel.id, targets.objectsOf(sel)),
       hostOf: (sel) => {
         const host = upFrom(sel);
-        return host ? withEarth(host.id, bodyObjects(host)) : [];
+        return host ? withEarth(host.id, targets.bodyObjects(host)) : [];
       },
       hostReach: (sel) => (upFrom(sel)?.id === EARTH.id ? observatories.reach : 0),
-      reachOf: (id) => Math.max(moons.reachOf(id), id === EARTH.id ? observatories.reach : 0),
+      reachOf: (id) => Math.max(targets.reachOf(id), id === EARTH.id ? observatories.reach : 0),
       onTakeCamera: () => {
         guide.cancelFlight();
         controls.cancel();
+        rig.edgePush = 0;
       },
       onRelease: () => controls.cancel(),
       upload: (texture) => renderer.initTexture(texture),

@@ -2,8 +2,8 @@ import { shortest, type Vec } from "@/space/close-up-flight";
 import type { BodyId } from "@horizon/toolkit/bodies";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 /**
- * The Orrery's own close-up framing: a body with its moon, and the detailed map a close-up
- * paints. The flight itself is shared (`@/space/close-up-flight`).
+ * The solar close-up's framing: a body with its moon, and the detailed map a close-up paints.
+ * The flight itself is every close-up's (`@/space/close-up-flight`).
  */
 import { clamp, dot3, smootherstep } from "@horizon/toolkit/math";
 

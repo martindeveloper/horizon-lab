@@ -81,11 +81,9 @@ src/
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
                                toolkit's scene host, orbit rig and controls, moves it along
                                the timeline and adds what is the Orrery's own: the sky,
-                               close-ups (close-up-controller.ts, close-up-flight.ts with the
-                               moon framing; the flight itself is src/space/close-up-flight.ts; the
-                               atmosphere shell over a body with air, from
-                               src/space/solar-system/graphics/air.ts; an observatory at its
-                               true size, Earth below it in a depth pass of its own),
+                               close-ups of Earth's observatories at their true size (the
+                               shared solar close-up, src/space/solar-system/scene/close-up.ts,
+                               draws Earth below one in a depth pass of its own),
                                streamed measured maps (measured-maps.ts: each body waits in
                                its map's mean colour, then fades it in), the guide, solar
                                activity, picking and the HUD
@@ -353,7 +351,11 @@ src/
                                with its own level of detail (lod.ts); reach-layer.ts draws the
                                reach on a host's kit; observatories-layer.ts draws Earth's
                                observatories (markers, orbits, models) where Earth's system
-                               is at its true scale
+                               is at its true scale; close-up.ts flies to a body (or an
+                               observatory) at its true size for any host, with its detailed
+                               map, atmosphere shell and depth pass (close-up-framing.ts: the
+                               moon framing; model/close-up.ts: what can be flown to, Back's
+                               level, the rig's bounds)
       format.ts                Names and orbit rows both simulations print
       cards.ts                 The figures the population cards quote (`POPULATION_FIGURES`)
     galaxy/                    The Galaxy and the nearest stars, today, for any host engine:
@@ -691,8 +693,9 @@ features and above the toolkit: it may use app code (`@/lib/facts`, the sources)
 a feature. It holds the bright-star sky (`brightStarGeometry`) and the solar system as
 one unit: `createSolarKit(basics)` and
 `createSolarSystem(kit, parent, { place, hideAll, setBodies, rulers })`, drawn each frame at
-a `SolarMoment`. The Orrery moves that moment along its timeline and adds close-ups, its sky
-and the guide; Deep Field holds it at `TODAY`, adds its reach (`solar-system/scene/reach-layer.ts`:
+a `SolarMoment`, with one close-up of a body at its true size (`solar-system/scene/close-up.ts`)
+that every host offers alike. The Orrery moves that moment along its timeline and adds Earth's
+observatories, its sky and the guide; Deep Field holds it at `TODAY`, adds its reach (`solar-system/scene/reach-layer.ts`:
 the probes, the heliopause, light-time rings) and carries on past it into the worlds beyond:
 `galaxy/` (the nearest stars and the Galaxy map, with the frames, blends and level of detail
 that place every scale in one world in au) and `cosmos/` (the cosmic map out to the microwave

@@ -19,6 +19,10 @@
       "title": "Objekty",
       "body": "Najděte cokoli a přeleťte na jeho měřítko."
     },
+    "closeUp": {
+      "title": "Zblízka",
+      "body": "Přeletí k tělesu nebo sondě v jejich skutečné velikosti."
+    },
     "settings": {
       "title": "Nastavení",
       "body": "Vrstvy, ovládání kamery a kvalita vykreslení."
@@ -74,7 +78,11 @@
     "lightLeftAgo": "Světlo vyšlo {ago}",
     "outToValue": "až do {distance}",
     "leaveCloseUp": "Zpět na mapu",
-    "closeUpNote": "Skutečná velikost, anténa míří k Zemi.",
+    "backTo": "Zpět: {name}",
+    "details": "Podrobnosti",
+    "hideDetails": "Skrýt podrobnosti",
+    "closeUpNote": "Skutečná velikost a aktuální orientace tělesa.",
+    "craftNote": "Skutečná velikost, anténa míří k Zemi.",
     "modelRedshiftValue": "modelové z = {value}"
   },
   "time": {

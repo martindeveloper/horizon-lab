@@ -4,7 +4,8 @@ import { CREDIT_URLS, MAP_SOURCE_URLS } from "../urls";
  * data and under which licence. The app owns where the WebP tiers are served
  * from and passes that base in. Bodies without an entry keep their painted map
  * (`@horizon/toolkit/bodies/surfaces`): Venus (featureless cloud
- * tops), Titan (haze), Sedna and Halley.
+ * tops), Titan (haze), and the small worlds never resolved: Haumea, Makemake, Eris,
+ * Sedna and Halley.
  *
  * All maps are equirectangular in the scene's convention: east longitude 0°
  * at the left edge, north at the top, and parametric latitude on the oblate
@@ -255,6 +256,16 @@ export const MAPS: Partial<Record<BodyId, MeasuredMap>> = {
     credit: OPAL_CREDIT,
     licence: "CC BY 4.0",
     url: OPAL_URL,
+  },
+  ceres: {
+    version: 1,
+    widths: { far: 1024, near: 4096, nearLight: 2048 },
+    mean: "#5e5953",
+    source:
+      "Dawn Framing Camera global mosaic (DLR, survey orbit, October 2015, 400 m), brightness only; the unlit south pole painted",
+    credit: "NASA/JPL-Caltech/UCLA/MPS/DLR/IDA; USGS Astrogeology",
+    licence: "Public domain",
+    url: MAP_SOURCE_URLS.ceres,
   },
   pluto: {
     version: 1,

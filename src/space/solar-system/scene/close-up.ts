@@ -10,6 +10,15 @@ import {
   type WebGLRenderer,
 } from "three";
 
+/**
+ * The solar close-up, shared by every lab that draws the solar system: a flight to a body at
+ * true size, its detailed map (measured or painted a few rows per frame), the atmosphere shell
+ * over a body with air (its own, its moons' and a moon's planet's, drawn in place of the
+ * surface shader's haze rim) and a depth pass of its own; or a flight to one of Earth's
+ * observatories at its true size, which its own pass draws, Earth below it keeping its detailed
+ * map and its air in a depth pass of its own. The host owns the store that asks for it, the
+ * rig it steers (`CloseUpRig`, whose limits follow `current`) and what it draws besides.
+ */
 import {
   STILL,
   TAP_STYLE,
@@ -22,21 +31,32 @@ import {
   type FlightMotion,
   type Vec,
 } from "@/space/close-up-flight";
+import type { CloseUpQuality } from "@/space/quality";
 import { AIR, AIR_BODIES } from "@/space/solar-system/graphics/air";
 import { MAP_BASE } from "@/space/solar-system/graphics/maps";
 import { moonOffset } from "@/space/solar-system/graphics/moons";
+import {
+  EARTH,
+  canFlyTo,
+  upFrom,
+  type CloseUpSelection,
+} from "@/space/solar-system/model/close-up";
 import { FRAME_RADII } from "@/space/solar-system/model/framing";
-/**
- * The close-up: a flight to a body at true size, its detailed map (measured or
- * painted a few rows per frame), the atmosphere shell over a body with air (its own, its moons'
- * and a moon's planet's, drawn in place of the surface shader's haze rim) and a depth pass of
- * its own; or a flight to one of Earth's observatories at its true size, which its own pass
- * draws, Earth below it keeping its detailed map and its air in a depth pass of its own.
- */
+import type { SolarMoment } from "@/space/solar-system/model/moment";
 import { observatoryById, type ObservatoryId } from "@/space/solar-system/model/observatories";
+import { positionOf } from "@/space/solar-system/model/position";
+import type { SurfaceSelection } from "@/space/solar-system/model/selection";
 import { SUN_R, type SolarKit } from "@/space/solar-system/scene/kit";
 import { spacecraftFrame } from "@/space/spacecraft/models";
-import { FIGURES, MAPS, MOONS, tierFile, type BodyId, type MoonId } from "@horizon/toolkit/bodies";
+import {
+  FIGURES,
+  MAPS,
+  MOONS,
+  tierFile,
+  type BodyId,
+  type MoonId,
+  type Vec3,
+} from "@horizon/toolkit/bodies";
 import { surfaceJob, type SurfaceJob } from "@horizon/toolkit/bodies/surfaces";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { WIDE_QUERY } from "@horizon/toolkit/environment";
@@ -44,10 +64,8 @@ import { lerp, logFraction } from "@horizon/toolkit/math";
 import { decodeMap, fetchMap, rising } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
 
-import { EARTH, canFlyTo, type CloseUpSelection, type OrrerySelection } from "../model/selection";
-import type { CloseUpQuality } from "../quality";
-import type { CameraRig } from "./camera-rig";
-import { closeUpMapWidth, moonFraming } from "./close-up-flight";
+import { closeUpMapWidth, moonFraming } from "./close-up-framing";
+import type { createSolarSystem } from "./solar-system";
 
 /** The layer of a moon's planet in a moon's close-up: its own depth pass, behind the moon's. */
 const HOST_LAYER = 2;
@@ -66,10 +84,64 @@ const LARGEST_MOON = new Map<BodyId, MoonId>();
 for (const moon of [...MOONS].sort((a, b) => a.radiusKm - b.radiusKm))
   LARGEST_MOON.set(moon.host, moon.id);
 
-export type BodySelection = CloseUpSelection;
+/** What the host's rig steers by: the orbit camera's pose and aim, and its glide to cancel. */
+export type CloseUpRig = { pose: OrbitPose; aim: Vector3; cancel: () => void };
+
+/**
+ * Where the bodies are and what draws them, for a close-up on the shared solar system
+ * (`createSolarSystem`): the host passes these on, adding what it draws about a body itself.
+ */
+export function solarCloseUpTargets(
+  solar: Pick<ReturnType<typeof createSolarSystem>, "sun" | "planets" | "moons">,
+  moment: () => SolarMoment,
+  now: () => Date,
+) {
+  const { sun, planets, moons } = solar;
+  const located: Vec3 = [0, 0, 0];
+  /** The body's own meshes: its globe, or its planet's with its rings. */
+  const bodyObjects = (sel: SurfaceSelection): Object3D[] => {
+    switch (sel.kind) {
+      case "sun":
+        return [sun];
+      case "planet":
+        return [planets.planets.find((p) => p.id === sel.id)!.body];
+      case "named":
+        return [planets.named.find((n) => n.body.id === sel.id)!.mesh];
+      case "moon":
+        return [moons.meshOf(sel.id)];
+    }
+  };
+  /* A host without an observatories layer frames the Earth below one; a host with it adds the craft. */
+  const globeOf = (sel: CloseUpSelection): SurfaceSelection =>
+    sel.kind === "observatory" ? EARTH : sel;
+  return {
+    bodyObjects,
+    /** Where the body is now, as the scene draws it: a moon where its system draws it. */
+    locate(sel: CloseUpSelection, out: Vector3) {
+      const globe = globeOf(sel);
+      const at =
+        (globe.kind === "moon" ? moons.drawnAt(globe.id) : null) ??
+        positionOf(globe, moment(), now(), located) ??
+        located;
+      return out.set(at[0], at[1], at[2]);
+    },
+    /** The body's own meshes and its moons'; a craft has none here. */
+    objectsOf(sel: CloseUpSelection) {
+      if (sel.kind === "observatory") return [];
+      return [...bodyObjects(sel), ...moons.objectsOf(sel.kind === "sun" ? "sun" : sel.id)];
+    },
+    /** For a moon, its planet's globe (rings included); for a craft, Earth's; none for the rest. */
+    hostOf(sel: CloseUpSelection) {
+      const host = upFrom(sel);
+      return host ? bodyObjects(host) : [];
+    },
+    /** How far the body's drawn moons reach. */
+    reachOf: (id: BodyId) => moons.reachOf(id),
+  };
+}
 
 type CloseUp = {
-  sel: BodySelection;
+  sel: CloseUpSelection;
   /** What the close-up frames: a body, or an observatory. */
   id: BodyId | ObservatoryId;
   /** The globe whose detailed map it holds: the body, or Earth below an observatory. */
@@ -143,14 +215,14 @@ type Shell = {
   sun: Vector3;
 };
 
-const subjectOf = (sel: BodySelection) => (sel.kind === "sun" ? "sun" : sel.id);
+const subjectOf = (sel: CloseUpSelection) => (sel.kind === "sun" ? "sun" : sel.id);
 /** The globe a close-up holds the detailed map of: its body's, or Earth's below an observatory. */
-const globeOf = (sel: BodySelection): BodyId =>
+const globeOf = (sel: CloseUpSelection): BodyId =>
   sel.kind === "observatory" ? EARTH.id : sel.kind === "sun" ? "sun" : sel.id;
 const M_PER_AU = AU_KM * 1e3;
 
 /** The true radius and the radius to frame, scene units: a globe's (rings included), or a craft's. */
-function sizeOf(sel: BodySelection) {
+function sizeOf(sel: CloseUpSelection) {
   if (sel.kind === "observatory") {
     const frame = spacecraftFrame(observatoryById(sel.id).model) / M_PER_AU;
     return { radius: frame, frame };
@@ -164,20 +236,20 @@ const setLayer = (objects: Object3D[], layer: number) => {
   for (const object of objects) object.traverse((child) => child.layers.set(layer));
 };
 
-export function createCloseUpController(
+export function createCloseUp(
   { scope, looks, camera, viewport, tight }: SolarKit,
   deps: {
-    rig: CameraRig;
+    rig: CloseUpRig;
     reduceMotion: MediaQueryList;
     invalidate: () => void;
     /** Where the body is now, as the scene draws it. */
-    locate: (sel: BodySelection, out: Vector3) => Vector3;
+    locate: (sel: CloseUpSelection, out: Vector3) => Vector3;
     /** The body's own meshes and its moons'. */
-    objectsOf: (sel: BodySelection) => Object3D[];
+    objectsOf: (sel: CloseUpSelection) => Object3D[];
     /** For a moon, its planet's globe (rings included); for an observatory, Earth's; none for the rest. */
-    hostOf: (sel: BodySelection) => Object3D[];
+    hostOf: (sel: CloseUpSelection) => Object3D[];
     /** How far past its globe the host's pass reaches (Earth's observatories), scene units. */
-    hostReach?: (sel: BodySelection) => number;
+    hostReach?: (sel: CloseUpSelection) => number;
     /** How far the body's drawn moons reach. */
     reachOf: (id: BodyId) => number;
     /** The close-up takes the camera from flights, the guide and input. */
@@ -343,7 +415,7 @@ export function createCloseUpController(
     return w > looks.mapWidth(id) ? surfaceJob(id, w, w / 2) : null;
   };
 
-  const start = (sel: BodySelection) => {
+  const start = (sel: CloseUpSelection) => {
     /* Moving on from another close-up (its planet to a moon) still leaves for the map it came from. */
     const home = close
       ? { pose: close.home, aim: close.homeAim }
@@ -436,7 +508,6 @@ export function createCloseUpController(
         );
     }
     rig.cancel();
-    rig.edgePush = 0;
     deps.onTakeCamera();
     if (reduceMotion.matches) {
       close.phase = "on";
@@ -558,7 +629,7 @@ export function createCloseUpController(
         : 1;
     },
     /** A body was selected: fetch its close-up map's bytes while the card is read. */
-    prefetch(sel: OrrerySelection | null) {
+    prefetch(sel: { kind: string } | null) {
       if (!canFlyTo(sel)) return;
       const near = nearFile(globeOf(sel));
       if (near) void bytesOf(near).catch(() => undefined);

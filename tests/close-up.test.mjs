@@ -2,12 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { orreryQuality } from "../src/features/orrery/lib/quality.ts";
-import {
-  closeUpMapWidth,
-  MOON_FILL,
-  moonFraming,
-  moonSwing,
-} from "../src/features/orrery/lib/scene/close-up-flight.ts";
 import { canCloseUp, useOrrery } from "../src/features/orrery/lib/store.ts";
 import {
   CLOSE_UP_FILL,
@@ -19,6 +13,12 @@ import {
   sunwardCloseUpPose,
 } from "../src/space/close-up-flight.ts";
 import { AIR, AIR_BODIES, airUniforms } from "../src/space/solar-system/graphics/air.ts";
+import {
+  closeUpMapWidth,
+  MOON_FILL,
+  moonFraming,
+  moonSwing,
+} from "../src/space/solar-system/scene/close-up-framing.ts";
 
 const near = (actual, expected, tolerance, label = "") =>
   assert.ok(

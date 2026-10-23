@@ -4,7 +4,7 @@
  */
 import type { PerspectiveCamera } from "three";
 
-import { closeUpLimits } from "@/space/close-up-flight";
+import { closeUpFar, closeUpZoom, type CloseUpFrame } from "@/space/solar-system/model/close-up";
 import {
   SOLAR_FRAMING,
   solarViewById,
@@ -14,9 +14,6 @@ import {
 import { createOrbitRig, createViewMoves } from "@horizon/toolkit/scene";
 
 import { ORRERY_EDGE, SOLAR_EDGE } from "./kit";
-
-/** What the rig needs to know about a close-up in progress. */
-type CloseUpFrame = { phase: "in" | "on" | "out"; radius: number; frame: number };
 
 export type CameraRig = ReturnType<typeof createCameraRig>;
 
@@ -28,15 +25,11 @@ export function createCameraRig(
   const rig = createOrbitRig(camera, {
     pose: { ...SOLAR_FRAMING, distance: 72 },
     reduceMotion,
-    /* From a true-size close-up to just past the Oort cloud. */
-    limits: () => {
-      const close = closeUp();
-      if (!close) return { min: 0.35, max: ORRERY_EDGE };
-      /* Around the body once arrived; open while a flight carries the camera. */
-      return close.phase === "on"
-        ? closeUpLimits(close.radius, close.frame)
-        : { min: 1e-12, max: SOLAR_EDGE };
-    },
+    /* From a true-size close-up to just past the Oort cloud; a close-up's own bounds in one. */
+    limits: () =>
+      closeUp()
+        ? closeUpZoom(closeUp(), { min: 1e-12, max: SOLAR_EDGE })
+        : { min: 0.35, max: ORRERY_EDGE },
     /* While a close-up flight owns the distance the zoom only follows; in a close-up, limits
        that moved never pull it back. */
     follow: () => {
@@ -45,8 +38,7 @@ export function createCameraRig(
     },
     nearFloor: SOLAR_FRAMING.nearFloor,
     /* In a close-up this frustum draws the rest of the system; the body gets its own pass. */
-    far: (distance, aim) =>
-      closeUp() ? Math.max(distance * 40, aim.length() * 2 + 60) : distance * 40,
+    far: (distance, aim) => (closeUp() ? closeUpFar(distance, aim) : distance * 40),
   });
 
   /* Flights between views keep the angles; reduced motion lands framed as the view is. */

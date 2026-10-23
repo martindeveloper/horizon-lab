@@ -29,9 +29,8 @@ import {
 import type { ObservatorySelection } from "@/space/solar-system/model/observatories";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
+import type { MoonSwing } from "@/space/solar-system/scene/close-up-framing";
 import type { DriftPoseShot, OrbitPose } from "@horizon/toolkit/camera";
-
-import type { MoonSwing } from "./scene/close-up-flight";
 
 /** What the close-up can frame on a visit: the Sun, a planet, a named body or an observatory. */
 export type CloseUpBody =

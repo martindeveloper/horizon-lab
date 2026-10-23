@@ -1,11 +1,14 @@
-import { ArrowLeft, ZoomIn } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
+import { CloseUpFooter } from "@/components/simulations/close-up-footer";
 import { HandoffRow } from "@/components/simulations/handoff-link";
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
 import { ATLAS_CARD_SOURCES, ATLAS_SOURCES, isAtlasId } from "@/space/cosmos/model/atlas";
+import { solarNameKey } from "@/space/solar-system/format";
+import { closeUpKey, upFrom } from "@/space/solar-system/model/close-up";
 import { viewOf } from "@/space/solar-system/model/framing";
+import { isReachSelection } from "@/space/solar-system/model/probes";
 import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { Action } from "@horizon/toolkit/ui";
 
@@ -17,9 +20,10 @@ import { CmbEvidence } from "./cmb";
 import { HaloEvidence } from "./dark-universe";
 
 /**
- * Facts and notes for the selected object. A solar system body leads back in time, to the
- * Orrery; the Sun on the Galaxy map flies back down to the planets; a probe offers its
- * close-up, at its true size.
+ * Facts and notes for the selected object, with the close-up entry: a body or a probe flies in
+ * at its true size, as in the Orrery; Back goes up a level, from a moon to its planet and from
+ * a planet to the map. A solar system body also leads back in time, to the Orrery; the Sun on
+ * the Galaxy map flies back down to the planets.
  */
 export function SelectionCard() {
   const t = useTranslations("deepField");
@@ -30,8 +34,17 @@ export function SelectionCard() {
   const select = useDeepField((s) => s.select);
   const closeUp = useDeepField((s) => s.closeUp);
   const offerCloseUp = useDeepField(canCloseUp);
+  /* On phones a close-up folds the card to a bar so the globe has the screen. */
+  const [expanded, setExpanded] = useState(false);
   const now = useNow({ updateInterval: 60_000 });
   if (!selection) return null;
+  /** The close-up open is the selection's own. */
+  const here =
+    closeUp !== null &&
+    (closeUp.kind === "reach"
+      ? isReachSelection(selection) && selection.id === closeUp.id
+      : isSolarSelection(selection) && closeUpKey(closeUp) === closeUpKey(selection));
+  const up = closeUp && closeUp.kind !== "reach" ? upFrom(closeUp) : null;
   // Keep the warning tied to the source manifest, including mixed-source cards.
   // When a preprint is published, update that manifest and review the caveat prose.
   const preprint =
@@ -63,36 +76,31 @@ export function SelectionCard() {
   }
 
   let footer: ReactNode = null;
-  if (closeUp) {
+  if (closeUp || offerCloseUp || isSolarSelection(selection)) {
     footer = (
       <>
-        <Action
-          variant="glass"
-          className="flex-1"
-          onClick={() => useDeepField.getState().leaveCloseUp()}
-        >
-          <ArrowLeft className="icon" aria-hidden />
-          {t("hud.leaveCloseUp")}
-        </Action>
-        <p className="w-full text-ui text-fg-secondary">{t("hud.closeUpNote")}</p>
+        <CloseUpFooter
+          namespace="deepField"
+          offer={offerCloseUp && !here}
+          open={closeUp !== null}
+          here={here}
+          note={isReachSelection(selection) ? "craft" : "body"}
+          backLabel={up ? t("hud.backTo", { name: t(solarNameKey(up)) }) : t("hud.leaveCloseUp")}
+          expanded={expanded}
+          onExpand={setExpanded}
+          onEnter={() => useDeepField.getState().enterCloseUp()}
+          onLeave={() => useDeepField.getState().leaveCloseUp()}
+        />
+        {isSolarSelection(selection) ? (
+          <HandoffRow
+            to="orrery"
+            view={viewOf(selection)}
+            title={t("hud.backInTime")}
+            hint={t("hud.backInTimeHint")}
+            className="-mx-2 w-full px-2"
+          />
+        ) : null}
       </>
-    );
-  } else if (offerCloseUp) {
-    footer = (
-      <Action className="flex-1" onClick={() => useDeepField.getState().enterCloseUp()}>
-        <ZoomIn className="icon" aria-hidden />
-        {t("hud.closeUp")}
-      </Action>
-    );
-  } else if (isSolarSelection(selection)) {
-    footer = (
-      <HandoffRow
-        to="orrery"
-        view={viewOf(selection)}
-        title={t("hud.backInTime")}
-        hint={t("hud.backInTimeHint")}
-        className="-mx-2 flex-1 px-2"
-      />
     );
   } else if (selection.kind === "galaxy" && selection.id === "sun") {
     footer = (
@@ -116,6 +124,7 @@ export function SelectionCard() {
       card={cardFor(t, f, selection, { unit, locale }, now)}
       closeLabel={t("hud.close")}
       onClose={() => select(null)}
+      folded={closeUp !== null && !expanded}
       cautionCallout={{ title: t(noteKey), tone: preprint ? "warning" : "info" }}
       details={details}
       footer={footer}

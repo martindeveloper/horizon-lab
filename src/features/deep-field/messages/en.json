@@ -19,6 +19,7 @@
       "title": "Objects",
       "body": "Find anything and fly to its scale."
     },
+    "closeUp": { "title": "Close-up", "body": "Fly in to a body or a probe at its true size." },
     "settings": {
       "title": "Settings",
       "body": "Layers, the camera pad and render quality."
@@ -74,7 +75,11 @@
     "lightLeftAgo": "Light left {ago}",
     "outToValue": "out to {distance}",
     "leaveCloseUp": "Back to the map",
-    "closeUpNote": "True size, dish turned to Earth.",
+    "backTo": "Back to {name}",
+    "details": "Details",
+    "hideDetails": "Hide details",
+    "closeUpNote": "True size, turned as it is now.",
+    "craftNote": "True size, dish turned to Earth.",
     "modelRedshiftValue": "model z = {value}"
   },
   "time": {

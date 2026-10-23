@@ -12,6 +12,7 @@ import {
   realmOf,
   cosmicToWorld,
 } from "@/space/galaxy/scene/frames";
+import { closeUpFar, closeUpZoom, type CloseUpFrame } from "@/space/solar-system/model/close-up";
 import { SOLAR_FRAMING } from "@/space/solar-system/model/views";
 /**
  * Deep Field's orbit camera (the toolkit's orbit rig): one zoom from the Sun's neighbourhood to
@@ -50,9 +51,11 @@ export function createCameraRig(
   options: {
     state: () => { selection: Selection | null };
     reduceMotion: { matches: boolean };
+    /** A body's close-up in progress (`@/space/solar-system/scene/close-up`), or null. */
+    closeUp?: () => CloseUpFrame | null;
   },
 ) {
-  const { state, reduceMotion } = options;
+  const { state, reduceMotion, closeUp = () => null } = options;
   const baseFov = camera.fov;
   /** A close-up holding the camera (`holdFocus`), or null. */
   let focus: CameraFocus | null = null;
@@ -87,13 +90,22 @@ export function createCameraRig(
     /* The ladder's ends; while the bulge card holds the aim on the centre, the Galaxy map's
        floor; in a close-up, its own. */
     limits: () =>
-      focus?.limits ?? {
+      focus?.limits ??
+      closeUpZoom(closeUp(), {
         min: (bulgeHeld() ? GALAXY_NEAR : LADDER_LY.near) * LY,
         max: LADDER_LY.far * LY,
-      },
-    /* A close-up's flight sets the distance itself. */
-    follow: () => ({ held: focus?.flying ?? false, clamp: true }),
+      }),
+    /* A close-up's flight sets the distance itself; in a body's, limits that moved never pull it back. */
+    follow: () => {
+      const close = closeUp();
+      return {
+        held: (focus?.flying ?? false) || (close !== null && close.phase !== "on"),
+        clamp: !close,
+      };
+    },
     nearFloor: SOLAR_FRAMING.nearFloor,
+    /* In a body's close-up this frustum draws the rest of the system; the body gets its own pass. */
+    far: (distance, aim) => (closeUp() ? closeUpFar(distance, aim) : distance * 40),
     onStep: (dt) => {
       hold =
         bulgeHeld() || haloHeld()
@@ -151,17 +163,19 @@ export function createCameraRig(
     },
   });
 
+  /** The pose a view is framed at. */
+  const viewPose = (id: ViewId) => {
+    const view = viewById(id);
+    return {
+      azimuth: view.azimuth ?? AZIMUTH,
+      inclination: view.inclination ?? inclinationOf(view.realm),
+      distance: worldDistance(view.ly),
+    };
+  };
   /* Across scales a flight turns to the view's framing; within one it keeps the angles. */
   const moves = createViewMoves(
     rig,
-    (id: ViewId) => {
-      const view = viewById(id);
-      return {
-        azimuth: view.azimuth ?? AZIMUTH,
-        inclination: view.inclination ?? inclinationOf(view.realm),
-        distance: worldDistance(view.ly),
-      };
-    },
+    viewPose,
     (id) => viewById(id).realm !== realmOf(rig.pose.distance),
   );
 
@@ -185,5 +199,6 @@ export function createCameraRig(
     holdFocus(next: CameraFocus | null) {
       focus = next;
     },
+    viewPose,
   });
 }

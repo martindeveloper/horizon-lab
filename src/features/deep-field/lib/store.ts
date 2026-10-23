@@ -18,7 +18,15 @@ import {
 } from "@/space/cosmos/model/atlas";
 import { CMB_INITIAL_STATUS, type CmbStatus } from "@/space/cosmos/model/cmb";
 import type { GalaxyShow, Realm, WorldSelection } from "@/space/galaxy/show";
+import {
+  canFlyTo,
+  closeUpKey,
+  sameSystem,
+  upFrom,
+  type CloseUpSelection,
+} from "@/space/solar-system/model/close-up";
 import { isReachSelection, type ProbeId } from "@/space/solar-system/model/probes";
+import { isSolarSelection } from "@/space/solar-system/model/selection";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 
 import { viewFromPath } from "../routing";
@@ -62,16 +70,36 @@ export const dropsSelection = (
 
 type Panel = "none" | "objects" | "view" | "dark";
 
+/** A probe leaving the solar system, as a close-up flies to it. */
+export type ProbeSelection = { kind: "reach"; id: ProbeId };
+
+/** What a close-up flies to: a body with a globe at its true size, or a probe at its. */
+export type DeepFieldCloseUp = CloseUpSelection | ProbeSelection;
+
 /** The probe the selection names, if it is one. */
-const probeOf = (sel: Selection | null): ProbeId | null =>
-  sel && isReachSelection(sel) && sel.id !== "heliopause" ? sel.id : null;
+const probeOf = (sel: Selection | null): ProbeSelection | null =>
+  sel && isReachSelection(sel) && sel.id !== "heliopause" ? { kind: "reach", id: sel.id } : null;
+
+/** The close-up a selection offers: a body's, a probe's, or none. */
+const closeUpOf = (sel: Selection | null): DeepFieldCloseUp | null =>
+  canFlyTo(sel) ? sel : probeOf(sel);
+
+/** A close-up as one string: equal for the same object. */
+const closeUpId = (sel: DeepFieldCloseUp) =>
+  sel.kind === "reach" ? `reach:${sel.id}` : closeUpKey(sel);
+
+/** Whether a selection keeps a close-up open: the same object, or one of its planet's system. */
+const keepsCloseUp = (closeUp: DeepFieldCloseUp, selection: Selection) =>
+  closeUp.kind === "reach"
+    ? isReachSelection(selection) && selection.id === closeUp.id
+    : isSolarSelection(selection) && sameSystem(closeUp, selection);
 
 /**
- * A probe can be flown to at its true size while the journey does not hold the camera; the
- * drift visits one itself (its card hidden meanwhile).
+ * A body or a probe can be flown to at its true size while the journey does not hold the
+ * camera; the drift visits one itself (its card hidden meanwhile).
  */
 export const canCloseUp = (s: Pick<DeepFieldStore, "selection" | "guideOpen">) =>
-  probeOf(s.selection) !== null && !s.guideOpen;
+  closeUpOf(s.selection) !== null && !s.guideOpen;
 
 const DEFAULT_SHOW: Show = {
   halo: false,
@@ -95,8 +123,8 @@ export type DeepFieldStore = SceneSlice &
     /** A depth the visitor dragged the ladder to (camera distance, ly), or null. */
     seek: { ly: number } | null;
     selection: Selection | null;
-    /** The probe the camera has flown to at its true size, or null. */
-    closeUp: ProbeId | null;
+    /** The body or probe the camera has flown to at its true size, or null. */
+    closeUp: DeepFieldCloseUp | null;
     /** A probe's model the view would show is still on its way (written by the scene). */
     sharpening: boolean;
     cmbStatus: CmbStatus;
@@ -117,9 +145,10 @@ export type DeepFieldStore = SceneSlice &
     /** Glides the zoom to a camera distance (ly), as the ladder's thumb asks. */
     seekTo: (ly: number) => void;
     select: (selection: Selection | null) => void;
-    /** Flies to the selected probe at its true size. */
+    /** Flies to the selected body or probe at its true size. */
     enterCloseUp: () => void;
-    leaveCloseUp: () => void;
+    /** Back up a level: from a moon to its planet, else (or with `toMap`) to the map. */
+    leaveCloseUp: (toMap?: boolean) => void;
     patchShow: (patch: Partial<Show>) => void;
     /** The View panel's settings as a visit starts: switches, distance unit, render quality. */
     resetView: () => void;
@@ -162,11 +191,11 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
     }));
   },
   seekTo: (ly) => set({ seek: { ly }, closeUp: null }),
-  /* Another selection lets go of a close-up. */
+  /* Another selection lets go of a close-up, unless it is one of the same planet's system. */
   select: (selection) =>
     set((s) => ({
       selection,
-      closeUp: probeOf(selection) === s.closeUp ? s.closeUp : null,
+      closeUp: s.closeUp && selection && keepsCloseUp(s.closeUp, selection) ? s.closeUp : null,
       // Finding a catalogue object must reveal it even from Illustration mode.
       show:
         selection?.kind === "cosmos" &&
@@ -177,9 +206,15 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
     })),
   enterCloseUp: () => {
     const s = get();
-    if (canCloseUp(s)) set({ closeUp: probeOf(s.selection), panel: "none", seek: null });
+    const next = closeUpOf(s.selection);
+    if (!next || s.guideOpen || (s.closeUp && closeUpId(s.closeUp) === closeUpId(next))) return;
+    set({ closeUp: next, panel: "none", seek: null });
   },
-  leaveCloseUp: () => set({ closeUp: null }),
+  leaveCloseUp: (toMap = false) =>
+    set((s) => {
+      const up = !toMap && s.closeUp && s.closeUp.kind !== "reach" ? upFrom(s.closeUp) : null;
+      return up ? { selection: up, closeUp: up } : { closeUp: null };
+    }),
   patchShow: (patch) => set((s) => ({ show: { ...s.show, ...patch } })),
   resetView: () => set({ show: DEFAULT_SHOW, ...RESET_SCENE_SETTINGS }),
   setPanel: (panel) => set({ panel }),
@@ -214,7 +249,8 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   ...helpSlice(set, get, {
     steps: HELP,
     save: (s) => ({ view: s.view, viewLy: s.viewLy, seek: s.seek, show: s.show }),
-    restore: (saved) => saved,
+    /* The tour's close-up and selection go with it. */
+    restore: (saved) => ({ ...saved, closeUp: null, selection: null }),
   }),
   guidePlaying: false,
   guideLanded: false,

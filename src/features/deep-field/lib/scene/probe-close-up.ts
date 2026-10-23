@@ -120,8 +120,9 @@ export function createProbeCloseUp(
     fly(false, home.pose, lookOff(aimNow()), lookOff(home.aim));
   }
 
-  /** Ends the close-up where the camera is, giving the aim and zoom back to the ladder. */
-  function end() {
+  /** Ends the close-up where the camera is, or (`landHome`) where it left from, giving the aim and zoom back to the ladder. */
+  function end(landHome = false) {
+    if (landHome && back) Object.assign(rig.pose, back.pose);
     probe = null;
     back = null;
     flight = null;

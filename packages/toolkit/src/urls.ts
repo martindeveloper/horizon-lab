@@ -322,6 +322,7 @@ export const CREDIT_URLS = {
 
 export const MAP_SOURCE_URLS = {
   moon: "https://svs.gsfc.nasa.gov/4720/",
+  ceres: "https://astrogeology.usgs.gov/search/map/ceres_dawn_fc_global_mosaic_400m",
   io: "https://astrogeology.usgs.gov/search/map/io_galileo_ssi_global_color_merge_mosaic_1km",
   europa: "https://astrogeology.usgs.gov/search/map/europa_voyager_galileo_ssi_global_mosaic_500m",
   ganymede:

@@ -15,7 +15,7 @@
  * maps with a soft seam. Hubble filter sets do not share a colour balance, so
  * each OPAL map keeps its structure and colour variations while its disc-mean
  * colour is set to the painted model's, which follows published true-colour
- * work (Irwin et al. 2024 for Uranus and Neptune). Mercury and Pluto mosaics
+ * work (Irwin et al. 2024 for Uranus and Neptune). Mercury, Ceres and Pluto mosaics
  * give brightness; their colour follows true-colour images.
  */
 import { execFileSync } from "node:child_process";
@@ -81,6 +81,7 @@ const SOURCES = {
   mars: `${USGS}/Mars_Viking_ClrMosaic_global_925m.tif`,
   mercury: `${USGS}/Mercury_MESSENGER_MDIS_Basemap_MD3Color_Mosaic_Global_665m.tif`,
   pluto: `${USGS}/Pluto_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif`,
+  ceres: `${USGS}/Ceres_Dawn_FC_DLR_global_20ppd_Oct2015.tif`,
 };
 
 const luminance = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -304,6 +305,16 @@ async function mercury(width) {
   return brightness("mercury", file, width, () => [0.19, 0.17, 0.15], true);
 }
 
+/**
+ * Ceres: Dawn's survey-orbit clear-filter mosaic in the body's near-neutral, faintly warm grey
+ * (Dawn colour, Nathues et al. 2015). The raster's left edge is 0° east (Occator's faculae land
+ * at 239° E); its unlit south pole is zero and painted.
+ */
+async function ceres(width) {
+  const file = await fetchCached(SOURCES.ceres);
+  return brightness("ceres", file, width, () => [0.1, 0.094, 0.088], false);
+}
+
 /** Pluto: dark terrain is tholin red-brown, bright terrain nitrogen-ice cream (New Horizons MVIC). */
 async function pluto(width) {
   /* The USGS Pluto mosaic starts at 0° east on its left edge. */
@@ -425,6 +436,7 @@ const BUILDERS = {
   mercury,
   earth,
   mars,
+  ceres,
   pluto,
   jupiter: (w) => opal("jupiter", w),
   saturn: (w) => opal("saturn", w),

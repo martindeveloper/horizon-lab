@@ -35,6 +35,10 @@ limb) are filled with Horizon's painted maps.
   Johns Hopkins University Applied Physics Laboratory, Carnegie Institution of
   Washington; USGS Astrogeology. Brightness only, in Mercury's true colour.
   <https://astrogeology.usgs.gov/search/map/mercury_messenger_mdis_basemap_md3_color_global_mosaic_665m>
+- Ceres: Dawn Framing Camera global mosaic, survey orbit, October 2015, 400 m per
+  pixel (DLR). NASA/JPL-Caltech/UCLA/MPS/DLR/IDA; USGS Astrogeology. Brightness
+  only, in Ceres's near-neutral grey; the unlit south pole is painted.
+  <https://astrogeology.usgs.gov/search/map/ceres_dawn_fc_global_mosaic_400m>
 - Pluto: New Horizons global mosaic, July 2017, 300 m per pixel. NASA, Johns
   Hopkins University Applied Physics Laboratory, Southwest Research Institute,
   Lunar and Planetary Institute; USGS Astrogeology. Brightness only, tinted by

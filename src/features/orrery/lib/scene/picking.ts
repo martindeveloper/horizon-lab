@@ -5,13 +5,13 @@ import { selectTapped } from "@/space/solar-system/model/framing";
 import { migrationProgress } from "@/space/solar-system/model/moment";
 import { observatoryPick } from "@/space/solar-system/model/observatories";
 import { solarPick } from "@/space/solar-system/model/selection";
+import { CLOSE_UP_LAYERS } from "@/space/solar-system/scene/close-up";
 import type { SolarKit } from "@/space/solar-system/scene/kit";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
 import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
 import { canFlyTo, orreryKey, sameSystem, type OrrerySelection } from "../model/selection";
 import type { useOrrery } from "../store";
-import { CLOSE_UP_LAYERS } from "./close-up-controller";
 
 /** A second tap on the same body within this window flies in for a close-up. */
 const DOUBLE_TAP_MS = 380;

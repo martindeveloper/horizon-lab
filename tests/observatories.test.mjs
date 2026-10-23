@@ -6,7 +6,6 @@ import { PerspectiveCamera, Vector3 } from "three";
 import { DisposalScope } from "@horizon/toolkit/rendering";
 
 import { createCameraRig } from "../src/features/orrery/lib/scene/camera-rig.ts";
-import { createCloseUpController } from "../src/features/orrery/lib/scene/close-up-controller.ts";
 import { useOrrery } from "../src/features/orrery/lib/store.ts";
 import { momentAt } from "../src/space/solar-system/model/moment.ts";
 import {
@@ -17,6 +16,7 @@ import {
   observatoryOffset,
   observatoryPosition,
 } from "../src/space/solar-system/model/observatories.ts";
+import { createCloseUp } from "../src/space/solar-system/scene/close-up.ts";
 import { SPACECRAFT, spacecraftFrame } from "../src/space/spacecraft/models.ts";
 
 const AU_KM = 149_597_870.7;
@@ -179,7 +179,7 @@ test("the Orrery flies to Hubble at its true size, lit three-quarters, and back 
         mapWidth: () => Infinity,
       },
     };
-    closeUp = createCloseUpController(kit, {
+    closeUp = createCloseUp(kit, {
       rig,
       reduceMotion,
       invalidate() {},

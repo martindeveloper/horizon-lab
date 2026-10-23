@@ -41,12 +41,40 @@ test("a probe's close-up opens from its card and lets go with another selection 
   assert.equal(api().closeUp, null, "the heliopause has no close-up");
   api().select({ kind: "reach", id: "voyager1" });
   api().enterCloseUp();
-  assert.equal(api().closeUp, "voyager1");
+  assert.deepEqual(api().closeUp, { kind: "reach", id: "voyager1" });
   api().select({ kind: "reach", id: "pioneer10" });
   assert.equal(api().closeUp, null, "another selection leaves it");
   api().enterCloseUp();
   api().setView("galaxy");
   assert.equal(api().closeUp, null, "a view flight leaves it");
+  api().select(null);
+});
+
+test("Deep Field flies to a body as the Orrery does: Back goes up a level, its system keeps it", () => {
+  const api = useDeepField.getState;
+  api().select({ kind: "galaxy", id: "bulge" });
+  api().enterCloseUp();
+  assert.equal(api().closeUp, null, "the bulge has no close-up");
+  api().select({ kind: "planet", id: "earth" });
+  api().enterCloseUp();
+  assert.deepEqual(api().closeUp, { kind: "planet", id: "earth" });
+  api().select({ kind: "moon", id: "moon" });
+  assert.deepEqual(api().closeUp, { kind: "planet", id: "earth" }, "its moon keeps the close-up");
+  api().enterCloseUp();
+  assert.deepEqual(api().closeUp, { kind: "moon", id: "moon" }, "and flies on to it");
+  api().leaveCloseUp();
+  assert.deepEqual(api().closeUp, { kind: "planet", id: "earth" }, "Back goes up to the Earth");
+  assert.deepEqual(api().selection, { kind: "planet", id: "earth" });
+  api().leaveCloseUp();
+  assert.equal(api().closeUp, null, "then to the map");
+  api().enterCloseUp();
+  api().select({ kind: "planet", id: "mars" });
+  assert.equal(api().closeUp, null, "another system lets go");
+  api().select({ kind: "moon", id: "moon" });
+  api().enterCloseUp();
+  api().leaveCloseUp(true);
+  assert.equal(api().closeUp, null, "a pull past the far bound goes straight to the map");
+  assert.deepEqual(api().selection, { kind: "moon", id: "moon" }, "and keeps the selection");
   api().select(null);
 });
 
@@ -99,6 +127,14 @@ test("Deep Field flies to a probe at its true size, lit three-quarters, and back
   assert.equal(closeUp.busy, false);
   assert.ok(Math.abs(rig.pose.distance / start.distance - 1) < 1e-6, `${rig.pose.distance} au`);
   assert.ok(rig.aim.length() < 1e-6, "the aim is back on the Sun");
+
+  /* Ended for another close-up (a body's) it lands home at once, so that one leaves from there. */
+  run("voyager1", 6);
+  closeUp.end(true);
+  run(null, 1);
+  assert.equal(closeUp.current, null);
+  assert.ok(Math.abs(rig.pose.distance / start.distance - 1) < 1e-6, "ended where it left from");
+  assert.ok(rig.aim.length() < 1e-6, "the aim is given back");
 });
 
 test("A drift's probe visit pulls away on the drift's own flight, the probe kept in view until the aim is home", () => {

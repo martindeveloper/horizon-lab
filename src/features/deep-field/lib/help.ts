@@ -7,10 +7,12 @@ const LEFT = { azimuth: -1, inclination: 0 };
 
 /** The galaxy the tour finds; the Local Group's view frames it, as in the Objects panel. */
 const ANDROMEDA: Selection = { kind: "cosmos", id: "andromeda" };
+/** The body the tour flies in to. */
+const JUPITER: Selection = { kind: "planet", id: "jupiter" };
 
 /**
- * The `?` tour: the camera, the depth ladder, the sightline, the objects, the guide, the View
- * panel and the experiences, each shown by doing what it does.
+ * The `?` tour: the camera, the depth ladder, the sightline, the objects, a close-up, the
+ * guide, the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<DeepFieldStore>[] = [
   {
@@ -55,6 +57,21 @@ export const HELP: readonly HelpStep<DeepFieldStore>[] = [
           s.setPanel("none");
         },
       },
+    ],
+  },
+  {
+    /* A body at its true size: the Objects panel found it, the card flies in. */
+    id: "closeUp",
+    targets: ["closeUp"],
+    cues: [
+      {
+        run: (s) => {
+          s.setPanel("none");
+          s.setView("giants");
+          s.select(JUPITER);
+        },
+      },
+      { at: 0.8, run: (s) => s.enterCloseUp() },
     ],
   },
   { id: "guide", targets: ["guide"] },

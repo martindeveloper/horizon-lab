@@ -1,10 +1,9 @@
-import { ArrowLeft, ChevronDown, ChevronUp, ZoomIn } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useState } from "react";
 
+import { CloseUpFooter } from "@/components/simulations/close-up-footer";
 import { SelectionSheet } from "@/components/simulations/selection-sheet";
 import { solarNameKey } from "@/space/solar-system/format";
-import { Action } from "@horizon/toolkit/ui";
 
 import { orreryKey, upFrom } from "../lib/model/selection";
 import { canCloseUp, closeUpAwaitsPresent, useOrrery } from "../lib/store";
@@ -28,15 +27,12 @@ export function SelectionCard() {
   const closeUp = useOrrery((s) => s.closeUp);
   const offerCloseUp = useOrrery(canCloseUp);
   const deepTime = useOrrery(closeUpAwaitsPresent);
-  const deepTimeNote = useId();
   /* On phones a close-up folds the card to a bar so the globe has the screen. */
   const [expanded, setExpanded] = useState(false);
   const now = useNow({ updateInterval: 60_000 });
   if (!selection) return null;
   const here = closeUp !== null && orreryKey(closeUp) === orreryKey(selection);
-  const offer = offerCloseUp && !here;
   const up = closeUp && upFrom(closeUp);
-  const back = up ? t("hud.backTo", { name: t(solarNameKey(up)) }) : t("hud.leaveCloseUp");
   return (
     <SelectionSheet
       card={cardFor(t, f, selection, yearsAgo, elliptical, now, { unit, locale })}
@@ -44,66 +40,22 @@ export function SelectionCard() {
       onClose={() => select(null)}
       folded={closeUp !== null && !expanded}
       footer={
-        closeUp || offerCloseUp || deepTime ? (
-          <>
-            {offer ? (
-              <Action
-                data-coach="closeUp"
-                className="flex-1"
-                onClick={() => useOrrery.getState().enterCloseUp()}
-              >
-                <ZoomIn className="icon" aria-hidden />
-                {t("hud.closeUp")}
-              </Action>
-            ) : null}
-            {closeUp ? (
-              <Action
-                data-coach="closeUp"
-                variant={offer ? "ghost" : "glass"}
-                className={offer ? "px-3" : "flex-1"}
-                onClick={() => useOrrery.getState().leaveCloseUp()}
-              >
-                <ArrowLeft className="icon" aria-hidden />
-                {back}
-              </Action>
-            ) : !offer && deepTime ? (
-              <Action
-                data-coach="closeUp"
-                className="flex-1"
-                disabled
-                aria-describedby={deepTimeNote}
-              >
-                <ZoomIn className="icon" aria-hidden />
-                {t("hud.closeUp")}
-              </Action>
-            ) : null}
-            {closeUp ? (
-              <Action
-                variant="ghost"
-                className="px-3 md:hidden"
-                aria-expanded={expanded}
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? t("hud.hideDetails") : t("hud.details")}
-                {expanded ? (
-                  <ChevronDown className="icon" aria-hidden />
-                ) : (
-                  <ChevronUp className="icon" aria-hidden />
-                )}
-              </Action>
-            ) : null}
-            {here ? (
-              <p className="w-full text-ui text-fg-secondary">
-                {t(selection.kind === "observatory" ? "hud.craftNote" : "hud.closeUpNote")}
-              </p>
-            ) : null}
-            {deepTime ? (
-              <p id={deepTimeNote} className="w-full text-ui text-fg-secondary">
-                {t("hud.closeUpPresentOnly")}
-              </p>
-            ) : null}
-            {here && selection.kind === "sun" ? <SolarActivityControls /> : null}
-          </>
+        closeUp !== null || offerCloseUp || deepTime ? (
+          <CloseUpFooter
+            namespace="orrery"
+            offer={offerCloseUp && !here}
+            open={closeUp !== null}
+            here={here}
+            note={selection.kind === "observatory" ? "craft" : "body"}
+            backLabel={up ? t("hud.backTo", { name: t(solarNameKey(up)) }) : t("hud.leaveCloseUp")}
+            awaiting={deepTime ? t("hud.closeUpPresentOnly") : null}
+            expanded={expanded}
+            onExpand={setExpanded}
+            onEnter={() => useOrrery.getState().enterCloseUp()}
+            onLeave={() => useOrrery.getState().leaveCloseUp()}
+          >
+            {selection.kind === "sun" ? <SolarActivityControls /> : null}
+          </CloseUpFooter>
         ) : null
       }
     />

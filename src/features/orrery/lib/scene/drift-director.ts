@@ -9,6 +9,7 @@ import { ambientMusic } from "@/components/shell/ambient-music";
 import { audioMapNow } from "@/lib/audio-maps";
 import { driftRunState, openingFor, timedDrift } from "@/lib/drift";
 import { createDriftVisits, type VisitFrame } from "@/space/drift-visits";
+import { moonSwing } from "@/space/solar-system/scene/close-up-framing";
 import type { AudioMap } from "@horizon/toolkit/audio";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { lerp } from "@horizon/toolkit/math";
@@ -17,7 +18,6 @@ import { createRigDrift, type RigDrift } from "@horizon/toolkit/scene";
 import { DRIFT, type CloseUpBody } from "../drift";
 import { canCloseUp, type useOrrery } from "../store";
 import type { CameraRig } from "./camera-rig";
-import { moonSwing } from "./close-up-flight";
 
 export function createDriftDirector(
   rig: CameraRig,
