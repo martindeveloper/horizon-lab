@@ -10,6 +10,7 @@ import { DisposalScope, startEngine } from "@horizon/toolkit/rendering";
 import { TAP_REACH_PX, defaultSceneAntialias } from "@horizon/toolkit/scene";
 import { AU_KM, RAD_PER_DEG } from "@horizon/toolkit/science";
 
+import { slotsIn, toolsShown } from "../src/components/simulations/toolbar-fold.ts";
 import { carryPose, handoffPath, leaveFor, takeHandoff } from "../src/lib/handoff.ts";
 import { bridgeRender, bridgeStore } from "../src/lib/scene-bridge.ts";
 import { withSpaceMessages } from "../src/space/messages.ts";
@@ -31,6 +32,18 @@ import {
   createSolarSystem,
   solarLabelPick,
 } from "../src/space/solar-system/scene/solar-system.ts";
+
+test("a toolbar shows every tool while its line has room, else what fits beside More", () => {
+  /* A phone's toolbar: 36 px buttons 8 px apart, 2 px padding each side. */
+  const pitch = { padding: 4, gap: 8, button: 36 };
+  assert.equal(slotsIn(4 + 6 * 36 + 5 * 8, pitch), 6, "exactly six fit");
+  assert.equal(slotsIn(4 + 6 * 36 + 5 * 8 - 1, pitch), 5, "a pixel short holds one fewer");
+  assert.equal(slotsIn(0, pitch), 0);
+  assert.equal(toolsShown(6, 6), 6, "all fit: no More");
+  assert.equal(toolsShown(7, 6), 5, "one short: five beside More");
+  assert.equal(toolsShown(7, 1), 0, "room for More alone");
+  assert.equal(toolsShown(7, Infinity), 7, "unmeasured shows all");
+});
 
 test("a crossing between the simulations is read once, by its addressee, with the pose left", () => {
   const pose = { azimuth: 1.2, inclination: 0.4, distance: 72 };

@@ -18,8 +18,8 @@ export type MoreItem = {
 };
 
 /**
- * Phones fold a scene toolbar's lesser tools into one button at its end: a short list of
- * named tools drops below it. Escape, an outside tap or tabbing away closes it; a choice
+ * A scene toolbar folds the tools its line has no room for into one button at its end: a short
+ * list of named tools drops below it. Escape, an outside tap or tabbing away closes it; a choice
  * closes it and leaves focus on the button, so a dialog it opens returns there.
  */
 export function SceneMoreMenu({

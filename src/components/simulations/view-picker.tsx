@@ -144,9 +144,9 @@ export function ViewPicker<Id extends string>({
 }
 
 /**
- * A lab's header row: the view pill, then the toolbar at the far end. Phones too narrow for both
- * take the tools a row lower.
+ * A lab's header row: the view pill, then the toolbar at the far end, on one line; where both
+ * don't fit the toolbar folds its tools into More.
  */
 export function HeaderRow({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-center gap-x-3 gap-y-2">{children}</div>;
+  return <div className="flex items-center gap-x-3">{children}</div>;
 }
