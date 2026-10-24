@@ -79,3 +79,16 @@ test("the track breaks exactly where the slider's epochs hand over, oldest first
   /* Each station lies in the epoch it stands for. */
   for (const epoch of EPOCHS) assert.equal(epochOf(epoch.yearsAgo), epoch.id);
 });
+
+test("the milestones' beads never crowd: each stands at its date, a quarter cell or more from the next", async () => {
+  const { MOMENTS, TRACK_CELLS, sliderToYearsAgo, yearsAgoToSlider } =
+    await import("../src/features/orrery/lib/model/timeline.ts");
+  const at = MOMENTS.map((m) => yearsAgoToSlider(m.yearsAgo)).sort((a, b) => a - b);
+  for (let k = 1; k < at.length; k += 1)
+    assert.ok(at[k] - at[k - 1] >= 1 / (4 * TRACK_CELLS) - 1e-9, `beads ${k - 1} and ${k} crowd`);
+  /* The thumb on a bead reads the milestone's own date. */
+  for (const m of MOMENTS) {
+    const back = sliderToYearsAgo(yearsAgoToSlider(m.yearsAgo));
+    assert.ok(Math.abs(back - m.yearsAgo) <= 1, `${m.id}: ${back} vs ${m.yearsAgo}`);
+  }
+});

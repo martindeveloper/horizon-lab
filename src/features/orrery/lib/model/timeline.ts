@@ -1,3 +1,5 @@
+import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
+import { THIN_DISK_ERA } from "@/space/galaxy/model/parameters";
 import {
   COLLAPSE_BEGINS,
   FORMATION_BEGINS,
@@ -16,15 +18,18 @@ import {
   SUN_BIRTH,
 } from "@/space/solar-system/model/parameters";
 import { clamp, lerp } from "@horizon/toolkit/math";
+import { convert } from "@horizon/toolkit/science";
 
 import {
   BELT_STIRRED_AFTER,
   CHICXULUB,
   EARTH_CRUST,
   EMBRYOS_AFTER,
+  JUPITER_CORE_AFTER,
   LHB_CLASSIC,
   MARS_DRY,
   MARS_DYNAMO_LAST,
+  MARS_HALF_AFTER,
   MOON_IMPACT_AFTER,
   OLDEST,
   PLANETESIMALS_AFTER,
@@ -35,41 +40,124 @@ import {
 export { OLDEST };
 
 const GAS_END = SUN_BIRTH - GAS_DISK_LIFETIME;
-/** The gas-disk segment starts this long after the first solids; earlier is one step. */
+/** The first million years' segment starts this long after the first solids; earlier is one step. */
 const FIRST_SOLIDS_FLOOR = 1e3;
-const GAS_DECADES = Math.log(GAS_DISK_LIFETIME / FIRST_SOLIDS_FLOOR);
 
-type Segment = { end: number; from: number; to: number; log?: true };
 /** The intact disk's epoch opens once the embryos have grown; the clearing's once the giants are on the move. */
 const DISK_EPOCH = 4.55e9;
 const CLEARING_EPOCH = 4.49e9;
-/** The track is a row of equal cells, one per epoch; the ages since the clearing take two, since they carry the milestones. */
-const EPOCH_CELLS = { sketch: 1, birth: 1, disk: 1, clearing: 1, today: 2 } as const;
-export const TRACK_CELLS = Object.values(EPOCH_CELLS).reduce((sum, cells) => sum + cells, 0);
-const cellEnd = (cells: number) => cells / TRACK_CELLS;
-/* Slider segments. The Sun's birth shares its cell between the formation, the gas disk and
-   the accretion; the gas disk is logarithmic in time since the first solids, so dust,
-   planetesimals and embryos (thousands, then hundreds of thousands, then millions of years)
-   each get room. */
-const SEGMENTS: readonly Segment[] = [
-  { end: cellEnd(1), from: OLDEST, to: FORMATION_BEGINS },
-  { end: cellEnd(1.35), from: FORMATION_BEGINS, to: SUN_BIRTH },
-  { end: cellEnd(1.8), from: SUN_BIRTH, to: GAS_END, log: true },
-  { end: cellEnd(2), from: GAS_END, to: DISK_EPOCH },
-  { end: cellEnd(3), from: DISK_EPOCH, to: CLEARING_EPOCH },
-  { end: cellEnd(4), from: CLEARING_EPOCH, to: CLEAR_DONE },
-  { end: 1, from: CLEAR_DONE, to: 0 },
+
+/** The dated milestones of the history: beads on the track, listed in the moments panel. */
+export type Moment =
+  | "merger"
+  | "thinDisk"
+  | "dust"
+  | "jupiterCore"
+  | "marsHalf"
+  | "accretion"
+  | "moon"
+  | "earthCrust"
+  | "bombardment"
+  | "marsDynamo"
+  | "marsDry"
+  | "vredefort"
+  | "saturnRings"
+  | "chicxulub";
+/**
+ * Each milestone, where it sits and how far either side of it its note holds (years). A span
+ * of 0 leaves the note to the eras' own stations below, which already tell that milestone.
+ */
+export const MOMENTS: readonly { id: Moment; yearsAgo: number; span: number }[] = [
+  { id: "merger", yearsAgo: convert(GALAXY.milkyway.gaiaEnceladus.value, "Gyr", "yr"), span: 0 },
+  { id: "thinDisk", yearsAgo: THIN_DISK_ERA, span: 0 },
+  { id: "dust", yearsAgo: SUN_BIRTH, span: 0 },
+  { id: "jupiterCore", yearsAgo: SUN_BIRTH - JUPITER_CORE_AFTER, span: 2.5e5 },
+  { id: "marsHalf", yearsAgo: SUN_BIRTH - MARS_HALF_AFTER, span: 4e5 },
+  { id: "accretion", yearsAgo: GAS_END, span: 0 },
+  { id: "moon", yearsAgo: SUN_BIRTH - MOON_IMPACT_AFTER, span: 0 },
+  { id: "earthCrust", yearsAgo: EARTH_CRUST, span: 4e7 },
+  { id: "bombardment", yearsAgo: LHB_CLASSIC, span: 1.5e8 },
+  { id: "marsDynamo", yearsAgo: MARS_DYNAMO_LAST, span: 6e7 },
+  { id: "marsDry", yearsAgo: MARS_DRY, span: 1e8 },
+  { id: "vredefort", yearsAgo: VREDEFORT, span: 6e7 },
+  {
+    id: "saturnRings",
+    yearsAgo: (SATURN_RINGS_AGE[0] + SATURN_RINGS_AGE[1]) / 2,
+    span: (SATURN_RINGS_AGE[1] - SATURN_RINGS_AGE[0]) / 2,
+  },
+  { id: "chicxulub", yearsAgo: CHICXULUB, span: 1.5e7 },
 ];
+
+/**
+ * The track is a row of equal cells, one per epoch. The Sun's birth and the ages since the
+ * clearing take two, since they hold most of the milestones.
+ */
+const EPOCH_CELLS = { sketch: 1, birth: 2, disk: 1, clearing: 1, today: 2 } as const;
+export const TRACK_CELLS = Object.values(EPOCH_CELLS).reduce((sum, cells) => sum + cells, 0);
+/** Where each epoch's cells start, counted from the track's start. */
+const CELL = {
+  sketch: 0,
+  birth: EPOCH_CELLS.sketch,
+  disk: EPOCH_CELLS.sketch + EPOCH_CELLS.birth,
+  clearing: EPOCH_CELLS.sketch + EPOCH_CELLS.birth + EPOCH_CELLS.disk,
+  today: TRACK_CELLS - EPOCH_CELLS.today,
+};
+/** Inside the birth's cells: the core's fall, then the first million years, logarithmic since the first solids. */
+const FALL_CELLS = 0.6;
+const FIRST_MYR_CELLS = 0.6;
+const FIRST_MYR_END = SUN_BIRTH - JUPITER_CORE_AFTER;
+
+type Segment = { end: number; from: number; to: number; log?: true };
+/** Track share at `cells` from the start. */
+const cellEnd = (cells: number) => cells / TRACK_CELLS;
+
+/**
+ * Linear segments from `from` to `to` over cells `a` to `b`, with a knot at every milestone
+ * between: the milestones' beads are spread evenly along their stretch of the track, so they
+ * never crowd, and the thumb stands on a bead exactly at its date.
+ */
+function spread(from: number, to: number, a: number, b: number): Segment[] {
+  const inner = MOMENTS.map((m) => m.yearsAgo)
+    .filter((y) => y < from && y > to)
+    .sort((x, y) => y - x);
+  const knots = [from, ...inner, to];
+  const step = (b - a) / (knots.length - 1);
+  return knots.slice(1).map((y, k) => ({
+    end: cellEnd(k === knots.length - 2 ? b : a + step * (k + 1)),
+    from: knots[k] ?? from,
+    to: y,
+  }));
+}
+
+/* Slider segments. The Sun's birth gives the core's fall its room, then the first million
+   years logarithmic since the first solids, so dust, planetesimals and Jupiter's core
+   (thousands, hundreds of thousands, then a million years) each get room; its later
+   milestones, like every other chapter's, are knots spread evenly along their stretch. */
+const SEGMENTS: readonly Segment[] = [
+  ...spread(OLDEST, FORMATION_BEGINS, CELL.sketch, CELL.birth),
+  { end: cellEnd(CELL.birth + FALL_CELLS), from: FORMATION_BEGINS, to: SUN_BIRTH },
+  {
+    end: cellEnd(CELL.birth + FALL_CELLS + FIRST_MYR_CELLS),
+    from: SUN_BIRTH,
+    to: FIRST_MYR_END,
+    log: true,
+  },
+  ...spread(FIRST_MYR_END, DISK_EPOCH, CELL.birth + FALL_CELLS + FIRST_MYR_CELLS, CELL.disk),
+  ...spread(DISK_EPOCH, CLEARING_EPOCH, CELL.disk, CELL.clearing),
+  ...spread(CLEARING_EPOCH, CLEAR_DONE, CELL.clearing, CELL.today),
+  ...spread(CLEAR_DONE, 0, CELL.today, TRACK_CELLS),
+];
+const FIRST_MYR_DECADES = Math.log(JUPITER_CORE_AFTER / FIRST_SOLIDS_FLOOR);
 
 function segmentYears(segment: Segment, f: number) {
   if (!segment.log) return lerp(segment.from, segment.to, f);
-  return f <= 0 ? SUN_BIRTH : SUN_BIRTH - FIRST_SOLIDS_FLOOR * Math.exp(f * GAS_DECADES);
+  return f <= 0 ? SUN_BIRTH : SUN_BIRTH - FIRST_SOLIDS_FLOOR * Math.exp(f * FIRST_MYR_DECADES);
 }
 
 function segmentFraction(segment: Segment, y: number) {
   if (!segment.log) return clamp((y - segment.from) / (segment.to - segment.from), 0, 1);
   const since = Math.max(SUN_BIRTH - y, FIRST_SOLIDS_FLOOR);
-  return clamp(Math.log(since / FIRST_SOLIDS_FLOOR) / GAS_DECADES, 0, 1);
+  return clamp(Math.log(since / FIRST_SOLIDS_FLOOR) / FIRST_MYR_DECADES, 0, 1);
 }
 
 /** Slider [0,1] → years ago, giving formation and clearing most of the track. */
@@ -100,49 +188,23 @@ export const isToday = (yearsAgo: number) => yearsAgo <= TODAY_SPAN;
 
 type Epoch = "sketch" | "birth" | "disk" | "clearing" | "today";
 
-/** The dated milestones since the clearing: stations on the slider's last stretch. */
-export type Moment =
-  | "earthCrust"
-  | "bombardment"
-  | "marsDynamo"
-  | "marsDry"
-  | "vredefort"
-  | "saturnRings"
-  | "chicxulub";
-/** Each station, where it sits and how far either side of it its note holds (years). */
-export const MOMENTS: readonly { id: Moment; yearsAgo: number; span: number }[] = [
-  { id: "earthCrust", yearsAgo: EARTH_CRUST, span: 4e7 },
-  { id: "bombardment", yearsAgo: LHB_CLASSIC, span: 1.5e8 },
-  { id: "marsDynamo", yearsAgo: MARS_DYNAMO_LAST, span: 6e7 },
-  { id: "marsDry", yearsAgo: MARS_DRY, span: 1e8 },
-  { id: "vredefort", yearsAgo: VREDEFORT, span: 6e7 },
-  {
-    id: "saturnRings",
-    yearsAgo: (SATURN_RINGS_AGE[0] + SATURN_RINGS_AGE[1]) / 2,
-    span: (SATURN_RINGS_AGE[1] - SATURN_RINGS_AGE[0]) / 2,
-  },
-  { id: "chicxulub", yearsAgo: CHICXULUB, span: 1.5e7 },
-];
-
 /** Finer, dated notes for the dock. Each one is a measured or well-established milestone. */
 type Note =
   | Moment
-  | "merger"
-  | "thinDisk"
   | "ingredients"
   | "core"
   | "collapse"
   | "protostar"
-  | "dust"
   | "planetesimals"
   | "gasDisk"
-  | "accretion"
   | "belt"
-  | "moon"
   | "disk"
   | "clearing"
   | "today";
 export function noteOf(yearsAgo: number): Note {
+  /* A dated milestone holds its note either side of it; the eras' stations tell the rest. */
+  for (const moment of MOMENTS)
+    if (moment.span > 0 && Math.abs(yearsAgo - moment.yearsAgo) <= moment.span) return moment.id;
   if (yearsAgo > 9.3e9) return "merger";
   if (yearsAgo > 7e9) return "thinDisk";
   if (yearsAgo > FORMATION_BEGINS) return "ingredients";
@@ -158,10 +220,8 @@ export function noteOf(yearsAgo: number): Note {
   if (yearsAgo > MODEL_START) return "moon";
   if (yearsAgo > 4.49e9) return "disk";
   if (yearsAgo >= CLEAR_DONE) return "clearing";
-  /* The lunar basins' classic date, kept as its own stop on the way to today. */
+  /* The lunar basins' classic date holds a little longer toward the crust's station. */
   if (yearsAgo > LHB_CLASSIC - 1.5e8 && yearsAgo < LHB_CLASSIC + 2e8) return "bombardment";
-  for (const moment of MOMENTS)
-    if (Math.abs(yearsAgo - moment.yearsAgo) <= moment.span) return moment.id;
   return "today";
 }
 /** The slider's epochs: each with the moment the thumb stops at for it, and its cells of the track. */

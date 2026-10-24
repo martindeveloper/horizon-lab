@@ -44,6 +44,13 @@
     "transit": "{name} přechází přes Slunce"
   },
   "moments": {
+    "merger": "Splynutí s Gaia-Enceladem",
+    "thinDisk": "Vzniká tenký disk",
+    "dust": "První pevné látky",
+    "jupiterCore": "Jádro Jupiteru je hotové",
+    "marsHalf": "Mars z poloviny vyrostlý",
+    "accretion": "Plynný disk je pryč",
+    "moon": "Vzniká Měsíc",
     "earthCrust": "Zemská kůra a první oceány",
     "bombardment": "Pozdní těžké bombardování",
     "marsDynamo": "Magnetické pole Marsu slábne",
@@ -424,6 +431,8 @@
     "dust": "První pevné látky kondenzují před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let: nula této časové osy. Prachová zrna se při jemných dotecích slepují a rostou v oblázky o velikosti milimetrů až centimetrů.",
     "planetesimals": "Podle modelů se oblázky během asi {planetesimalsKyr} {planetesimalsKyrPlural, select, one {tisíce} few {tisíc} many {tisíce} other {tisíc}} let shlukují do kilometrových planetesimál; dál od Slunce to trvá miliony let. Arrokoth je jedna z těch, které přežily.",
     "gasDisk": "V modelech do zhruba {embryosMyr} mil. let vyrostou embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led tak rychle, že zachytí plyn: vznikají obří planety.",
+    "jupiterCore": "Meteority se dělí do dvou izotopových rodin, které od sebe zůstaly odděleny zhruba od {jupiterCoreMyr} mil. let po prvních pevných látkách: jádro Jupiteru už narostlo natolik, že oddělilo vnější disk od vnitřního.",
+    "marsHalf": "Hafnium-wolframové hodiny v marsovských meteoritech ukazují Mars z poloviny vyrostlý asi {marsHalfMyr} mil. let po prvních pevných látkách: planetární zárodek, který přestal růst.",
     "accretion": "Záření a vítr mladého Slunce odvanou plyn. Uvnitř zůstává mnoho embryí velikosti Měsíce a Jupiterova přitažlivost jejich dráhy rozhoupe, až se začnou křížit.",
     "belt": "Daleko od Jupiteru se embrya při pomalých srážkách spojují v kamenné planety. Blízko něj jsou srážky rychlé a tělesa tříští: zůstává pás planetek.",
     "moon": "Podle převládajícího modelu do Země narazí těleso velikosti Marsu a z vyvržené hmoty vznikne Měsíc. Odhady spadají přibližně do rozmezí {moonImpactGyr} {moonImpactGyrPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} let před současností; mladší stáří mohou odrážet pozdější přetavení. Měsíc se skládá těsně za Rocheovou mezí a slapy ho odtlačují: jeho vykreslená dráha roste podle datovaných záznamů.",

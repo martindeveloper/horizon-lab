@@ -9,6 +9,12 @@ export const PLANETESIMALS_AFTER = 1e5;
 /** Runaway, then oligarchic growth gives Moon-mass embryos by ~1 Myr. */
 export const EMBRYOS_AFTER = 1e6;
 
+/** Jupiter's core past ~20 Earth masses within ~1 Myr of the first solids: meteorite isotopes split in two (Kruijer et al. 2017). */
+export const JUPITER_CORE_AFTER = 1e6;
+
+/** Mars half-grown 1.8 (+0.9/−1.0) Myr after the first solids, from hafnium–tungsten (Dauphas & Pourmand 2011). */
+export const MARS_HALF_AFTER = 1.8e6;
+
 /** Notes turn from gas dispersal to merging versus shattering collisions here (~20 Myr). */
 export const BELT_STIRRED_AFTER = 2e7;
 

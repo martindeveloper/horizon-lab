@@ -38,6 +38,13 @@
     "transit": "{name} crosses the Sun"
   },
   "moments": {
+    "merger": "Gaia-Enceladus merger",
+    "thinDisk": "The thin disk forms",
+    "dust": "First solids",
+    "jupiterCore": "Jupiter's core is built",
+    "marsHalf": "Mars half-grown",
+    "accretion": "Gas disk gone",
+    "moon": "The Moon forms",
     "earthCrust": "Earth's crust and first oceans",
     "bombardment": "Late Heavy Bombardment",
     "marsDynamo": "Mars's magnetic field fades",
@@ -418,6 +425,8 @@
     "dust": "The first solids condense {sunBirthGyr} billion years ago: the timeline's zero. Dust grains stick when they touch gently and grow into pebbles a millimetre to a centimetre across.",
     "planetesimals": "In models the pebbles gather within about {planetesimalsKyr} thousand years into planetesimals kilometres across; farther out this takes millions of years. Arrokoth is one that survived.",
     "gasDisk": "Models grow Moon-mass embryos within about {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to capture gas and become the giant planets.",
+    "jupiterCore": "Meteorites fall into two isotopic families that stayed apart from about {jupiterCoreMyr} million years after the first solids: Jupiter's core had grown massive enough to wall the outer disk off from the inner.",
+    "marsHalf": "Hafnium–tungsten clocks in Martian meteorites show Mars half-grown about {marsHalfMyr} million years after the first solids: a planetary embryo that stopped growing.",
     "accretion": "The young Sun's light and wind blow the gas away. Inside, many Moon-sized embryos remain, and Jupiter's pull sets their orbits crossing.",
     "belt": "Far from Jupiter, slow collisions merge the embryos into rocky planets. Near Jupiter the collisions are fast and shatter them: the asteroid belt.",
     "moon": "In the leading model a Mars-sized body strikes Earth and the Moon forms from the debris. Dates span about {moonImpactGyr} billion years ago; the younger ones may record later remelting. The Moon gathers just outside the Roche limit, and the tides push it outward: its drawn orbit grows through the dated records.",

@@ -6,6 +6,9 @@ import { SOURCE_URLS } from "@horizon/toolkit/urls";
 export type Source = { cite: string; link?: string };
 
 export const SOURCES = {
+  dauphas2011: {
+    cite: "Dauphas & Pourmand 2011, Nature 473, 489 (Mars half-grown in 1.8 +0.9/−1.0 Myr, from hafnium–tungsten)",
+  },
   feng2026: {
     cite: "Feng et al. 2026, MNRAS 546, stag011, Table 2 Mean (Gaia DR3 Cepheid rotation curve; inferred local density and dark mass inside 18 kpc)",
     link: "https://doi.org/10.1093/mnras/stag011",
@@ -17,6 +20,9 @@ export const SOURCES = {
   dado2026: {
     cite: "Dado et al. 2026, MNRAS 552, stag1865 (baryonic contraction and biases in extrapolated halo mass)",
     link: "https://doi.org/10.1093/mnras/stag1865",
+  },
+  kruijer2017: {
+    cite: "Kruijer, Burkhardt, Budde & Kleine 2017, PNAS 114, 6712 (Jupiter's core past ~20 Earth masses within ~1 Myr of the CAIs, from the two meteorite isotope families)",
   },
   navarro1997: {
     cite: "Navarro, Frenk & White 1997, ApJ 490, 493 (NFW density profile)",

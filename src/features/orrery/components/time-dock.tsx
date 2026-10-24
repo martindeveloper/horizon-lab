@@ -48,7 +48,7 @@ const STATIONS = EPOCHS.map((epoch, i) => ({
   at: yearsAgoToSlider(epoch.yearsAgo),
   end: yearsAgoToSlider(EPOCH_BOUNDS[i] ?? 0),
 }));
-/* The dated milestones since the clearing: ticks on the last chapter's bar, where they fall. */
+/* The dated milestones: beads on their chapters' bars, where they fall. */
 const TICKS = MOMENTS.map((moment) => ({ ...moment, at: yearsAgoToSlider(moment.yearsAgo) }));
 /** The track's chapters and their names line up with the thumb's travel, inset by its radius. */
 const TRAVEL = { marginInline: SLIDER_THUMB_PX / 2 };
@@ -233,9 +233,9 @@ function EraNote({ children }: { children: string }) {
 /**
  * The scrubber. The track is the history in chapters, one bar each, filled gold from the past
  * to the playhead; the epochs' names sit in cells beneath, each under its bar, the one the
- * clock is in lit. A name is a button to its epoch's station. The dated milestones since the
- * clearing are ticks on the last bar: wide screens name them on hover and set the clock to one
- * on a tap, and while the clock stands at one its name takes the cell. Phones name only the
+ * clock is in lit. A name is a button to its epoch's station. The dated milestones are beads
+ * on the bars: wide screens name them on hover and set the clock to one on a tap, and while
+ * the clock stands at one its name takes its cell. Phones name only the
  * epoch the clock is in. `dilation` is how far playback is slowed, 0–1, shown as a halo about
  * the thumb.
  */
@@ -290,7 +290,7 @@ function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }
           thumbClassName="slider-halo"
           thumbStyle={{ "--halo": dilation }}
         />
-        {/* The milestones' ticks rise from the bar: gold once passed, the one the clock stands at taller. */}
+        {/* The milestones are beads on the bar, ringed in the dock's surface: pale once passed, dim ahead, the one the clock stands at larger. */}
         <div role="group" aria-label={t("hud.momentsDeep")} className="not-md:pointer-events-none">
           {TICKS.map((m) => (
             <span
@@ -305,10 +305,12 @@ function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }
                   aria-pressed={m.id === note}
                   onClick={() => api().setYearsAgo(m.yearsAgo)}
                   className={cn(
-                    "relative block size-4 -translate-y-3 rounded-compact ui-focus before:absolute before:bottom-1 before:left-1/2 before:w-px before:-translate-x-1/2 before:transition-[background-color,height] before:duration-feedback before:ease-standard",
-                    m.id === note ? "before:h-2" : "before:h-1.5",
+                    "relative block size-4 -translate-y-1/2 rounded-compact ui-focus before:absolute before:top-1/2 before:left-1/2 before:-translate-1/2 before:rounded-full before:ring-1 before:ring-surface-primary before:transition-[background-color,width,height] before:duration-feedback before:ease-standard md:before:ring-2",
+                    m.id === note
+                      ? "before:size-1.5 before:bg-fg-primary md:before:size-[7px]"
+                      : "before:size-1 md:before:size-[5px]",
                     m.yearsAgo >= yearsAgo
-                      ? "before:bg-accent"
+                      ? "before:bg-fg-primary/85"
                       : "before:bg-fg-primary/35 hover:before:bg-fg-primary/70",
                   )}
                 />
@@ -328,8 +330,8 @@ function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }
           let align = "text-center";
           if (i === 0) align = "text-left";
           if (i === STATIONS.length - 1) align = "text-right";
-          /* The last cell names the milestone the clock stands at, and is the way back to it. */
-          const milestone = s.id === "today" ? standingAt : undefined;
+          /* The cell the clock is in names the milestone it stands at, and is the way back to it. */
+          const milestone = current ? standingAt : undefined;
           return (
             <button
               key={s.id}

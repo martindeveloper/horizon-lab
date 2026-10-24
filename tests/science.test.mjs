@@ -174,6 +174,8 @@ test("orrery timeline gives each formation stage room, a note and a play stop", 
   const stages = [
     [SUN_BIRTH - 5e3, "dust"],
     [SUN_BIRTH - 3e5, "planetesimals"],
+    [SUN_BIRTH - 1e6, "jupiterCore"],
+    [SUN_BIRTH - 1.8e6, "marsHalf"],
     [SUN_BIRTH - 2.5e6, "gasDisk"],
     [SUN_BIRTH - 1e7, "accretion"],
     [SUN_BIRTH - 3e7, "belt"],

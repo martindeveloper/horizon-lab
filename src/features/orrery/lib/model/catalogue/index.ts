@@ -26,6 +26,8 @@ export const PROSE_FIGURES = {
   diskLifetimesMyr: TIMELINE.formation.diskLifetimes,
   planetesimalsKyr: TIMELINE.formation.planetesimals,
   embryosMyr: TIMELINE.formation.embryos,
+  jupiterCoreMyr: TIMELINE.formation.jupiterCore,
+  marsHalfMyr: TIMELINE.formation.marsHalf,
   snowLineAu: TIMELINE.formation.snowLine,
   snowLineEstimatesAu: TIMELINE.formation.snowLineEstimates,
   moonImpactGyr: TIMELINE.formation.moonImpact,
