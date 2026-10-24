@@ -39,6 +39,15 @@ export const SATURN_RINGS_AGE: readonly [number, number] = [1e8, 4e8];
 /** The Chicxulub impact (Renne et al. 2013). */
 export const CHICXULUB = 6.604e7;
 
+/**
+ * The main-sequence Sun's brightening, L(t) = L☉ / (1 + 0.4 (1 − t/t☉)): Gough's (1981)
+ * interpolation of standard solar models, within a few per cent of them after the first
+ * ~0.2 Gyr (Feulner 2012). The young Sun shone at about 70 % of today.
+ */
+export const YOUNG_SUN_DIMMING = 0.4;
+/** The habitable zone's conservative edges today, moist to maximum greenhouse (Kopparapu et al. 2013). */
+export const HABITABLE_ZONE_AU: readonly [number, number] = [0.99, 1.7];
+
 /** Bright stars' proper motions scramble the constellations within ~10⁵ years. */
 export const NAMED_STARS_FADE = 1e5;
 

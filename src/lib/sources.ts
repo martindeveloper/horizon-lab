@@ -778,6 +778,26 @@ export const SOURCES = {
   zhao2021: {
     cite: "Zhao et al. 2021, arXiv:2102.09093 (Cygnus X-1's spin > 0.9985 by continuum fitting)",
   },
+  bergin2007: {
+    cite: "Bergin & Tafalla 2007, Annual Review of Astronomy and Astrophysics 45, 339 (cold dark clouds: dense cores at 10⁴–10⁵ molecules per cm³)",
+    link: "https://doi.org/10.1146/annurev.astro.45.071206.100404",
+  },
+  dunham2014: {
+    cite: "Dunham et al. 2014, Protostars and Planets VI, 195 (the evolution of protostars in the Spitzer and Herschel surveys; the Class 0 phase lasts 0.13–0.26 Myr)",
+    link: "https://arxiv.org/abs/1401.1809",
+  },
+  gough1981: {
+    cite: "Gough 1981, Solar Physics 74, 21 (the main-sequence Sun's luminosity by age, an interpolation of standard solar models)",
+    link: "https://doi.org/10.1007/BF00151270",
+  },
+  feulner2012: {
+    cite: "Feulner 2012, Reviews of Geophysics 50, RG2006 (the faint young Sun problem; Gough's law against standard models)",
+    link: "https://doi.org/10.1029/2011RG000375",
+  },
+  kopparapu2013: {
+    cite: "Kopparapu et al. 2013, ApJ 765, 131 (habitable zones around main-sequence stars; the Sun's conservative edges 0.99–1.70 au)",
+    link: "https://doi.org/10.1088/0004-637X/765/2/131",
+  },
   zwicky1933: {
     cite: "Zwicky 1933, Helv. Phys. Acta 6, 110 (Coma's missing mass)",
     link: SOURCE_URLS.zwicky1933,

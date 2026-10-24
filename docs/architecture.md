@@ -69,6 +69,8 @@ src/
       lib/model/               The solar system through time, on the shared model (src/space):
         timeline.ts            Slider segments, epochs, dated notes, playback
         events.ts              Dated moments the clock can be set to, found as roots on the orbits
+        earth-view.ts          The view from Earth: the centre's rules and each body's path seen from Earth
+        young-sun.ts           The faint young Sun: its output by age and the habitable zone that moves with it
         views.ts               The default view and the playing clock's speed-up by scale
         tour.ts                Guide steps and their flights
         catalogue/             The timeline's figures: value or span, unit, source, status
@@ -81,13 +83,17 @@ src/
                                @horizon/toolkit/scene; MAP_BASE is src/space/solar-system/graphics/maps.ts)
       lib/scene/               The engine: engine.ts hosts the shared solar system on the
                                toolkit's scene host, orbit rig and controls, moves it along
-                               the timeline and adds what is the Orrery's own: the sky,
+                               the timeline and adds what is the Orrery's own: the sky
+                               (sky-layer.ts, with the natal cloud's collapse),
                                close-ups of Earth's observatories at their true size (the
                                shared solar close-up, src/space/solar-system/scene/close-up.ts,
                                draws Earth below one in a depth pass of its own),
                                streamed measured maps (measured-maps.ts: each body waits in
-                               its map's mean colour, then fades it in), the guide, solar
-                               activity, picking and the HUD
+                               its map's mean colour, then fades it in), the view from Earth
+                               (earth-view.ts: the aim rides Earth, trails of the paths seen
+                               from it), the faint young Sun (young-sun.ts: the glow by its
+                               output, the habitable zone band), the guide, solar activity,
+                               picking and the HUD
       lib/store.ts             Zustand store (orrery namespace messages)
     deep-field/
       index.ts                 Public client entry: DeepFieldApp
@@ -328,7 +334,8 @@ src/
                                a soft point, the touch targets' invisible material
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
-                               disk), elements, tracers, catalogue, views (and the solar
+                               disk), formation (the core's free fall, the protostar),
+                               elements, tracers, catalogue, views (and the solar
                                framing every host engine shares), framing (and the radii an
                                arrival frames), position, moon-orbits (the moons' orbits, the
                                Moon from the toolkit's lunar theory, without three.js); its reach:

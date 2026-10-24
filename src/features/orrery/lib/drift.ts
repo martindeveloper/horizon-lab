@@ -15,7 +15,9 @@ import {
  * nudged in distance and tilt, or a close-up: the drift selects the body, flies in on the
  * close-up's own flight, slowed to a lean-back pace and settling onto the body, circles it
  * while it drifts nearer, then pulls out once to frame it with its largest moon and flies on
- * from there, so a body is dived to and pulled away from once each. Earth's visit dives on
+ * from there, so a body is dived to and pulled away from once each. A framed shot may set the
+ * timeline as its flight begins (`timeline`): the fall from the Oort cloud lands in the Sun's
+ * formation, which plays on to today. Earth's visit dives on
  * deeper instead, to Hubble above it, and pulls away from there: before a framed shot the
  * pull away is that shot's own flight (`withVisitFlights` gives it the flight out's seconds), before
  * another visit the close-up's own flight out. The holds
@@ -26,6 +28,7 @@ import {
  * held to `clock` model years per real second, so the inner planets and the belt glide rather
  * than whirl when seen from the giants.
  */
+import { FORMATION_BEGINS } from "@/space/solar-system/model/formation";
 import type { ObservatorySelection } from "@/space/solar-system/model/observatories";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
@@ -44,6 +47,11 @@ export type OrreryDriftShot =
         view: SolarViewId;
         /** Nudges to that framing. */
         pose?: Partial<OrbitPose>;
+        /**
+         * Sets the timeline, playing, as the flight to the shot begins: the Sun's formation
+         * plays through the fall and time runs on to today before the next visit.
+         */
+        timeline?: { yearsAgo: number };
       })
   | VisitShot<CloseUpBody>;
 
@@ -129,12 +137,16 @@ export const DRIFT: OrreryDrift = {
       /* On to the Oort cloud, landing on the second crest, held at the music's height. */
       { view: "scattered", flight: { duration: 20, lead: 0.3 }, hold: 2 },
       { land: "peak@2", view: "oort", flight: { duration: 28 }, hold: 27, creep: -0.04 },
-      /* And one long fall back to the giants, from above, as the track settles. */
+      /* And one long fall back to the giants as the track settles, into the natal cloud: the
+         timeline is set to the Sun's formation as the fall begins, the core falls in and the
+         protostar lights on the way down, the disk and the clearing play out at the giants, and
+         time runs on to today as the loop returns to the inner planets. */
       {
         view: "giants",
-        pose: { inclination: 1.3 },
+        pose: { inclination: 0.6 },
         flight: { duration: 40, lift: -0.1 },
         hold: 14,
+        timeline: { yearsAgo: FORMATION_BEGINS },
       },
     ],
     DRIFT_VISIT.pace,

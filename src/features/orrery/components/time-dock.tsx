@@ -6,6 +6,7 @@ import { MapScale } from "@/components/simulations/map-readouts";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
+import { sunExists } from "@/space/solar-system/model/moment";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import { convert } from "@horizon/toolkit/science";
 import { Dock, IconButton, Slider, Tooltip, cn, sliderStopAt } from "@horizon/toolkit/ui";
@@ -96,8 +97,10 @@ export function TimeDock() {
     });
   }
   let subline: string;
-  if (yearsAgo > SUN_BIRTH) {
+  if (!sunExists(yearsAgo)) {
     subline = t("time.noSun");
+  } else if (yearsAgo > SUN_BIRTH) {
+    subline = t("time.protostar");
   } else if (isToday(yearsAgo)) {
     const date = f.dateTime(now, { dateStyle: "long" });
     subline = onClock

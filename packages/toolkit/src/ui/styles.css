@@ -311,15 +311,12 @@
   box-shadow:
     var(--tw-ring-offset-shadow, 0 0 transparent), var(--tw-ring-shadow, 0 0 transparent),
     var(--surface-shadow), var(--surface-halo, 0 0 transparent);
-  /* While the HUD fades (`--hud-fade` below 1), its layer's opacity cuts the glass off from the
-     scene (a backdrop root): the blur has nothing to blur and the glass looks thin until the
-     fade ends. Meanwhile the tint lies over the space colour, which is how it looks over the
-     blurred dark scene, so the material holds its density through the fade. */
-  --surface-backing-stop: calc(clamp(0, (1 - var(--hud-fade)) * 1000, 1) * 100%);
-  --surface-backing: linear-gradient(
-    var(--color-space) var(--surface-backing-stop),
-    transparent var(--surface-backing-stop)
-  );
+  /* A fading HUD layer (opacity below 1) cuts the glass off from the scene (a backdrop root),
+     and the browser hands the blur back only a few frames after the fade ends: meanwhile the
+     glass looks thin. So the tint lies over the space colour, which is how it looks over the
+     blurred dark scene, for as long as `--hud-backing` holds it there (the immersive layer). */
+  --surface-backing-color: rgb(var(--scene-space) / var(--hud-backing));
+  --surface-backing: linear-gradient(var(--surface-backing-color), var(--surface-backing-color));
 }
 
 .glass,
@@ -1125,22 +1122,25 @@
 
 /* Cinematic chrome choreography. Animate only composited UI layers: never the
    canvas or its host dimensions, which would clear the WebGL drawing buffer.
-   The HUD's opacity is `--hud-fade`, inherited so the glass inside knows a fade is on. */
-@property --hud-fade {
+   The glass inside lies on solid space (`--hud-backing`) from before the HUD fades until a
+   reveal after it has arrived, then clears to its blur; see the glass materials. */
+@property --hud-backing {
   syntax: "<number>";
   inherits: true;
-  initial-value: 1;
+  initial-value: 0;
 }
 .immersive-overlays {
   position: absolute;
   inset: 0;
   z-index: 10;
   pointer-events: none;
-  --hud-fade: 1;
-  opacity: var(--hud-fade);
+  --hud-backing: 0;
+  opacity: 1;
   visibility: visible;
   transition:
-    --hud-fade var(--immersive-enter) var(--ease-enter) var(--immersive-step),
+    opacity var(--immersive-enter) var(--ease-enter) var(--immersive-step),
+    --hud-backing var(--transition-duration-reveal) var(--ease-standard)
+      calc(var(--immersive-step) + var(--immersive-enter)),
     visibility 0s;
 }
 .immersive-overlays :is(.hud-top, .hud-bottom) {
@@ -1148,10 +1148,12 @@
   transition: translate var(--immersive-enter) var(--ease-enter);
 }
 .immersive-overlays[data-hidden="true"] {
-  --hud-fade: 0;
+  --hud-backing: 1;
+  opacity: 0;
   visibility: hidden;
   transition:
-    --hud-fade var(--immersive-exit) var(--ease-exit),
+    opacity var(--immersive-exit) var(--ease-exit),
+    --hud-backing 0s,
     visibility 0s var(--immersive-exit);
 }
 .immersive-overlays[data-hidden="true"] .hud-top {
@@ -1180,7 +1182,8 @@
 }
 @starting-style {
   .immersive-overlays {
-    --hud-fade: 0;
+    --hud-backing: 1;
+    opacity: 0;
   }
   .immersive-overlays .hud-top {
     translate: 0 -14px;

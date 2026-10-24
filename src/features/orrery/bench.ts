@@ -1,6 +1,7 @@
 import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
 import { mountSceneEngine } from "@/space/bench";
+import { FORMATION_BEGINS } from "@/space/solar-system/model/formation";
 import {
   OBSERVATORY_IDS,
   observatoryById,
@@ -352,6 +353,39 @@ const SCENES: readonly OrreryBenchScene[] = [
     view: "kuiper",
     selection: { kind: "tracer", index: 8 },
     script: { frames: 100, duration: 10, keyframes: [0, 1] },
+  },
+  {
+    id: "from-earth",
+    description:
+      "The inner planets seen from Earth, time running: the Sun's circle, Venus's rose, Mars's loops",
+    tags: ["sequence", "earth-view"],
+    bloom: false,
+    lens: false,
+    view: "inner",
+    show: { fromEarth: true },
+    script: { frames: 240, duration: 8, keyframes: [0.5, 1] },
+  },
+  {
+    id: "sun-forms",
+    description:
+      "The Sun's formation from the giants' framing, playing: the core falls in, the protostar lights, the first disk grows",
+    tags: ["sequence", "formation"],
+    bloom: false,
+    lens: false,
+    view: "giants",
+    yearsAgo: FORMATION_BEGINS,
+    script: { frames: 420, duration: 14, keyframes: Array.from({ length: 29 }, (_, i) => i / 28) },
+  },
+  {
+    id: "young-sun",
+    description:
+      "The inner planets four billion years ago: the dimmer Sun, the habitable zone drawn in",
+    tags: ["young-sun"],
+    bloom: false,
+    lens: false,
+    view: "inner",
+    yearsAgo: 4e9,
+    playing: false,
   },
 ];
 

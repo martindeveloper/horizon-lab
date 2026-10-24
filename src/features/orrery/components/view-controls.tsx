@@ -14,13 +14,14 @@ import { useOrrery, type Show } from "../lib/store";
 import { ScaleGlyph } from "./scale-glyph";
 
 export const DISPLAY: (keyof Show)[] = [
+  "fromEarth",
   "elliptical",
   "trueSize",
   "faintRings",
   "names",
   "distances",
 ];
-export const EXTRA: (keyof Show)[] = ["plane"];
+export const EXTRA: (keyof Show)[] = ["habitable", "plane"];
 
 const VIEW_IDS = SOLAR_VIEWS.map((v) => v.id);
 

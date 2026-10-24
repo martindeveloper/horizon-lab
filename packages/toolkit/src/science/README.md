@@ -32,7 +32,7 @@ the one degree-to-radian factor; do not retype it.
 
 `UNITS` defines lengths (Å, nm, m, km, R☉, au, ly, Mly, pc, kpc, Mpc, Gpc), times (ms … Gyr,
 Julian century), angles (rad, °, ′, ″, mas, μas), masses (kg, M☉, M⊕), rates (s⁻¹, km/s/Mpc for H₀), speeds (m/s, km/s,
-c), accelerations (m/s²), K, energies (J, eV), powers (W, L☉) and magnetic fields (T, mT, G), each as a factor to its SI base. `convert(value, from, to)` refuses to
+c), accelerations (m/s²), K, energies (J, eV), powers (W, L☉), magnetic fields (T, mT, G) and number densities (cm⁻³), each as a factor to its SI base. `convert(value, from, to)` refuses to
 mix dimensions.
 
 ```ts

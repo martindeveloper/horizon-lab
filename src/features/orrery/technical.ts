@@ -28,6 +28,17 @@ const specification = {
         {
           equation: "kepler-third-law",
         },
+        "r_seen = r_body − r_Earth  (from Earth; trails over the last years)",
+      ],
+    },
+    {
+      id: "formation",
+      equations: [
+        {
+          equation: "free-fall-time",
+        },
+        "r / r₀ = cos² β,  t / t_ff = (2/π)(β + sin β cos β)  (a uniform sphere falling from rest)",
+        "ω r² = const  (the core spins up as it shrinks)",
       ],
     },
     {
@@ -64,6 +75,17 @@ const specification = {
         "λ_Jupiter − λ_Saturn = 0  (conjunction; geocentric longitudes)",
         "dr/dt = 0  (perihelion as the sign turns upward)",
         "λ_Sun − λ_Mercury = 0, |β_Mercury| < 0.267°  (transit)",
+      ],
+    },
+    {
+      id: "youngSun",
+      equations: [
+        {
+          equation: "young-sun-luminosity",
+        },
+        {
+          equation: "habitable-zone-edge",
+        },
       ],
     },
     {
@@ -114,6 +136,26 @@ const specification = {
       title:
         "Tsiganis, Gomes, Morbidelli & Levison (2005), Origin of the orbital architecture of the giant planets of the Solar System, Nature 435, 459",
       url: SOURCE_URLS.tsiganis2005,
+    },
+    {
+      title:
+        "Bergin & Tafalla (2007), Cold dark clouds: the initial conditions for star formation, ARA&A 45, 339",
+      url: "https://doi.org/10.1146/annurev.astro.45.071206.100404",
+    },
+    {
+      title:
+        "Dunham et al. (2014), The evolution of protostars: insights from ten years of infrared surveys with Spitzer and Herschel, Protostars and Planets VI, 195",
+      url: "https://arxiv.org/abs/1401.1809",
+    },
+    {
+      title:
+        "Gough (1981), Solar interior structure and luminosity variations, Solar Physics 74, 21",
+      url: "https://doi.org/10.1007/BF00151270",
+    },
+    {
+      title:
+        "Kopparapu et al. (2013), Habitable zones around main-sequence stars: new estimates, ApJ 765, 131",
+      url: "https://doi.org/10.1088/0004-637X/765/2/131",
     },
     {
       title: "Nesvorný (2018), Dynamical evolution of the early Solar System, ARA&A 56, 137",

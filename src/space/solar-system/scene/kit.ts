@@ -68,6 +68,8 @@ export type SolarFrame = SolarMoment & {
   playing: boolean;
   /** Camera distance from its aim, au. */
   dist: number;
+  /** How much of the unselected orbit lines to draw, 0–1; all by default (a host turning about Earth dims them). */
+  orbits?: number;
 };
 
 /** 1 while a body's own label, orbit and marker show; eases to 0 as its close-up fills the view. */

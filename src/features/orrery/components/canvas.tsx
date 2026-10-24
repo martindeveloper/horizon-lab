@@ -10,7 +10,7 @@ import { createOrreryEngine } from "../lib/scene/engine";
 import { useOrrery } from "../lib/store";
 
 /** Every name the scene places, and the words its distance labels use. */
-const LABEL_KEYS = [...SOLAR_LABEL_KEYS, ...OBSERVATORY_IDS, ...DISTANCE_WORDS];
+const LABEL_KEYS = [...SOLAR_LABEL_KEYS, "habitableZone", ...OBSERVATORY_IDS, ...DISTANCE_WORDS];
 
 const resetReady = () => useOrrery.getState().setReady(false);
 

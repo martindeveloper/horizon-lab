@@ -119,7 +119,16 @@ export function createPlanetsLayer(
   const orientation = new Quaternion();
   const poleWorld = new Vector3();
 
-  const updatePlanets = ({ now, show, sel, yearsAgo, mig, driftYears, dist }: SolarFrame) => {
+  const updatePlanets = ({
+    now,
+    show,
+    sel,
+    yearsAgo,
+    mig,
+    driftYears,
+    dist,
+    orbits = 1,
+  }: SolarFrame) => {
     const labelled = names.to(show.names);
     looks.exposeRings(show.faintRings);
     for (const planet of planets) {
@@ -178,7 +187,7 @@ export function createPlanetsLayer(
       if (orbit.line.visible) {
         orbit.update(el, show.elliptical);
         orbit.material.color.set(selected ? SOLAR_GOLD : ORBIT_COLOR[planet.id]);
-        orbit.material.opacity = (selected ? 0.95 : 0.62) * drawn;
+        orbit.material.opacity = (selected ? 0.95 : 0.62 * orbits) * drawn;
       }
       place(planet.id, tmp[0], tmp[1], tmp[2], labelled * inFrame * shown);
     }
@@ -193,6 +202,7 @@ export function createPlanetsLayer(
     driftYears,
     dist,
     present,
+    orbits = 1,
   }: SolarFrame) => {
     const labelled = names.value;
     for (const { body, mesh, orbit, on, view } of named) {
@@ -232,7 +242,7 @@ export function createPlanetsLayer(
       orbit.line.visible = drawn > 0.004;
       if (orbit.line.visible) {
         orbit.update(el, ellipse);
-        orbit.material.opacity = 0.7 * drawn;
+        orbit.material.opacity = 0.7 * (selected ? 1 : orbits) * drawn;
       }
       place(body.id, tmp[0], tmp[1], tmp[2], labelled * inView * shown);
     }

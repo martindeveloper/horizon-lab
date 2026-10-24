@@ -33,8 +33,11 @@ import {
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW } from "./model/views";
 
-/** The solar system scene's switches, and rulers from the selection to the other bodies. */
-export type Show = SolarShow & { distances: boolean };
+/**
+ * The solar system scene's switches, rulers from the selection to the other bodies, and the
+ * view from Earth (`model/earth-view.ts`), and the habitable zone (`model/young-sun.ts`).
+ */
+export type Show = SolarShow & { distances: boolean; fromEarth: boolean; habitable: boolean };
 
 export type Panel = "none" | "objects" | "view" | "reading" | "moments";
 
@@ -47,6 +50,8 @@ const DEFAULT_SHOW: Show = {
   plane: true,
   names: true,
   distances: false,
+  fromEarth: false,
+  habitable: true,
   trueSize: false,
   faintRings: false,
   elliptical: true,

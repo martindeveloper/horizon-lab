@@ -1,10 +1,13 @@
 /** The formation timeline and the model's clocks, as the notes, tour and technical prose quote them. */
 import type { Facts } from "@/lib/facts";
 import { GALAXY } from "@/space/galaxy/model/catalogue/galaxy";
+import { FREE_FALL } from "@/space/solar-system/model/formation";
 import {
   CLEAR_DONE,
+  CORE_DENSITY_CM3,
   GAS_DISK_LIFETIME,
   MODEL_START,
+  PROTOSTAR_BEFORE_SOLIDS,
   SNOW_LINE_AU,
   SUN_BIRTH,
 } from "@/space/solar-system/model/parameters";
@@ -35,6 +38,30 @@ export const TIMELINE = {
       source: "connelly2012",
       status: "verified",
       note: "CAIs 4,567.3 ± 0.16 Myr",
+    },
+    coreDensity: {
+      value: CORE_DENSITY_CM3,
+      unit: "cm-3",
+      source: "bergin2007",
+      status: "teaching-choice",
+      note: "dense cores run 10⁴–10⁵ H₂ per cm³; the dense end, about to fall",
+    },
+    freeFall: {
+      value: FREE_FALL,
+      unit: "yr",
+      show: "kyr",
+      digits: 2,
+      source: "bergin2007",
+      status: "derived",
+      note: "√(3π / 32 G ρ) at the catalogued core density, ρ = 2.8 m_H n",
+    },
+    protostar: {
+      value: PROTOSTAR_BEFORE_SOLIDS,
+      unit: "yr",
+      show: "kyr",
+      source: "dunham2014",
+      status: "teaching-choice",
+      note: "inside the Class 0 phase's 0.13–0.26 Myr; the first solids at its end",
     },
     gasDisk: {
       value: GAS_DISK_LIFETIME,

@@ -150,6 +150,8 @@ export function createPopulationsLayer(
   const oortOn = lod.fader();
   const diskOn = lod.fader();
   const age = lod.fader();
+  /** The planetesimal disk is drawn from the first solids on. */
+  const solids = lod.fader();
 
   const jupiterEl: Elements = { a: 0, e: 0, i: 0, omega: 0, node: 0, M: 0 };
 
@@ -211,7 +213,11 @@ export function createPopulationsLayer(
       const oortShown = oortOn.to(show.oort);
       if (oort.fade(OORT(dist) * oortShown * formed))
         oort.set(mig, driftYears, pixel, pxWorld(dist, 40));
-      const diskShown = DISK(dist) * diskOn.to(show.disk) * (1 - smoothstep(0.9, 0.98, mig));
+      const diskShown =
+        DISK(dist) *
+        diskOn.to(show.disk) *
+        solids.to(yearsAgo <= SUN_BIRTH) *
+        (1 - smoothstep(0.9, 0.98, mig));
       diskRing.visible = diskShown > 0.004;
       looks.disk.opacity = (1 - mig) * 0.85 * diskShown;
       const shells = SHELLS(dist) * oortShown;

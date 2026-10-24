@@ -50,6 +50,7 @@ import {
   migrationProgress,
   tracerSemiMajorAxis,
 } from "../src/space/solar-system/model/equations.ts";
+import { FORMATION_BEGINS } from "../src/space/solar-system/model/formation.ts";
 import { GALACTIC_YEAR, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
 
 const near = (actual, expected, tolerance, label) =>
@@ -188,8 +189,8 @@ test("orrery timeline gives each formation stage room, a note and a play stop", 
     [1e9, "today"],
   ];
   for (const [yearsAgo, note] of stages) assert.equal(noteOf(yearsAgo), note, `${yearsAgo}`);
-  // A long frame in the interstellar era stops at the Sun's birth instead of skipping the disk.
-  assert.equal(advancePlay(SUN_BIRTH + 1e6, 1), SUN_BIRTH);
+  // A long frame in the interstellar era stops where the formation plays instead of skipping it.
+  assert.equal(advancePlay(SUN_BIRTH + 1e6, 1), FORMATION_BEGINS);
   assert.ok(advancePlay(SUN_BIRTH - 1e4, 1 / 60) > SUN_BIRTH - 1.1e4, "early stages play slowly");
   const notes = new Set(Array.from({ length: 1001 }, (_, k) => noteOf(sliderToYearsAgo(k / 1000))));
   for (const [, note] of stages) assert.ok(notes.has(note), `${note} is reachable on the slider`);

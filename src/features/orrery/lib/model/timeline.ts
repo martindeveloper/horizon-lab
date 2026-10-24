@@ -1,3 +1,9 @@
+import {
+  COLLAPSE_BEGINS,
+  FORMATION_BEGINS,
+  FREE_FALL,
+  PROTOSTAR_LIT,
+} from "@/space/solar-system/model/formation";
 /**
  * The timeline: the slider's track, its epochs, the dated notes and playback. What the
  * solar system looks like at a moment is the shared model's (`@/space/solar-system/model/moment`).
@@ -34,11 +40,13 @@ const FIRST_SOLIDS_FLOOR = 1e3;
 const GAS_DECADES = Math.log(GAS_DISK_LIFETIME / FIRST_SOLIDS_FLOOR);
 
 type Segment = { end: number; from: number; to: number; log?: true };
-/* Slider segments: ISM, the gas disk, accretion, clearing, then everything since. The gas
-   disk is logarithmic in time since the first solids, so dust, planetesimals and embryos
-   (thousands, then hundreds of thousands, then millions of years) each get room. */
+/* Slider segments: ISM, the Sun's formation, the gas disk, accretion, clearing, then
+   everything since. The gas disk is logarithmic in time since the first solids, so dust,
+   planetesimals and embryos (thousands, then hundreds of thousands, then millions of years)
+   each get room. */
 const SEGMENTS: readonly Segment[] = [
-  { end: 0.1, from: OLDEST, to: SUN_BIRTH },
+  { end: 0.07, from: OLDEST, to: FORMATION_BEGINS },
+  { end: 0.1, from: FORMATION_BEGINS, to: SUN_BIRTH },
   { end: 0.19, from: SUN_BIRTH, to: GAS_END, log: true },
   { end: 0.25, from: GAS_END, to: MODEL_START },
   { end: 0.62, from: MODEL_START, to: CLEAR_DONE },
@@ -114,7 +122,9 @@ type Note =
   | "merger"
   | "thinDisk"
   | "ingredients"
+  | "core"
   | "collapse"
+  | "protostar"
   | "dust"
   | "planetesimals"
   | "gasDisk"
@@ -127,8 +137,10 @@ type Note =
 export function noteOf(yearsAgo: number): Note {
   if (yearsAgo > 9.3e9) return "merger";
   if (yearsAgo > 7e9) return "thinDisk";
-  if (yearsAgo > SUN_BIRTH + 1e6) return "ingredients";
-  if (yearsAgo > SUN_BIRTH) return "collapse";
+  if (yearsAgo > FORMATION_BEGINS) return "ingredients";
+  if (yearsAgo > COLLAPSE_BEGINS) return "core";
+  if (yearsAgo > PROTOSTAR_LIT) return "collapse";
+  if (yearsAgo > SUN_BIRTH) return "protostar";
   const since = SUN_BIRTH - yearsAgo;
   if (since < PLANETESIMALS_AFTER) return "dust";
   if (since < EMBRYOS_AFTER) return "planetesimals";
@@ -152,16 +164,20 @@ export const EPOCHS: readonly { id: Epoch; yearsAgo: number }[] = [
   { id: "today", yearsAgo: 0 },
 ];
 export function epochOf(yearsAgo: number): Epoch {
-  if (yearsAgo > SUN_BIRTH) return "sketch";
+  if (yearsAgo > FORMATION_BEGINS) return "sketch";
   if (yearsAgo > 4.55e9) return "birth";
   if (yearsAgo > 4.49e9) return "disk";
   if (yearsAgo >= CLEAR_DONE) return "clearing";
   return "today";
 }
 
+/** Seconds the core's free fall takes while playing: the formation's pace, quiet core to first solids. */
+const FREE_FALL_SECONDS = 4;
+
 /** Years of model time per real second while playing, by era. */
 function playRate(yearsAgo: number) {
-  if (yearsAgo > SUN_BIRTH) return 1.6e8;
+  if (yearsAgo > FORMATION_BEGINS) return 1.6e8;
+  if (yearsAgo > SUN_BIRTH) return FREE_FALL / FREE_FALL_SECONDS;
   /* The gas disk plays at a constant pace on its logarithmic slider segment. */
   if (yearsAgo > GAS_END) return 1.5 * Math.max(SUN_BIRTH - yearsAgo, FIRST_SOLIDS_FLOOR);
   if (yearsAgo > MODEL_START) return 1.2e7;
@@ -169,10 +185,14 @@ function playRate(yearsAgo: number) {
   return 2.2e8;
 }
 
-/** One playback step. It stops at the Sun's birth so a frame never skips the gas disk. */
+/** Moments a step never crosses: the formation's start and the first solids, so a long frame skips neither the collapse nor the dust. */
+const PLAY_STOPS = [FORMATION_BEGINS, SUN_BIRTH];
+
+/** One playback step. */
 export function advancePlay(yearsAgo: number, dt: number) {
   const next = Math.max(0, yearsAgo - playRate(yearsAgo) * dt);
-  return yearsAgo > SUN_BIRTH && next < SUN_BIRTH ? SUN_BIRTH : next;
+  for (const stop of PLAY_STOPS) if (yearsAgo > stop && next < stop) return stop;
+  return next;
 }
 
 /** Laps of the Galaxy the Sun has made by `yearsAgo`, one per galactic year (schematic). */

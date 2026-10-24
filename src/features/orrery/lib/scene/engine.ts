@@ -49,6 +49,7 @@ import {
 } from "@horizon/toolkit/scene";
 
 import { DRIFT } from "../drift";
+import { earthCentred } from "../model/earth-view";
 import { EARTH, solarPart, upFrom } from "../model/selection";
 import { solarActivityVisible } from "../model/solar-activity";
 import { advancePlay } from "../model/timeline";
@@ -57,6 +58,7 @@ import { orreryQuality } from "../quality";
 import { useOrrery, type OrreryStore } from "../store";
 import { createCameraRig } from "./camera-rig";
 import { createDriftDirector } from "./drift-director";
+import { createEarthView } from "./earth-view";
 import { createGuideDirector } from "./guide-director";
 import { createHud } from "./hud";
 import { ORRERY_EDGE, SOLAR_EDGE } from "./kit";
@@ -64,6 +66,7 @@ import { createMeasuredMaps } from "./measured-maps";
 import { createPicking } from "./picking";
 import { createSkyLayer } from "./sky-layer";
 import { createSolarActivityLifecycle } from "./solar-activity-lifecycle";
+import { createYoungSun } from "./young-sun";
 
 /** Seconds the Motion toggle takes to ease the orbits to a stop or back up to speed. */
 const MOTION_RAMP = 0.7;
@@ -100,6 +103,7 @@ export function createOrreryEngine({
     const rig = createCameraRig(camera, {
       reduceMotion,
       closeUp: () => closeUp.current,
+      home: (aim) => earthView.place(aim),
     });
     const { pose } = rig;
     /* Names keep above the time dock where it publishes its height (phones), else 150 px. */
@@ -131,6 +135,10 @@ export function createOrreryEngine({
       swarms: quality.swarms,
     });
     const { moons } = solar;
+    /* The view from Earth: the aim rides Earth and the bodies trail their paths seen from it. */
+    const earthView = createEarthView(kit, solar.root, { reduceMotion, shownFor });
+    /* The faint young Sun: the glow follows its output, the habitable zone moves with it. */
+    const youngSun = createYoungSun(kit, solar.root, { place, shownFor });
     /* Earth's observatories, with the solar system: in its depth passes about Earth, and at
        their true size after them. */
     const observatories = createObservatoriesLayer(kit, solar.root, {
@@ -257,6 +265,7 @@ export function createOrreryEngine({
         veil.busy ||
         controls.interacting ||
         sky.easing ||
+        earthView.busy ||
         lod.busy ||
         closeUp.busy() ||
         surfacesFading ||
@@ -268,10 +277,11 @@ export function createOrreryEngine({
     rig.snapToView(view);
     /* Arrived from Deep Field: open where it left off, or, from past the Oort cloud, come in
        from the Orrery's edge; then settle on this view. Leaving for Deep Field: it opens at
-       this pose, or from a close-up, at the pose the close-up flew in from. */
+       this pose (about the Sun, wherever the aim is), or from a close-up, at the pose the
+       close-up flew in from. */
     bridgeHandoff(scope, "orrery", rig, view, {
       arriveAt: (crossing) => crossing.pose ?? { distance: ORRERY_EDGE },
-      leaveAt: () => closeUp.current?.home ?? pose,
+      leaveAt: () => closeUp.current?.home ?? earthView.aboutSun(pose),
     });
     rig.applyPose();
 
@@ -462,11 +472,16 @@ export function createOrreryEngine({
               ) * closeUp.clockShare()
             : 0;
         driftYears += dt * driftRate * smootherstep(motionRamp);
+        const moment = momentAt(yearsAgo, driftYears);
 
         guide.stepCamera(state, dt);
         drift.step(dt);
         veil.step(dt, state.drift === "off");
         rig.step(dt);
+        earthView.step(dt, moment, now, {
+          on: earthCentred(state),
+          held: closeUp.current !== null,
+        });
         rig.home();
         closeUp.step(dt);
         surfacesFading = looks.step(dt);
@@ -476,17 +491,20 @@ export function createOrreryEngine({
 
         const selection = store.getState().selection;
         const frame: SolarFrame = {
-          ...momentAt(yearsAgo, driftYears),
+          ...moment,
           dt,
           now,
           show,
           sel: solarPart(selection),
           playing: state.playing,
           dist,
+          orbits: earthView.orbits,
         };
         guide.stepSketch(state, frame);
         sky.update(frame);
         const at = solar.update(frame, closeUp.current !== null);
+        earthView.update(frame);
+        youngSun.update(frame, show.habitable);
         const craft = closeUp.current?.sel;
         observatories.update({
           dt,

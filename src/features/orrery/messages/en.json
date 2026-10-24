@@ -8,6 +8,10 @@
     "objects": { "title": "Objects", "body": "Find a body and open its card." },
     "closeUp": { "title": "Close-up", "body": "Fly in to a body at its true size." },
     "time": { "title": "Time", "body": "Scrub through history, or replay the clearing." },
+    "fromEarth": {
+      "title": "From Earth",
+      "body": "Earth holds still, the Sun circles it and the planets draw their loops: the sky the epicycles explained."
+    },
     "moments": {
       "title": "Moments",
       "body": "Set the clock to an opposition or a conjunction, or the slider to a milestone of deep time."
@@ -53,6 +57,7 @@
     "today": "Today",
     "thousand": "{value} thousand years ago",
     "noSun": "No Sun yet",
+    "protostar": "A protostar, not yet the Sun",
     "laps": "{laps} Galaxy laps since the Sun formed, schematic",
     "clock": "Planets drawn for {date}",
     "offsetDays": "{value, plural, one {# day} other {# days}}",
@@ -63,6 +68,8 @@
     "clockBack": "Today − {offset} · {rate}"
   },
   "toggles": {
+    "fromEarth": "From Earth",
+    "habitable": "Habitable zone",
     "elliptical": "Ellipses",
     "trueSize": "True size",
     "faintRings": "Faint rings",
@@ -139,6 +146,9 @@
     "minutes": "{value} min",
     "hours": "{value} h",
     "tiltEquator": "{value}° to Earth's equator",
+    "outputThen": "Output at selected time",
+    "ofToday": "{value} % of today · model",
+    "habitableZone": "Habitable zone",
     "fromEarth": "From Earth",
     "l2": "L2, beyond Earth",
     "halo": "Once round L2",
@@ -307,6 +317,11 @@
         "title": "Mostly empty",
         "body": "True size shrinks each planet to its real radius, and at this distance they vanish. The usual markers are enlarged."
       },
+      "birth": {
+        "title": "A cloud falls in",
+        "body": "A cold core of the cloud falls in under its own weight in about {freeFallKyr} thousand years. Spinning faster as it shrinks, it flattens into a disk, and at the centre a protostar lights, warmed by the fall.",
+        "eq": "{equation} · n in molecules per cm³"
+      },
       "disk": {
         "title": "Born in a flat disk",
         "body": "The planets circle the Sun one way round and almost in one plane. Kant and Laplace took that as the mark of a birth in one spinning cloud of gas and dust."
@@ -336,7 +351,11 @@
     "sections": {
       "ephemeris": {
         "title": "Where the planets are",
-        "body": "Each planet's a, e, I, L, ϖ and Ω come from the JPL approximate elements for 1800–2050 with linear rates per Julian century. Kepler's equation is solved by Newton's method and the perifocal position is rotated into the J2000 ecliptic frame. Pluto uses its row from the table's earlier edition, since withdrawn by JPL. Sedna and Halley use their osculating elements with the mean anomaly counted from a known perihelion passage. Periods follow Kepler's third law."
+        "body": "Each planet's a, e, I, L, ϖ and Ω come from the JPL approximate elements for 1800–2050 with linear rates per Julian century. Kepler's equation is solved by Newton's method and the perifocal position is rotated into the J2000 ecliptic frame. Pluto uses its row from the table's earlier edition, since withdrawn by JPL. Sedna and Halley use their osculating elements with the mean anomaly counted from a known perihelion passage. Periods follow Kepler's third law. From Earth, the camera turns about Earth and each trail is a body's position less Earth's over the last years, so the loops of retrograde motion draw as they do in the sky."
+      },
+      "formation": {
+        "title": "The Sun's formation",
+        "body": "A dense core of the natal cloud, {coreDensity} molecules per cubic centimetre, falls in from rest in one free-fall time, about {freeFallKyr} thousand years. The core drawn before the camera shrinks on the cycloid of a uniform sphere, slowly at first, then all at once, spinning up as 1/r² and flattening into a disk. A protostar lights as it lands, {protostarKyr} thousand years before the first solids (the Class 0 phase): an ember through its dust that whitens as it grows, with a first disk a third of the painted one's radius growing out to it. Playback gives the free fall a few seconds and the slider gives the formation a segment of its own. A sketch in time: a real core falls inside out, and a protostar's own light is infrared."
       },
       "migration": {
         "title": "Formation and the clearing sketch",
@@ -345,6 +364,10 @@
       "sky": {
         "title": "The sky behind it",
         "body": "Bright stars are the shared J2000 catalogue placed by right ascension and declination and rotated into the planets' ecliptic frame. The Milky Way is sampled from a painted map in galactic coordinates (bulge toward Sagittarius, the Great Rift, the Coalsack): tens of thousands of grains and a soft haze drawn from the same map, so it looks granular like the real band rather than a smooth glow. The whole band turns about the galactic pole once per galactic year as the Sun orbits; before about {thinDiskGyr} billion years ago the thin disk and dust lane give way to a thicker, bluer disk; inside the natal cloud the view dims and reddens. Named stars fade beyond about {namedStarsYears} years, when proper motions have scrambled the constellations."
+      },
+      "youngSun": {
+        "title": "The faint young Sun",
+        "body": "On the main sequence the Sun brightens as its core turns hydrogen to helium. Gough's interpolation of standard solar models gives its output by age: about {youngSunPercent} % of today's as the sketch starts, within a few per cent of the models after its first few hundred million years. The glow follows the law; the contracting Sun before the sketch is not modelled, and the band is not drawn there. The habitable zone is drawn at its conservative edges today, {zoneInnerAu} to {zoneOuterAu} au (moist to maximum greenhouse, clouds left out), and moved with the square root of the output, where the same sunlight falls; the young Sun's redder light would shift the edges a little further still. The Sun's card reads both at the selected time."
       },
       "events": {
         "title": "Moments on the clock",
@@ -372,7 +395,9 @@
     "merger": "About {mergerGyr} billion years ago the Milky Way swallowed Gaia-Enceladus, stirring and thickening a thick disk that had already begun to form. The Sun's atoms are interstellar gas.",
     "thinDisk": "The thin disk is forming stars and the bar is in place by about {thinDiskGyr} billion years ago. Earlier stars are making the Sun's heavy elements.",
     "ingredients": "Interstellar gas, enriched by earlier generations of stars. The cloud that will form the Sun has not collapsed yet.",
-    "collapse": "A molecular-cloud core collapses in under a million years. Short-lived aluminium-26 in meteorites may point to a nearby massive star.",
+    "core": "A cold, dense core of the cloud, slowly turning: about {coreDensity} molecules per cubic centimetre. Short-lived aluminium-26 in meteorites may point to a nearby massive star.",
+    "collapse": "The core falls in under its own weight, in about {freeFallKyr} thousand years at that density: slowly at first, then all at once. Spinning faster as it shrinks, it flattens into a disk.",
+    "protostar": "A protostar glows at the centre, heated by the infall and hidden in dust, feeding from the disk around it. The first solids condense about {protostarKyr} thousand years on.",
     "dust": "First solids, {sunBirthGyr} billion years ago: the timeline's zero. Dust grains stick on gentle contact and grow into millimetre-to-centimetre pebbles.",
     "planetesimals": "In models, within about {planetesimalsKyr} thousand years the first pebbles gather into planetesimals kilometres across; farther out this goes on for millions of years. Arrokoth is one survivor.",
     "gasDisk": "In models, Moon-mass embryos by about {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to grab gas: the giants.",

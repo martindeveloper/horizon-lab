@@ -7,9 +7,10 @@
 import { factsOf, type Fact } from "@/lib/facts";
 import { PLANETS, POPULATIONS } from "@/space/solar-system/model/catalogue";
 
+import { SUN } from "./sun";
 import { TIMELINE } from "./timeline";
 
-const CATALOGUE = { timeline: TIMELINE } as const;
+const CATALOGUE = { timeline: TIMELINE, sun: SUN } as const;
 
 /**
  * Every figure the timeline notes, the guide and the technical notes quote, by the
@@ -18,6 +19,9 @@ const CATALOGUE = { timeline: TIMELINE } as const;
  */
 export const PROSE_FIGURES = {
   sunBirthGyr: TIMELINE.formation.firstSolids,
+  coreDensity: TIMELINE.formation.coreDensity,
+  freeFallKyr: TIMELINE.formation.freeFall,
+  protostarKyr: TIMELINE.formation.protostar,
   gasMyr: TIMELINE.formation.gasDisk,
   diskLifetimesMyr: TIMELINE.formation.diskLifetimes,
   planetesimalsKyr: TIMELINE.formation.planetesimals,
@@ -33,6 +37,9 @@ export const PROSE_FIGURES = {
   moonLavaGyr: TIMELINE.history.moonLava,
   ringsMyr: TIMELINE.history.saturnRings,
   chicxulubMyr: TIMELINE.history.chicxulub,
+  youngSunPercent: SUN.sun.start,
+  zoneInnerAu: SUN.sun.zoneInner,
+  zoneOuterAu: SUN.sun.zoneOuter,
   modelStartGyr: TIMELINE.formation.modelStart,
   clearDoneGyr: TIMELINE.formation.clearingDone,
   jupiterStartAu: PLANETS.jupiter.start,

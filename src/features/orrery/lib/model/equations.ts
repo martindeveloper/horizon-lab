@@ -3,6 +3,8 @@ import { OBSERVATORY_EQUATIONS } from "@/space/solar-system/model/observatories"
 import { ORBIT_EQUATIONS } from "@horizon/toolkit/bodies";
 import { keplerThirdLaw, lightTravelTime, type Formula } from "@horizon/toolkit/science";
 
+import { YOUNG_SUN_EQUATIONS } from "./young-sun";
+
 /**
  * Every formula the Orrery's `technical.ts` may reference by ID: the shared laws and the
  * solar system model's own. Shader-only steps, vector rotations and sampling recipes stay as
@@ -15,5 +17,6 @@ export const ORRERY_EQUATIONS = Object.fromEntries<Formula>(
     ...ORBIT_EQUATIONS,
     ...SOLAR_EQUATIONS,
     ...OBSERVATORY_EQUATIONS,
+    ...YOUNG_SUN_EQUATIONS,
   ].map((equation) => [equation.id, equation]),
 );

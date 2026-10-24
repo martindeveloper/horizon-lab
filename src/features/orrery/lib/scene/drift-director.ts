@@ -40,6 +40,8 @@ export function createDriftDirector(
   let timed = timedDrift(DRIFT, null);
   let timedWith: AudioMap | null = null;
   let drift: RigDrift;
+  /** The shot last flown to: a shot's timeline is set once, as its flight begins. */
+  let flownTo = -1;
   const visits = createDriftVisits<CloseUpBody>(rig, {
     ...options,
     settings: DRIFT.closeUp,
@@ -113,6 +115,17 @@ export function createDriftDirector(
       const map = audioMapNow(DRIFT.music?.track);
       if (map !== timedWith && !drift.flying) build(map);
       drift.step(driftRunState(state.drift), dt, leaving);
+      if (state.drift === "off") flownTo = -1;
+      else if (drift.shot !== flownTo) {
+        flownTo = drift.shot;
+        const shot = timed.shots[flownTo];
+        /* Under reduced motion the timeline stays the visitor's: the formation would not play. */
+        if (shot && "timeline" in shot && shot.timeline && !reduceMotion.matches) {
+          const s = store.getState();
+          s.setYearsAgo(shot.timeline.yearsAgo);
+          if (!s.playing) s.togglePlay();
+        }
+      }
     },
   };
 }

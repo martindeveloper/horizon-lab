@@ -1,7 +1,22 @@
 import { clamp01 } from "@horizon/toolkit/math";
-import { defineEquation, formatNumber, type Formula } from "@horizon/toolkit/science";
+import {
+  defineEquation,
+  formatNumber,
+  GRAVITATIONAL_CONSTANT,
+  JULIAN_YEAR_SECONDS,
+  PROTON_MASS_KG,
+  UNITS,
+  type Formula,
+} from "@horizon/toolkit/science";
 
-import { CLEAR_DONE, GALACTIC_YEAR, GAS_DISK_LIFETIME, MODEL_START, SUN_BIRTH } from "./parameters";
+import {
+  CLEAR_DONE,
+  GALACTIC_YEAR,
+  GAS_MASS_PER_H2,
+  GAS_DISK_LIFETIME,
+  MODEL_START,
+  SUN_BIRTH,
+} from "./parameters";
 
 /**
  * The solar system model's formulas, each written once: the model computes with them, the
@@ -12,6 +27,25 @@ import { CLEAR_DONE, GALACTIC_YEAR, GAS_DISK_LIFETIME, MODEL_START, SUN_BIRTH } 
 const n = (value: number) => formatNumber(value, "en", 3);
 const gyr = (years: number) => n(years / 1e9);
 const myr = (years: number) => n(years / 1e6);
+
+/**
+ * A uniform cloud at rest falls in on itself in one free-fall time, set by its density alone:
+ * `n` H₂ molecules per cm³, with ρ = 2.8 m_H n (helium included); `t_ff` in years.
+ */
+export const freeFallTime = defineEquation({
+  id: "free-fall-time",
+  text: `t_ff = √(3π / (32 G ρ)),  ρ = ${n(GAS_MASS_PER_H2)} m_H n`,
+  latex: `t_{ff} = \\sqrt{\\frac{3\\pi}{32\\,G\\rho}}, \\quad \\rho = ${n(GAS_MASS_PER_H2)}\\,m_H\\,n`,
+  output: "t",
+  variables: {
+    n: { symbol: "n", latex: "n", unit: "cm-3" },
+    t: { symbol: "t_ff", latex: "t_{ff}", unit: "yr" },
+  },
+  compute: ({ n }) => {
+    const rho = GAS_MASS_PER_H2 * PROTON_MASS_KG * n * UNITS["cm-3"].factor;
+    return Math.sqrt((3 * Math.PI) / (32 * GRAVITATIONAL_CONSTANT * rho)) / JULIAN_YEAR_SECONDS;
+  },
+});
 
 /** First solids 4.567 Gyr ago (CAI age); a 5 Myr gas disk. `t` is years ago. */
 export const gasDisk = defineEquation({
@@ -87,6 +121,7 @@ export const galacticAngle = defineEquation({
 
 /** The solar system model's formulas, for a simulation's equation registry. */
 export const SOLAR_EQUATIONS: readonly Formula[] = [
+  freeFallTime,
   gasDisk,
   migrationProgress,
   migratedElement,

@@ -20,7 +20,7 @@ export function migrationProgress(yearsAgo: number) {
   return migration.compute({ t: yearsAgo });
 }
 
-export const sunExists = (yearsAgo: number) => yearsAgo <= SUN_BIRTH;
+export { sunExists } from "./formation";
 /** 0 at the first solids, 1 once the gas disk is gone. */
 export function gasDiskFade(yearsAgo: number) {
   return 1 - gasDisk.compute({ t: yearsAgo });

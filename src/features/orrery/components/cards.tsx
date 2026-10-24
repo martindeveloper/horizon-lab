@@ -1,5 +1,6 @@
 import {
   buildCard,
+  distanceFormat,
   figure,
   formatAu,
   printAll,
@@ -25,8 +26,10 @@ import { isObservatorySelection } from "@/space/solar-system/model/observatories
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import { TRACERS, binOf, tracerElements } from "@/space/solar-system/model/tracers";
 import { namedById, type PlanetId } from "@horizon/toolkit/bodies";
+import { formatDistanceRange } from "@horizon/toolkit/science";
 
 import type { OrrerySelection } from "../lib/model/selection";
+import { habitableZone, sunLuminosity, youngSunModelled } from "../lib/model/young-sun";
 import { NAMED_NOTES, PLANET_NOTES, POPULATION_CARDS, SUN_CARD, TRACER_NOTES } from "./card-specs";
 import { formatYearsAgo } from "./format";
 import { observatoryCard } from "./observatory-cards";
@@ -40,6 +43,32 @@ type Moment = {
   elliptical: boolean;
   date: Date;
 };
+
+/** The Sun's card, with its output and habitable zone at the moment where the young-Sun law is applied. */
+function sunCard({ t, f, d, yearsAgo }: Moment): Card {
+  const card = staticCard(t, d, "cards.sun", SUN_CARD);
+  if (!youngSunModelled(yearsAgo)) return card;
+  const { inner, outer } = habitableZone(yearsAgo);
+  const facts = [
+    ...(yearsAgo > 0
+      ? [
+          {
+            id: "output",
+            label: t("facts.outputThen"),
+            value: t("facts.ofToday", {
+              value: f.number(sunLuminosity(yearsAgo) * 100, { maximumFractionDigits: 0 }),
+            }),
+          },
+        ]
+      : []),
+    {
+      id: "habitableZone",
+      label: t("facts.habitableZone"),
+      value: formatDistanceRange(inner, outer, distanceFormat(t, d)),
+    },
+  ];
+  return { ...card, facts: [...card.facts, ...facts] };
+}
 
 function planetCard(sel: Of<SolarSelection, "planet">, m: Moment): Card {
   const { t, f, d, mig, elliptical, date } = m;
@@ -149,7 +178,7 @@ export function cardFor(
   const m: Moment = { t, f, d, yearsAgo, mig: migrationProgress(yearsAgo), elliptical, date };
   switch (sel.kind) {
     case "sun":
-      return staticCard(t, d, "cards.sun", SUN_CARD);
+      return sunCard(m);
     case "planet":
       return planetCard(sel, m);
     case "named":

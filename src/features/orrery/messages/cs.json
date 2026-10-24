@@ -11,6 +11,10 @@
     "objects": { "title": "Objekty", "body": "Najděte těleso a otevřete jeho kartu." },
     "closeUp": { "title": "Zblízka", "body": "Přeletí k tělesu v jeho skutečné velikosti." },
     "time": { "title": "Čas", "body": "Projděte historii, nebo přehrajte odklízení těles." },
+    "fromEarth": {
+      "title": "Ze Země",
+      "body": "Země stojí, Slunce ji obíhá a planety kreslí své smyčky: obloha, kterou vysvětlovaly epicykly."
+    },
     "moments": {
       "title": "Okamžiky",
       "body": "Nastavte hodiny na opozici či konjunkci, nebo posuvník na milník hlubokého času."
@@ -59,6 +63,7 @@
     "today": "Dnes",
     "thousand": "před {value} tis. let",
     "noSun": "Před vznikem Slunce",
+    "protostar": "Protohvězda, ještě ne Slunce",
     "laps": "Počet oběhů Slunce kolem středu Galaxie od jeho vzniku: {laps} (schematicky)",
     "clock": "Polohy planet k datu {date}",
     "offsetDays": "{value, plural, one {# den} few {# dny} other {# dní}}",
@@ -69,6 +74,8 @@
     "clockBack": "Dnes − {offset} · {rate}"
   },
   "toggles": {
+    "fromEarth": "Ze Země",
+    "habitable": "Obyvatelná zóna",
     "elliptical": "Elipsy",
     "trueSize": "Skutečná velikost",
     "faintRings": "Slabé prstence",
@@ -145,6 +152,9 @@
     "minutes": "{value} min",
     "hours": "{value} h",
     "tiltEquator": "{value}° k zemskému rovníku",
+    "outputThen": "Zářivý výkon ve zvoleném čase",
+    "ofToday": "{value} % dnešního · model",
+    "habitableZone": "Obyvatelná zóna",
     "fromEarth": "Od Země",
     "l2": "L2 za Zemí",
     "halo": "Jeden oběh kolem L2",
@@ -313,6 +323,11 @@
         "title": "Převážně prázdno",
         "body": "Se Skutečnou velikostí mají planety své pravé poloměry a z této dálky zmizí. Běžné značky jsou zvětšené."
       },
+      "birth": {
+        "title": "Oblak se hroutí",
+        "body": "Chladné jádro oblaku se zhroutí vlastní vahou asi za {freeFallKyr} {freeFallKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let. Jak se smršťuje, točí se rychleji a zplošťuje do disku; ve středu se rozzáří protohvězda, zahřátá pádem.",
+        "eq": "{equation} · n v molekulách na cm³"
+      },
       "disk": {
         "title": "Planety vznikly v plochém disku",
         "body": "Planety krouží kolem Slunce jedním směrem a skoro v téže rovině. Kant a Laplace v tom viděli stopu zrodu v jediném rotujícím oblaku plynu a prachu."
@@ -342,7 +357,11 @@
     "sections": {
       "ephemeris": {
         "title": "Výpočet poloh planet",
-        "body": "Dráhové elementy a, e, I, L, ϖ a Ω každé planety i jejich lineární změny za juliánské století pocházejí z přibližných tabulek JPL pro roky 1800–2050. Keplerova rovnice se řeší Newtonovou metodou. Poloha v rovině dráhy, vyjádřená v perifokální soustavě, se poté převádí do ekliptikální soustavy J2000. Pro Pluto se používají údaje ze starší verze tabulky, kterou JPL mezitím stáhla. Sedna a Halleyova kometa používají oskulační dráhové elementy; jejich střední anomálie se počítá od známého průchodu perihelem. Oběžné doby se určují ze třetího Keplerova zákona."
+        "body": "Dráhové elementy a, e, I, L, ϖ a Ω každé planety i jejich lineární změny za juliánské století pocházejí z přibližných tabulek JPL pro roky 1800–2050. Keplerova rovnice se řeší Newtonovou metodou. Poloha v rovině dráhy, vyjádřená v perifokální soustavě, se poté převádí do ekliptikální soustavy J2000. Pro Pluto se používají údaje ze starší verze tabulky, kterou JPL mezitím stáhla. Sedna a Halleyova kometa používají oskulační dráhové elementy; jejich střední anomálie se počítá od známého průchodu perihelem. Oběžné doby se určují ze třetího Keplerova zákona. Při pohledu ze Země se kamera otáčí kolem Země a každá stopa je poloha tělesa bez polohy Země za poslední roky; smyčky zpětného pohybu se tak kreslí tak, jak je vidíme na obloze."
+      },
+      "formation": {
+        "title": "Vznik Slunce",
+        "body": "Husté jádro mateřského oblaku, {coreDensity} {coreDensityPlural, select, one {molekula} few {molekuly} many {molekuly} other {molekul}} na krychlový centimetr, se z klidu zhroutí za jednu dobu volného pádu, asi {freeFallKyr} {freeFallKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let. Jádro vykreslené před kamerou se smršťuje po cykloidě stejnorodé koule, zprvu pomalu, pak naráz, roztáčí se jako 1/r² a zplošťuje do disku. Při dopadu se rozzáří protohvězda, {protostarKyr} {protostarKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let před prvními pevnými látkami (fáze třídy 0): řeřavý uhlík prosvítající prachem, který s růstem bělá, s prvním diskem o třetině poloměru vykresleného, jenž k němu dorůstá. Přehrávání dává volnému pádu několik sekund a posuvník dává vzniku vlastní úsek. Náčrt v čase: skutečné jádro se hroutí zevnitř ven a vlastní světlo protohvězdy je infračervené."
       },
       "migration": {
         "title": "Vznik soustavy a model odklízení těles",
@@ -351,6 +370,10 @@
       "sky": {
         "title": "Obloha v pozadí",
         "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně {namedStarsYears} {namedStarsYearsPlural, select, one {rok} few {roky} many {roku} other {let}} od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí."
+      },
+      "youngSun": {
+        "title": "Slabé mladé Slunce",
+        "body": "Na hlavní posloupnosti Slunce zjasňuje, jak jeho jádro mění vodík v helium. Goughova interpolace standardních slunečních modelů dává jeho výkon podle stáří: na začátku náčrtu asi {youngSunPercent} % dnešního, po prvních několika stech milionech let v rámci několika procent modelů. Záře se řídí tímto zákonem; smršťující se Slunce před začátkem náčrtu modelováno není a pás se tam nekreslí. Obyvatelná zóna je kreslena na dnešních konzervativních okrajích, {zoneInnerAu} až {zoneOuterAu} au (od vlhkého po maximální skleník, bez oblačnosti), a posouvá se s odmocninou výkonu, tam, kde dopadá stejné sluneční záření; červenější světlo mladého Slunce by okraje posunulo ještě o kousek dál. Karta Slunce ukazuje obojí ve zvoleném čase."
       },
       "events": {
         "title": "Okamžiky na hodinách",
@@ -378,7 +401,9 @@
     "merger": "Asi před {mergerGyr} {mergerGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let Mléčná dráha pohltila galaxii Gaia-Enceladus, která rozvířila a zesílila už vznikající tlustý disk. Atomy budoucího Slunce jsou zatím součástí mezihvězdného plynu.",
     "thinDisk": "V tenkém disku vznikají hvězdy a nejpozději před přibližně {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je již přítomna příčka. Dřívější generace hvězd vytvářejí těžké prvky, které se později stanou součástí Slunce.",
     "ingredients": "Mezihvězdný plyn obohacený dřívějšími generacemi hvězd. Oblak, z něhož vznikne Slunce, se ještě nezhroutil.",
-    "collapse": "Jádro molekulárního oblaku se hroutí za méně než milion let. Krátce žijící hliník-26 v meteoritech může ukazovat na blízkou hmotnou hvězdu.",
+    "core": "Chladné husté jádro oblaku, pomalu se otáčející: zhruba {coreDensity} {coreDensityPlural, select, one {molekula} few {molekuly} many {molekuly} other {molekul}} na krychlový centimetr. Krátce žijící hliník-26 v meteoritech může ukazovat na blízkou hmotnou hvězdu.",
+    "collapse": "Jádro se hroutí vlastní vahou, při této hustotě asi za {freeFallKyr} {freeFallKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let: zprvu pomalu, pak naráz. Jak se smršťuje, točí se rychleji a zplošťuje do disku.",
+    "protostar": "Ve středu září protohvězda, zahřívaná dopadajícím plynem a skrytá v prachu, a přibírá hmotu z disku kolem sebe. První pevné látky kondenzují asi o {protostarKyr} {protostarKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let později.",
     "dust": "První pevné látky před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let: nula této časové osy. Prachová zrna se při pomalých srážkách spojují do částic o velikosti milimetrů až centimetrů.",
     "planetesimals": "Podle modelů během prvních {planetesimalsKyr} {planetesimalsKyrPlural, select, one {tisíce} few {tisíc} many {tisíce} other {tisíc}} let se první oblázky shlukují do kilometrových planetesimál; dál od Slunce to trvá miliony let. Jedním z dochovaných těles tohoto typu je Arrokoth.",
     "gasDisk": "Podle modelů do zhruba {embryosMyr} mil. let vznikají planetární embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led dost rychle, aby gravitačně zachytila okolní plyn: vznikají obří planety.",

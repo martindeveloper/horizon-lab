@@ -1,5 +1,5 @@
 /**
- * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, m/s², K, J, W, T).
+ * Units by dimension, each as a factor to its SI base (m, s, rad, rad/s, kg, m/s, m/s², K, J, W, T, m⁻³).
  * Symbols follow the SI and the IAU (au, ly, pc, M☉); hosts may translate them
  * for display. Astronomical definitions are exact where the IAU fixed them.
  */
@@ -28,7 +28,8 @@ export type Dimension =
   | "temperature"
   | "energy"
   | "power"
-  | "magneticField";
+  | "magneticField"
+  | "numberDensity";
 
 export type UnitDefinition = {
   dimension: Dimension;
@@ -71,6 +72,8 @@ export const UNITS = {
   kpc: unit("length", "kpc", 1e3 * PC),
   Mpc: unit("length", "Mpc", 1e6 * PC),
   Gpc: unit("length", "Gpc", 1e9 * PC),
+  // Number density (particles per volume; the SI base is per m³)
+  "cm-3": unit("numberDensity", "cm⁻³", 1e6, "\\mathrm{cm^{-3}}"),
   // Time
   ms: unit("time", "ms", 1e-3),
   s: unit("time", "s", 1),

@@ -2,6 +2,8 @@
  * The guided tour: one concept per step, each with a camera pose, a view, a time
  * and the display switches it needs. Copy lives in `tour.steps.<id>`.
  */
+import { freeFallTime } from "@/space/solar-system/model/equations";
+import { FORMATION_BEGINS } from "@/space/solar-system/model/formation";
 import { MODEL_START, SUN_BIRTH } from "@/space/solar-system/model/parameters";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import { type SolarViewId } from "@/space/solar-system/model/views";
@@ -15,6 +17,7 @@ type TourStepId =
   | "periods"
   | "ellipses"
   | "scale"
+  | "birth"
   | "disk"
   | "snowLine"
   | "clearing"
@@ -89,6 +92,20 @@ export const TOUR: readonly TourStep[] = [
     focus: { kind: "planet", id: "jupiter" },
     flight: { duration: 6, swing: 0.15, lead: -0.2 },
     drift: -0.01,
+  },
+  {
+    id: "birth",
+    view: "giants",
+    azimuth: 0.4,
+    inclination: 0.38,
+    distance: 70,
+    /* The formation plays from its quiet core: the fall, the protostar, then the disk. */
+    yearsAgo: FORMATION_BEGINS,
+    playing: true,
+    eq: true,
+    equation: freeFallTime,
+    flight: { duration: 7, lift: 0.12, lead: -0.3 },
+    drift: 0.004,
   },
   {
     id: "disk",

@@ -71,7 +71,7 @@
   --spacing-section: 1rem;
   --spacing-section-roomy: 1.5rem;
 
-  --color-space: #08080b;
+  --color-space: rgb(var(--scene-space));
   --color-space-fg: #ecece8;
   --color-space-title: #f4f4f0;
   --color-space-muted: #b2b2ae;
@@ -155,8 +155,9 @@
   --stroke-outline: 1px;
   --stroke-focus: 2px;
 
-  /* The scene gold is fixed; decorative UI gold adapts to the light material. */
+  /* The scene gold and space are fixed; decorative UI gold adapts to the light material. */
   --scene-solar: 226 192 122;
+  --scene-space: 8 8 11;
   --motion-stagger: 60ms;
   /* Waiting before showing information is separate from the transition itself. */
   --tooltip-wait: 280ms;

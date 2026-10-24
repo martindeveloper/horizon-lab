@@ -56,8 +56,9 @@ catalogue and `examples/visualization-example.tsx` for composition.
   makes hidden controls inert immediately, and eases them back in on exit.
   HUD rows slide gently toward the edges; the exit control arrives after the HUD
   starts clearing. Only UI opacity and translation animate, never canvas sizing.
-  The fade runs on the inherited `--hud-fade`: a fading layer hides the scene from backdrop
-  blur, so glass inside it lays its tint over the space colour until the fade ends.
+  A fading layer hides the scene from backdrop blur until a few frames after it settles, so
+  glass inside lays its tint over the space colour (`--hud-backing`) through the fade and
+  clears to its blur over the reveal timing once the HUD has arrived.
   Reduced motion skips the fade. It sets `data-immersive` on
   the `stage` selector's ancestor (the host CSS owns its viewport layout), owns
   F / Escape and shows the exit control. Fullscreen on that stage is offered only
@@ -198,7 +199,8 @@ Their highlights, shadows and glass rims use invariant `highlight`, `shadow` and
 `space-danger` stay fixed over astronomical scenes. Canvas UI can read them from
 the mounted element with `getComputedStyle`; physical spectra and authored scene
 materials keep their own colors. `--solar` is the theme-adaptive decorative RGB
-triple; `--scene-solar` is the invariant gold used by `--color-solar`.
+triple; `--scene-solar` and `--scene-space` are the invariant triples behind `--color-solar`
+and `--color-space`.
 
 The old `fg`/`muted`/`subtle` and `bg`/`surface`/`surface-2` utilities remain as
 inline compatibility aliases. New components and scoped theme overrides use the

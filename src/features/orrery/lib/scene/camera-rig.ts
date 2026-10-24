@@ -1,8 +1,8 @@
 /**
  * The Orrery's orbit camera (the toolkit's orbit rig): one zoom from a true-size close-up to
- * just past the Oort cloud, turning about the Sun, or about a body in a close-up.
+ * just past the Oort cloud, turning about the Sun (or Earth), or about a body in a close-up.
  */
-import type { PerspectiveCamera } from "three";
+import type { PerspectiveCamera, Vector3 } from "three";
 
 import { closeUpFar, closeUpZoom, type CloseUpFrame } from "@/space/solar-system/model/close-up";
 import {
@@ -19,9 +19,14 @@ export type CameraRig = ReturnType<typeof createCameraRig>;
 
 export function createCameraRig(
   camera: PerspectiveCamera,
-  options: { reduceMotion: { matches: boolean }; closeUp: () => CloseUpFrame | null },
+  options: {
+    reduceMotion: { matches: boolean };
+    closeUp: () => CloseUpFrame | null;
+    /** Places the aim for the frame: the Sun, or Earth in the view from Earth; the Sun by default. */
+    home?: (aim: Vector3) => void;
+  },
 ) {
-  const { reduceMotion, closeUp } = options;
+  const { reduceMotion, closeUp, home } = options;
   const rig = createOrbitRig(camera, {
     pose: { ...SOLAR_FRAMING, distance: 72 },
     reduceMotion,
@@ -39,6 +44,7 @@ export function createCameraRig(
     nearFloor: SOLAR_FRAMING.nearFloor,
     /* In a close-up this frustum draws the rest of the system; the body gets its own pass. */
     far: (distance, aim) => (closeUp() ? closeUpFar(distance, aim) : distance * 40),
+    ...(home ? { home } : {}),
   });
 
   /* Flights between views keep the angles; reduced motion lands framed as the view is. */

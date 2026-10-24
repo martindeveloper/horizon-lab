@@ -8,6 +8,19 @@ import { GM_KM3_S2 } from "@horizon/toolkit/bodies";
 
 /** Sun's age: the oldest solids, CAIs, are 4567.3 ± 0.16 Myr old (Connelly et al. 2012). */
 export const SUN_BIRTH = 4.567e9;
+/**
+ * The natal core's density, H₂ molecules per cm³: dense cores run 10⁴–10⁵ (Bergin & Tafalla
+ * 2007). The dense end, about to fall: one free-fall time is then about a hundred thousand years.
+ */
+export const CORE_DENSITY_CM3 = 1e5;
+/** Mass per H₂ molecule in hydrogen masses, helium included (a cosmic mixture): ρ = 2.8 m_H n. */
+export const GAS_MASS_PER_H2 = 2.8;
+/**
+ * The protostar lights this long before the first solids: the embedded Class 0 phase, 0.13–0.26
+ * Myr in the Spitzer and Herschel surveys (Dunham et al. 2014), the first solids condensing in
+ * the hot inner disk once the star feeds from it (a teaching choice inside that range).
+ */
+export const PROTOSTAR_BEFORE_SOLIDS = 2e5;
 /** Earth's age: 4.54 ± 0.05 Gyr from meteorites and the oldest lead (Dalrymple 2001). */
 export const EARTH_AGE = 4.54e9;
 /** Gas disk lifetime after the first solids (observed disks last ~3–10 Myr). */

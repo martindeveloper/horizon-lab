@@ -68,6 +68,27 @@ export const HELP: readonly HelpStep<OrreryStore>[] = [
     cues: [{ run: (s) => s.select(null) }, { at: 0.6, run: (s) => s.replay() }],
   },
   {
+    /* The switch is in the View panel (phones have no other); Earth holds still among the
+       inner planets, and time runs so the loops draw. */
+    id: "fromEarth",
+    targets: ["settings"],
+    cues: [
+      {
+        run: (s) => {
+          s.setPanel("view");
+          if (!isPresentEra(s.yearsAgo)) {
+            s.setYearsAgo(0);
+          }
+          s.setView("inner");
+          s.patchShow({ fromEarth: true });
+          if (!s.playing) {
+            s.togglePlay();
+          }
+        },
+      },
+    ],
+  },
+  {
     /* The clock's moments, by the clock. */
     id: "moments",
     targets: ["moments"],
