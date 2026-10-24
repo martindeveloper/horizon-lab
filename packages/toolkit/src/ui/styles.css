@@ -220,6 +220,40 @@
   @apply block rounded-full ui-focus outline-hidden transition-transform duration-feedback ease-standard focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary enabled-active:scale-95;
 }
 
+/*
+ * A halo about a slider's thumb for a playhead whose clock has slowed: it widens, and breathes
+ * more slowly, as `--halo` rises from 0 (none) to 1, so slowed time reads as dilated time.
+ * Reduced motion keeps the halo still.
+ */
+@utility slider-halo {
+  --halo: 0;
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--halo) * 14px);
+    border-radius: 9999px;
+    background: rgb(var(--solar) / 0.14);
+    box-shadow: 0 0 calc(var(--halo) * 18px) rgb(var(--solar) / 0.3);
+    opacity: var(--halo);
+    pointer-events: none;
+    transition:
+      inset var(--transition-duration-reveal) var(--ease-standard),
+      opacity var(--transition-duration-reveal) var(--ease-standard);
+    animation: slider-halo-breathe calc(1.2s + var(--halo) * 2.4s) var(--ease-standard) infinite;
+  }
+}
+@keyframes slider-halo-breathe {
+  50% {
+    transform: scale(0.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slider-halo::after {
+    animation: none;
+  }
+}
+
 @utility anim-rise {
   --enter-from: translateY(12px);
   animation: anim-enter var(--transition-duration-reveal) var(--ease-enter) both;

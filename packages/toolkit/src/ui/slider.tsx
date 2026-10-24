@@ -14,6 +14,9 @@ export type SliderProps = ComponentProps<typeof SliderPrimitive.Root> & {
   trackClassName?: string;
   trackStyle?: CSSProperties;
   rangeClassName?: string;
+  /** Styles the thumb, e.g. a halo about a playhead (`slider-halo`, sized by its `--halo` variable). */
+  thumbClassName?: string;
+  thumbStyle?: CSSProperties;
 };
 
 /** The thumb's diameter, px (`size-3.5`): its centre travels this much less than the track is long. */
@@ -31,6 +34,8 @@ export function Slider({
   trackClassName,
   trackStyle,
   rangeClassName,
+  thumbClassName,
+  thumbStyle,
   ...props
 }: SliderProps) {
   const values = props.value ?? props.defaultValue ?? [props.min ?? 0];
@@ -54,7 +59,11 @@ export function Slider({
       {values.map((value, index) => (
         <SliderPrimitive.Thumb
           key={index}
-          className="slider-thumb size-3.5 cursor-grab bg-accent transition-[box-shadow,transform] ease-enter data-disabled:cursor-default enabled-active:cursor-grabbing"
+          className={cn(
+            "slider-thumb size-3.5 cursor-grab bg-accent transition-[box-shadow,transform] ease-enter data-disabled:cursor-default enabled-active:cursor-grabbing",
+            thumbClassName,
+          )}
+          style={thumbStyle}
           aria-label={thumbLabels?.[index] ?? label}
           aria-valuetext={valueText?.(value, index)}
         />

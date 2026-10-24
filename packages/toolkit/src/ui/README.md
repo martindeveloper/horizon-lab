@@ -14,7 +14,10 @@ catalogue and `examples/visualization-example.tsx` for composition.
   warning icon. Its labelled `note` role does not interrupt screen readers.
   The host chooses the tone and owns any scientific or publication-status logic.
 - `Slider`: standard Radix slider with translated labels and optional scientific
-  track styling supplied by the caller. Its `slider-thumb` CSS utility also serves
+  track styling supplied by the caller, and the thumb's (`thumbClassName`, `thumbStyle`):
+  the `slider-halo` utility draws a halo about a playhead that widens and breathes more
+  slowly as its `--halo` variable rises from 0 to 1, for a clock that has slowed.
+  Its `slider-thumb` CSS utility also serves
   custom Radix sliders: shared focus ring, feedback transition, rounded shape and
   pressed scale, with dimensions, fill, border, glow and cursor left to the control.
   Transition and easing utilities can override its defaults.
