@@ -32,6 +32,7 @@ import {
 } from "@horizon/toolkit/science";
 
 import { startElements } from "./elements";
+import { MOON_DISTANCE } from "./history";
 import { COLD_CLASSICAL_AU, DISK_AU, OORT_SHELLS_AU, SUN_BIRTH } from "./parameters";
 import { TRACERS } from "./tracers";
 
@@ -458,6 +459,7 @@ export const SOLAR_CATALOGUE = {
   planets: PLANETS,
   named: NAMED_BODIES,
   moons: recordFrom(MOON_IDS, moonFacts),
+  moonDistance: MOON_DISTANCE,
   populations: POPULATIONS,
 } as const;
 

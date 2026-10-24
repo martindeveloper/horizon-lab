@@ -15,7 +15,9 @@ import {
   GAS_MASS_PER_H2,
   GAS_DISK_LIFETIME,
   MODEL_START,
+  ROCHE_FLUID,
   SUN_BIRTH,
+  TIDAL_RECESSION_POWER,
 } from "./parameters";
 
 /**
@@ -44,6 +46,51 @@ export const freeFallTime = defineEquation({
   compute: ({ n }) => {
     const rho = GAS_MASS_PER_H2 * PROTON_MASS_KG * n * UNITS["cm-3"].factor;
     return Math.sqrt((3 * Math.PI) / (32 * GRAVITATIONAL_CONSTANT * rho)) / JULIAN_YEAR_SECONDS;
+  },
+});
+
+/**
+ * Roche's limit for a fluid satellite: inside it the primary's tides pull a body apart. `R` is
+ * the primary's radius and `ratio` its density over the satellite's.
+ */
+export const rocheLimit = defineEquation({
+  id: "roche-limit",
+  text: `a_R = ${n(ROCHE_FLUID)} R (ρ_primary / ρ_satellite)^(1/3)`,
+  latex: `a_R = ${n(ROCHE_FLUID)}\\,R\\left(\\frac{\\rho_\\mathrm{primary}}{\\rho_\\mathrm{satellite}}\\right)^{1/3}`,
+  output: "a",
+  variables: {
+    R: { symbol: "R", latex: "R", unit: "km" },
+    ratio: {
+      symbol: "ρ_primary/ρ_satellite",
+      latex: "\\rho_\\mathrm{primary}/\\rho_\\mathrm{satellite}",
+    },
+    a: { symbol: "a_R", latex: "a_R", unit: "km" },
+  },
+  compute: ({ R, ratio }) => ROCHE_FLUID * R * Math.cbrt(ratio),
+});
+
+/**
+ * Tidal recession at constant torque between two dated distances: da/dt ∝ a^(−11/2), so
+ * a^(13/2) runs linearly from `a0` at `t0` to `a1` at `t1` (Darwin's law; times in years ago).
+ */
+export const tidalRecession = defineEquation({
+  id: "tidal-recession",
+  text: "a(t)^(13/2) = a₀^(13/2) + (a₁^(13/2) − a₀^(13/2)) (t − t₀) / (t₁ − t₀)",
+  latex:
+    "a(t)^{13/2} = a_0^{13/2} + \\left(a_1^{13/2} - a_0^{13/2}\\right)\\frac{t - t_0}{t_1 - t_0}",
+  output: "a",
+  variables: {
+    a0: { symbol: "a₀", latex: "a_0", unit: "km" },
+    a1: { symbol: "a₁", latex: "a_1", unit: "km" },
+    t0: { symbol: "t₀", latex: "t_0", unit: "yr" },
+    t1: { symbol: "t₁", latex: "t_1", unit: "yr" },
+    t: { symbol: "t", latex: "t", unit: "yr" },
+    a: { symbol: "a", latex: "a", unit: "km" },
+  },
+  compute: ({ a0, a1, t0, t1, t }) => {
+    const p = TIDAL_RECESSION_POWER;
+    const f = t1 === t0 ? 0 : (t - t0) / (t1 - t0);
+    return (a0 ** p + (a1 ** p - a0 ** p) * f) ** (1 / p);
   },
 });
 
@@ -125,6 +172,8 @@ export const SOLAR_EQUATIONS: readonly Formula[] = [
   gasDisk,
   migrationProgress,
   migratedElement,
+  rocheLimit,
+  tidalRecession,
   tracerSemiMajorAxis,
   galacticAngle,
 ];

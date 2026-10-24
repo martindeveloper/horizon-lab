@@ -802,6 +802,26 @@ export const SOURCES = {
     cite: "Zwicky 1933, Helv. Phys. Acta 6, 110 (Coma's missing mass)",
     link: SOURCE_URLS.zwicky1933,
   },
+  williams2000: {
+    cite: "Williams 2000, Reviews of Geophysics 38, 37 (the Elatina tidal rhythmites, 620 Myr ago: the Moon at 58.16 ± 0.30 Earth radii)",
+    link: "https://doi.org/10.1029/1999RG900016",
+  },
+  meyers2018: {
+    cite: "Meyers & Malinverno 2018, PNAS 115, 6363 (Milankovitch cycles in the Xiamaling Formation, 1.4 Gyr ago: the Moon 340,900 ± 2,600 km away, an 18.7 h day)",
+    link: "https://doi.org/10.1073/pnas.1717689115",
+  },
+  lantink2022: {
+    cite: "Lantink et al. 2022, PNAS 119, e2117146119 (Milankovitch cycles in the Joffre banded iron, 2.46 Gyr ago: the Moon 321,800 ± 6,500 km away, a 16.9 h day)",
+    link: "https://doi.org/10.1073/pnas.2117146119",
+  },
+  eulenfeld2023: {
+    cite: "Eulenfeld & Heubeck 2023, JGR Planets 128 (the Moodies Group's tidal bundles, 3.22 Gyr ago: the Moon at about 70 % of today's distance, a 13 h day)",
+    link: "https://arxiv.org/abs/2207.05464",
+  },
+  salmonCanup2014: {
+    cite: "Salmon & Canup 2014, Phil. Trans. R. Soc. A 372, 20130256 (the Moon accreted just outside the Roche limit, about 2.9 Earth radii)",
+    link: "https://doi.org/10.1098/rsta.2013.0256",
+  },
 } as const satisfies Record<string, Source>;
 
 export type SourceId = keyof typeof SOURCES;

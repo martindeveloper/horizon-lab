@@ -22,6 +22,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 
 import { namedElements, planetElements, rewinds } from "../model/elements";
 import { viewOf } from "../model/framing";
+import { saturnRingsFormed } from "../model/history";
 import { planetGrowth } from "../model/moment";
 import { SUN_BIRTH } from "../model/parameters";
 import type { SolarSelection } from "../model/selection";
@@ -159,11 +160,15 @@ export function createPlanetsLayer(
         const pole = u.pole?.value;
         if (pole instanceof Vector3) pole.copy(poleWorld);
         u.radius!.value = radius * eq;
+        /* Saturn's rings are dated: they come in across their age window. The others are not. */
+        const formed = planet.id === "saturn" ? saturnRingsFormed(yearsAgo) : 1;
+        u.formed!.value = formed;
         const globe = looks.planets[planet.id].uniforms;
         if (globe.ringPole) {
           const ringPole = globe.ringPole.value;
           if (ringPole instanceof Vector3) ringPole.copy(poleWorld);
           globe.ringRadius!.value = radius * eq;
+          globe.ringFormed!.value = formed;
         }
       }
       const present = grown > 0.02 ? 1 : 0;

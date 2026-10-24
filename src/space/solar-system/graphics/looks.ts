@@ -377,6 +377,7 @@ function ringMaterial(strips: RingTextures, id: PlanetId, system: RingSystem, su
       pole: { value: new Vector3(0, 1, 0) },
       radius: { value: 1 },
       squash: { value: FIGURES[id].equatorialKm / FIGURES[id].polarKm },
+      formed: { value: 1 },
     },
     vertexShader: VERT,
     fragmentShader: RING_FRAG,
@@ -477,6 +478,7 @@ export function createLooks(light = false, streamed = false, options: LooksOptio
         ringPole: { value: new Vector3(0, 1, 0) },
         ringRadius: { value: 1 },
         ringSpan: { value: new Vector2(system.innerKm / eq, system.outerKm / eq) },
+        ringFormed: { value: 1 },
       });
     }
     return material;

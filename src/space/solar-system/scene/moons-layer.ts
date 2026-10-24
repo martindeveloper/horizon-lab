@@ -1,4 +1,9 @@
-/** Major moons, grouped by planet. Each planet's marker is recorded as the planets are placed. */
+/**
+ * Major moons, grouped by planet. Each planet's marker is recorded as the planets are placed.
+ * Moons are drawn in the ephemeris's era; Earth's Moon also through deep time, from the impact
+ * on, its orbit at the distance the tidal records give (model/history.ts), so it draws nearer as
+ * time winds back and is gone before the impact.
+ */
 import { Mesh, Vector3, type Object3D } from "three";
 
 import {
@@ -15,6 +20,7 @@ import { type OrbitLine, ownedOrbitLine, type PlaceLabel } from "@horizon/toolki
 import { AU_KM } from "@horizon/toolkit/science";
 
 import { moonOffset, moonOrientation } from "../graphics/moons";
+import { moonDistanceRatio, moonExists } from "../model/history";
 import { moonOrbitShape } from "../model/moon-orbits";
 import { hostOf, type SolarSelection } from "../model/selection";
 import type { Globes } from "./geometry";
@@ -121,6 +127,8 @@ export function createMoonsLayer(
     };
   });
   const present = lod.fader();
+  /** The Moon's own era: from the impact on. */
+  const lunar = lod.fader();
   const names = lod.fader();
   const hosts: MoonHosts = new Map(systems.map((system) => [system.id, system.host]));
   const systemOf = (id: BodyId) => systems.find((s) => s.id === id);
@@ -164,11 +172,16 @@ export function createMoonsLayer(
        planet until its innermost moon clears the marker, but never past the
        planet's distance from the Sun; a wide system's outer moons less (SPREAD).
        True size keeps every distance real. */
-    update({ now, show, sel, present: today }: SolarFrame) {
+    update({ now, show, sel, present: today, yearsAgo }: SolarFrame) {
       const era = present.to(today);
+      const moonEra = Math.max(era, lunar.to(moonExists(yearsAgo)));
+      /* The Moon's distance over today's: its offset and orbit shrink with it. */
+      const recession = moonDistanceRatio(yearsAgo);
       const labelled = names.to(show.names);
       for (const system of systems) {
         const { host } = system;
+        const earth = system.id === "earth";
+        const recede = earth ? recession : 1;
         /* Pixel sizes at the planet, not the aim: a far system (Charon seen from Mars) is a
            point, so it neither shows nor labels; at the aim the two agree. */
         const range = Math.max(1e-12, camera.position.distanceTo(host.position));
@@ -181,7 +194,7 @@ export function createMoonsLayer(
         const near = 1 - smoothstep(NEAR[0], NEAR[1], range / host.position.length());
         const focus = Math.max(system.focus.to(selected), near);
         const shown =
-          era *
+          (earth ? moonEra : era) *
           (host.on ? 1 : 0) *
           Math.max(
             focus,
@@ -203,7 +216,7 @@ export function createMoonsLayer(
           const magnify = 1 + (Math.max(1, spread * slot.lift) - 1) * focus;
           /* A close-up keeps its moon on whatever its system's state. */
           const close = closeId() === moon.id;
-          if (shown > 0 || close) moonOffset(moon.id, now, offset);
+          if (shown > 0 || close) moonOffset(moon.id, now, offset).multiplyScalar(recede);
           const reach = offset.length() * magnify;
           const clears = reach > hidden ? smoothstep(from, to, (reach - host.extent) * perPx) : 0;
           const presence = close ? 1 : shown * clears;
@@ -223,7 +236,7 @@ export function createMoonsLayer(
             mesh.scale.setScalar(show.trueSize ? radius : radius * presence);
             system.reach = Math.max(
               system.reach,
-              (moon.aKm / AU_KM) * (1 + moon.e) * magnify + radius,
+              (moon.aKm / AU_KM) * (1 + moon.e) * magnify * recede + radius,
             );
             moonOrientation(moon.id, now, mesh.quaternion);
             if (mesh.material === looks.ghost) mesh.material = looks.moon(moon.id);
@@ -232,7 +245,7 @@ export function createMoonsLayer(
             hit.position.copy(mesh.position);
             hit.scale.setScalar(Math.max(radius, pxWorld(near, TOUCH_PX)));
             orbit.line.position.copy(host.position);
-            orbit.line.scale.setScalar(magnify);
+            orbit.line.scale.setScalar(magnify * recede);
             orbit.material.opacity = 0.45 * presence;
             orbit.set(moonOrbitShape(moon.id, now, shape));
           }

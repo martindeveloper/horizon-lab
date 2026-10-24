@@ -29,6 +29,7 @@ uniform vec4 occluders[OCCLUDERS];
 uniform sampler2D ringMap;   // radial strip, alpha = normal opacity 1 − e^(−τ)
 uniform vec3 ringPole;       // ring-plane normal, world
 uniform float ringRadius;    // equatorial radius, world units
+uniform float ringFormed;    // how much of the rings exists: 0 before their dated age, 1 within it
 uniform vec2 ringSpan;       // inner and outer edge, equatorial radii
 #endif
 
@@ -60,7 +61,7 @@ void main() {
   float t = -dot(vOffset, ringPole) / (abs(across) > 1e-4 ? across : 1e-4);
   float r = length(vOffset + sunDir * t) / ringRadius;
   float s = (r - ringSpan.x) / (ringSpan.y - ringSpan.x);
-  float opacity = texture2D(ringMap, vec2(clamp(s, 0.0, 1.0), 0.5)).a;
+  float opacity = texture2D(ringMap, vec2(clamp(s, 0.0, 1.0), 0.5)).a * ringFormed;
   float inRing = step(0.0, t) * step(0.0, s) * step(s, 1.0);
   float tau = -log(max(1.0 - opacity, 0.005));
   diffuse *= mix(1.0, exp(-tau / max(abs(across), 0.02)), inRing);

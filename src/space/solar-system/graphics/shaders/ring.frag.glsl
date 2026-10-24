@@ -13,6 +13,7 @@ uniform vec3 pole;         // ring-plane normal, world
 uniform float radius;      // planet's equatorial radius, world units
 uniform float squash;      // equatorial over polar radius
 uniform vec3 sunPos;       // the Sun, world; the origin unless a host moves it
+uniform float formed;      // how much of the rings exists: 0 before their dated age, 1 within it
 
 varying vec3 vNormal;
 varying vec3 vWorld;
@@ -38,7 +39,7 @@ void main() {
   float s = (r - span.x) / (span.y - span.x);
   vec2 at = vec2(clamp(s, 0.0, 1.0), 0.5);
   vec4 tex = texture2D(map, at);
-  float tau = -log(max(1.0 - tex.a * step(0.0, s) * step(s, 1.0), 0.005));
+  float tau = -log(max(1.0 - tex.a * formed * step(0.0, s) * step(s, 1.0), 0.005));
   if (tau <= 0.0) discard;
 
   vec3 sunDir = normalize(sunPos - vWorld);

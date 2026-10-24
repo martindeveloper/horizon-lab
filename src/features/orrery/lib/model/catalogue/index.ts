@@ -5,7 +5,7 @@
  * docs/science-sources.md lists the catalogues (`npm run docs:catalogue`).
  */
 import { factsOf, type Fact } from "@/lib/facts";
-import { PLANETS, POPULATIONS } from "@/space/solar-system/model/catalogue";
+import { PLANETS, POPULATIONS, SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 
 import { SUN } from "./sun";
 import { TIMELINE } from "./timeline";
@@ -37,6 +37,16 @@ export const PROSE_FIGURES = {
   moonLavaGyr: TIMELINE.history.moonLava,
   ringsMyr: TIMELINE.history.saturnRings,
   chicxulubMyr: TIMELINE.history.chicxulub,
+  moonKm: SOLAR_CATALOGUE.moons.moon.semiMajorAxis,
+  moonFormedKm: SOLAR_CATALOGUE.moonDistance.formed.distance,
+  moodiesShare: SOLAR_CATALOGUE.moonDistance.moodies.share,
+  moodiesGyr: SOLAR_CATALOGUE.moonDistance.moodies.age,
+  joffreKm: SOLAR_CATALOGUE.moonDistance.joffre.distance,
+  joffreGyr: SOLAR_CATALOGUE.moonDistance.joffre.age,
+  xiamalingKm: SOLAR_CATALOGUE.moonDistance.xiamaling.distance,
+  xiamalingGyr: SOLAR_CATALOGUE.moonDistance.xiamaling.age,
+  elatinaKm: SOLAR_CATALOGUE.moonDistance.elatina.distance,
+  elatinaMyr: SOLAR_CATALOGUE.moonDistance.elatina.age,
   youngSunPercent: SUN.sun.start,
   zoneInnerAu: SUN.sun.zoneInner,
   zoneOuterAu: SUN.sun.zoneOuter,

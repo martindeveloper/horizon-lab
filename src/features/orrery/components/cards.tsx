@@ -21,6 +21,7 @@ import {
 } from "@/space/solar-system/format";
 import { SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
 import { namedElements, planetElements, rewinds } from "@/space/solar-system/model/elements";
+import { moonDistanceKm } from "@/space/solar-system/model/history";
 import { migrationProgress } from "@/space/solar-system/model/moment";
 import { isObservatorySelection } from "@/space/solar-system/model/observatories";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
@@ -115,11 +116,25 @@ function namedCard(sel: Of<SolarSelection, "named">, m: Moment): Card {
   };
 }
 
-function moonCard(sel: Of<SolarSelection, "moon">, { t, f, d }: Moment): Card {
+/** A moon's card; the Moon's, in deep time, with its distance from Earth then (model/history.ts). */
+function moonCard(sel: Of<SolarSelection, "moon">, { t, f, d, yearsAgo }: Moment): Card {
+  const facts = moonRows(t, f, d, sel.id);
+  const then = sel.id === "moon" && yearsAgo > 0 ? moonDistanceKm(yearsAgo) : null;
+  if (then !== null) {
+    const today = SOLAR_CATALOGUE.moons.moon.semiMajorAxis.value;
+    facts.push({
+      id: "distanceThen",
+      label: t("facts.distanceThen"),
+      value: t("facts.kmOfToday", {
+        km: f.number(then, { maximumSignificantDigits: 3 }),
+        value: f.number((100 * then) / today, { maximumFractionDigits: 0 }),
+      }),
+    });
+  }
   return {
-    badge: t("badges.measured"),
+    badge: then === null ? t("badges.measured") : t("badges.model"),
     title: t(solarNameKey(sel)),
-    facts: moonRows(t, f, d, sel.id),
+    facts,
     body: "",
     caution: "",
   };

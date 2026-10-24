@@ -38,6 +38,20 @@ export const MODEL_START = 4.5e9;
 export const CLEAR_DONE = 4.45e9;
 
 /**
+ * The Moon-forming impact is narrated from here, 57 Myr after the first solids (4.51 Gyr ago,
+ * Barboni et al. 2017); estimates run as late as 4.35 Gyr ago (Borg et al. 2011).
+ */
+export const MOON_IMPACT_AFTER = 5.7e7;
+/** The latest estimate of the Moon-forming impact, years ago (Borg et al. 2011). */
+export const MOON_IMPACT_LATEST = 4.35e9;
+/** Saturn's rings' exposure age, years (Kempf et al. 2023): the drawn rings come in across it. */
+export const SATURN_RINGS_AGE: readonly [number, number] = [1e8, 4e8];
+/** Roche's limit for a fluid satellite, in the primary's radii times the cube root of the density ratio (Roche 1849). */
+export const ROCHE_FLUID = 2.456;
+/** Tidal recession at constant torque: da/dt ∝ a^(−11/2), so a^(13/2) grows linearly in time (Darwin 1879). */
+export const TIDAL_RECESSION_POWER = 13 / 2;
+
+/**
  * The Sun's galactic year: one lap at its own azimuthal speed, 2πR₀/(Θ₀ + V☉). With
  * R₀ = 8.28 kpc (GRAVITY) and 247 km/s (Reid et al. 2019) it is 206 Myr; 229 + 12 km/s
  * (Eilers et al. 2019; Schönrich et al. 2010) gives 211 Myr, and R₀ = 8.18 kpc 203 Myr.

@@ -334,7 +334,7 @@ src/
                                a soft point, the touch targets' invisible material
     solar-system/              The solar system at any moment, for any host engine:
       model/                   parameters, equations, moment (migration, growth, the gas
-                               disk), formation (the core's free fall, the protostar),
+                               disk), formation (the core's free fall, the protostar), history (Saturn's rings across their dated window, the Moon's distance by the tidal records),
                                elements, tracers, catalogue, views (and the solar
                                framing every host engine shares), framing (and the radii an
                                arrival frames), position, moon-orbits (the moons' orbits, the

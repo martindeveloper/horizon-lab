@@ -12,13 +12,12 @@ export const EMBRYOS_AFTER = 1e6;
 /** Notes turn from gas dispersal to merging versus shattering collisions here (~20 Myr). */
 export const BELT_STIRRED_AFTER = 2e7;
 
-/**
- * The Moon-forming impact is narrated from here, 57 Myr after the first solids (4.51 Gyr ago,
- * Barboni et al. 2017); estimates run as late as 4.35 Gyr ago (Borg et al. 2011).
- */
-export const MOON_IMPACT_AFTER = 5.7e7;
-/** The latest estimate of the Moon-forming impact, years ago (Borg et al. 2011). */
-export const MOON_IMPACT_LATEST = 4.35e9;
+/* The Moon-forming impact and Saturn's rings' age are the shared model's: the scene draws both. */
+export {
+  MOON_IMPACT_AFTER,
+  MOON_IMPACT_LATEST,
+  SATURN_RINGS_AGE,
+} from "@/space/solar-system/model/parameters";
 
 /** Classic Late Heavy Bombardment date from Apollo impact-melt ages, ~3.9 Gyr ago. */
 export const LHB_CLASSIC = 3.9e9;
@@ -34,8 +33,6 @@ export const MARS_DRY = 3.1e9;
 export const VREDEFORT = 2.02e9;
 /** The Moon's youngest dated lavas, Chang'e 5 (Li et al. 2021). */
 export const MOON_LAST_LAVA = 2.03e9;
-/** Saturn's rings' exposure age, years (Kempf et al. 2023). */
-export const SATURN_RINGS_AGE: readonly [number, number] = [1e8, 4e8];
 /** The Chicxulub impact (Renne et al. 2013). */
 export const CHICXULUB = 6.604e7;
 
