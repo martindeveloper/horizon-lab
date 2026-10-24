@@ -428,7 +428,20 @@ export function createOrreryEngine({
         return held;
       }
       if (playHead === null || state.yearsAgo !== playCommitted) playHead = state.yearsAgo;
+      const from = playHead;
       playHead = advancePlay(playHead, dt);
+      /* A step that plays to a moment pauses there, on it exactly, as playback crosses it; a
+         seek past it lets the stop go. */
+      const stop = state.playStop;
+      if (stop !== null && from > stop && playHead <= stop) {
+        playHead = stop;
+        store.getState().setYearsAgo(playHead);
+        store.setState({ playing: false, playStop: null });
+        playCommitted = playHead;
+        playClock = 0;
+        return playHead;
+      }
+      if (stop !== null && from <= stop) store.setState({ playStop: null });
       playClock += dt;
       if (playHead <= 0 || playClock > 0.08) {
         store.getState().setYearsAgo(playHead);

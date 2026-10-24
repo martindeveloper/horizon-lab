@@ -377,6 +377,30 @@ const SCENES: readonly OrreryBenchScene[] = [
     script: { frames: 420, duration: 14, keyframes: Array.from({ length: 29 }, (_, i) => i / 28) },
   },
   {
+    id: "saturn-rings-form",
+    description:
+      "Saturn selected half a billion years ago, time running to today: its rings come in across their dated window",
+    tags: ["sequence", "history"],
+    bloom: false,
+    lens: false,
+    view: "giants",
+    selection: { kind: "planet", id: "saturn" },
+    yearsAgo: 5e8,
+    script: { frames: 90, duration: 3, keyframes: [0, 0.25, 0.5, 0.75, 1] },
+  },
+  {
+    id: "moon-recedes",
+    description:
+      "Earth selected 2.46 billion years ago: the Moon's orbit drawn at the distance the Joffre record gives",
+    tags: ["history"],
+    bloom: false,
+    lens: false,
+    view: "inner",
+    selection: { kind: "planet", id: "earth" },
+    yearsAgo: 2.46e9,
+    playing: false,
+  },
+  {
     id: "young-sun",
     description:
       "The inner planets four billion years ago: the dimmer Sun, the habitable zone drawn in",

@@ -9,7 +9,7 @@ import {
 } from "@/space/solar-system/model/parameters";
 import { TRACERS, tallyAt } from "@/space/solar-system/model/tracers";
 
-import { sliderToYearsAgo, yearsAgoToSlider } from "./timeline";
+import { EPOCH_BOUNDS, EPOCHS, TRACK_CELLS, sliderToYearsAgo, yearsAgoToSlider } from "./timeline";
 
 export function modelSelfCheck(): string[] {
   const errors: string[] = [];
@@ -19,10 +19,15 @@ export function modelSelfCheck(): string[] {
   }
   if (migrationProgress(MODEL_START) !== 0 || migrationProgress(CLEAR_DONE) !== 1)
     errors.push("migration window");
+  /* Each epoch ends at a cell's edge of the track (the names' cells beneath it), and the
+     joins inside the birth's cell land on their moments. */
+  let cells = 0;
+  const edges = EPOCHS.map((epoch) => (cells += epoch.cells) / TRACK_CELLS);
   if (
-    Math.abs(sliderToYearsAgo(0.25) - MODEL_START) > 1 ||
-    Math.abs(sliderToYearsAgo(0.19) - (SUN_BIRTH - GAS_DISK_LIFETIME)) > 1 ||
-    Math.abs(sliderToYearsAgo(0.1) - SUN_BIRTH) > 1
+    EPOCH_BOUNDS.some((bound, k) => Math.abs(yearsAgoToSlider(bound) - (edges[k] ?? 0)) > 1e-9) ||
+    [SUN_BIRTH, SUN_BIRTH - GAS_DISK_LIFETIME].some(
+      (y) => Math.abs(sliderToYearsAgo(yearsAgoToSlider(y)) - y) > 1,
+    )
   )
     errors.push("slider segments");
   if (

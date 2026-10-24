@@ -12,6 +12,9 @@ import { keplerThirdLaw, type Formula } from "@horizon/toolkit/science";
 
 import type { Show } from "../store";
 
+/** The rocky planets' assembly is shown this long after the first solids: inside the belt's window. */
+const ASSEMBLY_AFTER = 3e7;
+
 type TourStepId =
   | "today"
   | "periods"
@@ -20,6 +23,7 @@ type TourStepId =
   | "birth"
   | "disk"
   | "snowLine"
+  | "assembly"
   | "clearing"
   | "oort";
 
@@ -32,6 +36,8 @@ type TourStep = TourShot & {
   view: SolarViewId;
   yearsAgo: number;
   playing?: boolean;
+  /** A playing step pauses here, years ago, so it ends on what it describes. */
+  playUntil?: number;
   show?: Partial<Show>;
   focus?: SolarSelection;
   /** Steps whose copy carries a one-line relation under the body. */
@@ -99,9 +105,10 @@ export const TOUR: readonly TourStep[] = [
     azimuth: 0.4,
     inclination: 0.38,
     distance: 70,
-    /* The formation plays from its quiet core: the fall, the protostar, then the disk. */
+    /* The formation plays from its quiet core: the fall, the protostar, then the first solids. */
     yearsAgo: FORMATION_BEGINS,
     playing: true,
+    playUntil: SUN_BIRTH,
     eq: true,
     equation: freeFallTime,
     flight: { duration: 7, lift: 0.12, lead: -0.3 },
@@ -128,6 +135,16 @@ export const TOUR: readonly TourStep[] = [
     yearsAgo: SUN_BIRTH - 2.5e6,
     flight: { duration: 7.5, lift: 0.15, lead: -0.5 },
     drift: 0.012,
+  },
+  {
+    id: "assembly",
+    view: "inner",
+    azimuth: 0.9,
+    inclination: 0.8,
+    distance: 9,
+    yearsAgo: SUN_BIRTH - ASSEMBLY_AFTER,
+    flight: { duration: 7, lift: 0.1, lead: 0.3 },
+    drift: 0.01,
   },
   {
     id: "clearing",

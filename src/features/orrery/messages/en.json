@@ -7,7 +7,7 @@
     "views": { "title": "Views", "body": "Jump between scales, out to the Oort cloud." },
     "objects": { "title": "Objects", "body": "Find a body and open its card." },
     "closeUp": { "title": "Close-up", "body": "Fly in to a body at its true size." },
-    "time": { "title": "Time", "body": "Scrub through history, or replay the clearing." },
+    "time": { "title": "Time", "body": "Scrub through history, or replay the chapter you are in." },
     "fromEarth": {
       "title": "From Earth",
       "body": "Earth holds still, the Sun circles it and the planets draw their loops: the sky the epicycles explained."
@@ -91,11 +91,18 @@
   "hud": {
     "play": "Play time",
     "pause": "Pause time",
-    "replay": "Replay the clearing",
+    "replay": {
+      "history": "Replay the whole history",
+      "formation": "Replay the Sun's formation",
+      "disk": "Replay the planets' birth",
+      "clearing": "Replay the clearing",
+      "ages": "Replay the ages since the clearing"
+    },
     "timeSlider": "Time. Left is older; the clearing gets extra room on the track.",
     "driftDays": "1 s ≈ {value} days",
     "driftYears": "1 s ≈ {value} years",
     "driftThousand": "1 s ≈ {value} thousand years",
+    "driftMillion": "1 s ≈ {value} million years",
     "clockPaused": "paused",
     "clockRate": "Time",
     "legend": "Switches hide a layer; they do not change the tally.",
@@ -148,6 +155,8 @@
     "tiltEquator": "{value}° to Earth's equator",
     "outputThen": "Output at selected time",
     "ofToday": "{value} % of today · model",
+    "distanceThen": "Distance at selected time",
+    "kmOfToday": "{km} km · {value} % of today · model",
     "habitableZone": "Habitable zone",
     "fromEarth": "From Earth",
     "l2": "L2, beyond Earth",
@@ -305,7 +314,7 @@
       },
       "periods": {
         "title": "Farther out, slower",
-        "body": "Earth laps the Sun in a year, Jupiter in {jupiterYears} years, Neptune in {neptuneYears}. Kepler's third law ties period to distance.",
+        "body": "Earth laps the Sun in a year, Jupiter in {jupiterYears} years, Neptune in {neptuneYears} years. Kepler's third law ties period to distance.",
         "eq": "{equation} · P in years, a in au"
       },
       "ellipses": {
@@ -324,11 +333,15 @@
       },
       "disk": {
         "title": "Born in a flat disk",
-        "body": "The planets circle the Sun one way round and almost in one plane. Kant and Laplace took that as the mark of a birth in one spinning cloud of gas and dust."
+        "body": "The planets circle the Sun one way round and almost in one plane. Kant and Laplace took that as the mark of a birth in one spinning cloud of gas and dust. The first solids condensed {sunBirthGyr} billion years ago: the solar system's age."
       },
       "snowLine": {
         "title": "The snow line",
         "body": "Inside about {snowLineAu} au only rock and metal condense; beyond, ice adds mass, so cores grow big enough to grab gas. Where Earth's water came from is debated: from farther out, or already in its rocky building blocks."
+      },
+      "assembly": {
+        "title": "The gas goes, the rocks gather",
+        "body": "Within about {gasMyr} million years the young Sun's light and wind blow the gas away, and the giants stop growing. Inside, Moon-size embryos collide for tens of millions of years into the rocky planets; a last Mars-size impact on Earth makes the Moon, and near Jupiter the leftovers shatter into the asteroid belt."
       },
       "clearing": {
         "title": "The clearing, as a model",
@@ -365,6 +378,10 @@
         "title": "The sky behind it",
         "body": "Bright stars are the shared J2000 catalogue placed by right ascension and declination and rotated into the planets' ecliptic frame. The Milky Way is sampled from a painted map in galactic coordinates (bulge toward Sagittarius, the Great Rift, the Coalsack): tens of thousands of grains and a soft haze drawn from the same map, so it looks granular like the real band rather than a smooth glow. The whole band turns about the galactic pole once per galactic year as the Sun orbits; before about {thinDiskGyr} billion years ago the thin disk and dust lane give way to a thicker, bluer disk; inside the natal cloud the view dims and reddens. Named stars fade beyond about {namedStarsYears} years, when proper motions have scrambled the constellations."
       },
+      "history": {
+        "title": "Saturn's rings and the Moon's distance",
+        "body": "Saturn's rings are drawn coming in across their dated window, {ringsMyr} million years ago: nothing in the model forms them. The Moon is drawn from the narrated impact on, starting just outside the fluid Roche limit, about {moonFormedKm} km, and receding through the tidal records to today's {moonKm} km: about {moodiesShare} % of today's distance {moodiesGyr} billion years ago from the Moodies tidal bundles, {joffreKm} km {joffreGyr} billion years ago from the Joffre banded iron, {xiamalingKm} km {xiamalingGyr} billion years ago from the Xiamaling Formation, {elatinaKm} km {elatinaMyr} million years ago from the Elatina rhythmites. Between records the distance follows the constant-torque law, a^(13/2) linear in time, a sketch: the real rate swung with the oceans' tidal resonances. The orbit is drawn at the system's magnified scale, so the scene shows the distance against today's and True size keeps it real; the Moon's card prints it at the selected time."
+      },
       "youngSun": {
         "title": "The faint young Sun",
         "body": "On the main sequence the Sun brightens as its core turns hydrogen to helium. Gough's interpolation of standard solar models gives its output by age: about {youngSunPercent} % of today's as the sketch starts, within a few per cent of the models after its first few hundred million years. The glow follows the law; the contracting Sun before the sketch is not modelled, and the band is not drawn there. The habitable zone is drawn at its conservative edges today, {zoneInnerAu} to {zoneOuterAu} au (moist to maximum greenhouse, clouds left out), and moved with the square root of the output, where the same sunlight falls; the young Sun's redder light would shift the edges a little further still. The Sun's card reads both at the selected time."
@@ -392,27 +409,27 @@
     }
   },
   "notes": {
-    "merger": "About {mergerGyr} billion years ago the Milky Way swallowed Gaia-Enceladus, stirring and thickening a thick disk that had already begun to form. The Sun's atoms are interstellar gas.",
-    "thinDisk": "The thin disk is forming stars and the bar is in place by about {thinDiskGyr} billion years ago. Earlier stars are making the Sun's heavy elements.",
-    "ingredients": "Interstellar gas, enriched by earlier generations of stars. The cloud that will form the Sun has not collapsed yet.",
-    "core": "A cold, dense core of the cloud, slowly turning: about {coreDensity} molecules per cubic centimetre. Short-lived aluminium-26 in meteorites may point to a nearby massive star.",
-    "collapse": "The core falls in under its own weight, in about {freeFallKyr} thousand years at that density: slowly at first, then all at once. Spinning faster as it shrinks, it flattens into a disk.",
-    "protostar": "A protostar glows at the centre, heated by the infall and hidden in dust, feeding from the disk around it. The first solids condense about {protostarKyr} thousand years on.",
-    "dust": "First solids, {sunBirthGyr} billion years ago: the timeline's zero. Dust grains stick on gentle contact and grow into millimetre-to-centimetre pebbles.",
-    "planetesimals": "In models, within about {planetesimalsKyr} thousand years the first pebbles gather into planetesimals kilometres across; farther out this goes on for millions of years. Arrokoth is one survivor.",
-    "gasDisk": "In models, Moon-mass embryos by about {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to grab gas: the giants.",
-    "accretion": "The young Sun's light and wind disperse the gas. Inside, many Moon-size embryos remain; Jupiter's pull makes their orbits cross.",
-    "belt": "Slow collisions far from Jupiter merge embryos into rocky planets. Near Jupiter they are fast and shatter: the asteroid belt.",
-    "moon": "In the leading model a Mars-size body strikes Earth and the Moon forms from the debris. Estimates span about {moonImpactGyr} billion years ago; the younger ages may record later remelting.",
-    "disk": "Disk intact: giants packed in, a heavy icy disk outside them. Starting orbits are a teaching sketch.",
-    "clearing": "Clearing, as a model: Jupiter and Saturn cross a resonance, the giants scatter each other and Neptune scatters the disk.",
-    "earthCrust": "Zircons from Jack Hills date Earth's crust to {earthCrustGyr} billion years ago, cool enough for liquid water soon after: the first oceans.",
-    "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that may be debris from one basin, Imbrium. A spike or a long tail? Debated.",
-    "marsDynamo": "Mars's dynamo still magnetises lavas {marsDynamoGyr} billion years ago. After that its global field is gone, and the solar wind strips the air away.",
-    "marsDry": "Around {marsDryGyr} billion years ago Mars's Hesperian ends: the rivers and lakes are mostly over, the cold desert begins.",
-    "vredefort": "{vredefortGyr} billion years ago an asteroid digs Vredefort, the largest confirmed impact on Earth. On the Moon the last lavas flow, {moonLavaGyr} billion years ago by Chang'e 5's basalts.",
-    "saturnRings": "Saturn's rings are young: Cassini's dust count gives them {ringsMyr} million years. Nothing in the model forms them; their origin is open.",
-    "chicxulub": "{chicxulubMyr} million years ago an asteroid strikes Chicxulub, Yucatán: the Cretaceous ends.",
-    "today": "Measured orbits. Planet positions are computed for the date on the clock."
+    "merger": "About {mergerGyr} billion years ago the Milky Way swallows the Gaia-Enceladus galaxy, stirring and thickening the thick disk that is already forming. The atoms that will make the Sun are still interstellar gas.",
+    "thinDisk": "By about {thinDiskGyr} billion years ago the thin disk is forming stars and the Galaxy's bar is in place. Earlier generations of stars are forging the heavy elements the Sun will inherit.",
+    "ingredients": "Interstellar gas, enriched by earlier generations of stars. The cloud that will become the Sun has not yet collapsed.",
+    "core": "A cold, dense core turns slowly inside the cloud: about {coreDensity} molecules per cubic centimetre. Short-lived aluminium-26 in meteorites hints at a massive star nearby.",
+    "collapse": "The core falls in under its own weight, taking about {freeFallKyr} thousand years at this density: slowly at first, then all at once. As it shrinks it spins faster and flattens into a disk.",
+    "protostar": "A protostar glows at the centre, heated by the infalling gas and hidden in dust, feeding from the disk around it. The first solids condense about {protostarKyr} thousand years later.",
+    "dust": "The first solids condense {sunBirthGyr} billion years ago: the timeline's zero. Dust grains stick when they touch gently and grow into pebbles a millimetre to a centimetre across.",
+    "planetesimals": "In models the pebbles gather within about {planetesimalsKyr} thousand years into planetesimals kilometres across; farther out this takes millions of years. Arrokoth is one that survived.",
+    "gasDisk": "Models grow Moon-mass embryos within about {embryosMyr} million years. Beyond the snow line, ice-rich cores grow fast enough to capture gas and become the giant planets.",
+    "accretion": "The young Sun's light and wind blow the gas away. Inside, many Moon-sized embryos remain, and Jupiter's pull sets their orbits crossing.",
+    "belt": "Far from Jupiter, slow collisions merge the embryos into rocky planets. Near Jupiter the collisions are fast and shatter them: the asteroid belt.",
+    "moon": "In the leading model a Mars-sized body strikes Earth and the Moon forms from the debris. Dates span about {moonImpactGyr} billion years ago; the younger ones may record later remelting. The Moon gathers just outside the Roche limit, and the tides push it outward: its drawn orbit grows through the dated records.",
+    "disk": "The sketch's starting state: the giants packed close, a heavy disk of icy bodies beyond them. The starting orbits are a teaching choice.",
+    "clearing": "The clearing, as a model: Jupiter and Saturn cross a resonance, the giants scatter one another, and Neptune scatters the disk.",
+    "earthCrust": "Zircons from Jack Hills show Earth had a crust {earthCrustGyr} billion years ago, and one cool enough for liquid water soon after: the first oceans.",
+    "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that debris may come from a single basin, Imbrium, so whether it was a spike or a long decline is still debated.",
+    "marsDynamo": "Mars's dynamo is still magnetising lavas {marsDynamoGyr} billion years ago. Later its global field fails, and the solar wind strips the atmosphere away.",
+    "marsDry": "Around {marsDryGyr} billion years ago Mars's Hesperian period ends: the rivers and lakes are mostly gone, and the cold desert begins.",
+    "vredefort": "{vredefortGyr} billion years ago an asteroid carves Vredefort, the largest confirmed impact structure on Earth. On the Moon, the youngest lavas yet sampled flow {moonLavaGyr} billion years ago, dated by Chang'e 5's basalts.",
+    "saturnRings": "Saturn's rings are young: Cassini's count of infalling dust gives them {ringsMyr} million years. Nothing in the model forms them and their origin is open; the drawn rings arrive across that window.",
+    "chicxulub": "{chicxulubMyr} million years ago an asteroid strikes Chicxulub, in Yucatán, and the Cretaceous ends.",
+    "today": "Measured orbits: the planets stand where they are on the clock's date."
   }
 }

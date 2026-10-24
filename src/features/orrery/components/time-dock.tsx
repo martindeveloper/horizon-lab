@@ -1,6 +1,6 @@
 import { CalendarClock, Pause, Play, RotateCcw } from "lucide-react";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { MapScale } from "@/components/simulations/map-readouts";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
@@ -8,18 +8,32 @@ import { proseArgs } from "@/lib/facts";
 import { asideOpen } from "@/lib/scene-store";
 import { sunExists } from "@/space/solar-system/model/moment";
 import { SUN_BIRTH } from "@/space/solar-system/model/parameters";
+import { clamp } from "@horizon/toolkit/math";
 import { convert } from "@horizon/toolkit/science";
-import { Dock, IconButton, Slider, Tooltip, cn, sliderStopAt } from "@horizon/toolkit/ui";
+import {
+  Dock,
+  IconButton,
+  SLIDER_THUMB_PX,
+  Slider,
+  Tooltip,
+  cn,
+  sliderStopAt,
+} from "@horizon/toolkit/ui";
 
 import { PROSE_FIGURES } from "../lib/model/catalogue";
 import { clockDate } from "../lib/model/events";
 import {
   EPOCHS,
+  EPOCH_BOUNDS,
   MOMENTS,
+  TRACK_CELLS,
+  chapterOf,
   epochOf,
   galacticLaps,
   isToday,
   noteOf,
+  playDilation,
+  playRate,
   sliderToYearsAgo,
   yearsAgoToSlider,
 } from "../lib/model/timeline";
@@ -28,16 +42,17 @@ import { formatYearsAgo } from "./format";
 import { momentTitle, useMoments } from "./moments-panel";
 import { DISPLAY, Switches } from "./view-controls";
 
-/* Epochs sit at their true places on the track, alternating above and below it so
-   neighbouring labels never meet, each where the thumb's centre stops for it. */
+/* The epochs in order, each where the thumb stops for it and the share of the track it ends at. */
 const STATIONS = EPOCHS.map((epoch, i) => ({
   ...epoch,
   at: yearsAgoToSlider(epoch.yearsAgo),
-  below: i % 2 === 1,
+  end: yearsAgoToSlider(EPOCH_BOUNDS[i] ?? 0),
 }));
-const trackX = sliderStopAt;
-/* The dated milestones since the clearing, as ticks under the track where they fall. */
+/* The dated milestones since the clearing: ticks on the last chapter's bar, where they fall. */
 const TICKS = MOMENTS.map((moment) => ({ ...moment, at: yearsAgoToSlider(moment.yearsAgo) }));
+/** The track's chapters and their names line up with the thumb's travel, inset by its radius. */
+const TRAVEL = { marginInline: SLIDER_THUMB_PX / 2 };
+const CELLS = { ...TRAVEL, gridTemplateColumns: `repeat(${TRACK_CELLS}, minmax(0, 1fr))` };
 
 /**
  * The dock never moves for a side panel. Only where its centred width reaches the panel
@@ -55,7 +70,9 @@ export function motionRateLabel(
   if (rate === 0) return t("hud.clockPaused");
   if (rate < 1.2) return t("hud.driftDays", { value: Math.round(rate * 365) });
   if (rate < 800) return t("hud.driftYears", { value: Math.round(rate) });
-  return t("hud.driftThousand", { value: f.number(rate / 1000, { maximumFractionDigits: 1 }) });
+  if (rate < 8e5)
+    return t("hud.driftThousand", { value: f.number(rate / 1000, { maximumFractionDigits: 1 }) });
+  return t("hud.driftMillion", { value: f.number(rate / 1e6, { maximumFractionDigits: 1 }) });
 }
 
 /** The timeline dock: date and playback, era note, epoch track, then the scale and display switches. */
@@ -96,8 +113,13 @@ export function TimeDock() {
       }),
     });
   }
+  /* History playing: the pace reads in the subline, and the playhead's halo widens as it slows. */
+  const inHistory = playing && !isToday(yearsAgo);
+  const dilation = inHistory ? playDilation(yearsAgo) : 0;
   let subline: string;
-  if (!sunExists(yearsAgo)) {
+  if (inHistory) {
+    subline = motionRateLabel(t, f, playRate(yearsAgo));
+  } else if (!sunExists(yearsAgo)) {
     subline = t("time.noSun");
   } else if (yearsAgo > SUN_BIRTH) {
     subline = t("time.protostar");
@@ -116,7 +138,9 @@ export function TimeDock() {
       }),
     });
   }
+  const note = noteOf(yearsAgo);
   const playLabel = t(playing ? "hud.pause" : "hud.play");
+  const replayLabel = t(`hud.replay.${chapterOf(yearsAgo)}`);
   return (
     <Dock ref={surface} footerClassName={cn(aside && "not-md:hidden")} className="flex flex-col">
       <div className="flex items-center gap-3">
@@ -126,8 +150,8 @@ export function TimeDock() {
               {playing ? <Pause className="icon" /> : <Play className="icon" />}
             </IconButton>
           </Tooltip>
-          <Tooltip label={t("hud.replay")}>
-            <IconButton aria-label={t("hud.replay")} onClick={() => api().replay()}>
+          <Tooltip label={replayLabel}>
+            <IconButton aria-label={replayLabel} onClick={() => api().replay()}>
               <RotateCcw className="icon" />
             </IconButton>
           </Tooltip>
@@ -156,11 +180,8 @@ export function TimeDock() {
           </p>
         </div>
       </div>
-      {/* A phone held sideways keeps the clock and the track; the scene needs the height. */}
-      <p className="mt-2 text-ui text-pretty text-fg-secondary not-md:line-clamp-3 not-md:min-h-12 md:line-clamp-3 md:min-h-10 md:leading-5 short:hidden">
-        {t(`notes.${noteOf(yearsAgo)}`, proseArgs(PROSE_FIGURES, locale))}
-      </p>
-      <Timeline yearsAgo={yearsAgo} />
+      <EraNote key={note}>{t(`notes.${note}`, proseArgs(PROSE_FIGURES, locale))}</EraNote>
+      <Timeline yearsAgo={yearsAgo} dilation={dilation} />
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-2.5 md:mt-1 md:pt-3 short:hidden">
         <MapScale namespace="orrery" value={scaleValue} unit={scaleUnit} px={scalePx} />
         <div className="hidden md:block">
@@ -171,91 +192,177 @@ export function TimeDock() {
   );
 }
 
-/** The scrubber with the epochs as stations on it; wide screens label and link them. */
-function Timeline({ yearsAgo }: { yearsAgo: number }) {
+/**
+ * The era's note, in reading type. It keeps a fixed number of lines while the clock scrubs,
+ * so the track never moves under the thumb: three on a phone, four on a wide screen. A note
+ * that runs past them is clipped and opens on a tap, and closes again with the next note
+ * (the dock keys it by note). A phone held sideways keeps only the clock and the track.
+ */
+function EraNote({ children }: { children: string }) {
+  const [clipped, setClipped] = useState(false);
+  const [open, setOpen] = useState(false);
+  /* The observer reports the box once as it mounts, then on every resize. */
+  const measure = useCallback((el: HTMLSpanElement) => {
+    const resize = new ResizeObserver(() => setClipped(el.scrollHeight > el.clientHeight + 1));
+    resize.observe(el);
+    return () => resize.disconnect();
+  }, []);
+  const words = (
+    <span ref={measure} className={cn(!open && "line-clamp-3 md:line-clamp-4")}>
+      {children}
+    </span>
+  );
+  return (
+    <p className="mt-2 min-h-15 text-body leading-5 text-pretty text-fg-secondary md:min-h-18 md:leading-6 short:hidden">
+      {clipped || open ? (
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((was) => !was)}
+          className="block w-full cursor-pointer rounded-compact text-left ui-focus select-text"
+        >
+          {words}
+        </button>
+      ) : (
+        words
+      )}
+    </p>
+  );
+}
+
+/**
+ * The scrubber. The track is the history in chapters, one bar each, filled gold from the past
+ * to the playhead; the epochs' names sit in cells beneath, each under its bar, the one the
+ * clock is in lit. A name is a button to its epoch's station. The dated milestones since the
+ * clearing are ticks on the last bar: wide screens name them on hover and set the clock to one
+ * on a tap, and while the clock stands at one its name takes the cell. Phones name only the
+ * epoch the clock is in. `dilation` is how far playback is slowed, 0–1, shown as a halo about
+ * the thumb.
+ */
+function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }) {
   const t = useTranslations("orrery");
   const figures = proseArgs(PROSE_FIGURES, useLocale());
   const f = useFormatter();
   const epoch = epochOf(yearsAgo);
   const note = noteOf(yearsAgo);
+  const standingAt = MOMENTS.find((m) => m.id === note);
+  const at = yearsAgoToSlider(yearsAgo);
+  const chapterStart = STATIONS[STATIONS.findIndex((s) => s.id === epoch) - 1]?.end ?? 0;
   const api = useOrrery.getState;
+  const tickLabel = (m: (typeof TICKS)[number]) =>
+    `${t(`moments.${m.id}`)} · ${formatYearsAgo(t, f, m.yearsAgo)}`;
   return (
-    <div data-coach="time" className="relative mt-1.5 md:mt-0 md:py-4">
-      {/* Painted before the slider, so the thumb passes over the station poles. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        {STATIONS.map((s) => (
-          <span
-            key={s.id}
-            style={{ left: trackX(s.at) }}
-            className={cn(
-              "absolute top-[calc(50%-0.25rem)] h-2 w-px transition-colors duration-feedback ease-standard md:h-[1.875rem]",
-              s.below ? "md:top-1/2" : "md:top-0.5",
-              s.id === epoch ? "bg-accent" : "bg-fg-primary/30",
-            )}
-          />
-        ))}
-      </div>
-      <Slider
-        aria-label={t("hud.timeSlider")}
-        min={0}
-        max={1000}
-        step={1}
-        value={[Math.round(yearsAgoToSlider(yearsAgo) * 1000)]}
-        valueText={(v) => formatYearsAgo(t, f, sliderToYearsAgo(v / 1000))}
-        onValueChange={([v]) => api().setYearsAgo(sliderToYearsAgo((v ?? 1000) / 1000))}
-      />
-      {/* Milestones since the clearing: a tap sets the clock; the one the note tells is lit. */}
-      <div role="group" aria-label={t("hud.momentsDeep")} className="hidden md:block">
-        {TICKS.map((m) => (
-          <span
-            key={m.id}
-            style={{ left: trackX(m.at) }}
-            className="absolute top-1/2 -translate-x-1/2"
-          >
-            <Tooltip
-              side="top"
-              label={`${t(`moments.${m.id}`)} · ${formatYearsAgo(t, f, m.yearsAgo)}`}
+    <div data-coach="time" className="mt-1.5 md:mt-0">
+      <div className="relative">
+        {/* The bars, painted before the slider so the thumb rides over them. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 grid items-center"
+          style={CELLS}
+        >
+          {STATIONS.map((s, i) => {
+            const start = i > 0 ? (STATIONS[i - 1]?.end ?? 0) : 0;
+            const filled = clamp((at - start) / (s.end - start), 0, 1);
+            return (
+              <span
+                key={s.id}
+                style={{ gridColumn: `span ${s.cells}` }}
+                className="relative h-0.5 overflow-hidden rounded-full bg-fg-primary/20 not-first:ml-[3px] not-last:mr-[3px]"
+              >
+                <span
+                  className="absolute inset-y-0 left-0 bg-accent"
+                  style={{ width: `${filled * 100}%` }}
+                />
+              </span>
+            );
+          })}
+        </div>
+        <Slider
+          aria-label={t("hud.timeSlider")}
+          min={0}
+          max={1000}
+          step={1}
+          value={[Math.round(at * 1000)]}
+          valueText={(v) => formatYearsAgo(t, f, sliderToYearsAgo(v / 1000))}
+          onValueChange={([v]) => api().setYearsAgo(sliderToYearsAgo((v ?? 1000) / 1000))}
+          trackClassName="bg-transparent"
+          rangeClassName="hidden"
+          thumbClassName="slider-halo"
+          thumbStyle={{ "--halo": dilation }}
+        />
+        {/* The milestones' ticks rise from the bar: gold once passed, the one the clock stands at taller. */}
+        <div role="group" aria-label={t("hud.momentsDeep")} className="not-md:pointer-events-none">
+          {TICKS.map((m) => (
+            <span
+              key={m.id}
+              style={{ left: sliderStopAt(m.at) }}
+              className="absolute top-1/2 -translate-x-1/2"
             >
-              <button
-                type="button"
-                aria-label={`${t(`moments.${m.id}`)} · ${formatYearsAgo(t, f, m.yearsAgo)}`}
-                aria-pressed={m.id === note}
-                onClick={() => api().setYearsAgo(m.yearsAgo)}
-                /* A short pole hanging from the track, the hit area a little wider than it. */
-                className={cn(
-                  "relative block h-4 w-3 rounded-compact ui-focus before:absolute before:top-0 before:left-1/2 before:h-3 before:w-px before:-translate-x-1/2 before:transition-colors before:duration-feedback before:ease-standard",
-                  m.id === note
-                    ? "before:bg-accent"
-                    : "before:bg-fg-primary/40 hover:before:bg-fg-primary/70",
-                )}
-              />
-            </Tooltip>
-          </span>
-        ))}
+              <Tooltip side="top" label={tickLabel(m)}>
+                <button
+                  type="button"
+                  aria-label={tickLabel(m)}
+                  aria-pressed={m.id === note}
+                  onClick={() => api().setYearsAgo(m.yearsAgo)}
+                  className={cn(
+                    "relative block size-4 -translate-y-3 rounded-compact ui-focus before:absolute before:bottom-1 before:left-1/2 before:w-px before:-translate-x-1/2 before:transition-[background-color,height] before:duration-feedback before:ease-standard",
+                    m.id === note ? "before:h-2" : "before:h-1.5",
+                    m.yearsAgo >= yearsAgo
+                      ? "before:bg-accent"
+                      : "before:bg-fg-primary/35 hover:before:bg-fg-primary/70",
+                  )}
+                />
+              </Tooltip>
+            </span>
+          ))}
+        </div>
       </div>
-      <div role="group" aria-label={t("hud.epochs")} className="hidden md:block">
-        {STATIONS.map((s) => {
-          const end = s.at >= 1;
+      <div
+        role="group"
+        aria-label={t("hud.epochs")}
+        className="-mt-1.5 hidden md:grid"
+        style={CELLS}
+      >
+        {STATIONS.map((s, i) => {
+          const current = s.id === epoch;
+          let align = "text-center";
+          if (i === 0) align = "text-left";
+          if (i === STATIONS.length - 1) align = "text-right";
+          /* The last cell names the milestone the clock stands at, and is the way back to it. */
+          const milestone = s.id === "today" ? standingAt : undefined;
           return (
             <button
               key={s.id}
               type="button"
-              aria-pressed={s.id === epoch}
+              aria-pressed={current}
+              style={{ gridColumn: `span ${s.cells}` }}
               /* Today is now: it also brings a clock run on (or set to a moment) back. */
-              onClick={() => (s.id === "today" ? api().setClock(0) : api().setYearsAgo(s.yearsAgo))}
-              style={{ left: trackX(s.at) }}
+              onClick={() => {
+                if (milestone) api().setYearsAgo(milestone.yearsAgo);
+                else if (s.id === "today") api().setClock(0);
+                else api().setYearsAgo(s.yearsAgo);
+              }}
               className={cn(
-                "absolute h-4 rounded-compact text-caption leading-4 tracking-wide whitespace-nowrap ui-focus transition-colors duration-feedback ease-standard",
-                s.below ? "bottom-0" : "top-0",
-                end ? "-translate-x-full pr-2" : "pl-2",
-                s.id === epoch ? "font-medium text-accent" : "text-fg-tertiary ui-quiet",
+                "h-4 truncate rounded-compact text-caption leading-4 tracking-wide ui-focus transition-colors duration-feedback ease-standard",
+                align,
+                current ? "font-medium text-accent" : "text-fg-tertiary ui-quiet",
               )}
             >
-              {t(`epochs.${s.id}`, figures)}
+              {milestone ? t(`moments.${milestone.id}`) : t(`epochs.${s.id}`, figures)}
             </button>
           );
         })}
       </div>
+      {/* Phones name only the chapter the clock is in (or its milestone), as one line under its bar. */}
+      <p
+        className={cn(
+          "-mt-1.5 h-4 text-caption leading-4 font-medium tracking-wide whitespace-nowrap text-accent md:hidden",
+          epoch === "today" ? "text-right" : "text-left",
+        )}
+        style={epoch === "today" ? TRAVEL : { ...TRAVEL, paddingLeft: `${chapterStart * 100}%` }}
+      >
+        {standingAt ? t(`moments.${standingAt.id}`) : t(`epochs.${epoch}`, figures)}
+      </p>
     </div>
   );
 }

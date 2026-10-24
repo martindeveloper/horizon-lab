@@ -125,3 +125,24 @@ test("the natal cloud is whole through the fall, gone at the first solids, and t
   assert.ok(skyEpoch(COLLAPSE_BEGINS).dim < 0.4, "dark inside the cloud");
   assert.ok(skyEpoch(SUN_BIRTH - 1e7).dim > 0.99, "clear once the disk era is well under way");
 });
+
+test("playback's dilation reads 0 at its fastest pace and 1 at its slowest, rising as the pace drops", async () => {
+  const { playDilation, playRate } = await import("../src/features/orrery/lib/model/timeline.ts");
+  assert.equal(playDilation(1e9), 0, "the ages since the clearing play fastest");
+  near(playDilation(SUN_BIRTH - 1), 1, 1e-6, "the first solids play slowest");
+  const formation = playDilation(COLLAPSE_BEGINS);
+  assert.ok(formation > 0.6 && formation < 0.9, `the fall is well slowed: ${formation}`);
+  const moments = [
+    1e9,
+    FORMATION_BEGINS + 1,
+    4.47e9,
+    4.52e9,
+    COLLAPSE_BEGINS,
+    SUN_BIRTH - 1e6,
+    SUN_BIRTH - 1,
+  ];
+  for (const a of moments)
+    for (const b of moments)
+      if (playRate(a) > playRate(b))
+        assert.ok(playDilation(a) < playDilation(b), `slower pace, more dilation: ${a} vs ${b}`);
+});

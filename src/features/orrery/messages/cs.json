@@ -10,7 +10,7 @@
     "views": { "title": "Pohledy", "body": "Přeskakujte mezi měřítky až k Oortovu oblaku." },
     "objects": { "title": "Objekty", "body": "Najděte těleso a otevřete jeho kartu." },
     "closeUp": { "title": "Zblízka", "body": "Přeletí k tělesu v jeho skutečné velikosti." },
-    "time": { "title": "Čas", "body": "Projděte historii, nebo přehrajte odklízení těles." },
+    "time": { "title": "Čas", "body": "Projděte historii, nebo přehrajte kapitolu, v níž jste." },
     "fromEarth": {
       "title": "Ze Země",
       "body": "Země stojí, Slunce ji obíhá a planety kreslí své smyčky: obloha, kterou vysvětlovaly epicykly."
@@ -97,11 +97,18 @@
   "hud": {
     "play": "Spustit čas",
     "pause": "Zastavit čas",
-    "replay": "Přehrát odklízení těles",
+    "replay": {
+      "history": "Přehrát celou historii",
+      "formation": "Přehrát vznik Slunce",
+      "disk": "Přehrát zrod planet",
+      "clearing": "Přehrát odklízení těles",
+      "ages": "Přehrát věky od odklízení těles"
+    },
     "timeSlider": "Čas. Vlevo je vzdálenější minulost; období odklízení těles má na posuvníku více prostoru.",
     "driftDays": "1 s ≈ {value, plural, one {# den} few {# dny} other {# dní}}",
     "driftYears": "1 s ≈ {value, plural, one {# rok} few {# roky} other {# let}}",
     "driftThousand": "1 s ≈ {value} tis. let",
+    "driftMillion": "1 s ≈ {value} mil. let",
     "clockPaused": "pozastaveno",
     "clockRate": "Čas",
     "legend": "Skrytí vrstvy nemění počet těles v přehledu.",
@@ -154,6 +161,8 @@
     "tiltEquator": "{value}° k zemskému rovníku",
     "outputThen": "Zářivý výkon ve zvoleném čase",
     "ofToday": "{value} % dnešního · model",
+    "distanceThen": "Vzdálenost ve zvoleném čase",
+    "kmOfToday": "{km} km · {value} % dnešní · model",
     "habitableZone": "Obyvatelná zóna",
     "fromEarth": "Od Země",
     "l2": "L2 za Zemí",
@@ -311,7 +320,7 @@
       },
       "periods": {
         "title": "Čím dál, tím pomaleji",
-        "body": "Země oběhne Slunce za rok, Jupiter za {jupiterYears} {jupiterYearsPlural, select, one {rok} few {roky} many {roku} other {let}}, Neptun za {neptuneYears}. Třetí Keplerův zákon spojuje oběžnou dobu s velkou poloosou dráhy.",
+        "body": "Země oběhne Slunce za rok, Jupiter za {jupiterYears} {jupiterYearsPlural, select, one {rok} few {roky} many {roku} other {let}}, Neptun za {neptuneYears} {neptuneYearsPlural, select, one {rok} few {roky} many {roku} other {let}}. Třetí Keplerův zákon spojuje oběžnou dobu s velkou poloosou dráhy.",
         "eq": "{equation} · P v letech, a v au"
       },
       "ellipses": {
@@ -330,11 +339,15 @@
       },
       "disk": {
         "title": "Planety vznikly v plochém disku",
-        "body": "Planety krouží kolem Slunce jedním směrem a skoro v téže rovině. Kant a Laplace v tom viděli stopu zrodu v jediném rotujícím oblaku plynu a prachu."
+        "body": "Planety krouží kolem Slunce jedním směrem a skoro v téže rovině. Kant a Laplace v tom viděli stopu zrodu v jediném rotujícím oblaku plynu a prachu. První pevné látky kondenzovaly před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let: to je stáří sluneční soustavy."
       },
       "snowLine": {
         "title": "Sněžná čára",
         "body": "Blíž než asi {snowLineAu} au kondenzují jen horniny a kovy; dál přibývá led, takže jádra dorostou natolik, aby zachytila plyn. Odkud má Země vodu, se stále diskutuje: zvenčí, nebo už z kamenných stavebních bloků, z nichž vznikla."
+      },
+      "assembly": {
+        "title": "Plyn mizí, kamení se skládá",
+        "body": "Asi do {gasMyr} {gasMyrPlural, select, one {milionu} few {milionů} many {milionu} other {milionů}} let záření a vítr mladého Slunce odvanou plyn a obří planety přestanou růst. Uvnitř se embrya velikosti Měsíce desítky milionů let srážejí v kamenné planety; poslední srážka Země s tělesem velikosti Marsu dá vzniknout Měsíci a u Jupiteru se zbytky tříští v pás planetek."
       },
       "clearing": {
         "title": "Odklízení těles jako model",
@@ -371,6 +384,10 @@
         "title": "Obloha v pozadí",
         "body": "Jasné hvězdy pocházejí ze sdíleného katalogu J2000. Jejich rektascenze a deklinace se převádějí do ekliptikální soustavy použité pro planety. Pás Mléčné dráhy vzniká vzorkováním výtvarné mapy v galaktických souřadnicích, která obsahuje výduť ve směru Střelce, Velkou trhlinu a Uhelný pytel. Z téže mapy se odvozují desetitisíce bodů i jemný opar, takže pás má zrnitou strukturu. V modelu se celý pás otáčí kolem galaktického pólu jednou za galaktický rok, v souladu s oběhem Slunce. V dobách před více než {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je místo tenkého disku s prachovým pásem zobrazen tlustší, modřejší disk. Uvnitř mateřského oblaku obraz tmavne a červená. Pojmenované hvězdy se přestávají zobrazovat přibližně {namedStarsYears} {namedStarsYearsPlural, select, one {rok} few {roky} many {roku} other {let}} od současnosti, protože jejich vlastní pohyby za tak dlouhou dobu výrazně mění podobu souhvězdí."
       },
+      "history": {
+        "title": "Saturnovy prstence a vzdálenost Měsíce",
+        "body": "Saturnovy prstence jsou vykresleny tak, že přibývají v průběhu svého datovaného okna, před {ringsMyr} {ringsMyrPlural, select, one {milionem} few {miliony} many {milionu} other {miliony}} let: model je nevytváří. Měsíc je vykreslen od vyprávěné srážky, od těsně za kapalnou Rocheovou mezí, asi {moonFormedKm} km, a vzdaluje se přes slapové záznamy k dnešním {moonKm} km: asi {moodiesShare} % dnešní vzdálenosti před {moodiesGyr} {moodiesGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let podle slapových svazků souvrství Moodies, {joffreKm} km před {joffreGyr} {joffreGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let podle páskovaných železných rud Joffre, {xiamalingKm} km před {xiamalingGyr} {xiamalingGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let podle souvrství Xiamaling, {elatinaKm} km před {elatinaMyr} {elatinaMyrPlural, select, one {milionem} few {miliony} many {milionu} other {miliony}} let podle slapových rytmitů Elatina. Mezi záznamy se vzdálenost řídí zákonem stálého slapového momentu, a^(13/2) lineárně v čase, což je náčrt: skutečná rychlost kolísala se slapovými rezonancemi oceánů. Dráha je vykreslena ve zvětšeném měřítku soustavy, scéna tedy ukazuje vzdálenost vůči dnešní a Skutečná velikost ji zachovává; karta Měsíce ji vypisuje ve zvoleném čase."
+      },
       "youngSun": {
         "title": "Slabé mladé Slunce",
         "body": "Na hlavní posloupnosti Slunce zjasňuje, jak jeho jádro mění vodík v helium. Goughova interpolace standardních slunečních modelů dává jeho výkon podle stáří: na začátku náčrtu asi {youngSunPercent} % dnešního, po prvních několika stech milionech let v rámci několika procent modelů. Záře se řídí tímto zákonem; smršťující se Slunce před začátkem náčrtu modelováno není a pás se tam nekreslí. Obyvatelná zóna je kreslena na dnešních konzervativních okrajích, {zoneInnerAu} až {zoneOuterAu} au (od vlhkého po maximální skleník, bez oblačnosti), a posouvá se s odmocninou výkonu, tam, kde dopadá stejné sluneční záření; červenější světlo mladého Slunce by okraje posunulo ještě o kousek dál. Karta Slunce ukazuje obojí ve zvoleném čase."
@@ -398,27 +415,27 @@
     }
   },
   "notes": {
-    "merger": "Asi před {mergerGyr} {mergerGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let Mléčná dráha pohltila galaxii Gaia-Enceladus, která rozvířila a zesílila už vznikající tlustý disk. Atomy budoucího Slunce jsou zatím součástí mezihvězdného plynu.",
-    "thinDisk": "V tenkém disku vznikají hvězdy a nejpozději před přibližně {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let je již přítomna příčka. Dřívější generace hvězd vytvářejí těžké prvky, které se později stanou součástí Slunce.",
-    "ingredients": "Mezihvězdný plyn obohacený dřívějšími generacemi hvězd. Oblak, z něhož vznikne Slunce, se ještě nezhroutil.",
-    "core": "Chladné husté jádro oblaku, pomalu se otáčející: zhruba {coreDensity} {coreDensityPlural, select, one {molekula} few {molekuly} many {molekuly} other {molekul}} na krychlový centimetr. Krátce žijící hliník-26 v meteoritech může ukazovat na blízkou hmotnou hvězdu.",
-    "collapse": "Jádro se hroutí vlastní vahou, při této hustotě asi za {freeFallKyr} {freeFallKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let: zprvu pomalu, pak naráz. Jak se smršťuje, točí se rychleji a zplošťuje do disku.",
-    "protostar": "Ve středu září protohvězda, zahřívaná dopadajícím plynem a skrytá v prachu, a přibírá hmotu z disku kolem sebe. První pevné látky kondenzují asi o {protostarKyr} {protostarKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let později.",
-    "dust": "První pevné látky před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let: nula této časové osy. Prachová zrna se při pomalých srážkách spojují do částic o velikosti milimetrů až centimetrů.",
-    "planetesimals": "Podle modelů během prvních {planetesimalsKyr} {planetesimalsKyrPlural, select, one {tisíce} few {tisíc} many {tisíce} other {tisíc}} let se první oblázky shlukují do kilometrových planetesimál; dál od Slunce to trvá miliony let. Jedním z dochovaných těles tohoto typu je Arrokoth.",
-    "gasDisk": "Podle modelů do zhruba {embryosMyr} mil. let vznikají planetární embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led dost rychle, aby gravitačně zachytila okolní plyn: vznikají obří planety.",
-    "accretion": "Záření a hvězdný vítr mladého Slunce rozptylují plyn. Ve vnitřní části soustavy zbývá mnoho planetárních embryí velikosti Měsíce. Jupiter mění jejich dráhy, které se začínají křížit.",
-    "belt": "Daleko od Jupiteru se planetární embrya při pomalých srážkách spojují v kamenné planety. Blízko Jupiteru jsou srážky rychlé a tělesa tříští: zůstává pás planetek.",
-    "moon": "Podle převládajícího modelu srážka Země s tělesem velikosti Marsu vyvrhne materiál, z něhož vznikne Měsíc. Odhady doby této události se pohybují přibližně v rozmezí {moonImpactGyr} {moonImpactGyrPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} let před současností; mladší stáří mohou zachycovat pozdější přetavení.",
-    "disk": "Výchozí stav modelu: obří planety na těsně sousedících drahách, za nimi hmotný disk ledových těles. Počáteční dráhy jsou zvoleny pro výukový model.",
-    "clearing": "Model odklízení těles: Jupiter a Saturn projdou rezonancí, obři si navzájem rozhodí dráhy a Neptun rozptýlí tělesa disku.",
-    "earthCrust": "Zirkony z Jack Hills datují zemskou kůru do doby před {earthCrustGyr} mld. let, dost chladnou pro tekutou vodu brzy poté: první oceány.",
-    "bombardment": "Mnoho impaktních tavenin přivezených misemi Apollo má stáří asi {lhbGyr} {lhbGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let. To vedlo k představě pozdního těžkého bombardování. Vzorky ale mohou z velké části pocházet z jediné pánve, Imbria. Zda nastalo krátké období zvýšeného počtu dopadů, nebo jejich četnost dlouhodobě klesala, zůstává sporné.",
-    "marsDynamo": "Dynamo Marsu ještě před {marsDynamoGyr} mld. let magnetizuje lávy. Poté jeho globální pole mizí a sluneční vítr odnáší atmosféru.",
-    "marsDry": "Zhruba před {marsDryGyr} mld. let končí na Marsu hesperian: řeky a jezera z větší části mizí, začíná studená poušť.",
-    "vredefort": "Před {vredefortGyr} mld. let vyhloubí planetka Vredefort, největší potvrzený dopad na Zemi. Na Měsíci tečou poslední lávy, před {moonLavaGyr} mld. let podle bazaltů Chang'e 5.",
-    "saturnRings": "Saturnovy prstence jsou mladé: podle prachu, který Cassini napočítala, mají {ringsMyr} mil. let. Model je nevytváří; jejich původ je otevřený.",
-    "chicxulub": "Před {chicxulubMyr} mil. let dopadá planetka u Chicxulubu na Yucatánu: končí křída.",
-    "today": "Měřené dráhy. Polohy planet jsou spočteny pro datum na hodinách."
+    "merger": "Asi před {mergerGyr} {mergerGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let Mléčná dráha pohlcuje galaxii Gaia-Enceladus; srážka rozvíří a zesílí tlustý disk, který už vzniká. Atomy budoucího Slunce jsou zatím mezihvězdným plynem.",
+    "thinDisk": "Před zhruba {thinDiskGyr} {thinDiskGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let už v tenkém disku vznikají hvězdy a Galaxie má příčku. Starší generace hvězd vytvářejí těžké prvky, které Slunce jednou zdědí.",
+    "ingredients": "Mezihvězdný plyn obohacený staršími generacemi hvězd. Oblak, z něhož vznikne Slunce, se ještě nezhroutil.",
+    "core": "Uvnitř oblaku se pomalu otáčí chladné husté jádro: zhruba {coreDensity} {coreDensityPlural, select, one {molekula} few {molekuly} many {molekuly} other {molekul}} na krychlový centimetr. Krátce žijící hliník-26 v meteoritech naznačuje, že nablízku byla hmotná hvězda.",
+    "collapse": "Jádro se hroutí vlastní vahou; při této hustotě to trvá asi {freeFallKyr} {freeFallKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let: zprvu pomalu, nakonec naráz. Jak se smršťuje, roztáčí se a zplošťuje do disku.",
+    "protostar": "Ve středu září protohvězda, zahřívaná dopadajícím plynem a skrytá v prachu; roste z disku kolem sebe. První pevné látky kondenzují asi o {protostarKyr} {protostarKyrPlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let později.",
+    "dust": "První pevné látky kondenzují před {sunBirthGyr} {sunBirthGyrPlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let: nula této časové osy. Prachová zrna se při jemných dotecích slepují a rostou v oblázky o velikosti milimetrů až centimetrů.",
+    "planetesimals": "Podle modelů se oblázky během asi {planetesimalsKyr} {planetesimalsKyrPlural, select, one {tisíce} few {tisíc} many {tisíce} other {tisíc}} let shlukují do kilometrových planetesimál; dál od Slunce to trvá miliony let. Arrokoth je jedna z těch, které přežily.",
+    "gasDisk": "V modelech do zhruba {embryosMyr} mil. let vyrostou embrya o hmotnosti Měsíce. Za sněžnou čárou rostou jádra bohatá na led tak rychle, že zachytí plyn: vznikají obří planety.",
+    "accretion": "Záření a vítr mladého Slunce odvanou plyn. Uvnitř zůstává mnoho embryí velikosti Měsíce a Jupiterova přitažlivost jejich dráhy rozhoupe, až se začnou křížit.",
+    "belt": "Daleko od Jupiteru se embrya při pomalých srážkách spojují v kamenné planety. Blízko něj jsou srážky rychlé a tělesa tříští: zůstává pás planetek.",
+    "moon": "Podle převládajícího modelu do Země narazí těleso velikosti Marsu a z vyvržené hmoty vznikne Měsíc. Odhady spadají přibližně do rozmezí {moonImpactGyr} {moonImpactGyrPlural, select, one {miliardy} few {miliard} many {miliardy} other {miliard}} let před současností; mladší stáří mohou odrážet pozdější přetavení. Měsíc se skládá těsně za Rocheovou mezí a slapy ho odtlačují: jeho vykreslená dráha roste podle datovaných záznamů.",
+    "disk": "Výchozí stav náčrtu: obří planety natěsno, za nimi hmotný disk ledových těles. Počáteční dráhy jsou výuková volba.",
+    "clearing": "Odklízení těles jako model: Jupiter se Saturnem projdou rezonancí, obři si navzájem rozhodí dráhy a Neptun rozptýlí disk.",
+    "earthCrust": "Zirkony z Jack Hills ukazují, že před {earthCrustGyr} mld. let měla Země kůru, a brzy poté dost chladnou pro tekutou vodu: první oceány.",
+    "bombardment": "Mnoho impaktních tavenin z misí Apollo má stáří asi {lhbGyr} {lhbGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let: klasické pozdní těžké bombardování. Velká část těch úlomků ale může pocházet z jediné pánve, Imbria, a tak zůstává sporné, zda šlo o krátkou špičku, nebo o dlouhý pokles.",
+    "marsDynamo": "Dynamo Marsu ještě před {marsDynamoGyr} mld. let magnetizuje lávy. Později jeho globální pole zanikne a sluneční vítr odnese atmosféru.",
+    "marsDry": "Zhruba před {marsDryGyr} mld. let končí na Marsu hesperian: řeky a jezera z větší části mizí a začíná studená poušť.",
+    "vredefort": "Před {vredefortGyr} mld. let vyhloubí planetka Vredefort, největší potvrzenou impaktní strukturu na Zemi. Na Měsíci tečou před {moonLavaGyr} mld. let nejmladší dosud odebrané lávy, datované bazalty Chang'e 5.",
+    "saturnRings": "Saturnovy prstence jsou mladé: podle dopadajícího prachu, který Cassini napočítala, mají {ringsMyr} mil. let. Model je nevytváří a jejich původ je otevřený; vykreslené prstence přibývají během tohoto okna.",
+    "chicxulub": "Před {chicxulubMyr} mil. let dopadá planetka u Chicxulubu na Yucatánu a končí křída.",
+    "today": "Měřené dráhy: planety stojí tam, kde jsou k datu na hodinách."
   }
 }

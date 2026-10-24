@@ -78,6 +78,18 @@ const specification = {
       ],
     },
     {
+      id: "history",
+      equations: [
+        {
+          equation: "roche-limit",
+        },
+        {
+          equation: "tidal-recession",
+        },
+        "rings(t) = 1 − smoothstep(100 Myr, 400 Myr, t)  (Saturn's rings across their dated window)",
+      ],
+    },
+    {
       id: "youngSun",
       equations: [
         {
@@ -160,6 +172,31 @@ const specification = {
     {
       title: "Nesvorný (2018), Dynamical evolution of the early Solar System, ARA&A 56, 137",
       url: SOURCE_URLS.nesvorny2018,
+    },
+    {
+      title:
+        "Salmon & Canup (2014), Accretion of the Moon from non-canonical discs, Phil. Trans. R. Soc. A 372, 20130256",
+      url: "https://doi.org/10.1098/rsta.2013.0256",
+    },
+    {
+      title:
+        "Eulenfeld & Heubeck (2023), Constraints on Moon's orbit 3.2 billion years ago from tidal bundle data, JGR Planets 128",
+      url: "https://arxiv.org/abs/2207.05464",
+    },
+    {
+      title:
+        "Lantink et al. (2022), Milankovitch cycles in banded iron formations constrain the Earth–Moon system 2.46 billion years ago, PNAS 119, e2117146119",
+      url: "https://doi.org/10.1073/pnas.2117146119",
+    },
+    {
+      title:
+        "Meyers & Malinverno (2018), Proterozoic Milankovitch cycles and the history of the solar system, PNAS 115, 6363",
+      url: "https://doi.org/10.1073/pnas.1717689115",
+    },
+    {
+      title:
+        "Williams (2000), Geological constraints on the Precambrian history of Earth's rotation and the Moon's orbit, Reviews of Geophysics 38, 37",
+      url: "https://doi.org/10.1029/1999RG900016",
     },
     {
       title:

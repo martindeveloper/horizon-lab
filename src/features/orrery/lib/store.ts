@@ -14,7 +14,6 @@ import {
   isObservatorySelection,
   type ObservatoryId,
 } from "@/space/solar-system/model/observatories";
-import { MODEL_START } from "@/space/solar-system/model/parameters";
 import { solarViewById, type SolarViewId } from "@/space/solar-system/model/views";
 import type { SolarShow } from "@/space/solar-system/scene/kit";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
@@ -30,6 +29,7 @@ import {
   type CloseUpSelection,
   type OrrerySelection,
 } from "./model/selection";
+import { CHAPTERS, chapterOf } from "./model/timeline";
 import { TOUR } from "./model/tour";
 import { DEFAULT_VIEW } from "./model/views";
 
@@ -82,6 +82,8 @@ export type OrreryStore = SceneSlice &
      * real time. Paused, everything holds. The one clock control; a seek keeps it as it is.
      */
     playing: boolean;
+    /** Playback pauses on reaching this moment (a Guide step that plays to what it describes); null runs on. */
+    playStop: number | null;
     view: SolarViewId;
     selection: OrrerySelection | null;
     /**
@@ -164,13 +166,14 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   ...guideSlice(set, get, {
     tour: TOUR,
     save: (s) => ({ show: s.show, playing: s.playing }),
-    restore: (saved) => saved,
+    restore: (saved) => ({ ...saved, playStop: null }),
     open: () => closeUpState(null),
     apply: (step) => ({
       view: step.view,
       viewDist: solarViewById(step.view).dist,
       yearsAgo: step.yearsAgo,
       playing: Boolean(step.playing) && !prefersReducedMotion(),
+      playStop: step.playUntil ?? null,
       /* Each step starts from the default layers. */
       show: { ...DEFAULT_SHOW, ...step.show },
       selection: step.focus ?? null,
@@ -193,6 +196,7 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
   yearsAgo: 0,
   /* Time runs from the start; the engine holds it under reduced motion. */
   playing: true,
+  playStop: null,
   view: typeof window === "undefined" ? DEFAULT_VIEW : viewFromPath(),
   selection: null,
   closeUp: null,
@@ -211,15 +215,22 @@ export const useOrrery = create<OrreryStore>((set, get) => ({
       clock: { years, stamp: (s.clock?.stamp ?? 0) + 1 },
     })),
   togglePlay: () => set((s) => ({ playing: !s.playing })),
+  /* Replay plays the chapter under the playhead again, from its start to its end: the giants'
+     framing shows the formation, the disk and the clearing whole; the ages since keep the view. */
   replay: () =>
-    set((s) => ({
-      ...atTime(s, MODEL_START),
-      playing: true,
-      view: "giants",
-      viewDist: solarViewById("giants").dist,
-      flight: s.flight + 1,
-      panel: "none",
-    })),
+    set((s) => {
+      const chapter = CHAPTERS[chapterOf(s.yearsAgo)];
+      const view = chapterOf(s.yearsAgo) === "ages" ? s.view : "giants";
+      return {
+        ...atTime(s, chapter.from),
+        playing: true,
+        playStop: chapter.until,
+        view,
+        viewDist: solarViewById(view).dist,
+        flight: view === s.view ? s.flight : s.flight + 1,
+        panel: "none",
+      };
+    }),
   setView: (view) => {
     const v = solarViewById(view);
     set((s) => ({
