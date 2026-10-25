@@ -108,7 +108,8 @@ catalogue and `examples/visualization-example.tsx` for composition.
   presses the target (or its first button) once found and again as the step ends if it is still
   `aria-expanded`. Escape, the close button and a press outside the callout, the target, what the
   target has open (`aria-controls`) and any `data-coach-opener` (`COACH_OPENER`) call `onClose`;
-  the arrows step from the scene or the callout. Next takes focus as it opens and `returnFocus`
+  the arrows step from anywhere but a control they move (a field, slider or choice), so a panel
+  or picker a step opens and focuses does not take them. Next takes focus as it opens and `returnFocus`
   gets it back. It reads the page a frame at a time only while mounted. `coach-model.ts` holds the
   arithmetic: `playCues` runs a step's cues (`{ at, run }`, seconds) on a clock and returns their
   stop; `placeCoach` picks the callout's place and `coachLeader` the leader's ends.

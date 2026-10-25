@@ -378,18 +378,21 @@ export function CoachMark({
   const [held, setHeld] = useState<CoachPlacement | null>(null);
   const shown = useRef<CoachPlacement | null>(null);
 
-  /* Escape closes from anywhere, the arrows step from the scene or the card; a press outside the card, its target and the opener closes. */
+  /*
+   * Escape closes from anywhere; the arrows step from anywhere but a control they move, so a
+   * panel or picker a step opens (and focuses) does not take them. A press outside the card,
+   * its target and the opener closes.
+   */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!isSceneShortcut(e, { controls: true })) return;
-      const inCard = e.target instanceof Node && !!card.current?.contains(e.target);
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
         handlers.current.onClose();
       } else if (
         (e.key === "ArrowRight" || e.key === "ArrowLeft") &&
-        (inCard || isSceneShortcut(e))
+        isSceneShortcut(e, { controls: "buttons" })
       ) {
         e.preventDefault();
         e.stopPropagation();

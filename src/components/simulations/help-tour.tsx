@@ -5,7 +5,19 @@ import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import type { StoreApi } from "zustand";
 
 import type { HelpSlice, HelpStep } from "@/lib/help";
-import { COACH_AVOID, CoachMark, playCues, useImmersive } from "@horizon/toolkit/ui";
+import {
+  COACH_AVOID,
+  CoachMark,
+  isSceneShortcut,
+  playCues,
+  useImmersive,
+} from "@horizon/toolkit/ui";
+
+/** The key that opens the tour. */
+export const HELP_SHORTCUT = "?";
+
+/** Every simulation's stage: the tour rings controls inside it, and its key acts from it. */
+const STAGE = "[data-simulation]";
 
 /** What the toolbar's `?` needs of a simulation's tour: its state, its steps and their cues. */
 export type HelpAccess = {
@@ -65,6 +77,27 @@ export function useHelp<S extends HelpSlice<unknown>>(
   );
 }
 
+/**
+ * `?` opens the tour, as the toolbar's `?` does. Like immersive view's key, it acts only with
+ * focus in the stage (WCAG 2.1.4), never while typing, and once per press.
+ */
+export function useHelpShortcut(help: HelpAccess) {
+  const { open, start } = help;
+  useEffect(() => {
+    if (open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== HELP_SHORTCUT || e.repeat || !isSceneShortcut(e, { controls: "buttons" })) {
+        return;
+      }
+      if (!(e.target instanceof Element && e.target.closest(STAGE))) return;
+      e.preventDefault();
+      start();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, start]);
+}
+
 /** The callout keeps clear of the HUD's glass and of the shell's bars over the stage. */
 const AVOID = `${COACH_AVOID}, .app-header, .app-footer`;
 
@@ -101,7 +134,7 @@ export function HelpTour({
       total={steps.length}
       targets={current.targets}
       press={current.press}
-      scope="[data-simulation]"
+      scope={STAGE}
       avoid={AVOID}
       labels={{
         previous: tHelp("previous"),

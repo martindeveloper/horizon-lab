@@ -156,30 +156,44 @@ export function createGiantsInput(
     host.removeEventListener("pointercancel", onUp);
   });
 
-  const STEPS: Record<string, number | "first" | "last"> = {
+  /* Left and right step along the ladder, Home and End go to its ends; up rises to the
+     overview and down goes back to the ladder. */
+  const STEPS: Record<string, number | "first" | "last" | "overview" | "ladder"> = {
     ArrowRight: 1,
-    ArrowDown: 1,
     PageDown: 1,
     ArrowLeft: -1,
-    ArrowUp: -1,
     PageUp: -1,
     Home: "first",
     End: "last",
+    ArrowUp: "overview",
+    ArrowDown: "ladder",
   };
   const onKey = (event: KeyboardEvent) => {
     const step = STEPS[event.key];
-    if (step === undefined || !inputAllowed() || !isSceneShortcut(event)) return;
+    /* A button a click left focused (a body's name, Overview) leaves the arrows to the scene. */
+    if (step === undefined || !inputAllowed() || !isSceneShortcut(event, { controls: "buttons" })) {
+      return;
+    }
+    if (step === "ladder" && !surveying()) return;
     event.preventDefault();
-    navigation.take();
     const state = useGiants.getState();
     switch (step) {
+      case "overview":
+        state.setOverview(true);
+        break;
+      case "ladder":
+        state.setOverview(false);
+        break;
       case "first":
+        navigation.take();
         state.go(0);
         break;
       case "last":
+        navigation.take();
         state.go(lastRung);
         break;
       default:
+        navigation.take();
         state.go(navigation.nearest() + step);
     }
   };

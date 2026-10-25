@@ -21,7 +21,7 @@ import {
   type DialogHandle,
 } from "@horizon/toolkit/ui";
 
-import { HelpTour, type HelpAccess } from "./help-tour";
+import { HELP_SHORTCUT, HelpTour, useHelpShortcut, type HelpAccess } from "./help-tour";
 import { SimulationExperience } from "./immersive";
 import { SceneMoreMenu, type MoreItem } from "./more-menu";
 import type { TechnicalDetailsAccess } from "./technical-details";
@@ -36,6 +36,8 @@ type SimulationTool = {
   ariaLabel?: string;
   /** Its row in the phone's More menu, when `label` names what a click does now ("Close"). */
   menuLabel?: string;
+  /** The key that does what it does, appended to its tooltip. */
+  shortcut?: string;
   icon: LucideIcon;
   active?: boolean;
   /** The id of the panel it discloses while open. */
@@ -57,15 +59,16 @@ function ToolButton({
   /** `end` for the toolbar's last button, so its tip stays on screen. */
   align?: "end";
 }) {
-  const { id, label, ariaLabel, icon: Icon, active, controls, onSelect } = tool;
+  const { id, label, ariaLabel, icon: Icon, active, controls, shortcut, onSelect } = tool;
   return (
-    <Tooltip label={label} {...(align ? { align } : {})}>
+    <Tooltip label={shortcut ? `${label} · ${shortcut}` : label} {...(align ? { align } : {})}>
       <IconButton
         ref={ref}
         data-return={id}
         data-coach={id}
         {...(opener ? { [COACH_OPENER]: "" } : {})}
         aria-label={ariaLabel ?? label}
+        {...(shortcut ? { "aria-keyshortcuts": shortcut } : {})}
         {...(controls !== undefined
           ? { "aria-expanded": !!active, "aria-controls": active ? controls : undefined }
           : {})}
@@ -170,8 +173,10 @@ export function SimulationToolbar({
     ariaLabel: help.open ? tHelp("close") : tHelp("start"),
     menuLabel: help.open ? tHelp("close") : tHelp("title"),
     active: help.open,
+    shortcut: HELP_SHORTCUT,
     onSelect: help.open ? help.end : help.start,
   };
+  useHelpShortcut(help);
 
   /* The places in toolbar order; those the line has no room for fold into More. */
   const places: readonly Place[] = [

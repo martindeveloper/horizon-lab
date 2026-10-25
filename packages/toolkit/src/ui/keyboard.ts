@@ -1,23 +1,28 @@
-/** Elements that own their keys: Space activates, arrows step, Escape closes. */
-const CONTROLS = [
-  "a[href]",
-  "button",
+/** Controls the arrows move within: a caret, a value, a choice in a group or list. */
+const ARROW_CONTROLS = [
   "input",
   "select",
-  "summary",
   "textarea",
   "[contenteditable='']",
   "[contenteditable='true']",
-  "[role=button]",
-  "[role=checkbox]",
-  "[role=link]",
   "[role=listbox]",
   "[role=menuitem]",
   "[role=option]",
   "[role=radio]",
   "[role=slider]",
-  "[role=switch]",
   "[role=tab]",
+].join(",");
+
+/** Elements that own their keys: Space activates, arrows step, Escape closes. */
+const CONTROLS = [
+  ARROW_CONTROLS,
+  "a[href]",
+  "button",
+  "summary",
+  "[role=button]",
+  "[role=checkbox]",
+  "[role=link]",
+  "[role=switch]",
 ].join(",");
 
 /**
@@ -26,13 +31,25 @@ const CONTROLS = [
  * composition, when something already handled the key, or inside an open
  * dialog. With `controls: false` (the default) it also stands aside while a
  * focused control would use the key itself, so Space still presses buttons
- * and arrows still move sliders.
+ * and arrows still move sliders. With `controls: "buttons"` it acts from a
+ * focused button or link too, which the arrows do not move, and stands aside
+ * only for the controls they do. `controls: true` acts from any control.
  */
-export function isSceneShortcut(event: KeyboardEvent, { controls = false } = {}) {
+export function isSceneShortcut(
+  event: KeyboardEvent,
+  { controls = false }: { controls?: boolean | "buttons" } = {},
+) {
   if (event.defaultPrevented || event.isComposing) return false;
   if (event.altKey || event.ctrlKey || event.metaKey) return false;
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return true;
   if (target.closest("dialog[open]")) return false;
-  return controls || !target.closest(CONTROLS);
+  switch (controls) {
+    case true:
+      return true;
+    case "buttons":
+      return !target.closest(ARROW_CONTROLS);
+    default:
+      return !target.closest(CONTROLS);
+  }
 }
