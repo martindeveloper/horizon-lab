@@ -37,6 +37,7 @@ export const PROSE_FIGURES = {
   marsDryGyr: TIMELINE.history.marsDry,
   vredefortGyr: TIMELINE.history.vredefort,
   moonLavaGyr: TIMELINE.history.moonLava,
+  moonGlassMyr: TIMELINE.history.moonGlass,
   ringsMyr: TIMELINE.history.saturnRings,
   chicxulubMyr: TIMELINE.history.chicxulub,
   moonKm: SOLAR_CATALOGUE.moons.moon.semiMajorAxis,

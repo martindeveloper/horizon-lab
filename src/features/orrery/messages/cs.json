@@ -32,7 +32,7 @@
   "viewHints": {
     "inner": "Merkur, Venuše, Země a Mars. Jupiter leží u okraje záběru.",
     "giants": "Jupiter až Neptun a raný disk planetesimál. V tomto pohledu nejlépe uvidíte odklízení zbylých těles.",
-    "kuiper": "Od dráhy Neptunu napříč klasickým Kuiperovým pásem, zhruba {kuiperAu} au.",
+    "kuiper": "Dráha Neptunu a Kuiperův pás, zhruba {kuiperAu} au.",
     "scattered": "Tělesa, která Neptun rozptýlil na protáhlé eliptické dráhy sahající stovky au od Slunce.",
     "oort": "Kulové plochy vyznačují vzdálenosti {oortInnerShellAu} a {oortShellAu} au; hustota bodů klesá jako r⁻³·⁵. Vzdálený Oortův oblak zatím nebyl přímo pozorován; jeho existenci odvozujeme především z drah dlouhoperiodických komet."
   },
@@ -53,10 +53,10 @@
     "moon": "Vzniká Měsíc",
     "earthCrust": "Zemská kůra a první oceány",
     "bombardment": "Pozdní těžké bombardování",
-    "marsDynamo": "Magnetické pole Marsu slábne",
+    "marsDynamo": "Poslední zmagnetizované lávy Marsu",
     "marsDry": "Mars vysychá",
-    "vredefort": "Dopad Vredefort; poslední lávy Měsíce",
-    "saturnRings": "Vznik Saturnových prstenců",
+    "vredefort": "Dopad Vredefort; nejmladší odebrané lávy Měsíce",
+    "saturnRings": "Saturnovy prstence, jsou-li mladé",
     "chicxulub": "Dopad Chicxulub"
   },
   "epochs": {
@@ -397,7 +397,7 @@
       },
       "youngSun": {
         "title": "Slabé mladé Slunce",
-        "body": "Na hlavní posloupnosti Slunce zjasňuje, jak jeho jádro mění vodík v helium. Goughova interpolace standardních slunečních modelů dává jeho výkon podle stáří: na začátku náčrtu asi {youngSunPercent} % dnešního, po prvních několika stech milionech let v rámci několika procent modelů. Záře se řídí tímto zákonem; smršťující se Slunce před začátkem náčrtu modelováno není a pás se tam nekreslí. Obyvatelná zóna je kreslena na dnešních konzervativních okrajích, {zoneInnerAu} až {zoneOuterAu} au (od vlhkého po maximální skleník, bez oblačnosti), a posouvá se s odmocninou výkonu, tam, kde dopadá stejné sluneční záření; červenější světlo mladého Slunce by okraje posunulo ještě o kousek dál. Karta Slunce ukazuje obojí ve zvoleném čase."
+        "body": "Na hlavní posloupnosti Slunce zjasňuje, jak jeho jádro mění vodík v helium. Goughova interpolace standardních slunečních modelů dává jeho výkon podle stáří: na začátku náčrtu asi {youngSunPercent} % dnešního, po prvních několika stech milionech let v rámci několika procent modelů. Záře se řídí tímto zákonem; smršťující se Slunce před začátkem náčrtu modelováno není a pás se tam nekreslí. Obyvatelná zóna je kreslena na dnešních konzervativních okrajích, {zoneInnerAu} až {zoneOuterAu} au (od vlhkého po maximální skleník, bez oblačnosti), a posouvá se s odmocninou výkonu, tam, kde dopadá stejné sluneční záření; červenější světlo mladého Slunce by oba okraje posunulo mírně zpět ven. Karta Slunce ukazuje obojí ve zvoleném čase."
       },
       "events": {
         "title": "Okamžiky na hodinách",
@@ -442,8 +442,8 @@
     "bombardment": "Mnoho impaktních tavenin z misí Apollo má stáří asi {lhbGyr} {lhbGyrPlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let: klasické pozdní těžké bombardování. Velká část těch úlomků ale může pocházet z jediné pánve, Imbria, a tak zůstává sporné, zda šlo o krátkou špičku, nebo o dlouhý pokles.",
     "marsDynamo": "Dynamo Marsu ještě před {marsDynamoGyr} mld. let magnetizuje lávy. Později jeho globální pole zanikne a sluneční vítr odnese atmosféru.",
     "marsDry": "Zhruba před {marsDryGyr} mld. let končí na Marsu hesperian: řeky a jezera z větší části mizí a začíná studená poušť.",
-    "vredefort": "Před {vredefortGyr} mld. let vyhloubí planetka Vredefort, největší potvrzenou impaktní strukturu na Zemi. Na Měsíci tečou před {moonLavaGyr} mld. let nejmladší dosud odebrané lávy, datované bazalty Chang'e 5.",
-    "saturnRings": "Saturnovy prstence jsou mladé: podle dopadajícího prachu, který Cassini napočítala, mají {ringsMyr} mil. let. Model je nevytváří a jejich původ je otevřený; vykreslené prstence přibývají během tohoto okna.",
+    "vredefort": "Před {vredefortGyr} mld. let vyhloubí planetka Vredefort, největší potvrzenou impaktní strukturu na Zemi. Na Měsíci tečou před {moonLavaGyr} mld. let nejmladší dosud odebrané lávy, datované bazalty Chang'e 5; jeho skleněné kuličky zaznamenávají erupce ještě před zhruba {moonGlassMyr} mil. let.",
+    "saturnRings": "Saturnovy prstence mohou být mladé: podle dopadajícího prachu, který Cassini napočítala, mají {ringsMyr} mil. let, ulpět ho však může jen málo, takže mohou být mnohem starší. Model je nevytváří; vykreslené prstence přibývají během tohoto okna.",
     "chicxulub": "Před {chicxulubMyr} mil. let dopadá planetka u Chicxulubu na Yucatánu a končí křída.",
     "today": "Měřené dráhy: planety stojí tam, kde jsou k datu na hodinách."
   }

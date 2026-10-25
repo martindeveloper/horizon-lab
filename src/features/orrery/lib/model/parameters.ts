@@ -37,7 +37,7 @@ export const MARS_DYNAMO_LAST = 3.7e9;
 export const MARS_DRY = 3.1e9;
 /** The Vredefort impact (Kamo et al. 1996). */
 export const VREDEFORT = 2.02e9;
-/** The Moon's youngest dated lavas, Chang'e 5 (Li et al. 2021). */
+/** The Moon's youngest sampled lavas, Chang'e 5 basalts (Li et al. 2021). */
 export const MOON_LAST_LAVA = 2.03e9;
 /** The Chicxulub impact (Renne et al. 2013). */
 export const CHICXULUB = 6.604e7;

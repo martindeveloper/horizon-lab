@@ -17,7 +17,7 @@ export const CORE_DENSITY_CM3 = 1e5;
 export const GAS_MASS_PER_H2 = 2.8;
 /**
  * The protostar lights this long before the first solids: the embedded Class 0 phase, 0.13–0.26
- * Myr in the Spitzer and Herschel surveys (Dunham et al. 2014), the first solids condensing in
+ * Myr in the Gould Belt survey (Dunham et al. 2015), the first solids condensing in
  * the hot inner disk once the star feeds from it (a teaching choice inside that range).
  */
 export const PROTOSTAR_BEFORE_SOLIDS = 2e5;
@@ -44,7 +44,10 @@ export const CLEAR_DONE = 4.45e9;
 export const MOON_IMPACT_AFTER = 5.7e7;
 /** The latest estimate of the Moon-forming impact, years ago (Borg et al. 2011). */
 export const MOON_IMPACT_LATEST = 4.35e9;
-/** Saturn's rings' exposure age, years (Kempf et al. 2023): the drawn rings come in across it. */
+/**
+ * Saturn's rings' exposure age, years (Kempf et al. 2023): the drawn rings come in across it.
+ * Contested: vaporised impactors may leave old rings clean (Hyodo et al. 2025).
+ */
 export const SATURN_RINGS_AGE: readonly [number, number] = [1e8, 4e8];
 /** Roche's limit for a fluid satellite, in the primary's radii times the cube root of the density ratio (Roche 1849). */
 export const ROCHE_FLUID = 2.456;

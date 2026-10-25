@@ -26,7 +26,7 @@
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",
     "giants": "Jupiter to Neptune, and the early disk. The best view of the clearing.",
-    "kuiper": "Neptune's orbit through the classical belt, about {kuiperAu} au.",
+    "kuiper": "Neptune's orbit and the Kuiper belt, about {kuiperAu} au.",
     "scattered": "Bodies Neptune tossed onto long ellipses, hundreds of au out.",
     "oort": "Guide shells at {oortInnerShellAu} and {oortShellAu} au; the dots thin out as r⁻³·⁵. The distant Oort cloud has not been directly observed; its existence is inferred mainly from the orbits of long-period comets."
   },
@@ -47,10 +47,10 @@
     "moon": "The Moon forms",
     "earthCrust": "Earth's crust and first oceans",
     "bombardment": "Late Heavy Bombardment",
-    "marsDynamo": "Mars's magnetic field fades",
+    "marsDynamo": "Mars's last magnetised lavas",
     "marsDry": "Mars dries out",
-    "vredefort": "Vredefort impact; the Moon's last lavas",
-    "saturnRings": "Saturn's rings form",
+    "vredefort": "Vredefort impact; the Moon's youngest sampled lavas",
+    "saturnRings": "Saturn's rings, if young",
     "chicxulub": "Chicxulub impact"
   },
   "epochs": {
@@ -391,7 +391,7 @@
       },
       "youngSun": {
         "title": "The faint young Sun",
-        "body": "On the main sequence the Sun brightens as its core turns hydrogen to helium. Gough's interpolation of standard solar models gives its output by age: about {youngSunPercent} % of today's as the sketch starts, within a few per cent of the models after its first few hundred million years. The glow follows the law; the contracting Sun before the sketch is not modelled, and the band is not drawn there. The habitable zone is drawn at its conservative edges today, {zoneInnerAu} to {zoneOuterAu} au (moist to maximum greenhouse, clouds left out), and moved with the square root of the output, where the same sunlight falls; the young Sun's redder light would shift the edges a little further still. The Sun's card reads both at the selected time."
+        "body": "On the main sequence the Sun brightens as its core turns hydrogen to helium. Gough's interpolation of standard solar models gives its output by age: about {youngSunPercent} % of today's as the sketch starts, within a few per cent of the models after its first few hundred million years. The glow follows the law; the contracting Sun before the sketch is not modelled, and the band is not drawn there. The habitable zone is drawn at its conservative edges today, {zoneInnerAu} to {zoneOuterAu} au (moist to maximum greenhouse, clouds left out), and moved with the square root of the output, where the same sunlight falls; the young Sun's redder light would move both edges slightly back out. The Sun's card reads both at the selected time."
       },
       "events": {
         "title": "Moments on the clock",
@@ -436,8 +436,8 @@
     "bombardment": "Many Apollo impact melts date to about {lhbGyr} billion years ago: the classic Late Heavy Bombardment. Much of that debris may come from a single basin, Imbrium, so whether it was a spike or a long decline is still debated.",
     "marsDynamo": "Mars's dynamo is still magnetising lavas {marsDynamoGyr} billion years ago. Later its global field fails, and the solar wind strips the atmosphere away.",
     "marsDry": "Around {marsDryGyr} billion years ago Mars's Hesperian period ends: the rivers and lakes are mostly gone, and the cold desert begins.",
-    "vredefort": "{vredefortGyr} billion years ago an asteroid carves Vredefort, the largest confirmed impact structure on Earth. On the Moon, the youngest lavas yet sampled flow {moonLavaGyr} billion years ago, dated by Chang'e 5's basalts.",
-    "saturnRings": "Saturn's rings are young: Cassini's count of infalling dust gives them {ringsMyr} million years. Nothing in the model forms them and their origin is open; the drawn rings arrive across that window.",
+    "vredefort": "{vredefortGyr} billion years ago an asteroid carves Vredefort, the largest confirmed impact structure on Earth. On the Moon, the youngest lavas yet sampled flow {moonLavaGyr} billion years ago, dated by Chang'e 5's basalts; its glass beads record eruptions as late as about {moonGlassMyr} million years ago.",
+    "saturnRings": "Saturn's rings may be young: Cassini's count of infalling dust gives them {ringsMyr} million years, though little of that dust may stick, so they could be far older. Nothing in the model forms them; the drawn rings arrive across that window.",
     "chicxulub": "{chicxulubMyr} million years ago an asteroid strikes Chicxulub, in Yucatán, and the Cretaceous ends.",
     "today": "Measured orbits: the planets stand where they are on the clock's date."
   }

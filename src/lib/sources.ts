@@ -483,12 +483,18 @@ export const SOURCES = {
     cite: "Li et al. 2021, Nature 600, 54 (Chang'e 5 basalts: lunar volcanism at 2030 ± 4 Myr)",
     link: "https://doi.org/10.1038/s41586-021-04100-2",
   },
+  wang2024moon: {
+    cite: "Wang et al. 2024, Science (Chang'e 5 volcanic glass beads: lunar volcanism 123 ± 15 Myr ago)",
+  },
   kempf2023: {
     cite: "Kempf et al. 2023, Science Advances 9, eadf8537 (Saturn's rings: exposure age ≲100–400 Myr)",
     link: "https://doi.org/10.1126/sciadv.adf8537",
   },
+  hyodo2025: {
+    cite: "Hyodo, Genda & Madeira 2025, Nature Geoscience (vaporised micrometeoroids may leave Saturn's rings clean: a young look need not mean young rings)",
+  },
   renne2013: {
-    cite: "Renne et al. 2013, Science 339, 684 (Chicxulub impact: 66.038 ± 0.011 Myr)",
+    cite: "Renne et al. 2013, Science 339, 684 (Chicxulub's Haitian tektites: 66.038 ± 0.025 Myr, the boundary within 32 kyr of them)",
     link: "https://doi.org/10.1126/science.1230492",
   },
   li2018: {
@@ -788,9 +794,9 @@ export const SOURCES = {
     cite: "Bergin & Tafalla 2007, Annual Review of Astronomy and Astrophysics 45, 339 (cold dark clouds: dense cores at 10⁴–10⁵ molecules per cm³)",
     link: "https://doi.org/10.1146/annurev.astro.45.071206.100404",
   },
-  dunham2014: {
-    cite: "Dunham et al. 2014, Protostars and Planets VI, 195 (the evolution of protostars in the Spitzer and Herschel surveys; the Class 0 phase lasts 0.13–0.26 Myr)",
-    link: "https://arxiv.org/abs/1401.1809",
+  dunham2015: {
+    cite: "Dunham et al. 2015, ApJS 220, 11 (young stellar objects in the Gould Belt: the Class 0 phase lasts 0.13–0.26 Myr)",
+    link: "https://arxiv.org/abs/1508.03199",
   },
   gough1981: {
     cite: "Gough 1981, Solar Physics 74, 21 (the main-sequence Sun's luminosity by age, an interpolation of standard solar models)",
