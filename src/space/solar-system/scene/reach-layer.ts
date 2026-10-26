@@ -2,11 +2,12 @@
  * Our reach, in the solar system's scales: how far sunlight gets in a given time (rings in
  * the ecliptic, ten light-minutes to a light-year), the heliopause where the Sun's wind gives
  * way to the gas between the stars, and the five probes past the planets on their real tracks,
- * where they are at the frame's date. A probe the camera approaches keeps its marker and name
- * until its model (`@/space/spacecraft`) takes over.
+ * where they are at the frame's date. A probe the camera approaches keeps its marker until its
+ * model (`@/space/spacecraft`) takes over, and its name, under the model's dish then.
  */
 import { Mesh, Quaternion, SphereGeometry, Sprite, Vector3, type Object3D } from "three";
 
+import { SPACECRAFT } from "@/space/spacecraft/models";
 import type { Vec3 } from "@horizon/toolkit/bodies";
 import {
   BELOW,
@@ -17,12 +18,14 @@ import {
   type PlaceLabel,
   type SceneKit,
 } from "@horizon/toolkit/scene";
+import { AU_KM } from "@horizon/toolkit/science";
 
 import type { ReachLooks } from "../graphics/reach-looks";
 import {
   HELIOPAUSE_AU,
   LIGHT_RINGS,
   PROBES,
+  PROBE_SPACECRAFT,
   probePosition,
   probeTrack,
   isReachSelection,
@@ -63,6 +66,9 @@ const LIMB_COLOR = 0xe2c99a;
 const LIMB_OPACITY = 0.38;
 /* The probes are what the heliosphere view is about: their names win over the rings'. */
 const PROBE_LABEL = { strong: true, below: true } as const;
+/** Half a probe's dish, au: close up, its name sits under the dish. */
+const dishRadius = (id: ProbeId) =>
+  SPACECRAFT[PROBE_SPACECRAFT[id]].face.across.value / 2 / (AU_KM * 1e3);
 
 /** A ring reads once it spans a few per cent of the view, until it runs well past the frame. */
 const ringShown = (r: number, dist: number) =>
@@ -192,7 +198,7 @@ export function createReachLayer(
         /* The name on the outline's top, as the screen has it. */
         up.set(0, 1, 0).applyQuaternion(camera.quaternion).multiplyScalar(limb.line.scale.x);
         up.add(limb.line.position);
-        place("heliopause", up.x, up.y, up.z, labelled * bubbleOn);
+        place("heliopause", up.x, up.y, up.z, labelled * bubbleOn * lines);
       } else place("heliopause", 0, 0, 0, false);
 
       for (const p of probes) {
@@ -211,7 +217,17 @@ export function createReachLayer(
           p.hit.scale.setScalar(pxWorld(dist, 14));
           p.trail.material.opacity = (picked ? 0.6 : TRAIL_OPACITY) * shown;
         }
-        place(p.id, p.at[0], p.at[1], p.at[2], labelled * (closing ? 1 : shown), PROBE_LABEL);
+        /* Closing on a probe, its name slides from the marker to under its dish. */
+        const drop = closing ? approach.model * dishRadius(p.id) : 0;
+        up.set(0, drop, 0).applyQuaternion(camera.quaternion);
+        place(
+          p.id,
+          p.at[0] - up.x,
+          p.at[1] - up.y,
+          p.at[2] - up.z,
+          labelled * (closing ? 1 : shown),
+          PROBE_LABEL,
+        );
       }
     },
   };

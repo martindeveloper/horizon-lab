@@ -73,7 +73,7 @@ export function createNeighboursLayer(
   return {
     pickables: [ring, ...stars.map((n) => n.mesh)],
     /** `azimuth` turns the ring's label toward the camera. */
-    update({ show, dist }: Frame, azimuth: number) {
+    update({ show, dist, lines }: Frame, azimuth: number) {
       const labelled = names.to(show.names);
       const shown = STARS(dist);
       const ringShown = RING(dist);
@@ -85,7 +85,8 @@ export function createNeighboursLayer(
         -Math.sin(azimuth) * PROXIMA_AU,
         0,
         -Math.cos(azimuth) * PROXIMA_AU,
-        labelled * RING_NAME(dist) * (ring.visible ? 1 : 0),
+        /* The ring is line art: its name goes with it under the drift's veil. */
+        labelled * RING_NAME(dist) * lines * (ring.visible ? 1 : 0),
         { text: `${L.proxima ?? "Proxima"} · ${distanceText(PROXIMA_AU, true)}` },
       );
       for (const n of stars) {

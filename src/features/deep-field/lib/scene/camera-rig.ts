@@ -104,8 +104,9 @@ export function createCameraRig(
       };
     },
     nearFloor: SOLAR_FRAMING.nearFloor,
-    /* In a body's close-up this frustum draws the rest of the system; the body gets its own pass. */
-    far: (distance, aim) => (closeUp() ? closeUpFar(distance, aim) : distance * 40),
+    /* In a close-up, a body's or a probe's, this frustum draws the rest of the system; the
+       subject gets its own pass. */
+    far: (distance, aim) => (closeUp() || focus ? closeUpFar(distance, aim) : distance * 40),
     onStep: (dt) => {
       hold =
         bulgeHeld() || haloHeld()

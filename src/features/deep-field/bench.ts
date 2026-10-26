@@ -124,8 +124,13 @@ export const benchTarget: BenchTarget = {
   async mount(sceneId, surface) {
     const scene = SCENES.find((s) => s.id === sceneId);
     if (!scene) throw new Error(`Unknown deep-field scene: ${sceneId}`);
-    /* A bench sequence draws its frames in one go: the probe's model is fetched first. */
-    if (scene.closeUp) await fetchSpacecraft(PROBE_SPACECRAFT[scene.closeUp]);
+    /* A bench sequence draws its frames in one go: the models of the probes it flies to are
+       fetched first. */
+    const visited = scene.drift
+      ? DRIFT.shots.flatMap((shot) => ("closeUp" in shot ? [shot.closeUp] : []))
+      : [];
+    if (scene.closeUp) visited.push(scene.closeUp);
+    await Promise.all(visited.map((id) => fetchSpacecraft(PROBE_SPACECRAFT[id])));
     const store = useDeepField;
     store.getState().resetView();
     store.setState({
