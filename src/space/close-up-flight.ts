@@ -20,8 +20,9 @@ const CLOSE_UP_INCLINATION = 0.3;
 
 /**
  * The pose that frames a body of `frameRadius` (scene units) at `body`, lit
- * three-quarters from the Sun. `halfTan` is the tangent of half the view's
- * shorter free extent; the Sun itself keeps the current azimuth.
+ * three-quarters from the Sun, on whichever side of the sunward line is nearer the
+ * current `azimuth`, so the flight in turns the least. `halfTan` is the tangent of
+ * half the view's shorter free extent; the Sun itself keeps the current azimuth.
  */
 export function closeUpPose(
   body: readonly [number, number, number],
@@ -30,8 +31,9 @@ export function closeUpPose(
   azimuth: number,
 ): OrbitPose {
   const sunward = Math.hypot(body[0], body[2]) > 0 ? Math.atan2(-body[0], -body[2]) : null;
+  const side = sunward === null || shortest(sunward, azimuth) >= 0 ? 1 : -1;
   return {
-    azimuth: sunward === null ? azimuth : sunward + CLOSE_UP_SWING,
+    azimuth: sunward === null ? azimuth : sunward + side * CLOSE_UP_SWING,
     inclination: CLOSE_UP_INCLINATION,
     distance: frameRadius / (halfTan * CLOSE_UP_FILL),
   };

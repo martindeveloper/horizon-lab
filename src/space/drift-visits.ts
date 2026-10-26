@@ -7,8 +7,8 @@ import type { OrbitRig, RigDrift } from "@horizon/toolkit/scene";
  * A drift's visits: shots the host flies as close-ups (`VisitShot`), one dive to a body and one
  * pull away. The visit opens the close-up the shot names, whose own flight takes the camera in,
  * slowed to a lean-back pace and settling onto the body; circles the body slowly through the
- * hold while it drifts nearer; may fly on deeper to a body of the same system (`onward`, the
- * dive's second stage) and circle that; then lets go. A visit before a framed shot pulls away on that
+ * hold, the way the drift was turning, while it drifts nearer; may fly on deeper to a body of
+ * the same system (`onward`, the dive's second stage) and circle that; then lets go. A visit before a framed shot pulls away on that
  * shot's own flight (the close-up released to it, keeping the body in view until the flight
  * hands the aim home), so the release flows on without a stop; before another visit the
  * close-up flies out itself. Flying on after a pause leaves any close-up first. Shared by the
@@ -35,10 +35,10 @@ export type VisitShot<Body> = CuedShot & {
 };
 
 /**
- * How a drift lingers at a body: seconds held, the slow orbit's rate (rad/s), how near the
- * camera drifts (a fraction of the arrival distance), how many times slower than a tap's the
- * flights in and out are, and the zoom's lead on them (`sampleCloseUp`: most of the flight
- * spent where the body is large).
+ * How a drift lingers at a body: seconds held, the slow orbit's rate (rad/s, turning the way
+ * the drift was), how near the camera drifts (a fraction of the arrival distance), how many
+ * times slower than a tap's the flights in and out are, and the zoom's lead on them
+ * (`sampleCloseUp`: most of the flight spent where the body is large).
  */
 export type VisitSettings = {
   hold: number;
@@ -118,6 +118,8 @@ type Visit =
       distance: number;
       inclination: number;
       azimuth: number;
+      /** The orbit's direction, ±1: the drift's turn carried on, never reversed. */
+      spin: number;
     }
   | { phase: "out" };
 
@@ -181,7 +183,7 @@ export function createDriftVisits<Body>(
     if (reduceMotion.matches) return;
     const t = Math.min(1, at.held / at.hold);
     const ramp = 1 - Math.exp(-at.held / 3);
-    at.azimuth += settings.orbit * ramp * dt;
+    at.azimuth += settings.orbit * at.spin * ramp * dt;
     const { min, max } = rig.limits();
     const base = {
       azimuth: at.azimuth,
@@ -212,6 +214,7 @@ export function createDriftVisits<Body>(
             distance: rig.pose.distance,
             inclination: rig.pose.inclination,
             azimuth: rig.pose.azimuth,
+            spin: Math.sign(options.drift().motion.azimuth) || 1,
           };
         }
         return;
