@@ -67,7 +67,7 @@ export const GALACTIC_YEAR = 206e6;
  * Earth's centre.
  */
 export const MOON_EARTH_MASS_RATIO = GM_KM3_S2.moon / GM_KM3_S2.earth;
-/** Charon's mass over Pluto's (their GMs from Brozović et al. 2015): the barycentre is 1/9.19 of the way to Charon. */
+/** Charon's mass over Pluto's (their GMs the JPL satellite fit's, as the toolkit holds them): the barycentre is 1/9.19 of the way to Charon. */
 export const CHARON_PLUTO_MASS_RATIO = GM_KM3_S2.charon / GM_KM3_S2.pluto;
 
 /** The primordial planetesimal disk outside the packed giants (Morbidelli 2005, Nice model). */
