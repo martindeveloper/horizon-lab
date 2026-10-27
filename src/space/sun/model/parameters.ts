@@ -102,7 +102,7 @@ export const SPORER_END_RAD = 8 * RAD_PER_DEG;
 export const SPORER_SPREAD_RAD = 6 * RAD_PER_DEG;
 /** No region emerges nearer the equator than this. */
 export const REGION_LATITUDE_MIN_RAD = 2 * RAD_PER_DEG;
-/** Joy's law: a bipole's tilt grows with its latitude, about half of it (Hale et al. 1919; Hathaway 2015, §4.7), with scatter. */
+/** Joy's law: a bipole's tilt grows with its latitude, about half of it low down (32° sin φ, Stenflo & Kosovichev 2012), with scatter. */
 export const JOY_SLOPE = 0.5;
 export const JOY_SCATTER_RAD = 0.15;
 /** Polar field at minimum, tesla (5–10 G, Hathaway 2015, §4.8), and an umbra's, up to 0.3 T (Solanki 2003). */

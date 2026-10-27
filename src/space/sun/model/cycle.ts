@@ -49,8 +49,8 @@ export function groupNumberIn(year: number) {
 
 /** Named stretches of the record, calendar years. */
 export const MAUNDER_MINIMUM = [1645, 1715] as const; // Eddy 1976
-export const DALTON_MINIMUM = [1790, 1830] as const; // Hathaway 2015, §4.4
-export const MODERN_MAXIMUM = [1940, 2000] as const; // Hathaway 2015, §4.4 (cycles 17–23)
+export const DALTON_MINIMUM = [1790, 1830] as const; // Usoskin 2017, LRSP 14, 3
+export const MODERN_MAXIMUM = [1940, 2000] as const; // Usoskin 2017: the Modern grand maximum (cycles 17–23)
 /** Schwabe announced the cycle in 1843 (published 1844); Wolf defined the relative number in 1848 (published 1852). */
 export const SCHWABE_YEAR = 1843;
 export const WOLF_YEAR = 1848;

@@ -457,7 +457,7 @@ const CYCLE = {
     value: DALTON_MINIMUM[1] - DALTON_MINIMUM[0],
     unit: "yr",
     digits: 2,
-    source: "hathaway2015",
+    source: "usoskin2017",
     status: "derived",
     note: `${DALTON_MINIMUM[0]}–${DALTON_MINIMUM[1]}`,
   },
@@ -487,8 +487,8 @@ const CYCLE = {
     digits: 1,
     note: "mean spot latitude as it ends",
   }),
-  joySlope: literatureFact(JOY_SLOPE, "ratio", "hathaway2015", "flag", {
-    note: "a bipole's tilt over its latitude",
+  joySlope: literatureFact(JOY_SLOPE, "ratio", "stenflo2012", "verified", {
+    note: "a bipole's tilt over its latitude: 32° sin φ, about half the latitude low down",
   }),
 } satisfies Facts;
 

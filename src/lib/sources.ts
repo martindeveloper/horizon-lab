@@ -318,7 +318,7 @@ export const SOURCES = {
     cite: "Häberle et al. 2024, Nature 631, 285 (ω Cen's fast central stars: an IMBH of at least 8,200 M☉)",
   },
   hathaway2015: {
-    cite: "Hathaway 2015, LRSP 12, 4 (the solar cycle: period, rise and shape, spot latitudes, Joy's law, polar fields, the named minima and maxima)",
+    cite: "Hathaway 2015, LRSP 12, 4 (the solar cycle: period, rise and shape, spot latitudes, polar fields, the Maunder minimum)",
     link: SOURCE_URLS.hathaway2015,
   },
   healy2024: {
@@ -738,6 +738,10 @@ export const SOURCES = {
     cite: "Stone et al. 2019, Nat. Astron. 3, 1013 (Voyager 2 crosses the heliopause)",
     link: SOURCE_URLS.stone2019,
   },
+  stenflo2012: {
+    cite: "Stenflo & Kosovichev 2012, ApJ 745, 129 (Joy's law from MDI bipoles: tilt 32.1° sin φ, about half the latitude low down)",
+    link: "https://doi.org/10.1088/0004-637X/745/2/129",
+  },
   struble1999: {
     cite: "Struble & Rood 1999, ApJS 125, 35 (Perseus cz 5,366 km/s, as quoted by Penny et al. 2010)",
   },
@@ -761,6 +765,10 @@ export const SOURCES = {
     link: SOURCE_URLS.tully2008,
   },
   tully2014: { cite: "Tully et al. 2014, Nature 513, 71" },
+  usoskin2017: {
+    cite: "Usoskin 2017, LRSP 14, 3 (grand minima and maxima of solar activity: the Dalton minimum ~1790–1830, the Modern grand maximum ~1940–2000)",
+    link: "https://doi.org/10.1007/s41116-017-0006-9",
+  },
   vallee2017: {
     cite: "Vallée 2017, Astron. Rev. 13, 113",
     link: SOURCE_URLS.vallee2017,
