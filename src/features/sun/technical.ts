@@ -43,7 +43,11 @@ const specification = {
     },
     {
       id: "atmosphere",
-      equations: ["K(ρ) ∝ 0.0532 ρ^−2.5 + 1.425 ρ^−7 + 2.565 ρ^−17"],
+      equations: [
+        {
+          equation: "baumbach-corona",
+        },
+      ],
     },
     {
       id: "field",

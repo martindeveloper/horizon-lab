@@ -1,3 +1,4 @@
+import { baumbachCorona } from "@/space/sun/equations";
 import {
   defineEquation,
   meanDensity,
@@ -74,5 +75,6 @@ export const GIANTS_EQUATIONS: Record<string, Formula> = Object.fromEntries(
     schwarzschildRadius,
     photonSphereRadius,
     shadowRadius,
+    baumbachCorona,
   ].map((equation) => [equation.id, equation]),
 );

@@ -6,6 +6,7 @@ import {
   PROFILE_SAMPLES,
   SPICULE_HEIGHT,
 } from "@/space/sun/graphics/parameters";
+import { BAUMBACH_POWERS, CORONA as SUN_CORONA } from "@/space/sun/model/corona";
 import { JOY_SLOPE } from "@/space/sun/model/parameters";
 import { SURFACE_ROTATION_DEG_PER_DAY } from "@/space/sun/model/rotation";
 import type { PlanetId } from "@horizon/toolkit/bodies";
@@ -466,6 +467,9 @@ export const SHADER_DEFINES = glslDefines({
   CORONA,
   CORONA_CONTRAST,
   CORONA_REACH,
+  /* Baumbach's K-corona, as the Sun catalogue holds it: its coefficients and their powers. */
+  BAUMBACH_K: SUN_CORONA.k,
+  BAUMBACH_POWERS,
   CHROMOSPHERE,
   PROMINENCE,
   RIBBON,

@@ -12,10 +12,11 @@ import {
 } from "@horizon/toolkit/science";
 
 import { goesFlux } from "./model/activity";
+import { kCorona } from "./model/corona";
 import { wolfNumber } from "./model/cycle";
 import { loopTemperature } from "./model/field";
 import { fusionEnergy, massToEnergyRate, PP_MASS_FRACTION } from "./model/fusion";
-import { GOES_CLASSES, LOOP_REFERENCE } from "./model/parameters";
+import { BAUMBACH_TERMS, GOES_CLASSES, LOOP_REFERENCE } from "./model/parameters";
 import { alfvenSpeed, magneticEnergy } from "./model/plasma";
 import { SURFACE_ROTATION_DEG_PER_DAY, surfaceRateDegPerDay } from "./model/rotation";
 import { diffusionTime, hydrostaticGradient } from "./model/structure";
@@ -166,6 +167,20 @@ export const goesClass = defineEquation({
   compute: ({ k, n }) => goesFlux(k, n),
 });
 
+/** Baumbach 1937: the K-corona's brightness falls as three powers of the radius. */
+export const baumbachCorona = defineEquation({
+  id: "baumbach-corona",
+  text: `K(ρ) ∝ ${BAUMBACH_TERMS.map(({ coefficient, power }) => `${coefficient} ρ^−${power}`).join(" + ")}`,
+  latex: `K(\\rho) \\propto ${BAUMBACH_TERMS.map(({ coefficient, power }) => `${coefficient}\\,\\rho^{-${power}}`).join(" + ")}`,
+  output: "K",
+  variables: {
+    rho: { symbol: "ρ", latex: "\\rho" },
+    K: { symbol: "K", latex: "K" },
+  },
+  compute: ({ rho }) => kCorona(rho),
+  source: "Baumbach 1937, Astron. Nachr. 263, 121",
+});
+
 /** Every formula the technical details and the guide may name, by ID. */
 export const SUN_EQUATIONS: Record<string, Formula> = Object.fromEntries(
   [
@@ -181,5 +196,6 @@ export const SUN_EQUATIONS: Record<string, Formula> = Object.fromEntries(
     reconnectionEnergy,
     loopTemperatureLaw,
     goesClass,
+    baumbachCorona,
   ].map((equation) => [equation.id, equation]),
 );

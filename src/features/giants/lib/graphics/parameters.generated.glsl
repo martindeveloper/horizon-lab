@@ -47,6 +47,8 @@
 #define CORONA              0.09
 #define CORONA_CONTRAST     0.55
 #define CORONA_REACH        4.0
+#define BAUMBACH_K          vec3(0.0532, 1.425, 2.565)
+#define BAUMBACH_POWERS     vec3(2.5, 7.0, 17.0)
 #define CHROMOSPHERE        0.32
 #define PROMINENCE          0.5
 #define RIBBON              1.4

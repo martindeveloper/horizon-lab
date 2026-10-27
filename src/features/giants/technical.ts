@@ -45,7 +45,9 @@ const specification = {
       equations: [
         "Ω(φ) = Ω₀ (1 − k sin² φ)",
         "L(t) ∝ (1 − e^(−t/τᵣ)) e^(−t/τ_d)",
-        "K(ρ) ∝ 0.0532 ρ^−2.5 + 1.425 ρ^−7 + 2.565 ρ^−17",
+        {
+          equation: "baumbach-corona",
+        },
       ],
     },
     {

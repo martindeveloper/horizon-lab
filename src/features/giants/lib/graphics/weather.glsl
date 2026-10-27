@@ -49,7 +49,8 @@ vec3 beams(vec2 o, float r, vec4 globe, vec3 tint) {
 // eye's compression; helmet streamers over the active regions at the limb, broad at the base
 // and drawn into stalks above; fine rays and plumes at the poles.
 vec3 corona(float r, vec2 dir, vec3 tint, float seed, vec4 globe) {
-  float k = (0.0532 * pow(r, -2.5) + 1.425 * pow(r, -7.0) + 2.565 * pow(r, -17.0)) / 4.0432;
+  vec3 powers = vec3(pow(r, -BAUMBACH_POWERS.x), pow(r, -BAUMBACH_POWERS.y), pow(r, -BAUMBACH_POWERS.z));
+  float k = dot(BAUMBACH_K, powers) / dot(BAUMBACH_K, vec3(1.0));
   float fall = pow(k, CORONA_CONTRAST);
   float streamers = 0.4;
   for (int j = 0; j < REGIONS; j++) {
