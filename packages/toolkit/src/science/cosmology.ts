@@ -15,13 +15,15 @@ import { convert } from "./units";
  */
 export type FlatLcdm = { H0: number; omegaM: number; omegaR?: number };
 
-/** Three massless neutrino species add 3 × 7/8 × (4/11)^(4/3) of the photons' density. */
-const NEUTRINO_SHARE = 3 * (7 / 8) * (4 / 11) ** (4 / 3);
+/** The effective number of neutrino species after incomplete decoupling (Bennett et al. 2021, JCAP 04, 073). */
+const NEUTRINO_SPECIES = 3.044;
+/** The neutrinos add N_eff × 7/8 × (4/11)^(4/3) of the photons' density. */
+const NEUTRINO_SHARE = NEUTRINO_SPECIES * (7 / 8) * (4 / 11) ** (4 / 3);
 
 /**
  * The radiation density parameter Ωr h² of a background at temperature `T` (K): the photons'
- * energy density a T⁴ / c² against the critical density at H₀ = 100 km/s/Mpc, with three
- * massless neutrino species beside them (4.18 × 10⁻⁵ at the CMB's temperature).
+ * energy density a T⁴ / c² against the critical density at H₀ = 100 km/s/Mpc, with the
+ * massless neutrinos beside them (4.18 × 10⁻⁵ at the CMB's temperature).
  */
 export function radiationDensity(T: number) {
   const radiationConstant =
