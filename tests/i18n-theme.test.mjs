@@ -14,7 +14,7 @@ import { getPathname } from "../src/i18n/navigation.ts";
 import { LOCALE_COOKIE, localeCookie, routing } from "../src/i18n/routing.ts";
 import { CREDITS } from "../src/lib/credits.ts";
 import { localeRewrites, siteRedirects } from "../src/lib/redirects.ts";
-import { simulations } from "../src/lib/simulations.ts";
+import { registered, simulations } from "../src/lib/simulations.ts";
 import { SOLAR_LABEL_KEYS } from "../src/space/solar-system/scene/solar-system.ts";
 import { layoutMessages, leaves } from "./messages-helper.mjs";
 
@@ -257,7 +257,7 @@ test("localized preset links, aliases, and initial scene state agree", () => {
 test("every Czech plural choice has its other form and reads in every category", async () => {
   const { createTranslator } = await import("next-intl");
   const { featureMessages, leaves } = await import("./messages-helper.mjs");
-  for (const feature of ["orrery", "deep-field", "voyage", "giants", "black-hole", "sun"]) {
+  for (const { id: feature } of registered) {
     const messages = featureMessages(feature, "cs");
     const t = createTranslator({
       locale: "cs",

@@ -5,14 +5,12 @@ import { withSpaceMessages } from "../src/space/messages.ts";
 
 const read = (path) => JSON.parse(readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8"));
 
-/** The simulations whose layouts merge the shared space copy under their own messages. */
-const SPACE = new Set(["orrery", "deep-field", "voyage", "giants", "spectroscopy", "sun"]);
-
-/** A simulation's messages as its layout loads them: the space copy under its own, for a space one. */
-export const featureMessages = (feature, locale) => {
-  const own = read(`features/${feature}/messages/${locale}.json`);
-  return SPACE.has(feature) ? withSpaceMessages(read(`space/messages/${locale}.json`), own) : own;
-};
+/** A simulation's messages as its layout loads them: the shared space copy under its own. */
+export const featureMessages = (feature, locale) =>
+  withSpaceMessages(
+    read(`space/messages/${locale}.json`),
+    read(`features/${feature}/messages/${locale}.json`),
+  );
 
 /**
  * The catalog a layout hands its provider: the locale layout's shared messages, and under a

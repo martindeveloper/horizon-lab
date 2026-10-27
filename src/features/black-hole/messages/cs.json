@@ -1,21 +1,12 @@
 {
   "help": {
-    "camera": {
-      "title": "Pohyb kamery",
-      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
-    },
     "views": { "title": "Černé díry", "body": "Díry na obloze podle hmotnosti, pak teorie." },
     "gauge": { "title": "Vzdálenost", "body": "Kde stojíte; klepnutím na poloměr se dozvíte víc." },
     "atlas": { "title": "Atlas", "body": "Kde na obloze která díra leží." },
     "clocks": { "title": "Hodiny", "body": "Pusťte dovnitř hodiny a sledujte, jak čas zpomaluje." },
-    "settings": { "title": "Nastavení", "body": "Spin, gravitace, kamera a optika." },
+    "settings": { "body": "Spin, gravitace, kamera a optika." },
     "guide": {
-      "title": "Průvodce",
       "body": "Naučte se, jak černá díra ohýbá světlo a čas, krok za krokem."
-    },
-    "experiences": {
-      "title": "Režimy prohlížení",
-      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
     }
   },
   "app": "Horizont událostí",
@@ -799,10 +790,7 @@
   "rainSymbol": "pád",
   "hoverSymbol": "klid",
   "technicalDetails": {
-    "open": "Technické podrobnosti",
-    "close": "Zavřít technické podrobnosti",
     "title": "Jak funguje simulace černé díry",
-    "featuresTitle": "Co lze prozkoumat",
     "summary": "Teoretické hodnoty poloměrů a drah doplňuje sledování paprsků v Kerrově prostoročase od vznášející se kamery. Záření disku, barvy a pohyb jsou ilustrativní, nejde o rekonstrukci astronomického pozorování ani o model přenosu záření. Všechny předvolby používají stejný model. Zdroje níže rozlišují ověřené fyzikální vztahy od aproximací použitých při vykreslování.",
     "features": {
       "views": "Deset pohledů: Cygnus X-1, Gaia BH3, GW231123, ω Centauri, Sagittarius A*, M87*, TON 618, disk v gravitační čočce, Schwarzschild a téměř extremální Kerr. Úpravou parametrů lze vytvořit vlastní scénu.",
@@ -834,8 +822,7 @@
         "title": "Co obraz nemodeluje",
         "body": "Dráhy světla sledují Kerrovy geodetiky, ale záření je názorný model kombinující několik aproximací, nikoli ověřená vědecká předpověď či rekonstrukce pozorování. Nemodeluje dynamiku plynu, magnetická pole, rozptyl, polarizaci ani přenos záření. Obloha, výtrysky, vyzařování padajícího plynu i záře nad diskem jsou procedurální; záře je výtvarná volba, nikoli model prachu či plazmatu. První průsečík s diskem ukončí paprsek, takže model nepředpovídá opticky tenké akreční toky ani jemné fotonové podprstence. Umělá záře fotonového prstence, oslnění, zvýrazněné ozvěny skvrny i hvězdy umístěné nesprávně blízko horizontu byly odstraněny. Počet kroků, analytický ohyb ve vzdáleném poli, omezení barevné teploty, expozice a mapování barev stále mění fyzikální věrnost obrazu, aby byly hlavní jevy dobře patrné. Kamera se vznáší jako pozorovatel s nulovým momentem hybnosti nebo se veze s plynem disku a zůstává vně horizontu; nemodeluje padajícího pozorovatele. Kamera vezoucí se s diskem obíhá animovanou rychlostí plynu, ne fyzikální. Hmotnosti pojmenovaných objektů jsou přibližné hodnoty z odborné literatury. Jejich spiny jsou předpokládané modelové hodnoty, kromě spinu GW231123 odvozeného z gravitačních vln; pohledy a barvy jsou výukové volby. Sgr A* a M87* mají horké, opticky tenké toky, jejichž světlo u horizontu je synchrotronové záření; jejich tenké disky jsou ilustrativní."
       }
-    },
-    "references": "Vědecké zdroje"
+    }
   },
   "modelNotice": "Světlo sleduje Kerrovy geodetiky; záření disku a barvy jsou ilustrativní. Spiny skutečných objektů jsou předpokládané modelové hodnoty, kromě GW231123.",
   "pauseStories": "Pozastavit střídání příběhů"

@@ -1,18 +1,12 @@
 {
   "help": {
-    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
     "views": { "title": "Black holes", "body": "Holes in the sky by mass, then theory." },
     "gauge": { "title": "Distance", "body": "Where you stand; tap a radius to learn it." },
     "atlas": { "title": "Atlas", "body": "Where each hole lies in the sky." },
     "clocks": { "title": "Clocks", "body": "Drop clocks in and watch time slow." },
-    "settings": { "title": "Settings", "body": "Spin, gravity, the camera and optics." },
+    "settings": { "body": "Spin, gravity, the camera and optics." },
     "guide": {
-      "title": "Guide",
       "body": "Learn how a black hole bends light and time, step by step."
-    },
-    "experiences": {
-      "title": "Viewing modes",
-      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
     }
   },
   "app": "Event Horizon",
@@ -796,10 +790,7 @@
   "rainSymbol": "rain",
   "hoverSymbol": "hover",
   "technicalDetails": {
-    "open": "Technical details",
-    "close": "Close technical details",
     "title": "Inside the black-hole simulation",
-    "featuresTitle": "What you can explore",
     "summary": "Analytic orbital readouts and Kerr ray tracing from a hovering camera. Disk light, colours and motion are illustrative, not a telescope reconstruction or radiative-transfer model. All presets share this model. Sources below distinguish established physics from the visual approximations.",
     "features": {
       "views": "Ten views: Cygnus X-1, Gaia BH3, GW231123, ω Centauri, Sagittarius A*, M87*, TON 618, a lensed disk, Schwarzschild, and near-extremal Kerr. Adjusting parameters also allows a custom scene.",
@@ -831,8 +822,7 @@
         "title": "What the image does not model",
         "body": "Light paths follow Kerr geodesics, but the emission is an illustrative hybrid, not a validated scientific prediction or observational reconstruction. It does not model gas dynamics, magnetic fields, scattering, polarization or radiative transfer. The sky, jets, plunge emissivity and the glow above the disk are procedural; the glow is art direction, not a dust or plasma model. The first disk intersection ends a ray, so optically thin flows and resolved photon subrings are not predicted. Artificial photon-ring glow, glare and exaggerated hotspot echoes have been removed, as have companion stars drawn at physically incorrect near-horizon distances. Finite step budgets, the analytic far-field bending, colour-temperature clamps, exposure and colour mapping still trade fidelity for real-time readability. The camera hovers as a zero-angular-momentum observer or rides with the disk gas, and stays outside the horizon; it is not a falling observer. A riding camera orbits at the gas’s animated rate, not its physical one. Named-object masses are approximate literature values. Their spins are assumed model values, except GW231123’s, inferred from its gravitational waves; camera poses and colours are teaching choices. Sgr A* and M87* have hot, optically thin flows whose horizon-scale light is synchrotron emission; their thin disks are illustrative."
       }
-    },
-    "references": "Scientific sources"
+    }
   },
   "modelNotice": "Light follows Kerr geodesics; disk light and colours are illustrative. Real-object spins are assumed model values, except GW231123’s.",
   "pauseStories": "Pause stories"
