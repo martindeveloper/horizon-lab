@@ -511,10 +511,10 @@ export const BLACK_HOLES = {
     }),
   },
   gw231123: {
-    mass: literatureFact(222, "Msun", "lvk2025", "verified", {
-      range: [180, 250],
+    mass: literatureFact(225, "Msun", "lvk2025", "verified", {
+      range: [182, 251],
       digits: 3,
-      note: "the remnant's mass after the merger of 137 and 101 M☉",
+      note: "the remnant's mass after the merger of 137 and 101 M☉ (225 +26/−43)",
     }),
     distance: literatureFact(2.2, "Gpc", "lvk2025", "verified", {
       range: [0.7, 4.1],

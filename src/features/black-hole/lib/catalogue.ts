@@ -50,7 +50,7 @@ export const OBSERVATORY = {
     }),
   },
   omegaCen: {
-    clusterMass: literatureFact(3.94e6, "Msun", "baumgardt2021", "verified", { digits: 3 }),
+    clusterMass: literatureFact(3.94e6, "Msun", "baumgardtCatalogue", "verified", { digits: 3 }),
     trackedStars: literatureFact(1.4e6, "count", "haberle2024", "verified", { digits: 2 }),
     images: literatureFact(500, "count", "haberle2024", "verified", {
       digits: 1,
@@ -106,7 +106,11 @@ export const OBSERVATORY = {
   gw150914: {
     primaryMass: literatureFact(34.6, "Msun", "abbott2016", "verified", { digits: 2 }),
     secondaryMass: literatureFact(30, "Msun", "abbott2016", "verified", { digits: 2 }),
-    distance: literatureFact(1.3e9, "ly", "abbott2016", "verified", { digits: 2 }),
+    distance: literatureFact(1.53e9, "ly", "abbott2016", "verified", {
+      digits: 2,
+      range: [1.0e9, 2.0e9],
+      note: "luminosity distance 470 (+140/−160) Mpc, GWTC-2.1",
+    }),
     radiated: literatureFact(3, "Msun", "abbott2016", "verified", {
       digits: 1,
       note: "the mass-energy carried off as waves, in M☉c²",

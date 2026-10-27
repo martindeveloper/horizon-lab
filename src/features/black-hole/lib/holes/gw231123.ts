@@ -3,8 +3,8 @@
  * confidently detected (as of GWTC-5.0, 2026).
  *
  *   detected   2023-11-23 13:54:30 UTC, LIGO Hanford + Livingston only; ~0.1 s, ~5 cycles at 30–80 Hz
- *   m₁, m₂     137 (+23/−18) and 101 (+22/−50) M☉; total 236 M☉
- *   M_f        222 (+28/−42) M☉   LVK, ApJL 993, L25 (2025), arXiv:2507.08219 v3
+ *   m₁, m₂     137 (+23/−18) and 101 (+22/−50) M☉; total 190–265 M☉
+ *   M_f        225 (+26/−43) M☉   LVK, ApJL 993, L25 (2025), arXiv:2507.08219 v3
  *   χ_f        0.84 (+0.08/−0.16), model-dependent (0.70–0.88 across waveforms)
  *   D_L        2.2 (+1.9/−1.5) Gpc, z ≈ 0.40; waves travelled ≈ 2–6 Gyr
  *   sky        ΔΩ₉₀ ≈ 1,700 deg² (GWTC-4.0; two detectors); no host galaxy, no light detected

@@ -73,7 +73,7 @@ export const SOURCES = {
     link: SOURCE_URLS.nistIsotopeMasses,
   },
   abbott2016: {
-    cite: "Abbott et al. 2016, PRL 116, 061102; GWOSC GWTC-2.1 (GW150914: 34.6 and 30.0 M☉, ~1.3 Gly, ~3 M☉c² radiated)",
+    cite: "Abbott et al. 2016, PRL 116, 061102; GWOSC GWTC-2.1 (GW150914: 34.6 and 30.0 M☉, D_L 470 Mpc ≈ 1.5 Gly, ~3 M☉c² radiated)",
   },
   abdElDayem2026: {
     cite: "Abd El Dayem et al. 2026, Nature (S301: within 11.5–12.0 au of Sgr A* at 25,000–25,600 km/s)",
@@ -126,6 +126,10 @@ export const SOURCES = {
   },
   baumgardt2021: {
     cite: "Baumgardt & Vasiliev 2021, MNRAS 505, 5957 (globular cluster distances: ω Cen 5.43 kpc)",
+  },
+  baumgardtCatalogue: {
+    cite: "Baumgardt & Hilker 2018, MNRAS 478, 1520, and the online catalogue of Galactic globular clusters (2018–2023): ω Cen 3.94 ± 0.02 × 10⁶ M☉",
+    link: "https://people.smp.uq.edu.au/HolgerBaumgardt/globular/",
   },
   bender2005: {
     cite: "Bender et al. 2005, ApJ 631, 280 (M31*: 1.4 × 10⁸ M☉)",
@@ -191,6 +195,10 @@ export const SOURCES = {
   charbonneau1999: {
     cite: "Charbonneau et al. 1999, ApJ 527, 445 (the tachocline from helioseismology: thickness 0.039 ± 0.013 R☉ under the convection zone's base at 0.713 R☉)",
     link: SOURCE_URLS.charbonneau1999,
+  },
+  chen2026: {
+    cite: "Chen et al. 2026, ApJ (ω Cen: JWST imaging of the centre, no infrared counterpart of an accreting black hole)",
+    link: "https://doi.org/10.3847/1538-4357/ae5242",
   },
   chen2019: {
     cite: "Chen et al. 2019, Nat. Astron. 3, 320 (Cepheid warp, Table 1)",
@@ -521,10 +529,22 @@ export const SOURCES = {
   lvk2025: {
     cite: "LIGO–Virgo–KAGRA Collaboration 2025, ApJL 993, L25 (GW231123: remnant mass, spin and distance)",
   },
+  bini2026: {
+    cite: "Bini et al. 2026, PRD (GW231123: waveform systematics and Gaussian noise; the high spin magnitudes kept, the detectors disagreeing on precession)",
+    link: "https://arxiv.org/abs/2601.09678",
+  },
+  gw231123Glitches2025: {
+    cite: "GW231123: extreme spins or microglitches?, 2025, arXiv:2510.07228 (weak frequent glitches could push spins near 0.7 toward the extreme)",
+    link: "https://arxiv.org/abs/2510.07228",
+  },
   lvkSummary2025: {
     cite: "LIGO–Virgo–KAGRA science summary of GW231123, 2025 (the pair-instability gap, ~60–130 M☉)",
   },
   lyndenBell1988: { cite: "Lynden-Bell et al. 1988, ApJ 326, 19" },
+  mahida2026: {
+    cite: "Mahida et al. 2026, ApJ (ω Cen: the most sensitive radio image of the cluster, ATCA 7.25 GHz, no central source)",
+    link: "https://arxiv.org/abs/2512.09649",
+  },
   m31Merger: {
     cite: "van der Marel et al. 2019, ApJ 872, 24; Sawala et al. 2025, Nat. Astron. 9, 1206; Wu et al. 2026, ApJL 1001, L19",
   },

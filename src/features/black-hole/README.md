@@ -15,7 +15,7 @@ Routes carry no language prefix. Mass and spin below are initial preset values, 
 | -------------- | ------------------------------- | ------------------- | ----- | ------ | ------------ |
 | Cygnus X-1     | `/lab/black-hole/stellar`       | 21.2                | 0.95  | cyg    | 0            |
 | Gaia BH3       | `/lab/black-hole/gaia-bh3`      | 32.7                | 0     | cyg    | 0            |
-| GW231123       | `/lab/black-hole/gw231123`      | 222                 | 0.84  | lensed | 0            |
+| GW231123       | `/lab/black-hole/gw231123`      | 225                 | 0.84  | lensed | 0            |
 | ω Centauri     | `/lab/black-hole/omega-cen`     | 8200                | 0     | sgr    | 0            |
 | Sagittarius A* | `/lab/black-hole/sgr-a`         | 4297000             | 0.94  | sgr    | 0            |
 | Messier 87*    | `/lab/black-hole/m87`           | 6500000000          | 0.9   | m87    | 1            |

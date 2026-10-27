@@ -327,7 +327,7 @@
       "2": {
         "kicker": "Five models",
         "title": "Wide error bars",
-        "body": "Five state-of-the-art waveform models gave noticeably different values for some parameters, such as the lighter mass and the distance. Researchers therefore quote wide ranges. Every model finds a rapidly spinning heavier black hole, and a 2026 follow-up study found the high masses and spins robust to detector noise."
+        "body": "Five state-of-the-art waveform models gave noticeably different values for some parameters, such as the lighter mass and the distance. Researchers therefore quote wide ranges. Every model finds a rapidly spinning heavier black hole. A 2026 reanalysis kept the high spins through different realisations of detector noise but found them to depend on the waveform model, and another study argues that tiny glitches could have inflated them: the spins remain debated."
       },
       "3": {
         "kicker": "About {gwKerrHorizonKm} km",
