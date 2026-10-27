@@ -115,7 +115,7 @@
     "schematic": "Measured distance · schematic path",
     "observations": "Measured inputs · derived distances",
     "reconstruction": "Reconstructed · published",
-    "acceptedReconstruction": "Reconstructed · accepted manuscript",
+    "acceptedReconstruction": "Reconstructed · accepted, in press",
     "preprintReconstruction": "Reconstructed · preprint"
   },
   "facts": {
@@ -365,7 +365,7 @@
       },
       "vela": {
         "body": "The updated CF4++ZOA reconstruction includes galaxies obscured by the Milky Way. The diamond marks the reconstructed density peak. The dashed circle gives the radius of a sphere with the same total overdense volume.",
-        "caution": "Accepted by A&A; values from manuscript v2. The circle is a size guide, not the structure’s shape. The published mass uses H₀ = {hubble} and a different region from the collapsing knots catalogue."
+        "caution": "Published in A&A 713, A4; values from the arXiv v2 table. The circle is a size guide, not the structure’s shape. The published mass uses H₀ = {hubble} and a different region from the collapsing knots catalogue."
       },
       "southPoleWall": {
         "body": "A wall inferred from galaxy motions in Cosmicflows-3. The diamond marks its approximate density peak at the celestial south pole, named Chamaeleon+11.8 in the paper.",
@@ -479,7 +479,7 @@
       },
       "cosmos": {
         "title": "Beyond the Milky Way",
-        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Hollow markers locate {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} with coordinate-spread crosses available on inspection. Vela uses the accepted 2026 v2 reconstruction; the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths remain a separate illustration. Data, Illustration and Both modes control the overlay; Both preserves the familiar Laniakea shape alongside the catalogues. Local galaxy populations remain illustrations. Generated galaxies beyond the web are hidden in Data mode. The CMB uses masked Planck 2018 SMICA temperatures with optional ACT DR6.02 NILC detail inside its trusted footprint; neither data gaps nor load failures are filled with synthetic CMB. Foreground-cleaned temperatures are reconstructions; sphere placement, colour and opacity are illustrative. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
+        "body": "Named nearby galaxies retain their measured anchors, including Andromeda ({andromedaMly} million light-years, approaching at {andromedaKms} km/s). Beyond them, the atlas imports {cf4Groups} {cf4GroupsPlural, select, one {CF4 group record} other {CF4 group records}}, {classixClusters} {classixClustersPlural, select, one {CLASSIX cluster} other {CLASSIX clusters}} and {desiGalaxies} {desiGalaxiesPlural, select, one {sampled DESI DR1 galaxy} other {sampled DESI DR1 galaxies}}. Sky positions and redshifts are measured; radial distances use flat ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). CF4 redshifts already use the CMB frame. Observer-frame CLASSIX and DESI redshifts receive the dipole correction; peculiar velocities remain. The sparse DESI sample is not a complete survey or coverage mask. Hollow markers locate {basinCount} {basinCountPlural, select, one {published CF4 basin centre} other {published CF4 basin centres}} with coordinate-spread crosses available on inspection. Vela uses the published 2026 reconstruction (A&A 713, A4, its arXiv v2 table); the South Pole Wall has an approximate peak marker. The {voidCount} {voidCountPlural, select, one {void} other {voids}} and {knotCount} {knotCountPlural, select, one {knot} other {knots}} come from explicitly labelled 2026 preprint tables. Supergalactic coordinates in h⁻¹ Mpc use h = {atlasH}. Void circles and the Vela circle are equivalent-volume size guides, not surfaces. The inner void circles describe subvolumes persistent in {voidSupport}% of realizations, not radial uncertainties. The older seeded web and flow paths remain a separate illustration. Data, Illustration and Both modes control the overlay; Both preserves the familiar Laniakea shape alongside the catalogues. Local galaxy populations remain illustrations. Generated galaxies beyond the web are hidden in Data mode. The CMB uses masked Planck 2018 SMICA temperatures with optional ACT DR6.02 NILC detail inside its trusted footprint; neither data gaps nor load failures are filled with synthetic CMB. Foreground-cleaned temperatures are reconstructions; sphere placement, colour and opacity are illustrative. The observable-universe horizon and microwave background follow the same cosmology, including radiation; its age is {universeGyr} billion years."
       },
       "depth": {
         "title": "Distance and light",
@@ -572,7 +572,7 @@
     "canvasPreprint": "{name} · preprint",
     "publication": {
       "published": "Published",
-      "accepted": "Accepted by A&A · manuscript v2",
+      "accepted": "Accepted · in press",
       "preprint": "Preprint · not peer reviewed"
     },
     "layers": {
@@ -587,7 +587,7 @@
       "classix": "CLASSIX · Böhringer et al. (2025)",
       "desi": "DESI DR1 · iron zcatalog v1 (2026-07-10)",
       "basins": "CF4 · Valade et al. (2024), v1",
-      "vela": "CF4++ZOA · Hollinger et al. (2026), v2",
+      "vela": "CF4++ZOA · Hollinger et al. (2026), A&A 713, A4",
       "voids": "V-web · Hollinger & Courtois (2026), v1",
       "sloan": "Sloan · Pomarède et al. (2026), v1",
       "south": "Cosmicflows-3 · Pomarède et al. (2020), v1"

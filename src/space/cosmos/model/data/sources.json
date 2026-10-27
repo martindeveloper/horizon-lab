@@ -27,8 +27,8 @@
   },
   "vela": {
     "url": "https://arxiv.org/html/2603.09339v2",
-    "publication": "accepted",
-    "version": "Hollinger et al. 2026; accepted by A&A 2026-06-22; Table 2",
+    "publication": "published",
+    "version": "Hollinger et al. 2026, A&A 713, A4; Table 2 as in arXiv v2",
     "reviewed": "2026-10-22",
     "sha256": "91d47d04c9d085e2d27f500765eddd226e666c7b613317dda344cb0c8840eafe",
     "referenceUrl": "https://arxiv.org/abs/2603.09339v2"

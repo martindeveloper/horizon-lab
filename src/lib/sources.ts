@@ -49,7 +49,7 @@ export const SOURCES = {
     link: "https://arxiv.org/abs/2409.17261v1",
   },
   vela2026: {
-    cite: "Hollinger et al. 2026, arXiv:2603.09339v2, accepted by A&A 22 June 2026 (CF4++ZOA; Vela, Table 2; masses at H₀ = 74.6)",
+    cite: "Hollinger et al. 2026, A&A 713, A4 (arXiv:2603.09339v2; CF4++ZOA; Vela, Table 2; masses at H₀ = 74.6)",
     link: "https://arxiv.org/abs/2603.09339v2",
   },
   cosmicVoids2026: {

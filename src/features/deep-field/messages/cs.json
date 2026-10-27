@@ -118,7 +118,7 @@
     "schematic": "Měřená vzdálenost · schematická dráha",
     "observations": "Změřené vstupy · odvozené vzdálenosti",
     "reconstruction": "Rekonstrukce · publikováno",
-    "acceptedReconstruction": "Rekonstrukce · přijatý rukopis",
+    "acceptedReconstruction": "Rekonstrukce · přijato, v tisku",
     "preprintReconstruction": "Rekonstrukce · preprint"
   },
   "facts": {
@@ -368,7 +368,7 @@
       },
       "vela": {
         "body": "Nová rekonstrukce CF4++ZOA zahrnuje i galaxie zakryté Mléčnou dráhou. Kosočtverec označuje rekonstruované maximum hustoty. Čárkovaná kružnice ukazuje poloměr koule se stejným objemem jako celá oblast nadprůměrné hustoty.",
-        "caution": "Přijato do A&A; hodnoty z verze rukopisu v2. Kružnice je měřítko velikosti, nikoli tvar struktury. Publikovaná hmotnost používá H₀ = {hubble} a jinou oblast než katalog smršťujících se uzlů."
+        "caution": "Publikováno v A&A 713, A4; hodnoty z tabulky verze arXiv v2. Kružnice je měřítko velikosti, nikoli tvar struktury. Publikovaná hmotnost používá H₀ = {hubble} a jinou oblast než katalog smršťujících se uzlů."
       },
       "southPoleWall": {
         "body": "Zeď odvozená z pohybů galaxií v Cosmicflows-3. Kosočtverec označuje přibližné maximum hustoty u jižního nebeského pólu, v článku nazvané Chamaeleon+11.8.",
@@ -482,7 +482,7 @@
       },
       "cosmos": {
         "title": "Za Mléčnou dráhou",
-        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Prázdné značky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}}; křížky rozptylu souřadnic se zobrazují při prohlížení vybrané struktury. Plachty používají přijatou rekonstrukci v2 z roku 2026; Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice zůstávají samostatnou ilustrací. Jejich překrytí řídí režimy Data, Ilustrace a Obojí; Obojí zachovává známý tvar Laniakey spolu s katalogy. Místní populace galaxií zůstávají ilustrační. Generované galaxie za pavučinou se v režimu Data skryjí. Reliktní záření používá maskované teploty Planck 2018 SMICA s volitelným detailem ACT DR6.02 NILC v ověřené oblasti; mezery ani chyby načítání se nedoplňují umělým zářením. Teploty po odstranění popředí jsou rekonstrukcí; umístění na kouli, barva a průhlednost jsou ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
+        "body": "Pojmenované blízké galaxie zůstávají ve změřených polohách, včetně Andromedy ({andromedaMly} milionu světelných let, přibližuje se rychlostí {andromedaKms} km/s). Dále atlas přebírá {cf4Groups} {cf4GroupsPlural, select, one {záznam skupiny CF4} few {záznamy skupin CF4} many {záznamu skupin CF4} other {záznamů skupin CF4}}, {classixClusters} {classixClustersPlural, select, one {kupu CLASSIX} few {kupy CLASSIX} many {kupy CLASSIX} other {kup CLASSIX}} a vzorek {desiGalaxies} {desiGalaxiesPlural, select, one {galaxie DESI DR1} few {galaxií DESI DR1} many {galaxie DESI DR1} other {galaxií DESI DR1}}. Směry a rudé posuvy jsou změřené; radiální vzdálenosti používají plochý model ΛCDM (H₀ = {hubble} km/s/Mpc, Ωm = {omegaM}). Posuvy CF4 už jsou ve vztažné soustavě reliktního záření. Posuvy CLASSIX a DESI dostávají dipólovou korekci; vlastní pohyby přetrvávají. Řídký vzorek DESI není úplnou přehlídkou ani maskou pokrytí. Prázdné značky ukazují středy {basinCount} {basinCountPlural, select, one {publikované pánve CF4} few {publikovaných pánví CF4} many {publikované pánve CF4} other {publikovaných pánví CF4}}; křížky rozptylu souřadnic se zobrazují při prohlížení vybrané struktury. Plachty používají publikovanou rekonstrukci z roku 2026 (A&A 713, A4, tabulka verze arXiv v2); Zeď jižního pólu má přibližnou značku maxima. Prázdnoty ({voidCount}) a uzly ({knotCount}) pocházejí z výslovně označených preprintových tabulek z roku 2026. Supergalaktické souřadnice v h⁻¹ Mpc používají h = {atlasH}. Kružnice prázdnot a Plachet jsou měřítka objemově ekvivalentní velikosti, nikoli povrchy. Vnitřní kružnice prázdnot popisují části objemu stálé v {voidSupport} % realizací, nikoli nejistotu poloměru. Starší generovaná vlákna a proudnice zůstávají samostatnou ilustrací. Jejich překrytí řídí režimy Data, Ilustrace a Obojí; Obojí zachovává známý tvar Laniakey spolu s katalogy. Místní populace galaxií zůstávají ilustrační. Generované galaxie za pavučinou se v režimu Data skryjí. Reliktní záření používá maskované teploty Planck 2018 SMICA s volitelným detailem ACT DR6.02 NILC v ověřené oblasti; mezery ani chyby načítání se nedoplňují umělým zářením. Teploty po odstranění popředí jsou rekonstrukcí; umístění na kouli, barva a průhlednost jsou ilustrační. Horizont pozorovatelného vesmíru a reliktní záření vycházejí ze stejné kosmologie včetně záření; stáří je {universeGyr} miliardy let."
       },
       "depth": {
         "title": "Vzdálenost a světlo",
@@ -575,7 +575,7 @@
     "canvasPreprint": "{name} · preprint",
     "publication": {
       "published": "Publikováno",
-      "accepted": "Přijato do A&A · rukopis v2",
+      "accepted": "Přijato · v tisku",
       "preprint": "Preprint · bez recenzního řízení"
     },
     "layers": {
@@ -590,7 +590,7 @@
       "classix": "CLASSIX · Böhringer et al. (2025)",
       "desi": "DESI DR1 · iron zcatalog v1 (2026-07-10)",
       "basins": "CF4 · Valade et al. (2024), v1",
-      "vela": "CF4++ZOA · Hollinger et al. (2026), v2",
+      "vela": "CF4++ZOA · Hollinger et al. (2026), A&A 713, A4",
       "voids": "V-web · Hollinger & Courtois (2026), v1",
       "sloan": "Sloan · Pomarède et al. (2026), v1",
       "south": "Cosmicflows-3 · Pomarède et al. (2020), v1"
