@@ -1,31 +1,19 @@
 import { useFormatter, useTranslations } from "next-intl";
 
-import { useSimulationDrift, type DriftStore } from "@/components/simulations/drift";
-import { SimulationImmersive } from "@/components/simulations/immersive";
-import { SimulationLoading } from "@/components/simulations/loading";
-import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
-import { useViewFromPath, type ViewStore } from "@/components/simulations/use-view-from-path";
-import { ANCHOR_IDS } from "@/lib/urls";
-import type { SolarViewId } from "@/space/solar-system/model/views";
-import { LoadingOverlay, VisualizationShell } from "@horizon/toolkit/ui";
+import { useSimulationDrift } from "@/components/simulations/drift";
+import { SimulationRoot } from "@/components/simulations/simulation-root";
 
 import { DRIFT } from "../lib/drift";
-import { useOrrery, type OrreryStore } from "../lib/store";
+import { useOrrery } from "../lib/store";
 import { viewFromPath } from "../routing";
 import { OrreryCanvas } from "./canvas";
 import { OrreryOverlay } from "./overlay";
 import { SolarActivityNotice } from "./solar-activity-controls";
 import { motionRateLabel } from "./time-dock";
 
-const reset = freshVisit(useOrrery);
-const views: ViewStore<SolarViewId> = useOrrery;
-const driftStore: DriftStore<OrreryStore> = useOrrery;
+/** The store as the root and the address hold it: a module value, so the component passes no hook. */
+const store = useOrrery;
 
-/** The tour drives the camera; immersive view ends it but keeps panels for the return. */
-function leaveGuide() {
-  const state = useOrrery.getState();
-  if (state.guideOpen) state.endGuide();
-}
 /** The drift's one readout: how fast the clock runs, since the planets' motion is what it shows. */
 function DriftClock() {
   const t = useTranslations("orrery");
@@ -40,31 +28,24 @@ function DriftClock() {
 
 export function Orrery() {
   const t = useTranslations("orrery");
-  const ready = useOrrery((s) => s.ready);
   const view = useOrrery((s) => s.view);
   const drift = useSimulationDrift(
     useOrrery((s) => s.drift),
-    driftStore,
+    store,
     DRIFT,
     <DriftClock />,
   );
-
-  useViewFromPath(views, viewFromPath);
-  useFreshVisit(reset);
-
   return (
-    <VisualizationShell id={ANCHOR_IDS.mainContent} tabIndex={-1} className="h-full">
-      <h1 className="sr-only">
-        {t("app")} · {t(`views.${view}`)}
-      </h1>
-      <OrreryCanvas />
-      <SimulationImmersive onEnter={leaveGuide} drift={drift}>
-        <OrreryOverlay />
-      </SimulationImmersive>
+    <SimulationRoot
+      namespace="orrery"
+      store={store}
+      views={{ store, fromPath: viewFromPath }}
+      heading={t(`views.${view}`)}
+      drift={drift}
+      canvas={<OrreryCanvas />}
+      overlay={<OrreryOverlay />}
+    >
       <SolarActivityNotice />
-      <LoadingOverlay ready={ready}>
-        <SimulationLoading title={t("app")} />
-      </LoadingOverlay>
-    </VisualizationShell>
+    </SimulationRoot>
   );
 }

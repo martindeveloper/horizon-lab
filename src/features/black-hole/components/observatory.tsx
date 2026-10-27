@@ -1,51 +1,58 @@
-import { useLayoutEffect } from "react";
+import { useSimulationDrift } from "@/components/simulations/drift";
+import { SimulationRoot } from "@/components/simulations/simulation-root";
+import type { ViewStore } from "@/components/simulations/use-view-from-path";
 
-import { useSimulationDrift, type DriftStore } from "@/components/simulations/drift";
-import { SimulationImmersive } from "@/components/simulations/immersive";
-import { freshVisit, useFreshVisit } from "@/components/simulations/use-fresh-visit";
-import { BlackHoleCanvas } from "@/features/black-hole/components/canvas";
-import { HorizonLoader } from "@/features/black-hole/components/loader";
-import { ObservatoryOverlay } from "@/features/black-hole/components/overlay";
-import { driftFor } from "@/features/black-hole/lib/drift";
-import { useBlackHole } from "@/features/black-hole/lib/store";
-import { presetIdFromPath } from "@/features/black-hole/routing";
-import { usePathname } from "@/i18n/navigation";
-import { ANCHOR_IDS } from "@/lib/urls";
-import { VisualizationShell } from "@horizon/toolkit/ui";
-
-import { BLACK_HOLE_PATH } from "../manifest";
+import { driftFor } from "../lib/drift";
+import { DEFAULT_PRESET_ID } from "../lib/holes/routes";
+import { useBlackHole, type BlackHoleStore } from "../lib/store";
+import { presetIdFromPath } from "../routing";
+import { BlackHoleCanvas } from "./canvas";
+import { ObservatoryOverlay } from "./overlay";
 import { SceneCameraProvider } from "./scene-camera";
 
-const reset = freshVisit(useBlackHole);
-const driftStore: DriftStore<ReturnType<typeof useBlackHole.getState>> = useBlackHole;
+/** The store as the root holds it: a module value, so the component passes no hook. */
+const store = useBlackHole;
+
+/**
+ * The store as the address sees it: the preset is its view. A hole the visitor has made their
+ * own ("custom") lives at the default address, so that address leaves it be.
+ */
+const views: ViewStore<string> = {
+  getState: () => {
+    const state = store.getState();
+    return {
+      view: state.presetId,
+      setView: (id) => {
+        if (id === DEFAULT_PRESET_ID && state.presetId === "custom") return;
+        state.applyPreset(id);
+      },
+    };
+  },
+  subscribe: store.subscribe,
+};
+/** The immersive view closes the panels; the guide keeps running behind the view. */
+const closePanels = () => store.getState().closePanels();
+/** The first frame with the sky in it. */
+const skyReady = (state: BlackHoleStore) => state.skyReady;
 
 export function Observatory() {
-  const pathname = usePathname();
-  useFreshVisit(reset);
-  const closePanels = useBlackHole((s) => s.closePanels);
   const drift = useSimulationDrift(
     useBlackHole((s) => s.drift),
-    driftStore,
+    store,
     driftFor(useBlackHole((s) => s.diskBrightness)),
   );
-
-  useLayoutEffect(() => {
-    const id = presetIdFromPath(pathname);
-    if (!id) return;
-    const state = useBlackHole.getState();
-    if (pathname === BLACK_HOLE_PATH && state.presetId === "custom") return;
-    if (state.presetId !== id) state.applyPreset(id);
-  }, [pathname]);
-
   return (
     <SceneCameraProvider>
-      <VisualizationShell id={ANCHOR_IDS.mainContent} tabIndex={-1} className="h-full">
-        <BlackHoleCanvas />
-        <SimulationImmersive onEnter={closePanels} drift={drift}>
-          <ObservatoryOverlay />
-        </SimulationImmersive>
-        <HorizonLoader />
-      </VisualizationShell>
+      <SimulationRoot
+        namespace="blackHole"
+        store={store}
+        views={{ store: views, fromPath: presetIdFromPath }}
+        drift={drift}
+        ready={skyReady}
+        onImmersive={closePanels}
+        canvas={<BlackHoleCanvas />}
+        overlay={<ObservatoryOverlay />}
+      />
     </SceneCameraProvider>
   );
 }
