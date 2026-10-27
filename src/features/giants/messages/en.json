@@ -251,7 +251,7 @@
       },
       "dwarf": {
         "title": "Small and heavy",
-        "body": "Sirius B is a dead star's core: smaller than Earth, about as heavy as the Sun. Its matter is crushed tight."
+        "body": "Sirius B is a dead star's core: smaller than Earth, about as heavy as the Sun. Only the pressure of its tightly packed electrons holds it up against that weight."
       },
       "pulsar": {
         "title": "A star the size of a city",
@@ -259,11 +259,11 @@
       },
       "giants": {
         "title": "Swallowing the planets",
-        "body": "Put Betelgeuse in the Sun's place and its surface lies beyond Mars. Its equatorial circumference divided by c is several hours."
+        "body": "Put Betelgeuse in the Sun's place and its surface lies beyond Mars. Light itself would need several hours to go round it."
       },
       "heavy": {
         "title": "Heavy is not big",
-        "body": "R136a1 is one of the most massive stars known, yet smaller than many giants. A star's power grows with its size squared and its temperature to the fourth."
+        "body": "R136a1 is one of the most massive stars known, yet smaller than many giants: it still burns hydrogen in its core, while a giant is an old star whose outer layers have swelled. A star's power grows with its size squared and its temperature to the fourth."
       },
       "horizons": {
         "title": "Past the stars",

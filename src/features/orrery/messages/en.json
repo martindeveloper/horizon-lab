@@ -312,7 +312,7 @@
     "steps": {
       "today": {
         "title": "Where the planets are today",
-        "body": "Positions computed for today's date from JPL orbital elements. Playing time moves them along these orbits faster."
+        "body": "Positions computed for today's date from JPL orbital elements. Play time and watch: the nearer a planet is to the Sun, the faster it laps."
       },
       "periods": {
         "title": "Farther out, slower",

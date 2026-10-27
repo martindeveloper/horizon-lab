@@ -254,7 +254,7 @@
       },
       "dwarf": {
         "title": "Malý a těžký",
-        "body": "Sírius B je jádro mrtvé hvězdy: menší než Země, zhruba tak těžké jako Slunce. Jeho hmota je stlačená na minimum."
+        "body": "Sírius B je jádro mrtvé hvězdy: menší než Země, zhruba tak těžké jako Slunce. Proti té tíze ho drží jen tlak natěsnaných elektronů."
       },
       "pulsar": {
         "title": "Hvězda velká jako město",
@@ -262,11 +262,11 @@
       },
       "giants": {
         "title": "Pohlcené planety",
-        "body": "Postavte Betelgeuzi na místo Slunce a její povrch bude za Marsem. Její rovníkový obvod dělený rychlostí světla odpovídá několika hodinám."
+        "body": "Postavte Betelgeuzi na místo Slunce a její povrch bude za Marsem. Samo světlo by ji obletělo za několik hodin."
       },
       "heavy": {
         "title": "Těžký neznamená velký",
-        "body": "R136a1 je jedna z nejhmotnějších známých hvězd, a přesto menší než mnoho obrů. Výkon hvězdy roste s druhou mocninou velikosti a se čtvrtou mocninou teploty."
+        "body": "R136a1 je jedna z nejhmotnějších známých hvězd, a přesto menší než mnoho obrů: v jádru stále spaluje vodík, zatímco obr je stará hvězda s nafouklými vnějšími vrstvami. Výkon hvězdy roste s druhou mocninou velikosti a se čtvrtou mocninou teploty."
       },
       "horizons": {
         "title": "Za hvězdami",

@@ -314,7 +314,7 @@
     "steps": {
       "today": {
         "title": "Kde jsou planety dnes",
-        "body": "Polohy spočtené pro dnešní datum z dráhových elementů JPL. Spuštěný čas je po těchto drahách posouvá rychleji."
+        "body": "Polohy spočtené pro dnešní datum z dráhových elementů JPL. Spusťte čas a sledujte: čím blíž je planeta Slunci, tím rychleji oběhne."
       },
       "periods": {
         "title": "Čím dál, tím pomaleji",
