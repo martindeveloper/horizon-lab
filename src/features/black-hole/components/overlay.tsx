@@ -8,22 +8,6 @@ import { SimulationToolbar } from "@/components/simulations/simulation-toolbar";
 import { useDockClearance, type DockInTheWay } from "@/components/simulations/use-dock-clearance";
 import { useSceneEscape, type EscapeStep } from "@/components/simulations/use-scene-escape";
 import { HeaderRow } from "@/components/simulations/view-picker";
-import { AtlasOverlay } from "@/features/black-hole/components/atlas";
-import { ClockDrops } from "@/features/black-hole/components/clocks";
-import { GuideOverlay } from "@/features/black-hole/components/guide";
-import { Hotspots } from "@/features/black-hole/components/hotspots";
-import { StoryLine } from "@/features/black-hole/components/learn";
-import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
-import { HELP } from "@/features/black-hole/lib/help";
-import { PRESETS } from "@/features/black-hole/lib/holes";
-import {
-  horizonOverM,
-  iscoOverM,
-  iscoPeriodSeconds,
-  photonOverM,
-  schwarzschildKm,
-} from "@/features/black-hole/lib/physics";
-import { useBlackHole } from "@/features/black-hole/lib/store";
 import {
   DataReadout,
   Dock,
@@ -33,10 +17,26 @@ import {
   useFocusHandoff,
 } from "@horizon/toolkit/ui";
 
+import { HELP } from "../lib/help";
+import { PRESETS } from "../lib/holes";
+import {
+  horizonOverM,
+  iscoOverM,
+  iscoPeriodSeconds,
+  photonOverM,
+  schwarzschildKm,
+} from "../lib/physics";
+import { useBlackHole } from "../lib/store";
+import { AtlasOverlay } from "./atlas";
+import { ClockDrops } from "./clocks";
+import { GuideOverlay } from "./guide";
+import { Hotspots } from "./hotspots";
+import { StoryLine } from "./learn";
 import { PinLesson } from "./pin-lessons";
 import { HolePicker } from "./preset-nav";
 import { SETTINGS_PANEL_ID, SettingsBody } from "./settings";
 import { BlackHoleTechnicalDetails } from "./technical-details";
+import { usePhysicsFormat } from "./use-physics-format";
 
 function Readout() {
   const { formatMassShort, formatLengthKm, formatDuration } = usePhysicsFormat();

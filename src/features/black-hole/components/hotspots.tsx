@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import { cn, isSceneShortcut, useFocusHandoff } from "@horizon/toolkit/ui";
+
 import {
   GAUGE_TICKS,
   PIN_IDS,
@@ -10,10 +12,8 @@ import {
   pinRadius,
   spreadLabels,
   type PinId,
-} from "@/features/black-hole/lib/pins";
-import { useBlackHole } from "@/features/black-hole/lib/store";
-import { cn, isSceneShortcut, useFocusHandoff } from "@horizon/toolkit/ui";
-
+} from "../lib/pins";
+import { useBlackHole } from "../lib/store";
 import { clearOverlay, drawOverHole, overlayFit, overlayLoop } from "./overlay-canvas";
 import { PinLesson } from "./pin-lessons";
 import { drawRing, ringTarget } from "./pin-rings";

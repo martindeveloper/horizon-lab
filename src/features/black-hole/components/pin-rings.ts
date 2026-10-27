@@ -1,7 +1,8 @@
 /** Canvas drawing for the lit pin: its ring and the leader’s target on it. */
 
-import { ringPoints, type PinId } from "@/features/black-hole/lib/pins";
 import { projectWorld, type CameraSnapshot } from "@horizon/toolkit/camera";
+
+import { ringPoints, type PinId } from "../lib/pins";
 
 /** Dashed equatorial ring of radius `radius` (units of M), projected through the camera. */
 export function drawRing(

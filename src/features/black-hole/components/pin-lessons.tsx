@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 
-import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
+import { Equation, PanelHeader, Sub } from "@horizon/toolkit/ui";
+
 import {
   criticalImpactParameters,
   horizonOverM,
@@ -8,10 +9,10 @@ import {
   iscoPeriodSeconds,
   photonOverM,
   schwarzschildKm,
-} from "@/features/black-hole/lib/physics";
-import type { PinId } from "@/features/black-hole/lib/pins";
-import { useBlackHole } from "@/features/black-hole/lib/store";
-import { Equation, PanelHeader, Sub } from "@horizon/toolkit/ui";
+} from "../lib/physics";
+import type { PinId } from "../lib/pins";
+import { useBlackHole } from "../lib/store";
+import { usePhysicsFormat } from "./use-physics-format";
 
 const PIN_LABELS = {
   horizon: { kicker: "pinHorizonK", title: "pinHorizonT" },

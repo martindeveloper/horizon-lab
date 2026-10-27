@@ -2,10 +2,10 @@ import { useTranslations } from "next-intl";
 import { useCallback, useRef } from "react";
 
 import { useSimulationEngine } from "@/components/simulations/use-simulation-engine";
-import { createBlackHoleEngine } from "@/features/black-hole/lib/engine";
-import { useBlackHole } from "@/features/black-hole/lib/store";
 import type { StartEngine } from "@horizon/toolkit/rendering";
 
+import { createBlackHoleEngine } from "../lib/engine";
+import { useBlackHole } from "../lib/store";
 import { useSceneCamera, useSceneFrames } from "./scene-camera";
 
 const resetReady = () => useBlackHole.getState().setSkyReady(false);

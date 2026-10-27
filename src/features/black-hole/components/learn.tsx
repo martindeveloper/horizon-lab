@@ -2,11 +2,12 @@ import { ChevronLeft, ChevronRight, Pause } from "lucide-react";
 import { useLocale, useMessages, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { figureArgs } from "@/features/black-hole/lib/figures";
-import { PRESETS } from "@/features/black-hole/lib/holes";
-import { useBlackHole } from "@/features/black-hole/lib/store";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import { Kicker, cn } from "@horizon/toolkit/ui";
+
+import { figureArgs } from "../lib/figures";
+import { PRESETS } from "../lib/holes";
+import { useBlackHole } from "../lib/store";
 
 export function StoryLine({ alwaysOpen = false }: { alwaysOpen?: boolean }) {
   const presetId = useBlackHole((s) => s.presetId);

@@ -10,10 +10,10 @@ import {
   GuideTitle,
 } from "@/components/simulations/guide-card";
 import { useGuideKeys } from "@/components/simulations/use-guide-keys";
-import { figureArgs } from "@/features/black-hole/lib/figures";
-import { useBlackHole } from "@/features/black-hole/lib/store";
-import { tourFor, type TourStep } from "@/features/black-hole/lib/tours";
 
+import { figureArgs } from "../lib/figures";
+import { useBlackHole } from "../lib/store";
+import { tourFor, type TourStep } from "../lib/tours";
 import { GuideSketch } from "./guide-sketch";
 
 /** Space and the right arrow move on, left goes back. */

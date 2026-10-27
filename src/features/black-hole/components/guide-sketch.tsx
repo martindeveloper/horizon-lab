@@ -1,9 +1,12 @@
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
-import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
-import { orbitBasis, type Basis } from "@/features/black-hole/lib/frame";
-import { B_CRIT, schwarzschildKm } from "@/features/black-hole/lib/physics";
+import { projectWorld } from "@horizon/toolkit/camera";
+import { prefersReducedMotion } from "@horizon/toolkit/environment";
+import type { Vec3 } from "@horizon/toolkit/math";
+
+import { orbitBasis, type Basis } from "../lib/frame";
+import { B_CRIT, schwarzschildKm } from "../lib/physics";
 import {
   buildSketch,
   LABEL_FADE,
@@ -11,15 +14,12 @@ import {
   type Sketch,
   type SketchContext,
   type Tone,
-} from "@/features/black-hole/lib/sketches";
-import { useBlackHole } from "@/features/black-hole/lib/store";
-import { tourFor } from "@/features/black-hole/lib/tours";
-import { projectWorld } from "@horizon/toolkit/camera";
-import { prefersReducedMotion } from "@horizon/toolkit/environment";
-import type { Vec3 } from "@horizon/toolkit/math";
-
+} from "../lib/sketches";
+import { useBlackHole } from "../lib/store";
+import { tourFor } from "../lib/tours";
 import { clearOverlay, drawOverHole, overlayFit, overlayLoop } from "./overlay-canvas";
 import { useSceneCamera, useSceneFrames } from "./scene-camera";
+import { usePhysicsFormat } from "./use-physics-format";
 
 const FADE_OUT = 0.7;
 /**

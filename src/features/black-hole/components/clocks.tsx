@@ -2,21 +2,6 @@ import { ChevronDown, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
-import {
-  DROP_START,
-  FADE_LIFE,
-  FLASH_LIFE,
-  FLASH_PERIOD,
-  RAIN_FLOOR,
-  SPEEDS,
-  beaconColor,
-  freshDrops,
-  rgba,
-  type Drop,
-  type SpeedId,
-} from "@/features/black-hole/lib/clocks";
-import { rainDrDt, rainRedshift } from "@/features/black-hole/lib/physics";
-import { useBlackHole } from "@/features/black-hole/lib/store";
 import { projectWorld } from "@horizon/toolkit/camera";
 import { prefersReducedMotion } from "@horizon/toolkit/environment";
 import {
@@ -30,6 +15,21 @@ import {
   useFocusHandoff,
 } from "@horizon/toolkit/ui";
 
+import {
+  DROP_START,
+  FADE_LIFE,
+  FLASH_LIFE,
+  FLASH_PERIOD,
+  RAIN_FLOOR,
+  SPEEDS,
+  beaconColor,
+  freshDrops,
+  rgba,
+  type Drop,
+  type SpeedId,
+} from "../lib/clocks";
+import { rainDrDt, rainRedshift } from "../lib/physics";
+import { useBlackHole } from "../lib/store";
 import { ClockRow } from "./clock-row";
 import { drawOverHole, overlayFit, overlayLoop } from "./overlay-canvas";
 import { useSceneCamera, useSceneFrames } from "./scene-camera";

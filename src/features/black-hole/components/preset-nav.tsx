@@ -2,11 +2,12 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ViewList, ViewPickerShell } from "@/components/simulations/view-picker";
-import { usePhysicsFormat } from "@/features/black-hole/hooks/use-physics-format";
-import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
-import { PRESETS, type HoleKind, type HoleSpec } from "@/features/black-hole/lib/holes";
-import { useBlackHole } from "@/features/black-hole/lib/store";
 import { Orb } from "@horizon/toolkit/ui";
+
+import { PRESETS, type HoleKind, type HoleSpec } from "../lib/holes";
+import { useBlackHole } from "../lib/store";
+import { usePhysicsFormat } from "./use-physics-format";
+import { useSelectHole } from "./use-select-hole";
 
 const KINDS: readonly HoleKind[] = ["catalog", "theory"];
 

@@ -2,7 +2,8 @@ import { X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useRef, useState } from "react";
 
-import { useSelectHole } from "@/features/black-hole/hooks/use-select-hole";
+import { Kicker, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
+
 import {
   ATLAS,
   BAR,
@@ -14,10 +15,10 @@ import {
   atlasFor,
   xyToPct,
   type AtlasSite,
-} from "@/features/black-hole/lib/atlas";
-import { figureArgs } from "@/features/black-hole/lib/figures";
-import { useBlackHole } from "@/features/black-hole/lib/store";
-import { Kicker, cn, kickerClass, useFocusHandoff } from "@horizon/toolkit/ui";
+} from "../lib/atlas";
+import { figureArgs } from "../lib/figures";
+import { useBlackHole } from "../lib/store";
+import { useSelectHole } from "./use-select-hole";
 
 const SCALE_KPC = 5;
 /** The bar's minor over major axis as drawn. */
