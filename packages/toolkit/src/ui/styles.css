@@ -1,6 +1,4 @@
-/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
-@reference "./theme.css";
-
+/* Bundled after theme.css (src/styles.css): its `md` variant is the one breakpoint, `@variant` writes it here. */
 @layer base {
   .no-scrollbar {
     -ms-overflow-style: none;

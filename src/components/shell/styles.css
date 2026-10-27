@@ -1,6 +1,4 @@
-/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
-@reference "@horizon/toolkit/theme.css";
-
+/* Bundled after theme.css (src/styles.css): its `md` variant is the one breakpoint, `@variant` writes it here. */
 :root {
   /* Phones get a slimmer bar; its 44px targets overhang it by 2px either side. */
   --app-header-height: calc(2.5rem + env(safe-area-inset-top, 0px));
