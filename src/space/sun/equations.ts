@@ -12,7 +12,7 @@ import {
 } from "@horizon/toolkit/science";
 
 import { goesFlux } from "./model/activity";
-import { kCorona } from "./model/corona";
+import { whiteLightCorona } from "./model/corona";
 import { wolfNumber } from "./model/cycle";
 import { loopTemperature } from "./model/field";
 import { fusionEnergy, massToEnergyRate, PP_MASS_FRACTION } from "./model/fusion";
@@ -167,17 +167,20 @@ export const goesClass = defineEquation({
   compute: ({ k, n }) => goesFlux(k, n),
 });
 
-/** Baumbach 1937: the K-corona's brightness falls as three powers of the radius. */
+/**
+ * Baumbach 1937: the white-light corona's brightness falls as three powers of the radius, the
+ * flat term the dust's (F), the steep two the electrons' (K).
+ */
 export const baumbachCorona = defineEquation({
   id: "baumbach-corona",
-  text: `K(ρ) ∝ ${BAUMBACH_TERMS.map(({ coefficient, power }) => `${coefficient} ρ^−${power}`).join(" + ")}`,
-  latex: `K(\\rho) \\propto ${BAUMBACH_TERMS.map(({ coefficient, power }) => `${coefficient}\\,\\rho^{-${power}}`).join(" + ")}`,
-  output: "K",
+  text: `B(ρ) ∝ ${BAUMBACH_TERMS.map(({ coefficient, power }) => `${coefficient} ρ^−${power}`).join(" + ")}`,
+  latex: `B(\\rho) \\propto ${BAUMBACH_TERMS.map(({ coefficient, power }) => `${coefficient}\\,\\rho^{-${power}}`).join(" + ")}`,
+  output: "B",
   variables: {
     rho: { symbol: "ρ", latex: "\\rho" },
-    K: { symbol: "K", latex: "K" },
+    B: { symbol: "B", latex: "B" },
   },
-  compute: ({ rho }) => kCorona(rho),
+  compute: ({ rho }) => whiteLightCorona(rho),
   source: "Baumbach 1937, Astron. Nachr. 263, 121",
 });
 

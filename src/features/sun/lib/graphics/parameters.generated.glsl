@@ -147,7 +147,7 @@
 #define PLUME_WIDTH               0.12
 #define RAY_SHARE                 0.25
 #define RAY_COUNT                 40.0
-#define F_CORONA_FALLOFF          2.3
+#define BAUMBACH_POWERS           vec3(2.5, 7.0, 17.0)
 #define E_CORONA_GLOW             0.14
 #define LOOP_GLOW_REACH           0.3
 #define LOOP_GLOW                 0.35

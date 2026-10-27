@@ -9,7 +9,6 @@ import {
   Mesh,
   ShaderMaterial,
   SphereGeometry,
-  Vector2,
   Vector3,
   Vector4,
   type Scene,
@@ -46,7 +45,7 @@ export function createAtmosphereLayer(
     uRamp: { value: tables.ramp },
     uResponse: { value: tables.response },
     uCorona: { value: new Vector3() },
-    uCoronaFE: { value: new Vector2() },
+    uCoronaE: { value: 0 },
     uEruption: { value: new Vector4(0, 1, 0, 0) },
     uEruptionShape: { value: new Vector4() },
     uCmePresence: { value: 0 },
@@ -132,9 +131,9 @@ export function createAtmosphereLayer(
         shapedBy = frame.fieldRevision;
         shape(frame.fieldLines);
       }
-      const { k, f, eScaleHeight } = settings.corona;
+      const { k, eScaleHeight } = settings.corona;
       uniforms.uCorona.value.set(k[0], k[1], k[2]);
-      uniforms.uCoronaFE.value.set(f, eScaleHeight);
+      uniforms.uCoronaE.value = eScaleHeight;
       const eruption = frame.eruption;
       const region = eruption ? frame.regions.find((r) => r.id === eruption.regionId) : undefined;
       if (eruption && region) {

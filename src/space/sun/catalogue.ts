@@ -327,7 +327,7 @@ const CORONA = {
     digits: 2,
     source: "baumbach1937",
     status: "derived",
-    note: "the K-corona at the limb over the mean disc, from Baumbach's fit",
+    note: "the K-corona at the limb over the mean disc: the two steep terms of Baumbach's fit",
   },
   windSlow: literatureFact(WIND_SLOW_KM_S, "km/s", "mccomas2000", "flag", {
     note: "representative slow-wind speed near Earth's orbit; sources are diverse",

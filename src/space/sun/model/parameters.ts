@@ -302,15 +302,17 @@ export const RECONNECTION = {
 
 /* -------------------------------------------------------------- the corona */
 
-/** Baumbach 1937: the K-corona's brightness in millionths of the mean disc, Σ cᵢ r^−pᵢ. */
+/**
+ * Baumbach 1937: the white-light corona's brightness in millionths of the mean disc, Σ cᵢ r^−pᵢ,
+ * as eclipse photometry sees it, K and F together. Its flat r^−2.5 term is in the main the
+ * dust's light (F); the two steep terms are the electrons' (K), which the field shapes (van de
+ * Hulst 1950). The lists are read in that order: the dust's term first.
+ */
 export const BAUMBACH_TERMS = [
   { coefficient: 0.0532, power: 2.5 },
   { coefficient: 1.425, power: 7 },
   { coefficient: 2.565, power: 17 },
 ] as const;
-/** The F-corona falls as r^−2.3 and equals the K-corona near 2.5 R (Koutchmy & Lamy 1985). */
-export const F_CORONA_POWER = 2.3;
-export const F_CORONA_CROSSOVER_R = 2.5;
 /** The E-corona's green line: Fe XIV 530.3 nm, formed near 2 MK (Priest 2014, §1.3). */
 export const E_CORONA_LINE_NM = 530.3;
 export const E_CORONA_KELVIN = 2e6;

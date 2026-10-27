@@ -18,12 +18,12 @@ import {
   SPICULE_HEIGHT,
 } from "@/space/sun/graphics/parameters";
 import { SUN_ACTIVITY_MAX_REGIONS } from "@/space/sun/graphics/prominence/parameters";
+import { BAUMBACH_POWERS } from "@/space/sun/model/corona";
 import { MAP_CENTRAL_MERIDIAN_RAD } from "@/space/sun/model/observed";
 import {
   CORONAL_MEAN_MOLECULAR_WEIGHT,
   DAY_S,
   E_CORONA_LINE_NM,
-  F_CORONA_POWER,
   GRANULE_SIZE_KM,
   POLAR_FIELD_T,
   RADIUS_M,
@@ -430,8 +430,6 @@ export const PLUME_WIDTH = 0.12;
 /** The corona's fine rays: their share of its light, and their count round the limb. */
 export const RAY_SHARE = 0.25;
 export const RAY_COUNT = 40;
-/** The F-corona's fall-off (dust, flat: the model's power law). */
-export const F_CORONA_FALLOFF = F_CORONA_POWER;
 /**
  * Fe XIV's green line against the K-corona's gain at the limb: drawn so it can be seen (in
  * broadband, as the eye takes an eclipse, it is far fainter), a teaching choice the legend states.
@@ -696,7 +694,8 @@ export const SHADER_DEFINES = glslDefines({
   PLUME_WIDTH,
   RAY_SHARE,
   RAY_COUNT,
-  F_CORONA_FALLOFF,
+  /* Baumbach's powers, the dust's term first: the shader splits the white-light corona by them. */
+  BAUMBACH_POWERS,
   E_CORONA_GLOW,
   LOOP_GLOW_REACH,
   LOOP_GLOW,

@@ -16,7 +16,7 @@ uniform vec4 uRegionDir[REGION_MAX];   // centre (body frame); angular radius
 uniform vec4 uRegionSide[REGION_MAX];  // across the axis; strength
 uniform vec4 uRegionState[REGION_MAX]; // flare; facula; age; seed
 uniform vec3 uCorona;                  // Baumbach's three coefficients
-uniform vec2 uCoronaFE;                // the F-corona's coefficient (Baumbach's units); the E-corona's scale height, R
+uniform float uCoronaE;                // the E-corona's scale height, R
 uniform float uDipole;
 uniform vec4 uEruption;                // the eruption's axis; its front's radius (0: none)
 uniform vec4 uEruptionShape;           // its spread, rad; the flare's light; its rope's height; its strength
@@ -39,10 +39,19 @@ vec3 lit(float intensity, float kelvin, int layer, vec3 own, float weight) {
   return own * weight * intensity;
 }
 
-// Baumbach's K-corona at a projected radius, against its value at the limb.
-float baumbach(float rho) {
-  vec3 powers = vec3(pow(rho, -2.5), pow(rho, -7.0), pow(rho, -17.0));
-  return dot(uCorona, powers) / max(dot(uCorona, vec3(1.0)), 1e-6);
+// Baumbach's white-light corona at a projected radius, against its value at the limb, read as
+// its two parts: the electrons' steep terms (K, which the field shapes) and the dust's flat
+// first term (F).
+vec3 baumbachTerms(float rho) {
+  vec3 powers = vec3(pow(rho, -BAUMBACH_POWERS.x), pow(rho, -BAUMBACH_POWERS.y), pow(rho, -BAUMBACH_POWERS.z));
+  return uCorona * powers / max(dot(uCorona, vec3(1.0)), 1e-6);
+}
+float kCorona(float rho) {
+  vec3 terms = baumbachTerms(rho);
+  return terms.y + terms.z;
+}
+float fCorona(float rho) {
+  return baumbachTerms(rho).x;
 }
 
 // A ray's course through the ejection's shell: a bright front along the axis, falling back
@@ -192,7 +201,7 @@ void main() {
        plumes inside them, the inner corona brightest just off the limb. */
     /* Scattered sunlight falls as Baumbach's law, seen with the eye's compression; the corona's
        own EUV light as its density squared, on its scale height. */
-    float fall = uLightMode == LIGHT_BAND ? exp(-h / EUV_SCALE_HEIGHT_R) : pow(baumbach(rho), CORONA_CONTRAST);
+    float fall = uLightMode == LIGHT_BAND ? exp(-h / EUV_SCALE_HEIGHT_R) : pow(kCorona(rho), CORONA_CONTRAST);
     /* A streamer shows as a ray where it stands against the sky; one leaning toward or away
        from us spreads into a broad glow and fades. */
     vec3 axisOfView = normalize(o);
@@ -233,14 +242,14 @@ void main() {
     col += lit(hole, HOLE_K, LAYER_CORONA, uSunlight, uWeights.w);
     col += lit(hot, ACTIVE_K, LAYER_CORONA, uSunlight, uWeights.w);
     /* Visible light only: the F-corona, sunlight on dust, flat and unstructured, added to the
-       K-corona's light before the eye's compression, so the two match where the model says;
+       K-corona's light before the eye's compression, so together they fall as Baumbach's fit;
        the E-corona, Fe XIV's green line, its emission the square of a hydrostatic density
        (the model's `eCorona`), low and near the regions, emphasized (`E_CORONA_GLOW`). */
     if (uLightMode != LIGHT_BAND) {
-      float electrons = baumbach(rho);
-      float dust = uCoronaFE.x * pow(rho, -F_CORONA_FALLOFF) / max(dot(uCorona, vec3(1.0)), 1e-6);
+      float electrons = kCorona(rho);
+      float dust = fCorona(rho);
       col += uWeights.w * uSunlight * CORONA_GLOW * (pow(electrons + dust, CORONA_CONTRAST) - pow(electrons, CORONA_CONTRAST));
-      col += uWeights.w * uGreen * E_CORONA_GLOW * CORONA_GLOW * exp(-2.0 * h / uCoronaFE.y) * (0.3 + streamers);
+      col += uWeights.w * uGreen * E_CORONA_GLOW * CORONA_GLOW * exp(-2.0 * h / uCoronaE) * (0.3 + streamers);
     }
   }
 

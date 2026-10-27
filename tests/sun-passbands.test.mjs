@@ -11,6 +11,7 @@ import {
   eCorona,
   fCorona,
   kCorona,
+  whiteLightCorona,
   windSpeed,
 } from "../src/space/sun/model/corona.ts";
 import { TEMPERATURES } from "../src/space/sun/model/parameters.ts";
@@ -254,18 +255,19 @@ test("colours come off the AIA tables and the magnetogram runs grey to gold and 
 });
 
 test("the corona's light falls off as Baumbach's fit and the wind is slow over the belt, fast from the holes", () => {
-  assert.ok(Math.abs(kCorona(1) - (0.0532 + 1.425 + 2.565)) < 1e-9);
+  /* Baumbach fitted the whole white-light corona; the model reads its flat term as the dust's. */
+  assert.ok(Math.abs(whiteLightCorona(1) - (0.0532 + 1.425 + 2.565)) < 1e-9);
+  assert.ok(Math.abs(kCorona(1) - (1.425 + 2.565)) < 1e-9);
+  assert.ok(Math.abs(fCorona(1) - 0.0532) < 1e-9);
   assert.deepEqual(CORONA.k, [0.0532, 1.425, 2.565]);
   assert.deepEqual(BAUMBACH_POWERS, [2.5, 7, 17]);
-  assert.ok(Math.abs(CORONA.f * 2.5 ** -2.3 - fCorona(2.5)) < 1e-12);
   assert.ok(
     CORONA.eScaleHeight > 0.1 && CORONA.eScaleHeight < 0.2,
     `scale height ${CORONA.eScaleHeight} R`,
   );
   for (const r of [1.2, 1.5, 2, 3, 5]) assert.ok(kCorona(r) < kCorona(r - 0.1), `K falls at ${r}`);
-  assert.ok(Math.abs(fCorona(2.5) - kCorona(2.5)) < 1e-9, "F equals K at the crossover");
-  assert.ok(fCorona(5) > kCorona(5), "and takes over beyond it");
-  assert.ok(fCorona(1.5) < kCorona(1.5));
+  assert.ok(fCorona(2.5) > kCorona(2.5), "the dust takes over beyond about two radii");
+  assert.ok(fCorona(1.5) < kCorona(1.5), "the electrons' light leads near the limb");
   assert.ok(eCorona(1) === 1 && eCorona(1.3) < 0.1, "the green line hugs the limb");
   assert.ok(coronaBrightness(1.5, 0) > coronaBrightness(1.5, 1), "a streamer outshines a hole");
   assert.equal(windSpeed(0), 400);

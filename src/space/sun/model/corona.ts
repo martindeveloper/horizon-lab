@@ -1,9 +1,10 @@
 /**
- * The corona's light and the wind that leaves it: the K-corona (electrons scattering the
- * photosphere's light, falling off as Baumbach 1937 fitted it), the F-corona (dust, flatter,
- * taking over beyond ~2.5 R), the E-corona (the Fe XIV green line of 2 MK gas), and the solar
- * wind's speed by latitude as Ulysses measured it (McComas et al. 2000). Radii in R☉ from the
- * centre; brightness in millionths of the mean disc.
+ * The corona's light and the wind that leaves it: the white-light corona as Baumbach 1937
+ * fitted eclipse photometry, read as its two parts, the K-corona (electrons scattering the
+ * photosphere's light: the fit's two steep terms) and the F-corona (dust, flat: its r^−2.5
+ * term, which takes over beyond ~2 R); the E-corona (the Fe XIV green line of 2 MK gas); and
+ * the solar wind's speed by latitude as Ulysses measured it (McComas et al. 2000). Radii in R☉
+ * from the centre; brightness in millionths of the mean disc.
  */
 import { smoothstep } from "@horizon/toolkit/math";
 import { pressureScaleHeight } from "@horizon/toolkit/science";
@@ -12,8 +13,6 @@ import {
   BAUMBACH_TERMS,
   CORONAL_MEAN_MOLECULAR_WEIGHT,
   E_CORONA_KELVIN,
-  F_CORONA_CROSSOVER_R,
-  F_CORONA_POWER,
   RADIUS_M,
   STREAMER_CONTRAST,
   SURFACE_GRAVITY,
@@ -24,22 +23,26 @@ import {
   WIND_SLOW_KM_S,
 } from "./parameters";
 
-/** The K-corona at `r` (R from the centre), millionths of the mean disc: Σ cᵢ r^−pᵢ. */
+/** Baumbach's terms as the model reads them: the dust's flat term, then the electrons' steep two. */
+const [F_TERM, ...K_TERMS] = BAUMBACH_TERMS;
+
+/** The K-corona at `r` (R from the centre), millionths of the mean disc: the fit's steep terms. */
 export function kCorona(r: number) {
   let sum = 0;
-  for (const { coefficient, power } of BAUMBACH_TERMS) sum += coefficient * r ** -power;
+  for (const { coefficient, power } of K_TERMS) sum += coefficient * r ** -power;
   return sum;
 }
 
-/** The F-corona: a flatter power law, equal to the K-corona at the crossover radius. */
-const F_SCALE = kCorona(F_CORONA_CROSSOVER_R) * F_CORONA_CROSSOVER_R ** F_CORONA_POWER;
-export const fCorona = (r: number) => F_SCALE * r ** -F_CORONA_POWER;
+/** The F-corona at `r`: the fit's flat term, sunlight on dust. */
+export const fCorona = (r: number) => F_TERM.coefficient * r ** -F_TERM.power;
+
+/** The white-light corona at `r`, as Baumbach fitted it: K and F together. */
+export const whiteLightCorona = (r: number) => kCorona(r) + fCorona(r);
 
 /**
  * The corona's constants as a shader reads them: Baumbach's three coefficients (powers
- * `BAUMBACH_POWERS`), the F-corona's coefficient in the same units (F = f r^−`F_CORONA_POWER`)
- * and the E-corona's scale height in R (`E_CORONA_SCALE_HEIGHT_R`, below; its glow falls as
- * `eCorona`).
+ * `BAUMBACH_POWERS`, the dust's term first) and the E-corona's scale height in R
+ * (`E_CORONA_SCALE_HEIGHT_R`, below; its glow falls as `eCorona`).
  */
 export const BAUMBACH_POWERS: readonly [number, number, number] = [
   BAUMBACH_TERMS[0].power,
@@ -56,11 +59,9 @@ export const E_CORONA_SCALE_HEIGHT_R =
   }) / RADIUS_M;
 export const CORONA: {
   k: readonly [number, number, number];
-  f: number;
   eScaleHeight: number;
 } = {
   k: [BAUMBACH_TERMS[0].coefficient, BAUMBACH_TERMS[1].coefficient, BAUMBACH_TERMS[2].coefficient],
-  f: F_SCALE,
   eScaleHeight: E_CORONA_SCALE_HEIGHT_R,
 };
 

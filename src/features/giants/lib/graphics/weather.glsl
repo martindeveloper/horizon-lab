@@ -45,8 +45,8 @@ vec3 beams(vec2 o, float r, vec4 globe, vec3 tint) {
   return tint * BEAM_GLOW * (beam * len + facing);
 }
 
-// The corona: Baumbach's fall-off for the light scattered by its electrons, seen with the
-// eye's compression; helmet streamers over the active regions at the limb, broad at the base
+// The corona: Baumbach's fall-off of the Sun's white-light corona, seen with the eye's
+// compression; helmet streamers over the active regions at the limb, broad at the base
 // and drawn into stalks above; fine rays and plumes at the poles.
 vec3 corona(float r, vec2 dir, vec3 tint, float seed, vec4 globe) {
   vec3 powers = vec3(pow(r, -BAUMBACH_POWERS.x), pow(r, -BAUMBACH_POWERS.y), pow(r, -BAUMBACH_POWERS.z));
