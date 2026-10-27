@@ -11,6 +11,25 @@ export const FINGER_PX = 44;
 /** A small target's reach, CSS px from its centre: under a fingertip anywhere on it. */
 export const TAP_REACH_PX = FINGER_PX / 2;
 
+/** A second tap on the same thing within this window means more (a close-up), ms. */
+export const DOUBLE_TAP_MS = 380;
+
+/**
+ * Tells a second tap on the same key within `windowMs` from a first: the first tap remembers
+ * its key, the second answers true and forgets it, so a third starts over.
+ */
+export function createDoubleTap(windowMs = DOUBLE_TAP_MS, now = () => performance.now()) {
+  let lastKey = "";
+  let lastAt = 0;
+  return (key: string) => {
+    const at = now();
+    const twice = key === lastKey && at - lastAt < windowMs;
+    lastKey = twice ? "" : key;
+    lastAt = at;
+    return twice;
+  };
+}
+
 /** What a tap landed on: an object's `userData.pick` (and instance), or what a label opens. */
 export type TapTarget = { pick: unknown; instance?: number | undefined };
 

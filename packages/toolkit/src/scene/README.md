@@ -158,6 +158,8 @@ covered pixels stay the same.
 
 ## Taps
 
+`createDoubleTap(windowMs?)` tells a second tap on the same key within the window
+(`DOUBLE_TAP_MS`): the kind a close-up opens on.
 `createTapPicking(basics, canvas, options)` reports each tap once, after a press
 that moved no more than 6 px; neither finger of a pinch taps. A name tapped squarely wins. Otherwise the
 pickables under the pointer give their `userData.pick` (and instance id): the

@@ -9,13 +9,10 @@ import { isReachSelection } from "@/space/solar-system/model/probes";
 import { isSolarSelection, solarPick } from "@/space/solar-system/model/selection";
 import { CLOSE_UP_LAYERS } from "@/space/solar-system/scene/close-up";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
-import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
+import { createDoubleTap, createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
 import type { Selection, useDeepField } from "../store";
 import type { SceneKit } from "./kit";
-
-/** A second tap on the same body within this window flies in for a close-up. */
-const DOUBLE_TAP_MS = 380;
 
 export function createPicking(
   kit: SceneKit,
@@ -32,8 +29,8 @@ export function createPicking(
     labelPick: (key: string) => Selection | undefined;
   },
 ) {
-  let lastTapKey = "";
-  let lastTapAt = 0;
+  /** A second tap on the same body flies in for a close-up. */
+  const secondTap = createDoubleTap();
 
   /* The Galaxy and the cosmic map draw in their own pass but are picked like the rest, as are
      the bodies a close-up draws in its own. In a close-up, taps never pull the camera away;
@@ -66,11 +63,7 @@ export function createPicking(
       if (!pick || !(canFlyTo(pick) || (isReachSelection(pick) && pick.id !== "heliopause")))
         return;
       const key = isSolarSelection(pick) ? closeUpKey(pick) : `reach:${pick.id}`;
-      const at = performance.now();
-      const twice = key === lastTapKey && at - lastTapAt < DOUBLE_TAP_MS;
-      lastTapKey = twice ? "" : key;
-      lastTapAt = at;
-      if (twice) api.enterCloseUp();
+      if (secondTap(key)) api.enterCloseUp();
     },
   });
 }

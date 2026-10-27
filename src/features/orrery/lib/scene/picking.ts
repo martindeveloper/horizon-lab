@@ -8,13 +8,10 @@ import { solarPick } from "@/space/solar-system/model/selection";
 import { CLOSE_UP_LAYERS } from "@/space/solar-system/scene/close-up";
 import type { SolarKit } from "@/space/solar-system/scene/kit";
 import { chooseSolarHit } from "@/space/solar-system/scene/solar-system";
-import { createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
+import { createDoubleTap, createTapPicking, type LabelHit } from "@horizon/toolkit/scene";
 
 import { canFlyTo, orreryKey, sameSystem, type OrrerySelection } from "../model/selection";
 import type { useOrrery } from "../store";
-
-/** A second tap on the same body within this window flies in for a close-up. */
-const DOUBLE_TAP_MS = 380;
 
 export function createPicking(
   kit: SolarKit,
@@ -30,8 +27,8 @@ export function createPicking(
     labelPick: (key: string) => OrrerySelection | undefined;
   },
 ) {
-  let lastTapKey = "";
-  let lastTapAt = 0;
+  /** A second tap on the same body flies in for a close-up. */
+  const secondTap = createDoubleTap();
 
   /* In a close-up, taps never pull the camera away; Back, Escape or zooming out do. Its own
      system still answers: a tap on the Moon or Hubble from the Earth's shows its card, and a
@@ -60,12 +57,7 @@ export function createPicking(
         api.select(pick);
       } else pick = selectTapped(api, target, migrationProgress(api.yearsAgo), options.distance());
       if (!pick || pick.kind === "tracer") return;
-      const key = orreryKey(pick);
-      const at = performance.now();
-      const twice = key === lastTapKey && at - lastTapAt < DOUBLE_TAP_MS;
-      lastTapKey = twice ? "" : key;
-      lastTapAt = at;
-      if (twice && canFlyTo(pick)) api.enterCloseUp();
+      if (secondTap(orreryKey(pick)) && canFlyTo(pick)) api.enterCloseUp();
     },
   });
 }
