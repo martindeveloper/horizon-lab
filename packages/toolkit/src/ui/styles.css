@@ -1,3 +1,6 @@
+/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
+@reference "./theme.css";
+
 @layer base {
   .no-scrollbar {
     -ms-overflow-style: none;
@@ -88,7 +91,7 @@
   }
 
   /* Phones (the complement of `md`) match the top HUD inset, leaving the scene more room. */
-  @media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
+  @variant not-md {
     .pad-hud-bottom {
       padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
     }
@@ -1107,7 +1110,7 @@
   outline: 2px solid rgb(var(--solar));
   outline-offset: 2px;
 }
-@media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
+@variant md {
   .coach-next {
     min-height: 2rem;
   }

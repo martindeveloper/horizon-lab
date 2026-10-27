@@ -1,10 +1,13 @@
+/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
+@reference "@horizon/toolkit/theme.css";
+
 :root {
   /* Phones get a slimmer bar; its 44px targets overhang it by 2px either side. */
   --app-header-height: calc(2.5rem + env(safe-area-inset-top, 0px));
   --app-footer-height: calc(1.75rem + env(safe-area-inset-bottom, 0px));
   --app-gutter: max(1rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
 }
-@media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
+@variant md {
   :root {
     --app-header-height: calc(2.75rem + env(safe-area-inset-top, 0px));
   }
@@ -239,7 +242,7 @@ html {
 /* Phones reach About, Credits and GitHub from the header menu, so over a simulation the
    footer's line goes to the scene (loading stages too, so nothing jumps when it mounts).
    The complement of the `md` variant, where the menu shows. */
-@media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
+@variant not-md {
   .app-shell:has(.simulation-stage) {
     --app-footer-height: 0px;
   }

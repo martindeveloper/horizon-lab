@@ -1,3 +1,6 @@
+/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
+@reference "@horizon/toolkit/theme.css";
+
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared
    stylesheet, because two utility bundles with overlapping class names cannot
    be cascade-ordered correctly for both the catalogue and the feature. */
@@ -29,7 +32,7 @@
     height: min(38dvh, 18rem);
   }
 
-  @media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
+  @variant md {
     :where([data-simulation="black-hole"]) .radial-gauge {
       height: min(50dvh, 26rem);
     }

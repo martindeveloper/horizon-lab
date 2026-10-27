@@ -1,3 +1,6 @@
+/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
+@reference "@horizon/toolkit/theme.css";
+
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
 
 /* The HUD the cockpit projects (components/overlay.tsx): it rides a spring the engine
@@ -10,7 +13,7 @@
 /* The console (components/flight-dock.tsx): two projected displays tilted back over the
    dash and angled in towards the pilot, the scanner's place between them. Phones keep one
    flat display. */
-@media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
+@variant md {
   /* On the displays' own parent: perspective reaches only an element's children, and the
      displays tilted without it would neither foreshorten nor take clicks in their receded
      corners (Chromium leaves those parts out of hit testing). */
@@ -37,7 +40,7 @@
 :where([data-simulation="voyage"]) .voyage-hud[data-ship="sail"] .voyage-console-grid {
   grid-template-columns: 1fr 24rem 1fr;
 }
-@media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
+@variant md {
   :where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-console-left,
   :where([data-simulation="voyage"]) .voyage-hud[data-ship="voyager"] .voyage-console-right {
     transform: none;
@@ -465,7 +468,7 @@
   opacity: 0.28;
 }
 /* Phones and a phone held sideways keep the scene: no dash, the struts hugging the edges. */
-@media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
+@variant not-md {
   :where([data-simulation="voyage"]) .voyage-dash {
     display: none;
   }
@@ -574,7 +577,7 @@
   left: 0;
 }
 /* Phones have no room beside the boresight. */
-@media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
+@variant not-md {
   :where([data-simulation="voyage"]) .voyage-floats {
     display: none;
   }
@@ -715,7 +718,7 @@
   height: 150px;
   translate: -50% 0;
 }
-@media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
+@variant not-md {
   :where([data-simulation="voyage"]) .voyage-scanner {
     display: none;
   }
