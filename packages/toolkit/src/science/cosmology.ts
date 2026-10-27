@@ -1,3 +1,10 @@
+import {
+  BOLTZMANN_CONSTANT,
+  CMB_TEMPERATURE_K,
+  GRAVITATIONAL_CONSTANT,
+  PLANCK_CONSTANT,
+  SPEED_OF_LIGHT,
+} from "./constants";
 import { convert } from "./units";
 
 /**
@@ -8,14 +15,32 @@ import { convert } from "./units";
  */
 export type FlatLcdm = { H0: number; omegaM: number; omegaR?: number };
 
+/** Three massless neutrino species add 3 × 7/8 × (4/11)^(4/3) of the photons' density. */
+const NEUTRINO_SHARE = 3 * (7 / 8) * (4 / 11) ** (4 / 3);
+
+/**
+ * The radiation density parameter Ωr h² of a background at temperature `T` (K): the photons'
+ * energy density a T⁴ / c² against the critical density at H₀ = 100 km/s/Mpc, with three
+ * massless neutrino species beside them (4.18 × 10⁻⁵ at the CMB's temperature).
+ */
+export function radiationDensity(T: number) {
+  const radiationConstant =
+    (8 * Math.PI ** 5 * BOLTZMANN_CONSTANT ** 4) /
+    (15 * PLANCK_CONSTANT ** 3 * SPEED_OF_LIGHT ** 3);
+  const photons = (radiationConstant * T ** 4) / SPEED_OF_LIGHT ** 2;
+  const H100 = convert(100, "km/s/Mpc", "Hz");
+  const critical = (3 * H100 ** 2) / (8 * Math.PI * GRAVITATIONAL_CONSTANT);
+  return (photons / critical) * (1 + NEUTRINO_SHARE);
+}
+
 /**
  * Planck 2018 VI, TT,TE,EE+lowE+lensing+BAO (Planck Collaboration 2020, A&A 641, A6, Table 2).
- * Ωr: photons at T = 2.7255 K and three neutrino species (Ωr h² = 4.18 × 10⁻⁵).
+ * Ωr: photons at the CMB's temperature and three massless neutrino species (`radiationDensity`).
  */
 export const PLANCK_2018 = {
   H0: 67.66,
   omegaM: 0.3111,
-  omegaR: 4.18e-5 / 0.6766 ** 2,
+  omegaR: radiationDensity(CMB_TEMPERATURE_K) / 0.6766 ** 2,
 } as const satisfies FlatLcdm;
 
 /** The Hubble time 1/H₀ in Gyr (977.79 / H₀ for H₀ in km/s/Mpc). */

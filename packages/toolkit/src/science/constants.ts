@@ -2,6 +2,7 @@ import {
   ATOMIC_MASS_CONSTANT_SI,
   BOLTZMANN_CONSTANT_SI,
   CLASSICAL_ELECTRON_RADIUS_SI,
+  CMB_TEMPERATURE_SI,
   ELECTRON_MASS_SI,
   ELEMENTARY_CHARGE_SI,
   GRAVITATIONAL_CONSTANT_SI,
@@ -242,6 +243,15 @@ export const CONSTANTS = {
     exact: false,
     source: "CODATA 2022",
   },
+  cmbTemperature: {
+    symbol: "T₀",
+    latex: "T_0",
+    value: CMB_TEMPERATURE_SI,
+    unit: "K",
+    unitLatex: "\\mathrm{K}",
+    exact: false,
+    source: "Fixsen 2009, ApJ 707, 916",
+  },
 } as const satisfies Record<string, Constant>;
 
 export type ConstantId = keyof typeof CONSTANTS;
@@ -273,6 +283,8 @@ export const PROTON_MASS_KG = CONSTANTS.protonMass.value;
 export const ATOMIC_MASS_KG = CONSTANTS.atomicMassConstant.value;
 export const CLASSICAL_ELECTRON_RADIUS_M = CONSTANTS.classicalElectronRadius.value;
 export const RYDBERG_INFINITY = CONSTANTS.rydbergConstant.value; // m⁻¹
+/** The cosmic microwave background's temperature today, K. */
+export const CMB_TEMPERATURE_K = CONSTANTS.cmbTemperature.value;
 export const VACUUM_PERMEABILITY = CONSTANTS.vacuumPermeability.value; // N A⁻²
 /** Radians in one degree (π/180): multiply degrees by it, divide radians by it. */
 export const RAD_PER_DEG = UNITS.deg.factor;

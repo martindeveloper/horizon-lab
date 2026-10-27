@@ -8,8 +8,8 @@ import {
   type GuideSlice,
   type SceneSlice,
 } from "@/lib/scene-store";
-import { CMB_KELVIN } from "@/space/cosmos/model/cosmos";
 import type { WorldSelection } from "@/space/galaxy/show";
+import { CMB_TEMPERATURE_K } from "@horizon/toolkit/science";
 
 import { viewFromPath } from "../routing";
 import { HELP } from "./help";
@@ -183,7 +183,7 @@ export const READOUTS: Readouts = {
   warp: DEFAULT_COMPRESSION,
   gravity: 0,
   gravityFrom: "sun",
-  cmbKelvin: CMB_KELVIN,
+  cmbKelvin: CMB_TEMPERATURE_K,
   epochMs: 0,
 };
 

@@ -6,8 +6,9 @@
  * away is. The microwave background's shell, 45 billion light-years out today, is centred on
  * whoever looks and is never reached.
  */
-import { CMB_KELVIN, CMB_LY, EVENT_HORIZON_LY, expansionFactor } from "@/space/cosmos/model/cosmos";
+import { CMB_LY, EVENT_HORIZON_LY, expansionFactor } from "@/space/cosmos/model/cosmos";
 import {
+  CMB_TEMPERATURE_K,
   LIGHT_YEAR_KM,
   UNITS,
   convert,
@@ -60,4 +61,4 @@ export function lookbackYears(km: number) {
 }
 
 /** The microwave background's temperature with the universe at scale `a`, kelvin: T₀ / a. */
-export const cmbKelvin = (a: number) => CMB_KELVIN / a;
+export const cmbKelvin = (a: number) => CMB_TEMPERATURE_K / a;

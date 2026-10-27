@@ -37,3 +37,5 @@ export const CLASSICAL_ELECTRON_RADIUS_SI = 2.8179403205e-15;
 export const RYDBERG_CONSTANT_SI = 10_973_731.568_157;
 /** Vacuum magnetic permeability μ₀, N A⁻² (CODATA 2022; no longer exact since 2019). */
 export const VACUUM_PERMEABILITY_SI = 1.25663706127e-6;
+/** The cosmic microwave background's temperature today, K (Fixsen 2009, ApJ 707, 916). */
+export const CMB_TEMPERATURE_SI = 2.7255;

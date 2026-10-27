@@ -90,9 +90,6 @@ const FIRST_GALAXIES_Z = 14.44;
 export const FIRST_GALAXIES_MLY = comovingMly(FIRST_GALAXIES_Z);
 /** The universe's age when that light set out, years: about 372,000. */
 export const CMB_AGE_YEARS = cosmicAgeAtRedshiftGyr(LAST_SCATTERING_Z, PLANCK_2018) * 1e9;
-/** The CMB's temperature today, K (Fixsen 2009). */
-export const CMB_KELVIN = 2.7255;
-
 /** Rings at the distances light set out from this many billion years ago (a teaching choice). */
 export const LOOKBACK_RINGS_GYR = [1, 5, 10] as const;
 /** Where light that set out `gyr` billion years ago started, today's distance in Mly. */

@@ -2,7 +2,7 @@ import { factsOf, type Facts, type Status, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
 import { BLACK_HOLES } from "@/space/stellar";
 /** Beyond the Milky Way: figures from the cosmos model and the literature. */
-import { convert, lookbackTimeGyr } from "@horizon/toolkit/science";
+import { CMB_TEMPERATURE_K, convert, lookbackTimeGyr } from "@horizon/toolkit/science";
 
 import { ATLAS_FACTS } from "./atlas-facts";
 import { CMB_FACTS } from "./cmb";
@@ -10,7 +10,6 @@ import {
   ANDROMEDA_APPROACH_KMS,
   ANDROMEDA_MLY,
   CMB_AGE_YEARS,
-  CMB_KELVIN,
   CMB_MLY,
   HORIZON_MLY,
   LAST_SCATTERING_Z,
@@ -409,7 +408,7 @@ export const COSMOS = {
       note: "the universe's age at z∗, with radiation: ~372,000 years",
     },
     cmbTemperature: {
-      value: CMB_KELVIN,
+      value: CMB_TEMPERATURE_K,
       unit: "K",
       digits: 5,
       source: "fixsen2009",
