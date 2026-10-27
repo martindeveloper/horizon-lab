@@ -4,11 +4,17 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import { gzipSync } from "node:zlib";
 
-import { FEATURES } from "../../src/config.ts";
+import { slugRoutes } from "../../src/lib/simulation-paths.ts";
+import { simulations } from "../../src/lib/simulations.ts";
 
-/* A simulation behind a switch has routes only in a build with the switch on. */
-const voyageRoutes = (routes) => (FEATURES.voyage ? routes : []);
-const sunRoutes = (routes) => (FEATURES.sun ? routes : []);
+/**
+ * Every simulation this build prerenders (one behind a switch has routes only with the switch
+ * on): its id, its address and one view beyond the default, which has an address of its own.
+ */
+const routes = simulations.map((manifest) => {
+  const route = manifest.href.slice(1);
+  return { id: manifest.id, route, view: `${route}/${slugRoutes(manifest.routes).slugs()[0]}` };
+});
 
 // Run after `npm run build`; inspect production artifacts without starting a server.
 const build = new URL("../../.next/", import.meta.url);
@@ -45,16 +51,9 @@ test("catalogues exclude WebGL and shader JavaScript, including preload referenc
     const gzipBytes = [...initial].reduce((total, path) => total + gzipSync(read(path)).length, 0);
     console.log(`${locale}: initial JS ${(gzipBytes / 1024).toFixed(1)} KiB gzip`);
     // The WebGL gate runs first on simulation routes; the renderer stays lazy behind it.
-    for (const suffix of [
-      "lab/black-hole",
-      "lab/orrery",
-      "lab/deep-field",
-      "lab/spectroscopy",
-      ...voyageRoutes(["experience/voyage"]),
-      ...sunRoutes(["lab/sun"]),
-    ]) {
-      const route = assets(`${locale}/${suffix}`, ".js");
-      for (const path of heavy) assert.ok(!route.has(path), `${locale}/${suffix} loads ${path}`);
+    for (const { route } of routes) {
+      const first = assets(`${locale}/${route}`, ".js");
+      for (const path of heavy) assert.ok(!first.has(path), `${locale}/${route} loads ${path}`);
     }
   }
 });
@@ -85,12 +84,7 @@ test("the spacecraft models' glTF loader stays in an optional chunk, off every r
     .filter((path) => marker.test(read(path)));
   assert.ok(loaders.length > 0, "find the glTF loader chunk");
   for (const locale of ["en", "cs"])
-    for (const suffix of [
-      "",
-      "/lab/deep-field",
-      ...voyageRoutes(["/experience/voyage"]),
-      ...sunRoutes(["/lab/sun"]),
-    ]) {
+    for (const suffix of ["", ...routes.map(({ route }) => `/${route}`)]) {
       const initial = assets(`${locale}${suffix}`, ".js");
       for (const path of loaders) assert.ok(!initial.has(path), `${locale}${suffix} loads ${path}`);
     }
@@ -126,35 +120,28 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       orrery: /scene-label/,
       "deep-field": /deep-field-rung/,
       spectroscopy: /spectroscopy-ribbon/,
+      giants: /giants-stage/,
       voyage: /voyage-cockpit/,
       sun: /scene-label/,
     };
-    for (const suffix of [
-      "lab/black-hole",
-      "lab/black-hole/m87",
-      "lab/orrery",
-      "lab/orrery/oort",
-      "lab/deep-field",
-      "lab/deep-field/laniakea",
-      "lab/spectroscopy",
-      "lab/spectroscopy/kirchhoff",
-      ...voyageRoutes(["experience/voyage", "experience/voyage/saturn"]),
-      ...sunRoutes(["lab/sun", "lab/sun/inside"]),
-    ]) {
-      const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
-        (path) => !shared.has(path),
-      );
-      assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
-      assert.match(contents(feature), marker[suffix.split("/")[1]]);
-      /* The zoomable scenes label their objects; the black hole and the spectra draw no labels. */
-      if (/^(?:lab\/(?:orrery|deep-field|sun)|experience\/voyage)/.test(suffix))
-        assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
-      assert.doesNotMatch(
-        contents(feature),
-        /@layer utilities/,
-        "Utilities compile once, in the shared stylesheet; a second bundle reorders the cascade",
-      );
-    }
+    /* The zoomable scenes label their objects; the black hole, the spectra and Giants draw their own. */
+    const labelled = new Set(["orrery", "deep-field", "sun", "voyage"]);
+    for (const { id, route, view } of routes)
+      for (const suffix of [route, view]) {
+        const feature = [...assets(`${locale}/${suffix}`, ".css")].filter(
+          (path) => !shared.has(path),
+        );
+        assert.ok(feature.length > 0, `${locale}/${suffix} needs its own CSS`);
+        assert.ok(marker[id], `${id} names a CSS marker`);
+        assert.match(contents(feature), marker[id]);
+        if (labelled.has(id))
+          assert.match(contents(feature), /scene-label/, `${locale}/${suffix} styles scene labels`);
+        assert.doesNotMatch(
+          contents(feature),
+          /@layer utilities/,
+          "Utilities compile once, in the shared stylesheet; a second bundle reorders the cascade",
+        );
+      }
     const bytes = [...shared].reduce((total, path) => total + Buffer.byteLength(read(path)), 0);
     console.log(`${locale}: initial CSS ${(bytes / 1024).toFixed(1)} KiB uncompressed`);
   }
