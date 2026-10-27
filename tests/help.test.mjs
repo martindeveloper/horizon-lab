@@ -7,7 +7,7 @@ import { coachLeader, placeCoach, placeHolds, playCues, settleCoach } from "@hor
 
 import { helpSlice } from "../src/lib/help.ts";
 import { registered } from "../src/lib/simulations.ts";
-import { featureMessages } from "./messages-helper.mjs";
+import { featureMessages, layoutMessages } from "./messages-helper.mjs";
 
 /** A clock the test turns by hand: `run(seconds)` fires what falls due, in time order. */
 function manualClock() {
@@ -382,9 +382,12 @@ for (const { id: slug } of registered) {
     const { steps } = await tourOf(slug);
     for (const locale of ["en", "cs"]) {
       const { help } = featureMessages(slug, locale);
+      /* The steps every simulation has take the shared words where the pack says nothing. */
+      const shared = layoutMessages(null, locale).help.steps;
+      const words = (id, field) => help?.[id]?.[field] ?? shared[id]?.[field];
       for (const { id } of steps) {
-        assert.equal(typeof help?.[id]?.title, "string", `${locale}: help.${id}.title`);
-        assert.equal(typeof help?.[id]?.body, "string", `${locale}: help.${id}.body`);
+        assert.equal(typeof words(id, "title"), "string", `${locale}: help.${id}.title`);
+        assert.equal(typeof words(id, "body"), "string", `${locale}: help.${id}.body`);
       }
     }
   });

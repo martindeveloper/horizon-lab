@@ -3,10 +3,6 @@
   "metadataDescription": "One star, up close: cut it open, watch it in any light, fly over a sunspot and see a flare break loose.",
   "canvasLabel": "The Sun, cut open and watched in any light, with its magnetic field",
   "help": {
-    "camera": {
-      "title": "Move the camera",
-      "body": "Drag to turn, scroll or pinch to zoom."
-    },
     "views": {
       "title": "Views",
       "body": "Eight places to stand, from the core to Parker's orbit."
@@ -24,7 +20,6 @@
       "body": "What this view shows. Pick one to open its card."
     },
     "settings": {
-      "title": "Settings",
       "body": "Layers, the camera pad and render quality."
     },
     "finder": {
@@ -32,12 +27,7 @@
       "body": "Find a place and fly to it."
     },
     "guide": {
-      "title": "Guide",
       "body": "Learn how the Sun works, step by step."
-    },
-    "experiences": {
-      "title": "Viewing modes",
-      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
     }
   },
   "hud": {

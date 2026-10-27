@@ -3,7 +3,6 @@
   "metadataDescription": "An honest orrery: the planets where they really are today, and the clearing of the early solar system as a labelled model, out to the Oort cloud.",
   "canvasLabel": "Interactive orrery of the solar system",
   "help": {
-    "camera": { "title": "Move the camera", "body": "Drag to turn, scroll or pinch to zoom." },
     "views": { "title": "Views", "body": "Jump between scales, out to the Oort cloud." },
     "objects": { "title": "Objects", "body": "Find a body and open its card." },
     "closeUp": { "title": "Close-up", "body": "Fly in to a body at its true size." },
@@ -16,12 +15,8 @@
       "title": "Moments",
       "body": "Set the clock to an opposition or a conjunction, or the slider to a milestone of deep time."
     },
-    "settings": { "title": "Settings", "body": "Layers, the camera pad and render quality." },
-    "guide": { "title": "Guide", "body": "Learn how the solar system took shape, step by step." },
-    "experiences": {
-      "title": "Viewing modes",
-      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
-    }
+    "settings": { "body": "Layers, the camera pad and render quality." },
+    "guide": { "body": "Learn how the solar system took shape, step by step." }
   },
   "viewHints": {
     "inner": "Mercury to Mars. Jupiter is near the edge.",

@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { cameraStep, closingSteps, type HelpStep } from "@/lib/help";
 
 import type { DeepFieldStore, Selection } from "./store";
 
@@ -15,16 +15,7 @@ const JUPITER: Selection = { kind: "planet", id: "jupiter" };
  * guide, the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<DeepFieldStore>[] = [
-  {
-    id: "camera",
-    cues: [
-      { run: (s) => s.camera?.turn(LEFT) },
-      { at: 0.5, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1.8, run: (s) => s.camera?.zoom(0.7) },
-      { at: 3.4, run: (s) => s.camera?.zoom(1 / 0.7) },
-    ],
-  },
+  cameraStep<DeepFieldStore>(LEFT),
   {
     /* A panel or a card hides the ladder and the sightline on a phone. */
     id: "depth",
@@ -74,18 +65,9 @@ export const HELP: readonly HelpStep<DeepFieldStore>[] = [
       { at: 0.8, run: (s) => s.enterCloseUp() },
     ],
   },
-  { id: "guide", targets: ["guide"] },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [
-      { run: (s) => s.setPanel("view") },
-      { at: 1, run: (s) => s.patchShow({ distances: true }) },
-    ],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setPanel("none") }],
-  },
+  ...closingSteps<DeepFieldStore>({
+    open: (s) => s.setPanel("view"),
+    show: (s) => s.patchShow({ distances: true }),
+    close: (s) => s.setPanel("none"),
+  }),
 ];

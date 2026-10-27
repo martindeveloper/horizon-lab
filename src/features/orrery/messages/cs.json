@@ -3,10 +3,6 @@
   "metadataDescription": "Poctivé planetárium: planety tam, kde dnes skutečně jsou, a vyčištění rané sluneční soustavy jako označený model, až po Oortův oblak.",
   "canvasLabel": "Interaktivní model sluneční soustavy",
   "help": {
-    "camera": {
-      "title": "Pohyb kamery",
-      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
-    },
     "views": { "title": "Pohledy", "body": "Přeskakujte mezi měřítky až k Oortovu oblaku." },
     "objects": { "title": "Objekty", "body": "Najděte těleso a otevřete jeho kartu." },
     "closeUp": { "title": "Zblízka", "body": "Přeletí k tělesu v jeho skutečné velikosti." },
@@ -19,14 +15,9 @@
       "title": "Okamžiky",
       "body": "Nastavte hodiny na opozici či konjunkci, nebo posuvník na milník hlubokého času."
     },
-    "settings": { "title": "Nastavení", "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
+    "settings": { "body": "Vrstvy, ovládání kamery a kvalita vykreslení." },
     "guide": {
-      "title": "Průvodce",
       "body": "Naučte se, jak vznikla sluneční soustava, krok za krokem."
-    },
-    "experiences": {
-      "title": "Režimy prohlížení",
-      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
     }
   },
   "viewHints": {

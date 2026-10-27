@@ -21,7 +21,11 @@ const STAGE = "[data-simulation]";
 
 /** What the toolbar's `?` needs of a simulation's tour: its state, its steps and their cues. */
 export type HelpAccess = {
-  /** The feature's message namespace: each step's words are `help.<id>.title` and `.body` in it. */
+  /**
+   * The feature's message namespace: each step's words are `help.<id>.title` and `.body` in it,
+   * or the shared `help.steps.<id>` words for the steps every simulation has (the camera, the
+   * guide, settings, the experiences) where its own pack says nothing.
+   */
   namespace: string;
   open: boolean;
   step: number;
@@ -124,12 +128,17 @@ export function HelpTour({
   }, [immersive, end]);
   const current = steps[step];
   if (!current) return null;
+  /* A step's own words, or the shared ones for a step every simulation has. */
+  const words = (field: "title" | "body") =>
+    t.has(`help.${current.id}.${field}`)
+      ? t(`help.${current.id}.${field}`)
+      : tHelp(`steps.${current.id}.${field}`);
   return (
     <CoachMark
       label={tHelp("label")}
       kicker={tHelp("progress", { step: step + 1, total: steps.length })}
-      title={t(`help.${current.id}.title`)}
-      body={t(`help.${current.id}.body`)}
+      title={words("title")}
+      body={words("body")}
       step={step}
       total={steps.length}
       targets={current.targets}

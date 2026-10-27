@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { cameraStep, closingSteps, type HelpStep } from "@/lib/help";
 
 import { DEFAULT_RUNG, rungIndex } from "./model/rungs";
 import type { GiantsStore } from "./store";
@@ -16,17 +16,7 @@ const HOME = rungIndex(DEFAULT_RUNG);
  * the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<GiantsStore>[] = [
-  {
-    id: "camera",
-    cues: [
-      { run: (s) => s.setOverview(false) },
-      { run: (s) => s.camera?.turn(LEFT) },
-      { at: 0.5, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1.8, run: (s) => s.camera?.zoom(WIDER) },
-      { at: 4, run: (s) => s.camera?.zoom(1 / WIDER) },
-    ],
-  },
+  cameraStep<GiantsStore>(LEFT, { zoom: WIDER, zoomBack: 4, before: (s) => s.setOverview(false) }),
   {
     id: "stars",
     targets: ["stars"],
@@ -47,15 +37,9 @@ export const HELP: readonly HelpStep<GiantsStore>[] = [
     targets: ["ruler"],
     cues: [{ at: 0.4, run: (s) => s.setRuler("earth") }],
   },
-  { id: "guide", targets: ["guide"] },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [{ run: (s) => s.setPanel("view") }, { at: 1, run: (s) => s.setOrbits(true) }],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setPanel("none") }],
-  },
+  ...closingSteps<GiantsStore>({
+    open: (s) => s.setPanel("view"),
+    show: (s) => s.setOrbits(true),
+    close: (s) => s.setPanel("none"),
+  }),
 ];

@@ -422,7 +422,19 @@
     "progress": "{step} / {total}",
     "previous": "Zpět",
     "next": "Další",
-    "finish": "Hotovo"
+    "finish": "Hotovo",
+    "steps": {
+      "camera": {
+        "title": "Pohyb kamery",
+        "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
+      },
+      "guide": { "title": "Průvodce" },
+      "settings": { "title": "Nastavení" },
+      "experiences": {
+        "title": "Režimy prohlížení",
+        "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
+      }
+    }
   },
   "guide": {
     "title": "Průvodce",

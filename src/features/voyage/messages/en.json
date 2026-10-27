@@ -12,10 +12,9 @@
     "rate": { "title": "Time warp", "body": "Hold the clocks, or run them faster." },
     "throttle": { "title": "Throttle", "body": "Push it to fly the ship by hand." },
     "settings": {
-      "title": "Settings",
       "body": "Cockpit, layers and render quality. The camera pad steers during manual flight."
     },
-    "guide": { "title": "Guide", "body": "Learn what a trip to the stars takes, step by step." },
+    "guide": { "body": "Learn what a trip to the stars takes, step by step." },
     "experiences": { "title": "Immersive view", "body": "Just the flight, no controls." }
   },
   "views": {

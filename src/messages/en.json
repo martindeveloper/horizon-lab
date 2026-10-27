@@ -422,7 +422,19 @@
     "progress": "{step} / {total}",
     "previous": "Back",
     "next": "Next",
-    "finish": "Done"
+    "finish": "Done",
+    "steps": {
+      "camera": {
+        "title": "Move the camera",
+        "body": "Drag to turn, scroll or pinch to zoom."
+      },
+      "guide": { "title": "Guide" },
+      "settings": { "title": "Settings" },
+      "experiences": {
+        "title": "Viewing modes",
+        "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
+      }
+    }
   },
   "guide": {
     "title": "Guide",

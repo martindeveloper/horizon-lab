@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { closingSteps, type HelpStep } from "@/lib/help";
 
 import { FULL_RANGE, WINDOWS } from "./model/scenes";
 import type { SpectroscopyStore } from "./store";
@@ -59,15 +59,9 @@ export const HELP: readonly HelpStep<SpectroscopyStore>[] = [
       { at: 1.6, run: (s) => s.setVelocity(RECEDING) },
     ],
   },
-  { id: "guide", targets: ["guide"] },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [{ run: (s) => s.setPanel("view") }, { at: 1, run: (s) => s.setNormalized(true) }],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setPanel("none") }],
-  },
+  ...closingSteps<SpectroscopyStore>({
+    open: (s) => s.setPanel("view"),
+    show: (s) => s.setNormalized(true),
+    close: (s) => s.setPanel("none"),
+  }),
 ];

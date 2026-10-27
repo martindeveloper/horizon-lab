@@ -3,10 +3,6 @@
   "metadataDescription": "From the planets to the edge of the observable universe in one zoom, where distance is also how long the light has been on its way.",
   "canvasLabel": "Interactive map from the planets to the observable universe",
   "help": {
-    "camera": {
-      "title": "Move the camera",
-      "body": "Drag to turn, scroll or pinch to zoom."
-    },
     "depth": {
       "title": "Depth",
       "body": "Drag or tap a rung to change scale."
@@ -21,16 +17,10 @@
     },
     "closeUp": { "title": "Close-up", "body": "Fly in to a body or a probe at its true size." },
     "settings": {
-      "title": "Settings",
       "body": "Layers, the camera pad and render quality."
     },
     "guide": {
-      "title": "Guide",
       "body": "Learn how far the universe reaches, step by step."
-    },
-    "experiences": {
-      "title": "Viewing modes",
-      "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."
     }
   },
   "views": {

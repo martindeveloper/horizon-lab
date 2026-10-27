@@ -7,8 +7,8 @@
     "elements": { "title": "Elements", "body": "Mark an element, or open one of its lines." },
     "line": { "title": "Lines", "body": "Tap a line to see the atom behind it." },
     "star": { "title": "Star", "body": "Pick a star and set how fast it moves." },
-    "settings": { "title": "Settings", "body": "The plot, the spectrograph and render quality." },
-    "guide": { "title": "Guide", "body": "Learn to read the light of stars, step by step." },
+    "settings": { "body": "The plot, the spectrograph and render quality." },
+    "guide": { "body": "Learn to read the light of stars, step by step." },
     "experiences": {
       "title": "Immersive view",
       "body": "Just the spectrum, no controls."

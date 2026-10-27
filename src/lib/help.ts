@@ -4,6 +4,8 @@
  * the visitor sees what it is for. Each simulation writes its steps in
  * `src/features/<slug>/lib/help.ts`; this is the machine every store carries. No React.
  */
+import type { OrbitTurn } from "@horizon/toolkit/camera";
+
 import type { SceneCamera } from "./scene-store";
 
 /** A step's move on the scene, `at` seconds after the step begins: one of the store's own actions. */
@@ -22,6 +24,65 @@ export type HelpStep<S> = {
    */
   cues?: readonly HelpCue<S>[];
 };
+
+/** What the camera step reads of a store: the camera its engine lends it. */
+type CameraHost = { camera?: SceneCamera | null };
+
+/**
+ * The first step of a tour, the camera: `turns` button steps of `turn`, half a second apart,
+ * then a zoom in by `zoom` and back out at `zoomBack` seconds, each shown by doing what it
+ * does. `before` runs as the step begins (leaving an overview, say).
+ */
+export function cameraStep<S extends CameraHost>(
+  turn: OrbitTurn,
+  options: {
+    turns?: number;
+    zoom?: number;
+    zoomBack?: number;
+    before?: (state: S) => void;
+  } = {},
+): HelpStep<S> {
+  const { turns = 3, zoom = 0.7, zoomBack = 3.4, before } = options;
+  const turnCues = Array.from({ length: turns }, (_, index): HelpCue<S> => ({
+    ...(index === 0 ? {} : { at: index * 0.5 }),
+    run: (s) => s.camera?.turn(turn),
+  }));
+  return {
+    id: "camera",
+    cues: [
+      ...(before ? [{ run: before }] : []),
+      ...turnCues,
+      { at: 1.8, run: (s) => s.camera?.zoom(zoom) },
+      { at: zoomBack, run: (s) => s.camera?.zoom(1 / zoom) },
+    ],
+  };
+}
+
+/**
+ * The last three steps of every tour: the guide; the settings panel, opened as the step begins
+ * and one of its switches shown a second later; and the experiences, the panel closed again.
+ * `beforeGuide` closes what an earlier step opened.
+ */
+export function closingSteps<S>(panel: {
+  open: (state: S) => void;
+  show: (state: S) => void;
+  close: (state: S) => void;
+  beforeGuide?: (state: S) => void;
+}): HelpStep<S>[] {
+  return [
+    {
+      id: "guide",
+      targets: ["guide"],
+      ...(panel.beforeGuide ? { cues: [{ run: panel.beforeGuide }] } : {}),
+    },
+    {
+      id: "settings",
+      targets: ["settings"],
+      cues: [{ run: panel.open }, { at: 1, run: panel.show }],
+    },
+    { id: "experiences", targets: ["experiences"], cues: [{ run: panel.close }] },
+  ];
+}
 
 /** What the tour gives back: the simulation's own fields, its panel and selection, the camera's place. */
 type HelpSaved<Saved> = {

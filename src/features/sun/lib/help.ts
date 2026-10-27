@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { cameraStep, closingSteps, type HelpStep } from "@/lib/help";
 
 import { PLACE_LIST } from "./model/places";
 import type { SunStore } from "./store";
@@ -11,16 +11,7 @@ const LEFT = { azimuth: -1, inclination: 0 };
  * the guide, the View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<SunStore>[] = [
-  {
-    id: "camera",
-    cues: [
-      { run: (s) => s.camera?.turn(LEFT) },
-      { at: 0.5, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1.8, run: (s) => s.camera?.zoom(0.7) },
-      { at: 3.4, run: (s) => s.camera?.zoom(1 / 0.7) },
-    ],
-  },
+  cameraStep<SunStore>(LEFT),
   {
     id: "views",
     targets: ["views"],
@@ -58,15 +49,9 @@ export const HELP: readonly HelpStep<SunStore>[] = [
     targets: ["finder"],
     cues: [{ run: (s) => s.setPanel("places") }],
   },
-  { id: "guide", targets: ["guide"] },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [{ run: (s) => s.setPanel("view") }, { at: 1, run: (s) => s.patchShow({ grid: true }) }],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setPanel("none") }],
-  },
+  ...closingSteps<SunStore>({
+    open: (s) => s.setPanel("view"),
+    show: (s) => s.patchShow({ grid: true }),
+    close: (s) => s.setPanel("none"),
+  }),
 ];

@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { cameraStep, closingSteps, type HelpStep } from "@/lib/help";
 
 import { DEFAULT_PRESET_ID } from "./holes/routes";
 import type { BlackHoleStore } from "./store";
@@ -14,14 +14,7 @@ const SHOWN = ["m87", DEFAULT_PRESET_ID] as const;
  * panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<BlackHoleStore>[] = [
-  {
-    id: "camera",
-    cues: [
-      { run: (s) => s.camera?.turn(LEFT) },
-      { at: 1.8, run: (s) => s.camera?.zoom(0.7) },
-      { at: 3.4, run: (s) => s.camera?.zoom(1 / 0.7) },
-    ],
-  },
+  cameraStep<BlackHoleStore>(LEFT, { turns: 1 }),
   {
     id: "views",
     targets: ["views"],
@@ -47,27 +40,13 @@ export const HELP: readonly HelpStep<BlackHoleStore>[] = [
     targets: ["clocks", "more"],
     cues: [{ at: 0.4, run: (s) => s.setClocksOpen(true) }],
   },
-  {
-    id: "guide",
-    targets: ["guide"],
-    cues: [{ run: (s) => s.setClocksOpen(false) }],
-  },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [
-      {
-        run: (s) => {
-          s.setClocksOpen(false);
-          s.setSettingsOpen(true);
-        },
-      },
-      { at: 1, run: (s) => s.setGravity(false) },
-    ],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setSettingsOpen(false) }],
-  },
+  ...closingSteps<BlackHoleStore>({
+    beforeGuide: (s) => s.setClocksOpen(false),
+    open: (s) => {
+      s.setClocksOpen(false);
+      s.setSettingsOpen(true);
+    },
+    show: (s) => s.setGravity(false),
+    close: (s) => s.setSettingsOpen(false),
+  }),
 ];

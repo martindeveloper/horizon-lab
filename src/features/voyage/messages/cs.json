@@ -12,11 +12,9 @@
     "rate": { "title": "Zrychlení času", "body": "Zastavte hodiny, nebo je zrychlete." },
     "throttle": { "title": "Tah", "body": "Posuňte páku a řiďte loď sami." },
     "settings": {
-      "title": "Nastavení",
       "body": "Kabina, vrstvy a kvalita vykreslení. Při ručním letu ovládání kamery mění směr lodi."
     },
     "guide": {
-      "title": "Průvodce",
       "body": "Naučte se, co obnáší cesta ke hvězdám, krok za krokem."
     },
     "experiences": { "title": "Nerušené prohlížení", "body": "Jen let, bez ovládání." }

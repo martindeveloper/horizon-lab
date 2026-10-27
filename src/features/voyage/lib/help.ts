@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { closingSteps, type HelpStep } from "@/lib/help";
 
 import { CLOCK_RATES, DEFAULT_COMPRESSION } from "./model/parameters";
 import type { VoyageStore } from "./store";
@@ -43,18 +43,9 @@ export const HELP: readonly HelpStep<VoyageStore>[] = [
       { at: 2, run: (s) => s.setThrottle(0) },
     ],
   },
-  { id: "guide", targets: ["guide"] },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [
-      { run: (s) => s.setPanel("view") },
-      { at: 1, run: (s) => s.patchShow({ canopy: false }) },
-    ],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setPanel("none") }],
-  },
+  ...closingSteps<VoyageStore>({
+    open: (s) => s.setPanel("view"),
+    show: (s) => s.patchShow({ canopy: false }),
+    close: (s) => s.setPanel("none"),
+  }),
 ];

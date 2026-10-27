@@ -1,4 +1,4 @@
-import type { HelpStep } from "@/lib/help";
+import { cameraStep, closingSteps, type HelpStep } from "@/lib/help";
 import { isPresentEra } from "@/space/solar-system/model/moment";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 
@@ -15,16 +15,7 @@ const JUPITER: SolarSelection = { kind: "planet", id: "jupiter" };
  * View panel and the experiences, each shown by doing what it does.
  */
 export const HELP: readonly HelpStep<OrreryStore>[] = [
-  {
-    id: "camera",
-    cues: [
-      { run: (s) => s.camera?.turn(LEFT) },
-      { at: 0.5, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1, run: (s) => s.camera?.turn(LEFT) },
-      { at: 1.8, run: (s) => s.camera?.zoom(0.7) },
-      { at: 3.4, run: (s) => s.camera?.zoom(1 / 0.7) },
-    ],
-  },
+  cameraStep<OrreryStore>(LEFT),
   {
     id: "views",
     targets: ["views"],
@@ -94,18 +85,9 @@ export const HELP: readonly HelpStep<OrreryStore>[] = [
     targets: ["moments"],
     cues: [{ run: (s) => s.setPanel("moments") }],
   },
-  { id: "guide", targets: ["guide"] },
-  {
-    id: "settings",
-    targets: ["settings"],
-    cues: [
-      { run: (s) => s.setPanel("view") },
-      { at: 1, run: (s) => s.patchShow({ distances: true }) },
-    ],
-  },
-  {
-    id: "experiences",
-    targets: ["experiences"],
-    cues: [{ run: (s) => s.setPanel("none") }],
-  },
+  ...closingSteps<OrreryStore>({
+    open: (s) => s.setPanel("view"),
+    show: (s) => s.patchShow({ distances: true }),
+    close: (s) => s.setPanel("none"),
+  }),
 ];

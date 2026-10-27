@@ -3,10 +3,6 @@
   "metadataDescription": "Od planet po okraj pozorovatelného vesmíru v jednom zoomu, ve kterém vzdálenost udává i to, jak dlouho k nám světlo letělo.",
   "canvasLabel": "Interaktivní mapa od planet po pozorovatelný vesmír",
   "help": {
-    "camera": {
-      "title": "Pohyb kamery",
-      "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
-    },
     "depth": {
       "title": "Hloubka",
       "body": "Tažením nebo klepnutím na příčku změníte měřítko."
@@ -24,16 +20,10 @@
       "body": "Přeletí k tělesu nebo sondě v jejich skutečné velikosti."
     },
     "settings": {
-      "title": "Nastavení",
       "body": "Vrstvy, ovládání kamery a kvalita vykreslení."
     },
     "guide": {
-      "title": "Průvodce",
       "body": "Naučte se, kam až vesmír sahá, krok za krokem."
-    },
-    "experiences": {
-      "title": "Režimy prohlížení",
-      "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."
     }
   },
   "views": {
