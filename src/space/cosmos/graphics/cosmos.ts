@@ -16,6 +16,7 @@
  */
 import { BufferAttribute, BufferGeometry, Color } from "three";
 
+import type { ByTier } from "@/space/quality";
 import type { Vec3 } from "@horizon/toolkit/bodies";
 import { gaussian, lcg, onSphere, smoothstep } from "@horizon/toolkit/math";
 import { createPointWriter, pointsGeometry, type PointWriter } from "@horizon/toolkit/scene";
@@ -96,6 +97,13 @@ export type CosmosDetail = {
   /** Galaxies per unit length along the measured chains and walls, and along the web's bridges. */
   strand: number;
   bridgeStrand: number;
+};
+
+/** The map's sampling by scene tier: Max keeps the web's structure and samples it half as densely again. */
+export const COSMOS_DETAIL: ByTier<CosmosDetail> = {
+  light: { share: 0.6, filaments: 26, knots: 70, strand: 1.2, bridgeStrand: 0.38 },
+  full: { share: 1, filaments: 38, knots: 110, strand: 2, bridgeStrand: 0.6 },
+  max: { share: 1.5, filaments: 38, knots: 110, strand: 3, bridgeStrand: 0.9 },
 };
 
 const scaled = (detail: CosmosDetail) => (count: number) => Math.round(count * detail.share);

@@ -5,7 +5,7 @@
  * The eclipse count and the ring strip are baked into the materials at mount, so a level
  * changed mid-visit keeps the ones it started with.
  */
-import type { CosmosDetail } from "@/space/cosmos/graphics/cosmos";
+import { COSMOS_DETAIL, type CosmosDetail } from "@/space/cosmos/graphics/cosmos";
 import { spaceQuality, type ByTier, type SpaceQuality } from "@/space/quality";
 import type { RenderQuality } from "@horizon/toolkit/rendering";
 
@@ -43,12 +43,6 @@ const MAPS: ByTier<MapBudgetQuality> = {
 const TIGHT_MAX_MAPS: MapBudgetQuality = { ...MAPS.full, anisotropy: MAPS.max.anisotropy };
 
 const OCCLUDERS: ByTier<number> = { light: 2, full: 4, max: 4 };
-/** The cosmic map's sampling, as Deep Field's. */
-const COSMOS: ByTier<CosmosDetail> = {
-  light: { share: 0.6, filaments: 26, knots: 70, strand: 1.2, bridgeStrand: 0.38 },
-  full: { share: 1, filaments: 38, knots: 110, strand: 2, bridgeStrand: 0.6 },
-  max: { share: 1.5, filaments: 38, knots: 110, strand: 3, bridgeStrand: 0.9 },
-};
 const RING_TEXELS: ByTier<number> = { light: 1024, full: 4096, max: 4096 };
 const STREAKS: ByTier<number> = { light: 260, full: 480, max: 720 };
 
@@ -61,7 +55,7 @@ export function voyageQuality(quality: RenderQuality, tight: boolean): VoyageQua
     maps: tier === "max" && tight ? TIGHT_MAX_MAPS : MAPS[tier],
     occluders: OCCLUDERS[tier],
     ringTexels: RING_TEXELS[tier],
-    cosmos: COSMOS[tier],
+    cosmos: COSMOS_DETAIL[tier],
     streaks: STREAKS[tier],
   };
 }
