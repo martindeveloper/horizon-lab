@@ -87,6 +87,11 @@ engines import already expanded shader strings and do not invoke it at runtime.
   in a finer level (`uFine`) and sizes its line to where it fades below `uThreshold`; the
   fragment shader draws a Gaussian line box-filtered over the target's texel, falling as
   1/r² along it from a core per channel (red widest).
+- `#include <horizon/resolve>` is the whole of a lab's resolve shader but its display step: it
+  declares the frame (`uImage`, `uTexel`) and the bloom chain (`uBloom`, `uBloomStrength`),
+  fringes and spikes the radiance with `HORIZON_LENS` defined, adds the glow and writes the
+  result through `vec3 display(vec3 radiance, vec2 fragCoord)`, which the including shader
+  defines (with any uniforms it reads) before the include.
 - `composite.frag.glsl`, `bloom-down.frag.glsl` and `bloom-up.frag.glsl` are the fragment
   shaders of the rendering module's composite and bloom passes (`createCompositePass`,
   `createBloomPass`), drawn with `fullscreen.vert.glsl`. The composite copies or FXAA-filters

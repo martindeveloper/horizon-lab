@@ -20,6 +20,7 @@ export { default as mathGLSL } from "./math.glsl";
 export { default as noiseGLSL } from "./noise.glsl";
 export { default as orbitGLSL } from "./orbit.glsl";
 export { default as relativityGLSL } from "./relativity.glsl";
+export { default as resolveGLSL } from "./resolve.glsl";
 export { default as srgbGLSL } from "./srgb.glsl";
 export { default as temperatureGLSL } from "./temperature.glsl";
 export { default as starsGLSL } from "./stars.glsl";
