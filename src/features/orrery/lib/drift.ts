@@ -1,7 +1,8 @@
-import type { CuedShot, DriftProgramme } from "@/lib/drift";
+import type { DriftProgramme } from "@/lib/drift";
 import {
   DRIFT_VISIT,
   withVisitFlights,
+  type FramedShot,
   type VisitSettings,
   type VisitShot,
 } from "@/space/drift-visits";
@@ -33,7 +34,6 @@ import type { ObservatorySelection } from "@/space/solar-system/model/observator
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
 import type { MoonSwing } from "@/space/solar-system/scene/close-up-framing";
-import type { DriftPoseShot, OrbitPose } from "@horizon/toolkit/camera";
 
 /** What the close-up can frame on a visit: the Sun, a planet, a named body or an observatory. */
 export type CloseUpBody =
@@ -41,18 +41,13 @@ export type CloseUpBody =
   | ObservatorySelection;
 
 export type OrreryDriftShot =
-  | (CuedShot &
-      Omit<DriftPoseShot, keyof OrbitPose> & {
-        /** The view whose framing the shot starts from. */
-        view: SolarViewId;
-        /** Nudges to that framing. */
-        pose?: Partial<OrbitPose>;
-        /**
-         * Sets the timeline, playing, as the flight to the shot begins: the Sun's formation
-         * plays through the fall and time runs on to today before the next visit.
-         */
-        timeline?: { yearsAgo: number };
-      })
+  | (FramedShot<SolarViewId> & {
+      /**
+       * Sets the timeline, playing, as the flight to the shot begins: the Sun's formation
+       * plays through the fall and time runs on to today before the next visit.
+       */
+      timeline?: { yearsAgo: number };
+    })
   | VisitShot<CloseUpBody>;
 
 export type OrreryDrift = DriftProgramme<OrreryDriftShot> & {

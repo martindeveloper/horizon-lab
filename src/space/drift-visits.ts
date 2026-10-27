@@ -1,7 +1,17 @@
-import type { CuedShot, DriftState } from "@/lib/drift";
-import type { OrbitPose } from "@horizon/toolkit/camera";
+import { audioMapNow } from "@/lib/audio-maps";
+import {
+  driftRunState,
+  openingFor,
+  timedDrift,
+  type CuedShot,
+  type DriftProgramme,
+  type DriftSlice,
+  type DriftState,
+} from "@/lib/drift";
+import type { AudioMap } from "@horizon/toolkit/audio";
+import type { DriftPoseShot, DriftShot, OrbitPose } from "@horizon/toolkit/camera";
 import { clamp, smootherstep } from "@horizon/toolkit/math";
-import type { OrbitRig, RigDrift } from "@horizon/toolkit/scene";
+import { createRigDrift, type OrbitRig, type RigDrift } from "@horizon/toolkit/scene";
 
 /**
  * A drift's visits: shots the host flies as close-ups (`VisitShot`), one dive to a body and one
@@ -123,34 +133,38 @@ type Visit =
     }
   | { phase: "out" };
 
+/** What a simulation tells the visits: how its close-up opens, lets go and flies out. */
+export type VisitHooks<Body> = {
+  /** Selects the body and opens its close-up; false when it cannot be had, skipping the visit. */
+  open: (body: Body) => boolean;
+  /** Lets the body's selection go, and the close-up with it unless it was released. */
+  letGo: () => void;
+  /** Leaves a close-up the drift is not visiting (one left from a pause). */
+  leave: () => void;
+  /** The close-up in progress, or null. */
+  closeUp: () => VisitFrame | null;
+  /** Hands the close-up's flight out to the drift's flight landing on `landing`. */
+  release: (landing: OrbitPose) => void;
+  /** The close-up flies a released flight on to its landing itself. */
+  reclaim: () => void;
+  /** The released flight has landed: the close-up ends where the drift left the camera. */
+  finish: () => void;
+  /**
+   * The pose a visit's last hold `t` (0..1) of the way through frames from its circling `base`
+   * (the Orrery's moon); a hold the visit flies on from only circles.
+   */
+  frame?: (base: OrbitPose, t: number) => OrbitPose;
+};
+
 export function createDriftVisits<Body>(
   rig: Pick<OrbitRig, "pose" | "settle" | "limits">,
-  options: {
+  options: VisitHooks<Body> & {
     settings: VisitSettings;
     reduceMotion: { matches: boolean };
     /** The programme's shots as timed now: a hold at a body may linger to meet a cue. */
     shots: () => readonly (object | VisitShot<Body>)[];
     /** The drift run on the rig. */
     drift: () => RigDrift;
-    /** Selects the body and opens its close-up; false when it cannot be had, skipping the visit. */
-    open: (body: Body) => boolean;
-    /** Lets the body's selection go, and the close-up with it unless it was released. */
-    letGo: () => void;
-    /** Leaves a close-up the drift is not visiting (one left from a pause). */
-    leave: () => void;
-    /** The close-up in progress, or null. */
-    closeUp: () => VisitFrame | null;
-    /** Hands the close-up's flight out to the drift's flight landing on `landing`. */
-    release: (landing: OrbitPose) => void;
-    /** The close-up flies a released flight on to its landing itself. */
-    reclaim: () => void;
-    /** The released flight has landed: the close-up ends where the drift left the camera. */
-    finish: () => void;
-    /**
-     * The pose a visit's last hold `t` (0..1) of the way through frames from its circling `base`
-     * (the Orrery's moon); a hold the visit flies on from only circles.
-     */
-    frame?: (base: OrbitPose, t: number) => OrbitPose;
   },
 ) {
   const { settings, reduceMotion, closeUp } = options;
@@ -267,6 +281,105 @@ export function createDriftVisits<Body>(
       if (leaving) options.leave();
       if (state !== "playing") visit = null;
       return leaving;
+    },
+  };
+}
+
+/** A shot that frames a view as the rig frames it, nudged by `pose`, with a pose shot's other fields. */
+export type FramedShot<View> = CuedShot &
+  Omit<DriftPoseShot, keyof OrbitPose> & {
+    view: View;
+    pose?: Partial<OrbitPose>;
+  };
+
+const isFramed = <View, Body>(shot: FramedShot<View> | VisitShot<Body>): shot is FramedShot<View> =>
+  "view" in shot;
+
+/**
+ * A drift on a rig whose shots frame views and visit bodies, the same in every space scene: the
+ * programme timed to its track's map once that has loaded (a map that arrives since retimes it,
+ * unless it is flying: that run keeps its timing), its framed shots posed by the rig and its
+ * visits handed off to the shared visits, opened on the shot whose cue the music is nearest.
+ * `busy` while the store says the drift plays; `takeOver` when the viewer moves the camera.
+ * `step` each frame, before the rig steps; a scene with more to do each shot (the Orrery's
+ * clock) reads the run and the shots as timed.
+ */
+export function createVisitingDrift<View, Body>(
+  rig: Pick<OrbitRig, "pose" | "cancel" | "settle" | "limits"> & {
+    framing: (view: View) => OrbitPose;
+  },
+  programme: DriftProgramme<FramedShot<View> | VisitShot<Body>> & { closeUp: VisitSettings },
+  options: {
+    reduceMotion: { matches: boolean };
+    store: { getState: () => Pick<DriftSlice, "drift" | "pauseDrift"> };
+    /** Where the music stands, seconds into its track (null while it is off), for the opening shot. */
+    musicPosition: () => number | null;
+    visits: VisitHooks<Body>;
+  },
+) {
+  const { reduceMotion, store, musicPosition } = options;
+  /** The programme timed to its track's map: a hold at a body may linger to meet a cue. */
+  let timed = timedDrift(programme, null);
+  let timedWith: AudioMap | null = null;
+  let drift: RigDrift;
+  const visits = createDriftVisits<Body>(rig, {
+    ...options.visits,
+    settings: programme.closeUp,
+    reduceMotion,
+    shots: () => timed.shots,
+    drift: () => drift,
+  });
+  /** A shot as the rig flies it: a visit is handed off; a framed view is posed by the rig. */
+  const posed = (shot: FramedShot<View> | VisitShot<Body>): DriftShot => {
+    if (!isFramed(shot)) return { handoff: true };
+    const { view, pose, ...rest } = shot;
+    return { ...rig.framing(view), ...pose, ...rest };
+  };
+  /** The drift timed by `map`: a run on the rig. */
+  function build(map: AudioMap | null) {
+    timed = timedDrift(programme, map);
+    timedWith = map;
+    drift = createRigDrift(
+      rig,
+      timed.shots.map(posed),
+      {
+        ...programme.camera,
+        /* The drift's curtain covers a fresh start: the camera cuts to the opening shot. */
+        cut: true,
+        reduceMotion,
+        opening: () => openingFor(timed, musicPosition()),
+      },
+      { handoff: visits.handoff },
+    );
+  }
+  build(audioMapNow(programme.music?.track));
+  return {
+    /** How the drift's visits fly. */
+    visitStyle: visits.style,
+    /** Frames are needed while the drift plays. */
+    get busy() {
+      return store.getState().drift === "playing";
+    },
+    /** The viewer moved the camera: the drift waits for them. */
+    takeOver() {
+      store.getState().pauseDrift();
+    },
+    /** The run under way. */
+    get run() {
+      return drift;
+    },
+    /** The programme's shots as timed now, in the programme's order. */
+    get shots(): readonly (FramedShot<View> | VisitShot<Body>)[] {
+      return timed.shots;
+    },
+    /** Steps the visits, then the run; the drift's state as it was read. */
+    step(dt: number): DriftState {
+      const state = store.getState().drift;
+      const leaving = visits.step(state);
+      const map = audioMapNow(programme.music?.track);
+      if (map !== timedWith && !drift.flying) build(map);
+      drift.step(driftRunState(state), dt, leaving);
+      return state;
     },
   };
 }

@@ -1,7 +1,8 @@
-import type { CuedShot, DriftProgramme } from "@/lib/drift";
+import type { DriftProgramme } from "@/lib/drift";
 import {
   DRIFT_VISIT,
   withVisitFlights,
+  type FramedShot,
   type VisitSettings,
   type VisitShot,
 } from "@/space/drift-visits";
@@ -22,19 +23,11 @@ import {
  * angles and distances still vary a little.
  */
 import type { ProbeId } from "@/space/solar-system/model/probes";
-import type { DriftPoseShot, OrbitPose } from "@horizon/toolkit/camera";
 
 import type { ViewId } from "./model/view-ids";
 
-export type DeepFieldDriftShot =
-  | (CuedShot &
-      Omit<DriftPoseShot, keyof OrbitPose> & {
-        /** The view the shot frames, as the ladder frames it. */
-        view: ViewId;
-        /** Nudges to that framing. */
-        pose?: Partial<OrbitPose>;
-      })
-  | VisitShot<ProbeId>;
+/** A view the ladder frames, nudged, or a visit to a probe. */
+export type DeepFieldDriftShot = FramedShot<ViewId> | VisitShot<ProbeId>;
 
 export type DeepFieldDrift = DriftProgramme<DeepFieldDriftShot> & {
   /** At a probe (`VisitSettings`). */

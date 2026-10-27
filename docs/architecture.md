@@ -35,7 +35,8 @@ src/
                                (simulation-layout.tsx), the client boundary and WebGL gate
                                (webgl-gate.tsx: simulationClient), immersive view, loading,
                                technical details; the view picker (view-picker.tsx) and the
-                               view-from-URL hook (use-view-from-path.ts); for zoomable scenes
+                               view-from-URL hook (use-view-from-path.ts) and the root every
+                               lab mounts on them (simulation-root.tsx); for zoomable scenes
                                the canvas host (scene-canvas.tsx) and its label words
                                (use-scene-labels.ts), side rail, selection sheet, the
                                Orrery–Deep Field link (handoff-link.tsx); the guide card every
@@ -53,8 +54,7 @@ src/
       routing.ts               Preset URL and redirect helpers
       server.ts                Server-only locale message loader
       bench.ts                 Headless benchmark target (see bench/README.md)
-      components/              Observatory-specific UI
-      hooks/                   Preset navigation and scientific formatting
+      components/              Observatory-specific UI, preset navigation and scientific formatting
       lib/                     Domain state, physics, shader body, engine orchestration;
                                frame.ts fills uniforms for both the engine and bench.ts
       messages/en.json         Feature copy (blackHole namespace)
@@ -561,18 +561,22 @@ helpers from `@/i18n/navigation`.
    (`src/components/simulations/simulation-layout.tsx`), which loads only that feature's
    translations beside the shared ones and keeps the scene mounted across its routes. The
    manifest supplies the feature switch, stylesheet scope (`id`) and namespace (`messageKey`).
-   Use the shared stage/shell components and keep browser-dependent scenes behind a
-   client-only boundary.
-   Wrap the overlay in `SimulationImmersive` and give its header `SimulationToolbar`
+   The entry is `simulationClient(namespace, loader)` (`webgl-gate.tsx`): the client-only
+   boundary, the loading page and the WebGL check. The root it loads is `SimulationRoot`
+   (`src/components/simulations/simulation-root.tsx`) given the store, the view on the address
+   (`routing.ts`'s `viewFromPath`), the canvas and the overlay, and the drift
+   (`useSimulationDrift`) where the lab has one: it renders the stage with its name, the
+   overlay in `SimulationImmersive`, and the loading veil until the first frame.
+   Give the overlay's header `SimulationToolbar`
    (`src/components/simulations/simulation-toolbar.tsx`), which keeps every
    simulation's tools in one order and holds the immersive toggle (see
    [Immersive view](#immersive-view)) and the `?` tour (see [Help](#help)).
-   Give it a lifecycle: its store is a module and outlives the page, so the root
-   component the layout keeps mounted calls `useFreshVisit(freshVisit(store))`
-   (`src/components/simulations/use-fresh-visit.ts`). Leaving the simulation puts the store
-   back as it was first made: no guide still running, no selection, panel or switch
-   carried into the next visit. Keep any remembered state in the store, not in module
-   variables, so the reset reaches it too.
+   The root gives the lab its lifecycle: its store is a module and outlives the page, so
+   leaving the simulation puts the store back as it was first made (`useFreshVisit`,
+   `src/components/simulations/use-fresh-visit.ts`): no guide still running, no selection,
+   panel or switch carried into the next visit; `onLeave` does anything more (new cases
+   dealt). Keep any remembered state in the store, not in module variables, so the reset
+   reaches it too.
 5. Export `simulationMetadata({ manifest, messages })` (`src/lib/metadata.ts`) from
    the page; a `[slug]/page.tsx` also supplies `viewTitle(t, id)`, sets
    `dynamicParams = false`, and exports `generateStaticParams = simulationStaticParams(manifest)`.
@@ -733,8 +737,10 @@ picker as `views`, More as `more` for what phones fold away) and plays its cues 
 the camera turns and zooms, a picker opens and a view changes, the clock speeds up, a panel
 opens with a layer on. `src/features/<slug>/lib/help.ts` lists the steps (`HelpStep`: `id`,
 `targets`, `press`, `cues`), their words are `help.<id>.title` and `.body` in the feature's
-messages, and the store composes `helpSlice` (`src/lib/help.ts`) with `save` and `restore` of
-the fields its cues touch. The slice keeps the panel, the selection and the camera's place
+messages, or the shared `help.steps.<id>` words (`src/messages`) for the steps every tour has
+where the feature's pack says nothing, and the store composes `helpSlice` (`src/lib/help.ts`)
+with `save` and `restore` of the fields its cues touch. The camera step and the closing three
+(guide, settings, experiences) are `cameraStep` and `closingSteps` of the same module. The slice keeps the panel, the selection and the camera's place
 (`SceneCamera.mark`, lent by the engine through `lendCamera`) itself. Starting ends a guided
 journey; ending, at any step and however (close, Escape, a press outside, Finish, immersive
 view), gives everything back and flies the camera home last. Cues set states outright, so Back
@@ -952,8 +958,10 @@ Spectra has no camera, so its experiences button enters immersive view directly.
   (`track` from the playlist, `level`), the camera settings (pace, variance, hold
   orbit and push, order) and the shots. Deep Field's and the Orrery's shots name a
   view plus nudges; the observatory's are poses in M with roll. The Orrery's and
-  Deep Field's programmes also visit bodies: a `closeUp` shot is a handoff to the
-  feature's close-up, run by the shared visits (`src/space/drift-visits.ts`: the drift
+  Deep Field's programmes also visit bodies, and both labs run on the shared visiting
+  drift (`createVisitingDrift`, `src/space/drift-visits.ts`: the programme timed to its
+  track's map, the framed shots posed by the rig, the visits handed off); a `closeUp` shot
+  is a handoff to the feature's close-up, run by the shared visits (the drift
   selects the body, the close-up flies in at `closeUp.pace` times its usual flight
   time with `closeUp.lead` settling the dive onto the body, the visit circles it and
   drifts nearer for the hold, then lets the selection go; before a framed shot the

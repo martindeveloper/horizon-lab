@@ -1,21 +1,18 @@
 /**
- * The Orrery's drift on its rig (the toolkit's rig drift). The programme's framed shots fly on
- * the drift camera; its close-ups are handoffs to the shared visits (`@/space/drift-visits`):
- * the body selected and its close-up opened, one dive in, a slow circle that drifts nearer, and
- * one pull away. Here the hold ends pulled out to show the body with its largest moon, and the
- * pull away leaves from there.
+ * The Orrery's drift on its rig: the shared visiting drift (`@/space/drift-visits`) with the
+ * programme's framed shots posed by the views and its close-ups handed off to the shared
+ * visits: the body selected and its close-up opened, one dive in, a slow circle that drifts
+ * nearer, and one pull away. Here the hold ends pulled out to show the body with its largest
+ * moon, the pull away leaves from there, and a shot with a timeline sets the clock as its
+ * flight begins.
  */
 import { ambientMusic } from "@/components/shell/ambient-music";
-import { audioMapNow } from "@/lib/audio-maps";
-import { driftRunState, openingFor, timedDrift } from "@/lib/drift";
-import { createDriftVisits, type VisitFrame } from "@/space/drift-visits";
+import { createVisitingDrift, type VisitFrame } from "@/space/drift-visits";
 import { moonSwing } from "@/space/solar-system/scene/close-up-framing";
-import type { AudioMap } from "@horizon/toolkit/audio";
 import type { OrbitPose } from "@horizon/toolkit/camera";
 import { lerp } from "@horizon/toolkit/math";
-import { createRigDrift, type RigDrift } from "@horizon/toolkit/scene";
 
-import { DRIFT, type CloseUpBody } from "../drift";
+import { DRIFT } from "../drift";
 import { canCloseUp, type useOrrery } from "../store";
 import type { CameraRig } from "./camera-rig";
 
@@ -35,96 +32,69 @@ export function createDriftDirector(
     finish: () => void;
   },
 ) {
-  const { reduceMotion, moonPose } = options;
-  /** The programme timed to its track's map: a hold at a body may linger to meet a cue. */
-  let timed = timedDrift(DRIFT, null);
-  let timedWith: AudioMap | null = null;
-  let drift: RigDrift;
+  const { reduceMotion, moonPose, closeUp, release, reclaim, finish } = options;
   /** The shot last flown to: a shot's timeline is set once, as its flight begins. */
   let flownTo = -1;
-  const visits = createDriftVisits<CloseUpBody>(rig, {
-    ...options,
-    settings: DRIFT.closeUp,
-    shots: () => timed.shots,
-    drift: () => drift,
-    open: (body) => {
-      const s = store.getState();
-      if (!canCloseUp({ ...s, selection: body })) return false;
-      s.select(body);
-      s.enterCloseUp();
-      return true;
-    },
-    /* Letting the selection go leaves the close-up too, and takes the body's marker with it. */
-    letGo: () => store.getState().select(null),
-    leave: () => {
-      const s = store.getState();
-      if (s.closeUp) s.leaveCloseUp(true);
-    },
-    /* Out to the largest moon toward the hold's end. */
-    frame: (base, t) => {
-      const swing = moonSwing(t, DRIFT.closeUp.moon);
-      const moon = swing > 0 ? moonPose(base) : null;
-      if (!moon) return base;
-      return {
-        azimuth: lerp(base.azimuth, moon.azimuth, swing),
-        inclination: lerp(base.inclination, moon.inclination, swing),
-        distance: Math.exp(lerp(Math.log(base.distance), Math.log(moon.distance), swing)),
-      };
+  const drift = createVisitingDrift(rig, DRIFT, {
+    reduceMotion,
+    store,
+    musicPosition: () => ambientMusic.position,
+    visits: {
+      closeUp,
+      release,
+      reclaim,
+      finish,
+      open: (body) => {
+        const s = store.getState();
+        if (!canCloseUp({ ...s, selection: body })) return false;
+        s.select(body);
+        s.enterCloseUp();
+        return true;
+      },
+      /* Letting the selection go leaves the close-up too, and takes the body's marker with it. */
+      letGo: () => store.getState().select(null),
+      leave: () => {
+        const s = store.getState();
+        if (s.closeUp) s.leaveCloseUp(true);
+      },
+      /* Out to the largest moon toward the hold's end. */
+      frame: (base, t) => {
+        const swing = moonSwing(t, DRIFT.closeUp.moon);
+        const moon = swing > 0 ? moonPose(base) : null;
+        if (!moon) return base;
+        return {
+          azimuth: lerp(base.azimuth, moon.azimuth, swing),
+          inclination: lerp(base.inclination, moon.inclination, swing),
+          distance: Math.exp(lerp(Math.log(base.distance), Math.log(moon.distance), swing)),
+        };
+      },
     },
   });
 
-  /** The drift timed by `map`: a run on the rig, its framed shots posed by the views, its close-ups handed off. */
-  function build(map: AudioMap | null) {
-    timed = timedDrift(DRIFT, map);
-    timedWith = map;
-    drift = createRigDrift(
-      rig,
-      timed.shots.map((shot) => {
-        if ("closeUp" in shot) return { handoff: true as const };
-        const { view, pose, ...rest } = shot;
-        return { ...rig.framing(view), ...pose, ...rest };
-      }),
-      {
-        ...DRIFT.camera,
-        /* The drift's curtain covers a fresh start: the camera cuts to the opening shot. */
-        cut: true,
-        reduceMotion,
-        opening: () => openingFor(timed, ambientMusic.position),
-      },
-      { handoff: visits.handoff },
-    );
-  }
-  build(audioMapNow(DRIFT.music?.track));
-
   return {
     /** How the drift's visits fly; the clock eases with them as well. */
-    visitStyle: visits.style,
-    /** Frames are needed while the drift plays. */
+    visitStyle: drift.visitStyle,
     get busy() {
-      return store.getState().drift === "playing";
+      return drift.busy;
     },
-    /** The viewer moved the camera: the drift waits for them. */
-    takeOver() {
-      store.getState().pauseDrift();
-    },
+    takeOver: () => drift.takeOver(),
     /** Call before the rig steps. */
     step(dt: number) {
-      const state = store.getState();
-      const leaving = visits.step(state.drift);
-      /* A map that arrived since retimes the drift, unless it is flying: that run keeps its timing. */
-      const map = audioMapNow(DRIFT.music?.track);
-      if (map !== timedWith && !drift.flying) build(map);
-      drift.step(driftRunState(state.drift), dt, leaving);
-      if (state.drift === "off") flownTo = -1;
-      else if (drift.shot !== flownTo) {
-        flownTo = drift.shot;
-        const shot = timed.shots[flownTo];
-        /* Under reduced motion the timeline stays the visitor's: the formation would not play. */
-        if (shot && "timeline" in shot && shot.timeline && !reduceMotion.matches) {
-          const s = store.getState();
-          s.setYearsAgo(shot.timeline.yearsAgo);
-          if (!s.playing) s.togglePlay();
-        }
+      const state = drift.step(dt);
+      if (state === "off") {
+        flownTo = -1;
+        return;
+      }
+      const { run } = drift;
+      if (run.shot === flownTo) return;
+      flownTo = run.shot;
+      /* The timed shots keep the programme's order: the shot's own fields are read from it. */
+      const shot = DRIFT.shots[flownTo];
+      /* Under reduced motion the timeline stays the visitor's: the formation would not play. */
+      if (shot && "timeline" in shot && shot.timeline && !reduceMotion.matches) {
+        const s = store.getState();
+        s.setYearsAgo(shot.timeline.yearsAgo);
+        if (!s.playing) s.togglePlay();
       }
     },
   };
