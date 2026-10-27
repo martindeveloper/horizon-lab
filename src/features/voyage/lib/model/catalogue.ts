@@ -10,14 +10,19 @@ import { jplElements } from "@horizon/toolkit/bodies";
 import {
   JULIAN_YEAR_SECONDS,
   SPEED_OF_LIGHT_KM_S,
+  STANDARD_GRAVITY,
   coastTrip,
   convertFigure,
+  torchTrip,
 } from "@horizon/toolkit/science";
 
 import { DRIVES } from "./parameters";
 
 const ALPHA_CEN = STARS.alphaCen;
+const alphaCenKm = convertFigure(ALPHA_CEN.distance.value, ALPHA_CEN.distance.unit, "km");
 const voyagerKms = DRIVES.voyager.kind === "coast" ? DRIVES.voyager.speed : 0;
+/** The torch ship's clocks to α Centauri: one g to the midpoint and one g back down. */
+const torchToAlphaCen = torchTrip(alphaCenKm, STANDARD_GRAVITY);
 
 export const PROSE_FIGURES = {
   voyagerKms: {
@@ -48,14 +53,28 @@ export const PROSE_FIGURES = {
   abSeparationAu: ALPHA_CEN.abSeparation,
   abPeriodYears: quoteAs(ALPHA_CEN.abPeriod, { digits: 2 }),
   voyagerYears: {
-    value:
-      coastTrip(convertFigure(ALPHA_CEN.distance.value, ALPHA_CEN.distance.unit, "km"), voyagerKms)
-        .t / JULIAN_YEAR_SECONDS,
+    value: coastTrip(alphaCenKm, voyagerKms).t / JULIAN_YEAR_SECONDS,
     unit: "yr",
     digits: 2,
     source: "akeson2021",
     status: "derived",
     note: "α Centauri's distance at Voyager's speed",
+  },
+  torchAlphaCenYears: {
+    value: torchToAlphaCen.tau / JULIAN_YEAR_SECONDS,
+    unit: "yr",
+    digits: 2,
+    source: "akeson2021",
+    status: "derived",
+    note: "α Centauri's distance at one g, turning over halfway: the ship's own clock",
+  },
+  torchAlphaCenEarthYears: {
+    value: torchToAlphaCen.t / JULIAN_YEAR_SECONDS,
+    unit: "yr",
+    digits: 2,
+    source: "akeson2021",
+    status: "derived",
+    note: "the same trip on Earth's clock",
   },
 } satisfies Record<string, ProseFigure>;
 

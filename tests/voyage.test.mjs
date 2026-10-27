@@ -17,6 +17,7 @@ import {
 import { tripTo } from "../src/features/voyage/components/trips.ts";
 import { bodyPositionKm, WORLD_BODIES } from "../src/features/voyage/lib/model/bodies.ts";
 import { PROSE_FIGURES } from "../src/features/voyage/lib/model/catalogue.ts";
+import { VOYAGE_EQUATIONS } from "../src/features/voyage/lib/model/equations.ts";
 import {
   C_KM_S,
   DRIVES,
@@ -325,7 +326,10 @@ for (const locale of ["en", "cs"]) {
       },
     });
     const figures = proseArgs(PROSE_FIGURES, locale);
-    for (const step of TOUR) clean(strict(`tour.steps.${step.id}.body`, figures));
+    for (const step of TOUR) {
+      clean(strict(`tour.steps.${step.id}.body`, figures));
+      if (step.equation) assert.ok(VOYAGE_EQUATIONS[step.equation], `${step.id}: ${step.equation}`);
+    }
     clean(strict("cards.far.alphaCen", figures));
     clean(strict("technicalDetails.features.flight", figures));
   });

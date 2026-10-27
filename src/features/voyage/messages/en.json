@@ -236,7 +236,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in {abPeriodYears} years; Proxima is the red one. Voyager would need {voyagerYears} years."
+        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in {abPeriodYears} years; Proxima is the red one. Voyager would need {voyagerYears} years. At one g the ship nears light speed within a year and its clock runs slow: {torchAlphaCenYears} years on board, {torchAlphaCenEarthYears} on Earth."
       },
       "galaxy": {
         "title": "The Galaxy, from above",

@@ -238,7 +238,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} {abPeriodYearsPlural, select, one {rok} few {roky} many {roku} other {let}}; Proxima je ta červená. Voyager by potřeboval {voyagerYears} {voyagerYearsPlural, select, one {rok} few {roky} many {roku} other {let}}."
+        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} {abPeriodYearsPlural, select, one {rok} few {roky} many {roku} other {let}}; Proxima je ta červená. Voyager by potřeboval {voyagerYears} {voyagerYearsPlural, select, one {rok} few {roky} many {roku} other {let}}. Při jednom g se loď do roka přiblíží rychlosti světla a její hodiny se zpomalí: {torchAlphaCenYears} {torchAlphaCenYearsPlural, select, one {rok} few {roky} many {roku} other {let}} na palubě, {torchAlphaCenEarthYears} {torchAlphaCenEarthYearsPlural, select, one {rok} few {roky} many {roku} other {let}} na Zemi."
       },
       "galaxy": {
         "title": "Galaxie shora",
