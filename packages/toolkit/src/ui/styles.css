@@ -88,7 +88,7 @@
   }
 
   /* Phones (the complement of `md`) match the top HUD inset, leaving the scene more room. */
-  @media (width < 48rem), (height < 30rem) {
+  @media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
     .pad-hud-bottom {
       padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
     }
@@ -1107,7 +1107,7 @@
   outline: 2px solid rgb(var(--solar));
   outline-offset: 2px;
 }
-@media (min-width: 48rem) and (min-height: 30rem) {
+@media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
   .coach-next {
     min-height: 2rem;
   }

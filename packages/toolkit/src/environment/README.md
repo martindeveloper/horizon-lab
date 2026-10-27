@@ -6,8 +6,8 @@ touches no browser globals.
 
 - `REDUCED_MOTION_QUERY`, `FINE_POINTER_QUERY`, `COARSE_POINTER_QUERY`,
   `WIDE_QUERY` (the theme's `md` width alone: a column beside the scene, on a phone
-  held sideways too), `WIDE_LAYOUT_QUERY` (`md` width and height: side rails instead
-  of sheets) and `PHONE_QUERY` (a coarse pointer on the layout below that): query
+  held sideways too), `WIDE_LAYOUT_QUERY` (`md` width and height, tablet height on a
+  touch screen: side rails instead of sheets) and `PHONE_QUERY` (a coarse pointer on the layout below that): query
   strings for `window.matchMedia`. Keep the returned list and read `.matches`
   when deciding, so a preference changed while the page is open applies at once.
   Spell the breakpoint through these, never as a literal, so layout code and the

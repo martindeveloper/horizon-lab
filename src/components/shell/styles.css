@@ -4,7 +4,7 @@
   --app-footer-height: calc(1.75rem + env(safe-area-inset-bottom, 0px));
   --app-gutter: max(1rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
 }
-@media (min-width: 48rem) and (min-height: 30rem) {
+@media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
   :root {
     --app-header-height: calc(2.75rem + env(safe-area-inset-top, 0px));
   }
@@ -239,7 +239,7 @@ html {
 /* Phones reach About, Credits and GitHub from the header menu, so over a simulation the
    footer's line goes to the scene (loading stages too, so nothing jumps when it mounts).
    The complement of the `md` variant, where the menu shows. */
-@media not ((min-width: 48rem) and (min-height: 30rem)) {
+@media not ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))) {
   .app-shell:has(.simulation-stage) {
     --app-footer-height: 0px;
   }

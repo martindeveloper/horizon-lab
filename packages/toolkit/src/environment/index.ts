@@ -7,14 +7,17 @@ export const FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 export const COARSE_POINTER_QUERY = "(pointer: coarse)";
 /** The theme's `md` width: room for a column beside the scene, a phone held sideways included. */
 export const WIDE_QUERY = "(min-width: 48rem)";
-/** The desktop layout: wide and tall enough for side rails (the theme's `md`). */
-export const WIDE_LAYOUT_QUERY = `${WIDE_QUERY} and (min-height: 30rem)`;
+/**
+ * The desktop layout: wide and tall enough for side rails and docks (the theme's `md`),
+ * a touch screen tablet-tall.
+ */
+export const WIDE_LAYOUT_QUERY = `${WIDE_QUERY} and (min-height: 30rem) and ((min-height: 40rem) or (not (pointer: coarse)))`;
 /**
  * A phone: a coarse primary pointer on the touch layout, the inverse of `WIDE_LAYOUT_QUERY`.
- * Landscape phones count; tablets and narrow desktop windows do not.
+ * Landscape and unfolded phones count; tablets and narrow desktop windows do not.
  */
 export const PHONE_QUERY =
-  "(pointer: coarse) and (max-width: 47.98rem), (pointer: coarse) and (max-height: 29.98rem)";
+  "(pointer: coarse) and (max-width: 47.98rem), (pointer: coarse) and (max-height: 39.98rem)";
 /** A screen that shows Display P3: wide colour can be offered. */
 export const WIDE_GAMUT_QUERY = "(color-gamut: p3)";
 

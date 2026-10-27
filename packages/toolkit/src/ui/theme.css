@@ -1,7 +1,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
-/* `md` is the desktop layout: wide *and* tall enough. Landscape phones keep the
-   touch layout (44px targets, bottom sheets). Use `not-md:` for its complement. */
-@custom-variant md (@media ((width >= 48rem) and (height >= 30rem)));
+/* `md` is the desktop layout: wide *and* tall enough, a touch screen tablet-tall (an
+   unfolded phone is not). Landscape phones keep the touch layout (44px targets, bottom
+   sheets). Use `not-md:` for its complement. */
+@custom-variant md (@media ((width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse)))));
 /* Too short for the full HUD (a phone held sideways): docks and captions keep their essentials. */
 @custom-variant short (@media (height < 30rem));
 

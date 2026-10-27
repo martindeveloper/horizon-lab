@@ -101,9 +101,10 @@ The root app imports `src/styles.css` once. It includes:
 1. Tailwind CSS.
 2. `packages/toolkit/src/ui/theme.css`: the single source of truth for colors, fonts,
    radii, and border shadows. It also redefines `md` as the desktop layout: at least
-   48rem wide **and** 30rem tall, so landscape phones keep the touch layout ("mobile"
-   sizes below). Use `not-md:` for phone-only rules, not `max-md:`, and the same
-   pair of conditions in hand-written CSS. `short:` (under 30rem tall, a phone held
+   48rem wide **and** 30rem tall, 40rem on a touch screen (`pointer: coarse`), so
+   landscape and unfolded phones keep the touch layout ("mobile" sizes below). Use
+   `not-md:` for phone-only rules, not `max-md:`, and the same conditions (`not (…)` for
+   the complement) in hand-written CSS. `short:` (under 30rem tall, a phone held
    sideways) trims docks and captions to their essentials so the scene keeps some height.
 3. Optional `packages/toolkit/src/ui/base.css`: document-wide defaults, enabled by this app.
 4. `packages/toolkit/src/ui/styles.css`: shared glass materials, HUD gradients, safe-area

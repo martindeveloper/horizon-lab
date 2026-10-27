@@ -29,7 +29,7 @@
     height: min(38dvh, 18rem);
   }
 
-  @media (min-width: 48rem) and (min-height: 30rem) {
+  @media (width >= 48rem) and (height >= 30rem) and ((height >= 40rem) or (not (pointer: coarse))) {
     :where([data-simulation="black-hole"]) .radial-gauge {
       height: min(50dvh, 26rem);
     }
