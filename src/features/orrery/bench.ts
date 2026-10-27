@@ -1,6 +1,5 @@
-import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
-import { mountSceneEngine } from "@/space/bench";
+import { benchDrift, driftScene, homeScenes, mountSceneEngine } from "@/space/bench";
 import { FORMATION_BEGINS } from "@/space/solar-system/model/formation";
 import {
   OBSERVATORY_IDS,
@@ -48,7 +47,7 @@ type OrreryBenchScene = BenchScene & {
 const DRIFT_MAP = parseAudioMap(interstellarDriftMap);
 /** The drift timed to its map: one loop is two plays of the track. */
 const DRIFT_TIMED = timedDrift(DRIFT, DRIFT_MAP);
-/** One loop of the drift; the engine steps at most a tenth of a second a frame. */
+/** One loop of the drift. */
 const DRIFT_LOOP = DRIFT_TIMED.loop;
 
 /**
@@ -116,27 +115,7 @@ const ACTIVITY_FRAME_S = 0.1;
  * ellipses whole, Sedna's out to its aphelion.
  */
 const SCENES: readonly OrreryBenchScene[] = [
-  {
-    id: "home",
-    description: "The giants (home view), standard quality",
-    tags: ["preset"],
-    bloom: false,
-    lens: false,
-  },
-  {
-    id: "home-bloom",
-    description: "The giants (home view), standard quality, bloom on",
-    tags: ["effects"],
-    bloom: true,
-    lens: false,
-  },
-  {
-    id: "home-lens",
-    description: "The giants (home view), standard quality, lens on",
-    tags: ["effects"],
-    bloom: false,
-    lens: true,
-  },
+  ...homeScenes("The giants"),
   ...(["inner", "kuiper", "scattered", "oort"] as const).map((view): OrreryBenchScene => ({
     id: view,
     description: `The ${view} view, standard quality: the orbits at that scale`,
@@ -241,19 +220,10 @@ const SCENES: readonly OrreryBenchScene[] = [
       keyframes: Array.from({ length: 20 }, (_, i) => i / 20),
     },
   },
-  {
-    id: "drift",
-    description: "One loop of the drift, timed to its track's map (two plays), from the home view",
-    tags: ["sequence", "camera", "drift"],
-    bloom: false,
-    lens: false,
-    drift: true,
-    script: {
-      frames: Math.ceil(DRIFT_LOOP / 0.1),
-      duration: DRIFT_LOOP,
-      keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
-    },
-  },
+  driftScene(
+    DRIFT_LOOP,
+    "One loop of the drift, timed to its track's map (two plays), from the home view",
+  ),
   {
     id: "drift-earth",
     description:
@@ -447,13 +417,7 @@ export const benchTarget: BenchTarget = {
       playing: scene.playing ?? true,
     });
     store.getState().patchShow({ faintRings: scene.faintRings ?? false });
-    /* A drift scene plays the drift as the page would once its map has loaded and its loader lifted. */
-    if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
-    store.getState().stopDrift();
-    if (scene.drift) {
-      store.getState().startDrift();
-      store.getState().readyDrift();
-    }
+    benchDrift(store, DRIFT, DRIFT_MAP, scene.drift);
     const instance = mountSceneEngine(surface, createOrreryEngine, () => store.setState({}));
     const preroll = (count: number) => {
       for (let index = 0; index < count; index += 1)

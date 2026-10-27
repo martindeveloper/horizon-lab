@@ -1,6 +1,5 @@
-import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
-import { mountSceneEngine } from "@/space/bench";
+import { benchDrift, mountSceneEngine } from "@/space/bench";
 import { parseAudioMap } from "@horizon/toolkit/audio";
 import type { BenchScene, BenchTarget } from "@horizon/toolkit/bench";
 
@@ -317,12 +316,7 @@ export const benchTarget: BenchTarget = {
       sideBySide: scene.beside !== undefined,
       ...(scene.beside ? { reference: "other" as const, otherBody: scene.beside } : {}),
     });
-    if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
-    store.getState().stopDrift();
-    if (scene.drift) {
-      store.getState().startDrift();
-      store.getState().readyDrift();
-    }
+    benchDrift(store, DRIFT, DRIFT_MAP, scene.drift);
     const instance = mountSceneEngine(
       surface,
       ({ canvas, host, labelRoot, onError }) =>

@@ -1,6 +1,78 @@
-import type { BenchFrame, BenchInstance, BenchSurface } from "@horizon/toolkit/bench";
+import { provideAudioMap } from "@/lib/audio-maps";
+import type { DriftProgramme, DriftSlice } from "@/lib/drift";
+import type { AudioMap } from "@horizon/toolkit/audio";
+import type { BenchFrame, BenchInstance, BenchScene, BenchSurface } from "@horizon/toolkit/bench";
 import type { SimulationEngine } from "@horizon/toolkit/rendering";
 import type { SceneMount } from "@horizon/toolkit/scene";
+
+/** A space scene's effect switches, as its bench scenes name them. */
+type EffectScene = BenchScene & { bloom: boolean; lens: boolean };
+
+/**
+ * A space scene's home view as a visitor first sees it, at standard quality, then the same with
+ * bloom on and with the lens on. `subject` names what the home view shows.
+ */
+export function homeScenes(subject: string): EffectScene[] {
+  const description = `${subject} (home view), standard quality`;
+  return [
+    { id: "home", description, tags: ["preset"], bloom: false, lens: false },
+    {
+      id: "home-bloom",
+      description: `${description}, bloom on`,
+      tags: ["effects"],
+      bloom: true,
+      lens: false,
+    },
+    {
+      id: "home-lens",
+      description: `${description}, lens on`,
+      tags: ["effects"],
+      bloom: false,
+      lens: true,
+    },
+  ];
+}
+
+/** The engine steps at most a tenth of a second a frame. */
+const DRIFT_FRAME_S = 0.1;
+/** Keyframes along one loop of a drift. */
+const DRIFT_KEYFRAMES = 24;
+
+/** One loop of a drift from the home view, timed to its track's map, its keyframes spread along it. */
+export function driftScene(loop: number, description: string): EffectScene & { drift: true } {
+  return {
+    id: "drift",
+    description,
+    tags: ["sequence", "camera", "drift"],
+    bloom: false,
+    lens: false,
+    drift: true,
+    script: {
+      frames: Math.ceil(loop / DRIFT_FRAME_S),
+      duration: loop,
+      keyframes: Array.from({ length: DRIFT_KEYFRAMES }, (_, i) => i / (DRIFT_KEYFRAMES - 1)),
+    },
+  };
+}
+
+/**
+ * The drift as a bench scene mounts it: its track's fixture map provided (none for a still
+ * scene), any earlier run stopped and, for a drift scene, started and told it is ready, as the
+ * page would once the map has loaded and its loader lifted.
+ */
+export function benchDrift(
+  store: { getState: () => Pick<DriftSlice, "stopDrift" | "startDrift" | "readyDrift"> },
+  programme: Pick<DriftProgramme<unknown>, "music">,
+  map: AudioMap | null,
+  on: boolean | undefined,
+) {
+  if (programme.music?.track) provideAudioMap(programme.music.track, on ? map : null);
+  store.getState().stopDrift();
+  if (on) {
+    store.getState().startDrift();
+    store.getState().readyDrift();
+  }
+}
 
 /**
  * A zoomable scene's real engine on the bench: the stage, the label layer and the canvas as

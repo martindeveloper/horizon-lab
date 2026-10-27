@@ -1,6 +1,5 @@
-import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
-import { mountSceneEngine } from "@/space/bench";
+import { benchDrift, driftScene, homeScenes, mountSceneEngine } from "@/space/bench";
 import { PROBE_SPACECRAFT, type ProbeId } from "@/space/solar-system/model/probes";
 import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import { parseAudioMap } from "@horizon/toolkit/audio";
@@ -24,7 +23,7 @@ type DeepFieldBenchScene = BenchScene & {
 
 /** The fixture map of the drift's track (`bench/fixtures/audio-maps`): the timing the bench replays. */
 const DRIFT_MAP = parseAudioMap(driftingProbeMap);
-/** One loop of the drift timed to its map; the engine steps at most a tenth of a second a frame. */
+/** One loop of the drift timed to its map. */
 const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
 
 /**
@@ -33,27 +32,7 @@ const DRIFT_LOOP = timedDrift(DRIFT, DRIFT_MAP).loop;
  * their orbits; the cosmic map's scales, where its populations fade in and out; and the drift.
  */
 const SCENES: readonly DeepFieldBenchScene[] = [
-  {
-    id: "home",
-    description: "The Galaxy (home view), standard quality",
-    tags: ["preset"],
-    bloom: false,
-    lens: false,
-  },
-  {
-    id: "home-bloom",
-    description: "The Galaxy (home view), standard quality, bloom on",
-    tags: ["effects"],
-    bloom: true,
-    lens: false,
-  },
-  {
-    id: "home-lens",
-    description: "The Galaxy (home view), standard quality, lens on",
-    tags: ["effects"],
-    bloom: false,
-    lens: true,
-  },
+  ...homeScenes("The Galaxy"),
   {
     id: "inner",
     description: "The inner planets, standard quality: the bodies at their largest in Deep Field",
@@ -99,19 +78,7 @@ const SCENES: readonly DeepFieldBenchScene[] = [
       keyframes: [0, 0.3, 0.58, 0.75, 1],
     },
   },
-  {
-    id: "drift",
-    description: "One loop of the drift, timed to its track's map, from the home view",
-    tags: ["sequence", "camera", "drift"],
-    bloom: false,
-    lens: false,
-    drift: true,
-    script: {
-      frames: Math.ceil(DRIFT_LOOP / 0.1),
-      duration: DRIFT_LOOP,
-      keyframes: Array.from({ length: 24 }, (_, i) => i / 23),
-    },
-  },
+  driftScene(DRIFT_LOOP, "One loop of the drift, timed to its track's map, from the home view"),
 ];
 
 /**
@@ -141,13 +108,7 @@ export const benchTarget: BenchTarget = {
       selection: scene.closeUp ? { kind: "reach", id: scene.closeUp } : null,
       closeUp: null,
     });
-    /* A drift scene plays the drift as the page would once its map has loaded and its loader lifted. */
-    if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
-    store.getState().stopDrift();
-    if (scene.drift) {
-      store.getState().startDrift();
-      store.getState().readyDrift();
-    }
+    benchDrift(store, DRIFT, DRIFT_MAP, scene.drift);
     const instance = mountSceneEngine(surface, createDeepFieldEngine, () => store.setState({}));
     if (scene.closeUp) store.getState().enterCloseUp();
     return {

@@ -1,6 +1,5 @@
-import { provideAudioMap } from "@/lib/audio-maps";
 import { timedDrift } from "@/lib/drift";
-import { mountSceneEngine } from "@/space/bench";
+import { benchDrift, mountSceneEngine } from "@/space/bench";
 import { fetchSpacecraft } from "@/space/spacecraft/graphics/loader";
 import { MAP_EPOCH } from "@/space/sun/frame";
 import { prominenceDensity } from "@/space/sun/graphics/prominence/volume";
@@ -353,11 +352,7 @@ export const benchTarget: BenchTarget = {
       bloom: scene.bloom ?? false,
       paused: false,
     });
-    if (DRIFT.music?.track) provideAudioMap(DRIFT.music.track, scene.drift ? DRIFT_MAP : null);
-    if (scene.drift) {
-      store.getState().startDrift();
-      store.getState().readyDrift();
-    }
+    benchDrift(store, DRIFT, DRIFT_MAP, scene.drift);
     /* Written by the map's arrival, between the frames the wait below renders. */
     const map = { finest: false };
     const instance = mountSceneEngine(
