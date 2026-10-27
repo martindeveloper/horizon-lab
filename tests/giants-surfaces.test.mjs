@@ -38,28 +38,26 @@ import {
   SPECTRUM_SAMPLES,
 } from "../src/space/sun/graphics/parameters.ts";
 import { sampleSpectrum } from "../src/space/sun/graphics/spectrum-sample.ts";
-
-const near = (a, b, tolerance = 1e-9) =>
-  assert.ok(Math.abs(a - b) <= tolerance * Math.max(1, Math.abs(b)), `${a} != ${b}`);
+import { closeRelative } from "./toolkit-helpers.mjs";
 
 test("ELR temperatures satisfy the published analytic pole/equator limits and Roche potential", () => {
   for (const omega of [0, 0.01, 0.3, 0.7, 0.95, 0.99]) {
     const w2 = omega ** 2;
     const polar = 1 / (1 + w2 / 2);
-    near(rocheOmega(polar), omega);
+    closeRelative(rocheOmega(polar), omega);
     // ELR (2011), equation 32, independent of the iterative latitude solution.
     const ratio =
       Math.sqrt(2 / (2 + w2)) * (1 - w2) ** (1 / 12) * Math.exp((-(4 / 3) * w2) / (2 + w2) ** 3);
-    near(elrTemperature(omega, Math.PI / 2) / elrTemperature(omega, 0), ratio);
+    closeRelative(elrTemperature(omega, Math.PI / 2) / elrTemperature(omega, 0), ratio);
     let before = Infinity;
     for (let j = 0; j <= 100; j++) {
       const theta = (Math.PI * j) / 200;
       const r = rocheRadius(omega, theta);
-      near(1 / r + (w2 * r * r * Math.sin(theta) ** 2) / 2, 1 + w2 / 2);
+      closeRelative(1 / r + (w2 * r * r * Math.sin(theta) ** 2) / 2, 1 + w2 / 2);
       const temperature = elrTemperature(omega, theta);
       assert.ok(Number.isFinite(temperature) && temperature > 0);
       assert.ok(temperature <= before + 1e-8, "temperature decreases from pole to equator");
-      near(elrTemperature(omega, Math.PI - theta), temperature, 1e-7);
+      closeRelative(elrTemperature(omega, Math.PI - theta), temperature, 1e-7);
       before = temperature;
     }
   }
@@ -83,14 +81,14 @@ test("rotator profiles conserve adopted luminosity on the drawn spheroid and mat
       const T = temperatures[k] + (temperatures[k + 1] - temperatures[k]) * (p - k);
       integral += ((T / SOLAR_TEFF_K) ** 4 * Math.sqrt(ratio ** 2 * (1 - y ** 2) + y ** 2)) / count;
     }
-    near(a * a * integral, drawn(facts.luminosity), 0.0002);
+    closeRelative(a * a * integral, drawn(facts.luminosity), 0.0002);
     assert.ok(look.poleK > look.equatorK);
-    near((look.tilt * 180) / Math.PI, id === "vega" ? 83.8 : 29.4);
+    closeRelative((look.tilt * 180) / Math.PI, id === "vega" ? 83.8 : 29.4);
   }
   const vega = LOOKS[rungIndex("vega")];
   assert.ok(Math.abs(vega.equatorK - 8910) < 100);
   assert.ok(Math.abs(vega.poleK - 10070) < 150);
-  for (const T of rotatingTemperatures(1, 1, 1)) near(T, SOLAR_TEFF_K);
+  for (const T of rotatingTemperatures(1, 1, 1)) closeRelative(T, SOLAR_TEFF_K);
 });
 
 test("atmosphere profiles retain published coefficients, disk flux and wavelength-dependent darkening", () => {
@@ -102,23 +100,25 @@ test("atmosphere profiles retain published coefficients, disk flux and wavelengt
     "blue darkens more than red",
   );
   for (const c of coefficients) {
-    near(limbIntensity(c, 1), 1);
+    closeRelative(limbIntensity(c, 1), 1);
     let flux = 0;
     for (let j = 0; j < 10000; j++) {
       const mu = (j + 0.5) / 10000;
       flux += (2 * mu * limbIntensity(c, mu)) / 10000;
     }
-    near(flux, 1 - c.reduce((sum, a, k) => sum + (a * (k + 1)) / (k + 5), 0), 1e-7);
+    closeRelative(flux, 1 - c.reduce((sum, a, k) => sum + (a * (k + 1)) / (k + 5), 0), 1e-7);
   }
   const a = limbCoefficients(5500, 4);
   const b = limbCoefficients(5750, 4);
   const middle = limbCoefficients(5625, 4);
-  middle.forEach((c, channel) => c.forEach((v, j) => near(v, (a[channel][j] + b[channel][j]) / 2)));
+  middle.forEach((c, channel) =>
+    c.forEach((v, j) => closeRelative(v, (a[channel][j] + b[channel][j]) / 2)),
+  );
   // Out-of-grid giants clamp, and no ordinary-star coefficients are applied to remnants.
   assert.deepEqual(limbCoefficients(3200, -0.5), limbCoefficients(3500, 0));
   const fallback = atmosphereProfile(25000, null);
-  near(fallback[0], 0.4, 1e-7);
-  near(fallback[(PROFILE_SAMPLES - 1) * 4], 1);
+  closeRelative(fallback[0], 0.4, 1e-7);
+  closeRelative(fallback[(PROFILE_SAMPLES - 1) * 4], 1);
   for (const T of [2500, 3000, 4000, 5772, 10000, 25000, 46000])
     for (const g of [-1, 0, 2, 4.5, 6]) {
       const profile = atmosphereProfile(T, g);
@@ -140,10 +140,10 @@ test("the continuum texture preserves spectral colours and relative light betwee
   for (const T of [1500, 3000, 5772, 10070, 46000, 90000]) {
     const actual = sampleSpectrum(table, T, new Float32Array(4));
     const expected = stellarContinuum(T);
-    actual.forEach((v, c) => near(v, expected[c], 0.0006));
+    actual.forEach((v, c) => closeRelative(v, expected[c], 0.0006));
     const rgb = blackbodyColor(T).map(decodeSrgb);
     const peak = Math.max(...actual.slice(0, 3));
-    rgb.forEach((v, c) => near(Math.max(0, actual[c]) / peak, v, 0.001));
+    rgb.forEach((v, c) => closeRelative(Math.max(0, actual[c]) / peak, v, 0.001));
   }
   assert.deepEqual(
     sampleSpectrum(table, SPECTRUM_MIN_K / 2, new Float32Array(4)),
@@ -164,10 +164,10 @@ test("stellar textures follow disc ownership, avoid repeated uploads, and releas
       const version = texture.version;
       tables.assign(0, index);
       assert.equal(texture.version, version, "unchanged owner does not upload again");
-      near(texture.image.data[3], LOOKS[index].equatorK, 1e-6);
-      near(texture.image.data[(PROFILE_SAMPLES - 1) * 4 + 3], LOOKS[index].poleK, 1e-6);
+      closeRelative(texture.image.data[3], LOOKS[index].equatorK, 1e-6);
+      closeRelative(texture.image.data[(PROFILE_SAMPLES - 1) * 4 + 3], LOOKS[index].poleK, 1e-6);
       const reference = stellarContinuum((LOOKS[index].equatorK + LOOKS[index].poleK) / 2);
-      near(tints.uniform.value.image.data[3], reference[3], 1e-6);
+      closeRelative(tints.uniform.value.image.data[3], reference[3], 1e-6);
     }
     assert.equal(texture.image.data.length, MAX_DISCS * PROFILE_SAMPLES * 4);
   } finally {
@@ -209,10 +209,10 @@ test("inspection magnifies physical sizes about the focus, keeping picking and t
   for (const zoom of [1, 4, 16]) {
     const camera = inspectCamera(cameraAt(ladder, focus, stage), ladder, focus, stage, zoom);
     const body = placeBody(ladder, camera, stage, focus);
-    near(body.x, original.x);
-    near(body.y, original.y);
-    near(body.radius, original.radius * zoom);
-    near(camera.scale * body.radius, radiusMetres("sun").radius);
+    closeRelative(body.x, original.x);
+    closeRelative(body.y, original.y);
+    closeRelative(body.radius, original.radius * zoom);
+    closeRelative(camera.scale * body.radius, radiusMetres("sun").radius);
     assert.equal(bodyAt(ladder, focus, stage, body.x, body.y, 0, camera), focus);
   }
   const api = useGiants.getState();

@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
 
-export const close = (a, b, tolerance = 1e-9) =>
-  assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
+/** `actual` within `tolerance` of `expected`; `label` names the figure in the failure. */
+export const close = (actual, expected, tolerance = 1e-9, label = "") =>
+  assert.ok(
+    Math.abs(actual - expected) <= tolerance,
+    `${label ? `${label}: ` : ""}${actual} is not within ${tolerance} of ${expected}`,
+  );
+
+/** `actual` within a share `relative` of `expected`, or of 1 below it: a figure near zero keeps an absolute floor. */
+export const closeRelative = (actual, expected, relative = 1e-9, label = "") =>
+  assert.ok(
+    Math.abs(actual - expected) <= relative * Math.max(1, Math.abs(expected)),
+    `${label ? `${label}: ` : ""}${actual} is not within ${relative * 100}% of ${expected}`,
+  );
 
 export function event(target, type, values = {}) {
   const e = new Event(type, { cancelable: true });

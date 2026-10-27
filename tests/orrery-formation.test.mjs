@@ -29,13 +29,12 @@ import {
   PROTOSTAR_BEFORE_SOLIDS,
   SUN_BIRTH,
 } from "../src/space/solar-system/model/parameters.ts";
-
-const near = (a, b, tol, what) => assert.ok(Math.abs(a - b) <= tol, `${what}: ${a} vs ${b}`);
+import { close } from "./toolkit-helpers.mjs";
 
 test("a core at the catalogued density falls in in about a hundred thousand years", () => {
   assert.ok(FREE_FALL > 9e4 && FREE_FALL < 1.1e5, `${FREE_FALL}`);
   /* Four times denser falls in half the time: t_ff ∝ 1/√ρ. */
-  near(freeFallTime.compute({ n: 4 * CORE_DENSITY_CM3 }), FREE_FALL / 2, 1e-6, "scaling");
+  close(freeFallTime.compute({ n: 4 * CORE_DENSITY_CM3 }), FREE_FALL / 2, 1e-6, "scaling");
   assert.equal(TIMELINE.formation.freeFall.value, FREE_FALL);
   assert.equal(TIMELINE.formation.coreDensity.value, CORE_DENSITY_CM3);
 });
@@ -60,7 +59,7 @@ test("the fall is slow at first and all at once at the end", () => {
 test("the protostar lights one Class 0 phase before the first solids and is the Sun from then on", () => {
   assert.equal(PROTOSTAR_LIT, SUN_BIRTH + PROTOSTAR_BEFORE_SOLIDS);
   assert.equal(protostarPhase(PROTOSTAR_LIT), 0);
-  near(protostarPhase(SUN_BIRTH + PROTOSTAR_BEFORE_SOLIDS / 2), 0.5, 1e-9, "halfway");
+  close(protostarPhase(SUN_BIRTH + PROTOSTAR_BEFORE_SOLIDS / 2), 0.5, 1e-9, "halfway");
   assert.equal(protostarPhase(SUN_BIRTH), 1);
   assert.equal(protostarPhase(0), 1);
   assert.ok(sunExists(PROTOSTAR_LIT) && sunExists(0));
@@ -120,7 +119,7 @@ test("the natal cloud is whole through the fall, gone at the first solids, and t
   for (const moment of [PROTOSTAR_LIT, SUN_BIRTH]) {
     const before = skyEpoch(moment + 1).dim;
     const after = skyEpoch(moment - 1).dim;
-    near(before, after, 1e-3, `sky dim at ${moment}`);
+    close(before, after, 1e-3, `sky dim at ${moment}`);
   }
   assert.ok(skyEpoch(COLLAPSE_BEGINS).dim < 0.4, "dark inside the cloud");
   assert.ok(skyEpoch(SUN_BIRTH - 1e7).dim > 0.99, "clear once the disk era is well under way");
@@ -129,7 +128,7 @@ test("the natal cloud is whole through the fall, gone at the first solids, and t
 test("playback's dilation reads 0 at its fastest pace and 1 at its slowest, rising as the pace drops", async () => {
   const { playDilation, playRate } = await import("../src/features/orrery/lib/model/timeline.ts");
   assert.equal(playDilation(1e9), 0, "the ages since the clearing play fastest");
-  near(playDilation(SUN_BIRTH - 1), 1, 1e-6, "the first solids play slowest");
+  close(playDilation(SUN_BIRTH - 1), 1, 1e-6, "the first solids play slowest");
   const formation = playDilation(COLLAPSE_BEGINS);
   assert.ok(formation > 0.6 && formation < 0.9, `the fall is well slowed: ${formation}`);
   const moments = [

@@ -14,8 +14,7 @@ import {
   saturnRingsFormed,
 } from "../src/space/solar-system/model/history.ts";
 import { SATURN_RINGS_AGE } from "../src/space/solar-system/model/parameters.ts";
-
-const near = (a, b, tol, what) => assert.ok(Math.abs(a - b) <= tol, `${what}: ${a} vs ${b}`);
+import { close } from "./toolkit-helpers.mjs";
 
 test("Saturn's rings come in across their dated window and are whole since", () => {
   const [young, old] = SATURN_RINGS_AGE;
@@ -36,17 +35,17 @@ test("Saturn's rings come in across their dated window and are whole since", () 
 test("the Moon starts just outside the Roche limit and recedes through the tidal records to today", () => {
   const today = moonById("moon").aKm;
   /* The fluid Roche limit for the Moon about Earth is about 2.9 Earth radii. */
-  near(ROCHE_LIMIT_KM / FIGURES.earth.meanKm, 2.9, 0.05, "Roche limit in Earth radii");
+  close(ROCHE_LIMIT_KM / FIGURES.earth.meanKm, 2.9, 0.05, "Roche limit in Earth radii");
   assert.ok(!moonExists(MOON_FORMED + 1) && moonExists(MOON_FORMED));
   assert.equal(moonDistanceKm(MOON_FORMED + 1), null);
   assert.equal(moonDistanceRatio(MOON_FORMED + 1), 0);
-  near(moonDistanceKm(MOON_FORMED), ROCHE_LIMIT_KM, 1e-6, "at the impact");
+  close(moonDistanceKm(MOON_FORMED), ROCHE_LIMIT_KM, 1e-6, "at the impact");
   /* Each record is met at its date. */
   for (const [name, record] of Object.entries(MOON_DISTANCE))
-    near(moonDistanceKm(record.age.value), record.distance.value, 1e-6, name);
-  near(moonDistanceKm(0), today, 1e-6, "today");
-  near(moonDistanceRatio(0), 1, 1e-9, "today over today");
-  near(moonDistanceRatio(3.22e9), 0.7, 1e-9, "Moodies share");
+    close(moonDistanceKm(record.age.value), record.distance.value, 1e-6, name);
+  close(moonDistanceKm(0), today, 1e-6, "today");
+  close(moonDistanceRatio(0), 1, 1e-9, "today over today");
+  close(moonDistanceRatio(3.22e9), 0.7, 1e-9, "Moodies share");
   /* Only ever outward. */
   let last = 0;
   for (let k = 0; k <= 1000; k += 1) {

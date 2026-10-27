@@ -42,33 +42,28 @@ import { useVoyage } from "../src/features/voyage/lib/store.ts";
 import { pathForView, resolveView, viewFromPath } from "../src/features/voyage/routing.ts";
 import { proseArgs } from "../src/lib/facts.ts";
 import { layoutMessages } from "./messages-helper.mjs";
+import { closeRelative } from "./toolkit-helpers.mjs";
 
 const YEAR_S = 365.25 * 86_400;
-const near = (actual, expected, tolerance, label = "") =>
-  assert.ok(
-    Math.abs(actual - expected) <= tolerance * Math.abs(expected),
-    `${label} ${actual} is not within ${tolerance * 100}% of ${expected}`,
-  );
-
 test("the torch ship reaches Andromeda in 28.6 years of its own time while Earth ages 2.5 million", () => {
   const trip = tripTimes(DRIVES.torch, 2.5e6 * LIGHT_YEAR_KM);
-  near(trip.tau / YEAR_S, 28.6, 0.02, "ship years");
-  near(trip.t / YEAR_S, 2.5e6, 0.01, "Earth years");
+  closeRelative(trip.tau / YEAR_S, 28.6, 0.02, "ship years");
+  closeRelative(trip.t / YEAR_S, 2.5e6, 0.01, "Earth years");
   assert.ok(trip.peak < C_KM_S && trip.peak > 0.9999 * C_KM_S);
   /* Halfway through its own time the ship has covered half the way. */
   const half = tripProgress(DRIVES.torch, 2.5e6 * LIGHT_YEAR_KM, 0.5);
-  near(half.covered, 0.5, 1e-6);
-  near(half.elapsed, 0.5, 1e-6);
+  closeRelative(half.covered, 0.5, 1e-6);
+  closeRelative(half.elapsed, 0.5, 1e-6);
   /* A tenth of the way in time, the ship is still crawling: far less than a tenth of the distance. */
   assert.ok(tripProgress(DRIVES.torch, 2.5e6 * LIGHT_YEAR_KM, 0.1).covered < 0.01);
 });
 
 test("Voyager coasts to α Centauri in about 77,000 years, Starshot's sail at 0.2 c in 22", () => {
   const km = 4.37 * LIGHT_YEAR_KM;
-  near(tripTimes(DRIVES.voyager, km).t / YEAR_S, 77_000, 0.02);
+  closeRelative(tripTimes(DRIVES.voyager, km).t / YEAR_S, 77_000, 0.02);
   const sail = tripTimes(DRIVES.sail, km);
-  near(sail.t / YEAR_S, 21.85, 0.01);
-  near(sail.tau / sail.t, Math.sqrt(1 - 0.04), 1e-9, "the sail's clock runs slow by γ");
+  closeRelative(sail.t / YEAR_S, 21.85, 0.01);
+  closeRelative(sail.tau / sail.t, Math.sqrt(1 - 0.04), 1e-9, "the sail's clock runs slow by γ");
 });
 
 test("a long torch flight stays finite: its proper velocity grows past where β rounds to 1", () => {
@@ -83,18 +78,22 @@ test("a long torch flight stays finite: its proper velocity grows past where β 
     last = u;
   }
   /* γ at the turnover is in the tens of millions, as the closed form has it. */
-  near(
+  closeRelative(
     Math.hypot(1, last / C_KM_S),
     1 + (STANDARD_GRAVITY_KM_S2 * 5.4e7 * LIGHT_YEAR_KM) / (2 * C_KM_S ** 2),
     1e-6,
   );
   /* Braking mirrors the burn; a coast holds its speed. */
-  near(
+  closeRelative(
     tripProperVelocity(DRIVES.torch, 0.9, trip),
     tripProperVelocity(DRIVES.torch, 0.1, trip),
     1e-12,
   );
-  near(speedOfProper(tripProperVelocity(DRIVES.sail, 0.4, trip)), DRIVES.sail.speed, 1e-12);
+  closeRelative(
+    speedOfProper(tripProperVelocity(DRIVES.sail, 0.4, trip)),
+    DRIVES.sail.speed,
+    1e-12,
+  );
 });
 
 test("the ship's integrator matches hyperbolic motion at one g", () => {
@@ -105,36 +104,36 @@ test("the ship's integrator matches hyperbolic motion at one g", () => {
     stepShip(ship, tau / 1000, { accel: STANDARD_GRAVITY_KM_S2, dir });
   const c = C_KM_S;
   const a = STANDARD_GRAVITY_KM_S2;
-  near(ship.x[0], ((c * c) / a) * (Math.cosh((a * tau) / c) - 1), 1e-3, "distance");
-  near(ship.t, (c / a) * Math.sinh((a * tau) / c), 1e-3, "Earth's clock");
-  near(ship.tau, tau, 1e-12);
-  near(shipGamma(ship), Math.cosh((a * tau) / c), 1e-3, "γ");
-  near(shipSpeed(ship), c * Math.tanh((a * tau) / c), 1e-3, "speed");
+  closeRelative(ship.x[0], ((c * c) / a) * (Math.cosh((a * tau) / c) - 1), 1e-3, "distance");
+  closeRelative(ship.t, (c / a) * Math.sinh((a * tau) / c), 1e-3, "Earth's clock");
+  closeRelative(ship.tau, tau, 1e-12);
+  closeRelative(shipGamma(ship), Math.cosh((a * tau) / c), 1e-3, "γ");
+  closeRelative(shipSpeed(ship), c * Math.tanh((a * tau) / c), 1e-3, "speed");
   assert.ok(shipSpeed(ship) < c);
   /* Coasting keeps the speed and runs Earth's clock γ times faster than the ship's. */
   const before = { t: ship.t, tau: ship.tau };
   stepShip(ship, 100, null);
-  near((ship.t - before.t) / (ship.tau - before.tau), shipGamma(ship), 1e-9);
+  closeRelative((ship.t - before.t) / (ship.tau - before.tau), shipGamma(ship), 1e-9);
   /* Thrust across the motion: the four-acceleration adds a·dτ across and leaves the motion's share. */
   const along = ship.u[0];
   stepShip(ship, 10, { accel: STANDARD_GRAVITY_KM_S2, dir: [0, 1, 0] });
-  near(ship.u[0], along, 1e-9, "along");
-  near(ship.u[1], STANDARD_GRAVITY_KM_S2 * 10, 1e-6, "across");
+  closeRelative(ship.u[0], along, 1e-9, "along");
+  closeRelative(ship.u[1], STANDARD_GRAVITY_KM_S2 * 10, 1e-6, "across");
 });
 
 test("a torch trip's progress: half the distance at the turnover, the rest braking", () => {
   const km = 2.5e6 * LIGHT_YEAR_KM;
-  near(tripProgress(DRIVES.torch, km, 0.5).covered, 0.5, 1e-9);
+  closeRelative(tripProgress(DRIVES.torch, km, 0.5).covered, 0.5, 1e-9);
   assert.ok(tripProgress(DRIVES.torch, km, 0.9).covered > 0.99);
-  near(tripProgress(DRIVES.torch, km, 1).covered, 1, 1e-9);
-  near(tripProgress(DRIVES.voyager, km, 0.3).covered, 0.3, 1e-9);
+  closeRelative(tripProgress(DRIVES.torch, km, 1).covered, 1, 1e-9);
+  closeRelative(tripProgress(DRIVES.voyager, km, 0.3).covered, 0.3, 1e-9);
 });
 
 test("bodies sit at their true places: Earth near 1 au, the Moon a light-second out, Earth's centre off the barycentre", async () => {
   const date = new Date("2026-10-20T00:00:00Z");
   const earth = bodyPositionKm("earth", date, [0, 0, 0]);
   const moon = bodyPositionKm("moon", date, [0, 0, 0]);
-  near(Math.hypot(...earth), AU_KM, 0.02, "Earth from the Sun");
+  closeRelative(Math.hypot(...earth), AU_KM, 0.02, "Earth from the Sun");
   const gap = Math.hypot(moon[0] - earth[0], moon[1] - earth[1], moon[2] - earth[2]);
   assert.ok(gap > 356_000 && gap < 407_000, `${gap} km to the Moon`);
   /* The barycentre offset is applied: Earth's centre is not on the JPL point. */
@@ -150,8 +149,8 @@ test("bodies sit at their true places: Earth near 1 au, the Moon a light-second 
 });
 
 test("sunlight falls as the inverse square: 1,361 W/m² at Earth, under a watt at Pluto", () => {
-  near(irradianceAt(AU_KM), 1361, 1e-9);
-  near(irradianceAt(39.5 * AU_KM), 0.87, 0.01, "sunlight at Pluto");
+  closeRelative(irradianceAt(AU_KM), 1361, 1e-9);
+  closeRelative(irradianceAt(39.5 * AU_KM), 0.87, 0.01, "sunlight at Pluto");
 });
 
 test("places and routes: every place is a body with a route, and slugs round-trip", () => {

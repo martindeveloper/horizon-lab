@@ -12,10 +12,7 @@ import { createHud } from "../src/features/orrery/lib/scene/hud.ts";
 import { ORRERY_EDGE } from "../src/features/orrery/lib/scene/kit.ts";
 import { useOrrery } from "../src/features/orrery/lib/store.ts";
 import { SOLAR_VIEWS } from "../src/space/solar-system/model/views.ts";
-import { assertSmoothFlight } from "./toolkit-helpers.mjs";
-
-const near = (actual, expected, tolerance, message) =>
-  assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: ${actual} vs ${expected}`);
+import { assertSmoothFlight, close } from "./toolkit-helpers.mjs";
 
 test("the along-orbit speed-up blends across its steps", () => {
   /* Away from the edges each step keeps its rate. */
@@ -77,14 +74,14 @@ test("wheel steps glide into each other and interrupt a flight without a jolt", 
     frame(dt);
   }
   const goal = rig.target;
-  near(goal, 72 * 1.13 ** 3, 1e-9, "notches add up");
+  close(goal, 72 * 1.13 ** 3, 1e-9, "notches add up");
   let last = rig.pose.distance;
   for (let k = 0; k < 120; k += 1) {
     frame(dt);
     assert.ok(rig.pose.distance >= last - 1e-12 && rig.pose.distance <= goal + 1e-9);
     last = rig.pose.distance;
   }
-  near(rig.pose.distance, goal, 1e-9, "settles");
+  close(rig.pose.distance, goal, 1e-9, "settles");
   assert.equal(rig.moving, false);
   /* A flight interrupted mid-way carries its speed into the glide. */
   rig.flyToView("oort");

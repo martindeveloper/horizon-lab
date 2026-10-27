@@ -21,14 +21,13 @@ import {
 } from "../src/space/solar-system/model/parameters.ts";
 import { OBSERVED_REGIONS, mapUv } from "../src/space/sun/model/observed.ts";
 import { SEEDED_GROUPS } from "../src/space/sun/model/spot-groups.ts";
-
-const near = (a, b, tolerance = 1e-10) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
+import { close } from "./toolkit-helpers.mjs";
 
 test("solar reprojection preserves disc centre, north/east directions and hides the far side", () => {
   const observer = solarObserver(new Date(HMI_SOURCES[1].date));
   const centre = projectSolarPoint(observer.toward, observer);
-  near(centre.x, 0);
-  near(centre.y, 0);
+  close(centre.x, 0);
+  close(centre.y, 0);
   assert.equal(projectSolarPoint(observer.toward.clone().negate(), observer), null);
   const north = observer.toward
     .clone()
@@ -39,11 +38,11 @@ test("solar reprojection preserves disc centre, north/east directions and hides 
     .multiplyScalar(Math.cos(0.4))
     .addScaledVector(observer.right, Math.sin(0.4));
   assert.ok(projectSolarPoint(north, observer).y > 0);
-  near(projectSolarPoint(north, observer).x, 0);
+  close(projectSolarPoint(north, observer).x, 0);
   assert.ok(projectSolarPoint(east, observer).x > 0);
-  near(projectSolarPoint(east, observer).y, 0);
-  near(solarSurface(0, 0).distanceTo(new Vector3(-1, 0, 0)), 0);
-  near(solarSurface(0, 0.2).distanceTo(solarSurface(2 * Math.PI, 0.2)), 0);
+  close(projectSolarPoint(east, observer).y, 0);
+  close(solarSurface(0, 0).distanceTo(new Vector3(-1, 0, 0)), 0);
+  close(solarSurface(0, 0.2).distanceTo(solarSurface(2 * Math.PI, 0.2)), 0);
 });
 
 test("the dated observations cover all nonpolar longitudes without duplicating a hemisphere", () => {
@@ -56,7 +55,7 @@ test("the dated observations cover all nonpolar longitudes without duplicating a
         `${lon}, ${lat}`,
       );
     }
-  near(sampleBilinear(new Float32Array([0, 2, 4, 6]), 2, 0.5, 0.5), 3);
+  close(sampleBilinear(new Float32Array([0, 2, 4, 6]), 2, 0.5, 0.5), 3);
 });
 
 const shippedSun = new URL(`../cdn${mapFile(MAPS_KEY, "sun", "nearLight")}`, import.meta.url);
@@ -90,7 +89,7 @@ test(
     }
     assert.ok(dark > 50, "observed umbrae remain dark");
     assert.ok(bright > w * h * 0.9, "quiet photosphere dominates");
-    near(mean / (w * h), SUN_MAP_QUIET_INTENSITY, 0.03);
+    close(mean / (w * h), SUN_MAP_QUIET_INTENSITY, 0.03);
     assert.ok(seam / h < 3, "no hard longitude seam");
     /* Poleward of the catalogued latitude the map is flat, which is what lets the globe stop
        counting the longitudes' stretch there; the equator's row carries the disc's texture. */

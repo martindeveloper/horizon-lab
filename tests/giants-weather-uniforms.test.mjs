@@ -7,12 +7,8 @@ import { LOOKS } from "../src/features/giants/lib/model/looks.ts";
 import { rungIndex } from "../src/features/giants/lib/model/rungs.ts";
 import { FLARE_K } from "../src/features/giants/lib/parameters.ts";
 import { stellarContinuum } from "../src/space/sun/graphics/atmosphere.ts";
+import { closeRelative } from "./toolkit-helpers.mjs";
 
-const near = (actual, expected, tolerance = 2e-6) =>
-  assert.ok(
-    Math.abs(actual - expected) <= tolerance * Math.max(1, Math.abs(expected)),
-    `${actual} != ${expected}`,
-  );
 const weather = () => {
   const look = LOOKS[rungIndex("sun")];
   return weatherAt("solar", { ...look, temperature: look.equatorK }, 30);
@@ -30,8 +26,8 @@ test("cached region axes preserve spot orientation, handedness and polar behavio
     ]) {
       Object.assign(data.regions[0], { centre, tilt, strength: 1 });
       upload.fill(data);
-      upload.uniforms.uRegionAxis.value[0].toArray().forEach((n, c) => near(n, axis[c]));
-      upload.uniforms.uRegionSide.value[0].toArray().forEach((n, c) => near(n, side[c]));
+      upload.uniforms.uRegionAxis.value[0].toArray().forEach((n, c) => closeRelative(n, axis[c]));
+      upload.uniforms.uRegionSide.value[0].toArray().forEach((n, c) => closeRelative(n, side[c]));
     }
     upload.fill(null);
     assert.ok(upload.uniforms.uRegionState.value.every((state) => state.x === 0));
@@ -48,13 +44,13 @@ test("cached ejection directions wrap continuously and retain their angular open
       Object.assign(data.ejections[0], { angle, front: 2, spread: 0.3, brightness: 1 });
       upload.fill(data);
       const d = upload.uniforms.uEjectionDirection.value[0];
-      near(Math.hypot(d.x, d.y), 1);
-      near(Math.cos(Math.atan2(d.y, d.x) - angle), 1);
-      near(Math.acos(d.z), 0.36);
+      closeRelative(Math.hypot(d.x, d.y), 1);
+      closeRelative(Math.cos(Math.atan2(d.y, d.x) - angle), 1);
+      closeRelative(Math.acos(d.z), 0.36);
     }
     Object.assign(data.ejections[0], { spread: 3 });
     upload.fill(data);
-    near(upload.uniforms.uEjectionDirection.value[0].z, -1);
+    closeRelative(upload.uniforms.uEjectionDirection.value[0].z, -1);
     upload.fill(null);
     assert.ok(upload.uniforms.uEjection.value.every((e) => e.w === 0));
   } finally {
@@ -68,7 +64,9 @@ test("cached emission preserves the spectrum, host-star exposure and dust scatte
   const emission = () => Array.from(upload.uniforms.uOutflows.value.image.data.slice(8, 11));
   try {
     const flare = stellarContinuum(FLARE_K);
-    upload.uniforms.uFlareColour.value.toArray().forEach((v, c) => near(v, flare[c], 0.0006));
+    upload.uniforms.uFlareColour.value
+      .toArray()
+      .forEach((v, c) => closeRelative(v, flare[c], 0.0006));
     const cloud = data.outflows[0];
     Object.assign(cloud, {
       centre: [0, 0, 2],
@@ -84,20 +82,20 @@ test("cached emission preserves the spectrum, host-star exposure and dust scatte
       const gas = stellarContinuum(cloud.temperature),
         face = stellarContinuum(host);
       emission().forEach((v, c) =>
-        near(v, 0.35 * cloud.gas * gas[c] * Math.exp(gas[3] - face[3]), 0.0006),
+        closeRelative(v, 0.35 * cloud.gas * gas[c] * Math.exp(gas[3] - face[3]), 0.0006),
       );
     }
     Object.assign(cloud, { gas: 0, dust: 0.7 });
     upload.fill(data, 3600);
     const front = emission();
     const face = stellarContinuum(3600);
-    front.forEach((v, c) => near(v, (0.04 * cloud.dust * face[c]) / 4));
+    front.forEach((v, c) => closeRelative(v, (0.04 * cloud.dust * face[c]) / 4));
     cloud.centre = [0, 0, 4];
     upload.fill(data, 3600);
-    emission().forEach((v, c) => near(v * 4, front[c]));
+    emission().forEach((v, c) => closeRelative(v * 4, front[c]));
     cloud.centre = [0, 0, -2];
     upload.fill(data, 3600);
-    emission().forEach((v, c) => near(v * 4, front[c]));
+    emission().forEach((v, c) => closeRelative(v * 4, front[c]));
   } finally {
     upload.dispose();
   }

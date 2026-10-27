@@ -24,10 +24,7 @@ import {
   galaxyToWorld,
   realmOf,
 } from "../src/space/galaxy/scene/frames.ts";
-import { assertSmoothFlight } from "./toolkit-helpers.mjs";
-
-const near = (actual, expected, tolerance, message) =>
-  assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: ${actual} vs ${expected}`);
+import { assertSmoothFlight, close } from "./toolkit-helpers.mjs";
 
 test("the realm blend is continuous and every view sits in its own map", () => {
   assert.equal(galaxyMix(HANDOFF.from), 0);
@@ -65,7 +62,7 @@ test("far out the camera orbits in the supergalactic plane, where Virgo lies", (
   const up = new Vector3(0, 1, 0).applyQuaternion(SUPERGALACTIC_FRAME);
   const galacticUp = new Vector3(0, 1, 0).applyQuaternion(GALAXY_FRAME);
   /* The two planes stand about 84° apart. */
-  near((up.angleTo(galacticUp) * 180) / Math.PI, 83.7, 0.5, "plane tilt");
+  close((up.angleTo(galacticUp) * 180) / Math.PI, 83.7, 0.5, "plane tilt");
 });
 
 test("the Galaxy model lines up with the sky's galactic frame, the Sun at the origin", () => {
@@ -77,7 +74,7 @@ test("the Galaxy model lines up with the sky's galactic frame, the Sun at the or
   const at = galaxyToWorld(SUN_ANCHOR[0], SUN_ANCHOR[1], SUN_ANCHOR[2], new Vector3());
   assert.ok(at.length() < 1e-6);
   const centre = galaxyToWorld(0, 0, 0, new Vector3());
-  near(centre.length() / LY, Math.hypot(...SUN_ANCHOR), 1e-6, "centre distance");
+  close(centre.length() / LY, Math.hypot(...SUN_ANCHOR), 1e-6, "centre distance");
   assert.ok(centre.clone().normalize().dot(GALACTIC_CENTRE) > 0.999);
 });
 
@@ -156,7 +153,7 @@ test("one zoom from the inner planets out past the nearest stars, turning about 
   rig.snapToView("inner");
   frame(0);
   assert.equal(realmOf(rig.pose.distance), "solar");
-  near(rig.pose.distance, 6, 1e-9, "the inner planets' view, in au");
+  close(rig.pose.distance, 6, 1e-9, "the inner planets' view, in au");
   assert.ok(rig.aim.length() < 1e-9, "turning about the Sun");
   assert.ok(rig.limits().min <= 0.35 + 1e-9, "close enough for Mercury");
   rig.flyToView("stars");
@@ -167,7 +164,7 @@ test("one zoom from the inner planets out past the nearest stars, turning about 
     assert.ok(x >= last - 1e-9, "never backs in");
     last = x;
   }
-  near(rig.pose.distance / LY, viewById("stars").ly, 1e-9, "at the stars");
+  close(rig.pose.distance / LY, viewById("stars").ly, 1e-9, "at the stars");
   assert.equal(realmOf(rig.pose.distance), "stars");
   assert.ok(rig.aim.length() < 1e-9, "still turning about the Sun");
 });
@@ -177,7 +174,7 @@ test("reduced motion lands every flight at once", () => {
   rig.snapToView("stars");
   rig.flyToView("galaxy");
   assert.equal(rig.flying, false);
-  near(rig.pose.distance, 92_000 * LY, 1e-3, "at the galaxy");
+  close(rig.pose.distance, 92_000 * LY, 1e-3, "at the galaxy");
   frame(1 / 60);
   assert.equal(realmOf(rig.pose.distance), "galaxy");
 });
@@ -227,8 +224,8 @@ test("selecting any new atlas landmark brings its actual position into a phone's
     rig.applyPose();
     camera.updateMatrixWorld();
     const p = cosmicToWorld(landmark.at, new Vector3()).project(camera);
-    near(p.x, 0, 1e-8, `${id} centred horizontally`);
-    near(p.y, 0, 1e-8, `${id} centred vertically`);
+    close(p.x, 0, 1e-8, `${id} centred horizontally`);
+    close(p.y, 0, 1e-8, `${id} centred vertically`);
   }
   state.selection = null;
   rig.step(0);

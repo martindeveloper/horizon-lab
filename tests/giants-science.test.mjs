@@ -26,42 +26,41 @@ import { TOUR } from "../src/features/giants/lib/model/tour.ts";
 import { factSources } from "../src/lib/facts.ts";
 import { SOURCES } from "../src/lib/sources.ts";
 import { featureMessages } from "./messages-helper.mjs";
-
-const near = (actual, expected, relative = 1e-10) =>
-  assert.ok(Math.abs(actual / expected - 1) < relative, `${actual} ≈ ${expected}`);
+import { closeRelative } from "./toolkit-helpers.mjs";
 
 test("spheroid density uses both axes, with the spherical limit and volume scaling", () => {
   const M = (8 * Math.PI) / 3;
-  near(spheroidDensity(M, 2, 0.5), 1);
-  near(spheroidDensity(2 * M, 2, 0.5), 2);
-  near(spheroidDensity(M, 4, 0.5), 0.25);
-  near(spheroidDensity(M, 2, 1), 0.5);
-  near(oblateDensity.compute({ M, a: 2, b: 0.5 }), 1);
-  for (const R of [1, 1e4, 1e9]) near(spheroidDensity(M, R, R), meanDensity.compute({ M, R }));
+  closeRelative(spheroidDensity(M, 2, 0.5), 1);
+  closeRelative(spheroidDensity(2 * M, 2, 0.5), 2);
+  closeRelative(spheroidDensity(M, 4, 0.5), 0.25);
+  closeRelative(spheroidDensity(M, 2, 1), 0.5);
+  closeRelative(oblateDensity.compute({ M, a: 2, b: 0.5 }), 1);
+  for (const R of [1, 1e4, 1e9])
+    closeRelative(spheroidDensity(M, R, R), meanDensity.compute({ M, R }));
 });
 
 test("flattened catalogue bodies use spheroid densities and all three input intervals", () => {
   // kg/m³ from the adopted masses and equatorial/polar dimensions, not equatorial spheres.
-  near(RUNG_FACTS.earth.density.value * 1000, 5513.413, 1e-6);
-  near(RUNG_FACTS.jupiter.density.value * 1000, 1326.54, 1e-6);
-  near(RUNG_FACTS.vega.density.value * 1000, 168.687, 1e-6);
-  near(RUNG_FACTS.achernar.density.value * 1000, 14.82236, 1e-6);
+  closeRelative(RUNG_FACTS.earth.density.value * 1000, 5513.413, 1e-6);
+  closeRelative(RUNG_FACTS.jupiter.density.value * 1000, 1326.54, 1e-6);
+  closeRelative(RUNG_FACTS.vega.density.value * 1000, 168.687, 1e-6);
+  closeRelative(RUNG_FACTS.achernar.density.value * 1000, 14.82236, 1e-6);
 
   const { mass, radius, polar, density } = RUNG_FACTS.achernar;
   // Lowest density: lowest mass and largest axes; highest: largest mass and smallest axes.
   const volume = (a, b) =>
     ((4 * Math.PI) / 3) * convert(a, "Rsun", "m") ** 2 * convert(b, "Rsun", "m");
-  near(
+  closeRelative(
     density.range[0] * 1000,
     convert(mass.range[0], "Msun", "kg") / volume(radius.range[1], polar.range[1]),
   );
-  near(
+  closeRelative(
     density.range[1] * 1000,
     convert(mass.range[1], "Msun", "kg") / volume(radius.range[0], polar.range[0]),
   );
   // Pin the adopted envelope too: silently dropping polar uncertainty must fail.
-  near(density.range[0] * 1000, 11.74121, 1e-6);
-  near(density.range[1] * 1000, 18.5218, 1e-6);
+  closeRelative(density.range[0] * 1000, 11.74121, 1e-6);
+  closeRelative(density.range[1] * 1000, 18.5218, 1e-6);
 });
 
 test("UY Scuti derives one consistent size from the adopted 2024 luminosity and temperature", () => {
@@ -70,13 +69,13 @@ test("UY Scuti derives one consistent size from the adopted 2024 luminosity and 
   assert.deepEqual(teff.range, [3380, 3720]);
   // Healy's 2024-04-11 catalogue: log L/L☉ and the asymmetric bolometric-magnitude errors.
   const L = 10 ** 5.094500706018924;
-  near(luminosity.value, L, 1e-5);
-  near(luminosity.range[0], L * 10 ** (-0.4 * 0.3629788612930296), 1e-5);
-  near(luminosity.range[1], L * 10 ** (0.4 * 0.3254371536723425), 1e-5);
-  near(stefanBoltzmann.compute({ R: radius.value, T: teff.value }), luminosity.value);
-  near(radius.value, 932.06345, 1e-7);
-  near(radius.range[0], 718.15847, 1e-7);
-  near(radius.range[1], 1194.41976, 1e-7);
+  closeRelative(luminosity.value, L, 1e-5);
+  closeRelative(luminosity.range[0], L * 10 ** (-0.4 * 0.3629788612930296), 1e-5);
+  closeRelative(luminosity.range[1], L * 10 ** (0.4 * 0.3254371536723425), 1e-5);
+  closeRelative(stefanBoltzmann.compute({ R: radius.value, T: teff.value }), luminosity.value);
+  closeRelative(radius.value, 932.06345, 1e-7);
+  closeRelative(radius.range[0], 718.15847, 1e-7);
+  closeRelative(radius.range[1], 1194.41976, 1e-7);
   assert.deepEqual(factSources(radius), ["healy2024"]);
   assert.equal(mass, undefined, "an older assumed mass is not a measurement for this solution");
   assert.equal(density, undefined);
@@ -91,13 +90,13 @@ test("black-hole drawing separates the horizon, photon sphere and apparent criti
     const rs = radiusMetres(id).radius;
     const rph = GIANTS_EQUATIONS["photon-sphere"].compute({ M });
     const impact = GIANTS_EQUATIONS["critical-impact"].compute({ M });
-    near(rs, (2 * G * M) / SPEED_OF_LIGHT ** 2);
-    near(rph, (3 * G * M) / SPEED_OF_LIGHT ** 2);
+    closeRelative(rs, (2 * G * M) / SPEED_OF_LIGHT ** 2);
+    closeRelative(rph, (3 * G * M) / SPEED_OF_LIGHT ** 2);
     // Schwarzschild null-geodesic turning-point relation, evaluated at the photon sphere.
-    near(impact ** 2, rph ** 3 / (rph - rs));
+    closeRelative(impact ** 2, rph ** 3 / (rph - rs));
     assert.ok(rs < rph && rph < impact);
     // The card's circumference/c is not the circular photon's distant-observer period.
-    near(drawn(facts.lap), (2 * Math.PI * rs) / SPEED_OF_LIGHT);
+    closeRelative(drawn(facts.lap), (2 * Math.PI * rs) / SPEED_OF_LIGHT);
     assert.ok((2 * Math.PI * impact) / SPEED_OF_LIGHT > 2.5 * drawn(facts.lap));
   }
 });
@@ -106,10 +105,10 @@ test("circumference/c preserves radius bounds and uses the drawn radius for span
   for (const { id } of RUNGS) {
     const { radius, lap } = RUNG_FACTS[id];
     const metres = (r) => convert(r, radius.unit, "m");
-    near(drawn(lap), lightLapSeconds(radiusMetres(id).radius));
+    closeRelative(drawn(lap), lightLapSeconds(radiusMetres(id).radius));
     if (radius.range) {
-      near(lap.range[0], lightLapSeconds(metres(radius.range[0])));
-      near(lap.range[1], lightLapSeconds(metres(radius.range[1])));
+      closeRelative(lap.range[0], lightLapSeconds(metres(radius.range[0])));
+      closeRelative(lap.range[1], lightLapSeconds(metres(radius.range[1])));
     }
   }
   const span = { unit: "s", source: "horizon", status: "derived", range: [4, 9] };
@@ -179,8 +178,8 @@ test("volume comparisons agree with density and exclude coordinate volumes of ho
   ]) {
     const result = compare(id, against);
     const densities = RUNG_FACTS[id].density.value / RUNG_FACTS[against].density.value;
-    near(result.volume, result.mass / densities);
-    near(result.volume * compare(against, id).volume, 1);
+    closeRelative(result.volume, result.mass / densities);
+    closeRelative(result.volume * compare(against, id).volume, 1);
     assert.ok(
       Math.abs(result.volume / result.width ** 3 - 1) > 0.05,
       "flattening materially changes volume",
@@ -224,8 +223,8 @@ test("Stephenson 2-18's model uses the same distance as its adopted luminosity",
   // Fok et al. 2012, Tables 6 and 8: RSGC2 SW, St2-18.
   assert.equal(convert(distance.value, distance.unit, "kpc"), 5.5);
   assert.equal(teff.value, 3200);
-  near(luminosity.value, 10 ** 5.64, 0.0015);
-  near(stefanBoltzmann.compute({ R: radius.value, T: teff.value }), luminosity.value);
+  closeRelative(luminosity.value, 10 ** 5.64, 0.0015);
+  closeRelative(stefanBoltzmann.compute({ R: radius.value, T: teff.value }), luminosity.value);
   assert.deepEqual(factSources(distance), factSources(luminosity));
   assert.equal(distance.range, undefined, "the adopted model distance has no published interval");
 });
@@ -233,8 +232,8 @@ test("Stephenson 2-18's model uses the same distance as its adopted luminosity",
 test("TON 618 retains both virial estimates and propagates both references to its horizon", () => {
   const { mass, radius, lap } = RUNG_FACTS["ton-618"];
   // Ge et al. 2019 and Shemmer et al. 2004, their Table 2 entries.
-  near(mass.range[0], 10 ** 10.61, 0.001);
-  near(mass.range[1], 10 ** 10.82, 0.002);
+  closeRelative(mass.range[0], 10 ** 10.61, 0.001);
+  closeRelative(mass.range[1], 10 ** 10.82, 0.002);
   for (const fact of [mass, radius, lap])
     assert.deepEqual(new Set(factSources(fact)), new Set(["ge2019", "shemmer2004"]));
 });

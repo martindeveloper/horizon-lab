@@ -30,9 +30,8 @@ import {
   transferredFluxAt,
   transportAt,
 } from "../src/space/sun/model/reconnection.ts";
+import { close } from "./toolkit-helpers.mjs";
 
-const near = (actual, expected, tolerance = 1e-7) =>
-  assert.ok(Math.abs(actual - expected) < tolerance, `${actual} ≈ ${expected}`);
 const dt = 1e-5;
 
 test("one magnetic field obeys divergence and Faraday's law throughout reconnection", () => {
@@ -51,9 +50,9 @@ test("one magnetic field obeys divergence and Faraday's law throughout reconnect
         ym = fluxAt(x, y - dt, s);
       const sp = fluxAt(x, y, s + dt),
         sm = fluxAt(x, y, s - dt);
-      near((xp.ay - xm.ay - yp.ax + ym.ax) / (2 * dt), 0);
-      near((sp.ay - sm.ay + yp.electric - ym.electric) / (2 * dt), 0);
-      near((-sp.ax + sm.ax - xp.electric + xm.electric) / (2 * dt), 0);
+      close((xp.ay - xm.ay - yp.ax + ym.ax) / (2 * dt), 0, 1e-7);
+      close((sp.ay - sm.ay + yp.electric - ym.electric) / (2 * dt), 0, 1e-7);
+      close((-sp.ax + sm.ax - xp.electric + xm.electric) / (2 * dt), 0, 1e-7);
     }
   }
 });
@@ -74,15 +73,16 @@ test("plasma converges from both sides and leaves upward and downward, with nonn
       const b = fluxAt(x, y, s),
         v = transportAt(x, y, s);
       assert.ok(Number.isFinite(v.vx) && Number.isFinite(v.vy) && v.resistivity >= 0);
-      near(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current);
+      close(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current, 1e-7);
       if (
         Math.abs(x) >= RECONNECTION.diffusionWidth ||
         Math.abs(y - 1) >= RECONNECTION.diffusionHeight
       ) {
         assert.equal(v.resistivity, 0);
-        near(
+        close(
           (fluxAt(x, y, s + dt).a - fluxAt(x, y, s - dt).a) / (2 * dt) + v.vx * b.ax + v.vy * b.ay,
           0,
+          1e-7,
         );
       }
     }
@@ -109,13 +109,13 @@ test("transport tends continuously to rest at the X-point without reversing eith
         if (dx) assert.ok(v.vx * dx < 0, "inflow must approach the sheet from either side");
         if (dy) assert.ok(v.vy * dy > 0, "outflow must leave the null in both vertical directions");
         assert.ok(speed < previousSpeed * 0.11, "velocity must vanish linearly near the null");
-        near(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current, 1e-12);
+        close(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current, 1e-12);
         previousSpeed = speed;
       }
       assert.ok(previousSpeed < 1e-4, "the flow comes to rest at the null");
     }
-    near(transportAt(0, 1, s).vx, 0, 1e-12);
-    near(transportAt(0, 1, s).vy, 0, 1e-12);
+    close(transportAt(0, 1, s).vx, 0, 1e-12);
+    close(transportAt(0, 1, s).vy, 0, 1e-12);
   }
 });
 
@@ -133,7 +133,7 @@ test("the nonnegative resistive closure keeps its required current sign across t
           "the scalar closure requires positive current throughout its support",
         );
         assert.ok(Number.isFinite(v.resistivity) && v.resistivity >= 0);
-        near(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current, 1e-12);
+        close(b.electric - v.vx * b.ax - v.vy * b.ay, v.resistivity * b.current, 1e-12);
       }
     }
   }
@@ -144,15 +144,19 @@ test("the X-point transfers equal flux to both products while the photospheric f
   const initialArcadeFlux = fluxAt(0, 0, 0).a - fluxAt(0, 1, 0).a;
   for (const s of [0.2, 0.45, 0.6, 0.8, 1]) {
     const x = fluxAt(0, 1, s);
-    near(x.ax, 0);
-    near(x.ay, 0);
-    near(fluxAt(0, 2, s).a - x.a - initialIslandFlux, transferredFluxAt(s));
-    near(fluxAt(0, 0, s).a - x.a - initialArcadeFlux, transferredFluxAt(s));
-    near(x.electric, fluxTransferRateAt(s));
-    near((transferredFluxAt(s + dt) - transferredFluxAt(s - dt)) / (2 * dt), fluxTransferRateAt(s));
+    close(x.ax, 0, 1e-7);
+    close(x.ay, 0, 1e-7);
+    close(fluxAt(0, 2, s).a - x.a - initialIslandFlux, transferredFluxAt(s), 1e-7);
+    close(fluxAt(0, 0, s).a - x.a - initialArcadeFlux, transferredFluxAt(s), 1e-7);
+    close(x.electric, fluxTransferRateAt(s), 1e-7);
+    close(
+      (transferredFluxAt(s + dt) - transferredFluxAt(s - dt)) / (2 * dt),
+      fluxTransferRateAt(s),
+      1e-7,
+    );
     for (const foot of [-1, -0.5, 0, 0.5, 1]) {
-      near(fluxAt(foot, 0, s).a, fluxAt(foot, 0, 0).a);
-      near(fluxAt(foot, 0, s).ax, fluxAt(foot, 0, 0).ax);
+      close(fluxAt(foot, 0, s).a, fluxAt(foot, 0, 0).a, 1e-7);
+      close(fluxAt(foot, 0, s).ax, fluxAt(foot, 0, 0).ax, 1e-7);
     }
   }
 });
@@ -170,7 +174,7 @@ test("every rendered line is a complete component of one flux contour, including
         const y = referenceHeight(line.points[2 * j + 1], g);
         const x = line.points[2 * j] / (g.lambda * displayWidth(y, g));
         assert.ok(y >= 0);
-        near(fluxAt(x, y, s).a, line.flux, 4e-6);
+        close(fluxAt(x, y, s).a, line.flux, 4e-6);
       }
       if (line.kind === "rope") {
         assert.deepEqual(
@@ -180,7 +184,7 @@ test("every rendered line is a complete component of one flux contour, including
       } else {
         assert.equal(line.points[1], 0);
         assert.equal(line.points[2 * (line.count - 1) + 1], 0);
-        near(line.points[0], -line.points[2 * (line.count - 1)]);
+        close(line.points[0], -line.points[2 * (line.count - 1)], 1e-7);
       }
       if (line.kind === "postflare") {
         const upper = lines
@@ -208,7 +212,7 @@ test("incoming contours converge, reconnected lower loops contract with fixed fe
       const prior = previous.get(key);
       if (prior && line.kind === "postflare") {
         assert.ok(current.top < prior.top);
-        near(current.foot, prior.foot);
+        close(current.foot, prior.foot, 1e-7);
         contractions++;
       }
       if (prior && line.kind === "rope") {
@@ -228,13 +232,13 @@ test("incoming contours converge, reconnected lower loops contract with fixed fe
 test("the ideal expansion keeps the mapped field divergence-free and its height mapping invertible", () => {
   for (const s of [0, 0.4, 0.6, 0.9]) {
     const g = geometryAt(s);
-    for (const y of [0, 0.8, 1, 1.2, 2, 3]) near(referenceHeight(displayHeight(y, g), g), y);
+    for (const y of [0, 0.8, 1, 1.2, 2, 3]) close(referenceHeight(displayHeight(y, g), g), y, 1e-7);
     for (const [x, y] of [
       [0.1, g.base * 0.8],
       [0.2, g.h],
       [-0.4, g.h * 2],
     ]) {
-      near(
+      close(
         (planeFieldAt(x + dt, y, g).bx -
           planeFieldAt(x - dt, y, g).bx +
           planeFieldAt(x, y + dt, g).by -
@@ -264,7 +268,7 @@ test("the prescribed rise and display deformation have continuous velocities at 
       const center = coordinate(join);
       const left = (center - coordinate(join - epsilon)) / epsilon;
       const right = (coordinate(join + epsilon) - center) / epsilon;
-      near(left, right, 2e-3);
+      close(left, right, 2e-3);
     }
   }
 });
@@ -287,9 +291,9 @@ test("the CME front moves continuously while envelope visibility fades in indepe
     at = eruptionAt(start),
     after = eruptionAt(start + 1e-6);
   assert.ok(at.cmeFront > 1 && at.cmePresence === 0);
-  near(before.cmeFront, at.cmeFront, 1e-4);
-  near(after.cmeFront, at.cmeFront, 1e-4);
-  near(before.cmePresence, after.cmePresence, 1e-8);
+  close(before.cmeFront, at.cmeFront, 1e-4);
+  close(after.cmeFront, at.cmeFront, 1e-4);
+  close(before.cmePresence, after.cmePresence, 1e-8);
 });
 
 test("light follows flux transfer, the eruption rises, and ribbon separation grows", () => {
@@ -324,7 +328,7 @@ test("light follows flux transfer, the eruption rises, and ribbon separation gro
   }
   assert.ok(lightPeak > ratePeak);
   assert.ok(flareLightAt(1) > 0 && flareLightAt(1) < 0.3);
-  near(eruptionAt(1).cmeFront, 5);
+  close(eruptionAt(1).cmeFront, 5, 1e-7);
 });
 
 test("the rope lifts off as one round body inside the CME's width and breaks free of the sheet", () => {
@@ -361,7 +365,7 @@ test("the rope lifts off as one round body inside the CME's width and breaks fre
     angle = Math.max(angle, arc);
     lateral = Math.max(lateral, (1 + ERUPTION_SCALE_R * displayHeight(y, g)) * Math.sin(arc));
   }
-  near(1 + ERUPTION_SCALE_R * displayHeight(top, g), CME_FINAL_HEIGHT_R, 1e-6);
-  near(2 * lateral, ERUPTION_SCALE_R * (displayHeight(top, g) - g.q), 0.02 * lateral);
-  near(angle, CME_SPREAD_RAD, 0.01);
+  close(1 + ERUPTION_SCALE_R * displayHeight(top, g), CME_FINAL_HEIGHT_R, 1e-6);
+  close(2 * lateral, ERUPTION_SCALE_R * (displayHeight(top, g) - g.q), 0.02 * lateral);
+  close(angle, CME_SPREAD_RAD, 0.01);
 });

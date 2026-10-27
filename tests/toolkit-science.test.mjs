@@ -54,8 +54,7 @@ import {
   toHorizontal,
 } from "@horizon/toolkit/science";
 
-const near = (actual, expected, tolerance) =>
-  assert.ok(Math.abs(actual - expected) < tolerance, `${actual} vs ${expected}`);
+import { close } from "./toolkit-helpers.mjs";
 
 test("scientific scaling handles boundaries, negative durations and nonfinite inputs", () => {
   assert.deepEqual(durationQuantity(1), { value: 1, unit: "s", digits: 2 });
@@ -76,7 +75,7 @@ test("distance units convert through exact IAU definitions and read out consiste
   assert.ok(Math.abs(PARSEC_AU - 206264.806) < 0.001);
   assert.ok(Math.abs(PARSEC_KM / 3.0857e13 - 1) < 1e-4, "a parsec is 3.0857 × 10¹³ km");
   assert.ok(Math.abs(convertDistance(1, "pc", "ly") - 3.26156) < 1e-5);
-  near(convertDistance(convertDistance(42, "ly", "au"), "au", "ly"), 42, 1e-12);
+  close(convertDistance(convertDistance(42, "ly", "au"), "au", "ly"), 42, 1e-12);
   assert.throws(() => convertDistance(Number.NaN, "au", "ly"), RangeError);
 
   assert.deepEqual(readout(5.374), { mantissa: 5.374, exponent: 0, digits: 2 });
@@ -172,8 +171,8 @@ test("named constants carry the units their names state", () => {
   assert.ok(Math.abs(SOLAR_MASS_KG / 1.98841e30 - 1) < 1e-4, "the Sun's mass in kg");
   const gm = GRAVITATIONAL_CONSTANT * SOLAR_MASS_KG;
   assert.ok(Math.abs(gm / 1.3271244e20 - 1) < 1e-5, "GM☉ (IAU 2015 B3) in m³ s⁻²");
-  near(RYDBERG_INFINITY, 1.0973731568157e7, 1e-3, "R∞ in m⁻¹");
-  near(1e9 / RYDBERG_INFINITY, 91.1267, 1e-4, "the Lyman limit for a fixed nucleus, nm");
+  close(RYDBERG_INFINITY, 1.0973731568157e7, 1e-3, "R∞ in m⁻¹");
+  close(1e9 / RYDBERG_INFINITY, 91.1267, 1e-4, "the Lyman limit for a fixed nucleus, nm");
   assert.equal(cssRgb([1, 0.5, 0]), "rgb(255 128 0)");
   assert.equal(cssRgb([0.2, 0.4, 1], 2), "rgb(102 204 255)", "brightness scales and clips");
   assert.equal(cssRgb([-1, 0, 0]), "rgb(0 0 0)");
@@ -183,7 +182,7 @@ test("Julian dates match the J2000 epoch", () => {
   assert.equal(julianDay(new Date("2000-01-01T12:00:00Z")), J2000_JD);
   assert.equal(julianDay(new Date("1970-01-01T00:00:00Z")), 2_440_587.5);
   const date = new Date("2026-10-18T18:00:00Z");
-  near(julianEphemerisDay(date) - julianDay(date), DELTA_T_SECONDS / 86_400, 1e-9);
+  close(julianEphemerisDay(date) - julianDay(date), DELTA_T_SECONDS / 86_400, 1e-9);
   assert.equal(JULIAN_CENTURY_DAYS, 36_525);
 });
 
@@ -201,83 +200,79 @@ test("sky coordinates: angles wrap, poles and the equator behave, conversions in
   assert.equal(hourAngle(10, 350), 20);
   // The celestial pole stands at the latitude, due north; the equator crosses the meridian at 90° − φ.
   const pole = toHorizontal(0, 90, 123, 49.9);
-  near(pole.altitude, 49.9, 1e-9);
+  close(pole.altitude, 49.9, 1e-9);
   assert.ok(Math.abs(((pole.azimuth + 180) % 360) - 180) < 1e-6);
   const meridian = toHorizontal(40, 0, 40, 49.9);
-  near(meridian.altitude, 40.1, 1e-9);
-  near(meridian.azimuth, 180, 1e-9);
+  close(meridian.altitude, 40.1, 1e-9);
+  close(meridian.azimuth, 180, 1e-9);
   // The ecliptic north pole sits at RA 270°, Dec 90° − ε; the equinox stays put.
   const eclipticPole = eclipticToEquatorial(0, 90, 23.44);
-  near(eclipticPole.ra, -90, 1e-9);
-  near(eclipticPole.dec, 90 - 23.44, 1e-9);
-  near(eclipticToEquatorial(0, 0, 23.44).ra, 0, 1e-12);
+  close(eclipticPole.ra, -90, 1e-9);
+  close(eclipticPole.dec, 90 - 23.44, 1e-9);
+  close(eclipticToEquatorial(0, 0, 23.44).ra, 0, 1e-12);
   // At J2000 precession is the identity.
   const still = precess(101.287, -16.716, new Date("2000-01-01T12:00:00Z"));
-  near(still.ra, 101.287, 1e-6);
-  near(still.dec, -16.716, 1e-6);
+  close(still.ra, 101.287, 1e-6);
+  close(still.dec, -16.716, 1e-6);
   // Rising: a quarter turn on the equator; the horizon offset narrows the arc.
-  near(risingHourAngle(0, 0), 90, 1e-9);
+  close(risingHourAngle(0, 0), 90, 1e-9);
   assert.ok(risingHourAngle(0, 49.9, 10) < 90);
   assert.equal(risingHourAngle(89, 49.9), 180);
   assert.equal(risingHourAngle(-89, 49.9), 0);
   // Galactic coordinates: the pole and M87 (l 283.78°, b 74.49°); the equinox at l 96.34°, b −60.19°.
-  near(equatorialToGalactic(192.85948, 27.12825).b, 90, 1e-9);
+  close(equatorialToGalactic(192.85948, 27.12825).b, 90, 1e-9);
   const m87 = equatorialToGalactic(187.7059, 12.3911);
-  near(m87.l, 283.78, 0.01);
-  near(m87.b, 74.49, 0.01);
+  close(m87.l, 283.78, 0.01);
+  close(m87.b, 74.49, 0.01);
   const equinox = equatorialToGalactic(0, 0);
-  near(equinox.l, 96.34, 0.01);
-  near(equinox.b, -60.19, 0.01);
+  close(equinox.l, 96.34, 0.01);
+  close(equinox.b, -60.19, 0.01);
 });
 
 test("sky angles, resonances and Hubble's law compute from the shared laws", () => {
-  const near = (actual, expected, tolerance) =>
-    assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} vs ${expected}`);
-  near(angularSeparation.compute({ ra1: 10, dec1: 90, ra2: 200, dec2: 0 }), 90, 1e-9);
-  near(angularSeparation.compute({ ra1: 0, dec1: 0, ra2: 1e-6, dec2: 0 }), 1e-6, 1e-15);
+  close(angularSeparation.compute({ ra1: 10, dec1: 90, ra2: 200, dec2: 0 }), 90, 1e-9);
+  close(angularSeparation.compute({ ra1: 0, dec1: 0, ra2: 1e-6, dec2: 0 }), 1e-6, 1e-15);
   /* Proxima and α Cen AB (Gaia DR3, Akeson 2021): 2.19°. */
-  near(
+  close(
     angularSeparation.compute({ ra1: 217.4289, dec1: -62.6795, ra2: 219.8994, dec2: -60.8354 }),
     2.19,
     0.01,
   );
-  near(resonanceSemiMajorAxis.compute({ ap: 5.2026, k: 1 / 4 }), 2.065, 0.001);
-  near(resonanceSemiMajorAxis.compute({ ap: 30.07, k: 3 / 2 }), 39.4, 0.01);
-  near(hubbleLaw.compute({ v: 6_766, H0: 67.66 }), 100, 1e-9);
+  close(resonanceSemiMajorAxis.compute({ ap: 5.2026, k: 1 / 4 }), 2.065, 0.001);
+  close(resonanceSemiMajorAxis.compute({ ap: 30.07, k: 3 / 2 }), 39.4, 0.01);
+  close(hubbleLaw.compute({ v: 6_766, H0: 67.66 }), 100, 1e-9);
 });
 
 test("flat ΛCDM: Planck 2018 gives a 13.8-billion-year Universe and a(t) inverts t(a)", () => {
-  const near = (actual, expected, tolerance) =>
-    assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} vs ${expected}`);
-  near(hubbleTimeGyr(PLANCK_2018.H0), 977.79 / 67.66, 0.01);
+  close(hubbleTimeGyr(PLANCK_2018.H0), 977.79 / 67.66, 0.01);
   const age = cosmicAgeGyr(1);
-  near(age, 13.79, 0.02);
-  near(scaleFactorAtAge(age), 1, 1e-12);
-  near(scaleFactorAtAge(age - 10), 0.37, 0.02);
-  for (const a of [0.1, 0.5, 0.9]) near(scaleFactorAtAge(cosmicAgeGyr(a)), a, 1e-12);
+  close(age, 13.79, 0.02);
+  close(scaleFactorAtAge(age), 1, 1e-12);
+  close(scaleFactorAtAge(age - 10), 0.37, 0.02);
+  for (const a of [0.1, 0.5, 0.9]) close(scaleFactorAtAge(cosmicAgeGyr(a)), a, 1e-12);
   // Comoving distance: Hubble's law while z is small, 3.40 Gpc at z = 1 for these parameters.
-  near(comovingDistanceMpc(0.001), hubbleLaw.compute({ v: 299.792458, H0: 67.66 }), 0.01);
-  near(comovingDistanceMpc(1), 3_396, 2);
+  close(comovingDistanceMpc(0.001), hubbleLaw.compute({ v: 299.792458, H0: 67.66 }), 0.01);
+  close(comovingDistanceMpc(1), 3_396, 2);
   assert.equal(comovingDistanceMpc(0), 0);
   // Lookback time: none today, the whole age at the Big Bang's edge.
   assert.equal(lookbackTimeGyr(0), 0);
-  near(lookbackTimeGyr(1e6), cosmicAgeAtRedshiftGyr(0), 1e-3);
-  near(lookbackTimeGyr(0.08), 1.09, 0.01);
+  close(lookbackTimeGyr(1e6), cosmicAgeAtRedshiftGyr(0), 1e-3);
+  close(lookbackTimeGyr(0.08), 1.09, 0.01);
   // Back to the Big Bang: last scattering (z∗ = 1089.80) at Planck's 13,885 Mpc, the edge at
   // ~14.2 Gpc, ~372,000 years after the Big Bang; today's age agrees with Planck's 13.787 Gyr.
-  near(comovingDistanceMpc(1089.8), 13_885, 15);
-  near(particleHorizonMpc(), 14_160, 30);
-  near(cosmicAgeAtRedshiftGyr(1089.8) * 1e9, 372_000, 5_000);
-  near(cosmicAgeAtRedshiftGyr(0), 13.787, 0.005);
-  near(cosmicAgeAtRedshiftGyr(1), cosmicAgeGyr(0.5), 0.01);
+  close(comovingDistanceMpc(1089.8), 13_885, 15);
+  close(particleHorizonMpc(), 14_160, 30);
+  close(cosmicAgeAtRedshiftGyr(1089.8) * 1e9, 372_000, 5_000);
+  close(cosmicAgeAtRedshiftGyr(0), 13.787, 0.005);
+  close(cosmicAgeAtRedshiftGyr(1), cosmicAgeGyr(0.5), 0.01);
   // The closed form leaves radiation out: about 5.6 million years older.
-  near(cosmicAgeGyr(1) - cosmicAgeAtRedshiftGyr(0), 0.0056, 0.0005);
+  close(cosmicAgeGyr(1) - cosmicAgeAtRedshiftGyr(0), 0.0056, 0.0005);
   // Without radiation the integral still starts cleanly at the Big Bang.
-  near(cosmicAgeAtRedshiftGyr(0, { H0: 67.66, omegaM: 0.3111 }), cosmicAgeGyr(1), 1e-6);
+  close(cosmicAgeAtRedshiftGyr(0, { H0: 67.66, omegaM: 0.3111 }), cosmicAgeGyr(1), 1e-6);
   // Lookback inverts, and so does the comoving distance (Infinity at the horizon).
-  for (const t of [1, 5, 10]) near(lookbackTimeGyr(redshiftAtLookback(t)), t, 1e-9);
+  for (const t of [1, 5, 10]) close(lookbackTimeGyr(redshiftAtLookback(t)), t, 1e-9);
   for (const z of [0.004, 0.073, 1, 1089.8])
-    near(redshiftAtComovingDistance(comovingDistanceMpc(z)) / z, 1, 1e-6);
+    close(redshiftAtComovingDistance(comovingDistanceMpc(z)) / z, 1, 1e-6);
   assert.equal(redshiftAtComovingDistance(0), 0);
   assert.equal(redshiftAtComovingDistance(particleHorizonMpc()), Number.POSITIVE_INFINITY);
 });
@@ -318,27 +313,27 @@ test("radiation laws: Planck integrates to Stefan–Boltzmann, Wien, photon ener
     let sum = 0;
     for (let nm = 10; nm < 200_000; nm *= 1.001)
       sum += planckRadiance(nm, T) * nm * 1e-9 * Math.log(1.001);
-    near((Math.PI * sum) / (sigma * T ** 4), 1, 2e-3);
+    close((Math.PI * sum) / (sigma * T ** 4), 1, 2e-3);
   }
   assert.equal(planckRadiance(500, 0), 0);
   // CODATA's b = 2.897 771 955 × 10⁻³ m K; the Sun peaks near 502 nm.
-  near(WIEN_CONSTANT, 2.897771955e-3, 1e-12);
-  near(wienDisplacement.compute({ T: 5772 }), 502.04, 0.01);
-  near(photonEnergy.compute({ lambda: 656.28 }), 1.8892, 1e-4);
+  close(WIEN_CONSTANT, 2.897771955e-3, 1e-12);
+  close(wienDisplacement.compute({ T: 5772 }), 502.04, 0.01);
+  close(photonEnergy.compute({ lambda: 656.28 }), 1.8892, 1e-4);
   assert.equal(convert(1, "eV", "J"), CONSTANTS.elementaryCharge.value);
   // Receding then approaching at the same speed undoes the shift exactly.
-  near(dopplerWavelengthRatio(300) * dopplerWavelengthRatio(-300), 1, 1e-15);
+  close(dopplerWavelengthRatio(300) * dopplerWavelengthRatio(-300), 1, 1e-15);
   // β = 0.001: λ/λ₀ = √(1.001 / 0.999), a shade more than 1 + β.
-  near(dopplerShift.compute({ lambda0: 500, v: 299.792458 }) - 500, 0.50025, 1e-6);
+  close(dopplerShift.compute({ lambda0: 500, v: 299.792458 }) - 500, 0.50025, 1e-6);
   // NIST's vacuum and air wavelengths of sodium D₂ and Hα.
-  near(vacuumToAir(589.1583), 588.995, 2e-4);
-  near(vacuumToAir(656.461), 656.2797, 2e-4);
+  close(vacuumToAir(589.1583), 588.995, 2e-4);
+  close(vacuumToAir(656.461), 656.2797, 2e-4);
   // And back: air to vacuum inverts it across the visible.
-  for (const nm of [380, 589.1583, 770]) near(airToVacuum(vacuumToAir(nm)), nm, 1e-9);
+  for (const nm of [380, 589.1583, 770]) close(airToVacuum(vacuumToAir(nm)), nm, 1e-9);
   // The classical electron radius agrees with e, mₑ and c through α (CODATA 2022).
   const e = CONSTANTS.elementaryCharge.value;
   const epsilon0 = (e * e) / (2 * 7.2973525643e-3 * PLANCK_CONSTANT * SPEED_OF_LIGHT);
-  near(
+  close(
     (e * e) /
       (4 * Math.PI * epsilon0 * CONSTANTS.electronMass.value * SPEED_OF_LIGHT ** 2) /
       CONSTANTS.classicalElectronRadius.value,
@@ -360,14 +355,14 @@ test("colours: the CIE observer, a 6500 K black body near white, spectral hues i
   assert.deepEqual(cieObserver(300), [0, 0, 0]);
   // The Planckian locus at 6504 K: x = 0.3135, y = 0.3237.
   const white = chromaticity(spectrumXyz((nm) => planckRadiance(nm, 6504)));
-  near(white.x, 0.3135, 0.002);
-  near(white.y, 0.3237, 0.002);
+  close(white.x, 0.3135, 0.002);
+  close(white.y, 0.3237, 0.002);
   // Cool stars are red, hot ones blue.
   const [r3, , b3] = blackbodyColor(3500);
   const [r20, , b20] = blackbodyColor(20_000);
   assert.ok(r3 > b3 && b20 > r20);
   // Violet is blue-dominated, 520 nm green, the red end red: no hue reversals at the ends.
-  near(wavelengthColor(520)[1], 1, 1e-9);
+  close(wavelengthColor(520)[1], 1, 1e-9);
   for (const nm of [650, 700, 760]) {
     const [r, g, b] = wavelengthColor(nm);
     assert.ok(r > 0.999 && g === 0 && b === 0, `${nm} nm is red`);
@@ -589,28 +584,28 @@ test("matter-only cosmology agrees with the analytic Einstein–de Sitter limits
   // https://www.damtp.cam.ac.uk/user/tong/cosmo/cosmohtml/S3.html
   for (const a of [0, 1e-6, 0.25, 1, 4]) {
     const expected = (2 / 3) * hubbleTime * a ** 1.5;
-    near(cosmicAgeGyr(a, model), expected, 1e-10);
-    near(scaleFactorAtAge(expected, model), a, 1e-12);
-    if (a > 0) near(cosmicAgeAtRedshiftGyr(1 / a - 1, model), expected, 1e-9);
+    close(cosmicAgeGyr(a, model), expected, 1e-10);
+    close(scaleFactorAtAge(expected, model), a, 1e-12);
+    if (a > 0) close(cosmicAgeAtRedshiftGyr(1 / a - 1, model), expected, 1e-9);
   }
   const horizon = (2 * 299792.458) / 70;
-  near(particleHorizonMpc(model), horizon, 1e-9);
+  close(particleHorizonMpc(model), horizon, 1e-9);
   for (const z of [0, 0.1, 1, 1000])
-    near(comovingDistanceMpc(z, model), horizon * (1 - 1 / Math.sqrt(1 + z)), 1e-9);
+    close(comovingDistanceMpc(z, model), horizon * (1 - 1 / Math.sqrt(1 + z)), 1e-9);
   assert.equal(eventHorizonMpc(model), Infinity);
-  near(cosmicAgeGyr(1, { H0: 70, omegaM: 1 - 1e-12 }), (2 / 3) * hubbleTime, 1e-10);
+  close(cosmicAgeGyr(1, { H0: 70, omegaM: 1 - 1e-12 }), (2 / 3) * hubbleTime, 1e-10);
 });
 
 test("cosmology inverses bracket early sources without silently capping redshift", () => {
   for (const model of [PLANCK_2018, { H0: 70, omegaM: 1 }]) {
     for (const z of [1e5, 2e6, 1e7]) {
       const distance = comovingDistanceMpc(z, model);
-      near(redshiftAtComovingDistance(distance, model) / z, 1, 1e-6);
+      close(redshiftAtComovingDistance(distance, model) / z, 1, 1e-6);
     }
     const z = 2e6;
     const lookback = lookbackTimeGyr(z, model);
     // Subtracting two cosmic ages limits the precision of a very early lookback time.
-    near(redshiftAtLookback(lookback, model) / z, 1, 1e-3);
+    close(redshiftAtLookback(lookback, model) / z, 1, 1e-3);
     assert.equal(redshiftAtLookback(0, model), 0);
     assert.equal(redshiftAtLookback(cosmicAgeAtRedshiftGyr(0, model), model), Infinity);
     assert.equal(cosmicAgeAtRedshiftGyr(Infinity, model), 0);
@@ -619,13 +614,13 @@ test("cosmology inverses bracket early sources without silently capping redshift
 
 test("sky coordinates remain finite at the zenith and nadir across latitudes", () => {
   for (let latitude = -89.9; latitude < 90; latitude += 0.1) {
-    near(toHorizontal(0, latitude, 0, latitude).altitude, 90, 2e-6);
-    near(toHorizontal(180, -latitude, 0, latitude).altitude, -90, 2e-6);
+    close(toHorizontal(0, latitude, 0, latitude).altitude, 90, 2e-6);
+    close(toHorizontal(180, -latitude, 0, latitude).altitude, -90, 2e-6);
   }
 });
 
 test("unit conversion avoids intermediate overflow for finite results", () => {
   assert.equal(convert(1e308, "km", "km"), 1e308);
-  near(convert(1e308, "km", "au") / 1e308, 1 / AU_KM, 1e-23);
+  close(convert(1e308, "km", "au") / 1e308, 1 / AU_KM, 1e-23);
   assert.equal(convert(-1e308, "km", "km"), -1e308);
 });

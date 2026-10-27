@@ -63,9 +63,8 @@ import {
   probeSpeed,
 } from "../src/space/solar-system/model/probes.ts";
 import { featureMessages, leaves } from "./messages-helper.mjs";
+import { close } from "./toolkit-helpers.mjs";
 
-const near = (actual, expected, tolerance, message) =>
-  assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: ${actual} vs ${expected}`);
 const length = (v) => Math.hypot(v[0], v[1], v[2]);
 
 const LOCALES = ["en", "cs"];
@@ -103,30 +102,30 @@ test("views run from the inner planets to the observable universe, and the ladde
     assert.ok(rung.depth > last && rung.depth > 0 && rung.depth < 1, rung.id);
     last = rung.depth;
   }
-  for (const d of [0, 0.25, 0.5, 1]) near(depthOf(lyAtDepth(d)), d, 1e-12, `depth ${d}`);
-  near(lyAtDepth(0), LADDER_LY.near, 1e-12, "near end");
+  for (const d of [0, 0.25, 0.5, 1]) close(depthOf(lyAtDepth(d)), d, 1e-12, `depth ${d}`);
+  close(lyAtDepth(0), LADDER_LY.near, 1e-12, "near end");
 });
 
 test("the probes fly their tracked paths: the Voyagers met the heliosphere's edges where they did", () => {
   /* Stone et al. 2005, 2008, 2013, 2019. */
-  near(crossingAu("voyager1", "shock"), 94, 0.5, "Voyager 1 at the termination shock");
-  near(crossingAu("voyager2", "shock"), 84, 0.5, "Voyager 2 at the termination shock");
-  near(crossingAu("voyager1", "heliopause"), 121.6, 0.3, "Voyager 1 at the heliopause");
-  near(crossingAu("voyager2", "heliopause"), 119, 0.3, "Voyager 2 at the heliopause");
+  close(crossingAu("voyager1", "shock"), 94, 0.5, "Voyager 1 at the termination shock");
+  close(crossingAu("voyager2", "shock"), 84, 0.5, "Voyager 2 at the termination shock");
+  close(crossingAu("voyager1", "heliopause"), 121.6, 0.3, "Voyager 1 at the heliopause");
+  close(crossingAu("voyager2", "heliopause"), 119, 0.3, "Voyager 2 at the heliopause");
   assert.ok(HELIOPAUSE_AU > 119 && HELIOPAUSE_AU < 121.6, "the bubble sits between the crossings");
   const now = new Date("2026-10-19T00:00:00Z");
   /* NASA quotes about 17 and 15 km/s, coasting away from the Sun. */
-  near(convert(probeSpeed("voyager1", now), "au/yr", "km/s"), 16.9, 0.2, "Voyager 1 speed");
-  near(convert(probeSpeed("voyager2", now), "au/yr", "km/s"), 15.3, 0.2, "Voyager 2 speed");
+  close(convert(probeSpeed("voyager1", now), "au/yr", "km/s"), 16.9, 0.2, "Voyager 1 speed");
+  close(convert(probeSpeed("voyager2", now), "au/yr", "km/s"), 15.3, 0.2, "Voyager 2 speed");
   for (const probe of PROBES) {
     /* Each path starts at Earth, just after launch. */
     const start = probePath(probe.id, 2100).slice(0, 3);
-    near(length(start), 1, 0.05, `${probe.id} leaves from Earth's distance`);
+    close(length(start), 1, 0.05, `${probe.id} leaves from Earth's distance`);
   }
 });
 
 test("Voyager 1 is a full light-day from Earth from mid-November 2026", () => {
-  near(LIGHT_DAY_AU, 173.14, 0.01, "a light-day");
+  close(LIGHT_DAY_AU, 173.14, 0.01, "a light-day");
   const day = firstLightDay("voyager1");
   /* NASA predicts 18 November 2026, 10:16 UTC; the card shows the day it falls on. */
   assert.equal(day.toISOString().slice(0, 10), "2026-11-18", day.toISOString());
@@ -134,8 +133,8 @@ test("Voyager 1 is a full light-day from Earth from mid-November 2026", () => {
   assert.equal(firstLightDay("newHorizons"), null, "not before its track ends");
   /* The rings are sunlight's reach: Earth lies inside ten light-minutes, Saturn past an hour. */
   const ring = (id) => LIGHT_RINGS.find((r) => r.id === id).au;
-  near(ring("lightMinutes"), 1.2, 0.01, "ten light-minutes");
-  near(ring("lightYear"), 63_241, 1, "a light-year");
+  close(ring("lightMinutes"), 1.2, 0.01, "ten light-minutes");
+  close(ring("lightYear"), 63_241, 1, "a light-year");
   assert.deepEqual(
     LIGHT_RINGS.map((r) => r.au),
     LIGHT_RINGS.map((r) => r.au).toSorted((a, b) => a - b),
@@ -148,11 +147,11 @@ test("the eyepiece: nearby, light's age is the distance; farther, ΛCDM redshift
   assert.equal(proxima.z, 0);
   /* Virgo at 53.8 Mly: z ≈ 0.0039, light ~54 million years old. */
   const virgo = sightline(53.8e6);
-  near(virgo.z, 0.0039, 0.0002, "Virgo redshift");
-  near(virgo.years / 1e6, 53.6, 0.5, "Virgo light");
+  close(virgo.z, 0.0039, 0.0002, "Virgo redshift");
+  close(virgo.years / 1e6, 53.6, 0.5, "Virgo light");
   /* The Sloan Great Wall's comoving distance gives back its z = 0.073, in the CMB frame. */
   const wall = anchorById("sloanGreatWall");
-  near(
+  close(
     sightline(wall.mly * 1e6).z,
     cmbCz(wall.l, wall.b, 0.073 * 299_792.458) / 299_792.458,
     1e-4,
@@ -161,8 +160,8 @@ test("the eyepiece: nearby, light's age is the distance; farther, ΛCDM redshift
   /* Past the microwave background nothing is seen. */
   const edge = sightline(1e12);
   assert.equal(edge.ly, CMB_LY);
-  near(edge.z, 1089.8, 1e-9, "last scattering");
-  near(edge.years / 1e9, 13.79, 0.02, "the oldest light");
+  close(edge.z, 1089.8, 1e-9, "last scattering");
+  close(edge.years / 1e9, 13.79, 0.02, "the oldest light");
   let last = 0;
   for (let ly = 1e3; ly < CMB_LY; ly *= 1.7) {
     const { years } = sightline(ly);
@@ -174,14 +173,14 @@ test("the eyepiece: nearby, light's age is the distance; farther, ΛCDM redshift
 test("named places land where catalogues put them, in the supergalactic plane", () => {
   const { x, y, z } = SUPERGALACTIC;
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-  near(dot(x, y), 0, 1e-12, "x ⟂ y");
-  near(dot(y, z), 0, 1e-12, "y ⟂ z");
+  close(dot(x, y), 0, 1e-12, "x ⟂ y");
+  close(dot(y, z), 0, 1e-12, "y ⟂ z");
   const virgo = anchorById("virgoCluster");
-  near(supergalacticLatitude(anchorToday(virgo)), -2.35, 0.2, "Virgo SGB");
+  close(supergalacticLatitude(anchorToday(virgo)), -2.35, 0.2, "Virgo SGB");
   /* M87's 16.8 Mpc (EHT 2019), the shared catalogue's. */
-  near(length(anchorToday(virgo)), 54.8, 0.1, "Virgo distance");
+  close(length(anchorToday(virgo)), 54.8, 0.1, "Virgo distance");
   for (const a of ANCHORS) assert.ok(a.mly > 0 && Math.abs(a.b) <= 90, a.id);
-  near(anchorById("sloanGreatWall").mly, 1_060, 40, "Sloan Great Wall");
+  close(anchorById("sloanGreatWall").mly, 1_060, 40, "Sloan Great Wall");
   /* The timing argument through today's separation turned around ~1 Mpc out. */
   assert.ok(LOCAL_TURNAROUND.mly > 3 && LOCAL_TURNAROUND.mly < 4, "turnaround ~1 Mpc");
   assert.ok(LOCAL_TURNAROUND.yearsAgo > 4e9 && LOCAL_TURNAROUND.yearsAgo < 7e9, "when");
@@ -190,9 +189,9 @@ test("named places land where catalogues put them, in the supergalactic plane", 
 test("the camera's aim leaves the galactic centre for each structure's heart, without jumps", () => {
   assert.equal(length(cosmicAim(200_000)), 0);
   const ga = anchorToday(anchorById("greatAttractor"));
-  near(length(cosmicAim(COSMIC_VIEW_LY.laniakea)), length(ga), 1e-6, "Great Attractor");
+  close(length(cosmicAim(COSMIC_VIEW_LY.laniakea)), length(ga), 1e-6, "Great Attractor");
   for (let ly = COSMIC_VIEW_LY.localGroup; ly <= COSMIC_VIEW_LY.sheet; ly *= 1.1)
-    near(length(cosmicAim(ly)), length(LOCAL_GROUP_CENTRE), 1e-9, `Local Group at ${ly}`);
+    close(length(cosmicAim(ly)), length(LOCAL_GROUP_CENTRE), 1e-9, `Local Group at ${ly}`);
   let last = 0;
   for (let ly = 3e5; ly <= COSMIC_VIEW_LY.web; ly *= 1.05) {
     const d = length(cosmicAim(ly));
@@ -203,14 +202,14 @@ test("the camera's aim leaves the galactic centre for each structure's heart, wi
 });
 
 test("the observable universe: its edge, the microwave background and the lookback rings", () => {
-  near(HORIZON_MLY / 1e3, 46.2, 0.2, "edge, Gly");
+  close(HORIZON_MLY / 1e3, 46.2, 0.2, "edge, Gly");
   /* The first galaxies sit about three quarters of the way out; the dark ages fill the rest. */
-  near(FIRST_GALAXIES_MLY / 1e3, 33.7, 0.2, "first galaxies, Gly");
+  close(FIRST_GALAXIES_MLY / 1e3, 33.7, 0.2, "first galaxies, Gly");
   assert.ok(FIRST_GALAXIES_MLY < CMB_MLY, "galaxies stop short of the microwave background");
-  near(CMB_MLY / 1e3, 45.29, 0.05, "microwave background, Gly");
-  near(CMB_AGE_YEARS, 372_000, 5_000, "released ~372,000 years after the Big Bang");
+  close(CMB_MLY / 1e3, 45.29, 0.05, "microwave background, Gly");
+  close(CMB_AGE_YEARS, 372_000, 5_000, "released ~372,000 years after the Big Bang");
   const radii = LOOKBACK_RINGS_GYR.map(lookbackMly);
-  near(radii[0] / 1e3, 1.04, 0.02, "1 billion years");
+  close(radii[0] / 1e3, 1.04, 0.02, "1 billion years");
   assert.ok(radii[1] > radii[0] && radii[2] > radii[1] && radii[2] < CMB_MLY);
 });
 

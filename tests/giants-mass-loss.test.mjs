@@ -11,15 +11,13 @@ import {
   OUTFLOW_LIFE_S,
 } from "../src/features/giants/lib/model/mass-loss.ts";
 import { rungIndex } from "../src/features/giants/lib/model/rungs.ts";
-
-const near = (a, b, tolerance = 1e-9) =>
-  assert.ok(Math.abs(a - b) <= tolerance * Math.max(1, Math.abs(b)), `${a} != ${b}`);
+import { closeRelative } from "./toolkit-helpers.mjs";
 
 test("grey grains recover the finite-disc surface limit and distant radiative equilibrium", () => {
   const star = 3600;
-  near(grainTemperature(star, 1), star * 2 ** -0.25);
+  closeRelative(grainTemperature(star, 1), star * 2 ** -0.25);
   for (const radius of [100, 1000, 1000000])
-    near(grainTemperature(star, radius), star / Math.sqrt(2 * radius), 1e-5);
+    closeRelative(grainTemperature(star, radius), star / Math.sqrt(2 * radius), 1e-5);
   let previous = Infinity;
   for (let r = 1; r < 10; r += 0.05) {
     const T = grainTemperature(star, r);
@@ -41,7 +39,8 @@ test("surface outflows expand, cool, dilute and form dust only after cooling", (
     assert.ok(cloud.temperature >= grainTemperature(3600, r));
     assert.ok(cloud.gas >= 0 && cloud.dust >= 0);
     if (cloud.temperature >= 1700) assert.equal(cloud.dust, 0);
-    if (age > 8 && age < 80) near((cloud.gas + cloud.dust / 5) * cloud.width ** 2, 0.19 ** 2, 1e-8);
+    if (age > 8 && age < 80)
+      closeRelative((cloud.gas + cloud.dust / 5) * cloud.width ** 2, 0.19 ** 2, 1e-8);
     gasSeen ||= cloud.gas > 0 && cloud.dust === 0;
     dustSeen ||= cloud.dust > 0 && cloud.temperature < 1700;
     [radius, width, temperature] = [r, cloud.width, cloud.temperature];
@@ -81,7 +80,7 @@ test("red-supergiant outbursts keep their launch direction, occur intermittently
         const dir = c.centre.map((x) => x / radius);
         const previous = directions.get(c.seed);
         if (previous) {
-          dir.forEach((x, i) => near(x, previous.dir[i]));
+          dir.forEach((x, i) => closeRelative(x, previous.dir[i]));
           assert.ok(radius > previous.radius, "detached material moves radially outwards");
         }
         directions.set(c.seed, { dir, radius });

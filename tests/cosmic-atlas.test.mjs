@@ -42,8 +42,8 @@ import cf4 from "../src/space/cosmos/model/data/cf4.json" with { type: "json" };
 import desi from "../src/space/cosmos/model/data/desi.json" with { type: "json" };
 import { createCosmosAtlas } from "../src/space/cosmos/scene/cosmos-atlas.ts";
 import { createCosmosMarks } from "../src/space/cosmos/scene/cosmos-marks.ts";
+import { close } from "./toolkit-helpers.mjs";
 
-const near = (a, b, tolerance = 1e-8) => assert.ok(Math.abs(a - b) < tolerance, `${a} vs ${b}`);
 const fromSun = (p) => new Vector3(...p).sub(new Vector3(...ATLAS_SUN));
 
 test("catalogue frames rotate and translate once, and h⁻¹ lengths use h₁₀₀", () => {
@@ -52,11 +52,11 @@ test("catalogue frames rotate and translate once, and h⁻¹ lengths use h₁₀
     const sg = [0, 0, 0];
     sg[axis] = 100;
     const vector = fromSun(reconstructedPosition(sg));
-    near(vector.length(), convert(100 / ATLAS_H, "Mpc", "Mly"));
-    near(vector.normalize().dot(new Vector3(...Object.values(SUPERGALACTIC)[axis])), 1);
+    close(vector.length(), convert(100 / ATLAS_H, "Mpc", "Mly"));
+    close(vector.normalize().dot(new Vector3(...Object.values(SUPERGALACTIC)[axis])), 1);
   }
   const radius = hMpcToMly(equivalentRadius((4 * Math.PI) / 3));
-  near(radius, hMpcToMly(1));
+  close(radius, hMpcToMly(1));
   // A measured sky direction is retained; the radial coordinate alone uses cosmology.
   const ra = 194.854,
     dec = 27.946,
@@ -66,8 +66,8 @@ test("catalogue frames rotate and translate once, and h⁻¹ lengths use h₁₀
   const corrected = cmbCz(l, b, z * c) / c;
   const observer = fromSun(observedPosition(ra, dec, z, "observer"));
   const cmb = fromSun(observedPosition(ra, dec, corrected, "cmb"));
-  near(observer.distanceTo(cmb), 0);
-  near(observer.length(), convert(comovingDistanceMpc(corrected, PLANCK_2018), "Mpc", "Mly"));
+  close(observer.distanceTo(cmb), 0);
+  close(observer.length(), convert(comovingDistanceMpc(corrected, PLANCK_2018), "Mpc", "Mly"));
 });
 
 test("observed geometry contains real catalogue positions and quality changes only subsample", () => {
@@ -101,8 +101,8 @@ test("reconstruction size guides and probabilities preserve their distinct meani
   for (const v of VOIDS) {
     assert.ok(v.robustRadiusMly > 0 && v.robustRadiusMly <= v.radiusMly);
     // The published effective radii are rounded to a tenth of h⁻¹ Mpc.
-    near(v.radius, equivalentRadius(v.volume), 0.13);
-    near(v.robustRadius, equivalentRadius(v.robustVolume), 0.13);
+    close(v.radius, equivalentRadius(v.volume), 0.13);
+    close(v.robustRadius, equivalentRadius(v.robustVolume), 0.13);
   }
   for (const k of KNOTS) assert.ok(k.robustVolume > 0 && k.robustVolume <= k.volume);
   for (const b of BASINS)
@@ -192,7 +192,7 @@ test("atlas switches, expansion and disposal affect the intended rendered data",
   atlas.setExpansion(0.5, new Vector3(...ATLAS_SUN));
   atlas.root.updateMatrixWorld();
   const p = atlas.root.localToWorld(new Vector3(...ATLAS_LANDMARKS.vela.at));
-  near(fromSun(p.toArray()).length(), fromSun(ATLAS_LANDMARKS.vela.at).length() * 0.5);
+  close(fromSun(p.toArray()).length(), fromSun(ATLAS_LANDMARKS.vela.at).length() * 0.5);
   const old = points[0].geometry;
   let retired = 0;
   old.addEventListener("dispose", () => retired++);
@@ -251,7 +251,7 @@ test("only the inspected structure reveals its true-scale guides unless the full
   update("localVoid");
   assert.equal(visibleLines().length, 2, "selected void shows its two different volume guides");
   assert.deepEqual(visibleLines()[0].parent.position.toArray(), ATLAS_LANDMARKS.localVoid.at);
-  near(visibleLines()[0].scale.x, VOIDS.find((v) => v.id === 10).radiusMly);
+  close(visibleLines()[0].scale.x, VOIDS.find((v) => v.id === 10).radiusMly);
   update("shapleyBasin");
   assert.equal(visibleLines().length, 1, "selection replaces the previous guides");
   assert.equal(

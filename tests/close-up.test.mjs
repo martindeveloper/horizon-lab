@@ -19,12 +19,8 @@ import {
   moonFraming,
   moonSwing,
 } from "../src/space/solar-system/scene/close-up-framing.ts";
+import { close } from "./toolkit-helpers.mjs";
 
-const near = (actual, expected, tolerance, label = "") =>
-  assert.ok(
-    Math.abs(actual - expected) <= tolerance,
-    `${label} ${actual} is not within ${tolerance} of ${expected}`,
-  );
 const cameraDir = ({ azimuth, inclination }) => [
   Math.cos(inclination) * Math.sin(azimuth),
   Math.sin(inclination),
@@ -36,11 +32,11 @@ test("arrival frames the body and lights it three-quarters from the Sun", () => 
   const radius = 2.27e-5;
   const halfTan = Math.tan((48 * Math.PI) / 360);
   const pose = closeUpPose(mars, radius, halfTan, 0);
-  near(radius / pose.distance, halfTan * CLOSE_UP_FILL, 1e-12, "apparent size");
+  close(radius / pose.distance, halfTan * CLOSE_UP_FILL, 1e-12, "apparent size");
   const toSun = [-mars[0], 0, -mars[2]].map((v) => v / Math.hypot(mars[0], mars[2]));
   const dir = cameraDir(pose);
   const cosine = dir[0] * toSun[0] + dir[2] * toSun[2];
-  near(cosine, Math.cos(CLOSE_UP_SWING) * Math.cos(pose.inclination), 1e-9, "phase angle");
+  close(cosine, Math.cos(CLOSE_UP_SWING) * Math.cos(pose.inclination), 1e-9, "phase angle");
   // The Sun has no sunward side: the current azimuth stays.
   assert.equal(closeUpPose([0, 0, 0], 0.00465, halfTan, 1.234).azimuth, 1.234);
   const limits = closeUpLimits(radius, radius * 2.3);
@@ -54,8 +50,8 @@ test("the flight pans first and dives after, and ends exactly on its poses", () 
   const end = sampleCloseUp(1, from, to, true);
   assert.deepEqual(start.pose, from);
   assert.equal(start.aim, 0);
-  near(end.pose.distance, to.distance, 1e-15);
-  near(end.pose.azimuth, to.azimuth, 1e-12);
+  close(end.pose.distance, to.distance, 1e-15);
+  close(end.pose.azimuth, to.azimuth, 1e-12);
   assert.equal(end.aim, 1);
   // Centred on the body while the dive is still well short of it.
   const mid = sampleCloseUp(0.55, from, to, true);
@@ -78,11 +74,11 @@ test("a slow dive and pull back keep the body in frame and leave and land at res
   const mars = [1.2, 0.02, -0.9];
   const sun = [0, 0, 0];
   const wide = { azimuth: 0.6, inclination: 1.2, distance: 9 };
-  const close = { azimuth: 2.4, inclination: 0.3, distance: 3e-5 };
+  const near = { azimuth: 2.4, inclination: 0.3, distance: 3e-5 };
   /* The body's offset from the middle of the view, as a tangent of the angle off it. */
   const off = (aim, distance) => Math.hypot(...aim.map((v, k) => v - mars[k])) / distance;
   for (const entering of [true, false]) {
-    const [from, to] = entering ? [wide, close] : [close, wide];
+    const [from, to] = entering ? [wide, near] : [near, wide];
     const [fromAim, toAim] = entering ? [sun, mars] : [mars, sun];
     const most = Math.max(off(fromAim, from.distance), off(toAim, to.distance));
     const zoom = (t) => Math.log(sampleCloseUp(t, from, to, entering, 1).pose.distance);
@@ -109,7 +105,7 @@ test("a slow dive and pull back keep the body in frame and leave and land at res
       to.distance,
       1,
     );
-    ends.forEach((v, k) => near(v, toAim[k], 1e-12, "lands on its aim"));
+    ends.forEach((v, k) => close(v, toAim[k], 1e-12, "lands on its aim"));
   }
   /* The clock may run on a visit: as the body travels the aim travels with it, mid-flight. */
   const looks = [
@@ -119,48 +115,50 @@ test("a slow dive and pull back keep the body in frame and leave and land at res
   const step = [0.3, -0.01, 0.2];
   const moved = mars.map((v, k) => v + step[k]);
   const here = aimAt(mars, ...looks, 0.05, 0.4);
-  aimAt(moved, ...looks, 0.05, 0.4).forEach((v, k) => near(v - here[k], step[k], 1e-12, "travels"));
+  aimAt(moved, ...looks, 0.05, 0.4).forEach((v, k) =>
+    close(v - here[k], step[k], 1e-12, "travels"),
+  );
   /* A camera already orbiting carries its turn into the dive and eases it out, landing as written. */
   const spin = { azimuth: 0.2, inclination: -0.05 };
   const h = 1e-4;
-  const turned = sampleCloseUp(h, wide, close, true, 1, spin).pose;
-  const still = sampleCloseUp(h, wide, close, true, 1).pose;
-  near((turned.azimuth - still.azimuth) / h, spin.azimuth, 1e-3, "leaves turning");
-  near((turned.inclination - still.inclination) / h, spin.inclination, 1e-3, "and tilting");
-  const landed = sampleCloseUp(1, wide, close, true, 1, spin).pose;
-  near(landed.azimuth, close.azimuth, 1e-12, "lands on its azimuth");
-  near(landed.inclination, close.inclination, 1e-12, "and its tilt");
+  const turned = sampleCloseUp(h, wide, near, true, 1, spin).pose;
+  const still = sampleCloseUp(h, wide, near, true, 1).pose;
+  close((turned.azimuth - still.azimuth) / h, spin.azimuth, 1e-3, "leaves turning");
+  close((turned.inclination - still.inclination) / h, spin.inclination, 1e-3, "and tilting");
+  const landed = sampleCloseUp(1, wide, near, true, 1, spin).pose;
+  close(landed.azimuth, near.azimuth, 1e-12, "lands on its azimuth");
+  close(landed.inclination, near.inclination, 1e-12, "and its tilt");
   /* A flight interrupted mid-way hands its zoom and its pan on: the next leaves at that
      pace, eases it out, and still lands where it was going. */
   const motion = { distance: -0.8, look: [0.3, 0, -0.1] };
-  const zoomed = sampleCloseUp(h, close, wide, false, 1, motion);
-  const stillOut = sampleCloseUp(h, close, wide, false, 1);
-  near(
+  const zoomed = sampleCloseUp(h, near, wide, false, 1, motion);
+  const stillOut = sampleCloseUp(h, near, wide, false, 1);
+  close(
     Math.log(zoomed.pose.distance / stillOut.pose.distance) / h,
     motion.distance,
     1e-3,
     "leaves zooming",
   );
   const looksOut = [
-    { look: [0, 0, 0], distance: close.distance },
+    { look: [0, 0, 0], distance: near.distance },
     { look: sun.map((v, k) => v - mars[k]), distance: wide.distance },
   ];
-  const panned = aimAt(mars, ...looksOut, close.distance, zoomed.aim, motion.look, zoomed.carry);
-  const stillAim = aimAt(mars, ...looksOut, close.distance, stillOut.aim);
+  const panned = aimAt(mars, ...looksOut, near.distance, zoomed.aim, motion.look, zoomed.carry);
+  const stillAim = aimAt(mars, ...looksOut, near.distance, stillOut.aim);
   panned.forEach((v, k) =>
-    near((v - stillAim[k]) / (close.distance * h), motion.look[k], 1e-3, "leaves panning"),
+    close((v - stillAim[k]) / (near.distance * h), motion.look[k], 1e-3, "leaves panning"),
   );
-  const arrived = sampleCloseUp(1, close, wide, false, 1, motion);
-  near(arrived.pose.distance, wide.distance, 1e-9, "lands on its distance");
+  const arrived = sampleCloseUp(1, near, wide, false, 1, motion);
+  close(arrived.pose.distance, wide.distance, 1e-9, "lands on its distance");
   aimAt(mars, ...looksOut, wide.distance, arrived.aim, motion.look, arrived.carry).forEach((v, k) =>
-    near(v, sun[k], 1e-9, "and on its aim"),
+    close(v, sun[k], 1e-9, "and on its aim"),
   );
 });
 
 test("the drift's swing frames the body with its moon, side-on, and comes back", () => {
   const halfTan = Math.tan((48 * Math.PI) / 360);
   const base = { azimuth: 0.4, inclination: 0.3, distance: 4.3e-5 };
-  // The Moon 60 Earth radii out, nearly behind the body from the arrival pose; Phobos close in.
+  // The Moon 60 Earth radii out, nearly behind the body from the arrival pose; Phobos near in.
   for (const moon of [
     [-6e-4, -2e-4, -2.2e-3],
     [5e-5, 1e-6, -3e-5],
@@ -204,9 +202,11 @@ test("the atmosphere shell: thin shells of scattering air on the bodies that hav
     /* The coefficients keep each column's depth: coefficient × scale height, in the body's own radii. */
     const unit = 1 + air.shell;
     u.rayleigh.forEach((k, i) =>
-      near(k * u.scale[0] * unit, air.rayleigh[i] * unit, 1e-9, `${id} rayleigh ${i}`),
+      close(k * u.scale[0] * unit, air.rayleigh[i] * unit, 1e-9, `${id} rayleigh ${i}`),
     );
-    u.mie.forEach((k, i) => near(k * u.scale[1] * unit, air.mie[i] * unit, 1e-9, `${id} mie ${i}`));
+    u.mie.forEach((k, i) =>
+      close(k * u.scale[1] * unit, air.mie[i] * unit, 1e-9, `${id} mie ${i}`),
+    );
   }
   /* Earth's air is bluest: Rayleigh scattering rises with frequency. */
   assert.ok(
@@ -219,7 +219,7 @@ test("the atmosphere shell: thin shells of scattering air on the bodies that hav
   assert.ok(steps("economy") >= 4, "even the lightest march resolves the limb");
 });
 
-test("close-up maps: detailed where there is detail, lighter on small devices", () => {
+test("near-up maps: detailed where there is detail, lighter on small devices", () => {
   assert.equal(closeUpMapWidth("earth", false), 2048);
   assert.equal(closeUpMapWidth("earth", true), 1024);
   assert.ok(closeUpMapWidth("neptune", false) <= 1024);
@@ -227,7 +227,7 @@ test("close-up maps: detailed where there is detail, lighter on small devices", 
     assert.ok(closeUpMapWidth(id, true) <= 1024, id);
 });
 
-test("store: close-ups need a globe, today and the solar map; leaving is automatic", () => {
+test("store: near-ups need a globe, today and the solar map; leaving is automatic", () => {
   const api = useOrrery.getState;
   const mars = { kind: "planet", id: "mars" };
   const phobos = { kind: "moon", id: "phobos" };
@@ -268,7 +268,7 @@ test("store: close-ups need a globe, today and the solar map; leaving is automat
   assert.equal(api().closeUp, null, "a view change ends it");
 });
 
-test("store: one clock; play only toggles, and a seek or a close-up keeps it", () => {
+test("store: one clock; play only toggles, and a seek or a near-up keeps it", () => {
   const api = useOrrery.getState;
   useOrrery.setState({ yearsAgo: 0, playing: false, guideOpen: false, closeUp: null, clock: null });
   api().togglePlay();
@@ -281,11 +281,11 @@ test("store: one clock; play only toggles, and a seek or a close-up keeps it", (
   api().togglePlay();
   api().select({ kind: "planet", id: "mars" });
   api().enterCloseUp();
-  assert.equal(api().playing, true, "a close-up holds the clock without pausing it");
+  assert.equal(api().playing, true, "a near-up holds the clock without pausing it");
   api().leaveCloseUp(true);
 });
 
-test("a close-up that follows a body round the Sun keeps the same three-quarter light", () => {
+test("a near-up that follows a body round the Sun keeps the same three-quarter light", () => {
   /* In the world frame, the camera's angle off the Sun as seen from the body. */
   const body = [10, 0, 0];
   const pose = closeUpPose(body, 1, 0.4, 0);
@@ -297,6 +297,6 @@ test("a close-up that follows a body round the Sun keeps the same three-quarter 
   const fromSun = Math.acos(-dir[0]);
   /* Up toward the Sun: the elevation is the complement of that angle, the framing the same. */
   const sunward = sunwardCloseUpPose(1, 0.4);
-  near(Math.PI / 2 - sunward.inclination, fromSun, 1e-12);
-  near(sunward.distance, pose.distance, 1e-12);
+  close(Math.PI / 2 - sunward.inclination, fromSun, 1e-12);
+  close(sunward.distance, pose.distance, 1e-12);
 });

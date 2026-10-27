@@ -45,12 +45,8 @@ import {
 
 import { moonOffset, moonOrientation } from "../src/space/solar-system/graphics/moons.ts";
 import { moonOrbitShape } from "../src/space/solar-system/model/moon-orbits.ts";
+import { close } from "./toolkit-helpers.mjs";
 
-const near = (actual, expected, tolerance, label = "") =>
-  assert.ok(
-    Math.abs(actual - expected) <= tolerance,
-    `${label} ${actual} is not within ${tolerance} of ${expected}`,
-  );
 const RAD = Math.PI / 180;
 const T2026 = centuriesSinceJ2000(new Date("2026-10-15T00:00:00Z"));
 
@@ -80,40 +76,40 @@ test("axial tilts match the planetary fact sheets, retrograde rotators included"
     pluto: 119.6,
   };
   for (const [id, expected] of Object.entries(tilt))
-    near(Math.acos(spinAxis(id).dot(orbitNormal(id))) / RAD, expected, 0.1, id);
+    close(Math.acos(spinAxis(id).dot(orbitNormal(id))) / RAD, expected, 0.1, id);
   // The Sun's equator is inclined 7.25° to the ecliptic.
-  near(Math.acos(poleVector("sun", T2026).y) / RAD, 7.25, 0.02, "sun");
+  close(Math.acos(poleVector("sun", T2026).y) / RAD, 7.25, 0.02, "sun");
 });
 
 test("sidereal rotation periods match current measurements", () => {
   const hours = (id) => (360 * 24) / (SPINS[id].meridian(1) - SPINS[id].meridian(0));
-  near(hours("sun") / 24, 25.38, 0.01, "Sun (Carrington)");
-  near(hours("mercury") / 24, 58.6462, 0.001, "Mercury");
-  near(hours("venus") / 24, -243.0226, 0.001, "Venus (Margot et al. 2021)");
-  near(hours("earth"), 23.9345, 0.0001, "Earth");
-  near(hours("mars"), 24.6229, 0.0001, "Mars");
-  near(hours("jupiter"), 9.925, 0.0005, "Jupiter System III");
-  near(hours("saturn"), 10 + 33 / 60 + 38 / 3600, 0.0005, "Saturn (Mankovich et al. 2019)");
-  near(hours("uranus"), -17.247864, 0.00001, "Uranus (Lamy et al. 2025)");
-  near(hours("neptune"), 15.9663, 0.0005, "Neptune (Karkoschka 2011, adopted by the IAU in 2015)");
-  near(hours("pluto") / 24, 6.3872, 0.0001, "Pluto");
+  close(hours("sun") / 24, 25.38, 0.01, "Sun (Carrington)");
+  close(hours("mercury") / 24, 58.6462, 0.001, "Mercury");
+  close(hours("venus") / 24, -243.0226, 0.001, "Venus (Margot et al. 2021)");
+  close(hours("earth"), 23.9345, 0.0001, "Earth");
+  close(hours("mars"), 24.6229, 0.0001, "Mars");
+  close(hours("jupiter"), 9.925, 0.0005, "Jupiter System III");
+  close(hours("saturn"), 10 + 33 / 60 + 38 / 3600, 0.0005, "Saturn (Mankovich et al. 2019)");
+  close(hours("uranus"), -17.247864, 0.00001, "Uranus (Lamy et al. 2025)");
+  close(hours("neptune"), 15.9663, 0.0005, "Neptune (Karkoschka 2011, adopted by the IAU in 2015)");
+  close(hours("pluto") / 24, 6.3872, 0.0001, "Pluto");
 });
 
 test("figures: IAU radii, flattening of the oblate planets", () => {
-  near(PLANET_RADIUS_KM.mercury, 2439.4, 0.05, "Mercury mean radius (IAU 2015)");
+  close(PLANET_RADIUS_KM.mercury, 2439.4, 0.05, "Mercury mean radius (IAU 2015)");
   for (const id of PLANET_IDS) {
     const { meanKm, equatorialKm, polarKm } = FIGURES[id];
     assert.equal(meanKm, PLANET_RADIUS_KM[id], id);
-    near(Math.cbrt(equatorialKm ** 2 * polarKm) / meanKm, 1, 2e-4, `${id} volume`);
+    close(Math.cbrt(equatorialKm ** 2 * polarKm) / meanKm, 1, 2e-4, `${id} volume`);
   }
-  near(flattening("earth"), 1 / 298.257, 2e-5, "Earth");
-  near(flattening("mars"), 0.00589, 2e-5, "Mars");
-  near(flattening("jupiter"), 0.06499, 2e-5, "Jupiter (Juno 1-bar figure)");
-  near(flattening("saturn"), 0.09796, 2e-5, "Saturn");
-  near(flattening("uranus"), 0.02293, 2e-5, "Uranus");
-  near(flattening("neptune"), 0.01708, 2e-5, "Neptune");
-  near(FIGURES.sun.meanKm, 695_700, 1, "nominal solar radius");
-  near(FIGURES.pluto.meanKm, 1188.3, 0.1, "Pluto (New Horizons)");
+  close(flattening("earth"), 1 / 298.257, 2e-5, "Earth");
+  close(flattening("mars"), 0.00589, 2e-5, "Mars");
+  close(flattening("jupiter"), 0.06499, 2e-5, "Jupiter (Juno 1-bar figure)");
+  close(flattening("saturn"), 0.09796, 2e-5, "Saturn");
+  close(flattening("uranus"), 0.02293, 2e-5, "Uranus");
+  close(flattening("neptune"), 0.01708, 2e-5, "Neptune");
+  close(FIGURES.sun.meanKm, 695_700, 1, "nominal solar radius");
+  close(FIGURES.pluto.meanKm, 1188.3, 0.1, "Pluto (New Horizons)");
 });
 
 test("the Earth turns to today's angle: Greenwich faces the sidereal time", () => {
@@ -138,7 +134,7 @@ test("rings: Saturn's divisions and Uranus's epsilon ring sit at their radii", (
   assert.ok(at(saturn, 119_500) < 0.15, "Cassini Division");
   assert.ok(at(saturn, 133_589) < at(saturn, 132_000) / 2, "Encke gap");
   assert.ok(at(saturn, 138_000) < 0.01, "Roche division");
-  near(136_770 / FIGURES.saturn.equatorialKm, 2.269, 0.001, "A ring edge in Saturn radii");
+  close(136_770 / FIGURES.saturn.equatorialKm, 2.269, 0.001, "A ring edge in Saturn radii");
   const uranus = RINGS.uranus;
   assert.ok(at(uranus, 51_149) > 0.5, "ε ring");
   assert.ok(at(uranus, 50_500) === 0, "gap inside ε");
@@ -151,16 +147,16 @@ test("rings: Neptune's faint dusty rings survive the strip and its mipmaps", () 
   const strip = levels[0];
   const at = (km) =>
     Math.floor(((km - neptune.innerKm) / (neptune.outerKm - neptune.innerKm)) * strip.texels);
-  near(strip.opacity[at(41_900)], 1e-4, 1e-6, "Galle, τ ≈ 10⁻⁴");
-  near(strip.dust[at(41_900)], 0.55, 1e-6, "Galle's dust");
+  close(strip.opacity[at(41_900)], 1e-4, 1e-6, "Galle, τ ≈ 10⁻⁴");
+  close(strip.dust[at(41_900)], 0.55, 1e-6, "Galle's dust");
   assert.equal(strip.opacity[at(50_000)], 0, "the gap inside Lassell");
   assert.equal(levels.at(-1).texels, 1, "the chain ends at one texel");
   const total = (level) => level.opacity.reduce((sum, a) => sum + a, 0) / level.texels;
   for (const level of levels)
-    near(total(level), total(strip), 1e-6, `mean opacity at ${level.texels}`);
+    close(total(level), total(strip), 1e-6, `mean opacity at ${level.texels}`);
   const weighted = (level) =>
     level.opacity.reduce((sum, a, t) => sum + a * level.dust[t], 0) / level.texels;
-  near(weighted(levels.at(-1)), weighted(strip), 1e-7, "dust, weighted by opacity, is kept");
+  close(weighted(levels.at(-1)), weighted(strip), 1e-7, "dust, weighted by opacity, is kept");
 });
 
 test("rings: a long exposure lifts only the systems darker than Saturn's", () => {
@@ -212,13 +208,13 @@ test("true colours: butterscotch Mars, Uranus and Neptune alike, Neptune a littl
   assert.ok(mars.g / mars.r > 0.45 && mars.b / mars.r < 0.45, "Mars is tan, not red");
   const uranus = mean("uranus");
   const neptune = mean("neptune");
-  near(neptune.luminance / uranus.luminance, 1, 0.2, "similar lightness");
+  close(neptune.luminance / uranus.luminance, 1, 0.2, "similar lightness");
   assert.ok(neptune.b / neptune.g > uranus.b / uranus.g, "Neptune bluer");
   assert.ok(uranus.g > uranus.r && neptune.g > neptune.r, "both greenish blue, not deep blue");
 });
 
 test("Earth's coastlines enclose 29 % land; the Great Red Spot has its current size", () => {
-  near(earthLandFraction(256, 128), 0.292, 0.015, "land fraction");
+  close(earthLandFraction(256, 128), 0.292, 0.015, "land fraction");
   const kmPerDeg = (FIGURES.jupiter.equatorialKm * Math.PI) / 180;
   const long = GREAT_RED_SPOT.longDeg * kmPerDeg * Math.cos(GREAT_RED_SPOT.lat * RAD);
   assert.ok(long > 13_000 && long < 17_000, `GRS ${long} km long`);
@@ -275,11 +271,11 @@ test("moons: IAU mean radii and sidereal periods", () => {
   };
   assert.deepEqual(MOONS.map((m) => m.id).sort(), Object.keys(radius).sort());
   for (const moon of MOONS) {
-    near(FIGURES[moon.id].meanKm, radius[moon.id], 0.01, moon.id);
+    close(FIGURES[moon.id].meanKm, radius[moon.id], 0.01, moon.id);
     // Inertial rate along the orbit: dM/dt + dω/dt + dΩ/dt · cos i.
     const rates = meanRates(moon);
     const turn = rates.M + rates.omega + rates.node * Math.cos(moon.i * RAD);
-    near(360 / turn, period[moon.id], period[moon.id] * 3e-5, `${moon.id} period`);
+    close(360 / turn, period[moon.id], period[moon.id] * 3e-5, `${moon.id} period`);
   }
 });
 
@@ -316,8 +312,8 @@ test("moons sit where JPL Horizons puts them today", () => {
     const model = moonOffset(moon.id, date);
     // The Moon's mean elements leave out the Sun's pull (evection, variation): ~3°.
     const tolerance = moon.id === "moon" ? 3 : 0.5;
-    near(model.angleTo(truth) / RAD, 0, tolerance, `${moon.id} direction`);
-    near(
+    close(model.angleTo(truth) / RAD, 0, tolerance, `${moon.id} direction`);
+    close(
       model.length() * 149_597_870.7,
       truth.length(),
       truth.length() * 0.02,
@@ -348,7 +344,7 @@ test("resonant moons follow their librations through the fitted decades", () => 
     const date = new Date(`${day}T00:00:00Z`);
     for (const [id, [x, y, z]] of Object.entries(moons)) {
       const model = moonOffset(id, date);
-      near(model.angleTo(equatorialFrameToScene(x, y, z)) / RAD, 0, 0.5, `${id} ${day}`);
+      close(model.angleTo(equatorialFrameToScene(x, y, z)) / RAD, 0, 0.5, `${id} ${day}`);
     }
   }
 });
@@ -359,7 +355,7 @@ test("Io, Europa and Ganymede keep the Laplace resonance", () => {
     const date = new Date(iso);
     const phi = meanLongitude("io", date) - 3 * meanLongitude("europa", date);
     const laplace = (((phi + 2 * meanLongitude("ganymede", date)) % 360) + 360) % 360;
-    near(laplace, 180, 0.5, iso);
+    close(laplace, 180, 0.5, iso);
   }
 });
 
@@ -377,17 +373,17 @@ test("moons rotate synchronously, the Moon in its Cassini state", () => {
     }
   }
   const spin = new Vector3(0, 1, 0).applyQuaternion(moonOrientation("moon", date));
-  near(spin.angleTo(new Vector3(0, 1, 0)) / RAD, 1.54, 0.01, "Moon's axis from the ecliptic pole");
+  close(spin.angleTo(new Vector3(0, 1, 0)) / RAD, 1.54, 0.01, "Moon's axis from the ecliptic pole");
   const a = moonOffset("moon", date);
   const b = moonOffset("moon", new Date(date.getTime() + 86_400_000));
-  near(spin.angleTo(a.cross(b)) / RAD, 6.7, 0.1, "Moon's axis from its orbit normal");
+  close(spin.angleTo(a.cross(b)) / RAD, 6.7, 0.1, "Moon's axis from its orbit normal");
 });
 
 test("the sky almanac and the orrery agree on Earth's radius and the Moon's tilt", () => {
   assert.equal(FIGURES.earth.equatorialKm, EARTH_EQUATORIAL_RADIUS_KM);
-  near(EARTH_EQUATORIAL_RADIUS_KM, 6378.14, 0.01, "Meeus' 6378.14 km");
+  close(EARTH_EQUATORIAL_RADIUS_KM, 6378.14, 0.01, "Meeus' 6378.14 km");
   assert.equal(MOONS.find((moon) => moon.id === "moon").cassini, LUNAR_EQUATOR_INCLINATION_DEG);
-  near(LUNAR_EQUATOR_INCLINATION_DEG, 1 + 32 / 60 + 32.7 / 3600, 1e-5, "I = 1°32′32.7″");
+  close(LUNAR_EQUATOR_INCLINATION_DEG, 1 + 32 / 60 + 32.7 / 3600, 1e-5, "I = 1°32′32.7″");
 });
 
 test("moon maps: brightness follows albedo, Europa brightest of the Galileans, Callisto darkest", () => {

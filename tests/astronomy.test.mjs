@@ -37,12 +37,8 @@ import {
   neighbourSeparationAu,
 } from "../src/space/galaxy/model/neighbours.ts";
 import { GALACTIC_YEAR, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
+import { close } from "./toolkit-helpers.mjs";
 
-const near = (actual, expected, tolerance, label = "") =>
-  assert.ok(
-    Math.abs(actual - expected) <= tolerance,
-    `${label} ${actual} is not within ${tolerance} of ${expected}`,
-  );
 /** Signed difference of two angles in degrees, in (−180, 180]. */
 const angle = (a, b) => ((((a - b) % 360) + 540) % 360) - 180;
 const hms = (h, m, s) => (h + m / 60 + s / 3600) * 15;
@@ -56,12 +52,12 @@ function heliocentricLongitude(id, date) {
 
 test("Greenwich sidereal time matches Meeus examples 12.a and 12.b", () => {
   // 1987 April 10, 0h UT: θ₀ = 13h10m46.3668s.
-  near(siderealTime(new Date("1987-04-10T00:00:00Z"), 0), hms(13, 10, 46.3668), 1e-6, "12.a");
+  close(siderealTime(new Date("1987-04-10T00:00:00Z"), 0), hms(13, 10, 46.3668), 1e-6, "12.a");
   // 1987 April 10, 19h21m UT: θ₀ = 8h34m57.0896s.
-  near(siderealTime(new Date("1987-04-10T19:21:00Z"), 0), hms(8, 34, 57.0896), 1e-6, "12.b");
+  close(siderealTime(new Date("1987-04-10T19:21:00Z"), 0), hms(8, 34, 57.0896), 1e-6, "12.b");
   // East longitude adds directly.
   const date = new Date("1987-04-10T00:00:00Z");
-  near(angle(siderealTime(date, 15), siderealTime(date, 0) + 15), 0, 1e-9, "east longitude");
+  close(angle(siderealTime(date, 15), siderealTime(date, 0) + 15), 0, 1e-9, "east longitude");
 });
 
 test("equatorial to horizontal coordinates match Meeus example 13.b", () => {
@@ -69,9 +65,9 @@ test("equatorial to horizontal coordinates match Meeus example 13.b", () => {
   // sidereal time 8h34m56.853s at Greenwich; west longitude 77°03′56″.
   const lst = hms(8, 34, 56.853) - dms(77, 3, 56);
   const venus = toHorizontal(hms(23, 9, 16.641), dms(-6, 43, 11.61), lst, dms(38, 55, 17));
-  near(venus.altitude, 15.1249, 5e-4, "altitude");
+  close(venus.altitude, 15.1249, 5e-4, "altitude");
   // Meeus measures azimuth from the south: A = 68.0337°; from the north, +180°.
-  near(venus.azimuth, 248.0337, 5e-4, "azimuth");
+  close(venus.azimuth, 248.0337, 5e-4, "azimuth");
 });
 
 test("precession matches Meeus example 21.b once proper motion is removed", () => {
@@ -84,34 +80,34 @@ test("precession matches Meeus example 21.b once proper motion is removed", () =
     dms(49, 13, 42.48),
     new Date(Date.UTC(2028, 10, 13, 4, 33, 36)),
   );
-  near(ra, hms(2, 46, 11.331) - (0.03425 * years * 15) / 3600, 2e-5, "α");
-  near(dec, dms(49, 20, 54.54) + (0.0895 * years) / 3600, 2e-5, "δ");
+  close(ra, hms(2, 46, 11.331) - (0.03425 * years * 15) / 3600, 2e-5, "α");
+  close(dec, dms(49, 20, 54.54) + (0.0895 * years) / 3600, 2e-5, "δ");
 });
 
 test("the scene frame puts the ecliptic and the Galaxy where the IAU defines them", () => {
   // Scene +X is the vernal equinox, +Y the north ecliptic pole (RA 18h, δ = 90° − ε).
   const equinox = equatorialToScene(0, 0);
-  near(equinox.x, 1, 1e-12);
+  close(equinox.x, 1, 1e-12);
   const pole = equatorialToScene(270, 90 - 23.4392794);
-  near(pole.y, 1, 1e-9, "ecliptic pole");
+  close(pole.y, 1, 1e-9, "ecliptic pole");
   // The June solstice point lies at ecliptic longitude 90°: scene −Z.
-  near(equatorialToScene(90, 23.4392794).z, -1, 1e-9, "solstice");
+  close(equatorialToScene(90, 23.4392794).z, -1, 1e-9, "solstice");
   // IAU galactic pole (RA 192.8595°, δ +27.1284°) is 60.19° from the ecliptic pole,
   // and the galactic centre (Sgr A*) lies in the galactic plane.
   const galacticPole = equatorialToScene(192.8595, 27.1284);
-  near((Math.acos(galacticPole.y) * 180) / Math.PI, 60.19, 0.01, "galactic tilt");
-  near(equatorialToScene(266.4168, -29.0078).dot(galacticPole), 0, 0.002, "centre in plane");
+  close((Math.acos(galacticPole.y) * 180) / Math.PI, 60.19, 0.01, "galactic tilt");
+  close(equatorialToScene(266.4168, -29.0078).dot(galacticPole), 0, 0.002, "centre in plane");
 });
 
 test("the Sun matches Meeus example 25.a and the 2026 equinoxes and solstices", () => {
   // 1992 October 13.0 TD (JDE 2448908.5): true λ = 199.90988°, R = 0.99766 au,
   // apparent α = 13h13m31.4s, δ = −7°47′06″. The low-precision series is ~0.01°.
   const sun = solarEcliptic(2448908.5);
-  near(angle(sun.longitude, 199.90988), 0, 0.01, "λ");
-  near(sun.distance, 0.99766, 2e-5, "R");
+  close(angle(sun.longitude, 199.90988), 0, 0.01, "λ");
+  close(sun.distance, 0.99766, 2e-5, "R");
   const { ra, dec } = eclipticToEquatorial(sun.longitude, 0, sun.obliquity);
-  near(angle(ra, hms(13, 13, 31.4)), 0, 0.01, "α");
-  near(dec, dms(-7, 47, 6), 0.01, "δ");
+  close(angle(ra, hms(13, 13, 31.4)), 0, 0.01, "α");
+  close(dec, dms(-7, 47, 6), 0.01, "δ");
   // Published instants (UTC) when the apparent longitude reaches 0°, 90°, 180°, 270°.
   for (const [iso, longitude] of [
     ["2026-03-20T14:46:00Z", 0],
@@ -120,7 +116,7 @@ test("the Sun matches Meeus example 25.a and the 2026 equinoxes and solstices", 
     ["2026-12-21T20:50:00Z", 270],
   ]) {
     const at = solarEcliptic(julianEphemerisDay(new Date(iso))).longitude;
-    near(angle(at, longitude), 0, 0.02, iso);
+    close(angle(at, longitude), 0, 0.02, iso);
   }
 });
 
@@ -141,7 +137,7 @@ test("the Moon is new at every published 2026 new moon and keeps to its distance
     "2026-12-09T00:52:00Z",
   ]) {
     const jde = julianEphemerisDay(new Date(iso));
-    near(angle(lunarPosition(jde).longitude, solarEcliptic(jde).longitude), 0, 0.03, iso);
+    close(angle(lunarPosition(jde).longitude, solarEcliptic(jde).longitude), 0, 0.03, iso);
   }
   // Geocentric distance stays within the known extremes (356,400–406,700 km).
   let min = Infinity;
@@ -161,7 +157,7 @@ test("Kepler's equation is solved to machine precision across eccentricities", (
       const M = (k / 36) * 2 * Math.PI;
       const E = keplerEquation.compute({ M, e });
       const residual = E - e * Math.sin(E) - (M % (2 * Math.PI));
-      near(Math.abs(Math.sin(residual / 2)), 0, 1e-11, `e=${e} M=${M}`);
+      close(Math.abs(Math.sin(residual / 2)), 0, 1e-11, `e=${e} M=${M}`);
     }
   }
 });
@@ -177,9 +173,9 @@ test("the JPL Earth agrees with the Almanac Sun once the equinox of date is remo
     const sun = solarEcliptic(julianEphemerisDay(date));
     const precession = (5029.0966 * T) / 3600;
     const expected = sun.longitude + 180 - precession + 20.5 / 3600;
-    near(angle(heliocentricLongitude("earth", date), expected), 0, 0.015, date.toISOString());
+    close(angle(heliocentricLongitude("earth", date), expected), 0, 0.015, date.toISOString());
     const [x, y, z] = keplerPosition(jplElements("earth", T));
-    near(Math.hypot(x, y, z), sun.distance, 1e-4, "Sun–Earth distance");
+    close(Math.hypot(x, y, z), sun.distance, 1e-4, "Sun–Earth distance");
   }
 });
 
@@ -194,7 +190,7 @@ test("planets reach opposition on the published 2026–27 dates", () => {
     ["mars", "2027-02-19T12:00:00Z"],
   ]) {
     const date = new Date(iso);
-    near(angle(heliocentricLongitude(id, date), heliocentricLongitude("earth", date)), 0, 0.6, id);
+    close(angle(heliocentricLongitude(id, date), heliocentricLongitude("earth", date)), 0, 0.6, id);
   }
 });
 
@@ -212,34 +208,38 @@ test("orbital periods follow Kepler's third law to the measured sidereal periods
   ]) {
     const computed = periodYears(jplElements(id, 0).a);
     // P² = a³ ignores the planet's own mass (Jupiter: 0.1 %); 0.15 % covers it.
-    near(computed / period, 1, 0.0015, id);
+    close(computed / period, 1, 0.0015, id);
   }
 });
 
 test("comets and dwarf planets pass perihelion where and when they did or will", () => {
   const distance = (elements) => Math.hypot(...keplerPosition(elements));
   // Halley: perihelion 1986 February 9, q = 0.587 au.
-  near(distance(namedById("halley").elementsAt(new Date("1986-02-09T00:00:00Z"), 0)), 0.587, 0.005);
+  close(
+    distance(namedById("halley").elementsAt(new Date("1986-02-09T00:00:00Z"), 0)),
+    0.587,
+    0.005,
+  );
   // Pluto (JPL table): perihelion 1989 September 5, q = 29.66 au.
   const pluto = (iso) => jplElements("pluto", centuriesSinceJ2000(new Date(iso)));
-  near(distance(pluto("1989-09-05T00:00:00Z")), 29.66, 0.05, "Pluto q");
+  close(distance(pluto("1989-09-05T00:00:00Z")), 29.66, 0.05, "Pluto q");
   // Sedna: perihelion about 2076, q ≈ 76.2 au.
-  near(distance(namedById("sedna").elementsAt(new Date("2076-07-01T00:00:00Z"), 0)), 76.2, 0.3);
+  close(distance(namedById("sedna").elementsAt(new Date("2076-07-01T00:00:00Z"), 0)), 76.2, 0.3);
 });
 
 test("nearby stars sit at their measured distances and meet their published encounters", () => {
   const star = (id) => NEIGHBOURS.find((s) => s.id === id);
   // Proxima Centauri: 4.2465 ly (Gaia DR3 parallax 768.07 mas).
-  near(neighbourDistanceLy(star("proxima"), 0), 4.2465, 0.002, "Proxima");
+  close(neighbourDistanceLy(star("proxima"), 0), 4.2465, 0.002, "Proxima");
   // α Centauri AB (Akeson et al. 2021): closest, ~3.1 ly, in ~28,000 years on the
   // straight line (cf. Bobylev 2010: 0.91 pc at 28.4 kyr on an integrated orbit).
   const alpha = closestApproach(star("alphaCen"));
-  near(alpha.ly, 3.15, 0.15, "α Cen distance");
-  near(-alpha.yearsAgo, 28_000, 1_500, "α Cen time");
+  close(alpha.ly, 3.15, 0.15, "α Cen distance");
+  close(-alpha.yearsAgo, 28_000, 1_500, "α Cen time");
   // Barnard's Star: ~3.75 ly in ~9,800 years (Bobylev 2010: 1.148 pc, 9.8 kyr).
   const barnard = closestApproach(star("barnard"));
-  near(barnard.ly, 3.75, 0.1, "Barnard distance");
-  near(-barnard.yearsAgo, 9_800, 500, "Barnard time");
+  close(barnard.ly, 3.75, 0.1, "Barnard distance");
+  close(-barnard.yearsAgo, 9_800, 500, "Barnard time");
   // Scholz's Star passed through the outer Oort cloud ~70–80 kyr ago
   // (Mamajek et al. 2015: 0.82 ly, 70 +15/−10 kyr; Dupuy et al. 2019: 68.7 kau ≈ 1.09 ly,
   // 80.5 kyr; straight-line track here).
@@ -250,13 +250,13 @@ test("nearby stars sit at their measured distances and meet their published enco
 
 test("the Sun's galactic orbit closes once per galactic year", () => {
   const today = sunGalactic(0);
-  near(today[0], 27_000, 1e-9);
-  near(today[1], 68, 1e-9);
-  near(today[2], 0, 1e-9);
+  close(today[0], 27_000, 1e-9);
+  close(today[1], 68, 1e-9);
+  close(today[2], 0, 1e-9);
   /* One galactic year back the Sun is at the same angle; its epicycles keep their own clocks. */
   const lap = sunGalactic(GALACTIC_YEAR);
-  near(Math.atan2(-lap[2], lap[0]), 0, 1e-9, "back after one lap");
-  near(galacticLaps(0), SUN_BIRTH / GALACTIC_YEAR, 1e-12);
+  close(Math.atan2(-lap[2], lap[0]), 0, 1e-9, "back after one lap");
+  close(galacticLaps(0), SUN_BIRTH / GALACTIC_YEAR, 1e-12);
 });
 
 test("neighbour tracks have a stationary distance minimum and preserve output buffers", () => {
@@ -266,15 +266,15 @@ test("neighbour tracks have a stationary distance minimum and preserve output bu
     assert.equal(neighbourPosition(star, yearsAgo, out), out);
     const before = neighbourPosition(star, yearsAgo - 100);
     const after = neighbourPosition(star, yearsAgo + 100);
-    for (let k = 0; k < 3; k++) near((before[k] + after[k]) / 2, out[k], 1e-9);
+    for (let k = 0; k < 3; k++) close((before[k] + after[k]) / 2, out[k], 1e-9);
     const velocity = after.map((v, k) => (v - before[k]) / 200);
     const cosine =
       out.reduce((sum, v, k) => sum + v * velocity[k], 0) /
       (Math.hypot(...out) * Math.hypot(...velocity));
-    near(cosine, 0, 1e-10);
+    close(cosine, 0, 1e-10);
     assert.ok(neighbourDistanceLy(star, yearsAgo - 100) > ly);
     assert.ok(neighbourDistanceLy(star, yearsAgo + 100) > ly);
-    near(
+    close(
       neighbourDistanceLy(star, yearsAgo - 100),
       neighbourDistanceLy(star, yearsAgo + 100),
       1e-12,

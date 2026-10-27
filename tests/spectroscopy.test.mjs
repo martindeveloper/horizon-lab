@@ -76,12 +76,7 @@ import {
   viewFromPath,
   viewRouteParams,
 } from "../src/features/spectroscopy/routing.ts";
-
-const near = (actual, expected, tolerance, label = "") =>
-  assert.ok(
-    Math.abs(actual - expected) <= tolerance,
-    `${label} ${actual} is not within ${tolerance} of ${expected}`,
-  );
+import { close } from "./toolkit-helpers.mjs";
 
 const BENCH = {
   view: "kirchhoff",
@@ -110,17 +105,17 @@ test("Saha and Boltzmann reproduce the textbook hydrogen curves (Pₑ = 20 Pa)",
   let half = 0;
   for (let T = 5000; T < 20_000 && !half; T += 10)
     if (ionizationFractions("H", T, 20)[0] < 0.5) half = T;
-  near(half, 9600, 150, "50 % ionized");
+  close(half, 9600, 150, "50 % ionized");
   let peak = 0;
   let best = 0;
   for (let T = 5000; T < 25_000; T += 10) {
     const share = levelShare("H", 0, 8, 10.1988, T, 20);
     if (share > best) [best, peak] = [share, T];
   }
-  near(peak, 9900, 200, "n = 2 peak");
+  close(peak, 9900, 200, "n = 2 peak");
   // Stages always add up; a cool gas is neutral, a hot one ionized.
   for (const T of [3000, 8000, 30_000])
-    near(
+    close(
       ionizationFractions("Fe", T, 10).reduce((a, b) => a + b, 0),
       1,
       1e-12,
@@ -128,17 +123,17 @@ test("Saha and Boltzmann reproduce the textbook hydrogen curves (Pₑ = 20 Pa)",
   assert.ok(ionizationFractions("Na", 2000, 10)[0] > 0.99);
   assert.ok(ionizationFractions("Ca", 6000, 10)[1] > 0.9, "a Sun-like layer holds Ca II");
   // Partition functions from NIST's levels: Fe I near 28 at 5000 K, hydrogen its ground state.
-  near(partitionFunction("Fe I", 5000), 28, 3);
-  near(partitionFunction("H I", 5000), 2, 1e-6);
+  close(partitionFunction("Fe I", 5000), 28, 3);
+  close(partitionFunction("H I", 5000), 2, 1e-6);
 });
 
 test("the Voigt function meets its exact limits and keeps its area", () => {
-  for (const v of [0, 0.7, 1.5, 3]) near(voigt(0, v), Math.exp(-v * v), 1e-4);
-  near(voigt(1, 0), 0.4275836, 1e-5, "e·erfc(1)");
-  near(voigt(0.01, 40) / (0.01 / (Math.sqrt(Math.PI) * 1600)), 1, 0.01, "Lorentz wing");
+  for (const v of [0, 0.7, 1.5, 3]) close(voigt(0, v), Math.exp(-v * v), 1e-4);
+  close(voigt(1, 0), 0.4275836, 1e-5, "e·erfc(1)");
+  close(voigt(0.01, 40) / (0.01 / (Math.sqrt(Math.PI) * 1600)), 1, 0.01, "Lorentz wing");
   let area = 0;
   for (let v = -300; v <= 300; v += 0.002) area += voigt(0.05, v) * 0.002;
-  near(area, Math.sqrt(Math.PI), 2e-3);
+  close(area, Math.sqrt(Math.PI), 2e-3);
 });
 
 test("a thin line's width counts its atoms: W = π rₑ λ² N f", () => {
@@ -155,8 +150,8 @@ test("a thin line's width counts its atoms: W = π rₑ λ² N f", () => {
   const tau = profile.peak * Math.sqrt(Math.PI) * profile.doppler * 1e-9;
   const expected = tau;
   const actual = absorbedWidth(profile) * 1e-9;
-  near(actual / expected, 1, 2e-3);
-  near(CLASSICAL_ELECTRON_RADIUS_M, 2.8179403205e-15, 1e-24);
+  close(actual / expected, 1, 2e-3);
+  close(CLASSICAL_ELECTRON_RADIUS_M, 2.8179403205e-15, 1e-24);
 });
 
 test("Kirchhoff's laws come out of one slab: dark, bright, reversed and vanishing lines", () => {
@@ -172,7 +167,7 @@ test("Kirchhoff's laws come out of one slab: dark, bright, reversed and vanishin
   const reversed = at(bench({ lamp: 1600, gas: 2500 }), 588.995);
   assert.ok(reversed.flux > 1.5 * reversed.continuum, "emission over a cooler lamp");
   const even = at(bench({ lamp: 2000, gas: 2000 }), 588.995);
-  near(even.flux / even.continuum, 1, 1e-5, "no line at one temperature");
+  close(even.flux / even.continuum, 1, 1e-5, "no line at one temperature");
   // Hydrogen needs heat: no Balmer lines in a flame, a clear series in a 10,000 K gas.
   assert.ok(
     reportLine(lineNear("H I", 656.279), bench({ elements: ["H"], column: 24 })).tau < 1e-10,
@@ -190,13 +185,18 @@ test("the curve of growth rises as N, flattens, then grows as √N", () => {
   const slopes = (curve) =>
     curve.slice(0, -1).map((p, i) => (curve[i + 1][1] - p[1]) / (curve[i + 1][0] - p[0]));
   // On the bench a thin sodium vapour starts on the linear part.
-  near(slopes(curveOfGrowth(lineNear("Na I", 588.995), bench({ column: 17 })))[0], 1, 0.02, "weak");
+  close(
+    slopes(curveOfGrowth(lineNear("Na I", 588.995), bench({ column: 17 })))[0],
+    1,
+    0.02,
+    "weak",
+  );
   // In the Sun an iron line runs from nearly linear through the flat part into the wings.
   const sun = star(starPhotosphere("sun"), { microturbulence: 1 });
   const iron = slopes(curveOfGrowth(lineNear("Fe I", 526.954), sun));
   assert.ok(iron[0] > 0.7, "rising");
   assert.ok(Math.min(...iron) < 0.3, "flat");
-  near(iron.at(-1), 0.5, 0.03, "damped");
+  close(iron.at(-1), 0.5, 0.03, "damped");
   for (let i = 1; i < iron.length; i++)
     assert.ok(Math.abs(iron[i] - iron[i - 1]) < 0.15, "a smooth curve");
 });
@@ -213,7 +213,7 @@ test("the continuum is H⁻ in the Sun and hydrogen in a B star, on the models' 
   for (let i = layerNear(sun, -3); i <= layerNear(sun, 0.5); i++) {
     const [a, b] = [sun.layers[i - 1], sun.layers[i]];
     const rosseland = (10 ** b.logTau - 10 ** a.logTau) / (b.column - a.column);
-    near(totalOpacity(parts(b)) / rosseland, 1, 0.25, `log τ = ${b.logTau}`);
+    close(totalOpacity(parts(b)) / rosseland, 1, 0.25, `log τ = ${b.logTau}`);
   }
   const photosphere = sun.layers[layerNear(sun, 0)];
   assert.ok(share(parts(photosphere), "hMinusBoundFree", "hMinusFreeFree") > 0.9, "H⁻ in the Sun");
@@ -257,8 +257,8 @@ test("down the main sequence, hydrogen peaks near A0 and helium appears only in 
 });
 
 test("a star's lines shift with its velocity; Earth's oxygen bands stay put", () => {
-  near(BAND_HEADS.A, 759.4, 0.15, "A band head");
-  near(BAND_HEADS.B, 686.75, 0.2, "B band head");
+  close(BAND_HEADS.A, 759.4, 0.15, "A band head");
+  close(BAND_HEADS.B, 686.75, 0.2, "B band head");
   const moving = star(starPhotosphere("sun"), { velocity: 300, airmass: 1, resolution: 20_000 });
   const s = synthesize(moving, 650, 770, 6000);
   const shifted = 656.279 * dopplerWavelengthRatio(300);
@@ -274,8 +274,8 @@ test("a velocity stretches a star's whole light, continuum too, and changes noth
   const still = synthesize(rest, 500, 520, 400);
   const moving = synthesize({ ...rest, velocity: 120 }, 500 * s, 520 * s, 400);
   for (let i = 0; i < 400; i++) {
-    near(moving.flux[i] / still.flux[i], 1, 1e-9, `flux ${i}`);
-    near(moving.continuum[i] / still.continuum[i], 1, 1e-9, `continuum ${i}`);
+    close(moving.flux[i] / still.flux[i], 1, 1e-9, `flux ${i}`);
+    close(moving.continuum[i] / still.continuum[i], 1, 1e-9, `continuum ${i}`);
   }
 });
 
@@ -283,11 +283,11 @@ test("a wide window's coarser grid shows what a close look does, within its samp
   // Pixels 0.1 nm wide in both: the whole range on its coarsest step, 20 nm on the finest.
   const sun = observationFor({ ...BENCH, view: "sun", air: true });
   const whole = synthesize(sun, 380, 770, 3901);
-  const close = synthesize(sun, 500, 520, 201);
+  const fine = synthesize(sun, 500, 520, 201);
   for (let i = 0; i < 201; i++) {
     const j = 1200 + i;
-    near(whole.wavelengths[j], close.wavelengths[i], 1e-9);
-    near(whole.flux[j] / whole.continuum[j], close.flux[i] / close.continuum[i], 0.01, `${j}`);
+    close(whole.wavelengths[j], fine.wavelengths[i], 1e-9);
+    close(whole.flux[j] / whole.continuum[j], fine.flux[i] / fine.continuum[i], 0.01, `${j}`);
   }
 });
 
@@ -310,16 +310,20 @@ test("the printed equations compute from the same physics as the spectra", () =>
   const [neutral, ionized] = ionizationFractions("Na", T, Pe);
   const U = partitionFunction("Na II", T) / partitionFunction("Na I", T);
   const chi = ionizationEnergy("Na I");
-  near(sahaEquation.compute({ U, chi, T, Pe }) / (ionized / neutral), 1, 1e-9, "Saha");
+  close(sahaEquation.compute({ U, chi, T, Pe }) / (ionized / neutral), 1, 1e-9, "Saha");
   const level = levelShare("Na", 0, 2, 2.1, T, Pe) / neutral;
-  near(boltzmannLaw.compute({ g: 2, dE: 2.1, T }) / partitionFunction("Na I", T) / level, 1, 1e-12);
+  close(
+    boltzmannLaw.compute({ g: 2, dE: 2.1, T }) / partitionFunction("Na I", T) / level,
+    1,
+    1e-12,
+  );
   const B = planckRadiance(589, 2000);
   assert.equal(
     slabTransfer.compute({ I0: 3e12, tau: 0.7, lambda: 589, T: 2000 }),
     slabIntensity(3e12, B, 0.7),
   );
-  near(slabTransfer.compute({ I0: 0, tau: 50, lambda: 589, T: 2000 }) / B, 1, 1e-12, "thick: B");
-  near(slabTransfer.compute({ I0: 5, tau: 0, lambda: 589, T: 2000 }), 5, 1e-12, "thin: I₀");
+  close(slabTransfer.compute({ I0: 0, tau: 50, lambda: 589, T: 2000 }) / B, 1, 1e-12, "thick: B");
+  close(slabTransfer.compute({ I0: 5, tau: 0, lambda: 589, T: 2000 }), 5, 1e-12, "thin: I₀");
 });
 
 test("hydrogen's lines follow Rydberg's formula to within fine structure", () => {
@@ -329,7 +333,7 @@ test("hydrogen's lines follow Rydberg's formula to within fine structure", () =>
     [5, 434.047],
   ]) {
     const vacuum = rydbergFormula.compute({ n1: 2, n2: n });
-    near(vacuum / 1.000277 - lineNear("H I", nm).wavelength, 0, 0.02, `n = ${n}`);
+    close(vacuum / 1.000277 - lineNear("H I", nm).wavelength, 0, 0.02, `n = ${n}`);
   }
 });
 
@@ -434,7 +438,7 @@ test("a dense bench gas keeps its line: wings wider than the wavelength stay on 
   const depths = [20, 23, 24, 26].map((column) =>
     depthAt(synthesize(bench({ column }), 585, 593, 400), 588.995),
   );
-  for (const depth of depths) near(depth, depths[0], 0.01, "saturated at every column");
+  for (const depth of depths) close(depth, depths[0], 0.01, "saturated at every column");
   assert.ok(depths[0] > 0.9);
 });
 
@@ -456,7 +460,7 @@ test("hydrogen's Holtsmark wings keep the line's area, so its oscillator strengt
     const weight = i === 0 || i === n ? 0.5 : 1;
     sum += weight * shapeAt(shape, Math.sinh(u)) * Math.cosh(u);
   }
-  near((sum * (2 * top)) / n / Math.sqrt(Math.PI), 1, 0.01, "area / √π");
+  close((sum * (2 * top)) / n / Math.sqrt(Math.PI), 1, 0.01, "area / √π");
 });
 
 test("fine structure stays resolved, energies come from vacuum wavelengths", () => {
@@ -467,8 +471,8 @@ test("fine structure stays resolved, energies come from vacuum wavelengths", () 
   assert.equal(lithium.length, 2);
   // Na D₂ at 588.995 nm in air is 589.158 nm in vacuum: 2.1044 eV, the levels' separation.
   const d2 = lineNear("Na I", 588.995);
-  near(d2.vacuum, 589.158, 0.002);
-  near(HC_EV_NM / d2.vacuum, d2.upper - d2.lower, 2e-4);
+  close(d2.vacuum, 589.158, 0.002);
+  close(HC_EV_NM / d2.vacuum, d2.upper - d2.lower, 2e-4);
 });
 
 test("the bench's lamp shines by Planck's law, even cool and in the blue, where it curves most", () => {
@@ -476,7 +480,7 @@ test("the bench's lamp shines by Planck's law, even cool and in the blue, where 
   const s = synthesize(cool, 380, 770, 1201);
   for (let i = 0; i < s.wavelengths.length; i++) {
     const nm = s.wavelengths[i];
-    near(s.continuum[i] / planckRadiance(airToVacuum(nm), 1500), 1, 1e-5, `${nm} nm`);
+    close(s.continuum[i] / planckRadiance(airToVacuum(nm), 1500), 1, 1e-5, `${nm} nm`);
   }
 });
 
@@ -485,7 +489,7 @@ test("a star returns surface flux: an isothermal atmosphere gives πB(T)", () =>
   const isothermal = { ...sun, layers: sun.layers.map((l) => ({ ...l, temperature: 6000 })) };
   const spectrum = synthesize(star(isothermal, { resolution: 20_000 }), 500, 501, 5);
   const middle = spectrum.wavelengths[2];
-  near(spectrum.continuum[2] / (Math.PI * planckRadiance(airToVacuum(middle), 6000)), 1, 1e-3);
+  close(spectrum.continuum[2] / (Math.PI * planckRadiance(airToVacuum(middle), 6000)), 1, 1e-3);
 });
 
 test("a velocity is measured on the line the spectrum shows: Ca I in the Sun, Ca II in a B star", () => {
@@ -519,7 +523,7 @@ test("the store zooms within the visible range and the guide gives the visitor's
   const { useSpectroscopy, MIN_SPAN } = await import("../src/features/spectroscopy/lib/store.ts");
   const api = useSpectroscopy.getState;
   api().setRange([500, 500.01]);
-  near(api().range[1] - api().range[0], MIN_SPAN, 1e-9);
+  close(api().range[1] - api().range[0], MIN_SPAN, 1e-9);
   api().setRange([300, 900]);
   assert.deepEqual(api().range, [380, 770]);
   api().setStar("aldebaran");
@@ -554,7 +558,7 @@ test("the guide glides between steps: zooms stay in range, a lamp switched off s
   };
   assert.deepEqual(poseBetween(from, to, 0), { ...from, range: [380, 770] });
   assert.deepEqual(poseBetween(from, to, 1), to);
-  near(ease(0.5), 0.5, 1e-12);
+  close(ease(0.5), 0.5, 1e-12);
   assert.ok(ease(0.1) < 0.1 && ease(0.9) > 0.9, "gentle start and landing");
   const lamps = [];
   for (let t = 0; t <= 1; t += 0.05) {
@@ -662,13 +666,13 @@ test("Balmer Stark widths follow Gigosos et al.'s fits: Hα and Hβ their own, h
   });
   const [alpha, beta, gamma] = [656.279, 486.135, 434.047].map((nm) => lineNear("H I", nm));
   // Gigosos, González & Cardeñoso 2003: Hα 2 × 0.549 nm (half width at half area), Hβ 4.800 nm.
-  near(starkFwhm(alpha, at(1e23)), 1.098, 1e-9, "Hα");
-  near(starkFwhm(beta, at(1e23)), 4.8, 1e-9, "Hβ");
-  near(starkFwhm(alpha, at(1e22)) / starkFwhm(alpha, at(1e23)), 10 ** -0.67965, 1e-9, "Hα power");
-  near(starkFwhm(beta, at(1e22)) / starkFwhm(beta, at(1e23)), 10 ** -0.68116, 1e-9, "Hβ power");
+  close(starkFwhm(alpha, at(1e23)), 1.098, 1e-9, "Hα");
+  close(starkFwhm(beta, at(1e23)), 4.8, 1e-9, "Hβ");
+  close(starkFwhm(alpha, at(1e22)) / starkFwhm(alpha, at(1e23)), 10 ** -0.67965, 1e-9, "Hα power");
+  close(starkFwhm(beta, at(1e22)) / starkFwhm(beta, at(1e23)), 10 ** -0.68116, 1e-9, "Hβ power");
   // Hγ: Hβ's width times λ² (n_u² − n_l²), the linear Stark splitting seen in wavelength.
   const expected = 4.8 * (434.047 / 486.135) ** 2 * (21 / 12);
-  near(starkFwhm(gamma, at(1e23)) / expected, 1, 2e-4, "Hγ");
+  close(starkFwhm(gamma, at(1e23)) / expected, 1, 2e-4, "Hγ");
   assert.equal(starkFwhm(lineNear("Na I", 588.995), at(1e23)), 0, "no linear Stark effect");
 });
 
@@ -687,13 +691,13 @@ test("a star's caches change nothing: windows, velocities, the curve of growth a
   const iron = lineNear("Fe I", 526.954);
   for (const [exponent, logWidth] of curveOfGrowth(iron, obs).filter((_, i) => i % 6 === 0)) {
     const width = reportLine(iron, { ...obs, abundances: { Fe: exponent } }).equivalentWidth;
-    near(Math.log10(width), logWidth, 1e-9, `log N + ${exponent}`);
+    close(Math.log10(width), logWidth, 1e-9, `log N + ${exponent}`);
   }
   // Taking an element's opacity out matches removing the element.
   const without = new Map(synthesizeWithout(obs, 585, 595, 600, ["Na"])).get("Na");
   const removed = synthesize({ ...obs, abundances: { Na: -20 } }, 585, 595, 600);
   for (let i = 0; i < 600; i++)
-    near(without.flux[i] / removed.flux[i], 1, 1e-5, `${removed.wavelengths[i]} nm`);
+    close(without.flux[i] / removed.flux[i], 1, 1e-5, `${removed.wavelengths[i]} nm`);
 });
 
 test("the guide, views and notes quote the catalogue's figures in both languages", async () => {
