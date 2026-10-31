@@ -21,7 +21,8 @@ export function OrreryGuide() {
   const t = useTranslations("orrery");
   const tGuide = useTranslations("guide");
   const f = useFormatter();
-  const figures = proseArgs(PROSE_FIGURES, useLocale());
+  const locale = useLocale();
+  const figures = proseArgs(PROSE_FIGURES, locale);
   const index = useOrrery((s) => s.guideStep);
   const yearsAgo = useOrrery((s) => s.yearsAgo);
   const playing = useOrrery((s) => s.playing);
@@ -36,7 +37,7 @@ export function OrreryGuide() {
       kicker={tGuide("progressWith", {
         step: index + 1,
         total: TOUR.length,
-        detail: formatYearsAgo(t, f, yearsAgo),
+        detail: formatYearsAgo(t, f, yearsAgo, locale),
       })}
       stepKey={step.id}
       focusNext

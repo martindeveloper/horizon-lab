@@ -172,7 +172,7 @@ export function TimeDock() {
           <p className="truncate font-display text-body/5 font-medium tracking-tight text-fg-primary tabular-nums md:text-panel md:leading-normal">
             {onClock
               ? f.dateTime(clockDate(now, driftYears), { dateStyle: "long" })
-              : formatYearsAgo(t, f, yearsAgo)}
+              : formatYearsAgo(t, f, yearsAgo, locale)}
           </p>
           {/* Phones wrap into reserved lines, so scrubbing never makes the dock jump. */}
           <p className="text-ui text-fg-secondary tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate short:min-h-0 short:truncate">
@@ -241,7 +241,8 @@ function EraNote({ children }: { children: string }) {
  */
 function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }) {
   const t = useTranslations("orrery");
-  const figures = proseArgs(PROSE_FIGURES, useLocale());
+  const locale = useLocale();
+  const figures = proseArgs(PROSE_FIGURES, locale);
   const f = useFormatter();
   const epoch = epochOf(yearsAgo);
   const note = noteOf(yearsAgo);
@@ -250,7 +251,7 @@ function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }
   const chapterStart = STATIONS[STATIONS.findIndex((s) => s.id === epoch) - 1]?.end ?? 0;
   const api = useOrrery.getState;
   const tickLabel = (m: (typeof TICKS)[number]) =>
-    `${t(`moments.${m.id}`)} · ${formatYearsAgo(t, f, m.yearsAgo)}`;
+    `${t(`moments.${m.id}`)} · ${formatYearsAgo(t, f, m.yearsAgo, locale)}`;
   return (
     <div data-coach="time" className="mt-1.5 md:mt-0">
       <div className="relative">
@@ -283,7 +284,7 @@ function Timeline({ yearsAgo, dilation }: { yearsAgo: number; dilation: number }
           max={1000}
           step={1}
           value={[Math.round(at * 1000)]}
-          valueText={(v) => formatYearsAgo(t, f, sliderToYearsAgo(v / 1000))}
+          valueText={(v) => formatYearsAgo(t, f, sliderToYearsAgo(v / 1000), locale)}
           onValueChange={([v]) => api().setYearsAgo(sliderToYearsAgo((v ?? 1000) / 1000))}
           trackClassName="bg-transparent"
           rangeClassName="hidden"

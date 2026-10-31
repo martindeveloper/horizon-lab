@@ -171,7 +171,7 @@ function tracerCard(sel: Of<SolarSelection, "tracer">, m: Moment): Card {
     badge: t("badges.sample"),
     title: t("cards.tracer.title", { bin: t(`layers.${bin}`) }),
     facts: [
-      { id: "when", label: t("facts.when"), value: formatYearsAgo(t, f, yearsAgo) },
+      { id: "when", label: t("facts.when"), value: formatYearsAgo(t, f, yearsAgo, d.locale) },
       ...orbitRows(t, f, d, el),
     ],
     body: note,

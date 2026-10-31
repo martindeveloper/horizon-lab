@@ -279,6 +279,8 @@ src/
   lib/
     sources.ts                 Shared bibliography the catalogue figures cite
     facts.ts                   Catalogue fact and card-spec types, and their printers
+    year-span.ts               A span of years in the unit that fits and its rounding (Orrery,
+                               Deep Field, Afterglow); each lab words its own sentences
     scene-store.ts             Every simulation's render settings and their setters
                                (`renderSlice`), what a zoomable scene's store shares
                                (`sceneSlice`), the guide machine of every stepped guide

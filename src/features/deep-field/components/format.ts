@@ -1,4 +1,5 @@
 import type { Format, Translate } from "@/lib/facts";
+import { yearSpan } from "@/lib/year-span";
 import { CMB_AGE_YEARS } from "@/space/cosmos/model/cosmos";
 import { convert, pluralOf } from "@horizon/toolkit/science";
 
@@ -19,9 +20,12 @@ export function formatAgo(t: Translate, f: Format, years: number, locale: string
   const hours = minutes / 60;
   if (hours < 48) return t("time.hours", n(hours));
   if (years < 1) return t("time.days", n(convert(years, "yr", "d")));
-  if (years < 1e6) return t("time.years", n(years));
-  if (years < 1e9) return t("time.million", n(years / 1e6));
-  return t("time.billion", n(years / 1e9));
+  /* A year and more: the shared unit rule (`yearSpan`), in the units the sentences have words for. */
+  const { unit, ...values } = yearSpan(f, years, locale, {
+    units: ["years", "million", "billion"],
+    digits: 3,
+  });
+  return t(`time.${unit}`, values);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { CalendarClock } from "lucide-react";
-import { useFormatter, useNow, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { GLYPH_ICON } from "@/components/simulations/body-orb";
@@ -37,6 +37,7 @@ export function momentTitle(t: Translate, event: SolarEvent) {
 export function MomentsPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("orrery");
   const f = useFormatter();
+  const locale = useLocale();
   const now = useNow({ updateInterval: 60_000 });
   const events = useMoments(now);
   const date = (value: Date) => f.dateTime(value, { dateStyle: "medium" });
@@ -89,7 +90,7 @@ export function MomentsPanel({ onClose }: { onClose: () => void }) {
             <ListItem
               key={moment.id}
               icon={<CalendarClock aria-hidden className={GLYPH_ICON} />}
-              detail={formatYearsAgo(t, f, moment.yearsAgo)}
+              detail={formatYearsAgo(t, f, moment.yearsAgo, locale)}
               onClick={() => {
                 const api = useOrrery.getState();
                 api.setYearsAgo(moment.yearsAgo);

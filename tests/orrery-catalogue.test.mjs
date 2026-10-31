@@ -113,7 +113,9 @@ test("years ago keep fixed decimals: two for billions, one for millions", () => 
         maximumFractionDigits: opts.maximumFractionDigits,
       }).format(value),
   };
-  assert.equal(formatYearsAgo(t, f, 4e9), "time.billion:4.00");
-  assert.equal(formatYearsAgo(t, f, 4.5e9), "time.billion:4.50");
-  assert.equal(formatYearsAgo(t, f, 5e6), "time.million:5.0");
+  assert.equal(formatYearsAgo(t, f, 4e9, "en"), "time.billion:4.00");
+  assert.equal(formatYearsAgo(t, f, 4.5e9, "en"), "time.billion:4.50");
+  assert.equal(formatYearsAgo(t, f, 5e6, "en"), "time.million:5.0");
+  /* The unit is picked on the printed value: 999,700 years is a million, not "1,000 thousand". */
+  assert.equal(formatYearsAgo(t, f, 999_700, "en"), "time.million:1.0");
 });
