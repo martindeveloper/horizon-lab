@@ -74,8 +74,8 @@ export type SceneStoreState = {
 export type SceneCamera = {
   /** Where the camera stands now, as a flight back there (a cut with reduced motion). */
   mark: () => () => void;
-  /** Zooms by a factor of the distance (below 1 nearer), easing as the wheel does. */
-  zoom: (factor: number) => void;
+  /** Zooms by a factor of the distance (below 1 nearer), easing as the wheel does; none in a view that only turns. */
+  zoom?: (factor: number) => void;
   /** Turns by button steps, as the camera pad does. */
   turn: (step: OrbitTurn) => void;
 };

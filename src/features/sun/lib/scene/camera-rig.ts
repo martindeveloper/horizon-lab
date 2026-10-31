@@ -455,7 +455,7 @@ export function createSunCamera(scope: DisposalScope, deps: SunCameraDeps) {
     rig.turnBy(by);
     deps.invalidate();
   };
-  const sceneCamera: SceneCamera = {
+  const sceneCamera: Required<SceneCamera> = {
     mark: () => {
       const back = sceneOrbit.mark();
       const framed = autoFramed;

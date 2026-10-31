@@ -145,7 +145,7 @@ export function lendCamera(
 export function orbitCamera(
   rig: Pick<OrbitRig, "inputPose" | "flyTo" | "zoomTo" | "turnBy" | "target">,
   invalidate: () => void,
-): SceneCamera {
+): Required<SceneCamera> {
   return {
     mark: () => {
       const { azimuth, inclination, distance } = rig.inputPose();

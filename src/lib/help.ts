@@ -30,8 +30,8 @@ type CameraHost = { camera?: SceneCamera | null };
 
 /**
  * The first step of a tour, the camera: `turns` button steps of `turn`, half a second apart,
- * then a zoom in by `zoom` and back out at `zoomBack` seconds, each shown by doing what it
- * does. `before` runs as the step begins (leaving an overview, say).
+ * then a zoom in by `zoom` and back out at `zoomBack` seconds where the camera zooms, each
+ * shown by doing what it does. `before` runs as the step begins (leaving an overview, say).
  */
 export function cameraStep<S extends CameraHost>(
   turn: OrbitTurn,
@@ -52,8 +52,8 @@ export function cameraStep<S extends CameraHost>(
     cues: [
       ...(before ? [{ run: before }] : []),
       ...turnCues,
-      { at: 1.8, run: (s) => s.camera?.zoom(zoom) },
-      { at: zoomBack, run: (s) => s.camera?.zoom(1 / zoom) },
+      { at: 1.8, run: (s) => s.camera?.zoom?.(zoom) },
+      { at: zoomBack, run: (s) => s.camera?.zoom?.(1 / zoom) },
     ],
   };
 }
