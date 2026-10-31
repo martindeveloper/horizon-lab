@@ -3,13 +3,15 @@
 // k ≈ 0.6 the flat-looking disc of airless regolith. A narrow wrap softens the
 // terminator; Earth adds an ocean glint, hazy bodies a Fresnel rim, and Saturn
 // the shadow of its rings. A new map fades in over what showed before (a streaming
-// placeholder's flat colour, or a coarser map).
+// placeholder's flat colour, or a coarser map); a host may blend in a later surface.
 
 uniform sampler2D map;       // surface colour (sRGB texture, read as linear)
 uniform vec3 mapTint;        // multiplies the map: a placeholder is a white texel times its colour
 uniform sampler2D prior;     // what the map is fading in over
 uniform vec3 priorTint;
 uniform float fade;          // 0 shows the prior, 1 the map
+uniform sampler2D laterMap;  // a later surface: a host's model of how the body will look
+uniform float later;         // 0 shows the map, 1 the later surface; 0 skips it
 uniform vec3 atmos;          // haze tint at the limb
 uniform float atmosStrength; // 0 = airless body
 uniform float ambient;       // linear floor so the night side is not pure black
@@ -18,6 +20,8 @@ uniform float specStrength;  // ocean glint
 uniform float specPower;     // glint tightness
 uniform vec3 sunPos;         // the Sun, world; the origin unless a host moves it
 uniform float sunRadius;     // the Sun's radius, world units; 0 lights from a point
+uniform vec3 sunlight;       // the Sun's light on the surface, linear: white at today's strength unless a host writes it
+uniform vec3 skylight;       // the sky's light on the night side's floor, linear: white unless a host writes it
 
 #ifdef OCCLUDERS
 // Bodies that may stand between this surface and the Sun: centre (world) and radius, world
@@ -91,18 +95,21 @@ void main() {
 
   vec3 albedo = texture2D(map, vUv).rgb * mapTint;
   if (fade < 1.0) albedo = mix(texture2D(prior, vUv).rgb * priorTint, albedo, fade);
-  vec3 col = albedo * (ambient + (1.0 - ambient) * diffuse);
+  if (later > 0.0) albedo = mix(albedo, texture2D(laterMap, vUv).rgb, later);
+  // The floor is the display's, whatever the Sun's strength: a night side never pure black,
+  // and lit by the sky's own colour where a host has one.
+  vec3 col = albedo * (ambient * skylight + (1.0 - ambient) * diffuse * sunlight);
 
   // Specular glint, only on the day side of bodies with specular reflection.
   if (specStrength > 0.0 && ndl > 0.0) {
     vec3 halfV = normalize(sunDir + viewDir);
-    col += pow(max(dot(n, halfV), 0.0), specPower) * specStrength * ndl;
+    col += pow(max(dot(n, halfV), 0.0), specPower) * specStrength * ndl * sunlight;
   }
 
   // Haze: Fresnel rim, brighter where the Sun lights the limb.
   if (atmosStrength > 0.0) {
     float fresnel = fresnelRim(n, viewDir, 2.35);
-    col += atmos * fresnel * atmosStrength * (0.15 + 0.85 * mu0);
+    col += atmos * fresnel * atmosStrength * (0.15 + 0.85 * mu0) * sunlight;
   }
 
   gl_FragColor = linearToOutputTexel(vec4(col, 1.0));

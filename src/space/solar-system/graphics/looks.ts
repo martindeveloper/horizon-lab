@@ -70,8 +70,10 @@ import SUN_FRAG from "./shaders/sun.frag.glsl";
 /**
  * Materials and textures, painted once at startup. Body maps and ring strips
  * come from `@horizon/toolkit/bodies`; sprites and the young disks are
- * small canvases. Bodies are lit by the Sun at the origin in linear light: no
- * photo plates, no post-processing. Everything here is disposed with the engine.
+ * small canvases. Bodies are lit by the Sun at the origin in linear light (`sunlight`, white
+ * at today's strength unless a host writes the Sun's colour and strength), and a host may blend
+ * in a later surface it models (`laterMap`, `later`): no photo plates, no post-processing.
+ * Everything here is disposed with the engine.
  */
 import VERT from "./shaders/surface.vert.glsl";
 import { BIN_COLOR } from "./tracers";
@@ -227,11 +229,15 @@ function lit(face: Face, look: Surface, sun: SunLight, defines?: Record<string, 
       ...occluders.uniforms,
       sunPos: { value: sun.sunPos },
       sunRadius: sun.sunRadius,
+      sunlight: { value: new Vector3(1, 1, 1) },
+      skylight: { value: new Vector3(1, 1, 1) },
       map: { value: face.texture },
       mapTint: { value: face.tint.clone() },
       prior: { value: WHITE },
       priorTint: { value: NO_TINT.clone() },
       fade: { value: 1 },
+      laterMap: { value: WHITE },
+      later: { value: 0 },
       atmos: { value: new Color(look.atmos?.[0] ?? "#000000") },
       atmosStrength: { value: look.atmos?.[1] ?? 0 },
       ambient: { value: look.ambient ?? 0.035 },
@@ -267,6 +273,7 @@ function airMaterial(air: Air, steps: number) {
       uMieG: { value: u.g },
       uDeep: { value: u.deep },
       uLight: { value: u.light },
+      uSunlight: { value: new Vector3(1, 1, 1) },
     },
     vertexShader: AIR_VERT,
     fragmentShader: AIR_FRAG,
