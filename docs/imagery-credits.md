@@ -28,6 +28,11 @@ limb) are filled with Horizon's painted maps.
 - Earth: Blue Marble Next Generation, October 2004, topography and bathymetry,
   with the Blue Marble cloud layer. NASA Earth Observatory (Reto Stöckli).
   <https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/>
+- Earth once its oceans are gone (Afterglow), a model: the same Blue Marble Next
+  Generation topography and bathymetry without clouds, the ocean basins shown as
+  bare seabed shaded by their depth, vegetation as bare soil and the ice sheets as
+  rock. NASA Earth Observatory (Reto Stöckli).
+  <https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/>
 - Mars: Viking Orbiter global colour mosaic, 925 m per pixel. NASA, USGS
   Astrogeology Science Center. Mean colour set to Hubble true colour.
   <https://astrogeology.usgs.gov/search/map/mars_viking_global_color_mosaic_925m>

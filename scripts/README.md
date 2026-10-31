@@ -10,6 +10,7 @@ One-off data builds, run by hand when a source changes, and the docs that descri
 | ------------------------------ | ------------------------------------------------------------------------------------------ | --------------------------------------- |
 | `fetch-cosmic-data.mjs`        | `src/space/cosmos/model/data/` (CF4, CLASSIX, DESI, basin/void/knot tables and provenance) | `src/space/cosmos/model/data/README.md` |
 | `build-planet-maps.mjs`        | `cdn/textures/bodies/<body>/<version>/` (planet, moon maps)                                | `docs/imagery-credits.md`               |
+| `build-dry-earth.mjs`          | `cdn/textures/bodies/earth-dry/<version>/` (Afterglow's modelled dry Earth)                | `docs/imagery-credits.md`               |
 | `build-spacecraft-models.mjs`  | `cdn/models/spacecraft/<id>/<version>/` (probes, Parker, observatories)                    | `docs/imagery-credits.md`               |
 | `build-sun-map.mjs`            | the Sun's map alone                                                                        | `docs/imagery-credits.md`               |
 | `build-sun-spot-stencil.mjs`   | `cdn/textures/bodies/sun/spots/<version>/` (Sun Lab spot atlas)                            | `docs/imagery-credits.md`               |

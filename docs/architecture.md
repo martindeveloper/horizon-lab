@@ -1040,6 +1040,8 @@ folder mirrors the bucket's keys:
   which also prints each far tier's mean colour for that entry (the placeholder while it
   streams). `npm run cdn:pull` fetches the published set, which the map tests check;
   without it they skip.
+- `textures/bodies/earth-dry/v<version>/earth-dry-<tier>.webp`: Afterglow's modelled dry
+  Earth (`DRY_EARTH_MAP`), written by `scripts/build-dry-earth.mjs`.
 - `textures/bodies/sun/spots/v<version>/atlas.png`, `pages.png`: the Sun Lab's close-up spot
   stencil, derived from the Sun's map by `scripts/build-sun-spot-stencil.mjs` (`VERSION`), its
   keys in `spot-stencil.generated.json`.

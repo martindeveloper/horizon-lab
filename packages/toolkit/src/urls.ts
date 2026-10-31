@@ -369,6 +369,8 @@ export const DOWNLOAD_URLS = {
   usgsMosaics: "https://planetarymaps.usgs.gov/mosaic",
   earthTopography:
     "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography-bathymetry/october/world.topo.bathy.200410.3x21600x10800.jpg",
+  earthTopographyLight:
+    "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography-bathymetry/october/world.topo.bathy.200410.3x5400x2700.jpg",
   earthClouds:
     "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_8192.tif",
   nistAsd: "https://physics.nist.gov/cgi-bin/ASD",
