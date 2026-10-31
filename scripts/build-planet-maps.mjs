@@ -36,6 +36,7 @@ import { buildSunMap } from "./build-sun-map.mjs";
 import { SRGB_TO_LINEAR as LUT, encodeSrgb as encode } from "./lib/colour.mjs";
 import { MOON_MAP_SOURCES, moonSourceX } from "./lib/moon-maps.mjs";
 import { fetchCached as download } from "./lib/net.mjs";
+import { raster } from "./lib/raster.mjs";
 
 sharp.cache(false);
 const root = new URL("../", import.meta.url);
@@ -224,24 +225,6 @@ async function opal(id, width) {
   anchor(img, mask, reference);
   fill(img, mask, reference);
   return img;
-}
-
-/** A large raster, resized with sharp, rolled so 0° east sits at the left edge. */
-async function raster(file, width, channels, centredOnZero) {
-  const h = width / 2;
-  const { data, info } = await sharp(file, { limitInputPixels: false, unlimited: true })
-    .resize(width, h, { fit: "fill", kernel: "lanczos3" })
-    .toColourspace(channels === 1 ? "b-w" : "srgb")
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const shift = centredOnZero ? width / 2 : 0;
-  const out = new Float32Array(width * h * channels);
-  for (let y = 0; y < h; y += 1)
-    for (let x = 0; x < width; x += 1)
-      for (let c = 0; c < channels; c += 1)
-        out[(y * width + x) * channels + c] =
-          data[(y * width + ((x + shift) % width)) * info.channels + c] / 255;
-  return out;
 }
 
 /**

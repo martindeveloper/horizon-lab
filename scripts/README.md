@@ -44,7 +44,8 @@ aws s3 cp cdn/textures/bodies/earth/v2/ s3://horizon-cdn/textures/bodies/earth/v
 ```
 
 Each script's header comment gives its sources and the exact command. `lib/net.mjs` fetches
-text and caches downloads; `lib/colour.mjs` converts between sRGB and linear light.
+text and caches downloads; `lib/colour.mjs` converts between sRGB and linear light;
+`lib/raster.mjs` reads an equirectangular source at a width, rolled to start at 0° east.
 
 The three Deep Field importers (`fetch-cosmic-data.mjs`, `fetch-dark-universe.mjs`,
 `fetch-cmb-data.mjs`) accept `--cache <directory>` for raw downloads and
