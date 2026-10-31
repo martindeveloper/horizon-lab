@@ -21,12 +21,8 @@ const NEVER: TripTimes = { t: Infinity, tau: Infinity, peak: 0 };
  * How long a drive takes from the ship to an anchor's place at a moment, on the two clocks;
  * forever to a place no drive reaches (`isFlyable`).
  */
-export const tripTo = (
-  drive: DriveId,
-  id: AnchorId,
-  ship: ArrayLike<number>,
-  { now, a }: Moment,
-) => (isFlyable(id) ? tripTimes(DRIVES[drive], distanceTo(id, now, a, ship)) : NEVER);
+export const tripTo = (drive: DriveId, id: AnchorId, ship: ArrayLike<number>, { now, a }: Moment) =>
+  isFlyable(id) ? tripTimes(DRIVES[drive], distanceTo(id, now, a, ship)) : NEVER;
 
 /** Earth's clock reads apart from the ship's once they differ by a hundredth. */
 export const clocksPart = ({ t, tau }: { t: number; tau: number }) => t > tau * 1.01;
