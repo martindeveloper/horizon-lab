@@ -170,7 +170,7 @@ a:focus-visible > .experience-play {
 /* Catalogue hero: a panorama over Ondřejov facing south, the brand mark at
    landscape scale. Today's solar arc spans the window, a frosted sun stands
    where the real Sun stands (HeroScene sets --sun-x, --sun-rise, --sun-glow,
-   and --sun-lift, the rise in pixels, capped on narrow screens),
+   and --sun-lift, the rise in pixels on the azimuth scale),
    the real sky blurs through it, and the horizon line clips it. Below the line
    the ground hides the stars. */
 .catalogue-hero {
@@ -243,7 +243,7 @@ a:focus-visible > .experience-play {
   white-space: nowrap;
 }
 
-/* Rise 0 centres the disc on the line, 1 lifts it by --sun-lift (on wide screens, to touch the top). */
+/* Rise 0 centres the disc on the line, 1 lifts it by --sun-lift (a degree up as long as one across). */
 .hero-sun {
   position: absolute;
   left: calc(var(--sun-x, 0.75) * 100%);

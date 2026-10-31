@@ -28,10 +28,12 @@ const MOON_RING = 0.62;
 /** A hero mounted later than this after page load arrived by navigation: no intro. */
 const INTRO_WINDOW = 4000;
 
+/** Facing south, the panorama spans azimuths from north-east to north-west, in degrees. */
+const AZIMUTH_FROM = 40;
+const AZIMUTH_SPAN = 280;
 /** Facing south: east on the left, west on the right. */
-const toX = (azimuth: number) => Math.min(0.97, Math.max(0.03, (azimuth - 40) / 280));
-/** Highest rise as a share of the hero's width. */
-const DOME = 0.5;
+const toX = (azimuth: number) =>
+  Math.min(0.97, Math.max(0.03, (azimuth - AZIMUTH_FROM) / AZIMUTH_SPAN));
 const toRise = (altitude: number) => Math.max(-1, Math.min(1, altitude / PEAK));
 
 type Body = { altitude: number; azimuth: number };
@@ -52,11 +54,38 @@ function sample(from: number, to: number, at: (ms: number) => Body) {
 }
 
 /**
- * Pixels from the line to a body's highest centre. Capped at a share of the
- * width, so a narrow, tall hero keeps the low dome of a wide one instead of
- * stretching the day into a spike.
+ * The Moon's own day around `now`, from lower culmination to the next, as the
+ * ends of a `sample` window. Its hour angle wraps from +180° to −180° there. A
+ * fixed 24 h window would leave a gap: the Moon comes back about 50 minutes later
+ * each day, so the path would break wherever the window ends, often high in the
+ * sky. Lower culmination lies below the horizon at Ondřejov, so the seam is hidden.
  */
-const liftFor = (w: number, h: number, size: number) => Math.max(0, Math.min(h - size, w * DOME));
+function lunarDay(now: number, hourAngle: (ms: number) => number): [number, number] {
+  const ends: number[] = [];
+  for (const step of [-STEP, STEP]) {
+    let ms = now;
+    let previous = hourAngle(ms);
+    // Bounded, though the wrap always comes within one lunar day.
+    while (Math.abs(ms - now) < DAY * 2) {
+      const next = hourAngle(ms + step);
+      if (Math.sign(step) * (next - previous) < 0) {
+        break;
+      }
+      ms += step;
+      previous = next;
+    }
+    ends.push(ms);
+  }
+  return [ends[0]!, ends[1]!];
+}
+
+/**
+ * Pixels from the line to a body at PEAK: a degree up is as long as a degree
+ * across, so the dome keeps the sky's proportions on any width instead of
+ * stretching to fill a tall hero. Capped so the disc stays inside.
+ */
+const liftFor = (w: number, h: number, size: number) =>
+  Math.max(0, Math.min(h - size, (w * PEAK) / AZIMUTH_SPAN));
 
 /**
  * The dial: the sky's daily turn about the pole, drawn face on. Each body
@@ -237,8 +266,7 @@ export function HeroScene({
       cache = {
         bucket,
         sun,
-        // The Moon's path over the twelve hours either side of now.
-        moon: sample(now - DAY / 2, now + DAY / 2, lunar),
+        moon: sample(...lunarDay(now, (ms) => lunar(ms).hourAngle), lunar),
         rise: event(sunrise, (t) => `↑ ${t}`),
         set: event(sunset, (t) => `${t} ↓`),
         sunRising: risingHourAngle(at(noon).declination, OBSERVER.latitude, HORIZON),
