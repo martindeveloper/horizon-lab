@@ -1,0 +1,18 @@
+/* The theme's `md` variant (theme.css) is the one breakpoint; `@variant` writes it here. */
+@reference "@horizon/toolkit/theme.css";
+
+/* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
+
+/* The timeline (components/timeline.tsx): the dock's horizon line. Where the tempo slows the
+   clock, dawn light rises from the line, fading upward; the playhead is the house's sun under
+   the horizon, a gold half-disc on the line, its corona the shared `slider-halo`. */
+:where([data-simulation="afterglow"]) .afterglow-dawn {
+  mask-image: linear-gradient(to top, black, transparent);
+}
+:where([data-simulation="afterglow"]) .afterglow-horizon {
+  box-shadow: 0 0 6px -1px color-mix(in oklab, var(--color-solar) 35%, transparent);
+}
+:where([data-simulation="afterglow"]) .afterglow-sun {
+  background-image: linear-gradient(to bottom, var(--color-solar) 50%, transparent 50%);
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--color-solar) 60%, transparent));
+}

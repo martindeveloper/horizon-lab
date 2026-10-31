@@ -1,0 +1,276 @@
+{
+  "app": "Afterglow",
+  "metadataDescription": "The Sun's whole life from low orbit over the worlds: the faint young Sun, the giant that swallows the inner planets, the white dwarf cooling for ever.",
+  "canvasLabel": "Low orbit over a world, the Sun over its limb, across the Sun's life",
+  "views": {
+    "young": "The young Sun",
+    "today": "Today",
+    "oceans": "The oceans lost",
+    "subgiant": "The swell",
+    "tip": "The red giant",
+    "flash": "The helium flash",
+    "pulses": "The pulses",
+    "nebula": "The nebula",
+    "dwarf": "The white dwarf"
+  },
+  "viewsShort": {
+    "young": "Young",
+    "today": "Today",
+    "oceans": "Oceans",
+    "subgiant": "Swell",
+    "tip": "Giant",
+    "flash": "Flash",
+    "pulses": "Pulses",
+    "nebula": "Nebula",
+    "dwarf": "Dwarf"
+  },
+  "viewHints": {
+    "young": "The young Sun shines at seven tenths of today. It will brighten. Press play.",
+    "today": "The Sun will swell past Mercury and Venus. Press play.",
+    "oceans": "The habitable zone has passed Earth. The oceans boil away.",
+    "subgiant": "The core is out of hydrogen. The Sun climbs to a giant.",
+    "tip": "Two hundred and fifty times wider. Mercury and Venus go.",
+    "flash": "Helium ignites. The Sun shrinks for a hundred million years.",
+    "pulses": "Pulses shed the envelope. The orbits widen.",
+    "nebula": "The hot core lights the cast-off gas. An illustration.",
+    "dwarf": "Stars at noon. The dwarf cools for ever."
+  },
+  "readouts": {
+    "label": "The Sun now, and what {name} gets of it",
+    "light": "Light",
+    "surface": "Surface",
+    "radius": "Radius",
+    "mass": "Mass",
+    "sunlight": "Sunlight",
+    "width": "Width",
+    "magnification": "Magnification"
+  },
+  "hud": {
+    "timeline": "The Sun's life",
+    "chapters": "Chapters",
+    "clock": "Clock",
+    "play": "Play",
+    "pause": "Pause",
+    "paused": "Paused",
+    "slower": "Slower",
+    "faster": "Faster",
+    "worlds": "Worlds",
+    "worldLost": "{name}, swallowed",
+    "standHere": "Stand here",
+    "wholeSky": "the whole sky",
+    "insideSun": "Inside the Sun",
+    "settings": "Settings"
+  },
+  "ratesShort": {
+    "quarter": "¼×",
+    "half": "½×",
+    "one": "1×",
+    "double": "2×",
+    "fourfold": "4×"
+  },
+  "span": {
+    "years": "{value} {valuePlural, select, one {year} other {years}}",
+    "thousand": "{value} thousand years",
+    "million": "{value} million years",
+    "billion": "{value} billion years"
+  },
+  "ago": {
+    "years": "{value} {valuePlural, select, one {year} other {years}} ago",
+    "thousand": "{value} thousand years ago",
+    "million": "{value} million years ago",
+    "billion": "{value} billion years ago"
+  },
+  "ahead": {
+    "years": "{value} {valuePlural, select, one {year} other {years}} from now",
+    "thousand": "{value} thousand years from now",
+    "million": "{value} million years from now",
+    "billion": "{value} billion years from now"
+  },
+  "time": {
+    "today": "today",
+    "perSecond": "{span} a second"
+  },
+  "units": {
+    "degrees": "{value}°",
+    "times": "{value}× Earth's today",
+    "percent": "{value} % of Earth's today",
+    "solarMasses": "{value} M☉",
+    "auValue": "{value} au",
+    "magnified": "{value}×",
+    "kelvin": "{value} K",
+    "solarLuminosities": "{value} L☉",
+    "solarRadii": "{value} R☉",
+    "earthSunlight": "{value} S⊕"
+  },
+  "facts": {
+    "sunlight": "Sunlight",
+    "sunWidth": "Sun's width",
+    "orbit": "Orbit",
+    "temperature": "Temperature from sunlight",
+    "fate": "Fate"
+  },
+  "fates": {
+    "engulfed": "Swallowed {when}",
+    "uncertain": "Swallowed by tides {when}, or spared on a wider orbit",
+    "survives": "Spared"
+  },
+  "badges": {
+    "model": "Modelled",
+    "lost": "Swallowed"
+  },
+  "cards": {
+    "earth": "Home until the oceans go. Its orbit widens to {earthTipOrbitAu} au as the Sun sheds mass, which by itself would clear the giant's {tipRadiusAu} au.",
+    "mars": "Thin air, so the sky stays dark and the red giant fills it. The habitable zone passes here as the Sun leaves the main sequence.",
+    "europa": "Airless ice. While the core burns helium, Jupiter's orbit gets {europaFlashPercent} % of the sunlight Earth has today.",
+    "enceladus": "Ice over an ocean. As the Sun climbs the giant branch the habitable zone reaches Saturn for a few tens of millions of years.",
+    "pluto": "Warm only at the giant's tip. From its widened orbit the nebula glows, then the dwarf fades among the stars.",
+    "earthCaution": "Schröder & Smith (2008) find tides and drag pull Earth in {earthLostKyr} thousand years before the tip; a planet needs {earthEscapeAu} au today to escape. Earlier work let Earth widen its orbit to {earthTipOrbitAu} au and survive."
+  },
+  "toggles": {
+    "glare": "Glare"
+  },
+  "atlas": {
+    "title": "Atlas",
+    "orbits": "Inner orbits",
+    "mapLabel": "The inner orbits from above, the Sun {radius} au across",
+    "mapNote": "Orbits widen as the Sun loses mass; the Sun's edge closes on them."
+  },
+  "hr": {
+    "title": "Hertzsprung–Russell diagram",
+    "label": "The Hertzsprung–Russell diagram, {name} marked",
+    "labelAll": "The Hertzsprung–Russell diagram",
+    "light": "Light (L☉)",
+    "radius": "{value} R☉",
+    "hotter": "hotter",
+    "cooler": "cooler",
+    "groups": {
+      "whiteDwarfs": "white dwarfs",
+      "mainSequence": "main sequence",
+      "giants": "giants",
+      "supergiants": "supergiants"
+    },
+    "lesson": "The Sun's dot walks its track: along the main sequence, up to the giants, down to the white dwarfs."
+  },
+  "help": {
+    "camera": {
+      "title": "Look round",
+      "body": "Drag to look round; double-tap to come back."
+    },
+    "timeline": {
+      "title": "Timeline",
+      "body": "The line under the clock is the Sun's life. Drag to scrub; tap a chapter to go there. Where dawn glows, time slows."
+    },
+    "worlds": {
+      "title": "Worlds",
+      "body": "Orbit another world at this moment. Tap it again for its card."
+    },
+    "clock": {
+      "title": "Clock",
+      "body": "Play the Sun's life. Slow chapters pass quickly; the fast ends hold."
+    },
+    "atlas": {
+      "title": "Atlas",
+      "body": "The inner orbits from above and the Sun's walk on the Hertzsprung–Russell diagram."
+    },
+    "settings": {
+      "body": "The glare and the render quality."
+    },
+    "guide": {
+      "body": "The Sun's life in ten steps, with the physics behind each."
+    },
+    "experiences": {
+      "title": "Viewing modes",
+      "body": "Immersive: just the view, no controls. Autoplay: sit back while the whole life runs to the music."
+    }
+  },
+  "tour": {
+    "steps": {
+      "young": {
+        "title": "The faint young Sun",
+        "body": "The Sun shone at {youngSunPercent} % of today's light. Earth kept its water all the same, and that is still a puzzle."
+      },
+      "today": {
+        "title": "Today",
+        "body": "{todayGyr} billion years on, the disc is {todayWidthDeg}° wide. Its light grows a tenth every billion years."
+      },
+      "oceans": {
+        "title": "The oceans lost",
+        "body": "In {oceansGyr} billion years the habitable zone's inner edge passes Earth. Its water escapes to space; by {oceansGoneGyrAhead} billion years the seas are gone."
+      },
+      "swell": {
+        "title": "The core runs dry",
+        "body": "At {msEndGyr} billion years the core's hydrogen is gone. Burning in a shell, the Sun swells and reddens."
+      },
+      "warm": {
+        "title": "A warm spell at Saturn",
+        "body": "On the climb the habitable zone reaches Saturn. Enceladus gets {enceladusWarmPercent} % of the sunlight Earth has today, for a few tens of millions of years."
+      },
+      "swallow": {
+        "title": "The red giant",
+        "body": "{tipGyrAhead} billion years from now the Sun reaches {tipRadiusRsun} solar radii at {tipKelvin} K. Mercury and Venus are gone; Earth's orbit widens to {earthTipOrbitAu} au, and whether tides pull it in is still argued."
+      },
+      "flash": {
+        "title": "The helium flash",
+        "body": "The core ignites helium in a flash. The Sun shrinks to {heliumRadiusRsun} solar radii for {heliumMyr} million years, and Jupiter's moons get {europaFlashPercent} % of Earth's sunlight."
+      },
+      "pulses": {
+        "title": "The pulses",
+        "body": "Thermal pulses shed the envelope; {massLostPercent} % of the Sun has already gone. The orbits widen as the mass streams away, and slow."
+      },
+      "nebula": {
+        "title": "The nebula",
+        "body": "The bare core, {nebulaKilokelvin} thousand kelvin, lights the cast-off gas. The nebula glows for {nebulaKyr} thousand years."
+      },
+      "dwarf": {
+        "title": "The white dwarf",
+        "body": "A white dwarf of {dwarfMass} solar masses, {dwarfRadiusKm} km across: Sirius B's kin, which burns at {siriusBKelvin} K. It takes {coolGyr} billion years to cool to the colour of a candle, and never stops."
+      }
+    },
+    "crossings": {
+      "orrery": {
+        "title": "The Orrery",
+        "hint": "The young Sun over the forming planets"
+      },
+      "sun": {
+        "title": "The Sun",
+        "hint": "Today's Sun up close"
+      },
+      "spectroscopy": {
+        "title": "Stellar Spectra",
+        "hint": "Why a cool star is red"
+      },
+      "giants": {
+        "title": "Giants",
+        "hint": "Sirius B beside the giants"
+      }
+    }
+  },
+  "technicalDetails": {
+    "title": "How Afterglow is drawn",
+    "summary": "A sparse, sourced track of the Sun's age, light, temperature and mass, interpolated between rows; everything else follows by the laws: the radius, the colour, the habitable zone, the widened orbits and what each world sees. The view is a display model exposed to the world's day side.",
+    "features": {
+      "track": "Schröder & Smith's table from the zero-age main sequence to the AGB tip, Miller Bertolami's crossing to the nebula, the Montreal cooling sequence for the dwarf.",
+      "worlds": "Orbits widened as the Sun loses mass; each world's sunlight, the Sun's width in its sky and whether the giant reaches it.",
+      "sky": "The world's globe with its measured map from low orbit, lit by the Sun's colour and strength; the Sun's photosphere over its limb with the shared continuum, limb darkening and granulation; the shared Milky Way and bright stars on the night side; the nebula from inside its shell, an illustration; Earth once its oceans go, a model dried from its measured relief.",
+      "clock": "Chapters as the clock's dilation: each stretch of the life gets seconds of its own whatever its length in years, and the tempo slows it where the Sun changes fast."
+    },
+    "sections": {
+      "track": {
+        "title": "The track",
+        "body": "The rows are literature values: Schröder & Smith (2008, Table 1) for the main sequence, the red-giant tip ({tipLuminosity} L☉, {tipKelvin} K, {massLostPercent} % of the mass lost) and the AGB; between them a drawn climb, held to their statement that the final ascent sweeps the inner planets in five million years. After the envelope leaves, Miller Bertolami's crossing ({nebulaKyr} thousand years for a 0.55 M☉ remnant) leads onto the 0.5 M☉ Montreal cooling sequence, the nearest tabulated mass to the {dwarfMass} M☉ remnant. Light and temperature interpolate log-linearly in age, and in the logarithm of the time since the envelope left where the clock runs fast; the radius follows by Stefan–Boltzmann."
+      },
+      "worlds": {
+        "title": "The worlds",
+        "body": "Each orbit is the body's mean distance today, widened by the mass the Sun has lost with the orbit's angular momentum kept, so Earth reaches {earthTipOrbitAu} au at the tip; a moon rides its planet's orbit. Sunlight is the Sun's light over the distance squared, the Sun's width 2 asin(R/d). A world is swallowed when the Sun's radius reaches its orbit: Mercury {mercuryLostMyr} million and Venus {venusLostMyr} million years before the tip on the drawn climb. Earth's widened orbit escapes by that rule, but Schröder & Smith's tidal calculation pulls it in {earthLostKyr} thousand years before the tip; the card says so. A world's temperature is its equilibrium temperature, the warmth sunlight alone holds it at: the Sun's surface temperature times a quarter power of the share it absorbs and the square root of its radius over twice the orbit, with each world's Bond albedo today from the literature. It leaves out any greenhouse, so today's Earth reads {earthTodayKelvin} K against the 288 K measured, and a steaming or scorched Earth would be hotter still."
+      },
+      "sky": {
+        "title": "The view",
+        "body": "The camera orbits the world a little over a radius from its centre (the notes below give the figure), on the place where the Sun stands just over the limb, a sunrise; the globe is the shared solar close-up's, its measured map at true size with its atmosphere shell where the world has air, lit from the Sun's direction by the Sun's colour and visible strength from the track, so a scrub changes the day side in every chapter. Once the oceans go, Earth's globe is a model: its measured map blends into a dry Earth built from the cloud-free Blue Marble relief (the land's shape and relief kept, the basins bare seabed shaded by their measured depth, plants turned to soil, the ice sheets to rock, no clouds), from the moist-greenhouse limit ({waterLossAu} au from today's Sun, reached {oceansGoingGyrAhead} billion years from now) to the runaway-greenhouse limit ({runawayAu} au, {oceansGoneGyrAhead} billion years), evenly in the logarithm of the sunlight; whether a thick haze of carbon dioxide would hide that rock is left open. The Sun's globe is drawn at its true angular size: its colour the shared CIE-integrated Planck continuum at the Sun's temperature, its limb darkening Claret's four-coefficient fit from the shared tables at the Sun's temperature and gravity, Eddington's grey law once the remnant's gravity leaves the grid, its granulation the shared convection pattern at the cells' true count across the radius (a cell a few pressure scale heights wide), so the giant shows a few huge cells and the dwarf none. The view is framed: the disc's size follows a steady power of the Sun's radius, whichever world it is seen from, so the swell and the collapse read as one change and a move to another world leaves the disc as it was; the HUD reads the magnification, and the Sun keeps its place over the limb. A move to another world is a flight as the clock runs or a world is chosen: the clock slows and the camera flies like a ship, still facing the Sun, in one smooth move: it backs off the world, which rounds into a globe and shrinks to a point beside the Sun, crosses with the Sun and the stars alone, then closes on the next world, a point on the Sun's other side that grows into a globe and settles under the camera, and the readouts name the world below as the globes change; a scrub of the timeline dissolves from one world to the next in place. The guide frames each step on what it is about (the disc, the globe or the sky), holds still while it is read and cuts between worlds with a dissolve; the drift sways wide and slow across the Sun and the limb and flies between worlds at a slower pace. The display's exposure is one law for everything: each radiance relative to the light a white surface at Earth's orbit has today, in the display's bands, shown as a root of it (the exponent is in the notes below); the eye adapts both ways, the day side held between a floor and a ceiling so a world under the dwarf still shows, and to the field it sees, so a giant that fills the view sets the exposure and the world is shown by it; the Sun's disc, brighter than any surface it lights by the square of the distance over its radius, is held at a peak that keeps its hue, limb and cells. The shared Milky Way and bright stars fade in as the field darkens; while the clock runs the camera sways and the world turns slowly under it, at a pace for the eye rather than its true day, which the clock would blur. The nebula is seen from inside its shell, so the whole sky takes a faint glow lit by the hot core, [O III] green near the star and Hα red farther out, brightest about the star and thinning on the chapter's clock, its light on the world's night side: an illustration, not a radiative model. Beyond the exposure nothing here is a photometric prediction."
+      },
+      "clock": {
+        "title": "The clock",
+        "body": "Nine chapters, each with seconds of its own at the pace of 1: the main sequence a few each, the climb and the tip the time, the fast ends a few, the dwarf's fade on a logarithmic clock. Playing, a billion years and ten thousand pass alike; the timeline's segments are proportional to the seconds, and its playhead rises over the horizon line. Where the Sun's radius and temperature would change faster than the eye follows (the climb's last rise, the flash, the crossing to the nebula), the tempo slows the playhead, easing in before and back up as the rush ends, so a calm stretch after it plays at its own pace; a move to another world slows it gently too, never to a stop, and dawn glows over the timeline where time slows. A visit opens playing; a hand on the timeline pauses it, a look round does not. A chapter tapped or a guide step eases the clock there along the track."
+      }
+    }
+  }
+}

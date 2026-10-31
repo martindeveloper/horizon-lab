@@ -4,6 +4,7 @@ import { format } from "oxfmt";
 
 import { UNITS, formatSignificant } from "@horizon/toolkit/science";
 
+import { catalogueFacts as afterglowFacts } from "../../src/features/afterglow/lib/model/catalogue.ts";
 import { catalogueFacts as blackHoleFacts } from "../../src/features/black-hole/lib/catalogue.ts";
 import { ownCatalogueFacts as deepFieldFacts } from "../../src/features/deep-field/lib/model/catalogue/index.ts";
 import {
@@ -38,6 +39,7 @@ const catalogueFacts = () => [
   ...giantsFacts().map((entry) => ({ ...entry, path: `giants/${entry.path}` })),
   ...blackHoleFacts().map((entry) => ({ ...entry, path: `black-hole/${entry.path}` })),
   ...deepFieldFacts().map((entry) => ({ ...entry, path: `deep-field/${entry.path}` })),
+  ...afterglowFacts().map((entry) => ({ ...entry, path: `afterglow/${entry.path}` })),
 ];
 
 const START = "<!-- catalogue:start -->";

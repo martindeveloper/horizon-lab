@@ -34,6 +34,7 @@ for (const flag of ["on", "off"])
       cwd: new URL("../", import.meta.url),
       env: {
         ...process.env,
+        NEXT_PUBLIC_FEATURE_AFTERGLOW: flag,
         NEXT_PUBLIC_FEATURE_GIANTS: flag,
         NEXT_PUBLIC_FEATURE_SUN: flag,
         NEXT_PUBLIC_FEATURE_VOYAGE: flag,

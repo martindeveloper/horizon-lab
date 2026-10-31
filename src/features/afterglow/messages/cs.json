@@ -1,0 +1,276 @@
+{
+  "app": "Dosvit",
+  "metadataDescription": "Celý život Slunce z nízké oběžné dráhy nad světy: slabé mladé Slunce, obr, který pohltí vnitřní planety, a bílý trpaslík chladnoucí navždy.",
+  "canvasLabel": "Nízká oběžná dráha nad světem, Slunce nad jeho okrajem, napříč životem Slunce",
+  "views": {
+    "young": "Mladé Slunce",
+    "today": "Dnes",
+    "oceans": "Ztráta oceánů",
+    "subgiant": "Nafouknutí",
+    "tip": "Rudý obr",
+    "flash": "Heliový záblesk",
+    "pulses": "Pulzy",
+    "nebula": "Mlhovina",
+    "dwarf": "Bílý trpaslík"
+  },
+  "viewsShort": {
+    "young": "Mládí",
+    "today": "Dnes",
+    "oceans": "Oceány",
+    "subgiant": "Růst",
+    "tip": "Obr",
+    "flash": "Záblesk",
+    "pulses": "Pulzy",
+    "nebula": "Mlhovina",
+    "dwarf": "Trpaslík"
+  },
+  "viewHints": {
+    "young": "Mladé Slunce svítí na sedm desetin dneška. Bude sílit. Spusťte přehrávání.",
+    "today": "Slunce se nafoukne za Merkur a Venuši. Spusťte přehrávání.",
+    "oceans": "Obyvatelná zóna minula Zemi. Oceány se vyvařují.",
+    "subgiant": "Jádru došel vodík. Slunce stoupá v obra.",
+    "tip": "Dvě stě padesátkrát širší. Merkur a Venuše mizí.",
+    "flash": "Helium se vznítí. Slunce se na sto milionů let smrští.",
+    "pulses": "Pulzy odhazují obal. Dráhy se rozšiřují.",
+    "nebula": "Žhavé jádro rozsvítí odhozený plyn. Ilustrace.",
+    "dwarf": "Hvězdy v poledne. Trpaslík chladne navždy."
+  },
+  "readouts": {
+    "label": "Slunce teď a co z něj dostává {name}",
+    "light": "Zářivost",
+    "surface": "Povrch",
+    "radius": "Poloměr",
+    "mass": "Hmotnost",
+    "sunlight": "Svit",
+    "width": "Šířka",
+    "magnification": "Zvětšení"
+  },
+  "hud": {
+    "timeline": "Život Slunce",
+    "chapters": "Kapitoly",
+    "clock": "Hodiny",
+    "play": "Přehrát",
+    "pause": "Pozastavit",
+    "paused": "Pozastaveno",
+    "slower": "Pomaleji",
+    "faster": "Rychleji",
+    "worlds": "Světy",
+    "worldLost": "{name}: pohlceno",
+    "standHere": "Stát zde",
+    "wholeSky": "celá obloha",
+    "insideSun": "Uvnitř Slunce",
+    "settings": "Nastavení"
+  },
+  "ratesShort": {
+    "quarter": "¼×",
+    "half": "½×",
+    "one": "1×",
+    "double": "2×",
+    "fourfold": "4×"
+  },
+  "span": {
+    "years": "{value} {valuePlural, select, one {rok} few {roky} many {roku} other {let}}",
+    "thousand": "{value} {valuePlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let",
+    "million": "{value} {valuePlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let",
+    "billion": "{value} {valuePlural, select, one {miliarda} few {miliardy} many {miliardy} other {miliard}} let"
+  },
+  "ago": {
+    "years": "před {value} {valuePlural, select, one {rokem} few {lety} many {roku} other {lety}}",
+    "thousand": "před {value} {valuePlural, select, one {tisícem} few {tisíci} many {tisíce} other {tisíci}} let",
+    "million": "před {value} {valuePlural, select, one {milionem} few {miliony} many {milionu} other {miliony}} let",
+    "billion": "před {value} {valuePlural, select, one {miliardou} few {miliardami} many {miliardy} other {miliardami}} let"
+  },
+  "ahead": {
+    "years": "za {value} {valuePlural, select, one {rok} few {roky} many {roku} other {let}}",
+    "thousand": "za {value} {valuePlural, select, one {tisíc} few {tisíce} many {tisíce} other {tisíc}} let",
+    "million": "za {value} {valuePlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let",
+    "billion": "za {value} {valuePlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let"
+  },
+  "time": {
+    "today": "dnes",
+    "perSecond": "{span} za sekundu"
+  },
+  "units": {
+    "degrees": "{value}°",
+    "times": "{value}× dnešní Země",
+    "percent": "{value} % dnešní Země",
+    "solarMasses": "{value} M☉",
+    "auValue": "{value} au",
+    "magnified": "{value}×",
+    "kelvin": "{value} K",
+    "solarLuminosities": "{value} L☉",
+    "solarRadii": "{value} R☉",
+    "earthSunlight": "{value} S⊕"
+  },
+  "facts": {
+    "sunlight": "Sluneční svit",
+    "sunWidth": "Šířka Slunce",
+    "temperature": "Teplota ze slunečního svitu",
+    "orbit": "Dráha",
+    "fate": "Osud"
+  },
+  "fates": {
+    "engulfed": "Pohlcen {when}",
+    "uncertain": "Pohlcena slapy {when}, nebo ušetřena na širší dráze",
+    "survives": "Přežije"
+  },
+  "badges": {
+    "model": "Modelováno",
+    "lost": "Pohlceno"
+  },
+  "cards": {
+    "earth": "Domov, dokud nezmizí oceány. Její dráha se rozšíří na {earthTipOrbitAu} au, jak Slunce ztrácí hmotu, což by samo o sobě stačilo nad obrových {tipRadiusAu} au.",
+    "mars": "Řídký vzduch, takže obloha zůstává tmavá a rudý obr ji vyplní. Obyvatelná zóna tudy prochází, když Slunce opouští hlavní posloupnost.",
+    "europa": "Led bez vzduchu. Zatímco jádro spaluje helium, Jupiterova dráha dostává {europaFlashPercent} % světla, které má dnes Země.",
+    "enceladus": "Led nad oceánem. Jak Slunce stoupá větví obrů, obyvatelná zóna na pár desítek milionů let dosáhne Saturnu.",
+    "pluto": "Teplo jen na vrcholu obří fáze. Z rozšířené dráhy září mlhovina a pak trpaslík bledne mezi hvězdami.",
+    "earthCaution": "Schröder a Smith (2008) zjišťují, že slapy a odpor Zemi vtáhnou {earthLostKyr} tisíc let před vrcholem; k úniku by planeta dnes potřebovala {earthEscapeAu} au. Starší práce nechaly Zemi rozšířit dráhu na {earthTipOrbitAu} au a přežít."
+  },
+  "toggles": {
+    "glare": "Záře"
+  },
+  "atlas": {
+    "title": "Atlas",
+    "orbits": "Vnitřní dráhy",
+    "mapLabel": "Vnitřní dráhy shora, Slunce {radius} au široké",
+    "mapNote": "Dráhy se rozšiřují, jak Slunce ztrácí hmotu; okraj Slunce se k nim blíží."
+  },
+  "hr": {
+    "title": "Hertzsprungův–Russellův diagram",
+    "label": "Hertzsprungův–Russellův diagram, označeno {name}",
+    "labelAll": "Hertzsprungův–Russellův diagram",
+    "light": "Zářivost (L☉)",
+    "radius": "{value} R☉",
+    "hotter": "teplejší",
+    "cooler": "chladnější",
+    "groups": {
+      "whiteDwarfs": "bílí trpaslíci",
+      "mainSequence": "hlavní posloupnost",
+      "giants": "obři",
+      "supergiants": "veleobři"
+    },
+    "lesson": "Tečka Slunce kráčí po své dráze: podél hlavní posloupnosti, nahoru k obrům, dolů k bílým trpaslíkům."
+  },
+  "help": {
+    "camera": {
+      "title": "Rozhlédnutí",
+      "body": "Tažením se rozhlédnete, dvojitým klepnutím se vrátíte."
+    },
+    "timeline": {
+      "title": "Časová osa",
+      "body": "Čára pod hodinami je život Slunce. Tažením jím procházíte, klepnutím na kapitolu se tam přenesete. Kde svítá, čas zpomalí."
+    },
+    "worlds": {
+      "title": "Světy",
+      "body": "Obíhejte v tuto chvíli jiný svět. Dalším klepnutím otevřete jeho kartu."
+    },
+    "clock": {
+      "title": "Hodiny",
+      "body": "Přehrajte život Slunce. Pomalé kapitoly ubíhají rychle, rychlé konce se zdrží."
+    },
+    "atlas": {
+      "title": "Atlas",
+      "body": "Vnitřní dráhy shora a pouť Slunce po Hertzsprungově–Russellově diagramu."
+    },
+    "settings": {
+      "body": "Záře a kvalita vykreslování."
+    },
+    "guide": {
+      "body": "Život Slunce v deseti krocích, s fyzikou za každým z nich."
+    },
+    "experiences": {
+      "title": "Režimy zobrazení",
+      "body": "Pohlcující: jen pohled, bez ovládání. Samospoušť: opřete se a nechte celý život běžet k hudbě."
+    }
+  },
+  "tour": {
+    "steps": {
+      "young": {
+        "title": "Slabé mladé Slunce",
+        "body": "Slunce svítilo na {youngSunPercent} % dnešního světla. Země si přesto udržela vodu, a to je dodnes záhada."
+      },
+      "today": {
+        "title": "Dnes",
+        "body": "O {todayGyr} {todayGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let později je kotouč {todayWidthDeg}° široký. Jeho světlo roste o desetinu každou miliardu let."
+      },
+      "oceans": {
+        "title": "Ztráta oceánů",
+        "body": "Za {oceansGyr} {oceansGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let mine vnitřní okraj obyvatelné zóny Zemi. Její voda uniká do vesmíru; za {oceansGoneGyrAhead} {oceansGoneGyrAheadPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let jsou moře pryč."
+      },
+      "swell": {
+        "title": "Jádro vyhasíná",
+        "body": "Ve {msEndGyr} miliardách let dojde v jádru vodík. Slunce hoří ve slupce, nafukuje se a rudne."
+      },
+      "warm": {
+        "title": "Teplá chvíle u Saturnu",
+        "body": "Při výstupu dosáhne obyvatelná zóna Saturnu. Enceladus dostává {enceladusWarmPercent} % světla, které má dnes Země, na pár desítek milionů let."
+      },
+      "swallow": {
+        "title": "Rudý obr",
+        "body": "Za {tipGyrAhead} {tipGyrAheadPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let dosáhne Slunce {tipRadiusRsun} slunečních poloměrů při {tipKelvin} K. Merkur a Venuše jsou pryč; dráha Země se rozšíří na {earthTipOrbitAu} au a o tom, zda ji slapy vtáhnou, se dosud vedou spory."
+      },
+      "flash": {
+        "title": "Heliový záblesk",
+        "body": "Jádro zažehne helium v záblesku. Slunce se na {heliumMyr} {heliumMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let smrští na {heliumRadiusRsun} {heliumRadiusRsunPlural, select, one {sluneční poloměr} few {sluneční poloměry} many {slunečního poloměru} other {slunečních poloměrů}} a Jupiterovy měsíce dostávají {europaFlashPercent} % pozemského světla."
+      },
+      "pulses": {
+        "title": "Pulzy",
+        "body": "Tepelné pulzy odhazují obal; {massLostPercent} % Slunce je už pryč. Dráhy se rozšiřují, jak hmota odtéká, a zpomalují."
+      },
+      "nebula": {
+        "title": "Mlhovina",
+        "body": "Obnažené jádro o {nebulaKilokelvin} tisících kelvinů rozsvítí odhozený plyn. Mlhovina září {nebulaKyr} tisíc let."
+      },
+      "dwarf": {
+        "title": "Bílý trpaslík",
+        "body": "Bílý trpaslík o {dwarfMass} hmotnosti Slunce, {dwarfRadiusKm} km v průměru: příbuzný Siria B, který hoří při {siriusBKelvin} K. Chladnout na barvu svíčky mu trvá {coolGyr} {coolGyrPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let a nikdy nepřestane."
+      }
+    },
+    "crossings": {
+      "orrery": {
+        "title": "Orloj",
+        "hint": "Mladé Slunce nad rodícími se planetami"
+      },
+      "sun": {
+        "title": "Slunce",
+        "hint": "Dnešní Slunce zblízka"
+      },
+      "spectroscopy": {
+        "title": "Hvězdná spektra",
+        "hint": "Proč je chladná hvězda rudá"
+      },
+      "giants": {
+        "title": "Obři",
+        "hint": "Sirius B vedle obrů"
+      }
+    }
+  },
+  "technicalDetails": {
+    "title": "Jak je Dosvit vykreslen",
+    "summary": "Řídká, ozdrojovaná dráha stáří, zářivosti, teploty a hmotnosti Slunce, interpolovaná mezi řádky; vše ostatní plyne ze zákonů: poloměr, barva, obyvatelná zóna, rozšířené dráhy a co vidí každý svět. Pohled je zobrazovací model exponovaný na denní stranu světa.",
+    "features": {
+      "track": "Tabulka Schrödera a Smithe od hlavní posloupnosti nulového stáří po vrchol AGB, přechod k mlhovině podle Millera Bertolamiho, montrealská chladicí sekvence pro trpaslíka.",
+      "worlds": "Dráhy rozšířené ztrátou hmoty Slunce; sluneční svit každého světa, šířka Slunce na jeho obloze a zda k němu obr dosáhne.",
+      "sky": "Glóbus světa s naměřenou mapou z nízké oběžné dráhy, osvětlený barvou a silou Slunce; fotosféra Slunce nad jeho okrajem se sdíleným kontinuem, okrajovým ztemněním a granulací; sdílená Mléčná dráha a jasné hvězdy na noční straně; mlhovina zevnitř své slupky, ilustrace; Země po ztrátě oceánů, model vysušený z jejího naměřeného reliéfu.",
+      "clock": "Kapitoly jako dilatace hodin: každý úsek života dostane vlastní sekundy bez ohledu na délku v letech a tempo ho zpomalí, kde se Slunce mění rychle."
+    },
+    "sections": {
+      "track": {
+        "title": "Dráha",
+        "body": "Řádky jsou literární hodnoty: Schröder a Smith (2008, tabulka 1) pro hlavní posloupnost, vrchol větve rudých obrů ({tipLuminosity} L☉, {tipKelvin} K, {massLostPercent} % hmoty ztraceno) a AGB; mezi nimi nakreslený výstup, držený jejich tvrzením, že závěrečný vzestup smete vnitřní planety za pět milionů let. Po odchodu obalu vede přechod podle Millera Bertolamiho ({nebulaKyr} tisíc let pro zbytek o 0,55 M☉) na montrealskou chladicí sekvenci 0,5 M☉, nejbližší tabelovanou hmotnost ke zbytku o {dwarfMass} M☉. Zářivost a teplota se interpolují log-lineárně ve stáří a v logaritmu času od odchodu obalu tam, kde hodiny běží rychle; poloměr plyne ze Stefanova–Boltzmannova zákona."
+      },
+      "worlds": {
+        "title": "Světy",
+        "body": "Každá dráha je dnešní střední vzdálenost tělesa, rozšířená o hmotu, kterou Slunce ztratilo, při zachování momentu hybnosti dráhy, takže Země na vrcholu dosáhne {earthTipOrbitAu} au; měsíc jede po dráze své planety. Sluneční svit je zářivost Slunce dělená čtvercem vzdálenosti, šířka Slunce 2 asin(R/d). Svět je pohlcen, když poloměr Slunce dosáhne jeho dráhy: na nakresleném výstupu Merkur {mercuryLostMyr} {mercuryLostMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} a Venuše {venusLostMyr} {venusLostMyrPlural, select, one {milion} few {miliony} many {milionu} other {milionů}} let před vrcholem. Rozšířená dráha Země podle tohoto pravidla unikne, ale slapový výpočet Schrödera a Smithe ji vtáhne {earthLostKyr} tisíc let před vrcholem; karta to říká. Teplota světa je jeho rovnovážná teplota, teplo, na kterém ho drží samotný sluneční svit: povrchová teplota Slunce krát čtvrtá odmocnina podílu, který svět pohltí, krát odmocnina poměru poloměru Slunce ku dvojnásobku dráhy, s dnešním Bondovým albedem každého světa z literatury. Nezahrnuje skleníkový jev, takže dnešní Země ukazuje {earthTodayKelvin} K proti naměřeným 288 K a zapařená či spálená Země by byla ještě teplejší."
+      },
+      "sky": {
+        "title": "Pohled",
+        "body": "Kamera obíhá svět o málo víc než poloměr od jeho středu (číslo uvádějí poznámky níže), na místě, kde Slunce stojí těsně nad okrajem, jako při východu; glóbus je glóbus sdíleného slunečního detailu, jeho naměřená mapa ve skutečné velikosti s atmosférickou slupkou tam, kde má svět vzduch, osvětlený ze směru Slunce jeho barvou a viditelnou silou z dráhy, takže posun po ose změní denní stranu v každé kapitole. Jakmile oceány mizí, je glóbus Země model: jeho naměřená mapa přechází v suchou Zemi sestavenou z bezoblačného reliéfu Blue Marble (tvar a reliéf pevniny zachované, pánve jako holé mořské dno stínované naměřenou hloubkou, rostlinstvo jako půda, ledovcové štíty jako skála, bez mraků), od meze vlhkého skleníku ({waterLossAu} au od dnešního Slunce, dosažené za {oceansGoingGyrAhead} {oceansGoingGyrAheadPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let) po mez překotného skleníku ({runawayAu} au, za {oceansGoneGyrAhead} {oceansGoneGyrAheadPlural, select, one {miliardu} few {miliardy} many {miliardy} other {miliard}} let), rovnoměrně v logaritmu slunečního svitu; zda by tu skálu skryl hustý opar oxidu uhličitého, zůstává otevřené. Glóbus Slunce je kreslen ve skutečné úhlové velikosti: jeho barva je sdílené Planckovo kontinuum integrované přes CIE při teplotě Slunce, jeho okrajové ztemnění Claretův čtyřkoeficientový fit ze sdílených tabulek při teplotě a gravitaci Slunce, Eddingtonův šedý zákon, jakmile gravitace zbytku opustí mřížku, jeho granulace sdílený konvekční vzor při skutečném počtu buněk napříč poloměrem (buňka široká pár tlakových škálových výšek), takže obr ukáže pár obrovských buněk a trpaslík žádnou. Pohled je rámován: velikost kotouče sleduje stálou mocninu poloměru Slunce, ať je vidět z kteréhokoli světa, takže nadmutí i zhroucení se čtou jako jedna změna a přesun na jiný svět kotouč nezmění; HUD ukazuje zvětšení a Slunce drží své místo nad okrajem. Přesun na jiný svět je let, když hodiny běží nebo je svět zvolen: hodiny zvolní a kamera letí jako loď, stále hledí ke Slunci, jedním plynulým pohybem: couvne od světa, který se zakulatí v glóbus a zmenší v bod vedle Slunce, proletí jen se Sluncem a hvězdami, pak se přiblíží k dalšímu světu, bodu na druhé straně Slunce, který vyroste v glóbus a usadí se pod kamerou, a údaje pojmenují svět pod kamerou, jakmile se glóby vymění; posun po časové ose přejde z jednoho světa do druhého rozplynutím na místě. Průvodce zarámuje každý krok na to, o čem je (kotouč, glóbus nebo oblohu), drží záběr v klidu, dokud se čte, a mezi světy přechází rozplynutím; drift se široce a pomalu pohupuje přes Slunce a obzor a mezi světy letí pomaleji. Expozice zobrazení je jeden zákon pro vše: každá zář vůči světlu, které má dnes bílý povrch na dráze Země, v pásmech displeje, ukázaná jako její odmocnina (exponent uvádějí poznámky níže); oko se přizpůsobuje oběma směry, denní strana se drží mezi podlahou a stropem, takže svět pod trpaslíkem je stále vidět, a poli, které vidí, takže obr vyplňující pohled určí expozici a svět se ukáže podle něj; sluneční kotouč, jasnější než každý povrch, který osvětluje, o druhou mocninu vzdálenosti ku poloměru, se drží na vrcholu, který zachová jeho barvu, okraj a buňky. Sdílená Mléčná dráha a jasné hvězdy vystupují, jak pole tmavne; kamera se při běhu hodin zvolna pohupuje a svět se pod ní pomalu otáčí, tempem pro oko, ne svým skutečným dnem, který by hodiny rozmazaly. Mlhovina je vidět zevnitř své slupky, takže celá obloha dostane slabou záři rozsvícenou žhavým jádrem, zelenou od [O III] u hvězdy a rudou od Hα dál, nejjasnější kolem hvězdy a řídnoucí na hodinách kapitoly, její světlo i na noční straně světa: ilustrace, ne zářivý model. Kromě expozice zde nic není fotometrickou předpovědí."
+      },
+      "clock": {
+        "title": "Hodiny",
+        "body": "Devět kapitol, každá s vlastními sekundami při tempu 1: hlavní posloupnost po několika, výstup a vrchol dostanou čas, rychlé konce pár, trpaslíkovo blednutí na logaritmických hodinách. Při přehrávání ubíhá miliarda let i deset tisíc stejně; úseky časové osy jsou úměrné sekundám a její jezdec vystupuje nad čáru obzoru. Kde by se poloměr a teplota Slunce měnily rychleji, než oko sleduje (poslední vzestup výstupu, záblesk, přechod k mlhovině), tempo jezdce zvolní, plynule předem a zpět ke konci spěchu, takže klidný úsek po něm běží vlastním tempem; mírně, nikdy do zastavení, zvolní i při přesunu na jiný svět a nad časovou osou svítá tam, kde čas zpomalí. Návštěva se otevře v přehrávání; ruka na ose jej pozastaví, rozhlédnutí ne. Klepnutá kapitola nebo krok průvodce tam hodiny plynule převedou po ose."
+      }
+    }
+  }
+}

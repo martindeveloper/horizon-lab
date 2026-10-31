@@ -834,6 +834,38 @@ export const SOURCES = {
     cite: "Feulner 2012, Reviews of Geophysics 50, RG2006 (the faint young Sun problem; Gough's law against standard models)",
     link: "https://doi.org/10.1029/2011RG000375",
   },
+  sackmann1993: {
+    cite: "Sackmann, Boothroyd & Kraemer 1993, ApJ 418, 457 (Our Sun. III. Present and future: the Sun from 0.7 L☉ on the zero-age main sequence to 2.2 L☉ as it leaves it; the giant branches with mass loss)",
+    link: "https://doi.org/10.1086/173407",
+  },
+  schroder2008: {
+    cite: "Schröder & Smith 2008, MNRAS 386, 155 (Distant future of the Sun and Earth revisited: Table 1 from the ZAMS to the AGB tip with the Schröder & Cuntz mass loss; Earth engulfed by tides half a million years before the RGB tip; a 0.5405 M☉ white dwarf)",
+    link: "https://doi.org/10.1111/j.1365-2966.2008.13022.x",
+  },
+  bergeronCooling: {
+    cite: "Bédard, Bergeron, Brassard & Fontaine 2020, ApJ 901, 93; the Montreal white dwarf cooling sequences (0.5 M☉, thick hydrogen layer: effective temperature, radius and cooling age)",
+    link: "https://www.astro.umontreal.ca/~bergeron/CoolingModels/",
+  },
+  millerBertolami2016: {
+    cite: "Miller Bertolami 2016, A&A 588, A25 (post-AGB and planetary-nebula central-star models: a 0.55 M☉ remnant crosses the HR diagram in about ten thousand years)",
+    link: "https://doi.org/10.1051/0004-6361/201526577",
+  },
+  howett2010: {
+    cite: "Howett, Spencer, Pearl & Segura 2010, Icarus 206, 573 (Cassini CIRS thermal inertias and bolometric Bond albedos of Saturn's icy moons: Enceladus 0.81)",
+    link: "https://doi.org/10.1016/j.icarus.2009.07.016",
+  },
+  buratti2017: {
+    cite: "Buratti et al. 2017, Icarus 287, 207 (New Horizons LORRI global albedos: Pluto's Bond albedo 0.72 ± 0.07)",
+    link: "https://doi.org/10.1016/j.icarus.2016.11.012",
+  },
+  lange2026: {
+    cite: "Lange et al. 2026, arXiv:2604.14374 (Europa's surface from the Galileo Photopolarimeter-Radiometer: a mean Bond albedo of 0.64 ± 0.06)",
+    link: "https://arxiv.org/abs/2604.14374",
+  },
+  kasting1993: {
+    cite: "Kasting, Whitmire & Reynolds 1993, Icarus 101, 108 (habitable zones around main-sequence stars: water loss by a moist greenhouse within 0.95 au of today's Sun, a runaway greenhouse within 0.84 au)",
+    link: "https://doi.org/10.1006/icar.1993.1010",
+  },
   kopparapu2013: {
     cite: "Kopparapu et al. 2013, ApJ 765, 131 (habitable zones around main-sequence stars; the Sun's conservative edges 0.99–1.70 au)",
     link: "https://doi.org/10.1088/0004-637X/765/2/131",

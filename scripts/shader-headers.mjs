@@ -1,5 +1,6 @@
 import { glslHeader } from "@horizon/toolkit/shaders/defines";
 
+import { SHADER_DEFINES as AFTERGLOW_SHADER_DEFINES } from "../src/features/afterglow/lib/model/parameters.ts";
 import { SHADER_DEFINES } from "../src/features/black-hole/lib/parameters.ts";
 import { SHADER_DEFINES as GIANTS_SHADER_DEFINES } from "../src/features/giants/lib/parameters.ts";
 import { SHADER_DEFINES as SUN_SHADER_DEFINES } from "../src/features/sun/lib/parameters.ts";
@@ -11,6 +12,14 @@ const command = "npm run shaders:generate";
 
 /** Each lab's generated GLSL header: where it lives, and what it must contain. */
 export const SHADER_HEADERS = [
+  {
+    lab: "afterglow",
+    path: "src/features/afterglow/lib/graphics/shaders/parameters.generated.glsl",
+    shaders: "src/features/afterglow/lib/graphics/shaders/",
+    defines: AFTERGLOW_SHADER_DEFINES,
+    guard: "HORIZON_AFTERGLOW_PARAMETERS",
+    source: "src/features/afterglow/lib/model/parameters.ts",
+  },
   {
     lab: "black-hole",
     path: "src/features/black-hole/lib/parameters.generated.glsl",

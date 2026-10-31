@@ -29,6 +29,7 @@ src/
       sun/                     The same three routes for the Sun's views ([view])
     experience/                Shared experience prefix (EXPERIENCE_PREFIX)
       voyage/                  The same three routes for Voyage's places
+      afterglow/               The same three routes for Afterglow's chapters
   components/
     shell/                     AppShell, header, phone menu, preferences, theme switch, stage sizing
     simulations/               Shared simulation stage: the lab route layout
@@ -276,6 +277,62 @@ src/
                                in model/instruments.ts), and the optional ship feel (feel.ts: a
                                crash's hold and jolt, the drive's spool-up, the view widening)
       lib/store.ts             Zustand store (voyage namespace messages)
+    afterglow/
+      index.ts                 Public client entry: AfterglowApp
+      manifest.ts, routing.ts, server.ts, technical.ts
+      components/              The overlay, the dock (the clock and the worlds over the timeline:
+                               the chapters along one horizon line, the playhead a sun under it,
+                               dawn where time slows), the world card, the atlas (the inner orbits
+                               from above, the HR diagram), the Settings panel, the guide caption
+                               with its crossings
+      lib/model/               The Sun's life, without WebGL:
+        track.ts               The evolutionary track as a sparse, sourced table (age, light,
+                               temperature, mass): Schröder & Smith 2008 from the ZAMS to the AGB
+                               tip, a drawn climb between their rows, Miller Bertolami 2016 for the
+                               crossing to the nebula, the Montreal 0.5 M☉ cooling sequence for the
+                               dwarf; log-linear interpolation, on a logarithmic clock after the
+                               envelope leaves
+        sun.ts                 The Sun at an age: the radius by Stefan–Boltzmann, the surface
+                               gravity, the habitable zone (the shared src/space/sun/model/young-sun),
+                               the spectrum's peak
+        worlds.ts              The worlds to stand on and the planets the giant reaches: orbits from
+                               the JPL elements, widened as the Sun loses mass (a ∝ 1/M); sunlight,
+                               the Sun's width and the period from the laws; a planet's fate (Earth's
+                               the tides', Schröder & Smith, marked uncertain)
+        chapters.ts            The chapters as the clock's dilation: cells of the track per chapter,
+                               the slider both ways, the play rate and the paces
+        pacing.ts              The tempo: playback slows where the Sun's radius and temperature
+                               rush (eased in, released within the rush), the playback step, the life's seconds
+        framing.ts             The Sun's frame: the disc's share from its radius, whichever world
+        flight.ts              Where the camera stands over a world, and a flight between
+                               worlds: pull back under the Sun, cross, come in
+        oceans.ts              Earth's oceans going between the moist- and runaway-greenhouse
+                               limits (Kasting et al. 1993), the dry map's blend
+        vantage.ts, tour.ts    The autoplay's schedule of worlds; the guided journey
+        catalogue.ts           The prose figures the copy quotes and the track's rows for the ledger
+        equations.ts           The formulas (the radius from L and T, the orbit's widening, the
+                               period about a lighter Sun, sunlight, the angular size)
+        parameters.ts          The clock's pace, the world changes, the orbit the view is taken from, where
+                               the Sun stands in the view, the display's exposure, the shader header
+        display.ts             The display's exposure: one law for the globe's day side and the Sun
+      lib/graphics/            looks.ts: the sky's and the Sun's uniforms, the shared continuum and
+                               limb tables as textures; shaders/: sky.frag (space, a point Sun's
+                               halo, the nebula's glow), star.vert/frag (the photosphere: the shared
+                               continuum, limb and granulation), the view include
+      lib/scene/               engine.ts on the toolkit's scene host: the sky pass, the shared bright
+                               stars and field (src/space/bright-stars, sky/milky-way), the world's
+                               globe by the shared solar close-up (src/space/solar-system/scene/
+                               close-up: its measured map, atmosphere shell and depth pass) lit by
+                               the Sun's colour and strength, the Sun's globe in a magnified pass of
+                               its own; the clock (playing at the chapter's pace and the tempo,
+                               easing to an aim), the world changes (a flight that pulls back
+                               and comes in, model/flight.ts, as the clock runs or a world is
+                               chosen; on a scrub veil.ts's still dissolves into the new; the
+                               clock hushed either way), the view (look-input.ts: drag, wheel, pinch, keys, eased
+                               to its aim) clamped so the Sun and the limb stay in frame, the
+                               HUD's clock
+      lib/store.ts             Zustand store (afterglow namespace messages); lib/drift.ts the autoplay
+                               (one track held, the life from the start at half pace)
   lib/
     sources.ts                 Shared bibliography the catalogue figures cite
     facts.ts                   Catalogue fact and card-spec types, and their printers
@@ -460,6 +517,8 @@ page scrolling.
 | `/lab/sun/eruption`         | The Sun's view (inside, sunspot, chromosphere, corona, eruption, cycle)                                                                      |
 | `/experience/voyage`        | Voyage, default place (Earth)                                                                                                                |
 | `/experience/voyage/saturn` | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
+| `/experience/afterglow`     | Afterglow, today's chapter (behind the `afterglow` feature switch, unreleased)                                                               |
+| `/experience/afterglow/tip` | Afterglow chapter (young, today, oceans, subgiant, tip, flash, pulses, nebula, dwarf)                                                        |
 | `/black-hole/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/orrery/...`               | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/en/...`, `/cs/...`        | Served in that language, then shown as the clean path                                                                                        |
@@ -731,6 +790,87 @@ The Orrery and Deep Field name the solar system's views alike, and their manifes
 route descriptor, including its default, and
 `src/lib/handoff.ts`, which finds the sides through the registry rather than by name, carries
 the camera's pose so it opens where this one left off; neither feature imports the other.
+
+## Afterglow
+
+Afterglow is the Sun's whole life from low orbit over a world, an experience: the globe's limb
+curves across the lower part of the view, the timeline in the dock below, the Sun stands low
+over the limb, a sunrise, and the world's day side brightens and reddens as the Sun changes
+while its night side shows the shared stars. The globe is the shared solar close-up's
+(`src/space/solar-system/scene/close-up.ts`): its measured map at true size (every world has
+one in the toolkit's `MAPS`: Earth, Mars, Europa, Enceladus, Pluto), its atmosphere shell where
+the world has air, its own depth pass, lit by the Sun's colour and visible strength from the
+track through the shared surface shader's `sunlight`. The Sun's globe is drawn by the shared
+photosphere pieces (`src/space/sun/graphics`): the CIE/Planck continuum at its temperature,
+Claret's limb darkening from the shared tables at its temperature and gravity, the shared
+granulation at the cells' true count across the radius (`src/space/sun/model/granulation.ts`,
+the law Giants also uses), so the giant shows a few huge cells and the dwarf none; beyond the
+open view the giant overflows, and inside the photosphere the whole sky is the continuum.
+Everything the scene and the cards show follows from one sourced track (`lib/model/track.ts`)
+by the laws: the radius by Stefan–Boltzmann, the habitable zone by the shared young-Sun law,
+orbits widened as the Sun loses mass with the periods by Kepler, sunlight by the inverse
+square, the Sun's width by 2 asin(R/d). A world is swallowed when the radius reaches its
+widened orbit (Mercury, then Venus); Earth's widened orbit would escape by that rule, so its
+fate is Schröder & Smith's tidal engulfment, flagged uncertain on its card; as the oceans go
+between Kasting et al.'s moist and runaway limits a modelled dry map (`scripts/build-dry-earth.mjs`)
+blends in over the measured one through the shared planet shader's `later` map.
+The chapters are the clock's dilation (`chapters.ts`): each has seconds of its own at the pace
+of 1 whatever its length in years (the main sequence a few seconds each, the climb and the tip
+the time), and the track's segments are proportional to them; the dwarf's fade runs on a
+logarithmic clock. Inside the chapters the tempo (`pacing.ts`) slows the playhead where the
+Sun's radius and temperature would change by more than `CHANGE_PER_S` a second, down to
+`TEMPO_FLOOR`, widened and smoothed ahead of each rush so it eases in and is back up as the
+rush ends (a calm stretch after one never holds the Sun still); a dissolve hushes the clock to
+`FADE_TEMPO` and a flight gently to `FLIGHT_TEMPO`, so one thing leads at a time. A visit opens playing from its chapter; a hand
+on the timeline pauses it, a look round does not. The Sun is framed, never drawn at true size in
+a wide view: the disc spans `DISC_SHARE` of the height at today's radius and grows as its
+radius to `DISC_GROWTH`, whichever world it is seen from, so a change reads as one steady
+change and a world change leaves the disc as it was; the HUD shows the magnification; the orbit's place on the globe is chosen so the Sun truly stands `SUN_LIFT`
+over the limb in the open view, and the magnified pass keeps it at the same place on the
+screen, the limb drawn over it. The display's exposure is one law (`display.ts`): every
+radiance relative to the light a white surface at Earth's orbit has today, in the display's
+bands, shown as its `DAY_GAMMA` root; the eye adapts both ways (the day side held between
+`DAY_FLOOR` and `DAY_CEILING`) and to the field it sees (a disc that fills the view sets the
+exposure), and the disc's brightest channel is held at `DISC_PEAK`, above the ceiling, so the
+Sun is always the brightest thing on screen and keeps its hue, limb and cells; a Sun too small
+for its frame is a haloed point. The stars fade with the field's glare; the nebula's shell
+lights the night side through the shared surface shader's `skylight`. Each way of playing
+has its own camera, one style object read in one place (`model/modes.ts`, `MODES`, the mode
+from `modeOf`): the timeline is the visitor's view with a small sway and flights between
+worlds; the guide glides (`GLIDE_S`) to each step's shot (`TourStep.shot`: the disc close for
+the Sun's figures, the globe for a world's, the sky for the nebula), holds still for reading,
+cuts between worlds with a dissolve and gives the visitor's view back as it ends; the drift
+opens on the resting view, sways wide and slow on incommensurate periods and flies between
+worlds slowly (`DRIFT_FLIGHT_S`). A new mode's sway reach is eased to (`SWAY_EASE_S`) and a
+flight calms it through its middle. While the clock runs the globe also turns about its own pole
+(`SPIN`, a visual pace, not the world's day), so its surface and air drift past the limb. A flight (`model/flight.ts`, the clock slowed gently by
+`flightHush` down to `FLIGHT_TEMPO`) moves like a ship, as one dolly (`along`): it eases out
+of the orbit, backs off and closes in at one steady pace in the logarithm of the distance and
+eases only into the orbit at the end, so it never slows or turns sharply between: it backs
+off the world it leaves while the globe's nearest point slides from the limb's place to a
+point low on the Sun's left (`FLIGHT_POINTS`, `standingPlace` turned out of the orbit's plane
+by a roll), until the globe is under a pixel (`VANISH_PX`); it crosses with the Sun and the
+stars alone (the globes change halfway, `FLIGHT_SWAP`); and it closes on the next world the
+same way from a point low on the Sun's right, the globe growing into the limb at rest. The
+view's frame faces the Sun as seen from the camera and the Sun's frame follows its law
+exactly, so the disc keeps its size.
+The readouts name the world drawn (`drawn`, written by the scene as the globes change), its
+name spelled out afresh at each change (`TextReveal`), since under a giant every world's night
+side and glowing horizon look alike. A scrub
+dissolves the old view's last frame into the new over `VANTAGE_FADE_S` instead; the Milky Way is set once to arch across the
+resting view (`MILKY_WAY_TILT`). The
+timeline sits in the dock under the clock and the worlds (`timeline.tsx`), as the Orrery's
+does: the chapters as proportional stretches of one horizon line, named under it as far as the
+name fits whole (a short name from the copy on a narrow one), the playhead the brand's sun
+under the horizon with the shared `slider-halo` as its corona while the tempo slows, and dawn
+over the stretches where time slows; a drag scrubs, a chapter's name goes there; the age is
+read once, in the dock beside it. The readouts sit on one glass
+chip top left with the chapter's one-line hint. The autoplay (its drift) runs the life from
+the start at half pace, the vantage moving outward on the schedule (`vantage.ts`), one track
+held. The nebula is drawn from inside its shell as a whole-sky glow lit by the hot core
+(`lib/model/nebula.ts`), an illustration the chapter and the technical notes label as such.
+The bench decodes the worlds' measured maps before the first frame, as Voyage fetches a
+probe's model, so every frame shows the real globe.
 
 ## Help
 

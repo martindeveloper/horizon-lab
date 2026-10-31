@@ -1,3 +1,4 @@
+import { afterglowManifest } from "../features/afterglow/manifest";
 import { blackHoleManifest } from "../features/black-hole/manifest";
 import { deepFieldManifest } from "../features/deep-field/manifest";
 import { giantsManifest } from "../features/giants/manifest";
@@ -19,6 +20,7 @@ export const registered = [
   giantsManifest,
   sunManifest,
   voyageManifest,
+  afterglowManifest,
 ] as const satisfies readonly SimulationManifest[];
 
 export type RegisteredSimulation = (typeof registered)[number];

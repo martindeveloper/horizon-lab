@@ -6,6 +6,8 @@ import manifest from "../src/app/manifest.ts";
 import robots from "../src/app/robots.ts";
 import sitemap from "../src/app/sitemap.ts";
 import { FEATURES, siteUrl } from "../src/config.ts";
+import { AFTERGLOW_PATH } from "../src/features/afterglow/manifest.ts";
+import { viewRouteParams as afterglowViewParams } from "../src/features/afterglow/routing.ts";
 import { BLACK_HOLE_PATH } from "../src/features/black-hole/manifest.ts";
 import { presetRouteParams } from "../src/features/black-hole/routing.ts";
 import { DEEP_FIELD_PATH } from "../src/features/deep-field/manifest.ts";
@@ -42,11 +44,15 @@ test("sitemap lists the catalogue, the about and credits pages, every simulation
     ...(FEATURES.giants ? rungRouteParams().map(({ star }) => `${GIANTS_PATH}/${star}`) : []),
     ...(FEATURES.voyage ? voyageViewParams().map(({ view }) => `${VOYAGE_PATH}/${view}`) : []),
     ...(FEATURES.sun ? sunViewParams().map(({ view }) => `${SUN_PATH}/${view}`) : []),
+    ...(FEATURES.afterglow
+      ? afterglowViewParams().map(({ view }) => `${AFTERGLOW_PATH}/${view}`)
+      : []),
   ];
   /* A simulation behind a switch that is off is nowhere in the sitemap. */
   if (!FEATURES.voyage) assert.ok(!paths.some((path) => path.startsWith(VOYAGE_PATH)));
   if (!FEATURES.giants) assert.ok(!paths.some((path) => path.startsWith(GIANTS_PATH)));
   if (!FEATURES.sun) assert.ok(!paths.some((path) => path.startsWith(SUN_PATH)));
+  if (!FEATURES.afterglow) assert.ok(!paths.some((path) => path.startsWith(AFTERGLOW_PATH)));
   assert.deepEqual([...paths].sort(), [...new Set(expected)].sort());
   for (const { entryPoints } of simulations)
     for (const { href } of entryPoints) assert.ok(paths.includes(href), href);

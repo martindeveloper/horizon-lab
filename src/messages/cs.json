@@ -198,6 +198,27 @@
           "title": "Pluto"
         }
       }
+    },
+    "afterglow": {
+      "title": "Dosvit",
+      "eyebrow": "Dosvit · Celý život Slunce",
+      "category": "Hvězdy a čas",
+      "description": "Obíhejte nízko nad světem a sledujte, jak Slunce prožije svůj život: slabé mladé Slunce, obr, který pohltí vnitřní planety, a bílý trpaslík chladnoucí navždy.",
+      "open": "Otevřít Dosvit",
+      "orbit": "Nízko nad pěti světy",
+      "swallow": "Obr pohltí vnitřní planety",
+      "dwarf": "Hvězdy v poledne",
+      "entryPoints": {
+        "young": {
+          "title": "Mladé Slunce"
+        },
+        "tip": {
+          "title": "Rudý obr"
+        },
+        "dwarf": {
+          "title": "Bílý trpaslík"
+        }
+      }
     }
   },
   "about": {
@@ -428,8 +449,12 @@
         "title": "Pohyb kamery",
         "body": "Tažením otáčíte, kolečkem nebo sevřením prstů přibližujete."
       },
-      "guide": { "title": "Průvodce" },
-      "settings": { "title": "Nastavení" },
+      "guide": {
+        "title": "Průvodce"
+      },
+      "settings": {
+        "title": "Nastavení"
+      },
       "experiences": {
         "title": "Režimy prohlížení",
         "body": "Nerušené prohlížení: jen výhled, bez ovládání. Drift: opřete se, kamera letí sama v rytmu hudby."

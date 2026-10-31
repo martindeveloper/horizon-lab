@@ -198,6 +198,27 @@
           "title": "Pluto"
         }
       }
+    },
+    "afterglow": {
+      "title": "Afterglow",
+      "eyebrow": "Afterglow · The Sun's whole life",
+      "category": "Stars & time",
+      "description": "Orbit low over a world and watch the Sun live its life: the faint young Sun, the giant that swallows the inner planets, the white dwarf that cools for ever.",
+      "open": "Open Afterglow",
+      "orbit": "Low orbit over five worlds",
+      "swallow": "The giant swallows the inner planets",
+      "dwarf": "Stars at noon",
+      "entryPoints": {
+        "young": {
+          "title": "The young Sun"
+        },
+        "tip": {
+          "title": "The red giant"
+        },
+        "dwarf": {
+          "title": "The white dwarf"
+        }
+      }
     }
   },
   "about": {
@@ -428,8 +449,12 @@
         "title": "Move the camera",
         "body": "Drag to turn, scroll or pinch to zoom."
       },
-      "guide": { "title": "Guide" },
-      "settings": { "title": "Settings" },
+      "guide": {
+        "title": "Guide"
+      },
+      "settings": {
+        "title": "Settings"
+      },
       "experiences": {
         "title": "Viewing modes",
         "body": "Immersive: just the view, no controls. Drift: sit back while the camera flies itself to the music."

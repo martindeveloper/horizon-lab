@@ -112,7 +112,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
     const shared = assets(locale, ".css");
     assert.doesNotMatch(
       contents(shared),
-      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit/,
+      /black-hole-orbit-ring|scene-label|deep-field-rung|spectroscopy-ribbon|voyage-cockpit|afterglow-horizon/,
     );
     const marker = {
       "black-hole": /black-hole-orbit-ring/,
@@ -123,6 +123,7 @@ test("black-hole styles load on feature routes, never on catalogue routes", () =
       giants: /giants-stage/,
       voyage: /voyage-cockpit/,
       sun: /scene-label/,
+      afterglow: /afterglow-horizon/,
     };
     /* The zoomable scenes label their objects; the black hole, the spectra and Giants draw their own. */
     const labelled = new Set(["orrery", "deep-field", "sun", "voyage"]);
