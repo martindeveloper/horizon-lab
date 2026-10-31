@@ -5,10 +5,10 @@
  */
 import type { Fact } from "@/lib/facts";
 import {
-  SOLAR_TEFF_K,
   convertFigure,
   logGravityCgs,
   stefanBoltzmann,
+  stellarRadius,
   surfaceGravity,
   type UnitId,
 } from "@horizon/toolkit/science";
@@ -96,7 +96,7 @@ function pointOf(id: StarId): HrPoint | null {
   const light = luminosity
     ? inUnit(luminosity, "Lsun")
     : stefanBoltzmann.compute({ R: inUnit(radius!, "Rsun"), T: kelvin });
-  const R = radius ? inUnit(radius, "Rsun") : Math.sqrt(light) / (kelvin / SOLAR_TEFF_K) ** 2;
+  const R = radius ? inUnit(radius, "Rsun") : stellarRadius.compute({ L: light, T: kelvin });
   const type = SPECTRAL_TYPES[id];
   const group = type ? groupOfType(type) : undefined;
   return group ? { id, kelvin, light, radius: R, group } : { id, kelvin, light, radius: R };

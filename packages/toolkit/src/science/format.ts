@@ -66,11 +66,15 @@ export function numberFormat(locale: string, digits: number, fixed: boolean) {
   return format;
 }
 
-/** Formats a plain or scientific readout with Intl; `fixed` keeps trailing zeros. */
-export function formatReadout(value: number, locale: string, fixed = false) {
+/**
+ * Formats a plain or scientific readout with Intl; `fixed` keeps trailing zeros, `tight` drops
+ * the spaces round the × ("2.42×10⁻⁵") for a readout's narrow column.
+ */
+export function formatReadout(value: number, locale: string, fixed = false, tight = false) {
   const r = readout(value);
   const number = numberFormat(locale, r.digits, fixed || r.exponent !== 0).format(r.mantissa);
-  return r.exponent ? `${number} × ${powerOfTen(r.exponent)}` : number;
+  if (!r.exponent) return number;
+  return tight ? `${number}×${powerOfTen(r.exponent)}` : `${number} × ${powerOfTen(r.exponent)}`;
 }
 
 /** A number with fixed maximum decimals through the cached Intl formatter. */

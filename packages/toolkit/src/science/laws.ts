@@ -209,6 +209,21 @@ export const stefanBoltzmann = defineEquation({
   source: "Stefan (1879), Boltzmann (1884)",
 });
 
+/** Stefan–Boltzmann the other way: a star's radius from its light and temperature. */
+export const stellarRadius = defineEquation({
+  id: "stellar-radius",
+  text: "R / R☉ = √(L / L☉) (T☉ / T)²",
+  latex: "\\frac{R}{R_\\odot} = \\sqrt{\\frac{L}{L_\\odot}}\\left(\\frac{T_\\odot}{T}\\right)^2",
+  output: "R",
+  variables: {
+    L: { symbol: "L / L☉", latex: "L/L_\\odot" },
+    T: { symbol: "T", latex: "T", unit: "K" },
+    R: { symbol: "R / R☉", latex: "R/R_\\odot" },
+  },
+  compute: ({ L, T }) => Math.sqrt(L) * (CONSTANTS.solarEffectiveTemperature.value / T) ** 2,
+  source: "Stefan (1879), Boltzmann (1884)",
+});
+
 /**
  * An atmosphere's pressure scale height: how far up its pressure falls by a factor e, for a
  * gas of mean particle mass μ (in atomic mass units) under gravity g.

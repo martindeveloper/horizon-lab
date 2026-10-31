@@ -17,6 +17,7 @@ import {
   convertFigure,
   schwarzschildRadius,
   stefanBoltzmann,
+  stellarRadius,
   surfaceGravity,
   type Range,
   type UnitId,
@@ -24,7 +25,7 @@ import {
 
 import { AIR_DENSITY, WATER_DENSITY } from "../parameters";
 import { lightLap, oblateDensity } from "./equations";
-import { radiusOf, teaspoonKg } from "./physics";
+import { teaspoonKg } from "./physics";
 import { RUNG_IDS, rungById, type RungId } from "./rungs";
 
 type Unit = Value["unit"];
@@ -136,7 +137,7 @@ function figuresOf(id: RungId): RungFacts {
       },
     );
   if (!radius && luminosity && teff)
-    radius = derive([luminosity, teff], (L, T) => radiusOf(L, T), {
+    radius = derive([luminosity, teff], (L, T) => stellarRadius.compute({ L, T }), {
       unit: "Rsun",
       source: luminosity.source,
       note: "from luminosity and temperature by Stefan–Boltzmann",

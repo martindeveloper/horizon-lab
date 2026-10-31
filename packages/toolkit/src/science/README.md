@@ -43,7 +43,8 @@ measure(4.24, "ly").format({ locale: "cs", symbols: { ly: "sv. r." } }); // "4,2
 ```
 
 `readout` chooses about three significant figures (scientific below 0.001 or
-from 10⁷); `formatReadout` and `formatNumber` print with cached Intl formatters,
+from 10⁷); `formatReadout` and `formatNumber` print with cached Intl formatters
+(`formatReadout`'s `tight` drops the spaces round the × for a narrow readout column),
 because canvas labels redraw every frame. `formatSignificant` prints a literature
 value to a chosen number of significant figures ("18,000", "5 × 10¹⁶", "10¹⁷").
 
@@ -68,7 +69,8 @@ parameter 3√3 GM/c²; `PHOTON_SPHERE_PER_RS` and `SHADOW_PER_RS` in horizon ra
 `angularSeparation` (haversine, degrees), `resonanceSemiMajorAxis` (Kepler III for an orbit
 of k times a planet's period), `hubbleLaw` (d = v / H₀, in Mpc), and for light `planckLaw`,
 `wienDisplacement`, `photonEnergy` (E = hc/λ, nm to eV) and `dopplerShift` (relativistic); for
-stars and planets `stefanBoltzmann` (L/L☉ from R/R☉ and T), `pressureScaleHeight`
+stars and planets `stefanBoltzmann` (L/L☉ from R/R☉ and T) and `stellarRadius` (its inverse,
+R/R☉ from L/L☉ and T), `pressureScaleHeight`
 (H = kT / μ mᵤ g), `surfaceGravity` (g = GM / R², with `logGravityCgs` for the log g model
 atmospheres are gridded on) and `meanDensity`; for
 a ship `lorentzFactor`, `timeDilation`, `relativisticDopplerLaw` and `rapidity` (below). A simulation's

@@ -14,6 +14,7 @@ import {
   convertDistance,
   formatDistance,
   formatDistanceRange,
+  formatReadout,
   formatSignificant,
   resolveDistanceUnit,
   PLANCK_2018,
@@ -86,6 +87,10 @@ test("distance units convert through exact IAU definitions and read out consiste
   const edge = readout(9.996e-5);
   assert.equal(edge.exponent, -4);
   assert.ok(Math.abs(edge.mantissa - 0.9996) < 1e-9);
+  /* A narrow readout's power of ten drops its spaces; plain figures print alike either way. */
+  assert.equal(formatReadout(4.512e-9, "en"), "4.51 × 10⁻⁹");
+  assert.equal(formatReadout(4.512e-9, "cs", true, true), "4,51×10⁻⁹");
+  assert.equal(formatReadout(0.541, "en", true, true), "0.541");
 
   const earth = lightTime(1);
   assert.equal(earth.unit, "min");
