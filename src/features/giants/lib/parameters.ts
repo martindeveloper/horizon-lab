@@ -1,4 +1,3 @@
-import { SOLAR_MEAN_MOLECULAR_WEIGHT } from "@/space/solar-composition";
 import {
   CHROMOSPHERE_HEIGHT,
   FACULA_CONTRAST,
@@ -28,14 +27,6 @@ import { RUNG_IDS } from "./model/rungs";
  * and the technical notes quote them, so the three cannot disagree.
  */
 
-/**
- * Mean mass per particle of a star's photosphere in atomic mass units: the Sun's neutral gas
- * (`SOLAR_MEAN_MOLECULAR_WEIGHT`), for every star. A teaching choice for the scale height that
- * sizes the granules.
- */
-export const MEAN_MOLECULAR_WEIGHT = SOLAR_MEAN_MOLECULAR_WEIGHT;
-/** A convection cell spans about this many pressure scale heights (the Sun's: ~1,000 km over ~150 km). */
-export const GRANULE_SCALE_HEIGHTS = 8;
 /** A teaspoon, m³. */
 export const TEASPOON_M3 = 5e-6;
 /** Water (the kit's) and sea-level air (20 °C), kg/m³: what a card compares a star's mean density with. */

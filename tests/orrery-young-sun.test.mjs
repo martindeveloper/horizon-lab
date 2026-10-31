@@ -3,14 +3,13 @@ import test from "node:test";
 
 import { SUN } from "../src/features/orrery/lib/model/catalogue/sun.ts";
 import { ORRERY_EQUATIONS } from "../src/features/orrery/lib/model/equations.ts";
-import { HABITABLE_ZONE_AU } from "../src/features/orrery/lib/model/parameters.ts";
 import {
   habitableZone,
   sunLuminosity,
-  youngSunLuminosity,
   youngSunModelled,
 } from "../src/features/orrery/lib/model/young-sun.ts";
 import { MODEL_START, SUN_BIRTH } from "../src/space/solar-system/model/parameters.ts";
+import { HABITABLE_ZONE_AU, youngSunLuminosity } from "../src/space/sun/model/young-sun.ts";
 
 test("the Sun shines at today's output now and at about seven tenths as the sketch starts", () => {
   assert.equal(sunLuminosity(0), 1);

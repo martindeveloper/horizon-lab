@@ -6,9 +6,9 @@
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, RingGeometry, type Object3D } from "three";
 
 import type { ShownFor, SolarFrame, SolarKit } from "@/space/solar-system/scene/kit";
+import { HABITABLE_ZONE_AU } from "@/space/sun/model/young-sun";
 import { BELOW, framed, ownedLine, type PlaceLabel } from "@horizon/toolkit/scene";
 
-import { HABITABLE_ZONE_AU } from "../model/parameters";
 import { habitableZone, sunLuminosity, youngSunModelled } from "../model/young-sun";
 
 /** A soft green: the band reads as a zone, not an orbit. */

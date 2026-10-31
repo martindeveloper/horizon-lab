@@ -55,7 +55,6 @@ import {
   restageLens,
   restageLight,
 } from "../src/features/giants/lib/model/pair.ts";
-import { granulesAcross } from "../src/features/giants/lib/model/physics.ts";
 import { METRES, RULERS, rulerFor } from "../src/features/giants/lib/model/ruler.ts";
 import { RUNG_IDS, RUNGS, rungIndex, rungForBody } from "../src/features/giants/lib/model/rungs.ts";
 import { TOUR } from "../src/features/giants/lib/model/tour.ts";
@@ -72,6 +71,7 @@ import {
 } from "../src/features/giants/lib/parameters.ts";
 import { comparedWith, useGiants } from "../src/features/giants/lib/store.ts";
 import { pathForRung, resolveRung, rungFromPath } from "../src/features/giants/routing.ts";
+import { granulesAcross } from "../src/space/sun/model/granulation.ts";
 import { featureMessages } from "./messages-helper.mjs";
 
 const ladder = createLadder(RUNG_IDS.map((id) => radiusMetres(id)));

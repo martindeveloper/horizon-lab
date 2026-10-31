@@ -70,7 +70,7 @@ src/
         timeline.ts            Slider segments, epochs, dated notes, playback
         events.ts              Dated moments the clock can be set to, found as roots on the orbits
         earth-view.ts          The view from Earth: the centre's rules and each body's path seen from Earth
-        young-sun.ts           The faint young Sun: its output by age and the habitable zone that moves with it
+        young-sun.ts           The faint young Sun along the timeline, on the shared law (src/space/sun/model)
         views.ts               The default view and the playing clock's speed-up by scale
         tour.ts                Guide steps and their flights
         catalogue/             The timeline's figures: value or span, unit, source, status
@@ -319,6 +319,9 @@ src/
                                drawn by the Orrery along its timeline and by Voyage from the ship;
                                band.ts paints the maps and grains on a worker (band.worker.ts),
                                the last sky per set of eras kept for the next mount
+    sun/model/                 The Sun's shared laws: the faint young Sun's output and habitable
+                               zone (young-sun.ts: Orrery, Afterglow) and the granules' size
+                               (granulation.ts: Giants, Afterglow)
     sun/graphics/              The Sun as any host draws it: the CIE/Planck continuum and Claret
                                limb tables (atmosphere.ts, limb-grid.json, spectrum-sample.ts),
                                the GLSL Giants and the Sun lab share (shaders/: continuum,

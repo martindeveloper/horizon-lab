@@ -7,6 +7,7 @@
  */
 import { CONVECTIVE_BELOW_K } from "@/space/hr-diagram";
 import { PROFILE_SAMPLES } from "@/space/sun/graphics/parameters";
+import { granulesAcross } from "@/space/sun/model/granulation";
 
 import {
   BEAM_REACH,
@@ -24,7 +25,6 @@ import {
 } from "../parameters";
 import type { ActivityKind } from "./activity";
 import { RUNG_FACTS, drawn, inUnit } from "./catalogue";
-import { granulesAcross } from "./physics";
 import { rotatingTemperatures } from "./rotation";
 import { RUNGS, type Rung, type Ring } from "./rungs";
 

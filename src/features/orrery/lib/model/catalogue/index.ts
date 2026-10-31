@@ -6,6 +6,7 @@
  */
 import { factsOf, type Fact } from "@/lib/facts";
 import { PLANETS, POPULATIONS, SOLAR_CATALOGUE } from "@/space/solar-system/model/catalogue";
+import { HABITABLE_ZONE } from "@/space/sun/model/young-sun";
 
 import { SUN } from "./sun";
 import { TIMELINE } from "./timeline";
@@ -51,8 +52,8 @@ export const PROSE_FIGURES = {
   elatinaKm: SOLAR_CATALOGUE.moonDistance.elatina.distance,
   elatinaMyr: SOLAR_CATALOGUE.moonDistance.elatina.age,
   youngSunPercent: SUN.sun.start,
-  zoneInnerAu: SUN.sun.zoneInner,
-  zoneOuterAu: SUN.sun.zoneOuter,
+  zoneInnerAu: HABITABLE_ZONE.inner,
+  zoneOuterAu: HABITABLE_ZONE.outer,
   modelStartGyr: TIMELINE.formation.modelStart,
   clearDoneGyr: TIMELINE.formation.clearingDone,
   jupiterStartAu: PLANETS.jupiter.start,

@@ -90,6 +90,7 @@ import {
 } from "./model/rotation";
 import { SEEDED_GROUPS, SPOT_GROUPS } from "./model/spot-groups";
 import { CORE_EDGE_R, photonDiffusionTime, structureAt } from "./model/structure";
+import { HABITABLE_ZONE } from "./model/young-sun";
 
 const SUN = NAMED_STARS.sun;
 const MODEL_S = "christensenDalsgaard1996";
@@ -690,6 +691,8 @@ export const SUN_CATALOGUE = {
   observed: OBSERVED,
   passbands: PASSBANDS,
   probes: PROBES,
+  /** Where sunlight keeps a world temperate today (the Orrery and Afterglow move it with the Sun's light). */
+  habitableZone: { today: HABITABLE_ZONE },
 } as const;
 
 /** Every fact with its path ("layers.interior.centralTemperature"), for tests and the ledger. */

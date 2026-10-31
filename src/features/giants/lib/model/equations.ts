@@ -1,6 +1,8 @@
 import { baumbachCorona } from "@/space/sun/equations";
+import { GRANULE_SCALE_HEIGHTS, granulesAcross } from "@/space/sun/model/granulation";
 import {
   defineEquation,
+  formatNumber,
   meanDensity,
   pressureScaleHeight,
   photonSphereRadius,
@@ -10,8 +12,7 @@ import {
   type Formula,
 } from "@horizon/toolkit/science";
 
-import { GRANULE_SCALE_HEIGHTS } from "../parameters";
-import { granulesAcross, lightLapSeconds, spheroidDensity } from "./physics";
+import { lightLapSeconds, spheroidDensity } from "./physics";
 
 /**
  * Giants' formulas, written once: the cards' derived figures compute with them, and the guide
@@ -23,8 +24,8 @@ import { granulesAcross, lightLapSeconds, spheroidDensity } from "./physics";
 /** Convection cells across a radius, each a few scale heights wide. */
 const granuleCount = defineEquation({
   id: "granules-across",
-  text: `N ≈ R / (${GRANULE_SCALE_HEIGHTS} H)`,
-  latex: `N \\approx \\frac{R}{${GRANULE_SCALE_HEIGHTS} H}`,
+  text: `N ≈ R / (${formatNumber(GRANULE_SCALE_HEIGHTS, "en", 2)} H)`,
+  latex: `N \\approx \\frac{R}{${formatNumber(GRANULE_SCALE_HEIGHTS, "en", 2)} H}`,
   output: "N",
   variables: {
     M: { symbol: "M / M☉", latex: "M/M_\\odot" },
