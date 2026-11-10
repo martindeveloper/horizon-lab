@@ -7,13 +7,13 @@
 import { clamp } from "@horizon/toolkit/math";
 
 import { CHAPTER_DEFINITIONS, type ChapterId } from "./chapter-ids";
+import { OCEANS_GOING } from "./oceans";
 import {
   END_AGE,
   FINAL_PULSE,
   HELIUM_END,
   MS_END,
   NEBULA_END,
-  OCEANS_AFTER,
   RGB_TIP,
   SWEEP,
   TODAY,
@@ -37,7 +37,8 @@ export type Chapter = {
 const STARTS: Readonly<Record<ChapterId, number>> = {
   young: 0,
   today: TODAY,
-  oceans: TODAY + OCEANS_AFTER,
+  /* The habitable zone's inner edge reaches Earth and its water begins to go (`oceans.ts`). */
+  oceans: OCEANS_GOING,
   subgiant: MS_END,
   tip: RGB_TIP - SWEEP,
   flash: RGB_TIP,

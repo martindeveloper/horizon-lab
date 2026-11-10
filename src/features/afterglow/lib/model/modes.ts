@@ -59,3 +59,14 @@ export const modeOf = (s: { drift: DriftState; guideOpen: boolean }): ModeId => 
   }
   return s.guideOpen ? "guide" : "timeline";
 };
+
+type Clock = { playing: boolean; drift: DriftState };
+
+/** Whether the clock is paused: by the visitor's own control, or by the autoplay's. */
+export const clockPaused = (s: Clock) => !s.playing || s.drift === "paused";
+
+/**
+ * Whether the clock runs, and with it all it moves (the sway, the world's turn): not while
+ * paused, and not behind the autoplay's loader, so the life starts when the autoplay does.
+ */
+export const clockRuns = (s: Clock) => !clockPaused(s) && s.drift !== "loading";

@@ -1,9 +1,10 @@
 /**
  * The worlds to stand on and the planets the giant reaches. Each orbit is the body's mean
  * distance today (the JPL elements), widened as the Sun loses mass with the orbit's angular
- * momentum kept; a world is lost when the Sun's radius reaches its orbit. Earth is the
- * exception the copy must name: by radius alone its widened orbit escapes, yet Schröder &
- * Smith (2008) find tides and drag pull it in half a million years before the tip.
+ * momentum kept; a world is lost when the Sun's radius reaches its orbit, and the inner planets
+ * sooner, when Schröder & Smith's (2008) tides and drag pull them in: the sketch has no tides,
+ * so their times are the paper's. Earth is the one the copy must name: by radius alone its
+ * widened orbit escapes, yet the tides take it half a million years before the tip.
  */
 import { literatureFact } from "@/lib/facts";
 import type { SurfaceSelection } from "@/space/solar-system/model/selection";
@@ -18,7 +19,13 @@ import {
   sunlightShare,
 } from "./equations";
 import { sunAt } from "./sun";
-import { EARTH_ENGULFED_BEFORE_TIP, MS_END, RGB_TIP } from "./track";
+import {
+  EARTH_ENGULFED_BEFORE_TIP,
+  MERCURY_BEFORE_EARTH,
+  MS_END,
+  RGB_TIP,
+  VENUS_BEFORE_EARTH,
+} from "./track";
 
 /** The worlds a visitor orbits, in order from the Sun: each has a measured map in the toolkit. */
 export const WORLD_IDS = ["earth", "mars", "europa", "enceladus", "pluto"] as const;
@@ -26,7 +33,7 @@ export type WorldId = (typeof WORLD_IDS)[number];
 
 /** Each world's Bond albedo: the share of all the sunlight it reflects, the rest warming it. */
 export const BOND_ALBEDO = {
-  earth: literatureFact(0.306, "ratio", "nssdc", "verified", { digits: 3 }),
+  earth: literatureFact(0.294, "ratio", "nssdc", "verified", { digits: 3 }),
   mars: literatureFact(0.25, "ratio", "nssdc", "verified", { digits: 2 }),
   europa: literatureFact(0.64, "ratio", "lange2026", "verified", {
     range: [0.58, 0.7],
@@ -160,6 +167,13 @@ export function zoneReaches(orbit: OrbitId): number {
 /** On the climb the habitable zone passes Saturn: Enceladus's warm spell, a few tens of millions of years. */
 export const WARM_SPELL = zoneReaches("saturn");
 
+/** How long before the tip tides and drag pull each inner planet in (Schröder & Smith 2008), years. */
+const PULLED_IN: Readonly<Partial<Record<OrbitId, number>>> = {
+  mercury: EARTH_ENGULFED_BEFORE_TIP + MERCURY_BEFORE_EARTH,
+  venus: EARTH_ENGULFED_BEFORE_TIP + VENUS_BEFORE_EARTH,
+  earth: EARTH_ENGULFED_BEFORE_TIP,
+};
+
 /** A planet's fate: swallowed at an age; Earth's, swallowed by tides though its widened orbit would escape; or spared. */
 export type Fate =
   | { kind: "engulfed"; age: number }
@@ -171,11 +185,14 @@ const FATES = new Map<OrbitId, Fate>();
 export function fateOf(orbit: OrbitId): Fate {
   const known = FATES.get(orbit);
   if (known) return known;
+  const reached = radiusReaches(orbit);
+  const pulledIn = PULLED_IN[orbit];
   let fate: Fate;
-  if (orbit === "earth") fate = { kind: "uncertain", age: RGB_TIP - EARTH_ENGULFED_BEFORE_TIP };
-  else {
-    const age = radiusReaches(orbit);
-    fate = age === null ? { kind: "survives" } : { kind: "engulfed", age };
+  if (pulledIn !== undefined) {
+    /* The tides' time; where the radius alone would never reach the orbit, the fate is argued. */
+    fate = { kind: reached === null ? "uncertain" : "engulfed", age: RGB_TIP - pulledIn };
+  } else {
+    fate = reached === null ? { kind: "survives" } : { kind: "engulfed", age: reached };
   }
   FATES.set(orbit, fate);
   return fate;

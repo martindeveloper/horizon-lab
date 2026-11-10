@@ -11,7 +11,7 @@ import { SwitchChips } from "@/components/simulations/switch-chips";
 
 import { useAfterglow, type Show } from "../lib/store";
 
-const SWITCHES: (keyof Show)[] = ["glare"];
+const SWITCHES: (keyof Show)[] = ["glare", "lightning"];
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const t = useTranslations("afterglow");

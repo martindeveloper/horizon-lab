@@ -3,16 +3,56 @@
 
 /* Feature-scoped rules only. Tailwind utilities compile once, in the shared stylesheet. */
 
+/* The move just made (components/readouts.tsx): the chip names the world left and an arrow
+   before the world arrived at. They hold while the move is read, then fade and close up, so the
+   name alone is left; under reduced motion they go at once when their time is up. `--read`
+   is how long they stay: the longest dissolve and a few seconds to read them after it. */
+:where([data-simulation="afterglow"]) .afterglow-came-from {
+  --read: 7s;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: afterglow-came-from var(--read) var(--ease-standard) both;
+}
+@keyframes afterglow-came-from {
+  0%,
+  85% {
+    max-width: 16em;
+    margin-inline-end: 0;
+    opacity: 1;
+  }
+  100% {
+    max-width: 0;
+    /* The row's gap after it closes with it. */
+    margin-inline-end: -0.375rem;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where([data-simulation="afterglow"]) .afterglow-came-from {
+    animation-timing-function: step-end;
+  }
+}
+
 /* The timeline (components/timeline.tsx): the dock's horizon line. Where the tempo slows the
    clock, dawn light rises from the line, fading upward; the playhead is the house's sun under
-   the horizon, a gold half-disc on the line, its corona the shared `slider-halo`. */
+   the horizon, a gold half-disc on the line, its corona the shared `slider-halo`. The sun is
+   gold down to the line's lower edge, so the line under its whole width is its own base, as in
+   the brand mark: the gold never stops halfway under it. */
+:where([data-simulation="afterglow"]) .afterglow-track {
+  --line: 2px;
+}
 :where([data-simulation="afterglow"]) .afterglow-dawn {
   mask-image: linear-gradient(to top, black, transparent);
 }
 :where([data-simulation="afterglow"]) .afterglow-horizon {
+  height: var(--line);
   box-shadow: 0 0 6px -1px color-mix(in oklab, var(--color-solar) 35%, transparent);
 }
 :where([data-simulation="afterglow"]) .afterglow-sun {
-  background-image: linear-gradient(to bottom, var(--color-solar) 50%, transparent 50%);
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-solar) calc(50% + var(--line) / 2),
+    transparent 0
+  );
   filter: drop-shadow(0 0 4px color-mix(in oklab, var(--color-solar) 60%, transparent));
 }

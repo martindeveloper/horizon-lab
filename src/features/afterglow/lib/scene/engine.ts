@@ -61,6 +61,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 import { fullscreenVertex } from "@horizon/toolkit/shaders";
 
 import { dryEarthFile } from "../graphics/dry-earth";
+import { lightningMaterial } from "../graphics/lightning";
 import { createStarLook, skyUniforms, sunUniforms, viewUniforms } from "../graphics/looks";
 import SKY_FRAG from "../graphics/shaders/sky.frag.glsl";
 import STAR_FRAG from "../graphics/shaders/star.frag.glsl";
@@ -72,6 +73,7 @@ import {
   FLIGHT_SWAP,
   flightHush,
   flightPlace,
+  flightTurn,
   standingPlace,
   type FlightEnd,
   type FlightPlace,
@@ -79,7 +81,8 @@ import {
   type SeenPlace,
 } from "../model/flight";
 import { discFrame } from "../model/framing";
-import { GLIDE_S, MODES, modeOf, type ModeId } from "../model/modes";
+import { flashDensity } from "../model/lightning";
+import { GLIDE_S, MODES, clockRuns, modeOf, type ModeId } from "../model/modes";
 import { nebulaGlow } from "../model/nebula";
 import { earthDryness } from "../model/oceans";
 import { advancePlay, tempoAt } from "../model/pacing";
@@ -88,11 +91,13 @@ import {
   DAY_GAMMA,
   FADE_TEMPO,
   FLIGHT_POINTS,
+  FLIGHT_TURN_ACROSS,
   FOV_DEG,
   FRAME_FROM_PX,
   FRAMING_DOUBLING_S,
   HORIZON_BAND,
   HORIZON_SHARE,
+  LIGHTNING,
   LOOK_DAMP_S,
   MILKY_WAY_PHASE,
   MILKY_WAY_TILT,
@@ -278,6 +283,17 @@ export function createAfterglowEngine(
         })
         .catch(() => undefined);
     }
+    /*
+     * Lightning in Earth's storms (`model/lightning.ts`): light at the cloud tops, on the
+     * globe's own sphere so it turns with it, drawn before the air shell so the air dims it.
+     * Hidden unless Earth is under the camera and there is something to flash.
+     */
+    const lightning = new Mesh(globe.geometry, scope.own(lightningMaterial()));
+    lightning.scale.setScalar(1 + LIGHTNING.cloudTopKm / FIGURES.earth.equatorialKm);
+    lightning.renderOrder = -1;
+    lightning.visible = false;
+    globe.add(lightning);
+    const sunFromGlobe = new Quaternion();
     scene.add(skyMesh, stars, starMesh, globe);
     const worldPos = new Vector3();
     const closeUp = createCloseUp(kit, {
@@ -524,10 +540,21 @@ export function createAfterglowEngine(
         restingYaw(FOV_DEG.open);
       return { apart: Math.hypot(below, beside), roll: Math.atan2(beside, below) };
     };
-    /** The view a flight keeps: the Sun over the limb, the distance a globe vanishes at, and where the worlds are points. */
+    /**
+     * The furthest the camera turns through a flight, radians (positive: left, after the world
+     * left): what takes the Sun to its place across the turned view, and less as the disc's own
+     * frame is wider than the open view, where a turn would stretch a giant off the lens's axis.
+     */
+    const turnReach = () => {
+      const whole =
+        Math.atan((2 * FLIGHT_TURN_ACROSS - 1) * tanHalf(FOV_DEG.open) * camera.aspect) -
+        restingYaw(FOV_DEG.open);
+      return Number.isNaN(framing) ? whole : whole * Math.min(1, FOV_DEG.open / framing) ** 2;
+    };
+    /** The view a flight keeps: the Sun over the limb, the distance a globe vanishes at, and where the worlds stand once small. */
     const flightView = (): FlightView => ({
       lift: sunOverLimb(),
-      far: 2 / (VANISH_PX * pixelAngle()),
+      gone: 2 / (VANISH_PX * pixelAngle()),
       leave: seenAt(FLIGHT_POINTS.leave),
       arrive: seenAt(FLIGHT_POINTS.arrive),
     });
@@ -555,14 +582,20 @@ export function createAfterglowEngine(
         .normalize(),
     );
     /* ------------------------------------------------------------ clock and vantage */
-    let age = store.getState().age;
-    let published = age;
+    /*
+     * The clock opens where the store stands. An age it was sent to before the scene was up (the
+     * chapter a visit's address names) has nowhere to ease from: the clock opens there, and the
+     * store hears it has arrived with the first frame.
+     */
+    const opening = store.getState();
+    let age = opening.aim ?? opening.age;
+    let published = opening.age;
     let sincePublish = 0;
     /** An age the clock eases to, along the track so the playhead glides evenly; null at rest. */
     let aim: { from: number; to: number; t: number } | null = null;
     /** The clock stands at an aim it was sent to without a flight: the store hears it has arrived. */
-    let arrivedAtOnce = false;
-    let world = store.getState().world;
+    let arrivedAtOnce = opening.aim !== null;
+    let world = opening.world;
     let vantage = vantageOf(world, sunAt(age).mass);
     /** Where a flight has the camera (`model/flight.ts`); null at rest. */
     let flown: FlightPlace | null = null;
@@ -630,7 +663,7 @@ export function createAfterglowEngine(
         return;
       }
       const style = MODES[modeOf(s)];
-      const flies = s.playing || aim !== null || s.aim !== null || !s.auto;
+      const flies = clockRuns(s) || aim !== null || s.aim !== null || !s.auto;
       if (
         style.change === "flight" &&
         flies &&
@@ -715,7 +748,7 @@ export function createAfterglowEngine(
           aim = null;
           arrived = true;
         }
-      } else if (s.playing) {
+      } else if (clockRuns(s)) {
         /* The clock hushes while the world changes, so one thing happens at a time. */
         age = advancePlay(age, dt, paceValue(s.pace), hushNow());
         if (age >= END_AGE) s.setPlaying(false);
@@ -731,7 +764,7 @@ export function createAfterglowEngine(
       const sun = sunAt(age);
       if (flight) {
         flight.t = Math.min(1, flight.t + dt / flight.seconds);
-        /* Halfway across the globes change, the world left and the next both under a pixel. */
+        /* Halfway the globes change, the world left and the next both out of the view. */
         if (flight.t >= FLIGHT_SWAP && world !== flight.to) swapWorld(flight.to);
         const from = vantageOf(flight.from, sun.mass);
         const to = vantageOf(flight.to, sun.mass);
@@ -770,7 +803,7 @@ export function createAfterglowEngine(
       dissolve !== null ||
       flight !== null ||
       !settled() ||
-      store.getState().playing ||
+      clockRuns(store.getState()) ||
       closeUp.busy() ||
       spin.rate > SETTLED.spin ||
       fading;
@@ -784,11 +817,13 @@ export function createAfterglowEngine(
         followAim(dt);
         /*
          * The camera sways while the clock runs, so nothing sits still, by the mode's reach
-         * (eased to, so a new mode never jolts) and calmed through a flight's middle, where the
-         * worlds' points are placed against the resting view.
+         * (eased to, so a new mode never jolts) and calmed through a flight's middle, as the
+         * visitor's own turn of the view is: there the camera's turn is the flight's alone
+         * (`flightTurn`), which the worlds' far places are laid out against.
          */
         const { sway } = MODES[mode];
-        if (s.playing && !reduceMotion.matches) {
+        const running = clockRuns(s) && !reduceMotion.matches;
+        if (running) {
           swayPhase.across += (2 * Math.PI * dt) / sway.acrossPeriod;
           swayPhase.horizon += (2 * Math.PI * dt) / sway.horizonPeriod;
         }
@@ -796,11 +831,11 @@ export function createAfterglowEngine(
         swayReach.across = lerp(swayReach.across, sway.across, ease);
         swayReach.horizon = lerp(swayReach.horizon, sway.horizon, ease);
         const calm = flight ? 1 - Math.sin(Math.PI * flight.t) ** 2 : 1;
+        const flightYaw = flight ? turnReach() * flightTurn(flight.t) : 0;
         const swayYaw = calm * swayReach.across * yawReach() * Math.sin(swayPhase.across);
         const swayHorizon = calm * swayReach.horizon * Math.sin(swayPhase.horizon);
         /* The world turns while the clock runs (`SPIN`), taken up and let go as it starts and stops. */
-        const turning = s.playing && !reduceMotion.matches ? 1 : 0;
-        spin.rate = lerp(spin.rate, turning, 1 - Math.exp(-dt / SPIN.easeS));
+        spin.rate = lerp(spin.rate, running ? 1 : 0, 1 - Math.exp(-dt / SPIN.easeS));
         spin.angle += spin.rate * SPIN.degPerS * DEG * dt;
         turnGlobe();
         starLookup.set(state.teff, state.logg);
@@ -836,7 +871,7 @@ export function createAfterglowEngine(
             turnQ.setFromEuler(
               euler.set(
                 pitchFor(share, FOV_DEG.open) - DIP,
-                restingYaw(FOV_DEG.open) + look.yaw + swayYaw,
+                restingYaw(FOV_DEG.open) + calm * look.yaw + swayYaw + flightYaw,
                 0,
                 "YXZ",
               ),
@@ -887,6 +922,21 @@ export function createAfterglowEngine(
             1 + nebula * NEBULA_SKYLIGHT[2],
           );
         }
+        /* The storms flash while the clock runs, taken up and let go with the globe's turn. */
+        const flashes =
+          world === "earth" && s.show.lightning && spin.rate > SETTLED.spin ? flashDensity(age) : 0;
+        lightning.visible = flashes > 0;
+        if (lightning.visible) {
+          const flash = lightning.material.uniforms;
+          flash.uDensity!.value = flashes;
+          flash.uShown!.value = spin.rate;
+          flash.uTime!.value = time;
+          flash
+            .uSun!.value.copy(worldPos)
+            .negate()
+            .normalize()
+            .applyQuaternion(sunFromGlobe.copy(globe.quaternion).invert());
+        }
         const air = looks.air(WORLDS[world].body.id);
         air?.uniforms.uSunlight?.value.set(
           display.tint[0] * day,
@@ -917,7 +967,7 @@ export function createAfterglowEngine(
             fromSun,
             cover: dissolve === null ? 0 : 1 - smootherstep(dissolve),
             cameraRadii: camera.position.distanceTo(worldPos) / vantage.radius,
-            yaw: restingYaw(FOV_DEG.open) + look.yaw + swayYaw,
+            yaw: restingYaw(FOV_DEG.open) + calm * look.yaw + swayYaw + flightYaw,
             pitch: pitchFor(share, FOV_DEG.open) - DIP,
             horizon: share,
             sunX: probe.x,

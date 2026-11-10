@@ -4,6 +4,7 @@
  * about. Copy lives in `tour.steps.<id>`; the caption holds while it is read, then the journey
  * moves on.
  */
+import { OCEANS_GOING } from "./oceans";
 import { AGB_END, HELIUM_START, MS_END, NEBULA_END, RGB_TIP, TODAY } from "./track";
 import { WARM_SPELL, type WorldId } from "./worlds";
 
@@ -51,8 +52,9 @@ export const TOUR_DWELL = 12;
 const GYR = 1e9;
 const MYR = 1e6;
 
-/** The moments two steps stand at, which their copy's figures are quoted for (`catalogue.ts`). */
+/** The moments three steps stand at, which their copy's figures are quoted for (`catalogue.ts`). */
 export const FLASH_STEP_AGE = HELIUM_START + 30 * MYR;
+export const PULSES_STEP_AGE = AGB_END - 0.2 * MYR;
 export const DWARF_STEP_AGE = NEBULA_END + 2 * GYR;
 
 export const TOUR: readonly TourStep[] = [
@@ -74,7 +76,8 @@ export const TOUR: readonly TourStep[] = [
   },
   {
     id: "oceans",
-    age: TODAY + 1 * GYR,
+    /* The zone's inner edge on Earth's orbit: the moment the caption's first figure names. */
+    age: OCEANS_GOING,
     world: "earth",
     equation: "habitable-zone-edge",
     shot: ON_WORLD,
@@ -105,7 +108,7 @@ export const TOUR: readonly TourStep[] = [
   { id: "flash", age: FLASH_STEP_AGE, world: "europa", shot: ON_DISC },
   {
     id: "pulses",
-    age: AGB_END - 0.2 * MYR,
+    age: PULSES_STEP_AGE,
     world: "enceladus",
     equation: "orbital-period",
     shot: ON_DISC,

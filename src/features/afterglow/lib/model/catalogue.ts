@@ -6,15 +6,15 @@
  */
 import { factsOf, proseFacts, quoteAs, type Fact, type Facts, type ProseFigure } from "@/lib/facts";
 import { NAMED_STARS } from "@/space/stellar";
-import { habitableZoneAt } from "@/space/sun/model/young-sun";
+import { HABITABLE_ZONE } from "@/space/sun/model/young-sun";
 import { SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
 
-import { EARTH_DRY, OCEANS_GOING, RUNAWAY_AU, WATER_LOSS_AU } from "./oceans";
-import { sunAt } from "./sun";
-import { DWARF_STEP_AGE, FLASH_STEP_AGE } from "./tour";
+import { FLASH_RATE } from "./lightning";
+import { EARTH_DRY, OCEANS_GOING } from "./oceans";
+import { RUNAWAY_AU, WATER_LOSS_AU, sunAt } from "./sun";
+import { DWARF_STEP_AGE, FLASH_STEP_AGE, PULSES_STEP_AGE } from "./tour";
 import {
   AGB_TIP,
-  COOLING_START,
   DWARF_MASS,
   EARTH_ENGULFED_BEFORE_TIP,
   HELIUM_START,
@@ -22,7 +22,6 @@ import {
   MS_END,
   NEBULA_END,
   NEBULA_YEARS,
-  OCEANS_AFTER,
   RGB_TIP,
   TODAY,
   TRACK,
@@ -67,14 +66,6 @@ export const PROSE_FIGURES = {
     source: "connelly2012",
     status: "verified",
     note: "the first solids' age",
-  },
-  oceansGyr: {
-    value: OCEANS_AFTER,
-    unit: "yr",
-    show: "Gyr",
-    source: "schroder2008",
-    status: "verified",
-    note: "the habitable zone's inner edge crosses 1 au in about a billion years",
   },
   msEndGyr: {
     value: MS_END,
@@ -130,6 +121,14 @@ export const PROSE_FIGURES = {
     status: "derived",
     note: "0.332 M☉ lost on the giant branch",
   },
+  pulsesMassLostPercent: {
+    value: (1 - sunAt(PULSES_STEP_AGE).mass) * 100,
+    unit: "percent",
+    digits: 2,
+    source: "schroder2008",
+    status: "derived",
+    note: "the mass gone where the guide's step stands, between the sketched early AGB and the table's AGB tip (0.546 M☉)",
+  },
   earthTipOrbitAu: {
     value: orbitAt("earth", row("rgbTip").mass),
     unit: "au",
@@ -144,8 +143,10 @@ export const PROSE_FIGURES = {
     digits: 2,
     source: "kasting1993",
     status: "verified",
-    note: "the moist-greenhouse limit for today's Sun",
+    note: "the moist-greenhouse limit for today's Sun: the habitable zone's inner edge here, as in Schröder & Smith",
   },
+  zoneInnerCloudFreeAu: quoteAs(HABITABLE_ZONE.inner, { digits: 2 }),
+  zoneOuterAu: quoteAs(HABITABLE_ZONE.outer, { digits: 2 }),
   runawayAu: {
     value: RUNAWAY_AU,
     unit: "au",
@@ -162,7 +163,7 @@ export const PROSE_FIGURES = {
     source: "kasting1993",
     sources: ["schroder2008"],
     status: "derived",
-    note: "Earth's sunlight on the track reaches the moist-greenhouse limit's",
+    note: "Earth's sunlight on the track reaches the moist-greenhouse limit's: the habitable zone's inner edge on Earth's orbit, where the oceans chapter and its guide step begin; Schröder & Smith: about a billion years",
   },
   oceansGoneGyrAhead: {
     value: EARTH_DRY - TODAY,
@@ -205,7 +206,7 @@ export const PROSE_FIGURES = {
     digits: 2,
     source: "schroder2008",
     status: "derived",
-    note: "where the drawn climb reaches Mercury's widened orbit; Schröder & Smith: 4.3 Myr",
+    note: "pulled in by tides and drag 3.8 Myr before Earth, itself half a million years before the tip",
   },
   venusLostMyr: {
     value: lostBeforeTip("venus"),
@@ -214,7 +215,7 @@ export const PROSE_FIGURES = {
     digits: 2,
     source: "schroder2008",
     status: "derived",
-    note: "where the drawn climb reaches Venus's widened orbit; Schröder & Smith: 1.5 Myr",
+    note: "pulled in by tides and drag 1.0 Myr before Earth, itself half a million years before the tip; the sketch's radius alone reaches its widened orbit later",
   },
   marsTipWidthDeg: {
     value: standingAt("mars", RGB_TIP).sunWidth * DEG_PER_RAD,
@@ -232,15 +233,16 @@ export const PROSE_FIGURES = {
     status: "derived",
   },
   zoneTipInnerAu: {
-    value: habitableZoneAt(row("rgbTip").luminosity).inner,
+    value: tip.zone.inner,
     unit: "au",
     digits: 2,
-    source: "kopparapu2013",
+    source: "kasting1993",
     sources: ["schroder2008"],
     status: "derived",
+    note: "the water-loss limit at the tip's light; Schröder & Smith: 49.4 au",
   },
   zoneTipOuterAu: {
-    value: habitableZoneAt(row("rgbTip").luminosity).outer,
+    value: tip.zone.outer,
     unit: "au",
     digits: 2,
     source: "kopparapu2013",
@@ -289,14 +291,15 @@ export const PROSE_FIGURES = {
     status: "derived",
     note: "the table reads 149 R☉",
   },
-  nebulaKyr: {
+  crossingKyr: {
     value: NEBULA_YEARS,
     unit: "yr",
     show: "kyr",
     digits: 2,
     source: "millerBertolami2016",
-    status: "verified",
-    note: "τcross for a 0.55 M☉ remnant at Z = 0.02",
+    sources: ["schroder2008"],
+    status: "derived",
+    note: "τcross, the bare star's time from log Teff = 3.85 to its hottest, at the 0.5405 M☉ remnant: log-interpolated between Table 3's Z₀ = 0.02 rows (24.9 kyr at 0.5281 M☉, 5.97 kyr at 0.5615 M☉)",
   },
   nebulaKilokelvin: {
     value: row("nebula").teff / 1000,
@@ -304,7 +307,7 @@ export const PROSE_FIGURES = {
     digits: 2,
     source: "bergeronCooling",
     status: "derived",
-    note: "the 0.5 M☉ cooling sequence's first temperature, thousands of kelvin",
+    note: "the 0.5 M☉ cooling sequence's first temperature, thousands of kelvin: the least the bare star's hottest can be, since it cools onto that sequence; Miller Bertolami tabulates no peak",
   },
   dwarfMass: {
     value: DWARF_MASS,
@@ -313,12 +316,13 @@ export const PROSE_FIGURES = {
     source: "schroder2008",
     status: "verified",
   },
-  dwarfRadiusKm: {
-    value: sunAt(COOLING_START).radius * SOLAR_RADIUS_KM,
+  dwarfDiameterKm: {
+    value: 2 * sunAt(DWARF_STEP_AGE).radius * SOLAR_RADIUS_KM,
     unit: "km",
     digits: 2,
     source: "bergeronCooling",
     status: "derived",
+    note: "the dwarf's width two billion years into the fade, where the guide's step stands: twice the 0.5 M☉ sequence's radius there",
   },
   coolGyr: {
     value: coolingAge("cooling4k"),
@@ -371,5 +375,6 @@ export const catalogueFacts = () =>
   factsOf({
     track: trackFacts(),
     worlds: Object.fromEntries(WORLD_IDS.map((id) => [id, { bondAlbedo: BOND_ALBEDO[id] }])),
+    weather: { earth: { flashRate: FLASH_RATE } },
     prose: { figures: proseFacts(PROSE_FIGURES) },
   });

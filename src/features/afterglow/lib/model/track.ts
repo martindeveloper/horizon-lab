@@ -5,9 +5,10 @@
  * Boothroyd & Kraemer (1993) give the same start; the rows between the table's are a sketch of
  * the climb, drawn to Schröder & Smith's statement that the final ascent sweeps the inner
  * planets in five million years; Miller Bertolami (2016) times the crossing to the nebula's
- * star, and the Montreal cooling sequences (0.5 M☉, the nearest to the 0.5405 M☉ remnant) the
- * white dwarf's fade. Between rows the track interpolates linearly in age, and in the
- * logarithm of the time since the envelope left where the clock runs fast.
+ * star (his Table 3, between the rows either side of the remnant's mass), and the Montreal
+ * cooling sequences (0.5 M☉, the nearest to the 0.5405 M☉ remnant) the white dwarf's fade.
+ * Between rows the track interpolates linearly in age, and in the logarithm of the time since
+ * the envelope left where the clock runs fast.
  */
 import type { Status } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
@@ -45,8 +46,6 @@ const MYR = 1e6;
 
 /** Today: the first solids' age. */
 export const TODAY = SUN_BIRTH;
-/** The inner edge of the habitable zone crosses Earth's orbit about a billion years from now (Schröder & Smith 2008). */
-export const OCEANS_AFTER = 1 * GYR;
 /** The core's hydrogen runs out (Schröder & Smith 2008, Table 1: MS:final). */
 export const MS_END = 10.0 * GYR;
 /** The red-giant tip (Schröder & Smith 2008: 12.167 Gy). */
@@ -55,6 +54,9 @@ export const RGB_TIP = 12.167 * GYR;
 export const SWEEP = 5 * MYR;
 /** Earth is engulfed by tides and drag this long before the tip (Schröder & Smith 2008, Fig. 2). */
 export const EARTH_ENGULFED_BEFORE_TIP = 0.5 * MYR;
+/** Venus and Mercury meet the same fate this long before Earth (Schröder & Smith 2008, section 4.3). */
+export const VENUS_BEFORE_EARTH = 1.0 * MYR;
+export const MERCURY_BEFORE_EARTH = 3.8 * MYR;
 /** Core helium burning begins (Schröder & Smith 2008, Table 1: ZA-He). */
 export const HELIUM_START = 12.17 * GYR;
 /** How long core helium burning lasts: Schröder & Smith's 130 Myr, Miller Bertolami's ~100 Myr. */
@@ -65,15 +67,28 @@ export const AGB_TIP = 12.3 * GYR;
 /** The final 30,000 y on the very tip of the AGB, then the last thermal pulse and 1,300 years of wind (Schröder & Smith 2008). */
 export const FINAL_PULSE = AGB_TIP + 30_000;
 export const AGB_END = FINAL_PULSE + 1_300;
-/** The crossing to the nebula's hot star: Miller Bertolami's τcross for a 0.55 M☉ remnant. */
-export const NEBULA_YEARS = 10_400;
+/** The white dwarf's final mass (Schröder & Smith 2008). */
+export const DWARF_MASS = 0.5405;
+/**
+ * Miller Bertolami (2016, Table 3, Z₀ = 0.02): the remnants either side of the Sun's (from 1.00
+ * and 1.25 M☉ stars) and their τcross, the years the bare star takes from log Teff = 3.85 to
+ * its hottest. It times the star, not how long a nebula glows.
+ */
+const CROSSINGS = [
+  { mass: 0.5281, years: 24_900 },
+  { mass: 0.5615, years: 5_970 },
+] as const;
+/** The crossing to the nebula's hot star: τcross at the remnant's mass, between the table's rows in the logarithm of the time. */
+export const NEBULA_YEARS = (() => {
+  const [light, heavy] = CROSSINGS;
+  const f = (DWARF_MASS - light.mass) / (heavy.mass - light.mass);
+  return Math.exp(Math.log(light.years) + f * Math.log(heavy.years / light.years));
+})();
 export const NEBULA_END = AGB_END + NEBULA_YEARS;
 /** The fade from the crossing's plateau onto the cooling track, at near-constant temperature: drawn. */
 const FADE_YEARS = 30_000;
 /** Where the white dwarf's cooling sequence begins. */
 export const COOLING_START = NEBULA_END + FADE_YEARS;
-/** The white dwarf's final mass (Schröder & Smith 2008). */
-export const DWARF_MASS = 0.5405;
 
 /** A Montreal cooling-sequence row (0.5 M☉, thick hydrogen layer): temperature, radius and cooling age. */
 type CoolingRow = { id: string; teff: number; radiusCm: number; age: number };
@@ -268,7 +283,7 @@ export const TRACK: readonly TrackRow[] = [
     source: "millerBertolami2016",
     sources: ["bergeronCooling"],
     status: "derived",
-    note: "the crossing's end, τcross = 10.4 kyr for a 0.55 M☉ remnant; the temperature is the cooling sequence's first",
+    note: "the crossing's end: τcross at 0.5405 M☉, log-interpolated between Table 3's Z₀ = 0.02 rows (24.9 kyr at 0.5281 M☉, 5.97 kyr at 0.5615 M☉); the temperature is the cooling sequence's first, the least the star's hottest can be: it cools onto that sequence, and the paper tabulates no peak",
   },
   ...COOLING.map((row, index): TrackRow => ({
     id: row.id,

@@ -27,9 +27,11 @@ type Panel = "none" | "settings";
 export type Show = {
   /** The eye's glare about the Sun. */
   glare: boolean;
+  /** Lightning in Earth's night-side storms while the clock runs. */
+  lightning: boolean;
 };
 
-const DEFAULT_SHOW: Show = { glare: true };
+const DEFAULT_SHOW: Show = { glare: true, lightning: true };
 
 /** What the guide gives back when it ends: where and when the visitor stood. */
 type Saved = {
@@ -78,6 +80,8 @@ export type AfterglowStore = SceneSlice &
     tempo: number;
     /** The world the scene draws: the one stood on, or through a move the one left until the globes change (the scene writes it). */
     drawn: WorldId;
+    /** The world the scene drew before that one, for the readouts to name the move; null until the first. */
+    cameFrom: WorldId | null;
     /** A chapter: the clock eases to its first moment and the vantage follows the schedule. */
     setView: (view: ChapterId) => void;
     /** The clock set outright (the timeline's scrub): the hand on the timeline pauses the clock, as the guide's does. */
@@ -128,6 +132,7 @@ export const useAfterglow = create<AfterglowStore>((set, get) => ({
   pace: DEFAULT_PACE,
   ...placed(VANTAGE[INITIAL_VIEW], chapterById(INITIAL_VIEW).from),
   drawn: standingWorld(VANTAGE[INITIAL_VIEW], chapterById(INITIAL_VIEW).from),
+  cameFrom: null,
   auto: true,
   selection: null,
   panel: "none",
@@ -181,7 +186,7 @@ export const useAfterglow = create<AfterglowStore>((set, get) => ({
   resetView: () => set({ show: DEFAULT_SHOW, ...EXPERIENCE_SCENE_SETTINGS }),
   setMagnification: (magnification) => set({ magnification }),
   setTempo: (tempo) => set({ tempo }),
-  setDrawn: (drawn) => set({ drawn }),
+  setDrawn: (drawn) => set((s) => (s.drawn === drawn ? s : { drawn, cameFrom: s.drawn })),
   tick: (age, arrived) =>
     set((s) => {
       /* Easing to an aim, the clock passes through other chapters: the aim's chapter and world hold until it lands. */

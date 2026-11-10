@@ -125,14 +125,15 @@ export function Timeline() {
         />
         {/*
          * The line and its sun in one box spanning the thumb's travel, both placed from the
-         * same share of it, so the sun always stands where the gold ends.
+         * same share of it, so the sun always stands where the gold ends; the box holds the
+         * line's thickness, which the sun fills as its base.
          */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 flex items-center"
+          className="afterglow-track pointer-events-none absolute inset-y-0 flex items-center"
           style={TRAVEL_BOX}
         >
-          <div className="afterglow-horizon relative h-0.5 w-full rounded-full">
+          <div className="afterglow-horizon relative w-full rounded-full">
             <div className="absolute inset-0 rounded-full bg-fg-primary/20" style={JOINS}>
               <div
                 className="absolute inset-y-0 left-0 bg-accent"

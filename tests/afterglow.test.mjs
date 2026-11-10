@@ -4,7 +4,7 @@ import test from "node:test";
 import { createTranslator } from "next-intl";
 
 import { MAPS } from "@horizon/toolkit/bodies";
-import { SOLAR_TEFF_K, stefanBoltzmann } from "@horizon/toolkit/science";
+import { SOLAR_RADIUS_KM, SOLAR_TEFF_K, stefanBoltzmann } from "@horizon/toolkit/science";
 
 import { PROSE_FIGURES, catalogueFacts } from "../src/features/afterglow/lib/model/catalogue.ts";
 import { CHAPTER_IDS } from "../src/features/afterglow/lib/model/chapter-ids.ts";
@@ -22,10 +22,11 @@ import {
   FLIGHT_SWAP,
   flightHush,
   flightPlace,
+  flightTurn,
   standingPlace,
 } from "../src/features/afterglow/lib/model/flight.ts";
 import { discShare } from "../src/features/afterglow/lib/model/framing.ts";
-import { MODES } from "../src/features/afterglow/lib/model/modes.ts";
+import { MODES, clockPaused, clockRuns } from "../src/features/afterglow/lib/model/modes.ts";
 import {
   EARTH_DRY,
   OCEANS_GOING,
@@ -43,6 +44,7 @@ import {
 import {
   DAY_CEILING,
   DAY_TODAY,
+  FLIGHT_FAR_RADII,
   FLIGHT_TEMPO,
   FOV_DEG,
   HORIZON_BAND,
@@ -156,15 +158,16 @@ test("the giant swallows Mercury, then Venus; Earth's fate is the tides' and mar
   assert.equal(venus.kind, "engulfed");
   assert.equal(earth.kind, "uncertain");
   assert.ok(mercury.age < venus.age && venus.age < earth.age && earth.age < RGB_TIP);
-  /* Schröder & Smith: Mercury 4.3 and Venus 1.5 Myr before the tip; the drawn climb within a couple of million years of them. */
-  assert.ok(
-    Math.abs(RGB_TIP - mercury.age - 4.3e6) < 2.5e6,
-    `${(RGB_TIP - mercury.age) / 1e6} Myr`,
-  );
-  assert.ok(Math.abs(RGB_TIP - venus.age - 1.5e6) < 1.5e6, `${(RGB_TIP - venus.age) / 1e6} Myr`);
-  /* By radius alone Earth's widened orbit escapes the tip. */
+  /* Schröder & Smith's tides: Mercury 3.8 and Venus 1.0 Myr before Earth, itself half a million years before the tip. */
+  closeRelative(RGB_TIP - mercury.age, 4.3e6, 1e-9, "Mercury");
+  closeRelative(RGB_TIP - venus.age, 1.5e6, 1e-9, "Venus");
+  /* By radius alone the giant reaches Mercury and Venus too, but Earth's widened orbit escapes the tip: only its fate is argued. */
   const tip = sunAt(RGB_TIP);
+  for (const id of ["mercury", "venus"]) assert.ok(orbitAt(id, tip.mass) < tip.radiusAu, id);
   assert.ok(orbitAt("earth", tip.mass) > tip.radiusAu);
+  /* The guide's step on the giant says both are gone: it stands after their loss. */
+  const swallow = TOUR.find((step) => step.id === "swallow");
+  assert.ok(lostBy("mercury", swallow.age) && lostBy("venus", swallow.age));
   for (const id of ["mars", "jupiter", "saturn", "pluto"])
     assert.equal(fateOf(id).kind, "survives");
   assert.equal(lostBy("mercury", mercury.age - 1), false);
@@ -287,6 +290,14 @@ test("every tour step names a world and a formula that exist, in forward time, w
     last = step.age;
   }
   assert.deepEqual(new Set(TOUR.map((s) => s.id)).size, TOUR.length, "ids unique");
+  /* A caption's figure for its own moment is the Sun's where the step stands, as the readouts beside it show. */
+  const at = (id) => sunAt(TOUR.find((step) => step.id === id).age);
+  closeRelative(PROSE_FIGURES.pulsesMassLostPercent.value, (1 - at("pulses").mass) * 100, 1e-12);
+  closeRelative(
+    PROSE_FIGURES.dwarfDiameterKm.value,
+    2 * at("dwarf").radius * SOLAR_RADIUS_KM,
+    1e-12,
+  );
   for (const chapter of CHAPTER_IDS) assert.ok(WORLD_IDS.includes(VANTAGE[chapter]), chapter);
   /* The schedule moves outward as the Sun approaches. */
   const order = WORLD_IDS;
@@ -383,6 +394,16 @@ test("the store: chapters ease the clock, a world stops the schedule, the guide 
   assert.equal(useAfterglow.getState().playing, true);
   assert.equal(useAfterglow.getState().pace, "half");
   assert.equal(useAfterglow.getState().world, "earth");
+  /* The life waits behind the autoplay's loader, runs once it is ready, and its Pause holds the clock. */
+  assert.equal(clockRuns(useAfterglow.getState()), false, "waiting behind the loader");
+  assert.equal(clockPaused(useAfterglow.getState()), false);
+  s.readyDrift();
+  assert.equal(clockRuns(useAfterglow.getState()), true);
+  s.pauseDrift();
+  assert.equal(clockRuns(useAfterglow.getState()), false, "the autoplay's Pause");
+  assert.equal(clockPaused(useAfterglow.getState()), true);
+  s.resumeDrift();
+  assert.equal(clockRuns(useAfterglow.getState()), true);
   s.stopDrift();
   assert.equal(useAfterglow.getState().playing, false);
   assert.equal(useAfterglow.getState().pace, "double");
@@ -488,10 +509,11 @@ test("a visitor never stands on a swallowed world: the nearest survivor outward 
 });
 
 test("Earth's oceans go between the moist and the runaway greenhouse, within the main sequence, and never come back", () => {
-  assert.ok(
-    chapterOf(OCEANS_GOING).id === "oceans",
-    "the water starts going in the oceans chapter",
-  );
+  /* One criterion: the habitable zone's inner edge reaches Earth's orbit as the water begins to go, where the chapter and its guide step begin. */
+  const going = sunAt(OCEANS_GOING);
+  closeRelative(going.zone.inner, orbitAt("earth", going.mass), 1e-9, "the zone's inner edge");
+  assert.equal(CHAPTERS.find((c) => c.id === "oceans").from, OCEANS_GOING);
+  assert.equal(TOUR.find((step) => step.id === "oceans").age, OCEANS_GOING);
   assert.ok(
     EARTH_DRY > OCEANS_GOING && EARTH_DRY < MS_END,
     "the seas are gone before the core's hydrogen",
@@ -520,15 +542,15 @@ test("a world's temperature from sunlight matches the textbook equilibrium today
   assert.ok(temperatureAt("mars", RGB_TIP - 1e6) > 1000);
 });
 
-test("a flight backs off one world to a point beside the Sun and closes on the next from its other side", () => {
+test("a flight backs off one world until it flies away beside the Sun and closes on the next from its other side", () => {
   const from = { distance: 1, radius: 4.26e-5 };
   const to = { distance: 1.52, radius: 2.27e-5 };
-  /* A landscape view: a pixel's angle, the frame's bottom edge below the Sun, and the points left and right of it. */
+  /* A landscape view: a pixel's angle, the frame's bottom edge below the Sun, and the places left and right of it. */
   const pixel = 4.7e-4;
   const bottom = 0.49;
   const view = {
     lift: 0.2,
-    far: 2 / pixel,
+    gone: 2 / pixel,
     leave: { apart: 0.58, roll: -1.08 },
     arrive: { apart: 0.48, roll: 0.95 },
   };
@@ -574,10 +596,12 @@ test("a flight backs off one world to a point beside the Sun and closes on the n
     /* Seen: on the screen and two pixels across (a night side's lit sliver is far thinner). */
     return { t, left, ...s, shown: s.px >= 2 && s.top * Math.cos(s.roll) < bottom };
   });
-  const near = (x, a, b) => x >= Math.min(a, b) - 1e-9 && x <= Math.max(a, b) + 1e-9;
+  /* A place held as the world flies away wanders by under a thousandth of a radian, as the Sun's direction shifts with the camera. */
+  const HELD = 1e-3;
+  const near = (x, a, b) => x >= Math.min(a, b) - HELD && x <= Math.max(a, b) + HELD;
   for (const [i, s] of samples.entries()) {
     if (!s.shown) continue;
-    /* Never drops out of the frame or slides onto the Sun: between the limb's place and its point, on its own side. */
+    /* Never drops out of the frame or slides onto the Sun: between the limb's place and its far place, on its own side. */
     const place = s.left ? view.leave : view.arrive;
     assert.ok(near(s.top, view.lift, place.apart), `place at ${s.t}`);
     assert.ok(near(s.roll, 0, place.roll), `side at ${s.t}`);
@@ -592,18 +616,27 @@ test("a flight backs off one world to a point beside the Sun and closes on the n
     seen(at(swap.t), from).px < 1 && swap.px < 1,
     "both are under a pixel as the globes change",
   );
+  /* It backs off gently to the far place, a small globe still, before it flies away: that takes most of the way out. */
+  const farPx = (2 * Math.asin(1 / FLIGHT_FAR_RADII)) / pixel;
+  const gentle = samples.filter((s) => s.left && s.px >= farPx).length;
+  const leaving = samples.filter((s) => s.left && s.shown).length;
+  assert.ok(gentle > 0.75 * leaving, `${gentle} of ${leaving} steps down to the far place`);
   assert.ok(
     samples.filter((s) => !s.left && s.shown).length > 0.3 * STEPS,
     "the next one is seen growing for the last part of the move",
   );
   /* No seam: each world's size, place and side change at rates that never jump between frames. */
   const smooth = (value, label) => {
-    const rates = samples
-      .slice(1)
-      .map((s, i) => ({ t: s.t, rate: (value(s) - value(samples[i])) * STEPS, shown: s.shown }));
+    /* A rate is one world's own: the step across the globes' change compares two worlds and is left out. */
+    const rates = samples.slice(1).map((s, i) => ({
+      t: s.t,
+      rate: (value(s) - value(samples[i])) * STEPS,
+      shown: s.shown && s.left === samples[i].left,
+      left: s.left,
+    }));
     const peak = Math.max(...rates.filter((r) => r.shown).map((r) => Math.abs(r.rate)));
     for (const [i, r] of rates.entries()) {
-      if (i === 0 || !r.shown || !rates[i - 1].shown) continue;
+      if (i === 0 || !r.shown || !rates[i - 1].shown || r.left !== rates[i - 1].left) continue;
       assert.ok(Math.abs(r.rate - rates[i - 1].rate) < 0.02 * peak, `${label} jolts at ${r.t}`);
     }
   };
@@ -615,4 +648,16 @@ test("a flight backs off one world to a point beside the Sun and closes on the n
   assert.ok(Math.abs(flightHush(1) - 1) < 1e-12);
   assert.ok(flightHush(0.05) > 0.97, "eases in with the camera");
   for (let t = 0; t <= 1; t += 0.01) assert.ok(flightHush(t) >= FLIGHT_TEMPO - 1e-12);
+  /* The camera turns after the world left, crosses at the middle, turns to meet the next and comes back, never past its reach and without a jolt. */
+  assert.equal(flightTurn(0), 0);
+  assert.ok(Math.abs(flightTurn(FLIGHT_SWAP)) < 1e-12 && Math.abs(flightTurn(1)) < 1e-12);
+  assert.ok(flightTurn(0.25) > 0.9 && flightTurn(0.75) < -0.9, "after the one, then to the other");
+  for (let i = 1; i <= STEPS; i += 1) {
+    const turn = flightTurn(i / STEPS);
+    assert.ok(Math.abs(turn) <= 1);
+    assert.ok(
+      Math.abs(turn - flightTurn((i - 1) / STEPS)) < 0.01,
+      `turns smoothly at ${i / STEPS}`,
+    );
+  }
 });

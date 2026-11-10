@@ -13,7 +13,7 @@
  */
 import { clamp, lerp } from "@horizon/toolkit/math";
 
-import { TRACK_CELLS, ageToSlider, chapterOf, sliderToAge } from "./chapters";
+import { TRACK_CELLS, ageToSlider, chapterOf, playRate, sliderToAge } from "./chapters";
 import { DAY_GAMMA } from "./parameters";
 import { sunAt, type SunState } from "./sun";
 import { END_AGE } from "./track";
@@ -76,6 +76,20 @@ export function tempoAt(u: number) {
   const x = clamp(u, 0, 1) * SAMPLES;
   const i = Math.min(SAMPLES - 1, Math.floor(x));
   return lerp(TEMPO[i]!, TEMPO[i + 1]!, x - i);
+}
+
+/** A frame of play: the step the clock's rate at a moment is judged over. */
+const FRAME_S = 1 / 60;
+
+/**
+ * Years of the Sun's life a real second of play covers at a moment, at the pace of 1: the
+ * chapter's rate slowed by the tempo there, and less where that would change the Sun's look by
+ * more than `CHANGE_PER_S` a second, as `advancePlay` holds it.
+ */
+export function yearsPerSecondAt(age: number) {
+  const paced = playRate(age) * tempoAt(ageToSlider(age));
+  const change = lookChange(sunAt(age), sunAt(age + paced * FRAME_S));
+  return paced * Math.min(1, (CHANGE_PER_S * FRAME_S) / Math.max(change, Number.EPSILON));
 }
 
 /** How much a tempo slows the clock, 0 (none) to 1 (the floor): what the timeline's glow shows. */

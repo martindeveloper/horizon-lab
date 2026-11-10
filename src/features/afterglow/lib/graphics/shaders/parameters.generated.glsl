@@ -2,27 +2,39 @@
 #ifndef HORIZON_AFTERGLOW_PARAMETERS
 #define HORIZON_AFTERGLOW_PARAMETERS
 
-#define PROFILE_SAMPLES     129
-#define GLARE_REACH         6.0
-#define GLARE_REACH_MAX     0.12
-#define GLARE_STRENGTH      0.35
-#define MIN_RADIUS_PX       2.0
-#define RESOLVED_PX         3.0
-#define HIGHLIGHT_WHITE     0.15
-#define POINT_HALO          0.6
-#define POINT_HALO_PX       7.0
-#define DAY_GAMMA           0.45
-#define SUN_OVER_SUNLIGHT   46238.82797
-#define CELL_CONTRAST_FINE  0.035
-#define CELL_CONTRAST_GIANT 0.065
-#define CELLS_FINE_FROM     300.0
-#define NEBULA_LEVEL        0.22
-#define NEBULA_CORE         0.35
-#define NEBULA_REACH        1.2
-#define NEBULA_FLOOR        0.12
-#define NEBULA_GRAIN        7.0
-#define NEBULA_GRAIN_DEPTH  0.7
-#define NEBULA_OIII_RGB     vec3(0.3, 1.0, 0.65)
-#define NEBULA_HALPHA_RGB   vec3(1.0, 0.3, 0.35)
+#define PROFILE_SAMPLES         129
+#define GLARE_REACH             6.0
+#define GLARE_REACH_MAX         0.12
+#define GLARE_STRENGTH          0.35
+#define MIN_RADIUS_PX           2.0
+#define RESOLVED_PX             3.0
+#define HIGHLIGHT_WHITE         0.15
+#define POINT_HALO              0.6
+#define POINT_HALO_PX           7.0
+#define DAY_GAMMA               0.45
+#define SUN_OVER_SUNLIGHT       46238.82797
+#define CELL_CONTRAST_FINE      0.035
+#define CELL_CONTRAST_GIANT     0.065
+#define CELLS_FINE_FROM         300.0
+#define NEBULA_LEVEL            0.22
+#define NEBULA_CORE             0.35
+#define NEBULA_REACH            1.2
+#define NEBULA_FLOOR            0.12
+#define NEBULA_GRAIN            7.0
+#define NEBULA_GRAIN_DEPTH      0.7
+#define NEBULA_OIII_RGB         vec3(0.3, 1.0, 0.65)
+#define NEBULA_HALPHA_RGB       vec3(1.0, 0.3, 0.35)
+#define LIGHTNING_CELL          0.03490658504
+#define LIGHTNING_STORMS        0.125
+#define LIGHTNING_SLOT_S        1.0
+#define LIGHTNING_STROKES       3
+#define LIGHTNING_STROKE_GAP_S  0.07
+#define LIGHTNING_STROKE_FADE_S 0.04
+#define LIGHTNING_FLASH_S       0.3
+#define LIGHTNING_REACH         0.001881427249
+#define LIGHTNING_SPREAD        0.7305053979
+#define LIGHTNING_DUSK          0.0348994967
+#define LIGHTNING_RGB           vec3(0.72, 0.82, 1.0)
+#define LIGHTNING_PEAK          1.4
 
 #endif // HORIZON_AFTERGLOW_PARAMETERS

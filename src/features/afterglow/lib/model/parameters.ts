@@ -3,6 +3,7 @@
  * where the Sun stands in the view, the display's exposure, and the shader's constants.
  */
 import { PROFILE_SAMPLES } from "@/space/sun/graphics/parameters";
+import { FIGURES } from "@horizon/toolkit/bodies";
 import { AU_KM, SOLAR_RADIUS_KM } from "@horizon/toolkit/science";
 import { glslDefines, glslInt } from "@horizon/toolkit/shaders/defines";
 
@@ -14,14 +15,17 @@ export const AGE_FLIGHT_S = 1.6;
  * screen) and the last view of the old world dissolves into the new one.
  */
 export const VANTAGE_FADE_S = 1.4;
+/** Seconds the dock's line under the world stood on takes to slide to the next (`components/dock.tsx`). */
+export const MARKER_SLIDE_S = 2.4;
 /** The clock's tempo as a dissolve begins, easing back to the chapter's: the Sun holds nearly still while the world changes. */
 export const FADE_TEMPO = 0.15;
 /**
  * Seconds a flight from one world to the next takes as the clock runs or a world is chosen
- * (`model/flight.ts`): backing off one world, the crossing and closing on the next; and the clock's tempo at its
- * middle: slowed, so the view's travel leads, never so far that the Sun stops changing.
+ * (`model/flight.ts`): backing off one world, the camera's turn across to the next and closing
+ * on it; and the clock's tempo at its middle: slowed, so the view's travel leads, never so far
+ * that the Sun stops changing.
  */
-export const FLIGHT_S = 8;
+export const FLIGHT_S = 10;
 export const FLIGHT_TEMPO = 0.4;
 /** Seconds the drift's flights take: a slow voyage, the lean-back mode's (`modes.ts`). */
 export const DRIFT_FLIGHT_S = 14;
@@ -32,17 +36,27 @@ export const DRIFT_FLIGHT_S = 14;
  * let go over about this many seconds as the clock starts and stops.
  */
 export const SPIN = { degPerS: 0.25, easeS: 1.5 } as const;
+
 /**
- * Where a flight's worlds are points, as shares of the view from its top left: the world left
- * shrinks away low on the Sun's left, the next first shows low on its right, a little under the
- * limb's place at rest so either clears a giant's disc in a landscape view.
+ * Where a flight's worlds stand once they are small, as shares of the view from its top left:
+ * the world left recedes to the Sun's left, the next first shows on its right, both about level
+ * with the limb's place at rest and clear of the dock, near enough the Sun to stay in a phone's
+ * narrow view; how far the camera backs off gently, in the world's radii from its centre, so
+ * the globe is small there but still a globe; and how small a globe is gone, pixels across.
  */
 export const FLIGHT_POINTS = {
-  leave: { across: 0.3, down: 0.74 },
-  arrive: { across: 0.9, down: 0.74 },
+  leave: { across: 0.38, down: 0.62 },
+  arrive: { across: 0.86, down: 0.62 },
 } as const;
-/** A flight's world is gone once its globe is this many pixels across: the far end of backing off and of closing in. */
+export const FLIGHT_FAR_RADII = 16;
 export const VANISH_PX = 1;
+/**
+ * The camera's turn through a flight: where the Sun stands across the view, as a share of its
+ * width from the left, when the camera is turned furthest after the world it leaves; it turns
+ * as far the other way to meet the next. A giant's disc is drawn through a wide lens, which
+ * would stretch it off its axis, so the scene turns less as that lens is wider.
+ */
+export const FLIGHT_TURN_ACROSS = 0.7;
 
 /**
  * The orbit the view is taken from, in the world's radii from its centre: low, so the globe's
@@ -193,6 +207,35 @@ const CELL_CONTRAST_FINE = 0.035;
 const CELL_CONTRAST_GIANT = 0.065;
 const CELLS_FINE_FROM = 300;
 
+/**
+ * Lightning's look on Earth's night side; its rate is the measured one (`lightning.ts`). Storms
+ * stand in cells this many degrees across (a whole number of them around the globe), one cell
+ * in `stormShare` holding one, so the flashes gather as they do. A storm draws a flash at most
+ * once a slot: a few return strokes a gap apart, each lighting the cloud about it out to
+ * `reachKm` and dying over `strokeFadeS`, at the cloud tops' height. It shows once the Sun is
+ * below the horizon, whole by this many degrees under it (sunlit cloud outshines it), in this
+ * colour, at this brightness on the display.
+ */
+export const LIGHTNING = {
+  cellDeg: 2,
+  stormShare: 0.125,
+  slotS: 1,
+  strokes: 3,
+  strokeGapS: 0.07,
+  strokeFadeS: 0.04,
+  reachKm: 12,
+  cloudTopKm: 10,
+  duskDeg: 2,
+  rgb: [0.72, 0.82, 1],
+  peak: 1.4,
+} as const;
+const RAD = Math.PI / 180;
+const LIGHTNING_CELL = LIGHTNING.cellDeg * RAD;
+const LIGHTNING_REACH = LIGHTNING.reachKm / FIGURES.earth.equatorialKm;
+/** A stroke's light is gone this many fade times on, and its glow this many reaches out. */
+const LIGHTNING_GONE = 4;
+const LIGHTNING_GLOW_OUT = 2.5;
+
 export const SHADER_DEFINES = glslDefines({
   PROFILE_SAMPLES: glslInt(PROFILE_SAMPLES),
   GLARE_REACH,
@@ -216,4 +259,18 @@ export const SHADER_DEFINES = glslDefines({
   NEBULA_GRAIN_DEPTH,
   NEBULA_OIII_RGB,
   NEBULA_HALPHA_RGB,
+  LIGHTNING_CELL,
+  LIGHTNING_STORMS: LIGHTNING.stormShare,
+  LIGHTNING_SLOT_S: LIGHTNING.slotS,
+  LIGHTNING_STROKES: glslInt(LIGHTNING.strokes),
+  LIGHTNING_STROKE_GAP_S: LIGHTNING.strokeGapS,
+  LIGHTNING_STROKE_FADE_S: LIGHTNING.strokeFadeS,
+  /* A flash from its first stroke to its last one's end, and its place kept this far inside its cell. */
+  LIGHTNING_FLASH_S:
+    (LIGHTNING.strokes - 1) * LIGHTNING.strokeGapS + LIGHTNING_GONE * LIGHTNING.strokeFadeS,
+  LIGHTNING_REACH,
+  LIGHTNING_SPREAD: 1 - (2 * LIGHTNING_GLOW_OUT * LIGHTNING_REACH) / LIGHTNING_CELL,
+  LIGHTNING_DUSK: Math.sin(LIGHTNING.duskDeg * RAD),
+  LIGHTNING_RGB: LIGHTNING.rgb,
+  LIGHTNING_PEAK: LIGHTNING.peak,
 });

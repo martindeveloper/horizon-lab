@@ -3,15 +3,18 @@
  * visitor feels it (ago, now, from now), spans of years, the Sun's width in the sky.
  */
 import type { Format, Translate } from "@/lib/facts";
-import { yearSpan } from "@/lib/year-span";
+import { yearSpan, yearStep, type YearSpanOptions } from "@/lib/year-span";
 
+import { chapterOf } from "../lib/model/chapters";
+import { yearsPerSecondAt } from "../lib/model/pacing";
 import { TODAY } from "../lib/model/track";
 
 const DEG = 180 / Math.PI;
 
 /** Afterglow's spans: two significant figures, three in billions, the shared unit rule (`yearSpan`). */
+const SPAN: YearSpanOptions = { digits: (unit) => (unit === "billion" ? 3 : 2) };
 const span = (f: Format, years: number, locale: string, steady: boolean) =>
-  yearSpan(f, years, locale, { digits: (unit) => (unit === "billion" ? 3 : 2), steady });
+  yearSpan(f, years, locale, { ...SPAN, steady });
 
 /**
  * A span of years in the unit that fits: "320 thousand years", "1.2 million years", "7.6 billion
@@ -42,6 +45,20 @@ export function formatFromToday(
   /* Each side its own sentence: a language may put the span in another case ("před 2 miliardami", "za 2 miliardy"). */
   const { unit, ...values } = span(f, offset, locale, steady);
   return t(`${offset < 0 ? "ago" : "ahead"}.${unit}`, values);
+}
+
+/**
+ * The time since the chapter began, "+4,200 years", where it says more than the age does: a
+ * second of play is worth less than the last digit of the age's place against today, so the age
+ * would stand still while the Sun changes, and the chapter's own time is the finer of the two.
+ * The age stays as coarse as the track knows it; the stretch's time is what the sources give.
+ * Whole years, a single figure under ten. Null elsewhere.
+ */
+export function formatSince(t: Translate, f: Format, age: number, locale: string) {
+  const since = Math.round(age - chapterOf(age).from);
+  const step = yearStep(age - TODAY, SPAN);
+  if (yearsPerSecondAt(age) >= step || yearStep(since, SPAN) >= step) return null;
+  return t("time.since", { span: formatYears(t, f, since, locale, since >= 10) });
 }
 
 /** The Sun's width in the sky: degrees, or the whole sky once the vantage is inside it. */

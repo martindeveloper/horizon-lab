@@ -92,6 +92,13 @@ const DRIFT_FLIGHT = {
   keyframes: Array.from({ length: 12 }, (_, k) => k / 11),
 };
 
+/** Six seconds of the clock running over today's Earth: long enough for its night-side storms to flash. */
+const STORMS = {
+  frames: 180,
+  duration: 6,
+  keyframes: Array.from({ length: 24 }, (_, k) => k / 23),
+};
+
 /** A tap on a chapter's name, traced until the move it starts has landed. */
 const TAP = {
   frames: (FLIGHT_S + 3) * 30,
@@ -231,26 +238,40 @@ const SCENES: readonly AfterglowBenchScene[] = [
   },
   {
     id: "flight-mars",
-    description: "The flight from Earth to Mars as the giant's chapter begins, played",
-    tags: ["sequence"],
+    description: "The flight from Earth to Mars as the giant's chapter begins, played and traced",
+    tags: ["sequence", "trace"],
     age: FLIGHT_FROM,
     world: "earth",
     view: "subgiant",
     bloom: true,
     playing: true,
+    trace: true,
     script: FLIGHT_SCRIPT,
   },
   {
     id: "drift-flight-mars",
-    description: "The drift's flight from Earth to Mars as the giant's chapter begins, played",
-    tags: ["sequence", "drift"],
+    description:
+      "The drift's flight from Earth to Mars as the giant's chapter begins, played and traced",
+    tags: ["sequence", "trace", "drift"],
     age: FLIGHT_FROM,
     world: "earth",
     view: "subgiant",
     bloom: true,
     playing: true,
     drift: true,
+    trace: true,
     script: DRIFT_FLIGHT,
+  },
+  {
+    id: "storms-earth",
+    description: "Today's Earth turning as the clock runs, lightning in its night-side storms",
+    tags: ["sequence"],
+    age: TODAY,
+    world: "earth",
+    view: "today",
+    bloom: true,
+    playing: true,
+    script: STORMS,
   },
   {
     id: "nebula-handover",

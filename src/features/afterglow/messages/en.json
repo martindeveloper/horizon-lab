@@ -32,7 +32,7 @@
     "tip": "Two hundred and fifty times wider. Mercury and Venus go.",
     "flash": "Helium ignites. The Sun shrinks for a hundred million years.",
     "pulses": "Pulses shed the envelope. The orbits widen.",
-    "nebula": "The hot core lights the cast-off gas. An illustration.",
+    "nebula": "The hot core lights the cast-off gas, faintly if at all. An illustration.",
     "dwarf": "Stars at noon. The dwarf cools for ever."
   },
   "readouts": {
@@ -88,7 +88,8 @@
   },
   "time": {
     "today": "today",
-    "perSecond": "{span} a second"
+    "perSecond": "{span} a second",
+    "since": "+{span}"
   },
   "units": {
     "degrees": "{value}°",
@@ -123,11 +124,12 @@
     "mars": "Thin air, so the sky stays dark and the red giant fills it. The habitable zone passes here as the Sun leaves the main sequence.",
     "europa": "Airless ice. While the core burns helium, Jupiter's orbit gets {europaFlashPercent} % of the sunlight Earth has today.",
     "enceladus": "Ice over an ocean. As the Sun climbs the giant branch the habitable zone reaches Saturn for a few tens of millions of years.",
-    "pluto": "Warm only at the giant's tip. From its widened orbit the nebula glows, then the dwarf fades among the stars.",
+    "pluto": "Warm only at the giant's tip. From its widened orbit a faint nebula may glow, then the dwarf fades among the stars.",
     "earthCaution": "Schröder & Smith (2008) find tides and drag pull Earth in {earthLostKyr} thousand years before the tip; a planet needs {earthEscapeAu} au today to escape. Earlier work let Earth widen its orbit to {earthTipOrbitAu} au and survive."
   },
   "toggles": {
-    "glare": "Glare"
+    "glare": "Glare",
+    "lightning": "Lightning"
   },
   "atlas": {
     "title": "Atlas",
@@ -195,7 +197,7 @@
       },
       "oceans": {
         "title": "The oceans lost",
-        "body": "In {oceansGyr} billion years the habitable zone's inner edge passes Earth. Its water escapes to space; by {oceansGoneGyrAhead} billion years the seas are gone."
+        "body": "In {oceansGoingGyrAhead} billion years the habitable zone's inner edge, the water-loss limit, passes Earth. Its water escapes to space; by {oceansGoneGyrAhead} billion years the seas are gone."
       },
       "swell": {
         "title": "The core runs dry",
@@ -215,15 +217,15 @@
       },
       "pulses": {
         "title": "The pulses",
-        "body": "Thermal pulses shed the envelope; {massLostPercent} % of the Sun has already gone. The orbits widen as the mass streams away, and slow."
+        "body": "Thermal pulses shed the envelope; {pulsesMassLostPercent} % of the Sun has already gone. The orbits widen as the mass streams away, and slow."
       },
       "nebula": {
         "title": "The nebula",
-        "body": "The bare core, {nebulaKilokelvin} thousand kelvin, lights the cast-off gas. The nebula glows for {nebulaKyr} thousand years."
+        "body": "The bare core takes {crossingKyr} thousand years to reach its hottest, over {nebulaKilokelvin} thousand kelvin. By then the cast-off gas is thin: the Sun's nebula will be faint, if it shows at all."
       },
       "dwarf": {
         "title": "The white dwarf",
-        "body": "A white dwarf of {dwarfMass} solar masses, {dwarfRadiusKm} km across: Sirius B's kin, which burns at {siriusBKelvin} K. It takes {coolGyr} billion years to cool to the colour of a candle, and never stops."
+        "body": "A white dwarf of {dwarfMass} solar masses, {dwarfDiameterKm} km across: Sirius B's kin, which shines at {siriusBKelvin} K. It takes {coolGyr} billion years to cool to an orange glow, and never stops."
       }
     },
     "crossings": {
@@ -257,15 +259,15 @@
     "sections": {
       "track": {
         "title": "The track",
-        "body": "The rows are literature values: Schröder & Smith (2008, Table 1) for the main sequence, the red-giant tip ({tipLuminosity} L☉, {tipKelvin} K, {massLostPercent} % of the mass lost) and the AGB; between them a drawn climb, held to their statement that the final ascent sweeps the inner planets in five million years. After the envelope leaves, Miller Bertolami's crossing ({nebulaKyr} thousand years for a 0.55 M☉ remnant) leads onto the 0.5 M☉ Montreal cooling sequence, the nearest tabulated mass to the {dwarfMass} M☉ remnant. Light and temperature interpolate log-linearly in age, and in the logarithm of the time since the envelope left where the clock runs fast; the radius follows by Stefan–Boltzmann."
+        "body": "The rows are literature values: Schröder & Smith (2008, Table 1) for the main sequence, the red-giant tip ({tipLuminosity} L☉, {tipKelvin} K, {massLostPercent} % of the mass lost) and the AGB; between them a drawn climb, held to their statement that the final ascent sweeps the inner planets in five million years. After the envelope leaves, Miller Bertolami's crossing (the bare star's time to its hottest: {crossingKyr} thousand years for the {dwarfMass} M☉ remnant, between his Z = 0.02 rows) leads onto the 0.5 M☉ Montreal cooling sequence, the nearest tabulated mass. Light and temperature interpolate log-linearly in age, and in the logarithm of the time since the envelope left where the clock runs fast; the radius follows by Stefan–Boltzmann."
       },
       "worlds": {
         "title": "The worlds",
-        "body": "Each orbit is the body's mean distance today, widened by the mass the Sun has lost with the orbit's angular momentum kept, so Earth reaches {earthTipOrbitAu} au at the tip; a moon rides its planet's orbit. Sunlight is the Sun's light over the distance squared, the Sun's width 2 asin(R/d). A world is swallowed when the Sun's radius reaches its orbit: Mercury {mercuryLostMyr} million and Venus {venusLostMyr} million years before the tip on the drawn climb. Earth's widened orbit escapes by that rule, but Schröder & Smith's tidal calculation pulls it in {earthLostKyr} thousand years before the tip; the card says so. A world's temperature is its equilibrium temperature, the warmth sunlight alone holds it at: the Sun's surface temperature times a quarter power of the share it absorbs and the square root of its radius over twice the orbit, with each world's Bond albedo today from the literature. It leaves out any greenhouse, so today's Earth reads {earthTodayKelvin} K against the 288 K measured, and a steaming or scorched Earth would be hotter still."
+        "body": "Each orbit is the body's mean distance today, widened by the mass the Sun has lost with the orbit's angular momentum kept, so Earth reaches {earthTipOrbitAu} au at the tip; a moon rides its planet's orbit. Sunlight is the Sun's light over the distance squared, the Sun's width 2 asin(R/d). A world is swallowed when the Sun's radius reaches its orbit, the inner planets sooner: Schröder & Smith's tides and drag pull Mercury in {mercuryLostMyr} million, Venus {venusLostMyr} million and Earth {earthLostKyr} thousand years before the tip, and the sketch takes those times from them. By radius alone Earth's widened orbit would escape; the card says so. The habitable zone's edges move with the square root of the Sun's light: the inner is the moist-greenhouse water-loss limit of Kasting et al. (1993), {waterLossAu} au today, as in Schröder & Smith, so it passes Earth as the oceans begin to go; Kopparapu et al.'s (2013) cloud-free model puts that limit at {zoneInnerCloudFreeAu} au, and the outer edge is their maximum greenhouse, {zoneOuterAu} au. A world's temperature is its equilibrium temperature, the warmth sunlight alone holds it at: the Sun's surface temperature times a quarter power of the share it absorbs and the square root of its radius over twice the orbit, with each world's Bond albedo today from the literature. It leaves out any greenhouse, so today's Earth reads {earthTodayKelvin} K against the 288 K measured, and a steaming or scorched Earth would be hotter still."
       },
       "sky": {
         "title": "The view",
-        "body": "The camera orbits the world a little over a radius from its centre (the notes below give the figure), on the place where the Sun stands just over the limb, a sunrise; the globe is the shared solar close-up's, its measured map at true size with its atmosphere shell where the world has air, lit from the Sun's direction by the Sun's colour and visible strength from the track, so a scrub changes the day side in every chapter. Once the oceans go, Earth's globe is a model: its measured map blends into a dry Earth built from the cloud-free Blue Marble relief (the land's shape and relief kept, the basins bare seabed shaded by their measured depth, plants turned to soil, the ice sheets to rock, no clouds), from the moist-greenhouse limit ({waterLossAu} au from today's Sun, reached {oceansGoingGyrAhead} billion years from now) to the runaway-greenhouse limit ({runawayAu} au, {oceansGoneGyrAhead} billion years), evenly in the logarithm of the sunlight; whether a thick haze of carbon dioxide would hide that rock is left open. The Sun's globe is drawn at its true angular size: its colour the shared CIE-integrated Planck continuum at the Sun's temperature, its limb darkening Claret's four-coefficient fit from the shared tables at the Sun's temperature and gravity, Eddington's grey law once the remnant's gravity leaves the grid, its granulation the shared convection pattern at the cells' true count across the radius (a cell a few pressure scale heights wide), so the giant shows a few huge cells and the dwarf none. The view is framed: the disc's size follows a steady power of the Sun's radius, whichever world it is seen from, so the swell and the collapse read as one change and a move to another world leaves the disc as it was; the HUD reads the magnification, and the Sun keeps its place over the limb. A move to another world is a flight as the clock runs or a world is chosen: the clock slows and the camera flies like a ship, still facing the Sun, in one smooth move: it backs off the world, which rounds into a globe and shrinks to a point beside the Sun, crosses with the Sun and the stars alone, then closes on the next world, a point on the Sun's other side that grows into a globe and settles under the camera, and the readouts name the world below as the globes change; a scrub of the timeline dissolves from one world to the next in place. The guide frames each step on what it is about (the disc, the globe or the sky), holds still while it is read and cuts between worlds with a dissolve; the drift sways wide and slow across the Sun and the limb and flies between worlds at a slower pace. The display's exposure is one law for everything: each radiance relative to the light a white surface at Earth's orbit has today, in the display's bands, shown as a root of it (the exponent is in the notes below); the eye adapts both ways, the day side held between a floor and a ceiling so a world under the dwarf still shows, and to the field it sees, so a giant that fills the view sets the exposure and the world is shown by it; the Sun's disc, brighter than any surface it lights by the square of the distance over its radius, is held at a peak that keeps its hue, limb and cells. The shared Milky Way and bright stars fade in as the field darkens; while the clock runs the camera sways and the world turns slowly under it, at a pace for the eye rather than its true day, which the clock would blur. The nebula is seen from inside its shell, so the whole sky takes a faint glow lit by the hot core, [O III] green near the star and Hα red farther out, brightest about the star and thinning on the chapter's clock, its light on the world's night side: an illustration, not a radiative model. Beyond the exposure nothing here is a photometric prediction."
+        "body": "The camera orbits the world a little over a radius from its centre (the notes below give the figure), on the place where the Sun stands just over the limb, a sunrise; the globe is the shared solar close-up's, its measured map at true size with its atmosphere shell where the world has air, lit from the Sun's direction by the Sun's colour and visible strength from the track, so a scrub changes the day side in every chapter. Once the oceans go, Earth's globe is a model: its measured map blends into a dry Earth built from the cloud-free Blue Marble relief (the land's shape and relief kept, the basins bare seabed shaded by their measured depth, plants turned to soil, the ice sheets to rock, no clouds), from the moist-greenhouse limit ({waterLossAu} au from today's Sun, reached {oceansGoingGyrAhead} billion years from now) to the runaway-greenhouse limit ({runawayAu} au, {oceansGoneGyrAhead} billion years), evenly in the logarithm of the sunlight; whether a thick haze of carbon dioxide would hide that rock is left open. The Sun's globe is drawn at its true angular size: its colour the shared CIE-integrated Planck continuum at the Sun's temperature, its limb darkening Claret's four-coefficient fit from the shared tables at the Sun's temperature and gravity, Eddington's grey law once the remnant's gravity leaves the grid, its granulation the shared convection pattern at the cells' true count across the radius (a cell a few pressure scale heights wide), so the giant shows a few huge cells and the dwarf none. The view is framed: the disc's size follows a steady power of the Sun's radius, whichever world it is seen from, so the swell and the collapse read as one change and a move to another world leaves the disc as it was; the HUD reads the magnification, and the Sun keeps its place over the limb. A move to another world is a flight as the clock runs or a world is chosen: the clock slows and the camera flies like a ship, still facing the Sun, in one smooth move: it lifts slowly off the world, which rounds into a globe and recedes gently to a small one beside the Sun, then gathers speed so the world flies away where it stands, to a point and gone; the camera turns a little after it, crosses with the Sun and the stars alone, and turns to meet the next world, a point on the Sun's other side that rushes up into a small globe and is closed on as gently until it settles under the camera; the readouts name the world below as the globes change; a scrub of the timeline dissolves from one world to the next in place. The guide frames each step on what it is about (the disc, the globe or the sky), holds still while it is read and cuts between worlds with a dissolve; the drift sways wide and slow across the Sun and the limb and flies between worlds at a slower pace. The display's exposure is one law for everything: each radiance relative to the light a white surface at Earth's orbit has today, in the display's bands, shown as a root of it (the exponent is in the notes below); the eye adapts both ways, the day side held between a floor and a ceiling so a world under the dwarf still shows, and to the field it sees, so a giant that fills the view sets the exposure and the world is shown by it; the Sun's disc, brighter than any surface it lights by the square of the distance over its radius, is held at a peak that keeps its hue, limb and cells. The shared Milky Way and bright stars fade in as the field darkens; while the clock runs the camera sways and the world turns slowly under it, at a pace for the eye rather than its true day, which the clock would blur. The nebula is seen from inside its shell, so the whole sky takes a faint glow lit by the hot core, [O III] green near the star and Hα red farther out, brightest about the star and thinning on the chapter's clock, its light on the world's night side: an illustration, not a radiative model, and of a nebula the Sun may never show: Schröder & Smith expect only a faint shell, Gesicki et al. (2018) a faint nebula at about the lowest mass that makes one. Beyond the exposure nothing here is a photometric prediction."
       },
       "clock": {
         "title": "The clock",

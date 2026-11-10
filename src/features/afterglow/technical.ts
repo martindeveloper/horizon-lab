@@ -2,6 +2,7 @@ import { GRANULE_SCALE_HEIGHTS } from "@/space/sun/model/granulation";
 import { formatNumber } from "@horizon/toolkit/science";
 import { SOURCE_URLS } from "@horizon/toolkit/urls";
 
+import { FLASH_RATE } from "./lib/model/lightning";
 import {
   DAY_CEILING,
   DAY_FLOOR,
@@ -47,6 +48,7 @@ const specification = {
         `shown = E · (I/I⊕)^${DAY_GAMMA},  E = clamp(${DAY_TODAY}, ${DAY_FLOOR} / S^${DAY_GAMMA}, ${DAY_CEILING} / S^${DAY_GAMMA}) eased in log to the disc's own as (R/${FOV_DEG.open / 2}°)² fills the view; S the day side's light, I any radiance against a white surface at 1 au today`,
         `the disc's brightest channel shown at most ${DISC_PEAK}, past the day side's ${DAY_CEILING}`,
         `stars out as the field (the day side, or a disc that fills the view) rises from ${STARS_OUT.floor} to ${STARS_OUT.ceiling}`,
+        `lightning on Earth's night side: ${FLASH_RATE.value} flashes a second over the globe today, spread evenly, × the share of the oceans left`,
       ],
     },
     {
@@ -72,6 +74,11 @@ const specification = {
       url: "https://doi.org/10.1051/0004-6361/201526577",
     },
     {
+      title:
+        "Gesicki, Zijlstra & Miller Bertolami (2018), The mysterious age invariance of the planetary nebula luminosity function bright cut-off, Nature Astronomy 2, 580",
+      url: "https://doi.org/10.1038/s41550-018-0453-9",
+    },
+    {
       title: "Bédard et al. (2020), the Montreal white dwarf cooling sequences",
       url: "https://www.astro.umontreal.ca/~bergeron/CoolingModels/",
     },
@@ -81,8 +88,18 @@ const specification = {
       url: "https://doi.org/10.1007/BF00151270",
     },
     {
+      title:
+        "Kasting, Whitmire & Reynolds (1993), Habitable zones around main sequence stars, Icarus 101, 108",
+      url: "https://doi.org/10.1006/icar.1993.1010",
+    },
+    {
       title: "Kopparapu et al. (2013), Habitable zones around main-sequence stars, ApJ 765, 131",
       url: "https://doi.org/10.1088/0004-637X/765/2/131",
+    },
+    {
+      title:
+        "Christian et al. (2003), Global frequency and distribution of lightning as observed from space by the Optical Transient Detector, JGR 108, 4005",
+      url: "https://doi.org/10.1029/2002JD002347",
     },
     {
       title:
