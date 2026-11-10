@@ -301,17 +301,26 @@ const SUNSPOT = {
   }),
 } satisfies Facts;
 
+/** The chromosphere's coolest layer, K: the temperature minimum of Avrett & Loeser's (2008) model C7, about 560 km up. */
+const TEMPERATURE_MINIMUM_K = 4_400;
+
 const CHROMOSPHERE = {
   thickness: literatureFact(CHROMOSPHERE_THICKNESS_KM, "km", "priest2014", "flag"),
-  temperatureMinimum: literatureFact(4_500, "K", "priest2014", "flag", { digits: 2 }),
-  temperature: literatureFact(null, "K", "priest2014", "flag", { range: [4_500, 20_000] }),
+  temperatureMinimum: literatureFact(TEMPERATURE_MINIMUM_K, "K", "avrett2008", "flag", {
+    digits: 2,
+    note: "semi-empirical model C7, as De la Luz et al. 2013 quote it; the earlier VAL-C gives 4,170 K",
+  }),
+  temperature: literatureFact(null, "K", "priest2014", "flag", {
+    range: [TEMPERATURE_MINIMUM_K, 20_000],
+    sources: ["avrett2008"],
+  }),
   halpha: {
     value: HALPHA_NM,
     unit: "nm",
-    digits: 5,
+    digits: 4,
     source: "priest2014",
     status: "derived",
-    note: "the Rydberg formula with hydrogen's reduced mass, in air",
+    note: "the Rydberg formula with hydrogen's reduced mass, in air; it leaves out the fine structure, so it holds to four figures (the line is measured at 656.28 nm)",
   },
 } satisfies Facts;
 
@@ -328,7 +337,7 @@ const CORONA = {
     digits: 2,
     source: "baumbach1937",
     status: "derived",
-    note: "the K-corona at the limb over the mean disc: the two steep terms of Baumbach's fit",
+    note: "the K-corona at the limb over the disc's centre: the two steep terms of Baumbach's fit",
   },
   windSlow: literatureFact(WIND_SLOW_KM_S, "km/s", "mccomas2000", "flag", {
     note: "representative slow-wind speed near Earth's orbit; sources are diverse",
@@ -412,9 +421,9 @@ const ROTATION = {
     unit: "s",
     show: "d",
     digits: 4,
-    source: "snodgrass1990",
+    source: "archinal2018",
     status: "derived",
-    note: `conventional Carrington frame, 360° / ${CARRINGTON_SIDEREAL_DEG_PER_DAY}° per day (sidereal)`,
+    note: `Carrington's frame as the IAU adopts it, 360° / ${CARRINGTON_SIDEREAL_DEG_PER_DAY}° per day (sidereal)`,
   },
   interiorPeriod: {
     value: (2 * Math.PI) / INTERIOR_RATE,
@@ -631,7 +640,7 @@ const PROBES = {
       digits: 3,
       source: "horizonsParker",
       status: "derived",
-      note: "from Horizons' perihelion and eccentricity: about 0.73 au, inside Venus's orbit",
+      note: "from Horizons' perihelion and eccentricity: about 0.73 au, just outside Venus's orbit",
     },
     shield: {
       value: PARKER_SHIELD_PERIHELION_C + CELSIUS_ZERO_K,
@@ -647,7 +656,7 @@ const PROBES = {
       digits: 3,
       source: "kasper2021",
       status: "flag",
-      note: "first measured crossing below the Alfvén surface, the corona's outer edge; the surface itself is uneven and moves",
+      note: "first measured crossing below the Alfvén surface, the corona's outer edge (Table I); radius from solar centre, 13 million km above the photosphere; the surface itself is uneven and moves",
     },
     period: {
       value: PARKER_PERIOD_D,
@@ -721,7 +730,7 @@ export const PROSE_FIGURES = {
   surfaceKelvin: BODY.teff,
   spotFieldT: SUNSPOT.field,
   chromosphereKm: CHROMOSPHERE.thickness,
-  halphaNm: quoteAs(CHROMOSPHERE.halpha, { digits: 4 }),
+  halphaNm: CHROMOSPHERE.halpha,
   coronaMK: quoteAs(CORONA.temperature, { perPower: 6, digits: 1 }),
   meanFieldMT: quoteAs(FIELD.meanField, { in: "mT" }),
   equatorDays: quoteAs(ROTATION.equatorPeriod, { in: "d", digits: 3 }),

@@ -4,7 +4,7 @@
  * photosphere's light: the fit's two steep terms) and the F-corona (dust, flat: its r^−2.5
  * term, which takes over beyond ~2 R); the E-corona (the Fe XIV green line of 2 MK gas); and
  * the solar wind's speed by latitude as Ulysses measured it (McComas et al. 2000). Radii in R☉
- * from the centre; brightness in millionths of the mean disc.
+ * from the centre; brightness in millionths of the disc centre's.
  */
 import { smoothstep } from "@horizon/toolkit/math";
 import { pressureScaleHeight } from "@horizon/toolkit/science";
@@ -26,7 +26,7 @@ import {
 /** Baumbach's terms as the model reads them: the dust's flat term, then the electrons' steep two. */
 const [F_TERM, ...K_TERMS] = BAUMBACH_TERMS;
 
-/** The K-corona at `r` (R from the centre), millionths of the mean disc: the fit's steep terms. */
+/** The K-corona at `r` (R from the centre), millionths of the disc centre's brightness: the fit's steep terms. */
 export function kCorona(r: number) {
   let sum = 0;
   for (const { coefficient, power } of K_TERMS) sum += coefficient * r ** -power;

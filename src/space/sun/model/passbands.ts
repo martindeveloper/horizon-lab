@@ -114,8 +114,9 @@ export const AIA_NM: Readonly<Record<AiaId, number>> = {
 
 /**
  * Hα, the Balmer line n = 3 → 2, by the Rydberg formula with hydrogen's reduced mass, in air
- * as spectroscopists quote it: 656.28 nm. It forms in gas of 6–10 kK: the chromosphere, and
- * prominences (Parenti 2014).
+ * as spectroscopists quote it: 656.29 nm, good to four figures (the formula leaves out the fine
+ * structure; the line is measured at 656.28 nm). It forms in gas of 6–10 kK: the chromosphere,
+ * and prominences (Parenti 2014).
  */
 const RYDBERG_H = RYDBERG_INFINITY / (1 + ELECTRON_MASS_KG / PROTON_MASS_KG);
 export const HALPHA_NM = vacuumToAir(1e9 / (RYDBERG_H * (1 / 4 - 1 / 9)));

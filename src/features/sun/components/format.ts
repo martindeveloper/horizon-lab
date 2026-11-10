@@ -55,7 +55,7 @@ export function lightLegend(t: Translate, d: DistanceSettings, id: LightId) {
       value: lightFigure(t, d.locale, photosphere.temperature),
     });
   if (id === "halpha")
-    return `${formatFigure(d.locale, chromosphere.halpha, { digits: 4, withUnit: true }).text} · ${t("lightReading.lineTransfer")}`;
+    return `${formatFigure(d.locale, chromosphere.halpha, { withUnit: true }).text} · ${t("lightReading.lineTransfer")}`;
   const band = bands[id];
   const peaks = [
     band.temperature,

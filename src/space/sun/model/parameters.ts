@@ -78,8 +78,12 @@ export const PARKER_EARLIER_TURN_DEG = 2.92;
 export const PARKER_LAST_FLYBY = Date.UTC(2024, 10, 6, 18, 44);
 /** Its heat shield's sunward face at the closest passes, °C: NASA's 2,500 °F. */
 export const PARKER_SHIELD_PERIHELION_C = ((2500 - 32) * 5) / 9;
-/** Where it first flew below the Alfvén surface, the corona's outer edge, 28 April 2021: radii from the centre (Kasper et al. 2021). */
-export const PARKER_CORONA_EDGE_R = 18.8;
+/**
+ * Where it first flew below the Alfvén surface, the corona's outer edge, 28 April 2021: radii
+ * from the centre, as its perihelia are (Kasper et al. 2021, Table I). The letter's "13 million
+ * km above the photosphere" and NASA's 18.8 R☉ are the same place measured from the surface.
+ */
+export const PARKER_CORONA_EDGE_R = 19.8;
 export const MAP_WINDOW_D = 21;
 /** Reported regions smaller than this, millionths of a hemisphere, are not listed. */
 export const OBSERVED_MIN_AREA_MSH = 10;
@@ -303,7 +307,7 @@ export const RECONNECTION = {
 /* -------------------------------------------------------------- the corona */
 
 /**
- * Baumbach 1937: the white-light corona's brightness in millionths of the mean disc, Σ cᵢ r^−pᵢ,
+ * Baumbach 1937: the white-light corona's brightness in millionths of the disc centre's, Σ cᵢ r^−pᵢ,
  * as eclipse photometry sees it, K and F together. Its flat r^−2.5 term is in the main the
  * dust's light (F); the two steep terms are the electrons' (K), which the field shapes (van de
  * Hulst 1950). The lists are read in that order: the dust's term first.
