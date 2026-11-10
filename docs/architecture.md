@@ -245,7 +245,7 @@ src/
         relativity.ts, ship.ts Trip times on both clocks; the ship's state and its integrator
                                on proper velocity (four-acceleration, rapidity)
         bodies.ts              Where every body is in km, doubles, barycentres resolved
-                               (barycentre.ts: the Earth–Moon and Pluto–Charon offsets)
+                               (the shared solar model's barycentre.ts)
         anchors.ts             Every destination: bodies, α Centauri, the Galaxy from above,
                                Andromeda, the edge of the reachable; the card each opens
         alpha-centauri.ts      α Centauri's three suns from the shared catalogue: B on its
@@ -400,7 +400,9 @@ src/
                                elements, tracers, catalogue, views (and the solar
                                framing every host engine shares), framing (and the radii an
                                arrival frames), position, moon-orbits (the moons' orbits, the
-                               Moon from the toolkit's lunar theory, without three.js); its reach:
+                               Moon from the toolkit's lunar theory, without three.js),
+                               barycentre (a planet's centre beside its system's: the
+                               Earth–Moon and Pluto–Charon offsets); its reach:
                                probes.ts (five probes on their JPL Horizons tracks,
                                probe-tracks.json from scripts/fetch-probe-tracks.mjs, the
                                heliopause they crossed, sunlight's light-time rings) and

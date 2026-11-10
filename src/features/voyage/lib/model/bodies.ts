@@ -1,3 +1,10 @@
+/**
+ * Every body the ship can fly to, and where each is at a moment in km (heliocentric, scene
+ * axes), in doubles: the shared ephemeris in au times the astronomical unit, the Earth–Moon
+ * and Pluto–Charon barycentres resolved to the planets' centres, and each moon at its true
+ * offset from its planet. The engine places what it draws from these.
+ */
+import { barycentreOffset, isBarycentreHost } from "@/space/solar-system/model/barycentre";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
 import { moonOffset } from "@/space/solar-system/model/moon-orbits";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
@@ -16,14 +23,6 @@ import {
 } from "@horizon/toolkit/bodies";
 import type { Vec3d } from "@horizon/toolkit/scene";
 import { AU_KM } from "@horizon/toolkit/science";
-
-/**
- * Every body the ship can fly to, and where each is at a moment in km (heliocentric, scene
- * axes), in doubles: the shared ephemeris in au times the astronomical unit, the Earth–Moon
- * and Pluto–Charon barycentres resolved to the planets' centres, and each moon at its true
- * offset from its planet. The engine places what it draws from these.
- */
-import { barycentreOffset, isBarycentreHost } from "./barycentre";
 
 export type WorldBody =
   | { id: "sun"; kind: "sun" }

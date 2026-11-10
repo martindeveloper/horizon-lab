@@ -1,16 +1,15 @@
-import { moonOffset } from "@/space/solar-system/model/moon-orbits";
-import {
-  CHARON_PLUTO_MASS_RATIO,
-  MOON_EARTH_MASS_RATIO,
-} from "@/space/solar-system/model/parameters";
 /**
  * Where a planet's centre is beside its system's barycentre. The planetary elements
  * (`@horizon/toolkit/bodies`, JPL) place the Earth–Moon and Pluto–Charon barycentres, not the
  * planets: the Moon swings Earth's centre 4,670 km (0.73 Earth radii) about the barycentre,
  * and Charon swings Pluto's 2,100 km, outside Pluto's surface. On a map of the solar system
- * that is below a pixel; a camera at a planet sees it.
+ * that is below a pixel; a camera at a planet sees it, and it moves the day of Earth's
+ * perihelion by up to a day and a half.
  */
 import type { MoonId, PlanetId, Vec3 } from "@horizon/toolkit/bodies";
+
+import { moonOffset } from "./moon-orbits";
+import { CHARON_PLUTO_MASS_RATIO, MOON_EARTH_MASS_RATIO } from "./parameters";
 
 /** The hosts whose elements are their system's barycentre, and the moon that moves them. */
 export type BarycentreHost = Extract<PlanetId, "earth"> | "pluto";

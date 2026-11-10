@@ -11,7 +11,7 @@ import {
   barycentreOffset,
   barycentreShare,
   isBarycentreHost,
-} from "../src/features/voyage/lib/model/barycentre.ts";
+} from "../src/space/solar-system/model/barycentre.ts";
 import { moonOffset } from "../src/space/solar-system/model/moon-orbits.ts";
 
 const km = (v) => Math.hypot(v[0], v[1], v[2]) * AU_KM;
