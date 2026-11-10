@@ -217,9 +217,11 @@ export type DriftSlice = {
  * The drift's machine, the same in every simulation: `open` clears what stands in the way as
  * the drift starts (a guide, panels, a close-up) and may call the store's own actions; `close`
  * sets things back when the drift ends. Both run before the drift's own state is written. A
- * drift starts `loading` and plays once the immersive view says it is ready.
+ * drift starts `loading` and plays once the immersive view says it is ready. A tour of the
+ * controls still open (`helpSlice`) ends first: it gives the scene back before the drift sets
+ * its own, never on top of it.
  */
-export function driftSlice<S extends DriftSlice>(
+export function driftSlice<S extends DriftSlice & { endHelp?: () => void }>(
   set: NoInfer<(patch: (state: S) => Partial<S>) => void>,
   get: () => S,
   hooks: {
@@ -232,6 +234,7 @@ export function driftSlice<S extends DriftSlice>(
     drift: "off",
     startDrift: () => {
       if (get().drift !== "off") return;
+      get().endHelp?.();
       const opened = hooks.open?.(get());
       set(() => patch({ drift: "loading", ...opened }));
     },

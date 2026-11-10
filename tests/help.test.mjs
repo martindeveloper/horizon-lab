@@ -5,6 +5,7 @@ import { createStore } from "zustand/vanilla";
 
 import { coachLeader, placeCoach, placeHolds, playCues, settleCoach } from "@horizon/toolkit/ui";
 
+import { driftSlice } from "../src/lib/drift.ts";
 import { helpSlice } from "../src/lib/help.ts";
 import { registered } from "../src/lib/simulations.ts";
 import { featureMessages, layoutMessages } from "./messages-helper.mjs";
@@ -306,6 +307,23 @@ test("starting the tour ends a guided journey first, and keeps the scene the gui
   STEPS[0].cues[0].run(store.getState());
   store.getState().endHelp();
   assert.equal(store.getState().view, "home");
+});
+
+test("a drift started from the tour ends it first, so its restore never lands on the drift's setup", () => {
+  const store = createStore((set, get) => ({
+    view: "home",
+    setView: (view) => set({ view }),
+    ...helpSlice(set, get, { steps: STEPS, save: (s) => ({ view: s.view }), restore: (v) => v }),
+    ...driftSlice(set, get, { open: () => ({ view: "drift" }) }),
+  }));
+  store.getState().startHelp();
+  STEPS[0].cues[0].run(store.getState());
+  store.getState().startDrift();
+  const s = store.getState();
+  assert.deepEqual(
+    { open: s.helpOpen, view: s.view, drift: s.drift },
+    { open: false, view: "drift", drift: "loading" },
+  );
 });
 
 /** A camera that only counts: what a tour asks of it, and its way home. */
