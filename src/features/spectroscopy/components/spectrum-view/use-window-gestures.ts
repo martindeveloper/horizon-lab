@@ -13,6 +13,11 @@ import { nearestVisible, type Visible } from "./labels";
 
 const api = useSpectroscopy.getState;
 
+/** The least two fingers are taken to be apart, px: one above the other, they still span a fingertip. */
+const PINCH_FLOOR = 8;
+/** How far apart two fingers are along the window, px, for a pinch's start and each move alike. */
+const pinchSpread = (a: number, b: number) => Math.max(PINCH_FLOOR, Math.abs(a - b));
+
 /**
  * Hover reads a wavelength, a tap picks a line, a mouse drag pans, the wheel zooms, and the
  * arrow keys step through lines (or pan with Shift). A finger has no hover, so on touch one
@@ -72,7 +77,7 @@ export function useWindowGestures(input: {
     if (pointers.current.size === 2) {
       gesture.current = true;
       const [a, b] = [...pointers.current.values()];
-      pinch.current = { distance: Math.abs(a! - b!), middle: (a! + b!) / 2, range };
+      pinch.current = { distance: pinchSpread(a!, b!), middle: (a! + b!) / 2, range };
       drag.current = null;
       setHoverAt(null);
     } else {
@@ -92,7 +97,7 @@ export function useWindowGestures(input: {
     if (!rect) return;
     if (pinch.current && pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
-      const distance = Math.max(8, Math.abs(a! - b!));
+      const distance = pinchSpread(a!, b!);
       const [lo, hi] = pinch.current.range;
       // Zoom about the fingers' midpoint, then carry the window with it.
       const centre = lo + ((pinch.current.middle - rect.left) / rect.width) * (hi - lo);
@@ -113,17 +118,23 @@ export function useWindowGestures(input: {
       }
     }
   };
-  const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+  /** A pointer lets go; the last one ends the gesture, and `lifted` off a tap it picks a line. */
+  const release = (e: ReactPointerEvent<HTMLDivElement>, lifted: boolean) => {
     const wasDrag = drag.current?.moved || gesture.current;
     pointers.current.delete(e.pointerId);
     if (pointers.current.size < 2) pinch.current = null;
     if (pointers.current.size === 0) {
-      if (!wasDrag && identify) api().select(nearest(nmAt(e.clientX))?.line.id ?? null);
+      if (lifted && !wasDrag && identify) {
+        api().select(nearest(nmAt(e.clientX))?.line.id ?? null);
+      }
       drag.current = null;
       gesture.current = false;
       if (e.pointerType === "touch") setHoverAt(null);
     }
   };
+  const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => release(e, true);
+  /* A touch the system takes away (its own gesture, a call) was never lifted: nothing is picked. */
+  const onPointerCancel = (e: ReactPointerEvent<HTMLDivElement>) => release(e, false);
   const onPointerLeave = () => setHoverAt(null);
 
   const onKeyDown = (e: ReactKeyboardEvent) => {
@@ -158,6 +169,13 @@ export function useWindowGestures(input: {
   return {
     hover,
     hovered,
-    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerLeave, onKeyDown },
+    handlers: {
+      onPointerDown,
+      onPointerMove,
+      onPointerUp,
+      onPointerCancel,
+      onPointerLeave,
+      onKeyDown,
+    },
   };
 }

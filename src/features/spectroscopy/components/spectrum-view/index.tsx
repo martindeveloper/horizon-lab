@@ -371,7 +371,7 @@ export function SpectrumView({ className }: { className?: string }) {
           onPointerDown={handlers.onPointerDown}
           onPointerMove={handlers.onPointerMove}
           onPointerUp={handlers.onPointerUp}
-          onPointerCancel={handlers.onPointerUp}
+          onPointerCancel={handlers.onPointerCancel}
           onPointerLeave={handlers.onPointerLeave}
           onDoubleClick={() => api().setRange(FULL_RANGE)}
           onKeyDown={handlers.onKeyDown}
