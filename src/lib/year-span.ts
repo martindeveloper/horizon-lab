@@ -40,14 +40,11 @@ export type YearSpanOptions = {
 
 const ALL: readonly YearUnit[] = ["years", "thousand", "million", "billion"];
 
-/**
- * A span of `years` (its size; the sign is the sentence's) in the largest unit its printed
- * value reaches, so 999,700 reads "1.0 million", never "1,000 thousand".
- */
-export function yearSpan(f: Format, years: number, locale: string, options: YearSpanOptions = {}) {
-  const { units = ALL, digits = 2, decimals, steady = false } = options;
-  const count = (given: YearDigits, unit: YearUnit, inUnit: number) =>
-    typeof given === "number" ? given : given(unit, inUnit);
+const count = (given: YearDigits, unit: YearUnit, inUnit: number) =>
+  typeof given === "number" ? given : given(unit, inUnit);
+
+/** The largest unit a span's printed value reaches, so 999,700 reads "1.0 million", never "1,000 thousand". */
+function unitOf(years: number, { units = ALL, digits = 2, decimals }: YearSpanOptions) {
   /* The number in a unit as it will print, rounded the way it prints. */
   const rounded = (unit: YearUnit) => {
     const inUnit = Math.abs(years) / SCALE[unit];
@@ -61,6 +58,16 @@ export function yearSpan(f: Format, years: number, locale: string, options: Year
   for (const candidate of units) {
     if (rounded(candidate) * SCALE[candidate] >= FROM[candidate]) unit = candidate;
   }
+  return unit;
+}
+
+/**
+ * A span of `years` (its size; the sign is the sentence's) in the largest unit its printed
+ * value reaches.
+ */
+export function yearSpan(f: Format, years: number, locale: string, options: YearSpanOptions = {}) {
+  const { digits = 2, decimals, steady = false } = options;
+  const unit = unitOf(years, options);
   const inUnit = Math.abs(years) / SCALE[unit];
   const value =
     decimals === undefined
@@ -73,4 +80,17 @@ export function yearSpan(f: Format, years: number, locale: string, options: Year
           maximumFractionDigits: count(decimals, unit, inUnit),
         });
   return { unit, value, valuePlural: pluralOf(locale, value) };
+}
+
+/**
+ * What the last digit a span prints is worth, in years: the least change the printed span
+ * shows, so a readout can tell when its clock runs finer than its words (0 for no span).
+ */
+export function yearStep(years: number, options: YearSpanOptions = {}) {
+  if (years === 0) return 0;
+  const { digits = 2, decimals } = options;
+  const unit = unitOf(years, options);
+  const inUnit = Math.abs(years) / SCALE[unit];
+  if (decimals !== undefined) return SCALE[unit] / 10 ** count(decimals, unit, inUnit);
+  return SCALE[unit] * 10 ** (Math.floor(Math.log10(inUnit)) + 1 - count(digits, unit, inUnit));
 }
