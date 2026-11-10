@@ -95,6 +95,10 @@ test("the store bridge acts once on each turn and flight, never on the engine's 
   assert.equal(seen.frames, 3, "changes outside a frame ask for one");
   assert.equal(bridge.ready(), true);
   assert.equal(bridge.ready(), false, "once");
+  /* The visit ending puts the first state back while the engine still listens: not a command. */
+  const before = structuredClone(seen);
+  store.setState(store.getInitialState(), true);
+  assert.deepEqual(seen, before);
   scope.dispose();
   store.setState({ view: "d", flight: 3 });
   assert.deepEqual(seen.flights, ["b", "c"], "disposed, it listens no more");

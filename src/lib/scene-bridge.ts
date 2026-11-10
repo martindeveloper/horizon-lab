@@ -74,10 +74,13 @@ export function bridgeHandoff<View>(
 /**
  * An engine's side of its store. Each new button turn and each view flight is acted on once;
  * a view the engine writes itself during a frame (the HUD following the zoom) is not, so the
- * camera never flies to where it already is. Every change outside a frame asks for one.
+ * camera never flies to where it already is. Every change outside a frame asks for one. The
+ * store put back as it was first made is the visit ending (`freshVisit`, which runs before the
+ * engine is disposed), not a command: nothing is acted on, so the engine writes nothing into
+ * the fresh store.
  */
 export function bridgeStore<S extends SceneStoreState>(
-  store: Pick<StoreApi<S>, "getState" | "subscribe">,
+  store: Pick<StoreApi<S>, "getState" | "getInitialState" | "subscribe">,
   scope: DisposalScope,
   handlers: {
     invalidate: () => void;
@@ -93,6 +96,7 @@ export function bridgeStore<S extends SceneStoreState>(
   let inFrame = false;
   scope.defer(
     store.subscribe((s) => {
+      if (s === store.getInitialState()) return;
       handlers.before?.(s);
       if (s.turn !== turn) {
         turn = s.turn;
