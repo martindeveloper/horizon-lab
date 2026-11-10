@@ -65,7 +65,10 @@ const PAGE_FALLBACK_PX = 800;
 const LEFT_TRIGGER = 6;
 const RIGHT_TRIGGER = 7;
 
-/** `event.code` of every key the input reads: the pilot's hands stay on these. */
+/**
+ * `event.code` of every key the input reads: the pilot's hands stay on these. None is a key the
+ * stage's own chrome takes (F toggles immersive view), so both act with focus in the stage.
+ */
 export const FLIGHT_KEYS = new Set([
   "KeyW",
   "KeyS",
@@ -74,7 +77,7 @@ export const FLIGHT_KEYS = new Set([
   "KeyQ",
   "KeyE",
   "KeyR",
-  "KeyF",
+  "KeyV",
   "KeyX",
   "ShiftLeft",
   "ShiftRight",
@@ -92,7 +95,7 @@ const axis = (keys: ReadonlySet<string>, positive: string, negative: string) =>
 export function flightAxesFromKeys(keys: ReadonlySet<string>, out: FlightAxes) {
   out.thrust = axis(keys, "KeyW", "KeyS");
   out.strafe = axis(keys, "KeyD", "KeyA");
-  out.lift = axis(keys, "KeyR", "KeyF");
+  out.lift = axis(keys, "KeyR", "KeyV");
   out.roll = axis(keys, "KeyE", "KeyQ");
   out.boost = keys.has("ShiftLeft") || keys.has("ShiftRight") ? 1 : 0;
   out.brake = keys.has("KeyX") ? 1 : 0;

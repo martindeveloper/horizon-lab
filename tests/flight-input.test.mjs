@@ -12,6 +12,7 @@ import {
   stickValue,
   wheelPixels,
 } from "@horizon/toolkit/camera";
+import { IMMERSIVE_SHORTCUT } from "@horizon/toolkit/ui";
 
 import { close, event } from "./toolkit-helpers.mjs";
 
@@ -28,7 +29,7 @@ test("held keys map to axes, opposed keys cancel and Shift boosts", () => {
     brake: 0,
     park: true,
   });
-  flightAxesFromKeys(new Set(["KeyS", "KeyA", "KeyF", "KeyQ"]), axes);
+  flightAxesFromKeys(new Set(["KeyS", "KeyA", "KeyV", "KeyQ"]), axes);
   assert.deepEqual([axes.thrust, axes.strafe, axes.lift, axes.roll], [-1, -1, -1, -1]);
   assert.equal(axes.boost, 0);
   assert.equal(axes.park, false);
@@ -48,11 +49,13 @@ test("held keys map to axes, opposed keys cancel and Shift boosts", () => {
     "KeyQ",
     "KeyE",
     "KeyR",
-    "KeyF",
+    "KeyV",
     "KeyX",
     "Space",
   ])
     assert.ok(FLIGHT_KEYS.has(code), code);
+  /* The stage's immersive shortcut stays its own: a key cannot both steer and toggle the view. */
+  assert.ok(!FLIGHT_KEYS.has(`Key${IMMERSIVE_SHORTCUT}`));
 });
 
 test("stick values pass a deadzone and stretch back to full travel", () => {
