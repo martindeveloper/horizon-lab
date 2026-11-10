@@ -112,8 +112,14 @@ const DEFAULT_SHOW: Show = {
   cosmicMode: ATLAS_EXPERIENCE_MODE.manual,
 };
 
-/** What the `?` tour's steps change and give back: the view, a ladder drag, the switches. */
-type HelpSaved = { view: ViewId; viewLy: number; seek: { ly: number } | null; show: Show };
+/** What the `?` tour's steps change and give back: the view, a ladder drag, a close-up, the switches. */
+type HelpSaved = {
+  view: ViewId;
+  viewLy: number;
+  seek: { ly: number } | null;
+  closeUp: DeepFieldCloseUp | null;
+  show: Show;
+};
 
 export type DeepFieldStore = SceneSlice &
   GuideSlice<Show> &
@@ -248,9 +254,14 @@ export const useDeepField = create<DeepFieldStore>((set, get) => ({
   }),
   ...helpSlice(set, get, {
     steps: HELP,
-    save: (s) => ({ view: s.view, viewLy: s.viewLy, seek: s.seek, show: s.show }),
-    /* The tour's close-up and selection go with it. */
-    restore: (saved) => ({ ...saved, closeUp: null, selection: null }),
+    save: (s) => ({
+      view: s.view,
+      viewLy: s.viewLy,
+      seek: s.seek,
+      closeUp: s.closeUp,
+      show: s.show,
+    }),
+    restore: (saved) => saved,
   }),
   guidePlaying: false,
   guideLanded: false,

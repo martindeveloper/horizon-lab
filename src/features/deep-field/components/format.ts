@@ -5,9 +5,13 @@ import { convert, pluralOf } from "@horizon/toolkit/science";
 
 import type { Then } from "../lib/model/depth";
 
+/** The day a source was last reviewed (an ISO date), as the "data reviewed" line prints it. */
+export const formatReviewed = (f: Format, isoDate: string) =>
+  f.dateTime(new Date(`${isoDate}T12:00:00Z`), { dateStyle: "medium", timeZone: "UTC" });
+
 /**
  * How long ago light set out: "43 minutes ago" from Jupiter, "4.25 years ago" from Proxima,
- * "2.5 million years ago" from Andromeda.
+ * "2.48 million years ago" from Andromeda.
  */
 export function formatAgo(t: Translate, f: Format, years: number, locale: string) {
   /* The number as printed, and its plural category for the unit's word. */

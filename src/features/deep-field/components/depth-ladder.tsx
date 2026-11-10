@@ -105,7 +105,9 @@ export function DepthLadder() {
             setHeld(value / STEPS);
             takeOver().seekTo(lyAtDepth(value / STEPS));
           }}
-          onValueCommit={() => setHeld(null)}
+          /* The slider captures the pointer for a drag and commits only one that ends elsewhere
+             than it began; losing the capture ends every drag, a cancelled touch included. */
+          onLostPointerCapture={() => setHeld(null)}
           onKeyDown={onKeyDown}
           className={cn(
             "relative flex touch-none select-none",

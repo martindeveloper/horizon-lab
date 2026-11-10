@@ -137,6 +137,63 @@ test("Deep Field flies to a probe at its true size, lit three-quarters, and back
   assert.ok(rig.aim.length() < 1e-6, "the aim is given back");
 });
 
+test("Leaving a probe's close-up for a view or a depth lands there, the aim where the ladder holds it", () => {
+  const camera = new PerspectiveCamera(48, 1.6, 1e-12, 1e6);
+  const reduceMotion = { matches: false };
+  const rig = createCameraRig(camera, { state: () => ({ selection: null }), reduceMotion });
+  rig.snap({ azimuth: 0.9, inclination: 0.42, distance: 520 });
+  const probeAt = (id, out) => probePosition(id, 2026.8, out);
+  const closeUp = createProbeCloseUp(rig, camera, { probeAt, reduceMotion });
+  const frame = (want) => {
+    closeUp.step(1 / 60, want);
+    rig.step(1 / 60);
+    rig.home();
+    rig.applyPose();
+  };
+  const run = (want, seconds) => {
+    for (let t = 0; t < seconds; t += 1 / 60) frame(want);
+  };
+  const landsOn = (pose, what) => {
+    assert.ok(Math.abs(rig.pose.distance / pose.distance - 1) < 1e-6, `${what}: its distance`);
+    /* A flight turns the shorter way round, so the angles agree to a whole turn. */
+    for (const key of ["azimuth", "inclination"])
+      assert.ok(Math.cos(rig.pose[key] - pose[key]) > 1 - 1e-9, `${what}: ${key} ${rig.pose[key]}`);
+  };
+
+  /* A view flight: the store has let the probe go as the flight is asked for. */
+  run("voyager1", 6);
+  const galaxy = rig.viewPose("galaxy");
+  closeUp.leaveTo(galaxy);
+  assert.deepEqual(closeUp.home, galaxy);
+  run(null, 1);
+  assert.equal(closeUp.current?.phase, "out", "one flight out, not back to where it left first");
+  /* Landing, the close-up hands the aim to the ladder: it must not jump as it does. */
+  let landedAt = null;
+  for (let i = 0; i < 600 && closeUp.current; i++) {
+    frame(null);
+    landedAt = rig.aim.clone();
+  }
+  assert.equal(closeUp.current, null);
+  landsOn(galaxy, "the view");
+  frame(null);
+  assert.ok(landedAt.length() > 1e8, "the Galaxy turns about its centre, not the Sun");
+  assert.ok(
+    rig.aim.distanceTo(landedAt) < galaxy.distance * 1e-6,
+    "the ladder takes the aim back without a jump",
+  );
+
+  /* A ladder drag: each new depth retargets the flight out already under way. */
+  rig.snap({ azimuth: 0.9, inclination: 0.42, distance: 520 });
+  run("voyager1", 6);
+  closeUp.leaveTo({ ...closeUp.home, distance: 40 });
+  run(null, 1);
+  const dragged = { ...closeUp.home, distance: 9000 };
+  closeUp.leaveTo(dragged);
+  run(null, 6);
+  assert.equal(closeUp.current, null);
+  landsOn(dragged, "the depth last asked for");
+});
+
 test("A drift's probe visit pulls away on the drift's own flight, the probe kept in view until the aim is home", () => {
   const camera = new PerspectiveCamera(48, 1.6, 1e-12, 1e6);
   const reduceMotion = { matches: false };

@@ -38,19 +38,22 @@ type Probe = {
   crossed?: { shock: string; heliopause: string };
 };
 
-/** Farthest first. */
+/**
+ * Farthest from the Sun first, as the lists print them: the order the tracks hold from 2023,
+ * when Voyager 2 passed Pioneer 10, to their end.
+ */
 export const PROBES: readonly Probe[] = [
   {
     id: "voyager1",
     launched: "1977-09-05",
     crossed: { shock: "2004-12-16", heliopause: "2012-08-25" },
   },
-  { id: "pioneer10", launched: "1972-03-03", lastSignal: "2003-01-23" },
   {
     id: "voyager2",
     launched: "1977-08-20",
     crossed: { shock: "2007-08-30", heliopause: "2018-11-05" },
   },
+  { id: "pioneer10", launched: "1972-03-03", lastSignal: "2003-01-23" },
   { id: "pioneer11", launched: "1973-04-06", lastSignal: "1995-11-24" },
   { id: "newHorizons", launched: "2006-01-19" },
 ];

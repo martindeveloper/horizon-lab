@@ -9,6 +9,7 @@ import { convert } from "@horizon/toolkit/science";
 
 import { cardFor, NEIGHBOUR_IDS } from "../src/features/deep-field/components/cards.tsx";
 import { formatAgo, formatThen } from "../src/features/deep-field/components/format.ts";
+import { HELP } from "../src/features/deep-field/lib/help.ts";
 import { PROSE_FIGURES } from "../src/features/deep-field/lib/model/catalogue/index.ts";
 import {
   EARTH_THEN,
@@ -59,6 +60,7 @@ import {
   crossingAu,
   firstLightDay,
   probeFromEarth,
+  probeFromSun,
   probePath,
   probeSpeed,
 } from "../src/space/solar-system/model/probes.ts";
@@ -122,6 +124,12 @@ test("the probes fly their tracked paths: the Voyagers met the heliosphere's edg
     const start = probePath(probe.id, 2100).slice(0, 3);
     close(length(start), 1, 0.05, `${probe.id} leaves from Earth's distance`);
   }
+  /* The lists print them farthest first: Voyager 2 passed Pioneer 10 in July 2023. */
+  const sunward = PROBES.map((probe) => probeFromSun(probe.id, now));
+  assert.deepEqual(
+    sunward,
+    sunward.toSorted((a, b) => b - a),
+  );
 });
 
 test("Voyager 1 is a full light-day from Earth from mid-November 2026", () => {
@@ -383,6 +391,36 @@ test("the journey sets each step's view, focus and switches, and gives the visit
   assert.equal(api().guideOpen, false, "past the last step the journey ends");
   assert.equal(api().selection, null);
   assert.deepEqual(api().show, savedShow, "the journey restores the visitor's atlas layers too");
+});
+
+test("the ? tour gives back the visitor's card and close-up, however it ends", () => {
+  const api = useDeepField.getState;
+  const fresh = useDeepField.getInitialState();
+  const mars = { kind: "planet", id: "mars" };
+  try {
+    for (const end of ["finish", "close"]) {
+      useDeepField.setState(fresh, true);
+      api().setView("inner");
+      api().select(mars);
+      api().enterCloseUp();
+      api().startHelp();
+      const last = end === "finish" ? HELP.length - 1 : 1;
+      for (let i = 0; i <= last; i++) {
+        api().goHelp(i);
+        for (const cue of HELP[i].cues ?? []) cue.run(api());
+      }
+      assert.notDeepEqual(api().closeUp, mars, "the tour moved on from it");
+      if (end === "finish") api().goHelp(HELP.length);
+      else api().endHelp();
+      assert.deepEqual(
+        { view: api().view, selection: api().selection, closeUp: api().closeUp },
+        { view: "inner", selection: mars, closeUp: mars },
+        `given back after ${end}`,
+      );
+    }
+  } finally {
+    useDeepField.setState(fresh, true);
+  }
 });
 
 test("Drift uses Illustration through loading, play and pause, then restores manual choices", () => {

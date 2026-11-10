@@ -25,7 +25,7 @@ import { TAP_STYLE } from "@/space/close-up-flight";
 import { createCosmosLayer } from "@/space/cosmos/scene/cosmos-layer";
 import { haloVisibility } from "@/space/galaxy/model/dark-halo";
 import { NEIGHBOURS } from "@/space/galaxy/model/neighbours";
-import { GALAXY_LAYER, LY, galaxyMix } from "@/space/galaxy/scene/frames";
+import { GALAXY_LAYER, LY, galaxyMix, realmOf } from "@/space/galaxy/scene/frames";
 import { createGalaxyLayer } from "@/space/galaxy/scene/galaxy-layer";
 import { createLabelPicks } from "@/space/galaxy/scene/label-picks";
 import { createLod } from "@/space/galaxy/scene/lod";
@@ -45,6 +45,7 @@ import {
   solarLabelPick,
 } from "@/space/solar-system/scene/solar-system";
 import type { Vec3 } from "@horizon/toolkit/bodies";
+import type { OrbitPose } from "@horizon/toolkit/camera";
 import { REDUCED_MOTION_QUERY, WIDE_QUERY } from "@horizon/toolkit/environment";
 import { withScope, type SimulationEngine } from "@horizon/toolkit/rendering";
 import {
@@ -62,6 +63,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 
 import { createLooks } from "../graphics/looks";
 import { LADDER_LY } from "../model/depth";
+import type { ViewId } from "../model/view-ids";
 import { viewById, worldDistance, type Realm } from "../model/views";
 import { deepFieldQuality } from "../quality";
 import { dropsSelection, useDeepField, type DeepFieldCloseUp } from "../store";
@@ -214,6 +216,47 @@ export function createDeepFieldEngine({
     /** The probe a close-up names, for the probe close-up; a body's is the shared one's. */
     const probeWanted = (want: DeepFieldCloseUp | null) =>
       want?.kind === "reach" ? want.id : null;
+    /* One rule for both close-ups, a body's and a probe's, wherever another camera move meets one. */
+    /** Where the close-up holding the camera lands as it leaves; null without one. */
+    const closeUpHome = () => bodyCloseUp.current?.home ?? closeUp.home;
+    /** Ends the close-up where the camera is: another camera takes it from there. */
+    const endCloseUp = () => {
+      bodyCloseUp.end(false);
+      closeUp.end();
+    };
+    /**
+     * Leaves the close-up for the pose `landing` gives (from where it would have landed): one
+     * flight, out of the body or the probe and on to it. False when the camera is the caller's
+     * to move: no close-up holds it, or reduced motion ended it where it was, for a cut.
+     */
+    const leaveCloseUpTo = (landing: (home: OrbitPose) => OrbitPose) => {
+      const home = closeUpHome();
+      if (!home) {
+        return false;
+      }
+      if (reduceMotion.matches) {
+        endCloseUp();
+        return false;
+      }
+      const pose = landing(home);
+      bodyCloseUp.leaveTo(pose);
+      closeUp.leaveTo(pose);
+      return true;
+    };
+    /**
+     * The scale a flight is carrying the camera to: a view flight's view, the landing of a
+     * close-up's flight out, the solar system while a body's close-up holds the camera.
+     */
+    const flyingTo = (view: ViewId): Realm | null => {
+      if (rig.flying) {
+        return viewById(view).realm;
+      }
+      const home = closeUpHome();
+      if (home && (bodyCloseUp.current ?? closeUp.current)?.phase === "out") {
+        return realmOf(home.distance);
+      }
+      return bodyCloseUp.current ? "solar" : null;
+    };
 
     /* The handoff and first pose read the rig's close-up state, so its controller must exist. */
     const { view } = store.getState();
@@ -295,25 +338,25 @@ export function createDeepFieldEngine({
           cosmos.retryCmb();
         }
         /* The guide takes the camera. */
-        if (s.guideOpen && bodyCloseUp.current) bodyCloseUp.end(false);
+        if (s.guideOpen && closeUpHome()) {
+          endCloseUp();
+        }
         if (s.seek !== lastSeek) {
           lastSeek = s.seek;
           if (!s.seek) return;
-          const close = bodyCloseUp.current;
+          const distance = worldDistance(s.seek.ly);
           /* From a close-up, one flight out to the depth the ladder asks for. */
-          if (close && !reduceMotion.matches)
-            bodyCloseUp.leaveTo({ ...close.home, distance: worldDistance(s.seek.ly) });
-          else rig.zoomTo(worldDistance(s.seek.ly), true);
+          if (!leaveCloseUpTo((home) => ({ ...home, distance }))) {
+            rig.zoomTo(distance, true);
+          }
         }
       },
       turn: (turn) => rig.turnBy(turn),
       fly: (s) => {
         /* The journey and the drift fly their own shots. */
         if (s.guideOpen || s.drift !== "off") return;
-        /* Leaving a close-up for a view: one flight, out of the body and on to the view. */
-        if (bodyCloseUp.current && !reduceMotion.matches) bodyCloseUp.leaveTo(rig.viewPose(s.view));
-        else {
-          bodyCloseUp.end(false);
+        /* Leaving a close-up for a view: one flight, out of it and on to the view. */
+        if (!leaveCloseUpTo(() => rig.viewPose(s.view))) {
           rig.flyToView(s.view);
         }
         controls.cancel();
@@ -330,12 +373,26 @@ export function createDeepFieldEngine({
         else bodyCloseUp.leave();
       },
     });
-    /* The camera as the store borrows it: the same pose across every scale, so home is one flight. */
+    /* The camera as the store borrows it: the same pose across every scale, so home is one
+       flight. A close-up entered since the mark, let go by the store, flies out to it; one the
+       store holds keeps the camera (the way back turns within it, and one given back lands on
+       its own). */
+    const orbit = orbitCamera(rig, () => engine.invalidate());
     scope.defer(
-      lendCamera(
-        store,
-        orbitCamera(rig, () => engine.invalidate()),
-      ),
+      lendCamera(store, {
+        ...orbit,
+        mark: () => {
+          const home = rig.inputPose();
+          const back = orbit.mark();
+          return () => {
+            if (store.getState().closeUp === null && leaveCloseUpTo(() => home)) {
+              engine.invalidate();
+            } else {
+              back();
+            }
+          };
+        },
+      }),
     );
     bridgeRender(store, scope, sceneHost, (level) => {
       const next = deepFieldQuality(level, tight);
@@ -424,13 +481,8 @@ export function createDeepFieldEngine({
         if ((realm !== lastRealm || isHalo) && !state.guideOpen) {
           lastRealm = realm;
           const sel = state.selection;
-          const flyingTo = rig.flying
-            ? viewById(state.view).realm
-            : bodyCloseUp.current
-              ? "solar"
-              : null;
           const haloVisible = state.show.halo && haloVisibility(dist / LY) > 0.004;
-          if (sel && dropsSelection(sel, realm, flyingTo, haloVisible))
+          if (sel && dropsSelection(sel, realm, flyingTo(state.view), haloVisible))
             store.getState().select(null);
         }
 
@@ -487,7 +539,7 @@ export function createDeepFieldEngine({
         hud.update(dt, invalidated || engine.dirty, {
           ly: dist / LY,
           aimLy: rig.aim.length() / LY,
-          syncView: !rig.flying && !bodyCloseUp.current && !state.guideOpen,
+          syncView: !rig.flying && !closeUpHome() && !state.guideOpen,
           angles: pose,
         });
         sceneHost.render(draw);

@@ -1,11 +1,13 @@
 /**
  * A probe at its true size: the Orrery's close-up flight (`@/space/close-up-flight`), from
  * wherever the ladder holds the camera to a few metres off the probe, three-quarter lit, and
- * back to where it left. The flight holds the rig's aim and distance (`CameraFocus`); landed,
- * the visitor turns and zooms about the probe within its close-up limits. A drift's visit
- * (`@/space/drift-visits`) flies it in its own style and may release the flight out to the
- * drift's next flight, the close-up keeping the probe in view until that flight hands the aim
- * home.
+ * back to where it left, or on to a pose asked for meanwhile (`leaveTo`: a view, a depth). The
+ * flight holds the rig's aim and distance (`CameraFocus`); landed, the visitor turns and zooms
+ * about the probe within its close-up limits. Every flight out lands the aim where the ladder
+ * holds it at the landing (`ladderAim`), so the ladder takes it back without a jump. A drift's
+ * visit (`@/space/drift-visits`) flies it in its own style and may release the flight out to
+ * the drift's next flight, the close-up keeping the probe in view until that flight hands the
+ * aim home.
  */
 import { Vector3, type PerspectiveCamera } from "three";
 
@@ -34,14 +36,13 @@ import type { CameraFocus, CameraRig } from "./camera-rig";
 
 const M_PER_AU = AU_KM * 1e3;
 
-/** A flight: its poses, where the aim looks off the probe at either end (`aimAt`), and how it goes. */
+/** A flight: its poses, where the aim looked off the probe as it set off (`aimAt`), and how it goes. */
 type Flight = {
   entering: boolean;
   t: number;
   from: OrbitPose;
   to: OrbitPose;
   lookFrom: Vec;
-  lookTo: Vec;
   style: CloseUpStyle;
   /** The camera's motion as the flight set off, carried on and eased out (`sampleCloseUp`). */
   motion: FlightMotion;
@@ -75,8 +76,8 @@ export function createProbeCloseUp(
   let wanted: ProbeId | null = null;
   /** The probe the close-up is with, heading for or leaving; null once it has ended. */
   let probe: ProbeId | null = null;
-  /** The pose and aim the close-up left from, the flight under way, a flight out released. */
-  let back: { pose: OrbitPose; aim: Vec } | null = null;
+  /** The pose the close-up left from or is leaving for, the flight under way, a flight out released. */
+  let back: OrbitPose | null = null;
   let flight: Flight | null = null;
   let released: Released | null = null;
 
@@ -89,40 +90,48 @@ export function createProbeCloseUp(
 
   /** The aim's look off the probe at `at`, from where it is now. */
   const lookOff = (aim: Vec): Vec => [aim[0] - at[0], aim[1] - at[1], aim[2] - at[2]];
+  const landingAim = new Vector3();
+  /** The look off the probe a flight out lands on: the ladder's aim at its landing. */
+  const lookHome = (landing: OrbitPose): Vec => {
+    const { x, y, z } = rig.ladderAim(landing.distance, landingAim);
+    return lookOff([x, y, z]);
+  };
 
   const pausedFlight = (f: Flight) => f.style.scripted !== null && (deps.paused?.() ?? false);
   /** A flight out is under way, the close-up's own or released to a drift's. */
   const leaving = () => released !== null || flight?.entering === false;
 
-  function fly(entering: boolean, to: OrbitPose, lookFrom: Vec, lookTo: Vec) {
+  function fly(entering: boolean, to: OrbitPose) {
     const style = deps.style?.() ?? TAP_STYLE;
     const motion = settingOff(STILL, entering, style);
-    flight = { entering, t: 0, from: { ...rig.pose }, to, lookFrom, lookTo, style, motion };
+    const lookFrom = lookOff(aimNow());
+    flight = { entering, t: 0, from: { ...rig.pose }, to, lookFrom, style, motion };
     focus.flying = true;
     rig.cancel();
   }
 
   function enter(id: ProbeId) {
-    const aim = aimNow();
-    back ??= { pose: { ...rig.pose }, aim };
+    back ??= { ...rig.pose };
     probe = id;
     released = null;
     const frame = frameOf(id);
     deps.probeAt(id, at);
-    fly(true, closeUpPose(at, frame, halfTan(), rig.pose.azimuth), lookOff(aim), ON);
+    fly(true, closeUpPose(at, frame, halfTan(), rig.pose.azimuth));
     focus.limits = closeUpLimits(frame, frame);
   }
 
   /** Flies out to `home` from wherever the camera is. */
-  function flyOut(home: { pose: OrbitPose; aim: Vec }) {
+  function flyOut(home: OrbitPose) {
     back = home;
     released = null;
-    fly(false, home.pose, lookOff(aimNow()), lookOff(home.aim));
+    fly(false, home);
   }
 
   /** Ends the close-up where the camera is, or (`landHome`) where it left from, giving the aim and zoom back to the ladder. */
   function end(landHome = false) {
-    if (landHome && back) Object.assign(rig.pose, back.pose);
+    if (landHome && back) {
+      Object.assign(rig.pose, back);
+    }
     probe = null;
     back = null;
     flight = null;
@@ -159,7 +168,27 @@ export function createProbeCloseUp(
     /** A released flight its camera no longer flies: the close-up flies on to the landing itself. */
     reclaim() {
       if (!released || !back) return;
-      flyOut({ pose: released.landing, aim: back.aim });
+      flyOut(released.landing);
+    },
+    /** Where the flight out lands: the pose the close-up left from, or the one it is leaving for. */
+    get home(): OrbitPose | null {
+      return back;
+    },
+    /**
+     * Flies out of the probe and on to `pose` in one flight (a view, a depth the ladder asks
+     * for); a flight out under way lands there instead.
+     */
+    leaveTo(pose: OrbitPose) {
+      if (!probe || released) {
+        return;
+      }
+      if (flight && !flight.entering) {
+        back = pose;
+        flight.to = pose;
+        return;
+      }
+      deps.probeAt(probe, at);
+      flyOut(pose);
     },
     end,
     /** Follows the store's close-up (`want`) and advances the flight; before the rig homes. */
@@ -179,7 +208,7 @@ export function createProbeCloseUp(
         const { landing, from, look } = released;
         const blend =
           landing.distance === from ? 1 : logFraction(rig.pose.distance, from, landing.distance);
-        const home = { look: lookOff(back.aim), distance: landing.distance };
+        const home = { look: lookHome(landing), distance: landing.distance };
         const aim = aimAt(at, { look, distance: from }, home, rig.pose.distance, blend);
         focus.at.set(aim[0], aim[1], aim[2]);
         rig.holdFocus(focus);
@@ -203,7 +232,7 @@ export function createProbeCloseUp(
       const look = aimAt(
         at,
         { look: flight.lookFrom, distance: from.distance },
-        { look: flight.lookTo, distance: to.distance },
+        { look: flight.entering ? ON : lookHome(to), distance: to.distance },
         sample.pose.distance,
         sample.aim,
         motion.look,

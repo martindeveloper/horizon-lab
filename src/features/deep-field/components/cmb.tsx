@@ -1,11 +1,12 @@
 import { ExternalLink } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 
 import { CMB_FACTS, CMB_PALETTE, CMB_SOURCE, type CmbStatus } from "@/space/cosmos/model/cmb";
 import { formatFigure } from "@horizon/toolkit/science";
 import { Action, Callout, Disclosure, Orb, SegmentedControl } from "@horizon/toolkit/ui";
 
 import { useDeepField } from "../lib/store";
+import { formatReviewed } from "./format";
 import { CaptionKey } from "./header-caption";
 
 export function cmbStatusKey(status: CmbStatus, detail: boolean) {
@@ -43,6 +44,7 @@ export function CmbControl() {
 /** Always identifies reconstruction and masks, even when the broader map is in Data mode. */
 export function CmbEvidence({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("deepField");
+  const f = useFormatter();
   const locale = useLocale();
   const status = useDeepField((s) => s.cmbStatus);
   const detail = useDeepField((s) => s.show.cmbDetail);
@@ -83,7 +85,7 @@ export function CmbEvidence({ compact = false }: { compact?: boolean }) {
         <p>{t("cmb.masks")}</p>
         <p>{t("cmb.resolution", resolution)}</p>
         <p>{t("cmb.releases")}</p>
-        <p>{t("atlas.reviewed", { date: CMB_SOURCE.reviewed })}</p>
+        <p>{t("atlas.reviewed", { date: formatReviewed(f, CMB_SOURCE.reviewed) })}</p>
         <ul className="grid gap-2">
           {(["planck", "act"] as const).map((id) => (
             <li key={id}>

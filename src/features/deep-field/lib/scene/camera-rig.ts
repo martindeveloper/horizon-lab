@@ -80,6 +80,32 @@ export function createCameraRig(
     return sel?.kind === "galaxy" && sel.id === "halo";
   };
 
+  /**
+   * Where the ladder holds the aim at a camera distance (au): close in, the camera turns about
+   * the Sun; farther, about the galactic centre; past the halo, about the heart of the
+   * structure in view.
+   */
+  const ladderAim = (distance: number, aim: Vector3) => {
+    const homing =
+      smootherstep(1 - toLogFraction(distance / LY, 9_000, 40_000)) * (1 - smootherstep(hold));
+    aim.copy(centre).multiplyScalar(1 - homing);
+    cosmicAim(distance / LY, heart);
+    if (heart[0] !== 0 || heart[1] !== 0 || heart[2] !== 0) {
+      aim.add(
+        beyond
+          .set(heart[0], heart[1], heart[2])
+          .applyQuaternion(GALAXY_FRAME)
+          .multiplyScalar(MLY * (1 - smootherstep(hold))),
+      );
+    }
+    /* The expanded atlas reaches either side of the old web framing. Selecting
+       a landmark brings it into view on a narrow phone without relocating data. */
+    return aim.lerp(
+      atlasAim,
+      smootherstep(atlasHold) * smootherstep(toLogFraction(distance / LY, 80e6, 450e6)),
+    );
+  };
+
   const rig = createOrbitRig(camera, {
     pose: {
       azimuth: AZIMUTH,
@@ -131,28 +157,13 @@ export function createCameraRig(
       (hold > 0 && hold < 1) ||
       (atlasHold > 0 && atlasHold < 1) ||
       (atlasHold > 0 && atlasAim.distanceTo(atlasTarget) > LY),
-    /* Close in, the camera turns about the Sun; farther, about the galactic centre; past the
-       halo, about the heart of the structure in view. */
+    /* The ladder's aim, or a close-up's while it holds the camera. */
     home: (aim, pose) => {
-      const homing =
-        smootherstep(1 - toLogFraction(pose.distance / LY, 9_000, 40_000)) *
-        (1 - smootherstep(hold));
-      aim.copy(centre).multiplyScalar(1 - homing);
-      cosmicAim(pose.distance / LY, heart);
-      if (heart[0] !== 0 || heart[1] !== 0 || heart[2] !== 0)
-        aim.add(
-          beyond
-            .set(heart[0], heart[1], heart[2])
-            .applyQuaternion(GALAXY_FRAME)
-            .multiplyScalar(MLY * (1 - smootherstep(hold))),
-        );
-      /* The expanded atlas reaches either side of the old web framing. Selecting
-         a landmark brings it into view on a narrow phone without relocating data. */
-      aim.lerp(
-        atlasAim,
-        smootherstep(atlasHold) * smootherstep(toLogFraction(pose.distance / LY, 80e6, 450e6)),
-      );
-      if (focus) aim.copy(focus.at);
+      if (focus) {
+        aim.copy(focus.at);
+      } else {
+        ladderAim(pose.distance, aim);
+      }
     },
     /* The orbit frame turns from the ecliptic to the galactic plane past the nearest stars,
        then to the supergalactic plane as the nearby galaxies come into view. */
@@ -200,6 +211,8 @@ export function createCameraRig(
     holdFocus(next: CameraFocus | null) {
       focus = next;
     },
+    /** Where the aim stands at a camera distance (au) once no close-up holds it, into `out`. */
+    ladderAim,
     viewPose,
   });
 }

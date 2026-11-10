@@ -3,6 +3,8 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import { ATLAS_CARD_SOURCES, ATLAS_SOURCES, type AtlasId } from "@/space/cosmos/model/atlas";
 
+import { formatReviewed } from "./format";
+
 /** Source state comes from the pinned import manifest, not a second UI status list. */
 export function AtlasProvenance({ id }: { id: AtlasId }) {
   const t = useTranslations("deepField");
@@ -32,12 +34,7 @@ export function AtlasProvenance({ id }: { id: AtlasId }) {
         })}
       </ul>
       <p className="mt-3 text-fg-secondary">
-        {t("atlas.reviewed", {
-          date: f.dateTime(new Date(`${ATLAS_SOURCES.cf4.reviewed}T12:00:00Z`), {
-            dateStyle: "medium",
-            timeZone: "UTC",
-          }),
-        })}
+        {t("atlas.reviewed", { date: formatReviewed(f, ATLAS_SOURCES.cf4.reviewed) })}
       </p>
     </div>
   );
