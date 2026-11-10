@@ -515,11 +515,11 @@ page scrolling.
 | `/lab/spectroscopy/stars`   | Stellar Spectra view (kirchhoff, stars, mystery)                                                                                             |
 | `/lab/giants`               | Giants, the Sun in focus (behind the `giants` feature switch, released: on)                                                                  |
 | `/lab/giants/betelgeuse`    | Giants with that body in focus (every rung in `rungs.ts`)                                                                                    |
-| `/lab/sun`                  | The Sun, its surface (behind the `sun` feature switch, unreleased)                                                                           |
+| `/lab/sun`                  | The Sun, its surface (behind the `sun` feature switch, released: on)                                                                         |
 | `/lab/sun/eruption`         | The Sun's view (inside, sunspot, chromosphere, corona, eruption, cycle)                                                                      |
 | `/experience/voyage`        | Voyage, default place (Earth)                                                                                                                |
 | `/experience/voyage/saturn` | Voyage place (earth, moon, mars, jupiter, saturn, pluto, stars, galaxy, andromeda, edge)                                                     |
-| `/experience/afterglow`     | Afterglow, today's chapter (behind the `afterglow` feature switch, unreleased)                                                               |
+| `/experience/afterglow`     | Afterglow, today's chapter (behind the `afterglow` feature switch, released: on)                                                             |
 | `/experience/afterglow/tip` | Afterglow chapter (young, today, oceans, subgiant, tip, flash, pulses, nebula, dwarf)                                                        |
 | `/black-hole/...`           | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |
 | `/orrery/...`               | Permanent redirect to the same `/lab` page (pre-prefix URL)                                                                                  |

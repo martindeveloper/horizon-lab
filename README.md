@@ -80,7 +80,13 @@ Sit back and fly. Real physics, less to read.
       <p>Ten stops · autopilot or the helm · ship clock and Earth clock</p>
       <p><a href="docs/science-sources.md#voyage-the-ship-and-its-drives">Sources →</a></p>
     </td>
-    <td width="50%" valign="top"></td>
+    <td width="50%" valign="top">
+      <img src="public/simulations/afterglow/og.png" alt="Afterglow" />
+      <h3>Afterglow</h3>
+      <p>Orbit low over a world and watch the Sun live its whole life, from the faint young Sun to the cooling white dwarf.</p>
+      <p>Nine chapters · five worlds · a guide timed to the music</p>
+      <p><a href="docs/science-sources.md">Sources →</a></p>
+    </td>
   </tr>
 </table>
 
@@ -103,8 +109,8 @@ npm run dev
 ```
 
 Open <http://localhost:3000>. Labs live under `/lab`, for example `/lab/black-hole`,
-`/lab/giants` and `/lab/sun`; experiences under `/experience`, such as `/experience/voyage`.
-URLs carry no language; a cookie picks it, English by default.
+`/lab/giants` and `/lab/sun`; experiences under `/experience`, such as `/experience/voyage`
+and `/experience/afterglow`. URLs carry no language; a cookie picks it, English by default.
 
 ## Scripts
 

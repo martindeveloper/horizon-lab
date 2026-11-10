@@ -64,7 +64,7 @@ export const FEATURES: Readonly<Record<FeatureId, boolean>> = {
   voyage: featureFlag(process.env.NEXT_PUBLIC_FEATURE_VOYAGE, ENVIRONMENT, DEBUG, true),
   giants: featureFlag(process.env.NEXT_PUBLIC_FEATURE_GIANTS, ENVIRONMENT, DEBUG, true),
   sun: featureFlag(process.env.NEXT_PUBLIC_FEATURE_SUN, ENVIRONMENT, DEBUG, true),
-  afterglow: featureFlag(process.env.NEXT_PUBLIC_FEATURE_AFTERGLOW, ENVIRONMENT, DEBUG),
+  afterglow: featureFlag(process.env.NEXT_PUBLIC_FEATURE_AFTERGLOW, ENVIRONMENT, DEBUG, true),
 };
 
 /**
