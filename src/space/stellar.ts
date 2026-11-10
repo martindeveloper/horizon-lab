@@ -14,6 +14,18 @@ import { literatureFact, factsOf, type Fact, type Value } from "@/lib/facts";
 import type { SourceId } from "@/lib/sources";
 import { STARS as NEIGHBOURS } from "@/space/galaxy/model/catalogue/stars";
 import { surfacePeriod } from "@/space/sun/model/rotation";
+import { convert } from "@horizon/toolkit/science";
+
+/** A turn's length, days: an equator's circumference (its radius in R☉) over the speed there, km/s. */
+const turnDays = (radiusSuns: number, speedKmS: number) =>
+  convert((2 * Math.PI * convert(radiusSuns, "Rsun", "km")) / speedKmS, "s", "d");
+
+/**
+ * Achernar's equator as the VLTI resolved it (Domiciano de Souza et al. 2014): its radius, R☉,
+ * and the speed it turns at, km/s, each with its published spread. Its period follows from them.
+ */
+const ACHERNAR_EQUATOR_RSUN = { value: 9.16, range: [8.93, 9.39] } as const;
+const ACHERNAR_EQUATOR_KM_S = { value: 298.8, range: [293.3, 305.7] } as const;
 
 /** What is measured of a star, a remnant or a hole; any may be missing. */
 export type StellarFigures = {
@@ -25,6 +37,8 @@ export type StellarFigures = {
   flattening?: Fact;
   /** Sidereal rotation period; at the equator for a star that turns faster there. */
   rotation?: Fact;
+  /** The speed its equator turns at, where it is measured in its own right (a resolved, tilted disc). */
+  equatorSpeed?: Fact;
   /** An upper limit on the rotation period, where only P/sin i is known (the tilt is not). */
   rotationLimit?: Fact;
   mass?: Fact;
@@ -228,13 +242,27 @@ export const NAMED_STARS = {
     radialVelocity: literatureFact(-13.5, "km/s", "simbad", "flag", { digits: 3 }),
   },
   achernar: {
-    rotation: literatureFact(null, "d", "domiciano2014", "derived", {
-      range: [1.37, 1.45],
-      digits: 3,
-      note: "one over its rotation frequency, 0.689 d⁻¹ as adopted there or 0.73 d⁻¹ in other analyses",
+    rotation: literatureFact(
+      turnDays(ACHERNAR_EQUATOR_RSUN.value, ACHERNAR_EQUATOR_KM_S.value),
+      "d",
+      "domiciano2014",
+      "derived",
+      {
+        range: [
+          turnDays(ACHERNAR_EQUATOR_RSUN.range[0], ACHERNAR_EQUATOR_KM_S.range[1]),
+          turnDays(ACHERNAR_EQUATOR_RSUN.range[1], ACHERNAR_EQUATOR_KM_S.range[0]),
+        ],
+        digits: 3,
+        note: "its equator's circumference over the speed it turns at",
+      },
+    ),
+    equatorSpeed: literatureFact(ACHERNAR_EQUATOR_KM_S.value, "km/s", "domiciano2014", "flag", {
+      range: ACHERNAR_EQUATOR_KM_S.range,
+      digits: 4,
+      note: "as Kervella et al. 2022 quote it",
     }),
-    radius: literatureFact(9.16, "Rsun", "domiciano2014", "verified", {
-      range: [8.93, 9.39],
+    radius: literatureFact(ACHERNAR_EQUATOR_RSUN.value, "Rsun", "domiciano2014", "verified", {
+      range: ACHERNAR_EQUATOR_RSUN.range,
       digits: 3,
     }),
     polar: literatureFact(6.79, "Rsun", "domiciano2014", "derived", {
@@ -551,7 +579,7 @@ export const BLACK_HOLES = {
     distance: literatureFact(8.277, "kpc", "gravity2022", "verified", { digits: 4 }),
     spin: literatureFact(0.94, "ratio", "eht2022", "teaching-choice", {
       digits: 2,
-      note: "assumed: the only EHT model passing every test; later work is split",
+      note: "assumed: the one EHT model passing every test applied in 2024, if the Faraday rotation is external; later work is split",
     }),
     companionPeriod: literatureFact(16.0455, "yr", "gravity2020", "verified", {
       digits: 4,

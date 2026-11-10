@@ -21,6 +21,7 @@ import { RUNG_FACTS, drawn, radiusMetres } from "../src/features/giants/lib/mode
 import { compare } from "../src/features/giants/lib/model/compare.ts";
 import { GIANTS_EQUATIONS, oblateDensity } from "../src/features/giants/lib/model/equations.ts";
 import { lightLapSeconds, spheroidDensity } from "../src/features/giants/lib/model/physics.ts";
+import { rocheOmega } from "../src/features/giants/lib/model/rotation.ts";
 import { RUNGS } from "../src/features/giants/lib/model/rungs.ts";
 import { TOUR } from "../src/features/giants/lib/model/tour.ts";
 import { factSources } from "../src/lib/facts.ts";
@@ -215,6 +216,18 @@ test("tour readouts carry length units and preserve the card's published interva
       assert.ok(readout.includes("–"), `${id} retains its interval`);
       assert.ok(card.facts.find(({ id }) => id === row).value.includes(readout));
     }
+  }
+});
+
+test("a flattened star's catalogued turn is the one its Roche shape needs", () => {
+  for (const id of ["vega", "achernar"]) {
+    const { radius, polar, mass, rotation } = RUNG_FACTS[id];
+    const Re = convert(radius.value, radius.unit, "m");
+    const GM = CONSTANTS.gravitationalConstant.value * convert(mass.value, mass.unit, "kg");
+    const rate = rocheOmega(polar.value / radius.value) * Math.sqrt(GM / Re ** 3);
+    const roche = convert((2 * Math.PI) / rate, "s", rotation.unit);
+    const [fastest, slowest] = rotation.range;
+    assert.ok(roche > fastest && roche < slowest, `${id}: ${roche} ${rotation.unit}`);
   }
 });
 
