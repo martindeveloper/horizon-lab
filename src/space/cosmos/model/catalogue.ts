@@ -8,6 +8,7 @@ import { ATLAS_FACTS } from "./atlas-facts";
 import { CMB_FACTS } from "./cmb";
 import {
   ANDROMEDA_APPROACH_KMS,
+  ANDROMEDA_KPC,
   ANDROMEDA_MLY,
   CMB_AGE_YEARS,
   CMB_MLY,
@@ -52,9 +53,10 @@ const andromedaDistance: Value = {
   value: ANDROMEDA_MLY,
   unit: "Mly",
   show: "Mly",
+  digits: 3,
   source: "li2021",
   status: "verified",
-  note: "765 kpc; 761 ± 11 kpc (Li et al. 2021) and 783 ± 25 kpc (McConnachie 2012)",
+  note: `${ANDROMEDA_KPC} ± 11 kpc from HST Cepheids; McConnachie 2012 gives 783 ± 25 kpc`,
 };
 /** M31's bright disk: RC3's isophotal diameter (log D25 = 3.28, in 0.1′) at the model's distance. */
 const M31_DISK_LY = convert(ANDROMEDA_MLY, "Mly", "ly") * convert(10 ** 3.28 / 10, "arcmin", "rad");
@@ -70,7 +72,7 @@ const ring = (gyr: number): Value => ({
 const greatAttractorDistance = anchorDistance("greatAttractor", "woudt2008", {
   digits: 2,
   status: "derived",
-  note: "the Norma Cluster's Hubble-flow distance, cz 4,871 km/s in the CMB frame; Dupuy & Courtois 2023 put the basin centre farther, ~105 Mpc",
+  note: "the Norma Cluster's Hubble-flow distance, heliocentric cz 4,871 km/s in the CMB frame; Dupuy & Courtois 2023 put the basin centre farther, ~105 Mpc",
 });
 
 export const COSMOS = {
@@ -175,7 +177,7 @@ export const COSMOS = {
       digits: 2,
       source: "m31Width",
       status: "derived",
-      note: "D25 = 190.5′ at the model's 765 kpc, to twice the ~40 kpc outer-disk radius",
+      note: `D25 = 190.5′ at the model's ${ANDROMEDA_KPC} kpc, to twice the ~40 kpc outer-disk radius`,
     },
     firstPass: {
       range: [4, 6],
@@ -249,13 +251,13 @@ export const COSMOS = {
   centaurus: {
     distance: anchorDistance("centaurusCluster", "hubbleFlow", {
       status: "derived",
-      note: "cz 3,418 km/s in the CMB frame at the model's H₀",
+      note: "heliocentric cz 3,418 km/s in the CMB frame, at the model's H₀",
     }),
   },
   hydra: {
     distance: anchorDistance("hydraCluster", "hubbleFlow", {
       status: "derived",
-      note: "cz 3,683 km/s in the CMB frame at the model's H₀",
+      note: "heliocentric cz 3,683 km/s in the CMB frame, at the model's H₀",
     }),
     members: {
       value: 580,

@@ -43,7 +43,10 @@ const n = (value: number) => formatNumber(value, "en", 4);
 /** The model's cosmology: flat ΛCDM with Planck 2018's H₀ (km/s/Mpc) and Ωm. */
 export const HUBBLE = PLANCK_2018.H0;
 export const OMEGA_M = PLANCK_2018.omegaM;
-/** Age of the Universe today, Gyr (13.787 for these parameters, radiation included). */
+/**
+ * Age of the Universe today, Gyr: 13.786 for these parameters, radiation included (Planck's
+ * own 13.787 counts a 0.06 eV neutrino, which the model leaves out).
+ */
 export const UNIVERSE_AGE_GYR = cosmicAgeAtRedshiftGyr(0, PLANCK_2018);
 
 /** Hubble-flow distance (Mly) for a recession velocity cz (km/s) at H₀. */
@@ -106,8 +109,10 @@ export const lookbackRingLabels = (name: (gyr: number) => string) =>
  * t₀ fix A, B and η, and with them when the pair turned around.
  * ------------------------------------------------------------------------------------- */
 
-/** M31's distance from the Milky Way today, Mly: 765 kpc (Li et al. 2021, McConnachie 2012). */
-export const ANDROMEDA_MLY = convert(765, "kpc", "Mly");
+/** M31's distance from the Milky Way today, kpc: 761 ± 11 from HST Cepheids (Li et al. 2021). */
+export const ANDROMEDA_KPC = 761;
+/** The same, Mly. */
+export const ANDROMEDA_MLY = convert(ANDROMEDA_KPC, "kpc", "Mly");
 /**
  * M31's radial velocity toward the Milky Way's centre, km/s (van der Marel et al. 2012,
  * −109 ± 4): the measured heliocentric −300 km/s less the Sun's own galactic motion.
