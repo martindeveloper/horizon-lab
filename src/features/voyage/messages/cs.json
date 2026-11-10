@@ -37,7 +37,7 @@
     "mars": "Slunce tu svítí méně než poloviční silou.",
     "jupiter": "Jeho měsíce vrhají na oblaka skutečné stíny.",
     "saturn": "Prstence zevnitř soustavy.",
-    "pluto": "Poledne je tu temnější než pozemský soumrak. Slunce je jasná hvězda.",
+    "pluto": "Poledne je tu šeré jako pozemský soumrak. Slunce je jasná hvězda.",
     "stars": "Čtyři světelné roky, u slunce jako naše. Slunce je jasná hvězda za vámi.",
     "galaxy": "Nad diskem, dvě stě tisíc světelných let daleko.",
     "andromeda": "Dva a půl milionu světelných let. Na Zemi uběhlo tolik let.",
@@ -85,7 +85,7 @@
     "brakeHold": "Držením brzdit",
     "invite": "Leťte klávesou W nebo pákou",
     "inviteTouch": "Leťte pákou",
-    "keys": "W S tah · A D · R F · Q E náklon · Shift zrychlení · X brzda · mezerník orbita · tažením rozhled",
+    "keys": "W S tah · A D · R V · Q E náklon · Shift zrychlení · X brzda · mezerník orbita · tažením rozhled",
     "slower": "Pomaleji",
     "faster": "Rychleji",
     "phase": {
@@ -170,9 +170,9 @@
       "moon": "Jeho odvrácená strana Zemi nikdy neukáže. Z přivrácené strany Země nikdy nezapadá.",
       "mars": "Poloviční šířka Země; den o čtyřicet minut delší než náš.",
       "jupiter": "Jedenáct Zemí napříč. Io, Europa, Ganymed a Callisto před ním přecházejí a stíní jeho oblaka.",
-      "saturn": "Prstence jsou převážně vodní led, jen desítky metrů tlusté, a sahaly by tři čtvrtiny cesty k Měsíci.",
+      "saturn": "Prstence jsou převážně vodní led, silné jen asi deset metrů, a sahaly by tři čtvrtiny cesty k Měsíci.",
       "io": "Nejsopečtější známý svět, hnětený Jupiterovými slapy.",
-      "europa": "Oceán pod ledem, hlubší než všechny pozemské dohromady.",
+      "europa": "Oceán pod ledem, v němž je víc vody než ve všech pozemských dohromady.",
       "titan": "Dusíková obloha hustší než pozemská a jezera metanu.",
       "pluto": "Charon je tak velký, že dvojice obíhá bod mimo Pluto."
     },
@@ -238,7 +238,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} {abPeriodYearsPlural, select, one {rok} few {roky} many {roku} other {let}}; Proxima je ta červená. Voyager by potřeboval {voyagerYears} {voyagerYearsPlural, select, one {rok} few {roky} many {roku} other {let}}. Při jednom g se loď do roka přiblíží rychlosti světla a její hodiny se zpomalí: {torchAlphaCenYears} {torchAlphaCenYearsPlural, select, one {rok} few {roky} many {roku} other {let}} na palubě, {torchAlphaCenEarthYears} {torchAlphaCenEarthYearsPlural, select, one {rok} few {roky} many {roku} other {let}} na Zemi."
+        "body": "Obloha se změnila: nejbližší hvězdy se posunuly, Slunce je jednou z nich. A a B kolem sebe oběhnou za {abPeriodYears} {abPeriodYearsPlural, select, one {rok} few {roky} many {roku} other {let}}; Proxima je ta červená. Voyager by potřeboval {voyagerYears} {voyagerYearsPlural, select, one {rok} few {roky} many {roku} other {let}}. Při jednom g se loď v půli cesty přiblíží rychlosti světla a její hodiny se zpomalí: {torchAlphaCenYears} {torchAlphaCenYearsPlural, select, one {rok} few {roky} many {roku} other {let}} na palubě, {torchAlphaCenEarthYears} {torchAlphaCenEarthYearsPlural, select, one {rok} few {roky} many {roku} other {let}} na Zemi."
       },
       "galaxy": {
         "title": "Galaxie shora",

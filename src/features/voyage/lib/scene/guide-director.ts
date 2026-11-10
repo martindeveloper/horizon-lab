@@ -25,8 +25,8 @@ export function createGuideDirector(ship: ShipCamera, store: typeof useVoyage) {
       }
       if (index < 0) return;
       if (ship.flying) flown = true;
-      /* Landed once this step's flight has run (or there was none to run). */
-      const landed = !ship.flying && (flown || ship.aim === s.destination);
+      /* Landed once this step's flight has run (or there was none to run); a wreck has not. */
+      const landed = !ship.crashed && !ship.flying && (flown || ship.aim === s.destination);
       if (landed !== s.guideLanded) store.setState({ guideLanded: landed });
     },
   };

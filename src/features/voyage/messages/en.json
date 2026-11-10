@@ -35,7 +35,7 @@
     "mars": "Sunlight is less than half as strong as on Earth.",
     "jupiter": "Its moons cast real shadows on the clouds.",
     "saturn": "The rings, from inside the system.",
-    "pluto": "Noon here is dimmer than Earth's dusk. The Sun is a bright star.",
+    "pluto": "Noon here is as dim as Earth's dusk. The Sun is a bright star.",
     "stars": "Four light-years out, at a sun like ours. The Sun is a bright star behind you.",
     "galaxy": "Above the disk, two hundred thousand light-years out.",
     "andromeda": "Two and a half million light-years. On Earth, that many years have passed.",
@@ -83,7 +83,7 @@
     "brakeHold": "Hold to brake",
     "invite": "Fly with W or the lever",
     "inviteTouch": "Fly with the lever",
-    "keys": "W S thrust · A D · R F · Q E roll · Shift boost · X brake · Space orbit · drag to look",
+    "keys": "W S thrust · A D · R V · Q E roll · Shift boost · X brake · Space orbit · drag to look",
     "slower": "Slower",
     "faster": "Faster",
     "phase": {
@@ -168,9 +168,9 @@
       "moon": "Its far side never faces Earth. Earth never sets from the near side.",
       "mars": "Half Earth's width; a day forty minutes longer than ours.",
       "jupiter": "Eleven Earths across. Io, Europa, Ganymede and Callisto pass in front of it and shade its clouds.",
-      "saturn": "The rings are mostly water ice, a few tens of metres thick, and would reach three-quarters of the way to the Moon.",
+      "saturn": "The rings are mostly water ice, about ten metres thick, and would reach three-quarters of the way to the Moon.",
       "io": "The most volcanic world known, squeezed by Jupiter's tides.",
-      "europa": "An ocean under the ice, deeper than all of Earth's together.",
+      "europa": "An ocean under the ice, with more water than all of Earth's together.",
       "titan": "A nitrogen sky thicker than Earth's, and lakes of methane.",
       "pluto": "Charon is so large that the pair orbits a point outside Pluto."
     },
@@ -236,7 +236,7 @@
       },
       "stars": {
         "title": "α Centauri",
-        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in {abPeriodYears} years; Proxima is the red one. Voyager would need {voyagerYears} years. At one g the ship nears light speed within a year and its clock runs slow: {torchAlphaCenYears} years on board, {torchAlphaCenEarthYears} on Earth."
+        "body": "The sky has changed: the nearest stars have moved, the Sun is one of them. A and B circle each other in {abPeriodYears} years; Proxima is the red one. Voyager would need {voyagerYears} years. At one g the ship nears light speed by halfway and its clock runs slow: {torchAlphaCenYears} years on board, {torchAlphaCenEarthYears} on Earth."
       },
       "galaxy": {
         "title": "The Galaxy, from above",

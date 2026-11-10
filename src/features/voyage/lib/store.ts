@@ -241,7 +241,16 @@ export const useVoyage = create<VoyageStore>((set, get) => ({
   disengage: () => set((s) => (s.flying ? { abort: s.abort + 1, panel: "none" } : {})),
   recover: () =>
     set((s) =>
-      s.crash ? { crash: null, recoveries: s.recoveries + 1, throttle: 0, panel: "none" } : {},
+      s.crash
+        ? {
+            crash: null,
+            recoveries: s.recoveries + 1,
+            throttle: 0,
+            panel: "none",
+            /* On the journey the step's flight, dropped by the wreck, runs again from that orbit. */
+            ...(s.guideOpen ? { flight: s.flight + 1 } : {}),
+          }
+        : {},
     ),
   toggleHold: () => set((s) => ({ compression: s.compression > 0 ? 0 : s.heldCompression })),
   ...guideSlice(set, get, {

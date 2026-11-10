@@ -110,9 +110,10 @@ export function VoyageOverlay() {
           {panel === "objects" ? <ObjectsPanel onClose={() => setPanel("none")} /> : null}
           {panel === "view" ? <ViewPanel onClose={() => setPanel("none")} /> : null}
           {panel === "none" && selection ? <SelectionCard /> : null}
-          {crashed ? <CrashCard /> : null}
         </>
       )}
+      {/* A wreck on the journey too: the pilot may take the helm at any step. */}
+      {crashed ? <CrashCard /> : null}
       {/*
         The HUD the cockpit projects, on its spring (lib/scene/cockpit.ts moves it), laid out
         for the drive (styles.css varies it by `data-ship`). The dock has one mount in every
