@@ -43,6 +43,7 @@ export const AUDIO_ASSETS = {
   lowDroneRises: audioAssets("low-drone-rises"),
   vastEmptySpace: audioAssets("vast-empty-space"),
   theStarRings: audioAssets("the-star-rings"),
+  theLastBreath: audioAssets("the-last-breath"),
 } as const;
 
 export const ANCHOR_IDS = { mainContent: "main-content" } as const;

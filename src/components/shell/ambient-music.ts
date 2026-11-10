@@ -68,6 +68,15 @@ export const ambientMusic = new MusicPlayer(
       ],
       map: assetUrl(AUDIO_ASSETS.theStarRings.map),
     },
+    {
+      title: "The Last Breath",
+      artist: "Horizon",
+      sources: [
+        { src: assetUrl(AUDIO_ASSETS.theLastBreath.opus), type: 'audio/webm; codecs="opus"' },
+        { src: assetUrl(AUDIO_ASSETS.theLastBreath.aac), type: 'audio/mp4; codecs="mp4a.40.2"' },
+      ],
+      map: assetUrl(AUDIO_ASSETS.theLastBreath.map),
+    },
   ],
   { storageKey: "music", level: MUSIC_LEVEL.ambient },
 );
