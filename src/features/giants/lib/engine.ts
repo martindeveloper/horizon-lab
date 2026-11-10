@@ -226,6 +226,14 @@ export function createGiantsEngine(
       if (useGiants.getState().surfaceZoom !== 1) useGiants.getState().setSurfaceZoom(1);
       head(to);
     };
+    /**
+     * A hand lets the camera go: it flies to the rung nearest `to`. Heading for that rung
+     * already (a tap that stopped nothing), it is left as it is, the surface close-up with it.
+     */
+    const settleOn = (to: number) => {
+      const rung = Math.round(clampRung(ladder, to));
+      if (rung !== target) fly(rung);
+    };
     /** Moves the pair's camera towards `to` on its rail (held to it), or there at once. */
     function pairTo(to: number, now = false) {
       pairRail.target = clamp(to, 0, 1);
@@ -408,7 +416,7 @@ export function createGiantsEngine(
         paired: () => side !== null,
         take: takeCamera,
         nearest: () => nearestRung(ladder, target),
-        snap: () => fly(Math.round(target)),
+        snap: () => settleOn(target),
         stop: () => {
           if (side) pairTo(pairPlace(), true);
           else {
@@ -434,7 +442,7 @@ export function createGiantsEngine(
         },
         coast: (by, velocity) => {
           if (side) return pairTo(pairRail.target + by);
-          fly(Math.round(clampRung(ladder, target + by)));
+          settleOn(target + by);
           if (!reduce && velocity !== null) glide = glideFrom(place, velocity, seconds);
         },
       },

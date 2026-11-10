@@ -67,9 +67,10 @@ export function createGiantsInput(
 
   /**
    * One pointer's drag: where it started, how far it went, its recent speed in rungs a second,
-   * and the globe it turns when it started on one (else it climbs the ladder).
+   * and what it took hold of as it went down: a globe it turns, or the camera it climbs the
+   * ladder with (neither over the overview, where it only taps).
    */
-  let drag: {
+  type Drag = {
     id: number;
     x: number;
     y: number;
@@ -77,9 +78,13 @@ export function createGiantsInput(
     last: number;
     velocity: number;
     globe: number | null;
-  } | null = null;
+    camera: boolean;
+  };
+  let drag: Drag | null = null;
   const climbOf = (dx: number, dy: number) => (-(dx + dy) / stage().height) * DRAG_RUNGS;
   const onDown = (event: PointerEvent) => {
+    /* One pointer holds the stage at a time: a second finger starts nothing and takes nothing over. */
+    if (drag) return;
     if (!inputAllowed() || (event.pointerType === "mouse" && event.button !== 0)) return;
     /* A body's name is a button: its own click opens the card, so it starts no drag. */
     if (event.target instanceof Element && event.target.closest("[data-rung]")) return;
@@ -87,7 +92,8 @@ export function createGiantsInput(
        where it is, and a glide or a pending snap stops here. Over the overview it only taps. */
     const tapOnly = surveying();
     const globe = tapOnly ? null : globeAt(event.clientX, event.clientY);
-    if (globe === null && !tapOnly) {
+    const camera = globe === null && !tapOnly;
+    if (camera) {
       if (!navigation.paired()) window.clearTimeout(snapTimer);
       navigation.stop();
     }
@@ -99,6 +105,7 @@ export function createGiantsInput(
       last: event.timeStamp,
       velocity: 0,
       globe,
+      camera,
     };
     host.setPointerCapture(event.pointerId);
   };
@@ -125,35 +132,46 @@ export function createGiantsInput(
       navigation.drag(climb);
     }
   };
-  const onUp = (event: PointerEvent) => {
-    if (!drag || event.pointerId !== drag.id) return;
+  /**
+   * Ends the live drag: what it held is let go, then a tap acts. `lifted` is the pointer's
+   * release; without one the gesture was cancelled (the system took the touch, the guide
+   * opened) and ends as a hand lifted at rest: no tap, no flick.
+   */
+  const end = (lifted: PointerEvent | null) => {
+    if (!drag) return;
     const ended = drag;
     drag = null;
-    if (host.hasPointerCapture(event.pointerId)) host.releasePointerCapture(event.pointerId);
-    if (ended.moved <= TAP_SLOP_PX) {
-      const index = pick(event.clientX, event.clientY);
-      if (index === null) return;
-      useGiants.getState().goTo(RUNG_IDS[index]!);
-      return;
+    if (host.hasPointerCapture(ended.id)) host.releasePointerCapture(ended.id);
+    const dragged = ended.moved > TAP_SLOP_PX;
+    const moving = lifted !== null && dragged && lifted.timeStamp - ended.last < 80;
+    if (ended.globe !== null) {
+      /* A turned globe coasts if flicked, and later goes home by itself (`grab.ts`). */
+      if (dragged) release(ended.globe, moving);
+    } else if (ended.camera) {
+      /* The camera settles on a rung, stopped mid-glide by a tap as much as dragged; a flick
+         carries on a little first, the glide taking over the hand's speed. Side by side it
+         settles wherever it comes to rest on the pair's rail. */
+      navigation.coast(moving ? ended.velocity * 0.18 : 0, moving ? ended.velocity : null);
     }
-    if (surveying()) return;
-    const moving = event.timeStamp - ended.last < 80;
-    /* A turned globe coasts if flicked, and later goes home by itself (`grab.ts`). */
-    if (ended.globe !== null) return release(ended.globe, moving);
-    /* A flick carries on a little, then settles on a rung, the glide taking over the hand's
-       speed; side by side it settles wherever it comes to rest on the pair's rail. */
-    const coast = moving ? ended.velocity * 0.18 : 0;
-    navigation.coast(coast, moving ? ended.velocity : null);
+    if (lifted === null || dragged) return;
+    const index = pick(lifted.clientX, lifted.clientY);
+    if (index !== null) useGiants.getState().goTo(RUNG_IDS[index]!);
+  };
+  const onUp = (event: PointerEvent) => {
+    if (event.pointerId === drag?.id) end(event);
+  };
+  const onCancel = (event: PointerEvent) => {
+    if (event.pointerId === drag?.id) end(null);
   };
   host.addEventListener("pointerdown", onDown);
   host.addEventListener("pointermove", onMove);
   host.addEventListener("pointerup", onUp);
-  host.addEventListener("pointercancel", onUp);
+  host.addEventListener("pointercancel", onCancel);
   resources.defer(() => {
     host.removeEventListener("pointerdown", onDown);
     host.removeEventListener("pointermove", onMove);
     host.removeEventListener("pointerup", onUp);
-    host.removeEventListener("pointercancel", onUp);
+    host.removeEventListener("pointercancel", onCancel);
   });
 
   /* Left and right step along the ladder, Home and End go to its ends; up rises to the
@@ -204,8 +222,6 @@ export function createGiantsInput(
     get dragging() {
       return drag !== null;
     },
-    cancel() {
-      drag = null;
-    },
+    cancel: () => end(null),
   };
 }
