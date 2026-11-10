@@ -4,8 +4,9 @@
  * Geometric units G = c = 1. Lengths on screen are in M = GM/c².
  *   M = 4.297e6 M☉  (GRAVITY Collaboration, A&A 657 L12, 2022; `BLACK_HOLES` in src/space/stellar.ts)
  *   D = 8.277 kpc
- *   a/M ≈ 0.94      not measured: the only EHT model passing every test (EHT 2022 Paper V;
- *                   2024 Paper VIII, a = 0.94, i = 150°). Later work is split (arXiv:2509.22639
+ *   a/M ≈ 0.94      not measured: in EHT 2022 Paper V every model fails a test; in 2024 Paper VIII one
+ *                   (a = 0.94, i = 150°) passes all applied, if the Faraday rotation is external
+ *                   to the flow. Later work is split (arXiv:2509.22639
  *                   disfavours high spin; arXiv:2601.16267 finds it unconstrained).
  *   i ≈ 30°         adopted, model-dependent: EHT 2024 conditional fit (150° ≡ 30° from the axis), GRAVITY flares,
  *                   arXiv:2601.16267

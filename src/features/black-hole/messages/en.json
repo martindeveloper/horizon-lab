@@ -611,7 +611,7 @@
       "0": {
         "kicker": "23 November 2023",
         "title": "The heaviest merger so far",
-        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about {gwPrimaryMass} and {gwSecondaryMass} solar masses merging into one of about {gwMassRound}. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
+        "body": "On 23 November 2023, the two LIGO detectors recorded gravitational waves from two black holes of about {gwPrimaryMass} and {gwSecondaryMass} solar masses merging into one of about {gwMass}. It is the most massive black-hole merger confidently detected so far. The black hole in this scene is an illustration of that remnant: no light from it has been detected."
       },
       "1": {
         "kicker": "{gwDurationS} s",
@@ -631,7 +631,7 @@
       "4": {
         "kicker": "pull back",
         "title": "Black holes without light",
-        "body": "Gravitational waves reveal black holes that emit no light at all. This remnant of about {gwMassRound} solar masses counts as an intermediate-mass black hole, like the candidate in Omega Centauri, but it formed in a distant galaxy, and its waves reached us after billions of years."
+        "body": "Gravitational waves reveal black holes that emit no light at all. This remnant of about {gwMass} solar masses counts as an intermediate-mass black hole, like the candidate in Omega Centauri, but it formed in a distant galaxy, and its waves reached us after billions of years."
       }
     }
   },

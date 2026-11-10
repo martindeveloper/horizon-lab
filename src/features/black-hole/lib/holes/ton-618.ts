@@ -3,7 +3,7 @@
  *
  *   z = 2.219         Shemmer et al., ApJ 614, 547 (2004); light left ≈ 10.8 Gyr ago,
  *                     comoving distance ≈ 18 Gly (Planck 2018 cosmology)
- *   M ≈ 4–7 × 10¹⁰ M☉ single-epoch Hβ virial estimates: 6.6 × 10¹⁰ (Shemmer 2004),
+ *   M ≈ 4.1–6.6 × 10¹⁰ M☉ single-epoch Hβ virial estimates: 6.6 × 10¹⁰ (Shemmer 2004),
  *                     4.07 × 10¹⁰ (Ge et al., AJ 157, 148, 2019); factor-of-a-few systematics
  *   a/M ≈ 0.6         not measured; a thin-disk mass limit (King 2016) needs a ≳ 0.6 at 6.6 × 10¹⁰
  *   L_bol ≈ 1–2 × 10⁴⁸ erg/s, L/L_Edd ≈ 0.14–0.37; radio-loud with an inner jet

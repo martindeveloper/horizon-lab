@@ -611,7 +611,7 @@
       "0": {
         "kicker": "23. listopadu 2023",
         "title": "Zatím nejhmotnější splynutí",
-        "body": "Dne 23. listopadu 2023 zachytily oba detektory LIGO gravitační vlny ze splynutí dvou černých děr o hmotnostech asi {gwPrimaryMass} a {gwSecondaryMass} Sluncí v jednu o hmotnosti zhruba {gwMassRound} Sluncí. Jde o zatím nejhmotnější spolehlivě zachycené splynutí černých děr. Černá díra v této scéně je jen ilustrací výsledného objektu: žádné světlo z něj zachyceno nebylo."
+        "body": "Dne 23. listopadu 2023 zachytily oba detektory LIGO gravitační vlny ze splynutí dvou černých děr o hmotnostech asi {gwPrimaryMass} a {gwSecondaryMass} Sluncí v jednu o hmotnosti zhruba {gwMass} Sluncí. Jde o zatím nejhmotnější spolehlivě zachycené splynutí černých děr. Černá díra v této scéně je jen ilustrací výsledného objektu: žádné světlo z něj zachyceno nebylo."
       },
       "1": {
         "kicker": "{gwDurationS} s",
@@ -631,7 +631,7 @@
       "4": {
         "kicker": "oddálení",
         "title": "Černé díry bez světla",
-        "body": "Gravitační vlny odhalují černé díry, které nevyzařují vůbec žádné světlo. Tento pozůstatek o hmotnosti asi {gwMassRound} Sluncí patří mezi černé díry střední hmotnosti, podobně jako kandidát v Omega Centauri, vznikl však ve vzdálené galaxii a jeho vlny k nám dorazily po miliardách let."
+        "body": "Gravitační vlny odhalují černé díry, které nevyzařují vůbec žádné světlo. Tento pozůstatek o hmotnosti asi {gwMass} Sluncí patří mezi černé díry střední hmotnosti, podobně jako kandidát v Omega Centauri, vznikl však ve vzdálené galaxii a jeho vlny k nám dorazily po miliardách let."
       }
     }
   },

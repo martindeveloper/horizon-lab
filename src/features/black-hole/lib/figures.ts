@@ -159,7 +159,7 @@ export const PROSE_FIGURES = {
   omegaKpc: OMEGA.distance,
   omegaLy: quoteAs(OMEGA.distance, { in: "ly", digits: 3 }),
   omegaMass: OMEGA.mass,
-  tonMassBillions: quoteAs(TON.mass, { span: true, perPower: 9, digits: 1 }),
+  tonMassBillions: quoteAs(TON.mass, { span: true, perPower: 9, digits: 2 }),
   tonHorizonAu: {
     range: [auOf(horizonKm(TON_LOW)), auOf(horizonKm(TON_HIGH))],
     unit: "au",
@@ -168,7 +168,6 @@ export const PROSE_FIGURES = {
     status: "derived",
   },
   gwMass: GW.mass,
-  gwMassRound: quoteAs(GW.mass, { digits: 2 }),
   gwHorizonKm: derived(horizonKm(GW.mass.value), "km", 2, GW.mass),
   gwGpc: GW.distance,
   gwSpin: GW.spin,

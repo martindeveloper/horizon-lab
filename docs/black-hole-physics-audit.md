@@ -259,7 +259,7 @@ remaining straight path: in these coordinates the bending term falls as 1/r⁴,
 giving (1/b)[2 − s(2s² + 3b²)/(b² + s²)^(3/2)] (4M/b for a full pass), with the
 second-order 15πM²/4b² shared in the same proportion. This replaced a blend that
 faded rays passing 8–24 M back towards their undeflected direction: a star seen
-at b = 20 M was bent 3° instead of 12°. Escaped sky directions agree with a converged
+at b = 20 M was bent 3° instead of 13°. Escaped sky directions agree with a converged
 integration to about 0.15° (median); spin enters the tail at order a/b², which is small
 beyond the hand-off radius.
 The disk's finite outer display window fades both emission and coverage,
