@@ -151,7 +151,7 @@ export class MusicPlayer {
     return () => void this.listeners.delete(listener);
   };
 
-  /** Call from a user gesture. Resolves false if the browser blocked playback. */
+  /** Call from a user gesture. Resolves false if the browser blocked playback, or it was paused before sound began. */
   play = async () => {
     this.remember(true);
     this.emit("playing");
@@ -435,6 +435,8 @@ export class MusicPlayer {
       this.armResume();
       return false;
     }
+    /* Paused or hidden while the first data was still arriving: that fade-out and stop stand. */
+    if (this.state !== "playing" || document.hidden) return false;
     const gain = this.master!.gain;
     gain.cancelScheduledValues(ctx.currentTime);
     gain.setValueAtTime(gain.value, ctx.currentTime);
