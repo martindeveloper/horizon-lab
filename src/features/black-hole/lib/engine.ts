@@ -117,6 +117,8 @@ function createWarmup() {
  */
 function createTourDirector(reduce: boolean) {
   let open = false;
+  /** The hole the guide last flew. */
+  let hole: State["presetId"] | null = null;
   let stepIndex = -1;
   let t = 0;
   let from: CameraPose = { azimuth: 0, inclination: 0, distance: 0, roll: 0 };
@@ -134,6 +136,7 @@ function createTourDirector(reduce: boolean) {
         t = 0;
         landed = null;
       }
+      hole = state.presetId;
       const step = tourFor(state.presetId)[state.guideStep];
       if (!step) return camera;
       if (t < 1 && !(state.guideArrived && reduce)) {
@@ -150,13 +153,17 @@ function createTourDirector(reduce: boolean) {
       if (!state.animationPaused && !reduce) held += dt;
       return holdPose(step, landed, held);
     },
-    /** The guide closed; true once, when a tour was running. */
-    close() {
-      const was = open;
+    /**
+     * The guide closed; true once, when a tour was running on the hole still shown: its camera
+     * is then the visitor's. Another hole opens in its own framing.
+     */
+    close(presetId: State["presetId"]) {
+      const kept = open && hole === presetId;
       open = false;
+      hole = null;
       stepIndex = -1;
       landed = null;
-      return was;
+      return kept;
     },
   };
 }
@@ -284,7 +291,8 @@ export function createBlackHoleEngine(
         t: reduce ? 1 : 0,
         wrote: storedPose(),
       };
-      engine.markDirty();
+      // A glide starts outside the frame loop, which idles while animation is paused.
+      engine.invalidate();
     }
     /** One frame of the glide; it ends where it lands, or where anything else takes the camera. */
     function stepGlide(state: State, dt: number) {
@@ -482,7 +490,7 @@ export function createBlackHoleEngine(
         moveCamera(drifted.pose, state.spin);
         engine.markDirty();
       } else if (state.drift === "off") {
-        if (tour.close()) storeCamera();
+        if (tour.close(state.presetId)) storeCamera();
         if (camera.roll !== 0) {
           camera.roll *= Math.exp(-stepDt / ROLL_DECAY);
           if (Math.abs(camera.roll) < 1e-4) camera.roll = 0;
