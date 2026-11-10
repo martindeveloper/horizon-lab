@@ -181,29 +181,29 @@ type Cells = {
   reference: { metal: Conditions; hydrogen: Conditions };
 };
 
-const cellsByModel = new WeakMap<Photosphere, Map<number, Cells>>();
+/**
+ * A star's source as a cache key: the model's own numbers and the microturbulence, as the
+ * slab's is its gas (`slabModel`). The worker is sent a copy of each observation
+ * (`synthesis.ts`), so the photosphere's identity would name a new star with every request.
+ */
+const sourceKey = (photosphere: Photosphere, microturbulence: number) =>
+  `${JSON.stringify(photosphere)}|${microturbulence}`;
+
+const cellsBySource = recentCache<string, Cells>(MODELS_KEPT);
 
 /** The star's cells, worked out once per model and microturbulence. */
 function cellsFor(photosphere: Photosphere, microturbulence: number): Cells {
-  let byTurbulence = cellsByModel.get(photosphere);
-  if (!byTurbulence) {
-    byTurbulence = new Map();
-    cellsByModel.set(photosphere, byTurbulence);
-  }
-  let known = byTurbulence.get(microturbulence);
-  if (!known) {
+  return cellsBySource(sourceKey(photosphere, microturbulence), () => {
     const cells = cellsOf(photosphere, microturbulence);
     const deepTemperature = photosphere.layers.at(-1)!.temperature;
     const at = (depth: number) => ({ ...layerAt(photosphere, depth), microturbulence });
-    known = {
+    return {
       cells,
       deepTemperature,
       columns: columnTable(cells, deepTemperature),
       reference: { metal: at(SHAPE_DEPTH.metal), hydrogen: at(SHAPE_DEPTH.hydrogen) },
     };
-    byTurbulence.set(microturbulence, known);
-  }
-  return known;
+  });
 }
 
 /**
@@ -372,20 +372,16 @@ type StarModel = Cells & {
 };
 
 const starModels = recentCache<string, StarModel>(MODELS_KEPT);
-/** Photospheres are told apart by identity (`starPhotosphere` gives the same object each time). */
-const photosphereIds = new WeakMap<Photosphere, number>();
-let photospheresSeen = 0;
+let starModelsBuilt = 0;
+/** How many star models have been worked out from nothing: what the cache saves, for the tests. */
+export const starModelBuilds = () => starModelsBuilt;
 
 /** The star's model: its cells, lines and lattices, by everything they depend on. */
 function starModel(obs: StarObservation): StarModel {
-  let id = photosphereIds.get(obs.photosphere);
-  if (id === undefined) {
-    id = photospheresSeen;
-    photospheresSeen += 1;
-    photosphereIds.set(obs.photosphere, id);
-  }
+  const source = sourceKey(obs.photosphere, obs.microturbulence);
   const abundances = ELEMENT_IDS.map((element) => obs.abundances?.[element] ?? 0).join();
-  return starModels(`${id}|${obs.microturbulence}|${abundances}`, () => {
+  return starModels(`${source}|${abundances}`, () => {
+    starModelsBuilt += 1;
     const cells = cellsFor(obs.photosphere, obs.microturbulence);
     const lines: StarLine[] = [];
     for (const line of LINES) {

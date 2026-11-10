@@ -40,6 +40,7 @@ import {
   poseBetween,
 } from "../src/features/spectroscopy/lib/model/guide-motion.ts";
 import {
+  BOLTZMANN_EV,
   ionizationFractions,
   levelShare,
 } from "../src/features/spectroscopy/lib/model/populations.ts";
@@ -63,9 +64,11 @@ import {
   formedLines,
   reportLine,
   slabIntensity,
+  starModelBuilds,
   synthesize,
   synthesizeWithout,
 } from "../src/features/spectroscopy/lib/model/spectrum.ts";
+import { MODELS_KEPT } from "../src/features/spectroscopy/lib/model/spectrum/sampling.ts";
 import { BAND_HEADS } from "../src/features/spectroscopy/lib/model/telluric.ts";
 import { voigt } from "../src/features/spectroscopy/lib/model/voigt.ts";
 import { mysteryAnswerOf } from "../src/features/spectroscopy/lib/synthesis.ts";
@@ -125,6 +128,15 @@ test("Saha and Boltzmann reproduce the textbook hydrogen curves (Pₑ = 20 Pa)",
   // Partition functions from NIST's levels: Fe I near 28 at 5000 K, hydrogen its ground state.
   close(partitionFunction("Fe I", 5000), 28, 3);
   close(partitionFunction("H I", 5000), 2, 1e-6);
+  // Hot, each of hydrogen's shells counts once: U = Σ 2n² e^(−Eₙ/kT), Eₙ = χ (1 − 1/n²), over
+  // the shells more than 1 eV below the limit (n ≤ 3), as the table is cut.
+  const chi = ionizationEnergy("H I");
+  for (const T of [20_000, 40_000]) {
+    let U = 0;
+    for (const n of [1, 2, 3])
+      U += 2 * n * n * Math.exp((-chi * (1 - 1 / n ** 2)) / (BOLTZMANN_EV * T));
+    close(partitionFunction("H I", T), U, 2e-4, `U(H I) at ${T} K`);
+  }
 });
 
 test("the Voigt function meets its exact limits and keeps its area", () => {
@@ -683,8 +695,12 @@ test("a star's caches change nothing: windows, velocities, the curve of growth a
   synthesize(obs, 580, 600, 800);
   synthesize({ ...obs, velocity: -25 }, 586, 592, 800);
   const cached = synthesize({ ...obs, velocity: 40 }, 585, 595, 1200);
-  // The same model under a new identity is worked out from nothing.
-  const fresh = synthesize({ ...obs, photosphere: { ...sun }, velocity: 40 }, 585, 595, 1200);
+  // Once as many other stars have been seen as are kept, the Sun's model is worked out from nothing.
+  for (let i = 0; i < MODELS_KEPT; i++)
+    synthesize(star(mainSequencePhotosphere(5000 + 500 * i)), 589, 589.1, 8);
+  const built = starModelBuilds();
+  const fresh = synthesize({ ...obs, velocity: 40 }, 585, 595, 1200);
+  assert.equal(starModelBuilds(), built + 1, "the Sun's model had been let go");
   assert.deepEqual(cached.flux, fresh.flux);
   assert.deepEqual(cached.continuum, fresh.continuum);
   // The curve of growth scales one line's opacity; changing the abundance gives the same widths.
@@ -698,6 +714,19 @@ test("a star's caches change nothing: windows, velocities, the curve of growth a
   const removed = synthesize({ ...obs, abundances: { Na: -20 } }, 585, 595, 600);
   for (let i = 0; i < 600; i++)
     close(without.flux[i] / removed.flux[i], 1, 1e-5, `${removed.wavelengths[i]} nm`);
+});
+
+test("the worker's copy of an observation finds the star model its original built", () => {
+  const obs = star(starPhotosphere("vega"), { resolution: 20_000 });
+  synthesize(obs, 480, 490, 600);
+  const built = starModelBuilds();
+  // What `postMessage` hands the worker with every pan, zoom and velocity step.
+  const copy = structuredClone({ ...obs, velocity: 12 });
+  assert.notEqual(copy.photosphere, obs.photosphere);
+  synthesize(copy, 482, 492, 600);
+  assert.equal(starModelBuilds(), built, "no new model for the same star");
+  synthesize({ ...copy, microturbulence: 4 }, 482, 492, 600);
+  assert.equal(starModelBuilds(), built + 1, "another microturbulence is another model");
 });
 
 test("the guide, views and notes quote the catalogue's figures in both languages", async () => {

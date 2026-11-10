@@ -71,7 +71,7 @@ const STAR_MODELS = data.stars as Record<string, Model>;
 
 const starPhotospheres = recentCache<string, Photosphere>(Object.keys(STAR_MODELS).length);
 
-/** The ATLAS9 model nearest a named star; the same object every time, so caches can key on it. */
+/** The ATLAS9 model nearest a named star, built once. */
 export const starPhotosphere = (id: string) =>
   starPhotospheres(id, () => {
     const model = STAR_MODELS[id];

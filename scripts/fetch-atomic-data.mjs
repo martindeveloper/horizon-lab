@@ -95,8 +95,10 @@ async function levels(species) {
   const limit = rows.find((r) => r.Term === "Limit");
   if (!limit) throw new Error(`${species}: no ionization limit`);
   const chi = number(limit["Level (eV)"]);
+  /* H I also lists each shell summed over its levels (configuration "2", g = 2n², no term or
+     J): a row without a J is such a sum, and its levels are already counted. */
   const states = rows
-    .filter((r) => r.Term !== "Limit" && r.g !== "")
+    .filter((r) => r.Term !== "Limit" && r.g !== "" && r.J !== "")
     .map((r) => ({ g: number(r.g), E: number(r["Level (eV)"]) }))
     .filter(({ g, E }) => Number.isFinite(g) && Number.isFinite(E) && E < chi - 1);
   const partition = GRID.map((T) => {

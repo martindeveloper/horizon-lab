@@ -228,8 +228,9 @@ export function lineNear(species: string, nm: number) {
 }
 
 /**
- * Lines with a name of their own: Fraunhofer's letters (1814), and the ones every
- * spectroscopist knows, each with a note on what it tells (`notes.<key>` in the messages).
+ * Lines with a name of their own: the Fraunhofer letters (his own of 1814, and K, h, g, e and
+ * the chromosphere's D₃ of 1868, added to them since), and the ones every spectroscopist
+ * knows, each with a note on what it tells (`notes.<key>` in the messages).
  */
 export const NAMED: readonly { line: Line; letter?: string; note: string }[] = [
   { line: lineNear("Ca II", 393.366), letter: "K", note: "caK" },

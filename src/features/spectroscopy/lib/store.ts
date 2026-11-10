@@ -88,7 +88,7 @@ export type SpectroscopyStore = Settings &
     range: readonly [number, number];
     /** Flux divided by the continuum, as astronomers plot it. */
     normalized: boolean;
-    /** Fraunhofer's letters over the lines he named. */
+    /** The Fraunhofer letters over the lines that carry one. */
     letters: boolean;
     /** Elements whose laboratory wavelengths are marked under the spectrum. */
     compare: readonly ElementId[];
