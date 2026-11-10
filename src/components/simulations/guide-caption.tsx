@@ -12,8 +12,8 @@ import { useDockClearance, type DockInTheWay } from "./use-dock-clearance";
 export type GuideState = {
   guideOpen: boolean;
   guideStep: number;
-  /** Applies a step; past the last one the guide ends. */
-  goGuide: (step: number) => void;
+  /** Applies a step; past the last one the guide ends. `ride`: the seconds a journey moving on by itself takes to get there. */
+  goGuide: (step: number, ride?: number) => void;
   endGuide: () => void;
 };
 
@@ -27,6 +27,16 @@ export type JourneyState = GuideState & {
 
 /** A journey's step: its message id and, where it differs from the journey's, its hold in seconds. */
 export type JourneyStep = { id: string; dwell?: number | undefined };
+
+/**
+ * A journey timed to something outside it (its music): how long a landed step still holds
+ * (null: its written hold), and how long the journey's own move on to a step takes (undefined:
+ * as a hand's). Both are asked as the hold starts and as it ends, never while rendering.
+ */
+export type JourneyTiming = {
+  holdLeft?: (index: number) => number | null;
+  ride?: (next: number) => number | undefined;
+};
 
 /**
  * The guide's back, on and out buttons, worded by the shared `guide` copy (`t` is
@@ -55,14 +65,15 @@ export function tourControls(
 }
 
 /**
- * Moves a journey on once a landed step has held for `dwell` seconds of play. A pause keeps
- * what is left; a new step starts afresh.
+ * Moves a journey on once a landed step has held for `dwell` seconds of play, or for what its
+ * `timing` says is left. A pause keeps what is left; a new step starts afresh.
  */
 function useGuideDwell(
   getState: () => Pick<GuideState, "guideOpen" | "guideStep" | "goGuide">,
   counting: boolean,
   dwell: number,
   index: number,
+  timing: JourneyTiming | undefined,
 ) {
   const left = useRef(dwell * 1000);
   /* Declared first, so a new step's full hold is in place before the timer below starts. */
@@ -72,15 +83,21 @@ function useGuideDwell(
   useEffect(() => {
     if (!counting) return;
     const started = performance.now();
-    const timer = window.setTimeout(() => {
-      const api = getState();
-      if (api.guideOpen && api.guideStep === index) api.goGuide(index + 1);
-    }, left.current);
+    const timed = timing?.holdLeft?.(index) ?? null;
+    const timer = window.setTimeout(
+      () => {
+        const api = getState();
+        if (api.guideOpen && api.guideStep === index) {
+          api.goGuide(index + 1, timing?.ride?.(index + 1));
+        }
+      },
+      timed === null ? left.current : timed * 1000,
+    );
     return () => {
       window.clearTimeout(timer);
       left.current = Math.max(0, left.current - (performance.now() - started));
     };
-  }, [counting, index, getState]);
+  }, [counting, index, getState, timing]);
 }
 
 /**
@@ -102,6 +119,7 @@ export function GuideCaption<Step extends JourneyStep>({
   clearance,
   extra,
   figures,
+  timing,
 }: {
   namespace: string;
   getState: () => JourneyState;
@@ -116,6 +134,8 @@ export function GuideCaption<Step extends JourneyStep>({
   extra?: ((step: Step) => ReactNode) | undefined;
   /** Catalogue figures the captions quote, by placeholder, printed in the page's language. */
   figures?: Readonly<Record<string, ProseFigure>> | undefined;
+  /** What the journey is timed to, when it is: a stable object (declared outside rendering). */
+  timing?: JourneyTiming | undefined;
 }) {
   const t = useTranslations(namespace);
   const locale = useLocale();
@@ -127,7 +147,7 @@ export function GuideCaption<Step extends JourneyStep>({
   const last = index >= tour.length - 1;
   const stepDwell = step.dwell ?? dwell;
   const counting = playing && landed && !last;
-  useGuideDwell(getState, counting, stepDwell, index);
+  useGuideDwell(getState, counting, stepDwell, index, timing);
 
   return (
     <GuideCard

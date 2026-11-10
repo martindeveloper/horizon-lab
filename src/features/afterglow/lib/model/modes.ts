@@ -70,3 +70,10 @@ export const clockPaused = (s: Clock) => !s.playing || s.drift === "paused";
  * paused, and not behind the autoplay's loader, so the life starts when the autoplay does.
  */
 export const clockRuns = (s: Clock) => !clockPaused(s) && s.drift !== "loading";
+
+/**
+ * Whether the world turns under the camera: as the clock runs, and through a journey left to
+ * play, whose own clock stands still between its rides, so a held step is never a still.
+ */
+export const worldTurns = (s: Clock & { guideOpen: boolean; guidePlaying: boolean }) =>
+  clockRuns(s) || (s.guideOpen && s.guidePlaying);

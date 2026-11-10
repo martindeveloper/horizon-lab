@@ -158,8 +158,11 @@ export type GuideSlice<Saved> = {
   /** What the visitor had before the guide, given back when it ends; kept across its steps. */
   savedBeforeGuide: Saved | null;
   startGuide: () => void;
-  /** Applies a step; past the last one the guide ends. */
-  goGuide: (step: number) => void;
+  /**
+   * Applies a step; past the last one the guide ends. `ride` is the seconds a journey that
+   * moved on by itself takes to get there; a hand's step names none.
+   */
+  goGuide: (step: number, ride?: number) => void;
   endGuide: () => void;
 };
 
@@ -183,7 +186,7 @@ export function guideSlice<
     tour: readonly Step[] | ((state: S) => readonly Step[]);
     save: (state: S) => Saved;
     restore: (saved: Saved) => Partial<S>;
-    apply: (step: Step, state: S) => Partial<S>;
+    apply: (step: Step, state: S, ride: number | undefined) => Partial<S>;
     open?: (state: S) => Partial<S>;
     close?: (state: S) => Partial<S>;
   },
@@ -207,11 +210,11 @@ export function guideSlice<
       );
       get().goGuide(0);
     },
-    goGuide: (index) => {
+    goGuide: (index, ride) => {
       const step = stepsOf(get())[index];
       if (!get().guideOpen || index < 0) return;
       if (!step) return get().endGuide();
-      set((s) => patch({ guideStep: index, ...guide.apply(step, s) }));
+      set((s) => patch({ guideStep: index, ...guide.apply(step, s, ride) }));
     },
     endGuide: () =>
       set((s) =>

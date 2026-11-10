@@ -106,6 +106,8 @@ export type AfterglowStore = SceneSlice &
     /* The guided journey (model/tour.ts). */
     guidePlaying: boolean;
     guideLanded: boolean;
+    /** Seconds the journey's own move to its step takes, the life played on to it (`TourStep.ride`); null for a hand's step, there at once. */
+    guideRide: number | null;
     toggleGuidePlaying: () => void;
     landGuide: () => void;
     beforeDrift: BeforeDrift | null;
@@ -219,8 +221,9 @@ export const useAfterglow = create<AfterglowStore>((set, get) => ({
       flight: get().flight + 1,
     }),
     open: () => ({ guidePlaying: !prefersReducedMotion(), playing: false, atlas: false }),
-    apply: (step, s) => ({
+    apply: (step, s, ride) => ({
       guideLanded: false,
+      guideRide: ride ?? null,
       aim: step.age,
       view: chapterOf(step.age).id,
       ...placed(step.world, step.age),
@@ -228,7 +231,7 @@ export const useAfterglow = create<AfterglowStore>((set, get) => ({
       flight: s.flight + 1,
       selection: null,
     }),
-    close: () => ({ guideLanded: false }),
+    close: () => ({ guideLanded: false, guideRide: null }),
   }),
   ...helpSlice(set, get, {
     steps: HELP,
@@ -251,6 +254,7 @@ export const useAfterglow = create<AfterglowStore>((set, get) => ({
   }),
   guidePlaying: false,
   guideLanded: false,
+  guideRide: null,
   toggleGuidePlaying: () => set((s) => ({ guidePlaying: !s.guidePlaying })),
   landGuide: () => {
     if (get().guideOpen && !get().guideLanded) set({ guideLanded: true });

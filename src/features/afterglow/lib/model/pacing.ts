@@ -113,6 +113,24 @@ export const LIFE_SECONDS = (() => {
   return seconds;
 })();
 
+/** The step the clock is played on by when a stretch is timed, seconds. */
+const TIMED_STEP_S = 1 / 30;
+
+/**
+ * Real seconds the clock takes to play from an age on to a later one at the pace of 1, the
+ * tempo and the per-step limit included: a ride over that stretch in other seconds plays at
+ * their ratio.
+ */
+export function playSeconds(from: number, to: number) {
+  let age = from;
+  let seconds = 0;
+  while (age < to && seconds < LIFE_SECONDS * 4) {
+    age = advancePlay(age, TIMED_STEP_S, 1);
+    seconds += TIMED_STEP_S;
+  }
+  return seconds;
+}
+
 /** Bisection steps the per-step limit takes to find how far a step may go. */
 const LIMIT_STEPS = 24;
 

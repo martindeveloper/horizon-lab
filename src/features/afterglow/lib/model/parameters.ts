@@ -30,7 +30,7 @@ export const FLIGHT_TEMPO = 0.4;
 /** Seconds the drift's flights take: a slow voyage, the lean-back mode's (`modes.ts`). */
 export const DRIFT_FLIGHT_S = 14;
 /**
- * The world turns under the camera while the clock runs, so its surface and air drift slowly
+ * The world turns under the camera while the clock runs or a journey plays, so its surface and air drift slowly
  * past the limb: this many degrees of its longitude a second, whatever the world (a visual
  * pace, not its day, which the clock's millions of years a second would blur), taken up and
  * let go over about this many seconds as the clock starts and stops.

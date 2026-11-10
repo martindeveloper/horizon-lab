@@ -982,7 +982,7 @@ catch-all dynamic route or backend is introduced.
 
 The header's `MusicToggle` drives `ambientMusic` (`src/components/shell/ambient-music.ts`),
 one `MusicPlayer` from `@horizon/toolkit/audio` with a playlist from the CDN:
-`interstellar-drift`, `aeolian-static`, `drifting-probe`, `low-drone-rises`, `vast-empty-space` and `the-star-rings`, each as
+`interstellar-drift`, `aeolian-static`, `drifting-probe`, `low-drone-rises`, `vast-empty-space`, `the-star-rings` and `the-last-breath`, each as
 `.webm` (Opus) and `.m4a` (AAC).
 The player owns playback: two streaming decks crossfade for 8 s where a track ends,
 the playlist wraps, and Web Audio gains fade play (3 s) and pause (1.5 s). The bed
@@ -1025,6 +1025,12 @@ the script and upload the map with it. A drift is a staged piece and begins at i
 track's first bar: when the playlist is already on that track, the player restarts it
 behind the drift's loader (`restart()`), blending into its intro; a paused drift lets the
 music run on, and on resume the camera rejoins at the shot nearest the music.
+A guided journey may be timed to a track too. Afterglow's holds the playlist on
+`the-last-breath` while it is open (`useDriftMusic`), restarts it at its first bar, and
+lands each step on a beat (`JOURNEY_MUSIC` and each step's `beat` in its `tour.ts`): left
+to play, the journey plays the Sun's life on to the next step in the seconds left to that
+beat (`JourneyTiming` in `guide-caption.tsx`, read from the player's position), and falls
+back to the written holds and rides, which add up to the same beats, with the music off.
 Tracks live on the CDN as `audio/<slug>.webm` and `.m4a` (see CDN assets). Without
 the bucket's CORS headers Web Audio plays silence.
 

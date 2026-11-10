@@ -82,10 +82,10 @@ import {
 } from "../model/flight";
 import { discFrame } from "../model/framing";
 import { flashDensity } from "../model/lightning";
-import { GLIDE_S, MODES, clockRuns, modeOf, type ModeId } from "../model/modes";
+import { GLIDE_S, MODES, clockRuns, modeOf, worldTurns, type ModeId } from "../model/modes";
 import { nebulaGlow } from "../model/nebula";
 import { earthDryness } from "../model/oceans";
-import { advancePlay, tempoAt } from "../model/pacing";
+import { advancePlay, playSeconds, tempoAt } from "../model/pacing";
 import {
   BLOOM,
   DAY_GAMMA,
@@ -125,6 +125,8 @@ import { useAfterglow, type AfterglowStore } from "../store";
 import { createLookInput } from "./look-input";
 import { createVeil } from "./veil";
 
+/** A ride sets its pace again this often, seconds, so it lands on time whatever slowed it. */
+const RIDE_REPACE_S = 0.5;
 /** The store hears the clock this often while it runs, seconds. */
 const PUBLISH_S = 1 / 30;
 /** The magnification is republished once it has changed this much, the tempo likewise. */
@@ -593,6 +595,15 @@ export function createAfterglowEngine(
     let sincePublish = 0;
     /** An age the clock eases to, along the track so the playhead glides evenly; null at rest. */
     let aim: { from: number; to: number; t: number } | null = null;
+    /**
+     * An age the clock is played on to (the journey's own move to its next step): the seconds
+     * left to arrive in, the pace that takes them, and the seconds since that pace was set. The
+     * pace is set again as it goes, so what slows the clock on the way (a dissolve's hush) is
+     * made up and the step lands on time.
+     */
+    let ride: { to: number; left: number; pace: number; since: number } | null = null;
+    /** The pace that plays the clock from where it is on to `to` in `seconds`. */
+    const ridePace = (to: number, seconds: number) => playSeconds(age, to) / seconds;
     /** The clock stands at an aim it was sent to without a flight: the store hears it has arrived. */
     let arrivedAtOnce = opening.aim !== null;
     let world = opening.world;
@@ -632,11 +643,18 @@ export function createAfterglowEngine(
     standOn(world);
     store.getState().setDrawn(world);
 
-    const startAim = (to: number) => {
+    /** Sends the clock to an age: eased there, or with `seconds` played on to a later one in that time. */
+    const startAim = (to: number, seconds: number | null = null) => {
+      ride = null;
       if (to === age || reduceMotion.matches) {
         age = to;
         aim = null;
         arrivedAtOnce = true;
+        return;
+      }
+      if (seconds !== null && seconds > AGE_FLIGHT_S && to > age) {
+        aim = null;
+        ride = { to, left: seconds, pace: ridePace(to, seconds), since: 0 };
         return;
       }
       aim = { from: age, to, t: 0 };
@@ -663,7 +681,7 @@ export function createAfterglowEngine(
         return;
       }
       const style = MODES[modeOf(s)];
-      const flies = clockRuns(s) || aim !== null || s.aim !== null || !s.auto;
+      const flies = clockRuns(s) || aim !== null || ride !== null || s.aim !== null || !s.auto;
       if (
         style.change === "flight" &&
         flies &&
@@ -709,13 +727,14 @@ export function createAfterglowEngine(
           age = s.age;
           published = age;
           aim = null;
+          ride = null;
         }
         changeMode(s);
         changeWorld(s);
       },
       turn: () => undefined,
       fly: (s) => {
-        if (s.aim !== null) startAim(s.aim);
+        if (s.aim !== null) startAim(s.aim, s.guideOpen ? s.guideRide : null);
       },
     });
     bridgeRender(store, scope, sceneHost, (level) => {
@@ -739,7 +758,20 @@ export function createAfterglowEngine(
       const s = store.getState();
       let arrived = arrivedAtOnce;
       arrivedAtOnce = false;
-      if (aim) {
+      if (ride) {
+        ride.left -= dt;
+        ride.since += dt;
+        if (ride.since >= RIDE_REPACE_S && ride.left > RIDE_REPACE_S) {
+          ride.pace = ridePace(ride.to, ride.left);
+          ride.since = 0;
+        }
+        age = advancePlay(age, dt, ride.pace, hushNow());
+        if (age >= ride.to) {
+          age = ride.to;
+          ride = null;
+          arrived = true;
+        }
+      } else if (aim) {
         aim.t = Math.min(1, aim.t + dt / AGE_FLIGHT_S);
         const f = smootherstep(aim.t);
         age =
@@ -787,7 +819,9 @@ export function createAfterglowEngine(
         s.tick(age, arrived);
       } else if (arrived) s.tick(age, true);
       const changing = nextWorld !== null || dissolve !== null || flight !== null;
-      if (s.guideOpen && !s.guideLanded && aim === null && !changing) s.landGuide();
+      if (s.guideOpen && !s.guideLanded && aim === null && ride === null && !changing) {
+        s.landGuide();
+      }
       /* The playhead's speed against the chapters' pace, for the timeline's glow. */
       const now = tempoAt(ageToSlider(age)) * hushNow();
       if (Math.abs(now - tempo) > TEMPO_STEP) {
@@ -799,11 +833,12 @@ export function createAfterglowEngine(
 
     const moving = () =>
       aim !== null ||
+      ride !== null ||
       nextWorld !== null ||
       dissolve !== null ||
       flight !== null ||
       !settled() ||
-      clockRuns(store.getState()) ||
+      worldTurns(store.getState()) ||
       closeUp.busy() ||
       spin.rate > SETTLED.spin ||
       fading;
@@ -835,7 +870,8 @@ export function createAfterglowEngine(
         const swayYaw = calm * swayReach.across * yawReach() * Math.sin(swayPhase.across);
         const swayHorizon = calm * swayReach.horizon * Math.sin(swayPhase.horizon);
         /* The world turns while the clock runs (`SPIN`), taken up and let go as it starts and stops. */
-        spin.rate = lerp(spin.rate, running ? 1 : 0, 1 - Math.exp(-dt / SPIN.easeS));
+        const turning = worldTurns(s) && !reduceMotion.matches;
+        spin.rate = lerp(spin.rate, turning ? 1 : 0, 1 - Math.exp(-dt / SPIN.easeS));
         spin.angle += spin.rate * SPIN.degPerS * DEG * dt;
         turnGlobe();
         starLookup.set(state.teff, state.logg);

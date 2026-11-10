@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createTranslator } from "next-intl";
@@ -6,6 +7,7 @@ import { createTranslator } from "next-intl";
 import { MAPS } from "@horizon/toolkit/bodies";
 import { SOLAR_RADIUS_KM, SOLAR_TEFF_K, stefanBoltzmann } from "@horizon/toolkit/science";
 
+import { ambientMusic } from "../src/components/shell/ambient-music.ts";
 import { PROSE_FIGURES, catalogueFacts } from "../src/features/afterglow/lib/model/catalogue.ts";
 import { CHAPTER_IDS } from "../src/features/afterglow/lib/model/chapter-ids.ts";
 import {
@@ -39,6 +41,7 @@ import {
   advancePlay,
   hushOf,
   lookChange,
+  playSeconds,
   tempoAt,
 } from "../src/features/afterglow/lib/model/pacing.ts";
 import {
@@ -55,7 +58,12 @@ import {
   SUN_LIFT,
 } from "../src/features/afterglow/lib/model/parameters.ts";
 import { sunAt } from "../src/features/afterglow/lib/model/sun.ts";
-import { CAPTION_TOP, TOUR } from "../src/features/afterglow/lib/model/tour.ts";
+import {
+  CAPTION_TOP,
+  JOURNEY_MUSIC,
+  TOUR,
+  beatAt,
+} from "../src/features/afterglow/lib/model/tour.ts";
 import {
   AGB_END,
   END_AGE,
@@ -660,4 +668,32 @@ test("a flight backs off one world until it flies away beside the Sun and closes
       `turns smoothly at ${i / STEPS}`,
     );
   }
+});
+
+test("the journey lands every step on a beat of its track, its holds and rides adding up to them", () => {
+  const map = JSON.parse(
+    readFileSync(
+      new URL("../bench/fixtures/audio-maps/the-last-breath.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  assert.ok(ambientMusic.tracks.some((track) => track.title === JOURNEY_MUSIC.track));
+  let at = beatAt(TOUR[0].beat);
+  for (const [index, step] of TOUR.entries()) {
+    assert.ok(Number.isInteger(step.beat), `${step.id} lands on a whole beat`);
+    closeRelative(at, beatAt(step.beat), 1e-9, `${step.id} lands on its beat`);
+    const next = TOUR[index + 1];
+    if (!next) break;
+    /* The ages run on, so the ride to the next step plays the life forward. */
+    assert.ok(next.age > step.age && next.beat > step.beat, `${next.id} follows ${step.id}`);
+    /* A caption is up for its ride and its hold: long enough to read, and no hold is cut short. */
+    assert.ok(step.dwell >= 5, `${step.id} holds ${step.dwell} s`);
+    assert.ok(next.ride + next.dwell >= 12 || !TOUR[index + 2], `${next.id} can be read`);
+    /* The ride plays the clock at a pace the visitor could pick: never past the dock's fastest. */
+    const pace = playSeconds(step.age, next.age) / next.ride;
+    assert.ok(pace > 0 && pace <= 2, `${next.id} is ridden to at ${pace.toFixed(2)}×`);
+    at += step.dwell + next.ride;
+  }
+  /* The last step lands before the track's crossfade begins. */
+  assert.ok(beatAt(TOUR.at(-1).beat) < map.period - 20, "the dwarf has the wind-down to itself");
 });
