@@ -3,6 +3,7 @@ import { cn } from "@horizon/toolkit/ui";
 /** One clock in the rates list; refs let the frame loop update it without re-rendering. */
 export function ClockRow({
   label,
+  rate,
   you = false,
   rowRef,
   dotRef,
@@ -12,6 +13,8 @@ export function ClockRow({
   onHover,
 }: {
   label: string;
+  /** The rate shown until the frame loop writes its own. */
+  rate: string;
   you?: boolean;
   rowRef?: (el: HTMLLIElement | null) => void;
   dotRef?: (el: HTMLSpanElement | null) => void;
@@ -54,7 +57,7 @@ export function ClockRow({
         />
       </span>
       <span ref={rateRef} className="w-11 shrink-0 text-right text-fg-primary">
-        1.00×
+        {rate}
       </span>
     </li>
   );

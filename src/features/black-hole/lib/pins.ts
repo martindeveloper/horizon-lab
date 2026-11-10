@@ -1,4 +1,5 @@
 import { toLogFraction } from "@horizon/toolkit/math";
+import { formatNumber } from "@horizon/toolkit/science";
 
 import { horizonOverM, iscoOverM, photonOverM } from "./physics";
 
@@ -47,9 +48,15 @@ export const GAUGE_TICKS = (() => {
   return ticks;
 })();
 
-/** Gauge radius text: fewer decimals as r grows. */
-export function formatR(r: number) {
-  return r < 10 ? r.toFixed(2) : r < 100 ? r.toFixed(1) : r.toFixed(0);
+/** Decimals of a gauge radius: fewer as r grows. */
+function radiusDigits(r: number) {
+  if (r < 10) return 2;
+  return r < 100 ? 1 : 0;
+}
+
+/** Gauge radius text in the visitor's locale. */
+export function formatR(r: number, locale: string) {
+  return formatNumber(r, locale, radiusDigits(r), true);
 }
 
 /** Push label centres apart by at least `gap`, keeping them inside [0, height]. */

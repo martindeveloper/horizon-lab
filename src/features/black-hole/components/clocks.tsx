@@ -1,5 +1,5 @@
 import { ChevronDown, RotateCcw } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { projectWorld } from "@horizon/toolkit/camera";
@@ -24,6 +24,8 @@ import {
   SPEEDS,
   beaconColor,
   freshDrops,
+  radiusLabel,
+  rateLabel,
   rgba,
   type Drop,
   type SpeedId,
@@ -75,6 +77,7 @@ function ClockRun({
   const cam = useSceneCamera();
   const frames = useSceneFrames();
   const t = useTranslations("blackHole");
+  const locale = useLocale();
   const setOpen = useBlackHole((s) => s.setClocksOpen);
   const layerRef = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -150,8 +153,8 @@ function ClockRun({
         if (!refs || !was) return;
         // A stopped clock keeps the rate it had at the floor: dτ/dt never reaches zero outside r = 2M.
         const rate = rainRedshift(d.r);
-        const label = `r ${d.r.toFixed(d.gone ? 2 : 1)}`;
-        const rateText = `${rate.toFixed(2)}×`;
+        const label = radiusLabel(d.r, locale, d.gone ? 2 : 1);
+        const rateText = rateLabel(rate, locale);
         if (label !== was.label && refs.label) refs.label.textContent = label;
         if (rateText !== was.rate) {
           if (refs.rate) refs.rate.textContent = rateText;
@@ -224,7 +227,7 @@ function ClockRun({
       loop.dispose();
       boxes.dispose();
     };
-  }, [cam, frames]);
+  }, [cam, frames, locale]);
 
   const restart = (
     <Tooltip label={t("dropAgain")} align="end">
@@ -270,6 +273,7 @@ function ClockRun({
                 youDotRef.current = el;
               }}
               label={t("gaugeYou")}
+              rate={rateLabel(1, locale)}
               you
             />
             {DROP_START.map((r, i) => (
@@ -295,7 +299,8 @@ function ClockRun({
                   const refs = rowRefs.current[i];
                   if (refs) refs.rate = el;
                 }}
-                label={`r ${r.toFixed(1)}`}
+                label={radiusLabel(r, locale)}
+                rate={rateLabel(1, locale)}
                 onHover={(on) => {
                   hoverRef.current = on ? i : null;
                   wakeRef.current?.();

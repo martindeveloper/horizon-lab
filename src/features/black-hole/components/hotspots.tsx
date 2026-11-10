@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { cn, isSceneShortcut, useFocusHandoff } from "@horizon/toolkit/ui";
@@ -36,6 +36,7 @@ export function Hotspots() {
   const cam = useSceneCamera();
   const frames = useSceneFrames();
   const t = useTranslations("blackHole");
+  const locale = useLocale();
   const layerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
@@ -129,7 +130,7 @@ export function Hotspots() {
           youY = y;
           you.style.top = `${y}px`;
         }
-        const text = `${formatR(cam.dist)} M`;
+        const text = `${formatR(cam.dist, locale)} M`;
         if (text !== youText && youValueRef.current) {
           youText = text;
           youValueRef.current.textContent = text;
@@ -209,7 +210,7 @@ export function Hotspots() {
       loop.dispose();
       boxes.dispose();
     };
-  }, [guideOpen, clocksOpen, mapOpen, cam, frames]);
+  }, [guideOpen, clocksOpen, mapOpen, cam, frames, locale]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -340,7 +341,7 @@ export function Hotspots() {
                         labelRefs.current[id] = el;
                       }}
                       type="button"
-                      aria-label={`${labels[id]} - r = ${r.toFixed(2)} M`}
+                      aria-label={`${labels[id]} - r = ${formatR(r, locale)} M`}
                       aria-expanded={active === id}
                       onClick={() => openPin(id)}
                       onPointerEnter={() => setHover(id)}
@@ -355,7 +356,7 @@ export function Hotspots() {
                     >
                       <span className="truncate">{labels[id]}</span>
                       <span className="hidden shrink-0 tracking-normal whitespace-nowrap text-space-muted normal-case tabular-nums md:inline">
-                        {formatR(r)} M
+                        {formatR(r, locale)} M
                       </span>
                     </button>
                   );

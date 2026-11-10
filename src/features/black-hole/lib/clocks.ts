@@ -1,4 +1,5 @@
 /** Rain-drop clocks. Radii in units of M. Schwarzschild teaching geodesic. */
+import { formatNumber } from "@horizon/toolkit/science";
 
 export const DROP_START = [22, 17.5, 13.2, 9.2, 5.8];
 /** Azimuth offsets from the camera, so the chain sits on the near face. */
@@ -62,3 +63,11 @@ export const SPEEDS = [
 ] as const;
 
 export type SpeedId = (typeof SPEEDS)[number]["id"];
+
+/** A clock's radius as the rates list labels it, in the visitor's locale. */
+export const radiusLabel = (r: number, locale: string, digits = 1) =>
+  `r ${formatNumber(r, locale, digits, true)}`;
+
+/** A clock's rate against the far clock, as the rates list prints it. */
+export const rateLabel = (rate: number, locale: string) =>
+  `${formatNumber(rate, locale, 2, true)}×`;

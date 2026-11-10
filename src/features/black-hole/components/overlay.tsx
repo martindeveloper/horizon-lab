@@ -39,7 +39,7 @@ import { BlackHoleTechnicalDetails } from "./technical-details";
 import { usePhysicsFormat } from "./use-physics-format";
 
 function Readout() {
-  const { formatMassShort, formatLengthKm, formatDuration } = usePhysicsFormat();
+  const { formatMassShort, formatLengthKm, formatDuration, formatNumber } = usePhysicsFormat();
   const t = useTranslations("blackHole");
   const massSolar = useBlackHole((s) => s.massSolar);
   const spin = useBlackHole((s) => s.spin);
@@ -56,9 +56,9 @@ function Readout() {
   const cells = [
     { k: massLabel, v: `${lowerLimit ? "≥ " : ""}${formatMassShort(massSolar)}` },
     { k: "Rs", v: formatLengthKm(rs) },
-    { k: t("horizon"), v: `${rh.toFixed(2)} M` },
-    { k: t("photon"), v: `${rp.toFixed(2)} M` },
-    { k: t("isco"), v: `${ri.toFixed(2)} M` },
+    { k: t("horizon"), v: `${formatNumber(rh, 2)} M` },
+    { k: t("photon"), v: `${formatNumber(rp, 2)} M` },
+    { k: t("isco"), v: `${formatNumber(ri, 2)} M` },
     { k: t("period"), v: formatDuration(period) },
   ];
 

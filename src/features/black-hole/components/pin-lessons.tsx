@@ -65,12 +65,14 @@ function HorizonLesson({
   rh: number;
   spin: number;
 }) {
-  const { formatMass, formatLengthKm, formatSpin } = usePhysicsFormat();
+  const { formatMass, formatLengthKm, formatSpin, formatNumber } = usePhysicsFormat();
   const rPlusKm = (rh / 2) * rs;
   const t = useTranslations("blackHole");
   return (
     <>
-      <p className="text-body text-fg-primary/80">{t("pins.horizon1", { rh: rh.toFixed(2) })}</p>
+      <p className="text-body text-fg-primary/80">
+        {t("pins.horizon1", { rh: formatNumber(rh, 2) })}
+      </p>
       <Equation>
         R<Sub>s</Sub> = 2GM / c² = {formatLengthKm(rs)}
       </Equation>
@@ -89,7 +91,7 @@ function HorizonLesson({
 }
 
 function PhotonLesson({ rp, rs, spin }: { rp: number; rs: number; spin: number }) {
-  const { formatLengthKm } = usePhysicsFormat();
+  const { formatLengthKm, formatNumber } = usePhysicsFormat();
   const bc = criticalImpactParameters(spin);
   const spinning = Math.abs(spin) >= 1e-3;
   const t = useTranslations("blackHole");
@@ -107,21 +109,21 @@ function PhotonLesson({ rp, rs, spin }: { rp: number; rs: number; spin: number }
       </Equation>
       {spinning ? (
         <Equation>
-          b<Sub>c</Sub> = {bc.prograde.toFixed(2)} M
+          b<Sub>c</Sub> = {formatNumber(bc.prograde, 2)} M
           <span className="text-fg-tertiary"> ({t("pins.prograde")})</span> ·{" "}
-          {bc.retrograde.toFixed(2)} M
+          {formatNumber(bc.retrograde, 2)} M
           <span className="text-fg-tertiary"> ({t("pins.retrograde")})</span>
         </Equation>
       ) : (
         <Equation>
-          b<Sub>c</Sub> = 3√3 M = {bc.prograde.toFixed(2)} M
+          b<Sub>c</Sub> = 3√3 M = {formatNumber(bc.prograde, 2)} M
           <span className="text-fg-tertiary"> (a</span>
           <Sub>*</Sub>
           <span className="text-fg-tertiary"> = 0)</span>
         </Equation>
       )}
       <p className="text-body text-fg-primary/80">
-        {t(spin < 0 ? "pins.photon2Retro" : "pins.photon2", { rp: rp.toFixed(2) })}
+        {t(spin < 0 ? "pins.photon2Retro" : "pins.photon2", { rp: formatNumber(rp, 2) })}
       </p>
     </>
   );
@@ -138,7 +140,7 @@ function IscoLesson({
   spin: number;
   massSolar: number;
 }) {
-  const { formatMass, formatDuration, formatSpin } = usePhysicsFormat();
+  const { formatMass, formatDuration, formatSpin, formatNumber } = usePhysicsFormat();
   const t = useTranslations("blackHole");
   return (
     <>
@@ -158,7 +160,7 @@ function IscoLesson({
       <p className="text-body text-fg-primary/80">
         {t(spin < 0 ? "pins.isco2Retro" : "pins.isco2", {
           spin: formatSpin(spin),
-          ri: ri.toFixed(2),
+          ri: formatNumber(ri, 2),
           mass: formatMass(massSolar),
           period: formatDuration(period),
         })}
