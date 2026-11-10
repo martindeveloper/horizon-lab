@@ -38,6 +38,8 @@ import { TRACERS } from "./tracers";
 
 /** Significant figures that keep every whole kilometre: 2,439.4 → 4, 69,911 → 5. */
 const wholeDigits = (value: number) => Math.max(1, Math.floor(Math.log10(Math.abs(value))) + 1);
+/** A period in whole years, and never fewer than two figures: Mercury's 0.24, Mars's 1.9. */
+const periodDigits = (years: number) => Math.max(2, wholeDigits(years));
 
 /** Where an orbit of `k` times the planet's period sits (Kepler's third law). */
 const resonance = (planet: PlanetId, k: number) =>
@@ -112,7 +114,7 @@ function planetFacts(id: PlanetId) {
     period: {
       value: period,
       unit: "yr",
-      digits: wholeDigits(period),
+      digits: periodDigits(period),
       source: "jplElements",
       status: "derived",
       note: "Kepler's third law from the J2000 semi-major axis",
@@ -186,7 +188,12 @@ function shapeFacts(id: PlanetId) {
   } satisfies Facts;
 }
 
-/** A moon's radius, mean distance from its planet and sidereal period (toolkit bodies). */
+/**
+ * A moon's radius, mean distance from its planet and sidereal period (toolkit bodies). The
+ * distance is JPL's mean element, rounded there to 100 km for all but Mars's and Uranus's moons:
+ * a precessing ellipse's semi-major axis, which about an oblate planet sits above the mean
+ * distance (Mimas's by 0.25 %).
+ */
 function moonFacts(id: MoonId) {
   const moon = moonById(id);
   return {
@@ -203,6 +210,7 @@ function moonFacts(id: MoonId) {
       digits: wholeDigits(moon.aKm),
       source: "jplSatElements",
       status: "verified",
+      note: "mean element, printed by JPL to the nearest 100 km for most moons",
     },
     period: {
       value: moon.periodDays,
@@ -345,8 +353,9 @@ const NAMED_BODIES = {
       unit: "ratio",
       digits: 3,
       source: "holler2021",
+      sources: ["brozovic2024"],
       status: "derived",
-      note: "Eris–Dysnomia system GM over Pluto's (DE440)",
+      note: "Eris–Dysnomia system GM over Pluto's",
     },
   },
   sedna: reachFacts("sedna", "jplHorizons", "barycentric", 2),

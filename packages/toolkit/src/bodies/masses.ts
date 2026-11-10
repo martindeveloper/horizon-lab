@@ -2,9 +2,10 @@
  * The bodies' gravitational parameters GM, km³ s⁻²: what a lab needs to make them pull.
  * The Sun, Earth and Jupiter are the IAU 2015 Resolution B3 nominal values; the rest come
  * from the JPL planetary (DE440) and satellite ephemerides. A planet's is its own, without its
- * moons. Ceres's is Dawn's (Park et al. 2016), Eris's the Eris–Dysnomia system's (Holler et al.
- * 2021), Haumea's its moons' (Ragozzine & Brown 2009). Makemake's, Sedna's and Halley's are
- * unmeasured and pull nothing a lab would notice.
+ * moons. Pluto's and Charon's are the post-New-Horizons fit's (Brozović & Jacobson 2024, AJ
+ * 167, 256), Ceres's is Dawn's (Park et al. 2016), Eris's the Eris–Dysnomia system's (Holler
+ * et al. 2021), Haumea's its moons' (Ragozzine & Brown 2009). Makemake's, Sedna's and
+ * Halley's are unmeasured and pull nothing a lab would notice.
  */
 import { EARTH_GM_SI, JUPITER_GM_SI, SOLAR_GM_SI } from "../science";
 import type { BodyId } from "./figures";

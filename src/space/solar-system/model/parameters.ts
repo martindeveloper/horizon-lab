@@ -39,10 +39,14 @@ export const CLEAR_DONE = 4.45e9;
 
 /**
  * The Moon-forming impact is narrated from here, 57 Myr after the first solids (4.51 Gyr ago,
- * Barboni et al. 2017); estimates run as late as 4.35 Gyr ago (Borg et al. 2011).
+ * Barboni et al. 2017); estimates run as late as 4.35 Gyr ago (Borg & Carlson 2023).
  */
 export const MOON_IMPACT_AFTER = 5.7e7;
-/** The latest estimate of the Moon-forming impact, years ago (Borg et al. 2011). */
+/**
+ * The latest estimate of the Moon-forming impact, years ago: where the reliable ages of the
+ * lunar crust and mantle cluster (Borg & Carlson 2023), the crust's FAN 60025 itself at
+ * 4.360 ± 0.003 Gyr (Borg et al. 2011).
+ */
 export const MOON_IMPACT_LATEST = 4.35e9;
 /**
  * Saturn's rings' exposure age, years (Kempf et al. 2023): the drawn rings come in across it.

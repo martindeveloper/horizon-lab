@@ -205,8 +205,9 @@ export const NAMED: readonly NamedBody[] = [
   },
   {
     id: "makemake",
-    /* Occultation 1,430 × 1,502 km (Ortiz et al. 2012, Nature 491, 566): 715 km mean. */
-    radiusKm: 715,
+    /* Occultation's preferred ellipse, 1,502 × 1,430 km (Ortiz et al. 2012, Nature 491, 566):
+       as the spheroid figures.ts draws, volume-equivalent 739 km. */
+    radiusKm: 739,
     elementsAt: (date, extraYears, out) =>
       fixedOrbit(
         { a: 45.5709, e: 0.15889, i: 29.028, omega: 297.092, node: 79.295 },

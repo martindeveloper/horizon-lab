@@ -58,6 +58,10 @@ export type Moon = {
   host: MoonHost;
   /** IAU mean radius, km (WGCCRE 2015, Archinal et al. 2018). */
   radiusKm: number;
+  /**
+   * JPL's mean semi-major axis, km, printed there to the nearest 100 km for all but Mars's and
+   * Uranus's moons. It sets the drawn distance alone; the motion runs on `periodDays`.
+   */
   aKm: number;
   e: number;
   /** ω, M, i, Ω at J2000, degrees. */

@@ -14,6 +14,7 @@ import {
   FIGURES,
   LUNAR_EQUATOR_INCLINATION_DEG,
   MOONS,
+  NAMED_IDS,
   PLANET_IDS,
   PLANET_RADIUS_KM,
   RINGS,
@@ -101,6 +102,11 @@ test("figures: IAU radii, flattening of the oblate planets", () => {
     const { meanKm, equatorialKm, polarKm } = FIGURES[id];
     assert.equal(meanKm, PLANET_RADIUS_KM[id], id);
     close(Math.cbrt(equatorialKm ** 2 * polarKm) / meanKm, 1, 2e-4, `${id} volume`);
+  }
+  /* A small world's mean radius is its drawn spheroid's, to the kilometre it is quoted to. */
+  for (const id of NAMED_IDS) {
+    const { meanKm, equatorialKm, polarKm } = FIGURES[id];
+    close(Math.cbrt(equatorialKm ** 2 * polarKm), meanKm, 0.5, `${id} volume`);
   }
   close(flattening("earth"), 1 / 298.257, 2e-5, "Earth");
   close(flattening("mars"), 0.00589, 2e-5, "Mars");

@@ -51,7 +51,7 @@ const turning =
     w0 + rate * d;
 /** Rotation rate in degrees per day for a sidereal period in hours (negative: retrograde). */
 const perHours = (hours: number) => (360 * 24) / hours;
-/** Neptune's pole precesses on a 3.4 kyr cone; N is that angle (IAU 2015). */
+/** Neptune's pole circles a cone once in 688 years, the precession of Triton's orbit; N is that angle (IAU 2015). */
 const neptuneN = (T: number) => (357.85 + 52.316 * T) * RAD;
 
 /** Mean radii come from ephemeris.ts and moons.ts; shapes are the IAU's except Jupiter's. */
@@ -79,7 +79,10 @@ export const FIGURES: Record<BodyId, Figure> = {
    * spheroid of the same volume and polar axis, its equator the geometric mean of the long axes.
    */
   haumea: { meanKm: namedById("haumea").radiusKm, equatorialKm: 994.5, polarKm: 513 },
-  /** The occultation's projected ellipse, 1,502 × 1,430 km (Ortiz et al. 2012). */
+  /**
+   * The occultation's preferred solution, a projected ellipse of 1,502 × 1,430 km (Ortiz et al.
+   * 2012; a 1,430 km circle fits the chords as well): drawn as the spheroid seen equator-on.
+   */
   makemake: { meanKm: namedById("makemake").radiusKm, equatorialKm: 751, polarKm: 715 },
   eris: sphere(namedById("eris").radiusKm),
   sedna: sphere(namedById("sedna").radiusKm),
