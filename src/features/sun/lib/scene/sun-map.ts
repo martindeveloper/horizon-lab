@@ -2,8 +2,12 @@
  * The measured Sun: SDO/HMI's flattened continuum map (`MAPS.sun`), streamed from the CDN as
  * the Orrery streams its bodies' maps. The far tier loads after the first frame and the tier
  * the quality allows right behind it, so the disc sharpens as soon as it can; the finest
- * that arrived is drawn and kept, a coarser one let go. A failed load leaves the procedural surface. Nothing waits on them:
- * `sharpening` says when the view is close enough to miss detail still on its way.
+ * that arrived is drawn and kept, a coarser one let go. Nothing waits on them: `sharpening`
+ * says when the view is close enough to miss detail still on its way.
+ *
+ * A tier is asked for once. One that fails is not asked for again on this page: the finest
+ * that arrived stays, or the procedural surface with none. Another quality asks for its own
+ * tier, once as well.
  */
 import {
   ClampToEdgeWrapping,
@@ -40,6 +44,8 @@ export function createSunMap(
   const arrived = new Set<MapTier>();
   let drawn: Texture | null = null;
   const failed = new Set<MapTier>();
+  /** A tier's one request is over, whichever way it went. */
+  const settled = (tier: MapTier) => arrived.has(tier) || failed.has(tier);
   let loading: MapTier | null = null;
   let stencilLoading = false;
   let shown: MapTier | null = null;
@@ -108,7 +114,7 @@ export function createSunMap(
 
   const load = (tier: MapTier) => {
     const file = widths && tierFile(MAP_BASE, "sun", tier);
-    if (!file || loading || arrived.has(tier)) return;
+    if (!file || loading || settled(tier)) return;
     loading = tier;
     loadMap(file, abort.signal).then(
       (texture) => {
@@ -145,7 +151,7 @@ export function createSunMap(
         void loadStencil();
       }
       const near = options.tier();
-      if (near !== "far" && arrived.has("far")) load(near);
+      if (near !== "far" && settled("far")) load(near);
     },
     /**
      * Whether detail is still on its way that the view would show: a texel of the drawn map
@@ -155,9 +161,7 @@ export function createSunMap(
     sharpening(px: number) {
       const near = options.tier();
       const awaited =
-        stencilLoading ||
-        loading !== null ||
-        (near !== "far" && arrived.has("far") && !arrived.has(near) && !failed.has(near));
+        stencilLoading || loading !== null || (near !== "far" && settled("far") && !settled(near));
       if (!awaited || !widths) return false;
       return TAU / (widths[shown ?? "far"] * px) > MAP_DETAIL_FROM_PX;
     },

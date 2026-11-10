@@ -4,10 +4,12 @@ import test from "node:test";
 
 import { LinearFilter, NearestFilter, NoColorSpace, SRGBColorSpace } from "three";
 
+import { MAPS, tierFile } from "@horizon/toolkit/bodies";
 import { DisposalScope } from "@horizon/toolkit/rendering";
 
 import { createSunMap } from "../src/features/sun/lib/scene/sun-map.ts";
 import { assetUrl } from "../src/lib/assets.ts";
+import { MAP_BASE } from "../src/space/solar-system/graphics/maps.ts";
 
 const stencil = JSON.parse(
   readFileSync(
@@ -95,5 +97,47 @@ test("Sun maps publish paired linear masks, retain the photograph on failure, an
       bitmaps.every((b) => b.closed === 1),
       "success and failure paths each close their bitmaps exactly once",
     );
+  }
+});
+
+test("a Sun map tier that fails is asked for once, and the other tier still loads", async (t) => {
+  const files = { far: tierFile(MAP_BASE, "sun", "far"), near: tierFile(MAP_BASE, "sun", "near") };
+  const other = { far: "near", near: "far" };
+  for (const failing of ["far", "near"]) {
+    const scope = new DisposalScope();
+    const asked = { far: 0, near: 0 };
+    const shown = [];
+    t.mock.method(globalThis, "fetch", async (url) => {
+      const tier = Object.keys(files).find((key) => files[key] === url);
+      if (tier) asked[tier]++;
+      return new Response(String(url), { status: tier === failing ? 503 : 200 });
+    });
+    const previous = globalThis.createImageBitmap;
+    globalThis.createImageBitmap = async () => ({ width: 1024, height: 512, close() {} });
+    try {
+      const maps = createSunMap(scope, {
+        tier: () => "near",
+        onLoad: (texture, width, finest) => shown.push({ width, finest }),
+        onStencil() {},
+        wake() {},
+      });
+      // Each frame asks again for whatever is still missing.
+      for (let frame = 0; frame < 6; frame++) {
+        maps.update();
+        await settle();
+      }
+      assert.deepEqual(asked, { far: 1, near: 1 }, `${failing} failed: no request is repeated`);
+      assert.deepEqual(
+        shown,
+        [{ width: MAPS.sun.widths[other[failing]], finest: failing === "far" }],
+        `${failing} failed: the ${other[failing]} tier is drawn`,
+      );
+      assert.equal(maps.sharpening(1e-6), false, "nothing is awaited once every tier is settled");
+    } finally {
+      scope.dispose();
+      t.mock.restoreAll();
+      if (previous === undefined) delete globalThis.createImageBitmap;
+      else globalThis.createImageBitmap = previous;
+    }
   }
 });
