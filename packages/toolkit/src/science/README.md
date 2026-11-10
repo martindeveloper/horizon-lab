@@ -177,7 +177,7 @@ the Big Bang (3.40 Gpc at z = 1, Planck's 13.88 Gpc at last scattering);
 `particleHorizonMpc()` is the edge of the observable universe (~14.2 Gpc, worked out once per
 model), `eventHorizonMpc()` the farthest place light sent today can ever reach (~5.1 Gpc), and
 `redshiftAtComovingDistance(mpc)` inverts the distance (Infinity at the horizon).
-`cosmicAgeAtRedshiftGyr(z)` gives the age then (13.787 Gyr today, Planck's value; ~372,000
+`cosmicAgeAtRedshiftGyr(z)` gives the age then (13.786 Gyr today, as Planck's values give without its neutrino mass; ~372,000
 years at the microwave background), and `lookbackTimeGyr(z)` and its inverse
 `redshiftAtLookback(gyr)` say how long ago light from redshift z set out. These integrate
 with radiation when the model has it.

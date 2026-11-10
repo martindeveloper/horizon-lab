@@ -171,8 +171,9 @@ export function lookbackTimeGyr(z: number, model: FlatLcdm = PLANCK_2018) {
 
 /**
  * Age (Gyr) of the universe at redshift z, with radiation: (1 / H₀) ∫₀ᵃ a′ da′ / √(Ωr + Ωm a′
- * + Ω_Λ a′⁴); 13.787 Gyr today with Planck's values. At the cosmic microwave background
- * (z ≈ 1090) it gives the familiar ~0.37 million years.
+ * + Ω_Λ a′⁴); 13.786 Gyr today with `PLANCK_2018` (Planck's own 13.787 counts a 0.06 eV
+ * neutrino, which this model leaves out). At the cosmic microwave background (z ≈ 1090) it
+ * gives the familiar ~0.37 million years.
  */
 export function cosmicAgeAtRedshiftGyr(z: number, model: FlatLcdm = PLANCK_2018) {
   const { H0, omegaM, omegaR = 0 } = model;
