@@ -66,8 +66,8 @@
     "offsetYears": "{value, plural, one {# year} other {# years}}",
     "offsetThousand": "{value} thousand years",
     "clockNext": "Planets drawn for {date} · next: {event}",
-    "clockDrift": "Today + {offset} · {rate}",
-    "clockBack": "Today − {offset} · {rate}"
+    "clockDrift": "Today + {offset}",
+    "clockBack": "Today − {offset}"
   },
   "toggles": {
     "fromEarth": "From Earth",
@@ -118,7 +118,7 @@
     "moments": "Moments",
     "momentsClock": "Set the clock to",
     "momentsDeep": "Back in time",
-    "momentsNote": "Found on the JPL orbits; past 2050 the orbits are carried on as they are today.",
+    "momentsNote": "Found on the JPL orbits; a date can fall a day off, and past 2050 the orbits are carried on as they are today.",
     "closeUpPresentOnly": "Close-ups show today's surfaces. Return to the present to zoom in.",
     "epochs": "Jump to an epoch",
     "deepField": "Further out · Deep Field",
@@ -200,7 +200,7 @@
         "caution": "The body is drawn as a flattened spheroid; the real one is a triaxial ellipsoid. The orbit is measured and does not move on the slider."
       },
       "makemake": {
-        "summary": "A bright, reddish dwarf planet in the classical Kuiper belt, found in 2005: methane frost over a surface of reddened organics. It has one small, dark moon, found in 2016.",
+        "summary": "A bright, reddish dwarf planet in the classical Kuiper belt, found in 2005: methane frost over a surface of reddened organics. It has one small, dark moon, imaged by Hubble in 2015 and announced in 2016.",
         "caution": "The orbit is measured and does not move on the slider. Its size comes from a stellar occultation in 2011; its mass is still poorly known."
       },
       "eris": {
@@ -283,7 +283,7 @@
     "sections": {
       "linear": {
         "title": "Distances in the 3D view are linear",
-        "body": "A step of 10 au is ten times a step of 1 au in every view. Mercury and the Oort cloud cannot share one useful picture: the cloud is tens of thousands of times farther out. Use the views."
+        "body": "A step of 10 au is ten times a step of 1 au in every view. Mercury and the Oort cloud cannot share one useful picture: the cloud reaches hundreds of thousands of times farther out. Use the views."
       },
       "size": {
         "title": "Dot size is not size",
@@ -390,7 +390,7 @@
       },
       "events": {
         "title": "Moments on the clock",
-        "body": "Each moment in the Objects panel is found on the same orbits the scene draws, not typed in: a scan from today brackets the next (or last) date where its condition crosses zero, a bisection narrows the bracket to the hour. A planet is at opposition when its heliocentric longitude meets Earth's; two planets are in conjunction when their longitudes seen from Earth meet; perihelion is where the distance's rate of change turns upward; a transit is an inferior conjunction with Mercury inside the Sun's disc. The JPL elements are fitted for 1800–2050; a later date carries them on as they are, and the panel says so. Picking a moment sets the clock to its date; playing time runs on from there, and Today brings it back."
+        "body": "Each moment in the Objects panel is found on the same orbits the scene draws, not typed in: a scan from today brackets the next (or last) date where its condition crosses zero, a bisection narrows the bracket. On approximate orbits a date can fall about a day from the almanac's. A planet is at opposition when its heliocentric longitude meets Earth's; two planets are in conjunction when their longitudes seen from Earth meet; perihelion is where the distance's rate of change turns upward (for Earth its own centre, not the Earth–Moon barycentre the elements give); a transit is an inferior conjunction with Mercury inside the Sun's disc. The JPL elements are fitted for 1800–2050; a later date carries them on as they are, and the panel says so. Picking a moment sets the clock to its date; playing time runs on from there, and Today brings it back."
       },
       "swarms": {
         "title": "Belts and clouds on the GPU",

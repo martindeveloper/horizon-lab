@@ -99,6 +99,8 @@ export function TimeDock() {
   /* The clock off today, run on by playing or set to a moment, either way from today. */
   const away = Math.abs(driftYears);
   const onClock = isToday(yearsAgo) && away > 0.002;
+  /* Past the calendar's reach the offset is all there is to tell: it takes the date's line. */
+  const clock = onClock ? clockDate(now, driftYears) : null;
   let offset: string;
   if (away < 1) {
     offset = t("time.offsetDays", {
@@ -113,6 +115,7 @@ export function TimeDock() {
       }),
     });
   }
+  const fromToday = t(driftYears > 0 ? "time.clockDrift" : "time.clockBack", { offset });
   /* History playing: the pace reads in the subline, and the playhead's halo widens as it slows. */
   const inHistory = playing && !isToday(yearsAgo);
   const dilation = inHistory ? playDilation(yearsAgo) : 0;
@@ -123,13 +126,13 @@ export function TimeDock() {
     subline = t("time.noSun");
   } else if (yearsAgo > SUN_BIRTH) {
     subline = t("time.protostar");
+  } else if (onClock) {
+    subline = clock ? `${fromToday} · ${driftLabel}` : driftLabel;
   } else if (isToday(yearsAgo)) {
     const date = f.dateTime(now, { dateStyle: "long" });
-    subline = onClock
-      ? t(driftYears > 0 ? "time.clockDrift" : "time.clockBack", { offset, rate: driftLabel })
-      : next
-        ? t("time.clockNext", { date, event: momentTitle(t, next) })
-        : t("time.clock", { date });
+    subline = next
+      ? t("time.clockNext", { date, event: momentTitle(t, next) })
+      : t("time.clock", { date });
   } else {
     subline = t("time.laps", {
       laps: f.number(galacticLaps(yearsAgo), {
@@ -137,6 +140,14 @@ export function TimeDock() {
         maximumFractionDigits: 1,
       }),
     });
+  }
+  let headline: string;
+  if (!onClock) {
+    headline = formatYearsAgo(t, f, yearsAgo, locale);
+  } else if (clock) {
+    headline = f.dateTime(clock, { dateStyle: "long" });
+  } else {
+    headline = fromToday;
   }
   const note = noteOf(yearsAgo);
   const playLabel = t(playing ? "hud.pause" : "hud.play");
@@ -170,9 +181,7 @@ export function TimeDock() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-body/5 font-medium tracking-tight text-fg-primary tabular-nums md:text-panel md:leading-normal">
-            {onClock
-              ? f.dateTime(clockDate(now, driftYears), { dateStyle: "long" })
-              : formatYearsAgo(t, f, yearsAgo, locale)}
+            {headline}
           </p>
           {/* Phones wrap into reserved lines, so scrubbing never makes the dock jump. */}
           <p className="text-ui text-fg-secondary tabular-nums not-md:line-clamp-2 not-md:min-h-8 md:truncate short:min-h-0 short:truncate">

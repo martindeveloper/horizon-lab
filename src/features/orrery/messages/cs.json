@@ -68,8 +68,8 @@
     "offsetYears": "{value, plural, one {# rok} few {# roky} other {# let}}",
     "offsetThousand": "{value} tis. let",
     "clockNext": "Polohy planet k datu {date} · příště: {event}",
-    "clockDrift": "Dnes + {offset} · {rate}",
-    "clockBack": "Dnes − {offset} · {rate}"
+    "clockDrift": "Dnes + {offset}",
+    "clockBack": "Dnes − {offset}"
   },
   "toggles": {
     "fromEarth": "Ze Země",
@@ -120,7 +120,7 @@
     "moments": "Okamžiky",
     "momentsClock": "Nastavit hodiny na",
     "momentsDeep": "Zpět v čase",
-    "momentsNote": "Nalezeno na drahách JPL; po roce 2050 dráhy pokračují tak, jak jsou dnes.",
+    "momentsNote": "Nalezeno na drahách JPL; datum se může o den lišit a po roce 2050 dráhy pokračují tak, jak jsou dnes.",
     "closeUpPresentOnly": "Pohled zblízka ukazuje dnešní povrchy. Pro přiblížení se vraťte do současnosti.",
     "epochs": "Přejít na období",
     "deepField": "Dál · Deep Field",
@@ -202,7 +202,7 @@
         "caution": "Těleso je vykresleno jako zploštělý sféroid; skutečné je trojosý elipsoid. Dráha je změřená a posuvník s ní nehýbe."
       },
       "makemake": {
-        "summary": "Jasná načervenalá trpasličí planeta v klasickém Kuiperově pásu, objevená roku 2005: metanové jíní na povrchu ze zčervenalých organických látek. Má jeden malý tmavý měsíc, objevený roku 2016.",
+        "summary": "Jasná načervenalá trpasličí planeta v klasickém Kuiperově pásu, objevená roku 2005: metanové jíní na povrchu ze zčervenalých organických látek. Má jeden malý tmavý měsíc, který Hubble vyfotografoval roku 2015; objev byl oznámen roku 2016.",
         "caution": "Dráha je změřená a posuvník s ní nehýbe. Velikost známe ze zákrytu hvězdy roku 2011, hmotnost je dosud známa jen hrubě."
       },
       "eris": {
@@ -285,7 +285,7 @@
     "sections": {
       "linear": {
         "title": "Vzdálenosti ve 3D jsou lineární",
-        "body": "Úsek dlouhý 10 au je v každém pohledu desetkrát delší než úsek dlouhý 1 au. Merkur a Oortův oblak proto nelze přehledně zobrazit současně: oblak leží desítky tisíckrát dál od Slunce. Mezi jednotlivými měřítky můžete přecházet pomocí nabídky Pohledy."
+        "body": "Úsek dlouhý 10 au je v každém pohledu desetkrát delší než úsek dlouhý 1 au. Merkur a Oortův oblak proto nelze přehledně zobrazit současně: oblak sahá statisíckrát dál od Slunce. Mezi jednotlivými měřítky můžete přecházet pomocí nabídky Pohledy."
       },
       "size": {
         "title": "Velikost značky není velikost tělesa",
@@ -392,7 +392,7 @@
       },
       "events": {
         "title": "Okamžiky na hodinách",
-        "body": "Každý okamžik v panelu Objekty je nalezen na týchž drahách, které scéna kreslí, ne opsán: hledání od dneška ohraničí příští (nebo poslední) datum, kde jeho podmínka prochází nulou, a půlení intervalu je zpřesní na hodinu. Planeta je v opozici, když se její heliocentrická délka setká se zemskou; dvě planety jsou v konjunkci, když se setkají jejich délky viděné ze Země; perihel je tam, kde se změna vzdálenosti obrací vzhůru; přechod je dolní konjunkce s Merkurem uvnitř slunečního kotouče. Elementy JPL jsou fitovány pro léta 1800–2050; pozdější datum je nechává, jak jsou, a panel to říká. Volba okamžiku nastaví hodiny na jeho datum; spuštěný čas z něj běží dál a Dnes je vrátí."
+        "body": "Každý okamžik v panelu Objekty je nalezen na týchž drahách, které scéna kreslí, ne opsán: hledání od dneška ohraničí příští (nebo poslední) datum, kde jeho podmínka prochází nulou, a půlení intervalu je zpřesní. Na přibližných drahách se datum může od ročenky lišit asi o den. Planeta je v opozici, když se její heliocentrická délka setká se zemskou; dvě planety jsou v konjunkci, když se setkají jejich délky viděné ze Země; perihel je tam, kde se změna vzdálenosti obrací vzhůru (u Země pro její vlastní střed, ne pro barycentrum Země–Měsíc, které udávají elementy); přechod je dolní konjunkce s Merkurem uvnitř slunečního kotouče. Elementy JPL jsou fitovány pro léta 1800–2050; pozdější datum je nechává, jak jsou, a panel to říká. Volba okamžiku nastaví hodiny na jeho datum; spuštěný čas z něj běží dál a Dnes je vrátí."
       },
       "swarms": {
         "title": "Pásy a oblaky na GPU",

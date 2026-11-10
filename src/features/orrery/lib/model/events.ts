@@ -3,9 +3,12 @@
  * of a function of the date on the shared orbits (`planetElements`, `namedElements`): a planet
  * at opposition, two planets in conjunction as seen from Earth, a body at perihelion or
  * aphelion, Mercury crossing the Sun's disc. A coarse scan from today brackets the next (or
- * last) sign change, a bisection narrows it to the hour. The orbits are the JPL fit, good for
+ * last) sign change, a bisection narrows it to the hour. That is the search's step, not the
+ * dates' accuracy: on approximate elements a moment can fall about a day from the almanac's
+ * (the slow Jupiter–Saturn conjunction does). The orbits are the JPL fit, good for
  * 1800–2050: a date further out is where that fit carries, marked `extrapolated`.
  */
+import { barycentreOffset, isBarycentreHost } from "@/space/solar-system/model/barycentre";
 import { namedElements, planetElements } from "@/space/solar-system/model/elements";
 import type { SolarSelection } from "@/space/solar-system/model/selection";
 import type { SolarViewId } from "@/space/solar-system/model/views";
@@ -142,6 +145,25 @@ function positionOf(body: BodyRef, date: Date): Vec3 {
       : namedElements(namedById(body.id), 1, 0, date);
   return keplerPosition(el);
 }
+
+const swing: Vec3 = [0, 0, 0];
+
+/**
+ * The body's own centre: where the elements place a system's barycentre (Earth's, Pluto's),
+ * its moon's swing is added. A longitude moves by seconds of arc for it and is read off the
+ * orbit; a distance turns where the swing says, Earth's perihelion up to a day and a half
+ * from its barycentre's.
+ */
+function centreOf(body: BodyRef, date: Date): Vec3 {
+  const at = positionOf(body, date);
+  if (isBarycentreHost(body.id)) {
+    barycentreOffset(body.id, date, swing);
+    at[0] += swing[0];
+    at[1] += swing[1];
+    at[2] += swing[2];
+  }
+  return at;
+}
 /** Ecliptic longitude, degrees, of a scene-frame position (X to the equinox, Y north, Z = −y). */
 const longitude = (p: Vec3) => Math.atan2(-p[2], p[0]) / RAD_PER_DEG;
 const latitude = (p: Vec3) => Math.atan2(p[1], Math.hypot(p[0], p[2])) / RAD_PER_DEG;
@@ -206,8 +228,8 @@ function rootOf(spec: Spec): {
       return {
         f: (ms) =>
           sign *
-          (distance(positionOf(first, new Date(ms + h))) -
-            distance(positionOf(first, new Date(ms - h)))),
+          (distance(centreOf(first, new Date(ms + h))) -
+            distance(centreOf(first, new Date(ms - h)))),
         step: Math.max(MS_PER_DAY, period / 400),
       };
     }
@@ -272,6 +294,12 @@ export function solarEvents(now: Date): SolarEvent[] {
   return events.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-/** The clock's date for a Motion offset: today plus `years` Julian years. */
-export const clockDate = (now: Date, years: number) =>
-  new Date(now.getTime() + years * MS_PER_YEAR);
+/**
+ * The clock's date for a Motion offset: today plus `years` Julian years. Null past the
+ * calendar's reach: a JavaScript date ends a hundred million days from 1970, some 270,000
+ * years either way, and beyond it only the offset can be told.
+ */
+export function clockDate(now: Date, years: number): Date | null {
+  const date = new Date(now.getTime() + years * MS_PER_YEAR);
+  return Number.isNaN(date.getTime()) ? null : date;
+}

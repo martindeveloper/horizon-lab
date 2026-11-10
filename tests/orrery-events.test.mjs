@@ -19,8 +19,8 @@ const within = (id, iso, days) => {
 };
 
 test("the moments found on the orbits land on the almanac's dates", () => {
-  /* Earth's next perihelion: early January 2027. */
-  within("earth-perihelion", "2027-01-03T00:00:00Z", 3);
+  /* Earth's next perihelion, 3 January 2027 at 02:33 UTC: Earth's own, a day before its barycentre's. */
+  within("earth-perihelion", "2027-01-03T02:33:00Z", 0.25);
   /* Mars's next opposition: 19 February 2027. */
   within("mars-opposition", "2027-02-19T00:00:00Z", 2);
   /* Jupiter and Saturn: the great conjunction of 21 December 2020 behind us, the next in late 2040. */
@@ -47,4 +47,12 @@ test("moments carry their offset from today, their order and whether the fit was
     Math.abs(back.getTime() - halley.date.getTime()) < 1000,
     "the clock's date is the moment's",
   );
+});
+
+test("the clock has a date only within the calendar's reach", () => {
+  /* A JavaScript date ends 100 million days from 1970: about 273,700 years from now. */
+  const edge = (8.64e15 - NOW.getTime()) / (365.25 * DAY_MS);
+  assert.equal(clockDate(NOW, edge - 1).getUTCFullYear(), 275_759);
+  assert.equal(clockDate(NOW, edge + 1), null);
+  assert.equal(clockDate(NOW, -300_000), null);
 });
