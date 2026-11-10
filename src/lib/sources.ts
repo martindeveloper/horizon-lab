@@ -114,15 +114,18 @@ export const SOURCES = {
     cite: "Avdellidou et al. 2024, Science 384, 348; Nesvorný et al. 2018, Nat. Astron. 2, 878; Edwards et al. 2024, Nat. Astron. 8, 1264 (an earlier instability)",
     link: SOURCE_URLS.avdellidou2024,
   },
+  avrett2008: {
+    cite: "Avrett & Loeser 2008, ApJS 175, 229 (the quiet Sun's chromosphere, model C7: a temperature minimum of 4,400 K)",
+  },
   banares2025: {
     cite: "Bañares-Hernández et al. 2025, A&A 693, A104 (ω Cen: any single IMBH below 6,000 M☉ at 3σ)",
     link: SOURCE_URLS.banares2025,
   },
   barboni2017: {
-    cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg et al. 2011, Nature 477, 70; Nimmo, Kleine & Morbidelli 2024, Nature 636, 598 (younger ages as remelting)",
+    cite: "Barboni et al. 2017, Sci. Adv. 3, e1602365; Borg & Carlson 2023, Annu. Rev. Earth Planet. Sci. 51, 25 (crust ages cluster at 4.35 Gyr); Nimmo, Kleine & Morbidelli 2024, Nature 636, 598 (younger ages as remelting)",
   },
   baumbach1937: {
-    cite: "Baumbach 1937, Astron. Nachr. 263, 121 (the corona's brightness with radius: 0.0532 r⁻²·⁵ + 1.425 r⁻⁷ + 2.565 r⁻¹⁷)",
+    cite: "Baumbach 1937, Astron. Nachr. 263, 121 (the corona's brightness with radius, in millionths of the disc centre's: 0.0532 r⁻²·⁵ + 1.425 r⁻⁷ + 2.565 r⁻¹⁷)",
   },
   baumgardt2021: {
     cite: "Baumgardt & Vasiliev 2021, MNRAS 505, 5957 (globular cluster distances: ω Cen 5.43 kpc)",
@@ -180,6 +183,10 @@ export const SOURCES = {
   breuval2023: {
     cite: "Breuval et al. 2023, ApJ 951, 118 (M33 at 840 ± 11 kpc from HST Cepheids)",
     link: SOURCE_URLS.breuval2023,
+  },
+  brozovic2024: {
+    cite: "Brozović & Jacobson 2024, AJ 167, 256 (JPL PLU060: GM of Pluto 869.3 ± 0.4 and Charon 106.1 ± 0.3 km³ s⁻²)",
+    link: "https://doi.org/10.3847/1538-3881/ad39f0",
   },
   castelli1994: {
     cite: "Castelli & Kurucz 1994, A&A 281, 817 (a model-atmosphere fit to Vega's disc-integrated light)",
@@ -415,7 +422,7 @@ export const SOURCES = {
     link: SOURCE_URLS.kaibVolk2022,
   },
   kasper2021: {
-    cite: "Kasper et al. 2021, PRL 127, 255101 (Parker below the Alfvén critical surface at 18.8 R☉, 28 April 2021)",
+    cite: "Kasper et al. 2021, PRL 127, 255101 (Parker first below the Alfvén critical surface 19.8 R☉ from the Sun's centre, 13 million km above the photosphere, 28 April 2021)",
     link: SOURCE_URLS.kasper2021,
   },
   kamland2011: {
@@ -847,7 +854,7 @@ export const SOURCES = {
     link: "https://www.astro.umontreal.ca/~bergeron/CoolingModels/",
   },
   millerBertolami2016: {
-    cite: "Miller Bertolami 2016, A&A 588, A25 (post-AGB and planetary-nebula central-star models: a 0.55 M☉ remnant crosses the HR diagram in about ten thousand years)",
+    cite: "Miller Bertolami 2016, A&A 588, A25 (post-AGB and planetary-nebula central-star models: at Z₀ = 0.02 a 0.53 M☉ remnant crosses the HR diagram in 24.9 kyr, a 0.56 M☉ one in 6.0 kyr)",
     link: "https://doi.org/10.1051/0004-6361/201526577",
   },
   howett2010: {
@@ -861,6 +868,10 @@ export const SOURCES = {
   lange2026: {
     cite: "Lange et al. 2026, arXiv:2604.14374 (Europa's surface from the Galileo Photopolarimeter-Radiometer: a mean Bond albedo of 0.64 ± 0.06)",
     link: "https://arxiv.org/abs/2604.14374",
+  },
+  christian2003: {
+    cite: "Christian et al. 2003, JGR 108(D1), 4005 (the Optical Transient Detector's five years: 44 ± 5 lightning flashes a second over the globe, ten over land to one over sea)",
+    link: "https://doi.org/10.1029/2002JD002347",
   },
   kasting1993: {
     cite: "Kasting, Whitmire & Reynolds 1993, Icarus 101, 108 (habitable zones around main-sequence stars: water loss by a moist greenhouse within 0.95 au of today's Sun, a runaway greenhouse within 0.84 au)",
