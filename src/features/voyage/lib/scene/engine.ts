@@ -5,7 +5,7 @@
  * something moves (a flight, a gesture, the clocks running) or a store change made the picture
  * stale, so a parked ship with its clocks held costs no GPU time.
  */
-import { Scene } from "three";
+import { Scene, type Object3D } from "three";
 
 import {
   bridgeRender,
@@ -36,7 +36,7 @@ import { AU_KM } from "@horizon/toolkit/science";
 import { isSceneShortcut } from "@horizon/toolkit/ui";
 
 import { blackbodyTexture, motionUniforms, writeMotion } from "../graphics/looks";
-import { createAnchorCache, isBodyAnchor, isProbeAnchor } from "../model/anchors";
+import { createAnchorCache, isBodyAnchor, isProbeAnchor, type AnchorId } from "../model/anchors";
 import { dateAt } from "../model/calendar";
 import { scaleFactorAt } from "../model/comoving";
 import {
@@ -134,7 +134,10 @@ export function createVoyageEngine(
     const bodies = createBodiesLayer(kit, scene, { place, globes, motion: moving, at: anchorAt });
     const dust = createSpeedLayer(kit, scene, lut, moving, quality.streaks);
     const alphaCen = createAlphaCentauriLayer(kit, scene, lut, { place, globes });
-    setBodies([...bodies.labelBodies, ...alphaCen.labelBodies]);
+    const globeBodies = [...bodies.labelBodies, ...alphaCen.labelBodies];
+    setBodies(globeBodies);
+    /* The globes by their anchor: each stands where the moving ship sees its body (`seen.ts`). */
+    const globeOf = new Map<AnchorId, Object3D>(globeBodies.map(({ key, mesh }) => [key, mesh]));
     const distanceText = createDistanceText(labels, () => store.getState().distanceUnit, locale);
     const worlds = createWorldsLayer(basics, scene, {
       place,
@@ -299,6 +302,7 @@ export function createVoyageEngine(
     const earth = vec3d();
     const aimPos = vec3d();
     const aimRel = vec3d();
+    const aimSeen = vec3d();
     const relVel = vec3d();
     const still = vec3d();
     const motion = createShipMotion();
@@ -438,7 +442,7 @@ export function createVoyageEngine(
             closing =
               -(relVel[0] * aimRel[0] + relVel[1] * aimRel[1] + relVel[2] * aimRel[2]) / range;
         } else if (ship.flying) closing = speed;
-        /* The dust shows the ship's motion through the near body's frame, at the warp it is seen at. */
+        /* The dust shows the ship's motion through its aim's frame, at the warp it is seen at. */
         const streaming = ship.flying
           ? ship.phase !== "align"
           : ship.mode === "free" && !ship.crashed;
@@ -456,6 +460,9 @@ export function createVoyageEngine(
         instruments.spool = spool;
         instruments.show = state.show;
         instruments.aimId = ship.destination;
+        /* The aim's marker sits where the aim is drawn: on its globe, or at its true place. */
+        const globe = globeOf.get(ship.destination);
+        instruments.aim = globe ? globe.position.toArray(aimSeen) : aimRel;
         instruments.axes = ship.axes;
         cockpit.update(instruments);
         hud.update(dt, storeChanged, { distance: range / AU_KM, ship: x, angles: ship.pose }, read);

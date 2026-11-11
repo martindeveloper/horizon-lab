@@ -62,6 +62,13 @@ export function gravityAt(
 export const dynamicalTime = (r: number, gm: number) =>
   gm > 0 ? Math.sqrt((r * r * r) / gm) : Infinity;
 
+/**
+ * The radius of a moon's Hill sphere, km, `separation` km from its planet: within it the
+ * moon's own pull holds a ship against the planet's tide. None where a mass is not known.
+ */
+export const hillRadius = (separation: number, gm: number, hostGm: number) =>
+  gm > 0 && hostGm > 0 ? separation * Math.cbrt(gm / (3 * hostGm)) : 0;
+
 /** The speed of a circular orbit at `r` km from a well, km/s. */
 export const circularSpeed = (r: number, gm: number) => (gm > 0 ? Math.sqrt(gm / r) : 0);
 

@@ -8,6 +8,7 @@ import {
   dynamicalTime,
   gmOf,
   gravityAt,
+  hillRadius,
 } from "../model/gravity";
 import type { ShipGravity, ShipState } from "../model/ship";
 
@@ -21,14 +22,20 @@ const MAX_PIECES = 400;
 /** Seconds the velocity of the body the ship rides is measured over. */
 const VELOCITY_S = 60;
 
-/** The local gravity wells, their motion, and the frame's safe integration step. */
+/**
+ * The local gravity wells, their motion, the body whose frame the ship flies in, and the
+ * frame's safe integration step. `orbitOf` is how far from a body the ship parks, km.
+ */
 export function createShipEnvironment(
   options: ShipEphemeris & { nearest: (at: Vec3d) => AnchorId },
   ship: ShipState,
+  orbitOf: (id: AnchorId) => number,
 ) {
   const { bodyAt } = options;
   const earlier = vec3d();
   const later = vec3d();
+  const moonPos = vec3d();
+  const hostPos = vec3d();
   const pull = vec3d();
   const dateLater = new Date();
   /** The pull on the ship, km/s², and the body pulling hardest, as last read. */
@@ -43,6 +50,28 @@ export function createShipEnvironment(
     out[1] = (later[1] - earlier[1]) / VELOCITY_S;
     out[2] = (later[2] - earlier[2]) / VELOCITY_S;
     return out;
+  };
+
+  /**
+   * The body whose frame a ship flown by hand is in: what its markers, its brake and its aim
+   * work against. It is the body whose surface is nearest (`near`), but a moon takes the frame
+   * from its planet only within its reach: its Hill sphere, or the orbit the ship parks in
+   * about it where that is wider (the small moons'). A moon that `held` the frame keeps it
+   * while its surface is the nearest. So a ship parked at a moon leaves in the moon's frame,
+   * and a moon passing a ship at its planet never takes the planet's.
+   */
+  const frameOf = (held: AnchorId, near: AnchorId): AnchorId => {
+    if (near === held || !isBodyAnchor(near)) return near;
+    const world = worldBody(near);
+    if (world.kind !== "moon") return near;
+    const now = options.now();
+    bodyAt(near, now, moonPos);
+    bodyAt(world.host, now, hostPos);
+    const reach = Math.max(
+      hillRadius(distanceVec3d(moonPos, hostPos), gmOf(near), gmOf(world.host)),
+      orbitOf(near),
+    );
+    return distanceVec3d(ship.x, moonPos) <= reach ? near : world.host;
   };
 
   /** The wells a ship near a body falls in: the Sun, the body, and its planet or its big moon. */
@@ -93,6 +122,7 @@ export function createShipEnvironment(
 
   return {
     bodyVelocity,
+    frameOf,
     readGravity,
     gravity,
     loadGravity(this: void, near: AnchorId, dtau: number) {

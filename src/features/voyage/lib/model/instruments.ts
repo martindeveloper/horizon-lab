@@ -49,10 +49,10 @@ export function markOnScreen(
 ): ScreenMark {
   const behind = z >= 0;
   if (behind) {
-    /* Behind: the direction's shadow on the screen, pushed out past the edge. */
-    const len = Math.hypot(x, y) || 1;
-    out.x = (-x / len) * 2;
-    out.y = (-y / len) * 2;
+    /* Behind: towards the side the direction lies, as the screen's pixels have it; dead astern, below. */
+    const flat = Math.hypot(x, y);
+    out.x = flat > 0 ? x / flat / aspect : 0;
+    out.y = flat > 0 ? y / flat : -1;
   } else {
     out.x = x / -z / (tanHalf * aspect);
     out.y = y / -z / tanHalf;

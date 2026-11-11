@@ -62,12 +62,17 @@ export function createShipFraming(
     };
   };
 
+  /** How far from a body's centre the ship parks on arrival, km: the body framed in the view. */
+  const orbitOf = (id: AnchorId) => {
+    const frameRadius = anchorRadius(id) * ((isBodyAnchor(id) && FRAME_RADII[id]) || 1);
+    return Math.max(floorOf(id), frameRadius / (halfTan() * ARRIVE_FILL));
+  };
+
   const framing = (id: AnchorId): OrbitPose => {
     bodyAt(id, options.now(), toPos);
     const sunward =
       Math.hypot(toPos[0], toPos[2]) > 0 ? Math.atan2(-toPos[0], -toPos[2]) : pose.azimuth;
-    const frameRadius = anchorRadius(id) * ((isBodyAnchor(id) && FRAME_RADII[id]) || 1);
-    const distance = Math.max(floorOf(id), frameRadius / (halfTan() * ARRIVE_FILL));
+    const distance = orbitOf(id);
     if (id === "galacticCentre")
       return {
         azimuth: Math.atan2(GALACTIC_NORTH.x, GALACTIC_NORTH.z),
@@ -103,5 +108,5 @@ export function createShipFraming(
     };
   };
 
-  return { arrival, poseAbout };
+  return { arrival, poseAbout, orbitOf };
 }

@@ -182,10 +182,13 @@ export function createShipCamera(
   const hands = createFlightAxes();
   /** Ship seconds per real second over the last frame: the rate asked for, or what held it back. */
   let warpNow = 0;
-  const { bodyVelocity, readGravity, gravity, loadGravity } = createShipEnvironment(options, ship);
+  const { arrival, poseAbout, orbitOf } = createShipFraming(options, pose, ship);
+  const { bodyVelocity, frameOf, readGravity, gravity, loadGravity } = createShipEnvironment(
+    options,
+    ship,
+    orbitOf,
+  );
   const thrust = { accel: 0, dir: thrustDir };
-
-  const { arrival, poseAbout } = createShipFraming(options, pose, ship);
 
   const touched = () => {
     options.onInput?.();
@@ -292,11 +295,11 @@ export function createShipCamera(
     if (focus) focusCanvas();
   };
 
-  /** Enters orbit about the nearest body, where the ship is, riding with it; the nose turns onto it. */
+  /** Enters orbit about the body whose frame the ship is in, where it is, riding with it; the nose turns onto it. */
   const park = () => {
     cruise = 0;
     if (mode === "orbit") return;
-    aim = options.nearest(ship.x);
+    aim = frameOf(aim, options.nearest(ship.x));
     const about = poseAbout(aim);
     settle = reduceMotion.matches ? null : { q0: camera.quaternion.clone(), t: 0 };
     sink = weighty();
@@ -364,7 +367,7 @@ export function createShipCamera(
   /**
    * Free flight for one frame: roll in real time; thrust and gravity in ship time at the flight
    * assist's warp unless the clocks are held, cut down where gravity needs finer steps than a
-   * frame allows. A coasting drive keeps the ship's speed through the body's frame to its
+   * frame allows. A coasting drive keeps the ship's speed through the aim's frame to its
    * cruise. Returns the nearest body once moved.
    */
   const fly = (dt: number, compression: number): AnchorId | undefined => {
@@ -465,7 +468,7 @@ export function createShipCamera(
     get mode() {
       return mode;
     },
-    /** The body the ship is at, nearest, or heading for. */
+    /** The body the ship is at, flies in the frame of (`frameOf`), or is heading for. */
     get aim() {
       return aim;
     },
@@ -522,7 +525,7 @@ export function createShipCamera(
     get axes(): Readonly<FlightAxes> {
       return handsNow();
     },
-    /** The ship's velocity relative to the body it is near, km/s, written into `out`. */
+    /** The ship's velocity relative to its aim, km/s, written into `out`. */
     relativeVelocity,
     /** The ship's feel: arrivals settle into orbit with weight. */
     setFeel(on: boolean) {
@@ -570,8 +573,8 @@ export function createShipCamera(
         return;
       }
       const now = options.now();
-      /* From where the ship is: the body it orbits, or, flown by hand or under way, the nearest. */
-      const from = mode === "orbit" && !flight ? aim : options.nearest(ship.x);
+      /* From where the ship is: the body it orbits, or, flown by hand or under way, whose frame it is in. */
+      const from = mode === "orbit" && !flight ? aim : frameOf(aim, options.nearest(ship.x));
       bodyAt(from, now, fromPos);
       const start = vec3d(ship.x[0] - fromPos[0], ship.x[1] - fromPos[1], ship.x[2] - fromPos[2]);
       /* The arrival keeps near the line of approach, so the destination stays ahead. */
@@ -631,7 +634,7 @@ export function createShipCamera(
     disengage() {
       if (!flight) return;
       attitude = camera.quaternion.toArray();
-      aim = options.nearest(ship.x);
+      aim = frameOf(aim, options.nearest(ship.x));
       flight = null;
       setMode("free");
       options.invalidate();
@@ -708,7 +711,7 @@ export function createShipCamera(
       } else if (mode === "free") {
         const near = fly(dt, compression);
         options.clock(ship.t);
-        if (near) aim = near;
+        if (near) aim = frameOf(aim, near);
         camera.quaternion.fromArray(attitude);
         easeSettle(dt);
       } else {

@@ -15,8 +15,17 @@ test("a mark ahead sits where the direction projects, one behind at the edge poi
   /* Behind and to the right: the chevron at the right edge, pointing right. */
   markOnScreen(1, 0, 1, tanHalf, 1.5, 0.9, out);
   assert.ok(out.off);
-  assert.ok(Math.abs(out.x + 0.9) < 1e-9, "a direction behind is shown opposite its shadow");
+  assert.ok(Math.abs(out.x - 0.9) < 1e-9, "a direction behind is shown opposite its shadow");
   assert.equal(Math.abs(out.y), 0);
+  assert.equal(Math.abs(out.angle), 0);
+  /* Crossing from ahead to behind, high on the right, the chevron keeps its place. */
+  const ahead = markOnScreen(3, 2, -1e-6, tanHalf, 1.5, 0.9, { ...out });
+  const behind = markOnScreen(3, 2, 1e-6, tanHalf, 1.5, 0.9, { ...out });
+  assert.ok(Math.abs(ahead.x - behind.x) < 1e-3 && Math.abs(ahead.y - behind.y) < 1e-3);
+  assert.ok(Math.abs(ahead.angle - behind.angle) < 1e-3);
+  /* Dead astern still has a place. */
+  markOnScreen(0, 0, 1, tanHalf, 1.5, 0.9, out);
+  assert.ok(out.off && out.x === 0 && Math.abs(out.y + 0.9) < 1e-9);
   /* Far to the left, ahead: at the left edge. */
   markOnScreen(-10, 0, -1, tanHalf, 1.5, 0.9, out);
   assert.ok(out.off && Math.abs(out.x + 0.9) < 1e-9);

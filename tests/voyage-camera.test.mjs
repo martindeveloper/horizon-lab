@@ -37,7 +37,8 @@ class Canvas extends EventTarget {
   }
 }
 
-function setup(t, reduced) {
+/** A rig parked at `world.at` (Earth), over the test's own bodies unless `world` gives others. */
+function setup(t, reduced, world = {}) {
   const previous = Object.fromEntries(
     ["window", "document", "navigator"].map((key) => [
       key,
@@ -68,25 +69,27 @@ function setup(t, reduced) {
   const now = new Date(0);
   const rig = createShipCamera(scope, camera, canvas, {
     reduceMotion: { matches: reduced },
-    bodyAt: (id, date, out) => {
-      out[0] = id === "sun" ? 0 : id === "mars" ? 2e8 : 1e8;
-      out[1] = 0;
-      out[2] = id === "sun" ? 0 : (date.getTime() / 1000) * 30;
-      if (id === "moon") out[0] += 384_400;
-      return out;
-    },
+    bodyAt:
+      world.bodyAt ??
+      ((id, date, out) => {
+        out[0] = id === "sun" ? 0 : id === "mars" ? 2e8 : 1e8;
+        out[1] = 0;
+        out[2] = id === "sun" ? 0 : (date.getTime() / 1000) * 30;
+        if (id === "moon") out[0] += 384_400;
+        return out;
+      }),
     now: () => now,
     clock: (seconds) => {
       now.setTime(seconds * 1000);
       return now;
     },
-    nearest: () => "earth",
+    nearest: world.nearest ?? (() => "earth"),
     warp: () => 1,
     halfTan: () => Math.tan((camera.fov * Math.PI) / 360),
     isShortcut: () => true,
     invalidate: () => {},
   });
-  rig.snapTo("earth");
+  rig.snapTo(world.at ?? "earth");
   rig.step(0, 0);
   return { rig, camera, canvas, window };
 }
@@ -193,4 +196,51 @@ test("manual flight still responds to the keys, drag, camera pad and throttle", 
   rig.setThrottle(0.5);
   assert.equal(rig.mode, "free");
   assert.equal(rig.axes.thrust, 0.5);
+});
+
+test("flown by hand the ship keeps its planet's frame past a moon, and takes a moon's only within its reach", (t) => {
+  /* Saturn moves along z; each moon stands off it by its own offset and runs 8 km/s faster. */
+  const MOON_KM_S = 8;
+  const moons = { rhea: [527_000, 0, 0], mimas: [-185_500, 0, 0] };
+  let near = "rhea";
+  const { rig } = setup(t, true, {
+    at: "saturn",
+    nearest: () => near,
+    bodyAt: (id, date, out) => {
+      const seconds = date.getTime() / 1000;
+      const offset = moons[id];
+      out[0] = id === "sun" ? 0 : 1.4e9 + (offset?.[0] ?? 0);
+      out[1] = offset?.[1] ?? 0;
+      out[2] = id === "sun" ? 0 : seconds * 10 + (offset ? offset[2] + seconds * MOON_KM_S : 0);
+      return out;
+    },
+  });
+  /** Puts Rhea `km` from the ship, across the motion. */
+  const rheaAt = (km) => {
+    moons.rhea = [rig.ship.x[0] - 1.4e9 + km, rig.ship.x[1], rig.ship.x[2] - rig.ship.t * 18];
+  };
+  const drift = () => Math.hypot(...rig.relativeVelocity([0, 0, 0]));
+
+  /* A moon's surface is the nearest, but far outside its reach: the frame stays Saturn's. */
+  rheaAt(60_000);
+  rig.setMode("free");
+  rig.step(0.1, 1);
+  assert.equal(rig.aim, "saturn");
+  assert.ok(drift() < 0.01, "the ship left at rest beside Saturn and reads so");
+  /* Inside Rhea's Hill sphere the frame is Rhea's: the ship moves past it at the moon's speed. */
+  rheaAt(3000);
+  rig.step(0.1, 1);
+  assert.equal(rig.aim, "rhea");
+  close(drift(), MOON_KM_S, 0.1);
+  /* Rhea keeps the frame while its surface is the nearest, however far. */
+  rheaAt(60_000);
+  rig.step(0.1, 1);
+  assert.equal(rig.aim, "rhea");
+  /* Another moon nearer, out of its reach: back to the planet, and the ship parks about it. */
+  near = "mimas";
+  rig.step(0.1, 1);
+  assert.equal(rig.aim, "saturn");
+  near = "rhea";
+  rig.setMode("orbit");
+  assert.equal(rig.aim, "saturn");
 });

@@ -56,9 +56,9 @@ export type CockpitFrame = {
   spool: number;
   /** The ship's heliocentric position, km. */
   ship: Readonly<Vec3d>;
-  /** The ship's velocity relative to the body it is near, km/s. */
+  /** The ship's velocity relative to its aim, km/s. */
   v: Readonly<Vec3d>;
-  /** The anchor the ship is at or heading for, and its offset from the ship, km. */
+  /** The anchor the ship is at or heading for, and where it is drawn from the ship, km. */
   aimId: AnchorId;
   aim: Readonly<Vec3d>;
   /** The pilot's hands: −1…1 along the ship's axes, and the boost and the brake, 0…1. */
