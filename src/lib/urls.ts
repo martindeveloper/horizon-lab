@@ -3,6 +3,7 @@ export const PAGE_URLS = {
   home: "/",
   about: "/about",
   credits: "/credits",
+  changelog: "/changelog",
   sitemap: "/sitemap.xml",
   version: "/version.json",
   debugNotFound: "/horizon-debug-not-found",

@@ -45,7 +45,8 @@ src/
                                with its dwell and tour controls (guide-caption.tsx) and the
                                guide's keys (use-guide-keys.ts); the `?` tour of the controls
                                (help-tour.tsx: `useHelp`, `HelpTour` on the toolkit's `CoachMark`)
-    pages/                     About and credits page bodies
+    pages/                     About, credits and changelog page bodies; letter.tsx is their
+                               shared header and margin-labelled part
     status/                    Brand-specific error-page composition and its locale
   features/
     catalogue/index.tsx        Server-rendered catalogue; styles.css holds tiles, hero and intro
@@ -360,6 +361,7 @@ src/
     redirects.ts               Native Next.js compatibility redirects
     metadata.ts                Page metadata: pageMetadata, simulationMetadata, localeParam
     credits.ts                 Imagery, data, font and package credits for /credits
+    changelog.ts               Reads and parses /changelog's Markdown (content/changelog)
   space/                       Shared astronomy for the shell, catalogue and simulations:
     messages/                  The shared copy (units, distance words, HUD chrome, the solar
                                system's names), merged under each one's namespace (messages.ts)
@@ -450,6 +452,7 @@ src/
       graphics/                cosmos.ts (the sampled clouds, web and far field), looks.ts
       scene/                   cosmos-layer.ts fades what cosmos-clouds.ts draws,
                                cosmos-rings.ts and cosmos-marks.ts, in the Galaxy's pass
+  content/changelog/           The change log, one Markdown file per language (<locale>.md)
   i18n/                        Shared request/routing/navigation configuration
   messages/                    Shared catalogue and shell copy; status/ the error and
                                404 copy, merged in, that the root pages bundle alone
@@ -591,6 +594,13 @@ Server Components receive the validated locale from route params: `localeParam(p
 (`src/lib/metadata.ts`) narrows it to a known locale or renders the 404. Pass it explicitly
 to `getTranslations` and server-rendered localized links; there is no request-time
 locale middleware to infer it. Client Components use the shared locale provider.
+
+Long-form page content is written once per language as Markdown rather than as message keys.
+The change log is the first: `src/content/changelog/<locale>.md`, read when `/changelog` is
+prerendered and parsed by `src/lib/changelog.ts`, whose header documents the part of Markdown
+it accepts (dated releases, groups, changes with details, `**strong**` and `code`); any other
+line fails the build. The page's kicker, title and lead stay in the message catalogs. A test
+holds the languages to the same releases, groups and counts of changes.
 
 Theme state belongs to the shared provider/header. Features consume semantic
 UI tokens; space canvases use invariant `space` colors. Do not add another theme

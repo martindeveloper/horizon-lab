@@ -9,6 +9,7 @@ export function sitePaths(available: readonly SimulationManifest[] = simulations
     PAGE_URLS.home,
     PAGE_URLS.about,
     PAGE_URLS.credits,
+    PAGE_URLS.changelog,
     ...available.flatMap(({ routes }) => slugRoutes(routes).paths()),
   ];
 }

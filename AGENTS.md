@@ -23,6 +23,9 @@ TypeScript, and Tailwind CSS. Deploys with Vercel’s native Next.js integration
   pages. Keep both message catalogs in sync; do not add locale state to localStorage
   or Zustand. Translate visible UI copy and accessibility labels. Keep page/social
   metadata and share images in English; canonical URLs carry no language.
+- The change log is Markdown, one file per language in `src/content/changelog/`, not message
+  keys. Add a release to every language at once, newest first, in the format
+  `src/lib/changelog.ts` documents.
 - Use next-themes for theme state. Dark is the default; light mode changes UI
   materials while `bg-space`/`text-space-fg` preserve the dark astronomical scene.
 - Run `npm test` for translation, routing, and contrast checks as well.

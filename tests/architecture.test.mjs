@@ -340,6 +340,7 @@ test("a new declared route reaches the sitemap and body links without another re
     "/",
     "/about",
     "/credits",
+    "/changelog",
     "/lab/example",
     "/lab/example/vega",
   ]);

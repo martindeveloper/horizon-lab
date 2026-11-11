@@ -17,6 +17,7 @@
     "sidereal": "Místní hvězdný čas v Ondřejově. Pozadí stránek znázorňuje oblohu nad tamní observatoří.",
     "about": "O projektu",
     "credits": "Zdroje",
+    "changelog": "Novinky",
     "homeTitle": "Horizon · O kousek blíž vesmíru",
     "playMusic": "Přehrát hudbu",
     "pauseMusic": "Pozastavit hudbu",
@@ -266,6 +267,12 @@
     },
     "signoff": "Jasnou oblohu.",
     "newTab": "otevře se v nové kartě"
+  },
+  "changelog": {
+    "kicker": "Novinky",
+    "title": "Co je nového, <em>a odkdy.</em>",
+    "lead": "Nejzajímavější změny v Horizonu, od nejnovějších.",
+    "metadataDescription": "Co se v Horizonu změnilo: nové laboratoře, zážitky a opravené hodnoty, od nejnovějších."
   },
   "credits": {
     "kicker": "Zdroje",

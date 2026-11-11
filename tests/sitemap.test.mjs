@@ -31,11 +31,12 @@ const origin = siteUrl().origin;
 const urls = sitemap().map(({ url }) => new URL(url));
 const paths = urls.map(({ pathname }) => pathname);
 
-test("sitemap lists the catalogue, the about and credits pages, every simulation and every preset/view", () => {
+test("sitemap lists the catalogue, the about, credits and changelog pages, every simulation and every preset/view", () => {
   const expected = [
     "/",
     "/about",
     "/credits",
+    "/changelog",
     ...simulations.map(({ href }) => href),
     ...presetRouteParams().map(({ hole }) => `${BLACK_HOLE_PATH}/${hole}`),
     ...viewRouteParams().map(({ view }) => `${ORRERY_PATH}/${view}`),

@@ -57,6 +57,32 @@ export function LetterHeader({
   );
 }
 
+/** One part of a letter: its label hangs in the margin on wide screens. */
+export function LetterPart({
+  id,
+  label,
+  className,
+  children,
+}: {
+  /** The label's id, which names the part. */
+  id: string;
+  label: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} className={cn("mt-16 sm:mt-20", letterGrid, className)}>
+      <h2
+        id={id}
+        className={cn(kickerClass, "text-balance lg:pt-[0.7em] lg:text-right lg:leading-relaxed")}
+      >
+        {label}
+      </h2>
+      <div className="mt-5 space-y-6 lg:mt-0">{children}</div>
+    </section>
+  );
+}
+
 /** An inline link that leaves the site, marked with an arrow and announced as opening a new tab. */
 export function ExternalLink({
   href,

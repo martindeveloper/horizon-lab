@@ -17,6 +17,7 @@
     "sidereal": "Local sidereal time at Ondřejov Observatory, whose sky is behind these pages",
     "about": "About",
     "credits": "Credits",
+    "changelog": "Changelog",
     "homeTitle": "Horizon · A little closer to the universe",
     "playMusic": "Play music",
     "pauseMusic": "Pause music",
@@ -266,6 +267,12 @@
     },
     "signoff": "Clear skies.",
     "newTab": "opens in a new tab"
+  },
+  "changelog": {
+    "kicker": "Changelog",
+    "title": "What's new, <em>and since when.</em>",
+    "lead": "The most interesting changes to Horizon, newest first.",
+    "metadataDescription": "What has changed in Horizon: new labs, experiences and corrected figures, newest first."
   },
   "credits": {
     "kicker": "Credits",

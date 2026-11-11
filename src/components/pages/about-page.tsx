@@ -1,12 +1,11 @@
 import { getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
 
 import { REPOSITORY_URL } from "@/config";
 import type { Locale } from "@/i18n/routing";
 import { ANCHOR_IDS, EXTERNAL_URLS } from "@/lib/urls";
-import { cn, kickerClass } from "@horizon/toolkit/ui";
+import { cn } from "@horizon/toolkit/ui";
 
-import { ExternalLink, LetterHeader, letterEmphasis, letterGrid } from "./letter";
+import { ExternalLink, LetterHeader, LetterPart, letterEmphasis, letterGrid } from "./letter";
 
 const COURSE_URL = EXTERNAL_URLS.astronomyCourse;
 
@@ -20,34 +19,6 @@ const caveats = ["simplified", "approximate", "performance"] as const;
 
 const linkClass =
   "ui-focus font-medium text-fg-primary underline decoration-accent/60 decoration-1 underline-offset-[0.22em] transition-colors duration-feedback ease-standard hover:decoration-accent focus-visible:rounded-compact";
-
-/** One part of the letter: its label hangs in the margin on wide screens. */
-function Part({
-  id,
-  label,
-  className,
-  children,
-}: {
-  id: string;
-  label: string;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      aria-labelledby={`about-${id}`}
-      className={cn("mt-16 sm:mt-20", letterGrid, className)}
-    >
-      <h2
-        id={`about-${id}`}
-        className={cn(kickerClass, "text-balance lg:pt-[0.7em] lg:text-right lg:leading-relaxed")}
-      >
-        {label}
-      </h2>
-      <div className="mt-5 space-y-6 lg:mt-0">{children}</div>
-    </section>
-  );
-}
 
 export async function AboutPage({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "about" });
@@ -72,7 +43,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             </figure>
           </LetterHeader>
 
-          <Part id="course" label={t("course.label")}>
+          <LetterPart id="about-course" label={t("course.label")}>
             <p>
               {t.rich("course.body", {
                 link: (chunks) => (
@@ -83,9 +54,9 @@ export async function AboutPage({ locale }: { locale: Locale }) {
               })}
             </p>
             <p>{t("course.next")}</p>
-          </Part>
+          </LetterPart>
 
-          <Part id="disclaimer" label={t("disclaimer.label")}>
+          <LetterPart id="about-disclaimer" label={t("disclaimer.label")}>
             <p>{t("disclaimer.body")}</p>
             <dl className="grid gap-y-3 border-y border-border py-5 text-[0.9em] leading-relaxed sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-8">
               {caveats.map((key) => (
@@ -98,9 +69,9 @@ export async function AboutPage({ locale }: { locale: Locale }) {
               ))}
             </dl>
             <p className="text-fg-primary">{t("disclaimer.sources")}</p>
-          </Part>
+          </LetterPart>
 
-          <Part id="source" label={t("source.label")}>
+          <LetterPart id="about-source" label={t("source.label")}>
             <p>
               {t.rich("source.body", {
                 link: (chunks) => (
@@ -110,9 +81,9 @@ export async function AboutPage({ locale }: { locale: Locale }) {
                 ),
               })}
             </p>
-          </Part>
+          </LetterPart>
 
-          <Part id="thanks" label={t("thanks.label")}>
+          <LetterPart id="about-thanks" label={t("thanks.label")}>
             <p>{t("thanks.body")}</p>
             <ul className="space-y-1.5">
               {[
@@ -125,7 +96,7 @@ export async function AboutPage({ locale }: { locale: Locale }) {
                 </li>
               ))}
             </ul>
-          </Part>
+          </LetterPart>
 
           <section aria-labelledby="about-author" className={cn("mt-20 sm:mt-24", letterGrid)}>
             <h2 id="about-author" className="sr-only">
@@ -140,13 +111,13 @@ export async function AboutPage({ locale }: { locale: Locale }) {
             </div>
           </section>
 
-          <Part
-            id="ai"
+          <LetterPart
+            id="about-ai"
             label={t("author.aiLabel")}
             className="border-t border-border pt-8 text-[0.85em] leading-relaxed text-fg-secondary"
           >
             <p>{t("author.ai")}</p>
-          </Part>
+          </LetterPart>
         </div>
       </article>
     </main>

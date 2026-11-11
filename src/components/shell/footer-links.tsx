@@ -7,7 +7,7 @@ import { PAGE_URLS } from "@/lib/urls";
 
 import { SiderealClock } from "./sidereal-clock";
 
-type FooterKey = "about" | "credits" | "newTab" | "sidereal";
+type FooterKey = "about" | "changelog" | "credits" | "newTab" | "sidereal";
 
 /** In the phone menu, GitHub stays visible at every width and `onNavigate` closes the menu. */
 export function FooterLinks({
@@ -41,6 +41,16 @@ export function FooterLinks({
           className="footer-link inline-flex"
         >
           {t("credits")}
+        </Link>
+        {/* A phone's line has no room for a third page; it shows from `sm` up, as GitHub does. */}
+        <span className="footer-dot hidden sm:block" aria-hidden />
+        <Link
+          href={PAGE_URLS.changelog}
+          prefetch={false}
+          onClick={onNavigate}
+          className="footer-link hidden sm:inline-flex"
+        >
+          {t("changelog")}
         </Link>
         <span className={menu ? "footer-dot" : "footer-dot hidden sm:block"} aria-hidden />
         <a
