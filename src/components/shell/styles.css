@@ -419,7 +419,10 @@ html {
 
 /* Playing, the controls rest and the waveform fills the pill. Hover, keyboard
    focus or a touch (`data-awake`) brings them back. While they rest the
-   waveform takes the pointer, so the tap that wakes them presses nothing.
+   waveform takes the pointer, so the tap that wakes them presses nothing;
+   woken, it gives the pointer back with its place. Each state sets both in
+   one rule, the woken ones after the resting one and as specific, so a woken
+   pill is never left with the waveform over its buttons.
    Resting is slow: the controls drift out after a beat and the waveform rises
    through them. Waking is prompt but soft, the waveform stepping aside. */
 .music-transport {
@@ -452,10 +455,8 @@ html {
 }
 .music-transport[data-playing="true"] .music-wave-fill {
   opacity: 1;
-  transition: var(--music-rest-in);
-}
-.music-transport[data-playing="true"]:not([data-awake="true"]) .music-wave-fill {
   pointer-events: auto;
+  transition: var(--music-rest-in);
 }
 .music-transport[data-awake="true"] .music-controls,
 .music-transport:has(:focus-visible) .music-controls {
@@ -465,6 +466,7 @@ html {
 .music-transport[data-awake="true"] .music-wave-fill,
 .music-transport:has(:focus-visible) .music-wave-fill {
   opacity: 0;
+  pointer-events: none;
   transition: var(--music-wake-out);
 }
 @media (hover: hover) {
