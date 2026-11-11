@@ -70,9 +70,9 @@ import { ageToSlider, paceValue, sliderToAge } from "../model/chapters";
 import { TODAY_LOG_Y, displayOf } from "../model/display";
 import { angularSize } from "../model/equations";
 import {
-  FLIGHT_SWAP,
   flightHush,
   flightPlace,
+  flightShowsNext,
   flightTurn,
   standingPlace,
   type FlightEnd,
@@ -546,12 +546,14 @@ export function createAfterglowEngine(
      * The furthest the camera turns through a flight, radians (positive: left, after the world
      * left): what takes the Sun to its place across the turned view, and less as the disc's own
      * frame is wider than the open view, where a turn would stretch a giant off the lens's axis.
+     * Read once the frame is settled for this frame's Sun (`settleFraming`): the globes' change
+     * unsets it, and the turn must not blink there.
      */
     const turnReach = () => {
       const whole =
         Math.atan((2 * FLIGHT_TURN_ACROSS - 1) * tanHalf(FOV_DEG.open) * camera.aspect) -
         restingYaw(FOV_DEG.open);
-      return Number.isNaN(framing) ? whole : whole * Math.min(1, FOV_DEG.open / framing) ** 2;
+      return whole * Math.min(1, FOV_DEG.open / framing) ** 2;
     };
     /** The view a flight keeps: the Sun over the limb, the distance a globe vanishes at, and where the worlds stand once small. */
     const flightView = (): FlightView => ({
@@ -796,10 +798,12 @@ export function createAfterglowEngine(
       const sun = sunAt(age);
       if (flight) {
         flight.t = Math.min(1, flight.t + dt / flight.seconds);
-        /* Halfway the globes change, the world left and the next both out of the view. */
-        if (flight.t >= FLIGHT_SWAP && world !== flight.to) swapWorld(flight.to);
         const from = vantageOf(flight.from, sun.mass);
         const to = vantageOf(flight.to, sun.mass);
+        /* The globes change in the crossing, the world left and the next both too small to see. */
+        if (world !== flight.to && flightShowsNext(flight.t, from, to)) {
+          swapWorld(flight.to);
+        }
         flown = flightPlace(flight.t, from, to, flightView());
         vantage = world === flight.to ? to : from;
         if (flight.t >= 1) {
@@ -866,7 +870,6 @@ export function createAfterglowEngine(
         swayReach.across = lerp(swayReach.across, sway.across, ease);
         swayReach.horizon = lerp(swayReach.horizon, sway.horizon, ease);
         const calm = flight ? 1 - Math.sin(Math.PI * flight.t) ** 2 : 1;
-        const flightYaw = flight ? turnReach() * flightTurn(flight.t) : 0;
         const swayYaw = calm * swayReach.across * yawReach() * Math.sin(swayPhase.across);
         const swayHorizon = calm * swayReach.horizon * Math.sin(swayPhase.horizon);
         /* The world turns while the clock runs (`SPIN`), taken up and let go as it starts and stops. */
@@ -893,6 +896,7 @@ export function createAfterglowEngine(
         uniforms.uSunRadius.value = angularSize.compute({ R: state.radiusAu, d: fromSun }) / 2;
         settleFraming(dt, state.radius, flown !== null);
         const fov = framing;
+        const flightYaw = flight ? turnReach() * flightTurn(flight.t) : 0;
         if (camera.fov !== FOV_DEG.open) {
           camera.fov = FOV_DEG.open;
           camera.updateProjectionMatrix();

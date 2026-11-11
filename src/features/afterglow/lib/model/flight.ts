@@ -11,8 +11,10 @@
  * and the world flies away where it stands, dwindling to a point and gone. The camera follows
  * it a little as it goes, then turns across the Sun and the stars to meet the next world: a
  * point on the Sun's other side that rushes up into a small globe, slows, and is closed on as
- * gently until it settles under the camera as the limb at rest. Nothing fades and nothing
- * stops: every pace joins the next without a jolt.
+ * gently until it settles under the camera as the limb at rest. Between the two, with neither
+ * in sight, the camera crosses on one curve from where the one was lost to where the other
+ * shows (`crossing`). Nothing fades and nothing stops: every pace joins the next without a
+ * jolt, and the camera's place never steps, so the Sun, seen from it, never turns at once.
  */
 import { clamp01, lerp, smootherstep } from "@horizon/toolkit/math";
 
@@ -46,8 +48,6 @@ const EASE = 0.25;
 const GONE_AT = 0.46;
 /** The share of that way flown gently, to the far place (`FLIGHT_FAR_RADII`); over the rest the world flies away. */
 const NEAR = 0.72;
-/** The globes change halfway across, the world left and the next both too small to see. */
-export const FLIGHT_SWAP = 0.5;
 
 /**
  * The camera `d` from a world whose globe's nearest point is `top` radians from the Sun,
@@ -82,18 +82,24 @@ function along(t: number) {
   return u <= 0.5 ? run(u) / whole : 1 - run(1 - u) / whole;
 }
 
+/** The gentle pace: what the distance's logarithm gains over the whole way out, were it held. */
+const GENTLE = Math.log(FLIGHT_FAR_RADII / ORBIT_RADII) / NEAR;
+/** What the rush adds to that logarithm by the place where a world is gone, `gone` radii off. */
+const rushTo = (gone: number) => Math.max(0, Math.log(gone / ORBIT_RADII) - GENTLE);
+
 /**
- * How far off a world the camera is, in its radii, `out` of the way to where it is gone. Up to
- * `NEAR` the distance moves evenly in its logarithm to the far place, so the globe shrinks by a
- * steady, gentle factor; past it the pace gathers as the square of the way on, joining without
- * a jolt, so the small globe flies away to nothing. Past 1 it is beyond sight.
+ * How far off a world the camera is, in its radii, `out` of the way to where it is gone (1). Up
+ * to `NEAR` the distance moves evenly in its logarithm to the far place, so the globe shrinks
+ * by a steady, gentle factor; past it the pace gathers as the square of the way on, joining
+ * without a jolt, so the small globe flies away to nothing.
  */
 function radiiAt(out: number, gone: number) {
-  const gentle = Math.log(FLIGHT_FAR_RADII / ORBIT_RADII) / NEAR;
-  const rush = Math.max(0, Math.log(gone / ORBIT_RADII) - gentle);
   const past = Math.max(0, (out - NEAR) / (1 - NEAR));
-  return ORBIT_RADII * Math.exp(gentle * out + rush * past * past);
+  return ORBIT_RADII * Math.exp(GENTLE * out + rushTo(gone) * past * past);
 }
+
+/** The pace of that distance's logarithm, per share of the way out, where the world is gone. */
+const paceGone = (gone: number) => GENTLE + (2 * rushTo(gone)) / (1 - NEAR);
 
 /**
  * Off a world or onto it, `out` of the way to where it is gone. Its nearest point slides from
@@ -111,7 +117,49 @@ function backedOff(end: FlightEnd, out: number, view: FlightView, place: SeenPla
   );
 }
 
-/** Where the camera is at a flight's progress `t` (0–1): off the world left for its first half, onto the next for its second. */
+/** A size or a distance `f` of the way from `a` to `b`, evenly in its logarithm. */
+const scaled = (a: number, b: number, f: number) => a * (b / a) ** f;
+
+/**
+ * Between the worlds, `across` (0–1) of the way from where the one left is gone to where the
+ * next shows. The camera stands off a point that slides from the one world to the other, at
+ * rest at both ends (a smooth step): its distance from the Sun and its size, evenly in their
+ * logarithms, and its far place in the view, straight across under the Sun. The camera's
+ * distance from that point, in its radii, carries the rush on as a cubic: it leaves at the
+ * pace the world was lost at, turns over and comes back at the pace the next is met at. So the
+ * camera's place and pace join both halves of the flight, and the Sun's face and the stars turn
+ * a little over the whole crossing, never at one moment.
+ */
+function crossing(across: number, from: FlightEnd, to: FlightEnd, view: FlightView): FlightPlace {
+  const slid = smootherstep(across);
+  const end = {
+    distance: scaled(from.distance, to.distance, slid),
+    radius: scaled(from.radius, to.radius, slid),
+  };
+  const beside = lerp(
+    view.leave.apart * Math.sin(view.leave.roll),
+    view.arrive.apart * Math.sin(view.arrive.roll),
+    slid,
+  );
+  const below = lerp(
+    view.leave.apart * Math.cos(view.leave.roll),
+    view.arrive.apart * Math.cos(view.arrive.roll),
+    slid,
+  );
+  /* The distance's pace as the crossing begins, per share of the crossing, as a share of the distance. */
+  const pace = (paceGone(view.gone) * (1 - 2 * GONE_AT)) / GONE_AT;
+  return standingPlace(
+    end,
+    end.radius * radiiAt(1, view.gone) * (1 + pace * across * (1 - across)),
+    Math.hypot(beside, below),
+    Math.atan2(beside, below),
+  );
+}
+
+/**
+ * Where the camera is at a flight's progress `t` (0–1): off the world left, across to the next
+ * and onto it, on one curve whose place and pace never step.
+ */
 export function flightPlace(
   t: number,
   from: FlightEnd,
@@ -119,9 +167,25 @@ export function flightPlace(
   view: FlightView,
 ): FlightPlace {
   const way = along(t);
-  return way < FLIGHT_SWAP
-    ? backedOff(from, way / GONE_AT, view, view.leave)
-    : backedOff(to, (1 - way) / GONE_AT, view, view.arrive);
+  if (way <= GONE_AT) {
+    return backedOff(from, way / GONE_AT, view, view.leave);
+  }
+  if (way >= 1 - GONE_AT) {
+    return backedOff(to, (1 - way) / GONE_AT, view, view.arrive);
+  }
+  return crossing((way - GONE_AT) / (1 - 2 * GONE_AT), from, to, view);
+}
+
+/**
+ * Whether the next world is the one drawn at a flight's progress `t`. The globes change at an
+ * edge of the crossing, so that the inner of the two is the one drawn through it: the camera,
+ * always beyond the world it watches, passes the outer one's place on the way across, too near
+ * for it to stay out of sight. Flying outward the next world is drawn as the crossing ends,
+ * flying inward as it begins.
+ */
+export function flightShowsNext(t: number, from: FlightEnd, to: FlightEnd) {
+  const way = along(t);
+  return to.distance > from.distance ? way >= 1 - GONE_AT : way > GONE_AT;
 }
 
 /**
@@ -138,7 +202,7 @@ const TURN_EASE = 0.25;
 
 /**
  * The clock's tempo through a flight at progress `t`: it eases down with the camera as it
- * backs off, is slowest as the globes change (`FLIGHT_TEMPO`) and eases back up as the next
+ * backs off, is slowest at the flight's middle (`FLIGHT_TEMPO`) and eases back up as the next
  * world nears, so the Sun never stops.
  */
 export const flightHush = (t: number) =>

@@ -862,8 +862,10 @@ eases only into the orbit at the end, so it never slows or turns sharply between
 off the world it leaves while the globe's nearest point slides from the limb's place to a
 point low on the Sun's left (`FLIGHT_POINTS`, `standingPlace` turned out of the orbit's plane
 by a roll), until the globe is under a pixel (`VANISH_PX`); it crosses with the Sun and the
-stars alone (the globes change halfway, `FLIGHT_SWAP`); and it closes on the next world the
-same way from a point low on the Sun's right, the globe growing into the limb at rest. The
+stars alone, on one curve that joins both halves in place and pace (`crossing`; the globes
+change at its edge that keeps the inner world drawn, `flightShowsNext`); and it closes on the
+next world the same way from a point low on the Sun's right, the globe growing into the limb
+at rest. The
 view's frame faces the Sun as seen from the camera and the Sun's frame follows its law
 exactly, so the disc keeps its size.
 The readouts name the world drawn (`drawn`, written by the scene as the globes change), its

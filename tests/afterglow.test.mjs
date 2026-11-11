@@ -21,9 +21,9 @@ import {
 import { displayOf } from "../src/features/afterglow/lib/model/display.ts";
 import { AFTERGLOW_EQUATIONS, angularSize } from "../src/features/afterglow/lib/model/equations.ts";
 import {
-  FLIGHT_SWAP,
   flightHush,
   flightPlace,
+  flightShowsNext,
   flightTurn,
   standingPlace,
 } from "../src/features/afterglow/lib/model/flight.ts";
@@ -553,18 +553,28 @@ test("a world's temperature from sunlight matches the textbook equilibrium today
   assert.ok(temperatureAt("mars", RGB_TIP - 1e6) > 1000);
 });
 
+/*
+ * A flight's ends, Earth and Mars today, and the view the scene lays out on a laptop's screen: a
+ * pixel's angle, the Sun over the limb, the places left and right of it.
+ */
+const FLIGHT_ENDS = {
+  earth: { distance: 1, radius: 4.26e-5 },
+  mars: { distance: 1.52, radius: 2.27e-5 },
+};
+const FLIGHT_PIXEL = 4.7e-4;
+const FLIGHT_VIEW = {
+  lift: 0.2,
+  gone: 2 / FLIGHT_PIXEL,
+  leave: { apart: 0.38, roll: -1.11 },
+  arrive: { apart: 0.35, roll: 1.07 },
+};
+
 test("a flight backs off one world until it flies away beside the Sun and closes on the next from its other side", () => {
-  const from = { distance: 1, radius: 4.26e-5 };
-  const to = { distance: 1.52, radius: 2.27e-5 };
-  /* A landscape view: a pixel's angle, the frame's bottom edge below the Sun, and the places left and right of it. */
-  const pixel = 4.7e-4;
+  const { earth: from, mars: to } = FLIGHT_ENDS;
+  const pixel = FLIGHT_PIXEL;
+  const view = FLIGHT_VIEW;
+  /* The frame's bottom edge below the Sun. */
   const bottom = 0.49;
-  const view = {
-    lift: 0.2,
-    gone: 2 / pixel,
-    leave: { apart: 0.58, roll: -1.08 },
-    arrive: { apart: 0.48, roll: 0.95 },
-  };
   const rest = (end) => standingPlace(end, ORBIT_RADII * end.radius, view.lift);
   const at = (t) => flightPlace(t, from, to, view);
   /*
@@ -602,7 +612,7 @@ test("a flight backs off one world until it flies away beside the Sun and closes
   const STEPS = 2000;
   const samples = Array.from({ length: STEPS + 1 }, (_, i) => {
     const t = i / STEPS;
-    const left = t < FLIGHT_SWAP;
+    const left = !flightShowsNext(t, from, to);
     const s = seen(at(t), left ? from : to);
     /* Seen: on the screen and two pixels across (a night side's lit sliver is far thinner). */
     return { t, left, ...s, shown: s.px >= 2 && s.top * Math.cos(s.roll) < bottom };
@@ -622,11 +632,6 @@ test("a flight backs off one world until it flies away beside the Sun and closes
     if (s.left) assert.ok(s.px <= before.px + 1e-9, `shrinks at ${s.t}`);
     else assert.ok(s.px >= before.px - 1e-9, `grows at ${s.t}`);
   }
-  const swap = samples.find((s) => s.t >= FLIGHT_SWAP);
-  assert.ok(
-    seen(at(swap.t), from).px < 1 && swap.px < 1,
-    "both are under a pixel as the globes change",
-  );
   /* It backs off gently to the far place, a small globe still, before it flies away: that takes most of the way out. */
   const farPx = (2 * Math.asin(1 / FLIGHT_FAR_RADII)) / pixel;
   const gentle = samples.filter((s) => s.left && s.px >= farPx).length;
@@ -661,7 +666,7 @@ test("a flight backs off one world until it flies away beside the Sun and closes
   for (let t = 0; t <= 1; t += 0.01) assert.ok(flightHush(t) >= FLIGHT_TEMPO - 1e-12);
   /* The camera turns after the world left, crosses at the middle, turns to meet the next and comes back, never past its reach and without a jolt. */
   assert.equal(flightTurn(0), 0);
-  assert.ok(Math.abs(flightTurn(FLIGHT_SWAP)) < 1e-12 && Math.abs(flightTurn(1)) < 1e-12);
+  assert.ok(Math.abs(flightTurn(0.5)) < 1e-12 && Math.abs(flightTurn(1)) < 1e-12);
   assert.ok(flightTurn(0.25) > 0.9 && flightTurn(0.75) < -0.9, "after the one, then to the other");
   for (let i = 1; i <= STEPS; i += 1) {
     const turn = flightTurn(i / STEPS);
@@ -670,6 +675,61 @@ test("a flight backs off one world until it flies away beside the Sun and closes
       Math.abs(turn - flightTurn((i - 1) / STEPS)) < 0.01,
       `turns smoothly at ${i / STEPS}`,
     );
+  }
+});
+
+test("a flight crosses from one world to the next without a step or a jolt, the globes changing out of sight", () => {
+  const { earth, mars } = FLIGHT_ENDS;
+  const STEPS = 2000;
+  for (const [from, to, way] of [
+    [earth, mars, "outward"],
+    [mars, earth, "inward"],
+  ]) {
+    const at = (i, steps = STEPS) => flightPlace(i / steps, from, to, FLIGHT_VIEW);
+    /*
+     * What the Sun shows follows where it is seen from: its face and the stars with the camera's
+     * direction from it, its size with the distance. The largest move of those between frames,
+     * and the largest change of that move from one frame to the next, as a rate.
+     */
+    const roughness = (steps) => {
+      const places = Array.from({ length: steps + 1 }, (_, i) => {
+        const p = at(i, steps);
+        const far = Math.hypot(p.x, p.y, p.z);
+        return [p.x / far, p.y / far, p.z / far, Math.log(far)];
+      });
+      const size = (v) => Math.hypot(...v);
+      const minus = (a, b) => a.map((v, k) => v - b[k]);
+      const moves = places.slice(1).map((p, i) => minus(p, places[i]));
+      return {
+        step: Math.max(...moves.map(size)),
+        jolt: Math.max(...moves.slice(1).map((m, i) => size(minus(m, moves[i])))) * steps,
+      };
+    };
+    /* A smooth flight's moves halve as its frames double, and its changes of pace with them; a step or a jolt keeps its size. */
+    const coarse = roughness(STEPS);
+    const fine = roughness(2 * STEPS);
+    assert.ok(fine.step < 0.6 * coarse.step, `${way}: the camera's place steps`);
+    assert.ok(fine.jolt < 0.6 * coarse.jolt, `${way}: the camera's pace jolts`);
+    /* Each world's pixels across while it is the one drawn. */
+    const px = (i, w) => {
+      const p = at(i);
+      return (2 * Math.asin(w.radius / Math.hypot(w.distance - p.x, p.y, p.z))) / FLIGHT_PIXEL;
+    };
+    const frames = Array.from({ length: STEPS + 1 }, (_, i) => i);
+    const change = frames.findIndex((i) => flightShowsNext(i / STEPS, from, to));
+    assert.ok(
+      px(change, from) < 1 && px(change - 1, to) < 1,
+      `${way}: a globe is in sight as they change`,
+    );
+    /* A world lost stays lost: the one left never shows again, and the next never shows before it comes for good. */
+    const staysLost = (sizes) => {
+      const lost = sizes.findIndex((size) => size < 1);
+      return lost < 0 || sizes.slice(lost).every((size) => size < 1);
+    };
+    const left = frames.slice(0, change).map((i) => px(i, from));
+    const next = frames.slice(change).map((i) => px(i, to));
+    assert.ok(staysLost(left), `${way}: the world left shows again`);
+    assert.ok(staysLost(next.toReversed()), `${way}: the next world shows before it comes`);
   }
 });
 
