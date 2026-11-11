@@ -517,11 +517,14 @@ test("a visitor never stands on a swallowed world: the nearest survivor outward 
 });
 
 test("Earth's oceans go between the moist and the runaway greenhouse, within the main sequence, and never come back", () => {
-  /* One criterion: the habitable zone's inner edge reaches Earth's orbit as the water begins to go, where the chapter and its guide step begin. */
+  /* One criterion: the habitable zone's inner edge reaches Earth's orbit as the water begins to go, where the chapter begins. */
   const going = sunAt(OCEANS_GOING);
   closeRelative(going.zone.inner, orbitAt("earth", going.mass), 1e-9, "the zone's inner edge");
   assert.equal(CHAPTERS.find((c) => c.id === "oceans").from, OCEANS_GOING);
-  assert.equal(TOUR.find((step) => step.id === "oceans").age, OCEANS_GOING);
+  /* The guide's step lands on the dry Earth its caption names: the seas go on the ride there, the caption up. */
+  const step = TOUR.findIndex((s) => s.id === "oceans");
+  assert.equal(earthDryness(TOUR[step].age), 1);
+  assert.equal(earthDryness(TOUR[step - 1].age), 0);
   assert.ok(
     EARTH_DRY > OCEANS_GOING && EARTH_DRY < MS_END,
     "the seas are gone before the core's hydrogen",

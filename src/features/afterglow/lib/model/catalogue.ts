@@ -163,7 +163,7 @@ export const PROSE_FIGURES = {
     source: "kasting1993",
     sources: ["schroder2008"],
     status: "derived",
-    note: "Earth's sunlight on the track reaches the moist-greenhouse limit's: the habitable zone's inner edge on Earth's orbit, where the oceans chapter and its guide step begin; Schröder & Smith: about a billion years",
+    note: "Earth's sunlight on the track reaches the moist-greenhouse limit's: the habitable zone's inner edge on Earth's orbit, where the oceans chapter begins; Schröder & Smith: about a billion years",
   },
   oceansGoneGyrAhead: {
     value: EARTH_DRY - TODAY,
@@ -173,7 +173,7 @@ export const PROSE_FIGURES = {
     source: "kasting1993",
     sources: ["schroder2008"],
     status: "derived",
-    note: "Earth's sunlight on the track reaches the runaway-greenhouse limit's",
+    note: "Earth's sunlight on the track reaches the runaway-greenhouse limit's, where the oceans' guide step stands",
   },
   earthTodayKelvin: {
     value: temperatureAt("earth", TODAY) ?? 0,

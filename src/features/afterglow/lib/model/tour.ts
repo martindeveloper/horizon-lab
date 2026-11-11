@@ -5,7 +5,7 @@
  * moves on: left to play, it plays the life on to the next step and lands it on a beat of its
  * track.
  */
-import { OCEANS_GOING } from "./oceans";
+import { EARTH_DRY } from "./oceans";
 import { AGB_END, HELIUM_START, MS_END, NEBULA_END, RGB_TIP, TODAY } from "./track";
 import { WARM_SPELL, type WorldId } from "./worlds";
 
@@ -104,16 +104,17 @@ const STEPS: readonly Omit<TourStep, "dwell">[] = [
     id: "oceans",
     /* Its second entry. */
     beat: 73,
-    ride: 6,
-    /* The zone's inner edge on Earth's orbit: the moment the caption's first figure names. */
-    age: OCEANS_GOING,
+    /* The zone's inner edge passes Earth halfway there, and the seas go under the caption. */
+    ride: 10,
+    /* The seas gone: the moment the caption's last figure names. */
+    age: EARTH_DRY,
     world: "earth",
     equation: "habitable-zone-edge",
     shot: ON_WORLD,
   },
   {
     id: "swell",
-    /* A phrase begins, well into the body: the long drying and swelling play under it. */
+    /* A phrase begins, well into the body: the long swelling plays under it. */
     beat: 154,
     ride: 22,
     age: MS_END + 2 * GYR,
